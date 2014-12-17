@@ -69,6 +69,10 @@ InputParameters validParams<MooseApp>()
 
   params.addCommandLineParam<bool>("timing", "-t --timing", false, "Enable all performance logging for timing purposes. This will disable all screen output of performance logs for all Console objects.");
 
+  // Legacy Flags
+  params.addParam<bool>("use_legacy_uo_aux_computation", true, "Set to true to have MOOSE recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavoir is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
+  params.addParam<bool>("use_legacy_uo_initialization", true, "Set to true to have MOOSE compute all UserObjects and Postprocessors during the initial setup phase of the problem recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavoir is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
+
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
   params.addPrivateParam<MooseSharedPointer<CommandLine> >("_command_line");
@@ -118,9 +122,8 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _recover(false),
     _restart(false),
     _half_transient(false),
-    _legacy_uo_aux_computation_default(true),
-    _legacy_uo_initialization_default(true)
-
+    _legacy_uo_aux_computation_default(getParam<bool>("use_legacy_uo_aux_computation")),
+    _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization"))
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
