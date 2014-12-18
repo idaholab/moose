@@ -1,8 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  # Yes we want a slightly irregular grid
+  nx = 11
+  ny = 11
 []
 
 [Variables]
