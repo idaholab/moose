@@ -72,7 +72,7 @@ MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
   // The numbers associated must be in sync with the ExecFlagType in Moose.h
-  return MultiMooseEnum("none=0 initial=1 linear=2 nonlinear=4 timestep_end=8 timestep_begin=16 final=32 failed=128 custom=256", default_type);
+  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 timestep_begin=0x10 final=0x20 failed=0x80", default_type);
 }
 
 Output::Output(const std::string & name, InputParameters & parameters) :
