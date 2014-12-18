@@ -127,11 +127,10 @@
 []
 
 [Outputs]
-  output_initial = false
   exodus = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'initial timestep_end failed nonlinear linear'
   [../]
 []

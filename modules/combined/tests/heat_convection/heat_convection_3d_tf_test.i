@@ -144,12 +144,12 @@
 
 [Outputs]    # Output Start
   file_base = out_3d_tf
-  output_initial = true
   exodus = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
- []      # Output END
+[]      # Output END
 #      # Input file END

@@ -194,8 +194,8 @@
 
 [Outputs]
   file_base = large_deform_harden3
-  output_initial = true
   exodus = false
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true

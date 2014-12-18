@@ -48,9 +48,9 @@
 []
 
 [Outputs]
-  output_initial = true
   file_base = recover_out
   exodus = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true

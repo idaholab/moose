@@ -240,13 +240,13 @@
 
 [Outputs]
   file_base = bl20
-  output_initial = true
-  output_final = true
   interval = 10000
   exodus = true
   hide = pgas
+  output_on = 'initial timestep_end final'
   [./console]
     type = Console
     perf_log = true
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []

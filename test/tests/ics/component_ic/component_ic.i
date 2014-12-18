@@ -103,7 +103,7 @@
 []
 
 [Outputs]
-  output_initial = true
+  output_on = 'initial timestep_end'
   [./out]
     type = Exodus
     output_scalar_variables = false
@@ -111,5 +111,6 @@
   [./console]
     type = Console
     perf_log = true
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []

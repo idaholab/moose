@@ -77,10 +77,10 @@
   file_base = normal_eigen_kernel
   interval = 1
   exodus = true
-  output_initial = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
-    linear_residuals = true
     perf_log = true
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []

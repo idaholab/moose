@@ -79,15 +79,14 @@
 
 [Outputs]
   file_base = single_out
-  output_initial = true
-  output_final = true
   interval = 1000000
   exodus = true
+  output_on = 'initial timestep_end final'
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = false
     interval = 1
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []
 

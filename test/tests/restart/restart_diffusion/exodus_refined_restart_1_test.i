@@ -48,10 +48,11 @@
 
 [Outputs]
   file_base = exodus_refined_restart_1
-  output_initial = true
   exodus = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []

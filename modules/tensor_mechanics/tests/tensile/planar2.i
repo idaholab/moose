@@ -289,8 +289,8 @@
 
 [Outputs]
   file_base = planar2
-  output_initial = true
   exodus = false
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true

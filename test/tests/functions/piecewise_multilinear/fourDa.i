@@ -59,11 +59,12 @@
 
 [Outputs]
   file_base = fourDa
-  output_initial = true
   exodus = true
   hide = dummy
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []

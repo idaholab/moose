@@ -125,7 +125,7 @@ active = 'diff1 diff2'
 
 [Outputs]
   file_base = out
-  output_initial = true
+  output_on = 'initial timestep_end'
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
@@ -133,5 +133,6 @@ active = 'diff1 diff2'
   [./console]
     type = Console
     perf_log = true
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []

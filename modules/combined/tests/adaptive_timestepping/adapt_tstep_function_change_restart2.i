@@ -177,7 +177,7 @@
 []
 
 [Outputs]
-  output_initial = true
+  output_on = 'initial timestep_end'
   [./out]
     type = Exodus
     elemental_as_nodal = true
@@ -185,7 +185,7 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
     max_rows = 10
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []

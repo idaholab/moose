@@ -97,6 +97,7 @@
 [Outputs]
   [./screen]
     type = Console
+    output_on = 'timestep_end failed nonlinear'
   [../]
   [./exodus]
     type = Exodus

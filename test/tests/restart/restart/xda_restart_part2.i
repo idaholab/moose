@@ -122,6 +122,6 @@
 
 [Outputs]
   file_base = out_xda_restart_part2
-  output_initial = true
   exodus = true
+  output_on = 'initial timestep_end'
 []

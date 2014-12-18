@@ -64,9 +64,9 @@
     refinements = 2
   [../]
   [./oversample_4]
-   type = Exodus
-   file_base = oversample_4
-   oversample = true
-   refinements = 4
- [../]
+    type = Exodus
+    file_base = oversample_4
+    oversample = true
+    refinements = 4
+  [../]
 []

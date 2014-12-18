@@ -30,9 +30,9 @@ InputParameters validParams<PetscOutput>()
 
   // **** DEPRECATED PARAMETERS ****
   params.addDeprecatedParam<bool>("linear_residuals", false, "Specifies whether output occurs on each linear residual evaluation",
-                                  "Please include 'residual' in the 'output_on' execution list to get this behavior.");
+                                  "Please include 'linear' in the 'output_on' execution list to get this behavior.");
   params.addDeprecatedParam<bool>("nonlinear_residuals", false, "Specifies whether output occurs on each nonlinear residual evaluation",
-                                  "Please include 'nonresidual' in the 'output_on' execution list to get this behavior.");
+                                  "Please include 'nonlinear' in the 'output_on' execution list to get this behavior.");
   // Psuedo time step divisors
   params.addParam<Real>("nonlinear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outputting non-linear residuals");
   params.addParam<Real>("linear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outputting linear residuals");

@@ -116,6 +116,6 @@
 
 [Outputs]
   file_base = out
-  output_initial = true
   exodus = true
+  output_on = 'initial timestep_end'
 []

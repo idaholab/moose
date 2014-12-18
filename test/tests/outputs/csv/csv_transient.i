@@ -85,6 +85,6 @@
 []
 
 [Outputs]
-  output_initial = true
   csv = true
+  output_on = 'initial timestep_end'
 []
