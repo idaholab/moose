@@ -28,6 +28,7 @@
 #include "NodalFloodCountAux.h"
 #include "NodalVolumeFraction.h"
 #include "BndsCalcAux.h"
+#include "TotalFreeEnergy.h"
 #include "ACGrGrPoly.h"
 #include "ACGBPoly.h"
 #include "ACParsed.h"
@@ -125,6 +126,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
+  registerAux(TotalFreeEnergy);
   // registerAux(SPPARKSAux);
 
   registerUserObject(NodalFloodCount);

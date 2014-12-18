@@ -20,6 +20,13 @@
   [../]
 []
 
+[AuxVariables]
+  [./local_energy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [ICs]
   [./cIC]
     type = RandomIC
@@ -46,6 +53,17 @@
     type = SplitCHWRes
     variable = w
     mob_name = M
+  [../]
+[]
+
+[AuxKernels]
+  [./local_energy]
+    type = TotalFreeEnergy
+    variable = local_energy
+    f_name = fbulk
+    interfacial_vars = c
+    kappa_names = kappa_c
+    execute_on = timestep
   [../]
 []
 
@@ -82,6 +100,10 @@
     type = SideIntegralVariablePostprocessor
     variable = c
     boundary = top
+  [../]
+  [./total_free_energy]
+    type = ElementIntegralVariablePostprocessor
+    variable = local_energy
   [../]
 []
 
