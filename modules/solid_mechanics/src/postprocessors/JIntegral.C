@@ -10,7 +10,7 @@ InputParameters validParams<JIntegral>()
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
   params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front corresponding to this q function");
   params.addParam<bool>("convert_J_to_K",false,"Convert J-integral to stress intensity factor K.");
-  params.addParam<bool>("symmetry_plane",false,"Adjust fracture integrals to account for a symmetry plane passing through the plane of the crack");
+  params.addParam<unsigned int>("symmetry_plane", "Account for a symmetry plane passing through the plane of the crack, normal to the specified axis (0=x, 1=y, 2=z)");
   params.addParam<Real>("poissons_ratio","Poisson's ratio");
   params.addParam<Real>("youngs_modulus","Young's modulus of the material.");
   params.set<bool>("use_displaced_mesh") = false;
@@ -30,7 +30,7 @@ JIntegral::JIntegral(const std::string & name, InputParameters parameters):
                         &getMaterialProperty<RealVectorValue>("J_thermal_term_vec"):
                         NULL),
     _convert_J_to_K(getParam<bool>("convert_J_to_K")),
-    _symmetry_plane(getParam<bool>("symmetry_plane")),
+    _has_symmetry_plane(isParamValid("symmetry_plane")),
     _poissons_ratio(isParamValid("poissons_ratio") ? getParam<Real>("poissons_ratio") : 0),
     _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0)
 {
@@ -101,7 +101,7 @@ Real
 JIntegral::getValue()
 {
   gatherSum(_integral_value);
-  if (_symmetry_plane)
+  if (_has_symmetry_plane)
     _integral_value *= 2.0;
 
   Real sign = (_integral_value > 0.0) ? 1.0 : ((_integral_value < 0.0) ? -1.0: 0.0);

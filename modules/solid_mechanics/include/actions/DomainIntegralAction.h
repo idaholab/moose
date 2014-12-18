@@ -54,7 +54,9 @@ protected:
   VariableName _disp_y;
   VariableName _disp_z;
   bool _convert_J_to_K;
-  bool _symmetry_plane;
+  bool _has_symmetry_plane;
+  unsigned int _symmetry_plane;
+  MooseEnum _position_type;
   bool _use_displaced_mesh;
 };
 

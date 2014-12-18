@@ -35,6 +35,9 @@ public:
   Real getCrackFrontForwardSegmentLength(const unsigned int node_index) const;
   Real getCrackFrontBackwardSegmentLength(const unsigned int node_index) const;
   const RealVectorValue & getCrackDirection(const unsigned int node_index) const;
+  Real getDistanceAlongFront(const unsigned int node_index) const;
+  bool hasAngleAlongFront() const;
+  Real getAngleAlongFront(const unsigned int node_index) const;
   unsigned int getNumCrackFrontNodes() const;
   bool treatAs2D() const {return _treat_as_2d;}
   RealVectorValue rotateToCrackFrontCoords(const RealVectorValue vector, const unsigned int node_index) const;
@@ -73,6 +76,8 @@ protected:
   std::vector<RealVectorValue> _tangent_directions;
   std::vector<RealVectorValue> _crack_directions;
   std::vector<std::pair<Real,Real> > _segment_lengths;
+  std::vector<Real> _distances_along_front;
+  std::vector<Real> _angles_along_front;
   std::vector<ColumnMajorMatrix> _rot_matrix;
   Real _overall_length;
   DIRECTION_METHOD _direction_method;
@@ -89,6 +94,8 @@ protected:
   bool _treat_as_2d;
   bool _closed_loop;
   unsigned int _axis_2d;
+  bool _has_symmetry_plane;
+  unsigned int _symmetry_plane;
 
   void getCrackFrontNodes(std::set<dof_id_type>& nodes);
   void orderCrackFrontNodes(std::set<dof_id_type>& nodes);
