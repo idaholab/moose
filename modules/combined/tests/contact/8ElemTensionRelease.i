@@ -59,7 +59,7 @@
   [./pid]
     type = ProcessorIDAux
     variable = pid
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
   [../]
   [./status]
     type = PenetrationAux
@@ -67,7 +67,7 @@
     variable = status
     boundary = 3
     paired_boundary = 2
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

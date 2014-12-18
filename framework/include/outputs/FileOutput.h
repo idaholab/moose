@@ -81,7 +81,7 @@ protected:
   /**
    * Checks if the output method should be executed
    */
-  bool shouldOutput(const OutputExecFlagType & type);
+  bool shouldOutput(const ExecFlagType & type);
 
   /**
    * Checks the filename for output

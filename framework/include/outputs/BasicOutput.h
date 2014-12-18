@@ -50,12 +50,12 @@ protected:
   /**
    * Overload to call the output() method at the correct time
    */
-  virtual void outputStep(const OutputExecFlagType & type);
+  virtual void outputStep(const ExecFlagType & type);
 
   /**
    * Overload this function with the desired output activities
    */
-  virtual void output(const OutputExecFlagType & type) = 0;
+  virtual void output(const ExecFlagType & type) = 0;
 };
 
 #endif /* BASICOUTPUT_H */

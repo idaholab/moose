@@ -28,7 +28,7 @@
   [./constant_dummy]
     type = ConstantAux
     variable = dummy
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
     value = 4
   [../]
 []
@@ -52,7 +52,7 @@
   [./u_integral]
     type = ElementIntegralVariablePostprocessor
     variable = u
-    execute_on = residual
+    execute_on = linear
   [../]
 []
 

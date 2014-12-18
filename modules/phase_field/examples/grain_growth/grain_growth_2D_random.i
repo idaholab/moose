@@ -64,7 +64,7 @@
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

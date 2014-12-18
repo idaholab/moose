@@ -80,7 +80,7 @@ Checkpoint::directory()
 }
 
 void
-Checkpoint::output(const OutputExecFlagType & /*type*/)
+Checkpoint::output(const ExecFlagType & /*type*/)
 {
   // Start the performance log
   Moose::perf_log.push("output()", "Checkpoint");

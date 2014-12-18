@@ -80,11 +80,9 @@ MooseEnumBase::fillNames(std::string names, std::string option_delim)
       mooseError("Invalid option supplied in MooseEnumBase: " << elements[i]);
 
     // See if there is a value supplied for this option
+    // strtol allows for proper conversions of both int and hex strings
     if (name_value.size() == 2)
-    {
-      std::istringstream iss(name_value[1]);
-      iss >> value;
-    }
+      value = strtol(name_value[1].c_str(), NULL, 0);
 
     name_value[0] = MooseUtils::trim(name_value[0]);
 

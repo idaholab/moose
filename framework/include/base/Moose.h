@@ -52,38 +52,56 @@ class Syntax;
 class FEProblem;
 
 /// Execution flags - when is the object executed/evaluated
-// Note: If this enum is changed, make sure to modify the local
-// function populateExecTypes in Moose.C.
+// Note: If this enum is changed, make sure to modify:
+//   (1) the local function populateExecTypes in Moose.C.
+//   (2) the method SetupInterface::getExecuteOptions
+//   (3) the function Output::getExecuteOptions
 enum ExecFlagType {
   EXEC_NONE              = 0x00,
   /// Object is evaluated only once at the beginning of the simulation
   EXEC_INITIAL           = 0x01,
   /// Object is evaluated in every residual computation
-  EXEC_RESIDUAL          = 0x02,
+  EXEC_LINEAR            = 0x02,
   /// Object is evaluated in every jacobian computation
-  EXEC_JACOBIAN          = 0x04,
+  EXEC_NONLINEAR         = 0x04,
   /// Object is evaluated at the end of every time step
-  EXEC_TIMESTEP          = 0x08,
+  EXEC_TIMESTEP_END      = 0x08,
   /// Object is evaluated at the beginning of every time step
   EXEC_TIMESTEP_BEGIN    = 0x10,
+  /// Object is evaluated at the end of the simulations (output only)
+  EXEC_FINAL             = 0x20,
+  /// Forces execution to occur (output only)
+  EXEC_FORCED            = 0x40,
+  /// Forces execution on failed solve (output only)
+  EXEC_FAILED            = 0x80,
   /// For use with custom executioners that want to fire objects at a specific time
-  EXEC_CUSTOM            = 0x20
+  EXEC_CUSTOM            = 0x100,
+  ///@{
+  /// Deprecated
+  EXEC_RESIDUAL          = 0x200, // EXEC_LINEAR
+  EXEC_JACOBIAN          = 0x400, // EXEC_NONLINEAR
+  EXEC_TIMESTEP          = 0x800, // EXEC_TIMESTEP_END
+  OUTPUT_NONE            = 0x00,
+  OUTPUT_INITIAL         = 0x01,
+  OUTPUT_LINEAR          = 0x02,
+  OUTPUT_NONLINEAR       = 0x04,
+  OUTPUT_TIMESTEP_END    = 0x08,
+  OUTPUT_TIMESTEP_BEGIN  = 0x10,
+  OUTPUT_FINAL           = 0x20,
+  OUTPUT_FORCED          = 0x40,
+  OUTPUT_FAILED          = 0x80,
+  OUTPUT_CUSTOM          = 0x100
+  ///@}
 };
 
-/// Output execution flags
-enum OutputExecFlagType
-{
-  OUTPUT_INITIAL = 0,
-  OUTPUT_LINEAR = 1,
-  OUTPUT_NONLINEAR = 2,
-  OUTPUT_TIMESTEP_END = 3,
-  OUTPUT_TIMESTEP_BEGIN = 4,
-  OUTPUT_FINAL = 5,
-  OUTPUT_FAILED = 6,
-  OUTPUT_CUSTOM = 7,
-  OUTPUT_FORCED = 8,
-  OUTPUT_NONE = 9
-};
+// Support for deprecated output flags
+typedef ExecFlagType OutputExecFlagType;
+
+// Some define trickery to allow YAK to continue to operate, this will
+// allow the update to MOOSE to occur w/o an integration branch
+#define EXEC_RESIDUAL EXEC_LINEAR
+#define EXEC_JACOBIAN EXEC_NONLINEAR
+#define EXEC_TIMESTEP EXEC_TIMESTEP_END
 
 namespace Moose
 {
@@ -95,8 +113,7 @@ namespace Moose
 extern PerfLog perf_log;
 
 /**
- * PerfLog to be used during setup.  This log will get printed just before the first solve.
- */
+ * PerfLog to be used during setup.  This log will get printed just before the first solve. */
 extern PerfLog setup_perf_log;
 
 /**

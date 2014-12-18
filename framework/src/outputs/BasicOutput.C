@@ -55,18 +55,18 @@ InputParameters validParams<BasicOutput<Output> >()
 // The generic output method used for Output, PetscOutput, and FileOutput base classes
 template<class OutputBase>
 void
-BasicOutput<OutputBase>::outputStep(const OutputExecFlagType & type)
+BasicOutput<OutputBase>::outputStep(const ExecFlagType & type)
 {
   // Force the output
-  if (type == OUTPUT_FORCED)
+  if (type == EXEC_FORCED)
     output(type);
 
   // If recovering disable output of initial condition, it was already output
-  if (type == OUTPUT_INITIAL && OutputBase::_app.isRecovering())
+  if (type == EXEC_INITIAL && OutputBase::_app.isRecovering())
     return;
 
   // Return if the current output is not on the desired interval
-  if (type != OUTPUT_FINAL && !OutputBase::onInterval())
+  if (type != EXEC_FINAL && !OutputBase::onInterval())
     return;
 
   // Call the output method
@@ -77,18 +77,18 @@ BasicOutput<OutputBase>::outputStep(const OutputExecFlagType & type)
 // OversampleOutput template specialization
 template<>
 void
-BasicOutput<OversampleOutput>::outputStep(const OutputExecFlagType & type)
+BasicOutput<OversampleOutput>::outputStep(const ExecFlagType & type)
 {
   // Force the output
-  if (type == OUTPUT_FORCED)
+  if (type == EXEC_FORCED)
     output(type);
 
   // If recovering disable output of initial condition, it was already output
-  if (type == OUTPUT_INITIAL && _app.isRecovering())
+  if (type == EXEC_INITIAL && _app.isRecovering())
     return;
 
   // Return if the current output is not on the desired interval
-  if (type != OUTPUT_FINAL && !onInterval())
+  if (type != EXEC_FINAL && !onInterval())
     return;
 
   // Call the output method (this has the file checking built in b/c OversampleOutput is a FileOutput)

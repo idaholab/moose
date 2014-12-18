@@ -41,7 +41,7 @@ Gnuplot::filename()
 }
 
 void
-Gnuplot::output(const OutputExecFlagType & type)
+Gnuplot::output(const ExecFlagType & type)
 {
   // Call the base class output (populates tables)
   TableOutput::output(type);

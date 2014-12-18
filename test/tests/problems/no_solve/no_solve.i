@@ -22,7 +22,7 @@
     type = FunctionAux
     variable = t
     function = t
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

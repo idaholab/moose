@@ -44,7 +44,7 @@ MaterialPropertyDebugOutput::~MaterialPropertyDebugOutput()
 }
 
 void
-MaterialPropertyDebugOutput::output(const OutputExecFlagType & /*type*/)
+MaterialPropertyDebugOutput::output(const ExecFlagType & /*type*/)
 {
 }
 

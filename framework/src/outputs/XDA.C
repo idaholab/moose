@@ -41,7 +41,7 @@ XDA::XDA(const std::string & name, InputParameters parameters) :
 }
 
 void
-XDA::output(const OutputExecFlagType & /*type*/)
+XDA::output(const ExecFlagType & /*type*/)
 {
   if (_binary)
   {

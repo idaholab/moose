@@ -53,14 +53,14 @@
     variable = receiver
     paired_variable = linear_field
     paired_boundary = rightleft
-    execute_on = timestep
+    execute_on = timestep_end
     boundary = leftright
   [../]
   [./y_displacement]
     type = FunctionAux
     variable = disp_y
     function = t
-    execute_on = 'residual timestep_begin'
+    execute_on = 'linear timestep_begin'
     block = left
   [../]
   [./elemental_right_to_left]

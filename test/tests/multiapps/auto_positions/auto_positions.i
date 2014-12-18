@@ -75,7 +75,7 @@
   [./auto_pos]
     type = AutoPositionsMultiApp
     app_type = MooseTestApp
-    execute_on = timestep
+    execute_on = timestep_end
     input_files = sub.i
     boundary = right
   [../]

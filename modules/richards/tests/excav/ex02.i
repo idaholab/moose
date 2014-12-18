@@ -90,7 +90,7 @@
   [./mass_final]
     type = RichardsMass
     variable = pressure
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
 # this is what calculates the mass flux to the excavation

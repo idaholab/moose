@@ -227,7 +227,7 @@ Exodus::outputInput()
 
 
 void
-Exodus::output(const OutputExecFlagType & type)
+Exodus::output(const ExecFlagType & type)
 {
   // Do nothing if there is nothing to output
   if (!hasOutput(type))

@@ -115,7 +115,7 @@
   [./pp]
     type = ElementIntegralVariablePostprocessor
     variable = u
-    execute_on = residual
+    execute_on = linear
   [../]
   [./l2_err]
     type = ElementL2Error

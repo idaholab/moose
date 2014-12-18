@@ -191,7 +191,7 @@ AdaptiveTransient::init()
   _problem.initialSetup();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
-  _output_warehouse.outputStep(OUTPUT_INITIAL);
+  _output_warehouse.outputStep(EXEC_INITIAL);
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   // If this is the first step
@@ -214,7 +214,7 @@ AdaptiveTransient::execute()
     if (lastSolveConverged())
       endStep();
   }
-  _output_warehouse.outputStep(OUTPUT_FINAL);
+  _output_warehouse.outputStep(EXEC_FINAL);
   postExecute();
 }
 
@@ -243,7 +243,7 @@ AdaptiveTransient::takeStep(Real input_dt)
   // Compute TimestepBegin Postprocessors
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
 
-  _output_warehouse.outputStep(OUTPUT_TIMESTEP_BEGIN);
+  _output_warehouse.outputStep(EXEC_TIMESTEP_BEGIN);
 
   _console << "Solving time step ";
   {
@@ -305,7 +305,7 @@ AdaptiveTransient::takeStep(Real input_dt)
     bool last_solve_converged = lastSolveConverged();
 
     if (last_solve_converged)
-      _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+      _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
 
     postSolve();
 
@@ -314,7 +314,7 @@ AdaptiveTransient::takeStep(Real input_dt)
     // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
     if (last_solve_converged)
     {
-      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
+      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
       _problem.computeUserObjects();
     }
 
@@ -327,7 +327,7 @@ AdaptiveTransient::endStep()
 {
   // if _synced_last_step is true, force the output no matter what
   if (_synced_last_step)
-    _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+    _output_warehouse.outputStep(EXEC_TIMESTEP_END);
 
 #ifdef LIBMESH_ENABLE_AMR
   if (_problem.adaptivity().isOn())
@@ -465,7 +465,7 @@ AdaptiveTransient::computeDT()
   {
     if (dt <= _dtmin)
     { //Can't cut back any more
-      _output_warehouse.outputStep(OUTPUT_FAILED);
+      _output_warehouse.outputStep(EXEC_FAILED);
       mooseError("Solve failed and timestep already at dtmin, cannot continue!");
     }
 

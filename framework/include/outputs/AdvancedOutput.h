@@ -197,7 +197,7 @@ public:
    *
    * @see Exodus
    */
-  bool hasOutput(const OutputExecFlagType & type);
+  bool hasOutput(const ExecFlagType & type);
 
   /**
    * Returns true if there exists nodal nonlinear variables for output
@@ -313,7 +313,7 @@ protected:
    * Calls the output() method if output should occur
    * @param type The type execution flag (see Moose.h)
    */
-  void outputStep(const OutputExecFlagType & type);
+  void outputStep(const ExecFlagType & type);
 
   /**
    * A single call to this function should output all the necessary data for a single timestep. By
@@ -323,7 +323,7 @@ protected:
    *
    * @see outputNodalVariables outputElementalVariables outputScalarVariables outputPostprocessors
    */
-  virtual void output(const OutputExecFlagType & type);
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Performs output of nodal nonlinear variables
@@ -419,7 +419,7 @@ private:
    * Handles logic for determining if a step should be output
    * @return True if a call if output should be preformed
    */
-  bool shouldOutput(const std::string & name, const OutputExecFlagType & type);
+  bool shouldOutput(const std::string & name, const ExecFlagType & type);
 
   /**
    * Method for defining the available parameters based on the types of outputs

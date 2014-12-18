@@ -493,8 +493,8 @@ public:
   ExecStore<VectorPostprocessorWarehouse> & getVectorPostprocessorWarehouse();
 
 
-  virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
-  virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
+  virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP_END, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
+  virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_LINEAR);
 
   // Dampers /////
   void addDamper(std::string damper_name, const std::string & name, InputParameters parameters);

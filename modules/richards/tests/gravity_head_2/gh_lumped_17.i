@@ -163,13 +163,13 @@
   [./mwater_fin]
     type = RichardsMass
     variable = pwater
-    execute_on = timestep
+    execute_on = timestep_end
     outputs = none
   [../]
   [./mgas_fin]
     type = RichardsMass
     variable = pgas
-    execute_on = timestep
+    execute_on = timestep_end
     outputs = none
   [../]
 

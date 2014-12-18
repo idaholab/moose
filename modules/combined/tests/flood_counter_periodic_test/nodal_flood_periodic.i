@@ -86,7 +86,7 @@
     type = NodalFloodCount
     variable = u
     threshold = 0.3
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

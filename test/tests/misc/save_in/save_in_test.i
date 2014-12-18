@@ -60,7 +60,7 @@
   [./saved_norm]
     type = NodalL2Norm
     variable = saved
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
 []

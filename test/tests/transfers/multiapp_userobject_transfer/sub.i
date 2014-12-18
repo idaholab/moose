@@ -47,7 +47,7 @@
   [./layered_aux]
     type = SpatialUserObjectAux
     variable = layered_average_value
-    execute_on = timestep
+    execute_on = timestep_end
     user_object = layered_average
   [../]
 []

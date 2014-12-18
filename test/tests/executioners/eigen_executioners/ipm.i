@@ -80,7 +80,7 @@
   [./unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
   [./udiff]

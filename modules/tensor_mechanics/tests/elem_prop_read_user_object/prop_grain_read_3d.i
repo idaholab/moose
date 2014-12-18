@@ -62,7 +62,7 @@
     rank_two_tensor = stress
     index_j = 1
     index_i = 1
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./e_yy]
@@ -71,14 +71,14 @@
     rank_two_tensor = elastic_strain
     index_j = 1
     index_i = 1
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./some_state_var]
     type = MaterialRealAux
     variable = some_state_var
     property = some_state_var
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
 []

@@ -67,7 +67,7 @@
   [./bubbles]
     type = NodalFloodCount
     variable = c
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

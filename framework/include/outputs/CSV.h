@@ -48,7 +48,7 @@ protected:
   /**
    * Output the table to a *.csv file
    */
-  virtual void output(const OutputExecFlagType & type);
+  virtual void output(const ExecFlagType & type);
 
   /**
    * The filename for the output file

@@ -36,7 +36,7 @@
     type = MaterialRealAux
     variable = mat
     property = matp
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

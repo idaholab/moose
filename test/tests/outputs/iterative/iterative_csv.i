@@ -40,7 +40,7 @@
 [Postprocessors]
   [./iterations]
      type = NumResidualEvaluations
-     execute_on = residual
+     execute_on = linear
   [../]
 []
 

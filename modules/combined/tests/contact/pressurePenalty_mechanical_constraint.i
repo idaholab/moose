@@ -60,7 +60,7 @@
     tensor = stress
     variable = stress_yy
     index = 1
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 [] # AuxKernels
 

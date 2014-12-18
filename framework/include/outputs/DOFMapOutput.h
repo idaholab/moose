@@ -44,7 +44,7 @@ public:
   /**
    * Write the DOF mapt
    */
-  void output(const OutputExecFlagType & type);
+  void output(const ExecFlagType & type);
 
 protected:
 

@@ -62,7 +62,7 @@
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep
+    execute_on = timestep_end
     positions = '0 0 0'
     input_files = sub.i
     max_procs_per_app = 1

@@ -223,10 +223,10 @@ Console::filename()
 }
 
 void
-Console::output(const OutputExecFlagType & type)
+Console::output(const ExecFlagType & type)
 {
   // Return if the current output is not on the desired interval
-  if (type != OUTPUT_FINAL && !onInterval())
+  if (type != EXEC_FINAL && !onInterval())
     return;
 
   // Output the system information first; this forces this to be the first item to write by default
@@ -239,11 +239,11 @@ Console::output(const OutputExecFlagType & type)
     outputInput();
 
   // Write the timestep information ("Time Step 0 ..."), this is may be controlled with "execute_on"
-  if (type == OUTPUT_TIMESTEP_BEGIN || (type == OUTPUT_INITIAL && _output_on.contains(OUTPUT_INITIAL)))
+  if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _output_on.contains(EXEC_INITIAL)))
     writeTimestepInformation();
 
   // Print Non-linear Residual (control with "execute_on")
-  if (type == OUTPUT_NONLINEAR && _output_on.contains(OUTPUT_NONLINEAR))
+  if (type == EXEC_NONLINEAR && _output_on.contains(EXEC_NONLINEAR))
   {
     if (_write_screen)
       Moose::out << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
@@ -253,7 +253,7 @@ Console::output(const OutputExecFlagType & type)
   }
 
   // Print Linear Residual (control with "execute_on")
-  else if (type == OUTPUT_LINEAR && _output_on.contains(OUTPUT_LINEAR))
+  else if (type == EXEC_LINEAR && _output_on.contains(EXEC_LINEAR))
   {
     if (_write_screen)
       Moose::out << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
@@ -263,7 +263,7 @@ Console::output(const OutputExecFlagType & type)
   }
 
   // Write variable norms
-  else if (type == OUTPUT_TIMESTEP_END)
+  else if (type == EXEC_TIMESTEP_END)
     writeVariableNorms();
 
   // Write Postprocessors and Scalars
@@ -555,7 +555,7 @@ Console::outputSystemInformation()
   {
     oss << "LEGACY MODES ENABLED:\n";
     if (_problem_ptr->legacyUoAuxComputation())
-      oss << "  Computing EXEC_RESIDUAL AuxKernel types when any UserObject type is executed.\n";
+      oss << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed.\n";
     if (_problem_ptr->legacyUoInitialization())
       oss << "  Computing all UserObjects during initial setup.\n";
   }

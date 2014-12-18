@@ -49,7 +49,7 @@ protected:
   /**
    * Perform the output of VTKOutput
    */
-  virtual void output(const OutputExecFlagType & type);
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Return the file name with the *.vtk extension
