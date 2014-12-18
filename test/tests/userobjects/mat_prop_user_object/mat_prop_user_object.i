@@ -31,7 +31,7 @@
     type = MatPropUserObjectAux
     variable = uo_e
     material_user_object = uo
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -64,7 +64,7 @@
   [./uo]
     type = MaterialPropertyUserObject
     mat_prop = 'e'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

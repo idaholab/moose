@@ -50,7 +50,7 @@ public:
    * Overload the Output::output method, this is required for Nemesis
    * output due to the method utilized for outputing single/global parameters
    */
-  virtual void output(const OutputExecFlagType & type);
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Sets up the libMesh::NemesisII_IO object used for outputting to the Nemesis format

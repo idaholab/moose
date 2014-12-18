@@ -50,7 +50,7 @@ TopResidualDebugOutput::~TopResidualDebugOutput()
 }
 
 void
-TopResidualDebugOutput::output(const OutputExecFlagType & /*type*/)
+TopResidualDebugOutput::output(const ExecFlagType & /*type*/)
 {
   // Display the top residuals
   if (_num_residuals > 0)

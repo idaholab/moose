@@ -94,7 +94,7 @@
     displacement = disp_x
     velocity = vel_x
     beta = 0.3025
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./accel_y]
     type = NewmarkAccelAux
@@ -102,7 +102,7 @@
     displacement = disp_y
     velocity = vel_y
     beta = 0.3025
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./accel_z]
     type = NewmarkAccelAux
@@ -110,28 +110,28 @@
     displacement = disp_z
     velocity = vel_z
     beta = 0.3025
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./vel_x]
     type = NewmarkVelAux
     variable = vel_x
     acceleration = accel_x
     gamma = 0.6
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./vel_y]
     type = NewmarkVelAux
     variable = vel_y
     acceleration = accel_y
     gamma = 0.6
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./vel_z]
     type = NewmarkVelAux
     variable = vel_z
     acceleration = accel_z
     gamma = 0.6
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -267,17 +267,17 @@
 [Postprocessors]
 #  [./ref_resid_x]
 #    type = NodalL2Norm
-#    execute_on = timestep
+#    execute_on = timestep_end
 #    variable = saved_x
 #  [../]
 #  [./ref_resid_y]
 #    type = NodalL2Norm
-#    execute_on = timestep
+#    execute_on = timestep_end
 #    variable = saved_y
 #  [../]
 #  [./ref_resid_z]
 #    type = NodalL2Norm
-#    execute_on = timestep
+#    execute_on = timestep_end
 #    variable = saved_z
 #  [../]
 #  [./nonlinear_its]

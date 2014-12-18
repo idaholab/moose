@@ -45,7 +45,7 @@
     value = 2
     operator = +
     coupled = u
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
   [../]
   [./coupled_l2_hierarchic]
     variable = l2_hierarchic
@@ -53,13 +53,13 @@
     value = 2
     operator = +
     coupled = u
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
   [../]
   [./constant]
     variable = one
     type = ConstantAux
     value = 1
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
   [../]
 []
 

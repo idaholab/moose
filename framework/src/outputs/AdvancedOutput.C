@@ -300,15 +300,15 @@ AdvancedOutput<OutputBase>::outputInput()
 // General outputStep() method
 template<class OutputBase>
 void
-AdvancedOutput<OutputBase>::outputStep(const OutputExecFlagType & type)
+AdvancedOutput<OutputBase>::outputStep(const ExecFlagType & type)
 {
 
   // If recovering disable output of initial condition, it was already output
-  if (type == OUTPUT_INITIAL && OutputBase::_app.isRecovering())
+  if (type == EXEC_INITIAL && OutputBase::_app.isRecovering())
     return;
 
   // Return if the current output is not on the desired interval
-  if (type != OUTPUT_FINAL && !OutputBase::onInterval())
+  if (type != EXEC_FINAL && !OutputBase::onInterval())
     return;
 
   // Call output methods for various types
@@ -319,11 +319,11 @@ AdvancedOutput<OutputBase>::outputStep(const OutputExecFlagType & type)
 // FileOutput::outputStep specialization
 template<>
 void
-AdvancedOutput<FileOutput>::outputStep(const OutputExecFlagType & type)
+AdvancedOutput<FileOutput>::outputStep(const ExecFlagType & type)
 {
 
   // If recovering disable output of initial condition, it was already output
-  if (type == OUTPUT_INITIAL && _app.isRecovering())
+  if (type == EXEC_INITIAL && _app.isRecovering())
     return;
 
   // Do nothing if the filename is not correct for output
@@ -331,7 +331,7 @@ AdvancedOutput<FileOutput>::outputStep(const OutputExecFlagType & type)
     return;
 
   // Return if the current output is not on the desired interval
-  if (type != OUTPUT_FINAL && !onInterval())
+  if (type != EXEC_FINAL && !onInterval())
     return;
 
   // Call output methods for various types
@@ -341,11 +341,11 @@ AdvancedOutput<FileOutput>::outputStep(const OutputExecFlagType & type)
 // OversampleOutput::outputStep specialization
 template<>
 void
-AdvancedOutput<OversampleOutput>::outputStep(const OutputExecFlagType & type)
+AdvancedOutput<OversampleOutput>::outputStep(const ExecFlagType & type)
 {
 
   // If recovering disable output of initial condition, it was already output
-  if (type == OUTPUT_INITIAL && _app.isRecovering())
+  if (type == EXEC_INITIAL && _app.isRecovering())
     return;
 
   // Do nothing if the filename is not correct for output
@@ -353,7 +353,7 @@ AdvancedOutput<OversampleOutput>::outputStep(const OutputExecFlagType & type)
     return;
 
   // Return if the current output is not on the desired interval
-  if (type != OUTPUT_FINAL && !onInterval())
+  if (type != EXEC_FINAL && !onInterval())
     return;
 
   // Perform oversample solution projection
@@ -365,7 +365,7 @@ AdvancedOutput<OversampleOutput>::outputStep(const OutputExecFlagType & type)
 
 template<class OutputBase>
 void
-AdvancedOutput<OutputBase>::output(const OutputExecFlagType & type)
+AdvancedOutput<OutputBase>::output(const ExecFlagType & type)
 {
   // Call the various output types, if data exists
   if (shouldOutput("nodal", type))
@@ -413,7 +413,7 @@ AdvancedOutput<OutputBase>::output(const OutputExecFlagType & type)
 
 template<class OutputBase>
 bool
-AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const OutputExecFlagType & type)
+AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const ExecFlagType & type)
 {
   // Do not output if the 'none' is contained by the output_on
   if (_advanced_output_on.contains(name) && _advanced_output_on[name].contains("none"))
@@ -432,7 +432,7 @@ AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const OutputE
     output_data_flag = false;
 
   // Force the output, if there is something to output and the time has not been output
-  if (type == OUTPUT_FORCED && output_data_flag && _last_output_time[name] != OutputBase::_time)
+  if (type == EXEC_FORCED && output_data_flag && _last_output_time[name] != OutputBase::_time)
     return true;
 
   // Return true (output should occur) if three criteria are satisfied, else do not output:
@@ -440,7 +440,7 @@ AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const OutputE
   //   (2) The current output type is contained in the list of output execution types
   //   (3) The current execution time is "final" or "forced" and the data has not already been output
   if (output_data_flag && _advanced_output_on[name].contains(type) &&
-      !(type == OUTPUT_FINAL && _last_output_time[name] == OutputBase::_time))
+      !(type == EXEC_FINAL && _last_output_time[name] == OutputBase::_time))
     return true;
   else
     return false;
@@ -448,7 +448,7 @@ AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const OutputE
 
 template<class OutputBase>
 bool
-AdvancedOutput<OutputBase>::hasOutput(const OutputExecFlagType & type)
+AdvancedOutput<OutputBase>::hasOutput(const ExecFlagType & type)
 {
   // If any of the component outputs are true, then there is some output to perform
   for (std::map<std::string, MultiMooseEnum>::const_iterator it = _advanced_output_on.begin(); it != _advanced_output_on.end(); ++it)

@@ -32,7 +32,7 @@
     type = ConstantAux
     variable = v
     value = 1
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
   [../]
 []
 

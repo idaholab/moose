@@ -36,7 +36,7 @@ VTKOutput::VTKOutput(const std::string & name, InputParameters & parameters) :
 }
 
 void
-VTKOutput::output(const OutputExecFlagType & /*type*/)
+VTKOutput::output(const ExecFlagType & /*type*/)
 {
 #ifdef LIBMESH_HAVE_VTK
 

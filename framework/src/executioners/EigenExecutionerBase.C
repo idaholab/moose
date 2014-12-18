@@ -104,7 +104,7 @@ EigenExecutionerBase::init()
   if (_solution_diff)
     _xdiff_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("xdiff")).execBitFlags();
   else
-    _xdiff_execflag = EXEC_TIMESTEP;
+    _xdiff_execflag = EXEC_TIMESTEP_END;
   if (isParamValid("normalization"))
     _norm_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization")).execBitFlags();
   else
@@ -136,7 +136,7 @@ EigenExecutionerBase::init()
   _problem.timeStep() = 0;
   Real t = _problem.time();
   _problem.time() = _problem.timeStep();
-  _output_warehouse.outputStep(OUTPUT_INITIAL);
+  _output_warehouse.outputStep(EXEC_INITIAL);
   _problem.time() = t;
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
@@ -205,9 +205,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   mooseAssert(tol_eig>0.0, "Invalid eigenvalue tolerance");
   mooseAssert(tol_x>0.0, "Invalid solution norm tolerance");
 
-  if ((_bx_execflag & (EXEC_TIMESTEP | EXEC_RESIDUAL)) == EXEC_NONE)
+  if ((_bx_execflag & (EXEC_TIMESTEP_END | EXEC_LINEAR)) == EXEC_NONE)
     mooseError("rhs postprocessor for the power method has to be executed on timestep or residual");
-  if ((_xdiff_execflag & (EXEC_TIMESTEP | EXEC_RESIDUAL)) == EXEC_NONE)
+  if ((_xdiff_execflag & (EXEC_TIMESTEP_END | EXEC_LINEAR)) == EXEC_NONE)
     mooseError("xdiff postprocessor for the power method has to be executed on timestep or residual");
 
   // not perform any iteration when max_iter==0
@@ -267,9 +267,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     postIteration();
 
     // FIXME: timestep needs to be changed to step
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
-    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
+    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
     _problem.onTimestepEnd();
 
     // save the initial residual
@@ -372,7 +372,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
       // FIXME: if 'step' capability is available, we will not need to do this.
       Real t = _problem.time();
       _problem.time() = time_base + Real(iter)/max_iter;
-      _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+      _output_warehouse.outputStep(EXEC_TIMESTEP_END);
       _problem.time() = t;
     }
   }
@@ -404,7 +404,7 @@ EigenExecutionerBase::postExecute()
     _problem.timeStep()++;
     Real t = _problem.time();
     _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+    _output_warehouse.outputStep(EXEC_TIMESTEP_END);
     _problem.time() = t;
   }
 
@@ -416,7 +416,7 @@ EigenExecutionerBase::postExecute()
   }
   else
   {
-    s = normalizeSolution(_norm_execflag & (EXEC_TIMESTEP | EXEC_RESIDUAL));
+    s = normalizeSolution(_norm_execflag & (EXEC_TIMESTEP_END | EXEC_LINEAR));
     if (std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
       _console << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
   }
@@ -426,7 +426,7 @@ EigenExecutionerBase::postExecute()
     _problem.timeStep()++;
     Real t = _problem.time();
     _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+    _output_warehouse.outputStep(EXEC_TIMESTEP_END);
     _problem.time() = t;
   }
 }
@@ -522,12 +522,12 @@ EigenExecutionerBase::chebyshev(unsigned int iter)
       coef[0] = alp;
       coef[1] = 1-alp;
       _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
-      _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(EXEC_RESIDUAL);
-      _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
-      _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-      _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+      _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
+      _problem.computeAuxiliaryKernels(EXEC_LINEAR);
+      _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
+      _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
+      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+      _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
       _eigenvalue = _source_integral;
     }
   }
@@ -578,12 +578,12 @@ EigenExecutionerBase::chebyshev(unsigned int iter)
         coef[1] = 1-alp+beta;
         coef[2] = -beta;
         _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
-        _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::PRE_AUX);
-        _problem.computeAuxiliaryKernels(EXEC_RESIDUAL);
-        _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
-        _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
-        _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-        _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+        _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
+        _problem.computeAuxiliaryKernels(EXEC_LINEAR);
+        _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
+        _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
+        _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+        _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
         _eigenvalue = _source_integral;
       }
 //    }
@@ -595,7 +595,7 @@ void
 EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k)
 {
   PostprocessorName bxp = getParam<PostprocessorName>("bx_norm");
-  if ((_bx_execflag & EXEC_RESIDUAL) == EXEC_NONE)
+  if ((_bx_execflag & EXEC_LINEAR) == EXEC_NONE)
     mooseError("rhs postprocessor for the nonlinear eigenvalue solve must be executed on residual");
   makeBXConsistent(k);
 

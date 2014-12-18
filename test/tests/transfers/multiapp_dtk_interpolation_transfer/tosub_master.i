@@ -61,7 +61,7 @@
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = tosub_sub.i
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

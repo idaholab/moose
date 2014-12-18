@@ -108,7 +108,7 @@ protected:
    *
    * @see outputNodalVariables outputElementalVariables outputScalarVariables outputPostprocessors
    */
-  virtual void outputStep(const OutputExecFlagType & type) = 0;
+  virtual void outputStep(const ExecFlagType & type) = 0;
 
   /**
    * A method called just prior to timestep(), this is used by PetscOutput to perform the necessary
@@ -120,7 +120,7 @@ protected:
    * Handles logic for determining if a step should be output
    * @return True if a call if output should be preformed
    */
-  bool shouldOutput(const OutputExecFlagType & type);
+  bool shouldOutput(const ExecFlagType & type);
 
   /**
    * Returns true if the output interval is satisfied

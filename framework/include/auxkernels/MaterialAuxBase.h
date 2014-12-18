@@ -25,6 +25,7 @@ class MaterialAuxBase;
 template<>
 InputParameters validParams<MaterialAuxBase<Real> >();
 
+
 template<>
 InputParameters validParams<MaterialAuxBase<RealVectorValue> >();
 

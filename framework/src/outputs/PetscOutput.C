@@ -117,13 +117,13 @@ PetscOutput::timestepSetupInternal()
   _linear_dt = _nonlinear_dt/_linear_dt_divisor; // set the pseudo linear timestep
 
   // Set the PETSc monitor functions
-  if (_output_on.contains(OUTPUT_NONLINEAR) && (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol) )
+  if (_output_on.contains(EXEC_NONLINEAR) && (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol) )
   {
     PetscErrorCode ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, PETSC_NULL);
     CHKERRABORT(_communicator.get(),ierr);
   }
 
-  if (_output_on.contains(OUTPUT_LINEAR) && (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol) )
+  if (_output_on.contains(EXEC_LINEAR) && (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol) )
   {
     PetscErrorCode ierr = KSPMonitorSet(ksp, petscLinearOutput, this, PETSC_NULL);
     CHKERRABORT(_communicator.get(),ierr);
@@ -151,7 +151,7 @@ PetscOutput::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * voi
   ptr->_on_nonlinear_residual = true;
 
   // Perform the output
-  ptr->outputStep(OUTPUT_NONLINEAR);
+  ptr->outputStep(EXEC_NONLINEAR);
 
   // Reset the non-linear output flag and the simulation time
   ptr->_on_nonlinear_residual = false;
@@ -177,7 +177,7 @@ PetscOutput::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void * void_pt
   ptr->_on_linear_residual = true;
 
   // Perform the output
-  ptr->outputStep(OUTPUT_LINEAR);
+  ptr->outputStep(EXEC_LINEAR);
 
   // Reset the linear output flag and the simulation time
   ptr->_on_linear_residual = false;

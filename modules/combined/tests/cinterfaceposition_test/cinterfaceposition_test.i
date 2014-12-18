@@ -25,7 +25,7 @@
     type = CInterfacePosition
     variable = u
     RefVal = 0.8
-    execute_on = residual
+    execute_on = linear
     direction_index = 0
   [../]
 []

@@ -284,7 +284,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
       // If we were looking for a steady state, but didn't reach one, we still need to output one more time, regardless of interval
       if (!at_steady)
-        output_warehouse.outputStep(OUTPUT_FORCED);
+        output_warehouse.outputStep(EXEC_FORCED);
 
     } // sub_cycling
     else if (_tolerate_failure)
@@ -334,7 +334,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
               {
                 if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
                 {
-                  output_warehouse.outputStep(OUTPUT_FORCED);
+                  output_warehouse.outputStep(EXEC_FORCED);
                   caught_up = true;
                 }
               }

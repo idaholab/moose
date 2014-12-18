@@ -129,7 +129,7 @@ Nemesis::outputScalarVariables()
 }
 
 void
-Nemesis::output(const OutputExecFlagType & type)
+Nemesis::output(const ExecFlagType & type)
 {
   if (!OversampleOutput::shouldOutput(type))
     return;

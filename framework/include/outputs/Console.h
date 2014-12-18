@@ -69,7 +69,7 @@ public:
    * (e.g., elemental or nodal) are required in the future this calls will need to be explicitly added
    * as well.
    */
-  virtual void output(const OutputExecFlagType & type);
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Creates the output file name

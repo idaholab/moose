@@ -61,13 +61,13 @@
   [./a]
     type = ElementIntegralVariablePostprocessor
     variable = u
-    execute_on = residual
+    execute_on = linear
   [../]
 
   [./total_a]
     type = TotalVariableValue
     value = a
-    execute_on = residual
+    execute_on = linear
   [../]
 []
 

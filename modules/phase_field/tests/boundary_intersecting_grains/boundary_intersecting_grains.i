@@ -54,7 +54,7 @@
   [./pid]
     type = ProcessorIDAux
     variable = pid
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
   [../]
 []
 

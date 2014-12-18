@@ -34,11 +34,16 @@ namespace Moose {
     if (execstore_type_to_enum.empty())
     {
       execstore_type_to_enum["INITIAL"]  = EXEC_INITIAL;
-      execstore_type_to_enum["RESIDUAL"] = EXEC_RESIDUAL;
-      execstore_type_to_enum["JACOBIAN"] = EXEC_JACOBIAN;
-      execstore_type_to_enum["TIMESTEP"] = EXEC_TIMESTEP;
+      execstore_type_to_enum["LINEAR"] = EXEC_LINEAR;
+      execstore_type_to_enum["NONLINEAR"] = EXEC_NONLINEAR;
+      execstore_type_to_enum["TIMESTEP_END"] = EXEC_TIMESTEP_END;
       execstore_type_to_enum["TIMESTEP_BEGIN"] = EXEC_TIMESTEP_BEGIN;
       execstore_type_to_enum["CUSTOM"] = EXEC_CUSTOM;
+
+      // Deprecated syntax
+      execstore_type_to_enum["RESIDUAL"] = EXEC_LINEAR;
+      execstore_type_to_enum["JACOBIAN"] = EXEC_NONLINEAR;
+      execstore_type_to_enum["TIMESTEP"] = EXEC_TIMESTEP_END;
     }
   }
 

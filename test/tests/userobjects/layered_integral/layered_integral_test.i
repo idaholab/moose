@@ -36,7 +36,7 @@
   [./liaux]
     type = SpatialUserObjectAux
     variable = layered_integral
-    execute_on = timestep
+    execute_on = timestep_end
     user_object = layered_integral
   [../]
 []
@@ -62,7 +62,7 @@
     direction = y
     num_layers = 3
     variable = u
-    execute_on = residual
+    execute_on = linear
   [../]
 []
 

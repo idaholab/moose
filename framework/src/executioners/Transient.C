@@ -187,7 +187,7 @@ Transient::init()
     _time_old = _time;
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
-  _output_warehouse.outputStep(OUTPUT_INITIAL);
+  _output_warehouse.outputStep(EXEC_INITIAL);
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   // If this is the first step
@@ -240,7 +240,7 @@ Transient::execute()
     _steps_taken++;
   }
 
-  _output_warehouse.outputStep(OUTPUT_FINAL);
+  _output_warehouse.outputStep(EXEC_FINAL);
   postExecute();
 }
 
@@ -324,7 +324,7 @@ Transient::solveStep(Real input_dt)
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
   // Perform output for timestep begin
-  _output_warehouse.outputStep(OUTPUT_TIMESTEP_BEGIN);
+  _output_warehouse.outputStep(EXEC_TIMESTEP_BEGIN);
 
   if (_picard_max_its > 1)
   {
@@ -361,7 +361,7 @@ Transient::solveStep(Real input_dt)
 
     _solution_change_norm = _problem.solutionChangeNorm();
 
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
 #if 0
     // User definable callback
     if (_estimate_error)
@@ -370,17 +370,17 @@ Transient::solveStep(Real input_dt)
 
     _problem.onTimestepEnd();
 
-    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
-    _problem.execTransfers(EXEC_TIMESTEP);
-    _problem.execMultiApps(EXEC_TIMESTEP, _picard_max_its == 1);
+    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
+    _problem.execTransfers(EXEC_TIMESTEP_END);
+    _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
   }
   else
   {
     _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
 
     // Perform the output of the current, failed time step (this only occurs if desired)
-    _output_warehouse.outputStep(OUTPUT_FAILED);
+    _output_warehouse.outputStep(EXEC_FAILED);
   }
 
   postSolve();
@@ -407,13 +407,13 @@ Transient::endStep(Real input_time)
     _problem.computeIndicatorsAndMarkers();
 
     // Perform the output of the current time step
-    _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+    _output_warehouse.outputStep(EXEC_TIMESTEP_END);
 
     // Output MultiApps if we were doing Picard iterations
     if (_picard_max_its > 1)
     {
       _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
-      _problem.advanceMultiApps(EXEC_TIMESTEP);
+      _problem.advanceMultiApps(EXEC_TIMESTEP_END);
     }
 
     //output
@@ -526,7 +526,7 @@ Transient::computeConstrainedDT()
          << dt_cur
          << std::endl;
   }
-  multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
+  multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_END);
   if (multi_app_dt < dt_cur)
   {
     dt_cur = multi_app_dt;

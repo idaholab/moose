@@ -41,7 +41,7 @@
   [./sum]
     type = RunTime
     time_type = 'alive'
-    execute_on = 'initial jacobian timestep'
+    execute_on = 'initial nonlinear timestep_end'
   [../]
 []
 

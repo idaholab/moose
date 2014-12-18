@@ -72,7 +72,7 @@
     diffusivity = diffusivity
     num_layers = 1
     variable = u
-    execute_on = residual
+    execute_on = linear
     boundary = top
   [../]
 []

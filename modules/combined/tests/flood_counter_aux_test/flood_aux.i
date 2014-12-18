@@ -79,7 +79,7 @@
   [./mapper]
     type = NodalFloodCountAux
     variable = bubble_map
-    execute_on = timestep
+    execute_on = timestep_end
     bubble_object = bubbles
   [../]
 []
@@ -98,7 +98,7 @@
     type = NodalFloodCount
     variable = u
     threshold = 0.3
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
