@@ -30,11 +30,11 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const std::string & n
     _penalty(getParam<Real>("penalty"))
 {
 
-  std::vector<unsigned int> nodelist;
+  std::vector<dof_id_type> nodelist;
   std::vector<boundary_id_type> boundary_id_list;
   _mesh.getMesh().boundary_info->build_node_list(nodelist,boundary_id_list);
 
-  std::vector<unsigned int>::iterator in;
+  std::vector<dof_id_type>::iterator in;
   std::vector<boundary_id_type>::iterator ib;
 
   for (in = nodelist.begin(), ib = boundary_id_list.begin();
