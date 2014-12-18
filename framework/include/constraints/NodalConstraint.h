@@ -43,7 +43,7 @@ public:
    * Get the list of connected slave nodes
    * @return list of slave node IDs
    */
-  std::vector<unsigned int> & getSlaveNodeId() { return _connected_nodes; }
+  std::vector<dof_id_type> & getSlaveNodeId() { return _connected_nodes; }
 
   /**
    * Built the connectivity for this constraint
@@ -81,7 +81,7 @@ protected:
   /// Value of the unknown variable this BC is action on
   VariableValue & _u_slave;
   /// node IDs connected to the master node (slave nodes)
-  std::vector<unsigned int> _connected_nodes;
+  std::vector<dof_id_type> _connected_nodes;
 
   /// Holds the current solution at the current quadrature point
   VariableValue & _u_master;

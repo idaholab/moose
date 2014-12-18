@@ -17,7 +17,7 @@
 #include "MooseMesh.h"
 #include "RandomInterface.h"
 
-const unsigned int MASTER = std::numeric_limits<dof_id_type>::max();
+const unsigned int MASTER = std::numeric_limits<unsigned int>::max();
 
 RandomData::RandomData(FEProblem &problem, const RandomInterface & random_interface) :
     _rd_problem(problem),
@@ -106,7 +106,7 @@ RandomData::updateGenerators()
       _seeds[id] = _generator.randl(MASTER);
 
       // Update the individual dof object generators
-      _generator.seed(id, _seeds[id]);
+      _generator.seed(static_cast<unsigned int>(id), _seeds[id]);
     }
   }
   else
@@ -120,7 +120,7 @@ RandomData::updateGenerators()
       _seeds[id] = _generator.randl(MASTER);
 
       // Update the individual dof object generators
-      _generator.seed(id, _seeds[id]);
+      _generator.seed(static_cast<unsigned int>(id), _seeds[id]);
     }
   }
 

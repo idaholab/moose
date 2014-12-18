@@ -35,15 +35,15 @@ public:
   virtual void timestepSetup();
   void updateReferenceResidual();
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
-                                                                    const int it,
+                                                                    const PetscInt it,
                                                                     const Real xnorm,
                                                                     const Real snorm,
                                                                     const Real fnorm,
                                                                     const Real rtol,
                                                                     const Real stol,
                                                                     const Real abstol,
-                                                                    const int nfuncs,
-                                                                    const int max_funcs,
+                                                                    const PetscInt nfuncs,
+                                                                    const PetscInt max_funcs,
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
 

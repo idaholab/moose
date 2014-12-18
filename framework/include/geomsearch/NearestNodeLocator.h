@@ -55,17 +55,17 @@ public:
   /**
    * Valid to call this after findNodes() has been called to get the distance to the nearest node.
    */
-  Real distance(unsigned int node_id);
+  Real distance(dof_id_type node_id);
 
   /**
    * Valid to call this after findNodes() has been called to get a pointer to the nearest node.
    */
-  const Node * nearestNode(unsigned int node_id);
+  const Node * nearestNode(dof_id_type node_id);
 
   /**
    * Returns the list of slave nodes this Locator is tracking.
    */
-  std::vector<unsigned int> & slaveNodes() { return _slave_nodes; }
+  std::vector<dof_id_type> & slaveNodes() { return _slave_nodes; }
 
   /**
    * Returns the NodeIdRange of slave nodes to be used for calling threaded
@@ -93,15 +93,15 @@ protected:
   NodeIdRange * _slave_node_range;
 
 public:
-  std::map<unsigned int, NearestNodeInfo> _nearest_node_info;
+  std::map<dof_id_type, NearestNodeInfo> _nearest_node_info;
 
   BoundaryID _boundary1;
   BoundaryID _boundary2;
 
   bool _first;
-  std::vector<unsigned int> _slave_nodes;
+  std::vector<dof_id_type> _slave_nodes;
 
-  std::map<unsigned int, std::vector<unsigned int> > _neighbor_nodes;
+  std::map<dof_id_type, std::vector<dof_id_type> > _neighbor_nodes;
 
   // The following parameter controls the patch size that is searched for each nearest neighbor
   static const unsigned int _patch_size;

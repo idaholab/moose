@@ -1269,7 +1269,7 @@ NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & do
 }
 
 void
-NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<unsigned int, std::vector<unsigned int> > & graph)
+NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<dof_id_type, std::vector<dof_id_type> > & graph)
 {
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
 
@@ -1351,16 +1351,16 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
     getNodeDofs(master_node_id, master_dofs);
 
     std::vector<dof_id_type> slave_dofs;
-    std::vector<unsigned int> & slave_node_ids = nc->getSlaveNodeId();
-    for (std::vector<unsigned int>::iterator si = slave_node_ids.begin(); si != slave_node_ids.end(); si++)
+    std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+    for (std::vector<dof_id_type>::iterator si = slave_node_ids.begin(); si != slave_node_ids.end(); si++)
       getNodeDofs(*si, slave_dofs);
 
-    for (std::vector<unsigned int>::iterator mi = master_dofs.begin(); mi != master_dofs.end(); mi++)
+    for (std::vector<dof_id_type>::iterator mi = master_dofs.begin(); mi != master_dofs.end(); mi++)
     {
-      unsigned int master_id = *mi;
-      for (std::vector<unsigned int>::iterator si = slave_dofs.begin(); si != slave_dofs.end(); si++)
+      dof_id_type master_id = *mi;
+      for (std::vector<dof_id_type>::iterator si = slave_dofs.begin(); si != slave_dofs.end(); si++)
       {
-        unsigned int slave_id = *si;
+        dof_id_type slave_id = *si;
         graph[master_id].push_back(slave_id);
         graph[slave_id].push_back(master_id);
       }
@@ -2023,8 +2023,8 @@ NonlinearSystem::residualGhosted()
 
 void
 NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
-                                 std::vector<unsigned int> & n_nz,
-                                 std::vector<unsigned int> & n_oz)
+                                 std::vector<dof_id_type> & n_nz,
+                                 std::vector<dof_id_type> & n_oz)
 {
 
   if (_add_implicit_geometric_coupling_entries_to_jacobian)

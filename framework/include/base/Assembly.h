@@ -438,9 +438,13 @@ protected:
   void reinitFEFace(const Elem * elem, unsigned int side);
 
   void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<dof_id_type> & dof_indices, Real scaling_factor);
-  void cacheResidualBlock(std::vector<Real> & cached_residual_values, std::vector<unsigned int> & cached_residual_rows, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor);
+  void cacheResidualBlock(std::vector<Real> & cached_residual_values,
+                          std::vector<dof_id_type> & cached_residual_rows,
+                          DenseVector<Number> & res_block,
+                          std::vector<dof_id_type> & dof_indices,
+                          Real scaling_factor);
 
-  void setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
+  void setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor);
 
   void addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
 
@@ -633,7 +637,7 @@ protected:
   };
 
   /// Cached shape function values stored by element
-  std::map<unsigned int, ElementFEShapeData * > _element_fe_shape_data_cache;
+  std::map<dof_id_type, ElementFEShapeData * > _element_fe_shape_data_cache;
 
   /// Whether or not fe cache should be built at all
   bool _should_use_fe_cache;
@@ -650,16 +654,16 @@ protected:
   std::vector<std::vector<Real> > _cached_residual_values;
 
   /// Where the cached values should go (the first vector is for TIME vs NONTIME)
-  std::vector<std::vector<unsigned int> > _cached_residual_rows;
+  std::vector<std::vector<dof_id_type> > _cached_residual_rows;
 
   unsigned int _max_cached_residuals;
 
   /// Values cached by calling cacheJacobian()
   std::vector<Real> _cached_jacobian_values;
   /// Row where the corresponding cached value should go
-  std::vector<unsigned int> _cached_jacobian_rows;
+  std::vector<dof_id_type> _cached_jacobian_rows;
   /// Column where the corresponding cached value should go
-  std::vector<unsigned int> _cached_jacobian_cols;
+  std::vector<dof_id_type> _cached_jacobian_cols;
 
   unsigned int _max_cached_jacobians;
 

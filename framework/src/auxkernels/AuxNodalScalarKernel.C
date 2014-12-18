@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<AuxNodalScalarKernel>()
 {
   InputParameters params = validParams<AuxScalarKernel>();
-  params.addRequiredParam<std::vector<unsigned int> >("nodes", "Node ids");
+  params.addRequiredParam<std::vector<dof_id_type> >("nodes", "Node ids");
   return params;
 }
 
@@ -27,7 +27,7 @@ AuxNodalScalarKernel::AuxNodalScalarKernel(const std::string & name, InputParame
     AuxScalarKernel(name, parameters),
     Coupleable(parameters, true),
     MooseVariableDependencyInterface(),
-    _node_ids(getParam<std::vector<unsigned int> >("nodes"))
+    _node_ids(getParam<std::vector<dof_id_type> >("nodes"))
 {
   // Fill in the MooseVariable dependencies
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();

@@ -3769,15 +3769,15 @@ FEProblem::getVariableNames()
 
 MooseNonlinearConvergenceReason
 FEProblem::checkNonlinearConvergence(std::string &msg,
-                                     const int it,
+                                     const PetscInt it,
                                      const Real xnorm,
                                      const Real snorm,
                                      const Real fnorm,
                                      const Real rtol,
                                      const Real stol,
                                      const Real abstol,
-                                     const int nfuncs,
-                                     const int max_funcs,
+                                     const PetscInt nfuncs,
+                                     const PetscInt max_funcs,
                                      const Real ref_resid,
                                      const Real div_threshold)
 {
@@ -3823,7 +3823,7 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
   }
 
   system._last_nl_rnorm = fnorm;
-  system._current_nl_its = it;
+  system._current_nl_its = static_cast<unsigned int>(it);
 
   msg = oss.str();
 
@@ -3834,12 +3834,12 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
 
 MooseLinearConvergenceReason
 FEProblem::checkLinearConvergence(std::string & /*msg*/,
-                                  const int n,
+                                  const PetscInt n,
                                   const Real rnorm,
                                   const Real /*rtol*/,
                                   const Real /*atol*/,
                                   const Real /*dtol*/,
-                                  const int maxits)
+                                  const PetscInt maxits)
 {
   // We initialize the reason to something that basically means MOOSE
   // has not made a decision on convergence yet.
@@ -3870,7 +3870,7 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
   // If either of our convergence criteria is met, store the number of linear
   // iterations in the System.
   if (reason == MOOSE_CONVERGED_ITS || reason == MOOSE_CONVERGED_RTOL)
-    system._current_l_its.push_back(n);
+    system._current_l_its.push_back(static_cast<unsigned int>(n));
 
   return reason;
 }

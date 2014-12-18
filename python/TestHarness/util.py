@@ -51,6 +51,9 @@ LIBMESH_OPTIONS = {
   'petsc_minor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_PETSC_VERSION_MINOR\s+(\d+)',
                      'default'   : '1'
                    },
+  'dof_id_bytes' : { 're_option' : r'#define\s+LIBMESH_DOF_ID_BYTES\s+(\d+)',
+                     'default'   : '4'
+                   },
 }
 
 

@@ -199,21 +199,21 @@ CoupledExecutioner::projectVariables(FEProblem & fep)
 
     // get dof indices for source variable
     unsigned int src_vn = src_sys.system().variable_number(src_mv.name());
-    std::set<unsigned int> src_var_indices;
+    std::set<dof_id_type> src_var_indices;
     src_sys.system().local_dof_indices(src_vn, src_var_indices);
 
     // get dof indices for destination variable
     unsigned int dest_vn = dest_sys.system().variable_number(dest_mv.name());
-    std::set<unsigned int> dest_var_indices;
+    std::set<dof_id_type> dest_var_indices;
     dest_sys.system().local_dof_indices(dest_vn, dest_var_indices);
 
     // NOTE: this is not very robust code. It relies on the same node numbering and that inserting values in the set in the same order will result
     // in a std::set with the same ordering, i.e. items in src_var_indices and dest_var_indices correspond to each other.
 
     // copy the values from src solution vector to dest solution vector
-    std::set<unsigned int>::iterator src_it = src_var_indices.begin();
-    std::set<unsigned int>::iterator src_it_end = src_var_indices.end();
-    std::set<unsigned int>::iterator dest_it = dest_var_indices.begin();
+    std::set<dof_id_type>::iterator src_it = src_var_indices.begin();
+    std::set<dof_id_type>::iterator src_it_end = src_var_indices.end();
+    std::set<dof_id_type>::iterator dest_it = dest_var_indices.begin();
     for (; src_it != src_it_end; ++src_it, ++dest_it)
       dest_sys.solution().set(*dest_it, src_sys.solution()(*src_it));
 

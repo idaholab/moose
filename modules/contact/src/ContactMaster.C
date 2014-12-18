@@ -121,13 +121,14 @@ ContactMaster::timestepSetup()
 void
 ContactMaster::updateContactSet(bool beginning_of_step)
 {
-  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
-  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
-  std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._locked_this_step;
-  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
+  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
+  std::map<dof_id_type, unsigned int> & unlocked_this_step = _penetration_locator._unlocked_this_step;
+  std::map<dof_id_type, unsigned int> & locked_this_step = _penetration_locator._locked_this_step;
+  std::map<dof_id_type, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
@@ -140,8 +141,8 @@ ContactMaster::updateContactSet(bool beginning_of_step)
 
     Real area = nodalArea(*pinfo);
 
-    const unsigned int slave_node_num = it->first;
-    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
+    const dof_id_type slave_node_num = it->first;
+    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
     if (beginning_of_step)
     {
@@ -239,10 +240,11 @@ ContactMaster::addPoints()
 {
   _point_to_info.clear();
 
-  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
@@ -252,9 +254,9 @@ ContactMaster::addPoints()
       continue;
 
 
-    unsigned int slave_node_num = it->first;
+    dof_id_type slave_node_num = it->first;
 
-    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
+    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
     if ( hpit != has_penetrated.end() )
     {
@@ -268,14 +270,14 @@ ContactMaster::addPoints()
 void
 ContactMaster::computeContactForce(PenetrationInfo * pinfo)
 {
-  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
+  std::map<dof_id_type, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
   const Node * node = pinfo->_node;
 
   RealVectorValue res_vec;
   // Build up residual vector
   for (unsigned int i=0; i<_mesh_dimension; ++i)
   {
-    long int dof_number = node->dof_number(0, _vars(i), 0);
+    dof_id_type dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
 
@@ -506,7 +508,7 @@ ContactMaster::nodalArea(PenetrationInfo & pinfo)
 {
   const Node * node = pinfo._node;
 
-  unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
+  dof_id_type dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
 
   Real area = (*_aux_solution)( dof );
   if (area == 0)

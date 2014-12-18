@@ -39,11 +39,11 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
     _slave_boundary(slave_id),
     _fe_type(order),
     _nearest_node(nearest_node),
-    _penetration_info(declareRestartableDataWithContext<std::map<unsigned int, PenetrationInfo *> >("penetration_info", &_mesh)),
-    _has_penetrated(declareRestartableData<std::set<unsigned int> >("has_penetrated")),
-    _locked_this_step(declareRestartableData<std::map<unsigned int, unsigned> >("locked_this_step")),
-    _unlocked_this_step(declareRestartableData<std::map<unsigned int, unsigned> >("unlocked_this_step")),
-    _lagrange_multiplier(declareRestartableData<std::map<unsigned int, Real> >("lagrange_multiplier")),
+    _penetration_info(declareRestartableDataWithContext<std::map<dof_id_type, PenetrationInfo *> >("penetration_info", &_mesh)),
+    _has_penetrated(declareRestartableData<std::set<dof_id_type> >("has_penetrated")),
+    _locked_this_step(declareRestartableData<std::map<dof_id_type, unsigned int> >("locked_this_step")),
+    _unlocked_this_step(declareRestartableData<std::map<dof_id_type, unsigned int> >("unlocked_this_step")),
+    _lagrange_multiplier(declareRestartableData<std::map<dof_id_type, Real> >("lagrange_multiplier")),
     _update_location(declareRestartableData<bool>("update_location", true)),
     _tangential_tolerance(0.0),
     _do_normal_smoothing(false),
@@ -78,7 +78,7 @@ PenetrationLocator::~PenetrationLocator()
     for (unsigned int dim = 0; dim < _fe[i].size(); dim++)
       delete _fe[i][dim];
 
-  for (std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_info.begin(); it != _penetration_info.end(); ++it)
+  for (std::map<dof_id_type, PenetrationInfo *>::iterator it = _penetration_info.begin(); it != _penetration_info.end(); ++it)
     delete it->second;
 }
 
@@ -88,9 +88,9 @@ PenetrationLocator::detectPenetration()
   Moose::perf_log.push("detectPenetration()","Solve");
 
   // Data structures to hold the element boundary information
-  std::vector< unsigned int > elem_list;
-  std::vector< unsigned short int > side_list;
-  std::vector< short int > id_list;
+  std::vector<dof_id_type> elem_list;
+  std::vector<unsigned short int> side_list;
+  std::vector<boundary_id_type> id_list;
 
   // Retrieve the Element Boundary data structures from the mesh
   _mesh.buildSideList(elem_list, side_list, id_list);
@@ -134,7 +134,7 @@ PenetrationLocator::reinit()
 }
 
 Real
-PenetrationLocator::penetrationDistance(unsigned int node_id)
+PenetrationLocator::penetrationDistance(dof_id_type node_id)
 {
   PenetrationInfo * info = _penetration_info[node_id];
 
@@ -146,9 +146,9 @@ PenetrationLocator::penetrationDistance(unsigned int node_id)
 
 
 RealVectorValue
-PenetrationLocator::penetrationNormal(unsigned int node_id)
+PenetrationLocator::penetrationNormal(dof_id_type node_id)
 {
-  std::map<unsigned int, PenetrationInfo *>::const_iterator found_it( _penetration_info.find(node_id) );
+  std::map<dof_id_type, PenetrationInfo *>::const_iterator found_it = _penetration_info.find(node_id);
 
   if (found_it != _penetration_info.end())
     return found_it->second->_normal;
@@ -191,8 +191,8 @@ PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
 void
 PenetrationLocator::saveContactStateVars()
 {
-  std::map<unsigned int, PenetrationInfo *>::iterator it( _penetration_info.begin() );
-  const std::map<unsigned int, PenetrationInfo *>::iterator it_end( _penetration_info.end() );
+  std::map<dof_id_type, PenetrationInfo *>::iterator it = _penetration_info.begin();
+  const std::map<dof_id_type, PenetrationInfo *>::iterator it_end = _penetration_info.end();
   for ( ; it != it_end; ++it )
   {
     if (it->second != NULL)

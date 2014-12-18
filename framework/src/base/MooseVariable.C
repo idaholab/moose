@@ -1218,7 +1218,7 @@ MooseVariable::computeNeighborValues()
   RealGradient dphi_local;
   RealTensor d2phi_local;
 
-  for (dof_id_type i=0; i < num_dofs; ++i)
+  for (unsigned int i=0; i < num_dofs; ++i)
   {
     idx = _dof_indices_neighbor[i];
     soln_local = current_solution(idx);

@@ -148,15 +148,15 @@ public:
    * @param div_threshold  Maximum value of residual before triggering divergence check
    */
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
-                                                                    const int it,
+                                                                    const PetscInt it,
                                                                     const Real xnorm,
                                                                     const Real snorm,
                                                                     const Real fnorm,
                                                                     const Real rtol,
                                                                     const Real stol,
                                                                     const Real abstol,
-                                                                    const int nfuncs,
-                                                                    const int max_funcs,
+                                                                    const PetscInt nfuncs,
+                                                                    const PetscInt max_funcs,
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
 
@@ -171,12 +171,12 @@ public:
    * @param maxits         Maximum number of linear iterations allowed
    */
   virtual MooseLinearConvergenceReason checkLinearConvergence(std::string &msg,
-                                                              const int n,
+                                                              const PetscInt n,
                                                               const Real rnorm,
                                                               const Real rtol,
                                                               const Real atol,
                                                               const Real dtol,
-                                                              const int maxits);
+                                                              const PetscInt maxits);
 
 #ifdef LIBMESH_HAVE_PETSC
   void storePetscOptions(const MultiMooseEnum & petsc_options,
@@ -243,7 +243,7 @@ public:
 
   virtual void prepareAssembly(THREAD_ID tid);
 
-  virtual void addGhostedElem(unsigned int elem_id);
+  virtual void addGhostedElem(dof_id_type elem_id);
   virtual void addGhostedBoundary(BoundaryID boundary_id);
   virtual void ghostGhostedBoundaries();
 
@@ -254,7 +254,7 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid);
-  virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid);
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);

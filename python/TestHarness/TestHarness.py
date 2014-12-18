@@ -83,6 +83,7 @@ class TestHarness:
       self.checks['unique_ids'] = set(['ALL'])
       self.checks['vtk'] = set(['ALL'])
       self.checks['tecplot'] = set(['ALL'])
+      self.checks['dof_id_bytes'] = set(['ALL'])
     else:
       self.checks['compiler'] = getCompilers(self.libmesh_dir)
       self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
@@ -92,6 +93,7 @@ class TestHarness:
       self.checks['unique_ids'] = getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
       self.checks['vtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'vtk')
       self.checks['tecplot'] =  getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
+      self.checks['dof_id_bytes'] = getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
 
     # Override the MESH_MODE option if using '--parallel-mesh' option
     if self.options.parallel_mesh == True or \

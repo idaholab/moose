@@ -199,7 +199,8 @@ public:
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
    */
-  void findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<unsigned int, std::vector<unsigned int> > & graph);
+  void findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data,
+                                            std::map<dof_id_type, std::vector<dof_id_type> > & graph);
 
   /**
    * Adds entries to the Jacobian in the correct positions for couplings coming from dofs being coupled that
@@ -270,8 +271,8 @@ public:
   virtual NumericVector<Number> & residualGhosted();
 
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
-                               std::vector<unsigned int> & n_nz,
-                               std::vector<unsigned int> & n_oz);
+                               std::vector<dof_id_type> & n_nz,
+                               std::vector<dof_id_type> & n_oz);
 
   /**
    * Sets a preconditioner

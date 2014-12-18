@@ -90,13 +90,13 @@ protected:
   bool _closed_loop;
   unsigned int _axis_2d;
 
-  void getCrackFrontNodes(std::set<unsigned int>& nodes);
-  void orderCrackFrontNodes(std::set<unsigned int>& nodes);
-  void orderEndNodes(std::vector<unsigned int> &end_nodes);
-  void pickLoopCrackEndNodes(std::vector<unsigned int> &end_nodes,
-                             std::set<unsigned int> &nodes,
-                             std::map<unsigned int, std::vector<unsigned int> > &node_to_line_elem_map,
-                             std::vector<std::vector<unsigned int> > &line_elems);
+  void getCrackFrontNodes(std::set<dof_id_type>& nodes);
+  void orderCrackFrontNodes(std::set<dof_id_type>& nodes);
+  void orderEndNodes(std::vector<dof_id_type> &end_nodes);
+  void pickLoopCrackEndNodes(std::vector<dof_id_type> &end_nodes,
+                             std::set<dof_id_type> &nodes,
+                             std::map<dof_id_type, std::vector<dof_id_type> > &node_to_line_elem_map,
+                             std::vector<std::vector<dof_id_type> > &line_elems);
   unsigned int maxNodeCoor(std::vector<Node *>& nodes, unsigned int dir0=0);
   void updateCrackFrontGeometry();
   void updateDataForCrackDirection();

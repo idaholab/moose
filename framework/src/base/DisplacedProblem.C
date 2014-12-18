@@ -302,7 +302,7 @@ DisplacedProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID
 }
 
 void
-DisplacedProblem::reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid)
+DisplacedProblem::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
   _displaced_nl.reinitNodes(nodes, tid);
   _displaced_aux.reinitNodes(nodes, tid);

@@ -342,7 +342,7 @@ MultiAppNearestNodeTransfer::execute()
           for (; to_node_it != to_node_end; ++to_node_it)
           {
             Node * to_node = *to_node_it;
-            unsigned int to_node_id = to_node->id();
+            dof_id_type to_node_id = to_node->id();
 
             Real current_distance = 0;
 
@@ -390,7 +390,7 @@ MultiAppNearestNodeTransfer::execute()
           for (; to_elem_it != to_elem_end; ++to_elem_it)
           {
             Elem * to_elem = *to_elem_it;
-            unsigned int to_elem_id = to_elem->id();
+            dof_id_type to_elem_id = to_elem->id();
 
             Point actual_position = to_elem->centroid()-app_position;
 
