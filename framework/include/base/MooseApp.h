@@ -421,6 +421,9 @@ protected:
   /// Legacy Uo Initialization flag
   bool _legacy_uo_initialization_default;
 
+  /// true if we want to just check the input file
+  bool _check_input;
+
 private:
 
   ///@{

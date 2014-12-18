@@ -52,6 +52,7 @@
 #include "DisplacementAboutAxis.h"
 #include "DisplacementAboutAxisAction.h"
 #include "TorqueReaction.h"
+#include "CrackDataSampler.h"
 #include "SolidMechanicsAction.h"
 #include "DomainIntegralAction.h"
 #include "SolidMechInertialForce.h"
@@ -154,6 +155,8 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(InteractionIntegral);
   registerPostprocessor(CavityPressurePostprocessor);
   registerPostprocessor(TorqueReaction);
+
+  registerVectorPostprocessor(CrackDataSampler);
 
   registerUserObject(MaterialTensorOnLine);
   registerUserObject(CavityPressureUserObject);

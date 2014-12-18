@@ -436,4 +436,26 @@
     input = 'lin_comb_incomp_len.i'
     expect_err = 'lc-aux: the length of v and w has to be the same'
   [../]
+
+  # check syntax
+  [./check_syntax_ok]
+    type = 'RunApp'
+    input = 'check_syntax_ok.i'
+    cli_args = '--check-input'
+    expect_out = 'Syntax OK'
+  [../]
+
+  [./check_syntax_error]
+    type = 'RunException'
+    input = 'check_syntax_error.i'
+    cli_args = '--check-input'
+    expect_err = 'ced: The number of nodes has to be 2, but it is 3.'
+  [../]
+
+  [./check_syntax_no_input]
+    type = 'RunException'
+    input = 'Foo'
+    input_switch = '--check-input'
+    expect_err = 'You specified --check-input, but did not provide an input file. Add -i <inputfile> to your command line.'
+  [../]
 []

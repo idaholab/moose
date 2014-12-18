@@ -21,13 +21,14 @@ InputParameters validParams<DomainIntegralAction>()
   params.addRequiredParam<std::vector<Real> >("radius_outer", "Outer radius for volume integral domain");
   params.addParam<std::vector<VariableName> >("output_variable", "Variable values to be reported along the crack front");
   params.addParam<bool>("convert_J_to_K",false,"Convert J-integral to stress intensity factor K.");
-  params.addParam<bool>("symmetry_plane",false,"Adjust fracture integrals to account for a symmetry plane passing through the plane of the crack");
   params.addParam<Real>("poissons_ratio","Poisson's ratio");
   params.addParam<Real>("youngs_modulus","Young's modulus");
   params.addParam<std::vector<SubdomainName> >("block","The block ids where InteractionIntegralAuxFields is defined");
   params.addParam<VariableName>("disp_x", "", "The x displacement");
   params.addParam<VariableName>("disp_y", "", "The y displacement");
   params.addParam<VariableName>("disp_z", "", "The z displacement");
+  MooseEnum position_type("Angle Distance","Distance");
+  params.addParam<MooseEnum>("position_type", position_type, "The method used to calculate position along crack front.  Options are: "+position_type.getRawNames());
   return params;
 }
 
@@ -46,7 +47,9 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
   _radius_inner(getParam<std::vector<Real> >("radius_inner")),
   _radius_outer(getParam<std::vector<Real> >("radius_outer")),
   _convert_J_to_K(false),
-  _symmetry_plane(getParam<bool>("symmetry_plane")),
+  _has_symmetry_plane(isParamValid("symmetry_plane")),
+  _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane") : std::numeric_limits<unsigned int>::max()),
+  _position_type(getParam<MooseEnum>("position_type")),
   _use_displaced_mesh(false)
 {
   if (isParamValid("crack_direction_vector"))
@@ -157,6 +160,8 @@ DomainIntegralAction::act()
       params.set<std::vector<BoundaryName> >("intersecting_boundary") = _intersecting_boundary_names;
     params.set<bool>("2d") = _treat_as_2d;
     params.set<unsigned int>("axis_2d") = _axis_2d;
+    if (_has_symmetry_plane)
+      params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
     params.set<std::vector<BoundaryName> >("boundary") = _boundary_names;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
@@ -242,7 +247,8 @@ DomainIntegralAction::act()
         params.set<Real>("youngs_modulus") = _youngs_modulus;
         params.set<Real>("poissons_ratio") = _poissons_ratio;
       }
-      params.set<bool>("symmetry_plane") = _symmetry_plane;
+      if (_has_symmetry_plane)
+        params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
@@ -277,7 +283,7 @@ DomainIntegralAction::act()
     if (_integrals.count(INTERACTION_INTEGRAL_KI) != 0 || _integrals.count(INTERACTION_INTEGRAL_KII) != 0 || _integrals.count(INTERACTION_INTEGRAL_KIII) != 0)
     {
 
-      if (_symmetry_plane && (_integrals.count(INTERACTION_INTEGRAL_KII) != 0 || _integrals.count(INTERACTION_INTEGRAL_KIII) != 0))
+      if (_has_symmetry_plane && (_integrals.count(INTERACTION_INTEGRAL_KII) != 0 || _integrals.count(INTERACTION_INTEGRAL_KIII) != 0))
         mooseError("In DomainIntegral, symmetry_plane option cannot be used with mode-II or mode-III interaction integral");
 
       const std::string pp_base_name("II");
@@ -426,9 +432,12 @@ DomainIntegralAction::act()
             pp_base_name = "II_KIII";
             break;
         }
-        const std::string vpp_type_name("VectorOfPostprocessors");
+        const std::string vpp_type_name("CrackDataSampler");
         InputParameters params = _factory.getValidParams(vpp_type_name);
         params.set<MultiMooseEnum>("execute_on") = "timestep";
+        params.set<UserObjectName>("crack_front_definition") = uo_name;
+        params.set<MooseEnum>("sort_by") = "id";
+        params.set<MooseEnum>("position_type") = _position_type;
         for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
         {
           std::vector<PostprocessorName> postprocessor_names;
