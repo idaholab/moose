@@ -18,9 +18,14 @@ TotalFreeEnergy::TotalFreeEnergy(const std::string & name,
     _F(getMaterialProperty<Real>(getParam<std::string>("f_name")) ),
     _kappa_names(getParam<std::vector<std::string> >("kappa_names"))
 {
+  //Error check to ensure size of interfacial_vars is the same as kappa_names
+  if (_nvars != _kappa_names.size())
+    mooseError("Size of interfacial_vars is not equal to the size of kappa_names in TotalFreeEnergy");
+
   _grad_vars.resize(_nvars);
   _kappas.resize(_nvars);
 
+  //Assign values of material and variable vectors
   for (unsigned int i = 0; i < _nvars; ++i)
   {
     _kappas[i] = &getMaterialProperty<Real>(_kappa_names[i]);
