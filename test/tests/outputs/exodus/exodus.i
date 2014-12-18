@@ -42,6 +42,7 @@
 [Outputs]
   [./console]
     type = Console
+    output_on = 'timestep_end failed nonlinear'
   [../]
   [./out]
     type = Exodus

@@ -89,7 +89,7 @@
 
 [Outputs]
   file_base = out
-  output_initial = true
+  output_on = 'initial timestep_end'
   csv = true
   exodus = true
   [./console]

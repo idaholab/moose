@@ -71,8 +71,8 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true

@@ -65,11 +65,11 @@
 
 [Outputs]
   file_base = out_wedge
-  output_initial = true
+  output_on = 'initial timestep_end'
   [./oversample]
     type = Exodus
     file_base = out_wedge_oversample
-    file = wedge6_mesh.e # Oversample to another mesh file
+    file = wedge6_mesh.e
   [../]
   [./console]
     type = Console

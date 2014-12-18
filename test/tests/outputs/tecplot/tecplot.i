@@ -40,6 +40,6 @@
 []
 
 [Outputs]
-  output_initial = true
   tecplot = true
+  output_on = 'initial timestep_end'
 []

@@ -92,7 +92,7 @@
 []
 
 [Outputs]
-  output_initial = true
+  output_on = 'initial timestep_end'
   [./out_displaced]
     type = Exodus
     use_displaced = true

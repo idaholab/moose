@@ -91,9 +91,11 @@
   [../]
   [./screen2]
     type = Console
+    output_on = 'timestep_end failed nonlinear'
   [../]
   [./screen3]
     type = Console
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []
 

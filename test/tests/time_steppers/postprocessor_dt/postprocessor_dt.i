@@ -93,5 +93,5 @@
 
 [Outputs]
   exodus = true
-  output_initial = true
+  output_on = 'initial timestep_end'
 []
