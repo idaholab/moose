@@ -6,6 +6,7 @@
 // Forward Declaration
 class ElasticEnergyMaterial;
 class RankTwoTensor;
+class ElasticityTensorR4;
 
 template<>
 InputParameters validParams<DerivativeBaseMaterial>();
@@ -28,13 +29,22 @@ protected:
 
   std::string _base_name;
 
-  // mechanics properties
+  /// Stress tensor
   const MaterialProperty<RankTwoTensor> & _stress;
-  std::vector<const MaterialProperty<RankTwoTensor> *> _dstress;
-  std::vector<std::vector<const MaterialProperty<RankTwoTensor> *> > _d2stress;
+  // std::vector<const MaterialProperty<RankTwoTensor> *> _dstress;
+  // std::vector<std::vector<const MaterialProperty<RankTwoTensor> *> > _d2stress;
+
+  ///@{ Elasticity tensor derivatives
+  const MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
+  std::vector<const MaterialProperty<ElasticityTensorR4> *> _delasticity_tensor;
+  std::vector<std::vector<const MaterialProperty<ElasticityTensorR4> *> > _d2elasticity_tensor;
+  ///@}
+
+  ///@{ Strain and derivatives
   const MaterialProperty<RankTwoTensor> & _strain;
   std::vector<const MaterialProperty<RankTwoTensor> *> _dstrain;
   std::vector<std::vector<const MaterialProperty<RankTwoTensor> *> > _d2strain;
+  ///@}
 };
 
 #endif //ELASTICENERGYMATERIAL_H
