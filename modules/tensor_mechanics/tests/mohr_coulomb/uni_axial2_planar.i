@@ -253,7 +253,7 @@
 
 [Outputs]
   file_base = uni_axial2_planar
-  output_initial = true
+  output_on = 'initial timestep_end'
   [./exodus]
     type = Exodus
     interval = 1
@@ -262,7 +262,7 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
   [./csv]
     type = CSV

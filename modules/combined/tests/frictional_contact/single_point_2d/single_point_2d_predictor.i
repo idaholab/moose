@@ -209,13 +209,13 @@
 
 [Outputs]
   file_base = single_point_2d_predictor_out
-  output_initial = true
   exodus = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
     max_rows = 5
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []
 

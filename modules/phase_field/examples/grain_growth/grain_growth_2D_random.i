@@ -136,14 +136,15 @@
 []
 
 [Outputs]
-  file_base = random_2D # Output base file name.  Note the output will be saved in the "output" directory, that MUST be created before you run the simulation
-  output_initial = true # Output initial condition
-  exodus = true # Exodus file will be outputted
+  file_base = random_2D
+  exodus = true
   csv = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
-    perf_log = true # Performance log will be printed to screen
-    max_rows = 20 # Will print the 20 most recent postprocessor values to the screen
+    perf_log = true
+    max_rows = 20
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []
 

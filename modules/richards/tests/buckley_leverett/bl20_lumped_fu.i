@@ -223,15 +223,14 @@
 
 [Outputs]
   file_base = bl20_lumped_fu
-  output_initial = true
-  output_final = true
   interval = 100000
   exodus = true
   hide = pgas
+  output_on = 'initial timestep_end final'
   [./console_out]
     type = Console
     interval = 1
-    nonlinear_residuals = true
     perf_log = true
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []

@@ -107,8 +107,8 @@
 
 [Outputs]
   file_base = circle
-  output_initial = true
   exodus = true
+  output_on = 'initial timestep_end'
   [./circle_oversample]
     type = Exodus
     file_base = circle_oversample

@@ -201,7 +201,7 @@
 
 [Outputs]
   file_base = sliding_elastic_blocks_2d_out
-  output_initial = true
+  output_on = 'initial timestep_end'
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
@@ -209,8 +209,8 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
     max_rows = 5
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []
 

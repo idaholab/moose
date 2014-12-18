@@ -279,13 +279,13 @@
 
 [Outputs]
   file_base = gh18
-  output_initial = true
-  output_final = true
   interval = 100000
   exodus = true
+  output_on = 'initial timestep_end final'
   [./console]
     type = Console
     perf_log = true
     interval = 1
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []
