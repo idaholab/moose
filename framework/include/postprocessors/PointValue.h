@@ -23,26 +23,71 @@ class PointValue;
 template<>
 InputParameters validParams<PointValue>();
 
+/**
+ * Compute the value of a variable at a specified location.
+ *
+ * Warning: This postprocessor may result in undefined behavior if utilized with
+ * non-continuous elements and the point being located lies on an element boundary.
+ */
 class PointValue : public GeneralPostprocessor
 {
 public:
+  /**
+   * Constructor.
+   * @param name The name of this PointValue postprocessor
+   * @param parameters The input file parameters for this object
+   */
   PointValue(const std::string & name, InputParameters parameters);
-  virtual ~PointValue();
-  virtual void initialize();
+
+  /**
+   * Destructor
+   */
+  virtual ~PointValue(){};
+
+  /**
+   * Empty method, no initialization needed
+   */
+  virtual void initialize(){};
+
+  /**
+   * Determines what element contains the specified point
+   */
   virtual void execute();
+
+  /**
+   * Returns the value of the variable at the specified location
+   */
   virtual Real getValue();
-  virtual Real variableValue();
+
+  /**
+   * Performs the necessary parallel communication as well as computes
+   * the value to return in the getValue method.
+   */
+  virtual void finalize();
 
 protected:
+
+  /// The variable from which a values is to be extracted
   MooseVariable & _var;
+
+  /// The value of the desired variable
   VariableValue & _u;
-  MooseMesh & _mesh;
-  Point _point;
+
+  /// A convenience reference to the libMesh::MeshBase object
+  MeshBase & _mesh;
+
+  /// The point to locate, stored as a vector for use with reinitElemPhys
   std::vector<Point> _point_vec;
+
+  /// The value of the variable at the desired location
   Real _value;
+
+  /// The processor id that owns the element that the point is located
   processor_id_type _root_id;
+
+  /// The element that contains the located point
+  dof_id_type _elem_id;
+
 };
-
-
 
 #endif /* POINTVALUE_H */
