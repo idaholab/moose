@@ -181,7 +181,7 @@ EigenExecutionerBase::addRealParameterReporter(const std::string & param_name)
 {
   InputParameters params = _app.getFactory().getValidParams("ProblemRealParameter");
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep";
+  execute_options = "timestep_end";
   params.set<MultiMooseEnum>("execute_on") = execute_options;
   params.set<std::string>("param_name") = param_name;
   _problem.addPostprocessor("ProblemRealParameter", param_name, params);

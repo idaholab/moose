@@ -42,7 +42,6 @@
 [Outputs]
   [./exodus]
     type = Exodus
-    oversample = true
     refinements = 2
     file_base = exodus_oversample_custom_name
   [../]

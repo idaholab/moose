@@ -34,25 +34,23 @@
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
-  exodus = true
-  output_on = 'initial timestep_end'
   [./console]
     type = Console
-    perf_log = true
-    output_on = 'initial linear nonlinear timestep_end'
+    output_on = 'initial timestep_end failed nonlinear'
   [../]
-  [./debug]
-    type = TopResidualDebugOutput
-    num_residuals = 1
+  [./out]
+    type = Exodus
+    output_on = 'initial timestep_end'
   [../]
+[]
+
+[Debug]
+  show_var_residual_norms = true
+  #show_actions = true
 []

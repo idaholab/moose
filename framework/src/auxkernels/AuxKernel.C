@@ -33,7 +33,7 @@ InputParameters validParams<AuxKernel>()
   params += validParams<RandomInterface>();
   params += validParams<MeshChangedInterface>();
 
-  // Add the SetupInterface parameter, 'execute_on', the default is 'residual'
+  // Add the SetupInterface parameter, 'execute_on', the default is 'linear'
   params += validParams<SetupInterface>();
 
   params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this object applies to");

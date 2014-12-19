@@ -239,7 +239,7 @@ DomainIntegralAction::act()
         pp_base_name = "J";
       const std::string pp_type_name("JIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<MultiMooseEnum>("execute_on") = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("convert_J_to_K") = _convert_J_to_K;
       if (_convert_J_to_K)
@@ -289,7 +289,7 @@ DomainIntegralAction::act()
       const std::string pp_base_name("II");
       const std::string pp_type_name("InteractionIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<MultiMooseEnum>("execute_on") = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
@@ -385,7 +385,7 @@ DomainIntegralAction::act()
       const std::string ov_base_name(_output_variables[i]);
       const std::string pp_type_name("CrackFrontData");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<MultiMooseEnum>("execute_on") = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       if (_treat_as_2d)
       {
@@ -434,7 +434,7 @@ DomainIntegralAction::act()
         }
         const std::string vpp_type_name("CrackDataSampler");
         InputParameters params = _factory.getValidParams(vpp_type_name);
-        params.set<MultiMooseEnum>("execute_on") = "timestep";
+        params.set<MultiMooseEnum>("execute_on") = "timestep_end";
         params.set<UserObjectName>("crack_front_definition") = uo_name;
         params.set<MooseEnum>("sort_by") = "id";
         params.set<MooseEnum>("position_type") = _position_type;
@@ -458,7 +458,7 @@ DomainIntegralAction::act()
       {
         const std::string vpp_type_name("VectorOfPostprocessors");
         InputParameters params = _factory.getValidParams(vpp_type_name);
-        params.set<MultiMooseEnum>("execute_on") = "timestep";
+        params.set<MultiMooseEnum>("execute_on") = "timestep_end";
         std::ostringstream vpp_name_stream;
         vpp_name_stream<<_output_variables[i]<<"_crack";
         std::vector<PostprocessorName> postprocessor_names;
