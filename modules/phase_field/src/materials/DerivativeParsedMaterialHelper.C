@@ -8,8 +8,9 @@ InputParameters validParams<DerivativeParsedMaterialHelper>()
 
   // Just in time compilation for the FParser objects
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-  params.addParam<bool>( "enable_jit", false, "Enable Just In Time compilation of the parsed functions (experimental)");
+  params.addParam<bool>( "enable_jit", false, "Enable Just In Time compilation of the parsed functions");
 #endif
+  params.addParam<bool>( "disable_fpoptimizer", false, "Disable the function parser algebraic optimizer");
   params.addParam<bool>( "fail_on_evalerror", false, "Fail fatally if a function evaluation returns an error code (otherwise just pass on NaN)");
   return params;
 }
@@ -29,6 +30,7 @@ DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string
     _func_F(NULL),
     _nmat_props(0),
     _enable_jit(isParamValid("enable_jit") && getParam<bool>("enable_jit")),
+    _disable_fpoptimizer(getParam<bool>("disable_fpoptimizer")),
     _fail_on_evalerror(getParam<bool>("fail_on_evalerror")),
     _nan(std::numeric_limits<Real>::quiet_NaN())
 {
@@ -193,14 +195,16 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
   unsigned int i, j, k;
 
   // base function
-  _func_F->Optimize();
+  if (!_disable_fpoptimizer)
+    _func_F->Optimize();
   if (_enable_jit && !_func_F->JITCompile())
     mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 
   // optimize first derivatives
   for (i = 0; i < _nargs; ++i)
   {
-    _func_dF[i]->Optimize();
+    if (!_disable_fpoptimizer)
+      _func_dF[i]->Optimize();
     if (_enable_jit && !_func_dF[i]->JITCompile())
       mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 
@@ -214,7 +218,8 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
     // optimize second derivatives
     for (j = i; j < _nargs; ++j)
     {
-      _func_d2F[i][j]->Optimize();
+      if (!_disable_fpoptimizer)
+        _func_d2F[i][j]->Optimize();
       if (_enable_jit && !_func_d2F[i][j]->JITCompile())
         mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 
@@ -230,7 +235,8 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
       {
         for (k = j; k < _nargs; ++k)
         {
-          _func_d3F[i][j][k]->Optimize();
+          if (!_disable_fpoptimizer)
+            _func_d3F[i][j][k]->Optimize();
           if (_enable_jit && !_func_d3F[i][j][k]->JITCompile())
             mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 
