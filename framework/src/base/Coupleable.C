@@ -144,7 +144,12 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
   }
 
   coupledCallback(var_name, false);
-  MooseVariable * var = getVar(var_name, comp);
+  return coupledValue(getVar(var_name, comp));
+}
+
+VariableValue &
+Coupleable::coupledValue(MooseVariable * var)
+{
   if (_nodal)
     return (_c_is_implicit) ? var->nodalSln() : var->nodalSlnOld();
   else

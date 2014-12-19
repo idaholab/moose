@@ -85,6 +85,7 @@ protected:
    * @see Kernel::value
    */
   virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValue(MooseVariable * var);
 
   /**
    * Returns an old value from previous time step  of a coupled variable
