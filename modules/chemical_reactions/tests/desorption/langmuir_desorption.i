@@ -119,13 +119,14 @@
 []
 [Outputs]
   file_base = langmuir_desorption
-  output_initial = true
   interval = 10
   exodus = true
   csv = 10
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true
+    output_on = 'timestep_end failed nonlinear'
   [../]
 [] # Outputs
 []

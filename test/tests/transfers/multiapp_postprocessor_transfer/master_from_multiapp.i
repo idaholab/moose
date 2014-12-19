@@ -65,8 +65,8 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
+  output_on = 'initial timestep_end'
 []
 
 [MultiApps]

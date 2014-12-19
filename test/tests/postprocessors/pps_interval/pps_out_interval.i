@@ -130,13 +130,13 @@
 
 [Outputs]
   file_base = pps_out_interval
-  output_initial = true
   interval = 2
   exodus = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
     interval = 1
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []

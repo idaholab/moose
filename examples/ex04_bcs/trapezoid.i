@@ -81,6 +81,6 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []

@@ -127,13 +127,11 @@
 []
 
 [Outputs]
-  output_initial = false
-  exodus = true
   csv = true
   exodus = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'linear timestep_end nonlinear failed'
   [../]
 []

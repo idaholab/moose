@@ -76,11 +76,12 @@
 
 [Outputs]
   file_base = out_part1
-  output_initial = true
   exodus = true
   checkpoint = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true
+    output_on = 'timestep_end failed nonlinear'
   [../]
 []

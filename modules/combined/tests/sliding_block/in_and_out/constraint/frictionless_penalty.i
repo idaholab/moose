@@ -186,9 +186,8 @@
 
 [Outputs]
   file_base = frictionless_penalty_out
-  output_initial = true
-#  csv = true
   interval = 10
+  output_on = 'initial timestep_end'
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
@@ -196,8 +195,8 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
     max_rows = 5
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []
 

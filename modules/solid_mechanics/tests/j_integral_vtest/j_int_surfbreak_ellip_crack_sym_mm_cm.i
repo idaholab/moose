@@ -220,12 +220,12 @@
 
 [Outputs]
   file_base = j_int_surfbreak_ellip_crack_sym_mm_cm_out
-  output_initial = false
   exodus = true
   csv = true
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []

@@ -170,8 +170,8 @@
 
 [Outputs]
   file_base = many_deforms_cap
-  output_initial = true
   exodus = false
+  output_on = 'initial timestep_end'
   [./console]
     type = Console
     perf_log = true
