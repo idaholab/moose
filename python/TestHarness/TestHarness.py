@@ -195,7 +195,7 @@ class TestHarness:
                   else: # This job is skipped - notify the runner
                     if (reason != ''):
                       self.handleTestResult(tester.parameters(), '', reason)
-                      self.runner.jobSkipped(tester.parameters()['test_name'])
+                    self.runner.jobSkipped(tester.parameters()['test_name'])
 
               os.chdir(saved_cwd)
               sys.path.pop()
