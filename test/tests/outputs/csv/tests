@@ -10,7 +10,6 @@
     type = CSVDiff
     input = 'csv_transient.i'
     csvdiff = 'csv_transient_out.csv'
-    skip = 'see #3431'
   [../]
   [./transient_exodus]
     # Tests output of postprocessors and scalars to Exodus files for transient propblems
@@ -25,7 +24,6 @@
     type = CSVDiff
     input = csv_restart_part1.i
     csvdiff = 'csv_restart_part1_out.csv'
-    skip = 'see #4407'
   [../]
   [./restart_part2]
     # Second part of CSV restart test
