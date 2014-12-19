@@ -467,6 +467,7 @@ class WriteCSV:
       self.file_object = open(logfile, 'w', 1)
     else:
       self.file_object = open(logfile, 'a', 1)
+    csv.field_size_limit(sys.maxsize)
     self.log_file = csv.writer(self.file_object, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
 
   # Close the logfile
@@ -514,6 +515,7 @@ machine_id is supplied by the client class. This allows for multiple agents if d
       if os.path.exists(self.arguments.outfile[-1]):
         memory_list = []
         history_file = open(self.arguments.outfile[-1], 'r')
+        csv.field_size_limit(sys.maxsize)
         reader = csv.reader(history_file, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
 
         # Get last item in list. Unfortunately, no way to do this until
@@ -691,6 +693,7 @@ class MemoryPlotter:
       memory_list = []
       if os.path.exists(log):
         log_file = open(log, 'r')
+        csv.field_size_limit(sys.maxsize)
         reader = csv.reader(log_file, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
         for row in reader:
           memory_list.append(row)
