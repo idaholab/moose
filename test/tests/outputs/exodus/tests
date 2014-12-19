@@ -18,9 +18,8 @@
   [./enable_initial]
     # Tests the enabling of the initial condition for steady-state Executioner
     type = 'Exodiff'
-    input = 'exodus.i'
-    exodiff = 'exodus_disable_initial_out.e'
-    cli_args = 'Outputs/out/output_initial=false Outputs/out/file_base=exodus_disable_initial_out'
+    input = 'exodus_enable_initial.i'
+    exodiff = 'exodus_enable_initial_out.e'
   [../]
 
   [./output_all]
