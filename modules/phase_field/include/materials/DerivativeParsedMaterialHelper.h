@@ -68,6 +68,7 @@ protected:
 
   /// feature flags
   bool _enable_jit;
+  bool _disable_fpoptimizer;
   bool _fail_on_evalerror;
 
   /// appropriate not a number value to return
