@@ -64,7 +64,7 @@ InputParameters validParams<Transient>()
 
   params.addParam<bool>("use_multiapp_dt", false, "If true then the dt for the simulation will be chosen by the MultiApps.  If false (the default) then the minimum over the master dt and the MultiApps is used");
 
-  params.addParam<unsigned int>("picard_max_its", 1, "Number of times each timestep will be solved.  Mainly used when wanting to do Picard iterations with MultiApps that are set to execute_on timestep or timestep_begin");
+  params.addParam<unsigned int>("picard_max_its", 1, "Number of times each timestep will be solved.  Mainly used when wanting to do Picard iterations with MultiApps that are set to execute_on timestep_end or timestep_begin");
   params.addParam<Real>("picard_rel_tol", 1e-8, "The relative nonlinear residual drop to shoot for during Picard iterations.  This check is performed based on the Master app's nonlinear residual.");
   params.addParam<Real>("picard_abs_tol", 1e-50, "The absolute nonlinear residual to shoot for during Picard iterations.  This check is performed based on the Master app's nonlinear residual.");
 

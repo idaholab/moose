@@ -32,7 +32,7 @@ CavityPressurePPAction::act()
 
   InputParameters params = _factory.getValidParams(pp_name);
 
-  params.set<MultiMooseEnum>("execute_on") = "residual";
+  params.set<MultiMooseEnum>("execute_on") = "linear";
 
   params.set<UserObjectName>("cavity_pressure_uo") = uo_name;
 

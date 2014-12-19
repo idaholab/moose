@@ -19,7 +19,7 @@ InputParameters validParams<CavityPressureUOAction>()
   params.addParam<std::string>("output", "The name to use for the cavity pressure value.");
 
   params += validParams<SetupInterface>();
-  params.set<MultiMooseEnum>("execute_on") = "residual";
+  params.set<MultiMooseEnum>("execute_on") = "linear";
 
   return params;
 }

@@ -69,9 +69,9 @@ SetupResidualDebugAction::act()
     InputParameters params = _factory.getValidParams("DebugResidualAux");
     params.set<AuxVariableName>("variable") = aux_var_name;
     params.set<NonlinearVariableName>("debug_variable") = var.name();
-    params.set<MultiMooseEnum>("execute_on") = "residual";
+    params.set<MultiMooseEnum>("execute_on") = "linear";
     _problem->addAuxKernel("DebugResidualAux", kern_name, params);
-    params.set<MultiMooseEnum>("execute_on") = "timestep";
+    params.set<MultiMooseEnum>("execute_on") = "timestep_end";
     _problem->addAuxKernel("DebugResidualAux", kern_name, params);
   }
 }

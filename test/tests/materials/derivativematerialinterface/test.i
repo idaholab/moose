@@ -31,6 +31,6 @@
   [./console]
     type = Console
     perf_log = false
-    output_on = 'timestep_end failed nonlinear'
+    output_on = 'initial timestep_end failed nonlinear'
   [../]
 []

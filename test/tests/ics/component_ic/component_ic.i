@@ -106,7 +106,7 @@
   output_on = 'initial timestep_end'
   [./out]
     type = Exodus
-    output_scalar_variables = false
+    output_scalars_on = 'none'
   [../]
   [./console]
     type = Console

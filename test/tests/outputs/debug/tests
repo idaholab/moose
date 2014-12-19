@@ -44,7 +44,7 @@
    [./show_top_residuals_nonlinear_only]
      # Test that top residuals may be limited to nonlinear iterations only
      type = RunApp
-     input = show_top_residuals.i Outputs/debug/linear_residuals=false
+     input = show_top_residuals_nonlinear_only.i
      expect_out = "0 Linear[^\n]*\n[^\n]*1 Linear"
    [../]
 

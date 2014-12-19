@@ -83,7 +83,6 @@
   end_time = 5
   num_steps = 500000
 
-  dtmax = 0.1
   dtmax = 0.25
 []
 
