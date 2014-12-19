@@ -145,14 +145,10 @@ AuxKernel::getPostprocessorValueByName(const PostprocessorName & name)
 }
 
 void
-AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
+AuxKernel::coupledCallback(MooseVariable * var, bool is_old)
 {
   if (is_old)
-  {
-    std::vector<VariableName> var_names = getParam<std::vector<VariableName> >(var_name);
-    for (std::vector<VariableName>::const_iterator it = var_names.begin(); it != var_names.end(); ++it)
-      _depend_vars.erase(*it);
-  }
+    _depend_vars.erase(var->name());
 }
 
 void

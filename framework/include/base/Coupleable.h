@@ -67,7 +67,7 @@ protected:
    */
   unsigned int coupledComponents(const std::string & var_name);
 
-  virtual void coupledCallback(const std::string & var_name, bool is_old);
+  virtual void coupledCallback(MooseVariable * var, bool is_old);
 
   /**
    * Returns the index for a coupled variable by name
@@ -95,6 +95,7 @@ protected:
    * @see Kernel::valueOld
    */
   virtual VariableValue & coupledValueOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValueOld(MooseVariable * var);
 
   /**
    * Returns an old value from two time steps previous of a coupled variable
@@ -104,6 +105,7 @@ protected:
    * @see Kernel::valueOlder
    */
   virtual VariableValue & coupledValueOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValueOlder(MooseVariable * var);
 
   /**
    * Returns gradient of a coupled variable
@@ -113,6 +115,7 @@ protected:
    * @see Kernel::gradient
    */
   virtual VariableGradient & coupledGradient(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradient(MooseVariable * var);
 
   /**
    * Returns an old gradient from previous time step of a coupled variable
@@ -122,6 +125,7 @@ protected:
    * @see Kernel::gradientOld
    */
   virtual VariableGradient & coupledGradientOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradientOld(MooseVariable * var);
 
   /**
    * Returns an old gradient from two time steps previous of a coupled variable
@@ -131,6 +135,7 @@ protected:
    * @see Kernel::gradientOlder
    */
   virtual VariableGradient & coupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradientOlder(MooseVariable * var);
 
   /**
    * Returns second derivative of a coupled variable
@@ -140,6 +145,7 @@ protected:
    * @see Kernel::second
    */
   virtual VariableSecond & coupledSecond(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableSecond & coupledSecond(MooseVariable * var);
 
   /**
    * Returns an old second derivative from previous time step of a coupled variable
@@ -149,6 +155,7 @@ protected:
    * @see Kernel::secondOld
    */
   virtual VariableSecond & coupledSecondOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableSecond & coupledSecondOld(MooseVariable * var);
 
   /**
    * Returns an old second derivative from two time steps previous of a coupled variable
@@ -158,6 +165,7 @@ protected:
    * @see Kernel::secondOlder
    */
   virtual VariableSecond & coupledSecondOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableSecond & coupledSecondOlder(MooseVariable * var);
 
   /**
    * Time derivative of a coupled variable
@@ -167,6 +175,7 @@ protected:
    * @see Kernel::dot
    */
   virtual VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledDot(MooseVariable * var);
 
   /**
    * Time derivative of a coupled variable with respect to the coefficients
@@ -176,6 +185,7 @@ protected:
    * @see Kernel:dotDu
    */
   virtual VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledDotDu(MooseVariable * var);
 
   /**
    * Returns nodal values of a coupled variable
@@ -184,6 +194,7 @@ protected:
    * @return Reference to a VariableValue for the coupled variable
    */
   virtual VariableValue & coupledNodalValue(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledNodalValue(MooseVariable * var);
 
   /**
    * Returns an old nodal value from previous time step  of a coupled variable
@@ -192,6 +203,7 @@ protected:
    * @return Reference to a VariableValue containing the old value of the coupled variable
    */
   virtual VariableValue & coupledNodalValueOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledNodalValueOld(MooseVariable * var);
 
   /**
    * Returns an old nodal value from two time steps previous of a coupled variable
@@ -200,6 +212,7 @@ protected:
    * @return Reference to a VariableValue containing the older value of the coupled variable
    */
   virtual VariableValue & coupledNodalValueOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledNodalValueOlder(MooseVariable * var);
 
 protected:
   // Reference to FEProblem
@@ -245,7 +258,7 @@ protected:
    * are coupled in.
    * @param name the name of the variable
    */
-  void validateExecutionerType(const std::string & name) const;
+  void validateExecutionerType(MooseVariable * var) const;
 
 private:
   /// Maximum qps for any element in this system
