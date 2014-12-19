@@ -51,8 +51,9 @@ typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElem
 
 namespace Moose
 {
-const SubdomainID ANY_BLOCK_ID = (SubdomainID) -1;
-const BoundaryID ANY_BOUNDARY_ID = (BoundaryID) -1;
+const SubdomainID ANY_BLOCK_ID = libMesh::Elem::invalid_subdomain_id - 1;
+const SubdomainID INVALID_BLOCK_ID = libMesh::Elem::invalid_subdomain_id;
+const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
 
 
