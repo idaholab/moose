@@ -33,7 +33,7 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'initial failed linear nonlinear timestep_end'
   [../]
   [./debug]
     type = TopResidualDebugOutput

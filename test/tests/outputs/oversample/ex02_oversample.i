@@ -58,12 +58,10 @@
   [../]
   [./os2]
     type = Exodus
-    oversample = true
     refinements = 2
   [../]
   [./os4]
     type = Exodus
-    oversample = true
     refinements = 4
   [../]
 []

@@ -77,7 +77,6 @@
   [./oversampling]
     file_base = out_file_oversample
     type = Exodus
-    oversample = true
     refinements = 3
   [../]
   [./console]

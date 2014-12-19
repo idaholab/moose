@@ -77,7 +77,6 @@
   [./oversample]
     type = Exodus
     refinements = 2
-    oversample = true
     file_base = adapt_out_oversample
     output_on = 'initial timestep_end'
   [../]

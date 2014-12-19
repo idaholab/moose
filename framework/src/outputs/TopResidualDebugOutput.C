@@ -32,9 +32,7 @@ InputParameters validParams<TopResidualDebugOutput>()
   params.addParam<unsigned int>("num_residuals", 0, "The number of top residuals to print out (0 = no output)");
 
   // By default operate on both nonlinear and linear residuals
-  params.set<bool>("nonlinear_residuals") = true;
-  params.set<bool>("linear_residuals") = true;
-
+  params.set<MultiMooseEnum>("output_on") = "linear nonlinear timestep_end";
   return params;
 }
 

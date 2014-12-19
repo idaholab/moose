@@ -63,7 +63,6 @@
   [./OverSampling]
     type = Exodus
     refinements = 3
-    oversample = true
   [../]
   [./console]
     type = Console
