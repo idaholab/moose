@@ -164,6 +164,8 @@ void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBas
   if (!first_elem)
     return;
 
+  intersected_elems.push_back(const_cast<Elem *>(first_elem));
+
   // Make a LineSegment object out of our two points for ease:
   LineSegment line_segment = LineSegment(p0, p1);
 
