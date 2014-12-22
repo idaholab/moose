@@ -406,8 +406,8 @@ private:
    * @param warehouse Reference to the postprocessor or vector postprocessor warehouse
    */
   template <typename warehouse_type, typename postprocessor_type>
-  bool
-  initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse);
+  void
+  initPostprocessorOrVectorPostprocessorLists(const std::string & output_data_name, warehouse_type & warehouse);
 
   /**
    * Initializes the list of items to be output using the available, show, and hide lists
@@ -468,10 +468,19 @@ private:
 // Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
 template <class OutputBase>
 template <typename warehouse_type, typename postprocessor_type>
-bool
-AdvancedOutput<OutputBase>::initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse)
+void
+AdvancedOutput<OutputBase>::initPostprocessorOrVectorPostprocessorLists(const std::string & output_data_name, warehouse_type & warehouse)
 {
-  // Return value
+
+  // Convience reference to the OutputData being operated on (should used "postprocessors" or "vector_postprocessors")
+  OutputData & output_data = _output_data[output_data_name];
+
+  // Build the input file parameter name (i.e. "output_postprocessors_on" or "output_vector_postprocessors_on")
+  std::ostringstream oss;
+  oss << "output_" << output_data_name << "_on";
+  std::string output_on_name = oss.str();
+
+  // True if the postprocessors has been limited using 'outputs' parameter
   bool has_limited_pps = false;
 
   // Loop through each of the execution flags
@@ -496,7 +505,7 @@ AdvancedOutput<OutputBase>::initPostprocessorOrVectorPostprocessorLists(OutputDa
       // account for "all" keyword (if it is present assume "all" was desired)
       if ( pps_outputs.find(OutputBase::_name) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
       {
-        if (!hasPostprocessorOutput())
+        if (!_advanced_output_on.contains("postprocessors") || (_advanced_output_on["postprocessors"].isValid() && _advanced_output_on["postprocessors"].contains("none")))
           mooseWarning("Postprocessor '" << pps->PPName()
                        << "' has requested to be output by the '" << OutputBase::_name
                        << "' output, but postprocessor output is not support by this type of output object.");
@@ -508,7 +517,19 @@ AdvancedOutput<OutputBase>::initPostprocessorOrVectorPostprocessorLists(OutputDa
     }
   }
 
-  return has_limited_pps;
+  // Produce the warning when 'outputs' is used, but postprocessor output is disabled
+  if (has_limited_pps && OutputBase::isParamValid(output_on_name))
+  {
+    const MultiMooseEnum & pp_on = OutputBase::template getParam<MultiMooseEnum>(output_on_name);
+    if (pp_on.contains("none"))
+    {
+      if (output_on_name == "output_postprocessors_on")
+        mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << OutputBase::_name << "' output object.");
+      else if (output_on_name == "output_postprocessors_on")
+        mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << OutputBase::_name << "' output object.");
+
+    }
+  }
 }
 
 #endif /* ADVANCEDOUTPUT_H */

@@ -487,25 +487,13 @@ AdvancedOutput<OutputBase>::initAvailableLists()
   // This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
   // to produce an warning if postprocessor output is disabled
   ExecStore<PostprocessorWarehouse> & warehouse = OutputBase::_problem_ptr->getPostprocessorWarehouse();
-  bool has_limited_pps = initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>(_output_data["postprocessors"], warehouse);
-
-  // Produce the warning when 'outputs' is used, but postprocessor output is disable
-  if (has_limited_pps && !hasPostprocessorOutput())
-
-    //if (has_limited_pps && isParamValid("output_postprocessors_on") && getParam<MultiMooseEnum>("output_postprocessors_on").isValid())
-    mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << OutputBase::_name << "' output object.");
+  initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>("postprocessors", warehouse);
 
   // Initialize vector postprocessor list
   // This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is then used
   // to produce an warning if vector postprocessor output is disabled
   ExecStore<VectorPostprocessorWarehouse> & vector_warehouse = OutputBase::_problem_ptr->getVectorPostprocessorWarehouse();
-  bool has_limited_vector_pps = initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>(_output_data["vector_postprocessors"], vector_warehouse);
-
-  // Produce the warning when 'outputs' is used, but vector postprocessor output is disable
-  if (has_limited_vector_pps &&
-      OutputBase::isParamValid("output_vector_postprocessors_on") &&
-      OutputBase::template getParam<MultiMooseEnum>("output_vector_postprocessors_on").isValid())
-    mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << OutputBase::_name << "' output object.");
+  initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>("vector_postprocessors", vector_warehouse);
 
   // Get a list of the available variables
   std::vector<VariableName> variables = OutputBase::_problem_ptr->getVariableNames();
@@ -716,6 +704,9 @@ template<class OutputBase>
 bool
 AdvancedOutput<OutputBase>::hasOutputHelper(const std::string & name)
 {
+  if (!OutputBase::_initialized)
+    mooseError("The output object must be initialized before it may be determined if " << name << " output is enabled.");
+
   return !_output_data[name].output.empty() && _advanced_output_on.contains(name) && _advanced_output_on[name].isValid() && !_advanced_output_on[name].contains("none");
 }
 
