@@ -25,37 +25,56 @@ class PointSamplerBase;
 template<>
 InputParameters validParams<PointSamplerBase>();
 
+/**
+ * Base class for point based VectorPostprocessors
+ */
 class PointSamplerBase :
   public GeneralVectorPostprocessor,
   public CoupleableMooseVariableDependencyIntermediateInterface,
   protected SamplerBase
 {
 public:
+  /**
+   * Constructor
+   * @param name The name of the VectorPostprocessor
+   * @param paramters Input parameters for this VectorPostprocessor
+   */
   PointSamplerBase(const std::string & name, InputParameters parameters);
 
+  /**
+   * Destructor
+   */
   virtual ~PointSamplerBase() {}
 
+  /**
+   * Initialization method
+   * Calls SampleBase::initialize and populates the local point ids allowing for
+   * execute() to mimize the number of point locator calls
+   */
   virtual void initialize();
+
+  /**
+   * Locates the elements at the user-specified points
+   */
   virtual void execute();
+
+  /**
+   * Performs the actual calculation of the variables at the specified points
+   */
   virtual void finalize();
 
+  /**
+   * Performs thread joining operations
+   * @see SamplerBase
+   */
   virtual void threadJoin(const SamplerBase & y);
 
 protected:
 
-  /**
-   * Find the local element that contains the point.  This will attempt to use a cached element to speed things up.
-   *
-   * @param p The point in physical space
-   * @param id A unique ID for this point.
-   * @return The Elem containing the point or NULL if this processor doesn't contain an element that contains this point.
-   */
-  const Elem * getLocalElemContainingPoint(const Point & p, unsigned int /*id*/);
-
   /// The Mesh we're using
-  MooseMesh & _mesh;
+  MeshBase & _mesh;
 
-  /// The points to evaluate at
+  /// The points to evaluate at (using a parallel vector here to save on point locator calls)
   std::vector<Point> _points;
 
   /// The ID to use for each point (yes, this is Real on purpose)
@@ -64,12 +83,17 @@ protected:
   /// So we don't have to create and destroy this vector over and over again
   std::vector<Real> _values;
 
-  unsigned int _qp;
+  /// The point locator utilized to find the user-specified locations
+  AutoPtr<PointLocatorBase> _point_locator;
 
-  /// So we don't have to create and destroy this
-  std::vector<Point> _point_vec;
+  /// Stores the processor ids for the elements located with the point locator
+  std::vector<processor_id_type> _root_ids;
 
-  AutoPtr<PointLocatorBase> _pl;
+  /// Stores the element ids for the elements located with the point locator
+  std::vector<dof_id_type> _elem_ids;
+
+  /// Storage structure local indices for minimizing point locator calls in execute()
+  std::vector<std::vector<Real> > _local_ids;
 };
 
 #endif

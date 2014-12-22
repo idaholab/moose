@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "PointSamplerBase.h"
+#include "MooseUtils.h"
 
 template<>
 InputParameters validParams<PointSamplerBase>()
@@ -30,8 +31,8 @@ PointSamplerBase::PointSamplerBase(const std::string & name, InputParameters par
     GeneralVectorPostprocessor(name, parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     SamplerBase(name, parameters, this, _communicator),
-    _mesh(_subproblem.mesh()),
-    _point_vec(1) // Only going to evaluate one point at a time for now
+    _mesh(_subproblem.mesh().getMesh()),
+    _local_ids(n_processors())
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());
@@ -48,38 +49,79 @@ PointSamplerBase::initialize()
 {
   SamplerBase::initialize();
 
-  // We do this here just in case it's been destroyed and recreated becaue of mesh adaptivity.
-  _pl = _mesh.getMesh().sub_point_locator();
+  // We do this here just in case it's been destroyed and recreated because of mesh adaptivity.
+  _point_locator = _mesh.sub_point_locator();
+
+  // The following code populates the local point indices for more efficient parallel calls to the point locator in execute() method
+  // Computes the number local parts
+  double n = n_processors(); // num. of procs, use Real to get correct division below
+  unsigned int parts = std::ceil(_ids.size() / n);
+
+  // Loop through the ids and store a subset of the ids for each processor
+  unsigned int cnt = 0;
+  for (std::vector<Real>::const_iterator it = _ids.begin(); it < _ids.end(); it+=parts)
+  {
+    if (it+parts < _ids.end())
+      _local_ids[cnt] = std::vector<Real>(it, it+parts);
+    else
+      _local_ids[cnt] = std::vector<Real>(it, _ids.end());
+    cnt += 1;
+  }
+
 }
 
 void
 PointSamplerBase::execute()
 {
-  for (unsigned int i=0; i<_points.size(); i++)
+
+  // Clear any previously located element and root ids
+  _elem_ids.clear();
+  _root_ids.clear();
+
+  // Loop over the points assigned to this processor
+  for (std::vector<Real>::const_iterator it = _local_ids[processor_id()].begin(); it != _local_ids[processor_id()].end(); ++it)
   {
-    Point & p = _points[i];
+    Point & p = _points[*it];
 
     // First find the element the hit lands in
-    const Elem * elem = getLocalElemContainingPoint(p, i);
+    const Elem * elem = (*_point_locator)(p);
 
-    // We have to pass a vector of points into reinitElemPhys
-    _point_vec[0] = p;
+    // Error if the element cannot be located
+    if (!elem)
+      mooseError("No element located at " << p << " in PointSamplerBase VectorPostprocessor named: " << _name);
 
-    if (elem)
-    {
-      _subproblem.reinitElemPhys(elem, _point_vec, 0); // Zero is for tid
-
-      for (unsigned int j=0; j<_coupled_moose_vars.size(); j++)
-        _values[j] = _coupled_moose_vars[j]->sln()[0]; // The zero is for the "qp"
-
-      SamplerBase::addSample(p, _ids[i], _values);
-    }
+    // Store the elem id and its processor
+    _elem_ids.push_back(elem->id());
+    _root_ids.push_back(elem->processor_id());
   }
+
 }
 
 void
 PointSamplerBase::finalize()
 {
+  // Build a single vector of all the located elements
+  _communicator.allgather(_elem_ids);
+  _communicator.allgather(_root_ids);
+
+  // A vector version of the current point, this is needed for reinintElemPhys
+  std::vector<Point> point_vec(1);
+
+  // Loop over all located elements, compute the variable values, and add the values to the sampling vectors (see SamplerBase)
+  for (unsigned int i = 0; i < _root_ids.size(); ++i)
+    if (_root_ids[i] == processor_id())
+    {
+      const Elem * elem = _mesh.elem(_elem_ids[i]);
+
+      point_vec[0] = _points[i];
+      _subproblem.reinitElemPhys(elem, point_vec, 0); // Zero is for tid
+
+      for (unsigned int j=0; j<_coupled_moose_vars.size(); j++)
+        _values[j] = _coupled_moose_vars[j]->sln()[0]; // The zero is for the "qp"
+
+      SamplerBase::addSample(_points[i], _ids[i], _values);
+    }
+
   SamplerBase::finalize();
 }
 
@@ -87,18 +129,5 @@ void
 PointSamplerBase::threadJoin(const SamplerBase & y)
 {
   const PointSamplerBase & vpp = static_cast<const PointSamplerBase &>(y);
-
   SamplerBase::threadJoin(vpp);
-}
-
-
-const Elem *
-PointSamplerBase::getLocalElemContainingPoint(const Point & p, unsigned int /*id*/)
-{
-  const Elem * elem = (*_pl)(p);
-
-  if (elem && elem->processor_id() == processor_id())
-    return elem;
-
-  return NULL;
 }
