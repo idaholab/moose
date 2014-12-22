@@ -70,6 +70,11 @@ public:
    */
   unsigned int getSampleSize();
 
+  /**
+   * Get a const reference to the coefficients of the least squares fit.
+   */
+  const std::vector<Real>& getCoefficients();
+
 private:
 
   /**
