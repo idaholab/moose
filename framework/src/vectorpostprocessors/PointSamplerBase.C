@@ -59,7 +59,7 @@ PointSamplerBase::initialize()
 
   // Loop through the ids and store a subset of the ids for each processor
   unsigned int cnt = 0;
-  for (std::vector<Real>::const_iterator it = _ids.begin(); it < _ids.end(); it+=parts)
+  for (std::vector<Real>::iterator it = _ids.begin(); it < _ids.end(); it+=parts)
   {
     if (it+parts < _ids.end())
       _local_ids[cnt] = std::vector<Real>(it, it+parts);
