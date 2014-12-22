@@ -25,13 +25,15 @@ const char * DerivativeParsedMaterialHelper::_eval_error_msg[] = {
 };
 
 DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string & name,
-                                                   InputParameters parameters) :
+                                                               InputParameters parameters,
+                                                               bool use_variable_names_verbatim) :
     DerivativeBaseMaterial(name, parameters),
     _func_F(NULL),
     _nmat_props(0),
     _enable_jit(isParamValid("enable_jit") && getParam<bool>("enable_jit")),
     _disable_fpoptimizer(getParam<bool>("disable_fpoptimizer")),
     _fail_on_evalerror(getParam<bool>("fail_on_evalerror")),
+    _use_variable_names_verbatim(use_variable_names_verbatim),
     _nan(std::numeric_limits<Real>::quiet_NaN())
 {
 }
@@ -66,7 +68,7 @@ void DerivativeParsedMaterialHelper::functionParse(const std::string & function_
                                                    const std::vector<Real> & tol_values)
 {
   // check number of coupled variables
-  if (_arg_names.size() == 0)
+  if (_nargs == 0)
     mooseError("Need at least one coupled variable for DerivativeParsedMaterialHelper.");
 
   // check constant vectors
@@ -125,9 +127,56 @@ void DerivativeParsedMaterialHelper::functionParse(const std::string & function_
   }
 
   // build 'variables' argument for fparser
-  std::string variables = _arg_names[0];
-  for (unsigned i = 1; i < _arg_names.size(); ++i)
-    variables += "," + _arg_names[i];
+  std::string variables;
+  if (_use_variable_names_verbatim)
+  {
+    variables = _arg_names[0];
+    for (unsigned i = 1; i < _nargs; ++i)
+      variables += "," + _arg_names[i];
+  }
+  else
+  {
+    // vector of the input file parameter names for each coupled variable in _arg_names
+    std::vector<std::string> arg_param_names(_nargs);
+
+    // enumerate all coupled variables
+    for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin(); it != _pars.coupledVarsEnd(); ++it)
+    {
+      std::map<std::string, std::vector<MooseVariable *> >::iterator vars = _coupled_vars.find(*it);
+
+      // no MOOSE variable was provided for this coupling
+      if (vars == _coupled_vars.end())
+        mooseError("Derivative parsed materials do not work with optional/default coupling yet. Please use addRequiredCoupledVar and provide coupling for all variables.");
+
+      // we do not allow vector coupling in this mode
+      if (vars->second.size() != 1)
+        mooseError("Derivative parsed materials mut couple exactly one non-linear variable per couple variable input parameter.");
+
+      // find the name of this MOOSE var in _arg_names
+      std::vector<std::string>::iterator pos = std::find(_arg_names.begin(), _arg_names.end(), vars->second[0]->name());
+
+      // check that we get a valid position
+      if (pos == _arg_names.end())
+        mooseError("Coupled variable not found.");
+
+      // make sure the mapping is unique, i.e. the user must not couple in the same variable multiple times
+      unsigned int index = pos - _arg_names.begin();
+      if (arg_param_names[index] != "")
+        mooseError("Coupling needs to be unique. You cannot couple the same non-linear variable multiple times.");
+
+      // insert the map value
+      arg_param_names[index] = *it;
+    }
+
+    // make sure we got a map value for each coupled variable
+    for (unsigned i = 0; i < _nargs; ++i)
+      if (arg_param_names[i] == "")
+        mooseError("No parameter name found for coupled varaiable " << _arg_names[i]);
+
+    variables = arg_param_names[0];
+    for (unsigned i = 1; i < _nargs; ++i)
+      variables += "," + arg_param_names[i];
+  }
 
   // get all material properties
   _nmat_props = mat_prop_names.size();
