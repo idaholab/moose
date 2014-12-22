@@ -6,7 +6,6 @@ InputParameters validParams<DerivativeBaseMaterial>()
   InputParameters params = validParams<Material>();
   params.addClassDescription("KKS model helper material to provide the free energy and its first and second derivatives");
   params.addParam<std::string>("f_name", "F", "Base name of the free energy function (used to name the material properties)");
-  params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
   params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
   return params;
 }
@@ -42,10 +41,13 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
     }
   }
 
-  // fetch names of variables in args
+  // fetch names and numbers of all coupled variables
   _arg_names.resize(_nargs);
-  for (i = 0; i < _nargs; ++i)
+  _arg_numbers.resize(_nargs);
+  for (i = 0; i < _nargs; ++i) {
     _arg_names[i] = _coupled_moose_vars[i]->name();
+    _arg_numbers[i] = _coupled_moose_vars[i]->number();
+  }
 
   // initialize derivatives
   for (i = 0; i < _nargs; ++i)

@@ -36,9 +36,8 @@ protected:
   /// name of the order parameter variable
   VariableName _eta_name;
 
-  /// index of the phi in _args (after it is appended by addPhiToArgs())
-  unsigned int _eta_id;
-  unsigned int _nfargs;
+  /// libMesh variable number for eta
+  unsigned int _eta_var;
 
   /// A-phase derivative material name
   std::string _fa_name;
