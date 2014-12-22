@@ -8,6 +8,7 @@ InputParameters validParams<ElasticEnergyMaterial>()
   InputParameters params = validParams<DerivativeBaseMaterial>();
   params.addClassDescription("Free energy material for the elastic energy contributions.");
   params.addParam<std::string>("base_name", "Material property base name");
+  params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
   return params;
 }
 

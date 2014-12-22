@@ -5,6 +5,7 @@ InputParameters validParams<DerivativeParsedMaterial>()
 {
   InputParameters params = validParams<DerivativeParsedMaterialHelper>();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
+  params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
 
   // Constants and their values
   params.addParam<std::vector<std::string> >("constant_names", std::vector<std::string>(), "Vector of constants used in the parsed function (use this for kB etc.)");
@@ -27,7 +28,7 @@ InputParameters validParams<DerivativeParsedMaterial>()
 
 DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
                                                    InputParameters parameters) :
-    DerivativeParsedMaterialHelper(name, parameters)
+    DerivativeParsedMaterialHelper(name, parameters, USE_MOOSE_NAMES)
 {
   // check number of coupled variables
   if (_arg_names.size() == 0)

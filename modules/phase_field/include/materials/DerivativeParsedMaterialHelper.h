@@ -16,8 +16,13 @@ InputParameters validParams<DerivativeParsedMaterialHelper>();
 class DerivativeParsedMaterialHelper : public DerivativeBaseMaterial
 {
 public:
+  enum VariableNameMappingMode {
+    USE_MOOSE_NAMES, USE_PARAM_NAMES
+  };
+
   DerivativeParsedMaterialHelper(const std::string & name,
-                                 InputParameters parameters);
+                                 InputParameters parameters,
+                                 VariableNameMappingMode map_mode = USE_PARAM_NAMES);
 
   virtual ~DerivativeParsedMaterialHelper();
 
@@ -70,6 +75,14 @@ protected:
   bool _enable_jit;
   bool _disable_fpoptimizer;
   bool _fail_on_evalerror;
+
+  /**
+   * Flag to indicate if MOOSE nonlinear variable names should be used as FParser variable names.
+   * This should be true only for DerivativeParsedMaterial. If set to false, this class looks up the
+   * input parameter name for each coupled variable and uses it as the FParser parameter name when
+   * parsing the FParser expression.
+   */
+  const VariableNameMappingMode _map_mode;
 
   /// appropriate not a number value to return
   const Real _nan;

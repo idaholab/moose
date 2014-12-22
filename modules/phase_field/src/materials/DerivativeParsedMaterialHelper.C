@@ -25,13 +25,15 @@ const char * DerivativeParsedMaterialHelper::_eval_error_msg[] = {
 };
 
 DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string & name,
-                                                   InputParameters parameters) :
+                                                               InputParameters parameters,
+                                                               VariableNameMappingMode map_mode) :
     DerivativeBaseMaterial(name, parameters),
     _func_F(NULL),
     _nmat_props(0),
     _enable_jit(isParamValid("enable_jit") && getParam<bool>("enable_jit")),
     _disable_fpoptimizer(getParam<bool>("disable_fpoptimizer")),
     _fail_on_evalerror(getParam<bool>("fail_on_evalerror")),
+    _map_mode(map_mode),
     _nan(std::numeric_limits<Real>::quiet_NaN())
 {
 }
@@ -66,7 +68,7 @@ void DerivativeParsedMaterialHelper::functionParse(const std::string & function_
                                                    const std::vector<Real> & tol_values)
 {
   // check number of coupled variables
-  if (_arg_names.size() == 0)
+  if (_nargs == 0)
     mooseError("Need at least one coupled variable for DerivativeParsedMaterialHelper.");
 
   // check constant vectors
@@ -125,9 +127,28 @@ void DerivativeParsedMaterialHelper::functionParse(const std::string & function_
   }
 
   // build 'variables' argument for fparser
-  std::string variables = _arg_names[0];
-  for (unsigned i = 1; i < _arg_names.size(); ++i)
-    variables += "," + _arg_names[i];
+  std::string variables;
+  switch (_map_mode)
+  {
+    case USE_MOOSE_NAMES:
+      variables = _arg_names[0];
+      for (unsigned i = 1; i < _nargs; ++i)
+        variables += "," + _arg_names[i];
+      break;
+
+    case USE_PARAM_NAMES:
+      // we do not allow vector coupling in this mode
+      if (!_mapping_is_unique)
+        mooseError("Derivative parsed materials must couple exactly one non-linear variable per coupled variable input parameter.");
+
+      variables = _arg_param_names[0];
+      for (unsigned i = 1; i < _nargs; ++i)
+        variables += "," + _arg_param_names[i];
+      break;
+
+    default:
+      mooseError("Unnknown variable mapping mode.");
+  }
 
   // get all material properties
   _nmat_props = mat_prop_names.size();
@@ -275,7 +296,8 @@ DerivativeParsedMaterialHelper::evaluate(ADFunction * parser)
 
   // hard fail or return not a number
   if (_fail_on_evalerror)
-    mooseError("DerivativeParsedMaterial function evaluation encountered an error: " << _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
+    mooseError("DerivativeParsedMaterial function evaluation encountered an error: "
+               << _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
 
   return _nan;
 }
