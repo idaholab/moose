@@ -200,7 +200,7 @@ public:
   class EBTernaryFuncTermNode : public EBTernaryTermNode
   {
   public:
-    enum NodeType { IFEXPR } type;
+    enum NodeType { CONDITIONAL } type;
 
     EBTernaryFuncTermNode(EBTermNode * _left, EBTermNode * _middle, EBTermNode * _right, NodeType _type) :
       EBTernaryTermNode(_left, _middle, _right), type(_type) {};
@@ -357,7 +357,7 @@ public:
     /**
      * Ternary functions
      */
-    friend EBTerm ifexpr(const EBTerm &, const EBTerm &, const EBTerm &);
+    friend EBTerm conditional(const EBTerm &, const EBTerm &, const EBTerm &);
   };
 
   // User facing host object for a function. This combines a term with an argument list.
