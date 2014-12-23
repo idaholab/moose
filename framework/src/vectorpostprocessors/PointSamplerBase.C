@@ -31,8 +31,7 @@ PointSamplerBase::PointSamplerBase(const std::string & name, InputParameters par
     GeneralVectorPostprocessor(name, parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     SamplerBase(name, parameters, this, _communicator),
-    _mesh(_subproblem.mesh().getMesh()),
-    _local_ids(n_processors())
+    _mesh(_subproblem.mesh().getMesh())
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());
@@ -51,23 +50,6 @@ PointSamplerBase::initialize()
 
   // We do this here just in case it's been destroyed and recreated because of mesh adaptivity.
   _point_locator = _mesh.sub_point_locator();
-
-  // The following code populates the local point indices for more efficient parallel calls to the point locator in execute() method
-  // Computes the number local parts
-  double n = n_processors(); // num. of procs, use Real to get correct division below
-  unsigned int parts = std::ceil(_ids.size() / n);
-
-  // Loop through the ids and store a subset of the ids for each processor
-  unsigned int cnt = 0;
-  for (std::vector<Real>::iterator it = _ids.begin(); it < _ids.end(); it+=parts)
-  {
-    if (it+parts < _ids.end())
-      _local_ids[cnt] = std::vector<Real>(it, it+parts);
-    else
-      _local_ids[cnt] = std::vector<Real>(it, _ids.end());
-    cnt += 1;
-  }
-
 }
 
 void
@@ -78,10 +60,18 @@ PointSamplerBase::execute()
   _elem_ids.clear();
   _root_ids.clear();
 
+  // Localize the indices of the _points vector to minimize the number of point locator calls
+  double n = n_processors(); // num. of procs, use Real to get correct division below
+  unsigned int parts = std::ceil(_ids.size() / n);
+  unsigned int start = processor_id()*parts;
+  unsigned int stop = start + parts;
+  if (stop > _points.size())
+    stop = _points.size();
+
   // Loop over the points assigned to this processor
-  for (std::vector<Real>::const_iterator it = _local_ids[processor_id()].begin(); it != _local_ids[processor_id()].end(); ++it)
+  for (unsigned int i = start; i < stop; ++i)
   {
-    Point & p = _points[*it];
+    Point & p = _points[i];
 
     // First find the element the hit lands in
     const Elem * elem = (*_point_locator)(p);

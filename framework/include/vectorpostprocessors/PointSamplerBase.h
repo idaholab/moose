@@ -91,9 +91,6 @@ protected:
 
   /// Stores the element ids for the elements located with the point locator
   std::vector<dof_id_type> _elem_ids;
-
-  /// Storage structure local indices for minimizing point locator calls in execute()
-  std::vector<std::vector<Real> > _local_ids;
 };
 
 #endif
