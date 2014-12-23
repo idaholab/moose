@@ -74,5 +74,5 @@ void ExpressionBuilderTest::test()
 
   // test ifexpr
   EBTerm if1 = conditional(x < 2 * y, x*x + y, y*y +x);
-  CPPUNIT_ASSERT( std::string(if1) == "if(x<2*y,x*x+y,y*y+x)" );
+  CPPUNIT_ASSERT( std::string(if1) == "if" "(x<2*y,x*x+y,y*y+x)" );
 }
