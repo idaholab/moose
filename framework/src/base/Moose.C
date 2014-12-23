@@ -193,6 +193,7 @@
 #include "LineValueSampler.h"
 #include "VectorOfPostprocessors.h"
 #include "ElementsAlongLine.h"
+#include "LineMaterialRealSampler.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -553,6 +554,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(LineValueSampler);
   registerVectorPostprocessor(VectorOfPostprocessors);
   registerVectorPostprocessor(ElementsAlongLine);
+  registerVectorPostprocessor(LineMaterialRealSampler);
 
   // user objects
   registerUserObject(LayeredIntegral);
