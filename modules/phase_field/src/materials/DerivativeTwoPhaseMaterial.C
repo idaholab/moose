@@ -16,7 +16,7 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>()
   params.addRequiredCoupledVar("args", "Arguments of fa and fb - use vector coupling");
 
   // Order parameter which determines the phase
-  params.addCoupledVar("eta", "Order parameter");
+  params.addRequiredCoupledVar("eta", "Order parameter");
 
   // Variables with applied tolerances and their tolerance values
   params.addParam<Real>("W", 0.0, "Energy barrier for the phase transformation from A to B");
