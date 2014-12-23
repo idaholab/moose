@@ -51,12 +51,3 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
                 mat_prop_names,
                 tol_names, tol_values);
 }
-
-/// Fm(cmg,cmv,T) takes three arguments
-unsigned int
-DerivativeParsedMaterial::expectedNumArgs()
-{
-  // this always returns the number of arguments that was passed in
-  // i.e. any number of args is accepted.
-  return _nargs;
-}

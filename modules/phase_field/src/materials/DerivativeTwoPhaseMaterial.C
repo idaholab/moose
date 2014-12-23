@@ -85,15 +85,6 @@ DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
   }
 }
 
-/// Fm(cmg,cmv,T) takes three arguments
-unsigned int
-DerivativeTwoPhaseMaterial::expectedNumArgs()
-{
-  // this always returns the number of arguments that was passed in
-  // i.e. any number of args is accepted.
-  return _nargs;
-}
-
 Real
 DerivativeTwoPhaseMaterial::computeF()
 {

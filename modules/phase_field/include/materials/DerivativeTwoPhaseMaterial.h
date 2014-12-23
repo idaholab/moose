@@ -24,8 +24,6 @@ public:
 protected:
   static InputParameters addPhiToArgs(InputParameters);
 
-  virtual unsigned int expectedNumArgs();
-
   virtual Real computeF();
   virtual Real computeDF(unsigned int);
   virtual Real computeD2F(unsigned int, unsigned int);

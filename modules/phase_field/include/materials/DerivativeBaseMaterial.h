@@ -92,10 +92,7 @@ protected:
   /// Flag that indicates if exactly one linear variable is coupled per input file coupling parameter
   bool _mapping_is_unique;
 
-  /**
-   * Number of coupled arguments.
-   * This value is expected to match the the return value of expectedNumArgs()
-   */
+  /// Number of coupled arguments.
   unsigned int _nargs;
 
   /// String vector of all argument names.
