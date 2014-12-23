@@ -6,7 +6,6 @@ InputParameters validParams<DerivativeBaseMaterial>()
   InputParameters params = validParams<Material>();
   params.addClassDescription("KKS model helper material to provide the free energy and its first and second derivatives");
   params.addParam<std::string>("f_name", "F", "Base name of the free energy function (used to name the material properties)");
-  params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
   params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
   return params;
 }
@@ -15,7 +14,7 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
                                                InputParameters parameters) :
     DerivativeMaterialInterface<Material>(name, parameters),
     _F_name(getParam<std::string>("f_name")),
-    _nargs(coupledComponents("args")),
+    _nargs(_coupled_moose_vars.size()),
     _third_derivatives(getParam<bool>("third_derivatives")),
     _prop_F(&declareProperty<Real>(_F_name))
 {
@@ -42,16 +41,19 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
     }
   }
 
-  // fetch names of variables in args
+  // fetch names and numbers of all coupled variables
   _arg_names.resize(_nargs);
-  for (i = 0; i < _nargs; ++i)
-    _arg_names[i] = getVar("args", i)->name();
+  _arg_numbers.resize(_nargs);
+  for (i = 0; i < _nargs; ++i) {
+    _arg_names[i] = _coupled_moose_vars[i]->name();
+    _arg_numbers[i] = _coupled_moose_vars[i]->number();
+  }
 
   // initialize derivatives
   for (i = 0; i < _nargs; ++i)
   {
     // get the coupled variable to use as function arguments
-    _args[i] = &coupledValue("args", i);
+    _args[i] = &coupledValue(_coupled_moose_vars[i]);
 
     // first derivatives
     _prop_dF[i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i]);

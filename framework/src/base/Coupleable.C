@@ -75,7 +75,7 @@ Coupleable::~Coupleable()
 }
 
 void
-Coupleable::coupledCallback(const std::string & /*var_name*/, bool /*is_old*/)
+Coupleable::coupledCallback(MooseVariable * /*var*/, bool /*is_old*/)
 {
 }
 
@@ -143,8 +143,14 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
     return *_default_value[var_name];
   }
 
-  coupledCallback(var_name, false);
-  MooseVariable * var = getVar(var_name, comp);
+  return coupledValue(getVar(var_name, comp));
+}
+
+VariableValue &
+Coupleable::coupledValue(MooseVariable * var)
+{
+  coupledCallback(var, false);
+
   if (_nodal)
     return (_c_is_implicit) ? var->nodalSln() : var->nodalSlnOld();
   else
@@ -165,9 +171,15 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
     return *_default_value[var_name];
   }
 
-  validateExecutionerType(var_name);
-  coupledCallback(var_name, true);
-  MooseVariable * var = getVar(var_name, comp);
+  return coupledValueOld(getVar(var_name, comp));
+}
+
+VariableValue &
+Coupleable::coupledValueOld(MooseVariable * var)
+{
+  validateExecutionerType(var);
+  coupledCallback(var, true);
+
   if (_nodal)
     return (_c_is_implicit) ? var->nodalSlnOld() : var->nodalSlnOlder();
   else
@@ -188,9 +200,15 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
     return *_default_value[var_name];
   }
 
-  validateExecutionerType(var_name);
-  coupledCallback(var_name, true);
-  MooseVariable * var = getVar(var_name, comp);
+  return coupledValueOlder(getVar(var_name, comp));
+}
+
+VariableValue &
+Coupleable::coupledValueOlder(MooseVariable * var)
+{
+  validateExecutionerType(var);
+  coupledCallback(var, true);
+
   if (_nodal)
   {
     if (_c_is_implicit)
@@ -207,14 +225,19 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
   }
 }
 
+
 VariableValue &
 Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
-  MooseVariable * var = getVar(var_name, comp);
+  return coupledDot(getVar(var_name, comp));
+}
 
+VariableValue &
+Coupleable::coupledDot(MooseVariable * var)
+{
   if (_nodal)
     return var->nodalSlnDot();
   else
@@ -227,8 +250,12 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
-  MooseVariable * var = getVar(var_name, comp);
+  return coupledDotDu(getVar(var_name, comp));
+}
 
+VariableValue &
+Coupleable::coupledDotDu(MooseVariable * var)
+{
   if (_nodal)
     return var->nodalSlnDuDotDu();
   else
@@ -242,11 +269,17 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_gradient;
 
-  coupledCallback(var_name, false);
+  return coupledGradient(getVar(var_name, comp));
+}
+
+VariableGradient &
+Coupleable::coupledGradient(MooseVariable * var)
+{
+  coupledCallback(var, false);
+
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  MooseVariable * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSln() : var->gradSlnOld();
 }
 
@@ -255,13 +288,18 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name)) // Return default 0
     return _default_gradient;
+  return coupledGradientOld(getVar(var_name, comp));
+}
 
-  coupledCallback(var_name, true);
+VariableGradient &
+Coupleable::coupledGradientOld(MooseVariable * var)
+{
+  validateExecutionerType(var);
+  coupledCallback(var, true);
+
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  validateExecutionerType(var_name);
-  MooseVariable * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnOld() : var->gradSlnOlder();
 }
 
@@ -271,17 +309,24 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
   if (!isCoupled(var_name)) // Return default 0
     return _default_gradient;
 
-  coupledCallback(var_name, true);
+  return coupledGradientOlder(getVar(var_name, comp));
+}
+
+VariableGradient &
+Coupleable::coupledGradientOlder(MooseVariable * var)
+{
+  validateExecutionerType(var);
+  coupledCallback(var, true);
+
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  validateExecutionerType(var_name);
-  MooseVariable * var = getVar(var_name, comp);
   if (_c_is_implicit)
     return var->gradSlnOlder();
   else
     mooseError("Older values not available for explicit schemes");
 }
+
 
 VariableSecond &
 Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
@@ -289,11 +334,17 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_second;
 
-  coupledCallback(var_name, false);
+  return coupledSecond(getVar(var_name, comp));
+}
+
+VariableSecond &
+Coupleable::coupledSecond(MooseVariable * var)
+{
+  coupledCallback(var, false);
+
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  MooseVariable * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->secondSln() : var->secondSlnOlder();
 }
 
@@ -303,12 +354,18 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_second;
 
-  coupledCallback(var_name, true);
+  return coupledSecondOld(getVar(var_name, comp));
+}
+
+VariableSecond &
+Coupleable::coupledSecondOld(MooseVariable * var)
+{
+  validateExecutionerType(var);
+  coupledCallback(var, true);
+
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  validateExecutionerType(var_name);
-  MooseVariable * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->secondSlnOld() : var->secondSlnOlder();
 }
 
@@ -318,17 +375,24 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_second;
 
-  coupledCallback(var_name, true);
+  return coupledSecondOlder(getVar(var_name, comp));
+}
+
+VariableSecond &
+Coupleable::coupledSecondOlder(MooseVariable * var)
+{
+  validateExecutionerType(var);
+  coupledCallback(var, true);
+
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  validateExecutionerType(var_name);
-  MooseVariable * var = getVar(var_name, comp);
   if (_c_is_implicit)
     return var->secondSlnOlder();
   else
     mooseError("Older values not available for explicit schemes");
 }
+
 
 VariableValue &
 Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
@@ -344,8 +408,13 @@ Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
     return *_default_value[var_name];
   }
 
-  coupledCallback(var_name, false);
-  MooseVariable * var = getVar(var_name, comp);
+  return coupledNodalValue(getVar(var_name, comp));
+}
+
+VariableValue &
+Coupleable::coupledNodalValue(MooseVariable * var)
+{
+  coupledCallback(var, false);
   return (_c_is_implicit) ? var->nodalValue() : var->nodalValueOld();
 }
 
@@ -363,9 +432,14 @@ Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp
     return *_default_value[var_name];
   }
 
-  validateExecutionerType(var_name);
-  coupledCallback(var_name, true);
-  MooseVariable * var = getVar(var_name, comp);
+  return coupledNodalValueOld(getVar(var_name, comp));
+}
+
+VariableValue &
+Coupleable::coupledNodalValueOld(MooseVariable * var)
+{
+  validateExecutionerType(var);
+  coupledCallback(var, true);
   return (_c_is_implicit) ? var->nodalValueOld() : var->nodalValueOlder();
 }
 
@@ -383,9 +457,15 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
     return *_default_value[var_name];
   }
 
-  validateExecutionerType(var_name);
-  coupledCallback(var_name, true);
-  MooseVariable * var = getVar(var_name, comp);
+  return coupledNodalValueOlder(getVar(var_name, comp));
+}
+
+VariableValue &
+Coupleable::coupledNodalValueOlder(MooseVariable * var)
+{
+  validateExecutionerType(var);
+  coupledCallback(var, true);
+
   if (_c_is_implicit)
     return var->nodalValueOlder();
   else
@@ -393,8 +473,8 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
 }
 
 void
-Coupleable::validateExecutionerType(const std::string & name) const
+Coupleable::validateExecutionerType(MooseVariable * var) const
 {
   if (!_c_fe_problem.isTransient())
-    mooseError("You may not couple in old or older values of \"" << name << "\" when using a \"Steady\" executioner.");
+    mooseError("You may not couple in old or older values of \"" << var->name() << "\" when using a \"Steady\" executioner.");
 }

@@ -104,6 +104,9 @@ protected:
   /// String vector of all argument names.
   std::vector<std::string> _arg_names;
 
+  /// String vector of all argument MOOSE variable numbers.
+  std::vector<int> _arg_numbers;
+
   /// Calculate (and allocate memory for) the third derivatives of the free energy.
   bool _third_derivatives;
 
