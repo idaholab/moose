@@ -315,6 +315,14 @@ public:
 
   virtual void restoreSolutions();
 
+  /**
+   * Output the current step.
+   * Will ensure that everything is in the proper state to be outputted.
+   * Then tell the OutputWarehouse to do its thing
+   * @param type The type execution flag (see Moose.h)
+   */
+  void outputStep(ExecFlagType type);
+
   virtual const std::vector<MooseObject *> & getObjectsByName(const std::string & name, THREAD_ID tid);
 
   // Function /////

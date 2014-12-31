@@ -62,10 +62,11 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
           MooseVariableScalar & scalar =  _multi_app->appProblem(i)->getScalarVariable(_tid, _to_aux_name);
 
           // Set all values of the AuxVariable to the value of the postprocessor
-          scalar.sln().setAllValues(pp_value);
+          scalar.setValues(pp_value);
 
           // Update the solution
           scalar.insert(scalar.sys().solution());
+          scalar.sys().solution().close();
         }
       break;
     }
@@ -88,8 +89,17 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
 
       // Loop over each sub-app and populate the AuxVariable values from the postprocessors
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      {
         if (_multi_app->hasLocalApp(i))
-          scalar.sys().solution().set(dof[i], _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name));
+        {
+          scalar.setValue(dof[i], _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name));
+
+          // Update the solution
+          scalar.insert(scalar.sys().solution());
+        }
+      }
+
+      scalar.sys().solution().close();
 
       break;
     }

@@ -1,0 +1,16 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'transferred_scalar_variable.i'
+    exodiff = 'transferred_scalar_variable_out.e'
+  [../]
+
+  [./csv_test]
+    type = 'CSVDiff'
+    input = 'transferred_scalar_variable.i'
+    csvdiff = 'transferred_scalar_variable_out.csv'
+
+    # This is here because the both use the same input file
+    prereq = 'test'
+  [../]
+[]
