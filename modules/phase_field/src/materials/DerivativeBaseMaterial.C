@@ -6,7 +6,6 @@ InputParameters validParams<DerivativeBaseMaterial>()
   InputParameters params = validParams<Material>();
   params.addClassDescription("KKS model helper material to provide the free energy and its first and second derivatives");
   params.addParam<std::string>("f_name", "F", "Base name of the free energy function (used to name the material properties)");
-  params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
   params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
   return params;
 }
@@ -15,15 +14,43 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
                                                InputParameters parameters) :
     DerivativeMaterialInterface<Material>(name, parameters),
     _F_name(getParam<std::string>("f_name")),
-    _nargs(coupledComponents("args")),
     _third_derivatives(getParam<bool>("third_derivatives")),
     _prop_F(&declareProperty<Real>(_F_name))
 {
   // loop counters
   unsigned int i, j, k;
 
-  // coupled variables
-  _args.resize(_nargs);
+  // fetch names and numbers of all coupled variables
+  _mapping_is_unique = true;
+  for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin(); it != _pars.coupledVarsEnd(); ++it)
+  {
+    std::map<std::string, std::vector<MooseVariable *> >::iterator vars = _coupled_vars.find(*it);
+
+    // no MOOSE variable was provided for this coupling
+    if (vars == _coupled_vars.end())
+      mooseError("Derivative parsed materials do not work with optional/default coupling yet. Please use addRequiredCoupledVar and provide coupling for all variables.");
+
+    // check if we have a 1:1 mapping between parameters and variables
+    if (vars->second.size() != 1)
+      _mapping_is_unique = false;
+
+    // iterate over all components
+    for (unsigned int j = 0; j < vars->second.size(); ++j)
+    {
+      // make sure each nonlinear variable is coupled in only once
+      if (std::find(_arg_names.begin(), _arg_names.end(), vars->second[j]->name()) != _arg_names.end())
+        mooseError("A nonlinear variable can only be coupled in once.");
+
+      // insert the map values
+      _arg_names.push_back(vars->second[j]->name());
+      _arg_numbers.push_back(vars->second[j]->number());
+      _arg_param_names.push_back(*it);
+
+      // get variable value
+      _args.push_back(&coupledValue(*it, j));
+    }
+  }
+  _nargs = _arg_names.size();
 
   // reserve space for material properties
   _prop_dF.resize(_nargs);
@@ -42,17 +69,9 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
     }
   }
 
-  // fetch names of variables in args
-  _arg_names.resize(_nargs);
-  for (i = 0; i < _nargs; ++i)
-    _arg_names[i] = getVar("args", i)->name();
-
   // initialize derivatives
   for (i = 0; i < _nargs; ++i)
   {
-    // get the coupled variable to use as function arguments
-    _args[i] = &coupledValue("args", i);
-
     // first derivatives
     _prop_dF[i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
 
@@ -84,10 +103,6 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
 void
 DerivativeBaseMaterial::initialSetup()
 {
-  if (_nargs != expectedNumArgs()) {
-    mooseError("Wrong number of arguments supplied for DerivativeBaseMaterial " + _F_name);
-  }
-
   // set the _prop_* pointers of all material poroperties that are not beeing used back to NULL
   unsigned int i, j, k;
   bool needs_third_derivatives = false;

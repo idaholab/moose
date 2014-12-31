@@ -20,9 +20,6 @@ class DerivativeParsedMaterial : public DerivativeParsedMaterialHelper
 public:
   DerivativeParsedMaterial(const std::string & name,
                            InputParameters parameters);
-
-protected:
-  virtual unsigned int expectedNumArgs();
 };
 
 #endif // DERIVATIVEPARSEDMATERIAL_H

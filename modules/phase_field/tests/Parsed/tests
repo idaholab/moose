@@ -24,6 +24,6 @@
     expect_out = '\nNo errors detected. :-\)\n'
     resize_mesh = true
     recover = false
-    skip = 'see #3847'
+    #skip = 'see #3847'
 [../]
 []

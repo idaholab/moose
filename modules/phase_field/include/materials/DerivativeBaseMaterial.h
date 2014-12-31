@@ -43,12 +43,6 @@ protected:
   virtual void computeProperties();
 
   /**
-   * Override this to return the number of arguments this function expects
-   * (i.e. the number of coupled components)
-   */
-  virtual unsigned int expectedNumArgs() = 0;
-
-  /**
    * Check if we got the right number of components in the 'args' coupled
    * variable vector.
    */
@@ -95,14 +89,20 @@ protected:
    */
   std::string _F_name;
 
-  /**
-   * Number of coupled arguments.
-   * This value is expected to match the the return value of expectedNumArgs()
-   */
+  /// Flag that indicates if exactly one linear variable is coupled per input file coupling parameter
+  bool _mapping_is_unique;
+
+  /// Number of coupled arguments.
   unsigned int _nargs;
 
   /// String vector of all argument names.
   std::vector<std::string> _arg_names;
+
+  /// String vector of all argument MOOSE variable numbers.
+  std::vector<int> _arg_numbers;
+
+  /// String vector of the input file coupling parameter name for each argument.
+  std::vector<std::string> _arg_param_names;
 
   /// Calculate (and allocate memory for) the third derivatives of the free energy.
   bool _third_derivatives;
