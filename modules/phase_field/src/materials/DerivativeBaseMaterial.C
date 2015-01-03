@@ -168,20 +168,20 @@ DerivativeBaseMaterial::computeProperties()
     {
       // set first derivatives
       if (_prop_dF[i])
-        (*_prop_dF[i])[_qp] = computeDF(i);
+        (*_prop_dF[i])[_qp] = computeDF(_arg_numbers[i]);
 
       // second derivatives
       for (j = i; j < _nargs; ++j)
       {
         if (_prop_d2F[i][j])
-          (*_prop_d2F[i][j])[_qp] = computeD2F(i, j);
+          (*_prop_d2F[i][j])[_qp] = computeD2F(_arg_numbers[i], _arg_numbers[j]);
 
         // third derivatives
         if (_third_derivatives)
         {
           for (k = j; k < _nargs; ++k)
             if (_prop_d3F[i][j][k])
-              (*_prop_d3F[i][j][k])[_qp] = computeD3F(i, j, k);
+              (*_prop_d3F[i][j][k])[_qp] = computeD3F(_arg_numbers[i], _arg_numbers[j], _arg_numbers[k]);
         }
       }
     }

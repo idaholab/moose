@@ -65,16 +65,14 @@ protected:
    *
    * \f$ \frac{d^2F}{dc_{arg1} dc_{arg2}} \f$
    *
-   * @param arg1 The index of the function argument the first derivative is taken of
-   * @param arg2 The index of the function argument the second derivative is taken of
-   * @Note arg1<=arg2 is guaranteed (deriviatives are symmetric)!
+   * @param arg1 The variable the first derivative is taken of
+   * @param arg2 The variable the second derivative is taken of
    */
   virtual Real computeD2F(unsigned int, unsigned int) = 0;
 
   /**
    * Override this method to calculate the third derivatives.
    *
-   * @Note arg1<=arg2<=arg3 is guaranteed!
    * @Note The implementation of this method is optional. It is only evaluated when
    *       the 'third_derivatives' parameter is set to true.
    */
