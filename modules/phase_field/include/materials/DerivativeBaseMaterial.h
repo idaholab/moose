@@ -96,8 +96,11 @@ protected:
   /// String vector of all argument names.
   std::vector<std::string> _arg_names;
 
-  /// String vector of all argument MOOSE variable numbers.
-  std::vector<int> _arg_numbers;
+  /// Vector of all argument MOOSE variable numbers.
+  std::vector<unsigned int> _arg_numbers;
+
+  /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
+  std::vector<unsigned int> _arg_index;
 
   /// String vector of the input file coupling parameter name for each argument.
   std::vector<std::string> _arg_param_names;

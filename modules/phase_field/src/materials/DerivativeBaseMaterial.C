@@ -22,6 +22,7 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
 
   // fetch names and numbers of all coupled variables
   _mapping_is_unique = true;
+  unsigned int max_number = 0;
   for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin(); it != _pars.coupledVarsEnd(); ++it)
   {
     std::map<std::string, std::vector<MooseVariable *> >::iterator vars = _coupled_vars.find(*it);
@@ -42,15 +43,23 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
         mooseError("A nonlinear variable can only be coupled in once.");
 
       // insert the map values
+      unsigned int number = vars->second[j]->number();
       _arg_names.push_back(vars->second[j]->name());
-      _arg_numbers.push_back(vars->second[j]->number());
+      _arg_numbers.push_back(number);
       _arg_param_names.push_back(*it);
+
+      // get the maximum var number
+      if (number > max_number)
+        max_number = number;
 
       // get variable value
       _args.push_back(&coupledValue(*it, j));
     }
   }
   _nargs = _arg_names.size();
+
+  // reserve space for number -> arg index lookup table
+  _arg_index.resize(max_number+1);
 
   // reserve space for material properties
   _prop_dF.resize(_nargs);
@@ -67,6 +76,9 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
       for (j = 0; j < _nargs; ++j)
         _prop_d3F[i][j].resize(_nargs);
     }
+
+    // populate number -> arg index lookup table
+    _arg_index[_arg_numbers[i]] = i;
   }
 
   // initialize derivatives
