@@ -78,7 +78,8 @@
   [./fm]
     type = KKSXeVacSolidMaterial
     f_name = fm
-    args = 'cg cv'
+    cmg = cg
+    cmv = cv
     block = 0
     T = 300
     outputs = exodus
@@ -123,4 +124,3 @@
     perf_log = true
   [../]
 []
-

@@ -39,6 +39,11 @@ private:
   /// (TODO: if cmg>cmv consider interstitial Xe)
   const Real _Efg;
 
+  VariableValue & _cmg;
+  unsigned int _cmg_var;
+  VariableValue & _cmv;
+  unsigned int _cmv_var;
+
   // helper function to return a well defined c*log(c)
   Real cLogC(Real c);
 };

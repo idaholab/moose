@@ -6,6 +6,8 @@ InputParameters validParams<KKSXeVacSolidMaterial>()
   InputParameters params = validParams<DerivativeBaseMaterial>();
   params.addClassDescription("KKS Solid phase free energy for Xe,Vac in UO2.  Fm(cmg,cmv)");
   params.addRequiredParam<Real>("T", "Temperature in [K]");
+  params.addRequiredCoupledVar("cmg", "Gas concnetration");
+  params.addRequiredCoupledVar("cmv", "Vacancy concnetration");
   return params;
 }
 
@@ -16,7 +18,11 @@ KKSXeVacSolidMaterial::KKSXeVacSolidMaterial(const std::string & name,
     _Omega(2.53),
     _kB(8.6173324e-5),
     _Efv(3.0),
-    _Efg(3.0)
+    _Efg(3.0),
+    _cmg(coupledValue("cmg")),
+    _cmg_var(coupled("cmg")),
+    _cmv(coupledValue("cmv")),
+    _cmv_var(coupled("cmv"))
 {
 }
 
@@ -33,58 +39,42 @@ KKSXeVacSolidMaterial::expectedNumArgs() { return 2; }
 // Free energy value
 Real
 KKSXeVacSolidMaterial::computeF() {
-  // create named aliases for the arguments
-  const Real & cmg = (*_args[0])[_qp];
-  const Real & cmv = (*_args[1])[_qp];
-
   return 1.0/_Omega * (
-      _kB*_T * (cLogC(cmv) + cLogC(1.0-cmv)) + _Efv * cmv
-    + _kB*_T * (cLogC(cmg) + cLogC(1.0-cmg)) + _Efg * cmg
+      _kB*_T * (cLogC(_cmv[_qp]) + cLogC(1.0-_cmv[_qp])) + _Efv * _cmv[_qp]
+    + _kB*_T * (cLogC(_cmg[_qp]) + cLogC(1.0-_cmg[_qp])) + _Efg * _cmg[_qp]
   );
 }
 
 // Derivative of the Free energy
 Real
-KKSXeVacSolidMaterial::computeDF(unsigned int arg) {
-  Real cmg = (*_args[0])[_qp];
-  Real cmv = (*_args[1])[_qp];
-
+KKSXeVacSolidMaterial::computeDF(unsigned int i_var) {
   const Real tol = 1e-10;
-  cmg = cmg < tol ? tol : (cmg > (1.0-tol) ? (1.0-tol) : cmg);
-  cmv = cmv < tol ? tol : (cmv > (1.0-tol) ? (1.0-tol) : cmv);
+  Real cmg = _cmg[_qp] < tol ? tol : (_cmg[_qp] > (1.0-tol) ? (1.0-tol) : _cmg[_qp]);
+  Real cmv = _cmv[_qp] < tol ? tol : (_cmv[_qp] > (1.0-tol) ? (1.0-tol) : _cmv[_qp]);
 
-  switch (arg)
-  {
-    case 0: // d/dcmg
-      return 1.0/_Omega * (_Efg + _kB*_T * (std::log(cmg) - std::log(-cmg + 1.0)));
+  if (i_var == _cmg_var)
+    return 1.0/_Omega * (_Efg + _kB*_T * (std::log(cmg) - std::log(-cmg + 1.0)));
 
-    case 1: // d/dcmv
-      return 1.0/_Omega * (_Efv + _kB*_T * (std::log(cmv) - std::log(-cmv + 1.0)));
-  }
+  if (i_var == _cmv_var)
+    return 1.0/_Omega * (_Efv + _kB*_T * (std::log(cmv) - std::log(-cmv + 1.0)));
 
   mooseError("Unknown derivative requested");
 }
 
 // Derivative of the Free energy
 Real
-KKSXeVacSolidMaterial::computeD2F(unsigned int arg1, unsigned int arg2) {
-  Real cmg = (*_args[0])[_qp];
-  Real cmv = (*_args[1])[_qp];
-
-  if (arg1 != arg2) return 0.0;
+KKSXeVacSolidMaterial::computeD2F(unsigned int i_var, unsigned int j_var) {
+  if (i_var != j_var) return 0.0;
 
   const Real tol = 1e-10;
-  cmg = cmg < tol ? tol : (cmg > (1.0-tol) ? (1.0-tol) : cmg);
-  cmv = cmv < tol ? tol : (cmv > (1.0-tol) ? (1.0-tol) : cmv);
+  Real cmg = _cmg[_qp] < tol ? tol : (_cmg[_qp] > (1.0-tol) ? (1.0-tol) : _cmg[_qp]);
+  Real cmv = _cmv[_qp] < tol ? tol : (_cmv[_qp] > (1.0-tol) ? (1.0-tol) : _cmv[_qp]);
 
-  switch (arg1)
-  {
-    case 0: // d/dcmg
-      return 1.0/_Omega * _kB*_T * (1.0 / (1.0 - cmg) + 1.0 / cmg);
+  if (i_var == _cmg_var)
+    return 1.0/_Omega * _kB*_T * (1.0 / (1.0 - cmg) + 1.0 / cmg);
 
-    case 1: // d/dcmv
-      return 1.0/_Omega * _kB*_T * (1.0 / (1.0 - cmv) + 1.0 / cmv);
-  }
+  if (i_var == _cmv_var)
+    return 1.0/_Omega * _kB*_T * (1.0 / (1.0 - cmv) + 1.0 / cmv);
 
   mooseError("Unknown derivative requested");
 }
