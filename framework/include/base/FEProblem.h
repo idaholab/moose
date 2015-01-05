@@ -323,6 +323,26 @@ public:
    */
   void outputStep(ExecFlagType type);
 
+  /**
+   * Ability to enable/disable all output calls
+   *
+   * This is needed by RattleSNake/YAK to disable output because of the Yo Dawg executioners calling
+   * other executioners.
+   */
+  void allowOutput(bool state);
+
+  /**
+   * Indicates that the next call to outputStep should be forced
+   *
+   * This is needed by the MultiApp system, if forceOutput is called the next call to outputStep,
+   * regardless of the type supplied to the call, will be executed with EXEC_FORCED.
+   *
+   * Forced output will NOT override the allowOutput flag.
+   *
+   * This is private, users should utilize FEProblem::forceOutput()
+   */
+  void forceOutput();
+
   virtual const std::vector<MooseObject *> & getObjectsByName(const std::string & name, THREAD_ID tid);
 
   // Function /////

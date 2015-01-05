@@ -3135,10 +3135,20 @@ FEProblem::outputStep(ExecFlagType type)
 {
   _nl.update();
   _aux.update();
-
   _app.getOutputWarehouse().outputStep(type);
 }
 
+void
+FEProblem::allowOutput(bool state)
+{
+  _app.getOutputWarehouse().allowOutput(state);
+}
+
+void
+FEProblem::forceOutput()
+{
+  _app.getOutputWarehouse().forceOutput();
+}
 
 Real
 FEProblem::solutionChangeNorm()
