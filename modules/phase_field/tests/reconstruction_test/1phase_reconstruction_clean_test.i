@@ -79,13 +79,13 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
 #  [./unique_grains]
 #    type = NodalFloodCountAux
 #    variable = unique_grains
-#    execute_on = timestep
+#    execute_on = timestep_end
 #    bubble_object = grain_tracker
 #    field_display = UNIQUE_REGION
 #  [../]
@@ -93,7 +93,7 @@
 #  [./var_indices]
 #    type = NodalFloodCountAux
 #    variable = var_indices
-#    execute_on = timestep
+#    execute_on = timestep_end
 #    bubble_object = grain_tracker
 #    field_display = VARIABLE_COLORING
 #  [../]
@@ -101,7 +101,7 @@
 #  [./centroids]
 #    type = NodalFloodCountAux
 #    variable = centroids
-#    execute_on = timestep
+#    execute_on = timestep_end
 #    bubble_object = grain_tracker
 #    field_display = CENTROID
 #  [../]
@@ -109,19 +109,19 @@
   [./grn]
     type = GrainIndexAux
     variable = grn
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
   [./phase]
     type = PhaseIndexAux
     variable = phase
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
   [./rgb]
     type = Euler2RGBAux
     variable = rgb
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -165,7 +165,7 @@
 #    threshold = 0.2
 #    connecting_threshold = 0.08
 #    convex_hull_buffer = 5.0
-#    execute_on = timestep
+#    execute_on = timestep_end
 #    remap_grains = true
 #    use_single_map = false
 #    enable_var_coloring = true
@@ -178,7 +178,7 @@
 
   [./n_nodes]
     type = NumNodes
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
