@@ -98,7 +98,7 @@ DerivativeTwoPhaseMaterial::computeDF(unsigned int i_var)
     return _dh[_qp] * (_prop_Fb[_qp] - _prop_Fa[_qp]) + _W * _dg[_qp];
   else
   {
-    unsigned int i = _arg_index[i_var];
+    unsigned int i = argIndex(i_var);
     return _h[_qp] * (*_prop_dFb[i])[_qp] + (1.0 - _h[_qp]) * (*_prop_dFa[i])[_qp];
   }
 }
@@ -109,8 +109,8 @@ DerivativeTwoPhaseMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
   if (i_var == _eta_var && j_var == _eta_var)
     return _d2h[_qp] * (_prop_Fb[_qp] - _prop_Fa[_qp]) + _W * _d2g[_qp];
 
-  unsigned int i = _arg_index[i_var];
-  unsigned int j = _arg_index[j_var];
+  unsigned int i = argIndex(i_var);
+  unsigned int j = argIndex(j_var);
 
   if (i_var == _eta_var)
     return _dh[_qp] * ((*_prop_dFb[j])[_qp] - (*_prop_dFa[j])[_qp]);

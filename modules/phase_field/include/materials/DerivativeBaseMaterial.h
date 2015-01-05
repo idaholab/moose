@@ -54,7 +54,9 @@ protected:
   virtual Real computeF() = 0;
 
   /**
-   * Override this method for calculating the first derivatives
+   * Override this method for calculating the first derivatives.
+   * The parameter is the libMesh variable number of the coupled variable.
+   * These numbers can be obtained using the coupled() method for each coupled variable.
    *
    * @param arg The index of the function argument the derivative is taken of
    */
@@ -78,6 +80,18 @@ protected:
    */
   virtual Real computeD3F(unsigned int, unsigned int, unsigned int);
 
+  /**
+   * DerivativeBaseMaterial keeps an internal list of all the variables the derivatives are taken w.r.t.
+   * We provide the MOOSE variable bames in _arg_names, the libMesh variable numbers in _arg_numbers, and the
+   * input file parameter names in _arg_param_names. All are indexed by the argument index.
+   * This method returns the argument index for a given the libMesh variable number.
+   *
+   * This mapping is necessary for internal classes which maintain lists of derivatives indexed by argument index
+   * and need to pull from those lists from the computeDF, computeD2F, and computeD3F methods, which receive
+   * libMesh variable numbers as parameters.
+   */
+  unsigned int argIndex(unsigned int) const;
+
   /// Coupled variables for function arguments
   std::vector<VariableValue *> _args;
 
@@ -99,9 +113,6 @@ protected:
   /// Vector of all argument MOOSE variable numbers.
   std::vector<unsigned int> _arg_numbers;
 
-  /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
-  std::vector<unsigned int> _arg_index;
-
   /// String vector of the input file coupling parameter name for each argument.
   std::vector<std::string> _arg_param_names;
 
@@ -119,6 +130,11 @@ protected:
 
   /// Material properties to store the third derivatives.
   std::vector<std::vector<std::vector<MaterialProperty<Real> *> > > _prop_d3F;
+
+private:
+  /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
+  /// this can be queried through the argIndex() method
+  std::vector<unsigned int> _arg_index;
 };
 
 #endif //DERIVATIVEBASEMATERIAL_H

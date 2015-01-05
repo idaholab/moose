@@ -51,7 +51,7 @@ ElasticEnergyMaterial::computeF()
 Real
 ElasticEnergyMaterial::computeDF(unsigned int i_var)
 {
-  unsigned int i = _arg_index[i_var];
+  unsigned int i = argIndex(i_var);
 
   // product rule d/di computeF
   return 0.5 * (
@@ -67,8 +67,8 @@ ElasticEnergyMaterial::computeDF(unsigned int i_var)
 Real
 ElasticEnergyMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
 {
-  unsigned int i = _arg_index[i_var];
-  unsigned int j = _arg_index[j_var];
+  unsigned int i = argIndex(i_var);
+  unsigned int j = argIndex(j_var);
 
   // product rule d/dj computeDF
   return 0.5 * (

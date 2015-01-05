@@ -27,9 +27,9 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
   {
     std::map<std::string, std::vector<MooseVariable *> >::iterator vars = _coupled_vars.find(*it);
 
-    // no MOOSE variable was provided for this coupling
+    // no MOOSE variable was provided for this coupling, skip derivatives w.r.t. this variable
     if (vars == _coupled_vars.end())
-      mooseError("Derivative parsed materials do not work with optional/default coupling yet. Please use addRequiredCoupledVar and provide coupling for all variables.");
+      continue;
 
     // check if we have a 1:1 mapping between parameters and variables
     if (vars->second.size() != 1)
@@ -163,6 +163,13 @@ Real
 DerivativeBaseMaterial::computeD3F(unsigned int /*arg1*/, unsigned int /*arg2*/, unsigned int /*arg3*/)
 {
   return 0.0;
+}
+
+unsigned int
+DerivativeBaseMaterial::argIndex(unsigned int i_var) const
+{
+  mooseAssert(_arg_number[_arg_index[i_var]] == i_var, "Requesting argIndex() of for a derivative w.r.t. a variable not coupled to.");
+  return _arg_index[i_var];
 }
 
 void
