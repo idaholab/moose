@@ -25,7 +25,7 @@ MathFreeEnergy::computeF()
 Real
 MathFreeEnergy::computeDF(unsigned int j_var)
 {
-  if (j_var == _c_var)
+  if (j_var == _c_var) //Note that these checks are only really necessary when the material has more than one coupled variable
     return _c[_qp]*(_c[_qp]*_c[_qp] - 1.0);
   else
     return 0.0;

@@ -10,7 +10,8 @@ template<>
 InputParameters validParams<MathFreeEnergy>();
 
 /**
- * Material class that creates the math free energy and its derivatives for use with CHParsed and SplitCHParsed. F = 1/4*(1 + c)^2*(1 - c)^2.
+ * Material class that creates the math free energy and its derivatives
+ * for use with CHParsed and SplitCHParsed. F = 1/4*(1 + c)^2*(1 - c)^2.
  */
 class MathFreeEnergy : public DerivativeBaseMaterial
 {
