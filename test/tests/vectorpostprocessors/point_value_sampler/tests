@@ -4,4 +4,10 @@
     input = 'point_value_sampler.i'
     csvdiff = 'point_value_sampler_out_point_sample_0001.csv'
   [../]
+  [./points_on_nodes]
+    # Tests the point sampler if the points are located on nodes
+    type = 'CSVDiff'
+    input = 'point_sampler_node_points.i'
+    csvdiff = 'point_sampler_node_points_out_point_sample_0001.csv'
+  [../]
 []
