@@ -188,7 +188,6 @@ template <typename T>
 void
 LineMaterialSamplerBase<T>::threadJoin(const SamplerBase & sb)
 {
-  const LineMaterialSamplerBase<T> & lmsb = static_cast<const LineMaterialSamplerBase<T> &>(sb);
   SamplerBase::threadJoin(sb);
 }
 
