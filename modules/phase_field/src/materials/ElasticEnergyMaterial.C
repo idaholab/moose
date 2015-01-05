@@ -8,6 +8,7 @@ InputParameters validParams<ElasticEnergyMaterial>()
   InputParameters params = validParams<DerivativeBaseMaterial>();
   params.addClassDescription("Free energy material for the elastic energy contributions.");
   params.addParam<std::string>("base_name", "Material property base name");
+  params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
   return params;
 }
 
@@ -48,8 +49,10 @@ ElasticEnergyMaterial::computeF()
 }
 
 Real
-ElasticEnergyMaterial::computeDF(unsigned int i)
+ElasticEnergyMaterial::computeDF(unsigned int i_var)
 {
+  unsigned int i = argIndex(i_var);
+
   // product rule d/di computeF
   return 0.5 * (
     ( // dstress/di
@@ -62,8 +65,11 @@ ElasticEnergyMaterial::computeDF(unsigned int i)
 }
 
 Real
-ElasticEnergyMaterial::computeD2F(unsigned int i, unsigned int j)
+ElasticEnergyMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
 {
+  unsigned int i = argIndex(i_var);
+  unsigned int j = argIndex(j_var);
+
   // product rule d/dj computeDF
   return 0.5 * (
     (

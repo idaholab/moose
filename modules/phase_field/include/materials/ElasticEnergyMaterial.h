@@ -24,9 +24,6 @@ protected:
   virtual Real computeDF(unsigned int);
   virtual Real computeD2F(unsigned int, unsigned int);
 
-  /// any number of args is accepted.
-  virtual unsigned int expectedNumArgs() { return _nargs; }
-
   std::string _base_name;
 
   /// Stress tensor

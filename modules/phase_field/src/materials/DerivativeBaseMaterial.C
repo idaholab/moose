@@ -6,7 +6,6 @@ InputParameters validParams<DerivativeBaseMaterial>()
   InputParameters params = validParams<Material>();
   params.addClassDescription("KKS model helper material to provide the free energy and its first and second derivatives");
   params.addParam<std::string>("f_name", "F", "Base name of the free energy function (used to name the material properties)");
-  params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
   params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
   return params;
 }
@@ -15,15 +14,52 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
                                                InputParameters parameters) :
     DerivativeMaterialInterface<Material>(name, parameters),
     _F_name(getParam<std::string>("f_name")),
-    _nargs(coupledComponents("args")),
     _third_derivatives(getParam<bool>("third_derivatives")),
     _prop_F(&declareProperty<Real>(_F_name))
 {
   // loop counters
   unsigned int i, j, k;
 
-  // coupled variables
-  _args.resize(_nargs);
+  // fetch names and numbers of all coupled variables
+  _mapping_is_unique = true;
+  unsigned int max_number = 0;
+  for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin(); it != _pars.coupledVarsEnd(); ++it)
+  {
+    std::map<std::string, std::vector<MooseVariable *> >::iterator vars = _coupled_vars.find(*it);
+
+    // no MOOSE variable was provided for this coupling, skip derivatives w.r.t. this variable
+    if (vars == _coupled_vars.end())
+      continue;
+
+    // check if we have a 1:1 mapping between parameters and variables
+    if (vars->second.size() != 1)
+      _mapping_is_unique = false;
+
+    // iterate over all components
+    for (unsigned int j = 0; j < vars->second.size(); ++j)
+    {
+      // make sure each nonlinear variable is coupled in only once
+      if (std::find(_arg_names.begin(), _arg_names.end(), vars->second[j]->name()) != _arg_names.end())
+        mooseError("A nonlinear variable can only be coupled in once.");
+
+      // insert the map values
+      unsigned int number = vars->second[j]->number();
+      _arg_names.push_back(vars->second[j]->name());
+      _arg_numbers.push_back(number);
+      _arg_param_names.push_back(*it);
+
+      // get the maximum var number
+      if (number > max_number)
+        max_number = number;
+
+      // get variable value
+      _args.push_back(&coupledValue(*it, j));
+    }
+  }
+  _nargs = _arg_names.size();
+
+  // reserve space for number -> arg index lookup table
+  _arg_index.resize(max_number+1);
 
   // reserve space for material properties
   _prop_dF.resize(_nargs);
@@ -40,19 +76,14 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
       for (j = 0; j < _nargs; ++j)
         _prop_d3F[i][j].resize(_nargs);
     }
-  }
 
-  // fetch names of variables in args
-  _arg_names.resize(_nargs);
-  for (i = 0; i < _nargs; ++i)
-    _arg_names[i] = getVar("args", i)->name();
+    // populate number -> arg index lookup table
+    _arg_index[_arg_numbers[i]] = i;
+  }
 
   // initialize derivatives
   for (i = 0; i < _nargs; ++i)
   {
-    // get the coupled variable to use as function arguments
-    _args[i] = &coupledValue("args", i);
-
     // first derivatives
     _prop_dF[i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
 
@@ -84,10 +115,6 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
 void
 DerivativeBaseMaterial::initialSetup()
 {
-  if (_nargs != expectedNumArgs()) {
-    mooseError("Wrong number of arguments supplied for DerivativeBaseMaterial " + _F_name);
-  }
-
   // set the _prop_* pointers of all material poroperties that are not beeing used back to NULL
   unsigned int i, j, k;
   bool needs_third_derivatives = false;
@@ -138,6 +165,13 @@ DerivativeBaseMaterial::computeD3F(unsigned int /*arg1*/, unsigned int /*arg2*/,
   return 0.0;
 }
 
+unsigned int
+DerivativeBaseMaterial::argIndex(unsigned int i_var) const
+{
+  mooseAssert(_arg_numbers[_arg_index[i_var]] == i_var, "Requesting argIndex() of for a derivative w.r.t. a variable not coupled to.");
+  return _arg_index[i_var];
+}
+
 void
 DerivativeBaseMaterial::computeProperties()
 {
@@ -153,20 +187,20 @@ DerivativeBaseMaterial::computeProperties()
     {
       // set first derivatives
       if (_prop_dF[i])
-        (*_prop_dF[i])[_qp] = computeDF(i);
+        (*_prop_dF[i])[_qp] = computeDF(_arg_numbers[i]);
 
       // second derivatives
       for (j = i; j < _nargs; ++j)
       {
         if (_prop_d2F[i][j])
-          (*_prop_d2F[i][j])[_qp] = computeD2F(i, j);
+          (*_prop_d2F[i][j])[_qp] = computeD2F(_arg_numbers[i], _arg_numbers[j]);
 
         // third derivatives
         if (_third_derivatives)
         {
           for (k = j; k < _nargs; ++k)
             if (_prop_d3F[i][j][k])
-              (*_prop_d3F[i][j][k])[_qp] = computeD3F(i, j, k);
+              (*_prop_d3F[i][j][k])[_qp] = computeD3F(_arg_numbers[i], _arg_numbers[j], _arg_numbers[k]);
         }
       }
     }
