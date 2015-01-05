@@ -29,8 +29,7 @@ InputParameters validParams<LeastSquaresFit>();
  */
 
 class LeastSquaresFit :
-  public GeneralVectorPostprocessor,
-  public VectorPostprocessorInterface
+  public GeneralVectorPostprocessor
 {
 public:
   /**
@@ -75,8 +74,8 @@ protected:
   const std::string _y_name;
 
   /// The variables with the x, y data to be fit
-  const VectorPostprocessorValue * _x_values;
-  const VectorPostprocessorValue * _y_values;
+  const VectorPostprocessorValue & _x_values;
+  const VectorPostprocessorValue & _y_values;
 
   /// The type of output
   const MooseEnum _output_type;

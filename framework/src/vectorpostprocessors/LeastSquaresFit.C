@@ -35,13 +35,12 @@ InputParameters validParams<LeastSquaresFit>()
 
 LeastSquaresFit::LeastSquaresFit(const std::string & name, InputParameters parameters) :
     GeneralVectorPostprocessor(name, parameters),
-    VectorPostprocessorInterface(parameters),
     _vpp_name(getParam<VectorPostprocessorName>("vectorpostprocessor")),
     _order(parameters.get<unsigned int>("order")),
     _x_name(getParam<std::string>("x_name")),
     _y_name(getParam<std::string>("y_name")),
-    _x_values(NULL),
-    _y_values(NULL),
+    _x_values(getVectorPostprocessorValue("vectorpostprocessor", _x_name)),
+    _y_values(getVectorPostprocessorValue("vectorpostprocessor", _y_name)),
     _output_type(getParam<MooseEnum>("output")),
     _num_samples(0),
     _sample_x(NULL),
@@ -63,26 +62,19 @@ LeastSquaresFit::LeastSquaresFit(const std::string & name, InputParameters param
       mooseWarning("In LeastSquaresFit num_samples parameter is unused with output=Coefficients");
     _coeffs = &declareVector("coefficients");
   }
+
+  if (_output_type == "Samples")
+  {
+    _sample_x->resize(_num_samples);
+    _sample_y->resize(_num_samples);
+  }
+  else
+    _coeffs->resize(_order+1);
 }
 
 void
 LeastSquaresFit::initialize()
 {
-  if (!_x_values)
-  {
-    if (!hasVectorPostprocessorByName(_vpp_name))
-      mooseError("In LeastSquaresFit, VectorPostprocessor with name: "<<_vpp_name<<" does not exist");
-    _x_values = &getVectorPostprocessorValueByName(_vpp_name, _x_name);
-    _y_values = &getVectorPostprocessorValueByName(_vpp_name, _y_name);
-    if (_output_type == "Samples")
-    {
-      _sample_x->resize(_num_samples);
-      _sample_y->resize(_num_samples);
-    }
-    else
-      _coeffs->resize(_order+1);
-  }
-
   if (_output_type == "Samples")
   {
     _sample_x->clear();
@@ -95,18 +87,18 @@ LeastSquaresFit::initialize()
 void
 LeastSquaresFit::execute()
 {
-  if (_x_values->size() != _y_values->size())
+  if (_x_values.size() != _y_values.size())
     mooseError("In LeastSquresFit size of data in x_values and y_values must be equal");
-  if (_x_values->size() == 0)
+  if (_x_values.size() == 0)
     mooseError("In LeastSquresFit size of data in x_values and y_values must be > 0");
-  PolynomialFit pf(*_x_values, *_y_values, _order, true);
+  PolynomialFit pf(_x_values, _y_values, _order, true);
   pf.generate();
 
 
   if (_output_type == "Samples")
   {
-    Real x_min = *(std::min_element(_x_values->begin(), _x_values->end()));
-    Real x_max = *(std::max_element(_x_values->begin(), _x_values->end()));
+    Real x_min = *(std::min_element(_x_values.begin(), _x_values.end()));
+    Real x_max = *(std::max_element(_x_values.begin(), _x_values.end()));
     Real x_span = x_max - x_min;
 
     for (unsigned int i=0; i<_num_samples; ++i)
