@@ -44,7 +44,7 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./unique_grains]
     type = NodalFloodCountAux
@@ -69,7 +69,7 @@
 [Postprocessors]
   [./n_nodes]
     type = NumNodes
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
   [./DOFs]
