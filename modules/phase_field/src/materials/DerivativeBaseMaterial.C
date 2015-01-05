@@ -168,7 +168,7 @@ DerivativeBaseMaterial::computeD3F(unsigned int /*arg1*/, unsigned int /*arg2*/,
 unsigned int
 DerivativeBaseMaterial::argIndex(unsigned int i_var) const
 {
-  mooseAssert(_arg_number[_arg_index[i_var]] == i_var, "Requesting argIndex() of for a derivative w.r.t. a variable not coupled to.");
+  mooseAssert(_arg_numbers[_arg_index[i_var]] == i_var, "Requesting argIndex() of for a derivative w.r.t. a variable not coupled to.");
   return _arg_index[i_var];
 }
 
