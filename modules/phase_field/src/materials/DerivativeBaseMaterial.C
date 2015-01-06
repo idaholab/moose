@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<DerivativeBaseMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addClassDescription("KKS model helper material to provide the free energy and its first and second derivatives");
+  params.addClassDescription("Material to provide a function (such as a free energy) and its derivatives w.r.t. the coupled variables");
   params.addParam<std::string>("f_name", "F", "Base name of the free energy function (used to name the material properties)");
   params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
   return params;
