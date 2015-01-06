@@ -79,7 +79,7 @@ FlowJunction::addMooseObjects()
   std::vector<VariableName> cv_lambda(1, _lm_name);
 
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "residual";
+  execute_options = "linear";
 
   std::string c_pps = genName(name(), "flow_pps");
   {
