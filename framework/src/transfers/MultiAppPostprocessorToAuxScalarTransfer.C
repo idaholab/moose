@@ -42,8 +42,6 @@ MultiAppPostprocessorToAuxScalarTransfer::MultiAppPostprocessorToAuxScalarTransf
 void
 MultiAppPostprocessorToAuxScalarTransfer::execute()
 {
-
-
   // Perform action based on the transfer direction
   switch (_direction)
   {
@@ -60,6 +58,8 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
         {
           // Get reference to the AuxVariable where the postprocessor will be passed
           MooseVariableScalar & scalar =  _multi_app->appProblem(i)->getScalarVariable(_tid, _to_aux_name);
+
+          scalar.reinit();
 
           // Set all values of the AuxVariable to the value of the postprocessor
           scalar.setValues(pp_value);
@@ -80,6 +80,9 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
       // The AuxVariable for storing the postprocessor values from the sub app
       MooseVariableScalar & scalar =  _multi_app->problem()->getScalarVariable(_tid, _to_aux_name);
 
+      // Ensure that the variable is up to date
+      scalar.reinit();
+
       // The dof indices for the scalar variable of interest
       std::vector<dof_id_type> & dof = scalar.dofIndices();
 
@@ -89,15 +92,9 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
 
       // Loop over each sub-app and populate the AuxVariable values from the postprocessors
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
-      {
-        if (_multi_app->hasLocalApp(i))
-        {
-          scalar.setValue(dof[i], _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name));
-
-          // Update the solution
-          scalar.insert(scalar.sys().solution());
-        }
-      }
+        if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
+          // Note: This can't be done using MooseScalarVariable::insert() because different processors will be setting dofs separately.
+          scalar.sys().solution().set(dof[i], _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name));
 
       scalar.sys().solution().close();
 
