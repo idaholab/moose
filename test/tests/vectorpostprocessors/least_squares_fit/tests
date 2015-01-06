@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'least_squares_fit.i'
+    csvdiff = 'least_squares_fit_out_least_squares_fit_coeffs_0001.csv least_squares_fit_out_least_squares_fit_sample_0001.csv'
+  [../]
+[]
+

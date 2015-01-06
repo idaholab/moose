@@ -20,6 +20,7 @@
 #include "DependencyResolverInterface.h"
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "Problem.h"
 
@@ -38,7 +39,8 @@ class GeneralUserObject :
   public TransientInterface,
   public DependencyResolverInterface,
   public UserObjectInterface,
-  protected PostprocessorInterface
+  protected PostprocessorInterface,
+  protected VectorPostprocessorInterface
 {
 public:
   GeneralUserObject(const std::string & name, InputParameters parameters);
@@ -56,8 +58,18 @@ public:
 
   virtual ~GeneralUserObject() {}
 
+  ///@{
+  /**
+   * Store dependency among same object types for proper execution order
+   */
+
+  // FIXME: This should be const but fails to work when it is const
   virtual PostprocessorValue & getPostprocessorValue(const std::string & name);
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
+
+  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name, const std::string & vector_name);
+  virtual const VectorPostprocessorValue & getVectorPostprocessorValueByName(const VectorPostprocessorName & name, const std::string & vector_name);
+  ///@}
 
 protected:
   std::set<std::string> _depend_vars;

@@ -183,3 +183,9 @@ PolynomialFit::getSampleSize()
 {
   return _x.size();
 }
+
+const std::vector<Real>&
+PolynomialFit::getCoefficients()
+{
+  return _coeffs;
+}
