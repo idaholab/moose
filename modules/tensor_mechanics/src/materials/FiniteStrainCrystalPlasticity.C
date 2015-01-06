@@ -414,10 +414,10 @@ FiniteStrainCrystalPlasticity::preSolveQp()
 
   _dfgrd_tmp = _deformation_gradient[_qp];
 
-  calc_schmid_tensor();
-
   getEulerAngles();
   getEulerRotations();
+
+  calc_schmid_tensor();
 
   RealTensorValue rot;
 
