@@ -24,6 +24,7 @@
 #include "BarrierFunctionMaterial.h"
 #include "SwitchingFunctionMaterial.h"
 #include "ElasticEnergyMaterial.h"
+#include "MathFreeEnergy.h"
 #include "NodalFloodCount.h"
 #include "NodalFloodCountAux.h"
 #include "NodalVolumeFraction.h"
@@ -123,6 +124,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(BarrierFunctionMaterial);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(ElasticEnergyMaterial);
+  registerMaterial(MathFreeEnergy);
 
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
