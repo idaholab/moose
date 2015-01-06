@@ -1048,17 +1048,22 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
 
   //Calculate theta based on in which quadrant in the crack front coordinate
   //system the qp is located
-  if (x_local >= 0 && y_local >= 0)
-    theta = std::asin(p_to_plane_dist/r);
+  if (r > 0)
+  {
+    if (x_local >= 0 && y_local >= 0)
+      theta = std::asin(p_to_plane_dist/r);
 
-  else if (x_local < 0 && y_local >= 0)
-    theta = libMesh::pi - std::asin(p_to_plane_dist/r);
+    else if (x_local < 0 && y_local >= 0)
+      theta = libMesh::pi - std::asin(p_to_plane_dist/r);
 
-  else if (x_local < 0 && y_local < 0)
-    theta = -(libMesh::pi - std::asin(p_to_plane_dist/r));
+    else if (x_local < 0 && y_local < 0)
+      theta = -(libMesh::pi - std::asin(p_to_plane_dist/r));
 
-  else if (x_local >= 0 && y_local < 0)
-    theta = -std::asin(p_to_plane_dist/r);
+    else if (x_local >= 0 && y_local < 0)
+      theta = -std::asin(p_to_plane_dist/r);
+  }
+  else if (r == 0)
+    theta = 0;
 }
 
 bool
