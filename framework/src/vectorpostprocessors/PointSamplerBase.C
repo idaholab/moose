@@ -50,12 +50,11 @@ PointSamplerBase::initialize()
 {
   SamplerBase::initialize();
 
-  _found_points.resize(_points.size());
-
   // We do this here just in case it's been destroyed and recreated becaue of mesh adaptivity.
   _pl = _mesh.getMesh().sub_point_locator();
 
   // Reset the _found_points array
+  _found_points.resize(_points.size());
   std::fill(_found_points.begin(), _found_points.end(), false);
 }
 
@@ -115,11 +114,9 @@ PointSamplerBase::finalize()
     // Only do this check on the proc zero because it's the same on every processor
     // _found_points should contain all 1's at this point (ie every point was found by a proc)
     if (pid == 0 && !_found_points[i])
-      mooseError("Sample point not found: " << _points[i]);
+      mooseError("In " << name() << ", sample point not found: " << _points[i]);
 
-    unsigned int id = max_id[i];
-
-    if (id == pid)
+    if (max_id[i] == pid)
       SamplerBase::addSample(_points[i], _ids[i], _values[i]);
   }
 
