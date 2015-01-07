@@ -102,7 +102,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
     _old_time_solution_norm(declareRestartableData<Real>("old_time_solution_norm", 0.0)),
-    _sync_times(_output_warehouse.getSyncTimes()),
+    _sync_times(_app.getOutputWarehouse().getSyncTimes()),
     _abort(getParam<bool>("abort_on_solve_fail")),
     _time_interval(declareRestartableData<bool>("time_interval", false)),
     _start_time(getParam<Real>("start_time")),
@@ -187,7 +187,7 @@ Transient::init()
     _time_old = _time;
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
-  _output_warehouse.outputStep(EXEC_INITIAL);
+  _problem.outputStep(EXEC_INITIAL);
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   // If this is the first step
@@ -240,7 +240,7 @@ Transient::execute()
     _steps_taken++;
   }
 
-  _output_warehouse.outputStep(EXEC_FINAL);
+  _problem.outputStep(EXEC_FINAL);
   postExecute();
 }
 
@@ -324,7 +324,7 @@ Transient::solveStep(Real input_dt)
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
   // Perform output for timestep begin
-  _output_warehouse.outputStep(EXEC_TIMESTEP_BEGIN);
+  _problem.outputStep(EXEC_TIMESTEP_BEGIN);
 
   if (_picard_max_its > 1)
   {
@@ -380,7 +380,7 @@ Transient::solveStep(Real input_dt)
     _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
 
     // Perform the output of the current, failed time step (this only occurs if desired)
-    _output_warehouse.outputStep(EXEC_FAILED);
+    _problem.outputStep(EXEC_FAILED);
   }
 
   postSolve();
@@ -407,7 +407,7 @@ Transient::endStep(Real input_time)
     _problem.computeIndicatorsAndMarkers();
 
     // Perform the output of the current time step
-    _output_warehouse.outputStep(EXEC_TIMESTEP_END);
+    _problem.outputStep(EXEC_TIMESTEP_END);
 
     // Output MultiApps if we were doing Picard iterations
     if (_picard_max_its > 1)

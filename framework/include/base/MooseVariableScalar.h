@@ -51,6 +51,11 @@ public:
    */
   void setValue(unsigned int i, Number value);
 
+  /**
+   * Set all of the values of this scalar variable to the same value
+   */
+  void setValues(Number value);
+
   void insert(NumericVector<Number> & soln);
 
 protected:

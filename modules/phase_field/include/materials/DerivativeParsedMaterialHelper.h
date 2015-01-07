@@ -89,11 +89,6 @@ protected:
 
   /// table of FParser eval error codes
   static const char * _eval_error_msg[];
-
-  // Dummy implementations
-  virtual Real computeF();
-  virtual Real computeDF(unsigned int);
-  virtual Real computeD2F(unsigned int, unsigned int);
 };
 
 #endif // DERIVATIVEPARSEDMATERIALHELPER_H

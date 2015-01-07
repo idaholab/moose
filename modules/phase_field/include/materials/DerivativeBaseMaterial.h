@@ -51,7 +51,7 @@ protected:
   /**
    * Override this method to provide the free energy function.
    */
-  virtual Real computeF() = 0;
+  virtual Real computeF() { return 0.0; }
 
   /**
    * Override this method for calculating the first derivatives.
@@ -60,7 +60,7 @@ protected:
    *
    * @param arg The index of the function argument the derivative is taken of
    */
-  virtual Real computeDF(unsigned int) = 0;
+  virtual Real computeDF(unsigned int) { return 0.0; }
 
   /**
    * Override this method to calculate the second derivatives.
@@ -70,7 +70,7 @@ protected:
    * @param arg1 The variable the first derivative is taken of
    * @param arg2 The variable the second derivative is taken of
    */
-  virtual Real computeD2F(unsigned int, unsigned int) = 0;
+  virtual Real computeD2F(unsigned int, unsigned int) { return 0.0; }
 
   /**
    * Override this method to calculate the third derivatives.
@@ -78,7 +78,7 @@ protected:
    * @Note The implementation of this method is optional. It is only evaluated when
    *       the 'third_derivatives' parameter is set to true.
    */
-  virtual Real computeD3F(unsigned int, unsigned int, unsigned int);
+  virtual Real computeD3F(unsigned int, unsigned int, unsigned int) { return 0.0; }
 
   /**
    * DerivativeBaseMaterial keeps an internal list of all the variables the derivatives are taken w.r.t.

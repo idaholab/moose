@@ -14,6 +14,9 @@
 
 #include "PointSamplerBase.h"
 
+// libMesh includes
+#include "libmesh/mesh_tools.h"
+
 template<>
 InputParameters validParams<PointSamplerBase>()
 {
@@ -34,7 +37,6 @@ PointSamplerBase::PointSamplerBase(const std::string & name, InputParameters par
     _point_vec(1) // Only going to evaluate one point at a time for now
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
-  _values.resize(_coupled_moose_vars.size());
 
   for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
     var_names[i] = _coupled_moose_vars[i]->name();
@@ -50,29 +52,44 @@ PointSamplerBase::initialize()
 
   // We do this here just in case it's been destroyed and recreated becaue of mesh adaptivity.
   _pl = _mesh.getMesh().sub_point_locator();
+
+  // Reset the _found_points array
+  _found_points.resize(_points.size());
+  std::fill(_found_points.begin(), _found_points.end(), false);
 }
 
 void
 PointSamplerBase::execute()
 {
+  MeshTools::BoundingBox bbox = getInflatedProcessorBoundingBox();
+
   for (unsigned int i=0; i<_points.size(); i++)
   {
     Point & p = _points[i];
 
-    // First find the element the hit lands in
-    const Elem * elem = getLocalElemContainingPoint(p, i);
-
-    // We have to pass a vector of points into reinitElemPhys
-    _point_vec[0] = p;
-
-    if (elem)
+    // Do a bounding box check so we're not doing unnecessary PointLocator lookups
+    if (bbox.contains_point(p))
     {
-      _subproblem.reinitElemPhys(elem, _point_vec, 0); // Zero is for tid
+      std::vector<Real> & values = _values[i];
 
-      for (unsigned int j=0; j<_coupled_moose_vars.size(); j++)
-        _values[j] = _coupled_moose_vars[j]->sln()[0]; // The zero is for the "qp"
+      if (values.empty())
+        values.resize(_coupled_moose_vars.size());
 
-      SamplerBase::addSample(p, _ids[i], _values);
+      // First find the element the hit lands in
+      const Elem * elem = getLocalElemContainingPoint(p, i);
+
+      if (elem)
+      {
+        // We have to pass a vector of points into reinitElemPhys
+        _point_vec[0] = p;
+
+        _subproblem.reinitElemPhys(elem, _point_vec, 0); // Zero is for tid
+
+        for (unsigned int j=0; j<_coupled_moose_vars.size(); j++)
+          values[j] = _coupled_moose_vars[j]->sln()[0]; // The zero is for the "qp"
+
+        _found_points[i] = true;
+      }
     }
   }
 }
@@ -80,6 +97,29 @@ PointSamplerBase::execute()
 void
 PointSamplerBase::finalize()
 {
+  // Save off for speed
+  unsigned int pid = processor_id();
+
+  /*
+   * Figure out which processor is actually going "claim" each point.
+   * If multiple processors found the point and computed values what happens is that
+   * maxloc will give us the smallest PID in max_id
+   */
+  std::vector<unsigned int> max_id(_found_points.size());
+
+  _communicator.maxloc(_found_points, max_id);
+
+  for (unsigned int i=0; i<max_id.size(); i++)
+  {
+    // Only do this check on the proc zero because it's the same on every processor
+    // _found_points should contain all 1's at this point (ie every point was found by a proc)
+    if (pid == 0 && !_found_points[i])
+      mooseError("In " << name() << ", sample point not found: " << _points[i]);
+
+    if (max_id[i] == pid)
+      SamplerBase::addSample(_points[i], _ids[i], _values[i]);
+  }
+
   SamplerBase::finalize();
 }
 
@@ -101,4 +141,21 @@ PointSamplerBase::getLocalElemContainingPoint(const Point & p, unsigned int /*id
     return elem;
 
   return NULL;
+}
+
+MeshTools::BoundingBox
+PointSamplerBase::getInflatedProcessorBoundingBox()
+{
+  // Grab a bounding box to speed things up
+  MeshTools::BoundingBox bbox = MeshTools::processor_bounding_box(_mesh, processor_id());
+
+  // Inflate the bbox just a bit to deal with roundoff
+  // Adding 1% of the diagonal size in each direction on each end
+  Real inflation_amount = 0.01 * (bbox.max() - bbox.min()).size();
+  Point inflation(inflation_amount, inflation_amount, inflation_amount);
+
+  bbox.first -= inflation; // min
+  bbox.second += inflation; // max
+
+  return bbox;
 }
