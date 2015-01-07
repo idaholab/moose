@@ -107,12 +107,18 @@ SubProblem::getMaterialPropertyBlockNames(const std::string & prop_name)
   block_names.reserve(blocks.size());
   for (std::set<SubdomainID>::iterator it = blocks.begin(); it != blocks.end(); ++it)
   {
-    SubdomainName name = mesh().getMesh().subdomain_name(*it);
-    if (name.empty())
+    SubdomainName name;
+    if (*it == Moose::ANY_BLOCK_ID)
+      name = "ANY_BLOCK_ID";
+    else
     {
-      std::ostringstream oss;
-      oss << *it;
-      name = oss.str();
+      name = mesh().getMesh().subdomain_name(*it);
+      if (name.empty())
+      {
+        std::ostringstream oss;
+        oss << *it;
+        name = oss.str();
+      }
     }
     block_names.push_back(name);
   }
@@ -148,12 +154,18 @@ SubProblem::getMaterialPropertyBoundaryNames(const std::string & prop_name)
 
   for (std::set<BoundaryID>::iterator it = boundaries.begin(); it != boundaries.end(); ++it)
   {
-    BoundaryName name = boundary_info.get_sideset_name(*it);
-    if (name.empty())
+    BoundaryName name;
+    if (*it == Moose::ANY_BOUNDARY_ID)
+      name = "ANY_BOUNDARY_ID";
+    else
     {
-      std::ostringstream oss;
-      oss << *it;
-      name = oss.str();
+      name = boundary_info.get_sideset_name(*it);
+      if (name.empty())
+      {
+        std::ostringstream oss;
+        oss << *it;
+        name = oss.str();
+      }
     }
     boundary_names.push_back(name);
   }

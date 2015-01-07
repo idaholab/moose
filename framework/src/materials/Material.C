@@ -155,18 +155,15 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
     if (!is_get)
       _supplied_props.insert(prop_name);
     _fe_problem.storeMatPropName(*it, prop_name);
-    _subproblem.storeMatPropName(*it, prop_name);
   }
 
   // Store material properties for the boundary ids
   for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
   {
-    /// \todo{see ticket #2192}
     // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
     if (!is_get)
       _supplied_props.insert(prop_name);
     _fe_problem.storeMatPropName(*it, prop_name);
-    _subproblem.storeMatPropName(*it, prop_name);
   }
 }
 

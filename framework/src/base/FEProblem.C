@@ -1563,26 +1563,15 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
     _reinit_displaced_elem = true;
   }
   else
-  {
     parameters.set<SubProblem *>("_subproblem") = this;
-  }
-
-//  parameters.set<SubProblem *>("_subproblem") = this;
-//  parameters.set<SubProblem *>("_subproblem_displaced") = _displaced_problem;
 
   // Get user-defined list of block names
   std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
-  std::vector<SubdomainID> block_ids(blocks.size());
+  std::vector<SubdomainID> block_ids = _mesh.getSubdomainIDs(blocks);
 
   // Get user-defined list of boundary names
   std::vector<BoundaryName> boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
-  std::vector<BoundaryID> boundary_ids(boundaries.size());
-
-  // Convert the ids to names
-  for (unsigned int i=0; i<blocks.size(); ++i)
-    block_ids[i] = _mesh.getSubdomainID(blocks[i]);
-  for (unsigned int i=0; i < boundaries.size(); ++i)
-    boundary_ids[i] = _mesh.getBoundaryID(boundaries[i]);
+  std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(boundaries);
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {

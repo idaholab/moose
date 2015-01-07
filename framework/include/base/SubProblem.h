@@ -317,7 +317,6 @@ protected:
    * from boudnary/block id to multimap.  Each of the multimaps is a list of
    * requestor object names to material property names.
    */
-  /// the map of properties requested (need to be checked)
   std::map<unsigned int, std::multimap<std::string, std::string> > _map_block_material_props_check;
   std::map<unsigned int, std::multimap<std::string, std::string> > _map_boundary_material_props_check;
   ///@}
