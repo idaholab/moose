@@ -1,11 +1,11 @@
 #include "DerivativeSumMaterial.h"
 
 template<>
-InputParameters validParams<Material>()
+InputParameters validParams<DerivativeSumMaterial>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<DerivativeBaseMaterial>();
   params.addClassDescription("Meta-material to sum up multiple derivative materials");
-  params.addParam<std::vector<std::string> >("f_names", "F", "Base name of the free energy function (used to name the material properties)");
+  params.addParam<std::vector<std::string> >("f_names", "Base name of the free energy function (used to name the material properties)");
   //params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
 
   // All arguments to the free energies being summed
