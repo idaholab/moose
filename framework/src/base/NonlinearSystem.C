@@ -2099,7 +2099,15 @@ void
 NonlinearSystem::serializeSolution()
 {
   if (_need_serialized_solution)
+  {
+    if (!_serialized_solution.initialized() || _serialized_solution.size() != _sys.n_dofs())
+    {
+      _serialized_solution.clear();
+      _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+    }
+
     _current_solution->localize(_serialized_solution);
+  }
  }
 
 void
