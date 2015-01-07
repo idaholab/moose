@@ -69,7 +69,7 @@
     type = DerivativeSumMaterial
     block = 0
     f_name = F
-    f_names = 'Fa Fb Fb'
+    sum_materials = 'Fa Fb Fb'
     args = 'c'
     outputs = exodus
   [../]
