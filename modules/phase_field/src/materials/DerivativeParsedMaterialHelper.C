@@ -276,11 +276,6 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
   }
 }
 
-/// need to implment these virtuals, although they never get called
-Real DerivativeParsedMaterialHelper::computeF() { return 0.0; }
-Real DerivativeParsedMaterialHelper::computeDF(unsigned int) { return 0.0; }
-Real DerivativeParsedMaterialHelper::computeD2F(unsigned int, unsigned int) { return 0.0; }
-
 Real
 DerivativeParsedMaterialHelper::evaluate(ADFunction * parser)
 {

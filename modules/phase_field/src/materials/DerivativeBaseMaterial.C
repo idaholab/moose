@@ -157,14 +157,6 @@ DerivativeBaseMaterial::initialSetup()
   }
 }
 
-// implementing this in the derived class is optional
-// (not really, but we'll have to check what is needed for the residuals!)
-Real
-DerivativeBaseMaterial::computeD3F(unsigned int /*arg1*/, unsigned int /*arg2*/, unsigned int /*arg3*/)
-{
-  return 0.0;
-}
-
 unsigned int
 DerivativeBaseMaterial::argIndex(unsigned int i_var) const
 {
