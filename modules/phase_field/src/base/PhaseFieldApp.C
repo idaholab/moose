@@ -20,6 +20,7 @@
 #include "RndBoundingBoxIC.h"
 #include "PFMobility.h"
 #include "DerivativeParsedMaterial.h"
+#include "DerivativeSumMaterial.h"
 #include "DerivativeTwoPhaseMaterial.h"
 #include "BarrierFunctionMaterial.h"
 #include "SwitchingFunctionMaterial.h"
@@ -120,6 +121,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFMobility);
   registerMaterial(GBEvolution);
   registerMaterial(DerivativeParsedMaterial);
+  registerMaterial(DerivativeSumMaterial);
   registerMaterial(DerivativeTwoPhaseMaterial);
   registerMaterial(BarrierFunctionMaterial);
   registerMaterial(SwitchingFunctionMaterial);
