@@ -21,7 +21,7 @@
     input = 'adapt_tstep_grow_init_dt_restart2.i'
     exodiff = 'adapt_tstep_grow_init_dt_restart2_out.e'
     #exodiff_opts = -TM
-    exodiff_opts = -steps last
+    exodiff_opts = '-steps last'
 
     prereq = 'test_grow_init_dt test_grow_init_dt_restart1'
   [../]
