@@ -101,15 +101,21 @@ TableOutput::outputScalarVariables()
   // Loop through each variable
   for (std::vector<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
   {
-    // Get reference to the variable and the no. of components
-    VariableValue & variable = _problem_ptr->getScalarVariable(0, *it).sln();
-    unsigned int n = variable.size();
+    // Get reference to the variable (0 is for TID)
+    MooseVariableScalar & scalar_var = _problem_ptr->getScalarVariable(0, *it);
+
+    // Make sure the value of the variable is in sync with the solution vector
+    scalar_var.reinit();
+
+    VariableValue & value = scalar_var.sln();
+
+    unsigned int n = value.size();
 
     // If the variable has a single component, simply output the value with the name
     if (n == 1)
     {
-      _scalar_table.addData(*it, variable[0], time());
-      _all_data_table.addData(*it, variable[0], time());
+      _scalar_table.addData(*it, value[0], time());
+      _all_data_table.addData(*it, value[0], time());
     }
 
     // Multi-component variables are appended with the component index
@@ -118,8 +124,8 @@ TableOutput::outputScalarVariables()
       {
         std::ostringstream os;
         os << *it << "_" << i;
-        _scalar_table.addData(os.str(), variable[i], time());
-        _all_data_table.addData(os.str(), variable[i], time());
+        _scalar_table.addData(os.str(), value[i], time());
+        _all_data_table.addData(os.str(), value[i], time());
       }
   }
 }

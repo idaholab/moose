@@ -3120,13 +3120,34 @@ FEProblem::advanceState()
     _bnd_material_props.shift();
 }
 
-void FEProblem::restoreSolutions()
+void
+FEProblem::restoreSolutions()
 {
   _nl.restoreSolutions();
   _aux.restoreSolutions();
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+}
+
+void
+FEProblem::outputStep(ExecFlagType type)
+{
+  _nl.update();
+  _aux.update();
+  _app.getOutputWarehouse().outputStep(type);
+}
+
+void
+FEProblem::allowOutput(bool state)
+{
+  _app.getOutputWarehouse().allowOutput(state);
+}
+
+void
+FEProblem::forceOutput()
+{
+  _app.getOutputWarehouse().forceOutput();
 }
 
 Real

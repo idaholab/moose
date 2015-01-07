@@ -72,12 +72,6 @@ public:
   bool hasOutput(const std::string & name) const;
 
   /**
-   * Calls the outputStep method for each output object
-   * @param type The type execution flag (see Moose.h)
-   */
-  void outputStep(ExecFlagType type);
-
-  /**
    * Calls the meshChanged method for every output object
    */
   void meshChanged();
@@ -205,25 +199,30 @@ public:
    */
   std::ostringstream & consoleBuffer() { return _console_buffer; }
 
+private:
+
+  /**
+   * Calls the outputStep method for each output object
+   * @param type The type execution flag (see Moose.h)
+   *
+   * This is private, users should utilize FEProblem::outputStep()
+   */
+  void outputStep(ExecFlagType type);
+
   /**
    * Ability to enable/disable all output calls
-   *
-   * This is needed by RattleSNake/YAK to disable output because of the Yo Dawg executioners calling
-   * other executioners.
+   * This is private, users should utilize FEProblem::allowOutput()
+   * @see FEProblem::allowOutput()
    */
   void allowOutput(bool state);
 
   /**
    * Indicates that the next call to outputStep should be forced
-   *
-   * This is needed by the MultiApp system, if forceOutput is called the next call to outputStep,
-   * regardless of the type supplied to the call, will be executed with EXEC_FORCED.
-   *
-   * Forced output will NOT override the allowOutput flag
+   * This is private, users should utilize FEProblem::forceOutput()
+   * @see FEProblem::forceOutput()
    */
   void forceOutput();
 
-private:
   /**
    * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
    * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
@@ -332,7 +331,7 @@ private:
   bool _force_output;
 
   // Allow complete access:
-  //  (1) FEProblem for calling initial/timestepSetup functions
+  //  (1) FEProblem for calling initial, timestepSetup, outputStep, etc. methods
   //  (2) MaterialOutputAction for calling addInterfaceHideVariables
   //  (3) OutputInterface for calling addInterfaceHideVariables
   friend class FEProblem;
