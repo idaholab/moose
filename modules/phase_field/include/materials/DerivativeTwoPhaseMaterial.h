@@ -25,6 +25,7 @@ protected:
   virtual Real computeF();
   virtual Real computeDF(unsigned int);
   virtual Real computeD2F(unsigned int, unsigned int);
+  virtual Real computeD3F(unsigned int, unsigned int, unsigned int);
 
   /// Phase parameter (0=A-phase, 1=B-phase)
   VariableValue & _eta;
@@ -45,12 +46,14 @@ protected:
   const MaterialProperty<Real> & _h;
   const MaterialProperty<Real> & _dh;
   const MaterialProperty<Real> & _d2h;
+  const MaterialProperty<Real> & _d3h;
 
   // g(eta) switching function
   std::string _g_name;
   const MaterialProperty<Real> & _g;
   const MaterialProperty<Real> & _dg;
   const MaterialProperty<Real> & _d2g;
+  const MaterialProperty<Real> & _d3g;
 
   /// Phase transformatuion energy barrier
   Real _W;
