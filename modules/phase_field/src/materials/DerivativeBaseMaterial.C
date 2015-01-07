@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<DerivativeBaseMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addClassDescription("KKS model helper material to provide the free energy and its first and second derivatives");
+  params.addClassDescription("Material to provide a function (such as a free energy) and its derivatives w.r.t. the coupled variables");
   params.addParam<std::string>("f_name", "F", "Base name of the free energy function (used to name the material properties)");
   params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
   return params;
@@ -155,14 +155,6 @@ DerivativeBaseMaterial::initialSetup()
       }
     }
   }
-}
-
-// implementing this in the derived class is optional
-// (not really, but we'll have to check what is needed for the residuals!)
-Real
-DerivativeBaseMaterial::computeD3F(unsigned int /*arg1*/, unsigned int /*arg2*/, unsigned int /*arg3*/)
-{
-  return 0.0;
 }
 
 unsigned int
