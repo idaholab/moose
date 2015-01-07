@@ -22,6 +22,15 @@
 //Forward Declarations
 class PointSamplerBase;
 
+// libMesh Forward Declarations
+namespace libMesh
+{
+  namespace MeshTools
+  {
+    class BoundingBox;
+  }
+}
+
 template<>
 InputParameters validParams<PointSamplerBase>();
 
@@ -52,6 +61,11 @@ protected:
    */
   const Elem * getLocalElemContainingPoint(const Point & p, unsigned int /*id*/);
 
+  /**
+   * Gets a processor_bounding_box... and inflates it a bit to handle edge cases
+   */
+  MeshTools::BoundingBox getInflatedProcessorBoundingBox();
+
   /// The Mesh we're using
   MooseMesh & _mesh;
 
@@ -61,8 +75,11 @@ protected:
   /// The ID to use for each point (yes, this is Real on purpose)
   std::vector<Real> _ids;
 
-  /// So we don't have to create and destroy this vector over and over again
-  std::vector<Real> _values;
+  /// Map of _points indices to the values
+  std::map<unsigned int, std::vector<Real> > _values;
+
+  /// Whether or not the Point was found on this processor (int because bool and uint don't work with MPI wrappers)
+  std::vector<int> _found_points;
 
   unsigned int _qp;
 
