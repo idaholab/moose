@@ -2816,10 +2816,14 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
       mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
 
     for (unsigned int i=0; i<transfer_exec_flags.size(); ++i)
+    {
       if (multi_app_transfer->direction() == MultiAppTransfer::TO_MULTIAPP)
         _to_multi_app_transfers(transfer_exec_flags[i])[0].addTransfer(multi_app_transfer);
       else
         _from_multi_app_transfers(transfer_exec_flags[i])[0].addTransfer(multi_app_transfer);
+
+      _transfers(transfer_exec_flags[i])[0].addTransfer(multi_app_transfer);
+    }
   }
   else
   {
