@@ -32,6 +32,9 @@ InputParameters validParams<MaterialAuxBase<RealVectorValue> >();
 template<>
 InputParameters validParams<MaterialAuxBase<RealTensorValue> >();
 
+template<>
+InputParameters validParams<MaterialAuxBase<DenseMatrix<Real> > >();
+
 /**
  * A base class for the various Material related AuxKernal objects
  */
