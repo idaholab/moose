@@ -37,10 +37,12 @@ DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
     _h(getMaterialProperty<Real>(_h_name)),
     _dh(getMaterialPropertyDerivative<Real>(_h_name, _eta_name)),
     _d2h(getMaterialPropertyDerivative<Real>(_h_name, _eta_name, _eta_name)),
+    _d3h(getMaterialPropertyDerivative<Real>(_h_name, _eta_name, _eta_name, _eta_name)),
     _g_name(getParam<std::string>("g")),
     _g(getMaterialProperty<Real>(_h_name)),
     _dg(getMaterialPropertyDerivative<Real>(_g_name, _eta_name)),
     _d2g(getMaterialPropertyDerivative<Real>(_g_name, _eta_name, _eta_name)),
+    _d3g(getMaterialPropertyDerivative<Real>(_g_name, _eta_name, _eta_name, _eta_name)),
     _W(getParam<Real>("W")),
     _prop_Fa(getMaterialProperty<Real>(_fa_name)),
     _prop_Fb(getMaterialProperty<Real>(_fb_name))
@@ -118,4 +120,31 @@ DerivativeTwoPhaseMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
     return _dh[_qp] * ((*_prop_dFb[i])[_qp] - (*_prop_dFa[i])[_qp]);
 
   return _h[_qp] * (*_prop_d2Fb[i][j])[_qp] + (1.0 - _h[_qp]) * (*_prop_d2Fa[i][j])[_qp];
+}
+
+Real
+DerivativeTwoPhaseMaterial::computeD3F(unsigned int i_var, unsigned int j_var, unsigned int k_var)
+{
+  if (i_var == _eta_var && j_var == _eta_var && k_var == _eta_var)
+    return _d3h[_qp] * (_prop_Fb[_qp] - _prop_Fa[_qp]) + _W * _d3g[_qp];
+
+  unsigned int i = argIndex(i_var);
+  unsigned int j = argIndex(j_var);
+  unsigned int k = argIndex(k_var);
+
+  if (j_var == _eta_var && k_var == _eta_var)
+    return _d2h[_qp] * ((*_prop_dFb[i])[_qp] - (*_prop_dFa[i])[_qp]);
+  if (i_var == _eta_var && k_var == _eta_var)
+    return _d2h[_qp] * ((*_prop_dFb[j])[_qp] - (*_prop_dFa[j])[_qp]);
+  if (i_var == _eta_var && j_var == _eta_var)
+    return _d2h[_qp] * ((*_prop_dFb[k])[_qp] - (*_prop_dFa[k])[_qp]);
+
+  if (i_var == _eta_var)
+    return _dh[_qp] * (*_prop_d2Fb[j][k])[_qp] + (1.0 - _dh[_qp]) * (*_prop_d2Fa[j][k])[_qp];
+  if (j_var == _eta_var)
+    return _dh[_qp] * (*_prop_d2Fb[i][k])[_qp] + (1.0 - _dh[_qp]) * (*_prop_d2Fa[i][k])[_qp];
+  if (k_var == _eta_var)
+    return _dh[_qp] * (*_prop_d2Fb[i][j])[_qp] + (1.0 - _dh[_qp]) * (*_prop_d2Fa[i][j])[_qp];
+
+  return _h[_qp] * (*_prop_d3Fb[i][j][k])[_qp] + (1.0 - _h[_qp]) * (*_prop_d3Fa[i][j][k])[_qp];
 }
