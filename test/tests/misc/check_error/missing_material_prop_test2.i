@@ -46,18 +46,24 @@
 
 [Materials]
   [./mat11]
-    type = Diff1Material
+    type = GenericConstantMaterial
     block = 1
+    prop_names =  'diff1'
+    prop_values = '1'
   [../]
 
   [./mat12]
-    type = Diff2Material
+    type = GenericConstantMaterial
     block = 1
+    prop_names =  'diff2'
+    prop_values = '1'
   [../]
 
   [./mat22]
-    type = Diff2Material
+    type = GenericConstantMaterial
     block = 2
+    prop_names =  'diff2'
+    prop_values = '1'
   [../]
 []
 

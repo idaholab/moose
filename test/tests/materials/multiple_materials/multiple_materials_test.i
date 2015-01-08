@@ -24,7 +24,6 @@
 []
 
 [AuxVariables]
-active = 'diff1 diff2'
   [./diff1]
     order = CONSTANT
     family = MONOMIAL
@@ -37,8 +36,6 @@ active = 'diff1 diff2'
 []
 
 [Kernels]
-  active = 'diff1 diff2'
-
   [./diff1]
     type = DiffMKernel
     variable = u
@@ -53,7 +50,6 @@ active = 'diff1 diff2'
 []
 
 [AuxKernels]
-active = 'diff1 diff2'
   [./diff1]
     type = MaterialRealAux
     variable = diff1
@@ -68,8 +64,6 @@ active = 'diff1 diff2'
 []
 
 [BCs]
-  active = 'left_u right_u left_v right_v'
-
   # Mesh Generation produces boundaries in counter-clockwise fashion
   [./left_u]
     type = DirichletBC
@@ -101,18 +95,18 @@ active = 'diff1 diff2'
 []
 
 [Materials]
-  active = 'dm1 dm2'
-
   [./dm1]
-    type = Diff1Material
+    type = GenericConstantMaterial
     block = 0
-    diff = 2
+    prop_names =  'diff1'
+    prop_values = '2'
   [../]
 
   [./dm2]
-    type = Diff2Material
+    type = GenericConstantMaterial
     block = 0
-    diff = 4
+    prop_names =  'diff2'
+    prop_values = '4'
   [../]
 []
 
