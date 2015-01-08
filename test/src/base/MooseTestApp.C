@@ -147,6 +147,7 @@
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
+#include "TestSerializedSolution.h"
 #include "InsideValuePPS.h"
 #include "BoundaryValuePPS.h"
 #include "NumInternalSides.h"
@@ -405,6 +406,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
+  registerPostprocessor(TestSerializedSolution);
   registerPostprocessor(BoundaryValuePPS);
   registerPostprocessor(NumInternalSides);
   registerPostprocessor(NumElemQPs);
