@@ -143,6 +143,7 @@
 #include "TrackDiracFront.h"
 #include "BoundaryUserObject.h"
 #include "TestBoundaryRestrictableAssert.h"
+#include "GetMaterialPropertyBoundaryBlockNamesTest.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -400,6 +401,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(TrackDiracFront);
   registerUserObject(BoundaryUserObject);
   registerUserObject(TestBoundaryRestrictableAssert);
+  registerUserObject(GetMaterialPropertyBoundaryBlockNamesTest);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
