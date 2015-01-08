@@ -27,7 +27,7 @@ void SimpleEigenStrainMaterial::computeEigenStrain()
 
   // first derivative w.r.t. c
   _deigenstrain_dc[_qp].zero();
-  _deigenstrain_dc[_qp].addIa(_epsilon0);
+  _deigenstrain_dc[_qp].addIa(-_epsilon0); // actually delastic_strain/dc
 
   // second derivative w.r.t. c (vanishes)
   _d2eigenstrain_dc2[_qp].zero();
