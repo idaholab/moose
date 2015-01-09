@@ -26,11 +26,11 @@ void SimpleEigenStrainMaterial::computeEigenStrain()
   _eigenstrain[_qp].addIa(_epsilon0 * (_c[_qp] - _c0));
 
   // first derivative w.r.t. c
-  _deigenstrain_dc[_qp].zero();
-  _deigenstrain_dc[_qp].addIa(-_epsilon0); // actually delastic_strain/dc
+  _delastic_strain_dc[_qp].zero();
+  _delastic_strain_dc[_qp].addIa(-_epsilon0); // delastic_strain/dc = -deigenstrain/dc
 
   // second derivative w.r.t. c (vanishes)
-  _d2eigenstrain_dc2[_qp].zero();
+  _d2elastic_strain_dc2[_qp].zero();
 }
 
 void SimpleEigenStrainMaterial::computeQpElasticityTensor()
