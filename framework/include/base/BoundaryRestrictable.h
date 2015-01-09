@@ -148,10 +148,13 @@ public:
   template<typename T>
   bool hasBoundaryMaterialProperty(const std::string & name) const;
 
+  /**
+   * Returns true if this object has been restricted to a boundary
+   */
   bool boundaryRestricted()
-    {
-      return _boundary_restricted;
-    }
+  {
+    return _boundary_restricted;
+  }
 
 private:
 

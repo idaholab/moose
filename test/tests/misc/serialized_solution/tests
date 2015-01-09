@@ -1,0 +1,17 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'serialized_solution.i'
+    exodiff = 'serialized_solution_out.e'
+  [../]
+  [./uniform_refine]
+    type = 'Exodiff'
+    input = 'uniform_refine.i'
+    exodiff = 'uniform_refine_out.e'
+  [../]
+  [./adapt]
+    type = 'Exodiff'
+    input = 'adapt.i'
+    exodiff = 'adapt_out.e-s003'
+  [../]
+[]

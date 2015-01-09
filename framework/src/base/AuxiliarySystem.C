@@ -50,8 +50,6 @@ AuxiliarySystem::~AuxiliarySystem()
 void
 AuxiliarySystem::init()
 {
-  if (_need_serialized_solution)
-    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
 }
 
 void
@@ -216,7 +214,15 @@ void
 AuxiliarySystem::serializeSolution()
 {
   if (_need_serialized_solution && _sys.n_dofs() > 0)            // libMesh does not like serializing of empty vectors
+  {
+    if (!_serialized_solution.initialized() || _serialized_solution.size() != _sys.n_dofs())
+    {
+      _serialized_solution.clear();
+      _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+    }
+
     solution().localize(_serialized_solution);
+  }
 }
 
 void

@@ -999,7 +999,7 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
     {
       ids.assign(_mesh_subdomains.begin(), _mesh_subdomains.end());
       if (i)
-        mooseWarning("You passed \"ANY_BLOCK_ID\" in addition to other sudomain_names.  This may be a logic error.");
+        mooseWarning("You passed \"ANY_BLOCK_ID\" in addition to other block names.  This may be a logic error.");
       break;
     }
 

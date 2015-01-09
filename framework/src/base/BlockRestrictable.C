@@ -60,9 +60,11 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
     // Get the IDs from the supplied names
     std::vector<SubdomainID> vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
 
-    // Create a set of IDS
-    for (std::vector<SubdomainID>::const_iterator it=vec_ids.begin(); it != vec_ids.end(); ++it)
-      _blk_ids.insert(*it);
+    // Store the IDs, handling ANY_BLOCK_ID if supplied
+    if (std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end())
+      _blk_ids.insert(Moose::ANY_BLOCK_ID);
+    else
+      _blk_ids.insert(vec_ids.begin(), vec_ids.end());
 
     // Check that supplied blocks are within the variable domain
     if (parameters.isParamValid("variable") &&
@@ -74,7 +76,7 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
 
       // Test if the variable blockIDs are valid for this object
       if (!isBlockSubset(var_ids))
-        mooseError("In object " << name << " the defined blocks are outside of the domain of the variable");
+         mooseError("In object " << name << " the defined blocks are outside of the domain of the variable");
     }
   }
 
