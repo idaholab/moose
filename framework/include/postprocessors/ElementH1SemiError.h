@@ -28,7 +28,7 @@ InputParameters validParams<ElementH1SemiError>();
 /**
  * This postprocessor will print out the h1 seminorm between the computed
  * solution and the passed function.
- * ||u,f||h1 is computed as sqrt( (grad u - grad f) * (grad u - grad f) )
+ * ||u-f||_{H^1} = sqrt( \int |grad u - grad f|^2 dx )
  */
 class ElementH1SemiError :
   public ElementIntegralVariablePostprocessor
