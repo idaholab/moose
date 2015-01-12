@@ -9,7 +9,7 @@ InputParameters validParams<TwoPhaseStressMaterial>()
   params.addParam<std::string>("h", "h", "Switching Function Material that provides h(eta)");
   params.addRequiredParam<std::string>("base_A", "Base name for the Phase A strain.");
   params.addRequiredParam<std::string>("base_B", "Base name for the Phase B strain.");
-  params.addParam<std::string>("base_name", "Base name for the Phase B strain.");
+  params.addParam<std::string>("base_name", "Base name for the computed global stress (optional).");
   return params;
 }
 

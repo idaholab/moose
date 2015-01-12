@@ -141,6 +141,7 @@
 #include "NodalSum.h"
 #include "ElementAverageValue.h"
 #include "ElementAverageTimeDerivative.h"
+#include "ElementW1pError.h"
 #include "ElementH1Error.h"
 #include "ElementH1SemiError.h"
 #include "ElementIntegralVariablePostprocessor.h"
@@ -504,6 +505,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalSum);
   registerPostprocessor(ElementAverageValue);
   registerPostprocessor(ElementAverageTimeDerivative);
+  registerPostprocessor(ElementW1pError);
   registerPostprocessor(ElementH1Error);
   registerPostprocessor(ElementH1SemiError);
   registerPostprocessor(ElementIntegralVariablePostprocessor);
