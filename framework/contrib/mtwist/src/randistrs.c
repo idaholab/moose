@@ -1,6 +1,11 @@
 #ifndef lint
-static char Rcs_Id[] =
-    "$Id: randistrs.c,v 1.10 2010-12-11 00:28:19+13 geoff Exp $";
+#ifdef __GNUC__
+#define ATTRIBUTE(attrs) __attribute__(attrs)
+#else
+#define ATTRIBUTE(attrs)
+#endif
+static char Rcs_Id[] ATTRIBUTE((used)) =
+    "$Id: randistrs.c,v 1.12 2013-01-05 01:18:52-08 geoff Exp $";
 #endif
 
 /*
@@ -50,7 +55,14 @@ static char Rcs_Id[] =
  * SUCH DAMAGE.
  *
  * $Log: randistrs.c,v $
- * Revision 1.10  2010-12-11 00:28:19+13  geoff
+ * Revision 1.12  2013-01-05 01:18:52-08  geoff
+ * Fix a lot of compiler warnings.  Allow rd_empirical_setup to take
+ * const arguments.
+ *
+ * Revision 1.11  2012-12-30 16:24:49-08  geoff
+ * Use gcc attributes to suppress warnings on Rcs_Id.
+ *
+ * Revision 1.10  2010-12-10 03:28:19-08  geoff
  * Rewrite the empirical-distribution interface to run in O(1) time and
  * to provide a continuous approximation to empirical distributions.
  *
@@ -90,124 +102,12 @@ static char Rcs_Id[] =
  *
  */
 
+#undef MT_GENERATE_CODE_IN_HEADER
+#define MT_GENERATE_CODE_IN_HEADER 0
 #include "mtwist.h"
 #include "randistrs.h"
 #include <math.h>
 #include <stdlib.h>
-
-/*
- * Table of contents:
- */
-int32_t			rds_iuniform(mt_state * state, int32_t lower,
-			  int32_t upper);
-					/* (Integer) uniform distribution */
-#ifdef INT64_MAX
-int64_t			rds_liuniform(mt_state * state, int64_t lower,
-			  int64_t upper);
-					/* (Integer) uniform distribution */
-#endif /* INT64_MAX */
-double			rds_uniform(mt_state * state,
-			  double lower, double upper);
-					/* (Floating) uniform distribution */
-double			rds_luniform(mt_state * state,
-			  double lower, double upper);
-					/* (Floating) uniform distribution */
-double			rds_exponential(mt_state * state, double mean);
-					/* Exponential distribution */
-double			rds_lexponential(mt_state * state, double mean);
-					/* Exponential distribution */
-double			rds_erlang(mt_state * state, int p, double mean);
-					/* p-Erlang distribution */
-double			rds_lerlang(mt_state * state, int p, double mean);
-					/* p-Erlang distribution */
-double			rds_weibull(mt_state * state,
-			  double shape, double scale);
-					/* Weibull distribution */
-double			rds_lweibull(mt_state * state,
-			  double shape, double scale);
-					/* Weibull distribution */
-double			rds_normal(mt_state * state,
-			  double mean, double sigma);
-					/* Normal distribution */
-double			rds_lnormal(mt_state * state,
-			  double mean, double sigma);
-					/* Normal distribution */
-double			rds_lognormal(mt_state * state,
-			  double shape, double scale);
-					/* Lognormal distribution */
-double			rds_llognormal(mt_state * state,
-			  double shape, double scale);
-					/* Lognormal distribution */
-double			rds_triangular(mt_state * state,
-			  double lower, double upper, double mode);
-					/* Triangular distribution */
-double			rds_ltriangular(mt_state * state,
-			  double lower, double upper, double mode);
-					/* Triangular distribution */
-size_t			rds_int_empirical(mt_state* state,
-			  rd_empirical_control* control);
-					/* Discrete integer empirical distr. */
-double			rds_double_empirical(mt_state* state,
-			  rd_empirical_control* control);
-					/* Discrete float empirical distr. */
-double			rds_continuous_empirical(mt_state* state,
-			  rd_empirical_control* control);
-					/* Continuous empirical distribution */
-int32_t			rd_iuniform(int32_t lower, int32_t upper);
-					/* (Integer) uniform distribution */
-#ifdef INT64_MAX
-int64_t			rd_liuniform(int64_t lower, int64_t upper);
-					/* (Integer) uniform distribution */
-#endif /* INT64_MAX */
-double			rd_uniform(double lower, double upper);
-					/* (Floating) uniform distribution */
-double			rd_luniform(double lower, double upper);
-					/* (Floating) uniform distribution */
-double			rd_exponential(double mean);
-					/* Exponential distribution */
-double			rd_lexponential(double mean);
-					/* Exponential distribution */
-double			rd_erlang(int p, double mean);
-					/* p-Erlang distribution */
-double			rd_lerlang(int p, double mean);
-					/* p-Erlang distribution */
-double			rd_weibull(double shape, double scale);
-					/* Weibull distribution */
-double			rd_lweibull(double shape, double scale);
-					/* Weibull distribution */
-double			rd_normal(double mean, double sigma);
-					/* Normal distribution */
-double			rd_lnormal(double mean, double sigma);
-					/* Normal distribution */
-double			rd_lognormal(double shape, double scale);
-					/* Lognormal distribution */
-double			rd_llognormal(double shape, double scale);
-					/* Lognormal distribution */
-double			rd_triangular(double lower, double upper, double mode);
-					/* Triangular distribution */
-double			rd_ltriangular(double lower, double upper, double mode);
-					/* Triangular distribution */
-rd_empirical_control*	rd_empirical_setup(size_t n_probs,
-			  double* probs, double* values);
-					/* Set up empirical distribution */
-void			rd_empirical_free(rd_empirical_control* control);
-					/* Free empirical control structure */
-size_t			rd_int_empirical(rd_empirical_control* control);
-					/* Discrete integer empirical distr. */
-double			rd_double_empirical(rd_empirical_control* control);
-					/* Discrete float empirical distr. */
-double			rd_continuous_empirical(rd_empirical_control* control);
-					/* Continuous empirical distribution */
-
-/*
- * The Mersenne Twist PRNG makes it default state available as an
- * external variable.  This feature is undocumented, but is useful to
- * use because it allows us to avoid implementing every function
- * twice.  (In fact, the feature was added to enable this file to be
- * written.  It would be better to write in C++, where I could control
- * the access to the state.)
- */
-extern mt_state		mt_default_state;
 
 /*
  * Threshold below which it is OK for uniform integer distributions to make
@@ -982,8 +882,8 @@ double rd_ltriangular(
  */
 rd_empirical_control* rd_empirical_setup(
     size_t		n_probs,	/* Number of probabilities provide */
-    double*		probs,		/* Probability (weight) table */
-    double*		values)		/* Value for floating distributions */
+    const double*	probs,		/* Probability (weight) table */
+    const double*	values)		/* Value for floating distributions */
     {
     rd_empirical_control* control;	/* Control structure we'll build */
     size_t		i;		/* General loop index */

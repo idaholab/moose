@@ -1,0 +1,55 @@
+MTWIST CHANGE LOG
+
+    WARNING OF INCORRECT OUTPUT AND INCOMPATIBLE CHANGE: Versions of
+    mtwist prior to 1.4 contained a bug that affects the random
+    sequence generated if any of mt_llrand, mts_llrand, mt_ldrand, or
+    mts_ldrand were used.  Versions prior to 1.4 generated sequences
+    with an incorrectly short cycle (repeating approximately every 20
+    billion random numbers).  They also had a probablity of saving
+    incorrect state if mt_savestate or mts_savestate was called.
+
+    Versions 1.4 and above may generate different sequences than prior
+    versions if any of these functions are used.  If you are depending
+    on reproducible PRNG sequences, you must decide whether to use the
+    older versions for repeatability, or the newer ones for
+    correctness.
+
+VERSION 1.5, 23-Jan-2014
+
+    - The second argument to gettimeofday is obsolete and, in modern
+      libraries, must be given as NULL.  Since mtwist never used the
+      second argument anyway, this correction has no run-time effect.
+
+VERSION 1.4, 12-Jun-2013
+
+    - INCOMPATIBLE CHANGE: correct a memory access error that resulted
+      in incorrectly short cycles if mt_llrand or mt_ldrand was used.
+
+VERSION 1.3, 11-Jun-2013
+
+    - Try to fall back to /dev/random if /dev/urandom doesn't exist.
+    - rd_empirical_setup now correctly declares its arguments as const.
+    - Get rid of many compiler warnings.
+
+VERSION 1.2, 30-Dec-2012
+
+    - Make 32-bit autoseeders return the seeds used, for reproducibility.
+    - Fix excess entropy usage in seeding functions.
+    - Include unit tests in distribution.
+    - Fix GCC warnings on Rcs_Id.
+    - Fix GCC warnings on table of contents.
+    - (Thanks to Markus Armbruster for all the above changes.)
+    - INCOMPATIBLE CHANGE: correct a memory access error that resulted
+      in incorrectly short cycles if mts_llrand or mts_ldrand was used.
+
+VERSION 1.1, 11-Dec-2010
+
+    - Fix inlining problems that prevented compilation under popular
+      Windows compilers.
+    - Rewrite empirical-distribution functions to use O(1) algorithm
+      (incompatible change; old programs that used empirical
+      distributions will need modification before they will compile).
+
+VERSION 1.0, 24-Jun-2010
+
+    - First production release.

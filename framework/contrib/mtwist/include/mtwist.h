@@ -2,7 +2,7 @@
 #define MTWIST_H
 
 /*
- * $Id: mtwist.h,v 1.20 2010-12-11 00:28:18+13 geoff Exp $
+ * $Id: mtwist.h,v 1.24 2012-12-31 22:22:03-08 geoff Exp $
  *
  * Header file for C/C++ use of the Mersenne-Twist pseudo-RNG.  See
  * http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html for full
@@ -41,7 +41,24 @@
  * Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  * $Log: mtwist.h,v $
- * Revision 1.20  2010-12-11 00:28:18+13  geoff
+ * Revision 1.24  2012-12-31 22:22:03-08  geoff
+ * Fix the out-of-bounds bug in mt_llrand and mt_ldrand that were
+ * overlooked because I assumed they used mts_*.
+ *
+ * Revision 1.23  2013-01-01 01:18:52-08  geoff
+ * Fix a lot of compiler warnings.
+ *
+ * Revision 1.22  2012-12-30 16:24:49-08  geoff
+ * Declare the new versions of the /dev/random and urandom seeding
+ * functions, which now return the seed chosen.
+ *
+ * Revision 1.21  2012-09-23 23:15:40-07  geoff
+ * Fix an array index violation found by valgrind and reported by David
+ * Chapman; under some circumstances statevec[-1] could be accessed and
+ * used in random-number generation.  The bug only affects the *_llrand
+ * and *_ldrand functions.
+ *
+ * Revision 1.20  2010-12-10 03:28:18-08  geoff
  * Add support for GENERATE_CODE_IN_HEADER.  Fix the URL for the original
  * Web page.
  *
@@ -181,17 +198,19 @@ extern void		mts_seed32new(mt_state* state, uint32_t seed);
 extern void		mts_seedfull(mt_state* state,
 			  uint32_t seeds[MT_STATE_SIZE]);
 					/* Set complicated seed for any gen. */
-extern void		mts_seed(mt_state* state);
+extern uint32_t		mts_seed(mt_state* state);
 					/* Choose seed from random input. */
 					/* ..Prefers /dev/urandom; uses time */
 					/* ..if /dev/urandom unavailable. */
 					/* ..Only gives 32 bits of entropy. */
-extern void		mts_goodseed(mt_state* state);
+					/* ..Returns seed usable with seed32 */
+extern uint32_t		mts_goodseed(mt_state* state);
 					/* Choose seed from more random */
 					/* ..input than mts_seed.  Prefers */
 					/* ../dev/random; uses time if that */
 					/* ..is unavailable.  Only gives 32 */
 					/* ..bits of entropy. */
+					/* ..Returns seed usable with seed32 */
 extern void		mts_bestseed(mt_state* state);
 					/* Choose seed from extremely random */
 					/* ..input (can be *very* slow). */
@@ -218,11 +237,11 @@ extern void		mt_seed32new(uint32_t seed);
 					/* Set random seed for default gen. */
 extern void		mt_seedfull(uint32_t seeds[MT_STATE_SIZE]);
 					/* Set complicated seed for default */
-extern void		mt_seed(void);	/* Choose seed from random input. */
+extern uint32_t		mt_seed(void);	/* Choose seed from random input. */
 					/* ..Prefers /dev/urandom; uses time */
 					/* ..if /dev/urandom unavailable. */
 					/* ..Only gives 32 bits of entropy. */
-extern void		mt_goodseed(void);
+extern uint32_t		mt_goodseed(void);
 					/* Choose seed from more random */
 					/* ..input than mts_seed.  Prefers */
 					/* ../dev/random; uses time if that */
@@ -251,44 +270,6 @@ extern int		mt_loadstate(FILE* statefile);
 #endif
 
 /*
- * C++ just takes multiple inline definitions
- * Legacy GCC requires one non-inline definition and any number of inline definitions
- * C99 requires one "extern inline" declaration and any number of inline definitions
- */
-#ifdef MT_GENERATE_CODE_IN_HEADER /* defined at this point in the file only once (by mtwist.c) */
-# if defined(__cplusplus)
-#  define MT_EXTERN
-#  define MT_IMPLEXTERN
-# elif defined(__STDC__) && __STDC_VERSION__ >= 199901L
-#  define MT_EXTERN       extern
-#  define MT_IMPLEXTERN
-# else  /* GCC convention */
-#  define MT_EXTERN
-#  define MT_IMPLEXTERN
-# endif
-#else  /* do not want symbols */
-# if defined(__cplusplus)
-#  define MT_EXTERN
-#  define MT_IMPLEXTERN
-# elif defined(__STDC__) && __STDC_VERSION__ >= 199901L
-#  define MT_EXTERN
-#  define MT_IMPLEXTERN
-# else  /* GCC convention */
-#  define MT_EXTERN       extern
-#  define MT_IMPLEXTERN   extern
-# endif
-#endif /* MT_GENERATE_CODE_IN_HEADER */
-
-/*
- * Make it possible for mtwist.c to disable the inline keyword.  We
- * use our own keyword so that we don't interfere with inlining in
- * C/C++ header files, above.
- */
-#ifndef MT_INLINE
-#define MT_INLINE	inline		/* Compiler has inlining */
-#endif /* MT_INLINE */
-
-/*
  * Functions for generating random numbers.  The actual code of the
  * functions is given in this file so that it can be declared inline.
  * For compilers that don't have the inline feature, mtwist.c will
@@ -299,28 +280,28 @@ extern int		mt_loadstate(FILE* statefile);
 #ifdef __cplusplus
 #endif /* __cplusplus */
 
-MT_EXTERN MT_INLINE uint32_t		mts_lrand(mt_state* state);
+extern uint32_t		mts_lrand(mt_state* state);
 					/* Generate 32-bit value, any gen. */
 #ifdef UINT64_MAX
-MT_EXTERN MT_INLINE uint64_t		mts_llrand(mt_state* state);
+extern uint64_t		mts_llrand(mt_state* state);
 					/* Generate 64-bit value, any gen. */
 #endif /* UINT64_MAX */
-MT_EXTERN MT_INLINE double		mts_drand(mt_state* state);
+extern double		mts_drand(mt_state* state);
 					/* Generate floating value, any gen. */
 					/* Fast, with only 32-bit precision */
-MT_EXTERN MT_INLINE double		mts_ldrand(mt_state* state);
+extern double		mts_ldrand(mt_state* state);
 					/* Generate floating value, any gen. */
 					/* Slower, with 64-bit precision */
 
-MT_EXTERN MT_INLINE uint32_t		mt_lrand(void);	/* Generate 32-bit random value */
+extern uint32_t		mt_lrand(void);	/* Generate 32-bit random value */
 #ifdef UINT64_MAX
-MT_EXTERN MT_INLINE uint64_t		mt_llrand(void);
+extern uint64_t		mt_llrand(void);
 					/* Generate 64-bit random value */
 #endif /* UINT64_MAX */
-MT_EXTERN MT_INLINE double		mt_drand(void);
+extern double		mt_drand(void);
 					/* Generate floating value */
 					/* Fast, with only 32-bit precision */
-MT_EXTERN MT_INLINE double		mt_ldrand(void);
+extern double		mt_ldrand(void);
 					/* Generate floating value */
 					/* Slower, with 64-bit precision */
 
@@ -370,12 +351,42 @@ MT_EXTERN MT_INLINE double		mt_ldrand(void);
 	}								\
 	while (0)
 
+/*
+ * The Mersenne Twist PRNG makes it default state available as an
+ * external variable.  This feature is undocumented, but is useful to
+ * use because it allows us to avoid implementing every randistr function
+ * twice.  (In fact, the feature was added to enable randistrs.c to be
+ * written.  It would be better to write in C++, where I could control
+ * the access to the state.)
+ */
 extern mt_state		mt_default_state;
 					/* State of the default generator */
 extern double		mt_32_to_double;
 					/* Multiplier to convert long to dbl */
 extern double		mt_64_to_double;
 					/* Mult'r to cvt long long to dbl */
+
+/*
+ * In gcc, inline functions must be declared extern or they'll produce
+ * assembly code (and thus linking errors).  We have to work around
+ * that difficulty with the MT_EXTERN define.
+ */
+#ifndef MT_EXTERN
+#ifdef __cplusplus
+#define MT_EXTERN			/* C++ doesn't need static */
+#else /* __cplusplus */
+#define MT_EXTERN	extern		/* C (at least gcc) needs extern */
+#endif /* __cplusplus */
+#endif /* MT_EXTERN */
+
+/*
+ * Make it possible for mtwist.c to disable the inline keyword.  We
+ * use our own keyword so that we don't interfere with inlining in
+ * C/C++ header files, above.
+ */
+#ifndef MT_INLINE
+#define MT_INLINE	inline		/* Compiler has inlining */
+#endif /* MT_INLINE */
 
 /*
  * Try to guess whether the compiler is one (like gcc) that requires
@@ -401,10 +412,10 @@ extern double		mt_64_to_double;
  * the pseudorandom numbers are generated in batches of MT_STATE_SIZE.  This
  * saves the cost of a modulus operation in the critical path.
  */
-MT_IMPLEXTERN MT_INLINE uint32_t mts_lrand(
+MT_EXTERN MT_INLINE uint32_t mts_lrand(
     register mt_state*	state)		/* State for the PRNG */
     {
-     uint32_t	random_value;	/* Pseudorandom value generated */
+    register uint32_t	random_value;	/* Pseudorandom value generated */
 
     if (state->stateptr <= 0)
 	mts_refresh(state);
@@ -430,11 +441,11 @@ MT_IMPLEXTERN MT_INLINE uint32_t mts_lrand(
  * optimize it out.  Doing so would be messy, since it would require two
  * nearly-identical internal implementations of mts_lrand.
  */
-MT_IMPLEXTERN MT_INLINE uint64_t mts_llrand(
-     mt_state*	state)		/* State for the PRNG */
+MT_EXTERN MT_INLINE uint64_t mts_llrand(
+    register mt_state*	state)		/* State for the PRNG */
     {
-     uint32_t	random_value_1;	/* 1st pseudorandom value generated */
-     uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
+    register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
+    register uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
 
     /*
      * For maximum speed, we'll handle the two overflow cases
@@ -455,7 +466,7 @@ MT_IMPLEXTERN MT_INLINE uint64_t mts_llrand(
 	    }
 	}
     else
-	random_value_1 = state->statevec[--state->stateptr];
+	random_value_1 = state->statevec[state->stateptr];
 
     MT_TEMPER(random_value_1);
 
@@ -472,10 +483,10 @@ MT_IMPLEXTERN MT_INLINE uint64_t mts_llrand(
  * (exclusive).  This function is optimized for speed, but it only generates
  * 32 bits of precision.  Use mts_ldrand to get 64 bits of precision.
  */
-MT_IMPLEXTERN MT_INLINE double mts_drand(
-     mt_state*	state)		/* State for the PRNG */
+MT_EXTERN MT_INLINE double mts_drand(
+    register mt_state*	state)		/* State for the PRNG */
     {
-     uint32_t	random_value;	/* Pseudorandom value generated */
+    register uint32_t	random_value;	/* Pseudorandom value generated */
 
     if (state->stateptr <= 0)
 	mts_refresh(state);
@@ -491,14 +502,14 @@ MT_IMPLEXTERN MT_INLINE double mts_drand(
  * (exclusive).  This function generates 64 bits of precision.  Use
  * mts_drand for more speed but less precision.
  */
-MT_IMPLEXTERN MT_INLINE double mts_ldrand(
-     mt_state*	state)		/* State for the PRNG */
+MT_EXTERN MT_INLINE double mts_ldrand(
+    register mt_state*	state)		/* State for the PRNG */
     {
 #ifdef UINT64_MAX
     uint64_t		final_value;	/* Final (integer) value */
 #endif /* UINT64_MAX */
-     uint32_t	random_value_1;	/* 1st pseudorandom value generated */
-     uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
+    register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
+    register uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
 
     /*
      * For maximum speed, we'll handle the two overflow cases
@@ -519,7 +530,7 @@ MT_IMPLEXTERN MT_INLINE double mts_ldrand(
 	    }
 	}
     else
-	random_value_1 = state->statevec[--state->stateptr];
+	random_value_1 = state->statevec[state->stateptr];
 
     MT_TEMPER(random_value_1);
 
@@ -540,9 +551,9 @@ MT_IMPLEXTERN MT_INLINE double mts_ldrand(
  *
  * See mts_lrand for full commentary.
  */
-MT_IMPLEXTERN MT_INLINE uint32_t mt_lrand()
+MT_EXTERN MT_INLINE uint32_t mt_lrand(void)
     {
-     uint32_t	random_value;	/* Pseudorandom value generated */
+    register uint32_t	random_value;	/* Pseudorandom value generated */
 
     if (mt_default_state.stateptr <= 0)
 	mts_refresh(&mt_default_state);
@@ -560,10 +571,10 @@ MT_IMPLEXTERN MT_INLINE uint32_t mt_lrand()
  *
  * See mts_llrand for full commentary.
  */
-MT_IMPLEXTERN MT_INLINE uint64_t mt_llrand()
+MT_EXTERN MT_INLINE uint64_t mt_llrand(void)
     {
-     uint32_t	random_value_1;	/* 1st pseudorandom value generated */
-     uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
+    register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
+    register uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
 
     /*
      * For maximum speed, we'll handle the two overflow cases
@@ -586,8 +597,7 @@ MT_IMPLEXTERN MT_INLINE uint64_t mt_llrand()
 	    }
 	}
     else
-	random_value_1 =
-	  mt_default_state.statevec[--mt_default_state.stateptr];
+	random_value_1 = mt_default_state.statevec[mt_default_state.stateptr];
 
     MT_TEMPER(random_value_1);
 
@@ -604,9 +614,9 @@ MT_IMPLEXTERN MT_INLINE uint64_t mt_llrand()
  * (exclusive).  This function is optimized for speed, but it only generates
  * 32 bits of precision.  Use mt_ldrand to get 64 bits of precision.
  */
-MT_IMPLEXTERN MT_INLINE double mt_drand()
+MT_EXTERN MT_INLINE double mt_drand(void)
     {
-     uint32_t	random_value;	/* Pseudorandom value generated */
+    register uint32_t	random_value;	/* Pseudorandom value generated */
 
     if (mt_default_state.stateptr <= 0)
 	mts_refresh(&mt_default_state);
@@ -622,13 +632,13 @@ MT_IMPLEXTERN MT_INLINE double mt_drand()
  * (exclusive).  This function generates 64 bits of precision.  Use
  * mts_drand for more speed but less precision.
  */
-MT_IMPLEXTERN MT_INLINE double mt_ldrand(void)
+MT_EXTERN MT_INLINE double mt_ldrand(void)
     {
 #ifdef UINT64_MAX
     uint64_t		final_value;	/* Final (integer) value */
 #endif /* UINT64_MAX */
-     uint32_t	random_value_1;	/* 1st pseudorandom value generated */
-     uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
+    register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
+    register uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
 
     /*
      * For maximum speed, we'll handle the two overflow cases
@@ -651,8 +661,7 @@ MT_IMPLEXTERN MT_INLINE double mt_ldrand(void)
 	    }
 	}
     else
-	random_value_1 =
-	  mt_default_state.statevec[--mt_default_state.stateptr];
+	random_value_1 = mt_default_state.statevec[mt_default_state.stateptr];
 
     MT_TEMPER(random_value_1);
 
@@ -695,14 +704,14 @@ class mt_prng
 			    state.stateptr = 0;
 			    state.initialized = 0;
 			    if (pickSeed)
-				mts_seed(&state);
+				(void)mts_seed(&state);
 			    }
-			mt_prng(uint32_t seed)
+			mt_prng(uint32_t newseed)
 					// Construct with 32-bit seeding
 			    {
 			    state.stateptr = 0;
 			    state.initialized = 0;
-			    mts_seed32(&state, seed);
+			    mts_seed32(&state, newseed);
 			    }
 			mt_prng(uint32_t seeds[MT_STATE_SIZE])
 					// Construct with full seeding
@@ -720,28 +729,28 @@ class mt_prng
 	/*
 	 * PRNG seeding functions.
 	 */
-	void		seed32(uint32_t seed)
+	void		seed32(uint32_t newseed)
 					// Set 32-bit random seed
 			    {
-			    mts_seed32(&state, seed);
+			    mts_seed32(&state, newseed);
 			    }
-	void		seed32new(uint32_t seed)
+	void		seed32new(uint32_t newseed)
 					// Set 32-bit random seed
 			    {
-			    mts_seed32new(&state, seed);
+			    mts_seed32new(&state, newseed);
 			    }
 	void		seedfull(uint32_t seeds[MT_STATE_SIZE])
 					// Set complicated random seed
 			    {
 			    mts_seedfull(&state, seeds);
 			    }
-	void		seed()		// Choose seed from random input
+	uint32_t	seed()		// Choose seed from random input
 			    {
-			    mts_seed(&state);
+			    return mts_seed(&state);
 			    }
-	void		goodseed()	// Choose better seed from random input
+	uint32_t	goodseed()	// Choose better seed from random input
 			    {
-			    mts_goodseed(&state);
+			    return mts_goodseed(&state);
 			    }
 	void		bestseed()	// Choose best seed from random input
 			    {

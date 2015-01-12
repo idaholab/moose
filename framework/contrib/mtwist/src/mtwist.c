@@ -1,6 +1,11 @@
 #ifndef lint
-static char Rcs_Id[] =
-    "$Id: mtwist.c,v 1.23 2010-12-11 00:28:18+13 geoff Exp $";
+#ifdef __GNUC__
+#define ATTRIBUTE(attrs) __attribute__(attrs)
+#else
+#define ATTRIBUTE(attrs)
+#endif
+static char Rcs_Id[] ATTRIBUTE((used)) =
+    "$Id: mtwist.c,v 1.28 2014-01-23 21:11:42-08 geoff Exp $";
 #endif
 
 /*
@@ -43,6 +48,28 @@ static char Rcs_Id[] =
  * Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  * $Log: mtwist.c,v $
+ * Revision 1.28  2014-01-23 21:11:42-08  geoff
+ * Fix an obsolete gettimeofday call
+ *
+ * Revision 1.27  2013-06-12 23:22:03-07  geoff
+ * Validity-check state pointer when saving.
+ *
+ * Revision 1.26  2013-01-01 01:18:52-08  geoff
+ * Fix a lot of comiler warnings.  Try to fall back to /dev/random if
+ * /dev/urandom doesn't exist.
+ *
+ * Revision 1.25  2012-12-30 16:24:49-08  geoff
+ * Use gcc attributes to suppress warnings on Rcs_Id.  Also get rid of
+ * most of the table of contents, to suppress a different gcc warning.
+ * Fix mts_seed and mts_goodseed to return the 32-bit seeds they chose.
+ * Fix all three /dev/Xrandom seeding functions to use only the entropy
+ * they need, rather than letting stdio eat far more than necessary.
+ * (Thanks to Markus Armbruster for all three ideas.)
+ *
+ * Revision 1.24  2011-02-18 00:49:12-08  geoff
+ * Fix a (harmless) typecasting error in mts_bestseed.  Thanks to Waclaw
+ * Kusnierczyk for pointing it out.
+ *
  * Revision 1.23  2010-12-11 00:28:18+13  geoff
  * Add support for GENERATE_CODE_IN_HEADER.  Fix the URL for the original
  * Web page.
@@ -169,63 +196,20 @@ static char Rcs_Id[] =
  * resides in that file rather than here.  We need to arrange for the
  * code to be compiled into this .o file, either because inlines
  * aren't supported or because somebody might want to take a pointer
- * to a function.  This define causes mtwist.h to produce symbols.
+ * to a function.  We do so with a couple of careful #defines.
  */
+#define MT_INLINE			/* Disable the inline keyword */
+#define MT_EXTERN			/* Generate real code for functions */
 #undef MT_GENERATE_CODE_IN_HEADER
 #define MT_GENERATE_CODE_IN_HEADER 1	/* Generate code when #including */
 
 #include "mtwist.h"
 
 /*
- * Table of contents:
+ * Table of (non-global) contents:
  */
-void			mts_mark_initialized(mt_state* state);
-					/* Mark a PRNG state as initialized */
-void			mts_seed32(mt_state* state, uint32_t seed);
-					/* Set random seed for any generator */
-void			mts_seed32new(mt_state* state, uint32_t seed);
-					/* Set random seed for any generator */
-void			mts_seedfull(mt_state* state,
-			  uint32_t seeds[MT_STATE_SIZE]);
-					/* Set complicated seed for any gen. */
-void			mts_seed(mt_state* state);
-					/* Choose seed from random input */
-void			mts_goodseed(mt_state* state);
-					/* Choose seed from more random */
-					/* ..input than mts_seed */
-static void		mts_devseed(mt_state* state, char* seed_dev);
+static uint32_t		mts_devseed(mt_state* state, char* seed_dev);
 					/* Choose seed from a device */
-void			mts_bestseed(mt_state* state);
-					/* Choose seed from extremely random */
-					/* ..input (can be *very* slow) */
-void			mts_refresh(mt_state* state);
-					/* Generate 624 more random values */
-int			mts_savestate(FILE* statefile, mt_state* state);
-					/* Save state to a file (ASCII) */
-int			mts_loadstate(FILE* statefile, mt_state* state);
-					/* Load state from a file (ASCII) */
-
-void			mt_seed32(uint32_t seed);
-					/* Set random seed for default gen. */
-void			mt_seed32new(uint32_t seed);
-					/* Set random seed for default gen. */
-void			mt_seedfull(uint32_t seeds[MT_STATE_SIZE]);
-					/* Set complicated seed for default */
-void			mt_seed(void);	/* Choose seed from random input */
-void			mt_goodseed(void);
-					/* Choose seed from more random */
-					/* ..input than mts_seed */
-void			mt_bestseed(void);
-					/* Choose seed from extremely random */
-					/* ..input (can be *very* slow) */
-extern mt_state*	mt_getstate(void);
-					/* Get current state of default */
-					/* ..generator */
-int			mt_savestate(FILE* statefile);
-					/* Save state to a file (ASCII) */
-int			mt_loadstate(FILE* statefile);
-					/* Load state from a file (ASCII) */
-
 
 /*
  * The following values are fundamental parameters of the algorithm.
@@ -509,10 +493,10 @@ void mts_seedfull(
  * of the current time if /dev/urandom is not available.  In any case,
  * only provides 32 bits of entropy.
  */
-void mts_seed(
+uint32_t mts_seed(
     mt_state*		state)		/* State vector to seed */
     {
-    mts_devseed(state, DEVURANDOM);
+    return mts_devseed(state, DEVURANDOM);
     }
 
 /*
@@ -521,10 +505,10 @@ void mts_seed(
  * of the current time if /dev/random is not available.  In any case,
  * only provides 32 bits of entropy.
  */
-void mts_goodseed(
+uint32_t mts_goodseed(
     mt_state*		state)		/* State vector to seed */
     {
-    mts_devseed(state, DEVRANDOM);
+    return mts_devseed(state, DEVRANDOM);
     }
 
 /*
@@ -532,7 +516,7 @@ void mts_goodseed(
  * If that device can't be opened, use the lower 32 bits from the
  * current time.
  */
-static void mts_devseed(
+static uint32_t mts_devseed(
     mt_state*		state,		/* State vector to seed */
     char*		seed_dev)	/* Device to seed from */
     {
@@ -550,17 +534,24 @@ static void mts_devseed(
     struct _timeb	tb;		/* Time of day (Windows mode) */
 #else /* WIN32 */
     struct timeval	tv;		/* Time of day */
-    struct timezone	tz;		/* Dummy for gettimeofday */
 #endif /* WIN32 */
 
     ranfile = fopen(seed_dev, "rb");
+    /*
+     * Some machines have /dev/random but not /dev/urandom.  On those
+     * machines, /dev/random is nonblocking, so we'll try it before we
+     * fall back to using the time.
+     */
+    if (ranfile == NULL)
+	ranfile = fopen(DEVRANDOM, "rb");
     if (ranfile != NULL)
 	{
+	setbuf(ranfile, NULL);
 	for (nextbyte = 0;
 	  nextbyte < (int)sizeof randomunion.ranbuffer;
 	  nextbyte += bytesread)
 	    {
-	    bytesread = fread(&randomunion.ranbuffer[nextbyte], 1,
+	    bytesread = fread(&randomunion.ranbuffer[nextbyte], (size_t)1,
 	      sizeof randomunion.ranbuffer - nextbyte, ranfile);
 	    if (bytesread == 0)
 		break;
@@ -569,7 +560,7 @@ static void mts_devseed(
 	if (nextbyte == sizeof randomunion.ranbuffer)
 	    {
 	    mts_seed32new(state, randomunion.randomvalue);
-	    return;
+	    return randomunion.randomvalue;
 	    }
 	}
 
@@ -581,7 +572,7 @@ static void mts_devseed(
 #ifdef WIN32
     (void) _ftime (&tb);
 #else /* WIN32 */
-    (void) gettimeofday (&tv, &tz);
+    (void) gettimeofday (&tv, NULL);
 #endif /* WIN32 */
 
     /*
@@ -593,6 +584,7 @@ static void mts_devseed(
     randomunion.randomvalue = tv.tv_sec * 1000000 + tv.tv_usec;
 #endif /* WIN32 */
     mts_seed32new(state, randomunion.randomvalue);
+    return randomunion.randomvalue;
     }
 
 /*
@@ -622,7 +614,7 @@ void mts_bestseed(
       nextbyte < (int)sizeof state->statevec;
       nextbyte += bytesread)
 	{
-	bytesread = fread((char *)&state->statevec + nextbyte, 1,
+	bytesread = fread((char *)&state->statevec[0] + nextbyte, (size_t)1,
 	  sizeof state->statevec - nextbyte, ranfile);
 	if (bytesread == 0)
 	    {
@@ -634,6 +626,7 @@ void mts_bestseed(
 	    return;
 	    }
 	}
+    fclose(ranfile);
     }
 
 /*
@@ -816,6 +809,17 @@ int mts_savestate(
     if (!state->initialized)
 	mts_seed32(state, DEFAULT_SEED32_OLD);
 
+    /*
+     * Ensure the state pointer is valid.
+     */
+    if (state->stateptr < 0  ||  state->stateptr > MT_STATE_SIZE)
+	{
+	fprintf(stderr,
+	  "Mtwist internal: Trying to write invalid state pointer %d\n",
+	  state->stateptr);
+	mts_refresh(state);
+	}
+
     for (i = MT_STATE_SIZE;  --i >= 0;  )
 	{
 	if (fprintf(statefile, "%" PRIu32 " ", state->statevec[i]) < 0)
@@ -902,23 +906,23 @@ void mt_seedfull(
 /*
  * Initialize the PRNG from random input.  See mts_seed.
  */
-void mt_seed()
+uint32_t mt_seed(void)
     {
-    mts_seed(&mt_default_state);
+    return mts_seed(&mt_default_state);
     }
 
 /*
  * Initialize the PRNG from random input.  See mts_goodseed.
  */
-void mt_goodseed()
+uint32_t mt_goodseed(void)
     {
-    mts_goodseed(&mt_default_state);
+    return mts_goodseed(&mt_default_state);
     }
 
 /*
  * Initialize the PRNG from random input.  See mts_bestseed.
  */
-void mt_bestseed()
+void mt_bestseed(void)
     {
     mts_bestseed(&mt_default_state);
     }
@@ -929,7 +933,7 @@ void mt_bestseed()
  * restoration.  The state should not be modified; instead, it should
  * be reused later as a parameter to one of the mts_xxx functions.
  */
-extern mt_state* mt_getstate()
+mt_state* mt_getstate(void)
     {
     return &mt_default_state;
     }

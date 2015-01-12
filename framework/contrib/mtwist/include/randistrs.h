@@ -2,7 +2,7 @@
 #define RANDISTRS_H
 
 /*
- * $Id: randistrs.h,v 1.7 2010-12-11 00:28:19+13 geoff Exp $
+ * $Id: randistrs.h,v 1.8 2013-01-05 01:18:52-08 geoff Exp $
  *
  * Header file for C/C++ use of a generalized package that generates
  * random numbers in various distributions, using the Mersenne-Twist
@@ -158,7 +158,11 @@
  *		As above, using the default MT-PRNG.
  *
  * $Log: randistrs.h,v $
- * Revision 1.7  2010-12-11 00:28:19+13  geoff
+ * Revision 1.8  2013-01-05 01:18:52-08  geoff
+ * Fix a lot of compiler warnings.  Allow rd_empirical_setup to take
+ * const arguments.
+ *
+ * Revision 1.7  2010-12-10 03:28:19-08  geoff
  * Support the new empirical_distribution interface.
  *
  * Revision 1.6  2010-06-24 20:53:59+12  geoff
@@ -306,7 +310,7 @@ extern double		rd_ltriangular(double lower, double upper,
 			  double mode);	/* Triangular distribution */
 extern rd_empirical_control*
 			rd_empirical_setup(size_t n_probs,
-			  double* probs, double* values);
+			  const double* probs, const double* values);
 					/* Set up empirical distribution */
 extern void		rd_empirical_free(rd_empirical_control* control);
 					/* Free empirical control structure */
@@ -342,9 +346,9 @@ class mt_distribution : public mt_prng
 			    : mt_prng(pickSeed)
 			    {
 			    }
-			mt_distribution(uint32_t seed)
+			mt_distribution(uint32_t newseed)
 					// Construct with 32-bit seeding
-			    : mt_prng(seed)
+			    : mt_prng(newseed)
 			    {
 			    }
 			mt_distribution(uint32_t seeds[MT_STATE_SIZE])
@@ -460,12 +464,10 @@ class mt_empirical_distribution
 			throw std::invalid_argument(
 			  "values must be one longer than probs");
 		    c = rd_empirical_setup(probs.size(),
-			  (double*)&probs.front(),
-			  (double*)&values.front());
+			  &probs.front(), &values.front());
 		    }
 		mt_empirical_distribution(const std::vector<double>& probs)
-		    : c(rd_empirical_setup(probs.size(),
-			(double*)&probs.front(), NULL))
+		    : c(rd_empirical_setup(probs.size(), &probs.front(), NULL))
 		    {
 		    }
 		~mt_empirical_distribution()

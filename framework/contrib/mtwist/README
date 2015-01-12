@@ -23,10 +23,10 @@ page for information.
 void mt_seed32new(uint32_t seed)
     Seeds the generator from a 32-bit constant
 
-void mt_seed(void)
+uint32_t mt_seed(void)
     Automatically seeds from /dev/urandom or system time
 
-void mt_goodseed(void)
+uint32_t mt_goodseed(void)
     Automatically seeds from /dev/random or system time (can be slow)
 
 void mt_bestseed(void)
