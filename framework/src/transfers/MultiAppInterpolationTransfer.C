@@ -63,7 +63,10 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const std::string &
 void
 MultiAppInterpolationTransfer::initialSetup()
 {
-  variableIntegrityCheck(_to_var_name);
+  if (_direction == TO_MULTIAPP)
+    variableIntegrityCheck(_to_var_name);
+  else
+    variableIntegrityCheck(_from_var_name);
 }
 
 void
