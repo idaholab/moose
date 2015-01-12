@@ -18,28 +18,11 @@
 template<>
 InputParameters validParams<ElementH1Error>()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
-  params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
+  InputParameters params = validParams<ElementW1pError>();
   return params;
 }
 
 ElementH1Error::ElementH1Error(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(name, parameters),
-    _func(getFunction("function"))
+    ElementW1pError(name, parameters)
 {
-}
-
-Real
-ElementH1Error::getValue()
-{
-  return std::sqrt(ElementIntegralPostprocessor::getValue());
-}
-
-Real
-ElementH1Error::computeQpIntegral()
-{
-  RealGradient graddiff = _grad_u[_qp]-_func.gradient(_t, _q_point[_qp]);
-  Real         funcdiff = _u[_qp]-_func.value(_t, _q_point[_qp]);
-
-  return graddiff*graddiff + funcdiff*funcdiff;
 }
