@@ -45,3 +45,9 @@ InputParameters validParams<MaterialAuxBase<std::vector<Real> > >()
 {
   return validParams<MaterialAuxBase<Real> >();
 }
+
+template<>
+InputParameters validParams<MaterialAuxBase<DenseMatrix<Real> > >()
+{
+  return validParams<MaterialAuxBase<Real> >();
+}
