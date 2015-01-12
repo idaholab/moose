@@ -12,13 +12,63 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "StatefulRandomNumberGenTest.h"
+#include "MooseRandomTest.h"
+#include "MooseRandom.h"
+#include <iomanip>
 #include <cmath>
 
-CPPUNIT_TEST_SUITE_REGISTRATION( StatefulRandomNumberGenTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( MooseRandomTest );
 
 void
-StatefulRandomNumberGenTest::testRandomGen()
+MooseRandomTest::setUp()
+{
+  MooseRandom::seed(0);
+}
+
+void
+MooseRandomTest::tearDown()
+{
+}
+
+void
+MooseRandomTest::rand()
+{
+  Real rand_num = MooseRandom::rand();
+  CPPUNIT_ASSERT( std::abs(rand_num - 0.548813502442288) < 1e-15 );
+}
+
+void
+MooseRandomTest::randSeq()
+{
+  for (unsigned int i = 0; i < 10000; i++)
+    MooseRandom::rand();
+  Real rand_num = MooseRandom::rand();
+  CPPUNIT_ASSERT( std::abs(rand_num - 0.748267985) < 1e-10 );
+}
+
+void
+MooseRandomTest::randNormal()
+{
+  Real rand_num = MooseRandom::randNormal();
+  CPPUNIT_ASSERT( std::abs(rand_num - 1.16307809549063) < 1e-14 );
+}
+
+void
+MooseRandomTest::randNormal2()
+{
+  Real rand_num = MooseRandom::randNormal(0.25, 0.1);
+  CPPUNIT_ASSERT( std::abs(rand_num - 0.366307809549063) < 1e-15 );
+}
+
+void
+MooseRandomTest::randl()
+{
+  uint32_t rand_num = MooseRandom::randl();
+  CPPUNIT_ASSERT( std::abs(rand_num - 2357136044) == 0 );
+}
+
+void
+MooseRandomTest::states()
 {
   MooseRandom mrand;
 
