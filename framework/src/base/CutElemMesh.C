@@ -1853,18 +1853,18 @@ void CutElemMesh::findCrackTipElements()
 
   //Debug: print MergedEdgeMap
   std::map<std::set<node_t*>, std::set<element_t*> >::iterator memit;
-  std::cout<<"BWS mergededgemap:"<<std::endl;
-  for (memit = MergedEdgeMap.begin(); memit != MergedEdgeMap.end(); ++memit)
-  {
-    std::cout<<"Elems: ";
-    std::set<element_t*> conn_elems = memit->second;
-    std::set<element_t*>::iterator setit;
-    for (setit = conn_elems.begin(); setit != conn_elems.end(); ++setit)
-    {
-      std::cout<<(*setit)->id<<" ";
-    }
-    std::cout<<std::endl;
-  }
+  //std::cout<<"MergedEdgeMap:"<<std::endl;
+  //for (memit = MergedEdgeMap.begin(); memit != MergedEdgeMap.end(); ++memit)
+  //{
+  //  std::cout<<"Elems: ";
+  //  std::set<element_t*> conn_elems = memit->second;
+  //  std::set<element_t*>::iterator setit;
+  //  for (setit = conn_elems.begin(); setit != conn_elems.end(); ++setit)
+  //  {
+  //    std::cout<<(*setit)->id<<" ";
+  //  }
+  //  std::cout<<std::endl;
+  //}
 
   //Go through MergedEdgeMap to find elements that are newly at the crack tip due to
   //crack growth.
@@ -1910,12 +1910,12 @@ void CutElemMesh::findCrackTipElements()
       }
     }
   }
-  std::cout<<"Crack tip elements: ";
-  for (sit=CrackTipElements.begin(); sit!=CrackTipElements.end(); ++sit)
-  {
-    std::cout<<(*sit)->id<<" ";
-  }
-  std::cout<<std::endl;
+  //std::cout<<"Crack tip elements: ";
+  //for (sit=CrackTipElements.begin(); sit!=CrackTipElements.end(); ++sit)
+  //{
+  //  std::cout<<(*sit)->id<<" ";
+  //}
+  //std::cout<<std::endl;
 }
 
 void CutElemMesh::printMesh()
