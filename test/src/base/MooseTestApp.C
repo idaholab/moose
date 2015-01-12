@@ -92,8 +92,7 @@
 
 // Materials
 #include "MTMaterial.h"
-#include "Diff1Material.h"
-#include "Diff2Material.h"
+#include "TypesMaterial.h"
 #include "StatefulMaterial.h"
 #include "SpatialStatefulMaterial.h"
 #include "ComputingInitialTest.h"
@@ -337,8 +336,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Materials
   registerMaterial(MTMaterial);
-  registerMaterial(Diff1Material);
-  registerMaterial(Diff2Material);
+  registerMaterial(TypesMaterial);
   registerMaterial(StatefulMaterial);
   registerMaterial(SpatialStatefulMaterial);
   registerMaterial(ComputingInitialTest);
