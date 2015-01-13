@@ -516,6 +516,20 @@ void FEProblem::initialSetup()
   _transfers(EXEC_INITIAL)[0].initialSetup();
   _transfers(EXEC_CUSTOM)[0].initialSetup();
 
+  _to_multi_app_transfers(EXEC_LINEAR)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_NONLINEAR)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_TIMESTEP_END)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_INITIAL)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_CUSTOM)[0].initialSetup();
+
+  _from_multi_app_transfers(EXEC_LINEAR)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_NONLINEAR)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_TIMESTEP_END)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_INITIAL)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_CUSTOM)[0].initialSetup();
+
   if (!_app.isRecovering())
   {
     _aux.compute(EXEC_TIMESTEP_BEGIN);
@@ -2816,14 +2830,10 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
       mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
 
     for (unsigned int i=0; i<transfer_exec_flags.size(); ++i)
-    {
       if (multi_app_transfer->direction() == MultiAppTransfer::TO_MULTIAPP)
         _to_multi_app_transfers(transfer_exec_flags[i])[0].addTransfer(multi_app_transfer);
       else
         _from_multi_app_transfers(transfer_exec_flags[i])[0].addTransfer(multi_app_transfer);
-
-      _transfers(transfer_exec_flags[i])[0].addTransfer(multi_app_transfer);
-    }
   }
   else
   {
