@@ -26,7 +26,7 @@ public:
    virtual double  Pdf(std::vector<double> x) = 0;                              ///< Pdf function at coordinate x
    virtual double  Cdf(std::vector<double> x) = 0;                              ///< Cdf function at coordinate x
    //virtual std::vector<double> InverseCdf(double min, double max) = 0;
-   virtual std::vector<double> InverseCdf(double F, double tolerance, int initial_divisions=10) = 0;
+   virtual std::vector<double> InverseCdf(double F, double tolerance, int initial_divisions=2) = 0;
 
    std::string & getType();
 
@@ -79,7 +79,7 @@ public:
   };
 
   std::vector<double>
-  InverseCdf(double F, double tolerance, int initial_divisions=10)
+  InverseCdf(double F, double tolerance, int initial_divisions=2)
   {
    return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
       //return _interpolator.NDinverseFunction(min, max);

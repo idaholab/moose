@@ -42,7 +42,7 @@ NDSpline::NDSpline(std::string filename, std::vector<double> alfa, std::vector<d
      _cellDxs.push_back(_discretizations[i][_discretizations[i].size()-1]-_discretizations[i][0]);
     }
 
- std::cerr << "ND spline completed initialization" << std::endl;
+ std::cout << "ND spline completed initialization" << std::endl;
 }
 
 

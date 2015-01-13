@@ -20,8 +20,8 @@ InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double 
  _point_coordinates = pointCoordinates;
  _p = p;
  _completed_init = true;
-        _cellPoint0.resize(dimensions);
-        _cellDxs.resize(dimensions);
+ _cellPoint0.resize(dimensions);
+ _cellDxs.resize(dimensions);
 
  // Functions do determine:
     //   * std::vector<double> _cellPoint0;
@@ -32,7 +32,7 @@ InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double 
 
  for (int d=0; d<_dimensions; d++){
   _cellPoint0[d]  = _point_coordinates[0][d];
-     cellPointInf[d] = _point_coordinates[0][d];
+  cellPointInf[d] = _point_coordinates[0][d];
  }
 
  for (int n=1; n<_number_of_points; n++)
@@ -72,7 +72,7 @@ double InverseDistanceWeighting::interpolateAt(std::vector<double> point){
    weightsCumulativeSum = 1;
    break;
   } else {
-            weights[i]= std::pow(1.0/minkowskiDistance(point, _point_coordinates[i],_p),_dimensions+1);
+   weights[i]= std::pow(1.0/minkowskiDistance(point, _point_coordinates[i],_p),_dimensions+1);
    weightsCumulativeSum += weights[i];
    value += weights[i] * _values[i];
   }
