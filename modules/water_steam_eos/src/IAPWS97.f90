@@ -150,7 +150,7 @@ contains
 
 !------------------------------------------------------------------------
 
-logical function cowat(t,p,d,h)
+recursive logical function cowat(t,p,d,h)
 
   ! Density d and internal energy u of liquid water as a function of
   ! temperature t (deg C) and pressure p (Pa).
@@ -255,7 +255,7 @@ end function cowat
 
 !------------------------------------------------------------------------
 
-logical function supst(t,p,d,h)
+recursive logical function supst(t,p,d,h)
 
   ! Density d and internal energy u of dry steam as a function of
   ! temperature t (deg C) and pressure p (Pa)
@@ -388,7 +388,7 @@ end function supst
 
 !------------------------------------------------------------------------
 
-logical function super(d,t,p,h)
+recursive logical function super(d,t,p,h)
 
   ! Pressure p and internal energy u of supercritical water/steam
   ! as a function of density d and temperature t (deg C).
@@ -470,7 +470,7 @@ end function super
 
 !------------------------------------------------------------------------
 
-logical function sat(t,p)
+recursive logical function sat(t,p)
 
   ! Saturation pressure as a function of temperature.
 
@@ -504,7 +504,7 @@ end function sat
 
 !------------------------------------------------------------------------
 
-double precision function visc(rho,t)
+recursive double precision function visc(rho,t)
 
   ! Calculates dynamic viscosity of water or steam, given the density
   ! rho and temperature t, using the IAPWS industrial formulation 2008.
@@ -570,7 +570,7 @@ end function visc
 
 !------------------------------------------------------------------------
 
-logical function tsat(p,t)
+recursive logical function tsat(p,t)
 
   ! Saturation temperature (deg C) as a function of pressure.
 
@@ -604,7 +604,7 @@ end function tsat
 
 !-----------------------------------------------------------------------
 
-double precision function b23p(t)
+recursive double precision function b23p(t)
 
   ! Returns the pressure on the boundary between regions 2 and 3,
   ! given a temperature t (deg C).
@@ -623,7 +623,7 @@ end function b23p
 
 !-----------------------------------------------------------------------
 
-double precision function b23t(p)
+recursive double precision function b23t(p)
 
   ! Returns the temperature on the boundary between regions 2 and 3,
   ! given a pressure p (Pa).
