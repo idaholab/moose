@@ -516,6 +516,7 @@ unsigned int CutElemMesh::addElements( std::vector< std::vector<unsigned int> > 
         currNode = mit->second;
       }
       newElem->nodes[j] = currNode;
+      InverseConnectivityMap[currNode].insert(newElem);
     }
   }
   return first_id;
@@ -543,6 +544,7 @@ CutElemMesh::element_t* CutElemMesh::addElement( std::vector<unsigned int> quad,
       currNode = mit->second;
     }
     newElem->nodes[j] = currNode;
+    InverseConnectivityMap[currNode].insert(newElem);
   }
   return newElem;
 }
@@ -563,12 +565,19 @@ void CutElemMesh::updateEdgeNeighbors()
     element_t* curr_elem = eit->second;
     std::vector<node_t*> nodes;
 
-    std::map<unsigned int, element_t*>::iterator eit2;
-    for (eit2 = Elements.begin(); eit2 != Elements.end(); ++eit2)
+    std::set<element_t*> neighbor_elements;
+    for (unsigned int inode=0; inode<curr_elem->num_nodes; ++inode)
     {
-      if (eit2 != eit)
+      std::set<element_t*> this_node_connected_elems = InverseConnectivityMap[curr_elem->nodes[inode]];
+      neighbor_elements.insert(this_node_connected_elems.begin(), this_node_connected_elems.end());
+    }
+
+    std::set<element_t*>::iterator eit2;
+    for (eit2 = neighbor_elements.begin(); eit2 != neighbor_elements.end(); ++eit2)
+    {
+      if (*eit2 != curr_elem)
       {
-        element_t *neigh_elem = eit2->second;
+        element_t *neigh_elem = *eit2;
         std::vector<node_t*> common_nodes;
 
         std::set<node_t*> curr_elem_nodes;
@@ -1068,6 +1077,7 @@ void CutElemMesh::reset()
   ParentElements.clear();
   MergedEdgeMap.clear();
   CrackTipElements.clear();
+  InverseConnectivityMap.clear();
 
   std::map<unsigned int, node_t*>::iterator mit;
   for (mit = PermanentNodes.begin(); mit != PermanentNodes.end(); ++mit )
@@ -1098,6 +1108,7 @@ void CutElemMesh::reset()
 
 void CutElemMesh::clearAncestry()
 {
+  InverseConnectivityMap.clear();
   for (unsigned int i=0; i<ParentElements.size(); ++i)
   {
     if (!deleteFromMap(Elements, ParentElements[i]))
@@ -1114,6 +1125,11 @@ void CutElemMesh::clearAncestry()
     element_t *curr_elem = eit->second;
     curr_elem->parent=NULL;
     curr_elem->children.clear();
+    for (unsigned int j=0; j != curr_elem->num_nodes; j++)
+    {
+      node_t *curr_node = curr_elem->nodes[j];
+      InverseConnectivityMap[curr_node].insert(curr_elem);
+    }
   }
 
   for (unsigned int i=0; i<PermanentNodes.size(); ++i)

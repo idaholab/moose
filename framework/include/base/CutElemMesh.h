@@ -228,7 +228,7 @@ class CutElemMesh
   std::vector< node_t* > NewNodes;
   std::vector< element_t* > ChildElements;
   std::vector< element_t* > ParentElements;
-
+  std::map< node_t*, std::set< element_t *> > InverseConnectivityMap;
 };
 
 #endif // #ifndef CUTELEM_MESH_H
