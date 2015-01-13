@@ -165,7 +165,7 @@ MOOSE is struggling with.
   preconditioners and ksp methods.  I typically use one of:
 \begin{enumerate}
 \item {\tt -ksp\_type=gmres -pc\_type=bjacobi}
-\item {\tt -ksp\_type=gmres -pc\_type=asm -sub\_pc\_type=lu}
+\item {\tt -ksp\_type=gmres -pc\_type=asm -sub\_pc\_type=lu -sub\_pc\_factor\_shift\_type=NONZERO}
 \end{enumerate}
 \end{itemize}
 
