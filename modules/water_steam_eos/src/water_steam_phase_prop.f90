@@ -1,5 +1,5 @@
 
- Subroutine wateos_PH(p, h, T, dw, hx, energyscale, tolerance, ierr)
+recursive Subroutine wateos_PH(p, h, T, dw, hx, energyscale, tolerance, ierr)
    use IAPWS97, only : cowat
 
   implicit none
@@ -94,7 +94,7 @@
 
 !*************************************************************
 
-  subroutine water_steam_prop_PH(p, h, T, Sw, &
+recursive subroutine water_steam_prop_PH(p, h, T, Sw, &
     Den,Denw, Dens, &
     hw, hs, dDendh, dDendp,  dhwdh,dhsdh,&
     dTdh, dswdh, ierror, dhwdp, dhsdp,dTdp)
@@ -123,11 +123,11 @@
   real*8 dTdp
   logical succ
 
-  real*8 arg1, arg2 ! 
+  real*8 arg1, arg2 !
 
   arg1 = 1.0D-14
   arg2 = 1.0D-14
-  
+
   call  water_steam_prop_PH_ex(p, h, T, Sw, &
     Den,Denw, Dens, &
     hw, hs, dDendh, dDendp,  dhwdh,dhsdh,&
@@ -143,7 +143,7 @@ end subroutine water_steam_prop_PH
 !*************************************************************
 ! Subroutine water_steam_prop_PH_ex
 !-------------------------------------------------------------
-  subroutine water_steam_prop_PH_ex(p, h, T, Sw, &
+recursive subroutine water_steam_prop_PH_ex(p, h, T, Sw, &
     Den,Denw, Dens, &
     hw, hs, dDendh, dDendp,  dhwdh,dhsdh,&
     dTdh, dswdh, ierror, dhwdp, dhsdp,dTdp, arg1, arg2)
@@ -165,7 +165,7 @@ end subroutine water_steam_prop_PH
   real*8 dw, dwmol
   real*8 dg, dgmol, dgp,dgt,hg,hgp,hgt
   integer ierr
-  integer :: iphase = 0
+  integer :: iphase
   real*8 delp, delh
   real*8 dw0, dw1, hw0,hw1, sw0, sw1
   real*8 dg0, dg1, hg0,hg1, h1
@@ -331,7 +331,7 @@ dhsdp=(hg1-hg0)/delp
 !*************************************************************
 ! Subroutine water_steam_prop_PH
 !-------------------------------------------------------------
- subroutine water_steam_prop_PH_noderiv(p, h, T, Sw, &
+recursive subroutine water_steam_prop_PH_noderiv(p, h, T, Sw, &
     Den,Denw, Dens, hw, hs,visw,viss,ierror)
    use IAPWS97, only : cowat, supst, tsat, visc
   implicit none
