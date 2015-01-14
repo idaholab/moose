@@ -108,6 +108,7 @@ public:
 
   /**
    * Returns the desired radial direction for RZ coordinate transformation
+   * @return The coordinate direction for the radial direction
    */
   unsigned int getAxisymmetricRadialCoord();
 

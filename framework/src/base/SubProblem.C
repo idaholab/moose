@@ -348,7 +348,7 @@ unsigned int
 SubProblem::getAxisymmetricRadialCoord()
 {
   if (_rz_coord_axis == 0)
-    return 1;
+    return 1; // if the rotation axis is x (0), then the radial direction is y (1)
   else
-    return 0;
+    return 0; // otherwise the radial direction is assumed to be x, i.e., the rotation axis is y
 }
