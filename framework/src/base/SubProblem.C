@@ -31,7 +31,8 @@ InputParameters validParams<SubProblem>()
 SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
     Problem(name, parameters),
     _factory(_app.getFactory()),
-    _restartable_data(libMesh::n_threads())
+    _restartable_data(libMesh::n_threads()),
+    _rz_coord_axis(1) // default to RZ rotation around y-axis
 {
   unsigned int n_threads = libMesh::n_threads();
   _real_zero.resize(n_threads, 0.);
@@ -341,4 +342,13 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
     else
       mooseError("No material defined on " + type + " " + check_name);
   }
+}
+
+unsigned int
+SubProblem::getAxisymmetricRadialCoord()
+{
+  if (_rz_coord_axis == 0)
+    return 1; // if the rotation axis is x (0), then the radial direction is y (1)
+  else
+    return 0; // otherwise the radial direction is assumed to be x, i.e., the rotation axis is y
 }
