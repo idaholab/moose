@@ -111,6 +111,7 @@ public:
 
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid);
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
+  void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
 
   /**
    * Set the coupling between variables
