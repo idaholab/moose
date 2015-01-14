@@ -28,6 +28,7 @@
 class CutElemMesh
 {
   public:
+  class element_t;
 
   enum N_CATEGORY
   {
@@ -66,9 +67,21 @@ class CutElemMesh
   class fragment
   {
     public:
-    std::vector< node_t*> boundary_nodes;
-  };
+    fragment(element_t * host)
+    {
+      host_elem = host;
+    };
 
+    //Construct a fragment from another fragment.  If convert_to_local is true,
+    //convert the nodes to local nodes, otherwise convert them to global nodes.
+    fragment(const fragment & other_frag, element_t * host, bool convert_to_local);
+
+    //The destructor must delete any local nodes
+    ~fragment();
+
+    std::vector< node_t*> boundary_nodes;
+    element_t * host_elem;
+  };
 
   class element_t
   {
@@ -87,7 +100,11 @@ class CutElemMesh
       crack_tip_split_element(false)
     {};
 
-    ~element_t(){};
+    ~element_t()
+    {
+      for (unsigned int i=0; i<fragments.size(); ++i)
+        delete fragments[i];
+    };
 
     void
     switchNode(node_t *new_node,
@@ -128,6 +145,12 @@ class CutElemMesh
     //connected to a face where a crack terminates, but will extend.
     bool should_duplicate_for_crack_tip();
 
+    //Given a global node, create a new local node
+    node_t * create_local_node_from_global_node(const node_t * global_node);
+
+    //Given a local node, find the global node corresponding to that node
+    node_t * get_global_node_from_local_node(const node_t * local_node);
+
     //id
     unsigned int id;
     unsigned int num_nodes;
@@ -143,7 +166,7 @@ class CutElemMesh
     //neighbors on edge
     std::vector<std::vector<element_t*> >edge_neighbors;
     //fragments
-    std::vector< fragment > fragments;
+    std::vector< fragment*> fragments;
     //set of children
     std::vector< element_t* > children;
     //special case at crack tip

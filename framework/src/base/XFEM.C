@@ -108,9 +108,9 @@ XFEMCutElem::save_fragment_info(const CutElemMesh::element_t * const elem)
     libMesh::err << " ERROR: In save_fragment_info New elements must have 1 interior link"<<std::endl;
     exit(1);
   }
-  for (unsigned int i=0; i<elem->fragments[0].boundary_nodes.size(); ++i)
+  for (unsigned int i=0; i<elem->fragments[0]->boundary_nodes.size(); ++i)
   {
-    CutElemMesh::node_t * node = elem->fragments[0].boundary_nodes[i];
+    CutElemMesh::node_t * node = elem->fragments[0]->boundary_nodes[i];
     if (node->category == CutElemMesh::N_CATEGORY_EMBEDDED)
     {
       bool found_edge(false);

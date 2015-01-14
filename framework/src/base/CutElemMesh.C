@@ -13,6 +13,7 @@
 /****************************************************************/
 
 //TODO:
+//Fix CutElemMeshError -- doesn't print out message when run in MOOSE
 //Clean up error checking in (!found_edge)
 //Save fragment for uncut element ahead of crack tip to avoid renumbering if only embedded node
 //Improve overlays_elem() check to not pass in edge
@@ -32,6 +33,55 @@
 
 #include "CutElemMesh.h"
 
+CutElemMesh::fragment::fragment(const fragment & other_frag,
+                                element_t * host,
+                                bool convert_to_local)
+{
+  host_elem = host;
+  boundary_nodes.resize(other_frag.boundary_nodes.size());
+  if (convert_to_local)
+  {
+    //convert from global to local indices if needed
+    for (unsigned int i=0; i<other_frag.boundary_nodes.size(); ++i)
+    {
+      if (other_frag.boundary_nodes[i]->category == N_CATEGORY_PERMANENT || 
+          other_frag.boundary_nodes[i]->category == N_CATEGORY_TEMP)
+      {
+        if (!other_frag.host_elem)
+          CutElemMeshError("In fragment::fragment() fragment constructing from must have a valid host_elem to convert from global to local nodes");
+        boundary_nodes[i] = other_frag.host_elem->create_local_node_from_global_node(other_frag.boundary_nodes[i]);
+      }
+      else
+      {
+        boundary_nodes[i] = other_frag.boundary_nodes[i];
+      }
+    }
+  }
+  else
+  {
+    //convert from local to global indices if needed
+    for (unsigned int i=0; i<other_frag.boundary_nodes.size(); ++i)
+    {
+      if (other_frag.boundary_nodes[i]->category != N_CATEGORY_PERMANENT &&
+          other_frag.boundary_nodes[i]->category != N_CATEGORY_TEMP)
+        boundary_nodes[i] = host->get_global_node_from_local_node(other_frag.boundary_nodes[i]);
+      else
+        boundary_nodes[i] = other_frag.boundary_nodes[i];
+    }
+  }
+};
+
+CutElemMesh::fragment::~fragment()
+{
+  for (unsigned int i=0; i<boundary_nodes.size(); ++i)
+  {
+    if (boundary_nodes[i]->category == N_CATEGORY_LOCAL_INDEX)
+    {
+      delete boundary_nodes[i];
+      boundary_nodes[i] = NULL;
+    }
+  }
+}
 
 void
 CutElemMesh::element_t::switchNode(node_t *new_node,
@@ -47,11 +97,11 @@ CutElemMesh::element_t::switchNode(node_t *new_node,
   }
   for (unsigned int i=0; i<fragments.size(); ++i)
   {
-    for (unsigned int j=0; j<fragments[i].boundary_nodes.size(); ++j)
+    for (unsigned int j=0; j<fragments[i]->boundary_nodes.size(); ++j)
     {
-      if (fragments[i].boundary_nodes[j] == old_node)
+      if (fragments[i]->boundary_nodes[j] == old_node)
       {
-        fragments[i].boundary_nodes[j] = new_node;
+        fragments[i]->boundary_nodes[j] = new_node;
       }
     }
   }
@@ -88,11 +138,11 @@ CutElemMesh::element_t::switchEmbeddedNode(node_t *new_node,
   }
   for (unsigned int i=0; i<fragments.size(); ++i)
   {
-    for (unsigned int j=0; j<fragments[i].boundary_nodes.size(); ++j)
+    for (unsigned int j=0; j<fragments[i]->boundary_nodes.size(); ++j)
     {
-      if (fragments[i].boundary_nodes[j] == old_node)
+      if (fragments[i]->boundary_nodes[j] == old_node)
       {
-        fragments[i].boundary_nodes[j] = new_node;
+        fragments[i]->boundary_nodes[j] = new_node;
       }
     }
   }
@@ -110,9 +160,9 @@ CutElemMesh::element_t::is_partial()
   for (unsigned int i=0; i<num_nodes; i++)
   {
     bool node_in_fragment = false;
-    for (unsigned int j=0; j<fragments[0].boundary_nodes.size(); ++j)
+    for (unsigned int j=0; j<fragments[0]->boundary_nodes.size(); ++j)
     {
-      if (nodes[i] == fragments[0].boundary_nodes[j])
+      if (nodes[i] == fragments[0]->boundary_nodes[j])
       {
         node_in_fragment = true;
         break;
@@ -357,9 +407,9 @@ CutElemMesh::element_t::get_non_physical_nodes(std::set<node_t*> &non_physical_n
 
   for (unsigned int i=0; i<fragments.size(); ++i)
   {
-    for (unsigned int j=0; j<fragments[i].boundary_nodes.size(); ++j)
+    for (unsigned int j=0; j<fragments[i]->boundary_nodes.size(); ++j)
     {
-      fragment_nodes.insert(fragments[i].boundary_nodes[j]);
+      fragment_nodes.insert(fragments[i]->boundary_nodes[j]);
     }
   }
 
@@ -432,6 +482,43 @@ CutElemMesh::element_t::should_duplicate_for_crack_tip()
     }
   }
   return should_duplicate;
+}
+
+CutElemMesh::node_t *
+CutElemMesh::element_t::create_local_node_from_global_node(const node_t * global_node)
+{
+  if (global_node->category != N_CATEGORY_PERMANENT &&
+      global_node->category != N_CATEGORY_TEMP)
+    CutElemMeshError("In create_local_node_from_global_node node is not global");
+
+  node_t * new_local_node = NULL;
+  unsigned int inode = 0;
+  for (; inode < nodes.size(); ++inode)
+  {
+    if (nodes[inode] == global_node)
+    {
+      new_local_node = new node_t(inode, N_CATEGORY_LOCAL_INDEX);
+      break;
+    }
+  }
+  if (!new_local_node)
+    CutElemMeshError("In create_local_node_from_global_node could not find global node");
+  return new_local_node;
+}
+
+CutElemMesh::node_t *
+CutElemMesh::element_t::get_global_node_from_local_node(const node_t * local_node)
+{
+  if (local_node->category != N_CATEGORY_LOCAL_INDEX)
+    CutElemMeshError("In get_global_node_from_local_node node passed in is not local");
+
+  node_t * global_node = nodes[local_node->id];
+
+  if (global_node->category != N_CATEGORY_PERMANENT &&
+      global_node->category != N_CATEGORY_TEMP)
+    CutElemMeshError("In get_global_node_from_local_node, the node stored by the element is not global");
+
+  return global_node;
 }
 
 CutElemMesh::CutElemMesh()
@@ -628,13 +715,13 @@ void CutElemMesh::updateEdgeNeighbors()
                 {
                   //Create a set of the link nodes in the current element
                   std::set<node_t*> curr_link_nodes;
-                  for (unsigned int l=0; l < curr_elem->fragments[0].boundary_nodes.size(); l++)
-                    curr_link_nodes.insert( curr_elem->fragments[0].boundary_nodes[l] );
+                  for (unsigned int l=0; l < curr_elem->fragments[0]->boundary_nodes.size(); l++)
+                    curr_link_nodes.insert( curr_elem->fragments[0]->boundary_nodes[l] );
 
                   //Create a set of the link nodes in the neighboring element
                   std::set<node_t*> neigh_link_nodes;
-                  for (unsigned int n=0; n < neigh_elem->fragments[0].boundary_nodes.size(); n++)
-                    neigh_link_nodes.insert( neigh_elem->fragments[0].boundary_nodes[n] );
+                  for (unsigned int n=0; n < neigh_elem->fragments[0]->boundary_nodes.size(); n++)
+                    neigh_link_nodes.insert( neigh_elem->fragments[0]->boundary_nodes[n] );
 
                   //Compare the sets of link nodes to see if more than one are common
                   std::vector<node_t*> common_nodes;
@@ -931,28 +1018,28 @@ void CutElemMesh::updatePhysicalLinksAndFragments()
 
     do //loop over link sets
     {
-      fragment new_frag;
+      fragment * new_frag = new fragment(curr_elem);
 
       do //loop over edges
       {
-        new_frag.boundary_nodes.push_back(curr_elem->nodes[iedge]);
+        new_frag->boundary_nodes.push_back(curr_elem->nodes[iedge]);
         if (iedge == cut_edges[icutedge])
         {
-          new_frag.boundary_nodes.push_back(curr_elem->embedded_nodes_on_edge[iedge]);
+          new_frag->boundary_nodes.push_back(curr_elem->embedded_nodes_on_edge[iedge]);
           if (cut_edges.size() == 2)
           {
             ++icutedge;
             if (icutedge == cut_edges.size())
               icutedge = 0;
             iedge = cut_edges[icutedge];
-            new_frag.boundary_nodes.push_back(curr_elem->embedded_nodes_on_edge[iedge]);
+            new_frag->boundary_nodes.push_back(curr_elem->embedded_nodes_on_edge[iedge]);
           }
         }
         ++iedge;
         if (iedge == num_edges)
           iedge = 0;
       }
-      while(new_frag.boundary_nodes[0] != curr_elem->nodes[iedge]);
+      while(new_frag->boundary_nodes[0] != curr_elem->nodes[iedge]);
 
       if (cut_edges.size() > 1)
       { //set the starting point for the loop over the other part of the element
@@ -991,11 +1078,11 @@ void CutElemMesh::physicalLinkAndFragmentSanityCheck(element_t *currElem)
   {
     num_emb.push_back(0);
     num_perm.push_back(0);
-    for (unsigned int j=0; j<currElem->fragments[i].boundary_nodes.size(); ++j)
+    for (unsigned int j=0; j<currElem->fragments[i]->boundary_nodes.size(); ++j)
     {
-      if (currElem->fragments[i].boundary_nodes[j]->category == N_CATEGORY_PERMANENT)
+      if (currElem->fragments[i]->boundary_nodes[j]->category == N_CATEGORY_PERMANENT)
         ++num_perm[i];
-      else if (currElem->fragments[i].boundary_nodes[j]->category == N_CATEGORY_EMBEDDED)
+      else if (currElem->fragments[i]->boundary_nodes[j]->category == N_CATEGORY_EMBEDDED)
         ++num_emb[i];
       else
       {
@@ -1007,7 +1094,7 @@ void CutElemMesh::physicalLinkAndFragmentSanityCheck(element_t *currElem)
   if (cut_edges.size() == 0)
   {
     if (currElem->fragments.size() != 1 ||
-        currElem->fragments[0].boundary_nodes.size() != num_edges)
+        currElem->fragments[0]->boundary_nodes.size() != num_edges)
     {
       CutElemMeshError("Incorrect link size for element with 0 cuts");
     }
@@ -1019,7 +1106,7 @@ void CutElemMesh::physicalLinkAndFragmentSanityCheck(element_t *currElem)
   else if (cut_edges.size() == 1)
   {
     if (currElem->fragments.size() != 1 ||
-        currElem->fragments[0].boundary_nodes.size() != num_edges+1)
+        currElem->fragments[0]->boundary_nodes.size() != num_edges+1)
     {
       CutElemMeshError("Incorrect link size for element with 1 cut");
     }
@@ -1031,7 +1118,7 @@ void CutElemMesh::physicalLinkAndFragmentSanityCheck(element_t *currElem)
   else if (cut_edges.size() == 2)
   {
     if (currElem->fragments.size() != 2 ||
-        (currElem->fragments[0].boundary_nodes.size()+currElem->fragments[1].boundary_nodes.size()) != num_edges+4)
+        (currElem->fragments[0]->boundary_nodes.size()+currElem->fragments[1]->boundary_nodes.size()) != num_edges+4)
     {
       CutElemMeshError("Incorrect link size for element with 2 cuts");
     }
@@ -1160,7 +1247,7 @@ void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
     CutElemMeshError("In restore_fragment_info Elements must not have any interior links");
   }
 
-  fragment new_frag;
+  fragment * new_frag = new fragment(elem);
 
   for (unsigned int i=0; i<interior_link.size(); ++i)
   {
@@ -1174,7 +1261,7 @@ void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
         CutElemMeshError("In restore_fragment_info could not find EmbeddedNode with id: "<<embedded_node_id);
       }
       node_t *node = mit->second;
-      new_frag.boundary_nodes.push_back(node);
+      new_frag->boundary_nodes.push_back(node);
     }
     else if (interior_link[i].first == N_CATEGORY_LOCAL_INDEX)
     {
@@ -1184,7 +1271,7 @@ void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
         CutElemMeshError("In restore_fragment_info node index out of bounds: "<<local_node_index);
       }
       node_t *node = elem->nodes[local_node_index];
-      new_frag.boundary_nodes.push_back(node);
+      new_frag->boundary_nodes.push_back(node);
     }
   }
   elem->fragments.push_back(new_frag);
@@ -1260,9 +1347,9 @@ void CutElemMesh::createChildElements()
         for (unsigned int j=0; j<num_nodes; j++)
         {
           bool node_in_fragment = false;
-          for (unsigned int k=0; k<curr_elem->fragments[ichild].boundary_nodes.size(); ++k)
+          for (unsigned int k=0; k<curr_elem->fragments[ichild]->boundary_nodes.size(); ++k)
           {
-            if (curr_elem->nodes[j] == curr_elem->fragments[ichild].boundary_nodes[k])
+            if (curr_elem->nodes[j] == curr_elem->fragments[ichild]->boundary_nodes[k])
             {
               node_in_fragment = true;
               break;
@@ -1281,10 +1368,10 @@ void CutElemMesh::createChildElements()
           }
         }
 
-        fragment new_frag;
-        for (unsigned int j=0; j<curr_elem->fragments[ichild].boundary_nodes.size(); ++j)
+        fragment * new_frag = new fragment(childElem);
+        for (unsigned int j=0; j<curr_elem->fragments[ichild]->boundary_nodes.size(); ++j)
         {
-          node_t * cur_link_node = curr_elem->fragments[ichild].boundary_nodes[j];
+          node_t * cur_link_node = curr_elem->fragments[ichild]->boundary_nodes[j];
           if (cur_link_node->category == N_CATEGORY_PERMANENT)
           {
             for (unsigned int k=0; k<num_nodes; ++k)
@@ -1292,18 +1379,18 @@ void CutElemMesh::createChildElements()
               if ((cur_link_node == childElem->nodes[k]) ||
                   (cur_link_node == childElem->nodes[k]->parent)) //BWS -- why would the link node be in the parent elem?
               {
-                new_frag.boundary_nodes.push_back(childElem->nodes[k]);
+                new_frag->boundary_nodes.push_back(childElem->nodes[k]);
                 break;
               }
             }
-            if (new_frag.boundary_nodes.size() != j+1)
+            if (new_frag->boundary_nodes.size() != j+1)
             {
               CutElemMeshError("Could not find link node in child elem nodes or their parents");
             }
           }
           else if (cur_link_node->category == N_CATEGORY_EMBEDDED)
           {
-            new_frag.boundary_nodes.push_back(cur_link_node);
+            new_frag->boundary_nodes.push_back(cur_link_node);
           }
           else
           {
@@ -1388,8 +1475,8 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
           {
             //set up the sets according to the links
             std::set<node_t*> child_link_nodes;
-            for (unsigned int l=0; l < childElem->fragments[0].boundary_nodes.size(); l++)
-              child_link_nodes.insert( childElem->fragments[0].boundary_nodes[l] );
+            for (unsigned int l=0; l < childElem->fragments[0]->boundary_nodes.size(); l++)
+              child_link_nodes.insert( childElem->fragments[0]->boundary_nodes[l] );
 
             for (unsigned int l=0; l < NeighborElem[j][k]->children.size(); l++)
             {
@@ -1414,8 +1501,8 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
 
               //construct this set
               std::set<node_t*> neigh_link_nodes;
-              for (unsigned int n=0; n < childOfNeighborElem->fragments[0].boundary_nodes.size(); n++)
-                neigh_link_nodes.insert( childOfNeighborElem->fragments[0].boundary_nodes[n] );
+              for (unsigned int n=0; n < childOfNeighborElem->fragments[0]->boundary_nodes.size(); n++)
+                neigh_link_nodes.insert( childOfNeighborElem->fragments[0]->boundary_nodes[n] );
 
               //Compare the sets of nodes on the common edge to see if more than one are common
               //That indicates that they share material, and the nodes should be collapsed.
@@ -1749,12 +1836,12 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
     // and only one of the nodes on the edge.
 
     std::set<node_t*> currLinkNodes;
-    for (unsigned int k=0; k < currElem->fragments[0].boundary_nodes.size(); k++)
-      currLinkNodes.insert( currElem->fragments[0].boundary_nodes[k] );
+    for (unsigned int k=0; k < currElem->fragments[0]->boundary_nodes.size(); k++)
+      currLinkNodes.insert( currElem->fragments[0]->boundary_nodes[k] );
 
     std::set<node_t*> neighLinkNodes;
-    for (unsigned int k=0; k < neighborElem->fragments[0].boundary_nodes.size(); k++)
-      neighLinkNodes.insert( neighborElem->fragments[0].boundary_nodes[k] );
+    for (unsigned int k=0; k < neighborElem->fragments[0]->boundary_nodes.size(); k++)
+      neighLinkNodes.insert( neighborElem->fragments[0]->boundary_nodes[k] );
 
     std::vector<node_t*> currCommonNodes;
     std::set_intersection(currLinkNodes.begin(), currLinkNodes.end(),
@@ -1820,8 +1907,8 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
       // and only one of the nodes on the edge.
 
       std::set<node_t*> currLinkNodes;
-      for (unsigned int k=0; k < currElem->fragments[0].boundary_nodes.size(); k++)
-        currLinkNodes.insert( currElem->fragments[0].boundary_nodes[k] );
+      for (unsigned int k=0; k < currElem->fragments[0]->boundary_nodes.size(); k++)
+        currLinkNodes.insert( currElem->fragments[0]->boundary_nodes[k] );
 
       std::vector<node_t*> currCommonNodes;
       std::set_intersection(currLinkNodes.begin(), currLinkNodes.end(),
@@ -2017,9 +2104,9 @@ void CutElemMesh::printMesh()
     {
       std::cout<<std::setw(4);
       std::cout << " " << j << " | ";
-      for (unsigned int k=0; k < currElem->fragments[j].boundary_nodes.size(); k++)
+      for (unsigned int k=0; k < currElem->fragments[j]->boundary_nodes.size(); k++)
       {
-        std::cout << std::setw(4) << currElem->fragments[j].boundary_nodes[k]->id_cat_str();
+        std::cout << std::setw(4) << currElem->fragments[j]->boundary_nodes[k]->id_cat_str();
       }
     }
     std::cout << std::endl;
