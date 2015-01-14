@@ -6,16 +6,15 @@ ifeq ($(CROW_USE_PYTHON3),TRUE)
 	PYTHON3_CONFIG_WHICH := $(shell which python3-config 2>/dev/null)
 endif
 
-ifneq ($(findstring SWIG Version 2,$(SWIG_VERSION)),)
-	HAS_SWIG := false #true
+ifeq ($(findstring SWIG Version 2,$(SWIG_VERSION)),)
+	HAS_SWIG := true
 else
-ifneq ($(findstring SWIG Version 3,$(SWIG_VERSION)),)
+ifeq ($(findstring SWIG Version 3,$(SWIG_VERSION)),)
 	HAS_SWIG := true
 else
 	HAS_SWIG := false
 endif
 endif
-$(warning HAS_SWIG $(HAS_SWIG))
 
 UNAME := $(shell uname)
 
@@ -75,7 +74,6 @@ endif
 
 HAS_DYNAMIC := $(shell $(libmesh_LIBTOOL) --config | grep build_libtool_libs | cut -d'=' -f2 )
 
-$(warning CROW_MODULES $(CROW_MODULES))
 ifeq ($(HAS_DYNAMIC),no)
 ifdef CONTROL_MODULES
 $(warning CROW modules must be compiled with shared libmesh libraries)
