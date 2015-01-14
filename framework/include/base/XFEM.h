@@ -48,20 +48,20 @@ class XFEM_geometric_cut;
 class XFEMCutElemNode
 {
 public:
-  XFEMCutElemNode(CutElemMesh::FRAG_NODE_CATEGORY category,
+  XFEMCutElemNode(CutElemMesh::N_CATEGORY category,
                   unsigned int index,
                   std::vector<Node*> master_nodes,
                   std::vector<Real> weights);
-  XFEMCutElemNode(CutElemMesh::FRAG_NODE_CATEGORY category,
+  XFEMCutElemNode(CutElemMesh::N_CATEGORY category,
                   unsigned int index);
   ~XFEMCutElemNode(){}
 
-  CutElemMesh::FRAG_NODE_CATEGORY get_category() const { return _category; }
+  CutElemMesh::N_CATEGORY get_category() const { return _category; }
   unsigned int get_index() const { return _index; }
   void get_coords(Real *coords, MeshBase *displaced_mesh=NULL) const;
 
 private:
-  CutElemMesh::FRAG_NODE_CATEGORY _category;
+  CutElemMesh::N_CATEGORY _category;
   unsigned int _index;
   std::vector<Node*> _master_nodes;
   std::vector<Real> _weights;

@@ -41,7 +41,7 @@
 #include "libmesh/parallel_mesh.h"
 #endif // DEBUG
 
-XFEMCutElemNode::XFEMCutElemNode(CutElemMesh::FRAG_NODE_CATEGORY category,
+XFEMCutElemNode::XFEMCutElemNode(CutElemMesh::N_CATEGORY category,
                                  unsigned int index,
                                  std::vector<Node*> master_nodes,
                                  std::vector<Real> weights):
@@ -103,14 +103,14 @@ XFEMCutElem::save_fragment_info(const CutElemMesh::element_t * const elem)
   _local_edge_has_intersection = elem->local_edge_has_intersection;
   _embedded_nodes_on_edge = elem->embedded_nodes_on_edge;
   _intersection_x = elem->intersection_x;
-  if (elem->interior_links.size() != 1)
+  if (elem->fragments.size() != 1)
   {
     libMesh::err << " ERROR: In save_fragment_info New elements must have 1 interior link"<<std::endl;
     exit(1);
   }
-  for (unsigned int i=0; i<elem->interior_links[0].size(); ++i)
+  for (unsigned int i=0; i<elem->fragments[0].boundary_nodes.size(); ++i)
   {
-    CutElemMesh::node_t * node = elem->interior_links[0][i];
+    CutElemMesh::node_t * node = elem->fragments[0].boundary_nodes[i];
     if (node->category == CutElemMesh::N_CATEGORY_EMBEDDED)
     {
       bool found_edge(false);
@@ -137,7 +137,7 @@ XFEMCutElem::save_fragment_info(const CutElemMesh::element_t * const elem)
         exit(1);
       }
 
-      XFEMCutElemNode xfcen(CutElemMesh::FRAG_NODE_EMBEDDED, node->id, master_nodes, master_weights);
+      XFEMCutElemNode xfcen(CutElemMesh::N_CATEGORY_EMBEDDED, node->id, master_nodes, master_weights);
       _interior_link.push_back(xfcen);
       _cut_line_nodes.push_back(xfcen);
     }
@@ -153,7 +153,7 @@ XFEMCutElem::save_fragment_info(const CutElemMesh::element_t * const elem)
           std::vector<Real> master_weights;
           master_nodes.push_back(_nodes[j]);
           master_weights.push_back(1.0);
-          XFEMCutElemNode xfcen(CutElemMesh::FRAG_NODE_LOCAL_INDEX, j, master_nodes, master_weights);
+          XFEMCutElemNode xfcen(CutElemMesh::N_CATEGORY_LOCAL_INDEX, j, master_nodes, master_weights);
           _interior_link.push_back(xfcen);
           found_node = true;
           break;
@@ -379,7 +379,7 @@ void XFEM::build_efa_mesh()
       if (cemit != _cut_elem_map.end())
       {
         XFEMCutElem *xfce = cemit->second;
-        std::vector<std::pair<CutElemMesh::FRAG_NODE_CATEGORY, unsigned int> > interior_link;
+        std::vector<std::pair<CutElemMesh::N_CATEGORY, unsigned int> > interior_link;
         for (unsigned int iil=0; iil<xfce->_interior_link.size(); ++iil)
         {
           interior_link.push_back(std::make_pair(xfce->_interior_link[iil].get_category(),
@@ -403,7 +403,7 @@ void XFEM::build_efa_mesh()
       if (cemit != _cut_elem_map.end())
       {
         XFEMCutElem *xfce = cemit->second;
-        std::vector<std::pair<CutElemMesh::FRAG_NODE_CATEGORY, unsigned int> > interior_link;
+        std::vector<std::pair<CutElemMesh::N_CATEGORY, unsigned int> > interior_link;
         for (unsigned int iil=0; iil<xfce->_interior_link.size(); ++iil)
         {
           interior_link.push_back(std::make_pair(xfce->_interior_link[iil].get_category(),

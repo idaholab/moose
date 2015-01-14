@@ -33,13 +33,8 @@ class CutElemMesh
   {
     N_CATEGORY_PERMANENT,
     N_CATEGORY_TEMP,
-    N_CATEGORY_EMBEDDED
-  };
-
-  enum FRAG_NODE_CATEGORY
-  {
-    FRAG_NODE_EMBEDDED,
-    FRAG_NODE_LOCAL_INDEX
+    N_CATEGORY_EMBEDDED,
+    N_CATEGORY_LOCAL_INDEX
   };
 
   class node_t
@@ -68,6 +63,13 @@ class CutElemMesh
     };
   };
 
+  class fragment
+  {
+    public:
+    std::vector< node_t*> boundary_nodes;
+  };
+
+
   class element_t
   {
     public:
@@ -82,7 +84,6 @@ class CutElemMesh
       intersection_x(num_edges,-1.0),
       parent(NULL),
       edge_neighbors(num_edges,std::vector<element_t*>(1,NULL)),
-      nb_frags(0),
       crack_tip_split_element(false)
     {};
 
@@ -141,10 +142,8 @@ class CutElemMesh
     element_t * parent;
     //neighbors on edge
     std::vector<std::vector<element_t*> >edge_neighbors;
-    //no of fragments
-    unsigned int nb_frags;
-    //interior links
-    std::vector< std::vector< node_t*> > interior_links;
+    //fragments
+    std::vector< fragment > fragments;
     //set of children
     std::vector< element_t* > children;
     //special case at crack tip
@@ -180,7 +179,7 @@ class CutElemMesh
   void reset();
   void clearAncestry();
   void restoreFragmentInfo(CutElemMesh::element_t * const elem,
-                           const std::vector<std::pair<FRAG_NODE_CATEGORY, unsigned int> > &interior_link);
+                           const std::vector<std::pair<N_CATEGORY, unsigned int> > &interior_link);
   void restoreEdgeIntersections(CutElemMesh::element_t * const elem,
                                 const std::vector<bool> &local_edge_has_intersection,
                                 const std::vector<CutElemMesh::node_t*> &embedded_nodes_on_edge,
