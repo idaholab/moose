@@ -10,7 +10,6 @@
  ***********************************************************/
 #include "ChemicalReactionsApp.h"
 #include "ContactApp.h"
-#include "FluidMassEnergyBalanceApp.h"
 #include "HeatConductionApp.h"
 #include "LinearElasticityApp.h"
 #include "MiscApp.h"
@@ -61,7 +60,6 @@ ModulesApp::registerObjects(Factory & factory)
    ***********************************************************/
   ChemicalReactionsApp::registerObjects(factory);
   ContactApp::registerObjects(factory);
-  FluidMassEnergyBalanceApp::registerObjects(factory);
   HeatConductionApp::registerObjects(factory);
   LinearElasticityApp::registerObjects(factory);
   MiscApp::registerObjects(factory);
@@ -83,7 +81,6 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
    ***********************************************************/
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
   ContactApp::associateSyntax(syntax, action_factory);
-  FluidMassEnergyBalanceApp::associateSyntax(syntax, action_factory);
   HeatConductionApp::associateSyntax(syntax, action_factory);
   LinearElasticityApp::associateSyntax(syntax, action_factory);
   MiscApp::associateSyntax(syntax, action_factory);
