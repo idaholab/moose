@@ -389,6 +389,7 @@ Assembly::reinit(const Elem * elem)
   // set the coord transformation
   _coord.resize(_current_qrule->n_points());
   _coord_type = _sys.subproblem().getCoordSystem(elem->subdomain_id());
+  unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
   switch (_coord_type)
   {
   case Moose::COORD_XYZ:
@@ -398,7 +399,7 @@ Assembly::reinit(const Elem * elem)
 
   case Moose::COORD_RZ:
     for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
-      _coord[qp] = 2 * M_PI * _current_q_points[qp](0);
+      _coord[qp] = 2 * M_PI * _current_q_points[qp](rz_radial_coord);
     break;
 
   case Moose::COORD_RSPHERICAL:
@@ -502,7 +503,7 @@ Assembly::reinit(const Elem * elem, unsigned int side)
     break;
   }
 
-  //Compute the area of the element
+  // Compute the area of the element
   _current_side_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
     _current_side_volume += _current_JxW_face[qp] * _coord[qp];
@@ -582,6 +583,7 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
   MooseArray<Real> coord;
   coord.resize(qrule.n_points());
   Moose::CoordinateSystemType coord_type = _sys.subproblem().getCoordSystem(neighbor->subdomain_id());
+  unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
   switch (coord_type) // coord type should be the same for the neighbor
   {
   case Moose::COORD_XYZ:
@@ -591,7 +593,7 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
 
   case Moose::COORD_RZ:
     for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-      coord[qp] = 2 * M_PI * q_points[qp](0);
+      coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
     break;
 
   case Moose::COORD_RSPHERICAL:

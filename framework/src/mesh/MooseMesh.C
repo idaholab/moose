@@ -115,6 +115,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _patch_size(40),
     _patch_update_strategy(getParam<MooseEnum>("patch_update_strategy")),
     _regular_orthogonal_mesh(false),
+    _rz_coord_axis(1),
     _allow_recovery(true)
 {
   switch (_mesh_distribution_type)

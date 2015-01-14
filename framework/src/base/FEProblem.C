@@ -321,6 +321,11 @@ FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const Multi
   }
 }
 
+void FEProblem::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
+{
+  _rz_coord_axis = rz_coord_axis;
+}
+
 void FEProblem::initialSetup()
 {
   // Write all cached calls to _console, this will output calls to _console from the object constructors

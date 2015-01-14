@@ -106,6 +106,11 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) = 0;
 
+  /**
+   * Returns the desired radial direction for RZ coordinate transformation
+   */
+  unsigned int getAxisymmetricRadialCoord();
+
   virtual DiracKernelInfo & diracKernelInfo();
   virtual Real finalNonlinearResidual();
   virtual unsigned int nNonlinearIterations();
@@ -333,6 +338,9 @@ protected:
 
   /// Where the restartable data is held (indexed on tid)
   RestartableDatas _restartable_data;
+
+  /// Storage for RZ axis selection
+  unsigned int _rz_coord_axis;
 
 private:
 

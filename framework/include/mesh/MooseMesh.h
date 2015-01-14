@@ -829,6 +829,9 @@ protected:
   /// Mortar interfaces mapped though master, slave IDs pairs
   std::map<std::pair<BoundaryID, BoundaryID>, MortarInterface *> _mortar_interface_by_ids;
 
+  /// Storage for the RZ axis direction (x = 0, y = 1)
+  unsigned int _rz_coord_axis;
+
   void cacheInfo();
   void freeBndNodes();
   void freeBndElems();
