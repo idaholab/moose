@@ -111,3 +111,9 @@ TensorMechanicsPlasticTensileMulti::dtensile_strength(const Real internal_param)
 {
   return _strength.derivative(internal_param);
 }
+
+std::string
+TensorMechanicsPlasticTensileMulti::modelName() const
+{
+  return "TensileMulti";
+}

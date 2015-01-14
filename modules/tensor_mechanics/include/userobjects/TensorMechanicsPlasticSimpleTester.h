@@ -20,6 +20,8 @@ class TensorMechanicsPlasticSimpleTester : public TensorMechanicsPlasticModel
  public:
   TensorMechanicsPlasticSimpleTester(const std::string & name, InputParameters parameters);
 
+  /// Returns the model name (SimpleTester)
+  virtual std::string modelName() const;
 
  protected:
 
