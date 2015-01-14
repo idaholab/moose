@@ -83,6 +83,7 @@ private:
   unsigned int _n_nodes;
   std::vector<Node*> _nodes;
   std::vector<bool> _physical_nodes;
+  CutElemMesh::fragment _fragment;
 
   Real _physical_volfrac;
 //  std::vector<XFEMCut> _cuts;
@@ -97,6 +98,10 @@ public:
   std::vector<bool> _local_edge_has_intersection;
   std::vector<CutElemMesh::node_t*> _embedded_nodes_on_edge;
   std::vector<Real> _intersection_x;
+  CutElemMesh::fragment & getFragment()
+  {
+    return _fragment;
+  }
 };
 
 /**

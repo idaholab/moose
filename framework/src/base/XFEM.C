@@ -83,7 +83,8 @@ XFEMCutElem::XFEMCutElem(Elem* elem, const CutElemMesh::element_t * const CEMele
   _elem(elem),
   _n_nodes(elem->n_nodes()),
   _nodes(_n_nodes,NULL),
-  _physical_nodes(_n_nodes,false)
+  _physical_nodes(_n_nodes,false),
+  _fragment(*CEMelem->fragments[0], NULL, true)
 {
   for (unsigned int i=0; i<_n_nodes; ++i)
   {
@@ -386,8 +387,9 @@ void XFEM::build_efa_mesh()
                                                  xfce->_interior_link[iil].get_index()));
         }
         CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
-        _efa_mesh.restoreFragmentInfo(CEMElem,
-                                      interior_link);
+        //_efa_mesh.restoreFragmentInfo(CEMElem,
+        //                              interior_link);
+        _efa_mesh.restoreFragmentInfo(CEMElem, xfce->getFragment());
       }
     }
   }

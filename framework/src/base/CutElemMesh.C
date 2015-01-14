@@ -13,7 +13,6 @@
 /****************************************************************/
 
 //TODO:
-//Fix CutElemMeshError -- doesn't print out message when run in MOOSE
 //Clean up error checking in (!found_edge)
 //Save fragment for uncut element ahead of crack tip to avoid renumbering if only embedded node
 //Improve overlays_elem() check to not pass in edge
@@ -44,7 +43,7 @@ CutElemMesh::fragment::fragment(const fragment & other_frag,
     //convert from global to local indices if needed
     for (unsigned int i=0; i<other_frag.boundary_nodes.size(); ++i)
     {
-      if (other_frag.boundary_nodes[i]->category == N_CATEGORY_PERMANENT || 
+      if (other_frag.boundary_nodes[i]->category == N_CATEGORY_PERMANENT ||
           other_frag.boundary_nodes[i]->category == N_CATEGORY_TEMP)
       {
         if (!other_frag.host_elem)
@@ -52,9 +51,7 @@ CutElemMesh::fragment::fragment(const fragment & other_frag,
         boundary_nodes[i] = other_frag.host_elem->create_local_node_from_global_node(other_frag.boundary_nodes[i]);
       }
       else
-      {
         boundary_nodes[i] = other_frag.boundary_nodes[i];
-      }
     }
   }
   else
@@ -62,8 +59,7 @@ CutElemMesh::fragment::fragment(const fragment & other_frag,
     //convert from local to global indices if needed
     for (unsigned int i=0; i<other_frag.boundary_nodes.size(); ++i)
     {
-      if (other_frag.boundary_nodes[i]->category != N_CATEGORY_PERMANENT &&
-          other_frag.boundary_nodes[i]->category != N_CATEGORY_TEMP)
+      if (other_frag.boundary_nodes[i]->category == N_CATEGORY_LOCAL_INDEX)
         boundary_nodes[i] = host->get_global_node_from_local_node(other_frag.boundary_nodes[i]);
       else
         boundary_nodes[i] = other_frag.boundary_nodes[i];
@@ -75,11 +71,9 @@ CutElemMesh::fragment::~fragment()
 {
   for (unsigned int i=0; i<boundary_nodes.size(); ++i)
   {
-    if (boundary_nodes[i]->category == N_CATEGORY_LOCAL_INDEX)
-    {
+    if (boundary_nodes[i] &&
+        boundary_nodes[i]->category == N_CATEGORY_LOCAL_INDEX)
       delete boundary_nodes[i];
-      boundary_nodes[i] = NULL;
-    }
   }
 }
 
@@ -503,6 +497,7 @@ CutElemMesh::element_t::create_local_node_from_global_node(const node_t * global
   }
   if (!new_local_node)
     CutElemMeshError("In create_local_node_from_global_node could not find global node");
+
   return new_local_node;
 }
 
@@ -1275,6 +1270,15 @@ void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
     }
   }
   elem->fragments.push_back(new_frag);
+}
+
+void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
+                                      fragment & from_frag)
+{
+  fragment * new_fragment = new fragment(from_frag, elem, false);
+  if (elem->fragments.size() != 0)
+    CutElemMeshError("in restoreFragmentInfo elements must not have any pre-existing fragments");
+  elem->fragments.push_back(new_fragment);
 }
 
 void CutElemMesh::restoreEdgeIntersections(CutElemMesh::element_t * const elem,

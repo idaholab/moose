@@ -23,7 +23,7 @@
 #include <map>
 #include <set>
 
-#define CutElemMeshError(msg) std::cout<<"CutElemMesh ERROR: "<<msg<<std::endl; exit(1);
+#define CutElemMeshError(msg) {std::cout<<"CutElemMesh ERROR: "<<msg<<std::endl; exit(1);}
 
 class CutElemMesh
 {
@@ -203,6 +203,8 @@ class CutElemMesh
   void clearAncestry();
   void restoreFragmentInfo(CutElemMesh::element_t * const elem,
                            const std::vector<std::pair<N_CATEGORY, unsigned int> > &interior_link);
+  void restoreFragmentInfo(CutElemMesh::element_t * const elem,
+                           fragment & from_frag);
   void restoreEdgeIntersections(CutElemMesh::element_t * const elem,
                                 const std::vector<bool> &local_edge_has_intersection,
                                 const std::vector<CutElemMesh::node_t*> &embedded_nodes_on_edge,
