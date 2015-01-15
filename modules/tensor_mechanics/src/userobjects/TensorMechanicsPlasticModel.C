@@ -158,3 +158,9 @@ TensorMechanicsPlasticModel::activeConstraints(const std::vector<Real> & f, cons
   for (unsigned surface = 0 ; surface < numberSurfaces() ; ++surface)
     act[surface] = (f[surface] > _f_tol);
 }
+
+std::string
+TensorMechanicsPlasticModel::modelName() const
+{
+  return "None";
+}

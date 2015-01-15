@@ -223,3 +223,10 @@ TensorMechanicsPlasticWeakPlaneShear::d2smooth(const RankTwoTensor & stress) con
   }
   return d2smoother2;
 }
+
+
+std::string
+TensorMechanicsPlasticWeakPlaneShear::modelName() const
+{
+  return "WeakPlaneShear";
+}

@@ -72,3 +72,9 @@ TensorMechanicsPlasticWeakPlaneTensileN::dflowPotential_dintnl(const RankTwoTens
 {
   return RankTwoTensor();
 }
+
+std::string
+TensorMechanicsPlasticWeakPlaneTensileN::modelName() const
+{
+  return "WeakPlaneTensileN";
+}

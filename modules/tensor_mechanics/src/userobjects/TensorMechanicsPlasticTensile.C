@@ -246,3 +246,9 @@ TensorMechanicsPlasticTensile::d2smooth(const RankTwoTensor & stress) const
   }
   return d2smoother2;
 }
+
+std::string
+TensorMechanicsPlasticTensile::modelName() const
+{
+  return "Tensile";
+}

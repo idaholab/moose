@@ -76,3 +76,9 @@ TensorMechanicsPlasticSimpleTester::dflowPotential_dintnl(const RankTwoTensor & 
 {
   return RankTwoTensor();
 }
+
+std::string
+TensorMechanicsPlasticSimpleTester::modelName() const
+{
+  return "SimpleTester";
+}

@@ -19,6 +19,8 @@ class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticWea
  public:
   TensorMechanicsPlasticWeakPlaneTensileN(const std::string & name, InputParameters parameters);
 
+  /// Returns the model name (WeakPlaneTensileN)
+  virtual std::string modelName() const;
 
  protected:
 

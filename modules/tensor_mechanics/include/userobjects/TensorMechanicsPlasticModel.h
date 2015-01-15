@@ -131,6 +131,9 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    */
   virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, std::vector<bool> & act) const;
 
+  /// Returns the model name (eg "MohrCoulom")
+  virtual std::string modelName() const;
+
   /// Tolerance on yield function
   Real _f_tol;
 
