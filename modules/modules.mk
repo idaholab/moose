@@ -12,7 +12,6 @@
 ifeq ($(ALL_MODULES),yes)
         CHEMICAL_REACTIONS        := yes
         CONTACT                   := yes
-        FLUID_MASS_ENERGY_BALANCE := yes
         HEAT_CONDUCTION           := yes
         LINEAR_ELASTICITY         := yes
         MISC                      := yes
@@ -52,12 +51,6 @@ endif
 ifeq ($(CONTACT),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/contact
   APPLICATION_NAME   := contact
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(FLUID_MASS_ENERGY_BALANCE),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/fluid_mass_energy_balance
-  APPLICATION_NAME   := fluid_mass_energy_balance
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
