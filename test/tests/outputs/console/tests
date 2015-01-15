@@ -94,7 +94,7 @@
     # Test the used of MooseObject::_console method
     type = RunApp
     input = 'moose_console.i'
-    expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0.4; t_step = 4'
+    expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0\.4; t_step = 4'
   [../]
   [./_console_const]
     # Test the used of MooseObject::_console method from a constant method
@@ -107,6 +107,41 @@
     type = RunApp
     input = 'console.i'
     cli_args = '--show-input'
-    expect_out = '[./screen]'
+    expect_out = '\[\./screen\]'
+  [../]
+  [./print_linear_residuals]
+    # Tests that flag is working to show linear residuals from the top level
+    type = RunApp
+    input = 'console_print_toggles.i'
+    expect_out = '0\sLinear'
+    cli_args = 'Outputs/print_linear_residuals=true'
+  [../]
+  [./print_linear_residuals_disable]
+    # Tests that using 'output_on' inside console disables flag to show linear residuals
+    type = RunApp
+    input = 'console_print_toggles.i'
+    expect_out = '\s*0\sNonlinear.*?\n\s*1\sNonlinear'
+    cli_args = "Outputs/print_linear_residuals=true Outputs/console/output_on='nonlinear final failed timestep_end'"
+  [../]
+  [./print_pref_log]
+    # Tests that flag is working to show performace log from the top level
+    type = RunApp
+    input = 'console_print_toggles.i'
+    expect_out = 'Moose Test Performance'
+    cli_args = 'Outputs/print_perf_log=true'
+  [../]
+  [./print_pref_log_disable]
+    # Tests that perf log is disabled flag when console level flag is set to false
+    type = RunApp
+    input = 'console_print_toggles.i'
+    expect_out = '\s*2\sNonlinear.*?\n\s*\n\Z'
+    cli_args = 'Outputs/print_perf_log=true Outputs/console/perf_log=false'
+    method = 'opt oprof' # debug prints some extra stuff at the end that messes up the regex
+  [../]
+  [./additional_output_on]
+    # Test use of 'additional_output_on' parameter
+    type = RunApp
+    input = 'additional_output_on.i'
+    expect_out = 'Time\sStep\s*0'
   [../]
 []
