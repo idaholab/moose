@@ -354,3 +354,9 @@ TensorMechanicsPlasticMohrCoulombMulti::dpsi(const Real internal_param) const
 {
   return _psi.derivative(internal_param);
 }
+
+std::string
+TensorMechanicsPlasticMohrCoulombMulti::modelName() const
+{
+  return "MohrCoulombMulti";
+}

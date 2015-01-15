@@ -72,6 +72,9 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    */
   virtual void dflowPotential_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & dr_dintnl) const;
 
+  /// Returns the model name (TensileMulti)
+  virtual std::string modelName() const;
+
  protected:
 
   const TensorMechanicsHardeningModel & _strength;

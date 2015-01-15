@@ -86,6 +86,8 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    */
   virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, std::vector<bool> & act) const;
 
+  /// Returns the model name (MohrCoulombMulti)
+  virtual std::string modelName() const;
 
 
  protected:

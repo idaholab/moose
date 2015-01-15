@@ -26,6 +26,8 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
  public:
   TensorMechanicsPlasticMohrCoulomb(const std::string & name, InputParameters parameters);
 
+  /// Returns the model name (MohrCoulomb)
+  virtual std::string modelName() const;
 
  protected:
 

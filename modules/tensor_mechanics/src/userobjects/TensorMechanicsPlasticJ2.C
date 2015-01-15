@@ -83,4 +83,8 @@ TensorMechanicsPlasticJ2::dyieldStrength(const Real & intnl) const
   return _strength.derivative(intnl);
 }
 
-
+std::string
+TensorMechanicsPlasticJ2::modelName() const
+{
+  return "J2";
+}

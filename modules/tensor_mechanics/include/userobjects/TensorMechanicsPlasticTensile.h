@@ -25,6 +25,8 @@ class TensorMechanicsPlasticTensile : public TensorMechanicsPlasticModel
  public:
   TensorMechanicsPlasticTensile(const std::string & name, InputParameters parameters);
 
+  /// Returns the model name (Tensile)
+  virtual std::string modelName() const;
 
  protected:
 

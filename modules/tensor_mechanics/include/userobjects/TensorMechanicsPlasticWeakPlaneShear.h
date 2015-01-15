@@ -20,6 +20,8 @@ class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
  public:
   TensorMechanicsPlasticWeakPlaneShear(const std::string & name, InputParameters parameters);
 
+  /// Returns the model name (WeakPlaneShear)
+  virtual std::string modelName() const;
 
  protected:
 

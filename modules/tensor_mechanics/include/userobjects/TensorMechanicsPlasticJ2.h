@@ -20,6 +20,8 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
  public:
   TensorMechanicsPlasticJ2(const std::string & name, InputParameters parameters);
 
+  /// returns the model name (J2)
+  virtual std::string modelName() const;
 
  protected:
 

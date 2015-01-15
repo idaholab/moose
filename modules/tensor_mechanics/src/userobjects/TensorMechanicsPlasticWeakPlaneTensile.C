@@ -73,3 +73,9 @@ TensorMechanicsPlasticWeakPlaneTensile::dtensile_strength(const Real internal_pa
 {
   return _strength.derivative(internal_param);
 }
+
+std::string
+TensorMechanicsPlasticWeakPlaneTensile::modelName() const
+{
+  return "WeakPlaneTensile";
+}
