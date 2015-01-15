@@ -32,9 +32,9 @@
 
 #include "CutElemMesh.h"
 
-CutElemMesh::fragment::fragment(const fragment & other_frag,
-                                element_t * host,
-                                bool convert_to_local)
+CutElemMesh::fragment_t::fragment_t(const fragment_t & other_frag,
+                                    element_t * host,
+                                    bool convert_to_local)
 {
   host_elem = host;
   boundary_nodes.resize(other_frag.boundary_nodes.size());
@@ -47,7 +47,7 @@ CutElemMesh::fragment::fragment(const fragment & other_frag,
           other_frag.boundary_nodes[i]->category == N_CATEGORY_TEMP)
       {
         if (!other_frag.host_elem)
-          CutElemMeshError("In fragment::fragment() fragment constructing from must have a valid host_elem to convert from global to local nodes");
+          CutElemMeshError("In fragment_t::fragment_t() fragment_t constructing from must have a valid host_elem to convert from global to local nodes");
         boundary_nodes[i] = other_frag.host_elem->create_local_node_from_global_node(other_frag.boundary_nodes[i]);
       }
       else
@@ -67,7 +67,7 @@ CutElemMesh::fragment::fragment(const fragment & other_frag,
   }
 };
 
-CutElemMesh::fragment::~fragment()
+CutElemMesh::fragment_t::~fragment_t()
 {
   for (unsigned int i=0; i<boundary_nodes.size(); ++i)
   {
@@ -1013,7 +1013,7 @@ void CutElemMesh::updatePhysicalLinksAndFragments()
 
     do //loop over link sets
     {
-      fragment * new_frag = new fragment(curr_elem);
+      fragment_t * new_frag = new fragment_t(curr_elem);
 
       do //loop over edges
       {
@@ -1242,7 +1242,7 @@ void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
     CutElemMeshError("In restore_fragment_info Elements must not have any interior links");
   }
 
-  fragment * new_frag = new fragment(elem);
+  fragment_t * new_frag = new fragment_t(elem);
 
   for (unsigned int i=0; i<interior_link.size(); ++i)
   {
@@ -1273,9 +1273,9 @@ void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
 }
 
 void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
-                                      fragment & from_frag)
+                                      fragment_t & from_frag)
 {
-  fragment * new_fragment = new fragment(from_frag, elem, false);
+  fragment_t * new_fragment = new fragment_t(from_frag, elem, false);
   if (elem->fragments.size() != 0)
     CutElemMeshError("in restoreFragmentInfo elements must not have any pre-existing fragments");
   elem->fragments.push_back(new_fragment);
@@ -1372,7 +1372,7 @@ void CutElemMesh::createChildElements()
           }
         }
 
-        fragment * new_frag = new fragment(childElem);
+        fragment_t * new_frag = new fragment_t(childElem);
         for (unsigned int j=0; j<curr_elem->fragments[ichild]->boundary_nodes.size(); ++j)
         {
           node_t * cur_link_node = curr_elem->fragments[ichild]->boundary_nodes[j];
