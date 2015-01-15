@@ -1,5 +1,9 @@
 .remark-code {
   font-size: 80%;
+  overflow-y: scroll;
+  overflow-x: scroll;
+  max-height: 400px;
+  display: block;
 }
 
 .left-50 {
@@ -130,11 +134,6 @@ figure {
   border: 0px;
 }
 
-/* Sets up the scrolbar to be always viewable */
-::-webkit-scrollbar {
-  -webkit-appearance: none;
-  width: 7px;
-}
 
 ::-webkit-scrollbar-thumb {
   border-radius: 4px;

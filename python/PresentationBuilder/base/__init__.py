@@ -1,3 +1,3 @@
 from PresentationBuilder import PresentationBuilder
-\
-__all__ = ['PresentationBuilder']
+from PresentationMerger import PresentationMerger
+__all__ = ['PresentationBuilder', 'PresentationMerger']
