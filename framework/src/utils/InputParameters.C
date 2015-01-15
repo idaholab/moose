@@ -453,7 +453,7 @@ InputParameters::hasDefaultPostprocessorValue(const std::string & name) const
 }
 
 void
-InputParameters::applyParameters(const InputParameters & common)
+InputParameters::applyParameters(const InputParameters & common, const std::vector<std::string> exclude)
 {
   // Disable the display of deprecated message when applying common parameters, this avoids a dump of messages
   _show_deprecated_message = false;
@@ -463,6 +463,10 @@ InputParameters::applyParameters(const InputParameters & common)
   {
     // Common parameter name
     const std::string & common_name = it->first;
+
+    // Continue to next parameter, if the current is in list of  excluded parameters
+    if (std::find(exclude.begin(), exclude.end(), common_name) != exclude.end())
+      continue;
 
     // Extract the properties from the local parameter for the current common parameter name
     bool local_exist = _values.find(common_name) != _values.end();
@@ -491,8 +495,14 @@ InputParameters::applyParameters(const InputParameters & common)
   // Loop through the coupled variables
   for (std::set<std::string>::const_iterator it = common.coupledVarsBegin(); it != common.coupledVarsEnd(); ++it)
   {
-    // If the local parameters has a coupled variable, populate it with the value from the common parameters
+    // Variable name
     const std::string var_name = *it;
+
+    // Continue to next variable, if the current is in list of  excluded parameters
+    if (std::find(exclude.begin(), exclude.end(), var_name) != exclude.end())
+      continue;
+
+    // If the local parameters has a coupled variable, populate it with the value from the common parameters
     if (hasCoupledValue(var_name))
     {
       if (common.hasDefaultCoupledValue(var_name))
@@ -504,4 +514,19 @@ InputParameters::applyParameters(const InputParameters & common)
 
   // Enable deprecated message printing
   _show_deprecated_message = true;
+}
+
+bool
+InputParameters::paramSetByUser(const std::string & name)
+{
+  // If the parameters is not located in the list, then it was set by the user
+  return _set_by_add_param.find(name) == _set_by_add_param.end();
+}
+
+const std::string &
+InputParameters::getDescription(const std::string & name)
+{
+  if (_doc_string.find(name) == _doc_string.end())
+    mooseError("No parameter exists with the name " << name );
+  return _doc_string[name];
 }

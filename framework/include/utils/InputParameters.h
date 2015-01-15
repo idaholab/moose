@@ -82,8 +82,20 @@ public:
   /**
    * Returns a writable reference to the named parameters.  Note: This is not a virtual
    * function! Use caution when comparing to the parent class implementation
+   * @param name The name of the parameter to set
+   * @param quite_mode When true the parameter is not removed from the _set_by_add_param list,
+   * this is generally not needed.
+   *
+   * "quite_mode" returns a writable reference to the named parameter, without removing it from the
+   * _set_by_add_param list. Using this method of set will make the parameter to continue to
+   * behave if its value where set ONLY by addParam and not any other method.
+   *
+   * This was added for handling parameters in the Output objects that have behavior dependent
+   * on whether the user modified the parameters. This is probably not the function you where
+   * looking for, see "set".
+   *
    */
-  template <typename T> T & set (const std::string&);
+  template <typename T> T & set (const std::string & name, bool quiet_mode = false);
 
   /**
    * Runs a range on the supplied parameter if it exists and throws an error if that check fails.
@@ -213,6 +225,11 @@ public:
    * Get the syntax for a command-line parameter
    */
   std::vector<std::string> getSyntax(const std::string &name);
+
+  /**
+   * Get the documentation string for a parameter
+   */
+  const std::string & getDescription(const std::string & name);
 
   /**
    * This method takes a space delimited list of parameter names and adds them to the specified group name.
@@ -410,9 +427,10 @@ public:
    */
   bool hasDefaultPostprocessorValue(const std::string & name) const;
 
-  /*
+  /**
    * Method for applying common parameters
    * @param common The set of parameters to apply to the parameters stored in this object
+   * @param exclude A vector of parameters to exclude
    *
    * In order to apply common parameter 4 statements must be satisfied
    *   (1) A local parameter must exist with the same name as common parameter
@@ -426,7 +444,13 @@ public:
    *
    * @see CommonOutputAction AddOutputAction
    */
-  void applyParameters(const InputParameters & common);
+  void applyParameters(const InputParameters & common, std::vector<std::string> exclude = std::vector<std::string>());
+
+  /**
+   * Method returns true if the parameter was by the user
+   * @param name The parameter name
+   */
+  bool paramSetByUser(const std::string & name);
 
   ///@{
   /*
@@ -518,7 +542,7 @@ private:
 // Template and inline function implementations
 template <typename T>
 T &
-InputParameters::set (const std::string& name)
+InputParameters::set (const std::string& name, bool quiet_mode)
 {
   checkConsistentType<T>(name);
 
@@ -526,6 +550,9 @@ InputParameters::set (const std::string& name)
     _values[name] = new Parameter<T>;
 
   set_attributes(name, false);
+
+  if (quiet_mode)
+    _set_by_add_param.insert(name);
 
   return cast_ptr<Parameter<T>*>(_values[name])->set();
 }
