@@ -67,110 +67,31 @@ class CutElemMesh
   class edge_t
   {
     public:
-    edge_t(node_t * node1, node_t * node2):
-      edge_node1(node1),
-      edge_node2(node2),
-      embedded_node(NULL),
-      intersection_x(-1.0)
-    {
-      consistency_check();
-    }
+    edge_t(node_t * node1, node_t * node2);
 
-    edge_t(const edge_t & other_edge)
-    {
-      edge_node1 = other_edge.edge_node1;
-      edge_node2 = other_edge.edge_node2;
-      intersection_x = other_edge.intersection_x;
-      embedded_node = other_edge.embedded_node;
-      consistency_check();
-    }
+    edge_t(const edge_t & other_edge);
 
-    bool operator == (const edge_t & other) const
-    {
-      if (other.edge_node1 == edge_node1 &&
-          other.edge_node2 == edge_node2)
-        return true;
-      else if (other.edge_node2 == edge_node1 &&
-          other.edge_node1 == edge_node2)
-        return true;
-      else
-        return false;
-    }
+    bool equivalent(const edge_t & other) const;
 
-    void add_intersection(double position, node_t * embedded_node_tmp, node_t * from_node)
-    {
-      embedded_node = embedded_node_tmp;
-      if (from_node == edge_node1)
-        intersection_x = position;
-      else if (from_node == edge_node2)
-        intersection_x = 1.0 - position;
-      else 
-        CutElemMeshError("In add_intersection from_node does not exist on edge");
-    }
+//    bool operator < (const edge_t & other) const;
 
-    node_t * get_node(unsigned int index)
-    {
-      if (index == 1)
-        return edge_node1;
-      else if (index == 2)
-        return edge_node2;
-      else
-        CutElemMeshError("In get_node index out of bounds");
-    }
+    void add_intersection(double position, node_t * embedded_node_tmp, node_t * from_node);
 
-    bool has_intersection()
-    {
-      return (embedded_node != NULL);
-    }
+    void replace_embedded_node(node_t * embedded_node_tmp);
 
-    bool has_intersection_at_position(double position, node_t * from_node)
-    {
-      double tol = 1.e-4;
-      bool has_int = false;
-      if (has_intersection())
-      {
-        double tmp_intersection_x = -1.0;
-        if (from_node == edge_node1)
-          tmp_intersection_x = position;
-        else if (from_node == edge_node2)
-          tmp_intersection_x = 1.0 - position;
-        else 
-          CutElemMeshError("In has_intersection from_node does not exist on edge");
-        if (std::abs(tmp_intersection_x - intersection_x) < tol)
-          has_int = true;
-      }
-      return has_int;
-    }
+    node_t * get_node(unsigned int index);
 
-    double get_intersection(node_t * from_node)
-    {
-      if (from_node == edge_node1)
-        return intersection_x;
-      else if (from_node == edge_node2)
-        return 1.0 - intersection_x;
-      else
-        CutElemMeshError("In get_intersection node not in edge");
-    }
+    bool has_intersection();
 
-    node_t * get_embedded_node()
-    {
-      return embedded_node;
-    }
+    bool has_intersection_at_position(double position, node_t * from_node);
 
-    void consistency_check()
-    {
-      bool consistent = true;
-      if ((edge_node1->category == N_CATEGORY_PERMANENT ||
-           edge_node1->category == N_CATEGORY_TEMP) &&
-          edge_node2->category == N_CATEGORY_LOCAL_INDEX)
-        consistent = false;
-      else if ((edge_node2->category == N_CATEGORY_PERMANENT ||
-                edge_node2->category == N_CATEGORY_TEMP) &&
-               edge_node1->category == N_CATEGORY_LOCAL_INDEX)
-        consistent = false;
-      if (!consistent)
-        CutElemMeshError("In consistency_check nodes on edge are not consistent");
-    }
+    double get_intersection(node_t * from_node);
+
+    node_t * get_embedded_node();
+
+    void consistency_check();
+
+    void switchNode(node_t *new_node, node_t *old_node);
 
     private:
     node_t * edge_node1;
@@ -202,24 +123,12 @@ class CutElemMesh
   {
     public:
 
-    element_t(unsigned int eid):
-      id(eid),
-      num_nodes(4),
-      num_edges(4),
-      nodes(num_nodes,NULL),
-      local_edge_has_intersection(num_edges,false),
-      embedded_nodes_on_edge(num_edges,NULL),
-      intersection_x(num_edges,-1.0),
-      parent(NULL),
-      edge_neighbors(num_edges,std::vector<element_t*>(1,NULL)),
-      crack_tip_split_element(false)
-    {};
+    element_t(unsigned int eid);
 
-    ~element_t()
-    {
-      for (unsigned int i=0; i<fragments.size(); ++i)
-        delete fragments[i];
-    };
+    ~element_t();
+
+    void
+    createEdges();
 
     void
     switchNode(node_t *new_node,
@@ -273,9 +182,7 @@ class CutElemMesh
     //array of nodes
     std::vector<node_t*> nodes;
     //list of cut edges
-    std::vector<bool> local_edge_has_intersection;
-    std::vector<node_t*> embedded_nodes_on_edge;
-    std::vector<double> intersection_x;
+    std::vector<edge_t*> edges;
     //parent
     element_t * parent;
     //neighbors on edge
@@ -362,7 +269,6 @@ class CutElemMesh
   std::map< unsigned int, node_t*> EmbeddedNodes;
   std::map< unsigned int, node_t*> TempNodes;
   std::map< unsigned int, element_t*> Elements;
-  std::set< edge_t* > Edges;
   std::map< std::set< node_t* >, std::set< element_t* > > MergedEdgeMap;
   std::set< element_t*> CrackTipElements;
   std::vector< node_t* > NewNodes;

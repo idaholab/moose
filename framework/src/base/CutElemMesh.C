@@ -32,6 +32,177 @@
 
 #include "CutElemMesh.h"
 
+CutElemMesh::edge_t::edge_t(node_t * node1, node_t * node2):
+  edge_node1(node1),
+  edge_node2(node2),
+  embedded_node(NULL),
+  intersection_x(-1.0)
+{
+  consistency_check();
+}
+
+CutElemMesh::edge_t::edge_t(const edge_t & other_edge)
+{
+  edge_node1 = other_edge.edge_node1;
+  edge_node2 = other_edge.edge_node2;
+  intersection_x = other_edge.intersection_x;
+  embedded_node = other_edge.embedded_node;
+  consistency_check();
+}
+
+bool
+CutElemMesh::edge_t::equivalent(const edge_t & other) const
+{
+  if (embedded_node != other.embedded_node)
+    return false;
+
+  double tol = 1.e-4;
+  if (other.edge_node1 == edge_node1 &&
+      other.edge_node2 == edge_node2)
+  {
+    if (std::abs(intersection_x - other.intersection_x) < tol)
+      return true;
+    else
+      return false;
+  }
+  else if (other.edge_node2 == edge_node1 &&
+           other.edge_node1 == edge_node2)
+  {
+    if (std::abs(intersection_x - 1.0 + other.intersection_x) < tol)
+      return true;
+    else
+      return false;
+  }
+  else
+    return false;
+}
+
+// TODO: Saving because I don't want to throw it away, but it needs more work to be used.
+//bool
+//CutElemMesh::edge_t::operator < (const edge_t & other) const
+//{
+//  node_t * this_min_node;
+//  node_t * this_max_node;
+//  node_t * other_min_node;
+//  node_t * other_max_node;
+//
+//  int this_node1_unique_index = ((int) edge_node1->category + 1) * edge_node1->id;
+//  int this_node2_unique_index = ((int) edge_node2->category + 1) * edge_node2->id;
+//  int other_node1_unique_index = ((int) other.edge_node1->category + 1) * edge_node1->id;
+//  int other_node2_unique_index = ((int) other.edge_node2->category + 1) * edge_node2->id;
+//  int this_min_index = std::min(this_node1_unique_index, this_node2_unique_index);
+//  int other_min_index = std::min(other_node1_unique_index, other_node2_unique_index);
+//
+//  if (this_min_index < other_min_index)
+//    return true;
+//  else if (this_min_index == other_min_index)
+//  {
+//    int this_max_index = std::max(this_node1_unique_index, this_node2_unique_index);
+//    int other_max_index = std::max(other_node1_unique_index, other_node2_unique_index);
+//
+//    if (this_max_index < other_max_index)
+//      return true;
+//  }
+//  return false;
+//}
+
+void
+CutElemMesh::edge_t::add_intersection(double position, node_t * embedded_node_tmp, node_t * from_node)
+{
+  embedded_node = embedded_node_tmp;
+  if (from_node == edge_node1)
+    intersection_x = position;
+  else if (from_node == edge_node2)
+    intersection_x = 1.0 - position;
+  else 
+    CutElemMeshError("In add_intersection from_node does not exist on edge");
+}
+
+void
+CutElemMesh::edge_t::replace_embedded_node(node_t * embedded_node_tmp)
+{
+  embedded_node = embedded_node_tmp;
+}
+
+CutElemMesh::node_t *
+CutElemMesh::edge_t::get_node(unsigned int index)
+{
+  if (index == 1)
+    return edge_node1;
+  else if (index == 2)
+    return edge_node2;
+  else
+    CutElemMeshError("In get_node index out of bounds");
+}
+
+bool
+CutElemMesh::edge_t::has_intersection()
+{
+  return (embedded_node != NULL);
+}
+
+bool
+CutElemMesh::edge_t::has_intersection_at_position(double position, node_t * from_node)
+{
+  double tol = 1.e-4;
+  bool has_int = false;
+  if (has_intersection())
+  {
+    double tmp_intersection_x = -1.0;
+    if (from_node == edge_node1)
+      tmp_intersection_x = position;
+    else if (from_node == edge_node2)
+      tmp_intersection_x = 1.0 - position;
+    else 
+      CutElemMeshError("In has_intersection from_node does not exist on edge");
+    if (std::abs(tmp_intersection_x - intersection_x) < tol)
+      has_int = true;
+  }
+  return has_int;
+}
+
+double
+CutElemMesh::edge_t::get_intersection(node_t * from_node)
+{
+  if (from_node == edge_node1)
+    return intersection_x;
+  else if (from_node == edge_node2)
+    return 1.0 - intersection_x;
+  else
+    CutElemMeshError("In get_intersection node not in edge");
+}
+
+CutElemMesh::node_t *
+CutElemMesh::edge_t::get_embedded_node()
+{
+  return embedded_node;
+}
+
+void
+CutElemMesh::edge_t::consistency_check()
+{
+  bool consistent = true;
+  if ((edge_node1->category == N_CATEGORY_PERMANENT ||
+       edge_node1->category == N_CATEGORY_TEMP) &&
+      edge_node2->category == N_CATEGORY_LOCAL_INDEX)
+    consistent = false;
+  else if ((edge_node2->category == N_CATEGORY_PERMANENT ||
+            edge_node2->category == N_CATEGORY_TEMP) &&
+           edge_node1->category == N_CATEGORY_LOCAL_INDEX)
+    consistent = false;
+  if (!consistent)
+    CutElemMeshError("In consistency_check nodes on edge are not consistent");
+}
+
+void
+CutElemMesh::edge_t::switchNode(node_t *new_node, node_t *old_node)
+{
+  if (edge_node1 == old_node)
+    edge_node1 = new_node;
+  else if (edge_node2 == old_node)
+    edge_node2 = new_node;
+}
+
 CutElemMesh::fragment_t::fragment_t(const fragment_t & other_frag,
                                     element_t * host,
                                     bool convert_to_local)
@@ -65,7 +236,7 @@ CutElemMesh::fragment_t::fragment_t(const fragment_t & other_frag,
         boundary_nodes[i] = other_frag.boundary_nodes[i];
     }
   }
-};
+}
 
 CutElemMesh::fragment_t::~fragment_t()
 {
@@ -73,7 +244,46 @@ CutElemMesh::fragment_t::~fragment_t()
   {
     if (boundary_nodes[i] &&
         boundary_nodes[i]->category == N_CATEGORY_LOCAL_INDEX)
+    {
       delete boundary_nodes[i];
+      boundary_nodes[i] = NULL;
+    }
+  }
+}
+
+CutElemMesh::element_t::element_t(unsigned int eid):
+  id(eid),
+  num_nodes(4),
+  num_edges(4),
+  nodes(num_nodes,NULL),
+  edges(num_edges,NULL),
+  parent(NULL),
+  edge_neighbors(num_edges,std::vector<element_t*>(1,NULL)),
+  crack_tip_split_element(false)
+{}
+
+CutElemMesh::element_t::~element_t()
+{
+  for (unsigned int i=0; i<fragments.size(); ++i)
+  {
+    if (fragments[i])
+      delete fragments[i];
+  }
+  for (unsigned int i=0; i<edges.size(); ++i)
+  {
+    if (edges[i])
+      delete edges[i];
+  }
+}
+
+void
+CutElemMesh::element_t::createEdges()
+{
+  for (unsigned int i=0; i<num_nodes; ++i)
+  {
+    unsigned int i_plus1(i<(num_nodes-1) ? i+1 : 0);
+    edge_t * new_edge = new edge_t(nodes[i],nodes[i_plus1]);
+    edges[i] = new_edge;
   }
 }
 
@@ -99,6 +309,9 @@ CutElemMesh::element_t::switchNode(node_t *new_node,
       }
     }
   }
+  for (unsigned int i=0; i<edges.size(); ++i)
+    edges[i]->switchNode(new_node, old_node);
+
   if (parent && descend_to_parent)
   {
     parent->switchNode(new_node,old_node,false);
@@ -125,9 +338,9 @@ CutElemMesh::element_t::switchEmbeddedNode(node_t *new_node,
 {
   for (unsigned int i=0; i<num_edges; ++i)
   {
-    if (embedded_nodes_on_edge[i] == old_node)
+    if (edges[i]->get_embedded_node() == old_node)
     {
-      embedded_nodes_on_edge[i] = new_node;
+      edges[i]->replace_embedded_node(new_node);
     }
   }
   for (unsigned int i=0; i<fragments.size(); ++i)
@@ -363,7 +576,7 @@ CutElemMesh::element_t::will_crack_tip_extend(std::vector<unsigned int> &split_n
         unsigned int num_cuts_in_neighbor = 0;
         for (unsigned int j=0; j<neighbor_elem->num_edges; ++j)
         {
-          if (neighbor_elem->local_edge_has_intersection[j])
+          if (neighbor_elem->edges[j]->has_intersection())
           {
             ++num_cuts_in_neighbor;
           }
@@ -388,9 +601,8 @@ void
 CutElemMesh::element_t::get_nodes_on_edge(unsigned int edge_idx,
                                           std::vector<node_t*> &edge_nodes)
 {
-  unsigned int edge_idx_plus1(edge_idx<(num_edges-1) ? edge_idx+1 : 0);
-  edge_nodes.push_back(nodes[edge_idx]);
-  edge_nodes.push_back(nodes[edge_idx_plus1]);
+  edge_nodes.push_back(edges[edge_idx]->get_node(1));
+  edge_nodes.push_back(edges[edge_idx]->get_node(2));
 }
 
 void
@@ -600,6 +812,7 @@ unsigned int CutElemMesh::addElements( std::vector< std::vector<unsigned int> > 
       newElem->nodes[j] = currNode;
       InverseConnectivityMap[currNode].insert(newElem);
     }
+    newElem->createEdges();
   }
   return first_id;
 }
@@ -628,6 +841,7 @@ CutElemMesh::element_t* CutElemMesh::addElement( std::vector<unsigned int> quad,
     newElem->nodes[j] = currNode;
     InverseConnectivityMap[currNode].insert(newElem);
   }
+  newElem->createEdges();
   return newElem;
 }
 
@@ -678,13 +892,11 @@ void CutElemMesh::updateEdgeNeighbors()
           bool found_edge = false;
           for (unsigned int edge_iter = 0; edge_iter < curr_elem->num_edges; ++edge_iter)
           {
-            unsigned int edge_iter_plus1(edge_iter<(curr_elem->num_edges-1) ? edge_iter+1 : 0);
-
             std::set<node_t*> edge_nodes;
-            edge_nodes.insert(curr_elem->nodes[edge_iter]);
-            edge_nodes.insert(curr_elem->nodes[edge_iter_plus1]);
-            node_t* edge_node1 = curr_elem->nodes[edge_iter];
-            node_t* edge_node2 = curr_elem->nodes[edge_iter_plus1];
+            node_t* edge_node1 = curr_elem->edges[edge_iter]->get_node(1);
+            node_t* edge_node2 = curr_elem->edges[edge_iter]->get_node(2);
+            edge_nodes.insert(edge_node1);
+            edge_nodes.insert(edge_node2);
 
             std::vector<node_t*> common_nodes_this_edge;
             std::set_intersection(edge_nodes.begin(), edge_nodes.end(),
@@ -818,14 +1030,13 @@ void CutElemMesh::initCrackTipTopology()
     {
       std::vector<element_t*> &edge_neighbors = curr_elem->edge_neighbors[edge_iter];
       if ((edge_neighbors.size() == 2) &&
-          (curr_elem->local_edge_has_intersection[edge_iter]))
+          (curr_elem->edges[edge_iter]->has_intersection()))
       {
         //Neither neighbor overlays current element.  We are on the uncut element ahead of the tip.
         //Flag neighbors as crack tip elements and add this element as their crack tip neighbor.
 
-        unsigned int edge_iter_plus1(edge_iter<(num_edges-1) ? edge_iter+1 : 0);
-        node_t* edge_node1 = curr_elem->nodes[edge_iter];
-        node_t* edge_node2 = curr_elem->nodes[edge_iter_plus1];
+        node_t* edge_node1 = curr_elem->edges[edge_iter]->get_node(1);
+        node_t* edge_node2 = curr_elem->edges[edge_iter]->get_node(2);
 
         if ((edge_neighbors[0]->overlays_elem(edge_node1,edge_node2)) ||
             (edge_neighbors[1]->overlays_elem(edge_node1,edge_node2)))
@@ -869,39 +1080,33 @@ void CutElemMesh::addEdgeIntersection( element_t * elem, unsigned int edgeid, do
 {
 
   node_t* local_embedded_node = NULL;
+  node_t* first_node_on_edge = elem->nodes[edgeid];
   if (embedded_node)
   {
     //use the existing embedded node if it was passed in
     local_embedded_node = embedded_node;
   }
 
-  double tol = 1.e-4;
-
-  if (elem->local_edge_has_intersection[edgeid])
+  if (elem->edges[edgeid]->has_intersection())
   {
-    if ((std::abs(elem->intersection_x[edgeid] - position) > tol)||
-        (embedded_node && elem->embedded_nodes_on_edge[edgeid] != embedded_node))
+    if (!elem->edges[edgeid]->has_intersection_at_position(position,first_node_on_edge) ||
+        (embedded_node && elem->edges[edgeid]->get_embedded_node() != embedded_node))
     {
       CutElemMeshError("Attempting to add edge intersection when one already exists with different position or node."
-                       << " elem: "<<elem->id<<" edge: "<<edgeid<<" position: "<<position<<" old position: "<<elem->intersection_x[edgeid]);
+                       << " elem: "<<elem->id<<" edge: "<<edgeid<<" position: "<<position<<" old position: "<<elem->edges[edgeid]->get_intersection(first_node_on_edge));
     }
-    local_embedded_node = elem->embedded_nodes_on_edge[edgeid];
+    local_embedded_node = elem->edges[edgeid]->get_embedded_node();
   }
   else
   {
-    elem->local_edge_has_intersection[edgeid] = true;
-    elem->intersection_x[edgeid] = position;
-
     if (!local_embedded_node)
     {
       //create the embedded node
       unsigned int new_node_id = getNewID(EmbeddedNodes);
       local_embedded_node = new node_t(new_node_id,N_CATEGORY_EMBEDDED);
       EmbeddedNodes.insert(std::make_pair(new_node_id,local_embedded_node));
-
     }
-    //insert the embedded node on the edge
-    elem->embedded_nodes_on_edge[edgeid] = local_embedded_node;
+    elem->edges[edgeid]->add_intersection(position, local_embedded_node, first_node_on_edge);
   }
 
   for (unsigned int en_iter = 0; en_iter < elem->edge_neighbors[edgeid].size(); ++en_iter)
@@ -919,41 +1124,17 @@ void CutElemMesh::addEdgeIntersection( element_t * elem, unsigned int edgeid, do
           {
             found = true;
 
-            unsigned int edgeid_plus1(edgeid<(elem->num_edges-1) ? edgeid+1 : 0);
-            node_t* edge_node1 = elem->nodes[edgeid];
-            node_t* edge_node2 = elem->nodes[edgeid_plus1];
-            double neighbor_position;
-            //BWSolay TODO: we shouldn't ever hit this case now
-            if (edge_neighbor->overlays_elem(edge_node1,edge_node2))
+            if (edge_neighbor->edges[j]->has_intersection())
             {
-              printMesh();
-              CutElemMeshError("in addEdgeIntersection: neighbor overlays current element.  "
-                               <<"curr: "<<elem->id<<" neigh: "<<edge_neighbor->id);
-              //neighbor_position = position;
-            }
-            else
-            {
-              neighbor_position = 1.0 - position;
-            }
-
-            if (edge_neighbor->local_edge_has_intersection[j])
-            {
-              if ((edge_neighbor->embedded_nodes_on_edge[j] != local_embedded_node) ||
-                  (std::abs(edge_neighbor->intersection_x[j] - neighbor_position) > tol))
+              if (!edge_neighbor->edges[j]->equivalent(*elem->edges[edgeid]))
               {
-//                printMesh();
-//                std::cout<<"neigh node: "<<edge_neighbor->embedded_nodes_on_edge[j]->id<<std::endl;
-//                std::cout<<"local node: "<<local_embedded_node->id<<std::endl;
-//                std::cout<<"neigh int: "<<edge_neighbor->intersection_x[j]<<std::endl;
-//                std::cout<<"local int: "<<neighbor_position<<std::endl;
                 CutElemMeshError("Attempting to add edge intersection when neighbor already has one that is incompatible."
                                  << " elem: "<<elem->id<<" edge: "<<edgeid
                                  <<" neighbor: "<<edge_neighbor->id<<" neighbor edge: "<<j);
               }
             }
-            edge_neighbor->local_edge_has_intersection[j] = true;
-            edge_neighbor->intersection_x[j] = neighbor_position;
-            edge_neighbor->embedded_nodes_on_edge[j] = local_embedded_node;
+            else
+              edge_neighbor->edges[j]->add_intersection(position, local_embedded_node, first_node_on_edge);
             break;
           }
         }
@@ -980,7 +1161,7 @@ void CutElemMesh::updatePhysicalLinksAndFragments()
     std::vector<unsigned int> cut_edges;
     for (unsigned int iedge=0; iedge<num_edges; ++iedge)
     {
-      if(curr_elem->embedded_nodes_on_edge[iedge])
+      if(curr_elem->edges[iedge]->has_intersection())
       {
         cut_edges.push_back(iedge);
       }
@@ -1020,14 +1201,14 @@ void CutElemMesh::updatePhysicalLinksAndFragments()
         new_frag->boundary_nodes.push_back(curr_elem->nodes[iedge]);
         if (iedge == cut_edges[icutedge])
         {
-          new_frag->boundary_nodes.push_back(curr_elem->embedded_nodes_on_edge[iedge]);
+          new_frag->boundary_nodes.push_back(curr_elem->edges[iedge]->get_embedded_node());
           if (cut_edges.size() == 2)
           {
             ++icutedge;
             if (icutedge == cut_edges.size())
               icutedge = 0;
             iedge = cut_edges[icutedge];
-            new_frag->boundary_nodes.push_back(curr_elem->embedded_nodes_on_edge[iedge]);
+            new_frag->boundary_nodes.push_back(curr_elem->edges[iedge]->get_embedded_node());
           }
         }
         ++iedge;
@@ -1057,7 +1238,7 @@ void CutElemMesh::physicalLinkAndFragmentSanityCheck(element_t *currElem)
   std::vector<unsigned int> cut_edges;
   for (unsigned int iedge=0; iedge<num_edges; ++iedge)
   {
-    if(currElem->embedded_nodes_on_edge[iedge])
+    if(currElem->edges[iedge]->has_intersection())
     {
       cut_edges.push_back(iedge);
     }
@@ -1235,44 +1416,6 @@ void CutElemMesh::clearAncestry()
 }
 
 void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
-                                      const std::vector<std::pair<N_CATEGORY, unsigned int> > &interior_link)
-{
-  if (elem->fragments.size() != 0)
-  {
-    CutElemMeshError("In restore_fragment_info Elements must not have any interior links");
-  }
-
-  fragment_t * new_frag = new fragment_t(elem);
-
-  for (unsigned int i=0; i<interior_link.size(); ++i)
-  {
-    if (interior_link[i].first == N_CATEGORY_EMBEDDED)
-    {
-      unsigned int embedded_node_id = interior_link[i].second;
-      std::map<unsigned int, node_t*>::const_iterator mit;
-      mit = EmbeddedNodes.find(embedded_node_id);
-      if (mit == EmbeddedNodes.end())
-      {
-        CutElemMeshError("In restore_fragment_info could not find EmbeddedNode with id: "<<embedded_node_id);
-      }
-      node_t *node = mit->second;
-      new_frag->boundary_nodes.push_back(node);
-    }
-    else if (interior_link[i].first == N_CATEGORY_LOCAL_INDEX)
-    {
-      unsigned int local_node_index = interior_link[i].second;
-      if (local_node_index > elem->nodes.size())
-      {
-        CutElemMeshError("In restore_fragment_info node index out of bounds: "<<local_node_index);
-      }
-      node_t *node = elem->nodes[local_node_index];
-      new_frag->boundary_nodes.push_back(node);
-    }
-  }
-  elem->fragments.push_back(new_frag);
-}
-
-void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem,
                                       fragment_t & from_frag)
 {
   fragment_t * new_fragment = new fragment_t(from_frag, elem, false);
@@ -1339,15 +1482,6 @@ void CutElemMesh::createChildElements()
         ChildElements.push_back(childElem);
         childElem->parent = curr_elem;
         curr_elem->children.push_back(childElem);
-        for (unsigned int j=0; j<num_edges; j++)
-        {
-          childElem->local_edge_has_intersection[j] = curr_elem->local_edge_has_intersection[j];
-          if (curr_elem->local_edge_has_intersection[j])
-          {
-            childElem->embedded_nodes_on_edge[j] = curr_elem->embedded_nodes_on_edge[j];
-            childElem->intersection_x[j] = curr_elem->intersection_x[j];
-          }
-        }
         for (unsigned int j=0; j<num_nodes; j++)
         {
           bool node_in_fragment = false;
@@ -1370,6 +1504,19 @@ void CutElemMesh::createChildElements()
             TempNodes.insert(std::make_pair(new_node_id,newNode));
             childElem->nodes[j] = newNode;
           }
+        }
+
+        for (unsigned int j=0; j<num_edges; j++)
+        {
+          unsigned int jplus1(j < (num_edges-1) ? j+1 : 0);
+          edge_t * new_edge = new edge_t(childElem->nodes[j], childElem->nodes[jplus1]);
+          if (curr_elem->edges[j]->has_intersection())
+          {
+            double child_position = curr_elem->edges[j]->get_intersection(curr_elem->nodes[j]);
+            node_t * child_embedded_node = curr_elem->edges[j]->get_embedded_node();
+            new_edge->add_intersection(child_position, child_embedded_node, childElem->nodes[j]);
+          }
+          childElem->edges[j] = new_edge;
         }
 
         fragment_t * new_frag = new fragment_t(childElem);
@@ -1475,7 +1622,7 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
           childEdgeNodes.push_back(childElem->nodes[j]);
           childEdgeNodes.push_back(childElem->nodes[jplus1]);
 
-          if (childElem->local_edge_has_intersection[j])
+          if (childElem->edges[j]->has_intersection())
           {
             //set up the sets according to the links
             std::set<node_t*> child_link_nodes;
@@ -1745,8 +1892,8 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
   edgeNodes.insert(currElem->nodes[edgeID]);
   edgeNodes.insert(currElem->nodes[edgeIDplus1]);
 
-  node_t* embeddedNode = currElem->embedded_nodes_on_edge[edgeID];
-  node_t* neighEmbeddedNode = neighborElem->embedded_nodes_on_edge[neighborEdgeID];
+  node_t* embeddedNode = currElem->edges[edgeID]->get_embedded_node();
+  node_t* neighEmbeddedNode = neighborElem->edges[neighborEdgeID]->get_embedded_node();
 
   if (embeddedNode != neighEmbeddedNode)
   {
@@ -1770,7 +1917,7 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
       for (unsigned int i=0; i<currElem->parent->children.size(); ++i)
       {
         if (currElem->parent->children[i] != currElem &&
-            currElem->parent->children[i]->embedded_nodes_on_edge[edgeID] == embeddedNode)
+            currElem->parent->children[i]->edges[edgeID]->get_embedded_node() == embeddedNode)
         {
           hasSiblingWithSameEmbeddedNode = true;
           break;
@@ -1801,7 +1948,7 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
       for (unsigned int i=0; i<neighborElem->parent->children.size(); ++i)
       {
         if (neighborElem->parent->children[i] != neighborElem &&
-            neighborElem->parent->children[i]->embedded_nodes_on_edge[neighborEdgeID] == embeddedNode)
+            neighborElem->parent->children[i]->edges[neighborEdgeID]->get_embedded_node() == embeddedNode)
         {
           hasSiblingWithSameEmbeddedNode = true;
           break;
@@ -1877,14 +2024,12 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
 void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
                                         unsigned int edgeID)
 {
-  unsigned int num_edges = currElem->num_edges;
   std::set<node_t*> edgeNodes;
 
-  unsigned int edgeIDplus1(edgeID<(num_edges-1) ? edgeID+1 : 0);
-  edgeNodes.insert(currElem->nodes[edgeID]);
-  edgeNodes.insert(currElem->nodes[edgeIDplus1]);
+  edgeNodes.insert(currElem->edges[edgeID]->get_node(1));
+  edgeNodes.insert(currElem->edges[edgeID]->get_node(2));
 
-  node_t* embeddedNode = currElem->embedded_nodes_on_edge[edgeID];
+  node_t* embeddedNode = currElem->edges[edgeID]->get_embedded_node();
 
   // Do elements on both side of the common edge have siblings?
   if (currElem->parent &&
@@ -1897,7 +2042,7 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
     for (unsigned int i=0; i<currElem->parent->children.size(); ++i)
     {
       if (currElem->parent->children[i] != currElem &&
-          currElem->parent->children[i]->embedded_nodes_on_edge[edgeID] == embeddedNode)
+          currElem->parent->children[i]->edges[edgeID]->get_embedded_node() == embeddedNode)
       {
         currElemHasSiblingWithSameEmbeddedNode = true;
         break;
@@ -2073,8 +2218,8 @@ void CutElemMesh::printMesh()
     for (unsigned int j=0; j<currElem->num_edges; j++)
     {
       std::cout<<std::setw(4);
-      if (currElem->local_edge_has_intersection[j])
-        std::cout << currElem->embedded_nodes_on_edge[j]->id << " ";
+      if (currElem->edges[j]->has_intersection())
+        std::cout << currElem->edges[j]->get_embedded_node()->id << " ";
       else
         std::cout << "  -- ";
     }

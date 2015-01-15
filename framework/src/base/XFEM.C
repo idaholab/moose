@@ -101,9 +101,21 @@ XFEMCutElem::~XFEMCutElem()
 void
 XFEMCutElem::save_fragment_info(const CutElemMesh::element_t * const elem)
 {
-  _local_edge_has_intersection = elem->local_edge_has_intersection;
-  _embedded_nodes_on_edge = elem->embedded_nodes_on_edge;
-  _intersection_x = elem->intersection_x;
+  for (unsigned int i=0; i<elem->edges.size(); ++i)
+  {
+    if ( elem->edges[i]->has_intersection())
+    {
+      _local_edge_has_intersection.push_back(true);
+      _embedded_nodes_on_edge.push_back(elem->edges[i]->get_embedded_node());
+      _intersection_x.push_back(elem->edges[i]->get_intersection(elem->nodes[i]));
+    }
+    else
+    {
+      _local_edge_has_intersection.push_back(false);
+      _embedded_nodes_on_edge.push_back(NULL);
+      _intersection_x.push_back(-1.0);
+    }
+  }
   if (elem->fragments.size() != 1)
   {
     libMesh::err << " ERROR: In save_fragment_info New elements must have 1 interior link"<<std::endl;
@@ -119,9 +131,8 @@ XFEMCutElem::save_fragment_info(const CutElemMesh::element_t * const elem)
       std::vector<Real> master_weights;
       for (unsigned int iedge=0; iedge<elem->num_edges; ++iedge)
       {
-        if (elem->embedded_nodes_on_edge[iedge] == node)
+        if (elem->edges[iedge]->get_embedded_node() == node)
         {
-          elem->intersection_x[iedge];
           int iedgeplus1(iedge<(elem->num_edges-1) ? iedge+1 : 0);
           master_nodes.push_back(_nodes[iedge]);
           master_nodes.push_back(_nodes[iedgeplus1]);
@@ -517,7 +528,7 @@ XFEM::mark_cut_edges_by_state()
     Real orig_cut_distance = -1.0;
     for (unsigned int i=0; i<nsides; ++i)
     {
-      if (CEMElem->local_edge_has_intersection[i])
+      if (CEMElem->edges[i]->has_intersection())
       {
         if (orig_cut_side_id != 999999)
         {
@@ -525,7 +536,7 @@ XFEM::mark_cut_edges_by_state()
           exit(1);
         }
         orig_cut_side_id = i;
-        orig_cut_distance = CEMElem->intersection_x[i];
+        orig_cut_distance = CEMElem->edges[i]->get_intersection(CEMElem->nodes[i]);
       }
     }
     if (orig_cut_side_id == 999999)
