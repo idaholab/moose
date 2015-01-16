@@ -4,7 +4,7 @@
   nx = 100
   ny = 10
   xmax = 0.304 # Length of test chamber
-  ymax = 0.0257 # Half inner diameter of test chamber
+  ymax = 0.0257 # Test chamber radius
 []
 
 [Variables]
@@ -16,7 +16,6 @@
   [./darcy_pressure]
     type = DarcyPressure
     variable = pressure
-    viscosity = 7.98e-4 # (Pa*s) Water at 30 degrees C (Wikipedia)
     permeability = 0.8451e-9 # (m^2) 1mm balls.  From paper
   [../]
 []
@@ -52,4 +51,3 @@
     linear_residuals = true
   [../]
 []
-

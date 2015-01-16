@@ -15,6 +15,7 @@
 #ifndef DARCYPRESSURE_H
 #define DARCYPRESSURE_H
 
+// Including the "Diffusion" Kernel here so we can extend it
 #include "Diffusion.h"
 
 class DarcyPressure;
@@ -22,7 +23,13 @@ class DarcyPressure;
 template<>
 InputParameters validParams<DarcyPressure>();
 
-
+/**
+ * Represents K/mu * grad_u * grad_phi
+ *
+ * We are inheriting from Diffusion instead of from Kernel because
+ * the grad_u * grad_phi is already coded in there and all we
+ * need to do is specialize that calculation by multiplying by K/mu
+ */
 class DarcyPressure : public Diffusion
 {
 public:
@@ -30,9 +37,20 @@ public:
   virtual ~DarcyPressure();
 
 protected:
+  /**
+   * Kernels _must_ override computeQpResidual()
+   */
   virtual Real computeQpResidual();
+
+  /**
+   * This is optional (but recommended!)
+   */
   virtual Real computeQpJacobian();
 
+  /**
+   * These references will be set by the initialization list so that
+   * values can be pulled from the Material system.
+   */
   MaterialProperty<Real> & _permeability;
   MaterialProperty<Real> & _viscosity;
 };

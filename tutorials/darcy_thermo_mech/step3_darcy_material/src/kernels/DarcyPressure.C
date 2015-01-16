@@ -18,10 +18,12 @@
 template<>
 InputParameters validParams<DarcyPressure>()
 {
-  InputParameters params = validParams<Kernel>();
+  // Start with the parameters from our parent
+  InputParameters params = validParams<Diffusion>();
 
-  params.addRequiredParam<Real>("permeability", "The permeability (K) of the fluid");
-  params.addRequiredParam<Real>("viscosity", "The viscosity (mu) of the fluid");
+  // No parameters are necessary here because we're going to get
+  // permeability and viscosity from the Material
+  // so we just return params...
 
   return params;
 }
@@ -29,6 +31,10 @@ InputParameters validParams<DarcyPressure>()
 
 DarcyPressure::DarcyPressure(const std::string & name, InputParameters parameters) :
     Diffusion(name, parameters),
+
+    // Get the permeability and viscosity from the Material system
+    // This returns a MaterialProperty<Real> reference that we store
+    // in the class and then index into in computeQpResidual/Jacobian....
     _permeability(getMaterialProperty<Real>("permeability")),
     _viscosity(getMaterialProperty<Real>("viscosity"))
 {
@@ -41,11 +47,13 @@ DarcyPressure::~DarcyPressure()
 Real
 DarcyPressure::computeQpResidual()
 {
+  // Use the MaterialProperty references we stored earlier
   return (_permeability[_qp]/_viscosity[_qp]) * Diffusion::computeQpResidual();
 }
 
 Real
 DarcyPressure::computeQpJacobian()
 {
+  // Use the MaterialProperty references we stored earlier
   return (_permeability[_qp]/_viscosity[_qp]) * Diffusion::computeQpJacobian();
 }
