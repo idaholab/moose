@@ -25,13 +25,13 @@
     type = DirichletBC # Simple u=value BC
     variable = pressure
     boundary = left # Name of a sideset in the mesh
-    value = 30 # Chosen to give a delta_P/L of ~ 100 kPa/m
+    value = 4000 # (Pa) From Figure 2 from paper.  First dot for 1mm balls.
   [../]
   [./outlet]
     type = DirichletBC
     variable = pressure
     boundary = right
-    value = 0 # Chosen to give a delta_P/L of ~ 100 kPa/m
+    value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm balls
   [../]
 []
 
