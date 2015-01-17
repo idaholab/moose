@@ -62,7 +62,7 @@ CutElemMeshTest::case1Common(CutElemMesh &MyMesh)
 void
 CutElemMeshTest::CutElemMeshTest1a()
 {
-  //std::cout<<"\nRunning case 1a"<<std::endl;
+  std::cout<<"\nRunning case 1a"<<std::endl;
   CutElemMesh MyMesh;
   case1Common(MyMesh);
 
@@ -71,14 +71,14 @@ CutElemMeshTest::CutElemMeshTest1a()
   //sets the links in the children according to the new temporary nodes
   MyMesh.updateTopology();
 
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
   //CPPUNIT_ASSERT(false);
 }
 
 void
 CutElemMeshTest::CutElemMeshTest1b()
 {
-  //std::cout<<"\nRunning case 1b"<<std::endl;
+  std::cout<<"\nRunning case 1b"<<std::endl;
   CutElemMesh MyMesh;
   case1Common(MyMesh);
 
@@ -95,7 +95,7 @@ CutElemMeshTest::CutElemMeshTest1b()
 
   MyMesh.updateTopology();
 
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
 }
 
 void
@@ -155,28 +155,28 @@ CutElemMeshTest::case2Intersections(CutElemMesh &MyMesh)
 void
 CutElemMeshTest::CutElemMeshTest2a()
 {
-  //std::cout<<"\nRunning case 2a"<<std::endl;
+  std::cout<<"\nRunning case 2a"<<std::endl;
   CutElemMesh MyMesh;
   case2Mesh(MyMesh);
   case2Intersections(MyMesh);
   MyMesh.updateTopology();
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
 }
 
 void CutElemMeshTest::CutElemMeshTest2b()
 {
-  //std::cout<<"\nRunning case 2b"<<std::endl;
+  std::cout<<"\nRunning case 2b"<<std::endl;
   CutElemMesh MyMesh;
   case2Mesh(MyMesh);
   case2Intersections(MyMesh);
   MyMesh.updateTopology(false);
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
 }
 
 void CutElemMeshTest::CutElemMeshTest2c()
 {
-  //std::cout<<"\nRunning case 2c"<<std::endl;
-  //std::cout<<"\nCut first element:"<<std::endl;
+  std::cout<<"\nRunning case 2c"<<std::endl;
+  std::cout<<"\nCut first element:"<<std::endl;
   CutElemMesh MyMesh;
   case2Mesh(MyMesh);
 
@@ -185,9 +185,9 @@ void CutElemMeshTest::CutElemMeshTest2c()
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
 
-  //std::cout<<"\nCut second element:"<<std::endl;
+  std::cout<<"\nCut second element:"<<std::endl;
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
@@ -196,9 +196,9 @@ void CutElemMeshTest::CutElemMeshTest2c()
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
 
-  //std::cout<<"\nCut third element:"<<std::endl;
+  std::cout<<"\nCut third element:"<<std::endl;
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
@@ -207,18 +207,18 @@ void CutElemMeshTest::CutElemMeshTest2c()
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
 
-  //std::cout<<"\nFinal:"<<std::endl;
+  std::cout<<"\nFinal:"<<std::endl;
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
 }
 
 void CutElemMeshTest::CutElemMeshTest3()
 {
-  //std::cout<<"\nRunning case 3"<<std::endl;
+  std::cout<<"\nRunning case 3"<<std::endl;
 
   // 0 ----- 1 ----- 2
   // |       |       |
@@ -272,12 +272,12 @@ void CutElemMeshTest::CutElemMeshTest3()
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
 
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
 }
 
 void CutElemMeshTest::CutElemMeshTest4()
 {
-  //std::cout<<"\nRunning case 4"<<std::endl;
+  std::cout<<"\nRunning case 4"<<std::endl;
 
   CutElemMesh MyMesh;
 
@@ -389,5 +389,5 @@ void CutElemMeshTest::CutElemMeshTest4()
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
 
-  //MyMesh.printMesh();
+  MyMesh.printMesh();
 }

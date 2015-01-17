@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <limits>
 
 #define CutElemMeshError(msg) {std::cout<<"CutElemMesh ERROR: "<<msg<<std::endl; exit(1);}
 
@@ -68,30 +69,26 @@ class CutElemMesh
   {
     public:
     edge_t(node_t * node1, node_t * node2);
-
     edge_t(const edge_t & other_edge);
+    edge_t(const edge_t & other_edge, element_t* host, bool convert_to_local);
 
     bool equivalent(const edge_t & other) const;
+    bool containsEdge(edge_t & other);
 
 //    bool operator < (const edge_t & other) const;
 
     void add_intersection(double position, node_t * embedded_node_tmp, node_t * from_node);
-
     void replace_embedded_node(node_t * embedded_node_tmp);
-
     node_t * get_node(unsigned int index);
 
     bool has_intersection();
-
     bool has_intersection_at_position(double position, node_t * from_node);
-
     double get_intersection(node_t * from_node);
 
     node_t * get_embedded_node();
-
     void consistency_check();
-
     void switchNode(node_t *new_node, node_t *old_node);
+    bool containsNode(node_t *node);
 
     private:
     node_t * edge_node1;
@@ -103,19 +100,30 @@ class CutElemMesh
   class fragment_t
   {
     public:
-    fragment_t(element_t * host)
-    {
-      host_elem = host;
-    };
+    fragment_t(element_t * host,
+               bool create_boundary_edges,
+               element_t * from_host = NULL,
+               unsigned int fragment_copy_index = std::numeric_limits<unsigned int>::max());
 
     //Construct a fragment from another fragment.  If convert_to_local is true,
     //convert the nodes to local nodes, otherwise convert them to global nodes.
-    fragment_t(const fragment_t & other_frag, element_t * host, bool convert_to_local);
+    fragment_t(const fragment_t & other_frag,
+               element_t * host,
+               bool convert_to_local);
 
     //The destructor must delete any local nodes
     ~fragment_t();
 
-    std::vector< node_t*> boundary_nodes;
+    void switchNode(node_t *new_node, node_t *old_node);
+    bool containsNode(node_t *node);
+    bool isConnected(fragment_t &other_fragment);
+    std::vector<fragment_t*> split();
+    std::vector<node_t*> commonNodesWithEdge(edge_t & other_edge);
+
+//    std::vector< node_t*> boundary_nodes;
+    std::vector< edge_t*> boundary_edges;
+
+    private:
     element_t * host_elem;
   };
 
@@ -216,15 +224,12 @@ class CutElemMesh
   void addEdgeIntersection( unsigned int elemid, unsigned int edgeid, double position );
   void addEdgeIntersection( element_t * elem, unsigned int edgeid, double position, node_t * embedded_node = NULL );
 
-  void updatePhysicalLinksAndFragmentsOld();
   void updatePhysicalLinksAndFragments();
   void physicalLinkAndFragmentSanityCheck(element_t *currElem);
 
   void updateTopology(bool mergeUncutVirtualEdges=true);
   void reset();
   void clearAncestry();
-  void restoreFragmentInfo(CutElemMesh::element_t * const elem,
-                           const std::vector<std::pair<N_CATEGORY, unsigned int> > &interior_link);
   void restoreFragmentInfo(CutElemMesh::element_t * const elem,
                            fragment_t & from_frag);
   void restoreEdgeIntersections(CutElemMesh::element_t * const elem,

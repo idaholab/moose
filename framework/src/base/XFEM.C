@@ -103,7 +103,7 @@ XFEMCutElem::save_fragment_info(const CutElemMesh::element_t * const elem)
 {
   for (unsigned int i=0; i<elem->edges.size(); ++i)
   {
-    if ( elem->edges[i]->has_intersection())
+    if (elem->edges[i]->has_intersection())
     {
       _local_edge_has_intersection.push_back(true);
       _embedded_nodes_on_edge.push_back(elem->edges[i]->get_embedded_node());
@@ -121,9 +121,18 @@ XFEMCutElem::save_fragment_info(const CutElemMesh::element_t * const elem)
     libMesh::err << " ERROR: In save_fragment_info New elements must have 1 interior link"<<std::endl;
     exit(1);
   }
-  for (unsigned int i=0; i<elem->fragments[0]->boundary_nodes.size(); ++i)
+  unsigned int num_frag_edges = elem->fragments[0]->boundary_edges.size();
+  for (unsigned int i = 0; i < num_frag_edges; ++i)
   {
-    CutElemMesh::node_t * node = elem->fragments[0]->boundary_nodes[i];
+    CutElemMesh::node_t * node = elem->fragments[0]->boundary_edges[i]->get_node(0);
+    unsigned int iprev(i>0 ? i-1 : num_frag_edges-1);
+    if (!elem->fragments[0]->boundary_edges[iprev]->containsNode(node))
+    {
+      node = elem->fragments[0]->boundary_edges[i]->get_node(1);
+      if (!elem->fragments[0]->boundary_edges[iprev]->containsNode(node))
+        libMesh::err << " ERROR: previous edge does not contain either of the nodes"<<std::endl;
+    }
+
     if (node->category == CutElemMesh::N_CATEGORY_EMBEDDED)
     {
       bool found_edge(false);
@@ -391,15 +400,7 @@ void XFEM::build_efa_mesh()
       if (cemit != _cut_elem_map.end())
       {
         XFEMCutElem *xfce = cemit->second;
-        std::vector<std::pair<CutElemMesh::N_CATEGORY, unsigned int> > interior_link;
-        for (unsigned int iil=0; iil<xfce->_interior_link.size(); ++iil)
-        {
-          interior_link.push_back(std::make_pair(xfce->_interior_link[iil].get_category(),
-                                                 xfce->_interior_link[iil].get_index()));
-        }
         CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
-        //_efa_mesh.restoreFragmentInfo(CEMElem,
-        //                              interior_link);
         _efa_mesh.restoreFragmentInfo(CEMElem, xfce->getFragment());
       }
     }
