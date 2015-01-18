@@ -19,6 +19,10 @@ protected:
   std::vector<std::string> _sum_materials;
   unsigned int _num_materials;
 
+  /// arguments to construct a sum of the form \f$ c+\gamma\sum_iF_i \f$
+  Real _prefactor;
+  Real _constant;
+
   /// Function values of the summands.
   std::vector<const MaterialProperty<Real> *> _summand_F;
 
