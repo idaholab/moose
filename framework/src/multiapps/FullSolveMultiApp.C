@@ -56,6 +56,8 @@ FullSolveMultiApp::init()
       if (!ex)
         mooseError("Executioner does not exist!");
 
+      ex->init();
+
       _executioners[i] = ex;
     }
     // Swap back
@@ -86,7 +88,6 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
   for (unsigned int i=0; i<_my_num_apps; i++)
   {
     Executioner * ex = _executioners[i];
-    ex->init();
     ex->execute();
   }
 
