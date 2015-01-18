@@ -29,13 +29,13 @@
     type = DirichletBC
     variable = temp
     boundary = left
-    value = 350 # (C)
+    value = 350 # (K)
   [../]
   [./outlet_temperature]
     type = DirichletBC
     variable = temp
     boundary = right
-    value = 300 # (C)
+    value = 300 # (K)
   [../]
 []
 
@@ -65,4 +65,3 @@
     linear_residuals = true
   [../]
 []
-

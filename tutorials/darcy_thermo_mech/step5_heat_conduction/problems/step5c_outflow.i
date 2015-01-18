@@ -29,7 +29,7 @@
     type = DirichletBC
     variable = temp
     boundary = left
-    value = 350 # (C)
+    value = 350 # (K)
   [../]
   [./outlet_temperature]
     type = HeatConductionBC
@@ -43,7 +43,7 @@
     type = GenericConstantMaterial
     block = 0
     prop_names = 'thermal_conductivity specific_heat density'
-    prop_values = '18 0.466 8000' # K: W/m*K from wikipedia @296K, Cp: (J/kg*K) from wikipedia, rho: (kg/m^3) from wikipedia
+    prop_values = '18 466 8000' # K: W/m*K from wikipedia @296K, Cp: (J/kg*K) from wikipedia, rho: (kg/m^3) from wikipedia
   [../]
 []
 
@@ -64,4 +64,3 @@
     linear_residuals = true
   [../]
 []
-
