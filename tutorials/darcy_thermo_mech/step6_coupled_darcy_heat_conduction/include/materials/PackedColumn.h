@@ -38,6 +38,9 @@ protected:
   /// The permeability (K)
   MaterialProperty<Real> & _permeability;
 
+  /// The porosity (eps)
+  MaterialProperty<Real> & _porosity;
+
   /// The viscosity of the fluid (mu)
   MaterialProperty<Real> & _viscosity;
 

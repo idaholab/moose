@@ -49,7 +49,10 @@ protected:
    * values can be pulled from the Material system.
    */
   MaterialProperty<Real> & _permeability;
+  MaterialProperty<Real> & _porosity;
   MaterialProperty<Real> & _viscosity;
+  MaterialProperty<Real> & _density;
+  MaterialProperty<Real> & _specific_heat;
 };
 
 #endif //DARCYCONVECTION_H

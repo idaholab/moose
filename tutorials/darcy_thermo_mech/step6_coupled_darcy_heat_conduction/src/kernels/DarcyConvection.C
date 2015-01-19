@@ -35,26 +35,29 @@ DarcyConvection::DarcyConvection(const std::string & name, InputParameters param
 
     // Grab necessary material properties
     _permeability(getMaterialProperty<Real>("permeability")),
-    _viscosity(getMaterialProperty<Real>("viscosity"))
+    _porosity(getMaterialProperty<Real>("porosity")),
+    _viscosity(getMaterialProperty<Real>("viscosity")),
+    _density(getMaterialProperty<Real>("density")),
+    _specific_heat(getMaterialProperty<Real>("specific_heat"))
 {
 }
 
 Real
 DarcyConvection::computeQpResidual()
 {
-  return -(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp] * _grad_u[_qp];
+  return _density[_qp]*_specific_heat[_qp]*_porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp] * _grad_u[_qp];
 }
 
 Real
 DarcyConvection::computeQpJacobian()
 {
-  return -(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp] * _grad_phi[_j][_qp];
+  return _density[_qp]*_specific_heat[_qp]*_porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp] * _grad_phi[_j][_qp];
 }
 
 Real
 DarcyConvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _pressure_var)
-    return -(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp] * _grad_u[_qp];
+    return _density[_qp]*_specific_heat[_qp]*_porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp] * _grad_u[_qp];
   return 0.0;
 }

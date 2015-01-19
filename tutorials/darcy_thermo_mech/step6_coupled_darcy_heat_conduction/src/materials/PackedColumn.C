@@ -21,6 +21,7 @@ PackedColumn::PackedColumn(const std::string & name, InputParameters parameters)
     // Declare two material properties.  This returns references that we
     // hold onto as member variables
     _permeability(declareProperty<Real>("permeability")),
+    _porosity(declareProperty<Real>("porosity")),
     _viscosity(declareProperty<Real>("viscosity")),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
     _specific_heat(declareProperty<Real>("specific_heat")),
@@ -54,7 +55,7 @@ PackedColumn::computeQpProperties()
 
   // We're assuming close packing  so the porosity will be 1 - 0.74048 = 0.25952
   // ( http://en.wikipedia.org/wiki/Close-packing_of_equal_spheres )
-  Real porosity = 0.25952;
+  _porosity[_qp] = 0.25952;
 
   // We will compute a "bulk" thermal conductivity, specific heat and density
   // as a linear combination of the water and steel (all from Wikipedia):
@@ -67,7 +68,7 @@ PackedColumn::computeQpProperties()
   Real steel_rho = 8000;  // (kg/m^3)
 
   // Now actually set the value at the quadrature point
-  _thermal_conductivity[_qp] = porosity*water_k + (1.0-porosity)*steel_k;
-  _specific_heat[_qp] = porosity*water_cp + (1.0-porosity)*steel_cp;
-  _density[_qp] = porosity*water_rho + (1.0-porosity)*steel_rho;
+  _thermal_conductivity[_qp] = _porosity[_qp]*water_k + (1.0-_porosity[_qp])*steel_k;
+  _specific_heat[_qp] = _porosity[_qp]*water_cp + (1.0-_porosity[_qp])*steel_cp;
+  _density[_qp] = _porosity[_qp]*water_rho + (1.0-_porosity[_qp])*steel_rho;
 }
