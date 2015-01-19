@@ -8,6 +8,11 @@ from ..slides import *
 
 ##
 # Class for generating complete slide shows from markdown syntax
+#
+# Available properties in top-level "[presentation]" block
+#   style = 'inl'
+#   code = 'dark' (see https://highlightjs.org/ for available options)
+#
 class PresentationBuilder(object):
 
   ##
@@ -100,6 +105,11 @@ class PresentationBuilder(object):
       if 'title' in self._params:
         data = re.sub(r'\<title\>.*?\</title\>', '<title>' + self._params['title'] + '</title>', data)
 
+    # Insert the code format
+    if name == 'bottom' and self._format == 'remark' and 'code' in self._params:
+      print 'hello'
+      data = re.sub(r"(highlightStyle:.*?\,)", "highlightStyle: '" + self._params['code'] + "',", data)
+
     # Return the html
     return data
 
@@ -132,7 +142,6 @@ class PresentationBuilder(object):
           style[m[0].strip()] = m[1].replace('\n', '').strip()
 
         self.warehouse.css = style
-
 
   ##
   # Inserts additional CSS commands into the html output

@@ -1,5 +1,5 @@
 # Python packages
-import os, re, inspect, string
+import os, re, inspect, string, urllib2
 from FactorySystem import InputParameters, MooseObject
 from ..images import *
 
@@ -9,7 +9,7 @@ try:
   from markdown.extensions.codehilite import CodeHiliteExtension
 
 except ImportError:
-  print 'Error importing markdown modules'
+ # print 'Error importing markdown modules'
   pass
 
 ##
@@ -30,6 +30,8 @@ class RemarkSlide(MooseObject):
     params.addParam('suffix', 'Raw markdown to insert after slide content')
     params.addParam('auto_title', True, 'Enable/disable automatic addition of (cont.) for slides without a title.')
     params.addParam('slides', 'A list of slides to include')
+    params.addParam('auto_insert_github_code', True, 'When true links to GitHub code is automatically inserted')
+    params.addParam('insert_github_code_link', 'top', 'When auto linking code place the link at with the code (top | bottom | none)')
 
     params.addParamsToGroup('properties', ['class', 'background-image'])
 
@@ -169,8 +171,55 @@ class RemarkSlide(MooseObject):
         self._pars[key] = match.group(1)
         markdown = markdown.replace(match.group(1), '')
 
+    # Search for github code urls
+    if self.getParam('auto_insert_github_code'):
+      regex = '(\[.*?\]\((https://github.com/(.*?/)blob/(.*?))\))'
+      markdown = re.sub(regex, self._insertGithubCode, markdown)
+
     # Return the parsed markdown
     return markdown
+
+  ##
+  # Substitution method for github code
+  def _insertGithubCode(self, match):
+
+    # Download the code
+    url = 'https://raw.githubusercontent.com/' + match.group(3) + match.group(4)
+    response = urllib2.urlopen(url)
+    code = response.read()
+
+    # Determine language
+    language = ''
+    _, ext = os.path.splitext(url)
+    if ext in ['.C', '.h']:
+      language = 'cpp'
+    elif ext == '.py':
+      language = 'python'
+    elif ext == '.i':
+      language = 'text'
+
+    # Do nothing if the language is not detected
+    else:
+      return match.group(0)
+
+    # Initialize the output string
+    block = ''
+
+    # Insert link at top
+    link = self.getParam('insert_github_code_link')
+    if link == 'top':
+      block += match.group(0) + '\n'
+
+    # Insert code
+    block += '\n```' + language + '\n'
+    block += code
+    block += '```\n'
+
+    # Insert link at bottom
+    if link == 'bottom':
+      block += match.group(0)
+
+    return block
 
   ##
   # Creates the Image objects from the markdown
