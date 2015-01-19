@@ -45,9 +45,6 @@
 [Outputs]
   output_initial = true # Output initial condiiton
   exodus = true # Output Exodus format
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_pref_log = true # Show performance log information on screen
+  print_linear_residuals = true # Display linear residuals on screen
 []
