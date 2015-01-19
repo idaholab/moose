@@ -1,4 +1,6 @@
 [presentation]
+  style = 'inl'
+  code = 'dark'
   [./cover]
     type = CoverSet
     title = '**PresentationBuilder**<br><br> A tool for generating slides from MOOSE wiki content'

@@ -94,7 +94,18 @@ public:
   virtual int timeStep();
 
   /**
+   * Get the output interval
+   */
+  const unsigned int & interval() const;
+
+  /**
+   * Get the current 'output_on' selections
+   */
+  std::string outputOn() const;
+
+  /**
    * Return the support output execution times
+   * @param default_type The default MultiMooseEnum option
    */
   static MultiMooseEnum getExecuteOptions(std::string default_type = "");
 
@@ -128,6 +139,12 @@ protected:
    */
   bool onInterval();
 
+  /**
+   * Initialization method.
+   * This populates the various data structures needed to control the output
+   */
+  virtual void init();
+
   /// Pointer the the FEProblem object for output object (use this)
   FEProblem * _problem_ptr;
 
@@ -145,14 +162,6 @@ protected:
 
   /// The common Execution types; this is used as the default execution type for everything except system information and input
   MultiMooseEnum _output_on;
-
-//private:
-
-  /**
-   * Initialization method.
-   * This populates the various data structures needed to control the output
-   */
-  virtual void init();
 
   /// The current time for output purposes
   Real & _time;
@@ -194,7 +203,6 @@ protected:
   bool _initialized;
 
   friend class OutputWarehouse;
-
 };
 
 #endif /* OUTPUT_H */
