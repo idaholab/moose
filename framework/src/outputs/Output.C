@@ -46,19 +46,20 @@ InputParameters validParams<Output>()
   // Add the 'output_on' input parameter for users to set
   params.addParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"), "Set to (none|initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment");
 
+  // Add ability to append to the 'output_on' list
+  params.addParam<MultiMooseEnum>("additional_output_on", Output::getExecuteOptions(), "This list of output flags is added to the existing flags (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment");
+
   // 'Timing' group
   params.addParamNamesToGroup("time_tolerance interval output_initial output_final sync_times sync_only start_time end_time ", "Timing");
 
+  // Output toggles
+  params.addParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file");
+  params.addParam<bool>("output_timestep_end", true, "Request that data be output at the end of the timestep");
+  params.addParam<bool>("output_final", false, "Force the final time step to be output, regardless of output interval");
+  params.addParam<bool>("output_failed", false, "When true all time attempted time steps are output");
 
   // **** DEPRECATED PARAMETERS ****
-  params.addDeprecatedParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file",
-                                  "replace by adding 'initial' to the 'output_on' option");
-  params.addDeprecatedParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output",
-                                  "replace by adding 'timestep_end' to the 'output_on' option");
-  params.addDeprecatedParam<bool>("output_final", false, "Force the final time step to be output, regardless of output interval",
-                                  "replace by adding 'final' to the 'output_on' option");
-  params.addDeprecatedParam<bool>("output_failed", false, "When true all time attempted time steps are output",
-                                  "replace by adding 'failed' to the 'output_on' option");
+  params.addDeprecatedParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output", "Replace this output with 'output_timestep_end'");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
@@ -71,8 +72,11 @@ InputParameters validParams<Output>()
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
+  // Build the string of options
+  std::string options = "none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 timestep_begin=0x10 final=0x20 failed=0x80";
+
   // The numbers associated must be in sync with the ExecFlagType in Moose.h
-  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 timestep_begin=0x10 final=0x20 failed=0x80", default_type);
+  return MultiMooseEnum(options, default_type);
 }
 
 Output::Output(const std::string & name, InputParameters & parameters) :
@@ -100,18 +104,22 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _initialized(false)
 {
 
-  // **** DEPRECATED PARAMETER SUPPORT ****
+  // Handle the short-cut output flags
   if (getParam<bool>("output_initial"))
     _output_on.push_back("initial");
-
-  if (!getParam<bool>("output_intermediate"))
-    _output_on.erase("timestep_end");
-
   if (getParam<bool>("output_final"))
     _output_on.push_back("final");
-
   if (getParam<bool>("output_failed"))
     _output_on.push_back("failed");
+
+  // Apply the additional output flags
+  MultiMooseEnum add = getParam<MultiMooseEnum>("additional_output_on");
+  for (MooseEnumIterator it = add.begin(); it != add.end(); ++it)
+    _output_on.push_back(*it);
+
+  // **** DEPRECATED PARAMETER SUPPORT ****
+  if (!getParam<bool>("output_intermediate"))
+    _output_on.erase("timestep_end");
 }
 
 void
@@ -195,4 +203,18 @@ int
 Output::timeStep()
 {
   return _t_step;
+}
+
+std::string
+Output::outputOn() const
+{
+  std::ostringstream oss;
+  for (MooseEnumIterator it = _output_on.begin(); it != _output_on.end(); ++it)
+  {
+    if (it == _output_on.begin())
+      oss << *it;
+    else
+      oss << " " << *it;
+  }
+  return oss.str();
 }

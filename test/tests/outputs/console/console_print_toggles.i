@@ -34,18 +34,14 @@
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
-  exodus = true
-  output_initial = true
-  print_linear_residuals = true
-  print_perf_log = true
+  # This block is needed so cli_args in the tests files is available
+  [./console]
+    type = Console
+  [../]
 []

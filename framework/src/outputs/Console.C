@@ -69,8 +69,6 @@ InputParameters validParams<Console>()
   multiplier.push_back(2);
   params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
 
-  // By default set System Information to output on initial
-  params.set<MultiMooseEnum>("output_system_information_on") = "initial";
 
   // Advanced group
   params.addParamNamesToGroup("max_rows fit_node verbose show_multiapp_name", "Advanced");
@@ -84,13 +82,20 @@ InputParameters validParams<Console>()
   // Variable norms group
   params.addParamNamesToGroup("outlier_variable_norms all_variable_norms outlier_multiplier", "Norms");
 
-  // By default the Console object outputs nonlinear iterations and failed timesteps
-  params.set<MultiMooseEnum>("output_on").push_back("nonlinear");
-  params.set<MultiMooseEnum>("output_on").push_back("failed");
+  /*
+   * The following modifies the default behavior from base class parameters. Notice the extra flag on
+   * the set method. This enables "quiet mode". This is done to allow for the proper detection
+   * of user-modified parameters
+   */
+  // By default set System Information to output on initial
+  params.set<MultiMooseEnum>("output_system_information_on", /*quiet_mode=*/true) =  "initial";
+
+  // Change the default behavior of 'output_on' to included nonlinear iterations and failed timesteps
+  params.set<MultiMooseEnum>("output_on", /*quiet_mode=*/true).push_back("nonlinear failed");
 
   // By default postprocessors and scalar are only output at the end of a timestep
-  params.set<MultiMooseEnum>("output_postprocessors_on") = "timestep_end";
-  params.set<MultiMooseEnum>("output_scalars_on") = "timestep_end";
+  params.set<MultiMooseEnum>("output_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
+  params.set<MultiMooseEnum>("output_scalars_on", /*quiet_mode=*/true) = "timestep_end";
 
   return params;
 }
@@ -120,6 +125,18 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _timing(_app.getParam<bool>("timing")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer())
 {
+
+  // Apply the special common console flags (print_...)
+  ActionWarehouse & awh = _app.actionWarehouse();
+  Action * common_action = awh.getActionsByName("common_output")[0];
+  if (!_pars.paramSetByUser("output_on") && common_action->getParam<bool>("print_linear_residuals"))
+    _output_on.push_back("linear");
+  if (!_pars.paramSetByUser("perf_log") && common_action->getParam<bool>("print_perf_log"))
+  {
+    _perf_log = true;
+    _solve_log = true;
+    _setup_log = true;
+  }
 
   // If --timing was used from the command-line, do nothing, all logs are enabled
   if (!_timing)
@@ -701,6 +718,13 @@ Console::outputSystemInformation()
   if (!pc_desc.empty())
     oss << std::setw(_field_width) << "  Preconditioner: " << pc_desc << '\n';
   oss << '\n';
+
+  // Output information
+  const std::vector<Output *> & outputs = _app.getOutputWarehouse().all();
+  oss << "Outputs:\n";
+  for (std::vector<Output *>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
+    oss << "  " << std::setw(_field_width-2) << (*it)->name() <<  "\"" << (*it)->outputOn() << "\"\n";
+  oss << "\n\n";
 
   // Output the information
   write(oss.str());
