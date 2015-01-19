@@ -13,6 +13,7 @@ if __name__ == '__main__':
            'input/fem.i',
            'input/anatomy.i',
            'input/kernels.i',
+           'input/coords.i',
            'input/peacock.i',
            'input/input_parameters.i',
            'input/materials.i',
