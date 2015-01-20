@@ -50,7 +50,8 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const std::string & name,
 void
 MultiAppUserObjectTransfer::initialSetup()
 {
-  variableIntegrityCheck(_to_var_name);
+  if (_direction == TO_MULTIAPP)
+    variableIntegrityCheck(_to_var_name);
 }
 
 void

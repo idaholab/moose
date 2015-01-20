@@ -121,6 +121,7 @@
     type = RunApp
     input = 'console_print_toggles.i'
     expect_out = '\s*0\sNonlinear.*?\n\s*1\sNonlinear'
+    valgrind = NONE
     cli_args = "Outputs/print_linear_residuals=true Outputs/console/output_on='nonlinear final failed timestep_end'"
   [../]
   [./print_pref_log]
