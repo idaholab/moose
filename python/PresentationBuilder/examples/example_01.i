@@ -1,4 +1,5 @@
 [presentation]
+  style = inl
   [./basic]
     type = FileSet
     title = '**FileSet:** Build and modify a slide set directly from a markdown file'

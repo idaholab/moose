@@ -77,3 +77,28 @@ Left
 .right[
 Right
 ]
+
+---
+# GitHub File Extraction
+
+[Kernel.C](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/Kernel.C)
+
+---
+
+[C++ Function Extraction](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/Kernel.C#computeResidual)
+
+---
+
+[C++ Function Prototype Extraction](https://github.com/idaholab/moose/blob/devel/framework/include/kernels/Kernel.h#computeOffDiagJacobian)
+
+[C++ Template Functions](https://github.com/idaholab/moose/blob/devel/framework/include/materials/Material.h#Material::getMaterialProperty)
+
+[C++ Template Function Prototypes](https://github.com/idaholab/moose/blob/devel/framework/include/materials/Material.h#getMaterialProperty)
+
+---
+
+[Input File Blocks](https://github.com/idaholab/moose/blob/devel/test/tests/adaptivity/initial_adapt/initial_adapt.i#Kernels)
+
+---
+
+[Input File Sub-Blocks](https://github.com/idaholab/moose/blob/devel/test/tests/adaptivity/initial_marker/initial_marker.i#Markers)
