@@ -124,19 +124,21 @@
     valgrind = NONE
     cli_args = "Outputs/print_linear_residuals=true Outputs/console/output_on='nonlinear final failed timestep_end'"
   [../]
-  [./print_pref_log]
+  [./print_perf_log]
     # Tests that flag is working to show performace log from the top level
     type = RunApp
     input = 'console_print_toggles.i'
     expect_out = 'Moose Test Performance'
     cli_args = 'Outputs/print_perf_log=true'
   [../]
-  [./print_pref_log_disable]
+  [./print_perf_log_disable]
     # Tests that perf log is disabled flag when console level flag is set to false
     type = RunApp
     input = 'console_print_toggles.i'
     expect_out = '\s*2\sNonlinear.*?\n\s*\n\Z'
-    cli_args = 'Outputs/print_perf_log=true Outputs/console/perf_log=false'
+    valgrind = NONE
+    # Note the "--disable-perflog" cli option is for libMesh currently NOT MOOSE
+    cli_args = '--disable-perflog Outputs/print_perf_log=true Outputs/console/perf_log=false'
     method = 'opt oprof' # debug prints some extra stuff at the end that messes up the regex
   [../]
   [./additional_output_on]
