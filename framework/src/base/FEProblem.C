@@ -521,6 +521,20 @@ void FEProblem::initialSetup()
   _transfers(EXEC_INITIAL)[0].initialSetup();
   _transfers(EXEC_CUSTOM)[0].initialSetup();
 
+  _to_multi_app_transfers(EXEC_LINEAR)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_NONLINEAR)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_TIMESTEP_END)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_INITIAL)[0].initialSetup();
+  _to_multi_app_transfers(EXEC_CUSTOM)[0].initialSetup();
+
+  _from_multi_app_transfers(EXEC_LINEAR)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_NONLINEAR)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_TIMESTEP_END)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_INITIAL)[0].initialSetup();
+  _from_multi_app_transfers(EXEC_CUSTOM)[0].initialSetup();
+
   if (!_app.isRecovering())
   {
     _aux.compute(EXEC_TIMESTEP_BEGIN);
