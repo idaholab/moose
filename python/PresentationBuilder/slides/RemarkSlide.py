@@ -2,6 +2,7 @@
 import os, re, inspect, string, urllib2
 from FactorySystem import InputParameters, MooseObject
 from ..images import *
+from ..utils import *
 
 try:
   import misaka
@@ -173,6 +174,11 @@ class RemarkSlide(MooseObject):
 
     # Search for github code urls
     if self.getParam('auto_insert_github_code'):
+      # Parse code with function extraction
+      regex = '(\[.*?\]\((https://github.com/(.*?/)blob/(.*?))#(.*?)\))'
+      markdown = re.sub(regex, self._insertGithubCode, markdown)
+
+      # Parse complete code
       regex = '(\[.*?\]\((https://github.com/(.*?/)blob/(.*?))\))'
       markdown = re.sub(regex, self._insertGithubCode, markdown)
 
@@ -197,10 +203,15 @@ class RemarkSlide(MooseObject):
       language = 'python'
     elif ext == '.i':
       language = 'text'
-
     # Do nothing if the language is not detected
     else:
       return match.group(0)
+
+    # Strip code (i.e, remove functions, prototypes and input file blocks)
+    if len(match.groups()) == 5:
+      strip = match.group(5)
+      if strip in code:
+        code = stripCode(code, ext, strip)
 
     # Initialize the output string
     block = ''

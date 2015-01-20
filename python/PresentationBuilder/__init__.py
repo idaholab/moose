@@ -1,1 +1,1 @@
-__all__ = ['base', 'slidesets', 'slides', 'images']
+__all__ = ['base', 'slidesets', 'slides', 'images', 'utils']
