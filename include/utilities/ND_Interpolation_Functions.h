@@ -28,7 +28,9 @@ public:
   virtual double getGradientAt(std::vector<double> point_coordinate);
   virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
   std::vector<double> NDinverseFunction(double F_min, double F_max);
-  std::vector<double> NDinverseFunctionGrid(double F, double tolerance, int initial_divisions);
+  std::vector<double> NDinverseFunctionGrid(double F);
+
+  void updateRNGparameters(double tolerance, double initial_divisions);
 
   double NDderivative(std::vector<double> coordinate);
   double integral(std::vector<double> coordinate, int samples);
@@ -40,6 +42,9 @@ protected:
   std::string _data_filename;
   bool _completed_init;
   int _dimensions;
+
+  double _tolerance;
+  int _initial_divisions;
 
   std::vector<double> _cellPoint0;
   std::vector<double> _cellDxs;

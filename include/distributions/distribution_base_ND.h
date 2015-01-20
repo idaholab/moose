@@ -26,7 +26,7 @@ public:
    virtual double  Pdf(std::vector<double> x) = 0;                              ///< Pdf function at coordinate x
    virtual double  Cdf(std::vector<double> x) = 0;                              ///< Cdf function at coordinate x
    //virtual std::vector<double> InverseCdf(double min, double max) = 0;
-   virtual std::vector<double> InverseCdf(double F, double tolerance, int initial_divisions=2) = 0;
+   virtual std::vector<double> InverseCdf(double F) = 0;
 
    std::string & getType();
 
@@ -36,7 +36,6 @@ protected:
    EPbFunctionType _function_type;
    std::map <std::string,double> _dis_parameters;
    bool _checkStatus;
-
 };
 
 class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
@@ -44,10 +43,15 @@ class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
 public:
   BasicMultiDimensionalInverseWeight(const char * data_filename,double p):  _interpolator(data_filename,p)
   {
+	  _tolerance = 0.1;
+	  _initial_divisions = 10;
   };
 
   BasicMultiDimensionalInverseWeight(std::string data_filename,double p):  _interpolator(data_filename,p)
   {
+	_tolerance = 0.1;
+	_initial_divisions = 10;
+
    bool LBcheck = _interpolator.checkLB(0.0);
    if (LBcheck == false)
     throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
@@ -78,15 +82,25 @@ public:
      return value;
   };
 
+  void updateRNGparameter(double tolerance, int initial_divisions){
+	  _tolerance = tolerance;
+	  _initial_divisions = initial_divisions;
+
+	  _interpolator.updateRNGparameters(tolerance,initial_divisions);
+  };
+
   std::vector<double>
-  InverseCdf(double F, double tolerance, int initial_divisions=2)
+  InverseCdf(double F)
   {
-   return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
+   return _interpolator.NDinverseFunctionGrid(F);
       //return _interpolator.NDinverseFunction(min, max);
   };
 
+
 protected:
   InverseDistanceWeighting  _interpolator;
+  double _tolerance;
+  int _initial_divisions;
 };
 
 
@@ -164,9 +178,9 @@ public:
 //    return std::vector<double>(2,-1.0);
 //  };
   std::vector<double>
-  InverseCdf(double F, double tolerance, int initial_divisions=10)
+  InverseCdf(double F)
   {
-   return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
+   return _interpolator.NDinverseFunctionGrid(F);
       //return _interpolator.NDinverseFunction(min, max);
   };
 protected:
@@ -222,9 +236,9 @@ public:
 //    return std::vector<double>(2,-1.0);
 //  };
   std::vector<double>
-  InverseCdf(double F, double tolerance, int initial_divisions=10)
+  InverseCdf(double F)
   {
-   return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
+   return _interpolator.NDinverseFunctionGrid(F);
       //return _interpolator.NDinverseFunction(min, max);
   };
 protected:

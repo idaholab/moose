@@ -77,6 +77,7 @@ BasicDistributionND::getType(){
    return _type;
 }
 
+
 double
 getDistributionVariable(BasicDistributionND & dist,const std::string & variable_name){
   return dist.getVariable(variable_name);
@@ -104,8 +105,9 @@ double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
 
 std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){
  //return dist.InverseCdf(min, max);
- return dist.InverseCdf((max-min)/2.0, (max-min), 10);
  //return std::vector<double>(2,-1.0);
+ //return dist.InverseCdf((max-min)/2.0, (max-min), 10);
+  return dist.InverseCdf((max-min)/2.0);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std::vector<double> mu){
