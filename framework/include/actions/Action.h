@@ -77,6 +77,17 @@ public:
    */
   std::string getShortName() const;
 
+  /**
+   * Returns the base name which is the string before the last delimiter for the
+   * current ParserBlock
+   * Note:
+   *  1) If there are multiple slashes, like ./foo/bar/baz, this will return
+   *     ./foo/bar while getShortName() will return baz.
+   *  2) If there are no slashes, this will return an empty string and
+   *     getShortName() will return the action name.
+   */
+  std::string getBaseName() const;
+
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
 
 protected:
