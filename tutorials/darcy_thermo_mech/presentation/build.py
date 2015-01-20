@@ -16,8 +16,12 @@ if __name__ == '__main__':
            'input/coords.i',
            'input/peacock.i',
            'input/input_parameters.i',
+           'input/step01.i',
+           'input/step02.i',
            'input/materials.i',
+           'input/step03.i',
            'input/aux_system.i',
+           'input/step04.i',
            'input/coupling.i',
            'input/adapt.i',
            'input/modules.i']
