@@ -5,7 +5,7 @@
     contents = false
     type = INLDjangoWikiSet
     wiki = MooseTraining/CoordinateSystems
-    inactive = 'spherical-coordinates'
+#    inactive = 'spherical-coordinates'
     [./Images]
       [./177]
         width = 280px
