@@ -19,6 +19,8 @@ public:
 
   static Real gapCyl( Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
 
+  static Real gapSphere( Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
+
 protected:
 
   virtual void computeQpProperties();
@@ -65,7 +67,6 @@ protected:
 
   Real _min_gap;
   Real _max_gap;
-  const bool _cylindrical_gap;
   Real _min_denom;
   Real _max_denom;
 

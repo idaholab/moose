@@ -1,5 +1,5 @@
 #
-# 1-D Gap Heat Transfer Test without mechanics
+# 2-D RZ Gap Heat Transfer Test without mechanics
 #
 # This test exercises 1-D gap heat transfer for a constant conductivity gap.
 #
@@ -11,28 +11,16 @@
 #  is ramped from 100 to 200 over one time unit, and then held fixed for an additional
 #  time unit.  The temperature of the far right boundary is held fixed at 100.
 #
-# A simple analytical solution is possible for the heat flux between the blocks
-#  (Note that this is for a Cartesion system, and the equation for a cylindrical
-#   system is different.  What is given here matches what is coded.):
+# A simple analytical solution is possible for the heat flux between the blocks, or cylinders in the case of RZ.:
 #
-#  Flux = (T_left - T_right) * (gapK/gap_width)
+#  Flux = (T_left - T_right) * (gapK/(r*ln(r2/r1)))
 #
-# The gap conductivity is specified as 1, thus
+# For gapK = 1 (default value)
 #
-#  gapK(Tavg) = 1.0*Tavg
+# The integrated heat flux across the gap at time 2 is then:
 #
-#
-# The integrated heat flux across the gap at time = 2 is then:
-#
-#  IntegrFlux(2) = Area * 100 * (1.0/1.0) = Area * 100
-#
-#  The area is taken as the area of the slave (inner) surface:
-#
-#  Area = 2 * pi * 1 * 1
-#
-#  So,
-#
-#  IntegrFlux(2) = 2 * pi * 100 -> 628.3185
+# 2*pi*h*k*delta_T/(ln(r2/r1))
+# 2*pi*1*1*100/(ln(2/1)) = 906.5 watts
 #
 # For comparison, see results from the flux post processors
 #
