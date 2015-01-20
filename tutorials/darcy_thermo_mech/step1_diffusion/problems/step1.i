@@ -35,6 +35,12 @@
   [../]
 []
 
+[Problem]
+  type = FEProblem # This is the "normal" type of Finite Element Problem in MOOSE
+  coord_type = RZ # Axisymmetric RZ
+  rz_coord_axis = X # Which axis the symmetry is around
+[]
+
 [Executioner]
   type = Steady # Steady state problem
   solve_type = PJFNK #Preconditioned Jacobian Free Newton Krylov

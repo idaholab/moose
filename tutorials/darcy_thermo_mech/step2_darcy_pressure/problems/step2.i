@@ -35,6 +35,12 @@
   [../]
 []
 
+[Problem]
+  type = FEProblem
+  coord_type = RZ
+  rz_coord_axis = X
+[]
+
 [Executioner]
   type = Steady
   solve_type = PJFNK
