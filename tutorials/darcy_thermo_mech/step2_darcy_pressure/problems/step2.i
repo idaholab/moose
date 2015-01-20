@@ -35,6 +35,12 @@
   [../]
 []
 
+[Problem]
+  type = FEProblem
+  coord_type = RZ
+  rz_coord_axis = X
+[]
+
 [Executioner]
   type = Steady
   solve_type = PJFNK
@@ -45,6 +51,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  print_pref_log = true
+  print_perf_log = true
   print_linear_residuals = true
 []
