@@ -270,7 +270,7 @@ MultiAppNearestNodeTransfer::execute()
       else
         to_mesh = &to_problem.mesh().getMesh();
 
-      bool is_nodal = to_sys.variable_type(to_var_num) == FEType();
+      bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
 
       dof_id_type n_nodes = to_mesh->n_nodes();
       dof_id_type n_elems = to_mesh->n_elem();
