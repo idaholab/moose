@@ -241,15 +241,11 @@
 
 [Outputs]
   file_base = bl22
+  print_perf_log = true
   [./exodus]
     type = Exodus
     interval = 100000
     hide = pgas
     output_on = 'initial final timestep_end'
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
   [../]
 []

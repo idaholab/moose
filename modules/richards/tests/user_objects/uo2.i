@@ -397,12 +397,9 @@
 []
 
 [Outputs]
-  active = 'console csv exodus'
+  active = 'csv exodus'
   file_base = uo2
-  [./console]
-    type = Console
-    perf_log = false
-  [../]
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

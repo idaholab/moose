@@ -91,10 +91,7 @@
 
 [Outputs]
   file_base = density
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-  [../]
+  output_initial = true
   [./csv]
     type = CSV
   [../]

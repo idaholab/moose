@@ -89,10 +89,7 @@
 
 [Outputs]
   file_base = seff1
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-  [../]
+  output_initial = true
   [./csv]
     type = CSV
   [../]

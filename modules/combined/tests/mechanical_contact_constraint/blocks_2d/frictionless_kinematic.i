@@ -149,16 +149,16 @@
 
 [Outputs]
   file_base = frictionless_kinematic_out
-  output_on = 'initial timestep_end'
+  output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
   [../]
   [./console]
     type = Console
-    perf_log = true
     max_rows = 5
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []
 

@@ -167,16 +167,13 @@
 
 [Outputs]
   file_base = rot_eg1
+  output_initial = true
   solution_history = true
-  output_on = 'initial timestep_end'
+  print_linear_residuals = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     use_displaced = true
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []
 

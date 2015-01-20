@@ -347,12 +347,9 @@
 []
 
 [Outputs]
-  active = 'console csv'
+  active = 'csv'
   file_base = uo3
-  [./console]
-    type = Console
-    perf_log = false
-  [../]
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

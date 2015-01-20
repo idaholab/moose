@@ -153,14 +153,13 @@
 
 [Outputs]
   file_base = voronoi_2D
+  output_initial = true
   exodus = true
   csv = true
-  output_on = 'initial timestep_end'
+  print_perf_log = true
   [./console]
     type = Console
-    perf_log = true
     max_rows = 20
-    output_on = 'timestep_end failed nonlinear'
   [../]
 []
 

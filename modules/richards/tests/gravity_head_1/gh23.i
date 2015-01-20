@@ -125,13 +125,13 @@
 
 [Outputs]
   file_base = gh23
+  output_initial = true
+  output_final = true
   interval = 10000
   exodus = true
-  output_on = 'initial timestep_end final'
+  print_perf_log = true
   [./console]
     interval = 1
     type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
   [../]
 []

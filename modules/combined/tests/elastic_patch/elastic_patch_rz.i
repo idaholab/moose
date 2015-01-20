@@ -229,14 +229,11 @@
 [] # Executioner
 
 [Outputs]
-  output_on = 'initial timestep_end'
+  output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
 [] # Outputs
