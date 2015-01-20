@@ -59,14 +59,11 @@
 []
 
 [Outputs]
-  output_on = 'initial timestep_end'
+  output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./out]
     type = Gnuplot
     extension = gif
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []

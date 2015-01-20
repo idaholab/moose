@@ -128,13 +128,9 @@
 
 [Outputs]
   file_base = pps_out
+  print_perf_log = true
   [./exodus]
     type = Exodus
     output_scalars_on = none
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
   [../]
 []

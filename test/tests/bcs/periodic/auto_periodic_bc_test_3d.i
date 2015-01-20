@@ -57,10 +57,6 @@
 [Outputs]
   file_base = out_auto_3d
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
-  [../]
+  print_perf_log = true
 []
 

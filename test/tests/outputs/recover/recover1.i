@@ -48,13 +48,10 @@
 []
 
 [Outputs]
+  output_initial = true
   file_base = recover_out
   exodus = true
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
   [./recover]
     type = Checkpoint
     file_base = test_recover_dir

@@ -74,12 +74,9 @@
 []
 
 [Outputs]
+  output_initial = true
   exodus = true
   sync_times = '0.5 9.5'
   checkpoint = true
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-    output_on = 'timestep_end failed nonlinear linear'
-  [../]
+  print_linear_residuals = true
 []
