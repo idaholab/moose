@@ -33,7 +33,6 @@ InputParameters validParams<GapConductance>()
   // Common
   params.addParam<Real>("min_gap", 1e-6, "A minimum gap size");
   params.addParam<Real>("max_gap", 1e6, "A maximum gap size");
-  params.addParam<bool>("cylindrical_gap", false, "Use cylindrical wall heat flux");
   params.addParam<Real>("min_denom", 1e-6, "A minimum value for r*(r2/r1) term in cylindrical wall heat flux");
   params.addParam<Real>("max_denom", 1e6, "A maximum value for r*(r2/r1) term in cylindrical wall heat flux");
 
@@ -69,7 +68,6 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
                 1/getParam<Real>("emissivity_1") + 1/getParam<Real>("emissivity_2") - 1 : 0 ),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
-   _cylindrical_gap(getParam<bool>("cylindrical_gap")),
    _min_denom(getParam<Real>("min_denom")),
    _max_denom(getParam<Real>("max_denom")),
    _temp_var(_quadrature ? getVar("variable",0) : NULL),
@@ -119,8 +117,10 @@ GapConductance::computeQpConductance()
 Real
 GapConductance::h_conduction()
 {
-  if (_cylindrical_gap)
+  if (_coord_sys == Moose::COORD_RZ)
     return gapK()/gapCyl(_radius, _r1, _r2, _min_denom, _max_denom);
+  if (_coord_sys == Moose::COORD_RSPHERICAL)
+    return gapK()/gapSphere(_radius, _r1, _r2, _min_denom, _max_denom);
   else
     return gapK()/gapLength(-(_gap_distance), _min_gap, _max_gap);
 }
@@ -206,6 +206,22 @@ GapConductance::gapCyl(Real radius, Real r1, Real r2, Real min_denom, Real max_d
   return denominator;
 }
 
+Real
+GapConductance::gapSphere(Real radius, Real r1, Real r2, Real min_denom, Real max_denom)
+{
+  Real denominator = std::pow(radius,2)*((1/r1)-(1/r2));
+
+  if (denominator > max_denom)
+  {
+    denominator = max_denom;
+  }
+  else if (denominator < min_denom)
+  {
+    denominator =  min_denom;
+  }
+
+  return denominator;
+}
 
 Real
 GapConductance::gapK()
@@ -268,7 +284,7 @@ GapConductance::computeGapValues()
     }
   }
 
-  if (_cylindrical_gap)
+  if (_coord_sys == Moose::COORD_RZ || _coord_sys == Moose::COORD_RSPHERICAL)
   {
     if (_normals[_qp](0) > 0)
     {
@@ -283,6 +299,6 @@ GapConductance::computeGapValues()
       _radius = _r2;
     }
     else
-      mooseError( "Issue with cylindrical flux calc. normals. \n");
+      mooseError( "Issue with cylindrical or sphereical flux calc. normals. \n");
   }
 }
