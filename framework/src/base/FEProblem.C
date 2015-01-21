@@ -1923,11 +1923,16 @@ FEProblem::initPostprocessorData(const std::string & name)
 
 }
 
-
 ExecStore<PostprocessorWarehouse> &
 FEProblem::getPostprocessorWarehouse()
 {
   return _pps;
+}
+
+ExecStore<UserObjectWarehouse> &
+FEProblem::getUserObjectWarehouse()
+{
+  return _user_objects;
 }
 
 /**

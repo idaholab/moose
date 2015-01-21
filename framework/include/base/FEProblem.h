@@ -486,6 +486,11 @@ public:
   ExecStore<PostprocessorWarehouse> & getPostprocessorWarehouse();
 
   /**
+   * Get a reference to the UserObjectWarehouse ExecStore object
+   */
+  ExecStore<UserObjectWarehouse> & getUserObjectWarehouse();
+
+  /**
    * Returns whether or not the current simulation has any multiapps
    */
   bool hasMultiApps() const { return _has_multiapps; }
