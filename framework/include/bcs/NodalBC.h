@@ -30,7 +30,6 @@ InputParameters validParams<NodalBC>();
 
 /**
  * Base class for deriving any boundary condition that works at nodes
- *
  */
 class NodalBC :
   public BoundaryCondition,
@@ -41,7 +40,8 @@ public:
   NodalBC(const std::string & name, InputParameters parameters);
 
   virtual void computeResidual(NumericVector<Number> & residual);
-  virtual void computeJacobian(SparseMatrix<Number> & jacobian);
+  virtual void computeJacobian();
+  virtual void computeOffDiagJacobian(unsigned int jvar);
 
 protected:
   /// current node being processed
@@ -49,10 +49,23 @@ protected:
 
   /// Quadrature point index
   unsigned int _qp;
-  /// Value of the unknown variable this BC is action on
+  /// Value of the unknown variable this BC is acting on
   VariableValue & _u;
 
   virtual Real computeQpResidual() = 0;
+
+  /**
+   * The user can override this function to compute the "on-diagonal"
+   * Jacobian contribution for this NodalBC.  If not overriden,
+   * returns 1.
+   */
+  virtual Real computeQpJacobian();
+
+  /**
+   * This is the virtual that derived classes should override for
+   * computing an off-diagonal jacobian component.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
 
 #endif /* NODALBC_H */
