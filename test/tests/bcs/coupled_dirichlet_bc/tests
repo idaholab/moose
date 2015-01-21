@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'coupled_dirichlet_bc.i'
+    exodiff = 'out.e'
+  [../]
+[]
