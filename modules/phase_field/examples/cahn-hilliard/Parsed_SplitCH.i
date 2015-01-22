@@ -63,7 +63,7 @@
     f_name = fbulk
     interfacial_vars = c
     kappa_names = kappa_c
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

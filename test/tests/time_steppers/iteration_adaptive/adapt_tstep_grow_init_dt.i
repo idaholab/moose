@@ -79,7 +79,7 @@
     type = Console
     output_postprocessors_on = none
     output_on = 'timestep_end failed nonlinear linear'
-    linear_residuals = true
+    output_linear = true
     output_postprocessors = false
   [../]
 []

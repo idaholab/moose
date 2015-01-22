@@ -27,12 +27,14 @@ InputParameters validParams<PetscOutput>()
 
   // Toggled for outputting nonlinear and linear residuals, only if we have PETSc
 #ifdef LIBMESH_HAVE_PETSC
+  params.addParam<bool>("output_linear", false, "Specifies whether output occurs on each linear residual evaluation");
+  params.addParam<bool>("output_nonlinear", false, "Specifies whether output occurs on each nonlinear residual evaluation");
 
   // **** DEPRECATED PARAMETERS ****
   params.addDeprecatedParam<bool>("linear_residuals", false, "Specifies whether output occurs on each linear residual evaluation",
-                                  "Please include 'linear' in the 'output_on' execution list to get this behavior.");
+                                  "Please use 'output_linear' to get this behavior.");
   params.addDeprecatedParam<bool>("nonlinear_residuals", false, "Specifies whether output occurs on each nonlinear residual evaluation",
-                                  "Please include 'nonlinear' in the 'output_on' execution list to get this behavior.");
+                                  "Please use 'output_nonlinear' to get this behavior.");
   // Psuedo time step divisors
   params.addParam<Real>("nonlinear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outputting non-linear residuals");
   params.addParam<Real>("linear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outputting linear residuals");
@@ -65,6 +67,12 @@ PetscOutput::PetscOutput(const std::string & name, InputParameters & parameters)
     _nonlinear_end_time(std::numeric_limits<Real>::max()),
     _linear_end_time(std::numeric_limits<Real>::max())
 {
+  // Output toggle support
+  if (getParam<bool>("output_linear"))
+    _output_on.push_back("linear");
+  if (getParam<bool>("output_nonlinear"))
+    _output_on.push_back("nonlinear");
+
   // **** DEPRECATED PARAMETER SUPPORT ****
   if (getParam<bool>("linear_residuals"))
     _output_on.push_back("linear");

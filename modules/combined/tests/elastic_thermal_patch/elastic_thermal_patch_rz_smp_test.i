@@ -287,7 +287,7 @@
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
-    nonlinear_residuals = true
+    output_nonlinear = true
     nonlinear_residual_dt_divisor = 100
   [../]
 [] # Outputs
