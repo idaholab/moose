@@ -36,6 +36,9 @@ protected:
    EPbFunctionType _function_type;
    std::map <std::string,double> _dis_parameters;
    bool _checkStatus;
+
+   double _tolerance;
+   int _initial_divisions;
 };
 
 class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
@@ -43,15 +46,10 @@ class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
 public:
   BasicMultiDimensionalInverseWeight(const char * data_filename,double p):  _interpolator(data_filename,p)
   {
-	  _tolerance = 0.1;
-	  _initial_divisions = 10;
   };
 
   BasicMultiDimensionalInverseWeight(std::string data_filename,double p):  _interpolator(data_filename,p)
   {
-	_tolerance = 0.1;
-	_initial_divisions = 10;
-
    bool LBcheck = _interpolator.checkLB(0.0);
    if (LBcheck == false)
     throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
@@ -60,17 +58,21 @@ public:
    if (UBcheck == false)
     throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
   };
+
   BasicMultiDimensionalInverseWeight(double p):  _interpolator(InverseDistanceWeighting(p))
   {
   };
+
   virtual ~BasicMultiDimensionalInverseWeight()
   {
   };
+
   double
   Pdf(std::vector<double> x)
   {
     return _interpolator.interpolateAt(x);
   };
+
   double
   Cdf(std::vector<double> x)
   {
@@ -82,11 +84,14 @@ public:
      return value;
   };
 
-  void updateRNGparameter(double tolerance, int initial_divisions){
+  void updateRNGparameter(double tolerance, double initial_divisions){
+	  std::cout<<"here" <<std::endl;
 	  _tolerance = tolerance;
-	  _initial_divisions = initial_divisions;
+	  _initial_divisions = (int)initial_divisions;
 
-	  _interpolator.updateRNGparameters(tolerance,initial_divisions);
+	  _interpolator.updateRNGparameters(_tolerance,_initial_divisions);
+
+	  std::cout<<"Distribution updateRNGparameter" <<std::endl;
   };
 
   std::vector<double>

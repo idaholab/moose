@@ -39,6 +39,8 @@ using boost::math::normal;
 
 BasicDistributionND::BasicDistributionND()
 {
+	_tolerance = 0.1;
+	_initial_divisions = 10;
 }
 
 BasicDistributionND::~BasicDistributionND()

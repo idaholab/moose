@@ -40,6 +40,8 @@ void NDInterpolation::fit(std::vector< std::vector<double> > coordinates, std::v
 void NDInterpolation::updateRNGparameters(double tolerance, double initial_divisions){
 	_tolerance = tolerance;
 	_initial_divisions = initial_divisions;
+
+	std::cout<<"NDInterpolation updateRNGparameter" <<std::endl;
 }
 
 
@@ -129,7 +131,7 @@ double NDInterpolation::vectorNorm(std::vector<double> point, double p){
 std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, double F_max){
  // iterative procedure of linear interpolation to determine a nextPoint between firstPoint and secondPoint until CDF(nextPoint) lies between F_min and F_max
 
-    double referenceCDF = (F_max-F_min)/2;
+ double referenceCDF = (F_max-F_min)/2;
 
  boost::random::mt19937 rng;
  rng.seed(time(NULL));
@@ -232,9 +234,9 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F){
  //tolerance = 0.1;
  int seed = time(0);
 
- std::cout<<"initial_divisions: "<< _initial_divisions << std::endl;
- std::cout<<"tolerance: "<< _tolerance << std::endl;
- std::cout<<"F: "<< F << std::endl;
+ std::cout<<"c++ initial_divisions: "<< _initial_divisions << std::endl;
+ std::cout<<"c++ tolerance: "<< _tolerance << std::endl;
+ std::cout<<"c++ F: "<< F << std::endl;
 
  int last_divisions = (int)round(1.0/_tolerance*_initial_divisions);
 
