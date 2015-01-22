@@ -71,6 +71,6 @@
 
 [Outputs]
   exodus = true
+  output_initial = true
   checkpoint = true
-  output_on = 'initial timestep_end'
 []

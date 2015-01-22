@@ -48,9 +48,9 @@
 []
 
 [Outputs]
+  print_perf_log = true
   [./console]
     type = Console
-    perf_log = true
-    additional_output_on = 'initial'
+    additional_output_on = initial
   [../]
 []

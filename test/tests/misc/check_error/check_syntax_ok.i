@@ -79,7 +79,4 @@
 []
 
 [Outputs]
-  [./console]
-    type = Console
-  [../]
 []

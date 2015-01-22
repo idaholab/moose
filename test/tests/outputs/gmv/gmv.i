@@ -40,6 +40,6 @@
 []
 
 [Outputs]
+  output_initial = true
   gmv = true
-  output_on = 'initial timestep_end'
 []

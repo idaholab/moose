@@ -76,17 +76,13 @@
 []
 
 [Outputs]
+  print_perf_log = true
   [./out]
     type = CSV
     align = true
     delimiter = ', '
     sync_times = '0.123456789123412 0.15 0.2'
     precision = 8
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
   [../]
 []
 

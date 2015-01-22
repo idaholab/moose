@@ -71,9 +71,5 @@
 [Outputs]
   file_base = solution_function_rot2
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
-  [../]
+  print_perf_log = true
 []

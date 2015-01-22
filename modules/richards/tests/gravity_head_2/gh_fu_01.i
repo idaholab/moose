@@ -275,9 +275,5 @@
 [Outputs]
   file_base = gh_fu_01
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
-  [../]
+  print_perf_log = true
 []

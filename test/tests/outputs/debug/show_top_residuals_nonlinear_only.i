@@ -54,6 +54,6 @@
   [./debug]
     type = TopResidualDebugOutput
     num_residuals = 1
-    output_on = 'nonlinear'
+    output_on = nonlinear
   [../]
 []

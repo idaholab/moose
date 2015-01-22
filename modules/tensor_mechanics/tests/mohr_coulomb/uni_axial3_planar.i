@@ -253,16 +253,13 @@
 
 [Outputs]
   file_base = uni_axial3_planar
-  output_on = 'initial timestep_end'
+  output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     interval = 1
     hide = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz yield_fcn s_xx s_xy s_xz s_yy s_yz s_zz f'
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
   [./csv]
     type = CSV

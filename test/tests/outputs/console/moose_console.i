@@ -48,7 +48,7 @@
 []
 
 [Outputs]
+  output_initial = true
   exodus = true
   interval = 2
-  output_on = 'initial timestep_end'
 []

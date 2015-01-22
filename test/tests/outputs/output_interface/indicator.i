@@ -56,7 +56,7 @@
 []
 
 [Outputs]
-  output_on = 'initial timestep_end'
+  output_initial = true
   [./console]
     type = Console
     perf_log = true

@@ -185,18 +185,19 @@
 []
 
 [Outputs]
+  # csv = true
   file_base = frictional_04_penalty_out
+  output_initial = true
   interval = 10
-  output_on = 'initial timestep_end'
+  print_linear_residuals = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
   [../]
   [./console]
     type = Console
-    perf_log = true
     max_rows = 5
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []
 

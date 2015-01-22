@@ -93,7 +93,7 @@
 [Outputs]
   interval = 1
   exodus = true
-  output_on = 'timestep_end'
+  output_on = timestep_end
   [./console]
     type = Console
     perf_log = true

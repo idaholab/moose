@@ -203,12 +203,9 @@
 
 [Outputs]
   file_base = bh_fu_03
+  output_initial = true
   exodus = false
   csv = true
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
