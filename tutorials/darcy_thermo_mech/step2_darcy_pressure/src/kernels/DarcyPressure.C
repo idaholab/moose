@@ -24,10 +24,10 @@ InputParameters validParams<DarcyPressure>()
   // Now add any extra parameters this class needs:
 
   // Add a required parameter.  If this isn't provided in the input file MOOSE will error.
-  params.addParam<Real>("permeability", "The permeability (K) of the fluid");
+  params.addRequiredParam<Real>("permeability", "The permeability (K) of the fluid");
 
   // Add a parameter with a default value.  This value can be overriden in the input file.
-  params.addRequiredParam<Real>("viscosity", 7.98e-4, "The viscosity (mu) of the fluid.  Default is for 30 degrees C.");
+  params.addParam<Real>("viscosity", 7.98e-4, "The viscosity (mu) of the fluid.  Default is for 30 degrees C.");
 
   return params;
 }

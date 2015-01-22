@@ -32,7 +32,7 @@
     value = 350 # (K)
   [../]
   [./outlet_temperature]
-    type = HeatConductionBC
+    type = HeatConductionOutflow
     variable = temp
     boundary = right
   [../]
