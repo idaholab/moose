@@ -630,8 +630,6 @@ void FEProblem::timestepSetup()
 
    // Timestep setup of output objects
   _app.getOutputWarehouse().timestepSetup();
-
-
 }
 
 unsigned int
@@ -3544,6 +3542,9 @@ FEProblem::possiblyRebuildGeomSearchPatches()
         _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
 
         reinitBecauseOfGhosting();
+        std::vector<PetscOutput*> outputs = _app.getOutputWarehouse().getOutputs<PetscOutput>();
+        for (std::vector<PetscOutput*>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
+          (*it)->timestepSetupInternal();
     }
   }
 }
