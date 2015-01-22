@@ -52,7 +52,7 @@ DarcyConvection::computeQpResidual()
   // http://en.wikipedia.org/wiki/Superficial_velocity
   RealVectorValue superficial_velocity = _porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp];
 
-  return coefs * superficial_velocity * _grad_u[_qp];
+  return coefs * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -62,7 +62,7 @@ DarcyConvection::computeQpJacobian()
 
   RealVectorValue superficial_velocity = _porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp];
 
-  return coefs * superficial_velocity * _grad_phi[_j][_qp];
+  return coefs * superficial_velocity * _grad_phi[_j][_qp] * _test[_i][_qp];
 }
 
 Real
@@ -74,7 +74,7 @@ DarcyConvection::computeQpOffDiagJacobian(unsigned int jvar)
 
     RealVectorValue superficial_velocity = _porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_grad_phi[_j][_qp];
 
-    return coefs * superficial_velocity * _grad_u[_qp];
+    return coefs * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
   }
 
   return 0.0;
