@@ -45,15 +45,11 @@
 []
 
 [Outputs]
+  output_initial = true
   file_base = spline
-  output_on = 'initial timestep_end'
+  print_perf_log = true
   [./OverSampling]
     type = Exodus
     refinements = 3
-  [../]
-  [./console]
-    type = Console
-    perf_log = false
-    output_on = 'timestep_end failed nonlinear'
   [../]
 []

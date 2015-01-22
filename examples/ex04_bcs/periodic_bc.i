@@ -75,9 +75,6 @@
   file_base = out_pbc
   interval = 1
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

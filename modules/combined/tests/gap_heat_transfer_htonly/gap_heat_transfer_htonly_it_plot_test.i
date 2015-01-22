@@ -156,14 +156,12 @@
 
 [Outputs]
   file_base = out_it_plot
+  output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
+    nonlinear_residuals = true
     nonlinear_residual_dt_divisor = 100
-    output_on = 'initial timestep_end nonlinear'
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'initial timestep_end failed nonlinear linear'
   [../]
 []

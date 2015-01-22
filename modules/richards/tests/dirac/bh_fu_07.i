@@ -178,12 +178,9 @@
 
 [Outputs]
   file_base = bh_fu_07
+  output_initial = true
+  output_final = true
   interval = 10000
   exodus = true
-  output_on = 'initial timestep_end final'
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
-  [../]
+  print_perf_log = true
 []

@@ -129,13 +129,13 @@
 []
 
 [Outputs]
+  output_initial = true
   interval = 4
   exodus = true
-  output_on = 'initial timestep_end'
+  print_linear_residuals = true
+  print_perf_log = true
   [./console]
     type = Console
     interval = 3
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []

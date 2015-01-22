@@ -66,14 +66,14 @@
 []
 
 [Outputs]
+  output_initial = true
   exodus = true
-  output_on = 'initial timestep_end'
+  print_linear_residuals = true
+  print_perf_log = true
   [./console]
     type = Console
-    perf_log = true
     start_time = 1
     end_time = 1.5
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []
 

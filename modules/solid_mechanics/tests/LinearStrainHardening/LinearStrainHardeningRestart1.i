@@ -186,16 +186,13 @@
 
 
 [Outputs]
+  output_initial = true
   exodus = true
   csv = true
-  output_on = 'initial timestep_end'
+  print_linear_residuals = true
+  print_perf_log = true
   [./out]
     type = Checkpoint
     num_files = 1
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []

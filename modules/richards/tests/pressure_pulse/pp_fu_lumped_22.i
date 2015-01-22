@@ -187,13 +187,14 @@
 
 [Outputs]
   file_base = pp_fu_lumped_22
+  output_initial = true
+  output_final = true
   interval = 10000
   exodus = true
-  output_on = 'initial timestep_end final'
+  print_linear_residuals = true
+  print_perf_log = true
   [./console]
     type = Console
-    perf_log = true
     interval = 1
-    output_on = 'timestep_end failed nonlinear linear'
   [../]
 []

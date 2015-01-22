@@ -170,13 +170,10 @@
 
 [Outputs]
   file_base = small_deform_hard_cubic
+  output_initial = true
   exodus = false
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

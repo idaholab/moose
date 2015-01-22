@@ -43,12 +43,9 @@
 
 [Outputs]
   file_base = out
+  output_initial = true
   exodus = true
   csv = true
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
