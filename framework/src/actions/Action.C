@@ -58,3 +58,9 @@ Action::getShortName() const
 {
   return _name.substr(_name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') + 1 : 0);
 }
+
+std::string
+Action::getBaseName() const
+{
+  return _name.substr(0, _name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') : 0);
+}
