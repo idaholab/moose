@@ -88,11 +88,10 @@ public:
    *
    * "quite_mode" returns a writable reference to the named parameter, without removing it from the
    * _set_by_add_param list. Using this method of set will make the parameter to continue to
-   * behave if its value where set ONLY by addParam and not any other method.
+   * behave if its value where set ONLY by addParam and not by any other method.
    *
    * This was added for handling parameters in the Output objects that have behavior dependent
-   * on whether the user modified the parameters. This is probably not the function you where
-   * looking for, see "set".
+   * on whether the user modified the parameters.
    *
    */
   template <typename T> T & set (const std::string & name, bool quiet_mode = false);
