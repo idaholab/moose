@@ -13,6 +13,7 @@
 #include "CoupledImplicitEuler.h"
 #include "CrossIC.h"
 #include "SmoothCircleIC.h"
+#include "ClosePackIC.h"
 #include "RndSmoothCircleIC.h"
 #include "MultiSmoothCircleIC.h"
 #include "LatticeSmoothCircleIC.h"
@@ -107,6 +108,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
+  registerInitialCondition(ClosePackIC);
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(MultiSmoothCircleIC);
   registerInitialCondition(LatticeSmoothCircleIC);
