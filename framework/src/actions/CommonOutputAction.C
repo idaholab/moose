@@ -52,6 +52,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("dofmap", false, "Create the dof map .json output file");
 
    // Common parameters
+
    // Note: Be sure that objects that share these parameters utilize the same defaults
    params.addParam<bool>("color", true, "Set to false to turn off all coloring in all outputs");
    params.addParam<std::string>("file_base", "Common file base name to be utilized with all output objects");
