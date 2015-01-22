@@ -355,17 +355,6 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("mesh.buildRefinementAndCoarseningMaps()", "Setup");
   }
 
-  if (!_app.isRecovering())
-  {
-    // uniform refine
-    if (_mesh.uniformRefineLevel() > 0)
-    {
-      Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-      adaptivity().uniformRefine(_mesh.uniformRefineLevel());
-      Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
-    }
-  }
-
   // Do this just in case things have been done to the mesh
   ghostGhostedBoundaries();
   _mesh.meshChanged();
