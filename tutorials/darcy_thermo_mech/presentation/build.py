@@ -30,8 +30,8 @@ if __name__ == '__main__':
            'input/materials.i',
            'input/step03.i',
            'input/aux_system.i',
-           'input/step04.i',
            'input/coupling.i',
+           'input/step04.i',
            'input/adapt.i',
            'input/modules.i']
 

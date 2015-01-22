@@ -241,18 +241,18 @@
     type = 'INLDjangoWikiSet'
     wiki = 'MooseSystems/AuxVariables'
   [../]
+  [./coupling]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseTraining/MultiphysicsCoupling'
+    inactive = 'example-3'
+    title = 'Multiphysics Coupling'
+  [../]
   [./step_04]
     type = 'INLDjangoWikiSet'
     wiki = 'MooseTutorials/DarcyThermoMechanical/Step04'
     title = 'Step 4: Velocity Auxiliary Variable'
     [./Images]
     [../]
-  [../]
-  [./coupling]
-    type = 'INLDjangoWikiSet'
-    wiki = 'MooseTraining/MultiphysicsCoupling'
-    inactive = 'example-3'
-    title = 'Multiphysics Coupling'
   [../]
   [./adaptivity]
     type = 'INLDjangoWikiSet'
