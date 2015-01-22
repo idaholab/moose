@@ -161,7 +161,7 @@
   print_perf_log = true
   [./exodus]
     type = Exodus
-    nonlinear_residuals = true
+    output_nonlinear = true
     nonlinear_residual_dt_divisor = 100
   [../]
 []
