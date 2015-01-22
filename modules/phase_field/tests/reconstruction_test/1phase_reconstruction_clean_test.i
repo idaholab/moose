@@ -216,11 +216,6 @@
   output_initial = true
   interval = 1
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-    nonlinear_residuals = true
-#    max_rows = 20
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
