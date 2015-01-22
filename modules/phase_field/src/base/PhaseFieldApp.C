@@ -11,6 +11,8 @@
 #include "SplitCHMath.h"
 #include "SplitCHParsed.h"
 #include "CoupledImplicitEuler.h"
+#include "SwitchingFunctionConstraintLagrange.h"
+#include "SwitchingFunctionConstraintEta.h"
 #include "CrossIC.h"
 #include "SmoothCircleIC.h"
 #include "ClosePackIC.h"
@@ -112,6 +114,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACGBPoly);
   registerKernel(ACParsed);
   registerKernel(MaskedBodyForce);
+  registerKernel(SwitchingFunctionConstraintLagrange);
+  registerKernel(SwitchingFunctionConstraintEta);
 
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
