@@ -5,6 +5,7 @@
     exodiff = 'pp01.e'
     rel_err = 1E-8
     use_old_floor = True
+    max_parallel = 1
   [../]
   [./pp02]
     type = 'Exodiff'
@@ -27,6 +28,7 @@
     exodiff = 'pp21.e'
     rel_err = 1E-8
     use_old_floor = True
+    max_parallel = 1
   [../]
   [./pp22]
     type = 'Exodiff'
@@ -41,6 +43,7 @@
     exodiff = 'pp_lumped_22.e'
     rel_err = 1E-4
     use_old_floor = True
+    max_parallel = 1
   [../]
 
   [./pp_fu_01]
@@ -49,6 +52,7 @@
     exodiff = 'pp_fu_01.e'
     rel_err = 1E-8
     use_old_floor = True
+    max_parallel = 1
   [../]
   [./pp_fu_02]
     type = 'Exodiff'
@@ -64,6 +68,7 @@
     exodiff = 'pp_fu_21.e'
     rel_err = 1E-8
     use_old_floor = True
+    max_parallel = 1
   [../]
   [./pp_fu_22]
     type = 'Exodiff'
