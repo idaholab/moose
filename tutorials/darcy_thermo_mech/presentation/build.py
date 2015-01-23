@@ -40,7 +40,8 @@ if __name__ == '__main__':
            'input/step05c.i',
            'input/step06.i',
            'input/adapt.i',
-           'input/step07.i']
+           'input/step07.i',
+           'input/postprocessors.i']
 
   # Create the presentation containing the entire moose workshop
   merger = base.PresentationMerger('darcy_thermo_mech.i', files, style='inl', title='ThermomechanicalDarcyFlow')
