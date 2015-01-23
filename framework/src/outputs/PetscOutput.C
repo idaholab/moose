@@ -113,7 +113,14 @@ PetscOutput::timestepSetupInternal()
 
   // Update the pseudo times
   _nonlinear_time = _time_old;                   // non-linear time starts with the previous time step
-  _nonlinear_dt = _dt/_nonlinear_dt_divisor;     // set the pseudo non-linear timestep
+  if (_dt != 0)
+  {
+    _nonlinear_dt = _dt/_nonlinear_dt_divisor;     // set the pseudo non-linear timestep as fraction of real timestep for transient executioners
+  }
+  else
+  {
+    _nonlinear_dt = 1./_nonlinear_dt_divisor;     // set the pseudo non-linear timestep for steady executioners (here _dt==0)
+  }
   _linear_dt = _nonlinear_dt/_linear_dt_divisor; // set the pseudo linear timestep
 
   // Set the PETSc monitor functions
