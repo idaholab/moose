@@ -1,7 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 30
+  nx = 60
   ny = 3
   xmax = 0.304 # Length of test chamber
   ymax = 0.0257 # Test chamber radius
@@ -129,3 +129,4 @@
   print_perf_log = true
   print_linear_residuals = true
 []
+
