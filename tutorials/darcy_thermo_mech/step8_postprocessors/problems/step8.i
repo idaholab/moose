@@ -113,6 +113,12 @@
     type = ElementAverageValue
     variable = temp
   [../]
+  [./outlet_heat_flux]
+    type = SideFluxIntegral
+    variable = temp
+    boundary = right
+    diffusivity = thermal_conductivity
+  [../]
 []
 
 [Problem]
@@ -123,11 +129,12 @@
 
 [Executioner]
   type = Transient
-  num_steps = 200
+  num_steps = 400
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  end_time = 110
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.1
@@ -135,7 +142,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   print_perf_log = true
   print_linear_residuals = true

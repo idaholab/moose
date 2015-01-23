@@ -327,4 +327,27 @@
     [./Images]
     [../]
   [../]
+  [./postprocessors]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseSystems/Postprocessors'
+    contents = 'false'
+    contents_level = '2'
+    title = 'Postprocessors'
+    [./Images]
+    [../]
+  [../]
+  [./step_08]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseTutorials/DarcyThermoMechanical/Step08'
+    title = 'Step 8: Posstprocessing'
+    [./Images]
+    [../]
+  [../]
+  [./step_09]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseTutorials/DarcyThermoMechanical/Step09'
+    title = 'Step 9: Posstprocessing'
+    [./Images]
+    [../]
+  [../]
 []
