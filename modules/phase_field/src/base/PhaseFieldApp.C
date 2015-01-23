@@ -27,6 +27,7 @@
 #include "SwitchingFunctionMaterial.h"
 #include "ElasticEnergyMaterial.h"
 #include "MathFreeEnergy.h"
+#include "GBAnisotropy.h"
 #include "NodalFloodCount.h"
 #include "NodalFloodCountAux.h"
 #include "NodalVolumeFraction.h"
@@ -129,6 +130,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(ElasticEnergyMaterial);
   registerMaterial(MathFreeEnergy);
+  registerMaterial(GBAnisotropy);
 
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
