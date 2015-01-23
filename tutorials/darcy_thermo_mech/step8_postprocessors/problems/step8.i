@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 60
-  ny = 3
+  nx = 200
+  ny = 10
   xmax = 0.304 # Length of test chamber
   ymax = 0.0257 # Test chamber radius
 []
@@ -108,6 +108,19 @@
   [../]
 []
 
+[Postprocessors]
+  [./average_temp]
+    type = ElementAverageValue
+    variable = temp
+  [../]
+  [./outlet_heat_flux]
+    type = SideFluxIntegral
+    variable = temp
+    boundary = right
+    diffusivity = thermal_conductivity
+  [../]
+[]
+
 [Problem]
   type = FEProblem
   coord_type = RZ
@@ -116,15 +129,19 @@
 
 [Executioner]
   type = Transient
-  num_steps = 100
+  num_steps = 400
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  end_time = 110
+  [./TimeStepper]
+    type = SolutionTimeAdaptiveDT
+    dt = 0.1
+  [../]
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   print_perf_log = true
   print_linear_residuals = true

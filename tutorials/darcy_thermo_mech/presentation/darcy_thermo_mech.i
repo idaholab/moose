@@ -254,6 +254,62 @@
     [./Images]
     [../]
   [../]
+  [./modules]
+    type = 'INLDjangoWikiSet'
+    wiki = 'PhysicsModules'
+    title = 'MOOSE Modules'
+    [./Images]
+      width = '300px'
+    [../]
+  [../]
+  [./step_05]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseTutorials/DarcyThermoMechanical/Step05'
+    title = 'Step 5: Heat Conduction'
+    [./Images]
+    [../]
+  [../]
+  [./executioners]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseSystems/Executioners'
+    contents = 'true'
+    contents_level = '2'
+    title = 'Executioners'
+    inactive = 'example-6 example-6s eigenvalue-executioner'
+    [./Images]
+    [../]
+  [../]
+  [./step_05b]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseTutorials/DarcyThermoMechanical/Step05/Step05_transient'
+    title = 'Step 5b: Transient Heat Conduction'
+    [./Images]
+    [../]
+  [../]
+  [./bcs]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseSystems/BCs'
+    contents = 'true'
+    contents_level = '2'
+    title = 'Boundary Conditions'
+    inactive = 'example-4 example-4o periodic-example'
+    [./Images]
+    [../]
+  [../]
+  [./step_05c]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseTutorials/DarcyThermoMechanical/Step05/Step05_outflow'
+    title = 'Step 5c: Outflow BC'
+    [./Images]
+    [../]
+  [../]
+  [./step_06]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseTutorials/DarcyThermoMechanical/Step06'
+    title = 'Step 6: Coupling Darcy and Heat Conduction'
+    [./Images]
+    [../]
+  [../]
   [./adaptivity]
     type = 'INLDjangoWikiSet'
     wiki = 'MooseTraining/Adaptivity'
@@ -264,12 +320,34 @@
     [./Images]
     [../]
   [../]
-  [./modules]
+  [./step_07]
     type = 'INLDjangoWikiSet'
-    wiki = 'PhysicsModules'
-    title = 'MOOSE Modules'
+    wiki = 'MooseTutorials/DarcyThermoMechanical/Step07'
+    title = 'Step 7: Mesh Adaptivity'
     [./Images]
-      width = '300px'
+    [../]
+  [../]
+  [./postprocessors]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseSystems/Postprocessors'
+    contents = 'false'
+    contents_level = '2'
+    title = 'Postprocessors'
+    [./Images]
+    [../]
+  [../]
+  [./step_08]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseTutorials/DarcyThermoMechanical/Step08'
+    title = 'Step 8: Posstprocessing'
+    [./Images]
+    [../]
+  [../]
+  [./step_09]
+    type = 'INLDjangoWikiSet'
+    wiki = 'MooseTutorials/DarcyThermoMechanical/Step09'
+    title = 'Step 9: Posstprocessing'
+    [./Images]
     [../]
   [../]
 []
