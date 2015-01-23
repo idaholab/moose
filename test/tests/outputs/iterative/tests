@@ -9,6 +9,16 @@
     max_parallel = 1
     max_threads = 1
   [../]
+  [./exodus_steady]
+    # Test the output of linear and nonlinear iterations to Exodus for a Steady Executioner
+    type = 'Exodiff'
+    input = 'iterative_steady.i'
+    exodiff = 'iterative_steady_out.e'
+
+    # This test relies on number of residuals being the same, so run it serially
+    max_parallel = 1
+    max_threads = 1
+  [../]
   [./vtk]
     # Test the output of linear and nonlinear iterations to VTK
     type = 'VTKDiff'
