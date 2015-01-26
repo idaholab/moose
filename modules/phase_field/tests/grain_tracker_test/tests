@@ -15,6 +15,7 @@
     #Note: this test should be run with min parallel=2 
     #but can diff across architectures in the finite nodal aux fields.
     # min_parallel = 2
+    skip = '#84'
   [../]
 
   [./test_ebsd]
