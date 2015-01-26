@@ -59,3 +59,25 @@
   print_linear_residuals = true
   print_perf_log = true
 []
+
+[Adaptivity]
+
+  marker = errorfrac
+  max_h_level = 4
+
+  [./Indicators]
+    [./error]
+      type = GradientJumpIndicator
+      variable = 'u v void'
+    [../]
+  [../]
+
+  [./Markers]
+    [./errorfrac]
+      type = ErrorFractionMarker
+      refine = 0.6
+      coarsen = 0.1
+      indicator = error
+    [../]
+  [../]
+[]

@@ -23,8 +23,8 @@ InputParameters validParams<TestStatefulTensor>()
 }
 
 TestStatefulTensor::TestStatefulTensor(const std::string & name, InputParameters parameters) : Material(name, parameters),
-   _tensor(declarePropertyDerivative<RankFourTensor>("tensor")),
-   _tensor_old(declarePropertyOld<RankFourTensor>("tensor"))
+   _tensor(declareProperty<RankFourTensor>("tensor")),
+   _tensor_old(declareProperty<RankFourTensor>("tensor"))
 {}
 
 void

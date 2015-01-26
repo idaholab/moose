@@ -31,6 +31,9 @@ void shallowCopyData(const std::vector<unsigned int> & stateful_prop_ids, Materi
 {
   for (unsigned int i=0; i<stateful_prop_ids.size(); ++i)
   {
+//    if (data_from.size() < stateful_prop_ids[i])
+//      std::cout << "i = " << i << std::endl;
+
     PropertyValue * prop = data[stateful_prop_ids[i]];              // do the look-up just once (OPT)
     PropertyValue * prop_from = data_from[i];                       // do the look-up just once (OPT)
     if (prop != NULL && prop_from != NULL)
@@ -324,6 +327,10 @@ void
 MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, unsigned int side)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+
+
+  //std::cout << _stateful_prop_id_to_prop_id << std::endl;
+  //std::cout << "_prop_name = " << _prop_names[_stateful_prop_id_to_prop_id] << std::endl;
 
   shallowCopyData(_stateful_prop_id_to_prop_id, material_data.props(), props()[&elem][side]);
   shallowCopyData(_stateful_prop_id_to_prop_id, material_data.propsOld(), propsOld()[&elem][side]);
