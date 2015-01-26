@@ -10,4 +10,9 @@
     input = 'orderparameterfunctionmaterial.i'
     exodiff = 'orderparameterfunctionmaterial_out.e'
   [../]
+  [./multibarrierfunction]
+    type = 'Exodiff'
+    input = 'multibarrierfunction.i'
+    exodiff = 'multibarrierfunction_out.e'
+  [../]
 []

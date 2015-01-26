@@ -25,7 +25,7 @@ public:
 protected:
   virtual void computeQpProperties();
 
-  /// Polynomial order of the switching function \f$ h(\eta) \f$
+  /// Polynomial order of the switching function \f$ g(\eta) \f$
   MooseEnum _g_order;
 
   /// zero out g contribution in the eta interval [0:1]
