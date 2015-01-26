@@ -39,6 +39,8 @@ CrackFrontData::CrackFrontData(const std::string & name, InputParameters paramet
     _var_name(parameters.get<VariableName>("variable")),
     _scale_factor(getParam<Real>("scale_factor"))
 {
+  if (!_subproblem.getVariable(_tid, _var_name).isNodal())
+    mooseError("CrackFrontData can be output only for nodal variables, variable '" << _var_name << "' is not nodal");
 }
 
 void
