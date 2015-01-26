@@ -1,8 +1,15 @@
 .\"
-.\" $Id: mtwist.3,v 1.7 2010-06-24 20:53:59+12 geoff Exp $
+.\" $Id: mtwist.3,v 1.9 2012-12-30 16:24:49-08 geoff Exp $
 .\"
 .\" $Log: mtwist.3,v $
-.\" Revision 1.7  2010-06-24 20:53:59+12  geoff
+.\" Revision 1.9  2012-12-30 16:24:49-08  geoff
+.\" Document the new return values from mt*_seed and mt*_goodseed.
+.\"
+.\" Revision 1.8  2012-09-04 22:22:55-07  geoff
+.\" Correct documentation of which seeding functions use /dev/random.
+.\" (Thanks to Nick Hall for spotting this.)
+.\"
+.\" Revision 1.7  2010-06-24 01:53:59-07  geoff
 .\" Change all documented declarations to use types from stdint.h.  Fix
 .\" some restriction descriptions.  Remove bugs that are no longer bugs.
 .\"
@@ -24,7 +31,7 @@
 .\" Revision 1.1  2001/06/16 21:20:31  geoff
 .\" Initial revision
 .\"
-.\" 
+.\"
 .TH mtwist 3 "June 14, 2001" "" "Linux Programmer's Manual"
 .SH NAME
 mts_seed32new, mts_seed32, mts_seedfull, mts_seed, mts_goodseed, mts_bestseed,
@@ -49,9 +56,9 @@ C interface:
 .BI "void mts_seedfull(mt_state* " state ","
 .BI "                  uint32_t " seeds "[MT_STATE_SIZE]);"
 .sp
-.BI "void mts_seed(mt_state* " state ");"
+.BI "uint32_t mts_seed(mt_state* " state ");"
 .sp
-.BI "void mts_goodseed(mt_state* " state ");"
+.BI "uint32_t mts_goodseed(mt_state* " state ");"
 .sp
 .BI "void mts_bestseed(mt_state* " state ");"
 .sp
@@ -260,35 +267,32 @@ The
 .BR mt_seed ,
 and
 .B seed
-functions use the system time to generate an argument to the
+functions use
+.B /dev/urandom
+(or the system time if
+.B /dev/urandom
+is unavailable) to generate an argument to the
 .B *seed32new
 functions to satisfy this need.
-The microseconds portion of the time is included in the seed to
+If the time is used, the microseconds portion of the time is included
+in the seed to
 enhance the probability that two programs will generate different
 random sequences.
+The actual seed used is returned so that it can be saved for reproducibility.
 .PP
-Since the various "plain"
-.B seed
-functions are also somewhat limited in the variety they can produce,
-two other functions are available on systems that have support for the
-.B /dev/random
-device.
 The
 .B *goodseed
-functions attempt to use
-.B /dev/urandom
-to get truly random values for use with
-.BR *seedfull .
-If
-.B /dev/urandom
-isn't available, these functions fall back to calling the equivalent "plain"
-.B seed
-function.
+functions
+work in a similar manner, but use
+.B /dev/random
+as their source of (32-bit) randomness.
 C++ programmers can also invoke
 .B goodseed
 at construction time by passing an argument of
 .B true
 to the constructor.
+Depending on the current amount of randomness available, these
+functions may take a significant amount of (wall-clock) time.
 .PP
 For the most random seed possible, the
 .B *bestseed
@@ -297,17 +301,25 @@ functions attempt to use
 to acquire values for
 .BR *seedfull ,
 falling back to
-.B *seed
+.B *goodseed
 if
 .B /dev/random
 is unavailable.
 The disadvantage of these functions is that it usually takes a
-significant amount of (wall-clock) time before
+very large amount of (wall-clock) time before
 .B /dev/random
 can produce enough entropy to provide a seed.
 Therefore, it is nearly always better to stick with the
 .B *goodseed
 functions.
+However, only the
+.B *seedfull
+functions can produce more than 32 bits of entropy.
+Because of the size of the state, the
+.B *seedfull
+functions do not return the seed used; if it is needed, the
+.B *savestate
+functions can be used to write it to a file.
 .PP
 Finally, it is often useful to be able to save and restore the PRNG
 state for later use.

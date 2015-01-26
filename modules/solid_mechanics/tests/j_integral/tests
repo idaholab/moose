@@ -3,30 +3,36 @@
    type = 'Exodiff'
    input = 'j_integral_2d.i'
    exodiff = 'j_integral_2d_out.e'
+   max_parallel = 1                       # lin_its and nl_its will not be the same in parallle and serial
  [../]
  [./j_2d_mouth_dir]
    type = 'Exodiff'
    input = 'j_integral_2d_mouth_dir.i'
    exodiff = 'j_integral_2d_mouth_dir_out.e'
+   max_parallel = 1                       # lin_its and nl_its will not be the same in parallle and serial
  [../]
  [./j_3d_as_2d]
    type = 'Exodiff'
    input = 'j_integral_3d_as_2d.i'
    exodiff = 'j_integral_3d_as_2d_out.e'
+   max_parallel = 1                       # lin_its and nl_its will not be the same in parallle and serial
  [../]
  [./j_3d]
    type = 'Exodiff'
    input = 'j_integral_3d.i'
    exodiff = 'j_integral_3d_out.e'
+   max_parallel = 1                       # lin_its and nl_its will not be the same in parallle and serial
  [../]
  [./j_3d_mouth_dir]
    type = 'Exodiff'
    input = 'j_integral_3d_mouth_dir.i'
    exodiff = 'j_integral_3d_mouth_dir_out.e'
+   max_parallel = 1                       # lin_its and nl_its will not be the same in parallle and serial
  [../]
  [./j_3d_mouth_dir_end_dir_vec]
    type = 'Exodiff'
    input = 'j_integral_3d_mouth_dir_end_dir_vec.i'
    exodiff = 'j_integral_3d_mouth_dir_end_dir_vec_out.e'
+   max_parallel = 1                       # lin_its and nl_its will not be the same in parallle and serial
  [../]
 []

@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'ex01.i'
     exodiff = 'ex01.e'
-    rel_err = 1E-5
+    rel_err = 1E-4
     use_old_floor = True
   [../]
   [./ex02]

@@ -19,7 +19,7 @@
     type = 'Exodiff'
     input = 'gravity_rz_test.i'
     exodiff = 'out_rz.e'
-    abs_zero = 1e-09
+    abs_zero = 1e-08
     use_old_floor = True
   [../]
 
@@ -38,5 +38,6 @@
     exodiff = 'out_qp_select.e'
     abs_zero = 1e-09
     use_old_floor = True
+    max_parallel = 1            # -pc_type lu
   [../]
 []

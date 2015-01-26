@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'TotalFreeEnergy_test.i'
     exodiff = 'TotalFreeEnergy_test_out.e'
+    max_parallel = 1                      # -pc_type lu
   [../]
   [./2var]
     type = 'Exodiff'
