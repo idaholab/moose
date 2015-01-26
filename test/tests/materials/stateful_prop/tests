@@ -73,4 +73,10 @@
     input = 'spatial_adaptivity_test.i'
     exodiff = 'spatial_adaptivity_test_out.e-s003'
   [../]
+
+  [./statful_indicator]
+    type = 'Exodiff'
+    input = 'statful_adapt_indicator.i'
+    exodiff = 'statful_adapt_indicator_out.e-s003'
+  [../]
 []

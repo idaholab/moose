@@ -157,13 +157,13 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+      //_fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       for (std::vector<Indicator *>::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
         (*it)->computeIndicator();
 
       _fe_problem.swapBackMaterialsFace(_tid);
-      _fe_problem.swapBackMaterialsNeighbor(_tid);
+      //_fe_problem.swapBackMaterialsNeighbor(_tid);
     }
   }
 }
