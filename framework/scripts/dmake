@@ -32,7 +32,8 @@ def getMakeDirectory():
 #  @param kwargs Optional keyword/value pairings
 #
 #  Keyword/Value Options:
-#    dbg = True | {False}   - Sets build method to debug (takes priority over opt and oprof)
+#    dbg = True | {False}   - Sets build method to debug (takes priority over devel, opt and oprof)
+#    devel = True | {False}   - Sets build method to devel (takes priority over opt and oprof)
 #    opt = True | {False}   - Sets build method to opt (take prioirity over oprof)
 #    oprof = {True} | False - Set build method to oprof (default)
 #    quiet = True | {False} - Disables the distcc verbose output
@@ -43,6 +44,8 @@ def runMake(distcc_hosts, jobs, **kwargs):
   # Set the build type
   if kwargs.pop('dbg', False):
     os.environ['METHOD'] = 'dbg'
+  elif kwargs.pop('devel', False):
+    os.environ['METHOD'] = 'devel'
   elif kwargs.pop('opt', False):
     os.environ['METHOD'] = 'opt'
   elif kwargs.pop('oprof', False):
@@ -136,6 +139,7 @@ def parseArguments(args=None):
   make.add_argument('--jobs', '-j', type=int, help='Override the automatic job count settings')
   make.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs available (please be nice)')
   make.add_argument('--dbg', '-d', action='store_true', help='Build in debug mode')
+  make.add_argument('--devel', action='store_true', help='Build in devel mode')
   make.add_argument('--oprof', '-p', action='store_true', help='Build in oprof mode')
   make.add_argument('--opt', '-o', action='store_true', help='Build in opt mode')
   make.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'make\' in the current directory')
@@ -214,7 +218,7 @@ if __name__ == "__main__":
   make_args += unknown
 
   # Get the make related options from dmake
-  dmake_make_options = subOptions(options,'timeout','quiet','dbg','opt','oprof')
+  dmake_make_options = subOptions(options,'timeout','quiet','dbg','devel','opt','oprof')
 
   # Create the local Machine object
   master = distcc.Machine(localhost=True)
