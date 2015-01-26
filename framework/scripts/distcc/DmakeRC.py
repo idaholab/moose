@@ -1,6 +1,7 @@
 # Load requied packages
 import sys, os, pickle, uuid, platform, urllib2, datetime
 from sets import Set
+import ssl
 
 ## @class DmakeRC
 #  Manages the .dmakrc file, which stores various information mainly for the purpose
@@ -352,6 +353,8 @@ class DmakeRC(object):
                  '&username=' + os.getenv('USER')
 
     try:
+      if hasattr(ssl, '_create_unverified_context'):
+        ssl._create_default_https_context = ssl._create_unverified_context
       fid = urllib2.urlopen(filename, None, 1)
       data = fid.read().split('\n')
       fid.close()
