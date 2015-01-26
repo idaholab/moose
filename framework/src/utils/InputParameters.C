@@ -519,8 +519,12 @@ InputParameters::applyParameters(const InputParameters & common, const std::vect
 bool
 InputParameters::paramSetByUser(const std::string & name)
 {
-  // If the parameters is not located in the list, then it was set by the user
-  return _set_by_add_param.find(name) == _set_by_add_param.end();
+  if (!isParamValid(name))
+    // if the parameter is invalid, it is for sure not set by the user
+    return false;
+  else
+    // If the parameters is not located in the list, then it was set by the user
+    return _set_by_add_param.find(name) == _set_by_add_param.end();
 }
 
 const std::string &
