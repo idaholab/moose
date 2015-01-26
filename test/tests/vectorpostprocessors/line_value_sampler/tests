@@ -3,6 +3,7 @@
     type = 'CSVDiff'
     input = 'line_value_sampler.i'
     csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
+    max_parallel = 1 # "libmesh #432"
   [../]
   [./parallel]
     # This ensures that PointSamplerBase is properly handling unique point finding
@@ -11,6 +12,7 @@
     csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
     min_parallel = 3
     prereq = test
+    deleted = "libmesh #432"
   [../]
   [./delimiter]
     type = 'CheckFiles'
