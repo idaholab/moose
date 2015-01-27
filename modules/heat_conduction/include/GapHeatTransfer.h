@@ -32,6 +32,8 @@ protected:
 
   virtual void computeGapValues();
 
+  const Moose::CoordinateSystemType & _coord_sys;
+
   bool _quadrature;
 
   NumericVector<Number> * _slave_flux;
@@ -44,6 +46,9 @@ protected:
 
   Real _gap_temp;
   Real _gap_distance;
+  Real _radius;
+  Real _r1;
+  Real _r2;
 
   //This is a factor that is used to gradually taper down the conductance if the
   //contact point is off the face and tangential_tolerance is nonzero.

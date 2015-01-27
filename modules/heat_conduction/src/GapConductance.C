@@ -31,14 +31,12 @@ InputParameters validParams<GapConductance>()
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
 
   // Common
-  params.addParam<Real>("min_gap", 1e-6, "A minimum gap size");
-  params.addParam<Real>("max_gap", 1e6, "A maximum gap size");
-  params.addParam<Real>("min_denom", 1e-6, "A minimum value for r*(r2/r1) term in cylindrical wall heat flux");
-  params.addParam<Real>("max_denom", 1e6, "A maximum value for r*(r2/r1) term in cylindrical wall heat flux");
+  params.addRangeCheckedParam<Real>("min_gap", 1e-6, "min_gap>=0", "A minimum gap (denominator) size");
+  params.addRangeCheckedParam<Real>("max_gap", 1e6, "max_gap>=0", "A maximum gap (denominator) size");
 
   params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
-  params.addParam<Real>("emissivity_1", 0.0, "The emissivity of the fuel surface");
-  params.addParam<Real>("emissivity_2", 0.0, "The emissivity of the cladding surface");
+  params.addRangeCheckedParam<Real>("emissivity_1", 0.0, "emissivity_1>=0 & emissivity_1<=1", "The emissivity of the fuel surface");
+  params.addRangeCheckedParam<Real>("emissivity_2", 0.0, "emissivity_2>=0 & emissivity_2<=1", "The emissivity of the cladding surface");
 
   params.addParam<bool>("use_displaced_mesh", true, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
 
@@ -68,8 +66,6 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
                 1/getParam<Real>("emissivity_1") + 1/getParam<Real>("emissivity_2") - 1 : 0 ),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
-   _min_denom(getParam<Real>("min_denom")),
-   _max_denom(getParam<Real>("max_denom")),
    _temp_var(_quadrature ? getVar("variable",0) : NULL),
    _penetration_locator(NULL),
    _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
@@ -117,12 +113,7 @@ GapConductance::computeQpConductance()
 Real
 GapConductance::h_conduction()
 {
-  if (_coord_sys == Moose::COORD_RZ)
-    return gapK()/gapCyl(_radius, _r1, _r2, _min_denom, _max_denom);
-  if (_coord_sys == Moose::COORD_RSPHERICAL)
-    return gapK()/gapSphere(_radius, _r1, _r2, _min_denom, _max_denom);
-  else
-    return gapK()/gapLength(-(_gap_distance), _min_gap, _max_gap);
+  return gapK() / gapLength(_coord_sys, _radius, _r1, _r2, _min_gap, _max_gap);
 }
 
 
@@ -175,7 +166,19 @@ GapConductance::dh_radiation()
 }
 
 Real
-GapConductance::gapLength(Real distance, Real min_gap, Real max_gap)
+GapConductance::gapLength(const Moose::CoordinateSystemType & system,
+                          Real radius, Real r1, Real r2, Real min_gap, Real max_gap)
+{
+  if (system == Moose::COORD_RZ)
+    return gapCyl(radius, r1, r2, min_gap, max_gap);
+  else if (system == Moose::COORD_RSPHERICAL)
+    return gapSphere(radius, r1, r2, min_gap, max_gap);
+  else
+    return gapRect(r2-r1, min_gap, max_gap);
+}
+
+Real
+GapConductance::gapRect(Real distance, Real min_gap, Real max_gap)
 {
   Real gap_L = distance;
 
@@ -299,6 +302,12 @@ GapConductance::computeGapValues()
       _radius = _r2;
     }
     else
-      mooseError( "Issue with cylindrical or sphereical flux calc. normals. \n");
+      mooseError( "Issue with cylindrical or spherical flux calc. normals. \n");
+  }
+  else
+  {
+    _r2 = -_gap_distance;
+    _r1 = 0;
+    _radius = 0;
   }
 }
