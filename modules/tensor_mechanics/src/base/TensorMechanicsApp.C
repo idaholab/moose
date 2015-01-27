@@ -36,6 +36,8 @@
 #include "TensorMechanicsHardeningCubic.h"
 #include "ElementPropertyReadFile.h"
 
+#include "TestStatefulTensor.h"
+
 #include "RankTwoAux.h"
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
@@ -94,6 +96,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ElementPropertyReadFileTest);
   registerMaterial(TwoPhaseStressMaterial);
   registerMaterial(SimpleEigenStrainMaterial);
+  registerMaterial(TestStatefulTensor);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

@@ -157,7 +157,9 @@ public:
    */
   bool hasOlderProperties() const { return _has_older_prop; }
 
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props() { return *_props_elem; }
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props() {
+    /*std::cout << "MaterialPropertyStorage::props().size() = " << _props_elem->size() << std::endl;*/
+    return *_props_elem; }
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld() { return *_props_elem_old; }
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder() { return *_props_elem_older; }
 
@@ -171,7 +173,19 @@ public:
 
   unsigned int getPropertyId (const std::string & prop_name);
 
+  /**
+   * Method that dumps the current property data to the screen
+   */
+  void dump() const;
+
+
 protected:
+
+  /**
+   * A helper function for dumping HashMap information
+   */
+  void dumpHelper(const std::string & title, HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * props) const;
+
   // indexing: [element][side]->material_properties
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * _props_elem;
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * _props_elem_old;

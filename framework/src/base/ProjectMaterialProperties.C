@@ -105,7 +105,7 @@ ProjectMaterialProperties::onElement(const Elem *elem)
 void
 ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
-  if (_fe_problem.needMaterialOnSide(bnd_id, _tid))
+  //if (_fe_problem.needMaterialOnSide(bnd_id, _tid))
   {
     // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
     _fe_problem.setCurrentBoundaryID(bnd_id);
@@ -145,7 +145,7 @@ ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, Bound
 void
 ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int /*side*/)
 {
-  if (_need_internal_side_material && _refine) // If we're refining then we need to also project "internal" child sides.
+  // if (_need_internal_side_material && _refine) // If we're refining then we need to also project "internal" child sides.
   {
     for (unsigned int child=0; child<elem->n_children(); child++)
     {
@@ -156,6 +156,8 @@ ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int /*side*
         if (!elem->is_child_on_side(child, side)) // Otherwise we already projected it
         {
           const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, -1, child, side);
+
+//          std::cout << "  on side internal" << std::endl;
 
           _bnd_material_props.prolongStatefulProps(refinement_map,
                                                    *_assembly[_tid]->qRule(),

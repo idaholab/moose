@@ -135,6 +135,8 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
   if (_finalize) // If finalizing we only do something on the elements
     return;
 
+  _fe_problem.getBndMaterialPropertyStorage().dump();
+
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor(side);
 

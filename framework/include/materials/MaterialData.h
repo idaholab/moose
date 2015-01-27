@@ -83,7 +83,7 @@ public:
   // material properties for given element (and possible side)
   void swapBack(const Elem & elem, unsigned int side = 0);
 
-  MaterialProperties & props() { return _props; }
+  MaterialProperties & props() { /*std::cout << "MaterialProperties::_props.size() = " << _props.size() << std::endl;*/ return _props; }
   MaterialProperties & propsOld() { return _props_old; }
   MaterialProperties & propsOlder() { return _props_older; }
 
