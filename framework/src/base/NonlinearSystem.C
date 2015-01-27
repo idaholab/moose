@@ -1468,6 +1468,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
             _fe_problem.reinitNodeFace(&slave_node, slave_boundary, 0);
 
             _fe_problem.prepareAssembly(0);
+            _fe_problem.reinitOffDiagScalars(0);
 
             std::vector<Point> points;
             points.push_back(info._closest_point);
