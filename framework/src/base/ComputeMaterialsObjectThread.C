@@ -70,6 +70,7 @@ ComputeMaterialsObjectThread::~ComputeMaterialsObjectThread()
 void
 ComputeMaterialsObjectThread::subdomainChanged()
 {
+  _fe_problem.getIndicatorWarehouse(_tid).updateActiveIndicators(_subdomain);
   _need_internal_side_material = _fe_problem.needMaterialOnSide(_subdomain, _tid);
   _fe_problem.subdomainSetup(_subdomain, _tid);
 }

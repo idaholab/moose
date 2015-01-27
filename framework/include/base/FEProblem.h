@@ -832,6 +832,11 @@ public:
    */
   MaterialWarehouse & getMaterialWarehouse(THREAD_ID tid) { return _materials[tid]; }
 
+  /**
+   * Return a reference to the IndicatorWarehouse
+   */
+  IndicatorWarehouse & getIndicatorWarehouse(THREAD_ID tid) { return _indicators[tid]; }
+
   /*
    * Return a pointer to the MaterialData
    */

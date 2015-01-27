@@ -4027,7 +4027,8 @@ FEProblem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
     {
       for (unsigned int i=0; i < Moose::exec_types.size(); ++i)
         if (!_user_objects(Moose::exec_types[i])[tid].sideUserObjects(bnd_id).empty() ||
-            !_user_objects(Moose::exec_types[i])[tid].sideUserObjects(Moose::ANY_BOUNDARY_ID).empty())
+            !_user_objects(Moose::exec_types[i])[tid].sideUserObjects(Moose::ANY_BOUNDARY_ID).empty() ||
+            !_indicators[tid].activeInternalSideIndicators().empty())
         {
           _bnd_mat_side_cache[tid][bnd_id] = true;
           break;
@@ -4051,7 +4052,8 @@ FEProblem::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
     {
       for (unsigned int i=0; i < Moose::exec_types.size(); ++i)
         if (!_user_objects(Moose::exec_types[i])[tid].internalSideUserObjects(subdomain_id).empty() ||
-            !_user_objects(Moose::exec_types[i])[tid].internalSideUserObjects(Moose::ANY_BLOCK_ID).empty())
+            !_user_objects(Moose::exec_types[i])[tid].internalSideUserObjects(Moose::ANY_BLOCK_ID).empty() ||
+            !_indicators[tid].activeInternalSideIndicators().empty())
         {
           _block_mat_side_cache[tid][subdomain_id] = true;
           break;
