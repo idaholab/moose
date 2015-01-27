@@ -73,4 +73,12 @@
     input = 'spatial_adaptivity_test.i'
     exodiff = 'spatial_adaptivity_test_out.e-s003'
   [../]
+
+  [./statful_indicator]
+    # This test is the same as spatial_adaptivity, but it includes
+    # an Indicator, which caused a seg. fault (#4602). This test exercises
+    # ProjectMaterialProperties::onInternalSide
+    type = 'RunApp'
+    input = 'stateful_adapt_indicator.i'
+  [../]
 []

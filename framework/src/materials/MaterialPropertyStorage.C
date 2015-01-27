@@ -189,9 +189,6 @@ MaterialPropertyStorage::restrictStatefulProps(const std::vector<std::pair<unsig
 
   material_data.size(n_qpoints);
 
-  // First, make sure that storage has been set aside for this element.
-  //initStatefulProps(material_data, mats, n_qpoints, elem, side);
-
   if (props()[&elem][side].size() == 0) props()[&elem][side].resize(_stateful_prop_id_to_prop_id.size());
   if (propsOld()[&elem][side].size() == 0) propsOld()[&elem][side].resize(_stateful_prop_id_to_prop_id.size());
   if (propsOlder()[&elem][side].size() == 0) propsOlder()[&elem][side].resize(_stateful_prop_id_to_prop_id.size());
