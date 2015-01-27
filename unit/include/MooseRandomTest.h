@@ -12,26 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef STATEFULRANDOMNUMBERGENTEST_H
-#define STATEFULRANDOMNUMBERGENTEST_H
+#ifndef MOOSERANDOMTEST_H
+#define MOOSERANDOMTEST_H
 
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-#include "MooseRandom.h"
-
-#include <string>
-
-class StatefulRandomNumberGenTest : public CppUnit::TestFixture
+class MooseRandomTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( StatefulRandomNumberGenTest );
+  CPPUNIT_TEST_SUITE( MooseRandomTest );
 
-  CPPUNIT_TEST( testRandomGen );
+  CPPUNIT_TEST( rand );
+  CPPUNIT_TEST( randSeq );
+  CPPUNIT_TEST( randNormal );
+  CPPUNIT_TEST( randNormal2 );
+  CPPUNIT_TEST( randl );
+  CPPUNIT_TEST( states );
 
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  void testRandomGen();
+  void setUp();
+  void tearDown();
+
+  void rand();
+  void randSeq();
+  void randNormal();
+  void randNormal2();
+  void randl();
+  void states();
 };
 
-#endif  // STATEFULRANDOMNUMBERGENTEST_H
+#endif  // MOOSERANDOMTEST_H

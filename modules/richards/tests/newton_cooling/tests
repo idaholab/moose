@@ -23,5 +23,6 @@
     exodiff = 'nc02.e'
     rel_err = 1E-4
     use_old_floor = True
+    max_parallel = 1
   [../]
 []

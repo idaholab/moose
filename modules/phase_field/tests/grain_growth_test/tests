@@ -49,6 +49,7 @@
     input = 'GrGr_OffDiag_test.i'
     exodiff = 'OffDiag.e-s002'
     group = 'adaptive'
+    max_parallel = 1                      # -pc_type lu
   [../]
 
   [./GBEvolution_mob_test]
@@ -61,6 +62,7 @@
     type = 'Exodiff'
     input = 'GrGr_test_explicit.i'
     exodiff = 'explicit.e'
+    max_parallel = 1
   [../]
 
   [./GrGrVoronoi3D_test]
@@ -73,5 +75,6 @@
     type = 'Exodiff'
     input = 'GrGr_particle_test.i'
     exodiff = 'particle.e-s005'
+    abs_zero = 1e-8
   [../]
 []

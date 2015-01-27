@@ -88,7 +88,7 @@ public:
   }
 
   /**
-   * The methoed seeds one of the independent random number generators
+   * The method seeds one of the independent random number generators
    * @param i     the index of the generator
    * @param seed  the seed number
    */

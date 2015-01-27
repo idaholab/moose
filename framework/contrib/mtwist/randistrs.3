@@ -1,8 +1,11 @@
 .\"
-.\" $Id: randistrs.3,v 1.5 2010-12-11 00:28:19+13 geoff Exp $
+.\" $Id: randistrs.3,v 1.6 2013-01-05 01:18:52-08 geoff Exp $
 .\"
 .\" $Log: randistrs.3,v $
-.\" Revision 1.5  2010-12-11 00:28:19+13  geoff
+.\" Revision 1.6  2013-01-05 01:18:52-08  geoff
+.\" Document the new prototype for rd_empirical_setup.
+.\"
+.\" Revision 1.5  2010-12-10 03:28:19-08  geoff
 .\" Document the new empirical-distribution interface.
 .\"
 .\" Revision 1.4  2010-06-24 20:53:59+12  geoff
@@ -19,7 +22,7 @@
 .\" Revision 1.1  2001/06/18 10:04:20  geoff
 .\" Initial revision
 .\"
-.\" 
+.\"
 .TH randistrs 3 "June 18, 2001" "" "Linux Programmer's Manual"
 .SH NAME
 rds_iuniform, rds_liuniform, rds_uniform, rds_luniform,
@@ -120,8 +123,8 @@ C interface:
 .sp
 .BI "double rd_ltriangular(double " lower ", double " upper ", double " mode ");"
 .sp
-.BI "void rd_empirical_setup(size_t " n_probs ", double* " probs ","
-.BI "                     double* " values ");"
+.BI "void rd_empirical_setup(size_t " n_probs ", const double* " probs ","
+.BI "                     const double* " values ");"
 .sp
 .BI "void rd_empirical_free(rd_empirical_control* " control ");"
 .sp
@@ -280,7 +283,7 @@ scale parameters.
 .PP
 The
 .B *triangular
-functions generate a triangular distribution in the range 
+functions generate a triangular distribution in the range
 .RI [ lower ,
 .IR upper )
 and with the given mode.

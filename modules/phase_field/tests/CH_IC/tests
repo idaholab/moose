@@ -33,6 +33,7 @@
     group = 'adaptive'
     scale_refine = 1
     valgrind = 'HEAVY'
+    max_parallel = 1
   [../]
 
   [./circleIC_3D_test]
@@ -50,5 +51,6 @@
     group = 'adaptive'
     scale_refine = 1
     valgrind = 'HEAVY'
+    max_parallel = 1
   [../]
 []
