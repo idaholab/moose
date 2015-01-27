@@ -30,35 +30,37 @@ std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
 void shallowCopyData(const std::vector<unsigned int> & stateful_prop_ids, MaterialProperties & data, MaterialProperties & data_from)
 {
 
-  std::cout << "  data.size() = " << data.size() << std::endl;
-  std::cout << "  data_from.size() = " << data_from.size() << std::endl;
 
-  if (data_from.size() == 0)
-    print_trace();
+  //std::cout << "data_from.size() = " << data_from.size() << std::endl;
 
   for (unsigned int i=0; i<stateful_prop_ids.size(); ++i)
   {
 
-    std::cout << "  i = " << i << std::endl;
 
+    //if (data.size() > i && data_from.size() > i)
+    {
 
-
-    PropertyValue * prop = data[stateful_prop_ids[i]];              // do the look-up just once (OPT)
-    PropertyValue * prop_from = data_from[i];                       // do the look-up just once (OPT)
-    if (prop != NULL && prop_from != NULL)
-      prop->swap(prop_from);
+      PropertyValue * prop = data[stateful_prop_ids[i]];              // do the look-up just once (OPT)
+      PropertyValue * prop_from = data_from[i];                       // do the look-up just once (OPT)
+      if (prop != NULL && prop_from != NULL)
+        prop->swap(prop_from);
+    }
   }
 }
+
 
 void shallowCopyDataBack(const std::vector<unsigned int> & stateful_prop_ids, MaterialProperties & data, MaterialProperties & data_from)
 {
 
   for (unsigned int i=0; i<stateful_prop_ids.size(); ++i)
   {
-    PropertyValue * prop = data[i];                                 // do the look-up just once (OPT)
-    PropertyValue * prop_from = data_from[stateful_prop_ids[i]];    // do the look-up just once (OPT)
-    if (prop != NULL && prop_from != NULL)
-      prop->swap(prop_from);
+    //if (data.size() > i && data_from.size() > i)
+    {
+      PropertyValue * prop = data[i];                                 // do the look-up just once (OPT)
+      PropertyValue * prop_from = data_from[stateful_prop_ids[i]];    // do the look-up just once (OPT)
+      if (prop != NULL && prop_from != NULL)
+        prop->swap(prop_from);
+    }
   }
 }
 
@@ -109,6 +111,9 @@ MaterialPropertyStorage::releaseProperties()
 void
 MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMap> > & refinement_map, QBase & qrule, QBase & qrule_face, MaterialPropertyStorage & parent_material_props, MaterialData & child_material_data, const Elem & elem, const int input_parent_side, const int input_child, const int input_child_side)
 {
+  // std::cout << "MaterialPropertyStorage::prolongStatefulProps " << elem.id() << " " << input_parent_side << " " << input_child << " " << input_child_side <<  std::endl;
+
+
   mooseAssert(input_child != -1 || input_parent_side == input_child_side, "Invalid inputs!");
 
   unsigned int n_qpoints = 0;
@@ -156,12 +161,18 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
     // init properties (allocate memory. etc)
     for (unsigned int i=0; i < _stateful_prop_id_to_prop_id.size(); ++i)
     {
+      //std::cout << "i = " << i << std::endl;
+      //std::cout << "child_elem.id = " << child_elem->id() << std::endl;
+      //std::cout << "props = " << props()[child_elem][child_side][i] << std::endl;
+
       // duplicate the stateful property in property storage (all three states - we will reuse the allocated memory there)
       // also allocating the right amount of memory, so we do not have to resize, etc.
       if (props()[child_elem][child_side][i] == NULL) props()[child_elem][child_side][i] = child_material_data.props()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
       if (propsOld()[child_elem][child_side][i] == NULL) propsOld()[child_elem][child_side][i] = child_material_data.propsOld()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
       if (hasOlderProperties())
         if (propsOlder()[child_elem][child_side][i] == NULL) propsOlder()[child_elem][child_side][i] = child_material_data.propsOlder()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
+
+      //std::cout << "props = " << props()[child_elem][child_side][i]->size() << std::endl;
 
       // Copy from the parent stateful properties
       for (unsigned int qp=0; qp<refinement_map[child].size(); qp++)
@@ -174,6 +185,8 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
         if (hasOlderProperties())
           propsOlder()[child_elem][child_side][i]->qpCopy(qp, parent_material_props.propsOlder()[&elem][parent_side][i], child_map[qp]._to);
       }
+      //   std::cout << "props = " << props()[child_elem][child_side][i]->size() << std::endl;
+
     }
   }
 }
@@ -336,13 +349,16 @@ MaterialPropertyStorage::copy(MaterialData & material_data, const Elem & elem_to
 void
 MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, unsigned int side)
 {
+
+  if (props()[&elem][side].size() == 0)
+  {
+    std::cout << "&elem = " << &elem << " (" << elem.id() << ")" << std::endl;
+    dump();
+    print_trace();
+  }
+
+
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
-
-  std::cout << "Elem: " << elem.id() << std::endl;
-  //std::cout << "  _stateful_prop_id_to_prop_id = " << _stateful_prop_id_to_prop_id << std::endl;
-  // std::cout << "  _prop_name = " << _prop_names[_stateful_prop_id_to_prop_id] << std::endl;
-
   shallowCopyData(_stateful_prop_id_to_prop_id, material_data.props(), props()[&elem][side]);
   shallowCopyData(_stateful_prop_id_to_prop_id, material_data.propsOld(), propsOld()[&elem][side]);
   if (hasOlderProperties())
@@ -424,4 +440,55 @@ MaterialPropertyStorage::addPropertyId (const std::string & prop_name)
   }
   else
     return it->second;
+}
+
+
+void
+MaterialPropertyStorage::dump() const
+{
+  dumpHelper("Current", _props_elem);
+  //dumpHelper("Old", _props_elem_old);
+  //dumpHelper("Older", _props_elem_older);
+
+}
+
+
+void
+MaterialPropertyStorage::dumpHelper(const std::string & title, HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * props) const
+{
+  // The stream to be dumped
+  std::stringstream oss;
+
+  // Table divider
+  std::string divider = "+-------------------+\n";
+
+  // Write the title and top divider
+  oss << title << ":\n";
+  oss << divider;
+
+  // Initialize HashMap iterators
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties > >::const_iterator it;
+  HashMap<unsigned int, MaterialProperties >::const_iterator jt;
+
+  // Write the header
+  oss << std::left << std::setw(8) << "| Elem." << std::setw(6) << "Side" << std::setw(6) << "Size" << "|" << '\n';
+
+  // Loop through the HashMap and do some dumping
+  for (it = props->begin(); it != props->end(); ++it)
+  {
+    unsigned int elem_id = it->first->id();
+    std::cout << elem_id << " " << it->first << '\n';
+
+    oss << divider;
+
+    for (jt = it->second.begin(); jt != it->second.end(); ++jt)
+    {
+      unsigned int side_id = jt->first;
+      unsigned int prop_size = jt->second.size();
+      oss << std::left << std::setfill(' ') << "| " << std::setw(6) << elem_id << std::setw(6)<< side_id << std::setw(6) << prop_size << "|" << '\n';
+    }
+  }
+  oss << divider;
+
+  Moose::out << oss.str() << "\n\n" << std::flush;
 }

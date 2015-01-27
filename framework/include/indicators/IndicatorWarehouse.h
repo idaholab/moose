@@ -44,6 +44,12 @@ public:
   const std::vector<Indicator *> & active() const { return _active_indicators; }
 
   /**
+   * Get the list of all active Indicators on a Subdomain
+   * @ return The list of all active Indicators on the subdomain
+   */
+//  const std::vector<Indicator *> & active(const SubdomainID & id) const { return _block_indicators[id]; }
+
+  /**
    * Get the list of all active Indicators
    * @return The list of all active InternalSideIndicators
    */

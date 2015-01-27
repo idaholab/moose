@@ -63,10 +63,8 @@
 []
 
 [Adaptivity]
-
   marker = errorfrac
-  max_h_level = 1
-
+ max_h_level = 1
   [./Indicators]
     [./error]
       type = GradientJumpIndicator
@@ -77,9 +75,9 @@
   [./Markers]
     [./errorfrac]
       type = ErrorFractionMarker
-      refine = 0.6
-      coarsen = 0.1
+      refine = 1
+      coarsen = 0
       indicator = error
-    [../]xs
+    [../]
   [../]
 []

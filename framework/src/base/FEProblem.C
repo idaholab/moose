@@ -1673,6 +1673,8 @@ FEProblem::getNeighborMaterials(SubdomainID block_id, THREAD_ID tid)
 void
 FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 {
+
+
   if (_materials[tid].hasMaterials(blk_id))
   {
     std::set<MooseVariable *> needed_moose_vars;
