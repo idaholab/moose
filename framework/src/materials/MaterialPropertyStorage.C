@@ -407,3 +407,50 @@ MaterialPropertyStorage::addPropertyId (const std::string & prop_name)
   else
     return it->second;
 }
+
+
+void
+MaterialPropertyStorage::dump() const
+{
+  dumpHelper("Current", _props_elem);
+  dumpHelper("Old", _props_elem_old);
+  dumpHelper("Older", _props_elem_older);
+}
+
+
+void
+MaterialPropertyStorage::dumpHelper(const std::string & title, HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * props) const
+{
+  // The stream to be dumped
+  std::stringstream oss;
+
+  // Table divider
+  std::string divider = "+-------------------+\n";
+
+  // Write the title and top divider
+  oss << title << ":\n";
+  oss << divider;
+
+  // Initialize HashMap iterators
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties > >::const_iterator it;
+  HashMap<unsigned int, MaterialProperties >::const_iterator jt;
+
+  // Write the header
+  oss << std::left << std::setw(8) << "| Elem." << std::setw(6) << "Side" << std::setw(6) << "Size" << "|" << '\n';
+
+  // Loop through the HashMap and do some dumping
+  for (it = props->begin(); it != props->end(); ++it)
+  {
+    unsigned int elem_id = it->first->id();
+    oss << divider;
+    for (jt = it->second.begin(); jt != it->second.end(); ++jt)
+    {
+      unsigned int side_id = jt->first;
+      unsigned int prop_size = jt->second.size();
+      oss << std::left << std::setfill(' ') << "| " << std::setw(6) << elem_id << std::setw(6)<< side_id << std::setw(6) << prop_size << "|" << '\n';
+    }
+  }
+  oss << divider;
+
+  Moose::out << oss.str() << "\n\n" << std::flush;
+}
