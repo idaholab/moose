@@ -35,6 +35,7 @@ class MooseObject :
   public libMesh::ParallelObject
 {
 public:
+  MooseObject(const InputParameters & parameters);
   MooseObject(const std::string & name, InputParameters parameters);
 
   virtual ~MooseObject() { }
@@ -77,14 +78,16 @@ public:
 
 protected:
 
-  /// The name of this object
-  std::string _name;
-
-  /// Parameters of this object
-  InputParameters _pars;
-
   /// The MooseApp this object is associated with
   MooseApp & _app;
+
+  /// Parameters of this object
+  const InputParameters & _parameters;
+  InputParameters _pars; // deprecated
+
+  /// The name of this object
+  const std::string _name;
+
 };
 
 template <typename T>

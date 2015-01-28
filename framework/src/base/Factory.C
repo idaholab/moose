@@ -14,6 +14,7 @@
 
 #include "Factory.h"
 #include "MooseApp.h"
+#include "InputParameterWarehouse.h"
 
 Factory::Factory(MooseApp & app):
     _app(app)
@@ -42,15 +43,13 @@ Factory::getValidParams(const std::string & obj_name)
   InputParameters params = (*func)();
   params.addPrivateParam("_moose_app", &_app);
 
-  MooseSharedPointer<InputParameters> ptr(new InputParameters(params));
-  _app.getInputParameterWarehouse().addInputParameters(ptr);
-
   return params;
 }
 
 MooseObjectPtr
 Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters)
 {
+  // Pointer to the object constructor
   std::map<std::string, buildPtr>::iterator it = _name_to_build_pointer.find(obj_name);
 
   // Check if the object is registered
@@ -61,12 +60,15 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   deprecatedMessage(obj_name);
 
   // Check to make sure that all required parameters are supplied
+  parameters.addPrivateParam<std::string>("_name", name);
   parameters.checkParams(name);
 
   // Actually call the function pointer.  You can do this in one line,
   // but it's a bit more obvious what's happening if you do it in two...
   buildPtr & func = it->second;
 
+  //const InputParameters & p = _app.getInputParameterWarehouse().addInputParameters(parameters);
+  std::cout << obj_name << std::endl;
   return (*func)(name, parameters);
 }
 
