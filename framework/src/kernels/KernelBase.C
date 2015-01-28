@@ -45,14 +45,14 @@ InputParameters validParams<KernelBase>()
 
 KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BlockRestrictable(name, parameters),
+    BlockRestrictable(parameters),
     SetupInterface(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "kernels"),
     PostprocessorInterface(parameters),
-    MaterialPropertyInterface(name, parameters),
+    MaterialPropertyInterface(parameters, blockIDs()),
     RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "Kernels"),

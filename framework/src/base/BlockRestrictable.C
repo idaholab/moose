@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE Includes
 #include "BlockRestrictable.h"
 
 template<>
@@ -23,10 +24,6 @@ InputParameters validParams<BlockRestrictable>()
   // Add the user-facing 'block' input parameter
   params.addParam<std::vector<SubdomainName> >("block", "The list of block ids (SubdomainID) that this object will be applied");
 
-  // Add the private parameter that is populated by this class that contains valid block ids for the
-  // object inheriting from this class
-  params.addPrivateParam<std::vector<SubdomainID> >("_block_ids", std::vector<SubdomainID>());
-
   // A parameter for disabling error message for objects restrictable by boundary and block,
   // if the parameter is valid it was already set so don't do anything
   if (!params.isParamValid("_dual_restrictable"))
@@ -36,13 +33,32 @@ InputParameters validParams<BlockRestrictable>()
   return params;
 }
 
-BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & parameters) :
+// Standard constructor
+BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
-    _blk_feproblem(parameters.isParamValid("_fe_problem") ?
-                   parameters.get<FEProblem *>("_fe_problem") : NULL),
-    _blk_mesh(parameters.isParamValid("_mesh") ?
-              parameters.get<MooseMesh *>("_mesh") : NULL)
+    _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
+    _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
+    _boundary_ids(_empty_boundary_ids)
 {
+  initializeBlockRestrictable(parameters);
+}
+
+// Dual restricted constructor
+BlockRestrictable::BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids) :
+    _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
+    _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
+    _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
+    _boundary_ids(boundary_ids)
+{
+  initializeBlockRestrictable(parameters);
+}
+
+void
+BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameters)
+{
+  // The name and id of the object
+  const std::string name = parameters.get<std::string>("name");
+
   // If the mesh pointer is not defined, but FEProblem is, get it from there
   if (_blk_feproblem != NULL && _blk_mesh == NULL)
     _blk_mesh = &_blk_feproblem->mesh();
@@ -85,14 +101,10 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
            (parameters.have_parameter<NonlinearVariableName>("variable") || parameters.have_parameter<AuxVariableName>("variable")))
       _blk_ids = variableSubdomianIDs(parameters);
 
-  // Produce error if the object is not allowed to be both block and boundary restrictable
-  if (!_blk_dual_restrictable && !_blk_ids.empty() && parameters.isParamValid("_boundary_ids"))
-  {
-    std::vector<BoundaryID> bnd_ids = parameters.get<std::vector<BoundaryID> >("_boundary_ids");
-    if (!bnd_ids.empty()
-        && std::find(bnd_ids.begin(), bnd_ids.end(), Moose::ANY_BOUNDARY_ID) != bnd_ids.end())
+  // Produce error if the object is not allowed to be both block and boundary restricted
+  if (!_blk_dual_restrictable && !_boundary_ids.empty() && !_boundary_ids.empty())
+    if (!_boundary_ids.empty() && _boundary_ids.find(Moose::ANY_BOUNDARY_ID) == _boundary_ids.end())
       mooseError("Attempted to restrict the object '" << name << "' to a block, but the object is already restricted by boundary");
-  }
 
   // If no blocks were defined above, specify that it is valid on all blocks
   if (_blk_ids.empty())
@@ -118,9 +130,6 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
       mooseError(msg.str());
     }
   }
-
-  // Store the private parameter that contains the set of block ids
-  parameters.set<std::vector<SubdomainID> >("_block_ids") = std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end());
 }
 
 const std::vector<SubdomainName> &
@@ -203,7 +212,7 @@ BlockRestrictable::isBlockSubset(std::vector<SubdomainID> ids) const
 }
 
 std::set<SubdomainID>
-BlockRestrictable::variableSubdomianIDs(InputParameters & parameters) const
+BlockRestrictable::variableSubdomianIDs(const InputParameters & parameters) const
 {
   // Return an empty set if _sys is not defined
   if (!parameters.isParamValid("_sys"))

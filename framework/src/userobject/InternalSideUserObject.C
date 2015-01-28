@@ -25,8 +25,8 @@ InputParameters validParams<InternalSideUserObject>()
 
 InternalSideUserObject::InternalSideUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
-    BlockRestrictable(name, parameters),
-    MaterialPropertyInterface(name, parameters),
+    BlockRestrictable(parameters),
+    MaterialPropertyInterface(parameters, blockIDs()),
     NeighborCoupleable(parameters, false, false),
     MooseVariableDependencyInterface(),
     UserObjectInterface(parameters),

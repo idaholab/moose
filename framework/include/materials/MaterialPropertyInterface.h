@@ -18,9 +18,19 @@
 #include <map>
 #include <string>
 
+// MOOSE includes
 #include "MaterialProperty.h"
 #include "InputParameters.h"
 #include "MaterialData.h"
+#include "MooseTypes.h"
+
+// Forward declarations
+class BlockRestrictable;
+class BoundaryRestrictable;
+
+class InterfaceCommunicationHelper;
+
+
 
 /**
  * \class MaterialPropertyInterface
@@ -35,7 +45,26 @@
 class MaterialPropertyInterface
 {
 public:
-  MaterialPropertyInterface(const std::string & name, InputParameters & parameters);
+
+  ///@{
+  /**
+   * Contructor.
+   *
+   * @param parameters The objects input parameters
+   * @param block_ids A reference to the block ids (optional)
+   * @param boundary_ids A reference to the boundary ids (optional)
+   *
+   * This class has four constructors:
+   *   (1) not restricted to boundaries or blocks
+   *   (2) restricted to only blocks
+   *   (3) restricted to only boundaries
+   *   (4) restricted to both blocks and boundaries
+   */
+  MaterialPropertyInterface(const InputParameters & parameters);
+  MaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids);
+  MaterialPropertyInterface(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids);
+  MaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids, const std::set<BoundaryID> & boundary_ids);
+  ///@}
 
   /**
    * Retrieve reference to material property (current time)
@@ -110,8 +139,9 @@ public:
   bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
 protected:
+
   /// The name of the object that this interface belongs to
-  std::string _mi_name;
+  const std::string _mi_name;
 
   /// Pointer to the material data class that stores properties
   MaterialData * _material_data;
@@ -119,15 +149,9 @@ protected:
   /// Reference to the FEProblem class
   FEProblem & _mi_feproblem;
 
-  /// Storage for the block ids created by BlockRestrictable
-  std::vector<SubdomainID> _mi_block_ids;
-
-  /// Storage for the boundary ids created by BoundaryRestrictable
-  std::vector<BoundaryID> _mi_boundary_ids;
-
   /**
    * A helper method for checking material properties
-   * This method was required to avoid a compiler problem with the templated
+   * This method was required to avoid a compiler problem with the template
    * getMaterialProperty method
    */
   void checkMaterialProperty(const std::string & name);
@@ -149,6 +173,26 @@ protected:
    * has been called by calling getMaterialPropertyCalled().
    */
   bool _get_material_property_called;
+
+private:
+
+  /**
+   * An initialization routine needed for dual constructors
+   */
+  void initializeMaterialPropertyInterface(const InputParameters & parameters);
+
+  /// An empty set for referencing when block_ids is not included
+  std::set<SubdomainID> _empty_block_ids;
+
+  /// An empty set for referencing when boundary_ids is not included
+  std::set<BoundaryID> _empty_boundary_ids;
+
+  /// Storage for the block ids created by BlockRestrictable
+  const std::set<SubdomainID> _mi_block_ids;
+
+  /// Storage for the boundary ids created by BoundaryRestrictable
+  const std::set<BoundaryID> _mi_boundary_ids;
+
 };
 
 template<typename T>

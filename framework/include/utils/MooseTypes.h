@@ -45,6 +45,7 @@ typedef Real                     PostprocessorValue;
 typedef std::vector<Real>        VectorPostprocessorValue;
 typedef boundary_id_type         BoundaryID;
 typedef subdomain_id_type        SubdomainID;
+typedef unsigned int             MooseObjectID;
 
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;

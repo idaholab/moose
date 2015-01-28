@@ -45,7 +45,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "dirac_kernels"),
-    MaterialPropertyInterface(name, parameters),
+    MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "DiracKernels"),

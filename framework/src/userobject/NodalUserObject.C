@@ -32,9 +32,9 @@ InputParameters validParams<NodalUserObject>()
 
 NodalUserObject::NodalUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
-    BlockRestrictable(name, parameters),
-    BoundaryRestrictable(name, parameters),
-    MaterialPropertyInterface(name, parameters),
+    BlockRestrictable(parameters),
+    BoundaryRestrictable(parameters, blockIDs()),
+    MaterialPropertyInterface(parameters, blockIDs(), boundaryIDs()),
     UserObjectInterface(parameters),
     Coupleable(parameters, true),
     ScalarCoupleable(parameters),

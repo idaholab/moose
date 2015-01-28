@@ -163,7 +163,7 @@ public:
    * Register a deprecated object that expires and has a replacement object
    * @param obj_name The name of the object to register (the new object you want people to use)
    * @param name The name of the object that is deprecated
-   * @param t_str String contiaining the experiation date for the object
+   * @param t_str String containing the expiration date for the object
    */
   template<typename T>
   void regReplaced(const std::string & obj_name, const std::string & name, const std::string t_str)
@@ -205,8 +205,8 @@ protected:
 
   /**
    * Parse time string (mm/dd/yyyy HH:MM)
-   * @param t_str String with the object experiation date, this must be in the form mm/dd/yyyy HH:MM
-   * @return A time_t object with the experation date
+   * @param t_str String with the object expiration date, this must be in the form mm/dd/yyyy HH:MM
+   * @return A time_t object with the expiration date
    */
   time_t parseTime(std::string);
 
@@ -230,6 +230,9 @@ protected:
 
   /// Storage for the deprecated objects that have replacements
   std::map<std::string, std::string> _deprecated_name;
+
+  /// Object id count
+  MooseObjectID _object_count;
 };
 
 #endif /* FACTORY_H */

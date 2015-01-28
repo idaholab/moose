@@ -856,7 +856,6 @@ public:
   void setErrorOnJacobianNonzeroReallocation(bool state) { _error_on_jacobian_nonzero_reallocation = state; }
 
 
-
 protected:
   /// Data names that will only be read from the restart file during RECOVERY
   std::set<std::string> _recoverable_data;
