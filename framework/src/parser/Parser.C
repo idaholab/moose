@@ -967,7 +967,7 @@ void Parser::setScalarParameter<PostprocessorName>(const std::string & full_name
   // Set the value here
   param->set() = pps_name;
 
-  Real real_value;
+  Real real_value = -std::numeric_limits<Real>::max();
   std::istringstream ss(pps_name);
 
   if (ss >> real_value && ss.eof())

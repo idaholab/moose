@@ -82,6 +82,8 @@ MultiAppPostprocessorTransfer::execute()
           reduced_pp_value = std::numeric_limits<Real>::max();
           default_init = std::numeric_limits<Real>::max();
           break;
+        default:
+          mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
       bool found_local = false;
@@ -103,6 +105,8 @@ MultiAppPostprocessorTransfer::execute()
             case MINIMUM:
               reduced_pp_value = std::min(curr_pp_value,reduced_pp_value);
               break;
+          default:
+            mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
           }
         }
       }
@@ -124,6 +128,8 @@ MultiAppPostprocessorTransfer::execute()
         case MINIMUM:
           _communicator.min(reduced_pp_value);
           break;
+      default:
+        mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
       to_problem.getPostprocessorValue(_to_pp_name) = reduced_pp_value;
