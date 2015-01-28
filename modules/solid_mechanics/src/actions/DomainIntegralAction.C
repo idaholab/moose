@@ -323,7 +323,7 @@ DomainIntegralAction::act()
         case INTERACTION_INTEGRAL_KIII:
           pp_base_name = "II_KIII";
           aux_mode_name = "_III_";
-          params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (2 * (1 + _poissons_ratio));
+          params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1 + _poissons_ratio);
           break;
         }
 

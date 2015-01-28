@@ -537,18 +537,18 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     const Node* crack_front_node = _mesh.nodePtr(_ordered_crack_front_nodes[0]);
     crack_direction = calculateCrackFrontDirection(crack_front_node,tangent_direction,MIDDLE_NODE);
     _crack_directions.push_back(crack_direction);
-    _crack_plane_normal = crack_direction.cross(tangent_direction);
+    _crack_plane_normal = tangent_direction.cross(crack_direction);
     ColumnMajorMatrix rot_mat;
     rot_mat(0,0) = crack_direction(0);
-    rot_mat(1,0) = crack_direction(1);
-    rot_mat(2,0) = crack_direction(2);
-    rot_mat(0,1) = _crack_plane_normal(0);
+    rot_mat(0,1) = crack_direction(1);
+    rot_mat(0,2) = crack_direction(2);
+    rot_mat(1,0) = _crack_plane_normal(0);
     rot_mat(1,1) = _crack_plane_normal(1);
-    rot_mat(2,1) = _crack_plane_normal(2);
-    rot_mat(0,2) = 0.0;
-    rot_mat(1,2) = 0.0;
+    rot_mat(1,2) = _crack_plane_normal(2);
+    rot_mat(2,0) = 0.0;
+    rot_mat(2,1) = 0.0;
     rot_mat(2,2) = 0.0;
-    rot_mat(_axis_2d,2) = 1.0;
+    rot_mat(2,_axis_2d) = 1.0;
     _rot_matrix.push_back(rot_mat);
 
     _segment_lengths.push_back(std::make_pair(0.0,0.0));
