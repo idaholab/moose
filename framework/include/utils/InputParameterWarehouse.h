@@ -54,7 +54,7 @@ public:
   const InputParameters & getInputParameters(const std::string & name);
 
 private:
-  std::map<std::string, InputParameters* > _name_to_pointer;
+  std::map<std::string, MooseSharedPointer<InputParameters> > _name_to_shared_pointer;
 
 };
 

@@ -22,29 +22,29 @@ InputParameterWarehouse::InputParameterWarehouse() :
 
 InputParameterWarehouse::~InputParameterWarehouse()
 {
-  std::vector<InputParameters *>::iterator it;
-  for (it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    delete *it;
+//  std::vector<InputParameters *>::iterator it;
+//  for (it = _all_objects.begin(); it != _all_objects.end(); ++it)
+//    delete *it;
 }
 
 const InputParameters &
 InputParameterWarehouse::addInputParameters(const InputParameters & params)
 {
 
-  InputParameters * ptr = new InputParameters(params);
-
+  MooseSharedPointer<InputParameters> ptr( new InputParameters(params));
 
   std::string name = ptr->get<std::string>("long_name");
-  _all_objects.push_back(ptr);
-  _name_to_pointer[name] = ptr;
 
-//aparams->print();
+  _all_objects.push_back(ptr.get());
 
-  return *_name_to_pointer[name];
+  _name_to_shared_pointer[name] = ptr;
+
+
+  return *_name_to_shared_pointer[name];
 }
 
 const InputParameters &
 InputParameterWarehouse::getInputParameters(const std::string & name)
 {
-  return *_name_to_pointer[name];
+  return *_name_to_shared_pointer[name];
 }
