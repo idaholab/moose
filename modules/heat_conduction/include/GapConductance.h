@@ -15,7 +15,9 @@ public:
 
   virtual ~GapConductance(){}
 
-  static Real gapLength(Real distance, Real min_gap, Real max_gap);
+  static Real gapLength(const Moose::CoordinateSystemType & system, Real radius, Real r1, Real r2, Real min_gap, Real max_gap);
+
+  static Real gapRect(Real distance, Real min_gap, Real max_gap);
 
   static Real gapCyl( Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
 
@@ -67,8 +69,6 @@ protected:
 
   Real _min_gap;
   Real _max_gap;
-  Real _min_denom;
-  Real _max_denom;
 
   MooseVariable * _temp_var;
   PenetrationLocator * _penetration_locator;
