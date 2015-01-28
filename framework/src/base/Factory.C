@@ -41,6 +41,10 @@ Factory::getValidParams(const std::string & obj_name)
   paramsPtr & func = it->second;
   InputParameters params = (*func)();
   params.addPrivateParam("_moose_app", &_app);
+
+  MooseSharedPointer<InputParameters> ptr(new InputParameters(params));
+  _app.getInputParameterWarehouse().addInputParameters(ptr);
+
   return params;
 }
 
