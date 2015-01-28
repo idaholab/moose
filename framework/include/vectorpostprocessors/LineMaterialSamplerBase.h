@@ -20,6 +20,7 @@
 #include "SamplerBase.h"
 #include "FEProblem.h"
 #include "InputParameters.h"
+#include "BlockRestrictable.h"
 
 //Forward Declarations
 template<typename T>
@@ -38,7 +39,8 @@ InputParameters validParams<LineMaterialSamplerBase<Real> >();
 template<typename T>
 class LineMaterialSamplerBase :
   public GeneralVectorPostprocessor,
-  public SamplerBase
+  public SamplerBase,
+  public BlockRestrictable
 {
 public:
   /**
@@ -111,6 +113,7 @@ template <typename T>
 LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const std::string & name, InputParameters parameters) :
     GeneralVectorPostprocessor(name, parameters),
     SamplerBase(name, parameters, this, _communicator),
+    BlockRestrictable(name, parameters),
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
     _mesh(_subproblem.mesh()),
@@ -152,6 +155,9 @@ LineMaterialSamplerBase<T>::execute()
     const Elem * elem = intersected_elems[i];
 
     if (elem->processor_id() != processor_id())
+      continue;
+
+    if (!hasBlocks(elem->subdomain_id()))
       continue;
 
     _subproblem.prepare(elem, _tid);
