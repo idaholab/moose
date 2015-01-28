@@ -28,6 +28,8 @@ public:
    //virtual std::vector<double> InverseCdf(double min, double max) = 0;
    virtual std::vector<double> InverseCdf(double F) = 0;
 
+   virtual int returnDimensionality() = 0;
+
    std::string & getType();
 
 protected:
@@ -44,19 +46,24 @@ protected:
 class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
 {
 public:
-  BasicMultiDimensionalInverseWeight(const char * data_filename,double p):  _interpolator(data_filename,p)
+  BasicMultiDimensionalInverseWeight(const char * data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
   {
+	  _CDFprovided = CDFprovided;
   };
 
-  BasicMultiDimensionalInverseWeight(std::string data_filename,double p):  _interpolator(data_filename,p)
+  BasicMultiDimensionalInverseWeight(std::string data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
   {
-   bool LBcheck = _interpolator.checkLB(0.0);
-   if (LBcheck == false)
-    throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+	  _CDFprovided = CDFprovided;
 
-   bool UBcheck = _interpolator.checkUB(1.0);
-   if (UBcheck == false)
-    throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+	  if (_CDFprovided) {
+		  bool LBcheck = _interpolator.checkLB(0.0);
+		  if (LBcheck == false)
+			  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+
+		  bool UBcheck = _interpolator.checkUB(1.0);
+		  if (UBcheck == false)
+			  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+	  }
   };
 
   BasicMultiDimensionalInverseWeight(double p):  _interpolator(InverseDistanceWeighting(p))
@@ -70,22 +77,29 @@ public:
   double
   Pdf(std::vector<double> x)
   {
-    return _interpolator.interpolateAt(x);
+	  if (_CDFprovided)
+		  return _interpolator.NDderivative(x);
+	  else
+		  return _interpolator.interpolateAt(x);
   };
 
   double
   Cdf(std::vector<double> x)
   {
-     double value = _interpolator.interpolateAt(x);
+	  double value;
+
+	  if (_CDFprovided)
+		  value = _interpolator.interpolateAt(x);
+	  else
+		  value = _interpolator.integral(x);
 
      if (value > 1.0)
-      value=1.0;
+    	 throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value calculated is above 1.0");
 
      return value;
   };
 
   void updateRNGparameter(double tolerance, double initial_divisions){
-	  std::cout<<"here" <<std::endl;
 	  _tolerance = tolerance;
 	  _initial_divisions = (int)initial_divisions;
 
@@ -101,11 +115,16 @@ public:
       //return _interpolator.NDinverseFunction(min, max);
   };
 
+  int
+  returnDimensionality()
+  {
+	  return _interpolator.returnDimensionality();
+  }
+
 
 protected:
   InverseDistanceWeighting  _interpolator;
-  double _tolerance;
-  int _initial_divisions;
+  bool _CDFprovided;
 };
 
 
@@ -120,17 +139,25 @@ public:
   virtual ~BasicMultivariateNormal();
   double  Pdf(std::vector<double> x);
   double  Cdf(std::vector<double> x);
+
 //  std::vector<double>
 //  InverseCdf(double /*min*/, double /*max*/)
 //  {
 //    return std::vector<double>(2,-1.0);
 //  };
+
   std::vector<double>
   InverseCdf(double F, double tolerance, int initial_divisions=10)
   {
    return std::vector<double>(2,-1.0);
       //return _interpolator.NDinverseFunction(min, max);
   };
+
+  int
+  returnDimensionality()
+  {
+	  return _mu.size();
+  }
 
   //double MVNDST(std::vector<double> a, std::vector<double> b, double alpha, double epsilon, int Nmax);
   double phi(double x);
@@ -188,6 +215,13 @@ public:
    return _interpolator.NDinverseFunctionGrid(F);
       //return _interpolator.NDinverseFunction(min, max);
   };
+
+  int
+  returnDimensionality()
+  {
+	  return _interpolator.returnDimensionality();
+  }
+
 protected:
   MicroSphere _interpolator;
 };
@@ -226,7 +260,7 @@ public:
      double value = _interpolator.interpolateAt(x);
 
      if (value > 1.0)
-      value=1.0;
+    	 throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value calculated is above 1.0");
 
      return value;
   };
@@ -246,6 +280,13 @@ public:
    return _interpolator.NDinverseFunctionGrid(F);
       //return _interpolator.NDinverseFunction(min, max);
   };
+
+  int
+  returnDimensionality()
+  {
+	  return _interpolator.returnDimensionality();
+  }
+
 protected:
   NDSpline _interpolator;
 };

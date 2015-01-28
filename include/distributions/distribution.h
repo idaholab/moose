@@ -39,6 +39,8 @@ public:
    virtual double untrMode() = 0;
    virtual double untrHazard(double x) = 0;
 
+   int returnDimensionality(){return 1;}
+
    std::string & getType(); ///< Get distribution type
    unsigned int getSeed(); ///< Get seed
    std::vector<std::string> getVariableNames();

@@ -116,6 +116,9 @@ public:
   std::string lastDistributionTriggered();
   bool atLeastADistTriggered();
 
+  int returnDimensionality(const std::string dist_alias);
+  int returnDimensionality(const char * dist_alias);
+
 protected:
   std::map < std::string, int > _vector_pos_map;
 

@@ -33,7 +33,9 @@ public:
   void updateRNGparameters(double tolerance, double initial_divisions);
 
   double NDderivative(std::vector<double> coordinate);
-  double integral(std::vector<double> coordinate, int samples);
+  double integral(std::vector<double> coordinate, int samples=1000);
+
+  int returnDimensionality(){return _dimensions;};
 
   NDInterpolation();
   ~NDInterpolation();

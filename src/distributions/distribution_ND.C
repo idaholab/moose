@@ -59,7 +59,7 @@ InputParameters validParams<MultiDimensionalInverseWeight>(){
 
 MultiDimensionalInverseWeight::MultiDimensionalInverseWeight(const std::string & name, InputParameters parameters):
     distributionND(name,parameters),
-    BasicMultiDimensionalInverseWeight(getParam<std::string>("data_filename"),getParam<double>("p"))
+    BasicMultiDimensionalInverseWeight(getParam<std::string>("data_filename"),getParam<double>("p"), getParam<bool>("CDF"))
 {
 }
 

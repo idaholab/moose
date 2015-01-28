@@ -384,6 +384,18 @@ std::string DistributionContainer::lastDistributionTriggered(){
 
 bool DistributionContainer::atLeastADistTriggered(){return _at_least_a_dist_triggered;}
 
+int DistributionContainer::returnDimensionality(const std::string dist_alias){
+   if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
+	 MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
+	 return dist->returnDimensionality();
+	}
+	throwError("returnDimensionality: Distribution " + dist_alias + " was not found in distribution container.");
+	return -1.0;
+}
+
+int DistributionContainer::returnDimensionality(const char * dist_alias){
+	return returnDimensionality(std::string(dist_alias));
+}
 
 DistributionContainer & DistributionContainer::Instance() {
   if(_instance == NULL){
