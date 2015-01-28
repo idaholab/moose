@@ -16,6 +16,10 @@
 #include "MooseApp.h"
 #include "InputParameterWarehouse.h"
 
+// Just for testing...
+#include "Diffusion.h"
+
+
 Factory::Factory(MooseApp & app):
     _app(app)
 {
@@ -67,9 +71,15 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   // but it's a bit more obvious what's happening if you do it in two...
   buildPtr & func = it->second;
 
-  //const InputParameters & p = _app.getInputParameterWarehouse().addInputParameters(parameters);
-  std::cout << obj_name << std::endl;
-  return (*func)(name, parameters);
+  // Some test code
+  if (obj_name == "Diffusion")
+  {
+    const InputParameters & p = _app.getInputParameterWarehouse().addInputParameters(parameters);
+    MooseSharedPointer<Diffusion> ptr (new Diffusion(p));
+    return ptr;
+  }
+  else
+    return (*func)(name, parameters);
 }
 
 time_t Factory::parseTime(const std::string t_str)

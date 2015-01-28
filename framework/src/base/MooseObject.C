@@ -33,12 +33,13 @@ MooseObject::MooseObject(const InputParameters & parameters) :
 {
 }
 
+
 // Deprecated
 MooseObject::MooseObject(const std::string & name, InputParameters parameters) :
   ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
   ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
   _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-  _parameters(_app.getInputParameterWarehouse().getInputParameters(parameters.get<std::string>("long_name"))),
+  _parameters(_app.getInputParameterWarehouse().getInputParameters(parameters.get<std::string>("_name"))),
   _pars(parameters),
   _name(name)
 {

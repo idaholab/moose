@@ -22,24 +22,19 @@ InputParameterWarehouse::InputParameterWarehouse() :
 
 InputParameterWarehouse::~InputParameterWarehouse()
 {
-//  std::vector<InputParameters *>::iterator it;
-//  for (it = _all_objects.begin(); it != _all_objects.end(); ++it)
-//    delete *it;
 }
 
 const InputParameters &
-InputParameterWarehouse::addInputParameters(const InputParameters & params)
+InputParameterWarehouse::addInputParameters(const InputParameters & parameters)
 {
+  // Create the actual InputParameters object to store and reference from the objects
+  MooseSharedPointer<InputParameters> ptr( new InputParameters(parameters));
 
-  MooseSharedPointer<InputParameters> ptr( new InputParameters(params));
+  // Store the object in the warehouse
+  std::string name = ptr->get<std::string>("_name");
+   _name_to_shared_pointer[name] = ptr;
 
-  std::string name = ptr->get<std::string>("long_name");
-
-  _all_objects.push_back(ptr.get());
-
-  _name_to_shared_pointer[name] = ptr;
-
-
+  // Return a const reference, this just saves calling the get method in Factory::create
   return *_name_to_shared_pointer[name];
 }
 
@@ -47,4 +42,23 @@ const InputParameters &
 InputParameterWarehouse::getInputParameters(const std::string & name)
 {
   return *_name_to_shared_pointer[name];
+}
+
+InputParameterIterator
+InputParameterWarehouse::begin()
+{
+  return _name_to_shared_pointer.begin();
+}
+
+InputParameterIterator
+InputParameterWarehouse::end()
+{
+  return _name_to_shared_pointer.end();
+}
+
+const std::vector<InputParameters *> &
+InputParameterWarehouse::all()
+{
+  mooseError("The all() method is not active for InputParameterWarehouse");
+  return _all_objects;
 }

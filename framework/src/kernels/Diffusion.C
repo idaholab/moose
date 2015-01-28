@@ -22,11 +22,14 @@ InputParameters validParams<Diffusion>()
   return p;
 }
 
+Diffusion::Diffusion(const InputParameters & parameters) :
+    Kernel(parameters)
+{
+}
 
 Diffusion::Diffusion(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters)
 {
-
 }
 
 Diffusion::~Diffusion()
