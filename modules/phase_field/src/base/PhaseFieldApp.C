@@ -4,6 +4,7 @@
 
 #include "MatDiffusion.h"
 #include "ACInterface.h"
+#include "ACMultiInterface.h"
 #include "CHMath.h"
 #include "CHParsed.h"
 #include "CHInterface.h"
@@ -103,6 +104,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 {
   registerKernel(MatDiffusion);
   registerKernel(ACInterface);
+  registerKernel(ACMultiInterface);
   registerKernel(CHMath);
   registerKernel(CHParsed);
   registerKernel(CHInterface);
