@@ -285,6 +285,13 @@ private:
    */
   void setOutputExecutionType(ExecFlagType type);
 
+  /**
+   * If content exists in the buffer, write it.
+   * This is used by Console to make sure PETSc related output does not dump
+   * before buffered content. It is private because people shouldn't be messing with it.
+   */
+  void flushConsoleBuffer();
+
   /// A map of the output pointers
   std::map<OutputName, Output *> _object_map;
 
@@ -334,9 +341,11 @@ private:
   //  (1) FEProblem for calling initial, timestepSetup, outputStep, etc. methods
   //  (2) MaterialOutputAction for calling addInterfaceHideVariables
   //  (3) OutputInterface for calling addInterfaceHideVariables
+  //  (4) Console for calling flushConsoleBuffer()
   friend class FEProblem;
   friend class MaterialOutputAction;
   friend class OutputInterface;
+  friend class Console;
 };
 
 template<typename T>
