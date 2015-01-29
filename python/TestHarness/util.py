@@ -212,10 +212,9 @@ def getCompilers(libmesh_dir):
 
   mpicxx_cmd = runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx")
 
-  # Account for useage of distcc
-  if "distcc" in mpicxx_cmd:
-    split_cmd = mpicxx_cmd.split()
-    mpicxx_cmd = split_cmd[-1]
+  # Account for usage of distcc or ccache
+  if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
+    mpicxx_cmd = mpicxx_cmd.split()[-1]
 
   # If mpi ic on the command, run -show to get the compiler
   if "mpi" in mpicxx_cmd:

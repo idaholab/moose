@@ -35,7 +35,8 @@ InputParameters validParams<GapHeatTransfer>()
 }
 
 GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters parameters)
-   :IntegratedBC(name, parameters),
+  :IntegratedBC(name, parameters),
+   _coord_sys( _assembly.coordSystem() ),
    _quadrature(getParam<bool>("quadrature")),
    _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
    _gap_conductance(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name"))),
@@ -187,7 +188,7 @@ GapHeatTransfer::gapLength() const
   if (!_has_info)
     return 1.0;
 
-  return GapConductance::gapLength( -_gap_distance, _min_gap, _max_gap );
+  return GapConductance::gapLength( _coord_sys, _radius, _r1, _r2, _min_gap, _max_gap );
 }
 
 Real
@@ -255,5 +256,29 @@ GapHeatTransfer::computeGapValues()
         mooseWarning( msg.str() );
       }
     }
+  }
+
+  if (_coord_sys == Moose::COORD_RZ || _coord_sys == Moose::COORD_RSPHERICAL)
+  {
+    if (_normals[_qp](0) > 0)
+    {
+      _r1 = _q_point[_qp](0);
+      _r2 = _q_point[_qp](0) - _gap_distance; // note, _gap_distance is negative
+      _radius = _r1;
+    }
+    else if (_normals[_qp](0) < 0)
+    {
+      _r1 = _q_point[_qp](0) + _gap_distance;
+      _r2 = _q_point[_qp](0);
+      _radius = _r2;
+    }
+    else
+      mooseError( "Issue with cylindrical or sphereical flux calc. normals. \n");
+  }
+  else
+  {
+    _r2 = -_gap_distance;
+    _r1 = 0;
+    _radius = 0;
   }
 }
