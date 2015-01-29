@@ -11,7 +11,22 @@ class CoverSet(SlideSet):
   @staticmethod
   def validParams():
     params = SlideSet.validParams()
+    params.addParam("active_sets", "A list of active slides")
+    params.addParam("inactive_sets", "A list of inactive slides")
     return params
+
+  ##
+  # Constructor
+  def __init__(self, name, params, **kwags):
+    SlideSet.__init__(self, name, params, **kwags)
+
+    # Create the list of active slides
+    self.active = ''
+    self.inactive = ''
+    if self.isParamValid("active_sets"):
+      self.active = self.getParam("active_sets")
+    if self.isParamValid("inactive_sets"):
+      self.inactive = self.getParam("inactive_sets")
 
   ##
   #
@@ -23,6 +38,9 @@ class CoverSet(SlideSet):
       if obj != self:
         for key in obj._slide_order:
           slide = obj._slides[key]
+          if not self._isSetActive(slide):
+            continue
+
           if slide.getParam('title') and obj.getParam('show_in_contents'):
             cnt += 1
 
@@ -59,7 +77,6 @@ class CoverSet(SlideSet):
     # Do nothing if the 'contents' flag is not set in the input file
     if not self.isParamValid('contents'):
       return
-
     # Loop through each object and append the markdown with title slides
     max_per_slide = int(self.getParam('contents_items_per_slide'))
     output = []
@@ -70,6 +87,10 @@ class CoverSet(SlideSet):
       if obj != self:
         for key in obj._slide_order:
           slide = obj._slides[key]
+
+          if not self._isSetActive(slide):
+            continue
+
           if slide.getParam('title') and obj.getParam('show_in_contents'):
 
             if len(output) <= page:
@@ -88,3 +109,11 @@ class CoverSet(SlideSet):
     for i in range(len(output)):
       contents_name = self.name() + '-contents-' + str(i)
       self._slides[contents_name].markdown += output[i]
+
+  ##
+  # Return true if the slide set is active for contents
+  def _isSetActive(self, slide):
+    parent = slide.getParam('_parent')
+    if parent.name() in self.inactive or (self.active != '' and parent.name() not in self.active):
+      return False
+    return True
