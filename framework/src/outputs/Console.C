@@ -246,6 +246,10 @@ Console::output(const ExecFlagType & type)
   if (type != EXEC_FINAL && !onInterval())
     return;
 
+  // Flush the Console buffer, if we don't do this here then the linear/nonlinear residual output
+  // may write to the screen prior to buffered text
+  _app.getOutputWarehouse().flushConsoleBuffer();
+
   // Output the system information first; this forces this to be the first item to write by default
   // However, 'output_system_information_on' still operates correctly, so it may be changed by the user
   if (shouldOutput("system_information", type))

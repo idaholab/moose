@@ -55,12 +55,6 @@ public:
   virtual void initialSetup();
 
   /**
-   * Timestep function
-   * Runs at the beginning of each timestep and prints the timestep, time, and dt information
-   */
-  //virtual void timestepSetup();
-
-  /**
    * Customizes the order of output for the various components as well as adds additional
    * output such as timestep information and nonlinear/linear residual information
    *

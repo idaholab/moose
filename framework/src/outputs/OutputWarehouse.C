@@ -184,6 +184,13 @@ OutputWarehouse::mooseConsole()
 }
 
 void
+OutputWarehouse::flushConsoleBuffer()
+{
+  if (!_console_buffer.str().empty())
+    mooseConsole();
+}
+
+void
 OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset)
 {
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
