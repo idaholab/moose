@@ -34,7 +34,7 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),
     MooseVariableDependencyInterface(),
-    TransientInterface(parameters, name, "element_user_objects"),
+    TransientInterface(parameters, "element_user_objects"),
     PostprocessorInterface(parameters),
     RandomInterface(name, parameters, _fe_problem, _tid, false),
     ZeroInterface(parameters),

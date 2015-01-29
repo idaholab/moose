@@ -30,7 +30,7 @@ InternalSideUserObject::InternalSideUserObject(const std::string & name, InputPa
     NeighborCoupleable(parameters, false, false),
     MooseVariableDependencyInterface(),
     UserObjectInterface(parameters),
-    TransientInterface(parameters, name, "internal_side_user_object"),
+    TransientInterface(parameters, "internal_side_user_object"),
     PostprocessorInterface(parameters),
     ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),

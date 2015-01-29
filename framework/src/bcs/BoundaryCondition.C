@@ -40,7 +40,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    TransientInterface(parameters, name, "bcs"),
+    TransientInterface(parameters, "bcs"),
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "BCs"),

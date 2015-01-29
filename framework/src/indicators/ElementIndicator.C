@@ -38,7 +38,7 @@ params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or n
 
 ElementIndicator::ElementIndicator(const std::string & name, InputParameters parameters) :
     Indicator(name, parameters),
-    TransientInterface(parameters, name, "indicators"),
+    TransientInterface(parameters, "indicators"),
     PostprocessorInterface(parameters),
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),

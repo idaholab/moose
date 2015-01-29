@@ -49,7 +49,7 @@ InputParameters validParams<DGKernel>()
 DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    TransientInterface(parameters, name, "dgkernels"),
+    TransientInterface(parameters, "dgkernels"),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false, false),

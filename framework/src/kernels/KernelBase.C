@@ -50,7 +50,7 @@ KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    TransientInterface(parameters, name, "kernels"),
+    TransientInterface(parameters, "kernels"),
     PostprocessorInterface(parameters),
     MaterialPropertyInterface(parameters, blockIDs()),
     RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),

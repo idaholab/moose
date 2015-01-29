@@ -44,7 +44,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    TransientInterface(parameters, name, "dirac_kernels"),
+    TransientInterface(parameters, "dirac_kernels"),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
