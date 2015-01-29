@@ -20,7 +20,7 @@ InputParameters validParams<SetupInterface>()
 {
   InputParameters params = emptyInputParameters();
 
-  // Get an MooseEnum of the avaible 'execute_on' options
+  // Get an MooseEnum of the available 'execute_on' options
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
 
   // Add the 'execute_on' input parameter for users to set
@@ -29,9 +29,9 @@ InputParameters validParams<SetupInterface>()
   return params;
 }
 
-SetupInterface::SetupInterface(InputParameters & params)
+SetupInterface::SetupInterface(const InputParameters & params)
 {
-  /**
+  /*
    * While many of the MOOSE systems inherit from this interface, it doesn't make sense for them all to adjust their execution flags.
    * Our way of dealing with this is by not having those particular classes add the this classes valid params to their own.  In
    * those cases it won't exist so we just set it to a default and ignore it.
@@ -47,14 +47,12 @@ SetupInterface::SetupInterface(InputParameters & params)
     syntax_conversion["timestep"] = "timestep_end";
 
     for (std::map<std::string, std::string>::const_iterator it = syntax_conversion.begin(); it != syntax_conversion.end(); ++it)
-    {
       if (flags.contains(it->first))
       {
         mooseWarning("The 'execute_on' option '" << it->first << "' is deprecated, please replace with '" << it->second << "'.");
         flags.erase(it->first);
         flags.push_back(it->second);
       }
-    }
 
     // Set the execution flags for this object
     _exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(flags);
