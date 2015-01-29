@@ -17,7 +17,7 @@
 #include "Postprocessor.h"
 #include "MooseTypes.h"
 
-PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
+PostprocessorInterface::PostprocessorInterface(const InputParameters & params) :
     _pi_feproblem(*params.get<FEProblem *>("_fe_problem")),
     _pi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
     _ppi_params(params)
@@ -44,8 +44,8 @@ PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & na
 PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
 {
-  // // Return the default if the Postprocessor does not exist and a default does, otherwise
-  // // continue as usual
+  // Return the default if the Postprocessor does not exist and a default does, otherwise
+  // continue as usual
   if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
     return _ppi_params.defaultPostprocessorValue(name);
   else
