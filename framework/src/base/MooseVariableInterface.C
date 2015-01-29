@@ -17,7 +17,7 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-MooseVariableInterface::MooseVariableInterface(InputParameters & parameters, bool nodal, std::string var_param_name) :
+MooseVariableInterface::MooseVariableInterface(const InputParameters & parameters, bool nodal, std::string var_param_name) :
     _nodal(nodal)
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");

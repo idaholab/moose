@@ -30,7 +30,7 @@ public:
    * @param nodal true if the variable is nodal
    * @param var_param_name the parameter name where we will find the coupled variable name
    */
-  MooseVariableInterface(InputParameters & parameters, bool nodal, std::string var_param_name = "variable");
+  MooseVariableInterface(const InputParameters & parameters, bool nodal, std::string var_param_name = "variable");
 
   /**
    * Get the variable that this object is using.
