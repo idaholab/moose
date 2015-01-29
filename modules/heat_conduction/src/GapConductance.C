@@ -34,6 +34,9 @@ InputParameters validParams<GapConductance>()
   params.addRangeCheckedParam<Real>("min_gap", 1e-6, "min_gap>=0", "A minimum gap (denominator) size");
   params.addRangeCheckedParam<Real>("max_gap", 1e6, "max_gap>=0", "A maximum gap (denominator) size");
 
+  MooseEnum coord_types("default XYZ", "default");
+  params.addParam<MooseEnum>("coord_type", coord_types, "Gap calculation type (default or XYZ).");
+
   params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
   params.addRangeCheckedParam<Real>("emissivity_1", 0.0, "emissivity_1>=0 & emissivity_1<=1", "The emissivity of the fuel surface");
   params.addRangeCheckedParam<Real>("emissivity_2", 0.0, "emissivity_2>=0 & emissivity_2<=1", "The emissivity of the cladding surface");
@@ -47,6 +50,8 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
   :Material(name, parameters),
    _appended_property_name( getParam<std::string>("appended_property_name") ),
    _temp(coupledValue("variable")),
+   _gap_type_set(false),
+   _gap_type(Moose::COORD_XYZ),
    _quadrature(getParam<bool>("quadrature")),
    _gap_temp(0),
    _gap_distance(88888),
@@ -93,8 +98,29 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
                                                                                          getParam<std::vector<BoundaryName> >("boundary")[0],
                                                                                          Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   }
+
 }
 
+void
+GapConductance::computeProperties()
+{
+  if (!_gap_type_set)
+  {
+    _gap_type_set = true;
+    if (getParam<MooseEnum>("coord_type") == "XYZ")
+    {
+      _gap_type = Moose::COORD_XYZ;
+    }
+    else
+    {
+      _gap_type = _coord_sys;
+    }
+    if (_gap_type == Moose::COORD_XYZ && _coord_sys == Moose::COORD_RSPHERICAL)
+      mooseError("The 'XYZ' coord_type and a spherical coordinate system are not compatible.");
+  }
+
+  Material::computeProperties();
+}
 
 void
 GapConductance::computeQpProperties()
@@ -106,14 +132,22 @@ GapConductance::computeQpProperties()
 void
 GapConductance::computeQpConductance()
 {
-  _gap_conductance[_qp] = h_conduction() + h_radiation();
-  _gap_conductance_dT[_qp] = dh_conduction();
+  if (_has_info)
+  {
+    _gap_conductance[_qp] = h_conduction() + h_radiation();
+    _gap_conductance_dT[_qp] = dh_conduction();
+  }
+  else
+  {
+    _gap_conductance[_qp] = 0;
+    _gap_conductance_dT[_qp] = 0;
+  }
 }
 
 Real
 GapConductance::h_conduction()
 {
-  return gapK() / gapLength(_coord_sys, _radius, _r1, _r2, _min_gap, _max_gap);
+  return gapK() / gapLength(_gap_type, _radius, _r1, _r2, _min_gap, _max_gap);
 }
 
 
@@ -287,7 +321,7 @@ GapConductance::computeGapValues()
     }
   }
 
-  if (_coord_sys == Moose::COORD_RZ || _coord_sys == Moose::COORD_RSPHERICAL)
+  if (_gap_type == Moose::COORD_RZ || _gap_type == Moose::COORD_RSPHERICAL)
   {
     if (_normals[_qp](0) > 0)
     {

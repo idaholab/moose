@@ -25,6 +25,7 @@ public:
 
 protected:
 
+  virtual void computeProperties();
   virtual void computeQpProperties();
 
   /**
@@ -44,6 +45,9 @@ protected:
   const std::string _appended_property_name;
 
   const VariableValue & _temp;
+
+  bool _gap_type_set;
+  Moose::CoordinateSystemType _gap_type;
 
   bool _quadrature;
 
