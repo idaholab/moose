@@ -3533,6 +3533,7 @@ FEProblem::possiblyRebuildGeomSearchPatches()
       // Let this fall through if things do need to be updated...
 
       case 1: // Always
+        // Flush output here to see the message before the reinitialization, which could take a while
         _console << "\n\nUpdating geometric search patches\n"<<std::endl;
 
         _geometric_search_data.clearNearestNodeLocators();
