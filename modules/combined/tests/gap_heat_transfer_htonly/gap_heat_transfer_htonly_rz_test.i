@@ -22,7 +22,20 @@
 # 2*pi*h*k*delta_T/(ln(r2/r1))
 # 2*pi*1*1*100/(ln(2/1)) = 906.5 watts
 #
-# For comparison, see results from the flux post processors
+# For comparison, see results from the flux post processors.
+#
+# As a second test, use the rectilinear (parallel plate) form of the gap heat transfer.
+#
+#  Flux = (T_left - T_right) * (gapK/gapL)
+#
+# For gapK = 1 (default value)
+#
+# The integrated heat flux across the gap at time 2 is then:
+#
+# 2*pi*h*k*delta_T/(1)
+# 2*pi*1*1*100/(1) = 628.3 watts
+#
+# For comparison, see results from the flux post processors.
 #
 
 [Problem]
@@ -35,7 +48,7 @@
 
 [Functions]
 
-  [./temp]
+  [./ramp]
     type = PiecewiseLinear
     x = '0   1   2'
     y = '100 200 200'
@@ -49,10 +62,23 @@
     master = 3
     slave = 2
   [../]
+  [./thermal_contact2]
+    type = GapHeatTransfer
+    variable = temp2
+    master = 3
+    slave = 2
+    coord_type = XYZ
+    appended_property_name = 2
+  [../]
 []
 
 [Variables]
   [./temp]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 100
+  [../]
+  [./temp2]
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
@@ -64,12 +90,20 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./gap_cond2]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
   [./heat]
     type = HeatConduction
     variable = temp
+  [../]
+  [./heat2]
+    type = HeatConduction
+    variable = temp2
   [../]
 []
 
@@ -79,13 +113,27 @@
     type = FunctionPresetBC
     boundary = 1
     variable = temp
-    function = temp
+    function = ramp
   [../]
 
   [./temp_far_right]
     type = PresetBC
     boundary = 4
     variable = temp
+    value = 100
+  [../]
+
+  [./temp_far_left2]
+    type = FunctionPresetBC
+    boundary = 1
+    variable = temp2
+    function = ramp
+  [../]
+
+  [./temp_far_right2]
+    type = PresetBC
+    boundary = 4
+    variable = temp2
     value = 100
   [../]
 []
@@ -95,6 +143,12 @@
     type = MaterialRealAux
     property = gap_conductance
     variable = gap_cond
+    boundary = 2
+  [../]
+  [./conductance2]
+    type = MaterialRealAux
+    property = gap_conductance
+    variable = gap_cond2
     boundary = 2
   [../]
 []
@@ -168,9 +222,35 @@
     diffusivity = thermal_conductivity
   [../]
 
+  [./temp_left2]
+    type = SideAverageValue
+    boundary = 2
+    variable = temp2
+  [../]
+
+  [./temp_right2]
+    type = SideAverageValue
+    boundary = 3
+    variable = temp2
+  [../]
+
+  [./flux_left2]
+    type = SideFluxIntegral
+    variable = temp2
+    boundary = 2
+    diffusivity = thermal_conductivity
+  [../]
+
+  [./flux_right2]
+    type = SideFluxIntegral
+    variable = temp2
+    boundary = 3
+    diffusivity = thermal_conductivity
+  [../]
+
+[]
 
 [Outputs]
-  file_base = out_rz
   output_initial = true
   exodus = true
   print_linear_residuals = true
