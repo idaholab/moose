@@ -51,7 +51,7 @@ public:
   /**
    * Class constructor
    */
-  OrientedBoxInterface(std::string name, InputParameters & parameters);
+  OrientedBoxInterface(const InputParameters & parameters);
 
   /**
    * Class destructor
