@@ -30,7 +30,7 @@ class FEProblem;
 class VectorPostprocessorInterface
 {
 public:
-  VectorPostprocessorInterface(InputParameters & params);
+  VectorPostprocessorInterface(const InputParameters & parameters);
 
   /**
    * Retrieve the value of a VectorPostprocessor
@@ -114,7 +114,7 @@ private:
   THREAD_ID _vpi_tid;
 
   /// VectorPostprocessorInterface Parameters
-  InputParameters _vpi_params;
+  const InputParameters _vpi_params;
 };
 
 #endif //VECTORPOSTPROCESSORINTERFACE_H
