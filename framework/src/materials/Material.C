@@ -55,7 +55,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     MaterialPropertyInterface(parameters, blockIDs(), boundaryIDs()),
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
-    Restartable(name, parameters, "Materials"),
+    Restartable(parameters, "Materials"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
 

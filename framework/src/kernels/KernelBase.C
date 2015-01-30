@@ -55,7 +55,7 @@ KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
     MaterialPropertyInterface(parameters, blockIDs()),
     RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
     GeometricSearchInterface(parameters),
-    Restartable(name, parameters, "Kernels"),
+    Restartable(parameters, "Kernels"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

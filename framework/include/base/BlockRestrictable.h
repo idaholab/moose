@@ -187,7 +187,7 @@ private:
   MooseMesh * _blk_mesh;
 
   /// An empty set for referencing when boundary_ids is not included
-  std::set<BoundaryID> _empty_boundary_ids;
+  const std::set<BoundaryID> _empty_boundary_ids;
 
   /// Reference to the boundary_ids, defaults to an empty set if not provided
   const std::set<BoundaryID> & _boundary_ids;

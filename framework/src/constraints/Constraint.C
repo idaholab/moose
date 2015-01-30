@@ -38,7 +38,7 @@ Constraint::Constraint(const std::string & name, InputParameters parameters) :
   UserObjectInterface(parameters),
   TransientInterface(parameters, "constraint"),
   GeometricSearchInterface(parameters),
-  Restartable(name, parameters, "Constraints"),
+  Restartable(parameters, "Constraints"),
   ZeroInterface(parameters),
   MeshChangedInterface(parameters),
   _subproblem(*parameters.get<SubProblem *>("_subproblem")),

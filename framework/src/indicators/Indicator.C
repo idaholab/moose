@@ -45,7 +45,7 @@ Indicator::Indicator(const std::string & name, InputParameters parameters) :
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    Restartable(name, parameters, "Indicators"),
+    Restartable(parameters, "Indicators"),
     OutputInterface(name, parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
