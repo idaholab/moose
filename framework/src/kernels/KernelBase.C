@@ -53,7 +53,7 @@ KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
     TransientInterface(parameters, "kernels"),
     PostprocessorInterface(parameters),
     MaterialPropertyInterface(parameters, blockIDs()),
-    RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
+    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
     GeometricSearchInterface(parameters),
     Restartable(parameters, "Kernels"),
     ZeroInterface(parameters),

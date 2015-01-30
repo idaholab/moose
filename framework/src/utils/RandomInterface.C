@@ -28,12 +28,11 @@ InputParameters validParams<RandomInterface>()
   return params;
 }
 
-RandomInterface::RandomInterface(const std::string & name, InputParameters & parameters,
-                                 FEProblem & problem, THREAD_ID tid, bool is_nodal) :
+RandomInterface::RandomInterface(const InputParameters & parameters, FEProblem & problem, THREAD_ID tid, bool is_nodal) :
     _random_data(NULL),
     _generator(NULL),
     _ri_problem(problem),
-    _ri_name(name),
+    _ri_name(parameters.get<std::string>("name")),
     _master_seed(parameters.get<unsigned int>("seed")),
     _is_nodal(is_nodal),
     _reset_on(EXEC_LINEAR),
