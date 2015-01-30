@@ -1741,7 +1741,11 @@ void
 MooseMesh::init()
 {
   if (!_app.isRecovering() || !_allow_recovery)
+  {
     buildMesh();
+    MeshRefinement mesh_refinement(*this);
+    mesh_refinement.uniformly_refine(_uniform_refine_level);
+  }
   else // When recovering just read the CPR file
     getMesh().read(_app.getRecoverFileBase() + "_mesh.cpr");
 }

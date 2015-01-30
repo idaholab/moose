@@ -76,15 +76,6 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   if (getParam<bool>("second_order"))
     mesh->getMesh().all_second_order(true);
 
-#ifdef LIBMESH_ENABLE_AMR
-  unsigned int level = getParam<unsigned int>("uniform_refine");
-
-  // Did they specify extra refinement levels on the command-line?
-  level += _app.getParam<unsigned int>("refinements");
-
-  mesh->uniformRefineLevel() = level;
-#endif //LIBMESH_ENABLE_AMR
-
   // Add entity names to the mesh
   if (_pars.isParamValid("block_id") && _pars.isParamValid("block_name"))
   {
@@ -131,12 +122,25 @@ SetupMeshAction::act()
 {
   // Create the mesh object and tell it to build itself
   _mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create(_type, "mesh", _moose_object_pars));
+
+#ifdef LIBMESH_ENABLE_AMR
+  unsigned int level = getParam<unsigned int>("uniform_refine");
+
+  // Did they specify extra refinement levels on the command-line?
+  level += _app.getParam<unsigned int>("refinements");
+
+  _mesh->uniformRefineLevel() = level;
+#endif //LIBMESH_ENABLE_AMR
+
   _mesh->init();
 
   if (isParamValid("displacements"))
   {
     // Create the displaced mesh
     _displaced_mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create(_type, "displaced_mesh", _moose_object_pars));
+#ifdef LIBMESH_ENABLE_AMR
+    _displaced_mesh->uniformRefineLevel() = level;
+#endif //LIBMESH_ENABLE_AMR
     _displaced_mesh->init();
 
     std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
