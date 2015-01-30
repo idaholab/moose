@@ -25,7 +25,7 @@ InputParameters validParams<OversampleOutput>()
 
   // Get the parameters from the parent object
   InputParameters params = validParams<FileOutput>();
-  params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling");
+  params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling (refinement levels beyond any uniform refinements)");
   params.addParam<Point>("position", "Set a positional offset, this vector will get added to the nodal coordinates to move the domain.");
   params.addParam<MeshFileName>("file", "The name of the mesh file to read, for oversampling");
 

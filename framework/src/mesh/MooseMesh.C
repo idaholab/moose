@@ -1878,17 +1878,17 @@ MooseMesh::setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * bounda
   _boundary_to_normal_map.reset(boundary_map);
 }
 
-#ifdef LIBMESH_ENABLE_AMR
-unsigned int & MooseMesh::uniformRefineLevel()
+unsigned int
+MooseMesh::uniformRefineLevel() const
 {
   return _uniform_refine_level;
 }
 
-const unsigned int & MooseMesh::uniformRefineLevel() const
+void
+MooseMesh::setUniformRefineLevel(unsigned int level)
 {
-  return _uniform_refine_level;
+  _uniform_refine_level = level;
 }
-#endif // LIBMESH_ENABLE_AMR
 
 void
 MooseMesh::addGhostedBoundary(BoundaryID boundary_id)

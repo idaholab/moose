@@ -354,12 +354,10 @@ MooseApp::meshOnly(std::string mesh_file_name)
   _action_warehouse.executeActionsWithAction("setup_mesh");
   _action_warehouse.executeActionsWithAction("prepare_mesh");
   _action_warehouse.executeActionsWithAction("add_mesh_modifier");
+  _action_warehouse.executeActionsWithAction("uniform_refine_mesh");
   _action_warehouse.executeActionsWithAction("setup_mesh_complete");
 
-  // uniform refinement
   MooseSharedPointer<MooseMesh> & mesh = _action_warehouse.mesh();
-  MeshRefinement mesh_refinement(mesh->getMesh());
-  mesh_refinement.uniformly_refine(mesh->uniformRefineLevel());
 
   // If no argument specified or if the argument following --mesh-only starts
   // with a dash, try to build an output filename based on the input mesh filename.

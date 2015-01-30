@@ -119,9 +119,18 @@ public:
   void initialAdaptMesh();
 
   /**
-   * Does 'level' levels of uniform refinements
+   * Performs uniform refinement of the passed Mesh object. The
+   * number of levels of refinement performed is stored in the
+   * MooseMesh object. No solution projection is performed in this
+   * version.
    */
-  void uniformRefine(unsigned int level);
+  static void uniformRefine(MooseMesh *mesh);
+
+  /**
+   * Performs uniform refinement on the meshes in the current
+   * object. Projections are performed of the solution vectors.
+   */
+  void uniformRefineWithProjection();
 
   /**
    * Is adaptivity on?

@@ -324,13 +324,15 @@ public:
    */
   void update();
 
-#ifdef LIBMESH_ENABLE_AMR
   /**
    * Returns the level of uniform refinement requested (zero if AMR is disabled).
    */
-  unsigned int & uniformRefineLevel();
-  const unsigned int & uniformRefineLevel() const;
-#endif //LIBMESH_ENABLE_AMR
+  unsigned int uniformRefineLevel() const;
+
+  /**
+   * Set uniform refinement level
+   */
+  void setUniformRefineLevel(unsigned int);
 
   /**
    * This will add the boundary ids to be ghosted to this processor

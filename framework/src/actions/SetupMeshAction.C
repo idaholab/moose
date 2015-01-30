@@ -82,7 +82,7 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   // Did they specify extra refinement levels on the command-line?
   level += _app.getParam<unsigned int>("refinements");
 
-  mesh->uniformRefineLevel() = level;
+  mesh->setUniformRefineLevel(level);
 #endif //LIBMESH_ENABLE_AMR
 
   // Add entity names to the mesh

@@ -357,11 +357,15 @@ void FEProblem::initialSetup()
 
   if (!_app.isRecovering())
   {
-    // uniform refine
-    if (_mesh.uniformRefineLevel() > 0)
+    /**
+     * If we are not recovering but we are doing restart (_app_setFileRestart() == true) with
+     * additional uniform refinements. We have to delay the refinement until this point
+     * in time so that the equation systems are initialized and projections can be performed.
+     */
+    if (_mesh.uniformRefineLevel() > 0 && _app.setFileRestart())
     {
       Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-      adaptivity().uniformRefine(_mesh.uniformRefineLevel());
+      adaptivity().uniformRefineWithProjection();
       Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
     }
   }
