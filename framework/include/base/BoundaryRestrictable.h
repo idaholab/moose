@@ -187,7 +187,7 @@ private:
   bool _boundary_restricted;
 
   /// An empty set for referencing when block_ids is not included
-  std::set<SubdomainID> _empty_block_ids;
+  const std::set<SubdomainID> _empty_block_ids;
 
   /// Reference to the block_ids, defaults to an empty set if not provided
   const std::set<SubdomainID> & _block_ids;

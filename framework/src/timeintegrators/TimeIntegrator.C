@@ -27,7 +27,7 @@ InputParameters validParams<TimeIntegrator>()
 
 TimeIntegrator::TimeIntegrator(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    Restartable(name, parameters, "TimeIntegrators"),
+    Restartable(parameters, "TimeIntegrators"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _nl(_fe_problem.getNonlinearSystem()),

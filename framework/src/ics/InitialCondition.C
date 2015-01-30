@@ -41,7 +41,7 @@ InitialCondition::InitialCondition(const std::string & name, InputParameters par
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters),
     DependencyResolverInterface(),
-    Restartable(name, parameters, "InitialConditions"),
+    Restartable(parameters, "InitialConditions"),
     ZeroInterface(parameters),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),

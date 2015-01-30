@@ -43,7 +43,7 @@ Executioner::Executioner(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
-    Restartable(name, parameters, "Executioners"),
+    Restartable(parameters, "Executioners"),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),

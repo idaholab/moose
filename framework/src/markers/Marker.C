@@ -39,7 +39,7 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     BlockRestrictable(parameters),
     SetupInterface(parameters),
     UserObjectInterface(parameters),
-    Restartable(name, parameters, "Markers"),
+    Restartable(parameters, "Markers"),
     PostprocessorInterface(parameters),
     MeshChangedInterface(parameters),
     OutputInterface(name, parameters),
