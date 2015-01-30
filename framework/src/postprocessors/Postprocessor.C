@@ -27,7 +27,7 @@ InputParameters validParams<Postprocessor>()
 }
 
 Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
-    OutputInterface(name, parameters),
+    OutputInterface(parameters),
     _pp_name(name)
 {
 }

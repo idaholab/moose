@@ -42,7 +42,7 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     Restartable(parameters, "Markers"),
     PostprocessorInterface(parameters),
     MeshChangedInterface(parameters),
-    OutputInterface(name, parameters),
+    OutputInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _adaptivity(_fe_problem.adaptivity()),

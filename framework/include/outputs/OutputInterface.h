@@ -42,7 +42,7 @@ public:
    * @param build_list If false the buildOutputHideVariableList must be called explicitly, this behavior
    *                   is required for automatic output of material properties
    */
-  OutputInterface(const std::string & name, InputParameters parameters, bool build_list = true);
+  OutputInterface(const InputParameters & parameters, bool build_list = true);
 
   /**
    * Builds hide lists for output objects NOT listed in the 'outputs' parameter
