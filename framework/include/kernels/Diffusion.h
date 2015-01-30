@@ -26,6 +26,7 @@ InputParameters validParams<Diffusion>();
 class Diffusion : public Kernel
 {
 public:
+  Diffusion(const InputParameters & parameters);
   Diffusion(const std::string & name, InputParameters parameters);
   virtual ~Diffusion();
 

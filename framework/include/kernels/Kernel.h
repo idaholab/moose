@@ -26,6 +26,7 @@ class Kernel :
   public KernelBase
 {
 public:
+  Kernel(const InputParameters & parameters);
   Kernel(const std::string & name, InputParameters parameters);
 
   virtual ~Kernel();

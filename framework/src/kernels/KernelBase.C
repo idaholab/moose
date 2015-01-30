@@ -44,7 +44,7 @@ InputParameters validParams<KernelBase>()
 }
 
 KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+    MooseObject(parameters),
     BlockRestrictable(name, parameters),
     SetupInterface(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),

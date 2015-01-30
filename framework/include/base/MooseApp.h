@@ -28,6 +28,7 @@
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "OutputWarehouse.h"
+#include "InputParameterWarehouse.h"
 
 // libMesh includes
 #include "libmesh/parallel_object.h"
@@ -319,6 +320,12 @@ public:
    */
   SystemInfo * getSystemInfo() { return _sys_info.get(); }
 
+
+  /**
+   * Return a reference to the InputParameterWarehouse
+   */
+  InputParameterWarehouse & getInputParameterWarehouse(){ return _input_parameter_warehouse; }
+
 protected:
 
   MooseApp(const std::string & name, InputParameters parameters);
@@ -372,6 +379,9 @@ protected:
 
   /// Where built actions are stored
   ActionWarehouse _action_warehouse;
+
+  /// Input parameter storage structure
+  InputParameterWarehouse _input_parameter_warehouse;
 
   /// Parser for parsing the input file
   Parser _parser;
