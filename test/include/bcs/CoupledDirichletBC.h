@@ -12,24 +12,41 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef COUPLEDDIRICHLETBC_H
+#define COUPLEDDIRICHLETBC_H
+
 #include "DirichletBC.h"
 
+class CoupledDirichletBC;
+
 template<>
-InputParameters validParams<DirichletBC>()
+InputParameters validParams<CoupledDirichletBC>();
+
+/**
+ * Implements the Dirichlet boundary condition
+ * c*u + u^2 + v^2 = _value
+ * where "u" is the current variable, and "v" is a coupled variable.
+ * Note: without the constant term, a zero initial guess gives you a
+ * zero row in the Jacobian, which is a bad thing.
+ */
+class CoupledDirichletBC : public DirichletBC
 {
-  InputParameters p = validParams<NodalBC>();
-  p.addRequiredParam<Real>("value", "Value of the BC");
-  return p;
-}
+public:
+  CoupledDirichletBC(const std::string & name, InputParameters parameters);
 
+protected:
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-DirichletBC::DirichletBC(const std::string & name, InputParameters parameters) :
-  NodalBC(name, parameters),
-  _value(getParam<Real>("value"))
-{}
+  // The coupled variable
+  VariableValue & _v;
 
-Real
-DirichletBC::computeQpResidual()
-{
-  return _u[_qp] - _value;
-}
+  /// The id of the coupled variable
+  unsigned int _v_num;
+
+  // The constant (not user-selectable for now)
+  Real _c;
+};
+
+#endif /* COUPLEDDIRICHLETBC_H */

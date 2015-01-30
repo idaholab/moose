@@ -1771,11 +1771,46 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   jacobian.close();
 
   PARALLEL_TRY {
-    // do nodal BC
-    std::vector<numeric_index_type> zero_rows;
+    // Make sure there are no cached NodalBC entries hanging around from the last assembly
+    _fe_problem.assembly(0).clearCachedNodalBCJacobianEntries();
 
+    // Cache the information about which BCs are coupled to which
+    // variables, so we don't have to figure it out for each node.
+    std::map<std::string, std::set<unsigned int> > bc_involved_vars;
+    const std::set<BoundaryID> & all_boundary_ids = _mesh.getBoundaryIDs();
+    for (std::set<BoundaryID>::const_iterator it=all_boundary_ids.begin(); it != all_boundary_ids.end(); ++it)
+    {
+      // Get reference to all the NodalBCs for this ID.  This is only
+      // safe if there are NodalBCs there to be gotten...
+      if (_bcs[0].hasNodalBCs(*it))
+      {
+        const std::vector<NodalBC *> & bcs = _bcs[0].getNodalBCs(*it);
+        for (std::vector<NodalBC *>::const_iterator bc_it = bcs.begin(); bc_it != bcs.end(); ++bc_it)
+        {
+          NodalBC * bc = *bc_it;
+
+          const std::vector<MooseVariable *> & coupled_moose_vars = bc->getCoupledMooseVars();
+
+          // Create the set of "involved" MOOSE vars, which includes all coupled vars and the BC's own variable
+          std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
+          for (unsigned int var = 0; var < coupled_moose_vars.size(); ++var)
+            var_set.insert(coupled_moose_vars[var]->number());
+
+          var_set.insert(bc->variable().number());
+        }
+      }
+    }
+
+    // Get variable coupling list.  We do all the NodalBC stuff on
+    // thread 0...  The couplingEntries() data structure determines
+    // which variables are "coupled" as far as the preconditioner is
+    // concerned, not what variables a boundary condition specifically
+    // depends on.
+    std::vector<std::pair<MooseVariable *, MooseVariable *> > & coupling_entries = _fe_problem.couplingEntries(/*_tid=*/0);
+
+    // Compute Jacobians for NodalBCs
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
+    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin(); nd != bnd_nodes.end(); ++nd)
     {
       const BndNode * bnode = *nd;
       BoundaryID boundary_id = bnode->_bnd_id;
@@ -1785,16 +1820,38 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
       {
         _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-        for (std::vector<NodalBC *>::const_iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
+        const std::vector<NodalBC *> & bcs = _bcs[0].getNodalBCs(boundary_id);
+        for (std::vector<NodalBC *>::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
         {
           NodalBC * bc = *it;
-          if (bc->shouldApply() && bc->variable().isNodalDefined())
-            zero_rows.push_back(bc->variable().nodalDofIndex());
+
+          // Get the set of involved MOOSE vars for this BC
+          std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
+
+          // Loop over all the variables whose Jacobian blocks are
+          // actually being computed, call computeOffDiagJacobian()
+          // for each one which is actually coupled (otherwise the
+          // value is zero.)
+          for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = coupling_entries.begin();
+               it != coupling_entries.end(); ++it)
+          {
+            unsigned int
+              ivar = it->first->number(),
+              jvar = it->second->number();
+
+            // We are only going to call computeOffDiagJacobian() if:
+            // 1.) the BC's variable is ivar
+            // 2.) jvar is "involved" with the BC (including jvar==ivar), and
+            // 3.) the BC should apply.
+            if ((bc->variable().number() == ivar) && var_set.count(jvar) && bc->shouldApply())
+              bc->computeOffDiagJacobian(jvar);
+          }
         }
       }
-    }
+    } // end loop over boundary nodes
 
-    jacobian.zero_rows(zero_rows, 1.0);
+    // Set the cached NodalBC values in the Jacobian matrix
+    _fe_problem.assembly(0).setCachedNodalBCJacobianEntries(jacobian);
   }
   PARALLEL_CATCH;
   jacobian.close();

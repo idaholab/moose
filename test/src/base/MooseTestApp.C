@@ -76,7 +76,6 @@
 #include "PolyCoupledDirichletBC.h"
 #include "MMSCoupledDirichletBC.h"
 #include "DirichletBCfuncXYZ0.h"
-#include "DirichletBCfuncXYZ1.h"
 #include "TEJumpBC.h"
 #include "OnOffDirichletBC.h"
 #include "OnOffNeumannBC.h"
@@ -85,6 +84,7 @@
 #include "BndTestDirichletBC.h"
 #include "MatTestNeumannBC.h"
 #include "MatDivergenceBC.h"
+#include "CoupledDirichletBC.h"
 
 #include "TEIC.h"
 #include "MTICSum.h"
@@ -311,7 +311,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerBoundaryCondition(PolyCoupledDirichletBC);
   registerBoundaryCondition(MMSCoupledDirichletBC);
   registerBoundaryCondition(DirichletBCfuncXYZ0);
-  registerBoundaryCondition(DirichletBCfuncXYZ1);
   registerBoundaryCondition(TEJumpBC);
   registerBoundaryCondition(OnOffDirichletBC);
   registerBoundaryCondition(OnOffNeumannBC);
@@ -328,6 +327,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerBoundaryCondition(DivergenceBC);
   registerBoundaryCondition(MatDivergenceBC);
+  registerBoundaryCondition(CoupledDirichletBC);
 
   // Initial conditions
   registerInitialCondition(TEIC);

@@ -12,24 +12,40 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "DirichletBC.h"
+#include "CoupledDirichletBC.h"
 
 template<>
-InputParameters validParams<DirichletBC>()
+InputParameters validParams<CoupledDirichletBC>()
 {
-  InputParameters p = validParams<NodalBC>();
-  p.addRequiredParam<Real>("value", "Value of the BC");
-  return p;
+  InputParameters params = validParams<DirichletBC>();
+  params.addRequiredCoupledVar("v", "The coupled variable");
+  return params;
 }
 
-
-DirichletBC::DirichletBC(const std::string & name, InputParameters parameters) :
-  NodalBC(name, parameters),
-  _value(getParam<Real>("value"))
+CoupledDirichletBC::CoupledDirichletBC(const std::string & name, InputParameters parameters) :
+    DirichletBC(name, parameters),
+    _v(coupledValue("v")),
+    _v_num(coupled("v")),
+    _c(1.0)
 {}
 
 Real
-DirichletBC::computeQpResidual()
+CoupledDirichletBC::computeQpResidual()
 {
-  return _u[_qp] - _value;
+  return _c*_u[_qp] + _u[_qp]*_u[_qp] + _v[_qp]*_v[_qp] - _value;
+}
+
+Real
+CoupledDirichletBC::computeQpJacobian()
+{
+  return _c + 2.*_u[_qp];
+}
+
+Real
+CoupledDirichletBC::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (jvar == _v_num)
+    return 2.*_v[_qp];
+  else
+    return 0.;
 }
