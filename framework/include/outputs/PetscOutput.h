@@ -120,5 +120,8 @@ private:
 
   /// Linear residual output end time
   Real _linear_end_time;
+
+  // FEProblem needs to call timestepSetupInternal in some cases
+  friend class FEProblem;
 };
 #endif //PETSCOUTPUT_H
