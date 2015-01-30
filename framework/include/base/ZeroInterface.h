@@ -35,7 +35,7 @@ class SubProblem;
 class ZeroInterface
 {
 public:
-  ZeroInterface(InputParameters parameters);
+  ZeroInterface(const InputParameters & parameters);
 
 protected:
   SubProblem & _zi_subproblem;
