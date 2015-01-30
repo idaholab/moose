@@ -12,18 +12,66 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "MaterialPropertyInterface.h"
 #include "FEProblem.h"
+#include "MooseApp.h"
 
-MaterialPropertyInterface::MaterialPropertyInterface(const std::string & name, InputParameters & parameters) :
-    _mi_name(name),
+// Standard construction
+MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters):
+    _mi_name(parameters.get<std::string>("name")),
     _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
-    _mi_block_ids(parameters.isParamValid("_block_ids") ?
-                  parameters.get<std::vector<SubdomainID> >("_block_ids") : std::vector<SubdomainID>()),
-    _mi_boundary_ids(parameters.isParamValid("_boundary_ids") ?
-                     parameters.get<std::vector<BoundaryID> >("_boundary_ids") : std::vector<BoundaryID>()),
     _stateful_allowed(true),
-    _get_material_property_called(false)
+    _get_material_property_called(false),
+    _mi_block_ids(_empty_block_ids),
+    _mi_boundary_ids(_empty_boundary_ids)
+{
+  initializeMaterialPropertyInterface(parameters);
+}
+
+// Block restricted
+MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids):
+    _mi_name(parameters.get<std::string>("name")),
+    _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
+    _stateful_allowed(true),
+    _get_material_property_called(false),
+    _mi_block_ids(block_ids),
+    _mi_boundary_ids(_empty_boundary_ids)
+
+{
+  initializeMaterialPropertyInterface(parameters);
+}
+
+// Boundary restricted
+MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids):
+    _mi_name(parameters.get<std::string>("name")),
+    _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
+    _stateful_allowed(true),
+    _get_material_property_called(false),
+    _mi_block_ids(_empty_block_ids),
+    _mi_boundary_ids(boundary_ids)
+
+{
+  initializeMaterialPropertyInterface(parameters);
+}
+
+// Dual restricted
+MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters,
+                                                     const std::set<SubdomainID> & block_ids,
+                                                     const std::set<BoundaryID> & boundary_ids):
+    _mi_name(parameters.get<std::string>("name")),
+    _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
+    _stateful_allowed(true),
+    _get_material_property_called(false),
+    _mi_block_ids(block_ids),
+    _mi_boundary_ids(boundary_ids)
+
+{
+  initializeMaterialPropertyInterface(parameters);
+}
+
+void
+MaterialPropertyInterface::initializeMaterialPropertyInterface(const InputParameters & parameters)
 {
   /* AuxKernels may be boundary or block restricted; however, they are built by the same action and task, add_aux_kernel.
      The type of material data that should be stored in the interface is not known until the object is constructed. Thus,
@@ -76,12 +124,12 @@ MaterialPropertyInterface::checkMaterialProperty(const std::string & name)
 {
   // If the material property is block restrictable, add to the list of materials to check
   if (!_mi_block_ids.empty())
-    for (std::vector<SubdomainID>::iterator it = _mi_block_ids.begin(); it != _mi_block_ids.end(); ++it)
+    for (std::set<SubdomainID>::const_iterator it = _mi_block_ids.begin(); it != _mi_block_ids.end(); ++it)
       _mi_feproblem.storeDelayedCheckMatProp(_mi_name, *it, name);
 
   // If the material property is boundary restrictable, add to the list of materials to check
   if (!_mi_boundary_ids.empty())
-    for (std::vector<BoundaryID>::iterator it = _mi_boundary_ids.begin(); it != _mi_boundary_ids.end(); ++it)
+    for (std::set<BoundaryID>::const_iterator it = _mi_boundary_ids.begin(); it != _mi_boundary_ids.end(); ++it)
       _mi_feproblem.storeDelayedCheckMatProp(_mi_name, *it, name);
 }
 

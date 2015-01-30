@@ -519,8 +519,6 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
   for (unsigned int i=0; i<boundaries.size(); ++i)
   {
     BoundaryID boundary_id = _mesh.getBoundaryID(boundaries[i]);
-
-    //parameters.set<BoundaryID>("_boundary_id") = boundary_id;
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
@@ -546,7 +544,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
         _vars[tid].addBoundaryVars(boundary_id, ibc->getCoupledVars());
       }
       else
-        mooseError("Unknown type of BoudaryCondition object");
+        mooseError("Unknown type of BoundaryCondition object");
 
       _vars[tid].addBoundaryVar(boundary_id, &bc->variable());
     }

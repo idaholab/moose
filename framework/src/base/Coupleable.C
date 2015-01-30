@@ -17,7 +17,7 @@
 #include "SubProblem.h"
 #include "FEProblem.h"
 
-Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
+Coupleable::Coupleable(const InputParameters & parameters, bool nodal) :
     _c_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _nodal(nodal),
     _c_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),

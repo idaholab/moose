@@ -110,7 +110,7 @@ public:
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
    * The template parameter must be a pointer or an error will be thrown.
    */
-  template <typename T> T getCheckedPointerParam(const std::string &name, const std::string &error_string="");
+  template <typename T> T getCheckedPointerParam(const std::string &name, const std::string &error_string="") const;
 
   /**
    * This method adds a parameter and documentation string to the InputParameters
@@ -690,7 +690,7 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
 
 template <typename T>
 T
-InputParameters::getCheckedPointerParam(const std::string &name, const std::string &error_string)
+InputParameters::getCheckedPointerParam(const std::string &name, const std::string &error_string) const
 {
   T param = this->get<T>(name);
 

@@ -580,7 +580,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
   if (act_iter != _action_wh.actionBlocksWithActionEnd(global_params_task))
     global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
 
-  // Set a pointer to the current InputParameters object being parsed so that it can be refered to in the extraction routines
+  // Set a pointer to the current InputParameters object being parsed so that it can be referred to in the extraction routines
   _current_params = &p;
   _current_error_stream = &error_stream;
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)

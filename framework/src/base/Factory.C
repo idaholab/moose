@@ -16,7 +16,8 @@
 #include "MooseApp.h"
 
 Factory::Factory(MooseApp & app):
-    _app(app)
+    _app(app),
+    _object_count(0)
 {
 }
 
@@ -57,12 +58,16 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   deprecatedMessage(obj_name);
 
   // Check to make sure that all required parameters are supplied
+  parameters.addParam<std::string>("name", name, "The objects short name");
+  parameters.addPrivateParam<MooseObjectID>("_object_id", _object_count);
   parameters.checkParams(name);
+
+  // Increment object counter
+  _object_count++;
 
   // Actually call the function pointer.  You can do this in one line,
   // but it's a bit more obvious what's happening if you do it in two...
   buildPtr & func = it->second;
-
   return (*func)(name, parameters);
 }
 

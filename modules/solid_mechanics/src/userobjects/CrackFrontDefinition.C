@@ -32,7 +32,7 @@ const Real CrackFrontDefinition::_tol = 1e-14;
 
 CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParameters parameters) :
     GeneralUserObject(name, parameters),
-    BoundaryRestrictable(name, parameters),
+    BoundaryRestrictable(parameters),
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_subproblem.mesh()),
     _treat_as_2d(getParam<bool>("2d")),

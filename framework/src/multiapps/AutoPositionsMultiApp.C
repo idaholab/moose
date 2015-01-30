@@ -29,7 +29,7 @@ InputParameters validParams<AutoPositionsMultiApp>()
 
 AutoPositionsMultiApp::AutoPositionsMultiApp(const std::string & name, InputParameters parameters):
     TransientMultiApp(name, parameters),
-    BoundaryRestrictable(name, parameters)
+    BoundaryRestrictable(parameters)
 {
 }
 

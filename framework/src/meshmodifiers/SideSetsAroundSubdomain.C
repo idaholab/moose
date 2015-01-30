@@ -34,7 +34,7 @@ InputParameters validParams<SideSetsAroundSubdomain>()
 
 SideSetsAroundSubdomain::SideSetsAroundSubdomain(const std::string & name, InputParameters parameters):
     AddSideSetsBase(name, parameters),
-    BlockRestrictable(name, parameters),
+    BlockRestrictable(parameters),
     _using_normal(isParamValid("normal")),
     _normal_tol(getParam<Real>("normal_tol")),
     _normal(_using_normal ? getParam<Point>("normal") : Point())

@@ -36,7 +36,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     BoundaryCondition(name, parameters),
     RandomInterface(name, parameters, _fe_problem, _tid, false),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
-    MaterialPropertyInterface(name, parameters),
+    MaterialPropertyInterface(parameters),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
     _current_side(_assembly.side()),

@@ -36,7 +36,7 @@ Constraint::Constraint(const std::string & name, InputParameters parameters) :
   SetupInterface(parameters),
   FunctionInterface(parameters),
   UserObjectInterface(parameters),
-  TransientInterface(parameters, name, "constraint"),
+  TransientInterface(parameters, "constraint"),
   GeometricSearchInterface(parameters),
   Restartable(name, parameters, "Constraints"),
   ZeroInterface(parameters),

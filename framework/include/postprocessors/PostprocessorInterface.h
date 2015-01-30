@@ -30,7 +30,7 @@ class FEProblem;
 class PostprocessorInterface
 {
 public:
-  PostprocessorInterface(InputParameters & params);
+  PostprocessorInterface(const InputParameters & params);
 
   /**
    * Retrieve the value of a Postprocessor

@@ -23,9 +23,6 @@ InputParameters validParams<BoundaryRestrictableRequired>()
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
 
-  // Create a private parameter for storing the boundary IDs
-  params.addPrivateParam<std::vector<BoundaryID> >("_boundary_ids", std::vector<BoundaryID>());
-
   // A parameter for disabling error message for objects restrictable by boundary and block,
   // if the parameter is valid it was already set so don't do anything
   if (!params.isParamValid("_dual_restrictable"))
@@ -34,8 +31,7 @@ InputParameters validParams<BoundaryRestrictableRequired>()
   return params;
 }
 
-
-BoundaryRestrictableRequired::BoundaryRestrictableRequired(const std::string name, InputParameters & parameters) :
-    BoundaryRestrictable(name, parameters)
+BoundaryRestrictableRequired::BoundaryRestrictableRequired(const InputParameters & parameters) :
+    BoundaryRestrictable(parameters)
 {
 }

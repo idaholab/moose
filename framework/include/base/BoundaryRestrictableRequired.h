@@ -33,7 +33,7 @@ InputParameters validParams<BoundaryRestrictableRequired>();
 class BoundaryRestrictableRequired : public BoundaryRestrictable
 {
 public:
-  BoundaryRestrictableRequired(const std::string name, InputParameters & parameters);
+  BoundaryRestrictableRequired(const InputParameters & parameters);
 };
 
 #endif // BOUNDARYRESTRICTABLEREQURIED_H
