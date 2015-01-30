@@ -55,6 +55,7 @@
 #endif
 #include "SolutionRasterizer.h"
 #include "ImageMesh.h"
+#include "MaskedBodyForce.h"
 
 //#include "SPPARKSUserObject.h"
 //#include "SPPARKSAux.h"
@@ -106,6 +107,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACGrGrPoly);
   registerKernel(ACGBPoly);
   registerKernel(ACParsed);
+  registerKernel(MaskedBodyForce);
 
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
