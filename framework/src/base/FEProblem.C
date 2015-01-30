@@ -630,8 +630,6 @@ void FEProblem::timestepSetup()
 
    // Timestep setup of output objects
   _app.getOutputWarehouse().timestepSetup();
-
-
 }
 
 unsigned int
@@ -3535,7 +3533,8 @@ FEProblem::possiblyRebuildGeomSearchPatches()
       // Let this fall through if things do need to be updated...
 
       case 1: // Always
-        _console << "\n\nUpdating geometric search patches\n\n";
+        // Flush output here to see the message before the reinitialization, which could take a while
+        _console << "\n\nUpdating geometric search patches\n"<<std::endl;
 
         _geometric_search_data.clearNearestNodeLocators();
         _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
@@ -3544,6 +3543,12 @@ FEProblem::possiblyRebuildGeomSearchPatches()
         _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
 
         reinitBecauseOfGhosting();
+
+        // This is needed to reinitialize PETSc output
+        std::vector<PetscOutput*> outputs = _app.getOutputWarehouse().getOutputs<PetscOutput>();
+        for (std::vector<PetscOutput*>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
+          (*it)->timestepSetupInternal();
+        Moose::PetscSupport::petscSetDefaults(*this);
     }
   }
 }
