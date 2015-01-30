@@ -69,9 +69,12 @@ RandomHitSolutionModifier::execute()
         }
       }
 
-      _subproblem.reinitNode(closest_node, 0);
-      _variable.setNodalValue(_variable.getNodalValue(*closest_node) + _amount);
-      _variable.insert(_fe_problem.getNonlinearSystem().solution());
+      if (closest_node)
+      {
+        _subproblem.reinitNode(closest_node, 0);
+        _variable.setNodalValue(_variable.getNodalValue(*closest_node) + _amount);
+        _variable.insert(_fe_problem.getNonlinearSystem().solution());
+      }
     }
   }
 

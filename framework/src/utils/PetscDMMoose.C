@@ -714,7 +714,7 @@ static PetscErrorCode DMMooseFunction(DM dm, Vec x, Vec r)
   libmesh_assert(x);
   libmesh_assert(r);
 
-  NonlinearSystem* nl;
+  NonlinearSystem* nl = NULL;
   ierr = DMMooseGetNonlinearSystem(dm, nl); CHKERRQ(ierr);
   PetscVector<Number>& X_sys = *cast_ptr<PetscVector<Number>* >(nl->sys().solution.get());
   PetscVector<Number>& R_sys = *cast_ptr<PetscVector<Number>* >(nl->sys().rhs);
@@ -791,7 +791,7 @@ static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
 #endif
 {
   PetscErrorCode ierr;
-  NonlinearSystem *nl;
+  NonlinearSystem *nl = NULL;
 
   PetscFunctionBegin;
   ierr = DMMooseGetNonlinearSystem(dm, nl);CHKERRQ(ierr);
@@ -883,7 +883,7 @@ static PetscErrorCode SNESJacobian_DMMoose(SNES,Vec x,Mat jac,Mat pc, void* ctx)
 static PetscErrorCode DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
 {
   PetscErrorCode ierr;
-  NonlinearSystem* nl;
+  NonlinearSystem* nl = NULL;
 
   PetscFunctionBegin;
   ierr = DMMooseGetNonlinearSystem(dm, nl);CHKERRQ(ierr);
