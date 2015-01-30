@@ -31,7 +31,7 @@ class CoupleableMooseVariableDependencyIntermediateInterface :
   public MooseVariableDependencyInterface
 {
 public:
-  CoupleableMooseVariableDependencyIntermediateInterface(InputParameters & parameters, bool nodal) :
+  CoupleableMooseVariableDependencyIntermediateInterface(const InputParameters & parameters, bool nodal) :
     Coupleable(parameters, nodal),
     ScalarCoupleable(parameters),
     MooseVariableInterface(parameters, nodal)

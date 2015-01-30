@@ -36,7 +36,7 @@ public:
    *        but the object calling getFunction only needs to use the name on the
    *        left hand side of the statement "function = func_name"
    */
-  FunctionInterface(InputParameters & params);
+  FunctionInterface(const InputParameters & params);
 
   /**
    * Get a function with a given name

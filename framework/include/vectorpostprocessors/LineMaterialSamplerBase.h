@@ -113,7 +113,7 @@ template <typename T>
 LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const std::string & name, InputParameters parameters) :
     GeneralVectorPostprocessor(name, parameters),
     SamplerBase(name, parameters, this, _communicator),
-    BlockRestrictable(name, parameters),
+    BlockRestrictable(parameters),
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
     _mesh(_subproblem.mesh()),

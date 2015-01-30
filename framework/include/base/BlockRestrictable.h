@@ -15,10 +15,12 @@
 #ifndef BLOCKRESTRICTABLE_H
 #define BLOCKRESTRICTABLE_H
 
+// MOOSE includes
 #include "InputParameters.h"
 #include "MooseTypes.h"
 #include "FEProblem.h"
 
+// Forward declarations
 class BlockRestrictable;
 
 template<>
@@ -56,13 +58,22 @@ InputParameters validParams<BlockRestrictable>();
 class BlockRestrictable
 {
 public:
+
   /**
    * Class constructor
    * Populates the 'block' input parameters, see the general class documentation for details.
-   * @param name The name of the class
    * @param params The input parameters (see the detailed help for additional information)
    */
-  BlockRestrictable(const std::string name, InputParameters & params);
+  BlockRestrictable(const InputParameters & parameters);
+
+  /**
+   * Class constructor
+   * Populates the 'block' input parameters when an object is also boundary restricted,
+   * see the general class documentation for details.
+   * @param parameters The input parameters (see the detailed help for additional information)
+   * @param boundary_ids The boundary ids that the object is restricted to
+   */
+  BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids);
 
   /**
    * Return the block names for this object
@@ -175,12 +186,22 @@ private:
   /// Pointer to Mesh
   MooseMesh * _blk_mesh;
 
+  /// An empty set for referencing when boundary_ids is not included
+  std::set<BoundaryID> _empty_boundary_ids;
+
+  /// Reference to the boundary_ids, defaults to an empty set if not provided
+  const std::set<BoundaryID> & _boundary_ids;
+
+  /**
+   * An initialization routine needed for dual constructors
+   */
+  void initializeBlockRestrictable(const InputParameters & parameters);
+
   /**
    * A helper function for extracting the subdomain IDs for a variable
    * @param parameters A reference to the input parameters supplied to the object
    */
-  std::set<SubdomainID> variableSubdomianIDs(InputParameters & parameters) const;
-
+  std::set<SubdomainID> variableSubdomianIDs(const InputParameters & parameters) const;
 };
 
 #endif // BLOCKRESTRICTABLE_H

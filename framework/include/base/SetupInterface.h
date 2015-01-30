@@ -28,7 +28,7 @@ InputParameters validParams<SetupInterface>();
 class SetupInterface
 {
 public:
-  SetupInterface(InputParameters & params);
+  SetupInterface(const InputParameters & params);
   virtual ~SetupInterface();
 
   /**

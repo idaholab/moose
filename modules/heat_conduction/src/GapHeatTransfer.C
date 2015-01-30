@@ -21,6 +21,9 @@ InputParameters validParams<GapHeatTransfer>()
   params.addParam<Real>("min_gap", 1.0e-6, "A minimum gap size");
   params.addParam<Real>("max_gap", 1.0e6, "A maximum gap size");
 
+  MooseEnum coord_types("default XYZ", "default");
+  params.addParam<MooseEnum>("coord_type", coord_types, "Gap calculation type (default or XYZ).");
+
   // Quadrature based
   params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored) however paired_boundary IS then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
@@ -36,7 +39,8 @@ InputParameters validParams<GapHeatTransfer>()
 
 GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters parameters)
   :IntegratedBC(name, parameters),
-   _coord_sys( _assembly.coordSystem() ),
+   _gap_type_set(false),
+   _gap_type(Moose::COORD_XYZ),
    _quadrature(getParam<bool>("quadrature")),
    _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
    _gap_conductance(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name"))),
@@ -75,6 +79,26 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
   }
 }
 
+void
+GapHeatTransfer::computeResidual()
+{
+  if (!_gap_type_set)
+  {
+    _gap_type_set = true;
+    if (getParam<MooseEnum>("coord_type") == "XYZ")
+    {
+      _gap_type = Moose::COORD_XYZ;
+    }
+    else
+    {
+      _gap_type = _assembly.coordSystem();
+    }
+    if (_gap_type == Moose::COORD_XYZ && _assembly.coordSystem() == Moose::COORD_RSPHERICAL)
+      mooseError("The 'XYZ' coord_type and a spherical coordinate system are not compatible.");
+  }
+
+  IntegratedBC::computeResidual();
+}
 
 Real
 GapHeatTransfer::computeQpResidual()
@@ -185,10 +209,10 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 Real
 GapHeatTransfer::gapLength() const
 {
-  if (!_has_info)
-    return 1.0;
+  if (_has_info)
+    return GapConductance::gapLength( _gap_type, _radius, _r1, _r2, _min_gap, _max_gap );
 
-  return GapConductance::gapLength( _coord_sys, _radius, _r1, _r2, _min_gap, _max_gap );
+  return 1;
 }
 
 Real
@@ -258,7 +282,7 @@ GapHeatTransfer::computeGapValues()
     }
   }
 
-  if (_coord_sys == Moose::COORD_RZ || _coord_sys == Moose::COORD_RSPHERICAL)
+  if (_gap_type == Moose::COORD_RZ || _gap_type == Moose::COORD_RSPHERICAL)
   {
     if (_normals[_qp](0) > 0)
     {
@@ -273,7 +297,7 @@ GapHeatTransfer::computeGapValues()
       _radius = _r2;
     }
     else
-      mooseError( "Issue with cylindrical or sphereical flux calc. normals. \n");
+      mooseError( "Issue with cylindrical or spherical flux calc. normals. \n");
   }
   else
   {

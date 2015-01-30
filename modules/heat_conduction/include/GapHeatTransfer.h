@@ -22,6 +22,7 @@ protected:
  * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation
  */
 
+  virtual void computeResidual();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
@@ -32,7 +33,8 @@ protected:
 
   virtual void computeGapValues();
 
-  const Moose::CoordinateSystemType & _coord_sys;
+  bool _gap_type_set;
+  Moose::CoordinateSystemType _gap_type;
 
   bool _quadrature;
 

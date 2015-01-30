@@ -33,8 +33,12 @@ public:
 
 protected:
   virtual Real computeQpResidual();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableValue & _v_face;
+  VariableValue & _v;
+
+  /// The id of the coupled variable
+  unsigned int _v_num;
 };
 
 #endif //MATCHEDVALUEBC_H

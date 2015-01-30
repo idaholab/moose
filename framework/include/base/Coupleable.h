@@ -32,7 +32,7 @@ public:
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if we need to couple with nodal values, otherwise false
    */
-  Coupleable(InputParameters & parameters, bool nodal);
+  Coupleable(const InputParameters & parameters, bool nodal);
 
   /**
    * Destructor for object

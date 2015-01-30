@@ -47,7 +47,50 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
 }
 
 void
-NodalBC::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
+NodalBC::computeJacobian()
 {
-  mooseError("This shouldn't be called!");
+  // We call the user's computeQpJacobian() function and store the
+  // results in the _assembly object. We can't store them directly in
+  // the element stiffness matrix, as they will only be inserted after
+  // all the assembly is done.
+  if (_var.isNodalDefined())
+  {
+    _qp = 0;
+    Real cached_val = computeQpJacobian();
+    dof_id_type cached_row = _var.nodalDofIndex();
+
+    // Cache the user's computeQpJacobian() value for later use.
+    _fe_problem.assembly(0).cacheNodalBCJacobianEntry(cached_row, cached_row, cached_val);
+  }
+}
+
+void
+NodalBC::computeOffDiagJacobian(unsigned int jvar)
+{
+  if (jvar == _var.number())
+    computeJacobian();
+  else
+  {
+    _qp = 0;
+    Real cached_val = computeQpOffDiagJacobian(jvar);
+    dof_id_type cached_row = _var.nodalDofIndex();
+    // Note: this only works for Lagrange variables...
+    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+
+    // Cache the user's computeQpJacobian() value for later use.
+    _fe_problem.assembly(0).cacheNodalBCJacobianEntry(cached_row, cached_col, cached_val);
+  }
+}
+
+
+Real
+NodalBC::computeQpJacobian()
+{
+  return 1.;
+}
+
+Real
+NodalBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+{
+  return 0.;
 }

@@ -12,26 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionInterface.h"
-#include "Function.h"
-#include "SubProblem.h"
-#include "MooseTypes.h"
+#ifndef MASKEDBODYFORCE_H
+#define MASKEDBODYFORCE_H
 
-FunctionInterface::FunctionInterface(InputParameters & params) :
-    _fni_feproblem(*params.get<FEProblem *>("_fe_problem")),
-    _fni_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
-    _fni_params(params)
-{
-}
+#include "BodyForce.h"
 
-Function &
-FunctionInterface::getFunction(const std::string & name)
-{
-  return _fni_feproblem.getFunction(_fni_params.get<FunctionName>(name), _fni_tid);
-}
+//Forward Declarations
+class MaskedBodyForce;
+class Function;
 
-Function &
-FunctionInterface::getFunctionByName(const FunctionName & name)
+template<>
+InputParameters validParams<MaskedBodyForce>();
+
+/**
+ * This kernel creates a body force that is modified by a mask defined
+ * as a material. Common uses of this would be to turn off or change the
+ * body force in certain regions of the mesh.
+ */
+
+class MaskedBodyForce : public BodyForce
 {
-  return _fni_feproblem.getFunction(name, _fni_tid);
-}
+public:
+
+  MaskedBodyForce(const std::string & name, InputParameters parameters);
+
+protected:
+  virtual Real computeQpResidual();
+
+  std::string _mask_property_name;
+  MaterialProperty<Real> & _mask;
+};
+
+#endif

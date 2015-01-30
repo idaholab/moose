@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    # Test close pack ic generator (2D)
+    type = Exodiff
+    input = MaskedBodyForce_test.i
+    exodiff = MaskedBodyForce_test_out.e
+  [../]
+[]

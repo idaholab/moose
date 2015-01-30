@@ -13,7 +13,7 @@ InputParameters validParams<ThermalContactAuxBCsAction>()
 
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose object that will be used for heat conduction over the gap");
-  params.addParam<std::string>("gap_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap size");
+  params.addParam<std::string>("gap_aux_type", "GapValueAux", "A string representing the Moose object that will be used for computing the gap size");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
@@ -42,7 +42,7 @@ ThermalContactAuxBCsAction::act()
 {
   bool quadrature = getParam<bool>("quadrature");
 
-  InputParameters params = _factory.getValidParams(getParam<std::string>("gap_type"));
+  InputParameters params = _factory.getValidParams(getParam<std::string>("gap_aux_type"));
 
   params.set<AuxVariableName>("variable") = ThermalContactAuxVarsAction::getGapValueName(_pars);
 
@@ -63,14 +63,14 @@ ThermalContactAuxBCsAction::act()
     params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
 
   params.set<bool>("warnings") = getParam<bool>("warnings");
-  _problem->addAuxKernel(getParam<std::string>("gap_type"), "gap_value_" + Moose::stringify(n), params);
+  _problem->addAuxKernel(getParam<std::string>("gap_aux_type"), "gap_value_" + Moose::stringify(n), params);
 
   if (quadrature)
   {
     std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
-    _problem->addAuxKernel(getParam<std::string>("gap_type"), "gap_value_master_" + Moose::stringify(n), params);
+    _problem->addAuxKernel(getParam<std::string>("gap_aux_type"), "gap_value_master_" + Moose::stringify(n), params);
 
   }
 

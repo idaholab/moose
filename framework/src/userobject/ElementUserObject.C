@@ -28,13 +28,13 @@ InputParameters validParams<ElementUserObject>()
 
 ElementUserObject::ElementUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
-    BlockRestrictable(name, parameters),
-    MaterialPropertyInterface(name, parameters),
+    BlockRestrictable(parameters),
+    MaterialPropertyInterface(parameters, blockIDs()),
     UserObjectInterface(parameters),
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),
     MooseVariableDependencyInterface(),
-    TransientInterface(parameters, name, "element_user_objects"),
+    TransientInterface(parameters, "element_user_objects"),
     PostprocessorInterface(parameters),
     RandomInterface(name, parameters, _fe_problem, _tid, false),
     ZeroInterface(parameters),

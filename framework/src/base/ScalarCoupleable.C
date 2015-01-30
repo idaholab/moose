@@ -16,7 +16,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 
-ScalarCoupleable::ScalarCoupleable(InputParameters & parameters) :
+ScalarCoupleable::ScalarCoupleable(const InputParameters & parameters) :
     _sc_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true)
 {
 

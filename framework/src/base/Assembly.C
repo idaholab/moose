@@ -1389,3 +1389,46 @@ Assembly::addJacobianOffDiagScalar(SparseMatrix<Number> & jacobian, unsigned int
       addJacobianBlock(jacobian, jacobianBlock(var_i.number(), var_j.number()), var_i.dofIndices(), var_j.dofIndices(), var_i.scalingFactor());
   }
 }
+
+void
+Assembly::cacheNodalBCJacobianEntry(numeric_index_type i, numeric_index_type j, Real value)
+{
+  _cached_nodal_bc_rows.push_back(i);
+  _cached_nodal_bc_cols.push_back(j);
+  _cached_nodal_bc_vals.push_back(value);
+}
+
+void
+Assembly::clearCachedNodalBCJacobianEntries()
+{
+  unsigned int orig_size = _cached_nodal_bc_rows.size();
+
+  _cached_nodal_bc_rows.clear();
+  _cached_nodal_bc_cols.clear();
+  _cached_nodal_bc_vals.clear();
+
+  // It's possible (though massively unlikely) that clear() will
+  // change the capacity of the vectors, so let's be paranoid and
+  // explicitly reserve() the same amount of memory to avoid multiple
+  // push_back() induced allocations.  We reserve 20% more than the
+  // original size that was cached to account for variations in the
+  // number of BCs assigned to each thread (for when the Jacobian
+  // contributions are computed threaded).
+  _cached_nodal_bc_rows.reserve(1.2*orig_size);
+  _cached_nodal_bc_cols.reserve(1.2*orig_size);
+  _cached_nodal_bc_vals.reserve(1.2*orig_size);
+}
+
+void
+Assembly::setCachedNodalBCJacobianEntries(SparseMatrix<Number> & jacobian)
+{
+  // First zero the rows (including the diagonals) to prepare for
+  // setting the cached values.
+  jacobian.zero_rows(_cached_nodal_bc_rows, 0.0);
+
+  // TODO: Use SparseMatrix::set_values() for efficiency
+  for (unsigned int i = 0; i < _cached_nodal_bc_vals.size(); ++i)
+    jacobian.set(_cached_nodal_bc_rows[i],
+                 _cached_nodal_bc_cols[i],
+                 _cached_nodal_bc_vals[i]);
+}
