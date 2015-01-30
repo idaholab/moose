@@ -28,7 +28,7 @@ InputParameters validParams<OutputInterface>()
 }
 
 
-OutputInterface::OutputInterface(const std::string & name, InputParameters parameters, bool build_list) :
+OutputInterface::OutputInterface(const InputParameters & parameters, bool build_list) :
     _oi_moose_app(*parameters.get<MooseApp *>("_moose_app")),
     _oi_output_warehouse(_oi_moose_app.getOutputWarehouse()),
     _oi_outputs(parameters.get<std::vector<OutputName> >("outputs").begin(),
@@ -42,7 +42,7 @@ OutputInterface::OutputInterface(const std::string & name, InputParameters param
   if (build_list)
   {
     std::set<std::string> names_set;
-    names_set.insert(name);
+    names_set.insert(parameters.get<std::string>("name"));
     buildOutputHideVariableList(names_set);
   }
 }

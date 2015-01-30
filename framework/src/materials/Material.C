@@ -61,7 +61,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
 
     // The false flag disables the automatic call  buildOutputVariableHideList;
     // for Material objects the hide lists are handled by MaterialOutputAction
-    OutputInterface(name, parameters, false),
+    OutputInterface(parameters, false),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
