@@ -207,6 +207,11 @@ class RemarkSlide(MooseObject):
     else:
       return match.group(0)
 
+    # Remove header
+    strt = code.find('/********')
+    stop = code.rfind('*******/\n')
+    code = code.replace(code[strt:stop+9], '')
+
     # Strip code (i.e, remove functions, prototypes and input file blocks)
     if len(match.groups()) == 5:
       strip = match.group(5)

@@ -58,7 +58,7 @@ class DjangoWikiSlide(RemarkSlide):
     #
     # However, RemarkJS does support indented code blocks, but these blocks need to be indented by
     # four spaces. The following preforms this indenting.
-    regex = re.compile(r'([\*-].*?\n)(```.*?```\s*\n)', re.MULTILINE|re.DOTALL)
+    regex = re.compile(r'(^\s*[\*-].*?\n)(```.*?```\s*\n)', re.MULTILINE|re.DOTALL)
     markdown = regex.sub(self._indentListNestedCode, markdown)
 
     # Extract comments
