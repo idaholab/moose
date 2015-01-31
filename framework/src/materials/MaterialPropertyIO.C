@@ -101,7 +101,7 @@ MaterialPropertyIO::read(const std::string & file_name)
 
   in.open(file_name_stream.str().c_str(), std::ios::in | std::ios::binary);
 
-  unsigned int read_file_version;
+  unsigned int read_file_version = 0;
 
   // version
   loadHelper(in, read_file_version, NULL);
