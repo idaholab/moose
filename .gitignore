@@ -75,6 +75,7 @@ temp_print_trace.*
 *.xyz
 *Revision.h
 *.json
+*.bak
 
 # Allow .e files in gold directories (7 levels)
 !/gold/*.e
@@ -172,6 +173,7 @@ libmoose-dbg*
 */doc/doxygen/html/*
 moose/doc/doxygen/html/*
 modules/*/doc/doxygen/html/*
+tutorials/*/*/doc/doxygen/html/*
 
 # Restartable Data
 *.rd
