@@ -90,7 +90,12 @@ protected:
    * and need to pull from those lists from the computeDF, computeD2F, and computeD3F methods, which receive
    * libMesh variable numbers as parameters.
    */
-  unsigned int argIndex(unsigned int) const;
+  unsigned int argIndex(unsigned int i_var) const
+  {
+    mooseAssert(i_var < _number_of_nl_variables, "Requesting argIndex() for an invalid Moose variable number. Maybe an AuxVariable?");
+    mooseAssert(_arg_numbers[_arg_index[i_var]] == i_var, "Requesting argIndex() for a derivative w.r.t. a variable not coupled to.");
+    return _arg_index[i_var];
+  }
 
   /// Coupled variables for function arguments
   std::vector<VariableValue *> _args;
@@ -131,9 +136,11 @@ protected:
   /// Material properties to store the third derivatives.
   std::vector<std::vector<std::vector<MaterialProperty<Real> *> > > _prop_d3F;
 
+  /// number of non-linear variable sin the problem
+  const unsigned int _number_of_nl_variables;
+
 private:
   /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
-  /// this can be queried through the argIndex() method
   std::vector<unsigned int> _arg_index;
 };
 

@@ -15,14 +15,15 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
     DerivativeMaterialInterface<Material>(name, parameters),
     _F_name(getParam<std::string>("f_name")),
     _third_derivatives(getParam<bool>("third_derivatives")),
-    _prop_F(&declareProperty<Real>(_F_name))
+    _prop_F(&declareProperty<Real>(_F_name)),
+    _number_of_nl_variables(_fe_problem.getNonlinearSystem().nVariables()),
+    _arg_index(_number_of_nl_variables)
 {
   // loop counters
   unsigned int i, j, k;
 
   // fetch names and numbers of all coupled variables
   _mapping_is_unique = true;
-  unsigned int max_number = 0;
   for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin(); it != _pars.coupledVarsEnd(); ++it)
   {
     std::map<std::string, std::vector<MooseVariable *> >::iterator vars = _coupled_vars.find(*it);
@@ -43,14 +44,15 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
         mooseError("A nonlinear variable can only be coupled in once.");
 
       // insert the map values
-      unsigned int number = vars->second[j]->number();
+      //unsigned int number = vars->second[j]->number();
+      unsigned int number = coupled(*it, j);
       _arg_names.push_back(vars->second[j]->name());
       _arg_numbers.push_back(number);
       _arg_param_names.push_back(*it);
 
-      // get the maximum var number
-      if (number > max_number)
-        max_number = number;
+      // populate number -> arg index lookup table skipping aux variables
+      if (number < _number_of_nl_variables)
+        _arg_index[number] = _args.size();
 
       // get variable value
       _args.push_back(&coupledValue(*it, j));
@@ -58,38 +60,37 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
   }
   _nargs = _arg_names.size();
 
-  // reserve space for number -> arg index lookup table
-  _arg_index.resize(max_number+1);
-
-  // reserve space for material properties
-  _prop_dF.resize(_nargs);
+  // reserve space for material properties and explicitly initialize to NULL
+  _prop_dF.resize(_nargs, NULL);
   _prop_d2F.resize(_nargs);
   _prop_d3F.resize(_nargs);
   for (i = 0; i < _nargs; ++i)
   {
-    _prop_d2F[i].resize(_nargs);
+    _prop_d2F[i].resize(_nargs, NULL);
 
-    // TODO: maybe we should reserve and initialize to NULL...
     if (_third_derivatives) {
       _prop_d3F[i].resize(_nargs);
 
       for (j = 0; j < _nargs; ++j)
-        _prop_d3F[i][j].resize(_nargs);
+        _prop_d3F[i][j].resize(_nargs, NULL);
     }
-
-    // populate number -> arg index lookup table
-    _arg_index[_arg_numbers[i]] = i;
   }
 
   // initialize derivatives
   for (i = 0; i < _nargs; ++i)
   {
+    // skip all derivatives w.r.t. auxiliary variables
+    if (_arg_numbers[i] >= _number_of_nl_variables) continue;
+
     // first derivatives
     _prop_dF[i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
 
     // second derivatives
     for (j = i; j < _nargs; ++j)
     {
+      // skip all derivatives w.r.t. auxiliary variables
+      if (_arg_numbers[j] >= _number_of_nl_variables) continue;
+
       _prop_d2F[i][j] =
       _prop_d2F[j][i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i], _arg_names[j]);
 
@@ -98,6 +99,9 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
       {
         for (k = j; k < _nargs; ++k)
         {
+          // skip all derivatives w.r.t. auxiliary variables
+          if (_arg_numbers[k] >= _number_of_nl_variables) continue;
+
           // filling all permutations does not cost us much and simplifies access
           // (no need to check i<=j<=k)
           _prop_d3F[i][j][k] =
@@ -155,13 +159,6 @@ DerivativeBaseMaterial::initialSetup()
       }
     }
   }
-}
-
-unsigned int
-DerivativeBaseMaterial::argIndex(unsigned int i_var) const
-{
-  mooseAssert(_arg_numbers[_arg_index[i_var]] == i_var, "Requesting argIndex() of for a derivative w.r.t. a variable not coupled to.");
-  return _arg_index[i_var];
 }
 
 void
