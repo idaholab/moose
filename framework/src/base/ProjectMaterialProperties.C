@@ -159,7 +159,7 @@ ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int side)
           _bnd_material_props.prolongStatefulProps(refinement_map,
                                                    *_assembly[_tid]->qRule(),
                                                    *_assembly[_tid]->qRuleFace(),
-                                                   _bnd_material_props, // Passing in the same properties to do side_to_side projection
+                                                   _material_props, // Passing in the same properties to do side_to_side projection
                                                    *_bnd_material_data[_tid],
                                                    *elem,
                                                    -1,child,child_side); // Gets us volume to side projection
