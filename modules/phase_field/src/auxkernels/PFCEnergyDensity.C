@@ -39,7 +39,8 @@ PFCEnergyDensity::computeValue()
 
   // Loop Through Variables
   for (unsigned int i = 1; i < _order; ++i)
-    val += std::pow(-1.0, i + 1.0) * (*_coeff[i])[_qp] * (*_vals[0])[_qp] * (*_vals[i])[_qp]/2.0;
+    val += (*_coeff[i])[_qp] * (*_vals[0])[_qp] * (*_vals[i])[_qp]/2.0;
+//    val += std::pow(-1.0, i + 1.0) * (*_coeff[i])[_qp] * (*_vals[0])[_qp] * (*_vals[i])[_qp]/2.0;
 
   val +=   (_b[_qp]/12.0 * std::pow((*_vals[0])[_qp], 4.0))
          - (_a[_qp]/6.0 * std::pow((*_vals[0])[_qp], 3.0));

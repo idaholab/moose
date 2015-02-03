@@ -46,10 +46,16 @@ PFCTradMaterial::computeQpProperties()
   else if (_order == 8)
   {
     _C0[_qp] = -49.0;
-    _C2[_qp] = 19.54624209; // Angstrom^2
-    _C4[_qp] = 2.998730464; // Angstrom^4, would be negative but coefficient term is negative
-    _C6[_qp] = 0.2134499536; // Angstrom^6
-    _C8[_qp] = 0.005988904704; // Angstrom^8, would be negative but coefficient term is negative
+//   original parameters; using km = 2.962081696
+//    _C2[_qp] = 19.54624209; // Angstrom^2
+//    _C4[_qp] = 2.998730464; // Angstrom^4, would be negative but coefficient term is negative
+//    _C6[_qp] = 0.2134499536; // Angstrom^6
+//    _C8[_qp] = 0.005988904704; // Angstrom^8, would be negative but coefficient term is negative
+//   new ones from Victor; using km = 2.985 A
+    _C2[_qp] = 20.00313; // Angstrom^2
+    _C4[_qp] = 3.11883; // Angstrom^4, would be negative but coefficient term is negative
+    _C6[_qp] = 0.22554; // Angstrom^6
+    _C8[_qp] = 0.00643; // Angstrom^8, would be negative but coefficient term is negative
   }
   else
   {
