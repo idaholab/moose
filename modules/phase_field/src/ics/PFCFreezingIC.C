@@ -86,7 +86,7 @@ PFCFreezingIC::value(const Point & p)
     if (_icdim > 2)
     {
       for (unsigned int i=0; i<_icdim; i++)
-        // val = val + 0.25; // commented out by YF
+        // one mode approximation for initial condition
         val += (std::cos((2.0/_lc*p(i%3))*libMesh::pi)*std::cos((2.0/_lc*p((i+1)%3))*libMesh::pi))/4.0; // Doesn't work in 2D
     }
     else
