@@ -49,15 +49,21 @@ protected:
   MaterialProperty<ColumnMajorMatrix> & _aux_disp_III;
   MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp_III;
   MaterialProperty<ColumnMajorMatrix> & _aux_strain_III;
+  MaterialProperty<ColumnMajorMatrix> & _aux_stress_T;
+  MaterialProperty<ColumnMajorMatrix> & _aux_disp_T;
+  MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp_T;
+  MaterialProperty<ColumnMajorMatrix> & _aux_strain_T;
 
   enum SIF_MODE
   {
     KI,
     KII,
-    KIII
+    KIII,
+    T
   };
 
   void computeAuxFields(const SIF_MODE sif_mode, ColumnMajorMatrix & stress, ColumnMajorMatrix & disp, ColumnMajorMatrix & grad_disp, ColumnMajorMatrix & strain);
+  void computeTFields(ColumnMajorMatrix & stress, ColumnMajorMatrix & grad_disp);
 
 private:
   const CrackFrontDefinition * _crack_front_definition;
