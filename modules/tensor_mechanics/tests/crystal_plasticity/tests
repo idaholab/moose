@@ -14,4 +14,14 @@
     input = 'crysp_user_object.i'
     exodiff = 'crysp_user_object_out.e'
   [../]
+  [./test_save_euler]
+    type = 'Exodiff'
+    input = 'crysp_save_euler.i'
+    exodiff = 'crysp_save_euler_out.e'
+  [../]
+  [./test_read_slip_prop]
+    type = 'Exodiff'
+    input = 'crysp_read_slip_prop.i'
+    exodiff = 'crysp_read_slip_prop_out.e'
+  [../]
 []
