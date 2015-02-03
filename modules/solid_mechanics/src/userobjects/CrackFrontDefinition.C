@@ -668,7 +668,6 @@ CrackFrontDefinition::updateCrackFrontGeometry()
             _angles_along_front[1] < 180.0)
           _angles_along_front[0] = 0.0;
 
-        unsigned int last_index = num_crack_front_nodes-1;
         if (MooseUtils::absoluteFuzzyEqual(_angles_along_front[num_crack_front_nodes - 1], 0.0, _tol) &&
             _angles_along_front[num_crack_front_nodes - 2] > 180.0)
           _angles_along_front[num_crack_front_nodes - 1] = 360.0;
