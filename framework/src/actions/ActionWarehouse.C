@@ -302,9 +302,6 @@ ActionWarehouse::executeAllActions()
   for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
   {
     std::string task = *it;
-
-    // Set the current task name
-    _current_task = task;
     executeActionsWithAction(task);
   }
 }
@@ -312,6 +309,9 @@ ActionWarehouse::executeAllActions()
 void
 ActionWarehouse::executeActionsWithAction(const std::string & task)
 {
+  // Set the current task name
+  _current_task = task;
+
   for (ActionIterator act_iter = actionBlocksWithActionBegin(task);
        act_iter != actionBlocksWithActionEnd(task);
        ++act_iter)
