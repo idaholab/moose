@@ -19,9 +19,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-[]
-
-[AuxVariables]
   [./c]
     order = FIRST
     family = LAGRANGE
@@ -57,6 +54,10 @@
     disp_x = disp_x
     disp_y = disp_y
   [../]
+  [./dummy]
+    type = MatDiffusion
+    variable = c
+  [../]
 []
 
 [Materials]
@@ -75,6 +76,12 @@
     block = 0
     args = 'c'
     outputs = exodus
+  [../]
+  [./genconst]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names  = 'D'
+    prop_values = '0'
   [../]
 []
 
