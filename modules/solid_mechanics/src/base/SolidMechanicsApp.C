@@ -52,6 +52,7 @@
 #include "PressureAction.h"
 #include "DisplacementAboutAxis.h"
 #include "DisplacementAboutAxisAction.h"
+#include "InteractionIntegralBenchmarkBC.h"
 #include "TorqueReaction.h"
 #include "CrackDataSampler.h"
 #include "SolidMechanicsAction.h"
@@ -115,6 +116,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(Pressure);
   registerBoundaryCondition(DisplacementAboutAxis);
+  registerBoundaryCondition(InteractionIntegralBenchmarkBC);
 
   registerExecutioner(AdaptiveTransient);
 
