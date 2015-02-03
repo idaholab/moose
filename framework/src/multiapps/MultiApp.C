@@ -45,16 +45,9 @@ InputParameters validParams<MultiApp>()
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   std::ostringstream app_types_strings;
-
   registeredMooseAppIterator it = AppFactory::instance().registeredObjectsBegin();
-  while (it != AppFactory::instance().registeredObjectsEnd())
-  {
-    app_types_strings << it->first;
-    ++it;
-    if (it != AppFactory::instance().registeredObjectsEnd())
-      app_types_strings<< ", ";
-  }
-
+  for ( ; it != AppFactory::instance().registeredObjectsEnd(); ++it)
+    app_types_strings << it->first << " ";
   MooseEnum app_types_options(app_types_strings.str());
 
   params.addRequiredParam<MooseEnum>("app_type", app_types_options, "The type of application to build.");
