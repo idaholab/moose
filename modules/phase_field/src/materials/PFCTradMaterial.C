@@ -35,7 +35,6 @@ PFCTradMaterial::computeQpProperties()
   _a[_qp] = 3.0/(2.0*u_s)*invSkm;
   _b[_qp] = 4.0/(30.0*u_s*u_s)*invSkm;
 
-
   if (_order == 4)
   {
     _C0[_qp] = -10.9153;
