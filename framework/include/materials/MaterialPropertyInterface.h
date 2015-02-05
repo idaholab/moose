@@ -181,11 +181,11 @@ private:
    */
   void initializeMaterialPropertyInterface(const InputParameters & parameters);
 
-  /// An empty set for referencing when block_ids is not included
-  std::set<SubdomainID> _empty_block_ids;
+  /// Empty sets for referencing when ids is not included
+  const std::set<SubdomainID> _empty_block_ids;
 
   /// An empty set for referencing when boundary_ids is not included
-  std::set<BoundaryID> _empty_boundary_ids;
+  const std::set<BoundaryID> _empty_boundary_ids;
 
   /// Storage for the block ids created by BlockRestrictable
   const std::set<SubdomainID> _mi_block_ids;
