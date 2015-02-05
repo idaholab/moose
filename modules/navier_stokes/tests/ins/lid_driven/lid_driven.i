@@ -29,7 +29,7 @@
 [MeshModifiers]
   [./corner_node]
     type = AddExtraNodeset
-    boundary = 99
+    new_boundary = 99
     nodes = '0'
   [../]
 []

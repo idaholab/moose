@@ -7,13 +7,13 @@
   [./block_1]
     type = SideSetsAroundSubdomain
     block = 'left'
-    boundary = 'hull_1'
+    new_boundary = 'hull_1'
   [../]
 
   [./block_2]
     type = SideSetsAroundSubdomain
     block = 'right'
-    boundary = 'hull_2'
+    new_boundary = 'hull_2'
   [../]
 []
 

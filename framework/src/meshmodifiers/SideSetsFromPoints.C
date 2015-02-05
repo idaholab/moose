@@ -27,23 +27,16 @@ template<>
 InputParameters validParams<SideSetsFromPoints>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
-  params.addParam<std::vector<BoundaryName> >("new_boundary", "The name of the boundary to create");
-  params.addDeprecatedParam<std::vector<BoundaryName> >("boundary", "The name of the boundary to create", "Use 'new_boundary' instead");
+  params.addRequiredParam<std::vector<BoundaryName> >("new_boundary", "The name of the boundary to create");
   params.addRequiredParam<std::vector<Point> >("points", "A list of points from which to start painting sidesets");
   return params;
 }
 
 SideSetsFromPoints::SideSetsFromPoints(const std::string & name, InputParameters parameters):
     AddSideSetsBase(name, parameters),
+    _boundary_names(getParam<std::vector<BoundaryName> >("new_boundary")),
     _points(getParam<std::vector<Point> >("points"))
 {
-  // *** DEPRECATED SUPPORT ***
-  // Remove these two lines, make 'new_boundary' required when this is removed, and move _boundary_names to initialization list
-  if (isParamValid("boundary"))
-    _pars.set<std::vector<BoundaryName> >("new_boundary") = getParam<std::vector<BoundaryName> >("boundary");
-
-  // Get the BoundaryIDs from the mesh
-  _boundary_names = getParam<std::vector<BoundaryName> >("new_boundary");
 
   if (_points.size() != _boundary_names.size())
     mooseError("point list and boundary list are not the same length");
