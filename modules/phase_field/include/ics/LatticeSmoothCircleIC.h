@@ -45,6 +45,8 @@ protected:
   Real _radius_variation;
   MooseEnum _radius_variation_type;
 
+  bool _avoid_bounds;
+
   Point _bottom_left;
   Point _top_right;
   Point _range;
