@@ -18,8 +18,8 @@
 #include "NearestNodeLocator.h"
 #include "SystemBase.h"
 
-GeometricSearchInterface::GeometricSearchInterface(InputParameters & params) :
-    _geometric_search_data(params.get<SubProblem *>("_subproblem")->geomSearchData())
+GeometricSearchInterface::GeometricSearchInterface(const InputParameters & parameters) :
+    _geometric_search_data(parameters.get<SubProblem *>("_subproblem")->geomSearchData())
 {
 }
 

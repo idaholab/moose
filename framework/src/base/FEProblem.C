@@ -108,7 +108,7 @@ InputParameters & injectFEProblem(FEProblem * fe_problem, InputParameters & para
 
 FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     SubProblem(name, parameters),
-    Restartable(name, injectFEProblem(this, parameters), "FEProblem"),
+    Restartable(injectFEProblem(this, parameters), "FEProblem"),
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),

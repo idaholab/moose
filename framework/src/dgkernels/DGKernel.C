@@ -54,7 +54,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     UserObjectInterface(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false, false),
     TwoMaterialPropertyInterface(name, parameters),
-    Restartable(name, parameters, "DGKernels"),
+    Restartable(parameters, "DGKernels"),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),

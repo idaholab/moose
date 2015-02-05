@@ -30,7 +30,7 @@ Function::Function(const std::string & name, InputParameters parameters) :
     TransientInterface(parameters, "functions"),
     PostprocessorInterface(parameters),
     UserObjectInterface(parameters),
-    Restartable(name, parameters, "Functions"),
+    Restartable(parameters, "Functions"),
     MeshChangedInterface(parameters),
     ScalarCoupleable(parameters)
 {

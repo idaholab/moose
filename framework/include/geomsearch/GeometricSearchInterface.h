@@ -28,7 +28,7 @@ class NearestNodeLocator;
 class GeometricSearchInterface
 {
 public:
-  GeometricSearchInterface(InputParameters & params);
+  GeometricSearchInterface(const InputParameters & parameters);
 
   /**
    * Retrieve the PentrationLocator associated with the two sides.

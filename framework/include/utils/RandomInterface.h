@@ -34,8 +34,7 @@ InputParameters validParams<RandomInterface>();
 class RandomInterface
 {
 public:
-  RandomInterface(const std::string & name, InputParameters & parameters, FEProblem & problem,
-                  THREAD_ID tid, bool is_nodal);
+  RandomInterface(const InputParameters & parameters, FEProblem & problem, THREAD_ID tid, bool is_nodal);
 
   ~RandomInterface();
 

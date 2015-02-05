@@ -81,7 +81,7 @@ Output::getExecuteOptions(std::string default_type)
 
 Output::Output(const std::string & name, InputParameters & parameters) :
     MooseObject(name, parameters),
-    Restartable(name, parameters, "Output"),
+    Restartable(parameters, "Output"),
     MeshChangedInterface(parameters),
     SetupInterface(parameters),
     _problem_ptr(getParam<FEProblem *>("_fe_problem")),

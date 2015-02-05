@@ -15,7 +15,7 @@
 #include "ZeroInterface.h"
 #include "SubProblem.h"
 
-ZeroInterface::ZeroInterface(InputParameters parameters) :
+ZeroInterface::ZeroInterface(const InputParameters & parameters) :
     _zi_subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _zi_tid(parameters.get<THREAD_ID>("_tid")),
     _real_zero(_zi_subproblem._real_zero[_zi_tid]),

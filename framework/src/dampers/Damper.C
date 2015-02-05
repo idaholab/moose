@@ -30,7 +30,7 @@ Damper::Damper(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
     MaterialPropertyInterface(parameters),
-    Restartable(name, parameters, "Dampers"),
+    Restartable(parameters, "Dampers"),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
