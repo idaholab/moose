@@ -180,8 +180,10 @@ void CutElemMeshTest::CutElemMeshTest2c()
   CutElemMesh MyMesh;
   case2Mesh(MyMesh);
 
-  MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 0,1,0.5);
+  unsigned int nodes1[4] = {0,3,4,1};
+  unsigned int elem_id = MyMesh.getElemIdByNodes(nodes1);
+  MyMesh.addEdgeIntersection((unsigned int) elem_id,0,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) elem_id,1,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
@@ -192,7 +194,11 @@ void CutElemMeshTest::CutElemMeshTest2c()
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.addEdgeIntersection((unsigned int) 1,1,0.5);
+//  MyMesh.printMesh();
+//  std::cout<<"\nCut second element:"<<std::endl;
+  unsigned int nodes2[4] = {1,4,5,2};
+  elem_id = MyMesh.getElemIdByNodes(nodes2);
+  MyMesh.addEdgeIntersection((unsigned int) elem_id,1,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
@@ -203,7 +209,10 @@ void CutElemMeshTest::CutElemMeshTest2c()
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.addEdgeIntersection((unsigned int) 1,2,0.5);
+//  MyMesh.printMesh();
+//  std::cout<<"\nCut third element:"<<std::endl;
+  elem_id = MyMesh.getElemIdByNodes(nodes2);
+  MyMesh.addEdgeIntersection((unsigned int) elem_id,2,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
@@ -389,5 +398,150 @@ void CutElemMeshTest::CutElemMeshTest4()
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
 
+  MyMesh.printMesh();
+}
+
+void
+CutElemMeshTest::case5Mesh(CutElemMesh &MyMesh)
+{
+  // 0 ----- 1 ----- 2 ----- 3
+  // |       |       |       |
+  // |       |       |       |
+  // |       |       |       |
+  // 4 ----- 5 ----- 6 ----- 7
+  // |       |       |       |
+  // |       |       |       |
+  // |       |       |       |
+  // 8 ----- 9 -----10 -----11
+
+  std::vector< std::vector<unsigned int> > quads;
+  unsigned int q1[] = {0,4,5,1};
+  std::vector<unsigned int> v1 (q1, q1 + sizeof(q1) / sizeof(unsigned int) );
+  quads.push_back(v1);
+  unsigned int q2[] = {1,5,6,2};
+  std::vector<unsigned int> v2 (q2, q2 + sizeof(q2) / sizeof(unsigned int) );
+  quads.push_back(v2);
+  unsigned int q3[] = {2,6,7,3};
+  std::vector<unsigned int> v3 (q3, q3 + sizeof(q3) / sizeof(unsigned int) );
+  quads.push_back(v3);
+  unsigned int q4[] = {4,8,9,5};
+  std::vector<unsigned int> v4 (q4, q4 + sizeof(q4) / sizeof(unsigned int) );
+  quads.push_back(v4);
+  unsigned int q5[] = {5,9,10,6};
+  std::vector<unsigned int> v5 (q5, q5 + sizeof(q5) / sizeof(unsigned int) );
+  quads.push_back(v5);
+  unsigned int q6[] = {6,10,11,7};
+  std::vector<unsigned int> v6 (q6, q6 + sizeof(q6) / sizeof(unsigned int) );
+  quads.push_back(v6);
+
+  MyMesh.addElements( quads );
+  MyMesh.updateEdgeNeighbors();
+}
+
+void CutElemMeshTest::CutElemMeshTest5a()
+{
+  // 0 ----- 1 ----- 2 ----- 3
+  // |       |       |       |
+  // x ----- x --x-- x ----- x
+  // |       |   |   |       |
+  // 4 ----- 5 --x-- 6 ----- 7
+  // |       |   |   |       |
+  // |       |   |   |       |
+  // |       |   |   |       |
+  // 8 ----- 9 --x--10 -----11
+
+  CutElemMesh MyMesh;
+  case5Mesh(MyMesh);
+
+  // add the horizontal cut
+  std::cout<<"\nRunning case 5a"<<std::endl;
+  std::cout<<"\nFirst cut:"<<std::endl;
+  MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 0,2,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 1,2,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 2,2,0.5);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+  MyMesh.printMesh();
+
+  // add the lower part of the vertical cut
+  std::cout<<"\nSecond cut:"<<std::endl;
+  MyMesh.addEdgeIntersection((unsigned int) 4,1,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 4,3,0.5);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+  MyMesh.printMesh();
+
+  // add the upper vertical cut
+  std::cout<<"\nThird cut:"<<std::endl;
+  MyMesh.addFragEdgeIntersection((unsigned int) 14,3,0.5); // I cheated here
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+  MyMesh.printMesh();
+}
+
+void CutElemMeshTest::CutElemMeshTest5b()
+{
+  // 0 ----- 1 ----- 2 ----- 3
+  // |       |       |       |
+  // x ----- x --x-- x ----- x
+  // |       |   |   |       |
+  // 4 ----- 5 --x-- 6 ----- 7
+  // |       |   |   |       |
+  // |       |   |   |       |
+  // |       |   |   |       |
+  // 8 ----- 9 --x--10 -----11
+
+  CutElemMesh MyMesh;
+  case5Mesh(MyMesh);
+
+  // add the horizontal cut
+  std::cout<<"\nRunning case 5b"<<std::endl;
+  std::cout<<"\nFirst cut:"<<std::endl;
+  MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 0,2,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 1,2,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 2,2,0.5);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+  MyMesh.printMesh();
+
+  // add the upper part of the vertical cut
+  std::cout<<"\nSecond cut:"<<std::endl;
+  MyMesh.addEdgeIntersection((unsigned int) 9,1,0.5);
+  MyMesh.addFragEdgeIntersection((unsigned int) 9,2,0.5); // I cheated here
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+  MyMesh.printMesh();
+
+  // add the lower vertical cut
+  std::cout<<"\nThird cut:"<<std::endl;
+  MyMesh.addEdgeIntersection((unsigned int) 4,1,0.5);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
   MyMesh.printMesh();
 }

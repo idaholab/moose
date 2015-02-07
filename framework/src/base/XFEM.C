@@ -41,56 +41,16 @@
 #include "libmesh/parallel_mesh.h"
 #endif // DEBUG
 
-XFEMCutElemNode::XFEMCutElemNode(CutElemMesh::N_CATEGORY category,
-                                 unsigned int index,
-                                 std::vector<Node*> master_nodes,
-                                 std::vector<Real> weights):
-  _category(category),
-  _index(index),
-  _master_nodes(master_nodes),
-  _weights(weights)
-{
-}
-
-void
-XFEMCutElemNode::get_coords(Real *coords, MeshBase *displaced_mesh) const
-{
-  coords[0] = 0.0;
-  coords[1] = 0.0;
-  coords[2] = 0.0;
-  std::vector<Node*> master_nodes;
-  if (displaced_mesh)
-  {
-    for (unsigned int i=0; i<_master_nodes.size(); ++i)
-    {
-      master_nodes.push_back(displaced_mesh->node_ptr(_master_nodes[i]->id()));
-    }
-  }
-  else
-  {
-    master_nodes = _master_nodes;
-  }
-
-  for (unsigned int i=0; i<master_nodes.size(); ++i)
-  {
-    coords[0] += _weights[i] * (*master_nodes[i])(0);
-    coords[1] += _weights[i] * (*master_nodes[i])(1);
-    coords[2] += _weights[i] * (*master_nodes[i])(2);
-  }
-}
 
 XFEMCutElem::XFEMCutElem(Elem* elem, const CutElemMesh::element_t * const CEMelem):
   _elem(elem),
   _n_nodes(elem->n_nodes()),
   _nodes(_n_nodes,NULL),
-  _physical_nodes(_n_nodes,false),
-  _fragment(*CEMelem->fragments[0], NULL, true)
+  _efa_elem(CEMelem,true)
 {
   for (unsigned int i=0; i<_n_nodes; ++i)
-  {
     _nodes[i] = elem->get_node(i);
-  }
-  save_fragment_info(CEMelem);
+  
   calc_physical_volfrac();
 }
 
@@ -98,105 +58,34 @@ XFEMCutElem::~XFEMCutElem()
 {
 }
 
-void
-XFEMCutElem::save_fragment_info(const CutElemMesh::element_t * const elem)
+Point
+XFEMCutElem::get_node_coords(CutElemMesh::node_t* CEMnode, MeshBase* displaced_mesh) const
 {
-  for (unsigned int i=0; i<elem->edges.size(); ++i)
+  Point node_coor(0.0,0.0,0.0);
+  std::vector<CutElemMesh::node_t*> master_nodes;
+  std::vector<Point> master_points;
+  std::vector<double> master_weights;
+
+  _efa_elem.getMasterInfo(CEMnode, master_nodes, master_weights);
+  for (unsigned int i = 0; i < master_nodes.size(); ++i)
   {
-    if (elem->edges[i]->has_intersection())
+    if (master_nodes[i]->category == CutElemMesh::N_CATEGORY_LOCAL_INDEX)
     {
-      _local_edge_has_intersection.push_back(true);
-      _embedded_nodes_on_edge.push_back(elem->edges[i]->get_embedded_node());
-      _intersection_x.push_back(elem->edges[i]->get_intersection(elem->nodes[i]));
+      Node* node = _nodes[master_nodes[i]->id];
+      if (displaced_mesh)
+        node = displaced_mesh->node_ptr(node->id());
+      Point node_p((*node)(0), (*node)(1), (*node)(2));
+      master_points.push_back(node_p);
     }
     else
     {
-      _local_edge_has_intersection.push_back(false);
-      _embedded_nodes_on_edge.push_back(NULL);
-      _intersection_x.push_back(-1.0);
-    }
-  }
-  if (elem->fragments.size() != 1)
-  {
-    libMesh::err << " ERROR: In save_fragment_info New elements must have 1 interior link"<<std::endl;
-    exit(1);
-  }
-  unsigned int num_frag_edges = elem->fragments[0]->boundary_edges.size();
-  for (unsigned int i = 0; i < num_frag_edges; ++i)
-  {
-    CutElemMesh::node_t * node = elem->fragments[0]->boundary_edges[i]->get_node(0);
-    unsigned int iprev(i>0 ? i-1 : num_frag_edges-1);
-    if (!elem->fragments[0]->boundary_edges[iprev]->containsNode(node))
-    {
-      node = elem->fragments[0]->boundary_edges[i]->get_node(1);
-      if (!elem->fragments[0]->boundary_edges[iprev]->containsNode(node))
-        libMesh::err << " ERROR: previous edge does not contain either of the nodes"<<std::endl;
-    }
-
-    if (node->category == CutElemMesh::N_CATEGORY_EMBEDDED)
-    {
-      bool found_edge(false);
-      std::vector<Node*> master_nodes;
-      std::vector<Real> master_weights;
-      for (unsigned int iedge=0; iedge<elem->num_edges; ++iedge)
-      {
-        if (elem->edges[iedge]->get_embedded_node() == node)
-        {
-          int iedgeplus1(iedge<(elem->num_edges-1) ? iedge+1 : 0);
-          master_nodes.push_back(_nodes[iedge]);
-          master_nodes.push_back(_nodes[iedgeplus1]);
-          master_weights.push_back(1.0-_intersection_x[iedge]);
-          master_weights.push_back(_intersection_x[iedge]);
-
-          found_edge = true;
-          break;
-        }
-      }
-      if (!found_edge)
-      {
-        libMesh::err << " ERROR: In save_fragment_info could not find embedded node on edges of element"<<std::endl;
-        exit(1);
-      }
-
-      XFEMCutElemNode xfcen(CutElemMesh::N_CATEGORY_EMBEDDED, node->id, master_nodes, master_weights);
-      _interior_link.push_back(xfcen);
-      _cut_line_nodes.push_back(xfcen);
-    }
-    else if (node->category == CutElemMesh::N_CATEGORY_PERMANENT)
-    {
-      bool found_node = false;
-      for (unsigned int j=0; j<elem->nodes.size(); ++j)
-      {
-        if (elem->nodes[j] == node)
-        {
-          _physical_nodes[j] = true;
-          std::vector<Node*> master_nodes;
-          std::vector<Real> master_weights;
-          master_nodes.push_back(_nodes[j]);
-          master_weights.push_back(1.0);
-          XFEMCutElemNode xfcen(CutElemMesh::N_CATEGORY_LOCAL_INDEX, j, master_nodes, master_weights);
-          _interior_link.push_back(xfcen);
-          found_node = true;
-          break;
-        }
-      }
-      if (!found_node)
-      {
-        libMesh::err << " ERROR: In save_fragment_info link could not find permanent node "<<node->id<<" in element "<<elem->id<<std::endl;
-        exit(1);
-      }
-    }
-    else
-    {
-      libMesh::err << " ERROR: In save_fragment_info link nodes must be either embedded or permanent"<<std::endl;
+      libMesh::err << " ERROR: master nodes must be local"<<std::endl;
       exit(1);
     }
-  }
-  if (_cut_line_nodes.size() != 2)
-  {
-    libMesh::err << " ERROR: In save_fragment_info interior link must contain exactly 2 embedded nodes to define cut line"<<std::endl;
-    exit(1);
-  }
+  } // i
+  for (unsigned int i = 0; i < master_nodes.size(); ++i)
+    node_coor += master_weights[i]*master_points[i];
+  return node_coor;
 }
 
 void
@@ -208,53 +97,71 @@ XFEMCutElem::calc_physical_volfrac()
   //Calculate area of entire element and fragment using the formula:
   // A = 1/2 sum_{i=0}^{n-1} (x_i y_{i+1} - x_{i+1} y{i})
 
-  for (unsigned int i=0; i<_n_nodes; ++i)
+  for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
   {
-    int iplus1(i<(_n_nodes-1) ? i+1 : 0);
-    el_area += 0.5 * ((*_nodes[i])(0)*(*_nodes[iplus1])(1) - (*_nodes[iplus1])(0)*(*_nodes[i])(1));
+    Point edge_p1 = get_node_coords(_efa_elem.fragments[0]->boundary_edges[i]->get_node(0));
+    Point edge_p2 = get_node_coords(_efa_elem.fragments[0]->boundary_edges[i]->get_node(1));
+    frag_area += 0.5*(edge_p1(0)-edge_p2(0))*(edge_p1(1)+edge_p2(1));
   }
 
-  for (unsigned int i=0; i<_interior_link.size(); ++i)
+  for (unsigned int i = 0; i < _efa_elem.edges.size(); ++i)
   {
-    int iplus1(i<(_interior_link.size()-1) ? i+1 : 0);
-    Real nodeicoords[3];
-    Real nodeip1coords[3];
-    _interior_link[i].get_coords(nodeicoords);
-    _interior_link[iplus1].get_coords(nodeip1coords);
-    frag_area += 0.5 * (nodeicoords[0]*nodeip1coords[1] - nodeip1coords[0]*nodeicoords[1]);
+    Point edge_p1 = get_node_coords(_efa_elem.edges[i]->get_node(0));
+    Point edge_p2 = get_node_coords(_efa_elem.edges[i]->get_node(1));
+    el_area += 0.5*(edge_p1(0)-edge_p2(0))*(edge_p1(1)+edge_p2(1));
   }
 
   _physical_volfrac = frag_area/el_area;
 }
 
-void
-XFEMCutElem::get_origin(Real *origin, MeshBase* displaced_mesh)const
+Point
+XFEMCutElem::get_origin(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
-  _cut_line_nodes[0].get_coords(origin, displaced_mesh);
+  std::vector<std::vector<CutElemMesh::node_t*> > cut_line_nodes;
+  for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
+  {
+    if (_efa_elem.fragments[0]->boundary_edges[i]->is_interior_edge())
+    {
+      std::vector<CutElemMesh::node_t*> node_line(2,NULL);
+      node_line[0] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(0);
+      node_line[1] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(1);
+      cut_line_nodes.push_back(node_line);
+    }  
+  }
+  if (cut_line_nodes.size() == 0)
+  {
+    libMesh::err << " ERROR: not cut line found in this element"<<std::endl;
+    exit(1);
+  }
+  return get_node_coords(cut_line_nodes[plane_id][0], displaced_mesh);
 }
 
-void
-XFEMCutElem::get_normal(Real *normal, MeshBase* displaced_mesh)const
+Point
+XFEMCutElem::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
-  Real node1coords[3];
-  Real node2coords[3];
-  Real p1p2[2];
-
-  _cut_line_nodes[0].get_coords(node1coords, displaced_mesh);
-  _cut_line_nodes[1].get_coords(node2coords, displaced_mesh);
-
-  p1p2[0] = node2coords[0] - node1coords[0];
-  p1p2[1] = node2coords[1] - node1coords[1];
-  Real len = sqrt(p1p2[0]*p1p2[0] + p1p2[1]*p1p2[1]);
-  p1p2[0] /= len;
-  p1p2[1] /= len;
-
-  //Take the cross product of the unit vector from node 1 to node 2
-  //and the vector pointing out of plane to get the outward
-  //normal of this cut of the fragment.  Reduces to this in 2d:
-  normal[0] =  p1p2[1];
-  normal[1] = -p1p2[0];
-  normal[2] = 0.0;
+  std::vector<std::vector<CutElemMesh::node_t*> > cut_line_nodes;
+  for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
+  {
+    if (_efa_elem.fragments[0]->boundary_edges[i]->is_interior_edge())
+    {
+      std::vector<CutElemMesh::node_t*> node_line(2,NULL);
+      node_line[0] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(0);
+      node_line[1] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(1);
+      cut_line_nodes.push_back(node_line);
+    }  
+  }
+  if (cut_line_nodes.size() == 0)
+  {
+    libMesh::err << " ERROR: not cut line found in this element"<<std::endl;
+    exit(1);
+  }
+  Point cut_line_p1 = get_node_coords(cut_line_nodes[plane_id][0], displaced_mesh);
+  Point cut_line_p2 = get_node_coords(cut_line_nodes[plane_id][1], displaced_mesh);
+  Point cut_line = cut_line_p2 - cut_line_p1;
+  Real len = std::sqrt(cut_line.size_sq());
+  cut_line *= (1.0/len);
+  Point normal(cut_line(1), -cut_line(0), 0.0);
+  return normal;
 }
 
 //-----------------------------------------------------------------
@@ -395,43 +302,31 @@ void XFEM::build_efa_mesh()
   for ( elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
   {
     Elem *elem = *elem_it;
+    std::map<const Elem*, XFEMCutElem*>::iterator cemit = _cut_elem_map.find(elem);
+    if (cemit != _cut_elem_map.end())
     {
-      std::map<const Elem*, XFEMCutElem*>::iterator cemit = _cut_elem_map.find(elem);
-      if (cemit != _cut_elem_map.end())
-      {
-        XFEMCutElem *xfce = cemit->second;
-        CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
-        _efa_mesh.restoreFragmentInfo(CEMElem, xfce->getFragment());
-      }
+      XFEMCutElem *xfce = cemit->second;
+      CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
+      _efa_mesh.restoreFragmentInfo(CEMElem, xfce->get_efa_elem());
     }
   }
 
+  //Must update edge neighbors before restore edge intersections. Otherwise, when we
+  //add edge intersections, we do not have neighbor information to use
   _efa_mesh.updateEdgeNeighbors();
 
   //Restore edge intersection information for elements that have been previously cut
-  for ( elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
+  for (elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
   {
     Elem *elem = *elem_it;
+    std::map<const Elem*, XFEMCutElem*>::iterator cemit = _cut_elem_map.find(elem);
+    if (cemit != _cut_elem_map.end())
     {
-      std::map<const Elem*, XFEMCutElem*>::iterator cemit = _cut_elem_map.find(elem);
-      if (cemit != _cut_elem_map.end())
-      {
-        XFEMCutElem *xfce = cemit->second;
-        std::vector<std::pair<CutElemMesh::N_CATEGORY, unsigned int> > interior_link;
-        for (unsigned int iil=0; iil<xfce->_interior_link.size(); ++iil)
-        {
-          interior_link.push_back(std::make_pair(xfce->_interior_link[iil].get_category(),
-                                                 xfce->_interior_link[iil].get_index()));
-        }
-        CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
-        _efa_mesh.restoreEdgeIntersections(CEMElem,
-                                           xfce->_local_edge_has_intersection,
-                                           xfce->_embedded_nodes_on_edge,
-                                           xfce->_intersection_x);
-      }
+      XFEMCutElem *xfce = cemit->second;
+      CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
+      _efa_mesh.restoreEdgeIntersections(CEMElem, xfce->get_efa_elem());
     }
   }
-
 
 //  _efa_mesh.updatePhysicalLinksAndFragments();
   _efa_mesh.initCrackTipTopology();
@@ -459,55 +354,84 @@ XFEM::mark_cut_edges_by_geometry(Real time)
   for ( ; elem_it != elem_end; ++elem_it)
   {
     Elem *elem = *elem_it;
-    std::vector<cutEdge> cutEdges;
-    for (unsigned int i=0; i<_geometric_cuts.size(); ++i)
+    std::vector<cutEdge> elemCutEdges;
+    std::vector<cutEdge> fragCutEdges;
+    std::vector<std::vector<Point> > frag_edges;
+
+    // get frag_edges
+    CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
+    if (CEMElem->fragments.size() > 0)
     {
-      _geometric_cuts[i]->cut_elem_by_geometry(elem, cutEdges, time);
+      if (CEMElem->fragments.size() > 1)
+      {
+        libMesh::err << " ERROR: element "<<elem->id()<<" has more than one fragments at this point"<<std::endl;
+        exit(1);
+      }
+      for (unsigned int i = 0; i < CEMElem->fragments[0]->boundary_edges.size(); ++i)
+      {
+        std::vector<Point> p_line(2,Point(0.0,0.0,0.0));
+        p_line[0] = get_efa_node_coor(CEMElem->fragments[0]->boundary_edges[i]->get_node(0), CEMElem, elem);
+        p_line[1] = get_efa_node_coor(CEMElem->fragments[0]->boundary_edges[i]->get_node(1), CEMElem, elem);
+        frag_edges.push_back(p_line);
+      } // i
     }
 
-    for (unsigned int i=0; i<cutEdges.size(); ++i)
+    // mark cut edges for the element and its fragment
+    for (unsigned int i=0; i<_geometric_cuts.size(); ++i)
     {
-      //Figure out the side id from the edge nodes -- maybe better to
-      //just return that from cut_elem_by_geometry
-      unsigned int nsides = 4;
-      unsigned int side_id = 999999;
-      Real distance = -1.0;
-      for (unsigned int j=0; j<nsides; ++j)
-      {
-        Node *node1 = elem->get_node(j);
-        Node *node2 = elem->get_node(j<nsides-1?j+1:0);
+      _geometric_cuts[i]->cut_elem_by_geometry(elem, elemCutEdges, time);
+      if (CEMElem->fragments.size() > 0)
+        _geometric_cuts[i]->cut_frag_by_geometry(frag_edges, fragCutEdges, time);
+    }
 
-        if (cutEdges[i].id1 == node1->id() && cutEdges[i].id2 == node2->id())
-        {
-          side_id = j;
-          distance = cutEdges[i].distance;
-          break;
-        }
-        else if (cutEdges[i].id2 == node1->id() && cutEdges[i].id1 == node2->id())
-        {
-          side_id = j;
-          distance = 1.0-cutEdges[i].distance;
-          break;
-        }
-      }
-      if (side_id == 999999)
-      {
-        libMesh::err << " ERROR: could not find side index for nodes: "<<cutEdges[i].id1<<" "<<cutEdges[i].id2<<std::endl;
-        exit(1);
-      }
-      if (distance < 0.0)
-      {
-        libMesh::err << " ERROR: invalid distance for cut edge with nodes: "<<cutEdges[i].id1<<" "<<cutEdges[i].id2<<" : "<<distance<<std::endl;
-        exit(1);
-      }
-
+    for (unsigned int i=0; i<elemCutEdges.size(); ++i)
+    {
       // elemid, edgeid, location
-      _efa_mesh.addEdgeIntersection(elem->id(),side_id,distance);
+      _efa_mesh.addEdgeIntersection(elem->id(),elemCutEdges[i].host_side_id,elemCutEdges[i].distance);
+      marked_edges = true;
+    }
+
+    for (unsigned int i=0; i<fragCutEdges.size(); ++i) // MUST DO THIS AFTER MARKING ELEMENT EDGES
+    {
+      _efa_mesh.addFragEdgeIntersection(elem->id(),fragCutEdges[i].host_side_id,fragCutEdges[i].distance);
       marked_edges = true;
     }
   }
 
   return marked_edges;
+}
+
+Point
+XFEM::get_efa_node_coor(CutElemMesh::node_t* CEMnode, CutElemMesh::element_t* CEMElem, 
+                        Elem *elem, MeshBase* displaced_mesh)
+{
+  Point node_coor(0.0,0.0,0.0);
+  std::vector<CutElemMesh::node_t*> master_nodes;
+  std::vector<Point> master_points;
+  std::vector<double> master_weights;
+
+  CEMElem->getMasterInfo(CEMnode, master_nodes, master_weights);
+  for (unsigned int i = 0; i < master_nodes.size(); ++i)
+  {
+    if (master_nodes[i]->category == CutElemMesh::N_CATEGORY_PERMANENT)
+    {
+      unsigned int local_node_id = CEMElem->getLocalNodeIndex(master_nodes[i]);
+      Node* node = elem->get_node(local_node_id);
+      if (displaced_mesh)
+        node = displaced_mesh->node_ptr(node->id());
+      Point node_p((*node)(0), (*node)(1), (*node)(2));
+      master_points.push_back(node_p);
+    }
+    else
+    {
+      libMesh::err << " ERROR: master nodes must be permanent"<<std::endl;
+      exit(1);
+    }
+  } // i
+  for (unsigned int i = 0; i < master_nodes.size(); ++i)
+    node_coor += master_weights[i]*master_points[i];
+
+  return node_coor;
 }
 
 bool
@@ -844,7 +768,7 @@ XFEM::get_cut_plane(const Elem* elem,
                     const XFEM_CUTPLANE_QUANTITY quantity) const
 {
   Real comp=0.0;
-  Real planedata[3];
+  Point planedata(0.0,0.0,0.0);
   std::map<const Elem*, XFEMCutElem*>::const_iterator it;
   it = _cut_elem_map.find(elem);
   if (it != _cut_elem_map.end())
@@ -853,14 +777,14 @@ XFEM::get_cut_plane(const Elem* elem,
     if ((unsigned int)quantity < 3)
     {
       unsigned int index = (unsigned int)quantity;
-      xfce->get_origin(planedata,_mesh2);
-      comp = planedata[index];
+      planedata = xfce->get_origin(0,_mesh2); // TODO: 2 cut planes in 1 elem
+      comp = planedata(index);
     }
     else if ((unsigned int)quantity < 6)
     {
       unsigned int index = (unsigned int)quantity - 3;
-      xfce->get_normal(planedata,_mesh2);
-      comp = planedata[index];
+      planedata = xfce->get_normal(0,_mesh2); // TODO: 2 cut planes in 1 elem
+      comp = planedata(index);
     }
     else
     {

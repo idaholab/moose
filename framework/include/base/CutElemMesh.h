@@ -65,6 +65,25 @@ class CutElemMesh
     };
   };
 
+  class faceNode
+  {
+    public:
+    faceNode(node_t* node, double xi, double eta);
+    faceNode(const faceNode & other_face_node);
+
+    ~faceNode();
+
+    node_t * get_node();
+    double get_para_coords(unsigned int i);
+    void switchNode(node_t* new_old, node_t* old_node);
+
+    private:
+
+    node_t * _node;
+    double _xi;
+    double _eta;
+  };
+
   class edge_t
   {
     public:
@@ -72,13 +91,16 @@ class CutElemMesh
     edge_t(const edge_t & other_edge);
     edge_t(const edge_t & other_edge, element_t* host, bool convert_to_local);
 
-    bool equivalent(const edge_t & other) const;
+    // the destructor must delete any local nodes
+    ~edge_t();
+
+    bool equivalent(const edge_t & other) const; // compares end nodes and embedded node
+    bool isOverlapping(const edge_t & other) const; // only compares end nodes
     bool containsEdge(edge_t & other);
 
 //    bool operator < (const edge_t & other) const;
 
     void add_intersection(double position, node_t * embedded_node_tmp, node_t * from_node);
-    void replace_embedded_node(node_t * embedded_node_tmp);
     node_t * get_node(unsigned int index);
 
     bool has_intersection();
@@ -89,6 +111,9 @@ class CutElemMesh
     void consistency_check();
     void switchNode(node_t *new_node, node_t *old_node);
     bool containsNode(node_t *node);
+    bool getNodeMasters(node_t* node, std::vector<node_t*> &master_nodes, std::vector<double> &master_weights);
+    bool is_interior_edge();
+    void remove_embedded_node();
 
     private:
     node_t * edge_node1;
@@ -102,7 +127,7 @@ class CutElemMesh
     public:
     fragment_t(element_t * host,
                bool create_boundary_edges,
-               element_t * from_host = NULL,
+               const element_t * from_host,
                unsigned int fragment_copy_index = std::numeric_limits<unsigned int>::max());
 
     //Construct a fragment from another fragment.  If convert_to_local is true,
@@ -117,8 +142,11 @@ class CutElemMesh
     void switchNode(node_t *new_node, node_t *old_node);
     bool containsNode(node_t *node);
     bool isConnected(fragment_t &other_fragment);
+    void combine_tip_edges();
     std::vector<fragment_t*> split();
     std::vector<node_t*> commonNodesWithEdge(edge_t & other_edge);
+    unsigned int get_num_cuts();
+    element_t* get_host();
 
 //    std::vector< node_t*> boundary_nodes;
     std::vector< edge_t*> boundary_edges;
@@ -132,6 +160,7 @@ class CutElemMesh
     public:
 
     element_t(unsigned int eid);
+    element_t(const element_t * from_elem, bool convert_to_local);
 
     ~element_t();
 
@@ -175,13 +204,35 @@ class CutElemMesh
     //Determine whether element at crack tip should be duplicated.  It should be duplicated
     //if the crack will extend into the next element, or if it has a non-physical node
     //connected to a face where a crack terminates, but will extend.
-    bool should_duplicate_for_crack_tip();
+    bool shouldDuplicateCrackTipSplitElem();
 
     //Given a global node, create a new local node
-    node_t * create_local_node_from_global_node(const node_t * global_node);
+    node_t * create_local_node_from_global_node(const node_t * global_node) const;
 
     //Given a local node, find the global node corresponding to that node
-    node_t * get_global_node_from_local_node(const node_t * local_node);
+    node_t * get_global_node_from_local_node(const node_t * local_node) const;
+
+    //Given a node_t, find the element edge or fragment edge that contains it
+    //Return its master nodes and weights
+    void getMasterInfo(node_t* node, std::vector<node_t*> &master_nodes,
+                       std::vector<double> &master_weights) const;
+
+    //Get the local node index of node
+    unsigned int getLocalNodeIndex(node_t * node) const;
+
+    //Given a element edge ID, get the corresponding fragment ID
+    bool getFragmentEdgeID(unsigned int elem_edge_id, unsigned int &frag_id, unsigned int &frag_edge_id);
+
+    //add an interior edge
+    bool is_edge_phantom(unsigned int edge_id);
+
+    //check if the element has only one fragment which has tip edges
+    bool frag_has_tip_edges();
+
+    //get the parametric coords of an embedded node
+    bool getEmbeddedNodeParaCoor(node_t* embedded_node, std::vector<double> &para_coor);
+    unsigned int getNumInteriorNodes();
+    unsigned int get_num_cuts();
 
     //id
     unsigned int id;
@@ -191,6 +242,8 @@ class CutElemMesh
     std::vector<node_t*> nodes;
     //list of cut edges
     std::vector<edge_t*> edges;
+    //list of interior embedded nodes
+    std::vector<faceNode*> interior_nodes;
     //parent
     element_t * parent;
     //neighbors on edge
@@ -202,6 +255,11 @@ class CutElemMesh
     //special case at crack tip
     bool crack_tip_split_element;
     std::vector<unsigned int> crack_tip_neighbors;
+
+    private:
+
+    void mapParaCoorFrom1Dto2D(unsigned int edge_id, unsigned int num_edges,
+                               double xi_1d, std::vector<double> &para_coor);
   };
 
   public:
@@ -223,6 +281,7 @@ class CutElemMesh
   void initCrackTipTopology();
   void addEdgeIntersection( unsigned int elemid, unsigned int edgeid, double position );
   void addEdgeIntersection( element_t * elem, unsigned int edgeid, double position, node_t * embedded_node = NULL );
+  void addFragEdgeIntersection(unsigned int elemid, unsigned int frag_edge_id, double position);
 
   void updatePhysicalLinksAndFragments();
   void physicalLinkAndFragmentSanityCheck(element_t *currElem);
@@ -230,12 +289,8 @@ class CutElemMesh
   void updateTopology(bool mergeUncutVirtualEdges=true);
   void reset();
   void clearAncestry();
-  void restoreFragmentInfo(CutElemMesh::element_t * const elem,
-                           fragment_t & from_frag);
-  void restoreEdgeIntersections(CutElemMesh::element_t * const elem,
-                                const std::vector<bool> &local_edge_has_intersection,
-                                const std::vector<CutElemMesh::node_t*> &embedded_nodes_on_edge,
-                                const std::vector<double> &intersection_x);
+  void restoreFragmentInfo(CutElemMesh::element_t * const elem, CutElemMesh::element_t & from_elem);
+  void restoreEdgeIntersections(CutElemMesh::element_t * const elem, CutElemMesh::element_t & from_elem);
 
   void createChildElements();
   void connectFragments( bool mergeUncutVirtualEdges);
@@ -256,6 +311,8 @@ class CutElemMesh
 
   void duplicateEmbeddedNode(element_t* currElem,
                              unsigned int edgeID);
+  void duplicateInteriorEmbeddedNode(element_t* currElem);
+  bool should_duplicate_for_crack_tip(element_t* currElem);
 
   void sanityCheck();
   void findCrackTipElements();
@@ -266,7 +323,8 @@ class CutElemMesh
   const std::vector<element_t*> &getParentElements(){return ParentElements;};
   const std::vector<node_t*> &getNewNodes(){return NewNodes;};
   const std::set<element_t*> &getCrackTipElements(){return CrackTipElements;};
-  element_t* getElemByID(unsigned int it);
+  element_t* getElemByID(unsigned int id);
+  unsigned int getElemIdByNodes(unsigned int * node_id);
 
   private:
   //unsigned int MaxElemId;

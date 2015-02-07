@@ -26,6 +26,7 @@ struct cutEdge
   unsigned int id1;
   unsigned int id2;
   Real distance;
+  unsigned int host_side_id;
 };
 
 class XFEM_geometric_cut
@@ -40,6 +41,9 @@ public:
   ~XFEM_geometric_cut();
 
   bool cut_elem_by_geometry(const Elem* elem, std::vector<cutEdge> & cutEdges, Real time);
+
+  bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges, 
+                            std::vector<cutEdge> & cutEdges, Real time);
 
   Real crossprod_2d(Real ax, Real ay, Real bx, Real by);
   Real cut_fraction(Real time);

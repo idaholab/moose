@@ -45,63 +45,29 @@ enum XFEM_CUTPLANE_QUANTITY
 
 class XFEM_geometric_cut;
 
-class XFEMCutElemNode
-{
-public:
-  XFEMCutElemNode(CutElemMesh::N_CATEGORY category,
-                  unsigned int index,
-                  std::vector<Node*> master_nodes,
-                  std::vector<Real> weights);
-  XFEMCutElemNode(CutElemMesh::N_CATEGORY category,
-                  unsigned int index);
-  ~XFEMCutElemNode(){}
-
-  CutElemMesh::N_CATEGORY get_category() const { return _category; }
-  unsigned int get_index() const { return _index; }
-  void get_coords(Real *coords, MeshBase *displaced_mesh=NULL) const;
-
-private:
-  CutElemMesh::N_CATEGORY _category;
-  unsigned int _index;
-  std::vector<Node*> _master_nodes;
-  std::vector<Real> _weights;
-};
-
 class XFEMCutElem
 {
 public:
   XFEMCutElem(Elem* elem,const CutElemMesh::element_t * const CEMelem);
   ~XFEMCutElem();
 
-  void set_nodes_from_elem(Elem *elem);
-  void save_fragment_info(const CutElemMesh::element_t * const elem);
-//  XFEMCutElem cut_with_plane();
-
 private:
 
   Elem* _elem;
   unsigned int _n_nodes;
   std::vector<Node*> _nodes;
-  std::vector<bool> _physical_nodes;
-  CutElemMesh::fragment_t _fragment;
+  CutElemMesh::element_t _efa_elem;
 
   Real _physical_volfrac;
-//  std::vector<XFEMCut> _cuts;
-  std::vector<XFEMCutElemNode> _cut_line_nodes;
+  Point get_node_coords(CutElemMesh::node_t* node, 
+                        MeshBase* displaced_mesh = NULL) const;
 
 public:
   void calc_physical_volfrac();
   Real get_physical_volfrac()const {return _physical_volfrac;}
-  void get_origin(Real *origin, MeshBase* displaced_mesh=NULL) const;
-  void get_normal(Real *normal, MeshBase* displaced_mesh=NULL) const;
-  std::vector<XFEMCutElemNode> _interior_link;
-  std::vector<bool> _local_edge_has_intersection;
-  std::vector<CutElemMesh::node_t*> _embedded_nodes_on_edge;
-  std::vector<Real> _intersection_x;
-  CutElemMesh::fragment_t & getFragment()
-  {
-    return _fragment;
-  }
+  Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
+  Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
+  CutElemMesh::element_t & get_efa_elem() {return _efa_elem;}
 };
 
 /**
@@ -145,6 +111,8 @@ public:
   void build_efa_mesh();
   bool mark_cut_edges(Real time);
   bool mark_cut_edges_by_geometry(Real time);
+  Point get_efa_node_coor(CutElemMesh::node_t* CEMnode, CutElemMesh::element_t* CEMElem, 
+                          Elem *elem, MeshBase* displaced_mesh = NULL);
   bool mark_cut_edges_by_state();
   bool cut_mesh_with_efa();
 

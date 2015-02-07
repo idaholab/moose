@@ -33,6 +33,8 @@ class CutElemMeshTest : public CppUnit::TestFixture
   CPPUNIT_TEST( CutElemMeshTest2c );
   CPPUNIT_TEST( CutElemMeshTest3 );
   CPPUNIT_TEST( CutElemMeshTest4 );
+  CPPUNIT_TEST( CutElemMeshTest5a );
+  CPPUNIT_TEST( CutElemMeshTest5b );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -54,6 +56,9 @@ public:
   void CutElemMeshTest3();
 
   void CutElemMeshTest4();
+  void case5Mesh(CutElemMesh &MyMesh);
+  void CutElemMeshTest5a();
+  void CutElemMeshTest5b();
 };
 
 #endif  // CUTELEMMESHTEST_H 
