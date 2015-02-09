@@ -12,6 +12,7 @@ InputParameters validParams<LatticeSmoothCircleIC>()
   params.addParam<Real>("radius_variation", 0.0, "Plus or minus fraction of random variation in the bubble radius");
   MooseEnum rand_options("uniform normal none","none");
   params.addParam<MooseEnum>("radius_variation_type", rand_options, "Type of distribution that random circle radii will follow");
+  params.addParam<bool>("avoid_bounds", true, "Don't place any bubbles on the simulation cell boundaries");
 
   return params;
 }
@@ -23,7 +24,8 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
     _circles_per_side(getParam<std::vector<unsigned int> >("circles_per_side")),
     _radius(getParam<Real>("radius")),
     _radius_variation(getParam<Real>("radius_variation")),
-    _radius_variation_type(getParam<MooseEnum>("radius_variation_type"))
+    _radius_variation_type(getParam<MooseEnum>("radius_variation_type")),
+    _avoid_bounds(getParam<bool>("avoid_bounds"))
 {
   //Set random seed
   MooseRandom::seed(getParam<unsigned int>("rand_seed"));
@@ -32,6 +34,9 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
 void
 LatticeSmoothCircleIC::initialSetup()
 {
+  // pad circles per side vector to size 3 (with 0)
+  _circles_per_side.resize(3);
+
   //Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {
@@ -64,10 +69,10 @@ LatticeSmoothCircleIC::initialSetup()
 
   switch (_radius_variation_type)
   {
-  case 2: //No variation
-    if (_radius_variation > 0.0)
-      mooseError("If radius_variation > 0.0, you must pass in a radius_variation_type in LatticeSmoothCircleIC");
-    break;
+    case 2: //No variation
+      if (_radius_variation > 0.0)
+        mooseError("If radius_variation > 0.0, you must pass in a radius_variation_type in LatticeSmoothCircleIC");
+      break;
   }
   SmoothCircleBaseIC::initialSetup();
 }
@@ -130,19 +135,19 @@ LatticeSmoothCircleIC::computeCircleCenters()
           zz = zz + (1.0 - 2.0*MooseRandom::rand())*_lattice_variation;
 
         //Verify not out of bounds
-        if (xx < _radii[cnt] + _int_width)
+        if (_avoid_bounds && xx < _radii[cnt] + _int_width)
           xx = _radii[cnt] + _int_width;
-        if (xx > _range(0) - (_radii[cnt] + _int_width))
+        if (_avoid_bounds && xx > _range(0) - (_radii[cnt] + _int_width))
           xx = _range(0) - (_radii[cnt] + _int_width);
-        if (yy < _radii[cnt] + _int_width)
+        if (_avoid_bounds && yy < _radii[cnt] + _int_width)
           yy = _radii[cnt] + _int_width;
-        if (yy > _range(1) - (_radii[cnt] + _int_width))
+        if (_avoid_bounds && yy > _range(1) - (_radii[cnt] + _int_width))
           yy = _range(1) - (_radii[cnt] + _int_width);
         if (_range(2) != 0.0)
         {
-          if (zz < _radii[cnt] + _int_width)
+          if (_avoid_bounds && zz < _radii[cnt] + _int_width)
             zz = _radii[cnt] + _int_width;
-          if (zz > _range(2) - (_radii[cnt] + _int_width))
+          if (_avoid_bounds && zz > _range(2) - (_radii[cnt] + _int_width))
             zz = _range(2) - (_radii[cnt] + _int_width);
         }
 

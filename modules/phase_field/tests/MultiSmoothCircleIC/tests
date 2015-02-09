@@ -15,6 +15,13 @@
     valgrind = 'HEAVY'
   [../]
 
+  [./lattice_bounds]
+    type = 'Exodiff'
+    input = 'latticesmoothcircleIC_bounds.i'
+    exodiff = 'latticesmoothcircleIC_bounds_out.e'
+    valgrind = 'HEAVY'
+  [../]
+
   [./lattice_test]
     type = 'Exodiff'
     input = 'latticesmoothcircleIC_test.i'
