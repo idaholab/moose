@@ -75,7 +75,7 @@ private:
   MooseRandom *_generator;
 
   FEProblem & _ri_problem;
-  const std::string & _ri_name;
+  const std::string _ri_name;
 
   unsigned int _master_seed;
   bool _is_nodal;
