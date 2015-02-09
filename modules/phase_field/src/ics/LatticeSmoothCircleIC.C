@@ -34,6 +34,9 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
 void
 LatticeSmoothCircleIC::initialSetup()
 {
+  // pad circles per side vector to size 3 (with 0)
+  _circles_per_side.resize(3);
+
   //Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {
@@ -66,10 +69,10 @@ LatticeSmoothCircleIC::initialSetup()
 
   switch (_radius_variation_type)
   {
-  case 2: //No variation
-    if (_radius_variation > 0.0)
-      mooseError("If radius_variation > 0.0, you must pass in a radius_variation_type in LatticeSmoothCircleIC");
-    break;
+    case 2: //No variation
+      if (_radius_variation > 0.0)
+        mooseError("If radius_variation > 0.0, you must pass in a radius_variation_type in LatticeSmoothCircleIC");
+      break;
   }
   SmoothCircleBaseIC::initialSetup();
 }
