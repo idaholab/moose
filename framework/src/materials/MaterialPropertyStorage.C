@@ -134,6 +134,7 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
 
     const Elem * child_elem = elem.child(child);
 
+    mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
     const std::vector<QpMap> & child_map = refinement_map[child];
 
     if (props()[child_elem][child_side].size() == 0) props()[child_elem][child_side].resize(_stateful_prop_id_to_prop_id.size());
@@ -154,6 +155,7 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
       for (unsigned int qp=0; qp<refinement_map[child].size(); qp++)
       {
         PropertyValue * child_property = props()[child_elem][child_side][i];
+        mooseAssert(props().contains(&elem), "Parent pointer is not in the MaterialProps data structure");
         PropertyValue * parent_property = parent_material_props.props()[&elem][parent_side][i];
 
         child_property->qpCopy(qp, parent_property, child_map[qp]._to);
@@ -212,11 +214,15 @@ MaterialPropertyStorage::restrictStatefulProps(const std::vector<std::pair<unsig
   {
     const std::pair<unsigned int, QpMap> & qp_pair = coarsening_map[qp];
     unsigned int child = qp_pair.first;
+
+    mooseAssert(child < coarsened_element_children.size(), "Coarsened element children vector not initialized");
     const Elem * child_elem = coarsened_element_children[child];
     const QpMap & qp_map = qp_pair.second;
 
     for (unsigned int i=0; i < _stateful_prop_id_to_prop_id.size(); ++i)
     {
+      mooseAssert(props().contains(child_elem), "Child element pointer is not in the MaterialProps data structure");
+
       PropertyValue * child_property = props()[child_elem][side][i];
       PropertyValue * parent_property = props()[&elem][side][i];
 
