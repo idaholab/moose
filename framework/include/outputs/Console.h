@@ -88,7 +88,7 @@ public:
   static void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr);
 
   /// Width used for printing simulation information
-  static const unsigned int _field_width = 25;
+  static const unsigned int _field_width = 27;
 
   /// Line length for printing simulation information
   static const unsigned int _line_length = 100;
@@ -213,6 +213,9 @@ protected:
 
   /// Number of significant digits
   unsigned int _precision;
+
+  /// Toggle for displaying output_on stuff in system information
+  bool _show_output_on_info;
 
 private:
 

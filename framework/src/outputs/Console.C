@@ -41,8 +41,9 @@ InputParameters validParams<Console>()
   params.addParam<unsigned int>("max_rows", 15, "The maximum number of postprocessor/scalar values displayed on screen during a timestep (set to 0 for unlimited)");
   params.addParam<MooseEnum>("fit_mode", pps_fit_mode, "Specifies the wrapping mode for post-processor tables that are printed to the screen (ENVIRONMENT: Read \"MOOSE_PPS_WIDTH\" for desired width, AUTO: Attempt to determine width automatically (serial only), <n>: Desired width");
 
-  // Timestep verbosity
+  // Verbosity
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
+  params.addParam<bool>("show_output_on", false, "Print the output execution with the system information");
 
   // Basic table output controls
   params.addParam<bool>("scientific_time", false, "Control the printing of time and dt in scientific notation");
@@ -88,13 +89,14 @@ InputParameters validParams<Console>()
    * of user-modified parameters
    */
   // By default set System Information to output on initial
-  params.set<MultiMooseEnum>("output_system_information_on", /*quiet_mode=*/true) =  "initial";
+  params.set<MultiMooseEnum>("output_system_information_on", /*quiet_mode=*/true) = "initial";
 
   // Change the default behavior of 'output_on' to included nonlinear iterations and failed timesteps
   params.set<MultiMooseEnum>("output_on", /*quiet_mode=*/true).push_back("nonlinear failed");
 
   // By default postprocessors and scalar are only output at the end of a timestep
   params.set<MultiMooseEnum>("output_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
+  params.set<MultiMooseEnum>("output_vector_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
   params.set<MultiMooseEnum>("output_scalars_on", /*quiet_mode=*/true) = "timestep_end";
 
   return params;
@@ -122,10 +124,10 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
     _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
+    _show_output_on_info(getParam<bool>("show_output_on")),
     _timing(_app.getParam<bool>("timing")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer())
 {
-
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
   Action * common_action = awh.getActionsByName("common_output")[0];
@@ -166,6 +168,10 @@ Console::Console(const std::string & name, InputParameters parameters) :
         Moose::_color_console = false;
     }
   }
+
+  // If --show-outputs is used, enable it
+  if (_app.getParam<bool>("show_outputs"))
+    _show_output_on_info = true;
 }
 
 Console::~Console()
@@ -724,10 +730,28 @@ Console::outputSystemInformation()
   oss << '\n';
 
   // Output information
-  const std::vector<Output *> & outputs = _app.getOutputWarehouse().all();
-  oss << "Outputs:\n";
-  for (std::vector<Output *>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
-    oss << "  " << std::setw(_field_width-2) << (*it)->name() <<  "\"" << (*it)->outputOn() << "\"\n";
+  if (_show_output_on_info)
+  {
+    const std::vector<Output *> & outputs = _app.getOutputWarehouse().all();
+    oss << "Outputs:\n";
+    for (std::vector<Output *>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
+    {
+      // Display the "output_on" settings
+      const MultiMooseEnum & output_on = (*it)->outputOn();
+      oss << "  " << std::setw(_field_width-2) << (*it)->name() <<  "\"" << output_on << "\"\n";
+
+      // Display the advanced "output_on" settings, only if they are different from "output_on"
+      AdvancedOutput * adv = dynamic_cast<AdvancedOutput *>(*it);
+      if (adv != NULL)
+      {
+        const OutputOnWarehouse & adv_on = adv->advancedOutputOn();
+        for (std::map<std::string, MultiMooseEnum>::const_iterator adv_it = adv_on.begin(); adv_it != adv_on.end(); ++adv_it)
+          if (output_on != adv_it->second)
+            oss << "    " << std::setw(_field_width-4) << adv_it->first + ":" <<  "\"" << adv_it->second << "\"\n";
+      }
+    }
+  }
+
   oss << "\n\n";
 
   // Output the information

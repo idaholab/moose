@@ -526,11 +526,17 @@ AdvancedOutput<OutputBase>::initExecutionTypes(const std::string & name, MultiMo
 
   // The parameters exists and has been set by the user
   if (OutputBase::_pars.template have_parameter<MultiMooseEnum>(param_name) && OutputBase::isParamValid(param_name))
+  {
     input = OutputBase::template getParam<MultiMooseEnum>(param_name);
 
-  // If the parameter does not exists; set it to a state where no valid entires exists so nothing gets executed
+    if (name != "system_information" && name != "input")
+      OutputBase::applyOutputOnShortCutFlags(input);
+  }
+
+  // If the parameter does not exists; set it to a state where no valid entries exists so nothing gets executed
   else if (!OutputBase::_pars. template have_parameter<MultiMooseEnum>(param_name))
     input = AdvancedOutput<OutputBase>::getExecuteOptions();
+
 }
 
 template<class OutputBase>
@@ -780,7 +786,14 @@ AdvancedOutput<OutputBase>::getVectorPostprocessorOutput()
   return _output_data["vector_postprocessors"].output;
 }
 
-// Instatiate the four possible template classes
+template<class OutputBase>
+const OutputOnWarehouse &
+AdvancedOutput<OutputBase>::advancedOutputOn() const
+{
+  return _advanced_output_on;
+}
+
+// Instantiate the four possible template classes
 template class AdvancedOutput<Output>;
 template class AdvancedOutput<PetscOutput>;
 template class AdvancedOutput<FileOutput>;

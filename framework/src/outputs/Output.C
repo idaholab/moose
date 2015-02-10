@@ -105,12 +105,7 @@ Output::Output(const std::string & name, InputParameters & parameters) :
 {
 
   // Handle the short-cut output flags
-  if (getParam<bool>("output_initial"))
-    _output_on.push_back("initial");
-  if (getParam<bool>("output_final"))
-    _output_on.push_back("final");
-  if (getParam<bool>("output_failed"))
-    _output_on.push_back("failed");
+  applyOutputOnShortCutFlags(_output_on);
 
   // Apply the additional output flags
   MultiMooseEnum add = getParam<MultiMooseEnum>("additional_output_on");
@@ -205,16 +200,35 @@ Output::timeStep()
   return _t_step;
 }
 
-std::string
+const MultiMooseEnum &
 Output::outputOn() const
 {
-  std::ostringstream oss;
-  for (MooseEnumIterator it = _output_on.begin(); it != _output_on.end(); ++it)
-  {
-    if (it == _output_on.begin())
-      oss << *it;
-    else
-      oss << " " << *it;
-  }
-  return oss.str();
+  return _output_on;
+}
+
+void
+Output::
+applyOutputOnShortCutFlags(MultiMooseEnum & input)
+{
+  /*
+   * output_initial/final/failed are false by default
+   * If they are enabled, then update the output_on
+   * to include this execution time.
+   */
+  if (getParam<bool>("output_initial"))
+    input.push_back("initial");
+
+  if (getParam<bool>("output_final"))
+    input.push_back("final");
+
+  if (getParam<bool>("output_failed"))
+    input.push_back("failed");
+
+  /*
+   * output_timestep_end is true by default
+   * If it is disabled, then update the output_on
+   * by removing it from the execution time.
+   */
+  if (!getParam<bool>("output_timestep_end"))
+    input.erase("timestep_end");
 }
