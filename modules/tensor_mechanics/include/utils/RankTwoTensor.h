@@ -286,6 +286,13 @@ public:
   void symmetricEigenvalues(std::vector<Real> & eigvals) const;
 
   /**
+   * computes eigenvalues and eigenvectors, assuming tens is symmetric, and places them
+   * in ascending order in eigvals.  eigvecs is a matrix with the first column
+   * being the first eigenvector, the second column being the second, etc.
+   */
+  void symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals, RankTwoTensor & eigvecs) const;
+
+  /**
    * computes eigenvalues, and their symmetric derivatives wrt vals,
    * assuming tens is symmetric
    * @param eigvals are the eigenvalues of the matrix, in ascending order

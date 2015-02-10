@@ -72,6 +72,23 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    */
   virtual void dflowPotential_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & dr_dintnl) const;
 
+  /**
+   * The active yield surfaces, given a vector of yield functions.
+   * This is used by FiniteStrainMultiPlasticity to determine the initial
+   * set of active constraints at the trial (stress, intnl) configuration.
+   * It is up to you (the coder) to determine how accurate you want the
+   * returned_stress to be.  Currently it is only used by FiniteStrainMultiPlasticity
+   * to estimate a good starting value for the Newton-Rahson procedure,
+   * so currently it may not need to be super perfect.
+   * @param f values of the yield functions
+   * @param stress stress tensor
+   * @param intnl internal parameter
+   * @param Eijkl elasticity tensor (stress = Eijkl*strain)
+   * @param act (output) act[i] = true if the i_th yield function is active
+   * @param returned_stress (output) Approximate value of the returned stress
+   */
+  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
+
   /// Returns the model name (TensileMulti)
   virtual std::string modelName() const;
 
@@ -88,6 +105,11 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
   /// d(tensile strength)/d(internal_param) as a function of residual value, rate, and internal_param
   virtual Real dtensile_strength(const Real internal_param) const;
 
+  /// dot product of two 3-dimensional vectors
+  Real dot(const std::vector<Real> & a, const std::vector<Real> & b) const;
+
+  /// triple product of three 3-dimensional vectors
+  Real triple(const std::vector<Real> & a, const std::vector<Real> & b, const std::vector<Real> & c) const;
 
 };
 
