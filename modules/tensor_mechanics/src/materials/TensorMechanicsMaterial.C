@@ -16,6 +16,7 @@ InputParameters validParams<TensorMechanicsMaterial>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temperature", "temperature variable");
   params.addParam<std::vector<FunctionName> >("initial_stress", "A list of functions describing the initial stress.  If provided, there must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, zz components respectively.  If not provided, all components of the initial stress will be zero");
+  params.addParam<FunctionName>("elasticity_tensor_prefactor", "Optional function to use as a scalar prefactor on teh elasticity tensor.");
   params.addParam<std::string>("base_name", "Material property base name");
   return params;
 }
@@ -44,7 +45,8 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
                   getParam<Real>("euler_angle_2"),
                   getParam<Real>("euler_angle_3")),
 
-    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
+    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
+    _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
 {
   const std::vector<FunctionName> & fcn_names(getParam<std::vector<FunctionName> >("initial_stress"));
   const unsigned num = fcn_names.size();
@@ -87,6 +89,10 @@ void TensorMechanicsMaterial::computeQpElasticityTensor()
   // Fill in the matrix stiffness material property
   RotationTensor R(_Euler_angles); // R type: RealTensorValue
   _elasticity_tensor[_qp] = _Cijkl;
+
+  if (_prefactor_function)
+    _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
+
   _elasticity_tensor[_qp].rotate(R);
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 }
