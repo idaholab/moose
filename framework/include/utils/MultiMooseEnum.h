@@ -50,6 +50,7 @@ public:
 
   virtual ~MultiMooseEnum();
 
+  ///@{
   /**
    * Comparison operators for comparing with character constants, MultiMooseEnums
    * or integer values
@@ -57,6 +58,8 @@ public:
    * @return bool - the truth value for the comparison
    */
   bool operator==(const MultiMooseEnum & value) const;
+  bool operator!=(const MultiMooseEnum & value) const;
+  ///@}
 
   ///@{
   /**

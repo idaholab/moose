@@ -15,6 +15,7 @@
 #include "MultiMooseEnum.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
+#include "InfixIterator.h"
 
 #include <sstream>
 #include <algorithm>
@@ -51,8 +52,23 @@ MultiMooseEnum::~MultiMooseEnum()
 bool
 MultiMooseEnum::operator==(const MultiMooseEnum & value) const
 {
-  return std::equal(value._current_ids.begin(), value._current_ids.end(),
-                    _current_ids.begin());
+  // Not the same if the lengths are different
+  if (value.size() != size())
+    return false;
+
+  // Return false if this enum does not contain an item from the other
+  for (MooseEnumIterator it = value.begin(); it != value.end(); ++it)
+    if (!contains(*it))
+      return false;
+
+  // If you get here, they must be the same
+  return true;
+}
+
+bool
+MultiMooseEnum::operator!=(const MultiMooseEnum & value) const
+{
+  return !(*this == value);
 }
 
 bool
@@ -245,6 +261,6 @@ MultiMooseEnum::unique_items_size() const
 std::ostream &
 operator<<(std::ostream & out, const MultiMooseEnum & obj)
 {
-  std::copy(obj._current_names_preserved.begin(), obj._current_names_preserved.end(), std::ostream_iterator<std::string>(out, " "));
+  std::copy(obj._current_names.begin(), obj._current_names.end(), infix_ostream_iterator<std::string>(out, " "));
   return out;
 }

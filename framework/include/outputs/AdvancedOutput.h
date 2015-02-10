@@ -77,7 +77,7 @@ public:
   OutputMapWrapper(){};
 
   /**
-   * An map assessor that errors if the key is not found
+   * A map accessor that errors if the key is not found
    */
   T & operator[](const std::string & name)
   {
@@ -95,6 +95,9 @@ public:
   typename std::map<std::string, T>::iterator begin() { return _map.begin(); }
   typename std::map<std::string, T>::iterator end() { return _map.end(); }
   typename std::map<std::string, T>::iterator find(const std::string & name) { return _map.find(name); }
+  typename std::map<std::string, T>::const_iterator begin() const { return _map.begin(); }
+  typename std::map<std::string, T>::const_iterator end() const { return _map.end(); } const
+  typename std::map<std::string, T>::const_iterator find(const std::string & name) const { return _map.find(name); }
   ///@}
 
   /**
@@ -135,7 +138,7 @@ public:
 
   /**
    * Constructor
-   * @param output_on The general "output_on" settings for the object
+   * @param output_on The general "output_on" settings for the object.
    */
   OutputOnWarehouse(const MultiMooseEnum & output_on, const InputParameters & params);
 };
@@ -306,6 +309,10 @@ public:
    */
   static InputParameters enableOutputTypes(const std::string & names = std::string());
 
+  /**
+   * Get the current advanced 'output_on' selections for display
+   */
+  const OutputOnWarehouse & advancedOutputOn() const;
 
 protected:
 
@@ -371,6 +378,7 @@ protected:
    * By default this method does nothing and is not called by output()
    */
   virtual void outputSystemInformation();
+
 
 private:
 
