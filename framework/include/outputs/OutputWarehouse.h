@@ -194,10 +194,16 @@ public:
   unsigned int & multiappLevel() { return _multiapp_level; }
 
   /**
-   * The buffered messages stream for Console objectsc
+   * The buffered messages stream for Console objects
    * @return Reference to the stream storing cached messages from calls to _console
    */
   std::ostringstream & consoleBuffer() { return _console_buffer; }
+
+  /**
+   * Return the current allow status
+   * This is needed by Console b/c of PETSc interactions (see Console::output()
+   */
+  bool allowOutput() const { return _allow_output; }
 
 private:
 
