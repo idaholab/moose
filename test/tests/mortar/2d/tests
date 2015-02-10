@@ -8,6 +8,15 @@
     compiler = 'GCC CLANG'
   [../]
 
+  [./conforming_two_var]
+    type = 'Exodiff'
+    input = 'conforming_two_var.i'
+    exodiff = 'conforming_two_var_out.e'
+    max_parallel = 1
+    max_threads = 1
+    compiler = 'GCC CLANG'
+  [../]
+
   [./non-conforming]
     type = 'Exodiff'
     input = 'non-conforming.i'
