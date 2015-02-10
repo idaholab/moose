@@ -21,22 +21,21 @@ SwitchingFunctionMaterial::SwitchingFunctionMaterial(const std::string & name,
 void
 SwitchingFunctionMaterial::computeQpProperties()
 {
+  Real n = _eta[_qp];
+  n = n>1 ? 1 : (n<0 ? 0 : n);
+
   switch (_h_order)
   {
     case 0: // SIMPLE
-      _prop_f[_qp] =   3.0 * _eta[_qp]*_eta[_qp]
-                     - 2.0 * _eta[_qp]*_eta[_qp]*_eta[_qp];
-      _prop_df[_qp] =   6.0 * _eta[_qp]
-                      - 6.0 * _eta[_qp]*_eta[_qp];
-      _prop_d2f[_qp] = 6.0 - 12.0 * _eta[_qp];
+      _prop_f[_qp]   = 3.0 * n*n - 2.0 * n*n*n;
+      _prop_df[_qp]  = 6.0 * n - 6.0 * n*n;
+      _prop_d2f[_qp] = 6.0 - 12.0 * n;
       break;
 
     case 1: // HIGH
-      _prop_f[_qp] =   _eta[_qp]*_eta[_qp]*_eta[_qp]
-                     * (6.0 * _eta[_qp]*_eta[_qp] - 15.0 * _eta[_qp] + 10.0);
-      _prop_df[_qp] =   30.0 * _eta[_qp]*_eta[_qp]
-                      * (_eta[_qp]*_eta[_qp] - 2.0 * _eta[_qp] + 1.0);
-      _prop_d2f[_qp] = _eta[_qp] * (120.0 * _eta[_qp]*_eta[_qp] - 180.0 * _eta[_qp] + 60.0);
+      _prop_f[_qp]   = n*n*n * (6.0 * n*n - 15.0 * n + 10.0);
+      _prop_df[_qp]  = 30.0 * n*n * (n*n - 2.0 * n + 1.0);
+      _prop_d2f[_qp] = n * (120.0 * n*n - 180.0 * n + 60.0);
       break;
 
     default:
