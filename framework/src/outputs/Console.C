@@ -242,6 +242,12 @@ Console::filename()
 void
 Console::output(const ExecFlagType & type)
 {
+  // Return if output is disabled via OutputWarehouse::allowOutput. This check needs to be done here because
+  // the output() method is called by PETSc directly for linear and nonlinear iterations. Normally, this
+  // disabling is handled by the warehouse itself, but Console is special
+  if (!_app.getOutputWarehouse().allowOutput())
+    return;
+
   // Return if the current output is not on the desired interval
   if (type != EXEC_FINAL && !onInterval())
     return;

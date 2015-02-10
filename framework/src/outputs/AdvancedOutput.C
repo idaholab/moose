@@ -415,6 +415,10 @@ template<class OutputBase>
 bool
 AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const ExecFlagType & type)
 {
+  // Ignore EXEC_FORCED for system information and input, there is no reason to force this
+  if (type == EXEC_FORCED && (name == "system_information" || name == "input"))
+    return false;
+
   // Do not output if the 'none' is contained by the output_on
   if (_advanced_output_on.contains(name) && _advanced_output_on[name].contains("none"))
     return false;
