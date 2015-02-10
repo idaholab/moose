@@ -1118,15 +1118,23 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
           ffc->reinit();
           ffc->computeResidual();
         }
-        _fe_problem.addResidual(tid);
+        _fe_problem.cacheResidual(tid);
 
         // evaluate residuals that go into master and slave side
         for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
         {
           FaceFaceConstraint * ffc = *fc_it;
-          ffc->computeResidualSide();
+
+          ffc->reinitSide(Moose::Master);
+          ffc->computeResidualSide(Moose::Master);
+          _fe_problem.cacheResidual(tid);
+
+          ffc->reinitSide(Moose::Slave);
+          ffc->computeResidualSide(Moose::Slave);
+          _fe_problem.cacheResidual(tid);
         }
       }
+      _fe_problem.addCachedResidual(tid);
     }
   }
 }
@@ -1641,15 +1649,27 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
       std::vector<FaceFaceConstraint *> & face_constraints = _constraints[tid].getFaceFaceConstraints(iface->_name);
       if (face_constraints.size() > 0)
       {
-        _fe_problem.prepare(elem, tid);
-        _fe_problem.reinitElem(elem, tid);
-
         for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
         {
           FaceFaceConstraint * ffc = *fc_it;
+
+          _fe_problem.prepare(elem, tid);
+          _fe_problem.reinitElem(elem, tid);
+          ffc->reinit();
           ffc->subProblem().prepareShapes(ffc->variable().number(), tid);
-          ffc->computeJacobian(jacobian);
+          ffc->computeJacobian();
+          _fe_problem.cacheJacobian(tid);
+
+          ffc->reinitSide(Moose::Master);
+          ffc->computeJacobianSide(Moose::Master);
+          _fe_problem.cacheJacobian(tid);
+
+          ffc->reinitSide(Moose::Slave);
+          ffc->computeJacobianSide(Moose::Slave);
+          _fe_problem.cacheJacobian(tid);
         }
+
+        _fe_problem.addCachedJacobian(jacobian, tid);
       }
     }
   }

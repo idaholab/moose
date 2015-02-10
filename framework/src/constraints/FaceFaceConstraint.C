@@ -98,6 +98,27 @@ FaceFaceConstraint::reinit()
 }
 
 void
+FaceFaceConstraint::reinitSide(Moose::ConstraintType res_type)
+{
+  switch (res_type)
+  {
+  case Moose::Master:
+    _assembly.reinit(_elem_master);
+    _master_var.prepare();
+    _assembly.prepare();
+    _assembly.reinitAtPhysical(_elem_master, _phys_points_master);
+    break;
+
+  case Moose::Slave:
+    _assembly.reinit(_elem_slave);
+    _slave_var.prepare();
+    _assembly.prepare();
+    _assembly.reinitAtPhysical(_elem_slave, _phys_points_slave);
+    break;
+  }
+}
+
+void
 FaceFaceConstraint::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
@@ -107,124 +128,86 @@ FaceFaceConstraint::computeResidual()
 }
 
 void
-FaceFaceConstraint::computeResidualSide()
+FaceFaceConstraint::computeResidualSide(Moose::ConstraintType side)
 {
-  // TODO: refactor these reinits into NonlinearSystem
+  switch (side)
   {
-    _assembly.reinit(_elem_master);
-    _master_var.prepare();
-    _assembly.prepare();
-    _assembly.reinitAtPhysical(_elem_master, _phys_points_master);
-
-    DenseVector<Number> & re_master = _assembly.residualBlock(_master_var.number());
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  case Moose::Master:
     {
-      for (_i = 0; _i < _test_master.size(); _i++)
-        re_master(_i) += _JxW_lm[_qp] * computeQpResidualSide(Moose::Master);
+      DenseVector<Number> & re_master = _assembly.residualBlock(_master_var.number());
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      {
+        for (_i = 0; _i < _test_master.size(); _i++)
+          re_master(_i) += _JxW_lm[_qp] * computeQpResidualSide(Moose::Master);
+      }
     }
-    _assembly.addResidual(_fe_problem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
-  }
+    break;
 
-  // TODO: refactor these reinits into NonlinearSystem
-  {
-    _assembly.reinit(_elem_slave);
-    _slave_var.prepare();
-    _assembly.prepare();
-    _assembly.reinitAtPhysical(_elem_slave, _phys_points_slave);
-
-    DenseVector<Number> & re_slave = _assembly.residualBlock(_slave_var.number());
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  case Moose::Slave:
     {
-      for (_i = 0; _i < _test_slave.size(); _i++)
-        re_slave(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidualSide(Moose::Slave);
+      DenseVector<Number> & re_slave = _assembly.residualBlock(_slave_var.number());
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      {
+        for (_i = 0; _i < _test_slave.size(); _i++)
+          re_slave(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidualSide(Moose::Slave);
+      }
     }
-    _assembly.addResidual(_fe_problem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+    break;
   }
 }
 
 void
-FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
+FaceFaceConstraint::computeJacobian()
 {
+  _phi = _assembly.getFE(_var.feType(), _dim-1)->get_phi();                // yes we need to do a copy here
   std::vector<std::vector<Real> > phi_master;
   std::vector<std::vector<Real> > phi_slave;
 
-  unsigned int nqp = _qrule->n_points();
+  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
 
-  _phys_points_master.resize(nqp);
-  _phys_points_slave.resize(nqp);
-  _test = _assembly.getFE(_var.feType(), _dim-1)->get_phi();               // yes we need to do a copy here
-  _phi = _assembly.getFE(_var.feType(), _dim-1)->get_phi();                // yes we need to do a copy here
-  _JxW_lm = _assembly.getFE(_var.feType(), _dim-1)->get_JxW();             // another copy here to preserve the right JxW
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < _phi.size(); _j++)
+        Kee(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobian();
+}
 
-  for (_qp = 0; _qp < nqp; _qp++)
+void
+FaceFaceConstraint::computeJacobianSide(Moose::ConstraintType side)
+{
+  switch (side)
   {
-    const Node * current_node = _mesh.getQuadratureNode(_current_elem, 0, _qp);
-
-    PenetrationInfo * master_pinfo = _master_penetration_locator._penetration_info[current_node->id()];
-    PenetrationInfo * slave_pinfo = _slave_penetration_locator._penetration_info[current_node->id()];
-
-    if (master_pinfo && slave_pinfo)
+  case Moose::Master:
     {
-      _phys_points_master[_qp] = master_pinfo->_closest_point;
-      _elem_master = master_pinfo->_elem;
+      DenseMatrix<Number> & Ken_master = _assembly.jacobianBlock(_var.number(), _master_var.number());
+      DenseMatrix<Number> & Kne_master = _assembly.jacobianBlock(_master_var.number(), _var.number());
 
-      _phys_points_slave[_qp] = slave_pinfo->_closest_point;
-      _elem_slave = slave_pinfo->_elem;
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        for (_i = 0; _i < _test_master.size(); _i++)
+        {
+          for (_j = 0; _j < _phi.size(); _j++)
+          {
+            Ken_master(_j, _i) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterMaster);
+            Kne_master(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveMaster);
+          }
+        }
     }
-  }
+    break;
 
-  // fill in the diagonal block
-  {
-    DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
-
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      for (_i = 0; _i < _test.size(); _i++)
-        for (_j = 0; _j < _phi.size(); _j++)
-          Kee(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobian();
-    _assembly.addJacobian(jacobian);
-  }
-
-  // off-diagonal part for master side
-  {
-    _assembly.reinit(_elem_master);
-    _master_var.prepare();
-    _assembly.prepare();
-    _assembly.reinitAtPhysical(_elem_master, _phys_points_master);
-
-    DenseMatrix<Number> & Ken_master = _assembly.jacobianBlock(_var.number(), _master_var.number());
-    DenseMatrix<Number> & Kne_master = _assembly.jacobianBlock(_master_var.number(), _var.number());
-
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      for (_i = 0; _i < _test_master.size(); _i++)
-      {
-        for (_j = 0; _j < _phi.size(); _j++)
+  case Moose::Slave:
+    {
+      DenseMatrix<Number> & Ken_slave = _assembly.jacobianBlock(_var.number(), _slave_var.number());
+      DenseMatrix<Number> & Kne_slave = _assembly.jacobianBlock(_slave_var.number(), _var.number());
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        for (_i = 0; _i < _test_slave.size(); _i++)
         {
-          Ken_master(_j, _i) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterMaster);
-          Kne_master(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveMaster);
+          for (_j = 0; _j < _phi.size(); _j++)
+          {
+            Ken_slave(_j, _i) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterSlave);
+            Kne_slave(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveSlave);
+          }
         }
-      }
-    _assembly.addJacobian(jacobian);
-  }
-
-  // off-diagonal part for slave side
-  {
-    _assembly.reinit(_elem_slave);
-    _slave_var.prepare();
-    _assembly.prepare();
-    _assembly.reinitAtPhysical(_elem_slave, _phys_points_slave);
-
-    DenseMatrix<Number> & Ken_slave = _assembly.jacobianBlock(_var.number(), _slave_var.number());
-    DenseMatrix<Number> & Kne_slave = _assembly.jacobianBlock(_slave_var.number(), _var.number());
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      for (_i = 0; _i < _test_slave.size(); _i++)
-      {
-        for (_j = 0; _j < _phi.size(); _j++)
-        {
-          Ken_slave(_j, _i) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterSlave);
-          Kne_slave(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveSlave);
-        }
-      }
-    _assembly.addJacobian(jacobian);
+    }
+    break;
   }
 }
 
