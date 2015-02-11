@@ -1,27 +1,18 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx=1
-  ny=1
-  nz=1
-  xmin=0.0
-  xmax=1.0
-  ymin=0.0
-  ymax=1.0
-  zmin=0.0
-  zmax=1.0
   elem_type = HEX8
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'ux uy uz'
 []
 
 [Variables]
-  [./disp_x]
+  [./ux]
     block = 0
   [../]
-  [./disp_y]
+  [./uy]
     block = 0
   [../]
-  [./disp_z]
+  [./uz]
     block = 0
   [../]
 []
@@ -63,9 +54,9 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_z = disp_z
-    disp_y = disp_y
-    disp_x = disp_x
+    disp_z = uz
+    disp_y = uy
+    disp_x = ux
     use_displaced_mesh = true
   [../]
 []
@@ -86,7 +77,7 @@
     rank_two_tensor = fp
     index_j = 2
     index_i = 2
-    execute_on = 'initial timestep_end'
+    execute_on = timestep_end
     block = 0
   [../]
   [./e_zz]
@@ -109,7 +100,7 @@
     variable = gss1
     slipsysvar = gss
     index_i = 1
-    execute_on = 'initial timestep_end'
+    execute_on = timestep_end
     block = 0
   [../]
 []
@@ -117,25 +108,25 @@
 [BCs]
   [./symmy]
     type = PresetBC
-    variable = disp_y
+    variable = uy
     boundary = bottom
     value = 0
   [../]
   [./symmx]
     type = PresetBC
-    variable = disp_x
+    variable = ux
     boundary = left
     value = 0
   [../]
   [./symmz]
     type = PresetBC
-    variable = disp_z
+    variable = uz
     boundary = back
     value = 0
   [../]
   [./tdisp]
     type = FunctionPresetBC
-    variable = disp_z
+    variable = uz
     boundary = front
     function = tdisp
   [../]
@@ -146,18 +137,29 @@
   [./crysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
-    disp_y = disp_y
-    disp_x = disp_x
-    disp_z = disp_z
+    disp_y = uy
+    disp_x = ux
     gtol = 1e-2
-    slip_sys_file_name = input_slip_sys.txt
-    slip_sys_res_prop_file_name = input_slip_sys_res.txt
-    slip_sys_flow_prop_file_name = input_slip_sys_flow_prop.txt
-    hprops = '1.0 541.5 60.8 109.8 2.5'
+    slip_sys_file_name = input_slip_sys_prop.txt
+    disp_z = uz
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     nss = 12
+    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
+    flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
+    hprops = '1.0 541.5 60.8 109.8 2.5'
     fill_method = symmetric9
-    intvar_read_type = slip_sys_res_file
+    tan_mod_type = exact
+    intvar_read_type = slip_sys_file
+    num_slip_sys_props = 1
+  [../]
+  [./elastic]
+    type = FiniteStrainElasticMaterial
+    block = 0
+    disp_y = uy
+    disp_x = ux
+    disp_z = uz
+    C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
+    fill_method = symmetric9
   [../]
 []
 
@@ -205,16 +207,20 @@
   dtmax = 10.0
   nl_rel_tol = 1e-10
   ss_check_tol = 1e-10
-  end_time = 10.0
+  end_time = 1
   dtmin = 0.05
   num_steps = 10
   nl_abs_step_tol = 1e-10
 []
 
 [Outputs]
-  file_base = crysp_fileread_out
+  file_base = crysp_read_slip_prop_out
   output_initial = true
   exodus = true
   print_linear_residuals = true
   print_perf_log = true
+[]
+
+[Problem]
+  use_legacy_uo_initialization = false
 []
