@@ -7,8 +7,10 @@
 #
 # New Module Step 5.
 #       MODULENAME                := yes
+#
+# Add to list
+# MODULE_LIST := ... MODULENAME
 ###############################################################################
-
 ifeq ($(ALL_MODULES),yes)
         CHEMICAL_REACTIONS        := yes
         CONTACT                   := yes
@@ -26,6 +28,9 @@ endif
 ifeq ($(PHASE_FIELD),yes)
         TENSOR_MECHANICS          := yes
 endif
+
+# The master list of all moose modules
+MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
