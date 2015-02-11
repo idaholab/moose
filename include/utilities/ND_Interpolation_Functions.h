@@ -72,10 +72,20 @@ class NDSpline: public NDInterpolation
 public:
   double interpolateAt(std::vector<double> point_coordinate);
   double getGradientAt(std::vector<double> point_coordinate);
+  double integralSpline(std::vector<double> point_coordinate);
+  double spline_cartesian_marginal_integration(double coordinate,int marginal_variable);
+  double spline_cartesian_inverse_marginal(double CDF,int marginal_variable, double precision);
+
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
+
   NDSpline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
+  NDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & _values, std::vector<double> alpha, std::vector<double> beta);
+
+  std::vector< std::vector<double> > getDiscretizations(){return _discretizations;};
+
   NDSpline();
   ~NDSpline();
+
   bool checkUB(double upper_bound);
   bool checkLB(double lower_bound);
 
@@ -97,6 +107,7 @@ private:
   double retrieveCoefficient(std::vector<int> coefficient_coordinate);
 
   double spline_cartesian_interpolation(std::vector<double> point_coordinate);
+  double spline_cartesian_integration(std::vector<double> point_coordinate);
   double getPointAtCoordinate(std::vector<int> coordinates);
 
   int fromNDto1Dconverter(std::vector<int> coordinate);
@@ -109,7 +120,9 @@ private:
   void from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing);
 
   double phi(double t);
+  double PHI(double t);
   double u_k(double x, std::vector<double> & discretizations, double k);
+  double U_K(double x, std::vector<double> & discretizations, double k);
   void tridag(std::vector<double> & a, std::vector<double> & b, std::vector<double> & c, std::vector<double> & r, std::vector<double> & u);
   std::vector<double> getCoefficients(std::vector<double> & y, double h, double alpha, double beta);
   //void iterationStep(int nDim, std::vector<double> & coefficients, std::vector<double> & data);
@@ -118,6 +131,14 @@ private:
   std::vector<std::vector<double> > tensorProductInterpolation(std::vector<std::vector<double> > step1, double h, double alpha, double beta);
   std::vector<std::vector<double> > matrixRestructuring(std::vector<std::vector<double> > step1);
   std::vector<double> getValues(std::vector<int> & loop_locator);
+
+  double val1(double t);
+  double val2(double t);
+  double val3(double t);
+  double val4(double t);
+  double val5(double t);
+  double val6(double t);
+
 };
 
 class InverseDistanceWeighting: public NDInterpolation

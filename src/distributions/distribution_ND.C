@@ -137,7 +137,7 @@ InputParameters validParams<MultiDimensionalCartesianSpline>(){
 
 MultiDimensionalCartesianSpline::MultiDimensionalCartesianSpline(const std::string & name, InputParameters parameters):
     distributionND(name,parameters),
-    BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"))
+    BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"), getParam<bool>("CDF"))
 {
 }
 
