@@ -17,7 +17,7 @@ InputParameters validParams<TableFunction>(){
    params.addRequiredParam<std::vector<double> >("x_coordinates", "x values (1D array)");
    params.addRequiredParam<std::vector<double> >("y_coordinates", "y values (1D array)");
    params.addParam<double>("scaling_factor", 1.0 ,"scaling factor. Result = InterpolatedValue*scaling_factor");
-   MooseEnum fitting_enum("step_left=0,step_right=1,linear=2,cubic_spline=3","linear");
+   MooseEnum fitting_enum("step_left=0 step_right=1 linear=2 cubic_spline=3","linear");
    params.addParam<MooseEnum>("fitting_type",fitting_enum, "type of fitting (0 = STEP_LEFT,1 = STEP_RIGHT,2 = LINEAR,3 = CUBIC_SPLINE)");
    return params;
 }
