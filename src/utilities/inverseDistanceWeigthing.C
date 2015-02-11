@@ -28,7 +28,7 @@ InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double 
     //   * std::vector<double> _cellDxs;
 
  std::vector<double> cellPointInf;
-        cellPointInf.resize(dimensions);
+ cellPointInf.resize(dimensions);
 
  for (int d=0; d<_dimensions; d++){
   _cellPoint0[d]  = _point_coordinates[0][d];

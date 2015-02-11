@@ -182,7 +182,7 @@ std::vector<double> read1Darray(std::string filename){
  if(not in)
   throwError("The filename " << filename << " does not exist!!!!");
  if(in)
-  std::cerr << "The file" << filename << " was succesfully found" << std::endl;
+  std::cerr << "The file" << filename << " was successfully found" << std::endl;
 
  double number;
     while (in >> number){

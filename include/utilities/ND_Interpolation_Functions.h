@@ -153,10 +153,15 @@ public:
   bool checkUB(double upper_bound);
   bool checkLB(double lower_bound);
 
+  std::vector<double> get_cellPoint0(){return _cellPoint0;};
+  std::vector<double> get_cellDxs(){return _cellDxs;};
+
 private:
   int _number_of_points;
   double _p;
   std::vector<double> _values;
+  std::vector<double> _cellPoint0;
+  std::vector<double> _cellDxs;
   std::vector< std::vector<double> > _point_coordinates;
 };
 
