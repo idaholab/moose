@@ -117,6 +117,10 @@ private:
   bool _auto_advance;
 
   std::set<unsigned int> _reset;
+
+  /// Flag for toggling console output on sub cycles
+  bool _print_sub_cycles;
+
 };
 
 #endif // TRANSIENTMULTIAPP_H

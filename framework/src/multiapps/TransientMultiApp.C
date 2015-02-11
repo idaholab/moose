@@ -11,15 +11,16 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "TransientMultiApp.h"
 
+// MOOSE includes
+#include "TransientMultiApp.h"
 #include "TimeStepper.h"
 #include "LayeredSideFluxAverage.h"
 #include "AllLocalDofIndicesThread.h"
-
 #include "Output.h"
+#include "Console.h"
 
-// libMesh
+// libMesh includes
 #include "libmesh/mesh_tools.h"
 
 template<>
@@ -37,6 +38,7 @@ InputParameters validParams<TransientMultiApp>()
   params.addParam<Real>("steady_state_tol", 1e-8, "The relative difference between the new solution and the old solution that will be considered to be at steady state");
 
   params.addParam<bool>("output_sub_cycles", false, "If true when sub_cycling every sub-cycle will be output.");
+  params.addParam<bool>("print_sub_cycles", true, "Toggle the display of sub-cycles on the screen.");
 
   params.addParam<unsigned int>("max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
 
@@ -63,7 +65,8 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _catch_up(getParam<bool>("catch_up")),
     _max_catch_up_steps(getParam<Real>("max_catch_up_steps")),
     _first(declareRestartableData<bool>("first", true)),
-    _auto_advance(false)
+    _auto_advance(false),
+    _print_sub_cycles(getParam<bool>("print_sub_cycles"))
 {
   // Transfer interpolation only makes sense for sub-cycling solves
   if (_interpolate_transfers && !_sub_cycling)
@@ -187,9 +190,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         _transferred_dofs = aldit._all_dof_indices;
       }
 
-      // Disable output for sub cycling
-      if (!_output_sub_cycles)
-        problem->allowOutput(false);
+      // Disable/enable output for sub cycling
+      problem->allowOutput(_output_sub_cycles); // disables all outputs, including console
+      problem->allowOutput<Console>(_print_sub_cycles); // re-enables Console to print, if desired
 
       ex->setTargetTime(target_time-app_time_offset);
 
