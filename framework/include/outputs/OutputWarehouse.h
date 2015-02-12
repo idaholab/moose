@@ -19,11 +19,11 @@
 #include <vector>
 
 // MOOSE includes
+#include "Output.h"
 #include "Warehouse.h"
 #include "InputParameters.h"
 
 // Forward declarations
-class Output;
 class Checkpoint;
 class FEProblem;
 
@@ -199,12 +199,6 @@ public:
    */
   std::ostringstream & consoleBuffer() { return _console_buffer; }
 
-  /**
-   * Return the current allow status
-   * This is needed by Console b/c of PETSc interactions (see Console::output()
-   */
-  bool allowOutput() const { return _allow_output; }
-
 private:
 
   /**
@@ -215,12 +209,16 @@ private:
    */
   void outputStep(ExecFlagType type);
 
+  ///@{
   /**
-   * Ability to enable/disable all output calls
+   * Ability to enable/disable output calls
    * This is private, users should utilize FEProblem::allowOutput()
    * @see FEProblem::allowOutput()
    */
   void allowOutput(bool state);
+  template <typename T> void allowOutput(bool state);
+  ///@}
+
 
   /**
    * Indicates that the next call to outputStep should be forced
@@ -337,9 +335,6 @@ private:
   /// The current output execution flag
   ExecFlagType _output_exec_flag;
 
-  /// Flag for enabling/disabling all output
-  bool _allow_output;
-
   /// Flag indicating that next call to outputStep is forced
   bool _force_output;
 
@@ -407,11 +402,6 @@ OutputWarehouse::getOutputs() const
   return outputs;
 }
 
-/**
- * Return a list of output objects with a given type
- * @tparam T The output object type
- * @return A vector of names
- */
 template<typename T>
 std::vector<OutputName>
 OutputWarehouse::getOutputNames()
@@ -429,6 +419,15 @@ OutputWarehouse::getOutputNames()
 
   // Return the names
   return names;
+}
+
+template<typename T>
+void
+OutputWarehouse::allowOutput(bool state)
+{
+  std::vector<T *> outputs = getOutputs<T>();
+  for (typename std::vector<T *>::iterator it = outputs.begin(); it != outputs.end(); ++it)
+    (*it)->allowOutput(state);
 }
 
 #endif // OUTPUTWAREHOUSE_H

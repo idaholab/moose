@@ -101,7 +101,8 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time") : std::numeric_limits<Real>::max()),
     _t_tol(getParam<Real>("time_tolerance")),
     _sync_only(getParam<bool>("sync_only")),
-    _initialized(false)
+    _initialized(false),
+    _allow_output(true)
 {
 
   // Handle the short-cut output flags

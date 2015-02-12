@@ -40,6 +40,7 @@
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "OutputWarehouse.h"
+#include "MooseApp.h"
 
 class DisplacedProblem;
 
@@ -324,13 +325,16 @@ public:
    */
   void outputStep(ExecFlagType type);
 
+  ///@{
   /**
    * Ability to enable/disable all output calls
    *
-   * This is needed by RattleSNake/YAK to disable output because of the Yo Dawg executioners calling
-   * other executioners.
+   * This is needed by Multiapps and applications to disable output for cases when
+   * executioners call other executions and when Multiapps are sub cycling.
    */
   void allowOutput(bool state);
+  template<typename T> void allowOutput(bool state);
+  ///@}
 
   /**
    * Indicates that the next call to outputStep should be forced
@@ -1044,5 +1048,12 @@ private:
   friend class Restartable;
   friend class DisplacedProblem;
 };
+
+template<typename T>
+void
+FEProblem::allowOutput(bool state)
+{
+  _app.getOutputWarehouse().allowOutput<T>(state);
+}
 
 #endif /* FEPROBLEM_H */

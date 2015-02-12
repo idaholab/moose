@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef OUTPUTBASE_H
-#define OUTPUTBASE_H
+#ifndef OUTPUT_H
+#define OUTPUT_H
 
 // MOOSE includes
 #include "MooseObject.h"
@@ -21,7 +21,6 @@
 #include "MooseTypes.h"
 #include "MooseMesh.h"
 #include "MeshChangedInterface.h"
-#include "MooseApp.h"
 #include "SetupInterface.h"
 
 // libMesh
@@ -108,6 +107,12 @@ public:
    * @param default_type The default MultiMooseEnum option
    */
   static MultiMooseEnum getExecuteOptions(std::string default_type = "");
+
+  /**
+   * Method for controlling the allow output state
+   * @param state The state to set the allow flag to
+   */
+  void allowOutput(bool state) { _allow_output = state; }
 
 
 protected:
@@ -207,6 +212,9 @@ protected:
 
   /// True if init() has been called
   bool _initialized;
+
+  /// Flag for disabling output
+  bool _allow_output;
 
   friend class OutputWarehouse;
 };
