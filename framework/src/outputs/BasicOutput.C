@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "BasicOutput.h"
+#include "MooseApp.h"
 
 // Define the four possible validParams methods
 template<>
@@ -57,9 +58,9 @@ template<class OutputBase>
 void
 BasicOutput<OutputBase>::outputStep(const ExecFlagType & type)
 {
-  // Force the output
-  if (type == EXEC_FORCED)
-    output(type);
+  // Output is not allowed
+  if (!OutputBase::_allow_output && type != EXEC_FORCED)
+    return;
 
   // If recovering disable output of initial condition, it was already output
   if (type == EXEC_INITIAL && OutputBase::_app.isRecovering())
@@ -79,9 +80,9 @@ template<>
 void
 BasicOutput<OversampleOutput>::outputStep(const ExecFlagType & type)
 {
-  // Force the output
-  if (type == EXEC_FORCED)
-    output(type);
+  // Output is not allowed
+  if (!_allow_output && type != EXEC_FORCED)
+    return;
 
   // If recovering disable output of initial condition, it was already output
   if (type == EXEC_INITIAL && _app.isRecovering())

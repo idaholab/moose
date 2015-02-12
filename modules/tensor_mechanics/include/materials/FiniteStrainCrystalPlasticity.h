@@ -70,6 +70,13 @@ protected:
    * This function read euler angles from user object (optional) - see test.
    */
   virtual void getEulerAngles();
+
+  /**
+   * This function assign initial values of slip system resistances/internal variables
+   * read from getSlipSystems().
+   */
+  virtual void assignSlipSysRes();
+
   /**
    * This function read slip system resistances from file - see test.
    */
@@ -250,6 +257,15 @@ protected:
   ///Type of tangent moduli calculation
   MooseEnum _tan_mod_type;
 
+  ///Read from options for initial values of internal variables
+  MooseEnum _intvar_read_type;
+
+  ///Number of slip system specific properties provided in the file containing slip system normals and directions
+  unsigned int _num_slip_sys_props;
+
+  ///Flag to save euler angle as Material Property
+  bool _save_euler_angle;
+
   MaterialProperty<RankTwoTensor> & _fp;
   MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _pk2;
@@ -262,6 +278,10 @@ protected:
   MaterialProperty<Real> & _acc_slip_old;
   MaterialProperty<RankTwoTensor> & _update_rot;
   MaterialProperty<RankTwoTensor> & _update_rot_old;
+
+  ///Save Euler angles for output only when save_euler_angle = true in .i file
+  MaterialProperty< std::vector<Real> > * _euler_ang;
+  MaterialProperty< std::vector<Real> > * _euler_ang_old;
 
   std::vector<Real> _mo;
   std::vector<Real> _no;
@@ -284,6 +304,11 @@ protected:
   RankTwoTensor _pk2_tmp;
   Real _accslip_tmp, _accslip_tmp_old;
   std::vector<Real> _gss_tmp;
+
+  std::vector<Real> _slip_sys_props;
+
+  bool _read_from_slip_sys_file;
+
 };
 
 #endif //FINITESTRAINCRYSTALPLASTICITY_H

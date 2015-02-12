@@ -21,6 +21,7 @@
 #include "MooseArray.h"
 #include "MooseObject.h"
 #include "MooseUtils.h"
+#include "Output.h"
 
 // libMesh
 #include "libmesh/libmesh_common.h"
@@ -34,7 +35,6 @@
 
 class MooseVariable;
 class MooseVariableScalar;
-class Output;
 class Material;
 class Function;
 class TimePeriod;

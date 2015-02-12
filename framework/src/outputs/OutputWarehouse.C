@@ -29,7 +29,6 @@ OutputWarehouse::OutputWarehouse() :
     Warehouse<Output>(),
     _multiapp_level(0),
     _output_exec_flag(EXEC_CUSTOM),
-    _allow_output(true),
     _force_output(false)
 {
   // Set the reserved names
@@ -152,9 +151,8 @@ OutputWarehouse::outputStep(ExecFlagType type)
   if (_force_output)
     type = EXEC_FORCED;
 
-  if (type == EXEC_FORCED || _allow_output)
-    for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-      (*it)->outputStep(type);
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->outputStep(type);
 
   // Reset force output flag
   _force_output = false;
@@ -286,7 +284,8 @@ OutputWarehouse::setOutputExecutionType(ExecFlagType type)
 void
 OutputWarehouse::allowOutput(bool state)
 {
-  _allow_output = state;
+  for (std::vector<Output *>::iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->allowOutput(state);
 }
 
 void
