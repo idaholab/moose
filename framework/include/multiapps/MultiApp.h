@@ -36,7 +36,10 @@ InputParameters validParams<MultiApp>();
 /**
  * A MultiApp represents one or more MOOSE applications that are running simultaneously.
  * These other MOOSE apps generally represent some "sub-solve" or "embedded-solves"
- * of the overall nonlinear solve.
+ * of the overall nonlinear solve. If your system support dynamic libraries unregistered
+ * Multiapps can be loaded on the fly by setting the exporting the appropriate library
+ * path using "MOOSE_LIBRARY_PATH" or by specifying a single input file library path
+ * in Multiapps InputParameters object.
  */
 class MultiApp :
   public MooseObject,
@@ -231,6 +234,30 @@ protected:
    */
   unsigned int globalAppToLocal(unsigned int global_app);
 
+  /**
+   * This method is called to register applications on demand. If an application is listed in
+   * the MultiApps section but is not compiled into the project, this method attempts to
+   * load a dynamic library and register it when it is needed. Throws an error if
+   * no suitable library is found that contains the app_name in question.
+   */
+  void dynamicRegisterApps(const std::string & app_name);
+
+  /**
+   * Converts an application name to a library name:
+   * Examples:
+   *   AnimalApp -> libanimal-oprof.la (assuming METHOD=oprof)
+   *   ThreeWordAnimalApp -> libthree_word_animal-dbg.la (assuming METHOD=dbg)
+   */
+  std::string appNameToLibName(const std::string & app_name) const;
+
+  std::string libNameToAppName(const std::string & library_name) const;
+
+  /**
+   * Recursively loads libraries and dependencies in the proper order to fully register a
+   * MOOSE application that may have several dependencies. REQUIRES: dynamic linking loader support.
+   */
+  void loadLibraryAndDependencies(const std::string & library_filename);
+
   /// The FEProblem this MultiApp is part of
   FEProblem * _fe_problem;
 
@@ -311,6 +338,9 @@ protected:
 
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;
+
+  /// Dynamic libraries, dependencies and their file handles
+  std::map<std::string, void *> _lib_handles;
 };
 
 #endif // MULTIAPP_H
