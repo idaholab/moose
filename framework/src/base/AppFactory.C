@@ -72,3 +72,9 @@ AppFactory::create(const std::string & obj_name, const std::string & name, Input
 
   return (*_name_to_build_pointer[obj_name])(name, parameters);
 }
+
+bool
+AppFactory::isRegistered(const std::string & app_name) const
+{
+  return _name_to_params_pointer.find(app_name) != _name_to_params_pointer.end();
+}
