@@ -17,7 +17,7 @@
     # spatial variation for testing purposes
     value = 'if(y>0.5,20,1)'
 
-    # fade in (or tween) an elasticity tensor at the start of teh simulation
+    # fade in (or tween) an elasticity tensor at the start of the simulation
     #value = 'if(t<1, max(t,0.1), 1.0)'
   [../]
 []

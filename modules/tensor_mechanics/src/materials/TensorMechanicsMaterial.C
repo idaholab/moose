@@ -16,7 +16,7 @@ InputParameters validParams<TensorMechanicsMaterial>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temperature", "temperature variable");
   params.addParam<std::vector<FunctionName> >("initial_stress", "A list of functions describing the initial stress.  If provided, there must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, zz components respectively.  If not provided, all components of the initial stress will be zero");
-  params.addParam<FunctionName>("elasticity_tensor_prefactor", "Optional function to use as a scalar prefactor on teh elasticity tensor.");
+  params.addParam<FunctionName>("elasticity_tensor_prefactor", "Optional function to use as a scalar prefactor on the elasticity tensor.");
   params.addParam<std::string>("base_name", "Material property base name");
   return params;
 }
