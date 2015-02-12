@@ -1,0 +1,7 @@
+[Tests]
+  [./tween]
+    type = 'Exodiff'
+    input = 'tween.i'
+    exodiff = 'tween_out.e'
+  [../]
+[]

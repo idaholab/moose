@@ -36,7 +36,7 @@ protected:
   Real _ftol;
   Real _eptol;
 
-  // outer and mixed product of teh delta function tensors
+  // outer and mixed product of the delta function tensors
   RankFourTensor _deltaOuter, _deltaMixed;
 
   /**
