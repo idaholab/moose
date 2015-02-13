@@ -80,6 +80,29 @@ BasicDistributionND::getType(){
 }
 
 
+double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
+	double value=0.0;
+
+	int numberOfVerteces = (int)pow(2,center.size());
+
+	for(int i=0; i<numberOfVerteces; i++){
+		std::vector<double> index = int2binary(i,center.size());
+		std::vector<double> NDcoordinate;
+		for(int j=0; j<center.size(); j++){
+			if (index[j]==0)
+				NDcoordinate[j] = center[j];
+			else
+				NDcoordinate[j] = center[j] + dx[j];
+		}
+		value += Cdf(NDcoordinate);
+	}
+
+	value = value/numberOfVerteces;
+
+	return value;
+}
+
+
 double
 getDistributionVariable(BasicDistributionND & dist,const std::string & variable_name){
   return dist.getVariable(variable_name);

@@ -129,15 +129,16 @@ template<>
 InputParameters validParams<MultiDimensionalCartesianSpline>(){
 
    InputParameters params = validParams<distributionND>();
-   params.addRequiredParam<std::vector<double> >("alpha", "alpha");
-   params.addRequiredParam<std::vector<double> >("beta", "beta");
+   //params.addRequiredParam<std::vector<double> >("alpha", "alpha");
+   //params.addRequiredParam<std::vector<double> >("beta", "beta");
    return params;
 
 }
 
 MultiDimensionalCartesianSpline::MultiDimensionalCartesianSpline(const std::string & name, InputParameters parameters):
     distributionND(name,parameters),
-    BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"), getParam<bool>("CDF"))
+	//BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"), getParam<bool>("CDF"))
+    BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"), getParam<bool>("CDF"))
 {
 }
 

@@ -49,7 +49,7 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
         std::vector<double> tempDiscretization;
         for (int j=0; j<discretizations[i]; j++){
             tempDiscretization.push_back(data[startingPoint]);
-            std::cerr << data[startingPoint] << " , " ;
+            std::cerr << data[startingPoint] << "," ;
             startingPoint++;
         }
         std::cerr << " - " <<  tempDiscretization.size() << std::endl;
@@ -65,7 +65,7 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
      startingPoint++;
     }
 
-    std::cerr << "End creating ND data array" << std::endl;
+    std::cerr << "Completed readOrderedNDarray" << std::endl;
 }
 
 void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int & numberOfPoints, std::vector< std::vector<double> > & pointcoordinates, std::vector<double> & values){
@@ -99,7 +99,7 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int 
   startingPoint += 1;
  }
 
- std::cerr << " completed readScatteredNDarray" << std::endl;
+ std::cerr << "Completed readScatteredNDarray" << std::endl;
 
  //check that data info is consistent
  if (values.size() != pointcoordinates.size())

@@ -20,6 +20,7 @@
 
 bool checkUpperBound(double upper_bound, std::vector<double> values);
 bool checkLowerBound(double lower_bound, std::vector<double> values);
+std::vector<double> int2binary(int value, int size);
 
 class NDInterpolation
 {
@@ -29,6 +30,8 @@ public:
   virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
   std::vector<double> NDinverseFunction(double F_min, double F_max);
   std::vector<double> NDinverseFunctionGrid(double F);
+
+  double averageCellValue(std::vector<double> center, std::vector<double> dx);
 
   void updateRNGparameters(double tolerance, double initial_divisions);
 
@@ -78,8 +81,9 @@ public:
 
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
 
+  NDSpline(std::string filename);
   NDSpline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
-  NDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & _values, std::vector<double> alpha, std::vector<double> beta);
+  NDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
 
   std::vector< std::vector<double> > getDiscretizations(){return _discretizations;};
 
@@ -160,8 +164,8 @@ private:
   int _number_of_points;
   double _p;
   std::vector<double> _values;
-  std::vector<double> _cellPoint0;
-  std::vector<double> _cellDxs;
+  //std::vector<double> _cellPoint0;
+  //std::vector<double> _cellDxs;
   std::vector< std::vector<double> > _point_coordinates;
 };
 

@@ -17,25 +17,49 @@ NDSpline::NDSpline(std::string filename, std::vector<double> alfa, std::vector<d
  NDSpline(_discretizations, _values, _alpha, _beta);
 }
 
+NDSpline::NDSpline(std::string filename){
+ // constructor for scattered data interpolation functions
+
+ readOrderedNDarray(filename, _dimensions, _discretizations, _values);
+
+ std::vector<double> alpha(_dimensions);
+ std::vector<double> beta(_dimensions);
+
+
+
+ for (int nDim=0; nDim<_dimensions; nDim++){
+	 alpha[nDim] = 0.0;
+	 beta[nDim] = 0.0;
+ }
+
+ NDSpline(_discretizations, _values, alpha, beta);
+}
+
 NDSpline::NDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta){
 	_discretizations = discretizations;
 	_values = values;
 	_alpha = alpha;
 	_beta = beta;
 
+	bool check = (_alpha.size() == _beta.size()) && (_beta.size() == _discretizations.size());
+
+	if (check == false)
+		throw ("ND spline: Dimensions of alpha and beta do not agree with data dimensionality");
+
+	_dimensions = _discretizations.size();
+
 	 std::cerr << "ND spline initialization" << std::endl;
 
 	 for (int nDim=0; nDim<_dimensions; nDim++){
-	  int length = _discretizations.at(nDim).size();
-	  _hj.push_back((_discretizations.at(nDim).at(length-1) - _discretizations.at(nDim).at(0))/(length-1));
-	  std::cerr << "dim " << nDim+1 << ": _hj: " << _hj.at(nDim) << std::endl;
+		 int length = _discretizations.at(nDim).size();
+	     _hj.push_back((_discretizations.at(nDim).at(length-1) - _discretizations.at(nDim).at(0))/(length-1));
+	     std::cerr << "dim " << nDim << ": _hj: " << _hj.at(nDim) << std::endl;
 
-	  _min_disc.push_back(_discretizations.at(nDim).at(0));
-	  _max_disc.push_back(_discretizations.at(nDim).at(length-1));
+	     _min_disc.push_back(_discretizations.at(nDim).at(0));
+	     _max_disc.push_back(_discretizations.at(nDim).at(length-1));
 
-	  //std::cout << "nDim: " << nDim << " ; _min_disc.at(nDim).at(0): " <<  _min_disc.at(nDim) << " ; _max_disc.at(nDim): " << _max_disc.at(nDim) << std::endl;
+	     //std::cout << "nDim: " << nDim << " ; _min_disc.at(nDim).at(0): " <<  _min_disc.at(nDim) << " ; _max_disc.at(nDim): " << _max_disc.at(nDim) << std::endl;
 	 }
-
 
 	 _completed_init = true;
 
@@ -101,7 +125,6 @@ double NDSpline::interpolateAt(std::vector<double> point_coordinate){
     minDistance = distances.at(i);
    }
   }
-  std::cout<<"minIndex: "<< minIndex << std::endl;
   interpolated_value = _values.at(minIndex);
  }
 
