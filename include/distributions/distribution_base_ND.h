@@ -126,14 +126,17 @@ public:
 
 	  if (_CDFprovided == false){    // PDF provided ---> create grid for CDF
 
-		  std::cerr<<"Creation of CDF interpolator for cartesian spline"<< std::endl;
-		  std::vector< std::vector<double> > discretizations = _interpolator.getDiscretizations();
+		  std::cerr<<"Creation of CDF interpolator for cartesian spline-"<< std::endl;
+		  std::vector< std::vector<double> > discretizations;
+		  _interpolator.getDiscretizations(discretizations);
+		  std::cerr<<"porcaccia"<<std::endl;
 		  int numberofValues = 1;
 		  int numberOfDimensions = discretizations.size();
+		  std::cerr<<"porcaccia: "<< numberOfDimensions << std::endl;
 		  std::vector<int> discretizationSizes(numberOfDimensions);
 		  for (int i=0; i<numberOfDimensions; i++){
-			  numberofValues *= discretizations[i].size();
-			  discretizationSizes[i] = discretizations[i].size();
+			  numberofValues *= discretizations.at(i).size();
+			  discretizationSizes.at(i) = discretizations.at(i).size();
 		  }
 
 		  std::vector<double> CDFvalues(numberofValues);
@@ -142,10 +145,9 @@ public:
 			  std::vector<int> NDcoordinateIndex = oneDtoNDconverter(i, discretizationSizes);
 			  std::vector<double> NDcoordinate(numberOfDimensions);
 			  for (int j=0; j<numberOfDimensions; j++)
-				  NDcoordinate[j] = discretizations[j][NDcoordinateIndex[j]];
-			  CDFvalues[i] = Cdf(NDcoordinate);
+				  NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
+			  CDFvalues.at(i) = _interpolator.integralSpline(NDcoordinate);
 		  }
-
 		  _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
 		  std::cerr<<"Creation of CDF interpolator for cartesian spline completed"<< std::endl;
 	  }
@@ -167,14 +169,17 @@ public:
 
 	  if (_CDFprovided == false){    // PDF provided ---> create grid for CDF
 
-		  std::cerr<<"Creation of CDF interpolator for cartesian spline"<< std::endl;
-		  std::vector< std::vector<double> > discretizations = _interpolator.getDiscretizations();
+		  std::cerr<<"Creation of CDF interpolator for cartesian spline:"<< std::endl;
+		  std::vector< std::vector<double> > discretizations;
+		  _interpolator.getDiscretizations(discretizations);
+		  std::cerr<<"porcaccia"<<std::endl;
 		  int numberofValues = 1;
 		  int numberOfDimensions = discretizations.size();
+		  std::cerr<<"porcaccia: "<< numberOfDimensions << std::endl;
 		  std::vector<int> discretizationSizes(numberOfDimensions);
 		  for (int i=0; i<numberOfDimensions; i++){
-			  numberofValues *= discretizations[i].size();
-			  discretizationSizes[i] = discretizations[i].size();
+			  numberofValues *= discretizations.at(i).size();
+			  discretizationSizes.at(i) = discretizations.at(i).size();
 		  }
 
 		  std::vector<double> CDFvalues(numberofValues);
@@ -183,8 +188,8 @@ public:
 			  std::vector<int> NDcoordinateIndex = oneDtoNDconverter(i, discretizationSizes);
 			  std::vector<double> NDcoordinate(numberOfDimensions);
 			  for (int j=0; j<numberOfDimensions; j++)
-				  NDcoordinate[j] = discretizations[j][NDcoordinateIndex[j]];
-			  CDFvalues[i] = _interpolator.integralSpline(NDcoordinate);
+				  NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
+			  CDFvalues.at(i) = _interpolator.integralSpline(NDcoordinate);
 		  }
 		  _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
 		  std::cerr<<"Creation of CDF interpolator for cartesian spline completed"<< std::endl;
@@ -230,8 +235,10 @@ public:
   {
 	  if (_CDFprovided)
 		  return _interpolator.NDinverseFunctionGrid(F);
-	  else
+	  else{
+		  std::cout<< "porca: " << _CDFinterpolator.returnDimensionality() << std::endl;
 		  return _CDFinterpolator.NDinverseFunctionGrid(F);
+	  }
   };
 
   double inverseMarginal(double F, int dimension){
@@ -306,8 +313,8 @@ public:
 		  std::vector<double> beta (n_dimensions);
 
 		  for(int i=0; i<n_dimensions; i++){
-			  alpha[i] = 0.0;
-			  beta[i] = 0.0;
+			  alpha.at(i) = 0.0;
+			  beta.at(i) = 0.0;
 		  }
 
 		  int numberDiscretization = 15;
@@ -330,17 +337,18 @@ public:
 			  std::vector<double> temp;
 			  for(int j=0; j<numberDiscretization; j++){
 				  double value = cellPoint0.at(i) + cellDxs.at(i)/numberDiscretization * j;
-				  //outputFile<<value;
+				  std::cout<<", " << value ;
 				  temp.push_back(value);
 			  }
 			  discretizations.push_back(temp);
+			  std::cout<<" " << std::endl;
 		  }
 
 		  int totalNumberOfValues=1;
 		  std::vector<int> discretizationSizes(n_dimensions);
 		  for(int i=0; i<n_dimensions; i++){
 			  totalNumberOfValues *= numberDiscretization;
-			  discretizationSizes[i] = numberDiscretization;
+			  discretizationSizes.at(i) = numberDiscretization;
 		  }
 
 		  std::vector<double> PDFvalues (totalNumberOfValues);
@@ -349,12 +357,14 @@ public:
 			  std::vector<int> NDcoordinateIndex = oneDtoNDconverter(i, discretizationSizes);
 			  std::vector<double> NDcoordinate(n_dimensions);
 			  for (int j=0; j<n_dimensions; j++)
-				  NDcoordinate[j] = discretizations[j][NDcoordinateIndex[j]];
-			  PDFvalues[i] = _interpolator.interpolateAt(NDcoordinate);
+				  NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
+			  PDFvalues.at(i) = _interpolator.interpolateAt(NDcoordinate);
+			  std::cout<<", " << PDFvalues.at(i) ;
 			  //outputFile<<PDFvalue;
 		  }
 
-		  _CDFspline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, true);
+		  std::cout<<" " << std::endl;
+		  _CDFspline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, false);
 		  //outputFile.close();
 		  std::cerr<<"Creation of ND spline distribution for inverseWeight completed"<< std::endl;
 	  }

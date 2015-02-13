@@ -25,8 +25,6 @@ NDSpline::NDSpline(std::string filename){
  std::vector<double> alpha(_dimensions);
  std::vector<double> beta(_dimensions);
 
-
-
  for (int nDim=0; nDim<_dimensions; nDim++){
 	 alpha[nDim] = 0.0;
 	 beta[nDim] = 0.0;
@@ -48,7 +46,7 @@ NDSpline::NDSpline(std::vector< std::vector<double> > & discretizations, std::ve
 
 	_dimensions = _discretizations.size();
 
-	 std::cerr << "ND spline initialization" << std::endl;
+	 std::cerr << "ND spline initialization"<<std::endl;
 
 	 for (int nDim=0; nDim<_dimensions; nDim++){
 		 int length = _discretizations.at(nDim).size();
@@ -545,6 +543,8 @@ double NDSpline::spline_cartesian_marginal_integration(double coordinate,int mar
 double NDSpline::spline_cartesian_inverse_marginal(double CDF,int marginal_variable, double precision){
 	//  Newton–Raphson method used here
 	int mid_position = _discretizations[marginal_variable].size()/2;
+
+	std::cout<<"here"<<std::endl;
 
 	double epsilon = 1.0;
 	double x_n   = _discretizations[marginal_variable][mid_position];

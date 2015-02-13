@@ -87,12 +87,13 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
 
 	for(int i=0; i<numberOfVerteces; i++){
 		std::vector<double> index = int2binary(i,center.size());
-		std::vector<double> NDcoordinate;
+		std::vector<double> NDcoordinate(center.size());
+
 		for(int j=0; j<center.size(); j++){
 			if (index[j]==0)
-				NDcoordinate[j] = center[j];
+				NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
 			else
-				NDcoordinate[j] = center[j] + dx[j];
+				NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
 		}
 		value += Cdf(NDcoordinate);
 	}

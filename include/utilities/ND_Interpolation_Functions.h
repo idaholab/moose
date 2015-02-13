@@ -17,6 +17,8 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
+#include <stdio.h>
 
 bool checkUpperBound(double upper_bound, std::vector<double> values);
 bool checkLowerBound(double lower_bound, std::vector<double> values);
@@ -85,7 +87,19 @@ public:
   NDSpline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
   NDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
 
-  std::vector< std::vector<double> > getDiscretizations(){return _discretizations;};
+  //std::vector< std::vector<double> > getDiscretizations(){
+  //	  std::cout<<"but why!"<< std::endl;
+  //	  return _discretizations;};
+
+  void getDiscretizations(std::vector< std::vector<double> > & vector){
+	  for(int i=0; i<_discretizations.size();i++){
+		  std::vector<double> temp;
+		  for(int j=0; j<_discretizations.at(i).size(); j++)
+			  temp.push_back(_discretizations.at(i).at(j));
+		  vector.push_back(temp);
+	  }
+	  std::cout<< "xxxx "<< vector.size() << std::endl;
+  }
 
   NDSpline();
   ~NDSpline();

@@ -13,7 +13,6 @@ InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double 
  std::vector< std::vector<double> > pointCoordinates;
 
  readScatteredNDarray(_data_filename, dimensions, numberOfPoints, pointCoordinates, values);
-
  _dimensions = dimensions;
  _number_of_points = numberOfPoints;
  _values = values;
