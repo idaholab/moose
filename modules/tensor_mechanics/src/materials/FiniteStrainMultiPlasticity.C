@@ -14,8 +14,8 @@ InputParameters validParams<FiniteStrainMultiPlasticity>()
   params.addRequiredRangeCheckedParam<Real>("ep_plastic_tolerance", "ep_plastic_tolerance>0", "The Newton-Raphson process is only deemed converged if the plastic strain increment constraints have L2 norm less than this.");
   params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
   params.addRangeCheckedParam<Real>("max_stepsize_for_dumb", 0.01, "max_stepsize_for_dumb>0 & max_stepsize_for_dumb<=1", "If your deactivation_scheme is 'something_to_dumb', then 'dumb' will only be used if the stepsize falls below this value.  This parameter is useful because the 'dumb' scheme is computationally expensive");
-  MooseEnum deactivation_scheme("optimized safe dumb optimized_to_safe safe_to_dumb optimized_to_safe_to_dumb", "optimized");
-  params.addParam<MooseEnum>("deactivation_scheme", deactivation_scheme, "Scheme by which constraints are deactivated.  NOTE: This is internally set to 'safe' if only one plastic model is used, regardless of what you enter.  safe: return to the yield surface and then deactivate constraints with negative plasticity multipliers.  optimized: deactivate a constraint as soon as its plasticity multiplier becomes negative.  dumb: iteratively try all combinations of active constraints until the solution is found.  optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe' instead.  optimized_to_safe_to_dumb: first use 'optimized', and if that fails, try with 'safe', and if that fails, try 'dumb'");
+  MooseEnum deactivation_scheme("optimized safe dumb optimized_to_safe safe_to_dumb optimized_to_safe_to_dumb optimized_to_dumb", "optimized");
+  params.addParam<MooseEnum>("deactivation_scheme", deactivation_scheme, "Scheme by which constraints are deactivated.  NOTE: This is internally set to 'safe' if only one plastic model is used, regardless of what you enter.  safe: return to the yield surface and then deactivate constraints with negative plasticity multipliers.  optimized: deactivate a constraint as soon as its plasticity multiplier becomes negative.  dumb: iteratively try all combinations of active constraints until the solution is found.  optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe' instead.  optimized_to_safe_to_dumb: first use 'optimized', and if that fails, try with 'safe', and if that fails, try 'dumb'.  optimized_to_dumb: first use 'optimized', and if that fails use 'dumb'.");
   params.addParam<RealVectorValue>("transverse_direction", "If this parameter is provided, before the return-map algorithm is called a rotation is performed so that the 'z' axis in the new frame lies along the transverse_direction in the original frame.  After returning, the inverse rotation is performed.  The transverse_direction will itself rotate with large strains.  This is so that transversely-isotropic plasticity models may be easily defined in the frame where the isotropy holds in the x-y plane.");
   params.addParam<bool>("ignore_failures", false, "The return-map algorithm will return with the best admissible stresses and internal parameters that it can, even if they don't fully correspond to the applied strain increment.  To speed computations, this flag can be set to true, the max_NR_iterations set small, and the min_stepsize large.");
   params.addClassDescription("Base class for multi-surface finite-strain plasticity");
@@ -46,6 +46,9 @@ FiniteStrainMultiPlasticity::FiniteStrainMultiPlasticity(const std::string & nam
     _intnl_old(declarePropertyOld<std::vector<Real> >("plastic_internal_parameter")),
     _yf(declareProperty<std::vector<Real> >("plastic_yield_function")),
     _iter(declareProperty<Real>("plastic_NR_iterations")), // this is really an unsigned int, but for visualisation i convert it to Real
+    _linesearch_needed(declareProperty<Real>("plastic_linesearch_needed")), // this is really a boolean, but for visualisation i convert it to Real
+    _ld_encountered(declareProperty<Real>("plastic_linear_dependence_encountered")), // this is really a boolean, but for visualisation i convert it to Real
+    _constraints_added(declareProperty<Real>("plastic_constraints_added")), // this is really a boolean, but for visualisation i convert it to Real
     _n(declareProperty<RealVectorValue>("plastic_transverse_direction")),
     _n_old(declarePropertyOld<RealVectorValue>("plastic_transverse_direction"))
 {
@@ -77,6 +80,9 @@ FiniteStrainMultiPlasticity::initQpStatefulProperties()
   _yf[_qp].assign(_num_surfaces, 0);
 
   _iter[_qp] = 0.0; // this is really an unsigned int, but for visualisation i convert it to Real
+  _linesearch_needed[_qp] = 0;
+  _ld_encountered[_qp] = 0;
+  _constraints_added[_qp] = 0;
 
   _n[_qp] = _n_input;
   _n_old[_qp] = _n_input;
@@ -102,17 +108,25 @@ FiniteStrainMultiPlasticity::computeQpStress()
   preReturnMap();
 
   unsigned int number_iterations;
+  bool linesearch_needed = false;
+  bool ld_encountered = false;
+  bool constraints_added = false;
 
   // try a purely elastic step first
   bool found_solution = elasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _elasticity_tensor[_qp], _strain_increment[_qp], _yf[_qp], number_iterations);
 
   // if not purely elastic, do some plastic return
   if (!found_solution)
-    plasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _elasticity_tensor[_qp], _strain_increment[_qp], _yf[_qp], number_iterations);
+    plasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _elasticity_tensor[_qp], _strain_increment[_qp], _yf[_qp], number_iterations, linesearch_needed, ld_encountered, constraints_added);
+
+  // Moose::out << "QP return complete\n";
 
   postReturnMap();
 
   _iter[_qp] = 1.0*number_iterations;
+  _linesearch_needed[_qp] = linesearch_needed;
+  _ld_encountered[_qp] = ld_encountered;
+  _constraints_added[_qp] = constraints_added;
 
   //Update measures of strain
   _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp] - (_plastic_strain[_qp] - _plastic_strain_old[_qp]);
@@ -180,7 +194,7 @@ FiniteStrainMultiPlasticity::elasticStep(const RankTwoTensor & stress_old, RankT
 
 
 bool
-FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations)
+FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added)
 {
   /**
    * the idea in the following is to potentially subdivide the
@@ -222,13 +236,22 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
   while (time_simulated < 1.0 && step_size >= _min_stepsize)
   {
     iter = 0;
-    return_successful = returnMap(stress_good, stress, intnl_good, intnl, plastic_strain_good, plastic_strain, E_ijkl, dep, yf, iter, step_size <= _max_stepsize_for_dumb);
+    return_successful = returnMap(stress_good, stress, intnl_good, intnl, plastic_strain_good, plastic_strain, E_ijkl, dep, yf, iter, step_size <= _max_stepsize_for_dumb, linesearch_needed, ld_encountered, constraints_added);
     iterations += iter;
 
     if (return_successful)
     {
       num_consecutive_successes += 1;
       time_simulated += step_size;
+
+      //Moose::out << " returned_with_yf(0=neg,1=zero) ";
+      //for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+      //if (yf[surface] < -_f[modelNumber(surface)]->_f_tol)
+      // Moose::out << "0";
+      //else
+      //  Moose::out << "1";
+      //Moose::out << "\n";
+
       if (time_simulated < 1.0)  // this condition is just for optimization: if time_simulated=1 then the "good" quantities are no longer needed
       {
         stress_good = stress;
@@ -254,6 +277,8 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
       for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
         yf[surface] = yf_good[surface];
       dep = step_size*strain_increment;
+
+      // Moose::out << " unsuccessful, cutting timestep to " << step_size << "\n";
     }
   }
 
@@ -289,7 +314,7 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
 
 
 bool
-FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb)
+FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added)
 {
   bool successful_return = elasticStep(stress_old, stress, intnl_old, intnl, plastic_strain_old, plastic_strain, E_ijkl, strain_increment, f, iter);
 
@@ -339,7 +364,11 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
   // those that exceed their _f_tol
   // active constraints.
   std::vector<bool> act;
-  buildActiveConstraints(f, stress, intnl, act);
+  buildActiveConstraints(f, stress, intnl, E_ijkl, act);
+
+  //Moose::out << "initial_act= ";
+  //for (unsigned i = 0 ; i < act.size() ; ++i)
+  //  Moose::out << act[i];
 
 
   // Inverse of E_ijkl (assuming symmetric)
@@ -366,9 +395,9 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
   // For complicated deactivation schemes we have to record the initial active set
   std::vector<bool> initial_act;
   initial_act.resize(_num_surfaces);
-  if (_deactivation_scheme == "optimized_to_safe" || _deactivation_scheme == "optimized_to_safe_to_dumb")
+  if (_deactivation_scheme == "optimized_to_safe" || _deactivation_scheme == "optimized_to_safe_to_dumb" || _deactivation_scheme == "optimized_to_dumb")
   {
-    // if "optimized" fails we can change the deactivation scheme to "safe"
+    // if "optimized" fails we can change the deactivation scheme to "safe", etc
     deact_scheme = "optimized";
     for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
       initial_act[surface] = act[surface];
@@ -380,7 +409,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
   // For "dumb" deactivation, the active set takes all combinations until a solution is found
   int dumb_iteration = 0;
   std::vector<unsigned int> dumb_order;
-  if (_deactivation_scheme == "dumb" || (_deactivation_scheme == "optimized_to_safe_to_dumb" && can_revert_to_dumb) || (_deactivation_scheme == "safe_to_dumb" && can_revert_to_dumb))
+  if (_deactivation_scheme == "dumb" || (_deactivation_scheme == "optimized_to_safe_to_dumb" && can_revert_to_dumb) || (_deactivation_scheme == "safe_to_dumb" && can_revert_to_dumb) || (_deactivation_scheme == "optimized_to_dumb" && can_revert_to_dumb))
     buildDumbOrder(stress, intnl, dumb_order);
   if (_deactivation_scheme == "dumb")
   {
@@ -418,8 +447,8 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
     // The Newton-Raphson loops
     while (nr_res2 > 0.5 && local_iter++ < _max_iter && single_step_success)
       //{Moose::out << " starting singlestep with local_iter = " << local_iter << "\n";
-      single_step_success = singleStep(nr_res2, stress, intnl_old, intnl, pm, delta_dp, E_inv, f, epp, ic, act, deact_scheme);
-    //Moose::out << "exiting singlestep with nr_res2 = " << nr_res2 << " and eigvals = " ;   std::vector<Real> eigvals;  stress.symmetricEigenvalues(eigvals); Moose::out << eigvals[0] << " " << eigvals[1] << " " <<eigvals[2] << "\n";}
+      single_step_success = singleStep(nr_res2, stress, intnl_old, intnl, pm, delta_dp, E_inv, f, epp, ic, act, deact_scheme, linesearch_needed, ld_encountered);
+      //Moose::out << "exiting singlestep with nr_res2 = " << nr_res2 << " single_step_success = " << single_step_success << " and eigvals = " ;   std::vector<Real> eigvals;  stress.symmetricEigenvalues(eigvals); Moose::out << eigvals[0] << " " << eigvals[1] << " " <<eigvals[2] << "\n"; stress.print(); }
     bool nr_good = (nr_res2 <= 0.5 && local_iter <= _max_iter && single_step_success);
 
 
@@ -464,6 +493,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
       kt_good = checkKuhnTucker(f, pm, act);
       if (!kt_good)
       {
+        // Moose::out << " Kuhn-Tucker failed\n";
         // Kuhn-Tucker conditions failed.
         // We can try turning off the constraints that
         // caused KT-failure
@@ -514,6 +544,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
 
       if (!admissible)
       {
+        // Moose::out << " Admissible failed\n";
         // Not admissible.
         // We can try adding constraints back in
         // We can try changing the deactivation scheme
@@ -521,6 +552,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
         bool add_constraints = canAddConstraints(act, all_f);
         if (add_constraints)
         {
+          constraints_added = true;
           std::vector<bool> act_plus(_num_surfaces, false); // "act" with the positive constraints added in
           for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
             if (act[surface] || (!act[surface] && (all_f[surface] > _f[modelNumber(surface)]->_f_tol)))
@@ -528,8 +560,13 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
           if (actives_tried.find(activeCombinationNumber(act_plus)) == actives_tried.end())
           {
             // haven't tried this combination of actives yet
+            constraints_added = true;
             for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
               act[surface] = act_plus[surface];
+            // Moose::out << "adding constraints in so act= ";
+            // for (unsigned i = 0 ; i < act.size() ; ++i)
+            //  Moose::out << act[i];
+            // Moose::out << "\n";
           }
           else
             add_constraints = false;  // haven't managed to add a new combination
@@ -602,9 +639,14 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
   }
 
 
+
   // returned, with either success or failure
   if (successful_return)
   {
+    //Moose::out << " final_act= ";
+    //for (unsigned i = 0 ; i < act.size() ; ++i)
+    //  Moose::out << act[i];
+    //Moose::out << "\n";
     plastic_strain += delta_dp;
     if (f.size() != _num_surfaces)
     {
@@ -639,6 +681,8 @@ FiniteStrainMultiPlasticity::canChangeScheme(const MooseEnum & current_deactivat
     return true;
   if (current_deactivation_scheme == "safe" && _deactivation_scheme == "optimized_to_safe_to_dumb" && can_revert_to_dumb)
     return true;
+  if (current_deactivation_scheme == "optimized" && _deactivation_scheme == "optimized_to_dumb" && can_revert_to_dumb)
+    return true;
   return false;
 }
 
@@ -651,8 +695,9 @@ FiniteStrainMultiPlasticity::changeScheme(const std::vector<bool> & initial_act,
     for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
       act[surface] = initial_act[surface];
   }
-  else if (current_deactivation_scheme == "safe" && (_deactivation_scheme == "optimized_to_safe_to_dumb" || _deactivation_scheme == "safe_to_dumb") && can_revert_to_dumb)
+  else if ((current_deactivation_scheme == "safe" && (_deactivation_scheme == "optimized_to_safe_to_dumb" || _deactivation_scheme == "safe_to_dumb") && can_revert_to_dumb) || (current_deactivation_scheme == "optimized" && _deactivation_scheme == "optimized_to_dumb" && can_revert_to_dumb))
   {
+    // Moose::out << " Changing to dumb\n";
     current_deactivation_scheme = "dumb";
     dumb_iteration = 0;
     buildDumbOrder(initial_stress, intnl_old, dumb_order);
@@ -661,7 +706,7 @@ FiniteStrainMultiPlasticity::changeScheme(const std::vector<bool> & initial_act,
 }
 
 bool
-FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, const MooseEnum & deactivation_scheme)
+FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, const MooseEnum & deactivation_scheme, bool & linesearch_needed, bool & ld_encountered)
 {
   bool successful_step;  // return value
 
@@ -714,10 +759,16 @@ FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, 
     // calculate dstress, dpm and dintnl for one full Newton-Raphson step
     nrStep(stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, active, deact_ld);
 
+    for (unsigned surface = 0 ; surface < deact_ld.size() ; ++surface)
+      if (deact_ld[surface])
+      {
+        ld_encountered = true;
+        break;
+      }
 
     // perform a line search
     // The line-search will exit with updated values
-    successful_step = lineSearch(nr_res2, stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, f, epp, ic, active, deact_ld);
+    successful_step = lineSearch(nr_res2, stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, f, epp, ic, active, deact_ld, linesearch_needed);
 
 
     if (!successful_step)
@@ -848,14 +899,18 @@ FiniteStrainMultiPlasticity::checkKuhnTucker(const std::vector<Real> & f, const 
     {
       if (f[ind++] < -_f[modelNumber(surface)]->_f_tol)
         if (pm[surface] != 0)
+          //{ Moose::out << "  KT: surface " << surface << " has f = " << f[ind-1] << " and pm = " << pm[surface] << "\n";
           return false;
+          //}
     }
     else if (pm[surface] != 0)
       mooseError("Crash due to plastic multiplier not being zero.  This occurred because of poor coding!!");
   }
   for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
     if (pm[surface] < 0)
+      //{ Moose::out << "  KT: surface " << surface << " has pm = " << pm[surface] << " which is negative \n";
       return false;
+      //}
   return true;
 }
 
@@ -936,7 +991,7 @@ FiniteStrainMultiPlasticity::residual2(const std::vector<Real> & pm, const std::
 
 
 bool
-FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld)
+FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld, bool & linesearch_needed)
 {
   // Line search algorithm straight out of "Numerical Recipes"
 
@@ -1035,6 +1090,9 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
     lam = std::max(tmp_lam, 0.1*lam);
   }
 
+  if (lam < 1.0)
+    linesearch_needed = true;
+
   // assign the quantities found in the line-search
   // back to the originals
   for (unsigned alpha = 0 ; alpha < pm.size() ; ++alpha)
@@ -1085,6 +1143,11 @@ FiniteStrainMultiPlasticity::incrementDumb(int & dumb_iteration, const std::vect
   dumb_iteration += 1;
   for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
     act[dumb_order[surface]] = (dumb_iteration & (1 << surface)); // returns true if the surface_th bit of dumb_iteration == 1
+  //Moose::out << "increment dumb to act= ";
+  //for (unsigned i = 0 ; i < act.size() ; ++i)
+  //  Moose::out << act[i];
+  //Moose::out << "\n";
+
 }
 
 bool
