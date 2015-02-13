@@ -415,7 +415,7 @@ extern double		mt_64_to_double;
 MT_EXTERN MT_INLINE uint32_t mts_lrand(
     register mt_state*	state)		/* State for the PRNG */
     {
-    register uint32_t	random_value;	/* Pseudorandom value generated */
+    uint32_t random_value; /* Pseudorandom value generated */
 
     if (state->stateptr <= 0)
 	mts_refresh(state);
@@ -444,8 +444,8 @@ MT_EXTERN MT_INLINE uint32_t mts_lrand(
 MT_EXTERN MT_INLINE uint64_t mts_llrand(
     register mt_state*	state)		/* State for the PRNG */
     {
-    register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
-    register uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
+    uint32_t random_value_1; /* 1st pseudorandom value generated */
+    uint32_t random_value_2; /* 2nd pseudorandom value generated */
 
     /*
      * For maximum speed, we'll handle the two overflow cases
@@ -486,7 +486,7 @@ MT_EXTERN MT_INLINE uint64_t mts_llrand(
 MT_EXTERN MT_INLINE double mts_drand(
     register mt_state*	state)		/* State for the PRNG */
     {
-    register uint32_t	random_value;	/* Pseudorandom value generated */
+    uint32_t random_value; /* Pseudorandom value generated */
 
     if (state->stateptr <= 0)
 	mts_refresh(state);
@@ -508,8 +508,8 @@ MT_EXTERN MT_INLINE double mts_ldrand(
 #ifdef UINT64_MAX
     uint64_t		final_value;	/* Final (integer) value */
 #endif /* UINT64_MAX */
-    register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
-    register uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
+    uint32_t random_value_1; /* 1st pseudorandom value generated */
+    uint32_t random_value_2; /* 2nd pseudorandom value generated */
 
     /*
      * For maximum speed, we'll handle the two overflow cases
@@ -553,7 +553,7 @@ MT_EXTERN MT_INLINE double mts_ldrand(
  */
 MT_EXTERN MT_INLINE uint32_t mt_lrand(void)
     {
-    register uint32_t	random_value;	/* Pseudorandom value generated */
+    uint32_t random_value; /* Pseudorandom value generated */
 
     if (mt_default_state.stateptr <= 0)
 	mts_refresh(&mt_default_state);
@@ -573,8 +573,8 @@ MT_EXTERN MT_INLINE uint32_t mt_lrand(void)
  */
 MT_EXTERN MT_INLINE uint64_t mt_llrand(void)
     {
-    register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
-    register uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
+    uint32_t random_value_1; /* 1st pseudorandom value generated */
+    uint32_t random_value_2; /* 2nd pseudorandom value generated */
 
     /*
      * For maximum speed, we'll handle the two overflow cases
@@ -616,7 +616,7 @@ MT_EXTERN MT_INLINE uint64_t mt_llrand(void)
  */
 MT_EXTERN MT_INLINE double mt_drand(void)
     {
-    register uint32_t	random_value;	/* Pseudorandom value generated */
+    uint32_t random_value; /* Pseudorandom value generated */
 
     if (mt_default_state.stateptr <= 0)
 	mts_refresh(&mt_default_state);
@@ -637,8 +637,8 @@ MT_EXTERN MT_INLINE double mt_ldrand(void)
 #ifdef UINT64_MAX
     uint64_t		final_value;	/* Final (integer) value */
 #endif /* UINT64_MAX */
-    register uint32_t	random_value_1;	/* 1st pseudorandom value generated */
-    register uint32_t	random_value_2;	/* 2nd pseudorandom value generated */
+    uint32_t random_value_1; /* 1st pseudorandom value generated */
+    uint32_t random_value_2; /* 2nd pseudorandom value generated */
 
     /*
      * For maximum speed, we'll handle the two overflow cases
