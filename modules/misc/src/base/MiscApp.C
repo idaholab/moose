@@ -44,6 +44,7 @@ MiscApp::~MiscApp()
 {
 }
 
+extern "C" void MiscApp__registerApps() { MiscApp::registerApps(); }
 void
 MiscApp::registerApps()
 {

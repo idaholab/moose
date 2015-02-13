@@ -86,6 +86,7 @@ PhaseFieldApp::~PhaseFieldApp()
 {
 }
 
+extern "C" void PhaseFieldApp__registerApps() { PhaseFieldApp::registerApps(); }
 void
 PhaseFieldApp::registerApps()
 {
