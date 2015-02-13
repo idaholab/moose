@@ -24,6 +24,7 @@
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
 #include "DerivativeTwoPhaseMaterial.h"
+#include "DerivativeMultiPhaseMaterial.h"
 #include "BarrierFunctionMaterial.h"
 #include "SwitchingFunctionMaterial.h"
 #include "ElasticEnergyMaterial.h"
@@ -131,6 +132,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
   registerMaterial(DerivativeTwoPhaseMaterial);
+  registerMaterial(DerivativeMultiPhaseMaterial);
   registerMaterial(BarrierFunctionMaterial);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(ElasticEnergyMaterial);
