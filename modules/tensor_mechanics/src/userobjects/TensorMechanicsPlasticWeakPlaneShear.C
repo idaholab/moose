@@ -224,6 +224,59 @@ TensorMechanicsPlasticWeakPlaneShear::d2smooth(const RankTwoTensor & stress) con
   return d2smoother2;
 }
 
+void
+TensorMechanicsPlasticWeakPlaneShear::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
+{
+  act.assign(1, false);
+  returned_stress = stress;
+
+  if (f[0] <= _f_tol)
+    return;
+
+  // in the following i will derive returned_stress for the case smoother=0
+
+
+  Real tanpsi = tan_psi(intnl);
+  Real tanphi = tan_phi(intnl);
+
+  // norm is the normal to the yield surface
+  // with f having psi (dilation angle) instead of phi:
+  // norm(0) = df/dsig(2,0) = df/dsig(0,2)
+  // norm(1) = df/dsig(2,1) = df/dsig(1,2)
+  // norm(2) = df/dsig(2,2)
+  std::vector<Real> norm(3, 0.0);
+  Real tau = std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2));
+  if (tau > 0.0)
+  {
+    norm[0] = 0.25*(stress(0, 2)+stress(2,0))/tau;
+    norm[1] = 0.25*(stress(1, 2)+stress(2,1))/tau;
+  }
+  norm[2] = tanpsi;
+
+  // to get the flow directions, we have to multiply norm by Eijkl.
+  // I assume that E(0,2,0,2) = E(1,2,1,2), and E(2,2,0,2) = 0 = E(0,2,1,2), etc
+  // with the usual symmetry.  This makes finding the returned_stress
+  // much easier.
+  // returned_stress = stress - alpha*n
+  // where alpha is chosen so that f = 0
+  Real alpha = f[0]/(Eijkl(0,2,0,2) + Eijkl(2,2,2,2)*tanpsi*tanphi);
+
+
+  if (1 - alpha*Eijkl(0,2,0,2)/tau >= 0)
+  {
+    // returning to the "edge" of the cone
+    returned_stress(2, 2) = stress(2, 2) - alpha*Eijkl(2, 2, 2, 2)*norm[2];
+    returned_stress(0, 2) = returned_stress(2, 0) = stress(0, 2) - alpha*2*Eijkl(0, 2, 0, 2)*norm[0];
+    returned_stress(1, 2) = returned_stress(2, 1) = stress(1, 2) - alpha*2*Eijkl(1, 2, 1, 2)*norm[1];
+  }
+  else
+  {
+    returned_stress(2, 2) = cohesion(intnl)/tanphi;
+    returned_stress(0, 2) = returned_stress(2, 0) = returned_stress(1, 2) = returned_stress(2, 1) = 0;
+  }
+
+  act[0] = true;
+}
 
 std::string
 TensorMechanicsPlasticWeakPlaneShear::modelName() const

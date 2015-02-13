@@ -20,6 +20,23 @@ class TensorMechanicsPlasticWeakPlaneTensile : public TensorMechanicsPlasticMode
  public:
   TensorMechanicsPlasticWeakPlaneTensile(const std::string & name, InputParameters parameters);
 
+  /**
+   * The active yield surfaces, given a vector of yield functions.
+   * This is used by FiniteStrainMultiPlasticity to determine the initial
+   * set of active constraints at the trial (stress, intnl) configuration.
+   * It is up to you (the coder) to determine how accurate you want the
+   * returned_stress to be.  Currently it is only used by FiniteStrainMultiPlasticity
+   * to estimate a good starting value for the Newton-Rahson procedure,
+   * so currently it may not need to be super perfect.
+   * @param f values of the yield functions
+   * @param stress stress tensor
+   * @param intnl internal parameter
+   * @param Eijkl elasticity tensor (stress = Eijkl*strain)
+   * @param act (output) act[i] = true if the i_th yield function is active
+   * @param returned_stress (output) Approximate value of the returned stress
+   */
+  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
+
   /// Returns the model name (WeakPlaneTensile)
   virtual std::string modelName() const;
 

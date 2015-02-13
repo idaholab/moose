@@ -763,6 +763,17 @@ RankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals) const
 }
 
 void
+RankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals, RankTwoTensor & eigvecs) const
+{
+  std::vector<PetscScalar> a;
+  syev("V", eigvals, a);
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      eigvecs(j, i) = a[i*N + j];
+}
+
+void
 RankTwoTensor::dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals) const
 {
   deigvals.resize(N);

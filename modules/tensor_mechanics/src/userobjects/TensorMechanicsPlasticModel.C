@@ -151,7 +151,7 @@ TensorMechanicsPlasticModel::dhardPotential_dintnlV(const RankTwoTensor & stress
 
 
 void
-TensorMechanicsPlasticModel::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & /*stress*/, const Real & /*intnl*/, std::vector<bool> & act) const
+TensorMechanicsPlasticModel::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & /*stress*/, const Real & /*intnl*/, const RankFourTensor & /*Eijkl*/, std::vector<bool> & act, RankTwoTensor & /*returned_stress*/) const
 {
   mooseAssert(f.size() == numberSurfaces(), "f incorrectly sized at " << f.size() << " in activeConstraints");
   act.resize(numberSurfaces());
