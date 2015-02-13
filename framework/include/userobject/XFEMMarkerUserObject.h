@@ -45,8 +45,10 @@ protected:
 private:
   MooseMesh & _mesh;
   std::vector<BoundaryID> _initiation_boundary_ids;
+  bool _secondary_cracks;
   XFEM *_xfem;
   std::map<unsigned int, RealVectorValue> _marked_elems;
+  std::set<unsigned int> _marked_frags;
   std::map<unsigned int, unsigned int> _marked_elem_sides;
 };
 

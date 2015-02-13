@@ -100,6 +100,7 @@ public:
 
   void addStateMarkedElem(unsigned int elem_id, RealVectorValue normal);
   void addStateMarkedElem(unsigned int elem_id, RealVectorValue normal, unsigned int marked_side);
+  void addStateMarkedFrag(unsigned int elem_id, RealVectorValue normal);
 
   void clearStateMarkedElems();
 
@@ -111,10 +112,12 @@ public:
   void build_efa_mesh();
   bool mark_cut_edges(Real time);
   bool mark_cut_edges_by_geometry(Real time);
-  Point get_efa_node_coor(CutElemMesh::node_t* CEMnode, CutElemMesh::element_t* CEMElem, 
-                          Elem *elem, MeshBase* displaced_mesh = NULL);
   bool mark_cut_edges_by_state();
+  bool init_crack_intersect_edge(Point cut_origin, RealVectorValue cut_normal, 
+                                 Point edge_p1, Point edge_p2, Real & dist);
   bool cut_mesh_with_efa();
+  Point get_efa_node_coor(CutElemMesh::node_t* CEMnode, CutElemMesh::element_t* CEMElem, 
+                          const Elem *elem, MeshBase* displaced_mesh = NULL);
 
   /**
    * Get the volume fraction of an element that is physical
@@ -143,6 +146,7 @@ private:
   std::set<const Elem*> _crack_tip_elems;
 
   std::map<const Elem*, RealVectorValue> _state_marked_elems;
+  std::set<const Elem*> _state_marked_frags;
   std::map<const Elem*, unsigned int> _state_marked_elem_sides;
 
   LocationMap<Node> _new_nodes_map;

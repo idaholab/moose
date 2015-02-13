@@ -21,12 +21,14 @@ InputParameters validParams<XFEMMarkerUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addParam<std::vector<BoundaryName> >("initiate_on_boundary","Permit cracks to initiate in elements adjacent to specified boundaries");
+  params.addRequiredParam<bool>("secondary_cracks", "should secondary cracks be allowed");
   return params;
 }
 
 XFEMMarkerUserObject::XFEMMarkerUserObject(const std::string & name, InputParameters parameters)
   :ElementUserObject(name, parameters),
-  _mesh(_subproblem.mesh())
+  _mesh(_subproblem.mesh()),
+  _secondary_cracks(getParam<bool>("secondary_cracks"))
 {
   FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
   if (fe_problem == NULL)
@@ -46,6 +48,7 @@ void
 XFEMMarkerUserObject::initialize()
 {
   _marked_elems.clear();
+  _marked_frags.clear(); // mark the fragment which has secondary crack growing from the primary crack
   _marked_elem_sides.clear();
 }
 
@@ -54,36 +57,49 @@ XFEMMarkerUserObject::execute()
 {
   RealVectorValue direction;
   bool isCut = _xfem->is_elem_cut(_current_elem);
-  if (!isCut)
+  bool isCTE = _xfem->is_elem_at_crack_tip(_current_elem);
+  bool isOnBoundary = false;
+  unsigned int boundarySide = 99999;
+  unsigned int _current_eid = _current_elem->id();
+  std::map<unsigned int, RealVectorValue>::iterator mit;
+  mit = _marked_elems.find(_current_eid);
+
+  for (unsigned int i=0; i<_initiation_boundary_ids.size(); ++i)
   {
-    bool isCTE = _xfem->is_elem_at_crack_tip(_current_elem);
-    bool isOnBoundary = false;
-    unsigned int boundarySide = 99999;
-    for (unsigned int i=0; i<_initiation_boundary_ids.size(); ++i)
+    if (_mesh.isBoundaryElem(_current_eid,_initiation_boundary_ids[i]))
     {
-      if (_mesh.isBoundaryElem(_current_elem->id(),_initiation_boundary_ids[i]))
-      {
-        isOnBoundary = true;
-        boundarySide = _mesh.sideWithBoundaryID(_current_elem, _initiation_boundary_ids[i]);
-      }
-    }
-    if ((isCTE || isOnBoundary)
-        && doesElementCrack(direction))
-    {
-      unsigned int _current_eid = _current_elem->id();
-      std::map<unsigned int, RealVectorValue>::iterator mit;
-      mit = _marked_elems.find(_current_eid);
-      if (mit != _marked_elems.end())
-      {
-        mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
-      }
-      _marked_elems[_current_eid] = direction;
-      if (isOnBoundary)
-      {
-        _marked_elem_sides[_current_eid] = boundarySide;
-      }
+      isOnBoundary = true;
+      boundarySide = _mesh.sideWithBoundaryID(_current_elem, _initiation_boundary_ids[i]);
     }
   }
+
+  if (isCTE && doesElementCrack(direction))
+  {
+    if (mit != _marked_elems.end())
+    {
+      mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
+    }
+    _marked_elems[_current_eid] = direction;
+  }
+  else if (isOnBoundary && doesElementCrack(direction))
+  {
+    if (mit != _marked_elems.end())
+    {
+      mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
+    }
+    _marked_elems[_current_eid] = direction;
+    _marked_elem_sides[_current_eid] = boundarySide;
+  }
+  else if (isCut && _secondary_cracks && doesElementCrack(direction))
+  {
+    if (mit != _marked_elems.end())
+    {
+      mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
+    }
+    _marked_elems[_current_eid] = direction;
+    _marked_frags.insert(_current_eid);
+  }
+  else {}
 }
 
 void
@@ -96,6 +112,13 @@ XFEMMarkerUserObject::threadJoin(const UserObject &y)
         ++mit )
   {
     _marked_elems[mit->first] = mit->second; //TODO do error checking for duplicates here too
+  }
+
+  for ( std::set<unsigned int>::const_iterator mit = xmuo._marked_frags.begin();
+        mit != xmuo._marked_frags.end();
+        ++mit )
+  {
+    _marked_frags.insert(*mit); //TODO do error checking for duplicates here too
   }
 
   for ( std::map<unsigned int, unsigned int>::const_iterator mit = xmuo._marked_elem_sides.begin();
@@ -120,12 +143,17 @@ XFEMMarkerUserObject::finalize()
     {
       _xfem->addStateMarkedElem(mit->first, mit->second, _marked_elem_sides[mit->first]);
     }
+    else if (_marked_frags.find(mit->first) != _marked_frags.end())
+    {
+      _xfem->addStateMarkedFrag(mit->first, mit->second);
+    }
     else
     {
       _xfem->addStateMarkedElem(mit->first, mit->second);
     }
   }
   _marked_elems.clear();
+  _marked_frags.clear();
   _marked_elem_sides.clear();
 }
 

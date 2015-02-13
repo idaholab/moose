@@ -113,6 +113,7 @@ class CutElemMesh
     bool containsNode(node_t *node);
     bool getNodeMasters(node_t* node, std::vector<node_t*> &master_nodes, std::vector<double> &master_weights);
     bool is_interior_edge();
+    bool is_elem_full_edge();
     void remove_embedded_node();
 
     private:
@@ -147,6 +148,8 @@ class CutElemMesh
     std::vector<node_t*> commonNodesWithEdge(edge_t & other_edge);
     unsigned int get_num_cuts();
     element_t* get_host();
+    std::vector<unsigned int> get_interior_edge_id();
+    bool is_edge_second_cut(unsigned int edge_id);
 
 //    std::vector< node_t*> boundary_nodes;
     std::vector< edge_t*> boundary_edges;
@@ -186,6 +189,7 @@ class CutElemMesh
 
     //Get the index of the specifed element in the edge_neighbors vector
     unsigned int get_neighbor_index(element_t * neighbor_elem);
+    unsigned int get_num_edge_neighbors(unsigned int edge_id);
 
     //Find out what side the specified element is on, and add it as a crack tip neighbor
     //element for that side.
@@ -205,6 +209,10 @@ class CutElemMesh
     //if the crack will extend into the next element, or if it has a non-physical node
     //connected to a face where a crack terminates, but will extend.
     bool shouldDuplicateCrackTipSplitElem();
+    bool shouldDuplicateForPhantomCorner();
+
+    // get all phantom nodes on the specified edge
+    std::set<node_t*> getPhantomNodeOnEdge(unsigned int edge_id);
 
     //Given a global node, create a new local node
     node_t * create_local_node_from_global_node(const node_t * global_node) const;
@@ -228,11 +236,14 @@ class CutElemMesh
 
     //check if the element has only one fragment which has tip edges
     bool frag_has_tip_edges();
+    unsigned int get_tip_edge_id();
 
     //get the parametric coords of an embedded node
     bool getEmbeddedNodeParaCoor(node_t* embedded_node, std::vector<double> &para_coor);
     unsigned int getNumInteriorNodes();
     unsigned int get_num_cuts();
+    bool is_cut_twice();
+    void display_nodes();
 
     //id
     unsigned int id;
@@ -258,8 +269,7 @@ class CutElemMesh
 
     private:
 
-    void mapParaCoorFrom1Dto2D(unsigned int edge_id, unsigned int num_edges,
-                               double xi_1d, std::vector<double> &para_coor);
+    void mapParaCoorFrom1Dto2D(unsigned int edge_id, double xi_1d, std::vector<double> &para_coor);
   };
 
   public:
@@ -339,5 +349,8 @@ class CutElemMesh
   std::vector< element_t* > ParentElements;
   std::map< node_t*, std::set< element_t *> > InverseConnectivityMap;
 };
+
+template <class T> unsigned int num_common_elems(std::set<T> &v1, std::set<T> &v2);
+template <class T> unsigned int num_common_elems(std::set<T> &v1, std::vector<T> &v2);
 
 #endif // #ifndef CUTELEM_MESH_H
