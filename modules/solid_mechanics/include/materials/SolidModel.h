@@ -79,8 +79,10 @@ protected:
   Function * const _poissons_ratio_function;
 
   const CRACKING_RELEASE _cracking_release;
-  const Real _cracking_stress;
+  Real _cracking_stress;
   const Real _cracking_residual_stress;
+  Function * const _cracking_stress_function;
+
   Real _cracking_alpha;
   std::vector<unsigned int> _active_crack_planes;
   const unsigned int _max_cracks;
