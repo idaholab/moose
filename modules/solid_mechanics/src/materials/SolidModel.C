@@ -36,6 +36,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
   params.addParam<Real>("cracking_residual_stress", 0.0, "The fraction of the cracking stress allowed to be maintained following a crack.");
+  params.addParam<FunctionName>("cracking_stress_function", "", "The cracking stress as a function of time and location" );
   params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
   params.addParam<Real>("cracking_neg_fraction", "The fraction of the cracking strain at which a transitition begins during decreasing strain to the original stiffness.");
@@ -101,6 +102,7 @@ SolidModel::SolidModel( const std::string & name,
   _cracking_stress( parameters.isParamValid("cracking_stress") ?
                     (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
   _cracking_residual_stress( getParam<Real>("cracking_residual_stress") ),
+  _cracking_stress_function( getParam<FunctionName>("cracking_stress_function") != "" ? &getFunction("cracking_stress_function") : NULL),
   _cracking_alpha( 0 ),
   _active_crack_planes(3,1),
   _max_cracks( getParam<unsigned int>("max_cracks") ),
@@ -364,7 +366,8 @@ void
 SolidModel::createElasticityTensor()
 {
   bool constant(true);
-  if ( _cracking_stress > 0 || _youngs_modulus_function || _poissons_ratio_function )
+
+  if ( _cracking_stress > 0 || _youngs_modulus_function || _poissons_ratio_function || _cracking_stress_function )
   {
     constant = false;
   }
@@ -546,6 +549,10 @@ SolidModel::initQpStatefulProperties()
     _stress_old_prop[_qp].fillFromInputVector( s );
   }
 
+  if (_cracking_stress_function != NULL)
+  {
+    _cracking_stress = _cracking_stress_function->value(_t, _q_point[_qp]);
+  }
   if (_cracking_stress > 0)
   {
     (*_crack_flags)[_qp](0) =
@@ -702,6 +709,11 @@ SolidModel::computeConstitutiveModelStress()
 void
 SolidModel::computeElasticityTensor()
 {
+  if (_cracking_stress_function != NULL)
+   {
+     _cracking_stress = _cracking_stress_function->value(_t, _q_point[_qp]);
+   }
+
   _stress_old = _stress_old_prop[_qp];
 
   bool changed = updateElasticityTensor( *_local_elasticity_tensor );
@@ -1039,6 +1051,11 @@ SolidModel::computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_stra
 void
 SolidModel::crackingStressRotation()
 {
+  if (_cracking_stress_function != NULL)
+   {
+     _cracking_stress = _cracking_stress_function->value(_t, _q_point[_qp]);
+   }
+
 
   if (_cracking_stress > 0)
   {

@@ -16,6 +16,14 @@
     scale_refine = 4
   [../]
 
+ [./cracking_function]
+    type = Exodiff
+    input = cracking_function.i
+    exodiff = cracking_function_out.e
+    abs_zero = 1e-4
+    scale_refine = 4
+  [../]
+
   [./exponential]
     type = Exodiff
     input = cracking_exponential.i
