@@ -119,7 +119,6 @@ FiniteStrainMultiPlasticity::computeQpStress()
   if (!found_solution)
     plasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _elasticity_tensor[_qp], _strain_increment[_qp], _yf[_qp], number_iterations, linesearch_needed, ld_encountered, constraints_added);
 
-  // Moose::out << "QP return complete\n";
 
   postReturnMap();
 
@@ -244,14 +243,6 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
       num_consecutive_successes += 1;
       time_simulated += step_size;
 
-      //Moose::out << " returned_with_yf(0=neg,1=zero) ";
-      //for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
-      //if (yf[surface] < -_f[modelNumber(surface)]->_f_tol)
-      // Moose::out << "0";
-      //else
-      //  Moose::out << "1";
-      //Moose::out << "\n";
-
       if (time_simulated < 1.0)  // this condition is just for optimization: if time_simulated=1 then the "good" quantities are no longer needed
       {
         stress_good = stress;
@@ -278,7 +269,6 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
         yf[surface] = yf_good[surface];
       dep = step_size*strain_increment;
 
-      // Moose::out << " unsuccessful, cutting timestep to " << step_size << "\n";
     }
   }
 
@@ -366,10 +356,6 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
   std::vector<bool> act;
   buildActiveConstraints(f, stress, intnl, E_ijkl, act);
 
-  //Moose::out << "initial_act= ";
-  //for (unsigned i = 0 ; i < act.size() ; ++i)
-  //  Moose::out << act[i];
-
 
   // Inverse of E_ijkl (assuming symmetric)
   RankFourTensor E_inv = E_ijkl.invSymm();
@@ -446,9 +432,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
 
     // The Newton-Raphson loops
     while (nr_res2 > 0.5 && local_iter++ < _max_iter && single_step_success)
-      //{Moose::out << " starting singlestep with local_iter = " << local_iter << "\n";
       single_step_success = singleStep(nr_res2, stress, intnl_old, intnl, pm, delta_dp, E_inv, f, epp, ic, act, deact_scheme, linesearch_needed, ld_encountered);
-      //Moose::out << "exiting singlestep with nr_res2 = " << nr_res2 << " single_step_success = " << single_step_success << " and eigvals = " ;   std::vector<Real> eigvals;  stress.symmetricEigenvalues(eigvals); Moose::out << eigvals[0] << " " << eigvals[1] << " " <<eigvals[2] << "\n"; stress.print(); }
     bool nr_good = (nr_res2 <= 0.5 && local_iter <= _max_iter && single_step_success);
 
 
@@ -493,11 +477,6 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
       kt_good = checkKuhnTucker(f, pm, act);
       if (!kt_good)
       {
-        // Moose::out << " Kuhn-Tucker failed\n";
-        // Kuhn-Tucker conditions failed.
-        // We can try turning off the constraints that
-        // caused KT-failure
-        // Or, if deact_scheme == "dumb", just increase the dumb_iteration
         if (deact_scheme != "dumb")
         {
           applyKuhnTucker(f, pm, act);
@@ -544,7 +523,6 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
 
       if (!admissible)
       {
-        // Moose::out << " Admissible failed\n";
         // Not admissible.
         // We can try adding constraints back in
         // We can try changing the deactivation scheme
@@ -563,10 +541,6 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
             constraints_added = true;
             for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
               act[surface] = act_plus[surface];
-            // Moose::out << "adding constraints in so act= ";
-            // for (unsigned i = 0 ; i < act.size() ; ++i)
-            //  Moose::out << act[i];
-            // Moose::out << "\n";
           }
           else
             add_constraints = false;  // haven't managed to add a new combination
@@ -643,10 +617,6 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
   // returned, with either success or failure
   if (successful_return)
   {
-    //Moose::out << " final_act= ";
-    //for (unsigned i = 0 ; i < act.size() ; ++i)
-    //  Moose::out << act[i];
-    //Moose::out << "\n";
     plastic_strain += delta_dp;
     if (f.size() != _num_surfaces)
     {
@@ -697,7 +667,6 @@ FiniteStrainMultiPlasticity::changeScheme(const std::vector<bool> & initial_act,
   }
   else if ((current_deactivation_scheme == "safe" && (_deactivation_scheme == "optimized_to_safe_to_dumb" || _deactivation_scheme == "safe_to_dumb") && can_revert_to_dumb) || (current_deactivation_scheme == "optimized" && _deactivation_scheme == "optimized_to_dumb" && can_revert_to_dumb))
   {
-    // Moose::out << " Changing to dumb\n";
     current_deactivation_scheme = "dumb";
     dumb_iteration = 0;
     buildDumbOrder(initial_stress, intnl_old, dumb_order);
@@ -899,18 +868,14 @@ FiniteStrainMultiPlasticity::checkKuhnTucker(const std::vector<Real> & f, const 
     {
       if (f[ind++] < -_f[modelNumber(surface)]->_f_tol)
         if (pm[surface] != 0)
-          //{ Moose::out << "  KT: surface " << surface << " has f = " << f[ind-1] << " and pm = " << pm[surface] << "\n";
           return false;
-          //}
     }
     else if (pm[surface] != 0)
       mooseError("Crash due to plastic multiplier not being zero.  This occurred because of poor coding!!");
   }
   for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
     if (pm[surface] < 0)
-      //{ Moose::out << "  KT: surface " << surface << " has pm = " << pm[surface] << " which is negative \n";
       return false;
-      //}
   return true;
 }
 
@@ -1143,11 +1108,6 @@ FiniteStrainMultiPlasticity::incrementDumb(int & dumb_iteration, const std::vect
   dumb_iteration += 1;
   for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
     act[dumb_order[surface]] = (dumb_iteration & (1 << surface)); // returns true if the surface_th bit of dumb_iteration == 1
-  //Moose::out << "increment dumb to act= ";
-  //for (unsigned i = 0 ; i < act.size() ; ++i)
-  //  Moose::out << act[i];
-  //Moose::out << "\n";
-
 }
 
 bool

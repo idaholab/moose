@@ -305,10 +305,8 @@ MultiPlasticityRawComponentAssembler::buildActiveConstraintsJoint(const std::vec
   f_single[0] = f[0];
   _f[0]->activeConstraints(f_single, stress, intnl[0], Eijkl, active_tensile, returned_stress);
   _f[1]->yieldFunctionV(returned_stress, intnl[1], f_single);
-  //Moose::out << "prediction: tensile act = " << active_tensile[0] << "\n";
   if (f_single[0] <= _f[1]->_f_tol)
   {
-    //Moose::out << "tensile alone\n";
     act[0] = active_tensile[0];
     return;
   }
@@ -318,10 +316,8 @@ MultiPlasticityRawComponentAssembler::buildActiveConstraintsJoint(const std::vec
   f_single[0] = f[1];
   _f[1]->activeConstraints(f_single, stress, intnl[1], Eijkl, active_shear, returned_stress);
   _f[0]->yieldFunctionV(returned_stress, intnl[0], f_single);
-  //Moose::out << "prediction: shear act = " << active_shear[0] << "\n";
   if (f_single[0] <= _f[0]->_f_tol)
   {
-    //Moose::out << "shear alone\n";
     act[1] = active_shear[0];
     return;
   }
@@ -349,7 +345,6 @@ MultiPlasticityRawComponentAssembler::buildActiveConstraintsRock(const std::vect
   f_single[2] = f[2];
   _f[0]->activeConstraints(f_single, stress, intnl[0], Eijkl, active_tensile, returned_stress);
   _f[1]->yieldFunctionV(returned_stress, intnl[1], f_single);
-  //Moose::out << "prediction: tensile act = " << active_tensile[0] << active_tensile[1] << active_tensile[2] << "\n";
   if (f_single[0] <= _f[1]->_f_tol && f_single[1] <= _f[1]->_f_tol && f_single[2] <= _f[1]->_f_tol && f_single[3] <= _f[1]->_f_tol && f_single[4] <= _f[1]->_f_tol && f_single[5] <= _f[1]->_f_tol)
   {
     act[0] = active_tensile[0];
@@ -368,7 +363,6 @@ MultiPlasticityRawComponentAssembler::buildActiveConstraintsRock(const std::vect
   f_single[5] = f[8];
   _f[1]->activeConstraints(f_single, stress, intnl[1], Eijkl, active_MC, returned_stress);
   _f[0]->yieldFunctionV(returned_stress, intnl[0], f_single);
-  //Moose::out << "prediction: MC act = " << active_MC[0] << active_MC[1] << active_MC[2]  << active_MC[3] << active_MC[4] << active_MC[5] << "\n";
   if (f_single[0] <= _f[0]->_f_tol && f_single[1] <= _f[0]->_f_tol && f_single[2] <= _f[0]->_f_tol)
   {
     act[3] = active_MC[0];

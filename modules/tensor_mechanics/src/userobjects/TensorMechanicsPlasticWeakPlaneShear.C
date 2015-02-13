@@ -251,6 +251,12 @@ TensorMechanicsPlasticWeakPlaneShear::activeConstraints(const std::vector<Real> 
     norm[0] = 0.25*(stress(0, 2)+stress(2,0))/tau;
     norm[1] = 0.25*(stress(1, 2)+stress(2,1))/tau;
   }
+  else
+  {
+    returned_stress(2, 2) = cohesion(intnl)/tanphi;
+    act[0] = true;
+    return;
+  }
   norm[2] = tanpsi;
 
   // to get the flow directions, we have to multiply norm by Eijkl.
@@ -264,16 +270,19 @@ TensorMechanicsPlasticWeakPlaneShear::activeConstraints(const std::vector<Real> 
 
   if (1 - alpha*Eijkl(0,2,0,2)/tau >= 0)
   {
-    // returning to the "edge" of the cone
+    // returning to the "surface" of the cone
     returned_stress(2, 2) = stress(2, 2) - alpha*Eijkl(2, 2, 2, 2)*norm[2];
     returned_stress(0, 2) = returned_stress(2, 0) = stress(0, 2) - alpha*2*Eijkl(0, 2, 0, 2)*norm[0];
     returned_stress(1, 2) = returned_stress(2, 1) = stress(1, 2) - alpha*2*Eijkl(1, 2, 1, 2)*norm[1];
   }
   else
   {
+    // returning to the "tip" of the cone
     returned_stress(2, 2) = cohesion(intnl)/tanphi;
     returned_stress(0, 2) = returned_stress(2, 0) = returned_stress(1, 2) = returned_stress(2, 1) = 0;
   }
+  returned_stress(0, 0) = stress(0, 0) - Eijkl(0, 0, 2, 2)*(stress(2, 2) - returned_stress(2, 2))/Eijkl(2, 2, 2, 2);
+  returned_stress(1, 1) = stress(1, 1) - Eijkl(1, 1, 2, 2)*(stress(2, 2) - returned_stress(2, 2))/Eijkl(2, 2, 2, 2);
 
   act[0] = true;
 }
