@@ -74,6 +74,35 @@ TensorMechanicsPlasticWeakPlaneTensile::dtensile_strength(const Real internal_pa
   return _strength.derivative(internal_param);
 }
 
+void
+TensorMechanicsPlasticWeakPlaneTensile::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
+{
+  act.assign(1, false);
+
+  if (f[0] <= _f_tol)
+  {
+    returned_stress = stress;
+    return;
+  }
+
+  Real str = tensile_strength(intnl);
+
+  RankTwoTensor n; // flow direction
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+      n(i, j) = Eijkl(i, j, 2, 2);
+
+  // returned_stress = stress - alpha*n
+  // where alpha = (stress(2, 2) - str)/n(2, 2)
+  Real alpha = (stress(2, 2) - str)/n(2, 2);
+
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+      returned_stress(i, j) = stress(i, j) - alpha*n(i, j);
+
+  act[0] = true;
+}
+
 std::string
 TensorMechanicsPlasticWeakPlaneTensile::modelName() const
 {

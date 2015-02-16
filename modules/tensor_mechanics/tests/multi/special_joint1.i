@@ -1,5 +1,6 @@
 # Plasticity models:
-# Planar tensile with strength = 1MPa
+# WeakPlaneTensile with strength = 1000Pa
+# WeakPlaneShear with cohesion = 0.1MPa and friction angle = 25
 #
 # Lame lambda = 1GPa.  Lame mu = 1.3GPa
 #
@@ -9,12 +10,12 @@
   type = GeneratedMesh
   dim = 3
   nx = 1000
-  ny = 1250
+  ny = 125
   nz = 1
   xmin = 0
   xmax = 1000
   ymin = 0
-  ymax = 1250
+  ymax = 125
   zmin = 0
   zmax = 1
 []
@@ -105,19 +106,15 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f0]
+  [./linesearch]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f1]
+  [./ld]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f2]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./int0]
+  [./constr_added]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -170,30 +167,20 @@
     index_i = 2
     index_j = 2
   [../]
-  [./f0]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 0
-    variable = f0
+  [./linesearch]
+    type = MaterialRealAux
+    property = plastic_linesearch_needed
+    variable = linesearch
   [../]
-  [./f1]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 1
-    variable = f1
+  [./ld]
+    type = MaterialRealAux
+    property = plastic_linear_dependence_encountered
+    variable = ld
   [../]
-  [./f2]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 2
-    variable = f2
-  [../]
-  [./int0]
-    type = MaterialStdVectorAux
-    property = plastic_internal_parameter
-    factor = 1E6
-    index = 0
-    variable = int0
+  [./constr_added]
+    type = MaterialRealAux
+    property = plastic_constraints_added
+    variable = constr_added
   [../]
   [./iter]
     type = MaterialRealAux
@@ -203,76 +190,64 @@
 []
 
 [Postprocessors]
-  [./tot_iters]
-    type = ElementIntegralMaterialProperty
-    mat_prop = plastic_NR_iterations
-    outputs = console
-  [../]
-  [./raw_f0]
-    type = ElementExtremeValue
-    variable = f0
-    outputs = console
-  [../]
-  [./raw_f1]
-    type = ElementExtremeValue
-    variable = f1
-    outputs = console
-  [../]
-  [./raw_f2]
-    type = ElementExtremeValue
-    variable = f2
-    outputs = console
-  [../]
-  [./iter]
+  [./max_iter]
     type = ElementExtremeValue
     variable = iter
     outputs = console
   [../]
-  [./f0]
-    type = PlotFunction
-    function = should_be_zero0_fcn
+  [./av_linesearch]
+    type = ElementAverageValue
+    variable = linesearch
+    outputs = 'console csv'
   [../]
-  [./f1]
-    type = PlotFunction
-    function = should_be_zero1_fcn
+  [./av_ld]
+    type = ElementAverageValue
+    variable = ld
+    outputs = 'console csv'
   [../]
-  [./f2]
-    type = PlotFunction
-    function = should_be_zero2_fcn
+  [./av_constr_added]
+    type = ElementAverageValue
+    variable = constr_added
+    outputs = 'console csv'
   [../]
-[]
-
-[Functions]
-  [./should_be_zero0_fcn]
-    type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f0'
-  [../]
-  [./should_be_zero1_fcn]
-    type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f1'
-  [../]
-  [./should_be_zero2_fcn]
-    type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f2'
+  [./av_iter]
+    type = ElementAverageValue
+    variable = iter
+    outputs = 'console csv'
   [../]
 []
 
 [UserObjects]
-  [./hard]
+  [./wpt_str]
     type = TensorMechanicsHardeningConstant
-    value = 1E6
+    value = 1000
   [../]
-  [./tensile]
-    type = TensorMechanicsPlasticTensileMulti
-    tensile_strength = hard
-    yield_function_tolerance = 1.0E-1
-    shift = 1.0E-1
+  [./wpt]
+    type = TensorMechanicsPlasticWeakPlaneTensile
+    tensile_strength = wpt_str
+    yield_function_tolerance = 1.0
+    internal_constraint_tolerance = 1.0E-7
+  [../]
+
+  [./wps_c]
+    type = TensorMechanicsHardeningConstant
+    value = 1.0E5
+  [../]
+  [./wps_tan_phi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.466
+  [../]
+  [./wps_tan_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.087
+  [../]
+  [./wps]
+    type = TensorMechanicsPlasticWeakPlaneShear
+    cohesion = wps_c
+    tan_friction_angle = wps_tan_phi
+    tan_dilation_angle = wps_tan_psi
+    smoother = 0
+    yield_function_tolerance = 1.0
     internal_constraint_tolerance = 1.0E-7
   [../]
 []
@@ -285,21 +260,23 @@
     disp_y = disp_y
     disp_z = disp_z
     fill_method = symmetric_isotropic
-    C_ijkl = '1E9 1.3E9'
-    #C_ijkl = '0 1.3E9'
-    deactivation_scheme = 'safe_to_dumb'
+    C_ijkl = '1.0E9 1.3E9'
     ep_plastic_tolerance = 1E-7
-    plastic_models = 'tensile'
+
+    plastic_models = 'wpt wps'
     max_NR_iterations = 5
-    min_stepsize = 1E-3
+    specialIC = 'joint'
+    deactivation_scheme = 'safe'
+    min_stepsize = 1
     max_stepsize_for_dumb = 1
+
     debug_fspb = 1
     debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
-    debug_jac_at_pm = '1 1 1'
-    debug_jac_at_intnl = '1 1 1'
+    debug_jac_at_pm = '1 1 1 1'
+    debug_jac_at_intnl = '1 1 1 1'
     debug_stress_change = 1E1
-    debug_pm_change = '1E-6 1E-6 1E-6'
-    debug_intnl_change = '1E-6 1E-6 1E-6'
+    debug_pm_change = '1E-6 1E-6 1E-6 1E-6'
+    debug_intnl_change = '1E-6 1E-6 1E-6 1E-6'
   [../]
 []
 
@@ -312,11 +289,14 @@
 
 
 [Outputs]
-  file_base = random_planar
-  output_initial = true
+  file_base = special_joint1
   exodus = false
-  print_linear_residuals = true
-  print_perf_log = true
+  output_on = 'initial timestep_end'
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = false
+  [../]
   [./csv]
     type = CSV
     interval = 1

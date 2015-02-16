@@ -211,6 +211,7 @@
     friction_angle = phi
     dilation_angle = psi
     yield_function_tolerance = 1E-3
+    shift = 1E-4
     internal_constraint_tolerance = 1E-9
   [../]
 []
