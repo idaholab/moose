@@ -48,6 +48,9 @@ protected:
    */
   unsigned int _num_surfaces;
 
+  /// Allows initial set of active constraints to be chosen optimally
+  MooseEnum _specialIC;
+
   /// User objects that define the yield functions, flow potentials, etc
   std::vector<const TensorMechanicsPlasticModel *> _f;
 
@@ -152,9 +155,10 @@ protected:
    * @param f yield functions (should be _num_surfaces of these)
    * @param stress stress tensor
    * @param intnl internal parameters
+   * @param Eijkl elasticity tensor (stress = Eijkl*strain)
    * @param act (output) the set of active constraints (will be resized to _num_surfaces)
    */
-  virtual void buildActiveConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<bool> & act);
+  virtual void buildActiveConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const std::vector<Real> & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act);
 
   /// returns the model number, given the surface number
   unsigned int modelNumber(unsigned int surface);
@@ -190,6 +194,32 @@ protected:
 
   /// _surfaces_given_model[model_number] = vector of surface numbers for this model
   std::vector<std::vector<unsigned int> > _surfaces_given_model;
+
+  /**
+   * "Rock" version
+   * Constructs a set of active constraints, given the yield functions, f.
+   * This uses TensorMechanicsPlasticModel::activeConstraints to identify the active
+   * constraints for each model.
+   * @param f yield functions (should be _num_surfaces of these)
+   * @param stress stress tensor
+   * @param intnl internal parameters
+   * @param Eijkl elasticity tensor (stress = Eijkl*strain)
+   * @param act (output) the set of active constraints (will be resized to _num_surfaces)
+   */
+  void buildActiveConstraintsRock(const std::vector<Real> & f, const RankTwoTensor & stress, const std::vector<Real> & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act);
+
+  /**
+   * "Joint" version
+   * Constructs a set of active constraints, given the yield functions, f.
+   * This uses TensorMechanicsPlasticModel::activeConstraints to identify the active
+   * constraints for each model.
+   * @param f yield functions (should be _num_surfaces of these)
+   * @param stress stress tensor
+   * @param intnl internal parameters
+   * @param Eijkl elasticity tensor (stress = Eijkl*strain)
+   * @param act (output) the set of active constraints (will be resized to _num_surfaces)
+   */
+  void buildActiveConstraintsJoint(const std::vector<Real> & f, const RankTwoTensor & stress, const std::vector<Real> & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act);
 
 };
 
