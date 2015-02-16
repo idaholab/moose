@@ -1,5 +1,5 @@
 class InputParameters:
-  def __init__(self):
+  def __init__(self, *args):
     self.valid = {}
     self.desc = {}
     self.substitute = {}

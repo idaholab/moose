@@ -107,7 +107,6 @@ class PresentationBuilder(object):
 
     # Insert the code format
     if name == 'bottom' and self._format == 'remark' and 'code' in self._params:
-      print 'hello'
       data = re.sub(r"(highlightStyle:.*?\,)", "highlightStyle: '" + self._params['code'] + "',", data)
 
     # Return the html

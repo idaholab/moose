@@ -1,7 +1,5 @@
-import re, urllib
-
+import re, urllib, traceback, sys
 from ..images import ImageBase
-
 
 ##
 # Image class for DjangoWikiSlide class
@@ -28,16 +26,16 @@ class DjangoWikiImage(ImageBase):
     # Get a reference to the image map contained in DjangoSlideSet
     self._image_map = self.parent.parent.images
 
-    # Store the caption, if it is not provided in the parameters
-    if not self.isParamValid('caption'):
-      if len(self.match.groups()) > 2:
-        self._pars['caption'] = self.match.group(3).replace('\r', '')
-
-    # Grab the image alignment if it is not provided
-    if not self.isParamValid('align'):
-      align = re.search(r'align:\s*(.*)', self.match.group(2))
-      if align:
-        self._pars['align'] = align.group(1)
+    # Stored the caption, if it is not provided in the parameters
+ #   if not self.isParamValid('caption'):
+ #     if len(self.match.groups()) > 2:
+ #       self._pars['caption'] = self.match.group(3).replace('\r', '')
+ #
+ #   # Grab the image alignment if it is not provided
+ #   if not self.isParamValid('align'):
+ #     align = re.search(r'align:\s*(.*)', self.match.group(2))
+ #     if align:
+ #       self._pars['align'] = align.group(1)
 
     # Set the name and url parameters
     name, url = self._image_map[self.name()]
@@ -52,18 +50,24 @@ class DjangoWikiImage(ImageBase):
   def match(markdown):
 
     # List of match iterators to return
-    m = []
+    m = dict()
 
     # Caption
     pattern = re.compile(r'\s*\[image:([0-9]*)(.*)\]\s*\n\s{4,}(.*?)\n')
-    m.append(pattern.finditer(markdown))
+    for item in pattern.finditer(markdown):
+      id = item.group(1)
+      m[id] = ImageBase.seperateImageOptions(item.group(2))
+      m[id].update({'caption' : item.group(3)})
 
     # No caption
     pattern = re.compile(r'\s*\[image:([0-9]*)(.*)\]\s*\n')
-    m.append(pattern.finditer(markdown))
+    for item in pattern.finditer(markdown):
+      id = item.group(1)
+      m[id] = ImageBase.seperateImageOptions(item.group(2))
 
     # Return the list
     return m
+
 
   ##
   # Substitution regex
