@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'derivativetwophasematerial.i'
     exodiff = 'derivativetwophasematerial_out.e'
-    max_parallel = 1                              # -pc_type lu
+    max_parallel = 1
   [../]
   [./orderparameterfunctionmaterial]
     type = 'Exodiff'
@@ -14,5 +14,10 @@
     type = 'Exodiff'
     input = 'multibarrierfunction.i'
     exodiff = 'multibarrierfunction_out.e'
+  [../]
+  [./lagrangemult]
+    type = 'Exodiff'
+    input = 'lagrangemult.i'
+    exodiff = 'lagrangemult_out.e'
   [../]
 []
