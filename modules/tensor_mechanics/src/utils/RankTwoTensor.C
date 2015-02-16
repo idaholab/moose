@@ -860,3 +860,26 @@ RankTwoTensor::syev(const char * calculation_type, std::vector<PetscScalar> & ei
   if (info != 0)
     mooseError("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the PETSC LAPACK syev routine returned error code " << info);
 }
+
+void
+RankTwoTensor::initRandom()
+{
+  unsigned int rand_seed = 2000;
+  MooseRandom::seed( rand_seed );
+}
+
+RankTwoTensor
+RankTwoTensor::genRandomTensor( Real val )
+{
+
+  RankTwoTensor tensor;
+
+  tensor(0,0) = ( MooseRandom::rand() + 1.0 ) * val;
+  tensor(0,1) = tensor(1,0) = ( MooseRandom::rand() + 1.0 ) * val;
+  tensor(0,2) = tensor(2,0) = ( MooseRandom::rand() + 1.0 ) * val;
+  tensor(1,1) = ( MooseRandom::rand() + 1.0 ) * val;
+  tensor(1,2) = tensor(2,1) = ( MooseRandom::rand() + 1.0 ) * val;
+  tensor(2,2) = ( MooseRandom::rand() + 1.0 ) * val;
+
+  return tensor;
+}

@@ -27,6 +27,9 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   params.addParam<MooseEnum>("intvar_read_type", intvar_read_options, "Read from options for initial value of internal variables: Default from .i file");
   params.addParam<unsigned int>("num_slip_sys_props", 0, "Number of slip system specific properties provided in the file containing slip system normals and directions");
   params.addParam<bool>("save_euler_angle", false , "Saves the Euler angles as Material Property if true");
+  params.addParam<bool>("gen_random_stress_flag", false, "Flag to generate random stress to perform time cutback on constitutive failure");
+  params.addParam<bool>("input_random_scaling_var", false, "Flag to input scaling variable: _Cijkl(0,0,0,0) when false");
+  params.addParam<Real>("random_scaling_var", 1e9, "Random scaling variable: Large value can cause non-positive definiteness");
 
   return params;
 }
@@ -53,6 +56,9 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
     _intvar_read_type(getParam<MooseEnum>("intvar_read_type")),
     _num_slip_sys_props(getParam<unsigned int>("num_slip_sys_props")),
     _save_euler_angle(getParam<bool>("save_euler_angle")),
+    _gen_rndm_stress_flag(getParam<bool>("gen_random_stress_flag")),
+    _input_rndm_scale_var(getParam<bool>("input_random_scaling_var")),
+    _rndm_scale_var(getParam<Real>("random_scaling_var")),
     _fp(declareProperty<RankTwoTensor>("fp")), // Plastic deformation gradient
     _fp_old(declarePropertyOld<RankTwoTensor>("fp")), // Plastic deformation gradient of previous increment
     _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress
@@ -71,8 +77,12 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
   {
     _euler_ang = &declareProperty< std::vector<Real> >("euler_ang");
     _euler_ang_old = &declarePropertyOld< std::vector<Real> >("euler_ang");
-
   }
+
+  if ( !_input_rndm_scale_var )
+    _rndm_scale_var = _Cijkl(0,0,0,0);
+
+  _err_tol = false;
 
   _tau.resize(_nss);
   _slip_incr.resize(_nss);
@@ -97,6 +107,8 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
     mooseError("Crystal Plasticity Error: Specify number of internal variable's initial values to be read from slip system file");
 
   getSlipSystems();
+
+  RankTwoTensor::initRandom();
 
 }
 
@@ -488,6 +500,8 @@ FiniteStrainCrystalPlasticity::preSolveQp()
 
   _elasticity_tensor[_qp] = _Cijkl;
   _elasticity_tensor[_qp].rotate(rot);
+
+  _err_tol = false;
 }
 
 void
@@ -501,24 +515,35 @@ FiniteStrainCrystalPlasticity::solveQp()
 void
 FiniteStrainCrystalPlasticity::postSolveQp()
 {
-  _stress[_qp] = _fe * _pk2[_qp] * _fe.transpose()/_fe.det();
+  if ( _err_tol )
+  {
+    if ( _gen_rndm_stress_flag )
+    _stress[_qp] = RankTwoTensor::genRandomTensor( _rndm_scale_var );
+    else
+      mooseError("FiniteStrainCrystalPlasticity: Constitutive failure");
+  }
+  else
+  {
+    _stress[_qp] = _fe * _pk2[_qp] * _fe.transpose()/_fe.det();
 
-  _Jacobian_mult[_qp] += calcTangentModuli();//Calculate jacobian for preconditioner
+    _Jacobian_mult[_qp] += calcTangentModuli();//Calculate jacobian for preconditioner
 
-  RankTwoTensor iden;
-  iden.addIa(1.0);
+    RankTwoTensor iden;
+    iden.addIa(1.0);
 
-  _lag_e[_qp] = _deformation_gradient[_qp].transpose() * _deformation_gradient[_qp] - iden;
-  _lag_e[_qp] = _lag_e[_qp] * 0.5;
+    _lag_e[_qp] = _deformation_gradient[_qp].transpose() * _deformation_gradient[_qp] - iden;
+    _lag_e[_qp] = _lag_e[_qp] * 0.5;
 
 
-  RankTwoTensor rot;
-  rot = get_current_rotation(_deformation_gradient[_qp]); // Calculate material rotation
-  _update_rot[_qp] = rot * _crysrot;
+    RankTwoTensor rot;
+    rot = get_current_rotation(_deformation_gradient[_qp]); // Calculate material rotation
+    _update_rot[_qp] = rot * _crysrot;
 
-  if ( _save_euler_angle )
-    for ( unsigned int i = 0; i < LIBMESH_DIM; i++ )
-      (*_euler_ang)[_qp][i] = _Euler_angles(i);
+    if ( _save_euler_angle )
+      for ( unsigned int i = 0; i < LIBMESH_DIM; i++ )
+        (*_euler_ang)[_qp][i] = _Euler_angles(i);
+
+  }
 
 }
 
@@ -541,7 +566,7 @@ FiniteStrainCrystalPlasticity::solveStatevar()
   gmax = 1.1 * _gtol;
   iterg = 0;
 
-  while (gmax > _gtol && iterg < _maxiterg) // Check for slip system resistance update tolerance
+  while (gmax > _gtol && iterg < _maxiterg && !_err_tol ) // Check for slip system resistance update tolerance
   {
     preSolveStress();
     solveStress();
@@ -565,7 +590,11 @@ FiniteStrainCrystalPlasticity::solveStatevar()
   }
 
   if (iterg == _maxiterg)
-    mooseError("FiniteStrainCrystalPLasticity: Hardness Integration error gmax" << gmax << "\n");
+  {
+    mooseWarning("FiniteStrainCrystalPLasticity: Hardness Integration error gmax" << gmax << "\n");
+    _err_tol = true;
+
+  }
 }
 
 void
@@ -605,12 +634,16 @@ FiniteStrainCrystalPlasticity::solveStress()
   //  mooseAssert( slip_incr_max < _slip_incr_tol, "FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
 
   if ( slip_incr_max > _slip_incr_tol )
-    mooseError("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
+  {
+    mooseWarning("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
+    _err_tol = true;
+
+  }
 
   Real rnorm = resid.L2norm();
   // _console << "rnorm=" << iter << ' ' << rnorm << '\n';
 
-  while (rnorm > _rtol && iter <  _maxiter) // Check for stress residual tolerance
+  while (rnorm > _rtol && iter <  _maxiter && !_err_tol ) // Check for stress residual tolerance
   {
 
     dpk2 = - jac.invSymm() * resid; // Calculate stress increment
@@ -626,11 +659,22 @@ FiniteStrainCrystalPlasticity::solveStress()
 
     // mooseAssert( slip_incr_max < _slip_incr_tol, "FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
     if ( slip_incr_max > _slip_incr_tol )
-      mooseError("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
+    {
+      mooseWarning("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
+      _err_tol = true;
+
+    }
 
     rnorm = resid.L2norm();
     iter++;
   }
+
+  if ( iter >= _maxiter )
+  {
+    mooseWarning("FiniteStrainCrystalPLasticity: Stress Integration error rmax = " << rnorm);
+    _err_tol = true;
+  }
+
 }
 
 void
