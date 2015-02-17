@@ -5,8 +5,8 @@ InputParameters validParams<KKSCHBulk>()
 {
   InputParameters params = validParams<CHBulk>();
   params.addClassDescription("KKS model kernel for the Bulk Cahn-Hilliard term. This operates on the concentration 'c' as the non-linear variable");
-  params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function F (f_name in the corresponding DerivativeBaseMaterial)");
-  params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function F (f_name in the corresponding DerivativeBaseMaterial)");
+  params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
+  params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
   params.addRequiredCoupledVar("ca", "phase concentration corresponding to the non-linear variable of this kernel");
   params.addRequiredCoupledVar("cb", "phase concentration corresponding to the non-linear variable of this kernel");
   params.addCoupledVar("args_a", "Vector of additional arguments to Fa");

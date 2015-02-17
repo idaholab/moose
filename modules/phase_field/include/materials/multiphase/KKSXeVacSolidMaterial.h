@@ -1,7 +1,7 @@
 #ifndef KKSXEVACSOLIDMATERIAL_H
 #define KKSXEVACSOLIDMATERIAL_H
 
-#include "DerivativeBaseMaterial.h"
+#include "DerivativeFunctionMaterialBase.h"
 
 // Forward Declarations
 class KKSXeVacSolidMaterial;
@@ -9,11 +9,11 @@ class KKSXeVacSolidMaterial;
 template<>
 InputParameters validParams<KKSXeVacSolidMaterial>();
 
-class KKSXeVacSolidMaterial : public DerivativeBaseMaterial
+class KKSXeVacSolidMaterial : public DerivativeFunctionMaterialBase
 {
 public:
   KKSXeVacSolidMaterial(const std::string & name,
-          InputParameters parameters);
+                        InputParameters parameters);
 
 protected:
   virtual unsigned int expectedNumArgs();

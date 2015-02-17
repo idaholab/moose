@@ -9,8 +9,8 @@ InputParameters validParams<KKSPhaseChemicalPotential>()
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("KKS model kernel to enforce the pointwise equality of phase chemical potentials  dFa/dca = dFb/dcb. The non-linear variable of this kernel is ca.");
   params.addRequiredCoupledVar("cb", "Phase b concentration"); // note that ca is u, the non-linear variable!
-  params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function Fa (f_name in the corresponding DerivativeBaseMaterial)");
-  params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function Fb (f_name in the corresponding DerivativeBaseMaterial)");
+  params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function Fa (f_name in the corresponding derivative function material)");
+  params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function Fb (f_name in the corresponding derivative function material)");
   params.addCoupledVar("args_a", "Vector of further parameters to Fa (optional, to add in second cross derivatives of Fa)");
   params.addCoupledVar("args_b", "Vector of further parameters to Fb (optional, to add in second cross derivatives of Fb)");
   return params;

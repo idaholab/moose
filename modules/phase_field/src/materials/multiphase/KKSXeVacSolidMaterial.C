@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<KKSXeVacSolidMaterial>()
 {
-  InputParameters params = validParams<DerivativeBaseMaterial>();
+  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
   params.addClassDescription("KKS Solid phase free energy for Xe,Vac in UO2.  Fm(cmg,cmv)");
   params.addRequiredParam<Real>("T", "Temperature in [K]");
   params.addRequiredCoupledVar("cmg", "Gas concnetration");
@@ -13,7 +13,7 @@ InputParameters validParams<KKSXeVacSolidMaterial>()
 
 KKSXeVacSolidMaterial::KKSXeVacSolidMaterial(const std::string & name,
                                              InputParameters parameters) :
-    DerivativeBaseMaterial(name, parameters),
+    DerivativeFunctionMaterialBase(name, parameters),
     _T(getParam<Real>("T")),
     _Omega(2.53),
     _kB(8.6173324e-5),

@@ -4,8 +4,8 @@ template<>
 InputParameters validParams<KKSGlobalFreeEnergy>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function F (f_name in the corresponding DerivativeBaseMaterial)");
-  params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function F (f_name in the corresponding DerivativeBaseMaterial)");
+  params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
+  params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
   params.addParam<std::string>("h_name", "h", "Base name for the switching function h(eta)");
   params.addParam<std::string>("g_name", "g", "Base name for the double well function g(eta)");
   params.addRequiredParam<Real>("w", "Double well height parameter");
