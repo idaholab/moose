@@ -14,6 +14,7 @@ class DjangoWikiSet(SlideSet):
     params.addRequiredParam('wiki', 'The mooseframework.org wiki site to extract')
     params.addParam('url', 'http://www.mooseframework.org/', 'The location of the Django wiki')
     params.addParam('auto_insert_moose_wiki', True, 'When true links to other moose wiki content is automatically inserted')
+    params.addParam('insert_wiki_link', True, 'When auto linking wiki pages place the link at with the page before the inserted content')
     return params
 
 
@@ -43,7 +44,7 @@ class DjangoWikiSet(SlideSet):
 
     # Search for wiki content links
     if self.getParam('auto_insert_moose_wiki'):
-      regex = r'\[.*?\]\((/wiki/.*?\))'
+      regex = r'(\[.*?\])\((/wiki/.*?)\)'
       raw = re.sub(regex, self._insertLinkedWikiContent, raw)
 
 
@@ -86,9 +87,15 @@ class DjangoWikiSet(SlideSet):
   ##
   # Substitution method for moose wiki content
   def _insertLinkedWikiContent(self, match):
+    page = self._url + match.group(2)
+    content = ''
 
+    if self.getParam('insert_wiki_link'):
+      content += match.group(1) + '(' + page + ')\n'
 
-    return match.group(0)
+    content += '\n\n---\n\n'
+    content += self._extractMarkdownFromWiki(page)
+    return content
 
   ##
   # Substitution function for enabling table of contents via [TOC] in wiki content
