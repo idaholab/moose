@@ -40,11 +40,16 @@ InputParameters validParams<MooseParsedFunctionBase>()
 
 MooseParsedFunctionBase::MooseParsedFunctionBase(const std::string & /*name*/, InputParameters parameters) :
     _pfb_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
-    _vars(verifyVars(parameters)),
-    _vals(verifyVals(parameters))
+    _vars(parameters.get<std::vector<std::string> >("vars")),
+    _vals(parameters.get<std::vector<std::string> >("vals"))
 {
   if (_vars.size() != _vals.size())
     mooseError("Number of vars must match the number of vals for a MooseParsedFunction!");
+
+  // Loop through the variables assigned by the user and give an error if x,y,z,t are used
+  for (unsigned int i = 0; i < _vars.size(); ++i)
+    if (_vars[i].find_first_of("xyzt") != std::string::npos && _vars[i].size() == 1)
+      mooseError("The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use and must not be declared in \"vars\"");
 }
 
 MooseParsedFunctionBase::~MooseParsedFunctionBase()
@@ -60,34 +65,4 @@ MooseParsedFunctionBase::verifyFunction(const std::string & function_str)
 
   // Return the input equation (no error)
   return function_str;
-}
-
-const std::vector<std::string>
-MooseParsedFunctionBase::verifyVars(const InputParameters & parameters)
-{
-  // Test the vars is defined
-  if (!parameters.have_parameter<std::vector<std::string> >("vars"))
-      mooseError("An input of std::vector<std::string> named 'vars' must exist.");
-
-  // Get the 'vars' parameter
-  const std::vector<std::string> vars = parameters.get<std::vector<std::string> >("vars");
-
-  // Loop through the variables assigned by the user and give an error if x,y,z,t are used
-  for (unsigned int i=0; i < vars.size(); ++i)
-    if (vars[i].find_first_of("xyzt") != std::string::npos && vars[i].size() == 1)
-      mooseError("The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use and must not be declared in \"vars\"");
-
-  // Return the variables (no error)
-  return vars;
-}
-
-const std::vector<std::string>
-MooseParsedFunctionBase::verifyVals(const InputParameters & parameters)
-{
-  // Test the vars is defined
-  if (!parameters.have_parameter<std::vector<std::string> >("vals"))
-      mooseError("An input of std::vector<std::string> named 'vals' must exist.");
-
-  // Return the 'vals' parameter
-  return parameters.get<std::vector<std::string> >("vals");
 }
