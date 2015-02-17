@@ -28,6 +28,7 @@ InputParameters validParams<DerivativeParsedMaterial>()
 
 DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
                                                    InputParameters parameters) :
+    FunctionMaterialBase(name, parameters),
     DerivativeParsedMaterialHelper(name, parameters, USE_MOOSE_NAMES)
 {
   // check number of coupled variables
@@ -45,9 +46,15 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
   // get material property names
   std::vector<std::string> mat_prop_names = getParam<std::vector<std::string> >("material_property_names");
 
-  // Build function and derivatives
+  // Build function
   functionParse(getParam<std::string>("function"),
                 constant_names, constant_expressions,
                 mat_prop_names,
                 tol_names, tol_values);
+
+  // Take derivatives
+  functionsDerivative();
+
+  // Optimize
+  functionsOptimize();
 }
