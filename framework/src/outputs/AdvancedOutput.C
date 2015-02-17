@@ -26,43 +26,6 @@
 #include "VectorPostprocessor.h"
 #include "MooseUtils.h"
 
-
-// Constructor of OutputOnWarehouse; initializes the MultiMooseEnums for all available output types
-OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & output_on, const InputParameters & params) : OutputMapWrapper<MultiMooseEnum>()
-{
-  // Initialize each of the output_on settings for the various types of outputs
-  if (params.have_parameter<MultiMooseEnum>("output_nodal_on"))
-    _map.insert(std::make_pair("nodal", output_on));
-
-  if (params.have_parameter<MultiMooseEnum>("output_elemental_on"))
-    _map.insert(std::make_pair("elemental", output_on));
-
-  if (params.have_parameter<MultiMooseEnum>("output_scalars_on"))
-    _map.insert(std::make_pair("scalars", output_on));
-
-  if (params.have_parameter<MultiMooseEnum>("output_postprocessors_on"))
-    _map.insert(std::make_pair("postprocessors", output_on));
-
-  if (params.have_parameter<MultiMooseEnum>("output_vector_postprocessors_on"))
-    _map.insert(std::make_pair("vector_postprocessors", output_on));
-
-  if (params.have_parameter<MultiMooseEnum>("output_input_on"))
-    _map.insert(std::make_pair("input", Output::getExecuteOptions()));
-
-  if (params.have_parameter<MultiMooseEnum>("output_system_information_on"))
-    _map.insert(std::make_pair("system_information", Output::getExecuteOptions("initial")));
-}
-
-// Constructor of OutputDataWarehouse; initializes the OutputData structures for 'variable' based output types
-OutputDataWarehouse::OutputDataWarehouse() : OutputMapWrapper<OutputData>()
-{
-  _map["nodal"] = OutputData();
-  _map["elemental"] = OutputData();
-  _map["scalars"] = OutputData();
-  _map["postprocessors"] = OutputData();
-  _map["vector_postprocessors"] = OutputData();
-}
-
 // A function, only available in this file, for adding the AdvancedOutput parameters. This is
 // used to eliminate code duplication between the difference specializations of the validParams function.
 namespace
@@ -132,17 +95,17 @@ InputParameters validParams<AdvancedOutput<Output> >()
 }
 
 // Defines the output types to enable for the AdvancedOutput object
-template<class OutputBase>
+template<class T>
 MultiMooseEnum
-AdvancedOutput<OutputBase>::getOutputTypes()
+AdvancedOutput<T>::getOutputTypes()
 {
   return MultiMooseEnum("nodal=0 elemental=1 scalar=2 postprocessor=3 vector_postprocessor=4 input=5 system_information=6");
 }
 
 // Enables the output types (see getOutputTypes) for an AdvancedOutput object
-template<class OutputBase>
+template<class T>
 InputParameters
-AdvancedOutput<OutputBase>::enableOutputTypes(const std::string & names)
+AdvancedOutput<T>::enableOutputTypes(const std::string & names)
 {
   // The parameters object that will be returned
   InputParameters params = emptyInputParameters();
@@ -151,7 +114,7 @@ AdvancedOutput<OutputBase>::enableOutputTypes(const std::string & names)
   params.addPrivateParam("_output_valid_params_was_called", true);
 
   // Get the MultiEnum of output types
-  MultiMooseEnum output_types = AdvancedOutput<OutputBase>::getOutputTypes();
+  MultiMooseEnum output_types = AdvancedOutput<T>::getOutputTypes();
 
   // Update the enum of output types to append
   if (names.empty())
@@ -165,37 +128,38 @@ AdvancedOutput<OutputBase>::enableOutputTypes(const std::string & names)
 }
 
 // Constructor
-template<class OutputBase>
-AdvancedOutput<OutputBase>::AdvancedOutput(const std::string & name, InputParameters & parameters) :
-    OutputBase(name, parameters),
-    _advanced_output_on(OutputBase::_output_on, parameters)
+template<class T>
+AdvancedOutput<T>::AdvancedOutput(const std::string & name, InputParameters & parameters) :
+    T(name, parameters)
 {
+  T::_is_advanced = true;
+  T::_advanced_output_on = OutputOnWarehouse(T::_output_on, parameters);
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::init()
+AdvancedOutput<T>::init()
 {
   // Do not initialize more than once
   // This check is needed for YAK which calls Executioners from within Executioners
-  if (OutputBase::_initialized)
+  if (T::_initialized)
     return;
 
   // Check that enable[disable]OutputTypes was called
-  if (!OutputBase::isParamValid("_output_valid_params_was_called"))
-    mooseError("The static method AdvancedOutput<OutputBase>::enableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '" << OutputBase::_name << "'");
+  if (!T::isParamValid("_output_valid_params_was_called"))
+    mooseError("The static method AdvancedOutput<T>::enableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '" << T::_name << "'");
 
   // Initialize the available output
   initAvailableLists();
 
   // Separate the hide/show list into components
-  initShowHideLists(OutputBase::template getParam<std::vector<VariableName> >("show"),
-                    OutputBase::template getParam<std::vector<VariableName> >("hide"));
+  initShowHideLists(T::template getParam<std::vector<VariableName> >("show"),
+                    T::template getParam<std::vector<VariableName> >("hide"));
 
   // If 'elemental_as_nodal = true' the elemental variable names must be appended to the
   // nodal variable names. Thus, when libMesh::EquationSystem::build_solution_vector is called
   // it will create the correct nodal variable from the elemental
-  if (OutputBase::isParamValid("elemental_as_nodal") && OutputBase::template getParam<bool>("elemental_as_nodal"))
+  if (T::isParamValid("elemental_as_nodal") && T::template getParam<bool>("elemental_as_nodal"))
   {
     OutputData & nodal = _output_data["nodal"];
     OutputData & elemental = _output_data["elemental"];
@@ -205,7 +169,7 @@ AdvancedOutput<OutputBase>::init()
   }
 
   // Similarly as above, if 'scalar_as_nodal = true' append the elemental variable lists
-  if (OutputBase::isParamValid("scalar_as_nodal") && OutputBase::template getParam<bool>("scalar_as_nodal"))
+  if (T::isParamValid("scalar_as_nodal") && T::template getParam<bool>("scalar_as_nodal"))
   {
     OutputData & nodal = _output_data["nodal"];
     OutputData & scalar = _output_data["scalars"];
@@ -219,98 +183,98 @@ AdvancedOutput<OutputBase>::init()
     initOutputList(it->second);
 
   // Initialize the execution flags
-  for (std::map<std::string, MultiMooseEnum>::iterator it = _advanced_output_on.begin(); it != _advanced_output_on.end(); ++it)
+  for (std::map<std::string, MultiMooseEnum>::iterator it = T::_advanced_output_on.begin(); it != T::_advanced_output_on.end(); ++it)
     initExecutionTypes(it->first, it->second);
 
   // Set the initialization flag
-  OutputBase::_initialized = true;
+  T::_initialized = true;
 
   // **** DEPRECATED PARAMETER SUPPORT ****
-  if (OutputBase::isParamValid("output_postprocessors") && !OutputBase::template getParam<bool>("output_postprocessors"))
-    _advanced_output_on["postprocessors"].clear();
-  if (OutputBase::isParamValid("output_vector_postprocessors") && !OutputBase::template getParam<bool>("output_vector_postprocessors"))
-    _advanced_output_on["vector_postprocessors"].clear();
-  if (OutputBase::isParamValid("output_scalar_variables") && !OutputBase::template getParam<bool>("output_scalar_variables"))
-    _advanced_output_on["scalars"].clear();
-  if (OutputBase::isParamValid("output_elemental_variables") && !OutputBase::template getParam<bool>("output_elemental_variables"))
-    _advanced_output_on["elemental"].clear();
-  if (OutputBase::isParamValid("output_nodal_variables") && !OutputBase::template getParam<bool>("output_nodal_variables"))
-    _advanced_output_on["nodal"].clear();
-  if (OutputBase::isParamValid("output_system_information") && !OutputBase::template getParam<bool>("output_system_information"))
-    _advanced_output_on["system_information"].clear();
-  if (OutputBase::isParamValid("output_input") && !OutputBase::template getParam<bool>("output_input"))
-    _advanced_output_on["input"].clear();
+  if (T::isParamValid("output_postprocessors") && !T::template getParam<bool>("output_postprocessors"))
+    T::_advanced_output_on["postprocessors"].clear();
+  if (T::isParamValid("output_vector_postprocessors") && !T::template getParam<bool>("output_vector_postprocessors"))
+    T::_advanced_output_on["vector_postprocessors"].clear();
+  if (T::isParamValid("output_scalar_variables") && !T::template getParam<bool>("output_scalar_variables"))
+    T::_advanced_output_on["scalars"].clear();
+  if (T::isParamValid("output_elemental_variables") && !T::template getParam<bool>("output_elemental_variables"))
+    T::_advanced_output_on["elemental"].clear();
+  if (T::isParamValid("output_nodal_variables") && !T::template getParam<bool>("output_nodal_variables"))
+    T::_advanced_output_on["nodal"].clear();
+  if (T::isParamValid("output_system_information") && !T::template getParam<bool>("output_system_information"))
+    T::_advanced_output_on["system_information"].clear();
+  if (T::isParamValid("output_input") && !T::template getParam<bool>("output_input"))
+    T::_advanced_output_on["input"].clear();
 }
 
-template<class OutputBase>
-AdvancedOutput<OutputBase>::~AdvancedOutput()
+template<class T>
+AdvancedOutput<T>::~AdvancedOutput()
 {
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::outputNodalVariables()
+AdvancedOutput<T>::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for the output object named '" << OutputBase::_name << "'");
+  mooseError("Individual output of nodal variables is not support for the output object named '" << T::_name << "'");
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::outputElementalVariables()
+AdvancedOutput<T>::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for this output object named '" << OutputBase::_name << "'");
+  mooseError("Individual output of elemental variables is not support for this output object named '" << T::_name << "'");
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::outputPostprocessors()
+AdvancedOutput<T>::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for this output object named '" << OutputBase::_name << "'");
+  mooseError("Individual output of postprocessors is not support for this output object named '" << T::_name << "'");
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::outputVectorPostprocessors()
+AdvancedOutput<T>::outputVectorPostprocessors()
 {
-  mooseError("Individual output of VectorPostprocessors is not support for this output object named '" << OutputBase::_name << "'");
+  mooseError("Individual output of VectorPostprocessors is not support for this output object named '" << T::_name << "'");
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::outputScalarVariables()
+AdvancedOutput<T>::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for this output object named '" << OutputBase::_name << "'");
+  mooseError("Individual output of scalars is not support for this output object named '" << T::_name << "'");
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::outputSystemInformation()
+AdvancedOutput<T>::outputSystemInformation()
 {
-  mooseError("Output of system information is not support for this output object named '" << OutputBase::_name << "'");
+  mooseError("Output of system information is not support for this output object named '" << T::_name << "'");
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::outputInput()
+AdvancedOutput<T>::outputInput()
 {
-  mooseError("Output of the input file information is not support for this output object named '" << OutputBase::_name << "'");
+  mooseError("Output of the input file information is not support for this output object named '" << T::_name << "'");
 }
 
 // General outputStep() method
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::outputStep(const ExecFlagType & type)
+AdvancedOutput<T>::outputStep(const ExecFlagType & type)
 {
   // Output is not allowed
-  if (!OutputBase::_allow_output && type != EXEC_FORCED)
+  if (!T::_allow_output && type != EXEC_FORCED)
     return;
 
   // If recovering disable output of initial condition, it was already output
-  if (type == EXEC_INITIAL && OutputBase::_app.isRecovering())
+  if (type == EXEC_INITIAL && T::_app.isRecovering())
     return;
 
   // Return if the current output is not on the desired interval
-  if (type != EXEC_FINAL && !OutputBase::onInterval())
+  if (type != EXEC_FINAL && !T::onInterval())
     return;
 
   // Call output methods for various types
@@ -371,64 +335,64 @@ AdvancedOutput<OversampleOutput>::outputStep(const ExecFlagType & type)
   output(type);
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::output(const ExecFlagType & type)
+AdvancedOutput<T>::output(const ExecFlagType & type)
 {
   // Call the various output types, if data exists
   if (shouldOutput("nodal", type))
   {
     outputNodalVariables();
-    _last_output_time["nodal"] = OutputBase::_time;
+    _last_output_time["nodal"] = T::_time;
   }
 
   if (shouldOutput("elemental", type))
   {
     outputElementalVariables();
-    _last_output_time["elemental"] = OutputBase::_time;
+    _last_output_time["elemental"] = T::_time;
   }
 
   if (shouldOutput("postprocessors", type))
   {
     outputPostprocessors();
-    _last_output_time["postprocessors"] = OutputBase::_time;
+    _last_output_time["postprocessors"] = T::_time;
   }
 
   if (shouldOutput("vector_postprocessors", type))
   {
     outputVectorPostprocessors();
-    _last_output_time["vector_postprocessors"] = OutputBase::_time;
+    _last_output_time["vector_postprocessors"] = T::_time;
   }
 
   if (shouldOutput("scalars", type))
   {
     outputScalarVariables();
-    _last_output_time["scalars"] = OutputBase::_time;
+    _last_output_time["scalars"] = T::_time;
   }
 
   if (shouldOutput("system_information", type))
   {
     outputSystemInformation();
-    _last_output_time["system_information"] = OutputBase::_time;
+    _last_output_time["system_information"] = T::_time;
   }
 
   if (shouldOutput("input", type))
   {
     outputInput();
-    _last_output_time["input"] = OutputBase::_time;
+    _last_output_time["input"] = T::_time;
   }
 }
 
-template<class OutputBase>
+template<class T>
 bool
-AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const ExecFlagType & type)
+AdvancedOutput<T>::shouldOutput(const std::string & name, const ExecFlagType & type)
 {
   // Ignore EXEC_FORCED for system information and input, there is no reason to force this
   if (type == EXEC_FORCED && (name == "system_information" || name == "input"))
     return false;
 
   // Do not output if the 'none' is contained by the output_on
-  if (_advanced_output_on.contains(name) && _advanced_output_on[name].contains("none"))
+  if (T::_advanced_output_on.contains(name) && T::_advanced_output_on[name].contains("none"))
     return false;
 
   // Data output flag, true if data exists to be output
@@ -440,30 +404,30 @@ AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const ExecFla
     output_data_flag = false;
 
   // Set flag to false, if the OutputOnWarehouse DOES NOT contain an entry
-  if (!_advanced_output_on.contains(name))
+  if (!T::_advanced_output_on.contains(name))
     output_data_flag = false;
 
   // Force the output, if there is something to output and the time has not been output
-  if (type == EXEC_FORCED && output_data_flag && _last_output_time[name] != OutputBase::_time)
+  if (type == EXEC_FORCED && output_data_flag && _last_output_time[name] != T::_time)
     return true;
 
   // Return true (output should occur) if three criteria are satisfied, else do not output:
   //   (1) The output_data_flag = true (i.e, there is data to output)
   //   (2) The current output type is contained in the list of output execution types
   //   (3) The current execution time is "final" or "forced" and the data has not already been output
-  if (output_data_flag && _advanced_output_on[name].contains(type) &&
-      !(type == EXEC_FINAL && _last_output_time[name] == OutputBase::_time))
+  if (output_data_flag && T::_advanced_output_on[name].contains(type) &&
+      !(type == EXEC_FINAL && _last_output_time[name] == T::_time))
     return true;
   else
     return false;
 }
 
-template<class OutputBase>
+template<class T>
 bool
-AdvancedOutput<OutputBase>::hasOutput(const ExecFlagType & type)
+AdvancedOutput<T>::hasOutput(const ExecFlagType & type)
 {
   // If any of the component outputs are true, then there is some output to perform
-  for (std::map<std::string, MultiMooseEnum>::const_iterator it = _advanced_output_on.begin(); it != _advanced_output_on.end(); ++it)
+  for (std::map<std::string, MultiMooseEnum>::const_iterator it = T::_advanced_output_on.begin(); it != T::_advanced_output_on.end(); ++it)
     if (shouldOutput(it->first, type))
       return true;
 
@@ -471,51 +435,51 @@ AdvancedOutput<OutputBase>::hasOutput(const ExecFlagType & type)
   return false;
 }
 
-template<class OutputBase>
+template<class T>
 bool
-AdvancedOutput<OutputBase>::hasOutput()
+AdvancedOutput<T>::hasOutput()
 {
   // Test that variables exist for output AND that output execution flags are valid
   for (std::map<std::string, OutputData>::const_iterator it = _output_data.begin(); it != _output_data.end(); ++it)
     if (!(it->second).output.empty() &&
-        _advanced_output_on.contains(it->first) &&
-        _advanced_output_on[it->first].isValid())
+        T::_advanced_output_on.contains(it->first) &&
+        T::_advanced_output_on[it->first].isValid())
       return true;
 
   // Test execution flags for non-variable output
-  if (_advanced_output_on.contains("system_information") && _advanced_output_on["system_information"].isValid())
+  if (T::_advanced_output_on.contains("system_information") && T::_advanced_output_on["system_information"].isValid())
     return true;
-  if (_advanced_output_on.contains("input") && _advanced_output_on["input"].isValid())
+  if (T::_advanced_output_on.contains("input") && T::_advanced_output_on["input"].isValid())
     return true;
 
   return false;
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::initAvailableLists()
+AdvancedOutput<T>::initAvailableLists()
 {
   // Initialize Postprocessor list
   // This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
   // to produce an warning if postprocessor output is disabled
-  ExecStore<PostprocessorWarehouse> & warehouse = OutputBase::_problem_ptr->getPostprocessorWarehouse();
+  ExecStore<PostprocessorWarehouse> & warehouse = T::_problem_ptr->getPostprocessorWarehouse();
   initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>("postprocessors", warehouse);
 
   // Initialize vector postprocessor list
   // This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is then used
   // to produce an warning if vector postprocessor output is disabled
-  ExecStore<VectorPostprocessorWarehouse> & vector_warehouse = OutputBase::_problem_ptr->getVectorPostprocessorWarehouse();
+  ExecStore<VectorPostprocessorWarehouse> & vector_warehouse = T::_problem_ptr->getVectorPostprocessorWarehouse();
   initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>("vector_postprocessors", vector_warehouse);
 
   // Get a list of the available variables
-  std::vector<VariableName> variables = OutputBase::_problem_ptr->getVariableNames();
+  std::vector<VariableName> variables = T::_problem_ptr->getVariableNames();
 
   // Loop through the variables and store the names in the correct available lists
   for (std::vector<VariableName>::const_iterator it = variables.begin(); it != variables.end(); ++it)
   {
-    if (OutputBase::_problem_ptr->hasVariable(*it))
+    if (T::_problem_ptr->hasVariable(*it))
     {
-      MooseVariable & var = OutputBase::_problem_ptr->getVariable(0, *it);
+      MooseVariable & var = T::_problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _output_data["elemental"].available.push_back(*it);
@@ -523,37 +487,37 @@ AdvancedOutput<OutputBase>::initAvailableLists()
         _output_data["nodal"].available.push_back(*it);
     }
 
-    else if (OutputBase::_problem_ptr->hasScalarVariable(*it))
+    else if (T::_problem_ptr->hasScalarVariable(*it))
       _output_data["scalars"].available.push_back(*it);
   }
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::initExecutionTypes(const std::string & name, MultiMooseEnum & input)
+AdvancedOutput<T>::initExecutionTypes(const std::string & name, MultiMooseEnum & input)
 {
   // Build the input paramter name
   std::string param_name = "output_";
   param_name += name + "_on";
 
   // The parameters exists and has been set by the user
-  if (OutputBase::_pars.template have_parameter<MultiMooseEnum>(param_name) && OutputBase::isParamValid(param_name))
+  if (T::_pars.template have_parameter<MultiMooseEnum>(param_name) && T::isParamValid(param_name))
   {
-    input = OutputBase::template getParam<MultiMooseEnum>(param_name);
+    input = T::template getParam<MultiMooseEnum>(param_name);
 
     if (name != "system_information" && name != "input")
-      OutputBase::applyOutputOnShortCutFlags(input);
+      T::applyOutputOnShortCutFlags(input);
   }
 
   // If the parameter does not exists; set it to a state where no valid entries exists so nothing gets executed
-  else if (!OutputBase::_pars. template have_parameter<MultiMooseEnum>(param_name))
-    input = AdvancedOutput<OutputBase>::getExecuteOptions();
+  else if (!T::_pars. template have_parameter<MultiMooseEnum>(param_name))
+    input = AdvancedOutput<T>::getExecuteOptions();
 
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::initShowHideLists(const std::vector<VariableName> & show, const std::vector<VariableName> & hide)
+AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, const std::vector<VariableName> & hide)
 {
 
   // Storage for user-supplied input that is unknown as a variable or postprocessor
@@ -562,20 +526,20 @@ AdvancedOutput<OutputBase>::initShowHideLists(const std::vector<VariableName> & 
   // Populate the show lists
   for (std::vector<VariableName>::const_iterator it = show.begin(); it != show.end(); ++it)
   {
-    if (OutputBase::_problem_ptr->hasVariable(*it))
+    if (T::_problem_ptr->hasVariable(*it))
     {
-      MooseVariable & var = OutputBase::_problem_ptr->getVariable(0, *it);
+      MooseVariable & var = T::_problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _output_data["elemental"].show.push_back(*it);
       else
         _output_data["nodal"].show.push_back(*it);
     }
-    else if (OutputBase::_problem_ptr->hasScalarVariable(*it))
+    else if (T::_problem_ptr->hasScalarVariable(*it))
       _output_data["scalars"].show.push_back(*it);
-    else if (OutputBase::_problem_ptr->hasPostprocessor(*it))
+    else if (T::_problem_ptr->hasPostprocessor(*it))
       _output_data["postprocessors"].show.push_back(*it);
-    else if (OutputBase::_problem_ptr->hasVectorPostprocessor(*it))
+    else if (T::_problem_ptr->hasVectorPostprocessor(*it))
       _output_data["vector_postprocessors"].show.push_back(*it);
     else
       unknown.push_back(*it);
@@ -584,20 +548,20 @@ AdvancedOutput<OutputBase>::initShowHideLists(const std::vector<VariableName> & 
   // Populate the hide lists
   for (std::vector<VariableName>::const_iterator it = hide.begin(); it != hide.end(); ++it)
   {
-    if (OutputBase::_problem_ptr->hasVariable(*it))
+    if (T::_problem_ptr->hasVariable(*it))
     {
-      MooseVariable & var = OutputBase::_problem_ptr->getVariable(0, *it);
+      MooseVariable & var = T::_problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _output_data["elemental"].hide.push_back(*it);
       else
         _output_data["nodal"].hide.push_back(*it);
     }
-    else if (OutputBase::_problem_ptr->hasScalarVariable(*it))
+    else if (T::_problem_ptr->hasScalarVariable(*it))
       _output_data["scalars"].hide.push_back(*it);
-    else if (OutputBase::_problem_ptr->hasPostprocessor(*it))
+    else if (T::_problem_ptr->hasPostprocessor(*it))
       _output_data["postprocessors"].hide.push_back(*it);
-    else if (OutputBase::_problem_ptr->hasVectorPostprocessor(*it))
+    else if (T::_problem_ptr->hasVectorPostprocessor(*it))
       _output_data["vector_postprocessors"].hide.push_back(*it);
     else
       unknown.push_back(*it);
@@ -614,9 +578,9 @@ AdvancedOutput<OutputBase>::initShowHideLists(const std::vector<VariableName> & 
   }
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::initOutputList(OutputData & data)
+AdvancedOutput<T>::initOutputList(OutputData & data)
 {
   // References to the vectors of variable names
   std::vector<std::string> & hide  = data.hide;
@@ -626,7 +590,7 @@ AdvancedOutput<OutputBase>::initOutputList(OutputData & data)
 
   // Append the list from OutputInterface objects
   std::set<std::string> interface_hide;
-  OutputBase::_app.getOutputWarehouse().buildInterfaceHideVariables(OutputBase::_name, interface_hide);
+  T::_app.getOutputWarehouse().buildInterfaceHideVariables(T::_name, interface_hide);
   hide.insert(hide.end(), interface_hide.begin(), interface_hide.end());
 
   // Sort the vectors
@@ -666,19 +630,19 @@ AdvancedOutput<OutputBase>::initOutputList(OutputData & data)
   }
 }
 
-template<class OutputBase>
+template<class T>
 void
-AdvancedOutput<OutputBase>::addValidParams(InputParameters & params, const MultiMooseEnum & types)
+AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum & types)
 {
 
   // Nodal output
   if (types.contains("nodal"))
-    params.addParam<MultiMooseEnum>("output_nodal_on", OutputBase::getExecuteOptions(), "Control the output of nodal variables");
+    params.addParam<MultiMooseEnum>("output_nodal_on", T::getExecuteOptions(), "Control the output of nodal variables");
 
   // Elemental output
   if (types.contains("elemental"))
   {
-    params.addParam<MultiMooseEnum>("output_elemental_on", OutputBase::getExecuteOptions(), "Control the output of elemental variables");
+    params.addParam<MultiMooseEnum>("output_elemental_on", T::getExecuteOptions(), "Control the output of elemental variables");
 
     // Add material output control, which are output via elemental variables
     params.addParam<bool>("output_material_properties", false, "Flag indicating if material properties should be output");
@@ -689,7 +653,7 @@ AdvancedOutput<OutputBase>::addValidParams(InputParameters & params, const Multi
 
   // Scalar variable output
   if (types.contains("scalar"))
-    params.addParam<MultiMooseEnum>("output_scalars_on", OutputBase::getExecuteOptions(), "Control the output of scalar variables");
+    params.addParam<MultiMooseEnum>("output_scalars_on", T::getExecuteOptions(), "Control the output of scalar variables");
 
   // Nodal and scalar output
   if (types.contains("nodal") && types.contains("scalar"))
@@ -701,108 +665,108 @@ AdvancedOutput<OutputBase>::addValidParams(InputParameters & params, const Multi
 
   // Postprocessors
   if (types.contains("postprocessor"))
-    params.addParam<MultiMooseEnum>("output_postprocessors_on", OutputBase::getExecuteOptions(), "Control of when postprocessors are output");
+    params.addParam<MultiMooseEnum>("output_postprocessors_on", T::getExecuteOptions(), "Control of when postprocessors are output");
   // Vector Postprocessors
   if (types.contains("vector_postprocessor"))
-    params.addParam<MultiMooseEnum>("output_vector_postprocessors_on", OutputBase::getExecuteOptions(), "Enable/disable the output of VectorPostprocessors");
+    params.addParam<MultiMooseEnum>("output_vector_postprocessors_on", T::getExecuteOptions(), "Enable/disable the output of VectorPostprocessors");
 
   // Input file
   if (types.contains("input"))
-    params.addParam<MultiMooseEnum>("output_input_on", OutputBase::getExecuteOptions(), "Enable/disable the output of the input file");
+    params.addParam<MultiMooseEnum>("output_input_on", T::getExecuteOptions(), "Enable/disable the output of the input file");
 
   // System Information
   if (types.contains("system_information"))
-    params.addParam<MultiMooseEnum>("output_system_information_on", OutputBase::getExecuteOptions(), "Control when the output of the simulation information occurs");
+    params.addParam<MultiMooseEnum>("output_system_information_on", T::getExecuteOptions(), "Control when the output of the simulation information occurs");
 
   // Store everything in the 'Variables' group
   params.addParamNamesToGroup("scalar_as_nodal elemental_as_nodal output_scalars_on output_nodal_on output_elemental_on output_postprocessors_on output_vector_postprocessors_on output_system_information_on output_input_on", "Variables");
 }
 
-template<class OutputBase>
+template<class T>
 bool
-AdvancedOutput<OutputBase>::hasOutputHelper(const std::string & name)
+AdvancedOutput<T>::hasOutputHelper(const std::string & name)
 {
-  if (!OutputBase::_initialized)
+  if (!T::_initialized)
     mooseError("The output object must be initialized before it may be determined if " << name << " output is enabled.");
 
-  return !_output_data[name].output.empty() && _advanced_output_on.contains(name) && _advanced_output_on[name].isValid() && !_advanced_output_on[name].contains("none");
+  return !_output_data[name].output.empty() && T::_advanced_output_on.contains(name) && T::_advanced_output_on[name].isValid() && !T::_advanced_output_on[name].contains("none");
 }
 
-template<class OutputBase>
+template<class T>
 bool
-AdvancedOutput<OutputBase>::hasNodalVariableOutput()
+AdvancedOutput<T>::hasNodalVariableOutput()
 {
   return hasOutputHelper("nodal");
 }
 
-template<class OutputBase>
+template<class T>
 const std::vector<std::string> &
-AdvancedOutput<OutputBase>::getNodalVariableOutput()
+AdvancedOutput<T>::getNodalVariableOutput()
 {
   return _output_data["nodal"].output;
 }
 
-template<class OutputBase>
+template<class T>
 bool
-AdvancedOutput<OutputBase>::hasElementalVariableOutput()
+AdvancedOutput<T>::hasElementalVariableOutput()
 {
   return hasOutputHelper("elemental");
 }
 
-template<class OutputBase>
+template<class T>
 const std::vector<std::string> &
-AdvancedOutput<OutputBase>::getElementalVariableOutput()
+AdvancedOutput<T>::getElementalVariableOutput()
 {
   return _output_data["elemental"].output;
 }
 
-template<class OutputBase>
+template<class T>
 bool
-AdvancedOutput<OutputBase>::hasScalarOutput()
+AdvancedOutput<T>::hasScalarOutput()
 {
   return hasOutputHelper("scalars");
 }
 
-template<class OutputBase>
+template<class T>
 const std::vector<std::string> &
-AdvancedOutput<OutputBase>::getScalarOutput()
+AdvancedOutput<T>::getScalarOutput()
 {
   return _output_data["scalars"].output;
 }
 
-template<class OutputBase>
+template<class T>
 bool
-AdvancedOutput<OutputBase>::hasPostprocessorOutput()
+AdvancedOutput<T>::hasPostprocessorOutput()
 {
   return hasOutputHelper("postprocessors");
 }
 
-template<class OutputBase>
+template<class T>
 const std::vector<std::string> &
-AdvancedOutput<OutputBase>::getPostprocessorOutput()
+AdvancedOutput<T>::getPostprocessorOutput()
 {
   return _output_data["postprocessors"].output;
 }
 
-template<class OutputBase>
+template<class T>
 bool
-AdvancedOutput<OutputBase>::hasVectorPostprocessorOutput()
+AdvancedOutput<T>::hasVectorPostprocessorOutput()
 {
   return hasOutputHelper("vector_postprocessors");
 }
 
-template<class OutputBase>
+template<class T>
 const std::vector<std::string> &
-AdvancedOutput<OutputBase>::getVectorPostprocessorOutput()
+AdvancedOutput<T>::getVectorPostprocessorOutput()
 {
   return _output_data["vector_postprocessors"].output;
 }
 
-template<class OutputBase>
+template<class T>
 const OutputOnWarehouse &
-AdvancedOutput<OutputBase>::advancedOutputOn() const
+AdvancedOutput<T>::advancedOutputOn() const
 {
-  return _advanced_output_on;
+  return T::_advanced_output_on;
 }
 
 // Instantiate the four possible template classes

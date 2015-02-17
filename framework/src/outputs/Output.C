@@ -102,7 +102,9 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _t_tol(getParam<Real>("time_tolerance")),
     _sync_only(getParam<bool>("sync_only")),
     _initialized(false),
-    _allow_output(true)
+    _allow_output(true),
+    _is_advanced(false),
+    _advanced_output_on(_output_on, parameters)
 {
 
   // Handle the short-cut output flags
@@ -205,6 +207,19 @@ const MultiMooseEnum &
 Output::outputOn() const
 {
   return _output_on;
+}
+
+bool
+Output::isAdvanced()
+{
+  return _is_advanced;
+}
+
+const OutputOnWarehouse &
+Output::advancedOutputOn() const
+{
+  mooseError("The output object " << name() << " is not an AdvancedOutput, use isAdvanced() to check.");
+  return _advanced_output_on;
 }
 
 void

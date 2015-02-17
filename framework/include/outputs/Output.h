@@ -22,6 +22,7 @@
 #include "MooseMesh.h"
 #include "MeshChangedInterface.h"
 #include "SetupInterface.h"
+#include "AdvancedOutputUtils.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -101,6 +102,18 @@ public:
    * Get the current 'output_on' selections for display
    */
   const MultiMooseEnum & outputOn() const;
+
+  /**
+   * Returns true if this object is an AdvancedOutput object
+   */
+  bool isAdvanced();
+
+  /**
+   * Returns the advanced output_on settings.
+   *
+   * Check if this is valid first with isAdvanced()
+   */
+  virtual const OutputOnWarehouse & advancedOutputOn() const;
 
   /**
    * Return the support output execution times
@@ -215,6 +228,15 @@ protected:
 
   /// Flag for disabling output
   bool _allow_output;
+
+  /// Flag for advanced output testing
+  bool _is_advanced;
+
+  /// Storage for the individual component execute flags
+  // This is here rather than in AdvancedOutput to allow generic
+  // access to this data from the Console object for displaying
+  // the output settings.
+  OutputOnWarehouse _advanced_output_on;
 
   friend class OutputWarehouse;
 };
