@@ -1,0 +1,26 @@
+#include "ParsedMaterial.h"
+
+template<>
+InputParameters validParams<ParsedMaterial>()
+{
+  InputParameters params = validParams<ParsedMaterialHelper>();
+  params += validParams<ParsedMaterialBase>();
+  params.addClassDescription("Parsed Function Material.");
+  return params;
+}
+
+ParsedMaterial::ParsedMaterial(const std::string & name,
+                               InputParameters parameters) :
+    FunctionMaterialBase(name, parameters),
+    ParsedMaterialHelper(name, parameters, USE_MOOSE_NAMES),
+    ParsedMaterialBase(name, parameters)
+{
+  // Build function
+  functionParse(_function,
+                _constant_names, _constant_expressions,
+                _mat_prop_names,
+                _tol_names, _tol_values);
+
+  // Optimize
+  functionsOptimize();
+}

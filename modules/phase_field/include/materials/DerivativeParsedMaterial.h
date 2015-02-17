@@ -2,6 +2,7 @@
 #define DERIVATIVEPARSEDMATERIAL_H
 
 #include "DerivativeParsedMaterialHelper.h"
+#include "ParsedMaterialBase.h"
 
 // Forward Declarations
 class DerivativeParsedMaterial;
@@ -15,7 +16,7 @@ InputParameters validParams<DerivativeParsedMaterial>();
  * This requires the autodiff patch (https://github.com/libMesh/libmesh/pull/238)
  * to Function Parser in libmesh.
  */
-class DerivativeParsedMaterial : public DerivativeParsedMaterialHelper
+class DerivativeParsedMaterial : public DerivativeParsedMaterialHelper, public ParsedMaterialBase
 {
 public:
   DerivativeParsedMaterial(const std::string & name,
