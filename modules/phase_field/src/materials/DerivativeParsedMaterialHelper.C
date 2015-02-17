@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<DerivativeParsedMaterialHelper>()
 {
-  InputParameters params = validParams<DerivativeBaseMaterial>();
+  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
   params += validParams<ParsedMaterialHelper>();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
   return params;

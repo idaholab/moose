@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<DerivativeTwoPhaseMaterial>()
 {
-  InputParameters params = validParams<DerivativeBaseMaterial>();
+  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
   params.addClassDescription("Two phase material that combines two single phase materials using a switching function.");
 
   // Two base materials
@@ -28,7 +28,7 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>()
 DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
                                                        InputParameters parameters) :
     FunctionMaterialBase(name, parameters),
-    DerivativeBaseMaterial(name, parameters),
+    DerivativeFunctionMaterialBase(name, parameters),
     _eta(coupledValue("eta")),
     _eta_name(getVar("eta", 0)->name()),
     _eta_var(coupled("eta")),

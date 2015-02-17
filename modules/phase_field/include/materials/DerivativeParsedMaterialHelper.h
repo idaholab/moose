@@ -1,7 +1,7 @@
 #ifndef DERIVATIVEPARSEDMATERIALHELPER_H
 #define DERIVATIVEPARSEDMATERIALHELPER_H
 
-#include "DerivativeBaseMaterial.h"
+#include "DerivativeFunctionMaterialBase.h"
 #include "ParsedMaterialHelper.h"
 #include "libmesh/fparser_ad.hh"
 

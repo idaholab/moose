@@ -1,14 +1,14 @@
 #ifndef DERIVATIVESUMMATERIAL_H
 #define DERIVATIVESUMMATERIAL_H
 
-#include "DerivativeBaseMaterial.h"
+#include "DerivativeFunctionMaterialBase.h"
 
 class DerivativeSumMaterial;
 
 template<>
 InputParameters validParams<DerivativeSumMaterial>();
 
-class DerivativeSumMaterial : public DerivativeBaseMaterial
+class DerivativeSumMaterial : public DerivativeFunctionMaterialBase
 {
 public:
   DerivativeSumMaterial(const std::string & name, InputParameters parameters);

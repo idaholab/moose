@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<ElasticEnergyMaterial>()
 {
-  InputParameters params = validParams<DerivativeBaseMaterial>();
+  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
   params.addClassDescription("Free energy material for the elastic energy contributions.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
@@ -15,7 +15,7 @@ InputParameters validParams<ElasticEnergyMaterial>()
 ElasticEnergyMaterial::ElasticEnergyMaterial(const std::string & name,
                                              InputParameters parameters) :
     FunctionMaterialBase(name, parameters),
-    DerivativeBaseMaterial(name, parameters),
+    DerivativeFunctionMaterialBase(name, parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _elasticity_tensor(getMaterialProperty<ElasticityTensorR4>(_base_name + "elasticity_tensor")),

@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<MathFreeEnergy>()
 {
-  InputParameters params = validParams<DerivativeBaseMaterial>();
+  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
   params.addClassDescription("Material that implements the math free energy and its derivatives: \nF = 1/4(1 + c)^2*(1 - c)^2");
   params.addRequiredCoupledVar("c","Concentration variable");
   return params;
@@ -12,7 +12,7 @@ InputParameters validParams<MathFreeEnergy>()
 MathFreeEnergy::MathFreeEnergy(const std::string & name,
                        InputParameters parameters) :
     FunctionMaterialBase(name, parameters),
-    DerivativeBaseMaterial(name, parameters),
+    DerivativeFunctionMaterialBase(name, parameters),
     _c(coupledValue("c")),
     _c_var(coupled("c"))
 {
