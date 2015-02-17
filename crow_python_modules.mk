@@ -19,3 +19,6 @@ $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.$(obj-suffix): $(CROW_DIR)/
 
 $(CROW_DIR)/install/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy2.so : $(CROW_DIR)/crow_modules/distribution1Dpy2.i $(CROW_DIR)/crow_modules/interpolationNDpy2.i
 	(cd $(CROW_DIR) && python $(CROW_DIR)/setup.py build_ext build install --install-platlib=$(CROW_DIR)/install)
+
+$(CROW_DIR)/install/crow_modules/_distribution1Dpy3.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy3.so : $(CROW_DIR)/crow_modules/distribution1Dpy3.i $(CROW_DIR)/crow_modules/interpolationNDpy3.i
+	(cd $(CROW_DIR) && python3 $(CROW_DIR)/setup3.py build_ext build install --install-platlib=$(CROW_DIR)/install)
