@@ -4,4 +4,10 @@
     input = 'piecewise_constant.i'
     exodiff = 'piecewise_constant_out.e'
   [../]
+
+  [./offset]
+    type = 'Exodiff'
+    input = 'offset.i'
+    exodiff = 'offset_out.e'
+  [../]
 []

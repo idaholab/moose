@@ -25,15 +25,17 @@ InputParameters validParams<Piecewise>()
   params.addParam<std::string>("format", "rows" ,"Format of csv data file that is in either in columns or rows");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
   params.addParam<int>("axis", "The axis used (0, 1, or 2 for x, y, or z) if this is to be a function of position");
+  params.addParam<Real>("x_offset", 0, "The offset that shifts the x values");
   return params;
 }
 
 Piecewise::Piecewise(const std::string & name, InputParameters parameters) :
-  Function(name, parameters),
-  _scale_factor( getParam<Real>("scale_factor") ),
-  _linear_interp( NULL ),
-  _has_axis(false),
-  _data_file_name(isParamValid("data_file") ? getParam<std::string>("data_file") : "")
+    Function(name, parameters),
+    _scale_factor(getParam<Real>("scale_factor")),
+    _linear_interp(NULL),
+    _has_axis(false),
+    _x_offset(getParam<Real>("x_offset")),
+    _data_file_name(isParamValid("data_file") ? getParam<std::string>("data_file") : "")
 {
   std::vector<Real> x;
   std::vector<Real> y;
@@ -96,6 +98,10 @@ Piecewise::Piecewise(const std::string & name, InputParameters parameters) :
   {
     mooseError("In Piecewise: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified.");
   }
+
+  // apply the x offset
+  for (unsigned int i = 0; i < x.size(); i++)
+    x[i] += _x_offset;
 
   _linear_interp = new LinearInterpolation( x, y );
 

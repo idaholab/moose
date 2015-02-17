@@ -39,6 +39,8 @@ protected:
   LinearInterpolation * _linear_interp;
   int _axis;
   bool _has_axis;
+  Real _x_offset;
+
 private:
   const std::string _data_file_name;
   bool parseNextLineReals( std::ifstream & ifs, std::vector<Real> & myvec);
