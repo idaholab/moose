@@ -35,7 +35,7 @@ ifeq ($(HAS_SWIG),false)
 else
 	SWIG_PY_FLAGS=-py3
 	CONTROL_MODULES = $(CROW_DIR)/control_modules/_distribution1D.so $(CROW_DIR)/control_modules/_crowtools.so
-	PYTHON_MODULES = $(CROW_DIR)/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/crow_modules/_distribution1Dpy3.so $(CROW_DIR)/crow_modules/_interpolationNDpy2.so $(CROW_DIR)/crow_modules/_interpolationNDpy3.so
+	PYTHON_MODULES = $(CROW_DIR)/install/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy2.so $(CROW_DIR)/crow_modules/_distribution1Dpy3.so $(CROW_DIR)/crow_modules/_interpolationNDpy3.so
 endif #Have SWIG
 	PYTHON_INCLUDE=$(PYTHON3_INCLUDE)
 	PYTHON_LIB=$(PYTHON3_LIB)
@@ -52,7 +52,7 @@ ifeq ($(HAS_SWIG),false)
 	PYTHON_MODULES =
 else
 	SWIG_PY_FLAGS=
-	PYTHON_MODULES = $(CROW_DIR)/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/crow_modules/_interpolationNDpy2.so
+	PYTHON_MODULES = $(CROW_DIR)/install/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy2.so
 	CONTROL_MODULES=$(CROW_DIR)/control_modules/_distribution1D.so $(CROW_DIR)/control_modules/_crowtools.so
 endif #have swig
 else #No python3 config or python2 config

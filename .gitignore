@@ -33,6 +33,5 @@ crow_modules/libinterpolationNDpy3.so*
 crow_modules/libinterpolationNDpy3.so*
 crow_modules/distribution1Dpy2_wrap.cpp
 crow_modules/interpolationNDpy2_wrap.cpp
-
-
-
+build/
+install/
