@@ -34,7 +34,7 @@ InputParameters validParams<MooseParsedFunctionBase>()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<std::string> >("vars", "The constant variables (excluding t,x,y,z) in the forcing function.");
-  params.addParam<std::vector<std::string> >("vals", "The initial values of the variables (optional)");
+  params.addParam<std::vector<std::string> >("vals", "Constant numeric values or postprocessor names for vars.");
   return params;
 }
 
@@ -43,6 +43,8 @@ MooseParsedFunctionBase::MooseParsedFunctionBase(const std::string & /*name*/, I
     _vars(verifyVars(parameters)),
     _vals(verifyVals(parameters))
 {
+  if (_vars.size() != _vals.size())
+    mooseError("Number of vars must match the number of vals for a MooseParsedFunction!");
 }
 
 MooseParsedFunctionBase::~MooseParsedFunctionBase()
