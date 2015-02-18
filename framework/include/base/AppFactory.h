@@ -49,9 +49,8 @@ MooseApp * buildApp(const std::string & name, InputParameters parameters)
   return new T(name, parameters);
 }
 
-
 /**
- * Generic AppFactory class for build all sorts of objects
+ * Generic AppFactory class for building Application objects
  */
 class AppFactory
 {
@@ -99,8 +98,18 @@ public:
    */
   virtual MooseApp *create(const std::string & obj_name, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
 
+  ///@{
+  /**
+   * Returns iterators to the begin/end of the registered objects data structure: a name -> validParams function pointer.
+   */
   registeredMooseAppIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }
   registeredMooseAppIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
+  ///@}
+
+  /**
+   * Returns a Boolean indicating whether an application type has been registered
+   */
+  bool isRegistered(const std::string & app_name) const;
 
 protected:
   std::map<std::string, appBuildPtr>  _name_to_build_pointer;
