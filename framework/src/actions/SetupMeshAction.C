@@ -42,9 +42,12 @@ InputParameters validParams<SetupMeshAction>()
 
   params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
 
+  params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned. This may cause large load imbalanced but is currently required if you "
+                                                    "have a simulation containing uniform refinement, adaptivity and stateful material properties");
+
   // groups
   params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation patch_size", "Advanced");
-  params.addParamNamesToGroup("second_order construct_side_list_from_node_list", "Advanced");
+  params.addParamNamesToGroup("second_order construct_side_list_from_node_list skip_partitioning", "Advanced");
   params.addParamNamesToGroup("block_id block_name boundary_id boundary_name", "Add Names");
 
   return params;
@@ -124,6 +127,10 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
 
   if (getParam<bool>("construct_side_list_from_node_list"))
     mesh->getMesh().get_boundary_info().build_side_list_from_node_list();
+
+  // Here we can override the partitioning for special cases
+  if (getParam<bool>("skip_partitioning"))
+    mesh->getMesh().skip_partitioning(getParam<bool>("skip_partitioning"));
 }
 
 void

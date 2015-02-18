@@ -3656,6 +3656,10 @@ FEProblem::checkProblemIntegrity()
 
       if (n_processors() > 1)
       {
+        if (_mesh.uniformRefineLevel() > 0 && _mesh.getMesh().skip_partitioning() == false)
+          mooseError("This simulation is using uniform refinement on the mesh, with stateful properties and adaptivity. "
+                     "You must skip partitioning to run this case:\nMesh/skip_partitioning=true");
+
         _console << "\nWarning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imbalances and degraded performance!!\n\n";
         _mesh.getMesh().skip_partitioning(true);
         if (_displaced_problem)
