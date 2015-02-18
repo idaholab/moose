@@ -741,10 +741,9 @@ Console::outputSystemInformation()
       oss << "  " << std::setw(_field_width-2) << (*it)->name() <<  "\"" << output_on << "\"\n";
 
       // Display the advanced "output_on" settings, only if they are different from "output_on"
-      AdvancedOutput * adv = dynamic_cast<AdvancedOutput *>(*it);
-      if (adv != NULL)
+      if ((*it)->isAdvanced())
       {
-        const OutputOnWarehouse & adv_on = adv->advancedOutputOn();
+        const OutputOnWarehouse & adv_on = (*it)->advancedOutputOn();
         for (std::map<std::string, MultiMooseEnum>::const_iterator adv_it = adv_on.begin(); adv_it != adv_on.end(); ++adv_it)
           if (output_on != adv_it->second)
             oss << "    " << std::setw(_field_width-4) << adv_it->first + ":" <<  "\"" << adv_it->second << "\"\n";
