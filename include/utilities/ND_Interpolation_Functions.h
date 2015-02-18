@@ -97,8 +97,7 @@ public:
 		  for(int j=0; j<_discretizations.at(i).size(); j++)
 			  temp.push_back(_discretizations.at(i).at(j));
 		  vector.push_back(temp);
-	  }
-	  std::cout<< "xxxx "<< vector.size() << std::endl;
+	  };
   }
 
   NDSpline();

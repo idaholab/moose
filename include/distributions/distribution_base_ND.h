@@ -93,21 +93,23 @@ public:
 	  }
 
 	  BasicMultiDimensionalCartesianSpline(data_filename,alpha,beta,CDFprovided);
+	  //_interpolator = NDSpline(data_filename,alpha,beta);
   };
 
   BasicMultiDimensionalCartesianSpline(const char * data_filename, bool CDFprovided):  _interpolator(data_filename)
   {
-	  _CDFprovided = CDFprovided;
+//	  _CDFprovided = CDFprovided;
+//
+//	  std::vector<double> alpha(_interpolator.returnDimensionality());
+//	  std::vector<double> beta(_interpolator.returnDimensionality());
+//
+//	  for(int i=0; i<_interpolator.returnDimensionality(); i++){
+//		  alpha[i] = 0.0;
+//		  beta[i] = 0.0;
+//	  }
 
-	  std::vector<double> alpha(_interpolator.returnDimensionality());
-	  std::vector<double> beta(_interpolator.returnDimensionality());
-
-	  for(int i=0; i<_interpolator.returnDimensionality(); i++){
-		  alpha[i] = 0.0;
-		  beta[i] = 0.0;
-	  }
-
-	  BasicMultiDimensionalCartesianSpline(std::string(data_filename),alpha,beta,CDFprovided);
+	  BasicMultiDimensionalCartesianSpline(std::string(data_filename),CDFprovided);
+	  //_interpolator = NDSpline(data_filename,alpha,beta);
   };
 
   BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool CDFprovided):  _interpolator(discretizations, values, alpha, beta)
@@ -126,13 +128,11 @@ public:
 
 	  if (_CDFprovided == false){    // PDF provided ---> create grid for CDF
 
-		  std::cerr<<"Creation of CDF interpolator for cartesian spline-"<< std::endl;
+		  std::cerr<<"Creation of CDF interpolator for cartesian spline"<< std::endl;
 		  std::vector< std::vector<double> > discretizations;
 		  _interpolator.getDiscretizations(discretizations);
-		  std::cerr<<"porcaccia"<<std::endl;
 		  int numberofValues = 1;
 		  int numberOfDimensions = discretizations.size();
-		  std::cerr<<"porcaccia: "<< numberOfDimensions << std::endl;
 		  std::vector<int> discretizationSizes(numberOfDimensions);
 		  for (int i=0; i<numberOfDimensions; i++){
 			  numberofValues *= discretizations.at(i).size();
@@ -149,7 +149,7 @@ public:
 			  CDFvalues.at(i) = _interpolator.integralSpline(NDcoordinate);
 		  }
 		  _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
-		  std::cerr<<"Creation of CDF interpolator for cartesian spline completed"<< std::endl;
+		  std::cerr<<"Creation of CDF interpolator for cartesian spline completed [std::vector<double>] :"<< _CDFinterpolator.returnDimensionality()<<std::endl;
 	  }
   };
 
@@ -160,22 +160,20 @@ public:
 	  if (_CDFprovided){
 	   bool LBcheck = _interpolator.checkLB(0.0);
 	   if (LBcheck == false)
-		throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+		throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0");
 
 	   bool UBcheck = _interpolator.checkUB(1.0);
 	   if (UBcheck == false)
-		throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+		throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0");
 	  }
 
 	  if (_CDFprovided == false){    // PDF provided ---> create grid for CDF
 
-		  std::cerr<<"Creation of CDF interpolator for cartesian spline:"<< std::endl;
+		  std::cerr<<"Creation of CDF interpolator for cartesian spline"<< std::endl;
 		  std::vector< std::vector<double> > discretizations;
 		  _interpolator.getDiscretizations(discretizations);
-		  std::cerr<<"porcaccia"<<std::endl;
 		  int numberofValues = 1;
 		  int numberOfDimensions = discretizations.size();
-		  std::cerr<<"porcaccia: "<< numberOfDimensions << std::endl;
 		  std::vector<int> discretizationSizes(numberOfDimensions);
 		  for (int i=0; i<numberOfDimensions; i++){
 			  numberofValues *= discretizations.at(i).size();
@@ -192,7 +190,7 @@ public:
 			  CDFvalues.at(i) = _interpolator.integralSpline(NDcoordinate);
 		  }
 		  _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
-		  std::cerr<<"Creation of CDF interpolator for cartesian spline completed"<< std::endl;
+		  std::cerr<<"Creation of CDF interpolator for cartesian spline completed [std::string data_filename]:"<< _CDFinterpolator.returnDimensionality()<<std::endl;
 	  }
   };
 
@@ -233,10 +231,10 @@ public:
   std::vector<double>
   InverseCdf(double F)
   {
-	  if (_CDFprovided)
+	  if (_CDFprovided == true)
 		  return _interpolator.NDinverseFunctionGrid(F);
 	  else{
-		  std::cout<< "porca: " << _CDFinterpolator.returnDimensionality() << std::endl;
+		  std::cout<< "BasicMultiDimensionalCartesianSpline - InverseCdf: " << _CDFinterpolator.returnDimensionality() << std::endl;
 		  return _CDFinterpolator.NDinverseFunctionGrid(F);
 	  }
   };
@@ -270,6 +268,19 @@ public:
 	  }
   }
 
+  void updateRNGparameter(double tolerance, double initial_divisions){
+	  _tolerance = tolerance;
+	  _initial_divisions = (int)initial_divisions;
+
+	  if (_CDFprovided)
+		  _interpolator.updateRNGparameters(_tolerance,_initial_divisions);
+	  else{
+		  _interpolator.updateRNGparameters(_tolerance,_initial_divisions);
+		  _CDFinterpolator.updateRNGparameters(_tolerance,_initial_divisions);
+	  }
+
+	  std::cout<<"Distribution updateRNGparameter" << _tolerance <<  _initial_divisions << std::endl;
+  };
 
 protected:
   bool _CDFprovided;
@@ -283,13 +294,7 @@ class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
 {
 public:
   BasicMultiDimensionalInverseWeight(const char * data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
-  {
-	  //_CDFprovided = CDFprovided;
-	  BasicMultiDimensionalInverseWeight(std::string(data_filename),p,CDFprovided);
-  };
-
-  BasicMultiDimensionalInverseWeight(std::string data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
-  {
+{
 	  std::cerr<<"Initialize BasicMultiDimensionalInverseWeight"<< std::endl;
 
 	  _CDFprovided = CDFprovided;
@@ -308,7 +313,6 @@ public:
 		  //BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool CDFprovided)
 		  std::cerr<<"Creating ND spline for inverseWeight"<< std::endl;
 		  int n_dimensions = _interpolator.returnDimensionality();
-		  std::cerr<<"n_dimensions: "<<  n_dimensions << std::endl;
 		  std::vector<double> alpha (n_dimensions);
 		  std::vector<double> beta (n_dimensions);
 
@@ -319,20 +323,11 @@ public:
 
 		  int numberDiscretization = 15;
 
-		  //std::string ID = data_filename;
-		  //std::string name="CDFdata_" + ID + ".txt";
-		  //std::ofstream outputFile;
-		  //outputFile.open(name.c_str());
-
-		  //outputFile<<n_dimensions;
-
-		  //for(int i=0; i<n_dimensions; i++)
-		  //	  outputFile<<numberDiscretization;
-
 		  std::vector<std::vector<double> > discretizations;
 		  std::vector<double> cellPoint0 = _interpolator.get_cellPoint0();
 		  std::vector<double> cellDxs = _interpolator.get_cellDxs();
 
+		  std::cerr<<"Discretization points for ND spline for inverseWeight"<< std::endl;
 		  for(int i=0; i<n_dimensions; i++){
 			  std::vector<double> temp;
 			  for(int j=0; j<numberDiscretization; j++){
@@ -356,18 +351,26 @@ public:
 		  for (int i=0; i<totalNumberOfValues; i++){
 			  std::vector<int> NDcoordinateIndex = oneDtoNDconverter(i, discretizationSizes);
 			  std::vector<double> NDcoordinate(n_dimensions);
-			  for (int j=0; j<n_dimensions; j++)
+			  for (int j=0; j<n_dimensions; j++){
 				  NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
+				  //std::cout<<" " << NDcoordinate.at(j) ;
+			  }
+			  //std::cout<<" - " ;
 			  PDFvalues.at(i) = _interpolator.interpolateAt(NDcoordinate);
-			  std::cout<<", " << PDFvalues.at(i) ;
-			  //outputFile<<PDFvalue;
+			  //std::cout<< PDFvalues.at(i) ;
+
+			  //std::cout<<" " << std::endl;
 		  }
 
-		  std::cout<<" " << std::endl;
+
 		  _CDFspline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, false);
-		  //outputFile.close();
-		  std::cerr<<"Creation of ND spline distribution for inverseWeight completed"<< std::endl;
+		  std::cerr<<"Creation of ND spline distribution for inverseWeight completed:: "<< _CDFspline.returnDimensionality() << std::endl;
 	  }
+};
+
+  BasicMultiDimensionalInverseWeight(std::string data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
+  {
+
   };
 
   BasicMultiDimensionalInverseWeight(double p):  _interpolator(InverseDistanceWeighting(p))
@@ -396,7 +399,7 @@ public:
 	  if (_CDFprovided)
 		  value = _interpolator.interpolateAt(x);
 	  else
-		  value = _interpolator.integral(x);
+		  value = _CDFspline.Cdf(x);
 
      if (value > 1.0)
     	 throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF value calculated is above 1.0");
@@ -410,20 +413,21 @@ public:
 
 	  _interpolator.updateRNGparameters(_tolerance,_initial_divisions);
 
-	  std::cout<<"Distribution updateRNGparameter" <<std::endl;
+	  _CDFspline.updateRNGparameter(_tolerance,_initial_divisions);
+
+	  std::cout<<"Distribution updateRNGparameter" << _tolerance <<  _initial_divisions << std::endl;
   };
+
 
   std::vector<double>
   InverseCdf(double F)
   {
-	  std::vector<double> value;
-
 	  if (_CDFprovided)
-		  value = _interpolator.NDinverseFunctionGrid(F);
-	  else
-		  value = _CDFspline.InverseCdf(F);
-
-      return value;
+		  return _interpolator.NDinverseFunctionGrid(F);
+	  else{
+		  std::cout<<"BasicMultiDimensionalInverseWeight - InverseCdf: " << _CDFspline.returnDimensionality() <<std::endl;
+		  return _CDFspline.InverseCdf(F);
+	  }
   };
 
   double inverseMarginal(double F, int dimension){
@@ -473,11 +477,19 @@ public:
 //    return std::vector<double>(2,-1.0);
 //  };
 
-  std::vector<double>
-  InverseCdf(double F, double tolerance, int initial_divisions=10)
+
+  double
+  inverseMarginal(double F, int dimension)
   {
-   return std::vector<double>(2,-1.0);
-      //return _interpolator.NDinverseFunction(min, max);
+	  throwError("BasicMultivariateNormal: inverseMarginal not available");
+	  return 0.0;
+  }
+
+  std::vector<double>
+  InverseCdf(double F)
+  {
+	  throwError("BasicMultivariateNormal: InverseCdf not available");
+	  return std::vector<double>(2,-1.0);
   };
 
   int
@@ -526,11 +538,7 @@ public:
   {
     return _interpolator.interpolateAt(x);
   };
-  double
-  InverseCdf(std::vector<double> /*x*/)
-  {
-    return -1.0;
-  };
+
 //  std::vector<double>
 //  InverseCdf(double /*min*/, double /*max*/)
 //  {
@@ -542,6 +550,13 @@ public:
    return _interpolator.NDinverseFunctionGrid(F);
       //return _interpolator.NDinverseFunction(min, max);
   };
+
+  double
+  inverseMarginal(double F, int dimension)
+  {
+	  throwError("BasicMultiDimensionalScatteredMS: inverseMarginal not available");
+	  return 0.0;
+  }
 
   int
   returnDimensionality()

@@ -252,8 +252,6 @@ double BasicMultivariateNormal::Pdf(std::vector<double> x){
 }
 
 double BasicMultivariateNormal::Cdf(std::vector<double> x){
- double value;
-
 // if(_mu.size() == x.size()){
 //  int dimensions = _mu.size();
 //  //boost::math::chi_squared chiDistribution(dimensions);

@@ -41,7 +41,7 @@ void NDInterpolation::updateRNGparameters(double tolerance, double initial_divis
 	_tolerance = tolerance;
 	_initial_divisions = initial_divisions;
 
-	std::cout<<"NDInterpolation updateRNGparameter" <<std::endl;
+	std::cout<<"c++ NDInterpolation updateRNGparameter" << _tolerance << _initial_divisions << std::endl;
 }
 
 
@@ -103,14 +103,14 @@ double NDInterpolation::minkowskiDistance (std::vector<double> point1, std::vect
  double distance;
 
  if (point1.size() == point1.size()){
-  double pDistance = 0;
-  for (int i=0; i<point1.size(); i++){
-   pDistance += pow(abs(point1[i]-point2[i]),p);
-  }
-  distance = pow(pDistance, 1/p);
-  //distance = sqrt(pDistance);
+   double pDistance = 0.0;
+   for (int i=0; i<point1.size(); i++){
+	 // use std::abs() and DON'T use abs()!!!!!!!!!!!!!!!!
+     pDistance =  pDistance + pow(std::abs(point1.at(i)-point2.at(i)),p);
+   }
+   distance = pow(pDistance, 1.0/p);
  }else
-  throw ("Error in minkowski distance: points having different dimensions");
+    throw ("Error in Minkowski distance: points having different dimensions");
 
  return distance;
 }
@@ -234,10 +234,10 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F){
  //tolerance = 0.1;
  int seed = time(0);
 
- std::cout<<"c++ initial_divisions: "<< _initial_divisions << std::endl;
- std::cout<<"c++ tolerance: "<< _tolerance << std::endl;
+ //std::cout<<"c++ initial_divisions: "<< _initial_divisions << std::endl;
+ //std::cout<<"c++ tolerance: "<< _tolerance << std::endl;
  std::cout<<"c++ F: "<< F << std::endl;
- std::cout<<"c++ _dimensions: "<< _dimensions << std::endl;
+ //std::cout<<"c++ _dimensions: "<< _dimensions << std::endl;
 
  int last_divisions = (int)round(1.0/_tolerance*_initial_divisions);
 
@@ -246,32 +246,31 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F){
  std::vector<int> NDcoordinate (_dimensions);
 
  for (int n=0; n<_dimensions; n++)
-  NDcoordinate[n] = 0;
- std::cout<<"here1 "<< _dimensions <<std::endl;
+  NDcoordinate.at(n) = 0;
+ //std::cout<<"NDinverseFunctionGrid: here1 "<< _dimensions <<std::endl;
  basic_cell = generateNewCell(NDcoordinate, _cellPoint0, _cellDxs, _dimensions);
- std::cout<<"here2 "<<std::endl;
+ //std::cout<<"NDinverseFunctionGrid: here2 "<<std::endl;
  // Divide input space into cells
  std::vector<std::vector<std::vector<double> > > coarseCell;
  refinedCellDivision(coarseCell, basic_cell, _initial_divisions);
- std::cout<<"here3 "<<std::endl;
+ //std::cout<<"NDinverseFunctionGrid: here3 "<<std::endl;
  // Select pivot cells
  cellsFilter(coarseCell, F);
- std::cout<<"here4 "<<std::endl;
+ //std::cout<<"NDinverseFunctionGrid: here4 "<<std::endl;
  // Subdivide pivot cells into sub-cells
  std::vector<std::vector<std::vector<double> > > refinedCell;
  for (int i=0; i<coarseCell.size(); i++)
 	 refinedCellDivision(refinedCell, coarseCell[i], last_divisions);
- std::cout<<"here5 "<<std::endl;
+ //std::cout<<"NDinverseFunctionGrid: here5 "<<std::endl;
  // Select pivot sub-cells
  cellsFilter(refinedCell, F);
- std::cout<<"here6 "<<std::endl;
+ //std::cout<<"NDinverseFunctionGrid: here6 "<<std::endl;
  // Randomly pick a pivot sub-cell
  std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell, seed);
- std::cout<<"here7"<<std::endl;
+ //std::cout<<"NDinverseFunctionGrid: here7"<<std::endl;
  // Get center of the picked cell
  std::vector<double> randomVector = getCellCenter(pivotSubcell);
-
- std::cout<<"here8"<<std::endl;
+ //std::cout<<"NDinverseFunctionGrid: here8"<<std::endl;
 
  return randomVector;
 }
@@ -337,7 +336,6 @@ void NDInterpolation::refinedCellDivision(std::vector<std::vector<std::vector<do
 }
 
 std::vector<int> NDInterpolation::arrayConverter(int oneDcoordinate, int divisions, int n_dimensions){
- double temp=0;
  std::vector<int> NDcoordinates (n_dimensions);
  std::vector<int> weights (n_dimensions);
 
@@ -359,14 +357,11 @@ std::vector<int> NDInterpolation::arrayConverter(int oneDcoordinate, int divisio
 }
 
 std::vector<std::vector<double> > NDInterpolation::generateNewCell(std::vector<int> NDcoordinate, std::vector<double> coordinateOfPointZero, std::vector<double> dxs, int n_dimensions){
- std::cout<<"here! "<< _dimensions << std::endl;
  int numberOfVerteces = (int)pow(2,_dimensions);
 
  std::vector<std::vector<double> > verteces;
 
  std::vector<double> vertexRealCoordinate (n_dimensions);
-
- std::cout<<"Logic coordinates: " << NDcoordinate[0] << " , " << NDcoordinate[1] << std::endl;
 
  for (int i=0; i<numberOfVerteces; i++){
   std::vector<int> vertexIntCoordinate = arrayConverter(i,2,n_dimensions);
@@ -374,7 +369,6 @@ std::vector<std::vector<double> > NDInterpolation::generateNewCell(std::vector<i
   for (int nDim=0; nDim<n_dimensions; nDim++)
 	  vertexRealCoordinate.at(nDim) = coordinateOfPointZero.at(nDim) + NDcoordinate.at(nDim) * dxs.at(nDim) + vertexIntCoordinate.at(nDim) * dxs.at(nDim);
 
-  std::cout<<"coordinates: " << vertexRealCoordinate.at(0) << " , " << vertexRealCoordinate.at(1) << std::endl;
   verteces.push_back(vertexRealCoordinate);
  }
  //std::cout<<" " << std::endl;
@@ -395,7 +389,6 @@ std::vector<std::vector<double> > NDInterpolation::pickNewCell(std::vector<std::
 }
 
 std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<double> > cell){
- int numberVerteces = cell.size();
  std::vector<double> dxs (_dimensions);
  std::vector<double> center (_dimensions);
 

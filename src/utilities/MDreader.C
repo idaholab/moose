@@ -10,10 +10,21 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <cmath>
 
 #include "MDreader.h"
 
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
+
+bool checkIfdoubleIsInt(double value){
+	double intPart;
+	double decPart = std::modf(value, &intPart);
+
+	if (decPart == 0.0)
+		return true;
+	else
+		return false;
+}
 
 void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::vector< std::vector<double> > & discretizationValues, std::vector<double> & values){
     //FILE* pFile = fopen("filename", "rb");
@@ -31,7 +42,10 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
  data = read1Darray(filename);
 
  int startingPoint = 0;
- numberOfDimensions = data[startingPoint];
+ if (checkIfdoubleIsInt(data[startingPoint]))
+	 numberOfDimensions = (int)data[startingPoint];
+ else
+	 throwError("readOrderedNDarray: error in" << filename << "; number of dimensions must be integer");
  std::cerr << "numberOfDimensions: " << numberOfDimensions << std::endl;
 
     std::vector<int> discretizations (numberOfDimensions);
@@ -39,7 +53,10 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
     startingPoint++;
     std::cerr << "discretizations" << std::endl;
     for (int i=0; i<numberOfDimensions; i++){
-        discretizations[i] = data[startingPoint];
+    	if (checkIfdoubleIsInt(data[startingPoint]))
+    		discretizations[i] = (int)data[startingPoint];
+    	else
+    		 throwError("readOrderedNDarray: error in" << filename << "; number of discretizaions must be integer");
         std::cerr << "discretizations["<< i << "]: " << discretizations[i] << std::endl;
         startingPoint++;
     }
@@ -77,9 +94,16 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int 
  std::vector<double> data;
  data = read1Darray(filename);
 
+ if (checkIfdoubleIsInt(data[0]))
+	 numberOfDimensions = (int)data[0];
+ else
+	 throwError("readScatteredNDarray: error in" << filename << "; number of dimensions must be integer");
  numberOfDimensions = data[0];
 
- numberOfPoints = data[1];
+ if (checkIfdoubleIsInt(data[1]))
+	 numberOfPoints = (int)data[1];
+ else
+	 throwError("readScatteredNDarray: error in" << filename << "; number of points must be integer");
 
  int startingPoint = 2;
 
@@ -106,6 +130,11 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int 
   throwError("Data contained in " << filename << " is not complete: point coordinates and values do not match.");
  if (numberOfPoints != pointcoordinates.size())
   throwError("Data contained in " << filename << " is not complete: expected number of points and point coordinates do not match.");
+
+//for (int n=0; n<numberOfPoints; n++){
+//	 std::cout<< pointcoordinates[n][0] << " ; " << pointcoordinates[n][1] << " : " << values[n] << std::endl;
+// }
+
 }
 
 void readMatrix(const std::string filename, int & rows, int & columns, std::vector< std::vector<double> > & matrix){
@@ -194,6 +223,7 @@ std::vector<double> read1Darray(std::string filename){
 
  return data;
 }
+
 
 
 //double returnCDFvalue(vector<double> coordinates){

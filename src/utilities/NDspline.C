@@ -61,8 +61,6 @@ NDSpline::NDSpline(std::vector< std::vector<double> > & discretizations, std::ve
 
 	 _completed_init = true;
 
-	 int numberOfCoefficients=1;
-
 	 if (_dimensions > 1)
 	  calculateCoefficients();
 	 else
@@ -335,10 +333,10 @@ double NDSpline::phi(double t){
  // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
  double phi_value=0;
 
- if (std::abs(t)<=2 & std::abs(t)>=1)
+ if ((std::abs(t)<=2) & (std::abs(t)>=1))
   phi_value = std::pow(2-std::abs(t),3);
 
- if (std::abs(t)<1)
+ if ((std::abs(t))<1)
   phi_value = 4 - 6*std::pow(std::abs(t),2) + 3*std::pow(std::abs(t),3);
 
  return phi_value;
@@ -431,7 +429,6 @@ int NDSpline::fromNDto1Dconverter(std::vector<int> coordinate){
 
 std::vector<int> NDSpline::from1DtoNDconverter(int oneDcoordinate, std::vector<int> indexes){
  int n_dimensions = indexes.size();
- double temp=0;
  std::vector<int> NDcoordinates (n_dimensions);
  std::vector<int> weights (n_dimensions);
 
@@ -453,8 +450,6 @@ std::vector<int> NDSpline::from1DtoNDconverter(int oneDcoordinate, std::vector<i
 
 
 double NDSpline::retrieveCoefficient(std::vector<int> coefficient_coordinate){
- double value = 0;
-
  int oneDlocation = fromNDto1Dconverter(coefficient_coordinate);
 
  return _spline_coefficients.at(oneDlocation);
