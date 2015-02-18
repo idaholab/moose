@@ -11,7 +11,6 @@ InputParameters validParams<MathFreeEnergy>()
 
 MathFreeEnergy::MathFreeEnergy(const std::string & name,
                        InputParameters parameters) :
-    FunctionMaterialBase(name, parameters),
     DerivativeFunctionMaterialBase(name, parameters),
     _c(coupledValue("c")),
     _c_var(coupled("c"))

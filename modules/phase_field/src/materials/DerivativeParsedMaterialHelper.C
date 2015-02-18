@@ -3,8 +3,7 @@
 template<>
 InputParameters validParams<DerivativeParsedMaterialHelper>()
 {
-  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
-  params += validParams<ParsedMaterialHelper>();
+  InputParameters params = ParsedMaterialHelper<DerivativeFunctionMaterialBase>::validParams();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
   return params;
 }
@@ -12,10 +11,7 @@ InputParameters validParams<DerivativeParsedMaterialHelper>()
 DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string & name,
                                                                InputParameters parameters,
                                                                VariableNameMappingMode map_mode) :
-
-    FunctionMaterialBase(name, parameters),
-    DerivativeFunctionMaterialBase(name, parameters),
-    ParsedMaterialHelper(name, parameters, map_mode)
+    ParsedMaterialHelper<DerivativeFunctionMaterialBase>(name, parameters, map_mode)
 {
 }
 

@@ -16,7 +16,6 @@ InputParameters validParams<DerivativeSumMaterial>()
 
 DerivativeSumMaterial::DerivativeSumMaterial(const std::string & name,
                                              InputParameters parameters) :
-    FunctionMaterialBase(name, parameters),
     DerivativeFunctionMaterialBase(name, parameters),
     _sum_materials(getParam<std::vector<std::string> >("sum_materials")),
     _num_materials(_sum_materials.size())

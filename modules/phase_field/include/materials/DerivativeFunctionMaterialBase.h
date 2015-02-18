@@ -10,15 +10,14 @@ template<>
 InputParameters validParams<DerivativeFunctionMaterialBase>();
 
 /**
- * %Material base class central to compute the a function value and its
- * derivatives at each quadrature point (such as phase free energy).
- * Classes derived from this base class are central to the phase field parsed
+ * %Material base class central to compute the a phase free energy and
+ * its derivatives. Classes derived from this base class are central to
  * the KKS system. The calculation of free energies is centralized here
- * as the results are used in multiple kernels (ACParsed, CHParsed, and
- * SplitCHParsed).
+ * as the results are used in multiple kernels (KKSPhaseChemicalPotential
+ * and \ref KKSCHBulk).
  *
- * DerivativeFunctionMaterialBase provides numerous material properties which contain
- * the function values and its derivatives. The material property names are
+ * A DerivativeFunctionMaterialBase provides numerous material properties which contain
+ * the free energy and its derivatives. The material property names are
  * constructed dynamically by the helper functions propertyNameFirst(),
  * propertyNameSecond(), and propertyNameThird() in DerivativeMaterialInterface.
  *
@@ -29,13 +28,12 @@ InputParameters validParams<DerivativeFunctionMaterialBase>();
  * free energy expression can be provided in the input file (with the
  * derivatives being calculated automatically).
  *
- * \see ACParsed
- * \see CHParsed
- * \see SplitCHParsed
+ * \see KKSPhaseChemicalPotential
+ * \see KKSCHBulk
  * \see DerivativeParsedMaterial
  * \see DerivativeMaterialInterface
  */
-class DerivativeFunctionMaterialBase : public virtual FunctionMaterialBase
+class DerivativeFunctionMaterialBase : public FunctionMaterialBase
 {
 public:
   DerivativeFunctionMaterialBase(const std::string & name, InputParameters parameters);

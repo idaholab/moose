@@ -11,7 +11,6 @@ InputParameters validParams<DerivativeParsedMaterial>()
 
 DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
                                                    InputParameters parameters) :
-    FunctionMaterialBase(name, parameters),
     DerivativeParsedMaterialHelper(name, parameters, USE_MOOSE_NAMES),
     ParsedMaterialBase(name, parameters)
 {

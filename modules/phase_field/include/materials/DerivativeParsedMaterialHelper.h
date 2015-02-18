@@ -14,7 +14,7 @@ InputParameters validParams<DerivativeParsedMaterialHelper>();
 /**
  * Helper class to perform the auto derivative taking.
  */
-class DerivativeParsedMaterialHelper : public DerivativeFunctionMaterialBase, public ParsedMaterialHelper
+class DerivativeParsedMaterialHelper : public ParsedMaterialHelper<DerivativeFunctionMaterialBase>
 {
 public:
   DerivativeParsedMaterialHelper(const std::string & name,
