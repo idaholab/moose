@@ -110,7 +110,6 @@ class RemarkSlide(MooseObject):
 
     # Initialize the image information storage
     self._images = dict()
-    self._createImages(self._raw_markdown)
 
     # Add comments supplied via the optional argument
     if self.isParamValid('comments'):
@@ -167,7 +166,7 @@ class RemarkSlide(MooseObject):
 
     # Search the raw markdown for an existing class
     for key in self._pars.groupKeys('properties'):
-      match = re.search('(' + key + ':\s*(.*?)\s*\n)', markdown)
+      match = re.search('^(' + key + ':\s*(.*?)\s*\n)', markdown)
       if match:
         self._pars[key] = match.group(1)
         markdown = markdown.replace(match.group(1), '')
@@ -184,6 +183,13 @@ class RemarkSlide(MooseObject):
 
     # Return the parsed markdown
     return markdown
+
+  ##
+  # True if the slide is active
+  def isActive(self):
+    active = self.parent.activeSlides()
+    return (self.name() in active)
+
 
   ##
   # Substitution method for github code
@@ -252,54 +258,54 @@ class RemarkSlide(MooseObject):
     if self._root:
       images_node = self._root.getNode(self.parent.name()).getNode('Images')
 
-    # Do nothing if the ./Images node does not exist
-    if not images_node:
-      return
-
     # Get the common parameters from the ./Images block
     parent_params = self._factory.validParams(self._image_type)
-    self._parser.extractParams('', parent_params, images_node)
+    if images_node:
+      self._parser.extractParams('', parent_params, images_node)
 
     # Build the image objects
     match_list = image_class.match(markdown)
-    for match in match_list:
-      for m in match:
+    for key, value in match_list.iteritems():
 
-        # Get the default parameters from the image being created
-        params = self._factory.validParams(self._image_type)
+      # Get the default parameters from the image being created
+      params = self._factory.validParams(self._image_type)
 
-        # Apply the common parameters
-        params.applyParams(parent_params)
+      # Apply settings coming from the image wiki line
+      # i.e. [](image:342: align:right width:500px)
+      if key in self.parent.image_settings:
+        wiki_settings = self.parent.image_settings[key]
+        for k, v in wiki_settings.iteritems():
+          if k in params:
+            params[k] = v
 
-        # Add the parent parameter
-        params.addPrivateParam('_parent', self)
-        params.addPrivateParam('_match', m)
+      # Apply settings coming from the image wiki line
+      # i.e. [image:342: align:right]
+      for k, v in value.iteritems():
+        if k in params:
+          params[k] = v
 
-        # Extract the object name
-        name = image_class.extractName(m)
+      # Apply the common parameters
+      params.applyParams(parent_params)
 
-        # Do nothing if the image was already created
-        # I am not sure why the images are matched more than once, but they are...
-        if name in self._images:
-          continue
+      # Add the parent parameter
+      params.addPrivateParam('_parent', self)
 
-        # Indicate that the image is being created
-        print ' '*6 + 'IMAGE:', name
+      # Indicate that the image is being created
+      print ' '*6 + 'IMAGE:', key
 
-        # Apply the [./Slides] block parameters
-        if images_node:
-          node = images_node.getNode(name)
-          if node:
+      # Apply the [./Slides] block parameters
+      if images_node:
+        node = images_node.getNode(key)
+        if node:
 
-            # Apply the parameters from the node
-            self._parser.extractParams('', params, node)
+          # Apply the parameters from the node
+          self._parser.extractParams('', params, node)
 
-            # Indicate that the parameters are being set for the image
-            print ' '*8 + 'Appling image settings from input file'
+          # Indicate that the parameters are being set for the image
+          print ' '*8 + 'Appling image settings from input file'
 
-        # Create and store the Image object
-        img = self._factory.create(self._image_type, name, params)
-        self._images[name] = img
+      img = self._factory.create(self._image_type, key, params)
+      self._images[key] = img
 
 
   ##

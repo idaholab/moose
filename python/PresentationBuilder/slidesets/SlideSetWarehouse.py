@@ -17,7 +17,15 @@ class SlideSetWarehouse(Warehouse):
   ##
   # Returns the complete markdown for all SlideSets
   def markdown(self):
-    output = [obj.getMarkdown() for obj in self.objects]
+
+    # Extract all the slide set content
+    output = []
+    for obj in self.objects:
+      markdown = obj.getMarkdown()
+      if not markdown:
+        print 'Warning: The slide set, ' + obj.name() +', does not contain content.'
+      else:
+        output.append(markdown)
 
     if self.format == 'remark':
       return '\n\n---\n\n'.join(output)

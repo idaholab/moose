@@ -40,8 +40,9 @@ class CoverSet(SlideSet):
           slide = obj._slides[key]
           if not self._isSetActive(slide):
             continue
-
-          if slide.getParam('title') and obj.getParam('show_in_contents'):
+          if not slide.isActive():
+             continue
+          if obj.getParam('title') and obj.getParam('show_in_contents'):
             cnt += 1
 
     # Determine the number of contents slides needed

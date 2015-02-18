@@ -73,21 +73,6 @@ protected:
 
   /// Values passed by the user, they may be Reals for Postprocessors
   const std::vector<std::string> _vals;
-
-private:
-  /**
-   * Verifies that the 'vars' variable exists and that pre-defined variables are not used (i.e., x,y,z,t)
-   * @param parameters InputParameters object relevant to this function
-   * @return The variables (i.e., vars)
-   */
-  const std::vector<std::string> verifyVars(const InputParameters & parameters);
-
-  /**
-   * Verifies that the 'vals' variable exists
-   * @param parameters InputParameters object relevant to this function
-   * @return The values (i.e., vals)
-   */
-  const std::vector<std::string> verifyVals(const InputParameters & parameters);
 };
 
 #endif // MOOSEPARSEDFUNCTIONBASE_H
