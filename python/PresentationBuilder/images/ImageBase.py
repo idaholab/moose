@@ -71,7 +71,6 @@ class ImageBase(MooseObject):
     # Flag for wrapping in div
     div = self.getParam('div_center')
 
-
     # Create the html <img> block
     img = ''
     if div:

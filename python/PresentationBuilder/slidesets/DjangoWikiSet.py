@@ -27,14 +27,9 @@ class DjangoWikiSet(SlideSet):
     self._url = self.getParam('url')
     self._page = urlparse.urljoin(self._url, os.path.join('wiki', self.getParam('wiki')))
 
-    # Read the actual wiki (used for image extraction)
-    url = urllib.urlopen(self._page)
-    self.wiki = url.read()
-
     # Build image map
     self.images = dict()
     self.image_settings = dict()
-    self._buildImageMap()
 
   ##
   # Read the raw wiki
@@ -47,7 +42,6 @@ class DjangoWikiSet(SlideSet):
       regex = r'(\[.*?\])\((/wiki/.*?)\)'
       raw = re.sub(regex, self._insertLinkedWikiContent, raw)
 
-
     # Return the markdown
     return raw
 
@@ -59,6 +53,9 @@ class DjangoWikiSet(SlideSet):
     url = urllib.urlopen(os.path.join(page,'_source'))
     content = url.readlines()
     raw = self._extractHTML(content, 'pre','class="pre-scrollable"')
+
+    # Update the image map
+    self._buildImageMap(page)
 
     # Extract image settings
     raw = re.sub(r'(?<![^\s.])\s*\[\]\(\s*image\s*:([0-9]*)\s*(.*?)\)', self._extractImageSettings, raw)
@@ -116,10 +113,14 @@ class DjangoWikiSet(SlideSet):
 
   ##
   # Creates an image map from the id to the name and url (private)
-  def _buildImageMap(self):
+  def _buildImageMap(self, page):
+
+    # Read the wiki content
+    url = urllib.urlopen(page)
+    wiki = url.read()
 
     # Read the image information
-    url = urllib.urlopen(os.path.join(self._page, '_plugin/images'))
+    url = urllib.urlopen(os.path.join(page, '_plugin/images'))
     raw = url.read()
 
     # Extract wiki image ids
@@ -133,12 +134,11 @@ class DjangoWikiSet(SlideSet):
     links = []
     pattern = re.compile(r'alt="(.*?)"')
     for m in pattern.finditer(raw):
-
       name = m.group(1)
       if name not in names:
         # Locate image URL
         regex = 'href=\"(/static/media/wiki/images/' + '.*' + name + ')">.*'
-        match = re.search(regex, self.wiki)
+        match = re.search(regex, wiki)
         link = None # case when image is not used
         if match:
           link = urlparse.urljoin(self._url, match.group(1))

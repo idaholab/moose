@@ -166,7 +166,7 @@ class RemarkSlide(MooseObject):
 
     # Search the raw markdown for an existing class
     for key in self._pars.groupKeys('properties'):
-      match = re.search('(' + key + ':\s*(.*?)\s*\n)', markdown)
+      match = re.search('^(' + key + ':\s*(.*?)\s*\n)', markdown)
       if match:
         self._pars[key] = match.group(1)
         markdown = markdown.replace(match.group(1), '')
@@ -184,13 +184,12 @@ class RemarkSlide(MooseObject):
     # Return the parsed markdown
     return markdown
 
-
   ##
-  # A virtual method for extracting parameters for images, this is needed
-  # in the Django chain to allow for wiki and input file image settings to be
-  # applied correctly.
-  def imageValidParams(self):
-    return self._factory.validParams(self._image_type)
+  # True if the slide is active
+  def isActive(self):
+    active = self.parent.activeSlides()
+    return (self.name() in active)
+
 
   ##
   # Substitution method for github code

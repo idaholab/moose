@@ -332,6 +332,10 @@ class SlideSet(MooseObject):
           output.append('')
 
     for i in range(len(output)):
+      if not output[i]:
+        print 'Warning: Contents for slide set, ' + self.name() + ', are empty.'
+        break
+
       contents_name = self.name() + '-contents-' + str(i)
       self._slides[contents_name].markdown += output[i]
 
