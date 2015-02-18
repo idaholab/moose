@@ -357,11 +357,15 @@ void FEProblem::initialSetup()
 
   if (!_app.isRecovering())
   {
-    // uniform refine
-    if (_mesh.uniformRefineLevel() > 0)
+    /**
+     * If we are not recovering but we are doing restart (_app_setFileRestart() == true) with
+     * additional uniform refinements. We have to delay the refinement until this point
+     * in time so that the equation systems are initialized and projections can be performed.
+     */
+    if (_mesh.uniformRefineLevel() > 0 && _app.setFileRestart())
     {
       Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-      adaptivity().uniformRefine(_mesh.uniformRefineLevel());
+      adaptivity().uniformRefineWithProjection();
       Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
     }
   }
@@ -3652,6 +3656,10 @@ FEProblem::checkProblemIntegrity()
 
       if (n_processors() > 1)
       {
+        if (_mesh.uniformRefineLevel() > 0 && _mesh.getMesh().skip_partitioning() == false)
+          mooseError("This simulation is using uniform refinement on the mesh, with stateful properties and adaptivity. "
+                     "You must skip partitioning to run this case:\nMesh/skip_partitioning=true");
+
         _console << "\nWarning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imbalances and degraded performance!!\n\n";
         _mesh.getMesh().skip_partitioning(true);
         if (_displaced_problem)
