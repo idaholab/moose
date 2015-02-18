@@ -4,6 +4,7 @@
 #include "ColumnMajorMatrix.h"
 #include "MaterialProperty.h"
 #include "DataIO.h"
+#include "MooseRandom.h"
 
 #include <cmath>
 #include "libmesh/libmesh.h"
@@ -550,6 +551,30 @@ public:
   friend std::ostream & operator<<(std::ostream & stream, const SymmTensor & obj);
 
 
+  static void initRandom()
+  {
+
+    unsigned int randinit = 2000;
+    MooseRandom::seed(randinit);
+
+  }
+
+
+  static SymmTensor genRandomSymmTensor(Real scalefactor)
+  {
+
+    SymmTensor tensor;
+
+    tensor.xx() = (MooseRandom::rand() + 1.0) * scalefactor;
+    tensor.yy() = (MooseRandom::rand() + 1.0) * scalefactor;
+    tensor.zz() = (MooseRandom::rand() + 1.0) * scalefactor;
+    tensor.xy() = (MooseRandom::rand() + 1.0) * scalefactor;
+    tensor.yz() = (MooseRandom::rand() + 1.0) * scalefactor;
+    tensor.zx() = (MooseRandom::rand() + 1.0) * scalefactor;
+
+    return tensor;
+
+  }
 
 private:
   Real _xx;
