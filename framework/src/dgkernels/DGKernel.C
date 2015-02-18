@@ -202,22 +202,10 @@ DGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,unsigned in
 void
 DGKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _var.number())
-    computeJacobian();
-  else
-  {
-    // Compute element-element Jacobian
-    computeOffDiagElemNeighJacobian(Moose::ElementElement,jvar);
-
-    // Compute element-neighbor Jacobian
-    computeOffDiagElemNeighJacobian(Moose::ElementNeighbor,jvar);
-
-    // Compute neighbor-element Jacobian
-    computeOffDiagElemNeighJacobian(Moose::NeighborElement,jvar);
-
-    // Compute neighbor-neighbor Jacobian
-    computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor,jvar);
-  }
+  computeOffDiagElemNeighJacobian(Moose::ElementElement,jvar);
+  computeOffDiagElemNeighJacobian(Moose::ElementNeighbor,jvar);
+  computeOffDiagElemNeighJacobian(Moose::NeighborElement,jvar);
+  computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor,jvar);
 }
 
 Real
