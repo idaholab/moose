@@ -21,7 +21,8 @@ class ImageBase(MooseObject):
     params.addParam('style', 'The img style property')
     params.addParam('vertical-align', 'The vertical alignment of the image')
     params.addParam('text-align', 'Text alignment of image')
-    params.addParamsToGroup('html', ['align', 'width', 'height', 'vertical-align', 'text-align'])
+    params.addParam('caption', 'The caption for the image')
+    params.addParamsToGroup('html', ['align', 'width', 'height', 'vertical-align', 'text-align', 'caption'])
 
     return params
 
@@ -34,10 +35,6 @@ class ImageBase(MooseObject):
   def __init__(self, name, params):
     MooseObject.__init__(self, name, params)
     self.parent = self.getParam('_parent')
-    self.match = self.getParam('_match')
-
-    # Store the complete markdown image text
-    self._raw = self.match.group(0)
 
     # Set download flag (default is true)
     self._download = True
@@ -48,8 +45,7 @@ class ImageBase(MooseObject):
   # Perform the matching
   # @param markdown The raw markdown to parse
   # @return A list of match iterators (i.e., re.finditer)
-  @staticmethod
-  def match(markdown):
+  def match(self, markdown):
     return []
 
   ##
@@ -74,7 +70,6 @@ class ImageBase(MooseObject):
 
     # Flag for wrapping in div
     div = self.getParam('div_center')
-
 
     # Create the html <img> block
     img = ''
@@ -110,3 +105,13 @@ class ImageBase(MooseObject):
 
     # Return the complete html
     return img
+
+  ##
+  #
+  @staticmethod
+  def seperateImageOptions(options):
+    output = dict()
+    for pair in options.split():
+      key, value = pair.split(':')
+      output[key] = value
+    return output

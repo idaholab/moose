@@ -29,16 +29,17 @@ class MarkdownImage(ImageBase):
     if not self.isParamValid('url'):
       self._pars['url'] = self.match.group(2)
 
-      ##
+  ##
   #
   @staticmethod
   def match(markdown):
 
     # List of match iterators to return
-    m = []
+    m = dict()
 
     pattern = re.compile(r'\!\[(.*?)\]\((.*)\)')
-    m.append(pattern.finditer(markdown))
+    for item in pattern.finditer(markdown):
+      m[item.group(1)] = ImageBase.seperateImageOptions(item.group(2))
 
     # Return the list
     return m

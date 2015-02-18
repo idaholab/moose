@@ -13,6 +13,8 @@ class DjangoWikiSet(SlideSet):
     params = SlideSet.validParams()
     params.addRequiredParam('wiki', 'The mooseframework.org wiki site to extract')
     params.addParam('url', 'http://www.mooseframework.org/', 'The location of the Django wiki')
+    params.addParam('auto_insert_moose_wiki', True, 'When true links to other moose wiki content is automatically inserted')
+    params.addParam('insert_wiki_link', True, 'When auto linking wiki pages place the link at with the page before the inserted content')
     return params
 
 
@@ -25,22 +27,38 @@ class DjangoWikiSet(SlideSet):
     self._url = self.getParam('url')
     self._page = urlparse.urljoin(self._url, os.path.join('wiki', self.getParam('wiki')))
 
-    # Read the _source wiki page html (used to get the raw markdown)
-    url = urllib.urlopen(os.path.join(self._page,'_source'))
-    self.source = url.readlines()
-
-    # Read the actual wiki (used for image extraction)
-    url = urllib.urlopen(self._page)
-    self.wiki = url.read()
-
     # Build image map
     self.images = dict()
-    self._buildImageMap()
+    self.image_settings = dict()
 
   ##
   # Read the raw wiki
   def read(self):
-    raw = self._extractHTML('pre','class="pre-scrollable"')
+
+    raw = self._extractMarkdownFromWiki(self._page)
+
+    # Search for wiki content links
+    if self.getParam('auto_insert_moose_wiki'):
+      regex = r'(\[.*?\])\((/wiki/.*?)\)'
+      raw = re.sub(regex, self._insertLinkedWikiContent, raw)
+
+    # Return the markdown
+    return raw
+
+  ##
+  #
+  def _extractMarkdownFromWiki(self, page):
+
+    # Read the _source wiki page html (used to get the raw markdown)
+    url = urllib.urlopen(os.path.join(page,'_source'))
+    content = url.readlines()
+    raw = self._extractHTML(content, 'pre','class="pre-scrollable"')
+
+    # Update the image map
+    self._buildImageMap(page)
+
+    # Extract image settings
+    raw = re.sub(r'(?<![^\s.])\s*\[\]\(\s*image\s*:([0-9]*)\s*(.*?)\)', self._extractImageSettings, raw)
 
     # Extract other RemarkJS commands
     raw = re.sub(r'(?<![^\s.])(\s*\[\]\((.*?)\))', self._applyRemark, raw)
@@ -48,8 +66,33 @@ class DjangoWikiSet(SlideSet):
     # Extract "[TOC]"
     raw = re.sub(r'(\s*\[TOC\])', self._stripTOC, raw)
 
-    # Return the markdown
+    # Return the markdown content
     return raw
+
+  ##
+  #
+  def _extractImageSettings(self, match):
+    id = match.group(1)
+    settings = dict()
+    for item in match.group(2).split(' '):
+      key, value = item.split(':')
+      settings[key] = value
+    self.image_settings[id] = settings
+    return ''
+
+
+  ##
+  # Substitution method for moose wiki content
+  def _insertLinkedWikiContent(self, match):
+    page = self._url + match.group(2)
+    content = ''
+
+    if self.getParam('insert_wiki_link'):
+      content += match.group(1) + '(' + page + ')\n'
+
+    content += '\n\n---\n\n'
+    content += self._extractMarkdownFromWiki(page)
+    return content
 
   ##
   # Substitution function for enabling table of contents via [TOC] in wiki content
@@ -70,10 +113,14 @@ class DjangoWikiSet(SlideSet):
 
   ##
   # Creates an image map from the id to the name and url (private)
-  def _buildImageMap(self):
+  def _buildImageMap(self, page):
+
+    # Read the wiki content
+    url = urllib.urlopen(page)
+    wiki = url.read()
 
     # Read the image information
-    url = urllib.urlopen(os.path.join(self._page, '_plugin/images'))
+    url = urllib.urlopen(os.path.join(page, '_plugin/images'))
     raw = url.read()
 
     # Extract wiki image ids
@@ -87,12 +134,11 @@ class DjangoWikiSet(SlideSet):
     links = []
     pattern = re.compile(r'alt="(.*?)"')
     for m in pattern.finditer(raw):
-
       name = m.group(1)
       if name not in names:
         # Locate image URL
         regex = 'href=\"(/static/media/wiki/images/' + '.*' + name + ')">.*'
-        match = re.search(regex, self.wiki)
+        match = re.search(regex, wiki)
         link = None # case when image is not used
         if match:
           link = urlparse.urljoin(self._url, match.group(1))
@@ -107,9 +153,10 @@ class DjangoWikiSet(SlideSet):
 
   ##
   # A method for extracting html blocks (private)
+  # @param content The html content to search
   # @param tag The html tag to search for (e.g., div)
   # @param args A list of additional items to search for
-  def _extractHTML(self, tag, *args):
+  def _extractHTML(self, content, tag, *args):
 
     # The data to be output
     output = []
@@ -120,7 +167,7 @@ class DjangoWikiSet(SlideSet):
 
     # Search each line in the raw wiki html
     store = False # Set to true when the block is located
-    for line in self.source:
+    for line in content:
 
       # The desired block was located
       if strt in line and all(arg in line for arg in args):
