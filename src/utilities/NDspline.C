@@ -14,7 +14,7 @@ NDSpline::NDSpline(std::string filename, std::vector<double> alfa, std::vector<d
 
  readOrderedNDarray(filename, _dimensions, _discretizations, _values);
 
- NDSpline(_discretizations, _values, _alpha, _beta);
+ NDSpline_init(_discretizations, _values, _alpha, _beta);
 }
 
 NDSpline::NDSpline(std::string filename){
@@ -30,10 +30,14 @@ NDSpline::NDSpline(std::string filename){
 	 beta[nDim] = 0.0;
  }
 
- NDSpline(_discretizations, _values, alpha, beta);
+ NDSpline_init(_discretizations, _values, alpha, beta);
 }
 
 NDSpline::NDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta){
+	NDSpline_init(discretizations, values, alpha, beta);
+}
+
+void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta){
 	_discretizations = discretizations;
 	_values = values;
 	_alpha = alpha;
@@ -78,7 +82,7 @@ NDSpline::NDSpline(std::vector< std::vector<double> > & discretizations, std::ve
 
 NDSpline::NDSpline(){
     _completed_init = false;
-    _dimensions = 0;
+    _dimensions = -1;
 }
 
 NDSpline::~NDSpline() {

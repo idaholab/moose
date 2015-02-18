@@ -31,7 +31,7 @@ public:
   virtual double getGradientAt(std::vector<double> point_coordinate);
   virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
   std::vector<double> NDinverseFunction(double F_min, double F_max);
-  std::vector<double> NDinverseFunctionGrid(double F);
+  std::vector<double> NDinverseFunctionGrid(double F, double g);
 
   double averageCellValue(std::vector<double> center, std::vector<double> dx);
 
@@ -65,7 +65,7 @@ protected:
   void refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > cell, int divisions);
   std::vector<int> arrayConverter(int oneDcoordinate, int divisions, int n_dimensions);
   std::vector<std::vector<double> > generateNewCell(std::vector<int> NDcoordinate, std::vector<double> coordinateOfPointZero, std::vector<double> dxs, int n_dimensions);
-  std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > cellsSet, int seed);
+  std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > cellsSet, double g);
   std::vector<double> getCellCenter(std::vector<std::vector<double> > cell);
 
   double OneDderivative(double fxph, double fx, double fxmh);
@@ -86,6 +86,7 @@ public:
   NDSpline(std::string filename);
   NDSpline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
   NDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
+  void NDSpline_init(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
 
   //std::vector< std::vector<double> > getDiscretizations(){
   //	  std::cout<<"but why!"<< std::endl;
@@ -99,6 +100,11 @@ public:
 		  vector.push_back(temp);
 	  };
   }
+
+  void printFunction(){
+	  std::cout<<"data ND spline1 value " << _discretizations.at(0).at(0) << std::endl;
+	  std::cout<<"data ND spline2 dimensions " << _dimensions << std::endl;
+  };
 
   NDSpline();
   ~NDSpline();

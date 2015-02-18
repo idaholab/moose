@@ -228,11 +228,10 @@ std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, do
 
 
 
-std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F){
+std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  //initial_divisions = 10;
  //tolerance = 0.1;
- int seed = time(0);
 
  //std::cout<<"c++ initial_divisions: "<< _initial_divisions << std::endl;
  //std::cout<<"c++ tolerance: "<< _tolerance << std::endl;
@@ -266,7 +265,7 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F){
  cellsFilter(refinedCell, F);
  //std::cout<<"NDinverseFunctionGrid: here6 "<<std::endl;
  // Randomly pick a pivot sub-cell
- std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell, seed);
+ std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
  //std::cout<<"NDinverseFunctionGrid: here7"<<std::endl;
  // Get center of the picked cell
  std::vector<double> randomVector = getCellCenter(pivotSubcell);
@@ -375,15 +374,18 @@ std::vector<std::vector<double> > NDInterpolation::generateNewCell(std::vector<i
  return verteces;
 }
 
-std::vector<std::vector<double> > NDInterpolation::pickNewCell(std::vector<std::vector<std::vector<double> > > cellsSet, int seed){
+std::vector<std::vector<double> > NDInterpolation::pickNewCell(std::vector<std::vector<std::vector<double> > > cellsSet, double g){
  int numberOfCells = cellsSet.size();
 
  // generate RN in [0,1]
- boost::random::mt19937 rng;
- rng.seed(seed);
- boost::random::uniform_int_distribution<> dist(1, numberOfCells);
+// int seed = time(0);
+// boost::random::mt19937 rng;
+// rng.seed(seed);
+// boost::random::uniform_int_distribution<> dist(1, numberOfCells);
+//
+// int pickedCell = dist(rng)-1;
 
- int pickedCell = dist(rng)-1;
+ int pickedCell = floor(g * numberOfCells);
 
  return cellsSet[pickedCell];
 }

@@ -130,12 +130,12 @@ double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
 }
 
 //std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){
-std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & F){
+std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & F, double & g){
  //return dist.InverseCdf(min, max);
  //return std::vector<double>(2,-1.0);
  //return dist.InverseCdf((max-min)/2.0, (max-min), 10);
  //return dist.InverseCdf((max-min)/2.0);
-	return dist.InverseCdf(F);
+	return dist.InverseCdf(F,g);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std::vector<double> mu){
