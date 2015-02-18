@@ -32,6 +32,10 @@ class CoverSet(SlideSet):
   #
   def initContents(self):
 
+    # Do nothing if the 'contents' flag is not set in the input file
+    if not self.isParamValid('contents') or not self.getParam('contents'):
+      return
+
     # Count the number of contents entries
     cnt = 0
     for obj in self._warehouse.objects:
@@ -76,8 +80,9 @@ class CoverSet(SlideSet):
   def contents(self):
 
     # Do nothing if the 'contents' flag is not set in the input file
-    if not self.isParamValid('contents'):
+    if not self.isParamValid('contents') or not self.getParam('contents'):
       return
+
     # Loop through each object and append the markdown with title slides
     max_per_slide = int(self.getParam('contents_items_per_slide'))
     output = []

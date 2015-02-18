@@ -59,10 +59,10 @@ class DjangoWikiSlide(RemarkSlide):
     # However, RemarkJS does support indented code blocks, but these blocks need to be indented by
     # four spaces. The following preforms this indenting.
     regex = re.compile(r'(^\s*[\*-].*?\n)(```.*?```\s*\n)', re.MULTILINE|re.DOTALL)
-    markdown = regex.sub(self._indentListNestedCode, markdown)
+    markdown = regex.sub(self.__indentListNestedCode, markdown)
 
     # Extract comments
-    markdown = re.sub(r'(?<![^\s.])(\s*\[\]\(\?\?\?\s*(.*?)\))', self._storeComment, markdown, re.S)
+    markdown = re.sub(r'(?<![^\s.])(\s*\[\]\(\?\?\?\s*(.*?)\))', self.__storeComment, markdown, re.S)
 
     # Add the comments at the end
     if self._comments:
@@ -77,15 +77,16 @@ class DjangoWikiSlide(RemarkSlide):
     # Return the markdown
     return markdown
 
+
   ##
   # Substitution function for extracting Remark comments (private)
-  def _storeComment(self, match):
+  def __storeComment(self, match):
     self._comments.append(match.group(2).strip())
     return ''
 
   ##
   # Subsitution function for nesting code in lists (private)
-  def _indentListNestedCode(self, match):
+  def __indentListNestedCode(self, match):
 
     # Perform an additional match to check if the ``` directly below the list item
     sub_match = re.search(r'(^\s*[\*-].*?\n)(```)', match.group(0), re.MULTILINE)
