@@ -62,5 +62,8 @@
 
     # Here we'll attempt to load a different module that's not compiled into this module
     app_type = InvalidApp
+
+    # Here we set an input file specific relative library path instead of using MOOSE_LIBRARY_PATH
+    library_path = '../../../../phase_field/lib'
   [../]
 []

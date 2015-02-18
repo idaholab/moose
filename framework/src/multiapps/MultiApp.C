@@ -23,6 +23,7 @@
 #include "AppFactory.h"
 #include "MooseUtils.h"
 #include "Console.h"
+#include "InfixIterator.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -560,7 +561,15 @@ MultiApp::dynamicRegisterApps(const std::string & app_name)
 
   // At this point the application should be registered so check it
   if (!AppFactory::instance().isRegistered(app_name))
-    mooseError("Unable to locate library for \"" << app_name << "\", have you exported MOOSE_LIBRARY_PATH?");
+  {
+    std::ostringstream oss;
+
+    oss << "Unable to locate library for \"" << app_name << "\".\nWe attempted to locate the library \"" << library_name << "\" in the following paths:\n\t";
+    std::copy(paths.begin(), paths.end(), infix_ostream_iterator<std::string>(oss, "\n\t"));
+    oss << "\n\nMake sure you have compiled the library and either set the \"library_path\" variable "
+        << "in your input file or exported \"MOOSE_LIBRARY_PATH\".";
+    mooseError(oss.str());
+  }
 }
 
 std::string
