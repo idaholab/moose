@@ -26,5 +26,11 @@
     resize_mesh = true
     recover = false
     #skip = 'see #3847'
-[../]
+  [../]
+
+  [./ParsedMaterial]
+    type = 'Exodiff'
+    input = 'ParsedMaterial_test.i'
+    exodiff = 'ParsedMaterial_test_out.e'
+  [../]
 []

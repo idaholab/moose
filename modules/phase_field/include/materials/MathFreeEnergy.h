@@ -1,7 +1,7 @@
 #ifndef MATHFREEENERGY_H
 #define MATHFREEENERGY_H
 
-#include "DerivativeBaseMaterial.h"
+#include "DerivativeFunctionMaterialBase.h"
 
 //Forward Declarations
 class MathFreeEnergy;
@@ -13,7 +13,7 @@ InputParameters validParams<MathFreeEnergy>();
  * Material class that creates the math free energy and its derivatives
  * for use with CHParsed and SplitCHParsed. F = 1/4*(1 + c)^2*(1 - c)^2.
  */
-class MathFreeEnergy : public DerivativeBaseMaterial
+class MathFreeEnergy : public DerivativeFunctionMaterialBase
 {
 public:
   MathFreeEnergy(const std::string & name,
