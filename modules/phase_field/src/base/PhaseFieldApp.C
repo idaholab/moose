@@ -20,6 +20,7 @@
 #include "SpecifiedSmoothCircleIC.h"
 #include "RndBoundingBoxIC.h"
 #include "PFMobility.h"
+#include "ParsedMaterial.h"
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
 #include "DerivativeTwoPhaseMaterial.h"
@@ -125,6 +126,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerMaterial(PFMobility);
   registerMaterial(GBEvolution);
+  registerMaterial(ParsedMaterial);
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
   registerMaterial(DerivativeTwoPhaseMaterial);

@@ -1,7 +1,7 @@
 #ifndef ELASTICENERGYMATERIAL_H
 #define ELASTICENERGYMATERIAL_H
 
-#include "DerivativeBaseMaterial.h"
+#include "DerivativeFunctionMaterialBase.h"
 
 // Forward Declaration
 class ElasticEnergyMaterial;
@@ -9,12 +9,12 @@ class RankTwoTensor;
 class ElasticityTensorR4;
 
 template<>
-InputParameters validParams<DerivativeBaseMaterial>();
+InputParameters validParams<DerivativeFunctionMaterialBase>();
 
 /**
  * Material class to compute the elastic free energy and its derivatives
  */
-class ElasticEnergyMaterial : public DerivativeBaseMaterial
+class ElasticEnergyMaterial : public DerivativeFunctionMaterialBase
 {
 public:
   ElasticEnergyMaterial(const std::string & name, InputParameters parameters);

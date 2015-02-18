@@ -1,64 +1,21 @@
-#include "DerivativeBaseMaterial.h"
+#include "DerivativeFunctionMaterialBase.h"
 
 template<>
-InputParameters validParams<DerivativeBaseMaterial>()
+InputParameters validParams<DerivativeFunctionMaterialBase>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<FunctionMaterialBase>();
   params.addClassDescription("Material to provide a function (such as a free energy) and its derivatives w.r.t. the coupled variables");
-  params.addParam<std::string>("f_name", "F", "Base name of the free energy function (used to name the material properties)");
   params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
   return params;
 }
 
-DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
-                                               InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(name, parameters),
-    _F_name(getParam<std::string>("f_name")),
-    _third_derivatives(getParam<bool>("third_derivatives")),
-    _prop_F(&declareProperty<Real>(_F_name)),
-    _number_of_nl_variables(_fe_problem.getNonlinearSystem().nVariables()),
-    _arg_index(_number_of_nl_variables)
+DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const std::string & name,
+                                                               InputParameters parameters) :
+    FunctionMaterialBase(name, parameters),
+    _third_derivatives(getParam<bool>("third_derivatives"))
 {
   // loop counters
   unsigned int i, j, k;
-
-  // fetch names and numbers of all coupled variables
-  _mapping_is_unique = true;
-  for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin(); it != _pars.coupledVarsEnd(); ++it)
-  {
-    std::map<std::string, std::vector<MooseVariable *> >::iterator vars = _coupled_vars.find(*it);
-
-    // no MOOSE variable was provided for this coupling, skip derivatives w.r.t. this variable
-    if (vars == _coupled_vars.end())
-      continue;
-
-    // check if we have a 1:1 mapping between parameters and variables
-    if (vars->second.size() != 1)
-      _mapping_is_unique = false;
-
-    // iterate over all components
-    for (unsigned int j = 0; j < vars->second.size(); ++j)
-    {
-      // make sure each nonlinear variable is coupled in only once
-      if (std::find(_arg_names.begin(), _arg_names.end(), vars->second[j]->name()) != _arg_names.end())
-        mooseError("A nonlinear variable can only be coupled in once.");
-
-      // insert the map values
-      //unsigned int number = vars->second[j]->number();
-      unsigned int number = coupled(*it, j);
-      _arg_names.push_back(vars->second[j]->name());
-      _arg_numbers.push_back(number);
-      _arg_param_names.push_back(*it);
-
-      // populate number -> arg index lookup table skipping aux variables
-      if (number < _number_of_nl_variables)
-        _arg_index[number] = _args.size();
-
-      // get variable value
-      _args.push_back(&coupledValue(*it, j));
-    }
-  }
-  _nargs = _arg_names.size();
 
   // reserve space for material properties and explicitly initialize to NULL
   _prop_dF.resize(_nargs, NULL);
@@ -117,9 +74,9 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
 }
 
 void
-DerivativeBaseMaterial::initialSetup()
+DerivativeFunctionMaterialBase::initialSetup()
 {
-  // set the _prop_* pointers of all material poroperties that are not beeing used back to NULL
+  // set the _prop_* pointers of all material properties that are not beeing used back to NULL
   unsigned int i, j, k;
   bool needs_third_derivatives = false;
 
@@ -155,14 +112,14 @@ DerivativeBaseMaterial::initialSetup()
         }
 
         if (!needs_third_derivatives)
-          mooseWarning("This simulation does not actually need the third derivatives of DerivativeBaseMaterial " + _name);
+          mooseWarning("This simulation does not actually need the third derivatives of DerivativeFunctionMaterialBase " + _name);
       }
     }
   }
 }
 
 void
-DerivativeBaseMaterial::computeProperties()
+DerivativeFunctionMaterialBase::computeProperties()
 {
   unsigned int i, j, k;
 
