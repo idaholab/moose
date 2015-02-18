@@ -11,10 +11,8 @@ template<>
 InputParameters validParams<ParsedMaterial>();
 
 /**
- * DerivativeFunctionMaterialBase child class to evaluate a parsed function for the
- * free energy and automatically provide all derivatives.
- * This requires the autodiff patch (https://github.com/libMesh/libmesh/pull/238)
- * to Function Parser in libmesh.
+ * FunctionMaterialBase child class to evaluate a parsed function. The function
+ * can access non-linear and aux variables (unlike MooseParsedFunction).
  */
 class ParsedMaterial : public ParsedMaterialHelper, public ParsedMaterialBase
 {

@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<DerivativeParsedMaterialHelper>();
 
 /**
- * Helper class to perform the bulk of the bulk of the auto derivative taking.
+ * Helper class to perform the auto derivative taking.
  */
 class DerivativeParsedMaterialHelper : public DerivativeFunctionMaterialBase, public ParsedMaterialHelper
 {

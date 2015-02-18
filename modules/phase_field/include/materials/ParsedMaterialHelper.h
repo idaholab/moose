@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<ParsedMaterialHelper>();
 
 /**
- * Helper class to perform the bulk of the bulk of the auto derivative taking.
+ * Helper class to perform the parsing and optimization of the function expression
  */
 class ParsedMaterialHelper : public virtual FunctionMaterialBase
 {
@@ -21,8 +21,8 @@ public:
   };
 
   ParsedMaterialHelper(const std::string & name,
-                                 InputParameters parameters,
-                                 VariableNameMappingMode map_mode = USE_PARAM_NAMES);
+                       InputParameters parameters,
+                       VariableNameMappingMode map_mode = USE_PARAM_NAMES);
 
   virtual ~ParsedMaterialHelper();
 
@@ -40,6 +40,7 @@ public:
 protected:
   virtual void computeProperties();
 
+  // run FPOptimizer on the parsed function
   virtual void functionsOptimize();
 
   /// Shorthand for an autodiff function parser object.
