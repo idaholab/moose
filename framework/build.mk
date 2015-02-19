@@ -329,6 +329,12 @@ clean_up:
 		$(MAKE) -C $${app} clean; \
 	done
 
+libmesh_update:
+	@echo ======================================================
+	@echo Downloading and updating libMesh
+	@echo ======================================================
+	$(MOOSE_DIR)/scripts/update_and_rebuild_libmesh.sh
+
 #
 # Maintenance
 #
