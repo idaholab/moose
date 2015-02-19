@@ -70,6 +70,7 @@ TensorMechanicsApp::~TensorMechanicsApp()
 {
 }
 
+extern "C" void TensorMechanicsApp_registerApps() { TensorMechanicsApp::registerApps(); }
 void
 TensorMechanicsApp::registerApps()
 {

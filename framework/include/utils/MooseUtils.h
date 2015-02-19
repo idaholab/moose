@@ -52,14 +52,18 @@ namespace MooseUtils
    * Checks to see if a file is readable (exists and permissions)
    * @param filename The filename to check
    * @param check_line_endings Whether or not to see if the file contains DOS line endings.
+   * @param throw_on_unreadable Whether or not to throw a MOOSE error if the file doesn't exist
+   * @return a Boolean indicating whether the file exists and is readable
    */
-  void checkFileReadable(const std::string & filename, bool check_line_endings = false);
+  bool checkFileReadable(const std::string & filename, bool check_line_endings = false, bool throw_on_unreadable = true);
 
   /**
    * Check if the file is writable (path exists and permissions)
    * @param filename The filename you want to see if you can write to.
+   * @param throw_on_unwritable Whether or not to throw a MOOSE error if the file is not writable
+   * return a Boolean indicating whether the file exists and is writable
    */
-  void checkFileWriteable(const std::string & filename);
+  bool checkFileWriteable(const std::string & filename, bool throw_on_unwritable = true);
 
   /**
    * This function implements a parallel barrier function but writes progress
@@ -84,6 +88,22 @@ namespace MooseUtils
    * If the supplied filename does not contain a path, it returns "." as the path
    */
   std::pair<std::string, std::string> splitFileName(std::string full_file);
+
+  /**
+   * Function for converting a camel case name to a name containing underscores.
+   * @param camel_case_name A string containing camel casing
+   * @return a string containing no capital letters with underscores as appropriate
+   */
+  std::string
+  camelCaseToUnderscore(const std::string & camel_case_name);
+
+  /**
+   * Function for converting an underscore name to a camel case name.
+   * @param underscore_name A string containing underscores
+   * @return a string containing camel casing
+   */
+  std::string
+  underscoreToCamelCase(const std::string & underscore_name, bool leading_upper_case);
 
   /**
    * This routine is a simple helper function for searching a map by values instead of keys

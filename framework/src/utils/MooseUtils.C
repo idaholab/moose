@@ -86,13 +86,18 @@ bool pathContains(const std::string &expression,
     return false;
 }
 
-void
-checkFileReadable(const std::string & filename, bool check_line_endings)
+bool
+checkFileReadable(const std::string & filename, bool check_line_endings, bool throw_on_unreadable)
 {
   std::ifstream in(filename.c_str(), std::ifstream::in);
   if (in.fail())
-    mooseError((std::string("Unable to open file \"") + filename
-                + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
+  {
+    if (throw_on_unreadable)
+      mooseError((std::string("Unable to open file \"") + filename
+                  + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
+    else
+      return false;
+  }
 
   if (check_line_endings)
   {
@@ -105,17 +110,28 @@ checkFileReadable(const std::string & filename, bool check_line_endings)
   }
 
   in.close();
+
+  return true;
 }
 
-void
-checkFileWriteable(const std::string & filename)
+bool
+checkFileWriteable(const std::string & filename, bool throw_on_unwritable)
 {
   std::ofstream out(filename.c_str(), std::ofstream::out);
   if (out.fail())
-    mooseError((std::string("Unable to open file \"") + filename
-                + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
+  {
+    if (throw_on_unwritable)
+      mooseError((std::string("Unable to open file \"") + filename
+                  + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
+    else
+      return false;
+  }
+
+
 
   out.close();
+
+  return true;
 }
 
 void
@@ -193,6 +209,50 @@ splitFileName(std::string full_file)
 
   // Return the path and file as a pair
   return std::pair<std::string, std::string>(path, file);
+}
+
+std::string
+camelCaseToUnderscore(const std::string & camel_case_name)
+{
+  string replaced = camel_case_name;
+  // Put underscores in front of each contiguous set of capital letters
+  pcrecpp::RE("(?!^)([A-Z]+)").GlobalReplace("_\\1", &replaced);
+
+  // Convert all capital letters to lower case
+  std::transform(replaced.begin(), replaced.end(), replaced.begin(), ::tolower);
+  return replaced;
+}
+
+std::string
+underscoreToCamelCase(const std::string & underscore_name, bool leading_upper_case)
+{
+  pcrecpp::StringPiece input(underscore_name);
+  pcrecpp::RE re("([^_]*)(_|$)");
+
+  std::string result;
+  std::string us, not_us;
+  bool make_upper = leading_upper_case;
+  while (re.Consume(&input, &not_us, &us))
+  {
+    if (not_us.length() > 0)
+    {
+      if (make_upper)
+      {
+        result += std::toupper(not_us[0]);
+        if (not_us.length() > 1)
+          result += not_us.substr(1);
+      }
+      else
+        result += not_us;
+    }
+    if (us == "")
+      break;
+
+    // Toggle flag so next match is upper cased
+    make_upper = true;
+  }
+
+  return result;
 }
 
 bool

@@ -24,4 +24,9 @@
     input = 'crysp_read_slip_prop.i'
     exodiff = 'crysp_read_slip_prop_out.e'
   [../]
+  [./test_cutback]
+    type = 'Exodiff'
+    input = 'crysp_cutback.i'
+    exodiff = 'crysp_cutback_out.e'
+  [../]
 []

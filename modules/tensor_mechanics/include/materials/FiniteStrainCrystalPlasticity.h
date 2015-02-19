@@ -266,6 +266,15 @@ protected:
   ///Flag to save euler angle as Material Property
   bool _save_euler_angle;
 
+  bool _gen_rndm_stress_flag;
+
+  ///Input option for scaling variable to generate random stress when convergence fails
+  bool _input_rndm_scale_var;
+
+  ///Scaling value
+  Real _rndm_scale_var;
+
+
   MaterialProperty<RankTwoTensor> & _fp;
   MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _pk2;
@@ -308,6 +317,8 @@ protected:
   std::vector<Real> _slip_sys_props;
 
   bool _read_from_slip_sys_file;
+
+  bool _err_tol;///Flag to check whether convergence is achieved
 
 };
 

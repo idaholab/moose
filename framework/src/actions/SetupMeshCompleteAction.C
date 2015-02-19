@@ -15,6 +15,8 @@
 #include "SetupMeshCompleteAction.h"
 #include "MooseMesh.h"
 #include "Moose.h"
+#include "Adaptivity.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<SetupMeshCompleteAction>()
@@ -49,8 +51,24 @@ SetupMeshCompleteAction::act()
   if (!_mesh)
     mooseError("No mesh file was supplied and no generation block was provided");
 
-  completeSetup(_mesh.get());
+  /**
+   * If possible we'd like to refine the mesh here before the equation systems
+   * are setup to avoid doing expensive projections. If however we are doing a
+   * file based restart and we need uniform refinements, we'll have to postpone
+   * those refinements until after the solution has been read in.
+   */
+  if (_current_task == "uniform_refine_mesh" && _app.setFileRestart() == false && _app.isRecovering() == false)
+  {
+    Adaptivity::uniformRefine(_mesh.get());
 
-  if (_displaced_mesh)
-    completeSetup(_displaced_mesh.get());
+    if (_displaced_mesh)
+      Adaptivity::uniformRefine(_displaced_mesh.get());
+  }
+  else
+  {
+    completeSetup(_mesh.get());
+
+    if (_displaced_mesh)
+      completeSetup(_displaced_mesh.get());
+  }
 }
