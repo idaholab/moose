@@ -148,7 +148,6 @@
 []
 
 [Preconditioning]
-  # active = ' '
   [./SMP]
     type = SMP
     full = true
@@ -158,11 +157,7 @@
 [Executioner]
   type = Transient
   scheme = 'bdf2'
-
-  # Preconditioned JFNK (default)
   solve_type = 'NEWTON'
-  petsc_options_iname = -pc_type
-  petsc_options_value = lu
 
   l_max_its = 15
   l_tol = 1.0e-4
@@ -177,7 +172,6 @@
 
 [Outputs]
   output_initial = true
-  interval = 1
   exodus = true
   print_perf_log = true
 []

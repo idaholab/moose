@@ -3,7 +3,6 @@
     type = 'Exodiff'
     input = 'derivativetwophasematerial.i'
     exodiff = 'derivativetwophasematerial_out.e'
-    max_parallel = 1
   [../]
   [./orderparameterfunctionmaterial]
     type = 'Exodiff'
