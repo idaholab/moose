@@ -1,0 +1,20 @@
+[Tests]
+  [./pps_old_test]
+    type = 'Exodiff'
+    input = 'pps_old_value.i'
+    exodiff = 'pps_old_value_out.e'
+  [../]
+
+  [./pps_old_residual_test]
+    type = 'Exodiff'
+    input = 'pps_old_value.i'
+    exodiff = 'pps_old_value_out.e'
+    prereq = pps_old_test
+  [../]
+
+  [./test_inital]
+    type = 'Exodiff'
+    input = 'initial_pps.i'
+    exodiff = 'out_initial_pps.e'
+  [../]
+[]

@@ -1,0 +1,8 @@
+[Tests]
+  [./test_nodal_max]
+    type = 'Exodiff'
+    input = 'nodal_max_value_test.i'
+    exodiff = 'out_nodal_max.e'
+    abs_zero = 1e-8
+  [../]
+[]
