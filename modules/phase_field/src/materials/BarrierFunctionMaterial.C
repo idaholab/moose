@@ -5,8 +5,8 @@ InputParameters validParams<BarrierFunctionMaterial>()
 {
   InputParameters params = validParams<OrderParameterFunctionMaterial>();
   params.addClassDescription("Helper material to provide g(eta) and its derivative in a polynomial.\nSIMPLE: eta^2*(1-eta)^2\nLOW: eta*(1-eta)");
-  MooseEnum h_order("SIMPLE=0 LOW", "SIMPLE");
-  params.addParam<MooseEnum>("g_order", h_order, "Polynomial order of the switching function h(eta)");
+  MooseEnum g_order("SIMPLE=0 LOW", "SIMPLE");
+  params.addParam<MooseEnum>("g_order", g_order, "Polynomial order of the barrier function g(eta)");
   params.addParam<bool>("well_only", false, "Make the g zero in [0:1] so it only contributes to enforcing the eta range and not to the phase transformation berrier.");
   params.set<std::string>("function_name") = std::string("g");
   return params;
@@ -41,8 +41,8 @@ BarrierFunctionMaterial::computeQpProperties()
       break;
 
     case 1: // LOW
-      _prop_f[_qp] = n * (1.0 - n);
-      _prop_df[_qp] = 1.0 - 2.0 * n;
+      _prop_f[_qp]   = n * (1.0 - n);
+      _prop_df[_qp]  = 1.0 - 2.0 * n;
       _prop_d2f[_qp] = - 2.0;
       break;
 
