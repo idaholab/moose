@@ -16,6 +16,7 @@
 #include "petscblaslapack.h"
 
 #include <vector>
+#include "MooseRandom.h"
 
 class RankTwoTensor;
 
@@ -322,6 +323,16 @@ public:
    * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
    */
   void syev(const char * calculation_type, std::vector<PetscScalar> & eigvals, std::vector<PetscScalar> & a) const;
+
+  /**
+   * This function initializes random seed based on a fixed number.
+   */
+  static void initRandom();
+
+  /**
+   * This function generates a random symmetric rank two tensor based on a scalar variable
+   */
+  static RankTwoTensor genRandomTensor( Real );
 
 protected:
 
