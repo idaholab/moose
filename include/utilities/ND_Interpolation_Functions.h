@@ -114,6 +114,8 @@ public:
 
   bool checkBoundaries(std::vector<double> point);
 
+  double getH(int dim){return _hj.at(dim);};
+
 private:
   std::vector< std::vector<double> > _discretizations;
   std::vector<double> _values;

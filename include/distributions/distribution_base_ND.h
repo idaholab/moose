@@ -131,6 +131,7 @@ public:
 		  int numberofValues = 1;
 		  int numberOfDimensions = discretizations.size();
 		  std::vector<int> discretizationSizes(numberOfDimensions);
+
 		  for (int i=0; i<numberOfDimensions; i++){
 			  numberofValues *= discretizations.at(i).size();
 			  discretizationSizes.at(i) = discretizations.at(i).size();
@@ -144,9 +145,17 @@ public:
 			  for (int j=0; j<numberOfDimensions; j++)
 				  NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
 			  CDFvalues.at(i) = _interpolator.integralSpline(NDcoordinate);
+			  //std::cerr<< NDcoordinate.at(0) << " " << NDcoordinate.at(1) << " : " << CDFvalues.at(i) << std::endl;
 		  }
 		  _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
 		  std::cerr<<"Creation of CDF interpolator for cartesian spline completed [BasicMultiDimensionalCartesianSpline_init]:"<< std::endl;
+	  }
+
+	  std::vector< std::vector<double> > discretizations;
+	  _interpolator.getDiscretizations(discretizations);
+
+	  for (int i=0; i<discretizations.at(1).size(); i++){
+		  double value = _interpolator.spline_cartesian_marginal_integration(discretizations.at(1).at(i), 1);
 	  }
   };
 
@@ -177,8 +186,8 @@ public:
 	  else
 		  value = _CDFinterpolator.interpolateAt(x);
 
-     if (value > 1.0)
-    	 throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value calculated is above 1.0");
+      if (value > 1.0)
+    	  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value calculated is above 1.0");
 
      return value;
   };
@@ -200,7 +209,7 @@ public:
 		  if (_CDFprovided){
 			  throwError("BasicMultiDimensionalCartesianSpline Distribution error: inverseMarginal calculation not available if CDF provided");
 		  }else{
-			  value = _interpolator.spline_cartesian_inverse_marginal(F, dimension, 0.00001);
+			  value = _interpolator.spline_cartesian_inverse_marginal(F, dimension, 0.01);
 		  }
 	  }else
 		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value for inverse marginal distribution is above 1.0");
@@ -214,13 +223,13 @@ public:
 	  return _interpolator.returnDimensionality();
   };
 
-  double cellIntegral(std::vector<double> center, std::vector<double> dx){
-	  if (_CDFprovided){
-		  return _interpolator.averageCellValue(center,dx);
-	  }else{
-		  return _CDFinterpolator.averageCellValue(center,dx);
-	  }
-  }
+//  double cellIntegral(std::vector<double> center, std::vector<double> dx){
+//	  if (_CDFprovided){
+//		  return _interpolator.averageCellValue(center,dx);
+//	  }else{
+//		  return _CDFinterpolator.averageCellValue(center,dx);
+//	  }
+//  }
 
   void updateRNGparameter(double tolerance, double initial_divisions){
 	  _tolerance = tolerance;
@@ -233,6 +242,16 @@ public:
 		  _CDFinterpolator.updateRNGparameters(_tolerance,_initial_divisions);
 	  }
   };
+
+  double Marginal(double x, int dimension){
+	  double value=0.0;
+	  if (_CDFprovided){
+		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: Marginal calculation not available if CDF provided");
+	  }else{
+		  value = _interpolator.spline_cartesian_marginal_integration(x, dimension);
+	  }
+	  return value;
+  }
 
 protected:
   bool _CDFprovided;
@@ -396,6 +415,7 @@ public:
 
 	  return value;
   }
+
 
   int
   returnDimensionality()
