@@ -29,7 +29,8 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./eta]
+
+  [./eta1]
     order = FIRST
     family = LAGRANGE
     [./InitialCondition]
@@ -42,22 +43,69 @@
       int_width = 2.0
     [../]
   [../]
+  [./eta2]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 0.5
+  [../]
+
+  [./lambda]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 1.0
+  [../]
 []
 
 [Kernels]
-  [./detadt]
+  [./deta1dt]
     type = TimeDerivative
-    variable = eta
+    variable = eta1
   [../]
-  [./ACBulk]
+  [./ACBulk1]
     type = ACParsed
-    variable = eta
+    variable = eta1
+    args = 'c eta2'
     f_name = F
   [../]
-  [./ACInterface]
+  [./ACInterface1]
     type = ACInterface
-    variable = eta
+    variable = eta1
     kappa_name = kappa_eta
+  [../]
+  [./lagrange1]
+    type = SwitchingFunctionConstraintEta
+    variable = eta1
+    h_name   = h1
+    lambda = lambda
+  [../]
+
+  [./deta2dt]
+    type = TimeDerivative
+    variable = eta2
+  [../]
+  [./ACBulk2]
+    type = ACParsed
+    variable = eta2
+    args = 'c eta1'
+    f_name = F
+  [../]
+  [./ACInterface2]
+    type = ACInterface
+    variable = eta2
+    kappa_name = kappa_eta
+  [../]
+  [./lagrange2]
+    type = SwitchingFunctionConstraintEta
+    variable = eta2
+    h_name   = h2
+    lambda = lambda
+  [../]
+
+  [./lagrange]
+    type = SwitchingFunctionConstraintLagrange
+    variable = lambda
+    etas    = 'eta1 eta2'
+    h_names = 'h1   h2'
   [../]
 
   [./c_res]
@@ -66,14 +114,14 @@
     f_name = F
     kappa_name = kappa_c
     w = w
-    args = 'eta'
+    args = 'eta1 eta2'
   [../]
   [./w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [./time1]
     type = CoupledImplicitEuler
     variable = w
     v = c
@@ -102,17 +150,27 @@
     mob = 1
   [../]
 
-  [./switching]
+  [./switching1]
     type = SwitchingFunctionMaterial
     block = 0
-    eta = eta
+    function_name = h1
+    eta = eta1
     h_order = SIMPLE
+    outputs = exodus
   [../]
-  [./barrier]
-    type = BarrierFunctionMaterial
+  [./switching2]
+    type = SwitchingFunctionMaterial
     block = 0
-    eta = eta
-    g_order = SIMPLE
+    function_name = h2
+    eta = eta2
+    h_order = SIMPLE
+    outputs = exodus
+  [../]
+
+  [./barrier]
+    type = MultiBarrierFunctionMaterial
+    block = 0
+    etas = 'eta1 eta2'
   [../]
 
   [./free_energy_A]
@@ -120,7 +178,7 @@
     block = 0
     f_name = Fa
     args = 'c'
-    function = '(c-0.1)^2*(c-1)^2 + c*0.01'
+    function = '(c-0.1)^2'
     third_derivatives = false
     enable_jit = true
   [../]
@@ -129,19 +187,19 @@
     block = 0
     f_name = Fb
     args = 'c'
-    function = 'c^2*(c-0.9)^2 + (1-c)*0.01'
+    function = '(c-0.9)^2'
     third_derivatives = false
     enable_jit = true
   [../]
 
   [./free_energy]
-    type = DerivativeTwoPhaseMaterial
+    type = DerivativeMultiPhaseMaterial
     block = 0
     f_name = F
-    fa_name = Fa
-    fb_name = Fb
+    fi_names = 'Fa   Fb'
+    hi_names = 'h1   h2'
+    etas     = 'eta1 eta2'
     args = 'c'
-    eta = eta
     third_derivatives = false
     outputs = exodus
   [../]
@@ -157,21 +215,34 @@
 [Executioner]
   type = Transient
   scheme = 'bdf2'
-  solve_type = 'NEWTON'
+
+  # Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+  #petsc_options = '-snes_ksp -snes_ksp_ew'
+  #petsc_options = '-ksp_monitor_snes_lg-snes_ksp_ew'
+  #petsc_options_iname = '-ksp_gmres_restart'
+  #petsc_options_value = '1000              '
 
   l_max_its = 15
-  l_tol = 1.0e-4
+  l_tol = 1.0e-6
 
-  nl_max_its = 10
-  nl_rel_tol = 1.0e-11
+  nl_max_its = 50
+  nl_rel_tol = 1.0e-8
+  nl_abs_tol = 1.0e-10
 
   start_time = 0.0
   num_steps = 1
-  dt = 0.1
+  dt = 0.01
+  dtmin = 0.01
+[]
+
+[Debug]
+  # show_var_residual_norms = true
 []
 
 [Outputs]
-  output_initial = true
+  interval = 1
   exodus = true
   print_perf_log = true
+  # print_linear_residuals = true
 []

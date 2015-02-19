@@ -4,6 +4,7 @@
 
 #include "MatDiffusion.h"
 #include "ACInterface.h"
+#include "ACMultiInterface.h"
 #include "CHMath.h"
 #include "CHParsed.h"
 #include "CHInterface.h"
@@ -11,6 +12,8 @@
 #include "SplitCHMath.h"
 #include "SplitCHParsed.h"
 #include "CoupledImplicitEuler.h"
+#include "SwitchingFunctionConstraintLagrange.h"
+#include "SwitchingFunctionConstraintEta.h"
 #include "CrossIC.h"
 #include "SmoothCircleIC.h"
 #include "ClosePackIC.h"
@@ -24,7 +27,9 @@
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
 #include "DerivativeTwoPhaseMaterial.h"
+#include "DerivativeMultiPhaseMaterial.h"
 #include "BarrierFunctionMaterial.h"
+#include "MultiBarrierFunctionMaterial.h"
 #include "SwitchingFunctionMaterial.h"
 #include "ElasticEnergyMaterial.h"
 #include "MathFreeEnergy.h"
@@ -99,6 +104,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 {
   registerKernel(MatDiffusion);
   registerKernel(ACInterface);
+  registerKernel(ACMultiInterface);
   registerKernel(CHMath);
   registerKernel(CHParsed);
   registerKernel(CHInterface);
@@ -110,6 +116,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACGBPoly);
   registerKernel(ACParsed);
   registerKernel(MaskedBodyForce);
+  registerKernel(SwitchingFunctionConstraintLagrange);
+  registerKernel(SwitchingFunctionConstraintEta);
 
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
@@ -131,7 +139,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
   registerMaterial(DerivativeTwoPhaseMaterial);
+  registerMaterial(DerivativeMultiPhaseMaterial);
   registerMaterial(BarrierFunctionMaterial);
+  registerMaterial(MultiBarrierFunctionMaterial);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(ElasticEnergyMaterial);
   registerMaterial(MathFreeEnergy);

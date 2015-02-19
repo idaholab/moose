@@ -11,6 +11,11 @@ InputParameters validParams<DerivativeSumMaterial>()
   // All arguments to the free energies being summed
   params.addRequiredCoupledVar("args", "Arguments of the free energy functions being summed - use vector coupling");
 
+  // Advanced arguments to construct a sum of the form \f$ c+\gamma\sum_iF_i \f$
+  params.addParam<Real>("prefactor", 1.0, "Prefactor to multiply the sum term with.");
+  params.addParam<Real>("constant", 0.0, "Constant to be added to the prefactor multiplied sum.");
+  params.addParamNamesToGroup("prefactor constant", "Advanced");
+
   return params;
 }
 
@@ -18,8 +23,10 @@ DerivativeSumMaterial::DerivativeSumMaterial(const std::string & name,
                                              InputParameters parameters) :
     DerivativeFunctionMaterialBase(name, parameters),
     _sum_materials(getParam<std::vector<std::string> >("sum_materials")),
-    _num_materials(_sum_materials.size())
-{
+    _num_materials(_sum_materials.size()),
+    _prefactor(getParam<Real>("prefactor")),
+    _constant(getParam<Real>("constant"))
+  {
   // we need at least one material in the sum
   if (_num_materials == 0)
     mooseError("Please supply at least one material to sum in DerivativeSumMaterial " << name);

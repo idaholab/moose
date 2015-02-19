@@ -13,7 +13,7 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>()
   params.addParam<std::string>("g", "g", "Barrier Function Material that provides g(eta)");
 
   // All arguments to the phase free energies
-  params.addRequiredCoupledVar("args", "Arguments of fa and fb - use vector coupling");
+  params.addCoupledVar("args", "Arguments of fa and fb - use vector coupling");
 
   // Order parameter which determines the phase
   params.addRequiredCoupledVar("eta", "Order parameter");
@@ -39,7 +39,7 @@ DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
     _d2h(getMaterialPropertyDerivative<Real>(_h_name, _eta_name, _eta_name)),
     _d3h(getMaterialPropertyDerivative<Real>(_h_name, _eta_name, _eta_name, _eta_name)),
     _g_name(getParam<std::string>("g")),
-    _g(getMaterialProperty<Real>(_h_name)),
+    _g(getMaterialProperty<Real>(_g_name)),
     _dg(getMaterialPropertyDerivative<Real>(_g_name, _eta_name)),
     _d2g(getMaterialPropertyDerivative<Real>(_g_name, _eta_name, _eta_name)),
     _d3g(getMaterialPropertyDerivative<Real>(_g_name, _eta_name, _eta_name, _eta_name)),
