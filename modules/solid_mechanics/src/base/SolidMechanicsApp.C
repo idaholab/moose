@@ -65,6 +65,8 @@
 #include "StressDivergenceRSpherical.h"
 #include "StressDivergenceTruss.h"
 #include "TrussMaterial.h"
+#include "RateDepSmearCrackModel.h"
+#include "RateDepSmearIsoCrackModel.h"
 
 
 template<>
@@ -139,6 +141,8 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(PowerLawCreepModel);
   registerMaterial(SolidModel);
   registerMaterial(TrussMaterial);
+  registerMaterial(RateDepSmearCrackModel);
+  registerMaterial(RateDepSmearIsoCrackModel);
 
   registerKernel(Gravity);
   registerKernel(HomogenizationKernel);
