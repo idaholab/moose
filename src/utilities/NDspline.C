@@ -545,32 +545,36 @@ double NDSpline::spline_cartesian_marginal_integration(double coordinate,int mar
 	    }
 	    value += _spline_coefficients.at(i)*product;
 	 }
-	 std::cout<< coordinate << " , " << value << std::endl;
 	 return value;
 }
 
 double NDSpline::spline_cartesian_inverse_marginal(double CDF,int marginal_variable, double precision){
 	//  Newton–Raphson method used here
+
+	if ((CDF<0.0) and (CDF>1.0))
+		throw ("Error in spline_cartesian_inverse_marginal: CDF provided is out of boundaries [0.0,1.0]");
+
 	int mid_position = _discretizations[marginal_variable].size()/2;
 
-//	double epsilon = 1.0;
-//	double x_n   = _discretizations[marginal_variable][mid_position];
-//	double x_np1 = _discretizations[marginal_variable][mid_position+1];
-//    double derivative;
-//
-//	do{
-//		if (x_np1>x_n)
-//			derivative = (spline_cartesian_marginal_integration(x_np1,marginal_variable) - spline_cartesian_marginal_integration(x_n,marginal_variable))/(x_np1 - x_n);
-//		else
-//			derivative = (spline_cartesian_marginal_integration(x_n,marginal_variable) - spline_cartesian_marginal_integration(x_np1,marginal_variable))/(x_n - x_np1);
-//
-//		x_np1 = x_n - spline_cartesian_marginal_integration(x_n,marginal_variable) / derivative;
-//		std::cout<<"x_np1 "<< x_np1 <<std::endl;
-//	}while(epsilon>precision);
-//
-//	return x_np1;
+	double epsilon = 1.0;
+	double x_n   = _discretizations[marginal_variable][mid_position];
+	double x_np1 = _discretizations[marginal_variable][mid_position+1];
+    double derivative;
 
-	return 3.0;
+	do{
+		if (x_np1>x_n)
+			derivative = (spline_cartesian_marginal_integration(x_np1,marginal_variable) - spline_cartesian_marginal_integration(x_n,marginal_variable))/(x_np1 - x_n);
+		else
+			derivative = (spline_cartesian_marginal_integration(x_n,marginal_variable) - spline_cartesian_marginal_integration(x_np1,marginal_variable))/(x_n - x_np1);
+		double next = x_n - (spline_cartesian_marginal_integration(x_n,marginal_variable) - CDF) / derivative;
+		epsilon = std::abs(x_np1 - x_n);
+		x_n = x_np1;
+		x_np1 = next;
+	}while(epsilon>precision);
+
+	return x_np1;
+
+	//return 3.0;
 }
 
 double NDSpline::integralSpline(std::vector<double> point_coordinate){

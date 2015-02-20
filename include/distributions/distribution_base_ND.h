@@ -150,13 +150,6 @@ public:
 		  _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
 		  std::cerr<<"Creation of CDF interpolator for cartesian spline completed [BasicMultiDimensionalCartesianSpline_init]:"<< std::endl;
 	  }
-
-	  std::vector< std::vector<double> > discretizations;
-	  _interpolator.getDiscretizations(discretizations);
-
-	  for (int i=0; i<discretizations.at(1).size(); i++){
-		  double value = _interpolator.spline_cartesian_marginal_integration(discretizations.at(1).at(i), 1);
-	  }
   };
 
   BasicMultiDimensionalCartesianSpline(): _interpolator()
