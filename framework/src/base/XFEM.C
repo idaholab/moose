@@ -117,6 +117,7 @@ XFEMCutElem::calc_physical_volfrac()
 Point
 XFEMCutElem::get_origin(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
+  Point orig(0.0,0.0,0.0);
   std::vector<std::vector<CutElemMesh::node_t*> > cut_line_nodes;
   for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
   {
@@ -130,15 +131,18 @@ XFEMCutElem::get_origin(unsigned int plane_id, MeshBase* displaced_mesh) const
   }
   if (cut_line_nodes.size() == 0)
   {
-    libMesh::err << " ERROR: not cut line found in this element"<<std::endl;
+    libMesh::err << " ERROR: no cut line found in this element"<<std::endl;
     exit(1);
   }
-  return get_node_coords(cut_line_nodes[plane_id][0], displaced_mesh);
+  if (plane_id < cut_line_nodes.size()) // valid plane_id
+    orig = get_node_coords(cut_line_nodes[plane_id][0], displaced_mesh);
+  return orig;
 }
 
 Point
 XFEMCutElem::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
+  Point normal(0.0,0.0,0.0);
   std::vector<std::vector<CutElemMesh::node_t*> > cut_line_nodes;
   for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
   {
@@ -152,15 +156,18 @@ XFEMCutElem::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
   }
   if (cut_line_nodes.size() == 0)
   {
-    libMesh::err << " ERROR: not cut line found in this element"<<std::endl;
+    libMesh::err << " ERROR: no cut line found in this element"<<std::endl;
     exit(1);
   }
-  Point cut_line_p1 = get_node_coords(cut_line_nodes[plane_id][0], displaced_mesh);
-  Point cut_line_p2 = get_node_coords(cut_line_nodes[plane_id][1], displaced_mesh);
-  Point cut_line = cut_line_p2 - cut_line_p1;
-  Real len = std::sqrt(cut_line.size_sq());
-  cut_line *= (1.0/len);
-  Point normal(cut_line(1), -cut_line(0), 0.0);
+  if (plane_id < cut_line_nodes.size()) // valid plane_id
+  {
+    Point cut_line_p1 = get_node_coords(cut_line_nodes[plane_id][0], displaced_mesh);
+    Point cut_line_p2 = get_node_coords(cut_line_nodes[plane_id][1], displaced_mesh);
+    Point cut_line = cut_line_p2 - cut_line_p1;
+    Real len = std::sqrt(cut_line.size_sq());
+    cut_line *= (1.0/len);
+    normal = Point(cut_line(1), -cut_line(0), 0.0);
+  }
   return normal;
 }
 
@@ -840,8 +847,8 @@ XFEM::get_elem_phys_volfrac(const Elem* elem) const
 }
 
 Real
-XFEM::get_cut_plane(const Elem* elem,
-                    const XFEM_CUTPLANE_QUANTITY quantity) const
+XFEM::get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity,
+                    unsigned int plane_id) const
 {
   Real comp=0.0;
   Point planedata(0.0,0.0,0.0);
@@ -853,13 +860,13 @@ XFEM::get_cut_plane(const Elem* elem,
     if ((unsigned int)quantity < 3)
     {
       unsigned int index = (unsigned int)quantity;
-      planedata = xfce->get_origin(0,_mesh2); // TODO: 2 cut planes in 1 elem
+      planedata = xfce->get_origin(plane_id,_mesh2); // TODO: 2 cut planes in 1 elem
       comp = planedata(index);
     }
     else if ((unsigned int)quantity < 6)
     {
       unsigned int index = (unsigned int)quantity - 3;
-      planedata = xfce->get_normal(0,_mesh2); // TODO: 2 cut planes in 1 elem
+      planedata = xfce->get_normal(plane_id,_mesh2); // TODO: 2 cut planes in 1 elem
       comp = planedata(index);
     }
     else

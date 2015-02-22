@@ -127,7 +127,8 @@ public:
   /**
    * Get specified component of normal or origin for cut plane for a given element
    */
-  Real get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity) const;
+  Real get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity, 
+                     unsigned int plane_id) const;
 
   bool is_elem_at_crack_tip(const Elem* elem) const;
   bool is_elem_cut(const Elem* elem) const;

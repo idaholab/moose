@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef XFEMCUTPLANEAUX_H
-#define XFEMCUTPLANEAUX_H
+#ifndef XFEMFIRSTCUTPLANEAUX_H
+#define XFEMFIRSTCUTPLANEAUX_H
 
 #include "AuxKernel.h"
 
@@ -22,7 +22,7 @@ class XFEM;
 /**
  * Coupled auxiliary value
  */
-class XFEMCutPlaneAux : public AuxKernel
+class XFEMFirstCutPlaneAux : public AuxKernel
 {
 public:
 
@@ -30,9 +30,9 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  XFEMCutPlaneAux(const std::string & name, InputParameters parameters);
+  XFEMFirstCutPlaneAux(const std::string & name, InputParameters parameters);
 
-  virtual ~XFEMCutPlaneAux() {}
+  virtual ~XFEMFirstCutPlaneAux() {}
 
 protected:
   virtual Real computeValue();
@@ -43,6 +43,6 @@ private:
 };
 
 template<>
-InputParameters validParams<XFEMCutPlaneAux>();
+InputParameters validParams<XFEMFirstCutPlaneAux>();
 
 #endif //XFEMCUTPLANEAUX_H
