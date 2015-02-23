@@ -12,35 +12,37 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "XFEMSecondCutPlaneAux.h"
+#include "XFEMCutPlaneAux.h"
 
 #include "XFEM.h"
 
 template<>
-InputParameters validParams<XFEMSecondCutPlaneAux>()
+InputParameters validParams<XFEMCutPlaneAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   MooseEnum quantity("origin_x origin_y origin_z normal_x normal_y normal_z");
   params.addRequiredParam<MooseEnum>("quantity", quantity, "The quantity to be extracted.  Choices: "+quantity.getRawNames());
+  params.addRequiredParam<unsigned int>("plane_id", "The index of which cut plane");
   return params;
 }
 
-XFEMSecondCutPlaneAux::XFEMSecondCutPlaneAux(const std::string & name, InputParameters parameters)
+XFEMCutPlaneAux::XFEMCutPlaneAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
-  _quantity(XFEM_CUTPLANE_QUANTITY(int(getParam<MooseEnum>("quantity"))))
+  _quantity(XFEM_CUTPLANE_QUANTITY(int(getParam<MooseEnum>("quantity")))),
+  _plane_id(getParam<unsigned int>("plane_id"))
 {
   FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
   if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblem in XFEMSecondCutPlaneAux");
+    mooseError("Problem casting _subproblem to FEProblem in XFEMCutPlaneAux");
   _xfem = fe_problem->get_xfem();
   if (isNodal())
-    mooseError("XFEMSecondCutPlaneAux can only be run on an element variable");
+    mooseError("XFEMCutPlaneAux can only be run on an element variable");
 }
 
 Real
-XFEMSecondCutPlaneAux::computeValue()
+XFEMCutPlaneAux::computeValue()
 {
-  Real value = _xfem->get_cut_plane(_current_elem, _quantity, 1);
+  Real value = _xfem->get_cut_plane(_current_elem, _quantity, _plane_id);
 
   return value;
 }
