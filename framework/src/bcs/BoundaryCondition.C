@@ -57,12 +57,14 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
 }
 
 MooseVariable &
-BoundaryCondition::variable(){
+BoundaryCondition::variable()
+{
   return _var;
 }
 
 SubProblem &
-BoundaryCondition::subProblem(){
+BoundaryCondition::subProblem()
+{
   return _subproblem;
 }
 
