@@ -7,6 +7,7 @@ InputParameters validParams<CoupledKernelGradTest>()
   InputParameters p = validParams<KernelGrad>();
   p.addRequiredCoupledVar("var2","Coupled Variable");
   p.addRequiredParam<std::vector<Real> >("vel","velocity");
+  p.addParam<bool>("test_coupling_error", false, "Set to true to verify that error messages are produced if a coupling is requested that wasn't declared");
   return p;
 }
 
@@ -22,6 +23,10 @@ CoupledKernelGradTest::CoupledKernelGradTest(const std::string & name, InputPara
     mooseError("ERROR: CoupledKernelGradTest only implemented for 2D, vel is not size 2");
   }
   _beta=RealVectorValue(a[0],a[1]);
+
+  // Test coupling error
+  if (getParam<bool>("test_coupling_error"))
+    coupledGradient("var_undeclared");
 }
 
 CoupledKernelGradTest::~CoupledKernelGradTest()
