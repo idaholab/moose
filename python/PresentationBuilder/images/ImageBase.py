@@ -14,7 +14,7 @@ class ImageBase(MooseObject):
     params.addParam('url', 'The image file url')
     params.addParam('download', False, 'Download the image locally')
 
-    params.addParam('div_center', True, 'Wrap html figure in centered div')
+    params.addParam('div_center', False, 'Wrap html figure in centered div')
     params.addParam('align', 'The image horizontal alignment')
     params.addParam('width', 'The image width')
     params.addParam('height', 'The image height')

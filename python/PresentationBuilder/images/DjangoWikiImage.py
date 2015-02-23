@@ -52,7 +52,8 @@ class DjangoWikiImage(ImageBase):
     pattern = re.compile(r'\s*\[image:([0-9]*)(.*)\]\s*\n')
     for item in pattern.finditer(markdown):
       id = item.group(1)
-      m[id] = ImageBase.seperateImageOptions(item.group(2))
+      if id not in m:
+        m[id] = ImageBase.seperateImageOptions(item.group(2))
 
     # Return the list
     return m

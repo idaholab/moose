@@ -25,7 +25,7 @@
 }
 
 .scriptsize {
-  font-size: 15px;
+  font-size: 15px;float
 }
 
 .footnotesize {
@@ -34,6 +34,10 @@
 
 .small {
   font-size: 20px;
+}
+
+.large {
+  font-sisze: 30px;
 }
 
 .font-16 {

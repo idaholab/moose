@@ -44,7 +44,7 @@ class RemarkSlide(MooseObject):
   @staticmethod
   def extractName(raw):
     # If the name is given in the slide markdown, use it
-    match = re.search('(name:\s*(.*?)\s*\n)', raw, re.MULTILINE)
+    match = re.search('(name:\s*(\w+).*?\n)', raw, re.MULTILINE)
     if match:
       return match.group(2)
 
@@ -165,10 +165,16 @@ class RemarkSlide(MooseObject):
       markdown = markdown.replace(match.group(1), '')
 
     # Search the raw markdown for an existing class
-    for key in self._pars.groupKeys('properties'):
-      match = re.search('^(' + key + ':\s*(.*?)\s*\n)', markdown)
+    for key in self._pars.keys():
+      match = re.search('(\s*' + key + '\s*:\s*(\w+))\s*\n', markdown)
       if match:
-        self._pars[key] = match.group(1)
+        value = match.group(2)
+        if value.lower() == 'true' or value == '1':
+          value = True
+        if value.lower() == 'false' or value == '0':
+          value = False
+
+        self._pars[key] = value
         markdown = markdown.replace(match.group(1), '')
 
     # Search for github code urls
@@ -400,9 +406,9 @@ class RemarkSlide(MooseObject):
         else:
           output += key + ': ' + value + '\n'
 
-
     # Insert continued title
     if self._title == None and self.getParam('auto_title'):
+
       idx = self.parent._slide_order.index(self.name())
       if idx > 0:
         previous_name = self.parent._slide_order[idx-1]
