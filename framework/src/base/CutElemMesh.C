@@ -2573,7 +2573,7 @@ void CutElemMesh::mergeNodes(node_t*  &childNode,
     {
       if(childOfNeighborNode->category == N_CATEGORY_PERMANENT)
       {
-        if (childOfNeighborNode->parent == childNode)
+        if (childOfNeighborNode->parent == childNode) // merge into childNode
         {
           childOfNeighborElem->switchNode(childNode, childOfNeighborNode);
           if (!deleteFromMap(PermanentNodes, childOfNeighborNode))
@@ -2583,7 +2583,7 @@ void CutElemMesh::mergeNodes(node_t*  &childNode,
           }
           childOfNeighborNode = childNode;
         }
-        else if (childNode->parent == childOfNeighborNode)
+        else if (childNode->parent == childOfNeighborNode) // merge into childOfNeighborNode
         {
           childElem->switchNode(childOfNeighborNode, childNode);
           if (!deleteFromMap(PermanentNodes, childNode))
@@ -2593,10 +2593,21 @@ void CutElemMesh::mergeNodes(node_t*  &childNode,
           }
           childNode = childOfNeighborNode;
         }
+        else if (childNode->parent != NULL && childNode->parent == childOfNeighborNode->parent)
+        {
+          // merge into childNode if both nodes are child permanent
+          childOfNeighborElem->switchNode(childNode, childOfNeighborNode);
+          if (!deleteFromMap(PermanentNodes, childOfNeighborNode)) // delete childOfNeighborNode
+          {
+            CutElemMeshError("Attempted to delete node: "<<childOfNeighborNode->id
+                             <<" from PermanentNodes, but couldn't find it")
+          }
+          childOfNeighborNode = childNode;
+        }
         else
         {
           CutElemMeshError("Attempting to merge nodes: "<<childNode->id<<" and "
-                           <<childOfNeighborNode->id<<" but both are permanent")
+                           <<childOfNeighborNode->id<<" but both are permanent themselves")
         }
       }
       else
