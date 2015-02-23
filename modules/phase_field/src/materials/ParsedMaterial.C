@@ -11,7 +11,7 @@ InputParameters validParams<ParsedMaterial>()
 
 ParsedMaterial::ParsedMaterial(const std::string & name,
                                InputParameters parameters) :
-    ParsedMaterialHelper(name, parameters, USE_MOOSE_NAMES),
+    ParsedMaterialHelper<FunctionMaterialBase>(name, parameters, USE_MOOSE_NAMES),
     ParsedMaterialBase(name, parameters)
 {
   // Build function
