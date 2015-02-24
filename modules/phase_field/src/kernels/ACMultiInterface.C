@@ -37,7 +37,7 @@ ACMultiInterface::ACMultiInterface(const std::string & name, InputParameters par
       _eta_vars[var] = i;
 
     // get the index of the variable the kernel is operating on
-    if (coupled("etas", i) == coupled("variable"))
+    if (coupled("etas", i) == _var.number())
       _a = i;
 
     // get gradient prefactors
