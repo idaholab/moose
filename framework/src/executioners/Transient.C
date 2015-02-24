@@ -425,7 +425,6 @@ Transient::solveStep(Real input_dt)
       Moose::out << "XFEM modifying mesh, repeating step"<<std::endl;
       _xfem_repeat_step = true;
       ++_xfem_update_count;
-      _output_warehouse.outputFailedStep();
     }
     else
     {
