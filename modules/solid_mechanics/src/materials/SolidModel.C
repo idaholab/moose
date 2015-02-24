@@ -1,6 +1,7 @@
 #include "SolidModel.h"
 
 #include "AxisymmetricRZ.h"
+#include "NonlinearRZ.h"
 #include "SphericalR.h"
 #include "Linear.h"
 #include "Nonlinear3D.h"
@@ -17,7 +18,7 @@
 template<>
 InputParameters validParams<SolidModel>()
 {
-  MooseEnum formulation("Nonlinear3D AxisymmetricRZ SphericalR Linear PlaneStrain");
+  MooseEnum formulation("Nonlinear3D NonlinearRZ AxisymmetricRZ SphericalR Linear PlaneStrain");
 
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
@@ -41,7 +42,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
   params.addParam<Real>("cracking_neg_fraction", "The fraction of the cracking strain at which a transitition begins during decreasing strain to the original stiffness.");
   params.addParam<MooseEnum>("formulation", formulation, "Element formulation.  Choices are: " + formulation.getRawNames());
-  params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D formulation.");
+  params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D/RZ formulation.");
   params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ, SphericalR, and PlaneStrain formulations.");
   params.addParam<bool>("compute_JIntegral", false, "Whether to compute the J Integral.");
   params.addCoupledVar("disp_r", "The r displacement");
@@ -1310,6 +1311,15 @@ SolidModel::createElement( const std::string & name,
       mooseError("Nonlinear3D formulation requested for coord_type = RZ problem");
     }
     element = new SolidMechanics::Nonlinear3D(*this, name, parameters);
+  }
+  else if ( formulation == "nonlinearrz" )
+  {
+    if ( !isCoupled("disp_r") ||
+         !isCoupled("disp_z") )
+    {
+      mooseError("NonlinearRZ must define disp_r and disp_z");
+    }
+    element = new SolidMechanics::NonlinearRZ(*this, name, parameters);
   }
   else if ( formulation == "axisymmetricrz" )
   {

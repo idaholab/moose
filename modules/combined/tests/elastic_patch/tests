@@ -45,6 +45,13 @@
     max_parallel = 1
   [../]
 
+  [./test_rz_nonlinear]
+    type = Exodiff
+    input = 'elastic_patch_rz_nonlinear.i'
+    exodiff = 'elastic_patch_rz_nonlinear_out.e'
+    max_parallel = 1
+  [../]
+
   [./test_rz_large_strain]
     type = Exodiff
     input = 'elastic_patch_rz_large_strain.i'
