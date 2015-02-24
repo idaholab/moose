@@ -402,15 +402,16 @@ CutElemMesh::fragment_t::fragment_t(element_t * host,
       for (unsigned int i = 0; i < from_host->edges.size(); ++i)
         boundary_edges.push_back(new edge_t(*from_host->edges[i]));
     }
-    else if (fragment_copy_index >= 0)
+    else
     {
       if (from_host->fragments.size() <= fragment_copy_index)
+      {
+        std::cout<<"num frags: "<<from_host->fragments.size()<<" index: "<<fragment_copy_index<<std::endl;
         CutElemMeshError("In fragment_t constructor fragment_copy_index out of bounds")
+      }
       for (unsigned int i = 0; i < from_host->fragments[fragment_copy_index]->boundary_edges.size(); ++i)
         boundary_edges.push_back(new edge_t(*from_host->fragments[fragment_copy_index]->boundary_edges[i]));
     }
-    else
-      CutElemMeshError("Invalid fragment_copy_index in fragment_t constructor")
   }
 }
 
