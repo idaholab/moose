@@ -109,6 +109,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<Real> >("scaling_factors") = _scaling_factor_bcs;
       // coupling
       params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
+      params.set<std::vector<VariableName> >("rhouA") = cv_rhouA;
       params.set<std::vector<VariableName> >("rho") = cv_rho;
       params.set<std::vector<VariableName> >("rhou") = cv_rhou;
       params.set<std::vector<VariableName> >("u") = cv_u;
