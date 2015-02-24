@@ -20,7 +20,6 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>()
 
   // Variables with applied tolerances and their tolerance values
   params.addParam<Real>("W", 0.0, "Energy barrier for the phase transformation from A to B");
-  params.addParam<std::vector<Real> >("tol_values", std::vector<Real>(), "Vector of tolerance values for the variables in tol_names");
 
   return params;
 }
