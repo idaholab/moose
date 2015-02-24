@@ -4,6 +4,8 @@
     type = FileSet
     title = '**FileSet:** Build and modify a slide set directly from a markdown file'
     file = example_01.md
+    contents = true
+    contents_title = 'Contents'
 
     [./Slides]
       [./test]
