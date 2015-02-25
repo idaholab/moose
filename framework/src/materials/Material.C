@@ -117,10 +117,6 @@ Material::computeQpProperties()
 {
 }
 
-void
-Material::timeStepSetup()
-{}
-
 QpData *
 Material::createData()
 {
