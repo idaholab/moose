@@ -3,6 +3,6 @@
     type = 'Exodiff'
     input = 'tween.i'
     exodiff = 'tween_out.e'
-    abs_zero = 1e-9
+    compiler = 'GCC CLANG'
   [../]
 []
