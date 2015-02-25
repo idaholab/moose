@@ -73,8 +73,6 @@ public:
 
   std::vector<Material *> & active(SubdomainID block_id);
 
-  void updateMaterialDataState();
-
   void addMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
   void addFaceMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
   void addNeighborMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);

@@ -89,12 +89,6 @@ public:
   virtual ~Material();
 
   /**
-   * This function is called at the beginning of each timestep
-   * for each active material block
-   */
-  virtual void timeStepSetup();
-
-  /**
    * All materials must override this virtual.
    * This is where they fill up the vectors with values.
    */

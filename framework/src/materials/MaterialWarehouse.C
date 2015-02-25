@@ -179,25 +179,6 @@ MaterialWarehouse::active(SubdomainID block_id)
   return it->second;
 }
 
-void MaterialWarehouse::updateMaterialDataState()
-{
-  for (std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_materials.begin(); it != _active_materials.end(); ++it)
-  {
-    for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
-    {
-      (*jt)->timeStepSetup();
-    }
-  }
-
-  for (std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_face_materials.begin(); it != _active_face_materials.end(); ++it)
-  {
-    for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
-    {
-      (*jt)->timeStepSetup();
-    }
-  }
-}
-
 void
 MaterialWarehouse::addMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material)
 {

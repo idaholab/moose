@@ -3126,7 +3126,7 @@ FEProblem::advanceState()
     _pps_data[tid]->copyValuesBack();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _materials[tid].updateMaterialDataState();
+    _materials[tid].timestepSetup();
 
   if (_material_props.hasStatefulProperties())
     _material_props.shift();
