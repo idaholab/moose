@@ -18,7 +18,7 @@ public:
 
   ParsedMaterialHelper(const std::string & name,
                        InputParameters parameters,
-                       VariableNameMappingMode map_mode = USE_PARAM_NAMES);
+                       VariableNameMappingMode map_mode);
 
   virtual ~ParsedMaterialHelper();
 
