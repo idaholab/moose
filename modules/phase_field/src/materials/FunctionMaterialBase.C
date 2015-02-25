@@ -17,9 +17,6 @@ FunctionMaterialBase::FunctionMaterialBase(const std::string & name,
     _number_of_nl_variables(_fe_problem.getNonlinearSystem().nVariables()),
     _arg_index(_number_of_nl_variables)
 {
-  // loop counters
-  unsigned int i, j, k;
-
   // fetch names and numbers of all coupled variables
   _mapping_is_unique = true;
   for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin(); it != _pars.coupledVarsEnd(); ++it)

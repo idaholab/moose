@@ -15,6 +15,12 @@ DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string
 {
 }
 
+void DerivativeParsedMaterialHelper::functionsPostParse()
+{
+  functionsDerivative();
+  functionsOptimize();
+}
+
 void DerivativeParsedMaterialHelper::functionsDerivative()
 {
   unsigned int i, j, k;

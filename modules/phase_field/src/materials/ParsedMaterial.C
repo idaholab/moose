@@ -14,12 +14,9 @@ ParsedMaterial::ParsedMaterial(const std::string & name,
     ParsedMaterialHelper<FunctionMaterialBase>(name, parameters, USE_MOOSE_NAMES),
     ParsedMaterialBase(name, parameters)
 {
-  // Build function
+  // Build function and optimize
   functionParse(_function,
                 _constant_names, _constant_expressions,
                 _mat_prop_names,
                 _tol_names, _tol_values);
-
-  // Optimize
-  functionsOptimize();
 }

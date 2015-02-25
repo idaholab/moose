@@ -38,6 +38,9 @@ public:
 protected:
   virtual void computeProperties();
 
+  // tasks to perform after parsing the primary function
+  virtual void functionsPostParse();
+
   // run FPOptimizer on the parsed function
   virtual void functionsOptimize();
 
@@ -257,6 +260,15 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
 
   // create parameter passing buffer
   _func_params = new Real[this->_nargs + _nmat_props];
+
+  // perform next steps (either optimize or take derivatives and then optimize)
+  functionsPostParse();
+}
+
+template<class T>
+void ParsedMaterialHelper<T>::functionsPostParse()
+{
+  functionsOptimize();
 }
 
 template<class T>
