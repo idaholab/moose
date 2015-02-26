@@ -14,6 +14,7 @@
 /**
  * Helper class template to perform the parsing and optimization of the
  * function expression.
+ * This should be templated on FunctionMaterialBase or DerivativeFunctionMaterialBase.
  */
 template<class T>
 class ParsedMaterialHelper :
@@ -42,6 +43,8 @@ public:
                      const std::vector<std::string> & tol_names,
                      const std::vector<Real> & tol_values);
 
+  virtual void registerMaterialProperties(const std::vector<std::string> & mat_prop_names);
+
   static InputParameters validParams();
 
 protected:
@@ -55,6 +58,9 @@ protected:
 
   /// The undiffed free energy function parser object.
   ADFunction * _func_F;
+
+  /// Material property names (set through functionParse)
+  std::vector<std::string> _mat_prop_names;
 
   /// Material properties needed by this free energy
   std::vector<MaterialProperty<Real> *> _mat_props;
@@ -70,6 +76,12 @@ protected:
    * parsing the FParser expression.
    */
   const VariableNameMappingMode _map_mode;
+
+  /*
+   * Material properties get fully described using this structure, including their dependent
+   * variables and derivation state.
+   */
+  class FunctionMaterialPropertyDescriptor;
 };
 
 
@@ -80,6 +92,7 @@ ParsedMaterialHelper<T>::ParsedMaterialHelper(const std::string & name,
     T(name, parameters),
     FunctionParserUtils(name, parameters),
     _func_F(NULL),
+    _mat_prop_names(),
     _nmat_props(0),
     _map_mode(map_mode)
 {
@@ -103,7 +116,8 @@ ParsedMaterialHelper<T>::validParams()
 }
 
 template<class T>
-void ParsedMaterialHelper<T>::functionParse(const std::string & function_expression)
+void
+ParsedMaterialHelper<T>::functionParse(const std::string & function_expression)
 {
   std::vector<std::string> empty_string_vector;
   functionParse(function_expression,
@@ -111,9 +125,10 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
 }
 
 template<class T>
-void ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
-                                         const std::vector<std::string> & constant_names,
-                                         const std::vector<std::string> & constant_expressions)
+void
+ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
+                                       const std::vector<std::string> & constant_names,
+                                       const std::vector<std::string> & constant_expressions)
 {
   std::vector<std::string> empty_string_vector;
   std::vector<Real> empty_real_vector;
@@ -122,13 +137,17 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
 }
 
 template<class T>
-void ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
-                                         const std::vector<std::string> & constant_names,
-                                         const std::vector<std::string> & constant_expressions,
-                                         const std::vector<std::string> & mat_prop_names,
-                                         const std::vector<std::string> & tol_names,
-                                         const std::vector<Real> & tol_values)
+void
+ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
+                                       const std::vector<std::string> & constant_names,
+                                       const std::vector<std::string> & constant_expressions,
+                                       const std::vector<std::string> & mat_prop_names,
+                                       const std::vector<std::string> & tol_names,
+                                       const std::vector<Real> & tol_values)
 {
+  // register material property names for potential differentiation stages
+  registerMaterialProperties(mat_prop_names);
+
   // build base function object
   _func_F =  new ADFunction();
 
@@ -177,12 +196,12 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
   }
 
   // get all material properties
-  _nmat_props = mat_prop_names.size();
+  _nmat_props = _mat_prop_names.size();
   _mat_props.resize(_nmat_props);
   for (unsigned int i = 0; i < _nmat_props; ++i)
   {
-    _mat_props[i] = &(this->template getMaterialProperty<Real>(mat_prop_names[i]));
-    variables += "," + mat_prop_names[i];
+    _mat_props[i] = &(this->template getMaterialProperty<Real>(_mat_prop_names[i]));
+    variables += "," + _mat_prop_names[i];
   }
 
   // erase leading comma
@@ -190,7 +209,7 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
 
   // build the base function
   if (_func_F->Parse(function_expression, variables) >= 0)
-     mooseError(std::string("Invalid function\n" + function_expression + "\nin ParsedMaterialHelper.\n") + _func_F->ErrorMsg());
+     mooseError("Invalid function\n" << function_expression << '\n' << variables << "\nin ParsedMaterialHelper.\n" << _func_F->ErrorMsg());
 
   // create parameter passing buffer
   _func_params = new Real[this->_nargs + _nmat_props];
@@ -200,13 +219,22 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
 }
 
 template<class T>
-void ParsedMaterialHelper<T>::functionsPostParse()
+void
+ParsedMaterialHelper<T>::registerMaterialProperties(const std::vector<std::string> & mat_prop_names)
+{
+  _mat_prop_names = mat_prop_names;
+}
+
+template<class T>
+void
+ParsedMaterialHelper<T>::functionsPostParse()
 {
   functionsOptimize();
 }
 
 template<class T>
-void ParsedMaterialHelper<T>::functionsOptimize()
+void
+ParsedMaterialHelper<T>::functionsOptimize()
 {
   // base function
   if (!_disable_fpoptimizer)
@@ -246,5 +274,22 @@ ParsedMaterialHelper<T>::computeProperties()
       (*this->_prop_F)[this->_qp] = evaluate(_func_F);
   }
 }
+
+template<class T>
+class ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor
+{
+public:
+  FunctionMaterialPropertyDescriptor(const std::string & name) : _name(name) {}
+
+  /// get the property name
+  const std::string getPropertyName() const { return this->propertyName(_name, _derivative_vars); };
+
+private:
+  /// function material property base name
+  std::string _name;
+
+  std::vector<VariableName> _dependent_vars;
+  std::vector<VariableName> _derivative_vars;
+};
 
 #endif //PARSEDMATERIALHELPER_H
