@@ -18,7 +18,7 @@ InputParameters validParams<DomainIntegralAction>()
 {
   InputParameters params = validParams<Action>();
   addCrackFrontDefinitionParams(params);
-  MultiMooseEnum integral_vec("JIntegral InteractionIntegralKI InteractionIntegralKII InteractionIntegralKIII");
+  MultiMooseEnum integral_vec("JIntegral InteractionIntegralKI InteractionIntegralKII InteractionIntegralKIII InteractionIntegralT");
   params.addRequiredParam<MultiMooseEnum>("integrals", integral_vec, "Domain integrals to calculate.  Choices are: " + integral_vec.getRawNames());
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
   params.addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for q AuxVariables");
@@ -151,7 +151,7 @@ DomainIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    params.set<MultiMooseEnum>("execute_on") = "initial";
+    params.set<MultiMooseEnum>("execute_on") = "initial nonlinear";
     params.set<MooseEnum>("crack_direction_method") = _direction_method_moose_enum;
     params.set<MooseEnum>("crack_end_direction_method") = _end_direction_method_moose_enum;
     if (_have_crack_direction_vector)
@@ -170,6 +170,14 @@ DomainIntegralAction::act()
       params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
     params.set<std::vector<BoundaryName> >("boundary") = _boundary_names;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+    if (_integrals.count(INTERACTION_INTEGRAL_T) != 0)
+    {
+      params.set<VariableName>("disp_x") = _disp_x;
+      params.set<VariableName>("disp_y") = _disp_y;
+      if (_disp_z !="")
+        params.set<VariableName>("disp_z") = _disp_z;
+      params.set<bool>("t_stress") = true;
+    }
 
     _problem->addUserObject(uo_type_name, uo_name, params);
   }
@@ -314,6 +322,9 @@ DomainIntegralAction::act()
         case J_INTEGRAL:
           continue;
 
+        case INTERACTION_INTEGRAL_T:
+          continue;
+
         case INTERACTION_INTEGRAL_KI:
           pp_base_name = "II_KI";
           aux_mode_name = "_I_";
@@ -422,6 +433,8 @@ DomainIntegralAction::act()
         std::string pp_base_name;
         switch (*sit)
         {
+          case INTERACTION_INTEGRAL_T:
+            continue;
           case J_INTEGRAL:
             if (_convert_J_to_K)
               pp_base_name = "K";
