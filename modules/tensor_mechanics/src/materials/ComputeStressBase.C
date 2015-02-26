@@ -1,0 +1,46 @@
+#include "ComputeStressBase.h"
+
+template<>
+InputParameters validParams<ComputeStressBase>()
+{
+  InputParameters params = validParams<Material>();
+  params.addParam<std::vector<FunctionName> >("initial_stress", "A list of functions describing the initial stress.  If provided, there must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, zz components respectively.  If not provided, all components of the initial stress will be zero");
+  params.addParam<std::string>("base_name", "Material property base name");
+  return params;
+}
+
+ComputeStressBase::ComputeStressBase(const std::string & name,
+                                                 InputParameters parameters) :
+    DerivativeMaterialInterface<Material>(name, parameters),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _stress(declareProperty<RankTwoTensor>(_base_name + "stress")),
+    _elasticity_tensor(getMaterialProperty<ElasticityTensorR4>(_base_name + "elasticity_tensor")),
+    _Jacobian_mult(declareProperty<ElasticityTensorR4>(_base_name + "Jacobian_mult"))
+{
+  const std::vector<FunctionName> & fcn_names(getParam<std::vector<FunctionName> >("initial_stress"));
+  const unsigned num = fcn_names.size();
+
+  if (!(num == 0 || num == 3*3))
+    mooseError("Either zero or " << 3*3 << " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied " << num << "\n");
+
+  _initial_stress.resize(num);
+  for (unsigned i = 0 ; i < num ; ++i)
+    _initial_stress[i] = &getFunctionByName(fcn_names[i]);
+}
+
+void
+ComputeStressBase::initQpStatefulProperties()
+{
+  _stress[_qp].zero();
+  if (_initial_stress.size() == 3*3)
+    for (unsigned i = 0 ; i < 3 ; ++i)
+      for (unsigned j = 0 ; j < 3 ; ++j)
+        _stress[_qp](i, j) = _initial_stress[i*3 + j]->value(_t, _q_point[_qp]);
+}
+
+void
+ComputeStressBase::computeQpProperties()
+{
+  computeQpStress();
+}
+

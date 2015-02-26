@@ -25,6 +25,9 @@
 #include "ElementPropertyReadFileTest.h"
 #include "TwoPhaseStressMaterial.h"
 #include "SimpleEigenStrainMaterial.h"
+#include "ComputeElasticityTensor.h"
+#include "ComputeSmallStrain.h"
+#include "ComputeLinearElasticStress.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -104,6 +107,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ElementPropertyReadFileTest);
   registerMaterial(TwoPhaseStressMaterial);
   registerMaterial(SimpleEigenStrainMaterial);
+  registerMaterial(ComputeElasticityTensor);
+  registerMaterial(ComputeSmallStrain);
+  registerMaterial(ComputeLinearElasticStress);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
