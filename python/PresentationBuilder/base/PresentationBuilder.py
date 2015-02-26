@@ -45,8 +45,9 @@ class PresentationBuilder(object):
     self._output_file = f + '.html'
 
     # Register the objects to be created
-    self.factory.loadPlugins('src', 'slidesets', SlideSet)
-    self.factory.loadPlugins('src', 'slides', RemarkSlide)
+    self.factory.loadPlugins('.', 'slidesets', MooseObject)
+    self.factory.loadPlugins('.', 'slides', MooseObject)
+    self.factory.loadPlugins('.', 'images', MooseObject)
 
     # Build the Parser object
     self.parser = Parser(self.factory, self.warehouse)
@@ -66,9 +67,6 @@ class PresentationBuilder(object):
 
     # Build the slides
     self.warehouse.execute()
-
-    # Build the table-of-contents
-    self._contents()
 
 
   ##
@@ -173,27 +171,3 @@ class PresentationBuilder(object):
     output += ' '*4
     output += data[idx:]
     return output
-
-
-  ##
-  # Builds the table of contents for each object
-  def _contents(self):
-
-    # Initialize the table-of-contents slides
-    for obj in self.warehouse.objects:
-      obj.initContents()
-
-    # Initial slide index
-    idx = 1
-    title_slides = []
-
-    # Loop through each object and slide and set the slide index
-    for obj in self.warehouse.objects:
-      for name in obj.activeSlides():
-        slide = obj._slides[name]
-        slide.index = idx
-        idx += slide.count()
-
-    # Call the contents object on each slide set
-    for obj in self.warehouse.objects:
-      obj.contents()
