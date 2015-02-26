@@ -129,10 +129,6 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
                                          const std::vector<std::string> & tol_names,
                                          const std::vector<Real> & tol_values)
 {
-  // check number of coupled variables
-  if (this->_nargs == 0)
-    mooseError("Need at least one coupled variable for ParsedMaterialHelper.");
-
   // build base function object
   _func_F =  new ADFunction();
 
@@ -163,8 +159,7 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
   switch (_map_mode)
   {
     case USE_MOOSE_NAMES:
-      variables = this->_arg_names[0];
-      for (unsigned i = 1; i < this->_nargs; ++i)
+      for (unsigned i = 0; i < this->_nargs; ++i)
         variables += "," + this->_arg_names[i];
       break;
 
@@ -173,8 +168,7 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
       if (!this->_mapping_is_unique)
         mooseError("Derivative parsed materials must couple exactly one non-linear variable per coupled variable input parameter.");
 
-      variables = this->_arg_param_names[0];
-      for (unsigned i = 1; i < this->_nargs; ++i)
+      for (unsigned i = 0; i < this->_nargs; ++i)
         variables += "," + this->_arg_param_names[i];
       break;
 
@@ -190,6 +184,9 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
     _mat_props[i] = &(this->template getMaterialProperty<Real>(mat_prop_names[i]));
     variables += "," + mat_prop_names[i];
   }
+
+  // erase leading comma
+  variables.erase(0,1);
 
   // build the base function
   if (_func_F->Parse(function_expression, variables) >= 0)

@@ -23,7 +23,7 @@ InputParameters validParams<ParsedMaterialBase>()
   // Material properties
   params.addParam<std::vector<std::string> >(
     "material_property_names", std::vector<std::string>(),
-    "Vector of material properties used in the parsed function (these should have a zero gradient!)");
+    "Vector of material properties used in the parsed function");
 
   // Function expression
   params.addRequiredParam<std::string>("function", "FParser function expression for the phase free energy");
