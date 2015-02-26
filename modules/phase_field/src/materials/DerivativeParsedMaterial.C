@@ -14,15 +14,9 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
     DerivativeParsedMaterialHelper(name, parameters, USE_MOOSE_NAMES),
     ParsedMaterialBase(name, parameters)
 {
-  // Build function
+  // Build function, take derivatives, optimize
   functionParse(_function,
                 _constant_names, _constant_expressions,
                 _mat_prop_names,
                 _tol_names, _tol_values);
-
-  // Take derivatives
-  functionsDerivative();
-
-  // Optimize
-  functionsOptimize();
 }
