@@ -14,6 +14,7 @@
 #include "CoupledImplicitEuler.h"
 #include "SwitchingFunctionConstraintLagrange.h"
 #include "SwitchingFunctionConstraintEta.h"
+#include "SwitchingFunctionPenalty.h"
 #include "CrossIC.h"
 #include "SmoothCircleIC.h"
 #include "ClosePackIC.h"
@@ -118,6 +119,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(MaskedBodyForce);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionConstraintEta);
+  registerKernel(SwitchingFunctionPenalty);
 
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
