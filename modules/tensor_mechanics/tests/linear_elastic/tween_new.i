@@ -82,7 +82,7 @@
     disp_y = disp_y
   [../]
   [./stress]
-    type = ComputeLinearElasticStress
+    type = ComputeElasticityStress
     block = 0
   [../]
 []

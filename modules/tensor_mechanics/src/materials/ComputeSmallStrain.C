@@ -4,21 +4,15 @@ template<>
 InputParameters validParams<ComputeSmallStrain>()
 {
   InputParameters params = validParams<ComputeStrainBase>();
+  params.addClassDescription("Compute a small strain.");
   return params;
 }
 
 ComputeSmallStrain::ComputeSmallStrain(const std::string & name,
                                                  InputParameters parameters) :
     DerivativeMaterialInterface<ComputeStrainBase>(name, parameters),
-    _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
     _eigen_strain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "eigen_strain"))
 {
-}
-
-void
-ComputeSmallStrain::initQpStatefulProperties()
-{
-  _total_strain[_qp].zero();
 }
 
 void

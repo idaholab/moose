@@ -26,6 +26,13 @@ ComputeStrainBase::ComputeStrainBase(const std::string & name,
     _T(coupledValue("temperature")),
     _T0(getParam<Real>("temperature_ref")),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" )
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain"))
 {
+}
+
+void
+ComputeStrainBase::initQpStatefulProperties()
+{
+  _total_strain[_qp].zero();
 }

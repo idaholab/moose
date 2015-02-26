@@ -16,6 +16,7 @@ public:
   ComputeStrainBase(const std:: string & name, InputParameters parameters);
 
 protected:
+  virtual void initQpStatefulProperties();
   virtual void computeProperties() = 0;
 
   VariableGradient & _grad_disp_x;
@@ -31,6 +32,8 @@ protected:
   const Real _thermal_expansion_coeff;
 
   std::string _base_name;
+
+  MaterialProperty<RankTwoTensor> & _total_strain;
 };
 
 #endif //COMPUTESTRAINBASE_H
