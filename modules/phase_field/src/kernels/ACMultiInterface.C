@@ -110,7 +110,10 @@ ACMultiInterface::computeQpOffDiagJacobian(unsigned int jvar)
   if (b < 0) return 0.0;
 
   return _L[_qp] * (*_kappa[b])[_qp] * (
-             2.0 * _test[_i][_qp] * ( (_eta_a[_qp] * _grad_phi[_j][_qp] - _phi[_j][_qp] * _grad_eta_a[_qp]) * (*_grad_eta[b])[_qp] )
+             2.0 * _test[_i][_qp] * (
+                 (_eta_a[_qp] * _grad_phi[_j][_qp] - _phi[_j][_qp] * _grad_eta_a[_qp]) * (*_grad_eta[b])[_qp]
+               + (_eta_a[_qp] * (*_grad_eta[b])[_qp] - (*_eta[b])[_qp] * _grad_eta_a[_qp]) * _grad_phi[_j][_qp]
+             )
            + ( - (   _eta_a[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp]
                    + _test[_i][_qp] * _phi[_j][_qp] * _grad_eta_a[_qp]
                    + _test[_i][_qp] * _eta_a[_qp] * _grad_phi[_j][_qp]
