@@ -32,8 +32,11 @@ protected:
   /// Switching functions and their drivatives
   std::vector<const MaterialProperty<Real> *> _h, _dh;
 
+  /// number of non-linear variables in the problem
+  const unsigned int _number_of_nl_variables;
+
   /// eta index for the j_vars in the jacobian computation
-  LIBMESH_BEST_UNORDERED_MAP<unsigned int, unsigned int> _j_eta;
+  std::vector<int> _j_eta;
 };
 
 #endif //SWITCHINGFUNCTIONCONSTRAINTLAGRANGE_H
