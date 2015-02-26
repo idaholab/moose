@@ -24,7 +24,7 @@ class INLSetInterface():
 
     # If a contents slide exists, set it up for INL presentation style
     contents_slide_name = self.name() + '-title'
-    if contents_slide_name in self._slides:
-      contents = self._slides[contents_slide_name]
-      contents._pars['background-image'] = 'inl_dark_title.png'
-      contents._pars['class'] = 'middle, cover'
+    if self.warehouse().hasObject(contents_slide_name):
+      contents = self.warehouse().getObject(contents_slide_name)
+      contents.parameters()['background-image'] = 'inl_dark_title.png'
+      contents.parameters()['class'] = 'middle, cover'

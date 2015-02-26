@@ -78,7 +78,6 @@ def stripInput(code, block):
         stop = m.end()
         break
 
-  print code[strt:stop]
   return code[strt:stop]
 
 

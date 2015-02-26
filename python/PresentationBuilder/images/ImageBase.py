@@ -13,6 +13,7 @@ class ImageBase(MooseObject):
     params.addParam('name', 'The image file name')
     params.addParam('url', 'The image file url')
     params.addParam('download', False, 'Download the image locally')
+    params.addPrivateParam('markdown') # The raw markdown source for this image
 
     params.addParam('div_center', False, 'Wrap html figure in centered div')
     params.addParam('align', 'The image horizontal alignment')
@@ -22,13 +23,9 @@ class ImageBase(MooseObject):
     params.addParam('vertical-align', 'The vertical alignment of the image')
     params.addParam('text-align', 'Text alignment of image')
     params.addParam('caption', 'The caption for the image')
-    params.addParamsToGroup('html', ['align', 'width', 'height', 'vertical-align', 'text-align', 'caption'])
+    params.addParamsToGroup('html', ['align', 'width', 'height', 'vertical-align', 'text-align'])
 
     return params
-
-  @staticmethod
-  def extractName(match):
-    return None
 
   ##
   # Constructor
@@ -39,30 +36,28 @@ class ImageBase(MooseObject):
     # Set download flag (default is true)
     self._download = True
     if self.isParamValid('download'):
-      self._download = self._pars['download']
+      self.__download = self.parameters()['download']
 
   ##
   # Perform the matching
   # @param markdown The raw markdown to parse
-  # @return A list of match iterators (i.e., re.finditer)
+  # @return A list of dictionaries
+  #
+  # The dicts must contains:
+  #  raw, url, caption, settings
   def match(self, markdown):
     return []
-
-  ##
-  # Return the regex for performing image substitution (virtual)
-  def sub(self):
-    return ''
 
   ##
   # Return the image html for replacing the markdown image syntax
   def html(self):
 
     # Get the name and url
-    name = self.getParam('name')
+    name = self.name()
     url = self.getParam('url')
 
     # Do not download the image
-    if self._download:
+    if self.__download:
       urllib.urlretrieve(url, name)
       img_name = name
     else:
@@ -102,16 +97,5 @@ class ImageBase(MooseObject):
     if div:
       img += '</div>'
 
-
     # Return the complete html
     return img
-
-  ##
-  #
-  @staticmethod
-  def seperateImageOptions(options):
-    output = dict()
-    for pair in options.split():
-      key, value = pair.split(':')
-      output[key] = value
-    return output

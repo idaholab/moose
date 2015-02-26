@@ -38,7 +38,6 @@ It is possible to modify the slide properties via the presentation input file by
 * Comments are also able to be added to the slide that are viewable in presentation mode.
 
 ---
-# Input File Slide Modification (cont.)
 ```text
 [presentation]
   [./file_set_demo]
@@ -66,11 +65,11 @@ name: images
 # Images
 Images are included with normal markdown syntax, but can also be modified.
 
-![A an image caption](example_01.png)
+![A an image caption](example_01.png width:200px)
 
 ---
 name: columns
-#Columns
+# Columns
 .left[
 Left
 ]

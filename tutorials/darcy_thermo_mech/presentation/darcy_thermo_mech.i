@@ -185,16 +185,6 @@
     [./Images]
     [../]
   [../]
-  [./peacock]
-    type = 'INLFileSet'
-    title = 'Peacock: The MOOSE GUI'
-    file = 'input/peacock.md'
-    [./Images]
-      [./peacock]
-        width = '570px'
-      [../]
-    [../]
-  [../]
   [./input_parameters]
     type = 'INLDjangoWikiSet'
     wiki = 'MooseTraining/InputParameters'
