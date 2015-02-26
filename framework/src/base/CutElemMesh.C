@@ -92,45 +92,6 @@ CutElemMesh::edge_t::edge_t(const edge_t & other_edge)
   consistency_check();
 }
 
-CutElemMesh::edge_t::edge_t(const edge_t & other_edge, element_t* host, 
-                            bool convert_to_local)
-{
-  if (convert_to_local)
-  {
-    //convert edge nodes from global to local indices if needed
-    //N.B. here host must be other_edge's host
-    if (other_edge.edge_node1->category == N_CATEGORY_PERMANENT ||
-        other_edge.edge_node1->category == N_CATEGORY_TEMP)
-      edge_node1 = host->create_local_node_from_global_node(other_edge.edge_node1);
-    else
-      edge_node1 = other_edge.edge_node1;
-
-    if (other_edge.edge_node2->category == N_CATEGORY_PERMANENT ||
-        other_edge.edge_node2->category == N_CATEGORY_TEMP)
-      edge_node2 = host->create_local_node_from_global_node(other_edge.edge_node2);
-    else
-      edge_node2 = other_edge.edge_node2;
-  }
-  else
-  {
-    //convert from local to global indices if needed
-    //N.B. here host must be this edge's host
-    if (other_edge.edge_node1->category == N_CATEGORY_LOCAL_INDEX)
-      edge_node1 = host->get_global_node_from_local_node(other_edge.edge_node1);
-    else
-      edge_node1 = other_edge.edge_node1;
-
-    if (other_edge.edge_node2->category == N_CATEGORY_LOCAL_INDEX)
-      edge_node2 = host->get_global_node_from_local_node(other_edge.edge_node2);
-    else
-      edge_node2 = other_edge.edge_node2;
-  }
-
-  intersection_x = other_edge.intersection_x;
-  embedded_node = other_edge.embedded_node;
-  consistency_check();
-}
-
 CutElemMesh::edge_t::~edge_t() // do not delete edge node - they will be deleted
 {}                             // in element_t's destructor
 
@@ -416,29 +377,13 @@ CutElemMesh::fragment_t::fragment_t(element_t * host,
 }
 
 CutElemMesh::fragment_t::fragment_t(const fragment_t & other_frag,
-                                    element_t * host,
-                                    bool convert_to_local)
+                                    element_t * host)
 {
   host_elem = host;
-  if (convert_to_local)
+  for (unsigned int i = 0; i < other_frag.boundary_edges.size(); ++i)
   {
-    // convert boundary edges from global to local indeces if needed
-    if (!other_frag.host_elem)
-      CutElemMeshError("In fragment_t::fragment_t() fragment_t constructing from must have a valid host_elem to convert from global to local nodes")
-    for (unsigned int i = 0; i < other_frag.boundary_edges.size(); ++i)
-    {
-      edge_t * new_edge = new edge_t(*other_frag.boundary_edges[i], other_frag.host_elem, convert_to_local);
-      boundary_edges.push_back(new_edge);
-    }
-  }
-  else
-  {
-    // convert boundary edges from local to global indeces if needed
-    for (unsigned int i = 0; i < other_frag.boundary_edges.size(); ++i)
-    {
-      edge_t * new_edge = new edge_t(*other_frag.boundary_edges[i], host, convert_to_local);
-      boundary_edges.push_back(new_edge);
-    }
+    edge_t * new_edge = new edge_t(*other_frag.boundary_edges[i]);
+    boundary_edges.push_back(new_edge);
   }
 }
 
@@ -694,7 +639,10 @@ CutElemMesh::element_t::element_t(const element_t* from_elem, bool convert_to_lo
     {
       if (from_elem->nodes[i]->category == N_CATEGORY_PERMANENT ||
           from_elem->nodes[i]->category == N_CATEGORY_TEMP)
+      {
         nodes[i] = from_elem->create_local_node_from_global_node(from_elem->nodes[i]);
+        local_nodes.push_back(nodes[i]);
+      }
       else
         CutElemMeshError("In element_t "<<from_elem->id<<" the copy constructor must have from_elem w/ global nodes. node: "
                          << i << " category: "<<from_elem->nodes[i]->category)
@@ -747,12 +695,12 @@ CutElemMesh::element_t::~element_t()
       interior_nodes[i] = NULL;
     }
   }
-  for (unsigned int i = 0; i < nodes.size(); ++i)
+  for (unsigned int i = 0; i < local_nodes.size(); ++i)
   {
-    if (nodes[i] && nodes[i]->category == N_CATEGORY_LOCAL_INDEX)
+    if (local_nodes[i])
     {
-      delete nodes[i];
-      nodes[i] = NULL;
+      delete local_nodes[i];
+      local_nodes[i] = NULL;
     }
   }
 }
@@ -2250,29 +2198,38 @@ void CutElemMesh::clearAncestry()
   //      to an element -- there shouldn't be any
 }
 
-void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem, CutElemMesh::element_t & from_elem)
+void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem, CutElemMesh::element_t * const from_elem)
 {
   // restore fragments
   if (elem->fragments.size() != 0)
     CutElemMeshError("in restoreFragmentInfo elements must not have any pre-existing fragments")
-  for (unsigned int i = 0; i < from_elem.fragments.size(); ++i)
-    elem->fragments.push_back(new fragment_t(*from_elem.fragments[i], elem, false));
+  for (unsigned int i = 0; i < from_elem->fragments.size(); ++i)
+    elem->fragments.push_back(new fragment_t(*from_elem->fragments[i], elem));
 
   // restore interior nodes
   if (elem->interior_nodes.size() != 0)
     CutElemMeshError("in restoreFragmentInfo elements must not have any pre-exsiting interior nodes")
-  for (unsigned int i = 0; i < from_elem.interior_nodes.size(); ++i)
-    elem->interior_nodes.push_back(new faceNode(*from_elem.interior_nodes[i]));
+  for (unsigned int i = 0; i < from_elem->interior_nodes.size(); ++i)
+    elem->interior_nodes.push_back(new faceNode(*from_elem->interior_nodes[i]));
+
+  // replace all local nodes with global nodes
+  for (unsigned int i = 0; i < from_elem->num_nodes; ++i)
+  {
+    if (from_elem->nodes[i]->category == N_CATEGORY_LOCAL_INDEX)
+      elem->switchNode(elem->nodes[i], from_elem->nodes[i], false); //element_t is not a child of any parent
+    else
+      CutElemMeshError("In restoreFragmentInfo all of from_elem's nodes must be local")
+  }
 }
 
-void CutElemMesh::restoreEdgeIntersections(CutElemMesh::element_t * const elem, CutElemMesh::element_t & from_elem)
+void CutElemMesh::restoreEdgeIntersections(CutElemMesh::element_t * const elem, CutElemMesh::element_t * const from_elem)
 {
   for (unsigned int i = 0; i < elem->num_edges; ++i)
   {
-    if (from_elem.edges[i]->has_intersection())
+    if (from_elem->edges[i]->has_intersection())
     {
-      double intersection_x = from_elem.edges[i]->get_intersection(from_elem.nodes[i]);
-      node_t * embedded_node = from_elem.edges[i]->get_embedded_node();
+      double intersection_x = from_elem->edges[i]->get_intersection(from_elem->nodes[i]);
+      node_t * embedded_node = from_elem->edges[i]->get_embedded_node();
       addEdgeIntersection(elem, i, intersection_x, embedded_node);
     }
   }

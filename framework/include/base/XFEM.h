@@ -53,7 +53,6 @@ public:
 
 private:
 
-  Elem* _elem;
   unsigned int _n_nodes;
   std::vector<Node*> _nodes;
   CutElemMesh::element_t _efa_elem;
@@ -67,7 +66,7 @@ public:
   Real get_physical_volfrac()const {return _physical_volfrac;}
   Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
   Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
-  CutElemMesh::element_t & get_efa_elem() {return _efa_elem;}
+  CutElemMesh::element_t * get_efa_elem() {return &_efa_elem;}
 };
 
 /**

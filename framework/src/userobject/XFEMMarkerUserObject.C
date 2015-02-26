@@ -21,7 +21,7 @@ InputParameters validParams<XFEMMarkerUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addParam<std::vector<BoundaryName> >("initiate_on_boundary","Permit cracks to initiate in elements adjacent to specified boundaries");
-  params.addRequiredParam<bool>("secondary_cracks", "should secondary cracks be allowed");
+  params.addParam<bool>("secondary_cracks", false, "should secondary cracks be allowed");
   return params;
 }
 

@@ -22,7 +22,7 @@ InputParameters validParams<XFEMCutPlaneAux>()
   InputParameters params = validParams<AuxKernel>();
   MooseEnum quantity("origin_x origin_y origin_z normal_x normal_y normal_z");
   params.addRequiredParam<MooseEnum>("quantity", quantity, "The quantity to be extracted.  Choices: "+quantity.getRawNames());
-  params.addRequiredParam<unsigned int>("plane_id", "The index of which cut plane");
+  params.addParam<unsigned int>("plane_id", 0, "The index of the cut plane");
   return params;
 }
 

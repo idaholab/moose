@@ -89,7 +89,6 @@ class CutElemMesh
     public:
     edge_t(node_t * node1, node_t * node2);
     edge_t(const edge_t & other_edge);
-    edge_t(const edge_t & other_edge, element_t* host, bool convert_to_local);
 
     // the destructor must delete any local nodes
     ~edge_t();
@@ -131,11 +130,9 @@ class CutElemMesh
                const element_t * from_host,
                unsigned int fragment_copy_index = std::numeric_limits<unsigned int>::max());
 
-    //Construct a fragment from another fragment.  If convert_to_local is true,
-    //convert the nodes to local nodes, otherwise convert them to global nodes.
+    //Construct a fragment from another fragment.
     fragment_t(const fragment_t & other_frag,
-               element_t * host,
-               bool convert_to_local);
+               element_t * host);
 
     //The destructor must delete any local nodes
     ~fragment_t();
@@ -255,6 +252,8 @@ class CutElemMesh
     std::vector<edge_t*> edges;
     //list of interior embedded nodes
     std::vector<faceNode*> interior_nodes;
+    //local nodes
+    std::vector<node_t*> local_nodes;
     //parent
     element_t * parent;
     //neighbors on edge
@@ -299,8 +298,8 @@ class CutElemMesh
   void updateTopology(bool mergeUncutVirtualEdges=true);
   void reset();
   void clearAncestry();
-  void restoreFragmentInfo(CutElemMesh::element_t * const elem, CutElemMesh::element_t & from_elem);
-  void restoreEdgeIntersections(CutElemMesh::element_t * const elem, CutElemMesh::element_t & from_elem);
+  void restoreFragmentInfo(CutElemMesh::element_t * const elem, CutElemMesh::element_t * const from_elem);
+  void restoreEdgeIntersections(CutElemMesh::element_t * const elem, CutElemMesh::element_t * const from_elem);
 
   void createChildElements();
   void connectFragments( bool mergeUncutVirtualEdges);

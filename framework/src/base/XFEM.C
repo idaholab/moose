@@ -43,7 +43,6 @@
 
 
 XFEMCutElem::XFEMCutElem(Elem* elem, const CutElemMesh::element_t * const CEMelem):
-  _elem(elem),
   _n_nodes(elem->n_nodes()),
   _nodes(_n_nodes,NULL),
   _efa_elem(CEMelem,true)
@@ -454,7 +453,6 @@ XFEM::mark_cut_edges_by_state()
 
     // find the first cut edge
     unsigned int nsides = CEMElem->num_edges;
-    unsigned int nnodes = elem->n_nodes();
     unsigned int orig_cut_side_id = 999999;
     Real orig_cut_distance = -1.0;
     CutElemMesh::node_t * orig_node = NULL;
