@@ -65,6 +65,11 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & name,
       {
         unsigned int n_apps = _multi_app->numGlobalApps();
         _proj_sys.resize(n_apps, NULL);
+
+        // Keep track of which EquationSystems just had new Systems
+        // added to them
+        std::set<EquationSystems *> augmented_es;
+
         for (unsigned int app = 0; app < n_apps; app++)
         {
           if (_multi_app->hasLocalApp(app))
@@ -84,11 +89,24 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & name,
 
             _proj_sys[app] = &proj_sys;
 
+            // We'll defer to_es.reinit() so we don't do it multiple
+            // times even if we add multiple new systems
+            augmented_es.insert(&to_es);
+
             //to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
 
             Moose::swapLibMeshComm(swapped);
           }
         }
+
+        // Make sure all new systems are initialized.
+        for (std::set<EquationSystems *>::iterator es_iter =
+             augmented_es.begin();
+             es_iter != augmented_es.end(); ++es_iter)
+          {
+            EquationSystems *es = *es_iter;
+            es->reinit();
+          }
       }
       break;
 
