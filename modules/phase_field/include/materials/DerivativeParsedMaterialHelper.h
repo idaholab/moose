@@ -24,6 +24,8 @@ public:
 protected:
   virtual void computeProperties();
 
+  virtual void functionsPostParse();
+
   void functionsDerivative();
   void functionsOptimize();
 
