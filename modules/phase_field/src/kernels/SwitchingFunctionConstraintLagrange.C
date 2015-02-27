@@ -15,7 +15,9 @@ SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(const s
     _h_names(getParam<std::vector<std::string> >("h_names")),
     _num_h(_h_names.size()),
     _h(_num_h),
-    _dh(_num_h)
+    _dh(_num_h),
+    _number_of_nl_variables(_fe_problem.getNonlinearSystem().nVariables()),
+    _j_eta(_number_of_nl_variables, -1)
 {
   // parameter check. We need exactly one eta per h
   if (_num_h != coupledComponents("etas"))
@@ -28,7 +30,9 @@ SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(const s
     _dh[i] = &getMaterialPropertyDerivative<Real>(_h_names[i], getVar("etas", i)->name());
 
     // generate the lookup table from j_var -> eta index
-    _j_eta[coupled("etas", i)] = i;
+    unsigned int num = coupled("etas", i);
+    if (num < _number_of_nl_variables)
+      _j_eta[num] = i;
   }
 }
 
@@ -51,10 +55,10 @@ SwitchingFunctionConstraintLagrange::computeQpJacobian()
 Real
 SwitchingFunctionConstraintLagrange::computeQpOffDiagJacobian(unsigned int j_var)
 {
-  const LIBMESH_BEST_UNORDERED_MAP<unsigned int, unsigned int>::iterator eta = _j_eta.find(j_var);
+  const int eta = _j_eta[j_var];
 
-  if (eta != _j_eta.end())
-    return (*_dh[eta->second])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  if (eta >= 0)
+    return (*_dh[eta])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   else
     return 0.0;
 }

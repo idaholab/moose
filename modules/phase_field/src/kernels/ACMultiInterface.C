@@ -16,7 +16,7 @@ ACMultiInterface::ACMultiInterface(const std::string & name, InputParameters par
     _eta(_num_etas),
     _grad_eta(_num_etas),
     _eta_vars(_fe_problem.getNonlinearSystem().nVariables(), -1),
-    _a(0),
+    _a(-1),
     _kappa_names(getParam<std::vector<std::string> >("kappa_names")),
     _kappa(_num_etas),
     _L(getMaterialProperty<Real>(getParam<std::string>("mob_name")))
@@ -43,6 +43,9 @@ ACMultiInterface::ACMultiInterface(const std::string & name, InputParameters par
     // get gradient prefactors
     _kappa[i] = &getMaterialProperty<Real>(_kappa_names[i]);
   }
+
+  if (_a < 0)
+    mooseError("Kernel variable must be listed in etas for ACMultiInterface kernel " << name);
 }
 
 Real

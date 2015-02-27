@@ -17,7 +17,7 @@ class DerivativeMultiPhaseMaterial : public DerivativeMultiPhaseBase
 {
 public:
   DerivativeMultiPhaseMaterial(const std::string & name,
-                                         InputParameters parameters);
+                               InputParameters parameters);
 
 protected:
   virtual Real computeDF(unsigned int);

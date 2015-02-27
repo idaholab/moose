@@ -19,6 +19,11 @@
     input = 'lagrangemult.i'
     exodiff = 'lagrangemult_out.e'
   [../]
+  [./penalty]
+    type = 'Exodiff'
+    input = 'penalty.i'
+    exodiff = 'penalty_out.e'
+  [../]
   [./acmultiinterface]
     type = 'Exodiff'
     input = 'acmultiinterface.i'
