@@ -9,5 +9,11 @@ contrib/* linguist-vendored
 *.eps linguist-vendored
 *.m linguist-vendored
 *.tex linguist-vendored
+*.e linguist-vendored
+*.js linguist-vendored
+*.nb linguist-vendored
+*.css linguist-vendored
+*.html linguist-vendored
+*.xml linguist-vendored
 
 *.C linguist-language=C++
