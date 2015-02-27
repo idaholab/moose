@@ -5,7 +5,7 @@ InputParameters validParams<TotalFreeEnergy>()
 {
   InputParameters params = validParams<TotalFreeEnergyBase>();
   params.addParam<std::string>("f_name", "F"," Base name of the free energy function");
-  params.addRequiredParam< std::vector<std::string> >("kappa_names", "Vector of kappa names corresponding to each variable name in interfacial_vars in the same order.");
+  params.addParam< std::vector<std::string> >("kappa_names", std::vector<std::string>(), "Vector of kappa names corresponding to each variable name in interfacial_vars in the same order.");
   return params;
 }
 

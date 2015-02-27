@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<TotalFreeEnergyBase>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredCoupledVar("interfacial_vars", "Variable names that contribute to interfacial energy");
+  params.addCoupledVar("interfacial_vars", "Variable names that contribute to interfacial energy");
   params.addCoupledVar("additional_free_energy", 0.0, "Coupled variable holding additional free energy contributions to be summed up");
   return params;
 }
