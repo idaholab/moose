@@ -555,7 +555,7 @@ double NDSpline::spline_cartesian_inverse_marginal(double CDF,int marginal_varia
 		throw ("Error in spline_cartesian_inverse_marginal: CDF provided is out of boundaries [0.0,1.0]");
 
 	double up = _discretizations[marginal_variable][_discretizations[marginal_variable].size()-1];
-	double down = _discretizations[marginal_variable][0];
+	double down = _discretizations[marginal_variable][0]+0.000001;
 	CDF = spline_cartesian_marginal_integration(down,marginal_variable) + CDF*(spline_cartesian_marginal_integration(up,marginal_variable) - spline_cartesian_marginal_integration(down,marginal_variable));
 
 	int mid_position = _discretizations[marginal_variable].size()/2;
