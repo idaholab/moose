@@ -29,6 +29,7 @@
 #include "ComputeSmallStrain.h"
 #include "ComputeFiniteStrain.h"
 #include "ComputeElasticityStress.h"
+#include "Compute1PhaseEigenStrain.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -112,6 +113,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeSmallStrain);
   registerMaterial(ComputeFiniteStrain);
   registerMaterial(ComputeElasticityStress);
+  registerMaterial(Compute1PhaseEigenStrain);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

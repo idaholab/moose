@@ -11,7 +11,7 @@ InputParameters validParams<ComputeSmallStrain>()
 ComputeSmallStrain::ComputeSmallStrain(const std::string & name,
                                                  InputParameters parameters) :
     DerivativeMaterialInterface<ComputeStrainBase>(name, parameters),
-    _eigen_strain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "eigen_strain"))
+    _eigen_strain(getMaterialProperty<RankTwoTensor>(_base_name + "eigen_strain"))
 {
 }
 
@@ -30,6 +30,5 @@ ComputeSmallStrain::computeProperties()
 
     //Remove the Eigen strain
     _total_strain[_qp] -= _eigen_strain[_qp];
-
   }
 }
