@@ -1,5 +1,5 @@
 # Linguist overrides
-doc/*.* linguist-vendored
+framework/doc/* linguist-vendored
 test/tests/* linguist-vendored
 contrib/*.* linguist-vendored
 *.C linguist-language=C++
