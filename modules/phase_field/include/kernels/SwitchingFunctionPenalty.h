@@ -1,24 +1,24 @@
-#ifndef SWITCHINGFUNCTIONCONSTRAINTLAGRANGE_H
-#define SWITCHINGFUNCTIONCONSTRAINTLAGRANGE_H
+#ifndef SWITCHINGFUNCTIONPENALTY_H
+#define SWITCHINGFUNCTIONPENALTY_H
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class SwitchingFunctionConstraintLagrange;
+class SwitchingFunctionPenalty;
 
 template<>
-InputParameters validParams<SwitchingFunctionConstraintLagrange>();
+InputParameters validParams<SwitchingFunctionPenalty>();
 
 /**
- * SwitchingFunctionConstraintLagrange is a constraint kernel that acts on the
- * lambda lagrange multiplier non-linear variables to
+ * SwitchingFunctionPenalty is a constraint kernel adds a penalty
+ * to each order parameter to
  * enforce \f$ \sum_n h_i(\eta_i) \equiv 1 \f$.
  */
-class SwitchingFunctionConstraintLagrange : public DerivativeMaterialInterface<Kernel>
+class SwitchingFunctionPenalty : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  SwitchingFunctionConstraintLagrange(const std::string & name, InputParameters parameters);
+  SwitchingFunctionPenalty(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -31,12 +31,19 @@ protected:
 
   /// Switching functions and their drivatives
   std::vector<const MaterialProperty<Real> *> _h, _dh;
+  const MaterialProperty<Real> * _d2h;
+
+  /// Penalty pre-factor
+  const Real _penalty;
 
   /// number of non-linear variables in the problem
   const unsigned int _number_of_nl_variables;
 
   /// eta index for the j_vars in the jacobian computation
   std::vector<int> _j_eta;
+
+  /// Index of the eta this kernel is operating on
+  int _a;
 };
 
-#endif //SWITCHINGFUNCTIONCONSTRAINTLAGRANGE_H
+#endif //SWITCHINGFUNCTIONPENALTY_H

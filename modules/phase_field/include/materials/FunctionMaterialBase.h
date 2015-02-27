@@ -68,7 +68,7 @@ protected:
   /// Material property to store the function value.
   MaterialProperty<Real> * _prop_F;
 
-  /// number of non-linear variable sin the problem
+  /// number of non-linear variables in the problem
   const unsigned int _number_of_nl_variables;
 
 private:
