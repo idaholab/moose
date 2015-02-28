@@ -573,10 +573,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
 
     successful_return = (nr_good && admissible && kt_good);
     if (successful_return)
-    {
-      still_finding_solution = false;
       break;
-    }
 
 
     if (still_finding_solution)
@@ -905,7 +902,7 @@ FiniteStrainMultiPlasticity::applyKuhnTucker(const std::vector<Real> & f, const 
   // if didn't turn off anything yet, turn off surface with minimum pm
   if (!turned_off)
   {
-    unsigned int surface_to_turn_off;
+    int surface_to_turn_off = -1;
     Real min_pm = 0;
     for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
       if (pm[surface] < min_pm)
@@ -913,7 +910,7 @@ FiniteStrainMultiPlasticity::applyKuhnTucker(const std::vector<Real> & f, const 
         min_pm = pm[surface];
         surface_to_turn_off = surface;
       }
-    if (min_pm < 0)
+    if (surface_to_turn_off >= 0)
       active[surface_to_turn_off] = false;
   }
 }
