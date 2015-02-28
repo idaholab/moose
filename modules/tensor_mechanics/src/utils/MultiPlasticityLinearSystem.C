@@ -161,6 +161,8 @@ MultiPlasticityLinearSystem::eliminateLinearDependence(const RankTwoTensor & str
     {
       r_tmp.push_back(r[current_yf]);
       info = singularValuesOfR(r_tmp, s);
+      if (info != 0)
+        mooseError("In finding the SVD in the return-map algorithm, the PETSC LAPACK gesvd routine returned with error code " << info);
       if (s[s.size() - 1] < _svd_tol*s[0])
       {
         scheduled_for_deactivation[current_yf] = true;
