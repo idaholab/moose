@@ -58,19 +58,19 @@ XFEMCutElem::~XFEMCutElem()
 }
 
 Point
-XFEMCutElem::get_node_coords(CutElemMesh::node_t* CEMnode, MeshBase* displaced_mesh) const
+XFEMCutElem::get_node_coords(EFAnode* CEMnode, MeshBase* displaced_mesh) const
 {
   Point node_coor(0.0,0.0,0.0);
-  std::vector<CutElemMesh::node_t*> master_nodes;
+  std::vector<EFAnode*> master_nodes;
   std::vector<Point> master_points;
   std::vector<double> master_weights;
 
   _efa_elem.getMasterInfo(CEMnode, master_nodes, master_weights);
   for (unsigned int i = 0; i < master_nodes.size(); ++i)
   {
-    if (master_nodes[i]->category == CutElemMesh::N_CATEGORY_LOCAL_INDEX)
+    if (master_nodes[i]->category() == N_CATEGORY_LOCAL_INDEX)
     {
-      Node* node = _nodes[master_nodes[i]->id];
+      Node* node = _nodes[master_nodes[i]->id()];
       if (displaced_mesh)
         node = displaced_mesh->node_ptr(node->id());
       Point node_p((*node)(0), (*node)(1), (*node)(2));
@@ -117,12 +117,12 @@ Point
 XFEMCutElem::get_origin(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
   Point orig(0.0,0.0,0.0);
-  std::vector<std::vector<CutElemMesh::node_t*> > cut_line_nodes;
+  std::vector<std::vector<EFAnode*> > cut_line_nodes;
   for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
   {
     if (_efa_elem.fragments[0]->boundary_edges[i]->is_interior_edge())
     {
-      std::vector<CutElemMesh::node_t*> node_line(2,NULL);
+      std::vector<EFAnode*> node_line(2,NULL);
       node_line[0] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(0);
       node_line[1] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(1);
       cut_line_nodes.push_back(node_line);
@@ -142,12 +142,12 @@ Point
 XFEMCutElem::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
   Point normal(0.0,0.0,0.0);
-  std::vector<std::vector<CutElemMesh::node_t*> > cut_line_nodes;
+  std::vector<std::vector<EFAnode*> > cut_line_nodes;
   for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
   {
     if (_efa_elem.fragments[0]->boundary_edges[i]->is_interior_edge())
     {
-      std::vector<CutElemMesh::node_t*> node_line(2,NULL);
+      std::vector<EFAnode*> node_line(2,NULL);
       node_line[0] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(0);
       node_line[1] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(1);
       cut_line_nodes.push_back(node_line);
@@ -455,7 +455,7 @@ XFEM::mark_cut_edges_by_state()
     unsigned int nsides = CEMElem->num_edges;
     unsigned int orig_cut_side_id = 999999;
     Real orig_cut_distance = -1.0;
-    CutElemMesh::node_t * orig_node = NULL;
+    EFAnode * orig_node = NULL;
     CutElemMesh::edge_t * orig_edge = NULL;
 
     if (is_elem_at_crack_tip(elem)) // crack tip element's crack intiation
@@ -602,11 +602,11 @@ XFEM::cut_mesh_with_efa()
   std::cout<<"BWS cut done"<<std::endl;
 
   //Add new nodes
-  const std::vector<CutElemMesh::node_t*> NewNodes = _efa_mesh.getNewNodes();
+  const std::vector<EFAnode*> NewNodes = _efa_mesh.getNewNodes();
   for (unsigned int i=0; i<NewNodes.size(); ++i)
   {
-    unsigned int new_node_id = NewNodes[i]->id;
-    unsigned int parent_id = NewNodes[i]->parent->id;
+    unsigned int new_node_id = NewNodes[i]->id();
+    unsigned int parent_id = NewNodes[i]->parent()->id();
 
     const Node *parent_node = _mesh->node_ptr(parent_id);
 
@@ -636,7 +636,7 @@ XFEM::cut_mesh_with_efa()
   const std::vector<CutElemMesh::element_t*> NewElements = _efa_mesh.getChildElements();
   for (unsigned int i=0; i<NewElements.size(); ++i)
   {
-    unsigned int parent_id = NewElements[i]->parent->id;
+    unsigned int parent_id = NewElements[i]->parent->id();
 
     Elem *parent_elem = _mesh->elem(parent_id);
     Elem *libmesh_elem = Elem::build(parent_elem->type()).release();
@@ -651,7 +651,7 @@ XFEM::cut_mesh_with_efa()
 
     for (unsigned int j=0; j<NewElements[i]->num_nodes; ++j)
     {
-      unsigned int node_id = NewElements[i]->nodes[j]->id;
+      unsigned int node_id = NewElements[i]->nodes[j]->id();
       Node *libmesh_node;
 
       std::map<unsigned int, Node*>::iterator nit = efa_id_to_new_node.find(node_id);
@@ -748,7 +748,7 @@ XFEM::cut_mesh_with_efa()
   const std::vector<CutElemMesh::element_t*> DeleteElements = _efa_mesh.getParentElements();
   for (unsigned int i=0; i<DeleteElements.size(); ++i)
   {
-    Elem *elem_to_delete = _mesh->elem(DeleteElements[i]->id);
+    Elem *elem_to_delete = _mesh->elem(DeleteElements[i]->id());
 
     //delete the XFEMCutElem object for any elements that are to be deleted
     std::map<const Elem*, XFEMCutElem*>::iterator cemit = _cut_elem_map.find(elem_to_delete);
@@ -766,7 +766,7 @@ XFEM::cut_mesh_with_efa()
 
     if (_mesh2)
     {
-      Elem *elem_to_delete2 = _mesh2->elem(DeleteElements[i]->id);
+      Elem *elem_to_delete2 = _mesh2->elem(DeleteElements[i]->id());
       elem_to_delete2->nullify_neighbors();
       _mesh2->boundary_info->remove(elem_to_delete2);
       _mesh2->delete_elem(elem_to_delete2);
@@ -782,7 +782,7 @@ XFEM::cut_mesh_with_efa()
     std::set<CutElemMesh::element_t*>::const_iterator sit;
     for (sit = CrackTipElements.begin(); sit != CrackTipElements.end(); ++sit)
     {
-      unsigned int eid = (*sit)->id;
+      unsigned int eid = (*sit)->id();
       Elem * crack_tip_elem = _mesh->elem(eid);
       _crack_tip_elems.insert(crack_tip_elem);
     }
@@ -797,18 +797,18 @@ XFEM::cut_mesh_with_efa()
 }
 
 Point
-XFEM::get_efa_node_coor(CutElemMesh::node_t* CEMnode, CutElemMesh::element_t* CEMElem, 
+XFEM::get_efa_node_coor(EFAnode* CEMnode, CutElemMesh::element_t* CEMElem, 
                         const Elem *elem, MeshBase* displaced_mesh)
 {
   Point node_coor(0.0,0.0,0.0);
-  std::vector<CutElemMesh::node_t*> master_nodes;
+  std::vector<EFAnode*> master_nodes;
   std::vector<Point> master_points;
   std::vector<double> master_weights;
 
   CEMElem->getMasterInfo(CEMnode, master_nodes, master_weights);
   for (unsigned int i = 0; i < master_nodes.size(); ++i)
   {
-    if (master_nodes[i]->category == CutElemMesh::N_CATEGORY_PERMANENT)
+    if (master_nodes[i]->category() == N_CATEGORY_PERMANENT)
     {
       unsigned int local_node_id = CEMElem->getLocalNodeIndex(master_nodes[i]);
       Node* node = elem->get_node(local_node_id);

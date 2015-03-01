@@ -58,7 +58,7 @@ private:
   CutElemMesh::element_t _efa_elem;
 
   Real _physical_volfrac;
-  Point get_node_coords(CutElemMesh::node_t* node, 
+  Point get_node_coords(EFAnode* node, 
                         MeshBase* displaced_mesh = NULL) const;
 
 public:
@@ -115,7 +115,7 @@ public:
   bool init_crack_intersect_edge(Point cut_origin, RealVectorValue cut_normal, 
                                  Point edge_p1, Point edge_p2, Real & dist);
   bool cut_mesh_with_efa();
-  Point get_efa_node_coor(CutElemMesh::node_t* CEMnode, CutElemMesh::element_t* CEMElem, 
+  Point get_efa_node_coor(EFAnode* CEMnode, CutElemMesh::element_t* CEMElem, 
                           const Elem *elem, MeshBase* displaced_mesh = NULL);
 
   /**

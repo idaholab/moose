@@ -24,6 +24,8 @@
 #include <set>
 #include <limits>
 
+#include "EFAnode.h"
+
 #define CutElemMeshError(msg) {std::cout<<"CutElemMesh ERROR: "<<msg<<std::endl; exit(1);}
 
 class CutElemMesh
@@ -31,55 +33,21 @@ class CutElemMesh
   public:
   class element_t;
 
-  enum N_CATEGORY
-  {
-    N_CATEGORY_PERMANENT,
-    N_CATEGORY_TEMP,
-    N_CATEGORY_EMBEDDED,
-    N_CATEGORY_LOCAL_INDEX
-  };
-
-  class node_t
-  {
-    public:
-
-    node_t(unsigned int nid, N_CATEGORY ncat, node_t* nparent=NULL):
-      category(ncat),
-      id(nid),
-      parent(nparent)
-    {};
-    N_CATEGORY category;
-    unsigned int id;
-    node_t* parent;
-    std::string id_cat_str()
-    {
-      std::ostringstream s;
-      s << id;
-      if (category == N_CATEGORY_EMBEDDED)
-        s<<"e";
-      else if (category == N_CATEGORY_TEMP)
-        s<<"t";
-      else
-        s<<" ";
-      return s.str();
-    };
-  };
-
   class faceNode
   {
     public:
-    faceNode(node_t* node, double xi, double eta);
+    faceNode(EFAnode* node, double xi, double eta);
     faceNode(const faceNode & other_face_node);
 
     ~faceNode();
 
-    node_t * get_node();
+    EFAnode * get_node();
     double get_para_coords(unsigned int i);
-    void switchNode(node_t* new_old, node_t* old_node);
+    void switchNode(EFAnode* new_old, EFAnode* old_node);
 
     private:
 
-    node_t * _node;
+    EFAnode * _node;
     double _xi;
     double _eta;
   };
@@ -87,7 +55,7 @@ class CutElemMesh
   class edge_t
   {
     public:
-    edge_t(node_t * node1, node_t * node2);
+    edge_t(EFAnode * node1, EFAnode * node2);
     edge_t(const edge_t & other_edge);
 
     // the destructor must delete any local nodes
@@ -99,26 +67,26 @@ class CutElemMesh
 
 //    bool operator < (const edge_t & other) const;
 
-    void add_intersection(double position, node_t * embedded_node_tmp, node_t * from_node);
-    node_t * get_node(unsigned int index);
+    void add_intersection(double position, EFAnode * embedded_node_tmp, EFAnode * from_node);
+    EFAnode * get_node(unsigned int index);
 
     bool has_intersection();
-    bool has_intersection_at_position(double position, node_t * from_node);
-    double get_intersection(node_t * from_node);
+    bool has_intersection_at_position(double position, EFAnode * from_node);
+    double get_intersection(EFAnode * from_node);
 
-    node_t * get_embedded_node();
+    EFAnode * get_embedded_node();
     void consistency_check();
-    void switchNode(node_t *new_node, node_t *old_node);
-    bool containsNode(node_t *node);
-    bool getNodeMasters(node_t* node, std::vector<node_t*> &master_nodes, std::vector<double> &master_weights);
+    void switchNode(EFAnode *new_node, EFAnode *old_node);
+    bool containsNode(EFAnode *node);
+    bool getNodeMasters(EFAnode* node, std::vector<EFAnode*> &master_nodes, std::vector<double> &master_weights);
     bool is_interior_edge();
     bool is_elem_full_edge();
     void remove_embedded_node();
 
     private:
-    node_t * edge_node1;
-    node_t * edge_node2;
-    node_t * embedded_node;
+    EFAnode * edge_node1;
+    EFAnode * edge_node2;
+    EFAnode * embedded_node;
     double intersection_x;
   };
 
@@ -137,18 +105,17 @@ class CutElemMesh
     //The destructor must delete any local nodes
     ~fragment_t();
 
-    void switchNode(node_t *new_node, node_t *old_node);
-    bool containsNode(node_t *node);
+    void switchNode(EFAnode *new_node, EFAnode *old_node);
+    bool containsNode(EFAnode *node);
     bool isConnected(fragment_t &other_fragment);
     void combine_tip_edges();
     std::vector<fragment_t*> split();
-    std::vector<node_t*> commonNodesWithEdge(edge_t & other_edge);
+    std::vector<EFAnode*> commonNodesWithEdge(edge_t & other_edge);
     unsigned int get_num_cuts();
     element_t* get_host();
     std::vector<unsigned int> get_interior_edge_id();
     bool is_edge_second_cut(unsigned int edge_id);
 
-//    std::vector< node_t*> boundary_nodes;
     std::vector< edge_t*> boundary_edges;
 
     private:
@@ -168,19 +135,20 @@ class CutElemMesh
     createEdges();
 
     void
-    switchNode(node_t *new_node,
-               node_t *old_node,
+    switchNode(EFAnode *new_node,
+               EFAnode *old_node,
                bool descend_to_parent = true);
 
     void
-    switchEmbeddedNode(node_t *new_node,
-                       node_t *old_node);
+    switchEmbeddedNode(EFAnode *new_node,
+                       EFAnode *old_node);
 
+    unsigned int id() const;
     bool is_partial();
 
     //Check if two elements that share a common edge (defined by edge end nodes) overlay each other
     //by looking at the ordering of the nodes.
-    bool overlays_elem(node_t* other_edge_node1, node_t* other_edge_node2);
+    bool overlays_elem(EFAnode* other_edge_node1, EFAnode* other_edge_node2);
 
     bool overlays_elem(element_t* other_elem);
 
@@ -197,10 +165,10 @@ class CutElemMesh
     bool will_crack_tip_extend(std::vector<unsigned int> &split_neighbors);
 
     //Get the nodes on the specified edge and return in the edge_nodes vector
-    void get_nodes_on_edge(unsigned int edge_idx, std::vector<node_t*> &edge_nodes);
+    void get_nodes_on_edge(unsigned int edge_idx, std::vector<EFAnode*> &edge_nodes);
 
     //Create a set of all non-physical nodes in the current element
-    void get_non_physical_nodes(std::set<node_t*> &non_physical_nodes);
+    void get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes);
 
     //Determine whether element at crack tip should be duplicated.  It should be duplicated
     //if the crack will extend into the next element, or if it has a non-physical node
@@ -209,21 +177,21 @@ class CutElemMesh
     bool shouldDuplicateForPhantomCorner();
 
     // get all phantom nodes on the specified edge
-    std::set<node_t*> getPhantomNodeOnEdge(unsigned int edge_id);
+    std::set<EFAnode*> getPhantomNodeOnEdge(unsigned int edge_id);
 
     //Given a global node, create a new local node
-    node_t * create_local_node_from_global_node(const node_t * global_node) const;
+    EFAnode * create_local_node_from_global_node(const EFAnode * global_node) const;
 
     //Given a local node, find the global node corresponding to that node
-    node_t * get_global_node_from_local_node(const node_t * local_node) const;
+    EFAnode * get_global_node_from_local_node(const EFAnode * local_node) const;
 
-    //Given a node_t, find the element edge or fragment edge that contains it
+    //Given a EFAnode, find the element edge or fragment edge that contains it
     //Return its master nodes and weights
-    void getMasterInfo(node_t* node, std::vector<node_t*> &master_nodes,
+    void getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
                        std::vector<double> &master_weights) const;
 
     //Get the local node index of node
-    unsigned int getLocalNodeIndex(node_t * node) const;
+    unsigned int getLocalNodeIndex(EFAnode * node) const;
 
     //Given a element edge ID, get the corresponding fragment ID
     bool getFragmentEdgeID(unsigned int elem_edge_id, unsigned int &frag_id, unsigned int &frag_edge_id);
@@ -236,24 +204,24 @@ class CutElemMesh
     unsigned int get_tip_edge_id();
 
     //get the parametric coords of an embedded node
-    bool getEmbeddedNodeParaCoor(node_t* embedded_node, std::vector<double> &para_coor);
+    bool getEmbeddedNodeParaCoor(EFAnode* embedded_node, std::vector<double> &para_coor);
     unsigned int getNumInteriorNodes();
     unsigned int get_num_cuts();
     bool is_cut_twice();
     void display_nodes();
 
     //id
-    unsigned int id;
+    unsigned int _id;
     unsigned int num_nodes;
     unsigned int num_edges;
     //array of nodes
-    std::vector<node_t*> nodes;
+    std::vector<EFAnode*> nodes;
     //list of cut edges
     std::vector<edge_t*> edges;
     //list of interior embedded nodes
     std::vector<faceNode*> interior_nodes;
     //local nodes
-    std::vector<node_t*> local_nodes;
+    std::vector<EFAnode*> local_nodes;
     //parent
     element_t * parent;
     //neighbors on edge
@@ -289,7 +257,7 @@ class CutElemMesh
   void updateEdgeNeighbors();
   void initCrackTipTopology();
   void addEdgeIntersection( unsigned int elemid, unsigned int edgeid, double position );
-  void addEdgeIntersection( element_t * elem, unsigned int edgeid, double position, node_t * embedded_node = NULL );
+  void addEdgeIntersection( element_t * elem, unsigned int edgeid, double position, EFAnode * embedded_node = NULL );
   void addFragEdgeIntersection(unsigned int elemid, unsigned int frag_edge_id, double position);
 
   void updatePhysicalLinksAndFragments();
@@ -303,13 +271,13 @@ class CutElemMesh
 
   void createChildElements();
   void connectFragments( bool mergeUncutVirtualEdges);
-  void mergeNodes(node_t* &childNode,
-                  node_t* &childOfNeighborNode,
+  void mergeNodes(EFAnode* &childNode,
+                  EFAnode* &childOfNeighborNode,
                   element_t* childElem,
                   element_t* childOfNeighborElem);
 
-  void addToMergedEdgeMap(node_t* node1,
-                          node_t* node2,
+  void addToMergedEdgeMap(EFAnode* node1,
+                          EFAnode* node2,
                           element_t* elem1,
                           element_t* elem2);
 
@@ -330,23 +298,23 @@ class CutElemMesh
 
   const std::vector<element_t*> &getChildElements(){return ChildElements;};
   const std::vector<element_t*> &getParentElements(){return ParentElements;};
-  const std::vector<node_t*> &getNewNodes(){return NewNodes;};
+  const std::vector<EFAnode*> &getNewNodes(){return NewNodes;};
   const std::set<element_t*> &getCrackTipElements(){return CrackTipElements;};
   element_t* getElemByID(unsigned int id);
   unsigned int getElemIdByNodes(unsigned int * node_id);
 
   private:
   //unsigned int MaxElemId;
-  std::map< unsigned int, node_t*> PermanentNodes;
-  std::map< unsigned int, node_t*> EmbeddedNodes;
-  std::map< unsigned int, node_t*> TempNodes;
+  std::map< unsigned int, EFAnode*> PermanentNodes;
+  std::map< unsigned int, EFAnode*> EmbeddedNodes;
+  std::map< unsigned int, EFAnode*> TempNodes;
   std::map< unsigned int, element_t*> Elements;
-  std::map< std::set< node_t* >, std::set< element_t* > > MergedEdgeMap;
+  std::map< std::set< EFAnode* >, std::set< element_t* > > MergedEdgeMap;
   std::set< element_t*> CrackTipElements;
-  std::vector< node_t* > NewNodes;
+  std::vector< EFAnode* > NewNodes;
   std::vector< element_t* > ChildElements;
   std::vector< element_t* > ParentElements;
-  std::map< node_t*, std::set< element_t *> > InverseConnectivityMap;
+  std::map< EFAnode*, std::set< element_t *> > InverseConnectivityMap;
 };
 
 template <class T> unsigned int num_common_elems(std::set<T> &v1, std::set<T> &v2);
