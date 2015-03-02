@@ -150,11 +150,13 @@ class ExponentialDistributionBackend;
 class BasicExponentialDistribution : public BasicTruncatedDistribution
 {
 public:
-  BasicExponentialDistribution(double lambda);
-  BasicExponentialDistribution(double lambda, double x_min, double x_max);
+  BasicExponentialDistribution(double lambda, double low=0.0);
+  BasicExponentialDistribution(double lambda, double x_min, double x_max, double low=0.0);
   virtual ~BasicExponentialDistribution();
 
-  double  untrCdf(double x);
+  double untrCdf(double x);
+  double Cdf(double x);
+  double InverseCdf(double x);
 };
 
 /*
@@ -203,8 +205,8 @@ class BetaDistributionBackend;
 class BasicBetaDistribution : public BasicTruncatedDistribution
 {
 public:
-  BasicBetaDistribution(double alpha, double beta, double scale);
-  BasicBetaDistribution(double alpha, double beta, double scale, double x_min, double x_max);
+  BasicBetaDistribution(double alpha, double beta, double scale, double low=0.0);
+  BasicBetaDistribution(double alpha, double beta, double scale, double x_min, double x_max, double low=0.0);
   virtual ~BasicBetaDistribution();
 
   double  Pdf(double x);                ///< Pdf function at coordinate x

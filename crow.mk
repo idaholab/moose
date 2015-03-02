@@ -44,7 +44,6 @@ else
 endif
 
 all:: $(CROW_LIB)
-
 $(CROW_LIB): $(CROW_objects) $(CROW_plugin_deps)
 	@echo "Linking "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
@@ -138,6 +137,7 @@ clean::
 	  $(CROW_DIR)/crow_modules/*_wrap.cxx \
 	  $(CROW_DIR)/crow_modules/*py[23].py \
 	  $(CROW_LIB) $(CROW_DIR)/libCROW-$(METHOD).*
+	@rm -Rf $(CROW_LIB)/install/ $(CROW_LIB)/build/
 
 clobber::
 	@rm -f $(CROW_DIR)/control_modules/_distribution1D.so \

@@ -524,9 +524,10 @@ public:
 };
 
 
-BasicExponentialDistribution::BasicExponentialDistribution(double lambda)
+BasicExponentialDistribution::BasicExponentialDistribution(double lambda, double low)
 {
   _dist_parameters["lambda"] = lambda;
+  _dist_parameters["low"] = low;
 
   if(not hasParameter("truncation")) {
     _dist_parameters["truncation"] = 1.0;
@@ -546,10 +547,11 @@ BasicExponentialDistribution::BasicExponentialDistribution(double lambda)
 }
 
 
-BasicExponentialDistribution::BasicExponentialDistribution(double lambda, double x_min, double x_max):
+BasicExponentialDistribution::BasicExponentialDistribution(double lambda, double x_min, double x_max, double low):
   BasicTruncatedDistribution(x_min,x_max)
 {
     _dist_parameters["lambda"] = lambda;
+    _dist_parameters["low"] = low;
     if (lambda<0)
     throwError("ERROR: incorrect value of lambda for exponential distribution");
     _backend = new ExponentialDistributionBackend(lambda);
@@ -571,6 +573,17 @@ BasicExponentialDistribution::untrCdf(double x){
   }
 }
 
+double
+BasicExponentialDistribution::Cdf(double x){
+  double low = _dist_parameters.find("low") ->second;
+  return BasicTruncatedDistribution::Cdf(x);//-low);
+}
+
+double
+BasicExponentialDistribution::InverseCdf(double x){
+  double low = _dist_parameters.find("low") ->second;
+  return BasicTruncatedDistribution::InverseCdf(x);// + low;
+}
 
 /*
  * CLASS WEIBULL DISTRIBUTION
@@ -735,11 +748,12 @@ public:
 };
 
 
-BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double scale)
+BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double scale, double low)
 {
   _dist_parameters["alpha"] = alpha;
-  _dist_parameters["beta"] = beta;
+  _dist_parameters["beta" ] = beta;
   _dist_parameters["scale"] = scale;
+  _dist_parameters["low"  ] = low;
 
   if(not hasParameter("truncation")) {
     _dist_parameters["truncation"] = 1.0;
@@ -757,13 +771,14 @@ BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double s
   _backend = new BetaDistributionBackend(alpha, beta);
 }
 
-BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double scale, double x_min, double x_max):
+BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double scale, double x_min, double x_max, double low):
   BasicTruncatedDistribution(x_min,x_max)
 {
     _dist_parameters["alpha"] = alpha;
-    _dist_parameters["beta"] = beta;
+    _dist_parameters["beta" ] = beta;
     _dist_parameters["scale"] = scale;
-
+    _dist_parameters["low"  ] = low;
+    
     if ((alpha<0) || (beta<0))
     throwError("ERROR: incorrect value of alpha or beta for beta distribution");
 
@@ -789,19 +804,23 @@ BasicBetaDistribution::untrCdf(double x){
 double
 BasicBetaDistribution::Pdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
-  return BasicTruncatedDistribution::Pdf(x/scale)/scale;
+  double low   = _dist_parameters.find("low"  ) ->second;
+  return BasicTruncatedDistribution::Pdf( (x-low)/scale)/scale;
 }
 
 double
 BasicBetaDistribution::Cdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
-  return BasicTruncatedDistribution::Cdf(x/scale);
+  double low   = _dist_parameters.find("low"  ) ->second;
+  //return BasicTruncatedDistribution::Cdf( (x-low)/scale );
+  return BasicTruncatedDistribution::Cdf( (x-low)/scale);// -low)/scale );
 }
 
 double
 BasicBetaDistribution::InverseCdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
-  return BasicTruncatedDistribution::InverseCdf(x)*scale;
+  double low   = _dist_parameters.find("low"  ) ->second;
+  return BasicTruncatedDistribution::InverseCdf(x)*scale+low;//*scale+low;
 }
 
 /*
