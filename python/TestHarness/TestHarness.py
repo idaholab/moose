@@ -546,7 +546,7 @@ class TestHarness:
         color = 'RED'
       else:
         color = 'GREEN'
-      test_name = colorText(specs['test_name']  + ": ", self.options, color)
+      test_name = colorText(specs['test_name']  + ": ", color, colored=self.options.colored, code=self.options.code)
       output = ("\n" + test_name).join(lines)
       print output
 
@@ -615,7 +615,8 @@ class TestHarness:
     if self.error_code & 0x0F:
       summary += ', <r>FATAL PARSER ERROR</r>'
 
-    print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed), self.options, "", html=True )
+    print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
+                     colored=self.options.colored, code=self.options.code )
     if self.options.pbs:
       print '\nYour PBS batch file:', self.options.pbs
     if self.file:
