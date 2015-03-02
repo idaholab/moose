@@ -33,4 +33,9 @@
     input = 'ParsedMaterial_test.i'
     exodiff = 'ParsedMaterial_test_out.e'
   [../]
+  [./ConstructionOrder]
+    type = 'Exodiff'
+    input = 'ConstructionOrder.i'
+    exodiff = 'ConstructionOrder_out.e'
+  [../]
 []
