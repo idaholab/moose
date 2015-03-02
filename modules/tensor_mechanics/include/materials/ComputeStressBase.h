@@ -23,6 +23,7 @@ protected:
   std::string _base_name;
 
   MaterialProperty<RankTwoTensor> & _stress;
+  MaterialProperty<RankTwoTensor> & _elastic_strain;
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
 
   /// initial stress components
