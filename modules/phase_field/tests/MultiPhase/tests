@@ -24,6 +24,11 @@
     input = 'penalty.i'
     exodiff = 'penalty_out.e'
   [../]
+  [./crosstermfreeenergy]
+    type = 'Exodiff'
+    input = 'crosstermfreeenergy.i'
+    exodiff = 'crosstermfreeenergy_out.e'
+  [../]
   [./acmultiinterface]
     type = 'Exodiff'
     input = 'acmultiinterface.i'
