@@ -43,6 +43,8 @@
 #include "FiniteStrainPlasticAux.h"
 #include "CrystalPlasticitySlipSysAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
+#include "StressDivergencePFFracTensors.h"
+
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -83,6 +85,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceTensors);
   registerKernel(CosseratStressDivergenceTensors);
   registerKernel(MomentBalancing);
+  registerKernel(StressDivergencePFFracTensors);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);

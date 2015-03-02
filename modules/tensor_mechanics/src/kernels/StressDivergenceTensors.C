@@ -12,6 +12,8 @@ InputParameters validParams<StressDivergenceTensors>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
   params.addParam<std::string>("base_name", "Material property base name");
+  params.set<bool>("use_displaced_mesh") = false;
+
   return params;
 }
 
