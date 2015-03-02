@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef TRICRYSTAL2CIRCLEGRAINSIC_H
 #define TRICRYSTAL2CIRCLEGRAINSIC_H
 
