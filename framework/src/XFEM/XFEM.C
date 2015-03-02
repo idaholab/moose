@@ -42,7 +42,7 @@
 #endif // DEBUG
 
 
-XFEMCutElem::XFEMCutElem(Elem* elem, const CutElemMesh::element_t * const CEMelem):
+XFEMCutElem::XFEMCutElem(Elem* elem, const EFAelement * const CEMelem):
   _n_nodes(elem->n_nodes()),
   _nodes(_n_nodes,NULL),
   _efa_elem(CEMelem,true)
@@ -331,7 +331,7 @@ void XFEM::build_efa_mesh()
     if (cemit != _cut_elem_map.end())
     {
       XFEMCutElem *xfce = cemit->second;
-      CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
+      EFAelement * CEMElem = _efa_mesh.getElemByID(elem->id());
       _efa_mesh.restoreFragmentInfo(CEMElem, xfce->get_efa_elem());
     }
   }
@@ -348,7 +348,7 @@ void XFEM::build_efa_mesh()
     if (cemit != _cut_elem_map.end())
     {
       XFEMCutElem *xfce = cemit->second;
-      CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
+      EFAelement * CEMElem = _efa_mesh.getElemByID(elem->id());
       _efa_mesh.restoreEdgeIntersections(CEMElem, xfce->get_efa_elem());
     }
   }
@@ -382,7 +382,7 @@ XFEM::mark_cut_edges_by_geometry(Real time)
     std::vector<cutEdge> elemCutEdges;
     std::vector<cutEdge> fragCutEdges;
     std::vector<std::vector<Point> > frag_edges;
-    CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
+    EFAelement * CEMElem = _efa_mesh.getElemByID(elem->id());
 
     // continue if elem has been already cut twice - IMPORTANT
     if (CEMElem->is_cut_twice())
@@ -445,7 +445,7 @@ XFEM::mark_cut_edges_by_state()
   {
     const Elem *elem = pmeit->first;
     RealVectorValue &normal = pmeit->second;
-    CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
+    EFAelement * CEMElem = _efa_mesh.getElemByID(elem->id());
 
     // continue if elem is already cut twice - IMPORTANT
     if (CEMElem->is_cut_twice())
@@ -456,7 +456,7 @@ XFEM::mark_cut_edges_by_state()
     unsigned int orig_cut_side_id = 999999;
     Real orig_cut_distance = -1.0;
     EFAnode * orig_node = NULL;
-    CutElemMesh::edge_t * orig_edge = NULL;
+    EFAedge * orig_edge = NULL;
 
     if (is_elem_at_crack_tip(elem)) // crack tip element's crack intiation
     {
@@ -633,7 +633,7 @@ XFEM::cut_mesh_with_efa()
   }
 
   //Add new elements
-  const std::vector<CutElemMesh::element_t*> NewElements = _efa_mesh.getChildElements();
+  const std::vector<EFAelement*> NewElements = _efa_mesh.getChildElements();
   for (unsigned int i=0; i<NewElements.size(); ++i)
   {
     unsigned int parent_id = NewElements[i]->parent->id();
@@ -745,7 +745,7 @@ XFEM::cut_mesh_with_efa()
   }
 
   //delete elements
-  const std::vector<CutElemMesh::element_t*> DeleteElements = _efa_mesh.getParentElements();
+  const std::vector<EFAelement*> DeleteElements = _efa_mesh.getParentElements();
   for (unsigned int i=0; i<DeleteElements.size(); ++i)
   {
     Elem *elem_to_delete = _mesh->elem(DeleteElements[i]->id());
@@ -778,8 +778,8 @@ XFEM::cut_mesh_with_efa()
   if (mesh_changed)
   {
     _crack_tip_elems.clear();
-    const std::set<CutElemMesh::element_t*> CrackTipElements = _efa_mesh.getCrackTipElements();
-    std::set<CutElemMesh::element_t*>::const_iterator sit;
+    const std::set<EFAelement*> CrackTipElements = _efa_mesh.getCrackTipElements();
+    std::set<EFAelement*>::const_iterator sit;
     for (sit = CrackTipElements.begin(); sit != CrackTipElements.end(); ++sit)
     {
       unsigned int eid = (*sit)->id();
@@ -797,7 +797,7 @@ XFEM::cut_mesh_with_efa()
 }
 
 Point
-XFEM::get_efa_node_coor(EFAnode* CEMnode, CutElemMesh::element_t* CEMElem, 
+XFEM::get_efa_node_coor(EFAnode* CEMnode, EFAelement* CEMElem, 
                         const Elem *elem, MeshBase* displaced_mesh)
 {
   Point node_coor(0.0,0.0,0.0);

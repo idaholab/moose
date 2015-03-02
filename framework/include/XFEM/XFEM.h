@@ -48,14 +48,14 @@ class XFEM_geometric_cut;
 class XFEMCutElem
 {
 public:
-  XFEMCutElem(Elem* elem,const CutElemMesh::element_t * const CEMelem);
+  XFEMCutElem(Elem* elem, const EFAelement * const CEMelem);
   ~XFEMCutElem();
 
 private:
 
   unsigned int _n_nodes;
   std::vector<Node*> _nodes;
-  CutElemMesh::element_t _efa_elem;
+  EFAelement _efa_elem;
 
   Real _physical_volfrac;
   Point get_node_coords(EFAnode* node, 
@@ -66,7 +66,7 @@ public:
   Real get_physical_volfrac()const {return _physical_volfrac;}
   Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
   Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
-  CutElemMesh::element_t * get_efa_elem() {return &_efa_elem;}
+  EFAelement * get_efa_elem() {return &_efa_elem;}
 };
 
 /**
@@ -115,7 +115,7 @@ public:
   bool init_crack_intersect_edge(Point cut_origin, RealVectorValue cut_normal, 
                                  Point edge_p1, Point edge_p2, Real & dist);
   bool cut_mesh_with_efa();
-  Point get_efa_node_coor(EFAnode* CEMnode, CutElemMesh::element_t* CEMElem, 
+  Point get_efa_node_coor(EFAnode* CEMnode, EFAelement* CEMElem, 
                           const Elem *elem, MeshBase* displaced_mesh = NULL);
 
   /**

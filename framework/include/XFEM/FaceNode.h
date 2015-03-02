@@ -12,51 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EFANODE_H
-#define EFANODE_H
+#ifndef FACENODE_H
+#define FACENODE_H
 
-#include <cstddef>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <map>
-#include <set>
-#include <limits>
-#include <algorithm>
-#include <iomanip>
-#include <cmath>
-#include "MooseError.h"
+#include "EFAnode.h"
 
-#define CutElemMeshError(msg) {std::cout<<"CutElemMesh ERROR: "<<msg<<std::endl; exit(1);}
-
-enum N_CATEGORY
+class FaceNode
 {
-  N_CATEGORY_PERMANENT,
-  N_CATEGORY_TEMP,
-  N_CATEGORY_EMBEDDED,
-  N_CATEGORY_LOCAL_INDEX
+  public:
+
+  FaceNode(EFAnode* node, double xi, double eta);
+  FaceNode(const FaceNode & other_face_node);
+
+  ~FaceNode();
+
+  private:
+
+  EFAnode * _node;
+  double _xi;
+  double _eta;
+
+  public:
+
+  EFAnode * get_node();
+  double get_para_coords(unsigned int i);
+  void switchNode(EFAnode* new_old, EFAnode* old_node);
 };
-
-class EFAnode
-{
-public:
-
-  EFAnode(unsigned int nid, N_CATEGORY ncat, EFAnode* nparent=NULL);
-
-private:
-
-  N_CATEGORY _category;
-  unsigned int _id;
-  EFAnode* _parent;
-
-public:
-
-  std::string id_cat_str();
-  unsigned int id() const;
-  N_CATEGORY category() const;
-  EFAnode* parent() const;
-  void remove_parent();
-};
-
 
 #endif

@@ -32,1432 +32,6 @@
 
 #include "CutElemMesh.h"
 
-CutElemMesh::faceNode::faceNode(EFAnode* node, double xi, double eta):
-  _node(node),
-  _xi(xi),
-  _eta(eta)
-{}
-
-CutElemMesh::faceNode::faceNode(const faceNode & other_face_node):
-  _node(other_face_node._node),
-  _xi(other_face_node._xi),
-  _eta(other_face_node._eta)
-{}
-
-CutElemMesh::faceNode::~faceNode()
-{}
-
-EFAnode *
-CutElemMesh::faceNode::get_node()
-{
-  return _node;
-}
-
-double
-CutElemMesh::faceNode::get_para_coords(unsigned int i)
-{
-  double coord = -100.0;
-  if (i == 0)
-    coord = _xi;
-  else if (i == 1)
-    coord = _eta;
-  else
-    CutElemMeshError("get_para_coords(): input out of bounds")
-
-  return coord;
-}
-
-void
-CutElemMesh::faceNode::switchNode(EFAnode* new_node, EFAnode* old_node)
-{
-  if (_node == old_node)
-    _node = new_node;
-}
-
-CutElemMesh::edge_t::edge_t(EFAnode * node1, EFAnode * node2):
-  edge_node1(node1),
-  edge_node2(node2),
-  embedded_node(NULL),
-  intersection_x(-1.0)
-{
-  consistency_check();
-}
-
-CutElemMesh::edge_t::edge_t(const edge_t & other_edge)
-{
-  edge_node1 = other_edge.edge_node1;
-  edge_node2 = other_edge.edge_node2;
-  intersection_x = other_edge.intersection_x;
-  embedded_node = other_edge.embedded_node;
-  consistency_check();
-}
-
-CutElemMesh::edge_t::~edge_t() // do not delete edge node - they will be deleted
-{}                             // in element_t's destructor
-
-bool
-CutElemMesh::edge_t::equivalent(const edge_t & other) const
-{
-  bool isEqual = false;
-  double tol = 1.e-4;
-  if (other.edge_node1 == edge_node1 &&
-      other.edge_node2 == edge_node2)
-  {
-    if (embedded_node != NULL)
-    {
-      if (embedded_node == other.embedded_node && 
-          std::abs(intersection_x - other.intersection_x) < tol)
-        isEqual = true;
-    }
-    else
-      isEqual = true;
-  }
-  else if (other.edge_node2 == edge_node1 &&
-           other.edge_node1 == edge_node2)
-  {
-    if (embedded_node != NULL)
-    {
-      if (embedded_node == other.embedded_node && 
-          std::abs(intersection_x - 1.0 + other.intersection_x) < tol)
-        isEqual = true;
-    }
-    else
-      isEqual = true;
-  }
-  else {}
-
-  return isEqual;
-}
-
-bool
-CutElemMesh::edge_t::isOverlapping(const edge_t &other) const
-{
-  bool isEqual = false;
-  if (other.edge_node1 == edge_node1 &&
-      other.edge_node2 == edge_node2)
-    isEqual = true;
-  else if (other.edge_node2 == edge_node1 &&
-           other.edge_node1 == edge_node2)
-    isEqual = true;
-  else {}
-  return isEqual;
-}
-
-bool
-CutElemMesh::edge_t::containsEdge(edge_t & other)
-{
-  bool contains = false;
-  if (equivalent(other))
-    contains = true;
-  else if (embedded_node)
-  {
-    if (other.containsNode(embedded_node) &&
-       (other.containsNode(edge_node1) || other.containsNode(edge_node2)))
-      contains = true;
-  }
-  else {}
-  return contains;
-}
-
-bool
-CutElemMesh::edge_t::getNodeMasters(EFAnode* node, std::vector<EFAnode*> &master_nodes, std::vector<double> &master_weights)
-{
-  master_nodes.clear();
-  master_weights.clear();
-  bool masters_found = true;
-  if (edge_node1 == node)
-  {
-    master_nodes.push_back(edge_node1);
-    master_weights.push_back(1.0);
-  }
-  else if (edge_node2 == node)
-  {
-    master_nodes.push_back(edge_node2);
-    master_weights.push_back(1.0);
-  }
-  else if (embedded_node == node) // edge's embedded node == node
-  {
-    master_nodes.push_back(edge_node1);
-    master_nodes.push_back(edge_node2);
-    master_weights.push_back(1.0-intersection_x);
-    master_weights.push_back(intersection_x);
-  }
-  else
-    masters_found = false;
-  return masters_found;
-}
-
-// TODO: Saving because I don't want to throw it away, but it needs more work to be used.
-//bool
-//CutElemMesh::edge_t::operator < (const edge_t & other) const
-//{
-//  node_t * this_min_node;
-//  node_t * this_max_node;
-//  node_t * other_min_node;
-//  node_t * other_max_node;
-//
-//  int this_node1_unique_index = ((int) edge_node1->category + 1) * edge_node1->id;
-//  int this_node2_unique_index = ((int) edge_node2->category + 1) * edge_node2->id;
-//  int other_node1_unique_index = ((int) other.edge_node1->category + 1) * edge_node1->id;
-//  int other_node2_unique_index = ((int) other.edge_node2->category + 1) * edge_node2->id;
-//  int this_min_index = std::min(this_node1_unique_index, this_node2_unique_index);
-//  int other_min_index = std::min(other_node1_unique_index, other_node2_unique_index);
-//
-//  if (this_min_index < other_min_index)
-//    return true;
-//  else if (this_min_index == other_min_index)
-//  {
-//    int this_max_index = std::max(this_node1_unique_index, this_node2_unique_index);
-//    int other_max_index = std::max(other_node1_unique_index, other_node2_unique_index);
-//
-//    if (this_max_index < other_max_index)
-//      return true;
-//  }
-//  return false;
-//}
-
-void
-CutElemMesh::edge_t::add_intersection(double position, EFAnode * embedded_node_tmp, EFAnode * from_node)
-{
-  embedded_node = embedded_node_tmp;
-  if (from_node == edge_node1)
-    intersection_x = position;
-  else if (from_node == edge_node2)
-    intersection_x = 1.0 - position;
-  else
-    CutElemMeshError("In add_intersection from_node does not exist on edge")
-}
-
-EFAnode *
-CutElemMesh::edge_t::get_node(unsigned int index)
-{
-  if (index == 0)
-    return edge_node1;
-  else if (index == 1)
-    return edge_node2;
-  else
-    CutElemMeshError("In get_node index out of bounds")
-}
-
-bool
-CutElemMesh::edge_t::has_intersection()
-{
-  return (embedded_node != NULL);
-}
-
-bool
-CutElemMesh::edge_t::has_intersection_at_position(double position, EFAnode * from_node)
-{
-  double tol = 1.e-4;
-  bool has_int = false;
-  if (has_intersection())
-  {
-    double tmp_intersection_x = -1.0;
-    if (from_node == edge_node1)
-      tmp_intersection_x = position;
-    else if (from_node == edge_node2)
-      tmp_intersection_x = 1.0 - position;
-    else
-      CutElemMeshError("In has_intersection from_node does not exist on edge")
-
-    if (std::abs(tmp_intersection_x - intersection_x) < tol)
-      has_int = true;
-  }
-  return has_int;
-}
-
-double
-CutElemMesh::edge_t::get_intersection(EFAnode * from_node)
-{
-  if (from_node == edge_node1)
-    return intersection_x;
-  else if (from_node == edge_node2)
-    return 1.0 - intersection_x;
-  else
-    CutElemMeshError("In get_intersection node not in edge")
-}
-
-EFAnode *
-CutElemMesh::edge_t::get_embedded_node()
-{
-  return embedded_node;
-}
-
-void
-CutElemMesh::edge_t::consistency_check()
-{
-  bool consistent = true;
-  if ((edge_node1->category() == N_CATEGORY_PERMANENT ||
-       edge_node1->category() == N_CATEGORY_TEMP) &&
-      edge_node2->category() == N_CATEGORY_LOCAL_INDEX)
-    consistent = false;
-  else if ((edge_node2->category() == N_CATEGORY_PERMANENT ||
-            edge_node2->category() == N_CATEGORY_TEMP) &&
-           edge_node1->category() == N_CATEGORY_LOCAL_INDEX)
-    consistent = false;
-  if (!consistent)
-    CutElemMeshError("In consistency_check nodes on edge are not consistent")
-}
-
-void
-CutElemMesh::edge_t::switchNode(EFAnode *new_node, EFAnode *old_node)
-{
-  if (edge_node1 == old_node)
-    edge_node1 = new_node;
-  else if (edge_node2 == old_node)
-    edge_node2 = new_node;
-  else if (embedded_node == old_node)
-    embedded_node = new_node;
-}
-
-bool
-CutElemMesh::edge_t::containsNode(EFAnode *node)
-{
-  if (edge_node1 == node ||
-      edge_node2 == node ||
-      embedded_node == node)
-    return true;
-  else
-    return false;
-}
-
-bool
-CutElemMesh::edge_t::is_interior_edge()
-{
-  if (edge_node1->category() == N_CATEGORY_EMBEDDED &&
-      edge_node2->category() == N_CATEGORY_EMBEDDED)
-    return true;
-  else
-    return false;
-}
-
-bool
-CutElemMesh::edge_t::is_elem_full_edge()
-{
-  if (edge_node1->category() != N_CATEGORY_EMBEDDED &&
-      edge_node2->category() != N_CATEGORY_EMBEDDED)
-    return true;
-  else
-    return false;
-}
-
-void
-CutElemMesh::edge_t::remove_embedded_node()
-{
-  embedded_node = NULL;
-  intersection_x = -1.0;
-}
-
-CutElemMesh::fragment_t::fragment_t(element_t * host,
-                                    bool create_boundary_edges,
-                                    const element_t * from_host,
-                                    unsigned int fragment_copy_index)
-{
-  host_elem = host;
-  if (create_boundary_edges)
-  {
-    if (!from_host)
-      CutElemMeshError("If fragment_copy_index given, fragment_t constructor must have a from_host to copy from")
-    if (fragment_copy_index == std::numeric_limits<unsigned int>::max())
-    {
-      for (unsigned int i = 0; i < from_host->edges.size(); ++i)
-        boundary_edges.push_back(new edge_t(*from_host->edges[i]));
-    }
-    else
-    {
-      if (from_host->fragments.size() <= fragment_copy_index)
-      {
-        std::cout<<"num frags: "<<from_host->fragments.size()<<" index: "<<fragment_copy_index<<std::endl;
-        CutElemMeshError("In fragment_t constructor fragment_copy_index out of bounds")
-      }
-      for (unsigned int i = 0; i < from_host->fragments[fragment_copy_index]->boundary_edges.size(); ++i)
-        boundary_edges.push_back(new edge_t(*from_host->fragments[fragment_copy_index]->boundary_edges[i]));
-    }
-  }
-}
-
-CutElemMesh::fragment_t::fragment_t(const fragment_t & other_frag,
-                                    element_t * host)
-{
-  host_elem = host;
-  for (unsigned int i = 0; i < other_frag.boundary_edges.size(); ++i)
-  {
-    edge_t * new_edge = new edge_t(*other_frag.boundary_edges[i]);
-    boundary_edges.push_back(new_edge);
-  }
-}
-
-CutElemMesh::fragment_t::~fragment_t()
-{
-  for (unsigned int i = 0; i < boundary_edges.size(); ++i)
-  {
-    if (boundary_edges[i])
-    {
-      delete boundary_edges[i];
-      boundary_edges[i] = NULL;
-    }
-  }
-}
-
-void
-CutElemMesh::fragment_t::switchNode(EFAnode *new_node, EFAnode *old_node)
-{
-  for (unsigned int i = 0; i < boundary_edges.size(); ++i)
-    boundary_edges[i]->switchNode(new_node, old_node);
-}
-
-bool
-CutElemMesh::fragment_t::containsNode(EFAnode *node)
-{
-  bool contains = false;
-  for (unsigned int i = 0; i < boundary_edges.size(); ++i)
-  {
-    if (boundary_edges[i]->containsNode(node))
-    {
-      contains = true;
-      break;
-    }
-  }
-  return contains;
-}
-
-bool
-CutElemMesh::fragment_t::isConnected(fragment_t &other_fragment)
-{
-  for (unsigned int i = 0; i < boundary_edges.size(); ++i)
-    for (unsigned int j = 0; j < other_fragment.boundary_edges.size(); ++j)
-      if (boundary_edges[i]->equivalent(*other_fragment.boundary_edges[j]))
-        return true;
-  return false;
-}
-
-void
-CutElemMesh::fragment_t::combine_tip_edges()
-{
-  // combine the tip edges in a crack tip fragment
-  // N.B. the host elem can only have one elem_tip_edge, otherwise it should have already been completely split
-  if (!host_elem)
-    CutElemMeshError("In combine_tip_edges() the frag must have host_elem")
-
-  bool has_tip_edges = false;
-  unsigned int elem_tip_edge_id = 99999;
-  std::vector<unsigned int> frag_tip_edge_id;
-  for (unsigned int i = 0; i < host_elem->num_edges; ++i)
-  {
-    frag_tip_edge_id.clear();
-    if (host_elem->edges[i]->has_intersection())
-    {
-      for (unsigned int j = 0; j < boundary_edges.size(); ++j)
-      {
-        if (host_elem->edges[i]->containsEdge(*boundary_edges[j]))
-          frag_tip_edge_id.push_back(j);
-      } // j
-      if (frag_tip_edge_id.size() == 2) // combine the two frag edges on this elem edge
-      {
-        has_tip_edges = true;
-        elem_tip_edge_id = i;
-        break;
-      }
-    }
-  } // i
-  if (has_tip_edges)
-  {
-    delete boundary_edges[frag_tip_edge_id[0]];
-    delete boundary_edges[frag_tip_edge_id[1]];
-    boundary_edges[frag_tip_edge_id[0]] = new edge_t(*host_elem->edges[elem_tip_edge_id]);
-    boundary_edges.erase(boundary_edges.begin()+frag_tip_edge_id[1]);
-  }
-}
-
-std::vector<CutElemMesh::fragment_t*>
-CutElemMesh::fragment_t::split()
-{
-  // This method will split one existing fragment into one or two
-  // new fragments and return them
-
-  std::vector<fragment_t *> new_fragments;
-  std::vector<unsigned int> cut_edges;
-  for (unsigned int iedge = 0; iedge < boundary_edges.size(); ++iedge)
-  {
-    if(boundary_edges[iedge]->has_intersection())
-      cut_edges.push_back(iedge);
-  }
-
-  if (cut_edges.size() == 0)
-  {} // do nothing
-  else if (cut_edges.size() > 2)
-    CutElemMeshError("In split() Fragment cannot have more than 2 cut edges")
-  else // cut_edges.size () == 1 || 2
-  {
-    unsigned int iedge=0;
-    unsigned int icutedge=0;
-
-    do //loop over new fragments
-    {
-      fragment_t * new_frag = new fragment_t(host_elem, false, NULL);
-
-      do //loop over edges
-      {
-        if (iedge == cut_edges[icutedge])
-        {
-          EFAnode * first_node_on_edge = boundary_edges[iedge]->get_node(0);
-          unsigned int iprevedge(iedge>0 ? iedge-1 : boundary_edges.size()-1);
-          if (!boundary_edges[iprevedge]->containsNode(first_node_on_edge))
-          {
-            first_node_on_edge = boundary_edges[iedge]->get_node(1);
-            if (!boundary_edges[iprevedge]->containsNode(first_node_on_edge))
-              CutElemMeshError("Previous edge does not contain either of the nodes in this edge")
-          }
-          EFAnode * embedded_node1 = boundary_edges[iedge]->get_embedded_node();
-          new_frag->boundary_edges.push_back(new edge_t(first_node_on_edge, embedded_node1));
-
-          ++icutedge; // jump to next cut edge or jump back to this edge when only 1 cut edge
-          if (icutedge == cut_edges.size())
-            icutedge = 0;
-          iedge = cut_edges[icutedge];
-          EFAnode * embedded_node2 = boundary_edges[iedge]->get_embedded_node();
-          if (embedded_node2 != embedded_node1)
-            new_frag->boundary_edges.push_back(new edge_t(embedded_node1, embedded_node2));
-
-          EFAnode * second_node_on_edge = boundary_edges[iedge]->get_node(1);
-          unsigned int inextedge(iedge<(boundary_edges.size()-1) ? iedge+1 : 0);
-          if (!boundary_edges[inextedge]->containsNode(second_node_on_edge))
-          {
-            second_node_on_edge = boundary_edges[iedge]->get_node(0);
-            if (!boundary_edges[inextedge]->containsNode(second_node_on_edge))
-              CutElemMeshError("Previous edge does not contain either of the nodes in this edge")
-          }
-          new_frag->boundary_edges.push_back(new edge_t(embedded_node2, second_node_on_edge));
-        }
-        else
-          new_frag->boundary_edges.push_back(new edge_t(*boundary_edges[iedge]));
-
-        ++iedge;
-        if (iedge == boundary_edges.size())
-          iedge = 0;
-      }
-      while(!boundary_edges[iedge]->containsEdge(*new_frag->boundary_edges[0]));
-
-      if (cut_edges.size() > 1)
-      { //set the starting point for the loop over the other part of the element
-        iedge = cut_edges[0]+1;
-        if (iedge == boundary_edges.size())
-          iedge = 0;
-      }
-
-      new_fragments.push_back(new_frag);
-    }
-    while(new_fragments.size() < cut_edges.size());
-  }
-
-  return new_fragments;
-}
-
-std::vector<EFAnode*>
-CutElemMesh::fragment_t::commonNodesWithEdge(edge_t & other_edge)
-{
-  std::vector<EFAnode*> common_nodes;
-  for (unsigned int i = 0; i < 2; ++i)
-  {
-    EFAnode* edge_node = other_edge.get_node(i);
-    if (containsNode(edge_node))
-      common_nodes.push_back(edge_node);
-  }
-  return common_nodes;
-}
-
-unsigned int
-CutElemMesh::fragment_t::get_num_cuts()
-{
-  unsigned int num_cut_edges = 0;
-  for (unsigned int i = 0; i < boundary_edges.size(); ++i)
-  {
-    if (boundary_edges[i]->has_intersection())
-      num_cut_edges += 1;
-  }
-  return num_cut_edges;
-}
-
-CutElemMesh::element_t*
-CutElemMesh::fragment_t::get_host()
-{
-  return host_elem;
-}
-
-std::vector<unsigned int>
-CutElemMesh::fragment_t::get_interior_edge_id()
-{
-  std::vector<unsigned int> interior_edge_id;
-  for (unsigned int i = 0; i < boundary_edges.size(); ++i)
-  {
-    if (boundary_edges[i]->is_interior_edge())
-      interior_edge_id.push_back(i);
-  }
-  return interior_edge_id;
-}
-
-bool
-CutElemMesh::fragment_t::is_edge_second_cut(unsigned int edge_id)
-{
-  bool is_second_cut = false;
-  if (!host_elem)
-    CutElemMeshError("in is_edge_second_cut() fragment must have host elem")
-  for (unsigned int i = 0; i < host_elem->interior_nodes.size(); ++i)
-    if (boundary_edges[edge_id]->containsNode(host_elem->interior_nodes[i]->get_node()))
-    {
-      is_second_cut = true;
-      break;
-    }
-  return is_second_cut;
-}
-
-CutElemMesh::element_t::element_t(unsigned int eid):
-  _id(eid),
-  num_nodes(4),
-  num_edges(4),
-  nodes(num_nodes,NULL),
-  edges(num_edges,NULL),
-  parent(NULL),
-  edge_neighbors(num_edges,std::vector<element_t*>(1,NULL)),
-  crack_tip_split_element(false)
-{}
-
-CutElemMesh::element_t::element_t(const element_t* from_elem, bool convert_to_local):
-  _id(from_elem->id()),
-  num_nodes(from_elem->num_nodes),
-  num_edges(from_elem->num_edges),
-  nodes(num_nodes,NULL),
-  edges(num_edges,NULL),
-  parent(NULL),
-  edge_neighbors(num_edges,std::vector<element_t*>(1,NULL)),
-  crack_tip_split_element(from_elem->crack_tip_split_element)
-{
-  if (convert_to_local)
-  {
-    // build local nodes from global nodes
-    for (unsigned int i = 0; i < num_nodes; ++i)
-    {
-      if (from_elem->nodes[i]->category() == N_CATEGORY_PERMANENT ||
-          from_elem->nodes[i]->category() == N_CATEGORY_TEMP)
-      {
-        nodes[i] = from_elem->create_local_node_from_global_node(from_elem->nodes[i]);
-        local_nodes.push_back(nodes[i]);
-      }
-      else
-        CutElemMeshError("In element_t "<<from_elem->id()<<" the copy constructor must have from_elem w/ global nodes. node: "
-                         << i << " category: "<<from_elem->nodes[i]->category())
-    }
-
-    // copy edges, fragments and interior nodes from from_elem
-    for (unsigned int i = 0; i < num_edges; ++i)
-      edges[i] = new edge_t(*from_elem->edges[i]);
-    for (unsigned int i = 0; i < from_elem->fragments.size(); ++i)
-      fragments.push_back(new fragment_t(NULL, true, from_elem, i));
-    for (unsigned int i = 0; i < from_elem->interior_nodes.size(); ++i)
-      interior_nodes.push_back(new faceNode(*from_elem->interior_nodes[i]));
-
-    // replace all global nodes with local nodes
-    for (unsigned int i = 0; i < num_nodes; ++i)
-    {
-      if (nodes[i]->category() == N_CATEGORY_LOCAL_INDEX)
-        switchNode(nodes[i], from_elem->nodes[i], false);//when save to _cut_elem_map, the element_t is not a child of any parent
-      else
-        CutElemMeshError("In element_t copy constructor this elem's nodes must be local")
-    } 
-  }
-  else
-    CutElemMeshError("this element_t constructor only converts global nodes to local nodes")
-}
-
-CutElemMesh::element_t::~element_t()
-{
-  for (unsigned int i=0; i<fragments.size(); ++i)
-  {
-    if (fragments[i])
-    {
-      delete fragments[i];
-      fragments[i] = NULL;
-    }
-  }
-  for (unsigned int i=0; i<edges.size(); ++i)
-  {
-    if (edges[i])
-    {
-      delete edges[i];
-      edges[i] = NULL;
-    }
-  }
-  for (unsigned int i=0; i<interior_nodes.size(); ++i)
-  {
-    if (interior_nodes[i])
-    {
-      delete interior_nodes[i];
-      interior_nodes[i] = NULL;
-    }
-  }
-  for (unsigned int i = 0; i < local_nodes.size(); ++i)
-  {
-    if (local_nodes[i])
-    {
-      delete local_nodes[i];
-      local_nodes[i] = NULL;
-    }
-  }
-}
-
-void
-CutElemMesh::element_t::createEdges()
-{
-  for (unsigned int i = 0; i < num_nodes; ++i)
-  {
-    unsigned int i_plus1(i < (num_nodes-1) ? i+1 : 0);
-    edge_t * new_edge = new edge_t(nodes[i], nodes[i_plus1]);
-    edges[i] = new_edge;
-  }
-}
-
-void
-CutElemMesh::element_t::switchNode(EFAnode *new_node,
-                                   EFAnode *old_node,
-                                   bool descend_to_parent)
-{
-  for (unsigned int i=0; i<num_nodes; ++i)
-  {
-    if (nodes[i] == old_node)
-      nodes[i] = new_node;
-  }
-  for (unsigned int i=0; i<fragments.size(); ++i)
-    fragments[i]->switchNode(new_node, old_node);
-
-  for (unsigned int i=0; i<edges.size(); ++i)
-    edges[i]->switchNode(new_node, old_node);
-
-  if (parent && descend_to_parent)
-  {
-    parent->switchNode(new_node,old_node,false);
-    for (unsigned int i=0; i<parent->edge_neighbors.size(); ++i)
-    {
-      for (unsigned int j=0; j<parent->edge_neighbors[i].size(); ++j)
-      {
-        if (parent->edge_neighbors[i][j])
-        {
-          element_t* edge_neighbor = parent->edge_neighbors[i][j];
-          for (unsigned int k=0; k<edge_neighbor->children.size(); ++k)
-          {
-            edge_neighbor->children[k]->switchNode(new_node,old_node,false);
-          }
-        }
-      }
-    }
-  }
-}
-
-void
-CutElemMesh::element_t::switchEmbeddedNode(EFAnode *new_emb_node,
-                                           EFAnode *old_emb_node)
-{
-  for (unsigned int i=0; i<num_edges; ++i)
-    edges[i]->switchNode(new_emb_node, old_emb_node);
-  for (unsigned int i = 0; i < interior_nodes.size(); ++i)
-    interior_nodes[i]->switchNode(new_emb_node, old_emb_node);
-  for (unsigned int i=0; i<fragments.size(); ++i)
-    fragments[i]->switchNode(new_emb_node, old_emb_node);
-}
-
-unsigned int
-CutElemMesh::element_t::id() const
-{
-  return _id;
-}
-
-bool
-CutElemMesh::element_t::is_partial()
-{
-  bool partial = false;
-  if (fragments.size() > 0)
-  {
-    for (unsigned int i = 0; i < num_nodes; ++i)
-    {
-      bool node_in_frag = false;
-      for (unsigned int j = 0; j < fragments.size(); ++j)
-      {
-        if (fragments[j]->containsNode(nodes[i]))
-        {
-          node_in_frag = true;
-          break;
-        }
-      } // j
-      if (!node_in_frag)
-      {
-        partial = true;
-        break;
-      }
-    } // i
-  }
-  return partial;
-}
-
-bool
-CutElemMesh::element_t::overlays_elem(element_t* other_elem)
-{
-  bool overlays = false;
-  //Find common nodes
-  std::set<EFAnode*> e1nodes(nodes.begin(), nodes.end());
-  std::set<EFAnode*> e2nodes(other_elem->nodes.begin(), other_elem->nodes.end());
-  std::vector<EFAnode*> common_nodes;
-  std::set_intersection(e1nodes.begin(), e1nodes.end(),
-                        e2nodes.begin(), e2nodes.end(),
-                        std::inserter(common_nodes,common_nodes.end()));
-
-  //Find indices of common nodes
-  if (common_nodes.size() == 2)
-  {
-    std::vector<EFAnode*> common_nodes_vec(common_nodes.begin(),common_nodes.end());
-
-    unsigned int e1n1idx = num_nodes+1;
-    unsigned int e1n2idx = num_nodes+1;
-    for (unsigned int i=0; i<num_nodes; ++i)
-    {
-      if (nodes[i] == common_nodes_vec[0])
-      {
-        e1n1idx = i;
-      }
-      else if (nodes[i] == common_nodes_vec[1])
-      {
-        e1n2idx = i;
-      }
-    }
-    if (e1n1idx > num_nodes || e1n2idx > num_nodes)
-      CutElemMeshError("in overlays_elem() couldn't find common node")
-
-    bool e1ascend = false;
-    unsigned int e1n1idx_plus1(e1n1idx<(num_nodes-1) ? e1n1idx+1 : 0);
-    unsigned int e1n1idx_minus1(e1n1idx>0 ? e1n1idx-1 : num_nodes-1);
-    if (e1n2idx == e1n1idx_plus1)
-    {
-      e1ascend = true;
-    }
-    else
-    {
-      if (e1n2idx != e1n1idx_minus1)
-        CutElemMeshError("in overlays_elem() common nodes must be adjacent to each other")
-    }
-
-    unsigned int e2n1idx = other_elem->num_nodes+1;
-    unsigned int e2n2idx = other_elem->num_nodes+1;
-    for (unsigned int i=0; i<other_elem->num_nodes; ++i)
-    {
-      if (other_elem->nodes[i] == common_nodes_vec[0])
-      {
-        e2n1idx = i;
-      }
-      else if (other_elem->nodes[i] == common_nodes_vec[1])
-      {
-        e2n2idx = i;
-      }
-    }
-    if (e2n1idx > other_elem->num_nodes || e2n2idx > other_elem->num_nodes)
-      CutElemMeshError("in overlays_elem() couldn't find common node")
-
-    bool e2ascend = false;
-    unsigned int e2n1idx_plus1(e2n1idx<(num_nodes-1) ? e2n1idx+1 : 0);
-    unsigned int e2n1idx_minus1(e2n1idx>0 ? e2n1idx-1 : num_nodes-1);
-    if (e2n2idx == e2n1idx_plus1)
-    {
-      e2ascend = true;
-    }
-    else
-    {
-      if (e2n2idx != e2n1idx_minus1)
-        CutElemMeshError("in overlays_elem() common nodes must be adjacent to each other")
-    }
-
-    //if indices both ascend or descend, they overlay
-    if ((e1ascend && e2ascend) ||
-        (!e1ascend && !e2ascend))
-    {
-      overlays = true;
-    }
-  }
-  else if (common_nodes.size() > 2)
-  {
-    //TODO: We probably need more error checking here.
-    overlays = true;
-  }
-  return overlays;
-}
-
-bool
-CutElemMesh::element_t::overlays_elem(EFAnode* other_edge_node1, EFAnode* other_edge_node2)
-{
-  bool overlays = false;
-  bool found_common_edge = false;
-  for (unsigned int edge_iter = 0; edge_iter < num_edges; ++edge_iter)
-  {
-    if (nodes[edge_iter] == other_edge_node1)
-    {
-      unsigned int edge_iter_plus1(edge_iter<(num_edges-1) ? edge_iter+1 : 0);
-      if (nodes[edge_iter_plus1] == other_edge_node2)
-      {
-        overlays = true;
-      }
-      else
-      {
-        unsigned int edge_iter_minus1(edge_iter>0 ? edge_iter-1 : num_edges-1);
-        if (nodes[edge_iter_minus1] != other_edge_node2)
-          CutElemMeshError("in overlays_elem() element does not have an edge that contains the provided nodes")
-      }
-      found_common_edge = true;
-      break;
-    }
-  }
-  if (!found_common_edge)
-    CutElemMeshError("in overlays_elem() element does not have an edge that contains the provided nodes")
-
-  return overlays;
-}
-
-unsigned int
-CutElemMesh::element_t::get_neighbor_index(element_t * neighbor_elem)
-{
-  for (unsigned int i=0; i<num_edges; ++i)
-  {
-    for (unsigned int j=0; j<edge_neighbors[i].size(); ++j)
-    {
-      if (edge_neighbors[i][j] == neighbor_elem)
-        return i;
-    }
-  }
-  CutElemMeshError("in get_neighbor_index() element: "<<_id<<" does not have neighbor: "<<neighbor_elem->id())
-}
-
-unsigned int
-CutElemMesh::element_t::get_num_edge_neighbors(unsigned int edge_id)
-{
-  unsigned int num_neighbors = 0;
-  if (edge_neighbors[edge_id][0])
-    num_neighbors = edge_neighbors[edge_id].size();
-  return num_neighbors;
-}
-
-void
-CutElemMesh::element_t::add_crack_tip_neighbor(element_t * neighbor_elem)
-{
-  unsigned int neighbor_index = get_neighbor_index(neighbor_elem);
-  for (unsigned int i=0; i<crack_tip_neighbors.size(); ++i)
-  {
-    if (crack_tip_neighbors[i] == neighbor_index)
-    {
-      CutElemMeshError("in add_crack_tip_neighbor() element: "<<_id
-                       <<" already has a crack tip neighbor set on side: "<<neighbor_index)
-    }
-  }
-  crack_tip_neighbors.push_back(neighbor_index);
-  if (crack_tip_neighbors.size() > 2)
-  {
-    for (unsigned int j=0; j<crack_tip_neighbors.size(); ++j)
-    {
-      std::cout<<"Neighbor: "<<crack_tip_neighbors[j]<<std::endl;
-    }
-    CutElemMeshError("in add_crack_tip_neighbor() element: "
-                     <<_id<<" cannot have more than 2 crack tip neighbors")
-  }
-}
-
-bool
-CutElemMesh::element_t::will_crack_tip_extend(std::vector<unsigned int> &split_neighbors)
-{
-  // N.B. this is called at the beginning of createChildElements
-  bool will_extend = false;
-  if (fragments.size() == 1)
-  {
-    if (crack_tip_split_element)
-    {
-      for (unsigned int i=0; i<crack_tip_neighbors.size(); ++i)
-      {
-        unsigned int neigh_idx = crack_tip_neighbors[i];
-        if (edge_neighbors[neigh_idx].size() != 1)
-        {
-          CutElemMeshError("in will_crack_tip_extend() element: "<<_id<<" has: "
-                           <<edge_neighbors[neigh_idx].size()<<" on edge: "<<neigh_idx)
-        }
-        element_t * neighbor_elem = edge_neighbors[neigh_idx][0];
-        if (neighbor_elem->fragments.size() > 2)
-        {
-          CutElemMeshError("in will_crack_tip_extend() element: "<<neighbor_elem->id()<<" has: "
-                           <<neighbor_elem->fragments.size()<<" fragments")
-        }
-        else if (neighbor_elem->fragments.size() == 2)
-        {
-          will_extend = true;
-          split_neighbors.push_back(neigh_idx);
-        }
-      }
-    }
-  }
-  return will_extend;
-}
-
-void
-CutElemMesh::element_t::get_nodes_on_edge(unsigned int edge_idx,
-                                          std::vector<EFAnode*> &edge_nodes)
-{
-  edge_nodes.push_back(edges[edge_idx]->get_node(0));
-  edge_nodes.push_back(edges[edge_idx]->get_node(1));
-}
-
-void
-CutElemMesh::element_t::get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes)
-{
-  //Any nodes that don't belong to any fragment are non-physical
-  //First add all nodes in the element to the set
-  for (unsigned int i=0; i<nodes.size(); ++i)
-    non_physical_nodes.insert(nodes[i]);
-
-  //Now delete any nodes that are contained in fragments
-  std::set<EFAnode*>::iterator sit;
-  for (sit=non_physical_nodes.begin(); sit != non_physical_nodes.end(); ++sit)
-  {
-    for (unsigned int i=0; i<fragments.size(); ++i)
-    {
-      if (fragments[i]->containsNode(*sit))
-      {
-        non_physical_nodes.erase(sit);
-        break;
-      }
-    }
-  }
-}
-
-bool
-CutElemMesh::element_t::shouldDuplicateCrackTipSplitElem()
-{
-  bool should_duplicate = false;
-  if (fragments.size() == 1)
-  {
-    std::vector<unsigned int> split_neighbors;
-    if (will_crack_tip_extend(split_neighbors))
-      should_duplicate = true;
-    else
-    {
-      //The element may not be at the crack tip, but could have a non-physical node
-      //connected to a crack tip face (on a neighbor element) that will be split.  We need to 
-      //duplicate in that case as well.
-
-      //Get the set of nodes in neighboring elements that are on a crack tip face that will be split
-      std::set<EFAnode*> crack_tip_face_nodes;
-      for (unsigned int i=0; i<edge_neighbors.size(); ++i)
-      {
-        for (unsigned int j=0; j<edge_neighbors[i].size(); ++j)
-        {
-          if (edge_neighbors[i][j])
-          {
-            std::vector<unsigned int> neighbor_split_neighbors;
-            if (edge_neighbors[i][j]->will_crack_tip_extend(neighbor_split_neighbors))
-            {
-              for (unsigned int k=0; k<neighbor_split_neighbors.size(); ++k)
-              {
-                //Get the nodes on the crack tip edge
-                std::vector<EFAnode*> edge_nodes;
-                edge_neighbors[i][j]->get_nodes_on_edge(neighbor_split_neighbors[k],edge_nodes);
-                for (unsigned int l=0; l<edge_nodes.size(); ++l)
-                {
-                  crack_tip_face_nodes.insert(edge_nodes[l]);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      //See if any of those nodes are in the non-physical part of this element.
-      //Create a set of all non-physical elements
-      std::set<EFAnode*> non_physical_nodes;
-      get_non_physical_nodes(non_physical_nodes);
-      if (num_common_elems(crack_tip_face_nodes, non_physical_nodes) > 0)
-        should_duplicate = true;
-    }
-  }
-  return should_duplicate;
-}
-
-bool
-CutElemMesh::element_t::shouldDuplicateForPhantomCorner()
-{
-  // if a partial element will be split for a second time and it has two neighbor elements
-  // sharing one phantom node with the aforementioned partial element, then the two neighbor 
-  // elements should be duplicated
-  bool should_duplicate = false;
-  if (fragments.size() == 1 && (!crack_tip_split_element))
-  {
-    for (unsigned int i = 0; i < num_edges; ++i)
-    {
-      std::set<EFAnode*> phantom_nodes = getPhantomNodeOnEdge(i);
-      if (phantom_nodes.size() > 0 && get_num_edge_neighbors(i) == 1)
-      {
-        element_t * neighbor_elem = edge_neighbors[i][0];
-        if (neighbor_elem->fragments.size() > 1) // neighbor will be split
-        {
-          for (unsigned int j = 0; j < neighbor_elem->num_edges; ++j)
-          {
-            if (!neighbor_elem->edges[j]->isOverlapping(*edges[i]) &&
-                neighbor_elem->get_num_edge_neighbors(j) > 0)
-            {
-              std::set<EFAnode*> neigh_phantom_nodes = neighbor_elem->getPhantomNodeOnEdge(j);
-              if (num_common_elems(phantom_nodes, neigh_phantom_nodes) > 0)
-              {
-                should_duplicate = true;
-                break;
-              }
-            }
-          } // j
-        }
-      }
-      if (should_duplicate) break;
-    } // i
-  }
-  return should_duplicate;
-}
-
-std::set<EFAnode*>
-CutElemMesh::element_t::getPhantomNodeOnEdge(unsigned int edge_id)
-{
-  std::set<EFAnode*> phantom_nodes;
-  if (fragments.size() > 0)
-  {
-    for (unsigned int j = 0; j < 2; ++j) // loop ove 2 edge nodes
-    {
-      bool node_in_frag = false;
-      for (unsigned int k = 0; k < fragments.size(); ++k)
-      {
-        if (fragments[k]->containsNode(edges[edge_id]->get_node(j)))
-        {
-          node_in_frag = true;
-          break;
-        }
-      }
-      if (!node_in_frag)
-        phantom_nodes.insert(edges[edge_id]->get_node(j));
-    } // j
-  }
-  return phantom_nodes;
-}
-
-EFAnode *
-CutElemMesh::element_t::create_local_node_from_global_node(const EFAnode * global_node) const
-{
-  if (global_node->category() != N_CATEGORY_PERMANENT &&
-      global_node->category() != N_CATEGORY_TEMP)
-    CutElemMeshError("In create_local_node_from_global_node node is not global")
-
-  EFAnode * new_local_node = NULL;
-  unsigned int inode = 0;
-  for (; inode < nodes.size(); ++inode)
-  {
-    if (nodes[inode] == global_node)
-    {
-      new_local_node = new EFAnode(inode, N_CATEGORY_LOCAL_INDEX);
-      break;
-    }
-  }
-  if (!new_local_node)
-    CutElemMeshError("In create_local_node_from_global_node could not find global node")
-
-  return new_local_node;
-}
-
-EFAnode *
-CutElemMesh::element_t::get_global_node_from_local_node(const EFAnode * local_node) const
-{
-  if (local_node->category() != N_CATEGORY_LOCAL_INDEX)
-    CutElemMeshError("In get_global_node_from_local_node node passed in is not local")
-
-  EFAnode * global_node = nodes[local_node->id()];
-
-  if (global_node->category() != N_CATEGORY_PERMANENT &&
-      global_node->category() != N_CATEGORY_TEMP)
-    CutElemMeshError("In get_global_node_from_local_node, the node stored by the element is not global")
-
-  return global_node;
-}
-
-void
-CutElemMesh::element_t::getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
-                                      std::vector<double> &master_weights) const
-{
-  master_nodes.clear();
-  master_weights.clear();
-  bool masters_found = false;
-  for (unsigned int i = 0; i < num_edges; ++i) // check element exterior edges
-  {
-    if (edges[i]->containsNode(node))
-    {
-      masters_found = edges[i]->getNodeMasters(node,master_nodes,master_weights);
-      if (masters_found)
-        break;
-      else
-        CutElemMeshError("In getMasterInfo: cannot find master nodes in element edges")
-    }
-  }
-
-  if (!masters_found) // check element interior embedded nodes
-  {
-    for (unsigned int i = 0; i < interior_nodes.size(); ++i)
-    {
-      if (interior_nodes[i]->get_node() == node)
-      {
-        double node_xi[4][2] = {{-1.0,-1.0},{1.0,-1.0},{1.0,1.0},{-1.0,1.0}};
-        double emb_xi  = interior_nodes[i]->get_para_coords(0);
-        double emb_eta = interior_nodes[i]->get_para_coords(1);
-        for (unsigned int j = 0; j < num_nodes; ++j)
-        {
-          master_nodes.push_back(nodes[j]);
-          double weight = 0.0;
-          if (num_nodes == 4)
-            weight = 0.25*(1+node_xi[j][0]*emb_xi)*(1+node_xi[j][1]*emb_eta);
-          else
-            CutElemMeshError("getMasterInfo only works for quad element now")
-          master_weights.push_back(weight);
-        }
-        masters_found = true;
-        break;
-      }
-    }
-  }
-
-  if (!masters_found)
-    CutElemMeshError("In element_t::getMaterInfo, cannot find the given EFAnode")
-}
-
-unsigned int
-CutElemMesh::element_t::getLocalNodeIndex(EFAnode * node) const
-{
-  unsigned int local_node_id = 99999;
-  for (unsigned int i = 0; i < num_nodes; ++i)
-  {
-    if (nodes[i] == node)
-    {
-      local_node_id = i;
-      break;
-    }
-  }
-  if (local_node_id == 99999)
-    CutElemMeshError("In element_t::getLocalNodeIndex, cannot find the given node")
-  return local_node_id;
-}
-
-bool
-CutElemMesh::element_t::getFragmentEdgeID(unsigned int elem_edge_id, unsigned int &frag_id, 
-                                          unsigned int &frag_edge_id)
-{
-  // find the fragment edge that coincides with the given element edge
-  bool frag_edge_found = false;
-  frag_id = 99999;
-  frag_edge_id = 99999;
-  if (fragments.size() > 0)
-  {
-    for (unsigned int i = 0; i < fragments.size(); ++i)
-    {
-      for (unsigned int j = 0; j < fragments[i]->boundary_edges.size(); ++j)
-      {
-        if (edges[elem_edge_id]->isOverlapping(*fragments[i]->boundary_edges[j]))
-        {
-          frag_id = i;
-          frag_edge_id = j;
-          frag_edge_found = true;
-          break;
-        }
-      }
-      if (frag_edge_found) break;
-    }
-  }
-  return frag_edge_found;
-}
-
-bool
-CutElemMesh::element_t::is_edge_phantom(unsigned int edge_id)
-{
-  bool is_phantom = false;
-  if (fragments.size() > 0)
-  {
-    if (fragments.size() != 1)
-      CutElemMeshError("in is_edge_phantom() an element has more than 1 fragment")
-    EFAnode * edge_node1 = edges[edge_id]->get_node(0);
-    EFAnode * edge_node2 = edges[edge_id]->get_node(1);
-    if ((!fragments[0]->containsNode(edge_node1)) &&
-        (!fragments[0]->containsNode(edge_node2)))
-      is_phantom =true;
-  }
-  return is_phantom;
-}
-
-bool
-CutElemMesh::element_t::frag_has_tip_edges()
-{
-  bool has_tip_edges = false;
-  if (fragments.size() == 1)
-  {
-    for (unsigned int i = 0; i < num_edges; ++i)
-    {
-      unsigned int num_frag_edges = 0; // count how many fragment edges this element edge contains
-      if (edges[i]->has_intersection())
-      {
-        for (unsigned int j = 0; j < fragments[0]->boundary_edges.size(); ++j)
-        {
-          if (edges[i]->containsEdge(*fragments[0]->boundary_edges[j]))
-            num_frag_edges += 1;
-        } // j
-        if (num_frag_edges == 2)
-        {
-          has_tip_edges = true;
-          break;
-        }
-      }
-    } // i
-  }
-  return has_tip_edges;
-}
-
-unsigned int
-CutElemMesh::element_t::get_tip_edge_id()
-{
-  // if this element is a crack tip element, returns the crack tip edge's ID
-  unsigned int tip_edge_id = 99999;
-  if (fragments.size() > 0) // crack tip element with a partial fragment saved
-  {
-    for (unsigned int i = 0; i < num_edges; ++i)
-    {
-      unsigned int num_frag_edges = 0; // count how many fragment edges this element edge contains
-      if (edges[i]->has_intersection())
-      {
-        for (unsigned int j = 0; j < fragments[0]->boundary_edges.size(); ++j)
-        {
-          if (edges[i]->containsEdge(*fragments[0]->boundary_edges[j]))
-            num_frag_edges += 1;
-        } // j
-        if (num_frag_edges == 2) // element edge contains two fragment edges
-        {
-          tip_edge_id = i;
-          break;
-        }
-      }
-    } // i
-  }
-  else // crack tip element with no fragment saved
-  {
-    if (get_num_cuts() == 1)
-    {
-      for (unsigned int i = 0; i < num_edges; ++i)
-      {
-        if (edges[i]->has_intersection())
-        {
-          tip_edge_id = i;
-          break;
-        }
-      }
-    }
-  }
-  return tip_edge_id;
-}
-
-bool
-CutElemMesh::element_t::getEmbeddedNodeParaCoor(EFAnode* embedded_node, std::vector<double> &para_coor)
-{
-  unsigned int edge_id = 99999;
-  bool edge_found = false;
-  for (unsigned int i = 0; i < num_edges; ++i)
-  {
-    if (edges[i]->get_embedded_node() == embedded_node)
-    {
-      edge_id = i;
-      edge_found = true;
-      break;
-    }
-  }
-  if (edge_found)
-  {
-    EFAnode* edge_node1 = edges[edge_id]->get_node(0);
-    double xi_1d = 2.0*edges[edge_id]->get_intersection(edge_node1) -1.0;
-    mapParaCoorFrom1Dto2D(edge_id, xi_1d, para_coor);
-  }
-  return edge_found;
-}
-
-unsigned int
-CutElemMesh::element_t::getNumInteriorNodes()
-{
-  return interior_nodes.size();
-}
-
-unsigned int
-CutElemMesh::element_t::get_num_cuts()
-{
-  unsigned int num_cuts = 0;
-  for (unsigned int i = 0; i < num_edges; ++i)
-    if (edges[i]->has_intersection())
-      num_cuts += 1;
-  return num_cuts;
-}
-
-bool
-CutElemMesh::element_t::is_cut_twice()
-{
-  bool cut_twice = false;
-  if (fragments.size() > 0)
-  {
-    unsigned int num_interior_edges = 0;
-    for (unsigned int i = 0; i < fragments[0]->boundary_edges.size(); ++i)
-    {
-      if (fragments[0]->boundary_edges[i]->is_interior_edge())
-        num_interior_edges += 1;
-    }
-    if (num_interior_edges == 2)
-      cut_twice = true;
-  }
-  return cut_twice;
-}
-
-void
-CutElemMesh::element_t::display_nodes()
-{
-  std::cout << "***** display nodes for element " << _id << " *****" << std::endl;
-  for (unsigned int i = 0; i < num_nodes; ++i)
-    std::cout << "addr " << nodes[i] << ", ID " << nodes[i]->id() << ", category " << nodes[i]->category() << std::endl;
-}
-
-void
-CutElemMesh::element_t::mapParaCoorFrom1Dto2D(unsigned int edge_id, double xi_1d, std::vector<double> &para_coor)
-{
-  para_coor.resize(2,0.0);
-  if (num_edges == 4)
-  {
-    if(edge_id == 0)
-    {
-      para_coor[0] = xi_1d;
-      para_coor[1] = -1.0;
-    }
-    else if(edge_id == 1)
-    {
-      para_coor[0] = 1.0;
-      para_coor[1] = xi_1d;
-    }
-    else if(edge_id == 2)
-    {
-      para_coor[0] = -xi_1d;
-      para_coor[1] = 1.0;
-    }
-    else if(edge_id == 3)
-    {
-      para_coor[0] = -1.0;
-      para_coor[1] = -xi_1d;
-    }
-    else
-      CutElemMeshError("edge_id out of bounds")
-  }
-  else
-    CutElemMeshError("mapParaCoorFram1Dto2D only for quad element only")
-}
-
 CutElemMesh::CutElemMesh()
 {}
 
@@ -1479,7 +53,7 @@ CutElemMesh::~CutElemMesh()
     delete mit->second;
     mit->second = NULL;
   }
-  std::map<unsigned int, element_t*>::iterator eit;
+  std::map<unsigned int, EFAelement*>::iterator eit;
   for (eit = Elements.begin(); eit != Elements.end(); ++eit )
   {
     delete eit->second;
@@ -1522,7 +96,7 @@ unsigned int CutElemMesh::addElements( std::vector< std::vector<unsigned int> > 
 
   for(unsigned int i = 0; i < quads.size(); ++i) {
     unsigned int new_elem_id = getNewID(Elements);
-    element_t* newElem = new element_t(new_elem_id);
+    EFAelement* newElem = new EFAelement(new_elem_id);
     Elements.insert(std::make_pair(new_elem_id,newElem));
 
     if (i == 0)
@@ -1545,15 +119,15 @@ unsigned int CutElemMesh::addElements( std::vector< std::vector<unsigned int> > 
   return first_id;
 }
 
-CutElemMesh::element_t* CutElemMesh::addElement( std::vector<unsigned int> quad, unsigned int id )
+EFAelement* CutElemMesh::addElement( std::vector<unsigned int> quad, unsigned int id )
 {
   unsigned int num_nodes = 4;
 
-  std::map<unsigned int, element_t*>::iterator mit = Elements.find(id);
+  std::map<unsigned int, EFAelement*>::iterator mit = Elements.find(id);
   if (mit != Elements.end())
     CutElemMeshError("In addElement element with id: "<<id<<" already exists")
 
-  element_t* newElem = new element_t(id);
+  EFAelement* newElem = new EFAelement(id);
   Elements.insert(std::make_pair(id,newElem));
 
   for (unsigned int j=0; j != num_nodes; j++) {
@@ -1574,33 +148,33 @@ CutElemMesh::element_t* CutElemMesh::addElement( std::vector<unsigned int> quad,
 
 void CutElemMesh::updateEdgeNeighbors()
 {
-  std::map<unsigned int, element_t*>::iterator eit;
+  std::map<unsigned int, EFAelement*>::iterator eit;
   for (eit = Elements.begin(); eit != Elements.end(); ++eit)
   {
-    element_t* elem = eit->second;
+    EFAelement* elem = eit->second;
     for (unsigned int edge_iter = 0; edge_iter < elem->num_edges; ++edge_iter)
     {
-      elem->edge_neighbors[edge_iter] = std::vector<element_t*>(1,NULL);
+      elem->edge_neighbors[edge_iter] = std::vector<EFAelement*>(1,NULL);
     }
   }
   for (eit = Elements.begin(); eit != Elements.end(); ++eit)
   {
-    element_t* curr_elem = eit->second;
+    EFAelement* curr_elem = eit->second;
     std::vector<EFAnode*> nodes;
 
-    std::set<element_t*> neighbor_elements;
+    std::set<EFAelement*> neighbor_elements;
     for (unsigned int inode=0; inode<curr_elem->num_nodes; ++inode)
     {
-      std::set<element_t*> this_node_connected_elems = InverseConnectivityMap[curr_elem->nodes[inode]];
+      std::set<EFAelement*> this_node_connected_elems = InverseConnectivityMap[curr_elem->nodes[inode]];
       neighbor_elements.insert(this_node_connected_elems.begin(), this_node_connected_elems.end());
     }
 
-    std::set<element_t*>::iterator eit2;
+    std::set<EFAelement*>::iterator eit2;
     for (eit2 = neighbor_elements.begin(); eit2 != neighbor_elements.end(); ++eit2)
     {
       if (*eit2 != curr_elem)
       {
-        element_t *neigh_elem = *eit2;
+        EFAelement *neigh_elem = *eit2;
         std::vector<EFAnode*> common_nodes;
 
         std::set<EFAnode*> curr_elem_nodes;
@@ -1688,12 +262,12 @@ void CutElemMesh::updateEdgeNeighbors()
   //Sanity check:
   for (eit = Elements.begin(); eit != Elements.end(); ++eit)
   {
-    element_t *curr_elem = eit->second;
+    EFAelement *curr_elem = eit->second;
     for (unsigned int edge_iter = 0; edge_iter < curr_elem->num_edges; ++edge_iter)
     {
       for (unsigned int en_iter = 0; en_iter < curr_elem->edge_neighbors[edge_iter].size(); ++en_iter)
       {
-        element_t* neigh_elem = curr_elem->edge_neighbors[edge_iter][en_iter];
+        EFAelement* neigh_elem = curr_elem->edge_neighbors[edge_iter][en_iter];
         if (neigh_elem != NULL)
         {
           bool found_neighbor = false;
@@ -1725,14 +299,14 @@ void CutElemMesh::updateEdgeNeighbors()
 void CutElemMesh::initCrackTipTopology()
 {
   CrackTipElements.clear(); // re-build CrackTipElements!
-  std::map<unsigned int, element_t*>::iterator eit;
+  std::map<unsigned int, EFAelement*>::iterator eit;
   for (eit = Elements.begin(); eit != Elements.end(); ++eit)
   {
-    element_t *curr_elem = eit->second;
+    EFAelement *curr_elem = eit->second;
     unsigned int num_edges = curr_elem->num_edges;
     for (unsigned int edge_iter = 0; edge_iter < num_edges; ++edge_iter)
     {
-      std::vector<element_t*> &edge_neighbors = curr_elem->edge_neighbors[edge_iter];
+      std::vector<EFAelement*> &edge_neighbors = curr_elem->edge_neighbors[edge_iter];
       if ((edge_neighbors.size() == 2) &&
           (curr_elem->edges[edge_iter]->has_intersection()))
       {
@@ -1771,15 +345,15 @@ void CutElemMesh::initCrackTipTopology()
 
 void CutElemMesh::addEdgeIntersection(unsigned int elemid, unsigned int edgeid, double position)
 {
-  std::map<unsigned int, element_t*>::iterator eit = Elements.find(elemid);
+  std::map<unsigned int, EFAelement*>::iterator eit = Elements.find(elemid);
   if (eit == Elements.end())
     CutElemMeshError("Could not find element with id: "<<elemid<<" in addEdgeIntersection")
 
-  element_t *curr_elem = eit->second;
+  EFAelement *curr_elem = eit->second;
   addEdgeIntersection( curr_elem, edgeid, position );
 }
 
-void CutElemMesh::addEdgeIntersection(element_t * elem, unsigned int edgeid, double position, EFAnode * embedded_node)
+void CutElemMesh::addEdgeIntersection(EFAelement * elem, unsigned int edgeid, double position, EFAnode * embedded_node)
 {
 
   EFAnode* local_embedded_node = NULL;
@@ -1819,7 +393,7 @@ void CutElemMesh::addEdgeIntersection(element_t * elem, unsigned int edgeid, dou
 
   for (unsigned int en_iter = 0; en_iter < elem->edge_neighbors[edgeid].size(); ++en_iter)
   {
-    element_t *edge_neighbor = elem->edge_neighbors[edgeid][en_iter];
+    EFAelement *edge_neighbor = elem->edge_neighbors[edgeid][en_iter];
     if (edge_neighbor)
     {
       unsigned int num_edges_neigh = edge_neighbor->num_edges;
@@ -1865,10 +439,10 @@ void CutElemMesh::addEdgeIntersection(element_t * elem, unsigned int edgeid, dou
 void CutElemMesh::addFragEdgeIntersection(unsigned int elemid, unsigned int frag_edge_id, double position)
 {
   // N.B. this method must be called after addEdgeIntersection
-  std::map<unsigned int, element_t*>::iterator eit = Elements.find(elemid);
+  std::map<unsigned int, EFAelement*>::iterator eit = Elements.find(elemid);
   if (eit == Elements.end())
     CutElemMeshError("Could not find element with id: "<<elemid<<" in addFragEdgeIntersection")
-  element_t *elem = eit->second;
+  EFAelement *elem = eit->second;
 
   if (elem->fragments.size() != 1)
     CutElemMeshError("Element: "<<elemid<<" should have only 1 fragment in addFragEdgeIntersection")
@@ -1904,7 +478,7 @@ void CutElemMesh::addFragEdgeIntersection(unsigned int elemid, unsigned int frag
       EmbeddedNodes.insert(std::make_pair(new_node_id,local_embedded_node));
       elem->fragments[0]->boundary_edges[frag_edge_id]->add_intersection(position, local_embedded_node, edge_node1);
       
-      //save this interior embedded node to faceNodes
+      //save this interior embedded node to FaceNodes
       std::vector<double> node1_para_coor(2,0.0);
       std::vector<double> node2_para_coor(2,0.0);
       if (elem->getEmbeddedNodeParaCoor(edge_node1, node1_para_coor) &&
@@ -1912,7 +486,7 @@ void CutElemMesh::addFragEdgeIntersection(unsigned int elemid, unsigned int frag
       {
         double xi  = (1.0-position)*node1_para_coor[0] + position*node2_para_coor[0];
         double eta = (1.0-position)*node1_para_coor[1] + position*node2_para_coor[1];
-        elem->interior_nodes.push_back(new faceNode(local_embedded_node, xi, eta));
+        elem->interior_nodes.push_back(new FaceNode(local_embedded_node, xi, eta));
       }
       else
         CutElemMeshError("elem: "<<elem->id()<<" cannot get the para coords of two end embedded nodes")
@@ -1926,13 +500,13 @@ void CutElemMesh::addFragEdgeIntersection(unsigned int elemid, unsigned int frag
 void CutElemMesh::updatePhysicalLinksAndFragments()
 {
   //loop over the elements in the mesh
-  std::map<unsigned int, element_t*>::iterator eit;
+  std::map<unsigned int, EFAelement*>::iterator eit;
   for (eit = Elements.begin(); eit != Elements.end(); ++eit)
   {
-    element_t *curr_elem = eit->second;
+    EFAelement *curr_elem = eit->second;
 
     // combine the crack-tip edges in a partial fragment to a single intersected edge
-    std::set<element_t*>::iterator sit;
+    std::set<EFAelement*>::iterator sit;
     sit = CrackTipElements.find(curr_elem);
     if (sit != CrackTipElements.end()) // curr_elem is a crack tip element
     {
@@ -1962,7 +536,7 @@ void CutElemMesh::updatePhysicalLinksAndFragments()
     
     // for an element with no fragment, create one fragment identical to the element
     if (curr_elem->fragments.size() == 0)
-        curr_elem->fragments.push_back(new fragment_t(curr_elem, true, curr_elem));
+        curr_elem->fragments.push_back(new EFAfragment(curr_elem, true, curr_elem));
     if (curr_elem->fragments.size() != 1)
       CutElemMeshError("In updatePhysicalLinksAndFragments: element "<<curr_elem->id()<<" must have 1 fragment at this point")
 
@@ -1985,7 +559,7 @@ void CutElemMesh::updatePhysicalLinksAndFragments()
     }
 
     // split one fragment into one or two new fragments
-    std::vector<fragment_t *> new_frags = curr_elem->fragments[0]->split();
+    std::vector<EFAfragment *> new_frags = curr_elem->fragments[0]->split();
     if (new_frags.size() == 1 || new_frags.size() == 2)
     {
       delete curr_elem->fragments[0]; // delete the old fragment
@@ -2000,7 +574,7 @@ void CutElemMesh::updatePhysicalLinksAndFragments()
   } // loop over all elements
 }
 
-void CutElemMesh::physicalLinkAndFragmentSanityCheck(element_t *currElem)
+void CutElemMesh::physicalLinkAndFragmentSanityCheck(EFAelement *currElem)
 {
   unsigned int num_edges = currElem->num_edges;
   std::vector<unsigned int> cut_edges;
@@ -2149,7 +723,7 @@ void CutElemMesh::reset()
     mit->second = NULL;
   }
   TempNodes.clear();
-  std::map<unsigned int, element_t*>::iterator eit;
+  std::map<unsigned int, EFAelement*>::iterator eit;
   for (eit = Elements.begin(); eit != Elements.end(); ++eit )
   {
     delete eit->second;
@@ -2171,10 +745,10 @@ void CutElemMesh::clearAncestry()
   }
   ParentElements.clear();
 
-  std::map<unsigned int, element_t*>::iterator eit;
+  std::map<unsigned int, EFAelement*>::iterator eit;
   for (eit = Elements.begin(); eit != Elements.end(); ++eit )
   {
-    element_t *curr_elem = eit->second;
+    EFAelement *curr_elem = eit->second;
     curr_elem->parent=NULL;
     curr_elem->children.clear();
     for (unsigned int j=0; j != curr_elem->num_nodes; j++)
@@ -2204,31 +778,31 @@ void CutElemMesh::clearAncestry()
   //      to an element -- there shouldn't be any
 }
 
-void CutElemMesh::restoreFragmentInfo(CutElemMesh::element_t * const elem, CutElemMesh::element_t * const from_elem)
+void CutElemMesh::restoreFragmentInfo(EFAelement * const elem, EFAelement * const from_elem)
 {
   // restore fragments
   if (elem->fragments.size() != 0)
     CutElemMeshError("in restoreFragmentInfo elements must not have any pre-existing fragments")
   for (unsigned int i = 0; i < from_elem->fragments.size(); ++i)
-    elem->fragments.push_back(new fragment_t(*from_elem->fragments[i], elem));
+    elem->fragments.push_back(new EFAfragment(*from_elem->fragments[i], elem));
 
   // restore interior nodes
   if (elem->interior_nodes.size() != 0)
     CutElemMeshError("in restoreFragmentInfo elements must not have any pre-exsiting interior nodes")
   for (unsigned int i = 0; i < from_elem->interior_nodes.size(); ++i)
-    elem->interior_nodes.push_back(new faceNode(*from_elem->interior_nodes[i]));
+    elem->interior_nodes.push_back(new FaceNode(*from_elem->interior_nodes[i]));
 
   // replace all local nodes with global nodes
   for (unsigned int i = 0; i < from_elem->num_nodes; ++i)
   {
     if (from_elem->nodes[i]->category() == N_CATEGORY_LOCAL_INDEX)
-      elem->switchNode(elem->nodes[i], from_elem->nodes[i], false); //element_t is not a child of any parent
+      elem->switchNode(elem->nodes[i], from_elem->nodes[i], false); //EFAelement is not a child of any parent
     else
       CutElemMeshError("In restoreFragmentInfo all of from_elem's nodes must be local")
   }
 }
 
-void CutElemMesh::restoreEdgeIntersections(CutElemMesh::element_t * const elem, CutElemMesh::element_t * const from_elem)
+void CutElemMesh::restoreEdgeIntersections(EFAelement * const elem, EFAelement * const from_elem)
 {
   for (unsigned int i = 0; i < elem->num_edges; ++i)
   {
@@ -2244,14 +818,14 @@ void CutElemMesh::restoreEdgeIntersections(CutElemMesh::element_t * const elem, 
 void CutElemMesh::createChildElements()
 {
   //temporary container for new elements -- will be merged with Elements
-  std::map<unsigned int, element_t*> newChildElements;
+  std::map<unsigned int, EFAelement*> newChildElements;
 
   //loop over the original elements in the mesh
-  std::map<unsigned int, element_t*>::iterator eit;
-  std::map<unsigned int, element_t*>::iterator ElementsEnd = Elements.end();
+  std::map<unsigned int, EFAelement*>::iterator eit;
+  std::map<unsigned int, EFAelement*>::iterator ElementsEnd = Elements.end();
   for (eit = Elements.begin(); eit != ElementsEnd; ++eit)
   {
-    element_t *curr_elem = eit->second;
+    EFAelement *curr_elem = eit->second;
     if (curr_elem->children.size() != 0)
       CutElemMeshError("Element cannot have existing children in createChildElements")
 
@@ -2276,7 +850,7 @@ void CutElemMesh::createChildElements()
         {
           new_elem_id = getNewID(newChildElements);
         }
-        element_t* childElem = new element_t(new_elem_id);
+        EFAelement* childElem = new EFAelement(new_elem_id);
         newChildElements.insert(std::make_pair(new_elem_id,childElem));
 
         ChildElements.push_back(childElem);
@@ -2298,14 +872,14 @@ void CutElemMesh::createChildElements()
         }
 
         // get child element's fragments
-        fragment_t * new_frag = new fragment_t(childElem, true, curr_elem, ichild);
+        EFAfragment * new_frag = new EFAfragment(childElem, true, curr_elem, ichild);
         childElem->fragments.push_back(new_frag);
 
         // get child element's edges
         for (unsigned int j=0; j<num_edges; j++)
         {
           unsigned int jplus1(j < (num_edges-1) ? j+1 : 0);
-          edge_t * new_edge = new edge_t(childElem->nodes[j], childElem->nodes[jplus1]);
+          EFAedge * new_edge = new EFAedge(childElem->nodes[j], childElem->nodes[jplus1]);
           if (curr_elem->edges[j]->has_intersection())
           {
             double child_position = curr_elem->edges[j]->get_intersection(curr_elem->nodes[j]);
@@ -2320,7 +894,7 @@ void CutElemMesh::createChildElements()
 
         // inherit old interior nodes
         for (unsigned int j = 0; j < curr_elem->interior_nodes.size(); ++j)
-          childElem->interior_nodes.push_back(new faceNode(*curr_elem->interior_nodes[j]));
+          childElem->interior_nodes.push_back(new FaceNode(*curr_elem->interior_nodes[j]));
       }
     }
     else //num_links == 1 || num_links == 0
@@ -2338,18 +912,18 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
   //now perform the comparison on the children
   for (unsigned int elem_iter = 0; elem_iter < ChildElements.size(); elem_iter++)
   {
-    element_t *childElem = ChildElements[elem_iter];
-    element_t *parentElem = childElem->parent;
+    EFAelement *childElem = ChildElements[elem_iter];
+    EFAelement *parentElem = childElem->parent;
     unsigned int num_edges = childElem->num_edges;
 
     //Gather the neighbor elements and edge ids of the common edges for those neighbors
-    std::vector<std::vector<element_t *> > NeighborElem;
+    std::vector<std::vector<EFAelement *> > NeighborElem;
     std::vector<std::vector<unsigned int> > neighbor_common_edge;
     for (unsigned int j=0; j<num_edges; ++j)
     {
       //loop over the children for the neighbor on this edge
       unsigned int num_edge_neighbors=parentElem->edge_neighbors[j].size();
-      NeighborElem.push_back(std::vector<element_t*> (num_edge_neighbors,NULL));
+      NeighborElem.push_back(std::vector<EFAelement*> (num_edge_neighbors,NULL));
       neighbor_common_edge.push_back(std::vector<unsigned int> (num_edge_neighbors,99999)); //big number to indicate edge not found
 
       for (unsigned int k=0; k<num_edge_neighbors; ++k)
@@ -2398,11 +972,11 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
           {
             for (unsigned int l=0; l < NeighborElem[j][k]->children.size(); l++)
             {
-              element_t *childOfNeighborElem = NeighborElem[j][k]->children[l];
+              EFAelement *childOfNeighborElem = NeighborElem[j][k]->children[l];
 
               //get nodes on this edge of childOfNeighborElem
               std::vector<EFAnode*> childOfNeighborEdgeNodes;
-              edge_t *neighborChildEdge = childOfNeighborElem->edges[neighbor_common_edge[j][k]];
+              EFAedge *neighborChildEdge = childOfNeighborElem->edges[neighbor_common_edge[j][k]];
               childOfNeighborEdgeNodes.push_back(neighborChildEdge->get_node(0));
               childOfNeighborEdgeNodes.push_back(neighborChildEdge->get_node(1));
 
@@ -2441,8 +1015,8 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
             {
               for (unsigned int l=0; l < NeighborElem[j][k]->children.size(); l++)
               {
-                element_t *childOfNeighborElem = NeighborElem[j][k]->children[l];
-                edge_t *neighborChildEdge = childOfNeighborElem->edges[neighbor_common_edge[j][k]];
+                EFAelement *childOfNeighborElem = NeighborElem[j][k]->children[l];
+                EFAedge *neighborChildEdge = childOfNeighborElem->edges[neighbor_common_edge[j][k]];
 
                 if (!neighborChildEdge->has_intersection()) //neighbor edge must NOT have intersection either
                 {
@@ -2511,7 +1085,7 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
       duplicateInteriorEmbeddedNode(childElem);
   } // loop over child elements
 
-  std::vector<element_t*>::iterator vit;
+  std::vector<EFAelement*>::iterator vit;
   for (vit=ChildElements.begin(); vit!=ChildElements.end(); )
   {
     if (*vit==NULL)
@@ -2527,8 +1101,8 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
 
 void CutElemMesh::mergeNodes(EFAnode*  &childNode,
                              EFAnode* &childOfNeighborNode,
-                             element_t* childElem,
-                             element_t* childOfNeighborElem)
+                             EFAelement* childElem,
+                             EFAelement* childOfNeighborElem)
 {
   if (childNode != childOfNeighborNode)
   {
@@ -2638,8 +1212,8 @@ void CutElemMesh::mergeNodes(EFAnode*  &childNode,
 
 void CutElemMesh::addToMergedEdgeMap(EFAnode* node1,
                                      EFAnode* node2,
-                                     element_t* elem1,
-                                     element_t* elem2)
+                                     EFAelement* elem1,
+                                     EFAelement* elem2)
 {
   std::set<EFAnode*> edge_nodes;
   edge_nodes.insert(node1);
@@ -2649,8 +1223,8 @@ void CutElemMesh::addToMergedEdgeMap(EFAnode* node1,
 }
 
 //This version is for cases where there is a neighbor element
-void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
-                                        element_t* neighborElem,
+void CutElemMesh::duplicateEmbeddedNode(EFAelement* currElem,
+                                        EFAelement* neighborElem,
                                         unsigned int edgeID,
                                         unsigned int neighborEdgeID)
 {
@@ -2764,7 +1338,7 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
 }
 
 //This version is for cases when there is no neighbor
-void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
+void CutElemMesh::duplicateEmbeddedNode(EFAelement* currElem,
                                         unsigned int edgeID)
 {
   EFAnode* embeddedNode = currElem->edges[edgeID]->get_embedded_node();
@@ -2809,7 +1383,7 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
   }
 }
 
-void CutElemMesh::duplicateInteriorEmbeddedNode(element_t* currElem)
+void CutElemMesh::duplicateInteriorEmbeddedNode(EFAelement* currElem)
 {
   if (currElem->getNumInteriorNodes() != 1)
     CutElemMeshError("current elem must have 1 interior node")
@@ -2848,7 +1422,7 @@ void CutElemMesh::duplicateInteriorEmbeddedNode(element_t* currElem)
   }
 }
 
-bool CutElemMesh::should_duplicate_for_crack_tip(element_t* currElem)
+bool CutElemMesh::should_duplicate_for_crack_tip(EFAelement* currElem)
 {
   // This method is called in createChildElements()
   // Only duplicate when 
@@ -2857,7 +1431,7 @@ bool CutElemMesh::should_duplicate_for_crack_tip(element_t* currElem)
   // 3) currElem is the neighbor of a to-be-second-split element which has another neighbor
   //    sharing a phantom node with currElem
   bool should_duplicate = false;
-  std::set<element_t*>::iterator sit;
+  std::set<EFAelement*>::iterator sit;
   sit = CrackTipElements.find(currElem);
   if (sit == CrackTipElements.end() && currElem->frag_has_tip_edges() && currElem->is_partial())
     should_duplicate = true;
@@ -2883,7 +1457,7 @@ void CutElemMesh::sanityCheck()
 
 void CutElemMesh::findCrackTipElements()
 {
-  std::set<element_t*>::iterator sit;
+  std::set<EFAelement*>::iterator sit;
   //Delete all elements that were previously flagged as crack tip elements if they have
   //been split (and hence appear in ParentElements).
   for (unsigned int i=0; i<ParentElements.size(); ++i)
@@ -2896,7 +1470,7 @@ void CutElemMesh::findCrackTipElements()
   }
 
   //Debug: print MergedEdgeMap
-  std::map<std::set<EFAnode*>, std::set<element_t*> >::iterator memit;
+  std::map<std::set<EFAnode*>, std::set<EFAelement*> >::iterator memit;
   //std::cout<<"MergedEdgeMap:"<<std::endl;
   //for (memit = MergedEdgeMap.begin(); memit != MergedEdgeMap.end(); ++memit)
   //{
@@ -2923,7 +1497,7 @@ void CutElemMesh::findCrackTipElements()
     }
     else if (memit->second.size() == 3)
     {
-      std::vector< element_t* > this_tip_elems(memit->second.begin(),memit->second.end());
+      std::vector< EFAelement* > this_tip_elems(memit->second.begin(),memit->second.end());
       bool olay01 = this_tip_elems[0]->overlays_elem(this_tip_elems[1]);
       bool olay12 = this_tip_elems[1]->overlays_elem(this_tip_elems[2]);
       bool olay20 = this_tip_elems[2]->overlays_elem(this_tip_elems[0]);
@@ -2995,10 +1569,10 @@ void CutElemMesh::printMesh()
             << std::endl;
   std::cout<<"------------------------------------------------------------"
            <<"--------------------------------------------------"<<std::endl;
-  std::map<unsigned int, element_t*>::iterator eit;
+  std::map<unsigned int, EFAelement*>::iterator eit;
   for (eit = Elements.begin(); eit != Elements.end(); ++eit )
   {
-    element_t* currElem = eit->second;
+    EFAelement* currElem = eit->second;
     std::cout << std::setw(4);
     std::cout << currElem->id() << " | ";
     for (unsigned int j=0; j<currElem->num_nodes; j++)
@@ -3058,9 +1632,9 @@ void CutElemMesh::printMesh()
   }
 }
 
-CutElemMesh::element_t* CutElemMesh::getElemByID(unsigned int id)
+EFAelement* CutElemMesh::getElemByID(unsigned int id)
 {
-  std::map<unsigned int, CutElemMesh::element_t*>::iterator mit = Elements.find(id);
+  std::map<unsigned int, EFAelement*>::iterator mit = Elements.find(id);
   if (mit == Elements.end())
     CutElemMeshError("in getElemByID() could not find element: "<<id)
   return mit->second;
@@ -3070,10 +1644,10 @@ unsigned int
 CutElemMesh::getElemIdByNodes(unsigned int * node_id)
 {
   unsigned int elem_id = 99999;
-  std::map<unsigned int, element_t*>::iterator eit;
+  std::map<unsigned int, EFAelement*>::iterator eit;
   for (eit = Elements.begin(); eit != Elements.end(); ++eit)
   {
-    element_t *curr_elem = eit->second;
+    EFAelement *curr_elem = eit->second;
     unsigned int counter = 0;
     for (unsigned int i = 0; i < curr_elem->num_nodes; ++i)
     {
@@ -3090,16 +1664,8 @@ CutElemMesh::getElemIdByNodes(unsigned int * node_id)
 }
 
 template <class T>
-unsigned int num_common_elems(std::set<T> &v1, std::set<T> &v2)
-{
-  std::vector<T> common_elems;
-  std::set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(),
-                        std::inserter(common_elems, common_elems.end()));
-  return common_elems.size();
-}
-
-template <class T>
-unsigned int num_common_elems(std::set<T> &v1, std::vector<T> &v2)
+unsigned int 
+CutElemMesh::num_common_elems(std::set<T> &v1, std::vector<T> &v2)
 {
   std::vector<T> common_elems;
   std::set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(),

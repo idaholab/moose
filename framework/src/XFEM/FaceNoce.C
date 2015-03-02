@@ -12,51 +12,46 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EFANODE_H
-#define EFANODE_H
+#include "FaceNode.h"
 
-#include <cstddef>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <map>
-#include <set>
-#include <limits>
-#include <algorithm>
-#include <iomanip>
-#include <cmath>
-#include "MooseError.h"
+FaceNode::FaceNode(EFAnode* node, double xi, double eta):
+  _node(node),
+  _xi(xi),
+  _eta(eta)
+{}
 
-#define CutElemMeshError(msg) {std::cout<<"CutElemMesh ERROR: "<<msg<<std::endl; exit(1);}
+FaceNode::FaceNode(const FaceNode & other_face_node):
+  _node(other_face_node._node),
+  _xi(other_face_node._xi),
+  _eta(other_face_node._eta)
+{}
 
-enum N_CATEGORY
+FaceNode::~FaceNode()
+{}
+
+EFAnode *
+FaceNode::get_node()
 {
-  N_CATEGORY_PERMANENT,
-  N_CATEGORY_TEMP,
-  N_CATEGORY_EMBEDDED,
-  N_CATEGORY_LOCAL_INDEX
-};
+  return _node;
+}
 
-class EFAnode
+double
+FaceNode::get_para_coords(unsigned int i)
 {
-public:
+  double coord = -100.0;
+  if (i == 0)
+    coord = _xi;
+  else if (i == 1)
+    coord = _eta;
+  else
+    mooseError("get_para_coords(): input out of bounds");
 
-  EFAnode(unsigned int nid, N_CATEGORY ncat, EFAnode* nparent=NULL);
+  return coord;
+}
 
-private:
-
-  N_CATEGORY _category;
-  unsigned int _id;
-  EFAnode* _parent;
-
-public:
-
-  std::string id_cat_str();
-  unsigned int id() const;
-  N_CATEGORY category() const;
-  EFAnode* parent() const;
-  void remove_parent();
-};
-
-
-#endif
+void
+FaceNode::switchNode(EFAnode* new_node, EFAnode* old_node)
+{
+  if (_node == old_node)
+    _node = new_node;
+}
