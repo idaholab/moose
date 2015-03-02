@@ -1,6 +1,7 @@
 #ifndef DERIVATIVEMATERIALINTERFACE_H
 #define DERIVATIVEMATERIALINTERFACE_H
 
+#include "Material.h"
 #include "MaterialProperty.h"
 #include "FEProblem.h"
 
@@ -63,7 +64,7 @@ public:
    * Fetch a pointer to a material property if it exists, otherwise return null
    */
   template<typename U>
-  MaterialProperty<U> * getMaterialPropertyPointer(const std::string & name);
+  MaterialProperty<U> * getMaterialPropertyPointer(const std::string & name) __attribute__ ((deprecated));
 
   // Interface style (2)
   // return references to a zero material property for non-existing material properties
@@ -169,6 +170,12 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
   // if found return the requested property
   if (this->template hasMaterialProperty<U>(name))
     return this->template getMaterialProperty<U>(name);
+
+  // spit out a warning if this is called from a material
+  // because of lazy property initialization this code path is
+  // construction order dependent!!!
+  if (dynamic_cast<Material*>(this))
+    mooseWarning("Construction order dependent input file. Make sure all materials that declare material properties needed by " << this->_name << " come before this material in the input file.");
 
   // otherwise return a reference to a static zero property
   unsigned int nqp = _dmi_fe_problem.getMaxQps();
