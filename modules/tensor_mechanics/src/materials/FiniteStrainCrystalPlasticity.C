@@ -36,6 +36,7 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   params.addParam<bool>("gen_random_stress_flag", false, "Flag to generate random stress to perform time cutback on constitutive failure");
   params.addParam<bool>("input_random_scaling_var", false, "Flag to input scaling variable: _Cijkl(0,0,0,0) when false");
   params.addParam<Real>("random_scaling_var", 1e9, "Random scaling variable: Large value can cause non-positive definiteness");
+  params.addParam<unsigned int>("random_seed", 2000, "Random integer used to generate random stress when constitutive failure occurs");
 
   return params;
 }
@@ -65,6 +66,7 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
     _gen_rndm_stress_flag(getParam<bool>("gen_random_stress_flag")),
     _input_rndm_scale_var(getParam<bool>("input_random_scaling_var")),
     _rndm_scale_var(getParam<Real>("random_scaling_var")),
+    _rndm_seed(getParam<unsigned int>("random_seed")),
     _fp(declareProperty<RankTwoTensor>("fp")), // Plastic deformation gradient
     _fp_old(declarePropertyOld<RankTwoTensor>("fp")), // Plastic deformation gradient of previous increment
     _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress
@@ -114,7 +116,7 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
 
   getSlipSystems();
 
-  RankTwoTensor::initRandom();
+  RankTwoTensor::initRandom( _rndm_seed );
 
 }
 
@@ -524,7 +526,7 @@ FiniteStrainCrystalPlasticity::postSolveQp()
   if ( _err_tol )
   {
     if ( _gen_rndm_stress_flag )
-    _stress[_qp] = RankTwoTensor::genRandomTensor( _rndm_scale_var );
+      _stress[_qp] = RankTwoTensor::genRandomSymmTensor( _rndm_scale_var, 1.0 );
     else
       mooseError("FiniteStrainCrystalPlasticity: Constitutive failure");
   }

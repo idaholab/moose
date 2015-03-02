@@ -280,6 +280,8 @@ protected:
   ///Scaling value
   Real _rndm_scale_var;
 
+  ///Seed value
+  unsigned int _rndm_seed;
 
   MaterialProperty<RankTwoTensor> & _fp;
   MaterialProperty<RankTwoTensor> & _fp_old;
