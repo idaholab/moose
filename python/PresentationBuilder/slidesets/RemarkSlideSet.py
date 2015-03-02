@@ -143,8 +143,20 @@ class RemarkSlideSet(MooseObject):
     for key, value in kwargs.iteritems():
       params[key] = value
 
-    # Build and store the slide
+    # Build the slide object
     slide = self.__factory.create(self.__slide_type, params)
+
+    # Parse the raw markdown and store it in the slide
+    self._parseSlide(slide, raw)
+    return slide
+
+
+  ##
+  # Method that calls the various parse methods for the slide content (protected)
+  # This also applies settings from the input file, this method exists to
+  # allow parent classes to modify slide settings
+  # @see INLDjangoWikiSet, INLCoverSet, INLMergeSet
+  def _parseSlide(self, slide, raw):
     raw = slide.parse(raw)
     raw = slide.parseImages(raw)
 
@@ -159,12 +171,11 @@ class RemarkSlideSet(MooseObject):
 
     # Store the markdown in the slide and return the slide
     slide.markdown = raw
-    return slide
 
 
   ##
-  # A helper that extracts the contents entries from each of the active slides (private)
-  def __extractContents(self):
+  # A helper that extracts the contents entries from each of the active slides (protected)
+  def _extractContents(self):
 
     contents = []
 
@@ -229,7 +240,7 @@ class RemarkSlideSet(MooseObject):
       return
 
     # Extract the contents entries
-    contents = self.__extractContents()
+    contents = self._extractContents()
 
     # Create the contents slides
     self._createContentsSlides(len(contents))
@@ -245,7 +256,7 @@ class RemarkSlideSet(MooseObject):
       return
 
     # Extract the contents entries
-    contents = self.__extractContents()
+    contents = self._extractContents()
 
     # Build the table-of-contents entries
     max_per_slide = int(self.getParam('contents_items_per_slide'))
