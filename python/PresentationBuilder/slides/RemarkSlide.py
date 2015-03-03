@@ -103,10 +103,8 @@ class RemarkSlide(MooseObject):
 
 
   ##
-  # Parse the markdown
-  #
-  # This method should overloaded to handle special syntax
-  def parse(self, markdown):
+  # Do initial parsing to extract the name of the slide
+  def parseName(self, markdown):
 
     # Remove un-wanted line endings
     markdown = markdown.replace('\r', '')
@@ -124,10 +122,6 @@ class RemarkSlide(MooseObject):
         self.parameters()[key] = value
         markdown = markdown.replace(match.group(1), '')
 
-    # Insert prefix markdown
-    if self.isParamValid('prefix'):
-      markdown = self.getParam('prefix') + '\n' + markdown
-
     # Locate the title of the slide
     match = re.search(r'^\s*(#+)\s+(.*)', markdown, re.MULTILINE)
     if match:
@@ -140,6 +134,19 @@ class RemarkSlide(MooseObject):
     elif not self.isParamValid('name'):
       name = self.parent.name() + '-' + str(self.parent.warehouse().numObjects())
       self.parameters()['name'] = name
+
+    return markdown
+
+
+  ##
+  # Parse the markdown
+  #
+  # This method should overloaded to handle special syntax
+  def parse(self, markdown):
+
+    # Insert prefix markdown
+    if self.isParamValid('prefix'):
+      markdown = self.getParam('prefix') + '\n' + markdown
 
     # Print a message of the slide that is being created
     print ' '*4, 'SLIDE:', self.name()
@@ -196,8 +203,7 @@ class RemarkSlide(MooseObject):
     #
     # Also, for some reason re.sub doesn't like this re, so I am doing it manually
     regex = r'```(.*?)```'
-    markdown = re.sub(regex, self.__subLineHighlight, markdown, re.DOTALL)
-
+    markdown = re.sub(regex, self.__subLineHighlight, markdown, re.DOTALL | re.MULTILINE)
 #    for m in re.finditer(regex, markdown, re.DOTALL | re.MULTILINE):
 #      for line in m.group(1).split('\n'):
 #        if line.strip().startswith('*'):
@@ -227,7 +233,7 @@ class RemarkSlide(MooseObject):
     #print markdown
     #print '-----------------------------------------------'
 
-    # Store the markdown
+    # Return the markdown
     return markdown
 
 
@@ -238,8 +244,7 @@ class RemarkSlide(MooseObject):
     for line in output.split('\n'):
       if line.strip().startswith('*'):
         output = output.replace(line, '*' + line)
-    return output
-
+    return match.group(0)
 
   ##
   # Substitution method for github code

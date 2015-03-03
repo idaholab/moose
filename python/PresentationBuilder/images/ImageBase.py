@@ -15,7 +15,7 @@ class ImageBase(MooseObject):
     params.addParam('download', False, 'Download the image locally')
     params.addPrivateParam('markdown') # The raw markdown source for this image
 
-    params.addParam('div_center', False, 'Wrap html figure in centered div')
+    params.addParam('div_center', True, 'Wrap html figure in centered div')
     params.addParam('align', 'The image horizontal alignment')
     params.addParam('width', 'The image width')
     params.addParam('height', 'The image height')
