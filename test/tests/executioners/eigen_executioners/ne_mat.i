@@ -64,7 +64,6 @@
   type = NonlinearEigen
 
   bx_norm = 'unorm'
-  xdiff = 'udiff'
   normalization = 'unorm'
   normal_factor = 9.990012561844
 
