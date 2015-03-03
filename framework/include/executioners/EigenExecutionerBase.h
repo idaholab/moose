@@ -73,17 +73,15 @@ public:
    * @param pfactor The factor on reducing the residual norm of each power iteration.
    * @param cheb_on To turn the Chebyshev acceleration on.
    * @param tol_eig Tolerance on the difference of the eigenvalue of two successive iterations.
-   * @param tol_x Tolerance on the difference of the solution norm of two successive iterations.
    * @param echo True to make screen printouts.
-   * @param output_convergence True to call MOOSE output system to output iteration history.
-   * @param time_base Used to set time for MOOSE output system.
+   * @param xdiff Name of the postprocessor evaluating the difference of the solution norm of two successive iterations.
+   * @param tol_x Tolerance on the difference of the solution norm of two successive iterations.
    * @param k Eigenvalue, input as the initial guess.
    * @param initial_res The initial residual.
    */
   virtual void inversePowerIteration(unsigned int min_iter, unsigned int max_iter, Real pfactor,
-                                     bool cheb_on, Real tol_eig, Real tol_x, bool echo,
-                                     bool output_convergence, Real time_base,
-                                     Real & k, Real & initial_res);
+                                     bool cheb_on, Real tol_eig, bool echo,
+                                     PostprocessorName xdiff, Real tol_x, Real & k, Real & initial_res);
 
   /**
    * Override this for actions that should take place before linear solve of each inverse power iteration
@@ -134,12 +132,6 @@ protected:
 
   // postprocessor for eigenvalue
   const Real & _source_integral;
-  const Real & _source_integral_old;
-  ExecFlagType _bx_execflag;
-
-  // postprocessor for evaluating |x-xprevious|
-  Real * _solution_diff;
-  ExecFlagType _xdiff_execflag;
 
   // postprocessor for normalization
   Real & _normalization;
@@ -166,7 +158,7 @@ protected:
     unsigned int icho;            // improved ratio estimation
   };
   Chebyshev_Parameters  chebyshev_parameters;
-  void chebyshev(unsigned int iter);
+  void chebyshev(unsigned int iter, const PostprocessorValue * solution_diff);
 };
 
 #endif //EIGENEXECUTIONERBASE_H
