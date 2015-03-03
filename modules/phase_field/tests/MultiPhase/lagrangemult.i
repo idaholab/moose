@@ -201,7 +201,6 @@
     etas     = 'eta1 eta2'
     args = 'c'
     third_derivatives = false
-    outputs = exodus
   [../]
 []
 

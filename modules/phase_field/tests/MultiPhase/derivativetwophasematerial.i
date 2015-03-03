@@ -144,6 +144,7 @@
     eta = eta
     third_derivatives = false
     outputs = exodus
+    output_properties = 'F dF/dc dF/deta d^2F/dc^2 d^2F/dcdeta d^2F/deta^2'
   [../]
 []
 
