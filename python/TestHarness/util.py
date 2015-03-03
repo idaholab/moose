@@ -1,6 +1,7 @@
 import platform, os, re
 from subprocess import *
 from time import strftime, gmtime, ctime, localtime, asctime
+from utils import colorText
 
 TERM_COLS = 110
 
@@ -75,48 +76,49 @@ def printResult(test_name, result, timing, start, end, options, color=True):
   f_result = ''
 
   cnt = (TERM_COLS-2) - len(test_name + result)
+  color_opts = {'code' : options.code, 'colored' : options.colored}
   if color:
     any_match = False
     # Color leading paths
     m = re.search(r'(.*):(.*)', test_name)
     if m:
-      test_name = colorText(m.group(1), options, 'CYAN') + ':' + m.group(2)
+      test_name = colorText(m.group(1), 'CYAN', **color_opts) + ':' + m.group(2)
     # Color the Caveats CYAN
     m = re.search(r'(\[.*?\])', result)
     if m:
       any_match = True
-      f_result += colorText(m.group(1), options, 'CYAN') + " "
+      f_result += colorText(m.group(1), 'CYAN', **color_opts) + " "
     # Color Exodiff or CVSdiff tests YELLOW
     m = re.search('(FAILED \((?:EXODIFF|CSVDIFF)\))', result)
     if m:
       any_match = True
-      f_result += colorText(m.group(1), options, 'YELLOW')
+      f_result += colorText(m.group(1), 'YELLOW', **color_opts)
     else:
       # Color remaining FAILED tests RED
       m = re.search('(FAILED \(.*\))', result)
       if m:
         any_match = True
-        f_result += colorText(m.group(1), options, 'RED')
+        f_result += colorText(m.group(1), 'RED', **color_opts)
     # Color deleted tests RED
     m = re.search('(deleted) (\(.*\))', result)
     if m:
       any_match = True
-      f_result += colorText(m.group(1), options, 'RED') + ' ' + m.group(2)
+      f_result += colorText(m.group(1), 'RED', **color_opts) + ' ' + m.group(2)
     # Color long running tests YELLOW
     m = re.search('(RUNNING\.\.\.)', result)
     if m:
       any_match = True
-      f_result += colorText(m.group(1), options, 'YELLOW')
+      f_result += colorText(m.group(1), 'YELLOW', **color_opts)
     # Color PBS status CYAN
     m = re.search('((?:LAUNCHED|RUNNING(?!\.)|EXITING|QUEUED))', result)
     if m:
       any_match = True
-      f_result += colorText(m.group(1), options, 'CYAN')
+      f_result += colorText(m.group(1), 'CYAN', **color_opts)
     # Color Passed tests GREEN
     m = re.search('(OK|DRY_RUN)', result)
     if m:
       any_match = True
-      f_result += colorText(m.group(1), options, 'GREEN')
+      f_result += colorText(m.group(1), 'GREEN', **color_opts)
 
     if not any_match:
       f_result = result
@@ -136,28 +138,6 @@ def printResult(test_name, result, timing, start, end, options, color=True):
 # it messes up the trac output.
 # supports weirded html for more advanced coloring schemes. \verbatim<r>,<g>,<y>,<b>\endverbatim All colors are bolded.
 
-def colorText(str, options, color, html=False):
-  # ANSI color codes for colored terminal output
-  color_codes = {'RESET':'\033[0m','BOLD':'\033[1m','RED':'\033[31m','GREEN':'\033[35m','CYAN':'\033[34m','YELLOW':'\033[33m','MAGENTA':'\033[32m'}
-  if options.code:
-    color_codes['GREEN'] = '\033[32m'
-    color_codes['CYAN']  = '\033[36m'
-    color_codes['MAGENTA'] = '\033[35m'
-
-  if options.colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
-    if html:
-      str = str.replace('<r>', color_codes['BOLD']+color_codes['RED'])
-      str = str.replace('<c>', color_codes['BOLD']+color_codes['CYAN'])
-      str = str.replace('<g>', color_codes['BOLD']+color_codes['GREEN'])
-      str = str.replace('<y>', color_codes['BOLD']+color_codes['YELLOW'])
-      str = str.replace('<b>', color_codes['BOLD'])
-      str = re.sub(r'</[rcgyb]>', color_codes['RESET'], str)
-    else:
-      str = color_codes[color] + str + color_codes['RESET']
-  elif html:
-    str = re.sub(r'</?[rcgyb]>', '', str)    # strip all "html" tags
-
-  return str
 
 def getPlatforms():
   # We'll use uname to figure this out.  platform.uname() is available on all platforms

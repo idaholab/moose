@@ -1,6 +1,5 @@
 import os, sys
 from FactorySystem import InputParameters
-from ..slidesets import SlideSet
 
 class INLSetInterface():
 
@@ -16,15 +15,11 @@ class INLSetInterface():
     return params
 
   ##
-  # Initialize the contents for the INL presentations
-  # This method should be called after the initContents method of the base class
-  #
-  # @see initContents
-  def initContents(self):
-
-    # If a contents slide exists, set it up for INL presentation style
-    contents_slide_name = self.name() + '-title'
-    if self.warehouse().hasObject(contents_slide_name):
-      contents = self.warehouse().getObject(contents_slide_name)
-      contents.parameters()['background-image'] = 'inl_dark_title.png'
-      contents.parameters()['class'] = 'middle, cover'
+  # Parsing that sets up INL cover design
+  # This method should be called before the _parseSlide method of the base class
+  # @see INLCoverSet, INLDjangoWikiSet, INLMergeCoverSet
+  @staticmethod
+  def applySlideSettings(slide):
+    if slide.name() and slide.name().endswith('title'):
+      slide.parameters()['background-image'] = 'inl_dark_title.png'
+      slide.parameters()['class'] = 'middle, cover'
