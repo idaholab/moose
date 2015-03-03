@@ -143,7 +143,8 @@ void
 Exodus::outputNodalVariables()
 {
   // Set the output variable to the nodal variables
-  _exodus_io_ptr->set_output_variables(getNodalVariableOutput());
+  std::vector<std::string> nodal(getNodalVariableOutput().begin(), getNodalVariableOutput().end());
+  _exodus_io_ptr->set_output_variables(nodal);
 
   // Write the data via libMesh::ExodusII_IO
   _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
@@ -161,7 +162,8 @@ Exodus::outputElementalVariables()
     outputEmptyTimestep();
 
   // Write the elemental data
-  _exodus_io_ptr->set_output_variables(getElementalVariableOutput());
+  std::vector<std::string> elemental(getElementalVariableOutput().begin(), getElementalVariableOutput().end());
+  _exodus_io_ptr->set_output_variables(elemental);
   _exodus_io_ptr->write_element_data(*_es_ptr);
 }
 
@@ -169,11 +171,11 @@ void
 Exodus::outputPostprocessors()
 {
   // List of desired postprocessor outputs
-  const std::vector<std::string> & pps = getPostprocessorOutput();
+  const std::set<std::string> & pps = getPostprocessorOutput();
 
   // Append the postprocessor data to the global name value parameters; scalar outputs
   // also append these member variables
-  for (std::vector<std::string>::const_iterator it = pps.begin(); it != pps.end(); ++it)
+  for (std::set<std::string>::const_iterator it = pps.begin(); it != pps.end(); ++it)
   {
     _global_names.push_back(*it);
     _global_values.push_back(_problem_ptr->getPostprocessorValue(*it));
@@ -184,10 +186,10 @@ void
 Exodus::outputScalarVariables()
 {
   // List of desired scalar outputs
-  const std::vector<std::string> & out = getScalarOutput();
+  const std::set<std::string> & out = getScalarOutput();
 
   // Append the scalar to the global output lists
-  for (std::vector<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  for (std::set<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
   {
     VariableValue & variable = _problem_ptr->getScalarVariable(0, *it).sln();
     unsigned int n = variable.size();

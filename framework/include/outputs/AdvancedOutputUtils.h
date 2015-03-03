@@ -36,16 +36,16 @@
 struct OutputData
 {
   /// A list of all possible outputs
-  std::vector<std::string> available;
+  std::set<std::string> available;
 
   /// User-supplied list of outputs to display
-  std::vector<std::string> show;
+  std::set<std::string> show;
 
   /// User-supplied list of outputs to hide
-  std::vector<std::string> hide;
+  std::set<std::string> hide;
 
   /// A list of the outputs to write
-  std::vector<std::string> output;
+  std::set<std::string> output;
 };
 
 

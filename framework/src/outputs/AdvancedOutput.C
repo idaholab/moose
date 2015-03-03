@@ -25,6 +25,7 @@
 #include "CoupledExecutioner.h"
 #include "VectorPostprocessor.h"
 #include "MooseUtils.h"
+#include "InfixIterator.h"
 
 // A function, only available in this file, for adding the AdvancedOutput parameters. This is
 // used to eliminate code duplication between the difference specializations of the validParams function.
@@ -163,9 +164,9 @@ AdvancedOutput<T>::init()
   {
     OutputData & nodal = _output_data["nodal"];
     OutputData & elemental = _output_data["elemental"];
-    nodal.show.insert(nodal.show.end(), elemental.show.begin(), elemental.show.end());
-    nodal.hide.insert(nodal.hide.end(), elemental.hide.begin(), elemental.hide.end());
-    nodal.available.insert(nodal.available.end(), elemental.available.begin(), elemental.available.end());
+    nodal.show.insert(elemental.show.begin(), elemental.show.end());
+    nodal.hide.insert(elemental.hide.begin(), elemental.hide.end());
+    nodal.available.insert(elemental.available.begin(), elemental.available.end());
   }
 
   // Similarly as above, if 'scalar_as_nodal = true' append the elemental variable lists
@@ -173,9 +174,9 @@ AdvancedOutput<T>::init()
   {
     OutputData & nodal = _output_data["nodal"];
     OutputData & scalar = _output_data["scalars"];
-    nodal.show.insert(nodal.show.end(), scalar.show.begin(), scalar.show.end());
-    nodal.hide.insert(nodal.hide.end(), scalar.hide.begin(), scalar.hide.end());
-    nodal.available.insert(nodal.available.end(), scalar.available.begin(), scalar.available.end());
+    nodal.show.insert(scalar.show.begin(), scalar.show.end());
+    nodal.hide.insert(scalar.hide.begin(), scalar.hide.end());
+    nodal.available.insert(scalar.available.begin(), scalar.available.end());
   }
 
   // Initialize the show/hide/output lists for each of the types of output
@@ -482,13 +483,13 @@ AdvancedOutput<T>::initAvailableLists()
       MooseVariable & var = T::_problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _output_data["elemental"].available.push_back(*it);
+        _output_data["elemental"].available.insert(*it);
       else
-        _output_data["nodal"].available.push_back(*it);
+        _output_data["nodal"].available.insert(*it);
     }
 
     else if (T::_problem_ptr->hasScalarVariable(*it))
-      _output_data["scalars"].available.push_back(*it);
+      _output_data["scalars"].available.insert(*it);
   }
 }
 
@@ -521,7 +522,7 @@ AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, con
 {
 
   // Storage for user-supplied input that is unknown as a variable or postprocessor
-  std::vector<std::string> unknown;
+  std::set<std::string> unknown;
 
   // Populate the show lists
   for (std::vector<VariableName>::const_iterator it = show.begin(); it != show.end(); ++it)
@@ -531,18 +532,18 @@ AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, con
       MooseVariable & var = T::_problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _output_data["elemental"].show.push_back(*it);
+        _output_data["elemental"].show.insert(*it);
       else
-        _output_data["nodal"].show.push_back(*it);
+        _output_data["nodal"].show.insert(*it);
     }
     else if (T::_problem_ptr->hasScalarVariable(*it))
-      _output_data["scalars"].show.push_back(*it);
+      _output_data["scalars"].show.insert(*it);
     else if (T::_problem_ptr->hasPostprocessor(*it))
-      _output_data["postprocessors"].show.push_back(*it);
+      _output_data["postprocessors"].show.insert(*it);
     else if (T::_problem_ptr->hasVectorPostprocessor(*it))
-      _output_data["vector_postprocessors"].show.push_back(*it);
+      _output_data["vector_postprocessors"].show.insert(*it);
     else
-      unknown.push_back(*it);
+      unknown.insert(*it);
   }
 
   // Populate the hide lists
@@ -553,27 +554,26 @@ AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, con
       MooseVariable & var = T::_problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _output_data["elemental"].hide.push_back(*it);
+        _output_data["elemental"].hide.insert(*it);
       else
-        _output_data["nodal"].hide.push_back(*it);
+        _output_data["nodal"].hide.insert(*it);
     }
     else if (T::_problem_ptr->hasScalarVariable(*it))
-      _output_data["scalars"].hide.push_back(*it);
+      _output_data["scalars"].hide.insert(*it);
     else if (T::_problem_ptr->hasPostprocessor(*it))
-      _output_data["postprocessors"].hide.push_back(*it);
+      _output_data["postprocessors"].hide.insert(*it);
     else if (T::_problem_ptr->hasVectorPostprocessor(*it))
-      _output_data["vector_postprocessors"].hide.push_back(*it);
+      _output_data["vector_postprocessors"].hide.insert(*it);
     else
-      unknown.push_back(*it);
+      unknown.insert(*it);
   }
 
   // Error if an unknown variable or postprocessor is found
   if (!unknown.empty())
   {
     std::ostringstream oss;
-    oss << "Output(s) do not exist (must be variable, scalar, postprocessor, or vector postprocessor): " << (*unknown.begin());
-    for (std::vector<std::string>::iterator it = unknown.begin()+1; it != unknown.end();  ++it)
-      oss << ", " << *it;
+    oss << "Output(s) do not exist (must be variable, scalar, postprocessor, or vector postprocessor): ";
+    std::copy(unknown.begin(), unknown.end(), infix_ostream_iterator<std::string>(oss, " "));
     mooseError(oss.str());
   }
 }
@@ -583,50 +583,44 @@ void
 AdvancedOutput<T>::initOutputList(OutputData & data)
 {
   // References to the vectors of variable names
-  std::vector<std::string> & hide  = data.hide;
-  std::vector<std::string> & show  = data.show;
-  std::vector<std::string> & avail = data.available;
-  std::vector<std::string> & output = data.output;
+  std::set<std::string> & hide  = data.hide;
+  std::set<std::string> & show  = data.show;
+  std::set<std::string> & avail = data.available;
+  std::set<std::string> & output = data.output;
 
   // Append the list from OutputInterface objects
   std::set<std::string> interface_hide;
   T::_app.getOutputWarehouse().buildInterfaceHideVariables(T::_name, interface_hide);
-  hide.insert(hide.end(), interface_hide.begin(), interface_hide.end());
-
-  // Sort the vectors
-  std::sort(avail.begin(), avail.end());
-  std::sort(show.begin(), show.end());
-  std::sort(hide.begin(), hide.end());
+  hide.insert(interface_hide.begin(), interface_hide.end());
 
   // Both show and hide are empty (show all available)
   if (show.empty() && hide.empty())
-    output.assign(avail.begin(), avail.end());
+    output = avail;
 
   // Only hide is empty (show all the variables listed)
   else if (!show.empty() && hide.empty())
-    output.assign(show.begin(), show.end());
+    output = show;
 
   // Only show is empty (show all except those hidden)
   else if (show.empty() && !hide.empty())
-    std::set_difference(avail.begin(), avail.end(), hide.begin(), hide.end(), std::back_inserter(output));
+    std::set_difference(avail.begin(), avail.end(), hide.begin(), hide.end(), std::inserter(output, output.begin()));
 
   // Both hide and show are present (show all those listed)
   else
   {
     // Check if variables are in both, which is invalid
     std::vector<std::string> tmp;
-    std::set_intersection(hide.begin(), hide.end(), avail.begin(), avail.end(), std::back_inserter(tmp));
+    std::set_intersection(hide.begin(), hide.end(), avail.begin(), avail.end(), std::inserter(tmp, tmp.begin()));
     if (!tmp.empty())
     {
       std::ostringstream oss;
-      oss << "Output(s) specified to be both shown and hidden: " << (*tmp.begin());
-      for (std::vector<std::string>::iterator it = tmp.begin()+1; it != tmp.end();  ++it)
-        oss << ", " << *it;
+      oss << "Output(s) specified to be both shown and hidden: ";
+      std::copy(tmp.begin(), tmp.end(), infix_ostream_iterator<std::string>(oss, " "));
       mooseError(oss.str());
     }
 
     // Define the output variable list
-    output.assign(show.begin(), show.end());
+    output = show;
   }
 }
 
@@ -700,7 +694,7 @@ AdvancedOutput<T>::hasNodalVariableOutput()
 }
 
 template<class T>
-const std::vector<std::string> &
+const std::set<std::string> &
 AdvancedOutput<T>::getNodalVariableOutput()
 {
   return _output_data["nodal"].output;
@@ -714,7 +708,7 @@ AdvancedOutput<T>::hasElementalVariableOutput()
 }
 
 template<class T>
-const std::vector<std::string> &
+const std::set<std::string> &
 AdvancedOutput<T>::getElementalVariableOutput()
 {
   return _output_data["elemental"].output;
@@ -728,7 +722,7 @@ AdvancedOutput<T>::hasScalarOutput()
 }
 
 template<class T>
-const std::vector<std::string> &
+const std::set<std::string> &
 AdvancedOutput<T>::getScalarOutput()
 {
   return _output_data["scalars"].output;
@@ -742,7 +736,7 @@ AdvancedOutput<T>::hasPostprocessorOutput()
 }
 
 template<class T>
-const std::vector<std::string> &
+const std::set<std::string> &
 AdvancedOutput<T>::getPostprocessorOutput()
 {
   return _output_data["postprocessors"].output;
@@ -756,7 +750,7 @@ AdvancedOutput<T>::hasVectorPostprocessorOutput()
 }
 
 template<class T>
-const std::vector<std::string> &
+const std::set<std::string> &
 AdvancedOutput<T>::getVectorPostprocessorOutput()
 {
   return _output_data["vector_postprocessors"].output;

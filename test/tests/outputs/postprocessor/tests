@@ -12,4 +12,10 @@
     expect_err = "The output object 'garbage' is not a defined output object"
     cli_args = 'Postprocessors/num_dofs/outputs=garbage'
   [../]
+  [./console]
+    # Test that "outputs=console" is working correctly with multiple execute_on items
+    type = 'CSVDiff'
+    input = 'postprocessor_console.i'
+    csvdiff = 'postprocessor_console_out.csv'
+  [../]
 []

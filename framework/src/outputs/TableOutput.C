@@ -53,10 +53,10 @@ void
 TableOutput::outputPostprocessors()
 {
   // List of names of the postprocessors to output
-  const std::vector<std::string> & out = getPostprocessorOutput();
+  const std::set<std::string> & out = getPostprocessorOutput();
 
   // Loop through the postprocessor names and extract the values from the PostprocessorData storage
-  for (std::vector<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  for (std::set<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
   {
     PostprocessorValue value = _problem_ptr->getPostprocessorValue(*it);
     _postprocessor_table.addData(*it, value, time());
@@ -68,10 +68,10 @@ void
 TableOutput::outputVectorPostprocessors()
 {
   // List of names of the postprocessors to output
-  const std::vector<std::string> & out = getVectorPostprocessorOutput();
+  const std::set<std::string> & out = getVectorPostprocessorOutput();
 
   // Loop through the postprocessor names and extract the values from the VectorPostprocessorData storage
-  for (std::vector<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  for (std::set<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
   {
     std::string vpp_name = *it;
 
@@ -96,10 +96,10 @@ void
 TableOutput::outputScalarVariables()
 {
   // List of scalar variables
-  const std::vector<std::string> & out = getScalarOutput();
+  const std::set<std::string> & out = getScalarOutput();
 
   // Loop through each variable
-  for (std::vector<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  for (std::set<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
   {
     // Get reference to the variable (0 is for TID)
     MooseVariableScalar & scalar_var = _problem_ptr->getScalarVariable(0, *it);
