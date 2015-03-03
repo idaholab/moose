@@ -53,8 +53,10 @@ protected:
   VariableValue & _temperature_old;
   const Real _alpha;
   Function * const _alpha_function;
-  const bool _has_stress_free_temp;
-  const Real _stress_free_temp;
+  bool _has_stress_free_temp;
+  Real _stress_free_temp;
+  bool _mean_alpha_function;
+  Real _ref_temp;
 
 private:
   using Material::computeProperties;

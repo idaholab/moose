@@ -39,6 +39,9 @@ InputParameters validParams<SolidModel>()
   params.addParam<FunctionName>("thermal_expansion_function", "Thermal expansion coefficient as a function of temperature.");
   params.addCoupledVar("temp", "Coupled Temperature");
   params.addParam<Real>("stress_free_temperature", "The stress-free temperature.  If not specified, the initial temperature is used.");
+  params.addParam<Real>("thermal_expansion_reference_temperature", "Reference temperature for mean thermal expansion function.");
+  MooseEnum cte_function_type("instantaneous mean");
+  params.addParam<MooseEnum>("thermal_expansion_function_type", cte_function_type, "Type of thermal expansion function.  Choices are: "+cte_function_type.getRawNames());
   params.addParam<std::vector<Real> >("initial_stress", "The initial stress tensor (xx, yy, zz, xy, yz, zx)");
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
@@ -123,6 +126,7 @@ SolidModel::SolidModel( const std::string & name,
   _piecewise_linear_alpha_function(NULL),
   _has_stress_free_temp(false),
   _stress_free_temp(0.0),
+  _ref_temp(0.0),
   _volumetric_models(),
   _volumetric_strain(),
   _volumetric_strain_old(),
@@ -236,6 +240,34 @@ SolidModel::SolidModel( const std::string & name,
     if (!_has_temp)
       mooseError("Cannot specify stress_free_temperature without coupling to temperature");
   }
+
+  if (parameters.isParamValid("thermal_expansion_function_type"))
+  {
+    if (!_alpha_function)
+      mooseError("thermal_expansion_function_type can only be set when thermal_expansion_function is used");
+    MooseEnum tec = getParam<MooseEnum>("thermal_expansion_function_type");
+    if (tec == "mean")
+      _mean_alpha_function = true;
+    else if (tec == "instantaneous")
+      _mean_alpha_function = false;
+    else
+      mooseError("Invalid option for thermal_expansion_function_type");
+  }
+  else
+    _mean_alpha_function = false;
+
+  if (parameters.isParamValid("thermal_expansion_reference_temperature"))
+  {
+    if (!_alpha_function)
+      mooseError("thermal_expansion_reference_temperature can only be set when thermal_expansion_function is used");
+    if (!_mean_alpha_function)
+      mooseError("thermal_expansion_reference_temperature can only be set when thermal_expansion_function_type = mean");
+    _ref_temp = getParam<Real>("thermal_expansion_reference_temperature");
+    if (!_has_temp)
+      mooseError("Cannot specify thermal_expansion_reference_temperature without coupling to temperature");
+  }
+  else if (_mean_alpha_function)
+    mooseError("Must specify thermal_expansion_reference_temperature if thermal_expansion_function_type = mean");
 
   if (parameters.isParamValid("thermal_expansion") && parameters.isParamValid("thermal_expansion_function"))
   {
@@ -463,24 +495,52 @@ SolidModel::applyThermalStrain()
 {
   if ( _has_temp && _t_step != 0 )
   {
-    Real tStrain;
-    Real alpha(_alpha);
+    Real inc_thermal_strain;
+    Real d_thermal_strain_d_temp;
+
+    Real old_temp;
+    if (_t_step == 1 && _has_stress_free_temp)
+      old_temp = _stress_free_temp;
+    else
+      old_temp = _temperature_old[_qp];
+
+    Real current_temp = _temperature[_qp];
+
+    Real delta_t = current_temp - old_temp;
+
+    Real alpha = _alpha;
+
     if (_alpha_function)
     {
       Point p;
-      alpha = _alpha_function->value(_temperature[_qp],p);
-    }
-    if (_t_step == 1 && _has_stress_free_temp)
-    {
-      tStrain = alpha * (_temperature[_qp] - _stress_free_temp);
+      Real alpha_current_temp = _alpha_function->value(current_temp,p);
+      Real alpha_old_temp = _alpha_function->value(old_temp,p);
+
+      if (_mean_alpha_function)
+      {
+        Real small(1e-6);
+
+        Real numerator = alpha_current_temp * (current_temp - _ref_temp) - alpha_old_temp * (old_temp - _ref_temp);
+        Real denominator = 1.0 + alpha_old_temp * (old_temp - _ref_temp);
+        if (denominator < small)
+          mooseError("Denominator too small in thermal strain calculation");
+        inc_thermal_strain = numerator / denominator;
+        d_thermal_strain_d_temp = alpha_current_temp * (current_temp - _ref_temp);
+      }
+      else
+      {
+        inc_thermal_strain = delta_t * 0.5 * (alpha_current_temp + alpha_old_temp);
+        d_thermal_strain_d_temp = alpha_current_temp;
+      }
     }
     else
     {
-      tStrain = alpha * (_temperature[_qp] - _temperature_old[_qp]);
+      inc_thermal_strain = delta_t * alpha;
+      d_thermal_strain_d_temp = alpha;
     }
-    _strain_increment.addDiag( -tStrain );
 
-    _d_strain_dT.addDiag( -alpha );
+    _strain_increment.addDiag( -inc_thermal_strain );
+    _d_strain_dT.addDiag( -d_thermal_strain_d_temp );
   }
 }
 
@@ -1489,12 +1549,23 @@ SolidModel::computeThermalJvec()
 
   Real alpha(_alpha);
   Real dalpha_dT = 0.0;
+  Real current_temp = _temperature[_qp];
 
   if (_piecewise_linear_alpha_function)
   {
     Point p;
-    alpha = _piecewise_linear_alpha_function->value(_temperature[_qp],p);
-    dalpha_dT = _piecewise_linear_alpha_function->timeDerivative(_temperature[_qp],p);
+    if (!_mean_alpha_function)
+    {
+      alpha = _piecewise_linear_alpha_function->value(current_temp,p);
+      dalpha_dT = _piecewise_linear_alpha_function->timeDerivative(current_temp,p);
+    }
+    else
+    {
+      Real alpha_current_temp = _piecewise_linear_alpha_function->value(current_temp,p);
+      alpha = alpha_current_temp * (current_temp - _ref_temp);
+      dalpha_dT = _piecewise_linear_alpha_function->timeDerivative(current_temp,p);
+    }
+
   }
 
   Real stress_trace;
@@ -1502,7 +1573,7 @@ SolidModel::computeThermalJvec()
 
   for (unsigned int i=0; i<3; ++i)
   {
-    Real dthermstrain_dx = alpha*_temp_grad[_qp](i) + dalpha_dT*_temp_grad[_qp](i)*(_temperature[_qp] - _stress_free_temp);
+    Real dthermstrain_dx = alpha*_temp_grad[_qp](i) + dalpha_dT*_temp_grad[_qp](i)*(current_temp - _stress_free_temp);
     (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
   }
 }
