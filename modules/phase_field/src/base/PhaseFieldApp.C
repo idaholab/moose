@@ -83,6 +83,9 @@
 #include "ConservedNormalNoise.h"
 #include "ConservedMaskedUniformNoise.h"
 #include "ConservedMaskedNormalNoise.h"
+#include "GrainTracker.h"
+#include "EBSDReader.h"
+#include "EBSDMesh.h"
 
 //#include "SPPARKSUserObject.h"
 //#include "SPPARKSAux.h"
@@ -175,6 +178,10 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(GBAnisotropy);
   registerMaterial(LinearIsoElasticPFDamage);
   registerMaterial(PFFracBulkRateMaterial);
+
+  registerPostprocessor(GrainTracker);
+  registerUserObject(EBSDReader);
+  registerMesh(EBSDMesh);
 
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);

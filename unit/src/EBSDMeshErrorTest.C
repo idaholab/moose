@@ -18,7 +18,7 @@
 #include "EBSDMesh.h"
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
-#include "MarmotUnitApp.h"
+#include "MooseUnitApp.h"
 #include "AppFactory.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( EBSDMeshErrorTest );
