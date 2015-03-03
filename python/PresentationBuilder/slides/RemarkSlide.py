@@ -196,11 +196,12 @@ class RemarkSlide(MooseObject):
     #
     # Also, for some reason re.sub doesn't like this re, so I am doing it manually
     regex = r'```(.*?)```'
-    for m in re.finditer(regex, markdown, re.DOTALL | re.MULTILINE):
-      for line in m.group(1).split('\n'):
-        if line.strip().startswith('*'):
-          print line
-          markdown = markdown.replace(line, '*' + line)
+    markdown = re.sub(regex, self.__subLineHighlight, markdown, re.DOTALL)
+
+#    for m in re.finditer(regex, markdown, re.DOTALL | re.MULTILINE):
+#      for line in m.group(1).split('\n'):
+#        if line.strip().startswith('*'):
+#          markdown = markdown.replace(line, '*' + line)
 
     # Search for github code urls
     if self.getParam('auto_insert_github_code'):
@@ -228,6 +229,16 @@ class RemarkSlide(MooseObject):
 
     # Store the markdown
     return markdown
+
+
+  ##
+  # Substitution method for fixing auto line highlighting
+  def __subLineHighlight(self, match):
+    output = match.group(0)
+    for line in output.split('\n'):
+      if line.strip().startswith('*'):
+        output = output.replace(line, '*' + line)
+    return output
 
 
   ##
