@@ -219,8 +219,6 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
   Real step_size = 1.0;
   Real time_simulated = 0.0;
 
-  RankTwoTensor dep = step_size*strain_increment;
-
   // the "good" variables hold the latest admissible stress
   // and internal parameters.
   RankTwoTensor stress_good = stress_old;
@@ -229,6 +227,21 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
   for (unsigned model = 0 ; model < _num_models ; ++model)
     intnl_good[model] = intnl_old[model];
   std::vector<Real> yf_good(_num_surfaces);
+
+
+  // Following is necessary because I want strain_increment to be "const"
+  // but I also want to be able to subdivide an initial_stress
+  RankTwoTensor this_strain_increment = strain_increment;
+  if (_t_step == 1 && isParamValid("initial_stress"))
+  {
+    RankFourTensor E_inv = E_ijkl.invSymm();
+    this_strain_increment += E_inv*stress_old;
+    stress_good = RankTwoTensor();
+  }
+
+
+  RankTwoTensor dep = step_size*this_strain_increment;
+
 
   unsigned int num_consecutive_successes = 0;
 
@@ -267,7 +280,7 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
       yf.resize(_num_surfaces); // might have excited with junk
       for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
         yf[surface] = yf_good[surface];
-      dep = step_size*strain_increment;
+      dep = step_size*this_strain_increment;
 
     }
   }
@@ -286,7 +299,7 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
     }
     else
     {
-      Moose::out << "After reducing the stepsize to " << step_size << " with original strain increment with L2norm " << strain_increment.L2norm() << " the returnMap algorithm failed\n";
+      Moose::out << "After reducing the stepsize to " << step_size << " with original strain increment with L2norm " << this_strain_increment.L2norm() << " the returnMap algorithm failed\n";
       _fspb_debug_stress = stress_good + E_ijkl*dep;
       _fspb_debug_pm.assign(_num_surfaces, 1); // this is chosen arbitrarily - please change if a more suitable value occurs to you!
       _fspb_debug_intnl.resize(_num_models);
