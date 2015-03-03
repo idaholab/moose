@@ -10,13 +10,13 @@ InputParameters validParams<ComputeFiniteStrain>()
 
 ComputeFiniteStrain::ComputeFiniteStrain(const std::string & name,
                                                  InputParameters parameters) :
-    DerivativeMaterialInterface<ComputeStrainBase>(name, parameters),
+    ComputeStrainBase(name, parameters),
     _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
     _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation gradient")),
-    _eigen_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "eigen_strain_increment")),
+    _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
     _T_old(coupledValueOld("temperature"))
 {
 }
@@ -98,7 +98,7 @@ ComputeFiniteStrain::computeQpStrain(const RankTwoTensor & Fhat)
   _strain_increment[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T_old[_qp]));
 
   //Remove the Eigen strain increment
-  _strain_increment[_qp] -= _eigen_strain_increment[_qp];
+  _strain_increment[_qp] -= _stress_free_strain_increment[_qp];
 
   RankTwoTensor D = _strain_increment[_qp]/_t_step;
   _strain_rate[_qp] = D;

@@ -6,7 +6,7 @@
 /**
  * ComputeFiniteStrain defines a the strain increment and rotation increment, for finite strains.
  */
-class ComputeFiniteStrain : public DerivativeMaterialInterface<ComputeStrainBase>
+class ComputeFiniteStrain : public ComputeStrainBase
 {
 public:
   ComputeFiniteStrain(const std:: string & name, InputParameters parameters);
@@ -23,7 +23,7 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _deformation_gradient;
 
-  const MaterialProperty<RankTwoTensor> & _eigen_strain_increment;
+  const MaterialProperty<RankTwoTensor> & _stress_free_strain_increment;
   VariableValue & _T_old;
 
 };

@@ -8,7 +8,7 @@
 #include "DerivativeMaterialInterface.h"
 
 /**
- * ComputeStressBase defines is the base class for strain tensors
+ * ComputeStressBase is the base class for strain tensors
  */
 class ComputeStressBase : public DerivativeMaterialInterface<Material>
 {
@@ -22,9 +22,13 @@ protected:
 
   std::string _base_name;
 
+  const MaterialProperty<RankTwoTensor> & _total_strain;
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _elastic_strain;
-  MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
+  const MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
+
+  /// Extra stress tensor
+  const MaterialProperty<RankTwoTensor> & _extra_stress;
 
   /// initial stress components
   std::vector<Function *> _initial_stress;

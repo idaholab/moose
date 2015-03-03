@@ -6,7 +6,7 @@
 /**
  * ComputeSmallStrain defines a strain tensor, assuming small strains.
  */
-class ComputeSmallStrain : public DerivativeMaterialInterface<ComputeStrainBase>
+class ComputeSmallStrain : public ComputeStrainBase
 {
 public:
   ComputeSmallStrain(const std:: string & name, InputParameters parameters);
@@ -14,7 +14,7 @@ public:
 protected:
   virtual void computeProperties();
 
-  const MaterialProperty<RankTwoTensor> & _eigen_strain;
+  const MaterialProperty<RankTwoTensor> & _stress_free_strain;
 
 };
 

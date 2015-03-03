@@ -9,7 +9,7 @@ InputParameters validParams<ComputeStrainBase>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addParam<Real>("temperature_ref", 273, "Reference temperature for thermal expansion in K");
   params.addCoupledVar("temperature", 273, "temperature in Kelvin");
-  params.addParam<std::string>("base_name", "Material property base name");
+  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
   params.addParam<Real>("thermal_expansion_coeff", 0, "Thermal expansion coefficient in 1/K");
   return params;
 }

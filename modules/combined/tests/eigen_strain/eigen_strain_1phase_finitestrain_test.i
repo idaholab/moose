@@ -76,7 +76,7 @@
   [./eigen_strain_incr00]
     type = RankTwoAux
     variable = eigen_strain_incr00
-    rank_two_tensor = eigen_strain_increment
+    rank_two_tensor = stress_free_strain_increment
     index_j = 0
     index_i = 0
   [../]
@@ -113,7 +113,7 @@
     disp_y = disp_y
   [../]
   [./stress]
-    type = ComputeElasticityStress
+    type = ComputeFiniteStrainElasticStress
     block = 0
   [../]
 []

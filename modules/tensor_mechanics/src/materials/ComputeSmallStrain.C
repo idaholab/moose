@@ -10,8 +10,8 @@ InputParameters validParams<ComputeSmallStrain>()
 
 ComputeSmallStrain::ComputeSmallStrain(const std::string & name,
                                                  InputParameters parameters) :
-    DerivativeMaterialInterface<ComputeStrainBase>(name, parameters),
-    _eigen_strain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "eigen_strain"))
+    ComputeStrainBase(name, parameters),
+    _stress_free_strain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain"))
 {
 }
 
@@ -29,6 +29,6 @@ ComputeSmallStrain::computeProperties()
     _total_strain[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T0 ));
 
     //Remove the Eigen strain
-    _total_strain[_qp] -= _eigen_strain[_qp];
+    _total_strain[_qp] -= _stress_free_strain[_qp];
   }
 }

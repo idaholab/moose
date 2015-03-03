@@ -8,7 +8,7 @@
 #include "DerivativeMaterialInterface.h"
 
 /**
- * ComputeStrainBase defines is the base class for strain tensors
+ * ComputeStrainBase is the base class for strain tensors
  */
 class ComputeStrainBase : public DerivativeMaterialInterface<Material>
 {

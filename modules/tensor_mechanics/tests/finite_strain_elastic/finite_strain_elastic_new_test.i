@@ -18,7 +18,6 @@
 []
 
 [AuxVariables]
-  active = ''
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -43,7 +42,6 @@
 []
 
 [AuxKernels]
-  active = ''
   [./stress_zz]
     type = RankTwoAux
     variable = stress_zz
@@ -97,7 +95,7 @@
     disp_z = disp_z
   [../]
   [./stress]
-    type = ComputeElasticityStress
+    type = ComputeFiniteStrainElasticStress
     block = 0
   [../]
 []

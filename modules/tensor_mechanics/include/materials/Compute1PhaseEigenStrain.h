@@ -1,21 +1,23 @@
 #ifndef COMPUTE1PHASEEIGENSTRAIN_H
 #define COMPUTE1PHASEEIGENSTRAIN_H
 
-#include "ComputeEigenStrainBase.h"
+#include "ComputeStressFreeStrainBase.h"
 
 /**
  * Compute1PhaseEigenStrain computes an Eigenstrain that is a function of a single variable defined by a base tensor and a scalar function defined in a Derivative Material.
  */
-class Compute1PhaseEigenStrain : public DerivativeMaterialInterface<ComputeEigenStrainBase>
+class Compute1PhaseEigenStrain : public ComputeStressFreeStrainBase
 {
 public:
   Compute1PhaseEigenStrain(const std:: string & name, InputParameters parameters);
 
 protected:
-  virtual void computeQpEigenStrain();
+  virtual void computeQpStressFreeStrain();
 
   VariableValue & _v;
   VariableName _v_name;
+
+  std::string _var_dep_name;
 
   const MaterialProperty<Real> & _var_dep;
   const MaterialProperty<Real> & _dvar_dep_dv;

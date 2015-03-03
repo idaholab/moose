@@ -63,7 +63,7 @@
   [./eigen_strain00]
     type = RankTwoAux
     variable = eigen_strain00
-    rank_two_tensor = eigen_strain
+    rank_two_tensor = stress_free_strain
     index_j = 0
     index_i = 0
   [../]
@@ -77,7 +77,7 @@
     fill_method = symmetric_isotropic
   [../]
   [./stress]
-    type = ComputeElasticityStress
+    type = ComputeLinearElasticStress
     block = 0
   [../]
   [./var_dependence]
