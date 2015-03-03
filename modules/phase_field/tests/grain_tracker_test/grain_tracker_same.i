@@ -91,10 +91,15 @@
 
 [Materials]
   [./CuGrGr]
-    type = CuGrGr
+    type = GBEvolution
     block = 0
     T = 500 # K
     wGB = 100 # nm
+
+    GBmob0 = 2.5e-6
+    Q = 0.23
+    GBenergy = 0.708
+    molar_volume = 7.11e-6
   [../]
 []
 
@@ -138,4 +143,3 @@
   exodus = true
   print_perf_log = true
 []
-
