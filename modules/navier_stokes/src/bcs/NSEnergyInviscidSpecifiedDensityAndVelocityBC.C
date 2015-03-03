@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 // This was experimental code and did not really work out, do not use!
 #include "NSEnergyInviscidSpecifiedDensityAndVelocityBC.h"
 
