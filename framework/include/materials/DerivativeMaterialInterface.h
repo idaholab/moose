@@ -14,6 +14,7 @@
 #ifndef DERIVATIVEMATERIALINTERFACE_H
 #define DERIVATIVEMATERIALINTERFACE_H
 
+#include "Material.h"
 #include "MaterialProperty.h"
 #include "FEProblem.h"
 
@@ -76,7 +77,7 @@ public:
    * Fetch a pointer to a material property if it exists, otherwise return null
    */
   template<typename U>
-  MaterialProperty<U> * getMaterialPropertyPointer(const std::string & name);
+  MaterialProperty<U> * getMaterialPropertyPointer(const std::string & name) __attribute__ ((deprecated));
 
   // Interface style (2)
   // return references to a zero material property for non-existing material properties
@@ -172,6 +173,29 @@ DerivativeMaterialInterface<T>::getMaterialPropertyPointer(const std::string & n
   return this->template hasMaterialProperty<U>(name) ? &(this->template getMaterialProperty<U>(name)) : NULL;
 }
 
+template<>
+template<typename U>
+const MaterialProperty<U> &
+DerivativeMaterialInterface<Material>::getDefaultMaterialProperty(const std::string & name)
+{
+  // if found return the requested property
+  if (this->template hasMaterialProperty<U>(name))
+    return this->template getMaterialProperty<U>(name);
+
+  // declare this material property
+  MaterialProperty<U> & preload_with_zero = this->template declareProperty<U>(name);
+
+  // resize to accomodate maximum number of qpoints
+  unsigned int nqp = _dmi_fe_problem.getMaxQps();
+  preload_with_zero.resize(nqp);
+
+  // set values for all qpoints to zero
+  for (unsigned int qp = 0; qp < nqp; ++qp)
+    mooseSetToZero<U>(preload_with_zero[qp]);
+
+  return preload_with_zero;
+}
+
 template<class T>
 template<typename U>
 const MaterialProperty<U> &
@@ -183,7 +207,7 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
   if (this->template hasMaterialProperty<U>(name))
     return this->template getMaterialProperty<U>(name);
 
-  // otherwise return a reference to a static zero property
+  // make sure _zero is in a sane state
   unsigned int nqp = _dmi_fe_problem.getMaxQps();
   if (int(nqp) > _zero.size())
   {
@@ -194,6 +218,8 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
     for (unsigned int qp = 0; qp < nqp; ++qp)
       mooseSetToZero<U>(_zero[qp]);
   }
+
+  // return a reference to a static zero property
   return _zero;
 }
 
