@@ -63,9 +63,6 @@ protected:
   std::vector<MaterialProperty<Real> *> _mat_props;
   unsigned int _nmat_props;
 
-  /// Array to stage the parameters passed to the functions when calling Eval.
-  Real * _func_params;
-
   /// Tolerance values for all arguments (to protect from log(0)).
   std::vector<Real> _tol;
 
