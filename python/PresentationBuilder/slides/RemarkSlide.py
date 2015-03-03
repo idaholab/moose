@@ -2,7 +2,7 @@
 import os, re, inspect, string, urllib2, sys
 from FactorySystem import InputParameters, MooseObject
 from ..images import *
-from ..utils import *
+from ..tools import *
 
 ##
 # Base class for individual Remark markdown slide content
@@ -169,7 +169,6 @@ class RemarkSlide(MooseObject):
       self.comments.append(match.group(1))
       markdown = markdown.replace(match.group(0), '')
 
-
     # Adjust the background-image parameter
     if self.isParamValid('background-image'):
       value = self.getParam('background-image')
@@ -189,6 +188,19 @@ class RemarkSlide(MooseObject):
     for key in self.parameters().groupKeys('properties'):
       if self.isParamValid(key):
           markdown = key + ':' + self.parameters()[key] + '\n' + markdown
+
+    # Adjust code starting with *
+    # Remark automatically highlights code lines starting with *, this is disabled
+    # by removing the background in the css and adding an extract *, I hope Remark
+    # will get updated so this is not necessary.
+    #
+    # Also, for some reason re.sub doesn't like this re, so I am doing it manually
+    regex = r'```(.*?)```'
+    for m in re.finditer(regex, markdown, re.DOTALL | re.MULTILINE):
+      for line in m.group(1).split('\n'):
+        if line.strip().startswith('*'):
+          print line
+          markdown = markdown.replace(line, '*' + line)
 
     # Search for github code urls
     if self.getParam('auto_insert_github_code'):
