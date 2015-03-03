@@ -7,6 +7,6 @@
   [./new]
     type = 'Exodiff'
     input = 'finite_strain_elastic_new_test.i'
-    exodiff = 'finite_strain_elastic_test_out.e'
+    exodiff = 'finite_strain_elastic_new_test_out.e'
   [../]
 []

@@ -1,10 +1,16 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ComputeElasticityTensor.h"
 
 template<>
 InputParameters validParams<ComputeElasticityTensor>()
 {
   InputParameters params = validParams<Material>();
-  params.addClassDescription("Compute an elasticity tensor material.");
+  params.addClassDescription("Compute an elasticity tensor.");
   params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addParam<MooseEnum>("fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
@@ -43,5 +49,4 @@ ComputeElasticityTensor::computeQpProperties()
 
   //Rotate tensor
   _elasticity_tensor[_qp].rotate(R);
-
 }

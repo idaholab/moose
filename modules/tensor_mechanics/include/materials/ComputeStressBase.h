@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef COMPUTESTRESSBASE_H
 #define COMPUTESTRESSBASE_H
 
@@ -8,7 +14,7 @@
 #include "DerivativeMaterialInterface.h"
 
 /**
- * ComputeStressBase is the base class for strain tensors
+ * ComputeStressBase is the base class for stress tensors
  */
 class ComputeStressBase : public DerivativeMaterialInterface<Material>
 {

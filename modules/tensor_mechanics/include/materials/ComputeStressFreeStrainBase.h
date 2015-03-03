@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef COMPUTESTRESSFREESTRAINBASE_H
 #define COMPUTESTRESSFREESTRAINBASE_H
 
@@ -6,7 +12,7 @@
 #include "RankTwoTensor.h"
 
 /**
- * ComputeStressFreeStrainBase is the base class for strain tensors
+ * ComputeStressFreeStrainBase is the base class for stress free strain tensors
  */
 class ComputeStressFreeStrainBase : public DerivativeMaterialInterface<Material>
 {

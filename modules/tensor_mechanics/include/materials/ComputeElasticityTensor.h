@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef COMPUTEELASTICITYTENSOR_H
 #define COMPUTEELASTICITYTENSOR_H
 
@@ -28,7 +34,6 @@ protected:
 
   /// prefactor function to multiply the elasticity tensor with
   Function * const _prefactor_function;
-
 };
 
 #endif //COMPUTEELASTICITYTENSOR_H

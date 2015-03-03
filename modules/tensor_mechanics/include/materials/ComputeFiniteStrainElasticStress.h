@@ -1,10 +1,16 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef COMPUTEFINITESTRAINELASTICSTRESS_H
 #define COMPUTEFINITESTRAINELASTICSTRESS_H
 
 #include "ComputeStressBase.h"
 
 /**
- * ComputeFiniteStrainElasticStress computes the stress following elasticity theory for either small or finite strains
+ * ComputeFiniteStrainElasticStress computes the stress following elasticity theory for finite strains
  */
 class ComputeFiniteStrainElasticStress : public ComputeStressBase
 {

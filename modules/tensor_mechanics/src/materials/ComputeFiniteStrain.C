@@ -1,10 +1,16 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ComputeFiniteStrain.h"
 
 template<>
 InputParameters validParams<ComputeFiniteStrain>()
 {
   InputParameters params = validParams<ComputeStrainBase>();
-  params.addClassDescription("Compute a strain and rotation increment for finite strains.");
+  params.addClassDescription("Compute a strain increment and rotation increment for finite strains.");
   return params;
 }
 

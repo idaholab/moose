@@ -1,10 +1,16 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef COMPUTEFINITESTRAIN_H
 #define COMPUTEFINITESTRAIN_H
 
 #include "ComputeStrainBase.h"
 
 /**
- * ComputeFiniteStrain defines a the strain increment and rotation increment, for finite strains.
+ * ComputeFiniteStrain defines a strain increment and rotation increment, for finite strains.
  */
 class ComputeFiniteStrain : public ComputeStrainBase
 {
@@ -25,7 +31,6 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _stress_free_strain_increment;
   VariableValue & _T_old;
-
 };
 
 #endif //COMPUTEFINITESTRAIN_H
