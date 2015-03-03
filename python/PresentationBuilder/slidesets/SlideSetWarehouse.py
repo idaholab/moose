@@ -1,5 +1,6 @@
-import sys, re
+import sys, re, sys
 from FactorySystem import Warehouse
+from utils import colorText
 
 
 ##
@@ -36,13 +37,21 @@ class SlideSetWarehouse(Warehouse):
   # Performs the slide creation steps
   def execute(self):
 
+    # Number of slide set objects
+    n = len(self.objects)
+
     # Read and build the slides
-    print 'EXECUTE:'
-    for obj in self.objects:
+    for i in range(n):
+      # Display the current object being executed
+      obj = self.objects[i]
       name = obj.name()
-      print '   READ:', name
+      msg = ['Building Set:', name, '(' + str(i+1), 'of', str(n) + ')']
+      print colorText(' '.join(msg), 'YELLOW')
+
+      # Read and build the content
+      print '  Reading content...'
       raw = obj.read()
-      print '  BUILD:', name
+      print '  Building content...'
       obj.build(raw)
 
     # Build the table-of-contents

@@ -14,8 +14,7 @@ class INLDjangoWikiSet(DjangoWikiSet, INLSetInterface):
     return params
 
   ##
-  # Initialize contents for INL slides
-  # This creates injects the dark title slide and centers the title
-  def initContents(self):
-    DjangoWikiSet.initContents(self)   # base class initialization
-    INLSetInterface.initContents(self) # format the contents for INL slides
+  # Performs INL slide parsing
+  def _parseSlide(self, slide, raw):
+    INLSetInterface.applySlideSettings(slide)
+    DjangoWikiSet._parseSlide(self, slide, raw)
