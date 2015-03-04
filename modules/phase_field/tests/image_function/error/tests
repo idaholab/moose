@@ -34,7 +34,7 @@
     # Test that correct error message occurs if VTK is disable in libMesh
     type = RunException
     input = check_error.i
-    expect_err = "A 'ImageFunction' is not a registered object"
+    expect_err = "libMesh must be configured with VTK enabled to utilize ImageFunction"
     vtk = false
   [../]
 []
