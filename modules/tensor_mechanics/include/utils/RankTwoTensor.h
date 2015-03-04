@@ -331,14 +331,23 @@ public:
   void syev(const char * calculation_type, std::vector<PetscScalar> & eigvals, std::vector<PetscScalar> & a) const;
 
   /**
-   * This function initializes random seed based on a fixed number.
+   * This function initializes random seed based on a user-defined number.
    */
-  static void initRandom();
+  static void initRandom( unsigned int );
 
   /**
-   * This function generates a random symmetric rank two tensor based on a scalar variable
+   * This function generates a random unsymmetric rank two tensor.
+   * The first real scales the random number.
+   * The second real offsets the uniform random number
    */
-  static RankTwoTensor genRandomTensor( Real );
+  static RankTwoTensor genRandomTensor( Real, Real );
+
+  /**
+   * This function generates a random symmetric rank two tensor.
+   * The first real scales the random number.
+   * The second real offsets the uniform random number
+   */
+  static RankTwoTensor genRandomSymmTensor( Real, Real );
 
 protected:
 
