@@ -129,7 +129,7 @@ class RemarkSlide(MooseObject):
 
     # Set the object name using the title, if the name parameter does not exist
     if not self.isParamValid('name') and (self.__title is not None):
-      self.parameters()['name'] = '-'.join(self.__title[1].lower().split())
+      self.parameters()['name'] = '-'.join(self.__title[1].lower().split()) + '-0'
 
     # Set the object name using the previous slide name , if the name parameter does not exist
     if not self.isParamValid('name') and self.parent.warehouse().objects:
@@ -143,6 +143,7 @@ class RemarkSlide(MooseObject):
           name = match.group(1) + str(int(match.group(2))+1)
         self.parameters()['name'] = name
 
+    # If the above attempts at naming fail, name the object based on the containing slide set
     elif not self.isParamValid('name'):
       name = self.parent.name() + '-' + str(self.parent.warehouse().numObjects())
       self.parameters()['name'] = name
