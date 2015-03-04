@@ -29,11 +29,18 @@ public:
   virtual ~PiecewiseLinear();
 
   /**
-   * This function will return a value based on the first input argument only.
+   * Get the value of the function (based on time only)
+   * \param t The time
+   * \param p The point in space (x,y,z) (unused)
+   * \return The value of the function at the specified time
    */
   virtual Real value(Real t, const Point & pt);
+
   /**
-   * This function will return a value based on the first input argument only.
+   * Get the time derivative of the function (based on time only)
+   * \param t The time
+   * \param p The point in space (x,y,z) (unused)
+   * \return The time derivative of the function at the specified time
    */
   virtual Real timeDerivative(Real t, const Point & pt);
 

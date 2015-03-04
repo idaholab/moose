@@ -52,6 +52,13 @@ Function::gradient(Real /*t*/, const Point & /*p*/)
   return RealGradient(0, 0, 0);
 }
 
+Real
+Function::timeDerivative(Real /*t*/, const Point & /*p*/)
+{
+  mooseError("timeDerivative method not defined for function " << _name);
+  return 0;
+}
+
 RealVectorValue
 Function::vectorValue(Real /*t*/, const Point & /*p*/)
 {
