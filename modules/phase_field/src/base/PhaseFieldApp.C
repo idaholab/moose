@@ -8,87 +8,115 @@
 #include "Moose.h"
 #include "AppFactory.h"
 
-#include "MatDiffusion.h"
+/*
+ * Kernels
+ */
+#include "ACGBPoly.h"
+#include "ACGrGrPoly.h"
 #include "ACInterface.h"
 #include "ACMultiInterface.h"
+#include "ACParsed.h"
+#include "CHInterface.h"
 #include "CHMath.h"
 #include "CHParsed.h"
-#include "CHInterface.h"
-#include "SplitCHWRes.h"
+#include "ConservedLangevinNoise.h"
+#include "CoupledImplicitEuler.h"
+#include "LangevinNoise.h"
+#include "MaskedBodyForce.h"
+#include "MatDiffusion.h"
+#include "PFFracBulkRate.h"
+#include "PFFracCoupledInterface.h"
+#include "PFFracIntVar.h"
 #include "SplitCHMath.h"
 #include "SplitCHParsed.h"
-#include "CoupledImplicitEuler.h"
-#include "SwitchingFunctionConstraintLagrange.h"
+#include "SplitCHWRes.h"
 #include "SwitchingFunctionConstraintEta.h"
+#include "SwitchingFunctionConstraintLagrange.h"
 #include "SwitchingFunctionPenalty.h"
-#include "CrossIC.h"
-#include "SmoothCircleIC.h"
+
+/*
+ * Initial Conditions
+ */
 #include "ClosePackIC.h"
-#include "RndSmoothCircleIC.h"
-#include "MultiSmoothCircleIC.h"
+#include "CrossIC.h"
+#include "HexPolycrystalIC.h"
 #include "LatticeSmoothCircleIC.h"
-#include "SpecifiedSmoothCircleIC.h"
+#include "MultiSmoothCircleIC.h"
+#include "PolycrystalRandomIC.h"
+#include "PolycrystalReducedIC.h"
 #include "RndBoundingBoxIC.h"
-#include "PFMobility.h"
-#include "ParsedMaterial.h"
+#include "RndSmoothCircleIC.h"
+#include "SmoothCircleIC.h"
+#include "SpecifiedSmoothCircleIC.h"
+#include "ThumbIC.h"
+#include "Tricrystal2CircleGrainsIC.h"
+
+/*
+ * Materials
+ */
+#include "BarrierFunctionMaterial.h"
+#include "DerivativeMultiPhaseMaterial.h"
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
 #include "DerivativeTwoPhaseMaterial.h"
-#include "DerivativeMultiPhaseMaterial.h"
-#include "BarrierFunctionMaterial.h"
-#include "MultiBarrierFunctionMaterial.h"
-#include "SwitchingFunctionMaterial.h"
 #include "ElasticEnergyMaterial.h"
-#include "MathFreeEnergy.h"
 #include "GBAnisotropy.h"
-#include "NodalFloodCount.h"
-#include "NodalFloodCountAux.h"
-#include "NodalVolumeFraction.h"
-#include "BndsCalcAux.h"
-#include "TotalFreeEnergy.h"
-#include "CrossTermGradientFreeEnergy.h"
-#include "ACGrGrPoly.h"
-#include "ACGBPoly.h"
-#include "ACParsed.h"
 #include "GBEvolution.h"
-#include "HexPolycrystalIC.h"
-#include "PolycrystalRandomIC.h"
-#include "PolycrystalReducedIC.h"
-#include "ThumbIC.h"
-#include "Tricrystal2CircleGrainsIC.h"
-#include "PolycrystalVariablesAction.h"
-#include "PolycrystalKernelAction.h"
-#include "BicrystalCircleGrainICAction.h"
-#include "BicrystalBoundingBoxICAction.h"
-#include "Tricrystal2CircleGrainsICAction.h"
-#include "PolycrystalHexGrainICAction.h"
-#include "PolycrystalVoronoiICAction.h"
-#include "PolycrystalRandomICAction.h"
-#ifdef LIBMESH_HAVE_VTK
-#include "ImageFunction.h"
-#endif
-#include "SolutionRasterizer.h"
-#include "ImageMesh.h"
-#include "MaskedBodyForce.h"
-#include "LangevinNoise.h"
-#include "ConservedLangevinNoise.h"
-
-#include "PFFracBulkRate.h"
-#include "PFFracIntVar.h"
-#include "PFFracCoupledInterface.h"
 #include "LinearIsoElasticPFDamage.h"
+#include "MathFreeEnergy.h"
+#include "MultiBarrierFunctionMaterial.h"
+#include "ParsedMaterial.h"
 #include "PFFracBulkRateMaterial.h"
+#include "PFMobility.h"
+#include "SwitchingFunctionMaterial.h"
 
-#include "ConservedUniformNoise.h"
-#include "ConservedNormalNoise.h"
-#include "ConservedMaskedUniformNoise.h"
-#include "ConservedMaskedNormalNoise.h"
+/*
+ * Postprocessors
+ */
 #include "GrainTracker.h"
-#include "EBSDReader.h"
-#include "EBSDMesh.h"
+#include "NodalFloodCount.h"
+#include "NodalVolumeFraction.h"
 
-//#include "SPPARKSUserObject.h"
-//#include "SPPARKSAux.h"
+/*
+ * AuxKernels
+ */
+#include "BndsCalcAux.h"
+#include "CrossTermGradientFreeEnergy.h"
+#include "NodalFloodCountAux.h"
+#include "TotalFreeEnergy.h"
+
+/*
+ * Functions
+ */
+#include "ImageFunction.h"
+
+/*
+ * User Objects
+ */
+#include "ConservedMaskedNormalNoise.h"
+#include "ConservedMaskedUniformNoise.h"
+#include "ConservedNormalNoise.h"
+#include "ConservedUniformNoise.h"
+#include "EBSDReader.h"
+#include "SolutionRasterizer.h"
+
+/*
+ * Meshes
+ */
+#include "EBSDMesh.h"
+#include "ImageMesh.h"
+
+/*
+ * Actions
+ */
+#include "BicrystalBoundingBoxICAction.h"
+#include "BicrystalCircleGrainICAction.h"
+#include "PolycrystalHexGrainICAction.h"
+#include "PolycrystalKernelAction.h"
+#include "PolycrystalRandomICAction.h"
+#include "PolycrystalVariablesAction.h"
+#include "PolycrystalVoronoiICAction.h"
+#include "Tricrystal2CircleGrainsICAction.h"
 
 template<>
 InputParameters validParams<PhaseFieldApp>()
@@ -126,83 +154,78 @@ PhaseFieldApp::registerApps()
 void
 PhaseFieldApp::registerObjects(Factory & factory)
 {
-  registerKernel(MatDiffusion);
+  registerKernel(ACGBPoly);
+  registerKernel(ACGrGrPoly);
   registerKernel(ACInterface);
   registerKernel(ACMultiInterface);
+  registerKernel(ACParsed);
+  registerKernel(CHInterface);
   registerKernel(CHMath);
   registerKernel(CHParsed);
-  registerKernel(CHInterface);
-  registerKernel(SplitCHWRes);
+  registerKernel(ConservedLangevinNoise);
+  registerKernel(CoupledImplicitEuler);
+  registerKernel(LangevinNoise);
+  registerKernel(MaskedBodyForce);
+  registerKernel(MatDiffusion);
+  registerKernel(PFFracBulkRate);
+  registerKernel(PFFracCoupledInterface);
+  registerKernel(PFFracIntVar);
   registerKernel(SplitCHMath);
   registerKernel(SplitCHParsed);
-  registerKernel(CoupledImplicitEuler);
-  registerKernel(ACGrGrPoly);
-  registerKernel(ACGBPoly);
-  registerKernel(ACParsed);
-  registerKernel(MaskedBodyForce);
-  registerKernel(SwitchingFunctionConstraintLagrange);
+  registerKernel(SplitCHWRes);
   registerKernel(SwitchingFunctionConstraintEta);
+  registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
-  registerKernel(PFFracBulkRate);
-  registerKernel(PFFracIntVar);
-  registerKernel(PFFracCoupledInterface);
-  registerKernel(LangevinNoise);
-  registerKernel(ConservedLangevinNoise);
 
-  registerInitialCondition(CrossIC);
-  registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(ClosePackIC);
-  registerInitialCondition(RndSmoothCircleIC);
-  registerInitialCondition(MultiSmoothCircleIC);
-  registerInitialCondition(LatticeSmoothCircleIC);
-  registerInitialCondition(SpecifiedSmoothCircleIC);
-  registerInitialCondition(RndBoundingBoxIC);
+  registerInitialCondition(CrossIC);
   registerInitialCondition(HexPolycrystalIC);
+  registerInitialCondition(LatticeSmoothCircleIC);
+  registerInitialCondition(MultiSmoothCircleIC);
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalReducedIC);
+  registerInitialCondition(RndBoundingBoxIC);
+  registerInitialCondition(RndSmoothCircleIC);
+  registerInitialCondition(SmoothCircleIC);
+  registerInitialCondition(SpecifiedSmoothCircleIC);
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
 
-  registerMaterial(PFMobility);
-  registerMaterial(GBEvolution);
-  registerMaterial(ParsedMaterial);
+  registerMaterial(BarrierFunctionMaterial);
+  registerMaterial(DerivativeMultiPhaseMaterial);
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
   registerMaterial(DerivativeTwoPhaseMaterial);
-  registerMaterial(DerivativeMultiPhaseMaterial);
-  registerMaterial(BarrierFunctionMaterial);
-  registerMaterial(MultiBarrierFunctionMaterial);
-  registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(ElasticEnergyMaterial);
-  registerMaterial(MathFreeEnergy);
   registerMaterial(GBAnisotropy);
+  registerMaterial(GBEvolution);
   registerMaterial(LinearIsoElasticPFDamage);
+  registerMaterial(MathFreeEnergy);
+  registerMaterial(MultiBarrierFunctionMaterial);
+  registerMaterial(ParsedMaterial);
   registerMaterial(PFFracBulkRateMaterial);
+  registerMaterial(PFMobility);
+  registerMaterial(SwitchingFunctionMaterial);
 
   registerPostprocessor(GrainTracker);
-  registerUserObject(EBSDReader);
-  registerMesh(EBSDMesh);
+  registerPostprocessor(NodalFloodCount);
+  registerPostprocessor(NodalVolumeFraction);
 
-  registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
-  registerAux(TotalFreeEnergy);
   registerAux(CrossTermGradientFreeEnergy);
-  // registerAux(SPPARKSAux);
+  registerAux(NodalFloodCountAux);
+  registerAux(TotalFreeEnergy);
 
-  registerUserObject(NodalFloodCount);
-  registerUserObject(NodalVolumeFraction);
-  registerUserObject(SolutionRasterizer);
-  registerUserObject(ConservedUniformNoise);
-  registerUserObject(ConservedNormalNoise);
-  registerUserObject(ConservedMaskedUniformNoise);
   registerUserObject(ConservedMaskedNormalNoise);
+  registerUserObject(ConservedMaskedUniformNoise);
+  registerUserObject(ConservedNormalNoise);
+  registerUserObject(ConservedUniformNoise);
+  registerUserObject(EBSDReader);
+  registerUserObject(SolutionRasterizer);
 
-  // registerUserObject(SPPARKSUserObject);
-
-#ifdef LIBMESH_HAVE_VTK
   registerFunction(ImageFunction);
-#endif
 
+  registerMesh(EBSDMesh);
   registerMesh(ImageMesh);
 }
 
