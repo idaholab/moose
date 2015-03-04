@@ -1,0 +1,175 @@
+#ifndef GRAINTRACKER_H
+#define GRAINTRACKER_H
+
+#include "NodalFloodCount.h"
+
+// libMesh includes
+#include "libmesh/mesh_tools.h"
+#include "libmesh/auto_ptr.h"
+#include "libmesh/sphere.h"
+
+class GrainTracker;
+class EBSDReader;
+
+template<>
+InputParameters validParams<GrainTracker>();
+
+class GrainTracker : public NodalFloodCount
+{
+public:
+  GrainTracker(const std::string & name, InputParameters parameters);
+  virtual ~GrainTracker();
+
+  virtual void initialize();
+  //virtual void threadJoin(const UserObject & y);
+  virtual void finalize();
+
+  /**
+   * Accessor for retrieving nodal field information (unique grains or variable indicies)
+   * @param node_id the node identifier for which to retrieve field data
+   * @param var_idx when using multi-map mode, the map number from which to retrieve data.
+   * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
+   * @return the nodal value
+   */
+  virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
+
+  /**
+   * Accessor for retrieving elemental field data (grain centroids).
+   * @param element_id the element identifier for which to retrieve field data
+   * @return the elemental value
+   */
+  virtual Real getElementalValue(dof_id_type element_id) const;
+
+  /**
+   * Returns a list of active unique grains for a particular node in a vector of pairs
+   * (unique_grain_id, variable_idx)
+   */
+  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type node_id) const;
+
+  /**
+   * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
+   * holds the ith node with the inner vector holds the list of active unique grains.
+   * (unique_grain_id, variable_idx)
+   */
+  virtual std::vector<std::vector<std::pair<unsigned int, unsigned int> > > getElementalValues(dof_id_type elem_id) const;
+
+public:
+  /// This struct holds the nodesets and bounding spheres for each flooded region.
+  struct BoundingSphereInfo;
+
+  /// This struct hold the information necessary to identify and track a unique grain;
+  struct UniqueGrain;
+
+protected:
+  /// This routine is called at the of finalize to update the field data
+  virtual void updateFieldInfo();
+
+  /**
+   * This method uses the bubble sets to build bounding spheres around each cluster of nodes.  In this class it will be called before periodic
+   * information has been added so that each bubble piece will have a unique sphere.  It populates the _bounding_spheres vector.
+   */
+  void buildBoundingSpheres();
+
+  /**
+   * This method first finds all of the bounding spheres from the _bounding_spheres vector that belong to the same bubble by using the
+   * overlapping periodic information (if periodic boundary conditions are active). If this is the first step that we beginning to track
+   * grains, each of these sets of spheres and the centroid are used to designate a unique grain which is stored in the _unique_grains
+   * datastructure.
+   */
+  void trackGrains();
+
+  /**
+   * This method is called after trackGrains to remap grains that are too close to each other.
+   */
+  void remapGrains();
+
+  /**
+   * This method swaps the values at all the nodes in grain_it1, with the values in grain_it2.
+   */
+  void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2, unsigned int attempt_number);
+
+  /**
+   * This method returns the periodic distance between two spheres.  If ignore_radii is true, then the distance will be between the two
+   * sphere centers.  If ignore_radii is false, then the distance will be between the edges of the two spheres.
+   */
+  Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const;
+
+  virtual unsigned long calculateUsage() const;
+
+  /*************************************************
+   *************** Data Structures *****************
+   ************************************************/
+
+  /// The timestep to begin tracking grains
+  const int _tracking_step;
+
+  /// The value added to each bounding sphere radius to detect earlier intersection
+  const Real _hull_buffer;
+
+  /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
+  const bool _remap;
+
+  /// A reference to the nonlinear system (used for retrieving solution vectors)
+  NonlinearSystem & _nl;
+
+  /// This data structure holds the raw lists of bounding spheres for each variable index.  It is used during the tracking routine
+  std::vector<std::list<BoundingSphereInfo *> > _bounding_spheres;
+
+  /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
+  std::map<unsigned int, UniqueGrain *> & _unique_grains;
+
+  /// Optional ESBD Reader
+  const EBSDReader * _ebsd_reader;
+
+public:
+  /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
+  enum STATUS
+  {
+    NOT_MARKED,
+    MARKED,
+    INACTIVE
+  };
+
+  /// This struct holds the nodesets and bounding spheres for each flooded region.
+  struct BoundingSphereInfo
+  {
+    BoundingSphereInfo(unsigned int node_id, const Point & center, Real radius);
+
+    unsigned int member_node_id;
+    libMesh::Sphere b_sphere;
+  };
+
+  /// This struct hold the information necessary to identify and track a unique grain;
+  struct UniqueGrain
+  {
+    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<dof_id_type> *nodes_pt, STATUS status);
+    ~UniqueGrain();
+
+    unsigned int variable_idx;
+    std::vector<BoundingSphereInfo *> sphere_ptrs;
+    STATUS status;
+    /**
+     * Pointer to the actual nodes ids.  Note: This pointer is not always valid.  It is invalid
+     * after new sets are built before "trackGrains" has been re-run.  This is intentional and lets us
+     * avoid making unnecessary copies of the set when we don't need it.
+     */
+    const std::set<dof_id_type> *nodes_ptr;
+  };
+
+  bool _compute_op_maps;
+  // Data structure for active order parameter information on nodes
+  std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > > _nodal_data;
+
+  // This map only works with Linear Lagrange on First Order Elements
+  static const unsigned int _qp_to_node[8];
+};
+
+
+template<> void dataStore(std::ostream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context);
+template<> void dataLoad(std::istream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context);
+
+template<> void dataStore(std::ostream & stream, GrainTracker::BoundingSphereInfo * & bound_sphere_info, void * context);
+template<> void dataLoad(std::istream & stream, GrainTracker::BoundingSphereInfo * & bound_sphere_info, void * context);
+
+
+#endif
