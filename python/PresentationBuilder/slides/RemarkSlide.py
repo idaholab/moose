@@ -127,9 +127,21 @@ class RemarkSlide(MooseObject):
     if match:
       self.__title = (match.group(1), match.group(2))
 
-    # Set the object name, if the name parameters has not been set
+    # Set the object name using the title, if the name parameter does not exist
     if not self.isParamValid('name') and (self.__title is not None):
       self.parameters()['name'] = '-'.join(self.__title[1].lower().split())
+
+    # Set the object name using the previous slide name , if the name parameter does not exist
+    if not self.isParamValid('name') and self.parent.warehouse().objects:
+      previous = self.parent.warehouse().objects[-1]
+      if previous and previous.name():
+
+        # Set the name of the slide with the correct number prefix based on the pervious slide
+        name = previous.name() + '-1'
+        match = re.search('(.*?)(\d+)$', previous.name())
+        if match:
+          name = match.group(1) + str(int(match.group(2))+1)
+        self.parameters()['name'] = name
 
     elif not self.isParamValid('name'):
       name = self.parent.name() + '-' + str(self.parent.warehouse().numObjects())
@@ -200,14 +212,8 @@ class RemarkSlide(MooseObject):
     # Remark automatically highlights code lines starting with *, this is disabled
     # by removing the background in the css and adding an extract *, I hope Remark
     # will get updated so this is not necessary.
-    #
-    # Also, for some reason re.sub doesn't like this re, so I am doing it manually
-    regex = r'```(.*?)```'
-    markdown = re.sub(regex, self.__subLineHighlight, markdown, re.DOTALL | re.MULTILINE)
-#    for m in re.finditer(regex, markdown, re.DOTALL | re.MULTILINE):
-#      for line in m.group(1).split('\n'):
-#        if line.strip().startswith('*'):
-#          markdown = markdown.replace(line, '*' + line)
+    regex = r'```.*?```'
+    markdown = re.sub(regex, self.__subLineHighlight, markdown, flags = re.DOTALL | re.MULTILINE)
 
     # Search for github code urls
     if self.getParam('auto_insert_github_code'):
@@ -240,11 +246,13 @@ class RemarkSlide(MooseObject):
   ##
   # Substitution method for fixing auto line highlighting
   def __subLineHighlight(self, match):
-    output = match.group(0)
-    for line in output.split('\n'):
-      if line.strip().startswith('*'):
-        output = output.replace(line, '*' + line)
-    return match.group(0)
+    cpp_section = match.group(0)
+    # Append asterisks at the front of lines beginning with asterisks
+    return re.sub('^(\s*)'    # Capture leading whitespace \
+                  '(\*)',     # Capture literal asterisk \
+                  '\\1*\\2',  # Replace with leading space, then a new asterisk followed by the captured asterisk \
+                  cpp_section, flags = re.MULTILINE | re.VERBOSE)
+
 
   ##
   # Substitution method for github code
