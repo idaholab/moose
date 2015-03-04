@@ -8,12 +8,12 @@
   [./test_hidden_shown]
     type = 'RunException'
     input = 'output_vars_hidden_shown_check.i'
-    expect_err = 'Output\(s\) specified to be both shown and hidden: nodal, u'
+    expect_err = 'Output\(s\) specified to be both shown and hidden: nodal u'
   [../]
 
   [./test_nonexistent]
     type = 'RunException'
     input = 'output_vars_nonexistent.i'
-    expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\): foo1, foo2'
+    expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\): foo1 foo2'
   [../]
 []

@@ -92,7 +92,7 @@ public:
    *
    * @see hasNodalVariableOutput
    */
-  const std::vector<std::string> & getNodalVariableOutput();
+  const std::set<std::string> & getNodalVariableOutput();
 
   /**
    * Returns true if there exists elemental nonlinear variables for output
@@ -106,7 +106,7 @@ public:
    * @return A vector of strings containing the names of the nonlinear variables for output
    * @see hasElementalVariableOutput
    */
-  const std::vector<std::string> & getElementalVariableOutput();
+  const std::set<std::string> & getElementalVariableOutput();
 
   /**
    * Returns true if there exists scalar variables for output
@@ -120,7 +120,7 @@ public:
    * @return A vector of strings containing the names of the scalar variables for output
    * @see hasScalarVariableOutput
    */
-  const std::vector<std::string> & getScalarOutput();
+  const std::set<std::string> & getScalarOutput();
 
   /**
    * Returns true if there exists postprocessors for output
@@ -134,7 +134,7 @@ public:
    * @return A vector of strings containing the names of the postprocessor variables for output
    * @see hasPostprocessorOutput
    */
-  const std::vector<std::string> & getPostprocessorOutput();
+  const std::set<std::string> & getPostprocessorOutput();
 
   /**
    * Returns true if there exists VectorPostprocessors for output
@@ -148,7 +148,7 @@ public:
    * @return A vector of strings containing the names of the VectorPostprocessor variables for output
    * @see hasVectorPostprocessorOutput
    */
-  const std::vector<std::string> & getVectorPostprocessorOutput();
+  const std::set<std::string> & getVectorPostprocessorOutput();
 
   /**
    * A method for enabling individual output type control
@@ -367,9 +367,9 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
          postprocessor_it != warehouse(Moose::exec_types[i])[0].all().end();
          ++postprocessor_it)
     {
-      // Store the name in the available postprocessors
+      // Store the name in the available postprocessors, if it does not already exist in the list
       postprocessor_type *pps = *postprocessor_it;
-      output_data.available.push_back(pps->PPName());
+      output_data.available.insert(pps->PPName());
 
       // Extract the list of outputs
       std::set<OutputName> pps_outputs = pps->getOutputs();
