@@ -77,7 +77,7 @@ public:
    * Fetch a pointer to a material property if it exists, otherwise return null
    */
   template<typename U>
-  MaterialProperty<U> * getMaterialPropertyPointer(const std::string & name) __attribute__ ((deprecated));
+  MaterialProperty<U> * getMaterialPropertyPointer(const std::string & name);
 
   // Interface style (2)
   // return references to a zero material property for non-existing material properties
@@ -101,14 +101,6 @@ public:
   const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
   template<typename U>
   const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
-
-  // deprecated methods
-  template<typename U>
-  const MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1) __attribute__ ((deprecated));
-  template<typename U>
-  const MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2) __attribute__ ((deprecated));
-  template<typename U>
-  const MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3) __attribute__ ((deprecated));
 
 private:
   FEProblem & _dmi_fe_problem;
@@ -170,6 +162,7 @@ template<typename U>
 MaterialProperty<U> *
 DerivativeMaterialInterface<T>::getMaterialPropertyPointer(const std::string & name)
 {
+  mooseDeprecated("getMaterialPropertyPointer is deprecated because it is construction order dependent. Use getDefaultMaterialProperty instead.");
   return this->template hasMaterialProperty<U>(name) ? &(this->template getMaterialProperty<U>(name)) : NULL;
 }
 
@@ -269,34 +262,6 @@ template<typename U>
 const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
 {
-  return getDefaultMaterialProperty<U>(propertyNameThird(base, c1, c2, c3));
-}
-
-// deprecated
-template<class T>
-template<typename U>
-const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std::string &c1)
-{
-  mooseDeprecated("getDerivative is being replaced by getMaterialPropertyDerivative (same arguments)");
-  return getDefaultMaterialProperty<U>(propertyNameFirst(base, c1));
-}
-
-template<class T>
-template<typename U>
-const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std::string &c1, const std::string &c2)
-{
-  mooseDeprecated("getDerivative is being replaced by getMaterialPropertyDerivative (same arguments)");
-  return getDefaultMaterialProperty<U>(propertyNameSecond(base, c1, c2));
-}
-
-template<class T>
-template<typename U>
-const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
-{
-  mooseDeprecated("getDerivative is being replaced by getMaterialPropertyDerivative (same arguments)");
   return getDefaultMaterialProperty<U>(propertyNameThird(base, c1, c2, c3));
 }
 
