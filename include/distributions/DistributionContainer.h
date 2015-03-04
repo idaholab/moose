@@ -96,8 +96,8 @@ public:
    */
   double inverseCdf(const char * dist_alias, double rng);
 
-  std::vector<double> inverseCdf(const char * dist_alias, double min, double max);
-  std::vector<double> inverseCdf(const std::string dist_alias, double min, double max);
+  std::vector<double> inverseCdf(const char * dist_alias, double F, double g);
+  std::vector<double> inverseCdf(const std::string dist_alias, double F, double g);
 
   double random(); // return a random number
 

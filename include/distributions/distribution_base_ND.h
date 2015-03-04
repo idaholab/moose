@@ -291,16 +291,16 @@ public:
 		  std::vector<double> cellPoint0 = _interpolator.get_cellPoint0();
 		  std::vector<double> cellDxs = _interpolator.get_cellDxs();
 
-		  std::cerr<<"Discretization points for ND spline for inverseWeight"<< std::endl;
+		  std::cerr<<"Discretization points for ND spline for inverseWeightZZZZ"<< std::endl;
 		  for(int i=0; i<n_dimensions; i++){
 			  std::vector<double> temp;
 			  for(int j=0; j<numberDiscretization; j++){
 				  double value = cellPoint0.at(i) + cellDxs.at(i)/numberDiscretization * j;
-				  std::cout<<", " << value ;
+				  //std::cout<<", " << value ;
 				  temp.push_back(value);
 			  }
 			  discretizations.push_back(temp);
-			  std::cout<<" " << std::endl;
+			  //std::cout<<" " << std::endl;
 		  }
 
 		  int totalNumberOfValues=1;
@@ -328,7 +328,7 @@ public:
 
 
 		  _CDFspline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, false);
-		  std::cerr<<"Creation of ND spline distribution for inverseWeight completed:: "<< _CDFspline.returnDimensionality() << std::endl;
+		  //std::cerr<<"Creation of ND spline distribution for inverseWeight completed:: "<< _CDFspline.returnDimensionality() << std::endl;
 	  }
 };
 
@@ -379,7 +379,7 @@ public:
 
 	  _CDFspline.updateRNGparameter(_tolerance,_initial_divisions);
 
-	  std::cout<<"Distribution updateRNGparameter" << _tolerance <<  _initial_divisions << std::endl;
+	  //std::cout<<"Distribution updateRNGparameter" << _tolerance <<  _initial_divisions << std::endl;
   };
 
 
@@ -389,7 +389,7 @@ public:
 	  if (_CDFprovided)
 		  return _interpolator.NDinverseFunctionGrid(F,g);
 	  else{
-		  std::cout<<"BasicMultiDimensionalInverseWeight - InverseCdf: " << _CDFspline.returnDimensionality() <<std::endl;
+		  //std::cout<<"BasicMultiDimensionalInverseWeight - InverseCdf: " << _CDFspline.returnDimensionality() <<std::endl;
 		  return _CDFspline.InverseCdf(F,g);
 	  }
   };

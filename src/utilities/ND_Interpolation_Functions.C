@@ -41,7 +41,7 @@ void NDInterpolation::updateRNGparameters(double tolerance, double initial_divis
 	_tolerance = tolerance;
 	_initial_divisions = initial_divisions;
 
-	std::cout<<"c++ NDInterpolation updateRNGparameter" << _tolerance << _initial_divisions << std::endl;
+	//std::cout<<"c++ NDInterpolation updateRNGparameter" << _tolerance << _initial_divisions << std::endl;
 }
 
 
@@ -60,7 +60,7 @@ bool checkUpperBound(double upper_bound, std::vector<double> values){
  for (int i=0; i<values.size(); i++){
   if (values.at(i) > upper_bound){
    check = check && false;
-   std::cout<< "values.at(i) : " << values.at(i) << std::endl;
+   //std::cout<< "values.at(i) : " << values.at(i) << std::endl;
   }
   else
    check = check && true;
@@ -235,7 +235,7 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  //std::cout<<"c++ initial_divisions: "<< _initial_divisions << std::endl;
  //std::cout<<"c++ tolerance: "<< _tolerance << std::endl;
- std::cout<<"c++ F: "<< F << std::endl;
+ //std::cout<<"c++ F: "<< F << std::endl;
  //std::cout<<"c++ _dimensions: "<< _dimensions << std::endl;
 
  int last_divisions = (int)round(1.0/_tolerance*_initial_divisions);
@@ -400,7 +400,7 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
 
   center[i] = cell[0][i] + dxs[i];
 
-  std::cout << "center: "<< center[i]<< std::endl;
+  //std::cout << "center: "<< center[i]<< std::endl;
  }
  return center;
 }

@@ -46,30 +46,30 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
 	 numberOfDimensions = (int)data[startingPoint];
  else
 	 throwError("readOrderedNDarray: error in" << filename << "; number of dimensions must be integer");
- std::cerr << "numberOfDimensions: " << numberOfDimensions << std::endl;
+ //std::cerr << "numberOfDimensions: " << numberOfDimensions << std::endl;
 
     std::vector<int> discretizations (numberOfDimensions);
 
     startingPoint++;
-    std::cerr << "discretizations" << std::endl;
+    //std::cerr << "discretizations" << std::endl;
     for (int i=0; i<numberOfDimensions; i++){
     	if (checkIfdoubleIsInt(data[startingPoint]))
     		discretizations[i] = (int)data[startingPoint];
     	else
     		 throwError("readOrderedNDarray: error in" << filename << "; number of discretizaions must be integer");
-        std::cerr << "discretizations["<< i << "]: " << discretizations[i] << std::endl;
+        //std::cerr << "discretizations["<< i << "]: " << discretizations[i] << std::endl;
         startingPoint++;
     }
 
     for (int i=0; i<numberOfDimensions; i++){
-     std::cerr << "Dimension: " << i << std::endl;
+     //std::cerr << "Dimension: " << i << std::endl;
         std::vector<double> tempDiscretization;
         for (int j=0; j<discretizations[i]; j++){
             tempDiscretization.push_back(data[startingPoint]);
-            std::cerr << data[startingPoint] << "," ;
+            //std::cerr << data[startingPoint] << "," ;
             startingPoint++;
         }
-        std::cerr << " - " <<  tempDiscretization.size() << std::endl;
+        //std::cerr << " - " <<  tempDiscretization.size() << std::endl;
         discretizationValues.push_back(tempDiscretization);
     }
 

@@ -55,7 +55,7 @@ void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretization
 	 for (int nDim=0; nDim<_dimensions; nDim++){
 		 int length = _discretizations.at(nDim).size();
 	     _hj.push_back((_discretizations.at(nDim).at(length-1) - _discretizations.at(nDim).at(0))/(length-1));
-	     std::cerr << "dim " << nDim << ": _hj: " << _hj.at(nDim) << std::endl;
+	     //std::cerr << "dim " << nDim << ": _hj: " << _hj.at(nDim) << std::endl;
 
 	     _min_disc.push_back(_discretizations.at(nDim).at(0));
 	     _max_disc.push_back(_discretizations.at(nDim).at(length-1));
