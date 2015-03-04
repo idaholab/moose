@@ -47,7 +47,7 @@ class SlideWarehouse(Warehouse):
     self.__count += 1
 
   ##
-  # The unumber of objects
+  # The number of objects
   def numObjects(self):
     return len(self.objects)
 
@@ -63,7 +63,6 @@ class SlideWarehouse(Warehouse):
   # @param name The name of the slide to check existence
   def hasObject(self, name):
     return name in self.__slide_map
-
 
   ##
   # Return the active slide objects (public)
