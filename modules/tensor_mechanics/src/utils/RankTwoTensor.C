@@ -877,24 +877,31 @@ RankTwoTensor::syev(const char * calculation_type, std::vector<PetscScalar> & ei
 }
 
 void
-RankTwoTensor::initRandom()
+RankTwoTensor::initRandom( unsigned int rand_seed )
 {
-  unsigned int rand_seed = 2000;
   MooseRandom::seed( rand_seed );
 }
 
 RankTwoTensor
-RankTwoTensor::genRandomTensor( Real val )
+RankTwoTensor::genRandomTensor( Real scale, Real offset )
 {
-
   RankTwoTensor tensor;
 
-  tensor(0,0) = ( MooseRandom::rand() + 1.0 ) * val;
-  tensor(0,1) = tensor(1,0) = ( MooseRandom::rand() + 1.0 ) * val;
-  tensor(0,2) = tensor(2,0) = ( MooseRandom::rand() + 1.0 ) * val;
-  tensor(1,1) = ( MooseRandom::rand() + 1.0 ) * val;
-  tensor(1,2) = tensor(2,1) = ( MooseRandom::rand() + 1.0 ) * val;
-  tensor(2,2) = ( MooseRandom::rand() + 1.0 ) * val;
+  for ( unsigned int i = 0; i < N; i++ )
+    for ( unsigned int j = 0; j < N; j++ )
+      tensor(i,j) = ( MooseRandom::rand() + offset ) * scale;
+
+  return tensor;
+}
+
+RankTwoTensor
+RankTwoTensor::genRandomSymmTensor( Real scale, Real offset )
+{
+  RankTwoTensor tensor;
+
+  for ( unsigned int i = 0; i < N; i++ )
+    for ( unsigned int j = i; j < N; j++ )
+      tensor(i,j) = tensor(j,i) = ( MooseRandom::rand() + offset ) * scale;
 
   return tensor;
 }
