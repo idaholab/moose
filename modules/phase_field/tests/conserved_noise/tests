@@ -1,0 +1,24 @@
+[Tests]
+  [./integral]
+    type = 'CSVDiff'
+    input = 'integral.i'
+    csvdiff = 'integral.csv'
+  [../]
+  [./normal]
+    max_parallel = 1
+    type = 'Exodiff'
+    input = 'normal.i'
+    exodiff = 'normal.e'
+  [../]
+  [./uniform]
+    max_parallel = 1
+    type = 'Exodiff'
+    input = 'uniform.i'
+    exodiff = 'uniform.e'
+  [../]
+  [./integral_normal_masked]
+    type = 'CSVDiff'
+    input = 'normal_masked.i'
+    csvdiff = 'normal_masked.csv'
+  [../]
+[]

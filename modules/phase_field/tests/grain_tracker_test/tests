@@ -1,0 +1,27 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'grain_tracker_same.i'
+    exodiff = 'grain_tracker_same_out.e'
+  [../]
+
+  [./test_recover]
+    type = 'Exodiff'
+    input = 'grain_tracker_recover.i'
+    exodiff = 'grain_tracker_recover_out.e
+               grain_tracker_recover_out.e-s002
+               grain_tracker_recover_out.e-s003'
+
+    #Note: this test should be run with min parallel=2
+    #but can diff across architectures in the finite nodal aux fields.
+    # min_parallel = 2
+    skip = '#84'
+  [../]
+
+  [./test_ebsd]
+    type = 'Exodiff'
+    input = 'grain_tracker_ebsd.i'
+    exodiff = 'grain_tracker_ebsd_out.e'
+    skip = 'ReconVarIC not moved yet'
+  [../]
+[]

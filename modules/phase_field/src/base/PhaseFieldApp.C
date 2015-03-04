@@ -70,12 +70,22 @@
 #include "SolutionRasterizer.h"
 #include "ImageMesh.h"
 #include "MaskedBodyForce.h"
+#include "LangevinNoise.h"
+#include "ConservedLangevinNoise.h"
 
 #include "PFFracBulkRate.h"
 #include "PFFracIntVar.h"
 #include "PFFracCoupledInterface.h"
 #include "LinearIsoElasticPFDamage.h"
 #include "PFFracBulkRateMaterial.h"
+
+#include "ConservedUniformNoise.h"
+#include "ConservedNormalNoise.h"
+#include "ConservedMaskedUniformNoise.h"
+#include "ConservedMaskedNormalNoise.h"
+#include "GrainTracker.h"
+#include "EBSDReader.h"
+#include "EBSDMesh.h"
 
 //#include "SPPARKSUserObject.h"
 //#include "SPPARKSAux.h"
@@ -136,6 +146,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(PFFracBulkRate);
   registerKernel(PFFracIntVar);
   registerKernel(PFFracCoupledInterface);
+  registerKernel(LangevinNoise);
+  registerKernel(ConservedLangevinNoise);
 
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
@@ -167,6 +179,10 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(LinearIsoElasticPFDamage);
   registerMaterial(PFFracBulkRateMaterial);
 
+  registerPostprocessor(GrainTracker);
+  registerUserObject(EBSDReader);
+  registerMesh(EBSDMesh);
+
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
   registerAux(TotalFreeEnergy);
@@ -176,6 +192,11 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(NodalFloodCount);
   registerUserObject(NodalVolumeFraction);
   registerUserObject(SolutionRasterizer);
+  registerUserObject(ConservedUniformNoise);
+  registerUserObject(ConservedNormalNoise);
+  registerUserObject(ConservedMaskedUniformNoise);
+  registerUserObject(ConservedMaskedNormalNoise);
+
   // registerUserObject(SPPARKSUserObject);
 
 #ifdef LIBMESH_HAVE_VTK
