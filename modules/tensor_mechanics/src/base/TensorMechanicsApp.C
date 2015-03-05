@@ -55,6 +55,7 @@
 #include "FiniteStrainPlasticAux.h"
 #include "CrystalPlasticitySlipSysAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
+#include "RankTwoScalarAux.h"
 #include "StressDivergencePFFracTensors.h"
 
 
@@ -140,6 +141,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(FiniteStrainPlasticAux);
   registerAux(CrystalPlasticitySlipSysAux);
   registerAux(CrystalPlasticityRotationOutAux);
+  registerAux(RankTwoScalarAux);
 }
 
 void
