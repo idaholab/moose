@@ -4,16 +4,16 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "Pressure.h"
+#include "PressureTM.h"
 #include "Function.h"
 #include "MooseError.h"
 
 template<>
-InputParameters validParams<Pressure>()
+InputParameters validParams<PressureTM>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addClassDescription("Applies a pressure on a given boundary in a given direction");
-  params.addRequiredParam<int>("component", "The component for the Pressure");
+  params.addRequiredParam<int>("component", "The component for the PressureTM");
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
   params.addParam<FunctionName>("function", "The function that describes the pressure");
   params.addParam<PostprocessorName>("postprocessor", "Postprocessor that will supply the pressure value");
@@ -21,7 +21,7 @@ InputParameters validParams<Pressure>()
   return params;
 }
 
-Pressure::Pressure(const std::string & name, InputParameters parameters)
+PressureTM::PressureTM(const std::string & name, InputParameters parameters)
   :IntegratedBC(name, parameters),
    _component(getParam<int>("component")),
    _factor(getParam<Real>("factor")),
@@ -43,7 +43,7 @@ Pressure::Pressure(const std::string & name, InputParameters parameters)
 }
 
 Real
-Pressure::computeQpResidual()
+PressureTM::computeQpResidual()
 {
   Real factor = _factor;
 

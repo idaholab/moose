@@ -4,28 +4,28 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef PRESSURE_H
-#define PRESSURE_H
+#ifndef PRESSURETM_H
+#define PRESSURETM_H
 
 #include "IntegratedBC.h"
 
 //Forward Declarations
 class Function;
-class Pressure;
+class PressureTM;
 
 template<>
-InputParameters validParams<Pressure>();
+InputParameters validParams<PressureTM>();
 
 /**
- * Pressure applies a pressure on a given boundary in the direction defined by component
+ * PressureTM applies a pressure on a given boundary in the direction defined by component
  */
-class Pressure : public IntegratedBC
+class PressureTM : public IntegratedBC
 {
 public:
 
-  Pressure(const std::string & name, InputParameters parameters);
+  PressureTM(const std::string & name, InputParameters parameters);
 
-  virtual ~Pressure(){}
+  virtual ~PressureTM(){}
 
 protected:
 
@@ -41,4 +41,4 @@ protected:
 
 };
 
-#endif //PRESSURE_H
+#endif //PRESSURETM_H

@@ -4,15 +4,15 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef PRESSUREACTION_H
-#define PRESSUREACTION_H
+#ifndef PRESSUREACTIONTM_H
+#define PRESSUREACTIONTM_H
 
 #include "Action.h"
 
-class PressureAction: public Action
+class PressureActionTM: public Action
 {
 public:
-  PressureAction(const std::string & name, InputParameters params);
+  PressureActionTM(const std::string & name, InputParameters params);
 
   virtual void act();
 
@@ -33,6 +33,6 @@ protected:
 };
 
 template<>
-InputParameters validParams<PressureAction>();
+InputParameters validParams<PressureActionTM>();
 
-#endif // PRESSUREACTION_H
+#endif // PRESSUREACTIONTM_H

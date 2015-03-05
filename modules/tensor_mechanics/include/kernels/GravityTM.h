@@ -4,27 +4,27 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef GRAVITY_H
-#define GRAVITY_H
+#ifndef GRAVITYTM_H
+#define GRAVITYTM_H
 
 #include "BodyForce.h"
 
 //Forward Declarations
-class Gravity;
+class GravityTM;
 
 template<>
-InputParameters validParams<Gravity>();
+InputParameters validParams<GravityTM>();
 
 /**
- * Gravity computes the body force (force/volume) given the acceleration of gravity (value) and the density
+ * GravityTM computes the body force (force/volume) given the acceleration of gravity (value) and the density
  */
-class Gravity : public BodyForce
+class GravityTM : public BodyForce
 {
 public:
 
-  Gravity(const std::string & name, InputParameters parameters);
+  GravityTM(const std::string & name, InputParameters parameters);
 
-  virtual ~Gravity() {}
+  virtual ~GravityTM() {}
 
 protected:
   virtual Real computeQpResidual();

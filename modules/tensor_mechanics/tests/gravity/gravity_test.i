@@ -43,7 +43,7 @@
     disp_z = disp_z
   [../]
   [./gravity_y]
-    type = Gravity
+    type = GravityTM
     variable = disp_y
     value = -9.81
   [../]

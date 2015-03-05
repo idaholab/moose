@@ -84,7 +84,7 @@
     boundary = 6
     value = 0.0
   [../]
-  [./Pressure]
+  [./PressureTM]
     [./Side1]
       boundary = 1
       function = rampConstant

@@ -9,12 +9,12 @@
 #include "AppFactory.h"
 
 #include "TensorMechanicsAction.h"
-#include "PressureAction.h"
+#include "PressureActionTM.h"
 
 #include "StressDivergenceTensors.h"
 #include "CosseratStressDivergenceTensors.h"
 #include "MomentBalancing.h"
-#include "Gravity.h"
+#include "GravityTM.h"
 
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
@@ -60,7 +60,7 @@
 #include "RankTwoScalarAux.h"
 #include "StressDivergencePFFracTensors.h"
 
-#include "Pressure.h"
+#include "PressureTM.h"
 
 
 template<>
@@ -103,7 +103,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(CosseratStressDivergenceTensors);
   registerKernel(MomentBalancing);
   registerKernel(StressDivergencePFFracTensors);
-  registerKernel(Gravity);
+  registerKernel(GravityTM);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
@@ -148,7 +148,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(CrystalPlasticityRotationOutAux);
   registerAux(RankTwoScalarAux);
 
-  registerBoundaryCondition(Pressure);
+  registerBoundaryCondition(PressureTM);
 }
 
 void
@@ -156,9 +156,9 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
 {
   syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
 
-  syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
-  syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
+  syntax.registerActionSyntax("EmptyAction", "BCs/PressureTM");
+  syntax.registerActionSyntax("PressureActionTM", "BCs/PressureTM/*");
 
   registerAction(TensorMechanicsAction, "add_kernel");
-  registerAction(PressureAction, "add_bc");
+  registerAction(PressureActionTM, "add_bc");
 }

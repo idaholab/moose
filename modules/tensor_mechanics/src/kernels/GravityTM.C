@@ -4,10 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "Gravity.h"
+#include "GravityTM.h"
 
 template<>
-InputParameters validParams<Gravity>()
+InputParameters validParams<GravityTM>()
 {
   InputParameters params = validParams<BodyForce>();
   params.addClassDescription("Apply gravity. Value is in units of acceleration.");
@@ -15,14 +15,14 @@ InputParameters validParams<Gravity>()
   return params;
 }
 
-Gravity::Gravity(const std::string & name, InputParameters parameters) :
+GravityTM::GravityTM(const std::string & name, InputParameters parameters) :
   BodyForce(name, parameters),
   _density(getMaterialProperty<Real>("density"))
 {
 }
 
 Real
-Gravity::computeQpResidual()
+GravityTM::computeQpResidual()
 {
   return _density[_qp] * BodyForce::computeQpResidual();
 }

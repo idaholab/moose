@@ -4,14 +4,14 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "PressureAction.h"
+#include "PressureActionTM.h"
 
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
 
 template<>
-InputParameters validParams<PressureAction>()
+InputParameters validParams<PressureActionTM>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
@@ -29,7 +29,7 @@ InputParameters validParams<PressureAction>()
   return params;
 }
 
-PressureAction::PressureAction(const std::string & name, InputParameters params) :
+PressureActionTM::PressureActionTM(const std::string & name, InputParameters params) :
   Action(name, params),
   _boundary(getParam<std::vector<BoundaryName> >("boundary")),
   _disp_x(getParam<NonlinearVariableName>("disp_x")),
@@ -37,7 +37,7 @@ PressureAction::PressureAction(const std::string & name, InputParameters params)
   _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _factor(getParam<Real>("factor")),
   _postprocessor(getParam<PostprocessorName>("postprocessor")),
-  _kernel_name("Pressure"),
+  _kernel_name("PressureTM"),
   _use_displaced_mesh(true)
 {
   _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_x"));
@@ -50,7 +50,7 @@ PressureAction::PressureAction(const std::string & name, InputParameters params)
 }
 
 void
-PressureAction::act()
+PressureActionTM::act()
 {
   // Determine number of dimensions
   unsigned int dim(1);
