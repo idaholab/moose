@@ -343,10 +343,13 @@ public:
    * regardless of the type supplied to the call, will be executed with EXEC_FORCED.
    *
    * Forced output will NOT override the allowOutput flag.
-   *
-   * This is private, users should utilize FEProblem::forceOutput()
    */
   void forceOutput();
+
+  /**
+   * Reinitialize petsc output for proper linear/nonlinear iteration display
+   */
+  void initPetscOutput();
 
   virtual const std::vector<MooseObject *> & getObjectsByName(const std::string & name, THREAD_ID tid);
 
