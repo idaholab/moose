@@ -21,7 +21,7 @@ class EFAelement;
 
 class EFAfragment
 {
-  public:
+public:
 
   EFAfragment(EFAelement * host,
              bool create_boundary_edges,
@@ -44,12 +44,14 @@ class EFAfragment
   EFAelement* get_host();
   std::vector<unsigned int> get_interior_edge_id();
   bool is_edge_second_cut(unsigned int edge_id);
+  unsigned int num_edges() const;
+  EFAedge* get_edge(unsigned int edge_id) const;
+  void add_edge(EFAedge* new_edge);
 
-  std::vector<EFAedge*> boundary_edges;
+private:
 
-  private:
-
-  EFAelement * host_elem;
+  std::vector<EFAedge*> _boundary_edges;
+  EFAelement * _host_elem;
 };
 
 #endif

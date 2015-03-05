@@ -96,17 +96,17 @@ XFEMCutElem::calc_physical_volfrac()
   //Calculate area of entire element and fragment using the formula:
   // A = 1/2 sum_{i=0}^{n-1} (x_i y_{i+1} - x_{i+1} y{i})
 
-  for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
+  for (unsigned int i = 0; i < _efa_elem.get_fragment(0)->num_edges(); ++i)
   {
-    Point edge_p1 = get_node_coords(_efa_elem.fragments[0]->boundary_edges[i]->get_node(0));
-    Point edge_p2 = get_node_coords(_efa_elem.fragments[0]->boundary_edges[i]->get_node(1));
+    Point edge_p1 = get_node_coords(_efa_elem.get_frag_edge(0,i)->get_node(0));
+    Point edge_p2 = get_node_coords(_efa_elem.get_frag_edge(0,i)->get_node(1));
     frag_area += 0.5*(edge_p1(0)-edge_p2(0))*(edge_p1(1)+edge_p2(1));
   }
 
-  for (unsigned int i = 0; i < _efa_elem.edges.size(); ++i)
+  for (unsigned int i = 0; i < _efa_elem.num_edges(); ++i)
   {
-    Point edge_p1 = get_node_coords(_efa_elem.edges[i]->get_node(0));
-    Point edge_p2 = get_node_coords(_efa_elem.edges[i]->get_node(1));
+    Point edge_p1 = get_node_coords(_efa_elem.get_edge(i)->get_node(0));
+    Point edge_p2 = get_node_coords(_efa_elem.get_edge(i)->get_node(1));
     el_area += 0.5*(edge_p1(0)-edge_p2(0))*(edge_p1(1)+edge_p2(1));
   }
 
@@ -118,13 +118,13 @@ XFEMCutElem::get_origin(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
   Point orig(0.0,0.0,0.0);
   std::vector<std::vector<EFAnode*> > cut_line_nodes;
-  for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
+  for (unsigned int i = 0; i < _efa_elem.get_fragment(0)->num_edges(); ++i)
   {
-    if (_efa_elem.fragments[0]->boundary_edges[i]->is_interior_edge())
+    if (_efa_elem.get_frag_edge(0,i)->is_interior_edge())
     {
       std::vector<EFAnode*> node_line(2,NULL);
-      node_line[0] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(0);
-      node_line[1] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(1);
+      node_line[0] = _efa_elem.get_frag_edge(0,i)->get_node(0);
+      node_line[1] = _efa_elem.get_frag_edge(0,i)->get_node(1);
       cut_line_nodes.push_back(node_line);
     }  
   }
@@ -143,13 +143,13 @@ XFEMCutElem::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
   Point normal(0.0,0.0,0.0);
   std::vector<std::vector<EFAnode*> > cut_line_nodes;
-  for (unsigned int i = 0; i < _efa_elem.fragments[0]->boundary_edges.size(); ++i)
+  for (unsigned int i = 0; i < _efa_elem.get_fragment(0)->num_edges(); ++i)
   {
-    if (_efa_elem.fragments[0]->boundary_edges[i]->is_interior_edge())
+    if (_efa_elem.get_frag_edge(0,i)->is_interior_edge())
     {
       std::vector<EFAnode*> node_line(2,NULL);
-      node_line[0] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(0);
-      node_line[1] = _efa_elem.fragments[0]->boundary_edges[i]->get_node(1);
+      node_line[0] = _efa_elem.get_frag_edge(0,i)->get_node(0);
+      node_line[1] = _efa_elem.get_frag_edge(0,i)->get_node(1);
       cut_line_nodes.push_back(node_line);
     }  
   }
@@ -389,18 +389,18 @@ XFEM::mark_cut_edges_by_geometry(Real time)
       continue;
 
     // get fragment edges
-    if (CEMElem->fragments.size() > 0)
+    if (CEMElem->num_frags() > 0)
     {
-      if (CEMElem->fragments.size() > 1)
+      if (CEMElem->num_frags() > 1)
       {
         libMesh::err << " ERROR: element "<<elem->id()<<" has more than one fragments at this point"<<std::endl;
         exit(1);
       }
-      for (unsigned int i = 0; i < CEMElem->fragments[0]->boundary_edges.size(); ++i)
+      for (unsigned int i = 0; i < CEMElem->get_fragment(0)->num_edges(); ++i)
       {
         std::vector<Point> p_line(2,Point(0.0,0.0,0.0));
-        p_line[0] = get_efa_node_coor(CEMElem->fragments[0]->boundary_edges[i]->get_node(0), CEMElem, elem);
-        p_line[1] = get_efa_node_coor(CEMElem->fragments[0]->boundary_edges[i]->get_node(1), CEMElem, elem);
+        p_line[0] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(0), CEMElem, elem);
+        p_line[1] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(1), CEMElem, elem);
         frag_edges.push_back(p_line);
       } // i
     }
@@ -409,7 +409,7 @@ XFEM::mark_cut_edges_by_geometry(Real time)
     for (unsigned int i=0; i<_geometric_cuts.size(); ++i)
     {
       _geometric_cuts[i]->cut_elem_by_geometry(elem, elemCutEdges, time);
-      if (CEMElem->fragments.size() > 0)
+      if (CEMElem->num_frags() > 0)
         _geometric_cuts[i]->cut_frag_by_geometry(frag_edges, fragCutEdges, time);
     }
 
@@ -424,7 +424,7 @@ XFEM::mark_cut_edges_by_geometry(Real time)
 
     for (unsigned int i=0; i<fragCutEdges.size(); ++i) // MUST DO THIS AFTER MARKING ELEMENT EDGES
     {
-      if (!CEMElem->fragments[0]->is_edge_second_cut(fragCutEdges[i].host_side_id))
+      if (!CEMElem->get_fragment(0)->is_edge_second_cut(fragCutEdges[i].host_side_id))
       {
         _efa_mesh.addFragEdgeIntersection(elem->id(),fragCutEdges[i].host_side_id,fragCutEdges[i].distance);
         marked_edges = true;
@@ -452,7 +452,7 @@ XFEM::mark_cut_edges_by_state()
       continue;
 
     // find the first cut edge
-    unsigned int nsides = CEMElem->num_edges;
+    unsigned int nsides = CEMElem->num_edges();
     unsigned int orig_cut_side_id = 999999;
     Real orig_cut_distance = -1.0;
     EFAnode * orig_node = NULL;
@@ -463,7 +463,7 @@ XFEM::mark_cut_edges_by_state()
       orig_cut_side_id = CEMElem->get_tip_edge_id();
       if (orig_cut_side_id < nsides) // valid crack-tip edge found
       {
-        orig_edge = CEMElem->edges[orig_cut_side_id];
+        orig_edge = CEMElem->get_edge(orig_cut_side_id);
         orig_cut_distance = orig_edge->get_intersection(orig_edge->get_node(0));
         orig_node = orig_edge->get_embedded_node();
       }
@@ -487,7 +487,7 @@ XFEM::mark_cut_edges_by_state()
         {
           orig_cut_distance = 0.5;
           _efa_mesh.addEdgeIntersection(elem->id(),orig_cut_side_id,orig_cut_distance);
-          orig_edge = CEMElem->edges[orig_cut_side_id];
+          orig_edge = CEMElem->get_edge(orig_cut_side_id);
           orig_node = orig_edge->get_embedded_node();
         }
         else
@@ -495,19 +495,20 @@ XFEM::mark_cut_edges_by_state()
       }
       else if (mit2 != _state_marked_frags.end()) // cut-surface secondary crack initiation
       {
-        if (CEMElem->fragments.size() != 1)
+        if (CEMElem->num_frags() != 1)
         {
-          libMesh::err << " ERROR: element "<<elem->id()<<" flagged for a secondary crack, but has "<<CEMElem->fragments.size()<<" fragments"<<std::endl;
+          libMesh::err << " ERROR: element "<<elem->id()<<" flagged for a secondary crack, but has "
+                       <<CEMElem->num_frags()<<" fragments"<<std::endl;
           exit(1);
         }
-        std::vector<unsigned int> interior_edge_id = CEMElem->fragments[0]->get_interior_edge_id();
+        std::vector<unsigned int> interior_edge_id = CEMElem->get_fragment(0)->get_interior_edge_id();
         if (interior_edge_id.size() == 1)
           orig_cut_side_id = interior_edge_id[0];
         else
           continue; // skip this elem if more than one interior edges found (i.e. elem's been cut twice)
         orig_cut_distance = 0.5;
         _efa_mesh.addFragEdgeIntersection(elem->id(),orig_cut_side_id,orig_cut_distance);
-        orig_edge = CEMElem->fragments[0]->boundary_edges[orig_cut_side_id];
+        orig_edge = CEMElem->get_frag_edge(0,orig_cut_side_id);
         orig_node = orig_edge->get_embedded_node(); // must be an interior embedded node
       }
       else
@@ -522,13 +523,13 @@ XFEM::mark_cut_edges_by_state()
     std::vector<Point> edge_ends(2,Point(0.0,0.0,0.0));
     for (unsigned int i = 0; i < nsides; ++i)
     {
-      if (!orig_edge->isOverlapping(*CEMElem->edges[i]))
+      if (!orig_edge->isOverlapping(*CEMElem->get_edge(i)))
       {
-        edge_ends[0] = get_efa_node_coor(CEMElem->edges[i]->get_node(0),CEMElem,elem);
-        edge_ends[1] = get_efa_node_coor(CEMElem->edges[i]->get_node(1),CEMElem,elem);
+        edge_ends[0] = get_efa_node_coor(CEMElem->get_edge(i)->get_node(0),CEMElem,elem);
+        edge_ends[1] = get_efa_node_coor(CEMElem->get_edge(i)->get_node(1),CEMElem,elem);
         Real distance = 0.0;
         if (init_crack_intersect_edge(cut_origin,normal,edge_ends[0],edge_ends[1],distance) &&
-           (!CEMElem->is_edge_phantom(i)) && (!CEMElem->edges[i]->has_intersection()))
+           (!CEMElem->is_edge_phantom(i)) && (!CEMElem->get_edge(i)->has_intersection()))
         {
           _efa_mesh.addEdgeIntersection(elem->id(),i,distance);
           break;
@@ -538,18 +539,18 @@ XFEM::mark_cut_edges_by_state()
 
     // loop though framgent boundary edges to add possible second cut points
     // N.B. must do this after marking element edges
-    if (CEMElem->fragments.size() > 0)
+    if (CEMElem->num_frags() > 0)
     {
-      for (unsigned int i = 0; i < CEMElem->fragments[0]->boundary_edges.size(); ++i)
+      for (unsigned int i = 0; i < CEMElem->get_fragment(0)->num_edges(); ++i)
       {
-        if (!orig_edge->isOverlapping(*CEMElem->fragments[0]->boundary_edges[i]))
+        if (!orig_edge->isOverlapping(*CEMElem->get_frag_edge(0,i)))
         {
-          edge_ends[0] = get_efa_node_coor(CEMElem->fragments[0]->boundary_edges[i]->get_node(0),CEMElem,elem);
-          edge_ends[1] = get_efa_node_coor(CEMElem->fragments[0]->boundary_edges[i]->get_node(1),CEMElem,elem);
+          edge_ends[0] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(0),CEMElem,elem);
+          edge_ends[1] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(1),CEMElem,elem);
           Real distance = 0.0;
           if (init_crack_intersect_edge(cut_origin,normal,edge_ends[0],edge_ends[1],distance) &&
-             (CEMElem->fragments[0]->boundary_edges[i]->is_elem_full_edge() || 
-              CEMElem->fragments[0]->boundary_edges[i]->is_interior_edge()))
+             (CEMElem->get_frag_edge(0,i)->is_elem_full_edge() || 
+              CEMElem->get_frag_edge(0,i)->is_interior_edge()))
           { 
             _efa_mesh.addFragEdgeIntersection(elem->id(),i,distance);
             break;
@@ -636,7 +637,7 @@ XFEM::cut_mesh_with_efa()
   const std::vector<EFAelement*> NewElements = _efa_mesh.getChildElements();
   for (unsigned int i=0; i<NewElements.size(); ++i)
   {
-    unsigned int parent_id = NewElements[i]->parent->id();
+    unsigned int parent_id = NewElements[i]->parent()->id();
 
     Elem *parent_elem = _mesh->elem(parent_id);
     Elem *libmesh_elem = Elem::build(parent_elem->type()).release();
@@ -649,9 +650,9 @@ XFEM::cut_mesh_with_efa()
       libmesh_elem2 = Elem::build(parent_elem2->type()).release();
     }
 
-    for (unsigned int j=0; j<NewElements[i]->num_nodes; ++j)
+    for (unsigned int j=0; j<NewElements[i]->num_nodes(); ++j)
     {
-      unsigned int node_id = NewElements[i]->nodes[j]->id();
+      unsigned int node_id = NewElements[i]->get_node(j)->id();
       Node *libmesh_node;
 
       std::map<unsigned int, Node*>::iterator nit = efa_id_to_new_node.find(node_id);
