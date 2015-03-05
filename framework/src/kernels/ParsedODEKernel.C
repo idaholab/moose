@@ -19,9 +19,12 @@ InputParameters validParams<ParsedODEKernel>()
 {
   InputParameters params = validParams<ODEKernel>();
   params += validParams<FunctionParserUtils>();
+  params.addClassDescription("Parsed ODE function kernel.");
 
   params.addRequiredParam<std::string>("function", "function expression");
   params.addCoupledVar("args", "additional coupled variables");
+  params.addParam<std::vector<std::string> >("constant_names", std::vector<std::string>(), "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<std::string> >( "constant_expressions", std::vector<std::string>(), "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   return params;
 }
@@ -53,8 +56,15 @@ ParsedODEKernel::ParsedODEKernel(const std::string & name, InputParameters param
       _arg_index[number] = i;
   }
 
-  // parse function
+  // base function object
   _func_F =  new ADFunction();
+
+  // add the constant expressions
+  addFParserConstants(_func_F,
+                      getParam<std::vector<std::string> >("constant_names"),
+                      getParam<std::vector<std::string> >("constant_expressions"));
+
+  // parse function
   if (_func_F->Parse(_function, variables) >= 0)
      mooseError("Invalid function\n" << _function << "\nin ParsedODEKernel " << name << ".\n" << _func_F->ErrorMsg());
 

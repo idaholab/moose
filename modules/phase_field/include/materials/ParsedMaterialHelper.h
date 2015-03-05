@@ -132,41 +132,11 @@ void ParsedMaterialHelper<T>::functionParse(const std::string & function_express
   if (this->_nargs == 0)
     mooseError("Need at least one coupled variable for ParsedMaterialHelper.");
 
-  // check constant vectors
-  unsigned int nconst = constant_expressions.size();
-  if (nconst != constant_expressions.size())
-    mooseError("The parameter vectors constant_names and constant_values must have equal length.");
-
   // build base function object
   _func_F =  new ADFunction();
 
   // initialize constants
-  ADFunction *expression;
-  std::vector<Real> constant_values(nconst);
-  for (unsigned int i = 0; i < nconst; ++i)
-  {
-    expression = new ADFunction();
-
-    // add previously evaluated constants
-    for (unsigned int j = 0; j < i; ++j)
-      if (!expression->AddConstant(constant_names[j], constant_values[j]))
-        mooseError("Invalid constant name in ParsedMaterialHelper");
-
-    // build the temporary comnstant expression function
-    if (expression->Parse(constant_expressions[i], "") >= 0)
-       mooseError(std::string("Invalid constant expression\n" + constant_expressions[i] + "\n in ParsedMaterialHelper. ") + expression->ErrorMsg());
-
-    constant_values[i] = expression->Eval(NULL);
-
-#ifdef DEBUG
-    this->_console << "Constant value " << i << ' ' << constant_expressions[i] << " = " << constant_values[i] << std::endl;
-#endif
-
-    if (!_func_F->AddConstant(constant_names[i], constant_values[i]))
-      mooseError("Invalid constant name in ParsedMaterialHelper");
-
-    delete expression;
-  }
+  addFParserConstants(_func_F, constant_names, constant_expressions);
 
   // tolerance vectors
   if (tol_names.size() != tol_values.size())
