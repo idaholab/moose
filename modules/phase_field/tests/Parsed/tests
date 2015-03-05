@@ -37,5 +37,6 @@
     type = 'Exodiff'
     input = 'ConstructionOrder.i'
     exodiff = 'ConstructionOrder_out.e'
+    skip = 'libmesh #487'
   [../]
 []
