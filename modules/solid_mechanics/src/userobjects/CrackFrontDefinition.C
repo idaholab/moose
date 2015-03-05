@@ -32,6 +32,10 @@ void addCrackFrontDefinitionParams(InputParameters& params)
   params.addParam<bool>("2d", false, "Treat body as two-dimensional");
   params.addRangeCheckedParam<unsigned int>("axis_2d", 2, "axis_2d>=0 & axis_2d<=2", "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
   params.addParam<unsigned int>("symmetry_plane", "Account for a symmetry plane passing through the plane of the crack, normal to the specified axis (0=x, 1=y, 2=z)");
+  params.addParam<bool>("t_stress", false, "Calculate T-stress");
+  params.addParam<VariableName>("disp_x","Variable containing the x displacement");
+  params.addParam<VariableName>("disp_y","Variable containing the y displacement");
+  params.addParam<VariableName>("disp_z","Variable containing the z displacement");
 }
 
 const Real CrackFrontDefinition::_tol = 1e-14;
@@ -45,7 +49,8 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
     _closed_loop(false),
     _axis_2d(getParam<unsigned int>("axis_2d")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
-    _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane") : std::numeric_limits<unsigned int>::max())
+    _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane") : std::numeric_limits<unsigned int>::max()),
+    _t_stress(getParam<bool>("t_stress"))
 {
   if (isParamValid("crack_mouth_boundary"))
     _crack_mouth_boundary_names = getParam<std::vector<BoundaryName> >("crack_mouth_boundary");
@@ -94,6 +99,15 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
       _crack_direction_vector_end_2 = getParam<RealVectorValue>("crack_direction_vector_end_2");
     }
   }
+
+  if (isParamValid("disp_x") && isParamValid("disp_y") && isParamValid("disp_z"))
+  {
+    _disp_x_var_name = getParam<VariableName>("disp_x");
+    _disp_y_var_name = getParam<VariableName>("disp_y");
+    _disp_z_var_name = getParam<VariableName>("disp_z");
+  }
+  else if (_t_stress)
+    mooseError("Displacement variables must be provided for T-stress calculation");
 }
 
 CrackFrontDefinition::~CrackFrontDefinition()
@@ -105,6 +119,8 @@ CrackFrontDefinition::execute()
 {
   //Because J-Integral is based on original geometry, the crack front geometry
   //is never updated, so everything that needs to happen is done in initialSetup()
+  if (_t_stress)
+    calculateTangentialStrainAlongFront();
 }
 
 void
@@ -119,6 +135,12 @@ CrackFrontDefinition::initialSetup()
 
   updateCrackFrontGeometry();
 
+  if (_t_stress)
+  {
+    unsigned int num_crack_front_nodes = _ordered_crack_front_nodes.size();
+    for (unsigned int i=0; i<num_crack_front_nodes; ++i)
+      _strain_along_front.push_back(-std::numeric_limits<Real>::max());
+  }
 }
 
 void
@@ -129,11 +151,8 @@ CrackFrontDefinition::initialize()
 void
 CrackFrontDefinition::finalize()
 {
-}
-
-void
-CrackFrontDefinition::threadJoin(const UserObject & /*uo*/)
-{
+  if (_t_stress)
+    _communicator.max(_strain_along_front);
 }
 
 void
@@ -1086,4 +1105,110 @@ CrackFrontDefinition::isNodeOnIntersectingBoundary(const Node * const node) cons
     }
   }
   return is_on_boundary;
+}
+
+void
+CrackFrontDefinition::calculateTangentialStrainAlongFront()
+{
+  RealVectorValue disp_current_node;
+  RealVectorValue disp_previous_node;
+  RealVectorValue disp_next_node;
+  RealVectorValue l0;
+  RealVectorValue l1;
+  RealVectorValue delta_l0;
+  RealVectorValue delta_l1;
+
+  unsigned int num_crack_front_nodes = _ordered_crack_front_nodes.size();
+  Node * current_node;
+  Node * previous_node;
+  Node * next_node;
+
+  // In finalize(), gatherMax builds and distributes the complete strain vector on all processors
+  // -> reset the vector every time
+  for (unsigned int i=0; i<num_crack_front_nodes; ++i)
+    _strain_along_front[i] = -std::numeric_limits<Real>::max();
+
+  current_node = _mesh.nodePtr(_ordered_crack_front_nodes[0]);
+  if (current_node->processor_id() == processor_id())
+  {
+    disp_current_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*current_node);
+    disp_current_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*current_node);
+    disp_current_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*current_node);
+
+    next_node = _mesh.nodePtr(_ordered_crack_front_nodes[1]);
+    disp_next_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*next_node);
+    disp_next_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*next_node);
+    disp_next_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*next_node);
+
+    //Calculate change in length of crack front edge and project in the tangent direction to get tangential strain
+    l1 = *next_node - *current_node;
+    l1 = (l1 * _tangent_directions[0]) * _tangent_directions[0];
+    delta_l1 = disp_next_node - disp_current_node;
+    delta_l1 = (delta_l1 * _tangent_directions[0]) * _tangent_directions[0];
+    _strain_along_front[0] = delta_l1.size() / l1.size();
+  }
+
+  for (unsigned int i=1; i<num_crack_front_nodes-1; ++i)
+  {
+    current_node = _mesh.nodePtr(_ordered_crack_front_nodes[i]);
+    if (current_node->processor_id() == processor_id())
+    {
+      disp_current_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*current_node);
+      disp_current_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*current_node);
+      disp_current_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*current_node);
+
+      previous_node = _mesh.nodePtr(_ordered_crack_front_nodes[i-1]);
+      disp_previous_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*previous_node);
+      disp_previous_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*previous_node);
+      disp_previous_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*previous_node);
+
+      next_node = _mesh.nodePtr(_ordered_crack_front_nodes[i+1]);
+      disp_next_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*next_node);
+      disp_next_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*next_node);
+      disp_next_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*next_node);
+
+      l0 = *current_node - *previous_node;
+      l0 = (l0 * _tangent_directions[i]) * _tangent_directions[i];
+      delta_l0 = disp_current_node - disp_previous_node;
+      delta_l0 = (delta_l0 * _tangent_directions[i]) * _tangent_directions[i];
+      l1 = *next_node - *current_node;
+      l1 = (l1 * _tangent_directions[i]) * _tangent_directions[i];
+      delta_l1 = disp_next_node - disp_current_node;
+      delta_l1 = (delta_l1 * _tangent_directions[i]) * _tangent_directions[i];
+      _strain_along_front[i] = 0.5 * ( delta_l0.size()/l0.size() + delta_l1.size()/l1.size() );
+    }
+  }
+
+  current_node = _mesh.nodePtr(_ordered_crack_front_nodes[num_crack_front_nodes-1]);
+  if (current_node->processor_id() == processor_id())
+  {
+    disp_current_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*current_node);
+    disp_current_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*current_node);
+    disp_current_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*current_node);
+
+    previous_node = _mesh.nodePtr(_ordered_crack_front_nodes[num_crack_front_nodes-2]);
+    disp_previous_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*previous_node);
+    disp_previous_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*previous_node);
+    disp_previous_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*previous_node);
+
+    l0 = *current_node - *previous_node;
+    delta_l0 = disp_current_node - disp_previous_node;
+    l0 = (l0 * _tangent_directions[num_crack_front_nodes-1]) * _tangent_directions[num_crack_front_nodes-1];
+    delta_l0 = (delta_l0 * _tangent_directions[num_crack_front_nodes-1]) * _tangent_directions[num_crack_front_nodes-1];
+
+    _strain_along_front[num_crack_front_nodes-1] = delta_l0.size() / l0.size();
+  }
+
+}
+
+Real
+CrackFrontDefinition::getCrackFrontTangentialStrain(const unsigned int node_index) const
+{
+  Real strain;
+  if (_t_stress)
+    strain = _strain_along_front[node_index];
+  else
+    mooseError("In CrackFrontDefinition, tangential strain not available");
+
+  return strain;
 }

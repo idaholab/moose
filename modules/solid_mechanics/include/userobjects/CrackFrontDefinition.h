@@ -34,7 +34,6 @@ public:
   virtual void initialize();
   virtual void finalize();
   virtual void execute();
-  virtual void threadJoin(const UserObject & uo);
 
   const Node * getCrackFrontNodePtr(const unsigned int node_index) const;
   const RealVectorValue & getCrackFrontTangent(const unsigned int node_index) const;
@@ -51,6 +50,7 @@ public:
   ColumnMajorMatrix rotateToCrackFrontCoords(const ColumnMajorMatrix tensor, const unsigned int node_index) const;
   void calculateRThetaToCrackFront(const Point qp, const unsigned int node_index, Real & r, Real & theta) const;
   bool isNodeOnIntersectingBoundary(const Node * const node) const;
+  Real getCrackFrontTangentialStrain(const unsigned int node_index) const;
 
 protected:
 
@@ -84,6 +84,7 @@ protected:
   std::vector<std::pair<Real,Real> > _segment_lengths;
   std::vector<Real> _distances_along_front;
   std::vector<Real> _angles_along_front;
+  std::vector<Real> _strain_along_front;
   std::vector<ColumnMajorMatrix> _rot_matrix;
   Real _overall_length;
   DIRECTION_METHOD _direction_method;
@@ -102,6 +103,10 @@ protected:
   unsigned int _axis_2d;
   bool _has_symmetry_plane;
   unsigned int _symmetry_plane;
+  std::string _disp_x_var_name;
+  std::string _disp_y_var_name;
+  std::string _disp_z_var_name;
+  bool _t_stress;
 
   void getCrackFrontNodes(std::set<dof_id_type>& nodes);
   void orderCrackFrontNodes(std::set<dof_id_type>& nodes);
@@ -116,6 +121,7 @@ protected:
   RealVectorValue calculateCrackFrontDirection(const Node* crack_front_node,
                                                const RealVectorValue& tangent_direction,
                                                const CRACK_NODE_TYPE ntype) const;
+  void calculateTangentialStrainAlongFront();
 
 };
 
