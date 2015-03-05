@@ -1,0 +1,7 @@
+[Tests]
+  [./3D]
+    type = Exodiff
+    input = 'gravity_test.i'
+    exodiff = 'gravity_test_out.e'
+  [../]
+[]
