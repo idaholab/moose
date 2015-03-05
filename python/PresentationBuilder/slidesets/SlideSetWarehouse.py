@@ -15,6 +15,7 @@ class SlideSetWarehouse(Warehouse):
     self.format = kwargs.pop('format', 'remark')
     self.css = dict() # Storage for the css stylesheet
 
+
   ##
   # Returns the complete markdown for all SlideSets
   def markdown(self):
@@ -32,6 +33,7 @@ class SlideSetWarehouse(Warehouse):
       return '\n\n---\n\n'.join(output)
     elif self.format == 'reveal':
       return '\n\n'.join(output)
+
 
   ##
   # Performs the slide creation steps
@@ -56,6 +58,7 @@ class SlideSetWarehouse(Warehouse):
 
     # Build the table-of-contents
     self.__contents()
+
 
   ##
   # Builds the table of contents for each object (private)
