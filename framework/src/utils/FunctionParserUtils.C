@@ -56,3 +56,41 @@ FunctionParserUtils::evaluate(ADFunction * parser)
 
   return _nan;
 }
+
+void
+FunctionParserUtils::addFParserConstants(ADFunction * parser,
+                                         const std::vector<std::string> & constant_names,
+                                         const std::vector<std::string> & constant_expressions)
+{
+  // temporary FParser object to evaluate constant_expressions
+  ADFunction *expression;
+
+  // check constant vectors
+  unsigned int nconst = constant_expressions.size();
+  if (nconst != constant_expressions.size())
+    mooseError("The parameter vectors constant_names and constant_values must have equal length.");
+
+  // previously evaluated constant_expressions may be used in following constant_expressions
+  std::vector<Real> constant_values(nconst);
+
+  for (unsigned int i = 0; i < nconst; ++i)
+  {
+    expression = new ADFunction();
+
+    // add previously evaluated constants
+    for (unsigned int j = 0; j < i; ++j)
+      if (!expression->AddConstant(constant_names[j], constant_values[j]))
+        mooseError("Invalid constant name in ParsedMaterialHelper");
+
+    // build the temporary comnstant expression function
+    if (expression->Parse(constant_expressions[i], "") >= 0)
+       mooseError("Invalid constant expression\n" << constant_expressions[i] << "\n in parsed function object.\n" <<  expression->ErrorMsg());
+
+    constant_values[i] = expression->Eval(NULL);
+
+    if (!parser->AddConstant(constant_names[i], constant_values[i]))
+      mooseError("Invalid constant name in parsed function object");
+
+    delete expression;
+  }
+}

@@ -21,6 +21,11 @@ protected:
   /// Evaluate FParser object and check EvalError
   Real evaluate(ADFunction *);
 
+  /// add constants (which can be complex expressions) to the parser object
+  void addFParserConstants(ADFunction * parser,
+                           const std::vector<std::string> & constant_names,
+                           const std::vector<std::string> & constant_expressions);
+
   /// feature flags
   bool _enable_jit;
   bool _disable_fpoptimizer;
