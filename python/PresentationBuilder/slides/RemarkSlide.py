@@ -2,7 +2,7 @@
 import os, re, inspect, string, urllib2, sys
 from FactorySystem import InputParameters, MooseObject
 from ..images import *
-from ..utils import *
+from ..tools import *
 
 ##
 # Base class for individual Remark markdown slide content
@@ -103,10 +103,8 @@ class RemarkSlide(MooseObject):
 
 
   ##
-  # Parse the markdown
-  #
-  # This method should overloaded to handle special syntax
-  def parse(self, markdown):
+  # Do initial parsing to extract the name of the slide
+  def parseName(self, markdown):
 
     # Remove un-wanted line endings
     markdown = markdown.replace('\r', '')
@@ -124,22 +122,44 @@ class RemarkSlide(MooseObject):
         self.parameters()[key] = value
         markdown = markdown.replace(match.group(1), '')
 
-    # Insert prefix markdown
-    if self.isParamValid('prefix'):
-      markdown = self.getParam('prefix') + '\n' + markdown
-
     # Locate the title of the slide
     match = re.search(r'^\s*(#+)\s+(.*)', markdown, re.MULTILINE)
     if match:
       self.__title = (match.group(1), match.group(2))
 
-    # Set the object name, if the name parameters has not been set
+    # Set the object name using the title, if the name parameter does not exist
     if not self.isParamValid('name') and (self.__title is not None):
-      self.parameters()['name'] = '-'.join(self.__title[1].lower().split())
+      self.parameters()['name'] = '-'.join(self.__title[1].lower().split()) + '-0'
 
+    # Set the object name using the previous slide name , if the name parameter does not exist
+    if not self.isParamValid('name') and self.parent.warehouse().objects:
+      previous = self.parent.warehouse().objects[-1]
+      if previous and previous.name():
+
+        # Set the name of the slide with the correct number prefix based on the pervious slide
+        name = previous.name() + '-1'
+        match = re.search('(.*?)(\d+)$', previous.name())
+        if match:
+          name = match.group(1) + str(int(match.group(2))+1)
+        self.parameters()['name'] = name
+
+    # If the above attempts at naming fail, name the object based on the containing slide set
     elif not self.isParamValid('name'):
       name = self.parent.name() + '-' + str(self.parent.warehouse().numObjects())
       self.parameters()['name'] = name
+
+    return markdown
+
+
+  ##
+  # Parse the markdown
+  #
+  # This method should overloaded to handle special syntax
+  def parse(self, markdown):
+
+    # Insert prefix markdown
+    if self.isParamValid('prefix'):
+      markdown = self.getParam('prefix') + '\n' + markdown
 
     # Print a message of the slide that is being created
     print ' '*4, 'SLIDE:', self.name()
@@ -169,7 +189,6 @@ class RemarkSlide(MooseObject):
       self.comments.append(match.group(1))
       markdown = markdown.replace(match.group(0), '')
 
-
     # Adjust the background-image parameter
     if self.isParamValid('background-image'):
       value = self.getParam('background-image')
@@ -189,6 +208,13 @@ class RemarkSlide(MooseObject):
     for key in self.parameters().groupKeys('properties'):
       if self.isParamValid(key):
           markdown = key + ':' + self.parameters()[key] + '\n' + markdown
+
+    # Adjust code starting with *
+    # Remark automatically highlights code lines starting with *, this is disabled
+    # by removing the background in the css and adding an extract *, I hope Remark
+    # will get updated so this is not necessary.
+    regex = r'```.*?```'
+    markdown = re.sub(regex, self.__subLineHighlight, markdown, flags = re.DOTALL | re.MULTILINE)
 
     # Search for github code urls
     if self.getParam('auto_insert_github_code'):
@@ -214,8 +240,19 @@ class RemarkSlide(MooseObject):
     #print markdown
     #print '-----------------------------------------------'
 
-    # Store the markdown
+    # Return the markdown
     return markdown
+
+
+  ##
+  # Substitution method for fixing auto line highlighting
+  def __subLineHighlight(self, match):
+    cpp_section = match.group(0)
+    # Append asterisks at the front of lines beginning with asterisks
+    return re.sub('^(\s*)'    # Capture leading whitespace \
+                  '(\*)',     # Capture literal asterisk \
+                  '\\1*\\2',  # Replace with leading space, then a new asterisk followed by the captured asterisk \
+                  cpp_section, flags = re.MULTILINE | re.VERBOSE)
 
 
   ##

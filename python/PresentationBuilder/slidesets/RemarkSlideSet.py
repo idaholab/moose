@@ -146,6 +146,18 @@ class RemarkSlideSet(MooseObject):
     # Build the slide object
     slide = self.__factory.create(self.__slide_type, params)
 
+    # Determine and set the slide name
+    raw = slide.parseName(raw)
+
+    # Apply the [./Slides] block
+    if self.__root:
+      node = self.__root.getNode(self.name()).getNode('Slides')
+      if node:
+        node = node.getNode(slide.name())
+        if node:
+          print ' '*6 + 'Apply settings from input file'
+          self.__parser.extractParams('', slide.parameters(), node)
+
     # Parse the raw markdown and store it in the slide
     self._parseSlide(slide, raw)
     return slide
@@ -157,19 +169,10 @@ class RemarkSlideSet(MooseObject):
   # allow parent classes to modify slide settings
   # @see INLDjangoWikiSet, INLCoverSet, INLMergeSet
   def _parseSlide(self, slide, raw):
+
+    # Parse the content into Remark format and store the content in the slide
     raw = slide.parse(raw)
     raw = slide.parseImages(raw)
-
-    # Apply the [./Slides] block
-    if self.__root:
-      node = self.__root.getNode(self.name()).getNode('Slides')
-      if node:
-        node = node.getNode(slide.name())
-        if node:
-          print ' '*6 + 'Apply settings from input file'
-          self.__parser.extractParams('', slide.parameters(), node)
-
-    # Store the markdown in the slide and return the slide
     slide.markdown = raw
 
 

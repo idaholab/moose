@@ -47,7 +47,7 @@ class SlideWarehouse(Warehouse):
     self.__count += 1
 
   ##
-  # The unumber of objects
+  # The number of objects
   def numObjects(self):
     return len(self.objects)
 
@@ -64,7 +64,6 @@ class SlideWarehouse(Warehouse):
   def hasObject(self, name):
     return name in self.__slide_map
 
-
   ##
   # Return the active slide objects (public)
   def activeObjects(self):
@@ -76,10 +75,11 @@ class SlideWarehouse(Warehouse):
     # and titles should be active unless listed as inactive
     if self.__active:
       for name in self.__slide_order:
-        if (name in self.__active) \
-        or name.startswith(self.__slide_set_name + '-contents') \
-        or name.startswith(self.__slide_set_name + '-title'):
-          slides.append(self.objects[self.__slide_map[name]])
+        for active in self.__active:
+          if (active in name) \
+             or name.startswith(self.__slide_set_name + '-contents') \
+             or name.startswith(self.__slide_set_name + '-title'):
+            slides.append(self.objects[self.__slide_map[name]])
     else:
       for name in self.__slide_order:
         slides.append(self.objects[self.__slide_map[name]])
@@ -87,7 +87,8 @@ class SlideWarehouse(Warehouse):
     # Remove inactive slides
     if self.__inactive:
       for slide in slides:
-        if slide.name() in self.__inactive:
-          slides.remove(slide)
+        for inactive in self.__inactive:
+          if inactive in slide.name():
+            slides.remove(slide)
 
     return slides
