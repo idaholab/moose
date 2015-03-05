@@ -3165,6 +3165,16 @@ FEProblem::forceOutput()
   _app.getOutputWarehouse().forceOutput();
 }
 
+void
+FEProblem::initPetscOutput()
+{
+  std::vector<PetscOutput*> outputs = _app.getOutputWarehouse().getOutputs<PetscOutput>();
+  for (std::vector<PetscOutput*>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
+    (*it)->timestepSetupInternal();
+  Moose::PetscSupport::petscSetDefaults(*this);
+}
+
+
 Real
 FEProblem::solutionChangeNorm()
 {
@@ -3549,10 +3559,7 @@ FEProblem::possiblyRebuildGeomSearchPatches()
         reinitBecauseOfGhosting();
 
         // This is needed to reinitialize PETSc output
-        std::vector<PetscOutput*> outputs = _app.getOutputWarehouse().getOutputs<PetscOutput>();
-        for (std::vector<PetscOutput*>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
-          (*it)->timestepSetupInternal();
-        Moose::PetscSupport::petscSetDefaults(*this);
+        initPetscOutput();
     }
   }
 }
