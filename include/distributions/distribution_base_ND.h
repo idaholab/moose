@@ -125,7 +125,7 @@ public:
 
 	  if (_CDFprovided == false){    // PDF provided ---> create grid for CDF
 
-		  std::cerr<<"Creation of CDF interpolator for cartesian spline"<< std::endl;
+		  std::cout<<"Creation of CDF interpolator for cartesian spline"<< std::endl;
 		  std::vector< std::vector<double> > discretizations;
 		  _interpolator.getDiscretizations(discretizations);
 		  int numberofValues = 1;
@@ -145,10 +145,10 @@ public:
 			  for (int j=0; j<numberOfDimensions; j++)
 				  NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
 			  CDFvalues.at(i) = _interpolator.integralSpline(NDcoordinate);
-			  //std::cerr<< NDcoordinate.at(0) << " " << NDcoordinate.at(1) << " : " << CDFvalues.at(i) << std::endl;
+			  //std::cout<< NDcoordinate.at(0) << " " << NDcoordinate.at(1) << " : " << CDFvalues.at(i) << std::endl;
 		  }
 		  _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
-		  std::cerr<<"Creation of CDF interpolator for cartesian spline completed [BasicMultiDimensionalCartesianSpline_init]:"<< std::endl;
+		  //std::cout<<"Creation of CDF interpolator for cartesian spline completed [BasicMultiDimensionalCartesianSpline_init]:"<< std::endl;
 	  }
   };
 
@@ -259,7 +259,7 @@ class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
 public:
   BasicMultiDimensionalInverseWeight(const char * data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
 {
-	  std::cerr<<"Initialize BasicMultiDimensionalInverseWeight"<< std::endl;
+	  std::cout<<"Initialize BasicMultiDimensionalInverseWeight"<< std::endl;
 
 	  _CDFprovided = CDFprovided;
 
@@ -275,7 +275,7 @@ public:
 	  else{	// PDF is provided
 		  // Create ND spline for the CDF
 		  //BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool CDFprovided)
-		  std::cerr<<"Creating ND spline for inverseWeight"<< std::endl;
+		  std::cout<<"Creating ND spline for inverseWeight"<< std::endl;
 		  int n_dimensions = _interpolator.returnDimensionality();
 		  std::vector<double> alpha (n_dimensions);
 		  std::vector<double> beta (n_dimensions);
@@ -291,7 +291,7 @@ public:
 		  std::vector<double> cellPoint0 = _interpolator.get_cellPoint0();
 		  std::vector<double> cellDxs = _interpolator.get_cellDxs();
 
-		  std::cerr<<"Discretization points for ND spline for inverseWeightZZZZ"<< std::endl;
+		  std::cout<<"Discretization points for ND spline for inverseWeight"<< std::endl;
 		  for(int i=0; i<n_dimensions; i++){
 			  std::vector<double> temp;
 			  for(int j=0; j<numberDiscretization; j++){
@@ -328,7 +328,7 @@ public:
 
 
 		  _CDFspline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, false);
-		  //std::cerr<<"Creation of ND spline distribution for inverseWeight completed:: "<< _CDFspline.returnDimensionality() << std::endl;
+		  //std::cout<<"Creation of ND spline distribution for inverseWeight completed:: "<< _CDFspline.returnDimensionality() << std::endl;
 	  }
 };
 

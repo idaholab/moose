@@ -238,7 +238,8 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
  //std::cout<<"c++ F: "<< F << std::endl;
  //std::cout<<"c++ _dimensions: "<< _dimensions << std::endl;
 
- int last_divisions = (int)round(1.0/_tolerance*_initial_divisions);
+ int last_divisions = (int)round(1.0/_initial_divisions);
+ std::cout<<"last_divisions "<< last_divisions <<std::endl;
 
  // Create basic cell
  std::vector<std::vector<double> > basic_cell;
