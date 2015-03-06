@@ -1,3 +1,13 @@
+#
+# Example 18 modified to use parsed ODE kernels.
+#
+# The ParsedODEKernel takes function expressions in the input file and computes
+# Jacobian entries via automatic differentiation. It allows for rapid development
+# of new models without the need for code recompilation.
+#
+# This input file should produce the exact same result as ex18.i
+#
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -54,6 +64,15 @@
     type = ODETimeDerivative
     variable = x
   [../]
+
+  #
+  # This parsed expression ODE Kernel behaves exactly as the ImplicitODEx kernel
+  # in the main example. Checkout ImplicitODEx::computeQpResidual() in the
+  # source code file ImplicitODEx.C to see the matching residual function.
+  #
+  # The ParsedODEKernel automaticaly generates the On- and Off-Diagonal Jacobian
+  # entries.
+  #
   [./ode1]
     type = ParsedODEKernel
     function = '-3*x - 2*y'
@@ -65,6 +84,11 @@
     type = ODETimeDerivative
     variable = y
   [../]
+
+  #
+  # This parsed expression ODE Kernel behaves exactly as the ImplicitODEy Kernel
+  # in the main example.
+  #
   [./ode2]
     type = ParsedODEKernel
     function = '-4*x - y'
