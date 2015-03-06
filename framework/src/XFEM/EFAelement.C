@@ -569,13 +569,7 @@ bool
 EFAelement::overlays_elem(const EFAelement* other_elem) const
 {
   bool overlays = false;
-  //Find common nodes
-  std::set<EFAnode*> e1nodes(_nodes.begin(), _nodes.end());
-  std::set<EFAnode*> e2nodes(other_elem->_nodes.begin(), other_elem->_nodes.end());
-  std::vector<EFAnode*> common_nodes;
-  std::set_intersection(e1nodes.begin(), e1nodes.end(),
-                        e2nodes.begin(), e2nodes.end(),
-                        std::inserter(common_nodes,common_nodes.end()));
+  std::vector<EFAnode*> common_nodes = get_common_nodes(other_elem);
 
   //Find indices of common nodes
   if (common_nodes.size() == 2)
@@ -765,19 +759,7 @@ EFAelement::setup_neighbors(std::map< EFAnode*, std::set<EFAelement*> > &Inverse
     if (*eit2 != this)
     {
       EFAelement *neigh_elem = *eit2;
-      std::vector<EFAnode*> common_nodes;
-
-      std::set<EFAnode*> curr_elem_nodes;
-      for (unsigned int k = 0; k < _nodes.size(); ++k)
-        curr_elem_nodes.insert(_nodes[k]);
-
-      std::set<EFAnode*> neigh_elem_nodes;
-      for (unsigned int k = 0; k < neigh_elem->num_nodes(); ++k)
-        neigh_elem_nodes.insert(neigh_elem->get_node(k));
-
-      std::set_intersection(curr_elem_nodes.begin(), curr_elem_nodes.end(),
-                            neigh_elem_nodes.begin(), neigh_elem_nodes.end(),
-                            std::inserter(common_nodes,common_nodes.end()));
+      std::vector<EFAnode*> common_nodes = get_common_nodes(neigh_elem);
 
       if (common_nodes.size() >= 2)
       {
@@ -880,6 +862,18 @@ EFAelement::neighbor_sanity_check()
       }
     }
   }
+}
+
+std::vector<EFAnode*>
+EFAelement::get_common_nodes(const EFAelement* other_elem) const
+{
+  std::set<EFAnode*> e1nodes(_nodes.begin(), _nodes.end());
+  std::set<EFAnode*> e2nodes(other_elem->_nodes.begin(), other_elem->_nodes.end());
+  std::vector<EFAnode*> common_nodes;
+  std::set_intersection(e1nodes.begin(), e1nodes.end(),
+                        e2nodes.begin(), e2nodes.end(),
+                        std::inserter(common_nodes,common_nodes.end()));
+  return common_nodes;
 }
 
 void

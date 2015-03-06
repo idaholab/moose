@@ -29,7 +29,7 @@
 #include <vector>
 
 #include "MaterialData.h"
-#include "CutElemMesh.h"
+#include "ElementFragmentAlgorithm.h"
 
 using namespace libMesh;
 
@@ -152,7 +152,7 @@ private:
   LocationMap<Node> _new_nodes_map;
   LocationMap<Node> _new_nodes_map2;
 
-  CutElemMesh _efa_mesh;
+  ElementFragmentAlgorithm _efa_mesh;
 };
 
 #endif // XFEM_H

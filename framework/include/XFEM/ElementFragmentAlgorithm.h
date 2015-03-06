@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CUTELEM_MESH_H
-#define CUTELEM_MESH_H
+#ifndef ELEMENTFRAGMENTALGORITHM_H
+#define ELEMENTFRAGMENTALGORITHM_H
 
 #include <cstddef>
 #include <iostream>
@@ -30,29 +30,29 @@
 #include "EFAfragment.h"
 #include "EFAelement.h"
 
-class CutElemMesh
+class ElementFragmentAlgorithm
 {
 public:
 
   /**
    * Constructor
    **/
-  CutElemMesh();
+  ElementFragmentAlgorithm();
 
-  ~CutElemMesh();
+  ~ElementFragmentAlgorithm();
 
 private:
   //unsigned int MaxElemId;
-  std::map< unsigned int, EFAnode*> PermanentNodes;
-  std::map< unsigned int, EFAnode*> EmbeddedNodes;
-  std::map< unsigned int, EFAnode*> TempNodes;
-  std::map< unsigned int, EFAelement*> Elements;
-  std::map< std::set< EFAnode* >, std::set< EFAelement* > > MergedEdgeMap;
-  std::set< EFAelement*> CrackTipElements;
-  std::vector< EFAnode* > NewNodes;
-  std::vector< EFAelement* > ChildElements;
-  std::vector< EFAelement* > ParentElements;
-  std::map< EFAnode*, std::set< EFAelement *> > InverseConnectivityMap;
+  std::map< unsigned int, EFAnode*> _permanent_nodes;
+  std::map< unsigned int, EFAnode*> _embedded_nodes;
+  std::map< unsigned int, EFAnode*> _temp_nodes;
+  std::map< unsigned int, EFAelement*> _elements;
+  std::map< std::set< EFAnode* >, std::set< EFAelement* > > _merged_edge_map;
+  std::set< EFAelement*> _crack_tip_elements;
+  std::vector< EFAnode* > _new_nodes;
+  std::vector< EFAelement* > _child_elements;
+  std::vector< EFAelement* > _parent_elements;
+  std::map< EFAnode*, std::set< EFAelement *> > _inverse_connectivity;
 
 public:
 
@@ -80,10 +80,10 @@ public:
   void printMesh();
   void error(const std::string &error_string);
 
-  const std::vector<EFAelement*> &getChildElements(){return ChildElements;};
-  const std::vector<EFAelement*> &getParentElements(){return ParentElements;};
-  const std::vector<EFAnode*> &getNewNodes(){return NewNodes;};
-  const std::set<EFAelement*> &getCrackTipElements(){return CrackTipElements;};
+  const std::vector<EFAelement*> &getChildElements(){return _child_elements;};
+  const std::vector<EFAelement*> &getParentElements(){return _parent_elements;};
+  const std::vector<EFAnode*> &getNewNodes(){return _new_nodes;};
+  const std::set<EFAelement*> &getCrackTipElements(){return _crack_tip_elements;};
   EFAelement* getElemByID(unsigned int id);
   unsigned int getElemIdByNodes(unsigned int * node_id);
 };

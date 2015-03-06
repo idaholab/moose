@@ -312,7 +312,7 @@ void XFEM::build_efa_mesh()
   MeshBase::element_iterator       elem_it  = _mesh->elements_begin();
   const MeshBase::element_iterator elem_end = _mesh->elements_end();
 
-  //Load all existing elements in to CutElemMesh
+  //Load all existing elements in to EFA mesh
   for ( elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
   {
     Elem *elem = *elem_it;
@@ -604,7 +604,7 @@ XFEM::cut_mesh_with_efa()
 
   //Add new nodes
   const std::vector<EFAnode*> NewNodes = _efa_mesh.getNewNodes();
-  for (unsigned int i=0; i<NewNodes.size(); ++i)
+  for (unsigned int i = 0; i < NewNodes.size(); ++i)
   {
     unsigned int new_node_id = NewNodes[i]->id();
     unsigned int parent_id = NewNodes[i]->parent()->id();
@@ -635,7 +635,7 @@ XFEM::cut_mesh_with_efa()
 
   //Add new elements
   const std::vector<EFAelement*> NewElements = _efa_mesh.getChildElements();
-  for (unsigned int i=0; i<NewElements.size(); ++i)
+  for (unsigned int i = 0; i < NewElements.size(); ++i)
   {
     unsigned int parent_id = NewElements[i]->parent()->id();
 
@@ -650,7 +650,7 @@ XFEM::cut_mesh_with_efa()
       libmesh_elem2 = Elem::build(parent_elem2->type()).release();
     }
 
-    for (unsigned int j=0; j<NewElements[i]->num_nodes(); ++j)
+    for (unsigned int j = 0; j < NewElements[i]->num_nodes(); ++j)
     {
       unsigned int node_id = NewElements[i]->get_node(j)->id();
       Node *libmesh_node;
@@ -747,7 +747,7 @@ XFEM::cut_mesh_with_efa()
 
   //delete elements
   const std::vector<EFAelement*> DeleteElements = _efa_mesh.getParentElements();
-  for (unsigned int i=0; i<DeleteElements.size(); ++i)
+  for (unsigned int i = 0; i < DeleteElements.size(); ++i)
   {
     Elem *elem_to_delete = _mesh->elem(DeleteElements[i]->id());
 

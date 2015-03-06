@@ -110,6 +110,7 @@ public:
   void clear_neighbors();
   void setup_neighbors(std::map< EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap);
   void neighbor_sanity_check();
+  std::vector<EFAnode*> get_common_nodes(const EFAelement* other_elem) const;
 
   // crack tip
   void init_crack_tip(std::set< EFAelement*> &CrackTipElements);
