@@ -11,7 +11,7 @@ InputParameters validParams<GravityTM>()
 {
   InputParameters params = validParams<BodyForce>();
   params.addClassDescription("Apply gravity. Value is in units of acceleration.");
-  params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<bool>("use_displaced_mesh", true, "Displaced mesh defaults to true");
   return params;
 }
 
@@ -24,6 +24,5 @@ GravityTM::GravityTM(const std::string & name, InputParameters parameters) :
 Real
 GravityTM::computeQpResidual()
 {
-  return _density[_qp] * BodyForce::computeQpResidual();
+  return _density[_qp]*BodyForce::computeQpResidual();
 }
-

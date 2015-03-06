@@ -38,7 +38,6 @@ protected:
   Function * const _function;
 
   const PostprocessorValue * const _postprocessor;
-
 };
 
 #endif //PRESSURETM_H

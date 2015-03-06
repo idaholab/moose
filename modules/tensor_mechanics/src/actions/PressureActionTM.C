@@ -53,24 +53,25 @@ void
 PressureActionTM::act()
 {
   // Determine number of dimensions
-  unsigned int dim(1);
+  unsigned int dim = 1;
+
   if (_disp_y != "")
-  {
     ++dim;
-  }
+
   if (_disp_z != "")
-  {
     ++dim;
-  }
 
   std::vector<NonlinearVariableName> vars;
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
   std::string short_name(_name);
+
   // Chop off "BCs/Pressure/"
   short_name.erase(0, 5+_kernel_name.size());
-  for (unsigned int i(0); i < dim; ++i)
+
+  //Create pressure BCs
+  for (unsigned int i = 0; i < dim; ++i)
   {
     std::stringstream name;
     name << "BCs/";
@@ -83,20 +84,16 @@ PressureActionTM::act()
     params.set<std::vector<BoundaryName> >("boundary") = _boundary;
     params.set<Real>("factor") = _factor;
     if (isParamValid("function"))
-    {
       params.set<FunctionName>("function") = getParam<FunctionName>("function");
-    }
 
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
-    params.set<int>("component") = i;
+    params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = vars[i];
+
     if (_has_save_in_vars[i])
-    {
       params.set<std::vector<AuxVariableName> >("save_in") = _save_in_vars[i];
-    }
 
     _problem->addBoundaryCondition(_kernel_name, name.str(), params);
   }
-
 }

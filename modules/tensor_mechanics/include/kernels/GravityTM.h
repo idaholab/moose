@@ -30,7 +30,6 @@ protected:
   virtual Real computeQpResidual();
 
   const MaterialProperty<Real> & _density;
-
 };
 
-#endif
+#endif //GRAVITYTM_H
