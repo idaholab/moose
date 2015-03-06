@@ -105,6 +105,8 @@ protected:
   PiecewiseLinear * _piecewise_linear_alpha_function;
   bool _has_stress_free_temp;
   Real _stress_free_temp;
+  bool _mean_alpha_function;
+  Real _ref_temp;
 
   std::map<SubdomainID, std::vector<VolumetricModel*> > _volumetric_models;
   std::vector<MaterialProperty<Real>*> _volumetric_strain;
