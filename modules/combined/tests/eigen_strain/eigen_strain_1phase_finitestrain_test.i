@@ -1,12 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
-  xmin = 0
-  xmax = 1
-  ymin = 0
-  ymax = 1
+  nx = 10
+  ny = 10
+  xmax = 0.5
+  ymax = 0.5
   elem_type = QUAD4
 []
 
@@ -41,9 +39,9 @@
 [ICs]
   [./c_IC]
     int_width = 0.15
-    x1 = 0.5
-    y1 = 0.5
-    radius = 0.15
+    x1 = 0
+    y1 = 0
+    radius = 0.25
     outvalue = 0
     variable = c
     invalue = 1
