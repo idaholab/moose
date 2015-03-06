@@ -28,8 +28,6 @@ public:
   Piecewise(const std::string & name, InputParameters parameters);
   virtual ~Piecewise();
 
-  virtual Real timeDerivative(Real t, const Point & p) = 0;
-
   virtual Real functionSize();
   virtual Real domain(int i);
   virtual Real range(int i);

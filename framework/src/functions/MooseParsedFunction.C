@@ -49,6 +49,12 @@ MooseParsedFunction::gradient(Real t, const Point & p)
   return _function_ptr->evaluateGradient(t, p);
 }
 
+Real
+MooseParsedFunction::timeDerivative(Real t, const Point & p)
+{
+  return _function_ptr->evaluateDot(t, p);
+}
+
 RealVectorValue
 MooseParsedFunction::vectorValue(Real /*t*/, const Point & /*p*/)
 {
