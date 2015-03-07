@@ -447,7 +447,7 @@ EFAelement::get_frag_edge(unsigned int frag_id, unsigned int edge_id) const
 }
 
 bool
-EFAelement::is_partial()
+EFAelement::is_partial() const
 {
   bool partial = false;
   if (_fragments.size() > 0)
@@ -909,7 +909,7 @@ EFAelement::init_crack_tip(std::set< EFAelement*> &CrackTipElements)
       _edge_neighbors[edge_iter][0]->add_crack_tip_neighbor(this);
       _edge_neighbors[edge_iter][1]->add_crack_tip_neighbor(this);
     }
-  }
+  } // edge_iter
 }
 
 void
@@ -968,7 +968,7 @@ EFAelement::should_duplicate_for_crack_tip(const std::set<EFAelement*> &CrackTip
 {
   // This method is called in createChildElements()
   // Only duplicate when 
-  // 1) currElem will be a NEW crack tip element with partial fragment
+  // 1) currElem will be a NEW crack tip element
   // 2) currElem is a crack tip split element at last time step and the tip will extend
   // 3) currElem is the neighbor of a to-be-second-split element which has another neighbor
   //    sharing a phantom node with currElem
@@ -1382,14 +1382,11 @@ void
 EFAelement::update_fragments(const std::set<EFAelement*> &CrackTipElements,
                              std::map<unsigned int, EFAnode*> &EmbeddedNodes)
 {
-  // combine the crack-tip edges in a partial fragment to a single intersected edge
-  std::set<EFAelement*>::iterator sit;
-  sit = CrackTipElements.find(this);
-  if (sit != CrackTipElements.end()) // curr_elem is a crack tip element
-  {
-    if (_fragments.size() == 1)
-      _fragments[0]->combine_tip_edges();
-  }
+  // combine the crack-tip edges in a fragment to a single intersected edge
+  // N.B. the tip edges could be on a domain boundary, but the elements having 
+  // them are not crack tip elements
+  if (_fragments.size() == 1)
+    _fragments[0]->combine_tip_edges();
 
   // if a fragment only has 1 intersection which is in an interior edge
   // remove this embedded node (MUST DO THIS AFTER combine_tip_edges())
@@ -1519,7 +1516,6 @@ EFAelement::fragment_sanity_check()
 
     if (num_emb[0] != 2 || num_emb[1] != 2 || (num_perm[0]+num_perm[1]) != _num_edges)
       mooseError("Incorrect node category for element with 2 cuts");
-
   }
   else if (cut_edges.size() == 3) // TODO: not a good sanity check
   {
@@ -1537,7 +1533,7 @@ EFAelement::fragment_sanity_check()
 }
 
 void
-EFAelement::restore_fragment(EFAelement* const from_elem)
+EFAelement::restore_fragment(const EFAelement* const from_elem)
 {
   // restore fragments
   if (_fragments.size() != 0)

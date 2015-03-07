@@ -49,7 +49,7 @@ EFAedge::equivalent(const EFAedge & other) const
           std::abs(_intersection_x - other._intersection_x) < tol)
         isEqual = true;
     }
-    else
+    else if (other._embedded_node == NULL)
       isEqual = true;
   }
   else if (other._edge_node2 == _edge_node1 &&
@@ -61,7 +61,7 @@ EFAedge::equivalent(const EFAedge & other) const
           std::abs(_intersection_x - 1.0 + other._intersection_x) < tol)
         isEqual = true;
     }
-    else
+    else if (other._embedded_node == NULL)
       isEqual = true;
   }
   else {}
@@ -84,18 +84,21 @@ EFAedge::isOverlapping(const EFAedge &other) const
 }
 
 bool
-EFAedge::containsEdge(EFAedge & other)
+EFAedge::isPartialOverlap(const EFAedge & other) const
 {
   bool contains = false;
-  if (equivalent(other))
+  if (containsEdge(other) || other.containsEdge(*this))
     contains = true;
-  else if (_embedded_node)
-  {
-    if (other.containsNode(_embedded_node) &&
-       (other.containsNode(_edge_node1) || other.containsNode(_edge_node2)))
-      contains = true;
-  }
-  else {}
+  return contains;
+}
+
+bool
+EFAedge::containsEdge(const EFAedge & other) const
+{
+  bool contains = false;
+  if (containsNode(other._edge_node1) &&
+      containsNode(other._edge_node2))
+    contains = true;
   return contains;
 }
 
@@ -251,7 +254,7 @@ EFAedge::switchNode(EFAnode *new_node, EFAnode *old_node)
 }
 
 bool
-EFAedge::containsNode(EFAnode *node)
+EFAedge::containsNode(EFAnode *node) const
 {
   if (_edge_node1 == node ||
       _edge_node2 == node ||

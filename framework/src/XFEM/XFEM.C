@@ -170,6 +170,12 @@ XFEMCutElem::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
   return normal;
 }
 
+const EFAelement*
+XFEMCutElem::get_efa_elem() const
+{
+  return &_efa_elem;
+}
+
 //-----------------------------------------------------------------
 // XFEM mesh modification methods
 XFEM::XFEM (std::vector<MaterialData *> & material_data, MeshBase* m, MeshBase* m2) :
@@ -523,7 +529,7 @@ XFEM::mark_cut_edges_by_state()
     std::vector<Point> edge_ends(2,Point(0.0,0.0,0.0));
     for (unsigned int i = 0; i < nsides; ++i)
     {
-      if (!orig_edge->isOverlapping(*CEMElem->get_edge(i)))
+      if (!orig_edge->isPartialOverlap(*CEMElem->get_edge(i)))
       {
         edge_ends[0] = get_efa_node_coor(CEMElem->get_edge(i)->get_node(0),CEMElem,elem);
         edge_ends[1] = get_efa_node_coor(CEMElem->get_edge(i)->get_node(1),CEMElem,elem);
@@ -543,7 +549,7 @@ XFEM::mark_cut_edges_by_state()
     {
       for (unsigned int i = 0; i < CEMElem->get_fragment(0)->num_edges(); ++i)
       {
-        if (!orig_edge->isOverlapping(*CEMElem->get_frag_edge(0,i)))
+        if (!orig_edge->isPartialOverlap(*CEMElem->get_frag_edge(0,i)))
         {
           edge_ends[0] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(0),CEMElem,elem);
           edge_ends[1] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(1),CEMElem,elem);
@@ -839,7 +845,9 @@ XFEM::get_elem_phys_volfrac(const Elem* elem) const
   if (it != _cut_elem_map.end())
   {
     const XFEMCutElem *xfce = it->second;
-    phys_volfrac = xfce->get_physical_volfrac();
+    const EFAelement* EFAelem = xfce->get_efa_elem();
+    if (EFAelem->is_partial()) // exclude the full crack tip elements
+      phys_volfrac = xfce->get_physical_volfrac();
   }
 
   return phys_volfrac;
@@ -856,22 +864,26 @@ XFEM::get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity,
   if (it != _cut_elem_map.end())
   {
     const XFEMCutElem *xfce = it->second;
-    if ((unsigned int)quantity < 3)
+    const EFAelement* EFAelem = xfce->get_efa_elem();
+    if (EFAelem->is_partial()) // exclude the full crack tip elements
     {
-      unsigned int index = (unsigned int)quantity;
-      planedata = xfce->get_origin(plane_id,_mesh2); // TODO: 2 cut planes in 1 elem
-      comp = planedata(index);
-    }
-    else if ((unsigned int)quantity < 6)
-    {
-      unsigned int index = (unsigned int)quantity - 3;
-      planedata = xfce->get_normal(plane_id,_mesh2); // TODO: 2 cut planes in 1 elem
-      comp = planedata(index);
-    }
-    else
-    {
-      libMesh::err << " ERROR: In get_cut_plane index out of range"<<std::endl;
-      exit(1);
+      if ((unsigned int)quantity < 3)
+      {
+        unsigned int index = (unsigned int)quantity;
+        planedata = xfce->get_origin(plane_id,_mesh2); // TODO: 2 cut planes in 1 elem
+        comp = planedata(index);
+      }
+      else if ((unsigned int)quantity < 6)
+      {
+        unsigned int index = (unsigned int)quantity - 3;
+        planedata = xfce->get_normal(plane_id,_mesh2); // TODO: 2 cut planes in 1 elem
+        comp = planedata(index);
+      }
+      else
+      {
+        libMesh::err << " ERROR: In get_cut_plane index out of range"<<std::endl;
+        exit(1);
+      }
     }
   }
 

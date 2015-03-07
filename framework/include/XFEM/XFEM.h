@@ -63,10 +63,10 @@ private:
 
 public:
   void calc_physical_volfrac();
-  Real get_physical_volfrac()const {return _physical_volfrac;}
+  Real get_physical_volfrac() const {return _physical_volfrac;}
   Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
   Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
-  EFAelement * get_efa_elem() {return &_efa_elem;}
+  const EFAelement * get_efa_elem() const;
 };
 
 /**

@@ -37,7 +37,8 @@ class EFAedge
 
   bool equivalent(const EFAedge & other) const; // compares end nodes and embedded node
   bool isOverlapping(const EFAedge & other) const; // only compares end nodes
-  bool containsEdge(EFAedge & other);
+  bool isPartialOverlap(const EFAedge & other) const;
+  bool containsEdge(const EFAedge & other) const;
 
 //  bool operator < (const EFAedge & other) const;
 
@@ -51,7 +52,7 @@ class EFAedge
   EFAnode * get_embedded_node();
   void consistency_check();
   void switchNode(EFAnode *new_node, EFAnode *old_node);
-  bool containsNode(EFAnode *node);
+  bool containsNode(EFAnode *node) const;
   bool getNodeMasters(EFAnode* node, std::vector<EFAnode*> &master_nodes, std::vector<double> &master_weights);
   bool is_interior_edge();
   bool is_elem_full_edge();

@@ -303,13 +303,13 @@ ElementFragmentAlgorithm::clearAncestry()
 }
 
 void
-ElementFragmentAlgorithm::restoreFragmentInfo(EFAelement * const elem, EFAelement * const from_elem)
+ElementFragmentAlgorithm::restoreFragmentInfo(EFAelement * const elem, const EFAelement * const from_elem)
 {
   elem->restore_fragment(from_elem);
 }
 
 void
-ElementFragmentAlgorithm::restoreEdgeIntersections(EFAelement * const elem, EFAelement * const from_elem)
+ElementFragmentAlgorithm::restoreEdgeIntersections(EFAelement * const elem, const EFAelement * const from_elem)
 {
   // 2D specific method
   for (unsigned int i = 0; i < elem->num_edges(); ++i)

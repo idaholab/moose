@@ -94,7 +94,7 @@ public:
   EFAfragment* get_fragment(unsigned int frag_id) const;
   void add_fragment(EFAfragment* frag);
   EFAedge* get_frag_edge(unsigned int frag_id, unsigned int edge_id) const;
-  bool is_partial();
+  bool is_partial() const;
   void get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes);
   std::set<EFAnode*> getPhantomNodeOnEdge(unsigned int edge_id);
   bool getFragmentEdgeID(unsigned int elem_edge_id, unsigned int &frag_id, unsigned int &frag_edge_id);
@@ -137,7 +137,7 @@ public:
   void update_fragments(const std::set<EFAelement*> &CrackTipElements,
                         std::map<unsigned int, EFAnode*> &EmbeddedNodes);
   void fragment_sanity_check();
-  void restore_fragment(EFAelement* from_elem);
+  void restore_fragment(const EFAelement* const from_elem);
 
   void create_child(const std::set<EFAelement*> &CrackTipElements,
                     std::map<unsigned int, EFAelement*> &Elements,
