@@ -657,7 +657,20 @@ double NDSpline::PHI(double t){
 // _spline_coefficients = std::vector<double>(numberOfCoefficientsToStore);
 //}
 
-
+//std::vector<double> NDSpline::NDinverseFunctionGrid(double F, double g){
+// generate RN in [0,1]
+// int seed = time(0);
+// boost::random::mt19937 rng;
+// rng.seed(seed);
+// boost::random::uniform_distribution<> dist(1, numberOfCells);
+//
+// int pickedCell = dist(rng)-1;
+//	std::vector<double> coordinate(_dimensions);
+//	for (int i=0; i<_dimensions; i++){
+//		coordinate.at(i) = spline_cartesian_inverse_marginal(F, i, _tolerance);
+//	}
+//	return coordinate;
+//}
 
 
 

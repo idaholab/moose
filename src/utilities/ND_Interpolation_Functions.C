@@ -227,7 +227,6 @@ std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, do
 }
 
 
-
 std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  //initial_divisions = 10;
@@ -238,78 +237,91 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
  //std::cout<<"c++ F: "<< F << std::endl;
  //std::cout<<"c++ _dimensions: "<< _dimensions << std::endl;
 
- int last_divisions = (int)round(1.0/_initial_divisions);
- std::cout<<"last_divisions "<< last_divisions <<std::endl;
+ int last_divisions = (int)round(1.0/_tolerance);
+ //std::cout<<"last_divisions: "<< last_divisions <<std::endl;
+ //std::cout<<"_initial_divisions: "<< _initial_divisions <<std::endl;
+ //std::cout<<"_tolerance: "<< _tolerance <<std::endl;
 
+ std::vector<double> pointMax(_dimensions);
+ for(int i=0; i< _dimensions; i++)
+	 pointMax.at(i) = _cellPoint0.at(i)+_cellDxs.at(i);
+
+ F = interpolateAt(_cellPoint0) + F * (interpolateAt(pointMax) - interpolateAt(_cellPoint0));
  // Create basic cell
  std::vector<std::vector<double> > basic_cell;
  std::vector<int> NDcoordinate (_dimensions);
 
  for (int n=0; n<_dimensions; n++)
   NDcoordinate.at(n) = 0;
- //std::cout<<"NDinverseFunctionGrid: here1 "<< _dimensions <<std::endl;
+ 	 //std::cout<<"NDinverseFunctionGrid: here1 "<< _dimensions <<std::endl;
  basic_cell = generateNewCell(NDcoordinate, _cellPoint0, _cellDxs, _dimensions);
- //std::cout<<"NDinverseFunctionGrid: here2 "<<std::endl;
- // Divide input space into cells
+ 	 //std::cout<<"NDinverseFunctionGrid: here2 "<<std::endl;
+ 	 // Divide input space into cells
  std::vector<std::vector<std::vector<double> > > coarseCell;
  refinedCellDivision(coarseCell, basic_cell, _initial_divisions);
- //std::cout<<"NDinverseFunctionGrid: here3 "<<std::endl;
- // Select pivot cells
+ 	 //std::cout<<"NDinverseFunctionGrid: here3 "<<std::endl;
+ 	 // Select pivot cells
+ //std::cout<<"a: " << coarseCell.size()<<std::endl;
  cellsFilter(coarseCell, F);
- //std::cout<<"NDinverseFunctionGrid: here4 "<<std::endl;
- // Subdivide pivot cells into sub-cells
+ //std::cout<<"b: " << coarseCell.size()<<std::endl;
+ 	 //std::cout<<"NDinverseFunctionGrid: here4 "<<std::endl;
+ 	 // Subdivide pivot cells into sub-cells
  std::vector<std::vector<std::vector<double> > > refinedCell;
  for (int i=0; i<coarseCell.size(); i++)
 	 refinedCellDivision(refinedCell, coarseCell[i], last_divisions);
- //std::cout<<"NDinverseFunctionGrid: here5 "<<std::endl;
- // Select pivot sub-cells
+ 	 //std::cout<<"NDinverseFunctionGrid: here5 "<<std::endl;
+ 	 // Select pivot sub-cells
+ //std::cout<<"c: " << refinedCell.size()<<std::endl;
  cellsFilter(refinedCell, F);
- //std::cout<<"NDinverseFunctionGrid: here6 "<<std::endl;
- // Randomly pick a pivot sub-cell
+ //std::cout<<"d: " << refinedCell.size()<<std::endl;
+ 	 //std::cout<<"NDinverseFunctionGrid: here6 "<<std::endl;
+ 	 // Randomly pick a pivot sub-cell
  std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
- //std::cout<<"NDinverseFunctionGrid: here7"<<std::endl;
- // Get center of the picked cell
+ 	 //std::cout<<"NDinverseFunctionGrid: here7"<<std::endl;
+ 	 // Get center of the picked cell
  std::vector<double> randomVector = getCellCenter(pivotSubcell);
- //std::cout<<"NDinverseFunctionGrid: here8"<<std::endl;
+ 	 //std::cout<<"NDinverseFunctionGrid: here8"<<std::endl;
 
  return randomVector;
 }
 
 
-bool NDInterpolation::pivotCellCheck(std::vector<std::vector<double> > cell, double F){
+bool NDInterpolation::pivotCellCheck(std::vector<std::vector<double> >& cell, double F){
  // This function check if F is contained within cell
  // if the vertex outcome is the same for all vertices then F is not contained within the cell --> outcome = True
 
  bool outcome = true;
 
+ //std::cout<< cell[0][0] << ";"<< cell[0][1] << ";"<< cell[1][0] << ";"<< cell[1][1];
+
  for (int n=1; n<cell.size(); n++){
-  if (vertexOutcome(cell[n-1],F) == vertexOutcome(cell[n],F))
+  if (vertexOutcome(cell.at(n-1),F) == vertexOutcome(cell.at(n),F))
    outcome = outcome && true;
   else
    outcome = outcome && false;
  }
+
+ //std::cout<<" out: " << outcome << std::endl;
  return outcome;
 }
 
-int NDInterpolation::vertexOutcome(std::vector<double> vertex, double F){
+int NDInterpolation::vertexOutcome(std::vector<double>& vertex, double F){
  int outcome;
-
- if (interpolateAt(vertex) <= F)
+ double value = interpolateAt(vertex);
+ if (value <= F)
   outcome = 0;
  else
   outcome = 1;
-
  return outcome;
 }
 
 void NDInterpolation::cellsFilter(std::vector<std::vector<std::vector<double> > >& vertices, double F){
  // This function filter out the cells from vertices that do not contain F
- //std::cout<<"vertices size: "<< vertices.size() << std::endl;
-
- for (int i=vertices.size(); i<0; i--)
-  if (pivotCellCheck(vertices[i], F) == false){
-   vertices.erase(vertices.begin() + i);
-  }
+ for (int i=vertices.size(); i>0; i--){
+	 if (pivotCellCheck(vertices.at(i-1), F) == true){
+		 vertices.erase(vertices.begin() + i - 1);
+	 }
+ }
 }
 
 void NDInterpolation::refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > cell, int divisions){

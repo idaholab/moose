@@ -59,8 +59,8 @@ protected:
   double minkowskiDistance(std::vector<double> point1, std::vector<double> point2, double p);
   double vectorNorm(std::vector<double> point, double p);
 
-  bool pivotCellCheck(std::vector<std::vector<double> > cell, double F);
-  int vertexOutcome(std::vector<double> vertex, double F);
+  bool pivotCellCheck(std::vector<std::vector<double> >& cell, double F);
+  int vertexOutcome(std::vector<double>& vertex, double F);
   void cellsFilter(std::vector<std::vector<std::vector<double> > >& vertices, double F);
   void refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > cell, int divisions);
   std::vector<int> arrayConverter(int oneDcoordinate, int divisions, int n_dimensions);
@@ -80,6 +80,8 @@ public:
   double integralSpline(std::vector<double> point_coordinate);
   double spline_cartesian_marginal_integration(double coordinate,int marginal_variable);
   double spline_cartesian_inverse_marginal(double CDF,int marginal_variable, double precision);
+
+  std::vector<double> NDinverseFunctionGrid(double F, double g);
 
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
 
