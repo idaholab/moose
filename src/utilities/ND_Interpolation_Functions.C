@@ -285,6 +285,38 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
  return randomVector;
 }
 
+double NDInterpolation::avgCDfValue(std::vector<std::vector<double> > cell){
+	double value = 0.0;
+	for(int i=0; i<cell.size(); i++)
+		value += interpolateAt(cell.at(i));
+	value = value/((double)cell.size());
+	return value;
+}
+
+int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices, double F){
+	std::vector<double> cellAvgValues (vertices.size());
+	double cumulativeValue = 0.0;
+	for(int i=0; i<vertices.size(); i++){
+		cellAvgValues.at(i) = avgCDfValue(vertices.at(i));
+		cumulativeValue += cellAvgValues.at(i);
+	}
+	for(int i=0; i<vertices.size(); i++){
+		cellAvgValues.at(i) = cellAvgValues.at(i)/cumulativeValue;
+	}
+
+	double RNGValue= 1.0;
+	int index=0;
+	double cumulativeIndex = 0.0;
+	for(int i=0; i<vertices.size(); i++){
+		cumulativeIndex += cellAvgValues.at(i);
+		index=i;
+		if (RNGValue > cumulativeIndex)
+			break;
+	}
+	return index;
+}
+
+
 
 bool NDInterpolation::pivotCellCheck(std::vector<std::vector<double> >& cell, double F){
  // This function check if F is contained within cell

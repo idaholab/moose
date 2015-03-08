@@ -70,6 +70,9 @@ protected:
 
   double OneDderivative(double fxph, double fx, double fxmh);
   double derivativeStep(std::vector<double> coordinate, int loop);
+
+  int CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices, double F);
+  double avgCDfValue(std::vector<std::vector<double> > cell);
 };
 
 class NDSpline: public NDInterpolation
