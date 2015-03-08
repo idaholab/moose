@@ -451,7 +451,7 @@ public:
   }
 
   std::vector<double>
-  InverseCdf(double F)
+  InverseCdf(double F, double g)
   {
 	  throwError("BasicMultivariateNormal: InverseCdf not available");
 	  return std::vector<double>(2,-1.0);
