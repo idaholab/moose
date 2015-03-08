@@ -47,7 +47,7 @@ private:
   std::map< unsigned int, EFAnode*> _embedded_nodes;
   std::map< unsigned int, EFAnode*> _temp_nodes;
   std::map< unsigned int, EFAelement*> _elements;
-  std::map< std::set< EFAnode* >, std::set< EFAelement* > > _merged_edge_map;
+//  std::map< std::set< EFAnode* >, std::set< EFAelement* > > _merged_edge_map;
   std::set< EFAelement*> _crack_tip_elements;
   std::vector< EFAnode* > _new_nodes;
   std::vector< EFAelement* > _child_elements;

@@ -204,7 +204,7 @@ ElementFragmentAlgorithm::updateTopology(bool mergeUncutVirtualEdges)
   _new_nodes.clear();
   _child_elements.clear();
   _parent_elements.clear();
-  _merged_edge_map.clear();
+//  _merged_edge_map.clear();
 
   unsigned int first_new_node_id = getNewID(_permanent_nodes);
 
@@ -229,7 +229,7 @@ ElementFragmentAlgorithm::reset()
   _new_nodes.clear();
   _child_elements.clear();
   _parent_elements.clear();
-  _merged_edge_map.clear();
+//  _merged_edge_map.clear();
   _crack_tip_elements.clear();
   _inverse_connectivity.clear();
 
@@ -350,7 +350,7 @@ ElementFragmentAlgorithm::connectFragments(bool mergeUncutVirtualEdges)
   {
     EFAelement *childElem = _child_elements[elem_iter];
     childElem->connect_neighbors(_permanent_nodes, _embedded_nodes, _temp_nodes,
-                                 _merged_edge_map, mergeUncutVirtualEdges);
+                                 mergeUncutVirtualEdges);
   } // loop over child elements
 
   std::vector<EFAelement*>::iterator vit;
@@ -394,65 +394,15 @@ ElementFragmentAlgorithm::findCrackTipElements()
     }
   }
 
-  //Debug: print MergedEdgeMap
-  std::map<std::set<EFAnode*>, std::set<EFAelement*> >::iterator memit;
-  //std::cout<<"MergedEdgeMap:"<<std::endl;
-  //for (memit = MergedEdgeMap.begin(); memit != MergedEdgeMap.end(); ++memit)
-  //{
-  //  std::cout<<"Elems: ";
-  //  std::set<element_t*> conn_elems = memit->second;
-  //  std::set<element_t*>::iterator setit;
-  //  for (setit = conn_elems.begin(); setit != conn_elems.end(); ++setit)
-  //  {
-  //    std::cout<<(*setit)->id<<" ";
-  //  }
-  //  std::cout<<std::endl;
-  //}
-
-  //Go through MergedEdgeMap to find elements that are newly at the crack tip due to
+  //Go through new child elements to find elements that are newly at the crack tip due to
   //crack growth.
-  for (memit = _merged_edge_map.begin(); memit != _merged_edge_map.end(); ++memit)
+  for (unsigned int elem_iter = 0; elem_iter < _child_elements.size(); elem_iter++)
   {
-    if (memit->second.size() < 2)
-    {
-      CutElemMeshError("in findCrackTipElements() cannot have <2 elements on common edge")
-    }
-    else if (memit->second.size() == 2)
-    {
-    }
-    else if (memit->second.size() == 3)
-    {
-      std::vector< EFAelement* > this_tip_elems(memit->second.begin(),memit->second.end());
-      bool olay01 = this_tip_elems[0]->overlays_elem(this_tip_elems[1]);
-      bool olay12 = this_tip_elems[1]->overlays_elem(this_tip_elems[2]);
-      bool olay20 = this_tip_elems[2]->overlays_elem(this_tip_elems[0]);
+    EFAelement *childElem = _child_elements[elem_iter];
+    if (childElem->frag_has_tip_edges())
+      _crack_tip_elements.insert(childElem);
+  } // loop over (new) child elements
 
-      if (olay01)
-      {
-        if (olay12 || olay20)
-        {
-          CutElemMeshError("in findCrackTipElements() only 2 of elements on tip edge can overlay")
-        }
-        _crack_tip_elements.insert(this_tip_elems[2]);
-      }
-      else if (olay12)
-      {
-        if (olay01 || olay20)
-        {
-          CutElemMeshError("in findCrackTipElements() only 2 of elements on tip edge can overlay")
-        }
-        _crack_tip_elements.insert(this_tip_elems[0]);
-      }
-      else if (olay20)
-      {
-        if (olay01 || olay12)
-        {
-          CutElemMeshError("in findCrackTipElements() only 2 of elements on tip edge can overlay")
-        }
-        _crack_tip_elements.insert(this_tip_elems[1]);
-      }
-    }
-  }
   //std::cout<<"Crack tip elements: ";
   //for (sit=CrackTipElements.begin(); sit!=CrackTipElements.end(); ++sit)
   //{

@@ -879,37 +879,39 @@ EFAelement::get_common_nodes(const EFAelement* other_elem) const
 void
 EFAelement::init_crack_tip(std::set< EFAelement*> &CrackTipElements)
 {
-  for (unsigned int edge_iter = 0; edge_iter < _num_edges; ++edge_iter)
+  if (frag_has_tip_edges())
   {
-    if ((_edge_neighbors[edge_iter].size() == 2) &&
-        (_edges[edge_iter]->has_intersection()))
+    CrackTipElements.insert(this);
+    for (unsigned int edge_iter = 0; edge_iter < _num_edges; ++edge_iter)
     {
-      //Neither neighbor overlays current element.  We are on the uncut element ahead of the tip.
-      //Flag neighbors as crack tip elements and add this element as their crack tip neighbor.
+      if ((_edge_neighbors[edge_iter].size() == 2) &&
+          (_edges[edge_iter]->has_intersection()))
+      {
+        //Neither neighbor overlays current element.  We are on the uncut element ahead of the tip.
+        //Flag neighbors as crack tip split elements and add this element as their crack tip neighbor.
 
-      EFAnode* edge_node1 = _edges[edge_iter]->get_node(0);
-      EFAnode* edge_node2 = _edges[edge_iter]->get_node(1);
+        EFAnode* edge_node1 = _edges[edge_iter]->get_node(0);
+        EFAnode* edge_node2 = _edges[edge_iter]->get_node(1);
 
-      if ((_edge_neighbors[edge_iter][0]->overlays_elem(edge_node1,edge_node2)) ||
-          (_edge_neighbors[edge_iter][1]->overlays_elem(edge_node1,edge_node2)))
-        mooseError("Element has a neighbor that overlays itself");
+        if ((_edge_neighbors[edge_iter][0]->overlays_elem(edge_node1,edge_node2)) ||
+            (_edge_neighbors[edge_iter][1]->overlays_elem(edge_node1,edge_node2)))
+	  mooseError("Element has a neighbor that overlays itself");
 
-      //Make sure the current elment hasn't been flagged as a tip element
-      if (_crack_tip_split_element)
-        mooseError("crack_tip_split_element already flagged.  In elem: "<<_id
-                   << " flags: "<<_crack_tip_split_element
-                   <<" "<<_edge_neighbors[edge_iter][0]->is_crack_tip_split()
-                   <<" "<<_edge_neighbors[edge_iter][1]->is_crack_tip_split());
+        //Make sure the current elment hasn't been flagged as a tip element
+        if (_crack_tip_split_element)
+          mooseError("crack_tip_split_element already flagged.  In elem: "<<_id
+		   << " flags: "<<_crack_tip_split_element
+		   <<" "<<_edge_neighbors[edge_iter][0]->is_crack_tip_split()
+		   <<" "<<_edge_neighbors[edge_iter][1]->is_crack_tip_split());
 
-      CrackTipElements.insert(this);
+        _edge_neighbors[edge_iter][0]->set_crack_tip_split();
+        _edge_neighbors[edge_iter][1]->set_crack_tip_split();
 
-      _edge_neighbors[edge_iter][0]->set_crack_tip_split();
-      _edge_neighbors[edge_iter][1]->set_crack_tip_split();
-
-      _edge_neighbors[edge_iter][0]->add_crack_tip_neighbor(this);
-      _edge_neighbors[edge_iter][1]->add_crack_tip_neighbor(this);
-    }
-  } // edge_iter
+        _edge_neighbors[edge_iter][0]->add_crack_tip_neighbor(this);
+        _edge_neighbors[edge_iter][1]->add_crack_tip_neighbor(this);
+      }
+    } // edge_iter
+  }
 }
 
 void
@@ -973,16 +975,17 @@ EFAelement::should_duplicate_for_crack_tip(const std::set<EFAelement*> &CrackTip
   // 3) currElem is the neighbor of a to-be-second-split element which has another neighbor
   //    sharing a phantom node with currElem
   bool should_duplicate = false;
-  std::set<EFAelement*>::iterator sit;
-  sit = CrackTipElements.find(this);
-  if (sit == CrackTipElements.end() && frag_has_tip_edges() && is_partial())
-    should_duplicate = true;
-  else if (shouldDuplicateCrackTipSplitElem())
-    should_duplicate = true;
-  else if (shouldDuplicateForPhantomCorner())
-    should_duplicate = true;
-  else {}
-
+  if (_fragments.size() == 1)
+  {
+    std::set<EFAelement*>::iterator sit;
+    sit = CrackTipElements.find(this);
+    if (sit == CrackTipElements.end() && frag_has_tip_edges())
+      should_duplicate = true;
+    else if (shouldDuplicateCrackTipSplitElem())
+      should_duplicate = true;
+    else if (shouldDuplicateForPhantomCorner())
+      should_duplicate = true;
+  }
   return should_duplicate;
 }
 
@@ -1007,29 +1010,27 @@ EFAelement::shouldDuplicateCrackTipSplitElem()
 
       //Get the set of nodes in neighboring elements that are on a crack tip face that will be split
       std::set<EFAnode*> crack_tip_face_nodes;
-      for (unsigned int i=0; i<_edge_neighbors.size(); ++i)
+      for (unsigned int i = 0; i < _num_edges; ++i)
       {
-        for (unsigned int j=0; j<_edge_neighbors[i].size(); ++j)
+        for (unsigned int j = 0; j < num_edge_neighbors(i); ++j)
         {
-          if (_edge_neighbors[i][j])
+          EFAelement* edge_neighbor = get_edge_neighbor(i,j);
+          std::vector<unsigned int> neighbor_split_neighbors;
+          if (edge_neighbor->will_crack_tip_extend(neighbor_split_neighbors))
           {
-            std::vector<unsigned int> neighbor_split_neighbors;
-            if (_edge_neighbors[i][j]->will_crack_tip_extend(neighbor_split_neighbors))
+            for (unsigned int k = 0; k < neighbor_split_neighbors.size(); ++k)
             {
-              for (unsigned int k=0; k<neighbor_split_neighbors.size(); ++k)
-              {
-                //Get the nodes on the crack tip edge
-                std::vector<EFAnode*> edge_nodes;
-                _edge_neighbors[i][j]->get_nodes_on_edge(neighbor_split_neighbors[k],edge_nodes);
-                for (unsigned int l=0; l<edge_nodes.size(); ++l)
-                {
-                  crack_tip_face_nodes.insert(edge_nodes[l]);
-                }
-              }
-            }
+              //Get the nodes on the crack tip edge
+              std::vector<EFAnode*> edge_nodes;
+              edge_neighbor->get_nodes_on_edge(neighbor_split_neighbors[k],edge_nodes);
+//              for (unsigned int l=0; l<edge_nodes.size(); ++l)
+//              {
+                crack_tip_face_nodes.insert(edge_nodes.begin(), edge_nodes.end());
+//              }
+            } // k
           }
-        }
-      }
+        } // j
+      } // i
 
       //See if any of those nodes are in the non-physical part of this element.
       //Create a set of all non-physical elements
@@ -1383,10 +1384,15 @@ EFAelement::update_fragments(const std::set<EFAelement*> &CrackTipElements,
                              std::map<unsigned int, EFAnode*> &EmbeddedNodes)
 {
   // combine the crack-tip edges in a fragment to a single intersected edge
-  // N.B. the tip edges could be on a domain boundary, but the elements having 
-  // them are not crack tip elements
-  if (_fragments.size() == 1)
-    _fragments[0]->combine_tip_edges();
+  std::set<EFAelement*>::iterator sit;
+  sit = CrackTipElements.find(this);
+  if (sit != CrackTipElements.end()) // curr_elem is a crack tip element
+  {
+    if (_fragments.size() == 1)
+      _fragments[0]->combine_tip_edges();
+    else
+      mooseError("crack tip elem " << _id << " can only have 1 fragment");
+  }
 
   // if a fragment only has 1 intersection which is in an interior edge
   // remove this embedded node (MUST DO THIS AFTER combine_tip_edges())
@@ -1643,7 +1649,6 @@ void
 EFAelement::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
                               std::map<unsigned int, EFAnode*> &EmbeddedNodes,
                               std::map<unsigned int, EFAnode*> &TempNodes,
-                              std::map<std::set<EFAnode*>, std::set<EFAelement*> > &MergedEdgeMap,
                               bool merge_phantom_edges)
 {
   // N.B. "this" must point to a child element that was just created
@@ -1677,11 +1682,7 @@ EFAelement::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
           //Check to see if the nodes are already merged.  There's nothing else to do in that case.
           if (childEdgeNodes[0] == childOfNeighborEdgeNodes[1] &&
               childEdgeNodes[1] == childOfNeighborEdgeNodes[0])
-          {
-            addToMergedEdgeMap(childEdgeNodes[0], childEdgeNodes[1], this, childOfNeighborElem,
-                               MergedEdgeMap);
             continue;
-          }
 
           if (_fragments[0]->isConnected(*childOfNeighborElem->get_fragment(0)))
           {
@@ -1699,8 +1700,7 @@ EFAelement::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
                          PermanentNodes, TempNodes);
               merged_nodes.push_back(childNode);
             }
-            addToMergedEdgeMap(merged_nodes[0], merged_nodes[1], this, childOfNeighborElem,
-                               MergedEdgeMap);
+
             duplicateEmbeddedNode(j, childOfNeighborElem, neighbor_edge_id, EmbeddedNodes);
           }
         } // l, loop over NeighborElem's children
@@ -1868,17 +1868,6 @@ EFAelement::mapParaCoorFrom1Dto2D(unsigned int edge_id, double xi_1d, std::vecto
   }
   else
     mooseError("mapParaCoorFram1Dto2D only for quad element only");
-}
-
-void
-EFAelement::addToMergedEdgeMap(EFAnode* node1, EFAnode* node2, EFAelement* elem1, EFAelement* elem2,
-                               std::map<std::set<EFAnode*>, std::set<EFAelement*> > &MergedEdgeMap)
-{
-  std::set<EFAnode*> edge_nodes;
-  edge_nodes.insert(node1);
-  edge_nodes.insert(node2);
-  MergedEdgeMap[edge_nodes].insert(elem1);
-  MergedEdgeMap[edge_nodes].insert(elem2);
 }
 
 void

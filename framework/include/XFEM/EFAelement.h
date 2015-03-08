@@ -149,7 +149,6 @@ public:
   void connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
                          std::map<unsigned int, EFAnode*> &EmbeddedNodes,
                          std::map<unsigned int, EFAnode*> &TempNodes,
-                         std::map<std::set<EFAnode*>, std::set<EFAelement*> > &MergedEdgeMap,
                          bool merge_phantom_edges);
   void print_elem();
 
@@ -158,8 +157,8 @@ private:
   void mapParaCoorFrom1Dto2D(unsigned int edge_id, double xi_1d, std::vector<double> &para_coor);
 
   // methods only called in connect_fragment()
-  void addToMergedEdgeMap(EFAnode* node1, EFAnode* node2, EFAelement* elem1, EFAelement* elem2,
-                          std::map< std::set<EFAnode*>, std::set<EFAelement*> > &MergedEdgeMap);
+//  void addToMergedEdgeMap(EFAnode* node1, EFAnode* node2, EFAelement* elem1, EFAelement* elem2,
+//                          std::map< std::set<EFAnode*>, std::set<EFAelement*> > &MergedEdgeMap);
   void mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
                   EFAelement* childElem, EFAelement* childOfNeighborElem, 
                   std::map<unsigned int, EFAnode*> &PermanentNodes,
