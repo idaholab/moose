@@ -597,6 +597,7 @@ XFEM::cut_mesh_with_efa()
 
   std::map<unsigned int, Node*> efa_id_to_new_node;
   std::map<unsigned int, Node*> efa_id_to_new_node2;
+  std::map<unsigned int, Elem*> efa_id_to_new_elem;
 
   _efa_mesh.updatePhysicalLinksAndFragments();
   // DEBUG
@@ -644,6 +645,7 @@ XFEM::cut_mesh_with_efa()
   for (unsigned int i = 0; i < NewElements.size(); ++i)
   {
     unsigned int parent_id = NewElements[i]->parent()->id();
+    unsigned int efa_child_id = NewElements[i]->id();
 
     Elem *parent_elem = _mesh->elem(parent_id);
     Elem *libmesh_elem = Elem::build(parent_elem->type()).release();
@@ -705,6 +707,7 @@ XFEM::cut_mesh_with_efa()
 
     XFEMCutElem * xfce = new XFEMCutElem(libmesh_elem, NewElements[i]);
     _cut_elem_map.insert(std::pair<Elem*,XFEMCutElem*>(libmesh_elem,xfce));
+    efa_id_to_new_elem.insert(std::make_pair(efa_child_id, libmesh_elem));
 
     if (_mesh2)
     {
@@ -790,7 +793,12 @@ XFEM::cut_mesh_with_efa()
     for (sit = CrackTipElements.begin(); sit != CrackTipElements.end(); ++sit)
     {
       unsigned int eid = (*sit)->id();
-      Elem * crack_tip_elem = _mesh->elem(eid);
+      Elem * crack_tip_elem;
+      std::map<unsigned int, Elem*>::iterator eit = efa_id_to_new_elem.find(eid);
+      if (eit != efa_id_to_new_elem.end())
+        crack_tip_elem = eit->second;
+      else
+        crack_tip_elem = _mesh->elem(eid);
       _crack_tip_elems.insert(crack_tip_elem);
     }
   }
