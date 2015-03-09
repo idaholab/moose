@@ -142,21 +142,16 @@ EigenExecutionerBase::makeBXConsistent(Real k)
   Real consistency_tolerance = 1e-10;
 
   // Scale the solution so that the postprocessor is equal to k.
+  // Note: all dependent objects of k must be evaluated on linear!
   // We have a fix point loop here, in case the postprocessor is a nonlinear function of the scaling factor.
   // FIXME: We have assumed this loop always converges.
   while (std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
   {
     // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
     _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, k/_source_integral);
-    // update all aux variables
-    for (unsigned int i=0; i<Moose::exec_types.size(); i++)
-    {
-      // EXEC_CUSTOM is special, should be treated only by specifically designed executioners.
-      if (Moose::exec_types[i]==EXEC_CUSTOM) continue;
-      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(Moose::exec_types[i]);
-      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::POST_AUX);
-    }
+    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
+    _problem.computeAuxiliaryKernels(EXEC_LINEAR);
+    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << _source_integral;
     _console << " |Bx_0| = " << ss.str() << std::endl;
