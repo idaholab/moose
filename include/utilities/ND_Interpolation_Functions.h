@@ -84,7 +84,7 @@ public:
   double spline_cartesian_marginal_integration(double coordinate,int marginal_variable);
   double spline_cartesian_inverse_marginal(double CDF,int marginal_variable, double precision);
 
-  std::vector<double> NDinverseFunctionGrid(double F, double g);
+  // std::vector<double> NDinverseFunctionGrid(double F, double g);
 
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
 
