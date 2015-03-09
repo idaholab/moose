@@ -227,63 +227,7 @@ std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, do
 }
 
 
-std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
- //initial_divisions = 10;
- //tolerance = 0.1;
-
- //std::cout<<"c++ initial_divisions: "<< _initial_divisions << std::endl;
- //std::cout<<"c++ tolerance: "<< _tolerance << std::endl;
- //std::cout<<"c++ F: "<< F << std::endl;
- //std::cout<<"c++ _dimensions: "<< _dimensions << std::endl;
-
- int last_divisions = (int)round(1.0/_tolerance);
- //std::cout<<"last_divisions: "<< last_divisions <<std::endl;
- //std::cout<<"_initial_divisions: "<< _initial_divisions <<std::endl;
- //std::cout<<"_tolerance: "<< _tolerance <<std::endl;
-
- std::vector<double> pointMax(_dimensions);
- for(int i=0; i< _dimensions; i++)
-	 pointMax.at(i) = _cellPoint0.at(i)+_cellDxs.at(i);
-
- F = interpolateAt(_cellPoint0) + F * (interpolateAt(pointMax) - interpolateAt(_cellPoint0));
- // Create basic cell
- std::vector<std::vector<double> > basic_cell;
- std::vector<int> NDcoordinate (_dimensions);
-
- for (int n=0; n<_dimensions; n++)
-  NDcoordinate.at(n) = 0;
- 	 //std::cout<<"NDinverseFunctionGrid: here1 "<< _dimensions <<std::endl;
- basic_cell = generateNewCell(NDcoordinate, _cellPoint0, _cellDxs, _dimensions);
- 	 //std::cout<<"NDinverseFunctionGrid: here2 "<<std::endl;
- 	 // Divide input space into cells
- std::vector<std::vector<std::vector<double> > > coarseCell;
- refinedCellDivision(coarseCell, basic_cell, _initial_divisions);
- 	 //std::cout<<"NDinverseFunctionGrid: here3 "<<std::endl;
- 	 // Select pivot cells
- //std::cout<<"a: " << coarseCell.size()<<std::endl;
- cellsFilter(coarseCell, F);
- //std::cout<<"b: " << coarseCell.size()<<std::endl;
- 	 //std::cout<<"NDinverseFunctionGrid: here4 "<<std::endl;
- 	 // Subdivide pivot cells into sub-cells
- std::vector<std::vector<std::vector<double> > > refinedCell;
- for (int i=0; i<coarseCell.size(); i++)
-	 refinedCellDivision(refinedCell, coarseCell[i], last_divisions);
- 	 //std::cout<<"NDinverseFunctionGrid: here5 "<<std::endl;
- 	 // Select pivot sub-cells
- //std::cout<<"c: " << refinedCell.size()<<std::endl;
- cellsFilter(refinedCell, F);
- //std::cout<<"d: " << refinedCell.size()<<std::endl;
- 	 //std::cout<<"NDinverseFunctionGrid: here6 "<<std::endl;
- 	 // Randomly pick a pivot sub-cell
- std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
- 	 //std::cout<<"NDinverseFunctionGrid: here7"<<std::endl;
- 	 // Get center of the picked cell
- std::vector<double> randomVector = getCellCenter(pivotSubcell);
- 	 //std::cout<<"NDinverseFunctionGrid: here8"<<std::endl;
-
- return randomVector;
-}
 
 double NDInterpolation::avgCDfValue(std::vector<std::vector<double> > cell){
 	double value = 0.0;
@@ -542,6 +486,44 @@ double NDInterpolation::averageCellValue(std::vector<double> center, std::vector
 	value = value/numberOfVerteces;
 
 	return value;
+}
+
+std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
+
+ int last_divisions = (int)round(1.0/_tolerance);
+
+ std::vector<double> pointMax(_dimensions);
+ for(int i=0; i< _dimensions; i++){
+	 pointMax.at(i) = _cellPoint0.at(i)+_cellDxs.at(i);
+ }
+ F = interpolateAt(_cellPoint0) + F * (interpolateAt(pointMax) - interpolateAt(_cellPoint0));
+
+ // Create basic cell
+ std::vector<std::vector<double> > basic_cell;
+ std::vector<int> NDcoordinate (_dimensions);
+
+ for (int n=0; n<_dimensions; n++){
+  NDcoordinate.at(n) = 0;
+ }
+
+ basic_cell = generateNewCell(NDcoordinate, _cellPoint0, _cellDxs, _dimensions);
+ 	 // Divide input space into cells
+ std::vector<std::vector<std::vector<double> > > coarseCell;
+ refinedCellDivision(coarseCell, basic_cell, _initial_divisions);
+ 	 // Select pivot cells
+ cellsFilter(coarseCell, F);
+ 	 // Subdivide pivot cells into sub-cells
+ std::vector<std::vector<std::vector<double> > > refinedCell;
+ for (int i=0; i<coarseCell.size(); i++){
+	 refinedCellDivision(refinedCell, coarseCell[i], last_divisions);
+ }
+ 	 // Select pivot sub-cells
+ cellsFilter(refinedCell, F);
+ 	 // Randomly pick a pivot sub-cell
+ std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
+ 	 // Get center of the picked cell
+ std::vector<double> randomVector = getCellCenter(pivotSubcell);
+ return randomVector;
 }
 
 
