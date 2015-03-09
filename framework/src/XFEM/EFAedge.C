@@ -220,6 +220,22 @@ EFAedge::get_intersection(EFAnode * from_node)
     mooseError("In get_intersection node not in edge");
 }
 
+double
+EFAedge::get_xi(EFAnode * node)
+{
+  // get the parametric coords of the input node
+  double xi = -100.0;
+  if (_edge_node1 == node)
+    xi = 0.0;
+  else if (_edge_node2 == node)
+    xi = 1.0;
+  else if (_embedded_node == node)
+    xi = _intersection_x;
+  else
+    mooseError("the given node is not found in the current edge");
+  return xi;
+}
+
 EFAnode *
 EFAedge::get_embedded_node()
 {

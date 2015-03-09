@@ -129,10 +129,32 @@ EFAfragment::combine_tip_edges()
   } // i
   if (has_tip_edges)
   {
+    EFAnode* node1 = _boundary_edges[frag_tip_edge_id[0]]->get_node(0);
+    EFAnode* emb_node = _boundary_edges[frag_tip_edge_id[0]]->get_node(1);
+    if (_boundary_edges[frag_tip_edge_id[1]]->containsNode(node1))
+    {
+      node1 = _boundary_edges[frag_tip_edge_id[0]]->get_node(1);
+      emb_node = node1;
+    }
+
+    EFAnode* node2 = _boundary_edges[frag_tip_edge_id[1]]->get_node(1);
+    if (_boundary_edges[frag_tip_edge_id[0]]->containsNode(node2))
+      node2 = _boundary_edges[frag_tip_edge_id[1]]->get_node(0);
+
+    EFAedge* elem_edge = _host_elem->get_edge(elem_tip_edge_id);
+    double xi_node1 = elem_edge->get_xi(node1);
+    double xi_node2 = elem_edge->get_xi(node2);
+    double xi_emb = elem_edge->get_xi(emb_node);
+    double position = (xi_emb - xi_node1)/(xi_node2 - xi_node1);
+    EFAedge* full_edge = new EFAedge(node1, node2);
+    full_edge->add_intersection(position, emb_node, node1);
+
     delete _boundary_edges[frag_tip_edge_id[0]];
     delete _boundary_edges[frag_tip_edge_id[1]];
-    _boundary_edges[frag_tip_edge_id[0]] = new EFAedge(*_host_elem->get_edge(elem_tip_edge_id));
+    _boundary_edges[frag_tip_edge_id[0]] = full_edge;
     _boundary_edges.erase(_boundary_edges.begin()+frag_tip_edge_id[1]);
+//    if (!full_edge->equivalent(*elem_edge))
+//      mooseError("the new full edge is not equivalent with the element edge");
   }
 }
 

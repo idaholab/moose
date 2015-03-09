@@ -48,6 +48,7 @@ class EFAedge
   bool has_intersection();
   bool has_intersection_at_position(double position, EFAnode * from_node);
   double get_intersection(EFAnode * from_node);
+  double get_xi(EFAnode * node);
 
   EFAnode * get_embedded_node();
   void consistency_check();
