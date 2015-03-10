@@ -43,7 +43,7 @@ protected:
   std::vector<int> _eta_vars;
 
   /// Index of the eta this kernel is operating on
-  int _a;
+  unsigned int _a;
 
   /// Interface gradient prefactor
   std::vector<std::string> _kappa_names;
