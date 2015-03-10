@@ -917,9 +917,10 @@ SolidModel::initialSetup()
 
   if (_compute_JIntegral && _alpha_function)
   {
-    _piecewise_linear_alpha_function = dynamic_cast<PiecewiseLinear * >(_alpha_function);
-    if ( !_piecewise_linear_alpha_function )
-      mooseError("thermal_expansion_function must be PiecewiseLinear if compute_JIntegral=true");
+    //Make sure that timeDerivative is supported for _alpha_function.  If not, it will error out.
+    Point dummy_point;
+    Real dummy_temp = 0;
+    _alpha_function->timeDerivative(dummy_temp,dummy_point);
   }
 
 }
@@ -1547,33 +1548,47 @@ SolidModel::computeThermalJvec()
 {
   mooseAssert(_J_thermal_term_vec, "_J_thermal_term_vec not initialized");
 
-  Real alpha(_alpha);
-  Real dalpha_dT = 0.0;
-  Real current_temp = _temperature[_qp];
-
-  if (_piecewise_linear_alpha_function)
-  {
-    Point p;
-    if (!_mean_alpha_function)
-    {
-      alpha = _piecewise_linear_alpha_function->value(current_temp,p);
-      dalpha_dT = _piecewise_linear_alpha_function->timeDerivative(current_temp,p);
-    }
-    else
-    {
-      Real alpha_current_temp = _piecewise_linear_alpha_function->value(current_temp,p);
-      alpha = alpha_current_temp * (current_temp - _ref_temp);
-      dalpha_dT = _piecewise_linear_alpha_function->timeDerivative(current_temp,p);
-    }
-
-  }
-
   Real stress_trace;
   stress_trace = _stress[_qp].xx() + _stress[_qp].yy() + _stress[_qp].zz();
 
-  for (unsigned int i=0; i<3; ++i)
+  if (_alpha_function)
   {
-    Real dthermstrain_dx = alpha*_temp_grad[_qp](i) + dalpha_dT*_temp_grad[_qp](i)*(current_temp - _stress_free_temp);
-    (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
+    Point p;
+    Real current_temp = _temperature[_qp];
+
+    if (!_mean_alpha_function)
+    {
+      Real alpha = _alpha_function->value(current_temp,p);
+      for (unsigned int i=0; i<3; ++i)
+      {
+        Real dthermstrain_dx = _temp_grad[_qp](i) * (alpha);
+        (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
+      }
+    }
+    else
+    {
+      Real small(1e-6);
+      Real dalphabar_dT = _alpha_function->timeDerivative(current_temp,p);
+      Real alphabar_Tsf = _alpha_function->value(_stress_free_temp,p);
+      Real alphabar = _alpha_function->value(current_temp,p);
+      Real numerator =  dalphabar_dT * (current_temp - _ref_temp) + alphabar;
+      Real denominator = 1.0 + alphabar_Tsf * (_stress_free_temp - _ref_temp);
+      if (denominator < small)
+        mooseError("Denominator too small in thermal strain calculation");
+      Real dthermstrain_dT = numerator / denominator;
+      for (unsigned int i=0; i<3; ++i)
+      {
+        Real dthermstrain_dx = _temp_grad[_qp](i) * dthermstrain_dT;
+        (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
+      }
+    }
+  }
+  else
+  {
+    for (unsigned int i=0; i<3; ++i)
+    {
+      Real dthermstrain_dx = _temp_grad[_qp](i) * _alpha;
+      (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
+    }
   }
 }

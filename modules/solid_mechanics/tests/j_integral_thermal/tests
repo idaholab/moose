@@ -11,4 +11,14 @@
     exodiff = 'j_integral_2d_ctefunc_out.e'
     max_parallel = 1                       # lin_its and nl_its will not be the same in parallle and serial
   [../]
+  [./test_jthermal_mean_ctefunc]
+    type = 'CSVDiff'
+    input = 'j_integral_2d_mean_ctefunc.i'
+    csvdiff = 'mean_out.csv'
+  [../]
+  [./test_jthermal_inst_ctefunc]
+    type = 'CSVDiff'
+    input = 'j_integral_2d_inst_ctefunc.i'
+    csvdiff = 'inst_out.csv'
+  [../]
 []
