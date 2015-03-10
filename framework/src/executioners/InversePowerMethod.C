@@ -66,7 +66,6 @@ InversePowerMethod::takeStep()
   preSolve();
   // we currently do not check the solution difference
   Real initial_res;
-  Real t0 = _problem.timeStep();
   inversePowerIteration(_min_iter, _max_iter, _pfactor, _cheb_on, _eig_check_tol, true,
                         getParam<PostprocessorName>("xdiff"), _sol_check_tol,
                         _eigenvalue, initial_res);

@@ -174,9 +174,6 @@ MultiAppCopyTransfer::execute()
 
       bool is_nodal = to_sys.variable_type(to_var_num) == FEType();
 
-      dof_id_type n_nodes = to_mesh->n_nodes();
-      dof_id_type n_elems = to_mesh->n_elem();
-
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
         if (!_multi_app->hasLocalApp(i))
