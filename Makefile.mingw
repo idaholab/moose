@@ -1,0 +1,67 @@
+###############################################################################
+################### MOOSE Application Standard Makefile #######################
+###############################################################################
+#
+# Optional Environment variables
+# MOOSE_DIR        - Root directory of the MOOSE project 
+# HERD_TRUNK_DIR   - Location of the HERD repository
+# FRAMEWORK_DIR    - Location of the MOOSE framework
+#
+###############################################################################
+MOOSE_DIR          ?= $(shell dirname `pwd`)/moose
+HERD_TRUNK_DIR     ?= $(shell dirname `pwd`)
+FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
+###############################################################################
+
+CURR_DIR    := $(shell pwd)
+ROOT_DIR    := $(HERD_TRUNK_DIR)
+
+###############################################################################
+#  The combination of MinGW and Windows Python leads to a path translation
+#  issues when doing the Python interface module.  MinGW is generally pretty 
+#  good at converting paths between the two worlds, but has trouble with the 
+#  last step of the process where built output is written.  Basically, if 
+#  CROW_DIR is a relative path it works but if it is absolute (which it is by 
+#  default, set to the current directory).  Setting CROW_DIR like this will
+#  override the default.  It is equivalent, but works better for MinGW:
+CROW_DIR=.
+
+# framework
+# include $(FRAMEWORK_DIR)/build.mk
+#include $(FRAMEWORK_DIR)/moose.mk
+
+################################## MODULES ####################################
+#ALL_MODULES := yes
+#include           $(MOOSE_DIR)/modules/modules.mk
+###############################################################################
+
+libmesh_CXX = g++
+libmesh_LIBTOOL = libtool
+obj-suffix = lo
+shared-lib-suffix = pyd
+libmesh_CPPFLAGS = -fPIC 
+libmesh_CXXFLAGS = 
+EXTRA_MODULE_LIBS = -L/bin/
+PYTHON_LIB = -L/python27/libs -lpython27
+
+all::
+
+#include $(FRAMEWORK_DIR)/build.mk
+# deps
+#include $(FRAMEWORK_DIR)/moose.mk
+include $(HERD_TRUNK_DIR)/crow/config.mk
+include $(HERD_TRUNK_DIR)/crow/crow_python_modules.mk
+
+$(warning PYTHON_MODULES $(PYTHON_MODULES))
+all:: $(PYTHON_MODULES)
+
+clean::
+	rm -fv $(HERD_TRUNK_DIR)/crow/src/distributions/*.$(obj-suffix) \
+               $(HERD_TRUNK_DIR)/crow/src/utilities/*.$(obj-suffix) \
+               $(HERD_TRUNK_DIR)/crow/src/tools/*.$(obj-suffix) \
+               $(HERD_TRUNK_DIR)/crow/python_modules/*.$(obj-suffix) \
+               $(HERD_TRUNK_DIR)/crow/python_modules/*.$(shared-lib-suffix)*
+
+###############################################################################
+# Additional special case targets should be added here
+
