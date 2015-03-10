@@ -49,7 +49,7 @@ ComputeFiniteStrain::computeProperties()
 
   ave_dfgrd_det=0.0;
 
-  for (unsigned int _qp = 0; _qp < _qrule->n_points(); ++_qp)
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     //Deformation gradient
     RankTwoTensor A(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]); //Deformation gradient
