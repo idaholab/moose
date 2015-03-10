@@ -102,6 +102,11 @@ public:
   const std::vector<Action *> & getActionsByName(const std::string & task) const;
 
   /**
+   * Check if Actions associated with passed in task exist.
+   */
+  bool hasActions(const std::string & task) const;
+
+  /**
    * This method loops over all actions in the warehouse and executes them.  Meta-actions
    * may add new actions to the warehouse on the fly and they will still be executed in order
    */
