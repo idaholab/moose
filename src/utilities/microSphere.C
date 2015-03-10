@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdlib>
 #include <cmath>
+#include <ctime>
 #include "MDreader.h"
 
 MicroSphere::MicroSphere(std::string filename, double p, int precision){
