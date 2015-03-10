@@ -180,6 +180,15 @@ ActionWarehouse::getActionsByName(const std::string & task) const
   return it->second;
 }
 
+bool
+ActionWarehouse::hasActions(const std::string & task) const
+{
+  if (_action_blocks.find(task) == _action_blocks.end())
+    return false;
+  else
+    return true;
+}
+
 void
 ActionWarehouse::buildBuildableActions(const std::string &task)
 {
