@@ -38,3 +38,4 @@ ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
 
 test: all
 	$(call TEST_exodiff,ex18.i,out.e)
+	$(call TEST_exodiff,ex18_parsed.i,out.e)
