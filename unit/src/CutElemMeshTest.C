@@ -23,7 +23,7 @@ CutElemMeshTest::~CutElemMeshTest()
 {}
 
 void
-CutElemMeshTest::case1Common(CutElemMesh &MyMesh)
+CutElemMeshTest::case1Common(ElementFragmentAlgorithm &MyMesh)
 {
   // 0 ----- 1 ----- 2
   // |       |       |
@@ -62,8 +62,8 @@ CutElemMeshTest::case1Common(CutElemMesh &MyMesh)
 void
 CutElemMeshTest::CutElemMeshTest1a()
 {
-  std::cout<<"\nRunning case 1a"<<std::endl;
-  CutElemMesh MyMesh;
+  std::cout<<"\n ***** Running case 1a *****"<<std::endl;
+  ElementFragmentAlgorithm MyMesh;
   case1Common(MyMesh);
 
   //creates all new elements (children)
@@ -78,8 +78,8 @@ CutElemMeshTest::CutElemMeshTest1a()
 void
 CutElemMeshTest::CutElemMeshTest1b()
 {
-  std::cout<<"\nRunning case 1b"<<std::endl;
-  CutElemMesh MyMesh;
+  std::cout<<"\n ***** Running case 1b *****"<<std::endl;
+  ElementFragmentAlgorithm MyMesh;
   case1Common(MyMesh);
 
   //creates all new elements (children)
@@ -99,7 +99,7 @@ CutElemMeshTest::CutElemMeshTest1b()
 }
 
 void
-CutElemMeshTest::case2Mesh(CutElemMesh &MyMesh)
+CutElemMeshTest::case2Mesh(ElementFragmentAlgorithm &MyMesh)
 {
   // 0 ----- 1 ----- 2
   // |       |       |
@@ -130,7 +130,7 @@ CutElemMeshTest::case2Mesh(CutElemMesh &MyMesh)
 }
 
 void
-CutElemMeshTest::case2Intersections(CutElemMesh &MyMesh)
+CutElemMeshTest::case2Intersections(ElementFragmentAlgorithm &MyMesh)
 {
   // 0 ----- 1 ----- 2
   // |       |       |
@@ -155,8 +155,8 @@ CutElemMeshTest::case2Intersections(CutElemMesh &MyMesh)
 void
 CutElemMeshTest::CutElemMeshTest2a()
 {
-  std::cout<<"\nRunning case 2a"<<std::endl;
-  CutElemMesh MyMesh;
+  std::cout<<"\n ***** Running case 2a *****"<<std::endl;
+  ElementFragmentAlgorithm MyMesh;
   case2Mesh(MyMesh);
   case2Intersections(MyMesh);
   MyMesh.updateTopology();
@@ -165,8 +165,8 @@ CutElemMeshTest::CutElemMeshTest2a()
 
 void CutElemMeshTest::CutElemMeshTest2b()
 {
-  std::cout<<"\nRunning case 2b"<<std::endl;
-  CutElemMesh MyMesh;
+  std::cout<<"\n ***** Running case 2b *****"<<std::endl;
+  ElementFragmentAlgorithm MyMesh;
   case2Mesh(MyMesh);
   case2Intersections(MyMesh);
   MyMesh.updateTopology(false);
@@ -175,50 +175,45 @@ void CutElemMeshTest::CutElemMeshTest2b()
 
 void CutElemMeshTest::CutElemMeshTest2c()
 {
-  std::cout<<"\nRunning case 2c"<<std::endl;
+  std::cout<<"\n ***** Running case 2c *****"<<std::endl;
   std::cout<<"\nCut first element:"<<std::endl;
-  CutElemMesh MyMesh;
+  ElementFragmentAlgorithm MyMesh;
   case2Mesh(MyMesh);
 
-  unsigned int nodes1[4] = {0,3,4,1};
-  unsigned int elem_id = MyMesh.getElemIdByNodes(nodes1);
-  MyMesh.addEdgeIntersection((unsigned int) elem_id,0,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) elem_id,1,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 0,1,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
+//  MyMesh.printMesh();
+
+//  std::cout<<"\nCut second element:"<<std::endl;
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
   MyMesh.printMesh();
 
   std::cout<<"\nCut second element:"<<std::endl;
-  MyMesh.clearAncestry();
-  MyMesh.updateEdgeNeighbors();
-  MyMesh.initCrackTipTopology();
-
-//  MyMesh.printMesh();
-//  std::cout<<"\nCut second element:"<<std::endl;
-  unsigned int nodes2[4] = {1,4,5,2};
-  elem_id = MyMesh.getElemIdByNodes(nodes2);
-  MyMesh.addEdgeIntersection((unsigned int) elem_id,1,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 1,1,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
+//  MyMesh.printMesh();
+
+//  std::cout<<"\nCut third element:"<<std::endl;
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors(); 
+  MyMesh.initCrackTipTopology();
   MyMesh.printMesh();
 
   std::cout<<"\nCut third element:"<<std::endl;
-  MyMesh.clearAncestry();
-  MyMesh.updateEdgeNeighbors();
-  MyMesh.initCrackTipTopology();
-
-//  MyMesh.printMesh();
-//  std::cout<<"\nCut third element:"<<std::endl;
-  elem_id = MyMesh.getElemIdByNodes(nodes2);
-  MyMesh.addEdgeIntersection((unsigned int) elem_id,2,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 6,2,0.5);// I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
-  MyMesh.printMesh();
+//  MyMesh.printMesh();
 
-  std::cout<<"\nFinal:"<<std::endl;
+//  std::cout<<"\nFinal:"<<std::endl;
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
@@ -227,7 +222,7 @@ void CutElemMeshTest::CutElemMeshTest2c()
 
 void CutElemMeshTest::CutElemMeshTest3()
 {
-  std::cout<<"\nRunning case 3"<<std::endl;
+  std::cout<<"\n ***** Running case 3 *****"<<std::endl;
 
   // 0 ----- 1 ----- 2
   // |       |       |
@@ -254,7 +249,7 @@ void CutElemMeshTest::CutElemMeshTest3()
   std::vector<unsigned int> v4 (q4, q4 + sizeof(q4) / sizeof(unsigned int) );
   quads2.push_back(v4);
 
-  CutElemMesh MyMesh;
+  ElementFragmentAlgorithm MyMesh;
   MyMesh.addElements( quads );
   MyMesh.addElements( quads2 ); //do in 2 batches just to test that it works
 
@@ -286,9 +281,9 @@ void CutElemMeshTest::CutElemMeshTest3()
 
 void CutElemMeshTest::CutElemMeshTest4()
 {
-  std::cout<<"\nRunning case 4"<<std::endl;
+  std::cout<<"\n ***** Running case 4 *****"<<std::endl;
 
-  CutElemMesh MyMesh;
+  ElementFragmentAlgorithm MyMesh;
 
   {
     unsigned int qary[] = {0, 1, 2, 3};
@@ -402,7 +397,7 @@ void CutElemMeshTest::CutElemMeshTest4()
 }
 
 void
-CutElemMeshTest::case5Mesh(CutElemMesh &MyMesh)
+CutElemMeshTest::case5Mesh(ElementFragmentAlgorithm &MyMesh)
 {
   // 0 ----- 1 ----- 2 ----- 3
   // |       |       |       |
@@ -450,11 +445,11 @@ void CutElemMeshTest::CutElemMeshTest5a()
   // |       |   |   |       |
   // 8 ----- 9 --x--10 -----11
 
-  CutElemMesh MyMesh;
+  ElementFragmentAlgorithm MyMesh;
   case5Mesh(MyMesh);
 
   // add the horizontal cut
-  std::cout<<"\nRunning case 5a"<<std::endl;
+  std::cout<<"\n ***** Running case 5a *****"<<std::endl;
   std::cout<<"\nFirst cut:"<<std::endl;
   MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
   MyMesh.addEdgeIntersection((unsigned int) 0,2,0.5);
@@ -504,11 +499,11 @@ void CutElemMeshTest::CutElemMeshTest5b()
   // |       |   |   |       |
   // 8 ----- 9 --x--10 -----11
 
-  CutElemMesh MyMesh;
+  ElementFragmentAlgorithm MyMesh;
   case5Mesh(MyMesh);
 
   // add the horizontal cut
-  std::cout<<"\nRunning case 5b"<<std::endl;
+  std::cout<<"\n ***** Running case 5b *****"<<std::endl;
   std::cout<<"\nFirst cut:"<<std::endl;
   MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
   MyMesh.addEdgeIntersection((unsigned int) 0,2,0.5);
@@ -536,7 +531,7 @@ void CutElemMeshTest::CutElemMeshTest5b()
 
   // add the lower vertical cut
   std::cout<<"\nThird cut:"<<std::endl;
-  MyMesh.addEdgeIntersection((unsigned int) 4,1,0.5);
+  MyMesh.addEdgeIntersection((unsigned int) 12,1,0.5); // I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();

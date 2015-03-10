@@ -1649,6 +1649,7 @@ void
 EFAelement::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
                               std::map<unsigned int, EFAnode*> &EmbeddedNodes,
                               std::map<unsigned int, EFAnode*> &TempNodes,
+                              std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap,
                               bool merge_phantom_edges)
 {
   // N.B. "this" must point to a child element that was just created
@@ -1757,11 +1758,19 @@ EFAelement::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
 
     if (childNode->category() == N_CATEGORY_TEMP)
     {
-      unsigned int new_node_id = getNewID(PermanentNodes);
-      EFAnode* newNode = new EFAnode(new_node_id,N_CATEGORY_PERMANENT,childNode->parent());
-      PermanentNodes.insert(std::make_pair(new_node_id,newNode));
-
-      switchNode(newNode, childNode);
+      // if current child element does not have siblings, and if current temp node is a lonely one
+      // this temp node should be merged back to its parent permanent node. Otherwise we would have
+      // permanent nodes that are not connected to any element
+      std::set<EFAelement*> patch_elems = InverseConnectivityMap[childNode->parent()];
+      if (_parent->num_frags() == 1 && patch_elems.size() == 1)
+        switchNode(childNode->parent(), childNode);
+      else
+      {
+        unsigned int new_node_id = getNewID(PermanentNodes);
+        EFAnode* newNode = new EFAnode(new_node_id,N_CATEGORY_PERMANENT,childNode->parent());
+        PermanentNodes.insert(std::make_pair(new_node_id,newNode));
+        switchNode(newNode, childNode);
+      }
       if (!deleteFromMap(TempNodes, childNode))
         mooseError("Attempted to delete node: "<<childNode->id()
                     <<" from TempNodes, but couldn't find it");

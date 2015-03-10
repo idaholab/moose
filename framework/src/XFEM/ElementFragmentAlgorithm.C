@@ -350,7 +350,7 @@ ElementFragmentAlgorithm::connectFragments(bool mergeUncutVirtualEdges)
   {
     EFAelement *childElem = _child_elements[elem_iter];
     childElem->connect_neighbors(_permanent_nodes, _embedded_nodes, _temp_nodes,
-                                 mergeUncutVirtualEdges);
+                                 _inverse_connectivity, mergeUncutVirtualEdges);
   } // loop over child elements
 
   std::vector<EFAelement*>::iterator vit;

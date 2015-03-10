@@ -19,7 +19,7 @@
 #include "cppunit/extensions/HelperMacros.h"
 
 // Moose includes
-#include "CutElemMesh.h"
+#include "ElementFragmentAlgorithm.h"
 
 class CutElemMeshTest : public CppUnit::TestFixture
 {
@@ -42,13 +42,13 @@ public:
   CutElemMeshTest();
   ~CutElemMeshTest();
 
-  void case1Common(CutElemMesh &MyMesh);
+  void case1Common(ElementFragmentAlgorithm &MyMesh);
 
   void CutElemMeshTest1a();
   void CutElemMeshTest1b();
 
-  void case2Intersections(CutElemMesh &MyMesh);
-  void case2Mesh(CutElemMesh &MyMesh);
+  void case2Intersections(ElementFragmentAlgorithm &MyMesh);
+  void case2Mesh(ElementFragmentAlgorithm &MyMesh);
   void CutElemMeshTest2a();
   void CutElemMeshTest2b();
   void CutElemMeshTest2c();
@@ -56,7 +56,7 @@ public:
   void CutElemMeshTest3();
 
   void CutElemMeshTest4();
-  void case5Mesh(CutElemMesh &MyMesh);
+  void case5Mesh(ElementFragmentAlgorithm &MyMesh);
   void CutElemMeshTest5a();
   void CutElemMeshTest5b();
 };

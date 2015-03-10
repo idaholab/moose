@@ -149,6 +149,7 @@ public:
   void connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
                          std::map<unsigned int, EFAnode*> &EmbeddedNodes,
                          std::map<unsigned int, EFAnode*> &TempNodes,
+                         std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap,
                          bool merge_phantom_edges);
   void print_elem();
 
