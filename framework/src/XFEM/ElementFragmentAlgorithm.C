@@ -66,26 +66,31 @@ unsigned int
 ElementFragmentAlgorithm::addElements( std::vector< std::vector<unsigned int> > &quads )
 {
   unsigned int first_id = 0;
-  unsigned int num_nodes = 4;
+  unsigned int num_nodes = quads[0].size();
 
   if (quads.size() == 0)
     CutElemMeshError("addElements called with empty vector of quads")
 
-  for(unsigned int i = 0; i < quads.size(); ++i) {
+  for(unsigned int i = 0; i < quads.size(); ++i)
+  {
     unsigned int new_elem_id = getNewID(_elements);
-    EFAelement* newElem = new EFAelement(new_elem_id);
+    EFAelement* newElem = new EFAelement(new_elem_id, num_nodes);
     _elements.insert(std::make_pair(new_elem_id,newElem));
 
     if (i == 0)
       first_id = new_elem_id;
 
-    for (unsigned int j=0; j != num_nodes; j++) {
+    for (unsigned int j = 0; j < num_nodes; ++j)
+    {
       EFAnode * currNode = NULL;
       std::map<unsigned int, EFAnode*>::iterator mit = _permanent_nodes.find(quads[i][j]);
-      if (mit == _permanent_nodes.end()) {
+      if (mit == _permanent_nodes.end())
+      {
         currNode = new EFAnode(quads[i][j],N_CATEGORY_PERMANENT);
         _permanent_nodes.insert(std::make_pair(quads[i][j],currNode));
-      } else {
+      }
+      else
+      {
         currNode = mit->second;
       }
       newElem->set_node(j, currNode);
@@ -99,22 +104,26 @@ ElementFragmentAlgorithm::addElements( std::vector< std::vector<unsigned int> > 
 EFAelement*
 ElementFragmentAlgorithm::addElement( std::vector<unsigned int> quad, unsigned int id )
 {
-  unsigned int num_nodes = 4;
+  unsigned int num_nodes = quad.size();
 
   std::map<unsigned int, EFAelement*>::iterator mit = _elements.find(id);
   if (mit != _elements.end())
     CutElemMeshError("In addElement element with id: "<<id<<" already exists")
 
-  EFAelement* newElem = new EFAelement(id);
+  EFAelement* newElem = new EFAelement(id, num_nodes);
   _elements.insert(std::make_pair(id,newElem));
 
-  for (unsigned int j=0; j != num_nodes; j++) {
+  for (unsigned int j = 0; j < num_nodes; ++j)
+  {
     EFAnode * currNode = NULL;
     std::map<unsigned int, EFAnode*>::iterator mit = _permanent_nodes.find(quad[j]);
-    if (mit == _permanent_nodes.end()) {
+    if (mit == _permanent_nodes.end())
+    {
       currNode = new EFAnode(quad[j],N_CATEGORY_PERMANENT);
       _permanent_nodes.insert(std::make_pair(quad[j],currNode));
-    } else {
+    }
+    else
+    {
       currNode = mit->second;
     }
     newElem->set_node(j, currNode);
@@ -122,6 +131,12 @@ ElementFragmentAlgorithm::addElement( std::vector<unsigned int> quad, unsigned i
   }
   newElem->createEdges();
   return newElem;
+}
+
+void
+ElementFragmentAlgorithm::set_dimension(unsigned int ndm)
+{
+  _mesh_dim = ndm;
 }
 
 void
@@ -183,7 +198,7 @@ ElementFragmentAlgorithm::addFragEdgeIntersection(unsigned int elemid, unsigned 
 }
 
 void
-ElementFragmentAlgorithm::updatePhysicalLinksAndFragments() // 2D specific element
+ElementFragmentAlgorithm::updatePhysicalLinksAndFragments()
 {
   //loop over the elements in the mesh
   std::map<unsigned int, EFAelement*>::iterator eit;
@@ -226,6 +241,7 @@ ElementFragmentAlgorithm::updateTopology(bool mergeUncutVirtualEdges)
 void
 ElementFragmentAlgorithm::reset()
 {
+  _mesh_dim = 0;
   _new_nodes.clear();
   _child_elements.clear();
   _parent_elements.clear();

@@ -70,9 +70,9 @@ bool XFEM_geometric_cut::cut_elem_by_geometry(const Elem* elem, std::vector<cutE
 
   Real fraction = cut_fraction(time);
 
-  unsigned int nsides = 4;
+  unsigned int nsides = elem->n_nodes();
 
-  for (unsigned int i=0; i<nsides; ++i)
+  for (unsigned int i = 0; i < nsides; ++i)
   {
     Node *node1 = elem->get_node(i);
     Node *node2 = elem->get_node(i<(nsides-1) ? i+1 : 0);

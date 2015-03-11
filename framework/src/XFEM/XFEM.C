@@ -314,6 +314,7 @@ void XFEM::build_efa_mesh()
 {
 
   _efa_mesh.reset();
+  _efa_mesh.set_dimension(_mesh->mesh_dimension());
 
   MeshBase::element_iterator       elem_it  = _mesh->elements_begin();
   const MeshBase::element_iterator elem_end = _mesh->elements_end();
@@ -322,11 +323,10 @@ void XFEM::build_efa_mesh()
   for ( elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
   {
     Elem *elem = *elem_it;
-    {
-      unsigned int quad_nodes[4]={elem->node(0),elem->node(1),elem->node(2),elem->node(3)};
-      std::vector<unsigned int >quad (quad_nodes, quad_nodes+sizeof(quad_nodes)/sizeof(unsigned int));
-      _efa_mesh.addElement(quad, elem->id());
-    }
+    std::vector<unsigned int> quad;
+    for (unsigned int i = 0; i < elem->n_nodes(); ++i)
+      quad.push_back(elem->node(i));
+    _efa_mesh.addElement(quad, elem->id());
   }
 
   //Restore fragment information for elements that have been previously cut
@@ -359,9 +359,7 @@ void XFEM::build_efa_mesh()
     }
   }
 
-//  _efa_mesh.updatePhysicalLinksAndFragments();
   _efa_mesh.initCrackTipTopology();
-
 //  std::cout << _efa_mesh << std::endl;
 }
 

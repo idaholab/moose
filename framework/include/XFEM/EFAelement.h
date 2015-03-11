@@ -24,7 +24,7 @@ class EFAelement
 {
 public:
 
-  EFAelement(unsigned int eid);
+  EFAelement(unsigned int eid, unsigned int n_nodes);
   EFAelement(const EFAelement * from_elem, bool convert_to_local);
 
   ~EFAelement();

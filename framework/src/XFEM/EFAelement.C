@@ -15,10 +15,10 @@
 #include "EFAfuncs.h"
 #include "EFAelement.h"
 
-EFAelement::EFAelement(unsigned int eid):
+EFAelement::EFAelement(unsigned int eid, unsigned int n_nodes):
   _id(eid),
-  _num_nodes(4),
-  _num_edges(4),
+  _num_nodes(n_nodes),
+  _num_edges(n_nodes),
   _nodes(_num_nodes,NULL),
   _edges(_num_edges,NULL),
   _parent(NULL),
@@ -271,14 +271,23 @@ EFAelement::getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
           double weight = 0.0;
           if (_num_nodes == 4)
             weight = 0.25*(1+node_xi[j][0]*emb_xi)*(1+node_xi[j][1]*emb_eta);
+          else if (_num_edges == 3)
+          {
+            if (j == 0)
+              weight = emb_xi;
+            else if (j == 1)
+              weight = emb_eta;
+            else
+              weight = 1.0 - emb_xi - emb_eta;
+          }
           else
-            mooseError("getMasterInfo only works for quad element now");
+            mooseError("unknown 2D element");
           master_weights.push_back(weight);
         }
         masters_found = true;
         break;
-      }
-    }
+      } // j
+    } // i
   }
 
   if (!masters_found)
@@ -1589,8 +1598,8 @@ EFAelement::create_child(const std::set<EFAelement*> &CrackTipElements,
       else
         new_elem_id = getNewID(newChildElements);
 
-      EFAelement* childElem = new EFAelement(new_elem_id);
-      newChildElements.insert(std::make_pair(new_elem_id,childElem));
+      EFAelement* childElem = new EFAelement(new_elem_id, this->num_nodes());
+      newChildElements.insert(std::make_pair(new_elem_id, childElem));
 
       ChildElements.push_back(childElem);
       childElem->set_parent(this);
@@ -1875,8 +1884,28 @@ EFAelement::mapParaCoorFrom1Dto2D(unsigned int edge_id, double xi_1d, std::vecto
     else
       mooseError("edge_id out of bounds");
   }
+  else if (_num_edges == 3)
+  {
+    if (edge_id == 0)
+    {
+      para_coor[0] = 0.5*(1.0 - xi_1d);
+      para_coor[1] = 0.5*(1.0 + xi_1d);
+    }
+    else if (edge_id == 1)
+    {
+      para_coor[0] = 0.0;
+      para_coor[1] = 0.5*(1.0 - xi_1d);
+    }
+    else if(edge_id == 2)
+    {
+      para_coor[0] = 0.5*(1.0 + xi_1d);
+      para_coor[1] = 0.0;
+    }
+    else
+      mooseError("edge_id out of bounds");
+  }
   else
-    mooseError("mapParaCoorFram1Dto2D only for quad element only");
+    mooseError("unknown element for 2D");
 }
 
 void

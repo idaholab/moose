@@ -43,6 +43,7 @@ public:
 
 private:
   //unsigned int MaxElemId;
+  unsigned int _mesh_dim;
   std::map< unsigned int, EFAnode*> _permanent_nodes;
   std::map< unsigned int, EFAnode*> _embedded_nodes;
   std::map< unsigned int, EFAnode*> _temp_nodes;
@@ -58,6 +59,7 @@ public:
 
   unsigned int addElements( std::vector< std::vector<unsigned int> > &quads );
   EFAelement* addElement( std::vector<unsigned int> quad, unsigned int id );
+  void set_dimension(unsigned int ndm);
 
   void updateEdgeNeighbors();
   void initCrackTipTopology();
