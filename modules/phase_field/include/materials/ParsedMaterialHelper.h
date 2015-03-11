@@ -88,6 +88,7 @@ ParsedMaterialHelper<T>::ParsedMaterialHelper(const std::string & name,
 template<class T>
 ParsedMaterialHelper<T>::~ParsedMaterialHelper()
 {
+  delete _func_F;
   delete[] _func_params;
 }
 
