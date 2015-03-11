@@ -34,6 +34,8 @@ InputParameters validParams<RichardsPiecewiseLinearSink>();
  *  (2) perm_nn*density/viscosity, where perm_nn is the
  *      permeability tensor projected in the normal direction.
  *  (3) a Function (which can be time-dependent, for instance)
+ * and divided by:
+ *  (4) an area Postprocessor
  */
 class RichardsPiecewiseLinearSink : public IntegratedBC
 {
@@ -86,6 +88,9 @@ protected:
 
   /// user object defining the relative permeability.  Only used if _fully_upwind = true
   const RichardsRelPerm * _relperm_UO;
+
+  /// area postprocessor.  if given then all bare_fluxes are divided by this quantity
+  const PostprocessorValue & _area_pp;
 
   /// number of nodes in this element.  Only used if _fully_upwind = true
   unsigned int _num_nodes;
