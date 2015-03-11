@@ -105,6 +105,11 @@ ParsedODEKernel::ParsedODEKernel(const std::string & name, InputParameters param
 
 ParsedODEKernel::~ParsedODEKernel()
 {
+  delete _func_F;
+  delete _func_dFdu;
+  for (unsigned int i = 0; i < _nargs; ++i)
+    delete _func_dFdarg[i];
+
   delete[] _func_params;
 }
 
