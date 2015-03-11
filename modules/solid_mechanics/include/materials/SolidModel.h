@@ -101,7 +101,7 @@ protected:
   VariableValue & _temperature_old;
   VariableGradient & _temp_grad;
   const Real _alpha;
-  Function * const _alpha_function;
+  Function * _alpha_function;
   PiecewiseLinear * _piecewise_linear_alpha_function;
   bool _has_stress_free_temp;
   Real _stress_free_temp;
