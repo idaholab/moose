@@ -893,7 +893,9 @@ const Node *
 CrackFrontDefinition::getCrackFrontNodePtr(const unsigned int node_index) const
 {
   mooseAssert(node_index < _ordered_crack_front_nodes.size(),"node_index out of range");
-  return _mesh.nodePtr(_ordered_crack_front_nodes[node_index]);
+  const Node * crack_front_node = _mesh.nodePtr(_ordered_crack_front_nodes[node_index]);
+  mooseAssert(crack_front_node != NULL,"invalid crack front node");
+  return crack_front_node;
 }
 
 const RealVectorValue &
@@ -1119,23 +1121,23 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
   RealVectorValue delta_l1;
 
   unsigned int num_crack_front_nodes = _ordered_crack_front_nodes.size();
-  Node * current_node;
-  Node * previous_node;
-  Node * next_node;
+  const Node * current_node;
+  const Node * previous_node;
+  const Node * next_node;
 
   // In finalize(), gatherMax builds and distributes the complete strain vector on all processors
   // -> reset the vector every time
   for (unsigned int i=0; i<num_crack_front_nodes; ++i)
     _strain_along_front[i] = -std::numeric_limits<Real>::max();
 
-  current_node = _mesh.nodePtr(_ordered_crack_front_nodes[0]);
+  current_node = getCrackFrontNodePtr(0);
   if (current_node->processor_id() == processor_id())
   {
     disp_current_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*current_node);
     disp_current_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*current_node);
     disp_current_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*current_node);
 
-    next_node = _mesh.nodePtr(_ordered_crack_front_nodes[1]);
+    next_node = getCrackFrontNodePtr(1);
     disp_next_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*next_node);
     disp_next_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*next_node);
     disp_next_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*next_node);
@@ -1150,19 +1152,19 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
 
   for (unsigned int i=1; i<num_crack_front_nodes-1; ++i)
   {
-    current_node = _mesh.nodePtr(_ordered_crack_front_nodes[i]);
+    current_node = getCrackFrontNodePtr(i);
     if (current_node->processor_id() == processor_id())
     {
       disp_current_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*current_node);
       disp_current_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*current_node);
       disp_current_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*current_node);
 
-      previous_node = _mesh.nodePtr(_ordered_crack_front_nodes[i-1]);
+      previous_node = getCrackFrontNodePtr(i-1);
       disp_previous_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*previous_node);
       disp_previous_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*previous_node);
       disp_previous_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*previous_node);
 
-      next_node = _mesh.nodePtr(_ordered_crack_front_nodes[i+1]);
+      next_node = getCrackFrontNodePtr(i+1);
       disp_next_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*next_node);
       disp_next_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*next_node);
       disp_next_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*next_node);
@@ -1179,14 +1181,14 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
     }
   }
 
-  current_node = _mesh.nodePtr(_ordered_crack_front_nodes[num_crack_front_nodes-1]);
+  current_node = getCrackFrontNodePtr(num_crack_front_nodes-1);
   if (current_node->processor_id() == processor_id())
   {
     disp_current_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*current_node);
     disp_current_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*current_node);
     disp_current_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*current_node);
 
-    previous_node = _mesh.nodePtr(_ordered_crack_front_nodes[num_crack_front_nodes-2]);
+    previous_node = getCrackFrontNodePtr(num_crack_front_nodes-2);
     disp_previous_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*previous_node);
     disp_previous_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*previous_node);
     disp_previous_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*previous_node);
