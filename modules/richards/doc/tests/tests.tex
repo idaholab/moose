@@ -654,6 +654,25 @@ Figure~\ref{s03.fig}.
 \end{figure}
 
 
+\noindent In the fourth set of two tests a piecewise-linear sink with
+fixed {\em total} flux of 0.1\,kg/s is applied to both the left and
+right boundaries.  A three-element 2D model is used with $0\leq x \leq
+1$ and $0\leq y \leq 4$, but the remaining parameters are as described
+above.  MOOSE must therefore proprotion the 0.1\,kg/s to the faces on
+the boundaries, resulting in a distributed flux of
+0.025\,kg.s$^{-1}$.m$^{-1}$.  The total fluid mass is recorded as a
+Postprocessor, and the correct behaviour is observed, as shown in
+Figure~\ref{s04.fig}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=9cm]{s04.eps}
+\caption{Comparison between the MOOSE result (in dots), and the
+  expected behaviour of the fluid mass in the system when a total flux
+  is prescribed on the boundaries.}
+\label{s04.fig}
+\end{figure}
+
 \chapter{PolyLine sink}
 \label{st}
 
