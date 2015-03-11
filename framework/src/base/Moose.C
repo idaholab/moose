@@ -187,6 +187,7 @@
 #include "ElementExtremeValue.h"
 #include "DifferencePostprocessor.h"
 #include "NumPicardIterations.h"
+#include "FunctionSideIntegral.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -554,6 +555,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
   registerPostprocessor(NumPicardIterations);
+  registerPostprocessor(FunctionSideIntegral);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
