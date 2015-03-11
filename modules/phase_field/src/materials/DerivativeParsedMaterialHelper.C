@@ -21,6 +21,23 @@ DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string
 {
 }
 
+DerivativeParsedMaterialHelper::~DerivativeParsedMaterialHelper()
+{
+  for (unsigned int i = 0; i < _nargs; ++i)
+  {
+    delete _func_dF[i];
+
+    for (unsigned int j = i; j < _nargs; ++j)
+    {
+      delete _func_d2F[i][j];
+
+      if (_third_derivatives)
+        for (unsigned int k = j; k < _nargs; ++k)
+          delete _func_d3F[i][j][k];
+    }
+  }
+}
+
 void DerivativeParsedMaterialHelper::functionsPostParse()
 {
   functionsDerivative();
