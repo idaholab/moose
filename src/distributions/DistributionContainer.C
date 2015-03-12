@@ -319,6 +319,7 @@ DistributionContainer::Cdf(const std::string dist_alias, std::vector<double> x){
 
    if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
      MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
+     std::cout<<'DistributionContainer::Cdf'<<std::endl;
      return dist->Cdf(x);
     }
     throwError("Cdf: Distribution ND" + dist_alias + " was not found in distribution container.");

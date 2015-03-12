@@ -1,5 +1,5 @@
 /*
- * distribution.C
+ * distribution_base_ND.C
  *
  *  Created on: Feb 6, 2014
  *      Author: alfoa

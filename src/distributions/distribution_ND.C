@@ -33,7 +33,7 @@ distributionND::distributionND(const std::string & name, InputParameters paramet
 {
    _type          = getParam<std::string>("type");
    _data_filename = getParam<std::string>("data_filename");
-   _function_type = getParam<EPbFunctionType>("function_type");
+   //_function_type = getParam<EPbFunctionType>("function_type");
    _dis_parameters["ProbabilityThreshold"]  = getParam<double>("ProbabilityThreshold");
    _dis_parameters["PB_window_Low"] = getParam<double>("PB_window_Low");
    _dis_parameters["PB_window_Up"]  = getParam<double>("PB_window_Up");
@@ -53,6 +53,7 @@ InputParameters validParams<MultiDimensionalInverseWeight>(){
 
    InputParameters params = validParams<distributionND>();
    params.addRequiredParam<double>("p", "Minkowski distance parameter");
+   params.addRequiredParam<bool>("CDF", "Boolean value (True if CDF is provided)");
    return params;
 
 }
@@ -129,6 +130,7 @@ template<>
 InputParameters validParams<MultiDimensionalCartesianSpline>(){
 
    InputParameters params = validParams<distributionND>();
+   params.addRequiredParam<bool>("CDF", "Boolean value (True if CDF is provided)");
    //params.addRequiredParam<std::vector<double> >("alpha", "alpha");
    //params.addRequiredParam<std::vector<double> >("beta", "beta");
    return params;

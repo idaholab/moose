@@ -258,19 +258,32 @@ class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
 {
 public:
   BasicMultiDimensionalInverseWeight(const char * data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
-{
-	  std::cout<<"Initialize BasicMultiDimensionalInverseWeight"<< std::endl;
-
+  {
 	  _CDFprovided = CDFprovided;
+	  BasicMultiDimensionalInverseWeight_init();
+  };
+
+  BasicMultiDimensionalInverseWeight(std::string data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
+  {
+	  _CDFprovided = CDFprovided;
+	  BasicMultiDimensionalInverseWeight_init();
+  };
+
+  BasicMultiDimensionalInverseWeight(double p):  _interpolator(InverseDistanceWeighting(p))
+  {
+  };
+
+  void BasicMultiDimensionalInverseWeight_init(){
+	  std::cout<<"Initialize BasicMultiDimensionalInverseWeight"<< std::endl;
 
 	  if (_CDFprovided) {
 		  bool LBcheck = _interpolator.checkLB(0.0);
 		  if (LBcheck == false)
-			  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+			  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0");
 
 		  bool UBcheck = _interpolator.checkUB(1.0);
 		  if (UBcheck == false)
-			  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+			  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0");
 	  }
 	  else{	// PDF is provided
 		  // Create ND spline for the CDF
@@ -325,21 +338,9 @@ public:
 
 			  //std::cout<<" " << std::endl;
 		  }
-
-
 		  _CDFspline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, false);
-		  //std::cout<<"Creation of ND spline distribution for inverseWeight completed:: "<< _CDFspline.returnDimensionality() << std::endl;
 	  }
-};
-
-  BasicMultiDimensionalInverseWeight(std::string data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
-  {
-
-  };
-
-  BasicMultiDimensionalInverseWeight(double p):  _interpolator(InverseDistanceWeighting(p))
-  {
-  };
+  }
 
   virtual ~BasicMultiDimensionalInverseWeight()
   {
@@ -359,9 +360,11 @@ public:
   Cdf(std::vector<double> x)
   {
 	  double value;
-
-	  if (_CDFprovided)
+	  std::cout<<'here2'<<std::endl;
+	  if (_CDFprovided){
+		  std::cout<<'here1'<<std::endl;
 		  value = _interpolator.interpolateAt(x);
+	  }
 	  else
 		  value = _CDFspline.Cdf(x);
 
