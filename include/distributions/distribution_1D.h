@@ -214,6 +214,7 @@ public:
   double  InverseCdf(double x);        ///< x
 
   double  untrCdf(double x);
+  double  untrPdf(double x);
 };
 
 /*
