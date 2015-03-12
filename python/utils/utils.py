@@ -30,3 +30,13 @@ def colorText(string, color, **kwargs):
     string = re.sub(r'</?[rcgyb]>', '', string)    # stringip all "html" tags
 
   return string
+
+
+##
+# A function for converting string to boolean
+def str2bool(string):
+  string = string.lower()
+  if string is 'true' or string is '1':
+    return True
+  else:
+    return False
