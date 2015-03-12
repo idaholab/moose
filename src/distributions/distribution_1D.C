@@ -793,6 +793,13 @@ BasicBetaDistribution::~BasicBetaDistribution()
 }
 
 double
+BasicBetaDistribution::untrPdf(double x){
+  double scale = _dist_parameters.find("scale") ->second;
+  double low   = _dist_parameters.find("low"  ) ->second;
+  return _backend->pdf( (x-low)/scale);
+}
+
+double
 BasicBetaDistribution::untrCdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
   double low   = _dist_parameters.find("low"  ) ->second;
@@ -807,9 +814,8 @@ BasicBetaDistribution::untrCdf(double x){
 
 double
 BasicBetaDistribution::Pdf(double x){
-  double scale = _dist_parameters.find("scale") ->second;
-  double low   = _dist_parameters.find("low"  ) ->second;
-  return BasicTruncatedDistribution::Pdf( (x-low)/scale);
+  double scale   = _dist_parameters.find("sacle"  ) ->second;
+  return BasicTruncatedDistribution::Pdf( x )/scale;// scaling happens in untrPdf
 }
 
 double
