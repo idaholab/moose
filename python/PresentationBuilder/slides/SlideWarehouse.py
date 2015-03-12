@@ -25,6 +25,7 @@ class SlideWarehouse(Warehouse):
     # Object counter
     self.__count = 0
 
+
   ##
   # Add a new object to the warehouse, in a specific location
   # @param index The location to insert the object
@@ -36,6 +37,7 @@ class SlideWarehouse(Warehouse):
     self.__slide_order.insert(index, name)
     self.__count += 1
 
+
   ##
   # Add a new object to the warehouse
   # @param moose_object The object to add
@@ -46,10 +48,12 @@ class SlideWarehouse(Warehouse):
     self.__slide_map[name] = self.__count
     self.__count += 1
 
+
   ##
   # The number of objects
   def numObjects(self):
     return len(self.objects)
+
 
   ##
   # Retrieves an object by name
@@ -71,15 +75,23 @@ class SlideWarehouse(Warehouse):
     # By default return all slide objects
     slides = []
 
-    # Create the active list, it is assumed that contents
-    # and titles should be active unless listed as inactive
+    # Create the active list
     if self.__active:
       for name in self.__slide_order:
-        for active in self.__active:
-          if (active in name) \
-             or name.startswith(self.__slide_set_name + '-contents') \
-             or name.startswith(self.__slide_set_name + '-title'):
-            slides.append(self.objects[self.__slide_map[name]])
+        # Assume that contents and titles should be active unless listed as inactive
+        if name.startswith(self.__slide_set_name + '-contents') \
+           or name.startswith(self.__slide_set_name + '-title'):
+          slides.append(self.objects[self.__slide_map[name]])
+
+        # If not title or contents, check against the active list by looping through the
+        # active items. If the active name is a subset of the slide name, use it
+        else:
+          for active in self.__active:
+            if (active in name):
+               slides.append(self.objects[self.__slide_map[name]])
+               break # stops active in self.__active loop, so it doesn't get added twice
+
+    # No active given, all the slides are active
     else:
       for name in self.__slide_order:
         slides.append(self.objects[self.__slide_map[name]])

@@ -22,7 +22,7 @@ class RemarkSlideSet(MooseObject):
     params.addParam('contents', False, 'Include table of contents slide')
     params.addParam('contents_title', 'The table-of-contents heading for this slide set')
     params.addParam('contents_level', 1, 'The heading level to include in the contents')
-    params.addParam('contents_items_per_slide', 11, 'The number of contents items to include on a page')
+    params.addParam('contents_items_per_slide', 12, 'The number of contents items to include on a page')
     params.addParam('show_in_contents', True, 'Toggle if slide set content appears in the table-of-contents')
     params.addParam('style', 'The CSS style sheet to utilize for this slide set')
     params.addParam('non_ascii_warn', True, 'Produce warning if non-ascii characters are located')
@@ -62,7 +62,7 @@ class RemarkSlideSet(MooseObject):
                                             inactive = self.getParam('inactive'))
 
     # Print a message
-    print '  CREATED:', name
+    print '  ', name
 
 
   ##
@@ -194,17 +194,15 @@ class RemarkSlideSet(MooseObject):
       for m in pattern.finditer(slide.markdown):
         contents.append((m.group(2).strip(), slide.name(), len(m.group(1)), slide.number))
 
-    return contents
-
+    # Separate contents into chunks based on the allowable size
+    n = int(self.getParam('contents_items_per_slide'))
+    output = [contents[i:i+n] for i in range(0, len(contents),n)]
+    return output
 
   ##
   # A helper method that creates the empty contents slides (protected)
   # @param number The number of contents entries
-  def _createContentsSlides(self, number):
-
-    # Determine the number of contents slides needed
-    max_per_slide = float(self.getParam('contents_items_per_slide'))
-    n = int(math.ceil(number / max_per_slide))
+  def _createContentsSlides(self, n):
 
     # Determine the table of contents header
     if self.isParamValid('contents_title'):
@@ -264,34 +262,25 @@ class RemarkSlideSet(MooseObject):
     # Build the table-of-contents entries
     max_per_slide = int(self.getParam('contents_items_per_slide'))
     lvl = int(self.getParam('contents_level'))
-    output = ['']
-    count = 0
-    page = 0
-    for item in contents:
-      if item[2] <= lvl:
-        title = item[0]         # the heading content
-        name = item[1]          # slide name
-        indent = 25*(item[2]-1) # heading level indenting
-        idx = str(item[3])      # slide index
-        height = '12px'
+    for i in range(len(contents)):
+      output = ''
+      for item in contents[i]:
+        if item[2] <= lvl:
+          title = item[0]         # the heading content
+          name = item[1]          # slide name
+          indent = 25*(item[2]-1) # heading level indenting
+          idx = str(item[3])      # slide index
+          height = '12px'
 
-        # Build a link to the slide, by name
-        link = '<a href="#' + name + '">'
+          # Build a link to the slide, by name
+          link = '<a href="#' + name + '">'
 
-        # Create the contents entry
-        output[page] += '<p style="line-height:' + height + ';text-align:left;text-indent:' + str(indent) + 'px;">' + link + title + '</a>'
-        output[page] += '<span style="float:right;">' + link + idx + '</a>'
-        output[page] += '</span></p>\n'
+          # Create the contents entry
+          output += '<p style="line-height:' + height + ';text-align:left;text-indent:' + str(indent) + 'px;">' + link + title + '</a>'
+          output += '<span style="float:right;">' + link + idx + '</a>'
+          output += '</span></p>\n'
 
-        count += 1
-        if (count > max_per_slide):
-          count = 0
-          page += 1
-          output.append('')
 
-    for i in range(len(output)):
-      if not output[i]:
-        print 'Warning: Contents for slide set, ' + self.name() + ', are empty.'
-        break
+      # Write the contents to the slide
       name = '-'.join([self.name(), 'contents', str(i)])
-      self.warehouse().getObject(name).markdown += output[i]
+      self.warehouse().getObject(name).markdown += output

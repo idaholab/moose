@@ -3,6 +3,7 @@ import sys, os, inspect, re
 from collections import OrderedDict
 
 from FactorySystem import *
+from utils import colorText
 from ..slidesets import *
 from ..slides import *
 
@@ -53,7 +54,7 @@ class PresentationBuilder(object):
     self.parser = Parser(self.factory, self.warehouse)
 
     # Create SlideSet objects via the Parser object by parsing the input file
-    print 'PARSER:'
+    print colorText('Parsing input...', 'CYAN')
     err = self.parser.parse(input_file)
     if err:
       sys.exit()
