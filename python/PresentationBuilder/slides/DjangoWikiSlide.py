@@ -25,6 +25,7 @@ class DjangoWikiSlide(RemarkSlide):
     # Storage for comments
     self.__comments = []
 
+
   ##
   # Parse the markdown retrieved from a Django wiki
   # @param markdown The raw markdown for the current slide

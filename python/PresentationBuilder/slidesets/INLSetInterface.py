@@ -20,6 +20,9 @@ class INLSetInterface():
   # @see INLCoverSet, INLDjangoWikiSet, INLMergeCoverSet
   @staticmethod
   def applySlideSettings(slide):
-    if slide.name() and slide.name().endswith('title'):
-      slide.parameters()['background-image'] = 'inl_dark_title.png'
-      slide.parameters()['class'] = 'middle, cover'
+    if slide.name():
+      if slide.name().endswith('-title'):
+        slide.parameters()['background-image'] = 'inl_dark_title.png'
+        slide.parameters()['class'] = 'middle, cover'
+      elif slide.name().endswith('-subtitle'):
+        slide.parameters()['class'] = 'middle, center'

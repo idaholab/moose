@@ -48,7 +48,7 @@ class SlideSetWarehouse(Warehouse):
       obj = self.objects[i]
       name = obj.name()
       msg = ['Building Set:', name, '(' + str(i+1), 'of', str(n) + ')']
-      print colorText(' '.join(msg), 'YELLOW')
+      print colorText(' '.join(msg), 'CYAN')
 
       # Read and build the content
       print '  Reading content...'
@@ -73,11 +73,14 @@ class SlideSetWarehouse(Warehouse):
     title_slides = []
 
     # Loop through each object and slide and set the slide index
+    print colorText('\nGenerating presentation:', 'GREEN')
     for obj in self.objects:
       for slide in obj.warehouse().activeObjects():
+        print '  ' + slide.name()
         slide.number = idx
         idx += 1 + len(re.findall('\n--', slide.markdown))
 
     # Call the contents object on each slide set
+    print colorText('\nUpdating Contents...', 'MAGENTA')
     for obj in self.objects:
       obj.contents()

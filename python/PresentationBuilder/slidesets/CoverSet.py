@@ -11,8 +11,8 @@ class CoverSet(RemarkSlideSet):
   @staticmethod
   def validParams():
     params = RemarkSlideSet.validParams()
-    params.addParam("active_sets", "A list of active slide sets")
-    params.addParam("inactive_sets", "A list of inactive slide sets")
+    params.addParam("active", "A list of active slide sets")
+    params.addParam("inactive", "A list of inactive slide sets")
     return params
 
 
@@ -27,10 +27,6 @@ class CoverSet(RemarkSlideSet):
     # Create the list of active slides
     self.__active = ''
     self.__inactive = ''
-    if self.isParamValid("active_sets"):
-      self.active = self.getParam("active_sets")
-    if self.isParamValid("inactive_sets"):
-      self.inactive = self.getParam("inactive_sets")
 
 
   ##
@@ -50,12 +46,24 @@ class CoverSet(RemarkSlideSet):
           cnt += 1
 
     # Create the empty contents slides
-    self._createContentsSlides(cnt)
+    max_per_slide = float(self.getParam('contents_items_per_slide'))
+    n = int(math.ceil(cnt / max_per_slide))
+    self._createContentsSlides(n)
 
 
   ##
   # Update the table-of-contents slide
   def contents(self):
+
+    # Define the active/inactive lists
+    if self.isParamValid("active"):
+      self.__active = self.getParam("active")
+    else:
+      for obj in self.__warehouse.objects:
+        self.__active += ' ' + obj.name()
+
+    if self.isParamValid("inactive"):
+      self.__inactive = self.getParam("inactive")
 
     # Do nothing if the 'contents' flag is not set in the input file
     if not self.isParamValid('contents') or not self.getParam('contents'):
@@ -69,25 +77,29 @@ class CoverSet(RemarkSlideSet):
 
     for obj in self.__warehouse.objects:
       if obj != self and obj.getParam('show_in_contents'):
+
+        # Do nothing if the slide is not active
+        if not self.__isSetActive(obj):
+          continue
+
+        # Do nothing if a title slide does not exist
         title_name = obj.name() + '-title'
-        if obj.warehouse().hasObject(title_name):
-          slide = obj.warehouse().getObject(title_name)
+        if not obj.warehouse().hasObject(title_name):
+          continue
 
-          if not self.__isSetActive(slide):
-            continue
+        slide = obj.warehouse().getObject(title_name)
+        if len(output) <= page:
+          output.append('')
 
-          if len(output) <= page:
-            output.append('')
+        link = '<a href="#' + slide.name() + '">'
+        output[page] += '<p style="text-align:left;">' + link + slide.title()[1] + '</a>'
+        output[page] += '<span style="float:right;">' + link + str(slide.number) + '</a>'
+        output[page] += '</span></p>\n'
 
-          link = '<a href="#' + slide.name() + '">'
-          output[page] += '<p style="text-align:left;">' + link + slide.title()[1] + '</a>'
-          output[page] += '<span style="float:right;">' + link + str(slide.number) + '</a>'
-          output[page] += '</span></p>\n'
-
-          count += 1
-          if (count >= max_per_slide):
-            count = 0
-            page += 1
+        count += 1
+        if (count >= max_per_slide):
+          count = 0
+          page += 1
 
     for i in range(len(output)):
       name = '-'.join([self.name(), 'contents', str(i)])
@@ -96,8 +108,7 @@ class CoverSet(RemarkSlideSet):
 
   ##
   # Return true if the slide set is active for contents
-  def __isSetActive(self, slide):
-    parent = slide.getParam('_parent')
-    if parent.name() in self.__inactive or (self.__active is not '' and parent.name() not in self.__active):
+  def __isSetActive(self, obj):
+    if (obj.name() not in self.__active) or (obj.name() in self.__inactive):
       return False
     return True

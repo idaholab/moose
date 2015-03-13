@@ -2,11 +2,11 @@ import os, re
 
 ##
 # A function for coloring text
-def colorText(str, color, **kwargs):
+def colorText(string, color, **kwargs):
 
   # Get the properties
   html = kwargs.pop('html', False)
-  code = kwargs.pop('code', False)
+  code = kwargs.pop('code', True)
   colored = kwargs.pop('colored', True)
 
   # ANSI color codes for colored terminal output
@@ -18,15 +18,25 @@ def colorText(str, color, **kwargs):
 
   if colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
     if html:
-      str = str.replace('<r>', color_codes['BOLD']+color_codes['RED'])
-      str = str.replace('<c>', color_codes['BOLD']+color_codes['CYAN'])
-      str = str.replace('<g>', color_codes['BOLD']+color_codes['GREEN'])
-      str = str.replace('<y>', color_codes['BOLD']+color_codes['YELLOW'])
-      str = str.replace('<b>', color_codes['BOLD'])
-      str = re.sub(r'</[rcgyb]>', color_codes['RESET'], str)
+      string = string.replace('<r>', color_codes['BOLD']+color_codes['RED'])
+      string = string.replace('<c>', color_codes['BOLD']+color_codes['CYAN'])
+      string = string.replace('<g>', color_codes['BOLD']+color_codes['GREEN'])
+      string = string.replace('<y>', color_codes['BOLD']+color_codes['YELLOW'])
+      string = string.replace('<b>', color_codes['BOLD'])
+      string = re.sub(r'</[rcgyb]>', color_codes['RESET'], string)
     else:
-      str = color_codes[color] + str + color_codes['RESET']
+      string = color_codes[color] + string + color_codes['RESET']
   elif html:
-    str = re.sub(r'</?[rcgyb]>', '', str)    # strip all "html" tags
+    string = re.sub(r'</?[rcgyb]>', '', string)    # stringip all "html" tags
 
-  return str
+  return string
+
+
+##
+# A function for converting string to boolean
+def str2bool(string):
+  string = string.lower()
+  if string is 'true' or string is '1':
+    return True
+  else:
+    return False
