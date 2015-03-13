@@ -1,2 +1,2 @@
-from utils import colorText
-__all__ = ['colorText']
+from utils import colorText, str2bool
+__all__ = ['colorText', 'str2bool']

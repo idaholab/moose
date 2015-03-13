@@ -1,6 +1,7 @@
 import os, re, urllib, urlparse
 from ..slidesets import RemarkSlideSet
 from FactorySystem import InputParameters
+from utils import colorText
 
 ##
 # Class for reading django-wiki content
@@ -15,6 +16,10 @@ class DjangoWikiSet(RemarkSlideSet):
     params.addParam('url', 'http://www.mooseframework.org/', 'The location of the Django wiki')
     params.addParam('auto_insert_moose_wiki', True, 'When true links to other moose wiki content is automatically inserted')
     params.addParam('insert_wiki_link', True, 'When auto linking wiki pages place the link at with the page before the inserted content')
+    params.addParam('insert_wiki_as_subpage', True, 'When auto linking wiki pages they are inserted with a lower title level')
+    params.addParam('use_wiki_title', True, 'When true the title from the wiki page is used as the title')
+    params.addParam('use_wiki_title_for_heading', False, 'When true if the first slide does not contain a heading the wiki title is used')
+    params.addPrivateParam('article_title', None) # A parameter for storing the wiki article title
     return params
 
 
@@ -59,12 +64,38 @@ class DjangoWikiSet(RemarkSlideSet):
   ##
   # Method for pulling wiki content from mooseframework.org site (private)
   # @param page The complete website to extract wiki content from
-  def __extractMarkdownFromWiki(self, page):
+  def __extractMarkdownFromWiki(self, page, **kwargs):
 
     # Read the _source wiki page html (used to get the raw markdown)
     url = urllib.urlopen(os.path.join(page,'_source'))
     content = url.readlines()
     raw = self.__extractHTML(content, 'pre','class="pre-scrollable"')
+
+    # Extract the article title
+    article_title = self.__extractHTML(content, 'h1', 'id="article-title"').split('\n')[0].strip()
+    self.parameters()['article_title'] = article_title
+
+    # If desired, use the article title for the slide set title
+    if self.getParam('use_wiki_title') and not self.isParamValid('title'):
+      self.parameters()['title'] = article_title
+
+    # If the first slide does not contain a heading the "use_wiki_title_for_heading" option is true,
+    # use the article title for the first heading of the slide(s)
+    if self.getParam('use_wiki_title_for_heading'):
+      idx = raw.find('[](---)')
+      match = re.search(r'^\s*(#+)\s+(.*?)', raw, flags = re.MULTILINE)
+      if not match or match.start(0) > idx:
+        print '    Adding article title as heading:', article_title
+        raw = '# ' + article_title + '\n' + raw
+
+    # By default, auto-linked content are inserted with headings at the second level
+    sub_page = kwargs.pop('sub_page', False)
+    if sub_page and self.getParam('insert_wiki_as_subpage'):
+      raw = re.sub(r'^\s*(#+)\s+', r'#\1 ', raw, flags = re.MULTILINE)
+      subtitle = '[](name:' + '-'.join(article_title.lower().split()) + '-subtitle)\n' \
+                 '# ' + article_title + '\n' \
+                 '\n[](---)\n\n'
+      raw = subtitle + raw
 
     # Update the image map
     self.__buildImageMap(page)
@@ -101,7 +132,7 @@ class DjangoWikiSet(RemarkSlideSet):
       content += match.group(1) + '(' + page + ')\n'
 
     content += '\n\n---\n\n'
-    content += self.__extractMarkdownFromWiki(page)
+    content += self.__extractMarkdownFromWiki(page, sub_page = True)
     return content
 
 

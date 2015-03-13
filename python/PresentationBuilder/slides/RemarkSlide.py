@@ -1,6 +1,7 @@
 # Python packages
 import os, re, inspect, string, urllib2, sys
 from FactorySystem import InputParameters, MooseObject
+from utils import colorText
 from ..images import *
 from ..tools import *
 
@@ -28,6 +29,7 @@ class RemarkSlide(MooseObject):
 
     params.addPrivateParam('title', False)
     return params
+
 
   ##
   # Constructor.
@@ -110,20 +112,19 @@ class RemarkSlide(MooseObject):
     markdown = markdown.replace('\r', '')
 
     # Search the raw markdown for an existing settings
-    for key in self.parameters().keys():
-      match = re.search('(\s*' + key + '\s*:\s*(\w+))\s*\n', markdown)
-      if match:
+    for match in re.finditer(r'(\w+)\s*:\s*(.*?)\n', markdown):
+      key = match.group(1)
+      if key in self.parameters():
         value = match.group(2)
         if value.lower() == 'true' or value == '1':
           value = True
         if value.lower() == 'false' or value == '0':
           value = False
-
         self.parameters()[key] = value
-        markdown = markdown.replace(match.group(1), '')
+        markdown = markdown.replace(match.group(0), '')
 
     # Locate the title of the slide
-    match = re.search(r'^\s*(#+)\s+(.*)', markdown, re.MULTILINE)
+    match = re.search(r'^\s*(#+)\s+(.*)\n', markdown, flags = re.MULTILINE)
     if match:
       self.__title = (match.group(1), match.group(2))
 
@@ -132,11 +133,11 @@ class RemarkSlide(MooseObject):
       self.parameters()['name'] = '-'.join(self.__title[1].lower().split()) + '-0'
 
     # Set the object name using the previous slide name , if the name parameter does not exist
-    if not self.isParamValid('name') and self.parent.warehouse().objects:
+    elif not self.isParamValid('name') and self.parent.warehouse().objects:
       previous = self.parent.warehouse().objects[-1]
       if previous and previous.name():
 
-        # Set the name of the slide with the correct number prefix based on the pervious slide
+        # Set the name of the slide with the correct number prefix based on the previous slide
         name = previous.name() + '-1'
         match = re.search('(.*?)(\d+)$', previous.name())
         if match:
@@ -163,6 +164,18 @@ class RemarkSlide(MooseObject):
 
     # Print a message of the slide that is being created
     print ' '*4, 'SLIDE:', self.name()
+    return markdown
+
+
+  ##
+  # Parse the markdown
+  #
+  # This method should overloaded to handle special syntax
+  def parse(self, markdown):
+
+    # Insert prefix markdown
+    if self.isParamValid('prefix'):
+      markdown = self.getParam('prefix') + '\n' + markdown
 
     # Apply continued title
     if (self.__title is None) and self.getParam('auto_title'):
@@ -199,10 +212,12 @@ class RemarkSlide(MooseObject):
 
       # Error if the file does not exist
       if not os.path.exists(value):
-        print 'ERROR: Background file "' + value + '" does not exist'
+        print colorText('WARNING: Background file "' + value + '" does not exist', 'YELLOW')
+        self.parameters()['background-image'] = ''
 
       # Update the parameter
-      self.parameters()['background-image'] = 'url(' + value + ')'
+      else:
+        self.parameters()['background-image'] = 'url(' + value + ')'
 
     # Re-insert the Remark properties, they are needed for Remark to create links
     for key in self.parameters().groupKeys('properties'):

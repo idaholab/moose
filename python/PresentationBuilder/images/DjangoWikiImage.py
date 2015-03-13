@@ -30,6 +30,8 @@ class DjangoWikiImage(ImageBase):
       self.parameters()['url'] = image_settings['url']
 
     # Apply the settings from the DjangoSlideSet
+    if image_settings['settings']:
+      print ' '*8 + 'Appling image settings from wiki'
     for pair in image_settings['settings'].split():
       k,v = pair.strip().split(':')
       if k in params:

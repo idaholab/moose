@@ -11,7 +11,7 @@ class MergeCoverSet(RemarkSlideSet):
   @staticmethod
   def validParams():
     params = RemarkSlideSet.validParams()
-    params.addParam('slide_sets', 'A vector of slideset names to combine into a single contents')
+    params.addRequiredParam('slide_sets', 'A vector of slideset names to combine into a single contents')
     return params
 
   def __init__(self, name, params, **kwargs):
@@ -21,9 +21,7 @@ class MergeCoverSet(RemarkSlideSet):
     self.__warehouse = self.getParam('_warehouse')
 
     # Build a list of sets to merge
-    self.__merge_list = []
-    if self.isParamValid('slide_sets'):
-      self.__merge_list = self.getParam('slide_sets')
+    self.__merge_list = self.getParam('slide_sets')
 
   ##
   # Search through all the slides in the specified slide sets for table of contents content
@@ -32,6 +30,10 @@ class MergeCoverSet(RemarkSlideSet):
     contents = []
     for obj in self.__warehouse.objects:
       if obj != self and (len(self.__merge_list) == 0 or obj.name() in self.__merge_list):
-        contents += obj._extractContents()
+        pages = obj._extractContents()
+        for page in pages:
+          contents += page
 
-    return contents
+    n = int(self.getParam('contents_items_per_slide'))
+    output = [contents[i:i+n] for i in range(0, len(contents),n)]
+    return output
