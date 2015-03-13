@@ -51,7 +51,7 @@ int sideIntersectedByLine(const Elem * elem, int not_side, const LineSegment & l
       continue;
 
     // Get a simplified side element
-    AutoPtr<Elem> side_elem = elem->side(i);
+    UniquePtr<Elem> side_elem = elem->side(i);
 
     if (dim == 3)
     {
