@@ -92,7 +92,7 @@ class CoverSet(RemarkSlideSet):
           output.append('')
 
         link = '<a href="#' + slide.name() + '">'
-        output[page] += '<p style="text-align:left;">' + link + slide.title()[1] + '</a>'
+        output[page] += '<p style="text-align:left;line-height:12px">' + link + slide.title()[1] + '</a>'
         output[page] += '<span style="float:right;">' + link + str(slide.number) + '</a>'
         output[page] += '</span></p>\n'
 
