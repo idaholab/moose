@@ -126,7 +126,7 @@ class PresentationBuilder(object):
 
       # Display a message if the style file doesn't exists and do nothinbg
       if not os.path.exists(style):
-        print 'ERROR: Style sheet file "' + style + '" does not exists'
+        raise Exception('Style sheet file "' + style + '" does not exists')
 
       # Read the CSS and store the css in a dict() within the warehouse (needed for Reveal format)
       else:

@@ -206,18 +206,12 @@ class RemarkSlide(MooseObject):
     if self.isParamValid('background-image'):
       value = self.getParam('background-image')
 
-      # Assume the image is in the backgrounds directory if it doesn't exist
+      # Assume the image is in the idaholab/presentations/moose_workshop directory if it doesn't exist
       if not os.path.exists(value):
-        value = os.path.join(self.__source_dir, 'backgrounds', value)
-
-      # Error if the file does not exist
-      if not os.path.exists(value):
-        print colorText('WARNING: Background file "' + value + '" does not exist', 'YELLOW')
-        self.parameters()['background-image'] = ''
+        value = os.path.join('https://raw.githubusercontent.com/idaholab/presentations/master/moose_workshop/images', value)
 
       # Update the parameter
-      else:
-        self.parameters()['background-image'] = 'url(' + value + ')'
+      self.parameters()['background-image'] = 'url(' + value + ')'
 
     # Re-insert the Remark properties, they are needed for Remark to create links
     for key in self.parameters().groupKeys('properties'):
