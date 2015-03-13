@@ -113,9 +113,9 @@
 
   l_max_its = 20
   nl_max_its = 10
-  l_tol = 1.0e-4
-  nl_rel_tol = 1.0e-6
-  nl_abs_tol = 1.0e-8
+  l_tol = 1.0e-7
+  nl_rel_tol = 1.0e-10
+  nl_abs_tol = 1.0e-12
 []
 
 [Outputs]
