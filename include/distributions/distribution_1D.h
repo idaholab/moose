@@ -96,12 +96,13 @@ class LogNormalDistributionBackend;
 class BasicLogNormalDistribution : public BasicTruncatedDistribution
 {
 public:
-  BasicLogNormalDistribution(double mu, double sigma);
-  BasicLogNormalDistribution(double mu, double sigma, double x_min, double x_max);
+  BasicLogNormalDistribution(double mu, double sigma, double low);
+  BasicLogNormalDistribution(double mu, double sigma, double x_min, double x_max, double low);
   virtual ~BasicLogNormalDistribution();
 
   double  InverseCdf(double x);        ///< x
 
+  double untrPdf(double x);
   double untrCdf(double x);
 };
 
@@ -150,10 +151,11 @@ class ExponentialDistributionBackend;
 class BasicExponentialDistribution : public BasicTruncatedDistribution
 {
 public:
-  BasicExponentialDistribution(double lambda, double low=0.0);
-  BasicExponentialDistribution(double lambda, double x_min, double x_max, double low=0.0);
+  BasicExponentialDistribution(double lambda, double low);
+  BasicExponentialDistribution(double lambda, double x_min, double x_max, double low);
   virtual ~BasicExponentialDistribution();
 
+  double untrPdf(double x);
   double untrCdf(double x);
   double Cdf(double x);
   double InverseCdf(double x);
@@ -170,11 +172,13 @@ class WeibullDistributionBackend;
 class BasicWeibullDistribution : public BasicTruncatedDistribution
 {
 public:
-  BasicWeibullDistribution(double k, double lambda);
-  BasicWeibullDistribution(double k, double lambda, double x_min, double x_max);
+  BasicWeibullDistribution(double k, double lambda, double low);
+  BasicWeibullDistribution(double k, double lambda, double x_min, double x_max, double low);
   virtual ~BasicWeibullDistribution();
 
+  double  untrPdf(double x);
   double  untrCdf(double x);
+  double InverseCdf(double x);
 };
 
 /*
@@ -205,8 +209,8 @@ class BetaDistributionBackend;
 class BasicBetaDistribution : public BasicTruncatedDistribution
 {
 public:
-  BasicBetaDistribution(double alpha, double beta, double scale, double low=0.0);
-  BasicBetaDistribution(double alpha, double beta, double scale, double x_min, double x_max, double low=0.0);
+  BasicBetaDistribution(double alpha, double beta, double scale, double low);
+  BasicBetaDistribution(double alpha, double beta, double scale, double x_min, double x_max, double low);
   virtual ~BasicBetaDistribution();
 
   double  Pdf(double x);                ///< Pdf function at coordinate x
