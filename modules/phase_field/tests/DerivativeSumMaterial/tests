@@ -3,6 +3,5 @@
     type = 'Exodiff'
     input = 'DerivativeSumMaterial.i'
     exodiff = 'DerivativeSumMaterial_out.e'
-    skip = 'libmesh #489'
   [../]
 []
