@@ -208,7 +208,7 @@ class RemarkSlide(MooseObject):
 
       # Assume the image is in the idaholab/presentations/moose_workshop directory if it doesn't exist
       if not os.path.exists(value):
-        value = os.path.join('https://raw.githubusercontent.com/idaholab/presentations/master/moose_workshop/images', value)
+        value = os.path.join('https://mooseframework.org/static/media/uploads/images/backgrounds', value)
 
       # Update the parameter
       self.parameters()['background-image'] = 'url(' + value + ')'
