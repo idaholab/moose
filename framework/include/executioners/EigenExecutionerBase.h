@@ -157,8 +157,7 @@ protected:
     double ratio_new;             // new estimated dominant ratio
     unsigned int icho;            // improved ratio estimation
   };
-  Chebyshev_Parameters  chebyshev_parameters;
-  void chebyshev(unsigned int iter, const PostprocessorValue * solution_diff);
+  void chebyshev(Chebyshev_Parameters & params, unsigned int iter, const PostprocessorValue * solution_diff);
 };
 
 #endif //EIGENEXECUTIONERBASE_H

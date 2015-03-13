@@ -233,6 +233,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   Real k_old = 0.0;
   Real & source_integral_old = getPostprocessorValueOld("bx_norm");
   Real saved_source_integral_old = source_integral_old;
+  Chebyshev_Parameters chebyshev_parameters;
 
   std::vector<Real> keff_history;
   std::vector<Real> diff_history;
@@ -316,7 +317,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
     if (cheb_on)
     {
-      chebyshev(iter, solution_diff);
+      chebyshev(chebyshev_parameters, iter, solution_diff);
       if (echo)
         _console << " Chebyshev step: " << chebyshev_parameters.icheb << std::endl;
     }
@@ -443,7 +444,7 @@ EigenExecutionerBase::printEigenvalue()
   _console << ss.str();
 }
 
-EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters ()
+EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters()
   :
   n_iter(50),
   fsmooth(2),
@@ -454,7 +455,7 @@ EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters ()
 {}
 
 void
-EigenExecutionerBase::Chebyshev_Parameters::reinit ()
+EigenExecutionerBase::Chebyshev_Parameters::reinit()
 {
   finit   = 6;
   lgac    = 0;
@@ -463,7 +464,7 @@ EigenExecutionerBase::Chebyshev_Parameters::reinit ()
 }
 
 void
-EigenExecutionerBase::chebyshev(unsigned int iter, const PostprocessorValue * solution_diff)
+EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, unsigned int iter, const PostprocessorValue * solution_diff)
 {
   if (!solution_diff) mooseError("solution diff is required for Chebyshev acceleration");
 
