@@ -23,7 +23,6 @@
     type = 'Exodiff'
     input = 'penalty.i'
     exodiff = 'penalty_out.e'
-    skip = 'libmesh #487'
   [../]
   [./crosstermfreeenergy]
     type = 'Exodiff'
@@ -34,7 +33,6 @@
     type = 'Exodiff'
     input = 'acmultiinterface.i'
     exodiff = 'acmultiinterface_out.e'
-    skip = 'libmesh #487'
   [../]
   [./acmultiinterface_aux]
     type = 'Exodiff'
