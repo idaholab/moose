@@ -251,10 +251,6 @@ class RemarkSlide(MooseObject):
       print '--------------------------------------------------'
       raise Exception('The name of the slide was not able to be set')
 
-    #print self.name() + ' -----------------------------------------------'
-    #print markdown
-    #print '-----------------------------------------------'
-
     # Return the markdown
     return markdown
 
@@ -264,9 +260,8 @@ class RemarkSlide(MooseObject):
   def __subLineHighlight(self, match):
     cpp_section = match.group(0)
     # Append asterisks at the front of lines beginning with asterisks
-    return re.sub('^(\s*)'    # Capture leading whitespace \
-                  '(\*)',     # Capture literal asterisk \
-                  '\\1*\\2',  # Replace with leading space, then a new asterisk followed by the captured asterisk \
+    return re.sub('^(\*)', # Capture literal asterisk starting a line \
+                  r'*\1',  # Replace with a new asterisk followed by the captured asterisk \
                   cpp_section, flags = re.MULTILINE | re.VERBOSE)
 
 
