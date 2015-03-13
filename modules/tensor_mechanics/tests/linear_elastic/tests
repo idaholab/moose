@@ -3,12 +3,12 @@
     type = 'Exodiff'
     input = 'tween.i'
     exodiff = 'tween_out.e'
-    compiler = 'GCC CLANG'
+    abs_zero = 1e-13
   [../]
   [./tween_new]
     type = 'Exodiff'
     input = 'tween_new.i'
     exodiff = 'tween_new_out.e'
-    abs_zero = 1e-9
+    abs_zero = 1e-13
   [../]
 []
