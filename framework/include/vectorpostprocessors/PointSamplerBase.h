@@ -86,7 +86,7 @@ protected:
   /// So we don't have to create and destroy this
   std::vector<Point> _point_vec;
 
-  AutoPtr<PointLocatorBase> _pl;
+  UniquePtr<PointLocatorBase> _pl;
 };
 
 #endif

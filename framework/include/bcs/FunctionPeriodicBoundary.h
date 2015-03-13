@@ -55,7 +55,7 @@ public:
   /**
    * Required interface, this class must be able to clone itself
    */
-  virtual AutoPtr<PeriodicBoundaryBase> clone(TransformationType t) const;
+  virtual UniquePtr<PeriodicBoundaryBase> clone(TransformationType t) const;
 
 protected:
 //  /// The dimension of the problem (says which _tr_XYZ member variables are active)
