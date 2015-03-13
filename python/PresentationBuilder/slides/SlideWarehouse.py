@@ -98,8 +98,8 @@ class SlideWarehouse(Warehouse):
 
     # Remove inactive slides
     if self.__inactive:
-      for slide in slides:
-        for inactive in self.__inactive:
+      for inactive in self.__inactive:
+        for slide in slides:
           if inactive in slide.name():
             slides.remove(slide)
 

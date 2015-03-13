@@ -22,6 +22,7 @@ class SlideSetWarehouse(Warehouse):
 
     # Extract all the slide set content
     output = []
+    print colorText('\nRetrieving Markdown', 'CYAN')
     for obj in self.objects:
       md = obj.markdown()
       if not md:
@@ -73,7 +74,7 @@ class SlideSetWarehouse(Warehouse):
     title_slides = []
 
     # Loop through each object and slide and set the slide index
-    print colorText('\nGenerating presentation:', 'CYAN')
+    print colorText('\nGenerating contents:', 'CYAN')
     for obj in self.objects:
       for slide in obj.warehouse().activeObjects():
         print '  ' + slide.name()
@@ -81,6 +82,5 @@ class SlideSetWarehouse(Warehouse):
         idx += 1 + len(re.findall('\n--', slide.markdown))
 
     # Call the contents object on each slide set
-    print colorText('Creating Contents', 'CYAN')
     for obj in self.objects:
       obj.contents()
