@@ -37,14 +37,10 @@ RichardsMaterial::RichardsMaterial(const std::string & name, InputParameters par
     Material(name, parameters),
 
     _material_por(getParam<Real>("mat_porosity")),
-    _por_change(isCoupled("por_change") ? &coupledValue("por_change") : &_zero), // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
-    _por_change_old(isCoupled("por_change") ? &coupledValueOld("por_change") : &_zero),
+    _por_change(isCoupled("por_change") ? coupledValue("por_change") : _zero),
+    _por_change_old(isCoupled("por_change") ? coupledValueOld("por_change") : _zero),
 
     _material_perm(getParam<RealTensorValue>("mat_permeability")),
-
-    _trace_perm(_material_perm.tr()),
-
-    _material_viscosity(getParam<std::vector<Real> >("viscosity")),
 
     _material_gravity(getParam<RealVectorValue>("gravity")),
 
@@ -55,6 +51,12 @@ RichardsMaterial::RichardsMaterial(const std::string & name, InputParameters par
 
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _num_p(_richards_name_UO.num_v()),
+
+    _trace_perm(_material_perm.tr()),
+
+    _material_viscosity(getParam<std::vector<Real> >("viscosity")),
+
+
 
     _pp_old(declareProperty<std::vector<Real> >("porepressure_old")),
     _pp(declareProperty<std::vector<Real> >("porepressure")),
@@ -508,8 +510,8 @@ RichardsMaterial::computeProperties()
   // porosity, permeability, and gravity
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
   {
-    _porosity[qp] = _material_por + (*_por_change)[qp];
-    _porosity_old[qp] = _material_por + (*_por_change_old)[qp];
+    _porosity[qp] = _material_por + _por_change[qp];
+    _porosity_old[qp] = _material_por + _por_change_old[qp];
 
     _permeability[qp] = _material_perm;
     for (unsigned int i = 0; i < LIBMESH_DIM; i++)
