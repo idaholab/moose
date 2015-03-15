@@ -158,8 +158,15 @@ RichardsPiecewiseLinearSink::computeQpResidual()
 
   flux *= _m_func.value(_t, _q_point[_qp]);
 
-  Moose::out << "area_pp = " << _area_pp << "\n";
-  flux /= _area_pp;
+  if (_area_pp == 0.0)
+  {
+    if (flux != 0)
+      mooseError("RichardsPiecewiseLinearSink: flux is nonzero, but area is zero!\n");
+    // if flux == 0, then leave it as zero.
+  }
+  else
+    flux /= _area_pp;
+
 
   return flux;
 }
@@ -243,7 +250,14 @@ RichardsPiecewiseLinearSink::jac(unsigned int wrt_num)
 
   deriv *= _m_func.value(_t, _q_point[_qp]);
 
-  deriv /= _area_pp;
+  if (_area_pp == 0.0)
+  {
+    if (deriv != 0)
+      mooseError("RichardsPiecewiseLinearSink: deriv is nonzero, but area is zero!\n");
+    // if deriv == 0, then leave it as zero.
+  }
+  else
+    deriv /= _area_pp;
 
   return _test[_i][_qp]*deriv*phi;
 }
