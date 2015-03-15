@@ -51,8 +51,8 @@ CutElemMeshTest::case1Common(ElementFragmentAlgorithm &MyMesh)
   // 3 ----- 4 ----- 5
 
   //these will create the embedded nodes - elemid, edgeid, location
-  MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 0,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,0,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,2,0.5);
 
   //algorithm assumes that an element can only be cut by one crack
   //segment at a time
@@ -144,10 +144,10 @@ CutElemMeshTest::case2Intersections(ElementFragmentAlgorithm &MyMesh)
   //       \   /
   //         6
 
-  MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 0,1,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 1,1,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 1,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,0,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,2,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
 }
@@ -180,8 +180,8 @@ void CutElemMeshTest::CutElemMeshTest2c()
   ElementFragmentAlgorithm MyMesh;
   case2Mesh(MyMesh);
 
-  MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 0,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,0,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,1,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
@@ -194,7 +194,7 @@ void CutElemMeshTest::CutElemMeshTest2c()
   MyMesh.printMesh();
 
   std::cout<<"\nCut second element:"<<std::endl;
-  MyMesh.addEdgeIntersection((unsigned int) 1,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,1,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
@@ -207,7 +207,7 @@ void CutElemMeshTest::CutElemMeshTest2c()
   MyMesh.printMesh();
 
   std::cout<<"\nCut third element:"<<std::endl;
-  MyMesh.addEdgeIntersection((unsigned int) 6,2,0.5);// I cheated here
+  MyMesh.addElemEdgeIntersection((unsigned int) 6,2,0.5);// I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
@@ -266,12 +266,12 @@ void CutElemMeshTest::CutElemMeshTest3()
   // 6 --x-- 7 ----- 8
 
   //these will create the embedded nodes - elemid, edgeid, location
-  MyMesh.addEdgeIntersection((unsigned int) 1,1,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 1,2,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 2,2,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 2,3,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 3,0,0.5);  //not necessary, but test it
-  MyMesh.addEdgeIntersection((unsigned int) 3,1,0.5);  //not necessary, but test it
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 2,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 2,3,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 3,0,0.5);  //not necessary, but test it
+  MyMesh.addElemEdgeIntersection((unsigned int) 3,1,0.5);  //not necessary, but test it
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
@@ -384,11 +384,11 @@ void CutElemMeshTest::CutElemMeshTest4()
   MyMesh.updateEdgeNeighbors();
 
   //these will create the embedded nodes - elemid, edgeid, location
-  MyMesh.addEdgeIntersection((unsigned int) 1,1,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 1,2,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 2,0,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 5,2,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 8,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 2,0,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 5,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 8,1,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
@@ -451,10 +451,10 @@ void CutElemMeshTest::CutElemMeshTest5a()
   // add the horizontal cut
   std::cout<<"\n ***** Running case 5a *****"<<std::endl;
   std::cout<<"\nFirst cut:"<<std::endl;
-  MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 0,2,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 1,2,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 2,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,0,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 2,2,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
@@ -465,8 +465,8 @@ void CutElemMeshTest::CutElemMeshTest5a()
 
   // add the lower part of the vertical cut
   std::cout<<"\nSecond cut:"<<std::endl;
-  MyMesh.addEdgeIntersection((unsigned int) 4,1,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 4,3,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 4,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 4,3,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
@@ -505,10 +505,10 @@ void CutElemMeshTest::CutElemMeshTest5b()
   // add the horizontal cut
   std::cout<<"\n ***** Running case 5b *****"<<std::endl;
   std::cout<<"\nFirst cut:"<<std::endl;
-  MyMesh.addEdgeIntersection((unsigned int) 0,0,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 0,2,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 1,2,0.5);
-  MyMesh.addEdgeIntersection((unsigned int) 2,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,0,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 2,2,0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
@@ -519,7 +519,7 @@ void CutElemMeshTest::CutElemMeshTest5b()
 
   // add the upper part of the vertical cut
   std::cout<<"\nSecond cut:"<<std::endl;
-  MyMesh.addEdgeIntersection((unsigned int) 9,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 9,1,0.5);
   MyMesh.addFragEdgeIntersection((unsigned int) 9,2,0.5); // I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
@@ -531,7 +531,7 @@ void CutElemMeshTest::CutElemMeshTest5b()
 
   // add the lower vertical cut
   std::cout<<"\nThird cut:"<<std::endl;
-  MyMesh.addEdgeIntersection((unsigned int) 12,1,0.5); // I cheated here
+  MyMesh.addElemEdgeIntersection((unsigned int) 12,1,0.5); // I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();

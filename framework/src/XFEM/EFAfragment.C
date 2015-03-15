@@ -24,9 +24,10 @@ EFAfragment::EFAfragment(EFAelement * host,
   if (create_boundary_edges)
   {
     if (!from_host)
-      mooseError("If fragment_copy_index given, EFAfragment constructor must have a from_host to copy from");
+      mooseError("EFAfragment constructor must have a from_host to copy from");
     if (fragment_copy_index == std::numeric_limits<unsigned int>::max())
     {
+      // copy the from_host itself
       for (unsigned int i = 0; i < from_host->num_edges(); ++i)
         _boundary_edges.push_back(new EFAedge(*from_host->get_edge(i)));
     }
@@ -74,7 +75,7 @@ EFAfragment::switchNode(EFAnode *new_node, EFAnode *old_node)
 }
 
 bool
-EFAfragment::containsNode(EFAnode *node)
+EFAfragment::containsNode(EFAnode *node) const
 {
   bool contains = false;
   for (unsigned int i = 0; i < _boundary_edges.size(); ++i)
@@ -89,7 +90,7 @@ EFAfragment::containsNode(EFAnode *node)
 }
 
 bool
-EFAfragment::isConnected(EFAfragment &other_fragment)
+EFAfragment::isConnected(EFAfragment &other_fragment) const
 {
   for (unsigned int i = 0; i < _boundary_edges.size(); ++i)
     for (unsigned int j = 0; j < other_fragment.num_edges(); ++j)
@@ -129,6 +130,7 @@ EFAfragment::combine_tip_edges()
   } // i
   if (has_tip_edges)
   {
+    // get the two end nodes of the new edge
     EFAnode* node1 = _boundary_edges[frag_tip_edge_id[0]]->get_node(0);
     EFAnode* emb_node = _boundary_edges[frag_tip_edge_id[0]]->get_node(1);
     if (_boundary_edges[frag_tip_edge_id[1]]->containsNode(node1))
@@ -141,14 +143,16 @@ EFAfragment::combine_tip_edges()
     if (_boundary_edges[frag_tip_edge_id[0]]->containsNode(node2))
       node2 = _boundary_edges[frag_tip_edge_id[1]]->get_node(0);
 
+    // get the new edge with one intersection
     EFAedge* elem_edge = _host_elem->get_edge(elem_tip_edge_id);
-    double xi_node1 = elem_edge->get_xi(node1);
-    double xi_node2 = elem_edge->get_xi(node2);
-    double xi_emb = elem_edge->get_xi(emb_node);
+    double xi_node1 = elem_edge->distance_from_node1(node1);
+    double xi_node2 = elem_edge->distance_from_node1(node2);
+    double xi_emb = elem_edge->distance_from_node1(emb_node);
     double position = (xi_emb - xi_node1)/(xi_node2 - xi_node1);
     EFAedge* full_edge = new EFAedge(node1, node2);
     full_edge->add_intersection(position, emb_node, node1);
 
+    // combine the two original fragment edges
     delete _boundary_edges[frag_tip_edge_id[0]];
     delete _boundary_edges[frag_tip_edge_id[1]];
     _boundary_edges[frag_tip_edge_id[0]] = full_edge;
@@ -162,21 +166,21 @@ std::vector<EFAfragment*>
 EFAfragment::split()
 {
   // This method will split one existing fragment into one or two
-  // new fragments and return them
-
+  // new fragments and return them.
+  // N.B. each boundary each can only have 1 cut at most
   std::vector<EFAfragment *> new_fragments;
   std::vector<unsigned int> cut_edges;
   for (unsigned int iedge = 0; iedge < _boundary_edges.size(); ++iedge)
   {
-    if(_boundary_edges[iedge]->has_intersection())
+    if (_boundary_edges[iedge]->num_embedded_nodes() > 1)
+      mooseError("A fragment boundary edge can't have more than 1 cuts");
+    if (_boundary_edges[iedge]->has_intersection())
       cut_edges.push_back(iedge);
   }
 
-  if (cut_edges.size() == 0)
-  {} // do nothing
-  else if (cut_edges.size() > 2)
-    mooseError("In split() Fragment cannot have more than 2 cut edges");
-  else // cut_edges.size () == 1 || 2
+  if (cut_edges.size() > 2)
+    mooseError("In split() fragment cannot have more than 2 cut edges");
+  else if (cut_edges.size() == 1 || cut_edges.size() == 2)
   {
     unsigned int iedge=0;
     unsigned int icutedge=0;
@@ -197,14 +201,14 @@ EFAfragment::split()
             if (!_boundary_edges[iprevedge]->containsNode(first_node_on_edge))
               mooseError("Previous edge does not contain either of the nodes in this edge");
           }
-          EFAnode * embedded_node1 = _boundary_edges[iedge]->get_embedded_node();
+          EFAnode * embedded_node1 = _boundary_edges[iedge]->get_embedded_node(0);
           new_frag->add_edge(new EFAedge(first_node_on_edge, embedded_node1));
 
           ++icutedge; // jump to next cut edge or jump back to this edge when only 1 cut edge
           if (icutedge == cut_edges.size())
             icutedge = 0;
           iedge = cut_edges[icutedge];
-          EFAnode * embedded_node2 = _boundary_edges[iedge]->get_embedded_node();
+          EFAnode * embedded_node2 = _boundary_edges[iedge]->get_embedded_node(0);
           if (embedded_node2 != embedded_node1)
             new_frag->add_edge(new EFAedge(embedded_node1, embedded_node2));
 
@@ -218,7 +222,7 @@ EFAfragment::split()
           }
           new_frag->add_edge(new EFAedge(embedded_node2, second_node_on_edge));
         }
-        else
+        else // not a cut edge
           new_frag->add_edge(new EFAedge(*_boundary_edges[iedge]));
 
         ++iedge;
@@ -241,7 +245,7 @@ EFAfragment::split()
 
   return new_fragments;
 }
-
+/*
 std::vector<EFAnode*>
 EFAfragment::commonNodesWithEdge(EFAedge & other_edge)
 {
@@ -254,43 +258,63 @@ EFAfragment::commonNodesWithEdge(EFAedge & other_edge)
   }
   return common_nodes;
 }
-
+*/
 unsigned int
-EFAfragment::get_num_cuts()
+EFAfragment::get_num_cuts() const
 {
   unsigned int num_cut_edges = 0;
   for (unsigned int i = 0; i < _boundary_edges.size(); ++i)
   {
     if (_boundary_edges[i]->has_intersection())
-      num_cut_edges += 1;
+      num_cut_edges += _boundary_edges[i]->num_embedded_nodes();
   }
   return num_cut_edges;
 }
 
 EFAelement*
-EFAfragment::get_host()
+EFAfragment::get_host() const
 {
   return _host_elem;
 }
 
+bool
+EFAfragment::is_edge_interior(unsigned int edge_id) const
+{
+  if (!_host_elem)
+    mooseError("in is_edge_interior() fragment must have host elem");
+  bool edge_in_elem_edge = false;
+  for (unsigned int i = 0; i < _host_elem->num_edges(); ++i)
+  {
+    if (_host_elem->get_edge(i)->containsEdge(*_boundary_edges[edge_id]))
+    {
+      edge_in_elem_edge = true;
+      break;
+    }
+  } // i
+  if (!edge_in_elem_edge)
+    return true; // yes, is interior
+  else
+    return false;
+}
+
 std::vector<unsigned int>
-EFAfragment::get_interior_edge_id()
+EFAfragment::get_interior_edge_id() const
 {
   std::vector<unsigned int> interior_edge_id;
   for (unsigned int i = 0; i < _boundary_edges.size(); ++i)
   {
-    if (_boundary_edges[i]->is_interior_edge())
+    if (is_edge_interior(i))
       interior_edge_id.push_back(i);
   }
   return interior_edge_id;
 }
 
 bool
-EFAfragment::is_edge_second_cut(unsigned int edge_id)
+EFAfragment::isSecondaryInteriorEdge(unsigned int edge_id) const
 {
   bool is_second_cut = false;
   if (!_host_elem)
-    mooseError("in is_edge_second_cut() fragment must have host elem");
+    mooseError("in is_edge_cut_twice() fragment must have host elem");
   for (unsigned int i = 0; i < _host_elem->getNumInteriorNodes(); ++i)
   {
     if (_boundary_edges[edge_id]->containsNode(_host_elem->get_interior_node(i)->get_node()))
@@ -316,8 +340,39 @@ EFAfragment::get_edge(unsigned int edge_id) const
   return _boundary_edges[edge_id];
 }
 
+std::set<EFAnode*>
+EFAfragment::get_edge_nodes(unsigned int edge_id) const
+{
+  std::set<EFAnode*> edge_nodes;
+  edge_nodes.insert(_boundary_edges[edge_id]->get_node(0));
+  edge_nodes.insert(_boundary_edges[edge_id]->get_node(1));
+  return edge_nodes;
+}
+
 void
 EFAfragment::add_edge(EFAedge* new_edge)
 {
   _boundary_edges.push_back(new_edge);
+}
+
+std::vector<EFAnode*>
+EFAfragment::get_common_nodes(EFAfragment* other) const
+{
+  bool edge_found = false;
+  std::vector<EFAnode*> common_nodes;
+  for (unsigned int i = 0; i < _boundary_edges.size(); ++i)
+  {
+    for (unsigned int j = 0; j < other->num_edges(); ++j)
+    {
+      if (_boundary_edges[i]->equivalent(*other->get_edge(j)))
+      {
+        common_nodes.push_back(_boundary_edges[i]->get_node(0));
+        common_nodes.push_back(_boundary_edges[i]->get_node(1));
+        edge_found = true;
+        break;
+      }
+    } // j
+    if (edge_found) break;
+  } // i
+  return common_nodes;
 }

@@ -30,8 +30,8 @@ class EFAedge
 
   EFAnode * _edge_node1;
   EFAnode * _edge_node2;
-  EFAnode * _embedded_node;
-  double _intersection_x;
+  std::vector<EFAnode*> _embedded_nodes;
+  std::vector<double> _intersection_x;
 
   public:
 
@@ -39,25 +39,29 @@ class EFAedge
   bool isOverlapping(const EFAedge & other) const; // only compares end nodes
   bool isPartialOverlap(const EFAedge & other) const;
   bool containsEdge(const EFAedge & other) const;
-
+  bool getNodeMasters(EFAnode* node, std::vector<EFAnode*> &master_nodes, 
+                      std::vector<double> &master_weights) const;
 //  bool operator < (const EFAedge & other) const;
 
   void add_intersection(double position, EFAnode * embedded_node_tmp, EFAnode * from_node);
-  EFAnode * get_node(unsigned int index);
+  void copy_intersection(const EFAedge & other, bool reverse_order = false);
+  EFAnode * get_node(unsigned int index) const;
 
-  bool has_intersection();
-  bool has_intersection_at_position(double position, EFAnode * from_node);
-  double get_intersection(EFAnode * from_node);
-  double get_xi(EFAnode * node);
+  bool has_intersection() const;
+  bool has_intersection_at_position(double position, EFAnode * from_node) const;
+  double get_intersection(unsigned int emb_id, EFAnode * from_node) const;
+  double distance_from_node1(EFAnode * node) const;
+  bool is_embedded_node(EFAnode * node) const;
+  unsigned int get_embedded_index(EFAnode * node) const;
+  unsigned int get_embedded_index(double position, EFAnode* from_node) const;
 
-  EFAnode * get_embedded_node();
+  EFAnode * get_embedded_node(unsigned int index) const;
+  unsigned int num_embedded_nodes() const;
   void consistency_check();
   void switchNode(EFAnode *new_node, EFAnode *old_node);
   bool containsNode(EFAnode *node) const;
-  bool getNodeMasters(EFAnode* node, std::vector<EFAnode*> &master_nodes, std::vector<double> &master_weights);
-  bool is_interior_edge();
-  bool is_elem_full_edge();
   void remove_embedded_node();
+  void remove_embedded_node(EFAnode * node);
 };
 
 #endif

@@ -175,14 +175,15 @@ ElementFragmentAlgorithm::initCrackTipTopology()
 }
 
 void
-ElementFragmentAlgorithm::addEdgeIntersection(unsigned int elemid, unsigned int edgeid, double position)
+ElementFragmentAlgorithm::addElemEdgeIntersection(unsigned int elemid, unsigned int edgeid, double position)
 {
+  // this method is called when we are marking cut edges
   std::map<unsigned int, EFAelement*>::iterator eit = _elements.find(elemid);
   if (eit == _elements.end())
     CutElemMeshError("Could not find element with id: "<<elemid<<" in addEdgeIntersection")
 
   EFAelement *curr_elem = eit->second;
-  curr_elem->add_edge_cut(edgeid, position, NULL, _embedded_nodes);
+  curr_elem->add_edge_cut(edgeid, position, NULL, _embedded_nodes, true);
 }
 
 void
@@ -327,16 +328,7 @@ ElementFragmentAlgorithm::restoreFragmentInfo(EFAelement * const elem, const EFA
 void
 ElementFragmentAlgorithm::restoreEdgeIntersections(EFAelement * const elem, const EFAelement * const from_elem)
 {
-  // 2D specific method
-  for (unsigned int i = 0; i < elem->num_edges(); ++i)
-  {
-    if (from_elem->get_edge(i)->has_intersection())
-    {
-      double intersection_x = from_elem->get_edge(i)->get_intersection(from_elem->get_node(i));
-      EFAnode * embedded_node = from_elem->get_edge(i)->get_embedded_node();
-      elem->add_edge_cut(i, intersection_x, embedded_node, _embedded_nodes);
-    }
-  }
+  elem->restore_intersections(from_elem);
 }
 
 void

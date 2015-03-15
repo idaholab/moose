@@ -120,7 +120,7 @@ XFEMCutElem::get_origin(unsigned int plane_id, MeshBase* displaced_mesh) const
   std::vector<std::vector<EFAnode*> > cut_line_nodes;
   for (unsigned int i = 0; i < _efa_elem.get_fragment(0)->num_edges(); ++i)
   {
-    if (_efa_elem.get_frag_edge(0,i)->is_interior_edge())
+    if (_efa_elem.get_fragment(0)->is_edge_interior(i))
     {
       std::vector<EFAnode*> node_line(2,NULL);
       node_line[0] = _efa_elem.get_frag_edge(0,i)->get_node(0);
@@ -145,7 +145,7 @@ XFEMCutElem::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
   std::vector<std::vector<EFAnode*> > cut_line_nodes;
   for (unsigned int i = 0; i < _efa_elem.get_fragment(0)->num_edges(); ++i)
   {
-    if (_efa_elem.get_frag_edge(0,i)->is_interior_edge())
+    if (_efa_elem.get_fragment(0)->is_edge_interior(i))
     {
       std::vector<EFAnode*> node_line(2,NULL);
       node_line[0] = _efa_elem.get_frag_edge(0,i)->get_node(0);
@@ -421,16 +421,18 @@ XFEM::mark_cut_edges_by_geometry(Real time)
     {
       if (!CEMElem->is_edge_phantom(elemCutEdges[i].host_side_id)) // must not be phantom edge
       {
-        _efa_mesh.addEdgeIntersection(elem->id(),elemCutEdges[i].host_side_id,elemCutEdges[i].distance);
+        _efa_mesh.addElemEdgeIntersection(elem->id(), elemCutEdges[i].host_side_id,
+                                          elemCutEdges[i].distance);
         marked_edges = true;
       }
     }
 
     for (unsigned int i=0; i<fragCutEdges.size(); ++i) // MUST DO THIS AFTER MARKING ELEMENT EDGES
     {
-      if (!CEMElem->get_fragment(0)->is_edge_second_cut(fragCutEdges[i].host_side_id))
+      if (!CEMElem->get_fragment(0)->isSecondaryInteriorEdge(fragCutEdges[i].host_side_id))
       {
-        _efa_mesh.addFragEdgeIntersection(elem->id(),fragCutEdges[i].host_side_id,fragCutEdges[i].distance);
+        _efa_mesh.addFragEdgeIntersection(elem->id(), fragCutEdges[i].host_side_id,
+                                          fragCutEdges[i].distance);
         marked_edges = true;
       }
     }
@@ -468,8 +470,9 @@ XFEM::mark_cut_edges_by_state()
       if (orig_cut_side_id < nsides) // valid crack-tip edge found
       {
         orig_edge = CEMElem->get_edge(orig_cut_side_id);
-        orig_cut_distance = orig_edge->get_intersection(orig_edge->get_node(0));
-        orig_node = orig_edge->get_embedded_node();
+        orig_node = CEMElem->get_tip_embedded();
+        unsigned int emb_id = orig_edge->get_embedded_index(orig_node);
+        orig_cut_distance = orig_edge->get_intersection(emb_id,orig_edge->get_node(0));
       }
       else
       {
@@ -487,12 +490,13 @@ XFEM::mark_cut_edges_by_state()
       if (mit1 != _state_marked_elem_sides.end()) // specified boundary crack initiation
       {
         orig_cut_side_id = mit1->second;
-        if (!CEMElem->is_edge_phantom(orig_cut_side_id))
+        if (!CEMElem->is_edge_phantom(orig_cut_side_id) &&
+            !CEMElem->get_edge(orig_cut_side_id)->has_intersection())
         {
           orig_cut_distance = 0.5;
-          _efa_mesh.addEdgeIntersection(elem->id(),orig_cut_side_id,orig_cut_distance);
+          _efa_mesh.addElemEdgeIntersection(elem->id(), orig_cut_side_id, orig_cut_distance);
           orig_edge = CEMElem->get_edge(orig_cut_side_id);
-          orig_node = orig_edge->get_embedded_node();
+          orig_node = orig_edge->get_embedded_node(0);
         }
         else
           continue; // skip this elem if specified boundary edge is phantom
@@ -511,9 +515,9 @@ XFEM::mark_cut_edges_by_state()
         else
           continue; // skip this elem if more than one interior edges found (i.e. elem's been cut twice)
         orig_cut_distance = 0.5;
-        _efa_mesh.addFragEdgeIntersection(elem->id(),orig_cut_side_id,orig_cut_distance);
+        _efa_mesh.addFragEdgeIntersection(elem->id(), orig_cut_side_id, orig_cut_distance);
         orig_edge = CEMElem->get_frag_edge(0,orig_cut_side_id);
-        orig_node = orig_edge->get_embedded_node(); // must be an interior embedded node
+        orig_node = orig_edge->get_embedded_node(0); // must be an interior embedded node
       }
       else
       {
@@ -521,7 +525,14 @@ XFEM::mark_cut_edges_by_state()
         exit(1);
       }
     }
-    Point cut_origin = get_efa_node_coor(orig_node, CEMElem, elem);// cutting plane origin's coords
+    Point cut_origin(0.0,0.0,0.0);
+    if (orig_node)
+      cut_origin = get_efa_node_coor(orig_node, CEMElem, elem);// cutting plane origin's coords
+    else
+    {
+      libMesh::err << " ERROR: element "<<elem->id()<<" does not have valid orig_node"<<std::endl;
+      exit(1);
+    }
 
     // loop through element edges to add possible second cut points
     std::vector<Point> edge_ends(2,Point(0.0,0.0,0.0));
@@ -533,13 +544,13 @@ XFEM::mark_cut_edges_by_state()
         edge_ends[1] = get_efa_node_coor(CEMElem->get_edge(i)->get_node(1),CEMElem,elem);
         Real distance = 0.0;
         if (init_crack_intersect_edge(cut_origin,normal,edge_ends[0],edge_ends[1],distance) &&
-           (!CEMElem->is_edge_phantom(i)) && (!CEMElem->get_edge(i)->has_intersection()))
+           (!CEMElem->is_edge_phantom(i)))
         {
-          _efa_mesh.addEdgeIntersection(elem->id(),i,distance);
+          _efa_mesh.addElemEdgeIntersection(elem->id(), i, distance);
           break;
         }
       }
-    }
+    } // i
 
     // loop though framgent boundary edges to add possible second cut points
     // N.B. must do this after marking element edges
@@ -553,14 +564,13 @@ XFEM::mark_cut_edges_by_state()
           edge_ends[1] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(1),CEMElem,elem);
           Real distance = 0.0;
           if (init_crack_intersect_edge(cut_origin,normal,edge_ends[0],edge_ends[1],distance) &&
-             (CEMElem->get_frag_edge(0,i)->is_elem_full_edge() || 
-              CEMElem->get_frag_edge(0,i)->is_interior_edge()))
+             (!CEMElem->get_fragment(0)->isSecondaryInteriorEdge(i)))
           { 
-            _efa_mesh.addFragEdgeIntersection(elem->id(),i,distance);
+            _efa_mesh.addFragEdgeIntersection(elem->id(), i, distance);
             break;
           }
         }
-      }
+      } // i
     }
 
     marked_edges = true;
@@ -876,13 +886,13 @@ XFEM::get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity,
       if ((unsigned int)quantity < 3)
       {
         unsigned int index = (unsigned int)quantity;
-        planedata = xfce->get_origin(plane_id,_mesh2); // TODO: 2 cut planes in 1 elem
+        planedata = xfce->get_origin(plane_id,_mesh2);
         comp = planedata(index);
       }
       else if ((unsigned int)quantity < 6)
       {
         unsigned int index = (unsigned int)quantity - 3;
-        planedata = xfce->get_normal(plane_id,_mesh2); // TODO: 2 cut planes in 1 elem
+        planedata = xfce->get_normal(plane_id,_mesh2);
         comp = planedata(index);
       }
       else
@@ -892,7 +902,6 @@ XFEM::get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity,
       }
     }
   }
-
   return comp;
 }
 
@@ -905,5 +914,15 @@ XFEM::is_elem_at_crack_tip(const Elem* elem) const
 bool
 XFEM::is_elem_cut(const Elem* elem) const
 {
-  return (_cut_elem_map.find(elem) != _cut_elem_map.end());
+  bool is_cut = false;
+  std::map<const Elem*, XFEMCutElem*>::const_iterator it;
+  it = _cut_elem_map.find(elem);
+  if (it != _cut_elem_map.end())
+  {
+    const XFEMCutElem *xfce = it->second;
+    const EFAelement* EFAelem = xfce->get_efa_elem();
+    if (EFAelem->is_partial()) // exclude the full crack tip elements
+      is_cut = true;
+  }
+  return is_cut;
 }

@@ -63,7 +63,7 @@ public:
 
   void updateEdgeNeighbors();
   void initCrackTipTopology();
-  void addEdgeIntersection( unsigned int elemid, unsigned int edgeid, double position );
+  void addElemEdgeIntersection(unsigned int elemid, unsigned int edgeid, double position);
   void addFragEdgeIntersection(unsigned int elemid, unsigned int frag_edge_id, double position);
 
   void updatePhysicalLinksAndFragments();

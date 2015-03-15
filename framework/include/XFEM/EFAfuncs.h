@@ -50,4 +50,13 @@ static unsigned int num_common_elems(std::set<T> &v1, std::vector<T> &v2)
   return common_elems.size();
 }
 
+template <class T>
+static std::vector<T> get_common_elems(std::set<T> &v1, std::set<T> &v2)
+{
+  std::vector<T> common_elems;
+  std::set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(),
+                        std::inserter(common_elems, common_elems.end()));
+  return common_elems;
+}
+
 #endif
