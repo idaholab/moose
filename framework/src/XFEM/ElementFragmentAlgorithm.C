@@ -326,12 +326,6 @@ ElementFragmentAlgorithm::restoreFragmentInfo(EFAelement * const elem, const EFA
 }
 
 void
-ElementFragmentAlgorithm::restoreEdgeIntersections(EFAelement * const elem, const EFAelement * const from_elem)
-{
-  elem->restore_intersections(from_elem);
-}
-
-void
 ElementFragmentAlgorithm::createChildElements()
 {
   //temporary container for new elements -- will be merged with Elements

@@ -72,7 +72,6 @@ public:
   void reset();
   void clearAncestry();
   void restoreFragmentInfo(EFAelement * const elem, const EFAelement * const from_elem);
-  void restoreEdgeIntersections(EFAelement * const elem, const EFAelement * const from_elem);
 
   void createChildElements();
   void connectFragments(bool mergeUncutVirtualEdges);

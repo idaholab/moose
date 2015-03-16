@@ -894,7 +894,6 @@ EFAelement::init_crack_tip(std::set< EFAelement*> &CrackTipElements)
       {
         //Neither neighbor overlays current element.  We are on the uncut element ahead of the tip.
         //Flag neighbors as crack tip split elements and add this element as their crack tip neighbor.
-
         EFAnode* edge_node1 = _edges[edge_iter]->get_node(0);
         EFAnode* edge_node2 = _edges[edge_iter]->get_node(1);
 
@@ -1623,20 +1622,8 @@ EFAelement::restore_fragment(const EFAelement* const from_elem)
   for (unsigned int i = 0; i < from_elem->_interior_nodes.size(); ++i)
     _interior_nodes.push_back(new FaceNode(*from_elem->_interior_nodes[i]));
 
-  // replace all local nodes with global nodes
-  for (unsigned int i = 0; i < from_elem->num_nodes(); ++i)
-  {
-    if (from_elem->_nodes[i]->category() == N_CATEGORY_LOCAL_INDEX)
-      switchNode(_nodes[i], from_elem->_nodes[i], false); //EFAelement is not a child of any parent
-    else
-      mooseError("In restoreFragmentInfo all of from_elem's nodes must be local");
-  }
-}
-
-void
-EFAelement::restore_intersections(const EFAelement* const from_elem)
-{
-  if (get_num_cuts() > 0)
+  // restore edge intersections
+  if (get_num_cuts() != 0)
     mooseError("In restoreEdgeIntersection: edge cuts already exist in element " << _id);
   for (unsigned int i = 0; i < _num_edges; ++i)
   {
@@ -1645,6 +1632,15 @@ EFAelement::restore_intersections(const EFAelement* const from_elem)
     if (_edges[i]->num_embedded_nodes() > 2)
       mooseError("elem " << _id << " has an edge with >2 cuts");
   } // i
+
+  // replace all local nodes with global nodes
+  for (unsigned int i = 0; i < from_elem->num_nodes(); ++i)
+  {
+    if (from_elem->_nodes[i]->category() == N_CATEGORY_LOCAL_INDEX)
+      switchNode(_nodes[i], from_elem->_nodes[i], false); //EFAelement is not a child of any parent
+    else
+      mooseError("In restoreFragmentInfo all of from_elem's nodes must be local");
+  }
 }
 
 void

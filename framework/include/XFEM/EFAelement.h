@@ -143,7 +143,6 @@ public:
                         std::map<unsigned int, EFAnode*> &EmbeddedNodes);
   void fragment_sanity_check(unsigned int n_old_frag_edges, unsigned int n_old_frag_cuts) const;
   void restore_fragment(const EFAelement* const from_elem);
-  void restore_intersections(const EFAelement* const from_elem);
 
   void create_child(const std::set<EFAelement*> &CrackTipElements,
                     std::map<unsigned int, EFAelement*> &Elements,

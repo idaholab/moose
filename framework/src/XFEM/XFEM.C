@@ -343,24 +343,10 @@ void XFEM::build_efa_mesh()
   }
 
   //Must update edge neighbors before restore edge intersections. Otherwise, when we
-  //add edge intersections, we do not have neighbor information to use
+  //add edge intersections, we do not have neighbor information to use.
+  //Correction: no need to use neighbor info now 
   _efa_mesh.updateEdgeNeighbors();
-
-  //Restore edge intersection information for elements that have been previously cut
-  for (elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
-  {
-    Elem *elem = *elem_it;
-    std::map<const Elem*, XFEMCutElem*>::iterator cemit = _cut_elem_map.find(elem);
-    if (cemit != _cut_elem_map.end())
-    {
-      XFEMCutElem *xfce = cemit->second;
-      EFAelement * CEMElem = _efa_mesh.getElemByID(elem->id());
-      _efa_mesh.restoreEdgeIntersections(CEMElem, xfce->get_efa_elem());
-    }
-  }
-
   _efa_mesh.initCrackTipTopology();
-//  std::cout << _efa_mesh << std::endl;
 }
 
 bool
