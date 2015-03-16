@@ -21,15 +21,20 @@ class MergeCoverSet(RemarkSlideSet):
     self.__warehouse = self.getParam('_warehouse')
 
     # Build a list of sets to merge
-    self.__merge_list = self.getParam('slide_sets')
+    self.__merge_list = self.getParam('slide_sets').split()
 
   ##
   # Search through all the slides in the specified slide sets for table of contents content
   def _extractContents(self):
+
+#    print len(self.__merge_list)
+#    print self.__merge_list
+
     # Count the number of contents entries
     contents = []
     for obj in self.__warehouse.objects:
-      if obj != self and (len(self.__merge_list) == 0 or obj.name() in self.__merge_list):
+      if (obj is not self) and (len(self.__merge_list) == 0 or obj.name() in self.__merge_list):
+      #  print 'TUTORIAL_SUMMARY_COVER:', obj.name()
         pages = obj._extractContents()
         for page in pages:
           contents += page

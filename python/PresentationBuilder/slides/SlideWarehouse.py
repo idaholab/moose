@@ -72,35 +72,36 @@ class SlideWarehouse(Warehouse):
   # Return the active slide objects (public)
   def activeObjects(self):
 
-    # By default return all slide objects
     slides = []
 
-    # Create the active list
-    if self.__active:
-      for name in self.__slide_order:
-        # Assume that contents and titles should be active unless listed as inactive
-        if name.startswith(self.__slide_set_name + '-contents') \
-           or name.startswith(self.__slide_set_name + '-title'):
-          slides.append(self.objects[self.__slide_map[name]])
+    for name in self.__slide_order:
+      slide = self.objects[self.__slide_map[name]]
+      active = False
 
-        # If not title or contents, check against the active list by looping through the
-        # active items. If the active name is a subset of the slide name, use it
-        else:
-          for active in self.__active:
-            if (active in name):
-               slides.append(self.objects[self.__slide_map[name]])
-               break # stops active in self.__active loop, so it doesn't get added twice
+      # Determine active status from active list,
+      # if the active list does not exist then everything is
+      # active
+      if not self.__active:
+        active = True
+      else:
+        for active_name in self.__active:
+          if active_name in slide.name():
+            active = True
+            break
 
-    # No active given, all the slides are active
-    else:
-      for name in self.__slide_order:
-        slides.append(self.objects[self.__slide_map[name]])
+      # Contents and titles are assumed active
+      if slide.name().endswith('-contents') or slide.name().endswith('-title'):
+        active = True
 
-    # Remove inactive slides
-    if self.__inactive:
-      for inactive in self.__inactive:
-        for slide in slides:
-          if inactive in slide.name():
-            slides.remove(slide)
+      # Handle inactive
+      for inactive_name in self.__inactive:
+        if inactive_name in slide.name():
+          active = False
+          break
+
+      # Append the slide if active
+      if active:
+        slides.append(slide)
+
 
     return slides

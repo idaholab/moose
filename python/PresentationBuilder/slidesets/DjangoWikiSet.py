@@ -15,6 +15,7 @@ class DjangoWikiSet(RemarkSlideSet):
     params.addRequiredParam('wiki', 'The mooseframework.org wiki site to extract')
     params.addParam('url', 'http://www.mooseframework.org/', 'The location of the Django wiki')
     params.addParam('auto_insert_moose_wiki', True, 'When true links to other moose wiki content is automatically inserted')
+    params.addParam('hide_wiki_link', False, 'When true and "auto_insert_moose_wiki = false" the link to the wiki page is removed from the content')
     params.addParam('insert_wiki_link', True, 'When auto linking wiki pages place the link at with the page before the inserted content')
     params.addParam('insert_wiki_as_subpage', True, 'When auto linking wiki pages they are inserted with a lower title level')
     params.addParam('use_wiki_title', True, 'When true the title from the wiki page is used as the title')
@@ -44,9 +45,11 @@ class DjangoWikiSet(RemarkSlideSet):
     raw = self.__extractMarkdownFromWiki(page)
 
     # Search for wiki content links
+    regex = r'(\[.*?\])\((/wiki/.*?)\)'
     if self.getParam('auto_insert_moose_wiki'):
-      regex = r'(\[.*?\])\((/wiki/.*?)\)'
       raw = re.sub(regex, self.__subLinkedWikiContent, raw)
+    elif self.getParam('hide_wiki_link'):
+      raw = re.sub(regex, '', raw)
 
     # Extract image settings
     raw = re.sub(r'(?<![^\s.])\s*\[\]\(\s*image\s*:([0-9]*)\s*(.*?)\)', self.__subImageSettings, raw)

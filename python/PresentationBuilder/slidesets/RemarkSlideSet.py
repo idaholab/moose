@@ -22,7 +22,7 @@ class RemarkSlideSet(MooseObject):
     params.addParam('contents', False, 'Include table of contents slide')
     params.addParam('contents_title', 'The table-of-contents heading for this slide set')
     params.addParam('contents_level', 1, 'The heading level to include in the contents')
-    params.addParam('contents_items_per_slide', 12, 'The number of contents items to include on a page')
+    params.addParam('contents_items_per_slide', 15, 'The number of contents items to include on a page')
     params.addParam('show_in_contents', True, 'Toggle if slide set content appears in the table-of-contents')
     params.addParam('style', 'The CSS style sheet to utilize for this slide set')
     params.addParam('non_ascii_warn', True, 'Produce warning if non-ascii characters are located')
@@ -61,6 +61,9 @@ class RemarkSlideSet(MooseObject):
                                             active = self.getParam('active'), \
                                             inactive = self.getParam('inactive'))
 
+    # Storage for markdown links
+    self.__links = []
+
     # Print a message
     print '  ', name
 
@@ -79,8 +82,11 @@ class RemarkSlideSet(MooseObject):
 
   ##
   # Creates the individual RemarkSlide objects
-  # @param raw The raw markdown, obtained from read() method, to seperate into slides
+  # @param raw The raw markdown, obtained from read() method, to separate into slides
   def build(self, markdown):
+
+    # Extract links
+    markdown = re.sub(r'\[.*?\]:.*?\n', self.__subLinkStorage, markdown)
 
     # Separate the slide content
     raw_slides = re.split(r'\n---', markdown)
@@ -114,10 +120,17 @@ class RemarkSlideSet(MooseObject):
     # Join the list with slide breaks
     output = '\n---\n'.join(output)
 
-#    # Append the links
-#    for link in self._links:
-#      output += link + '\n'
+    # Append the links
+    for link in self.__links:
+      output += link + '\n'
     return output
+
+
+  ##
+  # Sub method for storing wiki link shortcuts
+  def __subLinkStorage(self, match):
+    self.__links.append(match.group(0).replace(r'\r\n',''))
+    return ''
 
 
   ##
