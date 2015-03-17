@@ -162,6 +162,13 @@ private:
   std::vector<std::vector<double> > matrixRestructuring(std::vector<std::vector<double> > step1);
   std::vector<double> getValues(std::vector<int> & loop_locator);
 
+  /**
+   * These functions are implemented in NDspline.C.
+   * They implement the integral of the kernel functions of the ND-spline
+   * which are needed to calculate CDF and marginal distributions.
+   * Six functions are needed since the kernel function is piecewise with modulus operator.
+   */
+
   double val1(double t);
   double val2(double t);
   double val3(double t);

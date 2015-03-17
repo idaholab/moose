@@ -479,12 +479,12 @@ double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
 	double down = discretizations[discretizations.size()-1];
 
 	for(int n=0; n<discretizations.size(); n++)
-	if (x>discretizations[n])
-	down = n;
+		if (x>discretizations[n])
+			down = n;
 
 	for(int n=discretizations.size(); n<0; n--)
-	if (x<discretizations[n])
-	up = n;
+		if (x<discretizations[n])
+			up = n;
 
 	double scaled_x = down + (x-discretizations[down])/(discretizations[down+1]-discretizations[down]);
 
@@ -584,6 +584,13 @@ double NDSpline::spline_cartesian_inverse_marginal(double CDF,int marginal_varia
 double NDSpline::integralSpline(std::vector<double> point_coordinate){
 	return spline_cartesian_integration(point_coordinate);
 }
+
+/**
+ * These functions are implemented in NDspline.C.
+ * They implement the integral of the kernel functions of the ND-spline
+ * which are needed to calculate CDF and marginal distributions.
+ * Six functions are needed since the kernel function is piecewise with modulus operator.
+ */
 
 double NDSpline::val1(double t){
 	return 0.0;

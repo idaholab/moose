@@ -35,6 +35,11 @@ public:
    std::string & getType();
 
    std::vector<int> oneDtoNDconverter(int oneDcoordinate, std::vector<int> indexes){
+	   /**
+	    *  This function makes a conversion of a 1D array into an ND array.
+	    *  The objective it to determine the coordinates of an ND point from its coordinate in a 1D vector.
+	    *  The weights are needed since I do not know a priori the range of ND component.
+	    */
        int n_dimensions = indexes.size();
        std::vector<int> NDcoordinates (n_dimensions);
        std::vector<int> weights (n_dimensions);
@@ -297,7 +302,8 @@ public:
 			  alpha.at(i) = 0.0;
 			  beta.at(i) = 0.0;
 		  }
-
+		  // Here I am building a cartesian grid from a sparse set of points
+		  // TODO: give the possibility at the user to specify this value and add a ticket.
 		  int numberDiscretization = 15;
 
 		  std::vector<std::vector<double> > discretizations;
@@ -360,9 +366,7 @@ public:
   Cdf(std::vector<double> x)
   {
 	  double value;
-	  std::cout<<'here2'<<std::endl;
 	  if (_CDFprovided){
-		  std::cout<<'here1'<<std::endl;
 		  value = _interpolator.interpolateAt(x);
 	  }
 	  else
