@@ -314,12 +314,11 @@ public:
 		  for(int i=0; i<n_dimensions; i++){
 			  std::vector<double> temp;
 			  for(int j=0; j<numberDiscretization; j++){
+				  // in the following I am building a cartesian grid from a sparse set of points
 				  double value = cellPoint0.at(i) + cellDxs.at(i)/numberDiscretization * j;
-				  //std::cout<<", " << value ;
 				  temp.push_back(value);
 			  }
 			  discretizations.push_back(temp);
-			  //std::cout<<" " << std::endl;
 		  }
 
 		  int totalNumberOfValues=1;
@@ -336,13 +335,8 @@ public:
 			  std::vector<double> NDcoordinate(n_dimensions);
 			  for (int j=0; j<n_dimensions; j++){
 				  NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
-				  //std::cout<<" " << NDcoordinate.at(j) ;
 			  }
-			  //std::cout<<" - " ;
 			  PDFvalues.at(i) = _interpolator.interpolateAt(NDcoordinate);
-			  //std::cout<< PDFvalues.at(i) ;
-
-			  //std::cout<<" " << std::endl;
 		  }
 		  _CDFspline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, false);
 	  }
