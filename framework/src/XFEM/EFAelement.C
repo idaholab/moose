@@ -188,12 +188,13 @@ EFAelement::switchEmbeddedNode(EFAnode *new_emb_node,
 }
 
 
-void
-EFAelement::get_nodes_on_edge(unsigned int edge_idx,
-                              std::vector<EFAnode*> &edge_nodes) const
+std::vector<EFAnode*>
+EFAelement::get_edge_nodes(unsigned int edge_id) const
 {
-  edge_nodes.push_back(_edges[edge_idx]->get_node(0));
-  edge_nodes.push_back(_edges[edge_idx]->get_node(1));
+  std::vector<EFAnode*> edge_nodes;
+  edge_nodes.push_back(_edges[edge_id]->get_node(0));
+  edge_nodes.push_back(_edges[edge_id]->get_node(1));
+  return edge_nodes;
 }
 
 EFAnode *
@@ -1041,8 +1042,7 @@ EFAelement::shouldDuplicateCrackTipSplitElem()
             for (unsigned int k = 0; k < neighbor_split_neighbors.size(); ++k)
             {
               //Get the nodes on the crack tip edge
-              std::vector<EFAnode*> edge_nodes;
-              edge_neighbor->get_nodes_on_edge(neighbor_split_neighbors[k],edge_nodes);
+              std::vector<EFAnode*> edge_nodes = edge_neighbor->get_edge_nodes(neighbor_split_neighbors[k]);
               crack_tip_face_nodes.insert(edge_nodes.begin(), edge_nodes.end());
             } // k
           }
@@ -1760,18 +1760,11 @@ EFAelement::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
       {
         for (unsigned int l = 0; l < NeighborElem->num_children(); ++l)
         {
-          //get nodes on this edge of childElem
-          std::vector<EFAnode*> childEdgeNodes;
-          get_nodes_on_edge(j, childEdgeNodes);
-
-          //get nodes on this edge of childOfNeighborElem
           EFAelement *childOfNeighborElem = NeighborElem->get_child(l);
-          std::vector<EFAnode*> childOfNeighborEdgeNodes;
-          childOfNeighborElem->get_nodes_on_edge(neighbor_edge_id, childOfNeighborEdgeNodes);
+          EFAedge* neighborChildEdge = childOfNeighborElem->get_edge(neighbor_edge_id);
 
           //Check to see if the nodes are already merged.  There's nothing else to do in that case.
-          if (childEdgeNodes[0] == childOfNeighborEdgeNodes[1] &&
-              childEdgeNodes[1] == childOfNeighborEdgeNodes[0])
+          if (_edges[j]->isOverlapping(*neighborChildEdge))
             continue;
 
           if (_fragments[0]->isConnected(*childOfNeighborElem->get_fragment(0)))
@@ -1782,10 +1775,10 @@ EFAelement::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
               unsigned int childNodeIndex = i;
               unsigned int neighborChildNodeIndex = num_edge_nodes - 1 - childNodeIndex;
 
-              EFAnode* childNode = childEdgeNodes[childNodeIndex];
-              EFAnode* childOfNeighborNode = childOfNeighborEdgeNodes[neighborChildNodeIndex];
+              EFAnode* childNode = _edges[j]->get_node(childNodeIndex);
+              EFAnode* childOfNeighborNode = neighborChildEdge->get_node(neighborChildNodeIndex);
 
-              mergeNodes(childNode, childOfNeighborNode, this, childOfNeighborElem,
+              mergeNodes(childNode, childOfNeighborNode, childOfNeighborElem,
                          PermanentNodes, TempNodes);
             }
             duplicateEmbeddedNode(j, childOfNeighborElem, neighbor_edge_id, EmbeddedNodes);
@@ -1798,21 +1791,13 @@ EFAelement::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
         {
           for (unsigned int l = 0; l < NeighborElem->num_children(); ++l)
           {
-            std::vector<EFAnode*> childEdgeNodes;
-            get_nodes_on_edge(j, childEdgeNodes);
-
             EFAelement *childOfNeighborElem = NeighborElem->get_child(l);
             EFAedge *neighborChildEdge = childOfNeighborElem->get_edge(neighbor_edge_id);
 
             if (!neighborChildEdge->has_intersection()) //neighbor edge must NOT have intersection either
             {
-              //get nodes on this edge of childOfNeighborElem
-              std::vector<EFAnode*> childOfNeighborEdgeNodes;
-              childOfNeighborElem->get_nodes_on_edge(neighbor_edge_id, childOfNeighborEdgeNodes);
-
               //Check to see if the nodes are already merged.  There's nothing else to do in that case.
-              if (childEdgeNodes[0] == childOfNeighborEdgeNodes[1] &&
-                  childEdgeNodes[1] == childOfNeighborEdgeNodes[0])
+              if (_edges[j]->isOverlapping(*neighborChildEdge))
                 continue;
 
               unsigned int num_edge_nodes = 2;
@@ -1821,16 +1806,14 @@ EFAelement::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
                 unsigned int childNodeIndex = i;
                 unsigned int neighborChildNodeIndex = num_edge_nodes - 1 - childNodeIndex;
 
-                EFAnode* childNode = childEdgeNodes[childNodeIndex];
-                EFAnode* childOfNeighborNode = childOfNeighborEdgeNodes[neighborChildNodeIndex];
+                EFAnode* childNode = _edges[j]->get_node(childNodeIndex);
+                EFAnode* childOfNeighborNode = neighborChildEdge->get_node(neighborChildNodeIndex);
 
                 if (childNode->parent() != NULL &&
                     childNode->parent() == childOfNeighborNode->parent()) //non-material node and both come from same parent
-                {
-                  mergeNodes(childNode, childOfNeighborNode, this, childOfNeighborElem,
+                  mergeNodes(childNode, childOfNeighborNode, childOfNeighborElem,
                              PermanentNodes, TempNodes);
-                }
-              }
+              } // i
             }
           } // loop over NeighborElem's children
         } // if (merge_phantom_edges)
@@ -2006,10 +1989,15 @@ EFAelement::mapParaCoorFrom1Dto2D(unsigned int edge_id, double xi_1d,
 
 void
 EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
-                       EFAelement* childElem, EFAelement* childOfNeighborElem,       
+                       EFAelement* childOfNeighborElem,       
                        std::map<unsigned int, EFAnode*> &PermanentNodes,
                        std::map<unsigned int, EFAnode*> &TempNodes)
 {
+  // N.B. "this" must point to a child element that was just created
+  if (!_parent)
+    mooseError("no parent element for child element " << _id << " in mergeNodes");
+
+  EFAelement* childElem = this;
   if (childNode != childOfNeighborNode)
   {
     if(childNode->category() == N_CATEGORY_PERMANENT)

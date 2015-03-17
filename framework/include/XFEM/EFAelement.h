@@ -65,8 +65,7 @@ public:
   void switchNode(EFAnode *new_node, EFAnode *old_node,
                   bool descend_to_parent = true);
   void switchEmbeddedNode(EFAnode *new_node, EFAnode *old_node);
-  void get_nodes_on_edge(unsigned int edge_idx,
-                         std::vector<EFAnode*> &edge_nodes) const;
+  std::vector<EFAnode*> get_edge_nodes(unsigned int edge_id) const;
   EFAnode * create_local_node_from_global_node(const EFAnode * global_node) const;
   EFAnode * get_global_node_from_local_node(const EFAnode * local_node) const;
   void getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
@@ -167,7 +166,7 @@ private:
 //  void addToMergedEdgeMap(EFAnode* node1, EFAnode* node2, EFAelement* elem1, EFAelement* elem2,
 //                          std::map< std::set<EFAnode*>, std::set<EFAelement*> > &MergedEdgeMap);
   void mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
-                  EFAelement* childElem, EFAelement* childOfNeighborElem, 
+                  EFAelement* childOfNeighborElem,
                   std::map<unsigned int, EFAnode*> &PermanentNodes,
                   std::map<unsigned int, EFAnode*> &TempNodes);
 
