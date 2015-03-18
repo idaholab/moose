@@ -133,6 +133,7 @@
 #include "PiecewiseBilinear.h"
 #include "SplineFunction.h"
 #include "PiecewiseMultilinear.h"
+#include "LinearCombinationFunction.h"
 
 // materials
 #include "GenericConstantMaterial.h"
@@ -503,6 +504,7 @@ registerObjects(Factory & factory)
   registerFunction(PiecewiseBilinear);
   registerFunction(SplineFunction);
   registerFunction(PiecewiseMultilinear);
+  registerFunction(LinearCombinationFunction);
 
   // materials
   registerMaterial(GenericConstantMaterial);
