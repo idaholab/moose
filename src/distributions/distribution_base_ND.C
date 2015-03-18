@@ -1,5 +1,5 @@
 /*
- * distribution.C
+ * distribution_base_ND.C
  *
  *  Created on: Feb 6, 2014
  *      Author: alfoa
@@ -39,6 +39,8 @@ using boost::math::normal;
 
 BasicDistributionND::BasicDistributionND()
 {
+	_tolerance = 0.1;
+	_initial_divisions = 10;
 }
 
 BasicDistributionND::~BasicDistributionND()
@@ -77,6 +79,31 @@ BasicDistributionND::getType(){
    return _type;
 }
 
+
+double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
+	double value=0.0;
+
+	int numberOfVerteces = (int)pow(2,center.size());
+
+	for(int i=0; i<numberOfVerteces; i++){
+		std::vector<double> index = int2binary(i,center.size());
+		std::vector<double> NDcoordinate(center.size());
+
+		for(int j=0; j<center.size(); j++){
+			if (index[j]==0)
+				NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
+			else
+				NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
+		}
+		value += Cdf(NDcoordinate);
+	}
+
+	value = value/numberOfVerteces;
+
+	return value;
+}
+
+
 double
 getDistributionVariable(BasicDistributionND & dist,const std::string & variable_name){
   return dist.getVariable(variable_name);
@@ -102,10 +129,13 @@ double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
   return dist.Cdf(x);
 }
 
-std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){
+//std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){
+std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & F, double & g){
  //return dist.InverseCdf(min, max);
- return dist.InverseCdf((max-min)/2.0, (max-min), 10);
  //return std::vector<double>(2,-1.0);
+ //return dist.InverseCdf((max-min)/2.0, (max-min), 10);
+ //return dist.InverseCdf((max-min)/2.0);
+	return dist.InverseCdf(F,g);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std::vector<double> mu){
@@ -222,8 +252,6 @@ double BasicMultivariateNormal::Pdf(std::vector<double> x){
 }
 
 double BasicMultivariateNormal::Cdf(std::vector<double> x){
- double value;
-
 // if(_mu.size() == x.size()){
 //  int dimensions = _mu.size();
 //  //boost::math::chi_squared chiDistribution(dimensions);
