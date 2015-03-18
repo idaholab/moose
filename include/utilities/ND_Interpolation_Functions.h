@@ -43,7 +43,7 @@ public:
   int returnDimensionality(){return _dimensions;};
 
   NDInterpolation();
-  ~NDInterpolation();
+  virtual ~NDInterpolation();
 
 protected:
   std::string _data_filename;
@@ -98,9 +98,9 @@ public:
   //	  return _discretizations;};
 
   void getDiscretizations(std::vector< std::vector<double> > & vector){
-	  for(int i=0; i<_discretizations.size();i++){
+	  for(unsigned int i=0; i<_discretizations.size();i++){
 		  std::vector<double> temp;
-		  for(int j=0; j<_discretizations.at(i).size(); j++)
+		  for(unsigned int j=0; j<_discretizations.at(i).size(); j++)
 			  temp.push_back(_discretizations.at(i).at(j));
 		  vector.push_back(temp);
 	  };
@@ -112,7 +112,7 @@ public:
   };
 
   NDSpline();
-  ~NDSpline();
+  virtual ~NDSpline();
 
   bool checkUB(double upper_bound);
   bool checkLB(double lower_bound);
@@ -187,6 +187,7 @@ public:
   std::vector<double> NDinverseFunction(double F_min, double F_max);
   InverseDistanceWeighting(std::string filename, double p);
   InverseDistanceWeighting(double p);
+  virtual ~InverseDistanceWeighting() {};
   bool checkUB(double upper_bound);
   bool checkLB(double lower_bound);
 
@@ -237,8 +238,9 @@ public:
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
   MicroSphere(std::string filename, double p, int precision);
   MicroSphere(double p, int precision);
+  virtual ~MicroSphere() {};
 private:
-  int _number_of_points;
+  unsigned int _number_of_points;
   double _p;
   std::vector<double> _values;
   std::vector< std::vector<double> > _point_coordinates;

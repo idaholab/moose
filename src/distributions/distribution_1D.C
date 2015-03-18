@@ -575,13 +575,13 @@ BasicExponentialDistribution::untrCdf(double x){
 
 double
 BasicExponentialDistribution::Cdf(double x){
-  double low = _dist_parameters.find("low") ->second;
+  //double low = _dist_parameters.find("low") ->second;
   return BasicTruncatedDistribution::Cdf(x);//-low);
 }
 
 double
 BasicExponentialDistribution::InverseCdf(double x){
-  double low = _dist_parameters.find("low") ->second;
+  //double low = _dist_parameters.find("low") ->second;
   return BasicTruncatedDistribution::InverseCdf(x);// + low;
 }
 

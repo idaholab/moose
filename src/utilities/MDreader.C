@@ -85,7 +85,7 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
     std::cerr << "Completed readOrderedNDarray" << std::endl;
 }
 
-void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int & numberOfPoints, std::vector< std::vector<double> > & pointcoordinates, std::vector<double> & values){
+void readScatteredNDarray(std::string & filename, int & numberOfDimensions, unsigned int & numberOfPoints, std::vector< std::vector<double> > & pointcoordinates, std::vector<double> & values){
  // int - number of dimensions d
  // int - number of points n
  // [[double]]  - point coordinates
@@ -98,7 +98,7 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int 
 	 numberOfDimensions = (int)data[0];
  else
 	 throwError("readScatteredNDarray: error in" << filename << "; number of dimensions must be integer");
- numberOfDimensions = data[0];
+ numberOfDimensions = (int)data[0];
 
  if (checkIfdoubleIsInt(data[1]))
 	 numberOfPoints = (int)data[1];
@@ -107,7 +107,7 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int 
 
  int startingPoint = 2;
 
- for (int n=0; n<numberOfPoints; n++){
+ for (unsigned int n=0; n<numberOfPoints; n++){
   std::vector<double> tempVector (numberOfDimensions);
   for (int nDim=0; nDim<numberOfDimensions; nDim++){
    tempVector[nDim] = data[startingPoint];
@@ -118,7 +118,7 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int 
 
  //startingPoint += numberOfPoints * numberOfDimensions;
 
- for (int n=0; n<numberOfPoints; n++){
+ for (unsigned int n=0; n<numberOfPoints; n++){
   values.push_back(data[startingPoint]);
   startingPoint += 1;
  }
