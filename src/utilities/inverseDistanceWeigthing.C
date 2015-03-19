@@ -8,7 +8,7 @@
 InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double p){
  _data_filename = filename;
  int dimensions;
- int numberOfPoints;
+ unsigned int numberOfPoints;
  std::vector<double> values;
  std::vector< std::vector<double> > pointCoordinates;
 

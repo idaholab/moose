@@ -6,7 +6,7 @@
 
 
 void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::vector< std::vector<double> > & discretizationValues, std::vector<double> & values);
-void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int & numberOfPoints, std::vector< std::vector<double> > & pointcoordinates, std::vector<double> & values);
+void readScatteredNDarray(std::string & filename, int & numberOfDimensions,unsigned int & numberOfPoints, std::vector< std::vector<double> > & pointcoordinates, std::vector<double> & values);
 //double returnCDFvalue(std::vector<double> coordinates);
 //int findIndex(double pivot, std::vector<double> discretizations);
 std::vector<double> read1Darray(std::string filename);

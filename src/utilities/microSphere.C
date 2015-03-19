@@ -66,7 +66,7 @@ double MicroSphere::interpolateAt(std::vector<double> point_coordinate){
  }
  std::vector<double> weights (_values.size());
 
- for (int n=0; n<_values.size(); n++){
+ for (unsigned int n=0; n<_values.size(); n++){
   weight = minkowskiDistance(point_coordinate,_point_coordinates[n],_p);
 
   for (int j=0; j<_precision; j++){
@@ -86,7 +86,7 @@ double MicroSphere::cosValueBetweenVectors(std::vector<double> point1, std::vect
  double point1point2 = 0;
 
  if (point1.size() == point2.size()){
-  for (int nDim=0; nDim<point1.size(); nDim++){
+  for (unsigned int nDim=0; nDim<point1.size(); nDim++){
    point1point2 += point1[nDim] * point2[nDim];
   }
 

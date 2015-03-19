@@ -89,7 +89,7 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
 		std::vector<double> index = int2binary(i,center.size());
 		std::vector<double> NDcoordinate(center.size());
 
-		for(int j=0; j<center.size(); j++){
+		for(unsigned int j=0; j<center.size(); j++){
 			if (index[j]==0)
 				NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
 			else

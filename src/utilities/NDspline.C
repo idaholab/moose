@@ -111,7 +111,7 @@ double NDSpline::interpolateAt(std::vector<double> point_coordinate){
   for (int nDim=0; nDim<_dimensions; nDim++)
    indexes.at(nDim) = _discretizations.at(nDim).size();
 
-  for (int i=0; i<_values.size(); i++){
+  for (unsigned int i=0; i<_values.size(); i++){
    coordinates = from1DtoNDconverter(i, indexes);
    double distance = 0;
 
@@ -187,7 +187,7 @@ std::vector<double> NDSpline::fillArrayCoefficient(int n_dimensions, std::vector
  std::vector<double> temp;
  std::vector<double> y;
 
- for(int n=0; n<_discretizations.at(n_dimensions-1).size(); n++){
+ for(unsigned int n=0; n<_discretizations.at(n_dimensions-1).size(); n++){
   loop_locator.at(n_dimensions-1)=n;
 
   if (n_dimensions>2){
@@ -223,7 +223,7 @@ std::vector<double> NDSpline::fillArrayCoefficient(int n_dimensions, std::vector
 std::vector<double> NDSpline::coefficientRestructuring(std::vector<std::vector<double> > matrix){
  std::vector<double> array;
 
- for (int i=0; i<matrix.size(); i++)
+ for (unsigned int i=0; i<matrix.size(); i++)
   array.insert(array.end(), matrix.at(i).begin(), matrix.at(i).end());
 
  return array;
@@ -238,7 +238,7 @@ std::vector<std::vector<double> > NDSpline::tensorProductInterpolation(std::vect
  std::vector<std::vector<double> > step2;
  std::vector<double> temp;
 
- for (int n=0; n<step1restructured.size(); n++){
+ for (unsigned int n=0; n<step1restructured.size(); n++){
   temp = getCoefficients(step1restructured.at(n), h, alpha, beta);
   step2.push_back(temp);
   temp.clear();
@@ -268,7 +268,7 @@ std::vector<std::vector<double> > NDSpline::matrixRestructuring(std::vector<std:
 std::vector<double> NDSpline::getValues(std::vector<int> & loop_locator){
  std::vector<double> values (_discretizations.at(0).size());
 
- for (int n=0; n<_discretizations.at(0).size(); n++){
+ for (unsigned int n=0; n<_discretizations.at(0).size(); n++){
   loop_locator.at(0) = n;
   int oneDcoordinate = fromNDto1Dconverter(loop_locator);
      values.at(n) = _values.at(oneDcoordinate);
@@ -282,7 +282,7 @@ void NDSpline::from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDd
  // this function restructures a 2D vector into a 1D vector
  // example: 2D [[1,2],[3,4]] --> 1D restructuring [1,2,3,4]
 
- for (int i=0; i<twoDdata.size(); i++)
+ for (unsigned int i=0; i<twoDdata.size(); i++)
   oneDdata.insert(oneDdata.end(), twoDdata.at(i).begin(), twoDdata.at(i).end());
 }
 
@@ -292,7 +292,7 @@ void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDd
  // example: 1D [1,2,3,4,5,6] spacing=2 --> 2D restructuring [[1,2],[3,4],[5,6]]
 
  if (oneDdata.size()%spacing == 0)
-  for (int i=0; i<oneDdata.size()/spacing; i++){
+  for (unsigned int i=0; i<oneDdata.size()/spacing; i++){
    for (int j=0; j<spacing; j++)
     twoDdata[i][j] = oneDdata[spacing*i+j];
   }
@@ -309,20 +309,21 @@ void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDd
 
 double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
   // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
-  double up   = discretizations[0];
+  //double up   = discretizations[0];
   double down = discretizations[discretizations.size()-1];
 
-  for(int n=0; n<discretizations.size(); n++)
+  for(unsigned int n=0; n<discretizations.size(); n++)
    if (x>discretizations[n])
     down = n;
 
-  for(int n=discretizations.size(); n<0; n--)
-   if (x<discretizations[n])
-    up = n;
+  //up is never used
+  //for(int n=discretizations.size(); n<0; n--)
+  // if (x<discretizations[n])
+  //  up = n;
 
   // Node re-scaling - linear type
   //double scaled_x = down + (x-discretizations[down])/(discretizations[up]-discretizations[down]);
-  double scaled_x = down + (x-discretizations[down])/(discretizations[down+1]-discretizations[down]);
+  double scaled_x = down + (x-discretizations[(int)down])/(discretizations[(int)down+1]-discretizations[(int)down]);
 
   double a = 0.0;
   double h = 1.0;
@@ -475,18 +476,19 @@ bool NDSpline::checkBoundaries(std::vector<double> point){
 }
 
 double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
-	double up   = discretizations[0];
+        //double up   = discretizations[0];
 	double down = discretizations[discretizations.size()-1];
 
-	for(int n=0; n<discretizations.size(); n++)
+	for(unsigned int n=0; n<discretizations.size(); n++)
 		if (x>discretizations[n])
 			down = n;
 
-	for(int n=discretizations.size(); n<0; n--)
-		if (x<discretizations[n])
-			up = n;
+        //up is never used
+	//for(int n=discretizations.size(); n<0; n--)
+	//	if (x<discretizations[n])
+	//		up = n;
 
-	double scaled_x = down + (x-discretizations[down])/(discretizations[down+1]-discretizations[down]);
+	double scaled_x = down + (x-discretizations[(int)down])/(discretizations[(int)down+1]-discretizations[(int)down]);
 
 	double a = 0.0;
 	double h = 1.0;

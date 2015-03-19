@@ -445,14 +445,14 @@ public:
 
 
   double
-  inverseMarginal(double F, int dimension)
+    inverseMarginal(double /* F */, int /* dimension */)
   {
 	  throwError("BasicMultivariateNormal: inverseMarginal not available");
 	  return 0.0;
   }
 
   std::vector<double>
-  InverseCdf(double F, double g)
+    InverseCdf(double /* F */, double /* g */)
   {
 	  throwError("BasicMultivariateNormal: InverseCdf not available");
 	  return std::vector<double>(2,-1.0);
@@ -518,7 +518,7 @@ public:
   };
 
   double
-  inverseMarginal(double F, int dimension)
+    inverseMarginal(double /* F */, int /* dimension */)
   {
 	  throwError("BasicMultiDimensionalScatteredMS: inverseMarginal not available");
 	  return 0.0;
