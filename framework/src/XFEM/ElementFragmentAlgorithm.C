@@ -63,18 +63,18 @@ ElementFragmentAlgorithm::~ElementFragmentAlgorithm()
 }
 
 unsigned int
-ElementFragmentAlgorithm::addElements( std::vector< std::vector<unsigned int> > &quads )
+ElementFragmentAlgorithm::add2DElements( std::vector< std::vector<unsigned int> > &quads )
 {
   unsigned int first_id = 0;
   unsigned int num_nodes = quads[0].size();
 
   if (quads.size() == 0)
-    CutElemMeshError("addElements called with empty vector of quads")
+    CutElemMeshError("add2DElements called with empty vector of quads")
 
   for(unsigned int i = 0; i < quads.size(); ++i)
   {
     unsigned int new_elem_id = getNewID(_elements);
-    EFAelement* newElem = new EFAelement(new_elem_id, num_nodes);
+    EFAelement2D* newElem = new EFAelement2D(new_elem_id, num_nodes);
     _elements.insert(std::make_pair(new_elem_id,newElem));
 
     if (i == 0)
@@ -90,9 +90,8 @@ ElementFragmentAlgorithm::addElements( std::vector< std::vector<unsigned int> > 
         _permanent_nodes.insert(std::make_pair(quads[i][j],currNode));
       }
       else
-      {
         currNode = mit->second;
-      }
+
       newElem->set_node(j, currNode);
       _inverse_connectivity[currNode].insert(newElem);
     }
@@ -102,15 +101,15 @@ ElementFragmentAlgorithm::addElements( std::vector< std::vector<unsigned int> > 
 }
 
 EFAelement*
-ElementFragmentAlgorithm::addElement( std::vector<unsigned int> quad, unsigned int id )
+ElementFragmentAlgorithm::add2DElement( std::vector<unsigned int> quad, unsigned int id )
 {
   unsigned int num_nodes = quad.size();
 
   std::map<unsigned int, EFAelement*>::iterator mit = _elements.find(id);
   if (mit != _elements.end())
-    CutElemMeshError("In addElement element with id: "<<id<<" already exists")
+    CutElemMeshError("In add2DElement element with id: "<<id<<" already exists")
 
-  EFAelement* newElem = new EFAelement(id, num_nodes);
+  EFAelement2D* newElem = new EFAelement2D(id, num_nodes);
   _elements.insert(std::make_pair(id,newElem));
 
   for (unsigned int j = 0; j < num_nodes; ++j)
@@ -123,9 +122,8 @@ ElementFragmentAlgorithm::addElement( std::vector<unsigned int> quad, unsigned i
       _permanent_nodes.insert(std::make_pair(quad[j],currNode));
     }
     else
-    {
       currNode = mit->second;
-    }
+
     newElem->set_node(j, currNode);
     _inverse_connectivity[currNode].insert(newElem);
   }
@@ -182,7 +180,9 @@ ElementFragmentAlgorithm::addElemEdgeIntersection(unsigned int elemid, unsigned 
   if (eit == _elements.end())
     CutElemMeshError("Could not find element with id: "<<elemid<<" in addEdgeIntersection")
 
-  EFAelement *curr_elem = eit->second;
+  EFAelement2D *curr_elem = dynamic_cast<EFAelement2D*>(eit->second);
+  if (!curr_elem)
+    CutElemMeshError("addElemEdgeIntersection: elem "<<elemid<<" is not of type EFAelement2D")
   curr_elem->add_edge_cut(edgeid, position, NULL, _embedded_nodes, true);
 }
 
@@ -194,7 +194,9 @@ ElementFragmentAlgorithm::addFragEdgeIntersection(unsigned int elemid, unsigned 
   if (eit == _elements.end())
     CutElemMeshError("Could not find element with id: "<<elemid<<" in addFragEdgeIntersection")
 
-  EFAelement *elem = eit->second;
+  EFAelement2D *elem = dynamic_cast<EFAelement2D*>(eit->second);
+  if (!elem)
+    CutElemMeshError("addFragEdgeIntersection: elem "<<elemid<<" is not of type EFAelement2D")
   elem->add_frag_edge_cut(frag_edge_id, position, _embedded_nodes);
 }
 
@@ -401,7 +403,7 @@ ElementFragmentAlgorithm::findCrackTipElements()
   for (unsigned int elem_iter = 0; elem_iter < _child_elements.size(); elem_iter++)
   {
     EFAelement *childElem = _child_elements[elem_iter];
-    if (childElem->frag_has_tip_edges())
+    if (childElem->is_crack_tip_elem())
       _crack_tip_elements.insert(childElem);
   } // loop over (new) child elements
 

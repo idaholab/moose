@@ -190,7 +190,13 @@ void XFEM::build_efa_mesh()
     std::vector<unsigned int> quad;
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
       quad.push_back(elem->node(i));
-    _efa_mesh.addElement(quad, elem->id());
+    if (_mesh->mesh_dimension() == 2)
+      _efa_mesh.add2DElement(quad, elem->id());
+    else
+    {
+      libMesh::err << " ERROR: 3D XFEM EFA mesh building not supported yet"<<std::endl;
+      exit(1);
+    }
   }
 
   //Restore fragment information for elements that have been previously cut
@@ -217,8 +223,16 @@ bool
 XFEM::mark_cut_edges(Real time)
 {
   bool marked_edges = false;
-  marked_edges = mark_cut_edges_by_geometry(time);
-  marked_edges |= mark_cut_edges_by_state();
+  if (_mesh->mesh_dimension() == 2)
+  {
+    marked_edges = mark_cut_edges_by_geometry(time);
+    marked_edges |= mark_cut_edges_by_state();
+  }
+  else
+  {
+    libMesh::err << " ERROR: 3D XFEM cut marking not supported yet"<<std::endl;
+    exit(1);
+  }
   return marked_edges;
 }
 
@@ -236,7 +250,13 @@ XFEM::mark_cut_edges_by_geometry(Real time)
     std::vector<cutEdge> elemCutEdges;
     std::vector<cutEdge> fragCutEdges;
     std::vector<std::vector<Point> > frag_edges;
-    EFAelement * CEMElem = _efa_mesh.getElemByID(elem->id());
+    EFAelement * EFAelem = _efa_mesh.getElemByID(elem->id());
+    EFAelement2D * CEMElem = dynamic_cast<EFAelement2D*>(EFAelem);
+    if (!CEMElem)
+    {
+      libMesh::err << " ERROR: EFAelem is not of EFAelement2D type" << std::endl;
+      exit(1);
+    }
 
     // continue if elem has been already cut twice - IMPORTANT
     if (CEMElem->is_cut_twice())
@@ -301,7 +321,13 @@ XFEM::mark_cut_edges_by_state()
   {
     const Elem *elem = pmeit->first;
     RealVectorValue &normal = pmeit->second;
-    EFAelement * CEMElem = _efa_mesh.getElemByID(elem->id());
+    EFAelement * EFAelem = _efa_mesh.getElemByID(elem->id());
+    EFAelement2D * CEMElem = dynamic_cast<EFAelement2D*>(EFAelem);
+    if (!CEMElem)
+    {
+      libMesh::err << " ERROR: EFAelem is not of EFAelement2D type" << std::endl;
+      exit(1);
+    }
 
     // continue if elem is already cut twice - IMPORTANT
     if (CEMElem->is_cut_twice())
@@ -371,7 +397,8 @@ XFEM::mark_cut_edges_by_state()
       }
       else
       {
-        libMesh::err << " ERROR: element "<<elem->id()<<" flagged for state-based growth, but has no edge intersections"<<std::endl;
+        libMesh::err << " ERROR: element " << elem->id() 
+                     << " flagged for state-based growth, but has no edge intersections" << std::endl;
         exit(1);
       }
     }
@@ -563,8 +590,23 @@ XFEM::cut_mesh_with_efa()
 
     std::cout<<"XFEM added elem "<<libmesh_elem->id()+1<<std::endl;
 
-    XFEMCutElem * xfce = new XFEMCutElem(libmesh_elem, NewElements[i]);
-    _cut_elem_map.insert(std::pair<Elem*,XFEMCutElem*>(libmesh_elem,xfce));
+    XFEMCutElem * xfce;
+    if (_mesh->mesh_dimension() == 2)
+    {
+      EFAelement2D* new_efa_elem2d = dynamic_cast<EFAelement2D*>(NewElements[i]);
+      if (!new_efa_elem2d)
+      {
+        libMesh::err << " ERROR: dynamic_cast to new_efa_elem2d fails" <<std::endl;
+        exit(1);
+      }
+      xfce = new XFEMCutElem2D(libmesh_elem, new_efa_elem2d);
+    }
+    else if (_mesh->mesh_dimension() == 3)
+    {
+      libMesh::err << " ERROR: cannot support 3D yet"<<std::endl;
+      exit(1);
+    }
+    _cut_elem_map.insert(std::pair<Elem*,XFEMCutElem*>(libmesh_elem, xfce));
     efa_id_to_new_elem.insert(std::make_pair(efa_child_id, libmesh_elem));
 
     if (_mesh2)

@@ -12,22 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef XFEMCUTELEM2D_H
+#define XFEMCUTELEM2D_H
+
 #include "XFEMCutElem.h"
 
-XFEMCutElem::XFEMCutElem(Elem* elem):
-  _n_nodes(elem->n_nodes()),
-  _nodes(_n_nodes,NULL)
-{
-  for (unsigned int i = 0; i < _n_nodes; ++i)
-    _nodes[i] = elem->get_node(i);
-}
+using namespace libMesh;
 
-XFEMCutElem::~XFEMCutElem()
+class XFEMCutElem2D : public XFEMCutElem
 {
-}
+public:
+  XFEMCutElem2D(Elem* elem, const EFAelement2D * const CEMelem);
+  ~XFEMCutElem2D();
 
-Real
-XFEMCutElem::get_physical_volfrac() const
-{
-  return _physical_volfrac;
-}
+private:
+
+  EFAelement2D _efa_elem2d; // 2D EFAelement
+  Point get_node_coords(EFAnode* node, MeshBase* displaced_mesh = NULL) const;
+
+public:
+  void calc_physical_volfrac();
+  Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
+  Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
+  const EFAelement * get_efa_elem() const;
+};
+
+#endif

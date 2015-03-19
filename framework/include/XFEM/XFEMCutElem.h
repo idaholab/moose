@@ -36,25 +36,22 @@ using namespace libMesh;
 class XFEMCutElem
 {
 public:
-  XFEMCutElem(Elem* elem, const EFAelement * const CEMelem);
-  ~XFEMCutElem();
+  XFEMCutElem(Elem* elem);
+  virtual ~XFEMCutElem();
 
-private:
+protected:
 
   unsigned int _n_nodes;
   std::vector<Node*> _nodes;
-  EFAelement _efa_elem;
-
   Real _physical_volfrac;
-  Point get_node_coords(EFAnode* node, 
-                        MeshBase* displaced_mesh = NULL) const;
+  virtual Point get_node_coords(EFAnode* node, MeshBase* displaced_mesh = NULL) const = 0;
 
 public:
-  void calc_physical_volfrac();
-  Real get_physical_volfrac() const {return _physical_volfrac;}
-  Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
-  Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
-  const EFAelement * get_efa_elem() const;
+  virtual void calc_physical_volfrac() = 0;
+  Real get_physical_volfrac() const;
+  virtual Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const = 0;
+  virtual Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const = 0;
+  virtual const EFAelement * get_efa_elem() const = 0;
 };
 
 #endif

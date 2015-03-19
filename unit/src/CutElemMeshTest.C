@@ -39,7 +39,7 @@ CutElemMeshTest::case1Common(ElementFragmentAlgorithm &MyMesh)
   std::vector<unsigned int> v2 (q2, q2 + sizeof(q2) / sizeof(unsigned int) );
   quads.push_back(v2);
 
-  MyMesh.addElements( quads );
+  MyMesh.add2DElements( quads );
 
   MyMesh.updateEdgeNeighbors();
 
@@ -124,7 +124,7 @@ CutElemMeshTest::case2Mesh(ElementFragmentAlgorithm &MyMesh)
   std::vector<unsigned int> v3 (q3, q3 + sizeof(q3) / sizeof(unsigned int) );
   quads.push_back(v3);
 
-  MyMesh.addElements( quads );
+  MyMesh.add2DElements( quads );
 
   MyMesh.updateEdgeNeighbors();
 }
@@ -250,8 +250,8 @@ void CutElemMeshTest::CutElemMeshTest3()
   quads2.push_back(v4);
 
   ElementFragmentAlgorithm MyMesh;
-  MyMesh.addElements( quads );
-  MyMesh.addElements( quads2 ); //do in 2 batches just to test that it works
+  MyMesh.add2DElements( quads );
+  MyMesh.add2DElements( quads2 ); //do in 2 batches just to test that it works
 
   MyMesh.updateEdgeNeighbors();
 
@@ -288,97 +288,97 @@ void CutElemMeshTest::CutElemMeshTest4()
   {
     unsigned int qary[] = {0, 1, 2, 3};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,0);
+    MyMesh.add2DElement(qvec,0);
   }
 
   {
     unsigned int qary[] = {1, 4, 5, 2};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,1);
+    MyMesh.add2DElement(qvec,1);
   }
 
   {
     unsigned int qary[] = {4, 6, 7, 5};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,2);
+    MyMesh.add2DElement(qvec,2);
   }
 
   {
     unsigned int qary[] = {6, 8, 9, 7};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,3);
+    MyMesh.add2DElement(qvec,3);
   }
 
   {
     unsigned int qary[] = {3, 2, 10, 11};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,4);
+    MyMesh.add2DElement(qvec,4);
   }
 
   {
     unsigned int qary[] = {2, 5, 12, 10};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,5);
+    MyMesh.add2DElement(qvec,5);
   }
 
   {
     unsigned int qary[] = {5, 7, 13, 12};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,6);
+    MyMesh.add2DElement(qvec,6);
   }
 
   {
     unsigned int qary[] = {7, 9, 14, 13};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,7);
+    MyMesh.add2DElement(qvec,7);
   }
 
   {
     unsigned int qary[] = {11, 10, 15, 16};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,8);
+    MyMesh.add2DElement(qvec,8);
   }
 
   {
     unsigned int qary[] = {10, 12, 17, 15};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,9);
+    MyMesh.add2DElement(qvec,9);
   }
 
   {
     unsigned int qary[] = {12, 13, 18, 17};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,10);
+    MyMesh.add2DElement(qvec,10);
   }
 
   {
     unsigned int qary[] = {13, 14, 19, 18};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,11);
+    MyMesh.add2DElement(qvec,11);
   }
 
   {
     unsigned int qary[] = {16, 15, 20, 21};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,12);
+    MyMesh.add2DElement(qvec,12);
   }
 
   {
     unsigned int qary[] = {15, 17, 22, 20};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,13);
+    MyMesh.add2DElement(qvec,13);
   }
 
   {
     unsigned int qary[] = {17, 18, 23, 22};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,14);
+    MyMesh.add2DElement(qvec,14);
   }
 
   {
     unsigned int qary[] = {18, 19, 24, 23};
     std::vector<unsigned int> qvec (qary, qary + sizeof(qary) / sizeof(unsigned int) );
-    MyMesh.addElement(qvec,15);
+    MyMesh.add2DElement(qvec,15);
   }
 
   MyMesh.updateEdgeNeighbors();
@@ -429,7 +429,7 @@ CutElemMeshTest::case5Mesh(ElementFragmentAlgorithm &MyMesh)
   std::vector<unsigned int> v6 (q6, q6 + sizeof(q6) / sizeof(unsigned int) );
   quads.push_back(v6);
 
-  MyMesh.addElements( quads );
+  MyMesh.add2DElements( quads );
   MyMesh.updateEdgeNeighbors();
 }
 

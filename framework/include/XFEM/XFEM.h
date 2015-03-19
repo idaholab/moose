@@ -15,7 +15,7 @@
 #ifndef XFEM_H
 #define XFEM_H
 
-#include "XFEMCutElem.h"
+#include "XFEMCutElem2D.h"
 
 enum XFEM_CUTPLANE_QUANTITY
 {

@@ -28,7 +28,8 @@
 #include "FaceNode.h"
 #include "EFAedge.h"
 #include "EFAfragment.h"
-#include "EFAelement.h"
+#include "EFAelement2D.h"
+//#include "EFAelement3D.h"
 
 class ElementFragmentAlgorithm
 {
@@ -57,8 +58,8 @@ private:
 
 public:
 
-  unsigned int addElements( std::vector< std::vector<unsigned int> > &quads );
-  EFAelement* addElement( std::vector<unsigned int> quad, unsigned int id );
+  unsigned int add2DElements( std::vector< std::vector<unsigned int> > &quads );
+  EFAelement* add2DElement( std::vector<unsigned int> quad, unsigned int id );
   void set_dimension(unsigned int ndm);
 
   void updateEdgeNeighbors();
