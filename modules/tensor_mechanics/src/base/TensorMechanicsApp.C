@@ -16,6 +16,7 @@
 #include "StressDivergenceRZTensors.h"
 #include "MomentBalancing.h"
 #include "GravityTM.h"
+#include "PoroMechanicsCoupling.h"
 
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
@@ -114,6 +115,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(MomentBalancing);
   registerKernel(StressDivergencePFFracTensors);
   registerKernel(GravityTM);
+  registerKernel(PoroMechanicsCoupling);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
