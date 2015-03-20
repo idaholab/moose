@@ -9,7 +9,7 @@
 
 [Variables]
   [./pressure]
-    # Adds a Linear Lagrange variable by default
+    #Adds a Linear Lagrange variable by default
   [../]
 []
 
