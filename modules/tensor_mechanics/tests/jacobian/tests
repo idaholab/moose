@@ -35,7 +35,6 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
-
 # The --no-trap-fpe is necessary because when performing a singular value decomposition PETSc/LAPACK/BLAS checks 0/0, 1/0, etc, and Libmesh would trap these checks
   [./cto01]
     type = 'PetscJacobianTester'
@@ -142,5 +141,10 @@
     difference_tol = 1E10
     cli_args = '--no-trap-fpe'
   [../]
-
+  [./poro01]
+    type = 'PetscJacobianTester'
+    input = 'poro01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
 []
