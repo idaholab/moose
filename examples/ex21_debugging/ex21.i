@@ -1,6 +1,6 @@
 [Mesh]
   file = reactor.e
-  # Let's assign human friendly names to the blocks on the fly
+  #Let's assign human friendly names to the blocks on the fly
   block_id = '1 2'
   block_name = 'fuel deflector'
 
@@ -23,7 +23,7 @@
 []
 
 [Kernels]
-  # This Kernel consumes a real-gradient material property from the active material
+  #This Kernel consumes a real-gradient material property from the active material
   [./convection]
     type = Convection
     variable = convected
@@ -87,7 +87,7 @@
     block = 'fuel'
     diffusion_gradient = 'diffused'
 
-    # Approximate Parabolic Diffusivity
+    #Approximate Parabolic Diffusivity
     independent_vals = '0 0.25 0.5 0.75 1.0'
     dependent_vals = '1e-2 5e-3 1e-3 5e-3 1e-2'
   [../]
