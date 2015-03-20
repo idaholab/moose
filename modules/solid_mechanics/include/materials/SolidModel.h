@@ -262,7 +262,7 @@ protected:
   void createConstitutiveModel(const std::string & cm_name, const InputParameters & params);
 
   virtual Real GetPoissonsRatio() { return -1; };
-  
+
   virtual Real GetYoungsModulus() { return -1; };
 private:
 
