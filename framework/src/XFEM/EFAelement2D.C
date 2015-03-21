@@ -158,9 +158,8 @@ EFAelement2D::get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes) con
 }
 
 void
-EFAelement2D::switchNode(EFAnode *new_node,
-                       EFAnode *old_node,
-                       bool descend_to_parent)
+EFAelement2D::switchNode(EFAnode *new_node, EFAnode *old_node,
+                         bool descend_to_parent)
 {
   // We are not switching any embedded nodes here
   for (unsigned int i = 0; i < _num_nodes; ++i)

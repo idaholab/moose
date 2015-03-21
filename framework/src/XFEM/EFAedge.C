@@ -420,14 +420,19 @@ void
 EFAedge::remove_embedded_node(EFAnode * node)
 {
   unsigned int index = 0;
+  bool node_found = false;
   for (unsigned int i = 0; i < _embedded_nodes.size(); ++i)
   {
     if (_embedded_nodes[i] == node)
     {
       index = i;
+      node_found = true;
       break;
     }
+  }// i
+  if (node_found)
+  {
+    _embedded_nodes.erase(_embedded_nodes.begin() + index);
+    _intersection_x.erase(_intersection_x.begin() + index);
   }
-  _embedded_nodes.erase(_embedded_nodes.begin() + index);
-  _intersection_x.erase(_intersection_x.begin() + index);
 }

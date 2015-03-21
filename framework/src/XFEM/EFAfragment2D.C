@@ -40,6 +40,14 @@ EFAfragment2D::EFAfragment2D(EFAelement2D * host, bool create_boundary_edges,
   }
 }
 
+EFAfragment2D::EFAfragment2D(const EFAface* from_face):
+  EFAfragment(),
+  _host_elem(NULL)
+{
+  for (unsigned int i = 0; i < from_face->num_edges(); ++i)
+    _boundary_edges.push_back(new EFAedge(*from_face->get_edge(i)));
+}
+
 EFAfragment2D::~EFAfragment2D()
 {
   for (unsigned int i = 0; i < _boundary_edges.size(); ++i)

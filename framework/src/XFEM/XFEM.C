@@ -192,9 +192,13 @@ void XFEM::build_efa_mesh()
       quad.push_back(elem->node(i));
     if (_mesh->mesh_dimension() == 2)
       _efa_mesh.add2DElement(quad, elem->id());
+    else if (_mesh->mesh_dimension() == 3)
+    {
+     // _efa_mesh.add3DElement(quad, elem->id());
+    }
     else
     {
-      libMesh::err << " ERROR: 3D XFEM EFA mesh building not supported yet"<<std::endl;
+      libMesh::err << " ERROR: XFEM.C only works for 2D and 3D" << std::endl;
       exit(1);
     }
   }
