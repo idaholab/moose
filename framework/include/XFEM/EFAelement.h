@@ -74,10 +74,10 @@ public:
   virtual void switchEmbeddedNode(EFAnode *new_node, EFAnode *old_node) = 0;
   virtual void getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
                              std::vector<double> &master_weights) const = 0;
-  virtual unsigned int getNumInteriorNodes() const = 0;
+  virtual unsigned int num_interior_nodes() const = 0;
 
   virtual bool overlays_elem(const EFAelement* other_elem) const = 0;
-  virtual unsigned int get_neighbor_index(EFAelement * neighbor_elem) const = 0;
+  virtual unsigned int get_neighbor_index(const EFAelement * neighbor_elem) const = 0;
   virtual void clear_neighbors() = 0;
   virtual void setup_neighbors(std::map< EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap) = 0;
   virtual void neighbor_sanity_check() const = 0;

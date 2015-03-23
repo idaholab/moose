@@ -65,6 +65,20 @@ EFAelement2D::EFAelement2D(const EFAelement2D* from_elem, bool convert_to_local)
     mooseError("this EFAelement2D constructor only converts global nodes to local nodes");
 }
 
+EFAelement2D::EFAelement2D(const EFAface* from_face):
+  EFAelement(0, from_face->num_nodes()),
+  _num_edges(from_face->num_edges()),
+  _edges(_num_edges, NULL),
+  _edge_neighbors(_num_edges,std::vector<EFAelement2D*>(1,NULL))
+{
+  for (unsigned int i = 0; i < _num_nodes; ++i)
+    _nodes[i] = from_face->get_node(i);
+  for (unsigned int i = 0; i < _num_edges; ++i)
+    _edges[i] = new EFAedge(*from_face->get_edge(i));
+  for (unsigned int i = 0; i < from_face->num_interior_nodes(); ++i)
+    _interior_nodes.push_back(new FaceNode(*from_face->get_interior_node(i)));
+}
+
 EFAelement2D::~EFAelement2D()
 {
   for (unsigned int i = 0; i < _fragments.size(); ++i)
@@ -232,24 +246,17 @@ EFAelement2D::getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
     {
       if (_interior_nodes[i]->get_node() == node)
       {
-        double node_xi[4][2] = {{-1.0,-1.0},{1.0,-1.0},{1.0,1.0},{-1.0,1.0}};
-        double emb_xi  = _interior_nodes[i]->get_para_coords(0);
-        double emb_eta = _interior_nodes[i]->get_para_coords(1);
+        std::vector<double> emb_xi(2,0.0);
+        emb_xi[0] = _interior_nodes[i]->get_para_coords(0);
+        emb_xi[1] = _interior_nodes[i]->get_para_coords(1);
         for (unsigned int j = 0; j < _num_nodes; ++j)
         {
           master_nodes.push_back(_nodes[j]);
           double weight = 0.0;
           if (_num_nodes == 4)
-            weight = 0.25*(1+node_xi[j][0]*emb_xi)*(1+node_xi[j][1]*emb_eta);
-          else if (_num_edges == 3)
-          {
-            if (j == 0)
-              weight = emb_xi;
-            else if (j == 1)
-              weight = emb_eta;
-            else
-              weight = 1.0 - emb_xi - emb_eta;
-          }
+            weight = linearQuadShape2D(j, emb_xi);
+          else if (_num_nodes == 3)
+            weight = linearTrigShape2D(j, emb_xi);
           else
             mooseError("unknown 2D element");
           master_weights.push_back(weight);
@@ -265,7 +272,7 @@ EFAelement2D::getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
 }
 
 unsigned int
-EFAelement2D::getNumInteriorNodes() const
+EFAelement2D::num_interior_nodes() const
 {
   return _interior_nodes.size();
 }
@@ -355,7 +362,7 @@ EFAelement2D::overlays_elem(const EFAelement* other_elem) const
 }
 
 unsigned int
-EFAelement2D::get_neighbor_index(EFAelement * neighbor_elem) const
+EFAelement2D::get_neighbor_index(const EFAelement * neighbor_elem) const
 {
   for (unsigned int i = 0; i < _num_edges; ++i)
     for (unsigned int j = 0; j < _edge_neighbors[i].size(); ++j)
@@ -401,7 +408,7 @@ EFAelement2D::setup_neighbors(std::map< EFAnode*, std::set<EFAelement*> > &Inver
           bool is_edge_neighbor = false;
 
           //Must share nodes on this edge
-          if (num_common_elems(edge_nodes,common_nodes) == 2 &&
+          if (num_common_elems(edge_nodes, common_nodes) == 2 &&
              (!overlays_elem(neigh_elem)))
           {
             //Fragments must match up.
@@ -799,9 +806,9 @@ EFAelement2D::fragment_sanity_check(unsigned int n_old_frag_edges,
     num_emb[i] = emb_nodes.size();
   }
 
-  unsigned int num_interior_nodes = getNumInteriorNodes();
-  if (num_interior_nodes > 0 && num_interior_nodes != 1)
-    mooseError("After update_fragments this element has "<<num_interior_nodes<<" interior nodes");
+  unsigned int n_interior_nodes = num_interior_nodes();
+  if (n_interior_nodes > 0 && n_interior_nodes != 1)
+    mooseError("After update_fragments this element has "<<n_interior_nodes<<" interior nodes");
 
   if (n_old_frag_cuts == 0)
   {
@@ -929,7 +936,7 @@ EFAelement2D::create_child(const std::set<EFAelement*> &CrackTipElements,
 
       // inherit old interior nodes
       for (unsigned int j = 0; j < _interior_nodes.size(); ++j)
-        childElem->add_interior_node(new FaceNode(*_interior_nodes[j]));
+        childElem->_interior_nodes.push_back(new FaceNode(*_interior_nodes[j]));
     }
   }
   else //num_links == 1 || num_links == 0
@@ -1192,12 +1199,6 @@ EFAelement2D::getEdgeNodeParaCoor(EFAnode* node, std::vector<double> &para_coor)
   return edge_found;
 }
 
-void
-EFAelement2D::add_interior_node(FaceNode* face_node)
-{
-  _interior_nodes.push_back(face_node);
-}
-
 FaceNode*
 EFAelement2D::get_interior_node(unsigned int interior_node_id) const
 {
@@ -1270,46 +1271,26 @@ EFAelement2D::getPhantomNodeOnEdge(unsigned int edge_id) const
 }
 
 bool
-EFAelement2D::getFragmentEdgeID(unsigned int elem_edge_id, unsigned int &frag_id, 
-                                unsigned int &frag_edge_id) const
+EFAelement2D::getFragmentEdgeID(unsigned int elem_edge_id, unsigned int &frag_edge_id) const
 {
   // find the fragment edge that is contained by given element edge
   // N.B. if the elem edge contains two frag edges, this method will only return
   // the first frag edge ID
   bool frag_edge_found = false;
-  frag_id = 99999;
   frag_edge_id = 99999;
-  if (_fragments.size() > 0)
+  if (_fragments.size() == 1)
   {
-    for (unsigned int i = 0; i < _fragments.size(); ++i)
+    for (unsigned int j = 0; j < _fragments[0]->num_edges(); ++j)
     {
-      for (unsigned int j = 0; j < _fragments[i]->num_edges(); ++j)
+      if (_edges[elem_edge_id]->containsEdge(*_fragments[0]->get_edge(j)))
       {
-        if (_edges[elem_edge_id]->containsEdge(*_fragments[i]->get_edge(j)))
-        {
-          frag_id = i;
-          frag_edge_id = j;
-          frag_edge_found = true;
-          break;
-        }
-      } // j
-      if (frag_edge_found) break;
-    } // i
+        frag_edge_id = j;
+        frag_edge_found = true;
+        break;
+      }
+    } // j
   }
   return frag_edge_found;
-}
-
-std::set<EFAnode*>
-EFAelement2D::getFragEdgeNodes(unsigned int elem_edge_id) const
-{
-  // N.B. if the elem edge contains two frag edges, this method will only return
-  // the first frag edge's nodes
-  std::set<EFAnode*> frag_edge_nodes;
-  unsigned int frag_id = 99999;
-  unsigned int frag_edge_id = 99999;
-  if (getFragmentEdgeID(elem_edge_id, frag_id, frag_edge_id))
-    frag_edge_nodes = _fragments[frag_id]->get_edge_nodes(frag_edge_id);
-  return frag_edge_nodes;
 }
 
 bool
@@ -1488,16 +1469,15 @@ EFAelement2D::add_edge_cut(unsigned int edge_id, double position, EFAnode* embed
     bool add2elem = true;
 
     // check if it is necessary to add cuts to fragment
-    unsigned int frag_id = 99999; // which fragment has the partially overlapping edge
     unsigned int frag_edge_id = 99999; // the id of the partially overlapping fragment edge
     EFAedge* frag_edge = NULL;
     EFAnode* frag_edge_node1 = NULL;
     double frag_pos = -1.0;
     bool add2frag = false;
 
-    if (getFragmentEdgeID(edge_id, frag_id, frag_edge_id)) // elem edge contains a frag edge
+    if (getFragmentEdgeID(edge_id, frag_edge_id)) // elem edge contains a frag edge
     {
-      frag_edge = get_frag_edge(frag_id,frag_edge_id);
+      frag_edge = get_frag_edge(0, frag_edge_id);
       if ((!edge_contains_tip(edge_id)) && (!frag_edge->has_intersection())) //TODO: allow them?
       {
         double xi[2] = {-1.0,-1.0}; // relative coords of two frag edge nodes
@@ -1593,13 +1573,15 @@ EFAelement2D::add_frag_edge_cut(unsigned int frag_edge_id, double position,
         mooseError("Attemping to add intersection to an invalid fragment edge. Element: "
                     << _id << " fragment_edge: " << frag_edge_id);
 
-      //create the embedded node and add it to the fragment's boundary edge
+      // create the embedded node and add it to the fragment's boundary edge
       unsigned int new_node_id = getNewID(EmbeddedNodes);
       local_embedded = new EFAnode(new_node_id,N_CATEGORY_EMBEDDED);
       EmbeddedNodes.insert(std::make_pair(new_node_id,local_embedded));
       frag_edge->add_intersection(position, local_embedded, edge_node1);
 
-      //save this interior embedded node to FaceNodes
+      // save this interior embedded node to FaceNodes
+      // TODO: for unstructured elements, the following calution gives you inaccurate position of face nodes
+      // must solve this issue for 3D!
       std::vector<double> node1_para_coor(2,0.0);
       std::vector<double> node2_para_coor(2,0.0);
       if (getEdgeNodeParaCoor(edge_node1, node1_para_coor) &&

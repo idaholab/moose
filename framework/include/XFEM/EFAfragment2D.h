@@ -29,7 +29,7 @@ public:
   EFAfragment2D(EFAelement2D * host, bool create_boundary_edges,
                 const EFAelement2D * from_host,
                 unsigned int frag_id = std::numeric_limits<unsigned int>::max());
-  EFAfragment2D(const EFAface * from_face);
+  EFAfragment2D(EFAelement2D* host, const EFAface * from_face);
   ~EFAfragment2D();
 
 private:

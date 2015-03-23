@@ -40,9 +40,9 @@ EFAfragment2D::EFAfragment2D(EFAelement2D * host, bool create_boundary_edges,
   }
 }
 
-EFAfragment2D::EFAfragment2D(const EFAface* from_face):
+EFAfragment2D::EFAfragment2D(EFAelement2D* host, const EFAface* from_face):
   EFAfragment(),
-  _host_elem(NULL)
+  _host_elem(host)
 {
   for (unsigned int i = 0; i < from_face->num_edges(); ++i)
     _boundary_edges.push_back(new EFAedge(*from_face->get_edge(i)));
@@ -242,9 +242,9 @@ EFAfragment2D::isSecondaryInteriorEdge(unsigned int edge_id) const
 {
   bool is_second_cut = false;
   if (!_host_elem)
-    mooseError("in is_edge_cut_twice() fragment must have host elem");
+    mooseError("in isSecondaryInteriorEdge fragment must have host elem");
 
-  for (unsigned int i = 0; i < _host_elem->getNumInteriorNodes(); ++i)
+  for (unsigned int i = 0; i < _host_elem->num_interior_nodes(); ++i)
   {
     if (_boundary_edges[edge_id]->containsNode(_host_elem->get_interior_node(i)->get_node()))
     {

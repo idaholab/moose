@@ -204,6 +204,24 @@ EFAedge::add_intersection(double position, EFAnode * embedded_node_tmp, EFAnode 
 }
 
 void
+EFAedge::reset_intersection(double position, EFAnode * embedded_node_tmp, EFAnode * from_node)
+{
+  for (unsigned int i = 0; i < _embedded_nodes.size(); ++i)
+  {
+    if (_embedded_nodes[i] == embedded_node_tmp)
+    {
+      if (from_node == _edge_node1)
+        _intersection_x[i] = position;
+      else if (from_node == _edge_node2)
+        _intersection_x[i] = 1.0 - position;
+      else
+        mooseError("In set_intersection from_node does not exist on edge");
+      break;
+    }
+  } // i
+}
+
+void
 EFAedge::copy_intersection(const EFAedge & other, unsigned int from_node_id)
 {
   _embedded_nodes.clear();
@@ -231,6 +249,16 @@ EFAedge::get_node(unsigned int index) const
     return _edge_node2;
   else
     mooseError("In get_node index out of bounds");
+}
+
+void
+EFAedge::reverse_nodes()
+{
+  EFAnode* tmp = _edge_node1;
+  _edge_node1 = _edge_node2;
+  _edge_node2 = tmp;
+  for (unsigned int i = 0; i < _embedded_nodes.size(); ++i)
+    _intersection_x[i] = 1.0 - _intersection_x[i];
 }
 
 bool
@@ -296,7 +324,7 @@ EFAedge::distance_from_node1(EFAnode * node) const
 }
 
 bool
-EFAedge::is_embedded_node(EFAnode * node) const
+EFAedge::is_embedded_node(const EFAnode * node) const
 {
   bool is_emb = false;
   for (unsigned int i = 0; i < _embedded_nodes.size(); ++i)
@@ -400,7 +428,7 @@ EFAedge::switchNode(EFAnode *new_node, EFAnode *old_node)
 }
 
 bool
-EFAedge::containsNode(EFAnode *node) const
+EFAedge::containsNode(const EFAnode *node) const
 {
   if (_edge_node1 == node || _edge_node2 == node ||
       is_embedded_node(node))

@@ -44,14 +44,16 @@ class EFAedge
 //  bool operator < (const EFAedge & other) const;
 
   void add_intersection(double position, EFAnode * embedded_node_tmp, EFAnode * from_node);
+  void reset_intersection(double position, EFAnode * embedded_node_tmp, EFAnode * from_node);
   void copy_intersection(const EFAedge & other, unsigned int from_node_id);
   EFAnode * get_node(unsigned int index) const;
+  void reverse_nodes();
 
   bool has_intersection() const;
   bool has_intersection_at_position(double position, EFAnode * from_node) const;
   double get_intersection(unsigned int emb_id, EFAnode * from_node) const;
   double distance_from_node1(EFAnode * node) const;
-  bool is_embedded_node(EFAnode * node) const;
+  bool is_embedded_node(const EFAnode * node) const;
   unsigned int get_embedded_index(EFAnode * node) const;
   unsigned int get_embedded_index(double position, EFAnode* from_node) const;
 
@@ -59,7 +61,7 @@ class EFAedge
   unsigned int num_embedded_nodes() const;
   void consistency_check();
   void switchNode(EFAnode *new_node, EFAnode *old_node);
-  bool containsNode(EFAnode *node) const;
+  bool containsNode(const EFAnode *node) const;
   void remove_embedded_node();
   void remove_embedded_node(EFAnode * node);
 };

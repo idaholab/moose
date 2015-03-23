@@ -17,6 +17,7 @@
 
 #include "EFAfragment2D.h"
 #include "EFAelement.h"
+#include "EFAface.h"
 
 class EFAelement2D : public EFAelement
 {
@@ -24,6 +25,7 @@ public:
 
   EFAelement2D(unsigned int eid, unsigned int n_nodes);
   EFAelement2D(const EFAelement2D * from_elem, bool convert_to_local);
+  EFAelement2D(const EFAface * from_face);
 
   ~EFAelement2D();
 
@@ -47,10 +49,10 @@ public:
   void switchEmbeddedNode(EFAnode *new_node, EFAnode *old_node);
   void getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
                      std::vector<double> &master_weights) const;
-  unsigned int getNumInteriorNodes() const;
+  unsigned int num_interior_nodes() const;
 
   bool overlays_elem(const EFAelement* other_elem) const;
-  unsigned int get_neighbor_index(EFAelement* neighbor_elem) const;
+  unsigned int get_neighbor_index(const EFAelement* neighbor_elem) const;
   void clear_neighbors();
   void setup_neighbors(std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap);
   void neighbor_sanity_check() const;
@@ -87,7 +89,6 @@ public:
   EFAfragment2D* get_fragment(unsigned int frag_id) const;
   std::set<EFAnode*> get_edge_nodes(unsigned int edge_id) const;
   bool getEdgeNodeParaCoor(EFAnode* node, std::vector<double> &para_coor) const;
-  void add_interior_node(FaceNode* face_node);
   FaceNode* get_interior_node(unsigned int interior_node_id) const;
 
   unsigned int num_edges() const;
@@ -97,9 +98,7 @@ public:
 
   EFAedge* get_frag_edge(unsigned int frag_id, unsigned int edge_id) const;
   std::set<EFAnode*> getPhantomNodeOnEdge(unsigned int edge_id) const;
-  bool getFragmentEdgeID(unsigned int elem_edge_id, unsigned int &frag_id, 
-                         unsigned int &frag_edge_id) const;
-  std::set<EFAnode*> getFragEdgeNodes(unsigned int elem_edge_id) const;
+  bool getFragmentEdgeID(unsigned int elem_edge_id, unsigned int &frag_edge_id) const;
   bool is_edge_phantom(unsigned int edge_id) const;
 
   unsigned int num_edge_neighbors(unsigned int edge_id) const;
