@@ -851,7 +851,7 @@ EFAelement2D::restore_fragment(const EFAelement* const from_elem)
   for (unsigned int i = 0; i < _num_edges; ++i)
   {
     if (from_elem2d->_edges[i]->has_intersection())
-      _edges[i]->copy_intersection(*from_elem2d->_edges[i]);
+      _edges[i]->copy_intersection(*from_elem2d->_edges[i], 0);
     if (_edges[i]->num_embedded_nodes() > 2)
       mooseError("elem " << _id << " has an edge with >2 cuts");
   } // i
@@ -923,7 +923,7 @@ EFAelement2D::create_child(const std::set<EFAelement*> &CrackTipElements,
         unsigned int jplus1(j < (_num_edges-1) ? j+1 : 0);
         EFAedge * new_edge = new EFAedge(childElem->get_node(j), childElem->get_node(jplus1));
         if (_edges[j]->has_intersection())
-          new_edge->copy_intersection(*_edges[j]);
+          new_edge->copy_intersection(*_edges[j], 0);
         childElem->set_edge(j, new_edge);
       }
       childElem->remove_phantom_embedded_nodes(); // IMPORTANT

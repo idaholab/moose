@@ -44,7 +44,7 @@ class EFAedge
 //  bool operator < (const EFAedge & other) const;
 
   void add_intersection(double position, EFAnode * embedded_node_tmp, EFAnode * from_node);
-  void copy_intersection(const EFAedge & other, bool reverse_order = false);
+  void copy_intersection(const EFAedge & other, unsigned int from_node_id);
   EFAnode * get_node(unsigned int index) const;
 
   bool has_intersection() const;

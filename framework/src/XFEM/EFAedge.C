@@ -204,23 +204,20 @@ EFAedge::add_intersection(double position, EFAnode * embedded_node_tmp, EFAnode 
 }
 
 void
-EFAedge::copy_intersection(const EFAedge & other, bool reverse_order)
+EFAedge::copy_intersection(const EFAedge & other, unsigned int from_node_id)
 {
   _embedded_nodes.clear();
   _intersection_x.clear();
-  if (!reverse_order)
-  {
-    _embedded_nodes = other._embedded_nodes;
+  _embedded_nodes = other._embedded_nodes;
+  if (from_node_id == 0)
     _intersection_x = other._intersection_x;
-  }
-  else
+  else if (from_node_id == 1)
   {
-    _embedded_nodes = other._embedded_nodes;
     for (unsigned int i = 0; i < other.num_embedded_nodes(); ++i)
       _intersection_x.push_back(1.0 - other._intersection_x[i]);
-    std::reverse(_embedded_nodes.begin(), _embedded_nodes.end());
-    std::reverse(_intersection_x.begin(), _intersection_x.end());
   }
+  else
+    mooseError("from_node_id out of bounds");
   if (_embedded_nodes.size() != _intersection_x.size())
     mooseError("in copy_intersection() num of emb_nodes must be = num of inters_x");
 }
