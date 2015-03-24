@@ -38,15 +38,18 @@ public:
   virtual void execute();
 
 protected:
+  virtual void transferToMultiApp();
+  virtual void transferFromMultiApp();
+
   /**
    * Return the nearest node to the point p.
    * @param p The point you want to find the nearest node to.
    * @param distance This will hold the distance between the returned node and p
-   * @param nodes_begin - iterator to the beginning of the node list
-   * @param nodes_end - iterator to the end of the node list
+   * @param mesh The mesh in which we search for the node
+   * @param local true if we look at local nodes, otherwise we look at all nodes
    * @return The Node closest to point p.
    */
-  Node * getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end);
+  Node * getNearestNode(const Point & p, Real & distance, MooseMesh * mesh, bool local);
 
   AuxVariableName _to_var_name;
   VariableName _from_var_name;
