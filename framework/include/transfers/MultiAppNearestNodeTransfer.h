@@ -38,6 +38,9 @@ public:
   virtual void execute();
 
 protected:
+  virtual void transferToMultiApp();
+  virtual void transferFromMultiApp();
+
   /**
    * Return the nearest node to the point p.
    * @param p The point you want to find the nearest node to.
