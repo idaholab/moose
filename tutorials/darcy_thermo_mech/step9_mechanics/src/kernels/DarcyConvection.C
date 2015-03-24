@@ -38,7 +38,7 @@ DarcyConvection::DarcyConvection(const std::string & name, InputParameters param
     _porosity(getMaterialProperty<Real>("porosity")),
     _viscosity(getMaterialProperty<Real>("viscosity")),
     _density(getMaterialProperty<Real>("density")),
-    _specific_heat(getMaterialProperty<Real>("specific_heat"))
+    _heat_capacity(getMaterialProperty<Real>("heat_capacity"))
 {
 }
 
@@ -47,22 +47,19 @@ DarcyConvection::computeQpResidual()
 {
   // From "The Finite Difference Method For Transient Convection Diffusion", Ewa Majchrzak & Łukasz Turchan, 2012.
   // http://srimcs.im.pcz.pl/2012_1/art_07.pdf
-  Real coefs = _density[_qp]*_specific_heat[_qp];
-
+  //
   // http://en.wikipedia.org/wiki/Superficial_velocity
   RealVectorValue superficial_velocity = _porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp];
 
-  return coefs * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
+  return _heat_capacity[_qp] * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
 }
 
 Real
 DarcyConvection::computeQpJacobian()
 {
-  Real coefs = _density[_qp]*_specific_heat[_qp];
-
   RealVectorValue superficial_velocity = _porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp];
 
-  return coefs * superficial_velocity * _grad_phi[_j][_qp] * _test[_i][_qp];
+  return _heat_capacity[_qp] * superficial_velocity * _grad_phi[_j][_qp] * _test[_i][_qp];
 }
 
 Real
@@ -70,11 +67,9 @@ DarcyConvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _pressure_var)
   {
-    Real coefs = _density[_qp]*_specific_heat[_qp];
-
     RealVectorValue superficial_velocity = _porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_grad_phi[_j][_qp];
 
-    return coefs * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
+    return _heat_capacity[_qp] * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
   }
 
   return 0.0;

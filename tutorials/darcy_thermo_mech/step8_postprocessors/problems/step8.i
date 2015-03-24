@@ -42,6 +42,7 @@
   [./heat_conduction_time_derivative]
     type = HeatConductionTimeDerivative
     variable = temp
+    use_heat_capacity = true
   [../]
   [./heat_convection]
     type = DarcyConvection
@@ -146,4 +147,3 @@
   print_perf_log = true
   print_linear_residuals = true
 []
-
