@@ -226,37 +226,6 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
 bool
 MechanicalContactConstraint::shouldApply()
 {
-  //TODO:  We'll need to do something to call computeContactForce() for the nodes that are
-  //       off-processor.  There are no methods that get called for all nodes (at least
-  //       that I know of), so we can't do this correctly yet, but I'm leaving this here
-  //       to remind us that we need to do this.
-
-//  _point_to_info.clear();
-//
-//  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
-//
-//  std::map<dof_id_type, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-//  std::map<dof_id_type, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
-//
-//  for (; it!=end; ++it)
-//  {
-//    PenetrationInfo * pinfo = it->second;
-//
-//    if (!pinfo)
-//      continue;
-//
-//    dof_id_type slave_node_num = it->first;
-//
-//    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
-//
-//    if ( hpit != has_penetrated.end() )
-//    {
-//      addPoint(pinfo->_elem, pinfo->_closest_point);
-//      _point_to_info[pinfo->_closest_point] = pinfo;
-//      computeContactForce(pinfo);
-//    }
-//  }
-
   std::set<dof_id_type>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
   return (hpit != _penetration_locator._has_penetrated.end());
 }
