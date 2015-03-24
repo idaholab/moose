@@ -60,8 +60,8 @@ protected:
   /// The bulk thermal conductivity
   MaterialProperty<Real> & _thermal_conductivity;
 
-  /// The bulk specific heat
-  MaterialProperty<Real> & _specific_heat;
+  /// The bulk heat capacity
+  MaterialProperty<Real> & _heat_capacity;
 
   /// The bulk density
   MaterialProperty<Real> & _density;
