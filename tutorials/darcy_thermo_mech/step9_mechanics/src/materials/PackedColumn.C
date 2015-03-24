@@ -37,7 +37,7 @@ PackedColumn::PackedColumn(const std::string & name, InputParameters parameters)
     _porosity(declareProperty<Real>("porosity")),
     _viscosity(declareProperty<Real>("viscosity")),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-    _specific_heat(declareProperty<Real>("specific_heat")),
+    _heat_capacity(declareProperty<Real>("heat_capacity")),
     _density(declareProperty<Real>("density"))
 {
   // Sigh: Still can't depend on C++11....
@@ -82,6 +82,6 @@ PackedColumn::computeQpProperties()
 
   // Now actually set the value at the quadrature point
   _thermal_conductivity[_qp] = _porosity[_qp]*water_k + (1.0-_porosity[_qp])*steel_k;
-  _specific_heat[_qp] = _porosity[_qp]*water_cp + (1.0-_porosity[_qp])*steel_cp;
   _density[_qp] = _porosity[_qp]*water_rho + (1.0-_porosity[_qp])*steel_rho;
+  _heat_capacity[_qp] = _porosity[_qp]*water_cp*water_rho + (1.0-_porosity[_qp])*steel_cp*steel_rho;
 }
