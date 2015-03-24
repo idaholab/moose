@@ -61,8 +61,8 @@ private:
   /// Flag that indicates the type of formulation to utilize
   bool _use_heat_capacity;
 
-  /// A material property set to unity for setting the desnity equal to one
-  /// This is used when using the heat capcity formulation
+  /// A material property set to unity for setting the density equal to one
+  /// This is used when using the heat capacity formulation
   MaterialProperty<Real> _one;
 
   ///@{

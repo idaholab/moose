@@ -33,7 +33,7 @@ HeatConductionTimeDerivative::initialSetup()
   for (unsigned int i = 0; i < _one.size(); ++i)
     _one[i] = 1;
 
-  // Use the Heat Capcity based formulation
+  // Use the Heat Capacity based formulation
   if (_use_heat_capacity)
   {
     _specific_heat = &getMaterialProperty<Real>("heat_capacity");
