@@ -28,8 +28,10 @@ template<>
 InputParameters validParams<MultiAppNearestNodeTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
+
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
+  params.addParam<BoundaryName>("source_boundary", "The boundary we are transferring from (if not specified, whole domain is used).");
   params.addParam<bool>("displaced_source_mesh", false, "Whether or not to use the displaced mesh for the source mesh.");
   params.addParam<bool>("displaced_target_mesh", false, "Whether or not to use the displaced mesh for the target mesh.");
   params.addParam<bool>("fixed_meshes", false, "Set to true when the meshes are not changing (ie, no movement or adaptivity).  This will cache nearest node neighbors to greatly speed up the transfer.");
@@ -62,18 +64,12 @@ void
 MultiAppNearestNodeTransfer::transferToMultiApp()
 {
   FEProblem & from_problem = *_multi_app->problem();
-  MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-
-  MeshBase * from_mesh = NULL;
 
   if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-  {
     mooseError("Cannot use a NearestNode transfer from a displaced mesh to a MultiApp!");
-    from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
-  }
-  else
-    from_mesh = &from_problem.mesh().getMesh();
 
+  MooseMesh * from_mesh = &from_problem.mesh();
+  MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
   SystemBase & from_system_base = from_var.sys();
 
   System & from_sys = from_system_base.system();
@@ -107,28 +103,27 @@ MultiAppNearestNodeTransfer::transferToMultiApp()
 
       NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
 
-      MeshBase * mesh = NULL;
+      MeshBase * to_mesh = NULL;
 
       if (_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
-        mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
+        to_mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
       else
-        mesh = &_multi_app->appProblem(i)->mesh().getMesh();
+        to_mesh = &_multi_app->appProblem(i)->mesh().getMesh();
 
       bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
       if (is_nodal)
       {
-        MeshBase::const_node_iterator node_it = mesh->local_nodes_begin();
-        MeshBase::const_node_iterator node_end = mesh->local_nodes_end();
+        MeshBase::const_node_iterator node_it = to_mesh->local_nodes_begin();
+        MeshBase::const_node_iterator node_end = to_mesh->local_nodes_end();
 
         for (; node_it != node_end; ++node_it)
         {
           Node * node = *node_it;
 
-          Point actual_position = *node+_multi_app->position(i);
-
           if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
           {
+            Point actual_position = *node+_multi_app->position(i);
             // The zero only works for LAGRANGE!
             dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
@@ -136,17 +131,13 @@ MultiAppNearestNodeTransfer::transferToMultiApp()
             Moose::swapLibMeshComm(swapped);
 
             Real distance = 0; // Just to satisfy the last argument
-
-            MeshBase::const_node_iterator from_nodes_begin = from_mesh->nodes_begin();
-            MeshBase::const_node_iterator from_nodes_end   = from_mesh->nodes_end();
-
             Node * nearest_node = NULL;
 
             if (_fixed_meshes)
             {
               if (_node_map.find(node->id()) == _node_map.end())  // Haven't cached it yet
               {
-                nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
+                nearest_node = getNearestNode(actual_position, distance, from_mesh, false);
                 _node_map[node->id()] = nearest_node;
                 _distance_map[node->id()] = distance;
               }
@@ -157,7 +148,7 @@ MultiAppNearestNodeTransfer::transferToMultiApp()
               }
             }
             else
-              nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
+              nearest_node = getNearestNode(actual_position, distance, from_mesh, false);
 
             // Assuming LAGRANGE!
             dof_id_type from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -172,8 +163,8 @@ MultiAppNearestNodeTransfer::transferToMultiApp()
       }
       else // Elemental
       {
-        MeshBase::const_element_iterator elem_it = mesh->local_elements_begin();
-        MeshBase::const_element_iterator elem_end = mesh->local_elements_end();
+        MeshBase::const_element_iterator elem_it = to_mesh->local_elements_begin();
+        MeshBase::const_element_iterator elem_end = to_mesh->local_elements_end();
 
         for (; elem_it != elem_end; ++elem_it)
         {
@@ -192,16 +183,13 @@ MultiAppNearestNodeTransfer::transferToMultiApp()
 
             Real distance = 0; // Just to satisfy the last argument
 
-            MeshBase::const_node_iterator from_nodes_begin = from_mesh->nodes_begin();
-            MeshBase::const_node_iterator from_nodes_end   = from_mesh->nodes_end();
-
             Node * nearest_node = NULL;
 
             if (_fixed_meshes)
             {
               if (_node_map.find(elem->id()) == _node_map.end())  // Haven't cached it yet
               {
-                nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
+                nearest_node = getNearestNode(actual_position, distance, from_mesh, false);
                 _node_map[elem->id()] = nearest_node;
                 _distance_map[elem->id()] = distance;
               }
@@ -212,7 +200,7 @@ MultiAppNearestNodeTransfer::transferToMultiApp()
               }
             }
             else
-              nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
+              nearest_node = getNearestNode(actual_position, distance, from_mesh, false);
 
             // Assuming LAGRANGE!
             dof_id_type from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
@@ -319,14 +307,14 @@ MultiAppNearestNodeTransfer::transferFromMultiApp()
 
     // EquationSystems & from_es = from_sys.get_equation_systems();
 
-    MeshBase * from_mesh = NULL;
+    MooseMesh * from_mesh = NULL;
 
     if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-      from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+      from_mesh = &from_problem.getDisplacedProblem()->mesh();
     else
-      from_mesh = &from_problem.mesh().getMesh();
+      from_mesh = &from_problem.mesh();
 
-    MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(*from_mesh, from_mesh->processor_id());
+    MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(*from_mesh, from_mesh->getMesh().processor_id());
     Point app_position = _multi_app->position(i);
 
     Moose::swapLibMeshComm(swapped);
@@ -345,16 +333,13 @@ MultiAppNearestNodeTransfer::transferFromMultiApp()
 
         MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-        MeshBase::const_node_iterator from_nodes_begin = from_mesh->local_nodes_begin();
-        MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
-
         Node * nearest_node = NULL;
 
         if (_fixed_meshes)
         {
           if (_node_map.find(to_node->id()) == _node_map.end())  // Haven't cached it yet
           {
-            nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
+            nearest_node = getNearestNode(*to_node-app_position, current_distance, from_mesh, true);
             _node_map[to_node->id()] = nearest_node;
             _distance_map[to_node->id()] = current_distance;
           }
@@ -365,7 +350,7 @@ MultiAppNearestNodeTransfer::transferFromMultiApp()
           }
         }
         else
-          nearest_node = getNearestNode(*to_node-app_position, current_distance, from_nodes_begin, from_nodes_end);
+          nearest_node = getNearestNode(*to_node-app_position, current_distance, from_mesh, true);
 
         Moose::swapLibMeshComm(swapped);
 
@@ -395,16 +380,13 @@ MultiAppNearestNodeTransfer::transferFromMultiApp()
 
         MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-        MeshBase::const_node_iterator from_nodes_begin = from_mesh->local_nodes_begin();
-        MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
-
         Node * nearest_node = NULL;
 
         if (_fixed_meshes)
         {
           if (_node_map.find(to_elem->id()) == _node_map.end())  // Haven't cached it yet
           {
-            nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);
+            nearest_node = getNearestNode(actual_position, current_distance, from_mesh, true);
             _node_map[to_elem->id()] = nearest_node;
             _distance_map[to_elem->id()] = current_distance;
           }
@@ -415,7 +397,7 @@ MultiAppNearestNodeTransfer::transferFromMultiApp()
           }
         }
         else
-          nearest_node = getNearestNode(actual_position, current_distance, from_nodes_begin, from_nodes_end);
+          nearest_node = getNearestNode(actual_position, current_distance, from_mesh, true);
 
         Moose::swapLibMeshComm(swapped);
 
@@ -510,12 +492,12 @@ MultiAppNearestNodeTransfer::transferFromMultiApp()
 
       // EquationSystems & from_es = from_sys.get_equation_systems();
 
-      MeshBase * from_mesh = NULL;
+      MooseMesh * from_mesh = NULL;
 
       if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-        from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+        from_mesh = &from_problem.getDisplacedProblem()->mesh();
       else
-        from_mesh = &from_problem.mesh().getMesh();
+        from_mesh = &from_problem.mesh();
 
       Node & from_node = from_mesh->node(min_nodes[j]);
 
@@ -554,19 +536,46 @@ MultiAppNearestNodeTransfer::execute()
 }
 
 Node *
-MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)
+MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & distance, MooseMesh * mesh, bool local)
 {
   distance = std::numeric_limits<Real>::max();
   Node * nearest = NULL;
 
-  for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
+  if (isParamValid("source_boundary"))
   {
-    Real current_distance = (p-*(*node_it)).size();
+    BoundaryID src_bnd_id = mesh->getBoundaryID(getParam<BoundaryName>("source_boundary"));
 
-    if (current_distance < distance)
+    ConstBndNodeRange & bnd_nodes = *mesh->getBoundaryNodeRange();
+    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
     {
-      distance = current_distance;
-      nearest = *node_it;
+      const BndNode * bnode = *nd;
+      if (bnode->_bnd_id == src_bnd_id)
+      {
+        Node * node = bnode->_node;
+        Real current_distance = (p - *node).size();
+
+        if (current_distance < distance)
+        {
+          distance = current_distance;
+          nearest = node;
+        }
+      }
+    }
+  }
+  else
+  {
+    MeshBase::const_node_iterator nodes_begin = local ? mesh->localNodesBegin() : mesh->getMesh().nodes_begin();
+    MeshBase::const_node_iterator nodes_end   = local ? mesh->localNodesEnd()   : mesh->getMesh().nodes_end();
+
+    for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
+    {
+      Real current_distance = (p - *(*node_it)).size();
+
+      if (current_distance < distance)
+      {
+        distance = current_distance;
+        nearest = *node_it;
+      }
     }
   }
 
