@@ -8,31 +8,30 @@
 InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double p){
  _data_filename = filename;
  int dimensions;
- int numberOfPoints;
+ unsigned int numberOfPoints;
  std::vector<double> values;
  std::vector< std::vector<double> > pointCoordinates;
 
  readScatteredNDarray(_data_filename, dimensions, numberOfPoints, pointCoordinates, values);
-
  _dimensions = dimensions;
  _number_of_points = numberOfPoints;
  _values = values;
  _point_coordinates = pointCoordinates;
  _p = p;
  _completed_init = true;
-        _cellPoint0.resize(dimensions);
-        _cellDxs.resize(dimensions);
+ _cellPoint0.resize(dimensions);
+ _cellDxs.resize(dimensions);
 
  // Functions do determine:
     //   * std::vector<double> _cellPoint0;
     //   * std::vector<double> _cellDxs;
 
  std::vector<double> cellPointInf;
-        cellPointInf.resize(dimensions);
+ cellPointInf.resize(dimensions);
 
  for (int d=0; d<_dimensions; d++){
   _cellPoint0[d]  = _point_coordinates[0][d];
-     cellPointInf[d] = _point_coordinates[0][d];
+  cellPointInf[d] = _point_coordinates[0][d];
  }
 
  for (int n=1; n<_number_of_points; n++)
@@ -46,8 +45,9 @@ InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double 
  for (int d=0; d<_dimensions; d++)
   _cellDxs[d] = cellPointInf[d]-_cellPoint0[d];
 
- std::cerr << "_dimensions " << _dimensions << std::endl;
- std::cerr << "_number_of_points " << _number_of_points << std::endl;
+ //std::cerr << "_dimensions " << _dimensions << std::endl;
+ //std::cerr << "_number_of_points " << _number_of_points << std::endl;
+ //std::cerr << "_p " << _p << std::endl;
 }
 
 InverseDistanceWeighting::InverseDistanceWeighting(double p){
@@ -66,15 +66,16 @@ double InverseDistanceWeighting::interpolateAt(std::vector<double> point){
  {
    throw ("Error in interpolateAt: the class has not been completely initialized... you can not interpolate!!!!");
  }
+
  for (int i=0; i<_number_of_points; i++){
-  if (minkowskiDistance(point, _point_coordinates[i],_p) == 0){
-   value = _values[i];
-   weightsCumulativeSum = 1;
+  if (minkowskiDistance(point, _point_coordinates.at(i),_p) == 0.0){
+   value = _values.at(i);
+   weightsCumulativeSum = 1.0;
    break;
   } else {
-            weights[i]= std::pow(1.0/minkowskiDistance(point, _point_coordinates[i],_p),_dimensions+1);
-   weightsCumulativeSum += weights[i];
-   value += weights[i] * _values[i];
+   weights.at(i)= std::pow(1.0/minkowskiDistance(point, _point_coordinates.at(i),_p),_dimensions+1);
+   weightsCumulativeSum += weights.at(i);
+   value += weights.at(i) * _values.at(i);
   }
  }
 

@@ -33,7 +33,6 @@ class MultiDimensionalInverseWeight : public distributionND, public BasicMultiDi
 {
 public:
   MultiDimensionalInverseWeight(const std::string & name, InputParameters parameters);
-  //MultiDimensionalInverseWeight(const char * name, InputParameters parameters);
   virtual ~MultiDimensionalInverseWeight();
 };
 
