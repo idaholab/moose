@@ -62,17 +62,17 @@ protected:
   bool pivotCellCheck(std::vector<std::vector<double> >& cell, double F);
   int vertexOutcome(std::vector<double>& vertex, double F);
   void cellsFilter(std::vector<std::vector<std::vector<double> > >& vertices, double F);
-  void refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > cell, int divisions);
+  void refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > & cell, int divisions);
   std::vector<int> arrayConverter(int oneDcoordinate, int divisions, int n_dimensions);
   std::vector<std::vector<double> > generateNewCell(std::vector<int> NDcoordinate, std::vector<double> coordinateOfPointZero, std::vector<double> dxs, int n_dimensions);
-  std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > cellsSet, double g);
-  std::vector<double> getCellCenter(std::vector<std::vector<double> > cell);
+  std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > & cellsSet, double g);
+  std::vector<double> getCellCenter(std::vector<std::vector<double> > & cell);
 
   double OneDderivative(double fxph, double fx, double fxmh);
   double derivativeStep(std::vector<double> coordinate, int loop);
 
-  int CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices, double F);
-  double avgCDfValue(std::vector<std::vector<double> > cell);
+  int CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices, double g);
+  double integralCellValue(std::vector<std::vector<double> > cell);
 };
 
 class NDSpline: public NDInterpolation

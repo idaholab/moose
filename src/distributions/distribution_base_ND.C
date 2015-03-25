@@ -81,14 +81,13 @@ BasicDistributionND::getType(){
 }
 
 double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
-	double value = 0;
+	double value = 0.0;
 
 	int numberOfVerteces = (int)pow(2,center.size());
 	double sign = 1.0;
-	for(int i=numberOfVerteces; i<0; i--){
-		std::cout<<"i: " << i <<std::endl;
-		sign = sign * (-1.0);
-		std::vector<double> index = int2binary(i,center.size());
+
+	for(int i=numberOfVerteces; i>0; i--){
+		std::vector<double> index = int2binary(i-1,center.size());
 		std::vector<double> NDcoordinate(center.size());
 
 		for(unsigned int j=0; j<center.size(); j++){
@@ -97,10 +96,11 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
 			else
 				NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
 		}
-
 		value += Cdf(NDcoordinate) * sign;
+		//std::cout<< "i: " << i <<  " - index: " << index.at(0) <<" "<< index.at(1) << " - " << NDcoordinate.at(0) << " - " << NDcoordinate.at(1) << " ; CDFweight = "<< Cdf(NDcoordinate) * sign << std::endl;
+		sign = sign * (-1.0);
 	}
-	std::cout<<"cellIntegral: "<< center.size() << " " << numberOfVerteces << " "<< value << std::endl;
+	//std::cout<< "weights: " << center.at(0) <<" "<< center.at(1) << " ; value = "<< value << std::endl;
 	return value;
 }
 
@@ -194,9 +194,9 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_file
    }
 
    int dimensions = _mu.size();
-   for(int i=0; i<dimensions; i++)
-	for(int j=0; j<dimensions; j++)
-	 std::cerr<<_inverse_cov_matrix[i][j]<<std::endl;
+   //for(int i=0; i<dimensions; i++)
+	//for(int j=0; j<dimensions; j++)
+	 //std::cerr<<_inverse_cov_matrix[i][j]<<std::endl;
 
    _determinant_cov_matrix = getDeterminant(_cov_matrix);
 
@@ -222,7 +222,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_file
 	   std::vector<double> discretization_temp;
 	   double sigma = sqrt(_cov_matrix[i][i]);
 	   for(int n=0; n<25; n++){
-		   double disc_value = mu.at(i)- 6.0 * sigma + sigma * (double)n /2.0;
+		   double disc_value = mu.at(i) - 6.0 * sigma + sigma * (double)n /2.0;
 		   discretization_temp.push_back(disc_value);
 	   }
 	   discretizations.push_back(discretization_temp);
@@ -508,8 +508,8 @@ std::vector<std::vector<double> > BasicMultivariateNormal::choleskyDecomposition
    m1[r*dimensions+c] = matrix[r][c];
 
  double *c1 = cholesky(m1, dimensions);
- std::cout << "choleskyDecomposition" << std::endl;
- show_matrix(c1,dimensions);
+ //std::cout << "choleskyDecomposition" << std::endl;
+ //show_matrix(c1,dimensions);
 
  for (int r=0; r<dimensions; r++){
   std::vector<double> temp;
