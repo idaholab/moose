@@ -33,7 +33,7 @@ distributionND::distributionND(const std::string & name, InputParameters paramet
 {
    _type          = getParam<std::string>("type");
    _data_filename = getParam<std::string>("data_filename");
-   _function_type = getParam<EPbFunctionType>("function_type");
+   //_function_type = getParam<EPbFunctionType>("function_type");
    _dis_parameters["ProbabilityThreshold"]  = getParam<double>("ProbabilityThreshold");
    _dis_parameters["PB_window_Low"] = getParam<double>("PB_window_Low");
    _dis_parameters["PB_window_Up"]  = getParam<double>("PB_window_Up");
@@ -53,13 +53,14 @@ InputParameters validParams<MultiDimensionalInverseWeight>(){
 
    InputParameters params = validParams<distributionND>();
    params.addRequiredParam<double>("p", "Minkowski distance parameter");
+   params.addRequiredParam<bool>("CDF", "Boolean value (True if CDF is provided)");
    return params;
 
 }
 
 MultiDimensionalInverseWeight::MultiDimensionalInverseWeight(const std::string & name, InputParameters parameters):
     distributionND(name,parameters),
-    BasicMultiDimensionalInverseWeight(getParam<std::string>("data_filename"),getParam<double>("p"))
+    BasicMultiDimensionalInverseWeight(getParam<std::string>("data_filename"),getParam<double>("p"), getParam<bool>("CDF"))
 {
 }
 
@@ -129,15 +130,17 @@ template<>
 InputParameters validParams<MultiDimensionalCartesianSpline>(){
 
    InputParameters params = validParams<distributionND>();
-   params.addRequiredParam<std::vector<double> >("alpha", "alpha");
-   params.addRequiredParam<std::vector<double> >("beta", "beta");
+   params.addRequiredParam<bool>("CDF", "Boolean value (True if CDF is provided)");
+   //params.addRequiredParam<std::vector<double> >("alpha", "alpha");
+   //params.addRequiredParam<std::vector<double> >("beta", "beta");
    return params;
 
 }
 
 MultiDimensionalCartesianSpline::MultiDimensionalCartesianSpline(const std::string & name, InputParameters parameters):
     distributionND(name,parameters),
-    BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"))
+	//BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"), getParam<bool>("CDF"))
+    BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"), getParam<bool>("CDF"))
 {
 }
 

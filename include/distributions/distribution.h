@@ -18,13 +18,13 @@ class DistributionContainer;
 class BasicDistribution
 {
 public:
-  BasicDistribution();
-  virtual ~BasicDistribution();
-  double  getVariable(const std::string variable_name);  ///< getVariable from mapping
-  std::vector<double>  getVariableVector(const std::string variable_name);
+   BasicDistribution();
+   virtual ~BasicDistribution();
+   double  getVariable(const std::string variable_name);  ///< getVariable from mapping
+   std::vector<double>  getVariableVector(const std::string variable_name);
    void updateVariable(const std::string & variable_name, double & new_value);    ///< update variable into the mapping
 
-  virtual double getRandom(double x);  //Same as inverseCdf, except it can be forced.
+   virtual double getRandom(double x);  //Same as inverseCdf, except it can be forced.
 
    virtual double  Pdf(double x) = 0; ///< Pdf function at coordinate x
    virtual double  Cdf(double x) = 0; ///< Cdf function at coordinate x
@@ -38,6 +38,8 @@ public:
    virtual double untrMedian() = 0;
    virtual double untrMode() = 0;
    virtual double untrHazard(double x) = 0;
+
+   int returnDimensionality(){return 1;}
 
    std::string & getType(); ///< Get distribution type
    unsigned int getSeed(); ///< Get seed

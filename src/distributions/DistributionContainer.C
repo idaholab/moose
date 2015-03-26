@@ -363,14 +363,21 @@ DistributionContainer::getDistributionRandom(const std::string dist_alias){
 }
 
 std::vector<double>
-DistributionContainer::inverseCdf(const char * dist_alias, double min, double max){
-   return inverseCdf(std::string(dist_alias),min,max);
+DistributionContainer::inverseCdf(const char * dist_alias, double F, double g){
+   return inverseCdf(std::string(dist_alias),F,g);
 }
 
 std::vector<double>
-DistributionContainer::inverseCdf(const std::string /*dist_alias*/, double /*min*/, double /*max*/){
-    throwError("inverseCdf not yet implemented for MultiDimensional Distributions");
-    return std::vector<double>(2,-1.0);
+DistributionContainer::inverseCdf(const std::string dist_alias, double F, double g){
+
+   if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
+     MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
+     return dist->InverseCdf(F,g);
+    }
+    throwError("inverseCdf: Distribution ND" + dist_alias + " was not found in distribution container.");
+    std::vector<double> value (2,-1.0);
+    return value;
+
 }
 
 std::string DistributionContainer::lastDistributionTriggered(){
@@ -384,6 +391,18 @@ std::string DistributionContainer::lastDistributionTriggered(){
 
 bool DistributionContainer::atLeastADistTriggered(){return _at_least_a_dist_triggered;}
 
+int DistributionContainer::returnDimensionality(const std::string dist_alias){
+   if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
+	 MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
+	 return dist->returnDimensionality();
+	}
+	throwError("returnDimensionality: Distribution " + dist_alias + " was not found in distribution container.");
+	return -1.0;
+}
+
+int DistributionContainer::returnDimensionality(const char * dist_alias){
+	return returnDimensionality(std::string(dist_alias));
+}
 
 DistributionContainer & DistributionContainer::Instance() {
   if(_instance == NULL){

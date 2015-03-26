@@ -96,8 +96,8 @@ public:
    */
   double inverseCdf(const char * dist_alias, double rng);
 
-  std::vector<double> inverseCdf(const char * dist_alias, double min, double max);
-  std::vector<double> inverseCdf(const std::string dist_alias, double min, double max);
+  std::vector<double> inverseCdf(const char * dist_alias, double F, double g);
+  std::vector<double> inverseCdf(const std::string dist_alias, double F, double g);
 
   double random(); // return a random number
 
@@ -115,6 +115,9 @@ public:
   // for now we assume to get the last one.
   std::string lastDistributionTriggered();
   bool atLeastADistTriggered();
+
+  int returnDimensionality(const std::string dist_alias);
+  int returnDimensionality(const char * dist_alias);
 
 protected:
   std::map < std::string, int > _vector_pos_map;
