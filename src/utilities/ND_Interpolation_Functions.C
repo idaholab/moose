@@ -227,26 +227,52 @@ std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, do
 }
 
 
-
-
 double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
-//	double value = 0.0;
-//	for(unsigned int i=0; i<cell.size(); i++)
-//		value += interpolateAt(cell.at(i));
-//	value = value/((double)cell.size());
-//	return value;
-
 	double value = 0.0;
 
 	int numberOfVerteces = cell.size();
 	double sign = 1.0;
 
+	int counter = 1;
+
 	for(int i=numberOfVerteces; i>0; i--){
 		value += interpolateAt(cell.at(i-1)) * sign;
 		sign = sign * (-1.0);
+		counter++;
+		if (counter%2){
+			sign = sign * (-1.0);
+		}
 	}
+	std::cout<< cell.at(0).at(0) << " " << cell.at(3).at(1) << " " << value << std::endl;
+
 	return value;
 }
+
+//double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
+//	double value = 0.0;
+//
+//	int numberOfVerteces = cell.size();
+//	double sign = 1.0;
+//
+//	for(int i=numberOfVerteces; i>0; i--){
+//		value += interpolateAt(cell.at(i-1)) * sign;
+//		sign = sign * (-1.0);
+//	}
+//	std::cout<< cell.at(0).at(0) << " " << cell.at(3).at(1) << " " << value << std::endl;
+//	return value;
+//}
+
+//double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
+//	double value = 0.0;
+//
+//	int numberOfVerteces = cell.size();
+//
+//	for(int i=0; i<numberOfVerteces; i++){
+//		value += interpolateAt(cell.at(i));
+//	}
+//	//std::cout<< cell.at(3).at(0) << " " << cell.at(3).at(1) << " " << value/(double)numberOfVerteces << std::endl;
+//	return value/(double)numberOfVerteces;
+//}
 
 
 int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices,double g){
@@ -268,10 +294,12 @@ int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<doub
 	double cumulativeIndex = 0.0;
 	for(unsigned int i=0; i<vertices.size(); i++){
 		cumulativeIndex += cellAvgValues.at(i);
-		index=i;
-		if (cumulativeIndex > g)
+		if (cumulativeIndex > g){
+			index=i;
 			break;
+		}
 	}
+	//std::cout<<"g " << g << " " << index << std::endl;
 	return index;
 }
 
@@ -408,7 +436,6 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
 
   center[i] = cell[0][i] + dxs[i];
 
-  //std::cout << "center: "<< center[i]<< std::endl;
  }
  return center;
 }
@@ -511,53 +538,39 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  int last_divisions = (int)round(1.0/_tolerance);
 
- //std::cout<<"here1; F "<< F << std::endl;
-
  std::vector<double> pointMax(_dimensions);
- for(int i=0; i< _dimensions; i++){
+ for(int i=0; i< _dimensions; i++)
 	 pointMax.at(i) = _cellPoint0.at(i)+_cellDxs.at(i);
- }
- F = interpolateAt(_cellPoint0) + F * (interpolateAt(pointMax) - interpolateAt(_cellPoint0));
 
- //std::cout<<"here2"<<std::endl;
+ //F = interpolateAt(_cellPoint0) + F * (interpolateAt(pointMax) - interpolateAt(_cellPoint0));
 
- // Create basic cell
  std::vector<std::vector<double> > basic_cell;
  std::vector<int> NDcoordinate (_dimensions);
 
  for (int n=0; n<_dimensions; n++){
   NDcoordinate.at(n) = 0;
  }
- //std::cout<<"here3"<<std::endl;
+
  basic_cell = generateNewCell(NDcoordinate, _cellPoint0, _cellDxs, _dimensions);
- 	 // Divide input space into cells
- //std::cout<<"here4"<<std::endl;
  std::vector<std::vector<std::vector<double> > > coarseCell;
  refinedCellDivision(coarseCell, basic_cell, _initial_divisions);
- 	 // Select pivot cells
- cellsFilter(coarseCell, F);
 
- //std::cout<<"here5: " << coarseCell.size() <<std::endl;
+ // ==> cellsFilter(coarseCell, F);
 
  int pickedCell = CDFweightedPicking(coarseCell,g);
- //std::cout<<"pickedCell "<< pickedCell <<std::endl;
- 	 // Subdivide pivot cells into sub-cells
- std::vector<std::vector<std::vector<double> > > refinedCell;
 
- //std::cout<<"here6"<<std::endl;
+ std::vector<std::vector<std::vector<double> > > refinedCell;
 
  refinedCellDivision(refinedCell, coarseCell.at(pickedCell), last_divisions);
 
- //std::cout<<"here7: "<< refinedCell.size() << std::endl;
- 	 // Select pivot sub-cells
- cellsFilter(refinedCell,F);
+ /// ===>cellsFilter(refinedCell,F);
 
- //std::cout<<"here8 "<< refinedCell.size() << std::endl;
- 	 // Randomly pick a pivot sub-cell
- std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
- 	 // Get center of the picked cell
- //std::cout<<"here9"<<std::endl;
- std::vector<double> randomVector = getCellCenter(pivotSubcell);
+ //std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
+ int pickedSubCell = CDFweightedPicking(refinedCell,F);
+ std::vector<double> randomVector = getCellCenter(refinedCell.at(pickedSubCell));
+ //std::vector<double> randomVector = getCellCenter(coarseCell.at(pickedCell));
+
+ //std::vector<double> randomVector = getCellCenter(pivotSubcell);
  return randomVector;
 }
 

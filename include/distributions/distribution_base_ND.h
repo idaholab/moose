@@ -196,8 +196,9 @@ public:
   {
 	  if (_CDFprovided == true)
 		  return _interpolator.NDinverseFunctionGrid(F,g);
-	  else
+	  else{
 		  return _CDFinterpolator.NDinverseFunctionGrid(F,g);
+	  }
   };
 
   double inverseMarginal(double F, int dimension){
@@ -390,7 +391,6 @@ public:
 	  if (_CDFprovided)
 		  return _interpolator.NDinverseFunctionGrid(F,g);
 	  else{
-		  //std::cout<<"BasicMultiDimensionalInverseWeight - InverseCdf: " << _CDFspline.returnDimensionality() <<std::endl;
 		  return _CDFspline.InverseCdf(F,g);
 	  }
   };
