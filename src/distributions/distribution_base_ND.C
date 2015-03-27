@@ -86,6 +86,8 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
 	int numberOfVerteces = (int)pow(2,center.size());
 	double sign = 1.0;
 
+	int counter=1;
+
 	for(int i=numberOfVerteces; i>0; i--){
 		std::vector<double> index = int2binary(i-1,center.size());
 		std::vector<double> NDcoordinate(center.size());
@@ -99,6 +101,9 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
 		value += Cdf(NDcoordinate) * sign;
 		//std::cout<< "i: " << i <<  " - index: " << index.at(0) <<" "<< index.at(1) << " - " << NDcoordinate.at(0) << " - " << NDcoordinate.at(1) << " ; CDFweight = "<< Cdf(NDcoordinate) * sign << std::endl;
 		sign = sign * (-1.0);
+		counter++;
+		if (counter%2)
+			sign = sign * (-1.0);
 	}
 	//std::cout<< "weights: " << center.at(0) <<" "<< center.at(1) << " ; value = "<< value << std::endl;
 	return value;
@@ -408,7 +413,6 @@ double BasicMultivariateNormal::phi(double x){
 double BasicMultivariateNormal::phi_inv(double x){
  normal s;
  double value = quantile(s,x);
- //std::cout << "x: " << x << " ; value: " << value << std::endl;
  return value;
 }
 

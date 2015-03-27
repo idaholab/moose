@@ -123,6 +123,7 @@ DistributionContainer::random(){
   //return (static_cast<double>(rand())/static_cast<double>(RAND_MAX));
   //return _random.rand();
   //return MooseRandom::rand();
+  std::cout<<"here"<< _random->random() <<std::endl;
   return _random->random();
 }
 

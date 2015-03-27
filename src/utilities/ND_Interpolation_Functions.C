@@ -6,9 +6,6 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real_distribution.hpp>
 #include <ctime>
 
 
@@ -20,12 +17,12 @@ double NDInterpolation::interpolateAt(std::vector<double> point_coordinate){
   return -1;
 }
 
-std::vector<double> NDInterpolation::NDinverseFunction(double F_min, double F_max){
-  throw ("Error in NDinverseFunction: NOT IMPLEMENTED!!!!");
-  std::vector<double> a;
-  a.push_back(-1);
-  return a;
-}
+//std::vector<double> NDInterpolation::NDinverseFunction(double F_min, double F_max){
+//  throw ("Error in NDinverseFunction: NOT IMPLEMENTED!!!!");
+//  std::vector<double> a;
+//  a.push_back(-1);
+//  return a;
+//}
 
 
 double NDInterpolation::getGradientAt(std::vector<double> point_coordinate){
@@ -128,103 +125,103 @@ double NDInterpolation::vectorNorm(std::vector<double> point, double p){
  return norm;
 }
 
-std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, double F_max){
- // iterative procedure of linear interpolation to determine a nextPoint between firstPoint and secondPoint until CDF(nextPoint) lies between F_min and F_max
-
- double referenceCDF = (F_max-F_min)/2;
-
- boost::random::mt19937 rng;
- rng.seed(time(NULL));
- double range = rng.max() - rng.min();
-
-    // check input values inconsistencies
-
-    if (F_min > F_max)
-        throwError("ND RNG function: invalid param (F_min > F_max)");
-
-    std::vector<double> min_values (_dimensions);
-    std::vector<double> max_values (_dimensions);
-
-    // Find extreme points
-
-    for (int nDim=0; nDim<_dimensions; nDim++){
-        for (int nPoints=0; nPoints<_number_of_points; nPoints++){
-            if (_point_coordinates[nPoints][nDim] < min_values[nDim])
-                min_values[nDim] = _point_coordinates[nPoints][nDim];
-            if (_point_coordinates[nPoints][nDim] > max_values[nDim])
-                max_values[nDim] = _point_coordinates[nPoints][nDim];
-        }
-    }
-
-    std::vector<double> firstPoint  (_dimensions);
-    std::vector<double> secondPoint (_dimensions);
-    std::vector<double> nextPoint   (_dimensions);
-
-
-    // Randomly pick the fistPoint
-    for (int nDim=0; nDim<_dimensions; nDim++){
-     double temp = (rng()-rng.min())/range;;
-        firstPoint[nDim] = min_values[nDim] + (max_values[nDim]-min_values[nDim]) * temp;
-    }
-
-    int min_index, max_index = 0;
-
-    double min_value , max_value = 0.0;
-    for (int n=0; n<_number_of_points; n++){
-        if (_values[n] < min_value){
-         min_index = n;
-            min_value = _values[min_index];
-        }
-        if (_values[n] > max_value){
-         max_index = n;
-            max_value = _values[max_index];
-        }
-    }
-
-    bool convergence;
-
-    double valueFirstPoint = interpolateAt(firstPoint);
-    double valueSecondPoint;
-    double valueNextPoint;
-
-    if (valueFirstPoint < F_min && valueFirstPoint < F_max){
-        secondPoint = max_values;
-        valueSecondPoint = 1.0;
-        convergence = false;
-    } else if (interpolateAt(firstPoint) > F_min && interpolateAt(firstPoint) > F_max){
-        secondPoint = min_values;
-        valueSecondPoint = 0.0;
-        convergence = false;
-    } else {
-     nextPoint = firstPoint;
-        convergence = true;
-    }
-
-    while (convergence){
-        // Determine next point
-
-        for (int nDim=0; nDim<_dimensions; nDim++)
-            nextPoint[nDim] = (firstPoint[nDim]-secondPoint[nDim])*(valueFirstPoint-valueSecondPoint)/(referenceCDF-valueSecondPoint)+secondPoint[nDim];
-        valueNextPoint = interpolateAt(nextPoint);
-
-        if (referenceCDF>valueFirstPoint && referenceCDF<valueSecondPoint){
-            firstPoint = nextPoint;
-            // secondPoint remains
-        } else if (referenceCDF>valueSecondPoint && referenceCDF<valueFirstPoint) {
-            // firstPoint remains;
-            secondPoint = nextPoint;
-        } else
-            throwError("Computational error in NDinverse");
-
-        // test convergence
-        if (valueNextPoint > F_min && valueNextPoint < F_max)
-            convergence = true;
-        else
-            convergence = false;
-    }
-
-    return nextPoint;
-}
+//std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, double F_max){
+// // iterative procedure of linear interpolation to determine a nextPoint between firstPoint and secondPoint until CDF(nextPoint) lies between F_min and F_max
+//
+// double referenceCDF = (F_max-F_min)/2;
+//
+// boost::random::mt19937 rng;
+// rng.seed(time(NULL));
+// double range = rng.max() - rng.min();
+//
+//    // check input values inconsistencies
+//
+//    if (F_min > F_max)
+//        throwError("ND RNG function: invalid param (F_min > F_max)");
+//
+//    std::vector<double> min_values (_dimensions);
+//    std::vector<double> max_values (_dimensions);
+//
+//    // Find extreme points
+//
+//    for (int nDim=0; nDim<_dimensions; nDim++){
+//        for (int nPoints=0; nPoints<_number_of_points; nPoints++){
+//            if (_point_coordinates[nPoints][nDim] < min_values[nDim])
+//                min_values[nDim] = _point_coordinates[nPoints][nDim];
+//            if (_point_coordinates[nPoints][nDim] > max_values[nDim])
+//                max_values[nDim] = _point_coordinates[nPoints][nDim];
+//        }
+//    }
+//
+//    std::vector<double> firstPoint  (_dimensions);
+//    std::vector<double> secondPoint (_dimensions);
+//    std::vector<double> nextPoint   (_dimensions);
+//
+//
+//    // Randomly pick the fistPoint
+//    for (int nDim=0; nDim<_dimensions; nDim++){
+//     double temp = (rng()-rng.min())/range;;
+//        firstPoint[nDim] = min_values[nDim] + (max_values[nDim]-min_values[nDim]) * temp;
+//    }
+//
+//    int min_index, max_index = 0;
+//
+//    double min_value , max_value = 0.0;
+//    for (int n=0; n<_number_of_points; n++){
+//        if (_values[n] < min_value){
+//         min_index = n;
+//            min_value = _values[min_index];
+//        }
+//        if (_values[n] > max_value){
+//         max_index = n;
+//            max_value = _values[max_index];
+//        }
+//    }
+//
+//    bool convergence;
+//
+//    double valueFirstPoint = interpolateAt(firstPoint);
+//    double valueSecondPoint;
+//    double valueNextPoint;
+//
+//    if (valueFirstPoint < F_min && valueFirstPoint < F_max){
+//        secondPoint = max_values;
+//        valueSecondPoint = 1.0;
+//        convergence = false;
+//    } else if (interpolateAt(firstPoint) > F_min && interpolateAt(firstPoint) > F_max){
+//        secondPoint = min_values;
+//        valueSecondPoint = 0.0;
+//        convergence = false;
+//    } else {
+//     nextPoint = firstPoint;
+//        convergence = true;
+//    }
+//
+//    while (convergence){
+//        // Determine next point
+//
+//        for (int nDim=0; nDim<_dimensions; nDim++)
+//            nextPoint[nDim] = (firstPoint[nDim]-secondPoint[nDim])*(valueFirstPoint-valueSecondPoint)/(referenceCDF-valueSecondPoint)+secondPoint[nDim];
+//        valueNextPoint = interpolateAt(nextPoint);
+//
+//        if (referenceCDF>valueFirstPoint && referenceCDF<valueSecondPoint){
+//            firstPoint = nextPoint;
+//            // secondPoint remains
+//        } else if (referenceCDF>valueSecondPoint && referenceCDF<valueFirstPoint) {
+//            // firstPoint remains;
+//            secondPoint = nextPoint;
+//        } else
+//            throwError("Computational error in NDinverse");
+//
+//        // test convergence
+//        if (valueNextPoint > F_min && valueNextPoint < F_max)
+//            convergence = true;
+//        else
+//            convergence = false;
+//    }
+//
+//    return nextPoint;
+//}
 
 
 double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
@@ -243,7 +240,7 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
 			sign = sign * (-1.0);
 		}
 	}
-	std::cout<< cell.at(0).at(0) << " " << cell.at(3).at(1) << " " << value << std::endl;
+	//std::cout<< cell.at(0).at(0) << " " << cell.at(0).at(1) << " " << value << std::endl;
 
 	return value;
 }
@@ -409,14 +406,6 @@ std::vector<std::vector<double> > NDInterpolation::generateNewCell(std::vector<i
 std::vector<std::vector<double> > NDInterpolation::pickNewCell(std::vector<std::vector<std::vector<double> > > & cellsSet, double g){
  double numberOfCells = (double)cellsSet.size();
 
- // generate RN in [0,1]
-// int seed = time(0);
-// boost::random::mt19937 rng;
-// rng.seed(seed);
-// boost::random::uniform_int_distribution<> dist(1, numberOfCells);
-//
-// int pickedCell = dist(rng)-1;
-
  int pickedCell = (int)(g * numberOfCells);
 
  //std::cout<<"g " << g <<std::endl;
@@ -432,10 +421,10 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
 
  for (int i=0; i<_dimensions; i++){
   int vertexLoc = (int)pow(2,i);
-  dxs[i] = (cell[vertexLoc][i] - cell[0][i])/2.0;
+  dxs[i] = cell[vertexLoc][i] - cell[0][i];
 
-  center[i] = cell[0][i] + dxs[i];
-
+  double randomDisplacement = random();
+  center[i] = randomDisplacement;//cell[0][i] + randomDisplacement * dxs[i];
  }
  return center;
 }
@@ -478,29 +467,6 @@ double NDInterpolation::derivativeStep(std::vector<double> coordinate, int loop)
 }
 
 
-double NDInterpolation::integral(std::vector<double> coordinate, int samples){
- double value;
- double volume=1;
- double sum=0;
- std::vector<double> cellrange (_dimensions);
- std::vector<double> sampleCoordinate (_dimensions);
-
- boost::random::mt19937 rng;
- boost::random::uniform_real_distribution<> zeroOne(0,1);
-
- for (int i=0; i<_dimensions; i++){
-  cellrange[i] = coordinate[i]-_cellPoint0[i];
-  volume = volume * cellrange[i];
- }
-
- for (int n=0; n<samples; n++){
-  for (int i=0; i<_dimensions; i++)
-   sampleCoordinate[i] = _cellPoint0[i] + zeroOne(rng)  * cellrange[i];
-
-  sum = sum + interpolateAt(sampleCoordinate);
- }
- return value = volume/samples * sum;
-}
 
 
 std::vector<double> int2binary(int value, int size){

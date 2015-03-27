@@ -30,7 +30,7 @@ public:
   virtual double interpolateAt(std::vector<double> point_coordinate);
   virtual double getGradientAt(std::vector<double> point_coordinate);
   virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-  std::vector<double> NDinverseFunction(double F_min, double F_max);
+  //std::vector<double> NDinverseFunction(double F_min, double F_max);
   std::vector<double> NDinverseFunctionGrid(double F, double g);
 
   double averageCellValue(std::vector<double> center, std::vector<double> dx);
@@ -38,7 +38,6 @@ public:
   void updateRNGparameters(double tolerance, double initial_divisions);
 
   double NDderivative(std::vector<double> coordinate);
-  double integral(std::vector<double> coordinate, int samples=1000);
 
   int returnDimensionality(){return _dimensions;};
 
@@ -184,7 +183,7 @@ public:
   double interpolateAt(std::vector<double> point_coordinate);
   double getGradientAt(std::vector<double> point_coordinate);
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-  std::vector<double> NDinverseFunction(double F_min, double F_max);
+  //std::vector<double> NDinverseFunction(double F_min, double F_max);
   InverseDistanceWeighting(std::string filename, double p);
   InverseDistanceWeighting(double p);
   virtual ~InverseDistanceWeighting() {};
