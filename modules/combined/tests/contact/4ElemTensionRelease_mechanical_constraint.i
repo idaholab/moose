@@ -118,10 +118,10 @@
   dt = 0.1
   num_steps = 30
 
-  [./Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  [../]
+#   [./Predictor]
+#     type = SimplePredictor
+#     scale = 1.0
+#   [../]
 [] # Executioner
 
 [Outputs]
@@ -129,4 +129,5 @@
   exodus = true
   print_linear_residuals = true
   print_perf_log = true
+  hide = 'dummy_name_contact_force_0 dummy_name_contact_force_1'
 [] # Outputs
