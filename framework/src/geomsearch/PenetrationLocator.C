@@ -197,7 +197,7 @@ PenetrationLocator::saveContactStateVars()
   {
     if (it->second != NULL)
     {
-      it->second->_contact_force_old = it->second->_contact_force;
+//      it->second->_contact_force_old = it->second->_contact_force;
       it->second->_accumulated_slip_old = it->second->_accumulated_slip;
       it->second->_frictional_energy_old = it->second->_frictional_energy;
     }

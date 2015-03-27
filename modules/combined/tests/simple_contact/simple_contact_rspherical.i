@@ -147,4 +147,5 @@
   output_initial = true
   exodus = true
   print_linear_residuals = true
+  hide = 'fred_contact_force_0'
 [] # Outputs
