@@ -103,7 +103,7 @@ double NDInterpolation::minkowskiDistance (std::vector<double> point1, std::vect
    double pDistance = 0.0;
    for (unsigned int i=0; i<point1.size(); i++){
 	 // use std::abs() and DON'T use abs()!!!!!!!!!!!!!!!!
-     pDistance =  pDistance + pow(std::abs(point1.at(i)-point2.at(i)),p);
+     pDistance =  pDistance + pow(fabs(point1.at(i)-point2.at(i)),p);
    }
    distance = pow(pDistance, 1.0/p);
  }else
