@@ -3122,6 +3122,12 @@ FEProblem::advanceState()
   _nl.copyOldSolutions();
   _aux.copyOldSolutions();
 
+  if ( _displaced_problem != NULL )
+  {
+    _displaced_problem->nlSys().copyOldSolutions();
+    _displaced_problem->auxSys().copyOldSolutions();
+  }
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     _pps_data[tid]->copyValuesBack();
 
