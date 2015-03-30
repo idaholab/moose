@@ -105,8 +105,6 @@ public:
   unsigned int num_edge_neighbors(unsigned int edge_id) const;
   EFAelement2D* get_edge_neighbor(unsigned int edge_id, unsigned int neighbor_id) const;
 
-  bool is_child_edge_split(unsigned int elem_edge_id, EFAnode* &split_node) const;
-  bool is_child_edge_tip(unsigned int edge_id) const;
   bool frag_has_tip_edges() const;
   unsigned int get_tip_edge_id() const;
   EFAnode* get_tip_embedded() const;
@@ -122,12 +120,6 @@ private:
   // EFAelement2D unique methods
   void mapParaCoorFrom1Dto2D(unsigned int edge_id, double xi_1d,
                              std::vector<double> &para_coor) const;
-  void duplicateEmbeddedNode(unsigned int edgeID, EFAelement2D* neighborElem,
-                             unsigned int neighborEdgeID,
-                             std::map<unsigned int, EFAnode*> &EmbeddedNodes);
-  void duplicateEmbeddedNode(unsigned int edgeID,
-                             std::map<unsigned int, EFAnode*> &EmbeddedNodes);
-  void duplicateInteriorEmbeddedNode(std::map<unsigned int, EFAnode*> &EmbeddedNodes);
 };
 
 #endif

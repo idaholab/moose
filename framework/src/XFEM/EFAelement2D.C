@@ -1008,7 +1008,6 @@ EFAelement2D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
               mergeNodes(childNode, childOfNeighborNode, childOfNeighborElem,
                          PermanentNodes, TempNodes);
             }
-            duplicateEmbeddedNode(j, childOfNeighborElem, neighbor_edge_id, EmbeddedNodes);
           }
         } // l, loop over NeighborElem's children
       }
@@ -1073,14 +1072,7 @@ EFAelement2D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
         mooseError("Attempted to delete node: "<<childNode->id()
                     <<" from TempNodes, but couldn't find it");
     }
-    //No neighbor of parent on this edge -- free edge -- need to convert to permanent nodes
-    if (parent2d->num_edge_neighbors(j) == 0 && _edges[j]->has_intersection())
-      duplicateEmbeddedNode(j, EmbeddedNodes);
   } // j
-  
-  //duplicate the interior embedded node
-  if (_interior_nodes.size() > 0)
-    duplicateInteriorEmbeddedNode(EmbeddedNodes);
 }
 
 void
@@ -1361,64 +1353,6 @@ EFAelement2D::get_edge_neighbor(unsigned int edge_id, unsigned int neighbor_id) 
     return _edge_neighbors[edge_id][neighbor_id];
   else
     mooseError("edge neighbor does not exist");
-}
-
-bool
-EFAelement2D::is_child_edge_split(unsigned int elem_edge_id, EFAnode* &split_node) const
-{
-  // N.B. This is a check on a child element was just created
-  bool edge_split = false;  //Is the current element being/should be split on this edge?
-  split_node = NULL;
-  if (_parent && _parent->num_children() > 1)
-  {
-    if (edge_contains_tip(elem_edge_id))
-      mooseError("child's parent has 2 children but child has a tip edge");
-
-    std::set<EFAnode*> child_frag_edge_nodes = getFragEdgeNodes(elem_edge_id);
-    for (unsigned int i = 0; i < _parent->num_children(); ++i)
-    {
-      EFAelement2D* sibling = dynamic_cast<EFAelement2D*>(_parent->get_child(i));
-      if (!sibling) mooseError("dynamic cast sibling fails");
-
-      if (sibling != this)
-      {
-        std::set<EFAnode*> sibling_frag_edge_nodes = sibling->getFragEdgeNodes(elem_edge_id);
-        std::vector<EFAnode*> common_nodes = get_common_elems(child_frag_edge_nodes,sibling_frag_edge_nodes);
-        if (common_nodes.size() == 1)
-        {
-          edge_split = true;
-          split_node = common_nodes[0];
-          break;
-        }
-        else if (common_nodes.size() > 1)
-          mooseError("child frag have >1 common nodes with sibling frag on this edge");
-      }
-    } // i
-
-    if (split_node && !_edges[elem_edge_id]->is_embedded_node(split_node))
-      mooseError("the split node must be an embedded node on this edge");
-  }
-  return edge_split;
-}
-
-bool
-EFAelement2D::is_child_edge_tip(unsigned int edge_id) const
-{
-  // N.B. This is a check on a child element was just created
-  bool edge_tip = false;  //Was the current element a crack tip split element with a split on this edge?
-  if (_parent && _parent->num_children() == 1 &&
-      _parent->is_crack_tip_split())
-  {
-    for (unsigned int i = 0; i < _parent->num_crack_tip_neighbors(); ++i)
-    {
-      if (_parent->get_crack_tip_neighbor(i) == edge_id)
-      {
-        edge_tip = true;
-        break;
-      }
-    } // i
-  }
-  return edge_tip;
 }
 
 bool
@@ -1738,107 +1672,4 @@ EFAelement2D::mapParaCoorFrom1Dto2D(unsigned int edge_id, double xi_1d,
   }
   else
     mooseError("unknown element for 2D");
-}
-
-//This version is for cases where there is a neighbor element
-void
-EFAelement2D::duplicateEmbeddedNode(unsigned int edgeID, EFAelement2D* neighborElem,
-                                    unsigned int neighborEdgeID,
-                                    std::map<unsigned int, EFAnode*> &EmbeddedNodes)
-{
-  //Check to see whether the embedded node can be duplicated for both the current element
-  //and the neighbor element.
-  EFAnode* embeddedNode = NULL;
-  EFAnode* neighEmbeddedNode = NULL;
-
-  bool current_split = is_child_edge_split(edgeID, embeddedNode);
-  bool current_tip = is_child_edge_tip(edgeID); 
-  bool neighbor_split = neighborElem->is_child_edge_split(neighborEdgeID, neighEmbeddedNode);  
-  bool neighbor_tip = neighborElem->is_child_edge_tip(neighborEdgeID);    
-
-  bool can_dup = false;
-  // Don't duplicate if current and neighbor are both crack tip elems
-  // because that embedded node has already been duplicated
-  if ((current_split && neighbor_split) || (current_split && neighbor_tip) ||
-      (neighbor_split && current_tip))
-    can_dup = true;
-
-  if (can_dup)
-  {
-    if (embeddedNode == NULL)
-    {
-      if (neighEmbeddedNode == NULL)
-        mooseError("Both embedded nodes can't be NULL");
-      else
-        embeddedNode = neighEmbeddedNode; 
-    }
-    if (!_edges[edgeID]->is_embedded_node(embeddedNode) ||
-        !neighborElem->get_edge(neighborEdgeID)->is_embedded_node(embeddedNode))
-      mooseError("the embedded node is not shared by this edge & neighbor edge");
-
-    // Duplicate this embedded node
-    unsigned int new_node_id = getNewID(EmbeddedNodes);
-    EFAnode* newNode = new EFAnode(new_node_id,N_CATEGORY_EMBEDDED);
-    EmbeddedNodes.insert(std::make_pair(new_node_id,newNode));
-
-    switchEmbeddedNode(newNode, embeddedNode); // currElem
-    neighborElem->switchEmbeddedNode(newNode, embeddedNode); // neighborElem
-  }
-}
-
-//This version is for cases when there is no neighbor
-void
-EFAelement2D::duplicateEmbeddedNode(unsigned int edgeID,
-                                  std::map<unsigned int, EFAnode*> &EmbeddedNodes)
-{
-  EFAnode* embeddedNode = NULL;
-  if (is_child_edge_split(edgeID, embeddedNode))
-  {
-    // Duplicate this embedded node
-    unsigned int new_node_id = getNewID(EmbeddedNodes);
-    EFAnode* newNode = new EFAnode(new_node_id,N_CATEGORY_EMBEDDED);
-    EmbeddedNodes.insert(std::make_pair(new_node_id,newNode));
-    switchEmbeddedNode(newNode, embeddedNode);
-  }
-}
-
-void
-EFAelement2D::duplicateInteriorEmbeddedNode(std::map<unsigned int, EFAnode*> &EmbeddedNodes)
-{
-  if (_interior_nodes.size() != 1)
-    mooseError("current elem must have 1 interior node");
-  EFAnode* embeddedNode = _interior_nodes[0]->get_node();
-
-  if (_parent && _parent->num_children() > 1)
-  {
-    // Determine whether any of the sibling child elements have the same
-    // embedded node.  Only duplicate if that is the case.
-
-    bool currElemHasSiblingWithSameEmbeddedNode = false;
-    for (unsigned int i = 0; i < _parent->num_children(); ++i)
-    {
-      EFAelement2D* sibling = dynamic_cast<EFAelement2D*>(_parent->get_child(i));
-      if (!sibling) mooseError("dynamic cast sibling fails");
-
-      if (sibling != this)
-      {
-        if (sibling->getNumInteriorNodes() != 1)
-          mooseError("sibling elem must have 1 interior node");
-        if (sibling->get_interior_node(0)->get_node() == embeddedNode)
-        {
-          currElemHasSiblingWithSameEmbeddedNode = true;
-          break;
-        }
-      }
-    }
-
-    if (currElemHasSiblingWithSameEmbeddedNode)
-    {
-      // Duplicate this embedded node
-      unsigned int new_node_id = getNewID(EmbeddedNodes);
-      EFAnode* newNode = new EFAnode(new_node_id,N_CATEGORY_EMBEDDED);
-      EmbeddedNodes.insert(std::make_pair(new_node_id,newNode));
-      switchEmbeddedNode(newNode, embeddedNode);
-    }
-  }
 }
