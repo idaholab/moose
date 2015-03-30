@@ -18,7 +18,7 @@
 // MOOSE includes
 #include "AddVariableAction.h"
 
-//Forward declerations
+//Forward declarations
 class AddAuxVariableAction;
 
 template<>
