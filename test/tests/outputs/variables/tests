@@ -16,4 +16,11 @@
     input = 'output_vars_nonexistent.i'
     expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\): foo1 foo2'
   [../]
+
+  [./block_hide]
+    # Test that the "outputs = none" works from AuxVariables and Variables blocks
+    type = 'Exodiff'
+    input = 'hide_output_via_variables_block.i'
+    exodiff = 'hide_output_via_variables_block_out.e'
+  [../]
 []
