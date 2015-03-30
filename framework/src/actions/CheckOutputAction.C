@@ -17,8 +17,8 @@
 #include "Material.h"
 #include "MooseApp.h"
 #include "Console.h"
-//#include "Checkpoint.h"
 #include "CommonOutputAction.h"
+#include "AddVariableAction.h"
 
 template<>
 InputParameters validParams<CheckOutputAction>()
@@ -39,10 +39,34 @@ CheckOutputAction::~CheckOutputAction()
 void
 CheckOutputAction::act()
 {
+  checkVariableOutput("add_variable");
+  checkVariableOutput("add_aux_variable");
   checkMaterialOutput();
   checkConsoleOutput();
   checkPerfLogOutput();
   checkInputOutput();
+}
+
+void
+CheckOutputAction::checkVariableOutput(const std::string & task)
+{
+  // Loop through the actions for the given task
+  const std::vector<Action *> & actions = _awh.getActionsByName(task);
+  for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+  {
+    // Cast the object to AddVariableAction so that that OutputInterface::buildOutputHideVariableList may be called
+    AddVariableAction * ptr = dynamic_cast<AddVariableAction*>(*it);
+
+    // If the cast fails move to the next action, this is the case with NodalNormals which is also associated with
+    // the "add_aux_variable" task.
+    if (ptr == NULL)
+      continue;
+
+    // Create the hide list for the action
+    std::set<std::string> names_set;
+    names_set.insert(ptr->getShortName());
+    ptr->buildOutputHideVariableList(names_set);
+  }
 }
 
 void
@@ -85,7 +109,7 @@ void
 CheckOutputAction::checkPerfLogOutput()
 {
 
-  // Search for the existence of a Console outputter
+  // Search for the existence of a Console output object
   bool has_console = false;
   std::vector<Console *> ptrs = _app.getOutputWarehouse().getOutputs<Console>();
   for (std::vector<Console *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)

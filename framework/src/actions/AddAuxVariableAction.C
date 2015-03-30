@@ -22,6 +22,8 @@ InputParameters validParams<AddAuxVariableAction>()
   MooseEnum orders(AddAuxVariableAction::getAuxVariableOrders());
 
   InputParameters params = validParams<Action>();
+  params += validParams<OutputInterface>();
+
   params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
   params.addParam<MooseEnum>("order", orders,  "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
   params.addParam<Real>("initial_condition", 0.0, "Specifies the initial condition for this variable");

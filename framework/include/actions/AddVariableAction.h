@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "Action.h"
+#include "OutputInterface.h"
 
 // libMesh includes
 #include "libmesh/fe.h"
@@ -30,7 +31,9 @@ InputParameters validParams<AddVariableAction>();
 /**
  * Adds nonlinear variable
  */
-class AddVariableAction : public Action
+class AddVariableAction :
+  public Action,
+  public OutputInterface
 {
 public:
 
