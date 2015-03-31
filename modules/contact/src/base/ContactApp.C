@@ -90,7 +90,6 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("NodalAreaAction", "Contact/*");
   syntax.registerActionSyntax("NodalAreaVarAction", "Contact/*");
 
-  registerAction(ContactAction, "add_aux_variable");
   registerAction(ContactAction, "add_dg_kernel");
 
   registerAction(ContactPenetrationAuxAction, "add_aux_kernel");
