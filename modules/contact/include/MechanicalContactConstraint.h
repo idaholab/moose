@@ -110,10 +110,9 @@ protected:
   RealVectorValue _vars;
 
   MooseVariable * _nodal_area_var;
-  SystemBase & _area_aux_system;
+  SystemBase & _aux_system;
 
   libMesh::VectorValue<unsigned> _contact_force_var;
-  SystemBase & _pinfo_aux_system;
 
   /// Whether to include coupling between the master and slave nodes in the Jacobian
   const bool _master_slave_jacobian;

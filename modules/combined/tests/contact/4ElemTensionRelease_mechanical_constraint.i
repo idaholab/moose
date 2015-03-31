@@ -118,10 +118,10 @@
   dt = 0.1
   num_steps = 30
 
-  [./Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  [../]
+#   [./Predictor]
+#     type = SimplePredictor
+#     scale = 1.0
+#   [../]
 [] # Executioner
 
 [Outputs]
