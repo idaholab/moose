@@ -50,22 +50,25 @@ CheckOutputAction::act()
 void
 CheckOutputAction::checkVariableOutput(const std::string & task)
 {
-  // Loop through the actions for the given task
-  const std::vector<Action *> & actions = _awh.getActionsByName(task);
-  for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+  if (_awh.hasActions(task))
   {
-    // Cast the object to AddVariableAction so that that OutputInterface::buildOutputHideVariableList may be called
-    AddVariableAction * ptr = dynamic_cast<AddVariableAction*>(*it);
+    // Loop through the actions for the given task
+    const std::vector<Action *> & actions = _awh.getActionsByName(task);
+    for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+    {
+      // Cast the object to AddVariableAction so that that OutputInterface::buildOutputHideVariableList may be called
+      AddVariableAction * ptr = dynamic_cast<AddVariableAction*>(*it);
 
-    // If the cast fails move to the next action, this is the case with NodalNormals which is also associated with
-    // the "add_aux_variable" task.
-    if (ptr == NULL)
-      continue;
+      // If the cast fails move to the next action, this is the case with NodalNormals which is also associated with
+      // the "add_aux_variable" task.
+      if (ptr == NULL)
+        continue;
 
-    // Create the hide list for the action
-    std::set<std::string> names_set;
-    names_set.insert(ptr->getShortName());
-    ptr->buildOutputHideVariableList(names_set);
+      // Create the hide list for the action
+      std::set<std::string> names_set;
+      names_set.insert(ptr->getShortName());
+      ptr->buildOutputHideVariableList(names_set);
+    }
   }
 }
 
