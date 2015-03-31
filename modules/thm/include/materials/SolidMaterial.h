@@ -32,4 +32,4 @@ protected:
   const SolidMaterialProperties & _props;
 };
 
-#endif // R7MATERIAL_H
+#endif // SOLIDMATERIAL_H
