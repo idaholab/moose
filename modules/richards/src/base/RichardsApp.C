@@ -52,6 +52,7 @@
 
 // Materials
 #include "RichardsMaterial.h"
+#include "PoroFullSatMaterial.h"
 
 // DiracKernels
 #include "RichardsBorehole.h"
@@ -76,6 +77,7 @@
 #include "RichardsFlux.h"
 #include "RichardsFullyUpwindFlux.h"
 #include "RichardsPPenalty.h"
+#include "PoroFullSatTimeDerivative.h"
 
   // BoundaryConditions
 #include "RichardsExcav.h"
@@ -162,6 +164,7 @@ RichardsApp::registerObjects(Factory & factory)
 
   // Materials
   registerMaterial(RichardsMaterial);
+  registerMaterial(PoroFullSatMaterial);
 
   // DiracKernels
   registerDiracKernel(RichardsPolyLineSink);
@@ -186,6 +189,7 @@ RichardsApp::registerObjects(Factory & factory)
   registerKernel(RichardsFlux);
   registerKernel(RichardsFullyUpwindFlux);
   registerKernel(RichardsPPenalty);
+  registerKernel(PoroFullSatTimeDerivative);
 
   // BoundaryConditions
   registerBoundaryCondition(RichardsExcav);
