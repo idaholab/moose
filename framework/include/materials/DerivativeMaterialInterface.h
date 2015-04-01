@@ -202,7 +202,7 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
 
   // make sure _zero is in a sane state
   unsigned int nqp = _dmi_fe_problem.getMaxQps();
-  if (int(nqp) > _zero.size())
+  if (nqp > _zero.size())
   {
     // resize to accomodate maximum number of qpoints
     _zero.resize(nqp);
