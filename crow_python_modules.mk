@@ -24,7 +24,7 @@ $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.$(obj-suffix): $(CROW_DIR)/
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
 $(CROW_DIR)/install/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy2.so : $(CROW_DIR)/crow_modules/distribution1Dpy2.i $(CROW_DIR)/crow_modules/interpolationNDpy2.i $(DISTRIBUTION_SOURCE) $(INTERPOLATION_SOURCE)
-	(cd $(CROW_DIR) && unset CXX && python $(CROW_DIR)/setup.py build_ext build install --install-platlib=$(CROW_DIR)/install)
+	(cd $(CROW_DIR) && if test `uname` != "Darwin"; then unset CXX; fi && python $(CROW_DIR)/setup.py build_ext build install --install-platlib=$(CROW_DIR)/install)
 
 $(CROW_DIR)/install/crow_modules/_distribution1Dpy3.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy3.so : $(CROW_DIR)/crow_modules/distribution1Dpy3.i $(CROW_DIR)/crow_modules/interpolationNDpy3.i $(DISTRIBUTION_SOURCE) $(INTERPOLATION_SOURCE)
-	(cd $(CROW_DIR) && unset CXX && python3 $(CROW_DIR)/setup3.py build_ext build install --install-platlib=$(CROW_DIR)/install)
+	(cd $(CROW_DIR) && if test `uname` != "Darwin"; then unset CXX; fi && python3 $(CROW_DIR)/setup3.py build_ext build install --install-platlib=$(CROW_DIR)/install)
