@@ -971,6 +971,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
   }
 
   bool constraints_applied;
+  bool residual_has_inserted_values = false;
   if (!_assemble_constraints_separately) constraints_applied = false;
   for (std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
       it != penetration_locators->end();
@@ -1035,7 +1036,10 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
                 nfc->computeResidual();
 
                 if (nfc->overwriteSlaveResidual())
+                {
                   _fe_problem.setResidual(residual, 0);
+                  residual_has_inserted_values = true;
+                }
                 else
                   _fe_problem.cacheResidual(0);
                 _fe_problem.cacheResidualNeighbor(0);
@@ -1056,6 +1060,14 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
       if (constraints_applied)
       {
+        // If any of the above constraints inserted values in the residual, it needs to be assembled
+        // before adding the cached residuals below.
+        _communicator.max( residual_has_inserted_values );
+        if ( residual_has_inserted_values )
+        {
+          residual.close();
+          residual_has_inserted_values = false;
+        }
         _fe_problem.addCachedResidualDirectly(residual, 0);
         residual.close();
 
@@ -1070,6 +1082,14 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
     if (constraints_applied)
     {
+      // If any of the above constraints inserted values in the residual, it needs to be assembled
+      // before adding the cached residuals below.
+      _communicator.max( residual_has_inserted_values );
+      if ( residual_has_inserted_values )
+      {
+        residual.close();
+        residual_has_inserted_values = false;
+      }
       _fe_problem.addCachedResidualDirectly(residual, 0);
       residual.close();
 
