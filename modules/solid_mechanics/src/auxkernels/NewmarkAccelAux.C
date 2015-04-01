@@ -31,8 +31,11 @@ NewmarkAccelAux::NewmarkAccelAux(const std::string & name, InputParameters param
 Real
 NewmarkAccelAux::computeValue()
 {
-  Real accel_old = _u_old[_qp];
   if (!isNodal())
     mooseError("must run on a nodal variable");
+
+  Real accel_old = _u_old[_qp];
+  if (_dt == 0)
+    return accel_old;
   return 1/_beta*(((_disp[_qp]-_disp_old[_qp])/(_dt*_dt)) - _vel_old[_qp]/_dt - accel_old*(0.5-_beta));
 }
