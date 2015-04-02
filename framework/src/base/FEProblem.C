@@ -515,6 +515,14 @@ void FEProblem::initialSetup()
        ++it)
     it->second->updateSeeds(EXEC_INITIAL);
 
+  // Call init on the MultiApps
+  _multi_apps(EXEC_LINEAR)[0].initialSetup();
+  _multi_apps(EXEC_NONLINEAR)[0].initialSetup();
+  _multi_apps(EXEC_TIMESTEP_END)[0].initialSetup();
+  _multi_apps(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
+  _multi_apps(EXEC_INITIAL)[0].initialSetup();
+  _multi_apps(EXEC_CUSTOM)[0].initialSetup();
+
   // Call initial setup on the transfers
   _transfers(EXEC_LINEAR)[0].initialSetup();
   _transfers(EXEC_NONLINEAR)[0].initialSetup();
@@ -2708,7 +2716,7 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     _multi_apps(exec_flags[i])[0].addMultiApp(multi_app);
 
   // TODO: Is this really the right spot to init a multiapp?
-  multi_app->init();
+//  multi_app->init();
 }
 
 MultiApp *
