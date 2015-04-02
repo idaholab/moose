@@ -168,7 +168,6 @@
     cb       = cd
     fa_name  = fm
     fb_name  = fd
-    eta      = eta
     w        = w
   [../]
 

@@ -21,6 +21,12 @@
 #include "CHParsed.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledImplicitEuler.h"
+#include "KKSACBulkC.h"
+#include "KKSACBulkF.h"
+#include "KKSCHBulk.h"
+#include "KKSPhaseChemicalPotential.h"
+#include "KKSPhaseConcentration.h"
+#include "KKSSplitCHCRes.h"
 #include "LangevinNoise.h"
 #include "MaskedBodyForce.h"
 #include "MatDiffusion.h"
@@ -62,6 +68,7 @@
 #include "ElasticEnergyMaterial.h"
 #include "GBAnisotropy.h"
 #include "GBEvolution.h"
+#include "KKSXeVacSolidMaterial.h"
 #include "LinearIsoElasticPFDamage.h"
 #include "MathFreeEnergy.h"
 #include "MultiBarrierFunctionMaterial.h"
@@ -82,6 +89,7 @@
  */
 #include "BndsCalcAux.h"
 #include "CrossTermGradientFreeEnergy.h"
+#include "KKSGlobalFreeEnergy.h"
 #include "NodalFloodCountAux.h"
 #include "TotalFreeEnergy.h"
 
@@ -164,6 +172,12 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHParsed);
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledImplicitEuler);
+  registerKernel(KKSACBulkC);
+  registerKernel(KKSACBulkF);
+  registerKernel(KKSCHBulk);
+  registerKernel(KKSPhaseChemicalPotential);
+  registerKernel(KKSPhaseConcentration);
+  registerKernel(KKSSplitCHCRes);
   registerKernel(LangevinNoise);
   registerKernel(MaskedBodyForce);
   registerKernel(MatDiffusion);
@@ -199,6 +213,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(ElasticEnergyMaterial);
   registerMaterial(GBAnisotropy);
   registerMaterial(GBEvolution);
+  registerMaterial(KKSXeVacSolidMaterial);
   registerMaterial(LinearIsoElasticPFDamage);
   registerMaterial(MathFreeEnergy);
   registerMaterial(MultiBarrierFunctionMaterial);
@@ -213,6 +228,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
+  registerAux(KKSGlobalFreeEnergy);
   registerAux(NodalFloodCountAux);
   registerAux(TotalFreeEnergy);
 
