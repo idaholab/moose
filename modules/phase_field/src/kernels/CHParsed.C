@@ -15,13 +15,12 @@ InputParameters validParams<CHParsed>()
 }
 
 CHParsed::CHParsed(const std::string & name, InputParameters parameters) :
-    DerivativeKernelInterface<CHBulk>(name, parameters)
+    DerivativeKernelInterface<JvarMapInterface<CHBulk> >(name, parameters),
+    _second_derivatives(_nvar+1),
+    _third_derivatives(_nvar+1),
+    _third_cross_derivatives(_nvar),
+    _grad_vars(_nvar+1)
 {
-  // reserve space for derivatives and gradients
-  _second_derivatives.resize(_nvar+1);
-  _third_derivatives.resize(_nvar+1);
-  _grad_vars.resize(_nvar+1);
-
   // derivatives w.r.t. and gradients of the kernel variable
   _second_derivatives[0] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name());
   _third_derivatives[0]  = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name(), _var.name());
@@ -30,8 +29,17 @@ CHParsed::CHParsed(const std::string & name, InputParameters parameters) :
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    _second_derivatives[i+1] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _coupled_moose_vars[i]->name());
-    _third_derivatives[i+1]  = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name(), _coupled_moose_vars[i]->name());
+    std::string iname = _coupled_moose_vars[i]->name();
+    _second_derivatives[i+1] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), iname);
+    _third_derivatives[i+1]  = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name(), iname);
+
+    _third_cross_derivatives[i].resize(_nvar);
+    for (unsigned int j = 0; j < _nvar; ++j)
+    {
+      std::string jname = _coupled_moose_vars[j]->name();
+      _third_cross_derivatives[i][j] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), iname, jname);
+    }
+
     _grad_vars[i+1] = &(_coupled_moose_vars[i]->gradSln());
   }
 }
@@ -56,4 +64,21 @@ CHParsed::computeGradDFDCons(PFFunctionType type)
   }
 
   mooseError("Internal error");
+}
+
+Real
+CHParsed::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  // get the coupled variable jvar is referring to
+  unsigned int cvar;
+  if (!mapJvarToCvar(jvar, cvar))
+    return 0.0;
+
+  RealGradient J =   _grad_u[_qp] * _phi[_j][_qp] * (*_third_derivatives[cvar+1])[_qp]
+                   + _grad_phi[_j][_qp] * (*_second_derivatives[cvar+1])[_qp];
+
+  for (unsigned int i = 0; i < _nvar; ++i)
+    J += _phi[_j][_qp] * (*_grad_vars[i+1])[_qp] * (*_third_cross_derivatives[i][cvar])[_qp];
+
+  return _grad_test[_i][_qp] * _M[_qp] * J;
 }
