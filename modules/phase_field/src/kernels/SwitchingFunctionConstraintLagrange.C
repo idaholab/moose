@@ -13,6 +13,7 @@ InputParameters validParams<SwitchingFunctionConstraintLagrange>()
   params.addClassDescription("Lagrange multiplier kernel to constrain the sum of all switching functions in a multiphase system. This kernel acts on the lagrange multiplier variable.");
   params.addParam<std::vector<std::string> >("h_names", "Switching Function Materials that provide h(eta_i)");
   params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
+  params.addParam<Real>("epsilon", 1e9, "Shift factor to avoid a zero pivot");
   return params;
 }
 
@@ -23,7 +24,8 @@ SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(const s
     _h(_num_h),
     _dh(_num_h),
     _number_of_nl_variables(_fe_problem.getNonlinearSystem().nVariables()),
-    _j_eta(_number_of_nl_variables, -1)
+    _j_eta(_number_of_nl_variables, -1),
+    _epsilon(getParam<Real>("epsilon"))
 {
   // parameter check. We need exactly one eta per h
   if (_num_h != coupledComponents("etas"))
@@ -45,7 +47,7 @@ SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(const s
 Real
 SwitchingFunctionConstraintLagrange::computeQpResidual()
 {
-  Real g = -1.0;
+  Real g = -_epsilon * _u[_qp] - 1.0;
   for (unsigned int i = 0; i < _num_h; ++i)
     g += (*_h[i])[_qp];
 
@@ -55,7 +57,7 @@ SwitchingFunctionConstraintLagrange::computeQpResidual()
 Real
 SwitchingFunctionConstraintLagrange::computeQpJacobian()
 {
-  return 0.0;
+  return _test[_i][_qp] * -_epsilon * _phi[_j][_qp];
 }
 
 Real

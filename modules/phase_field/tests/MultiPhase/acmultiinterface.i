@@ -141,6 +141,7 @@
     variable = lambda
     etas    = 'eta1 eta2 eta3'
     h_names = 'h1   h2   h3'
+    epsilon = 0
   [../]
 []
 
