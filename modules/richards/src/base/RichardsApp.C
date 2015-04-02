@@ -52,7 +52,7 @@
 
 // Materials
 #include "RichardsMaterial.h"
-#include "PoroFullSatMaterial.h"
+#include "PoroFullSatMaterial.h" // Used for mechanical coupling
 
 // DiracKernels
 #include "RichardsBorehole.h"
@@ -77,7 +77,7 @@
 #include "RichardsFlux.h"
 #include "RichardsFullyUpwindFlux.h"
 #include "RichardsPPenalty.h"
-#include "PoroFullSatTimeDerivative.h"
+#include "PoroFullSatTimeDerivative.h" // Used for mechanical coupling
 
   // BoundaryConditions
 #include "RichardsExcav.h"
@@ -164,7 +164,7 @@ RichardsApp::registerObjects(Factory & factory)
 
   // Materials
   registerMaterial(RichardsMaterial);
-  registerMaterial(PoroFullSatMaterial);
+  registerMaterial(PoroFullSatMaterial); // Used for mechanical coupling
 
   // DiracKernels
   registerDiracKernel(RichardsPolyLineSink);
@@ -189,7 +189,7 @@ RichardsApp::registerObjects(Factory & factory)
   registerKernel(RichardsFlux);
   registerKernel(RichardsFullyUpwindFlux);
   registerKernel(RichardsPPenalty);
-  registerKernel(PoroFullSatTimeDerivative);
+  registerKernel(PoroFullSatTimeDerivative); // Used for mechanical coupling
 
   // BoundaryConditions
   registerBoundaryCondition(RichardsExcav);

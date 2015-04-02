@@ -1,0 +1,33 @@
+[Tests]
+  [./jacobian1]
+    type = PetscJacobianTester
+    input = jacobian1.i
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./terzaghi]
+    type = CSVDiff
+    input = terzaghi.i
+    csvdiff = terzaghi.csv
+  [../]
+  [./undrained_oedometer]
+    type = CSVDiff
+    input = undrained_oedometer.i
+    csvdiff = undrained_oedometer.csv
+  [../]
+  [./pp_generation]
+    type = CSVDiff
+    input = pp_generation.i
+    csvdiff = pp_generation.csv
+  [../]
+  [./pp_generation_unconfined]
+    type = CSVDiff
+    input = pp_generation_unconfined.i
+    csvdiff = pp_generation_unconfined.csv
+  [../]
+  [./unconsolidated_undrained]
+    type = CSVDiff
+    input = unconsolidated_undrained.i
+    csvdiff = unconsolidated_undrained.csv
+  [../]
+[]
