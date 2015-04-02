@@ -19,7 +19,7 @@ InputParameters validParams<SwitchingFunctionConstraintLagrange>();
 /**
  * SwitchingFunctionConstraintLagrange is a constraint kernel that acts on the
  * lambda lagrange multiplier non-linear variables to
- * enforce \f$ \sum_n h_i(\eta_i) \equiv 1 \f$.
+ * enforce \f$ \sum_n h_i(\eta_i) - \epsilon\lambda \equiv 1 \f$.
  */
 class SwitchingFunctionConstraintLagrange : public DerivativeMaterialInterface<Kernel>
 {
@@ -43,6 +43,9 @@ protected:
 
   /// eta index for the j_vars in the jacobian computation
   std::vector<int> _j_eta;
+
+  /// shift factor
+  Real _epsilon;
 };
 
 #endif //SWITCHINGFUNCTIONCONSTRAINTLAGRANGE_H
