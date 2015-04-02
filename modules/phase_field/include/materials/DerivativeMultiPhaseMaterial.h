@@ -28,9 +28,10 @@ public:
 protected:
   virtual Real computeDF(unsigned int);
   virtual Real computeD2F(unsigned int, unsigned int);
+  virtual Real computeD3F(unsigned int, unsigned int, unsigned int);
 
   /// Function value of the i phase.
-  std::vector<const MaterialProperty<Real> *> _dhi, _d2hi;
+  std::vector<const MaterialProperty<Real> *> _dhi, _d2hi, _d3hi;
 };
 
 #endif // DERIVATIVEMULTIPHASEMATERIAL_H

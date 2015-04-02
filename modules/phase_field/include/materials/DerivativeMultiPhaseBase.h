@@ -76,6 +76,7 @@ protected:
   /// Barrier function derivatives.
   std::vector<const MaterialProperty<Real> *> _dg;
   std::vector<std::vector<const MaterialProperty<Real> *> > _d2g;
+  std::vector<std::vector<std::vector<const MaterialProperty<Real> *> > > _d3g;
 
   /// Phase transformation energy barrier
   Real _W;
