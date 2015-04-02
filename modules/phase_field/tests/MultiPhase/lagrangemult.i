@@ -106,6 +106,7 @@
     variable = lambda
     etas    = 'eta1 eta2'
     h_names = 'h1   h2'
+    epsilon = 0
   [../]
 
   [./c_res]
