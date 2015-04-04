@@ -113,7 +113,16 @@ GrainTracker::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show
   if (_t_step < _tracking_step)
     return 0;
 
-  return NodalFloodCount::getNodalValue(node_id, var_idx, show_var_coloring);
+  return NodalFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
+}
+
+Real
+GrainTracker::getEntityValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
+{
+  if (_t_step < _tracking_step)
+    return 0;
+
+  return NodalFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
 }
 
 Real
@@ -299,12 +308,24 @@ GrainTracker::buildBoundingSpheres()
       // Find the min/max of our bounding box to calculate our bounding sphere
       for (std::set<dof_id_type>::iterator it2 = it1->_entity_ids.begin(); it2 != it1->_entity_ids.end(); ++it2)
       {
-        Node *node = mesh.query_node_ptr(*it2);
-        if (node)
+        Point point;
+        Point *p_ptr = NULL;
+        if (_is_elemental)
+        {
+          Elem *elem = mesh.query_elem(*it2);
+          if (elem)
+          {
+            point = elem->centroid();
+            p_ptr = &point;
+          }
+        }
+        else
+          p_ptr = mesh.query_node_ptr(*it2);
+        if (p_ptr)
           for (unsigned int i=0; i<mesh.spatial_dimension(); ++i)
           {
-            min_points[set_counter*3+i] = std::min(min_points[set_counter*3+i], (*node)(i));
-            max_points[set_counter*3+i] = std::max(max_points[set_counter*3+i], (*node)(i));
+            min_points[set_counter*3+i] = std::min(min_points[set_counter*3+i], (*p_ptr)(i));
+            max_points[set_counter*3+i] = std::max(max_points[set_counter*3+i], (*p_ptr)(i));
           }
       }
 
@@ -786,25 +807,42 @@ GrainTracker::updateFieldInfo()
     unsigned int curr_var = grain_it->second->variable_idx;
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
 
-    if (grain_it->second->status != INACTIVE)
-      for (std::set<dof_id_type>::iterator node_it = grain_it->second->nodes_ptr->begin();
-           node_it != grain_it->second->nodes_ptr->end(); ++node_it)
-      {
-        Node *curr_node = mesh.query_node_ptr(*node_it);
+    if (grain_it->second->status == INACTIVE)
+      continue;
 
-        if (curr_node &&
-            _mesh.isSemiLocal(curr_node) &&
-            _vars[grain_it->second->variable_idx]->getNodalValue(*curr_node) > tmp_map[curr_node->id()])
+    for (std::set<dof_id_type>::iterator entity_it = grain_it->second->nodes_ptr->begin();
+         entity_it != grain_it->second->nodes_ptr->end(); ++entity_it)
+    {
+//      // Highest variable value at this entity wins
+      Number entity_value = -std::numeric_limits<Number>::max();
+      if (_is_elemental)
+      {
+        const Elem * elem = mesh.query_elem(*entity_it);
+        if (elem && elem->is_semilocal(processor_id()))
         {
-          _bubble_maps[map_idx][curr_node->id()] = grain_it->first;
-          if (_var_index_mode)
-            _var_index_maps[map_idx][curr_node->id()] = grain_it->second->variable_idx;
+          std::vector<Point> centroid(1, elem->centroid());
+          _fe_problem.reinitElemPhys(elem, centroid, 0);
+          entity_value = _vars[curr_var]->sln()[0];
         }
       }
+      else
+      {
+        Node * node = mesh.query_node_ptr(*entity_it);
+        if (node && _mesh.isSemiLocal(node))
+          entity_value = _vars[curr_var]->getNodalValue(*node);
+      }
+
+      if (tmp_map.find(*entity_it) == tmp_map.end() || entity_value > tmp_map[*entity_it])
+      {
+        _bubble_maps[map_idx][*entity_it] = grain_it->first;
+        if (_var_index_mode)
+          _var_index_maps[map_idx][*entity_it] = grain_it->second->variable_idx;
+
+        tmp_map[*entity_it] = entity_value;
+      }
+    }
   }
 }
-
-
 
 Real
 GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const

@@ -33,6 +33,8 @@ public:
    */
   virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
 
+  virtual Real getEntityValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
+
   /**
    * Accessor for retrieving elemental field data (grain centroids).
    * @param element_id the element identifier for which to retrieve field data
