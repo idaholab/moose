@@ -1092,7 +1092,10 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
                   if (map_it->second == slave_node->id())
                     found = true;
                 if (!found)
+                {
                   periodic_node_map.insert(std::make_pair(master_node->id(), slave_node->id()));
+                  periodic_node_map.insert(std::make_pair(slave_node->id(), master_node->id()));
+                }
               }
             }
           }
