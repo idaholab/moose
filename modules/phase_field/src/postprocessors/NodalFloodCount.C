@@ -597,11 +597,13 @@ NodalFloodCount::appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const
   if (_is_elemental)
   {
     /**
-     * When running in elemental mode, we'll still add the periodic nodes to the data set.
-     * The final set will contain element ids and also the periodic node ids. This will
-     * allow us to reuse all the same logic for merging sets.
+     * When running in elemental mode, we still need information about periodic nodes in order
+     * to merge sets across the periodic boundaries. However in order to avoid running into issues
+     * with element ids and node ids overlapping we'll simply use numbers starting at the top of the
+     * dof_id_type range instead.
      *
-     * The first step in doing this will be to periodic nodes to the element id "data" set.
+     * TODO: Note: This may fail to work properly on meshes that approach std::numeric_limits<dof_id_type>::max()/2
+     * numbers of dofs.
      */
 
     for (std::set<dof_id_type>::iterator entity_it = data.begin(); entity_it != data.end(); ++entity_it)
@@ -614,9 +616,9 @@ NodalFloodCount::appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const
 
         for (IterType it = iters.first; it != iters.second; ++it)
         {
-          // Add both nodes in the periodic pair
-          periodic_neighbors.insert(it->first);
-          periodic_neighbors.insert(it->second);
+          // Add pseudo ids of both nodes in the periodic pair
+          periodic_neighbors.insert(std::numeric_limits<dof_id_type>::max() - it->first);
+          periodic_neighbors.insert(std::numeric_limits<dof_id_type>::max() - it->second);
         }
       }
     }
