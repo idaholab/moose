@@ -370,7 +370,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
 
         std::set<dof_id_type>::iterator end = data[map_num][i].end();
         for (std::set<dof_id_type>::iterator it = data[map_num][i].begin(); it != end; ++it)
-          partial_packed_data[current_idx++] = *it;                       // The individual node ids
+          partial_packed_data[current_idx++] = *it;                       // The individual entity ids
       }
 
       packed_data.insert(packed_data.end(), partial_packed_data.begin(), partial_packed_data.end());
@@ -581,6 +581,9 @@ NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned in
 unsigned int
 NodalFloodCount::appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const
 {
+  // Using a typedef makes the code easier to understand and avoids repeating information.
+  typedef std::multimap<dof_id_type, dof_id_type>::const_iterator IterType;
+
   unsigned int orig_size = data.size();
 
   /**
@@ -591,15 +594,42 @@ NodalFloodCount::appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const
    */
   std::set<dof_id_type> periodic_neighbors;
 
-  // Using a typedef makes the code easier to understand and avoids repeating information.
-  typedef std::multimap<dof_id_type, dof_id_type>::const_iterator IterType;
-
-  for (std::set<dof_id_type>::iterator s_it = data.begin(); s_it != data.end(); ++s_it)
+  if (_is_elemental)
   {
-    std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(*s_it);
+    /**
+     * When running in elemental mode, we'll still add the periodic nodes to the data set.
+     * The final set will contain element ids and also the periodic node ids. This will
+     * allow us to reuse all the same logic for merging sets.
+     *
+     * The first step in doing this will be to periodic nodes to the element id "data" set.
+     */
 
-    for (IterType it = iters.first; it != iters.second; ++it)
-      periodic_neighbors.insert(it->second);
+    for (std::set<dof_id_type>::iterator entity_it = data.begin(); entity_it != data.end(); ++entity_it)
+    {
+      Elem *elem = _mesh.elem(*entity_it);
+
+      for (unsigned int node_n=0; node_n < elem->n_nodes(); node_n++)
+      {
+        std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(elem->node(node_n));
+
+        for (IterType it = iters.first; it != iters.second; ++it)
+        {
+          // Add both nodes in the periodic pair
+          periodic_neighbors.insert(it->first);
+          periodic_neighbors.insert(it->second);
+        }
+      }
+    }
+  }
+  else
+  {
+    for (std::set<dof_id_type>::iterator entity_it = data.begin(); entity_it != data.end(); ++entity_it)
+    {
+      std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(*entity_it);
+
+      for (IterType it = iters.first; it != iters.second; ++it)
+        periodic_neighbors.insert(it->second);
+    }
   }
 
   // Now that we have all of the periodic_neighbors in our temporary set we need to add them to our input set
