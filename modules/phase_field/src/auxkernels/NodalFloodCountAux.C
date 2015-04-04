@@ -36,8 +36,8 @@ NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters
     else if (_field_display == "VARIABLE_COLORING")
       _var_coloring = true;
   }
-  else if (_field_display != "CENTROID" && _field_display != "ACTIVE_BOUNDS")
-    mooseError("UNIQUE_REGION and VARIABLE_COLORING are only avaialble for nodal aux variables");
+  //else if (_field_display != "CENTROID" && _field_display != "ACTIVE_BOUNDS")
+  //  mooseError("UNIQUE_REGION and VARIABLE_COLORING are only avaialble for nodal aux variables");
 }
 
 Real
@@ -47,7 +47,7 @@ NodalFloodCountAux::computeValue()
   {
   case 0:  // UNIQUE_REGION
   case 1:  // VARIABLE_COLORING
-    return _flood_counter.getNodalValue(_current_node->id(), _var_idx, _var_coloring);
+    return _flood_counter.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), _var_idx, _var_coloring);
   case 2:  // ACTIVE_BOUNDS
     if (isNodal())
       return _flood_counter.getNodalValues(_current_node->id()).size();

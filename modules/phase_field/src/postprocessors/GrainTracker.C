@@ -294,10 +294,10 @@ GrainTracker::buildBoundingSpheres()
     for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
          it1 != _bubble_sets[map_num].end(); ++it1)
     {
-      total_node_count += it1->_nodes.size();
+      total_node_count += it1->_entity_ids.size();
 
       // Find the min/max of our bounding box to calculate our bounding sphere
-      for (std::set<dof_id_type>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
+      for (std::set<dof_id_type>::iterator it2 = it1->_entity_ids.begin(); it2 != it1->_entity_ids.end(); ++it2)
       {
         Node *node = mesh.query_node_ptr(*it2);
         if (node)
@@ -328,7 +328,7 @@ GrainTracker::buildBoundingSpheres()
       // and the center plus the "hull buffer" value
       Real radius = (max - center).size() + _hull_buffer;
 
-      unsigned int some_node_id = *(it1->_nodes.begin());
+      unsigned int some_node_id = *(it1->_entity_ids.begin());
       _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, center, radius));
 
       ++set_counter;
@@ -388,7 +388,7 @@ GrainTracker::trackGrains()
          * member node id.  A single region may have multiple bounding spheres as members if it spans
          * periodic boundaries
          */
-        if (it1->_nodes.find((*it2)->member_node_id) != it1->_nodes.end())
+        if (it1->_entity_ids.find((*it2)->member_node_id) != it1->_entity_ids.end())
         {
           // Transfer ownership of the bounding sphere info to "sphere_ptrs" which will be stored in the unique grain
           sphere_ptrs.push_back(*it2);
@@ -400,7 +400,7 @@ GrainTracker::trackGrains()
       }
 
       // Create our new grains from this timestep that we will use to match up against the existing grains
-      new_grains.push_back(new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes, NOT_MARKED));
+      new_grains.push_back(new UniqueGrain(curr_var, sphere_ptrs, &it1->_entity_ids, NOT_MARKED));
     }
   }
 
