@@ -40,9 +40,15 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  void addBC(BoundaryID boundary_id, MooseSharedPointer<IntegratedBC> & bc);
-  void addNodalBC(BoundaryID boundary_id, MooseSharedPointer<NodalBC> & bc);
-  void addPresetNodalBC(BoundaryID boundary_id, MooseSharedPointer<PresetNodalBC> & bc);
+  ///@{
+  /**
+   * Methods for adding the various types of BoundaryCondition objects to the warehouse
+   * @param boundary_ids A set of BoundaryIDs that the supplied object pointer is active on
+   */
+  void addBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<IntegratedBC> & bc);
+  void addNodalBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<NodalBC> & bc);
+  void addPresetNodalBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<PresetNodalBC> & bc);
+  ///@}
 
   /**
    * Get boundary conditions on a specified boundary id

@@ -47,8 +47,20 @@ public:
    * @param var The variable
    */
   void addBoundaryVar(BoundaryID bnd, MooseVariable *var);
-  /// Convenience function for adding coupled vars at once
-  void addBoundaryVars(BoundaryID bnd, const std::map<std::string, std::vector<MooseVariable *> > & vars);
+
+  /**
+   * Add a variable to a set of boundaries
+   * @param boundary_ids The boundary ids where this variable is defined
+   * @param var The variable
+   */
+  void addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable *var);
+
+  /**
+   * Add a map of variables to a set of boundaries
+   * @param boundary_ids The boundary ids where this variable is defined
+   * @param vars A map of variables
+   */
+  void addBoundaryVars(const std::set<BoundaryID> & boundary_ids, const std::map<std::string, std::vector<MooseVariable *> > & vars);
 
   /**
    * Get a variable from the warehouse

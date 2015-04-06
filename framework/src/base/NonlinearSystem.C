@@ -510,44 +510,40 @@ NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::st
 void
 NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  std::vector<BoundaryName> boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
+  // Create a set of boundary ids
+  std::set<BoundaryID> boundary_ids;
+  const std::vector<BoundaryName> & boundary_names = parameters.get<std::vector<BoundaryName> >("boundary");
+  for (std::vector<BoundaryName>::const_iterator it = boundary_names.begin(); it != boundary_names.end(); ++it)
+    boundary_ids.insert(_mesh.getBoundaryID(*it));
 
-  /**
-   * Since MOOSE supports named boundary conditions we need to see if the vector contains
-   * names (strings) or ids (unsigned ints)
-   */
-  for (unsigned int i=0; i<boundaries.size(); ++i)
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    BoundaryID boundary_id = _mesh.getBoundaryID(boundaries[i]);
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
+
+    MooseSharedPointer<BoundaryCondition> bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create(bc_name, name, parameters));
+    _fe_problem._objects_by_name[tid][name].push_back(bc.get());
+
+    MooseSharedPointer<PresetNodalBC> pnbc = MooseSharedNamespace::dynamic_pointer_cast<PresetNodalBC>(bc);
+    if (pnbc.get())
+      _bcs[tid].addPresetNodalBC(boundary_ids, pnbc);
+
+    MooseSharedPointer<NodalBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<NodalBC>(bc);
+    MooseSharedPointer<IntegratedBC> ibc = MooseSharedNamespace::dynamic_pointer_cast<IntegratedBC>(bc);
+    if (nbc.get())
     {
-      parameters.set<THREAD_ID>("_tid") = tid;
-      parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
-
-      MooseSharedPointer<BoundaryCondition> bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create(bc_name, name, parameters));
-      _fe_problem._objects_by_name[tid][name].push_back(bc.get());
-
-      MooseSharedPointer<PresetNodalBC> pnbc = MooseSharedNamespace::dynamic_pointer_cast<PresetNodalBC>(bc);
-      if (pnbc.get())
-        _bcs[tid].addPresetNodalBC(boundary_id, pnbc);
-
-      MooseSharedPointer<NodalBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<NodalBC>(bc);
-      MooseSharedPointer<IntegratedBC> ibc = MooseSharedNamespace::dynamic_pointer_cast<IntegratedBC>(bc);
-      if (nbc.get())
-      {
-        _bcs[tid].addNodalBC(boundary_id, nbc);
-        _vars[tid].addBoundaryVars(boundary_id, nbc->getCoupledVars());
-      }
-      else if (ibc.get())
-      {
-        _bcs[tid].addBC(boundary_id, ibc);
-        _vars[tid].addBoundaryVars(boundary_id, ibc->getCoupledVars());
-      }
-      else
-        mooseError("Unknown type of BoundaryCondition object");
-
-      _vars[tid].addBoundaryVar(boundary_id, &bc->variable());
+      _bcs[tid].addNodalBC(boundary_ids, nbc);
+      _vars[tid].addBoundaryVars(boundary_ids, nbc->getCoupledVars());
     }
+    else if (ibc.get())
+    {
+      _bcs[tid].addBC(boundary_ids, ibc);
+      _vars[tid].addBoundaryVars(boundary_ids, ibc->getCoupledVars());
+    }
+    else
+      mooseError("Unknown type of BoundaryCondition object");
+
+    _vars[tid].addBoundaryVar(boundary_ids, &bc->variable());
   }
 }
 
@@ -571,17 +567,12 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
     _constraints[0].addNodeFaceConstraint(slave, master, nfc);
   }
   else if (ffc.get())
-  {
     _constraints[0].addFaceFaceConstraint(parameters.get<std::string>("interface"), ffc);
-  }
   else if (nc.get())
-  {
     _constraints[0].addNodalConstraint(nc);
-  }
   else
-  {
     mooseError("Unknown type of Constraint object");
-  }
+
   if (constraint.get() != NULL && constraint.get()->addCouplingEntriesToJacobian())
     addImplicitGeometricCouplingEntriesToJacobian(true);
 }
