@@ -111,6 +111,7 @@ BasicTruncatedDistribution::InverseCdf(double x){
   double value;
   double x_min = _dist_parameters.find("xMin") ->second;
   double x_max = _dist_parameters.find("xMax") ->second;
+
   if(x == 0.0) {
     //Using == in floats is generally a bad idea, but
     // 0.0 can be represented exactly.
@@ -127,7 +128,7 @@ BasicTruncatedDistribution::InverseCdf(double x){
     double temp=untrCdf(x_min)+x*(untrCdf(x_max)-untrCdf(x_min));
     value=untrInverseCdf(temp);
   } else {
-    value=-1;
+    throwError("A valid solution for inverseCdf was not found!");
   }
   return value;
 }
@@ -360,16 +361,17 @@ public:
  */
 
 
-BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma)
+BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma, double low)
 {
   _dist_parameters["mu"] = mu;
   _dist_parameters["sigma"] = sigma;
+  _dist_parameters["low"] = low;
 
   if(not hasParameter("truncation")) {
     _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dist_parameters["xMin"] = 0.0;
+    _dist_parameters["xMin"] = low;
   }
   if(not hasParameter("xMax")) {
     _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
@@ -379,11 +381,12 @@ BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma)
 
 }
 
-BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma, double x_min, double x_max):
+BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma, double x_min, double x_max, double low):
   BasicTruncatedDistribution(x_min,x_max)
 {
   _dist_parameters["mu"] = mu;
   _dist_parameters["sigma"] = sigma;
+  _dist_parameters["low"] = low;
 
   _backend = new LogNormalDistributionBackend(mu, sigma);
 
@@ -396,19 +399,30 @@ BasicLogNormalDistribution::~BasicLogNormalDistribution()
 }
 
 double
-BasicLogNormalDistribution::untrCdf(double x){
-  //std::cout << "LogNormalDistribution::untrCdf " << x << std::endl;
-  if(x <= 0) {
+BasicLogNormalDistribution::untrPdf(double x){
+  double low = _dist_parameters.find("low") ->second;
+  if(x <= low) {
     return 0.0;
   } else {
-    return _backend->cdf(x);
+    return _backend->pdf(x-low);
+  }
+}
+
+double
+BasicLogNormalDistribution::untrCdf(double x){
+  double low = _dist_parameters.find("low") ->second;
+  if(x <= low) {
+    return 0.0;
+  } else {
+    return _backend->cdf(x-low);
   }
 }
 
 
 double
 BasicLogNormalDistribution::InverseCdf(double x){
-  return BasicTruncatedDistribution::InverseCdf(x);
+  double low = _dist_parameters.find("low") ->second;
+  return BasicTruncatedDistribution::InverseCdf(x)+low;
 }
 
 /*
@@ -533,7 +547,7 @@ BasicExponentialDistribution::BasicExponentialDistribution(double lambda, double
     _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dist_parameters["xMin"] = 0.0;
+    _dist_parameters["xMin"] = low;
   }
   if(not hasParameter("xMax")) {
     _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
@@ -564,10 +578,22 @@ BasicExponentialDistribution::~BasicExponentialDistribution()
 }
 
 
+
+double
+BasicExponentialDistribution::untrPdf(double x){
+  double low = _dist_parameters.find("low") ->second;
+  if(x >= low) {
+    return _backend->pdf(x-low);
+  } else {
+    return 0.0;
+  }
+}
+
 double
 BasicExponentialDistribution::untrCdf(double x){
-  if(x >= 0.0) {
-    return _backend->cdf(x);
+  double low = _dist_parameters.find("low") ->second;
+  if(x >= low) {
+    return _backend->cdf(x-low);
   } else {
     return 0.0;
   }
@@ -575,14 +601,14 @@ BasicExponentialDistribution::untrCdf(double x){
 
 double
 BasicExponentialDistribution::Cdf(double x){
+  return BasicTruncatedDistribution::Cdf(x);
   //double low = _dist_parameters.find("low") ->second;
-  return BasicTruncatedDistribution::Cdf(x);//-low);
 }
 
 double
 BasicExponentialDistribution::InverseCdf(double x){
-  //double low = _dist_parameters.find("low") ->second;
-  return BasicTruncatedDistribution::InverseCdf(x);// + low;
+  double low = _dist_parameters.find("low") ->second;
+  return BasicTruncatedDistribution::InverseCdf(x) + low;
 }
 
 /*
@@ -601,16 +627,17 @@ public:
 };
 
 
-BasicWeibullDistribution::BasicWeibullDistribution(double k, double lambda)
+BasicWeibullDistribution::BasicWeibullDistribution(double k, double lambda, double low)
 {
   _dist_parameters["k"] = k; //shape
   _dist_parameters["lambda"] = lambda; //scale
+  _dist_parameters["low"] = low; //scale
 
   if(not hasParameter("truncation")) {
     _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dist_parameters["xMin"] = 0.0;
+    _dist_parameters["xMin"] = low;
   }
   if(not hasParameter("xMax")) {
     _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
@@ -622,11 +649,13 @@ BasicWeibullDistribution::BasicWeibullDistribution(double k, double lambda)
   _backend = new WeibullDistributionBackend(k, lambda);
 }
 
-BasicWeibullDistribution::BasicWeibullDistribution(double k, double lambda, double x_min, double x_max):
+BasicWeibullDistribution::BasicWeibullDistribution(double k, double lambda, double x_min, double x_max, double low):
   BasicTruncatedDistribution(x_min,x_max)
 {
     _dist_parameters["k"] = k; //shape
     _dist_parameters["lambda"] = lambda; //scale
+    _dist_parameters["low"] = low; //scale
+
     if ((lambda<0) || (k<0))
     throwError("ERROR: incorrect value of k or lambda for weibull distribution");
     _backend = new WeibullDistributionBackend(k, lambda);
@@ -639,12 +668,29 @@ BasicWeibullDistribution::~BasicWeibullDistribution()
 
 
 double
-BasicWeibullDistribution::untrCdf(double x){
-  if(x >= 0) {
-    return _backend->cdf(x);
+BasicWeibullDistribution::untrPdf(double x){
+  double low = _dist_parameters.find("low") ->second;
+  if(x >= low) {
+    return _backend->pdf(x-low);
   } else {
     return 0.0;
   }
+}
+
+double
+BasicWeibullDistribution::untrCdf(double x){
+  double low = _dist_parameters.find("low") ->second;
+  if(x >= low) {
+    return _backend->cdf(x-low);
+  } else {
+    return 0.0;
+  }
+}
+
+double
+BasicWeibullDistribution::InverseCdf(double x){
+  double low = _dist_parameters.find("low") ->second;
+  return BasicTruncatedDistribution::InverseCdf(x) + low;
 }
 
 /*
@@ -759,10 +805,10 @@ BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double s
     _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dist_parameters["xMin"] = 0.0;
+    _dist_parameters["xMin"] = low;
   }
   if(not hasParameter("xMax")) {
-    _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
+    _dist_parameters["xMax"] = low+scale;
   }
 
   if ((alpha<0) || (beta<0))
@@ -782,6 +828,7 @@ BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double s
     if ((alpha<0) || (beta<0))
     throwError("ERROR: incorrect value of alpha or beta for beta distribution");
 
+
     _backend = new BetaDistributionBackend(alpha, beta);
 }
 
@@ -791,10 +838,19 @@ BasicBetaDistribution::~BasicBetaDistribution()
 }
 
 double
+BasicBetaDistribution::untrPdf(double x){
+  double scale = _dist_parameters.find("scale") ->second;
+  double low   = _dist_parameters.find("low"  ) ->second;
+  return _backend->pdf( (x-low)/scale);
+}
+
+double
 BasicBetaDistribution::untrCdf(double x){
-  if(x >= 0 and x <= 1) {
-    return _backend->cdf(x);
-  } else if(x < 0){
+  double scale = _dist_parameters.find("scale") ->second;
+  double low   = _dist_parameters.find("low"  ) ->second;
+  if(x >= low and x <= low+scale) {
+    return _backend->cdf( (x-low)/scale );
+  } else if(x < low){
     return 0.0;
   } else {
     return 1.0;
@@ -803,24 +859,22 @@ BasicBetaDistribution::untrCdf(double x){
 
 double
 BasicBetaDistribution::Pdf(double x){
-  double scale = _dist_parameters.find("scale") ->second;
-  double low   = _dist_parameters.find("low"  ) ->second;
-  return BasicTruncatedDistribution::Pdf( (x-low)/scale)/scale;
+  double scale   = _dist_parameters.find("scale"  ) ->second;
+  return BasicTruncatedDistribution::Pdf( x )/scale;// scaling happens in untrPdf
 }
 
 double
 BasicBetaDistribution::Cdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
   double low   = _dist_parameters.find("low"  ) ->second;
-  //return BasicTruncatedDistribution::Cdf( (x-low)/scale );
-  return BasicTruncatedDistribution::Cdf( (x-low)/scale);// -low)/scale );
+  return BasicTruncatedDistribution::Cdf( x );// -low)/scale ); scaling happens in untrCdf
 }
 
 double
 BasicBetaDistribution::InverseCdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
   double low   = _dist_parameters.find("low"  ) ->second;
-  return BasicTruncatedDistribution::InverseCdf(x)*scale+low;//*scale+low;
+  return BasicTruncatedDistribution::InverseCdf( x )*scale+low;
 }
 
 /*
