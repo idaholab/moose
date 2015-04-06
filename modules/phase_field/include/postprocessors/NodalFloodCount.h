@@ -63,6 +63,8 @@ public:
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type /*node_id*/) const;
   virtual std::vector<std::vector<std::pair<unsigned int, unsigned int> > > getElementalValues(dof_id_type /*elem_id*/) const;
 
+  inline bool isElemental() const { return _is_elemental; }
+
 protected:
   class BubbleData
   {

@@ -55,6 +55,9 @@ public:
    */
   virtual std::vector<std::vector<std::pair<unsigned int, unsigned int> > > getElementalValues(dof_id_type elem_id) const;
 
+  // Debugging routine used for printing grain data structure information
+  void print();
+
 public:
   /// This struct holds the nodesets and bounding spheres for each flooded region.
   struct BoundingSphereInfo;

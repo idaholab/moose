@@ -27,17 +27,21 @@ NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters
     _flood_counter(getUserObject<NodalFloodCount>("bubble_object")),
     _var_idx(getParam<unsigned int>("map_index")),
     _field_display(getParam<MooseEnum>("field_display")),
-    _var_coloring(false)
+    _var_coloring(_field_display == "VARIABLE_COLORING")
 {
   if (isNodal())
   {
     if (_field_display == "CENTROID")
       mooseError("CENTROID coloring is only available for elemental aux variables");
-    else if (_field_display == "VARIABLE_COLORING")
-      _var_coloring = true;
+
+    if (_flood_counter.isElemental() && (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING"))
+      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the NodalFloodCounter");
   }
-  //else if (_field_display != "CENTROID" && _field_display != "ACTIVE_BOUNDS")
-  //  mooseError("UNIQUE_REGION and VARIABLE_COLORING are only avaialble for nodal aux variables");
+  else
+  {
+    if (! _flood_counter.isElemental() && (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING"))
+      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the NodalFloodCounter");
+  }
 }
 
 Real

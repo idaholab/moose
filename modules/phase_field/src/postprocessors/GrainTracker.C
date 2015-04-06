@@ -274,6 +274,21 @@ GrainTracker::getElementalValues(dof_id_type elem_id) const
   return elem_info;
 }
 
+void
+GrainTracker::print()
+{
+  for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin();
+       grain_it != _unique_grains.end(); ++grain_it)
+  {
+    Moose::out << "Grain " << grain_it->first << ":\n";
+
+    for (std::vector<BoundingSphereInfo *>::iterator it2 = grain_it->second->sphere_ptrs.begin(); it2 != grain_it->second->sphere_ptrs.end(); ++it2)
+    {
+      Moose::out << "Centroid: " << (*it2)->b_sphere.center() << " radius: " << (*it2)->b_sphere.radius() << '\n';
+    }
+  }
+}
+
 
 void
 GrainTracker::buildBoundingSpheres()

@@ -617,8 +617,8 @@ NodalFloodCount::appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const
         for (IterType it = iters.first; it != iters.second; ++it)
         {
           // Add pseudo ids of both nodes in the periodic pair
-          periodic_neighbors.insert(std::numeric_limits<dof_id_type>::max() - it->first);
-          periodic_neighbors.insert(std::numeric_limits<dof_id_type>::max() - it->second);
+          periodic_neighbors.insert(it->first);
+          periodic_neighbors.insert(it->second);
         }
       }
     }
