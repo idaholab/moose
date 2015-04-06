@@ -161,12 +161,13 @@ InputParameters validParams<LogNormalDistribution>(){
 
    params.addRequiredParam<double>("mu", "Mean");
    params.addRequiredParam<double>("sigma", "Standard deviation");
+   params.addParam<double>("low",0.0, "low");
 
    return params;
 }
 
 LogNormalDistribution::LogNormalDistribution(const std::string & name, InputParameters parameters):
-  distribution(name,parameters), BasicLogNormalDistribution(getParam<double>("mu"), getParam<double>("sigma"))
+  distribution(name,parameters), BasicLogNormalDistribution(getParam<double>("mu"), getParam<double>("sigma"),getParam<double>("low"))
 {
 }
 
@@ -232,11 +233,12 @@ InputParameters validParams<ExponentialDistribution>(){
    InputParameters params = validParams<distribution>();
 
    params.addRequiredParam<double>("lambda", "lambda");
+   params.addParam<double>("low",0.0, "low");
    return params;
 }
 
 ExponentialDistribution::ExponentialDistribution(const std::string & name, InputParameters parameters):
-  distribution(name,parameters), BasicExponentialDistribution(getParam<double>("lambda"))
+  distribution(name,parameters), BasicExponentialDistribution(getParam<double>("lambda"),getParam<double>("low"))
 {
 }
 ExponentialDistribution::~ExponentialDistribution()
@@ -254,12 +256,13 @@ InputParameters validParams<WeibullDistribution>(){
 
    params.addRequiredParam<double>("k", "shape parameter");
    params.addRequiredParam<double>("lambda", "scale parameter");
+   params.addParam<double>("low",0.0, "low");
    return params;
 }
 
 WeibullDistribution::WeibullDistribution(const std::string & name, InputParameters parameters):
   distribution(name,parameters),
-  BasicWeibullDistribution(getParam<double>("k"),getParam<double>("lambda"))
+  BasicWeibullDistribution(getParam<double>("k"),getParam<double>("lambda"),getParam<double>("low"))
 
 {
 }
@@ -306,13 +309,14 @@ InputParameters validParams<BetaDistribution>(){
    params.addRequiredParam<double>("alpha", "alpha parameter");
    params.addRequiredParam<double>("beta", "beta parameter");
    params.addParam<double>("scale",1.0,"scale value for distribution");
+   params.addParam<double>("low",0.0,"low value for distribution");
    return params;
 }
 
 BetaDistribution::BetaDistribution(const std::string & name, InputParameters parameters):
   distribution(name,parameters),
   BasicBetaDistribution(getParam<double>("alpha"),getParam<double>("beta"),
-                        getParam<double>("scale"))
+                        getParam<double>("scale"),getParam<double>("low"))
 
 {
 }

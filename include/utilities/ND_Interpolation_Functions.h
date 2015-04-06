@@ -74,6 +74,28 @@ protected:
   double integralCellValue(std::vector<std::vector<double> > cell);
 };
 
+class genericNDSpline: public NDInterpolation{
+public:
+  double interpolateAt(std::vector<double> point_coordinate);
+  double integralSpline(std::vector<double> point_coordinate);
+  double spline_cartesian_marginal_integration(double coordinate,int marginal_variable);
+  double spline_cartesian_inverse_marginal(double CDF,int marginal_variable, double precision);
+
+  genericNDSpline(std::string filename);
+  genericNDSpline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
+  genericNDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
+  void genericNDSpline_init(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
+
+  genericNDSpline();
+  virtual ~genericNDSpline();
+
+private:
+  std::vector< std::vector<double> > _discretizations;
+  std::vector<double> _values;
+  std::vector<double> _alpha;
+  std::vector<double> _beta;
+};
+
 class NDSpline: public NDInterpolation
 {
 public:
