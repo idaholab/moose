@@ -143,5 +143,4 @@
   output_initial = true
   exodus = true
   print_linear_residuals = true
-  hide = 'm3_s2_contact_force_0 m3_s2_contact_force_1'
 [] # Output

@@ -7,13 +7,11 @@
 
 #include "MechanicalContactConstraint.h"
 
-#include "Conversion.h"
 #include "SystemBase.h"
 #include "PenetrationLocator.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
-#include "libmesh/threads.h"
 
 template<>
 InputParameters validParams<MechanicalContactConstraint>()
@@ -45,11 +43,6 @@ InputParameters validParams<MechanicalContactConstraint>()
   params.addParam<bool>("master_slave_jacobian", true, "Whether to include jacobian entries coupling master and slave nodes.");
   params.addParam<bool>("connected_slave_nodes_jacobian", true, "Whether to include jacobian entries coupling nodes connected to slave nodes.");
   params.addParam<bool>("non_displacement_variables_jacobian", true, "Whether to include jacobian entries coupling with variables that are not displacement variables.");
-
-  params.addRequiredParam<AuxVariableName>("contact_force_0", "Component of the vector contact force at each slave node.");
-  params.addParam<AuxVariableName>("contact_force_1", "Component of the vector contact force at each slave node.");
-  params.addParam<AuxVariableName>("contact_force_2", "Component of the vector contact force at each slave node.");
-
   return params;
 }
 
@@ -70,9 +63,9 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
     _z_var(isCoupled("disp_z") ? coupled("disp_z") : libMesh::invalid_uint),
     _mesh_dimension(_mesh.dimension()),
     _vars(_x_var, _y_var, _z_var),
-    _aux_system(_geometric_search_data._subproblem.getVariable(_tid,getParam<AuxVariableName>("contact_force_0")).sys()),
     _nodal_area_var(getVar("nodal_area", 0)),
-    _contact_force_var(libMesh::invalid_uint),
+    _aux_system(_nodal_area_var->sys()),
+    _aux_solution(_aux_system.currentSolution()),
     _master_slave_jacobian(getParam<bool>("master_slave_jacobian")),
     _connected_slave_nodes_jacobian(getParam<bool>("connected_slave_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian"))
@@ -94,15 +87,6 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
 
   if (_friction_coefficient < 0)
     mooseError("The friction coefficient must be nonnegative");
-
-  for ( unsigned dim = 0; dim < _mesh_dimension; ++dim )
-  {
-    const std::string contact_force_name = "contact_force_" + Moose::stringify(dim);
-    if ( ! parameters.isParamValid(contact_force_name) )
-      mooseError("Missing contact force component\"" + contact_force_name + "\" (this is a logic error, not a user error).");
-    _contact_force_var(dim) =
-      _aux_system.getVariable(_tid, parameters.get<AuxVariableName>(contact_force_name)).number();
-  }
 }
 
 void
@@ -112,17 +96,12 @@ MechanicalContactConstraint::timestepSetup()
   {
     _penetration_locator._unlocked_this_step.clear();
     _penetration_locator._locked_this_step.clear();
-
-    // Why are we doing something specific if a time step is restarted because of failure of the
-    // previous attempt? Could this be causing the pollution of the next attempt that we sometimes
-    // observe?
     bool beginning_of_step = false;
     if (_t > _time_last_called)
     {
       beginning_of_step = true;
       _penetration_locator.saveContactStateVars();
     }
-    copyContactForceFromAuxVars();
     updateContactSet(beginning_of_step);
     _update_contact_set = false;
     _time_last_called = _t;
@@ -168,14 +147,13 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
       else
         pinfo->_penetrated_at_beginning_of_step = false;
 
-      pinfo->_starting_elem = pinfo->_elem;
-      pinfo->_starting_side_num = pinfo->_side_num;
-      pinfo->_starting_closest_point_ref = pinfo->_closest_point_ref;
+      pinfo->_starting_elem = it->second->_elem;
+      pinfo->_starting_side_num = it->second->_side_num;
+      pinfo->_starting_closest_point_ref = it->second->_closest_point_ref;
     }
 
     const Node * node = pinfo->_node;
     const Real area = nodalArea(*pinfo);
-    bool set_contact_force_to_zero = false;
 
     if ((_model == CM_FRICTIONLESS && _formulation == CF_DEFAULT) ||
         (_model == CM_COULOMB && _formulation == CF_DEFAULT))
@@ -194,7 +172,6 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
         //Moose::out << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
         has_penetrated.erase(hpit);
         pinfo->_contact_force.zero();
-        set_contact_force_to_zero = true;
         pinfo->_mech_status=PenetrationInfo::MS_NO_CONTACT;
         ++unlocked_this_step[slave_node_num];
       }
@@ -223,12 +200,9 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
       else
       {
         if (hpit != has_penetrated.end())
-        {
           has_penetrated.erase(hpit);
-          pinfo->_contact_force.zero();
-          set_contact_force_to_zero = true;
-          pinfo->_mech_status=PenetrationInfo::MS_NO_CONTACT;
-        }
+        pinfo->_contact_force.zero();
+        pinfo->_mech_status=PenetrationInfo::MS_NO_CONTACT;
       }
     }
     else
@@ -238,18 +212,6 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
         if (hpit == has_penetrated.end())
           has_penetrated.insert(slave_node_num);
       }
-    }
-
-    if ( set_contact_force_to_zero )
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      std::vector< dof_id_type > contact_force_dofs(_mesh_dimension);
-      std::vector< Real > zeros(_mesh_dimension,0);
-      for ( unsigned dim = 0; dim < _mesh_dimension; ++dim )
-      {
-        contact_force_dofs[dim] = node->dof_number(_aux_system.number(),_contact_force_var(dim),0);
-      }
-      _aux_system.solution().insert( zeros, contact_force_dofs );
     }
 
     if (_formulation == CF_AUGMENTED_LAGRANGE && hpit != has_penetrated.end())
@@ -284,6 +246,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
   RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
   const Real penalty = getPenalty(*pinfo);
   RealVectorValue pen_force(penalty * distance_vec);
+  RealVectorValue tan_residual(0,0,0);
 
   switch (_model)
   {
@@ -370,18 +333,6 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
     default:
       mooseError("Invalid or unavailable contact model");
       break;
-  }
-
-  // Write the current contact_force to the aux variables.
-  if ( _component == 0 )
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    std::vector< dof_id_type > contact_force_dofs(_mesh_dimension);
-    for ( unsigned dim = 0; dim < _mesh_dimension; ++dim )
-    {
-      contact_force_dofs[dim] = node->dof_number(_aux_system.number(),_contact_force_var(dim),0);
-    }
-    _aux_system.solution().insert( &pinfo->_contact_force(0), contact_force_dofs );
   }
 }
 
@@ -742,7 +693,7 @@ MechanicalContactConstraint::nodalArea(PenetrationInfo & pinfo)
 
   dof_id_type dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
 
-  Real area = (*_aux_system.currentSolution())( dof );
+  Real area = (*_aux_solution)( dof );
   if (area == 0)
   {
     if (_t_step > 1)
@@ -888,30 +839,4 @@ MechanicalContactConstraint::getCoupledVarComponent(unsigned int var_num,
     }
   }
   return coupled_var_is_disp_var;
-}
-
-void
-MechanicalContactConstraint::copyContactForceFromAuxVars()
-{
-  typedef std::map<dof_id_type, PenetrationInfo *> PenetrationMap;
-  PenetrationMap::iterator begin = _penetration_locator._penetration_info.begin();
-  PenetrationMap::iterator end = _penetration_locator._penetration_info.end();
-  for ( PenetrationMap::iterator it = begin; it != end; ++it )
-  {
-    PenetrationInfo * pinfo = it->second;
-    if ( pinfo /*&& _subproblem.mesh().isSemiLocal( const_cast< Node *>(pinfo->_node) )*/ )
-    {
-      const Node * node = pinfo->_node;
-
-      // Get the dof ids. These should eventually be stored in the pinfo so we don't keep looking
-      // them up.
-      std::vector< dof_id_type > contact_force_dofs( _mesh_dimension );
-      for ( unsigned dim = 0; dim < _mesh_dimension; ++dim )
-      {
-        contact_force_dofs[dim] = node->dof_number(_aux_system.number(),_contact_force_var(dim),0);
-      }
-      _aux_system.solutionOld().get( contact_force_dofs, &pinfo->_contact_force_old(0) );
-      pinfo->_contact_force = pinfo->_contact_force_old;
-    }
-  }
 }

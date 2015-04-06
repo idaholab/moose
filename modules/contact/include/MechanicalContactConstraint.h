@@ -92,6 +92,7 @@ protected:
   const ContactModel _model;
   const ContactFormulation _formulation;
   const bool _normalize_penalty;
+
   const Real _penalty;
   const Real _friction_coefficient;
   const Real _tension_release;
@@ -109,10 +110,9 @@ protected:
 
   RealVectorValue _vars;
 
-  SystemBase & _aux_system;
-
   MooseVariable * _nodal_area_var;
-  libMesh::VectorValue<unsigned> _contact_force_var;
+  SystemBase & _aux_system;
+  const NumericVector<Number> * _aux_solution;
 
   /// Whether to include coupling between the master and slave nodes in the Jacobian
   const bool _master_slave_jacobian;
@@ -120,10 +120,6 @@ protected:
   const bool _connected_slave_nodes_jacobian;
   /// Whether to include coupling terms with non-displacement variables in the Jacobian
   const bool _non_displacement_vars_jacobian;
-
-private:
-  void copyContactForceFromAuxVars();
-  void copyContactForceToAuxVars();
 };
 
 #endif
