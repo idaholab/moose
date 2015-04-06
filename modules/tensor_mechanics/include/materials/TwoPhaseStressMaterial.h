@@ -35,13 +35,13 @@ protected:
 
   // phase A material properties
   std::string _base_A;
-  MaterialProperty<RankTwoTensor> & _stress_A;
-  MaterialProperty<ElasticityTensorR4> & _dstress_dstrain_A;
+  const MaterialProperty<RankTwoTensor> & _stress_A;
+  const MaterialProperty<ElasticityTensorR4> & _dstress_dstrain_A;
 
   // phase B material properties
   std::string _base_B;
-  MaterialProperty<RankTwoTensor> & _stress_B;
-  MaterialProperty<ElasticityTensorR4> & _dstress_dstrain_B;
+  const MaterialProperty<RankTwoTensor> & _stress_B;
+  const MaterialProperty<ElasticityTensorR4> & _dstress_dstrain_B;
 
   // global material properties
   std::string _base_name;

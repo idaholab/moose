@@ -25,12 +25,12 @@ TwoPhaseStressMaterial::TwoPhaseStressMaterial(const std::string & name,
     _h_eta(getMaterialProperty<Real>(getParam<std::string>("h"))),
 
     _base_A(getParam<std::string>("base_A") + "_"),
-    _stress_A(getMaterialProperty<RankTwoTensor>(getParam<std::string>("base_A") + "_stress")),
-    _dstress_dstrain_A(declareProperty<ElasticityTensorR4>(_base_A + "Jacobian_mult")),
+    _stress_A(getMaterialProperty<RankTwoTensor>(_base_A + "stress")),
+    _dstress_dstrain_A(getMaterialProperty<ElasticityTensorR4>(_base_A + "Jacobian_mult")),
 
     _base_B(getParam<std::string>("base_B") + "_"),
-    _stress_B(getMaterialProperty<RankTwoTensor>(getParam<std::string>("base_B") + "_stress")),
-    _dstress_dstrain_B(declareProperty<ElasticityTensorR4>(_base_B + "Jacobian_mult")),
+    _stress_B(getMaterialProperty<RankTwoTensor>(_base_B + "stress")),
+    _dstress_dstrain_B(getMaterialProperty<ElasticityTensorR4>(_base_B + "Jacobian_mult")),
 
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _stress(declareProperty<RankTwoTensor>(_base_name + "stress")),
