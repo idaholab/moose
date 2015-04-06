@@ -75,27 +75,33 @@ BCWarehouse::jacobianSetup()
 }
 
 void
-BCWarehouse::addBC(BoundaryID boundary_id, MooseSharedPointer<IntegratedBC> & bc)
+BCWarehouse::addBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<IntegratedBC> & bc)
 {
   _all_objects.push_back(bc.get());
   _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
-  _bcs[boundary_id].push_back(bc.get());
+
+  for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+    _bcs[*it].push_back(bc.get());
 }
 
 void
-BCWarehouse::addNodalBC(BoundaryID boundary_id, MooseSharedPointer<NodalBC> & bc)
+BCWarehouse::addNodalBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<NodalBC> & bc)
 {
   _all_objects.push_back(bc.get());
   _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
-  _nodal_bcs[boundary_id].push_back(bc.get());
+
+  for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+    _nodal_bcs[*it].push_back(bc.get());
 }
 
 void
-BCWarehouse::addPresetNodalBC(BoundaryID boundary_id, MooseSharedPointer<PresetNodalBC> & bc)
+  BCWarehouse::addPresetNodalBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<PresetNodalBC> & bc)
 {
   _all_objects.push_back(bc.get());
   _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
-  _preset_nodal_bcs[boundary_id].push_back(bc.get());
+
+  for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+    _preset_nodal_bcs[*it].push_back(bc.get());
 }
 
 const std::vector<IntegratedBC *> &
