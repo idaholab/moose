@@ -10,13 +10,16 @@
 #include "Action.h"
 #include "MooseTypes.h"
 #include "MooseEnum.h"
+#include "OutputInterface.h"
 
 class ContactAction;
 
 template<>
 InputParameters validParams<ContactAction>();
 
-class ContactAction: public Action
+class ContactAction:
+  public Action,
+  public OutputInterface
 {
 public:
   ContactAction(const std::string & name, InputParameters params);

@@ -75,12 +75,18 @@ protected:
 
   PA_ENUM _quantity;
 
+  /// Writes old contact force, accumulated slip, and frictional energy to PenetrationInfo object.
+  virtual void timestepSetup();
+
   virtual Real computeValue();
 
   PenetrationLocator & _penetration_locator;
 
 public:
   static const Real NotPenetrated;
+
+private:
+  const bool _should_update_old_state;
 };
 
 #endif //PENETRATIONAUX_H

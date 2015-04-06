@@ -152,7 +152,6 @@
   output_initial = true
   print_linear_residuals = true
   print_perf_log = true
-  hide = 'leftright_contact_force_0 leftright_contact_force_1'
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

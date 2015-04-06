@@ -160,7 +160,6 @@
   output_initial = true
   print_linear_residuals = true
   print_perf_log = true
-  hide = 'dummy_name_contact_force_0 dummy_name_contact_force_1 dummy_name_contact_force_2'
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
