@@ -742,44 +742,32 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
     << COLOR_DEFAULT;
 
   MeshBase & mesh = _mesh.getMesh();
+
   // Remap the grain
-  for (std::set<dof_id_type>::const_iterator node_it = grain_it1->second->nodes_ptr->begin();
-       node_it != grain_it1->second->nodes_ptr->end(); ++node_it)
+  std::set<Node *> updated_nodes_tmp; // Used only in the elemental case
+  for (std::set<dof_id_type>::const_iterator entity_it = grain_it1->second->nodes_ptr->begin();
+       entity_it != grain_it1->second->nodes_ptr->end(); ++entity_it)
   {
-    Node *curr_node = mesh.query_node_ptr(*node_it);
+    Node *curr_node = NULL;
 
-    if (curr_node && curr_node->processor_id() == processor_id())
+    if (_is_elemental)
     {
-      _subproblem.reinitNode(curr_node, 0);
+      Elem *elem = mesh.query_elem(*entity_it);
+      if (!elem)
+        continue;
 
-      // Swap the values from one variable to the other
+      for (unsigned int i=0; i < elem->n_nodes(); ++i)
       {
-        VariableValue & value = _vars[curr_var_idx]->nodalSln();
-        VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
-        VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
-
-        // Copy Value from intersecting variable to new variable
-        dof_id_type & dof_index = _vars[new_variable_idx]->nodalDofIndex();
-
-        // Set the only DOF for this variable on this node
-        solution.set(dof_index, value[0]);
-        solution_old.set(dof_index, value_old[0]);
-        solution_older.set(dof_index, value_older[0]);
-      }
-      {
-        VariableValue & value = _vars[new_variable_idx]->nodalSln();
-        VariableValue & value_old = _vars[new_variable_idx]->nodalSlnOld();
-        VariableValue & value_older = _vars[new_variable_idx]->nodalSlnOlder();
-
-        // Copy Value from variable to the intersecting variable
-        dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
-
-        // Set the only DOF for this variable on this node
-        solution.set(dof_index, value[0]);
-        solution_old.set(dof_index, value_old[0]);
-        solution_older.set(dof_index, value_older[0]);
+        Node *curr_node = elem->get_node(i);
+        if (updated_nodes_tmp.find(curr_node) == updated_nodes_tmp.end())
+        {
+          updated_nodes_tmp.insert(curr_node);         // cache this node so we don't attempt to remap it again within this loop
+          swapSolutionValuesHelper(curr_node, curr_var_idx, new_variable_idx, solution, solution_old, solution_older);
+        }
       }
     }
+    else
+      swapSolutionValuesHelper(mesh.query_node_ptr(*entity_it), curr_var_idx, new_variable_idx, solution, solution_old, solution_older);
   }
 
   // Update the variable index in the unique grain datastructure
@@ -791,6 +779,45 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
   solution_older.close();
 
   _fe_problem.getNonlinearSystem().sys().update();
+
+}
+
+void
+GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, NumericVector<Real> & solution, NumericVector<Real> & solution_old, NumericVector<Real> & solution_older)
+{
+  if (curr_node && curr_node->processor_id() == processor_id())
+  {
+    // Reinit the node so we can get and set values of the solution here
+    _subproblem.reinitNode(curr_node, 0);
+
+    // Swap the values from one variable to the other
+    {
+      VariableValue & value = _vars[curr_var_idx]->nodalSln();
+      VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
+      VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
+
+      // Copy Value from intersecting variable to new variable
+      dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
+
+      // Set the only DOF for this variable on this node
+      solution.set(dof_index, value[0]);
+      solution_old.set(dof_index, value_old[0]);
+      solution_older.set(dof_index, value_older[0]);
+    }
+    {
+      VariableValue & value = _vars[new_var_idx]->nodalSln();
+      VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
+      VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
+
+      // Copy Value from variable to the intersecting variable
+      dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
+
+      // Set the only DOF for this variable on this node
+      solution.set(dof_index, value[0]);
+      solution_old.set(dof_index, value_old[0]);
+      solution_older.set(dof_index, value_older[0]);
+    }
+  }
 }
 
 void
