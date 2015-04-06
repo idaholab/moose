@@ -607,7 +607,7 @@ GrainTracker::remapGrains()
   bool variables_remapped;
   do
   {
-    Moose::out << "Remap Loop: " << ++times_through_loop << std::endl;
+    Moose::out << "Remap Loop: " << times_through_loop << std::endl;
 
     variables_remapped = false;
     for (std::map<unsigned int, UniqueGrain *>::iterator grain_it1 = _unique_grains.begin();
@@ -639,7 +639,7 @@ GrainTracker::remapGrains()
       }
     }
 
-    if (times_through_loop >= 5)
+    if (++times_through_loop >= 5)
       mooseError(COLOR_RED << "Five passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?" << COLOR_DEFAULT);
 
   } while (variables_remapped);
