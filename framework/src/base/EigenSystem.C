@@ -25,7 +25,8 @@ EigenSystem::EigenSystem(FEProblem & fe_problem, const std::string & name) :
     _sys_sol_old(NULL),
     _sys_sol_older(NULL),
     _aux_sol_old(NULL),
-    _aux_sol_older(NULL)
+    _aux_sol_older(NULL),
+    _eigen_kernel_counter(0)
 {
 }
 
@@ -68,6 +69,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
         std::set<SubdomainID> blk_ids = ekernel->blockIDs();
         _kernels[tid].addKernel(ekernel, blk_ids);
         _fe_problem._objects_by_name[tid][old_name].push_back(ekernel.get());
+        ++_eigen_kernel_counter;
       }
     }
     else // Standard nonlinear system kernel
@@ -287,4 +289,10 @@ EigenSystem::restoreOldSolutions()
   solutionOlder() = *_sys_sol_older;
   _fe_problem.getAuxiliarySystem().solutionOld() = *_aux_sol_old;
   _fe_problem.getAuxiliarySystem().solutionOlder() = *_aux_sol_older;
+}
+
+bool
+EigenSystem::containsEigenKernel() const
+{
+  return _eigen_kernel_counter>0;
 }
