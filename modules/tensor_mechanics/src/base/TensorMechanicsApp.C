@@ -26,6 +26,7 @@
 #include "CosseratLinearElasticMaterial.h"
 #include "ElementPropertyReadFileTest.h"
 #include "TwoPhaseStressMaterial.h"
+#include "MultiPhaseStressMaterial.h"
 #include "SimpleEigenStrainMaterial.h"
 #include "ComputeElasticityTensor.h"
 #include "ComputeIsotropicElasticityTensor.h"
@@ -116,6 +117,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(CosseratLinearElasticMaterial);
   registerMaterial(ElementPropertyReadFileTest);
   registerMaterial(TwoPhaseStressMaterial);
+  registerMaterial(MultiPhaseStressMaterial);
   registerMaterial(SimpleEigenStrainMaterial);
   registerMaterial(ComputeElasticityTensor);
   registerMaterial(ComputeIsotropicElasticityTensor);
