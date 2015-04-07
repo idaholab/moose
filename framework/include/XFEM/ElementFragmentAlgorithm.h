@@ -29,7 +29,7 @@
 #include "EFAedge.h"
 #include "EFAfragment.h"
 #include "EFAelement2D.h"
-//#include "EFAelement3D.h"
+#include "EFAelement3D.h"
 
 class ElementFragmentAlgorithm
 {
@@ -60,12 +60,15 @@ public:
 
   unsigned int add2DElements( std::vector< std::vector<unsigned int> > &quads );
   EFAelement* add2DElement( std::vector<unsigned int> quad, unsigned int id );
+  EFAelement* add3DElement( std::vector<unsigned int> quad, unsigned int id );
   void set_dimension(unsigned int ndm);
 
   void updateEdgeNeighbors();
   void initCrackTipTopology();
   void addElemEdgeIntersection(unsigned int elemid, unsigned int edgeid, double position);
   void addFragEdgeIntersection(unsigned int elemid, unsigned int frag_edge_id, double position);
+  void addElemFaceIntersection(unsigned int elemid, unsigned int faceid,
+                               std::vector<unsigned int> edgeid, std::vector<double> position);
 
   void updatePhysicalLinksAndFragments();
 

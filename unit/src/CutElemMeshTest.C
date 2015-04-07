@@ -202,7 +202,7 @@ void CutElemMeshTest::CutElemMeshTest2c()
 
 //  std::cout<<"\nCut third element:"<<std::endl;
   MyMesh.clearAncestry();
-  MyMesh.updateEdgeNeighbors(); 
+  MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
   MyMesh.printMesh();
 
@@ -539,4 +539,170 @@ void CutElemMeshTest::CutElemMeshTest5b()
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
   MyMesh.printMesh();
+}
+
+void
+CutElemMeshTest::case6Mesh(ElementFragmentAlgorithm &MyMesh)
+{
+  unsigned int q1[] = {0,1,4,3,9,10,13,12};
+  std::vector<unsigned int> v1 (q1, q1 + sizeof(q1) / sizeof(unsigned int) );
+  MyMesh.add3DElement(v1, 0);
+
+  unsigned int q2[] = {1,2,5,4,10,11,14,13};
+  std::vector<unsigned int> v2 (q2, q2 + sizeof(q2) / sizeof(unsigned int) );
+  MyMesh.add3DElement(v2, 1);
+
+  unsigned int q3[] = {3,4,7,6,12,13,16,15};
+  std::vector<unsigned int> v3 (q3, q3 + sizeof(q3) / sizeof(unsigned int) );
+  MyMesh.add3DElement(v3,2);
+
+  unsigned int q4[] = {4,5,8,7,13,14,17,16};
+  std::vector<unsigned int> v4 (q4, q4 + sizeof(q4) / sizeof(unsigned int) );
+  MyMesh.add3DElement(v4,3);
+
+  unsigned int q5[] = {9,10,13,12,18,19,22,21};
+  std::vector<unsigned int> v5 (q5, q5 + sizeof(q5) / sizeof(unsigned int) );
+  MyMesh.add3DElement(v5,4);
+
+  unsigned int q6[] = {10,11,14,13,19,20,23,22};
+  std::vector<unsigned int> v6 (q6, q6 + sizeof(q6) / sizeof(unsigned int) );
+  MyMesh.add3DElement(v6,5);
+
+  unsigned int q7[] = {12,13,16,15,21,22,25,24};
+  std::vector<unsigned int> v7 (q7, q7 + sizeof(q7) / sizeof(unsigned int) );
+  MyMesh.add3DElement(v7,6);
+
+  unsigned int q8[] = {13,14,17,16,22,23,26,25};
+  std::vector<unsigned int> v8 (q8, q8 + sizeof(q8) / sizeof(unsigned int) );
+  MyMesh.add3DElement(v8,7);
+
+  MyMesh.updateEdgeNeighbors();
+}
+
+void
+CutElemMeshTest::CutElemMeshTest6a()
+{
+  std::cout<<"\n ***** Running case 6a *****"<<std::endl;
+  ElementFragmentAlgorithm MyMesh;
+  case6Mesh(MyMesh);
+//  std::cout << " ***** original mesh *****" << std::endl;
+//  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2,0);
+  std::vector<double> cut_position(2,0.5);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 2, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+
+  MyMesh.addElemFaceIntersection(1, 4, cut_edge_id, cut_position); // unnecessary, just test
+  MyMesh.addElemFaceIntersection(2, 1, cut_edge_id, cut_position); // unnecessary, just test
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+//  std::cout << " ***** new mesh *****" << std::endl;
+  // second time, just test
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::cout << " ***** crack tip elements *****" << std::endl;
+  std::set<EFAelement*> crack_tip_elem = MyMesh.getCrackTipElements();
+  std::set<EFAelement*>::iterator it;
+  for (it = crack_tip_elem.begin(); it != crack_tip_elem.end(); ++it)
+    std::cout << (*it)->id() << " ";
+  std::cout << std::endl;
+}
+
+void
+CutElemMeshTest::CutElemMeshTest6b()
+{
+  std::cout<<"\n ***** Running case 6b *****"<<std::endl;
+  ElementFragmentAlgorithm MyMesh;
+  case6Mesh(MyMesh);
+
+  std::vector<unsigned int> cut_edge_id(2,0);
+  std::vector<double> cut_position(2,0.5);
+
+  cut_edge_id[0] = 1; cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(1, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1; cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(1, 4, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1; cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(3, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(3, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(3, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(4, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(4, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(4, 2, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0; cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(5, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(5, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(5, 4, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(7, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(7, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0; cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(7, 2, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  // second time cut, just test
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+ // print crack tip elems
+  std::cout << " ***** crack tip elements *****" << std::endl;
+  std::set<EFAelement*> crack_tip_elem = MyMesh.getCrackTipElements();
+  std::set<EFAelement*>::iterator it;
+  for (it = crack_tip_elem.begin(); it != crack_tip_elem.end(); ++it)
+    std::cout << (*it)->id() << " ";
+  std::cout << std::endl;
 }

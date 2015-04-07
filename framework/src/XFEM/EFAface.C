@@ -431,7 +431,7 @@ EFAface::remove_embedded_node(EFAnode* emb_node)
       node_found = true;
       index = i;
       break;
-    }  
+    }
   }
   if (node_found)
   {
@@ -444,7 +444,7 @@ std::vector<EFAface*>
 EFAface::split() const
 {
   std::vector<EFAface*> new_faces;
-  if (has_intersection())
+  if (get_num_cuts() > 0)
   {
     // contruct a fragment from this face
     EFAfragment2D* frag_tmp = new EFAfragment2D(NULL, this);
@@ -547,9 +547,9 @@ EFAface::reset_edge_intersection(const EFAface* ref_face)
             ref_face->getFaceNodeParaCoor(emb_node, emb_xi2d))
         {
           // TODO: this is not corrent for unstructured elements. Need a fix
-          double dist2node1 = std::sqrt((emb_xi2d[0]-node1_xi2d[0])*(emb_xi2d[0]-node1_xi2d[0]) 
+          double dist2node1 = std::sqrt((emb_xi2d[0]-node1_xi2d[0])*(emb_xi2d[0]-node1_xi2d[0])
                                       + (emb_xi2d[1]-node1_xi2d[1])*(emb_xi2d[1]-node1_xi2d[1]));
-          double full_dist = std::sqrt((node2_xi2d[0]-node1_xi2d[0])*(node2_xi2d[0]-node1_xi2d[0]) 
+          double full_dist = std::sqrt((node2_xi2d[0]-node1_xi2d[0])*(node2_xi2d[0]-node1_xi2d[0])
                                      + (node2_xi2d[1]-node1_xi2d[1])*(node2_xi2d[1]-node1_xi2d[1]));
           inters_x = dist2node1/full_dist;
         }
@@ -644,7 +644,7 @@ EFAface::is_same_orientation(const EFAface* other_face) const
     } // i
   }
   else
-    std::cout << "WARNING: in is_same_orientation two faces does not overlap" << std::endl;  
+    std::cout << "WARNING: in is_same_orientation two faces does not overlap" << std::endl;
   return same_order;
 }
 

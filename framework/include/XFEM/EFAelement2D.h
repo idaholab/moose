@@ -44,8 +44,9 @@ public:
   bool is_partial() const;
   void get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes) const;
 
-  void switchNode(EFAnode *new_node, EFAnode *old_node,
-                  bool descend_to_parent = true);
+  void switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent);
+  void switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent,
+                  std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap);
   void switchEmbeddedNode(EFAnode *new_node, EFAnode *old_node);
   void getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
                      std::vector<double> &master_weights) const;
@@ -109,7 +110,7 @@ public:
   EFAnode* get_tip_embedded() const;
   bool edge_contains_tip(unsigned int edge_id) const;
 
-  void add_edge_cut(unsigned int edge_id, double position, EFAnode* embedded_node, 
+  void add_edge_cut(unsigned int edge_id, double position, EFAnode* embedded_node,
                     std::map< unsigned int, EFAnode*> &EmbeddedNodes, bool add_to_neighbor);
   void add_frag_edge_cut(unsigned int frag_edge_id, double position,
                          std::map< unsigned int, EFAnode*> &EmbeddedNodes);

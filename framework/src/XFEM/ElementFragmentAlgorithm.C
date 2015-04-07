@@ -131,6 +131,44 @@ ElementFragmentAlgorithm::add2DElement( std::vector<unsigned int> quad, unsigned
   return newElem;
 }
 
+EFAelement*
+ElementFragmentAlgorithm::add3DElement( std::vector<unsigned int> quad, unsigned int id )
+{
+  unsigned int num_nodes = quad.size();
+  unsigned int num_faces = 0;
+  if (num_nodes == 8)
+    num_faces = 6;
+  else if (num_nodes == 4)
+    num_faces = 4;
+  else
+    CutElemMeshError("In add3DElement element with id: "<<id<<" has invalid num_nodes")
+
+  std::map<unsigned int, EFAelement*>::iterator mit = _elements.find(id);
+  if (mit != _elements.end())
+    CutElemMeshError("In add2DElement element with id: "<<id<<" already exists")
+
+  EFAelement3D* newElem = new EFAelement3D(id, num_nodes, num_faces);
+  _elements.insert(std::make_pair(id,newElem));
+
+  for (unsigned int j = 0; j < num_nodes; ++j)
+  {
+    EFAnode * currNode = NULL;
+    std::map<unsigned int, EFAnode*>::iterator mit = _permanent_nodes.find(quad[j]);
+    if (mit == _permanent_nodes.end())
+    {
+      currNode = new EFAnode(quad[j],N_CATEGORY_PERMANENT);
+      _permanent_nodes.insert(std::make_pair(quad[j],currNode));
+    }
+    else
+      currNode = mit->second;
+
+    newElem->set_node(j, currNode);
+    _inverse_connectivity[currNode].insert(newElem);
+  }
+  newElem->createFaces();
+  return newElem;
+}
+
 void
 ElementFragmentAlgorithm::set_dimension(unsigned int ndm)
 {
@@ -198,6 +236,24 @@ ElementFragmentAlgorithm::addFragEdgeIntersection(unsigned int elemid, unsigned 
   if (!elem)
     CutElemMeshError("addFragEdgeIntersection: elem "<<elemid<<" is not of type EFAelement2D")
   elem->add_frag_edge_cut(frag_edge_id, position, _embedded_nodes);
+}
+
+void
+ElementFragmentAlgorithm::addElemFaceIntersection(unsigned int elemid, unsigned int faceid,
+                                                  std::vector<unsigned int> edgeid, std::vector<double> position)
+{
+  // this method is called when we are marking cut edges
+  std::map<unsigned int, EFAelement*>::iterator eit = _elements.find(elemid);
+  if (eit == _elements.end())
+    CutElemMeshError("Could not find element with id: "<<elemid<<" in addEdgeIntersection")
+
+  EFAelement3D *curr_elem = dynamic_cast<EFAelement3D*>(eit->second);
+  if (!curr_elem)
+    CutElemMeshError("addElemEdgeIntersection: elem "<<elemid<<" is not of type EFAelement2D")
+
+  // add cuts to two face edges at the same time
+  curr_elem->addFaceEdgeCut(faceid, edgeid[0], position[0], NULL, _embedded_nodes, true, true);
+  curr_elem->addFaceEdgeCut(faceid, edgeid[1], position[1], NULL, _embedded_nodes, true, true);
 }
 
 void
@@ -303,10 +359,10 @@ ElementFragmentAlgorithm::clearAncestry()
     }
   }
 
-  for (unsigned int i = 0; i < _permanent_nodes.size(); ++i)
-    _permanent_nodes[i]->remove_parent();
-
   std::map<unsigned int, EFAnode*>::iterator mit;
+  for (mit = _permanent_nodes.begin(); mit != _permanent_nodes.end(); ++mit )
+    mit->second->remove_parent();
+
   for (mit = _temp_nodes.begin(); mit != _temp_nodes.end(); ++mit )
   {
     delete mit->second;
@@ -339,7 +395,7 @@ ElementFragmentAlgorithm::createChildElements()
   for (eit = _elements.begin(); eit != ElementsEnd; ++eit)
   {
     EFAelement *curr_elem = eit->second;
-    curr_elem->create_child(_crack_tip_elements, _elements, newChildElements, 
+    curr_elem->create_child(_crack_tip_elements, _elements, newChildElements,
                             _child_elements, _parent_elements, _temp_nodes);
   } // loop over elements
   //Merge newChildElements back in with Elements
@@ -361,13 +417,9 @@ ElementFragmentAlgorithm::connectFragments(bool mergeUncutVirtualEdges)
   for (vit = _child_elements.begin(); vit != _child_elements.end(); )
   {
     if (*vit == NULL)
-    {
       vit = _child_elements.erase(vit);
-    }
     else
-    {
       ++vit;
-    }
   }
 }
 
@@ -393,9 +445,7 @@ ElementFragmentAlgorithm::findCrackTipElements()
   {
     sit = _crack_tip_elements.find(_parent_elements[i]);
     if (sit != _crack_tip_elements.end())
-    {
       _crack_tip_elements.erase(sit);
-    }
   }
 
   //Go through new child elements to find elements that are newly at the crack tip due to
@@ -425,20 +475,55 @@ ElementFragmentAlgorithm::printMesh()
            <<"=================================================="<<std::endl;
   std::cout << "Permanent Nodes:" << std::endl;
   std::map<unsigned int, EFAnode*>::iterator mit;
+  unsigned int counter = 0;
   for (mit = _permanent_nodes.begin(); mit != _permanent_nodes.end(); ++mit )
-    std::cout << "  " << mit->second->id() << std::endl;
+  {
+    std::cout << "  " << mit->second->id();
+    counter += 1;
+    if (counter % 10 == 0)
+      std::cout << std::endl;
+  }
+  std::cout << std::endl;
   std::cout << "Temp Nodes:" << std::endl;
+  counter = 0;
   for (mit = _temp_nodes.begin(); mit != _temp_nodes.end(); ++mit )
-    std::cout << "  " << mit->second->id() << std::endl;
+  {
+    std::cout << "  " << mit->second->id();
+    counter += 1;
+    if (counter % 10 == 0)
+      std::cout << std::endl;
+  }
+  std::cout << std::endl;
   std::cout << "Embedded Nodes:" << std::endl;
+  counter = 0;
   for (mit = _embedded_nodes.begin(); mit != _embedded_nodes.end(); ++mit )
-    std::cout << "  " << mit->second->id() << std::endl;
+  {
+    std::cout << "  " << mit->second->id();
+    counter += 1;
+    if (counter % 10 == 0)
+      std::cout << std::endl;
+  }
+  std::cout << std::endl;
   std::cout << "Parent Elements:" << std::endl;
+  counter = 0;
   for (unsigned int i = 0; i < _parent_elements.size(); ++i)
-    std::cout << " " << _parent_elements[i]->id() << std::endl;
+  {
+    std::cout << " " << _parent_elements[i]->id();
+    counter += 1;
+    if (counter % 10 == 0)
+      std::cout << std::endl;
+  }
+  std::cout << std::endl;
   std::cout << "Child Elements:" << std::endl;
+  counter = 0;
   for (unsigned int i = 0; i < _child_elements.size(); ++i)
-    std::cout << " " << _child_elements[i]->id() << std::endl;
+  {
+    std::cout << " " << _child_elements[i]->id();
+    counter += 1;
+    if (counter % 10 == 0)
+      std::cout << std::endl;
+  }
+  std::cout << std::endl;
   std::cout << "Elements:" << std::endl;
   std::cout << "  id "
             << "|  nodes                "

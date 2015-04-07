@@ -425,7 +425,7 @@ EFAfragment3D::connect_subfaces(EFAface* start_face, unsigned int startOldFaceID
   {
     old_num_contrib = num_contrib_faces;
     for (unsigned int i = 0; i < subfaces.size(); ++i)
-    { 
+    {
       if (!contributed[i]) // old face not contributed to new fragment yet
       {
         bool adjacent_found = false;

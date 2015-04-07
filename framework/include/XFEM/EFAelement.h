@@ -69,8 +69,9 @@ public:
   virtual bool is_partial() const = 0;
   virtual void get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes) const = 0;
 
-  virtual void switchNode(EFAnode *new_node, EFAnode *old_node,
-                          bool descend_to_parent = true) = 0;
+  virtual void switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent) = 0;
+  virtual void switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent,
+                          std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap) = 0;
   virtual void switchEmbeddedNode(EFAnode *new_node, EFAnode *old_node) = 0;
   virtual void getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
                              std::vector<double> &master_weights) const = 0;
@@ -114,10 +115,9 @@ public:
 protected:
 
   // common methods
-  void mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
-                  EFAelement* childOfNeighborElem,
-                  std::map<unsigned int, EFAnode*> &PermanentNodes,
-                  std::map<unsigned int, EFAnode*> &TempNodes);
+  void mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode, EFAelement* childOfNeighborElem,
+                  std::map<unsigned int, EFAnode*> &PermanentNodes, std::map<unsigned int, EFAnode*> &TempNodes,
+                  std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap);
 };
 
 #endif

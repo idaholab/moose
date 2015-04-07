@@ -39,7 +39,7 @@ class EFAedge
   bool isOverlapping(const EFAedge & other) const; // only compares end nodes
   bool isPartialOverlap(const EFAedge & other) const;
   bool containsEdge(const EFAedge & other) const;
-  bool getNodeMasters(EFAnode* node, std::vector<EFAnode*> &master_nodes, 
+  bool getNodeMasters(EFAnode* node, std::vector<EFAnode*> &master_nodes,
                       std::vector<double> &master_weights) const;
 //  bool operator < (const EFAedge & other) const;
 

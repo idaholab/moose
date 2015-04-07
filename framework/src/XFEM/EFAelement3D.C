@@ -58,14 +58,14 @@ EFAelement3D::EFAelement3D(const EFAelement3D* from_elem, bool convert_to_local)
       if (_nodes[i]->category() == N_CATEGORY_LOCAL_INDEX)
         switchNode(_nodes[i], from_elem->_nodes[i], false);//when save to _cut_elem_map, the EFAelement is not a child of any parent
       else
-        mooseError("In EFAelement2D copy constructor this elem's nodes must be local");
+        mooseError("In EFAelement3D copy constructor this elem's nodes must be local");
     }
 
     // create element face connectivity array (IMPORTANT)
     create_adjacent_face_ix();
   }
   else
-    mooseError("this EFAelement2D constructor only converts global nodes to local nodes");
+    mooseError("this EFAelement3D constructor only converts global nodes to local nodes");
 }
 
 EFAelement3D::~EFAelement3D()
@@ -161,8 +161,7 @@ EFAelement3D::get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes) con
 }
 
 void
-EFAelement3D::switchNode(EFAnode *new_node, EFAnode *old_node,
-                         bool descend_to_parent)
+EFAelement3D::switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent)
 {
   // We are not switching any embedded nodes here
   for (unsigned int i = 0; i < _num_nodes; ++i)
@@ -181,18 +180,56 @@ EFAelement3D::switchNode(EFAnode *new_node, EFAnode *old_node,
     EFAelement3D* parent3d = dynamic_cast<EFAelement3D*>(_parent);
     if (!parent3d) mooseError("Failed to dynamic cast to parent3d");
 
-    parent3d->switchNode(new_node,old_node,false);
+    parent3d->switchNode(new_node, old_node, false);
     for (unsigned int i = 0; i < parent3d->num_faces(); ++i)
     {
       for (unsigned int j = 0; j < parent3d->num_face_neighbors(i); ++j)
       {
         EFAelement3D* face_neighbor = parent3d->get_face_neighbor(i,j);
         for (unsigned int k = 0; k < face_neighbor->num_children(); ++k)
-        {
-          face_neighbor->get_child(k)->switchNode(new_node,old_node,false);
-        } // k
+          face_neighbor->get_child(k)->switchNode(new_node, old_node, false);
       } // j
     } // i
+  }
+}
+
+void
+EFAelement3D::switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent,
+                         std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap)
+{
+  // We are not switching any embedded nodes here; This is an enhanced version
+  for (unsigned int i = 0; i < _num_nodes; ++i)
+  {
+    if (_nodes[i] == old_node)
+      _nodes[i] = new_node;
+  }
+  for (unsigned int i = 0; i < _fragments.size(); ++i)
+    _fragments[i]->switchNode(new_node, old_node);
+
+  for (unsigned int i = 0; i < _faces.size(); ++i)
+    _faces[i]->switchNode(new_node, old_node);
+
+  if (_parent && descend_to_parent)
+  {
+    _parent->switchNode(new_node, old_node, false);
+
+    // get all node neighbors and edge neighbors of _parent
+    std::set<EFAelement*> neighbor_elements;
+    for (unsigned int inode = 0; inode < _parent->num_nodes(); ++inode)
+    {
+      std::set<EFAelement*> this_node_connected_elems = InverseConnectivityMap[_parent->get_node(inode)];
+      neighbor_elements.insert(this_node_connected_elems.begin(), this_node_connected_elems.end());
+    }
+
+    // loop over all node neighbors and edge neighbors
+    std::set<EFAelement*>::iterator eit2;
+    for (eit2 = neighbor_elements.begin(); eit2 != neighbor_elements.end(); ++eit2)
+    {
+      EFAelement* neigh_elem = *eit2; // generalized neighbor element
+      if (neigh_elem != _parent)
+        for (unsigned int k = 0; k < neigh_elem->num_children(); ++k)
+          neigh_elem->get_child(k)->switchNode(new_node, old_node, false);
+    } // eit2
   }
 }
 
@@ -323,7 +360,7 @@ EFAelement3D::setup_neighbors(std::map<EFAnode*, std::set<EFAelement*> > &Invers
   for (eit2 = neighbor_elements.begin(); eit2 != neighbor_elements.end(); ++eit2)
   {
     EFAelement3D* neigh_elem = dynamic_cast<EFAelement3D*>(*eit2);
-    if (!neigh_elem) mooseError("neighbor_elem is not of EFAelement2D type");
+    if (!neigh_elem) mooseError("neighbor_elem is not of EFAelement3D type");
 
     if (neigh_elem != this)
     {
@@ -436,7 +473,7 @@ bool
 EFAelement3D::should_duplicate_for_crack_tip(const std::set<EFAelement*> &CrackTipElements)
 {
   // This method is called in createChildElements()
-  // Only duplicate when 
+  // Only duplicate when
   // 1) currElem will be a NEW crack tip element
   // 2) currElem is a crack tip split element at last time step and the tip will extend
   // 3) currElem is the neighbor of a to-be-second-split element which has another neighbor
@@ -472,7 +509,7 @@ EFAelement3D::shouldDuplicateCrackTipSplitElem()
     else
     {
       //The element may not be at the crack tip, but could have a non-physical node
-      //connected to a crack tip face (on a neighbor element) that will be split.  We need to 
+      //connected to a crack tip face (on a neighbor element) that will be split.  We need to
       //duplicate in that case as well.
 
       //Get the set of nodes in neighboring elements that are on a crack tip face that will be split
@@ -510,7 +547,7 @@ bool
 EFAelement3D::shouldDuplicateForPhantomCorner()
 {
   // if a partial element will be split for a second time and it has two neighbor elements
-  // sharing one phantom node with the aforementioned partial element, then the two neighbor 
+  // sharing one phantom node with the aforementioned partial element, then the two neighbor
   // elements should be duplicated
   bool should_duplicate = false;
   if (_fragments.size() == 1 && (!_crack_tip_split_element))
@@ -579,7 +616,7 @@ EFAelement3D::will_crack_tip_extend(std::vector<unsigned int> &split_neighbors) 
         {
           split_neighbors.push_back(neigh_idx);
           will_extend = true;
-        }        
+        }
       }
     } // i
   }
@@ -680,7 +717,7 @@ EFAelement3D::update_fragments(const std::set<EFAelement*> &CrackTipElements,
 }
 
 void
-EFAelement3D::fragment_sanity_check(unsigned int n_old_frag_faces, 
+EFAelement3D::fragment_sanity_check(unsigned int n_old_frag_faces,
                                     unsigned int n_old_frag_cuts) const
 {
   unsigned int n_interior_nodes = num_interior_nodes();
@@ -745,7 +782,7 @@ EFAelement3D::restore_fragment(const EFAelement* const from_elem)
 void
 EFAelement3D::create_child(const std::set<EFAelement*> &CrackTipElements,
                            std::map<unsigned int, EFAelement*> &Elements,
-                           std::map<unsigned int, EFAelement*> &newChildElements, 
+                           std::map<unsigned int, EFAelement*> &newChildElements,
                            std::vector<EFAelement*> &ChildElements,
                            std::vector<EFAelement*> &ParentElements,
                            std::map<unsigned int, EFAnode*> &TempNodes)
@@ -864,7 +901,7 @@ EFAelement3D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
   for (unsigned int j = 0; j < _num_faces; ++j)
   {
     for (unsigned int k = 0; k < parent3d->num_face_neighbors(j); ++k)
-    {   
+    {
       EFAelement3D* NeighborElem = parent3d->get_face_neighbor(j,k);
       unsigned int neighbor_face_id = NeighborElem->get_neighbor_index(parent3d);
 
@@ -889,7 +926,8 @@ EFAelement3D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
 
               EFAnode* childNode = _faces[j]->get_node(childNodeIndex);
               EFAnode* childOfNeighborNode = neighborChildFace->get_node(neighborChildNodeIndex);
-              mergeNodes(childNode, childOfNeighborNode, childOfNeighborElem, PermanentNodes, TempNodes);
+              mergeNodes(childNode, childOfNeighborNode, childOfNeighborElem, PermanentNodes, TempNodes,
+                         InverseConnectivityMap);
             } // i
           }
         } // l, loop over NeighborElem's children
@@ -921,7 +959,7 @@ EFAelement3D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
                 if (childNode->parent() != NULL &&
                     childNode->parent() == childOfNeighborNode->parent()) //non-material node and both come from same parent
                   mergeNodes(childNode, childOfNeighborNode, childOfNeighborElem,
-                             PermanentNodes, TempNodes);
+                             PermanentNodes, TempNodes, InverseConnectivityMap);
               } // i
             }
           } // loop over NeighborElem's children
@@ -942,13 +980,13 @@ EFAelement3D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
       // permanent nodes that are not connected to any element
       std::set<EFAelement*> patch_elems = InverseConnectivityMap[childNode->parent()];
       if (parent3d->num_frags() == 1 && patch_elems.size() == 1)
-        switchNode(childNode->parent(), childNode);
+        switchNode(childNode->parent(), childNode, false);
       else
       {
         unsigned int new_node_id = getNewID(PermanentNodes);
         EFAnode* newNode = new EFAnode(new_node_id,N_CATEGORY_PERMANENT,childNode->parent());
         PermanentNodes.insert(std::make_pair(new_node_id,newNode));
-        switchNode(newNode, childNode);
+        switchNode(newNode, childNode, false);
       }
       if (!deleteFromMap(TempNodes, childNode))
         mooseError("Attempted to delete node: "<<childNode->id()<<" from TempNodes, but couldn't find it");
@@ -972,12 +1010,12 @@ EFAelement3D::print_elem()
 
   // second line: emb nodes in all faces + neighbor of each face
   std::cout << std::setw(5);
-  std::cout << "embd" << "| ";
+  std::cout << "embed" << "| ";
   for (unsigned int j = 0; j < _num_faces; ++j)
   {
-    std::cout<<std::setw(4);
     for (unsigned int k = 0; k < _faces[j]->num_edges(); ++k)
     {
+      std::cout << std::setw(4);
       if (_faces[j]->get_edge(k)->has_intersection())
       {
         if (_faces[j]->get_edge(k)->num_embedded_nodes() > 1)
@@ -985,7 +1023,7 @@ EFAelement3D::print_elem()
           std::cout << "[";
           for (unsigned int l = 0; l < _faces[j]->get_edge(k)->num_embedded_nodes(); ++l)
           {
-            std::cout << _faces[j]->get_edge(k)->get_embedded_node(l)->id();
+            std::cout << _faces[j]->get_edge(k)->get_embedded_node(l)->id() << " ";
             if (l == _faces[j]->get_edge(k)->num_embedded_nodes()-1)
               std::cout<<"]";
             else
@@ -998,8 +1036,16 @@ EFAelement3D::print_elem()
       else
         std::cout << "  -- ";
     } // k
-    std::cout << ", ";
+    std::cout << " | ";
+  } // j
+  std::cout << std::endl;
 
+  // third line: neighbors
+  std::cout << std::setw(5);
+  std::cout << "neigh" << "| ";
+  for (unsigned int j = 0; j < _num_faces; ++j)
+  {
+    std::cout << std::setw(4);
     if (num_face_neighbors(j) > 1)
     {
       std::cout << "[";
@@ -1014,20 +1060,18 @@ EFAelement3D::print_elem()
     }
     else
     {
-      std::cout<<std::setw(4);
       if (num_face_neighbors(j) == 1)
         std::cout << get_face_neighbor(j,0)->id() << " ";
       else
         std::cout << "  -- ";
     }
-    std::cout << " | ";
-  } // j
+  }
   std::cout << std::endl;
 
-  // third line: fragments
-  std::cout << std::setw(5);
+  // fourth line: fragments
   for (unsigned int j = 0; j < _fragments.size(); ++j)
   {
+    std::cout << std::setw(4);
     std::cout << "frag" << j << "| ";
     for (unsigned int k = 0; k < _fragments[j]->num_faces(); ++k)
     {
@@ -1037,6 +1081,7 @@ EFAelement3D::print_elem()
     }
     std::cout << std::endl;
   }
+  std::cout << std::endl;
 }
 
 EFAfragment3D*
@@ -1516,13 +1561,13 @@ EFAelement3D::addFaceEdgeCut(unsigned int face_id, unsigned int edge_id, double 
     local_embedded = old_emb;
     cut_exist = true;
   }
-  
+
   if (!cut_exist)
   {
     // check if cut has already been added to the neighbor edges
     checkNeighborFaceCut(face_id, edge_id, position, edge_node1, embedded_node, local_embedded);
     checkNeighborFaceCut(adj_face_id, adj_edge_id, position, edge_node1, embedded_node, local_embedded);
-  
+
     if (!local_embedded) // need to create new embedded node
     {
       unsigned int new_node_id = getNewID(EmbeddedNodes);
@@ -1552,7 +1597,7 @@ EFAelement3D::addFaceEdgeCut(unsigned int face_id, unsigned int edge_id, double 
       unsigned int neigh_face_id = face_neighbor->get_neighbor_index(this);
       unsigned neigh_edge_id = getNeighborFaceEdgeID(face_id, edge_id, face_neighbor);
       double neigh_pos = 1.0 - position; // get emb node's postion on neighbor edge
-      face_neighbor->addFaceEdgeCut(neigh_face_id, neigh_edge_id, neigh_pos, local_embedded, 
+      face_neighbor->addFaceEdgeCut(neigh_face_id, neigh_edge_id, neigh_pos, local_embedded,
                                     EmbeddedNodes, false, true);
     } // en_iter
   } // If add_to_neighbor required

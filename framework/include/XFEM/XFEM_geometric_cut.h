@@ -42,7 +42,7 @@ public:
 
   bool cut_elem_by_geometry(const Elem* elem, std::vector<cutEdge> & cutEdges, Real time);
 
-  bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges, 
+  bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges,
                             std::vector<cutEdge> & cutEdges, Real time);
 
   Real crossprod_2d(Real ax, Real ay, Real bx, Real by);

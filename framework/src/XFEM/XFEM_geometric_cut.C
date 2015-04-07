@@ -122,7 +122,7 @@ bool XFEM_geometric_cut::cut_elem_by_geometry(const Elem* elem, std::vector<cutE
   return cut_elem;
 }
 
-bool XFEM_geometric_cut::cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges, 
+bool XFEM_geometric_cut::cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges,
                                               std::vector<cutEdge> & cutEdges, Real time)
 {
   //Use the algorithm described here to determine whether edges are cut by the cut line:

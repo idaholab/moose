@@ -96,7 +96,7 @@ XFEMCutElem2D::get_origin(unsigned int plane_id, MeshBase* displaced_mesh) const
       node_line[0] = _efa_elem2d.get_frag_edge(0,i)->get_node(0);
       node_line[1] = _efa_elem2d.get_frag_edge(0,i)->get_node(1);
       cut_line_nodes.push_back(node_line);
-    }  
+    }
   }
   if (cut_line_nodes.size() == 0)
   {
@@ -121,7 +121,7 @@ XFEMCutElem2D::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
       node_line[0] = _efa_elem2d.get_frag_edge(0,i)->get_node(0);
       node_line[1] = _efa_elem2d.get_frag_edge(0,i)->get_node(1);
       cut_line_nodes.push_back(node_line);
-    }  
+    }
   }
   if (cut_line_nodes.size() == 0)
   {

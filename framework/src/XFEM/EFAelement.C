@@ -55,7 +55,7 @@ EFAelement::display_nodes() const
 {
   std::cout << "***** display nodes for element " << _id << " *****" << std::endl;
   for (unsigned int i = 0; i < _num_nodes; ++i)
-    std::cout << "addr " << _nodes[i] << ", ID " << _nodes[i]->id() << ", category " << _nodes[i]->category() << std::endl;
+    std::cout << "addr " << _nodes[i] << ", ID " << _nodes[i]->id_cat_str() << ", category " << _nodes[i]->category() << std::endl;
 }
 
 EFAnode *
@@ -157,20 +157,14 @@ EFAelement::add_crack_tip_neighbor(EFAelement * neighbor_elem)
   //Find out what side the specified element is on, and add it as a crack tip neighbor
   //element for that side.
   unsigned int neighbor_index = get_neighbor_index(neighbor_elem);
+  bool crack_tip_neighbor_exist = false;
   for (unsigned int i = 0; i < _crack_tip_neighbors.size(); ++i)
   {
     if (_crack_tip_neighbors[i] == neighbor_index)
-      mooseError("in add_crack_tip_neighbor() element: "<<_id
-                  <<" already has a crack tip neighbor set on side: "<<neighbor_index);
+      crack_tip_neighbor_exist = true;
   }
-  _crack_tip_neighbors.push_back(neighbor_index);
-  if (_crack_tip_neighbors.size() > 2)
-  {
-    for (unsigned int j = 0; j < _crack_tip_neighbors.size(); ++j)
-      std::cout<<"Neighbor: "<<_crack_tip_neighbors[j]<<std::endl;
-    mooseError("in add_crack_tip_neighbor() element: "
-                <<_id<<" cannot have more than 2 crack tip neighbors");
-  }
+  if (!crack_tip_neighbor_exist)
+    _crack_tip_neighbors.push_back(neighbor_index);
 }
 
 EFAelement*
@@ -214,10 +208,9 @@ EFAelement::remove_parent_children()
 }
 
 void
-EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
-                       EFAelement* childOfNeighborElem,       
-                       std::map<unsigned int, EFAnode*> &PermanentNodes,
-                       std::map<unsigned int, EFAnode*> &TempNodes)
+EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode, EFAelement* childOfNeighborElem,
+                       std::map<unsigned int, EFAnode*> &PermanentNodes, std::map<unsigned int, EFAnode*> &TempNodes,
+                       std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap)
 {
   // N.B. "this" must point to a child element that was just created
   if (!_parent)
@@ -232,7 +225,7 @@ EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
       {
         if (childOfNeighborNode->parent() == childNode) // merge into childNode
         {
-          childOfNeighborElem->switchNode(childNode, childOfNeighborNode);
+          childOfNeighborElem->switchNode(childNode, childOfNeighborNode, true, InverseConnectivityMap);
           if (!deleteFromMap(PermanentNodes, childOfNeighborNode))
           {
             mooseError("Attempted to delete node: "<<childOfNeighborNode->id()
@@ -242,7 +235,7 @@ EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
         }
         else if (childNode->parent() == childOfNeighborNode) // merge into childOfNeighborNode
         {
-          childElem->switchNode(childOfNeighborNode, childNode);
+          childElem->switchNode(childOfNeighborNode, childNode, true, InverseConnectivityMap);
           if (!deleteFromMap(PermanentNodes, childNode))
           {
             mooseError("Attempted to delete node: "<<childNode->id()
@@ -253,7 +246,7 @@ EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
         else if (childNode->parent() != NULL && childNode->parent() == childOfNeighborNode->parent())
         {
           // merge into childNode if both nodes are child permanent
-          childOfNeighborElem->switchNode(childNode, childOfNeighborNode);
+          childOfNeighborElem->switchNode(childNode, childOfNeighborNode, true, InverseConnectivityMap);
           if (!deleteFromMap(PermanentNodes, childOfNeighborNode)) // delete childOfNeighborNode
           {
             mooseError("Attempted to delete node: "<<childOfNeighborNode->id()
@@ -275,11 +268,10 @@ EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
           mooseError("Attempting to merge nodes "<<childOfNeighborNode->id_cat_str()<<" and "
                       <<childNode->id_cat_str()<<" but neither the 2nd node nor its parent is parent of the 1st");
         }
-        childOfNeighborElem->switchNode(childNode, childOfNeighborNode);
+        childOfNeighborElem->switchNode(childNode, childOfNeighborNode, true, InverseConnectivityMap);
         if (!deleteFromMap(TempNodes, childOfNeighborNode))
         {
-          mooseError("Attempted to delete node: "<<childOfNeighborNode->id()
-                      <<" from TempNodes, but couldn't find it");
+          mooseError("Attempted to delete node: "<<childOfNeighborNode->id()<<" from TempNodes, but couldn't find it");
         }
         childOfNeighborNode = childNode;
       }
@@ -292,7 +284,7 @@ EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
         mooseError("Attempting to merge nodes "<<childNode->id()<<" and "
                     <<childOfNeighborNode->id()<<" but neither the 2nd node nor its parent is parent of the 1st");
       }
-      childElem->switchNode(childOfNeighborNode, childNode);
+      childElem->switchNode(childOfNeighborNode, childNode, true, InverseConnectivityMap);
       if (!deleteFromMap(TempNodes, childNode))
       {
         mooseError("Attempted to delete node: "<<childNode->id()<<" from TempNodes, but couldn't find it");
@@ -305,8 +297,8 @@ EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
       EFAnode* newNode = new EFAnode(new_node_id,N_CATEGORY_PERMANENT,childNode->parent());
       PermanentNodes.insert(std::make_pair(new_node_id,newNode));
 
-      childOfNeighborElem->switchNode(newNode, childOfNeighborNode);
-      childElem->switchNode(newNode, childNode);
+      childOfNeighborElem->switchNode(newNode, childOfNeighborNode, true, InverseConnectivityMap);
+      childElem->switchNode(newNode, childNode, true, InverseConnectivityMap);
 
       if (childNode->parent() != childOfNeighborNode->parent())
       {
@@ -316,13 +308,11 @@ EFAelement::mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode,
 
       if (!deleteFromMap(TempNodes, childOfNeighborNode))
       {
-        mooseError("Attempted to delete node: "<<childOfNeighborNode->id()
-                    <<" from TempNodes, but couldn't find it");
+        mooseError("Attempted to delete node: "<<childOfNeighborNode->id()<<" from TempNodes, but couldn't find it");
       }
       if (!deleteFromMap(TempNodes, childNode))
       {
-        mooseError("Attempted to delete node: "<<childNode->id()
-                    <<" from TempNodes, but couldn't find it");
+        mooseError("Attempted to delete node: "<<childNode->id()<<" from TempNodes, but couldn't find it");
       }
       childOfNeighborNode = newNode;
       childNode = newNode;

@@ -44,7 +44,7 @@ XFEMMaterialTensorMarkerUserObject::doesElementCrack(RealVectorValue &direction)
   unsigned int numqp = _qrule->n_points();
 
   Real rnd_mult = (1.0 - _random_range/2.0) + _random_range*getRandomReal();
-  
+
   if (_average)
   {
     SymmTensor average_tensor;

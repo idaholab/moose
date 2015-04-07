@@ -20,7 +20,7 @@ EFAnode::EFAnode(unsigned int nid, N_CATEGORY ncat, EFAnode* nparent):
   _parent(nparent)
 {};
 
-std::string 
+std::string
 EFAnode::id_cat_str()
 {
   std::ostringstream s;

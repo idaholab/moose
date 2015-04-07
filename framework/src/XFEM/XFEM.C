@@ -218,7 +218,7 @@ void XFEM::build_efa_mesh()
 
   //Must update edge neighbors before restore edge intersections. Otherwise, when we
   //add edge intersections, we do not have neighbor information to use.
-  //Correction: no need to use neighbor info now 
+  //Correction: no need to use neighbor info now
   _efa_mesh.updateEdgeNeighbors();
   _efa_mesh.initCrackTipTopology();
 }
@@ -401,7 +401,7 @@ XFEM::mark_cut_edges_by_state()
       }
       else
       {
-        libMesh::err << " ERROR: element " << elem->id() 
+        libMesh::err << " ERROR: element " << elem->id()
                      << " flagged for state-based growth, but has no edge intersections" << std::endl;
         exit(1);
       }
@@ -446,7 +446,7 @@ XFEM::mark_cut_edges_by_state()
           Real distance = 0.0;
           if (init_crack_intersect_edge(cut_origin,normal,edge_ends[0],edge_ends[1],distance) &&
              (!CEMElem->get_fragment(0)->isSecondaryInteriorEdge(i)))
-          { 
+          {
             _efa_mesh.addFragEdgeIntersection(elem->id(), i, distance);
             break;
           }
@@ -461,7 +461,7 @@ XFEM::mark_cut_edges_by_state()
 }
 
 bool
-XFEM::init_crack_intersect_edge(Point cut_origin, RealVectorValue cut_normal, 
+XFEM::init_crack_intersect_edge(Point cut_origin, RealVectorValue cut_normal,
                                 Point edge_p1, Point edge_p2, Real & dist)
 {
   dist = 0.0;
@@ -716,7 +716,7 @@ XFEM::cut_mesh_with_efa()
 }
 
 Point
-XFEM::get_efa_node_coor(EFAnode* CEMnode, EFAelement* CEMElem, 
+XFEM::get_efa_node_coor(EFAnode* CEMnode, EFAelement* CEMElem,
                         const Elem *elem, MeshBase* displaced_mesh)
 {
   Point node_coor(0.0,0.0,0.0);

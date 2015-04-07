@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CUTELEMMESHTEST_H 
-#define CUTELEMMESHTEST_H 
+#ifndef CUTELEMMESHTEST_H
+#define CUTELEMMESHTEST_H
 
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
@@ -35,6 +35,8 @@ class CutElemMeshTest : public CppUnit::TestFixture
   CPPUNIT_TEST( CutElemMeshTest4 );
   CPPUNIT_TEST( CutElemMeshTest5a );
   CPPUNIT_TEST( CutElemMeshTest5b );
+  CPPUNIT_TEST( CutElemMeshTest6a );
+  CPPUNIT_TEST( CutElemMeshTest6b );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -59,6 +61,10 @@ public:
   void case5Mesh(ElementFragmentAlgorithm &MyMesh);
   void CutElemMeshTest5a();
   void CutElemMeshTest5b();
+
+  void case6Mesh(ElementFragmentAlgorithm &MyMesh);
+  void CutElemMeshTest6a();
+  void CutElemMeshTest6b();
 };
 
-#endif  // CUTELEMMESHTEST_H 
+#endif  // CUTELEMMESHTEST_H

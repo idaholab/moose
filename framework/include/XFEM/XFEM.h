@@ -72,10 +72,10 @@ public:
   bool mark_cut_edges(Real time);
   bool mark_cut_edges_by_geometry(Real time);
   bool mark_cut_edges_by_state();
-  bool init_crack_intersect_edge(Point cut_origin, RealVectorValue cut_normal, 
+  bool init_crack_intersect_edge(Point cut_origin, RealVectorValue cut_normal,
                                  Point edge_p1, Point edge_p2, Real & dist);
   bool cut_mesh_with_efa();
-  Point get_efa_node_coor(EFAnode* CEMnode, EFAelement* CEMElem, 
+  Point get_efa_node_coor(EFAnode* CEMnode, EFAelement* CEMElem,
                           const Elem *elem, MeshBase* displaced_mesh = NULL);
 
   /**
@@ -86,7 +86,7 @@ public:
   /**
    * Get specified component of normal or origin for cut plane for a given element
    */
-  Real get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity, 
+  Real get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity,
                      unsigned int plane_id) const;
 
   bool is_elem_at_crack_tip(const Elem* elem) const;

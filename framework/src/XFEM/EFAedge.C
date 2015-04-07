@@ -51,7 +51,7 @@ EFAedge::equivalent(const EFAedge & other) const
       {
         for (unsigned int j = 0; j < other.num_embedded_nodes(); ++j)
         {
-          if (_embedded_nodes[i] == other._embedded_nodes[j] && 
+          if (_embedded_nodes[i] == other._embedded_nodes[j] &&
               std::abs(_intersection_x[i] - other._intersection_x[j]) < tol)
           {
             counter += 1;
@@ -76,7 +76,7 @@ EFAedge::equivalent(const EFAedge & other) const
       {
         for (unsigned int j = 0; j < other.num_embedded_nodes(); ++j)
         {
-          if (_embedded_nodes[i] == other._embedded_nodes[j] && 
+          if (_embedded_nodes[i] == other._embedded_nodes[j] &&
               std::abs(_intersection_x[i] - 1.0 + other._intersection_x[j]) < tol)
           {
             counter += 1;
@@ -126,7 +126,7 @@ EFAedge::containsEdge(const EFAedge & other) const
 }
 
 bool
-EFAedge::getNodeMasters(EFAnode* node, std::vector<EFAnode*> &master_nodes, 
+EFAedge::getNodeMasters(EFAnode* node, std::vector<EFAnode*> &master_nodes,
                         std::vector<double> &master_weights) const
 {
   master_nodes.clear();
