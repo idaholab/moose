@@ -75,6 +75,7 @@ protected:
   double avgCDfValue(std::vector<std::vector<double> > cell);
 };
 
+/*
 class genericNDSpline: public NDInterpolation{
 public:
   double interpolateAt(std::vector<double> point_coordinate);
@@ -96,6 +97,7 @@ private:
   std::vector<double> _alpha;
   std::vector<double> _beta;
 };
+*/
 
 class NDSpline: public NDInterpolation
 {
