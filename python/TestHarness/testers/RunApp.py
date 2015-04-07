@@ -13,7 +13,8 @@ class RunApp(Tester):
     params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
-    params.addParam('should_crash',False, "Inidicates that the test is expected to crash or otherwise terminate early")
+    params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
+    params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
 
     params.addParam('walltime',           "The max time as pbs understands it")
     params.addParam('job_name',           "The test name as pbs understands it")
@@ -190,7 +191,10 @@ class RunApp(Tester):
     reason = ''
     specs = self.specs
     if specs.isValid('expect_out'):
-      out_ok = self.checkOutputForPattern(output, specs['expect_out'])
+      if specs['match_literal']:
+        out_ok = self.checkOutputForLiteral(output, specs['expect_out'])
+      else:
+        out_ok = self.checkOutputForPattern(output, specs['expect_out'])
       if (out_ok and retcode != 0):
         reason = 'OUT FOUND BUT CRASH'
       elif (not out_ok):
@@ -218,6 +222,12 @@ class RunApp(Tester):
 
   def checkOutputForPattern(self, output, re_pattern):
     if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
+      return False
+    else:
+      return True
+
+  def checkOutputForLiteral(self, output, literal):
+    if output.find(literal) == -1:
       return False
     else:
       return True
