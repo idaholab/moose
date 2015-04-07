@@ -96,7 +96,6 @@
 #include "QuotientAux.h"
 #include "NormalizationAux.h"
 #include "VariableGradientComponent.h"
-#include "LinearCombinationAux.h"
 #include "ParsedAux.h"
 
 // dirac kernels
@@ -468,7 +467,6 @@ registerObjects(Factory & factory)
   registerAux(NormalizationAux);
   registerAux(FunctionScalarAux);
   registerAux(VariableGradientComponent);
-  registerAux(LinearCombinationAux);
   registerAux(ParsedAux);
 
   // Initial Conditions

@@ -437,12 +437,6 @@
     method = 'dbg'
   [../]
 
-  [./lin_comb_incomp_len]
-    type = 'RunException'
-    input = 'lin_comb_incomp_len.i'
-    expect_err = 'lc-aux: the length of v and w has to be the same'
-  [../]
-
   # check syntax
   [./check_syntax_ok]
     type = 'RunApp'
