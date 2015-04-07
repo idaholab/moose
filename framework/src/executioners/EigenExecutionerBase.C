@@ -164,6 +164,8 @@ EigenExecutionerBase::checkIntegrity()
   // check to make sure that we don't have any time kernels in this simulation
   if (_eigen_sys.containsTimeKernel())
     mooseError("You have specified time kernels in your steady state eigenvalue simulation");
+  if (!_eigen_sys.containsEigenKernel())
+    mooseError("You have not specified any eigen kernels in your eigenvalue simulation");
 }
 
 void
