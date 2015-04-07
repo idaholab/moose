@@ -14,4 +14,9 @@
     input = 'twophasestress.i'
     exodiff = 'twophasestress_out.e'
   [../]
+  [./multiphasestress]
+    type = 'Exodiff'
+    input = 'multiphasestress.i'
+    exodiff = 'multiphasestress_out.e'
+  [../]
 []
