@@ -1,4 +1,5 @@
 #include "ND_Interpolation_Functions.h"
+#include "randomClass.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -423,8 +424,9 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
   int vertexLoc = (int)pow(2,i);
   dxs[i] = cell[vertexLoc][i] - cell[0][i];
 
-  double randomDisplacement = random();
-  center[i] = randomDisplacement;//cell[0][i] + randomDisplacement * dxs[i];
+  RandomClass *randomDouble = new RandomClass();
+  double randomDisplacement = randomDouble->random();
+  center[i] = cell[0][i] + randomDisplacement * dxs[i];
  }
  return center;
 }
