@@ -52,7 +52,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
       MooseMesh & from_mesh = from_problem.mesh();
 
-      AutoPtr<PointLocatorBase> pl = from_mesh.getMesh().sub_point_locator();
+      UniquePtr<PointLocatorBase> pl = from_mesh.getMesh().sub_point_locator();
 
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {

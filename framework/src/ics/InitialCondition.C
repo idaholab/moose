@@ -110,12 +110,12 @@ InitialCondition::compute()
   // We cannot use the FE object in Assembly, since the following code is messing with the quadrature rules
   // for projections and would screw it up. However, if we implement projections from one mesh to another,
   // this code should use that implementation.
-  AutoPtr<FEBase> fe (FEBase::build(dim, fe_type));
+  UniquePtr<FEBase> fe (FEBase::build(dim, fe_type));
 
   // Prepare variables for projection
-  AutoPtr<QBase> qrule     (fe_type.default_quadrature_rule(dim));
-  AutoPtr<QBase> qedgerule (fe_type.default_quadrature_rule(1));
-  AutoPtr<QBase> qsiderule (fe_type.default_quadrature_rule(dim-1));
+  UniquePtr<QBase> qrule     (fe_type.default_quadrature_rule(dim));
+  UniquePtr<QBase> qedgerule (fe_type.default_quadrature_rule(1));
+  UniquePtr<QBase> qsiderule (fe_type.default_quadrature_rule(dim-1));
 
   // The values of the shape functions at the quadrature points
   const std::vector<std::vector<Real> > & phi = fe->get_phi();

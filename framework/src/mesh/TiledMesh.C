@@ -107,7 +107,7 @@ TiledMesh::buildMesh()
     BoundaryID back = getBoundaryID(getParam<BoundaryName>("back_boundary"));
 
     {
-      AutoPtr<MeshBase> clone = serial_mesh->clone();
+      UniquePtr<MeshBase> clone = serial_mesh->clone();
 
       // Build X Tiles
       for (unsigned int i=1; i<getParam<unsigned int>("x_tiles"); ++i)
@@ -117,7 +117,7 @@ TiledMesh::buildMesh()
       }
     }
     {
-      AutoPtr<MeshBase> clone = serial_mesh->clone();
+      UniquePtr<MeshBase> clone = serial_mesh->clone();
 
       // Build Y Tiles
       for (unsigned int i=1; i<getParam<unsigned int>("y_tiles"); ++i)
@@ -127,7 +127,7 @@ TiledMesh::buildMesh()
       }
     }
     {
-      AutoPtr<MeshBase> clone = serial_mesh->clone();
+      UniquePtr<MeshBase> clone = serial_mesh->clone();
 
       // Build Z Tiles
       for (unsigned int i=1; i<getParam<unsigned int>("z_tiles"); ++i)

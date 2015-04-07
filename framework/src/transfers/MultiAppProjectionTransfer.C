@@ -147,7 +147,7 @@ MultiAppProjectionTransfer::assembleL2To(EquationSystems & es, const std::string
   LinearImplicitSystem & system = es.get_system<LinearImplicitSystem>(system_name);
 
   FEType fe_type = system.variable_type(0);
-  AutoPtr<FEBase> fe(FEBase::build(dim, fe_type));
+  UniquePtr<FEBase> fe(FEBase::build(dim, fe_type));
   QGauss qrule(dim, fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule);
   const std::vector<Real> & JxW = fe->get_JxW();
@@ -246,7 +246,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   LinearImplicitSystem & system = es.get_system<LinearImplicitSystem>(system_name);
 
   FEType fe_type = system.variable_type(0);
-  AutoPtr<FEBase> fe(FEBase::build(dim, fe_type));
+  UniquePtr<FEBase> fe(FEBase::build(dim, fe_type));
   QGauss qrule(dim, fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule);
   const std::vector<Real> & JxW = fe->get_JxW();
