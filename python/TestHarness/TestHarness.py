@@ -132,8 +132,8 @@ class TestHarness:
         if base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
           dirnames[:] = []
 
-        # Look for test directories that aren't in contrib folders
-        if (self.test_match.search(dirpath) and "contrib" not in os.path.relpath(dirpath, os.getcwd())):
+        # walk into directories that aren't contrib directories
+        if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
           for file in filenames:
             # set cluster_handle to be None initially (happens for each test)
             self.options.cluster_handle = None
@@ -631,9 +631,6 @@ class TestHarness:
 
     ## Save executable-under-test name to self.executable
     self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
-
-    # Emulate the standard Nose RegEx for consistency
-    self.test_match = re.compile(r"(?:^|\b|[_-])[Tt]est")
 
     # Save the output dir since the current working directory changes during tests
     self.output_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), self.options.output_dir)
