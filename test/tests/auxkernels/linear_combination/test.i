@@ -68,10 +68,10 @@
 
 [AuxKernels]
   [./lc-aux]
-    type = LinearCombinationAux
+    type = ParsedAux
     variable = lc
-    v = 'v1 v2'
-    w = 'w1 w2'
+    function = 'v1*w1+v2*w2'
+    args = 'v1 w1 v2 w2'
     execute_on = 'timestep_end'
   [../]
 []
