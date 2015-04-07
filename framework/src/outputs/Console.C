@@ -272,6 +272,9 @@ Console::output(const ExecFlagType & type)
   // Print Non-linear Residual (control with "execute_on")
   if (type == EXEC_NONLINEAR && _output_on.contains(EXEC_NONLINEAR))
   {
+    if (_nonlinear_iter == 0)
+      _old_nonlinear_norm = std::numeric_limits<Real>::max();
+
     if (_write_screen)
       Moose::out << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
 
@@ -282,6 +285,9 @@ Console::output(const ExecFlagType & type)
   // Print Linear Residual (control with "execute_on")
   else if (type == EXEC_LINEAR && _output_on.contains(EXEC_LINEAR))
   {
+    if (_linear_iter == 0)
+      _old_linear_norm = std::numeric_limits<Real>::max();
+
     if (_write_screen)
       Moose::out << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
 
@@ -444,7 +450,7 @@ Console::writeVariableNorms()
 
 // Quick helper to output the norm in color
 std::string
-Console::outputNorm(Real old_norm, Real norm)
+Console::outputNorm(Real & old_norm, const Real & norm)
 {
   std::string color = COLOR_GREEN;
 
@@ -458,6 +464,7 @@ Console::outputNorm(Real old_norm, Real norm)
   std::stringstream oss;
   oss << std::scientific << color << norm << COLOR_DEFAULT;
 
+  old_norm = norm;
   return oss.str();
 }
 

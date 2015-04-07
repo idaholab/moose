@@ -120,7 +120,7 @@ protected:
    * @param old_norm The old residual norm to compare against
    * @param norm The current residual norm
    */
-  std::string outputNorm(Real old_norm, Real norm);
+  std::string outputNorm(Real & old_norm, const Real & norm);
 
   /**
    * Prints the time step information for the screen output
