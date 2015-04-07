@@ -55,15 +55,6 @@
   # active = 'Anisotropic'
   active = 'Anisotropic_A Anisotropic_B switching combined'
 
-  [./Anisotropic]
-    type = LinearElasticMaterial
-    block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    fill_method = symmetric9
-    C_ijkl = '1e6 1e5 1e5 1e6 0 1e6 .4e6 .2e6 .5e6'
-    applied_strain_vector = '0.1 0.05 0 0 0 0.01'
-  [../]
   [./Anisotropic_A]
     type = LinearElasticMaterial
     base_name = A
@@ -94,7 +85,7 @@
     type = TwoPhaseStressMaterial
     block = 0
     base_A = A
-    base_B = A
+    base_B = B
     outputs = exodus
   [../]
 []
