@@ -22,10 +22,22 @@
 []
 
 [AuxVariables]
-  [./eta]
+  [./eta1]
     [./InitialCondition]
       type = FunctionIC
       function = 'x/2'
+    [../]
+  [../]
+  [./eta2]
+    [./InitialCondition]
+      type = FunctionIC
+      function = 'y/2'
+    [../]
+  [../]
+  [./eta3]
+    [./InitialCondition]
+      type = FunctionIC
+      function = '(2^0.5-(y-1)^2=(y-1)^2)/2'
     [../]
   [../]
   [./e11_aux]
@@ -52,9 +64,6 @@
 []
 
 [Materials]
-  # active = 'Anisotropic'
-  active = 'Anisotropic_A Anisotropic_B switching combined'
-
   [./Anisotropic_A]
     type = LinearElasticMaterial
     base_name = A
@@ -72,20 +81,44 @@
     disp_x = disp_x
     disp_y = disp_y
     fill_method = symmetric9
-    C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
+    C_ijkl = '1e6 0 0 1e6 0 1.1e6 .5e6 .5e6 .5e6'
+    applied_strain_vector = '0.1 0.05 0 0 0 0.01'
+  [../]
+  [./Anisotropic_C]
+    type = LinearElasticMaterial
+    base_name = C
+    block = 0
+    disp_x = disp_x
+    disp_y = disp_y
+    fill_method = symmetric9
+    C_ijkl = '1.1e6 1e5 0 1e6 0 1e6 .5e6 .2e6 .5e6'
     applied_strain_vector = '0.1 0.05 0 0 0 0.01'
   [../]
 
-  [./switching]
+  [./switching_A]
     type = SwitchingFunctionMaterial
     block = 0
-    eta = eta
+    function_name = h1
+    eta = eta1
   [../]
-  [./combined]
-    type = TwoPhaseStressMaterial
+  [./switching_B]
+    type = SwitchingFunctionMaterial
     block = 0
-    base_A = A
-    base_B = B
+    function_name = h2
+    eta = eta2
+  [../]
+  [./switching_C]
+    type = SwitchingFunctionMaterial
+    block = 0
+    function_name = h3
+    eta = eta3
+  [../]
+
+  [./combined]
+    type = MultiPhaseStressMaterial
+    block = 0
+    phase_base = 'A  B  C'
+    h          = 'h1 h2 h3'
     outputs = exodus
   [../]
 []
