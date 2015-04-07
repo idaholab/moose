@@ -9,7 +9,8 @@
     # Tests if the header line for the postprocessor values table is correct
     type = RunApp
     input = 'console.i'
-    expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
+    expect_out = '| time           | num_aux        | num_vars       |'
+    match_literal = True
   [../]
   [./scalar_variables]
     # Test that the first header line for the wrapped scalar AuxVariable table is correct
