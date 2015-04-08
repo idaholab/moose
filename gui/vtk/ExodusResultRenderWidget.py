@@ -85,15 +85,15 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.right_layout.setStretchFactor(self.left_layout, 0.01)
     self.main_layout.addLayout(self.right_layout)
 
-#    self.setMinimumWidth(700)
+    # self.setMinimumWidth(700)
     self.setLayout(self.main_layout)
 
     self.vtkwidget = QVTKRenderWindowInteractor(self)
-#    self.vtkwidget.setMinimumHeight(300)
+    # self.vtkwidget.setMinimumHeight(300)
 
     # Create background, default to the gradient look
     self.renderer = vtk.vtkRenderer()
-    self._showBlackBackgroundChanged(0)
+    self._renderViewBackgroundChanged(0)
     self.renderer.ResetCamera()
 
     self.right_layout.addWidget(self.vtkwidget)
@@ -214,6 +214,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.toggle_groupbox.setMaximumHeight(70)
     self.toggle_layout = QtGui.QHBoxLayout()
     self.toggle_layout.setContentsMargins(0,0,0,0)
+    self.toggle_groupbox.setLayout(self.toggle_layout)
+
     self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
     self.draw_edges_checkbox.setToolTip('Show mesh elements')
     self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
@@ -226,14 +228,15 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.hide_scalebar_checkbox.stateChanged[int].connect(self._hideScalebarChanged)
     self.toggle_layout.addWidget(self.hide_scalebar_checkbox, alignment=QtCore.Qt.AlignHCenter)
 
-    # Add a button for toggling background to black
-    self.show_black_background_checkbox = QtGui.QCheckBox("Black")
-    self.show_black_background_checkbox.setToolTip('Toggle a black/gradient background')
-    self.show_black_background_checkbox.stateChanged[int].connect(self._showBlackBackgroundChanged)
-    self.toggle_layout.addWidget(self.show_black_background_checkbox, alignment=QtCore.Qt.AlignHCenter)
+    self.viewport_background = QtGui.QComboBox()
+    self.viewport_background.addItem('Gradient')
+    self.viewport_background.addItem('Black')
+    self.viewport_background.addItem('White')
+    self.viewport_background.setToolTip('Render view background')
+    self.viewport_background.currentIndexChanged[int].connect(self._renderViewBackgroundChanged)
+    self.toggle_layout.addWidget(self.viewport_background, alignment=QtCore.Qt.AlignRight)
 
     # Create a vertical layout and add the toggles
-    self.toggle_groupbox.setLayout(self.toggle_layout)
     self.reset_layout = QtGui.QVBoxLayout()
     self.reset_layout.addWidget(self.toggle_groupbox)
 
@@ -283,17 +286,17 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.scale_layout.addWidget(self.scale_checkbox)
     self.scale_layout.addStretch()
 
-    self.scale_x_label = QtGui.QLabel("x: ")
+    self.scale_x_label = QtGui.QLabel(" x:")
     self.scale_x_text = QtGui.QLineEdit("1.0")
     self.scale_x_text.setMinimumWidth(10)
     self.scale_x_text.setMaximumWidth(50)
 
-    self.scale_y_label = QtGui.QLabel("y: ")
+    self.scale_y_label = QtGui.QLabel(" y:")
     self.scale_y_text = QtGui.QLineEdit("1.0")
     self.scale_y_text.setMinimumWidth(10)
     self.scale_y_text.setMaximumWidth(50)
 
-    self.scale_z_label = QtGui.QLabel("z: ")
+    self.scale_z_label = QtGui.QLabel(" z:")
     self.scale_z_text = QtGui.QLineEdit("1.0")
     self.scale_z_text.setMinimumWidth(10)
     self.scale_z_text.setMaximumWidth(50)
@@ -482,7 +485,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.color_scheme_component.addItem('HSV (Cool to Warm)')
     self.color_scheme_component.addItem('Diverging (Blue to Red)')
     self.color_scheme_component.addItem('Shock')
-    self.color_scheme_component.setToolTip('The color scheme used byt the render view')
+    self.color_scheme_component.setToolTip('The color scheme used by the render view')
     self.color_scheme_component.currentIndexChanged[str].connect(self._colorSchemeSelected)
 
 #    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
@@ -755,24 +758,57 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.vtkwidget.repaint()
 
   ##
-  # A method for toggling black background or gradient background, it is controlled
-  # by the 'Black Background' toggle on the Visualize tab
-  # @param value The interger value from the checkbox (1=checked)
-  def _showBlackBackgroundChanged(self, value):
+  # Set render view text to print style
+  def _setRenderViewTextBlack(self):
+    if self.exodus_result is not None:
+      propT = self.exodus_result.scalar_bar.GetTitleTextProperty()
+      propT.SetColor(0,0,0)
+      propT.ShadowOff()
+      self.exodus_result.scalar_bar.SetTitleTextProperty(propT)
+      propL = self.exodus_result.scalar_bar.GetLabelTextProperty()
+      propL.SetColor(0,0,0)
+      propL.ShadowOff()
+      self.exodus_result.scalar_bar.SetLabelTextProperty(propL)
 
-    # Black when checked
-    if value == QtCore.Qt.Checked:
-      self.renderer.SetBackground(0,0,0)
-      self.renderer.SetGradientBackground(0)
-      #self.renderer.ResetCamera()
+  ##
+  # Set render view text to white/shadow style
+  def _setRenderViewTextWhite(self):
+    if self.exodus_result is not None:
+      propT = self.exodus_result.scalar_bar.GetTitleTextProperty()
+      propT.SetColor(1,1,1)
+      propT.ShadowOn()
+      self.exodus_result.scalar_bar.SetTitleTextProperty(propT)
+      propL = self.exodus_result.scalar_bar.GetLabelTextProperty()
+      propL.SetColor(1,1,1)
+      propL.ShadowOn()
+      self.exodus_result.scalar_bar.SetLabelTextProperty(propL)
 
-    # Gradient when unchecked
-    else:
+  ##
+  # A method for selecting the render view background, it is controlled
+  # by the viewport_background combobox on the Visualize tab
+  # @param value The combobox value (0=Gradient, 1=Black, 2=White)
+  def _renderViewBackgroundChanged(self, value):
+
+    # Gradient
+    if value == 0:
       self.renderer.SetBackground(0,0,0)
       self.renderer.SetBackground(0.2,0.2,0.2)
       self.renderer.SetBackground2(1,1,1)
       self.renderer.SetGradientBackground(1)
-      #self.renderer.ResetCamera()
+      self._setRenderViewTextWhite()
+
+    # Black
+    elif value == 1:
+      self.renderer.SetBackground(0,0,0)
+      self.renderer.SetGradientBackground(0)
+      self._setRenderViewTextWhite()
+
+    # White
+    elif value == 2:
+      self.renderer.SetBackground(1,1,1)
+      self.renderer.SetGradientBackground(0)
+      self._setRenderViewTextBlack()
+
 
     # Update thew GUI
     self.vtkwidget.repaint()
