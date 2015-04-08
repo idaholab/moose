@@ -91,20 +91,15 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
 {
   // Size the data structures to hold the correct number of maps
   _bounding_spheres.resize(_maps_size);
+
+  if (!_is_elemental && _compute_op_maps)
+    mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
 }
 
 GrainTracker::~GrainTracker()
 {
   for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
     delete it->second;
-}
-
-void
-GrainTracker::initialize()
-{
-  NodalFloodCount::initialize();
-
-  _nodal_data.clear();
 }
 
 Real
@@ -146,29 +141,13 @@ GrainTracker::getElementalValue(dof_id_type element_id) const
   return 0;
 }
 
-/*
 void
-GrainTracker::threadJoin(const UserObject & y)
+GrainTracker::initialize()
 {
-  // Don't track grains if the current simulation step is before the specified tracking step
-  if (_t_step < _tracking_step)
-    return;
+  NodalFloodCount::initialize();
 
-  const GrainTracker & pps = dynamic_cast<const GrainTracker &>(y);
-
-  pack(_packed_data, false);
-
-  std::vector<unsigned int> pps_packed_data;
-  pps.pack(pps_packed_data, false);
-
-  // Append the packed data structures together
-  std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
-
-  // Calculate thread Memory Usage
-  if (_track_memory)
-    _bytes_used += pps.calculateUsage();
+  _elemental_data.clear();
 }
-*/
 
 
 void
@@ -227,9 +206,9 @@ GrainTracker::finalize()
     {
       if (grain_it->second->status != INACTIVE)
       {
-        std::set<dof_id_type>::const_iterator node_it_end = grain_it->second->nodes_ptr->end();
-        for (std::set<dof_id_type>::const_iterator node_it = grain_it->second->nodes_ptr->begin(); node_it != node_it_end; ++node_it)
-          _nodal_data[*node_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
+        std::set<dof_id_type>::const_iterator elem_it_end = grain_it->second->nodes_ptr->end();
+        for (std::set<dof_id_type>::const_iterator elem_it = grain_it->second->nodes_ptr->begin(); elem_it != elem_it_end; ++elem_it)
+          _elemental_data[*elem_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
       }
     }
   }
@@ -244,35 +223,47 @@ GrainTracker::finalize()
 }
 
 
-const std::vector<std::pair<unsigned int, unsigned int> > &
-GrainTracker::getNodalValues(dof_id_type node_id) const
-{
-  const std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _nodal_data.find(node_id);
+//const std::vector<std::pair<unsigned int, unsigned int> > &
+//GrainTracker::getNodalValues(dof_id_type node_id) const
+//{
+//  const std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _nodal_data.find(node_id);
+//
+//  if (pos != _nodal_data.end())
+//    return pos->second;
+//  else
+//  {
+//#if DEBUG
+//    mooseDoOnce(Moose::out << "Nodal values not in structure for node: " << node_id << " this may be normal.");
+//#endif
+//    return _empty;
+//  }
+//}
 
-  if (pos != _nodal_data.end())
+const std::vector<std::pair<unsigned int, unsigned int> > &
+GrainTracker::getElementalValues(dof_id_type elem_id) const
+{
+  const std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _elemental_data.find(elem_id);
+
+  if (pos != _elemental_data.end())
     return pos->second;
   else
   {
 #if DEBUG
-    mooseDoOnce(Moose::out << "Nodal values not in structure for node: " << node_id << " this may be normal.");
+    mooseDoOnce(Moose::out << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
 #endif
     return _empty;
   }
-}
 
-std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
-GrainTracker::getElementalValues(dof_id_type elem_id) const
-{
-  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > elem_info;
-
-  const Elem * curr_elem = _mesh.elem(elem_id);
-  elem_info.resize(curr_elem->n_nodes());
-
-  for (unsigned int i=0; i<elem_info.size(); ++i)
-    // Note: This map only works with Linear Lagrange on First Order Elements
-    elem_info[_qp_to_node[i]] = getNodalValues(curr_elem->node(i));
-
-  return elem_info;
+//  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > elem_info;
+//
+//  const Elem * curr_elem = _mesh.elem(elem_id);
+//  elem_info.resize(curr_elem->n_nodes());
+//
+//  for (unsigned int i=0; i<elem_info.size(); ++i)
+//    // Note: This map only works with Linear Lagrange on First Order Elements
+//    elem_info[_qp_to_node[i]] = getNodalValues(curr_elem->node(i));
+//
+//  return elem_info;
 }
 
 void
@@ -959,5 +950,3 @@ GrainTracker::UniqueGrain::~UniqueGrain()
   for (unsigned int i=0; i<sphere_ptrs.size(); ++i)
     delete sphere_ptrs[i];
 }
-
-const unsigned int GrainTracker::_qp_to_node[8] = { 0, 1, 3, 2, 4, 5, 7, 6 };

@@ -260,20 +260,18 @@ NodalFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, boo
   }
 }
 
+//const std::vector<std::pair<unsigned int, unsigned int> > &
+//NodalFloodCount::getNodalValues(dof_id_type /*node_id*/) const
+//{
+//  mooseDoOnce(mooseWarning("Method not implemented"));
+//  return _empty;
+//}
+
 const std::vector<std::pair<unsigned int, unsigned int> > &
-NodalFloodCount::getNodalValues(dof_id_type /*node_id*/) const
+NodalFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return _empty;
-}
-
-std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
-NodalFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
-{
-  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > empty;
-
-  mooseDoOnce(mooseWarning("Method not implemented"));
-  return empty;
 }
 
 /*

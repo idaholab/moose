@@ -60,8 +60,8 @@ public:
 
   virtual Real getEntityValue(dof_id_type entity_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
 
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type /*node_id*/) const;
-  virtual std::vector<std::vector<std::pair<unsigned int, unsigned int> > > getElementalValues(dof_id_type /*elem_id*/) const;
+//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type /*node_id*/) const;
+  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
   inline bool isElemental() const { return _is_elemental; }
 

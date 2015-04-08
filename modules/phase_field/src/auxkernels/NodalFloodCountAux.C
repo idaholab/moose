@@ -34,6 +34,9 @@ NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters
     if (_field_display == "CENTROID")
       mooseError("CENTROID coloring is only available for elemental aux variables");
 
+    if (_field_display == "ACTIVE_BOUNDS")
+      mooseError("ACTIVE_BOUNDS is only available for elemental aux variables");
+
     if (_flood_counter.isElemental() && (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING"))
       mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the NodalFloodCounter");
   }
@@ -53,17 +56,7 @@ NodalFloodCountAux::computeValue()
   case 1:  // VARIABLE_COLORING
     return _flood_counter.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), _var_idx, _var_coloring);
   case 2:  // ACTIVE_BOUNDS
-    if (isNodal())
-      return _flood_counter.getNodalValues(_current_node->id()).size();
-    else
-    {
-      size_t size=0;
-      std::vector<std::vector<std::pair<unsigned int, unsigned int> > > values = _flood_counter.getElementalValues(_current_elem->id());
-
-      for (unsigned int i = 0; i < values.size(); ++i)
-        size += values[i].size();
-      return size;
-    }
+    return _flood_counter.getElementalValues(_current_elem->id()).size();
   case 3:  // CENTROID
     return _flood_counter.getElementalValue(_current_elem->id());
   }
