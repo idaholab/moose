@@ -675,7 +675,7 @@ GrainTracker::remapGrains()
       }
     }
 
-    if (++times_through_loop >= 5)
+    if (++times_through_loop >= 5 && processor_id() == 0)
       mooseError(COLOR_RED << "Five passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?" << COLOR_DEFAULT);
 
   } while (variables_remapped);

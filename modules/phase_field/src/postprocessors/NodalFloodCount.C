@@ -556,9 +556,22 @@ NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned in
   if (_is_elemental)
   {
     const Elem * elem = static_cast<const Elem *>(dof_object);
+    std::vector<const Elem *> all_active_neighbors;
+
+    // Loop over all neighbors (at the the same level as the current element)
     for (unsigned int i = 0; i < elem->n_neighbors(); ++i)
     {
-      const Elem * neighbor = elem->neighbor(i);
+      const Elem * neighbor_ancestor = elem->neighbor(i);
+      if (neighbor_ancestor)
+        // Retrieve only the active neighbors for each side of this element, append them to the list of active neighbors
+        neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+    }
+
+    // Loop over all active neighbors
+    for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin(); neighbor_it != all_active_neighbors.end(); ++neighbor_it)
+    {
+      const Elem* neighbor = *neighbor_it;
+
       // Only recurse on elems this processor can see
       if (neighbor && neighbor->is_semilocal(processor_id()))
         flood(neighbor, current_idx, _bubble_maps[map_num][entity_id]);
