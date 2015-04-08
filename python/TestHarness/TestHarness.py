@@ -120,85 +120,89 @@ class TestHarness:
     self.preRun()
     self.start_time = clock()
 
-    # PBS STUFF
-    if self.options.pbs and os.path.exists(self.options.pbs):
-      self.options.processingPBS = True
-      self.processPBSResults()
-    else:
-      self.options.processingPBS = False
-      base_dir = os.getcwd()
-      for dirpath, dirnames, filenames in os.walk(base_dir, followlinks=True):
-        # Prune submdule paths when searching for tests
-        if base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
-          dirnames[:] = []
+    try:
+      # PBS STUFF
+      if self.options.pbs and os.path.exists(self.options.pbs):
+        self.options.processingPBS = True
+        self.processPBSResults()
+      else:
+        self.options.processingPBS = False
+        base_dir = os.getcwd()
+        for dirpath, dirnames, filenames in os.walk(base_dir, followlinks=True):
+          # Prune submdule paths when searching for tests
+          if base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
+            dirnames[:] = []
 
-        # walk into directories that aren't contrib directories
-        if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
-          for file in filenames:
-            # set cluster_handle to be None initially (happens for each test)
-            self.options.cluster_handle = None
-            # See if there were other arguments (test names) passed on the command line
-            if file == self.options.input_file_name: #and self.test_match.search(file):
-              saved_cwd = os.getcwd()
-              sys.path.append(os.path.abspath(dirpath))
-              os.chdir(dirpath)
+          # walk into directories that aren't contrib directories
+          if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
+            for file in filenames:
+              # set cluster_handle to be None initially (happens for each test)
+              self.options.cluster_handle = None
+              # See if there were other arguments (test names) passed on the command line
+              if file == self.options.input_file_name: #and self.test_match.search(file):
+                saved_cwd = os.getcwd()
+                sys.path.append(os.path.abspath(dirpath))
+                os.chdir(dirpath)
 
-              if self.prunePath(file):
-                continue
+                if self.prunePath(file):
+                  continue
 
-              # Build a Warehouse to hold the MooseObjects
-              warehouse = Warehouse()
+                # Build a Warehouse to hold the MooseObjects
+                warehouse = Warehouse()
 
-              # Build a Parser to parse the objects
-              parser = Parser(self.factory, warehouse)
+                # Build a Parser to parse the objects
+                parser = Parser(self.factory, warehouse)
 
-              # Parse it
-              self.error_code = self.error_code | parser.parse(file)
+                # Parse it
+                self.error_code = self.error_code | parser.parse(file)
 
-              # Retrieve the tests from the warehouse
-              testers = warehouse.getAllObjects()
+                # Retrieve the tests from the warehouse
+                testers = warehouse.getAllObjects()
 
-              # Augment the Testers with additional information directly from the TestHarness
-              for tester in testers:
-                self.augmentParameters(file, tester)
-
-              if self.options.enable_recover:
-                testers = self.appendRecoverableTests(testers)
-
-
-              # Handle PBS tests.cluster file
-              if self.options.pbs:
-                (tester, command) = self.createClusterLauncher(dirpath, testers)
-                if command is not None:
-                  self.runner.run(tester, command)
-              else:
-                # Go through the Testers and run them
+                # Augment the Testers with additional information directly from the TestHarness
                 for tester in testers:
-                  # Double the alloted time for tests when running with the valgrind option
-                  tester.setValgrindMode(self.options.valgrind_mode)
+                  self.augmentParameters(file, tester)
 
-                  # When running in valgrind mode, we end up with a ton of output for each failed
-                  # test.  Therefore, we limit the number of fails...
-                  if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
-                    (should_run, reason) = (False, 'Max Fails Exceeded')
-                  elif self.num_failed > self.options.max_fails:
-                    (should_run, reason) = (False, 'Max Fails Exceeded')
-                  else:
-                    (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
+                if self.options.enable_recover:
+                  testers = self.appendRecoverableTests(testers)
 
-                  if should_run:
-                    command = tester.getCommand(self.options)
-                    # This method spawns another process and allows this loop to continue looking for tests
-                    # RunParallel will call self.testOutputAndFinish when the test has completed running
-                    # This method will block when the maximum allowed parallel processes are running
+
+                # Handle PBS tests.cluster file
+                if self.options.pbs:
+                  (tester, command) = self.createClusterLauncher(dirpath, testers)
+                  if command is not None:
                     self.runner.run(tester, command)
-                  else: # This job is skipped - notify the runner
-                    if (reason != ''):
-                      self.handleTestResult(tester.parameters(), '', reason)
-                    self.runner.jobSkipped(tester.parameters()['test_name'])
+                else:
+                  # Go through the Testers and run them
+                  for tester in testers:
+                    # Double the alloted time for tests when running with the valgrind option
+                    tester.setValgrindMode(self.options.valgrind_mode)
 
-              os.chdir(saved_cwd)
-              sys.path.pop()
+                    # When running in valgrind mode, we end up with a ton of output for each failed
+                    # test.  Therefore, we limit the number of fails...
+                    if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
+                      (should_run, reason) = (False, 'Max Fails Exceeded')
+                    elif self.num_failed > self.options.max_fails:
+                      (should_run, reason) = (False, 'Max Fails Exceeded')
+                    else:
+                      (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
+
+                    if should_run:
+                      command = tester.getCommand(self.options)
+                      # This method spawns another process and allows this loop to continue looking for tests
+                      # RunParallel will call self.testOutputAndFinish when the test has completed running
+                      # This method will block when the maximum allowed parallel processes are running
+                      self.runner.run(tester, command)
+                    else: # This job is skipped - notify the runner
+                      if (reason != ''):
+                        self.handleTestResult(tester.parameters(), '', reason)
+                      self.runner.jobSkipped(tester.parameters()['test_name'])
+
+                os.chdir(saved_cwd)
+                sys.path.pop()
+    except KeyboardInterrupt:
+      print '\nExiting due to keyboard interrupt...'
+      sys.exit(0)
 
     self.runner.join()
     # Wait for all tests to finish
