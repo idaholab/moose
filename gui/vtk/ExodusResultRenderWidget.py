@@ -67,52 +67,52 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.execution_widget.timestep_begin.connect(self._timestepBegin)
     self.execution_widget.timestep_end.connect(self._timestepEnd)
 
-    self.main_layout = QtGui.QHBoxLayout()
-    self.main_layout.setContentsMargins(0,0,0,0)
-
-#    self.main_layout.setSpacing(0)
+    self.left_layout = QtGui.QVBoxLayout()
+    # self.left_layout.setContentsMargins(0,0,0,0)
+    self.left_layout.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
+    self.left_widget = QtGui.QWidget()
+    self.left_widget.setLayout(self.left_layout)
 
     self.right_layout = QtGui.QVBoxLayout()
+    self.right_layout.setContentsMargins(0,0,0,0)
+    self.right_widget = QtGui.QWidget()
+    self.right_widget.setLayout(self.right_layout)
 
-    self.left_layout = QtGui.QVBoxLayout()
-    self.left_widget = QtGui.QWidget()
-    self.left_widget.setMaximumWidth(1)
+    self.splitter = QtGui.QSplitter()
+    self.splitter.setContentsMargins(0,0,0,0)
 
-    self.left_widget.setLayout(self.left_layout)
-    self.left_layout.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
+    self.splitter.addWidget(self.left_widget)
+    self.splitter.addWidget(self.right_widget)
+    self.splitter.setStretchFactor(0, 0.1)
+    self.splitter.setStretchFactor(1, 1)
 
-    self.main_layout.addWidget(self.left_widget)
-    self.right_layout.setStretchFactor(self.left_layout, 0.01)
-    self.main_layout.addLayout(self.right_layout)
-
-    # self.setMinimumWidth(700)
-    self.setLayout(self.main_layout)
-
-    self.vtkwidget = QVTKRenderWindowInteractor(self)
-    # self.vtkwidget.setMinimumHeight(300)
-
-    # Create background, default to the gradient look
+    # build the render viewport, default background to the gradient look
+    self.vtkwidget = QVTKRenderWindowInteractor(self.right_widget)
     self.renderer = vtk.vtkRenderer()
     self._renderViewBackgroundChanged(0)
     self.renderer.ResetCamera()
 
+    # add view to the right pane of the splitter
     self.right_layout.addWidget(self.vtkwidget)
     self.right_layout.setStretchFactor(self.vtkwidget, 100)
 
+    # show view and set interaction mode
     self.vtkwidget.show()
-
     self.vtkwidget.GetRenderWindow().AddRenderer(self.renderer)
     self.interactor = self.vtkwidget.GetRenderWindow().GetInteractor()
-
     self.interactor.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
+
+    # assemble the overall layout
+    self.main_layout = QtGui.QVBoxLayout()
+    self.main_layout.setContentsMargins(0,0,0,0)
+    self.main_layout.addWidget(self.splitter)
+    self.setLayout(self.main_layout)
 
     self.show()
     self.interactor.Initialize()
 
     self.first = True
-
     self.exodus_result = None
-
     self.has_displacements = False
     self.current_displacement_magnitude = 1.0
 
@@ -147,9 +147,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.bottom_controls_layout = QtGui.QHBoxLayout()
 
     self.left_layout.addLayout(self.controls_layout)
-    self.main_layout.setStretchFactor(self.left_layout, 0.1)
-
-#    self.main_layout.addLayout(self.bottom_controls_layout)
 
     self.leftest_controls_layout = QtGui.QVBoxLayout()
     self.left_controls_layout = QtGui.QVBoxLayout()
@@ -173,10 +170,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.output_control_group_box.setLayout(self.output_control_layout) # add the layout to the box
     self.leftest_controls_layout.addWidget(self.output_control_group_box) # add the box to the gui control layout
 
-
+    # add block list
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
-    #  self.block_view_group_box.setMaximumWidth(200)
-    #  self.block_view_group_box.setMaximumHeight(200)
 
     self.block_view_layout = QtGui.QVBoxLayout()
     self.block_view_layout.setContentsMargins(0,0,0,0)
@@ -204,14 +199,14 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.automatic_update_checkbox.setCheckState(QtCore.Qt.Checked)
     self.automatically_update = True
     self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
-#    self.left_controls_layout.addWidget(self.automatic_update_checkbox)
+    # self.left_controls_layout.addWidget(self.automatic_update_checkbox)
 
     # Create Group for viewer controls
 
     # Create the View Mesh toggle
     self.toggle_groupbox = QtGui.QGroupBox("View")
     self.toggle_groupbox.setFlat(True)
-    self.toggle_groupbox.setMaximumHeight(70)
+    self.toggle_groupbox.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
     self.toggle_layout = QtGui.QHBoxLayout()
     self.toggle_layout.setContentsMargins(0,0,0,0)
     self.toggle_groupbox.setLayout(self.toggle_layout)
@@ -220,6 +215,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.draw_edges_checkbox.setToolTip('Show mesh elements')
     self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
     self.toggle_layout.addWidget(self.draw_edges_checkbox, alignment=QtCore.Qt.AlignHCenter)
+    self.toggle_layout.addStretch()
 
     # Add a button for toggling the scalebar legend
     self.hide_scalebar_checkbox = QtGui.QCheckBox("Scalebar")
@@ -227,6 +223,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.hide_scalebar_checkbox.setCheckState(QtCore.Qt.Checked)
     self.hide_scalebar_checkbox.stateChanged[int].connect(self._hideScalebarChanged)
     self.toggle_layout.addWidget(self.hide_scalebar_checkbox, alignment=QtCore.Qt.AlignHCenter)
+    self.toggle_layout.addStretch()
 
     self.viewport_background = QtGui.QComboBox()
     self.viewport_background.addItem('Gradient')
@@ -245,15 +242,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     #
     self.mesh_groupbox = QtGui.QGroupBox("Mesh")
     self.mesh_groupbox.setFlat(True)
-    self.mesh_groupbox.setMaximumHeight(140)
+    self.mesh_groupbox.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
 
     self.mesh_layout = QtGui.QVBoxLayout()
-    self.mesh_layout.setSpacing(0)
     self.mesh_layout.setContentsMargins(0,0,0,0)
     self.mesh_groupbox.setLayout(self.mesh_layout)
 
     self.displace_layout = QtGui.QHBoxLayout()
-    self.displace_layout.setSpacing(0)
     self.displace_layout.setContentsMargins(0,0,0,0)
 
     self.displace_checkbox = QtGui.QCheckBox("Displace")
@@ -262,18 +257,18 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.displace_magnitude_label = QtGui.QLabel("Multiplier: ")
     self.displace_magnitude_text = QtGui.QLineEdit("1.0")
-    self.displace_magnitude_text.setMaximumWidth(50)
     self.displace_magnitude_text.setMinimumWidth(10)
     self.displace_magnitude_text.returnPressed.connect(self._displaceMagnitudeTextReturn)
 
     self.displace_layout.addWidget(self.displace_checkbox)
-    self.displace_layout.addStretch()
-    self.displace_layout.addWidget(self.displace_magnitude_label, alignment=QtCore.Qt.AlignRight)
-    self.displace_layout.addWidget(self.displace_magnitude_text, alignment=QtCore.Qt.AlignLeft)
+    self.displace_layout.addSpacing(10)
+    self.displace_layout.addStretch(0.1)
+    self.displace_layout.addWidget(self.displace_magnitude_label)
+    self.displace_layout.addWidget(self.displace_magnitude_text)
+    self.displace_layout.setStretchFactor(self.displace_magnitude_text, 1)
 
-    self.displace_line = QtGui.QWidget()
-    self.displace_line.setLayout(self.displace_layout)
-    self.mesh_layout.addWidget(self.displace_line)
+    # add displace line
+    self.mesh_layout.addLayout(self.displace_layout)
 
     # Scale line
     self.scale_layout = QtGui.QHBoxLayout()
@@ -284,45 +279,45 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.scale_checkbox.setChecked(False)
     self.scale_checkbox.toggled[bool].connect(self._scaleToggled)
     self.scale_layout.addWidget(self.scale_checkbox)
-    self.scale_layout.addStretch()
+    self.scale_layout.addSpacing(10)
+    self.scale_layout.addStretch(0.2)
 
     self.scale_x_label = QtGui.QLabel(" x:")
     self.scale_x_text = QtGui.QDoubleSpinBox()
-    self.scale_x_text.setValue(1.0)
+    self.scale_x_text.setValue(self.current_scale_x_magnitude)
     self.scale_x_text.setSingleStep(0.1)
     self.scale_x_text.setMinimumWidth(10)
-    self.scale_x_text.setMaximumWidth(50)
+    self.scale_layout.addWidget(self.scale_x_label)
+    self.scale_layout.addWidget(self.scale_x_text)
+    self.scale_layout.setStretchFactor(self.scale_x_text, 1)
+    self.scale_layout.addSpacing(5)
 
     self.scale_y_label = QtGui.QLabel(" y:")
     self.scale_y_text = QtGui.QDoubleSpinBox()
-    self.scale_y_text.setValue(1.0)
+    self.scale_y_text.setValue(self.current_scale_y_magnitude)
     self.scale_y_text.setSingleStep(0.1)
     self.scale_y_text.setMinimumWidth(10)
-    self.scale_y_text.setMaximumWidth(50)
+    self.scale_layout.addWidget(self.scale_y_label)
+    self.scale_layout.addWidget(self.scale_y_text)
+    self.scale_layout.setStretchFactor(self.scale_y_text, 1)
+    self.scale_layout.addSpacing(5)
 
     self.scale_z_label = QtGui.QLabel(" z:")
     self.scale_z_text = QtGui.QDoubleSpinBox()
-    self.scale_z_text.setValue(1.0)
+    self.scale_z_text.setValue(self.current_scale_z_magnitude)
     self.scale_z_text.setSingleStep(0.1)
     self.scale_z_text.setMinimumWidth(10)
-    self.scale_z_text.setMaximumWidth(50)
+    self.scale_layout.addWidget(self.scale_z_label)
+    self.scale_layout.addWidget(self.scale_z_text)
+    self.scale_layout.setStretchFactor(self.scale_z_text, 1)
 
+    # Connect signals and slots for scale spinners
     self.scale_x_text.valueChanged.connect(self._scaleMagnitudeChanged)
     self.scale_y_text.valueChanged.connect(self._scaleMagnitudeChanged)
     self.scale_z_text.valueChanged.connect(self._scaleMagnitudeChanged)
 
-    self.scale_layout.addWidget(self.scale_x_label, alignment=QtCore.Qt.AlignRight)
-    self.scale_layout.addWidget(self.scale_x_text, alignment=QtCore.Qt.AlignLeft)
-
-    self.scale_layout.addWidget(self.scale_y_label, alignment=QtCore.Qt.AlignRight)
-    self.scale_layout.addWidget(self.scale_y_text, alignment=QtCore.Qt.AlignLeft)
-
-    self.scale_layout.addWidget(self.scale_z_label, alignment=QtCore.Qt.AlignRight)
-    self.scale_layout.addWidget(self.scale_z_text, alignment=QtCore.Qt.AlignLeft)
-
-    self.scale_line = QtGui.QWidget()
-    self.scale_line.setLayout(self.scale_layout)
-    self.mesh_layout.addWidget(self.scale_line)
+    # add scale line
+    self.mesh_layout.addLayout(self.scale_layout)
 
     # Clip line
     self.clip_layout = QtGui.QHBoxLayout()
@@ -333,7 +328,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_checkbox.setChecked(False)
     self.clip_checkbox.toggled[bool].connect(self._clippingToggled)
     self.clip_layout.addWidget(self.clip_checkbox)
-    self.clip_layout.addStretch(1)
+    self.clip_layout.addStretch(0.1)
 
     self.clip_plane_combobox = QtGui.QComboBox()
     self.clip_plane_combobox.setToolTip('Direction of the normal for the clip plane')
@@ -342,6 +337,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_combobox.addItem('z')
     self.clip_plane_combobox.currentIndexChanged[str].connect(self._clipNormalChanged)
     self.clip_layout.addWidget(self.clip_plane_combobox)
+    self.scale_layout.addSpacing(5)
 
     self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.clip_plane_slider.setToolTip('Slide to change plane position')
@@ -349,15 +345,15 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_slider.setSliderPosition(50)
     self.clip_plane_slider.sliderReleased.connect(self._clipSliderReleased)
     self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)
-    self.clip_layout.addWidget(self.clip_plane_slider, 5)
+    self.clip_layout.addWidget(self.clip_plane_slider, 1)
 
-    self.clip_line = QtGui.QWidget()
-    self.clip_line.setLayout(self.clip_layout)
-    self.mesh_layout.addWidget(self.clip_line)
+    # add clip line
+    self.mesh_layout.addLayout(self.clip_layout)
 
+    # add mesh group
     self.reset_layout.addWidget(self.mesh_groupbox)
 
-
+    # Open/Save/Reset button row
     self.view_layout = QtGui.QHBoxLayout()
 
     self.open_button = QtGui.QPushButton('Open')
@@ -380,15 +376,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.reset_layout.addLayout(self.view_layout)
 
+    # add to right splitter pane
     self.right_controls_layout.addLayout(self.reset_layout)
 
 
     self.contour_groupbox = QtGui.QGroupBox("Contour")
     self.contour_groupbox.setFlat(True)
-#    self.contour_groupbox.setMaximumHeight(10)
-#    self.contour_groupbox.setMaximumHeight(70)
-#    contour_groupbox_policy = QtGui.QSizePolicy()
-    self.contour_groupbox.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
+    self.contour_groupbox.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
     self.contour_layout = QtGui.QVBoxLayout()
     self.contour_layout.setContentsMargins(0,0,0,0)
     self.contour_groupbox.setLayout(self.contour_layout)
@@ -400,60 +394,55 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.variable_contour_is_nodal = {}
     self.variable_contour.setToolTip('Which variable to color by')
     self.variable_contour.currentIndexChanged[int].connect(self._contourVariableSelected)
-#    self.variable_contour_layout.addWidget(self.contour_label, alignment=QtCore.Qt.AlignRight)
-    self.variable_contour_layout.addWidget(self.variable_contour, alignment=QtCore.Qt.AlignHCenter)
+    self.variable_contour_layout.addWidget(self.variable_contour)
+    self.variable_contour_layout.setStretchFactor(self.variable_contour, 1)
 
-#    self.component_layout = QtGui.QHBoxLayout()
     self.component_label = QtGui.QLabel("Component:")
     self.variable_component = QtGui.QComboBox()
     self.variable_component.setToolTip('If the variable is a vector this selects what component of that vector (or the Magnitude) to color by')
     self.variable_component.currentIndexChanged[str].connect(self._variableComponentSelected)
-#    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
-#    self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
-#    self.variable_contour_layout.addLayout(self.component_layout)
     self.variable_contour_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignHCenter)
 
     self.minmax_contour_layout = QtGui.QVBoxLayout()
     self.contour_layout.addLayout(self.minmax_contour_layout)
 
-    self.min_groupbox = QtGui.QWidget()
+    # min line
     self.min_layout = QtGui.QHBoxLayout()
     self.min_layout.setContentsMargins(0,0,0,0)
-    self.min_groupbox.setLayout(self.min_layout)
 
     self.min_radio_layout = QtGui.QVBoxLayout()
-
+    self.min_radio_layout.setContentsMargins(0,0,0,0)
     self.min_current_radio = QtGui.QRadioButton('Current')
     self.min_current_radio.setChecked(QtCore.Qt.Checked)
     self.min_current_radio.toggled.connect(self._updateContours)
     self.min_global_radio = QtGui.QRadioButton('Global')
     self.min_global_radio.toggled.connect(self._updateContours)
     self.min_radio_layout.addWidget(self.min_current_radio)
-#    self.min_radio_layout.addWidget(self.min_global_radio)
 
     self.min_custom_layout = QtGui.QHBoxLayout()
-    self.min_custom_layout.setSpacing(0)
+    self.min_custom_layout.setContentsMargins(0,0,0,0)
     self.min_custom_radio = QtGui.QRadioButton()
     self.min_custom_radio.toggled.connect(self._updateContours)
     self.min_custom_text = QtGui.QLineEdit()
     self.min_custom_text.returnPressed.connect(self._updateContours)
     self.min_custom_text.setDisabled(True)
-    self.min_custom_text.setMaximumWidth(100)
-    self.min_custom_layout.addWidget(self.min_custom_radio, alignment=QtCore.Qt.AlignLeft)
-    self.min_custom_layout.addWidget(self.min_custom_text, alignment=QtCore.Qt.AlignLeft)
-    self.min_custom_layout.addStretch()
+    self.min_custom_layout.addWidget(self.min_custom_radio)
+    self.min_custom_layout.addWidget(self.min_custom_text)
+    self.min_custom_layout.setStretchFactor(self.min_custom_text, 1)
 
     self.min_layout.addWidget(QtGui.QLabel("Min"))
-    self.min_layout.addStretch()
+    self.min_layout.addSpacing(10)
+    self.min_layout.addStretch(0.1)
     self.min_layout.addLayout(self.min_radio_layout)
     self.min_layout.addLayout(self.min_custom_layout)
+    self.min_layout.setStretchFactor(self.min_custom_layout, 1)
 
-    self.minmax_contour_layout.addWidget(self.min_groupbox)
+    # add min line
+    self.minmax_contour_layout.addLayout(self.min_layout)
 
-    self.max_groupbox = QtGui.QWidget()
+    # max line
     self.max_layout = QtGui.QHBoxLayout()
     self.max_layout.setContentsMargins(0,0,0,0)
-    self.max_groupbox.setLayout(self.max_layout)
 
     self.max_radio_layout = QtGui.QVBoxLayout()
 
@@ -463,7 +452,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.max_global_radio = QtGui.QRadioButton('Global')
     self.max_global_radio.toggled.connect(self._updateContours)
     self.max_radio_layout.addWidget(self.max_current_radio)
-#    self.max_radio_layout.addWidget(self.max_global_radio)
 
     self.max_custom_layout = QtGui.QHBoxLayout()
     self.max_custom_layout.setSpacing(0)
@@ -472,20 +460,20 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.max_custom_text = QtGui.QLineEdit()
     self.max_custom_text.returnPressed.connect(self._updateContours)
     self.max_custom_text.setDisabled(True)
-    self.max_custom_text.setMaximumWidth(100)
-    self.max_custom_layout.addWidget(self.max_custom_radio, alignment=QtCore.Qt.AlignLeft)
-    self.max_custom_layout.addWidget(self.max_custom_text, alignment=QtCore.Qt.AlignLeft)
-    self.max_custom_layout.addStretch()
+    self.max_custom_layout.addWidget(self.max_custom_radio)
+    self.max_custom_layout.addWidget(self.max_custom_text)
+    self.max_custom_layout.setStretchFactor(self.max_custom_text, 1)
 
     self.max_layout.addWidget(QtGui.QLabel("Max"))
-    self.max_layout.addStretch()
+    self.max_layout.addSpacing(10)
+    self.max_layout.addStretch(0.1)
     self.max_layout.addLayout(self.max_radio_layout)
     self.max_layout.addLayout(self.max_custom_layout)
+    self.max_layout.setStretchFactor(self.max_custom_layout, 1)
 
-    self.minmax_contour_layout.addWidget(self.max_groupbox)
+    # add max line
+    self.minmax_contour_layout.addLayout(self.max_layout)
 
-
-#    self.component_layout = QtGui.QHBoxLayout()
     self.color_scheme_label = QtGui.QLabel("Color Scheme:")
     self.color_scheme_component = QtGui.QComboBox()
     self.color_scheme_component.addItem('HSV (Cool to Warm)')
@@ -493,10 +481,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.color_scheme_component.addItem('Shock')
     self.color_scheme_component.setToolTip('The color scheme used by the render view')
     self.color_scheme_component.currentIndexChanged[str].connect(self._colorSchemeSelected)
-
-#    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
-#    self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
-#    self.variable_contour_layout.addLayout(self.component_layout)
 
     self.minmax_contour_layout.addWidget(self.color_scheme_component)
 
@@ -556,9 +540,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider_textbox.setMinimumWidth(30)
     self.time_slider_textbox.returnPressed.connect(self._sliderTextboxReturn)
 
-    self.time_groupbox = QtGui.QGroupBox("Time")
-    self.time_groupbox.setMaximumHeight(70)
-
     self.time_layout = QtGui.QHBoxLayout()
     self.time_layout.addWidget(self.beginning_button)
     self.time_layout.addWidget(self.back_button)
@@ -571,11 +552,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_layout.addWidget(self.time_slider)
     self.time_layout.addWidget(self.time_slider_textbox, alignment=QtCore.Qt.AlignLeft)
 
-    self.time_groupbox.setLayout(self.time_layout)
-
-    self.right_layout.addWidget(self.time_groupbox)
-
-
+    # add time controls in the right pane under the render view
+    self.right_layout.addLayout(self.time_layout)
 
   def _updateControls(self):
     self.old_contour = self.variable_contour.currentText()
