@@ -120,7 +120,7 @@ protected:
    * @param old_norm The old residual norm to compare against
    * @param norm The current residual norm
    */
-  std::string outputNorm(Real old_norm, Real norm);
+  std::string outputNorm(const Real & old_norm, const Real & norm);
 
   /**
    * Prints the time step information for the screen output
@@ -175,12 +175,6 @@ protected:
 
   /// Stream for storing information to be written to a file
   std::stringstream _file_output_stream;
-
-  /// Storage for the old linear residual (needed for color output)
-  Real _old_linear_norm;
-
-  /// Storage for the old non linear residual (needed for color output)
-  Real _old_nonlinear_norm;
 
   /// State for all performance logging
   bool _perf_log;
@@ -239,6 +233,12 @@ private:
 
   /// Reference to cached messages from calls to _console
   const std::ostringstream & _console_buffer;
+
+  /// Storage for the old linear residual (needed for color output and only when used when printing to the screen)
+  Real _old_linear_norm;
+
+  /// Storage for the old non linear residual (needed for color output and only when used when printing to the screen)
+  Real _old_nonlinear_norm;
 
   friend class OutputWarehouse;
 };
