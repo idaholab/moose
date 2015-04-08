@@ -264,6 +264,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.displace_magnitude_text.returnPressed.connect(self._displaceMagnitudeTextReturn)
 
     self.displace_layout.addWidget(self.displace_checkbox)
+    self.displace_layout.addStretch()
     self.displace_layout.addWidget(self.displace_magnitude_label, alignment=QtCore.Qt.AlignRight)
     self.displace_layout.addWidget(self.displace_magnitude_text, alignment=QtCore.Qt.AlignLeft)
 
@@ -280,6 +281,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.scale_checkbox.setChecked(False)
     self.scale_checkbox.toggled[bool].connect(self._scaleToggled)
     self.scale_layout.addWidget(self.scale_checkbox)
+    self.scale_layout.addStretch()
 
     self.scale_x_label = QtGui.QLabel("x: ")
     self.scale_x_text = QtGui.QLineEdit("1.0")
@@ -322,6 +324,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_checkbox.setChecked(False)
     self.clip_checkbox.toggled[bool].connect(self._clippingToggled)
     self.clip_layout.addWidget(self.clip_checkbox)
+    self.clip_layout.addStretch(1)
 
     self.clip_plane_combobox = QtGui.QComboBox()
     self.clip_plane_combobox.setToolTip('Direction of the normal for the clip plane')
@@ -337,7 +340,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_slider.setSliderPosition(50)
     self.clip_plane_slider.sliderReleased.connect(self._clipSliderReleased)
     self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)
-    self.clip_layout.addWidget(self.clip_plane_slider)
+    self.clip_layout.addWidget(self.clip_plane_slider, 5)
 
     self.clip_line = QtGui.QWidget()
     self.clip_line.setLayout(self.clip_layout)
@@ -401,11 +404,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 #    self.variable_contour_layout.addLayout(self.component_layout)
     self.variable_contour_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignHCenter)
 
-
     self.minmax_contour_layout = QtGui.QVBoxLayout()
     self.contour_layout.addLayout(self.minmax_contour_layout)
 
-    self.min_groupbox = QtGui.QGroupBox("Min")
+    self.min_groupbox = QtGui.QWidget()
     self.min_layout = QtGui.QHBoxLayout()
     self.min_layout.setContentsMargins(0,0,0,0)
     self.min_groupbox.setLayout(self.min_layout)
@@ -432,16 +434,16 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.min_custom_layout.addWidget(self.min_custom_text, alignment=QtCore.Qt.AlignLeft)
     self.min_custom_layout.addStretch()
 
+    self.min_layout.addWidget(QtGui.QLabel("Min"))
+    self.min_layout.addStretch()
     self.min_layout.addLayout(self.min_radio_layout)
     self.min_layout.addLayout(self.min_custom_layout)
 
     self.minmax_contour_layout.addWidget(self.min_groupbox)
 
-
-
-    self.max_groupbox = QtGui.QGroupBox("Max")
+    self.max_groupbox = QtGui.QWidget()
     self.max_layout = QtGui.QHBoxLayout()
-    self.min_layout.setContentsMargins(0,0,0,0)
+    self.max_layout.setContentsMargins(0,0,0,0)
     self.max_groupbox.setLayout(self.max_layout)
 
     self.max_radio_layout = QtGui.QVBoxLayout()
@@ -466,6 +468,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.max_custom_layout.addWidget(self.max_custom_text, alignment=QtCore.Qt.AlignLeft)
     self.max_custom_layout.addStretch()
 
+    self.max_layout.addWidget(QtGui.QLabel("Max"))
+    self.max_layout.addStretch()
     self.max_layout.addLayout(self.max_radio_layout)
     self.max_layout.addLayout(self.max_custom_layout)
 
