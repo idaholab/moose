@@ -52,7 +52,8 @@ class DerivativeMaterialInterface :
   public DerivativeMaterialPropertyNameInterface
 {
 public:
-  DerivativeMaterialInterface(const std::string & name, InputParameters parameters);
+  DerivativeMaterialInterface(const InputParameters & parameters);
+  DerivativeMaterialInterface(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Fetch a material property if it exists, otherwise return getZeroMaterialProperty.
@@ -122,8 +123,8 @@ private:
 
 
 template<class T>
-DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & name, InputParameters parameters) :
-    T(name, parameters),
+DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const InputParameters & parameters) :
+    T(parameters),
     _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _dmi_material_data(*parameters.getCheckedPointerParam<MaterialData *>("_material_data"))
 {
@@ -315,6 +316,16 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(const Materi
   if (c2 != "")
     return getDefaultMaterialPropertyByName<U>(propertyNameSecond(base, c1, c2));
   return getDefaultMaterialPropertyByName<U>(propertyNameFirst(base, c1));
+}
+
+
+// DEPRECATED CONSTRUCTOR
+template<class T>
+DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & deprecated_name, InputParameters parameters) :
+    T(deprecated_name, parameters),
+    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _dmi_material_data(*parameters.getCheckedPointerParam<MaterialData *>("_material_data"))
+{
 }
 
 #endif //DERIVATIVEMATERIALINTERFACE_H

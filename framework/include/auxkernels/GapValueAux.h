@@ -28,7 +28,8 @@ InputParameters validParams<GapValueAux>();
 class GapValueAux : public AuxKernel
 {
 public:
-  GapValueAux(const std::string & name, InputParameters parameters);
+  GapValueAux(const InputParameters & parameters);
+  GapValueAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~GapValueAux();
 

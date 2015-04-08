@@ -34,7 +34,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  SpatialUserObjectAux(const std::string & name, InputParameters parameters);
+  SpatialUserObjectAux(const InputParameters & parameters);
+  SpatialUserObjectAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SpatialUserObjectAux() {}
 

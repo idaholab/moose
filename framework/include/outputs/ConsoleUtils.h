@@ -68,7 +68,7 @@ std::string outputOutputInformation(MooseApp & app);
 /**
  * Output the legacy flag information
  */
-std::string outputLegacyInformation(FEProblem & problem);
+std::string outputLegacyInformation(MooseApp & app, FEProblem & problem);
 
 /**
  * Output system information

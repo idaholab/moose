@@ -26,7 +26,8 @@ InputParameters validParams<FunctionDT>();
 class FunctionDT : public TimeStepper
 {
 public:
-  FunctionDT(const std::string & name, InputParameters parameters);
+  FunctionDT(const InputParameters & parameters);
+  FunctionDT(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void init();
 

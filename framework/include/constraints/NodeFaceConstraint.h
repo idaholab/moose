@@ -45,7 +45,8 @@ class NodeFaceConstraint :
   public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
-  NodeFaceConstraint(const std::string & name, InputParameters parameters);
+  NodeFaceConstraint(const InputParameters & parameters);
+  NodeFaceConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodeFaceConstraint();
 
   /**

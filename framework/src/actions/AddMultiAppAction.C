@@ -21,13 +21,20 @@ InputParameters validParams<AddMultiAppAction>()
   return validParams<MooseObjectAction>();
 }
 
-AddMultiAppAction::AddMultiAppAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddMultiAppAction::AddMultiAppAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddMultiAppAction::act()
 {
-  _problem->addMultiApp(_type, getShortName(), _moose_object_pars);
+  _problem->addMultiApp(_type, _name, _moose_object_pars);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddMultiAppAction::AddMultiAppAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
 }

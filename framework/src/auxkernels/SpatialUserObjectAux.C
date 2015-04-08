@@ -23,8 +23,8 @@ InputParameters validParams<SpatialUserObjectAux>()
   return params;
 }
 
-SpatialUserObjectAux::SpatialUserObjectAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+SpatialUserObjectAux::SpatialUserObjectAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _user_object(getUserObjectBase("user_object"))
 {
 }
@@ -36,4 +36,12 @@ SpatialUserObjectAux::computeValue()
     return _user_object.spatialValue(*_current_node);
   else
     return _user_object.spatialValue(_current_elem->centroid());
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SpatialUserObjectAux::SpatialUserObjectAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _user_object(getUserObjectBase("user_object"))
+{
 }

@@ -22,7 +22,14 @@ InputParameters validParams<ElementH1Error>()
   return params;
 }
 
-ElementH1Error::ElementH1Error(const std::string & name, InputParameters parameters) :
-    ElementW1pError(name, parameters)
+ElementH1Error::ElementH1Error(const InputParameters & parameters) :
+    ElementW1pError(parameters)
+{
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementH1Error::ElementH1Error(const std::string & deprecated_name, InputParameters parameters) :
+    ElementW1pError(deprecated_name, parameters)
 {
 }

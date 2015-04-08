@@ -29,7 +29,8 @@ InputParameters validParams<DifferencePostprocessor>();
 class DifferencePostprocessor : public GeneralPostprocessor
 {
 public:
-  DifferencePostprocessor(const std::string & name, InputParameters parameters);
+  DifferencePostprocessor(const InputParameters & parameters);
+  DifferencePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~DifferencePostprocessor();
 
   virtual void initialize();

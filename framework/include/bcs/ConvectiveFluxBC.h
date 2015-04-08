@@ -31,7 +31,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  ConvectiveFluxBC(const std::string & name, InputParameters parameters);
+  ConvectiveFluxBC(const InputParameters & parameters);
+  ConvectiveFluxBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

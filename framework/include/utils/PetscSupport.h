@@ -102,7 +102,7 @@ InputParameters getPetscValidParams();
 MultiMooseEnum getCommonPetscFlags();
 
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc iname options (keys in key-value pairs)
-MultiMooseEnum getCommonPetscOptionsKeys();
+MultiMooseEnum getCommonPetscKeys();
 }
 }
 

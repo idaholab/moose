@@ -43,7 +43,8 @@ class GeneralUserObject :
   protected VectorPostprocessorInterface
 {
 public:
-  GeneralUserObject(const std::string & name, InputParameters parameters);
+  GeneralUserObject(const InputParameters & parameters);
+  GeneralUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * This function will get called when this user object needs to update its values

@@ -43,7 +43,8 @@ InputParameters validParams<SubProblem>();
 class SubProblem : public Problem
 {
 public:
-  SubProblem(const std::string & name, InputParameters parameters);
+  SubProblem(const InputParameters & parameters);
+  SubProblem(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SubProblem();
 
   virtual EquationSystems & es() = 0;

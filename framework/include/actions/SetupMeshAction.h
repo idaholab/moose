@@ -28,7 +28,8 @@ InputParameters validParams<SetupMeshAction>();
 class SetupMeshAction : public MooseObjectAction
 {
 public:
-  SetupMeshAction(const std::string & name, InputParameters params);
+  SetupMeshAction(InputParameters params);
+  SetupMeshAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

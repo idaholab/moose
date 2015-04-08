@@ -24,8 +24,8 @@ InputParameters validParams<FunctionPenaltyDirichletBC>()
   return params;
 }
 
-FunctionPenaltyDirichletBC::FunctionPenaltyDirichletBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+FunctionPenaltyDirichletBC::FunctionPenaltyDirichletBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _func(getFunction("function")),
     _p(getParam<Real>("penalty"))
 {}
@@ -41,3 +41,11 @@ FunctionPenaltyDirichletBC::computeQpJacobian()
 {
   return _p*_phi[_j][_qp]*_test[_i][_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+FunctionPenaltyDirichletBC::FunctionPenaltyDirichletBC(const std::string & deprecated_name, InputParameters parameters) :
+    IntegratedBC(deprecated_name, parameters),
+    _func(getFunction("function")),
+    _p(getParam<Real>("penalty"))
+{}

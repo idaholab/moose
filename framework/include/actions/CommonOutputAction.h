@@ -39,7 +39,8 @@ public:
   /**
    * Class constructor
    */
-  CommonOutputAction(const std::string & name, InputParameters params);
+  CommonOutputAction(InputParameters params);
+  CommonOutputAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Perform the action creation

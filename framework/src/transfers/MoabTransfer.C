@@ -52,8 +52,8 @@ InputParameters validParams<MoabTransfer>()
   return params;
 }
 
-MoabTransfer::MoabTransfer(const std::string & name, InputParameters parameters) :
-    Transfer(name, parameters),
+MoabTransfer::MoabTransfer(const InputParameters & parameters) :
+    Transfer(parameters),
     _direction(getParam<MooseEnum>("direction"))
 {
 }

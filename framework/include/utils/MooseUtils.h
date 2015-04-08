@@ -14,14 +14,22 @@
 #ifndef MOOSEUTILS_H
 #define MOOSEUTILS_H
 
+// STL includes
 #include <string>
 #include <vector>
 #include <map>
 #include <sstream>
 #include <algorithm>
 
+// MOOSE includes
+#include "HashMap.h"
+
 // libMesh includes
 #include "libmesh/parallel.h"
+#include "libmesh/elem.h"
+
+// Forward Declarations
+class MaterialProperties;
 
 namespace MooseUtils
 {
@@ -104,6 +112,11 @@ namespace MooseUtils
    */
   std::string
   underscoreToCamelCase(const std::string & underscore_name, bool leading_upper_case);
+
+  /**
+   * Function for stripping name after the file / in parser block
+   */
+  std::string shortName(const std::string & name);
 
   /**
    * This routine is a simple helper function for searching a map by values instead of keys
@@ -207,6 +220,14 @@ namespace MooseUtils
    */
   bool relativeFuzzyLessThan(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
 
+  /**
+   * Function to dump the contents of MaterialPropertyStorage for debugging purposes
+   * @param props The storage item to dump, this should be MaterialPropertyStorage.props()/propsOld()/propsOlder().
+   *
+   * Currently this only words for scalar material properties. Something to do as needed would be to create a method in MaterialProperty
+   * that may be overloaded to dump the type using template specialization.
+   */
+  void MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties> > & props);
 }
 
 #endif //MOOSEUTILS_H

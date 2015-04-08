@@ -25,7 +25,8 @@ InputParameters validParams<DetermineSystemType>();
 class DetermineSystemType : public MooseObjectAction
 {
 public:
-  DetermineSystemType(const std::string & name, InputParameters parameters);
+  DetermineSystemType(InputParameters parameters);
+  DetermineSystemType(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

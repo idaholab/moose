@@ -30,8 +30,8 @@ InputParameters validParams<SetupRecoverFileBaseAction>()
   return params;
 }
 
-SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(InputParameters params) :
+  Action(params)
 {
 }
 
@@ -178,4 +178,11 @@ SetupRecoverFileBaseAction::getCheckpointFiles(std::set<std::string> & files)
 
     tinydir_close(&dir);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
 }

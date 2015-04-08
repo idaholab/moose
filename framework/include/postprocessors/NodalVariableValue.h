@@ -30,7 +30,8 @@ InputParameters validParams<NodalVariableValue>();
 class NodalVariableValue : public GeneralPostprocessor
 {
 public:
-  NodalVariableValue(const std::string & name, InputParameters parameters);
+  NodalVariableValue(const InputParameters & parameters);
+  NodalVariableValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

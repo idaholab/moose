@@ -25,8 +25,8 @@ InputParameters validParams<QuotientAux>()
 
 
 
-QuotientAux::QuotientAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+QuotientAux::QuotientAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
    _numerator(coupledValue("numerator")),
    _denominator(coupledValue("denominator"))
 {}
@@ -38,3 +38,11 @@ QuotientAux::computeValue()
 {
   return _numerator[_qp] / _denominator[_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+QuotientAux::QuotientAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+   _numerator(coupledValue("numerator")),
+   _denominator(coupledValue("denominator"))
+{}

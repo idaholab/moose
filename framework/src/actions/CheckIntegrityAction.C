@@ -24,8 +24,8 @@ InputParameters validParams<CheckIntegrityAction>()
 }
 
 
-CheckIntegrityAction::CheckIntegrityAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+CheckIntegrityAction::CheckIntegrityAction(InputParameters params) :
+    Action(params)
 {
 }
 
@@ -35,4 +35,11 @@ CheckIntegrityAction::act()
   _awh.checkUnsatisfiedActions();
   if (_problem.get() != NULL)
     _problem->checkProblemIntegrity();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CheckIntegrityAction::CheckIntegrityAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

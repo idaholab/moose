@@ -36,7 +36,8 @@ public:
    * @param name
    * @param InputParameters
    */
-  OutputObjectTest(const std::string & name, InputParameters parameters);
+  OutputObjectTest(const InputParameters & parameters);
+  OutputObjectTest(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

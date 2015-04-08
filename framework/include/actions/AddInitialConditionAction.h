@@ -26,7 +26,8 @@ InputParameters validParams<AddInitialConditionAction>();
 class AddInitialConditionAction : public MooseObjectAction
 {
 public:
-  AddInitialConditionAction(const std::string & name, InputParameters params);
+  AddInitialConditionAction(InputParameters params);
+  AddInitialConditionAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

@@ -24,8 +24,8 @@ InputParameters validParams<CoupledForce>()
   return params;
 }
 
-CoupledForce::CoupledForce(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+CoupledForce::CoupledForce(const InputParameters & parameters) :
+    Kernel(parameters),
     _v_var(coupled("v")),
     _v(coupledValue("v"))
 {
@@ -49,4 +49,13 @@ CoupledForce::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _v_var)
     return -_phi[_j][_qp]*_test[_i][_qp];
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CoupledForce::CoupledForce(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _v_var(coupled("v")),
+    _v(coupledValue("v"))
+{
 }

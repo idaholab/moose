@@ -25,9 +25,9 @@ InputParameters validParams<LayeredIntegral>()
   return params;
 }
 
-LayeredIntegral::LayeredIntegral(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariableUserObject(name, parameters),
-    LayeredBase(name, parameters)
+LayeredIntegral::LayeredIntegral(const InputParameters & parameters) :
+    ElementIntegralVariableUserObject(parameters),
+    LayeredBase(parameters)
 {}
 
 void
@@ -59,3 +59,10 @@ LayeredIntegral::threadJoin(const UserObject & y)
   ElementIntegralVariableUserObject::threadJoin(y);
   LayeredBase::threadJoin(y);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+LayeredIntegral::LayeredIntegral(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralVariableUserObject(deprecated_name, parameters),
+    LayeredBase(parameters)
+{}

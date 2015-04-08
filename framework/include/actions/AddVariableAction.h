@@ -40,7 +40,8 @@ public:
   /**
    * Class constructor
    */
-  AddVariableAction(const std::string & name, InputParameters params);
+  AddVariableAction(InputParameters params);
+  AddVariableAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Adds the nonlinear variable
@@ -69,12 +70,12 @@ protected:
   void addVariable(std::string & var_name);
 
   /**
-   * Create initial condition object
+   * Create the action to generate the InitialCondition object
    *
    * If the user supplies a value for 'initial_condition' in the input file this
    * method will create the proper InitialCondition object.
    */
-  void setInitialCondition();
+  void createInitialConditionAction();
 
   /**
    * Get the block ids from the input parameters

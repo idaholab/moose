@@ -25,8 +25,8 @@ InputParameters validParams<LayeredAverage>()
   return params;
 }
 
-LayeredAverage::LayeredAverage(const std::string & name, InputParameters parameters) :
-    LayeredIntegral(name, parameters)
+LayeredAverage::LayeredAverage(const InputParameters & parameters) :
+    LayeredIntegral(parameters)
 {
   _layer_volumes.resize(_num_layers);
 }
@@ -69,4 +69,12 @@ LayeredAverage::threadJoin(const UserObject & y)
   const LayeredAverage & la = static_cast<const LayeredAverage &>(y);
   for (unsigned int i=0; i<_layer_volumes.size(); i++)
     _layer_volumes[i] += la._layer_volumes[i];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+LayeredAverage::LayeredAverage(const std::string & deprecated_name, InputParameters parameters) :
+    LayeredIntegral(deprecated_name, parameters)
+{
+  _layer_volumes.resize(_num_layers);
 }

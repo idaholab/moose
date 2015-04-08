@@ -35,7 +35,8 @@ class SideIntegralVariableUserObject :
   public MooseVariableInterface
 {
 public:
-  SideIntegralVariableUserObject(const std::string & name, InputParameters parameters);
+  SideIntegralVariableUserObject(const InputParameters & parameters);
+  SideIntegralVariableUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

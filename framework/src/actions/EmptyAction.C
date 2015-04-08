@@ -22,12 +22,19 @@ InputParameters validParams<EmptyAction>()
 }
 
 
-EmptyAction::EmptyAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+EmptyAction::EmptyAction(InputParameters params) :
+    Action(params)
 {
 }
 
 void
 EmptyAction::act()
+{
+}
+
+
+// DEPRECATED CONSTRUCTOR
+EmptyAction::EmptyAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
 {
 }

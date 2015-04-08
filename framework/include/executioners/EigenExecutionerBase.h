@@ -39,7 +39,8 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  EigenExecutionerBase(const std::string & name, InputParameters parameters);
+  EigenExecutionerBase(const InputParameters & parameters);
+  EigenExecutionerBase(const std::string & name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~EigenExecutionerBase();
 

@@ -31,7 +31,8 @@ class MultiAppVariableValueSamplePostprocessorTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppVariableValueSamplePostprocessorTransfer(const std::string & name, InputParameters parameters);
+  MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters);
+  MultiAppVariableValueSamplePostprocessorTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppVariableValueSamplePostprocessorTransfer() {}
 
   virtual void execute();

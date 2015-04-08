@@ -31,8 +31,8 @@ InputParameters validParams<ValueThresholdMarker>()
 }
 
 
-ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParameters parameters) :
-    QuadraturePointMarker(name, parameters),
+ValueThresholdMarker::ValueThresholdMarker(const InputParameters & parameters) :
+    QuadraturePointMarker(parameters),
     _coarsen_set(parameters.isParamValid("coarsen")),
     _coarsen(parameters.get<Real>("coarsen")),
     _refine_set(parameters.isParamValid("refine")),
@@ -72,4 +72,26 @@ ValueThresholdMarker::computeQpMarker()
   }
 
   return _third_state;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ValueThresholdMarker::ValueThresholdMarker(const std::string & deprecated_name, InputParameters parameters) :
+    QuadraturePointMarker(deprecated_name, parameters),
+    _coarsen_set(parameters.isParamValid("coarsen")),
+    _coarsen(parameters.get<Real>("coarsen")),
+    _refine_set(parameters.isParamValid("refine")),
+    _refine(parameters.get<Real>("refine")),
+
+    _invert(parameters.get<bool>("invert")),
+    _third_state((MarkerValue)(int)getParam<MooseEnum>("third_state")),
+
+    _u(coupledValue("variable"))
+{
+  if (_refine_set && _coarsen_set)
+  {
+    Real diff = _refine - _coarsen;
+    if ((diff > 0 && _invert) || (diff < 0 && !_invert))
+      mooseError("Invalid combination of refine, coarsen, and invert values specified");
+  }
 }

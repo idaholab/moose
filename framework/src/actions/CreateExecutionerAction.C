@@ -51,8 +51,8 @@ InputParameters validParams<CreateExecutionerAction>()
 }
 
 
-CreateExecutionerAction::CreateExecutionerAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+CreateExecutionerAction::CreateExecutionerAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -110,4 +110,10 @@ CreateExecutionerAction::act()
   Moose::setup_perf_log.pop("Create Executioner","Setup");
 
   _awh.executioner() = executioner;
+}
+
+// DEPRECATED CONSTRUCTOR
+CreateExecutionerAction::CreateExecutionerAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
 }

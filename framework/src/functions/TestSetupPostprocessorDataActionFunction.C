@@ -22,8 +22,8 @@ InputParameters validParams<TestSetupPostprocessorDataActionFunction>()
   return params;
 }
 
-TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFunction(const std::string & name, InputParameters parameters) :
-  Function(name, parameters)
+TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFunction(const InputParameters & parameters) :
+  Function(parameters)
 {
   if (hasPostprocessor("postprocessor"))
     mooseError("TestSetupPostprocessorDataActionFunction pass");
@@ -34,4 +34,16 @@ TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFuncti
 
 TestSetupPostprocessorDataActionFunction::~TestSetupPostprocessorDataActionFunction()
 {
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFunction(const std::string & deprecated_name, InputParameters parameters) :
+  Function(deprecated_name, parameters)
+{
+  if (hasPostprocessor("postprocessor"))
+    mooseError("TestSetupPostprocessorDataActionFunction pass");
+  else
+    mooseError("TestSetupPostprocessorDataActionFunction fail");
+
 }

@@ -31,7 +31,8 @@ class BoundingBoxNodeSet :
   public MeshModifier
 {
 public:
-  BoundingBoxNodeSet(const std::string & name, InputParameters params);
+  BoundingBoxNodeSet(const InputParameters & parameters);
+  BoundingBoxNodeSet(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void modify();
 

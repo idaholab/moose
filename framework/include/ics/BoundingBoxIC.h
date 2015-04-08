@@ -47,8 +47,8 @@ public:
    * @param name The name given to the initial condition in the input file.
    * @param parameters The parameters object holding data for the class to use.
    */
-  BoundingBoxIC(const std::string & name,
-                InputParameters parameters);
+  BoundingBoxIC(const InputParameters & parameters);
+  BoundingBoxIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * The value of the variable at a point.

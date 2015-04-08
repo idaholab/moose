@@ -31,7 +31,12 @@ class MaterialRealVectorValueAux : public MaterialAuxBase<RealVectorValue>
 {
 public:
 
-  MaterialRealVectorValueAux(const std::string & name, InputParameters parameters);
+  /**
+   * Class constructor
+   * @param parameters The input parameters for this object
+   */
+  MaterialRealVectorValueAux(const InputParameters & parameters);
+  MaterialRealVectorValueAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaterialRealVectorValueAux();
 

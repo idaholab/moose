@@ -29,7 +29,8 @@ InputParameters validParams<AverageElementSize>();
 class AverageElementSize : public ElementAverageValue
 {
 public:
-  AverageElementSize(const std::string & name, InputParameters parameters);
+  AverageElementSize(const InputParameters & parameters);
+  AverageElementSize(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

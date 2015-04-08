@@ -39,7 +39,8 @@ public:
    * Create new PiecewiseMultilinear object.
    * This calls GriddedData to do most of the work
    */
-  PiecewiseMultilinear(const std::string & name, InputParameters parameters);
+  PiecewiseMultilinear(const InputParameters & parameters);
+  PiecewiseMultilinear(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~PiecewiseMultilinear();
 
   /**

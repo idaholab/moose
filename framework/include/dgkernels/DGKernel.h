@@ -64,7 +64,8 @@ public:
    * @param name The name of this kernel.
    * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
    */
-  DGKernel(const std::string & name, InputParameters parameters);
+  DGKernel(const InputParameters & parameters);
+  DGKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~DGKernel();
 

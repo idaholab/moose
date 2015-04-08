@@ -23,8 +23,8 @@ InputParameters validParams<ConstantPointSource>()
   return params;
 }
 
-ConstantPointSource::ConstantPointSource(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
+ConstantPointSource::ConstantPointSource(const InputParameters & parameters) :
+    DiracKernel(parameters),
     _value(getParam<Real>("value")),
     _point_param(getParam<std::vector<Real> >("point"))
 {
@@ -54,3 +54,23 @@ ConstantPointSource::computeQpResidual()
   return -_test[_i][_qp]*_value;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantPointSource::ConstantPointSource(const std::string & deprecated_name, InputParameters parameters) :
+    DiracKernel(deprecated_name, parameters),
+    _value(getParam<Real>("value")),
+    _point_param(getParam<std::vector<Real> >("point"))
+{
+  _p(0) = _point_param[0];
+
+  if (_point_param.size() > 1)
+  {
+    _p(1) = _point_param[1];
+
+    if (_point_param.size() > 2)
+    {
+      _p(2) = _point_param[2];
+    }
+  }
+}

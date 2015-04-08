@@ -48,8 +48,8 @@ InputParameters validParams<GeneratedMesh>()
   return params;
 }
 
-GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameters) :
-    MooseMesh(name, parameters),
+GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
+    MooseMesh(parameters),
     _dim(getParam<MooseEnum>("dim")),
     _nx(getParam<int>("nx")),
     _ny(getParam<int>("ny")),
@@ -122,4 +122,15 @@ GeneratedMesh::buildMesh()
                                       elem_type);
     break;
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+GeneratedMesh::GeneratedMesh(const std::string & deprecated_name, InputParameters parameters) :
+    MooseMesh(deprecated_name, parameters),
+    _dim(getParam<MooseEnum>("dim")),
+    _nx(getParam<int>("nx")),
+    _ny(getParam<int>("ny")),
+    _nz(getParam<int>("nz"))
+{
 }

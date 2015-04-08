@@ -35,7 +35,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  ConstantAux(const std::string & name, InputParameters parameters);
+  ConstantAux(const InputParameters & parameters);
+  ConstantAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ConstantAux() {}
 

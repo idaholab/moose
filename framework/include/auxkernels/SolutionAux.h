@@ -37,7 +37,8 @@ public:
    * @param name The name of the SolutionAux kernel
    * @param parameters The input parameters for the kernel
    */
-  SolutionAux(const std::string & name, InputParameters parameters);
+  SolutionAux(const InputParameters & parameters);
+  SolutionAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /** Empty destructor
    */

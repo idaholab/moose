@@ -30,7 +30,8 @@ InputParameters validParams<FunctionValuePostprocessor>();
 class FunctionValuePostprocessor : public GeneralPostprocessor
 {
 public:
-  FunctionValuePostprocessor(const std::string & name, InputParameters parameters);
+  FunctionValuePostprocessor(const InputParameters & parameters);
+  FunctionValuePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~FunctionValuePostprocessor();
 
   virtual void initialize();

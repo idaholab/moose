@@ -27,7 +27,8 @@ class ElementL2Diff :
   public ElementIntegralVariablePostprocessor
 {
 public:
-  ElementL2Diff(const std::string & name, InputParameters parameters);
+  ElementL2Diff(const InputParameters & parameters);
+  ElementL2Diff(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

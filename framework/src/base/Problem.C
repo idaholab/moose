@@ -25,8 +25,8 @@ InputParameters validParams<Problem>()
   return params;
 }
 
-Problem::Problem(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+Problem::Problem(const InputParameters & parameters) :
+    MooseObject(parameters),
     _cli_option_found(false),
     _color_output(false),
     _termination_requested(false)
@@ -61,4 +61,14 @@ const std::vector<TimePeriod *> &
 Problem::getTimePeriods() const
 {
   return _time_periods;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Problem::Problem(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    _cli_option_found(false),
+    _color_output(false),
+    _termination_requested(false)
+{
 }

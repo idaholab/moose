@@ -108,8 +108,8 @@ InputParameters validParams<Console>()
   return params;
 }
 
-Console::Console(const std::string & name, InputParameters parameters) :
-    TableOutput(name, parameters),
+Console::Console(const InputParameters & parameters) :
+    TableOutput(parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _scientific_time(getParam<bool>("scientific_time")),
@@ -241,10 +241,7 @@ Console::initialSetup()
 
   // Enable verbose output if Executioner has it enabled
   if (_app.getExecutioner()->isParamValid("verbose") && _app.getExecutioner()->getParam<bool>("verbose"))
-  {
     _verbose = true;
-    _pars.set<bool>("verbose") = true;
-  }
 
   // Display a message to indicate the application is running (useful for MultiApps)
   if (_problem_ptr->hasMultiApps() || _app.getOutputWarehouse().multiappLevel() > 0)
@@ -547,7 +544,7 @@ Console::outputSystemInformation()
     _console << ConsoleUtils::outputOutputInformation(_app);
 
   // Output the legacy flags, these cannot be turned off so they become annoying to people.
-  _console << ConsoleUtils::outputLegacyInformation(*_problem_ptr);
+  _console << ConsoleUtils::outputLegacyInformation(_app, *_problem_ptr);
 
   _console << "\n\n";
 }
@@ -605,4 +602,80 @@ Console::petscSetupOutput()
 {
   char c[] =  {32,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,13,10,124,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,124,13,10,124,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,124,13,10,32,92,32,32,32,32,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,32,32,32,32,47,13,10,32,32,92,95,95,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,95,95,95,45,45,45,95,95,95,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,95,95,47,13,10,32,32,32,32,32,45,45,45,95,95,95,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,92,32,32,32,32,32,32,32,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,45,95,95,95,32,32,124,32,32,32,32,32,32,32,32,32,124,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,45,45,124,32,32,95,32,32,32,95,32,32,124,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,124,111,124,32,124,111,124,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,45,32,32,32,45,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,95,95,95,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,45,45,32,32,32,45,45,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,32,47,92,32,32,32,32,32,47,92,32,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,92,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,47,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,92,32,32,92,95,95,95,95,95,95,95,95,95,95,95,95,32,47,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,92,32,32,32,32,32,39,95,95,95,39,32,32,32,32,32,47,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,47,92,32,32,32,32,32,92,32,45,45,95,95,45,45,45,95,95,45,45,32,47,32,32,32,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,47,32,32,92,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,47,32,32,92,13,10,32,32,32,32,32,32,32,32,47,32,32,32,47,32,32,32,32,32,32,32,77,46,79,46,79,46,83,46,69,32,32,32,32,32,32,32,92,32,32,32,92,13,10,32,32,32,32,32,32,32,47,32,32,32,124,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,92,13,10,32,32,32,32,32,32,124,32,32,32,32,124,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,124,32,32,32,32,124,13,10,32,32,32,32,32,32,32,92,32,32,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,47,13,10,32,32,32,32,32,32,32,32,32,92,92,32,92,95,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,95,47,32,47,47,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,45,45,45,95,95,95,95,95,45,45,45,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,86,32,32,32,32,32,92,32,47,32,32,32,32,86,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,95,124,95,95,95,95,95,124,32,124,95,95,95,95,124,95,95,124};
   Moose::out << std::string(c) << std::endl << std::endl;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Console::Console(const std::string & deprecated_name, InputParameters parameters) :
+    TableOutput(deprecated_name, parameters),
+    _max_rows(getParam<unsigned int>("max_rows")),
+    _fit_mode(getParam<MooseEnum>("fit_mode")),
+    _scientific_time(getParam<bool>("scientific_time")),
+    _write_file(getParam<bool>("output_file")),
+    _write_screen(getParam<bool>("output_screen")),
+    _verbose(getParam<bool>("verbose")),
+    _perf_log(getParam<bool>("perf_log")),
+    _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
+    _setup_log(isParamValid("setup_log") ? getParam<bool>("setup_log") : _perf_log),
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+    _libmesh_log(getParam<bool>("libmesh_log")),
+#endif
+    _setup_log_early(getParam<bool>("setup_log_early")),
+    _perf_header(isParamValid("perf_header") ? getParam<bool>("perf_header") : _perf_log),
+    _all_variable_norms(getParam<bool>("all_variable_norms")),
+    _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
+    _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier")),
+    _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
+    _timing(_app.getParam<bool>("timing")),
+    _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
+    _old_linear_norm(std::numeric_limits<Real>::max()),
+    _old_nonlinear_norm(std::numeric_limits<Real>::max()),
+    _print_mesh_changed_info(getParam<bool>("print_mesh_changed_info")),
+    _system_info_flags(getParam<MultiMooseEnum>("system_info"))
+
+{
+  // Apply the special common console flags (print_...)
+  ActionWarehouse & awh = _app.actionWarehouse();
+  Action * common_action = awh.getActionsByName("common_output")[0];
+  if (!_pars.paramSetByUser("output_on") && common_action->getParam<bool>("print_linear_residuals"))
+    _output_on.push_back("linear");
+  if (!_pars.paramSetByUser("perf_log") && common_action->getParam<bool>("print_perf_log"))
+  {
+    _perf_log = true;
+    _solve_log = true;
+    _setup_log = true;
+  }
+
+  // If --timing was used from the command-line, do nothing, all logs are enabled
+  if (!_timing)
+  {
+    // Disable performance logging (all log input options must be false)
+    if (!_perf_log && !_setup_log && !_solve_log && !_perf_header && !_setup_log_early)
+    {
+      Moose::perf_log.disable_logging();
+      Moose::setup_perf_log.disable_logging();
+    }
+
+    // Disable libMesh log
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+    if (!_libmesh_log)
+      libMesh::perflog.disable_logging();
+#endif
+  }
+
+  // If --show-outputs is used, enable it
+  if (_app.getParam<bool>("show_outputs"))
+    _system_info_flags.push_back("output");
+
+  // Set output coloring
+  if (Moose::_color_console)
+  {
+    char * term_env = getenv("TERM");
+    if (term_env)
+    {
+      std::string term(term_env);
+      if (term != "xterm-256color" && term != "xterm")
+        Moose::_color_console = false;
+    }
+  }
 }

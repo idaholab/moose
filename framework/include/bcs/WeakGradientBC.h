@@ -36,7 +36,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  WeakGradientBC(const std::string & name, InputParameters parameters);
+  WeakGradientBC(const InputParameters & parameters);
+  WeakGradientBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -28,7 +28,8 @@ InputParameters validParams<UniformMarker>();
 class UniformMarker : public Marker
 {
 public:
-  UniformMarker(const std::string & name, InputParameters parameters);
+  UniformMarker(const InputParameters & parameters);
+  UniformMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~UniformMarker(){};
 
 protected:

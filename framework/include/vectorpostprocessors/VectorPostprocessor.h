@@ -35,7 +35,7 @@ InputParameters validParams<VectorPostprocessor>();
 class VectorPostprocessor
 {
 public:
-  VectorPostprocessor(const std::string & name, InputParameters parameters);
+  VectorPostprocessor(const InputParameters & parameters);
 
   virtual ~VectorPostprocessor(){}
 

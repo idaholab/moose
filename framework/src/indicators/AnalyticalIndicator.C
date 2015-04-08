@@ -23,8 +23,8 @@ InputParameters validParams<AnalyticalIndicator>()
 }
 
 
-AnalyticalIndicator::AnalyticalIndicator(const std::string & name, InputParameters parameters) :
-    ElementIntegralIndicator(name, parameters),
+AnalyticalIndicator::AnalyticalIndicator(const InputParameters & parameters) :
+    ElementIntegralIndicator(parameters),
     _func(getFunction("function"))
 {
 }
@@ -36,3 +36,11 @@ AnalyticalIndicator::computeQpIntegral()
   return diff*diff;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+AnalyticalIndicator::AnalyticalIndicator(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralIndicator(deprecated_name, parameters),
+    _func(getFunction("function"))
+{
+}

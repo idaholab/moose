@@ -23,8 +23,8 @@ InputParameters validParams<EqualValueConstraint>()
   return params;
 }
 
-EqualValueConstraint::EqualValueConstraint(const std::string & name, InputParameters parameters) :
-    FaceFaceConstraint(name, parameters)
+EqualValueConstraint::EqualValueConstraint(const InputParameters & parameters) :
+    FaceFaceConstraint(parameters)
 {
 }
 
@@ -65,4 +65,11 @@ EqualValueConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType jac_ty
   default:
     return 0;
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+EqualValueConstraint::EqualValueConstraint(const std::string & deprecated_name, InputParameters parameters) :
+    FaceFaceConstraint(deprecated_name, parameters)
+{
 }

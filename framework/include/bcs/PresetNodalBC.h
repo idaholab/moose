@@ -28,7 +28,8 @@ InputParameters validParams<PresetNodalBC>();
 class PresetNodalBC : public NodalBC
 {
 public:
-  PresetNodalBC(const std::string & name, InputParameters parameters);
+  PresetNodalBC(const InputParameters & parameters);
+  PresetNodalBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void computeValue(NumericVector<Number> & current_solution);
 

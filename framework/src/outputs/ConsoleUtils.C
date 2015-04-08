@@ -257,7 +257,7 @@ outputOutputInformation(MooseApp & app)
 }
 
 
-std::string outputLegacyInformation(FEProblem & problem)
+std::string outputLegacyInformation(MooseApp & app, FEProblem & problem)
 {
   std::stringstream oss;
   oss << std::left;
@@ -269,6 +269,8 @@ std::string outputLegacyInformation(FEProblem & problem)
       oss << COLOR_RED << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed." << COLOR_DEFAULT << '\n';
     if (problem.legacyUoInitialization())
       oss << COLOR_RED << "  Computing all UserObjects during initial setup." << COLOR_DEFAULT << '\n';
+    if (app.usingLegacyConstructors())
+      oss << COLOR_RED << "  Using legacy constructors." << COLOR_DEFAULT << '\n';
   }
 
   return oss.str();

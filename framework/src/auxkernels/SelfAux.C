@@ -21,8 +21,8 @@ InputParameters validParams<SelfAux>()
   return params;
 }
 
-SelfAux::SelfAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters)
+SelfAux::SelfAux(const InputParameters & parameters) :
+    AuxKernel(parameters)
 {
 }
 
@@ -34,4 +34,11 @@ Real
 SelfAux::computeValue()
 {
   return _u[_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SelfAux::SelfAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters)
+{
 }

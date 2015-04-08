@@ -22,8 +22,8 @@ InputParameters validParams<JumpIndicator>()
 }
 
 
-JumpIndicator::JumpIndicator(const std::string & name, InputParameters parameters) :
-    InternalSideIndicator(name, parameters)
+JumpIndicator::JumpIndicator(const InputParameters & parameters) :
+    InternalSideIndicator(parameters)
 {
 }
 
@@ -34,3 +34,10 @@ JumpIndicator::computeQpIndicator()
   return 0;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+JumpIndicator::JumpIndicator(const std::string & deprecated_name, InputParameters parameters) :
+    InternalSideIndicator(deprecated_name, parameters)
+{
+}

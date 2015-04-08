@@ -28,7 +28,8 @@ class AddExtraNodeset :
   public MeshModifier
 {
 public:
-  AddExtraNodeset(const std::string & name, InputParameters params);
+  AddExtraNodeset(const InputParameters & params);
+  AddExtraNodeset(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void modify();
 };

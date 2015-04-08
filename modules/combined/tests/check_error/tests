@@ -2,48 +2,48 @@
   [./increment_options_test]
     type = 'RunException'
     input = 'increment_options_test.i'
-    expect_err = 'The options for the increment calculation are RashidApprox and Eigen.'
+    expect_err = "The options for the increment calculation are RashidApprox and Eigen."
   [../]
 
   [./num_constants_test]
     type = 'RunException'
     input = 'num_constants_test.i'
-    expect_err = 'Exactly two elastic constants must be defined for material 'goo''
+    expect_err = "Exactly two elastic constants must be defined for material 'goo'"
   [../]
 
   [./youngs_modulus_test]
     type = 'RunException'
     input = 'youngs_modulus_test.i'
-    expect_err = 'Youngs modulus must be positive in material 'goo''
+    expect_err = "Youngs modulus must be positive in material 'goo'"
   [../]
 
   [./bulk_modulus_test]
     type = 'RunException'
     input = 'bulk_modulus_test.i'
-    expect_err = 'Bulk modulus must be positive in material 'goo''
+    expect_err = "Bulk modulus must be positive in material 'goo'"
   [../]
 
   [./poissons_ratio_test]
     type = 'RunException'
     input = 'poissons_ratio_test.i'
-    expect_err = 'Poissons ratio must be greater than -1 and less than 0.5 in material 'goo''
+    expect_err = "Poissons ratio must be greater than -1 and less than 0.5 in material 'goo'"
   [../]
 
   [./contact_displacements_test]
     type = 'RunException'
     input = 'contact_displacements.i'
-    expect_err = 'Contact requires updated coordinates.  Use the 'displacements'
+    expect_err = "Contact requires updated coordinates.  Use the"
   [../]
 
   [./shear_modulus_test]
     type = 'RunException'
     input = 'shear_modulus_test.i'
-    expect_err = 'Shear modulus must not be negative in material 'goo''
+    expect_err = "Shear modulus must not be negative in material 'goo'"
   [../]
 
   [./pressure_component_test]
     type = 'RunException'
     input = 'pressure_component.i'
-    expect_err = 'Invalid component given for fred: 123456789.'
+    expect_err = "Invalid component given for fred: 123456789."
   [../]
 []

@@ -26,8 +26,8 @@ InputParameters validParams<RunTime>()
   return params;
 }
 
-RunTime::RunTime(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+RunTime::RunTime(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _time_type(getParam<MooseEnum>("time_type"))
 {}
 
@@ -44,3 +44,10 @@ RunTime::getValue()
 
   mooseError("Invalid Type");
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RunTime::RunTime(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _time_type(getParam<MooseEnum>("time_type"))
+{}

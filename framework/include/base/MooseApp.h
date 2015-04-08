@@ -28,6 +28,7 @@
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "OutputWarehouse.h"
+#include "InputParameterWarehouse.h"
 
 // libMesh includes
 #include "libmesh/parallel_object.h"
@@ -287,7 +288,7 @@ public:
    *
    * @see MultiApp TransientMultiApp OutputWarehouse
    */
-  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers){ _output_file_numbers = numbers; }
+  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers) { _output_file_numbers = numbers; }
 
   /**
    * Store a map of outputter names and file numbers
@@ -296,7 +297,7 @@ public:
    *
    * @see MultiApp TransientMultiApp
    */
-  std::map<std::string, unsigned int> & getOutputFileNumbers(){ return _output_file_numbers; }
+  std::map<std::string, unsigned int> & getOutputFileNumbers() { return _output_file_numbers; }
 
   /**
    * Return true if the output position has been set
@@ -304,20 +305,9 @@ public:
   bool hasOutputWarehouse(){ return _output_position_set; }
 
   /**
-   * The OutputWarehouse for this App
-   * @return Reference to the OutputWarehouse object
+   * Get the OutputWarehouse objects
    */
   OutputWarehouse & getOutputWarehouse();
-
-  /**
-   * Set the OutputWarehouse object
-   * The CoupledExecutioner requires multiple OutputWarehouses, this allows the warehouses
-   * to be swapped out.
-   *
-   * If this function is called then getOutputWarehouse will return a reference to the
-   * _alternate_output_warehouse rather than _output_warehouse.
-   */
-  void setOutputWarehouse(OutputWarehouse * owh){ _alternate_output_warehouse = owh; }
 
   /**
    * Get SystemInfo object
@@ -354,6 +344,16 @@ public:
    */
   std::set<std::string> getLoadedLibraryPaths() const;
 
+  /**
+   * Get the InputParameterWarehouse for MooseObjects
+   */
+  InputParameterWarehouse & getInputParameterWarehouse();
+
+  /**
+   * Returns true if legacy constructors are being used
+   */
+  bool usingLegacyConstructors() { return _legacy_constructors; }
+
 protected:
 
   /**
@@ -369,6 +369,7 @@ protected:
   void loadLibraryAndDependencies(const std::string & library_filename, const Parameters & params);
 
   /// Constructor is protected so that this object is constructed through the AppFactory object
+  MooseApp(InputParameters parameters);
   MooseApp(const std::string & name, InputParameters parameters);
 
   /// Don't run the simulation, just complete all of the mesh preperation steps and exit
@@ -413,11 +414,11 @@ protected:
   /// Syntax of the input file
   Syntax _syntax;
 
-  /// An alternate OutputWarehouse object (required for CoupledExecutioner)
-  OutputWarehouse * _alternate_output_warehouse;
-
   /// OutputWarehouse object for this App
-  OutputWarehouse * _output_warehouse;
+  OutputWarehouse _output_warehouse;
+
+  /// Input parameter storage structure (this is a raw pointer so the destruction time can be explicitly controlled)
+  InputParameterWarehouse * _input_parameter_warehouse;
 
   /// The Factory responsible for building Actions
   ActionFactory _action_factory;
@@ -441,6 +442,7 @@ protected:
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
 
   Factory _factory;
+
 
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
@@ -472,6 +474,9 @@ protected:
 
   /// Legacy Uo Initialization flag
   bool _legacy_uo_initialization_default;
+
+  /// True when using legacy constructors
+  bool _legacy_constructors;
 
   /// true if we want to just check the input file
   bool _check_input;

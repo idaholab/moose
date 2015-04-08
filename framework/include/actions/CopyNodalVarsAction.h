@@ -26,7 +26,8 @@ InputParameters validParams<CopyNodalVarsAction>();
 class CopyNodalVarsAction: public Action
 {
 public:
-  CopyNodalVarsAction(const std::string & name, InputParameters params);
+  CopyNodalVarsAction(InputParameters params);
+  CopyNodalVarsAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

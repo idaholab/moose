@@ -32,7 +32,8 @@ InputParameters validParams<ConstantDamper>();
 class ConstantDamper : public Damper
 {
 public:
-  ConstantDamper(const std::string & name, InputParameters parameters);
+  ConstantDamper(const InputParameters & parameters);
+  ConstantDamper(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

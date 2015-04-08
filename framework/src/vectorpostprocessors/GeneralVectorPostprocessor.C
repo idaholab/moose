@@ -22,7 +22,14 @@ InputParameters validParams<GeneralVectorPostprocessor>()
   return params;
 }
 
-GeneralVectorPostprocessor::GeneralVectorPostprocessor(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
-    VectorPostprocessor(name, parameters)
+GeneralVectorPostprocessor::GeneralVectorPostprocessor(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
+    VectorPostprocessor(parameters)
+{}
+
+
+// DEPRECATED CONSTRUCTOR
+GeneralVectorPostprocessor::GeneralVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralUserObject(deprecated_name, parameters),
+    VectorPostprocessor(parameters)
 {}

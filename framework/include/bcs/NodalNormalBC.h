@@ -30,7 +30,8 @@ InputParameters validParams<NodalNormalBC>();
 class NodalNormalBC : public NodalBC
 {
 public:
-  NodalNormalBC(const std::string & name, InputParameters parameters);
+  NodalNormalBC(const InputParameters & parameters);
+  NodalNormalBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalNormalBC();
 
   virtual void computeResidual(NumericVector<Number> & residual);

@@ -27,7 +27,8 @@ class FDKernel :
   public Kernel
 {
 public:
-  FDKernel(const std::string & name, InputParameters parameters);
+  FDKernel(const InputParameters & parameters);
+  FDKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~FDKernel(){};
 

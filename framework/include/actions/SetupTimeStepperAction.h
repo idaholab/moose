@@ -28,7 +28,8 @@ InputParameters validParams<SetupTimeStepperAction>();
 class SetupTimeStepperAction : public MooseObjectAction
 {
 public:
-  SetupTimeStepperAction(const std::string & name, InputParameters parameters);
+  SetupTimeStepperAction(InputParameters parameters);
+  SetupTimeStepperAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SetupTimeStepperAction();
 
   virtual void act();

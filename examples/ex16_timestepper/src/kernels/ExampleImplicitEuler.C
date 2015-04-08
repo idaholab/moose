@@ -23,9 +23,8 @@ InputParameters validParams<ExampleImplicitEuler>()
   return params;
 }
 
-ExampleImplicitEuler::ExampleImplicitEuler(const std::string & name,
-                                           InputParameters parameters) :
-    TimeDerivative(name,parameters),
+ProblemRealParameter::ProblemRealParameter(const InputParameters & parameters) :
+    TimeDerivative(parameters),
     _time_coefficient(getMaterialProperty<Real>("time_coefficient"))
 {}
 
@@ -40,3 +39,9 @@ ExampleImplicitEuler::computeQpJacobian()
 {
   return _time_coefficient[_qp]*TimeDerivative::computeQpJacobian();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ProblemRealParameter::ProblemRealParameter(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters)
+{}

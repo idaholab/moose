@@ -28,8 +28,8 @@ InputParameters validParams<Transform>()
   return params;
 }
 
-Transform::Transform(const std::string & name, InputParameters parameters):
-    MeshModifier(name, parameters),
+Transform::Transform(const InputParameters & parameters):
+    MeshModifier(parameters),
     _transform(getParam<MooseEnum>("transform")),
     _vector_value(getParam<RealVectorValue>("vector_value"))
 {
@@ -51,4 +51,13 @@ Transform::modify()
   case 3:
     MeshTools::Modification::scale(*_mesh_ptr, _vector_value(0), _vector_value(1), _vector_value(2)); break;
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Transform::Transform(const std::string & deprecated_name, InputParameters parameters):
+    MeshModifier(deprecated_name, parameters),
+    _transform(getParam<MooseEnum>("transform")),
+    _vector_value(getParam<RealVectorValue>("vector_value"))
+{
 }

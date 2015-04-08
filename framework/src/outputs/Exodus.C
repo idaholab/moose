@@ -43,8 +43,8 @@ InputParameters validParams<Exodus>()
   return params;
 }
 
-Exodus::Exodus(const std::string & name, InputParameters parameters) :
-    AdvancedOutput<OversampleOutput>(name, parameters),
+Exodus::Exodus(const InputParameters & parameters) :
+    AdvancedOutput<OversampleOutput>(parameters),
     _exodus_initialized(false),
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
     _recovering(_app.isRecovering()),
@@ -113,7 +113,7 @@ Exodus::outputSetup()
   _exodus_initialized = false;
 
   // Increment file number and set appending status, append if all the following conditions are met:
-  //   (2) If the application is recovering (not restarting)
+  //   (1) If the application is recovering (not restarting)
   //   (2) The mesh has NOT changed
   //   (3) An existing Exodus file exists for appending (_exodus_num > 0)
   //   (4) Sequential output is NOT desired

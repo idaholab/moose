@@ -28,7 +28,8 @@ InputParameters validParams<DeprecatedBlockAction>();
 class DeprecatedBlockAction : public Action
 {
 public:
-  DeprecatedBlockAction(const std::string & name, InputParameters parameters);
+  DeprecatedBlockAction(InputParameters parameters);
+  DeprecatedBlockAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~DeprecatedBlockAction();
 
   void act();

@@ -30,7 +30,8 @@ class MultiAppPostprocessorInterpolationTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppPostprocessorInterpolationTransfer(const std::string & name, InputParameters parameters);
+  MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters);
+  MultiAppPostprocessorInterpolationTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppPostprocessorInterpolationTransfer() {}
 
   virtual void execute();

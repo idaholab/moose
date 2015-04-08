@@ -24,9 +24,9 @@ InputParameters validParams<NodalValueSampler>()
   return params;
 }
 
-NodalValueSampler::NodalValueSampler(const std::string & name, InputParameters parameters) :
-    NodalVariableVectorPostprocessor(name, parameters),
-    SamplerBase(name, parameters, this, _communicator)
+NodalValueSampler::NodalValueSampler(const InputParameters & parameters) :
+    NodalVariableVectorPostprocessor(parameters),
+    SamplerBase(parameters, this, _communicator)
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());
@@ -65,4 +65,20 @@ NodalValueSampler::threadJoin(const UserObject & y)
   const NodalValueSampler & vpp = static_cast<const NodalValueSampler &>(y);
 
   SamplerBase::threadJoin(vpp);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NodalValueSampler::NodalValueSampler(const std::string & deprecated_name, InputParameters parameters) :
+    NodalVariableVectorPostprocessor(deprecated_name, parameters),
+    SamplerBase(parameters, this, _communicator)
+{
+  std::vector<std::string> var_names(_coupled_moose_vars.size());
+  _values.resize(_coupled_moose_vars.size());
+
+  for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
+    var_names[i] = _coupled_moose_vars[i]->name();
+
+  // Initialize the datastructions in SamplerBase
+  SamplerBase::setupVariables(var_names);
 }

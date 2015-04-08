@@ -36,8 +36,8 @@ InputParameters validParams<TopResidualDebugOutput>()
   return params;
 }
 
-TopResidualDebugOutput::TopResidualDebugOutput(const std::string & name, InputParameters & parameters) :
-    BasicOutput<PetscOutput>(name, parameters),
+TopResidualDebugOutput::TopResidualDebugOutput(const InputParameters & parameters) :
+    BasicOutput<PetscOutput>(parameters),
     _num_residuals(getParam<unsigned int>("num_residuals")),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {

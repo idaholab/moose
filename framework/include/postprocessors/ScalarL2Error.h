@@ -30,7 +30,8 @@ class ScalarL2Error :
   public GeneralPostprocessor
 {
 public:
-  ScalarL2Error(const std::string & name, InputParameters parameters);
+  ScalarL2Error(const InputParameters & parameters);
+  ScalarL2Error(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

@@ -25,8 +25,8 @@ InputParameters validParams<ElementalVariableValue>()
   return params;
 }
 
-ElementalVariableValue::ElementalVariableValue(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+ElementalVariableValue::ElementalVariableValue(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.getMesh().query_elem(parameters.get<unsigned int>("elementid")))
@@ -57,4 +57,17 @@ ElementalVariableValue::getValue()
   gatherSum(value);
 
   return value;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementalVariableValue::ElementalVariableValue(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _mesh(_subproblem.mesh()),
+    _var_name(parameters.get<VariableName>("variable")),
+    _element(_mesh.getMesh().query_elem(parameters.get<unsigned int>("elementid")))
+{
+  // This class only works with SerialMesh, since it relies on a
+  // specific element numbering that we can't guarantee with ParallelMesh
+  _mesh.errorIfParallelDistribution("ElementalVariableValue");
 }

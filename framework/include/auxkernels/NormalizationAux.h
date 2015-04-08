@@ -30,7 +30,8 @@ InputParameters validParams<NormalizationAux>();
 class NormalizationAux : public AuxKernel
 {
 public:
-  NormalizationAux(const std::string & name, InputParameters parameters);
+  NormalizationAux(const InputParameters & parameters);
+  NormalizationAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NormalizationAux() {}
 

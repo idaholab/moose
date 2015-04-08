@@ -33,7 +33,8 @@ class NodalScalarKernel :
   public MooseVariableDependencyInterface
 {
 public:
-  NodalScalarKernel(const std::string & name, InputParameters parameters);
+  NodalScalarKernel(const InputParameters & parameters);
+  NodalScalarKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalScalarKernel();
 
   virtual void reinit();

@@ -24,8 +24,8 @@ InputParameters validParams<SimplePredictor>()
   return params;
 }
 
-SimplePredictor::SimplePredictor(const std::string & name, InputParameters parameters) :
-    Predictor(name, parameters),
+SimplePredictor::SimplePredictor(const InputParameters & parameters) :
+    Predictor(parameters),
     _scale(getParam<Real>("scale"))
 {
 }
@@ -54,4 +54,12 @@ SimplePredictor::apply(NumericVector<Number> & sln)
       sln.add(-dt_adjusted_scale_factor, _solution_older);
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SimplePredictor::SimplePredictor(const std::string & deprecated_name, InputParameters parameters) :
+    Predictor(deprecated_name, parameters),
+    _scale(getParam<Real>("scale"))
+{
 }

@@ -39,7 +39,8 @@ public:
   /**
    * Class constructor
    */
-  Exodus(const std::string & name, InputParameters);
+  Exodus(const InputParameters & parameters);
+  Exodus(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

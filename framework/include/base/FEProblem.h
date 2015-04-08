@@ -105,7 +105,8 @@ class FEProblem :
   public Restartable
 {
 public:
-  FEProblem(const std::string & name, InputParameters parameters);
+  FEProblem(const InputParameters & parameters);
+  FEProblem(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~FEProblem();
 
   virtual EquationSystems & es() { return _eq; }
@@ -181,11 +182,6 @@ public:
                                                               const Real dtol,
                                                               const PetscInt maxits);
 
-#ifdef LIBMESH_HAVE_PETSC
-  void storePetscOptions(const MultiMooseEnum & petsc_options,
-                         const MultiMooseEnum & petsc_options_inames,
-                         const std::vector<std::string> & petsc_options_values);
-#endif
 
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
@@ -380,17 +376,15 @@ public:
    */
   void initPetscOutput();
 
-  virtual const std::vector<MooseObject *> & getObjectsByName(const std::string & name, THREAD_ID tid);
-
 #ifdef LIBMESH_HAVE_PETSC
   /**
-   * Retrieve a writable referebce the PETSc options (used by PetscSupport)
+   * Retrieve a writable reference the PETSc options (used by PetscSupport)
    */
   Moose::PetscSupport::PetscOptions & getPetscOptions(){ return _petsc_options; }
 #endif //LIBMESH_HAVE_PETSC
 
   // Function /////
-  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
+  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters, bool auto_parsed = false);
   virtual bool hasFunction(const std::string & name, THREAD_ID tid = 0);
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
@@ -729,7 +723,7 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);
 
   // Displaced problem /////
-  virtual void initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters params);
+  virtual void initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters & params);
   virtual DisplacedProblem * & getDisplacedProblem() { return _displaced_problem; }
 
   virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL);
@@ -881,6 +875,7 @@ public:
    */
   MaterialData * getBoundaryMaterialData(THREAD_ID tid) { return _bnd_material_data[tid]; }
 
+  ///@{
   /**
    * Will return True if the user wants to get an error when
    * a nonzero is reallocated in the Jacobian by PETSc
@@ -914,9 +909,6 @@ protected:
   int & _t_step;
   Real & _dt;
   Real & _dt_old;
-
-  /// Objects by names, indexing: [thread][name]->array of moose objects with name 'name'
-  std::vector<std::map<std::string, std::vector<MooseObject *> > > _objects_by_name;
 
   NonlinearSystem & _nl;
   AuxiliarySystem _aux;
@@ -1020,7 +1012,7 @@ protected:
   /// Whether or not this system has any Constraints.
   bool _has_constraints;
 
-  /// Whether or not this systen has any multiapps
+  /// Whether or not this system has any multiapps
   bool _has_multiapps;
 
   /// Whether nor not stateful materials have been initialized

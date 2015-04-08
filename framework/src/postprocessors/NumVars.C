@@ -26,8 +26,8 @@ InputParameters validParams<NumVars>()
   return params;
 }
 
-NumVars::NumVars(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+NumVars::NumVars(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _system(getParam<MooseEnum>("system"))
 {}
 
@@ -44,3 +44,10 @@ NumVars::getValue()
 
   mooseError("Unknown system type!");
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NumVars::NumVars(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _system(getParam<MooseEnum>("system"))
+{}

@@ -22,11 +22,12 @@ InputParameters validParams<ScalarConstantIC>()
   return params;
 }
 
-ScalarConstantIC::ScalarConstantIC(const std::string & name, InputParameters parameters) :
-    ScalarInitialCondition(name, parameters),
+ScalarConstantIC::ScalarConstantIC(const InputParameters & parameters) :
+    ScalarInitialCondition(parameters),
     _value(getParam<Real>("value"))
 {
 }
+
 
 Real
 ScalarConstantIC::value()
@@ -34,3 +35,10 @@ ScalarConstantIC::value()
   return _value;
 }
 
+
+// DEPRECATED CONSTRUCTOR
+ScalarConstantIC::ScalarConstantIC(const std::string & deprecated_name, InputParameters parameters) :
+    ScalarInitialCondition(deprecated_name, parameters),
+    _value(getParam<Real>("value"))
+{
+}

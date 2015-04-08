@@ -22,8 +22,8 @@ InputParameters validParams<SteadyState>()
   return params;
 }
 
-SteadyState::SteadyState(const std::string & name, InputParameters parameters) :
-    TimeIntegrator(name, parameters)
+SteadyState::SteadyState(const InputParameters & parameters) :
+    TimeIntegrator(parameters)
 {
 }
 
@@ -45,4 +45,11 @@ SteadyState::postStep(NumericVector<Number> & residual)
 {
   residual += _Re_non_time;
   residual.close();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SteadyState::SteadyState(const std::string & deprecated_name, InputParameters parameters) :
+    TimeIntegrator(deprecated_name, parameters)
+{
 }

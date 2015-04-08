@@ -90,6 +90,5 @@
 
 [Problem]
   register_objects_from = 'PhaseFieldApp'
-  object_names = 'CHMath CHInterface PFMobility'
   library_path = '../../../../phase_field/lib'
 []

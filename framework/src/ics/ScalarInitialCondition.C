@@ -28,8 +28,8 @@ InputParameters validParams<ScalarInitialCondition>()
   return params;
 }
 
-ScalarInitialCondition::ScalarInitialCondition(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters) :
+    MooseObject(parameters),
     ScalarCoupleable(parameters),
     DependencyResolverInterface(),
     _subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
@@ -66,4 +66,23 @@ ScalarInitialCondition::compute(DenseVector<Number> & vals)
 {
   for (_i = 0; _i < _var.order(); ++_i)
     vals(_i) = value();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ScalarInitialCondition::ScalarInitialCondition(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    ScalarCoupleable(parameters),
+    DependencyResolverInterface(),
+    _subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _var(_sys.getScalarVariable(_tid, getParam<VariableName>("variable")))
+{
+  _supplied_vars.insert(getParam<VariableName>("variable"));
+
+  const std::vector<MooseVariableScalar *> & coupled_vars = getCoupledMooseScalarVars();
+  for (std::vector<MooseVariableScalar *>::const_iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
+    _depend_vars.insert((*it)->name());
 }

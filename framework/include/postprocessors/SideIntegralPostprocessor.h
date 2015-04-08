@@ -32,7 +32,8 @@ InputParameters validParams<SideIntegralPostprocessor>();
 class SideIntegralPostprocessor : public SidePostprocessor
 {
 public:
-  SideIntegralPostprocessor(const std::string & name, InputParameters parameters);
+  SideIntegralPostprocessor(const InputParameters & parameters);
+  SideIntegralPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

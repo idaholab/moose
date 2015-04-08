@@ -26,7 +26,8 @@ InputParameters validParams<AddIndicatorAction>();
 class AddIndicatorAction : public MooseObjectAction
 {
 public:
-  AddIndicatorAction(const std::string & name, InputParameters params);
+  AddIndicatorAction(InputParameters params);
+  AddIndicatorAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

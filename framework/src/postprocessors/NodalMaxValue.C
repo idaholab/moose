@@ -24,8 +24,8 @@ InputParameters validParams<NodalMaxValue>()
   return params;
 }
 
-NodalMaxValue::NodalMaxValue(const std::string & name, InputParameters parameters) :
-  NodalVariablePostprocessor(name, parameters),
+NodalMaxValue::NodalMaxValue(const InputParameters & parameters) :
+  NodalVariablePostprocessor(parameters),
   _value(-std::numeric_limits<Real>::max())
 {}
 
@@ -54,3 +54,10 @@ NodalMaxValue::threadJoin(const UserObject & y)
   const NodalMaxValue & pps = static_cast<const NodalMaxValue &>(y);
   _value = std::max(_value, pps._value);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NodalMaxValue::NodalMaxValue(const std::string & deprecated_name, InputParameters parameters) :
+  NodalVariablePostprocessor(deprecated_name, parameters),
+  _value(-std::numeric_limits<Real>::max())
+{}

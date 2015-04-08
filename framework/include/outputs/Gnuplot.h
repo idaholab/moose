@@ -41,7 +41,8 @@ public:
    *
    * @see initAvailable init seperate
    */
-  Gnuplot(const std::string & name, InputParameters & parameters);
+  Gnuplot(const InputParameters & parameters);
+  Gnuplot(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Output the table to a *.csv file

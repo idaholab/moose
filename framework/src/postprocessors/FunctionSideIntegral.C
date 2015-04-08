@@ -22,8 +22,8 @@ InputParameters params = validParams<SideIntegralPostprocessor>();
   return params;
 }
 
-FunctionSideIntegral::FunctionSideIntegral(const std::string & name, InputParameters parameters) :
-    SideIntegralPostprocessor(name, parameters),
+FunctionSideIntegral::FunctionSideIntegral(const InputParameters & parameters) :
+    SideIntegralPostprocessor(parameters),
     _func(getFunction("function"))
 {}
 
@@ -39,3 +39,10 @@ FunctionSideIntegral::computeQpIntegral()
 {
   return _func.value(_t, _q_point[_qp]);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+FunctionSideIntegral::FunctionSideIntegral(const std::string & deprecated_name, InputParameters parameters) :
+    SideIntegralPostprocessor(deprecated_name, parameters),
+    _func(getFunction("function"))
+{}

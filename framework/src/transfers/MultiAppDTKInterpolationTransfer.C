@@ -31,8 +31,8 @@ InputParameters validParams<MultiAppDTKInterpolationTransfer>()
   return params;
 }
 
-MultiAppDTKInterpolationTransfer::MultiAppDTKInterpolationTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppDTKInterpolationTransfer::MultiAppDTKInterpolationTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _from_var_name(getParam<VariableName>("source_variable")),
     _to_var_name(getParam<AuxVariableName>("variable"))
 {

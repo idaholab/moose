@@ -40,7 +40,8 @@ public:
    * @param name The name of the function
    * @param parameters The input parameters for the function
    */
-  Axisymmetric2D3DSolutionFunction(const std::string & name, InputParameters parameters);
+  Axisymmetric2D3DSolutionFunction(const InputParameters & parameters);
+  Axisymmetric2D3DSolutionFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Empty destructor

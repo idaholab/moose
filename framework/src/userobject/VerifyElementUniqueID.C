@@ -24,8 +24,8 @@ InputParameters validParams<VerifyElementUniqueID>()
   return params;
 }
 
-VerifyElementUniqueID::VerifyElementUniqueID(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters)
+VerifyElementUniqueID::VerifyElementUniqueID(const InputParameters & parameters) :
+    ElementUserObject(parameters)
 {}
 
 // This object can't test every possible scenario.  For instance, it can't detect recycled ids
@@ -67,3 +67,9 @@ VerifyElementUniqueID::finalize()
   if (it_end != _all_ids.end())
     mooseError("Duplicate unique_ids found!");
 }
+
+
+// DEPRECATED CONSTRUCTOR
+VerifyElementUniqueID::VerifyElementUniqueID(const std::string & deprecated_name, InputParameters parameters) :
+    ElementUserObject(deprecated_name, parameters)
+{}

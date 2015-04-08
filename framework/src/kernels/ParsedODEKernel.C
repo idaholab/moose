@@ -29,9 +29,9 @@ InputParameters validParams<ParsedODEKernel>()
   return params;
 }
 
-ParsedODEKernel::ParsedODEKernel(const std::string & name, InputParameters parameters) :
-    ODEKernel(name, parameters),
-    FunctionParserUtils(name, parameters),
+ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
+    ODEKernel(parameters),
+    FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
     _nargs(coupledScalarComponents("args")),
     _args(_nargs),
@@ -66,7 +66,7 @@ ParsedODEKernel::ParsedODEKernel(const std::string & name, InputParameters param
 
   // parse function
   if (_func_F->Parse(_function, variables) >= 0)
-     mooseError("Invalid function\n" << _function << "\nin ParsedODEKernel " << name << ".\n" << _func_F->ErrorMsg());
+    mooseError("Invalid function\n" << _function << "\nin ParsedODEKernel " << name() << ".\n" << _func_F->ErrorMsg());
 
   // on-diagonal derivative
   _func_dFdu = new ADFunction(*_func_F);
@@ -143,4 +143,80 @@ ParsedODEKernel::computeQpOffDiagJacobian(unsigned int jvar)
 
   updateParams();
   return evaluate(_func_dFdarg[i]);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ParsedODEKernel::ParsedODEKernel(const std::string & deprecated_name, InputParameters parameters) :
+    ODEKernel(deprecated_name, parameters),
+    FunctionParserUtils(parameters),
+    _function(getParam<std::string>("function")),
+    _nargs(coupledScalarComponents("args")),
+    _args(_nargs),
+    _arg_names(_nargs),
+    _func_dFdarg(_nargs),
+    _number_of_nl_variables(_sys.nVariables()),
+    _arg_index(_number_of_nl_variables, -1)
+{
+  // build variables argument (start with variable the kernel is operating on)
+  std::string variables = _var.name();
+
+  // add additional coupled variables
+  for (unsigned int i = 0; i < _nargs; ++i)
+  {
+    _arg_names[i] = getScalarVar("args", i)->name();
+    variables += "," + _arg_names[i];
+    _args[i] = &coupledScalarValue("args", i);
+
+    // populate number -> arg index lookup table skipping aux variables
+    unsigned int number = coupledScalar("args", i);
+    if (number < _number_of_nl_variables)
+      _arg_index[number] = i;
+  }
+
+  // base function object
+  _func_F =  new ADFunction();
+
+  // add the constant expressions
+  addFParserConstants(_func_F,
+                      getParam<std::vector<std::string> >("constant_names"),
+                      getParam<std::vector<std::string> >("constant_expressions"));
+
+  // parse function
+  if (_func_F->Parse(_function, variables) >= 0)
+    mooseError("Invalid function\n" << _function << "\nin ParsedODEKernel " << name() << ".\n" << _func_F->ErrorMsg());
+
+  // on-diagonal derivative
+  _func_dFdu = new ADFunction(*_func_F);
+  if (_func_dFdu->AutoDiff(_var.name()) != -1)
+    mooseError("Failed to take first derivative w.r.t. " << _var.name());
+
+  // off-diagonal derivatives
+  for (unsigned int i = 0; i < _nargs; ++i)
+  {
+    _func_dFdarg[i] = new ADFunction(*_func_F);
+    if (_func_dFdarg[i]->AutoDiff(_arg_names[i]) != -1)
+      mooseError("Failed to take first derivative w.r.t. " << _arg_names[i]);
+  }
+
+  // optimize
+  if (!_disable_fpoptimizer)
+  {
+    _func_F->Optimize();
+    _func_dFdu->Optimize();
+    for (unsigned int i = 0; i < _nargs; ++i)
+      _func_dFdarg[i]->Optimize();
+  }
+
+  // just-in-time compile
+  if (_enable_jit)
+  {
+    _func_F->JITCompile();
+    _func_dFdu->JITCompile();
+    for (unsigned int i = 0; i < _nargs; ++i)
+      _func_dFdarg[i]->JITCompile();
+  }
+
+  // reserve storage for parameter passing buffer
+  _func_params.resize(_nargs + 1);
 }

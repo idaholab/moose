@@ -23,8 +23,8 @@ InputParameters validParams<DirichletBC>()
 }
 
 
-DirichletBC::DirichletBC(const std::string & name, InputParameters parameters) :
-  NodalBC(name, parameters),
+DirichletBC::DirichletBC(const InputParameters & parameters) :
+  NodalBC(parameters),
   _value(getParam<Real>("value"))
 {}
 
@@ -33,3 +33,10 @@ DirichletBC::computeQpResidual()
 {
   return _u[_qp] - _value;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DirichletBC::DirichletBC(const std::string & deprecated_name, InputParameters parameters) :
+  NodalBC(deprecated_name, parameters),
+  _value(getParam<Real>("value"))
+{}

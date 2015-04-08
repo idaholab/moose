@@ -74,6 +74,7 @@
     input = 'pps_screen_out_warn.i'
     expect_out = "A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the 'console' output object."
     allow_warnings = true
+    max_parallel = 1 # warning can mix on multiple processes
   [../]
 
   [./show_input_test]

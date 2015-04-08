@@ -28,10 +28,10 @@ InputParameters validParams<BoundingBoxNodeSet>()
   return params;
 }
 
-BoundingBoxNodeSet::BoundingBoxNodeSet(const std::string & name, InputParameters params) :
-    MeshModifier(name, params),
-    _location(params.get<MooseEnum>("location")),
-    _bounding_box(params.get<RealVectorValue>("bottom_left"), params.get<RealVectorValue>("top_right"))
+BoundingBoxNodeSet::BoundingBoxNodeSet(const InputParameters & parameters) :
+    MeshModifier(parameters),
+    _location(getParam<MooseEnum>("location")),
+    _bounding_box(getParam<RealVectorValue>("bottom_left"), getParam<RealVectorValue>("top_right"))
 {
 }
 
@@ -85,4 +85,13 @@ BoundingBoxNodeSet::modify()
 
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
     boundary_info.nodeset_name(boundary_ids[i]) = boundary_names[i];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+BoundingBoxNodeSet::BoundingBoxNodeSet(const std::string & deprecated_name, InputParameters params) :
+    MeshModifier(deprecated_name, params),
+    _location(getParam<MooseEnum>("location")),
+    _bounding_box(getParam<RealVectorValue>("bottom_left"), params.get<RealVectorValue>("top_right"))
+{
 }

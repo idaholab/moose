@@ -68,6 +68,15 @@ public:
   const PostprocessorValue & getPostprocessorValueOlderByName(const PostprocessorName & name);
   ///@}
 
+  ///@{
+  /**
+   * Return the default postprocessor value
+   * @param name The name of the postprocessor parameter
+   * @return A const reference to the default value
+   */
+  const PostprocessorValue & getDefaultPostprocessorValue(const std::string & name);
+  ///@}
+
   /**
    * Determine if the Postprocessor exists
    * @param name The name of the Postprocessor parameter
@@ -75,7 +84,7 @@ public:
    *
    * @see hasPostprocessorByName getPostprocessorValue
    */
-  bool hasPostprocessor(const std::string & name);
+  bool hasPostprocessor(const std::string & name) const;
 
   /**
    * Determine if the Postprocessor exists

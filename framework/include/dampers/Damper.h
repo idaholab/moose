@@ -51,7 +51,8 @@ class Damper :
   public MeshChangedInterface
 {
 public:
-  Damper(const std::string & name, InputParameters parameters);
+  Damper(const InputParameters & parameters);
+  Damper(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Computes this Damper's damping for one element.

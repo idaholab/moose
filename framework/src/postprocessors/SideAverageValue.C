@@ -21,8 +21,8 @@ InputParameters validParams<SideAverageValue>()
   return params;
 }
 
-SideAverageValue::SideAverageValue(const std::string & name, InputParameters parameters) :
-    SideIntegralVariablePostprocessor(name, parameters),
+SideAverageValue::SideAverageValue(const InputParameters & parameters) :
+    SideIntegralVariablePostprocessor(parameters),
     _volume(0)
 {}
 
@@ -58,3 +58,10 @@ SideAverageValue::threadJoin(const UserObject & y)
   const SideAverageValue & pps = static_cast<const SideAverageValue &>(y);
   _volume += pps._volume;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideAverageValue::SideAverageValue(const std::string & deprecated_name, InputParameters parameters) :
+    SideIntegralVariablePostprocessor(deprecated_name, parameters),
+    _volume(0)
+{}

@@ -40,8 +40,8 @@ InputParameters validParams<Checkpoint>()
   return params;
 }
 
-Checkpoint::Checkpoint(const std::string & name, InputParameters & parameters) :
-    BasicOutput<FileOutput>(name, parameters),
+Checkpoint::Checkpoint(const InputParameters & parameters) :
+    BasicOutput<FileOutput>(parameters),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),

@@ -22,8 +22,8 @@ InputParameters validParams<GradientJumpIndicator>()
 }
 
 
-GradientJumpIndicator::GradientJumpIndicator(const std::string & name, InputParameters parameters) :
-    JumpIndicator(name, parameters)
+GradientJumpIndicator::GradientJumpIndicator(const InputParameters & parameters) :
+    JumpIndicator(parameters)
 {
 }
 
@@ -36,3 +36,10 @@ GradientJumpIndicator::computeQpIntegral()
   return jump*jump;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+GradientJumpIndicator::GradientJumpIndicator(const std::string & deprecated_name, InputParameters parameters) :
+    JumpIndicator(deprecated_name, parameters)
+{
+}

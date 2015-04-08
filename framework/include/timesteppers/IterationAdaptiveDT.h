@@ -27,7 +27,8 @@ class Piecewise;
 class IterationAdaptiveDT : public TimeStepper
 {
 public:
-  IterationAdaptiveDT(const std::string & name, InputParameters parameters);
+  IterationAdaptiveDT(const InputParameters & parameters);
+  IterationAdaptiveDT(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~IterationAdaptiveDT();
 
   virtual void init();

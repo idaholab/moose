@@ -271,6 +271,7 @@ OutputWarehouse::checkOutputs(const std::set<OutputName> & names)
       mooseError("The output object '" << *it << "' is not a defined output object");
 }
 
+
 const std::set<std::string> &
 OutputWarehouse::getReservedNames() const
 {

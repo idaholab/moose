@@ -28,8 +28,8 @@ InputParameters validParams<SubProblem>()
 
 // SubProblem /////
 
-SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
-    Problem(name, parameters),
+SubProblem::SubProblem(const InputParameters & parameters) :
+    Problem(parameters),
     _factory(_app.getFactory()),
     _restartable_data(libMesh::n_threads()),
     _rz_coord_axis(1) // default to RZ rotation around y-axis
@@ -351,4 +351,22 @@ SubProblem::getAxisymmetricRadialCoord()
     return 1; // if the rotation axis is x (0), then the radial direction is y (1)
   else
     return 0; // otherwise the radial direction is assumed to be x, i.e., the rotation axis is y
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SubProblem::SubProblem(const std::string & deprecated_name, InputParameters parameters) :
+    Problem(deprecated_name, parameters),
+    _factory(_app.getFactory()),
+    _restartable_data(libMesh::n_threads()),
+    _rz_coord_axis(1) // default to RZ rotation around y-axis
+{
+  unsigned int n_threads = libMesh::n_threads();
+  _real_zero.resize(n_threads, 0.);
+  _zero.resize(n_threads);
+  _grad_zero.resize(n_threads);
+  _second_zero.resize(n_threads);
+  _second_phi_zero.resize(n_threads);
+  _active_elemental_moose_variables.resize(n_threads);
+  _has_active_elemental_moose_variables.resize(n_threads);
 }

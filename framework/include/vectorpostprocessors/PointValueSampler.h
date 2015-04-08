@@ -27,7 +27,8 @@ InputParameters validParams<PointValueSampler>();
 class PointValueSampler : public PointSamplerBase
 {
 public:
-  PointValueSampler(const std::string & name, InputParameters parameters);
+  PointValueSampler(const InputParameters & parameters);
+  PointValueSampler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~PointValueSampler() {}
 };

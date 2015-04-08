@@ -26,7 +26,8 @@ InputParameters validParams<CheckIntegrityAction>();
 class CheckIntegrityAction : public Action
 {
 public:
-  CheckIntegrityAction(const std::string & name, InputParameters params);
+  CheckIntegrityAction(InputParameters params);
+  CheckIntegrityAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };
