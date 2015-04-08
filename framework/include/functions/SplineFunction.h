@@ -29,7 +29,7 @@ InputParameters validParams<SplineFunction>();
 class SplineFunction : public Function
 {
 public:
-  SplineFunction(const std::string & name, InputParameters parameters);
+  SplineFunction(const InputParameters & parameters);
   virtual ~SplineFunction();
 
   virtual Real value(Real t, const Point & p);

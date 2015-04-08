@@ -25,8 +25,8 @@ InputParameters validParams<SinDirichletBC>()
   return params;
 }
 
-SinDirichletBC::SinDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+SinDirichletBC::SinDirichletBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     _initial(getParam<Real>("initial")),
     _final(getParam<Real>("final")),
     _duration(getParam<Real>("duration"))

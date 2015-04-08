@@ -26,7 +26,7 @@ InputParameters validParams<SideFluxAverage>();
 class SideFluxAverage : public SideFluxIntegral
 {
 public:
-  SideFluxAverage(const std::string & name, InputParameters parameters);
+  SideFluxAverage(const InputParameters & parameters);
   virtual ~SideFluxAverage(){}
 
   virtual void initialize();

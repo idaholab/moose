@@ -26,8 +26,8 @@ InputParameters validParams<ElementUserObject>()
   return params;
 }
 
-ElementUserObject::ElementUserObject(const std::string & name, InputParameters parameters) :
-    UserObject(name, parameters),
+ElementUserObject::ElementUserObject(const InputParameters & parameters) :
+    UserObject(parameters),
     BlockRestrictable(parameters),
     MaterialPropertyInterface(parameters, blockIDs()),
     UserObjectInterface(parameters),

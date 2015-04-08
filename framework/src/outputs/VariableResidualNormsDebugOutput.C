@@ -31,8 +31,8 @@ InputParameters validParams<VariableResidualNormsDebugOutput>()
   return params;
 }
 
-VariableResidualNormsDebugOutput::VariableResidualNormsDebugOutput(const std::string & name, InputParameters & parameters) :
-    BasicOutput<PetscOutput>(name, parameters),
+VariableResidualNormsDebugOutput::VariableResidualNormsDebugOutput(const InputParameters & parameters) :
+    BasicOutput<PetscOutput>(parameters),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {
 }

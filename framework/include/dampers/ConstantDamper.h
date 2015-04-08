@@ -32,7 +32,7 @@ InputParameters validParams<ConstantDamper>();
 class ConstantDamper : public Damper
 {
 public:
-  ConstantDamper(const std::string & name, InputParameters parameters);
+  ConstantDamper(const InputParameters & parameters);
 
 protected:
   /**

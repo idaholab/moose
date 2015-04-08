@@ -30,7 +30,7 @@ class ScalarL2Error :
   public GeneralPostprocessor
 {
 public:
-  ScalarL2Error(const std::string & name, InputParameters parameters);
+  ScalarL2Error(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

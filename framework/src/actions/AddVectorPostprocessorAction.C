@@ -23,8 +23,8 @@ InputParameters validParams<AddVectorPostprocessorAction>()
   return params;
 }
 
-AddVectorPostprocessorAction::AddVectorPostprocessorAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddVectorPostprocessorAction::AddVectorPostprocessorAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -34,5 +34,5 @@ AddVectorPostprocessorAction::act()
   if (!_problem)
     mooseError("The Problem has not been initialized yet!");
 
-  _problem->addVectorPostprocessor(_type, getShortName(), _moose_object_pars);
+  _problem->addVectorPostprocessor(_type, _name, _moose_object_pars);
 }

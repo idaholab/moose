@@ -24,8 +24,8 @@ InputParameters validParams<ScalarVariable>()
   return params;
 }
 
-ScalarVariable::ScalarVariable(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+ScalarVariable::ScalarVariable(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
     _idx(getParam<unsigned int>("component"))
 {

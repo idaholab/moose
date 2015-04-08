@@ -30,7 +30,7 @@ class AutoPositionsMultiApp :
   public BoundaryRestrictable
 {
 public:
-  AutoPositionsMultiApp(const std::string & name, InputParameters parameters);
+  AutoPositionsMultiApp(const InputParameters & parameters);
 
   virtual ~AutoPositionsMultiApp();
 

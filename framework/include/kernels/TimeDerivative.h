@@ -26,7 +26,7 @@ InputParameters validParams<TimeDerivative>();
 class TimeDerivative : public TimeKernel
 {
 public:
-  TimeDerivative(const std::string & name, InputParameters parameters);
+  TimeDerivative(const InputParameters & parameters);
 
   virtual void computeJacobian();
 

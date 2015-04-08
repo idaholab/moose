@@ -37,7 +37,7 @@ class GeneralVectorPostprocessor :
   public VectorPostprocessor
 {
 public:
-  GeneralVectorPostprocessor(const std::string & name, InputParameters parameters);
+  GeneralVectorPostprocessor(const InputParameters & parameters);
 
   virtual ~GeneralVectorPostprocessor() {}
 

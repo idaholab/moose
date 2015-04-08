@@ -26,8 +26,8 @@ InputParameters validParams<SplineFunction>()
   return params;
 }
 
-SplineFunction::SplineFunction(const std::string & name, InputParameters parameters) :
-    Function(name, parameters),
+SplineFunction::SplineFunction(const InputParameters & parameters) :
+    Function(parameters),
     _ipol(getParam<std::vector<Real> >("x"),
           getParam<std::vector<Real> >("y"),
           getParam<Real>("yp1"),

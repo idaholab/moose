@@ -14,6 +14,9 @@
 
 #include "EigenKernel.h"
 #include "EigenSystem.h"
+#include "MooseApp.h"
+#include "Executioner.h"
+#include "EigenExecutionerBase.h"
 
 template<>
 InputParameters validParams<EigenKernel>()
@@ -24,29 +27,33 @@ InputParameters validParams<EigenKernel>()
   return params;
 }
 
-EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
-    KernelBase(name,parameters),
+EigenKernel::EigenKernel(const InputParameters & parameters) :
+    KernelBase(parameters),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
     _eigen_sys(NULL),
-    _eigenvalue(NULL)
+    _one(1.0),
+    _eigenvalue(&_one)
 {
+}
+
+void
+EigenKernel::initialSetup()
+{
+  EigenExecutionerBase * exec = dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner());
+
   if (_eigen)
   {
     _eigen_sys = static_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem());
-    _eigen_pp = _fe_problem.parameters().get<PostprocessorName>("eigen_postprocessor");
+    _eigen_pp = exec->getParam<PostprocessorName>("bx_norm");
     if (_is_implicit)
       _eigenvalue = &getPostprocessorValueByName(_eigen_pp);
     else
       _eigenvalue = &getPostprocessorValueOldByName(_eigen_pp);
   }
-  else
-  {
-    if (!_fe_problem.parameters().isParamValid("eigenvalue"))
-      _fe_problem.parameters().set<Real>("eigenvalue") = 1.0;
-    _eigenvalue = &_fe_problem.parameters().get<Real>("eigenvalue");
-  }
+  else if (exec != NULL)
+    _eigenvalue = &(exec->eigenValue());
 }
 
 void

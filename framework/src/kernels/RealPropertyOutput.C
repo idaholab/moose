@@ -24,8 +24,8 @@ InputParameters validParams<RealPropertyOutput>()
   return params;
 }
 
-RealPropertyOutput::RealPropertyOutput(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+RealPropertyOutput::RealPropertyOutput(const InputParameters & parameters) :
+    Kernel(parameters),
    _prop_name(getParam<std::string>("prop_name")),
    _prop(getMaterialProperty<Real>(_prop_name))
 {}

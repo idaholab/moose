@@ -21,8 +21,8 @@ InputParameters validParams<AddScalarKernelAction>()
   return validParams<MooseObjectAction>();
 }
 
-AddScalarKernelAction::AddScalarKernelAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddScalarKernelAction::AddScalarKernelAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -30,7 +30,7 @@ void
 AddScalarKernelAction::act()
 {
   if (_current_task == "add_scalar_kernel")
-    _problem->addScalarKernel(_type, getShortName(), _moose_object_pars);
+    _problem->addScalarKernel(_type, _name, _moose_object_pars);
   else
-    _problem->addAuxScalarKernel(_type, getShortName(), _moose_object_pars);
+    _problem->addAuxScalarKernel(_type, _name, _moose_object_pars);
 }

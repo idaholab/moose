@@ -29,8 +29,8 @@ InputParameters validParams<VTKOutput>()
   return params;
 }
 
-VTKOutput::VTKOutput(const std::string & name, InputParameters & parameters) :
-    BasicOutput<OversampleOutput>(name, parameters),
+VTKOutput::VTKOutput(const InputParameters & parameters) :
+    BasicOutput<OversampleOutput>(parameters),
     _binary(getParam<bool>("binary"))
 {
 }

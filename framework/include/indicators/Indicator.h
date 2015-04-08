@@ -54,7 +54,7 @@ class Indicator :
   public OutputInterface
 {
 public:
-  Indicator(const std::string & name, InputParameters parameters);
+  Indicator(const InputParameters & parameters);
   virtual ~Indicator(){};
 
   /**

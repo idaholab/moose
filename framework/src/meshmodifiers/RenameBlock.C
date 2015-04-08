@@ -26,8 +26,8 @@ InputParameters validParams<RenameBlock>()
   return params;
 }
 
-RenameBlock::RenameBlock(const std::string & name, InputParameters parameters) :
-    MeshModifier(name, parameters)
+RenameBlock::RenameBlock(const InputParameters & parameters) :
+    MeshModifier(parameters)
 {
   // error checking.  Must have exactly one of old_block_id or old_block_name
   if (isParamValid("old_block_id") && isParamValid("old_block_name"))

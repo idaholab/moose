@@ -37,8 +37,8 @@ InputParameters validParams<MaterialOutputAction>()
   return params;
 }
 
-MaterialOutputAction::MaterialOutputAction(const std::string & name, InputParameters params) :
-    Action(name, params),
+MaterialOutputAction::MaterialOutputAction(InputParameters params) :
+    Action(params),
     _output_warehouse(_app.getOutputWarehouse())
 {
 }

@@ -34,7 +34,7 @@ InputParameters validParams<Postprocessor>();
 class Postprocessor : public OutputInterface
 {
 public:
-  Postprocessor(const std::string & name, InputParameters parameters);
+  Postprocessor(const InputParameters & parameters);
 
   virtual ~Postprocessor(){ }
 

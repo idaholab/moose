@@ -25,8 +25,8 @@ InputParameters validParams<AddICAction>()
 }
 
 
-AddICAction::AddICAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddICAction::AddICAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -39,5 +39,5 @@ AddICAction::act()
   // The variable name will be the second to last element in the path name
   std::string & var_name = elements[elements.size()-2];
   _moose_object_pars.set<VariableName>("variable") = var_name;
-  _problem->addInitialCondition(_type, getShortName(), _moose_object_pars);
+  _problem->addInitialCondition(_type, _name, _moose_object_pars);
 }

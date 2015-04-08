@@ -27,7 +27,7 @@ InputParameters validParams<AddSideSetsBase>();
 class AddSideSetsBase : public MeshModifier
 {
 public:
-  AddSideSetsBase(const std::string & name, InputParameters parameters);
+  AddSideSetsBase(const InputParameters & parameters);
 
   virtual ~AddSideSetsBase();
 

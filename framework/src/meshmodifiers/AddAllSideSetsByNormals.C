@@ -30,8 +30,8 @@ InputParameters validParams<AddAllSideSetsByNormals>()
   return params;
 }
 
-AddAllSideSetsByNormals::AddAllSideSetsByNormals(const std::string & name, InputParameters parameters):
-    AddSideSetsBase(name, parameters)
+AddAllSideSetsByNormals::AddAllSideSetsByNormals(const InputParameters & parameters):
+    AddSideSetsBase(parameters)
 {
 }
 

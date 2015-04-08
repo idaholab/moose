@@ -35,7 +35,7 @@ class Predictor :
   public Restartable
 {
 public:
-  Predictor(const std::string & name, InputParameters parameters);
+  Predictor(const InputParameters & parameters);
   virtual ~Predictor();
 
   virtual int order() { return 0; }

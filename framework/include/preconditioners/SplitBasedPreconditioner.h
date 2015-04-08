@@ -43,7 +43,7 @@ public:
   /**
    *  Constructor. Initializes SplitBasedPreconditioner data structures
    */
-  SplitBasedPreconditioner (const std::string & name, InputParameters params);
+  SplitBasedPreconditioner (const InputParameters & params);
 
   /**
    * Destructor.

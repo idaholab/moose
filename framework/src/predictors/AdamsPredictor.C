@@ -23,8 +23,8 @@ InputParameters validParams<AdamsPredictor>()
   return params;
 }
 
-AdamsPredictor::AdamsPredictor(const std::string & name, InputParameters parameters) :
-    Predictor(name, parameters),
+AdamsPredictor::AdamsPredictor(const InputParameters & parameters) :
+    Predictor(parameters),
     _order(getParam<int>("order")),
     _current_old_solution(_nl.addVector("AB2_current_old_solution", true, GHOSTED)),
     _older_solution(_nl.addVector("AB2_older_solution", true, GHOSTED)),

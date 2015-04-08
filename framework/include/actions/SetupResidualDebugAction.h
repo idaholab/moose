@@ -29,7 +29,7 @@ InputParameters validParams<SetupResidualDebugAction>();
 class SetupResidualDebugAction : public Action
 {
 public:
-  SetupResidualDebugAction(const std::string & name, InputParameters parameters);
+  SetupResidualDebugAction(InputParameters parameters);
   virtual ~SetupResidualDebugAction();
 
   virtual void act();

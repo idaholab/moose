@@ -26,8 +26,8 @@ InputParameters validParams<PlotFunction>()
   return params;
 }
 
-PlotFunction::PlotFunction(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+PlotFunction::PlotFunction(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _func(getFunction("function")),
     _point(isParamValid("point") ? getParam<Point>("point") : Point()),
     _scale_factor(getParam<Real>("scale_factor"))

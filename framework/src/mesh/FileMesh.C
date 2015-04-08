@@ -32,8 +32,8 @@ InputParameters validParams<FileMesh>()
   return params;
 }
 
-FileMesh::FileMesh(const std::string & name, InputParameters parameters) :
-    MooseMesh(name, parameters),
+FileMesh::FileMesh(const InputParameters & parameters) :
+    MooseMesh(parameters),
     _file_name(getParam<MeshFileName>("file")),
     _exreader(NULL)
 {

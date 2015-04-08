@@ -37,7 +37,7 @@ public:
    * @param name The name of this PointValue postprocessor
    * @param parameters The input file parameters for this object
    */
-  PointValue(const std::string & name, InputParameters parameters);
+  PointValue(const InputParameters & parameters);
 
   /**
    * Destructor

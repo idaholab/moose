@@ -28,7 +28,7 @@ InputParameters validParams<ConstantScalarAux>();
 class ConstantScalarAux : public AuxScalarKernel
 {
 public:
-  ConstantScalarAux(const std::string & name, InputParameters parameters);
+  ConstantScalarAux(const InputParameters & parameters);
   virtual ~ConstantScalarAux();
 
 protected:

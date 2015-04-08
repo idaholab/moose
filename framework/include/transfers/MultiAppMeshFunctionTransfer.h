@@ -31,7 +31,7 @@ class MultiAppMeshFunctionTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppMeshFunctionTransfer(const std::string & name, InputParameters parameters);
+  MultiAppMeshFunctionTransfer(const InputParameters & parameters);
   virtual ~MultiAppMeshFunctionTransfer() {}
 
   virtual void initialSetup();

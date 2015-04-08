@@ -34,8 +34,8 @@ InputParameters validParams<Marker>()
   return params;
 }
 
-Marker::Marker(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+Marker::Marker(const InputParameters & parameters) :
+    MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(parameters),
     UserObjectInterface(parameters),
@@ -49,12 +49,12 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _field_var(_sys.getVariable(_tid, name)),
+    _field_var(_sys.getVariable(_tid, name())),
     _current_elem(_field_var.currentElem()),
 
     _mesh(_subproblem.mesh())
 {
-  _supplied.insert(name);
+  _supplied.insert(name());
 
   addMooseVariableDependency(&_field_var);
 }

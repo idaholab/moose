@@ -28,8 +28,8 @@ InputParameters validParams<SolutionAux>()
   return params;
 }
 
-SolutionAux::SolutionAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+SolutionAux::SolutionAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _solution_object(getUserObject<SolutionUserObject>("solution")),
     _direct(getParam<bool>("direct")),
     _scale_factor(getParam<Real>("scale_factor")),

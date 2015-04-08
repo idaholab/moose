@@ -25,8 +25,8 @@ InputParameters validParams<RungeKutta2>()
   return params;
 }
 
-RungeKutta2::RungeKutta2(const std::string & name, InputParameters parameters) :
-    TimeIntegrator(name, parameters),
+RungeKutta2::RungeKutta2(const InputParameters & parameters) :
+    TimeIntegrator(parameters),
     _stage(0)
 {
   _fe_problem.setConstJacobian(true);

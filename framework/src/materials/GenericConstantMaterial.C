@@ -23,8 +23,8 @@ InputParameters validParams<GenericConstantMaterial>()
   return params;
 }
 
-GenericConstantMaterial::GenericConstantMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+GenericConstantMaterial::GenericConstantMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _prop_names(getParam<std::vector<std::string> >("prop_names")),
     _prop_values(getParam<std::vector<Real> >("prop_values"))
 {

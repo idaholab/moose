@@ -29,7 +29,7 @@ class SideValueSampler :
   protected SamplerBase
 {
 public:
-  SideValueSampler(const std::string & name, InputParameters parameters);
+  SideValueSampler(const InputParameters & parameters);
 
   virtual ~SideValueSampler() {}
 

@@ -38,8 +38,8 @@ InputParameters validParams<FileOutput>()
   return params;
 }
 
-FileOutput::FileOutput(const std::string & name, InputParameters & parameters) :
-    PetscOutput(name, parameters),
+FileOutput::FileOutput(const InputParameters & parameters) :
+    PetscOutput(parameters),
     _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
     _padding(getParam<unsigned int>("padding")),
     _output_if_base_contains(parameters.get<std::vector<std::string> >("output_if_base_contains"))
@@ -54,7 +54,7 @@ FileOutput::FileOutput(const std::string & name, InputParameters & parameters) :
   else if (getParam<bool>("_built_by_moose"))
     _file_base = getOutputFileBase(_app);
   else
-    _file_base = getOutputFileBase(_app, "_" + name);
+    _file_base = getOutputFileBase(_app, "_" + name());
 
   // Check the file directory of file_base
   std::string base = "./" + _file_base;

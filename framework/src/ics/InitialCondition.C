@@ -33,8 +33,8 @@ InputParameters validParams<InitialCondition>()
   return params;
 }
 
-InitialCondition::InitialCondition(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+InitialCondition::InitialCondition(const InputParameters & parameters) :
+    MooseObject(parameters),
     Coupleable(parameters, getParam<SystemBase *>("_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<VariableName>("variable")).isNodal()),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),

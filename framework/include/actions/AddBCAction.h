@@ -26,7 +26,7 @@ InputParameters validParams<AddBCAction>();
 class AddBCAction : public MooseObjectAction
 {
 public:
-  AddBCAction(const std::string & name, InputParameters params);
+  AddBCAction(InputParameters params);
 
   virtual void act();
 };

@@ -24,8 +24,8 @@ InputParameters validParams<KernelValue>()
 }
 
 
-KernelValue::KernelValue(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+KernelValue::KernelValue(const InputParameters & parameters) :
+    Kernel(parameters)
 {
 }
 

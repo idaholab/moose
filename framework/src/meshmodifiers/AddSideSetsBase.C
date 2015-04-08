@@ -33,8 +33,8 @@ InputParameters validParams<AddSideSetsBase>()
   return params;
 }
 
-AddSideSetsBase::AddSideSetsBase(const std::string & name, InputParameters parameters):
-    MeshModifier(name, parameters),
+AddSideSetsBase::AddSideSetsBase(const InputParameters & parameters):
+    MeshModifier(parameters),
     _variance(getParam<Real>("variance")),
     _fixed_normal(getParam<bool>("fixed_normal")),
     _fe_face(NULL),

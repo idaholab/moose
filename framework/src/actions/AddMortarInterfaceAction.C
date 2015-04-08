@@ -26,8 +26,8 @@ InputParameters validParams<AddMortarInterfaceAction>()
   return params;
 }
 
-AddMortarInterfaceAction::AddMortarInterfaceAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters)
+AddMortarInterfaceAction::AddMortarInterfaceAction(InputParameters parameters) :
+    Action(parameters)
 {
 }
 
@@ -44,4 +44,3 @@ AddMortarInterfaceAction::act()
   if (_displaced_mesh)
     _displaced_mesh->addMortarInterface(iface_name, getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"), getParam<SubdomainName>("subdomain"));
 }
-

@@ -29,7 +29,7 @@ class NodalValueSampler :
   protected SamplerBase
 {
 public:
-  NodalValueSampler(const std::string & name, InputParameters parameters);
+  NodalValueSampler(const InputParameters & parameters);
 
   virtual ~NodalValueSampler() {}
 

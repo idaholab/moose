@@ -50,7 +50,7 @@ class ElementIndicator :
   public ZeroInterface
 {
 public:
-    ElementIndicator(const std::string & name, InputParameters parameters);
+    ElementIndicator(const InputParameters & parameters);
     virtual ~ElementIndicator(){};
 
 protected:

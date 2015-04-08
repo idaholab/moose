@@ -22,8 +22,8 @@ InputParameters validParams<ConstantDamper>()
   return params;
 }
 
-ConstantDamper::ConstantDamper(const std::string & name, InputParameters parameters) :
-    Damper(name, parameters),
+ConstantDamper::ConstantDamper(const InputParameters & parameters) :
+    Damper(parameters),
     _damping(getParam<Real>("damping"))
 {
 }

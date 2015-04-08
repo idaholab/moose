@@ -12,7 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "ActionFactory.h"
+#include "MooseApp.h"
 
 unsigned int ActionFactory::_unique_id = 0;
 
@@ -26,15 +28,15 @@ ActionFactory::~ActionFactory()
 }
 
 MooseSharedPointer<Action>
-ActionFactory::create(const std::string & action, const std::string & name, InputParameters params)
+ActionFactory::create(const std::string & action, const std::string & name, InputParameters parameters)
 {
-  params.addPrivateParam("_moose_app", &_app);
-  params.addPrivateParam("action_type", action);
+  parameters.addPrivateParam("_moose_app", &_app);
+  parameters.addPrivateParam("action_type", action);
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
   BuildInfo *build_info = NULL;
 
   // Check to make sure that all required parameters are supplied
-  params.checkParams(name);
+  parameters.checkParams(name);
 
   iters = _name_to_build_info.equal_range(action);
 
@@ -43,7 +45,7 @@ ActionFactory::create(const std::string & action, const std::string & name, Inpu
   for (ActionFactory::iterator it = iters.first; it != iters.second; ++it)
   {
     ++count;
-    if (params.have_parameter<unsigned int>("unique_id") && it->second._unique_id == params.get<unsigned int>("unique_id"))
+    if (parameters.have_parameter<unsigned int>("unique_id") && it->second._unique_id == parameters.get<unsigned int>("unique_id"))
     {
       build_info = &(it->second);
       break;
@@ -57,9 +59,11 @@ ActionFactory::create(const std::string & action, const std::string & name, Inpu
   if (!build_info)
     mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + name);
 
-  MooseSharedPointer<Action> action_obj = (*build_info->_build_pointer)(name, params);
+  // Add the name to the parameters and create the object
+  parameters.addParam<std::string>("name", name, "The complete name of the object");
+  MooseSharedPointer<Action> action_obj = (*build_info->_build_pointer)(parameters);
 
-  if (params.get<std::string>("task") == "")
+  if (parameters.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);
 
   return action_obj;

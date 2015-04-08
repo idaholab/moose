@@ -21,8 +21,8 @@ InputParameters validParams<SelfAux>()
   return params;
 }
 
-SelfAux::SelfAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters)
+SelfAux::SelfAux(const InputParameters & parameters) :
+    AuxKernel(parameters)
 {
 }
 

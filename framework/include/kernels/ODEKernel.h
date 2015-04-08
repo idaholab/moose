@@ -29,7 +29,7 @@ InputParameters validParams<ODEKernel>();
 class ODEKernel : public ScalarKernel
 {
 public:
-  ODEKernel(const std::string & name, InputParameters parameters);
+  ODEKernel(const InputParameters & parameters);
   virtual ~ODEKernel();
 
   virtual void reinit();

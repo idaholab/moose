@@ -33,8 +33,8 @@ InputParameters validParams<SetupDebugAction>()
   return params;
 }
 
-SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
+SetupDebugAction::SetupDebugAction(InputParameters parameters) :
+    Action(parameters),
     _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
   _awh.showActions(getParam<bool>("show_actions"));

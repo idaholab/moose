@@ -22,8 +22,8 @@ InputParameters validParams<SteadyState>()
   return params;
 }
 
-SteadyState::SteadyState(const std::string & name, InputParameters parameters) :
-    TimeIntegrator(name, parameters)
+SteadyState::SteadyState(const InputParameters & parameters) :
+    TimeIntegrator(parameters)
 {
 }
 

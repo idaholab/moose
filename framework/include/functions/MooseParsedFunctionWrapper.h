@@ -101,7 +101,7 @@ private:
   std::vector<unsigned int> _pp_index;
 
   /// Vector of pointers to PP values
-  std::vector<Real *> _pp_vals;
+  std::vector<const Real *> _pp_vals;
 
   /// Vector of pointers to the variables in libMesh::ParsedFunction
   std::vector<Real *> _addr;

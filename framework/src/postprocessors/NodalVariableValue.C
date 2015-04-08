@@ -26,8 +26,8 @@ InputParameters validParams<NodalVariableValue>()
   return params;
 }
 
-NodalVariableValue::NodalVariableValue(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+NodalVariableValue::NodalVariableValue(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _node_ptr(_mesh.getMesh().query_node_ptr(getParam<unsigned int>("nodeid"))),
@@ -38,7 +38,7 @@ NodalVariableValue::NodalVariableValue(const std::string & name, InputParameters
   _mesh.errorIfParallelDistribution("NodalVariableValue");
 
   if (_node_ptr == NULL)
-    mooseError("Node #" << getParam<unsigned int>("nodeid") << " specified in '" << name << "' not found in the mesh!");
+    mooseError("Node #" << getParam<unsigned int>("nodeid") << " specified in '" << name() << "' not found in the mesh!");
 }
 
 Real

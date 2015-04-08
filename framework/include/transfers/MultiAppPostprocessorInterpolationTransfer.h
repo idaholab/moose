@@ -30,7 +30,7 @@ class MultiAppPostprocessorInterpolationTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppPostprocessorInterpolationTransfer(const std::string & name, InputParameters parameters);
+  MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters);
   virtual ~MultiAppPostprocessorInterpolationTransfer() {}
 
   virtual void execute();

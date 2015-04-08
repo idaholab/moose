@@ -40,7 +40,7 @@ class PointSamplerBase :
   protected SamplerBase
 {
 public:
-  PointSamplerBase(const std::string & name, InputParameters parameters);
+  PointSamplerBase(const InputParameters & parameters);
 
   virtual ~PointSamplerBase() {}
 

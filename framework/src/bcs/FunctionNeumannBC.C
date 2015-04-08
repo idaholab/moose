@@ -23,8 +23,8 @@ InputParameters validParams<FunctionNeumannBC>()
   return params;
 }
 
-FunctionNeumannBC::FunctionNeumannBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+FunctionNeumannBC::FunctionNeumannBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _func(getFunction("function"))
 {
 }

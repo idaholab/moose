@@ -53,8 +53,8 @@ InputParameters validParams<PiecewiseBilinear>()
   return params;
 }
 
-PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters parameters) :
-  Function(name, parameters),
+PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
+  Function(parameters),
   _bilinear_interp( NULL ),
   _data_file_name( isParamValid("data_file") ? getParam<std::string>("data_file") : ""),
   _axis(getParam<int>("axis")),
@@ -72,17 +72,13 @@ PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters p
   }
 
   if (!_axisValid && !_yaxisValid && !_xaxisValid)
-  {
-    mooseError("Error in " << _name << ". None of axis, yaxis, or xaxis properly defined.  Allowable range is 0-2");
-  }
+    mooseError("Error in " << name() << ". None of axis, yaxis, or xaxis properly defined.  Allowable range is 0-2");
+
   if (_axisValid && (_yaxisValid || _xaxisValid))
-  {
-    mooseError("Error in " << _name << ". Cannot define axis with either yaxis or xaxis");
-  }
+    mooseError("Error in " << name() << ". Cannot define axis with either yaxis or xaxis");
+
   if (_radial && (!_yaxisValid || !_xaxisValid))
-  {
-    mooseError("Error in " << _name << ". yaxis and xaxis must be defined when radial = true");
-  }
+    mooseError("Error in " << name() << ". yaxis and xaxis must be defined when radial = true");
 
   std::vector<Real> x;
   std::vector<Real> y;

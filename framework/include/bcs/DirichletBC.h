@@ -30,7 +30,7 @@ InputParameters validParams<DirichletBC>();
 class DirichletBC : public NodalBC
 {
 public:
-  DirichletBC(const std::string & name, InputParameters parameters);
+  DirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

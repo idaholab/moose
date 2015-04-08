@@ -60,7 +60,7 @@ class AuxScalarKernel :
   public MeshChangedInterface
 {
 public:
-  AuxScalarKernel(const std::string & name, InputParameters parameters);
+  AuxScalarKernel(const InputParameters & parameters);
 
   virtual ~AuxScalarKernel();
 

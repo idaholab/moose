@@ -33,7 +33,7 @@ InputParameters validParams<CrankNicolson>();
 class CrankNicolson : public TimeIntegrator
 {
 public:
-  CrankNicolson(const std::string & name, InputParameters parameters);
+  CrankNicolson(const InputParameters & parameters);
   virtual ~CrankNicolson();
 
   virtual int order() { return 2; }

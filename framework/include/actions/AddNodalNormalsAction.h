@@ -36,7 +36,7 @@ InputParameters validParams<AddNodalNormalsAction>();
 class AddNodalNormalsAction : public Action
 {
 public:
-  AddNodalNormalsAction(const std::string & name, InputParameters parameters);
+  AddNodalNormalsAction(InputParameters parameters);
   virtual ~AddNodalNormalsAction();
 
   virtual void act();

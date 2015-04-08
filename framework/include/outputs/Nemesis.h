@@ -39,7 +39,7 @@ public:
   /**
    * Class constructor
    */
-  Nemesis(const std::string & name, InputParameters);
+  Nemesis(const InputParameters & parameters);
 
   /**
    * Class destructor

@@ -21,13 +21,13 @@ InputParameters validParams<AddMarkerAction>()
   return validParams<MooseObjectAction>();
 }
 
-AddMarkerAction::AddMarkerAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddMarkerAction::AddMarkerAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddMarkerAction::act()
 {
-  _problem->addMarker(_type, getShortName(), _moose_object_pars);
+  _problem->addMarker(_type, _name, _moose_object_pars);
 }

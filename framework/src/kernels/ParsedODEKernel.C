@@ -29,9 +29,9 @@ InputParameters validParams<ParsedODEKernel>()
   return params;
 }
 
-ParsedODEKernel::ParsedODEKernel(const std::string & name, InputParameters parameters) :
-    ODEKernel(name, parameters),
-    FunctionParserUtils(name, parameters),
+ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
+    ODEKernel(parameters),
+    FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
     _nargs(coupledScalarComponents("args")),
     _args(_nargs),
@@ -66,7 +66,7 @@ ParsedODEKernel::ParsedODEKernel(const std::string & name, InputParameters param
 
   // parse function
   if (_func_F->Parse(_function, variables) >= 0)
-     mooseError("Invalid function\n" << _function << "\nin ParsedODEKernel " << name << ".\n" << _func_F->ErrorMsg());
+    mooseError("Invalid function\n" << _function << "\nin ParsedODEKernel " << name() << ".\n" << _func_F->ErrorMsg());
 
   // on-diagonal derivative
   _func_dFdu = new ADFunction(*_func_F);

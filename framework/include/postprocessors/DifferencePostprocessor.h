@@ -29,7 +29,7 @@ InputParameters validParams<DifferencePostprocessor>();
 class DifferencePostprocessor : public GeneralPostprocessor
 {
 public:
-  DifferencePostprocessor(const std::string & name, InputParameters parameters);
+  DifferencePostprocessor(const InputParameters & parameters);
   virtual ~DifferencePostprocessor();
 
   virtual void initialize();

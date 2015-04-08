@@ -22,8 +22,8 @@ InputParameters validParams<MatchedValueBC>()
   return params;
 }
 
-MatchedValueBC::MatchedValueBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+MatchedValueBC::MatchedValueBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     _v(coupledValue("v")),
     _v_num(coupled("v"))
 {

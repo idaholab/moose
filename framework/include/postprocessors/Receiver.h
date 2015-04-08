@@ -35,7 +35,7 @@ public:
    * @param name The name of the Receiver postprocessor
    * @param parameters The input parameters
    */
-  Receiver(const std::string & name, InputParameters parameters);
+  Receiver(const InputParameters & parameters);
 
   /**
    * No action taken

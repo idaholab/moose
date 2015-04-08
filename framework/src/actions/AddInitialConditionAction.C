@@ -23,13 +23,13 @@ InputParameters validParams<AddInitialConditionAction>()
 }
 
 
-AddInitialConditionAction::AddInitialConditionAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddInitialConditionAction::AddInitialConditionAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddInitialConditionAction::act()
 {
-  _problem->addInitialCondition(_type, getShortName(), _moose_object_pars);
+  _problem->addInitialCondition(_type, _name, _moose_object_pars);
 }

@@ -24,8 +24,8 @@ InputParameters validParams<Residual>()
   return params;
 }
 
-Residual::Residual(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+Residual::Residual(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters)
 {}
 
 Real

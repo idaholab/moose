@@ -43,7 +43,7 @@ public:
    * @param name The name given to the MeshModifier in the input file.
    * @param parameters The parameters object holding data for the class to use.
    */
-  MeshModifier(const std::string & name, InputParameters parameters);
+  MeshModifier(const InputParameters & parameters);
 
   virtual ~MeshModifier();
 

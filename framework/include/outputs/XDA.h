@@ -35,7 +35,7 @@ public:
   /**
    * Class consturctor
    */
-  XDA(const std::string & name, InputParameters);
+  XDA(const InputParameters & parameters);
 
 protected:
 

@@ -28,7 +28,7 @@ InputParameters validParams<SteadyState>();
 class SteadyState : public TimeIntegrator
 {
 public:
-  SteadyState(const std::string & name, InputParameters parameters);
+  SteadyState(const InputParameters & parameters);
   virtual ~SteadyState();
 
   virtual int order() { return 0; }

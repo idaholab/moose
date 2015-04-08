@@ -22,8 +22,8 @@ InputParameters validParams<ElementIntegralIndicator>()
 }
 
 
-ElementIntegralIndicator::ElementIntegralIndicator(const std::string & name, InputParameters parameters) :
-    ElementIndicator(name, parameters)
+ElementIntegralIndicator::ElementIntegralIndicator(const InputParameters & parameters) :
+    ElementIndicator(parameters)
 {
 }
 

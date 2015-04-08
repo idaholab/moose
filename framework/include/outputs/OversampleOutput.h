@@ -57,7 +57,7 @@ public:
    * required for oversampling.
    * @see initOversample()
    */
-  OversampleOutput(const std::string & name, InputParameters & parameters);
+  OversampleOutput(const InputParameters & parameters);
 
   /**
    * Class destructor

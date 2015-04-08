@@ -25,7 +25,7 @@ InputParameters validParams<CreateProblemAction>();
 class CreateProblemAction : public MooseObjectAction
 {
 public:
-  CreateProblemAction(const std::string & name, InputParameters parameters);
+  CreateProblemAction(InputParameters parameters);
 
   virtual void act();
 

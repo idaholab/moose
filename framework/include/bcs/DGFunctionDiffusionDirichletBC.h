@@ -41,7 +41,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  DGFunctionDiffusionDirichletBC(const std::string & name, InputParameters parameters);
+  DGFunctionDiffusionDirichletBC(const InputParameters & parameters);
 
   virtual ~DGFunctionDiffusionDirichletBC() {}
 

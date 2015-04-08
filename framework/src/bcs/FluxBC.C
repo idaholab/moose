@@ -23,8 +23,8 @@ InputParameters validParams<FluxBC>()
 }
 
 
-FluxBC::FluxBC(const std::string & name, InputParameters params) :
-    IntegratedBC(name, params)
+FluxBC::FluxBC(const InputParameters & params) :
+    IntegratedBC(params)
 {
 }
 

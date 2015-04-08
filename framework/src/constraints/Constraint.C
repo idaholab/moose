@@ -31,8 +31,8 @@ InputParameters validParams<Constraint>()
   return params;
 }
 
-Constraint::Constraint(const std::string & name, InputParameters parameters) :
-  MooseObject(name, parameters),
+Constraint::Constraint(const InputParameters & parameters) :
+  MooseObject(parameters),
   SetupInterface(parameters),
   FunctionInterface(parameters),
   UserObjectInterface(parameters),

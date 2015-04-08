@@ -21,8 +21,8 @@ InputParameters validParams<AverageElementSize>()
   return params;
 }
 
-AverageElementSize::AverageElementSize(const std::string & name, InputParameters parameters) :
-    ElementAverageValue(name, parameters)
+AverageElementSize::AverageElementSize(const InputParameters & parameters) :
+    ElementAverageValue(parameters)
 {}
 
 void

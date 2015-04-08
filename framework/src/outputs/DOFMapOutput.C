@@ -43,8 +43,8 @@ InputParameters validParams<DOFMapOutput>()
   return params;
 }
 
-DOFMapOutput::DOFMapOutput(const std::string & name, InputParameters parameters) :
-    BasicOutput<FileOutput>(name, parameters),
+DOFMapOutput::DOFMapOutput(const InputParameters & parameters) :
+    BasicOutput<FileOutput>(parameters),
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _system_name(getParam<std::string>("system_name")),

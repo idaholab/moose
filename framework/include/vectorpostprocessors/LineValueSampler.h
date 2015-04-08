@@ -27,7 +27,7 @@ InputParameters validParams<LineValueSampler>();
 class LineValueSampler : public PointSamplerBase
 {
 public:
-  LineValueSampler(const std::string & name, InputParameters parameters);
+  LineValueSampler(const InputParameters & parameters);
 
   virtual ~LineValueSampler() {}
 };

@@ -29,9 +29,9 @@ InputParameters validParams<ParsedAux>()
   return params;
 }
 
-ParsedAux::ParsedAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
-    FunctionParserUtils(name, parameters),
+ParsedAux::ParsedAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
+    FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
     _nargs(coupledComponents("args")),
     _args(_nargs)
@@ -54,7 +54,7 @@ ParsedAux::ParsedAux(const std::string & name, InputParameters parameters) :
 
   // parse function
   if (_func_F->Parse(_function, variables) >= 0)
-     mooseError("Invalid function\n" << _function << "\nin ParsedAux " << name << ".\n" << _func_F->ErrorMsg());
+    mooseError("Invalid function\n" << _function << "\nin ParsedAux " << name() << ".\n" << _func_F->ErrorMsg());
 
   // optimize
   if (!_disable_fpoptimizer)

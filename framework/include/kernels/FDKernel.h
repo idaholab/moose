@@ -27,7 +27,7 @@ class FDKernel :
   public Kernel
 {
 public:
-  FDKernel(const std::string & name, InputParameters parameters);
+  FDKernel(const InputParameters & parameters);
 
   virtual ~FDKernel(){};
 

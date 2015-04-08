@@ -37,8 +37,8 @@ InputParameters validParams<MultiAppMeshFunctionTransfer>()
   return params;
 }
 
-MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
@@ -61,7 +61,7 @@ MultiAppMeshFunctionTransfer::initialSetup()
 void
 MultiAppMeshFunctionTransfer::execute()
 {
-  Moose::out << "Beginning MeshFunctionTransfer " << _name << std::endl;
+  Moose::out << "Beginning MeshFunctionTransfer " << name() << std::endl;
 
   switch (_direction)
   {
@@ -346,5 +346,5 @@ MultiAppMeshFunctionTransfer::execute()
     }
   }
 
-  _console << "Finished MeshFunctionTransfer " << _name << std::endl;
+  _console << "Finished MeshFunctionTransfer " << name() << std::endl;
 }

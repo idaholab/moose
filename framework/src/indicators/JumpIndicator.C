@@ -22,8 +22,8 @@ InputParameters validParams<JumpIndicator>()
 }
 
 
-JumpIndicator::JumpIndicator(const std::string & name, InputParameters parameters) :
-    InternalSideIndicator(name, parameters)
+JumpIndicator::JumpIndicator(const InputParameters & parameters) :
+    InternalSideIndicator(parameters)
 {
 }
 

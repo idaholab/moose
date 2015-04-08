@@ -28,7 +28,7 @@ InputParameters validParams<PresetBC>();
 class PresetBC : public PresetNodalBC
 {
 public:
-  PresetBC(const std::string & name, InputParameters parameters);
+  PresetBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpValue();

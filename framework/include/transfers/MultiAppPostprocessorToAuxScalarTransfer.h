@@ -36,7 +36,7 @@ public:
   /**
    * Class constructor.
    */
-  MultiAppPostprocessorToAuxScalarTransfer(const std::string & name, InputParameters parameters);
+  MultiAppPostprocessorToAuxScalarTransfer(const InputParameters & parameters);
 
   /**
    * Classs destructor.

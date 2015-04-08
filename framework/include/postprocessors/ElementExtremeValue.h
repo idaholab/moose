@@ -40,7 +40,7 @@ public:
    * @param name The name of the postprocessor
    * @param parameters The input parameters
    */
-  ElementExtremeValue(const std::string & name, InputParameters parameters);
+  ElementExtremeValue(const InputParameters & parameters);
   virtual void initialize();
   virtual Real getValue();
   virtual void threadJoin(const UserObject & y);

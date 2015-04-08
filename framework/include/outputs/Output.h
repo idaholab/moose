@@ -60,7 +60,7 @@ public:
    *
    * @see initAvailable init separate
    */
-  Output(const std::string & name, InputParameters & parameters);
+  Output(const InputParameters & parameters);
 
   /**
    * Get the output time.

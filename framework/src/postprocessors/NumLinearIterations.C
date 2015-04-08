@@ -24,8 +24,8 @@ InputParameters validParams<NumLinearIterations>()
   return params;
 }
 
-NumLinearIterations::NumLinearIterations(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+NumLinearIterations::NumLinearIterations(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters)
 {}
 
 Real

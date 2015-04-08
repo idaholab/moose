@@ -32,7 +32,7 @@ InputParameters validParams<ElementAverageValue>();
 class ElementAverageValue : public ElementIntegralVariablePostprocessor
 {
 public:
-  ElementAverageValue(const std::string & name, InputParameters parameters);
+  ElementAverageValue(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

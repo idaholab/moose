@@ -39,7 +39,7 @@ public:
   /**
    * Class constructor
    */
-  CommonOutputAction(const std::string & name, InputParameters params);
+  CommonOutputAction(InputParameters params);
 
   /**
    * Perform the action creation

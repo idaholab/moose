@@ -30,7 +30,7 @@ InputParameters validParams<NumNonlinearIterations>();
 class NumNonlinearIterations : public GeneralPostprocessor
 {
 public:
-  NumNonlinearIterations(const std::string & name, InputParameters parameters);
+  NumNonlinearIterations(const InputParameters & parameters);
 
   /**
    * Initialization to be done at each timestep

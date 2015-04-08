@@ -27,7 +27,7 @@ class SideSetsFromNormals :
   public AddSideSetsBase
 {
 public:
-  SideSetsFromNormals(const std::string & name, InputParameters parameters);
+  SideSetsFromNormals(const InputParameters & parameters);
 
   virtual ~SideSetsFromNormals();
 

@@ -22,8 +22,8 @@ InputParameters validParams<SideIntegralVariableUserObject>()
   return params;
 }
 
-SideIntegralVariableUserObject::SideIntegralVariableUserObject(const std::string & name, InputParameters parameters) :
-    SideIntegralUserObject(name, parameters),
+SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParameters & parameters) :
+    SideIntegralUserObject(parameters),
     MooseVariableInterface(parameters, false),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),

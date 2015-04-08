@@ -46,7 +46,7 @@ class UserObject :
   public MeshChangedInterface
 {
 public:
-  UserObject(const std::string & name, InputParameters params);
+  UserObject(const InputParameters & params);
   virtual ~UserObject();
 
   /**
@@ -82,7 +82,7 @@ public:
    * If a UserObject overrides this function that UserObject can then be used in a
    * Transfer to transfer information from one domain to another.
    */
-  virtual Real spatialValue(const Point & /*p*/) const { mooseError(_name << " does not satisfy the Spatial UserObject interface!"); }
+  virtual Real spatialValue(const Point & /*p*/) const { mooseError(name() << " does not satisfy the Spatial UserObject interface!"); }
 
   /**
    * Gather the parallel sum of the variable passed in. It takes care of values across all threads and CPUs (we DO hybrid parallelism!)

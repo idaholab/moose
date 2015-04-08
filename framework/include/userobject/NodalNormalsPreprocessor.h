@@ -34,7 +34,7 @@ class NodalNormalsPreprocessor :
   public BoundaryRestrictable
 {
 public:
-  NodalNormalsPreprocessor(const std::string & name, InputParameters parameters);
+  NodalNormalsPreprocessor(const InputParameters & parameters);
   virtual ~NodalNormalsPreprocessor();
 
   virtual void initialize();

@@ -36,7 +36,7 @@ public:
   /**
    * Class constructor
    */
-  FileOutput(const std::string & name, InputParameters & parameters);
+  FileOutput(const InputParameters & parameters);
 
   /**
    * Class destructor

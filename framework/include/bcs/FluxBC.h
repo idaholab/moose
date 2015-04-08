@@ -30,7 +30,7 @@ InputParameters validParams<FluxBC>();
 class FluxBC : public IntegratedBC
 {
 public:
-  FluxBC(const std::string & name, InputParameters params);
+  FluxBC(const InputParameters & params);
   virtual ~FluxBC();
 
 protected:

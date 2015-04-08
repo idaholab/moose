@@ -28,8 +28,8 @@ InputParameters validParams<SingleMatrixPreconditioner>()
   return params;
 }
 
-SingleMatrixPreconditioner::SingleMatrixPreconditioner(const std::string & name, InputParameters params) :
-    MoosePreconditioner(name, params)
+SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & params) :
+    MoosePreconditioner(params)
 {
   NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();

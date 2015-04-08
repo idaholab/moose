@@ -29,7 +29,7 @@ InputParameters validParams<VolumePostprocessor>();
 class VolumePostprocessor : public ElementIntegralPostprocessor
 {
 public:
-  VolumePostprocessor(const std::string & name, InputParameters parameters);
+  VolumePostprocessor(const InputParameters & parameters);
   virtual void threadJoin(const UserObject & y);
 
 protected:

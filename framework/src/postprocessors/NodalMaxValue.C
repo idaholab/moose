@@ -24,8 +24,8 @@ InputParameters validParams<NodalMaxValue>()
   return params;
 }
 
-NodalMaxValue::NodalMaxValue(const std::string & name, InputParameters parameters) :
-  NodalVariablePostprocessor(name, parameters),
+NodalMaxValue::NodalMaxValue(const InputParameters & parameters) :
+  NodalVariablePostprocessor(parameters),
   _value(-std::numeric_limits<Real>::max())
 {}
 

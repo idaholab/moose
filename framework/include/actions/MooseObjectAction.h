@@ -28,7 +28,7 @@ InputParameters validParams<MooseObjectAction>();
 class MooseObjectAction : public Action
 {
 public:
-  MooseObjectAction(const std::string & name, InputParameters params);
+  MooseObjectAction(InputParameters params);
 
   InputParameters & getObjectParams() { return _moose_object_pars; }
 

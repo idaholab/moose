@@ -21,8 +21,8 @@ InputParameters params = validParams<SideIntegralPostprocessor>();
   return params;
 }
 
-AreaPostprocessor::AreaPostprocessor(const std::string & name, InputParameters parameters) :
-    SideIntegralPostprocessor(name, parameters)
+AreaPostprocessor::AreaPostprocessor(const InputParameters & parameters) :
+    SideIntegralPostprocessor(parameters)
 {}
 
 void

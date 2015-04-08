@@ -26,8 +26,8 @@ InputParameters validParams<SideSetsBetweenSubdomains>()
   return params;
 }
 
-SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const std::string & name, InputParameters parameters):
-    MeshModifier(name, parameters)
+SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const InputParameters & parameters):
+    MeshModifier(parameters)
 {
 }
 

@@ -31,7 +31,7 @@ class MultiAppUserObjectTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppUserObjectTransfer(const std::string & name, InputParameters parameters);
+  MultiAppUserObjectTransfer(const InputParameters & parameters);
   virtual ~MultiAppUserObjectTransfer() {}
 
   virtual void initialSetup();

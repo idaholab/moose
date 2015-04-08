@@ -25,8 +25,8 @@ InputParameters validParams<SetupMeshCompleteAction>()
   return params;
 }
 
-SetupMeshCompleteAction::SetupMeshCompleteAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params) :
+    Action(params)
 {
 }
 

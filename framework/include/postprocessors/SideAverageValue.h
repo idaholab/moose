@@ -32,7 +32,7 @@ InputParameters validParams<SideAverageValue>();
 class SideAverageValue : public SideIntegralVariablePostprocessor
 {
 public:
-  SideAverageValue(const std::string & name, InputParameters parameters);
+  SideAverageValue(const InputParameters & parameters);
   virtual ~SideAverageValue(){}
 
   virtual void initialize();

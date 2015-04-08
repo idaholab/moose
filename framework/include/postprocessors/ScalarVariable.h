@@ -29,7 +29,7 @@ InputParameters validParams<ScalarVariable>();
 class ScalarVariable : public GeneralPostprocessor
 {
 public:
-  ScalarVariable(const std::string & name, InputParameters parameters);
+  ScalarVariable(const InputParameters & parameters);
   virtual ~ScalarVariable();
 
   virtual void initialize();

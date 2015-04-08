@@ -22,8 +22,8 @@ InputParameters validParams<LaplacianJumpIndicator>()
 }
 
 
-LaplacianJumpIndicator::LaplacianJumpIndicator(const std::string & name, InputParameters parameters) :
-    JumpIndicator(name, parameters),
+LaplacianJumpIndicator::LaplacianJumpIndicator(const InputParameters & parameters) :
+    JumpIndicator(parameters),
     _second_u(second()),
     _second_u_neighbor(neighborSecond())
 {

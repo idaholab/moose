@@ -41,8 +41,8 @@ InputParameters validParams<Material>()
 }
 
 
-Material::Material(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+Material::Material(const InputParameters & parameters) :
+    MooseObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters, blockIDs()),
     SetupInterface(parameters),
@@ -109,7 +109,7 @@ Material::initStatefulProperties(unsigned int n_points)
 void
 Material::initQpStatefulProperties()
 {
-  mooseDoOnce(mooseWarning(std::string("Material \"") + _name + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
+  mooseDoOnce(mooseWarning(std::string("Material \"") + name() + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
 }
 
 void
@@ -129,7 +129,7 @@ Material::checkStatefulSanity() const
   for (std::map<std::string, int>::const_iterator it = _props_to_flags.begin(); it != _props_to_flags.end(); ++it)
   {
     if (static_cast<int>(it->second) % 2 == 0) // Only Stateful properties declared!
-      mooseError("Material '" << _name << "' has stateful properties declared but not associated \"current\" properties." << it->second);
+      mooseError("Material '" << name() << "' has stateful properties declared but not associated \"current\" properties." << it->second);
   }
 }
 

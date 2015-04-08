@@ -26,8 +26,8 @@ InputParameters validParams<ElementsAlongLine>()
   return params;
 }
 
-ElementsAlongLine::ElementsAlongLine(const std::string & name, InputParameters parameters) :
-    GeneralVectorPostprocessor(name, parameters),
+ElementsAlongLine::ElementsAlongLine(const InputParameters & parameters) :
+    GeneralVectorPostprocessor(parameters),
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
     _elem_ids(declareVector("elem_ids"))

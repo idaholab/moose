@@ -21,8 +21,8 @@ InputParameters validParams<SideAverageValue>()
   return params;
 }
 
-SideAverageValue::SideAverageValue(const std::string & name, InputParameters parameters) :
-    SideIntegralVariablePostprocessor(name, parameters),
+SideAverageValue::SideAverageValue(const InputParameters & parameters) :
+    SideIntegralVariablePostprocessor(parameters),
     _volume(0)
 {}
 

@@ -32,7 +32,7 @@ InputParameters validParams<LayeredSideAverage>();
 class LayeredSideAverage : public LayeredSideIntegral
 {
 public:
-  LayeredSideAverage(const std::string & name, InputParameters parameters);
+  LayeredSideAverage(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

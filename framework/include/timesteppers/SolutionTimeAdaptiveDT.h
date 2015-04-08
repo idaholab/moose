@@ -30,7 +30,7 @@ InputParameters validParams<SolutionTimeAdaptiveDT>();
 class SolutionTimeAdaptiveDT : public TimeStepper
 {
 public:
-  SolutionTimeAdaptiveDT(const std::string & name, InputParameters parameters);
+  SolutionTimeAdaptiveDT(const InputParameters & parameters);
   virtual ~SolutionTimeAdaptiveDT();
 
   virtual void step();

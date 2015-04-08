@@ -26,7 +26,7 @@ InputParameters validParams<AnisotropicDiffusion>();
 class AnisotropicDiffusion : public Kernel
 {
 public:
-  AnisotropicDiffusion(const std::string & name, InputParameters parameters);
+  AnisotropicDiffusion(const InputParameters & parameters);
   virtual ~AnisotropicDiffusion();
 
 protected:

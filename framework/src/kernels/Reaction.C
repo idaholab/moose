@@ -21,8 +21,8 @@ InputParameters validParams<Reaction>()
   return params;
 }
 
-Reaction::Reaction(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+Reaction::Reaction(const InputParameters & parameters) :
+    Kernel(parameters)
 {}
 
 Real

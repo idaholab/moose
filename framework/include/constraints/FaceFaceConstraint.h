@@ -45,7 +45,7 @@ class FaceFaceConstraint :
   public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
-  FaceFaceConstraint(const std::string & name, InputParameters parameters);
+  FaceFaceConstraint(const InputParameters & parameters);
   virtual ~FaceFaceConstraint();
 
   /**

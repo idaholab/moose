@@ -61,8 +61,8 @@ InputParameters validParams<SolutionUserObject>()
   return params;
 }
 
-SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+SolutionUserObject::SolutionUserObject(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     _file_type(MooseEnum("xda=0 exodusII=1 xdr=2")),
     _mesh_file(getParam<MeshFileName>("mesh")),
     _es_file(getParam<FileName>("es")),
@@ -632,7 +632,7 @@ SolutionUserObject::evalMeshFunction(const Point & p, std::string var_name, unsi
   {
     std::ostringstream oss;
     p.print(oss);
-    mooseError("Failed to access the data for variable '"<< var_name << "' at point " << oss.str() << " in the '" << _name << "' SolutionUserObject");
+    mooseError("Failed to access the data for variable '"<< var_name << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
   }
   return output(it->second);
 }

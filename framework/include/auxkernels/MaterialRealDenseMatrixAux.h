@@ -36,7 +36,7 @@ public:
    * @param name The name of the AuxKernel
    * @param parameters The input parameters for this AuxKernel
    */
-  MaterialRealDenseMatrixAux(const std::string & name, InputParameters parameters);
+  MaterialRealDenseMatrixAux(const InputParameters & parameters);
 
   /**
    * Class destructor

@@ -29,7 +29,7 @@ InputParameters validParams<AreaPostprocessor>();
 class AreaPostprocessor : public SideIntegralPostprocessor
 {
 public:
-  AreaPostprocessor(const std::string & name, InputParameters parameters);
+  AreaPostprocessor(const InputParameters & parameters);
   virtual void threadJoin(const UserObject & y);
 
 protected:

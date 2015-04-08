@@ -29,7 +29,7 @@ InputParameters validParams<ElementsAlongLine>();
 class ElementsAlongLine : public GeneralVectorPostprocessor
 {
 public:
-  ElementsAlongLine(const std::string & name, InputParameters parameters);
+  ElementsAlongLine(const InputParameters & parameters);
 
   virtual ~ElementsAlongLine() {}
 

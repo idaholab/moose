@@ -25,8 +25,8 @@ InputParameters validParams<ConvectiveFluxBC>()
   return params;
 }
 
-ConvectiveFluxBC::ConvectiveFluxBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+ConvectiveFluxBC::ConvectiveFluxBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _initial(getParam<Real>("initial")),
     _final(getParam<Real>("final")),
     _rate(getParam<Real>("rate")),

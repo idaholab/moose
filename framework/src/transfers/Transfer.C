@@ -35,8 +35,8 @@ InputParameters validParams<Transfer>()
   return params;
 }
 
-Transfer::Transfer(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+Transfer::Transfer(const InputParameters & parameters) :
+    MooseObject(parameters),
     SetupInterface(parameters),
     Restartable(parameters, "Transfers"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

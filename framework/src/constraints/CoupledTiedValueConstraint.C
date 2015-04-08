@@ -24,8 +24,8 @@ InputParameters validParams<CoupledTiedValueConstraint>()
   return params;
 }
 
-CoupledTiedValueConstraint::CoupledTiedValueConstraint(const std::string & name, InputParameters parameters) :
-    NodeFaceConstraint(name, parameters),
+CoupledTiedValueConstraint::CoupledTiedValueConstraint(const InputParameters & parameters) :
+    NodeFaceConstraint(parameters),
     _scaling(getParam<Real>("scaling")),
     _residual_copy(_sys.residualGhosted())
 {

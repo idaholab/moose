@@ -26,7 +26,7 @@ InputParameters validParams<NumLinearIterations>();
 class NumLinearIterations : public GeneralPostprocessor
 {
 public:
-  NumLinearIterations(const std::string & name, InputParameters parameters);
+  NumLinearIterations(const InputParameters & parameters);
 
   virtual void initialize() {}
   virtual void execute() {}

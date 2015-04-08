@@ -32,8 +32,8 @@ InputParameters validParams<SideSetsFromPoints>()
   return params;
 }
 
-SideSetsFromPoints::SideSetsFromPoints(const std::string & name, InputParameters parameters):
-    AddSideSetsBase(name, parameters),
+SideSetsFromPoints::SideSetsFromPoints(const InputParameters & parameters):
+    AddSideSetsBase(parameters),
     _boundary_names(getParam<std::vector<BoundaryName> >("new_boundary")),
     _points(getParam<std::vector<Point> >("points"))
 {

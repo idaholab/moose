@@ -42,7 +42,7 @@ class MoosePreconditioner :
   public Restartable
 {
 public:
-  MoosePreconditioner(const std::string & name, InputParameters params);
+  MoosePreconditioner(const InputParameters & params);
   virtual ~MoosePreconditioner();
 
   /**

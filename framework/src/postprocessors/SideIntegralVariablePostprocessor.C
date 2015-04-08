@@ -22,8 +22,8 @@ InputParameters validParams<SideIntegralVariablePostprocessor>()
   return params;
 }
 
-SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(const std::string & name, InputParameters parameters) :
-    SideIntegralPostprocessor(name, parameters),
+SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(const InputParameters & parameters) :
+    SideIntegralPostprocessor(parameters),
     MooseVariableInterface(parameters, false),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),

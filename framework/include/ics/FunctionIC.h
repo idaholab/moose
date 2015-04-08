@@ -34,7 +34,7 @@ InputParameters validParams<FunctionIC>();
 class FunctionIC : public InitialCondition
 {
 public:
-  FunctionIC(const std::string & name, InputParameters parameters);
+  FunctionIC(const InputParameters & parameters);
 
 protected:
   /**

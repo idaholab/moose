@@ -25,6 +25,6 @@ InputParameters validParams<NodalVariableVectorPostprocessor>()
   return params;
 }
 
-NodalVariableVectorPostprocessor::NodalVariableVectorPostprocessor(const std::string & name, InputParameters parameters) :
-    NodalVectorPostprocessor(name, parameters)
+NodalVariableVectorPostprocessor::NodalVariableVectorPostprocessor(const InputParameters & parameters) :
+    NodalVectorPostprocessor(parameters)
 {}

@@ -37,8 +37,8 @@ InputParameters validParams<NodeFaceConstraint>()
   return params;
 }
 
-NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters parameters) :
-    Constraint(name, parameters),
+NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters) :
+    Constraint(parameters),
     // The slave side is at nodes (hence passing 'true').  The neighbor side is the master side and it is not at nodes (so passing false)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, true, false),
     _slave(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),

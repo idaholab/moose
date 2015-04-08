@@ -23,8 +23,8 @@ InputParameters validParams<Terminator>()
   return params;
 }
 
-Terminator::Terminator(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+Terminator::Terminator(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     _pp_names(),
     _pp_values(),
     _expression(getParam<std::string>("expression")),

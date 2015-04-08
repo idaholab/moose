@@ -28,7 +28,7 @@ InputParameters validParams<EqualValueConstraint>();
 class EqualValueConstraint : public FaceFaceConstraint
 {
 public:
-  EqualValueConstraint(const std::string & name, InputParameters parameters);
+  EqualValueConstraint(const InputParameters & parameters);
   virtual ~EqualValueConstraint();
 
 protected:

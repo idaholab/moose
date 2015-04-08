@@ -38,8 +38,8 @@ InputParameters validParams<DiracKernel>()
   return params;
 }
 
-DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+DiracKernel::DiracKernel(const InputParameters & parameters) :
+    MooseObject(parameters),
     SetupInterface(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),

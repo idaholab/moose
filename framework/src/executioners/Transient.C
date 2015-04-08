@@ -79,8 +79,8 @@ InputParameters validParams<Transient>()
   return params;
 }
 
-Transient::Transient(const std::string & name, InputParameters parameters) :
-    Executioner(name, parameters),
+Transient::Transient(const InputParameters & parameters) :
+    Executioner(parameters),
     _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
     _time_scheme(getParam<MooseEnum>("scheme")),
     _t_step(_problem.timeStep()),
@@ -145,7 +145,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
     else
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
-
   }
 
   if (!_restart_file_base.empty())

@@ -22,8 +22,8 @@ InputParameters validParams<TimestepSize>()
   return params;
 }
 
-TimestepSize::TimestepSize(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+TimestepSize::TimestepSize(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _feproblem(dynamic_cast<FEProblem &>(_subproblem))
 {}
 

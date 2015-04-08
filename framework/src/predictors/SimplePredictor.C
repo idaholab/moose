@@ -24,8 +24,8 @@ InputParameters validParams<SimplePredictor>()
   return params;
 }
 
-SimplePredictor::SimplePredictor(const std::string & name, InputParameters parameters) :
-    Predictor(name, parameters),
+SimplePredictor::SimplePredictor(const InputParameters & parameters) :
+    Predictor(parameters),
     _scale(getParam<Real>("scale"))
 {
 }

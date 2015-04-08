@@ -25,8 +25,8 @@ InputParameters validParams<QuotientAux>()
 
 
 
-QuotientAux::QuotientAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+QuotientAux::QuotientAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
    _numerator(coupledValue("numerator")),
    _denominator(coupledValue("denominator"))
 {}

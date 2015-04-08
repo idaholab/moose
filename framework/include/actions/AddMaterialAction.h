@@ -26,7 +26,7 @@ InputParameters validParams<AddMaterialAction>();
 class AddMaterialAction : public MooseObjectAction
 {
 public:
-  AddMaterialAction(const std::string & name, InputParameters params);
+  AddMaterialAction(InputParameters params);
 
   virtual void act();
 };

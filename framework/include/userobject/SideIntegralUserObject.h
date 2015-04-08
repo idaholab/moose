@@ -32,7 +32,7 @@ InputParameters validParams<SideIntegralUserObject>();
 class SideIntegralUserObject : public SideUserObject
 {
 public:
-  SideIntegralUserObject(const std::string & name, InputParameters parameters);
+  SideIntegralUserObject(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

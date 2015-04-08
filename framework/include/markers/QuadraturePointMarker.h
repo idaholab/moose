@@ -33,7 +33,7 @@ class QuadraturePointMarker :
   public MaterialPropertyInterface
 {
 public:
-  QuadraturePointMarker(const std::string & name, InputParameters parameters);
+  QuadraturePointMarker(const InputParameters & parameters);
   virtual ~QuadraturePointMarker(){};
 
 protected:

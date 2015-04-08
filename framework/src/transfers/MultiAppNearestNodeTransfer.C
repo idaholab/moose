@@ -39,8 +39,8 @@ InputParameters validParams<MultiAppNearestNodeTransfer>()
   return params;
 }
 
-MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
@@ -63,6 +63,7 @@ MultiAppNearestNodeTransfer::initialSetup()
 void
 MultiAppNearestNodeTransfer::transferToMultiApp()
 {
+  _console << "Beginning NearestNodeTransfer " << name() << std::endl;
   FEProblem & from_problem = *_multi_app->problem();
 
   if (_displaced_source_mesh && from_problem.getDisplacedProblem())
@@ -519,7 +520,7 @@ MultiAppNearestNodeTransfer::transferFromMultiApp()
 void
 MultiAppNearestNodeTransfer::execute()
 {
-  _console << "Beginning NearestNodeTransfer " << _name << std::endl;
+  _console << "Beginning NearestNodeTransfer " << name() << std::endl;
 
   switch (_direction)
   {
@@ -532,7 +533,7 @@ MultiAppNearestNodeTransfer::execute()
       break;
   }
 
-  _console << "Finished NearestNodeTransfer " << _name << std::endl;
+  _console << "Finished NearestNodeTransfer " << name() << std::endl;
 }
 
 Node *

@@ -45,8 +45,8 @@ InputParameters validParams<PhysicsBasedPreconditioner>()
   return params;
 }
 
-PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name, InputParameters params) :
-    MoosePreconditioner(name, params),
+PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & params) :
+    MoosePreconditioner(params),
     Preconditioner<Number>(MoosePreconditioner::_communicator),
     _nl(_fe_problem.getNonlinearSystem())
 {

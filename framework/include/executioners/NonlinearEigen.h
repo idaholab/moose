@@ -27,7 +27,7 @@ class NonlinearEigen : public EigenExecutionerBase
 {
 public:
 
-  NonlinearEigen(const std::string & name, InputParameters parameters);
+  NonlinearEigen(const InputParameters & parameters);
 
   virtual void init();
   virtual void execute();

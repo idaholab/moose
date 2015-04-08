@@ -80,8 +80,8 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
 #endif //LIBMESH_HAVE_PETSC
 }
 
-CreateExecutionerAction::CreateExecutionerAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+CreateExecutionerAction::CreateExecutionerAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -91,14 +91,14 @@ CreateExecutionerAction::act()
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This parameter
   // is held in the child block Adaptivity and needs to be pulled early
 
-  Moose::setup_perf_log.push("Create Executioner","Setup");
-  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
-  MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create(_type, "Executioner", _moose_object_pars));
-  Moose::setup_perf_log.pop("Create Executioner","Setup");
 
   if (_problem.get() != NULL)
   {
     storeCommonExecutionerParams(*_problem, _pars);
+
+#ifdef LIBMESH_HAVE_PETSC
+    storePetscOptions();
+#endif //LIBMESH_HAVE_PETSC
 
     // solver params
     EquationSystems & es = _problem->es();
@@ -135,6 +135,11 @@ CreateExecutionerAction::act()
 
   }
 
+  Moose::setup_perf_log.push("Create Executioner","Setup");
+  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
+  MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create(_type, "Executioner", _moose_object_pars));
+  Moose::setup_perf_log.pop("Create Executioner","Setup");
+
   _awh.executioner() = executioner;
 }
 
@@ -153,12 +158,89 @@ CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, In
   MooseEnum line_search = params.get<MooseEnum>("line_search");
   if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
     fe_problem.solverParams()._line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
+}
 
 #ifdef LIBMESH_HAVE_PETSC
-  MultiMooseEnum           petsc_options       = params.get<MultiMooseEnum>("petsc_options");
-  std::vector<std::string> petsc_options_iname = params.get<std::vector<std::string> >("petsc_options_iname");
-  std::vector<std::string> petsc_options_value = params.get<std::vector<std::string> >("petsc_options_value");
+void
+CreateExecutionerAction::storePetscOptions()
+{
+  const MultiMooseEnum           & petsc_options        = getParam<MultiMooseEnum>("petsc_options");
+  const std::vector<std::string> & petsc_options_inames = getParam<std::vector<std::string> >("petsc_options_iname");
+  const std::vector<std::string> & petsc_options_values = getParam<std::vector<std::string> >("petsc_options_value");
 
-  fe_problem.storePetscOptions(petsc_options, petsc_options_iname, petsc_options_value);
-#endif //LIBMESH_HAVE_PETSC
+  MultiMooseEnum & po = _moose_object_pars.set<MultiMooseEnum>("petsc_options");  // set because we need a writable reference
+
+  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
+  {
+    /**
+     * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
+     * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
+     */
+    if (*it == "-log_summary")
+      mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
+
+    // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
+    else
+    {
+      std::string help_string;
+      if (*it == "-snes" || *it == "-snes_mf" || *it == "-snes_mf_operator")
+        help_string = "Please set the solver type through \"solve_type\".";
+      else if (*it == "-ksp_monitor")
+        help_string = "Please use \"Outputs/console/type=Console Outputs/console/linear_residuals=true\"";
+
+      if (help_string != "")
+        mooseWarning("The PETSc option " << *it << " should not be used directly in a MOOSE input file. " << help_string);
+    }
+
+    if (find(po.begin(), po.end(), *it) == po.end())
+      po.push_back(*it);
+  }
+
+  // set because we need a writable reference
+  std::vector<std::string> & pn = _moose_object_pars.set<std::vector<std::string> >("petsc_options_iname");
+  std::vector<std::string> & pv = _moose_object_pars.set<std::vector<std::string> >("petsc_options_value");
+
+  if (petsc_options_inames.size() != petsc_options_values.size())
+    mooseError("PETSc names and options are not the same length");
+
+  bool boomeramg_found = false;
+  bool strong_threshold_found = false;
+  std::string pc_description = "";
+  for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
+  {
+    if (find(pn.begin(), pn.end(), petsc_options_inames[i]) == pn.end())
+    {
+      pn.push_back(petsc_options_inames[i]);
+      pv.push_back(petsc_options_values[i]);
+
+      // Look for a pc description
+      if (petsc_options_inames[i] == "-pc_type" || petsc_options_inames[i] == "-pc_sub_type" || petsc_options_inames[i] == "-pc_hypre_type")
+        pc_description += petsc_options_values[i] + ' ';
+
+      // This special case is common enough that we'd like to handle it for the user.
+      if (petsc_options_inames[i] == "-pc_hypre_type" && petsc_options_values[i] == "boomeramg")
+        boomeramg_found = true;
+      if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
+        strong_threshold_found = true;
+    }
+    else
+    {
+      for (unsigned int j = 0; j < pn.size(); j++)
+        if (pn[j] == petsc_options_inames[i])
+          pv[j] = petsc_options_values[i];
+    }
+  }
+
+  // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold value
+  // We will provide that for the user here if they haven't supplied it themselves.
+  if (boomeramg_found && !strong_threshold_found && _problem->mesh().dimension() == 3)
+  {
+    pn.push_back("-pc_hypre_boomeramg_strong_threshold");
+    pv.push_back("0.7");
+    pc_description += "strong_threshold: 0.7 (auto)";
+  }
+
+  // Set Preconditioner description
+  _problem->setPreconditionerDescription(pc_description);
 }
+#endif

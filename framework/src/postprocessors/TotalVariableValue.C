@@ -22,10 +22,10 @@ InputParameters validParams<TotalVariableValue>()
   return params;
 }
 
-TotalVariableValue::TotalVariableValue(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+TotalVariableValue::TotalVariableValue(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _value(0),
-    _value_old(getPostprocessorValueOldByName(_name)),
+    _value_old(getPostprocessorValueOldByName(name())),
     _pps_value(getPostprocessorValue("value")),
     _pps_value_old(getPostprocessorValueOld("value"))
 {

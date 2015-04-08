@@ -24,8 +24,8 @@ InputParameters validParams<MaterialStdVectorAux>()
   return params;
 }
 
-MaterialStdVectorAux::MaterialStdVectorAux(const std::string & name, InputParameters parameters) :
-  MaterialAuxBase<std::vector<Real> >(name, parameters),
+MaterialStdVectorAux::MaterialStdVectorAux(const InputParameters & parameters) :
+  MaterialAuxBase<std::vector<Real> >(parameters),
     _index(getParam<unsigned int>("index"))
 {
 }

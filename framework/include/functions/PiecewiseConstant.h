@@ -21,7 +21,7 @@
 class PiecewiseConstant : public Piecewise
 {
 public:
-  PiecewiseConstant(const std::string & name, InputParameters parameters);
+  PiecewiseConstant(const InputParameters & parameters);
   virtual ~PiecewiseConstant();
 
   /**

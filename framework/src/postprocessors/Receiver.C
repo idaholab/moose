@@ -23,9 +23,9 @@ InputParameters validParams<Receiver>()
   return params;
 }
 
-Receiver::Receiver(const std::string & name, InputParameters params) :
-    GeneralPostprocessor(name, params),
-    _my_value(getPostprocessorValueByName(name))
+Receiver::Receiver(const InputParameters & params) :
+    GeneralPostprocessor(params),
+    _my_value(getPostprocessorValueByName(name()))
 {
 }
 

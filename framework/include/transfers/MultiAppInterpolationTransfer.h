@@ -30,7 +30,7 @@ class MultiAppInterpolationTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppInterpolationTransfer(const std::string & name, InputParameters parameters);
+  MultiAppInterpolationTransfer(const InputParameters & parameters);
   virtual ~MultiAppInterpolationTransfer() {}
 
   virtual void initialSetup();

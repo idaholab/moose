@@ -36,8 +36,8 @@ InputParameters validParams<IterationAdaptiveDT>()
   return params;
 }
 
-IterationAdaptiveDT::IterationAdaptiveDT(const std::string & name, InputParameters parameters) :
-  TimeStepper(name, parameters),
+IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters) :
+  TimeStepper(parameters),
   _dt_old(declareRestartableData<Real>("dt_old",0.0)),
   _input_dt(getParam<Real>("dt")),
   _tfunc_last_step(declareRestartableData<bool>("tfunc_last_step",false)),

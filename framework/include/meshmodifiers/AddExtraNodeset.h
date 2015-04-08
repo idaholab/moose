@@ -28,7 +28,7 @@ class AddExtraNodeset :
   public MeshModifier
 {
 public:
-  AddExtraNodeset(const std::string & name, InputParameters params);
+  AddExtraNodeset(const InputParameters & params);
 
   virtual void modify();
 };

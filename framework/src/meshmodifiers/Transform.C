@@ -28,8 +28,8 @@ InputParameters validParams<Transform>()
   return params;
 }
 
-Transform::Transform(const std::string & name, InputParameters parameters):
-    MeshModifier(name, parameters),
+Transform::Transform(const InputParameters & parameters):
+    MeshModifier(parameters),
     _transform(getParam<MooseEnum>("transform")),
     _vector_value(getParam<RealVectorValue>("vector_value"))
 {

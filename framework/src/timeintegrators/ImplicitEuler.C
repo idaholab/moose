@@ -23,8 +23,8 @@ InputParameters validParams<ImplicitEuler>()
   return params;
 }
 
-ImplicitEuler::ImplicitEuler(const std::string & name, InputParameters parameters) :
-    TimeIntegrator(name, parameters)
+ImplicitEuler::ImplicitEuler(const InputParameters & parameters) :
+    TimeIntegrator(parameters)
 {
 }
 

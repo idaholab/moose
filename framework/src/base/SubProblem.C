@@ -28,8 +28,8 @@ InputParameters validParams<SubProblem>()
 
 // SubProblem /////
 
-SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
-    Problem(name, parameters),
+SubProblem::SubProblem(const InputParameters & parameters) :
+    Problem(parameters),
     _factory(_app.getFactory()),
     _restartable_data(libMesh::n_threads()),
     _rz_coord_axis(1) // default to RZ rotation around y-axis

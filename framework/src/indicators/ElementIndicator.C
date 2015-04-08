@@ -36,8 +36,8 @@ params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or n
 }
 
 
-ElementIndicator::ElementIndicator(const std::string & name, InputParameters parameters) :
-    Indicator(name, parameters),
+ElementIndicator::ElementIndicator(const InputParameters & parameters) :
+    Indicator(parameters),
     TransientInterface(parameters, "indicators"),
     PostprocessorInterface(parameters),
     Coupleable(parameters, false),
@@ -46,7 +46,7 @@ ElementIndicator::ElementIndicator(const std::string & name, InputParameters par
     MaterialPropertyInterface(parameters),
     ZeroInterface(parameters),
 
-    _field_var(_sys.getVariable(_tid, name)),
+    _field_var(_sys.getVariable(_tid, name())),
 
     _current_elem(_field_var.currentElem()),
     _current_elem_volume(_assembly.elemVolume()),

@@ -29,8 +29,8 @@ InputParameters validParams<NodalNormalBC>()
   return params;
 }
 
-NodalNormalBC::NodalNormalBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+NodalNormalBC::NodalNormalBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     _nx(coupledValue("nx")),
     _ny(coupledValue("ny")),
     _nz(coupledValue("nz"))

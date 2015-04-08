@@ -30,7 +30,7 @@ class MultiAppCopyTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppCopyTransfer(const std::string & name, InputParameters parameters);
+  MultiAppCopyTransfer(const InputParameters & parameters);
   virtual ~MultiAppCopyTransfer() {}
 
   virtual void initialSetup();

@@ -25,7 +25,7 @@ InputParameters validParams<ErrorToleranceMarker>();
 class ErrorToleranceMarker : public IndicatorMarker
 {
 public:
-  ErrorToleranceMarker(const std::string & name, InputParameters parameters);
+  ErrorToleranceMarker(const InputParameters & parameters);
   virtual ~ErrorToleranceMarker(){};
 
 protected:

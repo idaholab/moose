@@ -27,8 +27,8 @@ InputParameters validParams<LineValueSampler>()
   return params;
 }
 
-LineValueSampler::LineValueSampler(const std::string & name, InputParameters parameters) :
-    PointSamplerBase(name, parameters)
+LineValueSampler::LineValueSampler(const InputParameters & parameters) :
+    PointSamplerBase(parameters)
 {
   Point start_point = getParam<Point>("start_point");
   Point end_point = getParam<Point>("end_point");

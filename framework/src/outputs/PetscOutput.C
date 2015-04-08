@@ -54,8 +54,8 @@ InputParameters validParams<PetscOutput>()
   return params;
 }
 
-PetscOutput::PetscOutput(const std::string & name, InputParameters & parameters) :
-    Output(name, parameters),
+PetscOutput::PetscOutput(const InputParameters & parameters) :
+    Output(parameters),
     _nonlinear_iter(0),
     _linear_iter(0),
     _on_linear_residual(false),

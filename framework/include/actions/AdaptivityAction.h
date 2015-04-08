@@ -28,7 +28,7 @@ InputParameters validParams<AdaptivityAction>();
 class AdaptivityAction: public Action
 {
 public:
-  AdaptivityAction(const std::string & name, InputParameters params);
+  AdaptivityAction(InputParameters params);
 
   virtual void act();
 };

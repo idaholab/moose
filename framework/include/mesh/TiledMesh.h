@@ -28,7 +28,7 @@ InputParameters validParams<TiledMesh>();
 class TiledMesh : public MooseMesh
 {
 public:
-  TiledMesh(const std::string & name, InputParameters parameters);
+  TiledMesh(const InputParameters & parameters);
   TiledMesh(const TiledMesh & other_mesh);
 
   virtual MooseMesh & clone() const;

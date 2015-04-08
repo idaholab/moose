@@ -29,10 +29,10 @@ InputParameters validParams<PointSamplerBase>()
   return params;
 }
 
-PointSamplerBase::PointSamplerBase(const std::string & name, InputParameters parameters) :
-    GeneralVectorPostprocessor(name, parameters),
+PointSamplerBase::PointSamplerBase(const InputParameters & parameters) :
+    GeneralVectorPostprocessor(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
-    SamplerBase(name, parameters, this, _communicator),
+    SamplerBase(parameters, this, _communicator),
     _mesh(_subproblem.mesh()),
     _point_vec(1) // Only going to evaluate one point at a time for now
 {

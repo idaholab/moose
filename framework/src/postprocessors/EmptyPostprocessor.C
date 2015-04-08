@@ -24,6 +24,6 @@ InputParameters validParams<EmptyPostprocessor>()
   return params;
 }
 
-EmptyPostprocessor::EmptyPostprocessor(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+EmptyPostprocessor::EmptyPostprocessor(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters)
 {}

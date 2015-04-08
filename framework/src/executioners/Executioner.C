@@ -36,11 +36,19 @@ InputParameters validParams<Executioner>()
 
   params.addParam<std::vector<std::string> >("splitting", "Top-level splitting defining a hierarchical decomposition into subsystems to help the solver.");
 
+
+#ifdef LIBMESH_HAVE_PETSC
+  MultiMooseEnum common_petsc_options("", "", true);
+  params.addParam<MultiMooseEnum>("petsc_options", common_petsc_options, "Singleton PETSc options");
+  params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of PETSc name/value pairs");
+  params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+#endif //LIBMESH_HAVE_PETSC
+
   return params;
 }
 
-Executioner::Executioner(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+Executioner::Executioner(const InputParameters & parameters) :
+    MooseObject(parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
     Restartable(parameters, "Executioners"),

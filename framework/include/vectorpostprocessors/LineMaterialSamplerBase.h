@@ -49,7 +49,7 @@ public:
    * @param name The name of the class
    * @param parameters The input parameters
    */
-  LineMaterialSamplerBase(const std::string & name, InputParameters parameters);
+  LineMaterialSamplerBase(const InputParameters & parameters);
 
   /**
    * Class destructor
@@ -110,9 +110,9 @@ protected:
 };
 
 template <typename T>
-LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const std::string & name, InputParameters parameters) :
-    GeneralVectorPostprocessor(name, parameters),
-    SamplerBase(name, parameters, this, _communicator),
+LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & parameters) :
+    GeneralVectorPostprocessor(parameters),
+    SamplerBase(parameters, this, _communicator),
     BlockRestrictable(parameters),
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),

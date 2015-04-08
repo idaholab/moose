@@ -31,7 +31,7 @@ class TiedValueConstraint :
   public NodeFaceConstraint
 {
 public:
-  TiedValueConstraint(const std::string & name, InputParameters parameters);
+  TiedValueConstraint(const InputParameters & parameters);
   virtual ~TiedValueConstraint(){}
 
   virtual Real computeQpSlaveValue();

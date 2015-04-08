@@ -57,7 +57,7 @@ class Constraint :
   public MeshChangedInterface
 {
 public:
-  Constraint(const std::string & name, InputParameters parameters);
+  Constraint(const InputParameters & parameters);
   virtual ~Constraint();
 
   /**

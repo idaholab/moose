@@ -26,7 +26,7 @@ InputParameters validParams<CopyNodalVarsAction>();
 class CopyNodalVarsAction: public Action
 {
 public:
-  CopyNodalVarsAction(const std::string & name, InputParameters params);
+  CopyNodalVarsAction(InputParameters params);
 
   virtual void act();
 };

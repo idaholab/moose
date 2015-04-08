@@ -46,7 +46,7 @@ public:
    * Class constructor for the interface.  The first parameter, 'name' is not currently used.
    * @param parameters Input parameters from the object, it must contain '_fe_problem'
    */
-  MooseParsedFunctionBase(const std::string & /*name*/, InputParameters parameters);
+  MooseParsedFunctionBase(const InputParameters & parameters);
 
   /**
    * Class destructor.

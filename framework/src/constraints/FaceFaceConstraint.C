@@ -27,8 +27,8 @@ InputParameters validParams<FaceFaceConstraint>()
   return params;
 }
 
-FaceFaceConstraint::FaceFaceConstraint(const std::string & name, InputParameters parameters) :
-    Constraint(name, parameters),
+FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters) :
+    Constraint(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _dim(_mesh.dimension()),

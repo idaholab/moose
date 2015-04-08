@@ -26,13 +26,13 @@ InputParameters validParams<GlobalParamsAction>();
 class GlobalParamsAction: public Action
 {
 public:
-  GlobalParamsAction(const std::string & name, InputParameters params);
+  GlobalParamsAction(InputParameters params);
 
   virtual void act();
 
   /**
    * This function is here to remove parameters of a type so that global parameters
-   * can potentially use the same named variable as a differenent type depending on the
+   * can potentially use the same named variable as a different type depending on the
    * application.
    */
   void remove(const std::string & name);

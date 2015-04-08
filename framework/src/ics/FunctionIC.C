@@ -23,8 +23,8 @@ InputParameters validParams<FunctionIC>()
   return params;
 }
 
-FunctionIC::FunctionIC(const std::string & name, InputParameters parameters) :
-    InitialCondition(name, parameters),
+FunctionIC::FunctionIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _func(getFunction("function"))
 {
 }

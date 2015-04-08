@@ -40,7 +40,7 @@ class GeneralPostprocessor :
   public Postprocessor
 {
 public:
-  GeneralPostprocessor(const std::string & name, InputParameters parameters);
+  GeneralPostprocessor(const InputParameters & parameters);
 
   virtual ~GeneralPostprocessor() {}
 

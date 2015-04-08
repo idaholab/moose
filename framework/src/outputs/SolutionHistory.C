@@ -28,8 +28,8 @@ InputParameters validParams<SolutionHistory>()
 
 }
 
-SolutionHistory::SolutionHistory(const std::string & name, InputParameters & parameters) :
-    BasicOutput<FileOutput>(name, parameters)
+SolutionHistory::SolutionHistory(const InputParameters & parameters) :
+    BasicOutput<FileOutput>(parameters)
 {
 }
 

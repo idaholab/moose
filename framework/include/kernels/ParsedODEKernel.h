@@ -33,7 +33,7 @@ class ParsedODEKernel :
   public FunctionParserUtils
 {
 public:
-  ParsedODEKernel(const std::string & name, InputParameters parameters);
+  ParsedODEKernel(const InputParameters & parameters);
   virtual ~ParsedODEKernel();
 
 protected:

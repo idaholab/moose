@@ -26,7 +26,7 @@ InputParameters validParams<ODETimeDerivative>();
 class ODETimeDerivative : public ODEKernel
 {
 public:
-  ODETimeDerivative(const std::string & name, InputParameters parameters);
+  ODETimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

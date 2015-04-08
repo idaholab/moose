@@ -26,7 +26,7 @@ InputParameters validParams<CheckIntegrityAction>();
 class CheckIntegrityAction : public Action
 {
 public:
-  CheckIntegrityAction(const std::string & name, InputParameters params);
+  CheckIntegrityAction(InputParameters params);
 
   virtual void act();
 };

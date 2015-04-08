@@ -22,8 +22,8 @@ InputParameters validParams<ElementIntegralVariableUserObject>()
   return params;
 }
 
-ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(const std::string & name, InputParameters parameters) :
-    ElementIntegralUserObject(name, parameters),
+ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(const InputParameters & parameters) :
+    ElementIntegralUserObject(parameters),
     MooseVariableInterface(parameters, false),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),

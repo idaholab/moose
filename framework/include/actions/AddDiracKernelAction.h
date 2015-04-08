@@ -26,7 +26,7 @@ InputParameters validParams<AddDiracKernelAction>();
 class AddDiracKernelAction : public MooseObjectAction
 {
 public:
-  AddDiracKernelAction(const std::string & name, InputParameters params);
+  AddDiracKernelAction(InputParameters params);
 
   virtual void act();
 };

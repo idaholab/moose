@@ -26,7 +26,7 @@ InputParameters validParams<AddMarkerAction>();
 class AddMarkerAction : public MooseObjectAction
 {
 public:
-  AddMarkerAction(const std::string & name, InputParameters params);
+  AddMarkerAction(InputParameters params);
 
   virtual void act();
 

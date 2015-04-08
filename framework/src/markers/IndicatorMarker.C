@@ -23,8 +23,8 @@ InputParameters validParams<IndicatorMarker>()
 }
 
 
-IndicatorMarker::IndicatorMarker(const std::string & name, InputParameters parameters) :
-    Marker(name, parameters),
+IndicatorMarker::IndicatorMarker(const InputParameters & parameters) :
+    Marker(parameters),
     _error_vector(getErrorVector(parameters.get<IndicatorName>("indicator")))
 {
 }

@@ -36,7 +36,7 @@ public:
   /**
    * Class constructor
    */
-  Console(const std::string & name, InputParameters);
+  Console(const InputParameters & parameters);
 
   /**
    * Destructor

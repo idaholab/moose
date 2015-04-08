@@ -28,8 +28,8 @@ InputParameters validParams<ElementVectorL2Error>()
   return params;
 }
 
-ElementVectorL2Error::ElementVectorL2Error(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters),
+ElementVectorL2Error::ElementVectorL2Error(const InputParameters & parameters) :
+    ElementIntegralPostprocessor(parameters),
     _funcx(getFunction("function_x")),
     _funcy(getFunction("function_y")),
     _funcz(getFunction("function_z")),

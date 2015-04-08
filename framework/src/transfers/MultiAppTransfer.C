@@ -34,19 +34,20 @@ InputParameters validParams<MultiAppTransfer>()
 }
 
 // Free function to clear special execute_on option before initializing SetupInterface
-InputParameters & removeSpecialOption(InputParameters & params)
+const InputParameters & removeSpecialOption(const InputParameters & parameters)
 {
-  params.set<MultiMooseEnum>("execute_on").erase("SAME_AS_MULTIAPP");
-  return params;
+  InputParameters * params = const_cast<InputParameters*>(&parameters);
+  params->set<MultiMooseEnum>("execute_on").erase("SAME_AS_MULTIAPP");
+  return *params;
 }
 
-MultiAppTransfer::MultiAppTransfer(const std::string & name, InputParameters parameters) :
+MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters) :
     /**
      * Here we need to remove the special option that indicates to the user that this object will follow it's associated
      * Multiapp execute_on. This non-standard option is not understood by SetupInterface. In the absence of any execute_on
      * parameters, FEProblem will populate the execute_on MultiMooseEnum with the values from the associated MultiApp.
      */
-    Transfer(name, removeSpecialOption(parameters)),
+    Transfer(removeSpecialOption(parameters)),
     _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
     _direction(getParam<MooseEnum>("direction"))
 {
@@ -57,5 +58,5 @@ MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 {
   for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
     if (_multi_app->hasLocalApp(i) && !find_sys(_multi_app->appProblem(i)->es(), var_name))
-      mooseError("Cannot find variable " << var_name << " for " << _name << " Transfer");
+      mooseError("Cannot find variable " << var_name << " for " << name() << " Transfer");
 }

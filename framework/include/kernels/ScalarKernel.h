@@ -56,7 +56,7 @@ class ScalarKernel :
   public MeshChangedInterface
 {
 public:
-  ScalarKernel(const std::string & name, InputParameters parameters);
+  ScalarKernel(const InputParameters & parameters);
 
   virtual void reinit() = 0;
   virtual void computeResidual() = 0;

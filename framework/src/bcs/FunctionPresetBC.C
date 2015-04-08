@@ -23,8 +23,8 @@ InputParameters validParams<FunctionPresetBC>()
   return params;
 }
 
-FunctionPresetBC::FunctionPresetBC(const std::string & name, InputParameters parameters) :
-    PresetNodalBC(name, parameters),
+FunctionPresetBC::FunctionPresetBC(const InputParameters & parameters) :
+    PresetNodalBC(parameters),
     _func(getFunction("function"))
 {
 }

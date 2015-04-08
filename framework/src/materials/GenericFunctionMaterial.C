@@ -24,8 +24,8 @@ InputParameters validParams<GenericFunctionMaterial>()
   return params;
 }
 
-GenericFunctionMaterial::GenericFunctionMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+GenericFunctionMaterial::GenericFunctionMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _prop_names(getParam<std::vector<std::string> >("prop_names")),
     _prop_values(getParam<std::vector<FunctionName> >("prop_values"))
 {

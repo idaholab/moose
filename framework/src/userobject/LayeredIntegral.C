@@ -25,9 +25,9 @@ InputParameters validParams<LayeredIntegral>()
   return params;
 }
 
-LayeredIntegral::LayeredIntegral(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariableUserObject(name, parameters),
-    LayeredBase(name, parameters)
+LayeredIntegral::LayeredIntegral(const InputParameters & parameters) :
+    ElementIntegralVariableUserObject(parameters),
+    LayeredBase(parameters)
 {}
 
 void

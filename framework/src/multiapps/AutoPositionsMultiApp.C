@@ -27,8 +27,8 @@ InputParameters validParams<AutoPositionsMultiApp>()
 }
 
 
-AutoPositionsMultiApp::AutoPositionsMultiApp(const std::string & name, InputParameters parameters):
-    TransientMultiApp(name, parameters),
+AutoPositionsMultiApp::AutoPositionsMultiApp(const InputParameters & parameters):
+    TransientMultiApp(parameters),
     BoundaryRestrictable(parameters)
 {
 }

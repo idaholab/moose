@@ -30,8 +30,8 @@ InputParameters validParams<SetupRecoverFileBaseAction>()
   return params;
 }
 
-SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(InputParameters params) :
+  Action(params)
 {
 }
 

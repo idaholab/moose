@@ -31,7 +31,7 @@ class MultiAppVariableValueSamplePostprocessorTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppVariableValueSamplePostprocessorTransfer(const std::string & name, InputParameters parameters);
+  MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters);
   virtual ~MultiAppVariableValueSamplePostprocessorTransfer() {}
 
   virtual void execute();

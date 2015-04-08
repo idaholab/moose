@@ -26,7 +26,7 @@ InputParameters validParams<SetupDampersAction>();
 class SetupDampersAction : public Action
 {
 public:
-  SetupDampersAction(const std::string & name, InputParameters params);
+  SetupDampersAction(InputParameters params);
 
   virtual void act();
 };

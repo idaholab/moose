@@ -30,7 +30,7 @@ InputParameters validParams<ElementalVariableValue>();
 class ElementalVariableValue : public GeneralPostprocessor
 {
 public:
-  ElementalVariableValue(const std::string & name, InputParameters parameters);
+  ElementalVariableValue(const InputParameters & parameters);
 
   virtual void initialize() {}
   virtual void execute() {}

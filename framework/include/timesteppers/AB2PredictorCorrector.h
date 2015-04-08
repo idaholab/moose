@@ -35,7 +35,7 @@ InputParameters validParams<AB2PredictorCorrector>();
 class AB2PredictorCorrector : public TimeStepper
 {
 public:
-  AB2PredictorCorrector(const std::string & name, InputParameters parameters);
+  AB2PredictorCorrector(const InputParameters & parameters);
   virtual ~AB2PredictorCorrector();
 
   virtual Real computeDT();

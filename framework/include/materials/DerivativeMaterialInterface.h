@@ -47,7 +47,7 @@ template<class T>
 class DerivativeMaterialInterface : public T
 {
 public:
-  DerivativeMaterialInterface(const std::string & name, InputParameters parameters);
+  DerivativeMaterialInterface(const InputParameters & parameters);
 
   /**
    * Helper functions to generate the material property names for the
@@ -108,8 +108,8 @@ private:
 
 
 template<class T>
-DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & name, InputParameters parameters) :
-    T(name, parameters),
+DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const InputParameters & parameters) :
+    T(parameters),
     _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
 }

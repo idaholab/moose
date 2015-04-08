@@ -23,8 +23,8 @@ InputParameters validParams<NearestNodeDistanceAux>()
   return params;
 }
 
-NearestNodeDistanceAux::NearestNodeDistanceAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+NearestNodeDistanceAux::NearestNodeDistanceAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _nearest_node(_nodal ? getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0]) : getQuadratureNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0]))
 {
   if (boundaryNames().size() > 1)

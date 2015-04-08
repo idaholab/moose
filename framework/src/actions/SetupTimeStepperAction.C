@@ -25,8 +25,8 @@ InputParameters validParams<SetupTimeStepperAction>()
   return params;
 }
 
-SetupTimeStepperAction::SetupTimeStepperAction(const std::string & name, InputParameters parameters) :
-    MooseObjectAction(name, parameters)
+SetupTimeStepperAction::SetupTimeStepperAction(InputParameters parameters) :
+    MooseObjectAction(parameters)
 {
 }
 

@@ -21,8 +21,8 @@ InputParameters validParams<ElementAverageValue>()
   return params;
 }
 
-ElementAverageValue::ElementAverageValue(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(name, parameters),
+ElementAverageValue::ElementAverageValue(const InputParameters & parameters) :
+    ElementIntegralVariablePostprocessor(parameters),
     _volume(0)
 {}
 

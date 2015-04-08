@@ -22,8 +22,8 @@ InputParameters validParams<InternalSideVectorPostprocessor>()
   return params;
 }
 
-InternalSideVectorPostprocessor::InternalSideVectorPostprocessor(const std::string & name, InputParameters parameters) :
-    InternalSideUserObject(name, parameters),
-    VectorPostprocessor(name, parameters)
+InternalSideVectorPostprocessor::InternalSideVectorPostprocessor(const InputParameters & parameters) :
+    InternalSideUserObject(parameters),
+    VectorPostprocessor(parameters)
 {
 }

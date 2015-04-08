@@ -36,7 +36,7 @@ InputParameters validParams<MultiAppTransfer>();
 class MultiAppTransfer : public Transfer
 {
 public:
-  MultiAppTransfer(const std::string & name, InputParameters parameters);
+  MultiAppTransfer(const InputParameters & parameters);
   virtual ~MultiAppTransfer() {}
 
   enum

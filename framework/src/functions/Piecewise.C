@@ -28,8 +28,8 @@ InputParameters validParams<Piecewise>()
   return params;
 }
 
-Piecewise::Piecewise(const std::string & name, InputParameters parameters) :
-  Function(name, parameters),
+Piecewise::Piecewise(const InputParameters & parameters) :
+  Function(parameters),
   _scale_factor( getParam<Real>("scale_factor") ),
   _linear_interp( NULL ),
   _has_axis(false),
@@ -57,7 +57,7 @@ Piecewise::Piecewise(const std::string & name, InputParameters parameters) :
     }
     else
     {
-      mooseError("Invalid option for format: "+format+" in "+_name+".  Valid options are 'rows' and 'columns'.");
+      mooseError("Invalid option for format: "+format+" in "+name()+".  Valid options are 'rows' and 'columns'.");
     }
   }
   else if ((parameters.isParamValid("x")) ||

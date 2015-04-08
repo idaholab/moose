@@ -27,7 +27,7 @@ class SideSetsFromPoints :
   public AddSideSetsBase
 {
 public:
-  SideSetsFromPoints(const std::string & name, InputParameters parameters);
+  SideSetsFromPoints(const InputParameters & parameters);
 
   virtual ~SideSetsFromPoints();
 

@@ -49,13 +49,8 @@ InputParameters validParams<Problem>();
 class Problem : public MooseObject
 {
 public:
-  Problem(const std::string & name, InputParameters parameters);
+  Problem(const InputParameters & parameters);
   virtual ~Problem();
-
-  /**
-   * Get reference to all-purpose parameters
-   */
-  InputParameters & parameters() { return _pars; }
 
   virtual void init() = 0;
 

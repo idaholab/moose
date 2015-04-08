@@ -32,8 +32,8 @@ InputParameters validParams<ValueRangeMarker>()
 }
 
 
-ValueRangeMarker::ValueRangeMarker(const std::string & name, InputParameters parameters) :
-    QuadraturePointMarker(name, parameters),
+ValueRangeMarker::ValueRangeMarker(const InputParameters & parameters) :
+    QuadraturePointMarker(parameters),
     _lower_bound(parameters.get<Real>("lower_bound")),
     _upper_bound(parameters.get<Real>("upper_bound")),
     _buffer_size(parameters.get<Real>("buffer_size")),

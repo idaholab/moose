@@ -27,8 +27,8 @@ InputParameters validParams<CheckOutputAction>()
   return params;
 }
 
-CheckOutputAction::CheckOutputAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+CheckOutputAction::CheckOutputAction(InputParameters params) :
+  Action(params)
 {
 }
 
@@ -45,7 +45,6 @@ CheckOutputAction::act()
   checkMaterialOutput();
   checkConsoleOutput();
   checkPerfLogOutput();
-  checkInputOutput();
 }
 
 void
@@ -77,7 +76,7 @@ void
 CheckOutputAction::checkMaterialOutput()
 {
   // Do nothing if _problem is NULL (this is the case for coupled problems)
-  /* Do not produce warning, you will get a warning from OutputAction */
+  // Do not produce warning, you will get a warning from OutputAction
   if (_problem.get() == NULL)
     return;
 
@@ -123,8 +122,8 @@ CheckOutputAction::checkPerfLogOutput()
       break;
     }
 
-  /* If a Console outputter is found then all the correct handling of performance logs are
-     handled within the object(s), so do nothing */
+  // If a Console outputter is found then all the correct handling of performance logs are
+  //   handled within the object(s), so do nothing
   if (!has_console)
   {
     Moose::perf_log.disable_logging();
@@ -142,17 +141,5 @@ CheckOutputAction::checkPerfLogOutput()
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
     libMesh::perflog.enable_logging();
 #endif
-  }
-}
-
-void
-CheckOutputAction::checkInputOutput()
-{
-  if (_app.getParam<bool>("show_input"))
-  {
-    const std::vector<Console *> ptrs = _app.getOutputWarehouse().getOutputs<Console>();
-    for (std::vector<Console *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)
-      if ((*it)->getParam<bool>("output_screen"))
-        (*it)->parameters().set<MultiMooseEnum>("output_input_on") = "initial"; // Output::getExecuteOptions("initial");
   }
 }

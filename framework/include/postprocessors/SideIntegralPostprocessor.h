@@ -32,7 +32,7 @@ InputParameters validParams<SideIntegralPostprocessor>();
 class SideIntegralPostprocessor : public SidePostprocessor
 {
 public:
-  SideIntegralPostprocessor(const std::string & name, InputParameters parameters);
+  SideIntegralPostprocessor(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

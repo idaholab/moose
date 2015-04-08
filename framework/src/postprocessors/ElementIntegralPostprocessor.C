@@ -21,8 +21,8 @@ InputParameters validParams<ElementIntegralPostprocessor>()
   return params;
 }
 
-ElementIntegralPostprocessor::ElementIntegralPostprocessor(const std::string & name, InputParameters parameters) :
-    ElementPostprocessor(name, parameters),
+ElementIntegralPostprocessor::ElementIntegralPostprocessor(const InputParameters & parameters) :
+    ElementPostprocessor(parameters),
     _qp(0),
     _integral_value(0)
 {}

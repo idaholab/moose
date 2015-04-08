@@ -28,8 +28,8 @@ InputParameters validParams<NearestNodeValueAux>()
   return params;
 }
 
-NearestNodeValueAux::NearestNodeValueAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"),
                                         boundaryNames()[0])),
     _serialized_solution(_nl_sys.currentSolution()),

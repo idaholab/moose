@@ -25,7 +25,7 @@ InputParameters validParams<ElementIntegralMaterialProperty>();
 class ElementIntegralMaterialProperty : public ElementIntegralPostprocessor
 {
 public:
-  ElementIntegralMaterialProperty(const std::string & name, InputParameters parameters);
+  ElementIntegralMaterialProperty(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral();

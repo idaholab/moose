@@ -29,7 +29,7 @@ InputParameters validParams<MatchedValueBC>();
 class MatchedValueBC : public NodalBC
 {
 public:
-  MatchedValueBC(const std::string & name, InputParameters parameters);
+  MatchedValueBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

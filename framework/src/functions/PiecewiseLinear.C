@@ -21,8 +21,8 @@ InputParameters validParams<PiecewiseLinear>()
   return params;
 }
 
-PiecewiseLinear::PiecewiseLinear(const std::string & name, InputParameters parameters) :
-  Piecewise(name, parameters)
+PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters) :
+  Piecewise(parameters)
 {
 }
 

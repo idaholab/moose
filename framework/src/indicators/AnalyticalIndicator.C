@@ -23,8 +23,8 @@ InputParameters validParams<AnalyticalIndicator>()
 }
 
 
-AnalyticalIndicator::AnalyticalIndicator(const std::string & name, InputParameters parameters) :
-    ElementIntegralIndicator(name, parameters),
+AnalyticalIndicator::AnalyticalIndicator(const InputParameters & parameters) :
+    ElementIntegralIndicator(parameters),
     _func(getFunction("function"))
 {
 }

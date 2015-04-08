@@ -42,7 +42,7 @@ class TimeIntegrator :
   public Restartable
 {
 public:
-  TimeIntegrator(const std::string & name, InputParameters parameters);
+  TimeIntegrator(const InputParameters & parameters);
   virtual ~TimeIntegrator();
 
   virtual void preSolve() { }

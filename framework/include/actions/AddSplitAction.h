@@ -26,7 +26,7 @@ InputParameters validParams<AddSplitAction>();
 class AddSplitAction : public MooseObjectAction
 {
 public:
-  AddSplitAction(const std::string & name, InputParameters params);
+  AddSplitAction(InputParameters params);
   virtual void act();
 };
 

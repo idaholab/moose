@@ -34,8 +34,8 @@ InputParameters validParams<AddOutputAction>()
    return params;
 }
 
-AddOutputAction::AddOutputAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddOutputAction::AddOutputAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -50,11 +50,12 @@ AddOutputAction::act()
   OutputWarehouse & output_warehouse = _app.getOutputWarehouse();
 
   // Get the output object name
-  std::string object_name = getShortName();
+  std::string object_name = _name;
 
   // Reject the reserved names for objects not built by MOOSE
-  if (!_moose_object_pars.get<bool>("_built_by_moose") && output_warehouse.isReservedName(object_name))
-    mooseError("The name '" << object_name << "' is a reserved name for output objects");
+  std::string short_name = MooseUtils::shortName(object_name);
+  if (!_moose_object_pars.get<bool>("_built_by_moose") && output_warehouse.isReservedName(short_name))
+    mooseError("The name '" << short_name << "' is a reserved name for output objects");
 
   // Check that an object by the same name does not already exist; this must be done before the object
   // is created to avoid getting misleading errors from the Parser
@@ -67,7 +68,13 @@ AddOutputAction::act()
   // Create common parameter exclude list
   std::vector<std::string> exclude;
   if (_type == "Console")
+  {
     exclude.push_back("output_on");
+
+    // --show-input should enable the display of the input file on the screen
+    if (_app.getParam<bool>("show_input") && _moose_object_pars.get<bool>("output_screen"))
+      _moose_object_pars.set<MultiMooseEnum>("output_input_on") = "initial";
+  }
 
   // Apply the common parameters
   InputParameters * common = output_warehouse.getCommonParameters();

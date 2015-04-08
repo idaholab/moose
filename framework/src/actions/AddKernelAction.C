@@ -21,8 +21,8 @@ InputParameters validParams<AddKernelAction>()
   return validParams<MooseObjectAction>();
 }
 
-AddKernelAction::AddKernelAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddKernelAction::AddKernelAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -30,12 +30,12 @@ void
 AddKernelAction::act()
 {
   if (_current_task == "add_kernel")
-    _problem->addKernel(_type, getShortName(), _moose_object_pars);
+    _problem->addKernel(_type, _name, _moose_object_pars);
   else
   {
     if (getAllTasks().find("add_aux_bc") != getAllTasks().end())
       mooseWarning("The [AuxBCs] block is deprecated, all AuxKernels including both block and boundary restricted should be added within the [AuxKernels] block");
 
-    _problem->addAuxKernel(_type, getShortName(), _moose_object_pars);
+    _problem->addAuxKernel(_type, _name, _moose_object_pars);
   }
 }

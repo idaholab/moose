@@ -27,7 +27,7 @@ InputParameters validParams<AddVectorPostprocessorAction>();
 class AddVectorPostprocessorAction: public MooseObjectAction
 {
 public:
-  AddVectorPostprocessorAction(const std::string & name, InputParameters params);
+  AddVectorPostprocessorAction(InputParameters params);
 
   virtual void act();
 };

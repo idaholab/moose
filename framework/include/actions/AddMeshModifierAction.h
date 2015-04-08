@@ -28,7 +28,7 @@ InputParameters validParams<AddMeshModifierAction>();
 class AddMeshModifierAction : public MooseObjectAction
 {
 public:
-  AddMeshModifierAction(const std::string & name, InputParameters params);
+  AddMeshModifierAction(InputParameters params);
 
   virtual void act();
 };

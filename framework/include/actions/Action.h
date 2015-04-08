@@ -39,7 +39,7 @@ InputParameters validParams<Action>();
 class Action : public ConsoleStreamInterface
 {
 public:
-  Action(const std::string & name, InputParameters params);
+  Action(InputParameters parameters);
   virtual ~Action() {}                  // empty virtual destructor for proper memory release
 
   virtual void act() = 0;
@@ -91,11 +91,15 @@ public:
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
 
 protected:
-  /// The name of the action
-  std::string _name;
 
   /// Input parameters for the action
   InputParameters _pars;
+
+  /// The name of the action
+  std::string _name;
+
+  /// The short name of the action
+  std::string _short_name;
 
   // The registered syntax for this block if any
   std::string _registered_identifier;

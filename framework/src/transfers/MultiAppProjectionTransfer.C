@@ -52,8 +52,8 @@ InputParameters validParams<MultiAppProjectionTransfer>()
   return params;
 }
 
-MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
     _proj_type(getParam<MooseEnum>("proj_type")),
@@ -319,7 +319,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
 void
 MultiAppProjectionTransfer::execute()
 {
-  _console << "Beginning projection transfer " << _name << std::endl;
+  _console << "Beginning projection transfer " << name() << std::endl;
 
   switch (_direction)
   {
@@ -332,7 +332,7 @@ MultiAppProjectionTransfer::execute()
       break;
   }
 
-  _console << "Finished projection transfer " << _name << std::endl;
+  _console << "Finished projection transfer " << name() << std::endl;
 }
 
 void

@@ -25,8 +25,8 @@ InputParameters validParams<CoupledTransientExecutioner>()
   return params;
 }
 
-CoupledTransientExecutioner::CoupledTransientExecutioner(const std::string & name, InputParameters parameters) :
-    CoupledExecutioner(name, parameters),
+CoupledTransientExecutioner::CoupledTransientExecutioner(const InputParameters & parameters) :
+    CoupledExecutioner(parameters),
     _time(0),
     _dt(0),
     _t_step(0),
@@ -48,7 +48,7 @@ CoupledTransientExecutioner::execute()
   // preExecute
   for (unsigned int i = 0; i < n_problems; i++)
   {
-    _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
+    updateWarehouses(i);
     _executioners[i]->init();
     _executioners[i]->preExecute();
   }
@@ -56,7 +56,7 @@ CoupledTransientExecutioner::execute()
   std::vector<Transient *> trans(n_problems);
   for (unsigned int i = 0; i < n_problems; i++)
   {
-    _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
+    updateWarehouses(i);
     Transient * exec = dynamic_cast<Transient *>(_executioners[i].get());
     if (exec == NULL)
       mooseError("Executioner for problem '" << _fe_problems[i]->name() << "' has to be of a transient type.");
@@ -71,7 +71,7 @@ CoupledTransientExecutioner::execute()
     {
       for (unsigned int i = 0; i < n_problems; i++)
       {
-        _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
+        updateWarehouses(i);
         trans[i]->incrementStepOrReject();
       }
     }
@@ -80,7 +80,7 @@ CoupledTransientExecutioner::execute()
 
     for (unsigned int i = 0; i < n_problems; i++)
     {
-      _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
+      updateWarehouses(i);
       trans[i]->computeDT();
     }
 
@@ -89,7 +89,7 @@ CoupledTransientExecutioner::execute()
 
     for (unsigned int i = 0; i < n_problems; i++)
     {
-      _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
+      updateWarehouses(i);
       _console << "Solving '" << _fep_mapping[_fe_problems[i]] << "'" << std::endl;
       trans[i]->takeStep(_dt);
       projectVariables(*_fe_problems[(i + 1) % n_problems]);
@@ -97,7 +97,7 @@ CoupledTransientExecutioner::execute()
 
     for (unsigned int i = 0; i < n_problems; i++)
     {
-      _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
+      updateWarehouses(i);
       trans[i]->endStep();
     }
   }

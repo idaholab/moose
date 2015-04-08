@@ -31,7 +31,7 @@ class MultiAppVariableValueSampleTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppVariableValueSampleTransfer(const std::string & name, InputParameters parameters);
+  MultiAppVariableValueSampleTransfer(const InputParameters & parameters);
   virtual ~MultiAppVariableValueSampleTransfer() {}
 
   virtual void initialSetup();

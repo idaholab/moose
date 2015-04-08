@@ -25,7 +25,7 @@
 class Piecewise : public Function
 {
 public:
-  Piecewise(const std::string & name, InputParameters parameters);
+  Piecewise(const InputParameters & parameters);
   virtual ~Piecewise();
 
   virtual Real functionSize();

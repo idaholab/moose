@@ -21,8 +21,8 @@ InputParameters validParams<ODETimeDerivative>()
   return params;
 }
 
-ODETimeDerivative::ODETimeDerivative(const std::string & name, InputParameters parameters) :
-    ODEKernel(name, parameters)
+ODETimeDerivative::ODETimeDerivative(const InputParameters & parameters) :
+    ODEKernel(parameters)
 {
 }
 

@@ -35,7 +35,7 @@ class ElementIntegralVariablePostprocessor :
   public MooseVariableInterface
 {
 public:
-  ElementIntegralVariablePostprocessor(const std::string & name, InputParameters parameters);
+  ElementIntegralVariablePostprocessor(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral();

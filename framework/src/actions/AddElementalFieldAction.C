@@ -27,8 +27,8 @@ InputParameters validParams<AddElementalFieldAction>()
   return params;
 }
 
-AddElementalFieldAction::AddElementalFieldAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddElementalFieldAction::AddElementalFieldAction(InputParameters params) :
+    Action(params)
 {
 }
 

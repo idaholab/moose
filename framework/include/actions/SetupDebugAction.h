@@ -30,7 +30,7 @@ InputParameters validParams<SetupDebugAction>();
 class SetupDebugAction : public Action
 {
 public:
-  SetupDebugAction(const std::string & name, InputParameters parameters);
+  SetupDebugAction(InputParameters parameters);
   virtual ~SetupDebugAction();
 
   virtual void act();

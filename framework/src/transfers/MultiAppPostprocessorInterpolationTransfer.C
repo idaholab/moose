@@ -41,8 +41,8 @@ InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>()
   return params;
 }
 
-MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _postprocessor(getParam<PostprocessorName>("postprocessor")),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _num_points(getParam<unsigned int>("num_points")),

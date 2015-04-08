@@ -30,8 +30,8 @@ InputParameters validParams<FiniteDifferencePreconditioner>()
   return params;
 }
 
-FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const std::string & name, InputParameters params) :
-    MoosePreconditioner(name, params)
+FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParameters & params) :
+    MoosePreconditioner(params)
 {
   if (n_processors() > 1)
     mooseError("Can't use the Finite Difference Preconditioner in parallel yet!");

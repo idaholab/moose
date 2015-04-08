@@ -22,8 +22,8 @@ InputParameters validParams<MaxIncrement>()
   return params;
 }
 
-MaxIncrement::MaxIncrement(std::string name, InputParameters parameters) :
-    Damper(name, parameters),
+MaxIncrement::MaxIncrement(const InputParameters & parameters) :
+    Damper(parameters),
     _max_increment(parameters.get<Real>("max_increment"))
 {
 }
@@ -43,6 +43,3 @@ MaxIncrement::computeQpDamping()
 
   return 1.0;
 }
-
-
-

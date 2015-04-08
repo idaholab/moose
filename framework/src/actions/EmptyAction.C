@@ -22,8 +22,8 @@ InputParameters validParams<EmptyAction>()
 }
 
 
-EmptyAction::EmptyAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+EmptyAction::EmptyAction(InputParameters params) :
+    Action(params)
 {
 }
 

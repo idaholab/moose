@@ -23,8 +23,8 @@ InputParameters validParams<FunctionAux>()
   return params;
 }
 
-FunctionAux::FunctionAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+FunctionAux::FunctionAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _func(getFunction("function"))
 {
 }

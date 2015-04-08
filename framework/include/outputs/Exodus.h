@@ -39,7 +39,7 @@ public:
   /**
    * Class constructor
    */
-  Exodus(const std::string & name, InputParameters);
+  Exodus(const InputParameters & parameters);
 
   /**
    * Class destructor

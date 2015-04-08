@@ -26,8 +26,8 @@ InputParameters validParams<Postprocessor>()
   return params;
 }
 
-Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
+Postprocessor::Postprocessor(const InputParameters & parameters) :
     OutputInterface(parameters),
-    _pp_name(name)
+    _pp_name(MooseUtils::shortName(parameters.get<std::string>("name")))
 {
 }

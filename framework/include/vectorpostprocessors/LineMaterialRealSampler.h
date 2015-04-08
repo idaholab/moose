@@ -37,7 +37,7 @@ public:
    * @param name The name of the class
    * @param parameters The input parameters
    */
-  LineMaterialRealSampler(const std::string & name, InputParameters parameters);
+  LineMaterialRealSampler(const InputParameters & parameters);
 
   virtual ~LineMaterialRealSampler() {}
 

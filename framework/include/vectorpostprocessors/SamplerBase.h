@@ -35,7 +35,7 @@ public:
    * @param vpp A pointer to the child object
    * @param comm The communicator of the child
    */
-  SamplerBase(const std::string & name, InputParameters parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm);
+  SamplerBase(const InputParameters & parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm);
 
   virtual ~SamplerBase() {}
 

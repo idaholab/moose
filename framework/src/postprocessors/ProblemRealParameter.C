@@ -23,9 +23,8 @@ InputParameters validParams<ProblemRealParameter>()
   return params;
 }
 
-ProblemRealParameter::ProblemRealParameter(const std::string & name,
-                                           InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+ProblemRealParameter::ProblemRealParameter(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters)
 {}
 
 Real

@@ -23,6 +23,7 @@
 #include "Action.h"
 #include "ActionFactory.h"
 #include "OutputWarehouse.h"
+#include "InputParameterWarehouse.h"
 
 template<>
 InputParameters validParams<CoupledExecutioner>()
@@ -33,8 +34,8 @@ InputParameters validParams<CoupledExecutioner>()
 }
 
 
-CoupledExecutioner::CoupledExecutioner(const std::string & name, InputParameters parameters) :
-    Executioner(name, parameters)
+CoupledExecutioner::CoupledExecutioner(const InputParameters & parameters) :
+    Executioner(parameters)
 {
   InputParameters params = emptyInputParameters();
   params.addPrivateParam("_moose_app", &_app);
@@ -49,6 +50,7 @@ CoupledExecutioner::~CoupledExecutioner()
     delete _awhs[i];
     delete _parsers[i];
     delete _owhs[i];
+    delete _input_parameter_warehouse[i];
     // Note: _fe_problems are destroyed by executioners' destructors
   }
 
@@ -76,15 +78,19 @@ CoupledExecutioner::addFEProblem(const std::string & name, const FileName & file
   ActionWarehouse * awh = new ActionWarehouse(_app, _app.syntax(), _app.getActionFactory());
   Parser * parser = new Parser(_app, *awh);
   OutputWarehouse * owh = new OutputWarehouse();
+  InputParameterWarehouse * moiwh = new InputParameterWarehouse();
+
+  awh->mooseApp().setInputParameterWarehouse(moiwh);
 
   parser->parse(file_name);
   awh->build();
 
-  _name_index[name] = _awhs.size();
+  _name_index[MooseUtils::shortName(name)] = _awhs.size();
   _input_file_names.push_back(file_name);
   _awhs.push_back(awh);
   _parsers.push_back(parser);
   _owhs.push_back(owh);
+  _input_parameter_warehouse.push_back(moiwh);
 }
 
 void
@@ -162,8 +168,8 @@ CoupledExecutioner::build()
     // Set the input filename for the App, so that when AddOutputAction gets the default output filename that is correct
     _awhs[i]->mooseApp().setInputFileName(_input_file_names[i]);
 
-    // Set the App to return a reference to the OutputWarehouse stored in this Executioner rather than in the MooseApp
-    _awhs[i]->mooseApp().setOutputWarehouse(_owhs[i]);
+    // Set the App to return a reference to the OutputWarehouse and InputParameterWarehoue stored in this Executioner rather than in the MooseApp
+    updateWarehouses(i);
 
     _awhs[i]->executeAllActions();
     _executioners[i] = _awhs[i]->executioner();
@@ -233,4 +239,11 @@ CoupledExecutioner::getExecutionerByName(const std::string & name)
 {
   unsigned int i = _name_index[name];
   return _executioners[i].get();
+}
+
+void
+CoupledExecutioner::updateWarehouses(const unsigned int & i)
+{
+  _awhs[i]->mooseApp().setOutputWarehouse(_owhs[i]);
+  _awhs[i]->mooseApp().setInputParameterWarehouse(_input_parameter_warehouse[i]);
 }

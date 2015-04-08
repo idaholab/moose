@@ -21,8 +21,8 @@ InputParameters validParams<AddUserObjectAction>()
   return validParams<MooseObjectAction>();
 }
 
-AddUserObjectAction::AddUserObjectAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddUserObjectAction::AddUserObjectAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -44,5 +44,5 @@ AddUserObjectAction::act()
       _moose_object_pars.addPrivateParam<bool>("block_restricted_nodal", true);
   }
 
-  _problem->addUserObject(_type, getShortName(), _moose_object_pars);
+  _problem->addUserObject(_type, _name, _moose_object_pars);
 }

@@ -32,8 +32,8 @@ InputParameters validParams<SideSetsFromNormals>()
   return params;
 }
 
-SideSetsFromNormals::SideSetsFromNormals(const std::string & name, InputParameters parameters):
-    AddSideSetsBase(name, parameters),
+SideSetsFromNormals::SideSetsFromNormals(const InputParameters & parameters):
+    AddSideSetsBase(parameters),
     _normals(getParam<std::vector<Point> >("normals"))
 {
 

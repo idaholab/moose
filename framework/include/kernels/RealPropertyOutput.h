@@ -29,7 +29,7 @@ class RealPropertyOutput : public Kernel
 {
 public:
 
-  RealPropertyOutput(const std::string & name, InputParameters parameters);
+  RealPropertyOutput(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -49,8 +49,8 @@ InputParameters validParams<AuxKernel>()
   return params;
 }
 
-AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+AuxKernel::AuxKernel(const InputParameters & parameters) :
+    MooseObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters),
     SetupInterface(parameters),
@@ -128,7 +128,6 @@ AuxKernel::getUserObjectBase(const std::string & name)
   _depend_uo.insert(_pars.get<UserObjectName>(name));
   return UserObjectInterface::getUserObjectBase(name);
 }
-
 
 PostprocessorValue &
 AuxKernel::getPostprocessorValue(const std::string & name)

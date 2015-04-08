@@ -22,8 +22,8 @@ InputParameters validParams<ElementIntegralMaterialProperty>()
   return params;
 }
 
-ElementIntegralMaterialProperty::ElementIntegralMaterialProperty(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters),
+ElementIntegralMaterialProperty::ElementIntegralMaterialProperty(const InputParameters & parameters) :
+    ElementIntegralPostprocessor(parameters),
     _scalar(getMaterialProperty<Real>(getParam<std::string>("mat_prop")))
 {}
 

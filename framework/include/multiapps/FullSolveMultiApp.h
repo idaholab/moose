@@ -33,7 +33,7 @@ class FullSolveMultiApp :
   public MultiApp
 {
 public:
-  FullSolveMultiApp(const std::string & name, InputParameters parameters);
+  FullSolveMultiApp(const InputParameters & parameters);
 
   virtual ~FullSolveMultiApp();
 

@@ -57,7 +57,7 @@ class Marker :
   public OutputInterface
 {
 public:
-  Marker(const std::string & name, InputParameters parameters);
+  Marker(const InputParameters & parameters);
   virtual ~Marker() {}
 
   /// This mirrors the main refinement flag values in libMesh in Elem::RefinementState but adds "dont_mark"

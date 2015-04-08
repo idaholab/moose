@@ -21,8 +21,8 @@ InputParameters params = validParams<ElementIntegralPostprocessor>();
   return params;
 }
 
-VolumePostprocessor::VolumePostprocessor(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters)
+VolumePostprocessor::VolumePostprocessor(const InputParameters & parameters) :
+    ElementIntegralPostprocessor(parameters)
 {}
 
 void

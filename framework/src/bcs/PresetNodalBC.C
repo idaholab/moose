@@ -22,8 +22,8 @@ InputParameters validParams<PresetNodalBC>()
 }
 
 
-PresetNodalBC::PresetNodalBC(const std::string & name, InputParameters parameters) :
-  NodalBC(name, parameters)
+PresetNodalBC::PresetNodalBC(const InputParameters & parameters) :
+  NodalBC(parameters)
 {
 
 }

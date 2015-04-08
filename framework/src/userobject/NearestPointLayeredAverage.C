@@ -29,8 +29,8 @@ InputParameters validParams<NearestPointLayeredAverage>()
   return params;
 }
 
-NearestPointLayeredAverage::NearestPointLayeredAverage(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariableUserObject(name, parameters)
+NearestPointLayeredAverage::NearestPointLayeredAverage(const InputParameters & parameters) :
+    ElementIntegralVariableUserObject(parameters)
 {
   const std::vector<Real> & points_vec = getParam<std::vector<Real> >("points");
 
@@ -50,7 +50,7 @@ NearestPointLayeredAverage::NearestPointLayeredAverage(const std::string & name,
 
   // Build each of the LayeredAverage objects:
   for (unsigned int i=0; i<_points.size(); i++)
-    _layered_averages.push_back(new LayeredAverage(name, parameters));
+    _layered_averages.push_back(new LayeredAverage(parameters));
 }
 
 NearestPointLayeredAverage::~NearestPointLayeredAverage()

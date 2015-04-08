@@ -26,8 +26,8 @@ InputParameters validParams<InitDisplacedProblemAction>()
   return params;
 }
 
-InitDisplacedProblemAction::InitDisplacedProblemAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters)
+InitDisplacedProblemAction::InitDisplacedProblemAction(InputParameters parameters) :
+    Action(parameters)
 {
 }
 

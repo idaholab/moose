@@ -41,8 +41,8 @@ InputParameters validParams<OversampleOutput>()
   return params;
 }
 
-OversampleOutput::OversampleOutput(const std::string & name, InputParameters & parameters) :
-    FileOutput(name, parameters),
+OversampleOutput::OversampleOutput(const InputParameters & parameters) :
+    FileOutput(parameters),
     _mesh_ptr(getParam<bool>("use_displaced") ?
               &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
     _refinements(getParam<unsigned int>("refinements")),
@@ -217,7 +217,8 @@ OversampleOutput::cloneMesh()
     mesh_params.set<MeshFileName>("file") = getParam<MeshFileName>("file");
     mesh_params.set<bool>("nemesis") = false;
     mesh_params.set<bool>("skip_partitioning") = false;
-    _mesh_ptr = new FileMesh("output_problem_mesh", mesh_params);
+    mesh_params.set<std::string>("name") = "output_problem_mesh";
+    _mesh_ptr = new FileMesh(mesh_params);
     _mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
     _mesh_ptr->init();
     _mesh_ptr->prepare();

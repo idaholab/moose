@@ -41,7 +41,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  Steady(const std::string & name, InputParameters parameters);
+  Steady(const InputParameters & parameters);
 
   virtual ~Steady();
 

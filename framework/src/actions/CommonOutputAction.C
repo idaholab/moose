@@ -80,8 +80,8 @@ InputParameters validParams<CommonOutputAction>()
   return params;
 }
 
-CommonOutputAction::CommonOutputAction(const std::string & name, InputParameters params) :
-    Action(name, params),
+CommonOutputAction::CommonOutputAction(InputParameters params) :
+    Action(params),
     _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
   // Set the ActionWarehouse pointer in the parameters that will be passed to the actions created with this action

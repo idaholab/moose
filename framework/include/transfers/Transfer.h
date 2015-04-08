@@ -46,7 +46,7 @@ class Transfer :
   public Restartable
 {
 public:
-  Transfer(const std::string & name, InputParameters parameters);
+  Transfer(const InputParameters & parameters);
   virtual ~Transfer() {}
 
   /**

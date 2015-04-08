@@ -22,8 +22,8 @@ InputParameters validParams<DiffusionFluxBC>()
   return params;
 }
 
-DiffusionFluxBC::DiffusionFluxBC(const std::string & name, InputParameters parameters) :
-    FluxBC(name, parameters)
+DiffusionFluxBC::DiffusionFluxBC(const InputParameters & parameters) :
+    FluxBC(parameters)
 {
 }
 

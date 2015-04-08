@@ -47,7 +47,7 @@ InputParameters validParams<SimplePredictor>();
 class SimplePredictor : public Predictor
 {
 public:
-  SimplePredictor(const std::string & name, InputParameters parameters);
+  SimplePredictor(const InputParameters & parameters);
   virtual ~SimplePredictor();
 
   virtual void apply(NumericVector<Number> & sln);

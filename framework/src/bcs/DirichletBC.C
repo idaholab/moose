@@ -23,8 +23,8 @@ InputParameters validParams<DirichletBC>()
 }
 
 
-DirichletBC::DirichletBC(const std::string & name, InputParameters parameters) :
-  NodalBC(name, parameters),
+DirichletBC::DirichletBC(const InputParameters & parameters) :
+  NodalBC(parameters),
   _value(getParam<Real>("value"))
 {}
 

@@ -29,7 +29,7 @@ InputParameters validParams<AdamsPredictor>();
 class AdamsPredictor : public Predictor
 {
 public:
-  AdamsPredictor(const std::string & name, InputParameters parameters);
+  AdamsPredictor(const InputParameters & parameters);
   virtual ~AdamsPredictor();
 
   virtual int order() { return _order; }

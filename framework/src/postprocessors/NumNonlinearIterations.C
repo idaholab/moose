@@ -25,8 +25,8 @@ InputParameters validParams<NumNonlinearIterations>()
   return params;
 }
 
-NumNonlinearIterations::NumNonlinearIterations(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+NumNonlinearIterations::NumNonlinearIterations(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _fe_problem(dynamic_cast<FEProblem *>(&_subproblem)),
     _accumulate_over_step(getParam<bool>("accumulate_over_step")),
     _num_iters(0),

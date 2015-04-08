@@ -24,8 +24,8 @@ InputParameters validParams<PointValueSampler>()
   return params;
 }
 
-PointValueSampler::PointValueSampler(const std::string & name, InputParameters parameters) :
-    PointSamplerBase(name, parameters)
+PointValueSampler::PointValueSampler(const InputParameters & parameters) :
+    PointSamplerBase(parameters)
 {
   _points = getParam<std::vector<Point> >("points");
 

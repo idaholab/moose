@@ -23,8 +23,8 @@ InputParameters validParams<PostprocessorDT>()
   return params;
 }
 
-PostprocessorDT::PostprocessorDT(const std::string & name, InputParameters parameters) :
-    TimeStepper(name, parameters),
+PostprocessorDT::PostprocessorDT(const InputParameters & parameters) :
+    TimeStepper(parameters),
     PostprocessorInterface(parameters),
     _pps_value(getPostprocessorValue("postprocessor")),
     _has_initial_dt(isParamValid("dt")),

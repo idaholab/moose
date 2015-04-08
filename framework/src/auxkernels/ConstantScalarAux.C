@@ -23,8 +23,8 @@ InputParameters validParams<ConstantScalarAux>()
   return params;
 }
 
-ConstantScalarAux::ConstantScalarAux(const std::string & name, InputParameters parameters) :
-    AuxScalarKernel(name, parameters),
+ConstantScalarAux::ConstantScalarAux(const InputParameters & parameters) :
+    AuxScalarKernel(parameters),
     _value(getParam<Real>("value"))
 {
 }

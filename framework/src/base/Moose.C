@@ -153,7 +153,7 @@
 #include "ElementVectorL2Error.h"
 #include "EmptyPostprocessor.h"
 #include "NodalVariableValue.h"
-
+#include "EigenValueReporter.h"
 #include "NumDOFs.h"
 #include "TimestepSize.h"
 #include "RunTime.h"
@@ -499,7 +499,6 @@ registerObjects(Factory & factory)
   registerNamedFunction(MooseParsedVectorFunction, "ParsedVectorFunction");
   registerFunction(PiecewiseConstant);
   registerFunction(PiecewiseLinear);
-  registerDeprecatedObjectName(PiecewiseLinear, "PiecewiseLinearFile", "02/27/2014 00:00");
   registerFunction(SolutionFunction);
   registerFunction(PiecewiseBilinear);
   registerFunction(SplineFunction);
@@ -559,6 +558,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
   registerPostprocessor(NumPicardIterations);
+  registerPostprocessor(EigenValueReporter);
   registerPostprocessor(FunctionSideIntegral);
 
   // vector PPS
@@ -935,10 +935,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");
-  registerAction(AddVariableAction, "add_ic");     // initial condition shortcut syntax
-
   registerAction(AddAuxVariableAction, "add_aux_variable");
-  registerAction(AddAuxVariableAction, "add_ic");  // initial condition shortcut syntax
 
   registerAction(CopyNodalVarsAction, "check_copy_nodal_vars");
   registerAction(CopyNodalVarsAction, "copy_nodal_vars");

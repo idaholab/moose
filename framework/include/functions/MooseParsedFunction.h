@@ -50,7 +50,7 @@ public:
    * @param name The name of the function
    * @param parameters The input parameters
    */
-  MooseParsedFunction(const std::string & name, InputParameters parameters);
+  MooseParsedFunction(const InputParameters & parameters);
 
   /**
    * Destructor, it cleans up the libMesh::ParsedFunction object

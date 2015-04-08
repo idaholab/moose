@@ -28,7 +28,7 @@ InputParameters validParams<SetupPreconditionerAction>();
 class SetupPreconditionerAction : public MooseObjectAction
 {
 public:
-  SetupPreconditionerAction(const std::string & name, InputParameters params);
+  SetupPreconditionerAction(InputParameters params);
 
   virtual void act();
 

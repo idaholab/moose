@@ -14,6 +14,7 @@
 
 #include "MooseObject.h"
 #include "MooseApp.h"
+#include "MooseUtils.h"
 
 template<>
 InputParameters validParams<MooseObject>()
@@ -23,11 +24,18 @@ InputParameters validParams<MooseObject>()
 }
 
 
-MooseObject::MooseObject(const std::string & name, InputParameters parameters) :
+MooseObject::MooseObject(const InputParameters & parameters) :
   ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
   ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _name(name),
+  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
   _pars(parameters),
-  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))
+  _name(getParam<std::string>("name")),
+  _short_name(MooseUtils::shortName(_name))
 {
+}
+
+std::string
+MooseObject::name() const
+{
+  return _short_name;
 }

@@ -45,7 +45,7 @@ class InternalSideUserObject :
   public ZeroInterface
 {
 public:
-  InternalSideUserObject(const std::string & name, InputParameters parameters);
+  InternalSideUserObject(const InputParameters & parameters);
   virtual ~InternalSideUserObject();
 
   /**

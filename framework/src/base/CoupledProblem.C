@@ -22,8 +22,8 @@ InputParameters validParams<CoupledProblem>()
 }
 
 
-CoupledProblem::CoupledProblem(const std::string & name, InputParameters params) :
-    Problem(name, params)
+CoupledProblem::CoupledProblem(const InputParameters & params) :
+    Problem(params)
 {
 }
 

@@ -27,7 +27,7 @@ InputParameters validParams<NumPicardIterations>();
 class NumPicardIterations : public GeneralPostprocessor
 {
 public:
-  NumPicardIterations(const std::string & name, InputParameters parameters);
+  NumPicardIterations(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute() {}

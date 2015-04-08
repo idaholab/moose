@@ -28,7 +28,7 @@ InputParameters validParams<TotalVariableValue>();
 class TotalVariableValue : public GeneralPostprocessor
 {
 public:
-  TotalVariableValue(const std::string & name, InputParameters parameters);
+  TotalVariableValue(const InputParameters & parameters);
   virtual ~TotalVariableValue();
 
   virtual void initialize();

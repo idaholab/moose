@@ -37,7 +37,7 @@ public:
   /**
    * Factory constructor.
    */
-  BoundsAux(const std::string & name, InputParameters parameters);
+  BoundsAux(const InputParameters & parameters);
 
 protected:
   /**

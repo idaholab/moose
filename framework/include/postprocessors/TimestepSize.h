@@ -26,7 +26,7 @@ InputParameters validParams<TimestepSize>();
 class TimestepSize : public GeneralPostprocessor
 {
 public:
-  TimestepSize(const std::string & name, InputParameters parameters);
+  TimestepSize(const InputParameters & parameters);
 
   virtual void initialize() {}
   virtual void execute() {}

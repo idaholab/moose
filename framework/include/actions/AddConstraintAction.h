@@ -26,7 +26,7 @@ InputParameters validParams<AddConstraintAction>();
 class AddConstraintAction : public MooseObjectAction
 {
 public:
-  AddConstraintAction(const std::string & name, InputParameters params);
+  AddConstraintAction(InputParameters params);
 
   virtual void act();
 };

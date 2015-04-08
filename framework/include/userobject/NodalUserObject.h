@@ -50,7 +50,7 @@ class NodalUserObject :
   public ZeroInterface
 {
 public:
-  NodalUserObject(const std::string & name, InputParameters parameters);
+  NodalUserObject(const InputParameters & parameters);
 
   /**
    * This function will get called on each geometric object this postprocessor acts on

@@ -32,8 +32,8 @@ InputParameters validParams<MultiAppPostprocessorToAuxScalarTransfer>()
   return params;
 }
 
-MultiAppPostprocessorToAuxScalarTransfer::MultiAppPostprocessorToAuxScalarTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppPostprocessorToAuxScalarTransfer::MultiAppPostprocessorToAuxScalarTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _from_pp_name(getParam<PostprocessorName>("from_postprocessor")),
     _to_aux_name(getParam<VariableName>("to_aux_scalar"))
 {

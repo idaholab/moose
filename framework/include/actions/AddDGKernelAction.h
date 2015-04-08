@@ -26,7 +26,7 @@ InputParameters validParams<AddDGKernelAction>();
 class AddDGKernelAction : public MooseObjectAction
 {
 public:
-  AddDGKernelAction(const std::string & name, InputParameters params);
+  AddDGKernelAction(InputParameters params);
 
   virtual void act();
 };

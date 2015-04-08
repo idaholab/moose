@@ -24,8 +24,8 @@ InputParameters validParams<NodalNormalsCorner>()
   return params;
 }
 
-NodalNormalsCorner::NodalNormalsCorner(const std::string & name, InputParameters parameters) :
-    SideUserObject(name, parameters),
+NodalNormalsCorner::NodalNormalsCorner(const InputParameters & parameters) :
+    SideUserObject(parameters),
     _aux(_fe_problem.getAuxiliarySystem()),
     _corner_boundary_id(_mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary")))
 {

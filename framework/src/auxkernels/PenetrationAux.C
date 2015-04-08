@@ -47,8 +47,8 @@ InputParameters validParams<PenetrationAux>()
   return params;
 }
 
-PenetrationAux::PenetrationAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+PenetrationAux::PenetrationAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
 
     // Here we cast the value of the MOOSE enum to an integer to the class-based enum.
     _quantity(PenetrationAux::PA_ENUM(int(getParam<MooseEnum>("quantity")))),

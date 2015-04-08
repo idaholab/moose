@@ -30,7 +30,7 @@ class MultiAppNearestNodeTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppNearestNodeTransfer(const std::string & name, InputParameters parameters);
+  MultiAppNearestNodeTransfer(const InputParameters & parameters);
   virtual ~MultiAppNearestNodeTransfer() {}
 
   virtual void initialSetup();

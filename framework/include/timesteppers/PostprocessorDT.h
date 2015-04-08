@@ -31,7 +31,7 @@ class PostprocessorDT :
     public PostprocessorInterface
 {
 public:
-  PostprocessorDT(const std::string & name, InputParameters parameters);
+  PostprocessorDT(const InputParameters & parameters);
 
 protected:
   virtual Real computeInitialDT();

@@ -24,8 +24,8 @@ InputParameters validParams<MeshModifier>()
   return params;
 }
 
-MeshModifier::MeshModifier(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+MeshModifier::MeshModifier(const InputParameters & parameters) :
+    MooseObject(parameters),
     Restartable(parameters, "MeshModifiers"),
     _mesh_ptr(NULL)
 {

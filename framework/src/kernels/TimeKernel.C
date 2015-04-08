@@ -21,8 +21,8 @@ InputParameters validParams<TimeKernel>()
   return params;
 }
 
-TimeKernel::TimeKernel(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+TimeKernel::TimeKernel(const InputParameters & parameters) :
+    Kernel(parameters)
 {
 }
 

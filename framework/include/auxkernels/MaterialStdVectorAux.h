@@ -36,7 +36,7 @@ public:
    * @param name AuxKernel name
    * @param parameters The input parameters for this object
    */
-  MaterialStdVectorAux(const std::string & name, InputParameters parameters);
+  MaterialStdVectorAux(const InputParameters & parameters);
 
   /**
    * Class destructor

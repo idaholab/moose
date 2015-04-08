@@ -31,7 +31,7 @@ InputParameters validParams<ComboMarker>();
 class ComboMarker : public Marker
 {
 public:
-  ComboMarker(const std::string & name, InputParameters parameters);
+  ComboMarker(const InputParameters & parameters);
   virtual ~ComboMarker(){};
 
 protected:

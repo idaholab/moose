@@ -45,7 +45,7 @@ InputParameters validParams<Terminator>();
 class Terminator : public GeneralUserObject
 {
 public:
-  Terminator(const std::string & name, InputParameters parameters);
+  Terminator(const InputParameters & parameters);
   virtual ~Terminator();
 
   virtual void execute();

@@ -26,7 +26,7 @@ InputParameters validParams<NumVars>();
 class NumVars : public GeneralPostprocessor
 {
 public:
-  NumVars(const std::string & name, InputParameters parameters);
+  NumVars(const InputParameters & parameters);
 
   virtual void initialize() {}
 

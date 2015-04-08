@@ -39,8 +39,8 @@ InputParameters validParams<AddPeriodicBCAction>()
   return params;
 }
 
-AddPeriodicBCAction::AddPeriodicBCAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddPeriodicBCAction::AddPeriodicBCAction(InputParameters params) :
+    Action(params)
 {
 }
 

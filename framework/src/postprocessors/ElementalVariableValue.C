@@ -25,8 +25,8 @@ InputParameters validParams<ElementalVariableValue>()
   return params;
 }
 
-ElementalVariableValue::ElementalVariableValue(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+ElementalVariableValue::ElementalVariableValue(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.getMesh().query_elem(parameters.get<unsigned int>("elementid")))

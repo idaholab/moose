@@ -47,7 +47,7 @@ class MultiApp :
   public Restartable
 {
 public:
-  MultiApp(const std::string & name, InputParameters parameters);
+  MultiApp(const InputParameters & parameters);
 
   virtual ~MultiApp();
 

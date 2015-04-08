@@ -35,8 +35,10 @@ public:
    * Populates the SubProblem and MooseMesh pointers
    * @param parameters The InputParameters for the object.
    * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly correspond to the section in the input file so errors are easy to understand.
+   * @param subproblem An optional method for inputting the SubProblem object, this is used by FEProblem, othersize
+   * the SubProblem comes from the parameters
    */
-  Restartable(const InputParameters & parameters, std::string system_name);
+  Restartable(const InputParameters & parameters, std::string system_name, SubProblem * subproblem = NULL);
 
   /**
    * Constructor for objects that don't have "parameters"

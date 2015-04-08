@@ -24,8 +24,8 @@ InputParameters validParams<AnisotropicDiffusion>()
 }
 
 
-AnisotropicDiffusion::AnisotropicDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+AnisotropicDiffusion::AnisotropicDiffusion(const InputParameters & parameters) :
+    Kernel(parameters),
     _k(getParam<RealTensorValue>("tensor_coeff"))
 {
 }

@@ -35,7 +35,7 @@ class MooseObject :
   public libMesh::ParallelObject
 {
 public:
-  MooseObject(const std::string & name, InputParameters parameters);
+  MooseObject(const InputParameters & parameters);
 
   virtual ~MooseObject() { }
 
@@ -43,13 +43,13 @@ public:
    * Get the name of the object
    * @return The name of the object
    */
-  const std::string & name() const { return _name; }
+  std::string name() const;
 
   /**
    * Get the parameters of the object
    * @return The parameters of the object
    */
-  InputParameters & parameters() { return _pars; }
+  const InputParameters & parameters() { return _pars; }
 
   ///@{
   /**
@@ -57,8 +57,8 @@ public:
    * @param name The name of the parameter
    * @return The value of the parameter
    */
-  template <typename T>
-  const T & getParam(const std::string & name);
+  // template <typename T>
+  //const T & getParam(const std::string & name);
 
   template <typename T>
   const T & getParam(const std::string & name) const;
@@ -77,22 +77,21 @@ public:
 
 protected:
 
-  /// The name of this object
-  std::string _name;
-
-  /// Parameters of this object
-  InputParameters _pars;
-
   /// The MooseApp this object is associated with
   MooseApp & _app;
-};
 
-template <typename T>
-const T &
-MooseObject::getParam(const std::string & name)
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
-}
+  /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
+  const InputParameters & _pars;
+
+private:
+
+  /// The name of this object
+  const std::string & _name;
+
+  /// The short-name of this object
+  const std::string _short_name;
+
+};
 
 template <typename T>
 const T &

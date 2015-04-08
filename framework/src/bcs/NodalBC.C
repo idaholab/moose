@@ -26,8 +26,8 @@ InputParameters validParams<NodalBC>()
 }
 
 
-NodalBC::NodalBC(const std::string & name, InputParameters parameters) :
-    BoundaryCondition(name, parameters),
+NodalBC::NodalBC(const InputParameters & parameters) :
+    BoundaryCondition(parameters),
     RandomInterface(parameters, _fe_problem, _tid, true),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
     _current_node(_var.node()),

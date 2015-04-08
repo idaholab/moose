@@ -37,8 +37,8 @@ InputParameters validParams<Split>()
   return params;
 }
 
-Split::Split (const std::string & name, InputParameters params) :
-  MooseObject(name, params),
+Split::Split (const InputParameters & params) :
+  MooseObject(params),
   Restartable(params, "Splits"),
   _fe_problem(*params.getCheckedPointerParam<FEProblem *>("_fe_problem")),
   _vars(getParam<std::vector<std::string> >("vars")),
@@ -165,7 +165,7 @@ Split::setup(const std::string& prefix)
     std::string op = _petsc_options[j];
     if (op[0] != '-') {
       std::ostringstream err;
-      err << "Invalid petsc option name " << op << " for Split " << _name;
+      err << "Invalid petsc option name " << op << " for Split " << name();
       mooseError(err.str());
     }
     std::string opt = prefix+op.substr(1);
@@ -177,7 +177,7 @@ Split::setup(const std::string& prefix)
     std::string op = _petsc_options_iname[j];
     if (op[0] != '-') {
       std::ostringstream err;
-      err << "Invalid petsc option name " << op << " for Split " << _name;
+      err << "Invalid petsc option name " << op << " for Split " << name();
       mooseError(err.str());
     }
     std::string opt = prefix+op.substr(1);

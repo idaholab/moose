@@ -30,8 +30,8 @@ InputParameters validParams<SetupPreconditionerAction>()
   return params;
 }
 
-SetupPreconditionerAction::SetupPreconditionerAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+SetupPreconditionerAction::SetupPreconditionerAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -42,7 +42,7 @@ SetupPreconditionerAction::act()
   {
     // build the preconditioner
     _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
-    MooseSharedPointer<MoosePreconditioner> pc = MooseSharedNamespace::static_pointer_cast<MoosePreconditioner>(_factory.create(_type, getShortName(), _moose_object_pars));
+    MooseSharedPointer<MoosePreconditioner> pc = MooseSharedNamespace::static_pointer_cast<MoosePreconditioner>(_factory.create(_type, _name, _moose_object_pars));
     if (!pc.get())
       mooseError("Failed to build the preconditioner.");
 

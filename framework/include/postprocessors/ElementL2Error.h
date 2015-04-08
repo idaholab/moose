@@ -29,7 +29,7 @@ class ElementL2Error :
   public ElementIntegralVariablePostprocessor
 {
 public:
-  ElementL2Error(const std::string & name, InputParameters parameters);
+  ElementL2Error(const InputParameters & parameters);
 
   /**
    * Get the L2 Error.

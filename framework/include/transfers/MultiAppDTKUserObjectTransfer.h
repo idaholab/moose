@@ -60,7 +60,7 @@ class MultiAppDTKUserObjectTransfer :
   public MooseVariableInterface
 {
 public:
-  MultiAppDTKUserObjectTransfer(const std::string & name, InputParameters parameters);
+  MultiAppDTKUserObjectTransfer(const InputParameters & parameters);
   virtual ~MultiAppDTKUserObjectTransfer() {}
 
   typedef long unsigned int GlobalOrdinal;

@@ -40,12 +40,12 @@ InputParameters validParams<InternalSideIndicator>()
 }
 
 
-InternalSideIndicator::InternalSideIndicator(const std::string & name, InputParameters parameters) :
-    Indicator(name, parameters),
+InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters) :
+    Indicator(parameters),
     NeighborCoupleable(parameters, false, false),
     ScalarCoupleable(parameters),
     NeighborMooseVariableInterface(parameters, false),
-    _field_var(_sys.getVariable(_tid, name)),
+    _field_var(_sys.getVariable(_tid, name())),
 
     _current_elem(_assembly.elem()),
     _neighbor_elem(_assembly.neighbor()),

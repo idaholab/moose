@@ -31,8 +31,8 @@ InputParameters validParams<ValueThresholdMarker>()
 }
 
 
-ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParameters parameters) :
-    QuadraturePointMarker(name, parameters),
+ValueThresholdMarker::ValueThresholdMarker(const InputParameters & parameters) :
+    QuadraturePointMarker(parameters),
     _coarsen_set(parameters.isParamValid("coarsen")),
     _coarsen(parameters.get<Real>("coarsen")),
     _refine_set(parameters.isParamValid("refine")),

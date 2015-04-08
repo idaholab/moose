@@ -25,8 +25,8 @@ InputParameters validParams<PiecewiseMultilinear>()
 }
 
 
-PiecewiseMultilinear::PiecewiseMultilinear(const std::string & name, InputParameters parameters) :
-    Function(name, parameters)
+PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters) :
+    Function(parameters)
 {
   _gridded_data = new GriddedData(getParam<std::string>("data_file"));
   _dim = _gridded_data->getDim();

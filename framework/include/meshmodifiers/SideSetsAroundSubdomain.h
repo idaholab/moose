@@ -34,7 +34,7 @@ class SideSetsAroundSubdomain :
   public BlockRestrictable
 {
 public:
-  SideSetsAroundSubdomain(const std::string & name, InputParameters parameters);
+  SideSetsAroundSubdomain(const InputParameters & parameters);
 
   virtual ~SideSetsAroundSubdomain();
 

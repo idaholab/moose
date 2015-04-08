@@ -27,7 +27,7 @@ InputParameters validParams<PointValueSampler>();
 class PointValueSampler : public PointSamplerBase
 {
 public:
-  PointValueSampler(const std::string & name, InputParameters parameters);
+  PointValueSampler(const InputParameters & parameters);
 
   virtual ~PointValueSampler() {}
 };

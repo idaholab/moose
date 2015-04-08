@@ -26,7 +26,7 @@ InputParameters validParams<AddIndicatorAction>();
 class AddIndicatorAction : public MooseObjectAction
 {
 public:
-  AddIndicatorAction(const std::string & name, InputParameters params);
+  AddIndicatorAction(InputParameters params);
 
   virtual void act();
 

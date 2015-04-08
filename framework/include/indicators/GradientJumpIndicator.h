@@ -26,7 +26,7 @@ class GradientJumpIndicator :
   public JumpIndicator
 {
 public:
-  GradientJumpIndicator(const std::string & name, InputParameters parameters);
+  GradientJumpIndicator(const InputParameters & parameters);
   virtual ~GradientJumpIndicator(){};
 
 protected:

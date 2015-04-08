@@ -36,7 +36,7 @@ public:
   /**
    * Class constructor
    */
-  GMVOutput(const std::string & name, InputParameters);
+  GMVOutput(const InputParameters & parameters);
 
 protected:
 

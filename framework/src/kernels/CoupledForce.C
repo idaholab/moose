@@ -24,8 +24,8 @@ InputParameters validParams<CoupledForce>()
   return params;
 }
 
-CoupledForce::CoupledForce(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+CoupledForce::CoupledForce(const InputParameters & parameters) :
+    Kernel(parameters),
     _v_var(coupled("v")),
     _v(coupledValue("v"))
 {

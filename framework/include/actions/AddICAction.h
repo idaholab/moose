@@ -26,7 +26,7 @@ InputParameters validParams<AddICAction>();
 class AddICAction : public MooseObjectAction
 {
 public:
-  AddICAction(const std::string & name, InputParameters params);
+  AddICAction(InputParameters params);
 
   virtual void act();
 };

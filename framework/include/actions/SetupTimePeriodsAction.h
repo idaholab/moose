@@ -26,7 +26,7 @@ InputParameters validParams<SetupTimePeriodsAction>();
 class SetupTimePeriodsAction : public Action
 {
 public:
-  SetupTimePeriodsAction(const std::string & name, InputParameters params);
+  SetupTimePeriodsAction(InputParameters params);
 
   virtual void act();
 };

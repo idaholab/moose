@@ -21,8 +21,8 @@ InputParameters validParams<ElementL2Norm>()
   return params;
 }
 
-ElementL2Norm::ElementL2Norm(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(name, parameters)
+ElementL2Norm::ElementL2Norm(const InputParameters & parameters) :
+    ElementIntegralVariablePostprocessor(parameters)
 {
 }
 

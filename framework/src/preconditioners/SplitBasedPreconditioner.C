@@ -35,8 +35,8 @@ InputParameters validParams<SplitBasedPreconditioner>()
   return params;
 }
 
-SplitBasedPreconditioner::SplitBasedPreconditioner (const std::string & name, InputParameters params) :
-    MoosePreconditioner(name, params),
+SplitBasedPreconditioner::SplitBasedPreconditioner (const InputParameters & params) :
+    MoosePreconditioner(params),
     _nl(_fe_problem.getNonlinearSystem())
 {
   unsigned int n_vars        = _nl.nVariables();

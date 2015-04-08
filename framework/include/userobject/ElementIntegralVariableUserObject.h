@@ -35,7 +35,7 @@ class ElementIntegralVariableUserObject :
   public MooseVariableInterface
 {
 public:
-  ElementIntegralVariableUserObject(const std::string & name, InputParameters parameters);
+  ElementIntegralVariableUserObject(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral();

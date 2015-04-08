@@ -28,7 +28,7 @@ InputParameters validParams<NodalL2Norm>();
 class NodalL2Norm : public NodalVariablePostprocessor
 {
 public:
-  NodalL2Norm(const std::string & name, InputParameters parameters);
+  NodalL2Norm(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

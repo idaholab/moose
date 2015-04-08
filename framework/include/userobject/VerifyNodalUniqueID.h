@@ -27,7 +27,7 @@ InputParameters validParams<VerifyNodalUniqueID>();
 class VerifyNodalUniqueID : public NodalUserObject
 {
 public:
-  VerifyNodalUniqueID(const std::string & name, InputParameters parameters);
+  VerifyNodalUniqueID(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

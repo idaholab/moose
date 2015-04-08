@@ -34,17 +34,18 @@ InputParameters validParams<Action>()
   return params;
 }
 
-Action::Action(const std::string & name, InputParameters params) :
-    ConsoleStreamInterface(*params.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
-    _name(name),
-    _pars(params),
+Action::Action(InputParameters parameters) :
+    ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
+    _pars(parameters),
+    _name(getParam<std::string>("name")),
+    _short_name(MooseUtils::shortName(_name)),
     _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
     _action_type(getParam<std::string>("action_type")),
-    _app(*params.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
+    _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _factory(_app.getFactory()),
     _action_factory(_app.getActionFactory()),
-    _specific_task_name(params.isParamValid("task") ? getParam<std::string>("task") : ""),
-    _awh(*params.getCheckedPointerParam<ActionWarehouse *>("awh")),
+    _specific_task_name(parameters.isParamValid("task") ? getParam<std::string>("task") : ""),
+    _awh(*parameters.getCheckedPointerParam<ActionWarehouse *>("awh")),
     _current_task(_awh.getCurrentTaskName()),
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
@@ -56,7 +57,7 @@ Action::Action(const std::string & name, InputParameters params) :
 std::string
 Action::getShortName() const
 {
-  return _name.substr(_name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') + 1 : 0);
+  return _short_name;
 }
 
 std::string

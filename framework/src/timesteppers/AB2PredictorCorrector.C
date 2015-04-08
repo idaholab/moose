@@ -41,8 +41,8 @@ InputParameters validParams<AB2PredictorCorrector>()
   return params;
 }
 
-AB2PredictorCorrector::AB2PredictorCorrector(const std::string & name, InputParameters parameters) :
-    TimeStepper(name, parameters),
+AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters) :
+    TimeStepper(parameters),
     _u1(_fe_problem.getNonlinearSystem().addVector("u1", true, GHOSTED)),
     _aux1(_fe_problem.getAuxiliarySystem().addVector("aux1", true, GHOSTED)),
     _dt_full(declareRestartableData<Real>("dt_full", 0)),

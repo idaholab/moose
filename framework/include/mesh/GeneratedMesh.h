@@ -31,7 +31,7 @@ InputParameters validParams<GeneratedMesh>();
 class GeneratedMesh : public MooseMesh
 {
 public:
-  GeneratedMesh(const std::string & name, InputParameters parameters);
+  GeneratedMesh(const InputParameters & parameters);
   GeneratedMesh(const GeneratedMesh & other_mesh);
   virtual ~GeneratedMesh();
 

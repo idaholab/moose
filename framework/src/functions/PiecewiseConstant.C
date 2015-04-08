@@ -43,8 +43,8 @@ PiecewiseConstant::getDirection(const std::string & direction)
 }
 
 
-PiecewiseConstant::PiecewiseConstant(const std::string & name, InputParameters parameters) :
-  Piecewise(name, parameters),
+PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters) :
+  Piecewise(parameters),
   _direction(getDirection(getParam<MooseEnum>("direction")))
 {
 }

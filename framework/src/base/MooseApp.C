@@ -98,6 +98,8 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _global_time_offset(0.0),
     _alternate_output_warehouse(NULL),
     _output_warehouse(new OutputWarehouse),
+    _alternate_input_parameter_warehouse(NULL),
+    _input_parameter_warehouse(new InputParameterWarehouse),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
@@ -134,6 +136,7 @@ MooseApp::~MooseApp()
 
   // MUST be deleted before _comm is destroyed!
   delete _output_warehouse;
+  delete _input_parameter_warehouse;
 }
 
 void
@@ -258,6 +261,7 @@ MooseApp::getOutputFileBase()
 void
 MooseApp::runInputFile()
 {
+
   std::string mesh_file_name;
   if (isParamValid("mesh_only"))
   {
@@ -437,4 +441,13 @@ MooseApp::getOutputWarehouse()
     return *_output_warehouse;
   else
     return *_alternate_output_warehouse;
+}
+
+InputParameterWarehouse &
+MooseApp::getInputParameterWarehouse()
+{
+  if (_alternate_input_parameter_warehouse == NULL)
+    return *_input_parameter_warehouse;
+  else
+    return *_alternate_input_parameter_warehouse;
 }

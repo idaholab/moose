@@ -28,7 +28,7 @@ InputParameters validParams<MultiAppProjectionTransfer>();
 class MultiAppProjectionTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppProjectionTransfer(const std::string & name, InputParameters parameters);
+  MultiAppProjectionTransfer(const InputParameters & parameters);
   virtual ~MultiAppProjectionTransfer();
 
   virtual void execute();

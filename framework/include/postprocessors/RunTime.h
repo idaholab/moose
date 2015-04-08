@@ -26,7 +26,7 @@ InputParameters validParams<RunTime>();
 class RunTime : public GeneralPostprocessor
 {
 public:
-  RunTime(const std::string & name, InputParameters parameters);
+  RunTime(const InputParameters & parameters);
 
   virtual void initialize() {}
   virtual void execute() {}

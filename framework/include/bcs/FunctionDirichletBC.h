@@ -31,7 +31,7 @@ InputParameters validParams<FunctionDirichletBC>();
 class FunctionDirichletBC : public NodalBC
 {
 public:
-  FunctionDirichletBC(const std::string & name, InputParameters parameters);
+  FunctionDirichletBC(const InputParameters & parameters);
 
 protected:
   /**

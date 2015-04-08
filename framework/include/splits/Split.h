@@ -24,7 +24,7 @@ class Split :
   public Restartable
 {
  public:
-  Split(const std::string& name, InputParameters params);
+  Split(const InputParameters & params);
   virtual void setup(const std::string& prefix = "-");
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)

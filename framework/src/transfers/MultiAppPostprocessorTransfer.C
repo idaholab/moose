@@ -33,8 +33,8 @@ InputParameters validParams<MultiAppPostprocessorTransfer>()
   return params;
 }
 
-MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _from_pp_name(getParam<PostprocessorName>("from_postprocessor")),
     _to_pp_name(getParam<PostprocessorName>("to_postprocessor")),
     _reduction_type(getParam<MooseEnum>("reduction_type"))

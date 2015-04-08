@@ -24,8 +24,8 @@ InputParameters validParams<NodalNormalsEvaluator>()
   return params;
 }
 
-NodalNormalsEvaluator::NodalNormalsEvaluator(const std::string & name, InputParameters parameters) :
-    NodalUserObject(name, parameters),
+NodalNormalsEvaluator::NodalNormalsEvaluator(const InputParameters & parameters) :
+    NodalUserObject(parameters),
     _aux(_fe_problem.getAuxiliarySystem())
 {
 }

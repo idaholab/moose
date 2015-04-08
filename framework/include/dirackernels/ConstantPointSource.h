@@ -30,7 +30,7 @@ InputParameters validParams<ConstantPointSource>();
 class ConstantPointSource : public DiracKernel
 {
 public:
-  ConstantPointSource(const std::string & name, InputParameters parameters);
+  ConstantPointSource(const InputParameters & parameters);
 
   virtual void addPoints();
   virtual Real computeQpResidual();

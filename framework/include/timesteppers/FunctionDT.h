@@ -26,7 +26,7 @@ InputParameters validParams<FunctionDT>();
 class FunctionDT : public TimeStepper
 {
 public:
-  FunctionDT(const std::string & name, InputParameters parameters);
+  FunctionDT(const InputParameters & parameters);
 
   virtual void init();
 

@@ -26,7 +26,7 @@ InputParameters validParams<SamplerBase>()
   return params;
 }
 
-SamplerBase::SamplerBase(const std::string & /*name*/, InputParameters parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm) :
+SamplerBase::SamplerBase(const InputParameters & parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm) :
     _sampler_params(parameters),
     _vpp(vpp),
     _comm(comm),

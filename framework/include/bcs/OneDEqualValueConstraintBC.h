@@ -31,7 +31,7 @@ InputParameters validParams<OneDEqualValueConstraintBC>();
 class OneDEqualValueConstraintBC : public IntegratedBC
 {
 public:
-  OneDEqualValueConstraintBC(const std::string & name, InputParameters parameters);
+  OneDEqualValueConstraintBC(const InputParameters & parameters);
   virtual ~OneDEqualValueConstraintBC();
 
 protected:

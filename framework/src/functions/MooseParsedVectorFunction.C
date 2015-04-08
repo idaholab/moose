@@ -25,9 +25,9 @@ InputParameters validParams<MooseParsedVectorFunction>()
   return params;
 }
 
-MooseParsedVectorFunction::MooseParsedVectorFunction(const std::string & name, InputParameters parameters) :
-    Function(name, parameters),
-    MooseParsedFunctionBase(name, parameters),
+MooseParsedVectorFunction::MooseParsedVectorFunction(const InputParameters & parameters) :
+    Function(parameters),
+    MooseParsedFunctionBase(parameters),
     _vector_value(verifyFunction(std::string("{") + getParam<std::string>("value_x") + "}{" +
                                  getParam<std::string>("value_y") + "}{" +
                                  getParam<std::string>("value_z") + "}")),

@@ -25,8 +25,8 @@ InputParameters validParams<PointValue>()
   return params;
 }
 
-PointValue::PointValue(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+PointValue::PointValue(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
     _mesh(_subproblem.mesh().getMesh()),
@@ -47,7 +47,7 @@ PointValue::execute()
 
   // Error if the element cannot be located
   if (!elem)
-    mooseError("No element located at " << _point_vec[0] << " in PointValue Postprocessor named: " << _name);
+    mooseError("No element located at " << _point_vec[0] << " in PointValue Postprocessor named: " << name());
 
   // Store the element id and processor id that owns the located element
   _elem_id = elem->id();

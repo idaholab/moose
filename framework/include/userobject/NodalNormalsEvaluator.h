@@ -29,7 +29,7 @@ InputParameters validParams<NodalNormalsEvaluator>();
 class NodalNormalsEvaluator : public NodalUserObject
 {
 public:
-  NodalNormalsEvaluator(const std::string & name, InputParameters parameters);
+  NodalNormalsEvaluator(const InputParameters & parameters);
   virtual ~NodalNormalsEvaluator();
 
   virtual void initialize();

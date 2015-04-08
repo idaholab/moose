@@ -25,7 +25,7 @@ InputParameters validParams<MeshExtruder>();
 class MeshExtruder : public MeshModifier
 {
 public:
-  MeshExtruder(const std::string & name, InputParameters parameters);
+  MeshExtruder(const InputParameters & parameters);
 
   virtual ~MeshExtruder();
 

@@ -33,7 +33,7 @@ class TransientMultiApp :
   public MultiApp
 {
 public:
-  TransientMultiApp(const std::string & name, InputParameters parameters);
+  TransientMultiApp(const InputParameters & parameters);
 
   virtual ~TransientMultiApp();
 

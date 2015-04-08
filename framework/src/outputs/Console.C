@@ -108,8 +108,8 @@ InputParameters validParams<Console>()
   return params;
 }
 
-Console::Console(const std::string & name, InputParameters parameters) :
-    TableOutput(name, parameters),
+Console::Console(const InputParameters & parameters) :
+    TableOutput(parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _scientific_time(getParam<bool>("scientific_time")),
@@ -241,10 +241,7 @@ Console::initialSetup()
 
   // Enable verbose output if Executioner has it enabled
   if (_app.getExecutioner()->isParamValid("verbose") && _app.getExecutioner()->getParam<bool>("verbose"))
-  {
     _verbose = true;
-    _pars.set<bool>("verbose") = true;
-  }
 
   // Display a message to indicate the application is running (useful for MultiApps)
   if (_problem_ptr->hasMultiApps() || _app.getOutputWarehouse().multiappLevel() > 0)

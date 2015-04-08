@@ -29,7 +29,7 @@ class InternalSidePostprocessor :
   public Postprocessor
 {
 public:
-  InternalSidePostprocessor(const std::string & name, InputParameters parameters);
+  InternalSidePostprocessor(const InputParameters & parameters);
 
   /**
    * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!

@@ -30,8 +30,8 @@ InputParameters validParams<Kernel>()
   return params;
 }
 
-Kernel::Kernel(const std::string & name, InputParameters parameters) :
-    KernelBase(name, parameters),
+Kernel::Kernel(const InputParameters & parameters) :
+    KernelBase(parameters),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _u_dot(_var.uDot()),

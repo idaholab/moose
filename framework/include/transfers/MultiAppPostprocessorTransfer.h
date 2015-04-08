@@ -30,7 +30,7 @@ class MultiAppPostprocessorTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppPostprocessorTransfer(const std::string & name, InputParameters parameters);
+  MultiAppPostprocessorTransfer(const InputParameters & parameters);
   virtual ~MultiAppPostprocessorTransfer() {}
 
   virtual void execute();

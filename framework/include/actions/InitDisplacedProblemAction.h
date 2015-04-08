@@ -28,7 +28,7 @@ InputParameters validParams<InitDisplacedProblemAction>();
 class InitDisplacedProblemAction : public Action
 {
 public:
-  InitDisplacedProblemAction(const std::string & name, InputParameters parameters);
+  InitDisplacedProblemAction(InputParameters parameters);
   virtual ~InitDisplacedProblemAction();
 
   virtual void act();

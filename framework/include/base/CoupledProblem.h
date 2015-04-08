@@ -25,7 +25,7 @@ InputParameters validParams<CoupledProblem>();
 class CoupledProblem : public Problem
 {
 public:
-  CoupledProblem(const std::string & name, InputParameters params);
+  CoupledProblem(const InputParameters & params);
   virtual ~CoupledProblem();
 
   virtual void init();

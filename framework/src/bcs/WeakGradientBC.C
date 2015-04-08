@@ -21,8 +21,8 @@ InputParameters validParams<WeakGradientBC>()
   return params;
 }
 
-WeakGradientBC::WeakGradientBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters)
+WeakGradientBC::WeakGradientBC(const InputParameters & parameters) :
+    IntegratedBC(parameters)
 {}
 
 Real

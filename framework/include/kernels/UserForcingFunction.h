@@ -33,7 +33,7 @@ class UserForcingFunction : public Kernel
 {
 public:
 
-  UserForcingFunction(const std::string & name, InputParameters parameters);
+  UserForcingFunction(const InputParameters & parameters);
 
 protected:
   /**

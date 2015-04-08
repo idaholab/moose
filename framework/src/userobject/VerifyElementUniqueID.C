@@ -24,8 +24,8 @@ InputParameters validParams<VerifyElementUniqueID>()
   return params;
 }
 
-VerifyElementUniqueID::VerifyElementUniqueID(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters)
+VerifyElementUniqueID::VerifyElementUniqueID(const InputParameters & parameters) :
+    ElementUserObject(parameters)
 {}
 
 // This object can't test every possible scenario.  For instance, it can't detect recycled ids

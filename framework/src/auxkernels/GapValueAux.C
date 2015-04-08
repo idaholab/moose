@@ -38,8 +38,8 @@ InputParameters validParams<GapValueAux>()
   return params;
 }
 
-GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+GapValueAux::GapValueAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _penetration_locator(_nodal ?  getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))) : getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
     _moose_var(_subproblem.getVariable(_tid, getParam<VariableName>("paired_variable"))),
     _serialized_solution(_moose_var.sys().currentSolution()),

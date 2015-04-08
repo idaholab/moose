@@ -27,7 +27,7 @@ InputParameters validParams<NodalProxyMaxValue>();
 class NodalProxyMaxValue : public NodalVariablePostprocessor
 {
 public:
-  NodalProxyMaxValue(const std::string & name, InputParameters parameters);
+  NodalProxyMaxValue(const InputParameters & parameters);
 
   virtual void initialize();
   virtual Real computeValue();

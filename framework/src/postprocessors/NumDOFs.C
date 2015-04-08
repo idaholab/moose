@@ -22,8 +22,8 @@ InputParameters validParams<NumDOFs>()
   return params;
 }
 
-NumDOFs::NumDOFs(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+NumDOFs::NumDOFs(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters)
 {}
 
 Real

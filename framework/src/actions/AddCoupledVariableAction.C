@@ -26,8 +26,8 @@ InputParameters validParams<AddCoupledVariableAction>()
   return params;
 }
 
-AddCoupledVariableAction::AddCoupledVariableAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
+AddCoupledVariableAction::AddCoupledVariableAction(InputParameters parameters) :
+    Action(parameters),
     _from(getParam<std::string>("from")),
     _var_name(getParam<std::string>("var_name"))
 {

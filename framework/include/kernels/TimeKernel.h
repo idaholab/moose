@@ -30,7 +30,7 @@ InputParameters validParams<TimeKernel>();
 class TimeKernel : public Kernel
 {
 public:
-  TimeKernel(const std::string & name, InputParameters parameters);
+  TimeKernel(const InputParameters & parameters);
   virtual ~TimeKernel();
 
   virtual void computeResidual();

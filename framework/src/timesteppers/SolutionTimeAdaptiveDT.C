@@ -28,8 +28,8 @@ InputParameters validParams<SolutionTimeAdaptiveDT>()
   return params;
 }
 
-SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const std::string & name, InputParameters parameters) :
-    TimeStepper(name, parameters),
+SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const InputParameters & parameters) :
+    TimeStepper(parameters),
     _direction(getParam<int>("initial_direction")),
     _percent_change(getParam<Real>("percent_change")),
     _older_sol_time_vs_dt(std::numeric_limits<Real>::max()),

@@ -41,7 +41,7 @@ public:
    *
    * @see initAvailable init seperate
    */
-  Gnuplot(const std::string & name, InputParameters & parameters);
+  Gnuplot(const InputParameters & parameters);
 
   /**
    * Output the table to a *.csv file

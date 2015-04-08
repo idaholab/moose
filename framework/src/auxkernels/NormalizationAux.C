@@ -24,8 +24,8 @@ InputParameters validParams<NormalizationAux>()
   return params;
 }
 
-NormalizationAux::NormalizationAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+NormalizationAux::NormalizationAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _src(coupledValue("source_variable")),
     _pp_on_source(getPostprocessorValue("normalization")),
     _normal_factor(getParam<Real>("normal_factor"))

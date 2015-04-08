@@ -26,8 +26,8 @@ InputParameters validParams<ErrorFractionMarker>()
 }
 
 
-ErrorFractionMarker::ErrorFractionMarker(const std::string & name, InputParameters parameters) :
-    IndicatorMarker(name, parameters),
+ErrorFractionMarker::ErrorFractionMarker(const InputParameters & parameters) :
+    IndicatorMarker(parameters),
     _coarsen(parameters.get<Real>("coarsen")),
     _refine(parameters.get<Real>("refine"))
 {

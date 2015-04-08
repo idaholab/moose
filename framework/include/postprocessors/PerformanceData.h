@@ -26,7 +26,7 @@ InputParameters validParams<PerformanceData>();
 class PerformanceData : public GeneralPostprocessor
 {
 public:
-  PerformanceData(const std::string & name, InputParameters parameters);
+  PerformanceData(const InputParameters & parameters);
 
   virtual void initialize() {}
   virtual void execute() {}

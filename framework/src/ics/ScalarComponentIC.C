@@ -24,12 +24,12 @@ InputParameters validParams<ScalarComponentIC>()
   return params;
 }
 
-ScalarComponentIC::ScalarComponentIC(const std::string & name, InputParameters parameters) :
-    ScalarInitialCondition(name, parameters),
+ScalarComponentIC::ScalarComponentIC(const InputParameters & parameters) :
+    ScalarInitialCondition(parameters),
     _initial_values(getParam<std::vector<Real> >("values"))
 {
   if (_initial_values.size() < _var.order())
-    mooseError("The initial vector values size given to the scalar variable '" << _name << "' has wrong size." );
+    mooseError("The initial vector values size given to the scalar variable '" << name() << "' has wrong size." );
 }
 
 ScalarComponentIC::~ScalarComponentIC()

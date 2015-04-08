@@ -23,8 +23,8 @@ InputParameters validParams<DebugResidualAux>()
   return params;
 }
 
-DebugResidualAux::DebugResidualAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+DebugResidualAux::DebugResidualAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _debug_var(_nl_sys.getVariable(_tid, getParam<NonlinearVariableName>("debug_variable"))),
     _residual_copy(_nl_sys.residualGhosted())
 {

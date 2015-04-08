@@ -22,8 +22,8 @@ InputParameters validParams<ElementPostprocessor>()
   return params;
 }
 
-ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters),
-    Postprocessor(name, parameters)
+ElementPostprocessor::ElementPostprocessor(const InputParameters & parameters) :
+    ElementUserObject(parameters),
+    Postprocessor(parameters)
 {
 }

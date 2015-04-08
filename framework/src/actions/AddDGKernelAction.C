@@ -21,13 +21,13 @@ InputParameters validParams<AddDGKernelAction>()
   return validParams<MooseObjectAction>();
 }
 
-AddDGKernelAction::AddDGKernelAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddDGKernelAction::AddDGKernelAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddDGKernelAction::act()
 {
-  _problem->addDGKernel(_type, getShortName(), _moose_object_pars);
+  _problem->addDGKernel(_type, _name, _moose_object_pars);
 }

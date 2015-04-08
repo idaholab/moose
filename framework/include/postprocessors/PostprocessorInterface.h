@@ -67,7 +67,7 @@ public:
    *
    * see getPostprocessorValue
    */
-  PostprocessorValue & getPostprocessorValueOld(const std::string & name);
+  const PostprocessorValue & getPostprocessorValueOld(const std::string & name);
 
   /**
    * Retrieve the old value of a Postprocessor
@@ -89,7 +89,7 @@ public:
    *
    * @see hasPostprocessorByName getPostprocessorValue
    */
-  bool hasPostprocessor(const std::string & name);
+  bool hasPostprocessor(const std::string & name) const;
 
   /**
    * Determine if the postprocessor exists

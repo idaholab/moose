@@ -23,8 +23,8 @@ InputParameters validParams<CompositeFunction>()
   return params;
 }
 
-CompositeFunction::CompositeFunction(const std::string & name, InputParameters parameters) :
-  Function(name, parameters),
+CompositeFunction::CompositeFunction(const InputParameters & parameters) :
+  Function(parameters),
   FunctionInterface( parameters ),
   _scale_factor( getParam<Real>("scale_factor") )
 {
@@ -38,7 +38,7 @@ CompositeFunction::CompositeFunction(const std::string & name, InputParameters p
   _f.resize(len);
   for (unsigned i(0); i < len; ++i)
   {
-    if (_name == names[i])
+    if (name() == names[i])
     {
       mooseError( "A composite function must not reference itself" );
     }
@@ -46,7 +46,7 @@ CompositeFunction::CompositeFunction(const std::string & name, InputParameters p
     if (!f)
     {
       std::string msg("Error in composite function ");
-      msg += _name;
+      msg += name();
       msg += ".  Function ";
       msg += names[i];
       msg += " referenced but not found.";

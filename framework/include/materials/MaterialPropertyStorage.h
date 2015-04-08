@@ -157,9 +157,18 @@ public:
    */
   bool hasOlderProperties() const { return _has_older_prop; }
 
+  ///@{
+  /**
+   * Access methods to the stored material property data
+   *
+   */
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props() { return *_props_elem; }
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld() { return *_props_elem_old; }
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder() { return *_props_elem_older; }
+  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props() const { return *_props_elem; }
+  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld() const { return *_props_elem_old; }
+  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder() const { return *_props_elem_older; }
+  ///@}
 
   bool hasProperty(const std::string & prop_name) const;
   unsigned int addProperty(const std::string & prop_name);

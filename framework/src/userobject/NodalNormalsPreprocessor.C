@@ -28,8 +28,8 @@ InputParameters validParams<NodalNormalsPreprocessor>()
   return params;
 }
 
-NodalNormalsPreprocessor::NodalNormalsPreprocessor(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters),
+NodalNormalsPreprocessor::NodalNormalsPreprocessor(const InputParameters & parameters) :
+    ElementUserObject(parameters),
     BoundaryRestrictable(parameters),
     _aux(_fe_problem.getAuxiliarySystem()),
     _fe_type(getParam<Order>("fe_order"), getParam<FEFamily>("fe_family")),

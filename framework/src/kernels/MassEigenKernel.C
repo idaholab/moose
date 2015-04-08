@@ -21,8 +21,8 @@ InputParameters validParams<MassEigenKernel>()
   return params;
 }
 
-MassEigenKernel::MassEigenKernel(const std::string & name, InputParameters parameters) :
-    EigenKernel(name,parameters)
+MassEigenKernel::MassEigenKernel(const InputParameters & parameters) :
+    EigenKernel(parameters)
 {
 }
 

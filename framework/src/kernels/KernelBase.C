@@ -43,8 +43,8 @@ InputParameters validParams<KernelBase>()
   return params;
 }
 
-KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+KernelBase::KernelBase(const InputParameters & parameters) :
+    MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
@@ -89,7 +89,7 @@ KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
     if (var->feType() != _var.feType())
-      mooseError("Error in " + _name + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
+      mooseError("Error in " + name() + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
 
     _save_in[i] = var;
     var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
@@ -104,7 +104,7 @@ KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
     if (var->feType() != _var.feType())
-      mooseError("Error in " + _name + ". When saving diagonal Jacobian values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
+      mooseError("Error in " + name() + ". When saving diagonal Jacobian values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
 
     _diag_save_in[i] = var;
     var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);

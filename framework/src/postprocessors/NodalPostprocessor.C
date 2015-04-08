@@ -25,8 +25,8 @@ InputParameters validParams<NodalPostprocessor>()
   return params;
 }
 
-NodalPostprocessor::NodalPostprocessor(const std::string & name, InputParameters parameters) :
-    NodalUserObject(name, parameters),
-    Postprocessor(name, parameters)
+NodalPostprocessor::NodalPostprocessor(const InputParameters & parameters) :
+    NodalUserObject(parameters),
+    Postprocessor(parameters)
 {
 }

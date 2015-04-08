@@ -53,8 +53,8 @@ InputParameters validParams<SetupMeshAction>()
   return params;
 }
 
-SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+SetupMeshAction::SetupMeshAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 

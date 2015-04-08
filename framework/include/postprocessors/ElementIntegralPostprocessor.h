@@ -32,7 +32,7 @@ InputParameters validParams<ElementIntegralPostprocessor>();
 class ElementIntegralPostprocessor : public ElementPostprocessor
 {
 public:
-  ElementIntegralPostprocessor(const std::string & name, InputParameters parameters);
+  ElementIntegralPostprocessor(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

@@ -28,7 +28,7 @@ InputParameters validParams<DebugResidualAux>();
 class DebugResidualAux : public AuxKernel
 {
 public:
-  DebugResidualAux(const std::string & name, InputParameters parameters);
+  DebugResidualAux(const InputParameters & parameters);
   virtual ~DebugResidualAux();
 
 protected:

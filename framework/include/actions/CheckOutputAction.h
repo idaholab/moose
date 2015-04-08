@@ -36,7 +36,7 @@ public:
    * @param name Name of this action
    * @param params Input parameters for this object
    */
-  CheckOutputAction(const std::string & name, InputParameters params);
+  CheckOutputAction(InputParameters params);
 
   /**
    * Class destructor
@@ -70,11 +70,6 @@ private:
    * Performs PerfLog output settings
    */
   void checkPerfLogOutput();
-
-  /**
-   * Checks for --output-input command line parameter
-   */
-  void checkInputOutput();
 };
 
 #endif //CHECKOUTPUTACTION_H

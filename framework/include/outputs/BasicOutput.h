@@ -42,8 +42,7 @@ public:
    *
    * @see initAvailable init separate
    */
-  BasicOutput(const std::string & name, InputParameters & parameters) :
-      OutputBase(name, parameters){}
+  BasicOutput(const InputParameters & parameters) : OutputBase(parameters){}
 
 protected:
 

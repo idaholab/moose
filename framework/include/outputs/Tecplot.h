@@ -35,7 +35,7 @@ public:
   /**
    * Class constructor
    */
-  Tecplot(const std::string & name, InputParameters);
+  Tecplot(const InputParameters & parameters);
 
 protected:
 

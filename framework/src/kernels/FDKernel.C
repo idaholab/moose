@@ -29,8 +29,8 @@ InputParameters validParams<FDKernel>()
   return params;
 }
 
-FDKernel::FDKernel(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+FDKernel::FDKernel(const InputParameters & parameters) :
+    Kernel(parameters)
 {
   _scale = 1.490116119384766e-08; // HACK: sqrt of the machine epsilon for double precision
 #ifdef LIBMESH_HAVE_PETSC

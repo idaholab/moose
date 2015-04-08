@@ -48,8 +48,8 @@ InputParameters validParams<GeneratedMesh>()
   return params;
 }
 
-GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameters) :
-    MooseMesh(name, parameters),
+GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
+    MooseMesh(parameters),
     _dim(getParam<MooseEnum>("dim")),
     _nx(getParam<int>("nx")),
     _ny(getParam<int>("ny")),

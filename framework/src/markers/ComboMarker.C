@@ -23,8 +23,8 @@ InputParameters validParams<ComboMarker>()
 }
 
 
-ComboMarker::ComboMarker(const std::string & name, InputParameters parameters) :
-    Marker(name, parameters),
+ComboMarker::ComboMarker(const InputParameters & parameters) :
+    Marker(parameters),
     _names(parameters.get<std::vector<MarkerName> >("markers"))
 {
   for (unsigned int i=0; i<_names.size(); i++)

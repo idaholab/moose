@@ -21,13 +21,13 @@ InputParameters validParams<AddDamperAction>()
    return validParams<MooseObjectAction>();
 }
 
-AddDamperAction::AddDamperAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddDamperAction::AddDamperAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddDamperAction::act()
 {
-  _problem->addDamper(_type, getShortName(), _moose_object_pars);
+  _problem->addDamper(_type, _name, _moose_object_pars);
 }

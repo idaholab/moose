@@ -22,8 +22,8 @@ InputParameters validParams<SideFluxIntegral>()
   return params;
 }
 
-SideFluxIntegral::SideFluxIntegral(const std::string & name, InputParameters parameters) :
-    SideIntegralVariablePostprocessor(name, parameters),
+SideFluxIntegral::SideFluxIntegral(const InputParameters & parameters) :
+    SideIntegralVariablePostprocessor(parameters),
     _diffusivity(parameters.get<std::string>("diffusivity")),
     _diffusion_coef(getMaterialProperty<Real>(_diffusivity))
 {}

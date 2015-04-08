@@ -33,7 +33,7 @@ class TimeStepper :
   public Restartable
 {
 public:
-  TimeStepper(const std::string & name, InputParameters parameters);
+  TimeStepper(const InputParameters & parameters);
   virtual ~TimeStepper();
 
   /**

@@ -31,8 +31,8 @@ InputParameters validParams<DGFunctionDiffusionDirichletBC>()
   return params;
 }
 
-DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _func(getFunction("function")),
     _epsilon(getParam<Real>("epsilon")),
     _sigma(getParam<Real>("sigma"))

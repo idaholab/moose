@@ -24,8 +24,8 @@ InputParameters validParams<SideUserObject>()
   return params;
 }
 
-SideUserObject::SideUserObject(const std::string & name, InputParameters parameters) :
-    UserObject(name, parameters),
+SideUserObject::SideUserObject(const InputParameters & parameters) :
+    UserObject(parameters),
     BoundaryRestrictable(parameters),
     MaterialPropertyInterface(parameters, boundaryIDs()),
     Coupleable(parameters, false),

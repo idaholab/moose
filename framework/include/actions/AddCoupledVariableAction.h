@@ -29,7 +29,7 @@ InputParameters validParams<AddCoupledVariableAction>();
 class AddCoupledVariableAction : public Action
 {
 public:
-  AddCoupledVariableAction(const std::string & name, InputParameters parameters);
+  AddCoupledVariableAction(InputParameters parameters);
   virtual ~AddCoupledVariableAction();
 
   virtual void act();

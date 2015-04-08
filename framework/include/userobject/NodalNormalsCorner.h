@@ -29,7 +29,7 @@ InputParameters validParams<NodalNormalsCorner>();
 class NodalNormalsCorner : public SideUserObject
 {
 public:
-  NodalNormalsCorner(const std::string & name, InputParameters parameters);
+  NodalNormalsCorner(const InputParameters & parameters);
   virtual ~NodalNormalsCorner();
 
   virtual void initialize();

@@ -28,7 +28,7 @@ InputParameters validParams<SingleMatrixPreconditioner>();
 class SingleMatrixPreconditioner : public MoosePreconditioner
 {
 public:
-  SingleMatrixPreconditioner(const std::string & name, InputParameters params);
+  SingleMatrixPreconditioner(const InputParameters & params);
   virtual ~SingleMatrixPreconditioner();
 };
 

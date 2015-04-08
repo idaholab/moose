@@ -43,7 +43,7 @@ public:
   /**
    * Class constructor
    */
-  AddOutputAction(const std::string & name, InputParameters params);
+  AddOutputAction(InputParameters params);
 
   /**
    * Creates the actual output object

@@ -21,8 +21,8 @@ InputParameters validParams<SideFluxAverage>()
   return params;
 }
 
-SideFluxAverage::SideFluxAverage(const std::string & name, InputParameters parameters) :
-    SideFluxIntegral(name, parameters),
+SideFluxAverage::SideFluxAverage(const InputParameters & parameters) :
+    SideFluxIntegral(parameters),
     _volume(0)
 {}
 

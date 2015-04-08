@@ -27,7 +27,7 @@ template<> InputParameters validParams<ConstantFunction>();
 class ConstantFunction : public Function
 {
 public:
-  ConstantFunction(const std::string & name, InputParameters parameters);
+  ConstantFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p);
 

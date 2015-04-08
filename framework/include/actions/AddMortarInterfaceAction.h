@@ -28,7 +28,7 @@ InputParameters validParams<AddMortarInterfaceAction>();
 class AddMortarInterfaceAction : public Action
 {
 public:
-  AddMortarInterfaceAction(const std::string & name, InputParameters parameters);
+  AddMortarInterfaceAction(InputParameters parameters);
   virtual ~AddMortarInterfaceAction();
 
   virtual void act();

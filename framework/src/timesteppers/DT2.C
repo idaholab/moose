@@ -35,8 +35,8 @@ InputParameters validParams<DT2>()
   return params;
 }
 
-DT2::DT2(const std::string & name, InputParameters parameters) :
-    TimeStepper(name, parameters),
+DT2::DT2(const InputParameters & parameters) :
+    TimeStepper(parameters),
     _u_diff(NULL),
     _u1(NULL),
     _u2(NULL),

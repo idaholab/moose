@@ -28,7 +28,7 @@ InputParameters validParams<AddFEProblemAction>();
 class AddFEProblemAction : public Action
 {
 public:
-  AddFEProblemAction(const std::string & name, InputParameters parameters);
+  AddFEProblemAction(InputParameters parameters);
   virtual ~AddFEProblemAction();
 
   virtual void act();

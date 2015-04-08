@@ -23,7 +23,7 @@ InputParameters validParams<MeshChangedInterface>()
   return params;
 }
 
-MeshChangedInterface::MeshChangedInterface(InputParameters & params) :
+MeshChangedInterface::MeshChangedInterface(const InputParameters & params) :
     _mci_feproblem(*params.get<FEProblem *>("_fe_problem"))
 {
   _mci_feproblem.notifyWhenMeshChanges(this);

@@ -23,8 +23,8 @@ InputParameters validParams<InternalSideUserObject>()
   return params;
 }
 
-InternalSideUserObject::InternalSideUserObject(const std::string & name, InputParameters parameters) :
-    UserObject(name, parameters),
+InternalSideUserObject::InternalSideUserObject(const InputParameters & parameters) :
+    UserObject(parameters),
     BlockRestrictable(parameters),
     MaterialPropertyInterface(parameters, blockIDs()),
     NeighborCoupleable(parameters, false, false),

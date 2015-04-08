@@ -42,7 +42,7 @@ public:
    *
    * @see initAvailable init seperate
    */
-  SolutionHistory(const std::string & name, InputParameters & parameters);
+  SolutionHistory(const InputParameters & parameters);
 
   /**
    * Output the data to *.slh file

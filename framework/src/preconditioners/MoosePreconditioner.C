@@ -30,8 +30,8 @@ InputParameters validParams<MoosePreconditioner>()
 }
 
 
-MoosePreconditioner::MoosePreconditioner(const std::string & name, InputParameters params) :
-    MooseObject(name, params),
+MoosePreconditioner::MoosePreconditioner(const InputParameters & params) :
+    MooseObject(params),
     Restartable(params, "Preconditioners"),
     _fe_problem(*params.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {

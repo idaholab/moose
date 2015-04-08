@@ -31,8 +31,8 @@ InputParameters validParams<AddExtraNodeset>()
   return params;
 }
 
-AddExtraNodeset::AddExtraNodeset(const std::string & name, InputParameters params) :
-    MeshModifier(name, params)
+AddExtraNodeset::AddExtraNodeset(const InputParameters & params) :
+    MeshModifier(params)
 {
 }
 

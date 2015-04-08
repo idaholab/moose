@@ -54,7 +54,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  Executioner(const std::string & name, InputParameters parameters);
+  Executioner(const InputParameters & parameters);
 
   virtual ~Executioner();
 

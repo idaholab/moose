@@ -22,8 +22,8 @@ InputParameters validParams<GradientJumpIndicator>()
 }
 
 
-GradientJumpIndicator::GradientJumpIndicator(const std::string & name, InputParameters parameters) :
-    JumpIndicator(name, parameters)
+GradientJumpIndicator::GradientJumpIndicator(const InputParameters & parameters) :
+    JumpIndicator(parameters)
 {
 }
 

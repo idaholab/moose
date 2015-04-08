@@ -23,8 +23,8 @@ InputParameters validParams<ElementH1SemiError>()
   return params;
 }
 
-ElementH1SemiError::ElementH1SemiError(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(name, parameters),
+ElementH1SemiError::ElementH1SemiError(const InputParameters & parameters) :
+    ElementIntegralVariablePostprocessor(parameters),
     _func(getFunction("function"))
 {
 }

@@ -21,13 +21,13 @@ InputParameters validParams<AddTransferAction>()
   return validParams<MooseObjectAction>();
 }
 
-AddTransferAction::AddTransferAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddTransferAction::AddTransferAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddTransferAction::act()
 {
-  _problem->addTransfer(_type, getShortName(), _moose_object_pars);
+  _problem->addTransfer(_type, _name, _moose_object_pars);
 }

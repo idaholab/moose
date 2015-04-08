@@ -26,7 +26,7 @@ class AnalyticalIndicator :
   public ElementIntegralIndicator
 {
 public:
-  AnalyticalIndicator(const std::string & name, InputParameters parameters);
+  AnalyticalIndicator(const InputParameters & parameters);
   virtual ~AnalyticalIndicator(){};
 
 protected:

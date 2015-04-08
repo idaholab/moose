@@ -34,7 +34,7 @@ class MultiAppDTKInterpolationTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppDTKInterpolationTransfer(const std::string & name, InputParameters parameters);
+  MultiAppDTKInterpolationTransfer(const InputParameters & parameters);
   virtual ~MultiAppDTKInterpolationTransfer() {}
 
   virtual void execute();

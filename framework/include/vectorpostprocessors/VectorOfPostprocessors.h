@@ -37,7 +37,7 @@ public:
     * @param name The name of the object
     * @param parameters The input parameters
     */
-  VectorOfPostprocessors(const std::string & name, InputParameters parameters);
+  VectorOfPostprocessors(const InputParameters & parameters);
 
   /**
    * Destructor

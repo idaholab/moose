@@ -25,7 +25,7 @@
 class PiecewiseLinear : public Piecewise
 {
 public:
-  PiecewiseLinear(const std::string & name, InputParameters parameters);
+  PiecewiseLinear(const InputParameters & parameters);
   virtual ~PiecewiseLinear();
 
   /**

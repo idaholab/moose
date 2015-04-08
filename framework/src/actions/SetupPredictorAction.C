@@ -24,8 +24,8 @@ InputParameters validParams<SetupPredictorAction>()
   return params;
 }
 
-SetupPredictorAction::SetupPredictorAction(const std::string & name, InputParameters parameters) :
-    MooseObjectAction(name, parameters)
+SetupPredictorAction::SetupPredictorAction(InputParameters parameters) :
+    MooseObjectAction(parameters)
 {
 }
 

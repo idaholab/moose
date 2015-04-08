@@ -28,7 +28,7 @@ InputParameters validParams<UniformMarker>();
 class UniformMarker : public Marker
 {
 public:
-  UniformMarker(const std::string & name, InputParameters parameters);
+  UniformMarker(const InputParameters & parameters);
   virtual ~UniformMarker(){};
 
 protected:

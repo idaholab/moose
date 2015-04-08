@@ -26,7 +26,7 @@ InputParameters validParams<AddElementalFieldAction>();
 class AddElementalFieldAction : public Action
 {
 public:
-  AddElementalFieldAction(const std::string & name, InputParameters params);
+  AddElementalFieldAction(InputParameters params);
 
   virtual void act();
 };

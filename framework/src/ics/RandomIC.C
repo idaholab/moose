@@ -27,8 +27,8 @@ InputParameters validParams<RandomIC>()
   return params;
 }
 
-RandomIC::RandomIC(const std::string & name, InputParameters parameters) :
-    InitialCondition(name, parameters),
+RandomIC::RandomIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
     _range(_max - _min)

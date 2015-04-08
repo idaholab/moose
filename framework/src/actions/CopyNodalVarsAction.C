@@ -32,14 +32,15 @@ InputParameters validParams<CopyNodalVarsAction>()
   return params;
 }
 
-CopyNodalVarsAction::CopyNodalVarsAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+CopyNodalVarsAction::CopyNodalVarsAction(InputParameters params) :
+    Action(params)
 {
 }
 
 void
 CopyNodalVarsAction::act()
 {
+
   if (isParamValid("initial_from_file_var"))
   {
     SystemBase * system;

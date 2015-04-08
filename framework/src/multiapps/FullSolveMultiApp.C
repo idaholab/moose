@@ -26,8 +26,8 @@ InputParameters validParams<FullSolveMultiApp>()
 }
 
 
-FullSolveMultiApp::FullSolveMultiApp(const std::string & name, InputParameters parameters):
-    MultiApp(name, parameters),
+FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters):
+    MultiApp(parameters),
     _solved(false)
 {
 }
@@ -77,7 +77,7 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
   if (_solved)
     return;
 
-  _console << "Fully Solving MultiApp " << _name << std::endl;
+  _console << "Fully Solving MultiApp " << name() << std::endl;
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -96,5 +96,5 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
 
   _solved = true;
 
-  _console << "Finished Solving MultiApp " << _name << std::endl;
+  _console << "Finished Solving MultiApp " << name() << std::endl;
 }

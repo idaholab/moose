@@ -31,7 +31,7 @@ class ElementVariablePostprocessor :
   public MooseVariableInterface
 {
 public:
-  ElementVariablePostprocessor(const std::string & name, InputParameters parameters);
+  ElementVariablePostprocessor(const InputParameters & parameters);
 
   /// Just does a loop over "qp" calling computeQpValue()
   virtual void execute();

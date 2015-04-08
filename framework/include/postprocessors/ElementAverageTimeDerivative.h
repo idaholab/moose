@@ -29,7 +29,7 @@ InputParameters validParams<ElementAverageTimeDerivative>();
 class ElementAverageTimeDerivative : public ElementAverageValue
 {
 public:
-  ElementAverageTimeDerivative(const std::string & name, InputParameters parameters);
+  ElementAverageTimeDerivative(const InputParameters & parameters);
 
   virtual Real computeQpIntegral();
 };

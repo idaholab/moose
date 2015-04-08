@@ -84,7 +84,7 @@ class Material :
   public OutputInterface
 {
 public:
-  Material(const std::string & name, InputParameters parameters);
+  Material(const InputParameters & parameters);
 
   virtual ~Material();
 

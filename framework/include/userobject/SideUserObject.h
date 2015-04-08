@@ -44,7 +44,7 @@ class SideUserObject :
   public ZeroInterface
 {
 public:
-  SideUserObject(const std::string & name, InputParameters parameters);
+  SideUserObject(const InputParameters & parameters);
 
   /**
    * This function will get called on each geometric object this postprocessor acts on

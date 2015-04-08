@@ -28,7 +28,7 @@ class BodyForce : public Kernel
 {
 public:
 
-  BodyForce(const std::string & name, InputParameters parameters);
+  BodyForce(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

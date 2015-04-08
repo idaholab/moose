@@ -32,7 +32,7 @@ InputParameters validParams<ElementIntegralUserObject>();
 class ElementIntegralUserObject : public ElementUserObject
 {
 public:
-  ElementIntegralUserObject(const std::string & name, InputParameters parameters);
+  ElementIntegralUserObject(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

@@ -43,7 +43,7 @@ public:
   /**
    * Class constructor.
    */
-  TableOutput(const std::string & name, InputParameters);
+  TableOutput(const InputParameters & parameters);
 
 protected:
 

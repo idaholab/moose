@@ -25,8 +25,8 @@ InputParameters validParams<LayeredAverage>()
   return params;
 }
 
-LayeredAverage::LayeredAverage(const std::string & name, InputParameters parameters) :
-    LayeredIntegral(name, parameters)
+LayeredAverage::LayeredAverage(const InputParameters & parameters) :
+    LayeredIntegral(parameters)
 {
   _layer_volumes.resize(_num_layers);
 }

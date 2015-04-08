@@ -25,8 +25,8 @@ InputParameters validParams<BoundsAux>()
   return params;
 }
 
-BoundsAux::BoundsAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+BoundsAux::BoundsAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _upper_vector(_nl_sys.getVector("upper_bound")),
     _lower_vector(_nl_sys.getVector("lower_bound")),
     _bounded_variable_id(coupled("bounded_variable"))

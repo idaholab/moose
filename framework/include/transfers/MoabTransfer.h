@@ -28,7 +28,7 @@ class MoabTransfer :
   public Transfer
 {
 public:
-  MoabTransfer(const std::string & name, InputParameters parameters);
+  MoabTransfer(const InputParameters & parameters);
   virtual ~MoabTransfer() {}
 
   virtual void execute();

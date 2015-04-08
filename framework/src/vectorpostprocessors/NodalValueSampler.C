@@ -24,9 +24,9 @@ InputParameters validParams<NodalValueSampler>()
   return params;
 }
 
-NodalValueSampler::NodalValueSampler(const std::string & name, InputParameters parameters) :
-    NodalVariableVectorPostprocessor(name, parameters),
-    SamplerBase(name, parameters, this, _communicator)
+NodalValueSampler::NodalValueSampler(const InputParameters & parameters) :
+    NodalVariableVectorPostprocessor(parameters),
+    SamplerBase(parameters, this, _communicator)
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());

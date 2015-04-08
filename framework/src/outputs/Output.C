@@ -79,8 +79,8 @@ Output::getExecuteOptions(std::string default_type)
   return MultiMooseEnum(options, default_type);
 }
 
-Output::Output(const std::string & name, InputParameters & parameters) :
-    MooseObject(name, parameters),
+Output::Output(const InputParameters & parameters) :
+    MooseObject(parameters),
     Restartable(parameters, "Output"),
     MeshChangedInterface(parameters),
     SetupInterface(parameters),

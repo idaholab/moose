@@ -39,7 +39,7 @@ public:
    * @param name The name of the oject
    * @param parameters Th input parameters
    */
-  OrientedSubdomainBoundingBox(const std::string & name, InputParameters parameters);
+  OrientedSubdomainBoundingBox(const InputParameters & parameters);
 
   /**
    * Class destructor

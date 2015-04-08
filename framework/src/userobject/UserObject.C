@@ -33,8 +33,8 @@ InputParameters validParams<UserObject>()
   return params;
 }
 
-UserObject::UserObject(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+UserObject::UserObject(const InputParameters & parameters) :
+    MooseObject(parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
     Restartable(parameters, "UserObjects"),

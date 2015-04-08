@@ -34,8 +34,8 @@ InputParameters validParams<SolutionFunction>()
   return params;
 }
 
-SolutionFunction::SolutionFunction(const std::string & name, InputParameters parameters) :
-    Function(name, parameters),
+SolutionFunction::SolutionFunction(const InputParameters & parameters) :
+    Function(parameters),
     _solution_object_ptr(NULL),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))

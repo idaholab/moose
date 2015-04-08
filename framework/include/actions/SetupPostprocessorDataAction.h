@@ -40,7 +40,7 @@ public:
    * @param name The name of the Postprocessor that this action is acting upon
    * @param params Input parameters for the action
    */
-  SetupPostprocessorDataAction(const std::string & name, InputParameters params);
+  SetupPostprocessorDataAction(InputParameters params);
 
   /**
    * Class destructor

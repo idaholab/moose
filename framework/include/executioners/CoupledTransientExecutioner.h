@@ -27,7 +27,7 @@ InputParameters validParams<CoupledTransientExecutioner>();
 class CoupledTransientExecutioner : public CoupledExecutioner
 {
 public:
-  CoupledTransientExecutioner(const std::string & name, InputParameters parameters);
+  CoupledTransientExecutioner(const InputParameters & parameters);
   virtual ~CoupledTransientExecutioner();
 
   virtual void execute();

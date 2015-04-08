@@ -33,8 +33,8 @@ InputParameters validParams<SetAdaptivityOptionsAction>()
   return params;
 }
 
-SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(InputParameters params) :
+    Action(params)
 {
 }
 

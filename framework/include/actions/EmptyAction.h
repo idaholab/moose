@@ -28,7 +28,7 @@ InputParameters validParams<EmptyAction>();
 class EmptyAction : public Action
 {
 public:
-  EmptyAction(const std::string & name, InputParameters params);
+  EmptyAction(InputParameters params);
 
   virtual void act();
 };

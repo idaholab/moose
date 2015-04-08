@@ -26,8 +26,8 @@ InputParameters validParams<NumPicardIterations>()
   return params;
 }
 
-NumPicardIterations::NumPicardIterations(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+NumPicardIterations::NumPicardIterations(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _transient_executioner(NULL)
 {
 }

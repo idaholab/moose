@@ -24,8 +24,8 @@ InputParameters validParams<AddSplitAction>()
 }
 
 
-AddSplitAction::AddSplitAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddSplitAction::AddSplitAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 

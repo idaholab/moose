@@ -35,8 +35,8 @@ InputParameters validParams<LeastSquaresFit>()
   return params;
 }
 
-LeastSquaresFit::LeastSquaresFit(const std::string & name, InputParameters parameters) :
-    GeneralVectorPostprocessor(name, parameters),
+LeastSquaresFit::LeastSquaresFit(const InputParameters & parameters) :
+    GeneralVectorPostprocessor(parameters),
     _vpp_name(getParam<VectorPostprocessorName>("vectorpostprocessor")),
     _order(parameters.get<unsigned int>("order")),
     _x_name(getParam<std::string>("x_name")),

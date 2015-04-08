@@ -25,8 +25,8 @@ InputParameters validParams<ScalarL2Error>()
   return params;
 }
 
-ScalarL2Error::ScalarL2Error(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+ScalarL2Error::ScalarL2Error(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
     _func(getFunction("function"))
 {

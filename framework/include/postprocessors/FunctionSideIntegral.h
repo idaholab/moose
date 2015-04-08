@@ -30,7 +30,7 @@ InputParameters validParams<FunctionSideIntegral>();
 class FunctionSideIntegral : public SideIntegralPostprocessor
 {
 public:
-  FunctionSideIntegral(const std::string & name, InputParameters parameters);
+  FunctionSideIntegral(const InputParameters & parameters);
   virtual void threadJoin(const UserObject & y);
 
 protected:

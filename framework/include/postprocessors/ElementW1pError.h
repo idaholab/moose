@@ -43,7 +43,7 @@ class ElementW1pError :
   public ElementIntegralVariablePostprocessor
 {
 public:
-  ElementW1pError(const std::string & name, InputParameters parameters);
+  ElementW1pError(const InputParameters & parameters);
 
   virtual Real getValue();
 

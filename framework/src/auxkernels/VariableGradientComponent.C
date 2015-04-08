@@ -23,8 +23,8 @@ InputParameters validParams<VariableGradientComponent>()
   return params;
 }
 
-VariableGradientComponent::VariableGradientComponent(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+VariableGradientComponent::VariableGradientComponent(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _gradient(coupledGradient("gradient_variable")),
     _component(getParam<MooseEnum>("component"))
 {

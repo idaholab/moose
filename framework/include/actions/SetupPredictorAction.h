@@ -28,7 +28,7 @@ InputParameters validParams<SetupPredictorAction>();
 class SetupPredictorAction : public MooseObjectAction
 {
 public:
-  SetupPredictorAction(const std::string & name, InputParameters parameters);
+  SetupPredictorAction(InputParameters parameters);
   virtual ~SetupPredictorAction();
 
   virtual void act();

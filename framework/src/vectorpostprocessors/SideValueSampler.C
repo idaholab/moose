@@ -26,9 +26,9 @@ InputParameters validParams<SideValueSampler>()
   return params;
 }
 
-SideValueSampler::SideValueSampler(const std::string & name, InputParameters parameters) :
-    SideVectorPostprocessor(name, parameters),
-    SamplerBase(name, parameters, this, _communicator)
+SideValueSampler::SideValueSampler(const InputParameters & parameters) :
+    SideVectorPostprocessor(parameters),
+    SamplerBase(parameters, this, _communicator)
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());

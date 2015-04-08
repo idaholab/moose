@@ -24,8 +24,8 @@ InputParameters validParams<DetermineSystemType>()
 }
 
 
-DetermineSystemType::DetermineSystemType(const std::string & name, InputParameters parameters) :
-    MooseObjectAction(name, parameters)
+DetermineSystemType::DetermineSystemType(InputParameters parameters) :
+    MooseObjectAction(parameters)
 {
 }
 

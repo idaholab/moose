@@ -27,8 +27,8 @@ InputParameters validParams<Predictor>()
   return params;
 }
 
-Predictor::Predictor(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+Predictor::Predictor(const InputParameters & parameters) :
+    MooseObject(parameters),
     Restartable(parameters, "Predictors"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _nl(_fe_problem.getNonlinearSystem()),

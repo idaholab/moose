@@ -31,8 +31,8 @@ InputParameters validParams<SideSetsAroundSubdomain>()
   return params;
 }
 
-SideSetsAroundSubdomain::SideSetsAroundSubdomain(const std::string & name, InputParameters parameters):
-    AddSideSetsBase(name, parameters),
+SideSetsAroundSubdomain::SideSetsAroundSubdomain(const InputParameters & parameters):
+    AddSideSetsBase(parameters),
     BlockRestrictable(parameters),
     _boundary_names(getParam<std::vector<BoundaryName> >("new_boundary")),
     _using_normal(isParamValid("normal")),

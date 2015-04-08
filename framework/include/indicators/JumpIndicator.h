@@ -26,7 +26,7 @@ class JumpIndicator :
   public InternalSideIndicator
 {
 public:
-  JumpIndicator(const std::string & name, InputParameters parameters);
+  JumpIndicator(const InputParameters & parameters);
   virtual ~JumpIndicator(){};
 
 protected:

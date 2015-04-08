@@ -40,7 +40,7 @@ public:
    * @param name The name of the function
    * @param parameters The input parameters
    */
-  MooseParsedVectorFunction(const std::string & name, InputParameters parameters);
+  MooseParsedVectorFunction(const InputParameters & parameters);
 
   /**
    * Class destructor

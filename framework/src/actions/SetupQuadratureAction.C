@@ -34,8 +34,8 @@ InputParameters validParams<SetupQuadratureAction>()
   return params;
 }
 
-SetupQuadratureAction::SetupQuadratureAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
+SetupQuadratureAction::SetupQuadratureAction(InputParameters parameters) :
+    Action(parameters),
     _type(Moose::stringToEnum<QuadratureType>(getParam<MooseEnum>("type"))),
     _order(Moose::stringToEnum<Order>(getParam<MooseEnum>("order"))),
     _element_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("element_order"))),

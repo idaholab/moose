@@ -28,8 +28,8 @@ InputParameters validParams<ScalarInitialCondition>()
   return params;
 }
 
-ScalarInitialCondition::ScalarInitialCondition(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters) :
+    MooseObject(parameters),
     ScalarCoupleable(parameters),
     DependencyResolverInterface(),
     _subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),

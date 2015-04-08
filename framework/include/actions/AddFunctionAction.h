@@ -29,7 +29,7 @@ InputParameters validParams<AddFunctionAction>();
 class AddFunctionAction : public MooseObjectAction
 {
 public:
-  AddFunctionAction(const std::string & name, InputParameters params);
+  AddFunctionAction(InputParameters params);
 
   virtual void act();
 };

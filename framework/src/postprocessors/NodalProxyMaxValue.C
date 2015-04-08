@@ -25,8 +25,8 @@ InputParameters validParams<NodalProxyMaxValue>()
   return params;
 }
 
-NodalProxyMaxValue::NodalProxyMaxValue(const std::string & name, InputParameters parameters) :
-    NodalVariablePostprocessor(name, parameters),
+NodalProxyMaxValue::NodalProxyMaxValue(const InputParameters & parameters) :
+    NodalVariablePostprocessor(parameters),
     _value(-std::numeric_limits<Real>::max())
 {
 }

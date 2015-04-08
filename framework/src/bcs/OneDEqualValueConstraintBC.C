@@ -25,8 +25,8 @@ InputParameters validParams<OneDEqualValueConstraintBC>()
 }
 
 
-OneDEqualValueConstraintBC::OneDEqualValueConstraintBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+OneDEqualValueConstraintBC::OneDEqualValueConstraintBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _lambda(coupledScalarValue("lambda")),
     _lambda_var_number(coupledScalar("lambda")),
     _component(getParam<unsigned int>("component")),

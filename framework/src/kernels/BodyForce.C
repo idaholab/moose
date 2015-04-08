@@ -27,8 +27,8 @@ InputParameters validParams<BodyForce>()
   return params;
 }
 
-BodyForce::BodyForce(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+BodyForce::BodyForce(const InputParameters & parameters) :
+    Kernel(parameters),
     _value(getParam<Real>("value")),
     _function(getFunction("function"))
 {

@@ -28,7 +28,7 @@ InputParameters validParams<Transform>();
 class Transform : public MeshModifier
 {
 public:
-  Transform(const std::string & name, InputParameters parameters);
+  Transform(const InputParameters & parameters);
 
   virtual ~Transform();
 

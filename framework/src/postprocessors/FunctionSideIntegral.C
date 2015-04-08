@@ -22,8 +22,8 @@ InputParameters params = validParams<SideIntegralPostprocessor>();
   return params;
 }
 
-FunctionSideIntegral::FunctionSideIntegral(const std::string & name, InputParameters parameters) :
-    SideIntegralPostprocessor(name, parameters),
+FunctionSideIntegral::FunctionSideIntegral(const InputParameters & parameters) :
+    SideIntegralPostprocessor(parameters),
     _func(getFunction("function"))
 {}
 

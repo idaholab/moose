@@ -51,7 +51,7 @@ class Damper :
   public MeshChangedInterface
 {
 public:
-  Damper(const std::string & name, InputParameters parameters);
+  Damper(const InputParameters & parameters);
 
   /**
    * Computes this Damper's damping for one element.

@@ -40,7 +40,7 @@ public:
    * @param name Name of this action
    * @param params Input parameters for this action object
    */
-  MaterialOutputAction(const std::string & name, InputParameters params);
+  MaterialOutputAction(InputParameters params);
 
   /**
    * Class destructor

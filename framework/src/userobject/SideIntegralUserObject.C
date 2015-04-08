@@ -21,8 +21,8 @@ InputParameters validParams<SideIntegralUserObject>()
   return params;
 }
 
-SideIntegralUserObject::SideIntegralUserObject(const std::string & name, InputParameters parameters) :
-    SideUserObject(name, parameters),
+SideIntegralUserObject::SideIntegralUserObject(const InputParameters & parameters) :
+    SideUserObject(parameters),
     _qp(0),
     _integral_value(0)
 {}

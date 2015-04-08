@@ -23,8 +23,8 @@ InputParameters validParams<FunctionDirichletBC>()
   return params;
 }
 
-FunctionDirichletBC::FunctionDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+FunctionDirichletBC::FunctionDirichletBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     _func(getFunction("function"))
 {
 }

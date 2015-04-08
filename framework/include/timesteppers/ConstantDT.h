@@ -25,7 +25,7 @@ InputParameters validParams<ConstantDT>();
 class ConstantDT : public TimeStepper
 {
 public:
-  ConstantDT(const std::string & name, InputParameters parameters);
+  ConstantDT(const InputParameters & parameters);
 
 protected:
   virtual Real computeInitialDT();
