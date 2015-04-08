@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "EqualValueBoundaryConstraint.h"
-//#include "libmesh/boundary_info.h"
 
 template<>
 InputParameters validParams<EqualValueBoundaryConstraint>()
@@ -42,9 +41,7 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const std::string & n
        ++in, ++ib)
   {
     if (*ib == _slave_boundary_id && *in != _master_node_id)
-    {
       _connected_nodes.push_back(*in);
-    }
   }
 
 }
