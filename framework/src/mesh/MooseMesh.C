@@ -1043,8 +1043,8 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
 
   periodic_node_map.clear();
 
-  MeshBase::const_element_iterator it = getMesh().active_local_elements_begin();
-  MeshBase::const_element_iterator it_end = getMesh().active_local_elements_end();
+  MeshBase::const_element_iterator it = getMesh().active_elements_begin();
+  MeshBase::const_element_iterator it_end = getMesh().active_elements_end();
   AutoPtr<PointLocatorBase> point_locator = getMesh().sub_point_locator();
 
   // Get a const reference to the BoundaryInfo object that we will use several times below...

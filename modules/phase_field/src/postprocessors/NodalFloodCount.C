@@ -166,7 +166,7 @@ NodalFloodCount::finalize()
   _communicator.allgather(_packed_data, false);
   unpack(_packed_data);
 
-  mergeSets();
+  mergeSets(true);
 
   // Populate _bubble_maps and _var_index_maps
   updateFieldInfo();
@@ -318,18 +318,12 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
   {
     data[map_num].resize(_region_counts[map_num]+1);
 
-    unsigned int n_periodic_nodes = 0;
     {
       std::map<dof_id_type, int>::const_iterator end = _bubble_maps[map_num].end();
       // Reorganize the data by values
 
       for (std::map<dof_id_type, int>::const_iterator it = _bubble_maps[map_num].begin(); it != end; ++it)
         data[map_num][(it->second)].insert(it->first);
-
-      // Append our periodic neighbor nodes to the data structure before packing
-      if (merge_periodic_info)
-        for (std::vector<std::set<dof_id_type> >::iterator it = data[map_num].begin(); it != data[map_num].end(); ++it)
-          n_periodic_nodes += appendPeriodicNeighborNodes(*it);
 
       mooseAssert(_region_counts[map_num]+1 == data[map_num].size(), "Error in packing data");
     }
@@ -339,7 +333,6 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
        * The size of the packed data structure should be the sum of all of the following:
        * total number of marked nodes
        * the owning variable index for the current bubble
-       * inserted periodic neighbor information
        * the number of unique bubbles.
        *
        * We will pack the data into a series of groups representing each unique bubble
@@ -348,7 +341,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
        */
 
       // Note the _region_counts[mar_num]*2 takes into account the number of nodes and the variable index for each region
-      std::vector<dof_id_type> partial_packed_data(_bubble_maps[map_num].size() + n_periodic_nodes + _region_counts[map_num]*2);
+      std::vector<dof_id_type> partial_packed_data(_bubble_maps[map_num].size() + _region_counts[map_num]*2);
 
       // Now pack it up
       unsigned int current_idx = 0;
@@ -433,7 +426,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 }
 
 void
-NodalFloodCount::mergeSets()
+NodalFloodCount::mergeSets(bool use_periodic_boundary_info)
 {
   Moose::perf_log.push("mergeSets()", "NodalFloodCount");
   std::set<dof_id_type> set_union;
@@ -441,26 +434,48 @@ NodalFloodCount::mergeSets()
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
+    // Get an iterator pointing to the end of the list, we'll reuse it several times in the merge algorithm below
     std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
+
+    // Next add periodic neighbor information if requested to the BubbleData objects
+    if (use_periodic_boundary_info)
+      for (std::list<BubbleData>::iterator it = _bubble_sets[map_num].begin(); it != end; ++it)
+        appendPeriodicNeighborNodes(*it);
+
+    // Finally start our merge loops
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; /* No increment */)
     {
       bool need_it1_increment = true;
 
       for (std::list<BubbleData>::iterator it2 = it1; it2 != end; ++it2)
       {
-        if (it1 != it2 &&                       // Make sure that these iterators aren't pointing at the same set
-            it1->_var_idx == it2->_var_idx &&   // and that the sets have matching variable indices...
-                                                // then See if they overlap
-            setsIntersect(it1->_entity_ids.begin(), it1->_entity_ids.end(), it2->_entity_ids.begin(), it2->_entity_ids.end()))
+        if (it1 != it2 &&                                                               // Make sure that these iterators aren't pointing at the same set
+            it1->_var_idx == it2->_var_idx &&                                           // and that the sets have matching variable indices...
+            (setsIntersect(it1->_entity_ids.begin(), it1->_entity_ids.end(),            // Do they overlap on the current entity type? OR..
+                           it2->_entity_ids.begin(), it2->_entity_ids.end()) ||
+               (use_periodic_boundary_info &&                                           // Are we merging across periodic boundaries? AND
+               setsIntersect(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(),  // Do they overlap on periodic nodes?
+                             it2->_periodic_nodes.begin(), it2->_periodic_nodes.end())
+               )
+            )
+          )
         {
-          // Merge these two sets and remove the duplicate set
+          // Merge these two entity sets
           set_union.clear();
           std::set_union(it1->_entity_ids.begin(), it1->_entity_ids.end(), it2->_entity_ids.begin(), it2->_entity_ids.end(), set_union_inserter);
-
           // Put the merged set in the latter iterator so that we'll compare earlier sets to it again
           it2->_entity_ids = set_union;
-          _bubble_sets[map_num].erase(it1++);
 
+          // If we are merging periodic boundaries we'll need to merge those nodes too
+          if (use_periodic_boundary_info)
+          {
+            set_union.clear();
+            std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(), set_union_inserter);
+            it2->_periodic_nodes = set_union;
+          }
+
+          // Now remove the merged set, the one we didn't update (it1)
+          _bubble_sets[map_num].erase(it1++);
           // don't increment the outer loop since we just deleted it incremented
           need_it1_increment = false;
           // break out of the inner loop and move on
@@ -591,35 +606,15 @@ NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned in
   }
 }
 
-unsigned int
-NodalFloodCount::appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const
+void
+NodalFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
 {
   // Using a typedef makes the code easier to understand and avoids repeating information.
   typedef std::multimap<dof_id_type, dof_id_type>::const_iterator IterType;
 
-  unsigned int orig_size = data.size();
-
-  /**
-   * Now we will append our periodic neighbor information.  We treat the periodic neighbor nodes
-   * much like we do ghosted nodes in a multi-processor setting.  If a bubble is sitting on a
-   * periodic boundary we will simply add those periodic neighbors to the appropriate bubble
-   * before packing up the data
-   */
-  std::set<dof_id_type> periodic_neighbors;
-
   if (_is_elemental)
   {
-    /**
-     * When running in elemental mode, we still need information about periodic nodes in order
-     * to merge sets across the periodic boundaries. However in order to avoid running into issues
-     * with element ids and node ids overlapping we'll simply use numbers starting at the top of the
-     * dof_id_type range instead.
-     *
-     * TODO: Note: This may fail to work properly on meshes that approach std::numeric_limits<dof_id_type>::max()/2
-     * numbers of dofs.
-     */
-
-    for (std::set<dof_id_type>::iterator entity_it = data.begin(); entity_it != data.end(); ++entity_it)
+    for (std::set<dof_id_type>::iterator entity_it = data._entity_ids.begin(); entity_it != data._entity_ids.end(); ++entity_it)
     {
       Elem *elem = _mesh.elem(*entity_it);
 
@@ -629,28 +624,25 @@ NodalFloodCount::appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const
 
         for (IterType it = iters.first; it != iters.second; ++it)
         {
-          // Add pseudo ids of both nodes in the periodic pair
-          periodic_neighbors.insert(it->first);
-          periodic_neighbors.insert(it->second);
+          data._periodic_nodes.insert(it->first);
+          data._periodic_nodes.insert(it->second);
         }
       }
     }
   }
   else
   {
-    for (std::set<dof_id_type>::iterator entity_it = data.begin(); entity_it != data.end(); ++entity_it)
+    for (std::set<dof_id_type>::iterator entity_it = data._entity_ids.begin(); entity_it != data._entity_ids.end(); ++entity_it)
     {
       std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(*entity_it);
 
       for (IterType it = iters.first; it != iters.second; ++it)
-        periodic_neighbors.insert(it->second);
+      {
+        data._periodic_nodes.insert(it->first);
+        data._periodic_nodes.insert(it->second);
+      }
     }
   }
-
-  // Now that we have all of the periodic_neighbors in our temporary set we need to add them to our input set
-  data.insert(periodic_neighbors.begin(), periodic_neighbors.end());
-
-  return data.size() - orig_size;
 }
 
 void

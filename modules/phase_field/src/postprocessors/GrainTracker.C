@@ -180,21 +180,22 @@ GrainTracker::finalize()
   Moose::perf_log.push("finalize()","GrainTracker");
 
   // Exchange data in parallel
-  pack(_packed_data, false);                 // Make sure we delay packing of periodic neighbor information
+  pack(_packed_data, false);
   _communicator.allgather(_packed_data, false);
   unpack(_packed_data);
-  mergeSets();
+  mergeSets(false);
 
   Moose::perf_log.push("buildspheres()","GrainTracker");
   buildBoundingSpheres();                    // Build bounding sphere information
   Moose::perf_log.pop("buildspheres()","GrainTracker");
 
-//  NodalFloodCount::updateFieldInfo();
-  _packed_data.clear();
-  pack(_packed_data, true);                  // Pack the data again but this time add periodic neighbor information
-  _communicator.allgather(_packed_data, false);
-  unpack(_packed_data);
-  mergeSets();
+//  _packed_data.clear();
+//  pack(_packed_data, true);                  // Pack the data again but this time add periodic neighbor information
+//  _communicator.allgather(_packed_data, false);
+//  unpack(_packed_data);
+
+  // Now merge sets again but this time we'll add periodic neighbor information
+  mergeSets(true);
 
   Moose::perf_log.push("trackGrains()","GrainTracker");
   trackGrains();

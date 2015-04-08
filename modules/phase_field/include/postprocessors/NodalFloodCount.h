@@ -76,6 +76,7 @@ protected:
     {}
 
     std::set<dof_id_type> _entity_ids;
+    std::set<dof_id_type> _periodic_nodes;
     unsigned int _var_idx;
     bool _intersects_boundary;
   };
@@ -105,13 +106,13 @@ protected:
    * This routine merges the data in _bubble_sets from separate threads/processes to resolve
    * any bubbles that were counted as unique by multiple processors.
    */
-  void mergeSets();
+  void mergeSets(bool use_periodic_boundary_info);
 
   /**
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
-  unsigned int appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const;
+  void appendPeriodicNeighborNodes(BubbleData & data) const;
 
   /**
    * This routine updates the _region_offsets variable which is useful for quickly determining
