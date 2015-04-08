@@ -75,11 +75,13 @@ class UiBox(QtGui.QMainWindow):
     self.main_ui = QtGui.QWidget(self)
     self.main_ui.setObjectName(_fromUtf8("Dialog"))
     self.main_layout = QtGui.QVBoxLayout()
+    self.main_layout.setContentsMargins(0,0,0,0)
     self.setCentralWidget(self.main_ui)
 
     self.tabs = self.application.tabs(self)
 
     self.tab_widget = QtGui.QTabWidget()
+    self.tab_widget.setDocumentMode(True)
 
     for tab in self.tabs:
       self.tab_widget.addTab(tab, tab.name())

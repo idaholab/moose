@@ -68,6 +68,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.execution_widget.timestep_end.connect(self._timestepEnd)
 
     self.main_layout = QtGui.QHBoxLayout()
+    self.main_layout.setContentsMargins(0,0,0,0)
+
 #    self.main_layout.setSpacing(0)
 
     self.right_layout = QtGui.QVBoxLayout()
@@ -156,7 +158,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     ### Output selection controls ###
     # Create the box, layout, and control
     self.output_control_group_box = QtGui.QGroupBox("Select Output") # adds a box for storing widget
+    self.output_control_group_box.setFlat(True)
     self.output_control_layout = QtGui.QVBoxLayout() # creates a layout
+    self.output_control_layout.setContentsMargins(0,0,0,0)
     self.output_control = QtGui.QComboBox() # adds the actual dropdown menu
 
     # Set-up the control
@@ -171,10 +175,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
 
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
-#    self.block_view_group_box.setMaximumWidth(200)
-#    self.block_view_group_box.setMaximumHeight(200)
+    #  self.block_view_group_box.setMaximumWidth(200)
+    #  self.block_view_group_box.setMaximumHeight(200)
 
     self.block_view_layout = QtGui.QVBoxLayout()
+    self.block_view_layout.setContentsMargins(0,0,0,0)
+
     self.block_view_list = QtGui.QListView()
     self.block_view_model = QtGui.QStandardItemModel()
     self.block_view_model.itemChanged.connect(self._blockViewItemChanged)
@@ -204,9 +210,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     # Create the View Mesh toggle
     self.toggle_groupbox = QtGui.QGroupBox("View")
+    self.toggle_groupbox.setFlat(True)
     self.toggle_groupbox.setMaximumHeight(70)
     self.toggle_layout = QtGui.QHBoxLayout()
-    self.toggle_groupbox.setMaximumHeight(70)
+    self.toggle_layout.setContentsMargins(0,0,0,0)
     self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
     self.draw_edges_checkbox.setToolTip('Show mesh elements')
     self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
@@ -231,6 +238,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.reset_layout.addWidget(self.toggle_groupbox)
 
     self.displace_groupbox = QtGui.QGroupBox("Displace")
+    self.displace_groupbox.setFlat(True)
     self.displace_groupbox.setCheckable(True)
     self.displace_groupbox.setChecked(True)
     self.displace_groupbox.setDisabled(True)
@@ -238,6 +246,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.displace_groupbox.toggled[bool].connect(self._displaceToggled)
     self.displace_layout = QtGui.QHBoxLayout()
     self.displace_layout.setSpacing(0)
+    self.displace_layout.setContentsMargins(0,0,0,0)
     self.displace_groupbox.setLayout(self.displace_layout)
 
     self.displace_magnitude_label = QtGui.QLabel("Multiplier: ")
@@ -255,10 +264,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.scale_groupbox.setCheckable(True)
     self.scale_groupbox.setChecked(False)
     self.scale_groupbox.setDisabled(False)
+    self.scale_groupbox.setFlat(True)
     self.scale_groupbox.setMaximumHeight(70)
     self.scale_groupbox.toggled[bool].connect(self._scaleToggled)
     self.scale_layout = QtGui.QHBoxLayout()
     self.scale_layout.setSpacing(0)
+    self.scale_layout.setContentsMargins(0,0,0,0)
     self.scale_groupbox.setLayout(self.scale_layout)
 
     self.scale_x_label = QtGui.QLabel("x: ")
@@ -296,6 +307,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_groupbox.setCheckable(True)
     self.clip_groupbox.setChecked(False)
     self.clip_groupbox.setMaximumHeight(70)
+    self.clip_groupbox.setFlat(True)
     self.clip_groupbox.toggled[bool].connect(self._clippingToggled)
     clip_layout = QtGui.QHBoxLayout()
 
@@ -315,7 +327,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_slider.sliderReleased.connect(self._clipSliderReleased)
     self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)
     clip_layout.addWidget(self.clip_plane_slider)
-#     vbox->addStretch(1);
+    # vbox->addStretch(1);
+    clip_layout.setContentsMargins(0,0,0,0)
     self.clip_groupbox.setLayout(clip_layout)
 
     self.reset_layout.addWidget(self.clip_groupbox)
@@ -348,11 +361,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
 
     self.contour_groupbox = QtGui.QGroupBox("Contour")
+    self.contour_groupbox.setFlat(True)
 #    self.contour_groupbox.setMaximumHeight(10)
 #    self.contour_groupbox.setMaximumHeight(70)
 #    contour_groupbox_policy = QtGui.QSizePolicy()
     self.contour_groupbox.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
     self.contour_layout = QtGui.QVBoxLayout()
+    self.contour_layout.setContentsMargins(0,0,0,0)
     self.contour_groupbox.setLayout(self.contour_layout)
 
     self.variable_contour_layout = QtGui.QHBoxLayout()
@@ -381,6 +396,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.min_groupbox = QtGui.QGroupBox("Min")
     self.min_layout = QtGui.QHBoxLayout()
+    self.min_layout.setContentsMargins(0,0,0,0)
     self.min_groupbox.setLayout(self.min_layout)
 
     self.min_radio_layout = QtGui.QVBoxLayout()
@@ -414,6 +430,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.max_groupbox = QtGui.QGroupBox("Max")
     self.max_layout = QtGui.QHBoxLayout()
+    self.min_layout.setContentsMargins(0,0,0,0)
     self.max_groupbox.setLayout(self.max_layout)
 
     self.max_radio_layout = QtGui.QVBoxLayout()
