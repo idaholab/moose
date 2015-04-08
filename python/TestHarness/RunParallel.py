@@ -150,45 +150,41 @@ class RunParallel:
     now = clock()
     job_index = 0
     slot_freed = False
-    try:
-      for tuple in self.jobs:
-        if tuple != None:
-          (p, command, tester, start_time, f) = tuple
-          if p.poll() != None or now > (start_time + float(tester.specs['max_time'])):
-            # finish up as many jobs as possible, don't sleep until
-            # we've cleared all of the finished jobs
-            self.returnToTestHarness(job_index)
-            # We just output to the screen so reset the test harness "activity" timer
-            self.reported_timer = now
+    for tuple in self.jobs:
+      if tuple != None:
+        (p, command, tester, start_time, f) = tuple
+        if p.poll() != None or now > (start_time + float(tester.specs['max_time'])):
+          # finish up as many jobs as possible, don't sleep until
+          # we've cleared all of the finished jobs
+          self.returnToTestHarness(job_index)
+          # We just output to the screen so reset the test harness "activity" timer
+          self.reported_timer = now
 
-            slot_freed = True
-            # We just reset the timer so no need to check if we've been waiting for awhile in
-            # this iteration
+          slot_freed = True
+          # We just reset the timer so no need to check if we've been waiting for awhile in
+          # this iteration
 
-          # Has the TestHarness done nothing for awhile
-          elif now > (self.reported_timer + 10.0):
-            # Has the current test been previously reported?
-            if tester not in self.reported_jobs:
-              if tester.specs.isValid('min_reported_time'):
-                start_min_threshold = start_time + float(tester.specs['min_reported_time'])
-              else:
-                start_min_threshold = start_time + (0.1 * float(tester.specs['max_time']))
+        # Has the TestHarness done nothing for awhile
+        elif now > (self.reported_timer + 10.0):
+          # Has the current test been previously reported?
+          if tester not in self.reported_jobs:
+            if tester.specs.isValid('min_reported_time'):
+              start_min_threshold = start_time + float(tester.specs['min_reported_time'])
+            else:
+              start_min_threshold = start_time + (0.1 * float(tester.specs['max_time']))
 
-              threshold = max(start_min_threshold, (0.1 * float(tester.specs['max_time'])))
+            threshold = max(start_min_threshold, (0.1 * float(tester.specs['max_time'])))
 
-              if now >= threshold:
-                self.harness.handleTestResult(tester.specs, '', 'RUNNING...', start_time, now, False)
+            if now >= threshold:
+              self.harness.handleTestResult(tester.specs, '', 'RUNNING...', start_time, now, False)
 
-                self.reported_jobs.add(tester)
-                self.reported_timer = now
+              self.reported_jobs.add(tester)
+              self.reported_timer = now
 
-        job_index += 1
+      job_index += 1
 
-      if not slot_freed:
-        sleep(time_to_wait)
-    except KeyboardInterrupt:
-      print '\nExiting...'
-      sys.exit(0)
+    if not slot_freed:
+      sleep(time_to_wait)
 
   def satisfyLoad(self):
     # Get the current load average, or zero if it isn't available for some reason (such as being
