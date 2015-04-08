@@ -49,15 +49,12 @@
 [Executioner]
   type = Steady
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 
   petsc_options_iname = ''
   petsc_options_value = ''
 
   line_search = 'none'
-
 []
 
 [Postprocessors]
