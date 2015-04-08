@@ -25,7 +25,7 @@ ActionFactory::~ActionFactory()
 {
 }
 
-Action *
+MooseSharedPointer<Action>
 ActionFactory::create(const std::string & action, const std::string & name, InputParameters params)
 {
   params.addPrivateParam("_moose_app", &_app);
@@ -57,10 +57,7 @@ ActionFactory::create(const std::string & action, const std::string & name, Inpu
   if (!build_info)
     mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + name);
 
-  Action * action_obj = (*build_info->_build_pointer)(name, params);
-
-//  if (params.get<std::string>("task") == "")
-//    params.set<std::string>("task") = build_info->_task;
+  MooseSharedPointer<Action> action_obj = (*build_info->_build_pointer)(name, params);
 
   if (params.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);

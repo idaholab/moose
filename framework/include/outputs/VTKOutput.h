@@ -16,6 +16,7 @@
 #define VTKOUTPUT_H
 
 // MOOSE includes
+#include "BasicOutput.h"
 #include "OversampleOutput.h"
 
 // libMesh includes
@@ -31,7 +32,7 @@ InputParameters validParams<VTKOutput>();
  *
  */
 class VTKOutput :
-  public OversampleOutput
+  public BasicOutput<OversampleOutput>
 {
 public:
 
@@ -42,44 +43,20 @@ public:
    */
   VTKOutput(const std::string & name, InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~VTKOutput();
-
-  /**
-   * Creates the libMes::VTKOutputIO object for outputting the current timestep
-   */
-  virtual void outputSetup();
-
 
 protected:
 
   /**
    * Perform the output of VTKOutput
    */
-  virtual void output();
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Return the file name with the *.vtk extension
    */
   std::string filename();
 
-  //@{
-  /**
-   * Individual component output is not currently supported for VTKOutput
-   */
-  virtual void outputNodalVariables();
-  virtual void outputElementalVariables();
-  virtual void outputPostprocessors();
-  virtual void outputVectorPostprocessors();
-  virtual void outputScalarVariables();
-  //@}
-
 private:
-
-  /// Pointer to libMesh::VTKIO object
-  VTKIO * _vtk_io_ptr;
 
   /// Flag for using binary compression
   bool _binary;

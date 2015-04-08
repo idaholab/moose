@@ -31,7 +31,7 @@
     type = MatPropUserObjectAux
     variable = uo_e
     material_user_object = uo
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -64,7 +64,7 @@
   [./uo]
     type = MaterialPropertyUserObject
     mat_prop = 'e'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -79,9 +79,6 @@
   file_base = uo_material
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

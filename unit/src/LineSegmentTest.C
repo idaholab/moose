@@ -351,8 +351,7 @@ LineSegmentTest::planeIntersectTest()
   CPPUNIT_ASSERT( result == Point(0, 0, 0) );
 
   CPPUNIT_ASSERT( _neg3y.intersect(xy, result) == false );
-  CPPUNIT_ASSERT( _neg3y.intersect(xz, result) == true );
-  CPPUNIT_ASSERT( result == Point(0, 1, 0) );                //Assuming it uses the LineSegment as a line?
+  CPPUNIT_ASSERT( _neg3y.intersect(xz, result) == false );
   CPPUNIT_ASSERT( _neg3y.intersect(yz, result) == false );
   CPPUNIT_ASSERT( _neg3y.intersect(diag, result) == true );
   CPPUNIT_ASSERT( result == Point(0, 0, 0) );
@@ -365,12 +364,9 @@ LineSegmentTest::planeIntersectTest()
   CPPUNIT_ASSERT( result == Point(1, 1, 1) );
   CPPUNIT_ASSERT( _pos3diag.intersect(diag, result) == true );
 
-  CPPUNIT_ASSERT( _neg3diag.intersect(xy, result) == true );
-  CPPUNIT_ASSERT( result == Point(1, 1, 1) );
-  CPPUNIT_ASSERT( _neg3diag.intersect(xz, result) == true );
-  CPPUNIT_ASSERT( result == Point(1, 1, 1) );
-  CPPUNIT_ASSERT( _neg3diag.intersect(yz, result) == true );
-  CPPUNIT_ASSERT( result == Point(1, 1, 1) );
+  CPPUNIT_ASSERT( _neg3diag.intersect(xy, result) == false );
+  CPPUNIT_ASSERT( _neg3diag.intersect(xz, result) == false );
+  CPPUNIT_ASSERT( _neg3diag.intersect(yz, result) == false );
   CPPUNIT_ASSERT( _neg3diag.intersect(diag, result) == true );
 
   // Make some special lines to test

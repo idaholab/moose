@@ -61,8 +61,5 @@
   csv = true
   exodus = true
   sync_times = '10.5 20 30.5'
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

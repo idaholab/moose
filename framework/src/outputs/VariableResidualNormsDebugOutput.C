@@ -17,7 +17,6 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "Material.h"
-#include "Console.h"
 
 // libMesh includesx
 #include "libmesh/transient_system.h"
@@ -25,17 +24,17 @@
 template<>
 InputParameters validParams<VariableResidualNormsDebugOutput>()
 {
-  InputParameters params = validParams<PetscOutput>();
-  params += Output::disableOutputTypes();
+  InputParameters params = validParams<BasicOutput<PetscOutput> >();
+
+  // By default this outputs on every nonlinear iteration
+  params.set<MultiMooseEnum>("output_on") = "nonlinear";
   return params;
 }
 
 VariableResidualNormsDebugOutput::VariableResidualNormsDebugOutput(const std::string & name, InputParameters & parameters) :
-    PetscOutput(name, parameters),
+    BasicOutput<PetscOutput>(name, parameters),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {
-  // Force this outputter to output on nonlinear residuals
-  _output_nonlinear = true;
 }
 
 VariableResidualNormsDebugOutput::~VariableResidualNormsDebugOutput()
@@ -43,12 +42,8 @@ VariableResidualNormsDebugOutput::~VariableResidualNormsDebugOutput()
 }
 
 void
-VariableResidualNormsDebugOutput::output()
+VariableResidualNormsDebugOutput::output(const ExecFlagType & /*type*/)
 {
-  // Only show variable residual norms on Nonlinear iterations
-  if (!onNonlinearResidual())
-    return;
-
   // Stream for outputting
   std::ostringstream oss;
 

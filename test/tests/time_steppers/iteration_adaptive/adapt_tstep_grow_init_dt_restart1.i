@@ -77,8 +77,5 @@
   exodus = true
   checkpoint = true
   sync_times = '0.5 9.5'
-  [./console]
-    type = Console
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
 []

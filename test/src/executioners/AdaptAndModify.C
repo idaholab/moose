@@ -74,17 +74,11 @@ AdaptAndModify::endStep(Real input_time)
     }
     _problem.computeUserObjects(EXEC_CUSTOM);
 
-    //output
-    if (_time_interval)
-    {
-      //Set the time for the next output interval if we're at or beyond an output interval
-      if (_time + _timestep_tolerance >= _next_interval_output_time)
-      {
-        _next_interval_output_time += _time_interval_output_interval;
-      }
-    }
+    // Set the time for the next output interval if we're at or beyond an output interval
+    if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
+      _next_interval_output_time += _time_interval_output_interval;
   }
 
-  _output_warehouse.outputStep();
+  _problem.outputStep(EXEC_TIMESTEP_END);
 
 }

@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 // Original class author: A.M. Jokisaari,  O. Heinonen, M.R. Tonks
 
 #ifndef TENSORMECHANICSMATERIAL_H
@@ -42,39 +48,31 @@ protected:
   VariableGradient & _grad_disp_y_old;
   VariableGradient & _grad_disp_z_old;
 
+  /// Material property base name to allow for multiple TensorMechanicsMaterial to coexist in the same simulation
+  std::string _base_name;
+
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _total_strain;
   MaterialProperty<RankTwoTensor> & _elastic_strain;
+
+  std::string _elasticity_tensor_name;
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
+
+  /// derivative of stress w.r.t. strain (_dstress_dstrain)
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
 
-  Real _euler_angle_1;
-  Real _euler_angle_2;
-  Real _euler_angle_3;
-
-  // vectors to get the input values
-  std::vector<Real> _Cijkl_vector;
+  RealVectorValue _Euler_angles;
 
   /// Individual material information
   ElasticityTensorR4 _Cijkl;
 
-  // MaterialProperty<RankTwoTensor> & _d_stress_dT;
+  /// prefactor function to multiply the elasticity tensor with
+  Function * const _prefactor_function;
+
   RankTwoTensor _strain_increment;
-
-  RealVectorValue _Euler_angles;
-
-  /// Current deformation gradient
-  RankTwoTensor _dfgrd;
-
-  bool _has_T;
-  VariableValue * _T; //pointer rather than reference
-
-  /// determines the translation from C_ijkl to the Rank-4 tensor
-  RankFourTensor::FillMethod _fill_method;
 
   /// initial stress components
   std::vector<Function *> _initial_stress;
-
 };
 
 #endif //TENSORMECHANICSMATERIAL_H

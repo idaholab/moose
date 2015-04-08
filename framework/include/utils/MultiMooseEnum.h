@@ -21,7 +21,7 @@
 
 #include <set>
 
-typedef std::vector<std::string>::const_iterator MooseEnumIterator;
+typedef std::set<std::string>::const_iterator MooseEnumIterator;
 
 /**
  * This is a "smart" enum class intended to replace many of the shortcomings in the C++ enum type
@@ -50,6 +50,7 @@ public:
 
   virtual ~MultiMooseEnum();
 
+  ///@{
   /**
    * Comparison operators for comparing with character constants, MultiMooseEnums
    * or integer values
@@ -57,6 +58,8 @@ public:
    * @return bool - the truth value for the comparison
    */
   bool operator==(const MultiMooseEnum & value) const;
+  bool operator!=(const MultiMooseEnum & value) const;
+  ///@}
 
   ///@{
   /**
@@ -151,7 +154,8 @@ public:
    */
   virtual bool isValid() const { return !_current_ids.empty(); }
 
-  // InputParameters is allowed to create an empty enum but is responsible for
+
+  // InputParameters and Output is allowed to create an empty enum but is responsible for
   // filling it in after the fact
   friend class libMesh::Parameters;
 
@@ -181,7 +185,7 @@ private:
   std::vector<int> _current_ids;
 
   /// The corresponding name
-  std::vector<std::string> _current_names;
+  std::set<std::string> _current_names;
   std::vector<std::string> _current_names_preserved;
 };
 

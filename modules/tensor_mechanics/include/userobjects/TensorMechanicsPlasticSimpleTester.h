@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef TENSORMECHANICSPLASTICSIMPLETESTER_H
 #define TENSORMECHANICSPLASTICSIMPLETESTER_H
 
@@ -12,13 +18,18 @@ InputParameters validParams<TensorMechanicsPlasticSimpleTester>();
 
 /**
  * Class that can be used for testing multi-surface plasticity models.
- * Yield function = a*stress_yy + b*stress_zz - strength
+ * Yield function = a*stress_yy + b*stress_zz + c*stress_xx + d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + f*(stress_yz + stress_zy)/2 - strength
  * No hardening/softening.  Associative.
  */
 class TensorMechanicsPlasticSimpleTester : public TensorMechanicsPlasticModel
 {
  public:
   TensorMechanicsPlasticSimpleTester(const std::string & name, InputParameters parameters);
+
+  /// Returns the model name (SimpleTester)
+  virtual std::string modelName() const;
+
+ protected:
 
   /**
    * The yield function
@@ -68,13 +79,23 @@ class TensorMechanicsPlasticSimpleTester : public TensorMechanicsPlasticModel
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
 
- protected:
-
   /// a
   Real _a;
 
   /// b
   Real _b;
+
+  /// c
+  Real _c;
+
+  /// d
+  Real _d;
+
+  /// e
+  Real _e;
+
+  /// f
+  Real _f;
 
   /// strength
   Real _strength;

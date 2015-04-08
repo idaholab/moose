@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  Rogers-Stallybrass-Clements version of effective saturation of oil (gas) phase
 //  valid for residual saturations = 0, and viscosityOil = 2*viscosityWater.  (the "2" is important here!).
@@ -21,11 +24,11 @@ InputParameters validParams<RichardsSeff2gasRSC>()
 }
 
 RichardsSeff2gasRSC::RichardsSeff2gasRSC(const std::string & name, InputParameters parameters) :
-  RichardsSeff(name, parameters),
-  _oil_viscosity(getParam<Real>("oil_viscosity")),
-  _scale_ratio(getParam<Real>("scale_ratio")),
-  _shift(getParam<Real>("shift")),
-  _scale(0.25*_scale_ratio*_oil_viscosity)
+    RichardsSeff(name, parameters),
+    _oil_viscosity(getParam<Real>("oil_viscosity")),
+    _scale_ratio(getParam<Real>("scale_ratio")),
+    _shift(getParam<Real>("shift")),
+    _scale(0.25*_scale_ratio*_oil_viscosity)
 {}
 
 

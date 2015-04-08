@@ -83,7 +83,6 @@
   end_time = 5
   num_steps = 500000
 
-  dtmax = 0.1
   dtmax = 0.25
 []
 
@@ -92,8 +91,5 @@
   output_initial = true
   csv = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

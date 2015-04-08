@@ -70,13 +70,13 @@
     type = AccumulateAux
     variable = accum_slip_x
     accumulate_from_variable = inc_slip_x
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./accum_slip_y]
     type = AccumulateAux
     variable = accum_slip_y
     accumulate_from_variable = inc_slip_y
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./penetration]
     type = PenetrationAux
@@ -167,12 +167,12 @@
   [../]
   [./ref_resid_x]
     type = NodalL2Norm
-    execute_on = timestep
+    execute_on = timestep_end
     variable = saved_x
   [../]
   [./ref_resid_y]
     type = NodalL2Norm
-    execute_on = timestep
+    execute_on = timestep_end
     variable = saved_y
   [../]
 []
@@ -211,10 +211,10 @@
   file_base = single_point_2d_predictor_out
   output_initial = true
   exodus = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./console]
     type = Console
-    perf_log = true
-    linear_residuals = true
     max_rows = 5
   [../]
 []

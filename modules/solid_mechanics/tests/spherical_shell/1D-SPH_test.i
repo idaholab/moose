@@ -80,7 +80,7 @@
     tensor = stress
     variable = stress_zz
     index = 2
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -170,9 +170,6 @@
   output_initial = true
   exodus = true
   csv = false
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

@@ -1,0 +1,13 @@
+[Tests]
+  [./prepare]
+    type = 'RunApp'
+    input = 'diffuse.i'
+  [../]
+  [./test]
+    type = 'CheckFiles'
+    file_expect_out = '280 \n\n1 1.5 3.5 4.5\n'
+    check_files = 'out.xyz'
+    prereq = 'prepare'
+    input = 'raster.i'
+  []
+[]

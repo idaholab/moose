@@ -5,12 +5,14 @@
     input = 'normalized_penalty.i'
     exodiff = 'normalized_penalty_out.e'
     abs_zero = 1e-8
+    max_parallel = 1                                    # -pc_type lu
   [../]
   [./Q8]
     type = Exodiff
     input = 'normalized_penalty_Q8.i'
     exodiff = 'normalized_penalty_Q8_out.e'
     abs_zero = 1e-8
+    max_parallel = 1                                    # -pc_type lu
   [../]
 
   [./kin_Q4]
@@ -18,12 +20,14 @@
     input = 'normalized_penalty_kin.i'
     exodiff = 'normalized_penalty_kin_out.e'
     abs_zero = 1e-8
+    max_parallel = 1                                    # -pc_type lu
   [../]
   [./kin_Q8]
     type = Exodiff
     input = 'normalized_penalty_kin_Q8.i'
     exodiff = 'normalized_penalty_kin_Q8_out.e'
     abs_zero = 1e-8
+    max_parallel = 1                                    # -pc_type lu
   [../]
 
 []

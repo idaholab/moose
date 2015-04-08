@@ -28,6 +28,7 @@
   [./constant_dummy]
     type = ConstantAux
     variable = dummy
+    execute_on = 'initial timestep_end'
     value = 4
   [../]
 []
@@ -51,7 +52,7 @@
   [./u_integral]
     type = ElementIntegralVariablePostprocessor
     variable = u
-    execute_on = residual
+    execute_on = linear
   [../]
 []
 
@@ -87,11 +88,8 @@
   output_initial = true
   exodus = true
   show = u
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
 [LotsOfAuxVariables]

@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ContactPressureAux.h"
 
 #include "NodalArea.h"
@@ -11,7 +17,7 @@ InputParameters validParams<ContactPressureAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
-  params.set<std::vector<MooseEnum> >("execute_on")[0] = "jacobian";
+  params.set<MultiMooseEnum>("execute_on") = "nonlinear";
   return params;
 }
 
@@ -33,7 +39,7 @@ ContactPressureAux::computeValue()
   const Real area = _nodal_area[_qp];
   const PenetrationInfo * pinfo(NULL);
 
-  const std::map<unsigned int, PenetrationInfo*>::const_iterator it = _penetration_locator._penetration_info.find( _current_node->id() );
+  const std::map<dof_id_type, PenetrationInfo*>::const_iterator it = _penetration_locator._penetration_info.find( _current_node->id() );
   if (it != _penetration_locator._penetration_info.end())
   {
     pinfo = it->second;

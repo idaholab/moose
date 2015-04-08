@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #include "RichardsExcavGeom.h"
 
@@ -15,19 +18,21 @@ InputParameters validParams<RichardsExcavGeom>()
   params.addRequiredParam<Real>("end_time", "Time at the completion of the excavation");
   params.addRequiredParam<Real>("active_length", "This function is only active at a point if the distance between the point and the coal face <= active_length.");
   params.addParam<Real>("true_value", 1.0, "Return this value if a point is in the active zone.  This is usually used for controlling permeability-changes");
+  params.addParam<Real>("deactivation_time", 1.0E30, "Time at which this function is totally turned off");
   params.addClassDescription("This function defines excavation geometry.  It can be used to enforce pressures at the boundary of excavations, and to record fluid fluxes into excavations.");
   return params;
 }
 
 RichardsExcavGeom::RichardsExcavGeom(const std::string & name, InputParameters parameters) :
-  Function(name, parameters),
-  _start_posn(getParam<RealVectorValue>("start_posn")),
-  _start_time(getParam<Real>("start_time")),
-  _end_posn(getParam<RealVectorValue>("end_posn")),
-  _end_time(getParam<Real>("end_time")),
-  _active_length(getParam<Real>("active_length")),
-  _true_value(getParam<Real>("true_value")),
-  _retreat_vel(_end_posn - _start_posn)
+    Function(name, parameters),
+    _start_posn(getParam<RealVectorValue>("start_posn")),
+    _start_time(getParam<Real>("start_time")),
+    _end_posn(getParam<RealVectorValue>("end_posn")),
+    _end_time(getParam<Real>("end_time")),
+    _active_length(getParam<Real>("active_length")),
+    _true_value(getParam<Real>("true_value")),
+    _deactivation_time(getParam<Real>("deactivation_time")),
+    _retreat_vel(_end_posn - _start_posn)
 {
   if (_start_time >= _end_time)
     mooseError("Start time for excavation set to " << _start_time << " but this must be less than the end time, which is " << _end_time);
@@ -40,30 +45,29 @@ Real
 RichardsExcavGeom::value(Real t, const Point & p)
 {
   if (t < _start_time || (p - _start_posn)*_retreat_vel < 0)
-    // point is behind start posn - it'll never be active
-    {
-      return 0.0;
-    }
+  // point is behind start posn - it'll never be active
+  {
+    return 0.0;
+  }
+
+  if (t >= _deactivation_time)
+    return 0.0;
 
   RealVectorValue current_posn;
-  if (t >= _end_time) {
+  if (t >= _end_time)
     current_posn = _end_posn;
-  }
-  else {
+  else
     current_posn = _start_posn + (t - _start_time)*_retreat_vel;
-  }
 
   Real distance_into_goaf = (current_posn - p)*_retreat_vel/_norm_retreat_vel;
 
-  if (distance_into_goaf < 0) {
+  if (distance_into_goaf < 0)
     // point is ahead of current_posn
     return 0.0;
-  }
 
-  if (distance_into_goaf > _active_length) {
+  if (distance_into_goaf > _active_length)
     // point is too far into goaf
     return 0.0;
-  }
 
   return _true_value;
 }

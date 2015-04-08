@@ -62,8 +62,5 @@
   output_initial = true
   exodus = true
   hide = dummy
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

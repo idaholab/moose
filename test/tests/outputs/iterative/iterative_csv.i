@@ -40,7 +40,7 @@
 [Postprocessors]
   [./iterations]
      type = NumResidualEvaluations
-     execute_on = residual
+     execute_on = linear
   [../]
 []
 
@@ -58,15 +58,14 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
   [./out]
     type = CSV
-    nonlinear_residuals = true
-    linear_residuals = true
     nonlinear_residual_dt_divisor = 100
     linear_residual_dt_divisor = 100
     start_time = 1.8
     end_time = 1.85
+    output_on = 'nonlinear linear timestep_end'
   [../]
 []

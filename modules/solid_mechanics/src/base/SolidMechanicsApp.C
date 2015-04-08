@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "SolidMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -43,12 +49,18 @@
 #include "PowerLawCreepModel.h"
 #include "CavityPressureAction.h"
 #include "CavityPressurePostprocessor.h"
+#include "LineMaterialSymmTensorSampler.h"
 #include "CavityPressurePPAction.h"
 #include "CavityPressureUserObject.h"
 #include "CavityPressureUOAction.h"
 #include "PresetVelocity.h"
 #include "Pressure.h"
 #include "PressureAction.h"
+#include "DisplacementAboutAxis.h"
+#include "DisplacementAboutAxisAction.h"
+#include "InteractionIntegralBenchmarkBC.h"
+#include "TorqueReaction.h"
+#include "CrackDataSampler.h"
 #include "SolidMechanicsAction.h"
 #include "DomainIntegralAction.h"
 #include "SolidMechInertialForce.h"
@@ -59,12 +71,17 @@
 #include "StressDivergenceRSpherical.h"
 #include "StressDivergenceTruss.h"
 #include "TrussMaterial.h"
+#include "RateDepSmearCrackModel.h"
+#include "RateDepSmearIsoCrackModel.h"
 
 
 template<>
 InputParameters validParams<SolidMechanicsApp>()
 {
   InputParameters params = validParams<MooseApp>();
+  params.set<bool>("use_legacy_uo_initialization") = true;
+  params.set<bool>("use_legacy_uo_aux_computation") = false;
+
   return params;
 }
 
@@ -106,6 +123,8 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(Pressure);
+  registerBoundaryCondition(DisplacementAboutAxis);
+  registerBoundaryCondition(InteractionIntegralBenchmarkBC);
 
   registerExecutioner(AdaptiveTransient);
 
@@ -128,6 +147,8 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(PowerLawCreepModel);
   registerMaterial(SolidModel);
   registerMaterial(TrussMaterial);
+  registerMaterial(RateDepSmearCrackModel);
+  registerMaterial(RateDepSmearIsoCrackModel);
 
   registerKernel(Gravity);
   registerKernel(HomogenizationKernel);
@@ -146,6 +167,10 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(CrackFrontData);
   registerPostprocessor(InteractionIntegral);
   registerPostprocessor(CavityPressurePostprocessor);
+  registerPostprocessor(TorqueReaction);
+
+  registerVectorPostprocessor(CrackDataSampler);
+  registerVectorPostprocessor(LineMaterialSymmTensorSampler);
 
   registerUserObject(MaterialTensorOnLine);
   registerUserObject(CavityPressureUserObject);
@@ -163,15 +188,20 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
+  syntax.registerActionSyntax("EmptyAction", "BCs/DisplacementAboutAxis");
+  syntax.registerActionSyntax("DisplacementAboutAxisAction", "BCs/DisplacementAboutAxis/*");
+
   syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_user_object");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_variable");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_kernel");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_postprocessor");
+  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_vector_postprocessor");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_material");
 
   registerAction(PressureAction, "add_bc");
+  registerAction(DisplacementAboutAxisAction, "add_bc");
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
   registerAction(CavityPressureUOAction, "add_user_object");

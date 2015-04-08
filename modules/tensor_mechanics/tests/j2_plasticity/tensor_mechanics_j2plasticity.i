@@ -18,13 +18,13 @@
   [./cnode]
     type = AddExtraNodeset
     coord = '0.0 0.0 0.0'
-    boundary = 6
+    new_boundary = 6
   [../]
 
   [./snode]
     type = AddExtraNodeset
     coord = '1.0 0.0 0.0'
-    boundary = 7
+    new_boundary = 7
   [../]
 []
 
@@ -45,8 +45,8 @@
   [../]
 []
 
-[TensorMechanics]
-  [./solid]
+[Kernels]
+  [./TensorMechanics]
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
@@ -214,9 +214,6 @@
   file_base = out
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

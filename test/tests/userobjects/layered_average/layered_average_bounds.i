@@ -28,7 +28,7 @@
   [./layered_average]
     type = SpatialUserObjectAux
     variable = layered_average
-    execute_on = timestep
+    execute_on = timestep_end
     user_object = average
   [../]
 []
@@ -68,10 +68,7 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 

@@ -71,6 +71,8 @@ public:
    */
   MooseVariable & variable() { return _var; }
 
+  virtual bool addCouplingEntriesToJacobian() { return true; }
+
 protected:
   SubProblem & _subproblem;
   SystemBase & _sys;

@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #include "RichardsLumpedMassChange.h"
 
@@ -19,9 +22,8 @@ InputParameters validParams<RichardsLumpedMassChange>()
   return params;
 }
 
-RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name,
-                                             InputParameters parameters) :
-    TimeKernel(name,parameters),
+RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name, InputParameters parameters) :
+    TimeKernel(name, parameters),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _num_p(_richards_name_UO.num_v()),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
@@ -33,56 +35,25 @@ RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name,
     _seff_UO(&getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[_pvar])),
     _sat_UO(&getUserObjectByName<RichardsSat>(getParam<std::vector<UserObjectName> >("sat_UO")[_pvar])),
     _density_UO(&getUserObjectByName<RichardsDensity>(getParam<std::vector<UserObjectName> >("density_UO")[_pvar]))
-
 {
   _ps_at_nodes.resize(_num_p);
   _ps_old_at_nodes.resize(_num_p);
 
-  _nodal_pp.resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
-    _nodal_pp[i] = _richards_name_UO.raw_var(i);
+  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
+  {
+    _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
+    _ps_old_at_nodes[pnum] = _richards_name_UO.nodal_var_old(pnum);
+  }
 
   _dseff.resize(_num_p);
 }
 
 
-// i wish all this stuff wasn't necessary,
-// but we have to build the nodal values
-// we also have to put them into a form that seff_UO can use
-void
-RichardsLumpedMassChange::prepareNodalPressureValues()
-{
-  for (unsigned int i=0 ; i<_num_p; ++i)
-    _nodal_pp[i]->computeNodalValues();
-  //_var.computeNodalValues();
-
-
-  // we want to use seff_UO.seff, and this has arguments:
-  // seff(std::vector<VariableValue *> p, unsigned int qp)
-  // so i need a std::vector<VariableValue *> (ie a vector of pointers to VariableValues)
-  // This is just crazy and surely there is a better way!
-  for (unsigned int pnum=0 ; pnum<_num_p; ++pnum)
-  {
-    // _nodal_pp[pnum] is just like _var, and the ->nodalSln() returns a VariableValue &.  We want a pointer to this.
-    _ps_at_nodes[pnum] = &(_nodal_pp[pnum]->nodalSln());
-    _ps_old_at_nodes[pnum] = &(_nodal_pp[pnum]->nodalSlnOld());
-  }
-}
-
-
-
-void
-RichardsLumpedMassChange::computeResidual()
-{
-  prepareNodalPressureValues();
-  TimeKernel::computeResidual();
-}
-
 Real
 RichardsLumpedMassChange::computeQpResidual()
 {
   // current values:
-  Real density = (*_density_UO).density(_var.nodalSln()[_i]);
+  Real density = (*_density_UO).density((*_ps_at_nodes[_pvar])[_i]);
   Real seff = (*_seff_UO).seff(_ps_at_nodes, _i);
   Real sat = (*_sat_UO).sat(seff);
   Real mass = _porosity[_qp]*density*sat;
@@ -94,14 +65,14 @@ RichardsLumpedMassChange::computeQpResidual()
   // hence all the fluffing around with checking of sizes
   Real density_old;
   Real seff_old;
-  if (_var.nodalSlnOld().size()<=_i || (*_ps_old_at_nodes[0]).size() <= _i)
+  if ((*_ps_old_at_nodes[0]).size() <= _i)
   {
-    density_old = (*_density_UO).density(_var.nodalSln()[_i]);
+    density_old = (*_density_UO).density((*_ps_at_nodes[_pvar])[_i]);
     seff_old = (*_seff_UO).seff(_ps_at_nodes, _i);
   }
   else
   {
-    density_old = (*_density_UO).density(_var.nodalSlnOld()[_i]);
+    density_old = (*_density_UO).density((*_ps_old_at_nodes[_pvar])[_i]);
     seff_old = (*_seff_UO).seff(_ps_old_at_nodes, _i);
   }
   Real sat_old = (*_sat_UO).sat(seff_old);
@@ -112,21 +83,14 @@ RichardsLumpedMassChange::computeQpResidual()
 }
 
 
-void
-RichardsLumpedMassChange::computeJacobian()
-{
-  prepareNodalPressureValues();
-  TimeKernel::computeJacobian();
-}
-
 Real
 RichardsLumpedMassChange::computeQpJacobian()
 {
   if (_i != _j)
     return 0.0;
 
-  Real density = (*_density_UO).density(_var.nodalSln()[_i]);
-  Real ddensity = (*_density_UO).ddensity(_var.nodalSln()[_i]);
+  Real density = (*_density_UO).density((*_ps_at_nodes[_pvar])[_i]);
+  Real ddensity = (*_density_UO).ddensity((*_ps_at_nodes[_pvar])[_i]);
 
   Real seff = (*_seff_UO).seff(_ps_at_nodes, _i);
   (*_seff_UO).dseff(_ps_at_nodes, _i, _dseff);
@@ -141,13 +105,6 @@ RichardsLumpedMassChange::computeQpJacobian()
 
 
 
-void
-RichardsLumpedMassChange::computeOffDiagJacobian(unsigned int jvar)
-{
-  prepareNodalPressureValues();
-  TimeKernel::computeOffDiagJacobian(jvar);
-}
-
 Real
 RichardsLumpedMassChange::computeQpOffDiagJacobian(unsigned int jvar)
 {
@@ -157,7 +114,7 @@ RichardsLumpedMassChange::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
 
-  Real density = (*_density_UO).density(_var.nodalSln()[_i]);
+  Real density = (*_density_UO).density((*_ps_at_nodes[_pvar])[_i]);
 
   Real seff = (*_seff_UO).seff(_ps_at_nodes, _i);
   (*_seff_UO).dseff(_ps_at_nodes, _i, _dseff);

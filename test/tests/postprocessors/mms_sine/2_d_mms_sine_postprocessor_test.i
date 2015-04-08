@@ -120,8 +120,5 @@
   file_base = 2_d_postprocessor_out
   output_initial = true
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

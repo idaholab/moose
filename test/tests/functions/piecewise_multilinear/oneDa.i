@@ -244,10 +244,6 @@
   file_base = oneDa
   hide = dummy
   exodus = false
-  output_initial = false
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

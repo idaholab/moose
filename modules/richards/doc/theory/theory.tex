@@ -591,6 +591,17 @@ recharge is a known function of space and time, or in the case of
 applying sink fluxes at excavation boundaries whose position is a
 known function of space and time.
 
+I have also coded the option of specifying the {\em total} flux.  In
+  this case, the user specifies flux in kg.s$^{-1}$, and MOOSE
+  automatically spreads this equally over the entire boundary (so
+  internally to MOOSE this becomes a standard flux measured in
+  kg.s$^{-1}$.m$^{-2}$).  The user must also specify the boundary's
+  area as a Postprocessor.  All the other fluxes described here are
+  functions of porepressure, but in this case this freedom makes no
+  sense.  Therefore, that option, along with relative permeability,
+  mobility, and $g = g(x,y,z)$, should not be used when specifying the
+  total flux.  The function $g$ may be dependent on $t$, however.
+
 
 
 
@@ -1509,7 +1520,7 @@ suppose that Node 2 has high potential, and that nodes 0 and 1 are at
 immobile saturation.  Then fluid will flow from node 2 to node 1 (and
 then to node 0 in the next time step).  For simplicity, imagine that
 $\phi\rho S$ is a linear
-function of the potential $\phi$.  Then, up to constants, the
+function of the potential.  Then, up to constants, the
 discretised Richard's equation reads
 \begin{equation}
 \left(

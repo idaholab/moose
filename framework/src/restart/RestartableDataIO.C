@@ -100,13 +100,13 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
         it->second->store(data);
 
         // Store the size of the data then the data
-        unsigned int data_size = data.tellp();
+        unsigned int data_size = static_cast<unsigned int>(data.tellp());
         data_blk.write((const char *) &data_size, sizeof(data_size));
         data_blk << data.str();
       }
 
       // Write out this proc's block size
-      unsigned int data_blk_size = data_blk.tellp();
+      unsigned int data_blk_size = static_cast<unsigned int>(data_blk.tellp());
       out.write((const char *) &data_blk_size, sizeof(data_blk_size));
 
       // Write out the values

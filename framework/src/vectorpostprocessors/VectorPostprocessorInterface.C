@@ -17,10 +17,10 @@
 #include "VectorPostprocessor.h"
 #include "MooseTypes.h"
 
-VectorPostprocessorInterface::VectorPostprocessorInterface(InputParameters & params) :
-    _vpi_feproblem(*params.get<FEProblem *>("_fe_problem")),
-    _vpi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
-    _vpi_params(params)
+VectorPostprocessorInterface::VectorPostprocessorInterface(const InputParameters & parameters) :
+    _vpi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
+    _vpi_tid(parameters.have_parameter<THREAD_ID>("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
+    _vpi_params(parameters)
 {}
 
 const VectorPostprocessorValue &

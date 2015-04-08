@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "SolidMechInertialForce.h"
 #include "SubProblem.h"
 
@@ -26,6 +32,8 @@ SolidMechInertialForce::SolidMechInertialForce(const std::string & name, InputPa
 Real
 SolidMechInertialForce::computeQpResidual()
 {
+  if (_dt == 0)
+    return 0;
   Real accel=1/_beta*(((_u[_qp]-_u_old[_qp])/(_dt*_dt)) - _vel_old[_qp]/_dt - _accel_old[_qp]*(0.5-_beta));
   return _test[_i][_qp]*_density[_qp]*accel;
 }
@@ -33,6 +41,7 @@ SolidMechInertialForce::computeQpResidual()
 Real
 SolidMechInertialForce::computeQpJacobian()
 {
-  return _test[_i][_qp]*_density[_qp]*-1/(_beta*(_dt*_dt));
+  if (_dt == 0)
+    return 0;
+  return _test[_i][_qp]*_density[_qp]/(_beta*_dt*_dt)*_phi[_j][_qp];
 }
-

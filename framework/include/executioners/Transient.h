@@ -131,14 +131,14 @@ public:
    * Pointer to the TimeStepper
    * @return Pointer to the time stepper for this Executioner
    */
-  TimeStepper * getTimeStepper(){ return _time_stepper; }
+  TimeStepper * getTimeStepper(){ return _time_stepper.get(); }
 
   /**
    * Set the timestepper to use.
    *
    * @param ts The TimeStepper to use
    */
-  void setTimeStepper(TimeStepper * ts) { _time_stepper = ts; }
+  void setTimeStepper(MooseSharedPointer<TimeStepper> ts) { _time_stepper = ts; }
 
   /**
    * Get the timestepper.
@@ -201,6 +201,14 @@ public:
 
   void parentOutputPositionChanged() { _problem.parentOutputPositionChanged(); }
 
+  /**
+   * Get the number of Picard iterations performed
+   * @return Number of Picard iterations performed
+   */
+  //Because this returns the number of Picard iterations, rather than the current
+  //iteration count (which starts at 0), increment by 1.
+  Real numPicardIts() { return _picard_it+1; }
+
 
 protected:
   /**
@@ -211,7 +219,7 @@ protected:
   FEProblem & _problem;
 
   MooseEnum _time_scheme;
-  TimeStepper * _time_stepper;
+  MooseSharedPointer<TimeStepper> _time_stepper;
 
   /// Current timestep.
   int & _t_step;

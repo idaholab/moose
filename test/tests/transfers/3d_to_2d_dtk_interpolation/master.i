@@ -49,18 +49,15 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
 [MultiApps]
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep
+    execute_on = timestep_end
     positions = '0 0 0.5'
     input_files = sub.i
   [../]
@@ -70,7 +67,6 @@
   [./to_sub]
     type = MultiAppDTKInterpolationTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = from_master

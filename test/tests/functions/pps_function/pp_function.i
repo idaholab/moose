@@ -49,11 +49,8 @@
   file_base = out
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
 [Functions]
@@ -66,7 +63,7 @@
 [Postprocessors]
   [./right_value]
     variable = u
-    execute_on = residual
+    execute_on = linear
     boundary = 2
     type = SideAverageValue
   [../]

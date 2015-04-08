@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<Constraint>()
 {
   InputParameters params = validParams<MooseObject>();
-  // Add the SetupInterface parameter, 'execute_on', default is 'residual'
+  // Add the SetupInterface parameter, 'execute_on', default is 'linear'
   params += validParams<SetupInterface>();
 
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this constraint is applied to.");
@@ -36,9 +36,9 @@ Constraint::Constraint(const std::string & name, InputParameters parameters) :
   SetupInterface(parameters),
   FunctionInterface(parameters),
   UserObjectInterface(parameters),
-  TransientInterface(parameters, name, "constraint"),
+  TransientInterface(parameters, "constraint"),
   GeometricSearchInterface(parameters),
-  Restartable(name, parameters, "Constraints"),
+  Restartable(parameters, "Constraints"),
   ZeroInterface(parameters),
   MeshChangedInterface(parameters),
   _subproblem(*parameters.get<SubProblem *>("_subproblem")),

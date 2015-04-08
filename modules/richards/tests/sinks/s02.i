@@ -79,7 +79,7 @@
   [./mass_fin]
     type = RichardsMass
     variable = pressure
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./left_flux_out]
     type = RichardsHalfGaussianSinkFlux
@@ -174,8 +174,5 @@
   file_base = s02
   output_initial = true
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

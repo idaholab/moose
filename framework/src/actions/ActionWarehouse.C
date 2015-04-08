@@ -23,17 +23,17 @@
 #include "AddAuxVariableAction.h"
 #include "XTermConstants.h"
 #include "InfixIterator.h"
+#include "MemData.h"
 
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory) :
+    Warehouse<Action>(),
     ConsoleStreamInterface(app),
     _app(app),
     _syntax(syntax),
     _action_factory(factory),
     _generator_valid(false),
     _show_actions(false),
-    _show_parser(false),
-    _problem(NULL),
-    _executioner(NULL)
+    _show_parser(false)
 {
 }
 
@@ -52,13 +52,8 @@ ActionWarehouse::build()
 void
 ActionWarehouse::clear()
 {
-  std::set<Action *> unique_action_ptrs;
-  for (std::map<std::string, std::vector<Action *> >::iterator it = _action_blocks.begin(); it != _action_blocks.end(); ++it)
-    for (std::vector<Action *>::iterator jt = (*it).second.begin(); jt != (*it).second.end(); ++jt)
-      unique_action_ptrs.insert(*jt);
-
-  for (std::set<Action *>::iterator it = unique_action_ptrs.begin(); it != unique_action_ptrs.end(); ++it)
-    delete *it;
+  for (std::vector<MooseSharedPointer<Action> >::iterator it = _all_ptrs.begin(); it != _all_ptrs.end(); ++it)
+    it->reset();
 
   _action_blocks.clear();
   _generator_valid = false;
@@ -69,10 +64,13 @@ ActionWarehouse::clear()
   // _comm object owned by the MooseApp is destroyed.
   _mesh.reset();
   _displaced_mesh.reset();
+
+  _problem.reset();
+  _executioner.reset();
 }
 
 void
-ActionWarehouse::addActionBlock(Action * action)
+ActionWarehouse::addActionBlock(MooseSharedPointer<Action> action)
 {
   /**
    * Note: This routine uses the XTerm colors directly which is not advised for general purpose output coloring.
@@ -130,8 +128,8 @@ ActionWarehouse::addActionBlock(Action * action)
 
     // Make sure that the ObjectAction task and Action task are consistent
     // otherwise that means that is action was built by the wrong type
-    MooseObjectAction * moa = dynamic_cast<MooseObjectAction *>(action);
-    if (moa)
+    MooseSharedPointer<MooseObjectAction> moa = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
+    if (moa.get())
     {
       InputParameters mparams = moa->getObjectParams();
 
@@ -153,7 +151,8 @@ ActionWarehouse::addActionBlock(Action * action)
       Moose::err << COLOR_YELLOW << "Adding Action:         " << COLOR_DEFAULT << action->type() << " (" << COLOR_YELLOW << *it << COLOR_DEFAULT << ")\n";
 
     // Add it to the warehouse
-    _action_blocks[*it].push_back(action);
+    _all_ptrs.push_back(action);
+    _action_blocks[*it].push_back(action.get());
   }
 
   if (_show_parser)
@@ -179,6 +178,12 @@ ActionWarehouse::getActionsByName(const std::string & task) const
   if (it == _action_blocks.end())
     mooseError("The task " << task << " does not exist.");
   return it->second;
+}
+
+bool
+ActionWarehouse::hasActions(const std::string & task) const
+{
+  return _action_blocks.find(task) != _action_blocks.end();
 }
 
 void
@@ -303,9 +308,6 @@ ActionWarehouse::executeAllActions()
   for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
   {
     std::string task = *it;
-
-    // Set the current task name
-    _current_task = task;
     executeActionsWithAction(task);
   }
 }
@@ -313,13 +315,29 @@ ActionWarehouse::executeAllActions()
 void
 ActionWarehouse::executeActionsWithAction(const std::string & task)
 {
+  // Set the current task name
+  _current_task = task;
+
   for (ActionIterator act_iter = actionBlocksWithActionBegin(task);
        act_iter != actionBlocksWithActionEnd(task);
        ++act_iter)
   {
     if (_show_actions)
-      _console << "[DBG][ACT] " << (*act_iter)->type() << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")"  << std::endl;
-    (*act_iter)->act();
+    {
+      _console << "[DBG][ACT] "
+               << "TASK (" << COLOR_YELLOW << std::setw (24) << task << COLOR_DEFAULT << ") "
+               << "TYPE (" << COLOR_YELLOW << std::setw (32) << (*act_iter)->type() << COLOR_DEFAULT << ") "
+               << "NAME (" << COLOR_YELLOW << std::setw (16) << (*act_iter)->getShortName() << COLOR_DEFAULT << ") ";
+
+      MemData mcount;
+      mcount.start();
+      (*act_iter)->act();
+      mcount.stop();
+
+      _console << "MEM (" << COLOR_YELLOW << mcount.delta() << "kB" << COLOR_DEFAULT << ")"<< std::endl;
+    }
+    else
+      (*act_iter)->act();
   }
 }
 

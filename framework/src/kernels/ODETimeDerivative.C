@@ -35,5 +35,8 @@ ODETimeDerivative::computeQpResidual()
 Real
 ODETimeDerivative::computeQpJacobian()
 {
-  return _du_dot_du[_i];
+  if (_i == _j)
+    return _du_dot_du[_i];
+  else
+    return 0;
 }

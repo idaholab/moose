@@ -40,6 +40,7 @@
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "OutputWarehouse.h"
+#include "MooseApp.h"
 
 class DisplacedProblem;
 
@@ -111,6 +112,7 @@ public:
 
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid);
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
+  void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
 
   /**
    * Set the coupling between variables
@@ -148,15 +150,15 @@ public:
    * @param div_threshold  Maximum value of residual before triggering divergence check
    */
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
-                                                                    const int it,
+                                                                    const PetscInt it,
                                                                     const Real xnorm,
                                                                     const Real snorm,
                                                                     const Real fnorm,
                                                                     const Real rtol,
                                                                     const Real stol,
                                                                     const Real abstol,
-                                                                    const int nfuncs,
-                                                                    const int max_funcs,
+                                                                    const PetscInt nfuncs,
+                                                                    const PetscInt max_funcs,
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
 
@@ -171,12 +173,12 @@ public:
    * @param maxits         Maximum number of linear iterations allowed
    */
   virtual MooseLinearConvergenceReason checkLinearConvergence(std::string &msg,
-                                                              const int n,
+                                                              const PetscInt n,
                                                               const Real rnorm,
                                                               const Real rtol,
                                                               const Real atol,
                                                               const Real dtol,
-                                                              const int maxits);
+                                                              const PetscInt maxits);
 
 #ifdef LIBMESH_HAVE_PETSC
   void storePetscOptions(const MultiMooseEnum & petsc_options,
@@ -243,7 +245,7 @@ public:
 
   virtual void prepareAssembly(THREAD_ID tid);
 
-  virtual void addGhostedElem(unsigned int elem_id);
+  virtual void addGhostedElem(dof_id_type elem_id);
   virtual void addGhostedBoundary(BoundaryID boundary_id);
   virtual void ghostGhostedBoundaries();
 
@@ -254,7 +256,7 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid);
-  virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid);
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
@@ -315,6 +317,40 @@ public:
 
   virtual void restoreSolutions();
 
+  /**
+   * Output the current step.
+   * Will ensure that everything is in the proper state to be outputted.
+   * Then tell the OutputWarehouse to do its thing
+   * @param type The type execution flag (see Moose.h)
+   */
+  void outputStep(ExecFlagType type);
+
+  ///@{
+  /**
+   * Ability to enable/disable all output calls
+   *
+   * This is needed by Multiapps and applications to disable output for cases when
+   * executioners call other executions and when Multiapps are sub cycling.
+   */
+  void allowOutput(bool state);
+  template<typename T> void allowOutput(bool state);
+  ///@}
+
+  /**
+   * Indicates that the next call to outputStep should be forced
+   *
+   * This is needed by the MultiApp system, if forceOutput is called the next call to outputStep,
+   * regardless of the type supplied to the call, will be executed with EXEC_FORCED.
+   *
+   * Forced output will NOT override the allowOutput flag.
+   */
+  void forceOutput();
+
+  /**
+   * Reinitialize petsc output for proper linear/nonlinear iteration display
+   */
+  void initPetscOutput();
+
   virtual const std::vector<MooseObject *> & getObjectsByName(const std::string & name, THREAD_ID tid);
 
   // Function /////
@@ -325,7 +361,7 @@ public:
   // NL /////
   NonlinearSystem & getNonlinearSystem() { return _nl; }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
-  void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
+  void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
@@ -334,7 +370,7 @@ public:
 
   // Aux /////
   void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains = NULL);
-  void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
+  void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
@@ -457,6 +493,11 @@ public:
   ExecStore<PostprocessorWarehouse> & getPostprocessorWarehouse();
 
   /**
+   * Get a reference to the UserObjectWarehouse ExecStore object
+   */
+  ExecStore<UserObjectWarehouse> & getUserObjectWarehouse();
+
+  /**
    * Returns whether or not the current simulation has any multiapps
    */
   bool hasMultiApps() const { return _has_multiapps; }
@@ -493,8 +534,8 @@ public:
   ExecStore<VectorPostprocessorWarehouse> & getVectorPostprocessorWarehouse();
 
 
-  virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
-  virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
+  virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP_END, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
+  virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_LINEAR);
 
   // Dampers /////
   void addDamper(std::string damper_name, const std::string & name, InputParameters parameters);
@@ -813,6 +854,15 @@ public:
    */
   const std::string & getPreconditionerDescription() const { return _pc_description; }
 
+  /**
+   * Will return True if the user wants to get an error when
+   * a nonzero is reallocated in the Jacobian by PETSc
+   */
+  bool errorOnJacobianNonzeroReallocation() { return _error_on_jacobian_nonzero_reallocation; }
+
+  void setErrorOnJacobianNonzeroReallocation(bool state) { _error_on_jacobian_nonzero_reallocation = state; }
+
+
 protected:
   /// Data names that will only be read from the restart file during RECOVERY
   std::set<std::string> _recoverable_data;
@@ -853,7 +903,7 @@ protected:
   std::vector<Assembly *> _assembly;
 
   /// functions
-  std::vector<std::map<std::string, Function *> > _functions;
+  std::vector<std::map<std::string, MooseSharedPointer<Function> > > _functions;
 
   /// Initial condition warehouses (one for each thread)
   std::vector<InitialConditionWarehouse> _ics;
@@ -976,6 +1026,8 @@ private:
   bool _use_legacy_uo_aux_computation;
   bool _use_legacy_uo_initialization;
 
+  bool _error_on_jacobian_nonzero_reallocation;
+
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
    *
@@ -999,5 +1051,12 @@ private:
   friend class Restartable;
   friend class DisplacedProblem;
 };
+
+template<typename T>
+void
+FEProblem::allowOutput(bool state)
+{
+  _app.getOutputWarehouse().allowOutput<T>(state);
+}
 
 #endif /* FEPROBLEM_H */

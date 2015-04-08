@@ -19,7 +19,7 @@
 #include <map>
 #include <set>
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 class MultiApp;
 class TransientMultiApp;
@@ -27,17 +27,11 @@ class TransientMultiApp;
 /**
  * Holds MultiApps and provides some services
  */
-class MultiAppWarehouse
+class MultiAppWarehouse : public Warehouse<MultiApp>
 {
 public:
   MultiAppWarehouse();
   virtual ~MultiAppWarehouse();
-
-  /**
-   * Get list of all MultiApps
-   * @return The list of all active MultiApps
-   */
-  const std::vector<MultiApp *> & all() const { return _all_multi_apps; }
 
   /**
    * Get list of all TransientMultiApps
@@ -78,7 +72,6 @@ public:
   void parentOutputPositionChanged();
 
 protected:
-  std::vector<MultiApp *> _all_multi_apps;
   std::vector<TransientMultiApp *> _transient_multi_apps;
 
 private:

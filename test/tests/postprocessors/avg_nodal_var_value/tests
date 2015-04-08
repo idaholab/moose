@@ -1,0 +1,13 @@
+[Tests]
+  [./test_avg_nodal_var_value]
+    type = 'Exodiff'
+    input = 'avg_nodal_var_value.i'
+    exodiff = 'out_avg_nodal_var_value.e'
+  [../]
+
+  [./test_avg_nodal_var_value_ts_begin]
+    type = 'Exodiff'
+    input = 'avg_nodal_var_value_ts_begin.i'
+    exodiff = 'out_avg_nodal_var_value_ts_begin.e'
+  [../]
+[]

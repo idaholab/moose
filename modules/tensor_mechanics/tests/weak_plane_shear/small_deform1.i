@@ -41,8 +41,8 @@
   [../]
 []
 
-[TensorMechanics]
-  [./solid]
+[Kernels]
+  [./TensorMechanics]
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
@@ -143,8 +143,9 @@
     index_j = 2
   [../]
   [./yield_fcn_auxk]
-    type = MaterialRealAux
-    property = weak_plane_shear_yield_function
+    type = MaterialStdVectorAux
+    property = plastic_yield_function
+    index = 0
     variable = yield_fcn
   [../]
 []
@@ -172,24 +173,42 @@
   [../]
 []
 
+[UserObjects]
+  [./coh]
+    type = TensorMechanicsHardeningConstant
+    value = 1
+  [../]
+  [./tanphi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.5
+  [../]
+  [./tanpsi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.1111077
+  [../]
+  [./wps]
+    type = TensorMechanicsPlasticWeakPlaneShear
+    cohesion = coh
+    tan_friction_angle = tanphi
+    tan_dilation_angle = tanpsi
+    smoother = 0
+    yield_function_tolerance = 1E-6
+    internal_constraint_tolerance = 1E-6
+  [../]
+[]
+
 [Materials]
   [./mc]
-    type = FiniteStrainWeakPlaneShear
+    type = FiniteStrainMultiPlasticity
     block = 0
-    wps_cohesion = 1
-    wps_dilation_angle = 6.34
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
-    yield_function_tolerance = 1E-6
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
-    wps_friction_angle = 26.565051178
-    wps_normal_vector = '0 0 1'
-    wps_normal_rotates = false
+    plastic_models = wps
+    transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-5
-    internal_constraint_tolerance = 1E-6
-    wps_smoother = 0
     debug_fspb = 1
   [../]
 []
@@ -206,11 +225,8 @@
   file_base = small_deform1
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

@@ -101,6 +101,12 @@ public:
   unsigned int getCyclesPerStep() const { return _cycles_per_step; }
 
   /**
+   * Set the number of cycles_per_step
+   * @param num The number of cycles per step to execute
+   */
+  void setCyclesPerStep(const unsigned int & num){ _cycles_per_step = num; }
+
+  /**
    * Adapts the mesh based on the error estimator used
    *
    * @return a boolean that indicates whether the mesh was changed
@@ -113,9 +119,18 @@ public:
   void initialAdaptMesh();
 
   /**
-   * Does 'level' levels of uniform refinements
+   * Performs uniform refinement of the passed Mesh object. The
+   * number of levels of refinement performed is stored in the
+   * MooseMesh object. No solution projection is performed in this
+   * version.
    */
-  void uniformRefine(unsigned int level);
+  static void uniformRefine(MooseMesh *mesh);
+
+  /**
+   * Performs uniform refinement on the meshes in the current
+   * object. Projections are performed of the solution vectors.
+   */
+  void uniformRefineWithProjection();
 
   /**
    * Is adaptivity on?

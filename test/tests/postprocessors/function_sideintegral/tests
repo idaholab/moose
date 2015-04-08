@@ -1,0 +1,7 @@
+[Tests]
+  [./function_sideintegral]
+    type = 'CSVDiff'
+    input = 'function_sideintegral.i'
+    csvdiff = 'function_sideintegral.csv'
+  [../]
+[]

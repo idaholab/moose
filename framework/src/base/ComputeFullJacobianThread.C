@@ -161,9 +161,6 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 void
 ComputeFullJacobianThread::computeInternalFaceJacobian()
 {
-  if (_sys.getDGKernelWarehouse(_tid).active().empty())
-    return;
-
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
   for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
@@ -175,16 +172,10 @@ ComputeFullJacobianThread::computeInternalFaceJacobian()
       if (dg->variable().number() == ivar && dg->isImplicit())
       {
         unsigned int jvar = (*it).second->number();
+        dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
         dg->subProblem().prepareNeighborShapes(jvar, _tid);
         dg->computeOffDiagJacobian(jvar);
       }
     }
   }
-}
-
-void
-ComputeFullJacobianThread::postElement(const Elem * /*elem*/)
-{
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  _fe_problem.addJacobian(_jacobian, _tid);
 }

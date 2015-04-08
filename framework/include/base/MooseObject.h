@@ -51,21 +51,18 @@ public:
    */
   InputParameters & parameters() { return _pars; }
 
+  ///@{
   /**
    * Retrieve a parameter for the object
    * @param name The name of the parameter
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParam(const std::string & name) { return _pars.get<T>(name); }
+  const T & getParam(const std::string & name);
 
-  /**
-   * Retrieve a parameter for the object (const version)
-   * @param name The name of the parameter
-   * @return The value of the parameter
-   */
   template <typename T>
-  const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
+  const T & getParam(const std::string & name) const;
+  ///@}
 
   /**
    * Test if the supplied parameter is valid
@@ -89,5 +86,19 @@ protected:
   /// The MooseApp this object is associated with
   MooseApp & _app;
 };
+
+template <typename T>
+const T &
+MooseObject::getParam(const std::string & name)
+{
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+template <typename T>
+const T &
+MooseObject::getParam(const std::string & name) const
+{
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
 
 #endif /* MOOSEOBJECT_H*/

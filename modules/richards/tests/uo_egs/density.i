@@ -92,9 +92,6 @@
 [Outputs]
   file_base = density
   output_initial = true
-  [./console]
-    type = Console
-  [../]
   [./csv]
     type = CSV
   [../]

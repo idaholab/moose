@@ -42,10 +42,10 @@ class GeometricSearchData;
  */
 template<>
 inline void
-dataLoad(std::istream & stream, std::map<unsigned int, PenetrationInfo *> & m, void * context)
+dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, void * context)
 {
-  std::map<unsigned int, PenetrationInfo *>::iterator it = m.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = m.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator it = m.begin();
+  std::map<dof_id_type, PenetrationInfo *>::iterator end = m.end();
 
   for (; it != end; ++it)
     delete it->second;
@@ -58,7 +58,7 @@ dataLoad(std::istream & stream, std::map<unsigned int, PenetrationInfo *> & m, v
 
   for (unsigned int i = 0; i < size; i++)
   {
-    unsigned int key;
+    dof_id_type key;
     loadHelper(stream, key, context);
     loadHelper(stream, m[key], context);
   }
@@ -77,8 +77,8 @@ public:
    */
   void reinit();
 
-  Real penetrationDistance(unsigned int node_id);
-  RealVectorValue penetrationNormal(unsigned int node_id);
+  Real penetrationDistance(dof_id_type node_id);
+  RealVectorValue penetrationNormal(dof_id_type node_id);
 
   enum NORMAL_SMOOTHING_METHOD
   {
@@ -105,12 +105,12 @@ public:
   NearestNodeLocator & _nearest_node;
 
   /// Data structure of nodes and their associated penetration information
-  std::map<unsigned int, PenetrationInfo *> & _penetration_info;
+  std::map<dof_id_type, PenetrationInfo *> & _penetration_info;
 
-  std::set<unsigned int> & _has_penetrated;
-  std::map<unsigned int, unsigned> & _locked_this_step;
-  std::map<unsigned int, unsigned> & _unlocked_this_step;
-  std::map<unsigned int, Real> & _lagrange_multiplier;
+  std::set<dof_id_type> & _has_penetrated;
+  std::map<dof_id_type, unsigned int> & _locked_this_step;
+  std::map<dof_id_type, unsigned int> & _unlocked_this_step;
+  std::map<dof_id_type, Real> & _lagrange_multiplier;
 
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);

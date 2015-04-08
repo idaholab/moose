@@ -172,9 +172,9 @@
   [./andy]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-13 1E-13 100'
+    petsc_options = '-snes_monitor -snes_linesearch_monitor'
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol -ksp_max_it'
+    petsc_options_value = 'bcgs bjacobi 1E-13 1E-13 100 1E-20 1E-50 20'
   [../]
 []
 
@@ -191,11 +191,10 @@
   output_final = true
   interval = 10000
   exodus = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./console]
     type = Console
-    perf_log = true
     interval = 1
-    linear_residuals = true
-    nonlinear_residuals = true
   [../]
 []

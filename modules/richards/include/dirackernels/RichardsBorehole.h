@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSBOREHOLE_H
 #define RICHARDSBOREHOLE_H
@@ -146,31 +149,31 @@ protected:
   RealVectorValue _borehole_direction;
 
   /// fluid porepressure (or porepressures in case of multiphase)
-  MaterialProperty<std::vector<Real> > &_pp;
+  MaterialProperty<std::vector<Real> > & _pp;
 
   /// d(porepressure_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_dpp_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
 
   /// fluid viscosity
-  MaterialProperty<std::vector<Real> > &_viscosity;
+  MaterialProperty<std::vector<Real> > & _viscosity;
 
   /// material permeability
   MaterialProperty<RealTensorValue> & _permeability;
 
   /// deriviatves of Seff wrt variables
-  MaterialProperty<std::vector<std::vector<Real> > > &_dseff_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _dseff_dv;
 
   /// relative permeability
-  MaterialProperty<std::vector<Real> > &_rel_perm;
+  MaterialProperty<std::vector<Real> > & _rel_perm;
 
   /// d(relperm_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_drel_perm_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _drel_perm_dv;
 
   /// fluid density
-  MaterialProperty<std::vector<Real> > &_density;
+  MaterialProperty<std::vector<Real> > & _density;
 
   /// d(density_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_ddensity_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dv;
 
   /**
    * This is used to hold the total fluid flowing into the borehole
@@ -212,26 +215,16 @@ protected:
 
   /**
    * Holds the values of pressures at all the nodes of the element
-   * This holds the same info as _ps_at_nodes, but in a different way.
-   * Eg: _nodal_pp[_pvar]->nodalSln()[i] = (*_ps_at_nodes[_pvar])[i]
-   * We call its computeNodalValues method in order to retrieve the nodal
-   * porepressures from Moose if _fully_upwind = true.
-   * NOTE: only valid if all Richards variables are pressures
-   */
-  std::vector<MooseVariable *> _nodal_pp;
-
-  /**
-   * Holds the values of pressures at all the nodes of the element
    * Only used if _fully_upwind = true
    * Eg:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
-   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i]
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i] = porepressure of pressure-variable _pvar at node i
    */
   std::vector<VariableValue *> _ps_at_nodes;
 
 
   /// reads a space-separated line of floats from ifs and puts in myvec
-  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
+  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
 
   /**
    * Calculates Peaceman's form of the borehole well constant

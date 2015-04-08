@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "WaterSteamEOSApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -6,6 +12,9 @@ template<>
 InputParameters validParams<WaterSteamEOSApp>()
 {
   InputParameters params = validParams<MooseApp>();
+  params.set<bool>("use_legacy_uo_initialization") = true;
+  params.set<bool>("use_legacy_uo_aux_computation") = false;
+
   return params;
 }
 

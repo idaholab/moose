@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSVARNAMES_H
 #define RICHARDSVARNAMES_H
@@ -105,6 +108,20 @@ class RichardsVarNames :
    */
   MooseVariable * raw_var(unsigned int richards_var_num) const;
 
+  /**
+   * The nodal variable values for the given richards_var_num
+   * To extract a the value of pressure variable "pvar", at
+   * node i, use (*RichardsVarNames.nodal_var(pvar))[i]
+   * @param richards_var_num the richards variable number
+   */
+  VariableValue * nodal_var(unsigned int richards_var_num) const;
+
+  /**
+   * The old nodal variable values for the given richards_var_num
+   * @param richards_var_num the richards variable number
+   */
+  VariableValue * nodal_var_old(unsigned int richards_var_num) const;
+
   /// return the _var_types string
   std::string var_types() const;
 
@@ -131,6 +148,12 @@ class RichardsVarNames :
 
   /// moose_var_value_old[i] = old values of richards variable i
   std::vector<VariableValue *> _moose_var_value_old;
+
+  /// moose_var_value[i] = values of richards variable i
+  std::vector<VariableValue *> _moose_nodal_var_value; // this is a vector of pointers to VariableValues
+
+  /// moose_var_value_old[i] = old values of richards variable i
+  std::vector<VariableValue *> _moose_nodal_var_value_old;
 
   /// moose_grad_var[i] = gradient values of richards variable i
   std::vector<VariableGradient *> _moose_grad_var;

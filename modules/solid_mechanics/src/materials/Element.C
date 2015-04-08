@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "Element.h"
 
 #include "Nonlinear3D.h"
@@ -188,7 +194,6 @@ Element::polarDecompositionEigen( const ColumnMajorMatrix & Fhat, ColumnMajorMat
   const int ND = 3;
 
   ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
-  ColumnMajorMatrix invUhat(ND,ND), logVhat(ND,ND);
   ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
 
   ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
@@ -213,6 +218,7 @@ Element::polarDecompositionEigen( const ColumnMajorMatrix & Fhat, ColumnMajorMat
 
   ColumnMajorMatrix Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
 
+  ColumnMajorMatrix invUhat(ND,ND);
   invertMatrix(Uhat,invUhat);
 
   Rhat = Fhat * invUhat;

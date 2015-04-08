@@ -3,7 +3,7 @@
 ###############################################################################
 #
 # Optional Environment variables
-# MOOSE_DIR        - Root directory of the MOOSE project 
+# MOOSE_DIR        - Root directory of the MOOSE project
 # MODULE_DIR       - Location of the MOOSE modules directory
 # FRAMEWORK_DIR    - Location of the MOOSE framework
 #
@@ -17,10 +17,15 @@ FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
+# dependency on tensor_mechanics
+TENSOR_MECHANICS := yes
+include $(MODULE_DIR)/modules.mk
+
 # dep apps
 APPLICATION_DIR    := $(MODULE_DIR)/phase_field
 APPLICATION_NAME   := phase_field
 BUILD_EXEC         := yes
+DEPEND_MODULES     := tensor_mechanics
 DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include            $(FRAMEWORK_DIR)/app.mk
 

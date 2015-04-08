@@ -93,18 +93,18 @@
   [./x]
     type = ScalarVariable
     variable = x
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./y]
     type = ScalarVariable
     variable = y
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
   [./exact_x]
     type = PlotFunction
     function = exact_x_fn
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   # measure the error from exact solution in L2 norm
   [./l2err_x]
@@ -131,9 +131,6 @@
   file_base = out
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

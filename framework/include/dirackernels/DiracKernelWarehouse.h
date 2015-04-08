@@ -15,7 +15,7 @@
 #ifndef DIRACKERNELWAREHOUSE_H
 #define DIRACKERNELWAREHOUSE_H
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 #include <vector>
 
@@ -24,7 +24,7 @@ class DiracKernel;
 /**
  * Holds DiracKernels and provides some services
  */
-class DiracKernelWarehouse
+class DiracKernelWarehouse : public Warehouse<DiracKernel>
 {
 public:
   DiracKernelWarehouse();
@@ -35,12 +35,6 @@ public:
   void timestepSetup();
   void residualSetup();
   void jacobianSetup();
-
-  /**
-   * Get the list of all dirac kernels
-   * @return The list of all dirac kernels
-   */
-  const std::vector<DiracKernel *> & all() const { return _dirac_kernels; }
 
   /**
    * Adds a Dirac kernel
@@ -54,9 +48,6 @@ protected:
    * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
    */
   std::vector<MooseSharedPointer<DiracKernel> > _all_ptrs;
-
-  /// All dirac kernels
-  std::vector<DiracKernel *> _dirac_kernels;
 };
 
 #endif // DIRACKERNELWAREHOUSE_H

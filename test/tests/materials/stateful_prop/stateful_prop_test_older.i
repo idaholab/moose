@@ -93,9 +93,6 @@
   file_base = out_older
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
   csv = true
+  print_perf_log = true
 []

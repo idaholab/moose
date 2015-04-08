@@ -61,21 +61,41 @@
 
 [Adaptivity]
   steps = 3
-  marker = 'error_fraction'
-
-  [./Indicators]
-    [./gradient_jump]
-      type = GradientJumpIndicator
-      variable = u
-    [../]
-  [../]
+  marker = 'combo'
 
   [./Markers]
-    [./error_fraction]
-      type = ErrorFractionMarker
-      coarsen = 0.001
-      indicator = gradient_jump
-      refine = 0.8
+    [./combo]
+      # In a real problem you would want to mark based on an error
+      # indicator, but we want this test to run consistently in
+      # parallel, so we just mark elements within a box for
+      # refinement.  The boxes here are based on the 8x8
+      # uniformly-refined initial grid.
+      type = ComboMarker
+      markers = 'box1 box2 box3'
+    [../]
+
+    [./box1]
+      type = BoxMarker
+      bottom_left = '0.125 0.625 0'
+      top_right = '0.375 0.875 0'
+      inside = refine
+      outside = dont_mark
+    [../]
+
+    [./box2]
+      type = BoxMarker
+      bottom_left = '0.625 0.625 0'
+      top_right = '0.875 0.875 0'
+      inside = refine
+      outside = dont_mark
+    [../]
+
+    [./box3]
+      type = BoxMarker
+      bottom_left = '0.625 0.125 0'
+      top_right = '0.875 0.375 0'
+      inside = refine
+      outside = dont_mark
     [../]
   [../]
 []
@@ -85,6 +105,6 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []

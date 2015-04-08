@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef LATTICESMOOTHCIRCLEIC_H
 #define LATTICESMOOTHCIRCLEIC_H
 
@@ -44,6 +50,8 @@ protected:
   Real _radius;
   Real _radius_variation;
   MooseEnum _radius_variation_type;
+
+  bool _avoid_bounds;
 
   Point _bottom_left;
   Point _top_right;

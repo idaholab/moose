@@ -228,10 +228,9 @@
   interval = 100000
   exodus = true
   hide = pgas
+  print_perf_log = true
   [./console_out]
     type = Console
     interval = 1
-    nonlinear_residuals = true
-    perf_log = true
   [../]
 []

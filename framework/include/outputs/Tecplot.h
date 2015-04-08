@@ -16,6 +16,7 @@
 #define TECPLOT_H
 
 // MOOSE includes
+#include "BasicOutput.h"
 #include "OversampleOutput.h"
 
 // Forward declarations
@@ -27,8 +28,7 @@ InputParameters validParams<Tecplot>();
 /**
  * Class for output data to the TecplotII format
  */
-class Tecplot :
-  public OversampleOutput
+class Tecplot : public BasicOutput<OversampleOutput>
 {
 public:
 
@@ -43,7 +43,7 @@ protected:
    * Overload the Output::output method, this is required for Tecplot
    * output due to the method utilized for outputing single/global parameters
    */
-  virtual void output();
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Returns the current filename, this method handles adding the timestep suffix

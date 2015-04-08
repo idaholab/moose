@@ -1,7 +1,14 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef TENSORMECHANICSPLASTICMOHRCOULOMB_H
 #define TENSORMECHANICSPLASTICMOHRCOULOMB_H
 
 #include "TensorMechanicsPlasticModel.h"
+#include "TensorMechanicsHardeningModel.h"
 
 
 class TensorMechanicsPlasticMohrCoulomb;
@@ -11,17 +18,24 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>();
 
 /**
- * Mohr-Coulomb plasticity, nonassociative with hardening/softening
+ * Mohr-Coulomb plasticity, nonassociative with hardening/softening.
  *
- * The smoothing of the tip of the yield-surface cone is described in
+ * For 'hyperbolic' smoothing, the smoothing of the tip of the yield-surface cone is described in
  * Zienkiewicz and Prande "Some useful forms of isotropic yield surfaces for soil and rock mechanics" (1977) In G Gudehus (editor) "Finite Elements in Geomechanics" Wile, Chichester, pp 179-190.
+ * For 'cap' smoothing, additional smoothing is performed.
  * The smoothing of the edges of the cone is described in
  * AJ Abbo, AV Lyamin, SW Sloan, JP Hambleton "A C2 continuous approximation to the Mohr-Coulomb yield surface" International Journal of Solids and Structures 48 (2011) 3001-3010
+ *
  */
 class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
 {
  public:
   TensorMechanicsPlasticMohrCoulomb(const std::string & name, InputParameters parameters);
+
+  /// Returns the model name (MohrCoulomb)
+  virtual std::string modelName() const;
+
+ protected:
 
   /**
    * The yield function
@@ -71,37 +85,33 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
 
- protected:
+  /// Hardening model for cohesion
+  const TensorMechanicsHardeningModel & _cohesion;
 
-  /// The cohesion at zero hardening
-  Real _cohesion;
+  /// Hardening model for phi
+  const TensorMechanicsHardeningModel & _phi;
 
-  /// friction angle at zero hardening
-  Real _phi;
+  /// Hardening model for psi
+  const TensorMechanicsHardeningModel & _psi;
 
-  /// dilation angle at zero hardening
-  Real _psi;
-
-  /// The cohesion_residual
-  Real _cohesion_residual;
-
-  /// friction angle_residual
-  Real _phi_residual;
-
-  /// dilation angle_residual
-  Real _psi_residual;
-
-  /// Logarithmic rate of change of cohesion to _cohesion_residual
-  Real _cohesion_rate;
-
-  /// Logarithmic rate of change of _phi to _phi_residual
-  Real _phi_rate;
-
-  /// Logarithmic rate of change of _psi to _psi_residual
-  Real _psi_rate;
+  /**
+   * The yield function is modified to
+   * f = s_m*sinphi + sqrt(a + s_bar^2 K^2) - C*cosphi
+   * where "a" depends on the tip_scheme.  Currently _tip_scheme is
+   * 'hyperbolic', where a = _small_smoother2
+   * 'cap' where a = _small_smoother2 + (p(stress_mean - _cap_start))^2
+   *       with the function p(x)=x(1-exp(-_cap_rate*x)) for x>0, and p=0 otherwise
+   */
+  MooseEnum _tip_scheme;
 
   /// Square of tip smoothing parameter to smooth the cone at mean_stress = T
   Real _small_smoother2;
+
+  /// smoothing parameter dictating when the 'cap' will start - see doco for _tip_scheme
+  Real _cap_start;
+
+  /// dictates how quickly the 'cap' degenerates to a hemisphere - see doco for _tip_scheme
+  Real _cap_rate;
 
   /// edge smoothing parameter, in radians
   Real _tt;
@@ -126,6 +136,15 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
 
   /// if secondInvariant < _lode_cutoff then set Lode angle to zero.  This is to guard against precision-loss
   Real _lode_cutoff;
+
+  /// returns the 'a' parameter - see doco for _tip_scheme
+  virtual Real smooth(const RankTwoTensor & stress) const;
+
+  /// returns the da/dstress_mean - see doco for _tip_scheme
+  virtual Real dsmooth(const RankTwoTensor & stress) const;
+
+  /// returns the d^2a/dstress_mean^2 - see doco for _tip_scheme
+  virtual Real d2smooth(const RankTwoTensor & stress) const;
 
   /// cohesion as a function of internal parameter
   virtual Real cohesion(const Real internal_param) const;

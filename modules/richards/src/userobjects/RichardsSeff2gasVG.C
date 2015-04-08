@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  van-Genuchten gas effective saturation as a function of (Pwater, Pgas), and its derivs wrt to that pressure
 //
@@ -18,9 +21,9 @@ InputParameters validParams<RichardsSeff2gasVG>()
 }
 
 RichardsSeff2gasVG::RichardsSeff2gasVG(const std::string & name, InputParameters parameters) :
-  RichardsSeff(name, parameters),
-  _al(getParam<Real>("al")),
-  _m(getParam<Real>("m"))
+    RichardsSeff(name, parameters),
+    _al(getParam<Real>("al")),
+    _m(getParam<Real>("m"))
 {
 }
 

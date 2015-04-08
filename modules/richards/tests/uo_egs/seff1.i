@@ -90,9 +90,6 @@
 [Outputs]
   file_base = seff1
   output_initial = true
-  [./console]
-    type = Console
-  [../]
   [./csv]
     type = CSV
   [../]

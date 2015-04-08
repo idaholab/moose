@@ -13,7 +13,7 @@
     points = '0   0  0.5
               0.1 0  0
               0   0 -0.5'
-    boundary = 'top side bottom'
+    new_boundary = 'top side bottom'
   [../]
 []
 
@@ -57,9 +57,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

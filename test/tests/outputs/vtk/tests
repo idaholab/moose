@@ -34,7 +34,6 @@ cd[Tests]
     min_parallel = 2
     vtk = true
     mesh_mode = SERIAL
-    compiler = CLANG
   [../]
   [./diff_parallel_mesh]
     # Check that actual solution, in parallel with parallel mesh

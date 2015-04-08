@@ -70,6 +70,8 @@
   radius_inner = '12.5 25.0 37.5'
   radius_outer = '25.0 37.5 50.0'
   intersecting_boundary = '1 2'
+  symmetry_plane = 2
+  position_type = angle
 []
 
 [SolidMechanics]
@@ -91,27 +93,27 @@
     tensor = stress
     variable = stress_yy
     index = 1
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./stress_zz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zz
     index = 2
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./vonmises]
     type = MaterialTensorAux
     tensor = stress
     variable = vonmises
     quantity = vonmises
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -218,11 +220,9 @@
 
 [Outputs]
   file_base = j_int_surfbreak_ellip_crack_sym_mm_cm_out
-  output_initial = true
+  output_initial = false
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  csv = true
+  print_linear_residuals = true
+  print_perf_log = true
 []

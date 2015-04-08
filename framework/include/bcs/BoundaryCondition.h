@@ -89,6 +89,11 @@ public:
 
   /**
    * Hook for turning the boundary condition on and off.
+   *
+   * It is not safe to use variable values in this function, since (a) this is not called inside a quadrature loop,
+   * (b) reinit() is not called, thus the variables values are not computed.
+   * NOTE: In NodalBC-derived classes, we can use the variable values, since renitNodeFace() was called before calling
+   * this method. However, one has to index into the values manually, i.e. not using _qp.
    * @return true if the boundary condition should be applied, otherwise false
    */
   virtual bool shouldApply();

@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSMATERIAL_H
 #define RICHARDSMATERIAL_H
@@ -24,37 +27,89 @@ InputParameters validParams<RichardsMaterial>();
 class RichardsMaterial : public Material
 {
 public:
-  RichardsMaterial(const std::string & name,
-                  InputParameters parameters);
+  RichardsMaterial(const std::string & name, InputParameters parameters);
 
 protected:
 
-  virtual void computeProperties();
-
-
-private:
-
+  /// porosity as entered by the user
   Real _material_por;
-  VariableValue * _por_change;
-  VariableValue * _por_change_old;
 
+  /// porosity changes.  if not entered they default to zero
+  VariableValue & _por_change;
+  VariableValue & _por_change_old;
+
+  /// permeability as entered by the user
   RealTensorValue _material_perm;
-  /// trace of permeability tensor
-  Real _trace_perm;
-
-  std::vector<Real> _material_viscosity;
 
   /// gravity as entered by user
   RealVectorValue _material_gravity;
 
+  /// material properties
   MaterialProperty<Real> & _porosity_old;
   MaterialProperty<Real> & _porosity;
   MaterialProperty<RealTensorValue> & _permeability;
   MaterialProperty<RealVectorValue> & _gravity;
 
-
+  /// The variable names userobject for the Richards variables
   const RichardsVarNames & _richards_name_UO;
   unsigned int _num_p;
+
+
+  std::vector<const RichardsRelPerm *> _material_relperm_UO;
+  std::vector<const RichardsSeff *> _material_seff_UO;
+  std::vector<const RichardsSat *> _material_sat_UO;
+  std::vector<const RichardsDensity *> _material_density_UO;
+  std::vector<const RichardsSUPG *> _material_SUPG_UO;
+
+  std::vector<VariableValue *> _perm_change;
+
+
+
+  virtual void computeProperties();
+
+  /**
+   * computes the quadpoint values of the porepressure(s)
+   * and effective saturation(s), and their derivatives
+   * wrt the variables in the system.
+   * These are then used in computeProperties to compute
+   * relative permeability, density, and so on
+   */
+  void computePandSeff();
+
+
+  /**
+   * Computes the "derived" quantities --- those that
+   * depend on porepressure(s) and effective saturation(s) ---
+   * such as density, relative permeability, mass, flux, etc
+   * @param qp The quadpoint to evaluate the quantites at
+   */
+  void computeDerivedQuantities(unsigned int qp);
+
+  /**
+   * Computes 2nd derivatives of the flux.
+   * These are needed by kernels if doing SUPG
+   * @param qp The quadpoint to evaluate the quantites at
+   */
+  void compute2ndDerivedQuantities(unsigned int qp);
+
+  /**
+   * Assigns and zeroes the MaterialProperties
+   * associated with SUPG.
+   * @param qp The quadpoint to assign+zero at
+   */
+  void zeroSUPG(unsigned int qp);
+
+
+  /// Computes the tauvel_SUPG and its derivatives
+  void computeSUPG();
+
+ private:
+
+  /// trace of permeability tensor
+  Real _trace_perm;
+
+  std::vector<Real> _material_viscosity;
+
 
 
   /// old values of porepressure(s)
@@ -97,13 +152,13 @@ private:
   MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _d2seff_dv;
 
   /// old saturation
-  MaterialProperty<std::vector<Real> >& _sat_old;
+  MaterialProperty<std::vector<Real> > & _sat_old;
 
   /// saturation (vector of saturations in case of multiphase)
-  MaterialProperty<std::vector<Real> >& _sat;
+  MaterialProperty<std::vector<Real> > & _sat;
 
   /// d(saturation_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > >& _dsat_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _dsat_dv;
 
 
   /// relative permeability (vector of relative permeabilities in case of multiphase)
@@ -158,8 +213,6 @@ private:
   MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dtauvel_SUPG_dgradp; // d (_tauvel_SUPG_i)/d(_grad_variable_j)
   MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dtauvel_SUPG_dp; // d (_tauvel_SUPG_i)/d(variable_j)
 
-  std::vector<VariableValue *> _perm_change;
-
   /// d^2(density)/dp_j/dP_k - used in various derivative calculations
   std::vector<std::vector<std::vector<Real> > > _d2density;
 
@@ -172,31 +225,6 @@ private:
   std::vector<VariableValue *> _pressure_old_vals;
   std::vector<VariableGradient *> _grad_p;
 
-  std::vector<const RichardsRelPerm *> _material_relperm_UO;
-  std::vector<const RichardsSeff *> _material_seff_UO;
-  std::vector<const RichardsSat *> _material_sat_UO;
-  std::vector<const RichardsDensity *> _material_density_UO;
-  std::vector<const RichardsSUPG *> _material_SUPG_UO;
-
-
-  /**
-   * computes the quadpoint values of the porepressure(s)
-   * and effective saturation(s), and their derivatives
-   * wrt the variables in the system.
-   * These are then used in computeProperties to compute
-   * relative permeability, density, and so on
-   */
-  void computePandSeff();
-
-
-  /**
-   * Computes the "derived" quantities --- those that
-   * depend on porepressure(s) and effective saturation(s) ---
-   * such as density, relative permeability, mass, flux, etc
-   * @param qp The quadpoint to evaluate the quantites at
-   */
-  void computeDerivedQuantities(unsigned int qp);
-
 
   /**
    * Zeroes 2nd derivatives of the flux.
@@ -206,25 +234,6 @@ private:
    * @param qp The quadpoint to evaluate the quantites at
    */
   void zero2ndDerivedQuantities(unsigned int qp);
-
-
-  /**
-   * Computes 2nd derivatives of the flux.
-   * These are needed by kernels if doing SUPG
-   * @param qp The quadpoint to evaluate the quantites at
-   */
-  void compute2ndDerivedQuantities(unsigned int qp);
-
-  /**
-   * Assigns and zeroes the MaterialProperties
-   * associated with SUPG.
-   * @param qp The quadpoint to assign+zero at
-   */
-  void zeroSUPG(unsigned int qp);
-
-
-  /// Computes the tauvel_SUPG and its derivatives
-  void computeSUPG();
 
 
 

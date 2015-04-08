@@ -32,13 +32,13 @@ InitProblemAction::InitProblemAction(const std::string & name, InputParameters p
 void
 InitProblemAction::act()
 {
-  if (_problem != NULL)
+  if (_problem.get() != NULL)
     _problem->init();
   else
   {
     // init_problem is a mandatory action, we have an executioner at this point and all FEProblems are
     // already added, we build the coupled system
-    CoupledExecutioner * ex = dynamic_cast<CoupledExecutioner *>(_executioner);
+    CoupledExecutioner * ex = dynamic_cast<CoupledExecutioner *>(_executioner.get());
     if (ex != NULL)
       ex->build();
   }

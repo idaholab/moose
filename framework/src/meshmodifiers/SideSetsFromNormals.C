@@ -27,18 +27,21 @@ template<>
 InputParameters validParams<SideSetsFromNormals>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
-  params += validParams<BoundaryRestrictableRequired>();
+  params.addRequiredParam<std::vector<BoundaryName> >("new_boundary", "The name of the boundary to create");
   params.addRequiredParam<std::vector<Point> >("normals", "A list of normals for which to start painting sidesets");
   return params;
 }
 
 SideSetsFromNormals::SideSetsFromNormals(const std::string & name, InputParameters parameters):
     AddSideSetsBase(name, parameters),
-    BoundaryRestrictableRequired(name, parameters),
-    _boundary_ids(boundaryIDs().begin(), boundaryIDs().end()),
     _normals(getParam<std::vector<Point> >("normals"))
 {
-  if (_normals.size() != boundaryNames().size())
+
+  // Get the BoundaryIDs from the mesh
+  _boundary_names = getParam<std::vector<BoundaryName> >("new_boundary");
+
+
+  if (_normals.size() != _boundary_names.size())
     mooseError("normal list and boundary list are not the same length");
 
   // Make sure that the normals are normalized
@@ -62,8 +65,7 @@ SideSetsFromNormals::modify()
   // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
   _mesh_ptr->errorIfParallelDistribution("SideSetsFromNormals");
 
-  // Get the BoundaryIDs from the mesh
-  _boundary_ids = _mesh_ptr->getBoundaryIDs(boundaryNames(), true);
+  std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(_boundary_names, true);
 
   setup();
 
@@ -85,17 +87,17 @@ SideSetsFromNormals::modify()
       _fe_face->reinit(elem, side);
       const std::vector<Point> & normals = _fe_face->get_normals();
 
-      for (unsigned int i=0; i<_boundary_ids.size(); ++i)
+      for (unsigned int i=0; i<boundary_ids.size(); ++i)
       {
         if (std::abs(1.0 - _normals[i]*normals[0]) < 1e-5)
-          flood(*el, _normals[i], _boundary_ids[i]);
+          flood(*el, _normals[i], boundary_ids[i]);
       }
     }
   }
 
   finalize();
 
-  for (unsigned int i = 0; i < _boundary_ids.size(); ++i)
-    _mesh_ptr->getMesh().boundary_info->sideset_name(_boundary_ids[i]) = boundaryNames()[i];
-
+  BoundaryInfo & boundary_info = _mesh_ptr->getMesh().get_boundary_info();
+  for (unsigned int i = 0; i < boundary_ids.size(); ++i)
+    boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 }

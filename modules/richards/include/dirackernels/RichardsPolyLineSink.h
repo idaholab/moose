@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSPOLYLINESINK_H
 #define RICHARDSPOLYLINESINK_H
@@ -81,7 +84,7 @@ protected:
    * @param ifs the file stream
    * @param myvec upon return will contain the space-separated flows encountered in ifs
    */
-  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
+  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
 };
 
 #endif //RICHARDSPOLYLINESINK_H

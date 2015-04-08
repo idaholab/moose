@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 // Original class author: A.M. Jokisaari,  O. Heinonen
 
 #ifndef FINITESTRAINPLASTICMATERIAL_H
@@ -35,6 +41,9 @@ protected:
   Real _rtol;
   Real _ftol;
   Real _eptol;
+
+  // outer and mixed product of the delta function tensors
+  RankFourTensor _deltaOuter, _deltaMixed;
 
   /**
    * Implements the return map
@@ -98,10 +107,6 @@ protected:
    * @param dresid_dsig the required derivative (this is an output variable)
    */
   virtual void getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, RankFourTensor & dresid_dsig);
-
-
-  /// returns unity if i==j, otherwise zero
-  Real deltaFunc(unsigned int i, unsigned int j);
 
   /**
    * yield stress as a function of equivalent plastic strain.

@@ -1,7 +1,7 @@
 [Mesh]
   # This test uses SolutionUserObject which doesn't work with ParallelMesh.
   type = GeneratedMesh
-  distribution = serial
+  distribution = SERIAL
   dim = 2
   nx = 2
   ny = 2
@@ -84,10 +84,7 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []
 
 [ICs]

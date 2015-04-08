@@ -15,6 +15,7 @@
 #include "CoupledProblem.h"
 #include "Transient.h"
 #include "TimeStepper.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<CoupledTransientExecutioner>()
@@ -47,6 +48,7 @@ CoupledTransientExecutioner::execute()
   // preExecute
   for (unsigned int i = 0; i < n_problems; i++)
   {
+    _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
     _executioners[i]->init();
     _executioners[i]->preExecute();
   }
@@ -54,7 +56,8 @@ CoupledTransientExecutioner::execute()
   std::vector<Transient *> trans(n_problems);
   for (unsigned int i = 0; i < n_problems; i++)
   {
-    Transient * exec = dynamic_cast<Transient *>(_executioners[i]);
+    _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
+    Transient * exec = dynamic_cast<Transient *>(_executioners[i].get());
     if (exec == NULL)
       mooseError("Executioner for problem '" << _fe_problems[i]->name() << "' has to be of a transient type.");
     trans[i] = exec;
@@ -67,25 +70,35 @@ CoupledTransientExecutioner::execute()
     if (first != true)
     {
       for (unsigned int i = 0; i < n_problems; i++)
+      {
+        _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
         trans[i]->incrementStepOrReject();
+      }
     }
 
     first = false;
 
     for (unsigned int i = 0; i < n_problems; i++)
+    {
+      _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
       trans[i]->computeDT();
+    }
 
     _dt = trans[0]->getDT();
     _time += _dt;
 
     for (unsigned int i = 0; i < n_problems; i++)
     {
+      _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
       _console << "Solving '" << _fep_mapping[_fe_problems[i]] << "'" << std::endl;
       trans[i]->takeStep(_dt);
       projectVariables(*_fe_problems[(i + 1) % n_problems]);
     }
 
     for (unsigned int i = 0; i < n_problems; i++)
+    {
+      _executioners[i]->getMooseApp().setOutputWarehouse(_owhs[i]);
       trans[i]->endStep();
+    }
   }
 }

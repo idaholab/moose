@@ -21,12 +21,14 @@ template<>
 InputParameters validParams<CreateProblemAction>()
 {
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
+  MooseEnum rz_coord_axis("X=0 Y=1", "Y");
 
   InputParameters params = validParams<MooseObjectAction>();
   params.set<std::string>("type") = "FEProblem";
   params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
   params.addParam<std::vector<SubdomainName> >("block", "Block IDs for the coordinate systems");
   params.addParam<MultiMooseEnum>("coord_type", coord_types, "Type of the coordinate system per block param");
+  params.addParam<MooseEnum>("rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
 
   params.addParam<bool>("fe_cache", false, "Whether or not to turn on the finite element shape function caching system.  This can increase speed with an associated memory cost.");
 
@@ -52,18 +54,19 @@ CreateProblemAction::CreateProblemAction(const std::string & name, InputParamete
 void
 CreateProblemAction::act()
 {
-  if (_mesh != NULL)
+  if (_mesh.get() != NULL)
   {
     // build the problem only if we have mesh
     {
       _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
       _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
-      _problem = dynamic_cast<FEProblem *>(_factory.create(_type, _problem_name, _moose_object_pars));
-      if (_problem == NULL)
+      _problem = MooseSharedNamespace::dynamic_pointer_cast<FEProblem>(_factory.create(_type, _problem_name, _moose_object_pars));
+      if (!_problem.get())
         mooseError("Problem has to be of a FEProblem type");
     }
     // set up the problem
     _problem->setCoordSystem(_blocks, _coord_sys);
+    _problem->setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
     _problem->useFECache(_fe_cache);
     _problem->setKernelCoverageCheck(getParam<bool>("kernel_coverage_check"));
     _problem->legacyUoAuxComputation() = _pars.isParamValid("use_legacy_uo_aux_computation") ? getParam<bool>("use_legacy_uo_aux_computation") : _app.legacyUoAuxComputationDefault();

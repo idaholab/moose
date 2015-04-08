@@ -14,8 +14,8 @@
   [./tif]
     type = ImageFunction
     file_base = ../stack/test
-    file_type = png
-    file_range = 00
+    file_suffix = png
+    file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
     threshold = 30000
     upper_value = 1
   [../]
@@ -44,10 +44,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    nonlinear_residuals = false
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

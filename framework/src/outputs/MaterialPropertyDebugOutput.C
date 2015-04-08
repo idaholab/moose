@@ -25,22 +25,16 @@
 template<>
 InputParameters validParams<MaterialPropertyDebugOutput>()
 {
-  InputParameters params = validParams<PetscOutput>();
-  params += Output::disableOutputTypes();
+  InputParameters params = validParams<BasicOutput<Output> >();
 
-  // Create parameters for allowing debug outputter to be defined within the [Outputs] block
-  params.addParam<bool>("show_var_residual_norms", false, "Print the residual norms of the individual solution variables at each nonlinear iteration");
-  params.addParam<bool>("show_material_props", false, "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
-  params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
-
-  // By default operate on linear residuals, this is to maintain the behavior of show_top_residuals
-  params.set<bool>("linear_residuals") = true;
+  // This object only outputs data once, in the constructor, so disable fine control
+  params.suppressParameter<MultiMooseEnum>("output_on");
 
   return params;
 }
 
 MaterialPropertyDebugOutput::MaterialPropertyDebugOutput(const std::string & name, InputParameters & parameters) :
-    Output(name, parameters)
+    BasicOutput<Output>(name, parameters)
 {
   printMaterialMap();
 }
@@ -50,7 +44,7 @@ MaterialPropertyDebugOutput::~MaterialPropertyDebugOutput()
 }
 
 void
-MaterialPropertyDebugOutput::output()
+MaterialPropertyDebugOutput::output(const ExecFlagType & /*type*/)
 {
 }
 

@@ -19,7 +19,8 @@
 
 #include <fstream>
 
-MaterialWarehouse::MaterialWarehouse()
+MaterialWarehouse::MaterialWarehouse() :
+    Warehouse<Material>()
 {
   _master_list.reserve(3);
   _master_list.push_back(&_active_materials);
@@ -27,8 +28,10 @@ MaterialWarehouse::MaterialWarehouse()
   _master_list.push_back(&_active_neighbor_materials);
 }
 
-MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs)
+MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs) :
+    Warehouse<Material>()
 {
+  _all_objects = rhs._all_objects;
   _active_materials = rhs._active_materials;
   _active_face_materials = rhs._active_face_materials;
   _active_neighbor_materials = rhs._active_neighbor_materials;
@@ -58,29 +61,29 @@ MaterialWarehouse::initialSetup()
   for (std::map<BoundaryID, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
      sortMaterials(j->second);
 
-  for (unsigned int i=0; i<_mats.size(); i++)
-    _mats[i]->initialSetup();
+  for (unsigned int i=0; i<_all_objects.size(); i++)
+    _all_objects[i]->initialSetup();
 }
 
 void
 MaterialWarehouse::timestepSetup()
 {
-  for (unsigned int i=0; i<_mats.size(); i++)
-    _mats[i]->timestepSetup();
+  for (unsigned int i=0; i<_all_objects.size(); i++)
+    _all_objects[i]->timestepSetup();
 }
 
 void
 MaterialWarehouse::residualSetup()
 {
-  for (unsigned int i=0; i<_mats.size(); i++)
-    _mats[i]->residualSetup();
+  for (unsigned int i=0; i<_all_objects.size(); i++)
+    _all_objects[i]->residualSetup();
 }
 
 void
 MaterialWarehouse::jacobianSetup()
 {
-  for (unsigned int i=0; i<_mats.size(); i++)
-    _mats[i]->jacobianSetup();
+  for (unsigned int i=0; i<_all_objects.size(); i++)
+    _all_objects[i]->jacobianSetup();
 }
 
 bool
@@ -110,7 +113,8 @@ MaterialWarehouse::hasBoundaryMaterials(BoundaryID boundary_id) const
 std::vector<Material *> &
 MaterialWarehouse::getMaterials()
 {
-  return _mats;
+  mooseDeprecated("MaterialWarehouse::getMaterials() is deprecated - use MaterialWarehouse::all() instead");
+  return _all_objects;
 }
 
 std::vector<Material *> &
@@ -175,30 +179,11 @@ MaterialWarehouse::active(SubdomainID block_id)
   return it->second;
 }
 
-void MaterialWarehouse::updateMaterialDataState()
-{
-  for (std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_materials.begin(); it != _active_materials.end(); ++it)
-  {
-    for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
-    {
-      (*jt)->timeStepSetup();
-    }
-  }
-
-  for (std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_face_materials.begin(); it != _active_face_materials.end(); ++it)
-  {
-    for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
-    {
-      (*jt)->timeStepSetup();
-    }
-  }
-}
-
 void
 MaterialWarehouse::addMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material)
 {
   _all_ptrs.push_back(material);
-  _mats.push_back(material.get());
+  _all_objects.push_back(material.get());
 
   for (unsigned int i=0; i<blocks.size(); ++i)
   {
@@ -211,7 +196,7 @@ MaterialWarehouse::addMaterial(std::vector<SubdomainID> blocks, MooseSharedPoint
 void MaterialWarehouse::addFaceMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material)
 {
   _all_ptrs.push_back(material);
-  _mats.push_back(material.get());
+  _all_objects.push_back(material.get());
 
   for (unsigned int i=0; i<blocks.size(); ++i)
   {
@@ -225,7 +210,7 @@ void MaterialWarehouse::addFaceMaterial(std::vector<SubdomainID> blocks, MooseSh
 void MaterialWarehouse::addNeighborMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material)
 {
   _all_ptrs.push_back(material);
-  _mats.push_back(material.get());
+  _all_objects.push_back(material.get());
 
   for (unsigned int i=0; i<blocks.size(); ++i)
   {
@@ -239,7 +224,7 @@ void MaterialWarehouse::addNeighborMaterial(std::vector<SubdomainID> blocks, Moo
 void MaterialWarehouse::addBoundaryMaterial(std::vector<BoundaryID> boundaries, MooseSharedPointer<Material> & material)
 {
   _all_ptrs.push_back(material);
-  _mats.push_back(material.get());
+  _all_objects.push_back(material.get());
 
   for (std::vector<BoundaryID>::const_iterator it = boundaries.begin(); it != boundaries.end(); ++it)
   {

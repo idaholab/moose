@@ -65,11 +65,11 @@ TrackDiracFront::finalize()
 Elem *
 TrackDiracFront::localElementConnectedToCurrentNode()
 {
-  std::map< unsigned int, std::vector< unsigned int > > & _node_to_elem_map = _mesh.nodeToElemMap();
+  std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map = _mesh.nodeToElemMap();
 
   dof_id_type id = _current_node->id();
 
-  const std::vector< unsigned int > & connected_elems = _node_to_elem_map.at(id);
+  const std::vector<dof_id_type> & connected_elems = _node_to_elem_map.at(id);
 
   unsigned int pid = processor_id(); // This processor id
 

@@ -78,8 +78,5 @@
   output_initial = true
   exodus = true
   xda = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

@@ -24,8 +24,7 @@ template<>
 InputParameters validParams<Tecplot>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<OversampleOutput>();
-  params += Output::disableOutputTypes();
+  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
 
   // Add binary toggle
   params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");
@@ -42,7 +41,7 @@ InputParameters validParams<Tecplot>()
 }
 
 Tecplot::Tecplot(const std::string & name, InputParameters parameters) :
-    OversampleOutput(name, parameters),
+    BasicOutput<OversampleOutput>(name, parameters),
     _binary(getParam<bool>("binary")),
     _ascii_append(getParam<bool>("ascii_append")),
     _first_time(declareRestartableData<bool>("first_time", true))
@@ -54,17 +53,12 @@ Tecplot::Tecplot(const std::string & name, InputParameters parameters) :
     _binary = false;
   }
 #endif
-
-  // Force sequence output Note: This does not change the behavior for
-  // this object b/c outputSetup() is empty, but it is placed here for
-  // consistency.
-  sequence(true);
 }
 
 
 
 void
-Tecplot::output()
+Tecplot::output(const ExecFlagType & /*type*/)
 {
   TecplotIO out(*_mesh_ptr, _binary, time() + _app.getGlobalTimeOffset());
 

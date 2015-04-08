@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 //  This post processor calculates the J-Integral
 //
 #include "JIntegral.h"
@@ -10,6 +16,8 @@ InputParameters validParams<JIntegral>()
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
   params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front corresponding to this q function");
   params.addParam<bool>("convert_J_to_K",false,"Convert J-integral to stress intensity factor K.");
+  params.addParam<unsigned int>("symmetry_plane", "Account for a symmetry plane passing through the plane of the crack, normal to the specified axis (0=x, 1=y, 2=z)");
+  params.addParam<Real>("poissons_ratio","Poisson's ratio");
   params.addParam<Real>("youngs_modulus","Young's modulus of the material.");
   params.set<bool>("use_displaced_mesh") = false;
   return params;
@@ -28,7 +36,9 @@ JIntegral::JIntegral(const std::string & name, InputParameters parameters):
                         &getMaterialProperty<RealVectorValue>("J_thermal_term_vec"):
                         NULL),
     _convert_J_to_K(getParam<bool>("convert_J_to_K")),
-    _youngs_modulus(getParam<Real>("youngs_modulus"))
+    _has_symmetry_plane(isParamValid("symmetry_plane")),
+    _poissons_ratio(isParamValid("poissons_ratio") ? getParam<Real>("poissons_ratio") : 0),
+    _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0)
 {
 }
 
@@ -52,8 +62,8 @@ JIntegral::initialSetup()
     }
   }
 
-  if (_convert_J_to_K && !isParamValid("youngs_modulus"))
-    mooseError("youngs_modulus must be specified if convert_J_to_K = true");
+  if (_convert_J_to_K && (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio")))
+    mooseError("youngs_modulus and poissons_ratio must be specified if convert_J_to_K = true");
 }
 
 Real
@@ -97,10 +107,12 @@ Real
 JIntegral::getValue()
 {
   gatherSum(_integral_value);
+  if (_has_symmetry_plane)
+    _integral_value *= 2.0;
 
   Real sign = (_integral_value > 0.0) ? 1.0 : ((_integral_value < 0.0) ? -1.0: 0.0);
   if (_convert_J_to_K)
-    _integral_value = sign * std::sqrt(std::abs(_integral_value) * _youngs_modulus);
+    _integral_value = sign * std::sqrt(std::abs(_integral_value) * _youngs_modulus / (1 - std::pow(_poissons_ratio,2)));
 
   return _integral_value;
 }

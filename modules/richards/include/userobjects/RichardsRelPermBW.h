@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSRELPERMBW_H
 #define RICHARDSRELPERMBW_H
@@ -20,7 +23,7 @@ InputParameters validParams<RichardsRelPermBW>();
  */
 class RichardsRelPermBW : public RichardsRelPerm
 {
- public:
+public:
   RichardsRelPermBW(const std::string & name, InputParameters parameters);
 
   /**
@@ -41,7 +44,7 @@ class RichardsRelPermBW : public RichardsRelPerm
    */
   Real d2relperm(Real seff) const;
 
- protected:
+protected:
 
   // BW's initial saturation
   Real _sn;

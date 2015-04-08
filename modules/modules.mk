@@ -7,12 +7,13 @@
 #
 # New Module Step 5.
 #       MODULENAME                := yes
+#
+# Add to list
+# MODULE_LIST := ... MODULENAME
 ###############################################################################
-
 ifeq ($(ALL_MODULES),yes)
         CHEMICAL_REACTIONS        := yes
         CONTACT                   := yes
-        FLUID_MASS_ENERGY_BALANCE := yes
         HEAT_CONDUCTION           := yes
         LINEAR_ELASTICITY         := yes
         MISC                      := yes
@@ -23,6 +24,13 @@ ifeq ($(ALL_MODULES),yes)
         TENSOR_MECHANICS          := yes
         WATER_STEAM_EOS           := yes
 endif
+
+ifeq ($(PHASE_FIELD),yes)
+        TENSOR_MECHANICS          := yes
+endif
+
+# The master list of all moose modules
+MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
@@ -51,12 +59,6 @@ ifeq ($(CONTACT),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-ifeq ($(FLUID_MASS_ENERGY_BALANCE),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/fluid_mass_energy_balance
-  APPLICATION_NAME   := fluid_mass_energy_balance
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
 ifeq ($(HEAT_CONDUCTION),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
   APPLICATION_NAME   := heat_conduction
@@ -81,9 +83,19 @@ ifeq ($(NAVIER_STOKES),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
+ifeq ($(TENSOR_MECHANICS),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/tensor_mechanics
+  APPLICATION_NAME   := tensor_mechanics
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
 ifeq ($(PHASE_FIELD),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/phase_field
   APPLICATION_NAME   := phase_field
+
+  # Dependency on tensor mechanics
+  DEPEND_MODULES     := tensor_mechanics
+
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
@@ -96,12 +108,6 @@ endif
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(TENSOR_MECHANICS),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/tensor_mechanics
-  APPLICATION_NAME   := tensor_mechanics
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

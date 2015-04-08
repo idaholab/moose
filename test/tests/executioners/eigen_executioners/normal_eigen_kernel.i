@@ -69,7 +69,7 @@
   [./unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -78,9 +78,6 @@
   interval = 1
   exodus = true
   output_initial = true
-  [./console]
-    type = Console
-    linear_residuals = true
-    perf_log = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

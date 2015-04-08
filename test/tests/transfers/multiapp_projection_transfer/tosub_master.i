@@ -71,10 +71,7 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []
 
 [Debug]
@@ -85,7 +82,7 @@
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep
+    execute_on = timestep_end
     positions = '1 1 0 5 5 0'
     input_files = tosub_sub.i
   [../]
@@ -95,7 +92,6 @@
   [./tosub]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = u_nodal
@@ -105,7 +101,6 @@
   [./elemental_tosub]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = u_elemental
@@ -115,7 +110,6 @@
   [./elemental_to_sub_elemental]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = x
     variable = x_elemental
@@ -125,7 +119,6 @@
   [./elemental_to_sub_nodal]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = x
     variable = x_nodal

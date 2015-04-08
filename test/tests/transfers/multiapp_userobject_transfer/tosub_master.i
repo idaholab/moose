@@ -31,7 +31,7 @@
   [./layered_aux]
     type = SpatialUserObjectAux
     variable = layered_average_value
-    execute_on = timestep
+    execute_on = timestep_end
     user_object = layered_average
   [../]
 []
@@ -75,15 +75,12 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []
 
 [MultiApps]
   [./sub_app]
-    execute_on = timestep
+    execute_on = timestep_end
     positions = '0.3 0.1 0.3 0.7 0.1 0.3'
     type = TransientMultiApp
     input_files = tosub_sub.i
@@ -94,7 +91,6 @@
 [Transfers]
   [./layered_transfer]
     direction = to_multiapp
-    execute_on = timestep
     user_object = layered_average
     variable = multi_layered_average
     type = MultiAppUserObjectTransfer
@@ -102,7 +98,6 @@
   [../]
   [./element_layered_transfer]
     direction = to_multiapp
-    execute_on = timestep
     user_object = layered_average
     variable = element_multi_layered_average
     type = MultiAppUserObjectTransfer

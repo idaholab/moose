@@ -39,18 +39,15 @@ AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters param
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
-    TransientInterface(parameters, name, "scalar_aux_kernels"),
+    TransientInterface(parameters, "scalar_aux_kernels"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
-
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getScalarVariable(_tid, parameters.get<AuxVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-//    _dim(_mesh.dimension()),
-
     _u(_var.sln()),
     _u_old(_var.slnOld())
 {

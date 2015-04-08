@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  "Broadbridge-White" form of relative permeability (P Broadbridge and I White ``Constant rate rainfall infiltration: A versatile nonlinear model 1. Analytic Solution'', Water Resources Research 24 (1988) 145-154)
 //
@@ -21,12 +24,12 @@ InputParameters validParams<RichardsRelPermBW>()
 }
 
 RichardsRelPermBW::RichardsRelPermBW(const std::string & name, InputParameters parameters) :
-  RichardsRelPerm(name, parameters),
-  _sn(getParam<Real>("Sn")),
-  _ss(getParam<Real>("Ss")),
-  _kn(getParam<Real>("Kn")),
-  _ks(getParam<Real>("Ks")),
-  _c(getParam<Real>("C"))
+    RichardsRelPerm(name, parameters),
+    _sn(getParam<Real>("Sn")),
+    _ss(getParam<Real>("Ss")),
+    _kn(getParam<Real>("Kn")),
+    _ks(getParam<Real>("Ks")),
+    _c(getParam<Real>("C"))
 {
   if (_ss <= _sn)
     mooseError("In BW relative permeability Sn set to " << _sn << " and Ss set to " << _ss << " but these must obey Ss > Sn");
@@ -39,13 +42,11 @@ RichardsRelPermBW::RichardsRelPermBW(const std::string & name, InputParameters p
 Real
 RichardsRelPermBW::relperm(Real seff) const
 {
-  if (seff <= _sn) {
+  if (seff <= _sn)
     return _kn;
-  }
 
-  if (seff >= _ss) {
+  if (seff >= _ss)
     return _ks;
-  }
 
   Real s_internal = (seff - _sn)/(_ss - _sn);
   Real krel = _kn + _coef*std::pow(s_internal, 2)/(_c - s_internal);
@@ -57,13 +58,11 @@ RichardsRelPermBW::relperm(Real seff) const
 Real
 RichardsRelPermBW::drelperm(Real seff) const
 {
-  if (seff <= _sn) {
+  if (seff <= _sn)
     return 0.0;
-  }
 
-  if (seff >= _ss) {
+  if (seff >= _ss)
     return 0.0;
-  }
 
   Real s_internal = (seff - _sn)/(_ss - _sn);
   Real krelp = _coef*( 2.0*s_internal/(_c - s_internal) + std::pow(s_internal, 2)/std::pow(_c - s_internal, 2));
@@ -74,13 +73,11 @@ RichardsRelPermBW::drelperm(Real seff) const
 Real
 RichardsRelPermBW::d2relperm(Real seff) const
 {
-  if (seff <= _sn) {
+  if (seff <= _sn)
     return 0.0;
-  }
 
-  if (seff >= _ss) {
+  if (seff >= _ss)
     return 0.0;
-  }
 
   Real s_internal = (seff - _sn)/(_ss - _sn);
   Real krelpp = _coef*( 2.0/(_c - s_internal) + 4.0*s_internal/std::pow(_c - s_internal, 2) + 2*std::pow(s_internal, 2)/std::pow(_c - s_internal, 3) );

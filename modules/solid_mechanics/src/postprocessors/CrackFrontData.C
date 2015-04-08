@@ -1,16 +1,10 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 
 #include "CrackFrontData.h"
 #include "MooseMesh.h"
@@ -39,14 +33,22 @@ CrackFrontData::CrackFrontData(const std::string & name, InputParameters paramet
     _var_name(parameters.get<VariableName>("variable")),
     _scale_factor(getParam<Real>("scale_factor"))
 {
+  if (!_subproblem.getVariable(_tid, _var_name).isNodal())
+    mooseError("CrackFrontData can be output only for nodal variables, variable '" << _var_name << "' is not nodal");
+}
+
+void
+CrackFrontData::initialize()
+{
+  if (!(_crack_front_node_index < _crack_front_definition->getNumCrackFrontNodes()))
+    mooseError("crack_front_node_index out of range in CrackFrontData");
+
+  _crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_node_index);
 }
 
 Real
 CrackFrontData::getValue()
 {
-  if (! _crack_front_node)
-    _crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_node_index);
-
   Real value = 0;
 
   if (_crack_front_node->processor_id() == processor_id())

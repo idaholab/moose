@@ -60,14 +60,10 @@
 
 [Outputs]
   output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./out]
     type = Exodus
     output_material_properties = true
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    nonlinear_residuals = true
-    linear_residuals = true
   [../]
 []

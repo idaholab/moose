@@ -129,9 +129,9 @@
   output_final = true
   interval = 10000
   exodus = true
+  print_perf_log = true
   [./console]
     interval = 1
     type = Console
-    perf_log = true
   [../]
 []

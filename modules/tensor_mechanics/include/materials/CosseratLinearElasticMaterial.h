@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 // Original class author: A.M. Jokisaari,  O. Heinonen
 
 #ifndef COSSERATLINEARELASTICMATERIAL_H
@@ -23,15 +29,9 @@ protected:
   virtual void computeQpElasticityTensor();
 
   MaterialProperty<RankTwoTensor> & _eigenstrain;
-  MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
-  MaterialProperty<ElasticityTensorR4> & _d2elasticity_tensor_dc2;
-  MaterialProperty<RankTwoTensor> & _deigenstrain_dc;
-  MaterialProperty<RankTwoTensor> & _d2eigenstrain_dc2;
-
   MaterialProperty<RankTwoTensor> & _symmetric_strain;
   MaterialProperty<RankTwoTensor> & _antisymmetric_strain;
   MaterialProperty<RankTwoTensor> & _curvature;
-
 
   MaterialProperty<RankTwoTensor> & _symmetric_stress;
   MaterialProperty<RankTwoTensor> & _antisymmetric_stress;

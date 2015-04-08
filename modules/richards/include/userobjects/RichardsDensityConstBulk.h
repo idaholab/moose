@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSDENSITYCONSTBULK_H
 #define RICHARDSDENSITYCONSTBULK_H
@@ -19,7 +22,7 @@ InputParameters validParams<RichardsDensityConstBulk>();
  */
 class RichardsDensityConstBulk : public RichardsDensity
 {
- public:
+public:
   RichardsDensityConstBulk(const std::string & name, InputParameters parameters);
 
   /**
@@ -40,7 +43,7 @@ class RichardsDensityConstBulk : public RichardsDensity
    */
   Real d2density(Real p) const;
 
- protected:
+protected:
 
   /// density = _dens0*exp(p/_bulk)
   Real _dens0;

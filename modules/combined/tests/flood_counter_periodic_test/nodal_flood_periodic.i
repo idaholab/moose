@@ -86,7 +86,7 @@
     type = NodalFloodCount
     variable = u
     threshold = 0.3
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -109,6 +109,6 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []

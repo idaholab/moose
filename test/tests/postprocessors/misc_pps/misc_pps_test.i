@@ -128,13 +128,9 @@
 
 [Outputs]
   file_base = pps_out
-  output_initial = false
+  print_perf_log = true
   [./exodus]
     type = Exodus
-    output_scalar_variables = false
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
+    output_scalars_on = none
   [../]
 []

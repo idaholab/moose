@@ -34,7 +34,7 @@
   [./pp_aux]
     type = PostprocessorAux
     variable = pp_aux
-    execute_on = timestep
+    execute_on = timestep_end
     pp = t_pp
   [../]
 []
@@ -79,10 +79,7 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 

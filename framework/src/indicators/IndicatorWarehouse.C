@@ -16,54 +16,53 @@
 #include "Indicator.h"
 #include "InternalSideIndicator.h"
 
-IndicatorWarehouse::IndicatorWarehouse()
+IndicatorWarehouse::IndicatorWarehouse() :
+    Warehouse<Indicator>()
 {
 }
 
 IndicatorWarehouse::~IndicatorWarehouse()
 {
-  for (std::vector<Indicator *>::const_iterator i = _all_indicators.begin(); i != _all_indicators.end(); ++i)
-    delete *i;
-
 }
 
 void
 IndicatorWarehouse::initialSetup()
 {
-  for (std::vector<Indicator *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->initialSetup();
+  for (std::vector<MooseSharedPointer<Indicator> >::const_iterator it = _all_ptrs.begin(); it != _all_ptrs.end(); ++it)
+    (*it)->initialSetup();
 }
 
 void
 IndicatorWarehouse::timestepSetup()
 {
-  for (std::vector<Indicator *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->timestepSetup();
+  for (std::vector<MooseSharedPointer<Indicator> >::const_iterator it = _all_ptrs.begin(); it != _all_ptrs.end(); ++it)
+    (*it)->timestepSetup();
 }
 
 void
 IndicatorWarehouse::IndicatorSetup()
 {
-  for (std::vector<Indicator *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->IndicatorSetup();
+  for (std::vector<MooseSharedPointer<Indicator> >::const_iterator it = _all_ptrs.begin(); it != _all_ptrs.end(); ++it)
+    (*it)->IndicatorSetup();
 }
 
 void
-IndicatorWarehouse::addIndicator(Indicator *Indicator, std::vector<SubdomainID> & block_ids)
+IndicatorWarehouse::addIndicator(MooseSharedPointer<Indicator> indicator, std::vector<SubdomainID> & block_ids)
 {
-  _all_indicators.push_back(Indicator);
+  _all_ptrs.push_back(indicator);
+  _all_objects.push_back(indicator.get());
 
   bool internal_side_indicator = false;
 
-  if (dynamic_cast<InternalSideIndicator*>(Indicator))
+  if (MooseSharedNamespace::dynamic_pointer_cast<InternalSideIndicator>(indicator).get())
     internal_side_indicator = true;
 
   if (block_ids.empty())
   {
     if (internal_side_indicator)
-      _global_internal_side_indicators.push_back(Indicator);
+      _global_internal_side_indicators.push_back(indicator.get());
     else
-      _global_indicators.push_back(Indicator);
+      _global_indicators.push_back(indicator.get());
   }
   else
   {
@@ -72,9 +71,9 @@ IndicatorWarehouse::addIndicator(Indicator *Indicator, std::vector<SubdomainID> 
       SubdomainID blk_id = *it;
 
       if (internal_side_indicator)
-        _block_internal_side_indicators[blk_id].push_back(Indicator);
+        _block_internal_side_indicators[blk_id].push_back(indicator.get());
       else
-        _block_indicators[blk_id].push_back(Indicator);
+        _block_indicators[blk_id].push_back(indicator.get());
     }
   }
 }
@@ -88,47 +87,32 @@ IndicatorWarehouse::updateActiveIndicators(unsigned int subdomain_id)
   // add Indicators that live everywhere
   for (std::vector<Indicator *>::const_iterator it = _global_indicators.begin(); it != _global_indicators.end(); ++it)
   {
-    Indicator * Indicator = *it;
-    if (Indicator->isActive())
-    {
-      _active_indicators.push_back(Indicator);
-      //_active_var_indicators[Indicator->variable().number()].push_back(Indicator);
-    }
+    Indicator * indicator = *it;
+    if (indicator->isActive())
+      _active_indicators.push_back(indicator);
   }
 
   // then Indicators that live on a specified block
   for (std::vector<Indicator *>::const_iterator it = _block_indicators[subdomain_id].begin(); it != _block_indicators[subdomain_id].end(); ++it)
   {
-    Indicator * Indicator = *it;
-    if (Indicator->isActive())
-    {
-      _active_indicators.push_back(Indicator);
-      //_active_var_indicators[Indicator->variable().number()].push_back(Indicator);
-    }
+    Indicator * indicator = *it;
+    if (indicator->isActive())
+      _active_indicators.push_back(indicator);
   }
-
-
-
 
   // add Internal_Side_Indicators that live everywhere
   for (std::vector<Indicator *>::const_iterator it = _global_internal_side_indicators.begin(); it != _global_internal_side_indicators.end(); ++it)
   {
-    Indicator * Indicator = *it;
-    if (Indicator->isActive())
-    {
-      _active_internal_side_indicators.push_back(Indicator);
-      //_active_var_internal_side_indicators[Indicator->variable().number()].push_back(Indicator);
-    }
+    Indicator * indicator = *it;
+    if (indicator->isActive())
+      _active_internal_side_indicators.push_back(indicator);
   }
 
   // then Internal_Side_Indicators that live on a specified block
   for (std::vector<Indicator *>::const_iterator it = _block_internal_side_indicators[subdomain_id].begin(); it != _block_internal_side_indicators[subdomain_id].end(); ++it)
   {
-    Indicator * Indicator = *it;
-    if (Indicator->isActive())
-    {
-      _active_internal_side_indicators.push_back(Indicator);
-      //_active_var_internal_side_indicators[Indicator->variable().number()].push_back(Indicator);
-    }
+    Indicator * indicator = *it;
+    if (indicator->isActive())
+      _active_internal_side_indicators.push_back(indicator);
   }
 }

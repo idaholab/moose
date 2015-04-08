@@ -89,12 +89,6 @@ public:
   virtual ~Material();
 
   /**
-   * This function is called at the beginning of each timestep
-   * for each active material block
-   */
-  virtual void timeStepSetup();
-
-  /**
    * All materials must override this virtual.
    * This is where they fill up the vectors with values.
    */
@@ -232,6 +226,7 @@ Material::getMaterialProperty(const std::string & prop_name)
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
   _depend_props.insert(prop_name);
   registerPropName(prop_name, true, Material::CURRENT);
+  _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getProperty<T>(prop_name);
 }
 
@@ -241,6 +236,7 @@ Material::getMaterialPropertyOld(const std::string & prop_name)
 {
   _depend_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLD);
+  _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getPropertyOld<T>(prop_name);
 }
 
@@ -250,6 +246,7 @@ Material::getMaterialPropertyOlder(const std::string & prop_name)
 {
   _depend_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLDER);
+  _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getPropertyOlder<T>(prop_name);
 }
 

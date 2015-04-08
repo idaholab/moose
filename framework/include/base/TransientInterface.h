@@ -32,7 +32,7 @@ InputParameters validParams<TransientInterface>();
 class TransientInterface
 {
 public:
-  TransientInterface(InputParameters & parameters, const std::string & name, const std::string & object_type);
+  TransientInterface(const InputParameters & parameters, const std::string & object_type);
   virtual ~TransientInterface();
 
   /**

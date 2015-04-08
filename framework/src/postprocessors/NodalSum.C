@@ -15,8 +15,6 @@
 #include "NodalSum.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
-// libMesh
-#include "libmesh/boundary_info.h"
 
 template<>
 InputParameters validParams<NodalSum>()

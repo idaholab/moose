@@ -115,7 +115,7 @@
   [./pp]
     type = ElementIntegralVariablePostprocessor
     variable = u
-    execute_on = residual
+    execute_on = linear
   [../]
   [./l2_err]
     type = ElementL2Error
@@ -142,9 +142,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  hide = 'lambda'
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  hide = lambda
+  print_perf_log = true
 []

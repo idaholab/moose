@@ -22,7 +22,8 @@ template<>
 InputParameters validParams<AddExtraNodeset>()
 {
   InputParameters params = validParams<MeshModifier>();
-  params += validParams<BoundaryRestrictableRequired>();
+  params.addRequiredParam<std::vector<BoundaryName> >("new_boundary", "The name of the boundary to create");
+
   params.addParam<std::vector<unsigned int> >("nodes", "The nodes you want to be in the nodeset (Either this parameter or \"coord\" must be supplied).");
   params.addParam<std::vector<Real> >("coord","The nodes with coordinates you want to be in the nodeset (Either this parameter or \"nodes\" must be supplied).");
   params.addParam<Real>("tolerance", TOLERANCE, "The tolerance in which two nodes are considered identical");
@@ -31,14 +32,14 @@ InputParameters validParams<AddExtraNodeset>()
 }
 
 AddExtraNodeset::AddExtraNodeset(const std::string & name, InputParameters params) :
-    MeshModifier(name, params),
-    BoundaryRestrictableRequired(name, params)
+    MeshModifier(name, params)
 {
 }
 
 void
 AddExtraNodeset::modify()
 {
+
   // make sure the input is not empty
   bool data_valid = false;
   if (_pars.isParamValid("nodes"))
@@ -56,14 +57,17 @@ AddExtraNodeset::modify()
     mooseError("Node set can not be empty!");
 
   // Get the BoundaryIDs from the mesh
-  std::vector<BoundaryName> boundary_names = boundaryNames();
-  std::vector<BoundaryID> boundary_ids(boundaryIDs().begin(), boundaryIDs().end());
+  std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName> >("new_boundary");
+  std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(boundary_names, true);
+
+  // Get a reference to our BoundaryInfo object
+  BoundaryInfo & boundary_info = _mesh_ptr->getMesh().get_boundary_info();
 
   // add nodes with their ids
   const std::vector<unsigned int> & nodes = getParam<std::vector<unsigned int> >("nodes");
   for (unsigned int i=0; i<nodes.size(); i++)
     for (unsigned int j=0; j<boundary_ids.size(); ++j)
-      _mesh_ptr->getMesh().boundary_info->add_node(nodes[i], boundary_ids[j]);
+      boundary_info.add_node(nodes[i], boundary_ids[j]);
 
   // add nodes with their coordinates
   const std::vector<Real> & coord = getParam<std::vector<Real> >("coord");
@@ -92,7 +96,8 @@ AddExtraNodeset::modify()
       if (p.absolute_fuzzy_equals(q, getParam<Real>("tolerance")))
       {
         for (unsigned int j=0; j<boundary_ids.size(); ++j)
-          _mesh_ptr->getMesh().boundary_info->add_node(node, boundary_ids[j]);
+          boundary_info.add_node(node, boundary_ids[j]);
+
         on_node = true;
         break;
       }
@@ -102,5 +107,5 @@ AddExtraNodeset::modify()
   }
 
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
-    _mesh_ptr->getMesh().boundary_info->sideset_name(boundary_ids[i]) = boundary_names[i];
+    boundary_info.sideset_name(boundary_ids[i]) = boundary_names[i];
 }

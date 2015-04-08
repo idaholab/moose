@@ -75,8 +75,8 @@ public:
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
   virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains = NULL);
-  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
-  virtual void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
+  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
+  virtual void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
 
   // Adaptivity /////
   virtual void initAdaptivity();
@@ -96,7 +96,7 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid);
-  virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid);
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
@@ -151,7 +151,7 @@ public:
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
    */
-  virtual void addGhostedElem(unsigned int elem_id);
+  virtual void addGhostedElem(dof_id_type elem_id);
 
   /**
    * Will make sure that all necessary elements from boundary_id are ghosted to this processor
@@ -173,6 +173,12 @@ public:
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    */
   virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
+
+  /**
+   * Resets the displaced mesh to the reference mesh.  Required when
+   * refining the DisplacedMesh.
+   */
+  void undisplaceMesh();
 
 protected:
   FEProblem & _mproblem;

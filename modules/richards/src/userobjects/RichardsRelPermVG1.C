@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  "VG1" form of relative permeability
 //
@@ -19,14 +22,14 @@ InputParameters validParams<RichardsRelPermVG1>()
 }
 
 RichardsRelPermVG1::RichardsRelPermVG1(const std::string & name, InputParameters parameters) :
-  RichardsRelPermVG(name, parameters),
-  _simm(getParam<Real>("simm")),
-  _m(getParam<Real>("m")),
-  _scut(getParam<Real>("scut")),
-  _vg1_const(0),
-  _vg1_linear(0),
-  _vg1_quad(0),
-  _vg1_cub(0)
+    RichardsRelPermVG(name, parameters),
+    _simm(getParam<Real>("simm")),
+    _m(getParam<Real>("m")),
+    _scut(getParam<Real>("scut")),
+    _vg1_const(0),
+    _vg1_linear(0),
+    _vg1_quad(0),
+    _vg1_cub(0)
 {
   _vg1_const = RichardsRelPermVG::relperm(_scut);
   _vg1_linear = RichardsRelPermVG::drelperm(_scut);
@@ -43,17 +46,16 @@ RichardsRelPermVG1::initialSetup()
 Real
 RichardsRelPermVG1::relperm(Real seff) const
 {
-  if (seff >= 1.0) {
+  if (seff >= 1.0)
     return 1.0;
-  }
 
-  if (seff <= _simm) {
+  if (seff <= _simm)
     return 0.0;
-  }
 
   Real s_internal = (seff - _simm)/(1.0 - _simm);
 
-  if (s_internal < _scut) return RichardsRelPermVG::relperm(seff);
+  if (s_internal < _scut)
+    return RichardsRelPermVG::relperm(seff);
 
   Real krel = _vg1_const + _vg1_linear*(s_internal - _scut) + _vg1_quad*std::pow(s_internal - _scut, 2) + _vg1_cub*std::pow(s_internal - _scut, 3);
 
@@ -67,17 +69,16 @@ RichardsRelPermVG1::relperm(Real seff) const
 Real
 RichardsRelPermVG1::drelperm(Real seff) const
 {
-  if (seff >= 1.0) {
+  if (seff >= 1.0)
     return 0.0;
-  }
 
-  if (seff <= _simm) {
+  if (seff <= _simm)
     return 0.0;
-  }
 
   Real s_internal = (seff - _simm)/(1.0 - _simm);
 
-  if (s_internal < _scut) return RichardsRelPermVG::drelperm(seff);
+  if (s_internal < _scut)
+    return RichardsRelPermVG::drelperm(seff);
 
   Real krelp = _vg1_linear + 2*_vg1_quad*(s_internal - _scut) + 3*_vg1_cub*std::pow(s_internal - _scut, 2);
   return krelp/(1.0 - _simm);
@@ -87,17 +88,16 @@ RichardsRelPermVG1::drelperm(Real seff) const
 Real
 RichardsRelPermVG1::d2relperm(Real seff) const
 {
-  if (seff >= 1.0) {
+  if (seff >= 1.0)
     return 0.0;
-  }
 
-  if (seff <= _simm) {
+  if (seff <= _simm)
     return 0.0;
-  }
 
   Real s_internal = (seff - _simm)/(1.0 - _simm);
 
-  if (s_internal < _scut) return RichardsRelPermVG::d2relperm(seff);
+  if (s_internal < _scut)
+    return RichardsRelPermVG::d2relperm(seff);
 
   Real krelpp = 2*_vg1_quad + 6*_vg1_cub*(s_internal - _scut);
   return krelpp/std::pow(1.0 - _simm, 2);

@@ -1,16 +1,10 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "SparsityBasedContactConstraint.h"
 
 
@@ -42,7 +36,12 @@ SparsityBasedContactConstraint::getConnectedDofIndices()
   PetscErrorCode ierr;
   PetscInt ncols;
   const PetscInt *cols;
-  ierr = MatGetRow(jac,_var.nodalDofIndex(),&ncols,&cols,PETSC_NULL);CHKERRABORT(_communicator.get(), ierr);
+  ierr = MatGetRow(jac,
+                   static_cast<PetscInt>(_var.nodalDofIndex()),
+                   &ncols,
+                   &cols,
+                   PETSC_NULL);
+  CHKERRABORT(_communicator.get(), ierr);
   bool debug = false;
   if (debug) {
     libMesh::out << "_connected_dof_indices: adding " << ncols << " dofs from Jacobian row[" << _var.nodalDofIndex() << "] = [";
@@ -56,7 +55,12 @@ SparsityBasedContactConstraint::getConnectedDofIndices()
   if (debug) {
     libMesh::out << "]\n";
   }
-  ierr = MatRestoreRow(jac,_var.nodalDofIndex(),&ncols,&cols,PETSC_NULL);CHKERRABORT(_communicator.get(), ierr);
+  ierr = MatRestoreRow(jac,
+                       static_cast<PetscInt>(_var.nodalDofIndex()),
+                       &ncols,
+                       &cols,
+                       PETSC_NULL);
+  CHKERRABORT(_communicator.get(), ierr);
 #else
   NodeFaceConstraint::getConnectedDofIndices();
 #endif

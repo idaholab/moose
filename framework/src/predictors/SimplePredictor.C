@@ -39,9 +39,13 @@ SimplePredictor::apply(NumericVector<Number> & sln)
 {
   if (_dt_old > 0)
   {
-    std::streamsize cur_precision(Moose::out.precision());
+    // Save the original stream flags
+    std::ios_base::fmtflags out_flags = Moose::out.flags();
+
     _console << "  Applying predictor with scale factor = " << std::fixed << std::setprecision(2) << _scale << std::endl;
-    _console << std::scientific << std::setprecision(cur_precision);
+
+    // Restore the flags
+    Moose::out.flags(out_flags);
 
     Real dt_adjusted_scale_factor = _scale * _dt / _dt_old;
     if (dt_adjusted_scale_factor != 0.0)

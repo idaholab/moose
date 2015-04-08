@@ -86,9 +86,6 @@
 [Outputs]
   file_base = relperm
   output_initial = true
-  [./console]
-    type = Console
-  [../]
   [./csv]
     type = CSV
   [../]

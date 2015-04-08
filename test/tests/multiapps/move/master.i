@@ -51,18 +51,15 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
 [MultiApps]
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep
+    execute_on = timestep_end
     positions = '1 1 0'
     input_files = sub.i
     output_in_position = true

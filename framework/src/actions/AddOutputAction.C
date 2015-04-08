@@ -43,7 +43,7 @@ void
 AddOutputAction::act()
 {
   // Do nothing if FEProblem is NULL, this should only be the case for CoupledProblem
-  if (_problem == NULL)
+  if (_problem.get() == NULL)
     return;
 
   // Get a reference to the OutputWarehouse
@@ -62,24 +62,29 @@ AddOutputAction::act()
     mooseError("The output object named '" << object_name << "' already exists");
 
   // Add a pointer to the FEProblem class
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem",  _problem);
+  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem",  _problem.get());
+
+  // Create common parameter exclude list
+  std::vector<std::string> exclude;
+  if (_type == "Console")
+    exclude.push_back("output_on");
 
   // Apply the common parameters
   InputParameters * common = output_warehouse.getCommonParameters();
   if (common != NULL)
-    _moose_object_pars.applyParameters(*common);
+    _moose_object_pars.applyParameters(*common, exclude);
 
   // Set the correct value for the binary flag for XDA/XDR output
-  if (_type.compare("XDR") == 0)
+  if (_type == "XDR")
     _moose_object_pars.set<bool>("_binary") = true;
-  else if (_type.compare("XDA") == 0)
+  else if (_type == "XDA")
     _moose_object_pars.set<bool>("_binary") = false;
 
   // Adjust the checkpoint suffix if auto recovery was enabled
-  if (object_name.compare("auto_recovery_checkpoint") == 0)
+  if (object_name == "auto_recovery_checkpoint")
     _moose_object_pars.set<std::string>("suffix") = "auto_recovery";
 
   // Create the object and add it to the warehouse
-  MooseSharedPointer<Output> output = MooseSharedNamespace::static_pointer_cast<Output>(_factory.create_shared_ptr(_type, object_name, _moose_object_pars));
+  MooseSharedPointer<Output> output = MooseSharedNamespace::static_pointer_cast<Output>(_factory.create(_type, object_name, _moose_object_pars));
   output_warehouse.addOutput(output);
 }

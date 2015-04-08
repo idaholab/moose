@@ -107,9 +107,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

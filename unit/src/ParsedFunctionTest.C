@@ -34,10 +34,12 @@ ParsedFunctionTest::init()
 
   InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
   mesh_params.set<MooseEnum>("dim") = "3";
+  mesh_params.set<std::string>("name") = "mesh";
   _mesh = new GeneratedMesh("mesh", mesh_params); // deleted by ~FEProblem
 
   InputParameters problem_params = _factory->getValidParams("FEProblem");
   problem_params.set<MooseMesh *>("mesh") = _mesh;
+  problem_params.set<std::string>("name") = "FEProblem";
   _fe_problem = new FEProblem("fep", problem_params);
 }
 
@@ -65,6 +67,7 @@ ParsedFunctionTest::basicConstructor()
   params.set<FEProblem *>("_fe_problem") = _fe_problem;
   params.set<SubProblem *>("_subproblem") = _fe_problem;
   params.set<std::string>("value") = std::string("x + 1.5*y + 2 * z + t/4");
+  params.set<std::string>("name") = "test";
   MooseParsedFunction f("test", params);
   f.initialSetup();
   CPPUNIT_ASSERT(f.value(4, Point(1,2,3)) == 11);
@@ -87,6 +90,8 @@ ParsedFunctionTest::advancedConstructor()
   params.set<SubProblem *>("_subproblem") = _fe_problem;
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
+  params.set<std::string>("name") = "test";
+
 
   MooseParsedFunction f("test", params);
   f.initialSetup();
@@ -105,6 +110,7 @@ ParsedFunctionTest::advancedConstructor()
   params2.set<SubProblem *>("_subproblem") = _fe_problem;
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
+  params2.set<std::string>("name") = "test";
 
   MooseParsedFunction f2("test", params2);
   f2.initialSetup();
@@ -123,6 +129,7 @@ ParsedFunctionTest::advancedConstructor()
   params3.set<std::string>("value") = "q*x";
   params3.set<std::vector<std::string> >("vars") = one_var;
   params3.set<std::vector<std::string> >("vals") = one_val;
+  params3.set<std::string>("name") = "test";
 
   MooseParsedFunction f3("test", params3);
   f3.initialSetup();
@@ -139,6 +146,7 @@ ParsedFunctionTest::advancedConstructor()
   params4.set<std::string>("value") = "q*x + y/r + w";
   params4.set<std::vector<std::string> >("vars") = three_vars;
   params4.set<std::vector<std::string> >("vals") = two_vals;
+  params4.set<std::string>("name") = "test";
 
   MooseParsedFunction f4("test", params4);
   f4.initialSetup();
@@ -165,6 +173,7 @@ ParsedFunctionTest::testVariables()
   params.set<SubProblem *>("_subproblem") = _fe_problem;
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
+  params.set<std::string>("name") = "test";
 
   MooseParsedFunction f("test", params);
   f.initialSetup();
@@ -187,6 +196,7 @@ ParsedFunctionTest::testVariables()
   params2.set<SubProblem *>("_subproblem") = _fe_problem;
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
+  params2.set<std::string>("name") = "test";
 
   MooseParsedFunction f2("test", params2);
   f2.initialSetup();
@@ -213,6 +223,7 @@ ParsedFunctionTest::testConstants()
   //this functions tests that pi and e get correctly substituted
   //it also tests built in functions of the function parser
   InputParameters params = _factory->getValidParams("ParsedFunction");
+  params.set<std::string>("name") = "test";
   params.set<FEProblem *>("_fe_problem") = _fe_problem;
   params.set<SubProblem *>("_subproblem") = _fe_problem;
   params.set<std::string>("value") = "log(e) + x";
@@ -222,6 +233,7 @@ ParsedFunctionTest::testConstants()
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 2, f.value(0,1), 0.0000001 );
 
   InputParameters params2 = _factory->getValidParams("ParsedFunction");
+  params2.set<std::string>("name") = "test";
   params2.set<FEProblem *>("_fe_problem") = _fe_problem;
   params2.set<SubProblem *>("_subproblem") = _fe_problem;
   params2.set<std::string>("value") = "sin(pi*x)";

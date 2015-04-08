@@ -39,7 +39,7 @@ public:
 protected:
 
   Real _value;
-  unsigned int _node_id;
+  dof_id_type _node_id;
 };
 
 #endif //NODALPROXYMAXVALUE_H

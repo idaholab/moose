@@ -28,7 +28,7 @@
 []
 
 [Kernels]
-  active = 'cx_elastic cy_elastic cz_elastic x_couple y_couple z_couple x_moment y_moment z_moment'
+  active = 'cx_elastic cy_elastic cz_elastic x_moment y_moment z_moment'
   [./cx_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_x
@@ -44,32 +44,11 @@
     variable = disp_z
     component = 2
   [../]
-  [./x_couple]
-    type = StressDivergenceTensors
-    variable = wc_x
+  [./TensorMechanics]
     disp_z = wc_z
     disp_y = wc_y
     disp_x = wc_x
-    component = 0
-    appended_property_name = _couple
-  [../]
-  [./y_couple]
-    type = StressDivergenceTensors
-    variable = wc_y
-    disp_z = wc_z
-    disp_y = wc_y
-    disp_x = wc_x
-    component = 1
-    appended_property_name = _couple
-  [../]
-  [./z_couple]
-    type = StressDivergenceTensors
-    variable = wc_z
-    disp_z = wc_z
-    disp_y = wc_y
-    disp_x = wc_x
-    component = 2
-    appended_property_name = _couple
+    base_name = coupled
   [../]
   [./x_moment]
     type = MomentBalancing

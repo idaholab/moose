@@ -118,10 +118,6 @@
 
 [Outputs]
   file_base = gh10
-  output_initial = false
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

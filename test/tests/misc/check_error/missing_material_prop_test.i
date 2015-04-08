@@ -48,8 +48,10 @@
 
 [Materials]
   [./mat1]
-    type = Diff1Material
+    type = GenericConstantMaterial
     block = 1
+    prop_names =  'diff1'
+    prop_values = '1'
   [../]
 []
 
@@ -64,8 +66,5 @@
   file_base = out
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

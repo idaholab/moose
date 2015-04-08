@@ -29,7 +29,7 @@
 [MeshModifiers]
   [./corner_node]
     type = AddExtraNodeset
-    boundary = 99
+    new_boundary = 99
     nodes = '0'
   [../]
 []
@@ -248,9 +248,6 @@
   interval = 1
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

@@ -59,11 +59,9 @@
 [UserObjects]
   [./ex_soln]
     type = SolutionUserObject
-    system_variables = u_aux
-    system = AuxiliarySystem
-    mesh = out_0001_mesh.xda
-    es = out_0001.xda
-    legacy_read = true
+    system_variables = u
+    mesh = build_out_0001_mesh.xda
+    es = build_out_0001.xda
   [../]
 []
 
@@ -80,8 +78,5 @@
   file_base = out
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

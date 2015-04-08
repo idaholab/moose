@@ -1,4 +1,3 @@
-
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
@@ -44,25 +43,25 @@ InputParameters validParams<Material>()
 
 Material::Material(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BlockRestrictable(name, parameters),
-    BoundaryRestrictable(name, parameters),
+    BlockRestrictable(parameters),
+    BoundaryRestrictable(parameters, blockIDs()),
     SetupInterface(parameters),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
     ScalarCoupleable(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    TransientInterface(parameters, name, "materials"),
-    MaterialPropertyInterface(name, parameters),
+    TransientInterface(parameters, "materials"),
+    MaterialPropertyInterface(parameters, blockIDs(), boundaryIDs()),
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
-    Restartable(name, parameters, "Materials"),
+    Restartable(parameters, "Materials"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
 
     // The false flag disables the automatic call  buildOutputVariableHideList;
     // for Material objects the hide lists are handled by MaterialOutputAction
-    OutputInterface(name, parameters, false),
+    OutputInterface(parameters, false),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -118,10 +117,6 @@ Material::computeQpProperties()
 {
 }
 
-void
-Material::timeStepSetup()
-{}
-
 QpData *
 Material::createData()
 {
@@ -155,18 +150,15 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
     if (!is_get)
       _supplied_props.insert(prop_name);
     _fe_problem.storeMatPropName(*it, prop_name);
-    _subproblem.storeMatPropName(*it, prop_name);
   }
 
   // Store material properties for the boundary ids
   for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
   {
-    /// \todo{see ticket #2192}
     // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
     if (!is_get)
       _supplied_props.insert(prop_name);
     _fe_problem.storeMatPropName(*it, prop_name);
-    _subproblem.storeMatPropName(*it, prop_name);
   }
 }
 

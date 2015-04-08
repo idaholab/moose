@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ModulesApp.h"
 #include "Factory.h"
 #include "ActionFactory.h"
@@ -10,7 +16,6 @@
  ***********************************************************/
 #include "ChemicalReactionsApp.h"
 #include "ContactApp.h"
-#include "FluidMassEnergyBalanceApp.h"
 #include "HeatConductionApp.h"
 #include "LinearElasticityApp.h"
 #include "MiscApp.h"
@@ -25,6 +30,9 @@ template<>
 InputParameters validParams<ModulesApp>()
 {
   InputParameters params = validParams<MooseApp>();
+  params.set<bool>("use_legacy_uo_initialization") = true;
+  params.set<bool>("use_legacy_uo_aux_computation") = false;
+
   return params;
 }
 
@@ -58,7 +66,6 @@ ModulesApp::registerObjects(Factory & factory)
    ***********************************************************/
   ChemicalReactionsApp::registerObjects(factory);
   ContactApp::registerObjects(factory);
-  FluidMassEnergyBalanceApp::registerObjects(factory);
   HeatConductionApp::registerObjects(factory);
   LinearElasticityApp::registerObjects(factory);
   MiscApp::registerObjects(factory);
@@ -80,7 +87,6 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
    ***********************************************************/
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
   ContactApp::associateSyntax(syntax, action_factory);
-  FluidMassEnergyBalanceApp::associateSyntax(syntax, action_factory);
   HeatConductionApp::associateSyntax(syntax, action_factory);
   LinearElasticityApp::associateSyntax(syntax, action_factory);
   MiscApp::associateSyntax(syntax, action_factory);

@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSHALFGAUSSIANSINK
 #define RICHARDSHALFGAUSSIANSINK
@@ -26,9 +29,7 @@ InputParameters validParams<RichardsHalfGaussianSink>();
 class RichardsHalfGaussianSink : public IntegratedBC
 {
 public:
-
-  RichardsHalfGaussianSink(const std::string & name,
-                        InputParameters parameters);
+  RichardsHalfGaussianSink(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();

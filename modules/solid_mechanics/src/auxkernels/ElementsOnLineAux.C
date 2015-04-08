@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ElementsOnLineAux.h"
 
 template<>
@@ -10,7 +16,7 @@ InputParameters validParams<ElementsOnLineAux>()
   params.addRequiredParam<Real>("dist_tol", "Tolerance for distance between element and line");
   params.addParam<int>("line_id", 1, "ID of the line along which to pick elements");
 
-  params.set<std::vector<MooseEnum> >("execute_on")[0] = "initial";
+  params.set<MultiMooseEnum>("execute_on") = "initial";
 
   return params;
 }

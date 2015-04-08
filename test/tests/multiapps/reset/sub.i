@@ -47,11 +47,10 @@
 []
 
 [Outputs]
-  output_initial = false
   exodus = true
   [./console]
     type = Console
     perf_log = false
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []

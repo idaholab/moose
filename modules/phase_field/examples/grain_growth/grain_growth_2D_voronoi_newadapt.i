@@ -61,7 +61,7 @@
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -152,14 +152,14 @@
 []
 
 [Outputs]
-  file_base = voronoi_2D # Output base file name.  Note the output will be saved in the "output" directory, that MUST be created before you run the simulation
-  output_initial = true # Output initial condition
-  exodus = true # Exodus file will be outputted
+  file_base = voronoi_2D
+  output_initial = true
+  exodus = true
   csv = true
+  print_perf_log = true
   [./console]
     type = Console
-    perf_log = true # Performance log will be printed to screen
-    max_rows = 20 # Will print the 20 most recent postprocessor values to the screen
+    max_rows = 20
   [../]
 []
 

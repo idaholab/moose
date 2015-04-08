@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 /**
  * Modules Application
  */
@@ -26,8 +32,6 @@ int main(int argc, char *argv[])
 
   app->setCheckUnusedFlag(true);
   app->setErrorOverridden();
-  app->legacyUoInitializationDefault() = true;
-  app->legacyUoAuxComputationDefault() = false;
 
   // Execute the application
   app->run();

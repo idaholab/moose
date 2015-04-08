@@ -52,11 +52,8 @@
 [Outputs]
   file_base = out_os
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./oversample_2]
     type = Exodus
     file_base = oversample_2
@@ -64,9 +61,9 @@
     refinements = 2
   [../]
   [./oversample_4]
-   type = Exodus
-   file_base = oversample_4
-   oversample = true
-   refinements = 4
- [../]
+    type = Exodus
+    file_base = oversample_4
+    oversample = true
+    refinements = 4
+  [../]
 []

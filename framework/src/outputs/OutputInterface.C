@@ -28,21 +28,25 @@ InputParameters validParams<OutputInterface>()
 }
 
 
-OutputInterface::OutputInterface(const std::string & name, InputParameters parameters, bool build_list) :
+OutputInterface::OutputInterface(const InputParameters & parameters, bool build_list) :
     _oi_moose_app(*parameters.get<MooseApp *>("_moose_app")),
     _oi_output_warehouse(_oi_moose_app.getOutputWarehouse()),
     _oi_outputs(parameters.get<std::vector<OutputName> >("outputs").begin(),
                 parameters.get<std::vector<OutputName> >("outputs").end())
 {
+
   // By default it is assumed that the variable name associated with 'outputs' is the name
   // of the block, this is the case for Markers, Indicators, VectorPostprocessors, and Postprocessors.
   // However, for Materials this is not the case, so the call to buildOutputHideVariableList must be
   // disabled, the build_list allows for this behavior. The hide lists are handled by MaterialOutputAction
-  // in this case
+  // in this case.
+  //
+  // Variables/AuxVariables also call the buildOutputHideVariableList method later, because when their actions
+  // are called the Output objects do not exist. This case is handled by the CheckOutputAction::checkVariableOutput.
   if (build_list)
   {
     std::set<std::string> names_set;
-    names_set.insert(name);
+    names_set.insert(parameters.get<std::string>("name"));
     buildOutputHideVariableList(names_set);
   }
 }
@@ -51,7 +55,7 @@ void
 OutputInterface::buildOutputHideVariableList(std::set<std::string> variable_names)
 {
   // Set of available names
-  const std::set<OutputName> & avail =_oi_output_warehouse.getOutputNames();
+  const std::set<OutputName> & avail = _oi_output_warehouse.getOutputNames();
 
   // Check for 'none'; hide variables on all outputs
   if (_oi_outputs.find("none") != _oi_outputs.end())

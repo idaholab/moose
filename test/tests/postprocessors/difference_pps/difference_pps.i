@@ -32,7 +32,7 @@
     type = ConstantAux
     variable = v
     value = 1
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -83,9 +83,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

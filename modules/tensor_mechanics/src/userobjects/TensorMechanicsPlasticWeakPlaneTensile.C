@@ -1,12 +1,16 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 
 template<>
 InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensile>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
-  params.addRequiredRangeCheckedParam<Real>("tensile_strength", "tensile_strength>=0", "Weak plane tensile strength");
-  params.addParam<Real>("tensile_strength_residual", "Tenile strength at infinite hardening.  If not given, this defaults to tensile_strength, ie, perfect plasticity");
-  params.addRangeCheckedParam<Real>("tensile_strength_rate", 0, "tensile_strength_rate>=0", "Tensile strength = tensile_strenght_residual + (tensile_strength - tensile_strength_residual)*exp(-tensile_rate*plasticstrain).  Set to zero for perfect plasticity");
+  params.addRequiredParam<UserObjectName>("tensile_strength", "A TensorMechanicsHardening UserObject that defines hardening of the weak-plane tensile strength");
   params.addClassDescription("Associative weak-plane tensile plasticity with hardening/softening");
 
   return params;
@@ -15,10 +19,11 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensile>()
 TensorMechanicsPlasticWeakPlaneTensile::TensorMechanicsPlasticWeakPlaneTensile(const std::string & name,
                                                          InputParameters parameters) :
     TensorMechanicsPlasticModel(name, parameters),
-    _tension_cutoff(getParam<Real>("tensile_strength")),
-    _tension_cutoff_residual(parameters.isParamValid("tensile_strength_residual") ? getParam<Real>("tensile_strength_residual") : _tension_cutoff),
-    _tension_cutoff_rate(getParam<Real>("tensile_strength_rate"))
+    _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength"))
 {
+  // cannot check the following for all values of strength, but this is a start
+  if (_strength.value(0) < 0)
+    mooseError("Weak plane tensile strength must not be negative");
 }
 
 
@@ -66,11 +71,46 @@ TensorMechanicsPlasticWeakPlaneTensile::dflowPotential_dintnl(const RankTwoTenso
 Real
 TensorMechanicsPlasticWeakPlaneTensile::tensile_strength(const Real internal_param) const
 {
-  return _tension_cutoff_residual + (_tension_cutoff - _tension_cutoff_residual)*std::exp(-_tension_cutoff_rate*internal_param);
+  return _strength.value(internal_param);
 }
 
 Real
 TensorMechanicsPlasticWeakPlaneTensile::dtensile_strength(const Real internal_param) const
 {
-  return -_tension_cutoff_rate*(_tension_cutoff - _tension_cutoff_residual)*std::exp(-_tension_cutoff_rate*internal_param);
+  return _strength.derivative(internal_param);
+}
+
+void
+TensorMechanicsPlasticWeakPlaneTensile::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
+{
+  act.assign(1, false);
+
+  if (f[0] <= _f_tol)
+  {
+    returned_stress = stress;
+    return;
+  }
+
+  Real str = tensile_strength(intnl);
+
+  RankTwoTensor n; // flow direction
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+      n(i, j) = Eijkl(i, j, 2, 2);
+
+  // returned_stress = stress - alpha*n
+  // where alpha = (stress(2, 2) - str)/n(2, 2)
+  Real alpha = (stress(2, 2) - str)/n(2, 2);
+
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+      returned_stress(i, j) = stress(i, j) - alpha*n(i, j);
+
+  act[0] = true;
+}
+
+std::string
+TensorMechanicsPlasticWeakPlaneTensile::modelName() const
+{
+  return "WeakPlaneTensile";
 }

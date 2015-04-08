@@ -19,6 +19,11 @@ class Tester(MooseObject):
     params.addParam('group',       [], "A list of groups for which this test belongs.")
     params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test.")
     params.addParam('skip_checks', False, "Tells the TestHarness to skip additional checks (This parameter is set automatically by the TestHarness during recovery tests)")
+    params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
+
+    params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
+
+    params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
     # Test Filters
     params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
@@ -32,6 +37,7 @@ class Tester(MooseObject):
     params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
     params.addParam('vtk',           ['ALL'], "A test that runs only if VTK is detected ('ALL', 'TRUE', 'FALSE')")
     params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
+    params.addParam('dof_id_bytes',  ['ALL'], "A test that runs only if libmesh is configured --with-dof-id-bytes = a specific number, e.g. '4', '8'")
 
     return params
 
@@ -167,6 +173,11 @@ class Tester(MooseObject):
     # Check for positive scale refine values when using store timing options
     if self.specs['scale_refine'] == 0 and options.store_time:
       return (False, reason)
+
+    # There should only be one entry in self.specs['dof_id_bytes']
+    for x in self.specs['dof_id_bytes']:
+      if x != 'ALL' and not x in checks['dof_id_bytes']:
+        return (False, 'skipped (--with-dof-id-bytes!=' + x + ')')
 
     # Check the return values of the derived classes
     return self.checkRunnable(options)

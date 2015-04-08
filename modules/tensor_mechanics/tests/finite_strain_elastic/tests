@@ -1,0 +1,17 @@
+[Tests]
+  [./old]
+    type = 'Exodiff'
+    input = 'finite_strain_elastic_test.i'
+    exodiff = 'finite_strain_elastic_test_out.e'
+  [../]
+  [./new]
+    type = 'Exodiff'
+    input = 'finite_strain_elastic_new_test.i'
+    exodiff = 'finite_strain_elastic_new_test_out.e'
+  [../]
+  [./rotation_new]
+    type = 'Exodiff'
+    input = 'elastic_rotation_test.i'
+    exodiff = 'elastic_rotation_test_out.e'
+  [../]
+[]

@@ -52,6 +52,15 @@
   [../]
 []
 
+[Kernels]
+  [./TensorMechanics]
+    disp_z = uz
+    disp_y = uy
+    disp_x = ux
+    use_displaced_mesh = true
+  [../]
+[]
+
 [AuxKernels]
   [./stress_zz]
     type = RankTwoAux
@@ -59,7 +68,7 @@
     rank_two_tensor = stress
     index_j = 2
     index_i = 2
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./fp_zz]
@@ -68,7 +77,7 @@
     rank_two_tensor = fp
     index_j = 2
     index_i = 2
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./e_zz]
@@ -77,13 +86,13 @@
     rank_two_tensor = lage
     index_j = 2
     index_i = 2
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./rotout]
     type = CrystalPlasticityRotationOutAux
     variable = rotout
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./gss1]
@@ -91,7 +100,7 @@
     variable = gss1
     slipsysvar = gss
     index_i = 1
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
 []
@@ -140,6 +149,7 @@
     hprops = '1.0 541.5 60.8 109.8 2.5'
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
     fill_method = symmetric9
+    tan_mod_type = exact
   [../]
   [./elastic]
     type = FiniteStrainElasticMaterial
@@ -206,20 +216,8 @@
   file_base = out
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
-[]
-
-[TensorMechanics]
-  [./solid]
-    disp_z = uz
-    disp_y = uy
-    disp_x = ux
-    use_displaced_mesh = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
 [Problem]

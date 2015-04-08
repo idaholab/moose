@@ -60,14 +60,10 @@
 
 [Outputs]
   output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./out]
     type = Gnuplot
     extension = gif
-  [../]
-
-  [./console]
-    type = Console
-    linear_residuals = true
-    perf_log = true
   [../]
 []

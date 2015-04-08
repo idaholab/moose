@@ -158,14 +158,11 @@
 [Outputs]
   file_base = out
   output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
   [../]
 []
 

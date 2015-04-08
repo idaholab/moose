@@ -31,7 +31,7 @@
 []
 
 [Functions]
-  [./tif]
+  [./image_func]
     type = ImageFunction
     file = stack/test_00.png
   [../]
@@ -55,7 +55,7 @@
 [ICs]
   [./u_ic]
     type = FunctionIC
-    function = tif
+    function = image_func
     variable = u
   [../]
 []
@@ -78,10 +78,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    nonlinear_residuals = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

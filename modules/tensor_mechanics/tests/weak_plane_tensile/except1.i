@@ -23,8 +23,8 @@
   [../]
 []
 
-[TensorMechanics]
-  [./solid]
+[Kernels]
+  [./TensorMechanics]
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
@@ -154,21 +154,31 @@
   [../]
 []
 
+[UserObjects]
+  [./str]
+    type = TensorMechanicsHardeningConstant
+    value = -1.0
+  [../]
+  [./wpt]
+    type = TensorMechanicsPlasticWeakPlaneTensile
+    tensile_strength = str
+    yield_function_tolerance = 1E-6
+    internal_constraint_tolerance = 1E-5
+  [../]
+[]
+
 [Materials]
   [./mc]
-    type = FiniteStrainWeakPlaneTensile
+    type = FiniteStrainMultiPlasticity
     block = 0
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
-    wpt_tensile_strength = -1.0
-    yield_function_tolerance = 1E-6
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
-    wpt_normal_vector = '0 0 1'
-    wpt_normal_rotates = false
+    plastic_models = wpt
+    transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-5
-    internal_constraint_tolerance = 1E-5
   [../]
 []
 
@@ -184,11 +194,8 @@
   file_base = small_deform
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

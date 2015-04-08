@@ -8,7 +8,7 @@
 [MeshModifiers]
   [./middle_node]
     type = AddExtraNodeset
-    boundary = 'middle_node'
+    new_boundary = 'middle_node'
     nodes = '2'
   [../]
 []
@@ -67,10 +67,6 @@
   file_base = out
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
-
+  print_linear_residuals = true
+  print_perf_log = true
 []

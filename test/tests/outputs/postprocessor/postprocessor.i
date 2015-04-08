@@ -69,7 +69,7 @@
 [Postprocessors]
   [./num_vars]
     type = NumVars
-    outputs = 'exodus2 screen'
+    outputs = 'exodus2 console'
   [../]
   [./num_aux]
     type = NumVars
@@ -95,16 +95,11 @@
 []
 
 [Outputs]
-  [./screen]
-    type = Console
-  [../]
   [./exodus]
     type = Exodus
-    output_initial = false
   [../]
   [./exodus2]
     type = Exodus
-    output_initial = false
   [../]
 []
 

@@ -2,7 +2,7 @@
 # MOOSE
 #
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
-moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist-1.1
+moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/dtk_moab
 
 #
@@ -49,19 +49,18 @@ moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
 # clang static analyzer files
 moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 
-# revision header
-revision_header = $(FRAMEWORK_DIR)/include/base/HerdRevision.h
-
 app_INCLUDES := $(moose_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: herd_revision moose
+all:: moose_revision moose
 
-herd_revision:
-	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR))
+# revision header
+moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
+moose_revision:
+  $(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
+    $(moose_revision_header) MOOSE)
 
 moose: $(moose_LIB)
-
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
@@ -84,7 +83,7 @@ sa:: $(moose_analyzer)
 # include MOOSE dep files. Note: must use -include for deps, since they don't exist for first time builds.
 -include $(moose_deps)
 
--include $(wildcard $(FRAMEWORK_DIR)/contrib/mtwist-1.1/src/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/mtwist/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/dtk_moab/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
 
@@ -115,40 +114,80 @@ $(exodiff_APP): $(exodiff_objfiles)
 -include $(wildcard $(exodiff_DIR)/*.d)
 
 #
-# Maintenance
+# Clean targets
 #
 .PHONY: clean clobber cleanall echo_include echo_library
-app_LIB      := $(moose_LIBS) $(exodiff_APP)
 
+# Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
+app_LIB := $(moose_LIBS) $(exodiff_APP) libmoose-$(METHOD).*
+app_objects := $(moose_objects)
+app_deps := $(moose_deps)
+
+# The clean target removes everything we can remove "easily",
+# i.e. stuff which we have Makefile variables for.  Notes:
+# .) This clean target is also used by the apps, so it should only refer to
+#    app-specific variables.
+# .) This target respects $(METHOD), so, for example 'METHOD=dbg make
+#    clean' will only clean debug object and executable files.
+# .) Calling 'make clean' in an app should not remove MOOSE object
+#    files, libraries, etc.
 clean::
-	@rm -fr $(app_LIB) $(app_EXEC)
-	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \) -exec rm '{}' \;)
-	@$(shell find . \( -name *.gch \) | xargs rm -rf)
-	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
+	@rm -rf $(app_LIB) $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER)
 
-clobber::
-	@rm -fr $(app_LIB) $(app_EXEC)
-	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \
-                           -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;)
-	@$(shell find . \( -name *.gch \) | xargs rm -rf)
-	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
+# The clobber target does 'make clean' and then uses 'find' to clean a
+# bunch more stuff.  We have to write this target as though it could
+# be called from a top level application, therefore, we prune the
+# following paths from the search:
+# .) moose (ignore a possible MOOSE submodule)
+# .) .git  (don't accidentally delete any of git's metadata)
+# .) .svn  (don't accidentally delete any of svn's metadata)
+# Notes:
+# .) -exec rm is the only way to delete stuff, it won't work right if
+#    you pipe the output of find to 'xargs rm -rf' or pass the -delete
+#    flag to find
+# .) The ./ in front of the path names is absolutely required for the
+#    find command to work correctly.
+# .) Be careful: running 'make -n clobber' will actually delete files!
+# .) Running 'make clobber' is a good way to clean up outdated
+#    dependency and object files when you upgrade OSX versions or as
+#    source files are deleted over time.
+# .) 'make clobber' does not respect $(METHOD), it just deletes
+#    everything it can find!
+# .) We send any errors from the find command to /dev/null, since we
+#    don't really care about them and find has this annoying "feature"
+#    where it tries to search in directories it has already deleted (in
+#    this case .libs) and prints an error message about it.
+clobber:: clean
+	$(shell find . \( -path ./moose -or -path ./.git -or -path ./.svn \) -prune -or \
+          \( -name "*~" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.so*" -or -name "*.a" \
+          -or -name "*-opt" -or -name "*-dbg" -or -name "*-oprof" \
+          -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" -or -name "*.plist" \
+          -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.gch" -or -name .libs \) \
+          -exec rm -rf '{}' \; 2>/dev/null)
 
-cleanall::
+# cleanall runs 'make clean' in all dependent application directories
+cleanall:: clean
 	@echo "Cleaning in:"
-	@for i in $(app_DIRS); do echo \ $$i; done
-	@rm -fr $(app_LIBS) $(moose_LIBS) $(exodiff_APP)
-	@for dir in $(app_DIRS); \
-	do \
-		find $${dir} \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \) -exec rm '{}' \; ; \
-		find $${dir} -name *.gch | xargs rm -rf; \
-		find $${dir} -type d -name .libs | xargs rm -rf; \
-	done
+	@for dir in $(app_DIRS); do \
+          echo \ $$dir; \
+          make -C $$dir clean ; \
+        done
 
+# Debugging stuff
 echo_include:
 	@echo $(app_INCLUDES) $(libmesh_INCLUDE)
 
-echo_library:
+echo_app_libs:
 	@echo $(app_LIBS)
+
+echo_app_lib:
+	@echo $(app_LIB)
+
+echo_app_exec:
+	@echo $(app_EXEC)
+
+echo_app_objects:
+	@echo $(app_objects)
+
+echo_app_deps:
+	@echo $(app_deps)

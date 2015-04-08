@@ -82,6 +82,9 @@ MultiAppVariableValueSampleTransfer::execute()
           }
 
           _communicator.max(value);
+
+          if (value == -std::numeric_limits<Real>::max())
+            mooseError("Transfer failed to sample point value at point: " << multi_app_position);
         }
 
         if (_multi_app->hasLocalApp(i))

@@ -117,7 +117,7 @@ findContactPoint(PenetrationInfo & p_info,
   _fe->reinit(side, &points);
   RealGradient d = slave_point - phys_point[0];
 
-  Real update_size = 9999999;
+  Real update_size = std::numeric_limits<Real>::max();
 
   //Least squares
   for (unsigned int it=0; it<3 && update_size > TOLERANCE*1e3; ++it)
@@ -158,7 +158,7 @@ findContactPoint(PenetrationInfo & p_info,
     update_size = update.l2_norm();
   }
 
-  update_size = 9999999;
+  update_size = std::numeric_limits<Real>::max();
 
   unsigned nit=0;
 

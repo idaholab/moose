@@ -106,7 +106,7 @@
     type = PointValue
     variable = pressure
     point = '50 0 0'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -172,8 +172,5 @@
   file_base = th_lumped_02
   output_initial = true
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

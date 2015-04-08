@@ -16,11 +16,14 @@
 #define CHECKPOINT_H
 
 // MOOSE includes
+#include "BasicOutput.h"
 #include "FileOutput.h"
 #include "MaterialPropertyStorage.h"
 #include "RestartableData.h"
 #include "MaterialPropertyIO.h"
 #include "RestartableDataIO.h"
+
+#include <deque>
 
 // Forward declarations
 class Checkpoint;
@@ -50,8 +53,7 @@ struct CheckpointFileNames
 /**
  *
  */
-class Checkpoint:
-  public FileOutput
+class Checkpoint : public BasicOutput<FileOutput>
 {
 public:
 
@@ -71,12 +73,13 @@ public:
    * Outputs a checkpoint file.
    * Each call to this function creates various files associated with
    */
-  void output();
+  void output(const ExecFlagType & type);
 
   /**
    * Returns the base filename for the checkpoint files
    */
   std::string filename();
+
   /**
    * Retrieve the checkpoint output directory
    * @return String containing the checkpoint output directory
@@ -84,17 +87,6 @@ public:
   std::string directory();
 
 protected:
-
-  //@{
-  /**
-   * Invalid for Checkpoint output
-   */
-  virtual void outputNodalVariables();
-  virtual void outputElementalVariables();
-  virtual void outputScalarVariables();
-  virtual void outputPostprocessors();
-  virtual void outputVectorPostprocessors();
-  //@}
 
   void updateCheckpointFiles(CheckpointFileNames file_struct);
 
@@ -128,7 +120,7 @@ private:
   RestartableDataIO _restartable_data_io;
 
   /// Vector of checkpoint filename structures
-  std::vector<CheckpointFileNames> _file_names;
+  std::deque<CheckpointFileNames> _file_names;
 };
 
 #endif //CHECKPOINT_H

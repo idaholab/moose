@@ -9,11 +9,33 @@
     type = 'Exodiff'
     input = 'SplitCHParsed_test.i'
     exodiff = 'SplitCHParsed_test_out.e'
+    max_parallel = 1                      # -pc_type lu
   [../]
 
   [./ACParsed]
     type = 'Exodiff'
     input = 'ACParsed_test.i'
     exodiff = 'ACParsed_test_out.e'
+  [../]
+
+  [./analyzejacobian_ACParsed]
+    type = 'AnalyzeJacobian'
+    input = 'ACParsed_test.i'
+    prereq = 'ACParsed'
+    expect_out = '\nNo errors detected. :-\)\n'
+    resize_mesh = true
+    recover = false
+    #skip = 'see #3847'
+  [../]
+
+  [./ParsedMaterial]
+    type = 'Exodiff'
+    input = 'ParsedMaterial_test.i'
+    exodiff = 'ParsedMaterial_test_out.e'
+  [../]
+  [./ConstructionOrder]
+    type = 'Exodiff'
+    input = 'ConstructionOrder.i'
+    exodiff = 'ConstructionOrder_out.e'
   [../]
 []

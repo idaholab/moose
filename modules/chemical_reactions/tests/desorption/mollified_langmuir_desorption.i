@@ -124,9 +124,6 @@
   interval = 10
   exodus = true
   csv = 10
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 [] # Outputs
 []

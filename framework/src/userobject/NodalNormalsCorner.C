@@ -40,12 +40,15 @@ NodalNormalsCorner::execute()
 {
   Threads::spin_mutex::scoped_lock lock(nodal_normals_corner_mutex);
   NumericVector<Number> & sln = _aux.solution();
+
+  // Get a reference to our BoundaryInfo object
+  BoundaryInfo & boundary_info = _mesh.getMesh().get_boundary_info();
+
   for (unsigned int nd = 0; nd < _current_side_elem->n_nodes(); nd++)
   {
     const Node * node = _current_side_elem->get_node(nd);
-    if (_mesh.getMesh().boundary_info->has_boundary_id(node, _corner_boundary_id))
-    {
-      if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
+    if (boundary_info.has_boundary_id(node, _corner_boundary_id) &&
+        node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
       {
         dof_id_type dof_x = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
         dof_id_type dof_y = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
@@ -56,7 +59,6 @@ NodalNormalsCorner::execute()
         sln.add(dof_y, _normals[0](1));
         sln.add(dof_z, _normals[0](2));
       }
-    }
   }
 }
 

@@ -37,12 +37,12 @@ AddMeshModifierAction::act()
   if (_app.isRecovering())
     return;
 
-  // Add a pointer to the mesh, this is required for this MeshModifier to inheret from the BlockRestrictable,
+  // Add a pointer to the mesh, this is required for this MeshModifier to inherit from the BlockRestrictable,
   // as is the case for SideSetAroundSubdomain
   _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh.get();
 
   // Create the modifier object and run it
-  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create_shared_ptr(_type, getShortName(), _moose_object_pars));
+  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create(_type, getShortName(), _moose_object_pars));
   mooseAssert(_mesh != NULL, "Mesh hasn't been created");
 
   // Run the modifier on the normal mesh

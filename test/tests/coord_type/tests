@@ -1,0 +1,15 @@
+[Tests]
+  [./rz-y-rotation]
+    # Simple diffusion with rotation around the y-axis
+    type = Exodiff
+    input = coord_type_rz.i
+    exodiff = coord_type_rz_out.e
+  [../]
+  [/rz-x-rotation]
+    # Simple diffusion with rotation around the x-axis
+    type = Exodiff
+    input = coord_type_rz.i
+    exodiff = coord_type_rz_x_rotation.e
+    cli_args = 'Problem/rz_coord_axis=X Outputs/file_base=coord_type_rz_x_rotation'
+  [../]
+[]

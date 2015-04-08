@@ -34,6 +34,7 @@
     csvdiff = 'gh05.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
+    max_parallel = 1
   [../]
   [./gh06]
     type = 'CSVDiff'
@@ -73,6 +74,7 @@
     csvdiff = 'gh_lumped_07.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
+    max_parallel = 1
   [../]
   [./gh_lumped_08]
     type = 'CSVDiff'
@@ -127,6 +129,7 @@
     csvdiff = 'gh_fu_05.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
+    max_parallel = 1
   [../]
   [./gh_fu_06]
     type = 'CSVDiff'

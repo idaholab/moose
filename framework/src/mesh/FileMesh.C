@@ -29,11 +29,6 @@ InputParameters validParams<FileMesh>()
   InputParameters params = validParams<MooseMesh>();
 
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
-  params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned.  Probably not a good idea to use it with a serial mesh!");
-
-  // groups
-  params.addParamNamesToGroup("skip_partitioning", "Partitioning");
-
   return params;
 }
 
@@ -66,7 +61,6 @@ FileMesh::clone() const
 void
 FileMesh::buildMesh()
 {
-//  mooseAssert(_mesh == NULL, "Mesh already exists, and you are trying to read another");
   std::string _file_name = getParam<MeshFileName>("file");
 
   Moose::setup_perf_log.push("Read Mesh","Setup");
@@ -98,8 +92,6 @@ FileMesh::buildMesh()
     else
       getMesh().read(_file_name);
   }
-
-  getMesh().skip_partitioning(getParam<bool>("skip_partitioning"));
 
   Moose::setup_perf_log.pop("Read Mesh","Setup");
 }

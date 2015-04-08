@@ -380,20 +380,20 @@
   [./internalVolume]
     type = InternalVolume
     boundary = 100
-    execute_on = residual
+    execute_on = linear
   [../]
 
   [./aveTempInterior]
     type = SideAverageValue
     boundary = 100
     variable = temp
-    execute_on = residual
+    execute_on = linear
   [../]
   [./materialInput]
     type = SideAverageValue
     boundary = '7 8 9 10 11 12'
     variable = material_input
-    execute_on = residual
+    execute_on = linear
   [../]
 
 []
@@ -401,9 +401,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

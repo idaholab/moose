@@ -26,12 +26,14 @@
 #include <unistd.h>
 
 OutputWarehouse::OutputWarehouse() :
-    _multiapp_level(0)
+    Warehouse<Output>(),
+    _multiapp_level(0),
+    _output_exec_flag(EXEC_CUSTOM),
+    _force_output(false)
 {
   // Set the reserved names
   _reserved.insert("none");                  // allows 'none' to be used as a keyword in 'outputs' parameter
   _reserved.insert("all");                   // allows 'all' to be used as a keyword in 'outputs' parameter
-  _reserved.insert("_moose_debug_output");   // the [Debug] block creates this object
 }
 
 OutputWarehouse::~OutputWarehouse()
@@ -44,26 +46,46 @@ OutputWarehouse::~OutputWarehouse()
 void
 OutputWarehouse::initialSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->initialSetup();
-}
-
-
-void
-OutputWarehouse::init()
-{
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    (*it)->init();
 }
 
 void
 OutputWarehouse::timestepSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
   {
     (*it)->timestepSetupInternal();
     (*it)->timestepSetup();
   }
+}
+
+void
+OutputWarehouse::jacobianSetup()
+{
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->jacobianSetup();
+}
+
+void
+OutputWarehouse::residualSetup()
+{
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->residualSetup();
+}
+
+void
+OutputWarehouse::subdomainSetup()
+{
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->subdomainSetup();
+}
+
+void
+OutputWarehouse::init()
+{
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->init();
 }
 
 void
@@ -74,9 +96,9 @@ OutputWarehouse::addOutput(MooseSharedPointer<Output> & output)
   // Add the object to the warehouse storage, Checkpoint placed at end so they are called last
   Checkpoint * cp = dynamic_cast<Checkpoint *>(output.get());
   if (cp != NULL)
-    _object_ptrs.push_back(output.get());
+    _all_objects.push_back(output.get());
   else
-    _object_ptrs.insert(_object_ptrs.begin(), output.get());
+    _all_objects.insert(_all_objects.begin(), output.get());
 
   // Store the name and pointer
   _object_map[output->name()] = output.get();
@@ -104,7 +126,8 @@ OutputWarehouse::hasOutput(const std::string & name) const
 const std::vector<Output *> &
 OutputWarehouse::getOutputs() const
 {
-  return _object_ptrs;
+  mooseDeprecated("OutputWarehouse::getOutputs() is deprecated - use OutputWarehouse::all() instead");
+  return _all_objects;
 }
 
 
@@ -123,52 +146,23 @@ OutputWarehouse::addOutputFilename(const OutFileBase & filename)
 }
 
 void
-OutputWarehouse::outputInitial()
+OutputWarehouse::outputStep(ExecFlagType type)
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    (*it)->outputInitial();
-}
+  if (_force_output)
+    type = EXEC_FORCED;
 
-void
-OutputWarehouse::outputFailedStep()
-{
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    (*it)->outputFailedStep();
-}
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->outputStep(type);
 
-void
-OutputWarehouse::outputStep()
-{
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    (*it)->outputStep();
-}
-
-void
-OutputWarehouse::outputFinal()
-{
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    (*it)->outputFinal();
+  // Reset force output flag
+  _force_output = false;
 }
 
 void
 OutputWarehouse::meshChanged()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->meshChanged();
-}
-
-void
-OutputWarehouse::allowOutput(bool state)
-{
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    (*it)->allowOutput(state);
-}
-
-void
-OutputWarehouse::forceOutput()
-{
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    (*it)->forceOutput();
 }
 
 void
@@ -188,9 +182,16 @@ OutputWarehouse::mooseConsole()
 }
 
 void
+OutputWarehouse::flushConsoleBuffer()
+{
+  if (!_console_buffer.str().empty())
+    mooseConsole();
+}
+
+void
 OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset)
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
   {
     FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
     if (ptr != NULL)
@@ -211,8 +212,9 @@ OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsig
 std::map<std::string, unsigned int>
 OutputWarehouse::getFileNumbers()
 {
+
   std::map<std::string, unsigned int> output;
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
   {
     FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
     if (ptr != NULL)
@@ -271,4 +273,23 @@ bool
 OutputWarehouse::isReservedName(const std::string & name)
 {
   return _reserved.find(name) != _reserved.end();
+}
+
+void
+OutputWarehouse::setOutputExecutionType(ExecFlagType type)
+{
+  _output_exec_flag = type;
+}
+
+void
+OutputWarehouse::allowOutput(bool state)
+{
+  for (std::vector<Output *>::iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->allowOutput(state);
+}
+
+void
+OutputWarehouse::forceOutput()
+{
+  _force_output = true;
 }

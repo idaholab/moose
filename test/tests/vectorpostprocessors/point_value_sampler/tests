@@ -4,4 +4,10 @@
     input = 'point_value_sampler.i'
     csvdiff = 'point_value_sampler_out_point_sample_0001.csv'
   [../]
+
+  [./error]
+    type = RunException
+    input = not_found.i
+    expect_err = "sample point not found"
+  [../]
 []

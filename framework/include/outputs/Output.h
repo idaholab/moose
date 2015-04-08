@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef OUTPUTBASE_H
-#define OUTPUTBASE_H
+#ifndef OUTPUT_H
+#define OUTPUT_H
 
 // MOOSE includes
 #include "MooseObject.h"
@@ -21,7 +21,8 @@
 #include "MooseTypes.h"
 #include "MooseMesh.h"
 #include "MeshChangedInterface.h"
-#include "MooseApp.h"
+#include "SetupInterface.h"
+#include "AdvancedOutputUtils.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -36,27 +37,6 @@ template<>
 InputParameters validParams<Output>();
 
 /**
- * A structure for storing the various lists that contain
- * the names of the items to be exported. An instance of this
- * struct exists for each of the output types (non-linear variables,
- * scalar variables, and postprocessors)
- */
-struct OutputData
-{
-  /// A list of all possible outputs
-  std::vector<std::string> available;
-
-  /// User-supplied list of outputs to display
-  std::vector<std::string> show;
-
-  /// User-supplied list of outputs to hide
-  std::vector<std::string> hide;
-
-  /// A list of the outputs to write
-  std::vector<std::string> output;
-};
-
-/**
  * Based class for output objects
  *
  * Each output class (e.g., Exodus) should inherit from this base class. At a minimum, the pure
@@ -67,7 +47,8 @@ struct OutputData
 class Output :
   public MooseObject,
   public Restartable,
-  public MeshChangedInterface
+  public MeshChangedInterface,
+  public SetupInterface
 {
 public:
 
@@ -80,125 +61,6 @@ public:
    * @see initAvailable init separate
    */
   Output(const std::string & name, InputParameters & parameters);
-
-  /**
-   * Class destructor
-   */
-  virtual ~Output();
-
-  /**
-   * Returns true if any of the other has methods return true.
-   */
-  virtual bool hasOutput();
-
-  /**
-   * Returns true if there exists nodal nonlinear variables for output
-   * @return True if nonlinear variable output exists
-   * @see getNodalVariableOutput
-   */
-  bool hasNodalVariableOutput();
-
-  /**
-   * The list of nodal nonlinear variables names that are set for output
-   * @return A vector of strings containing the names of the nodal nonlinear variables for output
-   *
-   * Note: The list returned by this will contain the names of both elemental and nodal variable
-   * names if 'elemental_as_nodal = true' in the input file. The libMesh output system
-   * (EquationSystems::build_solution_vector) performs the correct action within the solution vector
-   * by setting the nodal values as the average of the values for each of the element that the node
-   * shares.
-   *
-   * @see hasNodalVariableOutput
-   */
-  const std::vector<std::string> & getNodalVariableOutput();
-
-  /**
-   * Returns true if there exists elemental nonlinear variables for output
-   * @return True if nonlinear variable output exists
-   * @see getElementalVariableOutput
-   */
-  bool hasElementalVariableOutput();
-
-  /**
-   * The list of elemental nonlinear variables names that are set for output
-   * @return A vector of strings containing the names of the nonlinear variables for output
-   * @see hasElementalVariableOutput
-   */
-  const std::vector<std::string> & getElementalVariableOutput();
-
-  /**
-   * Returns true if there exists scalar variables for output
-   * @return True if scalar variable output exists
-   * @see getScalarVariableOutput
-   */
-  bool hasScalarOutput();
-
-  /**
-   * The list of scalar variables names that are set for output
-   * @return A vector of strings containing the names of the scalar variables for output
-   * @see hasScalarVariableOutput
-   */
-  const std::vector<std::string> & getScalarOutput();
-
-  /**
-   * Returns true if there exists postprocessors for output
-   * @return True if postprocessor output exists
-   * @see getPostprocessorOutput
-   */
-  bool hasPostprocessorOutput();
-
-  /**
-   * The list of postprocessor names that are set for output
-   * @return A vector of strings containing the names of the postprocessor variables for output
-   * @see hasPostprocessorOutput
-   */
-  const std::vector<std::string> & getPostprocessorOutput();
-
-  /**
-   * Returns true if there exists VectorPostprocessors for output
-   * @return True if VectorPostprocessor output exists
-   * @see getVectorPostprocessorOutput
-   */
-  bool hasVectorPostprocessorOutput();
-
-  /**
-   * The list of VectorPostprocessor names that are set for output
-   * @return A vector of strings containing the names of the VectorPostprocessor variables for output
-   * @see hasVectorPostprocessorOutput
-   */
-  const std::vector<std::string> & getVectorPostprocessorOutput();
-
-  /**
-   * This is called any time that the mesh changes
-   * This class simply changes the _mesh_changed member variable to true, which is used by output()
-   * to trigger a call of the outputSetup() method.
-   */
-  virtual void meshChanged();
-
-  /**
-   * Set the sequence state
-   * When the sequence state is set to true then the outputSetup() method is called with every
-   * call to output(). In the case of Exodus output, this creates a new file with each output.
-   *
-   * The sequence state is automatically set to true when 'use_displaced = true', otherwise it
-   * is set to false initially
-   */
-  virtual void sequence(bool state);
-
-  /**
-   * A method for enable/disabing output.
-   * @param state A true/false flag that enables or disables all output, if set to false
-   * all subsequent calls to outputInitial(), outputStep(), and outputFinal() will not produce output.
-   * However, forceOutput() will always produce output.
-   */
-  void allowOutput(bool state);
-
-  /**
-   * A method for forcing output
-   * This will cause the next call to outputInitial, outputStep(), or outputFinal() to call output() method
-   * regardless of intervals, allow states, etc. The rules for calling outputSetup() are preserved.
-   */
-  void forceOutput();
 
   /**
    * Get the output time.
@@ -232,143 +94,80 @@ public:
   virtual int timeStep();
 
   /**
-   * A method controlling which types of outputs are supported by the Output object
-   * @param names (optional) Space seperated of output type names that are supported by this Output object,
-   *              if this is ommited all outputs types will be supported. The list of aviable output
-   *              types is given below.
-   *
-   * Output objects vary widely in what type of outputs they support (e.g., elemental variables,
-   * or postprocessor data). This method provides the user a means for controlling the types of
-   * outputs that are supported for the object being created. This is a static method that MUST
-   * be used to append parameters inside the objects validParams function.
-   *
-   * List of Output Types and Method Names
-   * The output system is designed around overloading virtual method calls to output the
-   * various output types, the following list gives the name of the output type and the associated
-   * virtual method that should be overloaded to perform the output in the object being created.
-   *
-   * Type                 virtual Method Name
-   * -------------------- ----------------------------
-   * nodal                outputNodalVariables()
-   * elemental            outputElementalVariables()
-   * scalar               outputScalarVariables()
-   * postprocessor        outputPostprocessors()
-   * vector_postprocessor outputVectorPostprocessors()
-   * input                outputInput()
-   * system_information   outputSystemInformation()
-   *
-   * @see CSV Exodus
-   *
+   * Get the output interval
    */
-  static InputParameters enableOutputTypes(const std::string & names = std::string());
+  const unsigned int & interval() const;
 
   /**
-   * A method for disabling all individual output type control
-   * @param names (optional) Space seperated of output type names that are un-supported by this Output object,
-   *              if this is ommited all outputs types will be un-supported.
-   *
-   * This method acts in the opposite manner for Output::enableOutputTypes().
-   *
-   * @see Output::enableOutputTypes() Checkpoint
+   * Get the current 'output_on' selections for display
    */
-  static InputParameters disableOutputTypes(const std::string & names = std::string());
+  const MultiMooseEnum & outputOn() const;
+
+  /**
+   * Returns true if this object is an AdvancedOutput object
+   */
+  bool isAdvanced();
+
+  /**
+   * Returns the advanced output_on settings.
+   *
+   * Check if this is valid first with isAdvanced()
+   */
+  virtual const OutputOnWarehouse & advancedOutputOn() const;
+
+  /**
+   * Return the support output execution times
+   * @param default_type The default MultiMooseEnum option
+   */
+  static MultiMooseEnum getExecuteOptions(std::string default_type = "");
+
+  /**
+   * Method for controlling the allow output state
+   * @param state The state to set the allow flag to
+   */
+  void allowOutput(bool state) { _allow_output = state; }
 
 
 protected:
 
   /**
-   * A single call to this function should output all the necessary data for a single timestep. By
-   * default this function performs calls each of the four virtual output methods: outputScalarVariables(),
-   * outputPostprocessors(), outputElementalVariables(), and outputNodalVariables(). But, only if output exists
-   * for each type.
+   * A single call to this function should output all the necessary data for a single timestep.
+   * @param type The type execution flag (see Moose.h)
+   * @param force Ignore the flag and preform the output
    *
    * @see outputNodalVariables outputElementalVariables outputScalarVariables outputPostprocessors
    */
-  virtual void output();
+  virtual void outputStep(const ExecFlagType & type) = 0;
 
   /**
-   * Performs output of nodal nonlinear variables
-   * The child class must define this method to output the nonlinear variables as desired
-   * @see Exodus::outputNodalVariables
+   * A method called just prior to timestep(), this is used by PetscOutput to perform the necessary
+   * setup actions for each timestep
    */
-  virtual void outputNodalVariables();
+  virtual void timestepSetupInternal();
 
   /**
-   * Performs output of elemental nonlinear variables
-   * The child class must define this method to output the nonlinear variables as desired
-   * @see Exodus::outputElementalVariables
+   * Handles logic for determining if a step should be output
+   * @return True if a call if output should be preformed
    */
-  virtual void outputElementalVariables();
-
-  /**
-   * Performs output of scalar variables
-   * The child class must define this method to output the scalar variables as desired
-   * @see Exodus::outputScalarVariables
-   */
-  virtual void outputScalarVariables();
-
-  /**
-   * Performs output of postprocessors
-   * The child class must define this method to output the postprocessors as desired
-   * @see Exodus::outputPostprocessors
-   */
-  virtual void outputPostprocessors();
-
-  /**
-   * Performs output of VectorPostprocessors
-   * The child class must define this method to output the VectorPostprocessors as desired
-   */
-  virtual void outputVectorPostprocessors();
-
-  /**
-   * Initial setup function that is called prior to any output
-   * This method is called by FEProblem::initialSetup via the OutputWarehouse. It is the last initialSetup so
-   * all objects are setup at the time of the execution.g
-   *
-   * For example, the Console object uses this function to write the system information which is desired to be before any
-   * other output.
-   *
-   * @see FEProblem::initialSetup Console
-   */
-  virtual void initialSetup();
-
-  /**
-   * Timestep setup function that is called at the beginning of the timestep
-   * This method is called by FEProblem::timestepSetup via the OutputWarhouse.
-   *
-   * @see FEProblem::timestepSetup()
-   */
-  virtual void timestepSetup();
-
-  /**
-   * This method is called initially by the output() method prior to any of the variable output methods.
-   * Hence, the child class should use this method to prepare for outputing data. For example, the Exodus
-   * output defines a pointer to the IO interface that is utilized for performing the data export.
-   *
-   * outputSetup() is also called  by the output() when the meshChanged() function is called; thus, the child class should
-   * use the _mesh_changed flag to indicate if something is different when the mesh changes. After every call of
-   * outputSetup() _mesh_changed flag is set to false.
-   */
-  virtual void outputSetup();
-
-  /**
-   * Performs the output of the input file
-   * By default this method does nothing and is not called, the individual Output objects are responsible for calling it
-   */
-  virtual void outputInput();
-
-  /**
-   * \todo{Make this call automatic in similar fashion to outputInput}
-   * Performs the output of system information
-   * By default this method does nothing and is not called by output()
-   */
-  virtual void outputSystemInformation();
+  bool shouldOutput(const ExecFlagType & type);
 
   /**
    * Returns true if the output interval is satisfied
    * \todo{Implement additional types of intervals (e.g., simulation time and real time)}
    */
-  bool checkInterval();
+  bool onInterval();
+
+  /**
+   * Initialization method.
+   * This populates the various data structures needed to control the output
+   */
+  virtual void init();
+
+  /**
+   * A method for modifying "output_on" MultiMooseEnums with the short-cut flag options
+   * @param input A reference to the enum to modifiy
+   */
+  void applyOutputOnShortCutFlags(MultiMooseEnum & input);
 
   /// Pointer the the FEProblem object for output object (use this)
   FEProblem * _problem_ptr;
@@ -382,146 +181,11 @@ protected:
   /// Reference the the libMesh::EquationSystems object that contains the data
   EquationSystems * _es_ptr;
 
-  /// Flag for outputing the initial solution
-  bool _output_initial;
-
-  /// Flag for outputting intermediate steps
-  bool _output_intermediate;
-
-  /// Flag for outputing the final step
-  bool _output_final;
-
-  /// Flag for output the input file
-  bool _output_input;
-
-  /// System information output flag
-  bool _system_information;
-
-  /// True if the meshChanged() function has been called (restartable)
-  bool _mesh_changed;
-
   /// Flag for forcing call to outputSetup() with every call to output() (restartable)
   bool _sequence;
 
-  /// Flag for disabling/enabling output
-  bool _allow_output;
-
-  /// Flag determining if the output system is on the initial output step (i.e., output control with output_initial parameter)
-  bool _on_initial;
-
-private:
-
-  /**
-   * Initialization method.
-   * This populates the various data structures needed to control the output
-   */
-  void init();
-
-  /**
-   * Performs initial output (if desired)
-   *
-   * If the output_initial input options is true calling this method will call the output() method, it
-   * does nothing otherwise. This method is called by the Steady and Transient Executioners via
-   * the FEProblem::outputInitial method.
-   *
-   * The main purpose is to have the output class perform the check on the output_initial option rather than
-   * the Executioner.
-   *
-   * @see output Steady Transient FEProblem
-   */
-  virtual void outputInitial();
-
-  /**
-   * Performs the output call, if _output_failed = true
-   * This method is what is called by the internal MOOSE framework, this should \b not be called by a user. This method
-   * calls outputSetup() prior to output() anytime the meshChanged() method was called or the _sequence flag is true.
-   *
-   * @see Transient::takeStep()
-   */
-  virtual void outputFailedStep();
-
-  /**
-   * Performs the output call, handling interval and outputSetup calls.
-   * This method is what is called by the internal MOOSE framework, this should \b not be called by a user. This method
-   * calls outputSetup() prior to output() any time the meshChanged() method was called or the _sequence flag is true.
-   */
-  virtual void outputStep();
-
-  /**
-   * Force the output of the final timestep (if desired)
-   *
-   * This is called by the Transient executioner when the simulation is done, it will output the final solution regardless
-   * of interval settings if 'output_final = true'.
-   *
-   * @see Transient::keepGoing
-   */
-  virtual void outputFinal();
-
-  /**
-   * Initializes the available lists for each of the output types
-   */
-  void initAvailableLists();
-
-  /**
-   * Timestep setup function that is called at the beginning of the timestep
-   * just prior to timestepSetup(). This method is meant for internal use only.
-   * This method is called by FEProblem::timestepSetup via the OutputWarhouse.
-   *
-   * @see PetscOutput
-   */
-  virtual void timestepSetupInternal();
-
-  /**
-   * Parses the user-supplied input for hiding and showing variables and postprocessors into
-   * a list for each type of output
-   * @param show The vector of names that are to be output
-   * @param hide The vector of names that are to be suppressed from the output
-   */
-  void initShowHideLists(const std::vector<VariableName> & show, const std::vector<VariableName> & hide);
-
-  /**
-   * Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
-   * @param output_data Reference to OutputData struct to initialize
-   * @param warehouse Reference to the postprocessor or vector postprocessor warehouse
-   */
-  template <typename warehouse_type, typename postprocessor_type>
-  bool
-  initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse);
-
-  /**
-   * Initializes the list of items to be output using the available, show, and hide lists
-   * @param data The OutputData to operate on
-   */
-  void initOutputList(OutputData & data);
-
-  /**
-   * Handles logic for determining if a step should be output
-   * @return True if a call if output should be preformed
-   */
-  bool shouldOutput();
-
-  /**
-   * Returns status of output initial flag
-   * @return True prior to call of outputInitial(), once this is called then it returns false
-   */
-  bool onInitial();
-
-  /**
-   * Method for defining the available parameters based on the types of outputs
-   * @param params The InputParamters object to add parameters to
-   * @param types The types of output this object should support (see Output::enableOutputTypes)
-   *
-   * Each output object may have a varying set of supported output types (e.g., elemental
-   * variables may not be supported). This private, static method populates the InputParameters
-   * object with the correct parameters based on the items contained in the MultiMooseEnum.
-   *
-   * This method is private, users should utlize the Output::enableOutputTypes method
-   *
-   * @see Output::enableOutputTypes
-   */
-  static void addValidParams(InputParameters & params, const MultiMooseEnum & types);
-
-  static MultiMooseEnum getOutputTypes();
+  /// The common Execution types; this is used as the default execution type for everything except system information and input
+  MultiMooseEnum _output_on;
 
   /// The current time for output purposes
   Real & _time;
@@ -537,21 +201,6 @@ private:
 
   /// Old time step delta
   Real & _dt_old;
-
-  /// Storage structure for the variable lists for elemental variable output (Variable and AuxVariable)
-  OutputData _elemental_variables;
-
-  /// Storage structure for the variable lists for nodal variable output (Variable and AuxVariable)
-  OutputData _nodal_variables;
-
-  /// Storage structure for the variable lists for postprocessor output
-  OutputData _postprocessor;
-
-  /// Storage structure for the variable lists for vector postprocessor output
-  OutputData _vector_postprocessor;
-
-  /// Storage structure for the variable lists for scalar output
-  OutputData _scalar;
 
   /// The number of outputs written
   unsigned int _num;
@@ -574,72 +223,22 @@ private:
   /// Flag for only executing at sync times
   bool _sync_only;
 
-  /// Flag for forcing output
-  bool _force_output;
-
-  /// Flag for outputting faild time steps
-  bool _output_failed;
-
-  /// True if outputSetup was called
-  // Note, this is needed by recovery system to guarantee that outputStep was called.
-  // Normal runs rely on _num == 0, but when recovering _num will likely be non-zero
-  bool _output_setup_called;
-
   /// True if init() has been called
   bool _initialized;
 
-  // Allow complete access
+  /// Flag for disabling output
+  bool _allow_output;
+
+  /// Flag for advanced output testing
+  bool _is_advanced;
+
+  /// Storage for the individual component execute flags
+  // This is here rather than in AdvancedOutput to allow generic
+  // access to this data from the Console object for displaying
+  // the output settings.
+  OutputOnWarehouse _advanced_output_on;
+
   friend class OutputWarehouse;
-  friend class FileOutput;
-  friend class OversampleOutput;
-  friend class PetscOutput;
-  friend class Console;
-  friend class TransientMultiApp;
 };
 
-// Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
-template <typename warehouse_type, typename postprocessor_type>
-bool
-Output::initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse)
-{
-  // Return value
-  bool has_limited_pps = false;
-
-  // Loop through each of the execution flags
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-  {
-    // Loop through each of the postprocessors
-    for (typename std::vector<postprocessor_type *>::const_iterator postprocessor_it = warehouse(Moose::exec_types[i])[0].all().begin();
-         postprocessor_it != warehouse(Moose::exec_types[i])[0].all().end();
-         ++postprocessor_it)
-    {
-      // Store the name in the available postprocessors
-      postprocessor_type *pps = *postprocessor_it;
-      output_data.available.push_back(pps->PPName());
-
-      // Extract the list of outputs
-      std::set<OutputName> pps_outputs = pps->getOutputs();
-
-      // Check that the outputs lists are valid
-      _app.getOutputWarehouse().checkOutputs(pps_outputs);
-
-      // Check that the output object allows postprocessor output,
-      // account for "all" keyword (if it is present assume "all" was desired)
-      if ( pps_outputs.find(_name) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
-      {
-        if (!isParamValid("output_postprocessors"))
-          mooseWarning("Postprocessor '" << pps->PPName()
-                       << "' has requested to be output by the '" << _name
-                       << "' output, but postprocessor output is not support by this type of output object.");
-      }
-
-      // Set the flag state for postprocessors that utilize 'outputs' parameter
-      if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
-        has_limited_pps = true;
-    }
-  }
-
-  return has_limited_pps;
-}
-
-#endif /* OUTPUTBASE_H */
+#endif /* OUTPUT_H */

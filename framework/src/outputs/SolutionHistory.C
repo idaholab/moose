@@ -21,8 +21,7 @@ template<>
 InputParameters validParams<SolutionHistory>()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<FileOutput>();
-  params += Output::disableOutputTypes();
+  InputParameters params = validParams<BasicOutput<FileOutput> >();
 
   // Return the parameters
   return params;
@@ -30,11 +29,7 @@ InputParameters validParams<SolutionHistory>()
 }
 
 SolutionHistory::SolutionHistory(const std::string & name, InputParameters & parameters) :
-    FileOutput(name, parameters)
-{
-}
-
-SolutionHistory::~SolutionHistory()
+    BasicOutput<FileOutput>(name, parameters)
 {
 }
 
@@ -45,7 +40,7 @@ SolutionHistory::filename()
 }
 
 void
-SolutionHistory::output()
+SolutionHistory::output(const ExecFlagType & /*type*/)
 {
   // Reference to the Non-linear System
   NonlinearSystem & nl_sys = _problem_ptr->getNonlinearSystem();

@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 // Original class author: M.R. Tonks
 
 #include "FiniteStrainMaterial.h"
@@ -18,7 +24,7 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
     _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
     _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
     _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
-    _dfgrd(declareProperty<RankTwoTensor>("deformation gradient"))
+    _deformation_gradient(declareProperty<RankTwoTensor>("deformation gradient"))
 {
 }
 
@@ -50,8 +56,8 @@ FiniteStrainMaterial::computeStrain()
     RankTwoTensor A(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]); //Deformation gradient
     RankTwoTensor Fbar(_grad_disp_x_old[_qp], _grad_disp_y_old[_qp], _grad_disp_z_old[_qp]); //Old Deformation gradient
 
-    _dfgrd[_qp] = A;
-    _dfgrd[_qp].addIa(1.0);//Gauss point deformation gradient
+    _deformation_gradient[_qp] = A;
+    _deformation_gradient[_qp].addIa(1.0);//Gauss point deformation gradient
 
     A -= Fbar; //A = gradU - gradUold
 
@@ -65,7 +71,7 @@ FiniteStrainMaterial::computeStrain()
     ave_Fhat += Fhat[_qp] * _JxW[_qp];
     volume += _JxW[_qp];
 
-    ave_dfgrd_det += _dfgrd[_qp].det() * _JxW[_qp]; //Average deformation gradient
+    ave_dfgrd_det += _deformation_gradient[_qp].det() * _JxW[_qp]; //Average deformation gradient
   }
 
   ave_Fhat /= volume; //This is needed for volumetric locking correction
@@ -78,8 +84,8 @@ FiniteStrainMaterial::computeStrain()
 
     computeQpStrain(Fhat[_qp]);
 
-    factor = std::pow(ave_dfgrd_det / _dfgrd[_qp].det(), 1.0/3.0);//Volumetric locking correction
-    _dfgrd[_qp] *= factor;//Volumetric locking correction
+    factor = std::pow(ave_dfgrd_det / _deformation_gradient[_qp].det(), 1.0/3.0);//Volumetric locking correction
+    _deformation_gradient[_qp] *= factor;//Volumetric locking correction
   }
 }
 

@@ -32,10 +32,11 @@ CachingPointSource::addPoints()
   // Add points on the unit square using user-defined IDs.  The first
   // time through a PointLocator will look up their elements, but on
   // subsequent calls to addPoints(), it should used cached values.
-  addPoint(Point(.25, .25), 0);
-  addPoint(Point(.75, .25), 1);
-  addPoint(Point(.75, .75), 2);
-  addPoint(Point(.25, .75), 3);
+  Real eps = 1.e-3;
+  addPoint(Point(.25 + eps, .25 + eps), 0);
+  addPoint(Point(.75 + eps, .25 + eps), 1);
+  addPoint(Point(.75 + eps, .75 + eps), 2);
+  addPoint(Point(.25 + eps, .75 + eps), 3);
 }
 
 Real

@@ -1,16 +1,10 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 
 #ifndef REFERENCERESIDUALPROBLEM_H
 #define REFERENCERESIDUALPROBLEM_H
@@ -35,15 +29,15 @@ public:
   virtual void timestepSetup();
   void updateReferenceResidual();
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
-                                                                    const int it,
+                                                                    const PetscInt it,
                                                                     const Real xnorm,
                                                                     const Real snorm,
                                                                     const Real fnorm,
                                                                     const Real rtol,
                                                                     const Real stol,
                                                                     const Real abstol,
-                                                                    const int nfuncs,
-                                                                    const int max_funcs,
+                                                                    const PetscInt nfuncs,
+                                                                    const PetscInt max_funcs,
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
 

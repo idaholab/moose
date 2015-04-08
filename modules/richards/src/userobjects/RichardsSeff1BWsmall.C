@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  "Broadbridge-White" form of effective saturation for Kn small (P Broadbridge and I White ``Constant rate rainfall infiltration: A versatile nonlinear model 1. Analytic Solution'', Water Resources Research 24 (1988) 145-154)
 //
@@ -22,11 +25,11 @@ InputParameters validParams<RichardsSeff1BWsmall>()
 }
 
 RichardsSeff1BWsmall::RichardsSeff1BWsmall(const std::string & name, InputParameters parameters) :
-  RichardsSeff(name, parameters),
-  _sn(getParam<Real>("Sn")),
-  _ss(getParam<Real>("Ss")),
-  _c(getParam<Real>("C")),
-  _las(getParam<Real>("las"))
+    RichardsSeff(name, parameters),
+    _sn(getParam<Real>("Sn")),
+    _ss(getParam<Real>("Ss")),
+    _c(getParam<Real>("C")),
+    _las(getParam<Real>("las"))
 {
   if (_ss <= _sn)
     mooseError("In BW effective saturation Sn set to " << _sn << " and Ss set to " << _ss << " but these must obey Ss > Sn");
@@ -63,11 +66,14 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
   const Real eps=4.0e-16, em1=0.3678794411714423215955237701614608;
   Real p,e,t,w;
   //if (z<-em1 || isinf(z) || isnan(z)) { // Andy read this might not compile on some machines
-  if (z<-em1) {
+  if (z < -em1)
     mooseError("LambertW: bad argument " << z << "\n");
-  }
-  if (0.0==z) return 0.0;
-  if (z<-em1+1e-4) { // series near -em1 in sqrt(q)
+
+  if (0.0 == z)
+    return 0.0;
+  if (z < -em1+1e-4)
+  {
+    // series near -em1 in sqrt(q)
     Real q=z+em1,r=std::sqrt(q),q2=q*q,q3=q2*q;
     return
      -1.0
@@ -81,19 +87,26 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
       -8.401032217523977370984161688514*q3*q;  // error approx 1e-16
   }
   /* initial approx for iteration... */
-  if (z<1.0) { /* series near 0 */
+  if (z < 1.0)
+  {
+    /* series near 0 */
     p=std::sqrt(2.0*(2.7182818284590452353602874713526625*z+1.0));
     w=-1.0+p*(1.0+p*(-0.333333333333333333333+p*0.152777777777777777777777));
-  } else
+  }
+  else
     w=std::log(z); /* asymptotic */
-  if (z>3.0) w-=std::log(w); /* useful? */
-  for (i=0; i<10; i++) { /* Halley iteration */
+  if (z > 3.0)
+    w-=std::log(w); /* useful? */
+  for (i = 0; i < 10; i++)
+  {
+    /* Halley iteration */
     e=std::exp(w);
     t=w*e-z;
     p=w+1.0;
     t/=e*p-0.5*(p+1.0)*t/p;
     w-=t;
-    if (std::fabs(t)<eps*(1.0+std::fabs(w))) return w; /* rel-abs error */
+    if (std::fabs(t) < eps*(1.0+std::fabs(w)))
+      return w; /* rel-abs error */
   }
   /* should never get here */
   mooseError("LambertW: No convergence at z= " << z << "\n");
@@ -103,7 +116,8 @@ Real
 RichardsSeff1BWsmall::seff(std::vector<VariableValue *> p, unsigned int qp) const
 {
   Real pp = (*p[0])[qp];
-  if (pp >= 0) return 1.0;
+  if (pp >= 0)
+    return 1.0;
 
   Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
   Real th = _c/(1 + LambertW(x)); // use branch 0 for positive x
@@ -116,7 +130,8 @@ RichardsSeff1BWsmall::dseff(std::vector<VariableValue *> p, unsigned int qp, std
   result[0] = 0.0;
 
   Real pp = (*p[0])[qp];
-  if (pp >= 0) return;
+  if (pp >= 0)
+    return;
 
   Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
   Real lamw = LambertW(x);
@@ -129,7 +144,8 @@ RichardsSeff1BWsmall::d2seff(std::vector<VariableValue *> p, unsigned int qp, st
   result[0][0] = 0.0;
 
   Real pp = (*p[0])[qp];
-  if (pp >= 0) return;
+  if (pp >= 0)
+    return;
 
   Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
   Real lamw = LambertW(x);

@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSSEFF1BWSMALL_H
 #define RICHARDSSEFF1BWSMALL_H
@@ -22,7 +25,7 @@ InputParameters validParams<RichardsSeff1BWsmall>();
  */
 class RichardsSeff1BWsmall : public RichardsSeff
 {
- public:
+public:
   RichardsSeff1BWsmall(const std::string & name, InputParameters parameters);
 
   /**
@@ -54,7 +57,7 @@ class RichardsSeff1BWsmall : public RichardsSeff
    */
   void d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const;
 
- protected:
+protected:
 
   /// BW's initial effective saturation
   Real _sn;

@@ -36,7 +36,7 @@
     type = MaterialRealAux
     variable = mat
     property = matp
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -74,12 +74,9 @@
 [Outputs]
   file_base = out
   output_initial = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
   [../]
 []

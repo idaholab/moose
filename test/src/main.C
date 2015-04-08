@@ -1,3 +1,16 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 #include "MooseInit.h"
 #include "MooseTestApp.h"
 #include "Moose.h"
@@ -16,9 +29,6 @@ int main(int argc, char *argv[])
 
   // This creates dynamic memory that we're responsible for deleting
   MooseApp * app = AppFactory::createApp("MooseTestApp", argc, argv);
-
-  app->legacyUoInitializationDefault() = true;
-  app->legacyUoAuxComputationDefault() = false;
 
   // Execute the application
   app->run();

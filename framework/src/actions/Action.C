@@ -43,7 +43,7 @@ Action::Action(const std::string & name, InputParameters params) :
     _app(*params.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _factory(_app.getFactory()),
     _action_factory(_app.getActionFactory()),
-    _specific_task_name(getParam<std::string>("task")),
+    _specific_task_name(params.isParamValid("task") ? getParam<std::string>("task") : ""),
     _awh(*params.getCheckedPointerParam<ActionWarehouse *>("awh")),
     _current_task(_awh.getCurrentTaskName()),
     _mesh(_awh.mesh()),
@@ -57,4 +57,10 @@ std::string
 Action::getShortName() const
 {
   return _name.substr(_name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') + 1 : 0);
+}
+
+std::string
+Action::getBaseName() const
+{
+  return _name.substr(0, _name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') : 0);
 }

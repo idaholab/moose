@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "FiniteStrainRatePlasticMaterial.h"
 
 
@@ -192,10 +198,9 @@ FiniteStrainRatePlasticMaterial::getFlowTensor(const RankTwoTensor & sig, Real /
 void
 FiniteStrainRatePlasticMaterial::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, Real yield_stress, RankFourTensor & dresid_dsig)
 {
-  unsigned i, j, k ,l;
   RankTwoTensor sig_dev, flow_tensor, flow_dirn,fij;
   RankTwoTensor dfi_dft;
-  RankFourTensor dft_dsig, dfd_dft, dfd_dsig, dfi_dsig;
+  RankFourTensor dfd_dft, dfd_dsig, dfi_dsig;
   Real sig_eqv;
   Real f1, f2, f3;
   Real dfi_dseqv;
@@ -208,11 +213,7 @@ FiniteStrainRatePlasticMaterial::getJac(const RankTwoTensor & sig, const RankFou
   flow_dirn = flow_tensor;
   dfi_dseqv = _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent - 1.0) / yield_stress;
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        for (l = 0; l < 3; ++l)
-          dfi_dsig(i,j,k,l) = flow_dirn(i,j) * flow_dirn(k,l) * dfi_dseqv; //d_flow_increment/d_sig
+  dfi_dsig = flow_dirn.outerProduct(flow_dirn) * dfi_dseqv; //d_flow_increment/d_sig
 
   f1 = 0.0;
   f2 = 0.0;
@@ -225,14 +226,10 @@ FiniteStrainRatePlasticMaterial::getJac(const RankTwoTensor & sig, const RankFou
     f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
   }
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        for (l = 0; l < 3; ++l)
-          dft_dsig(i,j,k,l) = f1 * deltaFunc(i,k) * deltaFunc(j,l) - f2 * deltaFunc(i,j) * deltaFunc(k,l) - f3 * sig_dev(i,j) * sig_dev(k,l); //d_flow_dirn/d_sig - 2nd part
+  dfd_dsig = f1 * _deltaMixed - f2 * _deltaOuter - f3 * sig_dev.outerProduct(sig_dev); //d_flow_dirn/d_sig - 2nd part
 
-  dfd_dsig = dft_dsig; //d_flow_dirn/d_sig
-  dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; //Jacobian
+  //Jacobian
+  dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig;
 }
 
 //Macaulay Bracket used in Perzyna Model

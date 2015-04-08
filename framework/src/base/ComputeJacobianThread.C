@@ -198,28 +198,25 @@ ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
   const Elem * neighbor = elem->neighbor(side);
 
   // Get the global id of the element and the neighbor
-  const unsigned int elem_id = elem->id();
-  const unsigned int neighbor_id = neighbor->id();
+  const dof_id_type
+    elem_id = elem->id(),
+    neighbor_id = neighbor->id();
 
   if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
   {
-    std::vector<DGKernel *> dgks = _sys.getDGKernelWarehouse(_tid).active();
-    if (dgks.size() > 0)
+    _fe_problem.reinitNeighbor(elem, side, _tid);
+
+    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+    _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
+    computeInternalFaceJacobian();
+
+    _fe_problem.swapBackMaterialsFace(_tid);
+    _fe_problem.swapBackMaterialsNeighbor(_tid);
+
     {
-      _fe_problem.reinitNeighbor(elem, side, _tid);
-
-      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
-
-      computeInternalFaceJacobian();
-
-      _fe_problem.swapBackMaterialsFace(_tid);
-      _fe_problem.swapBackMaterialsNeighbor(_tid);
-
-      {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addJacobianNeighbor(_jacobian, _tid);
-      }
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _fe_problem.addJacobianNeighbor(_jacobian, _tid);
     }
   }
 }

@@ -28,8 +28,8 @@
   [../]
 []
 
-[TensorMechanics]
-  [./solid]
+[Kernels]
+  [./TensorMechanics]
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -183,19 +183,37 @@
 []
 
 [UserObjects]
+  [./mc_coh]
+    type = TensorMechanicsHardeningConstant
+    value = 100
+  [../]
+  [./mc_phi]
+    type = TensorMechanicsHardeningConstant
+    value = 60
+    convert_to_radians = true
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 5
+    convert_to_radians = true
+  [../]
   [./mc]
     type = TensorMechanicsPlasticMohrCoulomb
-    mc_cohesion = 100
-    mc_friction_angle = 60
-    mc_dilation_angle = 5
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
     mc_tip_smoother = 4
     mc_edge_smoother = 25
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
   [../]
+  [./str]
+    type = TensorMechanicsHardeningConstant
+    value = 1
+  [../]
   [./wpt]
     type = TensorMechanicsPlasticWeakPlaneTensile
-    wpt_tensile_strength = 1.0
+    tensile_strength = str
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5
   [../]
@@ -234,11 +252,8 @@
   file_base = mc_wpt_1
   output_initial = true
   exodus = false
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

@@ -34,4 +34,12 @@
     expect_err = 'Point not found'
     recover = false
   [../]
+
+  [./mismatch_exec_on]
+    type = 'RunApp'
+    input = 'exec_on_mismatch.i'
+    expect_out = 'MultiAppTransfer execute_on flags do not match'
+    recover = false
+    max_parallel = 1
+  [../]
 []

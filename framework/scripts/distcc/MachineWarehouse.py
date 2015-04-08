@@ -34,8 +34,9 @@ class MachineWarehouse(object):
   def __init__(self, master, **kwargs):
 
     # Set default values for public/private members
-    self.machines = []
-    self.down = []
+    self.machines = []  # all machines
+    self.available = [] # machines that are available
+    self.down = []      # machines that are not available
 
     # Build the master machine
     self.master = master
@@ -54,7 +55,10 @@ class MachineWarehouse(object):
   #    max = True | {False}     - Run the maximum no. of threads (passed to _buildHosts)
   #    localhost = <int>        - Set the DISTCC_HOSTS localhost value (passed to _buildHosts)
   #    localslots = <int>       - Set the DISTCC_HOSTS localslots value (passed to _buildHosts)
+  #                               Number of jobs that cannot be run remotely that can be run concurrently
+  #                               on the local machine
   #    localslots_cpp = <int>   - Set the DISTCC_HOSTS localslots_cpp value (passed to _buildHosts)
+  #                               How many preprocessors will run in parallel on the local machine
   #    disable = list(<str>)    - list of machines to disable
   #    serial = True | {False}  - toggle the parallel creation of the Machine objects
   #    hammer = list(<str>)     - list of machines to set to max
@@ -86,7 +90,7 @@ class MachineWarehouse(object):
   def buildMachines(self, host_lines, **kwargs):
 
     # Return if the workers are already built
-    if len(self.machines) > 0:
+    if len(self.available) > 0:
       return
 
     # Handle empty host lines
@@ -132,9 +136,12 @@ class MachineWarehouse(object):
     # Populate the two lists of machines
     for machine in output:
 
+      # A list of all machines
+      self.machines.append(machine)
+
       # Available machines
       if machine.available:
-        self.machines.append(machine)
+        self.available.append(machine)
 
       # Unavailable machines
       else:
@@ -145,10 +152,10 @@ class MachineWarehouse(object):
   #  @param kwargs Optional keyword/value pairings
   #
   #  Optional Arguments:
-  #    max = True | {False}     - Run the maximum no. of threads (passed to _buildHosts)
-  #    localhost = <int>        - Set the DISTCC_HOSTS localhost value (passed to _buildHosts)
-  #    localslots = <int>       - Set the DISTCC_HOSTS localslots value (passed to _buildHosts)
-  #    localslots_cpp = <int>   - Set the DISTCC_HOSTS localslots_cpp value (passed to _buildHosts)
+  #    max = True | {False}     - Run the maximum no. of threads
+  #    localhost = <int>        - Set the DISTCC_HOSTS localhost value
+  #    localslots = <int>       - Set the DISTCC_HOSTS localslots value
+  #    localslots_cpp = <int>   - Set the DISTCC_HOSTS localslots_cpp value
   #    jobs = <int>             - Custom, user-defined jobs number
   def _buildHosts(self, **kwargs):
 
@@ -160,12 +167,12 @@ class MachineWarehouse(object):
     localslots_cpp = kwargs.pop('localslots_cpp', None)
 
     # Randomize the workers
-    shuffle(self.machines)
+    shuffle(self.available)
 
     # Create the distcc_hosts and jobs output
     jobs = 0
     distcc_hosts = ''
-    for machine in self.machines:
+    for machine in self.available:
       if use_max:
         distcc_hosts += " " + machine.hostname + '/' + str(machine.threads)
         jobs += int(machine.threads)
@@ -175,10 +182,13 @@ class MachineWarehouse(object):
 
     # Get the default or user-defined values for localhost/localslots_cpp/localslots
     if localhost == None:
-      localhost = min(2, self.master.threads)
+      # If the number of local threads is greater than the number of available remote
+      # jobs utilize the difference for local compiling. Do not allow the use of less
+      # than 2.
+      localhost = max(2, self.master.threads - jobs)
 
     if localslots == None:
-      localslots = self.master.threads/4
+      localslots = localhost
 
     if localslots_cpp == None:
       localslots_cpp = self.master.threads - localhost

@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSMASSCHANGE
 #define RICHARDSMASSCHANGE
@@ -25,8 +28,7 @@ class RichardsMassChange : public TimeDerivative
 {
 public:
 
-  RichardsMassChange(const std::string & name,
-                        InputParameters parameters);
+  RichardsMassChange(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -49,22 +51,22 @@ protected:
   bool _use_supg;
 
   /// fluid mass (or fluid masses in multiphase) at quadpoints
-  MaterialProperty<std::vector<Real> > &_mass;
+  MaterialProperty<std::vector<Real> > & _mass;
 
   /// d(fluid mass_i)/d(var_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_dmass;
+  MaterialProperty<std::vector<std::vector<Real> > > & _dmass;
 
   /// old value of fluid mass (or fluid masses in multiphase) at quadpoints
-  MaterialProperty<std::vector<Real> > &_mass_old;
+  MaterialProperty<std::vector<Real> > & _mass_old;
 
   /// tau_SUPG
-  MaterialProperty<std::vector<RealVectorValue> >&_tauvel_SUPG;
+  MaterialProperty<std::vector<RealVectorValue> > & _tauvel_SUPG;
 
   /// derivative of tau_SUPG wrt grad(variable)
-  MaterialProperty<std::vector<std::vector<RealTensorValue> > >&_dtauvel_SUPG_dgradv;
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dtauvel_SUPG_dgradv;
 
   /// deriv of tau_SUPG wrt variable
-  MaterialProperty<std::vector<std::vector<RealVectorValue> > >&_dtauvel_SUPG_dv;
+  MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dtauvel_SUPG_dv;
 
   /**
    * Derivative of residual with respect to wrt_num Richards variable

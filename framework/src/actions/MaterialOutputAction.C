@@ -51,7 +51,7 @@ void
 MaterialOutputAction::act()
 {
   // If running a coupled problem, loop through all the FEProblem objects
-  CoupledExecutioner * exec_ptr = dynamic_cast<CoupledExecutioner *>(_executioner);
+  CoupledExecutioner * exec_ptr = dynamic_cast<CoupledExecutioner *>(_executioner.get());
   if (exec_ptr != NULL)
   {
     std::vector<FEProblem *> & problems = exec_ptr->getProblems();
@@ -60,12 +60,12 @@ MaterialOutputAction::act()
   }
 
   // Error if _problem is NULL, I don't know how this would happen
-  else if (_problem == NULL)
+  else if (_problem.get() == NULL)
     mooseError("FEProblem pointer is NULL, it is needed for auto material property output");
 
   // Build on the problem for this action, this is what should happend for everything except coupled problems
   else
-    buildMaterialOutputObjects(_problem);
+    buildMaterialOutputObjects(_problem.get());
 }
 
 void
@@ -77,7 +77,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   _boundary_material_data = problem_ptr->getBoundaryMaterialData(0);
 
   // A complete list of all Material objects
-  std::vector<Material *> materials = problem_ptr->getMaterialWarehouse(0).getMaterials();
+  std::vector<Material *> materials = problem_ptr->getMaterialWarehouse(0).all();
 
   // Handle setting of material property output in [Outputs] sub-blocks
   // Output objects can enable material property output, the following code examines the parameters
@@ -175,13 +175,10 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   }
 }
 
-MooseObjectAction *
+MooseSharedPointer<MooseObjectAction>
 MaterialOutputAction::createAction(const std::string & type, const std::string & property_name,
                                    const std::string & variable_name, Material * material)
 {
-  // Declare the pointer to be returned by this method
-  MooseObjectAction * action;
-
   // Append the list of variables to create
   _variable_names.insert(variable_name);
 
@@ -200,13 +197,13 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
   action_params.set<std::string>("task") = "add_aux_kernel";
 
   // Create the action
-  action = static_cast<MooseObjectAction *>(_action_factory.create("AddKernelAction", long_name.str(), action_params));
+  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddKernelAction", long_name.str(), action_params));
 
   // Set the object parameters
   InputParameters & object_params = action->getObjectParams();
   object_params.set<std::string>("property") = property_name;
   object_params.set<AuxVariableName>("variable") = variable_name;
-  object_params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+  object_params.set<MultiMooseEnum>("execute_on") = "timestep_end";
 
   if (material->boundaryRestricted())
     object_params.set<std::vector<BoundaryName> >("boundary") = material->boundaryNames();
@@ -221,20 +218,21 @@ template<>
 void
 MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_name, Material * material)
 {
-  MooseObjectAction * action = createAction("MaterialRealAux", property_name, property_name, material);
-  _awh.addActionBlock(action);
+  _awh.addActionBlock(createAction("MaterialRealAux", property_name, property_name, material));
 }
 
 template<>
 void
 MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name, Material * material)
 {
+  char suffix[3] = {'x','y','z'};
+
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     std::ostringstream oss;
-    oss << property_name << "_" << i;
+    oss << property_name << "_" << suffix[i];
 
-    MooseObjectAction * action = createAction("MaterialRealVectorValueAux", property_name, oss.str(), material);
+    MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(createAction("MaterialRealVectorValueAux", property_name, oss.str(), material));
     action->getObjectParams().set<unsigned int>("component") = i;
     _awh.addActionBlock(action);
   }
@@ -251,7 +249,7 @@ MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & 
       std::ostringstream oss;
       oss << property_name << "_" << i << j;
 
-      MooseObjectAction * action = createAction("MaterialRealTensorValueAux", property_name, oss.str(), material);
+      MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(createAction("MaterialRealTensorValueAux", property_name, oss.str(), material));
       action->getObjectParams().set<unsigned int>("row") = i;
       action->getObjectParams().set<unsigned int>("column") = j;
       _awh.addActionBlock(action);

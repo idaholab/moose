@@ -1,0 +1,403 @@
+.\"
+.\" $Id: randistrs.3,v 1.6 2013-01-05 01:18:52-08 geoff Exp $
+.\"
+.\" $Log: randistrs.3,v $
+.\" Revision 1.6  2013-01-05 01:18:52-08  geoff
+.\" Document the new prototype for rd_empirical_setup.
+.\"
+.\" Revision 1.5  2010-12-10 03:28:19-08  geoff
+.\" Document the new empirical-distribution interface.
+.\"
+.\" Revision 1.4  2010-06-24 20:53:59+12  geoff
+.\" Change all documented declarations to use types from stdint.h.  Fix
+.\" some restriction descriptions and a misplaced header.  Clarify the
+.\" widths of the "l" versions for integer outputs.
+.\"
+.\" Revision 1.3  2010-06-09 13:19:10-07  geoff
+.\" Fix the notation for open and closed intervals.
+.\"
+.\" Revision 1.2  2001-06-18 17:41:17-07  geoff
+.\" Add documentation of the new "l" versions of all the functions.
+.\"
+.\" Revision 1.1  2001/06/18 10:04:20  geoff
+.\" Initial revision
+.\"
+.\"
+.TH randistrs 3 "June 18, 2001" "" "Linux Programmer's Manual"
+.SH NAME
+rds_iuniform, rds_liuniform, rds_uniform, rds_luniform,
+rds_exponential, rds_lexponential, rds_erlang, rds_lerlang,
+rds_weibull, rds_lweibull, rds_normal, rds_lnormal, rds_lognormal,
+rds_llognormal, rds_triangular, rds_ltriangular, rds_int_empirical,
+rds_double_empirical, rds_continuous_empirical,
+rd_iuniform, rd_liuniform, rd_uniform, rd_luniform,
+rd_exponential, rd_lexponential, rd_erlang, rd_lerlang, rd_weibull,
+rd_lweibull, rd_normal, rd_lnormal, rd_lognormal, rd_llognormal,
+rd_triangular, rd_ltriangular, rd_empirical_setup, rd_empirical_free,
+rd_int_empirical, rd_double_empirical, rd_continuous_empirical
+\- generate
+pseudo-random numbers in various distributions
+.SH SYNOPSIS
+.nf
+.IR "#defines" " (see below)"
+.br
+.B
+#include "randistrs.h"
+.sp
+.sp
+C interface:
+.sp
+.BI "int32_t rds_iuniform(mt_state* " state ", int32_t " lower ", int32_t " upper ");"
+.sp
+.BI "int64_t rds_liuniform(mt_state* " state ","
+.BI "                  int64_t " lower ", int64_t " upper ");"
+.sp
+.BI "double rds_uniform(mt_state* " state ", double " lower ", double " upper ");"
+.sp
+.BI "double rds_luniform(mt_state* " state ", double " lower ", double " upper ");"
+.sp
+.BI "double rds_exponential(mt_state* " state ", double " mean ");"
+.sp
+.BI "double rds_lexponential(mt_state* " state ", double " mean ");"
+.sp
+.BI "double rds_erlang(mt_state* " state ", int " p ", double " mean ");"
+.sp
+.BI "double rds_lerlang(mt_state* " state ", int " p ", double " mean ");"
+.sp
+.BI "double rds_weibull(mt_state* " state ", double " shape ", double " scale ");"
+.sp
+.BI "double rds_lweibull(mt_state* " state ", double " shape ", double " scale ");"
+.sp
+.BI "double rds_normal(mt_state* " state ", double " mean ", double " sigma ");"
+.sp
+.BI "double rds_lnormal(mt_state* " state ", double " mean ", double " sigma ");"
+.sp
+.BI "double rds_lognormal(mt_state* " state ", double " shape ", double " scale ");"
+.sp
+.BI "double rds_llognormal(mt_state* " state ", double " shape ", double " scale ");"
+.sp
+.BI "double rds_triangular(mt_state* " state ", double " lower ","
+.BI "                      double " upper ", double " mode ");"
+.sp
+.BI "double rds_ltriangular(mt_state* " state ", double " lower ","
+.BI "                      double " upper ", double " mode ");"
+.sp
+.BI "size_t rds_int_empirical(mt_state* " state ","
+.BI "                     rd_empirical_control* " control ");"
+.sp
+.BI "double rds_double_empirical(mt_state* " state ","
+.BI "                     rd_empirical_control* " control ");"
+.sp
+.BI "double rds_continuous_empirical(mt_state* " state ","
+.BI "                     rd_empirical_control* " control ");"
+.sp
+.BI "int32_t rd_iuniform(int32_t " lower ", int32_t " upper ");"
+.sp
+.BI "int64_t rd_liuniform(int64_t " lower ", int64_t " upper ");"
+.sp
+.BI "double rd_uniform(double " lower ", double " upper ");"
+.sp
+.BI "double rd_luniform(double " lower ", double " upper ");"
+.sp
+.BI "double rd_exponential(double " mean ");"
+.sp
+.BI "double rd_lexponential(double " mean ");"
+.sp
+.BI "double rd_erlang(int " p ", double " mean ");"
+.sp
+.BI "double rd_lerlang(int " p ", double " mean ");"
+.sp
+.BI "double rd_weibull(double " shape ", double " scale ");"
+.sp
+.BI "double rd_lweibull(double " shape ", double " scale ");"
+.sp
+.BI "double rd_normal(double " mean ", double " sigma ");"
+.sp
+.BI "double rd_lnormal(double " mean ", double " sigma ");"
+.sp
+.BI "double rd_lognormal(double " shape ", double " scale ");"
+.sp
+.BI "double rd_llognormal(double " shape ", double " scale ");"
+.sp
+.BI "double rd_triangular(double " lower ", double " upper ", double " mode ");"
+.sp
+.BI "double rd_ltriangular(double " lower ", double " upper ", double " mode ");"
+.sp
+.BI "void rd_empirical_setup(size_t " n_probs ", const double* " probs ","
+.BI "                     const double* " values ");"
+.sp
+.BI "void rd_empirical_free(rd_empirical_control* " control ");"
+.sp
+.BI "size_t rd_int_empirical(rd_empirical_control* " control ");"
+.sp
+.BI "double rd_double_empirical(rd_empirical_control* " control ");"
+.sp
+.BI "double rd_continuous_empirical(rd_empirical_control* " control ");"
+.sp
+.sp
+C++ interface:
+.sp
+.BI "mt_distribution " rng ;
+.sp
+.BI "int32_t " rng ".iuniform(int32_t " lower ", int32_t " upper ");"
+.sp
+.BI "int64_t " rng ".liuniform(int64_t " lower ", int64_t " upper ");"
+.sp
+.BI "double " rng ".uniform(double " lower ", double " upper ");"
+.sp
+.BI "double " rng ".luniform(double " lower ", double " upper ");"
+.sp
+.BI "double " rng ".exponential(double " mean ");"
+.sp
+.BI "double " rng ".lexponential(double " mean ");"
+.sp
+.BI "double " rng ".erlang(int " p ", double " mean ");"
+.sp
+.BI "double " rng ".lerlang(int " p ", double " mean ");"
+.sp
+.BI "double " rng ".weibull(double " shape ", double " scale ");"
+.sp
+.BI "double " rng ".lweibull(double " shape ", double " scale ");"
+.sp
+.BI "double " rng ".normal(double " mean ", double " sigma ");"
+.sp
+.BI "double " rng ".lnormal(double " mean ", double " sigma ");"
+.sp
+.BI "double " rng ".lognormal(double " shape ", double " scale ");"
+.sp
+.BI "double " rng ".llognormal(double " shape ", double " scale ");"
+.sp
+.BI "double " rng ".triangular(double " lower ", double " upper ", double " mode ");"
+.sp
+.BI "double " rng ".ltriangular(double " lower ", double " upper ", double " mode ");"
+.sp
+.sp
+.BI "mt_empirical_distribution " emp " (const vector<double> " probs ");"
+.sp
+.BI "mt_empirical_distribution " emp " (const vector<double> " probs ","
+.BI "                     const vector<double> " values ");"
+.sp
+.BI "size_t " emp ".int_empirical(mt_prng& " rng ");"
+.sp
+.BI "double " emp ".double_empirical(mt_prng& " rng ");"
+.sp
+.BI "double " emp ".continuous_empirical(mt_prng& " rng ");"
+.SH DESCRIPTION
+These functions generate pseudo-random numbers in various
+distributions using the Mersenne Twist algorithm described in
+.BR mtwist (3).
+.PP
+The C interface provides four flavors of each function:
+.BI rds_ xxx\fR,\fP
+.BI rds_l xxx\fR,\fP
+.BI rd_ xxx\fR,\fP
+and
+.BI rd_l xxx\fR.\fP
+The "\fBrds\fP" versions
+accept an explicit Mersenne Twist state vector, as
+described in
+.BR mtwist (3).
+The "\fBrd\fP" versions use the default global state vector;
+in general these functions should be avoided except for unimportant
+applications.
+The versions with no "\fBl\fP" after the underscore use the 32-bit
+version of the PRNG, while the "\fBl\fP" versions generate more bits
+(53 for floating-point values, 64 for integers) to increase the
+accuracy of the generated distribution at
+the expense of speed.
+.PP
+In the C++ interface, the
+.B mt_distribution
+class is derived from
+.B mt_prng
+(see
+.BR mtwist (3)),
+and provides all the functionality of that class as well as the
+extended functions for generating specific distributions.
+.PP
+With the exception of the
+.B *iuniform
+functions, all functions return a double-precision result.
+The range of the result depends on the distribution and the
+parameters.
+However, in all cases the precision of the result of non-"\fBl\fP"
+functions is limited to 32
+bits, or about 1 part in 4 billion.
+.PP
+The
+.B *iuniform
+functions generate integers selected from a uniform distribution in
+the range
+.RI [ lower ,
+.IR upper ).
+If the total range given to the non-"\fBl\fP" functions is less than
+429497 (2^32 / 10^4), a fast but slightly
+inaccurate method is used; the bias in this case will never exceed
+.01%.
+If the range exceeds that value, a slightly slower but precise method
+is used.
+.PP
+The
+.B *liuniform
+functions also generate uniformly distributed integers, but they will
+support a range greater than 4294967295.
+The
+.B *liuniform
+functions should never be used unless a large range is required.
+.PP
+The
+.B *uniform
+functions generate double-precision numbers selected from a uniform
+distribution in the range
+.RI [ lower ,
+.IR upper ).
+This function should
+.I not
+be used to generate uniformly distributed random integers.
+Use the
+.I *iuniform
+family instead.
+.PP
+The
+.B *exponential
+functions generate an exponential distribution with the given mean.
+The
+.B *erlang
+functions generate a
+.IR p -Erlang
+distribution with the given mean.
+The
+.B *weibull
+functions generate a Weibull function with the given shape and scale
+parameters.
+.PP
+The
+.B *normal
+functions generate a normal (Gaussian) distribution with the given
+mean and a standard deviation equal to
+.IR sigma .
+The
+.B *lognormal
+functions generate a lognormal distribution with the given shape and
+scale parameters.
+.PP
+The
+.B *triangular
+functions generate a triangular distribution in the range
+.RI [ lower ,
+.IR upper )
+and with the given mode.
+.PP
+The
+.B *empirical
+functions generate empirically determined distributions.
+The caller must supply a control structure that has been created by
+.BR rd_empirical_setup ,
+which accepts an array
+.I probs
+that contains
+.I n_probs
+weights specifying the relative frequencies of the various output values.
+(The weights do not need to sum to 1.0; they are normalized if they do
+not.)
+The
+.B values
+array, if not
+.BR NULL ,
+must contain
+.IR n_probs "+ 1"
+values; see below.
+The control structure can be freed by
+.B rd_empirical_free
+when it is no longer needed.
+.PP
+The
+.B rd_int_empirical
+function generates empirically distributed integers in the range
+[0,
+.IR n_probs ).
+This function ignores the values given to
+.BR rd_empirical_setup .
+.PP
+The
+.B rd_double_empirical
+function uses the results of
+.B rd_int_empirical
+as an index into the
+.I values
+array; in this case
+.IR values [ n_probs "+1]"
+entry is ignored (but must nevertheless be provided).
+If no
+.I values
+were provided to
+.B rd_empirical_setup, the output values will be evenly spaced on [0, 1).
+.PP
+The
+.B rd_continuous_empirical
+function generates continuous empirically determined distributions.
+It is similar to
+.I rd_double_empirical
+except that it chooses a result that is uniformly
+.IR values [ i ]
+and
+.IR values [ i "+1]"
+for some randomly chosen
+.I i
+in [0,
+.IR n_probs "]."
+The net effect is a piecewise linear approximation to the underlying
+CDF of the empirically observed distribution.
+.SH C++ INTERFACE
+.PP
+The C++ interface to the functions is based on a class derived from
+.BR mt_prng ;
+as such, the PRNG state is implied by the derived class.
+Otherwise, the C++ functions behave exactly like the similary named C
+functions.
+.PP
+The sole exception is empirical distributions;
+here, an auxiliary class is used to support the internal state needed
+to track the distribution.
+Since the generating functions require an
+.B mt_prng
+as an argument, an
+.B mt_distribution
+can also be used for this purpose.
+.SH NOTES
+.PP
+It would be helpful if the package supported even more distributions.
+Please e-mail the author (geoff@cs.hmc.edu) with suggestions for other
+distributions and (if possible) algorithms for generating them.
+.PP
+The
+.B *iuniform
+functions keep internal state in an attempt to speed up their
+performance when the range is large.
+This internal state makes them non-reentrant.
+.PP
+When the range is small,
+.B *iuniform
+functions exhibit a very slight bias in favor of some values.
+This bias isn't significant for any application less demanding than
+gambling.
+To eliminate the bias, compile
+.B randistrs.c
+with
+.B RD_MAX_BIAS
+set to zero.
+.PP
+The state-saving optimization in the
+.B *iuniform
+functions doesn't help when they are called with varying ranges, even
+if a different state vector is used for each range.
+.PP
+The naming of the C++ empirical-distribution is redundant, since
+"empirical" is implied by the class name.
+However, dropping that string would create conflicts with C++ type
+names, so the suffix was kept for consistency.
+.SH "SEE ALSO"
+.BR mtwist (3)
+.PP
+Any good statistics or simulation textbook for descriptions of the
+distributions.

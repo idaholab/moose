@@ -1,16 +1,23 @@
 [Tests]
+  [./build]
+    # Builds the solution for: test, direct, solution_aux_scale. output_error
+    type = 'Exodiff'
+    input = 'build.i'
+    exodiff = 'build_out.e'
+  [../]
+
   [./test]
     type = 'Exodiff'
     input = 'solution_aux.i'
     exodiff = 'solution_aux_out.e'
-    allow_warnings = true
+    prereq = 'build'
   [../]
 
   [./direct]
     type = 'Exodiff'
     input = 'solution_aux_direct.i'
     exodiff = 'solution_aux_direct_out.e'
-    allow_warnings = true
+    prereq = 'build'
   [../]
 
   [./exodus]
@@ -89,11 +96,19 @@
     expect_err = 'The SolutionUserObject contains multiple variables, \w+'
   [../]
 
-  [./scaled_solution]
+  [./solution_aux_scale]
     type = 'Exodiff'
     input = 'solution_aux_scale.i'
     exodiff = 'solution_aux_scale_out.e'
-    allow_warnings = true
+    prereq = 'build'
+  [../]
+
+  [./output_error]
+    type = 'RunException'
+    input = 'output_error.i'
+    expect_err = "Failed to access the data for variable 'u' at point"
+    prereq = 'build'
+    max_threads = 1 # Expect error test
   [../]
 
   [./aux_nonlinear_solution]
@@ -116,6 +131,10 @@
     exodiff = 'aux_nonlinear_solution_xdr_out.e'
     prereq = aux_nonlinear_solution
     max_threads = 1 # ticket 2283
+    # This test reads a binary file that was written with 4-byte dof
+    # ids.  At this time, it is only possible to read it back in with
+    # a libmesh that also uses 4-byte dof ids.
+    dof_id_bytes = 4
   [../]
 
   [./aux_nonlinear_solution_adapt]

@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "Moose.h"
 
 namespace Water_Steam_EOS
@@ -11,6 +17,11 @@ namespace Water_Steam_EOS
     //subroutine water_steam_prop_PH(p, h, Ts,T, Sw, Den, dTdp, dTdh, dDendp, dDendh,  ierr, dhwdp, dhsdp, dTdp)
     void FORTRAN_CALL(water_steam_prop_ph)( double&, double&, double&, double&, double&, double&, double&, double&, double&, double&,
                                double&, double&, double&, double&, double&, int&, double&, double&,double&);
+
+   //subroutine water_steam_prop_PH_ex(p, h, Ts,T, Sw, Den, dTdp, dTdh, dDendp, dDendh,  ierr, dhwdp, dhsdp, dTdp, arg1, arg2)
+    void FORTRAN_CALL(water_steam_prop_ph_ex)( double&, double&, double&, double&, double&, double&, double&, double&, double&, double&,
+                               double&, double&, double&, double&, double&, int&, double&, double&,double&, double&, double&);
+
     // subroutine water_steam_prop_PH_noderiv(p, h, T, Sw, Den,Denw, Dens, hw, hs,visw,viss,ierror)
     void FORTRAN_CALL(water_steam_prop_ph_noderiv)(double&,double&, double&, double&, double&, double&, double&, double&, double&, double&, double&, int&);
 

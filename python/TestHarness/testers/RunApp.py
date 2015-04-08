@@ -9,12 +9,12 @@ class RunApp(Tester):
     params = Tester.validParams()
     params.addRequiredParam('input',      "The input file to use for this test.")
     params.addParam('test_name',          "The name of the test - populated automatically")
-    params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
     params.addParam('skip_test_harness_cli_args', False, "Skip adding global TestHarness CLI Args for this test")
     params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
-    params.addParam('should_crash',False, "Inidicates that the test is expected to crash or otherwise terminate early")
+    params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
+    params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
 
     params.addParam('walltime',           "The max time as pbs understands it")
     params.addParam('job_name',           "The test name as pbs understands it")
@@ -25,7 +25,6 @@ class RunApp(Tester):
     params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
     params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
-    params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
     params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
 
     # Valgrind
@@ -80,6 +79,12 @@ class RunApp(Tester):
     if options.colored == False:
       specs['cli_args'].append('--no-color')
 
+    if options.cli_args and not specs['skip_test_harness_cli_args']:
+      specs['cli_args'].insert(0, options.cli_args)
+
+    if options.scaling and specs['scale_refine'] > 0:
+      specs['cli_args'].insert(0, ' -r ' + str(specs['scale_refine']))
+
     # Raise the floor
     ncpus = max(default_ncpus, int(specs['min_parallel']))
     # Lower the ceiling
@@ -90,27 +95,26 @@ class RunApp(Tester):
     #Set number of threads to be used upper bound
     nthreads = min(nthreads, int(specs['max_threads']))
 
+    caveats = []
     if nthreads > options.nthreads:
-      self.specs['caveats'] = ['min_threads=' + str(nthreads)]
+      caveats.append('min_threads=' + str(nthreads))
     elif nthreads < options.nthreads:
-      self.specs['caveats'] = ['max_threads=' + str(nthreads)]
+      caveats.append('max_threads=' + str(nthreads))
     # TODO: Refactor this caveats business
     if ncpus > default_ncpus:
-      self.specs['caveats'] = ['min_cpus=' + str(ncpus)]
+      caveats.append('min_cpus=' + str(ncpus))
     elif ncpus < default_ncpus:
-      self.specs['caveats'] = ['max_cpus=' + str(ncpus)]
+      caveats.append('max_cpus=' + str(ncpus))
+
+    if len(caveats) > 0:
+      self.specs['caveats'] = caveats
+
     if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
       command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(specs['cli_args'])
     elif options.valgrind_mode == specs['valgrind'] or options.valgrind_mode == 'HEAVY' and specs[VALGRIND] == 'NORMAL':
       command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
     else:
       command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
-
-    if options.scaling and specs['scale_refine'] > 0:
-      command += ' -r ' + str(specs['scale_refine'])
-
-    if options.cli_args and not specs['skip_test_harness_cli_args']:
-      command += ' ' + options.cli_args
 
     if options.pbs:
       return self.getPBSCommand(options)
@@ -156,10 +160,10 @@ class RunApp(Tester):
     # Convert MAX_TIME to hours:minutes for walltime use
     hours = int(int(self.specs['max_time']) / 3600)
     minutes = int(int(self.specs['max_time']) / 60) % 60
-    self.specs['walltime'] = '{:02,.0f}'.format(hours) + ':' + '{:02,.0f}'.format(minutes) + ':00'
+    self.specs['walltime'] = '{0:02d}'.format(hours) + ':' + '{0:02d}'.format(minutes) + ':00'
 
-    # Truncate JOB_NAME, as PBS can only accept 13 character -N (6 characters from test name + _TH (TestHarness) + _### (serialized number generated by cluster_launcher) = the 13 character limit)
-    self.specs['job_name'] = self.specs['input'][:6] + '_TH'
+    # Truncate JOB_NAME. PBS can only accept 13 character (6 characters from test name + _## (test serial number) + _### (serialized number generated by cluster_launcher) = the 13 character limit)
+    self.specs['job_name'] = self.specs['input'][:6] + '_' + str(options.test_serial_number).zfill(2)
     self.specs['job_name'] = self.specs['job_name'].replace('.', '')
     self.specs['job_name'] = self.specs['job_name'].replace('-', '')
 
@@ -180,14 +184,17 @@ class RunApp(Tester):
     # Write the cluster_launcher input file
     options.cluster_handle.write(content + '\n')
 
-    return os.path.join(self.specs['moose_dir'], 'framework', 'scripts', 'cluster_launcher.py') + ' tests.cluster'
+    return os.path.join(self.specs['moose_dir'], 'framework', 'scripts', 'cluster_launcher.py') + ' ' + options.pbs + '.cluster'
 
 
   def processResults(self, moose_dir, retcode, options, output):
     reason = ''
     specs = self.specs
     if specs.isValid('expect_out'):
-      out_ok = self.checkOutputForPattern(output, specs['expect_out'])
+      if specs['match_literal']:
+        out_ok = self.checkOutputForLiteral(output, specs['expect_out'])
+      else:
+        out_ok = self.checkOutputForPattern(output, specs['expect_out'])
       if (out_ok and retcode != 0):
         reason = 'OUT FOUND BUT CRASH'
       elif (not out_ok):
@@ -215,6 +222,12 @@ class RunApp(Tester):
 
   def checkOutputForPattern(self, output, re_pattern):
     if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
+      return False
+    else:
+      return True
+
+  def checkOutputForLiteral(self, output, literal):
+    if output.find(literal) == -1:
       return False
     else:
       return True

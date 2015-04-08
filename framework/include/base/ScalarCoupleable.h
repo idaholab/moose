@@ -30,7 +30,7 @@ public:
    * Constructing the object
    * @param parameters Parameters that come from constructing the object
    */
-  ScalarCoupleable(InputParameters & parameters);
+  ScalarCoupleable(const InputParameters & parameters);
 
   /**
    * Destructor for object

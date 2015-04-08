@@ -38,6 +38,7 @@
 #include "AddAllSideSetsByNormals.h"
 #include "SubdomainBoundingBox.h"
 #include "OrientedSubdomainBoundingBox.h"
+#include "RenameBlock.h"
 
 // problems
 #include "FEProblem.h"
@@ -70,6 +71,7 @@
 #include "WeakGradientBC.h"
 #include "DiffusionFluxBC.h"
 #include "PostprocessorDirichletBC.h"
+#include "OneDEqualValueConstraintBC.h"
 
 // auxkernels
 #include "ConstantAux.h"
@@ -84,6 +86,7 @@
 #include "MaterialRealVectorValueAux.h"
 #include "MaterialRealTensorValueAux.h"
 #include "MaterialStdVectorAux.h"
+#include "MaterialRealDenseMatrixAux.h"
 #include "DebugResidualAux.h"
 #include "BoundsAux.h"
 #include "SpatialUserObjectAux.h"
@@ -93,6 +96,7 @@
 #include "QuotientAux.h"
 #include "NormalizationAux.h"
 #include "VariableGradientComponent.h"
+#include "ParsedAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -128,6 +132,7 @@
 #include "PiecewiseBilinear.h"
 #include "SplineFunction.h"
 #include "PiecewiseMultilinear.h"
+#include "LinearCombinationFunction.h"
 
 // materials
 #include "GenericConstantMaterial.h"
@@ -139,6 +144,7 @@
 #include "NodalSum.h"
 #include "ElementAverageValue.h"
 #include "ElementAverageTimeDerivative.h"
+#include "ElementW1pError.h"
 #include "ElementH1Error.h"
 #include "ElementH1SemiError.h"
 #include "ElementIntegralVariablePostprocessor.h"
@@ -181,6 +187,8 @@
 #include "NodalExtremeValue.h"
 #include "ElementExtremeValue.h"
 #include "DifferencePostprocessor.h"
+#include "NumPicardIterations.h"
+#include "FunctionSideIntegral.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -188,6 +196,10 @@
 #include "SideValueSampler.h"
 #include "PointValueSampler.h"
 #include "LineValueSampler.h"
+#include "VectorOfPostprocessors.h"
+#include "LeastSquaresFit.h"
+#include "ElementsAlongLine.h"
+#include "LineMaterialRealSampler.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -232,6 +244,8 @@
 // ScalarKernels
 #include "ODETimeDerivative.h"
 #include "FunctionScalarAux.h"
+#include "NodalEqualValueConstraint.h"
+#include "ParsedODEKernel.h"
 
 // indicators
 #include "AnalyticalIndicator.h"
@@ -284,6 +298,7 @@
 #include "MultiAppMeshFunctionTransfer.h"
 #include "MultiAppUserObjectTransfer.h"
 #include "MultiAppNearestNodeTransfer.h"
+#include "MultiAppCopyTransfer.h"
 #include "MultiAppInterpolationTransfer.h"
 #include "MultiAppPostprocessorTransfer.h"
 #include "MultiAppProjectionTransfer.h"
@@ -348,7 +363,9 @@
 #include "SetupRecoverFileBaseAction.h"
 
 // Outputs
+#ifdef LIBMESH_HAVE_EXODUS_API
 #include "Exodus.h"
+#endif
 #include "Nemesis.h"
 #include "Console.h"
 #include "CSV.h"
@@ -362,6 +379,7 @@
 #include "MaterialPropertyDebugOutput.h"
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
+#include "DOFMapOutput.h"
 
 namespace Moose {
 
@@ -386,6 +404,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(AddAllSideSetsByNormals);
   registerMeshModifier(SubdomainBoundingBox);
   registerMeshModifier(OrientedSubdomainBoundingBox);
+  registerMeshModifier(RenameBlock);
 
   // problems
   registerProblem(FEProblem);
@@ -419,6 +438,7 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(WeakGradientBC);
   registerBoundaryCondition(DiffusionFluxBC);
   registerBoundaryCondition(PostprocessorDirichletBC);
+  registerBoundaryCondition(OneDEqualValueConstraintBC);
 
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
@@ -436,6 +456,7 @@ registerObjects(Factory & factory)
   registerAux(MaterialRealVectorValueAux);
   registerAux(MaterialRealTensorValueAux);
   registerAux(MaterialStdVectorAux);
+  registerAux(MaterialRealDenseMatrixAux);
   registerAux(DebugResidualAux);
   registerAux(BoundsAux);
   registerAux(SpatialUserObjectAux);
@@ -446,6 +467,7 @@ registerObjects(Factory & factory)
   registerAux(NormalizationAux);
   registerAux(FunctionScalarAux);
   registerAux(VariableGradientComponent);
+  registerAux(ParsedAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -480,6 +502,7 @@ registerObjects(Factory & factory)
   registerFunction(PiecewiseBilinear);
   registerFunction(SplineFunction);
   registerFunction(PiecewiseMultilinear);
+  registerFunction(LinearCombinationFunction);
 
   // materials
   registerMaterial(GenericConstantMaterial);
@@ -491,6 +514,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalSum);
   registerPostprocessor(ElementAverageValue);
   registerPostprocessor(ElementAverageTimeDerivative);
+  registerPostprocessor(ElementW1pError);
   registerPostprocessor(ElementH1Error);
   registerPostprocessor(ElementH1SemiError);
   registerPostprocessor(ElementIntegralVariablePostprocessor);
@@ -532,6 +556,8 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalExtremeValue);
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
+  registerPostprocessor(NumPicardIterations);
+  registerPostprocessor(FunctionSideIntegral);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
@@ -539,6 +565,10 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(SideValueSampler);
   registerVectorPostprocessor(PointValueSampler);
   registerVectorPostprocessor(LineValueSampler);
+  registerVectorPostprocessor(VectorOfPostprocessors);
+  registerVectorPostprocessor(LeastSquaresFit);
+  registerVectorPostprocessor(ElementsAlongLine);
+  registerVectorPostprocessor(LineMaterialRealSampler);
 
   // user objects
   registerUserObject(LayeredIntegral);
@@ -577,6 +607,8 @@ registerObjects(Factory & factory)
 
   // Scalar kernels
   registerScalarKernel(ODETimeDerivative);
+  registerScalarKernel(NodalEqualValueConstraint);
+  registerScalarKernel(ParsedODEKernel);
 
   // indicators
   registerIndicator(AnalyticalIndicator);
@@ -633,6 +665,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppMeshFunctionTransfer);
   registerTransfer(MultiAppUserObjectTransfer);
   registerTransfer(MultiAppNearestNodeTransfer);
+  registerTransfer(MultiAppCopyTransfer);
   registerTransfer(MultiAppInterpolationTransfer);
   registerTransfer(MultiAppPostprocessorTransfer);
   registerTransfer(MultiAppProjectionTransfer);
@@ -660,6 +693,7 @@ registerObjects(Factory & factory)
   registerOutput(MaterialPropertyDebugOutput);
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
+  registerNamedOutput(DOFMapOutput, "DOFMap");
 
   registered = true;
 }
@@ -739,6 +773,7 @@ addActionTypes(Syntax & syntax)
   registerTask("add_aux_variable", false);
   registerTask("add_variable", false);
 
+  registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
   registerTask("setup_mesh_complete", false);  // calls prepare
 
@@ -797,6 +832,7 @@ addActionTypes(Syntax & syntax)
 "(prepare_mesh)"
 "(add_mesh_modifier)"
 "(add_mortar_interface)"
+"(uniform_refine_mesh)"
 "(setup_mesh_complete)"
 "(determine_system_type)"
 "(create_problem)"
@@ -875,6 +911,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupMeshCompleteAction, "prepare_mesh");
   registerAction(AddMeshModifierAction, "add_mesh_modifier");
   registerAction(AddMortarInterfaceAction, "add_mortar_interface");
+  registerAction(SetupMeshCompleteAction, "uniform_refine_mesh");
   registerAction(SetupMeshCompleteAction, "setup_mesh_complete");
 
   registerAction(AddFunctionAction, "add_function");
@@ -995,11 +1032,10 @@ const std::vector<ExecFlagType> populateExecTypes()
   std::vector<ExecFlagType> exec_types(6);
   exec_types[0] = EXEC_INITIAL;
   exec_types[1] = EXEC_TIMESTEP_BEGIN;
-  exec_types[2] = EXEC_JACOBIAN;
-  exec_types[3] = EXEC_RESIDUAL;
-  exec_types[4] = EXEC_TIMESTEP;
+  exec_types[2] = EXEC_NONLINEAR;
+  exec_types[3] = EXEC_LINEAR;
+  exec_types[4] = EXEC_TIMESTEP_END;
   exec_types[5] = EXEC_CUSTOM;
-
   return exec_types;
 }
 

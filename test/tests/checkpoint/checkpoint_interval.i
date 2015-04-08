@@ -51,15 +51,11 @@
 [Outputs]
   output_initial = true
   exodus = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./out]
-  # Test the checkpoint interval parameter
     type = Checkpoint
-     interval = 3  # output every third timestep
-     num_files = 2  # keep the last two most recent checkpoint copies
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
+    interval = 3
+    num_files = 2
   [../]
 []

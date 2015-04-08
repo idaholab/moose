@@ -1,9 +1,9 @@
 [Tests]
   [./test]
+    # The XDA/XDR files for this test are created with test/tests/auxkernels/solution_aux/build.i
     type = 'Exodiff'
     input = 'solution_function_test.i'
     exodiff = 'out.e'
-    allow_warnings = true
   [../]
 
   [./exodus_interp_test]

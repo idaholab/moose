@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 // Original class author: M.R. Tonks
 
 #ifndef FINITESTRAINMATERIAL_H
@@ -33,7 +39,8 @@ protected:
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
   MaterialProperty<RankTwoTensor> & _stress_old;
   MaterialProperty<RankTwoTensor> & _rotation_increment;
-  MaterialProperty<RankTwoTensor> & _dfgrd;
+
+  MaterialProperty<RankTwoTensor> & _deformation_gradient;
 };
 
 #endif //FINITESTRAINMATERIAL_H

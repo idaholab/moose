@@ -20,7 +20,7 @@ InputParameters validParams<CoupledNeumannBC>()
   InputParameters params = validParams<IntegratedBC>();
 
   // Here we are adding a parameter that will be extracted from the input file by the Parser
-  params.addParam<Real>("alpha", 0.0, "Value multiplied by the coupled value on the boundary");
+  params.addParam<Real>("alpha", 1.0, "Value multiplied by the coupled value on the boundary");
   params.addRequiredCoupledVar("some_var", "Flux Value at the Boundary");
   return params;
 }

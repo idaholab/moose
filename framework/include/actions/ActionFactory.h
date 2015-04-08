@@ -41,7 +41,7 @@ class MooseApp;
 /**
  * Typedef for function to build objects
  */
-typedef Action * (*buildActionPtr)(const std::string & name, InputParameters parameters);
+typedef MooseSharedPointer<Action> (*buildActionPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef for validParams
@@ -53,9 +53,9 @@ typedef InputParameters (*paramsActionPtr)();
  * Build an object of type T
  */
 template<class T>
-Action * buildAction(const std::string & name, InputParameters parameters)
+MooseSharedPointer<Action> buildAction(const std::string & name, InputParameters parameters)
 {
-  return new T(name, parameters);
+  return MooseSharedPointer<Action>(new T(name, parameters));
 }
 
 /**
@@ -83,7 +83,7 @@ public:
 
   std::string getTaskName(const std::string & action);
 
-  Action * create(const std::string & action, const std::string & name, InputParameters params);
+  MooseSharedPointer<Action> create(const std::string & action, const std::string & name, InputParameters params);
 
   InputParameters getValidParams(const std::string & name);
 

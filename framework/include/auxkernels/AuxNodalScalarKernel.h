@@ -43,7 +43,7 @@ public:
 
 protected:
   /// List of node IDs
-  std::vector<unsigned int> _node_ids;
+  std::vector<dof_id_type> _node_ids;
 };
 
 #endif /* AUXNODALSCALARKERNEL_H */

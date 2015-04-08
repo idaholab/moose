@@ -74,15 +74,10 @@
   output_initial = true
   file_base = out_file
   exodus = true
+  print_perf_log = true
   [./oversampling]
     file_base = out_file_oversample
     type = Exodus
-    oversample = true
     refinements = 3
-    #append_oversample = true
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
   [../]
 []

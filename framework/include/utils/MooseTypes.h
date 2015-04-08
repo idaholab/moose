@@ -45,14 +45,16 @@ typedef Real                     PostprocessorValue;
 typedef std::vector<Real>        VectorPostprocessorValue;
 typedef boundary_id_type         BoundaryID;
 typedef subdomain_id_type        SubdomainID;
+typedef unsigned int             MooseObjectID;
 
-typedef StoredRange<std::vector<unsigned int>::iterator, unsigned int> NodeIdRange;
+typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
 
 namespace Moose
 {
-const SubdomainID ANY_BLOCK_ID = (SubdomainID) -1;
-const BoundaryID ANY_BOUNDARY_ID = (BoundaryID) -1;
+const SubdomainID ANY_BLOCK_ID = libMesh::Elem::invalid_subdomain_id - 1;
+const SubdomainID INVALID_BLOCK_ID = libMesh::Elem::invalid_subdomain_id;
+const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
 
 

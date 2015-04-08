@@ -66,21 +66,18 @@ public:
    */
   InputParameters & parameters() { return _pars; }
 
+  ///@{
   /**
    * Retrieve a parameter for the object
    * @param name The name of the parameter
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParam(const std::string & name) { return _pars.get<T>(name); }
+  const T & getParam(const std::string & name);
 
-  /**
-   * Retrieve a parameter for the object (const version)
-   * @param name The name of the parameter
-   * @return The value of the parameter
-   */
   template <typename T>
-  const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
+  const T & getParam(const std::string & name) const;
+  ///@}
 
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
 
@@ -201,7 +198,7 @@ public:
   /**
    * Retrieve the Executioner for this App.
    */
-  Executioner * getExecutioner() { return _executioner; }
+  Executioner * getExecutioner() { return _executioner.get(); }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
@@ -223,7 +220,7 @@ public:
    * @return The reference to the command line object
    * Setup options based on InputParameters.
    */
-  CommandLine * commandLine() { return _command_line; }
+  MooseSharedPointer<CommandLine> commandLine() { return _command_line; }
 
   /**
    * This method is here so we can determine whether or not we need to
@@ -250,12 +247,12 @@ public:
   /**
    * Whether or not this is a "recover" calculation.
    */
-  bool isRecovering() { return _recover; }
+  bool isRecovering() const { return _recover; }
 
   /**
    * Whether or not this is a "recover" calculation.
    */
-  bool isRestarting() { return _restart; }
+  bool isRestarting() const { return _restart; }
 
   /**
    * Return true if the recovery file base is set
@@ -320,7 +317,7 @@ public:
    * Get SystemInfo object
    * @return A pointer to the SystemInformation object
    */
-  SystemInfo * getSystemInfo() { return _sys_info; }
+  SystemInfo * getSystemInfo() { return _sys_info.get(); }
 
 protected:
 
@@ -335,7 +332,7 @@ protected:
   InputParameters _pars;
 
   /// The MPI communicator this App is going to use
-  const Parallel::Communicator * _comm;
+  const MooseSharedPointer<Parallel::Communicator> _comm;
 
   /// Input file name used
   std::string _input_filename;
@@ -359,7 +356,7 @@ protected:
   Real _global_time_offset;
 
   /// Command line object
-  CommandLine * _command_line;
+  MooseSharedPointer<CommandLine> _command_line;
 
   /// Syntax of the input file
   Syntax _syntax;
@@ -380,13 +377,13 @@ protected:
   Parser _parser;
 
   /// Pointer to the executioner of this run (typically build by actions)
-  Executioner * _executioner;
+  MooseSharedPointer<Executioner> _executioner;
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;
 
   /// System Information
-  SystemInfo * _sys_info;
+  MooseSharedPointer<SystemInfo> _sys_info;
 
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
@@ -424,6 +421,9 @@ protected:
   /// Legacy Uo Initialization flag
   bool _legacy_uo_initialization_default;
 
+  /// true if we want to just check the input file
+  bool _check_input;
+
 private:
 
   ///@{
@@ -438,5 +438,19 @@ private:
   // Allow FEProblem to set the recover/restart state, so make it a friend
   friend class FEProblem;
 };
+
+template <typename T>
+const T &
+MooseApp::getParam(const std::string & name)
+{
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+template <typename T>
+const T &
+MooseApp::getParam(const std::string & name) const
+{
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
 
 #endif /* MOOSEAPP_H */

@@ -35,9 +35,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
     SystemTempl<TransientExplicitSystem>(subproblem, name, Moose::VAR_AUXILIARY),
     _mproblem(subproblem),
     _serialized_solution(*NumericVector<Number>::build(_mproblem.comm()).release()),
-    _time_integrator(NULL),
     _u_dot(addVector("u_dot", true, GHOSTED)),
-    _du_dot_du(addVector("du_dot_du", true, GHOSTED)),
     _need_serialized_solution(false)
 {
   _nodal_vars.resize(libMesh::n_threads());
@@ -47,14 +45,11 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
 AuxiliarySystem::~AuxiliarySystem()
 {
   delete &_serialized_solution;
-  delete _time_integrator;
 }
 
 void
 AuxiliarySystem::init()
 {
-  if (_need_serialized_solution)
-    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
 }
 
 void
@@ -64,9 +59,9 @@ AuxiliarySystem::initialSetup()
   {
     _auxs(EXEC_INITIAL)[i].initialSetup();
     _auxs(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
-    _auxs(EXEC_TIMESTEP)[i].initialSetup();
-    _auxs(EXEC_JACOBIAN)[i].initialSetup();
-    _auxs(EXEC_RESIDUAL)[i].initialSetup();
+    _auxs(EXEC_TIMESTEP_END)[i].initialSetup();
+    _auxs(EXEC_NONLINEAR)[i].initialSetup();
+    _auxs(EXEC_LINEAR)[i].initialSetup();
   }
 }
 
@@ -76,9 +71,9 @@ AuxiliarySystem::timestepSetup()
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _auxs(EXEC_TIMESTEP_BEGIN)[i].timestepSetup();
-    _auxs(EXEC_TIMESTEP)[i].timestepSetup();
-    _auxs(EXEC_JACOBIAN)[i].timestepSetup();
-    _auxs(EXEC_RESIDUAL)[i].timestepSetup();
+    _auxs(EXEC_TIMESTEP_END)[i].timestepSetup();
+    _auxs(EXEC_NONLINEAR)[i].timestepSetup();
+    _auxs(EXEC_LINEAR)[i].timestepSetup();
   }
 }
 
@@ -87,8 +82,8 @@ AuxiliarySystem::jacobianSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
-    _auxs(EXEC_JACOBIAN)[i].jacobianSetup();
-    _auxs(EXEC_RESIDUAL)[i].jacobianSetup();
+    _auxs(EXEC_NONLINEAR)[i].jacobianSetup();
+    _auxs(EXEC_LINEAR)[i].jacobianSetup();
   }
 }
 
@@ -96,7 +91,7 @@ void
 AuxiliarySystem::residualSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
-    _auxs(EXEC_RESIDUAL)[i].residualSetup();
+    _auxs(EXEC_LINEAR)[i].residualSetup();
 }
 
 void
@@ -120,8 +115,7 @@ void
 AuxiliarySystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
 {
   parameters.set<SystemBase *>("_sys") = this;
-  TimeIntegrator * ti = static_cast<TimeIntegrator *>(_factory.create(type, name, parameters));
-  _time_integrator = ti;
+  _time_integrator = MooseSharedNamespace::static_pointer_cast<TimeIntegrator>(_factory.create(type, name, parameters));
 }
 
 void
@@ -132,7 +126,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & 
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    MooseSharedPointer<AuxKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxKernel>(_factory.create_shared_ptr(kernel_name, name, parameters));
+    MooseSharedPointer<AuxKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxKernel>(_factory.create(kernel_name, name, parameters));
 
     // Add this AuxKernel to multiple ExecStores
     const std::vector<ExecFlagType> & exec_flags = kernel->execFlags();
@@ -157,7 +151,7 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name, const std::str
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    MooseSharedPointer<AuxScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxScalarKernel>(_factory.create_shared_ptr(kernel_name, name, parameters));
+    MooseSharedPointer<AuxScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxScalarKernel>(_factory.create(kernel_name, name, parameters));
 
     // Add this AuxKernel to multiple ExecStores
     const std::vector<ExecFlagType> & exec_flags = kernel->execFlags();
@@ -210,12 +204,6 @@ AuxiliarySystem::solutionUDot()
 }
 
 NumericVector<Number> &
-AuxiliarySystem::solutionDuDotDu()
-{
-  return _du_dot_du;
-}
-
-NumericVector<Number> &
 AuxiliarySystem::serializedSolution()
 {
   _need_serialized_solution = true;
@@ -226,11 +214,19 @@ void
 AuxiliarySystem::serializeSolution()
 {
   if (_need_serialized_solution && _sys.n_dofs() > 0)            // libMesh does not like serializing of empty vectors
+  {
+    if (!_serialized_solution.initialized() || _serialized_solution.size() != _sys.n_dofs())
+    {
+      _serialized_solution.clear();
+      _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+    }
+
     solution().localize(_serialized_solution);
+  }
 }
 
 void
-AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
+AuxiliarySystem::compute(ExecFlagType type/* = EXEC_LINEAR*/)
 {
   if (_vars[0].scalars().size() > 0)
     computeScalarVars(type);
@@ -239,10 +235,10 @@ AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
   {
     computeNodalVars(type);
     computeElementalVars(type);
-
-    if (_need_serialized_solution)
-      serializeSolution();
   }
+
+  if (_need_serialized_solution)
+    serializeSolution();
 
   // can compute time derivatives _after_ the current values were updated
   // also, at the very beginning, avoid division by dt which might be zero.
@@ -398,8 +394,8 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
 
 void
 AuxiliarySystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
-                                 std::vector<unsigned int> & /*n_nz*/,
-                                 std::vector<unsigned int> & /*n_oz*/)
+                                 std::vector<dof_id_type> & /*n_nz*/,
+                                 std::vector<dof_id_type> & /*n_oz*/)
 {
 }
 

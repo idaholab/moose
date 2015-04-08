@@ -15,7 +15,7 @@
 #include "UserObjectInterface.h"
 #include "FEProblem.h"
 
-UserObjectInterface::UserObjectInterface(InputParameters & params) :
+UserObjectInterface::UserObjectInterface(const InputParameters & params) :
     _uoi_feproblem(*params.get<FEProblem *>("_fe_problem")),
     _uoi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
     _uoi_params(params)

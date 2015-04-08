@@ -1,16 +1,10 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "OneDContactConstraint.h"
 
 #include "SystemBase.h"
@@ -50,10 +44,11 @@ OneDContactConstraint::jacobianSetup()
 void
 OneDContactConstraint::updateContactSet()
 {
-  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
@@ -66,7 +61,7 @@ OneDContactConstraint::updateContactSet()
 
     if (pinfo->_distance > 0)
     {
-      unsigned int slave_node_num = it->first;
+      dof_id_type slave_node_num = it->first;
       has_penetrated.insert(slave_node_num);
     }
   }
@@ -75,7 +70,7 @@ OneDContactConstraint::updateContactSet()
 bool
 OneDContactConstraint::shouldApply()
 {
-  std::set<unsigned int>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
+  std::set<dof_id_type>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
   return (hpit != _penetration_locator._has_penetrated.end());
 }
 

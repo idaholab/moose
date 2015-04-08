@@ -114,7 +114,8 @@ InputFileFormatter::printParams(const std::string & /*prefix*/, const std::strin
 
       found = true;
       oss << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
-      size_t l_offset = 30;
+      // std::setw() takes an int
+      int l_offset = 30;
 
       if (!_dump_mode || value != "INVALID")
       {

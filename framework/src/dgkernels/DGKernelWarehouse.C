@@ -15,7 +15,8 @@
 #include "DGKernelWarehouse.h"
 #include "DGKernel.h"
 
-DGKernelWarehouse::DGKernelWarehouse()
+DGKernelWarehouse::DGKernelWarehouse() :
+    Warehouse<DGKernel>()
 {
 }
 
@@ -55,7 +56,7 @@ void
 DGKernelWarehouse::addDGKernel(MooseSharedPointer<DGKernel> & dg_kernel)
 {
   _all_ptrs.push_back(dg_kernel);
-  _all_dg_kernels.push_back(dg_kernel.get());
+  _all_objects.push_back(dg_kernel.get());
 }
 
 void
@@ -64,7 +65,7 @@ DGKernelWarehouse::updateActiveDGKernels(Real /*t*/, Real /*dt*/)
   _active_dg_kernels.clear();
 
   // add kernels that live everywhere
-  for (std::vector<DGKernel *>::const_iterator it = _all_dg_kernels.begin(); it != _all_dg_kernels.end(); ++it)
+  for (std::vector<DGKernel *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
   {
     DGKernel * dg_kernel = *it;
     // FIXME: add startTime/stopTime to DGKernel

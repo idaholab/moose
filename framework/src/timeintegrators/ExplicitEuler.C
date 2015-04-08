@@ -43,7 +43,6 @@ ExplicitEuler::computeTimeDerivatives()
   _u_dot.close();
 
   _du_dot_du = 1.0 / _dt;
-  _du_dot_du.close();
 }
 
 void

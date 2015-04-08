@@ -80,21 +80,20 @@ public:
   virtual const NumericVector<Number> * & currentSolution() { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
 
   virtual NumericVector<Number> & solutionUDot();
-  virtual NumericVector<Number> & solutionDuDotDu();
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution();
 
   // This is an empty function since the Aux system doesn't have a matrix!
   virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
-                               std::vector<unsigned int> & /*n_nz*/,
-                               std::vector<unsigned int> & /*n_oz*/);
+                               std::vector<dof_id_type> & /*n_nz*/,
+                               std::vector<dof_id_type> & /*n_oz*/);
 
   /**
    * Compute auxiliary variables
    * @param type Time flag of which variables should be computed
    */
-  virtual void compute(ExecFlagType type = EXEC_RESIDUAL);
+  virtual void compute(ExecFlagType type);
 
   /**
    * Get a list of dependent UserObjects for this exec type
@@ -138,11 +137,9 @@ protected:
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
   /// Time integrator
-  TimeIntegrator * _time_integrator;
+  MooseSharedPointer<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
-  /// solution vector for \f$ {du^dot}\over{du} \f$
-  NumericVector<Number> & _du_dot_du;
 
   /// Whether or not a copy of the residual needs to be made
   bool _need_serialized_solution;

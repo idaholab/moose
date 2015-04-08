@@ -78,8 +78,5 @@
   file_base = missing_mat_prop_test
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

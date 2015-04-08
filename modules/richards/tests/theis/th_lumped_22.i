@@ -156,7 +156,7 @@
     type = PointValue
     variable = pwater
     point = '50 0 0'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -215,8 +215,5 @@
   output_initial = true
   exodus = true
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

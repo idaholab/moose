@@ -34,10 +34,6 @@ Gnuplot::Gnuplot(const std::string & name, InputParameters & parameters) :
 {
 }
 
-Gnuplot::~Gnuplot()
-{
-}
-
 std::string
 Gnuplot::filename()
 {
@@ -45,10 +41,10 @@ Gnuplot::filename()
 }
 
 void
-Gnuplot::output()
+Gnuplot::output(const ExecFlagType & type)
 {
   // Call the base class output (populates tables)
-  TableOutput::output();
+  TableOutput::output(type);
 
   // Print the table containing all the data to a file
   if (!_all_data_table.empty())

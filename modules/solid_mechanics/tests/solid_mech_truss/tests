@@ -16,5 +16,6 @@
     input = 'truss.i'
     exodiff = 'truss_out.e'
     abs_zero = 1e-7
+    max_parallel = 1
   [../]
 []

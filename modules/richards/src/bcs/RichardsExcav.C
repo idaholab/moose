@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #include "RichardsExcav.h"
 #include "Function.h"
@@ -19,8 +22,7 @@ InputParameters validParams<RichardsExcav>()
   return params;
 }
 
-RichardsExcav::RichardsExcav(const std::string & name,
-                                             InputParameters parameters) :
+RichardsExcav::RichardsExcav(const std::string & name, InputParameters parameters) :
     NodalBC(name,parameters),
     _p_excav(getParam<Real>("p_excav")),
     _func(getFunction("excav_geom_function"))

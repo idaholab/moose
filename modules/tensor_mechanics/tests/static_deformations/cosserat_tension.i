@@ -32,32 +32,32 @@
 [MeshModifiers]
   [./bottom_xline1]
     type = AddExtraNodeset
-    boundary = 101
+    new_boundary = 101
     coord = '0 0 0'
   [../]
   [./bottom_xline2]
     type = AddExtraNodeset
-    boundary = 101
+    new_boundary = 101
     coord = '0.5 0 0'
   [../]
   [./bottom_xline3]
     type = AddExtraNodeset
-    boundary = 101
+    new_boundary = 101
     coord = '1 0 0'
   [../]
   [./bottom_zline1]
     type = AddExtraNodeset
-    boundary = 102
+    new_boundary = 102
     coord = '0 0 0.0'
   [../]
   [./bottom_zline2]
     type = AddExtraNodeset
-    boundary = 102
+    new_boundary = 102
     coord = '0 0 0.1'
   [../]
   [./bottom_zline3]
     type = AddExtraNodeset
-    boundary = 102
+    new_boundary = 102
     coord = '0 0 0.2'
   [../]
 []
@@ -100,7 +100,7 @@
     disp_y = wc_y
     disp_x = wc_x
     component = 0
-    appended_property_name = _couple
+    base_name = coupled
   [../]
   [./y_couple]
     type = StressDivergenceTensors
@@ -109,7 +109,7 @@
     disp_y = wc_y
     disp_x = wc_x
     component = 1
-    appended_property_name = _couple
+    base_name = coupled
   [../]
   [./z_couple]
     type = StressDivergenceTensors
@@ -118,7 +118,7 @@
     disp_y = wc_y
     disp_x = wc_x
     component = 2
-    appended_property_name = _couple
+    base_name = coupled
   [../]
   [./x_moment]
     type = MomentBalancing

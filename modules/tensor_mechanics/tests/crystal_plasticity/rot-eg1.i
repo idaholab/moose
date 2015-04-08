@@ -169,14 +169,11 @@
   file_base = rot_eg1
   output_initial = true
   solution_history = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     use_displaced = true
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
   [../]
 []
 

@@ -24,10 +24,10 @@ endif
 # Instead of using Make.common, use libmesh-config to get any libmesh
 # make variables we might need.  Be sure to pass METHOD along to libmesh-config
 # so that it can use the right one!
-libmesh_CXX      := $(shell METHOD=$(METHOD) $(libmesh_config) --cxx)
-libmesh_CC       := $(shell METHOD=$(METHOD) $(libmesh_config) --cc)
-libmesh_F77      := $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
-libmesh_F90      := $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
+libmesh_CXX      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cxx)
+libmesh_CC       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cc)
+libmesh_F77      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
+libmesh_F90      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
 libmesh_INCLUDE  := $(shell METHOD=$(METHOD) $(libmesh_config) --include)
 libmesh_CPPFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cppflags)
 libmesh_CXXFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cxxflags)
@@ -62,19 +62,13 @@ PCH_FLAGS=
 PCH_MODE=
 PCH_DEP=
 
-# Check if using precompiled headers is possible 
+# Check if using precompiled headers is possible
 # cxx compiler could be used to define which compiler is being used
-# so that different compiler options are usable. Libmesh only 
+# so that different compiler options are usable. Libmesh only
 # appears to check if GCC is used
 ifeq ($(MOOSE_PRECOMPILED), true)
   ifneq (,$(filter $(cxx_compiler), g++))
 	  PRECOMPILED = true
-  endif
-endif
-
-ifneq (,$(filter $(cxx_compiler), clang++))
-  ifneq (,$(findstring darwin,$(libmesh_HOST)))
-	libmesh_CXXFLAGS += -mmacosx-version-min=10.7
   endif
 endif
 
@@ -288,7 +282,7 @@ $(TEST): all
 # Build appliations up the tree
 up:
 	@echo ======================================================
-	@echo Building the following applications: 
+	@echo Building the following applications:
 	@for app in $(DEP_APPS); do echo \ $$app; done
 	@echo ======================================================
 	@echo
@@ -301,7 +295,7 @@ up:
 
 test_up: up
 	@echo ======================================================
-	@echo Testing the following applications: 
+	@echo Testing the following applications:
 	@for app in $(DEP_APPS); do echo \ $$app; done
 	@echo ======================================================
 	@echo
@@ -325,7 +319,7 @@ test_only_up:
 
 clean_up:
 	@echo ======================================================
-	@echo Cleaning the following applications: 
+	@echo Cleaning the following applications:
 	@for app in $(DEP_APPS); do echo \ $$app; done
 	@echo ======================================================
 	@echo
@@ -334,6 +328,12 @@ clean_up:
 		echo ====== Cleaning $${app} ====== ; \
 		$(MAKE) -C $${app} clean; \
 	done
+
+libmesh_update:
+	@echo ======================================================
+	@echo Downloading and updating libMesh
+	@echo ======================================================
+	$(MOOSE_DIR)/scripts/update_and_rebuild_libmesh.sh
 
 #
 # Maintenance

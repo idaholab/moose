@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #include "RichardsHalfGaussianSink.h"
 #include "Material.h"
@@ -21,8 +24,7 @@ InputParameters validParams<RichardsHalfGaussianSink>()
   return params;
 }
 
-RichardsHalfGaussianSink::RichardsHalfGaussianSink(const std::string & name,
-                                             InputParameters parameters) :
+RichardsHalfGaussianSink::RichardsHalfGaussianSink(const std::string & name, InputParameters parameters) :
     IntegratedBC(name,parameters),
     _maximum(getParam<Real>("max")),
     _sd(getParam<Real>("sd")),
@@ -39,12 +41,10 @@ RichardsHalfGaussianSink::computeQpResidual()
 {
   Real test_fcn_f = _test[_i][_qp]*_m_func.value(_t, _q_point[_qp]);
 
-  if (_pp[_qp][_pvar] >= _centre) {
+  if (_pp[_qp][_pvar] >= _centre)
     return test_fcn_f*_maximum;
-  }
-  else {
+  else
     return test_fcn_f*_maximum*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2));
-  }
 }
 
 Real
@@ -52,12 +52,10 @@ RichardsHalfGaussianSink::computeQpJacobian()
 {
   Real test_fcn_f = _test[_i][_qp]*_m_func.value(_t, _q_point[_qp]);
 
-  if (_pp[_qp][_pvar] >= _centre) {
+  if (_pp[_qp][_pvar] >= _centre)
     return 0.0;
-  }
-  else {
+  else
     return -test_fcn_f*_maximum*(_pp[_qp][_pvar] - _centre)/std::pow(_sd, 2)*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2))*_phi[_j][_qp]*_dpp_dv[_qp][_pvar][_pvar];
-  }
 }
 
 Real
@@ -69,10 +67,8 @@ RichardsHalfGaussianSink::computeQpOffDiagJacobian(unsigned int jvar)
 
   Real test_fcn_f = _test[_i][_qp]*_m_func.value(_t, _q_point[_qp]);
 
-  if (_pp[_qp][_pvar] >= _centre) {
+  if (_pp[_qp][_pvar] >= _centre)
     return 0.0;
-  }
-  else {
+  else
     return -test_fcn_f*_maximum*(_pp[_qp][_pvar] - _centre)/std::pow(_sd, 2)*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2))*_phi[_j][_qp]*_dpp_dv[_qp][_pvar][dvar];
-  }
 }

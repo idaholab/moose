@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  This post processor returns the mass due to a half-gaussian sink flux from the boundary of a volume.
 //
@@ -32,10 +35,8 @@ RichardsHalfGaussianSinkFlux::RichardsHalfGaussianSinkFlux(const std::string & n
 Real
 RichardsHalfGaussianSinkFlux::computeQpIntegral()
 {
-  if (_pp[_qp][_pvar] >= _centre) {
+  if (_pp[_qp][_pvar] >= _centre)
     return _maximum*_dt;
-  }
-  else {
+  else
     return _maximum*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2))*_dt;
-  }
 }

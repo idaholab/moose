@@ -86,7 +86,7 @@
     tensor = stress
     variable = vonmises
     quantity = vonmises
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -178,14 +178,14 @@
 
 [Outputs]
   output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
   [./console]
     type = Console
-    perf_log = true
-    linear_residuals = true
     max_rows = 10
   [../]
 []

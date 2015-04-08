@@ -87,8 +87,8 @@ private:
    * @param variable_name The AuxVariable name to create
    * @param material A pointer to the Material object containing the property of interest
    */
-  MooseObjectAction * createAction(const std::string & type, const std::string & property_name,
-                                   const std::string & variable_name, Material * material);
+  MooseSharedPointer<MooseObjectAction> createAction(const std::string & type, const std::string & property_name,
+                                                     const std::string & variable_name, Material * material);
 
   /// Pointer the MaterialData object storing the block restricted materials
   MaterialData * _block_material_data;

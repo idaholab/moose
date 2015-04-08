@@ -1,16 +1,10 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 
 #ifndef MATERIALTENSORAUX_H
 #define MATERIALTENSORAUX_H
@@ -32,11 +26,13 @@ public:
   virtual ~MaterialTensorAux() {}
 
 protected:
+  virtual Real computeValue();
 
   MaterialTensorCalculator _material_tensor_calculator;
   MaterialProperty<SymmTensor> & _tensor;
-  virtual Real computeValue();
 
+  const bool _has_qp_select;
+  const unsigned int _qp_select;
 };
 
 #endif // MATERIALTENSORAUX_H

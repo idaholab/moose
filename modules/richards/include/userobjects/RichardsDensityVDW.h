@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSDENSITYVDW_H
 #define RICHARDSDENSITYVDW_H
@@ -33,7 +36,7 @@ InputParameters validParams<RichardsDensityVDW>();
  */
 class RichardsDensityVDW : public RichardsDensity
 {
- public:
+public:
   RichardsDensityVDW(const std::string & name, InputParameters parameters);
 
   /**
@@ -54,7 +57,7 @@ class RichardsDensityVDW : public RichardsDensity
    */
   Real d2density(Real p) const;
 
- protected:
+protected:
 
   /// van der Waals a
   Real _a;

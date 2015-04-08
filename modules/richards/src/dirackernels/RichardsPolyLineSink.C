@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #include "RichardsPolyLineSink.h"
 
@@ -36,40 +39,39 @@ RichardsPolyLineSink::RichardsPolyLineSink(const std::string & name, InputParame
   std::vector<Real> scratch;
   while (parseNextLineReals(file, scratch))
   {
-    if (scratch.size() >= 1) {
+    if (scratch.size() >= 1)
+    {
       _xs.push_back(scratch[0]);
-      if (scratch.size() >= 2) {
+      if (scratch.size() >= 2)
         _ys.push_back(scratch[1]);
-      }
-      else {
+      else
         _ys.push_back(0.0);
-      }
-      if (scratch.size() >= 3) {
+
+      if (scratch.size() >= 3)
         _zs.push_back(scratch[2]);
-      }
-      else {
+      else
         _zs.push_back(0.0);
-      }
     }
   }
 
   file.close();
 }
 
-bool RichardsPolyLineSink::parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
+bool
+RichardsPolyLineSink::parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec)
 // reads a space-separated line of floats from ifs and puts in myvec
 {
   std::string line;
   myvec.clear();
   bool gotline(false);
-  if (getline(ifs,line))
+  if (getline(ifs, line))
   {
-    gotline=true;
+    gotline = true;
 
     //Harvest floats separated by whitespace
     std::istringstream iss(line);
     Real f;
-    while (iss>>f)
+    while (iss >> f)
     {
       myvec.push_back(f);
     }

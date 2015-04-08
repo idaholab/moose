@@ -604,7 +604,7 @@ ColumnMajorMatrixTest::inverse()
 void
 ColumnMajorMatrixTest::eigen()
 {
-    ColumnMajorMatrix matrix(2,2), e_vec(2,2), e_val(2,2);
+    ColumnMajorMatrix matrix(2,2), e_vec(2,2), e_val(2,1);
     Real err = 1.0e-14;
 
     matrix(0,0) = 1.0;
@@ -620,15 +620,13 @@ ColumnMajorMatrixTest::eigen()
     CPPUNIT_ASSERT( std::abs(e_vec(1,1) - 2/sqrt(5)) < err );
 
     CPPUNIT_ASSERT( e_val(0,0) == 0.0 );
-    CPPUNIT_ASSERT( e_val(0,1) == 0.0 );
     CPPUNIT_ASSERT( e_val(1,0) == 5.0 );
-    CPPUNIT_ASSERT( e_val(1,1) == 0.0 );
 }
 
 void
 ColumnMajorMatrixTest::eigenNonsym()
 {
-    ColumnMajorMatrix matrix(2,2), e_vector_right(2,2), e_vector_left(2,2), e_values_real(2,2), e_values_img(2,2);
+    ColumnMajorMatrix matrix(2,2), e_vector_right(2,2), e_vector_left(2,2), e_values_real(2,1), e_values_img(2,1);
     Real err = 1.0e-14;
 
     matrix(0,0) = 2.0;
@@ -644,14 +642,10 @@ ColumnMajorMatrixTest::eigenNonsym()
     CPPUNIT_ASSERT( std::abs(e_vector_right(1,1) - 1/sqrt(2)) < err );
 
     CPPUNIT_ASSERT( e_values_real(0,0) == 3.0 );
-    CPPUNIT_ASSERT( e_values_real(0,1) == 0.0 );
     CPPUNIT_ASSERT( e_values_real(1,0) == 1.0 );
-    CPPUNIT_ASSERT( e_values_real(1,1) == 0.0 );
 
     CPPUNIT_ASSERT( e_values_img(0,0) == 0.0 );
-    CPPUNIT_ASSERT( e_values_img(0,1) == 0.0 );
     CPPUNIT_ASSERT( e_values_img(1,0) == 0.0 );
-    CPPUNIT_ASSERT( e_values_img(1,1) == 0.0 );
 }
 
 void

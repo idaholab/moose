@@ -163,12 +163,12 @@
   [./x]
     type = ScalarVariable
     variable = x
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./y]
     type = ScalarVariable
     variable = y
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -185,9 +185,6 @@
   file_base = out_nonexistent
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
   show = 'u elemental nodal x foo1 foo2'
+  print_perf_log = true
 []

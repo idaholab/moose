@@ -1,0 +1,379 @@
+.\"
+.\" $Id: mtwist.3,v 1.9 2012-12-30 16:24:49-08 geoff Exp $
+.\"
+.\" $Log: mtwist.3,v $
+.\" Revision 1.9  2012-12-30 16:24:49-08  geoff
+.\" Document the new return values from mt*_seed and mt*_goodseed.
+.\"
+.\" Revision 1.8  2012-09-04 22:22:55-07  geoff
+.\" Correct documentation of which seeding functions use /dev/random.
+.\" (Thanks to Nick Hall for spotting this.)
+.\"
+.\" Revision 1.7  2010-06-24 01:53:59-07  geoff
+.\" Change all documented declarations to use types from stdint.h.  Fix
+.\" some restriction descriptions.  Remove bugs that are no longer bugs.
+.\"
+.\" Revision 1.6  2007-10-26 00:21:06-07  geoff
+.\" Document the new mt_u32bit_t type (barely).
+.\"
+.\" Revision 1.5  2002/10/30 07:39:53  geoff
+.\" Document the new seeding routines.
+.\"
+.\" Revision 1.4  2001/06/20 08:15:51  geoff
+.\" Correct the documentation of the generator's period.
+.\"
+.\" Revision 1.3  2001/06/19 00:43:01  geoff
+.\" Document the lack of a newline in the << operator
+.\"
+.\" Revision 1.2  2001/06/18 10:09:24  geoff
+.\" Fix the manual section.
+.\"
+.\" Revision 1.1  2001/06/16 21:20:31  geoff
+.\" Initial revision
+.\"
+.\"
+.TH mtwist 3 "June 14, 2001" "" "Linux Programmer's Manual"
+.SH NAME
+mts_seed32new, mts_seed32, mts_seedfull, mts_seed, mts_goodseed, mts_bestseed,
+mts_savestate, mts_loadstate, mt_seed32new, mt_seed32, mt_seedfull, mt_seed,
+mt_goodseed, mt_bestseed, mt_getstate, mt_savestate, mt_loadstate,
+mts_lrand, mts_llrand, mts_drand, mts_ldrand, mt_lrand, mt_llrand,
+mt_drand, mt_ldrand,
+mt_prng \- generate uniformly distributed pseudo-random numbers
+.SH SYNOPSIS
+.nf
+.IR "#defines" " (see below)"
+.br
+.B
+#include "mtwist.h"
+.sp
+C interface:
+.sp
+.BI "void mts_seed32(mt_state* " state ", uint32_t " seed ");"
+.sp
+.BI "void mts_seed32new(mt_state* " state ", uint32_t " seed ");"
+.sp
+.BI "void mts_seedfull(mt_state* " state ","
+.BI "                  uint32_t " seeds "[MT_STATE_SIZE]);"
+.sp
+.BI "uint32_t mts_seed(mt_state* " state ");"
+.sp
+.BI "uint32_t mts_goodseed(mt_state* " state ");"
+.sp
+.BI "void mts_bestseed(mt_state* " state ");"
+.sp
+.BI "int mts_savestate(FILE* " statefile ", mt_state* " state ");"
+.sp
+.BI "int mts_loadstate(FILE* " statefile ", mt_state* " state ");"
+.sp
+.BI "void mt_seed32(uint32_t " seed ");"
+.sp
+.BI "void mt_seed32new(uint32_t " seed ");"
+.sp
+.BI "void mt_seedfull(uint32_t " seeds "[MT_STATE_SIZE]);"
+.sp
+.B void mt_seed(void);
+.sp
+.B void mt_goodseed(void);
+.sp
+.B void mt_bestseed(void);
+.sp
+.B mt_state* mt_getstate(void);
+.sp
+.BI "int mt_savestate(FILE* " statefile ");"
+.sp
+.BI "int mt_loadstate(FILE* " statefile ");"
+.sp
+.BI "uint32_t mts_lrand(mt_state* " state ");"
+.sp
+.BI "uint64_t mts_llrand(mt_state* " state ");"
+.sp
+.BI "double mts_drand(mt_state* " state ");"
+.sp
+.BI "double mts_ldrand(mt_state* " state ");"
+.sp
+.B uint32_t mt_lrand(void);
+.sp
+.B uint64_t mt_llrand(void);
+.sp
+.B double mt_drand(void);
+.sp
+.B double mt_ldrand(void);
+.sp
+.B "C++ interface:"
+.sp
+.BI "mt_prng " rng ;
+.sp
+.BI "mt_prng " rng "(bool " pickseed " = false);"
+.sp
+.BI "mt_prng " rng "(uint32_t " seed );
+.sp
+.BI "mt_prng " rng "(uint32_t " seeds [MT_STATE_SIZE]);
+.sp
+.BI "void " rng ".seed32(uint32_t " seed ");"
+.sp
+.BI "void " rng ".seedfull(uint32_t seeds[MT_STATE_SIZE]);"
+.sp
+.BI "void " rng ".seed();"
+.sp
+.BI "void " rng ".goodseed();"
+.sp
+.BI "void " rng ".bestseed();"
+.sp
+.BI "uint32_t " rng ".lrand();"
+.sp
+.BI "uint64_t " rng ".llrand();"
+.sp
+.BI "double " rng ".drand();"
+.sp
+.BI "double " rng ".ldrand();"
+.sp
+.BI "double " rng "();"
+.sp
+.IB "stream" " << " rng ";"
+.sp
+.IB "stream" " >> " rng ";"
+.SH DESCRIPTION
+These functions generate pseudo-random numbers using Matsumoto and
+Nishimura's Mersenne Twist algorithm (see:
+.nf
+.sp
+        http://www.math.keio.ac.jp/~matumoto/emt.html
+.sp
+.fi
+for full information).
+The period of this pseudo random-number generator (PRNG) is 2^19337-1
+which is vastly longer than the life of the universe
+even if the random numbers are being generated at an impossible rate.
+The generator also has excellent statistical properties.
+.PP
+The
+.B mtwist
+package assumes a 32-bit machine with a modern C or C++ compiler that
+supports inline functions and the
+.B inttypes.h
+header file.
+If these features are not present, the package must be modified.
+.PP
+All of the PRNG functions work from a
+.IR "state vector" ,
+which is of type
+.B mt_state
+in C and type
+.B mt_prng
+in C++.
+The state vector stores everything that the PRNG needs to generate new
+numbers in the proper sequence.
+By using multiple state vectors, programs can draw random numbers from
+independent sequences, which is important in applications such as
+simulation (where each independent random variable should be drawn
+from its own sequence to avoid unintentional correlations).
+.PP
+For convenience, the C interface also provides a built-in default
+state vector that can be used in simple applications.
+The
+.BI mt_ xxx
+functions use the default state vector to control their behavior,
+while the
+.BI mts_xxx
+functions accept a user-provided state vector.
+.PP
+In C, a user-provided state vector has the following structure:
+.PP
+.nf
+#define MT_STATE_SIZE 624
+
+typedef struct {
+.in +8
+uint32_t statevec[MT_STATE_SIZE];
+.in +16
+/* Vector holding current state */
+.in -16
+int stateptr;   /* Next state entry to be used */
+int initialized;
+.in +16
+/* NZ if state has been initialized */
+.in -24
+} mt_state;
+.fi
+.PP
+An uninitialized PRNG is indicated by zeros in
+.I both
+.B stateptr
+and
+.BR initialized .
+It is the programmer's responsibility to ensure that these fields are
+zero before calling any of the
+.BI mts_xxx
+functions.
+.PP
+It is occasionally useful to directly access the default state vector, so
+.B mt_getstate
+will return a pointer to the default state.
+.PP
+In both C and C++, the functionality is divided into two categories:
+seeding and pseudorandom-number generation.
+If one of the generation functions is called on an unseeded generator,
+a default seed (specified by Matsumoto and Nishimura) will be used.
+Usually, the programmer will wish to override the default seed and
+choose a more appropriate one.
+The simplest way to seed a PRNG is by calling one of the
+.B *seed32new
+functions.
+This will invoke Matsumoto and Nishimura's revised Knuth-style seed
+generator.
+.PP
+The
+.B *seed32
+functions
+will invoke Matsumoto and Nishimura's original Knuth-style seed
+generator, which is now deprecated.
+In C++, the same effect can be achieved by passing a 32-bit
+.RB ( "uint32_t" )
+seed to the constructor.
+The original 32-bit seeder did not work correctly if the seed was zero,
+so in that
+case the default seed of 4357 will be substituted.
+The original seeder is still supported so that older software will
+continue to work in the same fashion without changes.
+.PP
+The
+.B *seed32new
+and
+.B *seed32
+functions are simple to use, but they have the drawback that only 4
+billion distinct pseudorandom sequences can be generated using them.
+To allow access to sequences beginning anywhere in the entire space of
+possibilities, the
+.B *seedfull
+functions can be passed an initial state vector of 624 32-bit numbers,
+or a C++ PRNG can be constructed with a 624-element array as an
+argument.
+The initialization vector must contain at least one nonzero value;
+if this rule is violated, the program will be aborted (unfortunately
+without a diagnostic message due to C/C++ portability issues).
+.PP
+The
+.BR *seed32new ,
+.BR *seed32 ,
+and
+.B *seedfull
+functions allow fixed, reproducible seeds, which is useful for
+simulation and experimentation.
+For game-like applications, non-reproducible seeds are usually more
+appropriate.
+The
+.BR mts_seed ,
+.BR mt_seed ,
+and
+.B seed
+functions use
+.B /dev/urandom
+(or the system time if
+.B /dev/urandom
+is unavailable) to generate an argument to the
+.B *seed32new
+functions to satisfy this need.
+If the time is used, the microseconds portion of the time is included
+in the seed to
+enhance the probability that two programs will generate different
+random sequences.
+The actual seed used is returned so that it can be saved for reproducibility.
+.PP
+The
+.B *goodseed
+functions
+work in a similar manner, but use
+.B /dev/random
+as their source of (32-bit) randomness.
+C++ programmers can also invoke
+.B goodseed
+at construction time by passing an argument of
+.B true
+to the constructor.
+Depending on the current amount of randomness available, these
+functions may take a significant amount of (wall-clock) time.
+.PP
+For the most random seed possible, the
+.B *bestseed
+functions attempt to use
+.B /dev/random
+to acquire values for
+.BR *seedfull ,
+falling back to
+.B *goodseed
+if
+.B /dev/random
+is unavailable.
+The disadvantage of these functions is that it usually takes a
+very large amount of (wall-clock) time before
+.B /dev/random
+can produce enough entropy to provide a seed.
+Therefore, it is nearly always better to stick with the
+.B *goodseed
+functions.
+However, only the
+.B *seedfull
+functions can produce more than 32 bits of entropy.
+Because of the size of the state, the
+.B *seedfull
+functions do not return the seed used; if it is needed, the
+.B *savestate
+functions can be used to write it to a file.
+.PP
+Finally, it is often useful to be able to save and restore the PRNG
+state for later use.
+In C, the functions
+.B *savestate
+.B *loadstate
+will save the current state into an open
+.B stdio
+.B FILE
+as a single long line (in ASCII)
+and later restore it such that the restored PRNG will pick up where
+the saved one left off.
+In C++, the same effect can be achieved by writing to or reading from
+a C++
+.B stream
+using the usual
+.B "<<"
+and
+.B ">>"
+operators.
+As with all well-behaved C++ types, the
+.B "<<"
+operator does not add a newline after the saved state.
+.PP
+Once a generator has been seeded,
+uniformly distributed pseudorandom numbers can be produced in several
+formats.
+(The functions in the
+.IR randistrs (3)
+library can be used to produce other statistical distributions.)
+The
+.B *lrand
+and
+.B *llrand
+generate 32-bit and 64-bit random integers uniformly distributed
+between 0 and the maximum unsigned value.
+(The
+.B *llrand
+functions are only available on machines that support a 64-bit
+data type.
+The
+.B *drand
+functions generate a double-precision number in the range [0,1)
+(i.e., 0 is a possible value but 1 is not).
+The number generated by
+.B *drand
+has 32 bits of precision.
+For convenience, the C++ interface also defines a function operator
+that returns the same result as
+.BR drand ,
+so that a PRNG can be called as if it were a function.
+For applications that demand increased precision, the
+.B *ldrand
+functions generate a double-precision number in [0,1) with up to 64
+bits of precision (usually 52 bits).
+.SH "SEE ALSO"
+.BR randistrs "(3), " drand48 "(3), " rand "(3), " random (3)

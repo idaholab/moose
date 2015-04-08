@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "StressDivergenceTensors.h"
 
 #include "Material.h"
@@ -11,10 +17,7 @@ InputParameters validParams<StressDivergenceTensors>()
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
-  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
-
-//  params.set<bool>("use_displaced_mesh") = true;
-  // Using the displaced mesh will be set in the solid mechanics action input now.
+  params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = false;
 
   return params;
@@ -23,9 +26,9 @@ InputParameters validParams<StressDivergenceTensors>()
 
 StressDivergenceTensors::StressDivergenceTensors(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
-    _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
-    _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
-    // _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+ getParam<std::string>("appended_property_name"))),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
+    _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>(_base_name + "Jacobian_mult")),
     _component(getParam<unsigned int>("component")),
     _xdisp_coupled(isCoupled("disp_x")),
     _ydisp_coupled(isCoupled("disp_y")),

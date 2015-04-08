@@ -28,13 +28,13 @@ template<>
 InputParameters validParams<Executioner>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<FileNameNoExtension>("restart_file_base", "File base name used for restart");
+  params.addParam<FileNameNoExtension>("restart_file_base", "", "File base name used for restart");
 
   params.registerBase("Executioner");
 
   params.addParamNamesToGroup("restart_file_base", "Restart");
 
-  params.addParam<std::vector<std::string> >("splitting","Top-level splitting defining a hierarchical decomposition into subsystems to help the solver.");
+  params.addParam<std::vector<std::string> >("splitting", "Top-level splitting defining a hierarchical decomposition into subsystems to help the solver.");
 
   return params;
 }
@@ -43,12 +43,11 @@ Executioner::Executioner(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
-    Restartable(name, parameters, "Executioners"),
+    Restartable(parameters, "Executioners"),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
-    _splitting(getParam<std::vector<std::string> >("splitting")),
-    _output_warehouse(_app.getOutputWarehouse())
+    _splitting(getParam<std::vector<std::string> >("splitting"))
 {
 }
 

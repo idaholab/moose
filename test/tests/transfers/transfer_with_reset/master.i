@@ -62,18 +62,15 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
 [MultiApps]
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep
+    execute_on = timestep_end
     positions = '0 0 0'
     input_files = sub.i
     reset_apps = 0
@@ -85,7 +82,6 @@
   [./t_from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = t
     variable = t
@@ -93,7 +89,6 @@
   [./u_from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = u_from_sub
@@ -101,7 +96,6 @@
   [./u_to_sub]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = u_from_master

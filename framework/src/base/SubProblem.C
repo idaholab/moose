@@ -31,7 +31,8 @@ InputParameters validParams<SubProblem>()
 SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
     Problem(name, parameters),
     _factory(_app.getFactory()),
-    _restartable_data(libMesh::n_threads())
+    _restartable_data(libMesh::n_threads()),
+    _rz_coord_axis(1) // default to RZ rotation around y-axis
 {
   unsigned int n_threads = libMesh::n_threads();
   _real_zero.resize(n_threads, 0.);
@@ -105,13 +106,24 @@ SubProblem::getMaterialPropertyBlockNames(const std::string & prop_name)
   std::set<SubdomainID> blocks = getMaterialPropertyBlocks(prop_name);
   std::vector<SubdomainName> block_names;
   block_names.reserve(blocks.size());
-
   for (std::set<SubdomainID>::iterator it = blocks.begin(); it != blocks.end(); ++it)
   {
-    std::stringstream ss;
-    ss << *it;
-    block_names.push_back(ss.str());
+    SubdomainName name;
+    if (*it == Moose::ANY_BLOCK_ID)
+      name = "ANY_BLOCK_ID";
+    else
+    {
+      name = mesh().getMesh().subdomain_name(*it);
+      if (name.empty())
+      {
+        std::ostringstream oss;
+        oss << *it;
+        name = oss.str();
+      }
+    }
+    block_names.push_back(name);
   }
+
   return block_names;
 }
 
@@ -139,13 +151,26 @@ SubProblem::getMaterialPropertyBoundaryNames(const std::string & prop_name)
   std::set<BoundaryID> boundaries = getMaterialPropertyBoundaryIDs(prop_name);
   std::vector<BoundaryName> boundary_names;
   boundary_names.reserve(boundaries.size());
+  const BoundaryInfo & boundary_info = mesh().getMesh().get_boundary_info();
 
   for (std::set<BoundaryID>::iterator it = boundaries.begin(); it != boundaries.end(); ++it)
   {
-    std::stringstream ss;
-    ss << *it;
-    boundary_names.push_back(ss.str());
+    BoundaryName name;
+    if (*it == Moose::ANY_BOUNDARY_ID)
+      name = "ANY_BOUNDARY_ID";
+    else
+    {
+      name = boundary_info.get_sideset_name(*it);
+      if (name.empty())
+      {
+        std::ostringstream oss;
+        oss << *it;
+        name = oss.str();
+      }
+    }
+    boundary_names.push_back(name);
   }
+
   return boundary_names;
 }
 
@@ -185,32 +210,17 @@ SubProblem::checkBoundaryMatProps()
   checkMatProps(_map_boundary_material_props, _map_boundary_material_props_check, "boundary");
 }
 
-bool
-SubProblem::checkMatPropRequested(std::map<unsigned int, std::multimap<std::string, std::string> > & check_props, const std::string & prop_name)
+void
+SubProblem::markMatPropRequested(const std::string & prop_name)
 {
-  // Loop through the properties to check
-  for (std::map<unsigned int, std::multimap<std::string, std::string> >::const_iterator check_it = check_props.begin();
-       check_it != check_props.end(); ++check_it)
-  {
-    // Loop through all the stored properties
-    for (std::multimap<std::string, std::string>::const_iterator prop_it = check_it->second.begin(); prop_it != check_it->second.end(); ++prop_it)
-    {
-      // return success as soon as the queried property name has been found
-      if (prop_it->second == prop_name)
-        return true;
-    }
-  }
-
-  return false;
+  _material_property_requested.insert(prop_name);
 }
 
 bool
-SubProblem::isMatPropRequested(const std::string & prop_name)
+SubProblem::isMatPropRequested(const std::string & prop_name) const
 {
-  return checkMatPropRequested(_map_block_material_props_check, prop_name) ||
-         checkMatPropRequested(_map_boundary_material_props_check, prop_name);
+  return _material_property_requested.find(prop_name) != _material_property_requested.end();
 }
-
 
 DiracKernelInfo &
 SubProblem::diracKernelInfo()
@@ -293,7 +303,7 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
         check_name = pos->second;
     }
     else
-      check_name = mesh().getMesh().boundary_info->sideset_name(check_id);
+      check_name = mesh().getMesh().get_boundary_info().sideset_name(check_id);
 
     // Create a name if it doesn't exist
     if (check_name.empty())
@@ -332,4 +342,13 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
     else
       mooseError("No material defined on " + type + " " + check_name);
   }
+}
+
+unsigned int
+SubProblem::getAxisymmetricRadialCoord()
+{
+  if (_rz_coord_axis == 0)
+    return 1; // if the rotation axis is x (0), then the radial direction is y (1)
+  else
+    return 0; // otherwise the radial direction is assumed to be x, i.e., the rotation axis is y
 }

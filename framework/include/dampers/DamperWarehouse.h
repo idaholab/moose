@@ -15,7 +15,7 @@
 #ifndef DAMPERWAREHOUSE_H
 #define DAMPERWAREHOUSE_H
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 #include <vector>
 
@@ -24,13 +24,11 @@ class Damper;
 /**
  * Holds dampers and provides some services
  */
-class DamperWarehouse
+class DamperWarehouse : public Warehouse<Damper>
 {
 public:
   DamperWarehouse();
   virtual ~DamperWarehouse();
-
-  const std::vector<Damper *> & all() const { return _dampers; }
 
   /**
    * Adds a damper
@@ -44,9 +42,6 @@ protected:
    * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
    */
   std::vector<MooseSharedPointer<Damper> > _all_ptrs;
-
-  /// The list of all dampers
-  std::vector<Damper *> _dampers;
 };
 
 #endif // DAMPERWAREHOUSE_H

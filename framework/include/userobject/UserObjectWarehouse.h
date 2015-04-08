@@ -16,6 +16,7 @@
 #define USER_OBJECTWAREHOUSE_H
 
 #include "UserObject.h"
+#include "Warehouse.h"
 
 #include <vector>
 #include <map>
@@ -30,7 +31,7 @@ class GeneralUserObject;
 /**
  * Holds user_objects and provides some services
  */
-class UserObjectWarehouse
+class UserObjectWarehouse : public Warehouse<UserObject>
 {
 public:
 
@@ -114,12 +115,6 @@ public:
   const std::vector<GeneralUserObject *> & genericUserObjects(GROUP group = ALL);
 
   /**
-   * Get the list of all user_objects
-   * @return The list of all user_objects
-   */
-  const std::vector<UserObject *> & all() const { return _all_user_objects; }
-
-  /**
    * Add a user_object
    * @param user_object UserObject being added
    */
@@ -158,7 +153,6 @@ protected:
   std::map<std::string, UserObject *> _name_to_user_objects;
 
   // All UserObjects
-  std::vector<UserObject *> _all_user_objects;
   std::vector<ElementUserObject *> _all_element_user_objects;
   std::vector<NodalUserObject *> _all_nodal_user_objects;
   std::vector<SideUserObject *> _all_side_user_objects;

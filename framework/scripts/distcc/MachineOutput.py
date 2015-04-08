@@ -82,14 +82,14 @@ class MachineOutput(object):
     # Print the slave machine information, if the information exists
     use = 0
     total = 0
-    if len(self.warehouse.machines) > 0:
-      for machine in self.warehouse.machines:
-         output.append(self._formatter(machine, col_width, attributes))
-         use += machine.use_threads
-         total += machine.cores
+    if len(self.warehouse.available) > 0:
+      for machine in self.warehouse.available:
+        output.append(self._formatter(machine, col_width, attributes))
+        use += machine.use_threads
+        total += machine.cores
       output.append(s)
 
-    # Print the down machine information, if the informatin exists
+    # Print the down machine information, if the information exists
     if len(self.warehouse.down) > 0:
       for machine in self.warehouse.down:
         output.append(self._formatter(machine, col_width, attributes))

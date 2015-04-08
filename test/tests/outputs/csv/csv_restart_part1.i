@@ -59,10 +59,6 @@
   output_initial = true
   csv = true
   checkpoint = true
-  [./console]
-    type = Console
-    perf_log = true
-    nonlinear_residuals = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

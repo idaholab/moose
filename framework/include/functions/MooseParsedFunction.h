@@ -73,6 +73,15 @@ public:
   virtual RealGradient gradient(Real t, const Point & p);
 
   /**
+   * Evaluate the time derivative of the function. This is computed in libMesh
+   * through automatic symbolic differentiation.
+   * \param t The time
+   * \param p The point in space (x,y,z)
+   * \return The time derivative of the function at the specified time and location
+   */
+  virtual Real timeDerivative(Real t, const Point & p);
+
+  /**
    * Method invalid for ParsedGradFunction
    * @see ParsedVectorFunction
    */

@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSFULLYUPWINDFLUX
 #define RICHARDSFULLYUPWINDFLUX
@@ -45,8 +48,7 @@ class RichardsFullyUpwindFlux : public Kernel
 {
 public:
 
-  RichardsFullyUpwindFlux(const std::string & name,
-                        InputParameters parameters);
+  RichardsFullyUpwindFlux(const std::string & name, InputParameters parameters);
 
 
 protected:
@@ -119,13 +121,13 @@ protected:
   MaterialProperty<std::vector<Real> > &_viscosity;
 
   /// permeability*(grad(pressure) - density*gravity)  (a vector of these in the multiphase case)
-  MaterialProperty<std::vector<RealVectorValue> > &_flux_no_mob;
+  MaterialProperty<std::vector<RealVectorValue> > & _flux_no_mob;
 
   /// d(_flux_no_mob)/d(variable)
-  MaterialProperty<std::vector<std::vector<RealVectorValue> > > &_dflux_no_mob_dv;
+  MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dflux_no_mob_dv;
 
   /// d(_flux_no_mob)/d(grad(variable))
-  MaterialProperty<std::vector<std::vector<RealTensorValue> > > &_dflux_no_mob_dgradv;
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dflux_no_mob_dgradv;
 
   /// number of nodes in this element
   unsigned int _num_nodes;
@@ -144,18 +146,9 @@ protected:
 
   /**
    * Holds the values of pressures at all the nodes of the element
-   * This holds the same info as _ps_at_nodes, but in a different way.
-   * Eg: _nodal_pp[_pvar]->nodalSln()[i] = (*_ps_at_nodes[_pvar])[i]
-   * We call its computeNodalValues method in order to retrieve the nodal
-   * porepressures from Moose
-   */
-  std::vector<MooseVariable *> _nodal_pp;
-
-  /**
-   * Holds the values of pressures at all the nodes of the element
    * Eg:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
-   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i]
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i] = value of porepressure at node i
    */
   std::vector<VariableValue *> _ps_at_nodes;
 

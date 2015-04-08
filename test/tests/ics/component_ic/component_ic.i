@@ -104,12 +104,9 @@
 
 [Outputs]
   output_initial = true
+  print_perf_log = true
   [./out]
     type = Exodus
-    output_scalar_variables = false
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
+    output_scalars_on = none
   [../]
 []

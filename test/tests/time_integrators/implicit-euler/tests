@@ -12,4 +12,12 @@
     exodiff = 'ie_out.e'
     max_parallel = 1
   [../]
+
+  [./monomials]
+    type = 'PetscJacobianTester'
+    input = 'ie-monomials.i'
+    ratio_tol = 1e-9
+    difference_tol = 1e7
+    recover = false
+  [../]
 []

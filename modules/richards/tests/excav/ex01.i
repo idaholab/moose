@@ -90,7 +90,7 @@
   [./mass_final]
     type = RichardsMass
     variable = pressure
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
 # this is what calculates the mass flux to the excavation
@@ -236,10 +236,7 @@
   file_base = ex01
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
   csv = true
+  print_linear_residuals = true
+  print_perf_log = true
 []

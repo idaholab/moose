@@ -1,3 +1,16 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 #include "MooseTestApp.h"
 #include "Moose.h"
 #include "Factory.h"
@@ -55,8 +68,10 @@
 #include "PMassEigenKernel.h"
 #include "CoupledEigenKernel.h"
 #include "ConsoleMessageKernel.h"
+#include "WrongJacobianDiffusion.h"
 
 #include "CoupledAux.h"
+#include "CoupledScalarAux.h"
 #include "CoupledGradAux.h"
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
@@ -74,7 +89,6 @@
 #include "PolyCoupledDirichletBC.h"
 #include "MMSCoupledDirichletBC.h"
 #include "DirichletBCfuncXYZ0.h"
-#include "DirichletBCfuncXYZ1.h"
 #include "TEJumpBC.h"
 #include "OnOffDirichletBC.h"
 #include "OnOffNeumannBC.h"
@@ -83,6 +97,7 @@
 #include "BndTestDirichletBC.h"
 #include "MatTestNeumannBC.h"
 #include "MatDivergenceBC.h"
+#include "CoupledDirichletBC.h"
 
 #include "TEIC.h"
 #include "MTICSum.h"
@@ -90,8 +105,7 @@
 
 // Materials
 #include "MTMaterial.h"
-#include "Diff1Material.h"
-#include "Diff2Material.h"
+#include "TypesMaterial.h"
 #include "StatefulMaterial.h"
 #include "SpatialStatefulMaterial.h"
 #include "ComputingInitialTest.h"
@@ -105,6 +119,9 @@
 #include "BadStatefulMaterial.h"
 #include "OutputTestMaterial.h"
 #include "SumMaterial.h"
+#include "VecRangeCheckMaterial.h"
+#include "DerivativeMaterialInterfaceTestProvider.h"
+#include "DerivativeMaterialInterfaceTestClient.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -138,9 +155,11 @@
 #include "TrackDiracFront.h"
 #include "BoundaryUserObject.h"
 #include "TestBoundaryRestrictableAssert.h"
+#include "GetMaterialPropertyBoundaryBlockNamesTest.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
+#include "TestSerializedSolution.h"
 #include "InsideValuePPS.h"
 #include "BoundaryValuePPS.h"
 #include "NumInternalSides.h"
@@ -196,6 +215,9 @@ template<>
 InputParameters validParams<MooseTestApp>()
 {
   InputParameters params = validParams<MooseApp>();
+
+  params.set<bool>("use_legacy_uo_initialization") = true;
+  params.set<bool>("use_legacy_uo_aux_computation") = false;
   return params;
 }
 
@@ -276,9 +298,11 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(PMassEigenKernel);
   registerKernel(CoupledEigenKernel);
   registerKernel(ConsoleMessageKernel);
+  registerKernel(WrongJacobianDiffusion);
 
   // Aux kernels
   registerAux(CoupledAux);
+  registerAux(CoupledScalarAux);
   registerAux(CoupledGradAux);
   registerAux(PolyConstantAux);
   registerAux(MMSConstantAux);
@@ -300,7 +324,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerBoundaryCondition(PolyCoupledDirichletBC);
   registerBoundaryCondition(MMSCoupledDirichletBC);
   registerBoundaryCondition(DirichletBCfuncXYZ0);
-  registerBoundaryCondition(DirichletBCfuncXYZ1);
   registerBoundaryCondition(TEJumpBC);
   registerBoundaryCondition(OnOffDirichletBC);
   registerBoundaryCondition(OnOffNeumannBC);
@@ -317,6 +340,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerBoundaryCondition(DivergenceBC);
   registerBoundaryCondition(MatDivergenceBC);
+  registerBoundaryCondition(CoupledDirichletBC);
 
   // Initial conditions
   registerInitialCondition(TEIC);
@@ -325,8 +349,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Materials
   registerMaterial(MTMaterial);
-  registerMaterial(Diff1Material);
-  registerMaterial(Diff2Material);
+  registerMaterial(TypesMaterial);
   registerMaterial(StatefulMaterial);
   registerMaterial(SpatialStatefulMaterial);
   registerMaterial(ComputingInitialTest);
@@ -340,6 +363,10 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(BadStatefulMaterial);
   registerMaterial(OutputTestMaterial);
   registerMaterial(SumMaterial);
+  registerMaterial(VecRangeCheckMaterial);
+  registerMaterial(DerivativeMaterialInterfaceTestProvider);
+  registerMaterial(DerivativeMaterialInterfaceTestClient);
+
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
@@ -386,9 +413,11 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(TrackDiracFront);
   registerUserObject(BoundaryUserObject);
   registerUserObject(TestBoundaryRestrictableAssert);
+  registerUserObject(GetMaterialPropertyBoundaryBlockNamesTest);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
+  registerPostprocessor(TestSerializedSolution);
   registerPostprocessor(BoundaryValuePPS);
   registerPostprocessor(NumInternalSides);
   registerPostprocessor(NumElemQPs);

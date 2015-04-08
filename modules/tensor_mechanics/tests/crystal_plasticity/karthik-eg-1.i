@@ -113,7 +113,7 @@
     variable = stress_zz
     index_i = 3
     index_j = 3
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./e_zz]
@@ -122,7 +122,7 @@
     variable = e_zz
     index_i = 3
     index_j = 3
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
 []
@@ -172,9 +172,6 @@
   output_initial = true
   exodus = true
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

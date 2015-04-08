@@ -95,7 +95,6 @@ LineSegment::intersect (const Plane & pl, Point & intersect_p) const
   Real numerator = (pl0-_p0)*N;
   Real denominator = I*N;
 
-
   // The Line is parallel to the plane
   if (std::abs(denominator) < 1.e-10)
   {
@@ -109,11 +108,12 @@ LineSegment::intersect (const Plane & pl, Point & intersect_p) const
     return false;
   }
 
-  // TODO: d can be used to determine whether the LineSegment intersects
-  // the plane or if the Line determined by the Segment intersects the plane
-  // d will fall between 0 and 1 if the intersection is within the line
-  // segment
   Real d = numerator / denominator;
+
+  // Make sure we haven't moved off the line segment!
+  if (d + libMesh::TOLERANCE < 0 || d - libMesh::TOLERANCE > (_p1-_p0).size())
+    return false;
+
   intersect_p = d*I + _p0;
 
   return true;

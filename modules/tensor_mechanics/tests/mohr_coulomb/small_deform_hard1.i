@@ -29,8 +29,8 @@
   [../]
 []
 
-[TensorMechanics]
-  [./solid]
+[Kernels]
+  [./TensorMechanics]
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -195,13 +195,27 @@
 []
 
 [UserObjects]
+  [./mc_coh]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 10
+    value_residual = 2
+    rate = 1E4
+  [../]
+  [./mc_phi]
+    type = TensorMechanicsHardeningConstant
+    value = 60
+    convert_to_radians = true
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 5
+    convert_to_radians = true
+  [../]
   [./mc]
     type = TensorMechanicsPlasticMohrCoulomb
-    mc_cohesion = 10
-    mc_cohesion_residual = 2
-    mc_cohesion_rate = 1E4
-    mc_friction_angle = 60
-    mc_dilation_angle = 5
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
     mc_tip_smoother = 4
     mc_edge_smoother = 25
     yield_function_tolerance = 1E-3
@@ -221,12 +235,12 @@
     ep_plastic_tolerance = 1E-9
     plastic_models = mc
     debug_fspb = 1
-    debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
+    debug_jac_at_stress = '10 1 2 1 10 3 2 3 10'
     debug_jac_at_pm = 1
-    debug_jac_at_intnl = 1
+    debug_jac_at_intnl = 1E-4
     debug_stress_change = 1E-5
     debug_pm_change = 1E-6
-    debug_intnl_change = 1E-6
+    debug_intnl_change = 1E-8
   [../]
 []
 
@@ -242,11 +256,8 @@
   file_base = small_deform_hard1
   output_initial = true
   exodus = false
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

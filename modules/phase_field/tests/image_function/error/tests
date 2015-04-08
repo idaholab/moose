@@ -1,24 +1,10 @@
 [Tests]
-  [./file_type]
+  [./file_suffix]
     # Test the un-supported file type error
     type = RunException
     input = check_error.i
-    cli_args = Functions/tif/file_type=bmp
-    expect_err = "Invalid option \"BMP\" in MooseEnum.  Valid options \(not case-sensitive\) are \"png tif tiff\"."
-    vtk = true
-  [../]
-  [./file_range]
-    # Test two many values supplied
-    type = RunException
-    input = file_range.i
-    expect_err = "Image range must specify one or two interger values"
-    vtk = true
-  [../]
-  [./file_range_order]
-    # Test the un-supported file type error
-    type = RunException
-    input = file_range_order.i
-    expect_err = "Image range must specify exactly two interger values, with the second larger than the first"
+    cli_args = Functions/tif/file_suffix=bmp
+    expect_err = "No image file\(s\) located"
     vtk = true
   [../]
   [./component]
@@ -48,7 +34,7 @@
     # Test that correct error message occurs if VTK is disable in libMesh
     type = RunException
     input = check_error.i
-    expect_err = "A 'ImageFunction' is not a registered object"
+    expect_err = "libMesh must be configured with VTK enabled to utilize ImageFunction"
     vtk = false
   [../]
 []

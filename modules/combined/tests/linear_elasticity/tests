@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'LinearElasticMaterial_test.i'
     exodiff = 'LinearElasticMaterial.e'
+    max_parallel = 1
   [../]
 
   [./linear_general_anisotropic_elasticity_test]
@@ -21,6 +22,7 @@
     type = 'Exodiff'
     input = 'Tensor_test.i'
     exodiff = 'Tensor_test.e'
+    max_parallel = 1
   [../]
 
   [./th_exp_test]

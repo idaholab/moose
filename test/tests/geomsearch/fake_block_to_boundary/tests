@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'fake_block_to_boundary.i'
+    exodiff = 'fake_block_to_boundary_out.e'
+  [../]
+[]

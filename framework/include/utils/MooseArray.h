@@ -77,6 +77,16 @@ public:
   }
 
   /**
+   * Change the number of elements the array can store to zero.
+   *
+   * Will destroy data currently in array!
+   *
+   * Note that this does _not_ free unused memory.
+   * This is done for speed.
+   */
+  void clear();
+
+  /**
    * Change the number of elements the array can store.
    *
    * Will allocate more memory if necessary.
@@ -201,6 +211,14 @@ MooseArray<T>::setAllValues(const T & value)
 template<typename T>
 inline
 void
+MooseArray<T>::clear()
+{
+  _size = 0;
+}
+
+template<typename T>
+inline
+void
 MooseArray<T>::resize(const unsigned int size)
 {
   if (size <= _allocated_size)
@@ -223,9 +241,7 @@ inline
 void
 MooseArray<T>::resize(const unsigned int size, const T & default_value)
 {
-  if (size <= _allocated_size)
-    _size = size;
-  else
+  if (size > _allocated_size)
   {
     T * new_pointer = new T[size];
     mooseAssert(new_pointer, "Failed to allocate MooseArray memory!");
@@ -236,14 +252,15 @@ MooseArray<T>::resize(const unsigned int size, const T & default_value)
         new_pointer[i] = _data[i];
       delete [] _data;
     }
+
     _data = new_pointer;
-
-    for (unsigned int i=_size; i<size; i++)
-      _data[i] = default_value;
-
     _allocated_size = size;
-    _size = size;
   }
+
+  for (unsigned int i=_size; i<size; i++)
+    _data[i] = default_value;
+
+  _size = size;
 }
 
 template<typename T>

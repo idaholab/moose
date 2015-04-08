@@ -28,8 +28,7 @@ template<>
 InputParameters validParams<Checkpoint>()
 {
   // Get the parameters from the base classes
-  InputParameters params = validParams<FileOutput>();
-  params += Output::disableOutputTypes(); // Checkpoint acts like a honey badger, it does what it wants; disable individual controls
+  InputParameters params = validParams<BasicOutput<FileOutput> >();
 
   // Typical checkpoint options
   params.addParam<unsigned int>("num_files", 2, "Number of the restart files to save");
@@ -42,7 +41,7 @@ InputParameters validParams<Checkpoint>()
 }
 
 Checkpoint::Checkpoint(const std::string & name, InputParameters & parameters) :
-    FileOutput(name, parameters),
+    BasicOutput<FileOutput>(name, parameters),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
@@ -81,7 +80,7 @@ Checkpoint::directory()
 }
 
 void
-Checkpoint::output()
+Checkpoint::output(const ExecFlagType & /*type*/)
 {
   // Start the performance log
   Moose::perf_log.push("output()", "Checkpoint");
@@ -149,23 +148,27 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
   if (_file_names.size() > _num_files)
   {
     // Extract the filenames to be removed
-    CheckpointFileNames delete_files = _file_names[0];
+    CheckpointFileNames delete_files = _file_names.front();
 
     // Remove these filenames from the list
-    _file_names.erase(_file_names.begin());
+    _file_names.pop_front();
 
     // Get thread and proc information
     processor_id_type proc_id = processor_id();
 
     // Delete checkpoint files (_mesh.cpr)
-    ret = remove(delete_files.checkpoint.c_str());
-    if (ret != 0)
-      mooseWarning("Error during the deletion of file '" << delete_files.checkpoint.c_str() << "': " << ret);
 
-    // Delete the system files (xdr and xdr.0000, ...)
-    ret = remove(delete_files.system.c_str());
-    if (ret != 0)
-      mooseWarning("Error during the deletion of file '" << delete_files.system.c_str() << "': " << ret);
+    if (proc_id == 0)
+    {
+      ret = remove(delete_files.checkpoint.c_str());
+      if (ret != 0)
+        mooseWarning("Error during the deletion of file '" << delete_files.checkpoint << "': " << ret);
+
+      // Delete the system files (xdr and xdr.0000, ...)
+      ret = remove(delete_files.system.c_str());
+      if (ret != 0)
+        mooseWarning("Error during the deletion of file '" << delete_files.system << "': " << ret);
+    }
 
     {
       std::ostringstream oss;
@@ -184,20 +187,11 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     // Remove material property files
     if (_material_property_storage.hasStatefulProperties() || _bnd_material_property_storage.hasStatefulProperties())
     {
-      ret = remove(delete_files.material.c_str());
+      std::ostringstream oss;
+      oss << delete_files.material << '-' << proc_id;
+      ret = remove(oss.str().c_str());
       if (ret != 0)
-        mooseWarning("Error during the deletion of file '" << delete_files.material.c_str() << "': " << ret);
-
-      for (THREAD_ID tid = 0; tid < n_threads; tid++)
-      {
-        std::ostringstream oss;
-        oss << delete_files.material << '-' << proc_id;
-        if (n_threads > 1)
-          oss << "-" << tid;
-        ret = remove(oss.str().c_str());
-        if (ret != 0)
-          mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
-      }
+        mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
     }
 
     // Remove the restart files (rd)
@@ -214,34 +208,4 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
       }
     }
   }
-}
-
-void
-Checkpoint::outputNodalVariables()
-{
-  mooseError("Invalid for Checkpoint output type");
-}
-
-void
-Checkpoint::outputElementalVariables()
-{
-  mooseError("Invalid for Checkpoint output type");
-}
-
-void
-Checkpoint::outputScalarVariables()
-{
-  mooseError("Invalid for Checkpoint output type");
-}
-
-void
-Checkpoint::outputPostprocessors()
-{
-  mooseError("Invalid for Checkpoint output type");
-}
-
-void
-Checkpoint::outputVectorPostprocessors()
-{
-  mooseError("Invalid for Checkpoint output type");
 }

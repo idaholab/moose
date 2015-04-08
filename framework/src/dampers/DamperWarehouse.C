@@ -15,7 +15,8 @@
 #include "DamperWarehouse.h"
 #include "Damper.h"
 
-DamperWarehouse::DamperWarehouse()
+DamperWarehouse::DamperWarehouse() :
+    Warehouse<Damper>()
 {
 }
 
@@ -27,5 +28,5 @@ void
 DamperWarehouse::addDamper(MooseSharedPointer<Damper> & damper)
 {
   _all_ptrs.push_back(damper);
-  _dampers.push_back(damper.get());
+  _all_objects.push_back(damper.get());
 }

@@ -15,6 +15,7 @@
 #include "MultiMooseEnum.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
+#include "InfixIterator.h"
 
 #include <sstream>
 #include <algorithm>
@@ -51,8 +52,23 @@ MultiMooseEnum::~MultiMooseEnum()
 bool
 MultiMooseEnum::operator==(const MultiMooseEnum & value) const
 {
-  return std::equal(value._current_ids.begin(), value._current_ids.end(),
-                    _current_ids.begin());
+  // Not the same if the lengths are different
+  if (value.size() != size())
+    return false;
+
+  // Return false if this enum does not contain an item from the other
+  for (MooseEnumIterator it = value.begin(); it != value.end(); ++it)
+    if (!contains(*it))
+      return false;
+
+  // If you get here, they must be the same
+  return true;
+}
+
+bool
+MultiMooseEnum::operator!=(const MultiMooseEnum & value) const
+{
+  return !(*this == value);
 }
 
 bool
@@ -177,7 +193,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
     std::string upper(*it);
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
-    _current_names.push_back(upper);
+    _current_names.insert(upper);
 
     if (std::find(_names.begin(), _names.end(), upper) == _names.end())
     {
@@ -205,10 +221,14 @@ void
 MultiMooseEnum::remove(InputIterator first, InputIterator last)
 {
   // Create a new list of enumerations by striping out the supplied values
-  std::vector<std::string> current = _current_names;
+  std::set<std::string> current = _current_names;
   for (InputIterator it = first; it != last; ++it)
   {
-    std::vector<std::string>::iterator found = std::find(current.begin(), current.end(), *it);
+    // Values stored as upper case
+    std::string upper(*it);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    std::set<std::string>::iterator found = current.find(upper);
     if (found != current.end())
       current.erase(found);
   }
@@ -241,6 +261,6 @@ MultiMooseEnum::unique_items_size() const
 std::ostream &
 operator<<(std::ostream & out, const MultiMooseEnum & obj)
 {
-  std::copy(obj._current_names_preserved.begin(), obj._current_names_preserved.end(), std::ostream_iterator<std::string>(out, " "));
+  std::copy(obj._current_names.begin(), obj._current_names.end(), infix_ostream_iterator<std::string>(out, " "));
   return out;
 }

@@ -157,14 +157,11 @@
 [Outputs]
   file_base = out_it_plot
   output_initial = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
-    nonlinear_residuals = true
+    output_nonlinear = true
     nonlinear_residual_dt_divisor = 100
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
   [../]
 []

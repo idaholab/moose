@@ -36,7 +36,7 @@
   [./liaux]
     type = SpatialUserObjectAux
     variable = layered_integral
-    execute_on = timestep
+    execute_on = timestep_end
     user_object = layered_integral
   [../]
 []
@@ -62,7 +62,7 @@
     direction = y
     num_layers = 5
     variable = u
-    execute_on = residual
+    execute_on = linear
     sample_type = average
     average_radius = 2
   [../]
@@ -75,9 +75,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

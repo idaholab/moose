@@ -104,14 +104,14 @@ public:
    * This function checks to see if there are unidentified variables in the input file (i.e. unused)
    * If the warn_is_error is set, then the program will abort if unidentified parameters are found
    */
-  void checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn);
+  void checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file) const;
 
   /**
    * This function checks to see if there were any overridden parameters in the input file.
    * (i.e. supplied more than once)
    * @param error_on_warn a Boolean that will trigger an error if this case is detected
    */
-  void checkOverriddenParams(bool error_on_warn);
+  void checkOverriddenParams(bool error_on_warn) const;
 
 protected:
   /// Appends sections from the CLI Reorders section names so that Debugging options can be enabled before parsing begins

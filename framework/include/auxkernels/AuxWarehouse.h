@@ -15,7 +15,7 @@
 #ifndef AUXWAREHOUSE_H
 #define AUXWAREHOUSE_H
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 #include <vector>
 #include <map>
@@ -31,7 +31,7 @@ class AuxScalarKernel;
  *
  * Used inside auxiliary system to store aux. kernels
  */
-class AuxWarehouse
+class AuxWarehouse : public Warehouse<AuxKernel>
 {
 public:
   AuxWarehouse();
@@ -43,7 +43,6 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  const std::vector<AuxKernel *> & all() const { return _all_aux_kernels; }
   const std::vector<AuxKernel *> & allElementKernels() const { return _all_element_aux_kernels; }
   const std::vector<AuxKernel *> & allNodalKernels() const { return _all_nodal_aux_kernels; }
 
@@ -74,8 +73,6 @@ public:
   void addScalarKernel(MooseSharedPointer<AuxScalarKernel> & kernel);
 
 protected:
-  /// all aux kernels
-  std::vector<AuxKernel *> _all_aux_kernels;
   /// all element aux kernels
   std::vector<AuxKernel *> _all_element_aux_kernels;
   /// all nodal aux kernels

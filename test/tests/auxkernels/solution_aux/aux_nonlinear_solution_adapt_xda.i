@@ -2,6 +2,7 @@
   # This test uses SolutionUserObject which doesn't work with ParallelMesh.
   type = FileMesh
   file = aux_nonlinear_solution_adapt_out_0004_mesh.xda
+  distribution = serial
 []
 
 [Adaptivity]
@@ -101,10 +102,7 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []
 
 [ICs]

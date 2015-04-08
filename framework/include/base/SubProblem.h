@@ -106,6 +106,12 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) = 0;
 
+  /**
+   * Returns the desired radial direction for RZ coordinate transformation
+   * @return The coordinate direction for the radial direction
+   */
+  unsigned int getAxisymmetricRadialCoord();
+
   virtual DiracKernelInfo & diracKernelInfo();
   virtual Real finalNonlinearResidual();
   virtual unsigned int nNonlinearIterations();
@@ -140,7 +146,7 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) = 0;
-  virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid) = 0;
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid) = 0;
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid) = 0;
@@ -217,19 +223,19 @@ public:
   virtual void checkBoundaryMatProps();
 
   /**
-   * Helper method for isMatPropRequested to factor out block and boundary checking
+   * Helper method for adding a material property name to the _material_property_requested set
    */
-  virtual bool checkMatPropRequested(std::map<unsigned int, std::multimap<std::string, std::string> > &, const std::string &);
+  virtual void markMatPropRequested(const std::string &);
 
   /**
    * Find out if a material property has been requested by any object
    */
-  virtual bool isMatPropRequested(const std::string & prop_name);
+  virtual bool isMatPropRequested(const std::string & prop_name) const;
 
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
    */
-  virtual void addGhostedElem(unsigned int elem_id) = 0;
+  virtual void addGhostedElem(dof_id_type elem_id) = 0;
 
   /**
    * Will make sure that all necessary elements from boundary_id are ghosted to this processor
@@ -308,13 +314,15 @@ protected:
   /// Map for boundary material properties (boundary_id -> list of properties)
   std::map<unsigned int, std::set<std::string> > _map_boundary_material_props;
 
+  /// set containing all material property names that have been requested by getMaterialProperty*
+  std::set<std::string> _material_property_requested;
+
   ///@{
   /**
    * Data structures of the requested material properties.  We store them in a map
    * from boudnary/block id to multimap.  Each of the multimaps is a list of
    * requestor object names to material property names.
    */
-  /// the map of properties requested (need to be checked)
   std::map<unsigned int, std::multimap<std::string, std::string> > _map_block_material_props_check;
   std::map<unsigned int, std::multimap<std::string, std::string> > _map_boundary_material_props_check;
   ///@}
@@ -331,6 +339,9 @@ protected:
 
   /// Where the restartable data is held (indexed on tid)
   RestartableDatas _restartable_data;
+
+  /// Storage for RZ axis selection
+  unsigned int _rz_coord_axis;
 
 private:
 

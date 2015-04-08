@@ -17,7 +17,7 @@
   [./RZ]
     type = Exodiff
     input = 'gap_heat_transfer_htonly_rz_test.i'
-    exodiff = 'out_rz.e'
+    exodiff = 'gap_heat_transfer_htonly_rz_test_out.e'
     abs_zero = 1e-9
     rel_err = 5e-3
   [../]
@@ -27,6 +27,7 @@
     input = 'gap_heat_transfer_htonly_rspherical.i'
     exodiff = 'gap_heat_transfer_htonly_rspherical_out.e'
     custom_cmp = 'gap_heat_transfer_htonly_rspherical.exodiff'
+    compiler = 'CLANG GCC'
   [../]
 
 []

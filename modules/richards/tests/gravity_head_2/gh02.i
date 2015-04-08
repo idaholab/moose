@@ -154,13 +154,13 @@
   [./mwater_fin]
     type = RichardsMass
     variable = pwater
-    execute_on = timestep
+    execute_on = timestep_end
     outputs = none
   [../]
   [./mgas_fin]
     type = RichardsMass
     variable = pgas
-    execute_on = timestep
+    execute_on = timestep_end
     outputs = none
   [../]
 
@@ -282,10 +282,6 @@
 
 [Outputs]
   file_base = gh02
-  output_initial = false
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

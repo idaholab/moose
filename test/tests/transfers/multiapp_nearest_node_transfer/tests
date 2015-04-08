@@ -34,4 +34,11 @@
     exodiff = 'fromsub_fixed_meshes_master_out.e'
     recover = false
   [../]
+
+  [./boundary_tosub]
+    type = 'Exodiff'
+    input = 'boundary_tosub_master.i'
+    exodiff = 'boundary_tosub_master_out_sub0.e'
+    recover = false
+  [../]
 []

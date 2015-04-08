@@ -1,5 +1,11 @@
 #!/bin/bash
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# If a user supplies an argument, that directory will be used as the start point for finding files that contain whitespace, otherwise the MOOSE directory
+# will be used (one up from the scripts directory where this script is located)
+REPO_DIR=${1:-"$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../"}
 
-find $SCRIPT_DIR/.. \( -name "*.[Chi]" -or -name "*.py" -or \( -name "contrib" -or -name "libmesh" \) -prune -and -type f \) -print0 | xargs -0 perl -pli -e "s/\s+$//"
+if [ ! -d "$REPO_DIR" ]; then
+  echo "$REPO_DIR directory does not exist";
+else
+  find $REPO_DIR \( -name "*.[Chi]" -or -name "*.py" -or \( -name "contrib" -or -name "libmesh" \) -prune -and -type f \) -print0 | xargs -0 perl -pli -e "s/\s+$//"
+fi

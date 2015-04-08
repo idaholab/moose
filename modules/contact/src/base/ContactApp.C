@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ContactApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -26,6 +32,9 @@ template<>
 InputParameters validParams<ContactApp>()
 {
   InputParameters params = validParams<MooseApp>();
+  params.set<bool>("use_legacy_uo_initialization") = true;
+  params.set<bool>("use_legacy_uo_aux_computation") = false;
+
   return params;
 }
 
@@ -81,7 +90,10 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("NodalAreaAction", "Contact/*");
   syntax.registerActionSyntax("NodalAreaVarAction", "Contact/*");
 
-  registerAction(ContactAction, "add_dg_kernel");
+  registerAction(ContactAction, "add_aux_kernel");
+  registerAction(ContactAction, "add_aux_variable");
+  registerAction(ContactAction, "add_dirac_kernel");
+  registerAction(ContactAction, "check_output");
 
   registerAction(ContactPenetrationAuxAction, "add_aux_kernel");
   registerAction(ContactPenetrationVarAction, "add_aux_variable");

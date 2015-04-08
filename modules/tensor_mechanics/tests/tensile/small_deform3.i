@@ -35,8 +35,8 @@
   [../]
 []
 
-[TensorMechanics]
-  [./solid]
+[Kernels]
+  [./TensorMechanics]
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -186,9 +186,13 @@
 []
 
 [UserObjects]
+  [./ts]
+    type = TensorMechanicsHardeningConstant
+    value = 1
+  [../]
   [./mc]
     type = TensorMechanicsPlasticTensile
-    tensile_strength = 1.0
+    tensile_strength = ts
     yield_function_tolerance = 1E-6
     tensile_tip_smoother = 0.0
     internal_constraint_tolerance = 1E-5
@@ -222,11 +226,8 @@
   file_base = small_deform3
   output_initial = true
   exodus = false
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

@@ -421,6 +421,33 @@ public:
 
   std::map<FEType, bool> _need_second_derivative;
 
+  /**
+   * Caches the NodalBC Jacobian entry 'value', to eventually be
+   * stored in the (i,j) location of the matrix.
+   *
+   * We can't add NodalBC values to the Jacobian (or preconditioning)
+   * matrix at the time they are computed -- we instead need to
+   * overwrite an entire row of values with the Jacobian associated to
+   * the NodalBC, which may be coupled to other variables, *after*
+   * matrix assembly is finished.
+   *
+   * We use numeric_index_type for the index arrays (rather than
+   * dof_id_type) since that is what the SparseMatrix interface uses,
+   * but at the time of this writing, those two types are equivalent.
+   */
+  void cacheNodalBCJacobianEntry(numeric_index_type i, numeric_index_type j, Real value);
+
+  /**
+   * Clears any cached NodalBC Jacobian entries that have been
+   * accumulated during previous Assembly calls.
+   */
+  void clearCachedNodalBCJacobianEntries();
+
+  /**
+   * Sets previously-cached NodalBC Jacobian values via SparseMatrix::set() calls.
+   */
+  void setCachedNodalBCJacobianEntries(SparseMatrix<Number> & jacobian);
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -438,9 +465,13 @@ protected:
   void reinitFEFace(const Elem * elem, unsigned int side);
 
   void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<dof_id_type> & dof_indices, Real scaling_factor);
-  void cacheResidualBlock(std::vector<Real> & cached_residual_values, std::vector<unsigned int> & cached_residual_rows, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor);
+  void cacheResidualBlock(std::vector<Real> & cached_residual_values,
+                          std::vector<dof_id_type> & cached_residual_rows,
+                          DenseVector<Number> & res_block,
+                          std::vector<dof_id_type> & dof_indices,
+                          Real scaling_factor);
 
-  void setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
+  void setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor);
 
   void addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
 
@@ -449,6 +480,10 @@ protected:
   CouplingMatrix * & _cm;
   /// Entries in the coupling matrix (only for field variables)
   std::vector<std::pair<MooseVariable *, MooseVariable *> > _cm_entry;
+  /// Flag that indicates if the jacobian block was used
+  std::vector<std::vector<unsigned char> > _jacobian_block_used;
+  /// Flag that indicates if the jacobian block for neighbor was used
+  std::vector<std::vector<unsigned char> > _jacobian_block_neighbor_used;
   /// DOF map
   const DofMap & _dof_map;
   /// Thread number (id)
@@ -629,7 +664,7 @@ protected:
   };
 
   /// Cached shape function values stored by element
-  std::map<unsigned int, ElementFEShapeData * > _element_fe_shape_data_cache;
+  std::map<dof_id_type, ElementFEShapeData * > _element_fe_shape_data_cache;
 
   /// Whether or not fe cache should be built at all
   bool _should_use_fe_cache;
@@ -646,16 +681,16 @@ protected:
   std::vector<std::vector<Real> > _cached_residual_values;
 
   /// Where the cached values should go (the first vector is for TIME vs NONTIME)
-  std::vector<std::vector<unsigned int> > _cached_residual_rows;
+  std::vector<std::vector<dof_id_type> > _cached_residual_rows;
 
   unsigned int _max_cached_residuals;
 
   /// Values cached by calling cacheJacobian()
   std::vector<Real> _cached_jacobian_values;
   /// Row where the corresponding cached value should go
-  std::vector<unsigned int> _cached_jacobian_rows;
+  std::vector<dof_id_type> _cached_jacobian_rows;
   /// Column where the corresponding cached value should go
-  std::vector<unsigned int> _cached_jacobian_cols;
+  std::vector<dof_id_type> _cached_jacobian_cols;
 
   unsigned int _max_cached_jacobians;
 
@@ -664,6 +699,13 @@ protected:
 
   /// Temporary work vector to keep from reallocating it
   std::vector<dof_id_type> _temp_dof_indices;
+
+  /**
+   * Storage for cached NodalBC data.
+   */
+  std::vector<Real> _cached_nodal_bc_vals;
+  std::vector<numeric_index_type> _cached_nodal_bc_rows;
+  std::vector<numeric_index_type> _cached_nodal_bc_cols;
 };
 
 #endif /* ASSEMBLY_H */

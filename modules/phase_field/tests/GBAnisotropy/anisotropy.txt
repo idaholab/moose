@@ -1,0 +1,8 @@
+>>>>>>>>> GB properties <<<<<<<<<
+---GB energy, mobility prefactor, activation energy---
+0.708 0.708
+0.708 0.708
+1.5e-6 1.5e-6
+1.5e-6 1.5e-6
+0.23	0.23
+0.23	0.23

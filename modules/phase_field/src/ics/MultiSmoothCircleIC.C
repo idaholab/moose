@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "MultiSmoothCircleIC.h"
 #include "MooseRandom.h"
 
@@ -41,8 +47,6 @@ MultiSmoothCircleIC::initialSetup()
     _top_right(i) = _mesh.getMaxInDimension(i);
   }
   _range = _top_right - _bottom_left;
-
-  _range.print();
 
   switch (_radius_variation_type)
   {

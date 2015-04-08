@@ -61,9 +61,6 @@
 [Outputs]
   output_initial = true
   gnuplot = true
-  [./console]
-    type = Console
-    linear_residuals = true
-    perf_log = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

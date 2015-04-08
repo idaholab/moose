@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef SOLIDMODEL_H
 #define SOLIDMODEL_H
 
@@ -79,8 +85,10 @@ protected:
   Function * const _poissons_ratio_function;
 
   const CRACKING_RELEASE _cracking_release;
-  const Real _cracking_stress;
+  Real _cracking_stress;
   const Real _cracking_residual_stress;
+  Function * const _cracking_stress_function;
+
   Real _cracking_alpha;
   std::vector<unsigned int> _active_crack_planes;
   const unsigned int _max_cracks;
@@ -93,10 +101,12 @@ protected:
   VariableValue & _temperature_old;
   VariableGradient & _temp_grad;
   const Real _alpha;
-  Function * const _alpha_function;
+  Function * _alpha_function;
   PiecewiseLinear * _piecewise_linear_alpha_function;
   bool _has_stress_free_temp;
   Real _stress_free_temp;
+  bool _mean_alpha_function;
+  Real _ref_temp;
 
   std::map<SubdomainID, std::vector<VolumetricModel*> > _volumetric_models;
   std::vector<MaterialProperty<Real>*> _volumetric_strain;
@@ -243,7 +253,7 @@ protected:
 
   std::map<SubdomainID, ConstitutiveModel*> _constitutive_model;
   // This set keeps track of the dynamic memory allocated in this object
-  std::set<ConstitutiveModel *> _models_to_free;
+  std::set<MooseSharedPointer<ConstitutiveModel> > _models_to_free;
   bool _constitutive_active;
 
   /// Compute the stress (sigma += deltaSigma)

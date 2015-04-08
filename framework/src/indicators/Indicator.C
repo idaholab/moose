@@ -41,12 +41,12 @@ InputParameters validParams<Indicator>()
 
 Indicator::Indicator(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BlockRestrictable(name, parameters),
+    BlockRestrictable(parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    Restartable(name, parameters, "Indicators"),
-    OutputInterface(name, parameters),
+    Restartable(parameters, "Indicators"),
+    OutputInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _sys(*parameters.get<SystemBase *>("_sys")),

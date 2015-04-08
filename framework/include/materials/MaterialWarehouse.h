@@ -19,8 +19,7 @@
 #include <map>
 #include <set>
 
-#include "MooseTypes.h"
-
+#include "Warehouse.h"
 
 class Material;
 
@@ -36,7 +35,7 @@ template <class T> class DependencyResolver;
  * 3) neighbor material - same as face material but on the neighboring element (used by DG)
  * 4) boundary material - defined on a surface (associated with a side set)
  */
-class MaterialWarehouse
+class MaterialWarehouse : public Warehouse<Material>
 {
 public:
   MaterialWarehouse();
@@ -73,8 +72,6 @@ public:
   ///@}
 
   std::vector<Material *> & active(SubdomainID block_id);
-
-  void updateMaterialDataState();
 
   void addMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
   void addFaceMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
@@ -123,9 +120,6 @@ protected:
 
   /// list of materials by name
   std::map<std::string, std::vector<Material *> > _mat_by_name;
-
-  /// All of the material objects this warehouse knows about
-  std::vector<Material *> _mats;
 
 private:
   /**

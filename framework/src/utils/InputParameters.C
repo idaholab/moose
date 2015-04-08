@@ -27,17 +27,21 @@ InputParameters emptyInputParameters()
 InputParameters::InputParameters() :
     Parameters(),
     _collapse_nesting(false),
-    _moose_object_syntax_visibility(true)
+    _moose_object_syntax_visibility(true),
+    _show_deprecated_message(true)
 {
 }
 
 InputParameters::InputParameters(const InputParameters &rhs) :
-    Parameters()
+    Parameters(),
+    _show_deprecated_message(true)
+
 {
   *this = rhs;
 }
 
-InputParameters::InputParameters(const Parameters &rhs)
+InputParameters::InputParameters(const Parameters &rhs) :
+    _show_deprecated_message(true)
 {
   Parameters::operator=(rhs);
   _collapse_nesting = false;
@@ -61,6 +65,7 @@ InputParameters::clear()
   _default_postprocessor_value.clear();
   _collapse_nesting = false;
   _moose_object_syntax_visibility = true;
+  _show_deprecated_message = true;
 }
 
 void
@@ -86,10 +91,14 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
     if (!have_parameter<MooseEnum>(name) && !have_parameter<MultiMooseEnum>(name))
       _valid_params.insert(name);
 
-    std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
-    if (pos != _deprecated_params.end())
+    if (_show_deprecated_message)
+    {
+      std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
+      if (pos != _deprecated_params.end())
       mooseWarning("The parameter " << name << " is deprecated.\n" << pos->second);
+    }
   }
+
 }
 
 std::string
@@ -272,6 +281,9 @@ InputParameters::mooseObjectSyntaxVisibility() const
     InputParameters::Parameter<type> * scalar_p = dynamic_cast<InputParameters::Parameter<type>*>(param);       \
     if (scalar_p)                                                                                               \
       rangeCheck<type, up_type>(long_name, short_name, scalar_p, oss); \
+    InputParameters::Parameter<std::vector<type> > * vector_p = dynamic_cast<InputParameters::Parameter<std::vector<type> >*>(param); \
+    if (vector_p)                                                                                               \
+      rangeCheck<type, up_type>(long_name, short_name, vector_p, oss); \
   } while (0)
 
 
@@ -441,13 +453,20 @@ InputParameters::hasDefaultPostprocessorValue(const std::string & name) const
 }
 
 void
-InputParameters::applyParameters(const InputParameters & common)
+InputParameters::applyParameters(const InputParameters & common, const std::vector<std::string> exclude)
 {
+  // Disable the display of deprecated message when applying common parameters, this avoids a dump of messages
+  _show_deprecated_message = false;
+
   // Loop through the common parameters
   for (InputParameters::const_iterator it = common.begin(); it != common.end(); ++it)
   {
     // Common parameter name
     const std::string & common_name = it->first;
+
+    // Continue to next parameter, if the current is in list of  excluded parameters
+    if (std::find(exclude.begin(), exclude.end(), common_name) != exclude.end())
+      continue;
 
     // Extract the properties from the local parameter for the current common parameter name
     bool local_exist = _values.find(common_name) != _values.end();
@@ -476,8 +495,14 @@ InputParameters::applyParameters(const InputParameters & common)
   // Loop through the coupled variables
   for (std::set<std::string>::const_iterator it = common.coupledVarsBegin(); it != common.coupledVarsEnd(); ++it)
   {
-    // If the local parameters has a coupled variable, populate it with the value from the common parameters
+    // Variable name
     const std::string var_name = *it;
+
+    // Continue to next variable, if the current is in list of  excluded parameters
+    if (std::find(exclude.begin(), exclude.end(), var_name) != exclude.end())
+      continue;
+
+    // If the local parameters has a coupled variable, populate it with the value from the common parameters
     if (hasCoupledValue(var_name))
     {
       if (common.hasDefaultCoupledValue(var_name))
@@ -486,4 +511,26 @@ InputParameters::applyParameters(const InputParameters & common)
         addCoupledVar(var_name, common.getDocString(var_name));
     }
   }
+
+  // Enable deprecated message printing
+  _show_deprecated_message = true;
+}
+
+bool
+InputParameters::paramSetByUser(const std::string & name)
+{
+  if (!isParamValid(name))
+    // if the parameter is invalid, it is for sure not set by the user
+    return false;
+  else
+    // If the parameters is not located in the list, then it was set by the user
+    return _set_by_add_param.find(name) == _set_by_add_param.end();
+}
+
+const std::string &
+InputParameters::getDescription(const std::string & name)
+{
+  if (_doc_string.find(name) == _doc_string.end())
+    mooseError("No parameter exists with the name " << name );
+  return _doc_string[name];
 }

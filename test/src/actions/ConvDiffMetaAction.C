@@ -38,8 +38,8 @@ ConvDiffMetaAction::ConvDiffMetaAction(const std::string & name, InputParameters
 void
 ConvDiffMetaAction::act()
 {
-  Action *action;
-  MooseObjectAction *moose_object_action;
+  MooseSharedPointer<Action> action;
+  MooseSharedPointer<MooseObjectAction> moose_object_action;
 
   std::vector<NonlinearVariableName> variables = getParam<std::vector<NonlinearVariableName> > ("variables");
 
@@ -80,8 +80,8 @@ ConvDiffMetaAction::act()
   // Setup our Diffusion Kernel on the "u" variable
   action_params.set<std::string>("type") = "Diffusion";
   action = _action_factory.create("AddKernelAction", "Kernels/diff_u", action_params);
-  moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-  mooseAssert (moose_object_action, "Dynamic Cast failed");
+  moose_object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
+  mooseAssert (moose_object_action.get(), "Dynamic Cast failed");
   {
     InputParameters & params = moose_object_action->getObjectParams();
     params.set<NonlinearVariableName>("variable") = variables[0];
@@ -92,8 +92,8 @@ ConvDiffMetaAction::act()
   // Setup our Diffusion Kernel on the "v" variable
   action = _action_factory.create("AddKernelAction", "Kernels/diff_v", action_params);
 
-  moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-  mooseAssert (moose_object_action, "Dynamic Cast failed");
+  moose_object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
+  mooseAssert (moose_object_action.get(), "Dynamic Cast failed");
   {
     InputParameters & params = moose_object_action->getObjectParams();
     params.set<NonlinearVariableName>("variable") = variables[1];
@@ -104,8 +104,8 @@ ConvDiffMetaAction::act()
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   action_params.set<std::string>("type") = "Convection";
   action = _action_factory.create("AddKernelAction", "Kernels/conv_u", action_params);
-  moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-  mooseAssert (moose_object_action, "Dynamic Cast failed");
+  moose_object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
+  mooseAssert (moose_object_action.get(), "Dynamic Cast failed");
   {
     std::vector<std::string> vel_vec_variable;
     InputParameters & params = moose_object_action->getObjectParams();

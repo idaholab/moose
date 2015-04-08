@@ -42,9 +42,8 @@
 [Outputs]
   [./out]
     type = Exodus
-    output_initial = true
     refinements = 2
-    oversample = true
     position = '1 1 0'
+    output_on = 'initial timestep_end'
   [../]
 []

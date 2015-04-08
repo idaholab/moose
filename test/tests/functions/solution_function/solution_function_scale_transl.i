@@ -70,8 +70,5 @@
 [Outputs]
   file_base = solution_function_scale_transl
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

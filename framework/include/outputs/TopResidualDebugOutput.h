@@ -16,6 +16,7 @@
 #define TOPRESIDUALEBUGOUTPUT_H
 
 // MOOSE includes
+#include "BasicOutput.h"
 #include "PetscOutput.h"
 #include "FEProblem.h"
 
@@ -33,17 +34,23 @@ InputParameters validParams<TopResidualDebugOutput>();
 struct TopResidualDebugOutputTopResidualData
 {
   unsigned int _var;
-  unsigned int _nd;
+  dof_id_type _nd;
   Real _residual;
+  bool _is_scalar;
 
-  TopResidualDebugOutputTopResidualData() { _var = 0; _nd = 0; _residual = 0.; }
+  TopResidualDebugOutputTopResidualData() :
+      _var(0),
+      _nd(0),
+      _residual(0.),
+      _is_scalar(false)
+    {}
 
-  TopResidualDebugOutputTopResidualData(unsigned int var, unsigned int nd, Real residual)
-  {
-    _var = var;
-    _nd = nd;
-    _residual = residual;
-  }
+  TopResidualDebugOutputTopResidualData(unsigned int var, dof_id_type nd, Real residual, bool is_scalar = false) :
+      _var(var),
+      _nd(nd),
+      _residual(residual),
+      _is_scalar(is_scalar)
+    {}
 };
 
 /**
@@ -51,7 +58,7 @@ struct TopResidualDebugOutputTopResidualData
  *
  * This class may be used from inside the [Outputs] block or via the [Debug] block (preferred)
  */
-class TopResidualDebugOutput : public PetscOutput
+class TopResidualDebugOutput : public BasicOutput<PetscOutput>
 {
 public:
 
@@ -72,7 +79,7 @@ protected:
   /**
    * Perform the debugging output
    */
-  virtual void output();
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Prints the n top residuals for the variables in the system

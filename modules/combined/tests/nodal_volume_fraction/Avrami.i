@@ -47,7 +47,7 @@
     type = NodalVolumeFraction
     variable = u
     threshold = 0.9
-    execute_on = timestep
+    execute_on = timestep_end
     Avrami_file = Avrami.csv
     mesh_volume = Volume
     equil_fraction = 0.5
@@ -69,9 +69,6 @@
   file_base = Avrami
   exodus = true
   output_initial = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

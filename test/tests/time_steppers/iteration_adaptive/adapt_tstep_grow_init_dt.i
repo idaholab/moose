@@ -77,7 +77,9 @@
   sync_times = '0.5 9.5'
   [./console]
     type = Console
-    linear_residuals = true
+    output_postprocessors_on = none
+    output_on = 'timestep_end failed nonlinear linear'
+    output_linear = true
     output_postprocessors = false
   [../]
 []

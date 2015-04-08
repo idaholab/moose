@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "InteractionIntegralAuxFields.h"
 
 template<>
@@ -6,6 +12,7 @@ InputParameters validParams<InteractionIntegralAuxFields>()
   InputParameters params = validParams<Material>();
   addInteractionIntegralAuxFieldsParams(params);
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
+  params.addRequiredParam<unsigned int>("crack_front_node_index","The index of the node on the crack front to calculate auxiliary fields at");
   //TODO: anisotropic material properties
   // material properties defined at crack front
   return params;
@@ -36,21 +43,21 @@ InteractionIntegralAuxFields::getSIFModesEnum()
 
 InteractionIntegralAuxFields::InteractionIntegralAuxFields(const std::string & name, InputParameters parameters) :
     Material(name, parameters),
-    _aux_stress_I(declareProperty<ColumnMajorMatrix>("aux_stress_I")),
-    _aux_disp_I(declareProperty<ColumnMajorMatrix>("aux_disp_I")),
-    _aux_grad_disp_I(declareProperty<ColumnMajorMatrix>("aux_grad_disp_I")),
-    _aux_strain_I(declareProperty<ColumnMajorMatrix>("aux_strain_I")),
-    _aux_stress_II(declareProperty<ColumnMajorMatrix>("aux_stress_II")),
-    _aux_disp_II(declareProperty<ColumnMajorMatrix>("aux_disp_II")),
-    _aux_grad_disp_II(declareProperty<ColumnMajorMatrix>("aux_grad_disp_II")),
-    _aux_strain_II(declareProperty<ColumnMajorMatrix>("aux_strain_II")),
-    _aux_stress_III(declareProperty<ColumnMajorMatrix>("aux_stress_III")),
-    _aux_disp_III(declareProperty<ColumnMajorMatrix>("aux_disp_III")),
-    _aux_grad_disp_III(declareProperty<ColumnMajorMatrix>("aux_grad_disp_III")),
-    _aux_strain_III(declareProperty<ColumnMajorMatrix>("aux_strain_III")),
+    _appended_index_name(getParam<std::string>("appended_index_name")),
+    _aux_stress_I(declareProperty<ColumnMajorMatrix>("aux_stress_I_"+_appended_index_name)),
+    _aux_disp_I(declareProperty<ColumnMajorMatrix>("aux_disp_I_"+_appended_index_name)),
+    _aux_grad_disp_I(declareProperty<ColumnMajorMatrix>("aux_grad_disp_I_"+_appended_index_name)),
+    _aux_strain_I(declareProperty<ColumnMajorMatrix>("aux_strain_I_"+_appended_index_name)),
+    _aux_stress_II(declareProperty<ColumnMajorMatrix>("aux_stress_II_"+_appended_index_name)),
+    _aux_disp_II(declareProperty<ColumnMajorMatrix>("aux_disp_II_"+_appended_index_name)),
+    _aux_grad_disp_II(declareProperty<ColumnMajorMatrix>("aux_grad_disp_II_"+_appended_index_name)),
+    _aux_strain_II(declareProperty<ColumnMajorMatrix>("aux_strain_II_"+_appended_index_name)),
+    _aux_stress_III(declareProperty<ColumnMajorMatrix>("aux_stress_III_"+_appended_index_name)),
+    _aux_disp_III(declareProperty<ColumnMajorMatrix>("aux_disp_III_"+_appended_index_name)),
+    _aux_grad_disp_III(declareProperty<ColumnMajorMatrix>("aux_grad_disp_III_"+_appended_index_name)),
+    _aux_strain_III(declareProperty<ColumnMajorMatrix>("aux_strain_III_"+_appended_index_name)),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _has_crack_front_node_index(isParamValid("crack_front_node_index")),
-    _crack_front_node_index(_has_crack_front_node_index ? getParam<unsigned int>("crack_front_node_index") : 0),
+    _crack_front_node_index(getParam<unsigned int>("crack_front_node_index")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus"))
 {
@@ -167,7 +174,7 @@ InteractionIntegralAuxFields::computeAuxFields(const SIF_MODE sif_mode, ColumnMa
   disp(0,0) = 1 / (2*_shear_modulus) * std::sqrt(_r/(2*libMesh::pi)) * (k(0) * ct2 * (_kappa - 1 + 2*st2*st2)
                                                       + k(1) * st2 * (_kappa + 1 + 2*ct2*ct2));
   disp(0,1) = 1 / (2*_shear_modulus) * std::sqrt(_r/(2*libMesh::pi)) * (k(0) * st2 * (_kappa + 1 - 2*ct2*ct2)
-                                                      - k(2) * ct2 * (_kappa - 1 - 2*st2*st2));
+                                                      - k(1) * ct2 * (_kappa - 1 - 2*st2*st2));
   disp(0,2) = 1 /   _shear_modulus * std::sqrt(_r/(2*libMesh::pi)) * k(2) * st2*st2;
 
   //Calculate x1 derivative of auxiliary displacements

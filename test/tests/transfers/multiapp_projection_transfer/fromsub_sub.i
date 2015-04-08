@@ -64,14 +64,10 @@
   num_steps = 1
   dt = 1
   solve_type = 'NEWTON'
-  print_linear_residuals = true
 []
 
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

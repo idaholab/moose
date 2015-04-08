@@ -117,8 +117,5 @@
 [Outputs]
   file_base = gh03
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

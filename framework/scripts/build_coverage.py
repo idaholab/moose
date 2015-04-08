@@ -12,6 +12,7 @@ def buildCMD(options):
   if options.mode == 'initialize':
     if len(options.application) > 1:
       tmp_cmd.append([options.lcov_command[0],
+                      '--gcov-tool', options.cov_tool,
                       '--capture',
                       '--initial',
                       '--directory', os.getcwd() + '/' + options.application[0],
@@ -20,6 +21,7 @@ def buildCMD(options):
       tmp_cmd[0].extend(tmp_additional_directories)
     else:
       tmp_cmd.append([options.lcov_command[0],
+                      '--gcov-tool', options.cov_tool,
                       '--capture',
                       '--initial',
                       '--directory', os.getcwd() + '/' + options.application[0],
@@ -30,6 +32,7 @@ def buildCMD(options):
   if options.mode == 'generate':
     if len(options.application) > 1:
       tmp_cmd.append([options.lcov_command[0],
+                      '--gcov-tool', options.cov_tool,
                       '--directory', os.getcwd() + '/' + options.application[0],
                       '--capture',
                       '--ignore-errors', 'gcov,source',
@@ -38,6 +41,7 @@ def buildCMD(options):
       tmp_cmd[0].extend(tmp_additional_directories)
     else:
       tmp_cmd.append([options.lcov_command[0],
+                      '--gcov-tool', options.cov_tool,
                       '--directory', os.getcwd() + '/' + options.application[0],
                       '--capture',
                       '--ignore-errors', 'gcov,source',
@@ -46,12 +50,14 @@ def buildCMD(options):
 
     # Build lcov combine command
     tmp_cmd.append([options.lcov_command[0],
+                    '--gcov-tool', options.cov_tool,
                     '--add-tracefile', os.getcwd() + '/initialize.info',
                     '--add-tracefile', os.getcwd() + '/covered.info',
                     '--output-file', os.getcwd() + '/combined.info' ])
 
     # Build lcov filter command
     tmp_cmd.append([options.lcov_command[0],
+                    '--gcov-tool', options.cov_tool,
                     '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/src*',
                     '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/include*',
                     '--output-file', options.outfile ])
@@ -105,7 +111,7 @@ def buildCMD(options):
     verifyCoverage(options)
 
 def verifyCoverage(options):
-  summary_command = subprocess.Popen([options.lcov_command[0], '--summary', options.outfile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  summary_command = subprocess.Popen([options.lcov_command[0], '--gcov-tool', options.cov_tool, '--summary', options.outfile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   summary_output = summary_command.communicate()[1]
   coverage = float(re.findall(r'lines.*: (\d+.\d+)', summary_output)[0])
   print summary_output + '\n\nCode Coverage: ' + str(coverage)
@@ -269,6 +275,7 @@ def _parseARGs(args=None):
   parser.add_argument('--html-location', help='Location of HTML generated content. Used in\nconjunction with --generate-html or --sync-location\n ')
   parser.add_argument('--sync-location', help='location to rsync the data to:\nuserid@server:/some/location\n ')
   parser.add_argument('--coverage-percentage', dest='coverage_percent', type=float, default=80.0, help='If specified, this is the percentage coverage has to pass\n ')
+  parser.add_argument('--cov-tool', metavar='coverage_tool', default="gcov", help='Which coverage tool to use (gcov default)\n ')
   options = parser.parse_args(args)
   return _verifyOptions(options)
 

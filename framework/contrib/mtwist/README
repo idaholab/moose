@@ -1,0 +1,45 @@
+This is an implementation of the Mersenne Twist pseudorandom number
+generator, including both C and C++ interfaces and a set of functions
+for generating random variates from common distributions.
+
+The full documentation for the package is in the manual pages,
+mtwist.3 and randistrs.3.
+
+For more information, see the Web page for the package, at:
+
+	http://www.cs.hmc.edu/~geoff/mtwist.html
+
+BRIEF SUMMARY OF FUNCTIONS:
+
+All functions come in two forms: mt_xxx and mts_xxx.  The difference
+is that the mts_xxx functions accept an additional parameter, "state",
+which encapsulates the entire PRNG state.  This allows multiple
+independent PRNG streams to be used.  The mt_xxx versions use a single
+shared state provided by the implementation.  Only the most commonly
+used mt_xxx versions are mentioned here; see mtwist(3) for more
+information.  There is also a C++ interface; again, see the manual
+page for information.
+
+void mt_seed32new(uint32_t seed)
+    Seeds the generator from a 32-bit constant
+
+uint32_t mt_seed(void)
+    Automatically seeds from /dev/urandom or system time
+
+uint32_t mt_goodseed(void)
+    Automatically seeds from /dev/random or system time (can be slow)
+
+void mt_bestseed(void)
+    Automatically seeds from /dev/random with high entropy (very slow)
+
+uint32_t mt_lrand(void)
+    Return a 32-bit pseudorandom value
+
+uint64_t mt_llrand(void)
+    Return a 64-bit pseudorandom value
+
+double mt_drand(void)
+    Return a pseudorandom double in [0,1) with 32 bits of randomness
+
+double mt_ldrand(void)
+    Return a pseudorandom double in [0,1) with 64 bits of randomness

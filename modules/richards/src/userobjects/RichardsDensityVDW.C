@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "RichardsDensityVDW.h"
 
 template<>
@@ -14,14 +20,14 @@ InputParameters validParams<RichardsDensityVDW>()
 }
 
 RichardsDensityVDW::RichardsDensityVDW(const std::string & name, InputParameters parameters) :
-  RichardsDensity(name, parameters),
-  _a(getParam<Real>("a")),
-  _b(getParam<Real>("b")),
-  _rt(getParam<Real>("temperature")*8.314472), // multiply by gas constant
-  _molar_mass(getParam<Real>("molar_mass")),
-  _infinity_ratio(getParam<Real>("infinity_ratio")),
-  _rhs(_rt*_b/_a),
-  _b2oa(_b*_b/_a)
+    RichardsDensity(name, parameters),
+    _a(getParam<Real>("a")),
+    _b(getParam<Real>("b")),
+    _rt(getParam<Real>("temperature")*8.314472), // multiply by gas constant
+    _molar_mass(getParam<Real>("molar_mass")),
+    _infinity_ratio(getParam<Real>("infinity_ratio")),
+    _rhs(_rt*_b/_a),
+    _b2oa(_b*_b/_a)
 {
   _vdw0 = densityVDW(0);
   _slope0 = ddensity(0)/_molar_mass/_infinity_ratio;
@@ -90,8 +96,8 @@ RichardsDensityVDW::d2density(Real p) const
     Real dcr = (1./3.)*std::pow(-2 + 9*_rhs - 18*y + sq, -2./3.)*(-18*dy + dsq);
     Real d2cr = (1./3.)*(-2./3.)*std::pow(-2 + 9*_rhs - 18*y + sq, -5./3.)*std::pow(-18*dy + dsq, 2);
     d2cr += (1./3.)*std::pow(-2 + 9*_rhs - 18*y + sq, -2./3.)*d2sq;
-    Real dx = std::pow(2, 1./3.)*( (3*dy)/3/cr + (-1 + 3*_rhs + 3*y)/3*(-dcr/cr/cr));
-    dx -= dcr/3/std::pow(2, 1./3.);
+    // Real dx = std::pow(2, 1./3.)*( (3*dy)/3/cr + (-1 + 3*_rhs + 3*y)/3*(-dcr/cr/cr));
+    // dx -= dcr/3/std::pow(2, 1./3.);
     Real d2x = std::pow(2, 1./3.)*( -(3*dy)*dcr/3/cr/cr + 3*dy/3*(-dcr/cr/cr) + (-1 + 3*_rhs + 3*y)/3*(-d2cr/cr/cr + 2*dcr*dcr/std::pow(cr, 3)) );
     d2x -= d2cr/3/std::pow(2, 1./3.);
     return _molar_mass*d2x/_b;

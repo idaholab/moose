@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef DOMAININTEGRALACTION_H
 #define DOMAININTEGRALACTION_H
 
@@ -23,7 +29,8 @@ protected:
     J_INTEGRAL,
     INTERACTION_INTEGRAL_KI,
     INTERACTION_INTEGRAL_KII,
-    INTERACTION_INTEGRAL_KIII
+    INTERACTION_INTEGRAL_KIII,
+    INTERACTION_INTEGRAL_T
   };
 
   unsigned int calcNumCrackFrontNodes();
@@ -54,6 +61,9 @@ protected:
   VariableName _disp_y;
   VariableName _disp_z;
   bool _convert_J_to_K;
+  bool _has_symmetry_plane;
+  unsigned int _symmetry_plane;
+  MooseEnum _position_type;
   bool _use_displaced_mesh;
 };
 

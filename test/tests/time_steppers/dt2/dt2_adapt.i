@@ -96,11 +96,7 @@
 []
 
 [Outputs]
-  output_initial = false
   csv = false
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

@@ -40,7 +40,7 @@ public:
   virtual NumericVector<Number> & solution() { return _undisplaced_system.solution(); }
 
   virtual NumericVector<Number> & solutionUDot() { return _undisplaced_system.solutionUDot(); }
-  virtual NumericVector<Number> & solutionDuDotDu() { return _undisplaced_system.solutionDuDotDu(); }
+  virtual Number & duDotDu() { return _undisplaced_system.duDotDu(); }
 
   /**
    * Return the residual copy from the NonlinearSystem
@@ -49,15 +49,15 @@ public:
   virtual NumericVector<Number> & residualCopy() { return _undisplaced_system.residualCopy(); }
   virtual NumericVector<Number> & residualGhosted() { return _undisplaced_system.residualGhosted(); }
 
-  virtual void augmentSendList(std::vector<unsigned int> & send_list){ _undisplaced_system.augmentSendList(send_list); }
+  virtual void augmentSendList(std::vector<dof_id_type> & send_list){ _undisplaced_system.augmentSendList(send_list); }
 
   /**
    * This is an empty function since the displaced system doesn't have a matrix!
    * All sparsity pattern modification will be taken care of by the undisplaced system directly
    */
   virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
-                               std::vector<unsigned int> & /*n_nz*/,
-                               std::vector<unsigned int> & /*n_oz*/)
+                               std::vector<dof_id_type> & /*n_nz*/,
+                               std::vector<dof_id_type> & /*n_oz*/)
     {}
 
   /**

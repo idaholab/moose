@@ -6,29 +6,29 @@
         <DataArray type="Float64" Name="aux" format="ascii" RangeMin="0" RangeMax="0">
           0 0 0 0 0 0
         </DataArray>
-        <DataArray type="Float64" Name="u" format="ascii" RangeMin="0.074429858005" RangeMax="1">
-          0.074429858072 0.074429858005 1 1 0.074429858227 1
+        <DataArray type="Float64" Name="u" format="ascii" RangeMin="0" RangeMax="0.074429857977">
+          0 0.074429857677 0.074429857773 0 0.074429857977 0
         </DataArray>
       </PointData>
       <CellData>
-        <DataArray type="Int32" Name="libmesh_elem_id" format="ascii" RangeMin="1" RangeMax="3">
-          1 3
+        <DataArray type="Int32" Name="libmesh_elem_id" format="ascii" RangeMin="0" RangeMax="2">
+          0 2
         </DataArray>
         <DataArray type="Int32" Name="subdomain_id" format="ascii" RangeMin="0" RangeMax="0">
           0 0
         </DataArray>
       </CellData>
       <Points>
-        <DataArray type="Float64" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="0.5" RangeMax="1.4142135624">
-          0.5 0 0 0.5 0.5 0
-          1 0 0 1 0.5 0
-          0.5 1 0 1 1 0
+        <DataArray type="Float64" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="0" RangeMax="1.1180339887">
+          0 0 0 0.5 0 0
+          0.5 0.5 0 0 0.5 0
+          0.5 1 0 0 1 0
         </DataArray>
       </Points>
       <Cells>
         <DataArray type="Int64" Name="connectivity" format="ascii" RangeMin="0" RangeMax="5">
-          0 2 3 1 1 3
-          5 4
+          0 1 2 3 3 2
+          4 5
         </DataArray>
         <DataArray type="Int64" Name="offsets" format="ascii" RangeMin="4" RangeMax="8">
           4 8

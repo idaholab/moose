@@ -20,19 +20,19 @@
 
 
 [Variables]
-  [./x_disp]
+  [./disp_x]
   [../]
-  [./y_disp]
+  [./disp_y]
   [../]
-  [./z_disp]
+  [./disp_z]
   [../]
 []
 
-[TensorMechanics]
-  [./solid]
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+[Kernels]
+  [./TensorMechanics]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -40,38 +40,38 @@
 [BCs]
   [./bottomx]
     type = PresetBC
-    variable = x_disp
+    variable = disp_x
     boundary = back
     value = 0.0
   [../]
   [./bottomy]
     type = PresetBC
-    variable = y_disp
+    variable = disp_y
     boundary = back
     value = 0.0
   [../]
   [./bottomz]
     type = PresetBC
-    variable = z_disp
+    variable = disp_z
     boundary = back
     value = 0.0
   [../]
 
   [./topx]
     type = PresetBC
-    variable = x_disp
+    variable = disp_x
     boundary = front
     value = 0E-6
   [../]
   [./topy]
     type = PresetBC
-    variable = y_disp
+    variable = disp_y
     boundary = front
     value = 0E-6
   [../]
   [./topz]
     type = PresetBC
-    variable = z_disp
+    variable = disp_z
     boundary = front
     value = 1E-6
   [../]
@@ -130,8 +130,9 @@
     index_j = 2
   [../]
   [./yield_fcn_auxk]
-    type = MaterialRealAux
-    property = weak_plane_tensile_yield_function
+    type = MaterialStdVectorAux
+    property = plastic_yield_function
+    index = 0
     variable = yield_fcn
   [../]
 []
@@ -159,21 +160,31 @@
   [../]
 []
 
+[UserObjects]
+  [./str]
+    type = TensorMechanicsHardeningConstant
+    value = 1
+  [../]
+  [./wpt]
+    type = TensorMechanicsPlasticWeakPlaneTensile
+    tensile_strength = str
+    yield_function_tolerance = 1E-6
+    internal_constraint_tolerance = 1E-5
+  [../]
+[]
+
 [Materials]
   [./mc]
-    type = FiniteStrainWeakPlaneTensile
+    type = FiniteStrainMultiPlasticity
     block = 0
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
-    wpt_tensile_strength = 1.0
-    yield_function_tolerance = 1E-6
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
-    wpt_normal_vector = '0 0 1'
-    wpt_normal_rotates = false
+    plastic_models = wpt
+    transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-5
-    internal_constraint_tolerance = 1E-5
   [../]
 []
 
@@ -189,11 +200,8 @@
   file_base = small_deform1
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

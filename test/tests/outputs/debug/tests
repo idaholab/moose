@@ -28,23 +28,38 @@
    [../]
 
    [./show_top_residuals]
-     # Test that top residauls are displayed using DebugOutput object via Outputs block
+     # Test that top residuals are displayed using DebugOutput object via Outputs block
      type = RunApp
      input = show_top_residuals.i
      expect_out = "\[DBG\]\[0\].*'u'.*at node"
    [../]
 
    [./show_top_residuals_debug]
-     # Test that top residauls are displayed using DebugOutput object via Debug block
+     # Test that top residuals are displayed using DebugOutput object via Debug block
      type = RunApp
      input = show_top_residuals_debug.i
      expect_out = "\[DBG\]\[0\].*'u'.*at node"
    [../]
 
    [./show_top_residuals_nonlinear_only]
-     # Test that top residauls may be limited to nonlinear iterations only
+     # Test that top residuals may be limited to nonlinear iterations only
      type = RunApp
-     input = show_top_residuals.i Outputs/debug/linear_residuals=false
+     input = show_top_residuals_nonlinear_only.i
      expect_out = "0 Linear[^\n]*\n[^\n]*1 Linear"
    [../]
+
+   [./show_top_residuals_scalar]
+     # Test that top residuals of scalar variables are displayed using DebugOutput object via Outputs block
+     type = RunApp
+     input = show_top_residuals_scalar.i
+     expect_out = "\[DBG\]\[0\].*'lambda' \(SCALAR\)"
+   [../]
+
+   [./show_top_residuals_scalar_debug]
+     # Test that top residuals of scalar variables are displayed using DebugOutput object via Debug block
+     type = RunApp
+     input = show_top_residuals_scalar_debug.i
+     expect_out = "\[DBG\]\[0\].*'lambda' \(SCALAR\)"
+   [../]
+
 []

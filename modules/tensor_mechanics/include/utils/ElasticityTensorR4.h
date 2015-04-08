@@ -1,7 +1,23 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef ELASTICITYTENSORR4_H
 #define ELASTICITYTENSORR4_H
 
 #include "RankFourTensor.h"
+#include "DerivativeMaterialInterface.h"
+
+class ElasticityTensorR4;
+
+/**
+ * Helper function template specialization to set an object to zero.
+ * Needed by DerivativeMaterialInterface
+ */
+template<>
+void mooseSetToZero<ElasticityTensorR4>(ElasticityTensorR4 & v);
 
 /**
  * ElasticityTensorR4 inherits from RankFourTensor.  As such it contains data and
@@ -26,6 +42,9 @@ public:
 
   /// Copy constructor for RankFourTensor
   ElasticityTensorR4(const RankFourTensor &a);
+
+  // Fill from vector
+  ElasticityTensorR4(const std::vector<Real> & input, FillMethod fill_method) : RankFourTensor(input, fill_method) {}
 
   /**
    * This is used for the standard kernel stress_ij*d(test)/dx_j, when varied wrt u_k

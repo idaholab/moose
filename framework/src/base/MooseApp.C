@@ -39,6 +39,8 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<std::string>("mesh_only", "--mesh-only", "Setup and Output the input mesh only.");
 
   params.addCommandLineParam<bool>("show_input", "--show-input", false, "Shows the parsed input file before running the simulation.");
+  params.addCommandLineParam<bool>("show_outputs", "--show-outputs", false, "Shows the output execution time information.");
+
   params.addCommandLineParam<bool>("no_color", "--no-color", false, "Disable coloring of all Console outputs.");
 
   params.addCommandLineParam<bool>("help", "-h --help", false, "Displays CLI usage statement.");
@@ -46,6 +48,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<std::string>("dump", "--dump [search_string]", "Shows a dump of available input file syntax.");
   params.addCommandLineParam<std::string>("yaml", "--yaml", "Dumps input file syntax in YAML format.");
   params.addCommandLineParam<bool>("syntax", "--syntax", false, "Dumps the associated Action syntax paths ONLY");
+  params.addCommandLineParam<bool>("check_input", "--check-input", false, "Check the input file (i.e. requires -i <filename>) and quit.");
 
   params.addCommandLineParam<unsigned int>("n_threads", "--n-threads=<n>", 1, "Runs the specified number of threads per process");
 
@@ -69,8 +72,14 @@ InputParameters validParams<MooseApp>()
 
   params.addCommandLineParam<bool>("timing", "-t --timing", false, "Enable all performance logging for timing purposes. This will disable all screen output of performance logs for all Console objects.");
 
+  // Legacy Flags
+  params.addParam<bool>("use_legacy_uo_aux_computation", true, "Set to true to have MOOSE recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavoir is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
+  params.addParam<bool>("use_legacy_uo_initialization", true, "Set to true to have MOOSE compute all UserObjects and Postprocessors during the initial setup phase of the problem recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavoir is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
+
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
+  params.addPrivateParam<MooseSharedPointer<CommandLine> >("_command_line");
+  params.addPrivateParam<MooseSharedPointer<Parallel::Communicator> >("_comm");
 
   return params;
 }
@@ -86,24 +95,27 @@ void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos
   }
 }
 
+// Free function for removing cli flags
+bool isFlag(const std::string s)
+{
+  return s.length() && s[0] == '-';
+}
+
 MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
-    ParallelObject(*parameters.get<Parallel::Communicator *>("_comm")), // Can't call getParam() before pars is set
+    ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
     _name(name),
     _pars(parameters),
-    _comm(getParam<Parallel::Communicator *>("_comm")),
+    _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _command_line(NULL),
     _alternate_output_warehouse(NULL),
     _output_warehouse(new OutputWarehouse),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
-    _executioner(NULL),
     _use_nonlinear(true),
-    _sys_info(NULL),
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
     _error_overridden(false),
@@ -113,33 +125,29 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _recover(false),
     _restart(false),
     _half_transient(false),
-    _legacy_uo_aux_computation_default(true),
-    _legacy_uo_initialization_default(true)
-
+    _legacy_uo_aux_computation_default(getParam<bool>("use_legacy_uo_aux_computation")),
+    _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
+    _check_input(getParam<bool>("check_input"))
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
     int argc = getParam<int>("_argc");
     char ** argv = getParam<char**>("_argv");
 
-    _sys_info = new SystemInfo(argc, argv);
-    _command_line = new CommandLine(argc, argv);
-    _command_line->addCommandLineOptionsFromParams(_pars);
+    _sys_info = MooseSharedPointer<SystemInfo>(new SystemInfo(argc, argv));
   }
+  if (isParamValid("_command_line"))
+    _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
+  else
+    mooseError("Valid CommandLine object required");
 }
 
 MooseApp::~MooseApp()
 {
-  delete _command_line;
-  delete _sys_info;
-  delete _executioner;
   _action_warehouse.clear();
 
   // MUST be deleted before _comm is destroyed!
   delete _output_warehouse;
-
-  // Note: Communicator MUST be destroyed last because everything else is using it!
-  delete _comm;
 }
 
 void
@@ -244,6 +252,9 @@ MooseApp::setupOptions()
   }
   else
   {
+    if (_check_input)
+      mooseError("You specified --check-input, but did not provide an input file. Add -i <inputfile> to your command line.");
+
     _command_line->printUsage();
     _ready_to_exit = true;
   }
@@ -278,16 +289,26 @@ MooseApp::runInputFile()
   _action_warehouse.executeAllActions();
   _executioner = _action_warehouse.executioner();
 
-  // If requested, see if there are unidentified name/value pairs in the input file
-  if (getParam<bool>("error_unused") || _enable_unused_check == ERROR_UNUSED)
+  bool error_unused = getParam<bool>("error_unused") || _enable_unused_check == ERROR_UNUSED;
+  bool warn_unused = getParam<bool>("warn_unused") || _enable_unused_check == WARN_UNUSED;
+
+  if (error_unused || warn_unused)
   {
+    // Check the input file parameters
     std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
-    _parser.checkUnidentifiedParams(all_vars, true);
-  }
-  else if (getParam<bool>("warn_unused") || _enable_unused_check == WARN_UNUSED)
-  {
-    std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
-    _parser.checkUnidentifiedParams(all_vars, _enable_unused_check == ERROR_UNUSED);
+    _parser.checkUnidentifiedParams(all_vars, error_unused, true);
+
+    // Only check CLI parameters on the main application
+    // TODO: Add support for SubApp overrides and checks #4119
+    if (_name == "main")
+    {
+      // Check the CLI parameters
+      all_vars = _command_line->getPot()->get_variable_names();
+      // Remove flags, they aren't "input" parameters
+      all_vars.erase( std::remove_if(all_vars.begin(), all_vars.end(), isFlag), all_vars.end() );
+
+      _parser.checkUnidentifiedParams(all_vars, error_unused, false);
+    }
   }
 
   if (getParam<bool>("error_override") || _error_overridden)
@@ -307,9 +328,15 @@ MooseApp::executeExecutioner()
   if (_executioner)
   {
 #ifdef LIBMESH_HAVE_PETSC
-    Moose::PetscSupport::petscSetupOutput(_command_line);
+    Moose::PetscSupport::petscSetupOutput(_command_line.get());
 #endif
     _executioner->init();
+    if (_check_input)
+    {
+      // Output to stderr, so it is easier for peacock to get the result
+      Moose::err << "Syntax OK" << std::endl;
+      return;
+    }
     _executioner->execute();
   }
   else
@@ -327,12 +354,10 @@ MooseApp::meshOnly(std::string mesh_file_name)
   _action_warehouse.executeActionsWithAction("setup_mesh");
   _action_warehouse.executeActionsWithAction("prepare_mesh");
   _action_warehouse.executeActionsWithAction("add_mesh_modifier");
+  _action_warehouse.executeActionsWithAction("uniform_refine_mesh");
   _action_warehouse.executeActionsWithAction("setup_mesh_complete");
 
-  // uniform refinement
   MooseSharedPointer<MooseMesh> & mesh = _action_warehouse.mesh();
-  MeshRefinement mesh_refinement(mesh->getMesh());
-  mesh_refinement.uniformly_refine(mesh->uniformRefineLevel());
 
   // If no argument specified or if the argument following --mesh-only starts
   // with a dash, try to build an output filename based on the input mesh filename.
@@ -408,12 +433,11 @@ MooseApp::run()
 void
 MooseApp::setOutputPosition(Point p)
 {
-
   _output_position_set = true;
   _output_position = p;
   _output_warehouse->meshChanged();
 
-  if (_executioner != NULL)
+  if (_executioner.get() != NULL)
     _executioner->parentOutputPositionChanged();
 }
 

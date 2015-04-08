@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ThermalContactBCsAction.h"
 #include "ThermalContactAuxVarsAction.h"
 
@@ -74,21 +80,22 @@ ThermalContactBCsAction::act()
 
   params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
 
+  params.addCoupledVar("disp_x", "The x displacement");
+  params.addCoupledVar("disp_y", "The y displacement");
+  params.addCoupledVar("disp_z", "The z displacement");
+
   if (isParamValid("disp_x"))
   {
-    params.addCoupledVar("disp_x", "The x displacement");
     std::vector<VariableName> disp_x(1, getParam<VariableName>("disp_x"));
     params.set< std::vector<VariableName> >("disp_x") = disp_x;
   }
   if (isParamValid("disp_y"))
   {
-    params.addCoupledVar("disp_y", "The y displacement");
     std::vector<VariableName> disp_y(1, getParam<VariableName>("disp_y"));
     params.set< std::vector<VariableName> >("disp_y") = disp_y;
   }
   if (isParamValid("disp_z"))
   {
-    params.addCoupledVar("disp_z", "The z displacement");
     std::vector<VariableName> disp_z(1, getParam<VariableName>("disp_z"));
     params.set< std::vector<VariableName> >("disp_z") = disp_z;
   }

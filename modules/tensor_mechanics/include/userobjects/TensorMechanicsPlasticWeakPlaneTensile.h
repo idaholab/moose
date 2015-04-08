@@ -1,7 +1,14 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef TENSORMECHANICSPLASTICWEAKPLANETENSILE_H
 #define TENSORMECHANICSPLASTICWEAKPLANETENSILE_H
 
 #include "TensorMechanicsPlasticModel.h"
+#include "TensorMechanicsHardeningModel.h"
 
 
 class TensorMechanicsPlasticWeakPlaneTensile;
@@ -12,12 +19,36 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensile>();
 
 /**
  * Rate-independent associative weak-plane tensile failure
- * with hardening/softening
+ * with hardening/softening of the tensile strength
  */
 class TensorMechanicsPlasticWeakPlaneTensile : public TensorMechanicsPlasticModel
 {
  public:
   TensorMechanicsPlasticWeakPlaneTensile(const std::string & name, InputParameters parameters);
+
+  /**
+   * The active yield surfaces, given a vector of yield functions.
+   * This is used by FiniteStrainMultiPlasticity to determine the initial
+   * set of active constraints at the trial (stress, intnl) configuration.
+   * It is up to you (the coder) to determine how accurate you want the
+   * returned_stress to be.  Currently it is only used by FiniteStrainMultiPlasticity
+   * to estimate a good starting value for the Newton-Rahson procedure,
+   * so currently it may not need to be super perfect.
+   * @param f values of the yield functions
+   * @param stress stress tensor
+   * @param intnl internal parameter
+   * @param Eijkl elasticity tensor (stress = Eijkl*strain)
+   * @param act (output) act[i] = true if the i_th yield function is active
+   * @param returned_stress (output) Approximate value of the returned stress
+   */
+  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
+
+  /// Returns the model name (WeakPlaneTensile)
+  virtual std::string modelName() const;
+
+ protected:
+
+  const TensorMechanicsHardeningModel & _strength;
 
   /**
    * The yield function
@@ -66,17 +97,6 @@ class TensorMechanicsPlasticWeakPlaneTensile : public TensorMechanicsPlasticMode
    * @return dr_dintnl(i, j) = dr(i, j)/dintnl
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
-
- protected:
-
-  /// tension cutoff
-  Real _tension_cutoff;
-
-  /// tension cutoff at infinite hardening/softening
-  Real _tension_cutoff_residual;
-
-  /// Tensile strength = wpt_tensile_strenght_residual + (wpt_tensile_strength - wpt_tensile_strength_residual)*exp(-wpt_tensile_rate*plasticstrain).
-  Real _tension_cutoff_rate;
 
   /// tensile strength as a function of residual value, rate, and internal_param
   virtual Real tensile_strength(const Real internal_param) const;

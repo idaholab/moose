@@ -1,9 +1,21 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 #ifndef DIRICHLETBCFUNCXYZ0_H
 #define DIRICHLETBCFUNCXYZ0_H
 
 #include "NodalBC.h"
 #include "UsrFunc.h"
-
 
 //Forward Declarations
 class DirichletBCfuncXYZ0;
@@ -24,21 +36,22 @@ public:
    */
   DirichletBCfuncXYZ0(const std::string & name, InputParameters parameters);
 
-  virtual ~DirichletBCfuncXYZ0(){}
+  /**
+   * Destructor.
+   */
+  virtual ~DirichletBCfuncXYZ0() {}
 
 protected:
-
   virtual Real computeQpResidual();
 
-  virtual Real computeQpJacobian();
-
 private:
-
- /**
-  *   Parameters for the manufactured solution used.
-  */
-  Real _A0,_B0,_C0,_omega0;
-
+  /**
+   * Parameters for the manufactured solution used.
+   */
+  Real _A0;
+  Real _B0;
+  Real _C0;
+  Real _omega0;
 };
 
 #endif //DIRICHLETBCFUNCXYZ0_H

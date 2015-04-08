@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ContactMaster.h"
 
 #include "FrictionalContactProblem.h"
@@ -42,27 +48,26 @@ InputParameters validParams<ContactMaster>()
 
 
 ContactMaster::ContactMaster(const std::string & name, InputParameters parameters) :
-  DiracKernel(name, parameters),
-  _component(getParam<unsigned int>("component")),
-  _model(contactModel(getParam<std::string>("model"))),
-  _formulation(contactFormulation(getParam<std::string>("formulation"))),
-  _normalize_penalty(getParam<bool>("normalize_penalty")),
-  _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
-  _penalty(getParam<Real>("penalty")),
-  _friction_coefficient(getParam<Real>("friction_coefficient")),
-  _tension_release(getParam<Real>("tension_release")),
-  _updateContactSet(true),
-  _time_last_called(-std::numeric_limits<Real>::max()),
-  _residual_copy(_sys.residualGhosted()),
-  _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
-  _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
-  _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
-  _mesh_dimension(_mesh.dimension()),
-  _vars(_x_var, _y_var, _z_var),
-  _nodal_area_var(getVar("nodal_area", 0)),
-  _aux_system( _nodal_area_var->sys() ),
-  _aux_solution( _aux_system.currentSolution() )
-
+    DiracKernel(name, parameters),
+    _component(getParam<unsigned int>("component")),
+    _model(contactModel(getParam<std::string>("model"))),
+    _formulation(contactFormulation(getParam<std::string>("formulation"))),
+    _normalize_penalty(getParam<bool>("normalize_penalty")),
+    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
+    _penalty(getParam<Real>("penalty")),
+    _friction_coefficient(getParam<Real>("friction_coefficient")),
+    _tension_release(getParam<Real>("tension_release")),
+    _updateContactSet(true),
+    _time_last_called(-std::numeric_limits<Real>::max()),
+    _residual_copy(_sys.residualGhosted()),
+    _x_var(isCoupled("disp_x") ? coupled("disp_x") : libMesh::invalid_uint),
+    _y_var(isCoupled("disp_y") ? coupled("disp_y") : libMesh::invalid_uint),
+    _z_var(isCoupled("disp_z") ? coupled("disp_z") : libMesh::invalid_uint),
+    _mesh_dimension(_mesh.dimension()),
+    _vars(_x_var, _y_var, _z_var),
+    _nodal_area_var(getVar("nodal_area", 0)),
+    _aux_system(_nodal_area_var->sys()),
+    _aux_solution(_aux_system.currentSolution())
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {
@@ -122,13 +127,14 @@ ContactMaster::timestepSetup()
 void
 ContactMaster::updateContactSet(bool beginning_of_step)
 {
-  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
-  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
-  std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._locked_this_step;
-  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
+  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
+  std::map<dof_id_type, unsigned int> & unlocked_this_step = _penetration_locator._unlocked_this_step;
+  std::map<dof_id_type, unsigned int> & locked_this_step = _penetration_locator._locked_this_step;
+  std::map<dof_id_type, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
@@ -141,8 +147,8 @@ ContactMaster::updateContactSet(bool beginning_of_step)
 
     Real area = nodalArea(*pinfo);
 
-    const unsigned int slave_node_num = it->first;
-    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
+    const dof_id_type slave_node_num = it->first;
+    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
     if (beginning_of_step)
     {
@@ -240,10 +246,11 @@ ContactMaster::addPoints()
 {
   _point_to_info.clear();
 
-  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
@@ -253,9 +260,9 @@ ContactMaster::addPoints()
       continue;
 
 
-    unsigned int slave_node_num = it->first;
+    dof_id_type slave_node_num = it->first;
 
-    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
+    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
     if ( hpit != has_penetrated.end() )
     {
@@ -269,14 +276,14 @@ ContactMaster::addPoints()
 void
 ContactMaster::computeContactForce(PenetrationInfo * pinfo)
 {
-  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
+  std::map<dof_id_type, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
   const Node * node = pinfo->_node;
 
   RealVectorValue res_vec;
   // Build up residual vector
   for (unsigned int i=0; i<_mesh_dimension; ++i)
   {
-    long int dof_number = node->dof_number(0, _vars(i), 0);
+    dof_id_type dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
 
@@ -507,7 +514,7 @@ ContactMaster::nodalArea(PenetrationInfo & pinfo)
 {
   const Node * node = pinfo._node;
 
-  unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
+  dof_id_type dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
 
   Real area = (*_aux_solution)( dof );
   if (area == 0)

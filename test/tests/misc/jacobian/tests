@@ -1,0 +1,14 @@
+[Tests]
+  [simple]
+    type = AnalyzeJacobian
+    input = simple.i
+    expect_out = "\(0,0\) On-diagonal Jacobian is slightly off \(by 0.500132 %\).*\(1,1\) On-diagonal Jacobian is wrong \(off by 100.0 %\).*\(2,2\) On-diagonal Jacobian needs to be implemented.*\(3,3\) On-diagonal Jacobian should just return  zero"
+    recover = false
+  []
+  [med]
+    type = AnalyzeJacobian
+    input = med.i
+    expect_out = "\(0,0\) On-diagonal Jacobian is questionable \(off by 10.00 %\).*\(1,1\) On-diagonal Jacobian is wrong \(off by 30.0 %\)"
+    recover = false 
+  []
+[]

@@ -12,8 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define NOTFOUND -999999
-
 #include "MultiAppMeshFunctionTransfer.h"
 
 // Moose
@@ -54,7 +52,10 @@ MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & n
 void
 MultiAppMeshFunctionTransfer::initialSetup()
 {
-  variableIntegrityCheck(_to_var_name);
+  if (_direction == TO_MULTIAPP)
+    variableIntegrityCheck(_to_var_name);
+  else
+    variableIntegrityCheck(_from_var_name);
 }
 
 void
@@ -100,7 +101,7 @@ MultiAppMeshFunctionTransfer::execute()
 
       MeshFunction from_func(from_es, *serialized_solution, from_sys.get_dof_map(), from_var_num);
       from_func.init(Trees::ELEMENTS);
-      from_func.enable_out_of_mesh_mode(NOTFOUND);
+      from_func.enable_out_of_mesh_mode(OutOfMeshValue);
 
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
@@ -146,7 +147,7 @@ MultiAppMeshFunctionTransfer::execute()
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-                if (from_value != NOTFOUND)
+                if (from_value != OutOfMeshValue)
                   solution.set(dof, from_value);
                 else if (_error_on_miss)
                   mooseError("Point not found! " << *node+_multi_app->position(i) << std::endl);
@@ -175,7 +176,7 @@ MultiAppMeshFunctionTransfer::execute()
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-                if (from_value != NOTFOUND)
+                if (from_value != OutOfMeshValue)
                   solution.set(dof, from_value);
                 else if (_error_on_miss)
                   mooseError("Point not found! " << centroid+_multi_app->position(i) << std::endl);
@@ -272,7 +273,7 @@ MultiAppMeshFunctionTransfer::execute()
 
         MeshFunction from_func(from_es, *serialized_from_solution, from_sys.get_dof_map(), from_var_num);
         from_func.init(Trees::ELEMENTS);
-        from_func.enable_out_of_mesh_mode(NOTFOUND);
+        from_func.enable_out_of_mesh_mode(OutOfMeshValue);
         Moose::swapLibMeshComm(swapped);
 
         if (is_nodal)
@@ -296,7 +297,7 @@ MultiAppMeshFunctionTransfer::execute()
                 Real from_value = from_func(*node-app_position);
                 Moose::swapLibMeshComm(swapped);
 
-                if (from_value != NOTFOUND)
+                if (from_value != OutOfMeshValue)
                   to_solution->set(dof, from_value);
                 else if (_error_on_miss)
                   mooseError("Point not found! " << *node-app_position <<std::endl);
@@ -327,7 +328,7 @@ MultiAppMeshFunctionTransfer::execute()
                 Real from_value = from_func(centroid-app_position);
                 Moose::swapLibMeshComm(swapped);
 
-                if (from_value != NOTFOUND)
+                if (from_value != OutOfMeshValue)
                   to_solution->set(dof, from_value);
                 else if (_error_on_miss)
                   mooseError("Point not found! " << centroid-app_position << std::endl);

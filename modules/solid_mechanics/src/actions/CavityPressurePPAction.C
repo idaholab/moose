@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "CavityPressurePPAction.h"
 
 #include "Factory.h"
@@ -32,7 +38,7 @@ CavityPressurePPAction::act()
 
   InputParameters params = _factory.getValidParams(pp_name);
 
-  params.set<std::vector<MooseEnum> >("execute_on")[0] = "residual";
+  params.set<MultiMooseEnum>("execute_on") = "linear";
 
   params.set<UserObjectName>("cavity_pressure_uo") = uo_name;
 

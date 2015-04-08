@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  Fluid density assuming constant bulk modulus
 //
@@ -18,9 +21,9 @@ InputParameters validParams<RichardsDensityConstBulk>()
 }
 
 RichardsDensityConstBulk::RichardsDensityConstBulk(const std::string & name, InputParameters parameters) :
-  RichardsDensity(name, parameters),
-  _dens0(getParam<Real>("dens0")),
-  _bulk(getParam<Real>("bulk_mod"))
+    RichardsDensity(name, parameters),
+    _dens0(getParam<Real>("dens0")),
+    _bulk(getParam<Real>("bulk_mod"))
 {}
 
 

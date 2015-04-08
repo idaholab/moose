@@ -31,7 +31,7 @@ TransferWarehouse::addTransfer(MooseSharedPointer<Transfer> transfer)
 {
   _all_ptrs.push_back(transfer);
 
-  _all_transfers.push_back(transfer.get());
+  _all_objects.push_back(transfer.get());
 
   MooseSharedPointer<MultiAppTransfer> multi_app_transfer = MooseSharedNamespace::dynamic_pointer_cast<MultiAppTransfer>(transfer);
 
@@ -42,7 +42,7 @@ TransferWarehouse::addTransfer(MooseSharedPointer<Transfer> transfer)
 bool
 TransferWarehouse::hasTransfer(const std::string & transfer_name) const
 {
-  for (std::vector<Transfer *>::const_iterator i = _all_transfers.begin(); i != _all_transfers.end(); ++i)
+  for (std::vector<Transfer *>::const_iterator i = _all_objects.begin(); i != _all_objects.end(); ++i)
     if ((*i)->name() == transfer_name)
       return true;
 
@@ -52,7 +52,7 @@ TransferWarehouse::hasTransfer(const std::string & transfer_name) const
 Transfer *
 TransferWarehouse::getTransfer(const std::string & transfer_name) const
 {
-  for (std::vector<Transfer *>::const_iterator i = _all_transfers.begin(); i != _all_transfers.end(); ++i)
+  for (std::vector<Transfer *>::const_iterator i = _all_objects.begin(); i != _all_objects.end(); ++i)
     if ((*i)->name() == transfer_name)
       return *i;
 
@@ -62,6 +62,6 @@ TransferWarehouse::getTransfer(const std::string & transfer_name) const
 void
 TransferWarehouse::initialSetup()
 {
-  for (std::vector<Transfer *>::iterator i = _all_transfers.begin(); i != _all_transfers.end(); ++i)
+  for (std::vector<Transfer *>::iterator i = _all_objects.begin(); i != _all_objects.end(); ++i)
     (*i)->initialSetup();
 }

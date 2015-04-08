@@ -204,11 +204,7 @@
 []
 
 [Outputs]
-  output_initial = false
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []
 
 [Debug]

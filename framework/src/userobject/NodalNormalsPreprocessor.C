@@ -30,7 +30,7 @@ InputParameters validParams<NodalNormalsPreprocessor>()
 
 NodalNormalsPreprocessor::NodalNormalsPreprocessor(const std::string & name, InputParameters parameters) :
     ElementUserObject(name, parameters),
-    BoundaryRestrictable(name, parameters),
+    BoundaryRestrictable(parameters),
     _aux(_fe_problem.getAuxiliarySystem()),
     _fe_type(getParam<Order>("fe_order"), getParam<FEFamily>("fe_family")),
     _has_corners(isParamValid("corner_boundary")),
@@ -57,6 +57,9 @@ NodalNormalsPreprocessor::execute()
 {
   NumericVector<Number> & sln = _aux.solution();
 
+  // Get a reference to our BoundaryInfo object for later use...
+  BoundaryInfo & boundary_info = _mesh.getMesh().get_boundary_info();
+
   // Loop through each node on the current element
   for (unsigned int i = 0; i < _current_elem->n_nodes(); i++)
   {
@@ -67,13 +70,13 @@ NodalNormalsPreprocessor::execute()
     if (_mesh.isBoundaryNode(node->id()))
     {
       // List of IDs for the boundary
-      std::vector<BoundaryID> node_boundary_ids = _mesh.getMesh().boundary_info->boundary_ids(node);
+      std::vector<BoundaryID> node_boundary_ids = boundary_info.boundary_ids(node);
 
       // Perform the calculation, the node must be:
       //    (1) On a boundary to which the object is restricted
       //    (2) Not on a corner of the boundary
       if (hasBoundary(node_boundary_ids, ANY)
-          && (!_has_corners || ! _mesh.getMesh().boundary_info->has_boundary_id(node, _corner_boundary_id)))
+          && (!_has_corners || !boundary_info.has_boundary_id(node, _corner_boundary_id)))
       {
         // Perform the caluation of the normal
         if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)

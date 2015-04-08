@@ -34,8 +34,7 @@ InputParameters validParams<RandomInterface>();
 class RandomInterface
 {
 public:
-  RandomInterface(const std::string & name, InputParameters & parameters, FEProblem & problem,
-                  THREAD_ID tid, bool is_nodal);
+  RandomInterface(const InputParameters & parameters, FEProblem & problem, THREAD_ID tid, bool is_nodal);
 
   ~RandomInterface();
 
@@ -76,7 +75,7 @@ private:
   MooseRandom *_generator;
 
   FEProblem & _ri_problem;
-  const std::string & _ri_name;
+  const std::string _ri_name;
 
   unsigned int _master_seed;
   bool _is_nodal;

@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef NODALMAXVARCHANGE_H
 #define NODALMAXVARCHANGE_H
@@ -21,7 +24,7 @@ InputParameters validParams<NodalMaxVarChange>();
  */
 class NodalMaxVarChange : public NodalVariablePostprocessor
 {
- public:
+public:
   NodalMaxVarChange(const std::string & name, InputParameters parameters);
 
   virtual void initialize();
@@ -29,7 +32,7 @@ class NodalMaxVarChange : public NodalVariablePostprocessor
   virtual Real getValue();
   virtual void threadJoin(const UserObject & y);
 
- protected:
+protected:
 
   /// old variable value at quad points
   VariableValue & _u_old;

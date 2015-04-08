@@ -19,6 +19,7 @@
 #include <map>
 #include <set>
 
+#include "Warehouse.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
 
@@ -28,23 +29,17 @@ class ScalarKernel;
 /**
  * Holds kernels and provides some services
  */
-class KernelWarehouse
+class KernelWarehouse : public Warehouse<KernelBase>
 {
 public:
   KernelWarehouse();
   virtual ~KernelWarehouse();
 
   // Setup /////
-  void initialSetup();
-  void timestepSetup();
-  void residualSetup();
-  void jacobianSetup();
-
-  /**
-   * Get list of all kernels
-   * @return The list of all active kernels
-   */
-  const std::vector<KernelBase *> & all() const { return _all_kernels; }
+  virtual void initialSetup();
+  virtual void timestepSetup();
+  virtual void residualSetup();
+  virtual void jacobianSetup();
 
   /**
    * Get the list of all active kernels
@@ -142,8 +137,6 @@ protected:
 
   /// Kernels active on a block and in specified time per variable
   std::map<unsigned int, std::vector<KernelBase *> > _active_var_kernels;
-  /// All instances of kernels
-  std::vector<KernelBase *> _all_kernels;
   /// Kernels that live everywhere (on the whole domain)
   std::vector<KernelBase *> _time_global_kernels;
 

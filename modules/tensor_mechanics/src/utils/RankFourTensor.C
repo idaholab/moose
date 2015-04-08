@@ -1,18 +1,25 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
 // Any other includes here
-#include <vector>
-#include "libmesh/tensor_value.h"
 #include "MaterialProperty.h"
-#include "libmesh/libmesh.h"
 #include <ostream>
 
-extern "C" void FORTRAN_CALL(dsyev) ( ... ); // eigenvalue and eigenvectors for symmetric matrix from LAPACK
-extern "C" void FORTRAN_CALL(dgeev) ( ... ); // eigenvalue and eigenvectors for general matrix from LAPACK
-extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
-extern "C" void FORTRAN_CALL(dgetrf) ( ... ); // matrix inversion routine from LAPACK
+#if PETSC_VERSION_LESS_THAN(3,5,0)
+  extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
+#endif
 
+template<>
+void mooseSetToZero<RankFourTensor>(RankFourTensor & v)
+{
+  v.zero();
+}
 
 MooseEnum
 RankFourTensor::fillMethodEnum()
@@ -22,6 +29,8 @@ RankFourTensor::fillMethodEnum()
 
 RankFourTensor::RankFourTensor()
 {
+  mooseAssert(N == 3, "RankFourTensor is currently only tested for 3 dimensions.");
+
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
@@ -32,6 +41,41 @@ RankFourTensor::RankFourTensor()
 RankFourTensor::RankFourTensor(const RankFourTensor & a)
 {
   *this = a;
+}
+
+RankFourTensor::RankFourTensor(const InitMethod init)
+{
+  switch (init)
+  {
+    case initNone:
+      break;
+
+    case initIdentity:
+      for (unsigned int i = 0; i < N; ++i)
+        for (unsigned int j = 0; j < N; ++j)
+          for (unsigned int k = 0; k < N; ++k)
+            for (unsigned int l = 0; l < N; ++l)
+              _vals[i][j][k][l] = 0.0;
+      for (unsigned int i = 0; i < N; ++i)
+        _vals[i][i][i][i] = 1.0;
+      break;
+
+    case initIdentityFour:
+      for (unsigned int i = 0; i < N; ++i)
+        for (unsigned int j = 0; j < N; ++j)
+          for (unsigned int k = 0; k < N; ++k)
+            for (unsigned int l = 0; l < N; ++l)
+              _vals[i][j][k][l] = (i==k) && (j==l);
+      break;
+
+    default:
+      mooseError("Unknown RankFourTensor initialization pattern.");
+  }
+}
+
+RankFourTensor::RankFourTensor(const std::vector<Real> & input, FillMethod fill_method)
+{
+  fillFromInputVector(input, fill_method);
 }
 
 Real &
@@ -63,55 +107,58 @@ RankFourTensor::operator=(const RankFourTensor & a)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          _vals[i][j][k][l] = a._vals[i][j][k][l];
+          _vals[i][j][k][l] = a(i,j,k,l);
 
   return *this;
 }
 
 RankTwoTensor
-RankFourTensor::operator*(const RankTwoTensor & a) const
+RankFourTensor::operator*(const RankTwoTensor & b) const
 {
   RealTensorValue result;
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          result(i,j) += _vals[i][j][k][l] * a(k,l);
+          result(i,j) += a(i,j,k,l) * b(k,l);
 
   return result;
 }
 
 RealTensorValue
-RankFourTensor::operator*(const RealTensorValue & a) const
+RankFourTensor::operator*(const RealTensorValue & b) const
 {
   RealTensorValue result;
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          result(i,j) += _vals[i][j][k][l] * a(k,l);
+          result(i,j) += a(i,j,k,l) * b(k,l);
 
   return result;
 }
 
 RankFourTensor
-RankFourTensor::operator*(const Real & a) const
+RankFourTensor::operator*(const Real b) const
 {
   RankFourTensor result;
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          result(i,j,k,l) = _vals[i][j][k][l] * a;
+          result(i,j,k,l) = a(i,j,k,l) * b;
 
   return result;
 }
 
 RankFourTensor &
-RankFourTensor::operator*=(const Real & a)
+RankFourTensor::operator*=(const Real a)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -123,21 +170,22 @@ RankFourTensor::operator*=(const Real & a)
 }
 
 RankFourTensor
-RankFourTensor::operator/(const Real & a) const
+RankFourTensor::operator/(const Real b) const
 {
   RankFourTensor result;
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          result(i,j,k,l) = _vals[i][j][k][l] / a;
+          result(i,j,k,l) = a(i,j,k,l) / b;
 
   return result;
 }
 
 RankFourTensor &
-RankFourTensor::operator/=(const Real & a)
+RankFourTensor::operator/=(const Real a)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -161,15 +209,16 @@ RankFourTensor::operator+=(const RankFourTensor & a)
 }
 
 RankFourTensor
-RankFourTensor::operator+(const RankFourTensor & a) const
+RankFourTensor::operator+(const RankFourTensor & b) const
 {
   RankFourTensor result;
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          result(i,j,k,l) = _vals[i][j][k][l] + a(i,j,k,l);
+          result(i,j,k,l) = a(i,j,k,l) + b(i,j,k,l);
 
   return result;
 }
@@ -187,15 +236,16 @@ RankFourTensor::operator-=(const RankFourTensor & a)
 }
 
 RankFourTensor
-RankFourTensor::operator-(const RankFourTensor & a) const
+RankFourTensor::operator-(const RankFourTensor & b) const
 {
   RankFourTensor result;
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          result(i,j,k,l) = _vals[i][j][k][l] - a(i,j,k,l);
+          result(i,j,k,l) = a(i,j,k,l) - b(i,j,k,l);
 
   return result;
 }
@@ -204,21 +254,22 @@ RankFourTensor
 RankFourTensor::operator-() const
 {
   RankFourTensor result;
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          result(i,j,k,l) = -_vals[i][j][k][l];
+          result(i,j,k,l) = -a(i,j,k,l);
 
   return result;
 }
 
 RankFourTensor
-RankFourTensor::operator*(const RankFourTensor & a) const
+RankFourTensor::operator*(const RankFourTensor & b) const
 {
   RankFourTensor result;
-
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -226,7 +277,7 @@ RankFourTensor::operator*(const RankFourTensor & a) const
         for (unsigned int l = 0; l < N; ++l)
           for (unsigned int p = 0; p < N; ++p)
             for (unsigned int q = 0; q < N; ++q)
-              result(i,j,k,l) += _vals[i][j][p][q] * a(p,q,k,l);
+              result(i,j,k,l) += a(i,j,p,q) * b(p,q,k,l);
 
   return result;
 }
@@ -235,24 +286,27 @@ Real
 RankFourTensor::L2norm() const
 {
   Real l2 = 0;
+  const RankFourTensor & a = *this;
+
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          l2 += std::pow(_vals[i][j][k][l], 2);
-  return std::pow(l2, 0.5);
+          l2 += std::pow(a(i,j,k,l), 2);
+
+  return std::sqrt(l2);
 }
 
 RankFourTensor
 RankFourTensor::invSymm() const
 {
-  int error;
-  double *mat;
-
-  RankFourTensor result;
-
   unsigned int ntens = N * (N+1) / 2;
   int nskip = N-1;
+  int error;
+
+  RankFourTensor result;
+  const RankFourTensor & a = *this;
+  std::vector<PetscScalar> mat(ntens * ntens);
 
   // We use the LAPACK matrix inversion routine here.  Form the matrix
   //
@@ -319,7 +373,7 @@ RankFourTensor::invSymm() const
   // mat[33] = C(1,2,0,1)*2
   // mat[34] = C(1,2,0,2)*2
   // mat[35] = C(1,2,1,2)*2
-  mat=(double*)calloc(ntens * ntens, sizeof(double));
+
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
@@ -328,16 +382,16 @@ RankFourTensor::invSymm() const
           if (i==j)
           {
             if (k==l)
-              mat[i*ntens+k] = _vals[i][j][k][l];
+              mat[i*ntens+k] = a(i,j,k,l);
             else
-              mat[i*ntens+nskip+k+l] += _vals[i][j][k][l];
+              mat[i*ntens+nskip+k+l] += a(i,j,k,l);
           }
           else // i!=j
           {
             if (k==l)
-              mat[(nskip+i+j)*ntens+k] = _vals[i][j][k][l];
+              mat[(nskip+i+j)*ntens+k] = a(i,j,k,l);
             else
-              mat[(nskip+i+j)*ntens+nskip+k+l] += _vals[i][j][k][l]; // note the +=, which results in double-counting and is rectified below
+              mat[(nskip+i+j)*ntens+nskip+k+l] += a(i,j,k,l); // note the +=, which results in double-counting and is rectified below
           }
         }
 
@@ -346,7 +400,7 @@ RankFourTensor::invSymm() const
       mat[i*ntens+j] /= 2.0; // because of double-counting above
 
   // use LAPACK to find the inverse
-  error = MatrixInversion(mat, ntens);
+  error = matrixInversion(mat, ntens);
   if (error != 0)
     mooseError("Error in Matrix  Inversion in RankFourTensor");
 
@@ -360,20 +414,19 @@ RankFourTensor::invSymm() const
           if (i==j)
           {
             if (k==l)
-              result(i,j,k,l)=mat[i*ntens+k];
+              result(i,j,k,l) = mat[i*ntens+k];
             else
-              result(i,j,k,l)=mat[i*ntens+nskip+k+l]/2.0;
+              result(i,j,k,l) = mat[i*ntens+nskip+k+l]/2.0;
           }
           else // i!=j
           {
             if (k==l)
-              result(i,j,k,l)=mat[(nskip+i+j)*ntens+k];
+              result(i,j,k,l) = mat[(nskip+i+j)*ntens+k];
             else
-              result(i,j,k,l)=mat[(nskip+i+j)*ntens+nskip+k+l]/2.0;
+              result(i,j,k,l) = mat[(nskip+i+j)*ntens+nskip+k+l]/2.0;
           }
         }
 
-  free(mat);
   return result;
 }
 
@@ -402,7 +455,7 @@ RankFourTensor::rotate(RealTensorValue & R)
 void
 RankFourTensor::print() const
 {
-  const RankFourTensor & s = *this;
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -411,7 +464,7 @@ RankFourTensor::print() const
       for (unsigned int k = 0; k < N; ++k)
       {
         for (unsigned int l = 0; l < N; ++l)
-          Moose::out << std::setw(15) << s(i,j,k,l) << " ";
+          Moose::out << std::setw(15) << a(i,j,k,l) << " ";
 
         Moose::out << std::endl;
       }
@@ -422,12 +475,13 @@ RankFourTensor
 RankFourTensor::transposeMajor() const
 {
   RankFourTensor result;
+  const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          result(i,j,k,l) = _vals[k][l][i][j];
+          result(i,j,k,l) = a(k,l,i,j);
 
   return result;
 }
@@ -510,34 +564,29 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod 
 }
 
 int
-RankFourTensor::MatrixInversion(double* A, int n) const
+RankFourTensor::matrixInversion(std::vector<PetscScalar> & A, int n) const
 {
-  int return_value, buffer_size;
-  int *ipiv, *buffer;
-
-  buffer_size = n * 64;
-
-  ipiv = (int*)calloc(n, sizeof(int));
-  buffer = (int*)calloc(buffer_size, sizeof(int));
+  int return_value,
+      buffer_size = n * 64;
+  std::vector<PetscBLASInt> ipiv(n);
+  std::vector<PetscScalar> buffer(buffer_size);
 
   // Following does a LU decomposition of "square matrix A"
   // upon return "A = P*L*U" if return_value == 0
   // Here i use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
-  FORTRAN_CALL(dgetrf)(&n, &n, A, &n, ipiv, &return_value);
+  LAPACKgetrf_(&n, &n, &A[0], &n, &ipiv[0], &return_value);
 
   if (return_value != 0)
-  {
     // couldn't LU decompose because: illegal value in A; or, A singular
-    free(ipiv);
-    free(buffer);
     return return_value;
-  }
 
   // get the inverse of A
-  FORTRAN_CALL(dgetri)(&n, A, &n, ipiv, buffer, &buffer_size, &return_value);
+#if PETSC_VERSION_LESS_THAN(3,5,0)
+  FORTRAN_CALL(dgetri)(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
+#else
+  LAPACKgetri_(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
+#endif
 
-  free(ipiv);
-  free(buffer);
   return return_value;
 }
 
@@ -696,8 +745,6 @@ RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 81)
     mooseError("To use fillGeneralFromInputVector, your input must have size 81. Yours has size " << input.size());
-
-  zero();
 
   int ind;
   for (unsigned int i = 0; i < N; ++i)

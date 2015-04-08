@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "GapHeatPointSourceMaster.h"
 #include "SystemBase.h"
 #include "PenetrationInfo.h"
@@ -47,8 +53,9 @@ GapHeatPointSourceMaster::addPoints()
 
   _slave_flux.close();
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {

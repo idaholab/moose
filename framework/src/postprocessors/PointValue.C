@@ -29,55 +29,56 @@ PointValue::PointValue(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
-    _mesh(_subproblem.mesh()),
-    _point(getParam<Point>("point")),
-    _point_vec(1, _point),
+    _mesh(_subproblem.mesh().getMesh()),
+    _point_vec(1, getParam<Point>("point")),
     _value(0),
-    _root_id(0)
-{
-}
-
-PointValue::~PointValue()
-{
-}
-
-void
-PointValue::initialize()
+    _root_id(0),
+    _elem_id(DofObject::invalid_id)
 {
 }
 
 void
 PointValue::execute()
 {
-  std::set<MooseVariable *> var_list;
-  var_list.insert(&_var);
+  // Locate the element and store the id
+  // We can't store the actual Element pointer here b/c PointLocatorBase returns a const Elem *
+  AutoPtr<PointLocatorBase> pl = _mesh.sub_point_locator();
+  const Elem * elem = (*pl)(_point_vec[0]);
 
-  AutoPtr<PointLocatorBase> pl = _mesh.getMesh().sub_point_locator();
+  // Error if the element cannot be located
+  if (!elem)
+    mooseError("No element located at " << _point_vec[0] << " in PointValue Postprocessor named: " << _name);
 
-  // First find the element the hit lands in
-  const Elem * elem = (*pl)(_point);
-  mooseAssert(elem, "No element located at the specified point");
+  // Store the element id and processor id that owns the located element
+  _elem_id = elem->id();
   _root_id = elem->processor_id();
+}
+
+void
+PointValue::finalize()
+{
+  // Gather a consist id for broadcasting the computed value
+  gatherMin(_root_id);
 
   // Compute the value at the point
-  if (elem && elem->processor_id() == processor_id())
+  if (_root_id == processor_id())
   {
+    const Elem * elem = _mesh.elem(_elem_id);
+    std::set<MooseVariable *> var_list;
+    var_list.insert(&_var);
+
     _fe_problem.setActiveElementalMooseVariables(var_list, _tid);
     _subproblem.reinitElemPhys(elem, _point_vec, 0);
     mooseAssert(_u.size() == 1, "No values in u!");
-    _value = variableValue();
+    _value = _u[0];
   }
+
+  // Make sure all processors have the correct computed values
+  _communicator.broadcast(_value, _root_id);
 }
 
 Real
 PointValue::getValue()
 {
-  _communicator.broadcast(_value, _root_id);
   return _value;
-}
-
-Real
-PointValue::variableValue()
-{
-  return _u[0];
 }

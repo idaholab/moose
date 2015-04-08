@@ -21,15 +21,38 @@ template<>
 InputParameters validParams<NumNonlinearIterations>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
+  params.addParam<bool>("accumulate_over_step", false, "When set to true, accumulates to count the total over all Picard iterations for each step");
   return params;
 }
 
 NumNonlinearIterations::NumNonlinearIterations(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
-{}
+    GeneralPostprocessor(name, parameters),
+    _fe_problem(dynamic_cast<FEProblem *>(&_subproblem)),
+    _accumulate_over_step(getParam<bool>("accumulate_over_step")),
+    _num_iters(0),
+    _time(-std::numeric_limits<Real>::max())
+{
+  if (!_fe_problem)
+    mooseError("Couldn't cast to FEProblem");
+}
+
+void
+NumNonlinearIterations::timestepSetup()
+{
+  if (_fe_problem->time() != _time)
+  {
+    _num_iters = 0;
+    _time = _fe_problem->time();
+  }
+}
 
 Real
 NumNonlinearIterations::getValue()
 {
-  return _subproblem.nNonlinearIterations();
+  if (_accumulate_over_step)
+    _num_iters += _subproblem.nNonlinearIterations();
+  else
+    _num_iters = _subproblem.nNonlinearIterations();
+
+  return _num_iters;
 }

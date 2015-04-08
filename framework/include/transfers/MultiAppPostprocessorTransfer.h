@@ -35,9 +35,18 @@ public:
 
   virtual void execute();
 
+  enum
+  {
+    AVERAGE,
+    SUM,
+    MAXIMUM,
+    MINIMUM
+  };
+
 protected:
   PostprocessorName _from_pp_name;
   PostprocessorName _to_pp_name;
+  MooseEnum _reduction_type;
 };
 
 #endif /* MULTIAPPPOSTPROCESSORTRANSFER_H */

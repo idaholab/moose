@@ -27,12 +27,14 @@ include $(FRAMEWORK_DIR)/moose.mk
 ################################## MODULES ####################################
 SOLID_MECHANICS   := yes
 TENSOR_MECHANICS  := yes
+PHASE_FIELD       := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
 APPLICATION_DIR  := $(MOOSE_DIR)/unit
 APPLICATION_NAME := moose-unit
 BUILD_EXEC       := yes
+app_BASE_DIR     :=      # Intentionally blank
 DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include $(FRAMEWORK_DIR)/app.mk
 

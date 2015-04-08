@@ -15,11 +15,13 @@
 #ifndef BOUNDARYRESTRICTABLE_H
 #define BOUNDARYRESTRICTABLE_H
 
+// MOOSE includes
 #include "InputParameters.h"
 #include "MooseTypes.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
+// Forward declarations
 class BoundaryRestrictable;
 
 template<>
@@ -47,10 +49,18 @@ public:
    * Class constructor
    * Populates the _bnd_ids for the given boundary names supplied
    * with the 'boundary' input parameter
-   * @param name Name of this object
    * @param parameters The input parameters
    */
-  BoundaryRestrictable(const std::string name, InputParameters & parameters);
+  BoundaryRestrictable(const InputParameters & parameters);
+
+  /**
+   * Class constructor
+   * Populates the 'block' input parameters when an object is also block restricted,
+   * see the general class documentation for details.
+   * @param parameters The input parameters (see the detailed help for additional information)
+   * @param block_ids The block ids that the object is restricted to
+   */
+  BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids);
 
   /**
    * Empty class destructor
@@ -148,10 +158,10 @@ public:
   template<typename T>
   bool hasBoundaryMaterialProperty(const std::string & name) const;
 
-  bool boundaryRestricted()
-    {
-      return _boundary_restricted;
-    }
+  /**
+   * Returns true if this object has been restricted to a boundary
+   */
+  bool boundaryRestricted() { return _boundary_restricted; }
 
 private:
 
@@ -173,7 +183,19 @@ private:
   /// Invalid BoundaryID for case when FEProblem
   const BoundaryID _invalid_boundary_id;
 
+  /// Flag indicating if the class is boundary restricted
   bool _boundary_restricted;
+
+  /// An empty set for referencing when block_ids is not included
+  const std::set<SubdomainID> _empty_block_ids;
+
+  /// Reference to the block_ids, defaults to an empty set if not provided
+  const std::set<SubdomainID> & _block_ids;
+
+  /**
+   * An initialization routine needed for dual constructors
+   */
+  void initializeBoundaryRestrictable(const InputParameters & parameters);
 
 protected:
 

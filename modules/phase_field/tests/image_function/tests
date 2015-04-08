@@ -6,6 +6,13 @@
     exodiff = image_2d_out.e
     vtk = true
   [../]
+  [./2d_elemental]
+    # Test ability to read in a single 20x20 image
+    type = Exodiff
+    input = image_2d_elemental.i
+    exodiff = image_2d_elemental_out.e
+    vtk = true
+  [../]
   [./3d]
     # Test ability to read in stack of 20x20 images
     type = Exodiff
@@ -101,6 +108,20 @@
     type = Exodiff
     input = crop.i
     exodiff = crop_out.e
+    vtk = true
+  [../]
+  [./image_mesh_3d]
+    # Tests ability to read a stack of 3D images into a Mesh
+    type = Exodiff
+    input = image_mesh_3d.i
+    exodiff = image_mesh_3d_out.e
+    vtk = true
+  [../]
+  [./image_mesh_2d]
+    # Tests ability to read a 2D image into a Mesh
+    type = Exodiff
+    input = image_mesh_2d.i
+    exodiff = image_mesh_2d_out.e
     vtk = true
   [../]
 []

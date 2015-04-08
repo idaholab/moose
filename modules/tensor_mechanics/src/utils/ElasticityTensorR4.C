@@ -1,4 +1,16 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ElasticityTensorR4.h"
+
+template<>
+void mooseSetToZero<ElasticityTensorR4>(ElasticityTensorR4 & v)
+{
+  v.zero();
+}
 
 ElasticityTensorR4::ElasticityTensorR4() :
     RankFourTensor()

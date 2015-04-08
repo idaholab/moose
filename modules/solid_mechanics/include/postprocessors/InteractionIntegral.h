@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef INTERACTIONINTEGRAL_H
 #define INTERACTIONINTEGRAL_H
 
@@ -46,6 +52,7 @@ protected:
   std::string _aux_strain_name;
   MaterialProperty<ColumnMajorMatrix> & _aux_strain;
   Real _K_factor;
+  bool _has_symmetry_plane;
 };
 
 #endif //INTERACTIONINTEGRAL_H

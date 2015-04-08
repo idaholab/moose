@@ -1,8 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  # Yes we want a slightly irregular grid
+  nx = 11
+  ny = 11
 []
 
 [Variables]
@@ -47,18 +48,15 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
 [MultiApps]
   [./sub]
     app_type = MooseTestApp
     positions = '0.5 0.5 0 0.7 0.7 0'
-    execute_on = timestep
+    execute_on = timestep_end
     type = TransientMultiApp
     input_files = sub.i
   [../]
@@ -69,7 +67,6 @@
     source_variable = u
     direction = to_multiapp
     variable = from_master
-    execute_on = timestep
     type = MultiAppVariableValueSampleTransfer
     multi_app = sub
   [../]

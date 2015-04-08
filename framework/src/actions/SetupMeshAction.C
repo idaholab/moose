@@ -42,9 +42,12 @@ InputParameters validParams<SetupMeshAction>()
 
   params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
 
+  params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned. This may cause large load imbalanced but is currently required if you "
+                                                    "have a simulation containing uniform refinement, adaptivity and stateful material properties");
+
   // groups
   params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation patch_size", "Advanced");
-  params.addParamNamesToGroup("second_order construct_side_list_from_node_list", "Advanced");
+  params.addParamNamesToGroup("second_order construct_side_list_from_node_list skip_partitioning", "Advanced");
   params.addParamNamesToGroup("block_id block_name boundary_id boundary_name", "Add Names");
 
   return params;
@@ -59,6 +62,7 @@ void
 SetupMeshAction::setupMesh(MooseMesh *mesh)
 {
   std::vector<BoundaryName> ghosted_boundaries = getParam<std::vector<BoundaryName> >("ghosted_boundaries");
+
   for (unsigned int i=0; i<ghosted_boundaries.size(); i++)
     mesh->addGhostedBoundary(mesh->getBoundaryID(ghosted_boundaries[i]));
 
@@ -81,7 +85,7 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   // Did they specify extra refinement levels on the command-line?
   level += _app.getParam<unsigned int>("refinements");
 
-  mesh->uniformRefineLevel() = level;
+  mesh->setUniformRefineLevel(level);
 #endif //LIBMESH_ENABLE_AMR
 
   // Add entity names to the mesh
@@ -122,21 +126,24 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   }
 
   if (getParam<bool>("construct_side_list_from_node_list"))
-    mesh->getMesh().boundary_info->build_side_list_from_node_list();
+    mesh->getMesh().get_boundary_info().build_side_list_from_node_list();
 
+  // Here we can override the partitioning for special cases
+  if (getParam<bool>("skip_partitioning"))
+    mesh->getMesh().skip_partitioning(getParam<bool>("skip_partitioning"));
 }
 
 void
 SetupMeshAction::act()
 {
   // Create the mesh object and tell it to build itself
-  _mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create_shared_ptr(_type, "mesh", _moose_object_pars));
+  _mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create(_type, "mesh", _moose_object_pars));
   _mesh->init();
 
   if (isParamValid("displacements"))
   {
     // Create the displaced mesh
-    _displaced_mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create_shared_ptr(_type, "displaced_mesh", _moose_object_pars));
+    _displaced_mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create(_type, "displaced_mesh", _moose_object_pars));
     _displaced_mesh->init();
 
     std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");

@@ -43,6 +43,7 @@ InputParameters validParams<AddVariableAction>()
 
   // Define the general input options
   InputParameters params = validParams<Action>();
+  params += validParams<OutputInterface>();
   params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
   params.addParam<MooseEnum>("order", orders,  "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
   params.addParam<Real>("initial_condition", 0.0, "Specifies the initial condition for this variable");
@@ -51,13 +52,14 @@ InputParameters validParams<AddVariableAction>()
 
   // Advanced input options
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
-  params.addParamNamesToGroup("scaling", "Advanced");
+  params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   return params;
 }
 
 AddVariableAction::AddVariableAction(const std::string & name, InputParameters params) :
     Action(name, params),
+    OutputInterface(params, false),
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
     _scalar_var(_fe_type.family == SCALAR)

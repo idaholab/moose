@@ -3,6 +3,11 @@
   dim = 2
   nx = 2
   ny = 2
+
+  # We found that the Metis partitioner sometimes partitioned this 2x2
+  # mesh differently on Mac vs. Linux?
+  partitioner = centroid
+  centroid_partitioner_direction = x
 []
 
 [Variables]
@@ -57,9 +62,6 @@
 [Outputs]
   output_initial = true
   vtk = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

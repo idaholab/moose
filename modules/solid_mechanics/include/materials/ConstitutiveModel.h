@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef CONSTITUTIVEMODEL_H
 #define CONSTITUTIVEMODEL_H
 
@@ -46,9 +52,11 @@ protected:
   VariableValue & _temperature;
   VariableValue & _temperature_old;
   const Real _alpha;
-  Function * const _alpha_function;
-  const bool _has_stress_free_temp;
-  const Real _stress_free_temp;
+  Function * _alpha_function;
+  bool _has_stress_free_temp;
+  Real _stress_free_temp;
+  bool _mean_alpha_function;
+  Real _ref_temp;
 
 private:
   using Material::computeProperties;

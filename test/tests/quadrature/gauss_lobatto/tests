@@ -1,0 +1,7 @@
+[Tests]
+  [./gauss_lobatto]
+    type = CSVDiff
+    input = 'gauss_lobatto.i'
+    csvdiff = 'gauss_lobatto_out.csv'
+  [../]
+[]

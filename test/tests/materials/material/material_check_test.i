@@ -9,6 +9,15 @@
   ny = 4
 []
 
+[MeshModifiers]
+  [./block_1]
+    type = SubdomainBoundingBox
+    top_right = '0.5 0.5 0'
+    bottom_left = '0 0 0'
+    block_id = 1
+  [../]
+[]
+
 [Variables]
   [./u]
     order = FIRST
@@ -71,12 +80,9 @@
 [Outputs]
   file_base = out
   output_initial = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
   [../]
 []

@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "Pressure.h"
 #include "Function.h"
 #include "MooseError.h"
@@ -33,8 +39,6 @@ Pressure::Pressure(const std::string & name, InputParameters parameters)
 
     mooseError( errMsg.str() );
   }
-
-  mooseAssert( getParam<FunctionName>("function") == "" || _function, "Function not found" );
 }
 
 Real

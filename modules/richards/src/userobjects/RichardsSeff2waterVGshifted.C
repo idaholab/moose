@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  shifted van-Genuchten water effective saturation as a function of (Pwater, Pgas), and its derivs wrt to that pressure
 //
@@ -19,10 +22,10 @@ InputParameters validParams<RichardsSeff2waterVGshifted>()
 }
 
 RichardsSeff2waterVGshifted::RichardsSeff2waterVGshifted(const std::string & name, InputParameters parameters) :
-  RichardsSeff(name, parameters),
-  _al(getParam<Real>("al")),
-  _m(getParam<Real>("m")),
-  _shift(getParam<Real>("shift"))
+    RichardsSeff(name, parameters),
+    _al(getParam<Real>("al")),
+    _m(getParam<Real>("m")),
+    _shift(getParam<Real>("shift"))
 {
   _scale = RichardsSeffVG::seff(-_shift, _al, _m);
 }
@@ -38,7 +41,7 @@ RichardsSeff2waterVGshifted::seff(std::vector<VariableValue *> p, unsigned int q
 }
 
 void
-RichardsSeff2waterVGshifted::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
+RichardsSeff2waterVGshifted::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> & result) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
   negpc = negpc - _shift;
@@ -47,7 +50,7 @@ RichardsSeff2waterVGshifted::dseff(std::vector<VariableValue *> p, unsigned int 
 }
 
 void
-RichardsSeff2waterVGshifted::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
+RichardsSeff2waterVGshifted::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
   negpc = negpc - _shift;

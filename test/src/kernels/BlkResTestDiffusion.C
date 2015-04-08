@@ -1,3 +1,16 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 #include "BlkResTestDiffusion.h"
 #include "MooseEnum.h"
 #include "MooseTypes.h"
@@ -31,6 +44,7 @@ InputParameters & modifyParams(InputParameters & params)
     params.suppressParameter<std::vector<SubdomainName> >("block");
     params.suppressParameter<FEProblem*>("_fe_problem");
     params.suppressParameter<NonlinearVariableName>("variable");
+    params.set<FEProblem*>("_fe_problem") = NULL;
     params.set<MooseMesh*>("_mesh") = NULL;
     break;
 

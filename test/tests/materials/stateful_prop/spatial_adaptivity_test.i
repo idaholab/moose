@@ -4,6 +4,8 @@
   nx = 2
   ny = 2
   uniform_refine = 3
+  # This option is necessary if you have uniform refinement + stateful material properties + adaptivity
+  skip_partitioning = true
 []
 
 [Variables]
@@ -90,6 +92,6 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []

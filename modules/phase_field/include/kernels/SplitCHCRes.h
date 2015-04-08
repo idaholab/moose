@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef SPLITCHCRES_H
 #define SPLITCHCRES_H
 
@@ -20,7 +26,6 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-private:
   std::string _kappa_name;
   MaterialProperty<Real> & _kappa;
   unsigned int _w_var;

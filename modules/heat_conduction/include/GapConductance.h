@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef GAPCONDUCTANCE_H
 #define GAPCONDUCTANCE_H
 
@@ -15,12 +21,17 @@ public:
 
   virtual ~GapConductance(){}
 
-  static Real gapLength(Real distance, Real min_gap, Real max_gap);
+  static Real gapLength(const Moose::CoordinateSystemType & system, Real radius, Real r1, Real r2, Real min_gap, Real max_gap);
+
+  static Real gapRect(Real distance, Real min_gap, Real max_gap);
 
   static Real gapCyl( Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
 
+  static Real gapSphere( Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
+
 protected:
 
+  virtual void computeProperties();
   virtual void computeQpProperties();
 
   /**
@@ -40,6 +51,9 @@ protected:
   const std::string _appended_property_name;
 
   const VariableValue & _temp;
+
+  bool _gap_type_set;
+  Moose::CoordinateSystemType _gap_type;
 
   bool _quadrature;
 
@@ -65,9 +79,6 @@ protected:
 
   Real _min_gap;
   Real _max_gap;
-  const bool _cylindrical_gap;
-  Real _min_denom;
-  Real _max_denom;
 
   MooseVariable * _temp_var;
   PenetrationLocator * _penetration_locator;

@@ -86,9 +86,6 @@
 [Outputs]
   [./screen]
     type = Console
-    output_initial = false
-    fit_mode = 100
-    linear_residuals = true
   [../]
   [./screen2]
     type = Console

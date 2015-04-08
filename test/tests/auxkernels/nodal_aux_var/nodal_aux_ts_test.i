@@ -73,7 +73,7 @@
     type = CoupledAux
     value = 2
     coupled = u
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -111,8 +111,5 @@
   file_base = out_ts
   exodus = true
   output_initial = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

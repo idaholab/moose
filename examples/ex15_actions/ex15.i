@@ -17,12 +17,11 @@
   [../]
 []
 
-# This is our new custom Convection Diffusion "Meta" block
-# that adds multiple kernels into our simulation
-#
-# Convection and Diffusion kernels on the first variable
-# Diffusion kernel on the second variable
-# The Convection kernel is coupled to the Diffusion kernel on the second variable
+#This is our new custom Convection Diffusion "Meta" block
+#that adds multiple kernels into our simulation
+#Convection and Diffusion kernels on the first variable
+#Diffusion kernel on the second variable
+#The Convection kernel is coupled to the Diffusion kernel on the second variable
 [ConvectionDiffusion]
     variables = 'convected diffused'
 []
@@ -74,9 +73,6 @@
 [Outputs]
   file_base = out
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

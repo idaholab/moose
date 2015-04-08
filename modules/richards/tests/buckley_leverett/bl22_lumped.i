@@ -244,17 +244,11 @@
 
 [Outputs]
   file_base = bl22_lumped
+  print_perf_log = true
   [./exodus]
     type = Exodus
-    output_initial = true
     interval = 100000
-    output_final = true
     hide = 'pgas bounds_dummy'
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-    nonlinear_residuals = false
+    output_on = 'initial final timestep_end'
   [../]
 []

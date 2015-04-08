@@ -1,6 +1,6 @@
 #
 # Test the non-split parsed function free enery Cahn-Hilliard Bulk kernel
-# The free energy used here has teh same functional form as the CHPoly kernel
+# The free energy used here has the same functional form as the CHPoly kernel
 # If everything works, the output of this test should replicate the output
 # of marmot/tests/chpoly_test/CHPoly_test.i (exodiff match)
 #
@@ -97,12 +97,7 @@
 [Outputs]
   output_initial = true
   interval = 1
-
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
-
+  print_perf_log = true
   [./OverSampling]
     type = Exodus
     refinements = 1

@@ -274,7 +274,7 @@ dataLoad(std::istream & stream, const Elem * & e, void * context)
   // Moose::out<<"Elem pointer load"<<std::endl;
 
   // TODO: Write out the unique ID of this element
-  dof_id_type id;
+  dof_id_type id = libMesh::DofObject::invalid_id;
 
   loadHelper(stream, id, context);
 
@@ -304,7 +304,7 @@ dataLoad(std::istream & stream, const Node * & n, void * context)
   // Moose::out<<"Node pointer load"<<std::endl;
 
   // TODO: Write out the unique ID of this nodeent
-  dof_id_type id;
+  dof_id_type id = libMesh::DofObject::invalid_id;
 
   loadHelper(stream, id, context);
 
@@ -339,7 +339,7 @@ dataLoad(std::istream & stream, Elem * & e, void * context)
   // Moose::out<<"Elem pointer load"<<std::endl;
 
   // TODO: Write out the unique ID of this element
-  dof_id_type id;
+  dof_id_type id = libMesh::DofObject::invalid_id;
 
   loadHelper(stream, id, context);
 
@@ -369,7 +369,7 @@ dataLoad(std::istream & stream, Node * & n, void * context)
   // Moose::out<<"Node pointer load"<<std::endl;
 
   // TODO: Write out the unique ID of this nodeent
-  dof_id_type id;
+  dof_id_type id = libMesh::DofObject::invalid_id;
 
   loadHelper(stream, id, context);
 

@@ -135,14 +135,14 @@ class XMLDiffer(object):
       return
 
     # Loop through each tree object in the master file
-    for elem0 in root[0].iter():
+    for elem0 in root[0].getiterator():
 
       # Intialize the result and error storage
       results = []
       errors  = []
 
       # Loop through all blocks in the second file with the current tag
-      for elem1 in root[1].iter(elem0.tag):
+      for elem1 in root[1].getiterator(elem0.tag):
 
         # Perform the comparision
         r, e = self._compareBlock(elem0, elem1)

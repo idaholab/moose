@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "ConstitutiveModel.h"
 
 template<>
@@ -15,6 +21,9 @@ InputParameters validParams<ConstitutiveModel>()
   params.addParam<Real>("thermal_expansion", "The thermal expansion coefficient.");
   params.addParam<FunctionName>("thermal_expansion_function", "Thermal expansion coefficient as a function of temperature.");
   params.addParam<Real>("stress_free_temperature", "The stress-free temperature.  If not specified, the initial temperature is used.");
+  params.addParam<Real>("thermal_expansion_reference_temperature", "Reference temperature for mean thermal expansion function.");
+  MooseEnum cte_function_type("instantaneous mean");
+  params.addParam<MooseEnum>("thermal_expansion_function_type", cte_function_type, "Type of thermal expansion function.  Choices are: "+cte_function_type.getRawNames());
 
   return params;
 }
@@ -29,8 +38,37 @@ ConstitutiveModel::ConstitutiveModel( const std::string & name,
    _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
    _alpha_function( parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
    _has_stress_free_temp(isParamValid("stress_free_temperature")),
-   _stress_free_temp(_has_stress_free_temp ? getParam<Real>("stress_free_temperature") : 0.0)
-{}
+   _stress_free_temp(_has_stress_free_temp ? getParam<Real>("stress_free_temperature") : 0.0),
+   _ref_temp(0.0)
+{
+  if (parameters.isParamValid("thermal_expansion_function_type"))
+  {
+    if (!_alpha_function)
+      mooseError("thermal_expansion_function_type can only be set when thermal_expansion_function is used");
+    MooseEnum tec = getParam<MooseEnum>("thermal_expansion_function_type");
+    if (tec == "mean")
+      _mean_alpha_function = true;
+    else if (tec == "instantaneous")
+      _mean_alpha_function = false;
+    else
+      mooseError("Invalid option for thermal_expansion_function_type");
+  }
+  else
+    _mean_alpha_function = false;
+
+  if (parameters.isParamValid("thermal_expansion_reference_temperature"))
+  {
+    if (!_alpha_function)
+      mooseError("thermal_expansion_reference_temperature can only be set when thermal_expansion_function is used");
+    if (!_mean_alpha_function)
+      mooseError("thermal_expansion_reference_temperature can only be set when thermal_expansion_function_type = mean");
+    _ref_temp = getParam<Real>("thermal_expansion_reference_temperature");
+    if (!_has_temp)
+      mooseError("Cannot specify thermal_expansion_reference_temperature without coupling to temperature");
+  }
+  else if (_mean_alpha_function)
+    mooseError("Must specify thermal_expansion_reference_temperature if thermal_expansion_function_type = mean");
+}
 
 void
 ConstitutiveModel::computeStress( const Elem & /*current_elem*/,
@@ -54,30 +92,57 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
                                       SymmTensor & strain_increment,
                                       SymmTensor & d_strain_dT)
 {
-  bool modified = false;
   if ( _has_temp && _t_step != 0 )
   {
-    Real tStrain;
-    Real alpha(_alpha);
+    Real inc_thermal_strain;
+    Real d_thermal_strain_d_temp;
+
+    Real old_temp;
+    if (_t_step == 1 && _has_stress_free_temp)
+      old_temp = _stress_free_temp;
+    else
+      old_temp = _temperature_old[qp];
+
+    Real current_temp = _temperature[qp];
+
+    Real delta_t = current_temp - old_temp;
+
+    Real alpha = _alpha;
+
     if (_alpha_function)
     {
       Point p;
-      alpha = _alpha_function->value(_temperature[qp],p);
-    }
-    if (alpha != 0)
-    {
-      modified = true;
-    }
-    if (_t_step == 1 && _has_stress_free_temp)
-    {
-      tStrain = alpha * (_temperature[qp] - _stress_free_temp);
+      Real alpha_current_temp = _alpha_function->value(current_temp,p);
+      Real alpha_old_temp = _alpha_function->value(old_temp,p);
+
+      if (_mean_alpha_function)
+      {
+        Real small(1e-6);
+
+        Real numerator = alpha_current_temp * (current_temp - _ref_temp) - alpha_old_temp * (old_temp - _ref_temp);
+        Real denominator = 1.0 + alpha_old_temp * (old_temp - _ref_temp);
+        if (denominator < small)
+          mooseError("Denominator too small in thermal strain calculation");
+        inc_thermal_strain = numerator / denominator;
+        d_thermal_strain_d_temp = alpha_current_temp * (current_temp - _ref_temp);
+      }
+      else
+      {
+        inc_thermal_strain = delta_t * 0.5 * (alpha_current_temp + alpha_old_temp);
+        d_thermal_strain_d_temp = alpha_current_temp;
+      }
     }
     else
     {
-      tStrain = alpha * (_temperature[qp] - _temperature_old[qp]);
+      inc_thermal_strain = delta_t * alpha;
+      d_thermal_strain_d_temp = alpha;
     }
-    strain_increment.addDiag( -tStrain );
-    d_strain_dT.addDiag( -alpha );
+
+    strain_increment.addDiag( -inc_thermal_strain );
+    d_strain_dT.addDiag( -d_thermal_strain_d_temp );
+
   }
+
+  bool modified = true;
   return modified;
 }

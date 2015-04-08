@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #include "RichardsMultiphaseProblem.h"
 
@@ -78,7 +81,7 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number>& vec_solution, N
 
     // dofs[0] is the dof number of the bounded variable at this node
     // dofs[1] is the dof number of the lower variable at this node
-    std::vector<unsigned int> dofs(2);
+    std::vector<dof_id_type> dofs(2);
     dofs[0] = node.dof_number(sys_num, _bounded_var_num, 0);
     dofs[1] = node.dof_number(sys_num, _lower_var_num, 0);
 

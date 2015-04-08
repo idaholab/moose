@@ -30,7 +30,7 @@
     property = bar
     variable = foo
     boundary = right
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -70,8 +70,5 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
 []

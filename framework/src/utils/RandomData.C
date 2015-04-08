@@ -17,7 +17,7 @@
 #include "MooseMesh.h"
 #include "RandomInterface.h"
 
-const unsigned int MASTER = std::numeric_limits<dof_id_type>::max();
+const unsigned int MASTER = std::numeric_limits<unsigned int>::max();
 
 RandomData::RandomData(FEProblem &problem, const RandomInterface & random_interface) :
     _rd_problem(problem),
@@ -52,9 +52,9 @@ RandomData::updateSeeds(ExecFlagType exec_flag)
     _new_seed = _master_seed + _rd_problem.timeStep();
   /**
    * case EXEC_TIMESTEP_BEGIN:   // reset and advance every timestep
-   * case EXEC_TIMESTEP:         // reset and advance every timestep
-   * case EXEC_RESIDUAL:         // Reset every residual, advance every timestep
-   * case EXEC_JACOBIAN:         // Reset every Jacobian, advance every timestep
+   * case EXEC_TIMESTEP_END:     // reset and advance every timestep
+   * case EXEC_LINEAR:           // Reset every residual, advance every timestep
+   * case EXEC_NONLINEAR:        // Reset every Jacobian, advance every timestep
    */
 
   // If the _new_seed has been updated, we need to update all of the generators
@@ -106,7 +106,7 @@ RandomData::updateGenerators()
       _seeds[id] = _generator.randl(MASTER);
 
       // Update the individual dof object generators
-      _generator.seed(id, _seeds[id]);
+      _generator.seed(static_cast<unsigned int>(id), _seeds[id]);
     }
   }
   else
@@ -120,7 +120,7 @@ RandomData::updateGenerators()
       _seeds[id] = _generator.randl(MASTER);
 
       // Update the individual dof object generators
-      _generator.seed(id, _seeds[id]);
+      _generator.seed(static_cast<unsigned int>(id), _seeds[id]);
     }
   }
 

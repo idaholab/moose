@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef JINTEGRAL_H
 #define JINTEGRAL_H
 
@@ -33,6 +39,8 @@ protected:
   MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
   bool _convert_J_to_K;
+  bool _has_symmetry_plane;
+  Real _poissons_ratio;
   Real _youngs_modulus;
 
 };

@@ -9,7 +9,8 @@
     # Tests if the header line for the postprocessor values table is correct
     type = RunApp
     input = 'console.i'
-    expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
+    expect_out = '| time           | num_aux        | num_vars       |'
+    match_literal = True
   [../]
   [./scalar_variables]
     # Test that the first header line for the wrapped scalar AuxVariable table is correct
@@ -32,6 +33,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_system_information_out'
     check_files = 'console_file_system_information_out.txt'
     file_expect_out = 'Num\s*DOFs:\s*242'
+    recover = false
   [../]
   [./file_postprocessor]
     # Test that file contains regex
@@ -40,6 +42,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_postprocessor_out'
     check_files = 'console_file_postprocessor_out.txt'
     file_expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
+    recover = false
   [../]
   [./file_scalar_aux]
     # Test that file contains regex
@@ -48,6 +51,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_scalar_aux_out'
     check_files = 'console_file_scalar_aux_out.txt'
     file_expect_out = '\| time\s*?\| aux0_0\s*?\|\n'
+    recover = false
   [../]
   [./file_solve_log]
     # Test that file contains regex
@@ -56,6 +60,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/solve_log=true Outputs/screen/file_base=console_file_solve_log_out'
     check_files = 'console_file_solve_log_out.txt'
     file_expect_out = 'Moose\sTest\sPerformance:'
+    recover = false
   [../]
   [./file_setup_log]
     # Test that file contains regex
@@ -64,6 +69,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/setup_log=true Outputs/screen/file_base=console_file_setup_log_out'
     check_files = 'console_file_setup_log_out.txt'
     file_expect_out = 'Setup\sPerformance:'
+    recover = false
   [../]
   [./norms]
     # Test that the variable norms are being output
@@ -89,7 +95,7 @@
     # Test the used of MooseObject::_console method
     type = RunApp
     input = 'moose_console.i'
-    expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0.4; t_step = 4'
+    expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0\.4; t_step = 4'
   [../]
   [./_console_const]
     # Test the used of MooseObject::_console method from a constant method
@@ -102,6 +108,44 @@
     type = RunApp
     input = 'console.i'
     cli_args = '--show-input'
-    expect_out = '[./screen]'
+    expect_out = '\[\./screen\]'
+  [../]
+  [./print_linear_residuals]
+    # Tests that flag is working to show linear residuals from the top level
+    type = RunApp
+    input = 'console_print_toggles.i'
+    expect_out = '0\sLinear'
+    cli_args = 'Outputs/print_linear_residuals=true'
+  [../]
+  [./print_linear_residuals_disable]
+    # Tests that using 'output_on' inside console disables flag to show linear residuals
+    type = RunApp
+    input = 'console_print_toggles.i'
+    expect_out = '\s*0\sNonlinear.*?\n\s*1\sNonlinear'
+    valgrind = NONE
+    cli_args = "Outputs/print_linear_residuals=true Outputs/console/output_on='nonlinear final failed timestep_end'"
+  [../]
+  [./print_perf_log]
+    # Tests that flag is working to show performace log from the top level
+    type = RunApp
+    input = 'console_print_toggles.i'
+    expect_out = 'Moose Test Performance'
+    cli_args = 'Outputs/print_perf_log=true'
+  [../]
+  [./print_perf_log_disable]
+    # Tests that perf log is disabled flag when console level flag is set to false
+    type = RunApp
+    input = 'console_print_toggles.i'
+    expect_out = '\s*2\sNonlinear.*?\n\s*\n\Z'
+    valgrind = NONE
+    # Note the "--disable-perflog" cli option is for libMesh currently NOT MOOSE
+    cli_args = '--disable-perflog Outputs/print_perf_log=true Outputs/console/perf_log=false'
+    method = 'opt oprof' # debug prints some extra stuff at the end that messes up the regex
+  [../]
+  [./additional_output_on]
+    # Test use of 'additional_output_on' parameter
+    type = RunApp
+    input = 'additional_output_on.i'
+    expect_out = 'Time\sStep\s*0'
   [../]
 []

@@ -18,24 +18,26 @@ template<>
 InputParameters validParams<InversePowerMethod>()
 {
   InputParameters params = validParams<EigenExecutionerBase>();
+  params.addParam<PostprocessorName>("xdiff", "To evaluate |x-x_previous| for power iterations");
   params.addParam<unsigned int>("max_power_iterations", 300, "The maximum number of power iterations");
   params.addParam<unsigned int>("min_power_iterations", 1, "Minimum number of power iterations");
   params.addParam<Real>("eig_check_tol", 1e-6, "Eigenvalue convergence tolerance");
+  params.addParam<Real>("sol_check_tol", std::numeric_limits<Real>::max(), "|x-x_previous| convergence tolerance");
   params.addParam<Real>("pfactor", 1e-2, "Reduce residual norm per power iteration by this factor");
   params.addParam<bool>("Chebyshev_acceleration_on", true, "If Chebyshev acceleration is turned on");
   params.addParam<Real>("k0", 1.0, "Initial guess of the eigenvalue");
-  params.addParam<bool>("output_pi_history", false, "True to output solutions durint PI");
   return params;
 }
 
 InversePowerMethod::InversePowerMethod(const std::string & name, InputParameters parameters)
     :EigenExecutionerBase(name, parameters),
+     _solution_diff(isParamValid("xdiff") ? &getPostprocessorValue("xdiff") : NULL),
      _min_iter(getParam<unsigned int>("min_power_iterations")),
      _max_iter(getParam<unsigned int>("max_power_iterations")),
      _eig_check_tol(getParam<Real>("eig_check_tol")),
+     _sol_check_tol(getParam<Real>("sol_check_tol")),
      _pfactor(getParam<Real>("pfactor")),
-     _cheb_on(getParam<bool>("Chebyshev_acceleration_on")),
-     _output_pi(getParam<bool>("output_pi_history"))
+     _cheb_on(getParam<bool>("Chebyshev_acceleration_on"))
 {
   _eigenvalue = getParam<Real>("k0");
   addRealParameterReporter("eigenvalue");
@@ -43,11 +45,6 @@ InversePowerMethod::InversePowerMethod(const std::string & name, InputParameters
   if (_max_iter<_min_iter) mooseError("max_power_iterations<min_power_iterations!");
   if (_eig_check_tol<0.0) mooseError("eig_check_tol<0!");
   if (_pfactor<0.0) mooseError("pfactor<0!");
-  if (getParam<bool>("output_on_final") && _output_pi)
-  {
-    mooseWarning("Only final solution will be outputted, output_pi_history=true will be ignored!");
-    _output_pi = false;
-  }
 }
 
 void
@@ -69,15 +66,14 @@ InversePowerMethod::takeStep()
   preSolve();
   // we currently do not check the solution difference
   Real initial_res;
-  Real t0 = _problem.timeStep();
-  inversePowerIteration(_min_iter, _max_iter, _pfactor, _cheb_on, _eig_check_tol,
-                        std::numeric_limits<Real>::max(), true, _output_pi, t0,
+  inversePowerIteration(_min_iter, _max_iter, _pfactor, _cheb_on, _eig_check_tol, true,
+                        getParam<PostprocessorName>("xdiff"), _sol_check_tol,
                         _eigenvalue, initial_res);
   postSolve();
   printEigenvalue();
 
-  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+  _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
   _problem.onTimestepEnd();
-  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+  _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
 }

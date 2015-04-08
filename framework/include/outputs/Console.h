@@ -55,17 +55,15 @@ public:
   virtual void initialSetup();
 
   /**
-   * Timestep function
-   * Runs at the beginning of each timestep and prints the timestep, time, and dt information
-   */
-  virtual void timestepSetup();
-
-  /**
-   * Adds a outputting of nonlinear/linear residual printing to the base class output() method
+   * Customizes the order of output for the various components as well as adds additional
+   * output such as timestep information and nonlinear/linear residual information
    *
-   * @see petscOutput
+   * This method explicitly re-implements portions of AdvancedOutput::output, which is generally not
+   * recommended. This is done here to get the output ordering desired. If additional output types
+   * (e.g., elemental or nodal) are required in the future this calls will need to be explicitly added
+   * as well.
    */
-  virtual void output();
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Creates the output file name
@@ -90,7 +88,7 @@ public:
   static void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr);
 
   /// Width used for printing simulation information
-  static const unsigned int _field_width = 25;
+  static const unsigned int _field_width = 27;
 
   /// Line length for printing simulation information
   static const unsigned int _line_length = 100;
@@ -124,6 +122,10 @@ protected:
    */
   std::string outputNorm(Real old_norm, Real norm);
 
+  /**
+   * Prints the time step information for the screen output
+   */
+  void writeTimestepInformation();
 
   /**
    * Write message to screen and/or file
@@ -212,6 +214,9 @@ protected:
   /// Number of significant digits
   unsigned int _precision;
 
+  /// Toggle for displaying output_on stuff in system information
+  bool _show_output_on_info;
+
 private:
 
   /**
@@ -219,7 +224,7 @@ private:
    * @param message The message to add to the output streams
    *
    * Any call to this method will write the supplied message to the screen and/or file,
-   * following the same restrictions as outputStep and outputInitial.
+   * following the same restrictions as outputStep.
    *
    * Calls to this method should be made via OutputWarehouse::mooseConsole so that the
    * output stream buffer is cleaned up correctly. Thus, it is a private method.

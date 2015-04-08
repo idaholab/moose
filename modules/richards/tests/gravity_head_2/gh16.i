@@ -155,13 +155,13 @@
   [./mwater_fin]
     type = RichardsMass
     variable = pwater
-    execute_on = timestep
+    execute_on = timestep_end
     output = none
   [../]
   [./mgas_fin]
     type = RichardsMass
     variable = pgas
-    execute_on = timestep
+    execute_on = timestep_end
     output = none
   [../]
 
@@ -284,8 +284,5 @@
   exodus = true
   csv = true
   perf_log = false
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

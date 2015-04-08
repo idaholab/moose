@@ -15,20 +15,13 @@
 #include "InitialCondition.h"
 #include "ScalarInitialCondition.h"
 
-InitialConditionWarehouse::InitialConditionWarehouse()
+InitialConditionWarehouse::InitialConditionWarehouse() :
+    Warehouse<InitialCondition>()
 {
 }
 
 InitialConditionWarehouse::~InitialConditionWarehouse()
 {
-  for (std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it = _ics.begin(); it != _ics.end(); ++it)
-    for (std::map<SubdomainID, InitialCondition *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
-      delete jt->second;
-  for (std::map<std::string, std::map<BoundaryID, InitialCondition *> >::iterator it = _boundary_ics.begin(); it != _boundary_ics.end(); ++it)
-    for (std::map<BoundaryID, InitialCondition *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
-      delete jt->second;
-  for (std::map<std::string, ScalarInitialCondition *>::iterator it = _scalar_ics.begin(); it != _scalar_ics.end(); ++it)
-    delete it->second;
 }
 
 void
@@ -36,16 +29,18 @@ InitialConditionWarehouse::initialSetup()
 {
   // Sort the ICs
   for (std::map<SubdomainID, std::vector<InitialCondition *> >::iterator it = _all_ics.begin(); it != _all_ics.end(); ++it)
-    sortICs(_all_ics[(*it).first]);
-  for (std::map<BoundaryID, std::vector<InitialCondition *> >::iterator it = _active_boundary_ics.begin(); it != _active_boundary_ics.end(); ++it)
-    sortICs(_active_boundary_ics[(*it).first]);
+  {
+    sortICs(it->second);
+    for (std::vector<InitialCondition *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+      (*jt)->initialSetup();
+  }
 
-  for (std::map<std::string, std::map<SubdomainID, InitialCondition *> >::iterator it1 = _ics.begin(); it1 != _ics.end(); ++it1)
-    for (std::map<SubdomainID, InitialCondition *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
-      it2->second->initialSetup();
-  for (std::map<std::string, std::map<BoundaryID, InitialCondition *> >::iterator it1 = _boundary_ics.begin(); it1 != _boundary_ics.end(); ++it1)
-    for (std::map<BoundaryID, InitialCondition *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
-      it2->second->initialSetup();
+  for (std::map<BoundaryID, std::vector<InitialCondition *> >::iterator it = _active_boundary_ics.begin(); it != _active_boundary_ics.end(); ++it)
+  {
+    sortICs(it->second);
+    for (std::vector<InitialCondition *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+      (*jt)->initialSetup();
+  }
 
   sortScalarICs(_active_scalar_ics);
 }
@@ -84,7 +79,7 @@ InitialConditionWarehouse::activeBoundary(BoundaryID boundary_id) const
 }
 
 void
-InitialConditionWarehouse::addInitialCondition(const std::string & var_name, SubdomainID blockid, InitialCondition * ic)
+InitialConditionWarehouse::addInitialCondition(const std::string & var_name, SubdomainID blockid, MooseSharedPointer<InitialCondition> ic)
 {
   std::string name;
 
@@ -99,16 +94,18 @@ InitialConditionWarehouse::addInitialCondition(const std::string & var_name, Sub
     mooseError(std::string("Initial Conditions '") + name + "' and '" + ic->name() + "' are both defined on the same block.");
 
   _ics[var_name][blockid] = ic;
-  _all_ics[blockid].push_back(ic);
+  _all_ics[blockid].push_back(ic.get());
+  _all_objects.push_back(ic.get());
 }
 
 void
-InitialConditionWarehouse::addBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id, InitialCondition * ic)
+InitialConditionWarehouse::addBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id, MooseSharedPointer<InitialCondition> ic)
 {
   if (_boundary_ics[var_name].find(boundary_id) == _boundary_ics[var_name].end())                     // Two ics on the same boundary
   {
     _boundary_ics[var_name][boundary_id] = ic;
-    _active_boundary_ics[boundary_id].push_back(ic);
+    _active_boundary_ics[boundary_id].push_back(ic.get());
+    _all_objects.push_back(ic.get());
   }
   else
     mooseError("Initial condition '" << _boundary_ics[var_name][boundary_id]->name() << "' and '" << ic->name() << "' are both defined on the same block.");
@@ -121,13 +118,13 @@ InitialConditionWarehouse::activeScalar() const
 }
 
 void
-InitialConditionWarehouse::addScalarInitialCondition(const std::string & var_name, ScalarInitialCondition * ic)
+InitialConditionWarehouse::addScalarInitialCondition(const std::string & var_name, MooseSharedPointer<ScalarInitialCondition> ic)
 {
-  std::map<std::string, ScalarInitialCondition *>::iterator it = _scalar_ics.find(var_name);
+  std::map<std::string, MooseSharedPointer<ScalarInitialCondition> >::iterator it = _scalar_ics.find(var_name);
   if (it == _scalar_ics.end())
   {
     _scalar_ics[var_name] = ic;
-    _active_scalar_ics.push_back(ic);
+    _active_scalar_ics.push_back(ic.get());
   }
   else
     mooseError("Initial condition for variable '" << var_name << "' has been already set.");

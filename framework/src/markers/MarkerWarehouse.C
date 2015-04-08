@@ -15,53 +15,50 @@
 #include "MarkerWarehouse.h"
 #include "Marker.h"
 
-MarkerWarehouse::MarkerWarehouse()
+MarkerWarehouse::MarkerWarehouse() :
+    Warehouse<Marker>()
 {
 }
 
 MarkerWarehouse::~MarkerWarehouse()
 {
-  for (std::vector<Marker *>::const_iterator i = _all_markers.begin(); i != _all_markers.end(); ++i)
-    delete *i;
-
 }
 
 void
 MarkerWarehouse::initialSetup()
 {
-  for (std::vector<Marker *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->initialSetup();
+  for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = _all_ptrs.begin(); it != _all_ptrs.end(); ++it)
+    (*it)->initialSetup();
 }
 
 void
 MarkerWarehouse::timestepSetup()
 {
-  for (std::vector<Marker *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->timestepSetup();
+  for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = _all_ptrs.begin(); it != _all_ptrs.end(); ++it)
+    (*it)->timestepSetup();
 }
 
 void
 MarkerWarehouse::markerSetup()
 {
-  for (std::vector<Marker *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->markerSetup();
+  for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = _all_ptrs.begin(); it != _all_ptrs.end(); ++it)
+    (*it)->markerSetup();
 }
 
 void
-MarkerWarehouse::addMarker(Marker *marker, std::vector<SubdomainID> & block_ids)
+MarkerWarehouse::addMarker(MooseSharedPointer<Marker> marker, std::vector<SubdomainID> & block_ids)
 {
-  _all_markers.push_back(marker);
+  _all_ptrs.push_back(marker);
+  _all_objects.push_back(marker.get());
 
   if (block_ids.empty())
-  {
-    _global_markers.push_back(marker);
-  }
+    _global_markers.push_back(marker.get());
   else
   {
     for (std::vector<SubdomainID>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
     {
       SubdomainID blk_id = *it;
-      _block_markers[blk_id].push_back(marker);
+      _block_markers[blk_id].push_back(marker.get());
     }
   }
 }
@@ -70,17 +67,13 @@ void
 MarkerWarehouse::updateActiveMarkers(unsigned int subdomain_id)
 {
   _active_markers.clear();
-  //_active_var_Markers.clear();
 
   // add Markers that live everywhere
   for (std::vector<Marker *>::const_iterator it = _global_markers.begin(); it != _global_markers.end(); ++it)
   {
     Marker * marker = *it;
     if (marker->isActive())
-    {
       _active_markers.push_back(marker);
-      //_active_var_Markers[Marker->variable().number()].push_back(Marker);
-    }
   }
 
   // then Markers that live on a specified block
@@ -88,10 +81,7 @@ MarkerWarehouse::updateActiveMarkers(unsigned int subdomain_id)
   {
     Marker * marker = *it;
     if (marker->isActive())
-    {
       _active_markers.push_back(marker);
-      //_active_var_Markers[Marker->variable().number()].push_back(Marker);
-    }
   }
 
   DependencyResolverInterface::sort(_active_markers.begin(), _active_markers.end());

@@ -16,7 +16,6 @@
 #define ADDEXTRANODESET_H
 
 #include "MeshModifier.h"
-#include "BoundaryRestrictableRequired.h"
 
 //Forward Declaration
 class MooseMesh;
@@ -26,8 +25,7 @@ template<>
 InputParameters validParams<AddExtraNodeset>();
 
 class AddExtraNodeset :
-  public MeshModifier,
-  public BoundaryRestrictableRequired
+  public MeshModifier
 {
 public:
   AddExtraNodeset(const std::string & name, InputParameters params);

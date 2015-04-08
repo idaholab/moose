@@ -109,8 +109,5 @@
   exodus = true
   file_base = out
   output_initial = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

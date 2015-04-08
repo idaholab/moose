@@ -17,43 +17,30 @@
 #include "NodeFaceConstraint.h"
 #include "FaceFaceConstraint.h"
 
-ConstraintWarehouse::ConstraintWarehouse()
+ConstraintWarehouse::ConstraintWarehouse() :
+    Warehouse<Constraint>()
 {
 }
 
 ConstraintWarehouse::~ConstraintWarehouse()
 {
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::iterator i = _node_face_constraints.begin(); i != _node_face_constraints.end(); ++i)
-    for (std::vector<NodeFaceConstraint *>::iterator k=(i->second).begin(); k!=(i->second).end(); ++k)
-      delete *k;
-
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::iterator i = _displaced_node_face_constraints.begin(); i != _displaced_node_face_constraints.end(); ++i)
-    for (std::vector<NodeFaceConstraint *>::iterator k=(i->second).begin(); k!=(i->second).end(); ++k)
-      delete *k;
-
-  for (std::map<std::string, std::vector<FaceFaceConstraint *> >::iterator i = _face_face_constraints.begin(); i != _face_face_constraints.end(); ++i)
-    for (std::vector<FaceFaceConstraint *>::iterator k=(i->second).begin(); k!=(i->second).end(); ++k)
-      delete *k;
-
-  for (std::vector<NodalConstraint *>::iterator i = _nodal_constraints.begin(); i != _nodal_constraints.end(); ++i)
-    delete *i;
 }
 
 void
 ConstraintWarehouse::initialSetup()
 {
-  for (std::vector<NodalConstraint *>::const_iterator curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
+  for (NodalConstraintIter curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
     (*curr)->initialSetup();
 
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
+  for (NodeFaceIter curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->initialSetup();
 
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
+  for (NodeFaceIter curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->initialSetup();
 
-  for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
+  for (FaceFaceIter curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->initialSetup();
 }
@@ -61,18 +48,18 @@ ConstraintWarehouse::initialSetup()
 void
 ConstraintWarehouse::timestepSetup()
 {
-  for (std::vector<NodalConstraint *>::const_iterator curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
+  for (NodalConstraintIter curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
     (*curr)->timestepSetup();
 
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
+  for (NodeFaceIter curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->timestepSetup();
 
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
+  for (NodeFaceIter curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->timestepSetup();
 
-  for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
+  for (FaceFaceIter curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->timestepSetup();
 }
@@ -80,18 +67,18 @@ ConstraintWarehouse::timestepSetup()
 void
 ConstraintWarehouse::residualSetup()
 {
-  for (std::vector<NodalConstraint *>::const_iterator curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
+  for (NodalConstraintIter curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
     (*curr)->residualSetup();
 
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
+  for (NodeFaceIter curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->residualSetup();
 
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
+  for (NodeFaceIter curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->residualSetup();
 
-  for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
+  for (FaceFaceIter curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->residualSetup();
 }
@@ -99,43 +86,50 @@ ConstraintWarehouse::residualSetup()
 void
 ConstraintWarehouse::jacobianSetup()
 {
-  for (std::vector<NodalConstraint *>::const_iterator curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
+  for (NodalConstraintIter curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
     (*curr)->jacobianSetup();
 
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
+  for (NodeFaceIter curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->jacobianSetup();
 
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
+  for (NodeFaceIter curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->jacobianSetup();
 
-  for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
+  for (FaceFaceIter curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->jacobianSetup();
 }
 
 void
-ConstraintWarehouse::addNodalConstraint(NodalConstraint * nc)
+ConstraintWarehouse::addNodalConstraint(MooseSharedPointer<NodalConstraint> nc)
 {
-  _nodal_constraints.push_back(nc);
+  _all_objects.push_back(nc.get());
+  _all_ptrs.push_back(nc);
+  _nodal_constraints.push_back(nc.get());
 }
 
 void
-ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*master*/, NodeFaceConstraint *nfc)
+ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*master*/, MooseSharedPointer<NodeFaceConstraint> nfc)
 {
+  _all_objects.push_back(nfc.get());
+  _all_ptrs.push_back(nfc);
+
   bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") && nfc->getParam<bool>("use_displaced_mesh");
 
   if (displaced)
-    _displaced_node_face_constraints[slave].push_back(nfc);
+    _displaced_node_face_constraints[slave].push_back(nfc.get());
   else
-    _node_face_constraints[slave].push_back(nfc);
+    _node_face_constraints[slave].push_back(nfc.get());
 }
 
 void
-ConstraintWarehouse::addFaceFaceConstraint(const std::string & name, FaceFaceConstraint * ffc)
+ConstraintWarehouse::addFaceFaceConstraint(const std::string & name, MooseSharedPointer<FaceFaceConstraint> ffc)
 {
-  _face_face_constraints[name].push_back(ffc);
+  _all_objects.push_back(ffc.get());
+  _all_ptrs.push_back(ffc);
+  _face_face_constraints[name].push_back(ffc.get());
 }
 
 std::vector<NodalConstraint *> &
@@ -165,9 +159,9 @@ ConstraintWarehouse::getFaceFaceConstraints(const std::string & name)
 void
 ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const
 {
-  for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator it = _face_face_constraints.begin(); it != _face_face_constraints.end(); ++it)
+  for (FaceFaceIter it = _face_face_constraints.begin(); it != _face_face_constraints.end(); ++it)
   {
-    for (std::vector<FaceFaceConstraint *>::const_iterator jt = (*it).second.begin(); jt != (*it).second.end(); ++jt)
+    for (std::vector<FaceFaceConstraint *>::const_iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
     {
       MooseVariable & var = (*jt)->variable();
       unique_variables.insert(var.name());

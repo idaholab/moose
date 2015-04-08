@@ -27,12 +27,12 @@ InputParameters validParams<TimeIntegrator>()
 
 TimeIntegrator::TimeIntegrator(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    Restartable(name, parameters, "TimeIntegrators"),
+    Restartable(parameters, "TimeIntegrators"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _nl(_fe_problem.getNonlinearSystem()),
     _u_dot(_sys.solutionUDot()),
-    _du_dot_du(_sys.solutionDuDotDu()),
+    _du_dot_du(_sys.duDotDu()),
     _solution(_sys.currentSolution()),
     _solution_old(_sys.solutionOld()),
     _solution_older(_sys.solutionOlder()),

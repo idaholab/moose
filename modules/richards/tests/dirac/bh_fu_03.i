@@ -125,21 +125,21 @@
   [./fluid_mass1]
     type = RichardsMass
     variable = pressure
-    execute_on = timestep
+    execute_on = timestep_end
     #output = file
   [../]
 
   [./zmass_error]
     type = PlotFunction
     function = mass_bal_fcn
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
   [./p0]
     type = PointValue
     variable = pressure
     point = '1 1 1'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -205,10 +205,7 @@
   file_base = bh_fu_03
   output_initial = true
   exodus = false
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
   csv = true
+  print_linear_residuals = true
+  print_perf_log = true
 []

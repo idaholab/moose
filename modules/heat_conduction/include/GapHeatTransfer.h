@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef GAPHEATTRANSFER_H
 #define GAPHEATTRANSFER_H
 
@@ -22,6 +28,7 @@ protected:
  * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation
  */
 
+  virtual void computeResidual();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
@@ -31,6 +38,9 @@ protected:
   virtual Real computeSlaveFluxContribution(Real grad_t);
 
   virtual void computeGapValues();
+
+  bool _gap_type_set;
+  Moose::CoordinateSystemType _gap_type;
 
   bool _quadrature;
 
@@ -44,6 +54,9 @@ protected:
 
   Real _gap_temp;
   Real _gap_distance;
+  Real _radius;
+  Real _r1;
+  Real _r2;
 
   //This is a factor that is used to gradually taper down the conductance if the
   //contact point is off the face and tangential_tolerance is nonzero.

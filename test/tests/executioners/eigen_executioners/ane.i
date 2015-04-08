@@ -63,7 +63,6 @@
   type = NonlinearEigen
 
   bx_norm = 'unorm'
-  xdiff = 'udiff'
 
   free_power_iterations = 10
   source_abs_tol = 1e-12
@@ -72,7 +71,7 @@
 # important: constant initial value set by auto_initilization does not
 # converge to the fundamental mode
   auto_initialization = false
-  output_on_final = true
+  output_after_power_iterations = false
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -86,7 +85,7 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     # execute on residual is important for nonlinear eigen solver!
-    execute_on = residual
+    execute_on = linear
   [../]
 
   [./udiff]
@@ -100,10 +99,9 @@
   file_base = ane
   interval = 1
   exodus = true
-#  output_initial = true
   [./console]
     type = Console
-    linear_residuals = true
     perf_log = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []

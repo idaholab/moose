@@ -25,16 +25,18 @@ InputParameters validParams<OversampleOutput>()
 
   // Get the parameters from the parent object
   InputParameters params = validParams<FileOutput>();
-
-  // Add the oversample related parameters
-  params.addParam<bool>("oversample", false, "Set to true to enable oversampling");
-  params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling");
+  params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling (refinement levels beyond any uniform refinements)");
   params.addParam<Point>("position", "Set a positional offset, this vector will get added to the nodal coordinates to move the domain.");
-  params.addParam<bool>("append_oversample", false, "Append '_oversample' to the output file base");
   params.addParam<MeshFileName>("file", "The name of the mesh file to read, for oversampling");
 
+  // **** DEPRECATED AND REMOVED PARAMETERS ****
+  params.addDeprecatedParam<bool>("oversample", false, "Set to true to enable oversampling",
+                                  "This parameter is no longer active, simply set 'refinements' to a value greater than zero to evoke oversampling");
+  params.addDeprecatedParam<bool>("append_oversample", false, "Append '_oversample' to the output file base",
+                                  "This parameter is no longer operational, to append '_oversample' utilize the output block name or 'file_base'");
+
   // 'Oversampling' Group
-  params.addParamNamesToGroup("refinements oversample position append_oversample file", "Oversampling");
+  params.addParamNamesToGroup("refinements position file", "Oversampling");
 
   return params;
 }
@@ -43,17 +45,18 @@ OversampleOutput::OversampleOutput(const std::string & name, InputParameters & p
     FileOutput(name, parameters),
     _mesh_ptr(getParam<bool>("use_displaced") ?
               &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
-    _oversample(getParam<bool>("oversample")),
     _refinements(getParam<unsigned int>("refinements")),
+    _oversample(_refinements > 0 || isParamValid("file")),
     _change_position(isParamValid("position")),
-    _position(_change_position ? getParam<Point>("position") : Point())
+    _position(_change_position ? getParam<Point>("position") : Point()),
+    _oversample_mesh_changed(true)
 {
+  // ** DEPRECATED SUPPORT **
+  if (getParam<bool>("append_oversample"))
+    _file_base += "_oversample";
 
+  // Creates and initializes the oversampled mesh
   initOversample();
-
-  // Append the '_oversample' to the file base, if desired and oversampling is being used
-  if (_oversample && isParamValid("append_oversample") && getParam<bool>("append_oversample"))
-    _file_base = _file_base + "_oversample";
 }
 
 OversampleOutput::~OversampleOutput()
@@ -77,48 +80,9 @@ OversampleOutput::~OversampleOutput()
 }
 
 void
-OversampleOutput::outputInitial()
+OversampleOutput::meshChanged()
 {
-  // Perform filename check
-  if (!_output_file)
-    return;
-
-  // Perform oversample solution projection
-  if (_oversample || _change_position)
-    update();
-
-  // Call the initial output method
-  Output::outputInitial();
-}
-
-void
-OversampleOutput::outputStep()
-{
-  // Perform filename check
-  if (!_output_file)
-    return;
-
-  // Perform oversample solution projection
-  if (_oversample || _change_position)
-    update();
-
-  // Call the step output method
-  Output::outputStep();
-}
-
-void
-OversampleOutput::outputFinal()
-{
-  // Perform filename check
-  if (!_output_file)
-    return;
-
-  // Perform oversample solution projection
-  if (_oversample || _change_position)
-    update();
-
-  // Call the final output methods
-  Output::outputFinal();
+  _oversample_mesh_changed = true;
 }
 
 void
@@ -136,7 +100,7 @@ OversampleOutput::initOversample()
       *(*nd) += _position;
 
   // Perform the mesh refinement
-  if (_oversample && _refinements > 0)
+  if (_oversample)
   {
     MeshRefinement mesh_refinement(_mesh_ptr->getMesh());
     mesh_refinement.uniformly_refine(_refinements);
@@ -191,8 +155,12 @@ OversampleOutput::initOversample()
 }
 
 void
-OversampleOutput::update()
+OversampleOutput::updateOversample()
 {
+  // Do nothing if oversampling and changing position are not enabled
+  if (!_oversample && !_change_position)
+    return;
+
   // Get a reference to actual equation system
   EquationSystems & source_es = _problem_ptr->es();
 
@@ -215,7 +183,7 @@ OversampleOutput::update()
       {
 
         // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it for re-initialization
-        if (_mesh_functions[sys_num][var_num] == NULL || _mesh_changed)
+        if (_mesh_functions[sys_num][var_num] == NULL || _oversample_mesh_changed)
         {
           delete _mesh_functions[sys_num][var_num];
           _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
@@ -236,7 +204,7 @@ OversampleOutput::update()
   }
 
   // Set this to false so that new output files are not created, since the oversampled mesh doesn't actually change
-  _mesh_changed = false;
+  _oversample_mesh_changed = false;
 }
 
 void

@@ -21,8 +21,8 @@
   [../]
 []
 
-[TensorMechanics]
-  [./solid]
+[Kernels]
+  [./TensorMechanics]
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -199,13 +199,25 @@
 []
 
 [UserObjects]
+  [./mc_coh]
+    type = TensorMechanicsHardeningConstant
+    value = 10E6
+  [../]
+  [./mc_phi]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 0
+    value_residual = 0.6981317 # 40deg
+    rate = 10000
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 0
+  [../]
   [./mc]
     type = TensorMechanicsPlasticMohrCoulomb
-    mc_cohesion = 10E6
-    mc_friction_angle = 0
-    mc_friction_angle_residual = 40
-    mc_friction_angle_rate = 10000
-    mc_dilation_angle = 0
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
     mc_tip_smoother = 0
     mc_edge_smoother = 25
     yield_function_tolerance = 1E-3
@@ -259,11 +271,8 @@
   file_base = uni_axial1
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

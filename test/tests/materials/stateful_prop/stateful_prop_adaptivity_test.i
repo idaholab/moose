@@ -5,6 +5,8 @@
   ny = 2
   nz = 2
   uniform_refine = 2
+  # This option is necessary if you have uniform refinement + stateful material properties + adaptivity
+  skip_partitioning = true
 []
 
 [Variables]
@@ -101,9 +103,6 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
   csv = true
+  print_perf_log = true
 []

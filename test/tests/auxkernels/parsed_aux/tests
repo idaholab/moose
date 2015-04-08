@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'parsed_aux_test.i'
+    exodiff = 'out.e'
+    scale_refine = 3
+  [../]
+[]

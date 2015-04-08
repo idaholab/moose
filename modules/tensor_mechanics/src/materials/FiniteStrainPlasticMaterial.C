@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "FiniteStrainPlasticMaterial.h"
 
 template<>
@@ -24,7 +30,9 @@ FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const std::string & nam
     _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
     _rtol(getParam<Real>("rtol")),
     _ftol(getParam<Real>("ftol")),
-    _eptol(getParam<Real>("eptol"))
+    _eptol(getParam<Real>("eptol")),
+    _deltaOuter(RankTwoTensor::Identity().outerProduct(RankTwoTensor::Identity())),
+    _deltaMixed(RankTwoTensor::Identity().mixedProductIkJl(RankTwoTensor::Identity()))
 {
 }
 
@@ -331,7 +339,6 @@ FiniteStrainPlasticMaterial::getSigEqv(const RankTwoTensor & stress)
 void
 FiniteStrainPlasticMaterial::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, RankFourTensor & dresid_dsig)
 {
-  unsigned int i, j, k, l;
   RankTwoTensor sig_dev, df_dsig, flow_dirn;
   RankTwoTensor dfi_dft, dfi_dsig;
   RankFourTensor dft_dsig, dfd_dft, dfd_dsig;
@@ -349,26 +356,11 @@ FiniteStrainPlasticMaterial::getJac(const RankTwoTensor & sig, const RankFourTen
   f2 = f1 / 3.0;
   f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        for (l = 0; l < 3; ++l)
-          dft_dsig(i,j,k,l) = f1 * deltaFunc(i,k) * deltaFunc(j,l) - f2 * deltaFunc(i,j) * deltaFunc(k,l) - f3 * sig_dev(i,j) * sig_dev(k,l);
+  dft_dsig = f1 * _deltaMixed - f2 * _deltaOuter - f3 * sig_dev.outerProduct(sig_dev);
 
   dfd_dsig = dft_dsig;
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr;
 }
-
-//Delta Function
-Real
-FiniteStrainPlasticMaterial::deltaFunc(const unsigned int i, const unsigned int j)
-{
-  if (i == j)
-    return 1.0;
-  else
-    return 0.0;
-}
-
 
 //Obtain yield stress for a given equivalent plastic strain (input)
 Real

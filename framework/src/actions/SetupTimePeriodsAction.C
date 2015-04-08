@@ -42,7 +42,7 @@ SetupTimePeriodsAction::SetupTimePeriodsAction(const std::string & name, InputPa
 void
 SetupTimePeriodsAction::act()
 {
-  if (_problem != NULL)
+  if (_problem.get() != NULL)
   {
     TimePeriod & tp = _problem->addTimePeriod(getShortName(), getParam<Real>("start"));
 

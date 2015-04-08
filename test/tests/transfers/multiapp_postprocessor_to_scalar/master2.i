@@ -79,11 +79,8 @@
   output_initial = true
   exodus = true
   hide = from_sub_app
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
 [MultiApps]
@@ -92,7 +89,7 @@
     positions = '0.5 0.5 0
                  0.7 0.7 0
                  0.8 0.8 0'
-    execute_on = timestep
+    execute_on = timestep_end
     type = TransientMultiApp
     input_files = sub2.i
   [../]
@@ -102,7 +99,6 @@
   [./pp_transfer]
     type = MultiAppPostprocessorToAuxScalarTransfer
     direction = from_multiapp
-    execute_on = timestep
     multi_app = pp_sub
     from_postprocessor = point_value
     to_aux_scalar = from_sub_app

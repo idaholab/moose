@@ -61,17 +61,14 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 [MultiApps]
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep
+    execute_on = timestep_end
     positions = '0 0 0'
     input_files = sub.i
     sub_cycling = true
@@ -84,7 +81,6 @@
   [./nearest_node]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = nearest_node
@@ -92,7 +88,6 @@
   [./mesh_function]
     type = MultiAppMeshFunctionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = mesh_function
@@ -100,7 +95,6 @@
   [./user_object]
     type = MultiAppUserObjectTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     variable = user_object
     user_object = layered_average
@@ -108,7 +102,6 @@
   [./interpolation]
     type = MultiAppInterpolationTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = interpolation

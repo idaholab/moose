@@ -48,13 +48,45 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   [../]
-
-  [./many]
+  [./small5]
     type = 'CSVDiff'
-    input = 'many_deforms.i'
-    csvdiff = 'many_deforms.csv'
+    input = 'small_deform5.i'
+    csvdiff = 'small_deform5.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+  [../]
+  [./small6]
+    type = 'CSVDiff'
+    input = 'small_deform6.i'
+    csvdiff = 'small_deform6.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+
+  [./many_cap]
+    type = 'CSVDiff'
+    input = 'many_deforms_cap.i'
+    csvdiff = 'many_deforms_cap.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    heavy = true
+  [../]
+
+  [./random]
+    type = 'CSVDiff'
+    input = 'random.i'
+    csvdiff = 'random.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=6 Mesh/ny=7 Mesh/xmax=6 Mesh/ymax=7'
+  [../]
+  [./random_heavy]
+    type = 'CSVDiff'
+    input = 'random.i'
+    csvdiff = 'random.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20'
     heavy = true
   [../]
 
@@ -62,6 +94,13 @@
     type = 'CSVDiff'
     input = 'small_deform_hard1.i'
     csvdiff = 'small_deform_hard1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./hard_cubic]
+    type = 'CSVDiff'
+    input = 'small_deform_hard_cubic.i'
+    csvdiff = 'small_deform_hard_cubic.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   [../]
@@ -91,7 +130,7 @@
     type = 'Exodiff'
     input = 'uni_axial2.i'
     exodiff = 'uni_axial2.e'
-    rel_err = 1.0E-5
+    rel_err = 4.0E-4
     abs_zero = 1.0E-4
     heavy = true
   [../]
@@ -99,7 +138,7 @@
     type = 'Exodiff'
     input = 'uni_axial3.i'
     exodiff = 'uni_axial3.e'
-    rel_err = 1.0E-5
+    rel_err = 4.0E-4
     abs_zero = 1.0E-4
     heavy = true
   [../]
@@ -111,4 +150,56 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   [../]
+
+  [./planar1]
+    type = 'CSVDiff'
+    input = 'planar1.i'
+    csvdiff = 'planar1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./planar3]
+    type = 'CSVDiff'
+    input = 'planar3.i'
+    csvdiff = 'planar3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./random_planar]
+    type = 'CSVDiff'
+    input = 'random_planar.i'
+    csvdiff = 'random_planar.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=6 Mesh/ny=7 Mesh/xmax=6 Mesh/ymax=7'
+  [../]
+  [./random_planar_heavy]
+    type = 'CSVDiff'
+    input = 'random_planar.i'
+    csvdiff = 'random_planar.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20'
+    heavy = true
+  [../]
+
+  [./uni_axial2_planar]
+    type = 'Exodiff'
+    input = 'uni_axial2_planar.i'
+    exodiff = 'uni_axial2_planar.e'
+    rel_err = 4.0E-3
+    abs_zero = 1.0E-3
+    heavy = true
+  [../]
+  [./uni_axial3_planar]
+    type = 'Exodiff'
+    input = 'uni_axial3_planar.i'
+    exodiff = 'uni_axial3_planar.e'
+    rel_err = 4.0E-3
+    abs_zero = 1.0E-3
+    heavy = true
+  [../]
+
 []

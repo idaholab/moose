@@ -32,7 +32,6 @@
     prereq = 'test_rz_restart1'
     input = 'cavity_pressure_rz.i'
     exodiff = 'cavity_pressure_rz_out.e'
-    cli_args = 'Executioner/restart_from_file=cavity_pressure_rz_out_cp/0001'
     delete_output_before_running = false
   [../]
 []

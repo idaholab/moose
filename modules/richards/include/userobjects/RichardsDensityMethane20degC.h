@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #ifndef RICHARDSDENSITYMETHANE20DEGC_H
 #define RICHARDSDENSITYMETHANE20DEGC_H
@@ -22,7 +25,7 @@ InputParameters validParams<RichardsDensityMethane20degC>();
  */
 class RichardsDensityMethane20degC : public RichardsDensity
 {
- public:
+public:
   RichardsDensityMethane20degC(const std::string & name, InputParameters parameters);
 
   /**

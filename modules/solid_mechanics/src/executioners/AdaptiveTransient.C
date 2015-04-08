@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "AdaptiveTransient.h"
 
 //Moose includes
@@ -106,9 +112,8 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
       _problem.addPredictor("Predictor", "predictor", params);
     }
     else
-    {
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
-    }
+
   }
 
   if (isParamValid("optimal_iterations"))
@@ -116,24 +121,18 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
     _adaptive_timestepping=true;
     _optimal_iterations = getParam<int>("optimal_iterations");
     if (isParamValid("iteration_window"))
-    {
       _iteration_window = getParam<int>("iteration_window");
-    }
+
     else
-    {
       _iteration_window = ceil(_optimal_iterations/5.0);
-    }
   }
   else
   {
     if (isParamValid("iteration_window"))
-    {
       mooseError("'optimal_iterations' must be used for 'iteration_window' to be used");
-    }
+
     if (isParamValid("linear_iteration_ratio"))
-    {
       mooseError("'optimal_iterations' must be used for 'linear_iteration_ratio' to be used");
-    }
   }
 
   if (isParamValid("timestep_limiting_function"))
@@ -144,16 +143,12 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
     _max_function_change = isParamValid("max_function_change") ?
         getParam<Real>("max_function_change") : -1;
     if (_max_function_change < 0.0)
-    {
       mooseError("'max_function_change' must be specified and be greater than 0");
-    }
   }
   else
   {
     if (isParamValid("max_function_change"))
-    {
       mooseError("'timestep_limiting_function' must be used for 'max_function_change' to be used");
-    }
   }
 
   const std::vector<Real> & sync_times = getParam<std::vector<Real> >("sync_times");
@@ -178,9 +173,7 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
   while (_remaining_sync_time && _curr_sync_time_iter->first <= _time)
   {
     if (++_curr_sync_time_iter == _sync_times.end())
-    {
       _remaining_sync_time = false;
-    }
   }
 
   if (!_restart_file_base.empty())
@@ -204,7 +197,7 @@ AdaptiveTransient::init()
   _problem.initialSetup();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
-  _output_warehouse.outputInitial();
+  _problem.outputStep(EXEC_INITIAL);
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   // If this is the first step
@@ -227,6 +220,7 @@ AdaptiveTransient::execute()
     if (lastSolveConverged())
       endStep();
   }
+  _problem.outputStep(EXEC_FINAL);
   postExecute();
 }
 
@@ -254,6 +248,8 @@ AdaptiveTransient::takeStep(Real input_dt)
 
   // Compute TimestepBegin Postprocessors
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
+
+  _problem.outputStep(EXEC_TIMESTEP_BEGIN);
 
   _console << "Solving time step ";
   {
@@ -315,7 +311,7 @@ AdaptiveTransient::takeStep(Real input_dt)
     bool last_solve_converged = lastSolveConverged();
 
     if (last_solve_converged)
-      _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+      _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
 
     postSolve();
 
@@ -324,7 +320,7 @@ AdaptiveTransient::takeStep(Real input_dt)
     // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
     if (last_solve_converged)
     {
-      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
+      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
       _problem.computeUserObjects();
     }
 
@@ -337,16 +333,11 @@ AdaptiveTransient::endStep()
 {
   // if _synced_last_step is true, force the output no matter what
   if (_synced_last_step)
-  {
-    _output_warehouse.forceOutput();
-    _output_warehouse.outputStep();
-  }
+    _problem.outputStep(EXEC_TIMESTEP_END);
 
 #ifdef LIBMESH_ENABLE_AMR
   if (_problem.adaptivity().isOn())
-  {
     _problem.adaptMesh();
-  }
 #endif
 
   _t_step++;
@@ -480,6 +471,7 @@ AdaptiveTransient::computeDT()
   {
     if (dt <= _dtmin)
     { //Can't cut back any more
+      _problem.outputStep(EXEC_FAILED);
       mooseError("Solve failed and timestep already at dtmin, cannot continue!");
     }
 
@@ -744,12 +736,8 @@ AdaptiveTransient::keepGoing()
     kg = false;
 
   if ((_time>_end_time) || (fabs(_time-_end_time)<1.e-14))
-  {
     if (lastSolveConverged())
-    {
       kg = false;
-    }
-  }
 
   return kg;
 }

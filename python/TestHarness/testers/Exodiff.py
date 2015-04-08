@@ -44,7 +44,7 @@ class Exodiff(RunApp):
                       + old_floor + ' -t ' + str(self.specs['rel_err']) + ' ' + ' '.join(self.specs['exodiff_opts']) + ' ' \
                       + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))
 
-      return commands
+    return commands
 
 
   def processResults(self, moose_dir, retcode, options, output):
@@ -64,16 +64,17 @@ class Exodiff(RunApp):
         reason = 'MISSING GOLD FILE'
         break
 
-    # Retrieve the commands
-    commands = self.processResultsCommand(moose_dir, options)
+    if reason == '':
+      # Retrieve the commands
+      commands = self.processResultsCommand(moose_dir, options)
 
-    for command in commands:
-      exo_output = runCommand(command)
+      for command in commands:
+        exo_output = runCommand(command)
 
-      output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(self.specs['exodiff_opts'])
+        output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(self.specs['exodiff_opts'])
 
-      if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
-        reason = 'EXODIFF'
-        break
+        if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
+          reason = 'EXODIFF'
+          break
 
     return (reason, output)

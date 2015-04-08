@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "NodalAreaAction.h"
 
 #include "Factory.h"
@@ -36,7 +42,7 @@ NodalAreaAction::act()
   _moose_object_pars.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,getParam<BoundaryName>("slave"));
   _moose_object_pars.set<VariableName>("variable") = "nodal_area_"+short_name;
 
-  _moose_object_pars.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep_begin";
+  _moose_object_pars.set<MultiMooseEnum>("execute_on") = "timestep_begin";
   _moose_object_pars.set<bool>("use_displaced_mesh") = true;
 
   _problem->addUserObject("NodalArea",

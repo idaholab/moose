@@ -48,8 +48,8 @@ void extraSendList(std::vector<dof_id_type> & send_list, void * context);
  * Free function used for a libMesh callback
  */
 void extraSparsity(SparsityPattern::Graph & sparsity,
-                   std::vector<unsigned int> & n_nz,
-                   std::vector<unsigned int> & n_oz,
+                   std::vector<dof_id_type> & n_nz,
+                   std::vector<dof_id_type> & n_oz,
                    void * context);
 
 /**
@@ -111,7 +111,7 @@ public:
   virtual NumericVector<Number> & solutionOlder() = 0;
 
   virtual NumericVector<Number> & solutionUDot() = 0;
-  virtual NumericVector<Number> & solutionDuDotDu() = 0;
+  virtual Number & duDotDu() = 0;
 
   /**
    * Check if the named vector exists in the system.
@@ -140,8 +140,8 @@ public:
    * Will modify the sparsity pattern to add logical geometric connections
    */
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
-                               std::vector<unsigned int> & n_nz,
-                               std::vector<unsigned int> & n_oz) = 0;
+                               std::vector<dof_id_type> & n_nz,
+                               std::vector<dof_id_type> & n_oz) = 0;
 
   /**
    * Returns true if we are currently computing Jacobian
@@ -437,16 +437,21 @@ public:
    * @param order The order of the variable
    * @param scale_factor The scaling factor to be used with this scalar variable
    */
-  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL)
   {
     FEType type(order, SCALAR);
-    unsigned int var_num = _sys.add_variable(var_name, type);
+    unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
+    if (active_subdomains == NULL)
+      _var_map[var_num] = std::set<SubdomainID>();
+    else
+      for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+        _var_map[var_num].insert(*it);
   }
 
   virtual bool hasVariable(const std::string & var_name)
@@ -483,7 +488,7 @@ public:
   virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
 
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
-  virtual NumericVector<Number> & solutionDuDotDu() { return *_dummy_vec; }
+  virtual Number & duDotDu() { return _du_dot_du; }
 
   virtual bool hasVector(std::string name) { return _sys.have_vector(name); }
   virtual NumericVector<Number> & getVector(std::string name) { return _sys.get_vector(name); }
@@ -579,6 +584,7 @@ protected:
   NumericVector<Number> & _solution;
   NumericVector<Number> & _solution_old;
   NumericVector<Number> & _solution_older;
+  Real _du_dot_du;
 
   NumericVector<Number> * _dummy_vec;                     // to satisfy the interface
 

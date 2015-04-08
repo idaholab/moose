@@ -101,18 +101,18 @@
   [./x]
     type = ScalarVariable
     variable = x
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./y]
     type = ScalarVariable
     variable = y
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
   [./exact_x]
     type = PlotFunction
     function = exact_x_fn
-    execute_on = timestep
+    execute_on = timestep_end
     point = '0 0 0'
   [../]
 
@@ -136,8 +136,5 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
+  print_perf_log = true
 []

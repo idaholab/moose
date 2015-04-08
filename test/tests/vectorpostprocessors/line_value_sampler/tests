@@ -4,6 +4,14 @@
     input = 'line_value_sampler.i'
     csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
   [../]
+  [./parallel]
+    # This ensures that PointSamplerBase is properly handling unique point finding
+    type = 'CSVDiff'
+    input = 'line_value_sampler.i'
+    csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
+    min_parallel = 3
+    prereq = test
+  [../]
   [./delimiter]
     type = 'CheckFiles'
     input = 'csv_delimiter.i'
@@ -11,4 +19,3 @@
     file_expect_out = 'id u v x y z\n0 0 1\.2346 0 0\.5 0\n0\.1 0\.1 1\.2346 0\.1 0\.5 0\n0\.2 0.2 1\.2346 0\.2 0.5 0'
   [../]
 []
-

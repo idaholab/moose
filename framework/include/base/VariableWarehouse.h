@@ -15,7 +15,7 @@
 #ifndef VARIABLEWAREHOUSE_H
 #define VARIABLEWAREHOUSE_H
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 #include <vector>
 #include <map>
@@ -28,7 +28,7 @@ class MooseVariableScalar;
 /**
  * Holds variables and provides some services
  */
-class VariableWarehouse
+class VariableWarehouse : public Warehouse<MooseVariableBase>
 {
 public:
   VariableWarehouse();
@@ -47,8 +47,20 @@ public:
    * @param var The variable
    */
   void addBoundaryVar(BoundaryID bnd, MooseVariable *var);
-  /// Convenience function for adding coupled vars at once
-  void addBoundaryVars(BoundaryID bnd, const std::map<std::string, std::vector<MooseVariable *> > & vars);
+
+  /**
+   * Add a variable to a set of boundaries
+   * @param boundary_ids The boundary ids where this variable is defined
+   * @param var The variable
+   */
+  void addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable *var);
+
+  /**
+   * Add a map of variables to a set of boundaries
+   * @param boundary_ids The boundary ids where this variable is defined
+   * @param vars A map of variables
+   */
+  void addBoundaryVars(const std::set<BoundaryID> & boundary_ids, const std::map<std::string, std::vector<MooseVariable *> > & vars);
 
   /**
    * Get a variable from the warehouse
@@ -69,12 +81,6 @@ public:
    * @return The list of variable names
    */
   const std::vector<VariableName> & names() const;
-
-  /**
-   * Get the list of all variables
-   * @return The list of variables
-   */
-  const std::vector<MooseVariableBase *> & all();
 
   /**
    * Get the list of variables
@@ -98,8 +104,6 @@ public:
 protected:
   /// list of variable names
   std::vector<VariableName> _names;
-  /// list of all variables
-  std::vector<MooseVariableBase *> _all;
   /// list of "normal" variables
   std::vector<MooseVariable *> _vars;
   /// Name to variable mapping

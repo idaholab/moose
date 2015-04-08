@@ -123,9 +123,6 @@
   output_initial = true
   exodus = true
   show = 'temp disp_x disp_y'
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

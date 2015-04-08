@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 #include "RichardsFlux.h"
 #include "Material.h"
@@ -18,8 +21,7 @@ InputParameters validParams<RichardsFlux>()
   return params;
 }
 
-RichardsFlux::RichardsFlux(const std::string & name,
-                                             InputParameters parameters) :
+RichardsFlux::RichardsFlux(const std::string & name, InputParameters parameters) :
     Kernel(name,parameters),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
@@ -38,7 +40,6 @@ RichardsFlux::RichardsFlux(const std::string & name,
     _tauvel_SUPG(getMaterialProperty<std::vector<RealVectorValue> >("tauvel_SUPG")),
     _dtauvel_SUPG_dgradv(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dtauvel_SUPG_dgradv")),
     _dtauvel_SUPG_dv(getMaterialProperty<std::vector<std::vector<RealVectorValue> > >("dtauvel_SUPG_dv"))
-
 {
 }
 
@@ -74,16 +75,16 @@ RichardsFlux::computeQpJac(unsigned int wrt_num)
   Real supg_kernel_prime = 0.0;
 
   if (supg_test != 0)
-    {
-      // NOTE: since Libmesh does not correctly calculate grad(_grad_u) correctly, so following might not be correct
-      supg_kernel = -(_dflux_dgradv[_qp][_pvar][_pvar]*_second_u[_qp]).tr() - _dflux_dv[_qp][_pvar][_pvar]*_grad_u[_qp];
+  {
+    // NOTE: since Libmesh does not correctly calculate grad(_grad_u) correctly, so following might not be correct
+    supg_kernel = -(_dflux_dgradv[_qp][_pvar][_pvar]*_second_u[_qp]).tr() - _dflux_dv[_qp][_pvar][_pvar]*_grad_u[_qp];
 
-      // NOTE: just like supg_kernel, this must be generalised for non-PPPP formulations
-      supg_kernel_prime = -(_d2flux_dvdv[_qp][_pvar][_pvar][wrt_num]*_phi[_j][_qp]*_grad_u[_qp]  + _phi[_j][_qp]*(_d2flux_dgradvdv[_qp][_pvar][_pvar][wrt_num]*_second_u[_qp]).tr() + (_d2flux_dvdgradv[_qp][_pvar][_pvar][wrt_num]*_grad_u[_qp])*_grad_phi[_j][_qp]);
-      if (wrt_num == _pvar)
-        supg_kernel_prime -=  _dflux_dv[_qp][_pvar][_pvar]*_grad_phi[_j][_qp];
-      //supg_kernel_prime -= (_dflux_dgradv[_qp][_pvar][_pvar]*_second_phi[_j][_qp]).tr(); // crashes because _second_phi_zero is not done correctly
-    }
+    // NOTE: just like supg_kernel, this must be generalised for non-PPPP formulations
+    supg_kernel_prime = -(_d2flux_dvdv[_qp][_pvar][_pvar][wrt_num]*_phi[_j][_qp]*_grad_u[_qp] + _phi[_j][_qp]*(_d2flux_dgradvdv[_qp][_pvar][_pvar][wrt_num]*_second_u[_qp]).tr() + (_d2flux_dvdgradv[_qp][_pvar][_pvar][wrt_num]*_grad_u[_qp])*_grad_phi[_j][_qp]);
+    if (wrt_num == _pvar)
+      supg_kernel_prime -= _dflux_dv[_qp][_pvar][_pvar]*_grad_phi[_j][_qp];
+    //supg_kernel_prime -= (_dflux_dgradv[_qp][_pvar][_pvar]*_second_phi[_j][_qp]).tr(); // crashes because _second_phi_zero is not done correctly
+  }
 
   return flux_prime + supg_test_prime*supg_kernel + supg_test*supg_kernel_prime;
 }

@@ -62,7 +62,7 @@
     direction = y
     num_layers = 3
     variable = u
-    execute_on = residual
+    execute_on = linear
     boundary = right
   [../]
 []

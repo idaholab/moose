@@ -182,15 +182,15 @@ DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & ty
 }
 
 void
-DisplacedProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+DisplacedProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
-  _displaced_nl.addScalarVariable(var_name, order, scale_factor);
+  _displaced_nl.addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
-DisplacedProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+DisplacedProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
-  _displaced_aux.addScalarVariable(var_name, order, scale_factor);
+  _displaced_aux.addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
@@ -302,7 +302,7 @@ DisplacedProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID
 }
 
 void
-DisplacedProblem::reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid)
+DisplacedProblem::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
   _displaced_nl.reinitNodes(nodes, tid);
   _displaced_aux.reinitNodes(nodes, tid);
@@ -574,4 +574,27 @@ DisplacedProblem::registerRecoverableData(std::string name)
   name += "/displaced";
 
   _mproblem.registerRecoverableData(name);
+}
+
+void
+DisplacedProblem::undisplaceMesh()
+{
+  // If undisplaceMesh() is called during initial adaptivity, it is
+  // not valid to call _mesh.getActiveSemiLocalNodeRange() since it is
+  // not set up yet.  So we are creating the Range by hand.
+  //
+  // We must undisplace *all* our nodes to the _ref_mesh
+  // configuration, not just the local ones, since the partitioners
+  // require this.  We are using the GRAIN_SIZE=1 from MooseMesh.C,
+  // not sure how this value was decided upon.
+  //
+  // Note: we don't have to invalidate/update as much stuff as
+  // DisplacedProblem::updateMesh() does, since this will be handled
+  // by a later call to updateMesh().
+  NodeRange node_range(_mesh.getMesh().nodes_begin(),
+                       _mesh.getMesh().nodes_end(),
+                       /*grainsize=*/1);
+
+  // Undisplace the mesh using threads.
+  Threads::parallel_for (node_range, UpdateDisplacedMeshThread(*this));
 }

@@ -86,13 +86,18 @@ bool pathContains(const std::string &expression,
     return false;
 }
 
-void
-checkFileReadable(const std::string & filename, bool check_line_endings)
+bool
+checkFileReadable(const std::string & filename, bool check_line_endings, bool throw_on_unreadable)
 {
   std::ifstream in(filename.c_str(), std::ifstream::in);
   if (in.fail())
-    mooseError((std::string("Unable to open file \"") + filename
-                + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
+  {
+    if (throw_on_unreadable)
+      mooseError((std::string("Unable to open file \"") + filename
+                  + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
+    else
+      return false;
+  }
 
   if (check_line_endings)
   {
@@ -105,17 +110,28 @@ checkFileReadable(const std::string & filename, bool check_line_endings)
   }
 
   in.close();
+
+  return true;
 }
 
-void
-checkFileWriteable(const std::string & filename)
+bool
+checkFileWriteable(const std::string & filename, bool throw_on_unwritable)
 {
   std::ofstream out(filename.c_str(), std::ofstream::out);
   if (out.fail())
-    mooseError((std::string("Unable to open file \"") + filename
-                + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
+  {
+    if (throw_on_unwritable)
+      mooseError((std::string("Unable to open file \"") + filename
+                  + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
+    else
+      return false;
+  }
+
+
 
   out.close();
+
+  return true;
 }
 
 void
@@ -126,7 +142,7 @@ parallelBarrierNotify(const Parallel::Communicator & comm)
   if (comm.rank() == 0)
   {
     // The master process is already through, so report it
-    Moose::out << "Jobs complete: 1/" << comm.size() << "\r" << std::flush;
+    Moose::out << "Jobs complete: 1/" << comm.size() << (1 == comm.size() ? "\n" : "\r") << std::flush;
     for (unsigned int i=2; i<=comm.size(); ++i)
     {
       comm.receive(MPI_ANY_SOURCE, slave_processor_id);
@@ -149,12 +165,12 @@ hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ex
   std::string file_ext;
   if (strip_exodus_ext)
   {
-    pcrecpp::RE re(".*\\.([^\\.]*?)(?:-s\\d+)?$"); // capture the complete extension, ignoring -s*
+    pcrecpp::RE re(".*\\.([^\\.]*?)(?:-s\\d+)?\\s*$"); // capture the complete extension, ignoring -s*
     re.FullMatch(filename, &file_ext);
   }
   else
   {
-    pcrecpp::RE re(".*\\.([^\\.]*)$"); // capture the complete extension
+    pcrecpp::RE re(".*\\.([^\\.]*?)\\s*$"); // capture the complete extension
     re.FullMatch(filename, &file_ext);
   }
 
@@ -193,6 +209,110 @@ splitFileName(std::string full_file)
 
   // Return the path and file as a pair
   return std::pair<std::string, std::string>(path, file);
+}
+
+std::string
+camelCaseToUnderscore(const std::string & camel_case_name)
+{
+  string replaced = camel_case_name;
+  // Put underscores in front of each contiguous set of capital letters
+  pcrecpp::RE("(?!^)([A-Z]+)").GlobalReplace("_\\1", &replaced);
+
+  // Convert all capital letters to lower case
+  std::transform(replaced.begin(), replaced.end(), replaced.begin(), ::tolower);
+  return replaced;
+}
+
+std::string
+underscoreToCamelCase(const std::string & underscore_name, bool leading_upper_case)
+{
+  pcrecpp::StringPiece input(underscore_name);
+  pcrecpp::RE re("([^_]*)(_|$)");
+
+  std::string result;
+  std::string us, not_us;
+  bool make_upper = leading_upper_case;
+  while (re.Consume(&input, &not_us, &us))
+  {
+    if (not_us.length() > 0)
+    {
+      if (make_upper)
+      {
+        result += std::toupper(not_us[0]);
+        if (not_us.length() > 1)
+          result += not_us.substr(1);
+      }
+      else
+        result += not_us;
+    }
+    if (us == "")
+      break;
+
+    // Toggle flag so next match is upper cased
+    make_upper = true;
+  }
+
+  return result;
+}
+
+bool
+absoluteFuzzyEqual(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (std::abs(var1 - var2) < tol);
+}
+
+bool
+absoluteFuzzyGreaterEqual(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (var1 > (var2 - tol));
+}
+
+bool
+absoluteFuzzyGreaterThan(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (var1 > (var2 + tol));
+}
+
+bool
+absoluteFuzzyLessEqual(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (var1 < (var2 + tol));
+}
+
+bool
+absoluteFuzzyLessThan(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (var1 < (var2 - tol));
+}
+
+bool
+relativeFuzzyEqual(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (absoluteFuzzyEqual(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+}
+
+bool
+relativeFuzzyGreaterEqual(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (absoluteFuzzyGreaterEqual(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+}
+
+bool
+relativeFuzzyGreaterThan(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (absoluteFuzzyGreaterThan(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+}
+
+bool
+relativeFuzzyLessEqual(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (absoluteFuzzyLessEqual(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+}
+
+bool
+relativeFuzzyLessThan(const Real & var1, const Real & var2, const Real & tol)
+{
+  return (absoluteFuzzyLessThan(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
 }
 
 } // MooseUtils namespace

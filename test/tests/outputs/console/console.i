@@ -85,12 +85,10 @@
 
 [Outputs]
   color = false
-
   [./screen]
     type = Console
-    output_initial = false
     fit_mode = 100
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []
 

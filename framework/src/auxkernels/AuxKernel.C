@@ -33,7 +33,7 @@ InputParameters validParams<AuxKernel>()
   params += validParams<RandomInterface>();
   params += validParams<MeshChangedInterface>();
 
-  // Add the SetupInterface parameter, 'execute_on', the default is 'residual'
+  // Add the SetupInterface parameter, 'execute_on', the default is 'linear'
   params += validParams<SetupInterface>();
 
   params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this object applies to");
@@ -51,19 +51,19 @@ InputParameters validParams<AuxKernel>()
 
 AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BlockRestrictable(name, parameters),
-    BoundaryRestrictable(name, parameters),
+    BlockRestrictable(parameters),
+    BoundaryRestrictable(parameters),
     SetupInterface(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    TransientInterface(parameters, name, "aux_kernels"),
-    MaterialPropertyInterface(name, parameters),
+    TransientInterface(parameters, "aux_kernels"),
+    MaterialPropertyInterface(parameters, blockIDs(), boundaryIDs()),
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
-    RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
+    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     GeometricSearchInterface(parameters),
-    Restartable(name, parameters, "AuxKernels"),
+    Restartable(parameters, "AuxKernels"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

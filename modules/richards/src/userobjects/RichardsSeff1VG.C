@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  van-Genuchten effective saturation as a function of single pressure, and its derivs wrt to that pressure
 //
@@ -18,9 +21,9 @@ InputParameters validParams<RichardsSeff1VG>()
 }
 
 RichardsSeff1VG::RichardsSeff1VG(const std::string & name, InputParameters parameters) :
-  RichardsSeff(name, parameters),
-  _al(getParam<Real>("al")),
-  _m(getParam<Real>("m"))
+    RichardsSeff(name, parameters),
+    _al(getParam<Real>("al")),
+    _m(getParam<Real>("m"))
 {
 }
 
@@ -32,13 +35,13 @@ RichardsSeff1VG::seff(std::vector<VariableValue *> p, unsigned int qp) const
 }
 
 void
-RichardsSeff1VG::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
+RichardsSeff1VG::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> & result) const
 {
   result[0] = RichardsSeffVG::dseff((*p[0])[qp], _al, _m);
 }
 
 void
-RichardsSeff1VG::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
+RichardsSeff1VG::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const
 {
   result[0][0] = RichardsSeffVG::d2seff((*p[0])[qp], _al, _m);
 }

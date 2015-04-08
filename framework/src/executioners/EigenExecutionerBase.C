@@ -22,14 +22,16 @@ InputParameters validParams<EigenExecutionerBase>()
 {
   InputParameters params = validParams<Executioner>();
   params.addRequiredParam<PostprocessorName>("bx_norm", "To evaluate |Bx| for the eigenvalue");
-  params.addParam<PostprocessorName>("xdiff", "To evaluate |x-x_previous| for power iterations");
   params.addParam<PostprocessorName>("normalization", "To evaluate |x| for normalization");
   params.addParam<Real>("normal_factor", "Normalize x to make |x| equal to this factor");
+  params.addParam<bool>("output_before_normalization", true, "True to output a step before normalization");
   params.addParam<bool>("auto_initialization", true, "True to ask the solver to set initial");
   params.addParam<Real>("time", 0.0, "System time");
-  params.addParam<bool>("output_on_final", false, "True to disable all the intemediate exodus outputs");
 
   params.addPrivateParam<bool>("_eigen", true);
+
+  params.addParamNamesToGroup("normalization normal_factor output_before_normalization", "Normalization");
+  params.addParamNamesToGroup("auto_initialization time", "Advanced");
   return params;
 }
 
@@ -39,8 +41,6 @@ EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParame
      _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
      _eigenvalue(_problem.parameters().set<Real>("eigenvalue")), // used for storing the eigenvalue
      _source_integral(getPostprocessorValue("bx_norm")),
-     _source_integral_old(getPostprocessorValueOld("bx_norm")),
-     _solution_diff(isParamValid("xdiff") ? &getPostprocessorValue("xdiff") : NULL),
      _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
                     : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
 {
@@ -76,8 +76,6 @@ EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParame
 
 EigenExecutionerBase::~EigenExecutionerBase()
 {
-  // This problem was built by the Factory and needs to be released by this destructor
-  delete &_problem;
 }
 
 void
@@ -99,20 +97,26 @@ EigenExecutionerBase::init()
     _eigen_sys.initSystemSolution(EigenSystem::EIGEN, 1.0);
   }
   _problem.initialSetup();
-  if (_source_integral==0.0) mooseError("|Bx| = 0!");
   _eigen_sys.initSystemSolutionOld(EigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated
-  // TODO: Multiple execFlags support
-  _bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execFlags()[0];
-  if (_solution_diff)
-    _xdiff_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("xdiff")).execFlags()[0];
-  else
-    _xdiff_execflag = EXEC_TIMESTEP;
+  ExecFlagType bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execBitFlags();
+  if ((bx_execflag & EXEC_LINEAR) == EXEC_NONE)
+    mooseError("Postprocessor "+getParam<PostprocessorName>("bx_norm")+" requires execute_on = 'linear'");
+
   if (isParamValid("normalization"))
-    _norm_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization")).execFlags()[0];
+    _norm_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization")).execBitFlags();
   else
-    _norm_execflag = _bx_execflag;
+    _norm_execflag = bx_execflag;
+
+  // check if _source_integral has been evaluated during initialSetup()
+  if ((bx_execflag & EXEC_INITIAL) == EXEC_NONE)
+  {
+    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
+    _problem.computeAuxiliaryKernels(EXEC_LINEAR);
+    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
+  }
+  if (_source_integral==0.0) mooseError("|Bx| = 0!");
 
   // normalize solution to make |Bx|=_eigenvalue, _eigenvalue at this point has the initialized value
   makeBXConsistent(_eigenvalue);
@@ -127,7 +131,7 @@ EigenExecutionerBase::init()
   _problem.timeStep() = 0;
   Real t = _problem.time();
   _problem.time() = _problem.timeStep();
-  _output_warehouse.outputInitial();
+  _problem.outputStep(EXEC_INITIAL);
   _problem.time() = t;
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
@@ -137,22 +141,17 @@ EigenExecutionerBase::makeBXConsistent(Real k)
 {
   Real consistency_tolerance = 1e-10;
 
-  // Scale the solution so that the postprocessor is equal to one.
+  // Scale the solution so that the postprocessor is equal to k.
+  // Note: all dependent objects of k must be evaluated on linear!
   // We have a fix point loop here, in case the postprocessor is a nonlinear function of the scaling factor.
   // FIXME: We have assumed this loop always converges.
   while (std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
   {
     // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
     _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, k/_source_integral);
-    // update all aux variables
-    for (unsigned int i=0; i<Moose::exec_types.size(); i++)
-    {
-      // EXEC_CUSTOM is special, should be treated only by specifically designed executioners.
-      if (Moose::exec_types[i]==EXEC_CUSTOM) continue;
-      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(Moose::exec_types[i]);
-      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::POST_AUX);
-    }
+    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
+    _problem.computeAuxiliaryKernels(EXEC_LINEAR);
+    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << _source_integral;
     _console << " |Bx_0| = " << ss.str() << std::endl;
@@ -165,15 +164,17 @@ EigenExecutionerBase::checkIntegrity()
   // check to make sure that we don't have any time kernels in this simulation
   if (_eigen_sys.containsTimeKernel())
     mooseError("You have specified time kernels in your steady state eigenvalue simulation");
+  if (!_eigen_sys.containsEigenKernel())
+    mooseError("You have not specified any eigen kernels in your eigenvalue simulation");
 }
 
 void
 EigenExecutionerBase::addRealParameterReporter(const std::string & param_name)
 {
   InputParameters params = _app.getFactory().getValidParams("ProblemRealParameter");
-  std::vector<MooseEnum> execute_options(SetupInterface::getExecuteOptions());
-  execute_options[0] = "timestep";
-  params.set<std::vector<MooseEnum> >("execute_on") = execute_options;
+  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
+  execute_options = "timestep_end linear";
+  params.set<MultiMooseEnum>("execute_on") = execute_options;
   params.set<std::string>("param_name") = param_name;
   _problem.addPostprocessor("ProblemRealParameter", param_name, params);
 }
@@ -184,10 +185,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
                                             Real pfactor,
                                             bool cheb_on,
                                             Real tol_eig,
-                                            Real tol_x,
                                             bool echo,
-                                            bool output_convergence,
-                                            Real time_base,
+                                            PostprocessorName xdiff,
+                                            Real tol_x,
                                             Real & k,
                                             Real & initial_res)
 {
@@ -195,10 +195,16 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   mooseAssert(pfactor>0.0, "Invaid linear convergence tolerance");
   mooseAssert(tol_eig>0.0, "Invalid eigenvalue tolerance");
   mooseAssert(tol_x>0.0, "Invalid solution norm tolerance");
-  if ( _bx_execflag != EXEC_TIMESTEP && _bx_execflag != EXEC_RESIDUAL)
-    mooseError("rhs postprocessor for the power method has to be executed on timestep or residual");
-  if ( _xdiff_execflag != EXEC_TIMESTEP && _xdiff_execflag != EXEC_RESIDUAL)
-    mooseError("xdiff postprocessor for the power method has to be executed on timestep or residual");
+
+  // obtain the solution diff
+  const PostprocessorValue * solution_diff = NULL;
+  if (xdiff != "")
+  {
+    solution_diff = &getPostprocessorValueByName(xdiff);
+    ExecFlagType xdiff_execflag = _problem.getUserObject<UserObject>(xdiff).execBitFlags();
+    if ((xdiff_execflag & EXEC_LINEAR) == EXEC_NONE)
+      mooseError("Postprocessor "+xdiff+" requires execute_on = 'linear'");
+  }
 
   // not perform any iteration when max_iter==0
   if (max_iter==0) return;
@@ -227,6 +233,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // some iteration variables
   Real k_old = 0.0;
+  Real & source_integral_old = getPostprocessorValueOld("bx_norm");
+  Real saved_source_integral_old = source_integral_old;
+  Chebyshev_Parameters chebyshev_parameters;
 
   std::vector<Real> keff_history;
   std::vector<Real> diff_history;
@@ -244,84 +253,65 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     // important: solutions of aux system is also copied
     _problem.advanceState();
     k_old = k;
-
-    // FIXME: timestep needs to be changed to step
-    _problem.onTimestepBegin(); // this will copy postprocessors to old
-    _problem.timestepSetup();
-    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);
-    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
-    _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
+    source_integral_old = _source_integral;
 
     preIteration();
     _problem.solve();
     postIteration();
 
-    // FIXME: timestep needs to be changed to step
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
-    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
-    _problem.onTimestepEnd();
-
     // save the initial residual
     if (iter==0) initial_res = _eigen_sys._initial_residual;
 
     // update eigenvalue
-    k = k_old * _source_integral / _source_integral_old;
-
-    // synchronize _eigenvalue with |Bx| for output purpose
-    // Note: if using MOOSE output system, eigenvalue output will be one iteration behind.
-    //       Also this will affect EigenKernels with eigen=false.
+    k = k_old * _source_integral / source_integral_old;
     _eigenvalue = k;
 
-    if (echo && (!output_convergence))
+    if (echo)
     {
       // output on screen the convergence history only when we want to and MOOSE output system is not used
       keff_history.push_back(k);
-      if (_solution_diff) diff_history.push_back(*_solution_diff);
+      if (solution_diff) diff_history.push_back(*solution_diff);
 
-      std::ios_base::fmtflags flg = Moose::out.flags();
-      std::streamsize pcs = Moose::out.precision();
-      if (_solution_diff)
+      std::stringstream ss;
+      if (solution_diff)
       {
-        _console << std::endl;
-        _console << " +================+=====================+=====================+\n";
-        _console << " | iteration      | eigenvalue          | solution_difference |\n";
-        _console << " +================+=====================+=====================+\n";
+        ss << std::endl;
+        ss << " +================+=====================+=====================+\n";
+        ss << " | iteration      | eigenvalue          | solution_difference |\n";
+        ss << " +================+=====================+=====================+\n";
         unsigned int j = 0;
         if (keff_history.size()>10)
         {
-          _console << " :                :                     :                     :\n";
+          ss << " :                :                     :                     :\n";
           j = keff_history.size()-10;
         }
         for (; j<keff_history.size(); j++)
-          _console << " | " << std::setw(14) << j
-                     << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
-                     << " | " << std::setw(19) << std::scientific << std::setprecision(8) << diff_history[j]
-                     << " |\n";
-        _console << " +================+=====================+=====================+\n" << std::flush;
-        _console << std::endl;
+          ss << " | " << std::setw(14) << j
+             << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
+             << " | " << std::setw(19) << std::scientific << std::setprecision(8) << diff_history[j]
+             << " |\n";
+        ss << " +================+=====================+=====================+\n" << std::flush;
       }
       else
       {
-        _console << std::endl;
-        _console << " +================+=====================+\n";
-        _console << " | iteration      | eigenvalue          |\n";
-        _console << " +================+=====================+\n";
+        ss << std::endl;
+        ss << " +================+=====================+\n";
+        ss << " | iteration      | eigenvalue          |\n";
+        ss << " +================+=====================+\n";
         unsigned int j = 0;
         if (keff_history.size()>10)
         {
-          _console << " :                :                     :\n";
+          ss << " :                :                     :\n";
           j = keff_history.size()-10;
         }
         for (; j<keff_history.size(); j++)
-          _console << " | " << std::setw(14) << j
-                     << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
-                     << " |\n";
-        _console << " +================+=====================+\n" << std::flush;
-        _console << std::endl;
+          ss << " | " << std::setw(14) << j
+             << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
+             << " |\n";
+        ss << " +================+=====================+\n" << std::flush;
+        ss << std::endl;
       }
-      Moose::out.flags(flg);
-      Moose::out.precision(pcs);
+      _console << ss.str() << std::endl;
     }
 
     // increment iteration number here
@@ -329,14 +319,14 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
     if (cheb_on)
     {
-      chebyshev(iter);
+      chebyshev(chebyshev_parameters, iter, solution_diff);
       if (echo)
         _console << " Chebyshev step: " << chebyshev_parameters.icheb << std::endl;
     }
 
     if (echo)
       _console << " ________________________________________________________________________________ "
-                 << std::endl;
+               << std::endl;
 
     // not perform any convergence check when number of iterations is less than min_iter
     if (iter>=min_iter)
@@ -347,25 +337,15 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
         bool converged = true;
         Real keff_error = fabs(k_old-k)/k;
         if (keff_error>tol_eig) converged = false;
-        if (_solution_diff)
-          if (*_solution_diff > tol_x) converged = false;
+        if (solution_diff)
+          if (*solution_diff > tol_x) converged = false;
         if (converged) break;
       }
       else
         break;
     }
-
-    // use output system to dump iteration history
-    if (output_convergence)
-    {
-      // we need to tempararily change system time to obtain the right output
-      // FIXME: if 'step' capability is available, we will not need to do this.
-      Real t = _problem.time();
-      _problem.time() = time_base + Real(iter)/max_iter;
-      _output_warehouse.outputStep();
-      _problem.time() = t;
-    }
   }
+  source_integral_old = saved_source_integral_old;
 
   // restore parameters changed by the executioner
   _problem.es().parameters.set<Real> ("linear solver tolerance") = tol1;
@@ -388,35 +368,34 @@ EigenExecutionerBase::postIteration()
 void
 EigenExecutionerBase::postExecute()
 {
-
-  if (!getParam<bool>("output_on_final"))
+  if (getParam<bool>("output_before_normalization"))
   {
     _problem.timeStep()++;
     Real t = _problem.time();
     _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep();
+    _problem.outputStep(EXEC_TIMESTEP_END);
     _problem.time() = t;
   }
 
   Real s = 1.0;
-  if (_norm_execflag==EXEC_CUSTOM)
+  if (_norm_execflag & EXEC_CUSTOM)
   {
     _console << " Cannot let the normalization postprocessor on custom." << std::endl;
     _console << " Normalization is abandoned!" << std::endl;
   }
   else
   {
-    s = normalizeSolution(_norm_execflag!=EXEC_TIMESTEP && _norm_execflag!=EXEC_RESIDUAL);
+    s = normalizeSolution(_norm_execflag & (EXEC_TIMESTEP_END | EXEC_LINEAR));
     if (std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
       _console << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
   }
 
-  if (getParam<bool>("output_on_final") || std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
+  if ((!getParam<bool>("output_before_normalization")) || std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
   {
     _problem.timeStep()++;
     Real t = _problem.time();
     _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep();
+    _problem.outputStep(EXEC_TIMESTEP_END);
     _problem.time() = t;
   }
 }
@@ -426,9 +405,9 @@ EigenExecutionerBase::normalizeSolution(bool force)
 {
   if (force)
   {
-    _problem.computeUserObjects(_norm_execflag);
-    _problem.computeAuxiliaryKernels(_norm_execflag);
-    _problem.computeUserObjects(_norm_execflag, UserObjectWarehouse::POST_AUX);
+    _problem.computeUserObjects(EXEC_INITIAL);
+    _problem.computeAuxiliaryKernels(EXEC_INITIAL);
+    _problem.computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::POST_AUX);
   }
 
   Real factor;
@@ -467,7 +446,7 @@ EigenExecutionerBase::printEigenvalue()
   _console << ss.str();
 }
 
-EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters ()
+EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters()
   :
   n_iter(50),
   fsmooth(2),
@@ -478,7 +457,7 @@ EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters ()
 {}
 
 void
-EigenExecutionerBase::Chebyshev_Parameters::reinit ()
+EigenExecutionerBase::Chebyshev_Parameters::reinit()
 {
   finit   = 6;
   lgac    = 0;
@@ -487,12 +466,14 @@ EigenExecutionerBase::Chebyshev_Parameters::reinit ()
 }
 
 void
-EigenExecutionerBase::chebyshev(unsigned int iter)
+EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, unsigned int iter, const PostprocessorValue * solution_diff)
 {
+  if (!solution_diff) mooseError("solution diff is required for Chebyshev acceleration");
+
   if (chebyshev_parameters.lgac==0)
   {
     if (chebyshev_parameters.icho==0)
-      chebyshev_parameters.ratio = *_solution_diff / chebyshev_parameters.flux_error_norm_old;
+      chebyshev_parameters.ratio = *solution_diff / chebyshev_parameters.flux_error_norm_old;
     else
     {
       chebyshev_parameters.ratio = chebyshev_parameters.ratio_new;
@@ -505,19 +486,16 @@ EigenExecutionerBase::chebyshev(unsigned int iter)
     {
       chebyshev_parameters.lgac = 1;
       chebyshev_parameters.icheb = 1;
-      chebyshev_parameters.error_begin = *_solution_diff;
+      chebyshev_parameters.error_begin = *solution_diff;
       chebyshev_parameters.iter_begin = iter;
       double alp = 2/(2-chebyshev_parameters.ratio);
       std::vector<double> coef(2);
       coef[0] = alp;
       coef[1] = 1-alp;
       _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
-      _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(EXEC_RESIDUAL);
-      _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
-      _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-      _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+      _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
+      _problem.computeAuxiliaryKernels(EXEC_LINEAR);
+      _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
       _eigenvalue = _source_integral;
     }
   }
@@ -538,7 +516,7 @@ EigenExecutionerBase::chebyshev(unsigned int iter)
     }
     else
     {*/
-      double gamma_new = (*_solution_diff/chebyshev_parameters.error_begin)*
+      double gamma_new = (*solution_diff/chebyshev_parameters.error_begin)*
         (std::cosh((chebyshev_parameters.icheb-1)*acosh(2/chebyshev_parameters.ratio-1)));
       if (gamma_new<1.0) gamma_new = 1.0;
 
@@ -568,25 +546,19 @@ EigenExecutionerBase::chebyshev(unsigned int iter)
         coef[1] = 1-alp+beta;
         coef[2] = -beta;
         _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
-        _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::PRE_AUX);
-        _problem.computeAuxiliaryKernels(EXEC_RESIDUAL);
-        _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
-        _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
-        _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-        _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+        _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
+        _problem.computeAuxiliaryKernels(EXEC_LINEAR);
+        _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
         _eigenvalue = _source_integral;
       }
 //    }
   }
-  chebyshev_parameters.flux_error_norm_old = *_solution_diff;
+  chebyshev_parameters.flux_error_norm_old = *solution_diff;
 }
 
 void
 EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k)
 {
-  PostprocessorName bxp = getParam<PostprocessorName>("bx_norm");
-  if ( _problem.getUserObject<UserObject>(bxp).execFlags()[0] != EXEC_RESIDUAL)
-    mooseError("rhs postprocessor for the nonlinear eigenvalue solve must be executed on residual");
   makeBXConsistent(k);
 
   // turn on nonlinear flag so that RHS kernels opterate on the current solutions

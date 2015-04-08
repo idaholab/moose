@@ -27,11 +27,12 @@ InputParameters validParams<Function>()
 Function::Function(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    TransientInterface(parameters, name, "functions"),
+    TransientInterface(parameters, "functions"),
     PostprocessorInterface(parameters),
     UserObjectInterface(parameters),
-    Restartable(name, parameters, "Functions"),
-    MeshChangedInterface(parameters)
+    Restartable(parameters, "Functions"),
+    MeshChangedInterface(parameters),
+    ScalarCoupleable(parameters)
 {
 }
 
@@ -49,6 +50,13 @@ RealGradient
 Function::gradient(Real /*t*/, const Point & /*p*/)
 {
   return RealGradient(0, 0, 0);
+}
+
+Real
+Function::timeDerivative(Real /*t*/, const Point & /*p*/)
+{
+  mooseError("timeDerivative method not defined for function " << _name);
+  return 0;
 }
 
 RealVectorValue

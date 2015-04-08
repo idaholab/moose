@@ -22,6 +22,7 @@
 #include "UserObjectInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "ScalarCoupleable.h"
 
 // libMesh
 #include "libmesh/vector_value.h"
@@ -43,7 +44,8 @@ class Function :
   public PostprocessorInterface,
   public UserObjectInterface,
   public Restartable,
-  public MeshChangedInterface
+  public MeshChangedInterface,
+  public ScalarCoupleable
 {
 public:
   /**
@@ -84,6 +86,14 @@ public:
    * \return A gradient of the function evaluated at the time and location
    */
   virtual RealGradient gradient(Real t, const Point & p);
+
+  /**
+   * Get the time derivative of the function
+   * \param t The time
+   * \param p The point in space (x,y,z)
+   * \return The time derivative of the function at the specified time and location
+   */
+  virtual Real timeDerivative(Real t, const Point & p);
 
   // Not defined
   virtual Real integral();

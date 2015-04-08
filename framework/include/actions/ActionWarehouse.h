@@ -23,6 +23,7 @@
 // MOOSE includes
 #include "Action.h"
 #include "ConsoleStreamInterface.h"
+#include "Warehouse.h"
 
 /// Typedef to hide implementation details
 typedef std::vector<Action *>::iterator ActionIterator;
@@ -35,7 +36,9 @@ class ActionFactory;
 /**
  * Storage for action instances.
  */
-class ActionWarehouse : public ConsoleStreamInterface
+class ActionWarehouse :
+  public Warehouse<Action>,
+  public ConsoleStreamInterface
 {
 public:
   ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory);
@@ -60,7 +63,7 @@ public:
   /**
    * This method add an \p Action instance to the warehouse.
    */
-  void addActionBlock(Action * blk);
+  void addActionBlock(MooseSharedPointer<Action> blk);
 
   /**
    * This method checks the actions stored in the warehouse against the list of required registered
@@ -99,6 +102,11 @@ public:
   const std::vector<Action *> & getActionsByName(const std::string & task) const;
 
   /**
+   * Check if Actions associated with passed in task exist.
+   */
+  bool hasActions(const std::string & task) const;
+
+  /**
    * This method loops over all actions in the warehouse and executes them.  Meta-actions
    * may add new actions to the warehouse on the fly and they will still be executed in order
    */
@@ -130,8 +138,8 @@ public:
   MooseSharedPointer<MooseMesh> & mesh() { return _mesh; }
   MooseSharedPointer<MooseMesh> & displacedMesh() { return _displaced_mesh; }
 
-  FEProblem * & problem() { return _problem; }
-  Executioner * & executioner() { return _executioner; }
+  MooseSharedPointer<FEProblem> & problem() { return _problem; }
+  MooseSharedPointer<Executioner> & executioner() { return _executioner; }
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
@@ -144,6 +152,8 @@ protected:
    * @param task The name of the task to find and build Actions for.
    */
   void buildBuildableActions(const std::string &task);
+
+  std::vector<MooseSharedPointer<Action> > _all_ptrs;
 
   /// The MooseApp this Warehouse is associated with
   MooseApp & _app;
@@ -184,9 +194,10 @@ protected:
   MooseSharedPointer<MooseMesh> _displaced_mesh;
 
   /// Problem class
-  FEProblem * _problem;
+  MooseSharedPointer<FEProblem> _problem;
+
   /// Executioner for the simulation (top-level class, is stored in MooseApp, where it is freed)
-  Executioner * _executioner;
+  MooseSharedPointer<Executioner> _executioner;
 };
 
 #endif // ACTIONWAREHOUSE_H

@@ -57,7 +57,6 @@ BDF2::computeTimeDerivatives()
     _u_dot.close();
 
     _du_dot_du = 1.0 / _dt;
-    _du_dot_du.close();
   }
   else
   {
@@ -69,7 +68,6 @@ BDF2::computeTimeDerivatives()
     _u_dot.close();
 
     _du_dot_du = _weight[0] / _dt;
-    _du_dot_du.close();
   }
 }
 

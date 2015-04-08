@@ -54,11 +54,8 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
 [MultiApps]
@@ -67,7 +64,7 @@
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = tosub_sub.i
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -76,7 +73,6 @@
     source_variable = u
     direction = to_multiapp
     variable = transferred_u
-    execute_on = timestep
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
   [../]
@@ -85,7 +81,6 @@
     source_variable = u
     direction = to_multiapp
     variable = elemental_transferred_u
-    execute_on = timestep
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
   [../]

@@ -29,7 +29,7 @@ InputParameters validParams<OrientedSubdomainBoundingBox>()
 
 OrientedSubdomainBoundingBox::OrientedSubdomainBoundingBox(const std::string & name, InputParameters parameters) :
     MeshModifier(name, parameters),
-    OrientedBoxInterface(name, parameters),
+    OrientedBoxInterface(parameters),
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<SubdomainID>("block_id"))
 

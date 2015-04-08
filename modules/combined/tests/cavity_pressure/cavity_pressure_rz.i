@@ -191,14 +191,14 @@
   [./internalVolume]
     type = InternalVolume
     boundary = 2
-    execute_on = residual
+    execute_on = linear
   [../]
 
   [./aveTempInterior]
     type = SideAverageValue
     boundary = 2
     variable = temp
-    execute_on = residual
+    execute_on = linear
   [../]
 
 []
@@ -206,11 +206,8 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
   [./checkpoint]
     type = Checkpoint
     num_files = 1

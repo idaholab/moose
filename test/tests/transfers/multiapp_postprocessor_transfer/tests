@@ -2,7 +2,13 @@
   [./test]
     type = 'Exodiff'
     input = 'master.i'
-    exodiff = 'master_out_pp_sub0.e master_out_pp_sub1.e'
+    exodiff = 'master_out_pp_sub0.e master_out_pp_sub1.e master_out.e'
+    recover = false
+  [../]
+  [./test_from_multiapp]
+    type = 'Exodiff'
+    input = 'master_from_multiapp.i'
+    exodiff = 'master_from_multiapp_out_sub0.e master_from_multiapp_out_sub1.e master_from_multiapp_out.e'
     recover = false
   [../]
 []

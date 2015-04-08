@@ -2,17 +2,18 @@
   [./except1]
     type = 'RunException'
     input = 'except1.i'
-    expect_err = 'wpt_tensile_strength>=0'
-  [../]
-  [./except2]
-    type = 'RunException'
-    input = 'except2.i'
-    expect_err = 'wpt_tensile_strength_rate>=0'
+    expect_err = 'Weak plane tensile strength must not be negative'
   [../]
   [./small1]
     type = 'CSVDiff'
     input = 'small_deform1.i'
     csvdiff = 'small_deform1.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./small1N]
+    type = 'CSVDiff'
+    input = 'small_deform1N.i'
+    csvdiff = 'small_deform1N.csv'
     rel_err = 1.0E-5
   [../]
   [./small2]
@@ -52,11 +53,10 @@
     csvdiff = 'small_deform_hard3.csv'
     rel_err = 1.0E-5
   [../]
-  [./small1_uo]
+  [./small_hard_cubic]
     type = 'CSVDiff'
-    input = 'small_deform1_uo.i'
-    csvdiff = 'small_deform1_uo.csv'
+    input = 'small_deform_hard_cubic.i'
+    csvdiff = 'small_deform_hard_cubic.csv'
     rel_err = 1.0E-5
   [../]
-
 []

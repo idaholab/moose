@@ -1,0 +1,29 @@
+create vertex 0    0 0
+create vertex 1    0 0
+create curve vertex 1 2
+
+create vertex 1.1 0 0
+create vertex 2.1 0 0
+create curve vertex 3 4
+
+curve 1 interval 2
+curve 1 scheme bias factor 1.0
+mesh curve 1
+
+curve 2 interval 2
+curve 2 scheme bias factor 1.0
+mesh curve 2
+
+set duplicate block elements off
+block 1 curve 1
+block 1 element type BEAM2
+
+set duplicate block elements off
+block 2 curve 2
+block 2 element type BEAM2
+
+nodeset 1 vertex 1
+nodeset 2 vertex 4
+
+nodeset 100 vertex 2
+nodeset 101 vertex 3

@@ -1,16 +1,10 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 
 #ifndef GLUEDCONTACTCONSTRAINT_H
 #define GLUEDCONTACTCONSTRAINT_H
@@ -46,6 +40,14 @@ public:
   virtual Real computeQpResidual(Moose::ConstraintType type);
 
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+
+  /**
+   * Compute off-diagonal Jacobian entries
+   * @param type The type of coupling
+   * @param jvar The index of the coupled variable
+   */
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                        unsigned int jvar);
 
   bool shouldApply();
 protected:

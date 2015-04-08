@@ -54,7 +54,6 @@ RungeKutta2::computeTimeDerivatives()
   _du_dot_du = 1. / _dt;
 
   _u_dot.close();
-  _du_dot_du.close();
 }
 
 void

@@ -1,11 +1,13 @@
 
- Subroutine wateos_PH(p, h, T, dw, hx, energyscale, ierr)
+recursive Subroutine wateos_PH(p, h, T, dw, hx, energyscale, tolerance, ierr)
    use IAPWS97, only : cowat
 
   implicit none
 
   real*8 p,h, energyscale
   real*8 T,dw, hx
+  real*8 tolerance
+
   integer ierr
 
   real*8 tx0, tx, dt, txd
@@ -27,7 +29,7 @@
    succ= cowat(tx, p, dw, hw)
    hx= hw * energyscale
 !   if(dabs((hx-h)/h)<= 1D-14) exit
-    if(dabs((hx-h))<= 1D-14) exit
+    if(dabs((hx-h))<= tolerance) exit
    txd = tx + dt
    succ = cowat(txd, p, dw, hw)
    hxd= hw * energyscale
@@ -46,12 +48,14 @@
 
 !*************************************************************
 
- Subroutine steameos_PH(p, h, T, dg, hx, energyscale, ierr)
+ Subroutine steameos_PH(p, h, T, dg, hx, energyscale, tolerance, ierr)
   use IAPWS97, only : supst
   implicit none
 
   real*8 p,h, energyscale
   real*8 T, dg, hx
+  real*8 tolerance
+
   integer ierr
 
   real*8 tx0, tx, dt,txd
@@ -73,7 +77,7 @@
   succ=supst(tx, p, dg, hg)
    hx = hg * energyscale
 !   if(dabs((hx-h)/h)<= 1D-14) exit
-   if(dabs((hx-h))<= 1D-14) exit
+   if(dabs((hx-h))<= tolerance) exit
    txd = tx + dt
    succ=supst(txd, p, dg, hg)
    hxd=hg * energyscale
@@ -90,15 +94,7 @@
 
 !*************************************************************
 
-
-
-
-!*************************************************************
-
-!*************************************************************
-! Subroutine water_steam_prop_PH
-!-------------------------------------------------------------
-  subroutine water_steam_prop_PH(p, h, T, Sw, &
+recursive subroutine water_steam_prop_PH(p, h, T, Sw, &
     Den,Denw, Dens, &
     hw, hs, dDendh, dDendp,  dhwdh,dhsdh,&
     dTdh, dswdh, ierror, dhwdp, dhsdp,dTdp)
@@ -119,7 +115,7 @@
   real*8 dw, dwmol
   real*8 dg, dgmol, dgp,dgt,hg,hgp,hgt
   integer ierr
-  integer :: iphase = 0
+  integer :: iphase
   real*8 delp, delh
   real*8 dw0, dw1, hw0,hw1, sw0, sw1
   real*8 dg0, dg1, hg0,hg1, h1
@@ -127,6 +123,57 @@
   real*8 dTdp
   logical succ
 
+  real*8 arg1, arg2 !
+
+  arg1 = 1.0D-14
+  arg2 = 1.0D-14
+
+  call  water_steam_prop_PH_ex(p, h, T, Sw, &
+    Den,Denw, Dens, &
+    hw, hs, dDendh, dDendp,  dhwdh,dhsdh,&
+    dTdh, dswdh, ierror, dhwdp, dhsdp,dTdp, arg1, arg2)
+
+
+
+end subroutine water_steam_prop_PH
+
+
+!*************************************************************
+
+!*************************************************************
+! Subroutine water_steam_prop_PH_ex
+!-------------------------------------------------------------
+recursive subroutine water_steam_prop_PH_ex(p, h, T, Sw, &
+    Den,Denw, Dens, &
+    hw, hs, dDendh, dDendp,  dhwdh,dhsdh,&
+    dTdh, dswdh, ierror, dhwdp, dhsdp,dTdp, arg1, arg2)
+   use IAPWS97, only : cowat, supst, tsat
+  implicit none
+
+  real*8, parameter::  fmwh2o = 18.01534d0
+  real*8, parameter::  ps350c = 16.529D6, hw350c=1670.9D0
+  real*8, parameter::  energyscale=1D-6 ! MJ/Kg
+  real*8, parameter::  epi_p = 0.1D-0, epi_h = 0.1D0 * energyscale
+
+
+  real*8, intent(inout)  :: p, h ! Pscal, KJ/Kg, C (initial guess)
+  real*8, intent(out) :: T, Sw, hw,hs,Den,Denw,Dens,  dTdh, dDendp,dDendh, dhwdh,dhsdh, dswdh, dhwdp,dhsdp
+  integer,intent(out) :: ierror  ! ierr = 10  critical point
+  real*8, intent(in)  :: arg1, arg2 ! optional input arguments to control convergence criteria
+
+  real*8 Ts
+  real*8 dw, dwmol
+  real*8 dg, dgmol, dgp,dgt,hg,hgp,hgt
+  integer ierr
+  integer :: iphase
+  real*8 delp, delh
+  real*8 dw0, dw1, hw0,hw1, sw0, sw1
+  real*8 dg0, dg1, hg0,hg1, h1
+  real*8 t0,t1, d0,d1
+  real*8 dTdp
+  logical succ
+
+  iphase = 0
 
 ! determine phase condition
   succ= TSAT( p, Ts)
@@ -153,7 +200,7 @@
   select case(iphase)
   case(1) ! water only
     T= Ts-10D0
-    call wateos_PH(p, h, T, dw, hw, energyscale, ierr)
+    call wateos_PH(p, h, T, dw, hw, energyscale, arg1, ierr)
     Sw=1D0
     dg=0D0
     hg=0D0
@@ -166,7 +213,7 @@
     hs=0D0
   case(2)
     T= Ts+10D0
-    call steameos_PH(p, h, T, dg, hg, energyscale, ierr)
+    call steameos_PH(p, h, T, dg, hg, energyscale, arg2, ierr)
     Sw=0D0
     dw=0D0
     hw=0D0
@@ -198,7 +245,7 @@
    t0= T
    succ =  cowat( T, p, dw0, hw0)
    hw0=hw0* energyscale
-   call  wateos_PH(p+delp, h, T, dw1, hw1, energyscale, ierr)
+   call  wateos_PH(p+delp, h, T, dw1, hw1, energyscale, arg1, ierr)
    t1=T
    dDendp=(dw1-dw0)/delp
    dTdp=(t1-t0)/delp
@@ -208,7 +255,7 @@
    dhsdp=0D0
 
 !++++++++++++++++++++++++++++++
-   call  wateos_PH(p, h+delh, T, dw1, hw1, energyscale, ierr)
+   call  wateos_PH(p, h+delh, T, dw1, hw1, energyscale, arg1, ierr)
    t1=T
 
    dDendh=(dw1-dw0)/delh
@@ -222,7 +269,7 @@
    t0=T
    succ=supst(T, p,  dg0, hg0)
    hg0 =hg0 * energyscale
-   call steameos_PH(p+delp, h, T, dg1, hg1, energyscale, ierr)
+   call steameos_PH(p+delp, h, T, dg1, hg1, energyscale, arg2, ierr)
    t1=T
    dDendp=(dg1-dg0)/delp
    dTdp=(t1-t0)/delp
@@ -232,7 +279,7 @@ dhwdp=0D0
 dhsdp=(hg1-hg0)/delp
 
 !++++++++++++++++++++++++++++
-   call  steameos_PH(p, h+delh, T, dw1, hg1, energyscale, ierr)
+   call  steameos_PH(p, h+delh, T, dw1, hg1, energyscale, arg2, ierr)
    t1=T
    dDendh=(dg1-dg0)/delh
    dTdh=(t1-t0)/delh
@@ -277,14 +324,14 @@ dhsdp=(hg1-hg0)/delp
   end select
   T=t0
 
- end subroutine water_steam_prop_PH
+ end subroutine water_steam_prop_PH_ex
 
 !*************************************************************
 
 !*************************************************************
 ! Subroutine water_steam_prop_PH
 !-------------------------------------------------------------
- subroutine water_steam_prop_PH_noderiv(p, h, T, Sw, &
+recursive subroutine water_steam_prop_PH_noderiv(p, h, T, Sw, &
     Den,Denw, Dens, hw, hs,visw,viss,ierror)
    use IAPWS97, only : cowat, supst, tsat, visc
   implicit none
@@ -293,7 +340,7 @@ dhsdp=(hg1-hg0)/delp
   real*8, parameter::  epi_p = 1D0, epi_h=1D-3
   real*8, parameter::  ps350c = 16.529D6, hw350c=1670.9D0
   real*8, parameter::  energyscale=1D-6 ! MJ/Kg
-
+  real*8, parameter::  arg1 = 1.0D-14, arg2=1.0D-14
 
   real*8, intent(in)  :: p, h ! Pscal, KJ/Kg, C (initial guess)
   real*8, intent(out) :: T, Sw, hw,hs,Den,Denw,Dens, viss,visw
@@ -303,7 +350,7 @@ dhsdp=(hg1-hg0)/delp
   real*8 dw
   real*8 dg, hg
   integer ierr
-  integer :: iphase = 0
+  integer :: iphase
   real*8 delp, delh
   real*8 dw0, dw1, hw0,hw1, sw0, sw1
   real*8 dg0, dg1, hg0,hg1, h1
@@ -311,6 +358,7 @@ dhsdp=(hg1-hg0)/delp
   real*8 dTdp
   logical succ
 
+  iphase = 0
 
 ! determine phase condition
   ierror=0
@@ -338,7 +386,7 @@ dhsdp=(hg1-hg0)/delp
   select case(iphase)
   case(1) ! water only
     T= Ts-10D0
-    call wateos_PH(p, h, T, dw, hw, energyscale, ierr)
+    call wateos_PH(p, h, T, dw, hw, energyscale, arg1, ierr)
     Sw=1D0
     dg=0D0
     hg=0D0
@@ -354,7 +402,7 @@ dhsdp=(hg1-hg0)/delp
     viss=1D-6
   case(2)
     T= Ts+10D0
-    call steameos_PH(p, h, T, dg, hg, energyscale, ierr)
+    call steameos_PH(p, h, T, dg, hg, energyscale, arg2, ierr)
     Sw=0D0
     dw=0D0
     hw=0D0
@@ -386,5 +434,3 @@ dhsdp=(hg1-hg0)/delp
 
 
  end subroutine water_steam_prop_PH_noderiv
-
-

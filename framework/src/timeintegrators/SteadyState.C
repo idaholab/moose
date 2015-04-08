@@ -37,8 +37,7 @@ SteadyState::computeTimeDerivatives()
   _u_dot.zero();
   _u_dot.close();
 
-  _du_dot_du.zero();
-  _du_dot_du.close();
+  _du_dot_du = 0;
 }
 
 void

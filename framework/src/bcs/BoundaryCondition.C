@@ -36,14 +36,14 @@ InputParameters validParams<BoundaryCondition>()
 
 BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    BoundaryRestrictableRequired(name, parameters),
+    BoundaryRestrictableRequired(parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    TransientInterface(parameters, name, "bcs"),
+    TransientInterface(parameters, "bcs"),
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
-    Restartable(name, parameters, "BCs"),
+    Restartable(parameters, "BCs"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
@@ -53,17 +53,18 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh())
-//    _dim(_mesh.dimension())
 {
 }
 
 MooseVariable &
-BoundaryCondition::variable(){
+BoundaryCondition::variable()
+{
   return _var;
 }
 
 SubProblem &
-BoundaryCondition::subProblem(){
+BoundaryCondition::subProblem()
+{
   return _subproblem;
 }
 

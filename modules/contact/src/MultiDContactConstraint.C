@@ -1,16 +1,10 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "MultiDContactConstraint.h"
 
 #include "SystemBase.h"
@@ -46,9 +40,9 @@ MultiDContactConstraint::MultiDContactConstraint(const std::string & name, Input
     _component(getParam<unsigned int>("component")),
     _model(contactModel(getParam<std::string>("model"))),
     _penalty(getParam<Real>("penalty")),
-    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
-    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
-    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+    _x_var(isCoupled("disp_x") ? coupled("disp_x") : libMesh::invalid_uint),
+    _y_var(isCoupled("disp_y") ? coupled("disp_y") : libMesh::invalid_uint),
+    _z_var(isCoupled("disp_z") ? coupled("disp_z") : libMesh::invalid_uint),
     _mesh_dimension(_mesh.dimension()),
     _vars(_x_var, _y_var, _z_var)
 {
@@ -76,12 +70,12 @@ MultiDContactConstraint::jacobianSetup()
 void
 MultiDContactConstraint::updateContactSet()
 {
-  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
-//  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
-  std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._unlocked_this_step;
+  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
+  std::map<dof_id_type, unsigned int> & locked_this_step = _penetration_locator._unlocked_this_step;
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
@@ -94,14 +88,14 @@ MultiDContactConstraint::updateContactSet()
 
     const Node * node = pinfo->_node;
 
-    unsigned int slave_node_num = it->first;
-    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
+    dof_id_type slave_node_num = it->first;
+    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
     RealVectorValue res_vec;
     // Build up residual vector
     for (unsigned int i=0; i<_mesh_dimension; ++i)
     {
-      int dof_number = node->dof_number(0, _vars(i), 0);
+      dof_id_type dof_number = node->dof_number(0, _vars(i), 0);
       res_vec(i) = _residual_copy(dof_number);
     }
 
@@ -147,7 +141,7 @@ MultiDContactConstraint::updateContactSet()
 bool
 MultiDContactConstraint::shouldApply()
 {
-  std::set<unsigned int>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
+  std::set<dof_id_type>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
   return (hpit != _penetration_locator._has_penetrated.end());
 }
 
@@ -177,7 +171,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
   // Build up residual vector
   for (unsigned int i=0; i<_mesh_dimension; ++i)
   {
-    int dof_number = node->dof_number(0, _vars(i), 0);
+    dof_id_type dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
 

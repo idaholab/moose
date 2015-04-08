@@ -1,7 +1,10 @@
-/*****************************************/
-/* Written by andrew.wilkins@csiro.au    */
-/* Please contact me if you make changes */
-/*****************************************/
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 
 //  "PowerGas" form of relative permeability
 //
@@ -18,9 +21,9 @@ InputParameters validParams<RichardsRelPermPowerGas>()
 }
 
 RichardsRelPermPowerGas::RichardsRelPermPowerGas(const std::string & name, InputParameters parameters) :
-  RichardsRelPerm(name, parameters),
-  _simm(getParam<Real>("simm")),
-  _n(getParam<Real>("n"))
+    RichardsRelPerm(name, parameters),
+    _simm(getParam<Real>("simm")),
+    _n(getParam<Real>("n"))
 {
 }
 

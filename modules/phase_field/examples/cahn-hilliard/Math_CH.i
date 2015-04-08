@@ -83,11 +83,8 @@
 [Outputs]
   output_initial = true
   exodus = true
-  active = 'console'
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
+  active = console
+  print_linear_residuals = true
+  print_perf_log = true
 []
 
