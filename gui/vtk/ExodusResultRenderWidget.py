@@ -237,17 +237,25 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.reset_layout = QtGui.QVBoxLayout()
     self.reset_layout.addWidget(self.toggle_groupbox)
 
-    self.displace_groupbox = QtGui.QGroupBox("Displace")
-    self.displace_groupbox.setFlat(True)
-    self.displace_groupbox.setCheckable(True)
-    self.displace_groupbox.setChecked(True)
-    self.displace_groupbox.setDisabled(True)
-    self.displace_groupbox.setMaximumHeight(70)
-    self.displace_groupbox.toggled[bool].connect(self._displaceToggled)
+    #
+    # mesh display options displace/scale/clip
+    #
+    self.mesh_groupbox = QtGui.QGroupBox("Mesh")
+    self.mesh_groupbox.setFlat(True)
+    self.mesh_groupbox.setMaximumHeight(140)
+
+    self.mesh_layout = QtGui.QVBoxLayout()
+    self.mesh_layout.setSpacing(0)
+    self.mesh_layout.setContentsMargins(0,0,0,0)
+    self.mesh_groupbox.setLayout(self.mesh_layout)
+
     self.displace_layout = QtGui.QHBoxLayout()
     self.displace_layout.setSpacing(0)
     self.displace_layout.setContentsMargins(0,0,0,0)
-    self.displace_groupbox.setLayout(self.displace_layout)
+
+    self.displace_checkbox = QtGui.QCheckBox("Displace")
+    self.displace_checkbox.setChecked(True)
+    self.displace_checkbox.toggled[bool].connect(self._displaceToggled)
 
     self.displace_magnitude_label = QtGui.QLabel("Multiplier: ")
     self.displace_magnitude_text = QtGui.QLineEdit("1.0")
@@ -255,22 +263,23 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.displace_magnitude_text.setMinimumWidth(10)
     self.displace_magnitude_text.returnPressed.connect(self._displaceMagnitudeTextReturn)
 
+    self.displace_layout.addWidget(self.displace_checkbox)
     self.displace_layout.addWidget(self.displace_magnitude_label, alignment=QtCore.Qt.AlignRight)
     self.displace_layout.addWidget(self.displace_magnitude_text, alignment=QtCore.Qt.AlignLeft)
 
-    self.reset_layout.addWidget(self.displace_groupbox)
+    self.displace_line = QtGui.QWidget()
+    self.displace_line.setLayout(self.displace_layout)
+    self.mesh_layout.addWidget(self.displace_line)
 
-    self.scale_groupbox = QtGui.QGroupBox("Scale")
-    self.scale_groupbox.setCheckable(True)
-    self.scale_groupbox.setChecked(False)
-    self.scale_groupbox.setDisabled(False)
-    self.scale_groupbox.setFlat(True)
-    self.scale_groupbox.setMaximumHeight(70)
-    self.scale_groupbox.toggled[bool].connect(self._scaleToggled)
+    # Scale line
     self.scale_layout = QtGui.QHBoxLayout()
     self.scale_layout.setSpacing(0)
     self.scale_layout.setContentsMargins(0,0,0,0)
-    self.scale_groupbox.setLayout(self.scale_layout)
+
+    self.scale_checkbox = QtGui.QCheckBox("Scale")
+    self.scale_checkbox.setChecked(False)
+    self.scale_checkbox.toggled[bool].connect(self._scaleToggled)
+    self.scale_layout.addWidget(self.scale_checkbox)
 
     self.scale_x_label = QtGui.QLabel("x: ")
     self.scale_x_text = QtGui.QLineEdit("1.0")
@@ -300,16 +309,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.scale_layout.addWidget(self.scale_z_label, alignment=QtCore.Qt.AlignRight)
     self.scale_layout.addWidget(self.scale_z_text, alignment=QtCore.Qt.AlignLeft)
 
-    self.reset_layout.addWidget(self.scale_groupbox)
+    self.scale_line = QtGui.QWidget()
+    self.scale_line.setLayout(self.scale_layout)
+    self.mesh_layout.addWidget(self.scale_line)
 
-    self.clip_groupbox = QtGui.QGroupBox("Clip")
-    self.clip_groupbox.setToolTip('Toggle clipping mode where the solution can be sliced open')
-    self.clip_groupbox.setCheckable(True)
-    self.clip_groupbox.setChecked(False)
-    self.clip_groupbox.setMaximumHeight(70)
-    self.clip_groupbox.setFlat(True)
-    self.clip_groupbox.toggled[bool].connect(self._clippingToggled)
-    clip_layout = QtGui.QHBoxLayout()
+    # Clip line
+    self.clip_layout = QtGui.QHBoxLayout()
+    self.clip_layout.setContentsMargins(0,0,0,0)
+
+    self.clip_checkbox = QtGui.QCheckBox("Clip")
+    self.clip_checkbox.setToolTip('Toggle clipping mode where the solution can be sliced open')
+    self.clip_checkbox.setChecked(False)
+    self.clip_checkbox.toggled[bool].connect(self._clippingToggled)
+    self.clip_layout.addWidget(self.clip_checkbox)
 
     self.clip_plane_combobox = QtGui.QComboBox()
     self.clip_plane_combobox.setToolTip('Direction of the normal for the clip plane')
@@ -317,8 +329,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_combobox.addItem('y')
     self.clip_plane_combobox.addItem('z')
     self.clip_plane_combobox.currentIndexChanged[str].connect(self._clipNormalChanged)
-
-    clip_layout.addWidget(self.clip_plane_combobox)
+    self.clip_layout.addWidget(self.clip_plane_combobox)
 
     self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.clip_plane_slider.setToolTip('Slide to change plane position')
@@ -326,13 +337,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_slider.setSliderPosition(50)
     self.clip_plane_slider.sliderReleased.connect(self._clipSliderReleased)
     self.clip_plane_slider.sliderMoved[int].connect(self._clipSliderMoved)
-    clip_layout.addWidget(self.clip_plane_slider)
-    # vbox->addStretch(1);
-    clip_layout.setContentsMargins(0,0,0,0)
-    self.clip_groupbox.setLayout(clip_layout)
+    self.clip_layout.addWidget(self.clip_plane_slider)
 
-    self.reset_layout.addWidget(self.clip_groupbox)
+    self.clip_line = QtGui.QWidget()
+    self.clip_line.setLayout(self.clip_layout)
+    self.mesh_layout.addWidget(self.clip_line)
 
+    self.reset_layout.addWidget(self.mesh_groupbox)
 
 
     self.view_layout = QtGui.QHBoxLayout()
@@ -576,7 +587,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self.has_displacements = True
 
     if self.has_displacements:
-      self.displace_groupbox.setDisabled(False)
+      self.displace_checkbox.setDisabled(False)
 
     self.block_view_model.clear()
     for block in self.exodus_result.blocks:
@@ -833,7 +844,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.exodus_result.lut.SetVectorModeToComponent()
       self.exodus_result.lut.SetVectorComponent(2)
 
-    if self.clip_groupbox.isChecked():
+    if self.clip_checkbox.isChecked():
       self.exodus_result.clipper.Modified()
       self.exodus_result.clipper.Update()
       self.exodus_result.clip_geom.Update()
@@ -1035,7 +1046,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.renderer.RemoveActor(actor)
       self.exodus_result = self.timestep_to_exodus_result[int(textbox_string)]
 
-      if self.clip_groupbox.isChecked():
+      if self.clip_checkbox.isChecked():
         self.renderer.AddActor(self.exodus_result.clip_actor)
         if self.draw_edges_checkbox.checkState() == QtCore.Qt.Checked:
           self.exodus_result.clip_actor.GetProperty().EdgeVisibilityOn()
@@ -1056,13 +1067,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         else:
           self.exodus_result.hideBlock(item.exodus_block)
 
-      if self.has_displacements and self.displace_groupbox.isChecked():
+      if self.has_displacements and self.displace_checkbox.isChecked():
         self.exodus_result.reader.SetApplyDisplacements(1)
         self.exodus_result.reader.SetDisplacementMagnitude(float(self.current_displacement_magnitude))
       else:
         self.exodus_result.reader.SetApplyDisplacements(0)
 
-      if self.scale_groupbox.isChecked():
+      if self.scale_checkbox.isChecked():
         self.exodus_result.actor.SetScale(self.current_scale_x_magnitude, self.current_scale_y_magnitude, self.current_scale_z_magnitude)
       else:
         self.exodus_result.actor.SetScale(1.0, 1.0, 1.0)
@@ -1136,7 +1147,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           # Avoid z-buffer fighting
           vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
 
-          if self.clip_groupbox.isChecked():
+          if self.clip_checkbox.isChecked():
             _clippingToggled(True)
 
           self.vtkwidget.repaint()
@@ -1156,7 +1167,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.time_slider.setMaximum(self.current_max_timestep)
         self.time_slider.setSliderPosition(self.current_max_timestep)
         self._timeSliderReleased()
-        if self.clip_groupbox.isChecked():
+        if self.clip_checkbox.isChecked():
           self._clipSliderReleased()
         self.vtkwidget.repaint()
       else:
