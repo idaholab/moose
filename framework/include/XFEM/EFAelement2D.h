@@ -45,8 +45,6 @@ public:
   void get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes) const;
 
   void switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent);
-  void switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent,
-                  std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap);
   void switchEmbeddedNode(EFAnode *new_node, EFAnode *old_node);
   void getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
                      std::vector<double> &master_weights) const;
@@ -60,7 +58,7 @@ public:
 
   void init_crack_tip(std::set<EFAelement*> &CrackTipElements);
   bool should_duplicate_for_crack_tip(const std::set<EFAelement*> &CrackTipElements);
-  bool shouldDuplicateCrackTipSplitElem();
+  bool shouldDuplicateCrackTipSplitElem(const std::set<EFAelement*> &CrackTipElements);
   bool shouldDuplicateForPhantomCorner();
   bool will_crack_tip_extend(std::vector<unsigned int> &split_neighbors) const;
   bool is_crack_tip_elem() const;

@@ -81,7 +81,7 @@ public:
   void connectFragments(bool mergeUncutVirtualEdges);
 
   void sanityCheck();
-  void findCrackTipElements();
+  void updateCrackTipElements();
   void printMesh();
   void error(const std::string &error_string);
 

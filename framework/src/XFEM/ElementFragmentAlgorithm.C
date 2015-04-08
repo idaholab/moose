@@ -285,7 +285,7 @@ ElementFragmentAlgorithm::updateTopology(bool mergeUncutVirtualEdges)
   createChildElements();
   connectFragments(mergeUncutVirtualEdges);
   sanityCheck();
-  findCrackTipElements();
+  updateCrackTipElements();
 
   std::map<unsigned int, EFAnode*>::iterator mit;
   for (mit = _permanent_nodes.begin(); mit != _permanent_nodes.end(); ++mit )
@@ -436,7 +436,7 @@ ElementFragmentAlgorithm::sanityCheck()
 }
 
 void
-ElementFragmentAlgorithm::findCrackTipElements()
+ElementFragmentAlgorithm::updateCrackTipElements()
 {
   std::set<EFAelement*>::iterator sit;
   //Delete all elements that were previously flagged as crack tip elements if they have

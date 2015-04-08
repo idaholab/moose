@@ -37,6 +37,7 @@ protected:
   std::vector<EFAelement*> _children;
   bool _crack_tip_split_element;
   std::vector<unsigned int> _crack_tip_neighbors;
+  std::vector<EFAelement*> _general_neighbors; // all elements sharing at least one node with curr elem
 
 public:
 
@@ -63,6 +64,9 @@ public:
   unsigned int num_children() const;
   void add_child(EFAelement* child);
   void remove_parent_children();
+  std::vector<EFAelement*> get_general_neighbors(std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivity) const;
+  EFAelement* get_general_neighbor(unsigned int index) const;
+  unsigned int num_general_neighbors() const;
 
   // pure virtual methods
   virtual unsigned int num_frags() const = 0;
@@ -70,8 +74,6 @@ public:
   virtual void get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes) const = 0;
 
   virtual void switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent) = 0;
-  virtual void switchNode(EFAnode *new_node, EFAnode *old_node, bool descend_to_parent,
-                          std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap) = 0;
   virtual void switchEmbeddedNode(EFAnode *new_node, EFAnode *old_node) = 0;
   virtual void getMasterInfo(EFAnode* node, std::vector<EFAnode*> &master_nodes,
                              std::vector<double> &master_weights) const = 0;
@@ -80,12 +82,12 @@ public:
   virtual bool overlays_elem(const EFAelement* other_elem) const = 0;
   virtual unsigned int get_neighbor_index(const EFAelement * neighbor_elem) const = 0;
   virtual void clear_neighbors() = 0;
-  virtual void setup_neighbors(std::map< EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap) = 0;
+  virtual void setup_neighbors(std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap) = 0;
   virtual void neighbor_sanity_check() const = 0;
 
   virtual void init_crack_tip(std::set< EFAelement*> &CrackTipElements) = 0;
   virtual bool should_duplicate_for_crack_tip(const std::set<EFAelement*> &CrackTipElements) = 0;
-  virtual bool shouldDuplicateCrackTipSplitElem() = 0;
+  virtual bool shouldDuplicateCrackTipSplitElem(const std::set<EFAelement*> &CrackTipElements) = 0;
   virtual bool shouldDuplicateForPhantomCorner() = 0;
   virtual bool will_crack_tip_extend(std::vector<unsigned int> &split_neighbors) const = 0;
   virtual bool is_crack_tip_elem() const = 0;
@@ -116,8 +118,7 @@ protected:
 
   // common methods
   void mergeNodes(EFAnode* &childNode, EFAnode* &childOfNeighborNode, EFAelement* childOfNeighborElem,
-                  std::map<unsigned int, EFAnode*> &PermanentNodes, std::map<unsigned int, EFAnode*> &TempNodes,
-                  std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap);
+                  std::map<unsigned int, EFAnode*> &PermanentNodes, std::map<unsigned int, EFAnode*> &TempNodes);
 };
 
 #endif
