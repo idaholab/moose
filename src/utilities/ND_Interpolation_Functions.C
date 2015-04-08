@@ -357,7 +357,7 @@ void NDInterpolation::refinedCellDivision(std::vector<std::vector<std::vector<do
 
  for (int n=0; n<numberNewCells; n++){
   std::vector<int> NDcoordinate = arrayConverter(n,divisions,_dimensions);
-  std::vector<std::vector<double> > newCell = generateNewCell(NDcoordinate, cell[0], dxs, _dimensions);
+  std::vector<std::vector<double> > newCell = generateNewCell(NDcoordinate, cell.at(0), dxs, _dimensions);
   refinedCell.push_back(newCell);
  }
 
@@ -420,12 +420,22 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
  std::vector<double> dxs (_dimensions);
  std::vector<double> center (_dimensions);
 
+ RandomClass *randomDouble = new RandomClass();
+
+ for (unsigned int i=0; i<cell.size(); i++){
+	 std::cout<< cell.at(i).at(0) << " " << cell.at(i).at(1) << std::endl;
+ }
+
  for (int i=0; i<_dimensions; i++){
   int vertexLoc = (int)pow(2,i);
   dxs[i] = cell[vertexLoc][i] - cell[0][i];
 
-  RandomClass *randomDouble = new RandomClass();
+  std::cout<< "dx " << dxs[i] << std::endl;
+
   double randomDisplacement = randomDouble->random();
+
+  std::cout<< "random " << randomDisplacement << std::endl;
+
   center[i] = cell[0][i] + randomDisplacement * dxs[i];
  }
  return center;
@@ -506,6 +516,8 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  int last_divisions = (int)round(1.0/_tolerance);
 
+ std::cout<<"last_divisions " << last_divisions << std::endl;
+
  std::vector<double> pointMax(_dimensions);
  for(int i=0; i< _dimensions; i++)
 	 pointMax.at(i) = _cellPoint0.at(i)+_cellDxs.at(i);
@@ -520,6 +532,10 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
  }
 
  basic_cell = generateNewCell(NDcoordinate, _cellPoint0, _cellDxs, _dimensions);
+
+ std::cout<< basic_cell.at(0).at(0) << " ; " << basic_cell.at(0).at(1)<<std::endl;
+ std::cout<< basic_cell.at(1).at(0) << " ; " << basic_cell.at(1).at(1)<<std::endl;
+
  std::vector<std::vector<std::vector<double> > > coarseCell;
  refinedCellDivision(coarseCell, basic_cell, _initial_divisions);
 
@@ -529,6 +545,9 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  std::vector<std::vector<std::vector<double> > > refinedCell;
 
+ std::cout<< coarseCell.at(pickedCell).at(0).at(0) << " " << coarseCell.at(pickedCell).at(0).at(1)<<std::endl;
+ std::cout<< coarseCell.at(pickedCell).at(1).at(0) << " " << coarseCell.at(pickedCell).at(1).at(1)<<std::endl;
+
  refinedCellDivision(refinedCell, coarseCell.at(pickedCell), last_divisions);
 
  /// ===>cellsFilter(refinedCell,F);
@@ -536,9 +555,7 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
  //std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
  int pickedSubCell = CDFweightedPicking(refinedCell,F);
  std::vector<double> randomVector = getCellCenter(refinedCell.at(pickedSubCell));
- //std::vector<double> randomVector = getCellCenter(coarseCell.at(pickedCell));
 
- //std::vector<double> randomVector = getCellCenter(pivotSubcell);
  return randomVector;
 }
 
