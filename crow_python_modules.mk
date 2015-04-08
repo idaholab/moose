@@ -23,6 +23,9 @@ $(CROW_DIR)/src/distributions/distribution_base_ND.$(obj-suffix): $(CROW_DIR)/sr
 $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.$(obj-suffix): $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
+$(CROW_DIR)/src/distributions/randomClass.$(obj-suffix): $(CROW_DIR)/src/distributions/randomClass.C
+	$(DISTRIBUTION_COMPILE_COMMAND)
+
 $(CROW_DIR)/install/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy2.so : $(CROW_DIR)/crow_modules/distribution1Dpy2.i $(CROW_DIR)/crow_modules/interpolationNDpy2.i $(DISTRIBUTION_SOURCE) $(INTERPOLATION_SOURCE)
 	(cd $(CROW_DIR) && if test `uname` != "Darwin"; then unset CXX; fi && python $(CROW_DIR)/setup.py build_ext build install --install-platlib=$(CROW_DIR)/install)
 
