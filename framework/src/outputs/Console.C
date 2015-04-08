@@ -110,8 +110,6 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _verbose(getParam<bool>("verbose")),
-    _old_linear_norm(std::numeric_limits<Real>::max()),
-    _old_nonlinear_norm(std::numeric_limits<Real>::max()),
     _perf_log(getParam<bool>("perf_log")),
     _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
     _setup_log(isParamValid("setup_log") ? getParam<bool>("setup_log") : _perf_log),
@@ -126,7 +124,9 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
     _show_output_on_info(getParam<bool>("show_output_on")),
     _timing(_app.getParam<bool>("timing")),
-    _console_buffer(_app.getOutputWarehouse().consoleBuffer())
+    _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
+    _old_linear_norm(std::numeric_limits<Real>::max()),
+    _old_nonlinear_norm(std::numeric_limits<Real>::max())
 {
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
@@ -272,21 +272,31 @@ Console::output(const ExecFlagType & type)
   // Print Non-linear Residual (control with "execute_on")
   if (type == EXEC_NONLINEAR && _output_on.contains(EXEC_NONLINEAR))
   {
+    if (_nonlinear_iter == 0)
+      _old_nonlinear_norm = std::numeric_limits<Real>::max();
+
     if (_write_screen)
       Moose::out << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
 
     if (_write_file)
       _file_output_stream << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << std::scientific << _norm << std::endl;
+
+    _old_nonlinear_norm = _norm;
   }
 
   // Print Linear Residual (control with "execute_on")
   else if (type == EXEC_LINEAR && _output_on.contains(EXEC_LINEAR))
   {
+    if (_linear_iter == 0)
+      _old_linear_norm = std::numeric_limits<Real>::max();
+
     if (_write_screen)
       Moose::out << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
 
     if (_write_file)
       _file_output_stream << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm << std::endl;
+
+    _old_linear_norm = _norm;
   }
 
   // Write variable norms
@@ -444,7 +454,7 @@ Console::writeVariableNorms()
 
 // Quick helper to output the norm in color
 std::string
-Console::outputNorm(Real old_norm, Real norm)
+Console::outputNorm(const Real & old_norm, const Real & norm)
 {
   std::string color = COLOR_GREEN;
 
