@@ -287,23 +287,29 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.scale_layout.addStretch()
 
     self.scale_x_label = QtGui.QLabel(" x:")
-    self.scale_x_text = QtGui.QLineEdit("1.0")
+    self.scale_x_text = QtGui.QDoubleSpinBox()
+    self.scale_x_text.setValue(1.0)
+    self.scale_x_text.setSingleStep(0.1)
     self.scale_x_text.setMinimumWidth(10)
     self.scale_x_text.setMaximumWidth(50)
 
     self.scale_y_label = QtGui.QLabel(" y:")
-    self.scale_y_text = QtGui.QLineEdit("1.0")
+    self.scale_y_text = QtGui.QDoubleSpinBox()
+    self.scale_y_text.setValue(1.0)
+    self.scale_y_text.setSingleStep(0.1)
     self.scale_y_text.setMinimumWidth(10)
     self.scale_y_text.setMaximumWidth(50)
 
     self.scale_z_label = QtGui.QLabel(" z:")
-    self.scale_z_text = QtGui.QLineEdit("1.0")
+    self.scale_z_text = QtGui.QDoubleSpinBox()
+    self.scale_z_text.setValue(1.0)
+    self.scale_z_text.setSingleStep(0.1)
     self.scale_z_text.setMinimumWidth(10)
     self.scale_z_text.setMaximumWidth(50)
 
-    self.scale_x_text.returnPressed.connect(self._scaleMagnitudeTextReturn)
-    self.scale_y_text.returnPressed.connect(self._scaleMagnitudeTextReturn)
-    self.scale_z_text.returnPressed.connect(self._scaleMagnitudeTextReturn)
+    self.scale_x_text.valueChanged.connect(self._scaleMagnitudeChanged)
+    self.scale_y_text.valueChanged.connect(self._scaleMagnitudeChanged)
+    self.scale_z_text.valueChanged.connect(self._scaleMagnitudeChanged)
 
     self.scale_layout.addWidget(self.scale_x_label, alignment=QtCore.Qt.AlignRight)
     self.scale_layout.addWidget(self.scale_x_text, alignment=QtCore.Qt.AlignLeft)
@@ -725,10 +731,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.current_displacement_magnitude = float(self.displace_magnitude_text.text())
     self._timeSliderReleased()
 
-  def _scaleMagnitudeTextReturn(self):
-    self.current_scale_x_magnitude = float(self.scale_x_text.text())
-    self.current_scale_y_magnitude = float(self.scale_y_text.text())
-    self.current_scale_z_magnitude = float(self.scale_z_text.text())
+  def _scaleMagnitudeChanged(self):
+    self.current_scale_x_magnitude = self.scale_x_text.value()
+    self.current_scale_y_magnitude = self.scale_y_text.value()
+    self.current_scale_z_magnitude = self.scale_z_text.value()
     self._timeSliderReleased()
 
   def _drawEdgesChanged(self, value):
