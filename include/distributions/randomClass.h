@@ -1,12 +1,8 @@
 
-namespace boost {
-namespace random {
-class mt19937;
-}
-}
+class RandomClassImpl;
 
 class RandomClass {
-  boost::random::mt19937 *rng;
+  RandomClassImpl *rng;
   const double range;
 public:
   RandomClass();
