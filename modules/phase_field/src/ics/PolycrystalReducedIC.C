@@ -70,9 +70,9 @@ PolycrystalReducedIC::initialSetup()
   if (_cody_test)
   {
     holder.resize(_grain_num);
-    holder[0] = Point(0.2, 0.85, 0.0);
-    holder[1] = Point(0.5, 0.85, 0.0);
-    holder[2] = Point(0.8, 0.85, 0.0);
+    holder[0] = Point(0.2, 0.99, 0.0);
+    holder[1] = Point(0.5, 0.99, 0.0);
+    holder[2] = Point(0.8, 0.99, 0.0);
 
     holder[3] = Point(0.2, 0.5, 0.0);
     holder[4] = Point(0.5, 0.5, 0.0);
@@ -109,7 +109,7 @@ PolycrystalReducedIC::initialSetup()
     _assigned_op[4] = 1.0;
     _assigned_op[5] = 1.0;
     _assigned_op[6] = 2.0;
-    _assigned_op[7] = 3.0;
+    _assigned_op[7] = 0.0;
     _assigned_op[8] = 2.0;
     _assigned_op[9] = 4.0;
   }
