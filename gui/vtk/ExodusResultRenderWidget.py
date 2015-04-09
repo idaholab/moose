@@ -216,9 +216,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     # min line
     self.min_layout = QtGui.QHBoxLayout()
     self.min_layout.setContentsMargins(0,0,0,0)
+    self.min_widget = QtGui.QWidget()
+    self.min_widget.setLayout(self.min_layout)
 
     self.min_radio_layout = QtGui.QVBoxLayout()
-    self.min_radio_layout.setContentsMargins(0,0,0,0)
+
     self.min_current_radio = QtGui.QRadioButton('Current')
     self.min_current_radio.setChecked(QtCore.Qt.Checked)
     self.min_current_radio.toggled.connect(self._updateContours)
@@ -246,14 +248,15 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.min_layout.setStretchFactor(self.min_custom_layout, 1)
 
     # add min line
-    self.contour_layout.addLayout(self.min_layout)
+    self.contour_layout.addWidget(self.min_widget)
 
     # max line
     self.max_layout = QtGui.QHBoxLayout()
     self.max_layout.setContentsMargins(0,0,0,0)
+    self.max_widget = QtGui.QWidget()
+    self.max_widget.setLayout(self.max_layout)
 
     self.max_radio_layout = QtGui.QVBoxLayout()
-
     self.max_current_radio = QtGui.QRadioButton('Current')
     self.max_current_radio.setChecked(QtCore.Qt.Checked)
     self.max_current_radio.toggled.connect(self._updateContours)
@@ -281,7 +284,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.max_layout.setStretchFactor(self.max_custom_layout, 1)
 
     # add max line
-    self.contour_layout.addLayout(self.max_layout)
+    self.contour_layout.addWidget(self.max_widget)
 
     self.color_scheme_label = QtGui.QLabel("Color Scheme:")
     self.color_scheme_component = QtGui.QComboBox()

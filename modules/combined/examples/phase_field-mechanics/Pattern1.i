@@ -253,7 +253,7 @@
     block = 0
     f_name = phase
     args = 'eta2 eta3'
-    function = 'eta3-eta2'
+    function = 'if(eta3>0.5,1,0)-if(eta2>0.5,1,0)'
     outputs = exodus
   [../]
 
