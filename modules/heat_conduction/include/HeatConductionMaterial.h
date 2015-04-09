@@ -37,10 +37,10 @@ protected:
 
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _thermal_conductivity_dT;
-  Function * const _thermal_conductivity_temperature_function;
+  Function * _thermal_conductivity_temperature_function;
 
   MaterialProperty<Real> & _specific_heat;
-  Function * const _specific_heat_temperature_function;
+  Function * _specific_heat_temperature_function;
 
 };
 
