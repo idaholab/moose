@@ -40,6 +40,9 @@ InputParameters validParams<NodalFloodCount>()
   params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
   params.addParam<bool>("track_memory_usage", false, "Calculate memory usage");
   params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of bubbles which intersect the boundary");
+
+  MooseEnum flood_type("NODAL ELEMENTAL", "NODAL");
+  params.addParam<MooseEnum>("flood_entity_type", flood_type, "Determines whether the flood algorithm runs on nodes or elements");
   return params;
 }
 
@@ -62,7 +65,8 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _track_memory(getParam<bool>("track_memory_usage")),
-    _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume"))
+    _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
+    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
 {
   // Size the data structures to hold the correct number of maps
   _bubble_maps.resize(_maps_size);
@@ -74,7 +78,7 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _var_index_maps.resize(_maps_size);
 
   // This map is always size to the number of variables
-  _nodes_visited.resize(_vars.size());
+  _entities_visited.resize(_vars.size());
 }
 
 NodalFloodCount::~NodalFloodCount()
@@ -94,7 +98,7 @@ NodalFloodCount::initialize()
     _bubble_maps[map_num].clear();
     _bubble_sets[map_num].clear();
     _region_counts[map_num] = 0;
-    _nodes_visited[map_num].clear();
+    _entities_visited[map_num].clear();
 
     if (_var_index_mode)
       _var_index_maps[map_num].clear();
@@ -102,7 +106,7 @@ NodalFloodCount::initialize()
 
   // TODO: use iterator
   for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
-    _nodes_visited[var_num].clear();
+    _entities_visited[var_num].clear();
 
   // Clear the packed data structure
   _packed_data.clear();
@@ -132,14 +136,24 @@ NodalFloodCount::execute()
   const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
   for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
-    Elem *current_elem = *el;
-    unsigned int n_nodes = current_elem->n_vertices();
-    for (unsigned int i = 0; i < n_nodes; ++i)
-    {
-      const Node *node = current_elem->get_node(i);
+    const Elem *current_elem = *el;
 
+    // Loop over elements or nodes
+    if (_is_elemental)
+    {
       for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
-        flood(node, var_num, 0);
+        flood(current_elem, var_num, 0);
+    }
+    else
+    {
+      unsigned int n_nodes = current_elem->n_vertices();
+      for (unsigned int i = 0; i < n_nodes; ++i)
+      {
+        const Node *current_node = current_elem->get_node(i);
+
+        for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
+          flood(current_node, var_num, 0);
+      }
     }
   }
 }
@@ -152,7 +166,7 @@ NodalFloodCount::finalize()
   _communicator.allgather(_packed_data, false);
   unpack(_packed_data);
 
-  mergeSets();
+  mergeSets(true);
 
   // Populate _bubble_maps and _var_index_maps
   updateFieldInfo();
@@ -208,27 +222,9 @@ NodalFloodCount::getValue()
 Real
 NodalFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
 {
-  mooseAssert(var_idx < _maps_size, "Index out of range");
-  mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
+  mooseDoOnce(mooseWarning("Please call getEntityValue instead"));
 
-  if (show_var_coloring)
-  {
-    std::map<dof_id_type, int>::const_iterator node_it = _var_index_maps[var_idx].find(node_id);
-
-    if (node_it != _var_index_maps[var_idx].end())
-      return node_it->second;
-    else
-      return 0;
-  }
-  else
-  {
-    std::map<dof_id_type, int>::const_iterator node_it = _bubble_maps[var_idx].find(node_id);
-
-    if (node_it != _bubble_maps[var_idx].end())
-      return node_it->second + _region_offsets[var_idx];
-    else
-      return 0;
-  }
+  return getEntityValue(node_id, var_idx, show_var_coloring);
 }
 
 Real
@@ -238,20 +234,44 @@ NodalFloodCount::getElementalValue(dof_id_type /*element_id*/) const
   return 0;
 }
 
+Real
+NodalFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool show_var_coloring) const
+{
+  mooseAssert(var_idx < _maps_size, "Index out of range");
+  mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
+
+  if (show_var_coloring)
+  {
+    std::map<dof_id_type, int>::const_iterator entity_it = _var_index_maps[var_idx].find(entity_id);
+
+    if (entity_it != _var_index_maps[var_idx].end())
+      return entity_it->second;
+    else
+      return 0;
+  }
+  else
+  {
+    std::map<dof_id_type, int>::const_iterator entity_it = _bubble_maps[var_idx].find(entity_id);
+
+    if (entity_it != _bubble_maps[var_idx].end())
+      return entity_it->second + _region_offsets[var_idx];
+    else
+      return 0;
+  }
+}
+
+//const std::vector<std::pair<unsigned int, unsigned int> > &
+//NodalFloodCount::getNodalValues(dof_id_type /*node_id*/) const
+//{
+//  mooseDoOnce(mooseWarning("Method not implemented"));
+//  return _empty;
+//}
+
 const std::vector<std::pair<unsigned int, unsigned int> > &
-NodalFloodCount::getNodalValues(dof_id_type /*node_id*/) const
+NodalFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return _empty;
-}
-
-std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
-NodalFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
-{
-  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > empty;
-
-  mooseDoOnce(mooseWarning("Method not implemented"));
-  return empty;
 }
 
 /*
@@ -296,18 +316,12 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
   {
     data[map_num].resize(_region_counts[map_num]+1);
 
-    unsigned int n_periodic_nodes = 0;
     {
       std::map<dof_id_type, int>::const_iterator end = _bubble_maps[map_num].end();
       // Reorganize the data by values
 
       for (std::map<dof_id_type, int>::const_iterator it = _bubble_maps[map_num].begin(); it != end; ++it)
         data[map_num][(it->second)].insert(it->first);
-
-      // Append our periodic neighbor nodes to the data structure before packing
-      if (merge_periodic_info)
-        for (std::vector<std::set<dof_id_type> >::iterator it = data[map_num].begin(); it != data[map_num].end(); ++it)
-          n_periodic_nodes += appendPeriodicNeighborNodes(*it);
 
       mooseAssert(_region_counts[map_num]+1 == data[map_num].size(), "Error in packing data");
     }
@@ -317,7 +331,6 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
        * The size of the packed data structure should be the sum of all of the following:
        * total number of marked nodes
        * the owning variable index for the current bubble
-       * inserted periodic neighbor information
        * the number of unique bubbles.
        *
        * We will pack the data into a series of groups representing each unique bubble
@@ -326,7 +339,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
        */
 
       // Note the _region_counts[mar_num]*2 takes into account the number of nodes and the variable index for each region
-      std::vector<dof_id_type> partial_packed_data(_bubble_maps[map_num].size() + n_periodic_nodes + _region_counts[map_num]*2);
+      std::vector<dof_id_type> partial_packed_data(_bubble_maps[map_num].size() + _region_counts[map_num]*2);
 
       // Now pack it up
       unsigned int current_idx = 0;
@@ -348,7 +361,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
 
         std::set<dof_id_type>::iterator end = data[map_num][i].end();
         for (std::set<dof_id_type>::iterator it = data[map_num][i].begin(); it != end; ++it)
-          partial_packed_data[current_idx++] = *it;                       // The individual node ids
+          partial_packed_data[current_idx++] = *it;                       // The individual entity ids
       }
 
       packed_data.insert(packed_data.end(), partial_packed_data.begin(), partial_packed_data.end());
@@ -411,7 +424,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 }
 
 void
-NodalFloodCount::mergeSets()
+NodalFloodCount::mergeSets(bool use_periodic_boundary_info)
 {
   Moose::perf_log.push("mergeSets()", "NodalFloodCount");
   std::set<dof_id_type> set_union;
@@ -419,26 +432,48 @@ NodalFloodCount::mergeSets()
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
+    // Get an iterator pointing to the end of the list, we'll reuse it several times in the merge algorithm below
     std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
+
+    // Next add periodic neighbor information if requested to the BubbleData objects
+    if (use_periodic_boundary_info)
+      for (std::list<BubbleData>::iterator it = _bubble_sets[map_num].begin(); it != end; ++it)
+        appendPeriodicNeighborNodes(*it);
+
+    // Finally start our merge loops
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; /* No increment */)
     {
       bool need_it1_increment = true;
 
       for (std::list<BubbleData>::iterator it2 = it1; it2 != end; ++it2)
       {
-        if (it1 != it2 &&                       // Make sure that these iterators aren't pointing at the same set
-            it1->_var_idx == it2->_var_idx &&   // and that the sets have matching variable indices...
-                                                // then See if they overlap
-            setsIntersect(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end()))
+        if (it1 != it2 &&                                                               // Make sure that these iterators aren't pointing at the same set
+            it1->_var_idx == it2->_var_idx &&                                           // and that the sets have matching variable indices...
+            (setsIntersect(it1->_entity_ids.begin(), it1->_entity_ids.end(),            // Do they overlap on the current entity type? OR..
+                           it2->_entity_ids.begin(), it2->_entity_ids.end()) ||
+               (use_periodic_boundary_info &&                                           // Are we merging across periodic boundaries? AND
+               setsIntersect(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(),  // Do they overlap on periodic nodes?
+                             it2->_periodic_nodes.begin(), it2->_periodic_nodes.end())
+               )
+            )
+          )
         {
-          // Merge these two sets and remove the duplicate set
+          // Merge these two entity sets
           set_union.clear();
-          std::set_union(it1->_nodes.begin(), it1->_nodes.end(), it2->_nodes.begin(), it2->_nodes.end(), set_union_inserter);
-
+          std::set_union(it1->_entity_ids.begin(), it1->_entity_ids.end(), it2->_entity_ids.begin(), it2->_entity_ids.end(), set_union_inserter);
           // Put the merged set in the latter iterator so that we'll compare earlier sets to it again
-          it2->_nodes = set_union;
-          _bubble_sets[map_num].erase(it1++);
+          it2->_entity_ids = set_union;
 
+          // If we are merging periodic boundaries we'll need to merge those nodes too
+          if (use_periodic_boundary_info)
+          {
+            set_union.clear();
+            std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(), set_union_inserter);
+            it2->_periodic_nodes = set_union;
+          }
+
+          // Now remove the merged set, the one we didn't update (it1)
+          _bubble_sets[map_num].erase(it1++);
           // don't increment the outer loop since we just deleted it incremented
           need_it1_increment = false;
           // break out of the inner loop and move on
@@ -465,7 +500,7 @@ NodalFloodCount::updateFieldInfo()
     unsigned int counter = 1;
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
     {
-      for (std::set<dof_id_type>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
+      for (std::set<dof_id_type>::iterator it2 = it1->_entity_ids.begin(); it2 != it1->_entity_ids.end(); ++it2)
       {
         // Color the bubble map with a unique region
         _bubble_maps[map_num][*it2] = counter;
@@ -483,82 +518,129 @@ NodalFloodCount::updateFieldInfo()
 }
 
 void
-NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_region)
+NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned int live_region)
 {
-  if (node == NULL)
-    return;
-  dof_id_type node_id = node->id();
-
-  // Has this node already been marked? - if so move along
-  if (_nodes_visited[current_idx].find(node_id) != _nodes_visited[current_idx].end())
+  if (dof_object == NULL)
     return;
 
-  // Mark this node as visited
-  _nodes_visited[current_idx][node_id] = true;
+  // Retrieve the id of the current entity
+  dof_id_type entity_id = dof_object->id();
 
-  // Determing which threshold to use based on whether this is an established region
+  // Has this entity already been marked? - if so move along
+  if (_entities_visited[current_idx].find(entity_id) != _entities_visited[current_idx].end())
+    return;
+
+  // Mark this entity as visited
+  _entities_visited[current_idx][entity_id] = true;
+
+  // Determine which threshold to use based on whether this is an established region
   Real threshold = (live_region ? _step_connecting_threshold : _step_threshold);
 
-  // Get the value of the current variable at the current node
-  Number nodal_val = _vars[current_idx]->getNodalValue(*node);
+  // Get the value of the current variable for the current entity
+  Number entity_value;
+  if (_is_elemental)
+  {
+    const Elem * elem = static_cast<const Elem *>(dof_object);
+    std::vector<Point> centroid(1, elem->centroid());
+    _fe_problem.reinitElemPhys(elem, centroid, 0);
+    entity_value = _vars[current_idx]->sln()[0];
+  }
+  else
+    entity_value = _vars[current_idx]->getNodalValue(*static_cast<const Node *>(dof_object));
 
   // This node hasn't been marked, is it in a bubble?  We must respect
   // the user-selected value of _use_less_than_threshold_comparison.
-  if (_use_less_than_threshold_comparison && (nodal_val < threshold))
+  if (_use_less_than_threshold_comparison && (entity_value < threshold))
     return;
 
-  if (!_use_less_than_threshold_comparison && (nodal_val > threshold))
+  if (!_use_less_than_threshold_comparison && (entity_value > threshold))
     return;
 
   // Yay! A bubble -> Mark it!
   unsigned int map_num = _single_map_mode ? 0 : current_idx;
   if (live_region)
-    _bubble_maps[map_num][node_id] = live_region;
+    _bubble_maps[map_num][entity_id] = live_region;
   else
   {
-    _bubble_maps[map_num][node_id] = ++_region_counts[map_num];
+    _bubble_maps[map_num][entity_id] = ++_region_counts[map_num];
     _region_to_var_idx.push_back(current_idx);
   }
 
-  std::vector< const Node * > neighbors;
-  MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, neighbors);
-  // Flood neighboring nodes that are also above this threshold with recursion
-  for (unsigned int i = 0; i < neighbors.size(); ++i)
+  if (_is_elemental)
   {
-    // Only recurse on nodes this processor can see
-    if (_mesh.isSemiLocal(const_cast<Node *>(neighbors[i])))
-      flood(neighbors[i], current_idx, _bubble_maps[map_num][node_id]);
+    const Elem * elem = static_cast<const Elem *>(dof_object);
+    std::vector<const Elem *> all_active_neighbors;
+
+    // Loop over all neighbors (at the the same level as the current element)
+    for (unsigned int i = 0; i < elem->n_neighbors(); ++i)
+    {
+      const Elem * neighbor_ancestor = elem->neighbor(i);
+      if (neighbor_ancestor)
+        // Retrieve only the active neighbors for each side of this element, append them to the list of active neighbors
+        neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+    }
+
+    // Loop over all active neighbors
+    for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin(); neighbor_it != all_active_neighbors.end(); ++neighbor_it)
+    {
+      const Elem* neighbor = *neighbor_it;
+
+      // Only recurse on elems this processor can see
+      if (neighbor && neighbor->is_semilocal(processor_id()))
+        flood(neighbor, current_idx, _bubble_maps[map_num][entity_id]);
+    }
+  }
+  else
+  {
+    std::vector< const Node * > neighbors;
+    MeshTools::find_nodal_neighbors(_mesh.getMesh(), *static_cast<const Node *>(dof_object), _nodes_to_elem_map, neighbors);
+    // Flood neighboring nodes that are also above this threshold with recursion
+    for (unsigned int i = 0; i < neighbors.size(); ++i)
+    {
+      // Only recurse on nodes this processor can see
+      if (_mesh.isSemiLocal(const_cast<Node *>(neighbors[i])))
+        flood(neighbors[i], current_idx, _bubble_maps[map_num][entity_id]);
+    }
   }
 }
 
-unsigned int
-NodalFloodCount::appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const
+void
+NodalFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
 {
-  unsigned int orig_size = data.size();
-
-  /**
-   * Now we will append our periodic neighbor information.  We treat the periodic neighbor nodes
-   * much like we do ghosted nodes in a multi-processor setting.  If a bubble is sitting on a
-   * periodic boundary we will simply add those periodic neighbors to the appropriate bubble
-   * before packing up the data
-   */
-  std::set<dof_id_type> periodic_neighbors;
-
   // Using a typedef makes the code easier to understand and avoids repeating information.
   typedef std::multimap<dof_id_type, dof_id_type>::const_iterator IterType;
 
-  for (std::set<dof_id_type>::iterator s_it = data.begin(); s_it != data.end(); ++s_it)
+  if (_is_elemental)
   {
-    std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(*s_it);
+    for (std::set<dof_id_type>::iterator entity_it = data._entity_ids.begin(); entity_it != data._entity_ids.end(); ++entity_it)
+    {
+      Elem *elem = _mesh.elem(*entity_it);
 
-    for (IterType it = iters.first; it != iters.second; ++it)
-      periodic_neighbors.insert(it->second);
+      for (unsigned int node_n=0; node_n < elem->n_nodes(); node_n++)
+      {
+        std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(elem->node(node_n));
+
+        for (IterType it = iters.first; it != iters.second; ++it)
+        {
+          data._periodic_nodes.insert(it->first);
+          data._periodic_nodes.insert(it->second);
+        }
+      }
+    }
   }
+  else
+  {
+    for (std::set<dof_id_type>::iterator entity_it = data._entity_ids.begin(); entity_it != data._entity_ids.end(); ++entity_it)
+    {
+      std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(*entity_it);
 
-  // Now that we have all of the periodic_neighbors in our temporary set we need to add them to our input set
-  data.insert(periodic_neighbors.begin(), periodic_neighbors.end());
-
-  return data.size() - orig_size;
+      for (IterType it = iters.first; it != iters.second; ++it)
+      {
+        data._periodic_nodes.insert(it->first);
+        data._periodic_nodes.insert(it->second);
+      }
+    }
+  }
 }
 
 void
@@ -602,7 +684,7 @@ NodalFloodCount::calculateBubbleVolumes()
       // Determine boundary intersection for each BubbleData object
       for (; bubble_it != bubble_end; ++bubble_it)
         bubble_it->_intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
-                                                        bubble_it->_nodes.begin(), bubble_it->_nodes.end());
+                                                        bubble_it->_entity_ids.begin(), bubble_it->_entity_ids.end());
     }
   }
 
@@ -640,7 +722,7 @@ NodalFloodCount::calculateBubbleVolumes()
         for (unsigned int node = 0; node < elem_n_nodes; ++node)
         {
           dof_id_type node_id = elem->node(node);
-          if (bubble_it->_nodes.find(node_id) != bubble_it->_nodes.end())
+          if (bubble_it->_entity_ids.find(node_id) != bubble_it->_entity_ids.end())
             ++flooded_nodes;
         }
 
@@ -696,7 +778,7 @@ NodalFloodCount::bytesHelper(std::list<BubbleData> container)
 {
   unsigned long bytes = 0;
   for (std::list<BubbleData>::iterator it = container.begin(); it != container.end(); ++it)
-    bytes += bytesHelper(it->_nodes) + sizeof(it->_var_idx);
+    bytes += bytesHelper(it->_entity_ids) + sizeof(it->_var_idx);
   return bytes;
 }
 
@@ -707,7 +789,7 @@ NodalFloodCount::calculateUsage() const
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
-    bytes += bytesHelper(_nodes_visited[map_num]);
+    bytes += bytesHelper(_entities_visited[map_num]);
     bytes += bytesHelper(_bubble_maps[map_num]);
 
     if (_var_index_mode)

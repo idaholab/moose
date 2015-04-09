@@ -91,6 +91,9 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
 {
   // Size the data structures to hold the correct number of maps
   _bounding_spheres.resize(_maps_size);
+
+  if (!_is_elemental && _compute_op_maps)
+    mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
 }
 
 GrainTracker::~GrainTracker()
@@ -99,21 +102,22 @@ GrainTracker::~GrainTracker()
     delete it->second;
 }
 
-void
-GrainTracker::initialize()
-{
-  NodalFloodCount::initialize();
-
-  _nodal_data.clear();
-}
-
 Real
 GrainTracker::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
 {
   if (_t_step < _tracking_step)
     return 0;
 
-  return NodalFloodCount::getNodalValue(node_id, var_idx, show_var_coloring);
+  return NodalFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
+}
+
+Real
+GrainTracker::getEntityValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
+{
+  if (_t_step < _tracking_step)
+    return 0;
+
+  return NodalFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
 }
 
 Real
@@ -137,29 +141,13 @@ GrainTracker::getElementalValue(dof_id_type element_id) const
   return 0;
 }
 
-/*
 void
-GrainTracker::threadJoin(const UserObject & y)
+GrainTracker::initialize()
 {
-  // Don't track grains if the current simulation step is before the specified tracking step
-  if (_t_step < _tracking_step)
-    return;
+  NodalFloodCount::initialize();
 
-  const GrainTracker & pps = dynamic_cast<const GrainTracker &>(y);
-
-  pack(_packed_data, false);
-
-  std::vector<unsigned int> pps_packed_data;
-  pps.pack(pps_packed_data, false);
-
-  // Append the packed data structures together
-  std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
-
-  // Calculate thread Memory Usage
-  if (_track_memory)
-    _bytes_used += pps.calculateUsage();
+  _elemental_data.clear();
 }
-*/
 
 
 void
@@ -171,21 +159,22 @@ GrainTracker::finalize()
   Moose::perf_log.push("finalize()","GrainTracker");
 
   // Exchange data in parallel
-  pack(_packed_data, false);                 // Make sure we delay packing of periodic neighbor information
+  pack(_packed_data, false);
   _communicator.allgather(_packed_data, false);
   unpack(_packed_data);
-  mergeSets();
+  mergeSets(false);
 
   Moose::perf_log.push("buildspheres()","GrainTracker");
   buildBoundingSpheres();                    // Build bounding sphere information
   Moose::perf_log.pop("buildspheres()","GrainTracker");
 
-//  NodalFloodCount::updateFieldInfo();
-  _packed_data.clear();
-  pack(_packed_data, true);                  // Pack the data again but this time add periodic neighbor information
-  _communicator.allgather(_packed_data, false);
-  unpack(_packed_data);
-  mergeSets();
+//  _packed_data.clear();
+//  pack(_packed_data, true);                  // Pack the data again but this time add periodic neighbor information
+//  _communicator.allgather(_packed_data, false);
+//  unpack(_packed_data);
+
+  // Now merge sets again but this time we'll add periodic neighbor information
+  mergeSets(true);
 
   Moose::perf_log.push("trackGrains()","GrainTracker");
   trackGrains();
@@ -217,9 +206,9 @@ GrainTracker::finalize()
     {
       if (grain_it->second->status != INACTIVE)
       {
-        std::set<dof_id_type>::const_iterator node_it_end = grain_it->second->nodes_ptr->end();
-        for (std::set<dof_id_type>::const_iterator node_it = grain_it->second->nodes_ptr->begin(); node_it != node_it_end; ++node_it)
-          _nodal_data[*node_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
+        std::set<dof_id_type>::const_iterator elem_it_end = grain_it->second->nodes_ptr->end();
+        for (std::set<dof_id_type>::const_iterator elem_it = grain_it->second->nodes_ptr->begin(); elem_it != elem_it_end; ++elem_it)
+          _elemental_data[*elem_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
       }
     }
   }
@@ -234,35 +223,62 @@ GrainTracker::finalize()
 }
 
 
-const std::vector<std::pair<unsigned int, unsigned int> > &
-GrainTracker::getNodalValues(dof_id_type node_id) const
-{
-  const std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _nodal_data.find(node_id);
+//const std::vector<std::pair<unsigned int, unsigned int> > &
+//GrainTracker::getNodalValues(dof_id_type node_id) const
+//{
+//  const std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _nodal_data.find(node_id);
+//
+//  if (pos != _nodal_data.end())
+//    return pos->second;
+//  else
+//  {
+//#if DEBUG
+//    mooseDoOnce(Moose::out << "Nodal values not in structure for node: " << node_id << " this may be normal.");
+//#endif
+//    return _empty;
+//  }
+//}
 
-  if (pos != _nodal_data.end())
+const std::vector<std::pair<unsigned int, unsigned int> > &
+GrainTracker::getElementalValues(dof_id_type elem_id) const
+{
+  const std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _elemental_data.find(elem_id);
+
+  if (pos != _elemental_data.end())
     return pos->second;
   else
   {
 #if DEBUG
-    mooseDoOnce(Moose::out << "Nodal values not in structure for node: " << node_id << " this may be normal.");
+    mooseDoOnce(Moose::out << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
 #endif
     return _empty;
   }
+
+//  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > elem_info;
+//
+//  const Elem * curr_elem = _mesh.elem(elem_id);
+//  elem_info.resize(curr_elem->n_nodes());
+//
+//  for (unsigned int i=0; i<elem_info.size(); ++i)
+//    // Note: This map only works with Linear Lagrange on First Order Elements
+//    elem_info[_qp_to_node[i]] = getNodalValues(curr_elem->node(i));
+//
+//  return elem_info;
 }
 
-std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
-GrainTracker::getElementalValues(dof_id_type elem_id) const
+void
+GrainTracker::print()
 {
-  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > elem_info;
+  for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin();
+       grain_it != _unique_grains.end(); ++grain_it)
+  {
+    Moose::out << "Grain " << grain_it->first << ":\n";
 
-  const Elem * curr_elem = _mesh.elem(elem_id);
-  elem_info.resize(curr_elem->n_nodes());
-
-  for (unsigned int i=0; i<elem_info.size(); ++i)
-    // Note: This map only works with Linear Lagrange on First Order Elements
-    elem_info[_qp_to_node[i]] = getNodalValues(curr_elem->node(i));
-
-  return elem_info;
+    for (std::vector<BoundingSphereInfo *>::iterator it2 = grain_it->second->sphere_ptrs.begin(); it2 != grain_it->second->sphere_ptrs.end(); ++it2)
+    {
+      Moose::out << "Centroid: " << (*it2)->b_sphere.center() << " radius: " << (*it2)->b_sphere.radius() << '\n';
+    }
+  }
 }
 
 
@@ -294,17 +310,29 @@ GrainTracker::buildBoundingSpheres()
     for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
          it1 != _bubble_sets[map_num].end(); ++it1)
     {
-      total_node_count += it1->_nodes.size();
+      total_node_count += it1->_entity_ids.size();
 
       // Find the min/max of our bounding box to calculate our bounding sphere
-      for (std::set<dof_id_type>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
+      for (std::set<dof_id_type>::iterator it2 = it1->_entity_ids.begin(); it2 != it1->_entity_ids.end(); ++it2)
       {
-        Node *node = mesh.query_node_ptr(*it2);
-        if (node)
+        Point point;
+        Point *p_ptr = NULL;
+        if (_is_elemental)
+        {
+          Elem *elem = mesh.query_elem(*it2);
+          if (elem)
+          {
+            point = elem->centroid();
+            p_ptr = &point;
+          }
+        }
+        else
+          p_ptr = mesh.query_node_ptr(*it2);
+        if (p_ptr)
           for (unsigned int i=0; i<mesh.spatial_dimension(); ++i)
           {
-            min_points[set_counter*3+i] = std::min(min_points[set_counter*3+i], (*node)(i));
-            max_points[set_counter*3+i] = std::max(max_points[set_counter*3+i], (*node)(i));
+            min_points[set_counter*3+i] = std::min(min_points[set_counter*3+i], (*p_ptr)(i));
+            max_points[set_counter*3+i] = std::max(max_points[set_counter*3+i], (*p_ptr)(i));
           }
       }
 
@@ -328,7 +356,7 @@ GrainTracker::buildBoundingSpheres()
       // and the center plus the "hull buffer" value
       Real radius = (max - center).size() + _hull_buffer;
 
-      unsigned int some_node_id = *(it1->_nodes.begin());
+      unsigned int some_node_id = *(it1->_entity_ids.begin());
       _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, center, radius));
 
       ++set_counter;
@@ -388,7 +416,7 @@ GrainTracker::trackGrains()
          * member node id.  A single region may have multiple bounding spheres as members if it spans
          * periodic boundaries
          */
-        if (it1->_nodes.find((*it2)->member_node_id) != it1->_nodes.end())
+        if (it1->_entity_ids.find((*it2)->member_node_id) != it1->_entity_ids.end())
         {
           // Transfer ownership of the bounding sphere info to "sphere_ptrs" which will be stored in the unique grain
           sphere_ptrs.push_back(*it2);
@@ -400,7 +428,7 @@ GrainTracker::trackGrains()
       }
 
       // Create our new grains from this timestep that we will use to match up against the existing grains
-      new_grains.push_back(new UniqueGrain(curr_var, sphere_ptrs, &it1->_nodes, NOT_MARKED));
+      new_grains.push_back(new UniqueGrain(curr_var, sphere_ptrs, &it1->_entity_ids, NOT_MARKED));
     }
   }
 
@@ -639,7 +667,7 @@ GrainTracker::remapGrains()
       }
     }
 
-    if (++times_through_loop >= 5)
+    if (++times_through_loop >= 5 && processor_id() == 0)
       mooseError(COLOR_RED << "Five passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?" << COLOR_DEFAULT);
 
   } while (variables_remapped);
@@ -721,44 +749,32 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
     << COLOR_DEFAULT;
 
   MeshBase & mesh = _mesh.getMesh();
+
   // Remap the grain
-  for (std::set<dof_id_type>::const_iterator node_it = grain_it1->second->nodes_ptr->begin();
-       node_it != grain_it1->second->nodes_ptr->end(); ++node_it)
+  std::set<Node *> updated_nodes_tmp; // Used only in the elemental case
+  for (std::set<dof_id_type>::const_iterator entity_it = grain_it1->second->nodes_ptr->begin();
+       entity_it != grain_it1->second->nodes_ptr->end(); ++entity_it)
   {
-    Node *curr_node = mesh.query_node_ptr(*node_it);
+    Node *curr_node = NULL;
 
-    if (curr_node && curr_node->processor_id() == processor_id())
+    if (_is_elemental)
     {
-      _subproblem.reinitNode(curr_node, 0);
+      Elem *elem = mesh.query_elem(*entity_it);
+      if (!elem)
+        continue;
 
-      // Swap the values from one variable to the other
+      for (unsigned int i=0; i < elem->n_nodes(); ++i)
       {
-        VariableValue & value = _vars[curr_var_idx]->nodalSln();
-        VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
-        VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
-
-        // Copy Value from intersecting variable to new variable
-        dof_id_type & dof_index = _vars[new_variable_idx]->nodalDofIndex();
-
-        // Set the only DOF for this variable on this node
-        solution.set(dof_index, value[0]);
-        solution_old.set(dof_index, value_old[0]);
-        solution_older.set(dof_index, value_older[0]);
-      }
-      {
-        VariableValue & value = _vars[new_variable_idx]->nodalSln();
-        VariableValue & value_old = _vars[new_variable_idx]->nodalSlnOld();
-        VariableValue & value_older = _vars[new_variable_idx]->nodalSlnOlder();
-
-        // Copy Value from variable to the intersecting variable
-        dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
-
-        // Set the only DOF for this variable on this node
-        solution.set(dof_index, value[0]);
-        solution_old.set(dof_index, value_old[0]);
-        solution_older.set(dof_index, value_older[0]);
+        Node *curr_node = elem->get_node(i);
+        if (updated_nodes_tmp.find(curr_node) == updated_nodes_tmp.end())
+        {
+          updated_nodes_tmp.insert(curr_node);         // cache this node so we don't attempt to remap it again within this loop
+          swapSolutionValuesHelper(curr_node, curr_var_idx, new_variable_idx, solution, solution_old, solution_older);
+        }
       }
     }
+    else
+      swapSolutionValuesHelper(mesh.query_node_ptr(*entity_it), curr_var_idx, new_variable_idx, solution, solution_old, solution_older);
   }
 
   // Update the variable index in the unique grain datastructure
@@ -770,6 +786,45 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
   solution_older.close();
 
   _fe_problem.getNonlinearSystem().sys().update();
+
+}
+
+void
+GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, NumericVector<Real> & solution, NumericVector<Real> & solution_old, NumericVector<Real> & solution_older)
+{
+  if (curr_node && curr_node->processor_id() == processor_id())
+  {
+    // Reinit the node so we can get and set values of the solution here
+    _subproblem.reinitNode(curr_node, 0);
+
+    // Swap the values from one variable to the other
+    {
+      VariableValue & value = _vars[curr_var_idx]->nodalSln();
+      VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
+      VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
+
+      // Copy Value from intersecting variable to new variable
+      dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
+
+      // Set the only DOF for this variable on this node
+      solution.set(dof_index, value[0]);
+      solution_old.set(dof_index, value_old[0]);
+      solution_older.set(dof_index, value_older[0]);
+    }
+    {
+      VariableValue & value = _vars[new_var_idx]->nodalSln();
+      VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
+      VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
+
+      // Copy Value from variable to the intersecting variable
+      dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
+
+      // Set the only DOF for this variable on this node
+      solution.set(dof_index, value[0]);
+      solution_old.set(dof_index, value_old[0]);
+      solution_older.set(dof_index, value_older[0]);
+    }
+  }
 }
 
 void
@@ -786,25 +841,42 @@ GrainTracker::updateFieldInfo()
     unsigned int curr_var = grain_it->second->variable_idx;
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
 
-    if (grain_it->second->status != INACTIVE)
-      for (std::set<dof_id_type>::iterator node_it = grain_it->second->nodes_ptr->begin();
-           node_it != grain_it->second->nodes_ptr->end(); ++node_it)
-      {
-        Node *curr_node = mesh.query_node_ptr(*node_it);
+    if (grain_it->second->status == INACTIVE)
+      continue;
 
-        if (curr_node &&
-            _mesh.isSemiLocal(curr_node) &&
-            _vars[grain_it->second->variable_idx]->getNodalValue(*curr_node) > tmp_map[curr_node->id()])
+    for (std::set<dof_id_type>::iterator entity_it = grain_it->second->nodes_ptr->begin();
+         entity_it != grain_it->second->nodes_ptr->end(); ++entity_it)
+    {
+//      // Highest variable value at this entity wins
+      Number entity_value = -std::numeric_limits<Number>::max();
+      if (_is_elemental)
+      {
+        const Elem * elem = mesh.query_elem(*entity_it);
+        if (elem && elem->is_semilocal(processor_id()))
         {
-          _bubble_maps[map_idx][curr_node->id()] = grain_it->first;
-          if (_var_index_mode)
-            _var_index_maps[map_idx][curr_node->id()] = grain_it->second->variable_idx;
+          std::vector<Point> centroid(1, elem->centroid());
+          _fe_problem.reinitElemPhys(elem, centroid, 0);
+          entity_value = _vars[curr_var]->sln()[0];
         }
       }
+      else
+      {
+        Node * node = mesh.query_node_ptr(*entity_it);
+        if (node && _mesh.isSemiLocal(node))
+          entity_value = _vars[curr_var]->getNodalValue(*node);
+      }
+
+      if (tmp_map.find(*entity_it) == tmp_map.end() || entity_value > tmp_map[*entity_it])
+      {
+        _bubble_maps[map_idx][*entity_it] = grain_it->first;
+        if (_var_index_mode)
+          _var_index_maps[map_idx][*entity_it] = grain_it->second->variable_idx;
+
+        tmp_map[*entity_it] = entity_value;
+      }
+    }
   }
 }
-
-
 
 Real
 GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const
@@ -878,5 +950,3 @@ GrainTracker::UniqueGrain::~UniqueGrain()
   for (unsigned int i=0; i<sphere_ptrs.size(); ++i)
     delete sphere_ptrs[i];
 }
-
-const unsigned int GrainTracker::_qp_to_node[8] = { 0, 1, 3, 2, 4, 5, 7, 6 };

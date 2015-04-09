@@ -27,17 +27,24 @@ NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters
     _flood_counter(getUserObject<NodalFloodCount>("bubble_object")),
     _var_idx(getParam<unsigned int>("map_index")),
     _field_display(getParam<MooseEnum>("field_display")),
-    _var_coloring(false)
+    _var_coloring(_field_display == "VARIABLE_COLORING")
 {
   if (isNodal())
   {
     if (_field_display == "CENTROID")
       mooseError("CENTROID coloring is only available for elemental aux variables");
-    else if (_field_display == "VARIABLE_COLORING")
-      _var_coloring = true;
+
+    if (_field_display == "ACTIVE_BOUNDS")
+      mooseError("ACTIVE_BOUNDS is only available for elemental aux variables");
+
+    if (_flood_counter.isElemental() && (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING"))
+      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the NodalFloodCounter");
   }
-  else if (_field_display != "CENTROID" && _field_display != "ACTIVE_BOUNDS")
-    mooseError("UNIQUE_REGION and VARIABLE_COLORING are only avaialble for nodal aux variables");
+  else
+  {
+    if (! _flood_counter.isElemental() && (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING"))
+      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the NodalFloodCounter");
+  }
 }
 
 Real
@@ -47,19 +54,9 @@ NodalFloodCountAux::computeValue()
   {
   case 0:  // UNIQUE_REGION
   case 1:  // VARIABLE_COLORING
-    return _flood_counter.getNodalValue(_current_node->id(), _var_idx, _var_coloring);
+    return _flood_counter.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), _var_idx, _var_coloring);
   case 2:  // ACTIVE_BOUNDS
-    if (isNodal())
-      return _flood_counter.getNodalValues(_current_node->id()).size();
-    else
-    {
-      size_t size=0;
-      std::vector<std::vector<std::pair<unsigned int, unsigned int> > > values = _flood_counter.getElementalValues(_current_elem->id());
-
-      for (unsigned int i = 0; i < values.size(); ++i)
-        size += values[i].size();
-      return size;
-    }
+    return _flood_counter.getElementalValues(_current_elem->id()).size();
   case 3:  // CENTROID
     return _flood_counter.getElementalValue(_current_elem->id());
   }

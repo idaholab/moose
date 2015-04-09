@@ -21,7 +21,7 @@ public:
   virtual ~GrainTracker();
 
   virtual void initialize();
-  //virtual void threadJoin(const UserObject & y);
+
   virtual void finalize();
 
   /**
@@ -32,6 +32,8 @@ public:
    * @return the nodal value
    */
   virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
+
+  virtual Real getEntityValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
 
   /**
    * Accessor for retrieving elemental field data (grain centroids).
@@ -44,14 +46,17 @@ public:
    * Returns a list of active unique grains for a particular node in a vector of pairs
    * (unique_grain_id, variable_idx)
    */
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type node_id) const;
+//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type node_id) const;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
    * holds the ith node with the inner vector holds the list of active unique grains.
    * (unique_grain_id, variable_idx)
    */
-  virtual std::vector<std::vector<std::pair<unsigned int, unsigned int> > > getElementalValues(dof_id_type elem_id) const;
+  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
+
+  // Debugging routine used for printing grain data structure information
+  void print();
 
 public:
   /// This struct holds the nodesets and bounding spheres for each flooded region.
@@ -87,6 +92,7 @@ protected:
    * This method swaps the values at all the nodes in grain_it1, with the values in grain_it2.
    */
   void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2, unsigned int attempt_number);
+  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, NumericVector<Real> & solution, NumericVector<Real> & solution_old, NumericVector<Real> & solution_older);
 
   /**
    * This method returns the periodic distance between two spheres.  If ignore_radii is true, then the distance will be between the two
@@ -157,11 +163,12 @@ public:
   };
 
   bool _compute_op_maps;
-  // Data structure for active order parameter information on nodes
-  std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > > _nodal_data;
 
-  // This map only works with Linear Lagrange on First Order Elements
-  static const unsigned int _qp_to_node[8];
+  /**
+   * Data structure for active order parameter information on elements:
+   * elem_id -> a vector of pairs each containing the grain number and the variable index representing that grain
+   */
+  std::map<dof_id_type, std::vector<std::pair<unsigned int, unsigned int> > > _elemental_data;
 };
 
 

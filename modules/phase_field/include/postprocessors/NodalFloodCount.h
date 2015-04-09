@@ -31,7 +31,7 @@ template<>
 InputParameters validParams<NodalFloodCount>();
 
 /**
- * This object will mark nodes of continous regions all with a unique number for the purpose of
+ * This object will mark nodes or elements of continuous regions all with a unique number for the purpose of
  * counting or "coloring" unique regions in a solution.  It is designed to work with either a
  * single variable, or multiple variables.
  *
@@ -58,20 +58,25 @@ public:
   virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
   virtual Real getElementalValue(dof_id_type element_id) const;
 
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type /*node_id*/) const;
-  virtual std::vector<std::vector<std::pair<unsigned int, unsigned int> > > getElementalValues(dof_id_type /*elem_id*/) const;
+  virtual Real getEntityValue(dof_id_type entity_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
+
+//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type /*node_id*/) const;
+  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
+
+  inline bool isElemental() const { return _is_elemental; }
 
 protected:
   class BubbleData
   {
   public:
-    BubbleData(std::set<dof_id_type> & nodes, unsigned int var_idx) :
-        _nodes(nodes),
+    BubbleData(std::set<dof_id_type> & entity_ids, unsigned int var_idx) :
+        _entity_ids(entity_ids),
         _var_idx(var_idx),
         _intersects_boundary(false)
     {}
 
-    std::set<dof_id_type> _nodes;
+    std::set<dof_id_type> _entity_ids;
+    std::set<dof_id_type> _periodic_nodes;
     unsigned int _var_idx;
     bool _intersects_boundary;
   };
@@ -84,10 +89,10 @@ protected:
   virtual void updateFieldInfo();
 
   /**
-   * This method will "mark" all nodes on neighboring elements that
+   * This method will "mark" all entities on neighboring elements that
    * are above the supplied threshold
    */
-  void flood(const Node *node, int current_idx, unsigned int live_region);
+  void flood(const DofObject *dof_object, int current_idx, unsigned int live_region);
 
   /**
    * These routines packs/unpack the _bubble_map data into a structure suitable for parallel
@@ -101,13 +106,13 @@ protected:
    * This routine merges the data in _bubble_sets from separate threads/processes to resolve
    * any bubbles that were counted as unique by multiple processors.
    */
-  void mergeSets();
+  void mergeSets(bool use_periodic_boundary_info);
 
   /**
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
-  unsigned int appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const;
+  void appendPeriodicNeighborNodes(BubbleData & data) const;
 
   /**
    * This routine updates the _region_offsets variable which is useful for quickly determining
@@ -206,7 +211,7 @@ protected:
    * for this since we don't want to explicitly store data for all the unmarked nodes in a serialized datastructures.
    * This keeps our overhead down since this variable never needs to be communicated.
    */
-  std::vector<std::map<dof_id_type, bool> > _nodes_visited;
+  std::vector<std::map<dof_id_type, bool> > _entities_visited;
 
   /**
    * The bubble maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
@@ -287,6 +292,11 @@ protected:
    * false.
    */
   bool _compute_boundary_intersecting_volume;
+
+  /**
+   * Determines if the flood counter is elements or not (nodes)
+   */
+  bool _is_elemental;
 };
 
 template<typename T>
