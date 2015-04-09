@@ -30,12 +30,18 @@ public:
 
 protected:
 
+  /**
+   * Computes the residual for the current slave node
+   */
   virtual Real computeQpResidual(Moose::ConstraintType type);
+
+  /**
+   * Computes the jacobian for the constraint
+   */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 
   short _slave_boundary_id;
   Real _penalty;
-
 };
 
 #endif /* EQUALVALUEBOUNDARYCONSTRAINT_H */

@@ -40,10 +40,18 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const std::string & n
        in != nodelist.end() && ib != boundary_id_list.end();
        ++in, ++ib)
   {
-    if (*ib == _slave_boundary_id && *in != _master_node_id)
+    bool slave_local(_mesh.node(*in).processor_id() == _subproblem.processor_id());
+    if (*ib == _slave_boundary_id &&
+        *in != _master_node_id &&
+        slave_local)
+    {
       _connected_nodes.push_back(*in);
-  }
 
+      std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[_master_node_id];
+      for (unsigned int i = 0; i < elems.size(); ++i)
+        _subproblem.addGhostedElem(elems[i]);
+    }
+  }
 }
 
 EqualValueBoundaryConstraint::~EqualValueBoundaryConstraint()
