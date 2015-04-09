@@ -312,6 +312,8 @@ DomainIntegralAction::act()
       params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1,_disp_y);
       if (_disp_z !="")
         params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
+      if (_has_symmetry_plane)
+        params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
 
       for (std::set<INTEGRAL>::iterator sit=_integrals.begin(); sit != _integrals.end(); ++sit)
       {

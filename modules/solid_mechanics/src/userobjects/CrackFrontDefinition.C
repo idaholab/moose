@@ -643,6 +643,10 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       _tangent_directions.push_back(tangent_direction);
       _crack_directions.push_back(calculateCrackFrontDirection(crack_front_nodes[i],tangent_direction,ntype));
 
+      //If the end directions are given by the user, correct also the tangent at the end nodes
+      if (_direction_method == CURVED_CRACK_FRONT && _end_direction_method == END_CRACK_DIRECTION_VECTOR &&
+          (ntype == END_1_NODE || ntype == END_2_NODE))
+        _tangent_directions[i] = _crack_plane_normal.cross(_crack_directions[i]);
 
       back_segment = forward_segment;
       back_segment_len = forward_segment_len;
