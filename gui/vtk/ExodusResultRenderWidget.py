@@ -256,9 +256,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.displace_checkbox.toggled[bool].connect(self._displaceToggled)
 
     self.displace_magnitude_label = QtGui.QLabel("Multiplier: ")
-    self.displace_magnitude_text = QtGui.QLineEdit("1.0")
+    self.displace_magnitude_text = QtGui.QDoubleSpinBox()
+    self.displace_magnitude_text.setValue(self.current_displacement_magnitude)
     self.displace_magnitude_text.setMinimumWidth(10)
-    self.displace_magnitude_text.returnPressed.connect(self._displaceMagnitudeTextReturn)
+    self.displace_magnitude_text.valueChanged.connect(self._displaceMagnitudeChanged)
 
     self.displace_layout.addWidget(self.displace_checkbox)
     self.displace_layout.addSpacing(10)
@@ -337,7 +338,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_combobox.addItem('z')
     self.clip_plane_combobox.currentIndexChanged[str].connect(self._clipNormalChanged)
     self.clip_layout.addWidget(self.clip_plane_combobox)
-    self.scale_layout.addSpacing(5)
 
     self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.clip_plane_slider.setToolTip('Slide to change plane position')
@@ -421,6 +421,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.min_custom_layout = QtGui.QHBoxLayout()
     self.min_custom_layout.setContentsMargins(0,0,0,0)
+    self.min_custom_layout.setSpacing(5)
     self.min_custom_radio = QtGui.QRadioButton()
     self.min_custom_radio.toggled.connect(self._updateContours)
     self.min_custom_text = QtGui.QLineEdit()
@@ -454,7 +455,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.max_radio_layout.addWidget(self.max_current_radio)
 
     self.max_custom_layout = QtGui.QHBoxLayout()
-    self.max_custom_layout.setSpacing(0)
+    self.max_custom_layout.setContentsMargins(0,0,0,0)
+    self.max_custom_layout.setSpacing(5)
     self.max_custom_radio = QtGui.QRadioButton()
     self.max_custom_radio.toggled.connect(self._updateContours)
     self.max_custom_text = QtGui.QLineEdit()
@@ -705,8 +707,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _scaleToggled(self, value):
     self._timeSliderReleased()
 
-  def _displaceMagnitudeTextReturn(self):
-    self.current_displacement_magnitude = float(self.displace_magnitude_text.text())
+  def _displaceMagnitudeChanged(self):
+    self.current_displacement_magnitude = self.displace_magnitude_text.value()
     self._timeSliderReleased()
 
   def _scaleMagnitudeChanged(self):
