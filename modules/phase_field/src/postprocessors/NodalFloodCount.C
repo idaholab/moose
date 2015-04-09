@@ -136,7 +136,7 @@ NodalFloodCount::execute()
   const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
   for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
-    const Elem *current_elem = *el;
+    const Elem * current_elem = *el;
 
     // Loop over elements or nodes
     if (_is_elemental)
@@ -149,7 +149,7 @@ NodalFloodCount::execute()
       unsigned int n_nodes = current_elem->n_vertices();
       for (unsigned int i = 0; i < n_nodes; ++i)
       {
-        const Node *current_node = current_elem->get_node(i);
+        const Node * current_node = current_elem->get_node(i);
 
         for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
           flood(current_node, var_num, 0);
@@ -260,13 +260,6 @@ NodalFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, boo
   }
 }
 
-//const std::vector<std::pair<unsigned int, unsigned int> > &
-//NodalFloodCount::getNodalValues(dof_id_type /*node_id*/) const
-//{
-//  mooseDoOnce(mooseWarning("Method not implemented"));
-//  return _empty;
-//}
-
 const std::vector<std::pair<unsigned int, unsigned int> > &
 NodalFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
 {
@@ -274,29 +267,8 @@ NodalFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
   return _empty;
 }
 
-/*
-  void
-  NodalFloodCount::threadJoin(const UserObject &y)
-  {
-  const NodalFloodCount & pps = dynamic_cast<const NodalFloodCount &>(y);
-
-  // Pack up the data on both of the threads
-  pack(_packed_data);
-
-  std::vector<unsigned int> pps_packed_data;
-  pps.pack(pps_packed_data);
-
-  // Append the packed data structures together
-  std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
-
-  // Calculate thread Memory Usage
-  if (_track_memory)
-  _bytes_used += pps.calculateUsage();
-  }
-*/
-
 void
-NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_periodic_info) const
+NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
 {
   /**
    * Don't repack the data if it's already packed - we might lose data that was updated
@@ -518,7 +490,7 @@ NodalFloodCount::updateFieldInfo()
 }
 
 void
-NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned int live_region)
+NodalFloodCount::flood(const DofObject * dof_object, int current_idx, unsigned int live_region)
 {
   if (dof_object == NULL)
     return;
@@ -583,7 +555,7 @@ NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned in
     // Loop over all active neighbors
     for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin(); neighbor_it != all_active_neighbors.end(); ++neighbor_it)
     {
-      const Elem* neighbor = *neighbor_it;
+      const Elem * neighbor = *neighbor_it;
 
       // Only recurse on elems this processor can see
       if (neighbor && neighbor->is_semilocal(processor_id()))
@@ -592,7 +564,7 @@ NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned in
   }
   else
   {
-    std::vector< const Node * > neighbors;
+    std::vector<const Node *> neighbors;
     MeshTools::find_nodal_neighbors(_mesh.getMesh(), *static_cast<const Node *>(dof_object), _nodes_to_elem_map, neighbors);
     // Flood neighboring nodes that are also above this threshold with recursion
     for (unsigned int i = 0; i < neighbors.size(); ++i)
@@ -614,9 +586,9 @@ NodalFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
   {
     for (std::set<dof_id_type>::iterator entity_it = data._entity_ids.begin(); entity_it != data._entity_ids.end(); ++entity_it)
     {
-      Elem *elem = _mesh.elem(*entity_it);
+      Elem * elem = _mesh.elem(*entity_it);
 
-      for (unsigned int node_n=0; node_n < elem->n_nodes(); node_n++)
+      for (unsigned int node_n = 0; node_n < elem->n_nodes(); node_n++)
       {
         std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(elem->node(node_n));
 
@@ -648,7 +620,7 @@ NodalFloodCount::updateRegionOffsets()
 {
   if (_global_numbering)
     // Note: We never need to touch offset zero - it should *always* be zero
-    for (unsigned int map_num=1; map_num < _maps_size; ++map_num)
+    for (unsigned int map_num = 1; map_num < _maps_size; ++map_num)
       _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
 }
 
@@ -705,7 +677,7 @@ NodalFloodCount::calculateBubbleVolumes()
   const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
   for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
   {
-    Elem *elem = *el;
+    Elem * elem = *el;
     unsigned int elem_n_nodes = elem->n_nodes();
     Real curr_volume = elem->volume();
 
@@ -756,7 +728,7 @@ NodalFloodCount::calculateBubbleVolumes()
     _communicator.sum(_total_volume_intersecting_boundary);
 
     // Scale the boundary intersecting grain volumes by the total domain volume
-    for (unsigned int i=0; i<_total_volume_intersecting_boundary.size(); ++i)
+    for (unsigned int i = 0; i<_total_volume_intersecting_boundary.size(); ++i)
       _total_volume_intersecting_boundary[i] /= total_volume;
   }
 
