@@ -1,3 +1,10 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "GrainTracker.h"
 #include "MooseMesh.h"
 #include "AddV.h"
@@ -61,7 +68,7 @@ template<> void dataLoad(std::istream & stream, GrainTracker::BoundingSphereInfo
 template<>
 InputParameters validParams<GrainTracker>()
 {
-  InputParameters params = validParams<NodalFloodCount>();
+  InputParameters params = validParams<FeatureFloodCount>();
   params.addRequiredParam<unsigned int>("op_num","number of grains");
   params.addRequiredParam<std::string>("var_name_base","base for variable names");
   params.addParam<int>("tracking_step", 1, "The timestep for when we should start tracking grains");
@@ -80,7 +87,7 @@ InputParameters validParams<GrainTracker>()
 }
 
 GrainTracker::GrainTracker(const std::string & name, InputParameters parameters) :
-    NodalFloodCount(name, AddV(parameters, "variable")),
+    FeatureFloodCount(name, AddV(parameters, "variable")),
     _tracking_step(getParam<int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _remap(getParam<bool>("remap_grains")),
@@ -108,7 +115,7 @@ GrainTracker::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show
   if (_t_step < _tracking_step)
     return 0;
 
-  return NodalFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
+  return FeatureFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
 }
 
 Real
@@ -117,7 +124,7 @@ GrainTracker::getEntityValue(dof_id_type node_id, unsigned int var_idx, bool sho
   if (_t_step < _tracking_step)
     return 0;
 
-  return NodalFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
+  return FeatureFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
 }
 
 Real
@@ -144,7 +151,7 @@ GrainTracker::getElementalValue(dof_id_type element_id) const
 void
 GrainTracker::initialize()
 {
-  NodalFloodCount::initialize();
+  FeatureFloodCount::initialize();
 
   _elemental_data.clear();
 }
@@ -159,7 +166,7 @@ GrainTracker::finalize()
   Moose::perf_log.push("finalize()","GrainTracker");
 
   // Exchange data in parallel
-  pack(_packed_data, false);
+  pack(_packed_data);
   _communicator.allgather(_packed_data, false);
   unpack(_packed_data);
   mergeSets(false);
@@ -876,7 +883,7 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
 unsigned long
 GrainTracker::calculateUsage() const
 {
-  unsigned long bytes = NodalFloodCount::calculateUsage();
+  unsigned long bytes = FeatureFloodCount::calculateUsage();
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {

@@ -12,7 +12,7 @@
 template<>
 InputParameters validParams<NodalVolumeFraction>()
 {
-  InputParameters params = validParams<NodalFloodCount>();
+  InputParameters params = validParams<FeatureFloodCount>();
   params.addRequiredParam<PostprocessorName>("mesh_volume", "Postprocessor from which to get mesh volume");
   params.addParam<FileName>("Avrami_file", "filename for Avrami analysis info (ln time and Avrami)");
   params.addParam<Real>("equil_fraction", -1.0, "Equilibrium volume fraction of 2nd phase for Avrami analysis");
@@ -21,7 +21,7 @@ InputParameters validParams<NodalVolumeFraction>()
 }
 
 NodalVolumeFraction::NodalVolumeFraction(const std::string & name, InputParameters parameters) :
-    NodalFloodCount(name, parameters),
+    FeatureFloodCount(name, parameters),
     _mesh_volume(getPostprocessorValue("mesh_volume")),
     _equil_fraction(getParam<Real>("equil_fraction"))
 {
@@ -36,11 +36,11 @@ NodalVolumeFraction::~NodalVolumeFraction()
 void
 NodalVolumeFraction::finalize()
 {
-  NodalFloodCount::finalize();
+  FeatureFloodCount::finalize();
 
   // If the bubble volume calculation wasn't done yet, do now.
   if (_all_bubble_volumes.empty())
-    NodalFloodCount::calculateBubbleVolumes();
+    FeatureFloodCount::calculateBubbleVolumes();
   calculateBubbleFraction();
 
   // Now calculate the Avrami data if requested
@@ -93,5 +93,3 @@ NodalVolumeFraction::calculateAvramiValue()
 {
   return std::log(std::log(1.0/(1.0 - (_volume_fraction/_equil_fraction) ) ) );
 }
-
-

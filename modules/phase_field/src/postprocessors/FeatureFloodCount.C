@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
-#include "NodalFloodCount.h"
+#include "FeatureFloodCount.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
@@ -25,7 +24,7 @@
 #include <limits>
 
 template<>
-InputParameters validParams<NodalFloodCount>()
+InputParameters validParams<FeatureFloodCount>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredCoupledVar("variable", "Ths variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
@@ -46,7 +45,7 @@ InputParameters validParams<NodalFloodCount>()
   return params;
 }
 
-NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters parameters) :
+FeatureFloodCount::FeatureFloodCount(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
@@ -81,12 +80,12 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
   _entities_visited.resize(_vars.size());
 }
 
-NodalFloodCount::~NodalFloodCount()
+FeatureFloodCount::~FeatureFloodCount()
 {
 }
 
 void
-NodalFloodCount::initialize()
+FeatureFloodCount::initialize()
 {
   // Get a pointer to the PeriodicBoundaries buried in libMesh
   // TODO: Can we do this in the constructor (i.e. are all objects necessary for this call in existance during ctor?)
@@ -131,7 +130,7 @@ NodalFloodCount::initialize()
 }
 
 void
-NodalFloodCount::execute()
+FeatureFloodCount::execute()
 {
   const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
   for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
@@ -159,7 +158,7 @@ NodalFloodCount::execute()
 }
 
 void
-NodalFloodCount::finalize()
+FeatureFloodCount::finalize()
 {
   // Exchange data in parallel
   pack(_packed_data);
@@ -208,7 +207,7 @@ NodalFloodCount::finalize()
 }
 
 Real
-NodalFloodCount::getValue()
+FeatureFloodCount::getValue()
 {
   unsigned int count = 0;
 
@@ -220,7 +219,7 @@ NodalFloodCount::getValue()
 
 
 Real
-NodalFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
+FeatureFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
 {
   mooseDoOnce(mooseWarning("Please call getEntityValue instead"));
 
@@ -228,14 +227,14 @@ NodalFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool s
 }
 
 Real
-NodalFloodCount::getElementalValue(dof_id_type /*element_id*/) const
+FeatureFloodCount::getElementalValue(dof_id_type /*element_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return 0;
 }
 
 Real
-NodalFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool show_var_coloring) const
+FeatureFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool show_var_coloring) const
 {
   mooseAssert(var_idx < _maps_size, "Index out of range");
   mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
@@ -261,14 +260,14 @@ NodalFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, boo
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &
-NodalFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
+FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return _empty;
 }
 
 void
-NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
+FeatureFloodCount::pack(std::vector<unsigned int> & packed_data) const
 {
   /**
    * Don't repack the data if it's already packed - we might lose data that was updated
@@ -325,7 +324,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
 
         if (_single_map_mode)
         {
-          mooseAssert(i-1 < _region_to_var_idx.size(), "Index out of bounds in NodalFloodCounter");
+          mooseAssert(i-1 < _region_to_var_idx.size(), "Index out of bounds in FeatureFloodCounter");
           partial_packed_data[current_idx++] = _region_to_var_idx[i-1];   // The variable owning this bubble
         }
         else
@@ -342,7 +341,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data) const
 }
 
 void
-NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
+FeatureFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 {
   bool start_next_set = true;
   bool has_data_to_save = false;
@@ -396,9 +395,9 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 }
 
 void
-NodalFloodCount::mergeSets(bool use_periodic_boundary_info)
+FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 {
-  Moose::perf_log.push("mergeSets()", "NodalFloodCount");
+  Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
   std::set<dof_id_type> set_union;
   std::insert_iterator<std::set<dof_id_type> > set_union_inserter(set_union, set_union.begin());
 
@@ -457,11 +456,11 @@ NodalFloodCount::mergeSets(bool use_periodic_boundary_info)
         ++it1;
     }
   }
-  Moose::perf_log.pop("mergeSets()", "NodalFloodCount");
+  Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
 
 void
-NodalFloodCount::updateFieldInfo()
+FeatureFloodCount::updateFieldInfo()
 {
   // This variable is only relevant in single map mode
   _region_to_var_idx.resize(_bubble_sets[0].size());
@@ -490,7 +489,7 @@ NodalFloodCount::updateFieldInfo()
 }
 
 void
-NodalFloodCount::flood(const DofObject * dof_object, int current_idx, unsigned int live_region)
+FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, unsigned int live_region)
 {
   if (dof_object == NULL)
     return;
@@ -577,7 +576,7 @@ NodalFloodCount::flood(const DofObject * dof_object, int current_idx, unsigned i
 }
 
 void
-NodalFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
+FeatureFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
 {
   // Using a typedef makes the code easier to understand and avoids repeating information.
   typedef std::multimap<dof_id_type, dof_id_type>::const_iterator IterType;
@@ -616,7 +615,7 @@ NodalFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
 }
 
 void
-NodalFloodCount::updateRegionOffsets()
+FeatureFloodCount::updateRegionOffsets()
 {
   if (_global_numbering)
     // Note: We never need to touch offset zero - it should *always* be zero
@@ -625,9 +624,9 @@ NodalFloodCount::updateRegionOffsets()
 }
 
 void
-NodalFloodCount::calculateBubbleVolumes()
+FeatureFloodCount::calculateBubbleVolumes()
 {
-  Moose::perf_log.push("calculateBubbleVolume()", "NodalFloodCount");
+  Moose::perf_log.push("calculateBubbleVolume()", "FeatureFloodCount");
 
   // Figure out which bubbles intersect the boundary if the user has enabled that capability.
   if (_compute_boundary_intersecting_volume)
@@ -741,12 +740,12 @@ NodalFloodCount::calculateBubbleVolumes()
 
   std::sort(_all_bubble_volumes.begin(), _all_bubble_volumes.end(), std::greater<Real>());
 
-  Moose::perf_log.pop("calculateBubbleVolume()", "NodalFloodCount");
+  Moose::perf_log.pop("calculateBubbleVolume()", "FeatureFloodCount");
 }
 
 template<>
 unsigned long
-NodalFloodCount::bytesHelper(std::list<BubbleData> container)
+FeatureFloodCount::bytesHelper(std::list<BubbleData> container)
 {
   unsigned long bytes = 0;
   for (std::list<BubbleData>::iterator it = container.begin(); it != container.end(); ++it)
@@ -755,7 +754,7 @@ NodalFloodCount::bytesHelper(std::list<BubbleData> container)
 }
 
 unsigned long
-NodalFloodCount::calculateUsage() const
+FeatureFloodCount::calculateUsage() const
 {
   unsigned long bytes = 0;
 
@@ -786,7 +785,7 @@ NodalFloodCount::calculateUsage() const
 }
 
 void
-NodalFloodCount::formatBytesUsed() const
+FeatureFloodCount::formatBytesUsed() const
 {
   std::stringstream oss;
   oss.precision(1);
@@ -803,4 +802,4 @@ NodalFloodCount::formatBytesUsed() const
 }
 
 
-const std::vector<std::pair<unsigned int, unsigned int> > NodalFloodCount::_empty;
+const std::vector<std::pair<unsigned int, unsigned int> > FeatureFloodCount::_empty;
