@@ -12,35 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "libmesh/mesh_base.h"
+#ifndef XFEM_GEOMETRIC_CUT_2D_H
+#define XFEM_GEOMETRIC_CUT_2D_H
+
 #include "XFEM_geometric_cut.h"
 
-XFEM_geometric_cut::XFEM_geometric_cut(Real t0, Real t1):
-  t_start(t0),
-  t_end(t1)
-{}
-
-XFEM_geometric_cut::~XFEM_geometric_cut()
-{}
-
-Real XFEM_geometric_cut::crossprod_2d(Real ax, Real ay, Real bx, Real by)
+class XFEM_geometric_cut_2d : public XFEM_geometric_cut
 {
-  return (ax*by-bx*ay);
-}
+public:
 
-Real XFEM_geometric_cut::cut_fraction(Real time)
-{
-  Real fraction = 0.0;
-  if (time > t_start)
-  {
-    if (time >= t_end)
-    {
-      fraction = 1.0;
-    }
-    else
-    {
-      fraction = (time - t_start) / (t_end - t_start);
-    }
-  }
-  return fraction;
-}
+  XFEM_geometric_cut_2d(Real x0_, Real y0_, Real x1_, Real y1_, Real t_start_, Real t_end_);
+  ~XFEM_geometric_cut_2d();
+
+  bool cut_elem_by_geometry(const Elem* elem, std::vector<cutEdge> & cutEdges, Real time);
+  bool cut_elem_by_geometry(const Elem* elem, std::vector<cutFace> & cutFaces, Real time);
+
+  bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges,
+                            std::vector<cutEdge> & cutEdges, Real time);
+  bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_faces,
+                            std::vector<cutFace> & cutFaces, Real time);
+
+private:
+  Real x0, x1, y0, y1;
+};
+
+#endif

@@ -74,6 +74,8 @@
 #include "ScalarInitialCondition.h"
 #include "InternalSideIndicator.h"
 #include "XFEM_geometric_cut.h"
+#include "XFEM_geometric_cut_2d.h"
+#include "XFEM_square_cut.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -92,6 +94,7 @@ InputParameters validParams<FEProblem>()
   params.addParam<bool>("use_nonlinear", true, "Determines whether to use a Nonlinear vs a Eigenvalue system (Automatically determined based on executioner)");
   params.addParam<bool>("error_on_jacobian_nonzero_reallocation", false, "This causes PETSc to error if it had to reallocate memory in the Jacobian matrix due to not having enough nonzeros");
 
+  params.addParam<std::string>("XFEM_cut_type", "line_segment_2d", "The type of XFEM cuts");
   params.addParam<std::vector<Real> >("XFEM_cuts","Data for XFEM geometric cuts");
   params.addParam<std::vector<Real> >("XFEM_cut_scale","X,Y scale factors for XFEM geometric cuts");
   params.addParam<std::vector<Real> >("XFEM_cut_translate","X,Y translations for XFEM geometric cuts");
@@ -132,6 +135,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _adaptivity(*this),
 #endif
     _xfem(_material_data, &_mesh.getMesh()),
+    _XFEM_cut_type(getParam<std::string>("XFEM_cut_type")),
     _displaced_mesh(NULL),
     _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),
@@ -252,45 +256,54 @@ void
 FEProblem::addXFEMGeometricCuts(InputParameters parameters)
 {
   std::vector<Real> cut_data = parameters.get<std::vector<Real> >("XFEM_cuts");
-  if (cut_data.size() % 6 != 0)
+  if (_XFEM_cut_type == "line_segment_2d")
   {
+    if (cut_data.size() % 6 != 0)
     mooseError("Length of XFEM_cuts must be a multiple of 6.");
-  }
-  unsigned int num_cuts = cut_data.size()/6;
 
-  std::vector<Real> trans;
-  if (parameters.isParamValid("XFEM_cut_translate"))
+    unsigned int num_cuts = cut_data.size()/6;
+
+    std::vector<Real> trans;
+    if (parameters.isParamValid("XFEM_cut_translate"))
+    {
+      trans = parameters.get<std::vector<Real> >("XFEM_cut_translate");
+    }
+    else
+    {
+      trans.push_back(0.0);
+      trans.push_back(0.0);
+    }
+
+    std::vector<Real> scale;
+    if (parameters.isParamValid("XFEM_cut_scale"))
+    {
+      scale = parameters.get<std::vector<Real> >("XFEM_cut_scale");
+    }
+    else
+    {
+      scale.push_back(1.0);
+      scale.push_back(1.0);
+    }
+
+    for (unsigned int i = 0; i < num_cuts; ++i)
+    {
+      Real x0 = (cut_data[i*6+0]+trans[0])*scale[0];
+      Real y0 = (cut_data[i*6+1]+trans[1])*scale[1];
+      Real x1 = (cut_data[i*6+2]+trans[0])*scale[0];
+      Real y1 = (cut_data[i*6+3]+trans[1])*scale[1];
+      Real t0 = cut_data[i*6+4];
+      Real t1 = cut_data[i*6+5];
+      _xfem.addGeometricCut(new XFEM_geometric_cut_2d( x0, y0, x1, y1, t0, t1));
+    } // i
+  }
+  else if (_XFEM_cut_type == "square_cut_3d")
   {
-    trans = parameters.get<std::vector<Real> >("XFEM_cut_translate");
+    if (cut_data.size() != 12)
+      mooseError("Length of XFEM_cuts must be 12");
+    _xfem.addGeometricCut(new XFEM_square_cut(cut_data));
   }
   else
-  {
-    trans.push_back(0.0);
-    trans.push_back(0.0);
-  }
-
-  std::vector<Real> scale;
-  if (parameters.isParamValid("XFEM_cut_scale"))
-  {
-    scale = parameters.get<std::vector<Real> >("XFEM_cut_scale");
-  }
-  else
-  {
-    scale.push_back(1.0);
-    scale.push_back(1.0);
-  }
-
-  for (unsigned int i=0; i<num_cuts; ++i)
-  {
-    Real x0 = (cut_data[i*6+0]+trans[0])*scale[0];
-    Real y0 = (cut_data[i*6+1]+trans[1])*scale[1];
-    Real x1 = (cut_data[i*6+2]+trans[0])*scale[0];
-    Real y1 = (cut_data[i*6+3]+trans[1])*scale[1];
-    Real t0 = cut_data[i*6+4];
-    Real t1 = cut_data[i*6+5];
-
-    _xfem.addGeometricCut(new XFEM_geometric_cut( x0, y0, x1, y1, t0, t1));
-  }
+    mooseError("unrecognized XFEM cut type");
 }
 
 Moose::CoordinateSystemType

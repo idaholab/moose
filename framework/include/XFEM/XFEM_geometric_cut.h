@@ -12,12 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GEOMETRIC_CUT_H
-#define GEOMETRIC_CUT_H
+#ifndef XFEM_GEOMETRIC_CUT_H
+#define XFEM_GEOMETRIC_CUT_H
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
 #include "libmesh/elem.h"
+#include "MooseError.h"
 
 using namespace libMesh;
 
@@ -29,29 +30,37 @@ struct cutEdge
   unsigned int host_side_id;
 };
 
+struct cutFace
+{
+  unsigned int face_id;
+  unsigned int face_edge1;
+  unsigned int face_edge2;
+  Real dist1;
+  Real dist2;
+};
+
 class XFEM_geometric_cut
 {
 public:
 
-  explicit
-  XFEM_geometric_cut();
-
-  XFEM_geometric_cut(Real x0_, Real y0_, Real x1_, Real y1_, Real t_start_, Real t_end_);
-
+  XFEM_geometric_cut(Real t0, Real t1);
   ~XFEM_geometric_cut();
 
-  bool cut_elem_by_geometry(const Elem* elem, std::vector<cutEdge> & cutEdges, Real time);
+  virtual bool cut_elem_by_geometry(const Elem* elem, std::vector<cutEdge> & cutEdges,
+                                    Real time) = 0;
+  virtual bool cut_elem_by_geometry(const Elem* elem, std::vector<cutFace> & cutFaces,
+                                    Real time) = 0;
 
-  bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges,
-                            std::vector<cutEdge> & cutEdges, Real time);
+  virtual bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges,
+                                    std::vector<cutEdge> & cutEdges, Real time) = 0;
+  virtual bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_faces,
+                                    std::vector<cutFace> & cutFaces, Real time) = 0;
 
   Real crossprod_2d(Real ax, Real ay, Real bx, Real by);
   Real cut_fraction(Real time);
 
-private:
-  Real x0, x1, y0, y1;
+protected:
   Real t_start, t_end;
-
 };
 
 

@@ -193,9 +193,7 @@ void XFEM::build_efa_mesh()
     if (_mesh->mesh_dimension() == 2)
       _efa_mesh.add2DElement(quad, elem->id());
     else if (_mesh->mesh_dimension() == 3)
-    {
-     // _efa_mesh.add3DElement(quad, elem->id());
-    }
+      _efa_mesh.add3DElement(quad, elem->id());
     else
     {
       libMesh::err << " ERROR: XFEM.C only works for 2D and 3D" << std::endl;
@@ -232,10 +230,10 @@ XFEM::mark_cut_edges(Real time)
     marked_edges = mark_cut_edges_by_geometry(time);
     marked_edges |= mark_cut_edges_by_state();
   }
-  else
+  else if (_mesh->mesh_dimension() == 3)
   {
-    libMesh::err << " ERROR: 3D XFEM cut marking not supported yet"<<std::endl;
-    exit(1);
+    // TODO: need to finish marking cut faces in 3D
+    // marked_edges = mark_cut_faces_by_geometry(time);
   }
   return marked_edges;
 }

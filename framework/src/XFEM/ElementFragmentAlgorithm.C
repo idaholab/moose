@@ -145,7 +145,7 @@ ElementFragmentAlgorithm::add3DElement( std::vector<unsigned int> quad, unsigned
 
   std::map<unsigned int, EFAelement*>::iterator mit = _elements.find(id);
   if (mit != _elements.end())
-    CutElemMeshError("In add2DElement element with id: "<<id<<" already exists")
+    CutElemMeshError("In add3DElement element with id: "<<id<<" already exists")
 
   EFAelement3D* newElem = new EFAelement3D(id, num_nodes, num_faces);
   _elements.insert(std::make_pair(id,newElem));
