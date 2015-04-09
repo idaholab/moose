@@ -22,6 +22,12 @@ InputParameters validParams<Component>()
  */
 static unsigned int comp_id = 0;
 
+void
+Component::doBuildMesh()
+{
+  buildMesh();
+}
+
 std::string
 Component::genName(const std::string & prefix, unsigned int id, const std::string & suffix)
 {

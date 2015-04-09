@@ -66,9 +66,13 @@ public:
   virtual void init();
 
   /**
-   * Build mesh for this component
+   * Builds mesh for this component and does bookkeeping
    */
-  virtual void buildMesh() = 0;
+  virtual void doBuildMesh();
+  /**
+   * Displace the reference mesh into 3D space
+   */
+  virtual void displaceMesh() = 0;
 
   virtual void addVariables() = 0;
 
@@ -135,6 +139,11 @@ public:
   static std::string genName(const std::string & prefix, const std::string & middle, const std::string & suffix);
 
 protected:
+  /**
+   * Build mesh for this component
+   */
+  virtual void buildMesh() = 0;
+
   /// Unique ID of this component
   unsigned int _id;
   /// Pointer to a parent component (used in composed components)

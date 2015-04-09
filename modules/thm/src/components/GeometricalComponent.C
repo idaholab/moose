@@ -26,6 +26,51 @@ GeometricalComponent::~GeometricalComponent()
 {
 }
 
+void
+GeometricalComponent::doBuildMesh()
+{
+  _first_node_id = _mesh.nNodes();
+  Component::doBuildMesh();
+  _last_node_id = _mesh.nNodes();
+
+  // shift the component in z-direction so they do not overlap
+  // NOTE: we are using 1D elements, so shifting each component by 1 is ok for now
+  // When using 2D or even 3D meshes, this has to be way smarter
+  for (unsigned int node_id = _first_node_id; node_id < _last_node_id; node_id++)
+    _mesh.node(node_id)(2) += id();
+}
+
+void
+GeometricalComponent::displaceMesh()
+{
+  Real rotation = M_PI * _rotation / 180.;
+  RealVectorValue z_offset(0, 0, id());
+
+  // rows of rotation matrix to rotate about x-axis
+  RealVectorValue Rx_x(1, 0,              0);
+  RealVectorValue Rx_y(0, cos(rotation), -sin(rotation));
+  RealVectorValue Rx_z(0, sin(rotation),  cos(rotation));
+  RealTensorValue Rx(Rx_x, Rx_y, Rx_z);
+
+  // figure out the rotation
+  Real r = _dir.size();
+  Real theta = acos(_dir(2) / r);
+  Real aphi = atan2(_dir(1), _dir(0));
+  // rows of transformation matrix
+  RealVectorValue x( cos(-aphi)*cos(M_PI/2-theta), sin(-aphi), -cos(-aphi)*sin(M_PI/2-theta));
+  RealVectorValue y(-sin(-aphi)*cos(M_PI/2-theta), cos(-aphi),  sin(-aphi)*sin(M_PI/2-theta));
+  RealVectorValue z( sin(M_PI/2-theta),            0.0,         cos(M_PI/2-theta));
+  RealTensorValue R(x, y, z);
+
+  for (unsigned int node_id = _first_node_id; node_id < _last_node_id; ++node_id)
+  {
+    Node & current_node = _phys_mesh->node(node_id);
+    RealVectorValue p(current_node(0), current_node(1), current_node(2));
+    // move to the origin, rotate about x-axis, transform to follow the direction and move to its position
+    current_node = R * (Rx * (p - z_offset)) + _position;
+  }
+}
+
 const std::vector<RELAP7::Connection> &
 GeometricalComponent::getConnections(RELAP7::EEndType id)
 {
