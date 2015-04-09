@@ -141,19 +141,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     return 'Visualize'
 
   def setupControls(self):
-    self.controls_widget = QtGui.QWidget()
+    # add to left splitter pane
     self.controls_layout = QtGui.QVBoxLayout()
-
-    self.bottom_controls_layout = QtGui.QHBoxLayout()
-
     self.left_layout.addLayout(self.controls_layout)
 
-    self.leftest_controls_layout = QtGui.QVBoxLayout()
-    self.left_controls_layout = QtGui.QVBoxLayout()
-    self.right_controls_layout = QtGui.QVBoxLayout()
-
-    ### Output selection controls ###
-    # Create the box, layout, and control
+    #
+    # Select Output group
+    #
     self.output_control_group_box = QtGui.QGroupBox("Select Output") # adds a box for storing widget
     self.output_control_group_box.setFlat(True)
     self.output_control_layout = QtGui.QVBoxLayout() # creates a layout
@@ -168,11 +162,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     # Add the control to the GUI
     self.output_control_layout.addWidget(self.output_control) # add the dropdown widget to the layout
     self.output_control_group_box.setLayout(self.output_control_layout) # add the layout to the box
-    self.leftest_controls_layout.addWidget(self.output_control_group_box) # add the box to the gui control layout
+    self.controls_layout.addWidget(self.output_control_group_box) # add the box to the gui control layout
 
-    # add block list
+    #
+    # Show Blocks group
+    #
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
-
     self.block_view_layout = QtGui.QVBoxLayout()
     self.block_view_layout.setContentsMargins(0,0,0,0)
 
@@ -181,29 +176,130 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.block_view_model.itemChanged.connect(self._blockViewItemChanged)
     self.block_view_list.setModel(self.block_view_model)
     self.block_view_layout.addWidget(self.block_view_list)
-
     self.block_view_group_box.setLayout(self.block_view_layout)
 
-    self.leftest_controls_layout.addWidget(self.block_view_group_box)
+    self.controls_layout.addWidget(self.block_view_group_box)
 
-    self.controls_layout.addLayout(self.leftest_controls_layout)
-    self.controls_layout.addLayout(self.left_controls_layout)
-    self.controls_layout.addLayout(self.right_controls_layout)
-
-    self.controls_layout.setStretchFactor(self.leftest_controls_layout,1.0)
-    self.controls_layout.setStretchFactor(self.left_controls_layout,1.5)
-    self.controls_layout.setStretchFactor(self.right_controls_layout,4.0)
-
-    self.automatic_update_checkbox = QtGui.QCheckBox("Automatically Update")
-    self.automatic_update_checkbox.setToolTip('Toggle automattically reading new timesteps as they finish computing')
-    self.automatic_update_checkbox.setCheckState(QtCore.Qt.Checked)
+    # self.automatic_update_checkbox = QtGui.QCheckBox("Automatically Update")
+    # self.automatic_update_checkbox.setToolTip('Toggle automattically reading new timesteps as they finish computing')
+    # self.automatic_update_checkbox.setCheckState(QtCore.Qt.Checked)
     self.automatically_update = True
-    self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
+    # self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
     # self.left_controls_layout.addWidget(self.automatic_update_checkbox)
 
-    # Create Group for viewer controls
+    #
+    # Contour group
+    #
+    self.contour_groupbox = QtGui.QGroupBox("Contour")
+    self.contour_groupbox.setFlat(True)
+    self.contour_groupbox.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
+    self.contour_layout = QtGui.QVBoxLayout()
+    self.contour_layout.setContentsMargins(0,0,0,0)
+    self.contour_groupbox.setLayout(self.contour_layout)
 
-    # Create the View Mesh toggle
+    self.variable_contour_layout = QtGui.QHBoxLayout()
+    self.contour_layout.addLayout(self.variable_contour_layout)
+    self.contour_label = QtGui.QLabel("Contour:")
+    self.variable_contour = QtGui.QComboBox()
+    self.variable_contour_is_nodal = {}
+    self.variable_contour.setToolTip('Which variable to color by')
+    self.variable_contour.currentIndexChanged[int].connect(self._contourVariableSelected)
+    self.variable_contour_layout.addWidget(self.variable_contour)
+    self.variable_contour_layout.setStretchFactor(self.variable_contour, 1)
+
+    #self.component_label = QtGui.QLabel("Component:")
+    self.variable_component = QtGui.QComboBox()
+    self.variable_component.setToolTip('If the variable is a vector this selects what component of that vector (or the Magnitude) to color by')
+    self.variable_component.currentIndexChanged[str].connect(self._variableComponentSelected)
+    self.variable_contour_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignHCenter)
+
+    # min line
+    self.min_layout = QtGui.QHBoxLayout()
+    self.min_layout.setContentsMargins(0,0,0,0)
+
+    self.min_radio_layout = QtGui.QVBoxLayout()
+    self.min_radio_layout.setContentsMargins(0,0,0,0)
+    self.min_current_radio = QtGui.QRadioButton('Current')
+    self.min_current_radio.setChecked(QtCore.Qt.Checked)
+    self.min_current_radio.toggled.connect(self._updateContours)
+    self.min_global_radio = QtGui.QRadioButton('Global')
+    self.min_global_radio.toggled.connect(self._updateContours)
+    self.min_radio_layout.addWidget(self.min_current_radio)
+
+    self.min_custom_layout = QtGui.QHBoxLayout()
+    self.min_custom_layout.setContentsMargins(0,0,0,0)
+    self.min_custom_layout.setSpacing(5)
+    self.min_custom_radio = QtGui.QRadioButton()
+    self.min_custom_radio.toggled.connect(self._updateContours)
+    self.min_custom_text = QtGui.QLineEdit()
+    self.min_custom_text.returnPressed.connect(self._updateContours)
+    self.min_custom_text.setDisabled(True)
+    self.min_custom_layout.addWidget(self.min_custom_radio)
+    self.min_custom_layout.addWidget(self.min_custom_text)
+    self.min_custom_layout.setStretchFactor(self.min_custom_text, 1)
+
+    self.min_layout.addWidget(QtGui.QLabel("Min"))
+    self.min_layout.addSpacing(10)
+    self.min_layout.addStretch(0.1)
+    self.min_layout.addLayout(self.min_radio_layout)
+    self.min_layout.addLayout(self.min_custom_layout)
+    self.min_layout.setStretchFactor(self.min_custom_layout, 1)
+
+    # add min line
+    self.contour_layout.addLayout(self.min_layout)
+
+    # max line
+    self.max_layout = QtGui.QHBoxLayout()
+    self.max_layout.setContentsMargins(0,0,0,0)
+
+    self.max_radio_layout = QtGui.QVBoxLayout()
+
+    self.max_current_radio = QtGui.QRadioButton('Current')
+    self.max_current_radio.setChecked(QtCore.Qt.Checked)
+    self.max_current_radio.toggled.connect(self._updateContours)
+    self.max_global_radio = QtGui.QRadioButton('Global')
+    self.max_global_radio.toggled.connect(self._updateContours)
+    self.max_radio_layout.addWidget(self.max_current_radio)
+
+    self.max_custom_layout = QtGui.QHBoxLayout()
+    self.max_custom_layout.setContentsMargins(0,0,0,0)
+    self.max_custom_layout.setSpacing(5)
+    self.max_custom_radio = QtGui.QRadioButton()
+    self.max_custom_radio.toggled.connect(self._updateContours)
+    self.max_custom_text = QtGui.QLineEdit()
+    self.max_custom_text.returnPressed.connect(self._updateContours)
+    self.max_custom_text.setDisabled(True)
+    self.max_custom_layout.addWidget(self.max_custom_radio)
+    self.max_custom_layout.addWidget(self.max_custom_text)
+    self.max_custom_layout.setStretchFactor(self.max_custom_text, 1)
+
+    self.max_layout.addWidget(QtGui.QLabel("Max"))
+    self.max_layout.addSpacing(10)
+    self.max_layout.addStretch(0.1)
+    self.max_layout.addLayout(self.max_radio_layout)
+    self.max_layout.addLayout(self.max_custom_layout)
+    self.max_layout.setStretchFactor(self.max_custom_layout, 1)
+
+    # add max line
+    self.contour_layout.addLayout(self.max_layout)
+
+    self.color_scheme_label = QtGui.QLabel("Color Scheme:")
+    self.color_scheme_component = QtGui.QComboBox()
+    self.color_scheme_component.addItem('HSV (Cool to Warm)')
+    self.color_scheme_component.addItem('Diverging (Blue to Red)')
+    self.color_scheme_component.addItem('Shock')
+    self.color_scheme_component.setToolTip('The color scheme used by the render view')
+    self.color_scheme_component.currentIndexChanged[str].connect(self._colorSchemeSelected)
+
+    # add color scheme selector
+    self.contour_layout.addWidget(self.color_scheme_component)
+
+    self.controls_layout.addWidget(self.contour_groupbox)
+    self.controls_layout.addSpacing(10)
+
+    #
+    # View group
+    #
     self.toggle_groupbox = QtGui.QGroupBox("View")
     self.toggle_groupbox.setFlat(True)
     self.toggle_groupbox.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
@@ -211,6 +307,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.toggle_layout.setContentsMargins(0,0,0,0)
     self.toggle_groupbox.setLayout(self.toggle_layout)
 
+    # Create the View Mesh toggle
     self.draw_edges_checkbox = QtGui.QCheckBox("View Mesh")
     self.draw_edges_checkbox.setToolTip('Show mesh elements')
     self.draw_edges_checkbox.stateChanged[int].connect(self._drawEdgesChanged)
@@ -225,6 +322,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.toggle_layout.addWidget(self.hide_scalebar_checkbox, alignment=QtCore.Qt.AlignHCenter)
     self.toggle_layout.addStretch()
 
+    # Render view background selector
     self.viewport_background = QtGui.QComboBox()
     self.viewport_background.addItem('Gradient')
     self.viewport_background.addItem('Black')
@@ -233,9 +331,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.viewport_background.currentIndexChanged[int].connect(self._renderViewBackgroundChanged)
     self.toggle_layout.addWidget(self.viewport_background, alignment=QtCore.Qt.AlignRight)
 
-    # Create a vertical layout and add the toggles
-    self.reset_layout = QtGui.QVBoxLayout()
-    self.reset_layout.addWidget(self.toggle_groupbox)
+    self.controls_layout.addWidget(self.toggle_groupbox)
+    self.controls_layout.addSpacing(10)
 
     #
     # mesh display options displace/scale/clip
@@ -243,7 +340,6 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.mesh_groupbox = QtGui.QGroupBox("Mesh")
     self.mesh_groupbox.setFlat(True)
     self.mesh_groupbox.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
-
     self.mesh_layout = QtGui.QVBoxLayout()
     self.mesh_layout.setContentsMargins(0,0,0,0)
     self.mesh_groupbox.setLayout(self.mesh_layout)
@@ -351,9 +447,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.mesh_layout.addLayout(self.clip_layout)
 
     # add mesh group
-    self.reset_layout.addWidget(self.mesh_groupbox)
+    self.controls_layout.addWidget(self.mesh_groupbox)
 
+    #
     # Open/Save/Reset button row
+    #
     self.view_layout = QtGui.QHBoxLayout()
 
     self.open_button = QtGui.QPushButton('Open')
@@ -368,127 +466,19 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.save_button.clicked.connect(self._saveView)
     self.view_layout.addWidget(self.save_button, alignment=QtCore.Qt.AlignHCenter)
 
+    self.view_layout.addStretch()
+
     self.reset_button = QtGui.QPushButton('Reset')
     self.reset_button.setMaximumWidth(100)
     self.reset_button.setToolTip('Recenter the camera on the current result')
     self.reset_button.clicked.connect(self._resetView)
     self.view_layout.addWidget(self.reset_button, alignment=QtCore.Qt.AlignHCenter)
 
-    self.reset_layout.addLayout(self.view_layout)
+    self.controls_layout.addLayout(self.view_layout)
 
-    # add to right splitter pane
-    self.right_controls_layout.addLayout(self.reset_layout)
-
-
-    self.contour_groupbox = QtGui.QGroupBox("Contour")
-    self.contour_groupbox.setFlat(True)
-    self.contour_groupbox.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
-    self.contour_layout = QtGui.QVBoxLayout()
-    self.contour_layout.setContentsMargins(0,0,0,0)
-    self.contour_groupbox.setLayout(self.contour_layout)
-
-    self.variable_contour_layout = QtGui.QHBoxLayout()
-    self.contour_layout.addLayout(self.variable_contour_layout)
-    self.contour_label = QtGui.QLabel("Contour:")
-    self.variable_contour = QtGui.QComboBox()
-    self.variable_contour_is_nodal = {}
-    self.variable_contour.setToolTip('Which variable to color by')
-    self.variable_contour.currentIndexChanged[int].connect(self._contourVariableSelected)
-    self.variable_contour_layout.addWidget(self.variable_contour)
-    self.variable_contour_layout.setStretchFactor(self.variable_contour, 1)
-
-    self.component_label = QtGui.QLabel("Component:")
-    self.variable_component = QtGui.QComboBox()
-    self.variable_component.setToolTip('If the variable is a vector this selects what component of that vector (or the Magnitude) to color by')
-    self.variable_component.currentIndexChanged[str].connect(self._variableComponentSelected)
-    self.variable_contour_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignHCenter)
-
-    self.minmax_contour_layout = QtGui.QVBoxLayout()
-    self.contour_layout.addLayout(self.minmax_contour_layout)
-
-    # min line
-    self.min_layout = QtGui.QHBoxLayout()
-    self.min_layout.setContentsMargins(0,0,0,0)
-
-    self.min_radio_layout = QtGui.QVBoxLayout()
-    self.min_radio_layout.setContentsMargins(0,0,0,0)
-    self.min_current_radio = QtGui.QRadioButton('Current')
-    self.min_current_radio.setChecked(QtCore.Qt.Checked)
-    self.min_current_radio.toggled.connect(self._updateContours)
-    self.min_global_radio = QtGui.QRadioButton('Global')
-    self.min_global_radio.toggled.connect(self._updateContours)
-    self.min_radio_layout.addWidget(self.min_current_radio)
-
-    self.min_custom_layout = QtGui.QHBoxLayout()
-    self.min_custom_layout.setContentsMargins(0,0,0,0)
-    self.min_custom_layout.setSpacing(5)
-    self.min_custom_radio = QtGui.QRadioButton()
-    self.min_custom_radio.toggled.connect(self._updateContours)
-    self.min_custom_text = QtGui.QLineEdit()
-    self.min_custom_text.returnPressed.connect(self._updateContours)
-    self.min_custom_text.setDisabled(True)
-    self.min_custom_layout.addWidget(self.min_custom_radio)
-    self.min_custom_layout.addWidget(self.min_custom_text)
-    self.min_custom_layout.setStretchFactor(self.min_custom_text, 1)
-
-    self.min_layout.addWidget(QtGui.QLabel("Min"))
-    self.min_layout.addSpacing(10)
-    self.min_layout.addStretch(0.1)
-    self.min_layout.addLayout(self.min_radio_layout)
-    self.min_layout.addLayout(self.min_custom_layout)
-    self.min_layout.setStretchFactor(self.min_custom_layout, 1)
-
-    # add min line
-    self.minmax_contour_layout.addLayout(self.min_layout)
-
-    # max line
-    self.max_layout = QtGui.QHBoxLayout()
-    self.max_layout.setContentsMargins(0,0,0,0)
-
-    self.max_radio_layout = QtGui.QVBoxLayout()
-
-    self.max_current_radio = QtGui.QRadioButton('Current')
-    self.max_current_radio.setChecked(QtCore.Qt.Checked)
-    self.max_current_radio.toggled.connect(self._updateContours)
-    self.max_global_radio = QtGui.QRadioButton('Global')
-    self.max_global_radio.toggled.connect(self._updateContours)
-    self.max_radio_layout.addWidget(self.max_current_radio)
-
-    self.max_custom_layout = QtGui.QHBoxLayout()
-    self.max_custom_layout.setContentsMargins(0,0,0,0)
-    self.max_custom_layout.setSpacing(5)
-    self.max_custom_radio = QtGui.QRadioButton()
-    self.max_custom_radio.toggled.connect(self._updateContours)
-    self.max_custom_text = QtGui.QLineEdit()
-    self.max_custom_text.returnPressed.connect(self._updateContours)
-    self.max_custom_text.setDisabled(True)
-    self.max_custom_layout.addWidget(self.max_custom_radio)
-    self.max_custom_layout.addWidget(self.max_custom_text)
-    self.max_custom_layout.setStretchFactor(self.max_custom_text, 1)
-
-    self.max_layout.addWidget(QtGui.QLabel("Max"))
-    self.max_layout.addSpacing(10)
-    self.max_layout.addStretch(0.1)
-    self.max_layout.addLayout(self.max_radio_layout)
-    self.max_layout.addLayout(self.max_custom_layout)
-    self.max_layout.setStretchFactor(self.max_custom_layout, 1)
-
-    # add max line
-    self.minmax_contour_layout.addLayout(self.max_layout)
-
-    self.color_scheme_label = QtGui.QLabel("Color Scheme:")
-    self.color_scheme_component = QtGui.QComboBox()
-    self.color_scheme_component.addItem('HSV (Cool to Warm)')
-    self.color_scheme_component.addItem('Diverging (Blue to Red)')
-    self.color_scheme_component.addItem('Shock')
-    self.color_scheme_component.setToolTip('The color scheme used by the render view')
-    self.color_scheme_component.currentIndexChanged[str].connect(self._colorSchemeSelected)
-
-    self.minmax_contour_layout.addWidget(self.color_scheme_component)
-
-    self.left_controls_layout.addWidget(self.contour_groupbox)
-
-
+    #
+    # Time controls
+    #
     self.beginning_button = QtGui.QToolButton()
     self.beginning_button.setToolTip('Go to first timestep')
     self.beginning_button.setIcon(QtGui.QIcon(pathname + '/resources/from_paraview/pqVcrFirst32.png'))
