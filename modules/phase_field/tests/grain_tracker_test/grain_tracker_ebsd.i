@@ -47,7 +47,7 @@
     execute_on = timestep_end
   [../]
   [./unique_grains]
-    type = NodalFloodCountAux
+    type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = timestep_begin
     bubble_object = grain_tracker

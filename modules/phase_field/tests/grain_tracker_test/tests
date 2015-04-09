@@ -5,6 +5,13 @@
     exodiff = 'grain_tracker_same_out.e'
   [../]
 
+  [./test_elemental]
+    type = 'Exodiff'
+    input = 'grain_tracker_test_elemental.i'
+    exodiff = 'grain_tracker_test_elemental_out.e-s002'
+    method = 'OPT OPROF' # slow test
+  [../]
+
   [./test_recover]
     type = 'Exodiff'
     input = 'grain_tracker_recover.i'
