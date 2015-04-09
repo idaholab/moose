@@ -1,7 +1,14 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #ifndef GRAINTRACKER_H
 #define GRAINTRACKER_H
 
-#include "NodalFloodCount.h"
+#include "FeatureFloodCount.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
@@ -14,7 +21,7 @@ class EBSDReader;
 template<>
 InputParameters validParams<GrainTracker>();
 
-class GrainTracker : public NodalFloodCount
+class GrainTracker : public FeatureFloodCount
 {
 public:
   GrainTracker(const std::string & name, InputParameters parameters);

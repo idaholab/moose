@@ -81,7 +81,7 @@
  * Postprocessors
  */
 #include "GrainTracker.h"
-#include "NodalFloodCount.h"
+#include "FeatureFloodCount.h"
 #include "NodalVolumeFraction.h"
 
 /*
@@ -90,7 +90,7 @@
 #include "BndsCalcAux.h"
 #include "CrossTermGradientFreeEnergy.h"
 #include "KKSGlobalFreeEnergy.h"
-#include "NodalFloodCountAux.h"
+#include "FeatureFloodCountAux.h"
 #include "TotalFreeEnergy.h"
 
 /*
@@ -222,14 +222,16 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFMobility);
   registerMaterial(SwitchingFunctionMaterial);
 
+  registerDeprecatedObjectName(FeatureFloodCount, "NodalFloodCount", "06/01/2015 00:00");
+  registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
-  registerPostprocessor(NodalFloodCount);
   registerPostprocessor(NodalVolumeFraction);
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
   registerAux(KKSGlobalFreeEnergy);
-  registerAux(NodalFloodCountAux);
+  registerDeprecatedObjectName(FeatureFloodCountAux, "NodalFloodCountAux", "06/01/2015 00:00");
+  registerAux(FeatureFloodCountAux);
   registerAux(TotalFreeEnergy);
 
   registerUserObject(ConservedMaskedNormalNoise);

@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
-#include "NodalFloodCount.h"
+#include "FeatureFloodCount.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
@@ -25,7 +24,7 @@
 #include <limits>
 
 template<>
-InputParameters validParams<NodalFloodCount>()
+InputParameters validParams<FeatureFloodCount>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredCoupledVar("variable", "Ths variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
@@ -46,7 +45,7 @@ InputParameters validParams<NodalFloodCount>()
   return params;
 }
 
-NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters parameters) :
+FeatureFloodCount::FeatureFloodCount(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
@@ -81,12 +80,12 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
   _entities_visited.resize(_vars.size());
 }
 
-NodalFloodCount::~NodalFloodCount()
+FeatureFloodCount::~FeatureFloodCount()
 {
 }
 
 void
-NodalFloodCount::initialize()
+FeatureFloodCount::initialize()
 {
   // Get a pointer to the PeriodicBoundaries buried in libMesh
   // TODO: Can we do this in the constructor (i.e. are all objects necessary for this call in existance during ctor?)
@@ -131,12 +130,12 @@ NodalFloodCount::initialize()
 }
 
 void
-NodalFloodCount::execute()
+FeatureFloodCount::execute()
 {
   const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
   for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
-    const Elem *current_elem = *el;
+    const Elem * current_elem = *el;
 
     // Loop over elements or nodes
     if (_is_elemental)
@@ -149,7 +148,7 @@ NodalFloodCount::execute()
       unsigned int n_nodes = current_elem->n_vertices();
       for (unsigned int i = 0; i < n_nodes; ++i)
       {
-        const Node *current_node = current_elem->get_node(i);
+        const Node * current_node = current_elem->get_node(i);
 
         for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
           flood(current_node, var_num, 0);
@@ -159,7 +158,7 @@ NodalFloodCount::execute()
 }
 
 void
-NodalFloodCount::finalize()
+FeatureFloodCount::finalize()
 {
   // Exchange data in parallel
   pack(_packed_data);
@@ -208,7 +207,7 @@ NodalFloodCount::finalize()
 }
 
 Real
-NodalFloodCount::getValue()
+FeatureFloodCount::getValue()
 {
   unsigned int count = 0;
 
@@ -220,7 +219,7 @@ NodalFloodCount::getValue()
 
 
 Real
-NodalFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
+FeatureFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
 {
   mooseDoOnce(mooseWarning("Please call getEntityValue instead"));
 
@@ -228,14 +227,14 @@ NodalFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool s
 }
 
 Real
-NodalFloodCount::getElementalValue(dof_id_type /*element_id*/) const
+FeatureFloodCount::getElementalValue(dof_id_type /*element_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return 0;
 }
 
 Real
-NodalFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool show_var_coloring) const
+FeatureFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool show_var_coloring) const
 {
   mooseAssert(var_idx < _maps_size, "Index out of range");
   mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
@@ -260,43 +259,15 @@ NodalFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, boo
   }
 }
 
-//const std::vector<std::pair<unsigned int, unsigned int> > &
-//NodalFloodCount::getNodalValues(dof_id_type /*node_id*/) const
-//{
-//  mooseDoOnce(mooseWarning("Method not implemented"));
-//  return _empty;
-//}
-
 const std::vector<std::pair<unsigned int, unsigned int> > &
-NodalFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
+FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return _empty;
 }
 
-/*
-  void
-  NodalFloodCount::threadJoin(const UserObject &y)
-  {
-  const NodalFloodCount & pps = dynamic_cast<const NodalFloodCount &>(y);
-
-  // Pack up the data on both of the threads
-  pack(_packed_data);
-
-  std::vector<unsigned int> pps_packed_data;
-  pps.pack(pps_packed_data);
-
-  // Append the packed data structures together
-  std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
-
-  // Calculate thread Memory Usage
-  if (_track_memory)
-  _bytes_used += pps.calculateUsage();
-  }
-*/
-
 void
-NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_periodic_info) const
+FeatureFloodCount::pack(std::vector<unsigned int> & packed_data) const
 {
   /**
    * Don't repack the data if it's already packed - we might lose data that was updated
@@ -353,7 +324,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
 
         if (_single_map_mode)
         {
-          mooseAssert(i-1 < _region_to_var_idx.size(), "Index out of bounds in NodalFloodCounter");
+          mooseAssert(i-1 < _region_to_var_idx.size(), "Index out of bounds in FeatureFloodCounter");
           partial_packed_data[current_idx++] = _region_to_var_idx[i-1];   // The variable owning this bubble
         }
         else
@@ -370,7 +341,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
 }
 
 void
-NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
+FeatureFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 {
   bool start_next_set = true;
   bool has_data_to_save = false;
@@ -424,9 +395,9 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 }
 
 void
-NodalFloodCount::mergeSets(bool use_periodic_boundary_info)
+FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 {
-  Moose::perf_log.push("mergeSets()", "NodalFloodCount");
+  Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
   std::set<dof_id_type> set_union;
   std::insert_iterator<std::set<dof_id_type> > set_union_inserter(set_union, set_union.begin());
 
@@ -485,11 +456,11 @@ NodalFloodCount::mergeSets(bool use_periodic_boundary_info)
         ++it1;
     }
   }
-  Moose::perf_log.pop("mergeSets()", "NodalFloodCount");
+  Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
 
 void
-NodalFloodCount::updateFieldInfo()
+FeatureFloodCount::updateFieldInfo()
 {
   // This variable is only relevant in single map mode
   _region_to_var_idx.resize(_bubble_sets[0].size());
@@ -518,7 +489,7 @@ NodalFloodCount::updateFieldInfo()
 }
 
 void
-NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned int live_region)
+FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, unsigned int live_region)
 {
   if (dof_object == NULL)
     return;
@@ -583,7 +554,7 @@ NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned in
     // Loop over all active neighbors
     for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin(); neighbor_it != all_active_neighbors.end(); ++neighbor_it)
     {
-      const Elem* neighbor = *neighbor_it;
+      const Elem * neighbor = *neighbor_it;
 
       // Only recurse on elems this processor can see
       if (neighbor && neighbor->is_semilocal(processor_id()))
@@ -592,7 +563,7 @@ NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned in
   }
   else
   {
-    std::vector< const Node * > neighbors;
+    std::vector<const Node *> neighbors;
     MeshTools::find_nodal_neighbors(_mesh.getMesh(), *static_cast<const Node *>(dof_object), _nodes_to_elem_map, neighbors);
     // Flood neighboring nodes that are also above this threshold with recursion
     for (unsigned int i = 0; i < neighbors.size(); ++i)
@@ -605,7 +576,7 @@ NodalFloodCount::flood(const DofObject *dof_object, int current_idx, unsigned in
 }
 
 void
-NodalFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
+FeatureFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
 {
   // Using a typedef makes the code easier to understand and avoids repeating information.
   typedef std::multimap<dof_id_type, dof_id_type>::const_iterator IterType;
@@ -614,9 +585,9 @@ NodalFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
   {
     for (std::set<dof_id_type>::iterator entity_it = data._entity_ids.begin(); entity_it != data._entity_ids.end(); ++entity_it)
     {
-      Elem *elem = _mesh.elem(*entity_it);
+      Elem * elem = _mesh.elem(*entity_it);
 
-      for (unsigned int node_n=0; node_n < elem->n_nodes(); node_n++)
+      for (unsigned int node_n = 0; node_n < elem->n_nodes(); node_n++)
       {
         std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(elem->node(node_n));
 
@@ -644,18 +615,18 @@ NodalFloodCount::appendPeriodicNeighborNodes(BubbleData & data) const
 }
 
 void
-NodalFloodCount::updateRegionOffsets()
+FeatureFloodCount::updateRegionOffsets()
 {
   if (_global_numbering)
     // Note: We never need to touch offset zero - it should *always* be zero
-    for (unsigned int map_num=1; map_num < _maps_size; ++map_num)
+    for (unsigned int map_num = 1; map_num < _maps_size; ++map_num)
       _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
 }
 
 void
-NodalFloodCount::calculateBubbleVolumes()
+FeatureFloodCount::calculateBubbleVolumes()
 {
-  Moose::perf_log.push("calculateBubbleVolume()", "NodalFloodCount");
+  Moose::perf_log.push("calculateBubbleVolume()", "FeatureFloodCount");
 
   // Figure out which bubbles intersect the boundary if the user has enabled that capability.
   if (_compute_boundary_intersecting_volume)
@@ -705,7 +676,7 @@ NodalFloodCount::calculateBubbleVolumes()
   const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
   for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
   {
-    Elem *elem = *el;
+    Elem * elem = *el;
     unsigned int elem_n_nodes = elem->n_nodes();
     Real curr_volume = elem->volume();
 
@@ -756,7 +727,7 @@ NodalFloodCount::calculateBubbleVolumes()
     _communicator.sum(_total_volume_intersecting_boundary);
 
     // Scale the boundary intersecting grain volumes by the total domain volume
-    for (unsigned int i=0; i<_total_volume_intersecting_boundary.size(); ++i)
+    for (unsigned int i = 0; i<_total_volume_intersecting_boundary.size(); ++i)
       _total_volume_intersecting_boundary[i] /= total_volume;
   }
 
@@ -769,12 +740,12 @@ NodalFloodCount::calculateBubbleVolumes()
 
   std::sort(_all_bubble_volumes.begin(), _all_bubble_volumes.end(), std::greater<Real>());
 
-  Moose::perf_log.pop("calculateBubbleVolume()", "NodalFloodCount");
+  Moose::perf_log.pop("calculateBubbleVolume()", "FeatureFloodCount");
 }
 
 template<>
 unsigned long
-NodalFloodCount::bytesHelper(std::list<BubbleData> container)
+FeatureFloodCount::bytesHelper(std::list<BubbleData> container)
 {
   unsigned long bytes = 0;
   for (std::list<BubbleData>::iterator it = container.begin(); it != container.end(); ++it)
@@ -783,7 +754,7 @@ NodalFloodCount::bytesHelper(std::list<BubbleData> container)
 }
 
 unsigned long
-NodalFloodCount::calculateUsage() const
+FeatureFloodCount::calculateUsage() const
 {
   unsigned long bytes = 0;
 
@@ -814,7 +785,7 @@ NodalFloodCount::calculateUsage() const
 }
 
 void
-NodalFloodCount::formatBytesUsed() const
+FeatureFloodCount::formatBytesUsed() const
 {
   std::stringstream oss;
   oss.precision(1);
@@ -831,4 +802,4 @@ NodalFloodCount::formatBytesUsed() const
 }
 
 
-const std::vector<std::pair<unsigned int, unsigned int> > NodalFloodCount::_empty;
+const std::vector<std::pair<unsigned int, unsigned int> > FeatureFloodCount::_empty;

@@ -75,7 +75,7 @@
 [Postprocessors]
   active = ''
   [./ngrains]
-    type = NodalFloodCount
+    type = FeatureFloodCount
     variable = bnds
     threshold = 0.7
   [../]

@@ -6,25 +6,25 @@
 /****************************************************************/
 
 
-#include "NodalFloodCountAux.h"
-#include "NodalFloodCount.h"
+#include "FeatureFloodCountAux.h"
+#include "FeatureFloodCount.h"
 #include "MooseEnum.h"
 
 template<>
-InputParameters validParams<NodalFloodCountAux>()
+InputParameters validParams<FeatureFloodCountAux>()
 {
   MooseEnum field_display("UNIQUE_REGION VARIABLE_COLORING ACTIVE_BOUNDS CENTROID", "UNIQUE_REGION");
 
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<UserObjectName>("bubble_object", "The NodalFloodCount UserObject to get values from.");
-  params.addParam<unsigned int>("map_index", 0, "The index of which map to retrieve values from when using NodalFloodCount with multiple maps.");
+  params.addRequiredParam<UserObjectName>("bubble_object", "The FeatureFloodCount UserObject to get values from.");
+  params.addParam<unsigned int>("map_index", 0, "The index of which map to retrieve values from when using FeatureFloodCount with multiple maps.");
   params.addParam<MooseEnum>("field_display", field_display, "Determines how the auxilary field should be colored. (UNIQUE_REGION and VARIABLE_COLORING are nodal, CENTROID is elemental, default: UNIQUE_REGION)");
   return params;
 }
 
-NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters parameters) :
+FeatureFloodCountAux::FeatureFloodCountAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _flood_counter(getUserObject<NodalFloodCount>("bubble_object")),
+    _flood_counter(getUserObject<FeatureFloodCount>("bubble_object")),
     _var_idx(getParam<unsigned int>("map_index")),
     _field_display(getParam<MooseEnum>("field_display")),
     _var_coloring(_field_display == "VARIABLE_COLORING")
@@ -38,17 +38,17 @@ NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters
       mooseError("ACTIVE_BOUNDS is only available for elemental aux variables");
 
     if (_flood_counter.isElemental() && (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING"))
-      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the NodalFloodCounter");
+      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the FeatureFloodCounter");
   }
   else
   {
     if (! _flood_counter.isElemental() && (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING"))
-      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the NodalFloodCounter");
+      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the FeatureFloodCounter");
   }
 }
 
 Real
-NodalFloodCountAux::computeValue()
+FeatureFloodCountAux::computeValue()
 {
   switch (_field_display)
   {

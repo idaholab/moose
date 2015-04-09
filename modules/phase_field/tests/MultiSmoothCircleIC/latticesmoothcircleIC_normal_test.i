@@ -72,7 +72,7 @@ active = 'Dv'
   active = 'bubbles'
 
   [./bubbles]
-    type = NodalFloodCount
+    type = FeatureFloodCount
     variable = c
     execute_on = timestep_end
   [../]

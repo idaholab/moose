@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
+  nx = 25
+  ny = 25
   nz = 0
   xmax = 1000
   ymax = 1000
@@ -11,7 +11,7 @@
 []
 
 [GlobalParams]
-  op_num = 7
+  op_num = 12
   var_name_base = gr
 []
 
@@ -24,7 +24,7 @@
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
       rand_seed = 8675
-      grain_num = 10
+      grain_num = 12
     [../]
   [../]
 []
@@ -35,12 +35,12 @@
     family = LAGRANGE
   [../]
   [./unique_grains]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
   [../]
   [./var_indices]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
   [../]
   [./centroids]
     order = CONSTANT
@@ -91,23 +91,26 @@
 
 [Materials]
   [./CuGrGr]
-    type = CuGrGr
+    type = GBEvolution
     block = 0
     T = 500 # K
-    wGB = 75 # nm
+    wGB = 100 # nm
+    GBmob0 = 2.5e-6
+    Q = 0.23
+    GBenergy = 0.708
+    molar_volume = 7.11e-6
   [../]
 []
 
 [Postprocessors]
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.8
-    convex_hull_buffer = 1.0
+    convex_hull_buffer = 5.0
     execute_on = timestep_end
-    remap_grains = true
     use_single_map = false
     enable_var_coloring = true
     condense_map_info = true
+    flood_entity_type = ELEMENTAL
   [../]
   [./DOFs]
     type = NumDOFs
@@ -124,13 +127,37 @@
   l_tol = 1.0e-4
   l_max_its = 30
   nl_max_its = 20
-  nl_rel_tol = 1.0e-7
+  nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 3
-  dt = 50.0
-  [./Adaptivity]
-    refine_fraction = 0.2
-    max_h_level = 3
+  num_steps = 2
+  dt = 100.0
+[]
+
+[Adaptivity]
+  marker = error_marker
+  max_h_level = 1
+  [./Markers]
+    active = 'error_marker'
+    [./bnds_marker]
+      type = ValueThresholdMarker
+      invert = true
+      refine = 0.85
+      coarsen = 0.975
+      third_state = DO_NOTHING
+      variable = bnds
+    [../]
+    [./error_marker]
+      type = ErrorFractionMarker
+      coarsen = 0.1
+      indicator = bnds_error
+      refine = 0.7
+    [../]
+  [../]
+  [./Indicators]
+    [./bnds_error]
+      type = GradientJumpIndicator
+      variable = bnds
+    [../]
   [../]
 []
 

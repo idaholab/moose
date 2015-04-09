@@ -5,9 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
-#ifndef NODALFLOODCOUNT_H
-#define NODALFLOODCOUNT_H
+#ifndef FEATUREFLOODCOUNT_H
+#define FEATUREFLOODCOUNT_H
 
 #include "GeneralPostprocessor.h"
 #include "Coupleable.h"
@@ -23,12 +22,12 @@
 #include "libmesh/periodic_boundaries.h"
 
 //Forward Declarations
-class NodalFloodCount;
+class FeatureFloodCount;
 class MooseMesh;
 class MooseVariable;
 
 template<>
-InputParameters validParams<NodalFloodCount>();
+InputParameters validParams<FeatureFloodCount>();
 
 /**
  * This object will mark nodes or elements of continuous regions all with a unique number for the purpose of
@@ -38,15 +37,15 @@ InputParameters validParams<NodalFloodCount>();
  * Note:  When inspecting multiple variables, those variables must not have regions of interest
  *        that overlap or they will not be correctly colored.
  */
-class NodalFloodCount :
+class FeatureFloodCount :
   public GeneralPostprocessor,
   public Coupleable,
   public MooseVariableDependencyInterface,
   public ZeroInterface
 {
 public:
-  NodalFloodCount(const std::string & name, InputParameters parameters);
-  ~NodalFloodCount();
+  FeatureFloodCount(const std::string & name, InputParameters parameters);
+  ~FeatureFloodCount();
 
   virtual void initialize();
   virtual void execute();
@@ -99,8 +98,8 @@ protected:
    * communication operations. See the comments in these routines for the exact
    * data structure layout.
    */
-  void pack(std::vector<unsigned int> &, bool merge_periodic_info=true) const;
-  void unpack(const std::vector<unsigned int> &);
+  void pack(std::vector<unsigned int> & packed_data) const;
+  void unpack(const std::vector<unsigned int> & packed_data);
 
   /**
    * This routine merges the data in _bubble_sets from separate threads/processes to resolve
@@ -286,7 +285,7 @@ protected:
   std::vector<Real> _total_volume_intersecting_boundary;
 
   /**
-   * If true, the NodalFloodCount object also computes the
+   * If true, the FeatureFloodCount object also computes the
    * (normalized) volume of bubbles which intersect the boundary and
    * reports this value in the CSV file (if available).  Defaults to
    * false.
@@ -301,7 +300,7 @@ protected:
 
 template<typename T>
 unsigned long
-NodalFloodCount::bytesHelper(T container)
+FeatureFloodCount::bytesHelper(T container)
 {
   typename T::value_type t;
   return sizeof(t) * container.size();
@@ -310,7 +309,7 @@ NodalFloodCount::bytesHelper(T container)
 
 template <class T>
 void
-NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> data)
+FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> data)
 {
   if (processor_id() == 0)
   {
@@ -350,4 +349,4 @@ NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> 
 }
 
 
-#endif //NODALFLOODCOUNT_H
+#endif //FEATUREFLOODCOUNT_H
