@@ -81,8 +81,8 @@ protected:
   Real _shear_modulus;
   Real _youngs_modulus;
 
-  Function * const _youngs_modulus_function;
-  Function * const _poissons_ratio_function;
+  Function * _youngs_modulus_function;
+  Function * _poissons_ratio_function;
 
   const CRACKING_RELEASE _cracking_release;
   Real _cracking_stress;
