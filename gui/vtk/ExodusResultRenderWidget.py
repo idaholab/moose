@@ -524,7 +524,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider_label = QtGui.QLabel("Timestep:")
     self.time_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.time_slider.setToolTip('Slide to select a timestep to display')
-#    self.time_slider.setMaximumWidth(600)
+    self.time_slider.setMinimumWidth(50)
 
     self.time_slider.valueChanged.connect(self._timeSliderChanged)
     self.time_slider.sliderReleased.connect(self._timeSliderReleased)
@@ -546,6 +546,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_layout.addWidget(self.time_slider_label, alignment=QtCore.Qt.AlignRight)
     self.time_layout.addWidget(self.time_slider)
     self.time_layout.addWidget(self.time_slider_textbox, alignment=QtCore.Qt.AlignLeft)
+    self.time_layout.addSpacing(10)
 
     # add time controls in the right pane under the render view
     self.right_layout.addLayout(self.time_layout)
