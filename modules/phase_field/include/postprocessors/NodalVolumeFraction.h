@@ -9,7 +9,7 @@
 #ifndef NODALVOLUMEFRACTION_H
 #define NODALVOLUMEFRACTION_H
 
-#include "NodalFloodCount.h"
+#include "FeatureFloodCount.h"
 
 //Forward Declarations
 class NodalVolumeFraction;
@@ -17,7 +17,7 @@ class NodalVolumeFraction;
 template<>
 InputParameters validParams<NodalVolumeFraction>();
 
-class NodalVolumeFraction : public NodalFloodCount
+class NodalVolumeFraction : public FeatureFloodCount
 {
 public:
   NodalVolumeFraction(const std::string & name, InputParameters parameters);

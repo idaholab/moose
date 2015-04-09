@@ -100,7 +100,7 @@
     type = NumNodes
   [../]
   [./num_grains]
-    type = NodalFloodCount
+    type = FeatureFloodCount
     variable = bnds
     threshold = 0.7
   [../]
@@ -146,4 +146,3 @@
     max_rows = 20
   [../]
 []
-

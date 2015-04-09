@@ -98,7 +98,7 @@ active = 'dt '
   # Scalar postprocessors
   [./ngrains]
   #Counts the number of grains in the polycrystal
-    type = NodalFloodCount
+    type = FeatureFloodCount
     variable = bnds
     threshold = 0.7
   [../]

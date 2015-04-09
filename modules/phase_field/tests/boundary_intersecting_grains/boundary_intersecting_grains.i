@@ -24,7 +24,7 @@
 
 [Variables]
   [./u]
-    # The NodalFloodCount object requires an *nodal* variable in order
+    # The FeatureFloodCount object requires an *nodal* variable in order
     # to work (otherwise it segfaults).
   [../]
 []
@@ -48,7 +48,7 @@
     # This auxkernel is initialized *before* the variable u is set
     # from FunctionIC, so it will always be zero initially...
     variable = grain_auxvar
-    type = NodalFloodCountAux
+    type = FeatureFloodCountAux
     bubble_object = flood_count_pp
   [../]
   [./pid]
@@ -79,7 +79,7 @@
 [Postprocessors]
   [./flood_count_pp]
     execute_on = 'TIMESTEP'
-    type = NodalFloodCount
+    type = FeatureFloodCount
     variable = u
     # For some reason I don't understand yet, the ImageFunction thing
     # returns either 0 or 62735 for the images we have... so a value

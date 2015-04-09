@@ -6,41 +6,41 @@
 /****************************************************************/
 
 
-#ifndef NODALFLOODCOUNTAUX_H
-#define NODALFLOODCOUNTAUX_H
+#ifndef FEATUREFLOODCOUNTAUX_H
+#define FEATUREFLOODCOUNTAUX_H
 
 #include "AuxKernel.h"
 
 //Forward Declarations
-class NodalFloodCountAux;
-class NodalFloodCount;
+class FeatureFloodCountAux;
+class FeatureFloodCount;
 
 template<>
-InputParameters validParams<NodalFloodCountAux>();
+InputParameters validParams<FeatureFloodCountAux>();
 
 /**
  * Function auxiliary value
  */
-class NodalFloodCountAux : public AuxKernel
+class FeatureFloodCountAux : public AuxKernel
 {
 public:
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  NodalFloodCountAux(const std::string & name, InputParameters parameters);
+  FeatureFloodCountAux(const std::string & name, InputParameters parameters);
 
-  virtual ~NodalFloodCountAux() {}
+  virtual ~FeatureFloodCountAux() {}
 
 protected:
   virtual Real computeValue();
 
   /// Function being used to compute the value of this kernel
-  const NodalFloodCount & _flood_counter;
+  const FeatureFloodCount & _flood_counter;
 
   const unsigned int _var_idx;
   const MooseEnum _field_display;
   bool _var_coloring;
 };
 
-#endif // NODALFLOODCOUNTAUX_H
+#endif // FEATUREFLOODCOUNTAUX_H

@@ -64,14 +64,14 @@
     execute_on = timestep_end
   [../]
   [./unique_grains]
-    type = NodalFloodCountAux
+    type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = timestep_end
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
-    type = NodalFloodCountAux
+    type = FeatureFloodCountAux
     variable = var_indices
     execute_on = timestep_end
     bubble_object = grain_tracker
