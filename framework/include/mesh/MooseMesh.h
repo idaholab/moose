@@ -490,8 +490,7 @@ public:
 
   /**
    * This routine builds a multimap of boundary ids to matching boundary ids across all periodic boundaries
-   * in the system.  It does this only for active local elements so the list will not be globally complete when
-   * run in parallel!
+   * in the system.
    */
   void buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const;
 
