@@ -463,7 +463,10 @@ void FEProblem::initialSetup()
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
   if (!_app.isRecovering())
+  {
+    computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
     _aux.compute(EXEC_INITIAL);
+  }
 
   if (_app.isRestarting() || _app.isRecovering())
   {
@@ -541,8 +544,6 @@ void FEProblem::initialSetup()
 
   if (!_app.isRecovering())
   {
-    _aux.compute(EXEC_TIMESTEP_BEGIN);
-
     Moose::setup_perf_log.push("Initial execTransfers()","Setup");
     execTransfers(EXEC_INITIAL);
     Moose::setup_perf_log.pop("Initial execTransfers()","Setup");
@@ -552,11 +553,15 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
 
     Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
+
     if (_use_legacy_uo_initialization)
-      computeUserObjects();
+    {
+      _aux.compute(EXEC_TIMESTEP_BEGIN);
+      computeUserObjects(EXEC_TIMESTEP_END);
+    }
 
     // The only user objects that should be computed here are the initial UOs
-    computeUserObjects(EXEC_INITIAL);
+    computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::POST_AUX);
 
     if (_use_legacy_uo_initialization)
     {
