@@ -18,10 +18,6 @@
 // MOOSE includes
 #include "TableOutput.h"
 #include "FormattedTable.h"
-#include "Conversion.h"
-
-// libMesh includes
-#include "libmesh/string_to_enum.h"
 
 // Forward declarations
 class Console;
@@ -73,25 +69,9 @@ public:
   virtual std::string filename();
 
   /**
-   * Display the system information
-   */
-  void outputSystemInformation();
-
-  /**
    * Output string for setting up PETSC output
    */
   static void petscSetupOutput();
-
-  /** Helper function function for stringstream formatting
-   * @see outputSimulationInformation()
-   */
-  static void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr);
-
-  /// Width used for printing simulation information
-  static const unsigned int _field_width = 27;
-
-  /// Line length for printing simulation information
-  static const unsigned int _line_length = 100;
 
 protected:
 
@@ -207,9 +187,6 @@ protected:
 
   /// Number of significant digits
   unsigned int _precision;
-
-  /// Toggle for displaying output_on stuff in system information
-  bool _show_output_on_info;
 
 private:
 

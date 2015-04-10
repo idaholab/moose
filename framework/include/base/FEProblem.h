@@ -278,7 +278,6 @@ public:
   virtual void useFECache(bool fe_cache);
 
   virtual void init();
-  virtual void init2();
   virtual void solve();
   virtual bool converged();
   virtual unsigned int nNonlinearIterations() { return _nl.nNonlinearIterations(); }

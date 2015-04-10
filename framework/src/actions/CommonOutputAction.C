@@ -40,6 +40,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("exodus", false, "Output the results using the default settings for Exodus output");
    params.addParam<bool>("nemesis", false, "Output the results using the default settings for Nemesis output");
    params.addParam<bool>("console", true, "Output the results using the default settings for Console output");
+   params.addParam<bool>("simulation_information", true, "Output the simulation information using the default settings for SimulationInformation output");
    params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
    params.addParam<bool>("vtk", false, "Output the results using the default settings for VTKOutput output");
    params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
@@ -130,6 +131,9 @@ CommonOutputAction::act()
     create("Console");
   else
     _pars.set<bool>("console") = false;
+
+  if (getParam<bool>("simulation_information"))
+    create("SimulationInformation");
 
   if (getParam<bool>("csv"))
     create("CSV");

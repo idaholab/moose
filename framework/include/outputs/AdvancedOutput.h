@@ -174,7 +174,6 @@ public:
    * postprocessor        outputPostprocessors()
    * vector_postprocessor outputVectorPostprocessors()
    * input                outputInput()
-   * system_information   outputSystemInformation()
    *
    * @see CSV Exodus
    */
@@ -242,13 +241,6 @@ protected:
    * By default this method does nothing and is not called, the individual Output objects are responsible for calling it
    */
   virtual void outputInput();
-
-  /**
-   * \todo{Make this call automatic in similar fashion to outputInput}
-   * Performs the output of system information
-   * By default this method does nothing and is not called by output()
-   */
-  virtual void outputSystemInformation();
 
 
 private:

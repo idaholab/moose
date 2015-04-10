@@ -328,9 +328,6 @@ void FEProblem::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 
 void FEProblem::initialSetup()
 {
-  // Write all cached calls to _console, this will output calls to _console from the object constructors
-  _app.getOutputWarehouse().mooseConsole();
-
   if (_app.isRecovering())
     _resurrector->setRestartFile(_app.getRecoverFileBase());
 
@@ -608,7 +605,6 @@ void FEProblem::initialSetup()
     _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
 
   // Perform output related setups
-  _app.getOutputWarehouse().init();
   _app.getOutputWarehouse().initialSetup();
   _app.getOutputWarehouse().mooseConsole(); // writes all calls to _console from initialSetup()
 }
@@ -3063,13 +3059,6 @@ FEProblem::init()
     _displaced_mesh->meshChanged();
   Moose::setup_perf_log.pop("FEProblem::init::meshChanged()","Setup");
 
-  init2();
-  _initialized = true;
-}
-
-void
-FEProblem::init2()
-{
   Moose::setup_perf_log.push("NonlinearSystem::update()","Setup");
   _nl.update();
   Moose::setup_perf_log.pop("NonlinearSystem::update()","Setup");
@@ -3083,6 +3072,8 @@ FEProblem::init2()
     _displaced_problem->init();
 
   _aux.init();
+
+  _initialized = true;
 }
 
 void

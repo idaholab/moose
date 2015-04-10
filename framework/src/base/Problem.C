@@ -62,9 +62,3 @@ Problem::getTimePeriods() const
 {
   return _time_periods;
 }
-
-const std::string &
-Problem::name()
-{
-  return _name;
-}
