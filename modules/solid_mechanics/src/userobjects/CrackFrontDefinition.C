@@ -1119,10 +1119,15 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
   RealVectorValue disp_current_node;
   RealVectorValue disp_previous_node;
   RealVectorValue disp_next_node;
-  RealVectorValue l0;
-  RealVectorValue l1;
-  RealVectorValue delta_l0;
-  RealVectorValue delta_l1;
+
+  RealVectorValue forward_segment0;
+  RealVectorValue forward_segment1;
+  Real forward_segment0_len;
+  Real forward_segment1_len;
+  RealVectorValue back_segment0;
+  RealVectorValue back_segment1;
+  Real back_segment0_len;
+  Real back_segment1_len;
 
   unsigned int num_crack_front_nodes = _ordered_crack_front_nodes.size();
   const Node * current_node;
@@ -1146,12 +1151,15 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
     disp_next_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*next_node);
     disp_next_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*next_node);
 
-    //Calculate change in length of crack front edge and project in the tangent direction to get tangential strain
-    l1 = *next_node - *current_node;
-    l1 = (l1 * _tangent_directions[0]) * _tangent_directions[0];
-    delta_l1 = disp_next_node - disp_current_node;
-    delta_l1 = (delta_l1 * _tangent_directions[0]) * _tangent_directions[0];
-    _strain_along_front[0] = delta_l1.size() / l1.size();
+    forward_segment0 = *next_node - *current_node;
+    forward_segment0 = (forward_segment0 * _tangent_directions[0]) * _tangent_directions[0];
+    forward_segment0_len = forward_segment0.size();
+
+    forward_segment1 = (*next_node + disp_next_node) - (*current_node + disp_current_node);
+    forward_segment1 = (forward_segment1 * _tangent_directions[0]) * _tangent_directions[0];
+    forward_segment1_len = forward_segment1.size();
+
+    _strain_along_front[0] = (forward_segment1_len - forward_segment0_len) / forward_segment0_len;
   }
 
   for (unsigned int i=1; i<num_crack_front_nodes-1; ++i)
@@ -1173,15 +1181,24 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
       disp_next_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*next_node);
       disp_next_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*next_node);
 
-      l0 = *current_node - *previous_node;
-      l0 = (l0 * _tangent_directions[i]) * _tangent_directions[i];
-      delta_l0 = disp_current_node - disp_previous_node;
-      delta_l0 = (delta_l0 * _tangent_directions[i]) * _tangent_directions[i];
-      l1 = *next_node - *current_node;
-      l1 = (l1 * _tangent_directions[i]) * _tangent_directions[i];
-      delta_l1 = disp_next_node - disp_current_node;
-      delta_l1 = (delta_l1 * _tangent_directions[i]) * _tangent_directions[i];
-      _strain_along_front[i] = 0.5 * ( delta_l0.size()/l0.size() + delta_l1.size()/l1.size() );
+      back_segment0 = *current_node - *previous_node;
+      back_segment0 = (back_segment0 * _tangent_directions[i]) * _tangent_directions[i];
+      back_segment0_len = back_segment0.size();
+
+      back_segment1 = (*current_node + disp_current_node) - (*previous_node + disp_previous_node);
+      back_segment1 = (back_segment1 * _tangent_directions[i]) * _tangent_directions[i];
+      back_segment1_len = back_segment1.size();
+
+      forward_segment0 = *next_node - *current_node;
+      forward_segment0 = (forward_segment0 * _tangent_directions[i]) * _tangent_directions[i];
+      forward_segment0_len = forward_segment0.size();
+
+      forward_segment1 = (*next_node + disp_next_node) - (*current_node + disp_current_node);
+      forward_segment1 = (forward_segment1 * _tangent_directions[i]) * _tangent_directions[i];
+      forward_segment1_len = forward_segment1.size();
+
+      _strain_along_front[i] = 0.5 * ((back_segment1_len - back_segment0_len) / back_segment0_len
+                                      + (forward_segment1_len - forward_segment0_len) / forward_segment0_len);
     }
   }
 
@@ -1197,12 +1214,15 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
     disp_previous_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*previous_node);
     disp_previous_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*previous_node);
 
-    l0 = *current_node - *previous_node;
-    delta_l0 = disp_current_node - disp_previous_node;
-    l0 = (l0 * _tangent_directions[num_crack_front_nodes-1]) * _tangent_directions[num_crack_front_nodes-1];
-    delta_l0 = (delta_l0 * _tangent_directions[num_crack_front_nodes-1]) * _tangent_directions[num_crack_front_nodes-1];
+    back_segment0 = *current_node - *previous_node;
+    back_segment0 = (back_segment0 * _tangent_directions[num_crack_front_nodes-1]) * _tangent_directions[num_crack_front_nodes-1];
+    back_segment0_len = back_segment0.size();
 
-    _strain_along_front[num_crack_front_nodes-1] = delta_l0.size() / l0.size();
+    back_segment1 = (*current_node + disp_current_node) - (*previous_node + disp_previous_node);
+    back_segment1 = (back_segment1 * _tangent_directions[num_crack_front_nodes-1]) * _tangent_directions[num_crack_front_nodes-1];
+    back_segment1_len = back_segment1.size();
+
+    _strain_along_front[num_crack_front_nodes-1] = (back_segment1_len - back_segment0_len) / back_segment0_len;
   }
 
 }

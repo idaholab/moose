@@ -807,21 +807,23 @@ NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residua
   for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
   {
     NodalConstraint * nc = (*it);
-
-    Node & master_node = _mesh.node(nc->getMasterNodeId());
-    // reinit variables at the master node
-    _fe_problem.reinitNode(&master_node, tid);
-    _fe_problem.prepareAssembly(tid);
-
-    // go over slave nodes
-    std::vector<dof_id_type> slave_nodes = nc->getSlaveNodeId();
-    for (std::vector<dof_id_type>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
+    std::vector<dof_id_type>& slave_nodes = nc->getSlaveNodeId();
+    if (slave_nodes.size() > 0)
     {
-      Node & slave_node = _mesh.node(*it);
-      // reinit variables on the slave node
-      _fe_problem.reinitNodeNeighbor(&slave_node, tid);
-      // compute residual
-      nc->computeResidual(residual);
+      Node & master_node = _mesh.node(nc->getMasterNodeId());
+      // reinit variables at the master node
+      _fe_problem.reinitNode(&master_node, tid);
+      _fe_problem.prepareAssembly(tid);
+
+      // go over slave nodes
+      for (std::vector<dof_id_type>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
+      {
+        Node & slave_node = _mesh.node(*it);
+        // reinit variables on the slave node
+        _fe_problem.reinitNodeNeighbor(&slave_node, tid);
+        // compute residual
+        nc->computeResidual(residual);
+      }
     }
   }
 }
@@ -835,21 +837,23 @@ NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian
   for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
   {
     NodalConstraint * nc = (*it);
-
-    Node & master_node = _mesh.node(nc->getMasterNodeId());
-    // reinit variables at the master node
-    _fe_problem.reinitNode(&master_node, tid);
-    _fe_problem.prepareAssembly(tid);
-
-    // go over slave nodes
-    std::vector<dof_id_type> slave_nodes = nc->getSlaveNodeId();
-    for (std::vector<dof_id_type>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
+    std::vector<dof_id_type>& slave_nodes = nc->getSlaveNodeId();
+    if (slave_nodes.size() > 0)
     {
-      Node & slave_node = _mesh.node(*it);
-      // reinit variables on the slave node
-      _fe_problem.reinitNodeNeighbor(&slave_node, tid);
-      // compute residual
-      nc->computeJacobian(jacobian);
+      Node & master_node = _mesh.node(nc->getMasterNodeId());
+      // reinit variables at the master node
+      _fe_problem.reinitNode(&master_node, tid);
+      _fe_problem.prepareAssembly(tid);
+
+      // go over slave nodes
+      for (std::vector<dof_id_type>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
+      {
+        Node & slave_node = _mesh.node(*it);
+        // reinit variables on the slave node
+        _fe_problem.reinitNodeNeighbor(&slave_node, tid);
+        // compute Jacobian
+        nc->computeJacobian(jacobian);
+      }
     }
   }
 }
