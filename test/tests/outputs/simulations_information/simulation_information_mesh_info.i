@@ -74,10 +74,5 @@
   output_initial = true
   print_linear_residuals = true
   print_perf_log = true
-  simulation_information = false
-  [./mesh_info]
-    type = SimulationInformation
-    output_on = timestep_begin
-    info = 'mesh'
-  [../]
+  print_mesh_changed_info = true
 []

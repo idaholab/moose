@@ -73,7 +73,17 @@ public:
    */
   static void petscSetupOutput();
 
+  /**
+   * Performs console related printing when the mesh is changed
+   */
+  void meshChanged();
+
 protected:
+
+  /**
+   * Adds the printing of system information to the init() method
+   */
+  void init();
 
   /**
    * Print the input file at the beginning of the simulation
@@ -94,6 +104,11 @@ protected:
    * Not implemented.
    */
   virtual void outputVectorPostprocessors() { mooseError("Can't currently output VectorPostprocessors to the screen"); };
+
+  /**
+   * Print system information
+   */
+  virtual void outputSystemInformation();
 
   /**
    * A helper function for outputting norms in color
@@ -120,7 +135,7 @@ protected:
    */
   void indentMessage(std::string & message);
 
-/**
+  /**
    * Write the file stream to the file
    * @param append Toggle for appending the file
    *
@@ -216,6 +231,13 @@ private:
 
   /// Storage for the old non linear residual (needed for color output and only when used when printing to the screen)
   Real _old_nonlinear_norm;
+
+  /// Flag for printing mesh information when the mesh changes
+  bool _print_mesh_changed_info;
+
+  /// Flags for controlling the what simulations information is shown
+  MultiMooseEnum _system_info_flags;
+
 
   friend class OutputWarehouse;
 };

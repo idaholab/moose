@@ -46,6 +46,8 @@ void addAdvancedOutputParams(InputParameters & params)
                                   "'output_postprocessors_on' has replaced this parameter");
   params.addDeprecatedParam<bool>("output_vector_postprocessors", true, "Enable/disable the output of vector postprocessors",
                                   "'output_vector_postprocessors_on' has replaced this parameter");
+  params.addDeprecatedParam<bool>("output_system_information", true, "Enable/disable the output of the simulation information",
+                                  "'output_system_information_on' has replaced this parameter");
   params.addDeprecatedParam<bool>("output_elemental_variables", true, "Enable/disable the output of elemental variables",
                                   "'output_elemental_on' has replaced this parameter");
   params.addDeprecatedParam<bool>("output_nodal_variables", true, "Enable/disable the output of nodal variables",
@@ -98,7 +100,7 @@ template<class T>
 MultiMooseEnum
 AdvancedOutput<T>::getOutputTypes()
 {
-  return MultiMooseEnum("nodal=0 elemental=1 scalar=2 postprocessor=3 vector_postprocessor=4 input=5");
+  return MultiMooseEnum("nodal=0 elemental=1 scalar=2 postprocessor=3 vector_postprocessor=4 input=5 system_information=6");
 }
 
 // Enables the output types (see getOutputTypes) for an AdvancedOutput object
@@ -199,6 +201,8 @@ AdvancedOutput<T>::init()
     T::_advanced_output_on["elemental"].clear();
   if (T::isParamValid("output_nodal_variables") && !T::template getParam<bool>("output_nodal_variables"))
     T::_advanced_output_on["nodal"].clear();
+  if (T::isParamValid("output_system_information") && !T::template getParam<bool>("output_system_information"))
+    T::_advanced_output_on["system_information"].clear();
   if (T::isParamValid("output_input") && !T::template getParam<bool>("output_input"))
     T::_advanced_output_on["input"].clear();
 }
@@ -241,6 +245,13 @@ void
 AdvancedOutput<T>::outputScalarVariables()
 {
   mooseError("Individual output of scalars is not support for this output object named '" << T::_name << "'");
+}
+
+template<class T>
+void
+AdvancedOutput<T>::outputSystemInformation()
+{
+  mooseError("Output of system information is not support for this output object named '" << T::_name << "'");
 }
 
 template<class T>
@@ -360,6 +371,12 @@ AdvancedOutput<T>::output(const ExecFlagType & type)
     _last_output_time["scalars"] = T::_time;
   }
 
+  if (shouldOutput("system_information", type))
+  {
+    outputSystemInformation();
+    _last_output_time["system_information"] = T::_time;
+  }
+
   if (shouldOutput("input", type))
   {
     outputInput();
@@ -371,6 +388,10 @@ template<class T>
 bool
 AdvancedOutput<T>::shouldOutput(const std::string & name, const ExecFlagType & type)
 {
+  // Ignore EXEC_FORCED for system information and input, there is no reason to force this
+  if (type == EXEC_FORCED && (name == "system_information" || name == "input"))
+    return false;
+
   // Do not output if the 'none' is contained by the output_on
   if (T::_advanced_output_on.contains(name) && T::_advanced_output_on[name].contains("none"))
     return false;
@@ -427,6 +448,8 @@ AdvancedOutput<T>::hasOutput()
       return true;
 
   // Test execution flags for non-variable output
+  if (T::_advanced_output_on.contains("system_information") && T::_advanced_output_on["system_information"].isValid())
+    return true;
   if (T::_advanced_output_on.contains("input") && T::_advanced_output_on["input"].isValid())
     return true;
 
@@ -483,7 +506,7 @@ AdvancedOutput<T>::initExecutionTypes(const std::string & name, MultiMooseEnum &
   {
     input = T::template getParam<MultiMooseEnum>(param_name);
 
-    if (name != "input")
+    if (name != "system_information" && name != "input")
       T::applyOutputOnShortCutFlags(input);
   }
 
@@ -645,8 +668,12 @@ AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum
   if (types.contains("input"))
     params.addParam<MultiMooseEnum>("output_input_on", T::getExecuteOptions(), "Enable/disable the output of the input file");
 
+  // System Information
+  if (types.contains("system_information"))
+    params.addParam<MultiMooseEnum>("output_system_information_on", T::getExecuteOptions(), "Control when the output of the simulation information occurs");
+
   // Store everything in the 'Variables' group
-  params.addParamNamesToGroup("scalar_as_nodal elemental_as_nodal output_scalars_on output_nodal_on output_elemental_on output_postprocessors_on output_vector_postprocessors_on output_input_on", "Variables");
+  params.addParamNamesToGroup("scalar_as_nodal elemental_as_nodal output_scalars_on output_nodal_on output_elemental_on output_postprocessors_on output_vector_postprocessors_on output_system_information_on output_input_on", "Variables");
 }
 
 template<class T>

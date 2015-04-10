@@ -14,6 +14,7 @@
 
 // MOOSE includes
 #include "Console.h"
+#include "ConsoleUtils.h"
 #include "FEProblem.h"
 #include "Postprocessor.h"
 #include "PetscSupport.h"
@@ -30,7 +31,7 @@ InputParameters validParams<Console>()
 
   // Get the parameters from the base class
   InputParameters params = validParams<TableOutput>();
-  params += TableOutput::enableOutputTypes("scalar postprocessor input");
+  params += TableOutput::enableOutputTypes("system_information scalar postprocessor input");
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", true, "Output to the screen");
@@ -59,7 +60,10 @@ InputParameters validParams<Console>()
   params.addParam<bool>("libmesh_log", true, "Print the libMesh performance log, requires libMesh to be configured with --enable-perflog");
 #endif
 
-  // Toggle for printing variable normals
+  // Toggle printing of mesh information on adaptivity steps
+  params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
+
+  // Toggle for printing variable norms
   params.addParam<bool>("outlier_variable_norms", true, "If true, outlier variable norms will be printed after each solve");
   params.addParam<bool>("all_variable_norms", false, "If true, all variable norms will be printed after each solve");
 
@@ -69,9 +73,12 @@ InputParameters validParams<Console>()
   multiplier.push_back(2);
   params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
 
+  // System information controls
+  MultiMooseEnum info("framework mesh aux nonlinear execution output", "framework mesh aux nonlinear execution");
+  params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output')");
 
   // Advanced group
-  params.addParamNamesToGroup("max_rows fit_node verbose show_multiapp_name", "Advanced");
+  params.addParamNamesToGroup("max_rows fit_node verbose show_multiapp_name system_info", "Advanced");
 
   // Performance log group
   params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Perf Log");
@@ -87,6 +94,9 @@ InputParameters validParams<Console>()
    * the set method. This enables "quiet mode". This is done to allow for the proper detection
    * of user-modified parameters
    */
+  // By default set System Information to output on initial
+  params.set<MultiMooseEnum>("output_system_information_on", /*quiet_mode=*/true) = "initial";
+
   // Change the default behavior of 'output_on' to included nonlinear iterations and failed timesteps
   params.set<MultiMooseEnum>("output_on", /*quiet_mode=*/true).push_back("nonlinear failed");
 
@@ -121,7 +131,10 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _timing(_app.getParam<bool>("timing")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
     _old_linear_norm(std::numeric_limits<Real>::max()),
-    _old_nonlinear_norm(std::numeric_limits<Real>::max())
+    _old_nonlinear_norm(std::numeric_limits<Real>::max()),
+    _print_mesh_changed_info(getParam<bool>("print_mesh_changed_info")),
+    _system_info_flags(getParam<MultiMooseEnum>("system_info"))
+
 {
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
@@ -151,6 +164,10 @@ Console::Console(const std::string & name, InputParameters parameters) :
       libMesh::perflog.disable_logging();
 #endif
   }
+
+  // If --show-outputs is used, enable it
+  if (_app.getParam<bool>("show_outputs"))
+    _system_info_flags.push_back("output");
 
   // Set output coloring
   if (Moose::_color_console)
@@ -204,6 +221,16 @@ Console::~Console()
 }
 
 void
+Console::init()
+{
+  // If output_on = 'initial' perform the output
+  if (shouldOutput("system_information", EXEC_INITIAL))
+    outputSystemInformation();
+
+  TableOutput::init();
+}
+
+void
 Console::initialSetup()
 {
   // Set the string for multiapp output indenting
@@ -246,6 +273,11 @@ Console::output(const ExecFlagType & type)
   // Flush the Console buffer, if we don't do this here then the linear/nonlinear residual output
   // may write to the screen prior to buffered text
   _app.getOutputWarehouse().flushConsoleBuffer();
+
+  // Output the system information first; this forces this to be the first item to write by default
+  // However, 'output_system_information_on' still operates correctly, so it may be changed by the user
+  if (shouldOutput("system_information", type) && !(type == EXEC_INITIAL && _initialized))
+    outputSystemInformation();
 
   // Write the input
   if (shouldOutput("input", type))
@@ -506,6 +538,50 @@ Console::outputScalarVariables()
   }
 }
 
+void
+Console::outputSystemInformation()
+{
+  if (_system_info_flags.contains("framework"))
+    mooseConsole(ConsoleUtils::outputFrameworkInformation(_app, *_problem_ptr));
+
+  if (_system_info_flags.contains("mesh"))
+    mooseConsole(ConsoleUtils::outputMeshInformation(*_problem_ptr));
+
+  if (_system_info_flags.contains("nonlinear"))
+  {
+    std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr);
+    if (!output.empty())
+    {
+      mooseConsole("Nonlinear System:\n");
+      mooseConsole(output);
+    }
+  }
+
+  if (_system_info_flags.contains("aux"))
+  {
+    std::string output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);
+    if (!output.empty())
+    {
+      mooseConsole("Auxiliary System:\n");
+      mooseConsole(output);
+    }
+  }
+
+  if (_system_info_flags.contains("execution"))
+    mooseConsole(ConsoleUtils::outputExecutionInformation(_app, *_problem_ptr));
+
+  if (_system_info_flags.contains("output"))
+    mooseConsole(ConsoleUtils::outputOutputInformation(_app));
+
+  _console << "\n\n" << std::flush;
+}
+
+void
+Console::meshChanged()
+{
+  if (_print_mesh_changed_info)
+    mooseConsole(ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false ));
+}
 
 void
 Console::indentMessage(std::string & message)

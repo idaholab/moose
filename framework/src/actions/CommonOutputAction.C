@@ -19,9 +19,7 @@
 #include "MooseObjectAction.h"
 #include "ActionFactory.h"
 #include "Output.h"
-//#include "Exodus.h"
 #include "OutputWarehouse.h"
-//#include "FileOutput.h"
 
 // Extrnal includes
 #include "tinydir.h"
@@ -40,7 +38,6 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("exodus", false, "Output the results using the default settings for Exodus output");
    params.addParam<bool>("nemesis", false, "Output the results using the default settings for Nemesis output");
    params.addParam<bool>("console", true, "Output the results using the default settings for Console output");
-   params.addParam<bool>("simulation_information", true, "Output the simulation information using the default settings for SimulationInformation output");
    params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
    params.addParam<bool>("vtk", false, "Output the results using the default settings for VTKOutput output");
    params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
@@ -77,6 +74,7 @@ InputParameters validParams<CommonOutputAction>()
   // Add special Console flags
   params.addParam<bool>("print_linear_residuals", false, "Enable printing of linear residuals to the screen (Console)");
   params.addParam<bool>("print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
+  params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
 
   // Return object
   return params;
@@ -131,9 +129,6 @@ CommonOutputAction::act()
     create("Console");
   else
     _pars.set<bool>("console") = false;
-
-  if (getParam<bool>("simulation_information"))
-    create("SimulationInformation");
 
   if (getParam<bool>("csv"))
     create("CSV");

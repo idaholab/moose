@@ -3582,11 +3582,10 @@ FEProblem::adaptMesh()
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
   for (unsigned int i=0; i < cycles_per_step; ++i)
   {
-    _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << "\n";
+    _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << std::endl;
     if (_adaptivity.adaptMesh())
       meshChanged();
   }
-  _console << std::flush;
 }
 #endif //LIBMESH_ENABLE_AMR
 

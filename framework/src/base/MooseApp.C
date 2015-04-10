@@ -27,9 +27,6 @@
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/string_to_enum.h"
 
-const unsigned short FIELD_WIDTH = 25;
-const unsigned short LINE_LENGTH = 100;
-
 template<>
 InputParameters validParams<MooseApp>()
 {
@@ -82,17 +79,6 @@ InputParameters validParams<MooseApp>()
   params.addPrivateParam<MooseSharedPointer<Parallel::Communicator> >("_comm");
 
   return params;
-}
-
-// Free function for stringstream formatting
-void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)
-{
-  if (curr - begin > LINE_LENGTH)
-  {
-    oss << "\n";
-    begin = oss.tellp();
-    oss << std::setw(FIELD_WIDTH + 2) << "";  // "{ "
-  }
 }
 
 // Free function for removing cli flags
@@ -344,7 +330,7 @@ void
 MooseApp::meshOnly(std::string mesh_file_name)
 {
   /**
-   * These actions should be the minimum set necessary to generate and output
+   * Thesgete actions should be the minimum set necessary to generate and output
    * a Mesh.
    */
   _action_warehouse.executeActionsWithAction("set_global_params");
