@@ -240,6 +240,7 @@
 #include "CoupledTiedValueConstraint.h"
 #include "AddBoundsVectorsAction.h"
 #include "EqualValueConstraint.h"
+#include "EqualValueBoundaryConstraint.h"
 
 // ScalarKernels
 #include "ODETimeDerivative.h"
@@ -604,6 +605,7 @@ registerObjects(Factory & factory)
   registerConstraint(TiedValueConstraint);
   registerConstraint(CoupledTiedValueConstraint);
   registerConstraint(EqualValueConstraint);
+  registerConstraint(EqualValueBoundaryConstraint);
 
   // Scalar kernels
   registerScalarKernel(ODETimeDerivative);
