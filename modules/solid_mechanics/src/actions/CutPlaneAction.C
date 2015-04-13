@@ -47,7 +47,7 @@ CutPlaneAction::act()
   else if (_current_task == "add_aux_kernel")
   {
     InputParameters params = _factory.getValidParams("XFEMCutPlaneAux");
-    params.set<MultiMooseEnum>("execute_on") = "timestep";
+    params.set<MultiMooseEnum>("execute_on") = "timestep_end";
 
     // first cut plane
     params.set<unsigned int>("plane_id") = 0;
