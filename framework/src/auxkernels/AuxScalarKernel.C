@@ -39,6 +39,7 @@ AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters param
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
+    DependencyResolverInterface(),
     TransientInterface(parameters, "scalar_aux_kernels"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
@@ -51,6 +52,11 @@ AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters param
     _u(_var.sln()),
     _u_old(_var.slnOld())
 {
+  _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
+
+  const std::vector<MooseVariableScalar *> & coupled_vars = getCoupledMooseScalarVars();
+  for (std::vector<MooseVariableScalar *>::const_iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
+    _depend_vars.insert((*it)->name());
 }
 
 AuxScalarKernel::~AuxScalarKernel()
@@ -66,6 +72,19 @@ AuxScalarKernel::compute()
     _var.setValue(_i, value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
   }
 }
+
+const std::set<std::string> &
+AuxScalarKernel::getRequestedItems()
+{
+  return _depend_vars;
+}
+
+const std::set<std::string> &
+AuxScalarKernel::getSuppliedItems()
+{
+  return _supplied_vars;
+}
+
 
 bool
 AuxScalarKernel::isActive()

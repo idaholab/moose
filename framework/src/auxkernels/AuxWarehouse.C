@@ -41,6 +41,8 @@ AuxWarehouse::initialSetup()
        i != _active_nodal_bcs.end(); ++i)
     sortAuxKernels(i->second);
 
+  sortScalarKernels(_scalar_kernels);
+
   for (std::vector<AuxKernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->initialSetup();
 }
@@ -142,6 +144,26 @@ AuxWarehouse::sortAuxKernels(std::vector<AuxKernel *> & aux_vector)
     const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
     for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
       oss << (static_cast<AuxKernel *>(it->first))->name() << " -> " << (static_cast<AuxKernel *>(it->second))->name() << "\n";
+    mooseError(oss.str());
+  }
+}
+
+void
+AuxWarehouse::sortScalarKernels(std::vector<AuxScalarKernel *> & kernels)
+{
+  try
+  {
+    // Sort based on dependencies
+    DependencyResolverInterface::sort(kernels.begin(), kernels.end());
+  }
+  catch(CyclicDependencyException<DependencyResolverInterface *> & e)
+  {
+    std::ostringstream oss;
+
+    oss << "Cyclic dependency detected in aux scalar kernel ordering:\n";
+    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
+    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+      oss << (static_cast<AuxScalarKernel *>(it->first))->name() << " -> " << (static_cast<AuxScalarKernel *>(it->second))->name() << "\n";
     mooseError(oss.str());
   }
 }
