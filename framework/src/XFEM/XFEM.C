@@ -135,12 +135,6 @@ XFEM::update(Real time)
 
   bool mesh_changed = false;
 
-  _new_nodes_map.init(*_mesh);
-  if (_mesh2)
-  {
-    _new_nodes_map2.init(*_mesh2);
-  }
-
   build_efa_mesh();
   // DEBUG
 //  std::cout << "***** after efa mesh built *****" << std::endl;
@@ -154,8 +148,7 @@ XFEM::update(Real time)
   {
     _mesh->update_parallel_id_counts();
     MeshCommunication().make_elems_parallel_consistent(*_mesh);
-    MeshCommunication().make_nodes_parallel_consistent(*_mesh,_new_nodes_map);
-    _new_nodes_map.clear();
+    MeshCommunication().make_nodes_parallel_consistent(*_mesh);
 //    _mesh->find_neighbors();
 //    _mesh->contract();
     _mesh->prepare_for_use(true); //doing this preserves the numbering, but generates warning
@@ -164,8 +157,7 @@ XFEM::update(Real time)
     {
       _mesh2->update_parallel_id_counts();
       MeshCommunication().make_elems_parallel_consistent(*_mesh2);
-      MeshCommunication().make_nodes_parallel_consistent(*_mesh2,_new_nodes_map2);
-      _new_nodes_map2.clear();
+      MeshCommunication().make_nodes_parallel_consistent(*_mesh2);
       _mesh2->prepare_for_use(true);
     }
   }
@@ -508,7 +500,6 @@ XFEM::cut_mesh_with_efa()
     Point *new_point = new Point(*parent_node);
     Node *new_node = _mesh->add_point(*new_point, DofObject::invalid_id, parent_node->processor_id());
 
-    _new_nodes_map.insert(*new_node);
     new_node->set_n_systems(parent_node->n_systems());
     efa_id_to_new_node.insert(std::make_pair(new_node_id,new_node));
     std::cout<<"XFEM added new node: "<<new_node->id()+1<<std::endl;
@@ -520,7 +511,6 @@ XFEM::cut_mesh_with_efa()
       Point *new_point2 = new Point(*parent_node2);
       Node *new_node2 = _mesh2->add_point(*new_point2, DofObject::invalid_id, parent_node2->processor_id());
 
-      _new_nodes_map2.insert(*new_node2);
       new_node2->set_n_systems(parent_node2->n_systems());
       efa_id_to_new_node2.insert(std::make_pair(new_node_id,new_node2));
       std::cout<<"XFEM2 added new node: "<<new_node2->id()+1<<std::endl;

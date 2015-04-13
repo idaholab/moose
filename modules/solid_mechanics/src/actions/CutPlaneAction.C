@@ -30,19 +30,19 @@ CutPlaneAction::act()
 {
   if (_current_task == "add_aux_variable")
   {
-    _problem->addAuxVariable("xfem_first_cut_origin_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_first_cut_origin_y",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_first_cut_origin_z",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_first_cut_normal_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_first_cut_normal_y",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_first_cut_normal_z",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut_origin_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut_origin_y",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut_origin_z",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut_normal_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut_normal_y",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut_normal_z",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
 
-    _problem->addAuxVariable("xfem_second_cut_origin_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_second_cut_origin_y",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_second_cut_origin_z",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_second_cut_normal_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_second_cut_normal_y",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-    _problem->addAuxVariable("xfem_second_cut_normal_z",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut2_origin_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut2_origin_y",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut2_origin_z",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut2_normal_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut2_normal_y",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
+    _problem->addAuxVariable("xfem_cut2_normal_z",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
   }
   else if (_current_task == "add_aux_kernel")
   {
@@ -52,55 +52,55 @@ CutPlaneAction::act()
     // first cut plane
     params.set<unsigned int>("plane_id") = 0;
 
-    params.set<AuxVariableName>("variable") = "xfem_first_cut_origin_x";
+    params.set<AuxVariableName>("variable") = "xfem_cut_origin_x";
     params.set<MooseEnum>("quantity") = "origin_x";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_first_cut_origin_x", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut_origin_x", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_first_cut_origin_y";
+    params.set<AuxVariableName>("variable") = "xfem_cut_origin_y";
     params.set<MooseEnum>("quantity") = "origin_y";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_first_cut_origin_y", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut_origin_y", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_first_cut_origin_z";
+    params.set<AuxVariableName>("variable") = "xfem_cut_origin_z";
     params.set<MooseEnum>("quantity") = "origin_z";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_first_cut_origin_z", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut_origin_z", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_first_cut_normal_x";
+    params.set<AuxVariableName>("variable") = "xfem_cut_normal_x";
     params.set<MooseEnum>("quantity") = "normal_x";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_first_cut_normal_x", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut_normal_x", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_first_cut_normal_y";
+    params.set<AuxVariableName>("variable") = "xfem_cut_normal_y";
     params.set<MooseEnum>("quantity") = "normal_y";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_first_cut_normal_y", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut_normal_y", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_first_cut_normal_z";
+    params.set<AuxVariableName>("variable") = "xfem_cut_normal_z";
     params.set<MooseEnum>("quantity") = "normal_z";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_first_cut_normal_z", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut_normal_z", params);
 
     // second cut plane
     params.set<unsigned int>("plane_id") = 1;
 
-    params.set<AuxVariableName>("variable") = "xfem_second_cut_origin_x";
+    params.set<AuxVariableName>("variable") = "xfem_cut2_origin_x";
     params.set<MooseEnum>("quantity") = "origin_x";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_second_cut_origin_x", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut2_origin_x", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_second_cut_origin_y";
+    params.set<AuxVariableName>("variable") = "xfem_cut2_origin_y";
     params.set<MooseEnum>("quantity") = "origin_y";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_second_cut_origin_y", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut2_origin_y", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_second_cut_origin_z";
+    params.set<AuxVariableName>("variable") = "xfem_cut2_origin_z";
     params.set<MooseEnum>("quantity") = "origin_z";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_second_cut_origin_z", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut2_origin_z", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_second_cut_normal_x";
+    params.set<AuxVariableName>("variable") = "xfem_cut2_normal_x";
     params.set<MooseEnum>("quantity") = "normal_x";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_second_cut_normal_x", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut2_normal_x", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_second_cut_normal_y";
+    params.set<AuxVariableName>("variable") = "xfem_cut2_normal_y";
     params.set<MooseEnum>("quantity") = "normal_y";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_second_cut_normal_y", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut2_normal_y", params);
 
-    params.set<AuxVariableName>("variable") = "xfem_second_cut_normal_z";
+    params.set<AuxVariableName>("variable") = "xfem_cut2_normal_z";
     params.set<MooseEnum>("quantity") = "normal_z";
-    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_second_cut_normal_z", params);
+    _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut2_normal_z", params);
   }
 }

@@ -44,7 +44,7 @@ class XFEM_geometric_cut
 public:
 
   XFEM_geometric_cut(Real t0, Real t1);
-  ~XFEM_geometric_cut();
+  virtual ~XFEM_geometric_cut();
 
   virtual bool cut_elem_by_geometry(const Elem* elem, std::vector<cutEdge> & cutEdges,
                                     Real time) = 0;
