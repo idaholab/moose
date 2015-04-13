@@ -77,7 +77,6 @@ public:
     build_info._task = task;
     build_info._unique_id = _unique_id++;
     _name_to_build_info.insert(std::make_pair(name, build_info));
-
     _task_to_action_map.insert(std::make_pair(task, name));
   }
 
