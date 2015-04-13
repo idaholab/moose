@@ -1,3 +1,5 @@
+#ifndef RANDOMCLASS_H
+#define RANDOMCLASS_H
 
 class RandomClassImpl;
 
@@ -10,3 +12,5 @@ public:
   void seed(unsigned int seed);
   double random();
 };
+
+#endif /* RANDOMCLASS_H */

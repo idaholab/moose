@@ -19,6 +19,7 @@
 #include <string>
 #include <iostream>
 #include <stdio.h>
+#include "randomClass.h"
 
 bool checkUpperBound(double upper_bound, std::vector<double> values);
 bool checkLowerBound(double lower_bound, std::vector<double> values);
@@ -45,6 +46,7 @@ public:
   virtual ~NDInterpolation();
 
 protected:
+  RandomClass * _randomDouble;
   std::string _data_filename;
   bool _completed_init;
   int _dimensions;

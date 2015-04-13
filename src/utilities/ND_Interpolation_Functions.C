@@ -1,5 +1,4 @@
 #include "ND_Interpolation_Functions.h"
-#include "randomClass.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -47,6 +46,7 @@ NDInterpolation::NDInterpolation()
 {
 	  _tolerance = 0.1;
 	  _initial_divisions = 10;
+	  _randomDouble = new RandomClass();
 }
 NDInterpolation::~NDInterpolation()
 {
@@ -279,9 +279,10 @@ int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<doub
 
 	for(unsigned int i=0; i<vertices.size(); i++){
 		cellAvgValues.at(i) = integralCellValue(vertices.at(i));
+		//std::cout<<cellAvgValues.at(i)<<std::endl;
 		cumulativeValue += cellAvgValues.at(i);
 	}
-
+	//std::cout<<"===="<<std::endl;
 	for(unsigned int i=0; i<vertices.size(); i++){
 		cellAvgValues.at(i) = cellAvgValues.at(i)/cumulativeValue;
 		//std::cout<< i << ": " << cellAvgValues.at(i) << std::endl;
@@ -420,21 +421,19 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
  std::vector<double> dxs (_dimensions);
  std::vector<double> center (_dimensions);
 
- RandomClass *randomDouble = new RandomClass();
-
- for (unsigned int i=0; i<cell.size(); i++){
-	 std::cout<< cell.at(i).at(0) << " " << cell.at(i).at(1) << std::endl;
- }
+// for (unsigned int i=0; i<cell.size(); i++){
+//	 std::cout<< "cc: " << cell.at(i).at(0) << " " << cell.at(i).at(1) << std::endl;
+// }
 
  for (int i=0; i<_dimensions; i++){
   int vertexLoc = (int)pow(2,i);
   dxs[i] = cell[vertexLoc][i] - cell[0][i];
 
-  std::cout<< "dx " << dxs[i] << std::endl;
+  //std::cout<< "dx " << dxs[i] << std::endl;
 
-  double randomDisplacement = randomDouble->random();
+  double randomDisplacement = _randomDouble->random();
 
-  std::cout<< "random " << randomDisplacement << std::endl;
+  //std::cout<< "random " << randomDisplacement << std::endl;
 
   center[i] = cell[0][i] + randomDisplacement * dxs[i];
  }
@@ -516,7 +515,7 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  int last_divisions = (int)round(1.0/_tolerance);
 
- std::cout<<"last_divisions " << last_divisions << std::endl;
+ //std::cout<<"last_divisions " << last_divisions << std::endl;
 
  std::vector<double> pointMax(_dimensions);
  for(int i=0; i< _dimensions; i++)
@@ -533,9 +532,6 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  basic_cell = generateNewCell(NDcoordinate, _cellPoint0, _cellDxs, _dimensions);
 
- std::cout<< basic_cell.at(0).at(0) << " ; " << basic_cell.at(0).at(1)<<std::endl;
- std::cout<< basic_cell.at(1).at(0) << " ; " << basic_cell.at(1).at(1)<<std::endl;
-
  std::vector<std::vector<std::vector<double> > > coarseCell;
  refinedCellDivision(coarseCell, basic_cell, _initial_divisions);
 
@@ -544,9 +540,6 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
  int pickedCell = CDFweightedPicking(coarseCell,g);
 
  std::vector<std::vector<std::vector<double> > > refinedCell;
-
- std::cout<< coarseCell.at(pickedCell).at(0).at(0) << " " << coarseCell.at(pickedCell).at(0).at(1)<<std::endl;
- std::cout<< coarseCell.at(pickedCell).at(1).at(0) << " " << coarseCell.at(pickedCell).at(1).at(1)<<std::endl;
 
  refinedCellDivision(refinedCell, coarseCell.at(pickedCell), last_divisions);
 
