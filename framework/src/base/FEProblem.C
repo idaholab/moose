@@ -462,11 +462,6 @@ void FEProblem::initialSetup()
 
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
-  if (!_app.isRecovering())
-  {
-    computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
-    _aux.compute(EXEC_INITIAL);
-  }
 
   if (_app.isRestarting() || _app.isRecovering())
   {
@@ -553,6 +548,9 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
 
     Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
+
+    computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
+    _aux.compute(EXEC_INITIAL);
 
     if (_use_legacy_uo_initialization)
     {

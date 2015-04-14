@@ -22,8 +22,10 @@
     family = MONOMIAL
   [../]
   [./disp_x]
+    initial_condition = 0.0
   [../]
   [./disp_y]
+    initial_condition = 0.5
   [../]
 []
 
@@ -47,20 +49,6 @@
     type = UserForcingFunction
     variable = u
     function = axial_force
-  [../]
-[]
-
-[AuxKernels]
-  [./disp_x]
-    type = ConstantAux
-    variable = disp_x
-    execute_on = initial
-  [../]
-  [./disp_y]
-    type = ConstantAux
-    variable = disp_y
-    value = 0.5
-    execute_on = initial
   [../]
 []
 
