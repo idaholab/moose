@@ -101,3 +101,25 @@ SideSetsFromNormals::modify()
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideSetsFromNormals::SideSetsFromNormals(const std::string & deprecated_name, InputParameters parameters):
+    AddSideSetsBase(deprecated_name, parameters),
+    _normals(getParam<std::vector<Point> >("normals"))
+{
+
+  // Get the BoundaryIDs from the mesh
+  _boundary_names = getParam<std::vector<BoundaryName> >("new_boundary");
+
+
+  if (_normals.size() != _boundary_names.size())
+    mooseError("normal list and boundary list are not the same length");
+
+  // Make sure that the normals are normalized
+  for (std::vector<Point>::iterator normal_it = _normals.begin(); normal_it != _normals.end(); ++normal_it)
+  {
+    mooseAssert(normal_it->size() >= 1e-5, "Normal is zero");
+    *normal_it /= normal_it->size();
+  }
+}

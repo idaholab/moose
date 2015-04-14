@@ -27,6 +27,7 @@ class AddBCAction : public MooseObjectAction
 {
 public:
   AddBCAction(InputParameters params);
+  AddBCAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

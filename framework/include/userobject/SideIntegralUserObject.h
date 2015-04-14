@@ -33,6 +33,7 @@ class SideIntegralUserObject : public SideUserObject
 {
 public:
   SideIntegralUserObject(const InputParameters & parameters);
+  SideIntegralUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

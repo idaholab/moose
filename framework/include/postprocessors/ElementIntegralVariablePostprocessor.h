@@ -36,6 +36,7 @@ class ElementIntegralVariablePostprocessor :
 {
 public:
   ElementIntegralVariablePostprocessor(const InputParameters & parameters);
+  ElementIntegralVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

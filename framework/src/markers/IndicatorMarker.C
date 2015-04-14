@@ -28,3 +28,11 @@ IndicatorMarker::IndicatorMarker(const InputParameters & parameters) :
     _error_vector(getErrorVector(parameters.get<IndicatorName>("indicator")))
 {
 }
+
+
+// DEPRECATED CONSTRUCTOR
+IndicatorMarker::IndicatorMarker(const std::string & deprecated_name, InputParameters parameters) :
+    Marker(deprecated_name, parameters),
+    _error_vector(getErrorVector(parameters.get<IndicatorName>("indicator")))
+{
+}

@@ -28,6 +28,7 @@ class VectorMagnitudeAux : public AuxKernel
 {
 public:
   VectorMagnitudeAux(const InputParameters & parameters);
+  VectorMagnitudeAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~VectorMagnitudeAux();
 
 protected:

@@ -27,6 +27,7 @@ class CopyNodalVarsAction: public Action
 {
 public:
   CopyNodalVarsAction(InputParameters params);
+  CopyNodalVarsAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

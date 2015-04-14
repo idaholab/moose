@@ -79,3 +79,10 @@ AddAuxVariableAction::act()
   if (isParamValid("initial_condition"))
     createInitialConditionAction();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddAuxVariableAction::AddAuxVariableAction(const std::string & deprecated_name, InputParameters params) :
+    AddVariableAction(deprecated_name, params)
+{
+}

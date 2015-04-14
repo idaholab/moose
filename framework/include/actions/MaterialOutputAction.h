@@ -41,6 +41,7 @@ public:
    * @param params Input parameters for this action object
    */
   MaterialOutputAction(InputParameters params);
+  MaterialOutputAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

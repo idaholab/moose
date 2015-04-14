@@ -58,6 +58,7 @@ class Marker :
 {
 public:
   Marker(const InputParameters & parameters);
+  Marker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Marker() {}
 
   /// This mirrors the main refinement flag values in libMesh in Elem::RefinementState but adds "dont_mark"

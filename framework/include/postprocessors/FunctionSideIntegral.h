@@ -31,6 +31,7 @@ class FunctionSideIntegral : public SideIntegralPostprocessor
 {
 public:
   FunctionSideIntegral(const InputParameters & parameters);
+  FunctionSideIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void threadJoin(const UserObject & y);
 
 protected:

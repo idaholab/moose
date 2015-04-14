@@ -31,3 +31,10 @@ AddConstraintAction::act()
 {
   _problem->addConstraint(_type, _name, _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddConstraintAction::AddConstraintAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

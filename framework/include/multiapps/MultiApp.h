@@ -48,6 +48,7 @@ class MultiApp :
 {
 public:
   MultiApp(const InputParameters & parameters);
+  MultiApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MultiApp();
 

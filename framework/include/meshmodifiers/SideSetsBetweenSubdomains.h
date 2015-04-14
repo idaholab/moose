@@ -27,6 +27,7 @@ class SideSetsBetweenSubdomains :
 {
 public:
   SideSetsBetweenSubdomains(const InputParameters & parameters);
+  SideSetsBetweenSubdomains(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SideSetsBetweenSubdomains();
 

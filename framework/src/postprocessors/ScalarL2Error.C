@@ -50,3 +50,12 @@ ScalarL2Error::getValue()
   Real diff = (_var.sln()[0] - _func.value(_t, p));
   return std::sqrt(diff*diff);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ScalarL2Error::ScalarL2Error(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
+    _func(getFunction("function"))
+{
+}

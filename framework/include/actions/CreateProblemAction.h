@@ -26,6 +26,7 @@ class CreateProblemAction : public MooseObjectAction
 {
 public:
   CreateProblemAction(InputParameters parameters);
+  CreateProblemAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

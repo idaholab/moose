@@ -31,6 +31,7 @@ class TimeKernel : public Kernel
 {
 public:
   TimeKernel(const InputParameters & parameters);
+  TimeKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~TimeKernel();
 
   virtual void computeResidual();

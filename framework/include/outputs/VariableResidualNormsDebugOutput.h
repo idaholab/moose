@@ -41,6 +41,7 @@ public:
    * @param parameters Object input parameters
    */
   VariableResidualNormsDebugOutput(const InputParameters & parameters);
+  VariableResidualNormsDebugOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

@@ -30,6 +30,7 @@ class SideValueSampler :
 {
 public:
   SideValueSampler(const InputParameters & parameters);
+  SideValueSampler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SideValueSampler() {}
 

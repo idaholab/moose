@@ -39,6 +39,7 @@ public:
    * constructor.
    */
   VacuumBC(const InputParameters & parameters);
+  VacuumBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

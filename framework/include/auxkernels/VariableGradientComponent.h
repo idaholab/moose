@@ -37,6 +37,7 @@ public:
    * @param parameters Input parameters for the object
    */
   VariableGradientComponent(const InputParameters & parameters);
+  VariableGradientComponent(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

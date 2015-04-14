@@ -27,6 +27,7 @@ class AddIndicatorAction : public MooseObjectAction
 {
 public:
   AddIndicatorAction(InputParameters params);
+  AddIndicatorAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

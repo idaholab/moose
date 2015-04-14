@@ -109,3 +109,10 @@ AddExtraNodeset::modify()
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
     boundary_info.sideset_name(boundary_ids[i]) = boundary_names[i];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddExtraNodeset::AddExtraNodeset(const std::string & deprecated_name, InputParameters params) :
+    MeshModifier(deprecated_name, params)
+{
+}

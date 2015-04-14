@@ -116,3 +116,10 @@ KernelValue::precomputeQpJacobian()
 {
   return 0.0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+KernelValue::KernelValue(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters)
+{
+}

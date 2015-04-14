@@ -38,6 +38,7 @@ public:
    * @param parameters The input file parameters for this object
    */
   PointValue(const InputParameters & parameters);
+  PointValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Destructor

@@ -31,3 +31,10 @@ AddDamperAction::act()
 {
   _problem->addDamper(_type, _name, _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddDamperAction::AddDamperAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

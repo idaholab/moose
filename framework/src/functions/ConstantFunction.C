@@ -32,3 +32,11 @@ ConstantFunction::value(Real, const Point &)
 {
   return _value;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantFunction::ConstantFunction(const std::string & deprecated_name, InputParameters parameters) :
+    Function(deprecated_name, parameters),
+    _value(getParam<Real>("value"))
+{
+}

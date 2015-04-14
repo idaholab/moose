@@ -143,3 +143,10 @@ CheckOutputAction::checkPerfLogOutput()
 #endif
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+CheckOutputAction::CheckOutputAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
+}

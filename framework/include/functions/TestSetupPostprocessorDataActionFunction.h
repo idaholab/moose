@@ -38,6 +38,7 @@ public:
    * @param parameters
    */
   TestSetupPostprocessorDataActionFunction(const InputParameters & parameters);
+  TestSetupPostprocessorDataActionFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

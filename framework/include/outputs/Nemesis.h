@@ -40,6 +40,7 @@ public:
    * Class constructor
    */
   Nemesis(const InputParameters & parameters);
+  Nemesis(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

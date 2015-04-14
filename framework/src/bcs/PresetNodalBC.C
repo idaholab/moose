@@ -41,3 +41,11 @@ PresetNodalBC::computeQpResidual()
 {
   return _u[_qp] - computeQpValue();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+PresetNodalBC::PresetNodalBC(const std::string & deprecated_name, InputParameters parameters) :
+  NodalBC(deprecated_name, parameters)
+{
+
+}

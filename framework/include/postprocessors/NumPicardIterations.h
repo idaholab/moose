@@ -28,6 +28,7 @@ class NumPicardIterations : public GeneralPostprocessor
 {
 public:
   NumPicardIterations(const InputParameters & parameters);
+  NumPicardIterations(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute() {}

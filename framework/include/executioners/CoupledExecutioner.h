@@ -36,6 +36,7 @@ class CoupledExecutioner : public Executioner
 {
 public:
   CoupledExecutioner(const InputParameters & parameters);
+  CoupledExecutioner(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CoupledExecutioner();
 
   virtual Problem & problem();

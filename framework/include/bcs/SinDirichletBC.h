@@ -30,6 +30,7 @@ class SinDirichletBC : public NodalBC
 public:
 
   SinDirichletBC(const InputParameters & parameters);
+  SinDirichletBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -34,3 +34,10 @@ AddBCAction::act()
 {
   _problem->addBoundaryCondition(_type, _name, _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddBCAction::AddBCAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

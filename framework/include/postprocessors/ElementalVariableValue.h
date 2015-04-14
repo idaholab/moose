@@ -31,6 +31,7 @@ class ElementalVariableValue : public GeneralPostprocessor
 {
 public:
   ElementalVariableValue(const InputParameters & parameters);
+  ElementalVariableValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

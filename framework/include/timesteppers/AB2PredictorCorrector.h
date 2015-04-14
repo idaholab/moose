@@ -36,6 +36,7 @@ class AB2PredictorCorrector : public TimeStepper
 {
 public:
   AB2PredictorCorrector(const InputParameters & parameters);
+  AB2PredictorCorrector(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AB2PredictorCorrector();
 
   virtual Real computeDT();

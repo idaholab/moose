@@ -27,6 +27,7 @@ class ODETimeDerivative : public ODEKernel
 {
 public:
   ODETimeDerivative(const InputParameters & parameters);
+  ODETimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

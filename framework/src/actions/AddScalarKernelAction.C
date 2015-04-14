@@ -34,3 +34,10 @@ AddScalarKernelAction::act()
   else
     _problem->addAuxScalarKernel(_type, _name, _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddScalarKernelAction::AddScalarKernelAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

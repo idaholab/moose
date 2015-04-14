@@ -29,6 +29,7 @@ class TotalVariableValue : public GeneralPostprocessor
 {
 public:
   TotalVariableValue(const InputParameters & parameters);
+  TotalVariableValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~TotalVariableValue();
 
   virtual void initialize();

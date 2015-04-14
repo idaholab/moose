@@ -31,6 +31,7 @@ class PlotFunction : public GeneralPostprocessor
 {
 public:
   PlotFunction(const InputParameters & parameters);
+  PlotFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~PlotFunction();
 
   virtual void initialize();

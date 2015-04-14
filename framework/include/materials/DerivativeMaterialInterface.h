@@ -47,7 +47,8 @@ template<class T>
 class DerivativeMaterialInterface : public T
 {
 public:
-  DerivativeMaterialInterface(const InputParameters & parameters);
+  DerivativeMaterialInterface(InputParameters parameters);
+  DerivativeMaterialInterface(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Helper functions to generate the material property names for the
@@ -108,7 +109,7 @@ private:
 
 
 template<class T>
-DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const InputParameters & parameters) :
+DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const InputParameters parameters) :
     T(parameters),
     _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
@@ -263,6 +264,15 @@ const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
 {
   return getDefaultMaterialProperty<U>(propertyNameThird(base, c1, c2, c3));
+}
+
+
+// DEPRECATED CONSTRUCTOR
+template<class T>
+DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & deprecated_name, InputParameters parameters) :
+    T(deprecated_name, parameters),
+    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
+{
 }
 
 #endif //DERIVATIVEMATERIALINTERFACE_H

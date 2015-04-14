@@ -52,3 +52,10 @@ AddElementalFieldAction::act()
   else
     _problem->addAuxVariable(variable, fe_type, &blocks);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddElementalFieldAction::AddElementalFieldAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
+}

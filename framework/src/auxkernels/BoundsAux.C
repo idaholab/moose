@@ -52,3 +52,19 @@ BoundsAux::computeValue()
 
   return 0.0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+BoundsAux::BoundsAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _upper_vector(_nl_sys.getVector("upper_bound")),
+    _lower_vector(_nl_sys.getVector("lower_bound")),
+    _bounded_variable_id(coupled("bounded_variable"))
+{
+  if (!isNodal())
+    mooseError("BoundsAux must be used on a nodal auxiliary variable!");
+  _upper_valid = parameters.isParamValid("upper");
+  if (_upper_valid) _upper = getParam<Real>("upper");
+  _lower_valid = parameters.isParamValid("lower");
+  if (_lower_valid) _lower = getParam<Real>("lower");
+}

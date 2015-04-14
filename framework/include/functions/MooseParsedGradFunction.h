@@ -44,6 +44,7 @@ public:
    * @param parameters The input parameters
    */
   MooseParsedGradFunction(const InputParameters & parameters);
+  MooseParsedGradFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

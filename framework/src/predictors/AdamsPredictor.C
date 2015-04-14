@@ -99,3 +99,20 @@ AdamsPredictor::apply(NumericVector<Number> & sln)
 
   _solution_predictor.localize(sln);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AdamsPredictor::AdamsPredictor(const std::string & deprecated_name, InputParameters parameters) :
+    Predictor(deprecated_name, parameters),
+    _order(getParam<int>("order")),
+    _current_old_solution(_nl.addVector("AB2_current_old_solution", true, GHOSTED)),
+    _older_solution(_nl.addVector("AB2_older_solution", true, GHOSTED)),
+    _oldest_solution(_nl.addVector("AB2_rejected_solution", true, GHOSTED)),
+    _tmp_previous_solution(_nl.addVector("tmp_previous_solution", true, GHOSTED)),
+    _tmp_residual_old(_nl.addVector("tmp_residual_old", true, GHOSTED)),
+    _tmp_third_vector(_nl.addVector("tmp_third_vector", true, GHOSTED)),
+    _t_step_old(declareRestartableData<int>("t_step_old", 0)),
+    _dt_older(declareRestartableData<Real>("dt_older", 0)),
+    _dtstorage(declareRestartableData<Real>("dtstorage", 0))
+{
+}

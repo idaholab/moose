@@ -34,6 +34,7 @@ class AuxNodalScalarKernel :
 {
 public:
   AuxNodalScalarKernel(const InputParameters & parameters);
+  AuxNodalScalarKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AuxNodalScalarKernel();
 
   /**

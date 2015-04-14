@@ -77,3 +77,13 @@ SolutionFunction::value(Real t, const Point & p)
 {
   return _scale_factor*(_solution_object_ptr->pointValue(t, p, _var_name)) + _add_factor;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SolutionFunction::SolutionFunction(const std::string & deprecated_name, InputParameters parameters) :
+    Function(deprecated_name, parameters),
+    _solution_object_ptr(NULL),
+    _scale_factor(getParam<Real>("scale_factor")),
+    _add_factor(getParam<Real>("add_factor"))
+{
+}

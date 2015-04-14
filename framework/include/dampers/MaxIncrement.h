@@ -31,6 +31,7 @@ class MaxIncrement : public Damper
 {
 public:
   MaxIncrement(const InputParameters & parameters);
+  MaxIncrement(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaxIncrement();
 

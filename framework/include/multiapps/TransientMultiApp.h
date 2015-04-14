@@ -34,6 +34,7 @@ class TransientMultiApp :
 {
 public:
   TransientMultiApp(const InputParameters & parameters);
+  TransientMultiApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~TransientMultiApp();
 

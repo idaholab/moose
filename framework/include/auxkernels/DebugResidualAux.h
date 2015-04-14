@@ -29,6 +29,7 @@ class DebugResidualAux : public AuxKernel
 {
 public:
   DebugResidualAux(const InputParameters & parameters);
+  DebugResidualAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~DebugResidualAux();
 
 protected:

@@ -27,6 +27,7 @@ class AddConstraintAction : public MooseObjectAction
 {
 public:
   AddConstraintAction(InputParameters params);
+  AddConstraintAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

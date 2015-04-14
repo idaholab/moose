@@ -36,6 +36,7 @@ public:
    * Class constructor
    */
   Tecplot(const InputParameters & parameters);
+  Tecplot(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

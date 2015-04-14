@@ -3957,3 +3957,119 @@ FEProblem::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
 
   return _block_mat_side_cache[tid][subdomain_id];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+FEProblem::FEProblem(const std::string & deprecated_name, InputParameters parameters) :
+    SubProblem(deprecated_name, parameters),
+    Restartable(parameters, "FEProblem", this),
+    _mesh(*parameters.get<MooseMesh *>("mesh")),
+    _eq(_mesh),
+    _initialized(false),
+    _kernel_type(Moose::KT_ALL),
+    _current_boundary_id(Moose::INVALID_BOUNDARY_ID),
+    _solve(getParam<bool>("solve")),
+
+    _transient(false),
+    _time(declareRestartableData<Real>("time")),
+    _time_old(declareRestartableData<Real>("time_old")),
+    _t_step(declareRecoverableData<int>("t_step")),
+    _dt(declareRestartableData<Real>("dt")),
+    _dt_old(declareRestartableData<Real>("dt_old")),
+
+    _nl(getParam<bool>("use_nonlinear") ? *(new NonlinearSystem(*this, name_sys("nl", _n))) : *(new EigenSystem(*this, name_sys("nl", _n)))),
+    _aux(*this, name_sys("aux", _n)),
+    _coupling(Moose::COUPLING_DIAG),
+    _cm(NULL),
+#ifdef LIBMESH_ENABLE_AMR
+    _adaptivity(*this),
+#endif
+    _displaced_mesh(NULL),
+    _displaced_problem(NULL),
+    _geometric_search_data(*this, _mesh),
+    _reinit_displaced_elem(false),
+    _reinit_displaced_face(false),
+    _input_file_saved(false),
+    _has_dampers(false),
+    _has_constraints(false),
+    _has_multiapps(false),
+    _has_initialized_stateful(false),
+    _resurrector(NULL),
+    _const_jacobian(false),
+    _has_jacobian(false),
+    _kernel_coverage_check(false),
+    _max_qps(std::numeric_limits<unsigned int>::max()),
+    _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
+    _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
+    _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
+{
+
+  _n++;
+
+  _time = 0.0;
+  _time_old = 0.0;
+  _t_step = 0;
+  _dt = 0;
+  _dt_old = _dt;
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  _assembly.resize(n_threads);
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _assembly[i] = new Assembly(_nl, couplingMatrix(), i);
+
+  unsigned int dimNullSpace      = parameters.get<unsigned int>("dimNullSpace");
+  unsigned int dimNearNullSpace  = parameters.get<unsigned int>("dimNearNullSpace");
+  for (unsigned int i = 0; i < dimNullSpace; ++i)
+  {
+    std::ostringstream oss;
+    oss << "_" << i;
+    // do not project, since this will be recomputed, but make it ghosted, since the near nullspace builder might march over all nodes
+    _nl.addVector("NullSpace"+oss.str(),false,GHOSTED,false);
+  }
+  _subspace_dim["NullSpace"] = dimNullSpace;
+  for (unsigned int i = 0; i < dimNearNullSpace; ++i)
+  {
+    std::ostringstream oss;
+    oss << "_" << i;
+    // do not project, since this will be recomputed, but make it ghosted, since the near-nullspace builder might march over all semilocal nodes
+    _nl.addVector("NearNullSpace"+oss.str(),false,GHOSTED,false);
+  }
+  _subspace_dim["NearNullSpace"] = dimNearNullSpace;
+
+  _functions.resize(n_threads);
+  _ics.resize(n_threads);
+  _materials.resize(n_threads);
+
+  _material_data.resize(n_threads);
+  _bnd_material_data.resize(n_threads);
+  _neighbor_material_data.resize(n_threads);
+  for (unsigned int i = 0; i < n_threads; i++)
+  {
+    _material_data[i] = new MaterialData(_material_props);
+    _bnd_material_data[i] = new MaterialData(_bnd_material_props);
+    _neighbor_material_data[i] = new MaterialData(_bnd_material_props);
+  }
+
+  _pps_data.resize(n_threads);
+
+  for (unsigned int i=0; i<n_threads; i++)
+    _pps_data[i] = new PostprocessorData(*this, i);
+
+  _vpps_data.resize(n_threads);
+
+  for (unsigned int i=0; i<n_threads; i++)
+    _vpps_data[i] = new VectorPostprocessorData(*this, i);
+
+  _indicators.resize(n_threads);
+  _markers.resize(n_threads);
+
+  _active_elemental_moose_variables.resize(n_threads);
+
+  _block_mat_side_cache.resize(n_threads);
+  _bnd_mat_side_cache.resize(n_threads);
+
+  _resurrector = new Resurrector(*this);
+
+  _eq.parameters.set<FEProblem *>("_fe_problem") = this;
+}

@@ -27,3 +27,9 @@ InputParameters validParams<EmptyPostprocessor>()
 EmptyPostprocessor::EmptyPostprocessor(const InputParameters & parameters) :
     GeneralPostprocessor(parameters)
 {}
+
+
+// DEPRECATED CONSTRUCTOR
+EmptyPostprocessor::EmptyPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters)
+{}

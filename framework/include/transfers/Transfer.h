@@ -47,6 +47,7 @@ class Transfer :
 {
 public:
   Transfer(const InputParameters & parameters);
+  Transfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Transfer() {}
 
   /**

@@ -37,3 +37,9 @@ WeakGradientBC::computeQpJacobian()
   return (_grad_phi[_j][_qp]*_normals[_qp])*_test[_i][_qp];
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+WeakGradientBC::WeakGradientBC(const std::string & deprecated_name, InputParameters parameters) :
+    IntegratedBC(deprecated_name, parameters)
+{}

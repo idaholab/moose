@@ -58,3 +58,10 @@ ElementAverageValue::threadJoin(const UserObject & y)
   const ElementAverageValue & pps = static_cast<const ElementAverageValue &>(y);
   _volume += pps._volume;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementAverageValue::ElementAverageValue(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralVariablePostprocessor(deprecated_name, parameters),
+    _volume(0)
+{}

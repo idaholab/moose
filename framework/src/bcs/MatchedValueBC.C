@@ -43,3 +43,12 @@ MatchedValueBC::computeQpOffDiagJacobian(unsigned int jvar)
   else
     return 0.;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MatchedValueBC::MatchedValueBC(const std::string & deprecated_name, InputParameters parameters) :
+    NodalBC(deprecated_name, parameters),
+    _v(coupledValue("v")),
+    _v_num(coupled("v"))
+{
+}

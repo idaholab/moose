@@ -391,3 +391,44 @@ DiracKernel::updateCaches(const Elem* old_elem,
     points.push_back(std::make_pair(p, id));
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DiracKernel::DiracKernel(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    SetupInterface(parameters),
+    CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
+    FunctionInterface(parameters),
+    UserObjectInterface(parameters),
+    TransientInterface(parameters, "dirac_kernels"),
+    MaterialPropertyInterface(parameters),
+    PostprocessorInterface(parameters),
+    GeometricSearchInterface(parameters),
+    Restartable(parameters, "DiracKernels"),
+    ZeroInterface(parameters),
+    MeshChangedInterface(parameters),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _mesh(_subproblem.mesh()),
+    _coord_sys(_assembly.coordSystem()),
+    _dirac_kernel_info(_subproblem.diracKernelInfo()),
+    _current_elem(_var.currentElem()),
+    _q_point(_assembly.qPoints()),
+    _physical_point(_assembly.physicalPoints()),
+    _qrule(_assembly.qRule()),
+    _JxW(_assembly.JxW()),
+    _phi(_assembly.phi()),
+    _grad_phi(_assembly.gradPhi()),
+    _test(_var.phi()),
+    _grad_test(_var.gradPhi()),
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
+    _u_dot(_var.uDot()),
+    _du_dot_du(_var.duDotDu())
+{
+  // Stateful material properties are not allowed on DiracKernels
+  statefulPropertiesAllowed(false);
+}

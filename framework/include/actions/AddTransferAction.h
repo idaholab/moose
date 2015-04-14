@@ -27,6 +27,7 @@ class AddTransferAction : public MooseObjectAction
 {
 public:
   AddTransferAction(InputParameters params);
+  AddTransferAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

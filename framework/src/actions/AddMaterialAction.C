@@ -31,3 +31,10 @@ AddMaterialAction::act()
 {
   _problem->addMaterial(_type, _name, _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddMaterialAction::AddMaterialAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

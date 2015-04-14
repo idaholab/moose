@@ -115,3 +115,21 @@ SolutionTimeAdaptiveDT::rejectStep()
 
   TimeStepper::rejectStep();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const std::string & deprecated_name, InputParameters parameters) :
+    TimeStepper(deprecated_name, parameters),
+    _direction(getParam<int>("initial_direction")),
+    _percent_change(getParam<Real>("percent_change")),
+    _older_sol_time_vs_dt(std::numeric_limits<Real>::max()),
+    _old_sol_time_vs_dt(std::numeric_limits<Real>::max()),
+    _sol_time_vs_dt(std::numeric_limits<Real>::max()),
+    _adapt_log(getParam<bool>("adapt_log"))
+{
+  if ((_adapt_log) && (processor_id() == 0))
+  {
+    _adaptive_log.open("adaptive_log");
+    _adaptive_log<<"Adaptive Times Step Log"<<std::endl;
+  }
+}

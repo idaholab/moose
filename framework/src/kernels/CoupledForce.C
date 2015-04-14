@@ -50,3 +50,12 @@ CoupledForce::computeQpOffDiagJacobian(unsigned int jvar)
     return -_phi[_j][_qp]*_test[_i][_qp];
   return 0.0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+CoupledForce::CoupledForce(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _v_var(coupled("v")),
+    _v(coupledValue("v"))
+{
+}

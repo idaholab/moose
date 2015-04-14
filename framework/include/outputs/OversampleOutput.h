@@ -58,6 +58,7 @@ public:
    * @see initOversample()
    */
   OversampleOutput(const InputParameters & parameters);
+  OversampleOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

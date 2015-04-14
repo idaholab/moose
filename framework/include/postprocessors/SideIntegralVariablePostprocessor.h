@@ -36,6 +36,7 @@ class SideIntegralVariablePostprocessor :
 {
 public:
   SideIntegralVariablePostprocessor(const InputParameters & parameters);
+  SideIntegralVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

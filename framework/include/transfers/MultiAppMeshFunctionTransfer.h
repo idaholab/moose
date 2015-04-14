@@ -32,6 +32,7 @@ class MultiAppMeshFunctionTransfer :
 {
 public:
   MultiAppMeshFunctionTransfer(const InputParameters & parameters);
+  MultiAppMeshFunctionTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppMeshFunctionTransfer() {}
 
   virtual void initialSetup();

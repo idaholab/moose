@@ -30,6 +30,7 @@ class MatchedValueBC : public NodalBC
 {
 public:
   MatchedValueBC(const InputParameters & parameters);
+  MatchedValueBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

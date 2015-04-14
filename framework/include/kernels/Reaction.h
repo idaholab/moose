@@ -27,6 +27,7 @@ class Reaction : public Kernel
 {
 public:
   Reaction(const InputParameters & parameters);
+  Reaction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

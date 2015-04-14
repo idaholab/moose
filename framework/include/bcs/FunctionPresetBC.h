@@ -32,6 +32,7 @@ class FunctionPresetBC : public PresetNodalBC
 {
 public:
   FunctionPresetBC(const InputParameters & parameters);
+  FunctionPresetBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

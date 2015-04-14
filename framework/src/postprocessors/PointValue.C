@@ -82,3 +82,17 @@ PointValue::getValue()
 {
   return _value;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+PointValue::PointValue(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _u(_var.sln()),
+    _mesh(_subproblem.mesh().getMesh()),
+    _point_vec(1, getParam<Point>("point")),
+    _value(0),
+    _root_id(0),
+    _elem_id(DofObject::invalid_id)
+{
+}

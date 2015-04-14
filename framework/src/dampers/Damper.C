@@ -66,3 +66,30 @@ Damper::computeDamping()
 
   return damping;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+Damper::Damper(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    SetupInterface(parameters),
+    MaterialPropertyInterface(parameters),
+    Restartable(parameters, "Dampers"),
+    MeshChangedInterface(parameters),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _coord_sys(_assembly.coordSystem()),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+
+    _current_elem(_var.currentElem()),
+    _q_point(_assembly.qPoints()),
+    _qrule(_assembly.qRule()),
+    _JxW(_assembly.JxW()),
+
+    _u_increment(_var.increment()),
+
+    _u(_var.sln()),
+    _grad_u(_var.gradSln())
+{
+}

@@ -41,6 +41,7 @@ class IntegratedBC :
 {
 public:
   IntegratedBC(const InputParameters & parameters);
+  IntegratedBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~IntegratedBC();
 

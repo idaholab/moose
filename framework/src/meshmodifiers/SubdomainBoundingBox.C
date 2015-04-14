@@ -67,3 +67,13 @@ SubdomainBoundingBox::modify()
   if (isParamValid("block_name"))
     _mesh_ptr->getMesh().subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SubdomainBoundingBox::SubdomainBoundingBox(const std::string & deprecated_name, InputParameters parameters) :
+    MeshModifier(deprecated_name, parameters),
+    _location(parameters.get<MooseEnum>("location")),
+    _block_id(parameters.get<SubdomainID>("block_id")),
+    _bounding_box(parameters.get<RealVectorValue>("bottom_left"), parameters.get<RealVectorValue>("top_right"))
+{
+}

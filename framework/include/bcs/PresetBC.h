@@ -29,6 +29,7 @@ class PresetBC : public PresetNodalBC
 {
 public:
   PresetBC(const InputParameters & parameters);
+  PresetBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpValue();

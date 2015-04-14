@@ -480,3 +480,26 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we 
   problem->advanceState();
   _transient_executioners[i] = ex;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+TransientMultiApp::TransientMultiApp(const std::string & deprecated_name, InputParameters parameters):
+    MultiApp(deprecated_name, parameters),
+    _sub_cycling(getParam<bool>("sub_cycling")),
+    _interpolate_transfers(getParam<bool>("interpolate_transfers")),
+    _detect_steady_state(getParam<bool>("detect_steady_state")),
+    _steady_state_tol(getParam<Real>("steady_state_tol")),
+    _output_sub_cycles(getParam<bool>("output_sub_cycles")),
+    _max_failures(getParam<unsigned int>("max_failures")),
+    _tolerate_failure(getParam<bool>("tolerate_failure")),
+    _failures(0),
+    _catch_up(getParam<bool>("catch_up")),
+    _max_catch_up_steps(getParam<Real>("max_catch_up_steps")),
+    _first(declareRestartableData<bool>("first", true)),
+    _auto_advance(false),
+    _print_sub_cycles(getParam<bool>("print_sub_cycles"))
+{
+  // Transfer interpolation only makes sense for sub-cycling solves
+  if (_interpolate_transfers && !_sub_cycling)
+    mooseError("MultiApp " << name() << " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
+}

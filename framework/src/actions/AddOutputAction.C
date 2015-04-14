@@ -95,3 +95,10 @@ AddOutputAction::act()
   MooseSharedPointer<Output> output = MooseSharedNamespace::static_pointer_cast<Output>(_factory.create(_type, object_name, _moose_object_pars));
   output_warehouse.addOutput(output);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddOutputAction::AddOutputAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

@@ -30,6 +30,7 @@ class CoupledForce : public Kernel
 {
 public:
   CoupledForce(const InputParameters & parameters);
+  CoupledForce(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -179,3 +179,10 @@ SetupRecoverFileBaseAction::getCheckpointFiles(std::set<std::string> & files)
     tinydir_close(&dir);
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
+}

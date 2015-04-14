@@ -44,3 +44,10 @@ AddMortarInterfaceAction::act()
   if (_displaced_mesh)
     _displaced_mesh->addMortarInterface(iface_name, getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"), getParam<SubdomainName>("subdomain"));
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddMortarInterfaceAction::AddMortarInterfaceAction(const std::string & deprecated_name, InputParameters parameters) :
+    Action(deprecated_name, parameters)
+{
+}

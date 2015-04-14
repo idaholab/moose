@@ -26,6 +26,7 @@ class MeshExtruder : public MeshModifier
 {
 public:
   MeshExtruder(const InputParameters & parameters);
+  MeshExtruder(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MeshExtruder();
 

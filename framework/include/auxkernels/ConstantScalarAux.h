@@ -29,6 +29,7 @@ class ConstantScalarAux : public AuxScalarKernel
 {
 public:
   ConstantScalarAux(const InputParameters & parameters);
+  ConstantScalarAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ConstantScalarAux();
 
 protected:

@@ -59,3 +59,10 @@ LayeredIntegral::threadJoin(const UserObject & y)
   ElementIntegralVariableUserObject::threadJoin(y);
   LayeredBase::threadJoin(y);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+LayeredIntegral::LayeredIntegral(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralVariableUserObject(deprecated_name, parameters),
+    LayeredBase(parameters)
+{}

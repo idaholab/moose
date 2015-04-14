@@ -27,6 +27,7 @@ class JumpIndicator :
 {
 public:
   JumpIndicator(const InputParameters & parameters);
+  JumpIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~JumpIndicator(){};
 
 protected:

@@ -58,6 +58,7 @@ class Constraint :
 {
 public:
   Constraint(const InputParameters & parameters);
+  Constraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Constraint();
 
   /**

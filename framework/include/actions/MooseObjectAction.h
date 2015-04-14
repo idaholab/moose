@@ -29,6 +29,7 @@ class MooseObjectAction : public Action
 {
 public:
   MooseObjectAction(InputParameters params);
+  MooseObjectAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   InputParameters & getObjectParams() { return _moose_object_pars; }
 

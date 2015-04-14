@@ -40,3 +40,10 @@ ODETimeDerivative::computeQpJacobian()
   else
     return 0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ODETimeDerivative::ODETimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
+    ODEKernel(deprecated_name, parameters)
+{
+}

@@ -27,6 +27,7 @@ class NumVars : public GeneralPostprocessor
 {
 public:
   NumVars(const InputParameters & parameters);
+  NumVars(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
 

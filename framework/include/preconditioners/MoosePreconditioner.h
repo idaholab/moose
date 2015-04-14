@@ -43,6 +43,7 @@ class MoosePreconditioner :
 {
 public:
   MoosePreconditioner(const InputParameters & params);
+  MoosePreconditioner(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual ~MoosePreconditioner();
 
   /**

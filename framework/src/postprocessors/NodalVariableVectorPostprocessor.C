@@ -28,3 +28,9 @@ InputParameters validParams<NodalVariableVectorPostprocessor>()
 NodalVariableVectorPostprocessor::NodalVariableVectorPostprocessor(const InputParameters & parameters) :
     NodalVectorPostprocessor(parameters)
 {}
+
+
+// DEPRECATED CONSTRUCTOR
+NodalVariableVectorPostprocessor::NodalVariableVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    NodalVectorPostprocessor(deprecated_name, parameters)
+{}

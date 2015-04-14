@@ -37,6 +37,7 @@ public:
    * @param parameters The input parameters for this AuxKernel
    */
   MaterialRealTensorValueAux(const InputParameters & parameters);
+  MaterialRealTensorValueAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

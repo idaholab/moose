@@ -36,3 +36,11 @@ AnalyticalIndicator::computeQpIntegral()
   return diff*diff;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+AnalyticalIndicator::AnalyticalIndicator(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralIndicator(deprecated_name, parameters),
+    _func(getFunction("function"))
+{
+}

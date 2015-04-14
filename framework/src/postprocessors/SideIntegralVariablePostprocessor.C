@@ -37,3 +37,15 @@ SideIntegralVariablePostprocessor::computeQpIntegral()
 {
   return _u[_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    SideIntegralPostprocessor(deprecated_name, parameters),
+    MooseVariableInterface(parameters, false),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _u(_var.sln()),
+    _grad_u(_var.gradSln())
+{
+  addMooseVariableDependency(mooseVariable());
+}

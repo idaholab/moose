@@ -34,6 +34,7 @@ class CrankNicolson : public TimeIntegrator
 {
 public:
   CrankNicolson(const InputParameters & parameters);
+  CrankNicolson(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CrankNicolson();
 
   virtual int order() { return 2; }

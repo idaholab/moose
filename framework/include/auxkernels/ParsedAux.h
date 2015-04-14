@@ -34,6 +34,7 @@ class ParsedAux :
 {
 public:
   ParsedAux(const InputParameters & parameters);
+  ParsedAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ParsedAux();
 
 protected:

@@ -35,6 +35,7 @@ public:
    * constructor.
    */
   SpatialUserObjectAux(const InputParameters & parameters);
+  SpatialUserObjectAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SpatialUserObjectAux() {}
 

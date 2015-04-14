@@ -92,3 +92,13 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
     }
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MoosePreconditioner::MoosePreconditioner(const std::string & deprecated_name, InputParameters params) :
+    MooseObject(deprecated_name, params),
+    Restartable(params, "Preconditioners"),
+    _fe_problem(*params.getCheckedPointerParam<FEProblem *>("_fe_problem"))
+{
+  _fe_problem.getNonlinearSystem().setPCSide(getParam<MooseEnum>("pc_side"));
+}

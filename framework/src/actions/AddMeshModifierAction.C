@@ -62,3 +62,10 @@ AddMeshModifierAction::act()
 
   // mesh_modifier is deleted here
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddMeshModifierAction::AddMeshModifierAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

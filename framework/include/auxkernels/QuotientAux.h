@@ -33,6 +33,7 @@ class QuotientAux : public AuxKernel
 {
 public:
   QuotientAux(const InputParameters & parameters);
+  QuotientAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~QuotientAux() {}
 

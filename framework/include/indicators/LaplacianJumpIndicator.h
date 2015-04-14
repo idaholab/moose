@@ -27,6 +27,7 @@ class LaplacianJumpIndicator :
 {
 public:
   LaplacianJumpIndicator(const InputParameters & parameters);
+  LaplacianJumpIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~LaplacianJumpIndicator(){};
 
 protected:

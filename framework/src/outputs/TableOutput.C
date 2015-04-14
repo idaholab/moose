@@ -129,3 +129,13 @@ TableOutput::outputScalarVariables()
       }
   }
 }
+
+// DEPRECATED CONSTRUCTOR
+TableOutput::TableOutput(const std::string & deprecated_name, InputParameters parameters) :
+    AdvancedOutput<FileOutput>(deprecated_name, parameters),
+    _tables_restartable(getParam<bool>("append_restart")),
+    _postprocessor_table(_tables_restartable ? declareRestartableData<FormattedTable>("postprocessor_table") : declareRecoverableData<FormattedTable>("postprocessor_table")),
+    _scalar_table(_tables_restartable ? declareRestartableData<FormattedTable>("scalar_table") : declareRecoverableData<FormattedTable>("scalar_table")),
+    _all_data_table(_tables_restartable ? declareRestartableData<FormattedTable>("all_data_table") : declareRecoverableData<FormattedTable>("all_data_table"))
+{
+}

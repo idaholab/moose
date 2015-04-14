@@ -30,6 +30,7 @@ class NumResidualEvaluations : public GeneralPostprocessor
 {
 public:
   NumResidualEvaluations(const InputParameters & parameters);
+  NumResidualEvaluations(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

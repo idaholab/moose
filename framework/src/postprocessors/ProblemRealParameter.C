@@ -32,3 +32,9 @@ ProblemRealParameter::getValue()
 {
   return _fe_problem.getParam<Real>(getParam<std::string>("param_name"));
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ProblemRealParameter::ProblemRealParameter(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters)
+{}

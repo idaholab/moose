@@ -44,6 +44,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    */
   MeshModifier(const InputParameters & parameters);
+  MeshModifier(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MeshModifier();
 

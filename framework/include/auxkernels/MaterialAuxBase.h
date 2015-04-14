@@ -49,6 +49,7 @@ public:
    * @param parameters The input parameters for this object
    */
   MaterialAuxBase(const InputParameters & parameters);
+  MaterialAuxBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

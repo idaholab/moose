@@ -31,6 +31,7 @@ class DirichletBC : public NodalBC
 {
 public:
   DirichletBC(const InputParameters & parameters);
+  DirichletBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

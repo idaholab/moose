@@ -35,6 +35,7 @@ public:
    * Class constructor
    */
   AddAuxVariableAction(InputParameters params);
+  AddAuxVariableAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Creates the AuxVariable

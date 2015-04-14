@@ -37,6 +37,7 @@ public:
    * @param parameters The input parameters for this object
    */
   MaterialStdVectorAux(const InputParameters & parameters);
+  MaterialStdVectorAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

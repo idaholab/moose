@@ -98,3 +98,11 @@ ElementExtremeValue::threadJoin(const UserObject & y)
       break;
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementExtremeValue::ElementExtremeValue(const std::string & deprecated_name, InputParameters parameters) :
+  ElementVariablePostprocessor(deprecated_name, parameters),
+  _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
+  _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max())
+{}

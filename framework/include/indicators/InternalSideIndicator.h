@@ -54,6 +54,7 @@ public:
    *
    */
   InternalSideIndicator(const InputParameters & parameters);
+  InternalSideIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~InternalSideIndicator();
 

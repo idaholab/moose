@@ -32,6 +32,7 @@ class SetupQuadratureAction : public Action
 {
 public:
   SetupQuadratureAction(InputParameters parameters);
+  SetupQuadratureAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SetupQuadratureAction();
 
 protected:

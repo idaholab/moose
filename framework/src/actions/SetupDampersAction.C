@@ -38,3 +38,10 @@ SetupDampersAction::act()
   if (it_beg != it_end)
     _problem->setupDampers();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SetupDampersAction::SetupDampersAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
+}

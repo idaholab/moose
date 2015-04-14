@@ -33,3 +33,10 @@ VectorNeumannBC::computeQpResidual()
   return -_test[_i][_qp]*(_value*_normals[_qp]);
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+VectorNeumannBC::VectorNeumannBC(const std::string & deprecated_name, InputParameters parameters) :
+    IntegratedBC(deprecated_name, parameters),
+    _value(getParam<RealVectorValue>("vector_value"))
+{}

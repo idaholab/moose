@@ -26,6 +26,7 @@ class AddBoundsVectorsAction : public Action
 {
 public:
   AddBoundsVectorsAction(InputParameters params);
+  AddBoundsVectorsAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

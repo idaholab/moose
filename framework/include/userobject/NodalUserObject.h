@@ -51,6 +51,7 @@ class NodalUserObject :
 {
 public:
   NodalUserObject(const InputParameters & parameters);
+  NodalUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * This function will get called on each geometric object this postprocessor acts on

@@ -93,3 +93,17 @@ Executioner::getTimeStepperName()
 {
   return std::string();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+Executioner::Executioner(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    UserObjectInterface(parameters),
+    PostprocessorInterface(parameters),
+    Restartable(parameters, "Executioners"),
+    _initial_residual_norm(std::numeric_limits<Real>::max()),
+    _old_initial_residual_norm(std::numeric_limits<Real>::max()),
+    _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
+    _splitting(getParam<std::vector<std::string> >("splitting"))
+{
+}

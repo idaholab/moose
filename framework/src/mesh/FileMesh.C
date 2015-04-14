@@ -104,3 +104,13 @@ FileMesh::read(const std::string & file_name)
   else
     getMesh().read(file_name, /*mesh_data=*/NULL, /*skip_renumber=*/true);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+FileMesh::FileMesh(const std::string & deprecated_name, InputParameters parameters) :
+    MooseMesh(deprecated_name, parameters),
+    _file_name(getParam<MeshFileName>("file")),
+    _exreader(NULL)
+{
+  getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
+}

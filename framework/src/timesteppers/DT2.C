@@ -247,3 +247,21 @@ DT2::converged()
   else
     return false;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DT2::DT2(const std::string & deprecated_name, InputParameters parameters) :
+    TimeStepper(deprecated_name, parameters),
+    _u_diff(NULL),
+    _u1(NULL),
+    _u2(NULL),
+    _u_saved(NULL),
+    _u_older_saved(NULL),
+    _aux1(NULL),
+    _aux_saved(NULL),
+    _aux_older_saved(NULL),
+    _error(0.),
+    _e_tol(getParam<Real>("e_tol")),
+    _e_max(getParam<Real>("e_max")),
+    _max_increase(getParam<Real>("max_increase"))
+{}

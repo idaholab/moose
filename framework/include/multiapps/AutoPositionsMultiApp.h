@@ -31,6 +31,7 @@ class AutoPositionsMultiApp :
 {
 public:
   AutoPositionsMultiApp(const InputParameters & parameters);
+  AutoPositionsMultiApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~AutoPositionsMultiApp();
 

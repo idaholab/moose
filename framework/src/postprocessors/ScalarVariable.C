@@ -51,3 +51,12 @@ ScalarVariable::getValue()
   _var.reinit();
   return _var.sln()[_idx];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ScalarVariable::ScalarVariable(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
+    _idx(getParam<unsigned int>("component"))
+{
+}

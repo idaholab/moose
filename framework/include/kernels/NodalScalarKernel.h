@@ -34,6 +34,7 @@ class NodalScalarKernel :
 {
 public:
   NodalScalarKernel(const InputParameters & parameters);
+  NodalScalarKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalScalarKernel();
 
   virtual void reinit();

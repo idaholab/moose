@@ -38,3 +38,11 @@ ConstantScalarAux::computeValue()
 {
   return _value;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantScalarAux::ConstantScalarAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxScalarKernel(deprecated_name, parameters),
+    _value(getParam<Real>("value"))
+{
+}

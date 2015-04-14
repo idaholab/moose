@@ -55,6 +55,7 @@ public:
    * @return Whether or not the solve was successful.
    */
   Executioner(const InputParameters & parameters);
+  Executioner(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Executioner();
 

@@ -48,3 +48,24 @@ GenericConstantMaterial::computeQpProperties()
   for (unsigned int i=0; i<_num_props; i++)
     (*_properties[i])[_qp] = _prop_values[i];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+GenericConstantMaterial::GenericConstantMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    Material(deprecated_name, parameters),
+    _prop_names(getParam<std::vector<std::string> >("prop_names")),
+    _prop_values(getParam<std::vector<Real> >("prop_values"))
+{
+  unsigned int num_names = _prop_names.size();
+  unsigned int num_values = _prop_values.size();
+
+  if (num_names != num_values)
+    mooseError("Number of prop_names must match the number of prop_values for a GenericConstantMaterial!");
+
+  _num_props = num_names;
+
+  _properties.resize(num_names);
+
+  for (unsigned int i=0; i<_num_props; i++)
+    _properties[i] = &declareProperty<Real>(_prop_names[i]);
+}

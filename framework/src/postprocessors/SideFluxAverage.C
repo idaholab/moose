@@ -57,3 +57,10 @@ SideFluxAverage::threadJoin(const UserObject & y)
   const SideFluxAverage & pps = static_cast<const SideFluxAverage &>(y);
   _volume += pps._volume;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideFluxAverage::SideFluxAverage(const std::string & deprecated_name, InputParameters parameters) :
+    SideFluxIntegral(deprecated_name, parameters),
+    _volume(0)
+{}

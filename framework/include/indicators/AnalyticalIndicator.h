@@ -27,6 +27,7 @@ class AnalyticalIndicator :
 {
 public:
   AnalyticalIndicator(const InputParameters & parameters);
+  AnalyticalIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AnalyticalIndicator(){};
 
 protected:

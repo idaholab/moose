@@ -32,3 +32,10 @@ ElementIntegralMaterialProperty::computeQpIntegral()
 {
   return _scalar[_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementIntegralMaterialProperty::ElementIntegralMaterialProperty(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralPostprocessor(deprecated_name, parameters),
+    _scalar(getMaterialProperty<Real>(getParam<std::string>("mat_prop")))
+{}

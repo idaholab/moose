@@ -36,6 +36,7 @@ public:
    * constructor.
    */
   SinNeumannBC(const InputParameters & parameters);
+  SinNeumannBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

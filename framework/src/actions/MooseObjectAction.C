@@ -35,3 +35,17 @@ MooseObjectAction::MooseObjectAction(InputParameters params) :
                        ? _factory.getValidParams(_type) : validParams<MooseObject>())
 {
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MooseObjectAction::MooseObjectAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params),
+    _type(getParam<std::string>("type")),
+
+    // We will create a second parameters object from the main factory unless instructed otherwise
+    _moose_object_pars(!params.have_parameter<bool>("skip_param_construction") ||
+                       (params.have_parameter<bool>("skip_param_construction") &&
+                        !params.get<bool>("skip_param_construction"))
+                       ? _factory.getValidParams(_type) : validParams<MooseObject>())
+{
+}

@@ -51,3 +51,31 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
   for (unsigned int i=0; i<coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementUserObject::ElementUserObject(const std::string & deprecated_name, InputParameters parameters) :
+    UserObject(deprecated_name, parameters),
+    BlockRestrictable(parameters),
+    MaterialPropertyInterface(parameters, blockIDs()),
+    UserObjectInterface(parameters),
+    Coupleable(parameters, false),
+    ScalarCoupleable(parameters),
+    MooseVariableDependencyInterface(),
+    TransientInterface(parameters, "element_user_objects"),
+    PostprocessorInterface(parameters),
+    RandomInterface(parameters, _fe_problem, _tid, false),
+    ZeroInterface(parameters),
+    _mesh(_subproblem.mesh()),
+    _current_elem(_assembly.elem()),
+    _current_elem_volume(_assembly.elemVolume()),
+    _q_point(_assembly.qPoints()),
+    _qrule(_assembly.qRule()),
+    _JxW(_assembly.JxW()),
+    _coord(_assembly.coordTransformation())
+{
+  // Keep track of which variables are coupled so we know what we depend on
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
+}

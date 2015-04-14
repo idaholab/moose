@@ -31,6 +31,7 @@ class CompositeFunction : public Function, protected FunctionInterface
 {
 public:
   CompositeFunction(const InputParameters & parameters);
+  CompositeFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CompositeFunction();
 
   virtual Real value(Real t, const Point & pt);

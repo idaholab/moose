@@ -26,6 +26,7 @@ class IndicatorMarker : public Marker
 {
 public:
   IndicatorMarker(const InputParameters & parameters);
+  IndicatorMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~IndicatorMarker(){};
 
 protected:

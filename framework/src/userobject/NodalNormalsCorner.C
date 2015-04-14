@@ -78,3 +78,12 @@ void
 NodalNormalsCorner::threadJoin(const UserObject & /*uo*/)
 {
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NodalNormalsCorner::NodalNormalsCorner(const std::string & deprecated_name, InputParameters parameters) :
+    SideUserObject(deprecated_name, parameters),
+    _aux(_fe_problem.getAuxiliarySystem()),
+    _corner_boundary_id(_mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary")))
+{
+}

@@ -29,6 +29,7 @@ class EmptyAction : public Action
 {
 public:
   EmptyAction(InputParameters params);
+  EmptyAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

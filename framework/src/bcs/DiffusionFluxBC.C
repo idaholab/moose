@@ -42,3 +42,10 @@ DiffusionFluxBC::computeQpFluxJacobian()
 {
   return _grad_phi[_j][_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DiffusionFluxBC::DiffusionFluxBC(const std::string & deprecated_name, InputParameters parameters) :
+    FluxBC(deprecated_name, parameters)
+{
+}

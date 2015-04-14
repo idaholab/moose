@@ -51,6 +51,7 @@ public:
    * @param parameters The input parameters
    */
   MooseParsedFunction(const InputParameters & parameters);
+  MooseParsedFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Destructor, it cleans up the libMesh::ParsedFunction object

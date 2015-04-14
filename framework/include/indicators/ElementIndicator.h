@@ -51,6 +51,7 @@ class ElementIndicator :
 {
 public:
     ElementIndicator(const InputParameters & parameters);
+  ElementIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
     virtual ~ElementIndicator(){};
 
 protected:

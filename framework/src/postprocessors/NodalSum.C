@@ -55,3 +55,11 @@ NodalSum::threadJoin(const UserObject & y)
   const NodalSum & pps = static_cast<const NodalSum &>(y);
   _sum += pps._sum;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NodalSum::NodalSum(const std::string & deprecated_name, InputParameters parameters) :
+    NodalVariablePostprocessor(deprecated_name, parameters),
+    _sum(0)
+{
+}

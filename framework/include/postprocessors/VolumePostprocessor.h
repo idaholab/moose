@@ -30,6 +30,7 @@ class VolumePostprocessor : public ElementIntegralPostprocessor
 {
 public:
   VolumePostprocessor(const InputParameters & parameters);
+  VolumePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void threadJoin(const UserObject & y);
 
 protected:

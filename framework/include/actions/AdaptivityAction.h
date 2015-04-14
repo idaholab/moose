@@ -29,6 +29,7 @@ class AdaptivityAction: public Action
 {
 public:
   AdaptivityAction(InputParameters params);
+  AdaptivityAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

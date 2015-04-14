@@ -41,3 +41,11 @@ ElementH1SemiError::computeQpIntegral()
   RealGradient diff = _grad_u[_qp]-_func.gradient(_t, _q_point[_qp]);
   return diff*diff;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementH1SemiError::ElementH1SemiError(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralVariablePostprocessor(deprecated_name, parameters),
+    _func(getFunction("function"))
+{
+}

@@ -40,6 +40,7 @@ public:
    * @param parameters Th input parameters
    */
   OrientedSubdomainBoundingBox(const InputParameters & parameters);
+  OrientedSubdomainBoundingBox(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

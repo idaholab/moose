@@ -52,3 +52,17 @@ NodalScalarKernel::computeOffDiagJacobian(unsigned int jvar)
   if (jvar == _var.number())
     computeJacobian();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NodalScalarKernel::NodalScalarKernel(const std::string & deprecated_name, InputParameters parameters) :
+    ScalarKernel(deprecated_name, parameters),
+    Coupleable(parameters, true),
+    MooseVariableDependencyInterface(),
+    _node_ids(getParam<std::vector<dof_id_type> >("nodes"))
+{
+  // Fill in the MooseVariable dependencies
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
+}

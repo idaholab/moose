@@ -89,3 +89,10 @@ ODEKernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ODEKernel::ODEKernel(const std::string & deprecated_name, InputParameters parameters) :
+    ScalarKernel(deprecated_name, parameters)
+{
+}

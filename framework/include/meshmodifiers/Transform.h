@@ -29,6 +29,7 @@ class Transform : public MeshModifier
 {
 public:
   Transform(const InputParameters & parameters);
+  Transform(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Transform();
 

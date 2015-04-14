@@ -44,3 +44,11 @@ EigenValueReporter::getValue()
 {
   return _eigen_executioner->eigenValue();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+EigenValueReporter::EigenValueReporter(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _eigen_executioner(NULL)
+{
+}

@@ -26,6 +26,7 @@ class ErrorFractionMarker : public IndicatorMarker
 {
 public:
   ErrorFractionMarker(const InputParameters & parameters);
+  ErrorFractionMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ErrorFractionMarker(){};
 
   virtual void markerSetup();

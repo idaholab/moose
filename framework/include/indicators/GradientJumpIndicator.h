@@ -27,6 +27,7 @@ class GradientJumpIndicator :
 {
 public:
   GradientJumpIndicator(const InputParameters & parameters);
+  GradientJumpIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~GradientJumpIndicator(){};
 
 protected:

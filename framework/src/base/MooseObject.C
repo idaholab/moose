@@ -27,8 +27,9 @@ InputParameters validParams<MooseObject>()
 MooseObject::MooseObject(const InputParameters & parameters) :
   ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
   ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+  _deprecated_pars(emptyInputParameters()), // not used in this version, just need to keep the compiler happy
   _pars(parameters),
+  _app(*_pars.getCheckedPointerParam<MooseApp *>("_moose_app")),
   _name(getParam<std::string>("name")),
   _short_name(MooseUtils::shortName(_name))
 {
@@ -38,4 +39,16 @@ std::string
 MooseObject::name() const
 {
   return _short_name;
+}
+
+// DEPRECATED CONSTRUCTOR
+MooseObject::MooseObject(const std::string & /*deprecated_name*/, InputParameters parameters) :
+  ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
+  ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
+  _deprecated_pars(parameters),
+  _pars(_deprecated_pars),
+  _app(*_pars.getCheckedPointerParam<MooseApp *>("_moose_app")),
+  _name(getParam<std::string>("name")),
+  _short_name(MooseUtils::shortName(_name))
+{
 }

@@ -37,6 +37,7 @@ public:
    * @param parameters Input parameters for this object
    */
   MaterialRealAux(const InputParameters & parameters);
+  MaterialRealAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

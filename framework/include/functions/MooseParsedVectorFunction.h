@@ -41,6 +41,7 @@ public:
    * @param parameters The input parameters
    */
   MooseParsedVectorFunction(const InputParameters & parameters);
+  MooseParsedVectorFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

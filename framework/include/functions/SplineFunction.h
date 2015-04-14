@@ -30,6 +30,7 @@ class SplineFunction : public Function
 {
 public:
   SplineFunction(const InputParameters & parameters);
+  SplineFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SplineFunction();
 
   virtual Real value(Real t, const Point & p);

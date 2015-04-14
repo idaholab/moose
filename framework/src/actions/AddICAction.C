@@ -41,3 +41,10 @@ AddICAction::act()
   _moose_object_pars.set<VariableName>("variable") = var_name;
   _problem->addInitialCondition(_type, _name, _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddICAction::AddICAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

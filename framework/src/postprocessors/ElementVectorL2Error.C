@@ -62,3 +62,16 @@ ElementVectorL2Error::computeQpIntegral()
 
   return (sol_val - func_val).size_sq(); // dot product of difference vector
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementVectorL2Error::ElementVectorL2Error(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralPostprocessor(deprecated_name, parameters),
+    _funcx(getFunction("function_x")),
+    _funcy(getFunction("function_y")),
+    _funcz(getFunction("function_z")),
+    _u(coupledValue("var_x")),
+    _v(coupledValue("var_y")),
+    _w(coupledValue("var_z"))
+{
+}

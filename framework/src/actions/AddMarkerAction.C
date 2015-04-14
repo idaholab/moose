@@ -31,3 +31,10 @@ AddMarkerAction::act()
 {
   _problem->addMarker(_type, _name, _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddMarkerAction::AddMarkerAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

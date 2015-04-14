@@ -96,3 +96,12 @@ RungeKutta2::postStep(NumericVector<Number> & residual)
   residual += _Re_time;
   residual.close();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RungeKutta2::RungeKutta2(const std::string & deprecated_name, InputParameters parameters) :
+    TimeIntegrator(deprecated_name, parameters),
+    _stage(0)
+{
+  _fe_problem.setConstJacobian(true);
+}

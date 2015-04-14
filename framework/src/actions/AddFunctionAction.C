@@ -31,3 +31,10 @@ AddFunctionAction::act()
 {
   _problem->addFunction(_type, _name, _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddFunctionAction::AddFunctionAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

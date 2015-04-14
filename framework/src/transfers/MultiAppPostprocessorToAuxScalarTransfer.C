@@ -102,3 +102,12 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
     }
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MultiAppPostprocessorToAuxScalarTransfer::MultiAppPostprocessorToAuxScalarTransfer(const std::string & deprecated_name, InputParameters parameters) :
+    MultiAppTransfer(deprecated_name, parameters),
+    _from_pp_name(getParam<PostprocessorName>("from_postprocessor")),
+    _to_aux_name(getParam<VariableName>("to_aux_scalar"))
+{
+}

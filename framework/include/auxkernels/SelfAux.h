@@ -36,6 +36,7 @@ public:
    * constructor.
    */
   SelfAux(const InputParameters & parameters);
+  SelfAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SelfAux();
 

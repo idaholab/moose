@@ -60,3 +60,11 @@ NodalL2Error::threadJoin(const UserObject & y)
   const NodalL2Error & pps = static_cast<const NodalL2Error &>(y);
   _integral_value += pps._integral_value;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NodalL2Error::NodalL2Error(const std::string & deprecated_name, InputParameters parameters) :
+    NodalVariablePostprocessor(deprecated_name, parameters),
+    _func(getFunction("function"))
+{
+}

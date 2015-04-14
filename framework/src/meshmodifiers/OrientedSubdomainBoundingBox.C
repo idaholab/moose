@@ -60,3 +60,14 @@ OrientedSubdomainBoundingBox::modify()
       (*el)->subdomain_id() = _block_id;
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+OrientedSubdomainBoundingBox::OrientedSubdomainBoundingBox(const std::string & deprecated_name, InputParameters parameters) :
+    MeshModifier(deprecated_name, parameters),
+    OrientedBoxInterface(parameters),
+    _location(parameters.get<MooseEnum>("location")),
+    _block_id(parameters.get<SubdomainID>("block_id"))
+
+{
+}

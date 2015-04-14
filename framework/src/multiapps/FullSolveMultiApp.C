@@ -98,3 +98,11 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
 
   _console << "Finished Solving MultiApp " << name() << std::endl;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+FullSolveMultiApp::FullSolveMultiApp(const std::string & deprecated_name, InputParameters parameters):
+    MultiApp(deprecated_name, parameters),
+    _solved(false)
+{
+}

@@ -67,3 +67,13 @@ DGFunctionDiffusionDirichletBC::computeQpJacobian()
 
   return r;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const std::string & deprecated_name, InputParameters parameters) :
+    IntegratedBC(deprecated_name, parameters),
+    _func(getFunction("function")),
+    _epsilon(getParam<Real>("epsilon")),
+    _sigma(getParam<Real>("sigma"))
+{
+}

@@ -38,6 +38,7 @@ public:
    * @param parameters
    */
   EigenValueReporter(const InputParameters & parameters);
+  EigenValueReporter(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

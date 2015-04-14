@@ -65,6 +65,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    */
   InitialCondition(const InputParameters & parameters);
+  InitialCondition(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~InitialCondition();
 

@@ -47,3 +47,11 @@ NumPicardIterations::getValue()
 {
   return _transient_executioner->numPicardIts();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NumPicardIterations::NumPicardIterations(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _transient_executioner(NULL)
+{
+}

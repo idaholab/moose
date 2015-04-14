@@ -55,6 +55,7 @@ public:
    * @param parameters The InputParameters for the object
    */
   AdvancedOutput(const InputParameters & parameters);
+  AdvancedOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor
@@ -406,6 +407,16 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
 
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+template<class T>
+AdvancedOutput<T>::AdvancedOutput(const std::string & deprecated_name, InputParameters parameters) :
+    T(deprecated_name, parameters)
+{
+  T::_is_advanced = true;
+  T::_advanced_output_on = OutputOnWarehouse(T::_output_on, parameters);
 }
 
 #endif /* ADVANCEDOUTPUT_H */

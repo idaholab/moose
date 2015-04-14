@@ -236,3 +236,62 @@ DGKernel::subProblem()
 {
   return _subproblem;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DGKernel::DGKernel(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    SetupInterface(parameters),
+    TransientInterface(parameters, "dgkernels"),
+    FunctionInterface(parameters),
+    UserObjectInterface(parameters),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false, false),
+    TwoMaterialPropertyInterface(parameters),
+    Restartable(parameters, "DGKernels"),
+    MeshChangedInterface(parameters),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _mesh(_subproblem.mesh()),
+
+    _current_elem(_assembly.elem()),
+    _current_elem_volume(_assembly.elemVolume()),
+
+    _neighbor_elem(_assembly.neighbor()),
+    _neighbor_elem_volume(_assembly.neighborVolume()),
+
+    _current_side(_assembly.side()),
+    _current_side_elem(_assembly.sideElem()),
+    _current_side_volume(_assembly.sideElemVolume()),
+
+    _coord_sys(_assembly.coordSystem()),
+    _q_point(_assembly.qPointsFace()),
+    _qrule(_assembly.qRuleFace()),
+    _JxW(_assembly.JxWFace()),
+    _coord(_assembly.coordTransformation()),
+
+    _boundary_id(parameters.get<BoundaryID>("_boundary_id")),
+
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
+
+    _phi(_assembly.phiFace()),
+    _grad_phi(_assembly.gradPhiFace()),
+
+    _test(_var.phiFace()),
+    _grad_test(_var.gradPhiFace()),
+
+    _normals(_var.normals()),
+
+    _phi_neighbor(_assembly.phiFaceNeighbor()),
+    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor()),
+
+    _test_neighbor(_var.phiFaceNeighbor()),
+    _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
+
+    _u_neighbor(_var.slnNeighbor()),
+    _grad_u_neighbor(_var.gradSlnNeighbor())
+{
+}

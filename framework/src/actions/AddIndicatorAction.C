@@ -31,3 +31,10 @@ AddIndicatorAction::act()
 {
   _problem->addIndicator(_type, _name, _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddIndicatorAction::AddIndicatorAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

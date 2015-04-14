@@ -244,3 +244,10 @@ CreateExecutionerAction::storePetscOptions()
   _problem->setPreconditionerDescription(pc_description);
 }
 #endif
+
+
+// DEPRECATED CONSTRUCTOR
+CreateExecutionerAction::CreateExecutionerAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

@@ -61,6 +61,7 @@ class AuxScalarKernel :
 {
 public:
   AuxScalarKernel(const InputParameters & parameters);
+  AuxScalarKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~AuxScalarKernel();
 

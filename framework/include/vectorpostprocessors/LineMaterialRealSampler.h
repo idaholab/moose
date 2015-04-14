@@ -38,6 +38,7 @@ public:
    * @param parameters The input parameters
    */
   LineMaterialRealSampler(const InputParameters & parameters);
+  LineMaterialRealSampler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~LineMaterialRealSampler() {}
 

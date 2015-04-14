@@ -33,3 +33,10 @@ NeumannBC::computeQpResidual()
   return -_test[_i][_qp]*_value;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+NeumannBC::NeumannBC(const std::string & deprecated_name, InputParameters parameters) :
+  IntegratedBC(deprecated_name, parameters),
+  _value(getParam<Real>("value"))
+{}

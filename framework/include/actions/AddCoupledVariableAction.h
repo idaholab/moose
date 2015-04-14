@@ -30,6 +30,7 @@ class AddCoupledVariableAction : public Action
 {
 public:
   AddCoupledVariableAction(InputParameters parameters);
+  AddCoupledVariableAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AddCoupledVariableAction();
 
   virtual void act();

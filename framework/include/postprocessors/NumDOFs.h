@@ -27,6 +27,7 @@ class NumDOFs : public GeneralPostprocessor
 {
 public:
   NumDOFs(const InputParameters & parameters);
+  NumDOFs(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

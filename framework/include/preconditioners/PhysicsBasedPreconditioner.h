@@ -44,6 +44,7 @@ public:
    *  Constructor. Initializes PhysicsBasedPreconditioner data structures
    */
   PhysicsBasedPreconditioner (const InputParameters & params);
+  PhysicsBasedPreconditioner(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Destructor.

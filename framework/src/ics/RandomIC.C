@@ -51,3 +51,15 @@ RandomIC::value(const Point & /*p*/)
 
   return rand_num;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RandomIC::RandomIC(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _min(getParam<Real>("min")),
+    _max(getParam<Real>("max")),
+    _range(_max - _min)
+{
+  mooseAssert(_range > 0.0, "Min > Max for RandomIC!");
+  MooseRandom::seed(getParam<unsigned int>("seed"));
+}

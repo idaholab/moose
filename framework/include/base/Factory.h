@@ -29,7 +29,8 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerObject(name)                        factory.reg<name>(stringifyName(name))
+//#define registerObject(name)                        factory.reg<name>(stringifyName(name))
+#define registerObject(name)                        factory.regDeprecated<name>(stringifyName(name))
 #define registerNamedObject(obj, name)              factory.reg<obj>(name)
 
 // for backward compatibility
@@ -105,7 +106,7 @@ typedef MooseSharedPointer<MooseObject> MooseObjectPtr;
  * Typedef for function to build objects
  */
 typedef MooseObjectPtr (*buildPtr)(const InputParameters & parameters);
-
+typedef MooseObjectPtr (*buildDeprecatedPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef for validParams
@@ -126,6 +127,11 @@ MooseObjectPtr buildObject(const InputParameters & parameters)
   return MooseObjectPtr(new T(parameters));
 }
 
+template<class T>
+MooseObjectPtr buildDeprecatedObject(const std::string & name, InputParameters parameters)
+{
+  return MooseObjectPtr(new T(name, parameters));
+}
 
 /**
  * Generic factory class for build all sorts of objects
@@ -151,6 +157,18 @@ public:
     else
       mooseError("Object '" + obj_name + "' already registered.");
   }
+
+  template<typename T>
+  void regDeprecated(const std::string & obj_name)
+    {
+      if (_name_to_deprecated_build_pointer.find(obj_name) == _name_to_deprecated_build_pointer.end())
+      {
+        _name_to_deprecated_build_pointer[obj_name] = &buildDeprecatedObject<T>;
+        _name_to_params_pointer[obj_name] = &validParams<T>;
+      }
+      else
+        mooseError("Object '" + obj_name + "' already registered.");
+    }
 
   /**
    * Register a deprecated object that expires and has a replacement object
@@ -183,6 +201,7 @@ public:
    * @return The created object
    */
   MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
+  MooseSharedPointer<MooseObject> createDeprecated(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
 
   /**
    * Access to registered object iterator (begin)
@@ -214,6 +233,7 @@ protected:
 
   /// Storage for pointers to the object
   std::map<std::string, buildPtr> _name_to_build_pointer;
+  std::map<std::string, buildDeprecatedPtr> _name_to_deprecated_build_pointer;
 
   /// Storage for pointers to the parameters objects
   std::map<std::string, paramsPtr> _name_to_params_pointer;

@@ -54,3 +54,13 @@ ElementsAlongLine::execute()
   for (unsigned int i=0; i<num_elems; i++)
     _elem_ids[i] = intersected_elems[i]->id();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementsAlongLine::ElementsAlongLine(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralVectorPostprocessor(deprecated_name, parameters),
+    _start(getParam<Point>("start")),
+    _end(getParam<Point>("end")),
+    _elem_ids(declareVector("elem_ids"))
+{
+}

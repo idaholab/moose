@@ -38,6 +38,7 @@ public:
    * @param parameters The input parameters for the function
    */
   SolutionFunction(const InputParameters & parameters);
+  SolutionFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /** Empty destructor
    */

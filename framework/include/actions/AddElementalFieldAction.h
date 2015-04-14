@@ -27,6 +27,7 @@ class AddElementalFieldAction : public Action
 {
 public:
   AddElementalFieldAction(InputParameters params);
+  AddElementalFieldAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

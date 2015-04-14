@@ -30,6 +30,7 @@ class NodalNormalsEvaluator : public NodalUserObject
 {
 public:
   NodalNormalsEvaluator(const InputParameters & parameters);
+  NodalNormalsEvaluator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalNormalsEvaluator();
 
   virtual void initialize();

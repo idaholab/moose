@@ -303,3 +303,88 @@ void
 PhysicsBasedPreconditioner::clear ()
 {
 }
+
+
+// DEPRECATED CONSTRUCTOR
+PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & deprecated_name, InputParameters params) :
+    MoosePreconditioner(deprecated_name, params),
+    Preconditioner<Number>(MoosePreconditioner::_communicator),
+    _nl(_fe_problem.getNonlinearSystem())
+{
+  unsigned int num_systems = _nl.sys().n_vars();
+  _systems.resize(num_systems);
+  _preconditioners.resize(num_systems);
+  _off_diag.resize(num_systems);
+  _off_diag_mats.resize(num_systems);
+  _pre_type.resize(num_systems);
+
+  { // Setup the Coupling Matrix so MOOSE knows what we're doing
+    NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+    unsigned int n_vars = nl.nVariables();
+
+    // The coupling matrix is held and released by FEProblem, so it is not released in this object
+    CouplingMatrix * cm = new CouplingMatrix(n_vars);
+
+    bool full = false; //getParam<bool>("full"); // TODO: add a FULL option for PBP
+
+    if (!full)
+    {
+      // put 1s on diagonal
+      for (unsigned int i = 0; i < n_vars; i++)
+        (*cm)(i, i) = 1;
+
+      // off-diagonal entries
+      std::vector<std::vector<unsigned int> > off_diag(n_vars);
+      for (unsigned int i = 0; i < getParam<std::vector<std::string> >("off_diag_row").size(); i++)
+      {
+        unsigned int row = nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_row")[i]).number();
+        unsigned int column = nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_column")[i]).number();
+        (*cm)(row, column) = 1;
+      }
+
+      // TODO: handle coupling entries between NL-vars and SCALAR-vars
+    }
+    else
+    {
+      for (unsigned int i = 0; i < n_vars; i++)
+        for (unsigned int j = 0; j < n_vars; j++)
+          (*cm)(i,j) = 1;
+    }
+
+    _fe_problem.setCouplingMatrix(cm);
+  }
+
+  // PC types
+  const std::vector<std::string> & pc_types = getParam<std::vector<std::string> >("preconditioner");
+  for (unsigned int i = 0; i < num_systems; i++)
+    _pre_type[i] = Utility::string_to_enum<PreconditionerType>(pc_types[i]);
+
+  // solve order
+  const std::vector<std::string> & solve_order = getParam<std::vector<std::string> >("solve_order");
+  _solve_order.resize(solve_order.size());
+  for (unsigned int i = 0; i < solve_order.size(); i++)
+    _solve_order[i] = _nl.sys().variable_number(solve_order[i]);
+
+  // diag and off-diag systems
+  unsigned int n_vars = _nl.sys().n_vars();
+
+  // off-diagonal entries
+  const std::vector<std::string> & odr = getParam<std::vector<std::string> >("off_diag_row");
+  const std::vector<std::string> & odc = getParam<std::vector<std::string> >("off_diag_column");
+  std::vector<std::vector<unsigned int> > off_diag(n_vars);
+  for (unsigned int i = 0; i < odr.size(); i++)
+  {
+    unsigned int row = _nl.sys().variable_number(odr[i]);
+    unsigned int column = _nl.sys().variable_number(odc[i]);
+    off_diag[row].push_back(column);
+  }
+  // Add all of the preconditioning systems
+  for (unsigned int var = 0; var < n_vars; var++)
+    addSystem(var, off_diag[var], _pre_type[var]);
+
+  // We don't want to be computing the big Jacobian!
+  _nl.sys().nonlinear_solver->jacobian = NULL;
+  _nl.sys().nonlinear_solver->attach_preconditioner(this);
+
+  _fe_problem.solverParams()._type = Moose::ST_JFNK;
+}

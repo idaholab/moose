@@ -27,6 +27,7 @@ class AddSplitAction : public MooseObjectAction
 {
 public:
   AddSplitAction(InputParameters params);
+  AddSplitAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual void act();
 };
 

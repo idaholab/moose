@@ -159,3 +159,26 @@ PiecewiseMultilinear::getNeighborIndices(std::vector<Real> in_arr, Real x, unsig
       lower_x = upper_x - 1;
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+PiecewiseMultilinear::PiecewiseMultilinear(const std::string & deprecated_name, InputParameters parameters) :
+    Function(deprecated_name, parameters)
+{
+  _gridded_data = new GriddedData(getParam<std::string>("data_file"));
+  _dim = _gridded_data->getDim();
+  _gridded_data->getAxes(_axes);
+  _gridded_data->getGrid(_grid);
+
+  // GriddedData does not require monotonicity of axes, but we do
+  for (unsigned int i = 0; i < _dim; ++i)
+    for (unsigned int j = 1; j < _grid[i].size(); ++j)
+      if (_grid[i][j - 1] >= _grid[i][j])
+        mooseError("PiecewiseMultilinear needs monotonically-increasing axis data.  Axis " << i << " contains non-monotonicity at value " << _grid[i][j]);
+
+  // GriddedData does not demand that each axis is independent, but we do
+  std::set<int> s(_axes.begin(), _axes.end());
+  if (s.size() != _dim)
+    mooseError("PiecewiseMultilinear needs the AXES to be independent.  Check the AXES lines in your data file.");
+
+}

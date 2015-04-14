@@ -43,3 +43,11 @@ MaxIncrement::computeQpDamping()
 
   return 1.0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MaxIncrement::MaxIncrement(const std::string & deprecated_name, InputParameters parameters) :
+    Damper(deprecated_name, parameters),
+    _max_increment(parameters.get<Real>("max_increment"))
+{
+}

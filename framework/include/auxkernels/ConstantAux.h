@@ -36,6 +36,7 @@ public:
    * constructor.
    */
   ConstantAux(const InputParameters & parameters);
+  ConstantAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ConstantAux() {}
 

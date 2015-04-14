@@ -30,6 +30,11 @@ ActionFactory::~ActionFactory()
 MooseSharedPointer<Action>
 ActionFactory::create(const std::string & action, const std::string & name, InputParameters parameters)
 {
+  // DEPRECATED OBJECT CREATION
+  if (_name_to_deprecated_build_info.find(action) != _name_to_deprecated_build_info.end())
+    return createDeprecated(action, name, parameters);
+
+
   parameters.addPrivateParam("_moose_app", &_app);
   parameters.addPrivateParam("action_type", action);
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
@@ -69,6 +74,51 @@ ActionFactory::create(const std::string & action, const std::string & name, Inpu
   return action_obj;
 }
 
+MooseSharedPointer<Action>
+ActionFactory::createDeprecated(const std::string & action, const std::string & name, InputParameters parameters)
+{
+  parameters.addPrivateParam("_moose_app", &_app);
+  parameters.addPrivateParam("action_type", action);
+  std::pair<ActionFactory::deprecated_iterator, ActionFactory::deprecated_iterator> iters;
+  DeprecatedBuildInfo *build_info = NULL;
+
+  // Check to make sure that all required parameters are supplied
+  parameters.checkParams(name);
+
+  iters = _name_to_deprecated_build_info.equal_range(action);
+
+  // Find the Action that matches the one we have registered based on unique_id
+  unsigned short count = 0;
+  for (ActionFactory::deprecated_iterator it = iters.first; it != iters.second; ++it)
+  {
+    ++count;
+    if (parameters.have_parameter<unsigned int>("unique_id") && it->second._unique_id == parameters.get<unsigned int>("unique_id"))
+    {
+      build_info = &(it->second);
+      break;
+    }
+  }
+
+  // For backwards compatibility - If there is only one Action registered but it doesn't contain a unique_id that
+  // matches, then surely it must still be the correct one
+  if (count == 1 && !build_info)
+    build_info = &(iters.first->second);
+
+  if (!build_info)
+    mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + name);
+
+  // Add the name to the parameters and create the object
+  parameters.addParam<std::string>("name", name, "The complete name of the object");
+  MooseSharedPointer<Action> action_obj = (*build_info->_build_pointer)(name, parameters);
+
+  if (parameters.get<std::string>("task") == "")
+    action_obj->appendTask(build_info->_task);
+
+  mooseDeprecated("Actions using deprecated constructors");
+
+  return action_obj;
+}
+
 InputParameters
 ActionFactory::getValidParams(const std::string & name)
 {
@@ -78,13 +128,24 @@ ActionFactory::getValidParams(const std::string & name)
    * so we can safely use the first instance
    */
   ActionFactory::iterator iter = _name_to_build_info.find(name);
+  ActionFactory::deprecated_iterator diter = _name_to_deprecated_build_info.find(name);
 
-  if (iter == _name_to_build_info.end())
+  if (iter == _name_to_build_info.end() && diter == _name_to_deprecated_build_info.end())
     mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
 
-  InputParameters params = (iter->second._params_pointer)();
+  InputParameters params = emptyInputParameters();
+  if (iter != _name_to_build_info.end())
+  {
+    params += (iter->second._params_pointer)();
+    params.addPrivateParam<unsigned int>("unique_id", iter->second._unique_id);
+  }
 
-  params.addPrivateParam<unsigned int>("unique_id", iter->second._unique_id);
+  else if (diter != _name_to_deprecated_build_info.end())
+  {
+    params += (diter->second._params_pointer)();
+    params.addPrivateParam<unsigned int>("unique_id", diter->second._unique_id);
+  }
+
   params.addPrivateParam("_moose_app", &_app);
 
   return params;
@@ -136,6 +197,12 @@ ActionFactory::getTasksByAction(const std::string & action) const
   std::pair<std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator, std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator>
     iters = _name_to_build_info.equal_range(action);
   for (std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator it = iters.first; it != iters.second; ++it)
+    tasks.insert(it->second._task);
+
+  // DEPRECATED
+  std::pair<std::multimap<std::string, ActionFactory::DeprecatedBuildInfo>::const_iterator, std::multimap<std::string, ActionFactory::DeprecatedBuildInfo>::const_iterator>
+    dep_iters = _name_to_deprecated_build_info.equal_range(action);
+  for (std::multimap<std::string, ActionFactory::DeprecatedBuildInfo>::const_iterator it = dep_iters.first; it != dep_iters.second; ++it)
     tasks.insert(it->second._task);
 
   return tasks;

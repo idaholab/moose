@@ -48,3 +48,10 @@ SetupPredictorAction::act()
     _problem->getNonlinearSystem().setPredictor(predictor);
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SetupPredictorAction::SetupPredictorAction(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObjectAction(deprecated_name, parameters)
+{
+}

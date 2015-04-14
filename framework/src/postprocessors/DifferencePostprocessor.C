@@ -55,3 +55,12 @@ DifferencePostprocessor::threadJoin(const UserObject & /*uo*/)
 {
   // nothing to do here, general PPS do not run threaded
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DifferencePostprocessor::DifferencePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _value1(getPostprocessorValue("value1")),
+    _value2(getPostprocessorValue("value2"))
+{
+}

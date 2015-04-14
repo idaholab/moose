@@ -26,6 +26,7 @@ class CoupledProblem : public Problem
 {
 public:
   CoupledProblem(const InputParameters & params);
+  CoupledProblem(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual ~CoupledProblem();
 
   virtual void init();

@@ -27,6 +27,7 @@ class AnisotropicDiffusion : public Kernel
 {
 public:
   AnisotropicDiffusion(const InputParameters & parameters);
+  AnisotropicDiffusion(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AnisotropicDiffusion();
 
 protected:

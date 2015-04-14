@@ -57,6 +57,7 @@ public:
    * @return Whether or not the solve was successful.
    */
   PetscTSExecutioner(const InputParameters & parameters);
+  PetscTSExecutioner(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~PetscTSExecutioner();
 

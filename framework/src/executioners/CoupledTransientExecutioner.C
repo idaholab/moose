@@ -102,3 +102,14 @@ CoupledTransientExecutioner::execute()
     }
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+CoupledTransientExecutioner::CoupledTransientExecutioner(const std::string & deprecated_name, InputParameters parameters) :
+    CoupledExecutioner(deprecated_name, parameters),
+    _time(0),
+    _dt(0),
+    _t_step(0),
+    _n_steps(getParam<unsigned int>("num_steps"))
+{
+}

@@ -93,3 +93,15 @@ SideSetsFromPoints::modify()
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
     _mesh_ptr->getMesh().boundary_info->sideset_name(boundary_ids[i]) = _boundary_names[i];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideSetsFromPoints::SideSetsFromPoints(const std::string & deprecated_name, InputParameters parameters):
+    AddSideSetsBase(deprecated_name, parameters),
+    _boundary_names(getParam<std::vector<BoundaryName> >("new_boundary")),
+    _points(getParam<std::vector<Point> >("points"))
+{
+
+  if (_points.size() != _boundary_names.size())
+    mooseError("point list and boundary list are not the same length");
+}

@@ -110,3 +110,14 @@ FDKernel::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
     ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
   */
 }
+
+
+// DEPRECATED CONSTRUCTOR
+FDKernel::FDKernel(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters)
+{
+  _scale = 1.490116119384766e-08; // HACK: sqrt of the machine epsilon for double precision
+#ifdef LIBMESH_HAVE_PETSC
+  _scale = PETSC_SQRT_MACHINE_EPSILON;
+#endif
+}

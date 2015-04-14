@@ -42,6 +42,7 @@ public:
    * @param parameters Object parameters
    */
   VTKOutput(const InputParameters & parameters);
+  VTKOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 
 protected:

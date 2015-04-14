@@ -38,6 +38,7 @@ class OrientedBoxMarker :
 {
 public:
   OrientedBoxMarker(const InputParameters & parameters);
+  OrientedBoxMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~OrientedBoxMarker(){};
 
 protected:

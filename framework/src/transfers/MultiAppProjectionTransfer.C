@@ -414,3 +414,68 @@ MultiAppProjectionTransfer::fromMultiApp()
   _console << "Projecting solution" << std::endl;
   projectSolution(*_multi_app->problem(), 0);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & deprecated_name, InputParameters parameters) :
+    MultiAppTransfer(deprecated_name, parameters),
+    _to_var_name(getParam<AuxVariableName>("variable")),
+    _from_var_name(getParam<VariableName>("source_variable")),
+    _proj_type(getParam<MooseEnum>("proj_type")),
+    _compute_matrix(true)
+{
+  switch (_direction)
+  {
+    case TO_MULTIAPP:
+      {
+        unsigned int n_apps = _multi_app->numGlobalApps();
+        _proj_sys.resize(n_apps, NULL);
+        for (unsigned int app = 0; app < n_apps; app++)
+        {
+          if (_multi_app->hasLocalApp(app))
+          {
+            MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
+
+            FEProblem & to_problem = *_multi_app->appProblem(app);
+            FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+                           Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
+            to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
+
+            EquationSystems & to_es = to_problem.es();
+            LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
+                                                                                           + "-" + Utility::enum_to_string<Order>(fe_type.order));
+            _proj_var_num = proj_sys.add_variable("var", fe_type);
+            proj_sys.attach_assemble_function(assemble_l2_to);
+
+            _proj_sys[app] = &proj_sys;
+
+            //to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
+
+            Moose::swapLibMeshComm(swapped);
+          }
+        }
+      }
+      break;
+
+    case FROM_MULTIAPP:
+      {
+        _proj_sys.resize(1);
+
+        FEProblem & to_problem = *_multi_app->problem();
+        FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+                       Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
+        to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
+
+        EquationSystems & to_es = to_problem.es();
+        LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
+                                                                                       + "-" + Utility::enum_to_string<Order>(fe_type.order));
+        _proj_var_num = proj_sys.add_variable("var", fe_type);
+        proj_sys.attach_assemble_function(assemble_l2_from);
+
+        _proj_sys[0] = &proj_sys;
+
+        // to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
+      }
+      break;
+  }
+}

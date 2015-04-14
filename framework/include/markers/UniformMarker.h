@@ -29,6 +29,7 @@ class UniformMarker : public Marker
 {
 public:
   UniformMarker(const InputParameters & parameters);
+  UniformMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~UniformMarker(){};
 
 protected:

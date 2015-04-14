@@ -27,6 +27,7 @@ class CreateExecutionerAction : public MooseObjectAction
 {
 public:
   CreateExecutionerAction(InputParameters params);
+  CreateExecutionerAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

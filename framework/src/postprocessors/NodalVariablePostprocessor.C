@@ -32,3 +32,13 @@ NodalVariablePostprocessor::NodalVariablePostprocessor(const InputParameters & p
     _u(_var.nodalSln())
 {
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NodalVariablePostprocessor::NodalVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    NodalPostprocessor(deprecated_name, parameters),
+    MooseVariableInterface(parameters, true),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _u(_var.nodalSln())
+{
+}

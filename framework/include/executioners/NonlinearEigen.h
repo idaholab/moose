@@ -28,6 +28,7 @@ class NonlinearEigen : public EigenExecutionerBase
 public:
 
   NonlinearEigen(const InputParameters & parameters);
+  NonlinearEigen(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void init();
   virtual void execute();

@@ -60,3 +60,12 @@ AverageNodalVariableValue::threadJoin(const UserObject & y)
   _avg += pps._avg;
   _n += pps._n;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AverageNodalVariableValue::AverageNodalVariableValue(const std::string & deprecated_name, InputParameters parameters) :
+    NodalVariablePostprocessor(deprecated_name, parameters),
+    _avg(0),
+    _n(0)
+{
+}

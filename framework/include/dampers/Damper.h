@@ -52,6 +52,7 @@ class Damper :
 {
 public:
   Damper(const InputParameters & parameters);
+  Damper(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Computes this Damper's damping for one element.

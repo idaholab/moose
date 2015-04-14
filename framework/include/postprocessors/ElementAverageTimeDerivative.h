@@ -30,6 +30,7 @@ class ElementAverageTimeDerivative : public ElementAverageValue
 {
 public:
   ElementAverageTimeDerivative(const InputParameters & parameters);
+  ElementAverageTimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real computeQpIntegral();
 };

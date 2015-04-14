@@ -28,6 +28,7 @@ class CoupledTransientExecutioner : public CoupledExecutioner
 {
 public:
   CoupledTransientExecutioner(const InputParameters & parameters);
+  CoupledTransientExecutioner(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CoupledTransientExecutioner();
 
   virtual void execute();

@@ -35,6 +35,7 @@ public:
    * constructor.
    */
   FunctionAux(const InputParameters & parameters);
+  FunctionAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~FunctionAux() {}
 

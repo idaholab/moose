@@ -30,6 +30,7 @@ class ElementVectorL2Error :
 {
 public:
   ElementVectorL2Error(const InputParameters & parameters);
+  ElementVectorL2Error(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Get the L2 Error.

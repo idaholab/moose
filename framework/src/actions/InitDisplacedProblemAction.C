@@ -45,3 +45,10 @@ InitDisplacedProblemAction::act()
     _problem->initDisplacedProblem(_displaced_mesh.get(), params);
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+InitDisplacedProblemAction::InitDisplacedProblemAction(const std::string & deprecated_name, InputParameters parameters) :
+    Action(deprecated_name, parameters)
+{
+}

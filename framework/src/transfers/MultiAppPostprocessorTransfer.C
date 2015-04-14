@@ -137,3 +137,16 @@ MultiAppPostprocessorTransfer::execute()
     }
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const std::string & deprecated_name, InputParameters parameters) :
+    MultiAppTransfer(deprecated_name, parameters),
+    _from_pp_name(getParam<PostprocessorName>("from_postprocessor")),
+    _to_pp_name(getParam<PostprocessorName>("to_postprocessor")),
+    _reduction_type(getParam<MooseEnum>("reduction_type"))
+{
+  if (_direction == FROM_MULTIAPP)
+    if (!_reduction_type.isValid())
+      mooseError("In MultiAppPostprocessorTransfer, must specify 'reduction_type' if direction = from_multiapp");
+}

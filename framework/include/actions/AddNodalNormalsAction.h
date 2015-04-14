@@ -37,6 +37,7 @@ class AddNodalNormalsAction : public Action
 {
 public:
   AddNodalNormalsAction(InputParameters parameters);
+  AddNodalNormalsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AddNodalNormalsAction();
 
   virtual void act();

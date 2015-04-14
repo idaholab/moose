@@ -36,6 +36,7 @@ class GenericFunctionMaterial : public Material
 {
 public:
   GenericFunctionMaterial(const InputParameters & parameters);
+  GenericFunctionMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

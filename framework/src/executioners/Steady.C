@@ -127,3 +127,23 @@ Steady::checkIntegrity()
   if (_problem.getNonlinearSystem().containsTimeKernel())
     mooseError("You have specified time kernels in your steady state simulation");
 }
+
+
+// DEPRECATED CONSTRUCTOR
+Steady::Steady(const std::string & deprecated_name, InputParameters parameters) :
+    Executioner(deprecated_name, parameters),
+    _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
+    _time_step(_problem.timeStep()),
+    _time(_problem.time())
+{
+  _problem.getNonlinearSystem().setDecomposition(_splitting);
+
+  if (!_restart_file_base.empty())
+    _problem.setRestartFile(_restart_file_base);
+
+  {
+    std::string ti_str = "SteadyState";
+    InputParameters params = _app.getFactory().getValidParams(ti_str);
+    _problem.addTimeIntegrator(ti_str, "ti", params);
+  }
+}

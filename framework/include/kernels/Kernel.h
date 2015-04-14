@@ -27,6 +27,7 @@ class Kernel :
 {
 public:
   Kernel(const InputParameters & parameters);
+  Kernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Kernel();
 

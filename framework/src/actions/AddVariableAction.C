@@ -160,3 +160,14 @@ AddVariableAction::getSubdomainIDs()
   }
   return blocks;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddVariableAction::AddVariableAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params),
+    OutputInterface(params, false),
+    _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+             Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
+    _scalar_var(_fe_type.family == SCALAR)
+{
+}

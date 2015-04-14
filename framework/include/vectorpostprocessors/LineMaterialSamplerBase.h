@@ -50,6 +50,7 @@ public:
    * @param parameters The input parameters
    */
   LineMaterialSamplerBase(const InputParameters & parameters);
+  LineMaterialSamplerBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

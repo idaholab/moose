@@ -674,3 +674,27 @@ MultiApp::loadLibraryAndDependencies(const std::string & library_filename)
     }
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MultiApp::MultiApp(const std::string & deprecated_name, InputParameters parameters):
+    MooseObject(deprecated_name, parameters),
+    SetupInterface(parameters),
+    Restartable(parameters, "MultiApps"),
+    _fe_problem(getParam<FEProblem *>("_fe_problem")),
+    _app_type(getParam<MooseEnum>("app_type")),
+    _input_files(getParam<std::vector<std::string> >("input_files")),
+    _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
+    _inflation(getParam<Real>("bounding_box_inflation")),
+    _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
+    _output_in_position(getParam<bool>("output_in_position")),
+    _reset_time(getParam<Real>("reset_time")),
+    _reset_apps(getParam<std::vector<unsigned int> >("reset_apps")),
+    _reset_happened(false),
+    _move_time(getParam<Real>("move_time")),
+    _move_apps(getParam<std::vector<unsigned int> >("move_apps")),
+    _move_positions(getParam<std::vector<Point> >("move_positions")),
+    _move_happened(false),
+    _has_an_app(true)
+{
+}

@@ -68,6 +68,7 @@ public:
    * @param parameters Object input parameters
    */
   TopResidualDebugOutput(const InputParameters & parameters);
+  TopResidualDebugOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

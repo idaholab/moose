@@ -29,6 +29,7 @@ class AddFEProblemAction : public Action
 {
 public:
   AddFEProblemAction(InputParameters parameters);
+  AddFEProblemAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AddFEProblemAction();
 
   virtual void act();

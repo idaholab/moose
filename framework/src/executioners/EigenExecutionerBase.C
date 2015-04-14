@@ -172,7 +172,7 @@ EigenExecutionerBase::addEigenValueReporter()
 {
   InputParameters params = _app.getFactory().getValidParams("EigenValueReporter");
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep_end";
+  execute_options = "initial timestep_end";
   params.set<MultiMooseEnum>("execute_on") = execute_options;
   _problem.addPostprocessor("EigenValueReporter", "eigenvalue", params);
 }
@@ -580,4 +580,40 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   _problem.es().parameters.set<Real> ("nonlinear solver absolute residual tolerance") = tol1;
   _problem.es().parameters.set<Real> ("linear solver tolerance") = tol2;
   _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = tol3;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+EigenExecutionerBase::EigenExecutionerBase(const std::string & deprecated_name, InputParameters parameters) :
+    Executioner(deprecated_name, parameters),
+     _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
+     _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
+     _eigenvalue(1.0),
+     _source_integral(getPostprocessorValue("bx_norm")),
+     _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
+                    : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
+{
+
+  //FIXME: currently we have to use old and older solution vectors for power iteration.
+  //       We will need 'step' in the future.
+  _problem.transient(true);
+
+  {
+    // No time integrator for eigenvalue problem
+    std::string ti_str = "SteadyState";
+    InputParameters params = _app.getFactory().getValidParams(ti_str);
+    _problem.addTimeIntegrator(ti_str, "ti", params);
+  }
+
+  // we want to tell the App about what our system time is (in case anyone else is interested).
+  Real system_time = getParam<Real>("time");
+  _app.setStartTime(system_time);
+
+  // set the system time
+  _problem.time() = system_time;
+  _problem.timeOld() = system_time;
+
+  // used for controlling screen print-out
+  _problem.timeStep() = 0;
+  _problem.dt() = 1.0;
 }

@@ -34,3 +34,12 @@ MeshModifier::MeshModifier(const InputParameters & parameters) :
 MeshModifier::~MeshModifier()
 {
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MeshModifier::MeshModifier(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    Restartable(parameters, "MeshModifiers"),
+    _mesh_ptr(NULL)
+{
+}

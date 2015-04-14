@@ -52,3 +52,12 @@ Transform::modify()
     MeshTools::Modification::scale(*_mesh_ptr, _vector_value(0), _vector_value(1), _vector_value(2)); break;
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+Transform::Transform(const std::string & deprecated_name, InputParameters parameters):
+    MeshModifier(deprecated_name, parameters),
+    _transform(getParam<MooseEnum>("transform")),
+    _vector_value(getParam<RealVectorValue>("vector_value"))
+{
+}

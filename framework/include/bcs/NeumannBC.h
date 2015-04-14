@@ -35,6 +35,7 @@ public:
    * constructor.
    */
   NeumannBC(const InputParameters & parameters);
+  NeumannBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 
 protected:

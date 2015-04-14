@@ -2195,3 +2195,117 @@ MooseMesh::addMortarInterface(const std::string & name, BoundaryName master, Bou
   _mortar_interface_by_name[name] = iface;
   _mortar_interface_by_ids[std::pair<BoundaryID, BoundaryID>(master_id, slave_id)] = iface;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MooseMesh::MooseMesh(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    Restartable(parameters, "Mesh"),
+    _mesh_distribution_type(getParam<MooseEnum>("distribution")),
+    _use_parallel_mesh(false),
+    _distribution_overridden(false),
+    _mesh(NULL),
+    _partitioner_name(getParam<MooseEnum>("partitioner")),
+    _partitioner_overridden(false),
+    _uniform_refine_level(0),
+    _is_changed(false),
+    _is_nemesis(getParam<bool>("nemesis")),
+    _is_prepared(false),
+    _refined_elements(NULL),
+    _coarsened_elements(NULL),
+    _active_local_elem_range(NULL),
+    _active_semilocal_node_range(NULL),
+    _active_node_range(NULL),
+    _local_node_range(NULL),
+    _bnd_node_range(NULL),
+    _bnd_elem_range(NULL),
+    _node_to_elem_map_built(false),
+    _patch_size(40),
+    _patch_update_strategy(getParam<MooseEnum>("patch_update_strategy")),
+    _regular_orthogonal_mesh(false),
+    _allow_recovery(true)
+{
+  switch (_mesh_distribution_type)
+  {
+  case 0: // PARALLEL
+    _use_parallel_mesh = true;
+    break;
+  case 1: // SERIAL
+    if (_app.getParallelMeshOnCommandLine() || _is_nemesis)
+      _distribution_overridden = true;
+    break;
+  case 2: // DEFAULT
+    // The user did not specify 'distribution = XYZ' in the input file,
+    // so we allow the --parallel-mesh command line arg to possibly turn
+    // on ParallelMesh.  If the command line arg is not present, we pick SerialMesh.
+    if (_app.getParallelMeshOnCommandLine())
+      _use_parallel_mesh = true;
+
+    break;
+    // No default switch needed for MooseEnum
+  }
+
+  // If the user specifies 'nemesis = true' in the Mesh block, we
+  // must use ParallelMesh.
+  if (_is_nemesis)
+    _use_parallel_mesh = true;
+
+  unsigned dim = getParam<MooseEnum>("dim");
+
+  if (_use_parallel_mesh)
+  {
+    _mesh = new ParallelMesh(_communicator, dim);
+    if (_partitioner_name != "default" && _partitioner_name != "parmetis")
+    {
+      _partitioner_name = "parmetis";
+      _partitioner_overridden = true;
+    }
+  }
+  else
+    _mesh = new SerialMesh(_communicator, dim);
+
+  // Set the partitioner
+  switch (_partitioner_name)
+  {
+  case -3: // default
+    // We'll use the default partitioner, but notify the user of which one is being used...
+    if (_use_parallel_mesh)
+      _partitioner_name = "parmetis";
+    else
+      _partitioner_name = "metis";
+    break;
+
+  // No need to explicitily create the metis or parmetis partitioners,
+  // They are the default for serial and parallel mesh respectively
+  case -2: // metis
+  case -1: // parmetis
+    break;
+
+  case 0: // linear
+    getMesh().partitioner() = UniquePtr<Partitioner>(new LinearPartitioner);
+    break;
+  case 1: // centroid
+  {
+    if (!isParamValid("centroid_partitioner_direction"))
+      mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+
+    MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
+
+    if (direction == "x")
+      getMesh().partitioner() = UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
+    else if (direction == "y")
+      getMesh().partitioner() = UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
+    else if (direction == "z")
+      getMesh().partitioner() = UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
+    else if (direction == "radial")
+      getMesh().partitioner() = UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+    break;
+  }
+  case 2: // hilbert_sfc
+    getMesh().partitioner() = UniquePtr<Partitioner>(new HilbertSFCPartitioner);
+    break;
+  case 3: // morton_sfc
+    getMesh().partitioner() = UniquePtr<Partitioner>(new MortonSFCPartitioner);
+    break;
+  }
+}

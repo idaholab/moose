@@ -37,6 +37,7 @@ public:
    * constructor.
    */
   ProcessorIDAux(const InputParameters & parameters);
+  ProcessorIDAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ProcessorIDAux();
 

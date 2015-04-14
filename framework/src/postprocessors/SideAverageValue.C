@@ -58,3 +58,10 @@ SideAverageValue::threadJoin(const UserObject & y)
   const SideAverageValue & pps = static_cast<const SideAverageValue &>(y);
   _volume += pps._volume;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideAverageValue::SideAverageValue(const std::string & deprecated_name, InputParameters parameters) :
+    SideIntegralVariablePostprocessor(deprecated_name, parameters),
+    _volume(0)
+{}

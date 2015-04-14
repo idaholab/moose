@@ -33,3 +33,9 @@ NumResidualEvaluations::getValue()
 {
   return _fe_problem.getNonlinearSystem().nResidualEvaluations();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NumResidualEvaluations::NumResidualEvaluations(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters)
+{}

@@ -35,8 +35,8 @@ InputParameters validParams<SplitBasedPreconditioner>()
   return params;
 }
 
-SplitBasedPreconditioner::SplitBasedPreconditioner (const InputParameters & params) :
-    MoosePreconditioner(params),
+SplitBasedPreconditioner::SplitBasedPreconditioner(const InputParameters & parameters) :
+    MoosePreconditioner(parameters),
     _nl(_fe_problem.getNonlinearSystem())
 {
   unsigned int n_vars        = _nl.nVariables();
@@ -71,4 +71,38 @@ void
 SplitBasedPreconditioner::setup()
 {
 }
+
+// DEPRECATED CONSTRUCTOR
+SplitBasedPreconditioner::SplitBasedPreconditioner(const std::string & name, InputParameters params) :
+    MoosePreconditioner(name, params),
+    _nl(_fe_problem.getNonlinearSystem())
+{
+  unsigned int n_vars        = _nl.nVariables();
+  bool full = getParam<bool>("full");
+  CouplingMatrix *cm = new CouplingMatrix(n_vars);
+  if (!full)
+  {
+    // put 1s on diagonal
+    for (unsigned int i = 0; i < n_vars; i++)
+      (*cm)(i, i) = 1;
+
+    // off-diagonal entries
+    std::vector<std::vector<unsigned int> > off_diag(n_vars);
+    for (unsigned int i = 0; i < getParam<std::vector<std::string> >("off_diag_row").size(); i++)
+    {
+      unsigned int row = _nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_row")[i]).number();
+      unsigned int column = _nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_column")[i]).number();
+      (*cm)(row, column) = 1;
+    }
+  }
+  else
+  {
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
+        (*cm)(i,j) = 1;
+  }
+  _fe_problem.setCouplingMatrix(cm);
+  _nl.useSplitBasedPreconditioner(true);
+}
+
 #endif

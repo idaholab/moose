@@ -37,3 +37,10 @@ DeprecatedBlockAction::act()
 {
   mooseError("Input file block '" + name()  + "' has been deprecated.");
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DeprecatedBlockAction::DeprecatedBlockAction(const std::string & deprecated_name, InputParameters parameters) :
+    Action(deprecated_name, parameters)
+{
+}

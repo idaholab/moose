@@ -71,3 +71,10 @@ PiecewiseLinear::average()
 {
   return integral()/(_linear_interp->domain(_linear_interp->getSampleSize()-1)-_linear_interp->domain(0));
 }
+
+
+// DEPRECATED CONSTRUCTOR
+PiecewiseLinear::PiecewiseLinear(const std::string & deprecated_name, InputParameters parameters) :
+  Piecewise(deprecated_name, parameters)
+{
+}

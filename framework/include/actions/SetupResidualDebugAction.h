@@ -30,6 +30,7 @@ class SetupResidualDebugAction : public Action
 {
 public:
   SetupResidualDebugAction(InputParameters parameters);
+  SetupResidualDebugAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SetupResidualDebugAction();
 
   virtual void act();

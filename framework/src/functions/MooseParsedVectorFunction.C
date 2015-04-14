@@ -58,3 +58,15 @@ MooseParsedVectorFunction::initialSetup()
   if (_function_ptr == NULL)
     _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _vector_value, _vars, _vals);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MooseParsedVectorFunction::MooseParsedVectorFunction(const std::string & deprecated_name, InputParameters parameters) :
+    Function(deprecated_name, parameters),
+    MooseParsedFunctionBase(parameters),
+    _vector_value(verifyFunction(std::string("{") + getParam<std::string>("value_x") + "}{" +
+                                 getParam<std::string>("value_y") + "}{" +
+                                 getParam<std::string>("value_z") + "}")),
+    _function_ptr(NULL)
+{
+}

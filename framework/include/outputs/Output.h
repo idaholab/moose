@@ -61,6 +61,7 @@ public:
    * @see initAvailable init separate
    */
   Output(const InputParameters & parameters);
+  Output(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Get the output time.

@@ -247,3 +247,13 @@ CoupledExecutioner::updateWarehouses(const unsigned int & i)
   _awhs[i]->mooseApp().setOutputWarehouse(_owhs[i]);
   _awhs[i]->mooseApp().setInputParameterWarehouse(_input_parameter_warehouse[i]);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+CoupledExecutioner::CoupledExecutioner(const std::string & deprecated_name, InputParameters parameters) :
+    Executioner(deprecated_name, parameters)
+{
+  InputParameters params = emptyInputParameters();
+  params.addPrivateParam("_moose_app", &_app);
+  _problem = MooseSharedNamespace::static_pointer_cast<CoupledProblem>(_app.getFactory().create("CoupledProblem", "master_problem", params));
+}

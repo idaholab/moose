@@ -36,6 +36,7 @@ class MooseObject :
 {
 public:
   MooseObject(const InputParameters & parameters);
+  MooseObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MooseObject() { }
 
@@ -75,13 +76,18 @@ public:
    */
   MooseApp & getMooseApp() { return _app; }
 
-protected:
+private:
 
-  /// The MooseApp this object is associated with
-  MooseApp & _app;
+  /// Storage for InputParameters when using deprecated constructor
+  const InputParameters _deprecated_pars;
+
+protected:
 
   /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
   const InputParameters & _pars;
+
+  /// The MooseApp this object is associated with
+  MooseApp & _app;
 
 private:
 

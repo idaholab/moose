@@ -29,6 +29,7 @@ class EqualValueConstraint : public FaceFaceConstraint
 {
 public:
   EqualValueConstraint(const InputParameters & parameters);
+  EqualValueConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~EqualValueConstraint();
 
 protected:

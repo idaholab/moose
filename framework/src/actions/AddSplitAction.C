@@ -35,3 +35,10 @@ AddSplitAction::act()
   _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
   _problem->getNonlinearSystem().addSplit(_type, getShortName(), _moose_object_pars);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddSplitAction::AddSplitAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
+}

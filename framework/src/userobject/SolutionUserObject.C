@@ -650,3 +650,72 @@ SolutionUserObject::isVariableNodal(const std::string & var_name) const
   std::map<std::string, bool>::const_iterator it = _local_variable_nodal.find(var_name);
   return it->second;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SolutionUserObject::SolutionUserObject(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralUserObject(deprecated_name, parameters),
+    _file_type(MooseEnum("xda=0 exodusII=1 xdr=2")),
+    _mesh_file(getParam<MeshFileName>("mesh")),
+    _es_file(getParam<FileName>("es")),
+    _system_name(getParam<std::string>("system")),
+    _system_variables(getParam<std::vector<std::string> >("system_variables")),
+    _exodus_time_index(getParam<int>("timestep")),
+    _interpolate_times(false),
+    _mesh(NULL),
+    _es(NULL),
+    _system(NULL),
+    _mesh_function(NULL),
+    _exodusII_io(NULL),
+    _serialized_solution(NULL),
+    _es2(NULL),
+    _system2(NULL),
+    _mesh_function2(NULL),
+    _serialized_solution2(NULL),
+    _interpolation_time(0.0),
+    _interpolation_factor(0.0),
+    _exodus_times(NULL),
+    _exodus_index1(-1),
+    _exodus_index2(-1),
+    _scale(getParam<std::vector<Real> >("scale")),
+    _scale_multiplier(getParam<std::vector<Real> >("scale_multiplier")),
+    _translation(getParam<std::vector<Real> >("translation")),
+    _rotation0_vector(getParam<RealVectorValue>("rotation0_vector")),
+    _rotation0_angle(getParam<Real>("rotation0_angle")),
+    _r0(RealTensorValue()),
+    _rotation1_vector(getParam<RealVectorValue>("rotation1_vector")),
+    _rotation1_angle(getParam<Real>("rotation1_angle")),
+    _r1(RealTensorValue()),
+    _transformation_order(getParam<MultiMooseEnum>("transformation_order")),
+    _initialized(false)
+{
+
+  // form rotation matrices with the specified angles
+  Real halfPi = std::acos(0.0);
+  Real a;
+  Real b;
+
+  a = std::cos(halfPi*_rotation0_angle/90);
+  b = std::sin(halfPi*_rotation0_angle/90);
+  // the following is an anticlockwise rotation about z
+  RealTensorValue rot0_z(
+  a, -b, 0,
+  b, a, 0,
+  0, 0, 1);
+  // form the rotation matrix that will take rotation0_vector to the z axis
+  RealTensorValue vec0_to_z = RotationMatrix::rotVecToZ(_rotation0_vector);
+  // _r0 is then: rotate points so vec0 lies along z; then rotate about angle0; then rotate points back
+  _r0 = vec0_to_z.transpose()*(rot0_z*vec0_to_z);
+
+  a = std::cos(halfPi*_rotation1_angle/90);
+  b = std::sin(halfPi*_rotation1_angle/90);
+  // the following is an anticlockwise rotation about z
+  RealTensorValue rot1_z(
+  a, -b, 0,
+  b, a, 0,
+  0, 0, 1);
+  // form the rotation matrix that will take rotation1_vector to the z axis
+  RealTensorValue vec1_to_z = RotationMatrix::rotVecToZ(_rotation1_vector);
+  // _r1 is then: rotate points so vec1 lies along z; then rotate about angle1; then rotate points back
+  _r1 = vec1_to_z.transpose()*(rot1_z*vec1_to_z);
+}

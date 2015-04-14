@@ -50,6 +50,7 @@ class Problem : public MooseObject
 {
 public:
   Problem(const InputParameters & parameters);
+  Problem(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Problem();
 
   virtual void init() = 0;

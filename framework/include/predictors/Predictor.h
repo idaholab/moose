@@ -36,6 +36,7 @@ class Predictor :
 {
 public:
   Predictor(const InputParameters & parameters);
+  Predictor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Predictor();
 
   virtual int order() { return 0; }

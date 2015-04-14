@@ -37,3 +37,12 @@ ConstantVectorPostprocessor::initialize()
 void
 ConstantVectorPostprocessor::execute()
 {}
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantVectorPostprocessor::ConstantVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralVectorPostprocessor(deprecated_name, parameters),
+    _value(declareVector("value"))
+{
+  _value = getParam<VectorPostprocessorValue>("value");
+}

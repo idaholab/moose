@@ -58,7 +58,8 @@
   solve_type = NEWTON
   l_max_its = 800
   nl_rel_tol = 1e-10
-  num_steps = 10
+  num_steps = 5
+  start_time = 2.5
   end_time = 5
   dt = 0.5
 []

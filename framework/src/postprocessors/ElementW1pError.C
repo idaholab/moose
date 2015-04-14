@@ -52,3 +52,12 @@ ElementW1pError::computeQpIntegral()
 
   return val;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementW1pError::ElementW1pError(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralVariablePostprocessor(deprecated_name, parameters),
+    _p(getParam<Real>("p")),
+    _func(getFunction("function"))
+{
+}

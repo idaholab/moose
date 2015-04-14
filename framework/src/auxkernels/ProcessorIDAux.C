@@ -38,3 +38,10 @@ ProcessorIDAux::computeValue()
   else
     return _current_elem->processor_id();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ProcessorIDAux::ProcessorIDAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters)
+{
+}

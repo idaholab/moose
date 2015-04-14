@@ -35,6 +35,7 @@ class MultiAppDTKInterpolationTransfer :
 {
 public:
   MultiAppDTKInterpolationTransfer(const InputParameters & parameters);
+  MultiAppDTKInterpolationTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppDTKInterpolationTransfer() {}
 
   virtual void execute();

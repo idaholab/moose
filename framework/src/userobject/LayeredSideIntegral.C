@@ -59,3 +59,10 @@ LayeredSideIntegral::threadJoin(const UserObject & y)
   SideIntegralVariableUserObject::threadJoin(y);
   LayeredBase::threadJoin(y);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+LayeredSideIntegral::LayeredSideIntegral(const std::string & deprecated_name, InputParameters parameters) :
+    SideIntegralVariableUserObject(deprecated_name, parameters),
+    LayeredBase(parameters)
+{}

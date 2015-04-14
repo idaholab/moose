@@ -71,3 +71,11 @@ LayeredSideAverage::threadJoin(const UserObject & y)
     if (lsa.layerHasValue(i))
       _layer_volumes[i] += lsa._layer_volumes[i];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+LayeredSideAverage::LayeredSideAverage(const std::string & deprecated_name, InputParameters parameters) :
+    LayeredSideIntegral(deprecated_name, parameters)
+{
+  _layer_volumes.resize(_num_layers);
+}

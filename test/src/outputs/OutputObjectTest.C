@@ -42,7 +42,7 @@ OutputObjectTest::initialSetup()
 
   if (_type == "getOutput")
   {
-    OutputObjectTest * ptr = _app.getOutputWarehouse().getOutput<OutputObjectTest>(_name);
+    OutputObjectTest * ptr = _app.getOutputWarehouse().getOutput<OutputObjectTest>(name());
     if (ptr == this)
       mooseError("getOutput test passed");
   }

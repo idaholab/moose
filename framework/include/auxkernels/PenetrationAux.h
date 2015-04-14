@@ -37,6 +37,7 @@ public:
    * constructor.
    */
   PenetrationAux(const InputParameters & parameters);
+  PenetrationAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~PenetrationAux();
 

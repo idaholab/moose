@@ -48,6 +48,7 @@ class SimplePredictor : public Predictor
 {
 public:
   SimplePredictor(const InputParameters & parameters);
+  SimplePredictor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SimplePredictor();
 
   virtual void apply(NumericVector<Number> & sln);

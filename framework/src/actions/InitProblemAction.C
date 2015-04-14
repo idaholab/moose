@@ -43,3 +43,10 @@ InitProblemAction::act()
       ex->build();
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+InitProblemAction::InitProblemAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
+}

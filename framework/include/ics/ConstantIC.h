@@ -42,6 +42,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    */
   ConstantIC(const InputParameters & parameters);
+  ConstantIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * The value of the variable at a point.

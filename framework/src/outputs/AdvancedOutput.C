@@ -137,6 +137,7 @@ AdvancedOutput<T>::AdvancedOutput(const InputParameters & parameters) :
   T::_advanced_output_on = OutputOnWarehouse(T::_output_on, parameters);
 }
 
+
 template<class T>
 void
 AdvancedOutput<T>::initialSetup()

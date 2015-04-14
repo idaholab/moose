@@ -53,6 +53,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    */
   ScalarInitialCondition(const InputParameters & parameters);
+  ScalarInitialCondition(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ScalarInitialCondition();
 

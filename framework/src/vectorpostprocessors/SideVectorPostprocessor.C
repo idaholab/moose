@@ -26,3 +26,10 @@ SideVectorPostprocessor::SideVectorPostprocessor(const InputParameters & paramet
     SideUserObject(parameters),
     VectorPostprocessor(parameters)
 {}
+
+
+// DEPRECATED CONSTRUCTOR
+SideVectorPostprocessor::SideVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    SideUserObject(deprecated_name, parameters),
+    VectorPostprocessor(parameters)
+{}

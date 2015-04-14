@@ -41,6 +41,7 @@ public:
   virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
 
   EigenKernel(const InputParameters & parameters);
+  EigenKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual bool isActive();
 
 protected:

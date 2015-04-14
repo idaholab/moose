@@ -33,6 +33,7 @@ class ElementIntegralUserObject : public ElementUserObject
 {
 public:
   ElementIntegralUserObject(const InputParameters & parameters);
+  ElementIntegralUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

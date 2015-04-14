@@ -31,3 +31,9 @@ NumNodes::getValue()
 {
   return _subproblem.mesh().nNodes();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NumNodes::NumNodes(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters)
+{}

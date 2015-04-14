@@ -35,3 +35,10 @@ SelfAux::computeValue()
 {
   return _u[_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SelfAux::SelfAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters)
+{
+}

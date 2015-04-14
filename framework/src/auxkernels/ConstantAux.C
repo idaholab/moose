@@ -34,3 +34,11 @@ ConstantAux::computeValue()
 {
   return _value;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantAux::ConstantAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _value(getParam<Real>("value"))
+{
+}

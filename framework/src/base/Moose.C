@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+
 #include "libmesh/petsc_macro.h"
 
 #include "Moose.h"
@@ -390,6 +391,11 @@ static bool registered = false;
 void
 registerObjects(Factory & factory)
 {
+
+#undef registerObject
+#define registerObject(name) factory.reg<name>(stringifyName(name))
+
+
   // mesh
   registerMesh(FileMesh);
   registerMesh(GeneratedMesh);
@@ -700,6 +706,10 @@ registerObjects(Factory & factory)
   registerNamedOutput(DOFMapOutput, "DOFMap");
 
   registered = true;
+
+#undef registerObject
+#define registerObject(name) factory.regDeprecated<name>(stringifyName(name))
+
 }
 
 void
@@ -909,6 +919,11 @@ addActionTypes(Syntax & syntax)
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
+
+#undef registerAction
+#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+
+
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
   registerAction(SetupMeshAction, "setup_mesh");
@@ -999,6 +1014,9 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   // TODO: Why is this here?
   registerTask("finish_input_file_output", false);
   registerAction(EmptyAction, "finish_input_file_output");
+
+#undef registerAction
+#define registerAction(tplt, action) action_factory.regDeprecated<tplt>(stringifyName(tplt), action)
 }
 
 void

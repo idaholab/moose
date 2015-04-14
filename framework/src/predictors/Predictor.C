@@ -49,3 +49,24 @@ Predictor::Predictor(const InputParameters & parameters) :
 Predictor::~Predictor()
 {
 }
+
+
+// DEPRECATED CONSTRUCTOR
+Predictor::Predictor(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    Restartable(parameters, "Predictors"),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _nl(_fe_problem.getNonlinearSystem()),
+
+    _t_step(_fe_problem.timeStep()),
+    _dt(_fe_problem.dt()),
+    _dt_old(_fe_problem.dtOld()),
+    _solution(*_nl.currentSolution()),
+    _solution_old(_nl.solutionOld()),
+    _solution_older(_nl.solutionOlder()),
+    _solution_predictor(_nl.addVector("predictor", true, GHOSTED)),
+    _scale(getParam<Real>("scale"))
+{
+  if (_scale < 0.0 || _scale > 1.0)
+    mooseError("Input value for scale = " << _scale << " is outside of permissible range (0 to 1)");
+}

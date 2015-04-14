@@ -61,3 +61,11 @@ SideIntegralPostprocessor::computeIntegral()
     sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
   return sum;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideIntegralPostprocessor::SideIntegralPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    SidePostprocessor(deprecated_name, parameters),
+    _qp(0),
+    _integral_value(0)
+{}

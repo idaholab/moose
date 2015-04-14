@@ -48,6 +48,7 @@ public:
    * @return Whether or not the solve was successful.
    */
   Transient(const InputParameters & parameters);
+  Transient(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Transient();
 
   virtual Problem & problem();

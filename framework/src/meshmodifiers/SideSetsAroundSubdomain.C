@@ -119,3 +119,22 @@ SideSetsAroundSubdomain::modify()
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideSetsAroundSubdomain::SideSetsAroundSubdomain(const std::string & deprecated_name, InputParameters parameters):
+    AddSideSetsBase(deprecated_name, parameters),
+    BlockRestrictable(parameters),
+    _boundary_names(getParam<std::vector<BoundaryName> >("new_boundary")),
+    _using_normal(isParamValid("normal")),
+    _normal_tol(getParam<Real>("normal_tol")),
+    _normal(_using_normal ? getParam<Point>("normal") : Point())
+{
+
+  if (_using_normal)
+  {
+    // normalize
+    mooseAssert(_normal.size() >= 1E-5, "Normal is zero");
+    _normal /= _normal.size();
+  }
+}

@@ -36,6 +36,7 @@ public:
    * @param parameters The input parameters
    */
   Receiver(const InputParameters & parameters);
+  Receiver(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * No action taken

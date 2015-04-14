@@ -40,3 +40,12 @@ BodyForce::computeQpResidual()
   Real factor = _value * _function.value(_t, _q_point[_qp]);
   return _test[_i][_qp] * -factor;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+BodyForce::BodyForce(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _value(getParam<Real>("value")),
+    _function(getFunction("function"))
+{
+}

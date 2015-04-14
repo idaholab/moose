@@ -582,3 +582,17 @@ MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & distance, Mo
 
   return nearest;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const std::string & deprecated_name, InputParameters parameters) :
+    MultiAppTransfer(deprecated_name, parameters),
+    _to_var_name(getParam<AuxVariableName>("variable")),
+    _from_var_name(getParam<VariableName>("source_variable")),
+    _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
+    _displaced_target_mesh(getParam<bool>("displaced_target_mesh")),
+    _fixed_meshes(getParam<bool>("fixed_meshes"))
+{
+  // This transfer does not work with ParallelMesh
+  _fe_problem.mesh().errorIfParallelDistribution("MultiAppNearestNodeTransfer");
+}

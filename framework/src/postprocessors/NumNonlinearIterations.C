@@ -56,3 +56,16 @@ NumNonlinearIterations::getValue()
 
   return _num_iters;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NumNonlinearIterations::NumNonlinearIterations(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _fe_problem(dynamic_cast<FEProblem *>(&_subproblem)),
+    _accumulate_over_step(getParam<bool>("accumulate_over_step")),
+    _num_iters(0),
+    _time(-std::numeric_limits<Real>::max())
+{
+  if (!_fe_problem)
+    mooseError("Couldn't cast to FEProblem");
+}

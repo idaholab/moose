@@ -116,3 +116,10 @@ AddAllSideSetsByNormals::getNextBoundaryID()
 
   return next_id;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddAllSideSetsByNormals::AddAllSideSetsByNormals(const std::string & deprecated_name, InputParameters parameters):
+    AddSideSetsBase(deprecated_name, parameters)
+{
+}

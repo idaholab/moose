@@ -65,6 +65,7 @@ public:
    * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
    */
   DGKernel(const InputParameters & parameters);
+  DGKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~DGKernel();
 

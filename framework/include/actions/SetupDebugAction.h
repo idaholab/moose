@@ -31,6 +31,7 @@ class SetupDebugAction : public Action
 {
 public:
   SetupDebugAction(InputParameters parameters);
+  SetupDebugAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SetupDebugAction();
 
   virtual void act();

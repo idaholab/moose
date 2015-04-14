@@ -40,3 +40,11 @@ AddFEProblemAction::act()
   if (master_executioner != NULL)
     master_executioner->addFEProblem(_name, _input_filename);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AddFEProblemAction::AddFEProblemAction(const std::string & deprecated_name, InputParameters parameters) :
+    Action(deprecated_name, parameters),
+    _input_filename(getParam<FileName>("input_file"))
+{
+}

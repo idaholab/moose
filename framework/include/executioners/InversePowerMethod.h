@@ -28,6 +28,7 @@ class InversePowerMethod : public EigenExecutionerBase
 public:
 
   InversePowerMethod(const InputParameters & parameters);
+  InversePowerMethod(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void execute();
 

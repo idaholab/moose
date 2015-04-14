@@ -26,6 +26,7 @@ class Piecewise : public Function
 {
 public:
   Piecewise(const InputParameters & parameters);
+  Piecewise(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Piecewise();
 
   virtual Real functionSize();
