@@ -22,6 +22,7 @@
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
+#include "DependencyResolverInterface.h"
 #include "TransientInterface.h"
 #include "Assembly.h"
 #include "MooseVariableScalar.h"
@@ -53,6 +54,7 @@ class AuxScalarKernel :
   public FunctionInterface,
   public UserObjectInterface,
   public PostprocessorInterface,
+  public DependencyResolverInterface,
   public TransientInterface,
   public ZeroInterface,
   public MeshChangedInterface
@@ -73,6 +75,10 @@ public:
   MooseVariableScalar & variable() { return _var; }
 
   SubProblem & subProblem() { return _subproblem; }
+
+  virtual const std::set<std::string> & getRequestedItems();
+
+  virtual const std::set<std::string> & getSuppliedItems();
 
   /**
    * Use this to enable/disable the constraint
@@ -95,6 +101,10 @@ protected:
 
   VariableValue & _u;
   VariableValue & _u_old;
+
+  /// Depend AuxKernels
+  std::set<std::string> _depend_vars;
+  std::set<std::string> _supplied_vars;
 
   /**
    * Compute the value of this kernel.
