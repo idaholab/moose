@@ -34,7 +34,8 @@ public:
 
  private:
 
-  Function & _coefficient;
+  /// Biot coefficient
+  const MaterialProperty<Real> & _coefficient;
 
   VariableValue & _porepressure;
 

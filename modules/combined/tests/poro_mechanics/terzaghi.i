@@ -130,19 +130,16 @@
     [./poro_x]
     type = PoroMechanicsCoupling
     variable = disp_x
-    coefficient = 0.6
     component = 0
   [../]
   [./poro_y]
     type = PoroMechanicsCoupling
     variable = disp_y
-    coefficient = 0.6
     component = 1
   [../]
   [./poro_z]
     type = PoroMechanicsCoupling
     variable = disp_z
-    coefficient = 0.6
     component = 2
   [../]
   [./poro_timederiv]

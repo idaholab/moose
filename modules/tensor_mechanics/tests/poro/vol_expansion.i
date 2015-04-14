@@ -92,21 +92,18 @@
   [./poro_x]
     type = PoroMechanicsCoupling
     variable = disp_x
-    coefficient = 2.0
     porepressure = p
     component = 0
   [../]
   [./poro_y]
     type = PoroMechanicsCoupling
     variable = disp_y
-    coefficient = 2.0
     porepressure = p
     component = 1
   [../]
   [./poro_z]
     type = PoroMechanicsCoupling
     variable = disp_z
-    coefficient = 2.0
     porepressure = p
     component = 2
   [../]
@@ -215,6 +212,11 @@
   [../]
   [./stress]
     type = ComputeLinearElasticStress
+  [../]
+  [./biot]
+    type = GenericConstantMaterial
+    prop_names = biot_coefficient
+    prop_values = 2.0
   [../]
 []
 

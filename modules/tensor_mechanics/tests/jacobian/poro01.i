@@ -73,42 +73,36 @@
   [./poro_x]
     type = PoroMechanicsCoupling
     variable = disp_x
-    coefficient = 0.54
     porepressure = p
     component = 0
   [../]
   [./poro_y]
     type = PoroMechanicsCoupling
     variable = disp_y
-    coefficient = 0.54
     porepressure = p
     component = 1
   [../]
   [./poro_z]
     type = PoroMechanicsCoupling
     variable = disp_z
-    coefficient = 0.54
     porepressure = p
     component = 2
   [../]
   [./This_is_not_poroelasticity._It_is_checking_diagonal_jacobian]
     type = PoroMechanicsCoupling
     variable = disp_x
-    coefficient = 1.23
     porepressure = disp_x
     component = 0
   [../]
   [./This_is_not_poroelasticity._It_is_checking_diagonal_jacobian_again]
     type = PoroMechanicsCoupling
     variable = disp_x
-    coefficient = 1.23
     porepressure = disp_x
     component = 1
   [../]
   [./This_is_not_poroelasticity._It_is_checking_offdiagonal_jacobian_for_disps]
     type = PoroMechanicsCoupling
     variable = disp_x
-    coefficient = 1.23
     porepressure = disp_y
     component = 2
   [../]
@@ -126,6 +120,11 @@
   [../]
   [./stress]
     type = ComputeLinearElasticStress
+  [../]
+  [./biot]
+    type = GenericConstantMaterial
+    prop_names = biot_coefficient
+    prop_values = 0.54
   [../]
 []
 
