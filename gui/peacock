@@ -75,6 +75,7 @@ class UiBox(QtGui.QMainWindow):
     self.main_ui = QtGui.QWidget(self)
     self.main_ui.setObjectName(_fromUtf8("Dialog"))
     self.main_layout = QtGui.QVBoxLayout()
+    self.main_layout.setContentsMargins(0,0,0,0)
     self.setCentralWidget(self.main_ui)
 
     self.tabs = self.application.tabs(self)
