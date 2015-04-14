@@ -17,6 +17,7 @@
 #include "MooseApp.h"
 #include "OutputWarehouse.h"
 #include "Checkpoint.h"
+#include "MooseObjectAction.h"
 
 // External includes
 #include "pcrecpp.h"
@@ -134,9 +135,26 @@ SetupRecoverFileBaseAction::getCheckpointFiles(std::set<std::string> & files)
     checkpoint_dirs.insert(FileOutput::getOutputFileBase(_app, "_out_cp"));
 
   // Add the directories from any existing checkpoint objects
-  const std::vector<Checkpoint *> ptrs = _app.getOutputWarehouse().getOutputs<Checkpoint>();
-  for (std::vector<Checkpoint *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)
-    checkpoint_dirs.insert((*it)->directory());
+  const std::vector<Action *> actions = _awh.getActionsByName("add_output");
+  for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+  {
+    // Get the parameters from the MooseObjectAction
+    MooseObjectAction * moose_object_action = static_cast<MooseObjectAction *>(*it);
+    const InputParameters & params = moose_object_action->getObjectParams();
+
+    // Loop through the actions and add the necessary directories to the list to check
+    if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
+    {
+      if (params.isParamValid("file_base"))
+        checkpoint_dirs.insert(common->getParam<std::string>("file_base") + "_cp");
+      else
+      {
+        std::ostringstream oss;
+        oss << "_" << (*it)->getShortName() << "_cp";
+        checkpoint_dirs.insert(FileOutput::getOutputFileBase(_app, oss.str()));
+      }
+    }
+  }
 
   // Loop through the possible directories and extract the files
   for (std::set<std::string>::const_iterator it = checkpoint_dirs.begin(); it != checkpoint_dirs.end(); ++it)

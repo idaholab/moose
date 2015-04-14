@@ -41,10 +41,30 @@
   [../]
   [./recover]
     # Gold for this test was created using checkpoint.i without any recover options
-    type = RunApp
+    type = Exodiff
     input = checkpoint.i
-    cli_args = --recover
+    exodiff = checkpoint_out.e
+    cli_args = '--recover'
     recover = false
     prereq = recover_half_transient
+    delete_output_before_running = false
+  [../]
+
+  [./recover_with_checkpoint_block_half_transient]
+    # Tests that recover works when defining as a Output sub-block
+    type = RunApp
+    input = checkpoint_block.i
+    cli_args = '--half-transient'
+    recover = false
+  [../]
+  [./recover_with_checkpoint_block]
+    # Gold for this test was created using checkpoint_block.i without any recover options
+    type = Exodiff
+    input = checkpoint_block.i
+    exodiff = checkpoint_block_out.e
+    cli_args = '--recover'
+    recover = false
+    delete_output_before_running = false
+    prereq = recover_with_checkpoint_block_half_transient
   [../]
 []
