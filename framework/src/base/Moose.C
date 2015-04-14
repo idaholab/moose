@@ -247,6 +247,7 @@
 #include "FunctionScalarAux.h"
 #include "NodalEqualValueConstraint.h"
 #include "ParsedODEKernel.h"
+#include "QuotientScalarAux.h"
 
 // indicators
 #include "AnalyticalIndicator.h"
@@ -611,6 +612,7 @@ registerObjects(Factory & factory)
   registerScalarKernel(ODETimeDerivative);
   registerScalarKernel(NodalEqualValueConstraint);
   registerScalarKernel(ParsedODEKernel);
+  registerScalarKernel(QuotientScalarAux);
 
   // indicators
   registerIndicator(AnalyticalIndicator);

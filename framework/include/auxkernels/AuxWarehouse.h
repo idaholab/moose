@@ -108,6 +108,12 @@ private:
    * might have on coupled values
    */
   void sortAuxKernels(std::vector<AuxKernel *> & aux_vector);
+
+  /**
+   * This routine uses the Dependency Resolver to sort scalar AuxKernels based on dependencies they
+   * might have on coupled values
+   */
+  void sortScalarKernels(std::vector<AuxScalarKernel *> & kernels);
 };
 
 #endif // AUXWAREHOUSE_H
