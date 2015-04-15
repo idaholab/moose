@@ -596,6 +596,9 @@ void FEProblem::initialSetup()
   for (unsigned int tid = 0; tid < n_threads; tid++)
     reinitScalars(tid);
 
+  if (_displaced_mesh)
+    _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
+
   // Perform output related setups
   _app.getOutputWarehouse().init();
   _app.getOutputWarehouse().initialSetup();
