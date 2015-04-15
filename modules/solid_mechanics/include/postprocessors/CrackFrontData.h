@@ -38,7 +38,7 @@ public:
 
 protected:
   const CrackFrontDefinition * const _crack_front_definition;
-  const unsigned int _crack_front_node_index;
+  const unsigned int _crack_front_point_index;
   const Node * _crack_front_node;
   MooseMesh & _mesh;
   std::string _var_name;

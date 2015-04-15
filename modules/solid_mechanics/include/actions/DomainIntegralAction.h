@@ -33,10 +33,11 @@ protected:
     INTERACTION_INTEGRAL_T
   };
 
-  unsigned int calcNumCrackFrontNodes();
+  unsigned int calcNumCrackFrontPoints();
 
   std::set<INTEGRAL> _integrals;
   const std::vector<BoundaryName> & _boundary_names;
+  std::vector<Point> _crack_front_points;
   const std::string _order;
   const std::string _family;
   MooseEnum _direction_method_moose_enum;

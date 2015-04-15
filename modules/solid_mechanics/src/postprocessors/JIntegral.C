@@ -14,7 +14,7 @@ InputParameters validParams<JIntegral>()
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params.addCoupledVar("q", "The q function, aux variable");
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
-  params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front corresponding to this q function");
+  params.addParam<unsigned int>("crack_front_point_index","The index of the point on the crack front corresponding to this q function");
   params.addParam<bool>("convert_J_to_K",false,"Convert J-integral to stress intensity factor K.");
   params.addParam<unsigned int>("symmetry_plane", "Account for a symmetry plane passing through the plane of the crack, normal to the specified axis (0=x, 1=y, 2=z)");
   params.addParam<Real>("poissons_ratio","Poisson's ratio");
@@ -28,8 +28,8 @@ JIntegral::JIntegral(const std::string & name, InputParameters parameters):
     _scalar_q(coupledValue("q")),
     _grad_of_scalar_q(coupledGradient("q")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _has_crack_front_node_index(isParamValid("crack_front_node_index")),
-    _crack_front_node_index(_has_crack_front_node_index ? getParam<unsigned int>("crack_front_node_index") : 0),
+    _has_crack_front_point_index(isParamValid("crack_front_point_index")),
+    _crack_front_point_index(_has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
     _treat_as_2d(false),
     _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor")),
     _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")?
@@ -49,16 +49,16 @@ JIntegral::initialSetup()
 
   if (_treat_as_2d)
   {
-    if (_has_crack_front_node_index)
+    if (_has_crack_front_point_index)
     {
-      mooseWarning("crack_front_node_index ignored because CrackFrontDefinition is set to treat as 2D");
+      mooseWarning("crack_front_point_index ignored because CrackFrontDefinition is set to treat as 2D");
     }
   }
   else
   {
-    if (!_has_crack_front_node_index)
+    if (!_has_crack_front_point_index)
     {
-      mooseError("crack_front_node_index must be specified in JIntegral");
+      mooseError("crack_front_point_index must be specified in JIntegral");
     }
   }
 
@@ -70,7 +70,7 @@ Real
 JIntegral::computeQpIntegral()
 {
   ColumnMajorMatrix grad_of_vector_q;
-  const RealVectorValue& crack_direction = _crack_front_definition->getCrackDirection(_crack_front_node_index);
+  const RealVectorValue& crack_direction = _crack_front_definition->getCrackDirection(_crack_front_point_index);
   grad_of_vector_q(0,0) = crack_direction(0)*_grad_of_scalar_q[_qp](0);
   grad_of_vector_q(0,1) = crack_direction(0)*_grad_of_scalar_q[_qp](1);
   grad_of_vector_q(0,2) = crack_direction(0)*_grad_of_scalar_q[_qp](2);
@@ -94,8 +94,8 @@ JIntegral::computeQpIntegral()
   Real q_avg_seg = 1.0;
   if (!_crack_front_definition->treatAs2D())
   {
-    q_avg_seg = (_crack_front_definition->getCrackFrontForwardSegmentLength(_crack_front_node_index) +
-                 _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_node_index)) / 2.0;
+    q_avg_seg = (_crack_front_definition->getCrackFrontForwardSegmentLength(_crack_front_point_index) +
+                 _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_point_index)) / 2.0;
   }
 
   Real etot = -eq + eq_thermal;

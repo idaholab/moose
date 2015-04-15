@@ -19,7 +19,7 @@ InputParameters validParams<CrackFrontData>()
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "The name of a variable whose value at the crack front is to be reported");
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
-  params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front where data is to be reported");
+  params.addParam<unsigned int>("crack_front_point_index","The index of the point on the crack front where data is to be reported");
   params.addParam<Real>("scale_factor",1, "A scale factor to be applied to the reported quantity");
   return params;
 }
@@ -27,7 +27,7 @@ InputParameters validParams<CrackFrontData>()
 CrackFrontData::CrackFrontData(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _crack_front_node_index(isParamValid("crack_front_node_index") ? getParam<unsigned int>("crack_front_node_index") : 0),
+    _crack_front_point_index(isParamValid("crack_front_point_index") ? getParam<unsigned int>("crack_front_point_index") : 0),
     _crack_front_node(NULL),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
@@ -40,10 +40,13 @@ CrackFrontData::CrackFrontData(const std::string & name, InputParameters paramet
 void
 CrackFrontData::initialize()
 {
-  if (!(_crack_front_node_index < _crack_front_definition->getNumCrackFrontNodes()))
-    mooseError("crack_front_node_index out of range in CrackFrontData");
+  if (!(_crack_front_point_index < _crack_front_definition->getNumCrackFrontPoints()))
+    mooseError("crack_front_point_index out of range in CrackFrontData");
+  if (!_crack_front_definition->hasCrackFrontNodes())
+    mooseError("CrackFrontData not currently supported if crack front is defined with points rather than nodes");
 
-  _crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_node_index);
+
+  _crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_point_index);
 }
 
 Real

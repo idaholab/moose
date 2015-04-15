@@ -67,7 +67,7 @@ protected:
 
 private:
   const CrackFrontDefinition * _crack_front_definition;
-  const unsigned int _crack_front_node_index;
+  const unsigned int _crack_front_point_index;
   std::vector<SIF_MODE> _sif_mode;
   Real _poissons_ratio;
   Real _youngs_modulus;

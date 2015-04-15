@@ -21,6 +21,7 @@ InputParameters validParams<DomainIntegralAction>()
   MultiMooseEnum integral_vec("JIntegral InteractionIntegralKI InteractionIntegralKII InteractionIntegralKIII InteractionIntegralT");
   params.addRequiredParam<MultiMooseEnum>("integrals", integral_vec, "Domain integrals to calculate.  Choices are: " + integral_vec.getRawNames());
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+  params.addParam<std::vector<Point> >("crack_front_points", "Set of points to define crack front");
   params.addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for q AuxVariables");
   params.addParam<std::string>("family", "LAGRANGE", "Specifies the family of FE shape functions to use for q AuxVariables");
   params.addRequiredParam<std::vector<Real> >("radius_inner", "Inner radius for volume integral domain");
@@ -58,6 +59,10 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
   _position_type(getParam<MooseEnum>("position_type")),
   _use_displaced_mesh(false)
 {
+  if (isParamValid("crack_front_points"))
+  {
+    _crack_front_points = getParam<std::vector<Point> >("crack_front_points");
+  }
   if (isParamValid("crack_direction_vector"))
   {
     _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
@@ -114,7 +119,11 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
   }
 
   if (isParamValid("output_variable"))
+  {
     _output_variables = getParam<std::vector<VariableName> >("output_variable");
+    if (_crack_front_points.size() > 0)
+      mooseError("'output_variables' not yet supported with 'crack_front_points'");
+  }
 
   if (isParamValid("convert_J_to_K"))
     _convert_J_to_K = getParam<bool>("convert_J_to_K");
@@ -140,7 +149,7 @@ DomainIntegralAction::act()
   const std::string uo_name("crackFrontDefinition");
   const std::string ak_base_name("q");
   const std::string av_base_name("q");
-  const unsigned int num_crack_front_nodes = calcNumCrackFrontNodes();
+  const unsigned int num_crack_front_points = calcNumCrackFrontPoints();
   const std::string aux_stress_base_name("aux_stress");
   const std::string aux_grad_disp_base_name("aux_grad_disp");
 
@@ -166,7 +175,10 @@ DomainIntegralAction::act()
     params.set<unsigned int>("axis_2d") = _axis_2d;
     if (_has_symmetry_plane)
       params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
-    params.set<std::vector<BoundaryName> >("boundary") = _boundary_names;
+    if (_boundary_names.size() != 0)
+      params.set<std::vector<BoundaryName> >("boundary") = _boundary_names;
+    if (_crack_front_points.size() != 0)
+      params.set<std::vector<Point> >("crack_front_points") = _crack_front_points;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
     if (_integrals.count(INTERACTION_INTEGRAL_T) != 0)
     {
@@ -193,10 +205,10 @@ DomainIntegralAction::act()
       }
       else
       {
-        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
         {
           std::ostringstream av_name_stream;
-          av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+          av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
           _problem->addAuxVariable(av_name_stream.str(),
                                    FEType(Utility::string_to_enum<Order>(_order),
                                           Utility::string_to_enum<FEFamily>(_family)));
@@ -227,14 +239,14 @@ DomainIntegralAction::act()
       }
       else
       {
-        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
         {
           std::ostringstream ak_name_stream;
-          ak_name_stream<<ak_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+          ak_name_stream<<ak_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
           std::ostringstream av_name_stream;
-          av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+          av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
           params.set<AuxVariableName>("variable") = av_name_stream.str();
-          params.set<unsigned int>("crack_front_node_index") = cfn_index;
+          params.set<unsigned int>("crack_front_point_index") = cfp_index;
           _problem->addAuxKernel(ak_type_name, ak_name_stream.str(), params);
         }
       }
@@ -277,16 +289,16 @@ DomainIntegralAction::act()
         }
         else
         {
-          for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+          for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
           {
             std::ostringstream av_name_stream;
-            av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
             std::ostringstream pp_name_stream;
-            pp_name_stream<<pp_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
             std::vector<VariableName> qvars;
             qvars.push_back(av_name_stream.str());
             params.set<std::vector<VariableName> >("q") = qvars;
-            params.set<unsigned int>("crack_front_node_index") = cfn_index;
+            params.set<unsigned int>("crack_front_point_index") = cfp_index;
             _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
           }
         }
@@ -369,24 +381,24 @@ DomainIntegralAction::act()
           }
           else
           {
-            for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+            for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
             {
               std::ostringstream av_name_stream;
-              av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+              av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
               std::ostringstream pp_name_stream;
-              pp_name_stream<<pp_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+              pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
               std::ostringstream cfn_index_stream;
-              cfn_index_stream<<cfn_index+1;
+              cfn_index_stream<<cfp_index+1;
               std::ostringstream aux_stress_name_stream;
-              aux_stress_name_stream<<aux_stress_base_name<<aux_mode_name<<cfn_index+1;
+              aux_stress_name_stream<<aux_stress_base_name<<aux_mode_name<<cfp_index+1;
               std::ostringstream aux_grad_disp_name_stream;
-              aux_grad_disp_name_stream<<aux_grad_disp_base_name<<aux_mode_name<<cfn_index+1;
+              aux_grad_disp_name_stream<<aux_grad_disp_base_name<<aux_mode_name<<cfp_index+1;
               params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
               params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
               std::vector<VariableName> qvars;
               qvars.push_back(av_name_stream.str());
               params.set<std::vector<VariableName> >("q") = qvars;
-              params.set<unsigned int>("crack_front_node_index") = cfn_index;
+              params.set<unsigned int>("crack_front_point_index") = cfp_index;
               _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
             }
           }
@@ -409,12 +421,12 @@ DomainIntegralAction::act()
       }
       else
       {
-        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
         {
           std::ostringstream pp_name_stream;
-          pp_name_stream<<ov_base_name<<"_crack_"<<cfn_index+1;
+          pp_name_stream<<ov_base_name<<"_crack_"<<cfp_index+1;
           params.set<VariableName>("variable") = _output_variables[i];
-          params.set<unsigned int>("crack_front_node_index") = cfn_index;
+          params.set<unsigned int>("crack_front_point_index") = cfp_index;
           _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
         }
       }
@@ -459,10 +471,10 @@ DomainIntegralAction::act()
           std::vector<PostprocessorName> postprocessor_names;
           std::ostringstream vpp_name_stream;
           vpp_name_stream<<pp_base_name<<"_"<<ring_index+1;
-          for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+          for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
           {
             std::ostringstream pp_name_stream;
-            pp_name_stream<<pp_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
             postprocessor_names.push_back(pp_name_stream.str());
           }
           params.set<std::vector<PostprocessorName> >("postprocessors") = postprocessor_names;
@@ -478,10 +490,10 @@ DomainIntegralAction::act()
         std::ostringstream vpp_name_stream;
         vpp_name_stream<<_output_variables[i]<<"_crack";
         std::vector<PostprocessorName> postprocessor_names;
-        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
         {
           std::ostringstream pp_name_stream;
-          pp_name_stream<<vpp_name_stream.str()<<"_"<<cfn_index+1;
+          pp_name_stream<<vpp_name_stream.str()<<"_"<<cfp_index+1;
           postprocessor_names.push_back(pp_name_stream.str());
         }
         params.set<std::vector<PostprocessorName> >("postprocessors") = postprocessor_names;
@@ -546,19 +558,19 @@ DomainIntegralAction::act()
       {
         std::ostringstream mater_name_stream;
         mater_name_stream<<mater_base_name<<"_1";
-        params.set<unsigned int>("crack_front_node_index") = 0;
+        params.set<unsigned int>("crack_front_point_index") = 0;
         params.set<std::string>("appended_index_name") = "1";
         _problem->addMaterial(mater_type_name,mater_name_stream.str(),params);
       }
       else
       {
-        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
         {
           std::ostringstream mater_name_stream;
-          mater_name_stream<<mater_base_name<<"_"<<cfn_index+1;
-          params.set<unsigned int>("crack_front_node_index") = cfn_index;
+          mater_name_stream<<mater_base_name<<"_"<<cfp_index+1;
+          params.set<unsigned int>("crack_front_point_index") = cfp_index;
           std::ostringstream cfn_index_stream;
-          cfn_index_stream<<cfn_index+1;
+          cfn_index_stream<<cfp_index+1;
           params.set<std::string>("appended_index_name") = cfn_index_stream.str();
           _problem->addMaterial(mater_type_name,mater_name_stream.str(),params);
         }
@@ -569,25 +581,34 @@ DomainIntegralAction::act()
 
 
 unsigned int
-DomainIntegralAction::calcNumCrackFrontNodes()
+DomainIntegralAction::calcNumCrackFrontPoints()
 {
-  std::vector<BoundaryID> bids = _mesh->getBoundaryIDs(_boundary_names,true);
-  std::set<unsigned int> nodes;
-
-  ConstBndNodeRange & bnd_nodes = *_mesh->getBoundaryNodeRange();
-  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
+  unsigned int num_points = 0;
+  if (_boundary_names.size() != 0)
   {
-    const BndNode * bnode = *nd;
-    BoundaryID boundary_id = bnode->_bnd_id;
+    std::vector<BoundaryID> bids = _mesh->getBoundaryIDs(_boundary_names,true);
+    std::set<unsigned int> nodes;
 
-    for (unsigned int ibid=0; ibid<bids.size(); ++ibid)
+    ConstBndNodeRange & bnd_nodes = *_mesh->getBoundaryNodeRange();
+    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
     {
-      if (boundary_id == bids[ibid])
+      const BndNode * bnode = *nd;
+      BoundaryID boundary_id = bnode->_bnd_id;
+
+      for (unsigned int ibid=0; ibid<bids.size(); ++ibid)
       {
-        nodes.insert(bnode->_node->id());
-        break;
+        if (boundary_id == bids[ibid])
+        {
+          nodes.insert(bnode->_node->id());
+          break;
+        }
       }
     }
+    num_points = nodes.size();
   }
-  return nodes.size();
+  else if (_crack_front_points.size() != 0)
+    num_points = _crack_front_points.size();
+  else
+    mooseError("Must define either 'boundary' or 'crack_front_points'");
+  return num_points;
 }

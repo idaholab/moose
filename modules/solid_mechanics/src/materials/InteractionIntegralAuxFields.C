@@ -12,7 +12,7 @@ InputParameters validParams<InteractionIntegralAuxFields>()
   InputParameters params = validParams<Material>();
   addInteractionIntegralAuxFieldsParams(params);
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
-  params.addRequiredParam<unsigned int>("crack_front_node_index","The index of the node on the crack front to calculate auxiliary fields at");
+  params.addRequiredParam<unsigned int>("crack_front_point_index","The index of the point on the crack front to calculate auxiliary fields at");
   return params;
 }
 
@@ -59,7 +59,7 @@ InteractionIntegralAuxFields::InteractionIntegralAuxFields(const std::string & n
     _aux_grad_disp_T(declareProperty<ColumnMajorMatrix>("aux_grad_disp_T_"+_appended_index_name)),
     _aux_strain_T(declareProperty<ColumnMajorMatrix>("aux_strain_T_"+_appended_index_name)),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _crack_front_node_index(getParam<unsigned int>("crack_front_node_index")),
+    _crack_front_point_index(getParam<unsigned int>("crack_front_point_index")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus"))
 {
@@ -80,7 +80,7 @@ InteractionIntegralAuxFields::computeQpProperties()
 
   // Calculate (r,theta) position of qp relative to crack front
   Point p(_q_point[_qp]);
-  _crack_front_definition->calculateRThetaToCrackFront(p,_crack_front_node_index,_r,_theta);
+  _crack_front_definition->calculateRThetaToCrackFront(p,_crack_front_point_index,_r,_theta);
 
   //Calculate auxiliary stress tensor at current qp
   for (std::vector<SIF_MODE>::iterator it = _sif_mode.begin(); it != _sif_mode.end(); ++it)

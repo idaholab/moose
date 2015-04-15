@@ -47,7 +47,7 @@ CrackDataSampler::CrackDataSampler(const std::string & name, InputParameters par
 void
 CrackDataSampler::initialize()
 {
-  if (_crack_front_definition->getNumCrackFrontNodes() != _domain_integral_postprocessor_values.size())
+  if (_crack_front_definition->getNumCrackFrontPoints() != _domain_integral_postprocessor_values.size())
     mooseError("In CrackDataSampler, number of crack front nodes != number of domain integral postprocessors");
   if (_position_type == "angle" && !_crack_front_definition->hasAngleAlongFront())
     mooseError("In CrackDataSampler, 'position_type = Angle' specified, but angle is not available.  "
@@ -62,7 +62,7 @@ CrackDataSampler::execute()
   for (unsigned int i=0; i<_domain_integral_postprocessor_values.size(); ++i)
   {
     values.clear();
-    const Point & crack_front_node = *_crack_front_definition->getCrackFrontNodePtr(i);
+    const Point *crack_front_point = _crack_front_definition->getCrackFrontPoint(i);
     Real position;
     if (_position_type == "Angle")
       position = _crack_front_definition->getAngleAlongFront(i);
@@ -70,7 +70,7 @@ CrackDataSampler::execute()
       position = _crack_front_definition->getDistanceAlongFront(i);
 
     values.push_back(*_domain_integral_postprocessor_values[i]);
-    addSample(crack_front_node, position, values);
+    addSample(*crack_front_point, position, values);
   }
 }
 
