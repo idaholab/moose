@@ -188,21 +188,6 @@
 
 []
 
-[Postprocessors]
-  [./_dt]
-    type = TimestepSize
-  [../]
-
-  [./nl_its]
-    type = NumNonlinearIterations
-  [../]
-
-  [./lin_its]
-    type = NumLinearIterations
-  [../]
-[]
-
-
 [Outputs]
   file_base = j_integral_2d_mouth_dir_out
   output_initial = true

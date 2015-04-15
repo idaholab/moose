@@ -65,7 +65,7 @@
 
 [DomainIntegral]
   integrals = JIntegral
-  boundary = 800
+  crack_front_points = '0 -10 0'
   crack_direction_method = CrackDirectionVector
   crack_direction_vector = '1 0 0'
   2d = true
@@ -85,7 +85,7 @@
     tensor = stress
     variable = stress_xx
     index = 0
-    execute_on = timestep     # for efficiency, only compute at the end of a timestep
+    execute_on = timestep_end     # for efficiency, only compute at the end of a timestep
   [../]
   [./stress_yy]
     type = MaterialTensorAux
@@ -188,7 +188,7 @@
 []
 
 [Outputs]
-  file_base = j_integral_2d_out
+  file_base = j_integral_2d_points_out
   output_initial = true
   exodus = true
   print_linear_residuals = true
