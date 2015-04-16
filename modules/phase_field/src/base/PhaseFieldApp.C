@@ -50,6 +50,7 @@
 #include "MultiSmoothCircleIC.h"
 #include "PolycrystalRandomIC.h"
 #include "PolycrystalReducedIC.h"
+#include "ReconVarIC.h"
 #include "RndBoundingBoxIC.h"
 #include "RndSmoothCircleIC.h"
 #include "SmoothCircleIC.h"
@@ -124,6 +125,7 @@
 #include "PolycrystalRandomICAction.h"
 #include "PolycrystalVariablesAction.h"
 #include "PolycrystalVoronoiICAction.h"
+#include "ReconVarICAction.h"
 #include "Tricrystal2CircleGrainsICAction.h"
 
 template<>
@@ -198,6 +200,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(MultiSmoothCircleIC);
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalReducedIC);
+  registerInitialCondition(ReconVarIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(SmoothCircleIC);
@@ -259,6 +262,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("PolycrystalHexGrainICAction", "ICs/PolycrystalICs/PolycrystalHexGrainIC");
   syntax.registerActionSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
   syntax.registerActionSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
+  syntax.registerActionSyntax("ReconVarICAction", "ICs/PolycrystalICs/ReconVarIC");
 
   registerAction(PolycrystalKernelAction, "add_kernel");
   registerAction(PolycrystalVariablesAction, "add_variable");
@@ -268,4 +272,5 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PolycrystalHexGrainICAction, "add_ic");
   registerAction(PolycrystalVoronoiICAction, "add_ic");
   registerAction(PolycrystalRandomICAction, "add_ic");
+  registerAction(ReconVarICAction, "add_ic");
 }
