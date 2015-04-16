@@ -36,12 +36,16 @@
 
 [Materials]
   [./CuGrGr]
-    type = CuGrGr
+    type = GBEvolution
     block = 0
     T = 500 #K
     wGB = 6.0 #micron
     length_scale = 1.0e-6
     time_scale = 1.0e-4
+    GBmob0 = 2.5e-6
+    Q = 0.23
+    GBenergy = 0.708
+    molar_volume = 7.11e-6
   [../]
 []
 
