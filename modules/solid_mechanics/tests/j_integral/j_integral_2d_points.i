@@ -1,8 +1,5 @@
 #This tests the J-Integral evaluation capability.
-#This is a 3d extrusion of a 2d plane strain model with 2 elements
-#through the thickness, and calculates the J-Integrals using options
-#to treat it as 3d.
-#Crack direction is defined using the crack mouth coordinates.
+#This is a 2d plane strain model
 #The analytic solution for J1 is 2.434.  This model
 #converges to that solution with a refined mesh.
 #Reference: National Agency for Finite Element Methods and Standards (U.K.):
@@ -17,14 +14,11 @@
   family = LAGRANGE
   disp_x = disp_x
   disp_y = disp_y
-  disp_z = disp_z
 []
 
 [Mesh]
-  file = crack3d.e
-  displacements = 'disp_x disp_y disp_z'
-#  partitioner = centroid
-#  centroid_partitioner_direction = z
+  file = crack2d.e
+  displacements = 'disp_x disp_y'
 []
 
 
@@ -32,8 +26,6 @@
   [./disp_x]
   [../]
   [./disp_y]
-  [../]
-  [./disp_z]
   [../]
 []
 
@@ -73,15 +65,13 @@
 
 [DomainIntegral]
   integrals = JIntegral
-  boundary = 800
-  crack_direction_method = CrackMouth
-  crack_mouth_boundary = 900
-  crack_end_direction_method = CrackDirectionVector
-  crack_direction_vector_end_1 = '1.0 0.0 0.0'
-  crack_direction_vector_end_2 = '1.0 0.0 0.0'
-  radius_inner = '4.0 5.5'
-  radius_outer = '5.5 7.0'
-  output_variable = 'disp_x'
+  crack_front_points = '0 -10 0'
+  crack_direction_method = CrackDirectionVector
+  crack_direction_vector = '1 0 0'
+  2d = true
+  axis_2d = 2
+  radius_inner = '4.0 4.5 5.0 5.5 6.0'
+  radius_outer = '4.5 5.0 5.5 6.0 6.5'
 []
 
 [SolidMechanics]
@@ -95,7 +85,7 @@
     tensor = stress
     variable = stress_xx
     index = 0
-    execute_on = timestep     # for efficiency, only compute at the end of a timestep
+    execute_on = timestep_end     # for efficiency, only compute at the end of a timestep
   [../]
   [./stress_yy]
     type = MaterialTensorAux
@@ -128,56 +118,10 @@
 
 [BCs]
 
-#  [./pin_x]
-#    type = DirichletBC
-#    variable = disp_x
-#    boundary = 200
-#    value = 0.0
-#  [../]
-#
-#  [./pin_y]
-#    type = DirichletBC
-#    variable = disp_y
-#    boundary = 200
-#    value = 0.0
-#  [../]
-
   [./crack_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
-    value = 0.0
-  [../]
-
- # [./nocrack_y]
- #   type = DirichletBC
- #   variable = disp_y
- #   boundary = 600
- #   value = 0.0
- # [../]
-
-# [./no_x]
-#   type = DirichletBC
-#   variable = disp_x
-#   boundary = 500
-#   value = 0.0
-# [../]
-# [./no_y]
-#   type = DirichletBC
-#   variable = disp_y
-#   boundary = 500
-#   value = 0.0
-# [../]
-  [./no_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 500
-    value = 0.0
-  [../]
-  [./no_z2]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 510
     value = 0.0
   [../]
 
@@ -204,11 +148,11 @@
 
     disp_x = disp_x
     disp_y = disp_y
-    disp_z = disp_z
 
     youngs_modulus = 207000
     poissons_ratio = 0.3
     thermal_expansion = 1e-5
+    formulation = PlaneStrain
     compute_JIntegral = true
   [../]
 []
@@ -243,29 +187,8 @@
 
 []
 
-[Postprocessors]
-  [./_dt]
-    type = TimestepSize
-  [../]
-
-  [./nl_its]
-    type = NumNonlinearIterations
-  [../]
-
-  [./lin_its]
-    type = NumLinearIterations
-  [../]
-
-  [./disp_x_centercrack]
-    type = CrackFrontData
-    crack_front_definition = crackFrontDefinition
-    variable = disp_x
-    crack_front_point_index = 1
-  [../]
-[]
-
 [Outputs]
-  file_base = j_integral_3d_mouth_dir_end_dir_vec_out
+  file_base = j_integral_2d_points_out
   output_initial = true
   exodus = true
   print_linear_residuals = true

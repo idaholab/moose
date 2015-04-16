@@ -2,7 +2,6 @@
 #This is a 3d extrusion of a 2d plane strain model with 2 elements
 #through the thickness, and calculates the J-Integrals using options
 #to treat it as 3d.
-#Crack direction is defined using the crack mouth coordinates.
 #The analytic solution for J1 is 2.434.  This model
 #converges to that solution with a refined mesh.
 #Reference: National Agency for Finite Element Methods and Standards (U.K.):
@@ -73,15 +72,13 @@
 
 [DomainIntegral]
   integrals = JIntegral
-  boundary = 800
-  crack_direction_method = CrackMouth
-  crack_mouth_boundary = 900
-  crack_end_direction_method = CrackDirectionVector
-  crack_direction_vector_end_1 = '1.0 0.0 0.0'
-  crack_direction_vector_end_2 = '1.0 0.0 0.0'
+  crack_front_points = '0 -10 .5
+                        0 -10 0
+                        0 -10 -.5'
+  crack_direction_method = CrackDirectionVector
+  crack_direction_vector = '1 0 0'
   radius_inner = '4.0 5.5'
   radius_outer = '5.5 7.0'
-  output_variable = 'disp_x'
 []
 
 [SolidMechanics]
@@ -95,7 +92,7 @@
     tensor = stress
     variable = stress_xx
     index = 0
-    execute_on = timestep     # for efficiency, only compute at the end of a timestep
+    execute_on = timestep_end     # for efficiency, only compute at the end of a timestep
   [../]
   [./stress_yy]
     type = MaterialTensorAux
@@ -243,29 +240,8 @@
 
 []
 
-[Postprocessors]
-  [./_dt]
-    type = TimestepSize
-  [../]
-
-  [./nl_its]
-    type = NumNonlinearIterations
-  [../]
-
-  [./lin_its]
-    type = NumLinearIterations
-  [../]
-
-  [./disp_x_centercrack]
-    type = CrackFrontData
-    crack_front_definition = crackFrontDefinition
-    variable = disp_x
-    crack_front_point_index = 1
-  [../]
-[]
-
 [Outputs]
-  file_base = j_integral_3d_mouth_dir_end_dir_vec_out
+  file_base = j_integral_3d_points_out
   output_initial = true
   exodus = true
   print_linear_residuals = true

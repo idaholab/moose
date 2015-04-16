@@ -123,7 +123,7 @@
     youngs_modulus = 30000
     poissons_ratio = 0.3
     crack_front_definition = crackFrontDefinition
-    crack_front_node_index = 0
+    crack_front_point_index = 0
   [../]
 
   [./all_y]
@@ -134,7 +134,7 @@
     youngs_modulus = 30000
     poissons_ratio = 0.3
     crack_front_definition = crackFrontDefinition
-    crack_front_node_index = 0
+    crack_front_point_index = 0
   [../]
 
   [./all_z]
@@ -145,7 +145,7 @@
     youngs_modulus = 30000
     poissons_ratio = 0.3
     crack_front_definition = crackFrontDefinition
-    crack_front_node_index = 0
+    crack_front_point_index = 0
   [../]
 
 [] # BCs

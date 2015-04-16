@@ -36,21 +36,24 @@ public:
   virtual void execute();
 
   const Node * getCrackFrontNodePtr(const unsigned int node_index) const;
-  const RealVectorValue & getCrackFrontTangent(const unsigned int node_index) const;
-  Real getCrackFrontForwardSegmentLength(const unsigned int node_index) const;
-  Real getCrackFrontBackwardSegmentLength(const unsigned int node_index) const;
-  const RealVectorValue & getCrackDirection(const unsigned int node_index) const;
-  Real getDistanceAlongFront(const unsigned int node_index) const;
+  const Point * getCrackFrontPoint(const unsigned int point_index) const;
+  const RealVectorValue & getCrackFrontTangent(const unsigned int point_index) const;
+  Real getCrackFrontForwardSegmentLength(const unsigned int point_index) const;
+  Real getCrackFrontBackwardSegmentLength(const unsigned int point_index) const;
+  const RealVectorValue & getCrackDirection(const unsigned int point_index) const;
+  Real getDistanceAlongFront(const unsigned int point_index) const;
   bool hasAngleAlongFront() const;
-  Real getAngleAlongFront(const unsigned int node_index) const;
-  unsigned int getNumCrackFrontNodes() const;
+  Real getAngleAlongFront(const unsigned int point_index) const;
+  unsigned int getNumCrackFrontPoints() const;
   bool treatAs2D() const {return _treat_as_2d;}
-  RealVectorValue rotateToCrackFrontCoords(const RealVectorValue vector, const unsigned int node_index) const;
-  ColumnMajorMatrix rotateToCrackFrontCoords(const SymmTensor tensor, const unsigned int node_index) const;
-  ColumnMajorMatrix rotateToCrackFrontCoords(const ColumnMajorMatrix tensor, const unsigned int node_index) const;
-  void calculateRThetaToCrackFront(const Point qp, const unsigned int node_index, Real & r, Real & theta) const;
+  RealVectorValue rotateToCrackFrontCoords(const RealVectorValue vector, const unsigned int point_index) const;
+  ColumnMajorMatrix rotateToCrackFrontCoords(const SymmTensor tensor, const unsigned int point_index) const;
+  ColumnMajorMatrix rotateToCrackFrontCoords(const ColumnMajorMatrix tensor, const unsigned int point_index) const;
+  void calculateRThetaToCrackFront(const Point qp, const unsigned int point_index, Real & r, Real & theta) const;
   bool isNodeOnIntersectingBoundary(const Node * const node) const;
+  bool isPointWithIndexOnIntersectingBoundary(const unsigned int point_index) const;
   Real getCrackFrontTangentialStrain(const unsigned int node_index) const;
+  bool hasCrackFrontNodes() const { return _geom_definition_method == CRACK_FRONT_NODES; }
 
 protected:
 
@@ -74,11 +77,19 @@ protected:
     END_2_NODE
   };
 
+  enum CRACK_GEOM_DEFINITION
+  {
+    CRACK_FRONT_NODES,
+    CRACK_FRONT_POINTS
+  };
+
   AuxiliarySystem & _aux;
   MooseMesh & _mesh;
   static const Real _tol;
 
   std::vector<unsigned int> _ordered_crack_front_nodes;
+  CRACK_GEOM_DEFINITION _geom_definition_method;
+  std::vector<Point> _crack_front_points;
   std::vector<RealVectorValue> _tangent_directions;
   std::vector<RealVectorValue> _crack_directions;
   std::vector<std::pair<Real,Real> > _segment_lengths;
@@ -118,11 +129,10 @@ protected:
   unsigned int maxNodeCoor(std::vector<Node *>& nodes, unsigned int dir0=0);
   void updateCrackFrontGeometry();
   void updateDataForCrackDirection();
-  RealVectorValue calculateCrackFrontDirection(const Node* crack_front_node,
+  RealVectorValue calculateCrackFrontDirection(const Point& crack_front_point,
                                                const RealVectorValue& tangent_direction,
                                                const CRACK_NODE_TYPE ntype) const;
   void calculateTangentialStrainAlongFront();
-
 };
 
 

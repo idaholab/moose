@@ -38,7 +38,7 @@ protected:
 
   const int _component;
   const CrackFrontDefinition * _crack_front_definition;
-  const unsigned int _crack_front_node_index;
+  const unsigned int _crack_front_point_index;
 
   Real _r;
   Real _theta;
