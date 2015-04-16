@@ -133,7 +133,7 @@ MultiApp::~MultiApp()
 }
 
 void
-MultiApp::init()
+MultiApp::initialSetup()
 {
   // Fill in the _positions vector
   fillPositions();

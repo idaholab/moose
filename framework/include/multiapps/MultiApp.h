@@ -51,7 +51,7 @@ public:
 
   virtual ~MultiApp();
 
-  virtual void init();
+  virtual void initialSetup();
 
   /**
    * Gets called just before transfers are done _to_ the MultiApp

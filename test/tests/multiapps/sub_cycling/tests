@@ -3,13 +3,11 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e master_out_sub0.e'
-    recover = false
   [../]
   [./test_sub_cycle_output]
     # Run the same test as above, but test for sub-cycle output
     type = 'Exodiff'
     input = 'master_sub_output.i'
     exodiff = 'master_sub_output_out.e master_sub_output_out_sub0.e'
-    recover = false
   [../]
 []

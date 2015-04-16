@@ -3,6 +3,5 @@
     type = 'Exodiff'
     input = 'dt_from_multi.i'
     exodiff = 'dt_from_multi_out_sub_app0.e dt_from_multi_out_sub_app1.e dt_from_multi_out_sub_app2.e dt_from_multi_out_sub_app3.e'
-    recover = false
   [../]
 []

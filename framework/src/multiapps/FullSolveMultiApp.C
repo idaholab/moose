@@ -37,9 +37,9 @@ FullSolveMultiApp::~FullSolveMultiApp()
 }
 
 void
-FullSolveMultiApp::init()
+FullSolveMultiApp::initialSetup()
 {
-  MultiApp::init();
+  MultiApp::initialSetup();
 
   if (_has_an_app)
   {

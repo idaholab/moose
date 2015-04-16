@@ -70,3 +70,10 @@ MultiAppWarehouse::parentOutputPositionChanged()
   for (unsigned int i=0; i<_all_objects.size(); i++)
     _all_objects[i]->parentOutputPositionChanged();
 }
+
+void
+MultiAppWarehouse::initialSetup()
+{
+  for (std::vector<MultiApp *>::iterator i = _all_objects.begin(); i != _all_objects.end(); ++i)
+    (*i)->initialSetup();
+}
