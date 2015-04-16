@@ -20,6 +20,8 @@ InputParameters validParams<InteractionIntegral>()
   params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front corresponding to this q function");
   params.addParam<Real>("K_factor", "Conversion factor between interaction integral and stress intensity factor K");
   params.addParam<unsigned int>("symmetry_plane", "Account for a symmetry plane passing through the plane of the crack, normal to the specified axis (0=x, 1=y, 2=z)");
+  params.addParam<bool>("t_stress", false, "Calculate T-stress");
+  params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
@@ -39,14 +41,12 @@ InteractionIntegral::InteractionIntegral(const std::string & name, InputParamete
     _grad_disp_z(parameters.get<SubProblem *>("_subproblem")->mesh().dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
     _aux_stress_name(getParam<std::string>("aux_stress")),
     _aux_stress(getMaterialProperty<ColumnMajorMatrix>(_aux_stress_name)),
-    _aux_disp_name(getParam<std::string>("aux_disp")),
-    _aux_disp(getMaterialProperty<ColumnMajorMatrix>(_aux_disp_name)),
     _aux_grad_disp_name(getParam<std::string>("aux_grad_disp")),
     _aux_grad_disp(getMaterialProperty<ColumnMajorMatrix>(_aux_grad_disp_name)),
-    _aux_strain_name(getParam<std::string>("aux_strain")),
-    _aux_strain(getMaterialProperty<ColumnMajorMatrix>(_aux_strain_name)),
     _K_factor(getParam<Real>("K_factor")),
-    _has_symmetry_plane(isParamValid("symmetry_plane"))
+    _has_symmetry_plane(isParamValid("symmetry_plane")),
+    _t_stress(getParam<bool>("t_stress")),
+    _poissons_ratio(getParam<Real>("poissons_ratio"))
 {
 }
 
@@ -76,6 +76,10 @@ Real
 InteractionIntegral::getValue()
 {
   gatherSum(_integral_value);
+
+  if (_t_stress && !_treat_as_2d)
+    _integral_value += _poissons_ratio * _crack_front_definition->getCrackFrontTangentialStrain(_crack_front_node_index);
+
   return _K_factor*_integral_value;
 }
 
