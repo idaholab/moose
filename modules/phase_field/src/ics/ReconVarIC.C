@@ -1,5 +1,4 @@
 #include "ReconVarIC.h"
-#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<ReconVarIC>()
@@ -33,7 +32,7 @@ ReconVarIC::ReconVarIC(const std::string & name,InputParameters parameters) :
 void
 ReconVarIC::initialSetup()
 {
-  //Get the number of grains from the EBSD data, reduce by one if consider phase becuase grain numbering starts at one in phase 1
+  //Get the number of grains from the EBSD data, reduce by one if consider phase because grain numbering starts at one in phase 1
   _grain_num = _ebsd_reader.getGrainNum();
   if (_consider_phase)
     _grain_num -= 1;
@@ -52,7 +51,7 @@ ReconVarIC::initialSetup()
     //Assign center point values
     _centerpoints.resize(_grain_num);
 
-    for (unsigned int gr = 0; gr < _grain_num; gr++)
+    for (unsigned int gr = 0; gr < _grain_num; ++gr)
     {
       const EBSDReader::EBSDAvgData & d = _ebsd_reader.getAvgData(gr + grn_index_offset);
       _centerpoints[gr] = d.p;
@@ -63,43 +62,53 @@ ReconVarIC::initialSetup()
 
     _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
 
+    /* Output _assigned_op map for debugging purposes
+    for (std::vector<Real>::const_iterator ii = _assigned_op.begin(); ii != _assigned_op.end() ;++ii)
+    {
+      Moose::out << "_assigned_op: " << *ii << "\n" << std::endl;
+    }*/
   }
 }
 
-
-// Note that we are not actually using Point coordinates that get passed in to assign the order parameter.
-// By knowing the curent elements index, we can use it's centroid to grab the EBSD grain index
-// associated with the point from the EBSDReader user object.
 Real
-ReconVarIC::value(const Point &)
+ReconVarIC::value(const Point & /*p*/)
 {
-  const Point p1 = _current_elem->centroid();
-  const EBSDReader::EBSDPointData & d = _ebsd_reader.getData(p1);
-  const unsigned int grn_index = d.grain;
-  const unsigned int phase_index = d.phase;
+  // Initialize each point value by referencing the nodeToGrainWeightMap from the EBSDReader user object.
+  // Import nodeToGrainWeightMap from EBSDReader for all nodes.  This map consists of the node index
+  // followed by a vector of weights for all grains at that node.
+  const std::map<dof_id_type, std::vector<Real> > & node_to_grn_weight_map = _ebsd_reader.getNodeToGrainWeightMap();
 
-  Real value = 0.0;
-
-  if (!_consider_phase) //This is the old methodology where everything is an order parameter so grain_num is unchanged
+  /* Output rows of node_to_grain_weight_map for debugging purposes
+  for(std::map<dof_id_type, std::vector<Real> >::const_iterator it2 = node_to_grn_weight_map.begin();
+    it2 != node_to_grn_weight_map.end(); ++it2)
   {
-    if (_assigned_op[grn_index] == _op_index)
-      value = 1.0;
-  }
-  else
-  {
-    if (_all_to_one) //Ever part of this phase will be assigned to the same variable
-    {
-      if (phase_index == _phase)
-        value = 1.0;
-    }
-    else //For the given phase, each grain is assigned to the corresponding op., but grain_num is one less.
-    {
-      if (phase_index == _phase)
-        if (_assigned_op[grn_index - 1] == _op_index)
-          value = 1.0;
-    }
+    Moose::out << "Node_id:   " << it2->first <<  std::endl;
+    for (unsigned int j = 0; j < it2->second.size(); ++j)
+      if (it2->second[j] > 0)
+        Moose::out << j << ": " << it2->second[j] << '\n';
+  }*/
 
+  // Return error if current node is NULL
+  if (_current_node == NULL)
+  {
+    mooseError("The following node id is reporting a NULL condition: " << _current_node->id());
   }
 
-  return value;
+  // Make sure the _current_node is in the node_to_grn_weight_map (return error if not in map)
+  std::map<dof_id_type, std::vector<Real> >::const_iterator it = node_to_grn_weight_map.find(_current_node->id());
+  if (it == node_to_grn_weight_map.end())
+  {
+    mooseError("The following node id is not in the node map: " << _current_node->id());
+  }
+
+  // Increment through all grains at node_index
+  for (unsigned int grn = 0; grn < _grain_num; ++grn)
+  {
+    // If the current order parameter index (_op_index) is equal to the assinged index (_assigned_op),
+    // set the value from node_to_grn_weight_map
+    if (_assigned_op[grn] == _op_index && (it->second)[grn] > 0.0)
+      return (it->second)[grn];
+  }
+
+  return 0.0;
 }

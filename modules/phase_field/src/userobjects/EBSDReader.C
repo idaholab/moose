@@ -6,6 +6,7 @@
 /****************************************************************/
 #include "EBSDReader.h"
 #include "EBSDMesh.h"
+#include "MooseMesh.h"
 
 #include <Eigen/Geometry>
 
@@ -150,6 +151,9 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
 
     a.p *= 1.0/Real(a.n);
   }
+
+  // Build map
+  buildNodeToGrainWeightMap();
 }
 
 EBSDReader::~EBSDReader()
@@ -226,4 +230,65 @@ EBSDReader::indexFromIndex(unsigned int var) const
     mooseError("Error! Index out of range in EBSDReader::indexFromIndex()");
 
   return avg_index;
+}
+
+const std::map<dof_id_type, std::vector<Real> > &
+EBSDReader::getNodeToGrainWeightMap() const
+{
+  return _node_to_grn_weight_map;
+}
+
+void
+EBSDReader::buildNodeToGrainWeightMap()
+{
+  // Import nodeToElemMap from MooseMesh for current node
+  // This map consists of the node index followed by a vector of element indices that are associated with that node
+  std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToElemMap();
+  libMesh::MeshBase &mesh = _mesh.getMesh();
+
+  /* Output rows of node_to_elem_map for debugging purposes
+  for(std::map<dof_id_type, std::vector<dof_id_type> >::const_iterator it = node_to_elem_map.begin();
+    it != node_to_elem_map.end(); ++it)
+  {
+    Moose::out << "Node_id:   " << it->first <<  std::endl;
+    for (std::vector<dof_id_type>::const_iterator b = it->second.begin(); b != it->second.end() ;++b)
+    {
+      Moose::out << *b << "     " << std::endl;
+    }
+    Moose::out << "\n" << std::endl;
+  }
+  */
+
+  // Loop through each node in mesh and calculate eta values for each grain associated with the node
+  MeshBase::const_node_iterator ni = mesh.nodes_begin();
+  const MeshBase::const_node_iterator nend = mesh.nodes_end();
+  for (; ni != nend; ++ni)
+  {
+    // Get node_id
+    const dof_id_type node_id = (*ni)->id();
+
+    // Initialize node_to_grn_weight_map
+    _node_to_grn_weight_map[node_id].resize(_feature_num, 0);
+
+    // Loop through element indices associated with the current node and record weighted eta value in new map
+    unsigned int n_elems = node_to_elem_map[node_id].size();  // n_elems can range from 1 to 4 for 2D and 1 to 8 for 3D problems
+
+    for (unsigned int ne = 0; ne < n_elems; ++ne)
+    {
+      // Current element index
+      unsigned int elem_id = node_to_elem_map[node_id][ne];
+
+      // Retrieve EBSD grain number for the current element index
+      unsigned int grain_id;
+      const Elem * elem = mesh.elem(elem_id);
+      const EBSDReader::EBSDPointData & d = getData(elem->centroid());
+      grain_id = d.grain;
+
+      // Calculate eta value and add to map
+      _node_to_grn_weight_map[node_id][grain_id] += 1.0 / n_elems;
+
+      // Output values for debugging
+      //Moose::out << "node_id: " << node_id << ", n_elems: " << n_elems << ", ne: " << ne << ", elem_id: " << elem_id << ",  grain_id: " << grain_id << ",  node_to_grn_weight_map: " << _node_to_grn_weight_map[node_id][grain_id] <<  "\n" << std::endl;
+    }
+  }
 }

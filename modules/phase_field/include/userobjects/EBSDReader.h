@@ -65,6 +65,12 @@ public:
    */
   unsigned int getGrainNum(unsigned int phase) const;
 
+  /**
+   * Creates a map consisting of the node index followd by
+   * a vector of all grain weights for that node
+   */
+   const std::map<dof_id_type, std::vector<Real> > & getNodeToGrainWeightMap() const;
+
 protected:
   // MooseMesh Variables
   MooseMesh & _mesh;
@@ -86,34 +92,41 @@ protected:
   // feature ID for given phases and grains
   std::vector<std::vector<unsigned int> > _feature_id;
 
-  /// Dimension of the problem domain
+  // Map of grain weights per node
+  std::map<dof_id_type, std::vector<Real> > _node_to_grn_weight_map;
+
+  // Dimension of the problem domain
   unsigned int _mesh_dimension;
 
-  /// The number of values in the x, y and z directions.
+  // The number of values in the x, y and z directions.
   unsigned _nx, _ny, _nz;
 
-  /// The spacing of the values in x, y and z directions.
+  // The spacing of the values in x, y and z directions.
   Real _dx, _dy, _dz;
 
-  /// Grid origin
+  // Grid origin
   Real _minx, _miny, _minz;
 
-  /// Maximum grid extent
+  // Maximum grid extent
   Real _maxx, _maxy, _maxz;
 
-  // Initial condition values of EBSD variables
+/*  // Initial condition values of EBSD variables
   std::vector<Real> _phi1_ic, _PHI_ic, _phi2_ic, _x_ic, _y_ic, _z_ic;
   std::vector<unsigned int> _grn_ic, _phase_ic, _sym_ic;
 
   // Grain averaged values of EBSD variables
   std::vector<Real> _avg_phi1, _avg_PHI, _avg_phi2, _avg_x, _avg_y, _avg_z;
   std::vector<unsigned int> _avg_phase, _avg_sym;
+  */
 
-  /// Computes a global index in the _data array given an input *centroid* point
+  // Computes a global index in the _data array given an input *centroid* point
   unsigned indexFromPoint(const Point & p) const;
 
-  /// Transfer the index into the _avg_data array from given index
+  // Transfer the index into the _avg_data array from given index
   unsigned indexFromIndex(unsigned int var) const;
+
+  // Build map
+  void buildNodeToGrainWeightMap();
 };
 
 #endif // EBSDREADER_H

@@ -19,7 +19,6 @@ InputParameters validParams<ReconVarIC>();
 
 /**
  * ReconVarIC creates a polycrystal initial condition from an EBSD dataset
-
 */
 class ReconVarIC : public InitialCondition
 {
@@ -28,7 +27,7 @@ public:
   ReconVarIC(const std::string & name, InputParameters parameters);
 
   virtual void initialSetup();
-  virtual Real value(const Point &);
+  virtual Real value(const Point & /*p*/);
 
 private:
   MooseMesh & _mesh;
@@ -42,18 +41,19 @@ private:
   unsigned int _op_index;
 
   unsigned int _grain_num;
-  Point _bottom_left;
-  Point _top_right;
-  Point _range;
+  //Point _bottom_left;
+  //Point _top_right;
+  //Point _range;
 
-  struct GrainPoint {
-    unsigned int grain;
-    Point p;
-  };
-  std::map<unsigned int, GrainPoint> _gp;
+  //struct GrainPoint {
+  //  unsigned int grain;
+  //  Point p;
+  //};
+  //std::map<unsigned int, GrainPoint> _gp;
 
   std::vector<Point> _centerpoints;
   std::vector<Real> _assigned_op;
+  std::map<dof_id_type, std::vector<Real> > node_to_grn_weight_map;
 };
 
 #endif //RECONVARIC_H
