@@ -5,7 +5,6 @@
 #include <vector>
 #include <map>
 #include "distribution.h"
-#include <boost/random/mersenne_twister.hpp>
 #include "randomClass.h"
 
 class BasicDistribution;
