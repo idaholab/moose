@@ -186,21 +186,6 @@
 
 []
 
-[Postprocessors]
-  [./_dt]
-    type = TimestepSize
-  [../]
-
-  [./nl_its]
-    type = NumNonlinearIterations
-  [../]
-
-  [./lin_its]
-    type = NumLinearIterations
-  [../]
-[]
-
-
 [Outputs]
   file_base = j_integral_2d_out
   output_initial = true
