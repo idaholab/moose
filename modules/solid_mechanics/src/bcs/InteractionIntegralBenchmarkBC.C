@@ -16,7 +16,7 @@ InputParameters validParams<InteractionIntegralBenchmarkBC>()
   InputParameters params = validParams<PresetNodalBC>();
   params.addRequiredParam<MooseEnum>("component", disp_component, "The component of the displacement to apply BC on.");
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
-  params.addParam<unsigned int>("crack_front_node_index",0,"The index of the node on the crack front.");
+  params.addParam<unsigned int>("crack_front_point_index",0,"The index of the point on the crack front.");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.addParam<Real>("KI",1.0,"Mode I stress intensity factor to apply.");
@@ -29,7 +29,7 @@ InteractionIntegralBenchmarkBC::InteractionIntegralBenchmarkBC(const std::string
     PresetNodalBC(name, parameters),
     _component(getParam<MooseEnum>("component")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _crack_front_node_index(getParam<unsigned int>("crack_front_node_index")),
+    _crack_front_point_index(getParam<unsigned int>("crack_front_point_index")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
     _ki(getParam<Real>("KI")),
@@ -44,7 +44,7 @@ Real
 InteractionIntegralBenchmarkBC::computeQpValue()
 {
   Point p(*_current_node);
-  _crack_front_definition->calculateRThetaToCrackFront(p,_crack_front_node_index,_r,_theta);
+  _crack_front_definition->calculateRThetaToCrackFront(p,_crack_front_point_index,_r,_theta);
 
   if (_r == 0)
     _theta = 0;

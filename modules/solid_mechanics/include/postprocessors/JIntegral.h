@@ -33,8 +33,8 @@ protected:
   /// The gradient of the scalar q field
   VariableGradient & _grad_of_scalar_q;
   const CrackFrontDefinition * const _crack_front_definition;
-  bool _has_crack_front_node_index;
-  const unsigned int _crack_front_node_index;
+  bool _has_crack_front_point_index;
+  const unsigned int _crack_front_point_index;
   bool _treat_as_2d;
   MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;

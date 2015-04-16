@@ -257,10 +257,9 @@
     type = CrackFrontData
     crack_front_definition = crackFrontDefinition
     variable = disp_x
-    crack_front_node_index = 1
+    crack_front_point_index = 1
   [../]
 []
-
 
 [Outputs]
   file_base = j_integral_3d_mouth_dir_out
