@@ -225,16 +225,14 @@ MooseApp::setupOptions()
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
-  else if (_input_filename != "") // They already specified an input filename
+  else if (_input_filename != "" || isParamValid("input_file")) // They already specified an input filename
   {
-    _parser.parse(_input_filename);
-    _action_warehouse.build();
-    return;
-  }
-  else if (isParamValid("input_file"))
-  {
+    if (_input_filename == "")
+      _input_filename = getParam<std::string>("input_file");
+
     if (isParamValid("recover"))
     {
+      // We need to set the flag manually here since the recover parameter is a string type (takes an optional filename)
       _recover = true;
 
       // Get command line argument following --recover on command line
@@ -246,7 +244,6 @@ MooseApp::setupOptions()
         _recover_base = recover_following_arg;
     }
 
-    _input_filename = getParam<std::string>("input_file");
     _parser.parse(_input_filename);
     _action_warehouse.build();
   }
