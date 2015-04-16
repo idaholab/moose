@@ -272,7 +272,7 @@ Console::output(const ExecFlagType & type)
 
   // Flush the Console buffer, if we don't do this here then the linear/nonlinear residual output
   // may write to the screen prior to buffered text
-  _app.getOutputWarehouse().flushConsoleBuffer();
+  // _app.getOutputWarehouse().flushConsoleBuffer();
 
   // Output the system information first; this forces this to be the first item to write by default
   // However, 'output_system_information_on' still operates correctly, so it may be changed by the user
@@ -293,11 +293,7 @@ Console::output(const ExecFlagType & type)
     if (_nonlinear_iter == 0)
       _old_nonlinear_norm = std::numeric_limits<Real>::max();
 
-    if (_write_screen)
-      Moose::out << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
-
-    if (_write_file)
-      _file_output_stream << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << std::scientific << _norm << std::endl;
+    _console << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << '\n';
 
     _old_nonlinear_norm = _norm;
   }
@@ -308,11 +304,7 @@ Console::output(const ExecFlagType & type)
     if (_linear_iter == 0)
       _old_linear_norm = std::numeric_limits<Real>::max();
 
-    if (_write_screen)
-      Moose::out << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
-
-    if (_write_file)
-      _file_output_stream << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm << std::endl;
+    _console << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << '\n';
 
     _old_linear_norm = _norm;
   }
@@ -398,7 +390,7 @@ Console::writeTimestepInformation()
   }
 
   // Output to the screen
-  write(oss.str());
+  _console << oss.str();
 }
 
 void
@@ -467,7 +459,7 @@ Console::writeVariableNorms()
   }
 
   // Update the output streams
-  write(oss.str());
+  _console << oss.str();
 }
 
 // Quick helper to output the norm in color
@@ -498,13 +490,7 @@ Console::outputInput()
   std::ostringstream oss;
   oss << "--- " << _app.getInputFileName() << " ------------------------------------------------------";
   _app.actionWarehouse().printInputFile(oss);
-  oss << "\n";
-
-  if (_write_screen)
-    Moose::out << oss.str() << std::endl;
-
-  if (_write_file)
-    _file_output_stream << oss.str() << std::endl;
+  _console << oss.str() << '\n';
 }
 
 void
@@ -517,8 +503,7 @@ Console::outputPostprocessors()
     std::stringstream oss;
     oss << "\nPostprocessor Values:\n";
     _postprocessor_table.printTable(oss, _max_rows, _fit_mode);
-    oss << std::endl;
-    write(oss.str());
+    _console << oss.str() << '\n';
   }
 }
 
@@ -533,8 +518,7 @@ Console::outputScalarVariables()
     oss << "\nScalar Variable Values:\n";
     if (processor_id() == 0)
       _scalar_table.printTable(oss, _max_rows, _fit_mode);
-    oss << std::endl;
-    write(oss.str());
+    _console << oss.str() << '\n';
   }
 }
 
@@ -542,45 +526,39 @@ void
 Console::outputSystemInformation()
 {
   if (_system_info_flags.contains("framework"))
-    mooseConsole(ConsoleUtils::outputFrameworkInformation(_app, *_problem_ptr));
+    _console << ConsoleUtils::outputFrameworkInformation(_app, *_problem_ptr);
 
   if (_system_info_flags.contains("mesh"))
-    mooseConsole(ConsoleUtils::outputMeshInformation(*_problem_ptr));
+    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr);
 
   if (_system_info_flags.contains("nonlinear"))
   {
     std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr);
     if (!output.empty())
-    {
-      mooseConsole("Nonlinear System:\n");
-      mooseConsole(output);
-    }
+      _console << "Nonlinear System:\n" << output;
   }
 
   if (_system_info_flags.contains("aux"))
   {
     std::string output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);
     if (!output.empty())
-    {
-      mooseConsole("Auxiliary System:\n");
-      mooseConsole(output);
-    }
+      _console << "Auxiliary System:\n" << output;
   }
 
   if (_system_info_flags.contains("execution"))
-    mooseConsole(ConsoleUtils::outputExecutionInformation(_app, *_problem_ptr));
+    _console << ConsoleUtils::outputExecutionInformation(_app, *_problem_ptr);
 
   if (_system_info_flags.contains("output"))
-    mooseConsole(ConsoleUtils::outputOutputInformation(_app));
+    _console << ConsoleUtils::outputOutputInformation(_app);
 
-  _console << "\n\n" << std::flush;
+  _console << "\n\n";
 }
 
 void
 Console::meshChanged()
 {
   if (_print_mesh_changed_info)
-    mooseConsole(ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false ));
+    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false );
 }
 
 void
@@ -603,7 +581,7 @@ Console::write(std::string message, bool indent)
 
   // Write the message to file
   if (_write_file)
-    _file_output_stream << message << std::endl;
+    _file_output_stream << message;
 
   // Apply MultiApp indenting
   if (indent)

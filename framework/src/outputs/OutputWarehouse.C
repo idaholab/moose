@@ -151,8 +151,10 @@ OutputWarehouse::outputStep(ExecFlagType type)
   if (_force_output)
     type = EXEC_FORCED;
 
+  flushConsoleBuffer();
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->outputStep(type);
+  flushConsoleBuffer();
 
   // Reset force output flag
   _force_output = false;

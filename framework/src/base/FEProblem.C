@@ -3580,9 +3580,9 @@ void
 FEProblem::adaptMesh()
 {
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
-  for (unsigned int i=0; i < cycles_per_step; ++i)
+  for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
-    _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << std::endl;
+    _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << '\n';
     if (_adaptivity.adaptMesh())
       meshChanged();
   }
