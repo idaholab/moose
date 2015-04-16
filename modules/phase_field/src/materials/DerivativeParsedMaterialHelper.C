@@ -90,7 +90,7 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
   unsigned int i, j, k;
 
   // base function
-  ParsedMaterialHelper::functionsOptimize();
+  ParsedMaterialHelper<DerivativeFunctionMaterialBase>::functionsOptimize();
 
   // optimize first derivatives
   for (i = 0; i < _nargs; ++i)
