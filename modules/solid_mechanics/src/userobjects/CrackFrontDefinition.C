@@ -106,7 +106,7 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
     _disp_y_var_name = getParam<VariableName>("disp_y");
     _disp_z_var_name = getParam<VariableName>("disp_z");
   }
-  else if (_t_stress)
+  else if (_t_stress == true && _treat_as_2d == false)
     mooseError("Displacement variables must be provided for T-stress calculation");
 }
 
@@ -119,7 +119,7 @@ CrackFrontDefinition::execute()
 {
   //Because J-Integral is based on original geometry, the crack front geometry
   //is never updated, so everything that needs to happen is done in initialSetup()
-  if (_t_stress)
+  if (_t_stress == true && _treat_as_2d == false)
     calculateTangentialStrainAlongFront();
 }
 

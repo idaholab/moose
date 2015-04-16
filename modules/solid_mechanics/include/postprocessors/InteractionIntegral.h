@@ -45,14 +45,12 @@ protected:
   VariableGradient & _grad_disp_z;
   std::string _aux_stress_name;
   MaterialProperty<ColumnMajorMatrix> & _aux_stress;
-  std::string _aux_disp_name;
-  MaterialProperty<ColumnMajorMatrix> & _aux_disp;
   std::string _aux_grad_disp_name;
   MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp;
-  std::string _aux_strain_name;
-  MaterialProperty<ColumnMajorMatrix> & _aux_strain;
   Real _K_factor;
   bool _has_symmetry_plane;
+  bool _t_stress;
+  Real _poissons_ratio;
 };
 
 #endif //INTERACTIONINTEGRAL_H
