@@ -32,7 +32,7 @@ namespace ConsoleUtils
 
 
 std::string
-outputFrameworkInformation(MooseApp & app, FEProblem & problem)
+outputFrameworkInformation(MooseApp & app)
 {
   std::stringstream oss;
   oss << std::left;
@@ -40,18 +40,9 @@ outputFrameworkInformation(MooseApp & app, FEProblem & problem)
   if (app.getSystemInfo() != NULL)
     oss << app.getSystemInfo()->getInfo();
 
-  if (problem.legacyUoAuxComputation() || problem.legacyUoInitialization())
-  {
-    oss << "LEGACY MODES ENABLED:\n";
-    if (problem.legacyUoAuxComputation())
-      oss << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed.\n";
-    if (problem.legacyUoInitialization())
-      oss << "  Computing all UserObjects during initial setup.\n";
-  }
-
-  oss << std::left << '\n'
+  oss << std::left
       << "Parallelism:\n"
-      << std::setw(console_field_width) << "  Num Processors: " << static_cast<std::size_t>(problem.n_processors()) << '\n'
+      << std::setw(console_field_width) << "  Num Processors: " << static_cast<std::size_t>(app.n_processors()) << '\n'
       << std::setw(console_field_width) << "  Num Threads: " << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
       << '\n';
 
@@ -261,6 +252,25 @@ outputOutputInformation(MooseApp & app)
           oss << "    " << std::setw(console_field_width-4) << adv_it->first + ":" <<  "\"" << adv_it->second << "\"\n";
     }
   }
+
+  return oss.str();
+}
+
+
+std::string outputLegacyInformation(FEProblem & problem)
+{
+  std::stringstream oss;
+  oss << std::left;
+
+  if (problem.legacyUoAuxComputation() || problem.legacyUoInitialization())
+  {
+    oss << COLOR_RED << "LEGACY MODES ENABLED:\n";
+    if (problem.legacyUoAuxComputation())
+      oss << COLOR_RED << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed.\n";
+    if (problem.legacyUoInitialization())
+      oss << COLOR_RED << "  Computing all UserObjects during initial setup.\n";
+  }
+  oss << COLOR_DEFAULT;
 
   return oss.str();
 }

@@ -61,6 +61,13 @@ OutputWarehouse::timestepSetup()
 }
 
 void
+OutputWarehouse::timestepSetupInternal()
+{
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->timestepSetupInternal();
+}
+
+void
 OutputWarehouse::jacobianSetup()
 {
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
@@ -151,7 +158,6 @@ OutputWarehouse::outputStep(ExecFlagType type)
   if (_force_output)
     type = EXEC_FORCED;
 
-  flushConsoleBuffer();
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->outputStep(type);
   flushConsoleBuffer();

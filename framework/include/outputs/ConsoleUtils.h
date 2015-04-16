@@ -35,9 +35,9 @@ static const unsigned int console_line_length = 100;
 /**
  * Outputs framework information
  *
- * This includes the versions and timestamps as well as legacy flag status
+ * This includes the versions and timestamps
  */
-std::string outputFrameworkInformation(MooseApp & app, FEProblem & problem);
+std::string outputFrameworkInformation(MooseApp & app);
 
 /**
  * Output the mesh information
@@ -64,6 +64,11 @@ std::string outputExecutionInformation(MooseApp & app, FEProblem & problem);
  * Output the output information
  */
 std::string outputOutputInformation(MooseApp & app);
+
+/**
+ * Output the legacy flag information
+ */
+std::string outputLegacyInformation(FEProblem & problem);
 
 /**
  * Output system information

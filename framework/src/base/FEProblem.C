@@ -3085,6 +3085,9 @@ FEProblem::solve()
 
   Moose::setSolverDefaults(*this);
 
+  // Setup the output system for printing linear/nonlinear iteration information
+  _app.getOutputWarehouse().timestepSetupInternal();
+
   Moose::perf_log.push("solve()","Solve");
 
   possiblyRebuildGeomSearchPatches();

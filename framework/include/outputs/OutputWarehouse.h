@@ -255,6 +255,12 @@ private:
   void timestepSetup();
 
   /**
+   * Calls the timestepSetup function for each of the output objects
+   * @see FEProblem::solve()
+   */
+  void timestepSetupInternal();
+
+  /**
    * Calls the jacobianSetup function for each of the output objects
    * @see FEProblem::computeJacobian
    */
@@ -339,13 +345,16 @@ private:
   bool _force_output;
 
   // Allow complete access:
-  //  (1) FEProblem for calling initial, timestepSetup, outputStep, etc. methods
-  //  (2) MaterialOutputAction for calling addInterfaceHideVariables
-  //  (3) OutputInterface for calling addInterfaceHideVariables
-  //  (4) Console for calling flushConsoleBuffer()
+  // FEProblem for calling initial, timestepSetup, outputStep, etc. methods
   friend class FEProblem;
+
+  // MaterialOutputAction for calling addInterfaceHideVariables
   friend class MaterialOutputAction;
+
+  // OutputInterface for calling addInterfaceHideVariables
   friend class OutputInterface;
+
+  // Console for calling flushConsoleBuffer()
   friend class Console;
 };
 

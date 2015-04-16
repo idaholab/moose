@@ -270,10 +270,6 @@ Console::output(const ExecFlagType & type)
   if (type != EXEC_FINAL && !onInterval())
     return;
 
-  // Flush the Console buffer, if we don't do this here then the linear/nonlinear residual output
-  // may write to the screen prior to buffered text
-  // _app.getOutputWarehouse().flushConsoleBuffer();
-
   // Output the system information first; this forces this to be the first item to write by default
   // However, 'output_system_information_on' still operates correctly, so it may be changed by the user
   if (shouldOutput("system_information", type) && !(type == EXEC_INITIAL && _initialized))
@@ -526,7 +522,7 @@ void
 Console::outputSystemInformation()
 {
   if (_system_info_flags.contains("framework"))
-    _console << ConsoleUtils::outputFrameworkInformation(_app, *_problem_ptr);
+    _console << ConsoleUtils::outputFrameworkInformation(_app);
 
   if (_system_info_flags.contains("mesh"))
     _console << ConsoleUtils::outputMeshInformation(*_problem_ptr);
@@ -550,6 +546,9 @@ Console::outputSystemInformation()
 
   if (_system_info_flags.contains("output"))
     _console << ConsoleUtils::outputOutputInformation(_app);
+
+  // Output the legacy flags, these cannot be turned off so they become annoying to people.
+  _console << ConsoleUtils::outputLegacyInformation(*_problem_ptr);
 
   _console << "\n\n";
 }
