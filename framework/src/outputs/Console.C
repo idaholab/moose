@@ -220,19 +220,17 @@ Console::~Console()
   }
 }
 
+
 void
-Console::init()
+Console::initialSetup()
 {
   // If output_on = 'initial' perform the output
   if (shouldOutput("system_information", EXEC_INITIAL))
     outputSystemInformation();
 
-  TableOutput::init();
-}
+  // Call the base class method
+  TableOutput::initialSetup();
 
-void
-Console::initialSetup()
-{
   // Set the string for multiapp output indenting
   if (_app.getOutputWarehouse().multiappLevel() > 0)
     _multiapp_indent = COLOR_CYAN + _app.name() + ": " + COLOR_DEFAULT;
@@ -255,6 +253,7 @@ Console::initialSetup()
   // Output the performance log early
   if (getParam<bool>("setup_log_early"))
     write(Moose::setup_perf_log.get_perf_info());
+
 }
 
 std::string
@@ -279,7 +278,7 @@ Console::output(const ExecFlagType & type)
   if (shouldOutput("input", type))
     outputInput();
 
-  // Write the timestep information ("Time Step 0 ..."), this is may be controlled with "execute_on"
+  // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
   if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _output_on.contains(EXEC_INITIAL)))
     writeTimestepInformation();
 
@@ -289,7 +288,7 @@ Console::output(const ExecFlagType & type)
     if (_nonlinear_iter == 0)
       _old_nonlinear_norm = std::numeric_limits<Real>::max();
 
-    _console << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << '\n';
+    _console << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << '\n';
 
     _old_nonlinear_norm = _norm;
   }
@@ -300,7 +299,7 @@ Console::output(const ExecFlagType & type)
     if (_linear_iter == 0)
       _old_linear_norm = std::numeric_limits<Real>::max();
 
-    _console << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << '\n';
+    _console << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << '\n';
 
     _old_linear_norm = _norm;
   }

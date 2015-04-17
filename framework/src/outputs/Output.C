@@ -121,13 +121,13 @@ Output::Output(const std::string & name, InputParameters & parameters) :
 }
 
 void
-Output::init()
+Output::initialSetup()
 {
   _initialized = true;
 }
 
 void
-Output::timestepSetupInternal()
+Output::solveSetup()
 {
 }
 

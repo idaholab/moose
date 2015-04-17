@@ -54,17 +54,14 @@ void
 OutputWarehouse::timestepSetup()
 {
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-  {
-    (*it)->timestepSetupInternal();
     (*it)->timestepSetup();
-  }
 }
 
 void
-OutputWarehouse::timestepSetupInternal()
+OutputWarehouse::solveSetup()
 {
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->timestepSetupInternal();
+    (*it)->solveSetup();
 }
 
 void
@@ -86,13 +83,6 @@ OutputWarehouse::subdomainSetup()
 {
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->subdomainSetup();
-}
-
-void
-OutputWarehouse::init()
-{
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->init();
 }
 
 void

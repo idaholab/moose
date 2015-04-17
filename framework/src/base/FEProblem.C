@@ -328,6 +328,12 @@ void FEProblem::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 
 void FEProblem::initialSetup()
 {
+  // Flush all output to _console that occured during construction of objects
+  _app.getOutputWarehouse().mooseConsole();
+
+  // Perform output related setups
+  _app.getOutputWarehouse().initialSetup();
+
   if (_app.isRecovering())
     _resurrector->setRestartFile(_app.getRecoverFileBase());
 
@@ -604,9 +610,8 @@ void FEProblem::initialSetup()
   if (_displaced_mesh)
     _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
 
-  // Perform output related setups
-  _app.getOutputWarehouse().initialSetup();
-  _app.getOutputWarehouse().mooseConsole(); // writes all calls to _console from initialSetup()
+  // Writes all calls to _console from initialSetup() methods
+  _app.getOutputWarehouse().mooseConsole();
 }
 
 void FEProblem::timestepSetup()
@@ -3086,7 +3091,7 @@ FEProblem::solve()
   Moose::setSolverDefaults(*this);
 
   // Setup the output system for printing linear/nonlinear iteration information
-  _app.getOutputWarehouse().timestepSetupInternal();
+  initPetscOutput();
 
   Moose::perf_log.push("solve()","Solve");
 
@@ -3182,9 +3187,7 @@ FEProblem::forceOutput()
 void
 FEProblem::initPetscOutput()
 {
-  std::vector<PetscOutput*> outputs = _app.getOutputWarehouse().getOutputs<PetscOutput>();
-  for (std::vector<PetscOutput*>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
-    (*it)->timestepSetupInternal();
+  _app.getOutputWarehouse().solveSetup();
   Moose::PetscSupport::petscSetDefaults(*this);
 }
 

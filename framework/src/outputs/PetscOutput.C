@@ -107,7 +107,7 @@ PetscOutput::~PetscOutput()
 }
 
 void
-PetscOutput::timestepSetupInternal()
+PetscOutput::solveSetup()
 {
 // Only execute if PETSc exists
 #ifdef LIBMESH_HAVE_PETSC

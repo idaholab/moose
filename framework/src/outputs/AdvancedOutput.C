@@ -139,7 +139,7 @@ AdvancedOutput<T>::AdvancedOutput(const std::string & name, InputParameters & pa
 
 template<class T>
 void
-AdvancedOutput<T>::init()
+AdvancedOutput<T>::initialSetup()
 {
   // Do not initialize more than once
   // This check is needed for YAK which calls Executioners from within Executioners

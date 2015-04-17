@@ -60,6 +60,9 @@ Exodus::~Exodus()
 void
 Exodus::initialSetup()
 {
+  // Call base class setup method
+  AdvancedOutput<OversampleOutput>::initialSetup();
+
   // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
   if (!hasOutput())

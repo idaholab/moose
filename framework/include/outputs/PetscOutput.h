@@ -67,7 +67,7 @@ private:
   /**
    * Internal setup function that executes at the beginning of the time step
    */
-  void timestepSetupInternal();
+  void solveSetup();
 
 #ifdef LIBMESH_HAVE_PETSC
   /**
@@ -120,8 +120,5 @@ private:
 
   /// Linear residual output end time
   Real _linear_end_time;
-
-  // FEProblem needs to call timestepSetupInternal in some cases
-  friend class FEProblem;
 };
 #endif //PETSCOUTPUT_H

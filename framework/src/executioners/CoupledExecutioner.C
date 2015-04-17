@@ -166,7 +166,6 @@ CoupledExecutioner::build()
     _awhs[i]->mooseApp().setOutputWarehouse(_owhs[i]);
 
     _awhs[i]->executeAllActions();
-    _owhs[i]->init();
     _executioners[i] = _awhs[i]->executioner();
     _fe_problems[i] = _awhs[i]->problem().get();
   }

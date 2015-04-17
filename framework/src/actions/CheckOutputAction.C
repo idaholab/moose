@@ -46,15 +46,6 @@ CheckOutputAction::act()
   checkConsoleOutput();
   checkPerfLogOutput();
   checkInputOutput();
-
-  // Flush the _console buffer, this prints any calls to _console that may have occurred during construction
-  _app.getOutputWarehouse().mooseConsole();
-
-  // Call init() on Output objects
-  // Note, this can not be done in FEProblem::init() because it must be called after
-  // all output objects are constructed.
-  _app.getOutputWarehouse().init();
-
 }
 
 void
