@@ -24,12 +24,12 @@ public:
   XFEM_geometric_cut_2d(Real x0_, Real y0_, Real x1_, Real y1_, Real t_start_, Real t_end_);
   ~XFEM_geometric_cut_2d();
 
-  bool cut_elem_by_geometry(const Elem* elem, std::vector<cutEdge> & cutEdges, Real time);
-  bool cut_elem_by_geometry(const Elem* elem, std::vector<cutFace> & cutFaces, Real time);
+  virtual bool cut_elem_by_geometry(const Elem* elem, std::vector<cutEdge> & cutEdges, Real time);
+  virtual bool cut_elem_by_geometry(const Elem* elem, std::vector<cutFace> & cutFaces, Real time);
 
-  bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges,
+  virtual bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_edges,
                             std::vector<cutEdge> & cutEdges, Real time);
-  bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_faces,
+  virtual bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_faces,
                             std::vector<cutFace> & cutFaces, Real time);
 
 private:

@@ -37,15 +37,14 @@ private:
 
 public:
   // override pure virtual methods
-  void switchNode(EFAnode *new_node, EFAnode *old_node);
-  bool containsNode(EFAnode *node) const;
-  unsigned int get_num_cuts() const;
-  std::set<EFAnode*> get_all_nodes() const;
-  bool isConnected(EFAfragment *other_fragment) const;
+  virtual void switchNode(EFAnode *new_node, EFAnode *old_node);
+  virtual bool containsNode(EFAnode *node) const;
+  virtual unsigned int get_num_cuts() const;
+  virtual std::set<EFAnode*> get_all_nodes() const;
+  virtual bool isConnected(EFAfragment *other_fragment) const;
 
   // EFAfragment3D specific methods
   void combine_tip_faces();
-  void combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAface* elem_face);
   bool is_face_interior(unsigned int face_id) const;
   std::vector<unsigned int> get_interior_face_id() const;
   bool isThirdInteriorFace(unsigned int face_id) const;
@@ -67,6 +66,7 @@ private:
   EFAfragment3D* connect_subfaces(EFAface* start_face, unsigned int startOldFaceID,
                                   std::vector<std::vector<EFAface*> > &subfaces);
   EFAedge* lonelyEdgeOnFace(unsigned int face_id) const;
+  void combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAface* elem_face);
 };
 
 #endif

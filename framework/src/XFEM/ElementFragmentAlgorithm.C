@@ -170,12 +170,6 @@ ElementFragmentAlgorithm::add3DElement( std::vector<unsigned int> quad, unsigned
 }
 
 void
-ElementFragmentAlgorithm::set_dimension(unsigned int ndm)
-{
-  _mesh_dim = ndm;
-}
-
-void
 ElementFragmentAlgorithm::updateEdgeNeighbors()
 {
   std::map<unsigned int, EFAelement*>::iterator eit;
@@ -300,7 +294,6 @@ ElementFragmentAlgorithm::updateTopology(bool mergeUncutVirtualEdges)
 void
 ElementFragmentAlgorithm::reset()
 {
-  _mesh_dim = 0;
   _new_nodes.clear();
   _child_elements.clear();
   _parent_elements.clear();

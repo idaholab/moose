@@ -28,13 +28,13 @@ public:
 private:
 
   EFAelement2D _efa_elem2d; // 2D EFAelement
-  Point get_node_coords(EFAnode* node, MeshBase* displaced_mesh = NULL) const;
+  virtual Point get_node_coords(EFAnode* node, MeshBase* displaced_mesh = NULL) const;
 
 public:
-  void calc_physical_volfrac();
-  Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
-  Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
-  const EFAelement * get_efa_elem() const;
+  virtual void calc_physical_volfrac();
+  virtual Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
+  virtual Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
+  virtual const EFAelement * get_efa_elem() const;
 };
 
 #endif

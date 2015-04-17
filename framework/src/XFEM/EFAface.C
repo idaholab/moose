@@ -313,7 +313,7 @@ EFAface::sort_edges()
     EFAedge* last_edge = ordered_edges[i-1];
     for (unsigned int j = 0; j < _num_edges; ++j)
     {
-      if (!_edges[j]->isOverlapping(*last_edge) &&
+      if (!_edges[j]->equivalent(*last_edge) &&
           _edges[j]->containsNode(last_edge->get_node(1)))
       {
         ordered_edges[i] = _edges[j];
@@ -343,7 +343,7 @@ EFAface::is_trig_quad() const
 }
 
 bool
-EFAface::overlap_with(const EFAface* other_face) const
+EFAface::equivalent(const EFAface* other_face) const
 {
   unsigned int counter = 0; // counter number of equal nodes
   bool overlap = false;
@@ -411,7 +411,7 @@ bool
 EFAface::doesOwnEdge(const EFAedge* other_edge) const
 {
   for (unsigned int i = 0; i < _edges.size(); ++i)
-    if (_edges[i]->isOverlapping(*other_edge))
+    if (_edges[i]->equivalent(*other_edge))
       return true;
   return false;
 }
@@ -491,7 +491,7 @@ EFAface::combine_with(const EFAface* other_face) const
     new_frag->add_edge(new_edge0); // common_nodes[0]'s edge
 
     unsigned int other_iedge(other_edge_id0<(other_face->_num_edges-1) ? other_edge_id0+1 : 0);
-    while (!other_face->_edges[other_iedge]->isOverlapping(*other_face->_edges[other_edge_id1]))
+    while (!other_face->_edges[other_iedge]->equivalent(*other_face->_edges[other_edge_id1]))
     {
       new_frag->add_edge(new EFAedge(*other_face->_edges[other_iedge]));
       other_iedge += 1;
@@ -504,7 +504,7 @@ EFAface::combine_with(const EFAface* other_face) const
     new_frag->add_edge(new_edge1);
 
     unsigned int this_iedge(this_edge_id1<(_num_edges-1) ? this_edge_id1+1 : 0);
-    while (!_edges[this_iedge]->isOverlapping(*_edges[this_edge_id0])) // common_nodes[1]'s edge
+    while (!_edges[this_iedge]->equivalent(*_edges[this_edge_id0])) // common_nodes[1]'s edge
     {
       new_frag->add_edge(new EFAedge(*_edges[this_iedge]));
       this_iedge += 1;
@@ -626,7 +626,7 @@ bool
 EFAface::is_same_orientation(const EFAface* other_face) const
 {
   bool same_order = false;
-  if (overlap_with(other_face))
+  if (equivalent(other_face))
   {
     for (unsigned int i = 0; i < other_face->num_nodes(); ++i)
     {

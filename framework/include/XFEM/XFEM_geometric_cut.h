@@ -56,11 +56,11 @@ public:
   virtual bool cut_frag_by_geometry(std::vector<std::vector<Point> > & frag_faces,
                                     std::vector<cutFace> & cutFaces, Real time) = 0;
 
-  Real crossprod_2d(Real ax, Real ay, Real bx, Real by);
   Real cut_fraction(Real time);
 
 protected:
   Real t_start, t_end;
+  Real crossprod_2d(Real ax, Real ay, Real bx, Real by);
 };
 
 

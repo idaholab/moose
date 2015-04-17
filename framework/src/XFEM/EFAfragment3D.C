@@ -108,7 +108,7 @@ EFAfragment3D::isConnected(EFAfragment* other_fragment) const
   {
     for (unsigned int j = 0; j < other_frag3d->num_faces(); ++j)
     {
-      if (_faces[i]->overlap_with(other_frag3d->_faces[j]))
+      if (_faces[i]->equivalent(other_frag3d->_faces[j]))
       {
         is_connected = true;
         break;
@@ -138,40 +138,6 @@ EFAfragment3D::combine_tip_faces()
       combine_two_faces(frag_tip_face_id[0], frag_tip_face_id[1], _host_elem->get_face(i));
   } // i, loop over all elem faces
   // TODO: may need to combine other frag faces that have tip edges
-}
-
-void
-EFAfragment3D::combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAface* elem_face)
-{
-  // get the new full face
-  EFAface* full_face = _faces[face_id1]->combine_with(_faces[face_id2]);
-  full_face->reset_edge_intersection(elem_face); // IMPORTANT
-
-  // take care of the common adjacent faces (combine their tip edges)
-  std::set<EFAface*> face1_neigh;
-  face1_neigh.insert(_adjacent_face_ix[face_id1].begin(), _adjacent_face_ix[face_id1].end());
-  std::set<EFAface*> face2_neigh;
-  face2_neigh.insert(_adjacent_face_ix[face_id2].begin(), _adjacent_face_ix[face_id2].end());
-  std::vector<EFAface*> common_adjacent_faces = get_common_elems(face1_neigh, face2_neigh);
-
-  for (unsigned int i = 0; i < common_adjacent_faces.size(); ++i)
-  {
-    EFAface* comm_face = common_adjacent_faces[i];
-    if (comm_face != NULL)
-    {
-      unsigned int edge_id1 = comm_face->adjacentCommonEdge(_faces[face_id1]);
-      unsigned int edge_id2 = comm_face->adjacentCommonEdge(_faces[face_id2]);
-      comm_face->combine_two_edges(edge_id1, edge_id2);
-      comm_face->reset_edge_intersection(elem_face); // IMPORTANT
-    }
-  } // i
-
-  // delete old faces and update private members of EFAfragment3D
-  delete _faces[face_id1];
-  delete _faces[face_id2];
-  _faces[face_id1] = full_face;
-  _faces.erase(_faces.begin() + face_id2);
-  create_adjacent_face_ix(); // rebuild _adjacent_face_ix: IMPORTANT
 }
 
 bool
@@ -484,4 +450,38 @@ EFAfragment3D::lonelyEdgeOnFace(unsigned int face_id) const
     if (_adjacent_face_ix[face_id][i] == NULL)
       return _faces[face_id]->get_edge(i);
   return NULL;
+}
+
+void
+EFAfragment3D::combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAface* elem_face)
+{
+  // get the new full face
+  EFAface* full_face = _faces[face_id1]->combine_with(_faces[face_id2]);
+  full_face->reset_edge_intersection(elem_face); // IMPORTANT
+
+  // take care of the common adjacent faces (combine their tip edges)
+  std::set<EFAface*> face1_neigh;
+  face1_neigh.insert(_adjacent_face_ix[face_id1].begin(), _adjacent_face_ix[face_id1].end());
+  std::set<EFAface*> face2_neigh;
+  face2_neigh.insert(_adjacent_face_ix[face_id2].begin(), _adjacent_face_ix[face_id2].end());
+  std::vector<EFAface*> common_adjacent_faces = get_common_elems(face1_neigh, face2_neigh);
+
+  for (unsigned int i = 0; i < common_adjacent_faces.size(); ++i)
+  {
+    EFAface* comm_face = common_adjacent_faces[i];
+    if (comm_face != NULL)
+    {
+      unsigned int edge_id1 = comm_face->adjacentCommonEdge(_faces[face_id1]);
+      unsigned int edge_id2 = comm_face->adjacentCommonEdge(_faces[face_id2]);
+      comm_face->combine_two_edges(edge_id1, edge_id2);
+      comm_face->reset_edge_intersection(elem_face); // IMPORTANT
+    }
+  } // i
+
+  // delete old faces and update private members of EFAfragment3D
+  delete _faces[face_id1];
+  delete _faces[face_id2];
+  _faces[face_id1] = full_face;
+  _faces.erase(_faces.begin() + face_id2);
+  create_adjacent_face_ix(); // rebuild _adjacent_face_ix: IMPORTANT
 }

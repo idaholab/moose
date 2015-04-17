@@ -506,7 +506,7 @@ EFAelement3D::shouldDuplicateForPhantomCorner()
         {
           for (unsigned int j = 0; j < neighbor_elem->num_faces(); ++j)
           {
-            if (!neighbor_elem->get_face(j)->overlap_with(_faces[i]) &&
+            if (!neighbor_elem->get_face(j)->equivalent(_faces[i]) &&
                 neighbor_elem->num_face_neighbors(j) > 0)
             {
               std::set<EFAnode*> neigh_phantom_nodes = neighbor_elem->getPhantomNodeOnFace(j);
@@ -584,10 +584,11 @@ EFAelement3D::get_num_cuts() const
 }
 
 bool
-EFAelement3D::is_cut_twice() const
+EFAelement3D::is_final_cut() const
 {
-  // if an element has been cut twice its fragment must have two interior edges
-  bool cut_twice = false;
+  // if an element has been cut third times its fragment must have 3 interior faces
+  // and at this point, we do not want it to be further cut
+  bool cut_third = false;
   if (_fragments.size() > 0)
   {
     unsigned int num_interior_faces = 0;
@@ -596,10 +597,10 @@ EFAelement3D::is_cut_twice() const
       if (_fragments[0]->is_face_interior(i))
         num_interior_faces += 1;
     }
-    if (num_interior_faces == 2)
-      cut_twice = true;
+    if (num_interior_faces == 3)
+      cut_third = true;
   }
-  return cut_twice;
+  return cut_third;
 }
 
 void
@@ -858,7 +859,7 @@ EFAelement3D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
 
           //Check to see if the nodes are already merged.  There's nothing else to do in that case.
           EFAface* neighborChildFace = childOfNeighborElem->get_face(neighbor_face_id);
-          if (_faces[j]->overlap_with(neighborChildFace))
+          if (_faces[j]->equivalent(neighborChildFace))
             continue;
 
           if (_fragments[0]->isConnected(childOfNeighborElem->get_fragment(0)))
@@ -888,7 +889,7 @@ EFAelement3D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
             if (!neighborChildFace->has_intersection()) //neighbor face must NOT have intersection either
             {
               //Check to see if the nodes are already merged.  There's nothing else to do in that case.
-              if (_faces[j]->overlap_with(neighborChildFace))
+              if (_faces[j]->equivalent(neighborChildFace))
                 continue;
 
               for (unsigned int i = 0; i < _faces[j]->num_nodes(); ++i)
@@ -1096,25 +1097,6 @@ EFAelement3D::remove_embedded_node(EFAnode* emb_node, bool remove_for_neighbor)
   }
 }
 
-bool
-EFAelement3D::is_cut_third_times() const
-{
-  // if an element has been cut third times its fragment must have 3 interior faces
-  bool cut_third = false;
-  if (_fragments.size() > 0)
-  {
-    unsigned int num_interior_faces = 0;
-    for (unsigned int i = 0; i < _fragments[0]->num_faces(); ++i)
-    {
-      if (_fragments[0]->is_face_interior(i))
-        num_interior_faces += 1;
-    }
-    if (num_interior_faces == 3)
-      cut_third = true;
-  }
-  return cut_third;
-}
-
 unsigned int
 EFAelement3D::num_faces() const
 {
@@ -1176,7 +1158,7 @@ unsigned int
 EFAelement3D::get_face_id(EFAface* face) const
 {
   for (unsigned int iface = 0; iface < _num_faces; ++iface)
-    if (_faces[iface]->overlap_with(face))
+    if (_faces[iface]->equivalent(face))
       return iface;
   mooseError("input face not found in get_face_id()");
   return 99999;
@@ -1190,7 +1172,7 @@ EFAelement3D::get_common_face_id(const EFAelement3D* other_elem) const
   {
     for (unsigned int j = 0; j < other_elem->_num_faces; ++j)
     {
-      if (_faces[i]->overlap_with(other_elem->_faces[j]))
+      if (_faces[i]->equivalent(other_elem->_faces[j]))
       {
         face_id.push_back(i);
         break;
@@ -1238,7 +1220,7 @@ EFAelement3D::getNeighborFaceEdgeID(unsigned int face_id, unsigned int edge_id,
     EFAface* neigh_face = neighbor_elem->get_face(neigh_face_id);
     for (unsigned int i = 0; i < neigh_face->num_edges(); ++i)
     {
-      if (_faces[face_id]->get_edge(edge_id)->isOverlapping(*neigh_face->get_edge(i)))
+      if (_faces[face_id]->get_edge(edge_id)->equivalent(*neigh_face->get_edge(i)))
       {
         neigh_face_edge_id = i;
         break;

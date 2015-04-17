@@ -585,7 +585,7 @@ EFAelement2D::shouldDuplicateForPhantomCorner()
         {
           for (unsigned int j = 0; j < neighbor_elem->num_edges(); ++j)
           {
-            if (!neighbor_elem->get_edge(j)->isOverlapping(*_edges[i]) &&
+            if (!neighbor_elem->get_edge(j)->equivalent(*_edges[i]) &&
                 neighbor_elem->num_edge_neighbors(j) > 0)
             {
               std::set<EFAnode*> neigh_phantom_nodes = neighbor_elem->getPhantomNodeOnEdge(j);
@@ -660,7 +660,7 @@ EFAelement2D::get_num_cuts() const
 }
 
 bool
-EFAelement2D::is_cut_twice() const
+EFAelement2D::is_final_cut() const
 {
   // if an element has been cut twice its fragment must have two interior edges
   bool cut_twice = false;
@@ -977,7 +977,7 @@ EFAelement2D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
 
           //Check to see if the nodes are already merged.  There's nothing else to do in that case.
           EFAedge* neighborChildEdge = childOfNeighborElem->get_edge(neighbor_edge_id);
-          if (_edges[j]->isOverlapping(*neighborChildEdge))
+          if (_edges[j]->equivalent(*neighborChildEdge))
             continue;
 
           if (_fragments[0]->isConnected(childOfNeighborElem->get_fragment(0)))
@@ -1009,7 +1009,7 @@ EFAelement2D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes
             if (!neighborChildEdge->has_intersection()) //neighbor edge must NOT have intersection either
             {
               //Check to see if the nodes are already merged.  There's nothing else to do in that case.
-              if (_edges[j]->isOverlapping(*neighborChildEdge))
+              if (_edges[j]->equivalent(*neighborChildEdge))
                 continue;
 
               unsigned int num_edge_nodes = 2;

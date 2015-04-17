@@ -93,7 +93,7 @@ public:
   virtual bool is_crack_tip_elem() const = 0;
 
   virtual unsigned int get_num_cuts() const = 0;
-  virtual bool is_cut_twice() const = 0;
+  virtual bool is_final_cut() const = 0;
   virtual void update_fragments(const std::set<EFAelement*> &CrackTipElements,
                                 std::map<unsigned int, EFAnode*> &EmbeddedNodes) = 0;
   virtual void fragment_sanity_check(unsigned int n_old_frag_edges,

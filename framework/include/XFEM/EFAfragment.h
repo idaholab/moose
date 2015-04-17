@@ -26,7 +26,6 @@ public:
 
   virtual void switchNode(EFAnode *new_node, EFAnode *old_node) = 0;
   virtual bool containsNode(EFAnode *node) const = 0;
-//  std::vector<EFAnode*> commonNodesWithEdge(EFAedge & other_edge);
   virtual unsigned int get_num_cuts() const = 0;
   virtual std::set<EFAnode*> get_all_nodes() const = 0;
   virtual bool isConnected(EFAfragment *other_fragment) const = 0;

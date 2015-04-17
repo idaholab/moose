@@ -168,9 +168,7 @@ XFEM::update(Real time)
 
 void XFEM::build_efa_mesh()
 {
-
   _efa_mesh.reset();
-  _efa_mesh.set_dimension(_mesh->mesh_dimension());
 
   MeshBase::element_iterator       elem_it  = _mesh->elements_begin();
   const MeshBase::element_iterator elem_end = _mesh->elements_end();
@@ -253,7 +251,7 @@ XFEM::mark_cut_edges_by_geometry(Real time)
     }
 
     // continue if elem has been already cut twice - IMPORTANT
-    if (CEMElem->is_cut_twice())
+    if (CEMElem->is_final_cut())
       continue;
 
     // get fragment edges
@@ -324,7 +322,7 @@ XFEM::mark_cut_edges_by_state()
     }
 
     // continue if elem is already cut twice - IMPORTANT
-    if (CEMElem->is_cut_twice())
+    if (CEMElem->is_final_cut())
       continue;
 
     // find the first cut edge

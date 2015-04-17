@@ -61,7 +61,7 @@ public:
   void reverse_edges();
   bool is_trig_quad() const;
 
-  bool overlap_with(const EFAface* other_face) const;
+  bool equivalent(const EFAface* other_face) const;
   bool containsNode(const EFAnode* node) const;
   bool containsFace(const EFAface* other_face) const;
   bool doesOwnEdge(const EFAedge* other_edge) const;

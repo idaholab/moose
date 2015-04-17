@@ -39,11 +39,11 @@ private:
 
 public:
   // override pure virtual methods
-  void switchNode(EFAnode *new_node, EFAnode *old_node);
-  bool containsNode(EFAnode *node) const;
-  unsigned int get_num_cuts() const;
-  std::set<EFAnode*> get_all_nodes() const;
-  bool isConnected(EFAfragment *other_fragment) const;
+  virtual void switchNode(EFAnode *new_node, EFAnode *old_node);
+  virtual bool containsNode(EFAnode *node) const;
+  virtual unsigned int get_num_cuts() const;
+  virtual std::set<EFAnode*> get_all_nodes() const;
+  virtual bool isConnected(EFAfragment *other_fragment) const;
 
   // EFAfragment2D specific methods
   void combine_tip_edges();

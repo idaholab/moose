@@ -33,68 +33,10 @@ EFAedge::EFAedge(const EFAedge & other_edge)
 }
 
 EFAedge::~EFAedge() // do not delete edge node - they will be deleted
-{}                  // in element_t's destructor
+{}                  // in EFAelement's destructor
 
 bool
 EFAedge::equivalent(const EFAedge & other) const
-{
-  bool isEqual = false;
-  double tol = 1.e-4;
-  if (other._edge_node1 == _edge_node1 &&
-      other._edge_node2 == _edge_node2)
-  {
-    if (_embedded_nodes.size() > 0 &&
-        _embedded_nodes.size() == other.num_embedded_nodes())
-    {
-      unsigned int counter = 0; // count equal embedded nodes
-      for (unsigned int i = 0; i < _embedded_nodes.size(); ++i)
-      {
-        for (unsigned int j = 0; j < other.num_embedded_nodes(); ++j)
-        {
-          if (_embedded_nodes[i] == other._embedded_nodes[j] &&
-              std::abs(_intersection_x[i] - other._intersection_x[j]) < tol)
-          {
-            counter += 1;
-            break;
-          }
-        } // j
-      } // i
-      if (counter == _embedded_nodes.size())
-        isEqual = true;
-    }
-    else if (_embedded_nodes.size() == 0 && other.num_embedded_nodes() == 0)
-      isEqual = true;
-  }
-  else if (other._edge_node2 == _edge_node1 &&
-           other._edge_node1 == _edge_node2)
-  {
-    if (_embedded_nodes.size() > 0 &&
-        _embedded_nodes.size() == other.num_embedded_nodes())
-    {
-      unsigned int counter = 0;
-      for (unsigned int i = 0; i < _embedded_nodes.size(); ++i)
-      {
-        for (unsigned int j = 0; j < other.num_embedded_nodes(); ++j)
-        {
-          if (_embedded_nodes[i] == other._embedded_nodes[j] &&
-              std::abs(_intersection_x[i] - 1.0 + other._intersection_x[j]) < tol)
-          {
-            counter += 1;
-            break;
-          }
-        } // j
-      } // i
-      if (counter == _embedded_nodes.size())
-        isEqual = true;
-    }
-    else if (_embedded_nodes.size() == 0 && other.num_embedded_nodes() == 0)
-      isEqual = true;
-  }
-  return isEqual;
-}
-
-bool
-EFAedge::isOverlapping(const EFAedge &other) const
 {
   bool isEqual = false;
   if (other._edge_node1 == _edge_node1 &&

@@ -44,7 +44,6 @@ public:
 
 private:
   //unsigned int MaxElemId;
-  unsigned int _mesh_dim;
   std::map< unsigned int, EFAnode*> _permanent_nodes;
   std::map< unsigned int, EFAnode*> _embedded_nodes;
   std::map< unsigned int, EFAnode*> _temp_nodes;
@@ -61,7 +60,6 @@ public:
   unsigned int add2DElements( std::vector< std::vector<unsigned int> > &quads );
   EFAelement* add2DElement( std::vector<unsigned int> quad, unsigned int id );
   EFAelement* add3DElement( std::vector<unsigned int> quad, unsigned int id );
-  void set_dimension(unsigned int ndm);
 
   void updateEdgeNeighbors();
   void initCrackTipTopology();
@@ -93,4 +91,4 @@ public:
   unsigned int getElemIdByNodes(unsigned int * node_id);
 };
 
-#endif // #ifndef CUTELEM_MESH_H
+#endif // #ifndef ELEMENTFRAGMENTALGORITHM_H

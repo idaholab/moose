@@ -23,11 +23,6 @@ XFEM_geometric_cut::XFEM_geometric_cut(Real t0, Real t1):
 XFEM_geometric_cut::~XFEM_geometric_cut()
 {}
 
-Real XFEM_geometric_cut::crossprod_2d(Real ax, Real ay, Real bx, Real by)
-{
-  return (ax*by-bx*ay);
-}
-
 Real XFEM_geometric_cut::cut_fraction(Real time)
 {
   Real fraction = 0.0;
@@ -43,4 +38,9 @@ Real XFEM_geometric_cut::cut_fraction(Real time)
     }
   }
   return fraction;
+}
+
+Real XFEM_geometric_cut::crossprod_2d(Real ax, Real ay, Real bx, Real by)
+{
+  return (ax*by-bx*ay);
 }
