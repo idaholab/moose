@@ -52,7 +52,8 @@ private:
   double r8vec_dot_product(int n, double a1[], double a2[]);
   Point cross_product(Point p1, Point p2);
   Real dot_product(Point p1, Point p2);
-  bool isInsideCutPlane(Point p0);
+  bool isInsideCutPlane(Point p);
+  bool isInsideEdge(Point p1, Point p2, Point p);
   Real getRelativePosition(Point p1, Point p2, Point p);
   void normalize(Point & p);
 };

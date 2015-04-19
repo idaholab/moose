@@ -299,7 +299,7 @@ FEProblem::addXFEMGeometricCuts(InputParameters parameters)
   else if (_XFEM_cut_type == "square_cut_3d")
   {
     if (cut_data.size() != 12)
-      mooseError("Length of XFEM_cuts must be 12");
+      mooseError("Length of XFEM_cuts must be 12 when square_cut_3d");
     _xfem.addGeometricCut(new XFEM_square_cut(cut_data));
   }
   else

@@ -128,10 +128,12 @@ XFEM_square_cut::intersect_with_edge(Point p1, Point p2, Point &pint)
   double cut_point[3] = {0.0,0.0,0.0};
   if (plane_normal_line_exp_int_3d(plane_point, plane_normal, edge_point1, edge_point2, cut_point) == 1)
   {
-    pint(0) = cut_point[0];
-    pint(1) = cut_point[1];
-    pint(2) = cut_point[2];
-    has_inters = true;
+    Point temp_p(cut_point[0], cut_point[1], cut_point[2]);
+    if (isInsideCutPlane(temp_p) && isInsideEdge(p1, p2, temp_p))
+    {
+      pint = temp_p;
+      has_inters = true;
+    }
   }
   return has_inters;
 }
@@ -321,6 +323,16 @@ XFEM_square_cut::isInsideCutPlane(Point p)
   if (counter == 4)
     inside = true;
   return inside;
+}
+
+bool
+XFEM_square_cut::isInsideEdge(Point p1, Point p2, Point p)
+{
+  Real intersection_x = getRelativePosition(p1, p2, p);
+  if (intersection_x >= 0.0 && intersection_x <= 1.0)
+    return true;
+  else
+    return false;
 }
 
 Real
