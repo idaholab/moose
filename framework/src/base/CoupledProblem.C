@@ -35,8 +35,3 @@ void
 CoupledProblem::init()
 {
 }
-
-void
-CoupledProblem::output(bool /*force*/)
-{
-}

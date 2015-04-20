@@ -17,7 +17,7 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "Material.h"
-#include "Console.h"
+#include "ConsoleUtils.h"
 
 // libMesh includesx
 #include "libmesh/transient_system.h"
@@ -83,19 +83,19 @@ MaterialPropertyDebugOutput::printMaterialMap() const
     printMaterialProperties(active_boundary, material_warehouse.getBoundaryMaterials(*it));
   }
 
-  // Write the stored strings to the Console output objects
+  // Write the stored strings to the ConsoleUtils output objects
   _console << "Materials:\n";
-  _console << std::setw(Console::_field_width) << "  Active Materials on Subdomain:\n";
-  _console << std::setw(Console::_field_width) << active_block.str() << '\n';
+  _console << std::setw(ConsoleUtils::console_field_width) << "  Active Materials on Subdomain:\n";
+  _console << std::setw(ConsoleUtils::console_field_width) << active_block.str() << '\n';
 
-  _console << std::setw(Console::_field_width) << "  Active Face Materials on Subdomain:\n";
-  _console << std::setw(Console::_field_width) << active_face.str() << '\n';
+  _console << std::setw(ConsoleUtils::console_field_width) << "  Active Face Materials on Subdomain:\n";
+  _console << std::setw(ConsoleUtils::console_field_width) << active_face.str() << '\n';
 
-  _console << std::setw(Console::_field_width) << "  Active Neighboring Materials on Subdomain:\n";
-  _console << std::setw(Console::_field_width) << active_neighbor.str() << '\n';
+  _console << std::setw(ConsoleUtils::console_field_width) << "  Active Neighboring Materials on Subdomain:\n";
+  _console << std::setw(ConsoleUtils::console_field_width) << active_neighbor.str() << '\n';
 
-  _console << std::setw(Console::_field_width) << "  Active Materials on Boundaries:\n";
-  _console << std::setw(Console::_field_width) << active_boundary.str() << '\n';
+  _console << std::setw(ConsoleUtils::console_field_width) << "  Active Materials on Boundaries:\n";
+  _console << std::setw(ConsoleUtils::console_field_width) << active_boundary.str() << '\n';
 }
 
 void
@@ -108,17 +108,17 @@ MaterialPropertyDebugOutput::printMaterialProperties(std::stringstream & output,
     const std::set<std::string> & props = (*jt)->getSuppliedItems();
 
     // Adds the material name to the output stream
-    output << std::left << std::setw(Console::_field_width) << "      Material Name: " << (*jt)->name() << '\n';
+    output << std::left << std::setw(ConsoleUtils::console_field_width) << "      Material Name: " << (*jt)->name() << '\n';
 
-    // Build stream for properties using the Console helper functions to wrap the names if there are too many for one line
+    // Build stream for properties using the ConsoleUtils helper functions to wrap the names if there are too many for one line
     std::streampos begin_string_pos = output.tellp();
     std::streampos curr_string_pos = begin_string_pos;
-    output << std::left << std::setw(Console::_field_width) << "      Property Names: ";
+    output << std::left << std::setw(ConsoleUtils::console_field_width) << "      Property Names: ";
     for (std::set<std::string>::const_iterator prop_it = props.begin(); prop_it != props.end(); ++prop_it)
     {
       output << "\"" << (*prop_it) << "\" ";
       curr_string_pos = output.tellp();
-      Console::insertNewline(output, begin_string_pos, curr_string_pos);
+      ConsoleUtils::insertNewline(output, begin_string_pos, curr_string_pos);
     }
     output << '\n';
   }

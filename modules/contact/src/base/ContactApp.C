@@ -93,7 +93,10 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(ContactAction, "add_aux_kernel");
   registerAction(ContactAction, "add_aux_variable");
   registerAction(ContactAction, "add_dirac_kernel");
-  registerAction(ContactAction, "check_output");
+
+  registerTask("output_penetration_info_vars", false);
+  registerAction(ContactAction, "output_penetration_info_vars");
+  syntax.addDependency("output_penetration_info_vars", "add_output");
 
   registerAction(ContactPenetrationAuxAction, "add_aux_kernel");
   registerAction(ContactPenetrationVarAction, "add_aux_variable");

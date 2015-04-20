@@ -53,12 +53,6 @@ public:
   virtual ~Problem();
 
   /**
-   * Get the name of this problem
-   * @return The name of this problem
-   */
-  virtual const std::string & name();
-
-  /**
    * Get reference to all-purpose parameters
    */
   InputParameters & parameters() { return _pars; }

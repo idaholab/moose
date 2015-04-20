@@ -71,6 +71,11 @@ public:
    */
   void parentOutputPositionChanged();
 
+  /**
+   * Calls the initialSetup() function for all Multiapps in the Warehouse
+   */
+  void initialSetup();
+
 protected:
   std::vector<TransientMultiApp *> _transient_multi_apps;
 

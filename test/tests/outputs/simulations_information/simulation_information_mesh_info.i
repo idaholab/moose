@@ -5,17 +5,42 @@
   ny = 10
 []
 
+[Adaptivity]
+  marker = marker
+  max_h_level = 2
+  [./Indicators]
+    [./indicator]
+      type = GradientJumpIndicator
+      variable = u
+    [../]
+  [../]
+  [./Markers]
+    [./marker]
+      type = ErrorFractionMarker
+      coarsen = 0.1
+      indicator = indicator
+      refine = 0.7
+    [../]
+  [../]
+[]
+
 [Variables]
   [./u]
   [../]
 []
 
+[AuxVariables]
+  [./aux_u]
+  [../]
+[]
+
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = CoefDiffusion
     variable = u
+    coef = 0.1
   [../]
-  [./td]
+  [./time]
     type = TimeDerivative
     variable = u
   [../]
@@ -38,28 +63,16 @@
 
 [Executioner]
   type = Transient
-  num_steps = 10
-  dt = 0.2
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  num_steps = 3
+  dt = 0.1
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
   output_initial = true
-  exodus = true
+  print_linear_residuals = true
   print_perf_log = true
-  checkpoint = true
-[]
-
-[MultiApps]
-  [./sub_app]
-    positions = '0 0 0  0.5 0.5 0  0.6 0.6 0  0.7 0.7 0'
-    type = TransientMultiApp
-    input_files = 'dt_from_master_sub.i'
-    app_type = MooseTestApp
-  [../]
+  print_mesh_changed_info = true
 []

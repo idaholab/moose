@@ -188,6 +188,12 @@ public:
 protected:
 
   /**
+   * Initialization method.
+   * This populates the various data structures needed to control the output
+   */
+  virtual void initialSetup();
+
+  /**
    * Calls the output() method if output should occur
    * @param type The type execution flag (see Moose.h)
    */
@@ -252,12 +258,6 @@ protected:
 
 
 private:
-
-  /**
-   * Initialization method.
-   * This populates the various data structures needed to control the output
-   */
-  virtual void init();
 
   /**
    * Initializes the available lists for each of the output types

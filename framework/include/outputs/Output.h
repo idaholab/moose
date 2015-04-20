@@ -140,10 +140,10 @@ protected:
   virtual void outputStep(const ExecFlagType & type) = 0;
 
   /**
-   * A method called just prior to timestep(), this is used by PetscOutput to perform the necessary
+   * A method called just prior to the solve, this is used by PetscOutput to perform the necessary
    * setup actions for each timestep
    */
-  virtual void timestepSetupInternal();
+  virtual void solveSetup();
 
   /**
    * Handles logic for determining if a step should be output
@@ -161,7 +161,7 @@ protected:
    * Initialization method.
    * This populates the various data structures needed to control the output
    */
-  virtual void init();
+  virtual void initialSetup();
 
   /**
    * A method for modifying "output_on" MultiMooseEnums with the short-cut flag options

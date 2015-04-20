@@ -122,11 +122,6 @@ public:
   std::set<Real> & getSyncTimes();
 
   /**
-   * Call the init() method for each of the Outputs
-   */
-  void init();
-
-  /**
    * Test that the output names exist
    * @param A vector of names to check
    * This method will produce an error if any of the supplied
@@ -255,6 +250,12 @@ private:
   void timestepSetup();
 
   /**
+   * Calls the timestepSetup function for each of the output objects
+   * @see FEProblem::solve()
+   */
+  void solveSetup();
+
+  /**
    * Calls the jacobianSetup function for each of the output objects
    * @see FEProblem::computeJacobian
    */
@@ -339,13 +340,16 @@ private:
   bool _force_output;
 
   // Allow complete access:
-  //  (1) FEProblem for calling initial, timestepSetup, outputStep, etc. methods
-  //  (2) MaterialOutputAction for calling addInterfaceHideVariables
-  //  (3) OutputInterface for calling addInterfaceHideVariables
-  //  (4) Console for calling flushConsoleBuffer()
+  // FEProblem for calling initial, timestepSetup, outputStep, etc. methods
   friend class FEProblem;
+
+  // MaterialOutputAction for calling addInterfaceHideVariables
   friend class MaterialOutputAction;
+
+  // OutputInterface for calling addInterfaceHideVariables
   friend class OutputInterface;
+
+  // Console for calling flushConsoleBuffer()
   friend class Console;
 };
 

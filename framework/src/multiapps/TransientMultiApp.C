@@ -104,9 +104,9 @@ TransientMultiApp::appTransferVector(unsigned int app, std::string var_name)
 }
 
 void
-TransientMultiApp::init()
+TransientMultiApp::initialSetup()
 {
-  MultiApp::init();
+  MultiApp::initialSetup();
 
   if (!_has_an_app)
     return;

@@ -54,10 +54,14 @@ void
 OutputWarehouse::timestepSetup()
 {
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-  {
-    (*it)->timestepSetupInternal();
     (*it)->timestepSetup();
-  }
+}
+
+void
+OutputWarehouse::solveSetup()
+{
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+    (*it)->solveSetup();
 }
 
 void
@@ -79,13 +83,6 @@ OutputWarehouse::subdomainSetup()
 {
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->subdomainSetup();
-}
-
-void
-OutputWarehouse::init()
-{
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->init();
 }
 
 void
@@ -153,6 +150,7 @@ OutputWarehouse::outputStep(ExecFlagType type)
 
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->outputStep(type);
+  flushConsoleBuffer();
 
   // Reset force output flag
   _force_output = false;
