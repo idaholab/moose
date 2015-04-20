@@ -109,11 +109,25 @@ protected:
   /// Time
   Real & _t;
 
+  /// The coordinate system type for this problem, references the value in Assembly
   const Moose::CoordinateSystemType & _coord_sys;
+
+  /// The variable that this initial condition is acting upon.
   MooseVariable & _var;
 
+  /**
+   * The current element we are on will retrieving values at specific points in the domain. Note that this _IS_
+   * valid even for nodes shared among several elements.
+   */
   const Elem * & _current_elem;
 
+  /**
+   * The current node if the point we are evaluating at also happens to be a node.
+   * Otherwise the pointer will be NULL.
+   */
+  const Node * _current_node;
+
+  /// The current quadrature point, contains the "nth" node number when visiting nodes.
   unsigned int _qp;
 
   std::set<std::string> _depend_vars;
