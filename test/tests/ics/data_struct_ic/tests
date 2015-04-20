@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'data_struct_ic_test.i'
+    exodiff = 'data_struct_ic_test_out.e'
+  [../]
+[]

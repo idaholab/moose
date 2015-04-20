@@ -99,9 +99,11 @@
 #include "MatDivergenceBC.h"
 #include "CoupledDirichletBC.h"
 
+// ICs
 #include "TEIC.h"
 #include "MTICSum.h"
 #include "MTICMult.h"
+#include "DataStructIC.h"
 
 // Materials
 #include "MTMaterial.h"
@@ -346,6 +348,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerInitialCondition(TEIC);
   registerInitialCondition(MTICSum);
   registerInitialCondition(MTICMult);
+  registerInitialCondition(DataStructIC);
 
   // Materials
   registerMaterial(MTMaterial);
