@@ -7,7 +7,8 @@ os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
 #### Set the name of the application here and moose directory relative to the application
 app_name = 'darcy_thermo_mech'
 
-MOOSE_DIR = os.path.abspath(os.path.join('..', 'moose'))
+#### Three directories up
+MOOSE_DIR = os.path.abspath(os.path.join('..', '..', '..'))
 #### See if a submodule is available
 if os.path.exists(os.path.abspath(os.path.join('moose', 'framework', 'Makefile'))):
   MOOSE_DIR = os.path.abspath('moose')
