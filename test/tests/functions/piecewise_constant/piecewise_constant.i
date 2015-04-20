@@ -24,7 +24,7 @@
   [./bVar]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.2
+    initial_condition = 0.1
   [../]
   [./cVar]
     order = FIRST
@@ -34,21 +34,21 @@
   [./dVar]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.2
+    initial_condition = 0.1
   [../]
 []
 
 [Functions]
   [./a]
     type = PiecewiseConstant
-    xy_data = '0 0.1
-               1 0.2
-               2 0.1'
+    xy_data = '0.5 0.1
+               1.0 0.2
+               1.5 0.1'
     direction = left
   [../]
   [./b]
     type = PiecewiseConstant
-    x = '0   1   2'
+    x = '0.5 1.0 1.5'
     y = '0.1 0.2 0.1'
     direction = right
   [../]

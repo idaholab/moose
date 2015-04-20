@@ -67,7 +67,13 @@ PiecewiseConstant::value(Real t, const Point & p)
   const unsigned len = functionSize();
   const Real toler = 1e-14;
 
-  // endpoint case
+  // endpoint cases
+  if ( (_direction == LEFT  && x < (1+toler) * domain(0)) ||
+       (_direction == RIGHT && x < (1-toler) * domain(0)) )
+  {
+    func_value = range(0);
+    i = len;
+  }
   if ( (_direction == LEFT  && x > (1+toler) * domain(len-1)) ||
        (_direction == RIGHT && x > (1-toler) * domain(len-1)) )
   {
