@@ -6,32 +6,27 @@
 /****************************************************************/
 #include "ThermoDiffusion.h"
 
-namespace
-{
-const std::string temperature_name = "temp";
-const std::string heat_of_transport_name = "heat_of_transport";
-const std::string mass_diffusivity_name = "mass_diffusivity";
-const std::string gas_constant_name = "gas_constant";
-} // namespace anon
-
 template<>
 InputParameters validParams< ThermoDiffusion >()
 {
   InputParameters params = validParams< Kernel >();
-  params.addRequiredCoupledVar( temperature_name, "Coupled temperature" );
-  params.addParam< Real >( gas_constant_name, 8.3144621, "Gas constant" );
+  params.addRequiredCoupledVar( "temp", "Coupled temperature" );
+  params.addParam< Real >( "gas_constant", 8.3144621, "Gas constant" );
+  params.addParam< std::string >( "heat_of_transport", "heat_of_transport", "Property name for the heat of transport.");
+  params.addParam< std::string >( "mass_diffusivity", "mass_diffusivity", "Property name for the diffusivity.");
+
   params.addClassDescription( "Kernel for thermo-diffusion (Soret effect, thermophoresis, etc.)" );
   return params;
 }
 
 ThermoDiffusion::ThermoDiffusion( const std::string & name, InputParameters parameters ) :
     Kernel( name, parameters ),
-    _temperature( coupledValue( temperature_name ) ),
-    _grad_temperature( coupledGradient( temperature_name ) ),
-    _mass_diffusivity( getMaterialProperty< Real >( mass_diffusivity_name ) ),
-    _heat_of_transport( getMaterialProperty< Real >( heat_of_transport_name ) ),
-    _gas_constant( getParam< Real >( gas_constant_name ) ),
-    _temperature_index( coupled( temperature_name ) )
+    _temperature( coupledValue( "temp" ) ),
+    _grad_temperature( coupledGradient( "temp" ) ),
+    _mass_diffusivity( getMaterialProperty< Real >( getParam< std::string >( "mass_diffusivity" ) ) ),
+    _heat_of_transport( getMaterialProperty< Real >( getParam< std::string >( "heat_of_transport" ) ) ),
+    _gas_constant( getParam< Real >( "gas_constant" ) ),
+    _temperature_index( coupled( "temp" ) )
 {
 }
 
