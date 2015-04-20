@@ -22,7 +22,7 @@ objects	    := $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
 cobjects    := $(patsubst %.c, %.$(obj-suffix), $(csrcfiles))
 fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
-app_objects := $(objects) $(cobjects) $(fobjects) $(f90objects)
+app_objects := $(objects) $(cobjects) $(fobjects) $(f90objects) $(ADDITIONAL_APP_OBJECTS)
 
 # plugin files
 plugfiles   := $(shell find $(PLUGIN_DIR) -name "*.C" 2>/dev/null)
@@ -43,7 +43,8 @@ main_object := $(patsubst %.C, %.$(obj-suffix), $(main_src))
 # dependency files
 app_deps    := $(patsubst %.C, %.$(obj-suffix).d, $(srcfiles)) \
                $(patsubst %.c, %.$(obj-suffix).d, $(csrcfiles)) \
-               $(patsubst %.C, %.$(obj-suffix).d, $(main_src))
+               $(patsubst %.C, %.$(obj-suffix).d, $(main_src)) \
+               $(ADDITIONAL_APP_DEPS)
 
 depend_dirs := $(foreach i, $(DEPEND_MODULES), $(MOOSE_DIR)/modules/$(i)/include)
 depend_dirs += $(APPLICATION_DIR)/include
