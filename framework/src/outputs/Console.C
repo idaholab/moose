@@ -14,6 +14,7 @@
 
 // MOOSE includes
 #include "Console.h"
+#include "ConsoleUtils.h"
 #include "FEProblem.h"
 #include "Postprocessor.h"
 #include "PetscSupport.h"
@@ -43,7 +44,6 @@ InputParameters validParams<Console>()
 
   // Verbosity
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
-  params.addParam<bool>("show_output_on", false, "Print the output execution with the system information");
 
   // Basic table output controls
   params.addParam<bool>("scientific_time", false, "Control the printing of time and dt in scientific notation");
@@ -60,7 +60,10 @@ InputParameters validParams<Console>()
   params.addParam<bool>("libmesh_log", true, "Print the libMesh performance log, requires libMesh to be configured with --enable-perflog");
 #endif
 
-  // Toggle for printing variable normals
+  // Toggle printing of mesh information on adaptivity steps
+  params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
+
+  // Toggle for printing variable norms
   params.addParam<bool>("outlier_variable_norms", true, "If true, outlier variable norms will be printed after each solve");
   params.addParam<bool>("all_variable_norms", false, "If true, all variable norms will be printed after each solve");
 
@@ -70,9 +73,12 @@ InputParameters validParams<Console>()
   multiplier.push_back(2);
   params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
 
+  // System information controls
+  MultiMooseEnum info("framework mesh aux nonlinear execution output", "framework mesh aux nonlinear execution");
+  params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output')");
 
   // Advanced group
-  params.addParamNamesToGroup("max_rows fit_node verbose show_multiapp_name", "Advanced");
+  params.addParamNamesToGroup("max_rows fit_node verbose show_multiapp_name system_info", "Advanced");
 
   // Performance log group
   params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Perf Log");
@@ -122,11 +128,13 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
     _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
-    _show_output_on_info(getParam<bool>("show_output_on")),
     _timing(_app.getParam<bool>("timing")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
     _old_linear_norm(std::numeric_limits<Real>::max()),
-    _old_nonlinear_norm(std::numeric_limits<Real>::max())
+    _old_nonlinear_norm(std::numeric_limits<Real>::max()),
+    _print_mesh_changed_info(getParam<bool>("print_mesh_changed_info")),
+    _system_info_flags(getParam<MultiMooseEnum>("system_info"))
+
 {
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
@@ -157,6 +165,10 @@ Console::Console(const std::string & name, InputParameters parameters) :
 #endif
   }
 
+  // If --show-outputs is used, enable it
+  if (_app.getParam<bool>("show_outputs"))
+    _system_info_flags.push_back("output");
+
   // Set output coloring
   if (Moose::_color_console)
   {
@@ -168,10 +180,6 @@ Console::Console(const std::string & name, InputParameters parameters) :
         Moose::_color_console = false;
     }
   }
-
-  // If --show-outputs is used, enable it
-  if (_app.getParam<bool>("show_outputs"))
-    _show_output_on_info = true;
 }
 
 Console::~Console()
@@ -212,9 +220,17 @@ Console::~Console()
   }
 }
 
+
 void
 Console::initialSetup()
 {
+  // If output_on = 'initial' perform the output
+  if (shouldOutput("system_information", EXEC_INITIAL))
+    outputSystemInformation();
+
+  // Call the base class method
+  TableOutput::initialSetup();
+
   // Set the string for multiapp output indenting
   if (_app.getOutputWarehouse().multiappLevel() > 0)
     _multiapp_indent = COLOR_CYAN + _app.name() + ": " + COLOR_DEFAULT;
@@ -237,6 +253,7 @@ Console::initialSetup()
   // Output the performance log early
   if (getParam<bool>("setup_log_early"))
     write(Moose::setup_perf_log.get_perf_info());
+
 }
 
 std::string
@@ -252,20 +269,16 @@ Console::output(const ExecFlagType & type)
   if (type != EXEC_FINAL && !onInterval())
     return;
 
-  // Flush the Console buffer, if we don't do this here then the linear/nonlinear residual output
-  // may write to the screen prior to buffered text
-  _app.getOutputWarehouse().flushConsoleBuffer();
-
   // Output the system information first; this forces this to be the first item to write by default
   // However, 'output_system_information_on' still operates correctly, so it may be changed by the user
-  if (shouldOutput("system_information", type))
+  if (shouldOutput("system_information", type) && !(type == EXEC_INITIAL && _initialized))
     outputSystemInformation();
 
   // Write the input
   if (shouldOutput("input", type))
     outputInput();
 
-  // Write the timestep information ("Time Step 0 ..."), this is may be controlled with "execute_on"
+  // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
   if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _output_on.contains(EXEC_INITIAL)))
     writeTimestepInformation();
 
@@ -275,11 +288,7 @@ Console::output(const ExecFlagType & type)
     if (_nonlinear_iter == 0)
       _old_nonlinear_norm = std::numeric_limits<Real>::max();
 
-    if (_write_screen)
-      Moose::out << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
-
-    if (_write_file)
-      _file_output_stream << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << std::scientific << _norm << std::endl;
+    _console << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << '\n';
 
     _old_nonlinear_norm = _norm;
   }
@@ -290,11 +299,7 @@ Console::output(const ExecFlagType & type)
     if (_linear_iter == 0)
       _old_linear_norm = std::numeric_limits<Real>::max();
 
-    if (_write_screen)
-      Moose::out << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
-
-    if (_write_file)
-      _file_output_stream << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm << std::endl;
+    _console << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << '\n';
 
     _old_linear_norm = _norm;
   }
@@ -380,7 +385,7 @@ Console::writeTimestepInformation()
   }
 
   // Output to the screen
-  write(oss.str());
+  _console << oss.str();
 }
 
 void
@@ -449,7 +454,7 @@ Console::writeVariableNorms()
   }
 
   // Update the output streams
-  write(oss.str());
+  _console << oss.str();
 }
 
 // Quick helper to output the norm in color
@@ -471,19 +476,6 @@ Console::outputNorm(const Real & old_norm, const Real & norm)
   return oss.str();
 }
 
-
-// Method for stringstream formatting
-void
-Console::insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)
-{
-   if (curr - begin > _line_length)
-   {
-     oss << "\n";
-     begin = oss.tellp();
-     oss << std::setw(_field_width + 2) << "";  // "{ "
-   }
-}
-
 void
 Console::outputInput()
 {
@@ -493,13 +485,7 @@ Console::outputInput()
   std::ostringstream oss;
   oss << "--- " << _app.getInputFileName() << " ------------------------------------------------------";
   _app.actionWarehouse().printInputFile(oss);
-  oss << "\n";
-
-  if (_write_screen)
-    Moose::out << oss.str() << std::endl;
-
-  if (_write_file)
-    _file_output_stream << oss.str() << std::endl;
+  _console << oss.str() << '\n';
 }
 
 void
@@ -512,8 +498,7 @@ Console::outputPostprocessors()
     std::stringstream oss;
     oss << "\nPostprocessor Values:\n";
     _postprocessor_table.printTable(oss, _max_rows, _fit_mode);
-    oss << std::endl;
-    write(oss.str());
+    _console << oss.str() << '\n';
   }
 }
 
@@ -528,11 +513,51 @@ Console::outputScalarVariables()
     oss << "\nScalar Variable Values:\n";
     if (processor_id() == 0)
       _scalar_table.printTable(oss, _max_rows, _fit_mode);
-    oss << std::endl;
-    write(oss.str());
+    _console << oss.str() << '\n';
   }
 }
 
+void
+Console::outputSystemInformation()
+{
+  if (_system_info_flags.contains("framework"))
+    _console << ConsoleUtils::outputFrameworkInformation(_app);
+
+  if (_system_info_flags.contains("mesh"))
+    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr);
+
+  if (_system_info_flags.contains("nonlinear"))
+  {
+    std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr);
+    if (!output.empty())
+      _console << "Nonlinear System:\n" << output;
+  }
+
+  if (_system_info_flags.contains("aux"))
+  {
+    std::string output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);
+    if (!output.empty())
+      _console << "Auxiliary System:\n" << output;
+  }
+
+  if (_system_info_flags.contains("execution"))
+    _console << ConsoleUtils::outputExecutionInformation(_app, *_problem_ptr);
+
+  if (_system_info_flags.contains("output"))
+    _console << ConsoleUtils::outputOutputInformation(_app);
+
+  // Output the legacy flags, these cannot be turned off so they become annoying to people.
+  _console << ConsoleUtils::outputLegacyInformation(*_problem_ptr);
+
+  _console << "\n\n";
+}
+
+void
+Console::meshChanged()
+{
+  if (_print_mesh_changed_info)
+    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false );
+}
 
 void
 Console::indentMessage(std::string & message)
@@ -554,7 +579,7 @@ Console::write(std::string message, bool indent)
 
   // Write the message to file
   if (_write_file)
-    _file_output_stream << message << std::endl;
+    _file_output_stream << message;
 
   // Apply MultiApp indenting
   if (indent)
@@ -573,198 +598,6 @@ Console::mooseConsole(const std::string & message)
 
   // Flush the stream to the screen
   Moose::out << std::flush;
-}
-
-void
-Console::outputSystemInformation()
-{
-  // Don't build this information if nothing is to be written
-  if (!_write_screen && !_write_file)
-    return;
-
-  std::stringstream oss;
-
-  // Framework information
-  if (_app.getSystemInfo() != NULL)
-    oss << _app.getSystemInfo()->getInfo();
-
-  if (_problem_ptr->legacyUoAuxComputation() || _problem_ptr->legacyUoInitialization())
-  {
-    oss << "LEGACY MODES ENABLED:\n";
-    if (_problem_ptr->legacyUoAuxComputation())
-      oss << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed.\n";
-    if (_problem_ptr->legacyUoInitialization())
-      oss << "  Computing all UserObjects during initial setup.\n";
-  }
-
-  oss << std::left << '\n'
-      << "Parallelism:\n"
-      << std::setw(_field_width) << "  Num Processors: " << static_cast<std::size_t>(n_processors()) << '\n'
-      << std::setw(_field_width) << "  Num Threads: " << static_cast<std::size_t>(n_threads()) << '\n'
-      << '\n';
-
-  MooseMesh & moose_mesh = _problem_ptr->mesh();
-  MeshBase & mesh = moose_mesh.getMesh();
-  oss << "Mesh: " << '\n'
-      << std::setw(_field_width) << "  Distribution: " << (moose_mesh.isParallelMesh() ? "parallel" : "serial")
-      << (moose_mesh.isDistributionForced() ? " (forced) " : "") << '\n'
-      << std::setw(_field_width) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
-      << std::setw(_field_width) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n'
-      << std::setw(_field_width) << "  Nodes:" << '\n'
-      << std::setw(_field_width) << "    Total:" << mesh.n_nodes() << '\n'
-      << std::setw(_field_width) << "    Local:" << mesh.n_local_nodes() << '\n'
-      << std::setw(_field_width) << "  Elems:" << '\n'
-      << std::setw(_field_width) << "    Total:" << mesh.n_elem() << '\n'
-      << std::setw(_field_width) << "    Local:" << mesh.n_local_elem() << '\n'
-      << std::setw(_field_width) << "  Num Subdomains: "       << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
-      << std::setw(_field_width) << "  Num Partitions: "       << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
-  if (n_processors() > 1 && moose_mesh.partitionerName() != "")
-    oss << std::setw(_field_width) << "  Partitioner: "       << moose_mesh.partitionerName()
-        << (moose_mesh.isPartitionerForced() ? " (forced) " : "")
-        << '\n';
-  oss << '\n';
-
-  EquationSystems & eq = _problem_ptr->es();
-  unsigned int num_systems = eq.n_systems();
-  for (unsigned int i=0; i<num_systems; ++i)
-  {
-    const System & system = eq.get_system(i);
-    if (system.system_type() == "TransientNonlinearImplicit")
-      oss << "Nonlinear System:" << '\n';
-    else if (system.system_type() == "TransientExplicit")
-      oss << "Auxiliary System:" << '\n';
-    else
-      oss << std::setw(_field_width) << system.system_type() << '\n';
-
-    if (system.n_dofs())
-    {
-      oss << std::setw(_field_width) << "  Num DOFs: " << system.n_dofs() << '\n'
-          << std::setw(_field_width) << "  Num Local DOFs: " << system.n_local_dofs() << '\n';
-
-      std::streampos begin_string_pos = oss.tellp();
-      std::streampos curr_string_pos = begin_string_pos;
-      oss << std::setw(_field_width) << "  Variables: ";
-      for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-      {
-        const VariableGroup &vg_description (system.variable_group(vg));
-
-        if (vg_description.n_variables() > 1) oss << "{ ";
-        for (unsigned int vn=0; vn<vg_description.n_variables(); vn++)
-        {
-          oss << "\"" << vg_description.name(vn) << "\" ";
-          curr_string_pos = oss.tellp();
-          insertNewline(oss, begin_string_pos, curr_string_pos);
-        }
-
-        if (vg_description.n_variables() > 1) oss << "} ";
-      }
-      oss << '\n';
-
-      begin_string_pos = oss.tellp();
-      curr_string_pos = begin_string_pos;
-      oss << std::setw(_field_width) << "  Finite Element Types: ";
-#ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
-      for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-      {
-        oss << "\""
-            << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
-            << "\" ";
-        curr_string_pos = oss.tellp();
-        insertNewline(oss, begin_string_pos, curr_string_pos);
-      }
-      oss << '\n';
-#else
-      for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-      {
-        oss << "\""
-            << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
-            << "\", \""
-            << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().radial_family)
-            << "\" ";
-        curr_string_pos = oss.tellp();
-        insertNewline(oss, begin_string_pos, curr_string_pos);
-      }
-      oss << '\n';
-
-      begin_string_pos = oss.tellp();
-      curr_string_pos = begin_string_pos;
-      oss << std::setw(_field_width) << "  Infinite Element Mapping: ";
-      for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-      {
-        oss << "\""
-            << libMesh::Utility::enum_to_string<InfMapType>(system.get_dof_map().variable_group(vg).type().inf_map)
-            << "\" ";
-        curr_string_pos = oss.tellp();
-        insertNewline(oss, begin_string_pos, curr_string_pos);
-      }
-      oss << '\n';
-#endif
-
-      begin_string_pos = oss.tellp();
-      curr_string_pos = begin_string_pos;
-      oss << std::setw(_field_width) << "  Approximation Orders: ";
-      for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-      {
-#ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
-        oss << "\""
-            << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().order)
-            << "\" ";
-#else
-        oss << "\""
-            << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().order)
-            << "\", \""
-            << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().radial_order)
-            << "\" ";
-#endif
-        curr_string_pos = oss.tellp();
-        insertNewline(oss, begin_string_pos, curr_string_pos);
-      }
-      oss << "\n\n";
-    }
-    else
-      oss << "   *** EMPTY ***\n\n";
-  }
-
-  oss << "Execution Information:\n"
-      << std::setw(_field_width) << "  Executioner: " << demangle(typeid(*_app.getExecutioner()).name()) << '\n';
-
-  std::string time_stepper = _app.getExecutioner()->getTimeStepperName();
-  if (time_stepper != "")
-    oss << std::setw(_field_width) << "  TimeStepper: " << time_stepper << '\n';
-
-  oss << std::setw(_field_width) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(_problem_ptr->solverParams()._type) << '\n';
-
-  const std::string & pc_desc = _problem_ptr->getPreconditionerDescription();
-  if (!pc_desc.empty())
-    oss << std::setw(_field_width) << "  Preconditioner: " << pc_desc << '\n';
-  oss << '\n';
-
-  // Output information
-  if (_show_output_on_info)
-  {
-    const std::vector<Output *> & outputs = _app.getOutputWarehouse().all();
-    oss << "Outputs:\n";
-    for (std::vector<Output *>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
-    {
-      // Display the "output_on" settings
-      const MultiMooseEnum & output_on = (*it)->outputOn();
-      oss << "  " << std::setw(_field_width-2) << (*it)->name() <<  "\"" << output_on << "\"\n";
-
-      // Display the advanced "output_on" settings, only if they are different from "output_on"
-      if ((*it)->isAdvanced())
-      {
-        const OutputOnWarehouse & adv_on = (*it)->advancedOutputOn();
-        for (std::map<std::string, MultiMooseEnum>::const_iterator adv_it = adv_on.begin(); adv_it != adv_on.end(); ++adv_it)
-          if (output_on != adv_it->second)
-            oss << "    " << std::setw(_field_width-4) << adv_it->first + ":" <<  "\"" << adv_it->second << "\"\n";
-      }
-    }
-  }
-
-  oss << "\n\n";
-
-  // Output the information
-  write(oss.str());
 }
 
 void

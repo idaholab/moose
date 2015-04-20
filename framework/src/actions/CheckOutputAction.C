@@ -39,6 +39,7 @@ CheckOutputAction::~CheckOutputAction()
 void
 CheckOutputAction::act()
 {
+  // Perform the various output related checks
   checkVariableOutput("add_variable");
   checkVariableOutput("add_aux_variable");
   checkMaterialOutput();

@@ -49,6 +49,9 @@ Nemesis::~Nemesis()
 void
 Nemesis::initialSetup()
 {
+  // Call the base class method
+  AdvancedOutput<OversampleOutput>::initialSetup();
+
   // Make certain that a Nemesis_IO object exists
   meshChanged();
 }

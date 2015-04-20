@@ -49,6 +49,9 @@ CSV::CSV(const std::string & name, InputParameters & parameters) :
 void
 CSV::initialSetup()
 {
+  // Call the base class method
+  TableOutput::initialSetup();
+
   // Set the delimiter
   if (_set_delimiter)
     _all_data_table.setDelimiter(_delimiter);

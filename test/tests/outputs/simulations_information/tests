@@ -1,0 +1,14 @@
+[Tests]
+  [./basic]
+    # Tests that the various components of the simulation information header are printed to the screen
+    type = RunApp
+    input = 'simulation_information.i'
+    expect_out = 'Framework\sInformation:.*?Mesh:.*?Nonlinear\sSystem:.*?Auxiliary\sSystem:.*?Execution\sInformation:'
+  [../]
+  [./mesh]
+    # Check that simulation information may be printed with differing output_on
+    type = RunApp
+    input = 'simulation_information_mesh_info.i'
+    expect_out = 'time\s=\s0.1.*?Nodes:.*?time\s=\s0.2.*?Nodes:.*?time\s=\s0.3.*?Nodes:'
+  [../]
+[]

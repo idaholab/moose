@@ -328,8 +328,11 @@ void FEProblem::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 
 void FEProblem::initialSetup()
 {
-  // Write all cached calls to _console, this will output calls to _console from the object constructors
+  // Flush all output to _console that occured during construction of objects
   _app.getOutputWarehouse().mooseConsole();
+
+  // Perform output related setups
+  _app.getOutputWarehouse().initialSetup();
 
   if (_app.isRecovering())
     _resurrector->setRestartFile(_app.getRecoverFileBase());
@@ -607,10 +610,8 @@ void FEProblem::initialSetup()
   if (_displaced_mesh)
     _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
 
-  // Perform output related setups
-  _app.getOutputWarehouse().init();
-  _app.getOutputWarehouse().initialSetup();
-  _app.getOutputWarehouse().mooseConsole(); // writes all calls to _console from initialSetup()
+  // Writes all calls to _console from initialSetup() methods
+  _app.getOutputWarehouse().mooseConsole();
 }
 
 void FEProblem::timestepSetup()
@@ -3063,13 +3064,6 @@ FEProblem::init()
     _displaced_mesh->meshChanged();
   Moose::setup_perf_log.pop("FEProblem::init::meshChanged()","Setup");
 
-  init2();
-  _initialized = true;
-}
-
-void
-FEProblem::init2()
-{
   Moose::setup_perf_log.push("NonlinearSystem::update()","Setup");
   _nl.update();
   Moose::setup_perf_log.pop("NonlinearSystem::update()","Setup");
@@ -3083,6 +3077,8 @@ FEProblem::init2()
     _displaced_problem->init();
 
   _aux.init();
+
+  _initialized = true;
 }
 
 void
@@ -3093,6 +3089,9 @@ FEProblem::solve()
 #endif
 
   Moose::setSolverDefaults(*this);
+
+  // Setup the output system for printing linear/nonlinear iteration information
+  initPetscOutput();
 
   Moose::perf_log.push("solve()","Solve");
 
@@ -3188,9 +3187,7 @@ FEProblem::forceOutput()
 void
 FEProblem::initPetscOutput()
 {
-  std::vector<PetscOutput*> outputs = _app.getOutputWarehouse().getOutputs<PetscOutput>();
-  for (std::vector<PetscOutput*>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
-    (*it)->timestepSetupInternal();
+  _app.getOutputWarehouse().solveSetup();
   Moose::PetscSupport::petscSetDefaults(*this);
 }
 
@@ -3589,13 +3586,12 @@ void
 FEProblem::adaptMesh()
 {
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
-  for (unsigned int i=0; i < cycles_per_step; ++i)
+  for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
-    _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << "\n";
+    _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << '\n';
     if (_adaptivity.adaptMesh())
       meshChanged();
   }
-  _console << std::flush;
 }
 #endif //LIBMESH_ENABLE_AMR
 

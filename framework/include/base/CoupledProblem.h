@@ -30,8 +30,6 @@ public:
 
   virtual void init();
 
-  virtual void output(bool force = false);
-
 protected:
 };
 

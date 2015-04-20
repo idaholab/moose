@@ -19,9 +19,7 @@
 #include "MooseObjectAction.h"
 #include "ActionFactory.h"
 #include "Output.h"
-//#include "Exodus.h"
 #include "OutputWarehouse.h"
-//#include "FileOutput.h"
 
 // Extrnal includes
 #include "tinydir.h"
@@ -76,6 +74,7 @@ InputParameters validParams<CommonOutputAction>()
   // Add special Console flags
   params.addParam<bool>("print_linear_residuals", false, "Enable printing of linear residuals to the screen (Console)");
   params.addParam<bool>("print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
+  params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
 
   // Return object
   return params;

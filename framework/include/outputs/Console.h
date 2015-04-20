@@ -18,10 +18,6 @@
 // MOOSE includes
 #include "TableOutput.h"
 #include "FormattedTable.h"
-#include "Conversion.h"
-
-// libMesh includes
-#include "libmesh/string_to_enum.h"
 
 // Forward declarations
 class Console;
@@ -73,27 +69,21 @@ public:
   virtual std::string filename();
 
   /**
-   * Display the system information
-   */
-  void outputSystemInformation();
-
-  /**
    * Output string for setting up PETSC output
    */
   static void petscSetupOutput();
 
-  /** Helper function function for stringstream formatting
-   * @see outputSimulationInformation()
+  /**
+   * Performs console related printing when the mesh is changed
    */
-  static void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr);
-
-  /// Width used for printing simulation information
-  static const unsigned int _field_width = 27;
-
-  /// Line length for printing simulation information
-  static const unsigned int _line_length = 100;
+  void meshChanged();
 
 protected:
+
+  /**
+   * Adds the printing of system information to the init() method
+   */
+  void init();
 
   /**
    * Print the input file at the beginning of the simulation
@@ -114,6 +104,11 @@ protected:
    * Not implemented.
    */
   virtual void outputVectorPostprocessors() { mooseError("Can't currently output VectorPostprocessors to the screen"); };
+
+  /**
+   * Print system information
+   */
+  virtual void outputSystemInformation();
 
   /**
    * A helper function for outputting norms in color
@@ -140,7 +135,7 @@ protected:
    */
   void indentMessage(std::string & message);
 
-/**
+  /**
    * Write the file stream to the file
    * @param append Toggle for appending the file
    *
@@ -208,9 +203,6 @@ protected:
   /// Number of significant digits
   unsigned int _precision;
 
-  /// Toggle for displaying output_on stuff in system information
-  bool _show_output_on_info;
-
 private:
 
   /**
@@ -239,6 +231,13 @@ private:
 
   /// Storage for the old non linear residual (needed for color output and only when used when printing to the screen)
   Real _old_nonlinear_norm;
+
+  /// Flag for printing mesh information when the mesh changes
+  bool _print_mesh_changed_info;
+
+  /// Flags for controlling the what simulations information is shown
+  MultiMooseEnum _system_info_flags;
+
 
   friend class OutputWarehouse;
 };

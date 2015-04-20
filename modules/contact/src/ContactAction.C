@@ -41,7 +41,7 @@ InputParameters validParams<ContactAction>()
   params.addParam<MooseEnum>("system", system, "System to use for constraint enforcement.  Options are: " + system.getRawNames());
 
   // Hide the auto-generated aux variables.
-  params.set<std::vector<OutputName> >("outputs") = std::vector<OutputName>(1,"none");
+  params.set<std::vector<OutputName> >("outputs") = std::vector<OutputName>(1, "none");
   params.addParam<bool>("output_penetration_info_vars", false, "Show the aux variables for the PenetrationInfo objects in the output files.");
 
   return params;
@@ -148,7 +148,7 @@ ContactAction::act()
     }
   }
 
-  else if ( _current_task == "check_output" )
+  else if ( _current_task == "output_penetration_info_vars" )
   {
     // The hide list has to be built after the outputs are built, therefore it has to be in this
     // task rather than in the add_aux_variable task.
