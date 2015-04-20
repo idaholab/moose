@@ -184,6 +184,8 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
     _assembly.addJacobian(jacobian);
   }
 
+  const Elem * save_current_elem = _current_elem;
+
   // off-diagonal part for master side
   {
     _assembly.reinit(_elem_master);
@@ -226,6 +228,11 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
       }
     _assembly.addJacobian(jacobian);
   }
+
+  _assembly.reinit(save_current_elem);
+  _master_var.prepare();
+  _slave_var.prepare();
+  _assembly.prepare();
 }
 
 Real

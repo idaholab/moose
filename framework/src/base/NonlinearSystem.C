@@ -1647,6 +1647,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
         for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
         {
           FaceFaceConstraint * ffc = *fc_it;
+          ffc->reinit();
           ffc->subProblem().prepareShapes(ffc->variable().number(), tid);
           ffc->computeJacobian(jacobian);
         }
