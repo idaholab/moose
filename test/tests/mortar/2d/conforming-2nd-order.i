@@ -77,6 +77,7 @@
     variable = u
     function = exact_sln
     block = '1 2'
+    execute_on = 'initial timestep_end'
   [../]
 []
 

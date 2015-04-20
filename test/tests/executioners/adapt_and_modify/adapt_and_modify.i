@@ -39,12 +39,12 @@
 [UserObjects]
   [./rh_uo]
     type = RandomHitUserObject
-    execute_on = timestep_begin
+    execute_on = 'initial timestep_begin'
     num_hits = 1
   [../]
   [./rhsm]
     type = RandomHitSolutionModifier
-    execute_on = custom
+    execute_on = 'custom'
     modify = u
     random_hits = rh_uo
     amount = 1000

@@ -53,6 +53,7 @@
   [./volume]
     type = ElementIntegralVariablePostprocessor
     variable = one
+    execute_on = 'initial timestep_end'
   [../]
 []
 

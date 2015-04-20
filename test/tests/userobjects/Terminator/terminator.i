@@ -22,6 +22,7 @@
   [./max_c]
     type = NodalMaxValue
     variable = c
+    execute_on = 'initial timestep_end'
   [../]
 []
 

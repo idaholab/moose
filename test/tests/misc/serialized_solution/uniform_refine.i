@@ -43,10 +43,12 @@
   [./aux]
     type = TestSerializedSolution
     system = aux
+    execute_on = 'initial timestep_end'
   [../]
   [./nl]
     type = TestSerializedSolution
     system = nl
+    execute_on = 'initial timestep_end'
   [../]
 []
 

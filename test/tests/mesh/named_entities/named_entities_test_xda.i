@@ -83,12 +83,14 @@
     type = ElementAverageValue
     variable = u
     block = 'center_block'
+    execute_on = 'initial timestep_end'
   [../]
 
   [./side_average]
     type = SideAverageValue
     variable = u
     boundary = 'right_side'
+    execute_on = 'initial timestep_end'
   [../]
 []
 

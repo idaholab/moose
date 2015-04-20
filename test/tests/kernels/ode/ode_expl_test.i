@@ -76,6 +76,7 @@
   [./y]
     type = ScalarVariable
     variable = y
+    execute_on = 'initial timestep_end'
   [../]
 []
 

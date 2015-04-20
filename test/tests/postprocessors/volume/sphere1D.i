@@ -100,18 +100,22 @@
     type = ElementAverageValue
     block = 1
     variable = constantVar
+    execute_on = 'initial timestep_end'
   [../]
   [./volume1]
     type = VolumePostprocessor
     block = 1
+    execute_on = 'initial timestep_end'
   [../]
   [./volume2]
     type = VolumePostprocessor
     block = 2
+    execute_on = 'initial timestep_end'
   [../]
   [./volume3]
     type = VolumePostprocessor
     block = 3
+    execute_on = 'initial timestep_end'
   [../]
 []
 
