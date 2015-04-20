@@ -68,6 +68,7 @@ RungeKutta2::solve()
   _fe_problem.getNonlinearSystem().sys().solve();
 
   _fe_problem.advanceState();
+  _fe_problem.initPetscOutput();
 
   // ---------------------------------
   _console << " 2. stage" << std::endl;
