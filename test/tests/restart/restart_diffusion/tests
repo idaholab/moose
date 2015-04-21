@@ -20,6 +20,12 @@
     recover = false
   [../]
 
+  [./test_1]
+    type = 'Exodiff'
+    input = 'restart_diffusion_test_steady.i'
+    exodiff = 'steady_out.e'
+  [../]
+
   [./test_2]
     type = 'Exodiff'
     input = 'restart_diffusion_test_transient.i'
@@ -27,9 +33,10 @@
     prereq = 'test_1'
   [../]
 
-  [./test_1]
+  [./test_2_new_name]
     type = 'Exodiff'
-    input = 'restart_diffusion_test_steady.i'
-    exodiff = 'steady_out.e'
+    input = 'restart_diffusion_test_transient_new_name.i'
+    exodiff = 'restart_diffusion_test_transient_new_name_out.e'
+    prereq = 'test_1'
   [../]
 []

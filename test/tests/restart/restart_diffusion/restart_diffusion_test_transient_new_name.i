@@ -3,9 +3,11 @@
 []
 
 [Variables]
-  [./u]
+  [./u_new]
     order = FIRST
     family = LAGRANGE
+
+    # Testing that we can load a solution from a different variable name
     initial_from_file_var = u
     initial_from_file_timestep = 2
   [../]
@@ -16,27 +18,27 @@
 
   [./bodyforce]
     type = BodyForce
-    variable = u
+    variable = u_new
     value = 10.0
   [../]
 
   [./ie]
     type = TimeDerivative
-    variable = u
+    variable = u_new
   [../]
 []
 
 [BCs]
   [./left]
     type = DirichletBC
-    variable = u
+    variable = u_new
     boundary = 1
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
-    variable = u
+    variable = u_new
     boundary = 2
     value = 1
   [../]
@@ -54,7 +56,6 @@
 []
 
 [Outputs]
-  file_base = out
   output_initial = true
   exodus = true
   print_perf_log = true
