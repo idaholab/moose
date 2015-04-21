@@ -6,7 +6,7 @@
 # Source = s  (units = 1/second)
 #
 # Expect:
-# porepressure = Biot-Modulus*s
+# porepressure = Biot-Modulus*s*t
 # stress = 0 (remember this is effective stress)
 #
 # Parameters:

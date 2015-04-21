@@ -7,8 +7,8 @@
 # Source = s  (units = 1/second)
 #
 # Expect:
-# strain_zz = disp_z = BiotCoefficient*BiotModulus*s/((bulk + 4*shear/3) + BiotCoefficient^2*BiotModulus)
-# porepressure = BiotModulus*(s - BiotCoefficient*strain_zz)
+# strain_zz = disp_z = BiotCoefficient*BiotModulus*s*t/((bulk + 4*shear/3) + BiotCoefficient^2*BiotModulus)
+# porepressure = BiotModulus*(s*t - BiotCoefficient*strain_zz)
 # stress_xx = (bulk - 2*shear/3)*strain_zz   (remember this is effective stress)
 # stress_xx = (bulk + 4*shear/3)*strain_zz   (remember this is effective stress)
 #

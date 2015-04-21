@@ -30,4 +30,20 @@
     input = unconsolidated_undrained.i
     csvdiff = unconsolidated_undrained.csv
   [../]
+  [./mandel]
+    type = CSVDiff
+    input = mandel.i
+    csvdiff = mandel.csv
+  [../]
+  [./borehole]
+    type = Exodiff
+    input = borehole_lowres.i
+    exodiff = borehole_lowres.e
+  [../]
+  [./borehole_heavy]
+    type = Exodiff
+    input = borehole_highres.i
+    exodiff = borehole_highres.e
+    heavy = true
+  [../]
 []

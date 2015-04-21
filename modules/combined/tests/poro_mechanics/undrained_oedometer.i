@@ -1,13 +1,14 @@
 # An undrained oedometer test on a saturated poroelastic sample.
 #
 # The sample is a single unit element, with roller BCs on the sides
-# and bottom.  A constant velocity is applied to the top: v = -0.01*t.
+# and bottom.  A constant displacement is applied to the top: disp_z = -0.01*t.
 # There is no fluid flow.
 #
 # Under these conditions
-# porepressure = -(Biot coefficient)*(Biot modulus)*v
-# stress_xx = (bulk - 2*shear/3)*v (remember this is effective stress)
-# stress_zz = (bulk + 4*shear/3)*v (remember this is effective stress)
+# porepressure = -(Biot coefficient)*(Biot modulus)*disp_z/L
+# stress_xx = (bulk - 2*shear/3)*disp_z/L (remember this is effective stress)
+# stress_zz = (bulk + 4*shear/3)*disp_z/L (remember this is effective stress)
+# where L is the height of the sample (L=1 in this test)
 #
 # Parameters:
 # Biot coefficient = 0.3
