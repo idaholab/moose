@@ -105,11 +105,13 @@
     variable = u
     function = exact_sln
     block = '1 2'
+    execute_on = 'initial timestep_end'
   [../]
   [./l2_v]
     type = ElementL2Norm
     variable = v
     block = '1 2'
+    execute_on = 'initial timestep_end'
   [../]
 []
 

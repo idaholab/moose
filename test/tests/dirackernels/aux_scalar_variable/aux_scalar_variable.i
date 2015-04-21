@@ -44,6 +44,7 @@
   [./source_value]
     type = ScalarVariable
     variable = shared
+    execute_on = 'initial timestep_end'
   [../]
 []
 

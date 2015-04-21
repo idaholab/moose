@@ -89,26 +89,32 @@
  [./int2_u]
    type = ElementL2Norm
    variable = u
+   execute_on = 'initial timestep_end'
  [../]
  [./int2_l2_lagrange]
    type = ElementL2Norm
    variable = l2_lagrange
+   execute_on = 'initial timestep_end'
  [../]
  [./int2_l2_hierarchic]
    type = ElementL2Norm
    variable = l2_hierarchic
+   execute_on = 'initial timestep_end'
  [../]
  [./int_u]
    type = ElementIntegralVariablePostprocessor
    variable = u
+   execute_on = 'initial timestep_end'
  [../]
  [./int_l2_lagrange]
    type = ElementIntegralVariablePostprocessor
    variable = l2_lagrange
+   execute_on = 'initial timestep_end'
  [../]
  [./int_l2_hierarchic]
    type = ElementIntegralVariablePostprocessor
    variable = l2_hierarchic
+   execute_on = 'initial timestep_end'
  [../]
 []
 

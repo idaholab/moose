@@ -78,22 +78,26 @@
     type = ScalarVariable
     variable = v
     component = 0
+    execute_on = 'initial timestep_end'
   [../]
   [./v2]
     type = ScalarVariable
     variable = v
     component = 1
+    execute_on = 'initial timestep_end'
   [../]
 
   [./a1]
     type = ScalarVariable
     variable = a
     component = 0
+    execute_on = 'initial timestep_end'
   [../]
   [./a2]
     type = ScalarVariable
     variable = a
     component = 1
+    execute_on = 'initial timestep_end'
   [../]
 []
 

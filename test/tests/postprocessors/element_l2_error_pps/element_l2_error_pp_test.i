@@ -89,6 +89,7 @@
     type = ElementL2Error
     variable = u
     function = u_func
+    execute_on = 'initial timestep_end'
   [../]
 []
 

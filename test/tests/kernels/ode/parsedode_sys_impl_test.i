@@ -103,18 +103,18 @@
   [./x]
     type = ScalarVariable
     variable = x
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
   [./y]
     type = ScalarVariable
     variable = y
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
 
   [./exact_x]
     type = PlotFunction
     function = exact_x_fn
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
     point = '0 0 0'
   [../]
 
@@ -122,6 +122,7 @@
     type = ScalarL2Error
     variable = x
     function = exact_x_fn
+    execute_on = 'initial timestep_end'
   [../]
 []
 

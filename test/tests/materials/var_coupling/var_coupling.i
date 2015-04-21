@@ -54,6 +54,7 @@
   [./aux1_integral]
     type = ElementIntegralVariablePostprocessor
     variable = aux1
+    execute_on = 'initial timestep_end'
   [../]
 []
 

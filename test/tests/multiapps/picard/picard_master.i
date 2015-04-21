@@ -51,6 +51,7 @@
 [Postprocessors]
   [./picard_its]
     type = NumPicardIterations
+    execute_on = 'initial timestep_end'
   [../]
 []
 

@@ -69,13 +69,14 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
+    execute_on = 'initial timestep_end'
   [../]
 
   # Just use some postprocessor that gives values good enough for time stepping ;-)
   [./dt]
     type = ElementAverageValue
     variable = u
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
 []
 

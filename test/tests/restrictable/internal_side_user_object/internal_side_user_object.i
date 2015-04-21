@@ -34,14 +34,17 @@
 [Postprocessors]
   [./all_pp]
     type = NumInternalSides
+    execute_on = 'initial timestep_end'
    [../]
   [./block_1_pp]
     type = NumInternalSides
     block = 1
+    execute_on = 'initial timestep_end'
   [../]
   [./block_2_pp]
     type = NumInternalSides
     block = 2
+    execute_on = 'initial timestep_end'
   [../]
 []
 

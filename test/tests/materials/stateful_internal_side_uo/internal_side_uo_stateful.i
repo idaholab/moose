@@ -27,6 +27,7 @@
     type = InsideUserObject
     variable = u
     diffusivity = diffusivity
+    execute_on = 'initial timestep_end'
 #    use_old_prop = true # Access a stateful material on an internal side
   [../]
 []
@@ -69,6 +70,7 @@
   [./value]
     type = InsideValuePPS
     user_object = isuo
+    execute_on = 'initial timestep_end'
   [../]
 []
 
