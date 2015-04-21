@@ -62,7 +62,7 @@ SideSetsFromPoints::modify()
 
   _visited.clear();
 
-  AutoPtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, *_mesh_ptr);
+  UniquePtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, *_mesh_ptr);
 
   for (unsigned int i=0; i< boundary_ids.size(); ++i)
   {
@@ -74,7 +74,7 @@ SideSetsFromPoints::modify()
         continue;
 
       // See if this point is on this side
-      AutoPtr<Elem> elem_side = elem->side(side);
+      UniquePtr<Elem> elem_side = elem->side(side);
 
       if (elem_side->contains_point(_points[i]))
       {

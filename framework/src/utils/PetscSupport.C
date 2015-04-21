@@ -426,8 +426,8 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
 
     // Create new NumericVectors with the right ghosting - note: these will be destroyed
     // when this function exits, so nobody better hold pointers to them any more!
-    AutoPtr<NumericVector<Number> > ghosted_y_aptr( cls.zero_clone() );
-    AutoPtr<NumericVector<Number> > ghosted_w_aptr( cls.zero_clone() );
+    UniquePtr<NumericVector<Number> > ghosted_y_aptr( cls.zero_clone() );
+    UniquePtr<NumericVector<Number> > ghosted_w_aptr( cls.zero_clone() );
 
     // Create PetscVector wrappers around the Vecs.
     PetscVector<Number> ghosted_y( static_cast<PetscVector<Number> *>(ghosted_y_aptr.get())->vec(), problem.comm());
