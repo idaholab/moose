@@ -93,11 +93,13 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
+    execute_on = 'initial timestep_end'
   [../]
 
   [./x]
     type = ScalarVariable
     variable = x
+    execute_on = 'initial timestep_end'
   [../]
 []
 

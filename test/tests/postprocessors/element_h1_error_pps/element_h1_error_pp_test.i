@@ -91,24 +91,28 @@
 [Postprocessors]
   [./dofs]
     type = NumDOFs
+    execute_on = 'initial timestep_end'
   [../]
 
   [./h1_error]
     type = ElementH1Error
     variable = u
     function = u_func
+    execute_on = 'initial timestep_end'
   [../]
 
   [./h1_semi]
     type = ElementH1SemiError
     variable = u
     function = u_func
+    execute_on = 'initial timestep_end'
   [../]
 
   [./l2_error]
     type = ElementL2Error
     variable = u
     function = u_func
+    execute_on = 'initial timestep_end'
   [../]
 []
 

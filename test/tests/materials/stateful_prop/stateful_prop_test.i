@@ -71,6 +71,7 @@
   [./integral]
     type = ElementAverageValue
     variable = prop1
+    execute_on = 'initial timestep_end'
   [../]
 []
 

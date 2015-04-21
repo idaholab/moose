@@ -112,10 +112,12 @@
     type = ElementL2Error
     variable = u
     function = solution
+    execute_on = 'initial timestep_end'
   [../]
 
   [./dofs]
     type = NumDOFs
+    execute_on = 'initial timestep_end'
   [../]
 []
 

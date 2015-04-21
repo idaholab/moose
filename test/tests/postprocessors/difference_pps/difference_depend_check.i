@@ -33,12 +33,15 @@
     type = DifferencePostprocessor
     value1 = nodes
     value2 = elems
+    execute_on = 'initial timestep_end'
   [../]
   [./nodes]
     type = NumNodes
+    execute_on = 'initial timestep_end'
   [../]
   [./elems]
     type = NumElems
+    execute_on = 'initial timestep_end'
   [../]
 []
 

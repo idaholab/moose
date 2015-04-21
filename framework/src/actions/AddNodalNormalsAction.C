@@ -65,7 +65,7 @@ AddNodalNormalsAction::act()
 
   // Set the execute options
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep_begin";
+  execute_options = "initial timestep_begin";
 
   // Create the NodalNormalsPreprocessor UserObject
   if (_current_task == "add_postprocessor")

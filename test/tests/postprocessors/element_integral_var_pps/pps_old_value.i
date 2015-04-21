@@ -61,11 +61,13 @@
   [./a]
     type = ElementIntegralVariablePostprocessor
     variable = u
+    execute_on = 'initial timestep_end'
   [../]
 
   [./total_a]
     type = TotalVariableValue
     value = a
+    execute_on = 'initial timestep_end'
   [../]
 []
 

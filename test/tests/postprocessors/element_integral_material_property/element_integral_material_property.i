@@ -47,6 +47,7 @@
   [./prop_integral]
     type = ElementIntegralMaterialProperty
     mat_prop = prop
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -64,4 +65,3 @@
   print_linear_residuals = true
   print_perf_log = true
 []
-
