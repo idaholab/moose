@@ -29,7 +29,7 @@ libmesh_CC       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cc)
 libmesh_F77      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
 libmesh_F90      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
 libmesh_INCLUDE  := $(shell METHOD=$(METHOD) $(libmesh_config) --include)
-libmesh_CPPFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cppflags) $(ADDITIONAL_CPPFLAGS)
+libmesh_CPPFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cppflags)
 libmesh_CXXFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cxxflags)
 libmesh_CFLAGS   := $(shell METHOD=$(METHOD) $(libmesh_config) --cflags)
 libmesh_FFLAGS   := $(shell METHOD=$(METHOD) $(libmesh_config) --fflags)
@@ -85,7 +85,7 @@ ifdef PRECOMPILED
 %.h.gch/$(METHOD).h.gch : %.h
 	@echo "MOOSE Pre-Compiling Header (in "$(METHOD)" mode) "$<"..."
 	@mkdir -p $(FRAMEWORK_DIR)/include/base/Precompiled.h.gch
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED $(libmesh_INCLUDE) -MMD -MF $@.d -c $< -o $@
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED $(libmesh_INCLUDE) -MMD -MF $@.d -c $< -o $@
 
 #
 # add dependency - all object files depend on the precompiled header file.
@@ -103,17 +103,17 @@ endif
 pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.C $(PCH_DEP)
 	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.cpp $(PCH_DEP)
 	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 #
 # Static Analysis
@@ -130,12 +130,12 @@ pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 pcre%.$(obj-suffix) : pcre%.c
 	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.c
 	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 
 
@@ -265,10 +265,10 @@ endif
 #
 %-$(METHOD).plugin : %.C
 	@echo "MOOSE Compiling C++ Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.c
 	@echo "MOOSE Compiling C Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f
 	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F77) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
