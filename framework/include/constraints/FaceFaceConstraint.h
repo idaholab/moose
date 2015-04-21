@@ -52,17 +52,27 @@ public:
    * Evaluate variables, compute q-points, etc.
    */
   virtual void reinit();
+  virtual void reinitSide(Moose::ConstraintType res_type);
 
   /**
    * Computes the residual for the current element.
    */
   virtual void computeResidual();
-  virtual void computeResidualSide();
+  /**
+   * Computes residual contributions from master or slave side
+   * @param side Master or slave side
+   */
+  virtual void computeResidualSide(Moose::ConstraintType side);
 
   /**
-   * Computes the jacobian for the current element.
+   * Computes the Jacobian for the current element (i.e element of the Mortar interface).
    */
-  virtual void computeJacobian(SparseMatrix<Number> & jacobian);
+  virtual void computeJacobian();
+  /**
+   * Computes Jacobian contributions from master or slave side
+   * @param side Master or slave side
+   */
+  virtual void computeJacobianSide(Moose::ConstraintType side);
 
 protected:
   virtual Real computeQpResidual() = 0;
