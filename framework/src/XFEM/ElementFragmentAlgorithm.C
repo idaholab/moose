@@ -251,6 +251,13 @@ ElementFragmentAlgorithm::addElemFaceIntersection(unsigned int elemid, unsigned 
 }
 
 void
+ElementFragmentAlgorithm::addFragFaceIntersection(unsigned int ElemID, unsigned int FragFaceID,
+                                                  std::vector<unsigned int> FragFaceEdgeID, std::vector<double> position)
+{
+  // TODO: need to finish this for 3D problems
+}
+
+void
 ElementFragmentAlgorithm::updatePhysicalLinksAndFragments()
 {
   //loop over the elements in the mesh

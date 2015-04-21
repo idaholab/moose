@@ -67,6 +67,8 @@ public:
   void addFragEdgeIntersection(unsigned int elemid, unsigned int frag_edge_id, double position);
   void addElemFaceIntersection(unsigned int elemid, unsigned int faceid,
                                std::vector<unsigned int> edgeid, std::vector<double> position);
+  void addFragFaceIntersection(unsigned int ElemID, unsigned int FragFaceID,
+                               std::vector<unsigned int> FragFaceEdgeID, std::vector<double> position);
 
   void updatePhysicalLinksAndFragments();
 

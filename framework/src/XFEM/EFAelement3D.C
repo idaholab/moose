@@ -1314,6 +1314,54 @@ EFAelement3D::getFragmentFaceID(unsigned int elem_face_id, unsigned int &frag_fa
 }
 
 bool
+EFAelement3D::getFragmentFaceEdgeID(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID, 
+                                    unsigned int &FragFaceID, unsigned int &FragFaceEdgeID) const
+{
+  // Purpose: given an edge of an elem face, find which frag face's edge it contains
+  bool frag_edge_found = false;
+  FragFaceID = 99999;
+  FragFaceEdgeID = 99999;
+  if (getFragmentFaceID(ElemFaceID, FragFaceID))
+  {
+    EFAedge* elem_edge = _faces[ElemFaceID]->get_edge(ElemFaceEdgeID);
+    EFAface* frag_face = get_frag_face(0, FragFaceID);
+    for (unsigned int i = 0; i < frag_face->num_edges(); ++i)
+    {
+      if (elem_edge->containsEdge(*frag_face->get_edge(i)))
+      {
+        FragFaceEdgeID = i;
+        frag_edge_found = true;
+        break;
+      }
+    } // i
+  }
+  return frag_edge_found;
+}
+
+bool
+EFAelement3D::is_real_edge_cut(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID, double position) const
+{
+  unsigned int FragFaceID = 99999;
+  unsigned int FragFaceEdgeID = 99999;
+  bool is_in_real = false;
+  if (_fragments.size() == 0)
+  {
+    is_in_real = true;
+  }
+  else if (getFragmentFaceEdgeID(ElemFaceID, ElemFaceEdgeID, FragFaceID, FragFaceEdgeID))
+  {
+    EFAedge* elem_edge = _faces[ElemFaceID]->get_edge(ElemFaceEdgeID);
+    EFAedge* frag_edge = get_frag_face(0, FragFaceID)->get_edge(FragFaceEdgeID);
+    double xi[2] = {-1.0,-1.0}; // relative coords of two frag edge nodes
+    xi[0] = elem_edge->distance_from_node1(frag_edge->get_node(0));
+    xi[1] = elem_edge->distance_from_node1(frag_edge->get_node(1));
+    if ((position - xi[0])*(position - xi[1]) < 0.0) // the cut to be added is within the real part of the edge
+      is_in_real = true;
+  }
+  return is_in_real;
+}
+
+bool
 EFAelement3D::is_face_phantom(unsigned int face_id) const
 {
   bool is_phantom = false;
@@ -1457,11 +1505,32 @@ EFAelement3D::face_contains_tip(unsigned int face_id) const
   return contain_tip;
 }
 
+bool
+EFAelement3D::frag_face_already_cut(unsigned int ElemFaceID) const
+{
+  // when marking cuts, check if the corresponding frag face already has been cut
+  bool has_cut = false;
+  if (face_contains_tip(ElemFaceID))
+    has_cut = true;
+  else
+  {
+    unsigned int FragFaceID = 99999;
+    if (getFragmentFaceID(ElemFaceID, FragFaceID))
+    {
+      EFAface* frag_face = get_frag_face(0, FragFaceID);
+      if (frag_face->has_intersection())
+        has_cut = true;
+    }
+  }
+  return has_cut;
+}
+
 void
 EFAelement3D::addFaceEdgeCut(unsigned int face_id, unsigned int edge_id, double position,
                              EFAnode* embedded_node, std::map<unsigned int, EFAnode*> &EmbeddedNodes,
                              bool add_to_neighbor, bool add_to_adjacent)
 {
+  // Purpose: add intersection on Edge edge_id of Face face_id
   EFAnode* local_embedded = NULL;
   EFAedge* cut_edge = _faces[face_id]->get_edge(edge_id);
   EFAnode* edge_node1 = cut_edge->get_node(0);
@@ -1486,7 +1555,8 @@ EFAelement3D::addFaceEdgeCut(unsigned int face_id, unsigned int edge_id, double 
     cut_exist = true;
   }
 
-  if (!cut_exist)
+  if (!cut_exist && !frag_face_already_cut(face_id) &&
+      is_real_edge_cut(face_id, edge_id, position))
   {
     // check if cut has already been added to the neighbor edges
     checkNeighborFaceCut(face_id, edge_id, position, edge_node1, embedded_node, local_embedded);

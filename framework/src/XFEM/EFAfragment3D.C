@@ -178,7 +178,7 @@ EFAfragment3D::isThirdInteriorFace(unsigned int face_id) const
 {
   bool is_third_cut = false;
   if (!_host_elem)
-    mooseError("in isSecondaryInteriorFace fragment must have host elem");
+    mooseError("in isThirdInteriorFace fragment must have host elem");
 
   for (unsigned int i = 0; i < _host_elem->num_interior_nodes(); ++i)
   {
@@ -373,6 +373,30 @@ EFAfragment3D::hasFaceWithOneCut() const
     if (_faces[i]->get_num_cuts() == 1)
       return true;
   return false;
+}
+
+void
+EFAfragment3D::get_node_info(std::vector<std::vector<unsigned int> > &face_node_ix,
+                             std::vector<EFAnode*> &nodes) const
+{
+  // get all nodes' pointers - a vector
+  std::set<EFAnode*> all_node_set = get_all_nodes();
+  nodes.resize(all_node_set.size());
+  std::copy(all_node_set.begin(), all_node_set.end(), nodes.begin());
+
+  // get face connectivity
+  face_node_ix.clear();
+  for (unsigned int i = 0; i < _faces.size(); ++i)
+  {
+    std::vector<unsigned int> line_face_ix;
+    for (unsigned int j = 0; j < _faces[i]->num_nodes(); ++j)
+    {
+      EFAnode* node = _faces[i]->get_node(j);
+      unsigned int vec_index = std::find(nodes.begin(), nodes.end(), node) - nodes.begin();
+      line_face_ix.push_back(vec_index);
+    }
+    face_node_ix.push_back(line_face_ix);
+  }
 }
 
 EFAfragment3D*

@@ -33,10 +33,8 @@ struct cutEdge
 struct cutFace
 {
   unsigned int face_id;
-  unsigned int face_edge1;
-  unsigned int face_edge2;
-  Real dist1;
-  Real dist2;
+  std::vector<unsigned int> face_edge;
+  std::vector<Real> position;
 };
 
 class XFEM_geometric_cut

@@ -107,6 +107,9 @@ public:
   EFAface* get_frag_face(unsigned int frag_id, unsigned int face_id) const;
   std::set<EFAnode*> getPhantomNodeOnFace(unsigned int face_id) const;
   bool getFragmentFaceID(unsigned int elem_face_id, unsigned int &frag_face_id) const;
+  bool getFragmentFaceEdgeID(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID, 
+                             unsigned int &FragFaceID, unsigned int &FragFaceEdgeID) const;
+  bool is_real_edge_cut(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID, double position) const;
   bool is_face_phantom(unsigned int face_id) const;
   unsigned int num_face_neighbors(unsigned int face_id) const;
   EFAelement3D* get_face_neighbor(unsigned int face_id, unsigned int neighbor_id) const;
@@ -115,6 +118,7 @@ public:
   std::vector<unsigned int> get_tip_face_id() const;
   std::set<EFAnode*> get_tip_embedded_nodes() const;
   bool face_contains_tip(unsigned int face_id) const;
+  bool frag_face_already_cut(unsigned int ElemFaceID) const;
 
   void addFaceEdgeCut(unsigned int face_id, unsigned int edge_id, double position,
                       EFAnode* embedded_node, std::map<unsigned int, EFAnode*> &EmbeddedNodes,

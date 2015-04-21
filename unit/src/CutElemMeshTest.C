@@ -685,17 +685,20 @@ CutElemMeshTest::CutElemMeshTest6b()
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
+  std::cout << "***** right after updateTopology *****" << std::endl;
+  MyMesh.printMesh();
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
   // second time cut, just test
-  MyMesh.updatePhysicalLinksAndFragments();
+/*  MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
-  MyMesh.initCrackTipTopology();
+  MyMesh.initCrackTipTopology();*/
 
+  std::cout << "***** final mesh *****" << std::endl;
   MyMesh.printMesh();
 
  // print crack tip elems

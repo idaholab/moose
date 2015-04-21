@@ -107,6 +107,7 @@ public:
   unsigned int get_tip_edge_id() const;
   EFAnode* get_tip_embedded() const;
   bool edge_contains_tip(unsigned int edge_id) const;
+  bool frag_edge_already_cut(unsigned int ElemEdgeID) const;
 
   void add_edge_cut(unsigned int edge_id, double position, EFAnode* embedded_node,
                     std::map< unsigned int, EFAnode*> &EmbeddedNodes, bool add_to_neighbor);

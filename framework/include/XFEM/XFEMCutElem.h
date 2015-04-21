@@ -43,6 +43,7 @@ protected:
 
   unsigned int _n_nodes;
   std::vector<Node*> _nodes;
+  Real _elem_volume;
   Real _physical_volfrac;
   virtual Point get_node_coords(EFAnode* node, MeshBase* displaced_mesh = NULL) const = 0;
 

@@ -60,6 +60,8 @@ public:
   void remove_invalid_embedded(std::map<unsigned int, EFAnode*> &EmbeddedNodes);
   void remove_embedded_node(EFAnode* emb_node);
   bool hasFaceWithOneCut() const;
+  void get_node_info(std::vector<std::vector<unsigned int> > &face_node_ix,
+                     std::vector<EFAnode*> &nodes) const;
 
 private:
 

@@ -16,6 +16,7 @@
 #define XFEM_H
 
 #include "XFEMCutElem2D.h"
+#include "XFEMCutElem3D.h"
 
 enum XFEM_CUTPLANE_QUANTITY
 {
@@ -72,6 +73,8 @@ public:
   bool mark_cut_edges(Real time);
   bool mark_cut_edges_by_geometry(Real time);
   bool mark_cut_edges_by_state();
+  bool mark_cut_faces_by_geometry(Real time);
+  bool mark_cut_faces_by_state();
   bool init_crack_intersect_edge(Point cut_origin, RealVectorValue cut_normal,
                                  Point edge_p1, Point edge_p2, Real & dist);
   bool cut_mesh_with_efa();

@@ -26,6 +26,7 @@ XFEM_square_cut::XFEM_square_cut(std::vector<Real> square_nodes):
   Point v1_to_v3 = _v3 - _v1;
   Point v2_to_v4 = _v4 - _v2;
   _normal = cross_product(v1_to_v3, v2_to_v4);
+  normalize(_normal);
 }
 
 XFEM_square_cut::~XFEM_square_cut()
@@ -67,7 +68,7 @@ XFEM_square_cut::cut_elem_by_geometry(const Elem* elem, std::vector<cutFace> & c
         node_id1 = hex_ix[i][j];
         node_id2 = hex_ix[i][jplus1];
       }
-      else // tet
+      else if (elem->n_nodes() == 4) // tet
       {
         node_id1 = tet_ix[i][j];
         node_id2 = tet_ix[i][jplus1];
@@ -82,18 +83,16 @@ XFEM_square_cut::cut_elem_by_geometry(const Elem* elem, std::vector<cutFace> & c
         cut_edges.push_back(j);
         cut_pos.push_back(getRelativePosition(p1, p2, pint));
       }
-      else
-        mooseError("plane and line are not appropriated intersected");
     } // j, loop over face edges
     if (cut_edges.size() == 2)
     {
       cut_elem = true;
       cutFace mycut;
       mycut.face_id = i;
-      mycut.face_edge1 = cut_edges[0];
-      mycut.face_edge2 = cut_edges[1];
-      mycut.dist1 = cut_pos[0];
-      mycut.dist2 = cut_pos[1];
+      mycut.face_edge.push_back(cut_edges[0]);
+      mycut.face_edge.push_back(cut_edges[1]);
+      mycut.position.push_back(cut_pos[0]);
+      mycut.position.push_back(cut_pos[1]);
       cutFaces.push_back(mycut);
     }
   } // i, loop over faces
@@ -317,7 +316,7 @@ XFEM_square_cut::isInsideCutPlane(Point p)
     normalize(middle2p); // normalize
     normalize(side_norm); // normalize
     Real dotp = dot_product(middle2p, side_norm);
-    if (dotp < 0.0)
+    if (dotp <= 0.0)
       counter += 1;
   }
   if (counter == 4)
@@ -328,8 +327,12 @@ XFEM_square_cut::isInsideCutPlane(Point p)
 bool
 XFEM_square_cut::isInsideEdge(Point p1, Point p2, Point p)
 {
-  Real intersection_x = getRelativePosition(p1, p2, p);
-  if (intersection_x >= 0.0 && intersection_x <= 1.0)
+  Point p1_to_p2 = p2 - p1;
+  Point p_to_p1 = p1 - p;
+  Point p_to_p2 = p2 - p;
+  Real dotp1 = dot_product(p_to_p1, p1_to_p2);
+  Real dotp2 = dot_product(p_to_p2, p1_to_p2);
+  if (dotp1*dotp2 <= 0.0)
     return true;
   else
     return false;

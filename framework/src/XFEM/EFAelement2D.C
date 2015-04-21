@@ -1422,6 +1422,26 @@ EFAelement2D::edge_contains_tip(unsigned int edge_id) const
   return contain_tip;
 }
 
+bool
+EFAelement2D::frag_edge_already_cut(unsigned int ElemEdgeID) const
+{
+  // when marking cuts, check if the corresponding frag edge already has been cut
+  bool has_cut = false;
+  if (edge_contains_tip(ElemEdgeID))
+    has_cut = true;
+  else
+  {
+    unsigned int FragEdgeID = 99999;
+    if (getFragmentEdgeID(ElemEdgeID, FragEdgeID))
+    {
+      EFAedge* frag_edge = get_frag_edge(0, FragEdgeID);
+      if (frag_edge->has_intersection())
+        has_cut = true;
+    }
+  }
+  return has_cut;
+}
+
 void
 EFAelement2D::add_edge_cut(unsigned int edge_id, double position, EFAnode* embedded_node,
                            std::map<unsigned int, EFAnode*> &EmbeddedNodes, bool add_to_neighbor)
@@ -1456,12 +1476,12 @@ EFAelement2D::add_edge_cut(unsigned int edge_id, double position, EFAnode* embed
     if (getFragmentEdgeID(edge_id, frag_edge_id)) // elem edge contains a frag edge
     {
       frag_edge = get_frag_edge(0, frag_edge_id);
-      if ((!edge_contains_tip(edge_id)) && (!frag_edge->has_intersection())) //TODO: allow them?
+      if (!frag_edge_already_cut(edge_id))
       {
         double xi[2] = {-1.0,-1.0}; // relative coords of two frag edge nodes
-        for (unsigned int j = 0; j < 2; ++j)
-          xi[j] = _edges[edge_id]->distance_from_node1(frag_edge->get_node(j));
-        if ((position - xi[0])*(position - xi[1]) < 0.0)
+        xi[0] = _edges[edge_id]->distance_from_node1(frag_edge->get_node(0));
+        xi[1] = _edges[edge_id]->distance_from_node1(frag_edge->get_node(1));
+        if ((position - xi[0])*(position - xi[1]) < 0.0) // the cut to be added is within the real part of the edge
         {
           frag_edge_node1 = frag_edge->get_node(0);
           frag_pos = (position - xi[0])/(xi[1] - xi[0]);

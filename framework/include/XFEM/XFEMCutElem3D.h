@@ -12,23 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef XFEMCUTELEM3D_H
+#define XFEMCUTELEM3D_H
+
 #include "XFEMCutElem.h"
 
-XFEMCutElem::XFEMCutElem(Elem* elem):
-  _n_nodes(elem->n_nodes()),
-  _nodes(_n_nodes,NULL)
-{
-  for (unsigned int i = 0; i < _n_nodes; ++i)
-    _nodes[i] = elem->get_node(i);
-  _elem_volume = elem->volume();
-}
+using namespace libMesh;
 
-XFEMCutElem::~XFEMCutElem()
+class XFEMCutElem3D : public XFEMCutElem
 {
-}
+public:
+  XFEMCutElem3D(Elem* elem, const EFAelement3D * const CEMelem);
+  ~XFEMCutElem3D();
 
-Real
-XFEMCutElem::get_physical_volfrac() const
-{
-  return _physical_volfrac;
-}
+private:
+
+  EFAelement3D _efa_elem3d; // 3D EFAelement
+  virtual Point get_node_coords(EFAnode* node, MeshBase* displaced_mesh = NULL) const;
+
+public:
+  virtual void calc_physical_volfrac();
+  virtual Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
+  virtual Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
+  virtual const EFAelement * get_efa_elem() const;
+
+private:
+  double polyhedron_volume_3d(double coord[], int order_max, int face_num,
+                              int node[], int node_num, int order[]) const;
+  Point cross_product(Point p1, Point p2) const;
+  void i4vec_zero(int n, int a[]) const;
+};
+
+#endif

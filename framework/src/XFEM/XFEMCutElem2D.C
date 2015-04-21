@@ -72,15 +72,7 @@ XFEMCutElem2D::calc_physical_volfrac()
     Point edge_p2 = get_node_coords(_efa_elem2d.get_frag_edge(0,i)->get_node(1));
     frag_area += 0.5*(edge_p1(0)-edge_p2(0))*(edge_p1(1)+edge_p2(1));
   }
-
-  for (unsigned int i = 0; i < _efa_elem2d.num_edges(); ++i)
-  {
-    Point edge_p1 = get_node_coords(_efa_elem2d.get_edge(i)->get_node(0));
-    Point edge_p2 = get_node_coords(_efa_elem2d.get_edge(i)->get_node(1));
-    el_area += 0.5*(edge_p1(0)-edge_p2(0))*(edge_p1(1)+edge_p2(1));
-  }
-
-  _physical_volfrac = frag_area/el_area;
+  _physical_volfrac = frag_area/_elem_volume;
 }
 
 Point
