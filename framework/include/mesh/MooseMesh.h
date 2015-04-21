@@ -774,7 +774,7 @@ protected:
   std::set<BoundaryID> _mesh_boundary_ids;
 
   /// The boundary to normal map - valid only when AddAllSideSetsByNormals is active
-  AutoPtr<std::map<BoundaryID, RealVectorValue> > _boundary_to_normal_map;
+  UniquePtr<std::map<BoundaryID, RealVectorValue> > _boundary_to_normal_map;
 
   /// array of boundary nodes
   std::vector<BndNode *> _bnd_nodes;

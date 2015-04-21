@@ -1178,7 +1178,7 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
   //   original projected position of slave node
   std::vector<Point> points(1);
   points[0] = info._starting_closest_point_ref;
-  AutoPtr<Elem> side = info._starting_elem->build_side(info._starting_side_num, false);
+  UniquePtr<Elem> side = info._starting_elem->build_side(info._starting_side_num, false);
   fe.reinit(side.get(), &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];

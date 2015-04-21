@@ -174,7 +174,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     break;
 
   case 0: // linear
-    getMesh().partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
+    getMesh().partitioner().reset(new LinearPartitioner);
     break;
   case 1: // centroid
   {
@@ -184,20 +184,20 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
     if (direction == "x")
-      getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
+      getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
     else if (direction == "y")
-      getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
+      getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
     else if (direction == "z")
-      getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
+      getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
     else if (direction == "radial")
-      getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+      getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
     break;
   }
   case 2: // hilbert_sfc
-    getMesh().partitioner() = AutoPtr<Partitioner>(new HilbertSFCPartitioner);
+    getMesh().partitioner().reset(new HilbertSFCPartitioner);
     break;
   case 3: // morton_sfc
-    getMesh().partitioner() = AutoPtr<Partitioner>(new MortonSFCPartitioner);
+    getMesh().partitioner().reset(new MortonSFCPartitioner);
     break;
   }
 }
@@ -1045,7 +1045,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
 
   MeshBase::const_element_iterator it = getMesh().active_elements_begin();
   MeshBase::const_element_iterator it_end = getMesh().active_elements_end();
-  AutoPtr<PointLocatorBase> point_locator = getMesh().sub_point_locator();
+  UniquePtr<PointLocatorBase> point_locator = getMesh().sub_point_locator();
 
   // Get a const reference to the BoundaryInfo object that we will use several times below...
   const BoundaryInfo & boundary_info = getMesh().get_boundary_info();
@@ -1071,8 +1071,8 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
           const Elem* neigh = pbs->neighbor(boundary_id, *point_locator, elem, s);
           unsigned int s_neigh = boundary_info.side_with_boundary_id (neigh, periodic->pairedboundary);
 
-          AutoPtr<Elem> elem_side = elem->build_side(s);
-          AutoPtr<Elem> neigh_side = neigh->build_side(s_neigh);
+          UniquePtr<Elem> elem_side = elem->build_side(s);
+          UniquePtr<Elem> neigh_side = neigh->build_side(s_neigh);
 
           // At this point we have matching sides - lets find matching nodes
           for (unsigned int i=0; i<elem_side->n_nodes(); ++i)
@@ -1586,11 +1586,11 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   for (unsigned int i=0; i<template_elem->n_nodes(); i++)
     elem->set_node(i) = mesh.node_ptr(i);
 
-  AutoPtr<FEBase> fe (FEBase::build(dim, FEType()));
+  UniquePtr<FEBase> fe (FEBase::build(dim, FEType()));
   fe->get_phi();
   const std::vector<Point>& q_points_volume = fe->get_xyz();
 
-  AutoPtr<FEBase> fe_face (FEBase::build(dim, FEType()));
+  UniquePtr<FEBase> fe_face (FEBase::build(dim, FEType()));
   fe_face->get_phi();
   const std::vector<Point>& q_points_face = fe_face->get_xyz();
 

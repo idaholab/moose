@@ -91,7 +91,7 @@ protected:
   /// by all DiracKernels to find Points.  It needs to be centrally managed and it
   /// also needs to be rebuilt in FEProblem::meshChanged() to work with Mesh
   /// adaptivity.
-  AutoPtr<PointLocatorBase> _point_locator;
+  UniquePtr<PointLocatorBase> _point_locator;
 };
 
 #endif //DIRACKERNELINFO_H

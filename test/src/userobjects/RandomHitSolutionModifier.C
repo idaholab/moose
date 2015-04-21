@@ -37,7 +37,7 @@ RandomHitSolutionModifier::RandomHitSolutionModifier(const std::string & name, I
 void
 RandomHitSolutionModifier::execute()
 {
-  AutoPtr<PointLocatorBase> pl = _mesh.getMesh().sub_point_locator();
+  UniquePtr<PointLocatorBase> pl = _mesh.getMesh().sub_point_locator();
 
   const std::vector<Point> & hits = _random_hits.hits();
 
