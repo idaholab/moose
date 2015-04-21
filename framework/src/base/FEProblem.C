@@ -2971,17 +2971,9 @@ FEProblem::createQRules(QuadratureType type, Order order, Order volume_order, Or
   // Find the maximum number of quadrature points
   {
     Moose::setup_perf_log.push("maxQps()","Setup");
-    MaxQpsThread mqt(*this);
+    MaxQpsThread mqt(*this, type, std::max(order, volume_order), face_order);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mqt);
     _max_qps = mqt.max();
-
-    // Set all of the current volume quadrature rules back to NULL as if we never did this...
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    {
-      for (unsigned int dim=0; dim <= LIBMESH_DIM; dim++)
-        _assembly[tid]->setVolumeQRule(NULL,dim);
-    }
-
     Moose::setup_perf_log.pop("maxQps()","Setup");
   }
 }

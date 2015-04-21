@@ -137,6 +137,10 @@ Assembly::buildFE(FEType type)
   {
     if (!_fe[dim][type])
       _fe[dim][type] = FEBase::build(dim, type).release();
+    _fe[dim][type]->get_phi();
+    _fe[dim][type]->get_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _fe[dim][type]->get_d2phi();
   }
 }
 
@@ -151,6 +155,10 @@ Assembly::buildFaceFE(FEType type)
   {
     if (!_fe_face[dim][type])
       _fe_face[dim][type] = FEBase::build(dim, type).release();
+    _fe_face[dim][type]->get_phi();
+    _fe_face[dim][type]->get_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _fe_face[dim][type]->get_d2phi();
   }
 }
 
@@ -165,6 +173,10 @@ Assembly::buildFaceNeighborFE(FEType type)
   {
     if (!_fe_neighbor[dim][type])
       _fe_neighbor[dim][type] = FEBase::build(dim, type).release();
+    _fe_neighbor[dim][type]->get_phi();
+    _fe_neighbor[dim][type]->get_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _fe_neighbor[dim][type]->get_d2phi();
   }
 }
 
@@ -189,6 +201,72 @@ Assembly::getFEFaceNeighbor(FEType type, unsigned int dim)
   return _fe_neighbor[dim][type];
 }
 
+const VariablePhiValue &
+Assembly::fePhi(FEType type)
+{
+  buildFE(type);
+  return _fe_shape_data[type]->_phi;
+}
+
+const VariablePhiGradient &
+Assembly::feGradPhi(FEType type)
+{
+  buildFE(type);
+  return _fe_shape_data[type]->_grad_phi;
+}
+
+const VariablePhiSecond &
+Assembly::feSecondPhi(FEType type)
+{
+  _need_second_derivative[type] = true;
+  buildFE(type);
+  return _fe_shape_data[type]->_second_phi;
+}
+
+const VariablePhiValue &
+Assembly::fePhiFace(FEType type)
+{
+  buildFaceFE(type);
+  return _fe_shape_data_face[type]->_phi;
+}
+
+const VariablePhiGradient &
+Assembly::feGradPhiFace(FEType type)
+{
+  buildFaceFE(type);
+  return _fe_shape_data_face[type]->_grad_phi;
+}
+
+const VariablePhiSecond &
+Assembly::feSecondPhiFace(FEType type)
+{
+  _need_second_derivative[type] = true;
+  buildFaceFE(type);
+  return _fe_shape_data_face[type]->_second_phi;
+}
+
+const VariablePhiValue &
+Assembly::fePhiFaceNeighbor(FEType type)
+{
+  buildFaceNeighborFE(type);
+  return _fe_shape_data_face_neighbor[type]->_phi;
+}
+
+const VariablePhiGradient &
+Assembly::feGradPhiFaceNeighbor(FEType type)
+{
+  buildFaceNeighborFE(type);
+  return _fe_shape_data_face_neighbor[type]->_grad_phi;
+}
+
+const VariablePhiSecond &
+Assembly::feSecondPhiFaceNeighbor(FEType type)
+{
+  _need_second_derivative[type] = true;
+  buildFaceNeighborFE(type);
+  return _fe_shape_data_face_neighbor[type]->_second_phi;
+}
+
 void
 Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
 {
@@ -207,9 +285,6 @@ Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Ord
   _holder_qrule_arbitrary.clear();
   for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
     _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, order);
-
-//  setVolumeQRule(_qrule_volume);
-//  setFaceQRule(_qrule_face);
 }
 
 void
@@ -296,7 +371,7 @@ Assembly::reinitFE(const Elem * elem)
 
       fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe->get_phi()));
       fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe->get_dphi()));
-      if (_need_second_derivative[fe_type])
+      if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
         fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe->get_d2phi()));
 
       if (do_caching)
@@ -314,7 +389,7 @@ Assembly::reinitFE(const Elem * elem)
     {
       fesd->_phi.shallowCopy(cached_fesd->_phi);
       fesd->_grad_phi.shallowCopy(cached_fesd->_grad_phi);
-      if (_need_second_derivative[fe_type])
+      if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
         fesd->_second_phi.shallowCopy(cached_fesd->_second_phi);
     }
   }
@@ -357,7 +432,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 
     fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_face->get_phi()));
     fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_face->get_dphi()));
-    if (_need_second_derivative[fe_type])
+    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
       fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_face->get_d2phi()));
   }
 
@@ -555,7 +630,7 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
 
     fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_neighbor->get_phi()));
     fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_neighbor->get_dphi()));
-    if (_need_second_derivative[fe_type])
+    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
       fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_neighbor->get_d2phi()));
   }
 
