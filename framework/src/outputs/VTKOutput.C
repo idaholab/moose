@@ -74,3 +74,10 @@ VTKOutput::filename()
   // Return the filename
   return output.str();
 }
+
+// DEPRECATED CONSTRUCTOR
+VTKOutput::VTKOutput(const std::string & name, InputParameters parameters) :
+    BasicOutput<OversampleOutput>(name, parameters),
+    _binary(getParam<bool>("binary"))
+{
+}

@@ -14,6 +14,7 @@
 
 #include "MoosePreconditioner.h"
 #include "FEProblem.h"
+#include "Executioner.h" // for common parameters, see validParams below
 
 template<>
 InputParameters validParams<MoosePreconditioner>()
@@ -23,8 +24,11 @@ InputParameters validParams<MoosePreconditioner>()
 
   MooseEnum pc_side("left right symmetric", "right");
   params.addParam<MooseEnum>("pc_side", pc_side, "Preconditioning side");
-
   params.registerBase("MoosePreconditioner");
+
+#ifdef LIBMESH_HAVE_PETSC
+  params += commonExecutionParameters();
+#endif //LIBMESH_HAVE_PETSC
 
   return params;
 }

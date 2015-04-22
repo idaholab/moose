@@ -23,31 +23,30 @@ InputParameters validParams<MooseObject>()
   return params;
 }
 
+// For deprecated constructor support
+InputParameters & injectParameters(MooseApp & app, InputParameters & parameters)
+{
+  THREAD_ID tid = parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0;
+  std::string name = parameters.get<std::string>("name");
+  return app.getInputParameterWarehouse().addInputParameters(name, parameters, tid);
+}
 
 MooseObject::MooseObject(const InputParameters & parameters) :
   ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
   ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _deprecated_pars(emptyInputParameters()), // not used in this version, just need to keep the compiler happy
+  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
   _pars(parameters),
-  _app(*_pars.getCheckedPointerParam<MooseApp *>("_moose_app")),
   _name(getParam<std::string>("name")),
   _short_name(MooseUtils::shortName(_name))
 {
-}
-
-std::string
-MooseObject::name() const
-{
-  return _short_name;
 }
 
 // DEPRECATED CONSTRUCTOR
 MooseObject::MooseObject(const std::string & /*deprecated_name*/, InputParameters parameters) :
   ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
   ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _deprecated_pars(parameters),
-  _pars(_deprecated_pars),
-  _app(*_pars.getCheckedPointerParam<MooseApp *>("_moose_app")),
+  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+  _pars(injectParameters(_app, parameters)),
   _name(getParam<std::string>("name")),
   _short_name(MooseUtils::shortName(_name))
 {

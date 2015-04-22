@@ -330,6 +330,7 @@ public:
 
 protected:
 
+  MooseApp(InputParameters parameters);
   MooseApp(const std::string & name, InputParameters parameters);
 
   virtual void meshOnly(std::string mesh_file_name);

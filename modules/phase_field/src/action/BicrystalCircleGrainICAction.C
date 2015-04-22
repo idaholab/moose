@@ -8,6 +8,7 @@
 #include "Factory.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -94,6 +95,6 @@ BicrystalCircleGrainICAction::act()
     }
 
     //Add initial condition
-    _problem->addInitialCondition("SmoothCircleIC", "InitialCondition", poly_params);
+    _problem->addInitialCondition("SmoothCircleIC", "ICs/PolycrystalICs/BicrystalCircleGrainIC_" + Moose::stringify(op), poly_params);
   }
 }

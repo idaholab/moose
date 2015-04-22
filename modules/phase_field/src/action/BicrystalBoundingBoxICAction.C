@@ -8,6 +8,7 @@
 #include "Factory.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -94,6 +95,6 @@ BicrystalBoundingBoxICAction::act()
     }
 
     //Add initial condition
-    _problem->addInitialCondition("BoundingBoxIC", "InitialCondition", poly_params);
+    _problem->addInitialCondition("BoundingBoxIC", "ICs/PolycrystalICs/BicrystalBoundingBoxIC_" + Moose::stringify(op), poly_params);
   }
 }

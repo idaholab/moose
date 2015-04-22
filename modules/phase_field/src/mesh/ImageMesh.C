@@ -10,6 +10,7 @@
 #include "ImageMesh.h"
 #include "FileRangeBuilder.h"
 #include "pcrecpp.h"
+#include "MooseApp.h"
 
 // libMesh includes
 #include "libmesh/mesh_generation.h"
@@ -29,13 +30,13 @@ InputParameters validParams<ImageMesh>()
   return params;
 }
 
-ImageMesh::ImageMesh(const std::string & name, InputParameters parameters) :
-    GeneratedMesh(name, parameters),
+ImageMesh::ImageMesh(const std::string & obj_name, InputParameters parameters) :
+    GeneratedMesh(obj_name, parameters),
     _scale_to_one(getParam<bool>("scale_to_one")),
     _cells_per_pixel(getParam<Real>("cells_per_pixel"))
 {
-  // Set up the parameters associated with file ranges
-  int status = parseFileRange(_pars);
+  // Set up the parameters associated with file ranges (this needs to be moved to validParams, if possible)
+  int status = parseFileRange(_app.getInputParameterWarehouse().getInputParameters(name()));
 
   // Failure is not an option
   if (status != 0)
@@ -149,14 +150,15 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
 
   // We've determined the correct xmax, ymax, zmax values, so set them in
   // our InputParameters object.
-  _pars.set<Real>("xmax") = xmax;
-  _pars.set<Real>("ymax") = ymax;
-  _pars.set<Real>("zmax") = zmax;
+  InputParameters & pars = _app.getInputParameterWarehouse().getInputParameters(name());
+  pars.set<Real>("xmax") = xmax;
+  pars.set<Real>("ymax") = ymax;
+  pars.set<Real>("zmax") = zmax;
 
   // Set the number of cells in the x, y, and z directions that we determined.
-  _pars.set<int>("nx") = nx;
-  _pars.set<int>("ny") = ny;
-  _pars.set<int>("nz") = nz;
+  pars.set<int>("nx") = nx;
+  pars.set<int>("ny") = ny;
+  pars.set<int>("nz") = nz;
 }
 
 
@@ -200,12 +202,13 @@ ImageMesh::buildMesh2D(const std::string & filename)
 
   // We've determined the correct xmax, ymax values so set them in
   // our InputParameters object
-  _pars.set<Real>("xmax") = xmax;
-  _pars.set<Real>("ymax") = ymax;
+  InputParameters & pars = _app.getInputParameterWarehouse().getInputParameters(name());
+  pars.set<Real>("xmax") = xmax;
+  pars.set<Real>("ymax") = ymax;
 
   // Set the number of cells in the x and y directions that we determined.
-  _pars.set<int>("nx") = nx;
-  _pars.set<int>("ny") = ny;
+  pars.set<int>("nx") = nx;
+  pars.set<int>("ny") = ny;
 }
 
 

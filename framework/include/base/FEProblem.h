@@ -346,10 +346,23 @@ public:
    */
   void initPetscOutput();
 
-//  virtual const std::vector<MooseObject *> & getObjectsByName(const std::string & name, THREAD_ID tid);
+  /**
+   * Store the petsc options for use by PetscSupport::petscSetOptions
+   * @params action_params The InputParameters for the Action
+   * @params object_params The InputParameters for the MooseObject created by the MooseObjectAction
+   *
+   * @see CreateExectionerAction and SetupPreconditionerAction)
+   */
+  void storePetscOptions(const MultiMooseEnum & petsc_options, const std::vector<std::string> & petsc_options_inames, const std::vector<std::string> & petsc_options_values);
+
+  /**
+   * Retrieve the PETSc options (used by PetscSupport::petscSetOptions)
+   */
+  void getPetscOptions(MultiMooseEnum & petsc_options, std::vector<std::string> & petsc_options_inames, std::vector<std::string> & petsc_options_values);
+
 
   // Function /////
-  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
+  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters, bool auto_parsed = false);
   virtual bool hasFunction(const std::string & name, THREAD_ID tid = 0);
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
@@ -1013,6 +1026,13 @@ protected:
 
   /// Preconditioner description
   std::string _pc_description;
+
+  ///@{
+  /// PETSc option storage
+  MultiMooseEnum _petsc_options;
+  std::vector<std::string> _petsc_options_inames;
+  std::vector<std::string> _petsc_options_values;
+  ///@}
 
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)

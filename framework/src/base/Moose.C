@@ -708,7 +708,7 @@ registerObjects(Factory & factory)
   registered = true;
 
 #undef registerObject
-#define registerObject(name) factory.regDeprecated<name>(stringifyName(name))
+#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 
 }
 
@@ -1016,7 +1016,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(EmptyAction, "finish_input_file_output");
 
 #undef registerAction
-#define registerAction(tplt, action) action_factory.regDeprecated<tplt>(stringifyName(tplt), action)
+#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 }
 
 void

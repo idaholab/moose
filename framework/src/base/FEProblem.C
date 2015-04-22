@@ -138,6 +138,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _has_jacobian(false),
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
+    _petsc_options("", "", true),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
@@ -1151,8 +1152,11 @@ FEProblem::subdomainSetupSide(SubdomainID subdomain, THREAD_ID tid)
 }
 
 void
-FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
+FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters, bool auto_parsed /*=false*/)
 {
+
+
+
   parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
 
@@ -1161,7 +1165,13 @@ FEProblem::addFunction(std::string type, const std::string & name, InputParamete
     MooseSharedPointer<Function> func = MooseSharedNamespace::static_pointer_cast<Function>(_factory.create(type, name, parameters, tid));
     if (_functions[tid].find(name) != _functions[tid].end())
       mooseError("Duplicate function name added to FEProblem: " << name);
-    _functions[tid][func->name()] = func;
+
+    // When default parsed functions are added the name() method can cause problems because of the
+    // division side causing it to be stored incorrectly.
+    if (auto_parsed)
+      _functions[tid][name] = func;
+    else
+      _functions[tid][func->name()] = func;
   }
 }
 
@@ -1200,7 +1210,7 @@ FEProblem::getFunction(const std::string & name, THREAD_ID tid)
         // It parsed ok, so build a MooseParsedFunction
         InputParameters params = _factory.getValidParams("ParsedFunction");
         params.set<std::string>("value") = name;
-        addFunction("ParsedFunction", name, params);
+        addFunction("ParsedFunction", name, params, /*auto_parsed=*/ true);
       }
     }
 
@@ -3958,6 +3968,21 @@ FEProblem::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
   return _block_mat_side_cache[tid][subdomain_id];
 }
 
+void
+FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options, const std::vector<std::string> & petsc_options_inames, const std::vector<std::string> & petsc_options_values)
+{
+  _petsc_options = petsc_options;
+  _petsc_options_inames = petsc_options_inames;
+  _petsc_options_values = petsc_options_values;
+}
+
+void
+FEProblem::getPetscOptions(MultiMooseEnum & petsc_options, std::vector<std::string> & petsc_options_inames, std::vector<std::string> & petsc_options_values)
+{
+  petsc_options = _petsc_options;
+  petsc_options_inames = _petsc_options_inames;
+  petsc_options_values = _petsc_options_values;
+}
 
 // DEPRECATED CONSTRUCTOR
 FEProblem::FEProblem(const std::string & deprecated_name, InputParameters parameters) :
@@ -3999,6 +4024,7 @@ FEProblem::FEProblem(const std::string & deprecated_name, InputParameters parame
     _has_jacobian(false),
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
+    _petsc_options("", "", true),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))

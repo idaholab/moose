@@ -46,25 +46,14 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
   return *_name_to_shared_pointer[tid][name];
 }
 
-const InputParameters &
+InputParameters &
 InputParameterWarehouse::getInputParameters(const std::string & name, THREAD_ID tid /* =0 */)
 {
-  return *_name_to_shared_pointer[tid][name];
+  std::map<std::string, MooseSharedPointer<InputParameters> >::iterator iter = _name_to_shared_pointer[tid].find(name);
+  if (iter == _name_to_shared_pointer[tid].end())
+    mooseError("Unknown InputParameters object " << name);
+  return *(iter->second.get());
 }
-
-/*
-InputParameterIterator
-InputParameterWarehouse::begin()
-{
-  return _name_to_shared_pointer.begin();
-}
-
-InputParameterIterator
-InputParameterWarehouse::end()
-{
-  return _name_to_shared_pointer.end();
-}
-*/
 
 const std::vector<InputParameters *> &
 InputParameterWarehouse::all() const

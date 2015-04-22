@@ -98,7 +98,6 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
         mooseWarning("The parameter " << name << " is deprecated.\n" << pos->second);
     }
   }
-
 }
 
 std::string

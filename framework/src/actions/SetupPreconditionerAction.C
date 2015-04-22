@@ -25,8 +25,6 @@ template<>
 InputParameters validParams<SetupPreconditionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-  CreateExecutionerAction::populateCommonExecutionerParams(params);
-
   return params;
 }
 
@@ -48,11 +46,11 @@ SetupPreconditionerAction::act()
 
     _problem->getNonlinearSystem().setPreconditioner(pc);
 
-    /**
-     * Go ahead and set common precondition options here.  The child classes will still be called
-     * through the action warehouse
-     */
-    CreateExecutionerAction::storeCommonExecutionerParams(*_problem, _pars);
+
+    // Extract and store PETSc related settings on FEProblem
+#ifdef LIBMESH_HAVE_PETSC
+    CreateExecutionerAction::storePetscOptions(*_problem, _moose_object_pars);
+#endif //LIBMESH_HAVE_PETSC
   }
 }
 

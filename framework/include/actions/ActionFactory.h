@@ -28,7 +28,7 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerAction(tplt, action) action_factory.regDeprecated<tplt>(stringifyName(tplt), action)
+#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 
 
 #define registerTask(name, is_required)                            syntax.registerTaskName(name, is_required)
@@ -44,7 +44,7 @@ class MooseApp;
  * Typedef for function to build objects
  */
 typedef MooseSharedPointer<Action> (*buildActionPtr)(InputParameters parameters);
-typedef MooseSharedPointer<Action> (*buildDeprecatedActionPtr)(const std::string & name, InputParameters parameters);
+typedef MooseSharedPointer<Action> (*buildLegacyActionPtr)(const std::string & name, InputParameters parameters);
 
 
 /**
@@ -63,7 +63,7 @@ MooseSharedPointer<Action> buildAction(InputParameters parameters)
 }
 
 template<class T>
-MooseSharedPointer<Action> buildDeprecatedAction(const std::string & name, InputParameters parameters)
+MooseSharedPointer<Action> buildLegacyAction(const std::string & name, InputParameters parameters)
 {
   return MooseSharedPointer<Action>(new T(name, parameters));
 }
@@ -79,15 +79,15 @@ public:
   virtual ~ActionFactory();
 
   template<typename T>
-  void regDeprecated(const std::string & name, const std::string & task)
+  void regLegacy(const std::string & name, const std::string & task)
   {
-    DeprecatedBuildInfo build_info;
-    build_info._build_pointer = &buildDeprecatedAction<T>;
+    LegacyBuildInfo build_info;
+    build_info._build_pointer = &buildLegacyAction<T>;
     build_info._params_pointer = &validParams<T>;
     build_info._task = task;
     build_info._unique_id = _unique_id++;
-    _name_to_deprecated_build_info.insert(std::make_pair(name, build_info));
-    _task_to_deprecated_action_map.insert(std::make_pair(task, name));
+    _name_to_legacy_build_info.insert(std::make_pair(name, build_info));
+    _task_to_legacy_action_map.insert(std::make_pair(task, name));
   }
 
   template<typename T>
@@ -105,7 +105,7 @@ public:
   std::string getTaskName(const std::string & action);
 
   MooseSharedPointer<Action> create(const std::string & action, const std::string & name, InputParameters parameters);
-  MooseSharedPointer<Action> createDeprecated(const std::string & action, const std::string & name, InputParameters parameters);
+  MooseSharedPointer<Action> createLegacy(const std::string & action, const std::string & name, InputParameters parameters);
 
   InputParameters getValidParams(const std::string & name);
 
@@ -118,10 +118,10 @@ public:
     unsigned int _unique_id;
   };
 
-  class DeprecatedBuildInfo
+  class LegacyBuildInfo
   {
   public:
-    buildDeprecatedActionPtr _build_pointer;
+    buildLegacyActionPtr _build_pointer;
     paramsActionPtr _params_pointer;
     std::string _task;
     unsigned int _unique_id;
@@ -130,8 +130,8 @@ public:
   /// Typedef for registered Action iterator
   typedef std::multimap<std::string, BuildInfo>::iterator iterator;
   typedef std::multimap<std::string, BuildInfo>::const_iterator const_iterator;
-  typedef std::multimap<std::string, DeprecatedBuildInfo>::iterator deprecated_iterator;
-  typedef std::multimap<std::string, DeprecatedBuildInfo>::const_iterator const_deprecated_iterator;
+  typedef std::multimap<std::string, LegacyBuildInfo>::iterator legacy_iterator;
+  typedef std::multimap<std::string, LegacyBuildInfo>::const_iterator const_legacy_iterator;
 
   iterator begin();
   const_iterator begin() const;
@@ -150,9 +150,9 @@ protected:
 
   std::multimap<std::string, std::string> _task_to_action_map;
 
-  std::multimap<std::string, DeprecatedBuildInfo> _name_to_deprecated_build_info;
+  std::multimap<std::string, LegacyBuildInfo> _name_to_legacy_build_info;
 
-  std::multimap<std::string, std::string> _task_to_deprecated_action_map;
+  std::multimap<std::string, std::string> _task_to_legacy_action_map;
 
 
   // TODO: I don't think we need this anymore

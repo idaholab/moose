@@ -38,8 +38,6 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
 
-  CreateExecutionerAction::populateCommonExecutionerParams(params);
-
   params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol", "Solver");
   params.addParamNamesToGroup("no_fe_reinit", "Advanced");
 
@@ -49,35 +47,6 @@ InputParameters validParams<CreateExecutionerAction>()
 void
 CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & params)
 {
-  MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
-  params.addParam<MooseEnum>   ("solve_type",      solve_type,
-                                "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
-                                "JFNK: Jacobian-Free Newton Krylov "
-                                "NEWTON: Full Newton Solve "
-                                "FD: Use finite differences to compute Jacobian "
-                                "LINEAR: Solving a linear problem");
-
-  // Line Search Options
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3,3,0)
-  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
-#else
-  MooseEnum line_search("default shell none basic l2 bt cp", "default");
-#endif
-  std::string addtl_doc_str(" (Note: none = basic)");
-#else
-  MooseEnum line_search("default", "default");
-  std::string addtl_doc_str("");
-#endif
-  params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
-
-#ifdef LIBMESH_HAVE_PETSC
-  MultiMooseEnum common_petsc_options("", "", true);
-
-  params.addParam<MultiMooseEnum>("petsc_options", common_petsc_options, "Singleton PETSc options");
-  params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of PETSc name/value pairs");
-  params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-#endif //LIBMESH_HAVE_PETSC
 }
 
 CreateExecutionerAction::CreateExecutionerAction(InputParameters params) :
@@ -90,14 +59,11 @@ CreateExecutionerAction::act()
 {
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This parameter
   // is held in the child block Adaptivity and needs to be pulled early
-
-
   if (_problem.get() != NULL)
   {
-    storeCommonExecutionerParams(*_problem, _pars);
-
+    // Extract and store PETSc related settings on FEProblem
 #ifdef LIBMESH_HAVE_PETSC
-    storePetscOptions();
+    storePetscOptions(*_problem, _moose_object_pars);
 #endif //LIBMESH_HAVE_PETSC
 
     // solver params
@@ -143,9 +109,9 @@ CreateExecutionerAction::act()
   _awh.executioner() = executioner;
 }
 
-
+#ifdef LIBMESH_HAVE_PETSC
 void
-CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, InputParameters & params)
+CreateExecutionerAction::storePetscOptions(FEProblem & fe_problem, InputParameters & params)
 {
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("solve_type"))
@@ -155,20 +121,23 @@ CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, In
     fe_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
   }
 
-  MooseEnum line_search = params.get<MooseEnum>("line_search");
-  if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
-    fe_problem.solverParams()._line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
-}
+  if (params.isParamValid("line_search"))
+  {
+      MooseEnum line_search = params.get<MooseEnum>("line_search");
+      if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
+        fe_problem.solverParams()._line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
+  }
 
-#ifdef LIBMESH_HAVE_PETSC
-void
-CreateExecutionerAction::storePetscOptions()
-{
-  const MultiMooseEnum           & petsc_options        = getParam<MultiMooseEnum>("petsc_options");
-  const std::vector<std::string> & petsc_options_inames = getParam<std::vector<std::string> >("petsc_options_iname");
-  const std::vector<std::string> & petsc_options_values = getParam<std::vector<std::string> >("petsc_options_value");
+  // The parameters contained in the Action
+  const MultiMooseEnum           & petsc_options        = params.get<MultiMooseEnum>("petsc_options");
+  const std::vector<std::string> & petsc_options_inames = params.get<std::vector<std::string> >("petsc_options_iname");
+  const std::vector<std::string> & petsc_options_values = params.get<std::vector<std::string> >("petsc_options_value");
 
-  MultiMooseEnum & po = _moose_object_pars.set<MultiMooseEnum>("petsc_options");  // set because we need a writable reference
+  // The options to store in FEProblem, start with any existing stored parameters
+  MultiMooseEnum po("","", true);
+  std::vector<std::string> pn;
+  std::vector<std::string> pv;
+  fe_problem.getPetscOptions(po, pn, pv);
 
   for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
   {
@@ -195,10 +164,6 @@ CreateExecutionerAction::storePetscOptions()
     if (find(po.begin(), po.end(), *it) == po.end())
       po.push_back(*it);
   }
-
-  // set because we need a writable reference
-  std::vector<std::string> & pn = _moose_object_pars.set<std::vector<std::string> >("petsc_options_iname");
-  std::vector<std::string> & pv = _moose_object_pars.set<std::vector<std::string> >("petsc_options_value");
 
   if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("PETSc names and options are not the same length");
@@ -233,7 +198,7 @@ CreateExecutionerAction::storePetscOptions()
 
   // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold value
   // We will provide that for the user here if they haven't supplied it themselves.
-  if (boomeramg_found && !strong_threshold_found && _problem->mesh().dimension() == 3)
+  if (boomeramg_found && !strong_threshold_found && fe_problem.mesh().dimension() == 3)
   {
     pn.push_back("-pc_hypre_boomeramg_strong_threshold");
     pv.push_back("0.7");
@@ -241,7 +206,10 @@ CreateExecutionerAction::storePetscOptions()
   }
 
   // Set Preconditioner description
-  _problem->setPreconditionerDescription(pc_description);
+  fe_problem.setPreconditionerDescription(pc_description);
+
+  // Store the parameters on FEProblem
+  fe_problem.storePetscOptions(po, pn, pv);
 }
 #endif
 

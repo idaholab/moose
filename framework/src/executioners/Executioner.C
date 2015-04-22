@@ -23,7 +23,6 @@
 #include <vector>
 #include <limits>
 
-
 template<>
 InputParameters validParams<Executioner>()
 {
@@ -36,14 +35,45 @@ InputParameters validParams<Executioner>()
 
   params.addParam<std::vector<std::string> >("splitting", "Top-level splitting defining a hierarchical decomposition into subsystems to help the solver.");
 
+#ifdef LIBMESH_HAVE_PETSC
+  params += commonExecutionParameters();
+#endif //LIBMESH_HAVE_PETSC
+
+  return params;
+}
+
+InputParameters commonExecutionParameters()
+{
+  InputParameters params = emptyInputParameters();
+  MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
+  params.addParam<MooseEnum>   ("solve_type",      solve_type,
+                                "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
+                                "JFNK: Jacobian-Free Newton Krylov "
+                                "NEWTON: Full Newton Solve "
+                                "FD: Use finite differences to compute Jacobian "
+                                "LINEAR: Solving a linear problem");
+
+  // Line Search Options
+#ifdef LIBMESH_HAVE_PETSC
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
+#else
+  MooseEnum line_search("default shell none basic l2 bt cp", "default");
+#endif
+  std::string addtl_doc_str(" (Note: none = basic)");
+#else
+  MooseEnum line_search("default", "default");
+  std::string addtl_doc_str("");
+#endif
+  params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
 
 #ifdef LIBMESH_HAVE_PETSC
   MultiMooseEnum common_petsc_options("", "", true);
+
   params.addParam<MultiMooseEnum>("petsc_options", common_petsc_options, "Singleton PETSc options");
   params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of PETSc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
-
   return params;
 }
 

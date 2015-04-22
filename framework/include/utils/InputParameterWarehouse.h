@@ -19,8 +19,9 @@
 #include "Warehouse.h"
 #include "ParallelUniqueId.h"
 
-// Forwared declarations
+// Forward declarations
 class InputParameters;
+class MooseApp;
 
 typedef std::map<std::string, MooseSharedPointer<InputParameters> >::const_iterator InputParameterIterator;
 
@@ -45,22 +46,16 @@ public:
    */
   virtual ~InputParameterWarehouse();
 
-
   /**
    * Return a reference to the InputParameters for the named object
    * @name The full name of the object for which parameters are desired
    * @return A const reference to the warehouse copy of the InputParameters
+   *
+   * If you are using this method to access a writable reference to input parameters, this
+   * will break the ability to control the parameters with the MOOSE control logic system.
+   * Only change parameters if you know what you are doing.
    */
-  const InputParameters & getInputParameters(const std::string & long_name, THREAD_ID tid = 0);
-
-  ///@{
-  /**
-   * Iterators to the InputParameter objects
-   * @return Const iterator to the map that stores the parameter objects
-   */
-  //InputParameterIterator begin();
-  //InputParameterIterator end();
-  ///@}
+  InputParameters & getInputParameters(const std::string & long_name, THREAD_ID tid = 0);
 
   /**
    * This method is not valid, so it will produce an error
@@ -94,6 +89,9 @@ private:
 
   friend class Factory;
   friend class ActionFactory;
+
+  // for deprecated support, this will be removed (see MooseObject.C)
+  friend InputParameters & injectParameters(MooseApp & app, InputParameters & parameters);
 };
 
 #endif // INPUTPARAMETERWAREHOUSE_H

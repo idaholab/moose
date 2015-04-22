@@ -20,7 +20,7 @@
 #include "Diffusion.h"
 
 
-Factory::Factory(MooseApp & app):
+Factory::Factory(MooseApp & app) :
     _app(app)
 {
 }
@@ -54,8 +54,8 @@ MooseObjectPtr
 Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
 {
   // DEPRECATED CREATION
-  if (_name_to_deprecated_build_pointer.find(obj_name) != _name_to_deprecated_build_pointer.end())
-    return createDeprecated(obj_name, name, parameters, tid);
+  if (_name_to_legacy_build_pointer.find(obj_name) != _name_to_legacy_build_pointer.end())
+    return createLegacy(obj_name, name, parameters, tid);
 
   // Pointer to the object constructor
   std::map<std::string, buildPtr>::iterator it = _name_to_build_pointer.find(obj_name);
@@ -80,13 +80,13 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
 }
 
 MooseObjectPtr
-Factory::createDeprecated(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
+Factory::createLegacy(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
 {
   // Pointer to the object constructor
-  std::map<std::string, buildDeprecatedPtr>::iterator it = _name_to_deprecated_build_pointer.find(obj_name);
+  std::map<std::string, buildLegacyPtr>::iterator it = _name_to_legacy_build_pointer.find(obj_name);
 
   // Check if the object is registered
-  if (it == _name_to_deprecated_build_pointer.end())
+  if (it == _name_to_legacy_build_pointer.end())
     mooseError("Object '" + obj_name + "' was not registered.");
 
   // Print out deprecated message, if it exists
@@ -101,7 +101,7 @@ Factory::createDeprecated(const std::string & obj_name, const std::string & name
 
   // Actually call the function pointer.  You can do this in one line,
   // but it's a bit more obvious what's happening if you do it in two...
-  buildDeprecatedPtr & func = it->second;
+  buildLegacyPtr & func = it->second;
   return (*func)(name, parameters);
 }
 

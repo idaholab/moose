@@ -25,8 +25,8 @@ InputParameters validParams<CavityPressureUserObject>()
   return params;
 }
 
-CavityPressureUserObject::CavityPressureUserObject(const std::string & name, InputParameters params)
-  :GeneralUserObject(name, params),
+CavityPressureUserObject::CavityPressureUserObject(const std::string & obj_name, InputParameters params) :
+    GeneralUserObject(obj_name, params),
    _cavity_pressure(declareRestartableData<Real>("cavity_pressure", 0)),
    _n0(declareRestartableData<Real>("initial_moles", 0)),
    _initial_pressure(getParam<Real>("initial_pressure")),
@@ -67,7 +67,7 @@ CavityPressureUserObject::getValue( const std::string & quantity ) const
   }
   else
   {
-    mooseError("Unknown quantity in " + _name);
+    mooseError("Unknown quantity in " + name());
   }
   return value;
 }

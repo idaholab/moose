@@ -165,11 +165,10 @@ void petscSetupDM (NonlinearSystem & nl) {
 void
 petscSetOptions(FEProblem & problem)
 {
-  Executioner * exec = problem.getMooseApp().getExecutioner();
-  const MultiMooseEnum & petsc_options = exec->getParam<MultiMooseEnum>("petsc_options");
-  const std::vector<std::string> & petsc_options_inames = exec->getParam<std::vector<std::string> >("petsc_options_iname");
-  const std::vector<std::string> & petsc_options_values = exec->getParam<std::vector<std::string> >("petsc_options_value");
-
+  MultiMooseEnum petsc_options("", "", true);
+  std::vector<std::string> petsc_options_inames;
+  std::vector<std::string> petsc_options_values;
+  problem.getPetscOptions(petsc_options, petsc_options_inames, petsc_options_values);
 
   if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("PETSc names and options are not the same length");

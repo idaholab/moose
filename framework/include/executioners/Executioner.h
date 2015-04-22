@@ -32,6 +32,13 @@ template<>
 InputParameters validParams<Executioner>();
 
 /**
+ * A helper function for creating execution related parameters, these are needed by
+ * both Preconditioners and Executioners.
+ */
+InputParameters commonExecutionParameters();
+
+
+/**
  * Executioners are objects that do the actual work of solving your problem.
  *
  * In general there are two "sets" of Executioners: Steady and Transient.

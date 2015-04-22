@@ -53,6 +53,9 @@ AppFactory::getValidParams(const std::string & name)
 MooseApp *
 AppFactory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN)
 {
+  if (_name_to_legacy_build_pointer.find(name) == _name_to_legacy_build_pointer.end())
+    return createLegacy(obj_name, name, parameters, COMM_WORLD_IN);
+
   if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
     mooseError("Object '" + obj_name + "' was not registered.");
 
@@ -62,6 +65,7 @@ AppFactory::create(const std::string & obj_name, const std::string & name, Input
   MooseSharedPointer<Parallel::Communicator> comm(new Parallel::Communicator(COMM_WORLD_IN));
 
   parameters.set<MooseSharedPointer<Parallel::Communicator> >("_comm") = comm;
+  parameters.set<std::string>("name") = name;
 
   if (!parameters.isParamValid("_command_line"))
     mooseError("Valid CommandLine object required");
@@ -70,7 +74,31 @@ AppFactory::create(const std::string & obj_name, const std::string & name, Input
   command_line->addCommandLineOptionsFromParams(parameters);
   command_line->populateInputParams(parameters);
 
-  return (*_name_to_build_pointer[obj_name])(name, parameters);
+  return (*_name_to_build_pointer[obj_name])(parameters);
+}
+
+MooseApp *
+AppFactory::createLegacy(const std::string & obj_name, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN)
+{
+  if (_name_to_legacy_build_pointer.find(obj_name) == _name_to_legacy_build_pointer.end())
+    mooseError("Legacy object '" + obj_name + "' was not registered.");
+
+  // Check to make sure that all required parameters are supplied
+  parameters.checkParams("");
+
+  MooseSharedPointer<Parallel::Communicator> comm(new Parallel::Communicator(COMM_WORLD_IN));
+
+  parameters.set<MooseSharedPointer<Parallel::Communicator> >("_comm") = comm;
+  parameters.set<std::string>("name") = name;
+
+  if (!parameters.isParamValid("_command_line"))
+    mooseError("Valid CommandLine object required");
+
+  MooseSharedPointer<CommandLine> command_line = parameters.get<MooseSharedPointer<CommandLine> >("_command_line");
+  command_line->addCommandLineOptionsFromParams(parameters);
+  command_line->populateInputParams(parameters);
+
+  return (*_name_to_legacy_build_pointer[obj_name])(name, parameters);
 }
 
 bool

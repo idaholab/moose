@@ -30,12 +30,10 @@ public:
   CreateExecutionerAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
-
   static void populateCommonExecutionerParams(InputParameters & params);
-  static void storeCommonExecutionerParams(FEProblem & problem, InputParameters & params);
 
 #ifdef LIBMESH_HAVE_PETSC
-  void storePetscOptions();
+  static void storePetscOptions(FEProblem & problem, InputParameters & params);
 #endif
 
 };

@@ -27,6 +27,7 @@ class MooseObject;
 template<>
 InputParameters validParams<MooseObject>();
 
+
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
@@ -44,7 +45,7 @@ public:
    * Get the name of the object
    * @return The name of the object
    */
-  std::string name() const;
+  std::string name() const { return _short_name; }
 
   /**
    * Get the parameters of the object
@@ -52,18 +53,13 @@ public:
    */
   const InputParameters & parameters() { return _pars; }
 
-  ///@{
   /**
    * Retrieve a parameter for the object
    * @param name The name of the parameter
    * @return The value of the parameter
    */
-  // template <typename T>
-  //const T & getParam(const std::string & name);
-
   template <typename T>
   const T & getParam(const std::string & name) const;
-  ///@}
 
   /**
    * Test if the supplied parameter is valid
@@ -76,27 +72,19 @@ public:
    */
   MooseApp & getMooseApp() { return _app; }
 
-private:
-
-  /// Storage for InputParameters when using deprecated constructor
-  const InputParameters _deprecated_pars;
-
 protected:
-
-  /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
-  const InputParameters & _pars;
 
   /// The MooseApp this object is associated with
   MooseApp & _app;
 
-private:
+  /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
+  const InputParameters & _pars;
 
-  /// The name of this object
+  /// The full name of this object
   const std::string & _name;
 
-  /// The short-name of this object
+  /// The short name of this object, this is what is returned by the name() method
   const std::string _short_name;
-
 };
 
 template <typename T>

@@ -44,6 +44,6 @@
   [./pressure_component_test]
     type = 'RunException'
     input = 'pressure_component.i'
-    expect_err = 'Invalid component given for fred: 123456789.'
+    expect_err = 'Invalid component given for BCs/fred: 123456789.'
   [../]
 []

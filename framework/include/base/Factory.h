@@ -30,8 +30,8 @@
  */
 #define stringifyName(name) #name
 //#define registerObject(name)                        factory.reg<name>(stringifyName(name))
-#define registerObject(name)                        factory.regDeprecated<name>(stringifyName(name))
-#define registerNamedObject(obj, name)              factory.reg<obj>(name)
+#define registerObject(name)                        factory.regLegacy<name>(stringifyName(name))
+#define registerNamedObject(obj, name)              factory.regLegacy<obj>(name)
 
 // for backward compatibility
 #define registerKernel(name)                        registerObject(name)
@@ -94,8 +94,8 @@
 #define registerNamedSplit(obj, name)               registerNamedObject(obj, name)
 #define registerNamedOutput(obj, name)              registerNamedObject(obj, name)
 
-#define registerReplacedObject(name, time)              factory.regReplaced<name>(stringifyName(name), time)
-#define registerReplacedNamedObject(obj, name, time)    factory.regReplaced<obj>(stringifyName(obj), name, time)
+#define registerDeprecatedObject(name, time)             factory.regDeprecated<name>(stringifyName(name), time)
+#define registerDeprecatedObjectName(obj, name, time)    factory.regReplaced<obj>(stringifyName(obj), name, time)
 
 /**
  * Typedef to wrap shared pointer type
@@ -106,7 +106,7 @@ typedef MooseSharedPointer<MooseObject> MooseObjectPtr;
  * Typedef for function to build objects
  */
 typedef MooseObjectPtr (*buildPtr)(const InputParameters & parameters);
-typedef MooseObjectPtr (*buildDeprecatedPtr)(const std::string & name, InputParameters parameters);
+typedef MooseObjectPtr (*buildLegacyPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef for validParams
@@ -128,7 +128,7 @@ MooseObjectPtr buildObject(const InputParameters & parameters)
 }
 
 template<class T>
-MooseObjectPtr buildDeprecatedObject(const std::string & name, InputParameters parameters)
+MooseObjectPtr buildLegacyObject(const std::string & name, InputParameters parameters)
 {
   return MooseObjectPtr(new T(name, parameters));
 }
@@ -158,17 +158,20 @@ public:
       mooseError("Object '" + obj_name + "' already registered.");
   }
 
+  /**
+   * Register a deprecated object that expires
+   * @param obj_name The name of the object to register
+   * @param t_str String contiaining the experiation date for the object
+   */
   template<typename T>
-  void regDeprecated(const std::string & obj_name)
-    {
-      if (_name_to_deprecated_build_pointer.find(obj_name) == _name_to_deprecated_build_pointer.end())
-      {
-        _name_to_deprecated_build_pointer[obj_name] = &buildDeprecatedObject<T>;
-        _name_to_params_pointer[obj_name] = &validParams<T>;
-      }
-      else
-        mooseError("Object '" + obj_name + "' already registered.");
-    }
+  void regDeprecated(const std::string & obj_name, const std::string t_str)
+  {
+    // Register the name
+    regLegacy<T>(obj_name);
+
+    // Store the time
+    _deprecated_time[obj_name] = parseTime(t_str);
+  }
 
   /**
    * Register a deprecated object that expires and has a replacement object
@@ -180,11 +183,27 @@ public:
   void regReplaced(const std::string & obj_name, const std::string & name, const std::string t_str)
   {
     // Register the name
-    reg<T>(name, t_str);
+    regDeprecated<T>(name, t_str);
 
     // Store the new name
     _deprecated_name[name] = obj_name;
   }
+
+  /**
+   * Registration for legacy constructors
+   */
+  template<typename T>
+  void regLegacy(const std::string & obj_name)
+    {
+      if (_name_to_legacy_build_pointer.find(obj_name) == _name_to_legacy_build_pointer.end())
+      {
+        _name_to_legacy_build_pointer[obj_name] = &buildLegacyObject<T>;
+        _name_to_params_pointer[obj_name] = &validParams<T>;
+      }
+      else
+        mooseError("Object '" + obj_name + "' already registered.");
+    }
+
 
   /**
    * Get valid parameters for the object
@@ -201,7 +220,7 @@ public:
    * @return The created object
    */
   MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
-  MooseSharedPointer<MooseObject> createDeprecated(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
+  MooseSharedPointer<MooseObject> createLegacy(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
 
   /**
    * Access to registered object iterator (begin)
@@ -233,7 +252,7 @@ protected:
 
   /// Storage for pointers to the object
   std::map<std::string, buildPtr> _name_to_build_pointer;
-  std::map<std::string, buildDeprecatedPtr> _name_to_deprecated_build_pointer;
+  std::map<std::string, buildLegacyPtr> _name_to_legacy_build_pointer;
 
   /// Storage for pointers to the parameters objects
   std::map<std::string, paramsPtr> _name_to_params_pointer;
