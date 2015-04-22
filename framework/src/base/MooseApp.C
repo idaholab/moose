@@ -104,6 +104,7 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _use_nonlinear(true),
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
+    _shared_factory(&_factory),
     _error_overridden(false),
     _ready_to_exit(false),
     _initial_from_file(false),
