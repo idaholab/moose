@@ -330,7 +330,7 @@ void
 MooseApp::meshOnly(std::string mesh_file_name)
 {
   /**
-   * Thesgete actions should be the minimum set necessary to generate and output
+   * These actions should be the minimum set necessary to generate and output
    * a Mesh.
    */
   _action_warehouse.executeActionsWithAction("set_global_params");
