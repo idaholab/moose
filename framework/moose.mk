@@ -52,13 +52,21 @@ moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 app_INCLUDES := $(moose_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: moose_revision moose
+all:: libmesh_submodule_status moose_revision moose
 
 # revision header
 moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
 moose_revision:
-  $(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
-    $(moose_revision_header) MOOSE)
+	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
+	  $(moose_revision_header) MOOSE)
+
+# libmesh submodule status
+libmesh_status := $(shell pushd $(MOOSE_DIR); git submodule status libmesh; popd)
+ifneq (,$(findstring +,$(libmesh_status)))
+	libmesh_message = "\n***WARNING***\nYour libmesh is out of date.\nYou need to run update_and_rebuild_libmesh.sh in the scripts directory.\n\n"
+endif
+libmesh_submodule_status:
+	@if [ x$(libmesh_message) != "x" ]; then echo $(libmesh_message); fi
 
 moose: $(moose_LIB)
 
@@ -116,7 +124,7 @@ $(exodiff_APP): $(exodiff_objfiles)
 #
 # Clean targets
 #
-.PHONY: clean clobber cleanall echo_include echo_library
+.PHONY: clean clobber cleanall echo_include echo_library libmesh_submodule_status
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_LIB := $(moose_LIBS) $(exodiff_APP) libmoose-$(METHOD).*
