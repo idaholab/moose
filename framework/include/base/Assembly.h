@@ -402,17 +402,17 @@ public:
   const VariablePhiSecond & secondPhiFaceNeighbor() { return _second_phi_face_neighbor; }
 
 
-  const VariablePhiValue & fePhi(FEType type)             { buildFE(type); return _fe_shape_data[type]->_phi; }
-  const VariablePhiGradient & feGradPhi(FEType type) { buildFE(type); return _fe_shape_data[type]->_grad_phi; }
-  const VariablePhiSecond & feSecondPhi(FEType type) { buildFE(type); _need_second_derivative[type] = true; return _fe_shape_data[type]->_second_phi; }
+  const VariablePhiValue & fePhi(FEType type);
+  const VariablePhiGradient & feGradPhi(FEType type);
+  const VariablePhiSecond & feSecondPhi(FEType type);
 
-  const VariablePhiValue & fePhiFace(FEType type)             { buildFaceFE(type); return _fe_shape_data_face[type]->_phi; }
-  const VariablePhiGradient & feGradPhiFace(FEType type) { buildFaceFE(type); return _fe_shape_data_face[type]->_grad_phi; }
-  const VariablePhiSecond & feSecondPhiFace(FEType type) { buildFaceFE(type); _need_second_derivative[type] = true; return _fe_shape_data_face[type]->_second_phi; }
+  const VariablePhiValue & fePhiFace(FEType type);
+  const VariablePhiGradient & feGradPhiFace(FEType type);
+  const VariablePhiSecond & feSecondPhiFace(FEType type);
 
-  const VariablePhiValue & fePhiFaceNeighbor(FEType type)             { buildFaceNeighborFE(type); return _fe_shape_data_face_neighbor[type]->_phi; }
-  const VariablePhiGradient & feGradPhiFaceNeighbor(FEType type) { buildFaceNeighborFE(type); return _fe_shape_data_face_neighbor[type]->_grad_phi; }
-  const VariablePhiSecond & feSecondPhiFaceNeighbor(FEType type) { buildFaceNeighborFE(type); _need_second_derivative[type] = true; return _fe_shape_data_face_neighbor[type]->_second_phi; }
+  const VariablePhiValue & fePhiFaceNeighbor(FEType type);
+  const VariablePhiGradient & feGradPhiFaceNeighbor(FEType type);
+  const VariablePhiSecond & feSecondPhiFaceNeighbor(FEType type);
 
   /**
    * Invalidate any currently cached data.  In particular this will cause FE data to get recached.
