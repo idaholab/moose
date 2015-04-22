@@ -328,11 +328,11 @@ void FEProblem::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 
 void FEProblem::initialSetup()
 {
-  // Flush all output to _console that occured during construction of objects
-  _app.getOutputWarehouse().mooseConsole();
-
   // Perform output related setups
   _app.getOutputWarehouse().initialSetup();
+
+  // Flush all output to _console that occured during construction of objects
+  _app.getOutputWarehouse().mooseConsole();
 
   if (_app.isRecovering())
     _resurrector->setRestartFile(_app.getRecoverFileBase());
@@ -518,7 +518,7 @@ void FEProblem::initialSetup()
        ++it)
     it->second->updateSeeds(EXEC_INITIAL);
 
-  // Call init on the MultiApps
+  // Call initialSetup on the MultiApps
   _multi_apps(EXEC_LINEAR)[0].initialSetup();
   _multi_apps(EXEC_NONLINEAR)[0].initialSetup();
   _multi_apps(EXEC_TIMESTEP_END)[0].initialSetup();
@@ -526,7 +526,7 @@ void FEProblem::initialSetup()
   _multi_apps(EXEC_INITIAL)[0].initialSetup();
   _multi_apps(EXEC_CUSTOM)[0].initialSetup();
 
-  // Call initial setup on the transfers
+  // Call initialSetup on the transfers
   _transfers(EXEC_LINEAR)[0].initialSetup();
   _transfers(EXEC_NONLINEAR)[0].initialSetup();
   _transfers(EXEC_TIMESTEP_END)[0].initialSetup();
