@@ -7,6 +7,7 @@
 #include "CrackFrontDefinition.h"
 #include <map>
 #include <vector>
+#include "libmesh/mesh_tools.h"
 
 template<>
 InputParameters validParams<CrackFrontDefinition>()
@@ -34,6 +35,8 @@ void addCrackFrontDefinitionParams(InputParameters& params)
   params.addRangeCheckedParam<unsigned int>("axis_2d", 2, "axis_2d>=0 & axis_2d<=2", "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
   params.addParam<unsigned int>("symmetry_plane", "Account for a symmetry plane passing through the plane of the crack, normal to the specified axis (0=x, 1=y, 2=z)");
   params.addParam<bool>("t_stress", false, "Calculate T-stress");
+  params.addParam<bool>("q_function_rings", false, "Generate rings of nodes for q-function");
+  params.addParam<unsigned int>("last_ring","The number of rings of nodes to generate");
   params.addParam<VariableName>("disp_x","Variable containing the x displacement");
   params.addParam<VariableName>("disp_y","Variable containing the y displacement");
   params.addParam<VariableName>("disp_z","Variable containing the z displacement");
@@ -51,7 +54,8 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
     _axis_2d(getParam<unsigned int>("axis_2d")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane") : std::numeric_limits<unsigned int>::max()),
-    _t_stress(getParam<bool>("t_stress"))
+    _t_stress(getParam<bool>("t_stress")),
+    _q_function_rings(getParam<bool>("q_function_rings"))
 {
   if (isParamValid("crack_front_points"))
   {
@@ -59,6 +63,8 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
     _geom_definition_method = CRACK_FRONT_POINTS;
     if (_t_stress)
       mooseError("t_stress not yet supported with crack_front_points");
+    if (_q_function_rings)
+      mooseError("q_function_rings not supported with crack_front_points");
   }
   else if (isParamValid("boundary"))
     _geom_definition_method = CRACK_FRONT_NODES;
@@ -125,6 +131,13 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
   }
   else if (_t_stress == true && _treat_as_2d == false)
     mooseError("Displacement variables must be provided for T-stress calculation");
+
+  if (_q_function_rings)
+  {
+    if (!isParamValid("last_ring"))
+      mooseError("The max number of rings of nodes to generate must be provided if q_function_rings = true");
+    _last_ring = getParam<unsigned int>("last_ring");
+  }
 }
 
 CrackFrontDefinition::~CrackFrontDefinition()
@@ -154,6 +167,9 @@ CrackFrontDefinition::initialSetup()
   }
 
   updateCrackFrontGeometry();
+
+  if (_q_function_rings)
+    createQFunctionRings();
 
   if (_t_stress)
   {
@@ -192,7 +208,7 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<dof_id_type>& nodes)
   {
     if (nodes.size() > 1)
     {
-      //Delete all but one node if they are collinear in the axis normal to the 2d plane
+      //Check that the nodes are collinear in the axis normal to the 2d plane
       unsigned int axis0;
       unsigned int axis1;
 
@@ -232,10 +248,6 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<dof_id_type>& nodes)
             mooseError("Boundary provided in CrackFrontDefinition contains " << nodes.size() << " nodes, which are not collinear in the " << _axis_2d << " axis.  Must contain either 1 node or collinear nodes to treat as 2D.");
         }
       }
-
-      std::set<dof_id_type>::iterator second_node = nodes.begin();
-      ++second_node;
-      nodes.erase(second_node,nodes.end());
     }
   }
 }
@@ -254,9 +266,6 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> &nodes)
   }
   else // nodes.size() > 1
   {
-    if (_treat_as_2d)
-      mooseError("Boundary provided in CrackFrontDefinition contains " << nodes.size() << " nodes.  Must contain 1 node to treat as 2D.");
-
     //Loop through the set of crack front nodes, and create a node to element map for just the crack front nodes
     //The main reason for creating a second map is that we need to do a sort prior to the set_intersection.
     //The original map contains vectors, and we can't sort them, so we create sets in the local map.
@@ -1288,4 +1297,190 @@ CrackFrontDefinition::getCrackFrontTangentialStrain(const unsigned int node_inde
     mooseError("In CrackFrontDefinition, tangential strain not available");
 
   return strain;
+}
+
+
+void
+CrackFrontDefinition::createQFunctionRings()
+{
+  //In the variable names, "cfn" = crack front node
+
+  if (_treat_as_2d) //2D: the q-function defines an integral domain that is constant along the crack front
+  {
+    std::vector<std::vector<const Elem *> > nodes_to_elem_map;
+    MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), nodes_to_elem_map);
+
+    std::set<dof_id_type> nodes_prev_ring;
+    nodes_prev_ring.insert(_ordered_crack_front_nodes.begin(),_ordered_crack_front_nodes.end());
+
+    std::set<dof_id_type> connected_nodes_this_cfn;
+    connected_nodes_this_cfn.insert(_ordered_crack_front_nodes.begin(),_ordered_crack_front_nodes.end());
+
+    std::set<dof_id_type> old_ring_nodes_this_cfn = connected_nodes_this_cfn;
+
+    //The first ring contains only the crack front node(s)
+    std::pair<dof_id_type,unsigned int> node_ring_index = std::make_pair(_ordered_crack_front_nodes[0],1);
+    _crack_front_node_to_node_map[node_ring_index].insert(connected_nodes_this_cfn.begin(),connected_nodes_this_cfn.end());
+
+    //Build rings of nodes around the crack front node
+    for (unsigned int ring=2; ring<=_last_ring; ++ring)
+    {
+
+      //Find nodes connected to the nodes of the previous ring
+      std::set<dof_id_type> new_ring_nodes_this_cfn;
+      for (std::set<dof_id_type>::iterator nit = old_ring_nodes_this_cfn.begin();
+           nit != old_ring_nodes_this_cfn.end();
+           ++nit)
+      {
+        std::vector<const Node *> neighbors;
+        MeshTools::find_nodal_neighbors(_mesh.getMesh(), _mesh.node(*nit), nodes_to_elem_map, neighbors);
+        for (unsigned int inei=0; inei<neighbors.size(); ++inei)
+        {
+          std::set<dof_id_type>::iterator thisit = connected_nodes_this_cfn.find(neighbors[inei]->id());
+
+          //Add only nodes that are not already present in any of the rings
+          if (thisit == connected_nodes_this_cfn.end())
+            new_ring_nodes_this_cfn.insert(neighbors[inei]->id());
+        }
+      }
+
+      //Add new nodes to rings
+      connected_nodes_this_cfn.insert(new_ring_nodes_this_cfn.begin(),new_ring_nodes_this_cfn.end());
+      old_ring_nodes_this_cfn = new_ring_nodes_this_cfn;
+
+      std::pair<dof_id_type,unsigned int> node_ring_index = std::make_pair(_ordered_crack_front_nodes[0],ring);
+      _crack_front_node_to_node_map[node_ring_index].insert(connected_nodes_this_cfn.begin(),connected_nodes_this_cfn.end());
+    }
+  }
+  else //3D: The q-function defines one integral domain around each crack front node
+  {
+    unsigned int num_crack_front_points = _ordered_crack_front_nodes.size();
+    std::vector<std::vector<const Elem *> > nodes_to_elem_map;
+    MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), nodes_to_elem_map);
+    for (unsigned int icfn=0; icfn<num_crack_front_points; ++icfn)
+    {
+      std::set<dof_id_type> nodes_prev_ring;
+      nodes_prev_ring.insert(_ordered_crack_front_nodes[icfn]);
+
+      std::set<dof_id_type> connected_nodes_prev_cfn;
+      std::set<dof_id_type> connected_nodes_this_cfn;
+      std::set<dof_id_type> connected_nodes_next_cfn;
+
+      connected_nodes_this_cfn.insert(_ordered_crack_front_nodes[icfn]);
+
+      if (_closed_loop && icfn==0)
+      {
+        connected_nodes_prev_cfn.insert(_ordered_crack_front_nodes[num_crack_front_points-1]);
+        connected_nodes_next_cfn.insert(_ordered_crack_front_nodes[icfn+1]);
+      }
+      else if (_closed_loop && icfn==num_crack_front_points-1)
+      {
+        connected_nodes_prev_cfn.insert(_ordered_crack_front_nodes[icfn-1]);
+        connected_nodes_next_cfn.insert(_ordered_crack_front_nodes[0]);
+      }
+      else if (icfn==0)
+      {
+        connected_nodes_next_cfn.insert(_ordered_crack_front_nodes[icfn+1]);
+      }
+      else if (icfn==num_crack_front_points-1)
+      {
+        connected_nodes_prev_cfn.insert(_ordered_crack_front_nodes[icfn-1]);
+      }
+      else
+      {
+        connected_nodes_prev_cfn.insert(_ordered_crack_front_nodes[icfn-1]);
+        connected_nodes_next_cfn.insert(_ordered_crack_front_nodes[icfn+1]);
+      }
+
+      std::set<dof_id_type> old_ring_nodes_prev_cfn = connected_nodes_prev_cfn;
+      std::set<dof_id_type> old_ring_nodes_this_cfn = connected_nodes_this_cfn;
+      std::set<dof_id_type> old_ring_nodes_next_cfn = connected_nodes_next_cfn;
+
+      //The first ring contains only the crack front node
+      std::pair<dof_id_type,unsigned int> node_ring_index = std::make_pair(_ordered_crack_front_nodes[icfn],1);
+      _crack_front_node_to_node_map[node_ring_index].insert(connected_nodes_this_cfn.begin(),connected_nodes_this_cfn.end());
+
+      //Build rings of nodes around the crack front node
+      for (unsigned int ring=2; ring<=_last_ring; ++ring)
+      {
+
+        //Find nodes connected to the nodes of the previous ring, but exclude nodes in rings of neighboring crack front nodes
+        std::set<dof_id_type> new_ring_nodes_this_cfn;
+        addNodesToQFunctionRing(new_ring_nodes_this_cfn,
+                                old_ring_nodes_this_cfn,
+                                connected_nodes_this_cfn,
+                                connected_nodes_prev_cfn,
+                                connected_nodes_next_cfn,
+                                nodes_to_elem_map);
+
+        std::set<dof_id_type> new_ring_nodes_prev_cfn;
+        addNodesToQFunctionRing(new_ring_nodes_prev_cfn,
+                                old_ring_nodes_prev_cfn,
+                                connected_nodes_prev_cfn,
+                                connected_nodes_this_cfn,
+                                connected_nodes_next_cfn,
+                                nodes_to_elem_map);
+
+        std::set<dof_id_type> new_ring_nodes_next_cfn;
+        addNodesToQFunctionRing(new_ring_nodes_next_cfn,
+                                old_ring_nodes_next_cfn,
+                                connected_nodes_next_cfn,
+                                connected_nodes_prev_cfn,
+                                connected_nodes_this_cfn,
+                                nodes_to_elem_map);
+
+        //Add new nodes to the three sets of nodes
+        connected_nodes_prev_cfn.insert(new_ring_nodes_prev_cfn.begin(),new_ring_nodes_prev_cfn.end());
+        connected_nodes_this_cfn.insert(new_ring_nodes_this_cfn.begin(),new_ring_nodes_this_cfn.end());
+        connected_nodes_next_cfn.insert(new_ring_nodes_next_cfn.begin(),new_ring_nodes_next_cfn.end());
+        old_ring_nodes_prev_cfn = new_ring_nodes_prev_cfn;
+        old_ring_nodes_this_cfn = new_ring_nodes_this_cfn;
+        old_ring_nodes_next_cfn = new_ring_nodes_next_cfn;
+
+        std::pair<dof_id_type,unsigned int> node_ring_index = std::make_pair(_ordered_crack_front_nodes[icfn],ring);
+        _crack_front_node_to_node_map[node_ring_index].insert(connected_nodes_this_cfn.begin(),connected_nodes_this_cfn.end());
+      }
+    }
+  }
+}
+
+void
+CrackFrontDefinition::addNodesToQFunctionRing(std::set<dof_id_type>& nodes_new_ring, const std::set<dof_id_type>& nodes_old_ring, const std::set<dof_id_type>& nodes_all_rings, const std::set<dof_id_type>& nodes_neighbor1, const std::set<dof_id_type>& nodes_neighbor2, std::vector<std::vector<const Elem *> >& nodes_to_elem_map)
+{
+  for (std::set<dof_id_type>::const_iterator nit = nodes_old_ring.begin();
+       nit != nodes_old_ring.end();
+       ++nit)
+  {
+    std::vector<const Node *> neighbors;
+    MeshTools::find_nodal_neighbors(_mesh.getMesh(), _mesh.node(*nit), nodes_to_elem_map, neighbors);
+    for (unsigned int inei=0; inei<neighbors.size(); ++inei)
+    {
+      std::set<dof_id_type>::const_iterator previt = nodes_all_rings.find(neighbors[inei]->id());
+      std::set<dof_id_type>::const_iterator thisit = nodes_neighbor1.find(neighbors[inei]->id());
+      std::set<dof_id_type>::const_iterator nextit = nodes_neighbor2.find(neighbors[inei]->id());
+
+      //Add only nodes that are not already present in any of the three sets of nodes
+      if (previt == nodes_all_rings.end() &&
+          thisit == nodes_neighbor1.end() &&
+          nextit == nodes_neighbor2.end())
+        nodes_new_ring.insert(neighbors[inei]->id());
+    }
+  }
+}
+
+bool
+CrackFrontDefinition::isNodeInRing(const unsigned int ring_index, const dof_id_type connected_node_id, const unsigned int node_index) const
+{
+  bool is_node_in_ring = false;
+  std::pair<dof_id_type,unsigned int> node_ring_key = std::make_pair(_ordered_crack_front_nodes[node_index],ring_index);
+  std::map<std::pair<dof_id_type,unsigned int>,std::set<dof_id_type> >::const_iterator nnmit = _crack_front_node_to_node_map.find(node_ring_key);
+
+  if (nnmit == _crack_front_node_to_node_map.end())
+    mooseError("Could not find crack front node " << _ordered_crack_front_nodes[node_index] << "in the crack front node to q-function ring-node map for ring " << ring_index);
+
+  std::set<dof_id_type> q_func_nodes = nnmit->second;
+  if (q_func_nodes.find(connected_node_id) != q_func_nodes.end())
+    is_node_in_ring = true;
+
+  return is_node_in_ring;
 }
