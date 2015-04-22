@@ -68,7 +68,7 @@
   [./bad_second_order_test]
     type = 'RunException'
     input = 'bad_second_order_test.i'
-    expect_err = 'Bad ElemType'
+    expect_err = 'ERROR: Finite element LAGRANGE on geometric element QUAD4\nonly supports FEInterface::max_order = 1, not fe_type.order = 2'
     method = 'DBG'
   [../]
 
