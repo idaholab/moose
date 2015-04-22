@@ -59,8 +59,15 @@ protected:
   /// The undiffed free energy function parser object.
   ADFunction * _func_F;
 
+  /*
+   * Material properties get fully described using this structure, including their dependent
+   * variables and derivation state.
+   */
+  class FunctionMaterialPropertyDescriptor;
+
   /// Material property names (set through functionParse)
-  std::vector<std::string> _mat_prop_names;
+  std::vector<FunctionMaterialPropertyDescriptor> _mat_props_descriptors;
+  std::vector<std::string> _mat_prop_names; // deprecate this!
 
   /// Material properties needed by this free energy
   std::vector<MaterialProperty<Real> *> _mat_props;
@@ -76,12 +83,6 @@ protected:
    * parsing the FParser expression.
    */
   const VariableNameMappingMode _map_mode;
-
-  /*
-   * Material properties get fully described using this structure, including their dependent
-   * variables and derivation state.
-   */
-  class FunctionMaterialPropertyDescriptor;
 };
 
 
@@ -279,17 +280,121 @@ template<class T>
 class ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor
 {
 public:
-  FunctionMaterialPropertyDescriptor(const std::string & name) : _name(name) {}
+  /*
+   * The descriptor is constructed with an expression that describes the
+   * material property.
+   * Examples:
+   *   'F'               A material property called 'F' with no declared variable
+   *                     dependencies (i.e. vanishing derivatives)
+   *   'F(c,phi)'        A material property called 'F' with declared dependence
+   *                     on 'c' and 'phi' (uses DerivativeFunctionMaterial rules to
+   *                     look up the derivatives)
+   *   'a:=D[x(t),t,t]'  The second time derivative of the t-dependent material property 'x'
+   *                     which will be referred to as 'a' in the function expression.
+   */
+  FunctionMaterialPropertyDescriptor(const std::string & expression);
 
   /// get the property name
-  const std::string getPropertyName() const { return this->propertyName(_name, _derivative_vars); };
+  const std::string getPropertyName() const { return this->propertyName(_base_name, _derivative_vars); };
 
 private:
+  void parseDerivative(const std::string & expression);
+  void parseDependentVariables(const std::string & expression);
+
+  /// name used in function expression
+  std::string _fparser_name;
+
   /// function material property base name
-  std::string _name;
+  std::string _base_name;
 
   std::vector<VariableName> _dependent_vars;
   std::vector<VariableName> _derivative_vars;
 };
+
+template<class T>
+ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std::string & expression) :
+    _dependent_vars(),
+    _derivative_vars()
+{
+  size_t define = expression.find_last_of(":=");
+
+  // expression contains a ':='
+  if (define != std::string::npos)
+  {
+    // section before ':=' is the name used in the function expression
+    _fparser_name = expression.substr(0, define);
+
+    // parse right hand side
+    parseDerivative(expression.substr(define+2));
+  }
+  else
+  {
+    // parse entire expression and use natural material property base name
+    // for D(x(t),t,t) this would simply be 'x'!
+    parseDerivative(expression);
+    _fparser_name = _base_name;
+  }
+}
+
+template<class T>
+void
+ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expression)
+{
+  size_t open  = expression.find_first_of("[");
+  size_t close = expression.find_last_of("]");
+
+  if (open == std::string::npos && close == std::string::npos)
+  {
+    // no derivative requested
+    parseDependentVariables(expression);
+    return;
+  }
+  else if (open != std::string::npos && close != std::string::npos && expression.substr(0, open) == "D")
+  {
+    // parse argument list 0 is the function and 1,.. ar the variable to take the derivative w.r.t.
+    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), _derivative_vars, 0, ",");
+
+    // check for empty [] brackets
+    if (_derivative_vars.size() > 0)
+    {
+      // parse argument zero of D[] as the function material property
+      parseDependentVariables(_derivative_vars[0]);
+
+      // remove function from the _derivative_vars vector
+      _derivative_vars.erase(_derivative_vars.begin());
+      return;
+    }
+  }
+
+  mooseError("Malformed material_properties expression '" << expression << "'");
+}
+
+template<class T>
+void
+ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & expression)
+{
+  size_t open  = expression.find_first_of("(");
+  size_t close = expression.find_last_of(")");
+
+  if (open == std::string::npos && close == std::string::npos)
+  {
+    // material property name without arguments
+    _fparser_name = _base_name = expression;
+  }
+  else if (open != std::string::npos && close != std::string::npos)
+  {
+    // take material property name before bracket
+    _base_name = expression.substr(0, open);
+
+    // parse argument list
+    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), _dependent_vars, 0, ",");
+
+    // cremove duplicates from dependent variable list
+    std::sort(_dependent_vars.begin(), _dependent_vars.end());
+    _dependent_vars.erase(std::unique(_dependent_vars.begin(), _dependent_vars.end()), _dependent_vars.end());
+  }
+  else
+    mooseError("Malformed material_properties expression '" << expression << "'");
+}
 
 #endif //PARSEDMATERIALHELPER_H
