@@ -33,7 +33,6 @@ protected:
   virtual void computeProperties();
 
   virtual void functionsPostParse();
-  virtual void registerMaterialProperties(const std::vector<std::string> & mat_prop_names);
 
   void functionsDerivative();
   void functionsOptimize();
@@ -46,9 +45,6 @@ protected:
 
   /// The third derivatives of the free energy (function parser objects).
   std::vector<std::vector<std::vector<ADFunction *> > > _func_d3F;
-
-  /// material property dependent variables
-  std::vector<std::vector<std::string> > _mat_prop_args;
 };
 
 #endif // DERIVATIVEPARSEDMATERIALHELPER_H

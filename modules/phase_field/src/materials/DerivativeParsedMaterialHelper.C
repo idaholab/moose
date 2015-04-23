@@ -45,41 +45,6 @@ void DerivativeParsedMaterialHelper::functionsPostParse()
 }
 
 void
-DerivativeParsedMaterialHelper::registerMaterialProperties(const std::vector<std::string> & mat_prop_names)
-{
-  unsigned int num_mat_prop = mat_prop_names.size();
-
-  _mat_prop_args.clear();
-  _mat_prop_args.resize(num_mat_prop);
-  _mat_prop_names.resize(num_mat_prop);
-
-  // for this material we pass in every material property with its dependent variables as a , separated list in ()
-  for (unsigned int i = 0; i < num_mat_prop; ++i)
-  {
-    // find first '(' and last ')'
-    const std::string & name = mat_prop_names[i];
-    size_t open  = name.find_first_of("(");
-    size_t close = name.find_last_of(")");
-
-    if (open == std::string::npos && close == std::string::npos)
-    {
-      // material property name without arguments
-      _mat_prop_names[i] = name;
-    }
-    else if (open != std::string::npos && close != std::string::npos)
-    {
-      // take material property name before bracket
-      _mat_prop_names.push_back(name.substr(0, open));
-
-      // parse argument list
-      MooseUtils::tokenize(name.substr(open + 1, close - open - 1), _mat_prop_args[i], 0, ",");
-    }
-    else
-      mooseError("Malformed materialproperty name in DerivativeParsedMaterialHelper derived material " << _name);
-  }
-}
-
-void
 DerivativeParsedMaterialHelper::functionsDerivative()
 {
   unsigned int i, j, k;
@@ -203,8 +168,9 @@ DerivativeParsedMaterialHelper::computeProperties()
     }
 
     // insert material property values
-    for (i = 0; i < _nmat_props; ++i)
-      _func_params[i + _nargs] = (*_mat_props[i])[_qp];
+    unsigned int nmat_props = _mat_prop_descriptors.size();
+    for (i = 0; i < nmat_props; ++i)
+      _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
 
     // set function value
     if (_prop_F)

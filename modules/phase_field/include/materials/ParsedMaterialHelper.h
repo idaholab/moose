@@ -43,8 +43,6 @@ public:
                      const std::vector<std::string> & tol_names,
                      const std::vector<Real> & tol_values);
 
-  virtual void registerMaterialProperties(const std::vector<std::string> & mat_prop_names);
-
   static InputParameters validParams();
 
 protected:
@@ -65,13 +63,8 @@ protected:
    */
   class FunctionMaterialPropertyDescriptor;
 
-  /// Material property names (set through functionParse)
-  std::vector<FunctionMaterialPropertyDescriptor> _mat_props_descriptors;
-  std::vector<std::string> _mat_prop_names; // deprecate this!
-
-  /// Material properties needed by this free energy
-  std::vector<MaterialProperty<Real> *> _mat_props;
-  unsigned int _nmat_props;
+  /// Material property descriptors (obtained by parsing _mat_prop_expressions)
+  std::vector<FunctionMaterialPropertyDescriptor> _mat_prop_descriptors;
 
   /// Tolerance values for all arguments (to protect from log(0)).
   std::vector<Real> _tol;
@@ -93,8 +86,8 @@ ParsedMaterialHelper<T>::ParsedMaterialHelper(const std::string & name,
     T(name, parameters),
     FunctionParserUtils(name, parameters),
     _func_F(NULL),
-    _mat_prop_names(),
-    _nmat_props(0),
+    _mat_prop_descriptors(0),
+    _tol(0),
     _map_mode(map_mode)
 {
 }
@@ -142,13 +135,10 @@ void
 ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
                                        const std::vector<std::string> & constant_names,
                                        const std::vector<std::string> & constant_expressions,
-                                       const std::vector<std::string> & mat_prop_names,
+                                       const std::vector<std::string> & mat_prop_expressions,
                                        const std::vector<std::string> & tol_names,
                                        const std::vector<Real> & tol_values)
 {
-  // register material property names for potential differentiation stages
-  registerMaterialProperties(mat_prop_names);
-
   // build base function object
   _func_F =  new ADFunction();
 
@@ -197,12 +187,15 @@ ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
   }
 
   // get all material properties
-  _nmat_props = _mat_prop_names.size();
-  _mat_props.resize(_nmat_props);
-  for (unsigned int i = 0; i < _nmat_props; ++i)
+  unsigned int nmat_props = mat_prop_expressions.size();
+  _mat_prop_descriptors.resize(nmat_props);
+  for (unsigned int i = 0; i < nmat_props; ++i)
   {
-    _mat_props[i] = &(this->template getMaterialProperty<Real>(_mat_prop_names[i]));
-    variables += "," + _mat_prop_names[i];
+    // parse the material property parameter entry into a FunctionMaterialPropertyDescriptor
+    _mat_prop_descriptors[i] = FunctionMaterialPropertyDescriptor(mat_prop_expressions[i], this);
+
+    // get the fparser symbol name for teh new material property
+    variables += "," + _mat_prop_descriptors[i].getSymbolName();
   }
 
   // erase leading comma
@@ -213,17 +206,10 @@ ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
      mooseError("Invalid function\n" << function_expression << '\n' << variables << "\nin ParsedMaterialHelper.\n" << _func_F->ErrorMsg());
 
   // create parameter passing buffer
-  _func_params = new Real[this->_nargs + _nmat_props];
+  _func_params = new Real[this->_nargs + nmat_props];
 
   // perform next steps (either optimize or take derivatives and then optimize)
   functionsPostParse();
-}
-
-template<class T>
-void
-ParsedMaterialHelper<T>::registerMaterialProperties(const std::vector<std::string> & mat_prop_names)
-{
-  _mat_prop_names = mat_prop_names;
 }
 
 template<class T>
@@ -265,8 +251,9 @@ ParsedMaterialHelper<T>::computeProperties()
     }
 
     // insert material property values
-    for (unsigned int i = 0; i < _nmat_props; ++i)
-      _func_params[i + this->_nargs] = (*_mat_props[i])[this->_qp];
+    unsigned int nmat_props = _mat_prop_descriptors.size();
+    for (unsigned int i = 0; i < nmat_props; ++i)
+      _func_params[i + this->_nargs] = _mat_prop_descriptors[i].value()[this->_qp];
 
     // TODO: computeQpProperties()
 
@@ -292,14 +279,34 @@ public:
    *   'a:=D[x(t),t,t]'  The second time derivative of the t-dependent material property 'x'
    *                     which will be referred to as 'a' in the function expression.
    */
-  FunctionMaterialPropertyDescriptor(const std::string & expression);
+  FunctionMaterialPropertyDescriptor(const std::string &, T *);
+
+  /// default constructor
+  FunctionMaterialPropertyDescriptor();
+
+  /// copy constructor
+  FunctionMaterialPropertyDescriptor(const FunctionMaterialPropertyDescriptor &);
+
+  /// get the fparser symbol name
+  const std::string & getSymbolName() const { return _fparser_name; };
 
   /// get the property name
-  const std::string getPropertyName() const { return this->propertyName(_base_name, _derivative_vars); };
+  const std::string getPropertyName() const
+  {
+    mooseAssert( _parent_material != NULL, "_parent_material pointer is NULL" );
+    return _parent_material->propertyName(_base_name, _derivative_vars);
+  };
+
+  /// get the property reference
+  const MaterialProperty<Real> & value() const
+  {
+    mooseAssert( _value != NULL, "_value pointer is NULL" );
+    return *_value;
+  }
 
 private:
-  void parseDerivative(const std::string & expression);
-  void parseDependentVariables(const std::string & expression);
+  void parseDerivative(const std::string &);
+  void parseDependentVariables(const std::string &);
 
   /// name used in function expression
   std::string _fparser_name;
@@ -307,14 +314,21 @@ private:
   /// function material property base name
   std::string _base_name;
 
-  std::vector<VariableName> _dependent_vars;
-  std::vector<VariableName> _derivative_vars;
+  std::vector<std::string> _dependent_vars;
+  std::vector<std::string> _derivative_vars;
+
+  /// material property value
+  MaterialProperty<Real> * _value;
+
+  /// parent material class
+  T * _parent_material;
 };
 
 template<class T>
-ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std::string & expression) :
+ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std::string & expression, T * parent) :
     _dependent_vars(),
-    _derivative_vars()
+    _derivative_vars(),
+    _parent_material(parent)
 {
   size_t define = expression.find_last_of(":=");
 
@@ -334,6 +348,27 @@ ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor::FunctionMaterialPro
     parseDerivative(expression);
     _fparser_name = _base_name;
   }
+
+  // get the material property reference
+  _value = &(parent->template getMaterialProperty<Real>(getPropertyName()));
+}
+
+template<class T>
+ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor() :
+    _value(NULL),
+    _parent_material(NULL)
+{
+}
+
+template<class T>
+ParsedMaterialHelper<T>::FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const FunctionMaterialPropertyDescriptor & rhs) :
+    _fparser_name(rhs._fparser_name),
+    _base_name(rhs._base_name),
+    _dependent_vars(rhs._dependent_vars),
+    _derivative_vars(rhs._derivative_vars),
+    _value(rhs._value),
+    _parent_material(rhs._parent_material)
+{
 }
 
 template<class T>
