@@ -88,7 +88,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
          parameters.have_parameter<AuxVariableName>("variable")))
     {
       // A pointer to the variable class
-      std::set<SubdomainID> var_ids = variableSubdomianIDs(parameters);
+      std::set<SubdomainID> var_ids = variableSubdomainIDs(parameters);
 
       // Test if the variable blockIDs are valid for this object
       if (!isBlockSubset(var_ids))
@@ -99,7 +99,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
   // The 'block' input parameter is undefined, if the object contains a variable, set the subdomain ids to those of the variable
   else if (parameters.isParamValid("variable") &&
            (parameters.have_parameter<NonlinearVariableName>("variable") || parameters.have_parameter<AuxVariableName>("variable")))
-      _blk_ids = variableSubdomianIDs(parameters);
+      _blk_ids = variableSubdomainIDs(parameters);
 
   // Produce error if the object is not allowed to be both block and boundary restricted
   if (!_blk_dual_restrictable && !_boundary_ids.empty() && !_boundary_ids.empty())
@@ -212,7 +212,7 @@ BlockRestrictable::isBlockSubset(std::vector<SubdomainID> ids) const
 }
 
 std::set<SubdomainID>
-BlockRestrictable::variableSubdomianIDs(const InputParameters & parameters) const
+BlockRestrictable::variableSubdomainIDs(const InputParameters & parameters) const
 {
   // Return an empty set if _sys is not defined
   if (!parameters.isParamValid("_sys"))

@@ -201,7 +201,7 @@ private:
    * A helper function for extracting the subdomain IDs for a variable
    * @param parameters A reference to the input parameters supplied to the object
    */
-  std::set<SubdomainID> variableSubdomianIDs(const InputParameters & parameters) const;
+  std::set<SubdomainID> variableSubdomainIDs(const InputParameters & parameters) const;
 };
 
 #endif // BLOCKRESTRICTABLE_H
