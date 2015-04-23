@@ -80,8 +80,8 @@ TensorMechanicsApp::TensorMechanicsApp(const std::string & name, InputParameters
 {
   srand(processor_id());
 
-  Moose::registerObjects(_factory);
-  TensorMechanicsApp::registerObjects(_factory);
+  Moose::registerObjects(*_shared_factory);
+  TensorMechanicsApp::registerObjects(*_shared_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);

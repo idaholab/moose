@@ -388,7 +388,11 @@ protected:
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
 
+  /// The factory used to construct all MooseObjects (unique instance for this
   Factory _factory;
+
+  /// Pointer to the factory, necessary for migrating to a new shared factory model while maintaining backwards compatibility
+  Factory * _shared_factory;
 
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
