@@ -96,7 +96,6 @@ template<class T>
 ParsedMaterialHelper<T>::~ParsedMaterialHelper()
 {
   delete _func_F;
-  delete[] _func_params;
 }
 
 template<class T>
@@ -206,7 +205,7 @@ ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
      mooseError("Invalid function\n" << function_expression << '\n' << variables << "\nin ParsedMaterialHelper.\n" << _func_F->ErrorMsg());
 
   // create parameter passing buffer
-  _func_params = new Real[this->_nargs + nmat_props];
+  _func_params.resize(this->_nargs + nmat_props);
 
   // perform next steps (either optimize or take derivatives and then optimize)
   functionsPostParse();
