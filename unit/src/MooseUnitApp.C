@@ -26,7 +26,7 @@ MooseUnitApp::MooseUnitApp(const std::string & name, InputParameters parameters)
 {
   srand(processor_id());
 
-  Moose::registerObjects(_factory);
+  Moose::registerObjects(*_shared_factory);
   Moose::associateSyntax(_syntax, _action_factory);
 }
 

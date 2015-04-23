@@ -39,8 +39,8 @@ InputParameters validParams<ModulesApp>()
 ModulesApp::ModulesApp(const std::string & name, InputParameters parameters) :
     MooseApp(name, parameters)
 {
-  Moose::registerObjects(_factory);
-  ModulesApp::registerObjects(_factory);
+  Moose::registerObjects(*_shared_factory);
+  ModulesApp::registerObjects(*_shared_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   ModulesApp::associateSyntax(_syntax, _action_factory);

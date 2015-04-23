@@ -28,8 +28,8 @@ ExampleApp::ExampleApp(const std::string & name, InputParameters parameters) :
 {
   srand(processor_id());
 
-  Moose::registerObjects(_factory);
-  ExampleApp::registerObjects(_factory);
+  Moose::registerObjects(*_shared_factory);
+  ExampleApp::registerObjects(*_shared_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   ExampleApp::associateSyntax(_syntax, _action_factory);

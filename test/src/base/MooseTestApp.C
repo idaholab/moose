@@ -229,8 +229,8 @@ MooseTestApp::MooseTestApp(const std::string & name, InputParameters parameters)
 {
   srand(processor_id());
 
-  Moose::registerObjects(_factory);
-  MooseTestApp::registerObjects(_factory);
+  Moose::registerObjects(*_shared_factory);
+  MooseTestApp::registerObjects(*_shared_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   MooseTestApp::associateSyntax(_syntax, _action_factory);

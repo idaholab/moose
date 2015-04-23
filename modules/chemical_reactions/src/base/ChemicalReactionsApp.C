@@ -49,8 +49,8 @@ ChemicalReactionsApp::ChemicalReactionsApp(const std::string & name, InputParame
 {
   srand(processor_id());
 
-  Moose::registerObjects(_factory);
-  ChemicalReactionsApp::registerObjects(_factory);
+  Moose::registerObjects(*_shared_factory);
+  ChemicalReactionsApp::registerObjects(*_shared_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);

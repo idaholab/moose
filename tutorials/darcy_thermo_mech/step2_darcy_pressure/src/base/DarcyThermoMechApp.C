@@ -34,9 +34,9 @@ DarcyThermoMechApp::DarcyThermoMechApp(const std::string & name, InputParameters
 {
   srand(processor_id());
 
-  Moose::registerObjects(_factory);
-  ModulesApp::registerObjects(_factory);
-  DarcyThermoMechApp::registerObjects(_factory);
+  Moose::registerObjects(*_shared_factory);
+  ModulesApp::registerObjects(*_shared_factory);
+  DarcyThermoMechApp::registerObjects(*_shared_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   ModulesApp::associateSyntax(_syntax, _action_factory);

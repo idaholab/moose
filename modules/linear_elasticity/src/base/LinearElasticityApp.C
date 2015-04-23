@@ -31,8 +31,8 @@ LinearElasticityApp::LinearElasticityApp(const std::string & name, InputParamete
 {
   srand(processor_id());
 
-  Moose::registerObjects(_factory);
-  LinearElasticityApp::registerObjects(_factory);
+  Moose::registerObjects(*_shared_factory);
+  LinearElasticityApp::registerObjects(*_shared_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   LinearElasticityApp::associateSyntax(_syntax, _action_factory);
