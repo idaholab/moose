@@ -25,8 +25,16 @@ InputParameters validParams<NodalVectorPostprocessor>()
   return params;
 }
 
-NodalVectorPostprocessor::NodalVectorPostprocessor(const std::string & name, InputParameters parameters) :
-    NodalUserObject(name, parameters),
-    VectorPostprocessor(name, parameters)
+NodalVectorPostprocessor::NodalVectorPostprocessor(const InputParameters & parameters) :
+    NodalUserObject(parameters),
+    VectorPostprocessor(parameters)
+{
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NodalVectorPostprocessor::NodalVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    NodalUserObject(deprecated_name, parameters),
+    VectorPostprocessor(parameters)
 {
 }

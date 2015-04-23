@@ -29,8 +29,8 @@ InputParameters validParams<InversePowerMethod>()
   return params;
 }
 
-InversePowerMethod::InversePowerMethod(const std::string & name, InputParameters parameters)
-    :EigenExecutionerBase(name, parameters),
+InversePowerMethod::InversePowerMethod(const InputParameters & parameters) :
+    EigenExecutionerBase(parameters),
      _solution_diff(isParamValid("xdiff") ? &getPostprocessorValue("xdiff") : NULL),
      _min_iter(getParam<unsigned int>("min_power_iterations")),
      _max_iter(getParam<unsigned int>("max_power_iterations")),
@@ -40,7 +40,7 @@ InversePowerMethod::InversePowerMethod(const std::string & name, InputParameters
      _cheb_on(getParam<bool>("Chebyshev_acceleration_on"))
 {
   _eigenvalue = getParam<Real>("k0");
-  addRealParameterReporter("eigenvalue");
+  addEigenValueReporter();
 
   if (_max_iter<_min_iter) mooseError("max_power_iterations<min_power_iterations!");
   if (_eig_check_tol<0.0) mooseError("eig_check_tol<0!");
@@ -76,4 +76,24 @@ InversePowerMethod::takeStep()
   _problem.onTimestepEnd();
   _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
   _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+InversePowerMethod::InversePowerMethod(const std::string & deprecated_name, InputParameters parameters) :
+    EigenExecutionerBase(deprecated_name, parameters),
+     _solution_diff(isParamValid("xdiff") ? &getPostprocessorValue("xdiff") : NULL),
+     _min_iter(getParam<unsigned int>("min_power_iterations")),
+     _max_iter(getParam<unsigned int>("max_power_iterations")),
+     _eig_check_tol(getParam<Real>("eig_check_tol")),
+     _sol_check_tol(getParam<Real>("sol_check_tol")),
+     _pfactor(getParam<Real>("pfactor")),
+     _cheb_on(getParam<bool>("Chebyshev_acceleration_on"))
+{
+  _eigenvalue = getParam<Real>("k0");
+  addEigenValueReporter();
+
+  if (_max_iter<_min_iter) mooseError("max_power_iterations<min_power_iterations!");
+  if (_eig_check_tol<0.0) mooseError("eig_check_tol<0!");
+  if (_pfactor<0.0) mooseError("pfactor<0!");
 }

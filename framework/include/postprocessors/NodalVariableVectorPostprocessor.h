@@ -29,7 +29,8 @@ InputParameters validParams<NodalVariableVectorPostprocessor>();
 class NodalVariableVectorPostprocessor : public NodalVectorPostprocessor
 {
 public:
-  NodalVariableVectorPostprocessor(const std::string & name, InputParameters parameters);
+  NodalVariableVectorPostprocessor(const InputParameters & parameters);
+  NodalVariableVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 };
 
 #endif

@@ -50,7 +50,8 @@ class ElementIndicator :
   public ZeroInterface
 {
 public:
-    ElementIndicator(const std::string & name, InputParameters parameters);
+    ElementIndicator(const InputParameters & parameters);
+  ElementIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
     virtual ~ElementIndicator(){};
 
 protected:

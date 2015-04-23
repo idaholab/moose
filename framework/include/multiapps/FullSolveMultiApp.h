@@ -33,7 +33,8 @@ class FullSolveMultiApp :
   public MultiApp
 {
 public:
-  FullSolveMultiApp(const std::string & name, InputParameters parameters);
+  FullSolveMultiApp(const InputParameters & parameters);
+  FullSolveMultiApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~FullSolveMultiApp();
 

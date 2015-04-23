@@ -45,7 +45,8 @@ InputParameters validParams<Terminator>();
 class Terminator : public GeneralUserObject
 {
 public:
-  Terminator(const std::string & name, InputParameters parameters);
+  Terminator(const InputParameters & parameters);
+  Terminator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Terminator();
 
   virtual void execute();

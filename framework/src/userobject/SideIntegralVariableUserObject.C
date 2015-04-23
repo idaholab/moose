@@ -22,8 +22,8 @@ InputParameters validParams<SideIntegralVariableUserObject>()
   return params;
 }
 
-SideIntegralVariableUserObject::SideIntegralVariableUserObject(const std::string & name, InputParameters parameters) :
-    SideIntegralUserObject(name, parameters),
+SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParameters & parameters) :
+    SideIntegralUserObject(parameters),
     MooseVariableInterface(parameters, false),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
@@ -36,4 +36,16 @@ Real
 SideIntegralVariableUserObject::computeQpIntegral()
 {
   return _u[_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SideIntegralVariableUserObject::SideIntegralVariableUserObject(const std::string & deprecated_name, InputParameters parameters) :
+    SideIntegralUserObject(deprecated_name, parameters),
+    MooseVariableInterface(parameters, false),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _u(_var.sln()),
+    _grad_u(_var.gradSln())
+{
+  addMooseVariableDependency(mooseVariable());
 }

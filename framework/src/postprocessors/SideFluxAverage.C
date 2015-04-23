@@ -21,8 +21,8 @@ InputParameters validParams<SideFluxAverage>()
   return params;
 }
 
-SideFluxAverage::SideFluxAverage(const std::string & name, InputParameters parameters) :
-    SideFluxIntegral(name, parameters),
+SideFluxAverage::SideFluxAverage(const InputParameters & parameters) :
+    SideFluxIntegral(parameters),
     _volume(0)
 {}
 
@@ -57,3 +57,10 @@ SideFluxAverage::threadJoin(const UserObject & y)
   const SideFluxAverage & pps = static_cast<const SideFluxAverage &>(y);
   _volume += pps._volume;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideFluxAverage::SideFluxAverage(const std::string & deprecated_name, InputParameters parameters) :
+    SideFluxIntegral(deprecated_name, parameters),
+    _volume(0)
+{}

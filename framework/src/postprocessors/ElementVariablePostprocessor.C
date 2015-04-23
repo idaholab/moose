@@ -25,8 +25,8 @@ InputParameters validParams<ElementVariablePostprocessor>()
   return params;
 }
 
-ElementVariablePostprocessor::ElementVariablePostprocessor(const std::string & name, InputParameters parameters) :
-    ElementPostprocessor(name, parameters),
+ElementVariablePostprocessor::ElementVariablePostprocessor(const InputParameters & parameters) :
+    ElementPostprocessor(parameters),
     MooseVariableInterface(parameters, false),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
@@ -42,4 +42,18 @@ ElementVariablePostprocessor::execute()
 {
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     computeQpValue();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementVariablePostprocessor::ElementVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    ElementPostprocessor(deprecated_name, parameters),
+    MooseVariableInterface(parameters, false),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
+    _u_dot(_var.uDot()),
+    _qp(0)
+{
+  addMooseVariableDependency(mooseVariable());
 }

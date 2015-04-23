@@ -27,6 +27,7 @@ class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {
 public:
   TwoMaterialPropertyInterface(const InputParameters & parameters);
+  TwoMaterialPropertyInterface(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Retrieve the property named "name"

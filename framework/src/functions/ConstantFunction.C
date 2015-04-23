@@ -21,8 +21,8 @@ template<> InputParameters validParams<ConstantFunction>()
    return params;
 }
 
-ConstantFunction::ConstantFunction(const std::string & name, InputParameters parameters) :
-    Function(name, parameters),
+ConstantFunction::ConstantFunction(const InputParameters & parameters) :
+    Function(parameters),
     _value(getParam<Real>("value"))
 {
 }
@@ -31,4 +31,12 @@ Real
 ConstantFunction::value(Real, const Point &)
 {
   return _value;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantFunction::ConstantFunction(const std::string & deprecated_name, InputParameters parameters) :
+    Function(deprecated_name, parameters),
+    _value(getParam<Real>("value"))
+{
 }

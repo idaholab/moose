@@ -53,8 +53,8 @@ InputParameters validParams<SetupMeshAction>()
   return params;
 }
 
-SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+SetupMeshAction::SetupMeshAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -155,4 +155,11 @@ SetupMeshAction::act()
 
   if (_displaced_mesh)
     setupMesh(_displaced_mesh.get());
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupMeshAction::SetupMeshAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
 }

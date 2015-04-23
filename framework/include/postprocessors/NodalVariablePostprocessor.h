@@ -30,7 +30,8 @@ class NodalVariablePostprocessor :
   public MooseVariableInterface
 {
 public:
-  NodalVariablePostprocessor(const std::string & name, InputParameters parameters);
+  NodalVariablePostprocessor(const InputParameters & parameters);
+  NodalVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   MooseVariable & _var;

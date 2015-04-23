@@ -36,7 +36,8 @@ public:
   /**
    * Class constructor
    */
-  FileOutput(const std::string & name, InputParameters & parameters);
+  FileOutput(const InputParameters & parameters);
+  FileOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

@@ -48,7 +48,8 @@ public:
    * @param name Name of the AuxKernel
    * @param parameters The input parameters for this object
    */
-  MaterialAuxBase(const std::string & name, InputParameters parameters);
+  MaterialAuxBase(const InputParameters & parameters);
+  MaterialAuxBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor
@@ -69,15 +70,15 @@ protected:
 };
 
 template<typename T>
-MaterialAuxBase<T>::MaterialAuxBase(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+MaterialAuxBase<T>::MaterialAuxBase(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _prop(getMaterialProperty<T>(getParam<std::string>("property"))),
     _factor(getParam<Real>("factor")),
     _offset(getParam<Real>("offset"))
 {
   std::string prop = getParam<std::string>("property");
   if (!hasBlockMaterialProperty(prop))
-    mooseError("The required material property, "+prop+", is not defined on all blocks for AuxKernel "+name);
+    mooseError("The required material property, "+prop+", is not defined on all blocks for AuxKernel "+name());
 }
 
 #endif //MATERIALAUXBASE_H

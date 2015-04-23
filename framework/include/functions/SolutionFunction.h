@@ -37,7 +37,8 @@ public:
    * @param name The name of the function
    * @param parameters The input parameters for the function
    */
-  SolutionFunction(const std::string & name, InputParameters parameters);
+  SolutionFunction(const InputParameters & parameters);
+  SolutionFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /** Empty destructor
    */

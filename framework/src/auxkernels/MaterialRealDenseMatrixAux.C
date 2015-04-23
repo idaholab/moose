@@ -23,8 +23,8 @@ InputParameters validParams<MaterialRealDenseMatrixAux>()
   return params;
 }
 
-MaterialRealDenseMatrixAux::MaterialRealDenseMatrixAux(const std::string & name, InputParameters parameters) :
-    MaterialAuxBase<DenseMatrix<Real> >(name, parameters),
+MaterialRealDenseMatrixAux::MaterialRealDenseMatrixAux(const InputParameters & parameters) :
+    MaterialAuxBase<DenseMatrix<Real> >(parameters),
     _row(getParam<unsigned int>("row")),
     _col(getParam<unsigned int>("column"))
 {

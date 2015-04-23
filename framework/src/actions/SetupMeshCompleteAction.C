@@ -25,8 +25,8 @@ InputParameters validParams<SetupMeshCompleteAction>()
   return params;
 }
 
-SetupMeshCompleteAction::SetupMeshCompleteAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params) :
+    Action(params)
 {
 }
 
@@ -71,4 +71,11 @@ SetupMeshCompleteAction::act()
     if (_displaced_mesh)
       completeSetup(_displaced_mesh.get());
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupMeshCompleteAction::SetupMeshCompleteAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

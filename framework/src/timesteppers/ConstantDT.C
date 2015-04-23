@@ -25,8 +25,8 @@ InputParameters validParams<ConstantDT>()
   return params;
 }
 
-ConstantDT::ConstantDT(const std::string & name, InputParameters parameters) :
-    TimeStepper(name, parameters),
+ConstantDT::ConstantDT(const InputParameters & parameters) :
+    TimeStepper(parameters),
     _constant_dt(getParam<Real>("dt")),
     _growth_factor(getParam<Real>("growth_factor"))
 {
@@ -42,4 +42,13 @@ Real
 ConstantDT::computeDT()
 {
   return std::min(_constant_dt, _growth_factor * getCurrentDT());
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantDT::ConstantDT(const std::string & deprecated_name, InputParameters parameters) :
+    TimeStepper(deprecated_name, parameters),
+    _constant_dt(getParam<Real>("dt")),
+    _growth_factor(getParam<Real>("growth_factor"))
+{
 }

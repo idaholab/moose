@@ -29,7 +29,8 @@ class RealPropertyOutput : public Kernel
 {
 public:
 
-  RealPropertyOutput(const std::string & name, InputParameters parameters);
+  RealPropertyOutput(const InputParameters & parameters);
+  RealPropertyOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

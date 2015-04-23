@@ -63,7 +63,8 @@ class KernelBase :
   public MeshChangedInterface
 {
 public:
-  KernelBase(const std::string & name, InputParameters parameters);
+  KernelBase(const InputParameters & parameters);
+  KernelBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~KernelBase();
 

@@ -14,10 +14,14 @@
 
 #include "Factory.h"
 #include "MooseApp.h"
+#include "InputParameterWarehouse.h"
 
-Factory::Factory(MooseApp & app):
-    _app(app),
-    _object_count(0)
+// Just for testing...
+#include "Diffusion.h"
+
+
+Factory::Factory(MooseApp & app) :
+    _app(app)
 {
 }
 
@@ -42,12 +46,18 @@ Factory::getValidParams(const std::string & obj_name)
   paramsPtr & func = it->second;
   InputParameters params = (*func)();
   params.addPrivateParam("_moose_app", &_app);
+
   return params;
 }
 
 MooseObjectPtr
-Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters)
+Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
 {
+  // DEPRECATED CREATION
+  if (_name_to_legacy_build_pointer.find(obj_name) != _name_to_legacy_build_pointer.end())
+    return createLegacy(obj_name, name, parameters, tid);
+
+  // Pointer to the object constructor
   std::map<std::string, buildPtr>::iterator it = _name_to_build_pointer.find(obj_name);
 
   // Check if the object is registered
@@ -58,18 +68,43 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   deprecatedMessage(obj_name);
 
   // Check to make sure that all required parameters are supplied
-  parameters.addParam<std::string>("name", name, "The objects short name");
-  parameters.addPrivateParam<MooseObjectID>("_object_id", _object_count);
   parameters.checkParams(name);
 
-  // Increment object counter
-  _object_count++;
+  // Create the actual parameters object that the object will reference
+  InputParameters & params = _app.getInputParameterWarehouse().addInputParameters(name, parameters, tid);
 
   // Actually call the function pointer.  You can do this in one line,
   // but it's a bit more obvious what's happening if you do it in two...
   buildPtr & func = it->second;
+  return (*func)(params);
+}
+
+MooseObjectPtr
+Factory::createLegacy(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
+{
+  // Pointer to the object constructor
+  std::map<std::string, buildLegacyPtr>::iterator it = _name_to_legacy_build_pointer.find(obj_name);
+
+  // Check if the object is registered
+  if (it == _name_to_legacy_build_pointer.end())
+    mooseError("Object '" + obj_name + "' was not registered.");
+
+  // Print out deprecated message, if it exists
+  deprecatedMessage(obj_name);
+
+  // Check to make sure that all required parameters are supplied
+  parameters.set<std::string>("name") = name;
+  parameters.set<THREAD_ID>("_tid") = tid;
+  parameters.checkParams(name);
+
+  mooseDeprecated("MooseObjects using deprecated constructors");
+
+  // Actually call the function pointer.  You can do this in one line,
+  // but it's a bit more obvious what's happening if you do it in two...
+  buildLegacyPtr & func = it->second;
   return (*func)(name, parameters);
 }
+
 
 time_t Factory::parseTime(const std::string t_str)
 {

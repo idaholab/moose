@@ -24,8 +24,8 @@ InputParameters validParams<InitProblemAction>()
 }
 
 
-InitProblemAction::InitProblemAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+InitProblemAction::InitProblemAction(InputParameters params) :
+    Action(params)
 {
 }
 
@@ -42,4 +42,11 @@ InitProblemAction::act()
     if (ex != NULL)
       ex->build();
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+InitProblemAction::InitProblemAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

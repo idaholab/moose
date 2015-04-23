@@ -40,7 +40,8 @@ public:
    * @param name The name of the postprocessor
    * @param parameters The input parameters
    */
-  NodalExtremeValue(const std::string & name, InputParameters parameters);
+  NodalExtremeValue(const InputParameters & parameters);
+  NodalExtremeValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void initialize();
   virtual void execute();
   virtual Real getValue();

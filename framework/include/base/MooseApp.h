@@ -28,6 +28,7 @@
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "OutputWarehouse.h"
+#include "InputParameterWarehouse.h"
 
 // libMesh includes
 #include "libmesh/parallel_object.h"
@@ -297,14 +298,9 @@ public:
    */
   bool hasOutputWarehouse(){ return _output_position_set; }
 
+  ///@{
   /**
-   * The OutputWarehouse for this App
-   * @return Reference to the OutputWarehouse object
-   */
-  OutputWarehouse & getOutputWarehouse();
-
-  /**
-   * Set the OutputWarehouse object
+   * Set/get the OutputWarehouse objects
    * The CoupledExecutioner requires multiple OutputWarehouses, this allows the warehouses
    * to be swapped out.
    *
@@ -312,6 +308,8 @@ public:
    * _alternate_output_warehouse rather than _output_warehouse.
    */
   void setOutputWarehouse(OutputWarehouse * owh){ _alternate_output_warehouse = owh; }
+  OutputWarehouse & getOutputWarehouse();
+  ///@}
 
   /**
    * Get SystemInfo object
@@ -319,8 +317,20 @@ public:
    */
   SystemInfo * getSystemInfo() { return _sys_info.get(); }
 
+
+  ///@{
+  /**
+   * Set/Get the InputParameterWarehouse for MooseObjects or Actions
+   *
+   * The CoupledExecutioner requires multiple parameter warehouse, these methods allow them to be swapped out.
+   */
+  void setInputParameterWarehouse(InputParameterWarehouse * iwh){ _alternate_input_parameter_warehouse = iwh; }
+  InputParameterWarehouse & getInputParameterWarehouse();
+  ///@}
+
 protected:
 
+  MooseApp(InputParameters parameters);
   MooseApp(const std::string & name, InputParameters parameters);
 
   virtual void meshOnly(std::string mesh_file_name);
@@ -367,6 +377,12 @@ protected:
   /// OutputWarehouse object for this App
   OutputWarehouse * _output_warehouse;
 
+  /// Alternate InputParameterWarehouse objects (required for CoupledExecutioner)
+  InputParameterWarehouse * _alternate_input_parameter_warehouse;
+
+  /// Input parameter storage structures
+  InputParameterWarehouse * _input_parameter_warehouse;
+
   /// The Factory responsible for building Actions
   ActionFactory _action_factory;
 
@@ -389,6 +405,7 @@ protected:
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
 
   Factory _factory;
+
 
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;

@@ -38,7 +38,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  VacuumBC(const std::string & name, InputParameters parameters);
+  VacuumBC(const InputParameters & parameters);
+  VacuumBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

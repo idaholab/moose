@@ -27,7 +27,8 @@ class SideSetsFromNormals :
   public AddSideSetsBase
 {
 public:
-  SideSetsFromNormals(const std::string & name, InputParameters parameters);
+  SideSetsFromNormals(const InputParameters & parameters);
+  SideSetsFromNormals(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SideSetsFromNormals();
 

@@ -1,4 +1,5 @@
 #include "EBSDMesh.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<EBSDMesh>()
@@ -136,7 +137,7 @@ EBSDMesh::buildMesh()
   nr[2] = _geometry.n[2];
 
   // set min/max box length
-  InputParameters & params = parameters();
+  InputParameters & params = _app.getInputParameterWarehouse().getInputParameters(_name);
   params.set<Real>("xmin") = _geometry.min[0];
   params.set<Real>("xmax") = nr[0] * _geometry.d[0] + _geometry.min[0];
   params.set<Real>("ymin") = _geometry.min[1];

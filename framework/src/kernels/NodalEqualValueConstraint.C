@@ -22,11 +22,11 @@ InputParameters validParams<NodalEqualValueConstraint>()
   return params;
 }
 
-NodalEqualValueConstraint::NodalEqualValueConstraint(const std::string & name, InputParameters parameters) :
-    NodalScalarKernel(name, parameters)
+NodalEqualValueConstraint::NodalEqualValueConstraint(const InputParameters & parameters) :
+    NodalScalarKernel(parameters)
 {
   if (_node_ids.size() != 2)
-    mooseError(name << ": The number of nodes has to be 2, but it is " << _node_ids.size() << ".");
+    mooseError(name() << ": The number of nodes has to be 2, but it is " << _node_ids.size() << ".");
 
   unsigned int n = coupledComponents("var");
   _value.resize(n);
@@ -68,5 +68,23 @@ NodalEqualValueConstraint::computeJacobian()
 
     ken(k, 0) =  1.;
     ken(k, 1) = -1.;
+  }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NodalEqualValueConstraint::NodalEqualValueConstraint(const std::string & deprecated_name, InputParameters parameters) :
+    NodalScalarKernel(deprecated_name, parameters)
+{
+  if (_node_ids.size() != 2)
+    mooseError(name() << ": The number of nodes has to be 2, but it is " << _node_ids.size() << ".");
+
+  unsigned int n = coupledComponents("var");
+  _value.resize(n);
+  _val_number.resize(n);
+  for (unsigned int k = 0; k < n; k++)
+  {
+    _value[k] = &coupledValue("var", k);
+    _val_number[k] = coupled("var", k);
   }
 }

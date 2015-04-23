@@ -26,7 +26,8 @@ InputParameters validParams<AddKernelAction>();
 class AddKernelAction : public MooseObjectAction
 {
 public:
-  AddKernelAction(const std::string & name, InputParameters params);
+  AddKernelAction(InputParameters params);
+  AddKernelAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

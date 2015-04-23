@@ -35,7 +35,8 @@ public:
    * @param name The name of the Receiver postprocessor
    * @param parameters The input parameters
    */
-  Receiver(const std::string & name, InputParameters parameters);
+  Receiver(const InputParameters & parameters);
+  Receiver(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * No action taken

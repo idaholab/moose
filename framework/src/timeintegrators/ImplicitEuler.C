@@ -23,8 +23,8 @@ InputParameters validParams<ImplicitEuler>()
   return params;
 }
 
-ImplicitEuler::ImplicitEuler(const std::string & name, InputParameters parameters) :
-    TimeIntegrator(name, parameters)
+ImplicitEuler::ImplicitEuler(const InputParameters & parameters) :
+    TimeIntegrator(parameters)
 {
 }
 
@@ -49,4 +49,11 @@ ImplicitEuler::postStep(NumericVector<Number> & residual)
   residual += _Re_time;
   residual += _Re_non_time;
   residual.close();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ImplicitEuler::ImplicitEuler(const std::string & deprecated_name, InputParameters parameters) :
+    TimeIntegrator(deprecated_name, parameters)
+{
 }

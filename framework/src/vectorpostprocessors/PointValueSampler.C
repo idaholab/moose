@@ -24,8 +24,21 @@ InputParameters validParams<PointValueSampler>()
   return params;
 }
 
-PointValueSampler::PointValueSampler(const std::string & name, InputParameters parameters) :
-    PointSamplerBase(name, parameters)
+PointValueSampler::PointValueSampler(const InputParameters & parameters) :
+    PointSamplerBase(parameters)
+{
+  _points = getParam<std::vector<Point> >("points");
+
+  _ids.resize(_points.size());
+
+  for (unsigned int i=0; i<_points.size(); i++)
+    _ids[i] = i;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PointValueSampler::PointValueSampler(const std::string & deprecated_name, InputParameters parameters) :
+    PointSamplerBase(deprecated_name, parameters)
 {
   _points = getParam<std::vector<Point> >("points");
 

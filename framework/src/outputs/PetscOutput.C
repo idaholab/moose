@@ -54,8 +54,8 @@ InputParameters validParams<PetscOutput>()
   return params;
 }
 
-PetscOutput::PetscOutput(const std::string & name, InputParameters & parameters) :
-    Output(name, parameters),
+PetscOutput::PetscOutput(const InputParameters & parameters) :
+    Output(parameters),
     _nonlinear_iter(0),
     _linear_iter(0),
     _on_linear_residual(false),
@@ -208,4 +208,54 @@ PetscOutput::time()
     return _linear_time;
   else
     return Output::time();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PetscOutput::PetscOutput(const std::string & deprecated_name, InputParameters parameters) :
+    Output(deprecated_name, parameters),
+    _nonlinear_iter(0),
+    _linear_iter(0),
+    _on_linear_residual(false),
+    _on_nonlinear_residual(false),
+    _nonlinear_dt_divisor(getParam<Real>("nonlinear_residual_dt_divisor")),
+    _linear_dt_divisor(getParam<Real>("linear_residual_dt_divisor")),
+    _nonlinear_start_time(-std::numeric_limits<Real>::max()),
+    _linear_start_time(-std::numeric_limits<Real>::max()),
+    _nonlinear_end_time(std::numeric_limits<Real>::max()),
+    _linear_end_time(std::numeric_limits<Real>::max())
+{
+  // Output toggle support
+  if (getParam<bool>("output_linear"))
+    _output_on.push_back("linear");
+  if (getParam<bool>("output_nonlinear"))
+    _output_on.push_back("nonlinear");
+
+  // **** DEPRECATED PARAMETER SUPPORT ****
+  if (getParam<bool>("linear_residuals"))
+    _output_on.push_back("linear");
+  if (getParam<bool>("nonlinear_residuals"))
+    _output_on.push_back("nonlinear");
+
+  // Nonlinear residual start-time supplied by user
+  if (isParamValid("nonlinear_residual_start_time"))
+  {
+    _nonlinear_start_time = getParam<Real>("nonlinear_residual_start_time");
+    _output_on.push_back("nonlinear");
+  }
+
+  // Nonlinear residual end-time supplied by user
+  if (isParamValid("nonlinear_residual_end_time"))
+    _nonlinear_end_time = getParam<Real>("nonlinear_residual_end_time");
+
+  // Linear residual start-time supplied by user
+  if (isParamValid("linear_residual_start_time"))
+  {
+    _linear_start_time = getParam<Real>("linear_residual_start_time");
+    _output_on.push_back("linear");
+  }
+
+  // Linear residual end-time supplied by user
+  if (isParamValid("linear_residual_end_time"))
+    _linear_end_time = getParam<Real>("linear_residual_end_time");
 }

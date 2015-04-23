@@ -37,8 +37,8 @@ InputParameters validParams<MultiAppUserObjectTransfer>()
   return params;
 }
 
-MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _user_object_name(getParam<UserObjectName>("user_object")),
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
@@ -57,7 +57,7 @@ MultiAppUserObjectTransfer::initialSetup()
 void
 MultiAppUserObjectTransfer::execute()
 {
-  _console << "Beginning MultiAppUserObjectTransfer " << _name << std::endl;
+  _console << "Beginning MultiAppUserObjectTransfer " << name() << std::endl;
 
   switch (_direction)
   {
@@ -252,5 +252,17 @@ MultiAppUserObjectTransfer::execute()
     }
   }
 
-  _console << "Finished MultiAppUserObjectTransfer " << _name << std::endl;
+  _console << "Finished MultiAppUserObjectTransfer " << name() << std::endl;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const std::string & deprecated_name, InputParameters parameters) :
+    MultiAppTransfer(deprecated_name, parameters),
+    _to_var_name(getParam<AuxVariableName>("variable")),
+    _user_object_name(getParam<UserObjectName>("user_object")),
+    _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
+{
+  // This transfer does not work with ParallelMesh
+  _fe_problem.mesh().errorIfParallelDistribution("MultiAppUserObjectTransfer");
 }

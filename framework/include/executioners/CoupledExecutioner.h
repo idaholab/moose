@@ -23,6 +23,7 @@ class ActionWarehouse;
 class FEProblem;
 class Parser;
 class OutputWarehouse;
+class InputParameterWarehouse;
 
 
 template<>
@@ -34,7 +35,8 @@ InputParameters validParams<CoupledExecutioner>();
 class CoupledExecutioner : public Executioner
 {
 public:
-  CoupledExecutioner(const std::string & name, InputParameters parameters);
+  CoupledExecutioner(const InputParameters & parameters);
+  CoupledExecutioner(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CoupledExecutioner();
 
   virtual Problem & problem();
@@ -101,6 +103,9 @@ protected:
   /// Vector of OutputWarehouse object pointers
   std::vector<OutputWarehouse *> _owhs;
 
+  /// Vector of InputParameterWarehouse object pointers
+  std::vector<InputParameterWarehouse *> _input_parameter_warehouse;
+
   /**
    * Create an action that adds a variable
    * @param task Type of action we are looking for
@@ -125,6 +130,12 @@ protected:
   virtual FEProblem * getProblemByName(const std::string & name);
 
   virtual Executioner * getExecutionerByName(const std::string & name);
+
+  /**
+   * A method for swapping the various warehouses between MooseApps
+   * @param i The coupled executioner index
+   */
+  void updateWarehouses(const unsigned int & i);
 };
 
 

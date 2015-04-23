@@ -26,7 +26,8 @@ InputParameters validParams<NumNodes>();
 class NumNodes : public GeneralPostprocessor
 {
 public:
-  NumNodes(const std::string & name, InputParameters parameters);
+  NumNodes(const InputParameters & parameters);
+  NumNodes(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

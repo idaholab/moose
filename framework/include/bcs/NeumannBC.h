@@ -34,7 +34,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  NeumannBC(const std::string & name, InputParameters parameters);
+  NeumannBC(const InputParameters & parameters);
+  NeumannBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 
 protected:

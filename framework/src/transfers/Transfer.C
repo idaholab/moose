@@ -35,8 +35,8 @@ InputParameters validParams<Transfer>()
   return params;
 }
 
-Transfer::Transfer(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+Transfer::Transfer(const InputParameters & parameters) :
+    MooseObject(parameters),
     SetupInterface(parameters),
     Restartable(parameters, "Transfers"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
@@ -69,4 +69,17 @@ Transfer::find_sys(EquationSystems & es, const std::string & var_name) const
   mooseAssert(sys, "Unable to find variable " + var_name);
 
   return sys;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Transfer::Transfer(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    SetupInterface(parameters),
+    Restartable(parameters, "Transfers"),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
+    _tid(parameters.get<THREAD_ID>("_tid"))
+{
 }

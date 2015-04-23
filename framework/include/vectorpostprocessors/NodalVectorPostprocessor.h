@@ -31,7 +31,8 @@ class NodalVectorPostprocessor :
   public VectorPostprocessor
 {
 public:
-  NodalVectorPostprocessor(const std::string & name, InputParameters parameters);
+  NodalVectorPostprocessor(const InputParameters & parameters);
+  NodalVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!

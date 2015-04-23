@@ -8,6 +8,7 @@
 #include "Factory.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -65,6 +66,6 @@ PolycrystalRandomICAction::act()
     poly_params.set<unsigned int>("typ") = _random_type;
 
     //Add initial condition
-    _problem->addInitialCondition("PolycrystalRandomIC", "InitialCondition", poly_params);
+    _problem->addInitialCondition("PolycrystalRandomIC", "ICs/PolycrystalICs/PolycrystalRandomIC_" + Moose::stringify(op), poly_params);
   }
 }

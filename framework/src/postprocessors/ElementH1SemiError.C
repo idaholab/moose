@@ -23,8 +23,8 @@ InputParameters validParams<ElementH1SemiError>()
   return params;
 }
 
-ElementH1SemiError::ElementH1SemiError(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(name, parameters),
+ElementH1SemiError::ElementH1SemiError(const InputParameters & parameters) :
+    ElementIntegralVariablePostprocessor(parameters),
     _func(getFunction("function"))
 {
 }
@@ -40,4 +40,12 @@ ElementH1SemiError::computeQpIntegral()
 {
   RealGradient diff = _grad_u[_qp]-_func.gradient(_t, _q_point[_qp]);
   return diff*diff;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementH1SemiError::ElementH1SemiError(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralVariablePostprocessor(deprecated_name, parameters),
+    _func(getFunction("function"))
+{
 }

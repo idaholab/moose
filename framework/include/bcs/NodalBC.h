@@ -37,7 +37,8 @@ class NodalBC :
   public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
-  NodalBC(const std::string & name, InputParameters parameters);
+  NodalBC(const InputParameters & parameters);
+  NodalBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void computeResidual(NumericVector<Number> & residual);
   virtual void computeJacobian();

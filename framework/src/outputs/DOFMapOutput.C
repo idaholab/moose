@@ -43,8 +43,8 @@ InputParameters validParams<DOFMapOutput>()
   return params;
 }
 
-DOFMapOutput::DOFMapOutput(const std::string & name, InputParameters parameters) :
-    BasicOutput<FileOutput>(name, parameters),
+DOFMapOutput::DOFMapOutput(const InputParameters & parameters) :
+    BasicOutput<FileOutput>(parameters),
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _system_name(getParam<std::string>("system_name")),
@@ -196,4 +196,25 @@ DOFMapOutput::output(const ExecFlagType & /*type*/)
   // Write the actual file
   if (_write_file)
     writeStreamToFile();
+}
+
+// DEPRECATED CONSTRUCTOR
+DOFMapOutput::DOFMapOutput(const std::string & name, InputParameters parameters) :
+    BasicOutput<FileOutput>(name, parameters),
+    _write_file(getParam<bool>("output_file")),
+    _write_screen(getParam<bool>("output_screen")),
+    _system_name(getParam<std::string>("system_name")),
+    _mesh(_problem_ptr->mesh())
+{
+  // Set output coloring
+  if (Moose::_color_console)
+  {
+    char * term_env = getenv("TERM");
+    if (term_env)
+    {
+      std::string term(term_env);
+      if (term != "xterm-256color" && term != "xterm")
+        Moose::_color_console = false;
+    }
+  }
 }

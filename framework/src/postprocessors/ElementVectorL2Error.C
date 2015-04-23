@@ -28,8 +28,8 @@ InputParameters validParams<ElementVectorL2Error>()
   return params;
 }
 
-ElementVectorL2Error::ElementVectorL2Error(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters),
+ElementVectorL2Error::ElementVectorL2Error(const InputParameters & parameters) :
+    ElementIntegralPostprocessor(parameters),
     _funcx(getFunction("function_x")),
     _funcy(getFunction("function_y")),
     _funcz(getFunction("function_z")),
@@ -61,4 +61,17 @@ ElementVectorL2Error::computeQpIntegral()
   func_val(2) = _funcz.value(_t, _q_point[_qp]);
 
   return (sol_val - func_val).size_sq(); // dot product of difference vector
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementVectorL2Error::ElementVectorL2Error(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralPostprocessor(deprecated_name, parameters),
+    _funcx(getFunction("function_x")),
+    _funcy(getFunction("function_y")),
+    _funcz(getFunction("function_z")),
+    _u(coupledValue("var_x")),
+    _v(coupledValue("var_y")),
+    _w(coupledValue("var_z"))
+{
 }

@@ -34,8 +34,8 @@ InputParameters validParams<XDA>()
   return params;
 }
 
-XDA::XDA(const std::string & name, InputParameters parameters) :
-    BasicOutput<OversampleOutput> (name, parameters),
+XDA::XDA(const InputParameters & parameters) :
+    BasicOutput<OversampleOutput> (parameters),
     _binary(getParam<bool>("_binary"))
 {
 }
@@ -69,4 +69,10 @@ XDA::filename()
          << std::right
          << _file_num;
   return output.str();
+}
+
+XDA::XDA(const std::string & name, InputParameters parameters) :
+    BasicOutput<OversampleOutput> (name, parameters),
+    _binary(getParam<bool>("_binary"))
+{
 }

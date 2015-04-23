@@ -29,6 +29,7 @@
 #include "CommandLine.h"
 #include "Console.h"
 #include "MultiMooseEnum.h"
+#include "Executioner.h"
 
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
@@ -164,9 +165,10 @@ void petscSetupDM (NonlinearSystem & nl) {
 void
 petscSetOptions(FEProblem & problem)
 {
-        MultiMooseEnum             petsc_options = problem.parameters().get<MultiMooseEnum>("petsc_options");
-  const std::vector<std::string> & petsc_options_inames = problem.parameters().get<std::vector<std::string> >("petsc_inames");
-  const std::vector<std::string> & petsc_options_values = problem.parameters().get<std::vector<std::string> >("petsc_values");
+  MultiMooseEnum petsc_options("", "", true);
+  std::vector<std::string> petsc_options_inames;
+  std::vector<std::string> petsc_options_values;
+  problem.getPetscOptions(petsc_options, petsc_options_inames, petsc_options_values);
 
   if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("PETSc names and options are not the same length");

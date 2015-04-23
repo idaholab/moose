@@ -31,8 +31,8 @@ InputParameters validParams<MultiAppDTKUserObjectTransfer>()
   return params;
 }
 
-MultiAppDTKUserObjectTransfer::MultiAppDTKUserObjectTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppDTKUserObjectTransfer::MultiAppDTKUserObjectTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     MooseVariableInterface(parameters, true),
     _user_object_name(getParam<UserObjectName>("user_object")),
     _setup(false)

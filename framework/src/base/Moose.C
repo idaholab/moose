@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+
 #include "libmesh/petsc_macro.h"
 
 #include "Moose.h"
@@ -153,7 +154,7 @@
 #include "ElementVectorL2Error.h"
 #include "EmptyPostprocessor.h"
 #include "NodalVariableValue.h"
-
+#include "EigenValueReporter.h"
 #include "NumDOFs.h"
 #include "TimestepSize.h"
 #include "RunTime.h"
@@ -390,6 +391,11 @@ static bool registered = false;
 void
 registerObjects(Factory & factory)
 {
+
+#undef registerObject
+#define registerObject(name) factory.reg<name>(stringifyName(name))
+
+
   // mesh
   registerMesh(FileMesh);
   registerMesh(GeneratedMesh);
@@ -499,7 +505,6 @@ registerObjects(Factory & factory)
   registerNamedFunction(MooseParsedVectorFunction, "ParsedVectorFunction");
   registerFunction(PiecewiseConstant);
   registerFunction(PiecewiseLinear);
-  registerDeprecatedObjectName(PiecewiseLinear, "PiecewiseLinearFile", "02/27/2014 00:00");
   registerFunction(SolutionFunction);
   registerFunction(PiecewiseBilinear);
   registerFunction(SplineFunction);
@@ -559,6 +564,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
   registerPostprocessor(NumPicardIterations);
+  registerPostprocessor(EigenValueReporter);
   registerPostprocessor(FunctionSideIntegral);
 
   // vector PPS
@@ -700,6 +706,10 @@ registerObjects(Factory & factory)
   registerNamedOutput(DOFMapOutput, "DOFMap");
 
   registered = true;
+
+#undef registerObject
+#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
+
 }
 
 void
@@ -909,6 +919,11 @@ addActionTypes(Syntax & syntax)
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
+
+#undef registerAction
+#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+
+
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
   registerAction(SetupMeshAction, "setup_mesh");
@@ -935,10 +950,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");
-  registerAction(AddVariableAction, "add_ic");     // initial condition shortcut syntax
-
   registerAction(AddAuxVariableAction, "add_aux_variable");
-  registerAction(AddAuxVariableAction, "add_ic");  // initial condition shortcut syntax
 
   registerAction(CopyNodalVarsAction, "check_copy_nodal_vars");
   registerAction(CopyNodalVarsAction, "copy_nodal_vars");
@@ -1002,6 +1014,9 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   // TODO: Why is this here?
   registerTask("finish_input_file_output", false);
   registerAction(EmptyAction, "finish_input_file_output");
+
+#undef registerAction
+#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 }
 
 void

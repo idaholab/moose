@@ -23,8 +23,8 @@ InputParameters validParams<PresetBC>()
 }
 
 
-PresetBC::PresetBC(const std::string & name, InputParameters parameters) :
-  PresetNodalBC(name, parameters),
+PresetBC::PresetBC(const InputParameters & parameters) :
+  PresetNodalBC(parameters),
   _value(getParam<Real>("value"))
 {
 
@@ -34,4 +34,13 @@ Real
 PresetBC::computeQpValue()
 {
   return _value;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PresetBC::PresetBC(const std::string & deprecated_name, InputParameters parameters) :
+  PresetNodalBC(deprecated_name, parameters),
+  _value(getParam<Real>("value"))
+{
+
 }

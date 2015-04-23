@@ -130,12 +130,13 @@ AdvancedOutput<T>::enableOutputTypes(const std::string & names)
 
 // Constructor
 template<class T>
-AdvancedOutput<T>::AdvancedOutput(const std::string & name, InputParameters & parameters) :
-    T(name, parameters)
+AdvancedOutput<T>::AdvancedOutput(const InputParameters & parameters) :
+    T(parameters)
 {
   T::_is_advanced = true;
   T::_advanced_output_on = OutputOnWarehouse(T::_output_on, parameters);
 }
+
 
 template<class T>
 void
@@ -148,7 +149,7 @@ AdvancedOutput<T>::initialSetup()
 
   // Check that enable[disable]OutputTypes was called
   if (!T::isParamValid("_output_valid_params_was_called"))
-    mooseError("The static method AdvancedOutput<T>::enableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '" << T::_name << "'");
+    mooseError("The static method AdvancedOutput<T>::enableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '" << T::name() << "'");
 
   // Initialize the available output
   initAvailableLists();
@@ -216,49 +217,49 @@ template<class T>
 void
 AdvancedOutput<T>::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for the output object named '" << T::_name << "'");
+  mooseError("Individual output of nodal variables is not support for the output object named '" << T::name() << "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for this output object named '" << T::_name << "'");
+  mooseError("Individual output of elemental variables is not support for this output object named '" << T::name() << "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for this output object named '" << T::_name << "'");
+  mooseError("Individual output of postprocessors is not support for this output object named '" << T::name() << "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputVectorPostprocessors()
 {
-  mooseError("Individual output of VectorPostprocessors is not support for this output object named '" << T::_name << "'");
+  mooseError("Individual output of VectorPostprocessors is not support for this output object named '" << T::name() << "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for this output object named '" << T::_name << "'");
+  mooseError("Individual output of scalars is not support for this output object named '" << T::name() << "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputSystemInformation()
 {
-  mooseError("Output of system information is not support for this output object named '" << T::_name << "'");
+  mooseError("Output of system information is not support for this output object named '" << T::name() << "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputInput()
 {
-  mooseError("Output of the input file information is not support for this output object named '" << T::_name << "'");
+  mooseError("Output of the input file information is not support for this output object named '" << T::name() << "'");
 }
 
 // General outputStep() method
@@ -590,7 +591,7 @@ AdvancedOutput<T>::initOutputList(OutputData & data)
 
   // Append the list from OutputInterface objects
   std::set<std::string> interface_hide;
-  T::_app.getOutputWarehouse().buildInterfaceHideVariables(T::_name, interface_hide);
+  T::_app.getOutputWarehouse().buildInterfaceHideVariables(T::name(), interface_hide);
   hide.insert(interface_hide.begin(), interface_hide.end());
 
   // Both show and hide are empty (show all available)

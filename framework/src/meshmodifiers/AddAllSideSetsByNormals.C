@@ -30,8 +30,8 @@ InputParameters validParams<AddAllSideSetsByNormals>()
   return params;
 }
 
-AddAllSideSetsByNormals::AddAllSideSetsByNormals(const std::string & name, InputParameters parameters):
-    AddSideSetsBase(name, parameters)
+AddAllSideSetsByNormals::AddAllSideSetsByNormals(const InputParameters & parameters):
+    AddSideSetsBase(parameters)
 {
 }
 
@@ -115,4 +115,11 @@ AddAllSideSetsByNormals::getNextBoundaryID()
   _mesh_boundary_ids.insert(next_id);
 
   return next_id;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddAllSideSetsByNormals::AddAllSideSetsByNormals(const std::string & deprecated_name, InputParameters parameters):
+    AddSideSetsBase(deprecated_name, parameters)
+{
 }

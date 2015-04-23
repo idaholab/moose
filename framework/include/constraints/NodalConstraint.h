@@ -30,7 +30,8 @@ class NodalConstraint :
   public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
-  NodalConstraint(const std::string & name, InputParameters parameters);
+  NodalConstraint(const InputParameters & parameters);
+  NodalConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalConstraint();
 
   /**

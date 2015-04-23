@@ -21,8 +21,8 @@ InputParameters validParams<LineMaterialRealSampler>()
   return params;
 }
 
-LineMaterialRealSampler::LineMaterialRealSampler(const std::string & name, InputParameters parameters) :
-    LineMaterialSamplerBase<Real>(name, parameters)
+LineMaterialRealSampler::LineMaterialRealSampler(const InputParameters & parameters) :
+    LineMaterialSamplerBase<Real>(parameters)
 {
 }
 

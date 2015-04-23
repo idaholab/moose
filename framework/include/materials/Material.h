@@ -84,7 +84,8 @@ class Material :
   public OutputInterface
 {
 public:
-  Material(const std::string & name, InputParameters parameters);
+  Material(const InputParameters & parameters);
+  Material(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Material();
 
@@ -133,12 +134,6 @@ public:
 
   void checkStatefulSanity() const;
 
-  /**
-   * Get the list of output objects that this class is restricted
-   * @return A vector of OutputNames
-   */
-  std::set<OutputName> getOutputs();
-
 protected:
   SubProblem & _subproblem;
 
@@ -164,7 +159,6 @@ protected:
   unsigned int & _current_side;
 
   MooseMesh & _mesh;
-//  unsigned int _dim;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;

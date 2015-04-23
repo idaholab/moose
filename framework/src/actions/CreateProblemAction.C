@@ -42,8 +42,8 @@ InputParameters validParams<CreateProblemAction>()
 }
 
 
-CreateProblemAction::CreateProblemAction(const std::string & name, InputParameters parameters) :
-    MooseObjectAction(name, parameters),
+CreateProblemAction::CreateProblemAction(InputParameters parameters) :
+    MooseObjectAction(parameters),
     _problem_name(getParam<std::string>("name")),
     _blocks(getParam<std::vector<SubdomainName> >("block")),
     _coord_sys(getParam<MultiMooseEnum>("coord_type")),
@@ -60,6 +60,13 @@ CreateProblemAction::act()
     {
       _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
       _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
+
+#ifdef LIBMESH_HAVE_PETSC
+      // put in empty arrays for PETSc options
+      _moose_object_pars.set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
+      _moose_object_pars.set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
+      _moose_object_pars.set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
+#endif
       _problem = MooseSharedNamespace::dynamic_pointer_cast<FEProblem>(_factory.create(_type, _problem_name, _moose_object_pars));
       if (!_problem.get())
         mooseError("Problem has to be of a FEProblem type");
@@ -72,4 +79,15 @@ CreateProblemAction::act()
     _problem->legacyUoAuxComputation() = _pars.isParamValid("use_legacy_uo_aux_computation") ? getParam<bool>("use_legacy_uo_aux_computation") : _app.legacyUoAuxComputationDefault();
     _problem->legacyUoInitialization() = _pars.isParamValid("use_legacy_uo_initialization") ? getParam<bool>("use_legacy_uo_initialization") : _app.legacyUoInitializationDefault();
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CreateProblemAction::CreateProblemAction(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObjectAction(deprecated_name, parameters),
+    _problem_name(getParam<std::string>("name")),
+    _blocks(getParam<std::vector<SubdomainName> >("block")),
+    _coord_sys(getParam<MultiMooseEnum>("coord_type")),
+    _fe_cache(getParam<bool>("fe_cache"))
+{
 }

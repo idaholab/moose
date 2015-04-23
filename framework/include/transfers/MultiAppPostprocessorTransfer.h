@@ -30,7 +30,8 @@ class MultiAppPostprocessorTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppPostprocessorTransfer(const std::string & name, InputParameters parameters);
+  MultiAppPostprocessorTransfer(const InputParameters & parameters);
+  MultiAppPostprocessorTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppPostprocessorTransfer() {}
 
   virtual void execute();

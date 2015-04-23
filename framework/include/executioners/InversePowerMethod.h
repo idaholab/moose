@@ -27,7 +27,8 @@ class InversePowerMethod : public EigenExecutionerBase
 {
 public:
 
-  InversePowerMethod(const std::string & name, InputParameters parameters);
+  InversePowerMethod(const InputParameters & parameters);
+  InversePowerMethod(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void execute();
 
@@ -35,7 +36,7 @@ protected:
   virtual void takeStep();
 
   /// postprocessor for evaluating |x-xprevious|
-  Real * _solution_diff;
+  const PostprocessorValue * _solution_diff;
   /// minimum number of power iterations
   const unsigned int & _min_iter;
   /// maximum number of power iterations

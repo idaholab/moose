@@ -26,7 +26,8 @@ InputParameters validParams<SetupMeshCompleteAction>();
 class SetupMeshCompleteAction : public Action
 {
 public:
-  SetupMeshCompleteAction(const std::string & name, InputParameters params);
+  SetupMeshCompleteAction(InputParameters params);
+  SetupMeshCompleteAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   bool completeSetup(MooseMesh *mesh);
 

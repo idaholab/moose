@@ -25,7 +25,8 @@
 class PiecewiseLinear : public Piecewise
 {
 public:
-  PiecewiseLinear(const std::string & name, InputParameters parameters);
+  PiecewiseLinear(const InputParameters & parameters);
+  PiecewiseLinear(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~PiecewiseLinear();
 
   /**

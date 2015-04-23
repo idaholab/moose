@@ -51,7 +51,8 @@ class ElementUserObject :
   public ZeroInterface
 {
 public:
-  ElementUserObject(const std::string & name, InputParameters parameters);
+  ElementUserObject(const InputParameters & parameters);
+  ElementUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * This function will get called on each geometric object this postprocessor acts on

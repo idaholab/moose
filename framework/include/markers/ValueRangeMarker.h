@@ -28,7 +28,8 @@ InputParameters validParams<ValueRangeMarker>();
 class ValueRangeMarker : public QuadraturePointMarker
 {
 public:
-  ValueRangeMarker(const std::string & name, InputParameters parameters);
+  ValueRangeMarker(const InputParameters & parameters);
+  ValueRangeMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ValueRangeMarker(){};
 
 protected:

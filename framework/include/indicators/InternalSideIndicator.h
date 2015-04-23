@@ -20,7 +20,7 @@
 #include "Indicator.h"
 #include "NeighborCoupleable.h"
 #include "ScalarCoupleable.h"
-#include "MooseVariableInterface.h"
+#include "NeighborMooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
 
 #include "Assembly.h"
@@ -53,7 +53,8 @@ public:
    * Factory constructor initializes all internal references needed for indicator computation.
    *
    */
-  InternalSideIndicator(const std::string & name, InputParameters parameters);
+  InternalSideIndicator(const InputParameters & parameters);
+  InternalSideIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~InternalSideIndicator();
 

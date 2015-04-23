@@ -28,8 +28,8 @@ InputParameters validParams<Piecewise>()
   return params;
 }
 
-Piecewise::Piecewise(const std::string & name, InputParameters parameters) :
-  Function(name, parameters),
+Piecewise::Piecewise(const InputParameters & parameters) :
+  Function(parameters),
   _scale_factor( getParam<Real>("scale_factor") ),
   _linear_interp( NULL ),
   _has_axis(false),
@@ -57,7 +57,7 @@ Piecewise::Piecewise(const std::string & name, InputParameters parameters) :
     }
     else
     {
-      mooseError("Invalid option for format: "+format+" in "+_name+".  Valid options are 'rows' and 'columns'.");
+      mooseError("Invalid option for format: "+format+" in "+name()+".  Valid options are 'rows' and 'columns'.");
     }
   }
   else if ((parameters.isParamValid("x")) ||
@@ -214,5 +214,88 @@ Piecewise::parseColumns( std::vector<Real> & x, std::vector<Real> & y )
       x.push_back(scratch[0]);
       y.push_back(scratch[1]);
     }
+  }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Piecewise::Piecewise(const std::string & deprecated_name, InputParameters parameters) :
+  Function(deprecated_name, parameters),
+  _scale_factor( getParam<Real>("scale_factor") ),
+  _linear_interp( NULL ),
+  _has_axis(false),
+  _data_file_name(isParamValid("data_file") ? getParam<std::string>("data_file") : "")
+{
+  std::vector<Real> x;
+  std::vector<Real> y;
+
+  if (_data_file_name != "")
+  {
+    if ((parameters.isParamValid("x")) ||
+        (parameters.isParamValid("y")) ||
+        (parameters.isParamValid("xy_data")))
+    {
+      mooseError("In Piecewise: Cannot specify 'data_file' and 'x', 'y', or 'xy_data' together.");
+    }
+    std::string format = getParam<std::string>("format");
+    if (format.compare(0, 4, "rows")==0)
+    {
+      parseRows( x, y );
+    }
+    else if (format.compare(0, 7, "columns")==0)
+    {
+      parseColumns( x, y);
+    }
+    else
+    {
+      mooseError("Invalid option for format: "+format+" in "+name()+".  Valid options are 'rows' and 'columns'.");
+    }
+  }
+  else if ((parameters.isParamValid("x")) ||
+           (parameters.isParamValid("y")))
+  {
+    if (! ((parameters.isParamValid("x")) &&
+          (parameters.isParamValid("y"))))
+    {
+      mooseError("In Piecewise: Both 'x' and 'y' must be specified if either one is specified.");
+    }
+    if (parameters.isParamValid("xy_data"))
+    {
+      mooseError("In Piecewise: Cannot specify 'x', 'y', and 'xy_data' together.");
+    }
+    x = getParam<std::vector<Real> >("x");
+    y = getParam<std::vector<Real> >("y");
+  }
+  else if (parameters.isParamValid("xy_data"))
+  {
+    std::vector<Real> xy = getParam<std::vector<Real> >("xy_data");
+    unsigned int xy_size = xy.size();
+    if (xy_size % 2 != 0)
+    {
+      mooseError("In Piecewise: Length of data provided in 'xy_data' must be a multiple of 2.");
+    }
+    unsigned int x_size = xy_size/2;
+    x.reserve(x_size);
+    y.reserve(x_size);
+    for (unsigned int i=0; i<xy_size/2; ++i)
+    {
+      x.push_back(xy[i*2]);
+      y.push_back(xy[i*2+1]);
+    }
+  }
+  else
+  {
+    mooseError("In Piecewise: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified.");
+  }
+
+  _linear_interp = new LinearInterpolation( x, y );
+
+
+  if (parameters.isParamValid("axis"))
+  {
+    _axis=parameters.get<int>("axis");
+    if (_axis < 0 || _axis > 2)
+      mooseError("In Piecewise function axis="<<_axis<<" outside allowable range (0-2).");
+    _has_axis = true;
   }
 }

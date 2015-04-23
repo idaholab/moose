@@ -23,9 +23,9 @@ InputParameters validParams<Receiver>()
   return params;
 }
 
-Receiver::Receiver(const std::string & name, InputParameters params) :
-    GeneralPostprocessor(name, params),
-    _my_value(getPostprocessorValueByName(name))
+Receiver::Receiver(const InputParameters & params) :
+    GeneralPostprocessor(params),
+    _my_value(getPostprocessorValueByName(name()))
 {
 }
 
@@ -41,4 +41,12 @@ Receiver::initialSetup()
 {
   if (isParamValid("default"))
     _fe_problem.getPostprocessorValue(_pp_name) = getParam<Real>("default");
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Receiver::Receiver(const std::string & deprecated_name, InputParameters params) :
+    GeneralPostprocessor(deprecated_name, params),
+    _my_value(getPostprocessorValueByName(name()))
+{
 }

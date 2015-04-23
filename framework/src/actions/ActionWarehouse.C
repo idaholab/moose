@@ -79,7 +79,7 @@ ActionWarehouse::addActionBlock(MooseSharedPointer<Action> action)
    * objects exist in the system, we are just using the constants directly.
    */
 
-  std::string registered_identifier = action->getParams().get<std::string>("registered_identifier");
+  std::string registered_identifier = action->parameters().get<std::string>("registered_identifier");
   std::set<std::string> tasks;
 
   if (_show_parser)
@@ -304,7 +304,6 @@ ActionWarehouse::executeAllActions()
     _console << "\n[DBG][ACT] Executing actions:" << std::endl;
   }
 
-
   for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
   {
     std::string task = *it;
@@ -365,7 +364,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
     bool is_parent;
     if (_syntax.isAssociated(name, &is_parent) != "")
      {
-      InputParameters params = (*i)->getParams();
+      InputParameters params = (*i)->parameters();
 
       // TODO: Do we need to insert more nodes for each task?
       tree.insertNode(name, *tasks.begin(), true, &params);

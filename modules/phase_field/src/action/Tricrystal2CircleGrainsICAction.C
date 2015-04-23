@@ -8,6 +8,7 @@
 #include "Factory.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -62,6 +63,6 @@ Tricrystal2CircleGrainsICAction::act()
 
 
     //Add initial condition
-    _problem->addInitialCondition("Tricrystal2CircleGrainsIC", "InitialCondition", poly_params);
+    _problem->addInitialCondition("Tricrystal2CircleGrainsIC", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC_" + Moose::stringify(op), poly_params);
   }
 }

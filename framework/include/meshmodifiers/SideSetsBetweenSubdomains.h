@@ -26,7 +26,8 @@ class SideSetsBetweenSubdomains :
   public MeshModifier
 {
 public:
-  SideSetsBetweenSubdomains(const std::string & name, InputParameters parameters);
+  SideSetsBetweenSubdomains(const InputParameters & parameters);
+  SideSetsBetweenSubdomains(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SideSetsBetweenSubdomains();
 

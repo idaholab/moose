@@ -22,8 +22,8 @@ InputParameters validParams<CoupledProblem>()
 }
 
 
-CoupledProblem::CoupledProblem(const std::string & name, InputParameters params) :
-    Problem(name, params)
+CoupledProblem::CoupledProblem(const InputParameters & params) :
+    Problem(params)
 {
 }
 
@@ -33,5 +33,11 @@ CoupledProblem::~CoupledProblem()
 
 void
 CoupledProblem::init()
+{
+}
+
+// DEPRECATED CONSTRUCTOR
+CoupledProblem::CoupledProblem(const std::string & deprecated_name, InputParameters params) :
+    Problem(deprecated_name, params)
 {
 }

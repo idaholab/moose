@@ -40,12 +40,12 @@ InputParameters validParams<InternalSideIndicator>()
 }
 
 
-InternalSideIndicator::InternalSideIndicator(const std::string & name, InputParameters parameters) :
-    Indicator(name, parameters),
+InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters) :
+    Indicator(parameters),
     NeighborCoupleable(parameters, false, false),
     ScalarCoupleable(parameters),
     NeighborMooseVariableInterface(parameters, false),
-    _field_var(_sys.getVariable(_tid, name)),
+    _field_var(_sys.getVariable(_tid, name())),
 
     _current_elem(_assembly.elem()),
     _neighbor_elem(_assembly.neighbor()),
@@ -122,4 +122,45 @@ InternalSideIndicator::finalize()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     _solution.set(_field_var.nodalDofIndex(), std::sqrt(value)/(Real)n_flux_faces);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+InternalSideIndicator::InternalSideIndicator(const std::string & deprecated_name, InputParameters parameters) :
+    Indicator(deprecated_name, parameters),
+    NeighborCoupleable(parameters, false, false),
+    ScalarCoupleable(parameters),
+    NeighborMooseVariableInterface(parameters, false),
+    _field_var(_sys.getVariable(_tid, name())),
+
+    _current_elem(_assembly.elem()),
+    _neighbor_elem(_assembly.neighbor()),
+
+    _current_side(_assembly.side()),
+    _current_side_elem(_assembly.sideElem()),
+
+    _coord_sys(_assembly.coordSystem()),
+    _q_point(_assembly.qPointsFace()),
+    _qrule(_assembly.qRuleFace()),
+    _JxW(_assembly.JxWFace()),
+    _coord(_assembly.coordTransformation()),
+
+    _boundary_id(parameters.get<BoundaryID>("_boundary_id")),
+
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _scale_by_flux_faces(parameters.get<bool>("scale_by_flux_faces")),
+
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
+
+    _normals(_field_var.normals()),
+
+    _u_neighbor(_var.slnNeighbor()),
+    _grad_u_neighbor(_var.gradSlnNeighbor())
+{
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
+
+  addMooseVariableDependency(mooseVariable());
 }

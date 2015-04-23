@@ -40,7 +40,8 @@ class PointSamplerBase :
   protected SamplerBase
 {
 public:
-  PointSamplerBase(const std::string & name, InputParameters parameters);
+  PointSamplerBase(const InputParameters & parameters);
+  PointSamplerBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~PointSamplerBase() {}
 

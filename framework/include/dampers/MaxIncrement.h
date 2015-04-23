@@ -30,7 +30,8 @@ InputParameters validParams<MaxIncrement>();
 class MaxIncrement : public Damper
 {
 public:
-  MaxIncrement(std::string name, InputParameters parameters);
+  MaxIncrement(const InputParameters & parameters);
+  MaxIncrement(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaxIncrement();
 

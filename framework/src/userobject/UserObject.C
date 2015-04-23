@@ -33,8 +33,8 @@ InputParameters validParams<UserObject>()
   return params;
 }
 
-UserObject::UserObject(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+UserObject::UserObject(const InputParameters & parameters) :
+    MooseObject(parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
     Restartable(parameters, "UserObjects"),
@@ -58,5 +58,21 @@ UserObject::load(std::ifstream & /*stream*/)
 
 void
 UserObject::store(std::ofstream & /*stream*/)
+{
+}
+
+
+// DEPRECATED CONSTRUCTOR
+UserObject::UserObject(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    SetupInterface(parameters),
+    FunctionInterface(parameters),
+    Restartable(parameters, "UserObjects"),
+    MeshChangedInterface(parameters),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _coord_sys(_assembly.coordSystem())
 {
 }

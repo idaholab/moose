@@ -29,7 +29,8 @@ InputParameters validParams<VolumePostprocessor>();
 class VolumePostprocessor : public ElementIntegralPostprocessor
 {
 public:
-  VolumePostprocessor(const std::string & name, InputParameters parameters);
+  VolumePostprocessor(const InputParameters & parameters);
+  VolumePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void threadJoin(const UserObject & y);
 
 protected:

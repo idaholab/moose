@@ -23,8 +23,8 @@ InputParameters validParams<FluxBC>()
 }
 
 
-FluxBC::FluxBC(const std::string & name, InputParameters params) :
-    IntegratedBC(name, params)
+FluxBC::FluxBC(const InputParameters & params) :
+    IntegratedBC(params)
 {
 }
 
@@ -42,4 +42,11 @@ Real
 FluxBC::computeQpJacobian()
 {
   return - computeQpFluxJacobian() * _normals[_qp] * _test[_i][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FluxBC::FluxBC(const std::string & deprecated_name, InputParameters params) :
+    IntegratedBC(deprecated_name, params)
+{
 }

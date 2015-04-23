@@ -24,8 +24,8 @@ InputParameters validParams<NodalL2Norm>()
   return params;
 }
 
-NodalL2Norm::NodalL2Norm(const std::string & name, InputParameters parameters) :
-  NodalVariablePostprocessor(name, parameters),
+NodalL2Norm::NodalL2Norm(const InputParameters & parameters) :
+  NodalVariablePostprocessor(parameters),
   _sum_of_squares(0.0)
 {}
 
@@ -55,3 +55,10 @@ NodalL2Norm::threadJoin(const UserObject & y)
   const NodalL2Norm & pps = static_cast<const NodalL2Norm &>(y);
   _sum_of_squares += pps._sum_of_squares;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NodalL2Norm::NodalL2Norm(const std::string & deprecated_name, InputParameters parameters) :
+  NodalVariablePostprocessor(deprecated_name, parameters),
+  _sum_of_squares(0.0)
+{}

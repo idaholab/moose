@@ -30,7 +30,8 @@ InputParameters validParams<SideFluxIntegral>();
 class SideFluxIntegral : public SideIntegralVariablePostprocessor
 {
 public:
-  SideFluxIntegral(const std::string & name, InputParameters parameters);
+  SideFluxIntegral(const InputParameters & parameters);
+  SideFluxIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

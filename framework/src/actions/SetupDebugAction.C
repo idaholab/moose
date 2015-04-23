@@ -33,8 +33,8 @@ InputParameters validParams<SetupDebugAction>()
   return params;
 }
 
-SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
+SetupDebugAction::SetupDebugAction(InputParameters parameters) :
+    Action(parameters),
     _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
   _awh.showActions(getParam<bool>("show_actions"));
@@ -88,4 +88,20 @@ SetupDebugAction::createOutputAction(const std::string & type, const std::string
 
   // Return the pointer to the action
   return action.get();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupDebugAction::SetupDebugAction(const std::string & deprecated_name, InputParameters parameters) :
+    Action(deprecated_name, parameters),
+    _action_params(_action_factory.getValidParams("AddOutputAction"))
+{
+
+  _pars.print();
+
+  _awh.showActions(getParam<bool>("show_actions"));
+  _awh.showParser(getParam<bool>("show_parser"));
+
+  // Set the ActionWarehouse pointer in the parameters that will be passed to the actions created with this action
+  _action_params.set<ActionWarehouse *>("awh") = &_awh;
 }

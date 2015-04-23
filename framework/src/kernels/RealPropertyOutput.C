@@ -24,8 +24,8 @@ InputParameters validParams<RealPropertyOutput>()
   return params;
 }
 
-RealPropertyOutput::RealPropertyOutput(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+RealPropertyOutput::RealPropertyOutput(const InputParameters & parameters) :
+    Kernel(parameters),
    _prop_name(getParam<std::string>("prop_name")),
    _prop(getMaterialProperty<Real>(_prop_name))
 {}
@@ -41,3 +41,11 @@ RealPropertyOutput::computeQpJacobian()
 {
   return _test[_i][_qp]*_phi[_j][_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RealPropertyOutput::RealPropertyOutput(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+   _prop_name(getParam<std::string>("prop_name")),
+   _prop(getMaterialProperty<Real>(_prop_name))
+{}

@@ -36,7 +36,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  PenetrationAux(const std::string & name, InputParameters parameters);
+  PenetrationAux(const InputParameters & parameters);
+  PenetrationAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~PenetrationAux();
 

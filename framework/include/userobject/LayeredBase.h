@@ -33,7 +33,7 @@ InputParameters validParams<LayeredBase>();
 class LayeredBase
 {
 public:
-  LayeredBase(const std::string & name, InputParameters parameters);
+  LayeredBase(const InputParameters & parameters);
 
   /**
    * Given a Point return the integral value associated with the layer that point falls in.

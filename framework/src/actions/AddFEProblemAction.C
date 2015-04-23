@@ -23,8 +23,8 @@ InputParameters validParams<AddFEProblemAction>()
   return params;
 }
 
-AddFEProblemAction::AddFEProblemAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
+AddFEProblemAction::AddFEProblemAction(InputParameters parameters) :
+    Action(parameters),
     _input_filename(getParam<FileName>("input_file"))
 {
 }
@@ -38,5 +38,13 @@ AddFEProblemAction::act()
 {
   CoupledExecutioner * master_executioner = dynamic_cast<CoupledExecutioner *>(_executioner.get());
   if (master_executioner != NULL)
-    master_executioner->addFEProblem(getShortName(), _input_filename);
+    master_executioner->addFEProblem(_name, _input_filename);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddFEProblemAction::AddFEProblemAction(const std::string & deprecated_name, InputParameters parameters) :
+    Action(deprecated_name, parameters),
+    _input_filename(getParam<FileName>("input_file"))
+{
 }

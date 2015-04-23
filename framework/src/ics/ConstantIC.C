@@ -23,8 +23,8 @@ InputParameters validParams<ConstantIC>()
   return params;
 }
 
-ConstantIC::ConstantIC(const std::string & name, InputParameters parameters) :
-    InitialCondition(name, parameters),
+ConstantIC::ConstantIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _value(getParam<Real>("value"))
 {
 }
@@ -35,3 +35,10 @@ ConstantIC::value(const Point & /*p*/)
   return _value;
 }
 
+
+// DEPRECATED CONSTRUCTOR
+ConstantIC::ConstantIC(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _value(getParam<Real>("value"))
+{
+}

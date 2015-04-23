@@ -25,13 +25,11 @@ template<>
 InputParameters validParams<SetupPreconditionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-  CreateExecutionerAction::populateCommonExecutionerParams(params);
-
   return params;
 }
 
-SetupPreconditionerAction::SetupPreconditionerAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+SetupPreconditionerAction::SetupPreconditionerAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -42,16 +40,23 @@ SetupPreconditionerAction::act()
   {
     // build the preconditioner
     _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
-    MooseSharedPointer<MoosePreconditioner> pc = MooseSharedNamespace::static_pointer_cast<MoosePreconditioner>(_factory.create(_type, getShortName(), _moose_object_pars));
+    MooseSharedPointer<MoosePreconditioner> pc = MooseSharedNamespace::static_pointer_cast<MoosePreconditioner>(_factory.create(_type, _name, _moose_object_pars));
     if (!pc.get())
       mooseError("Failed to build the preconditioner.");
 
     _problem->getNonlinearSystem().setPreconditioner(pc);
 
-    /**
-     * Go ahead and set common precondition options here.  The child classes will still be called
-     * through the action warehouse
-     */
-    CreateExecutionerAction::storeCommonExecutionerParams(*_problem, _pars);
+
+    // Extract and store PETSc related settings on FEProblem
+#ifdef LIBMESH_HAVE_PETSC
+    CreateExecutionerAction::storePetscOptions(*_problem, _moose_object_pars);
+#endif //LIBMESH_HAVE_PETSC
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupPreconditionerAction::SetupPreconditionerAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
 }

@@ -95,10 +95,9 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
     {
       std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
       if (pos != _deprecated_params.end())
-      mooseWarning("The parameter " << name << " is deprecated.\n" << pos->second);
+        mooseWarning("The parameter " << name << " is deprecated.\n" << pos->second);
     }
   }
-
 }
 
 std::string
@@ -436,14 +435,21 @@ InputParameters::getGroupName(const std::string &param_name) const
 }
 
 PostprocessorValue &
-InputParameters::defaultPostprocessorValue(const std::string & name, bool suppress_error)
+InputParameters::getDefaultPostprocessorValue(const std::string & name, bool suppress_error)
 {
   // Check that a default exists, error if it does not
-  if (!(suppress_error || hasDefaultPostprocessorValue(name)))
+  std::map<std::string, PostprocessorValue>::iterator it = _default_postprocessor_value.find(name);
+  if (!(suppress_error || it != _default_postprocessor_value.end()))
     mooseError("A default PostprcessorValue does not exist for the given name: " << name);
 
   // Return the value
-  return _default_postprocessor_value[name];
+  return it->second;
+}
+
+void
+InputParameters::setDefaultPostprocessorValue(const std::string & name, const PostprocessorValue & value)
+{
+  _default_postprocessor_value[name] = value;
 }
 
 bool
@@ -517,7 +523,7 @@ InputParameters::applyParameters(const InputParameters & common, const std::vect
 }
 
 bool
-InputParameters::paramSetByUser(const std::string & name)
+InputParameters::paramSetByUser(const std::string & name) const
 {
   if (!isParamValid(name))
     // if the parameter is invalid, it is for sure not set by the user

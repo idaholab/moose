@@ -26,7 +26,8 @@ InputParameters validParams<FunctionParserUtils>();
 class FunctionParserUtils
 {
 public:
-  FunctionParserUtils(const std::string & name, InputParameters parameters);
+  FunctionParserUtils(const InputParameters & parameters);
+  FunctionParserUtils(const std::string & name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// Shorthand for an autodiff function parser object.
   typedef FunctionParserADBase<Real> ADFunction;

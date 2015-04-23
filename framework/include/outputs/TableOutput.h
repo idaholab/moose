@@ -43,7 +43,8 @@ public:
   /**
    * Class constructor.
    */
-  TableOutput(const std::string & name, InputParameters);
+  TableOutput(const InputParameters & parameters);
+  TableOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

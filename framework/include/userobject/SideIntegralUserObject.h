@@ -32,7 +32,8 @@ InputParameters validParams<SideIntegralUserObject>();
 class SideIntegralUserObject : public SideUserObject
 {
 public:
-  SideIntegralUserObject(const std::string & name, InputParameters parameters);
+  SideIntegralUserObject(const InputParameters & parameters);
+  SideIntegralUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

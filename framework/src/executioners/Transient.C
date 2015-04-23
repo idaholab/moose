@@ -79,8 +79,8 @@ InputParameters validParams<Transient>()
   return params;
 }
 
-Transient::Transient(const std::string & name, InputParameters parameters) :
-    Executioner(name, parameters),
+Transient::Transient(const InputParameters & parameters) :
+    Executioner(parameters),
     _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
     _time_scheme(getParam<MooseEnum>("scheme")),
     _t_step(_problem.timeStep()),
@@ -145,7 +145,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
     else
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
-
   }
 
   if (!_restart_file_base.empty())
@@ -684,4 +683,89 @@ Transient::getTimeStepperName()
     return demangle(typeid(*_time_stepper).name());
   else
     return std::string();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Transient::Transient(const std::string & deprecated_name, InputParameters parameters) :
+    Executioner(deprecated_name, parameters),
+    _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
+    _time_scheme(getParam<MooseEnum>("scheme")),
+    _t_step(_problem.timeStep()),
+    _time(_problem.time()),
+    _time_old(_problem.timeOld()),
+    _dt(_problem.dt()),
+    _dt_old(_problem.dtOld()),
+    _unconstrained_dt(declareRestartableData<Real>("unconstrained_dt", -1)),
+    _at_sync_point(declareRestartableData<bool>("at_sync_point", false)),
+    _first(declareRecoverableData<bool>("first", true)),
+    _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
+    _end_time(getParam<Real>("end_time")),
+    _dtmin(getParam<Real>("dtmin")),
+    _dtmax(getParam<Real>("dtmax")),
+    _num_steps(getParam<unsigned int>("num_steps")),
+    _n_startup_steps(getParam<int>("n_startup_steps")),
+    _steps_taken(0),
+    _trans_ss_check(getParam<bool>("trans_ss_check")),
+    _ss_check_tol(getParam<Real>("ss_check_tol")),
+    _ss_tmin(getParam<Real>("ss_tmin")),
+    _old_time_solution_norm(declareRestartableData<Real>("old_time_solution_norm", 0.0)),
+    _sync_times(_app.getOutputWarehouse().getSyncTimes()),
+    _abort(getParam<bool>("abort_on_solve_fail")),
+    _time_interval(declareRestartableData<bool>("time_interval", false)),
+    _start_time(getParam<Real>("start_time")),
+    _timestep_tolerance(getParam<Real>("timestep_tolerance")),
+    _target_time(declareRestartableData<Real>("target_time", -1)),
+    _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
+    _picard_it(0),
+    _picard_max_its(getParam<unsigned int>("picard_max_its")),
+    _picard_converged(false),
+    _picard_initial_norm(0.0),
+    _picard_rel_tol(getParam<Real>("picard_rel_tol")),
+    _picard_abs_tol(getParam<Real>("picard_abs_tol")),
+    _verbose(getParam<bool>("verbose"))
+{
+  _problem.getNonlinearSystem().setDecomposition(_splitting);
+  _t_step = 0;
+  _dt = 0;
+  _next_interval_output_time = 0.0;
+
+  // Either a start_time has been forced on us, or we want to tell the App about what our start time is (in case anyone else is interested.
+  if (_app.hasStartTime())
+    _start_time = _app.getStartTime();
+  else
+    _app.setStartTime(_start_time);
+
+  _time = _time_old = _start_time;
+  _problem.transient(true);
+
+  if (parameters.isParamValid("predictor_scale"))
+  {
+    mooseWarning("Parameter 'predictor_scale' is deprecated, migrate your input file to use Predictor sub-block.");
+
+    Real predscale = getParam<Real>("predictor_scale");
+    if (predscale >= 0.0 && predscale <= 1.0)
+    {
+      InputParameters params = _app.getFactory().getValidParams("SimplePredictor");
+      params.set<Real>("scale") = predscale;
+      _problem.addPredictor("SimplePredictor", "predictor", params);
+    }
+
+    else
+      mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
+  }
+
+  if (!_restart_file_base.empty())
+    _problem.setRestartFile(_restart_file_base);
+
+  setupTimeIntegrator();
+
+  if (_app.halfTransient()) // Cut timesteps and end_time in half...
+  {
+    _end_time /= 2.0;
+    _num_steps /= 2.0;
+
+    if (_num_steps == 0) // Always do one step in the first half
+      _num_steps = 1;
+  }
 }

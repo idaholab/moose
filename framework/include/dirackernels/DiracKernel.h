@@ -62,7 +62,8 @@ class DiracKernel :
   public MeshChangedInterface
 {
 public:
-  DiracKernel(const std::string & name, InputParameters parameters);
+  DiracKernel(const InputParameters & parameters);
+  DiracKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~DiracKernel(){}
 
   /**

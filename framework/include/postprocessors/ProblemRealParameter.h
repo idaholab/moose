@@ -26,7 +26,8 @@ InputParameters validParams<ProblemRealParameter>();
 class ProblemRealParameter : public GeneralPostprocessor
 {
 public:
-  ProblemRealParameter(const std::string & name, InputParameters parameters);
+  ProblemRealParameter(const InputParameters & parameters);
+  ProblemRealParameter(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

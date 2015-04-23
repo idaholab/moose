@@ -54,7 +54,8 @@ public:
    * @param name The name of the output object
    * @param parameters The InputParameters for the object
    */
-  AdvancedOutput(const std::string & name, InputParameters & parameters);
+  AdvancedOutput(const InputParameters & parameters);
+  AdvancedOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor
@@ -379,11 +380,11 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
 
       // Check that the output object allows postprocessor output,
       // account for "all" keyword (if it is present assume "all" was desired)
-      if ( pps_outputs.find(T::_name) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
+      if ( pps_outputs.find(T::name()) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
       {
         if (!T::_advanced_output_on.contains("postprocessors") || (T::_advanced_output_on["postprocessors"].isValid() && T::_advanced_output_on["postprocessors"].contains("none")))
           mooseWarning("Postprocessor '" << pps->PPName()
-                       << "' has requested to be output by the '" << T::_name
+                       << "' has requested to be output by the '" << T::name()
                        << "' output, but postprocessor output is not support by this type of output object.");
       }
 
@@ -400,12 +401,22 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
     if (pp_on.contains("none"))
     {
       if (output_on_name == "output_postprocessors_on")
-        mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << T::_name << "' output object.");
+        mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << T::name() << "' output object.");
       else if (output_on_name == "output_postprocessors_on")
-        mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << T::_name << "' output object.");
+        mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << T::name() << "' output object.");
 
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+template<class T>
+AdvancedOutput<T>::AdvancedOutput(const std::string & deprecated_name, InputParameters parameters) :
+    T(deprecated_name, parameters)
+{
+  T::_is_advanced = true;
+  T::_advanced_output_on = OutputOnWarehouse(T::_output_on, parameters);
 }
 
 #endif /* ADVANCEDOUTPUT_H */

@@ -31,8 +31,8 @@ InputParameters validParams<MeshExtruder>()
   return params;
 }
 
-MeshExtruder::MeshExtruder(const std::string & name, InputParameters parameters):
-    MeshModifier(name, parameters),
+MeshExtruder::MeshExtruder(const InputParameters & parameters):
+    MeshModifier(parameters),
     _num_layers(getParam<unsigned int>("num_layers")),
     _extrusion_vector(getParam<RealVectorValue>("extrusion_vector"))
 {
@@ -96,3 +96,12 @@ MeshExtruder::changeID(const std::vector<BoundaryName> & names, BoundaryID old_i
 }
 
 
+
+
+// DEPRECATED CONSTRUCTOR
+MeshExtruder::MeshExtruder(const std::string & deprecated_name, InputParameters parameters):
+    MeshModifier(deprecated_name, parameters),
+    _num_layers(getParam<unsigned int>("num_layers")),
+    _extrusion_vector(getParam<RealVectorValue>("extrusion_vector"))
+{
+}

@@ -26,7 +26,8 @@ InputParameters validParams<PerformanceData>();
 class PerformanceData : public GeneralPostprocessor
 {
 public:
-  PerformanceData(const std::string & name, InputParameters parameters);
+  PerformanceData(const InputParameters & parameters);
+  PerformanceData(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

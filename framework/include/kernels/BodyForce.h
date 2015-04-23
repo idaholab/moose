@@ -28,7 +28,8 @@ class BodyForce : public Kernel
 {
 public:
 
-  BodyForce(const std::string & name, InputParameters parameters);
+  BodyForce(const InputParameters & parameters);
+  BodyForce(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

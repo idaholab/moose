@@ -26,8 +26,8 @@ InputParameters validParams<SideSetsBetweenSubdomains>()
   return params;
 }
 
-SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const std::string & name, InputParameters parameters):
-    MeshModifier(name, parameters)
+SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const InputParameters & parameters):
+    MeshModifier(parameters)
 {
 }
 
@@ -73,4 +73,11 @@ SideSetsBetweenSubdomains::modify()
 
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
     boundary_info.sideset_name(boundary_ids[i]) = boundary_names[i];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const std::string & deprecated_name, InputParameters parameters):
+    MeshModifier(deprecated_name, parameters)
+{
 }

@@ -22,8 +22,8 @@ InputParameters validParams<NumDOFs>()
   return params;
 }
 
-NumDOFs::NumDOFs(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+NumDOFs::NumDOFs(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters)
 {}
 
 Real
@@ -31,3 +31,9 @@ NumDOFs::getValue()
 {
   return _subproblem.es().n_dofs();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NumDOFs::NumDOFs(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters)
+{}

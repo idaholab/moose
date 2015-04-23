@@ -23,12 +23,15 @@
 /**
  * Macros
  */
-#define registerApp(name)                        AppFactory::instance().reg<name>(#name)
+//#define registerApp(name)                        AppFactory::instance().reg<name>(#name)
+#define registerApp(name)                        AppFactory::instance().regLegacy<name>(#name)
 
 /**
  * Typedef for function to build objects
  */
-typedef MooseApp * (*appBuildPtr)(const std::string & name, InputParameters parameters);
+typedef MooseApp * (*appBuildPtr)(InputParameters parameters);
+typedef MooseApp * (*appLegacyBuildPtr)(const std::string & name, InputParameters parameters);
+
 
 /**
  * Typedef for validParams
@@ -44,7 +47,12 @@ typedef std::map<std::string, paramsPtr>::iterator registeredMooseAppIterator;
  * Build an object of type T
  */
 template<class T>
-MooseApp * buildApp(const std::string & name, InputParameters parameters)
+MooseApp * buildApp(InputParameters parameters)
+{
+  return new T(parameters);
+}
+template<class T>
+MooseApp * buildLegacyApp(const std::string & name, InputParameters parameters)
 {
   return new T(name, parameters);
 }
@@ -82,6 +90,16 @@ public:
     }
   }
 
+  template<typename T>
+  void regLegacy(const std::string & name)
+  {
+     if (_name_to_legacy_build_pointer.find(name) == _name_to_legacy_build_pointer.end())
+    {
+      _name_to_legacy_build_pointer[name] = &buildLegacyApp<T>;
+      _name_to_params_pointer[name] = &validParams<T>;
+    }
+  }
+
   /**
    * Get valid parameters for the object
    * @param name Name of the object whose parameter we are requesting
@@ -97,6 +115,7 @@ public:
    * @return The created object
    */
   virtual MooseApp *create(const std::string & obj_name, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
+  virtual MooseApp *createLegacy(const std::string & obj_name, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
 
   ///@{
   /**
@@ -113,6 +132,8 @@ public:
 
 protected:
   std::map<std::string, appBuildPtr>  _name_to_build_pointer;
+  std::map<std::string, appLegacyBuildPtr>  _name_to_legacy_build_pointer;
+
   std::map<std::string, paramsPtr> _name_to_params_pointer;
 
   static AppFactory _instance;

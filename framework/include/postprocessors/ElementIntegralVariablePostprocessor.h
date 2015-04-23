@@ -35,7 +35,8 @@ class ElementIntegralVariablePostprocessor :
   public MooseVariableInterface
 {
 public:
-  ElementIntegralVariablePostprocessor(const std::string & name, InputParameters parameters);
+  ElementIntegralVariablePostprocessor(const InputParameters & parameters);
+  ElementIntegralVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

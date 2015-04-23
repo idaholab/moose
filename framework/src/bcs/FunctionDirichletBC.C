@@ -23,8 +23,8 @@ InputParameters validParams<FunctionDirichletBC>()
   return params;
 }
 
-FunctionDirichletBC::FunctionDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+FunctionDirichletBC::FunctionDirichletBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     _func(getFunction("function"))
 {
 }
@@ -39,4 +39,12 @@ Real
 FunctionDirichletBC::computeQpResidual()
 {
   return _u[_qp]-f();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FunctionDirichletBC::FunctionDirichletBC(const std::string & deprecated_name, InputParameters parameters) :
+    NodalBC(deprecated_name, parameters),
+    _func(getFunction("function"))
+{
 }

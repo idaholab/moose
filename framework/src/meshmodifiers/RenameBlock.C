@@ -26,8 +26,8 @@ InputParameters validParams<RenameBlock>()
   return params;
 }
 
-RenameBlock::RenameBlock(const std::string & name, InputParameters parameters) :
-    MeshModifier(name, parameters)
+RenameBlock::RenameBlock(const InputParameters & parameters) :
+    MeshModifier(parameters)
 {
   // error checking.  Must have exactly one of old_block_id or old_block_name
   if (isParamValid("old_block_id") && isParamValid("old_block_name"))
@@ -84,4 +84,25 @@ RenameBlock::modify()
       // libmesh appears to check that _old_block_id[i] isn't too big or too small
       _mesh_ptr->getMesh().subdomain_name(_old_block_id[i]) = _new_block_name[i];
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RenameBlock::RenameBlock(const std::string & deprecated_name, InputParameters parameters) :
+    MeshModifier(deprecated_name, parameters)
+{
+  // error checking.  Must have exactly one of old_block_id or old_block_name
+  if (isParamValid("old_block_id") && isParamValid("old_block_name"))
+    mooseError("RenameBlock: You must supply exactly one of old_block_id or old_block_name\n");
+  else if (!isParamValid("old_block_id") && !isParamValid("old_block_name"))
+    mooseError("RenameBlock: You must supply exactly one of old_block_id or old_block_name\n");
+
+  // error checking.  Must have exactly one of new_block_id or new_block_name
+  // In principal we could have both (the old block would then be given a new ID and a new name)
+  // but i feel that could lead to confusion for the user.  If the user wants to do that they
+  // should use two of these RenameBlock MeshModifiers.
+  if (isParamValid("new_block_id") && isParamValid("new_block_name"))
+    mooseError("RenameBlock: You must supply exactly one of new_block_id or new_block_name\n");
+  else if (!isParamValid("new_block_id") && !isParamValid("new_block_name"))
+    mooseError("RenameBlock: You must supply exactly one of new_block_id or new_block_name\n");
 }

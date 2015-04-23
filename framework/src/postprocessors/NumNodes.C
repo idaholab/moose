@@ -22,8 +22,8 @@ InputParameters validParams<NumNodes>()
   return params;
 }
 
-NumNodes::NumNodes(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+NumNodes::NumNodes(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters)
 {}
 
 Real
@@ -31,3 +31,9 @@ NumNodes::getValue()
 {
   return _subproblem.mesh().nNodes();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NumNodes::NumNodes(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters)
+{}

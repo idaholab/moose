@@ -33,7 +33,8 @@ InputParameters validParams<NodalEqualValueConstraint>();
 class NodalEqualValueConstraint : public NodalScalarKernel
 {
 public:
-  NodalEqualValueConstraint(const std::string & name, InputParameters parameters);
+  NodalEqualValueConstraint(const InputParameters & parameters);
+  NodalEqualValueConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalEqualValueConstraint();
 
   virtual void computeResidual();

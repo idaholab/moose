@@ -32,8 +32,8 @@ InputParameters validParams<BoundingBoxIC>()
   return params;
 }
 
-BoundingBoxIC::BoundingBoxIC(const std::string & name, InputParameters parameters) :
-  InitialCondition(name, parameters),
+BoundingBoxIC::BoundingBoxIC(const InputParameters & parameters) :
+  InitialCondition(parameters),
   _x1(getParam<Real>("x1")),
   _y1(getParam<Real>("y1")),
   _z1(getParam<Real>("z1")),
@@ -57,3 +57,20 @@ BoundingBoxIC::value(const Point & p)
   return _inside;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+BoundingBoxIC::BoundingBoxIC(const std::string & deprecated_name, InputParameters parameters) :
+  InitialCondition(deprecated_name, parameters),
+  _x1(getParam<Real>("x1")),
+  _y1(getParam<Real>("y1")),
+  _z1(getParam<Real>("z1")),
+  _x2(getParam<Real>("x2")),
+  _y2(getParam<Real>("y2")),
+  _z2(getParam<Real>("z2")),
+  _inside(getParam<Real>("inside")),
+  _outside(getParam<Real>("outside")),
+  _bottom_left(_x1,_y1,_z1),
+  _top_right(_x2,_y2,_z2)
+{
+}

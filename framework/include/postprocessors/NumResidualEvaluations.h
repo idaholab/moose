@@ -29,7 +29,8 @@ InputParameters validParams<NumResidualEvaluations>();
 class NumResidualEvaluations : public GeneralPostprocessor
 {
 public:
-  NumResidualEvaluations(const std::string & name, InputParameters parameters);
+  NumResidualEvaluations(const InputParameters & parameters);
+  NumResidualEvaluations(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

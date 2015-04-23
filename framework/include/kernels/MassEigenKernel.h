@@ -26,7 +26,8 @@ InputParameters validParams<MassEigenKernel>();
 class MassEigenKernel : public EigenKernel
 {
 public:
-  MassEigenKernel(const std::string & name, InputParameters parameters);
+  MassEigenKernel(const InputParameters & parameters);
+  MassEigenKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

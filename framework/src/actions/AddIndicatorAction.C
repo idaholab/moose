@@ -21,13 +21,20 @@ InputParameters validParams<AddIndicatorAction>()
   return validParams<MooseObjectAction>();
 }
 
-AddIndicatorAction::AddIndicatorAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddIndicatorAction::AddIndicatorAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddIndicatorAction::act()
 {
-  _problem->addIndicator(_type, getShortName(), _moose_object_pars);
+  _problem->addIndicator(_type, _name, _moose_object_pars);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddIndicatorAction::AddIndicatorAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
 }

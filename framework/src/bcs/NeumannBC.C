@@ -22,8 +22,8 @@ InputParameters validParams<NeumannBC>()
   return params;
 }
 
-NeumannBC::NeumannBC(const std::string & name, InputParameters parameters) :
-  IntegratedBC(name, parameters),
+NeumannBC::NeumannBC(const InputParameters & parameters) :
+  IntegratedBC(parameters),
   _value(getParam<Real>("value"))
 {}
 
@@ -33,3 +33,10 @@ NeumannBC::computeQpResidual()
   return -_test[_i][_qp]*_value;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+NeumannBC::NeumannBC(const std::string & deprecated_name, InputParameters parameters) :
+  IntegratedBC(deprecated_name, parameters),
+  _value(getParam<Real>("value"))
+{}

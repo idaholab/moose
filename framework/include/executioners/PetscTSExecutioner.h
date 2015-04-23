@@ -56,7 +56,8 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  PetscTSExecutioner(const std::string & name, InputParameters parameters);
+  PetscTSExecutioner(const InputParameters & parameters);
+  PetscTSExecutioner(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~PetscTSExecutioner();
 

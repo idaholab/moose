@@ -26,9 +26,9 @@ InputParameters validParams<MooseParsedGradFunction>()
   return params;
 }
 
-MooseParsedGradFunction::MooseParsedGradFunction(const std::string & name, InputParameters parameters) :
-    Function(name, parameters),
-    MooseParsedFunctionBase(name, parameters),
+MooseParsedGradFunction::MooseParsedGradFunction(const InputParameters & parameters) :
+    Function(parameters),
+    MooseParsedFunctionBase(parameters),
     _value(verifyFunction(getParam<std::string>("value"))),
     _grad_value(verifyFunction(std::string("{") + getParam<std::string>("grad_x") + "}{" +
                                  getParam<std::string>("grad_y") + "}{" +
@@ -73,4 +73,18 @@ MooseParsedGradFunction::initialSetup()
 
   if (_grad_function_ptr == NULL)
     _grad_function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _grad_value, _vars, _vals);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MooseParsedGradFunction::MooseParsedGradFunction(const std::string & deprecated_name, InputParameters parameters) :
+    Function(deprecated_name, parameters),
+    MooseParsedFunctionBase(parameters),
+    _value(verifyFunction(getParam<std::string>("value"))),
+    _grad_value(verifyFunction(std::string("{") + getParam<std::string>("grad_x") + "}{" +
+                                 getParam<std::string>("grad_y") + "}{" +
+                                 getParam<std::string>("grad_z") + "}")),
+    _function_ptr(NULL),
+    _grad_function_ptr(NULL)
+{
 }

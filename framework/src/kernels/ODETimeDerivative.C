@@ -21,8 +21,8 @@ InputParameters validParams<ODETimeDerivative>()
   return params;
 }
 
-ODETimeDerivative::ODETimeDerivative(const std::string & name, InputParameters parameters) :
-    ODEKernel(name, parameters)
+ODETimeDerivative::ODETimeDerivative(const InputParameters & parameters) :
+    ODEKernel(parameters)
 {
 }
 
@@ -39,4 +39,11 @@ ODETimeDerivative::computeQpJacobian()
     return _du_dot_du[_i];
   else
     return 0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ODETimeDerivative::ODETimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
+    ODEKernel(deprecated_name, parameters)
+{
 }

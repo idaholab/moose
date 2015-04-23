@@ -26,9 +26,9 @@ InputParameters validParams<VectorOfPostprocessors>()
   return params;
 }
 
-VectorOfPostprocessors::VectorOfPostprocessors(const std::string & name, InputParameters parameters) :
-    GeneralVectorPostprocessor(name, parameters),
-    _pp_vec(declareVector(name))
+VectorOfPostprocessors::VectorOfPostprocessors(const InputParameters & parameters) :
+    GeneralVectorPostprocessor(parameters),
+    _pp_vec(declareVector(MooseUtils::shortName(parameters.get<std::string>("name"))))
 {
   std::vector<PostprocessorName> pps_names(getParam<std::vector<PostprocessorName> >("postprocessors"));
   _pp_vec.resize(pps_names.size());
@@ -51,4 +51,20 @@ VectorOfPostprocessors::execute()
 {
   for (unsigned int i=0; i<_postprocessor_values.size(); ++i)
     _pp_vec.push_back(*_postprocessor_values[i]);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+VectorOfPostprocessors::VectorOfPostprocessors(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralVectorPostprocessor(deprecated_name, parameters),
+    _pp_vec(declareVector(MooseUtils::shortName(parameters.get<std::string>("name"))))
+{
+  std::vector<PostprocessorName> pps_names(getParam<std::vector<PostprocessorName> >("postprocessors"));
+  _pp_vec.resize(pps_names.size());
+  for (unsigned int i=0; i<pps_names.size(); ++i)
+  {
+    if (!hasPostprocessorByName(pps_names[i]))
+      mooseError("In VectorOfPostprocessors, postprocessor with name: "<<pps_names[i]<<" does not exist");
+    _postprocessor_values.push_back(&getPostprocessorValueByName(pps_names[i]));
+  }
 }

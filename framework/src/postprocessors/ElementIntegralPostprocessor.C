@@ -21,8 +21,8 @@ InputParameters validParams<ElementIntegralPostprocessor>()
   return params;
 }
 
-ElementIntegralPostprocessor::ElementIntegralPostprocessor(const std::string & name, InputParameters parameters) :
-    ElementPostprocessor(name, parameters),
+ElementIntegralPostprocessor::ElementIntegralPostprocessor(const InputParameters & parameters) :
+    ElementPostprocessor(parameters),
     _qp(0),
     _integral_value(0)
 {}
@@ -62,3 +62,11 @@ ElementIntegralPostprocessor::computeIntegral()
     sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
   return sum;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementIntegralPostprocessor::ElementIntegralPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    ElementPostprocessor(deprecated_name, parameters),
+    _qp(0),
+    _integral_value(0)
+{}

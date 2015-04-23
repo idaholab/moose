@@ -26,7 +26,8 @@ InputParameters validParams<ElementL2Norm>();
 class ElementL2Norm : public ElementIntegralVariablePostprocessor
 {
 public:
-  ElementL2Norm(const std::string & name, InputParameters parameters);
+  ElementL2Norm(const InputParameters & parameters);
+  ElementL2Norm(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

@@ -28,7 +28,8 @@ InputParameters validParams<RungeKutta2>();
 class RungeKutta2 : public TimeIntegrator
 {
 public:
-  RungeKutta2(const std::string & name, InputParameters parameters);
+  RungeKutta2(const InputParameters & parameters);
+  RungeKutta2(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~RungeKutta2();
 
   virtual int order() { return 2; }

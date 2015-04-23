@@ -24,8 +24,8 @@ InputParameters validParams<VerifyNodalUniqueID>()
   return params;
 }
 
-VerifyNodalUniqueID::VerifyNodalUniqueID(const std::string & name, InputParameters parameters) :
-    NodalUserObject(name, parameters)
+VerifyNodalUniqueID::VerifyNodalUniqueID(const InputParameters & parameters) :
+    NodalUserObject(parameters)
 {}
 
 // This object can't test every possible scenario.  For instance, it can't detect recycled ids
@@ -67,3 +67,9 @@ VerifyNodalUniqueID::finalize()
   if (it_end != _all_ids.end())
     mooseError("Duplicate unique_ids found!");
 }
+
+
+// DEPRECATED CONSTRUCTOR
+VerifyNodalUniqueID::VerifyNodalUniqueID(const std::string & deprecated_name, InputParameters parameters) :
+    NodalUserObject(deprecated_name, parameters)
+{}

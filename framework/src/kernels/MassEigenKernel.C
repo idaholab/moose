@@ -21,8 +21,8 @@ InputParameters validParams<MassEigenKernel>()
   return params;
 }
 
-MassEigenKernel::MassEigenKernel(const std::string & name, InputParameters parameters) :
-    EigenKernel(name,parameters)
+MassEigenKernel::MassEigenKernel(const InputParameters & parameters) :
+    EigenKernel(parameters)
 {
 }
 
@@ -36,4 +36,11 @@ Real
 MassEigenKernel::computeQpJacobian()
 {
   return -_phi[_j][_qp] * _test[_i][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MassEigenKernel::MassEigenKernel(const std::string & deprecated_name, InputParameters parameters) :
+    EigenKernel(deprecated_name, parameters)
+{
 }

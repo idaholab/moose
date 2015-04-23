@@ -18,7 +18,7 @@ InputParameters validParams<MaterialVectorAux>();
 class MaterialVectorAux : public AuxKernel
 {
 public:
-  MaterialVectorAux( const std::string & name, InputParameters parameters );
+  MaterialVectorAux( const std::string & obj_name, InputParameters parameters );
 
   virtual ~MaterialVectorAux() {}
 

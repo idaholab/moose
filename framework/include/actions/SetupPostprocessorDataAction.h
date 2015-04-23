@@ -40,7 +40,8 @@ public:
    * @param name The name of the Postprocessor that this action is acting upon
    * @param params Input parameters for the action
    */
-  SetupPostprocessorDataAction(const std::string & name, InputParameters params);
+  SetupPostprocessorDataAction(InputParameters params);
+  SetupPostprocessorDataAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

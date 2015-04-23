@@ -26,7 +26,8 @@ InputParameters validParams<NumDOFs>();
 class NumDOFs : public GeneralPostprocessor
 {
 public:
-  NumDOFs(const std::string & name, InputParameters parameters);
+  NumDOFs(const InputParameters & parameters);
+  NumDOFs(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

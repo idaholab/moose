@@ -21,8 +21,8 @@ InputParameters validParams<WeakGradientBC>()
   return params;
 }
 
-WeakGradientBC::WeakGradientBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters)
+WeakGradientBC::WeakGradientBC(const InputParameters & parameters) :
+    IntegratedBC(parameters)
 {}
 
 Real
@@ -37,3 +37,9 @@ WeakGradientBC::computeQpJacobian()
   return (_grad_phi[_j][_qp]*_normals[_qp])*_test[_i][_qp];
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+WeakGradientBC::WeakGradientBC(const std::string & deprecated_name, InputParameters parameters) :
+    IntegratedBC(deprecated_name, parameters)
+{}

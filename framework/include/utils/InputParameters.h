@@ -57,6 +57,7 @@ class InputParameters : public Parameters
 {
 public:
   InputParameters(const InputParameters &rhs);
+  InputParameters(const std::string & deprecated_name, InputParameters rhs); // DEPRECATED CONSTRUCTOR
   InputParameters(const Parameters &rhs);
 
   virtual ~InputParameters() {}
@@ -415,9 +416,17 @@ public:
   /**
    * Get the default value for a postprocessor added with addPostprocessor
    * @param name The name of the postprocessor
+   * @param suppress_error If true, the error check is suppressed
    * @return The default value for the postprocessor
    */
-  PostprocessorValue & defaultPostprocessorValue(const std::string & name, bool suppress_error=false);
+  PostprocessorValue & getDefaultPostprocessorValue(const std::string & name, bool suppress_error=false);
+
+  /**
+   * Set the default value for a postprocessor added with addPostprocessor
+   * @param name The name of the postprocessor
+   * @value value The value of the postprocessor default to set
+   */
+  void setDefaultPostprocessorValue(const std::string & name, const PostprocessorValue & value);
 
   /**
    * Returns true if a default PostprocessorValue is defined
@@ -449,7 +458,7 @@ public:
    * Method returns true if the parameter was by the user
    * @param name The parameter name
    */
-  bool paramSetByUser(const std::string & name);
+  bool paramSetByUser(const std::string & name) const;
 
   ///@{
   /*

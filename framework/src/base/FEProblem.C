@@ -99,16 +99,9 @@ InputParameters validParams<FEProblem>()
   return params;
 }
 
-/// Inject this object's self into it's own parameters
-InputParameters & injectFEProblem(FEProblem * fe_problem, InputParameters & parameters)
-{
-  parameters.set<FEProblem *>("_fe_problem") = fe_problem;
-  return parameters;
-}
-
-FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
-    SubProblem(name, parameters),
-    Restartable(injectFEProblem(this, parameters), "FEProblem"),
+FEProblem::FEProblem(const InputParameters & parameters) :
+    SubProblem(parameters),
+    Restartable(parameters, "FEProblem", this),
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
@@ -145,17 +138,11 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _has_jacobian(false),
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
+    _petsc_options("", "", true),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
 {
-
-#ifdef LIBMESH_HAVE_PETSC
-  // put in empty arrays for PETSc options
-  this->parameters().set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
-  this->parameters().set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
-  this->parameters().set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
-#endif
 
   _n++;
 
@@ -213,8 +200,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   for (unsigned int i=0; i<n_threads; i++)
     _vpps_data[i] = new VectorPostprocessorData(*this, i);
-
-  _objects_by_name.resize(n_threads);
 
   _indicators.resize(n_threads);
   _markers.resize(n_threads);
@@ -1166,30 +1151,27 @@ FEProblem::subdomainSetupSide(SubdomainID subdomain, THREAD_ID tid)
   }
 }
 
-const std::vector<MooseObject *> &
-FEProblem::getObjectsByName(const std::string & name, THREAD_ID tid)
-{
-  std::map<std::string, std::vector<MooseObject *> >::iterator it = _objects_by_name[tid].find(name);
-  if (it != _objects_by_name[tid].end())
-    return (*it).second;
-  else
-    mooseError("Unable to find objects with a given name.");
-}
-
 void
-FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
+FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters, bool auto_parsed /*=false*/)
 {
+
+
+
   parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
-    MooseSharedPointer<Function> func = MooseSharedNamespace::static_pointer_cast<Function>(_factory.create(type, name, parameters));
+    MooseSharedPointer<Function> func = MooseSharedNamespace::static_pointer_cast<Function>(_factory.create(type, name, parameters, tid));
     if (_functions[tid].find(name) != _functions[tid].end())
       mooseError("Duplicate function name added to FEProblem: " << name);
-    _functions[tid][name] = func;
-    _objects_by_name[tid][name].push_back(func.get());
+
+    // When default parsed functions are added the name() method can cause problems because of the
+    // division side causing it to be stored incorrectly.
+    if (auto_parsed)
+      _functions[tid][name] = func;
+    else
+      _functions[tid][func->name()] = func;
   }
 }
 
@@ -1228,7 +1210,7 @@ FEProblem::getFunction(const std::string & name, THREAD_ID tid)
         // It parsed ok, so build a MooseParsedFunction
         InputParameters params = _factory.getValidParams("ParsedFunction");
         params.set<std::string>("value") = name;
-        addFunction("ParsedFunction", name, params);
+        addFunction("ParsedFunction", name, params, /*auto_parsed=*/ true);
       }
     }
 
@@ -1454,6 +1436,7 @@ FEProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & n
 void
 FEProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters)
 {
+
   // before we start to mess with the initial condition, we need to check parameters for errors.
   parameters.checkParams(name);
 
@@ -1471,49 +1454,48 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
     const std::vector<BoundaryName> & boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
 
     if (blocks.size() > 0 && boundaries.size() > 0)
-    {
       mooseError("Both 'block' and 'boundary' parameters were specified in initial condition '" << name << "'.  You can only you either of them.");
-    }
+
     // boundary-restricted IC
     else if (boundaries.size() > 0 && blocks.size() == 0)
     {
       if (var.isNodal())
-      {
         for (unsigned int tid=0; tid < libMesh::n_threads(); tid++)
-        {
-          parameters.set<THREAD_ID>("_tid") = tid;
           for (unsigned int i = 0; i < boundaries.size(); i++)
           {
             BoundaryID bnd_id = _mesh.getBoundaryID(boundaries[i]);
+            std::ostringstream oss;
+            oss << name << "_" << bnd_id;
             _ics[tid].addBoundaryInitialCondition(var_name, bnd_id,
-                                                  MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, name, parameters)));
+                                                  MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, oss.str(), parameters, tid)));
           }
-        }
-      }
+
       else
         mooseError("You are trying to set a boundary restricted variable on non-nodal variable.  That is not allowed.");
     }
+
     // block-restricted IC
     else
     {
       // this means: either no block and no boundary parameters specified or just block specified
       for (unsigned int tid=0; tid < libMesh::n_threads(); tid++)
       {
-        parameters.set<THREAD_ID>("_tid") = tid;
         if (blocks.size() > 0)
           for (unsigned int i = 0; i < blocks.size(); i++)
           {
             SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
+            std::ostringstream oss;
+            oss << name << "_" << blk_id;
             _ics[tid].addInitialCondition(var_name, blk_id,
-                                          MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, name, parameters)));
+                                          MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, oss.str(), parameters, tid)));
           }
         else
           _ics[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID,
-                                        MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, name, parameters)));
+                                          MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, name, parameters, tid)));
       }
     }
-
   }
+
   // scalar IC
   else if (hasScalarVariable(var_name))
   {
@@ -1521,11 +1503,8 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
     parameters.set<SystemBase *>("_sys") = &var.sys();
 
     for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-    {
-      parameters.set<THREAD_ID>("_tid") = tid;
       _ics[tid].addScalarInitialCondition(var_name,
-                                          MooseSharedNamespace::static_pointer_cast<ScalarInitialCondition>(_factory.create(ic_name, name, parameters)));
-    }
+                                          MooseSharedNamespace::static_pointer_cast<ScalarInitialCondition>(_factory.create(ic_name, name, parameters, tid)));
   }
   else
     mooseError("Variable '" << var_name << "' requested in initial condition '" << name << "' does not exist.");
@@ -1611,42 +1590,41 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
-
     if (block_ids.size() > 0)
     {
+      // The name of the object being created, this is changed multiple times as objects are created below
+      std::string object_name;
+
       // volume material
       parameters.set<bool>("_bnd") = false;
       parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-      MooseSharedPointer<Material> volume_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters));
+      MooseSharedPointer<Material> volume_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters, tid));
       _materials[tid].addMaterial(block_ids, volume_material);
-      _objects_by_name[tid][name].push_back(volume_material.get());
 
       // face material
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      MooseSharedPointer<Material> face_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters));
+      object_name = name + "_face";
+      MooseSharedPointer<Material> face_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, object_name, parameters, tid));
       _materials[tid].addFaceMaterial(block_ids, face_material);
-      _objects_by_name[tid][name].push_back(face_material.get());
 
       // neighbor material
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = true;
       parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
-      MooseSharedPointer<Material> neighbor_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters));
+      object_name = name + "_neighbor";
+      MooseSharedPointer<Material> neighbor_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, object_name, parameters, tid));
       _materials[tid].addNeighborMaterial(block_ids, neighbor_material);
-      _objects_by_name[tid][name].push_back(neighbor_material.get());
     }
     else if (boundary_ids.size() > 0)
     {
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      MooseSharedPointer<Material> bnd_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters));
+      MooseSharedPointer<Material> bnd_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters, tid));
       _materials[tid].addBoundaryMaterial(boundary_ids, bnd_material);
-      _objects_by_name[tid][name].push_back(bnd_material.get());
     }
     else
       mooseError("Material '" + name + "' did not specify either block or boundary parameter");
@@ -1791,8 +1769,9 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_
 void
 FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_materials[tid].hasBoundaryMaterials(boundary_id)/* && _nl.hasActiveIntegratedBCs(boundary_id, tid)*/)
+  if (_materials[tid].hasBoundaryMaterials(boundary_id))
   {
+
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
@@ -1891,8 +1870,6 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
-
     // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
     // to be otherwise
     MaterialData * mat_data = _material_data[tid];
@@ -1904,7 +1881,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
-    MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters);
+    MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
     if (!mo)
       mooseError("Unable to determine type for Postprocessor: " + mo->name());
 
@@ -1915,8 +1892,8 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
     for (unsigned int i=0; i<exec_flags.size(); ++i)
     {
       // Check for name collision
-      if (_user_objects(exec_flags[i])[tid].getUserObjectByName(name))
-        mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a Postprocessor by the same name.");
+      if (_user_objects(exec_flags[i])[tid].getUserObjectByName(mo->name()))
+        mooseError(std::string("A UserObject with the name \"") + mo->name() + "\" already exists.  You may not add a Postprocessor by the same name.");
       _pps(exec_flags[i])[tid].addPostprocessor(pp);
 
       // Add it to the user object warehouse as well...
@@ -1927,8 +1904,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
     }
 
-    _objects_by_name[tid][name].push_back(mo.get());
-    _pps_data[tid]->init(name);
+    _pps_data[tid]->init(mo->name());
   }
 }
 
@@ -2002,7 +1978,6 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
 
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<VectorPostprocessorData *>("_vector_postprocessor_data") = _vpps_data[tid];
 
     // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
@@ -2016,7 +1991,8 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
-    MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters);
+    MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
+
     if (!mo)
       mooseError("Unable to determine type for VectorPostprocessor: " + mo->name());
 
@@ -2027,8 +2003,8 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
     for (unsigned int i=0; i<exec_flags.size(); ++i)
     {
       // Check for name collision
-      if (_user_objects(exec_flags[i])[tid].getUserObjectByName(name))
-        mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
+      if (_user_objects(exec_flags[i])[tid].getUserObjectByName(mo->name()))
+        mooseError(std::string("A UserObject with the name \"") + mo->name() + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
       _vpps(exec_flags[i])[tid].addVectorPostprocessor(pp);
 
       // Add it to the user object warehouse as well...
@@ -2038,8 +2014,6 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
 
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
     }
-
-    _objects_by_name[tid][name].push_back(mo.get());
   }
 }
 
@@ -2060,8 +2034,6 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
-
     // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
     // to be otherwise
     MaterialData * mat_data = _material_data[tid];
@@ -2074,13 +2046,11 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
-    MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create(user_object_name, name, parameters));
+    MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create(user_object_name, name, parameters, tid));
 
     const std::vector<ExecFlagType> & exec_flags = user_object->execFlags();
     for (unsigned int i=0; i<exec_flags.size(); ++i)
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
-
-    _objects_by_name[tid][name].push_back(user_object.get());
   }
 }
 
@@ -2640,18 +2610,15 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _material_data[tid];
 
     parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
     parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
 
-    MooseSharedPointer<Indicator> indicator = MooseSharedNamespace::static_pointer_cast<Indicator>(_factory.create(indicator_name, name, parameters));
+    MooseSharedPointer<Indicator> indicator = MooseSharedNamespace::static_pointer_cast<Indicator>(_factory.create(indicator_name, name, parameters, tid));
 
     std::vector<SubdomainID> block_ids;
     _indicators[tid].addIndicator(indicator, block_ids);
-
-    _objects_by_name[tid][name].push_back(indicator.get());
   }
 }
 
@@ -2673,14 +2640,10 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
-
-    MooseSharedPointer<Marker> marker = MooseSharedNamespace::static_pointer_cast<Marker>(_factory.create(marker_name, name, parameters));
+    MooseSharedPointer<Marker> marker = MooseSharedNamespace::static_pointer_cast<Marker>(_factory.create(marker_name, name, parameters, tid));
 
     std::vector<SubdomainID> block_ids;
     _markers[tid].addMarker(marker, block_ids);
-
-    _objects_by_name[tid][name].push_back(marker.get());
   }
 }
 
@@ -2690,7 +2653,6 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
   _has_multiapps = true;
 
   parameters.set<FEProblem *>("_fe_problem") = this;
-  parameters.set<THREAD_ID>("_tid") = 0;
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
   parameters.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
 
@@ -2836,7 +2798,6 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
 
-  parameters.set<THREAD_ID>("_tid") = 0;
 
   MooseSharedPointer<MooseObject> mo = _factory.create(transfer_name, name, parameters);
 
@@ -3513,7 +3474,7 @@ FEProblem::predictorCleanup(NumericVector<Number>& /*ghosted_solution*/)
 }
 
 void
-FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters params)
+FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters & params)
 {
   if (displaced_mesh == NULL)
     mooseError("Trying to set displaced mesh to NULL");
@@ -3937,84 +3898,6 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
   return reason;
 }
 
-#ifdef LIBMESH_HAVE_PETSC
-void
-FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options,
-                             const std::vector<std::string> & petsc_options_inames,
-                             const std::vector<std::string> & petsc_options_values)
-{
-  MultiMooseEnum & po = parameters().set<MultiMooseEnum>("petsc_options");         // set because we need a writable reference
-
-  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
-  {
-    /**
-     * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
-     * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
-     */
-    if (*it == "-log_summary")
-      mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
-
-    // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
-    else
-    {
-      std::string help_string;
-      if (*it == "-snes" || *it == "-snes_mf" || *it == "-snes_mf_operator")
-        help_string = "Please set the solver type through \"solve_type\".";
-      else if (*it == "-ksp_monitor")
-        help_string = "Please use \"Outputs/console/type=Console Outputs/console/linear_residuals=true\"";
-
-      if (help_string != "")
-        mooseWarning("The PETSc option " << *it << " should not be used directly in a MOOSE input file. " << help_string);
-    }
-
-    if (find(po.begin(), po.end(), *it) == po.end())
-      po.push_back(*it);
-  }
-
-  std::vector<std::string> & pn = parameters().set<std::vector<std::string> >("petsc_inames");         // set because we need a writable reference
-  std::vector<std::string> & pv = parameters().set<std::vector<std::string> >("petsc_values");         // set because we need a writable reference
-
-  if (petsc_options_inames.size() != petsc_options_values.size())
-    mooseError("PETSc names and options are not the same length");
-
-  bool boomeramg_found = false;
-  bool strong_threshold_found = false;
-  _pc_description = "";
-  for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
-  {
-    if (find(pn.begin(), pn.end(), petsc_options_inames[i]) == pn.end())
-    {
-      pn.push_back(petsc_options_inames[i]);
-      pv.push_back(petsc_options_values[i]);
-
-      // Look for a pc description
-      if (petsc_options_inames[i] == "-pc_type" || petsc_options_inames[i] == "-pc_sub_type" || petsc_options_inames[i] == "-pc_hypre_type")
-        _pc_description += petsc_options_values[i] + ' ';
-
-      // This special case is common enough that we'd like to handle it for the user.
-      if (petsc_options_inames[i] == "-pc_hypre_type" && petsc_options_values[i] == "boomeramg")
-        boomeramg_found = true;
-      if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
-        strong_threshold_found = true;
-    }
-    else
-    {
-      for (unsigned int j = 0; j < pn.size(); j++)
-        if (pn[j] == petsc_options_inames[i])
-          pv[j] = petsc_options_values[i];
-    }
-  }
-
-  // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold value
-  // We will provide that for the user here if they haven't supplied it themselves.
-  if (boomeramg_found && !strong_threshold_found && _mesh.dimension() == 3)
-  {
-    pn.push_back("-pc_hypre_boomeramg_strong_threshold");
-    pv.push_back("0.7");
-    _pc_description += "strong_threshold: 0.7 (auto)";
-  }
-}
-#endif
 
 SolverParams &
 FEProblem::solverParams()
@@ -4083,4 +3966,136 @@ FEProblem::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
   }
 
   return _block_mat_side_cache[tid][subdomain_id];
+}
+
+void
+FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options, const std::vector<std::string> & petsc_options_inames, const std::vector<std::string> & petsc_options_values)
+{
+  _petsc_options = petsc_options;
+  _petsc_options_inames = petsc_options_inames;
+  _petsc_options_values = petsc_options_values;
+}
+
+void
+FEProblem::getPetscOptions(MultiMooseEnum & petsc_options, std::vector<std::string> & petsc_options_inames, std::vector<std::string> & petsc_options_values)
+{
+  petsc_options = _petsc_options;
+  petsc_options_inames = _petsc_options_inames;
+  petsc_options_values = _petsc_options_values;
+}
+
+// DEPRECATED CONSTRUCTOR
+FEProblem::FEProblem(const std::string & deprecated_name, InputParameters parameters) :
+    SubProblem(deprecated_name, parameters),
+    Restartable(parameters, "FEProblem", this),
+    _mesh(*parameters.get<MooseMesh *>("mesh")),
+    _eq(_mesh),
+    _initialized(false),
+    _kernel_type(Moose::KT_ALL),
+    _current_boundary_id(Moose::INVALID_BOUNDARY_ID),
+    _solve(getParam<bool>("solve")),
+
+    _transient(false),
+    _time(declareRestartableData<Real>("time")),
+    _time_old(declareRestartableData<Real>("time_old")),
+    _t_step(declareRecoverableData<int>("t_step")),
+    _dt(declareRestartableData<Real>("dt")),
+    _dt_old(declareRestartableData<Real>("dt_old")),
+
+    _nl(getParam<bool>("use_nonlinear") ? *(new NonlinearSystem(*this, name_sys("nl", _n))) : *(new EigenSystem(*this, name_sys("nl", _n)))),
+    _aux(*this, name_sys("aux", _n)),
+    _coupling(Moose::COUPLING_DIAG),
+    _cm(NULL),
+#ifdef LIBMESH_ENABLE_AMR
+    _adaptivity(*this),
+#endif
+    _displaced_mesh(NULL),
+    _displaced_problem(NULL),
+    _geometric_search_data(*this, _mesh),
+    _reinit_displaced_elem(false),
+    _reinit_displaced_face(false),
+    _input_file_saved(false),
+    _has_dampers(false),
+    _has_constraints(false),
+    _has_multiapps(false),
+    _has_initialized_stateful(false),
+    _resurrector(NULL),
+    _const_jacobian(false),
+    _has_jacobian(false),
+    _kernel_coverage_check(false),
+    _max_qps(std::numeric_limits<unsigned int>::max()),
+    _petsc_options("", "", true),
+    _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
+    _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
+    _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
+{
+
+  _n++;
+
+  _time = 0.0;
+  _time_old = 0.0;
+  _t_step = 0;
+  _dt = 0;
+  _dt_old = _dt;
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  _assembly.resize(n_threads);
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _assembly[i] = new Assembly(_nl, couplingMatrix(), i);
+
+  unsigned int dimNullSpace      = parameters.get<unsigned int>("dimNullSpace");
+  unsigned int dimNearNullSpace  = parameters.get<unsigned int>("dimNearNullSpace");
+  for (unsigned int i = 0; i < dimNullSpace; ++i)
+  {
+    std::ostringstream oss;
+    oss << "_" << i;
+    // do not project, since this will be recomputed, but make it ghosted, since the near nullspace builder might march over all nodes
+    _nl.addVector("NullSpace"+oss.str(),false,GHOSTED,false);
+  }
+  _subspace_dim["NullSpace"] = dimNullSpace;
+  for (unsigned int i = 0; i < dimNearNullSpace; ++i)
+  {
+    std::ostringstream oss;
+    oss << "_" << i;
+    // do not project, since this will be recomputed, but make it ghosted, since the near-nullspace builder might march over all semilocal nodes
+    _nl.addVector("NearNullSpace"+oss.str(),false,GHOSTED,false);
+  }
+  _subspace_dim["NearNullSpace"] = dimNearNullSpace;
+
+  _functions.resize(n_threads);
+  _ics.resize(n_threads);
+  _materials.resize(n_threads);
+
+  _material_data.resize(n_threads);
+  _bnd_material_data.resize(n_threads);
+  _neighbor_material_data.resize(n_threads);
+  for (unsigned int i = 0; i < n_threads; i++)
+  {
+    _material_data[i] = new MaterialData(_material_props);
+    _bnd_material_data[i] = new MaterialData(_bnd_material_props);
+    _neighbor_material_data[i] = new MaterialData(_bnd_material_props);
+  }
+
+  _pps_data.resize(n_threads);
+
+  for (unsigned int i=0; i<n_threads; i++)
+    _pps_data[i] = new PostprocessorData(*this, i);
+
+  _vpps_data.resize(n_threads);
+
+  for (unsigned int i=0; i<n_threads; i++)
+    _vpps_data[i] = new VectorPostprocessorData(*this, i);
+
+  _indicators.resize(n_threads);
+  _markers.resize(n_threads);
+
+  _active_elemental_moose_variables.resize(n_threads);
+
+  _block_mat_side_cache.resize(n_threads);
+  _bnd_mat_side_cache.resize(n_threads);
+
+  _resurrector = new Resurrector(*this);
+
+  _eq.parameters.set<FEProblem *>("_fe_problem") = this;
 }

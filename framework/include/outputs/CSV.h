@@ -41,7 +41,8 @@ public:
    *
    * @see initAvailable init separate
    */
-  CSV(const std::string & name, InputParameters & parameters);
+  CSV(const InputParameters & parameters);
+  CSV(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

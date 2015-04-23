@@ -26,12 +26,16 @@ InputParameters validParams<CreateExecutionerAction>();
 class CreateExecutionerAction : public MooseObjectAction
 {
 public:
-  CreateExecutionerAction(const std::string & name, InputParameters params);
+  CreateExecutionerAction(InputParameters params);
+  CreateExecutionerAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
-
   static void populateCommonExecutionerParams(InputParameters & params);
-  static void    storeCommonExecutionerParams(FEProblem & problem, InputParameters & params);
+
+#ifdef LIBMESH_HAVE_PETSC
+  static void storePetscOptions(FEProblem & problem, InputParameters & params);
+#endif
+
 };
 
 #endif // CREATEEXECUTIONERACTION_H

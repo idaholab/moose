@@ -11,8 +11,8 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "MooseError.h"
 
+// STL includes
 #include <string>
 #include <vector>
 #include <map>
@@ -21,6 +21,10 @@
 #include <fstream>
 #include <istream>
 #include <iterator>
+
+// MOOSE includes
+#include "MooseError.h"
+#include "MaterialProperty.h"
 
 // External includes
 #include "pcrecpp.h"
@@ -255,6 +259,12 @@ underscoreToCamelCase(const std::string & underscore_name, bool leading_upper_ca
   return result;
 }
 
+std::string
+shortName(const std::string & name)
+{
+  return name.substr(name.find_last_of('/') != std::string::npos ? name.find_last_of('/') + 1 : 0);
+}
+
 bool
 absoluteFuzzyEqual(const Real & var1, const Real & var2, const Real & tol)
 {
@@ -313,6 +323,43 @@ bool
 relativeFuzzyLessThan(const Real & var1, const Real & var2, const Real & tol)
 {
   return (absoluteFuzzyLessThan(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+}
+
+void
+MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties> > & props)
+{
+  // Define the iterators
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::const_iterator elem_it;
+  HashMap<unsigned int, MaterialProperties>::const_iterator side_it;
+  MaterialProperties::const_iterator prop_it;
+
+  // Loop through the elements
+  for (elem_it = props.begin(); elem_it != props.end(); ++elem_it)
+  {
+    Moose::out << "Element " << elem_it->first->id() << '\n';
+
+    // Loop through the sides
+    for (side_it = elem_it->second.begin(); side_it != elem_it->second.end(); ++side_it)
+    {
+      Moose::out << "  Side " << side_it->first << '\n';
+
+      // Loop over properties
+      unsigned int cnt = 0;
+      for (prop_it = side_it->second.begin(); prop_it != side_it->second.end(); ++prop_it)
+      {
+        MaterialProperty<Real> * mp = dynamic_cast<MaterialProperty<Real> *>(*prop_it);
+        if (mp)
+        {
+          Moose::out << "    Property " << cnt << '\n';
+          cnt++;
+
+          // Loop over quadrature points
+          for (unsigned int qp = 0; qp < mp->size(); ++qp)
+            Moose::out << "      prop[" << qp << "] = " << (*mp)[qp] << '\n';
+        }
+      }
+    }
+  }
 }
 
 } // MooseUtils namespace

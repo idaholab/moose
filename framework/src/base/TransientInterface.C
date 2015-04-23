@@ -35,7 +35,7 @@ TransientInterface::TransientInterface(const InputParameters & parameters, const
     _is_transient(_ti_feproblem.isTransient()),
     _object_type(object_type),
     _time_periods(_ti_feproblem.getTimePeriods()),
-    _ti_name(parameters.get<std::string>("name"))
+    _ti_name(MooseUtils::shortName(parameters.get<std::string>("name")))
 {
 }
 
@@ -57,7 +57,6 @@ TransientInterface::isActive()
     {
       bool ret_value;
       const std::vector<std::string> & objects = _time_periods[i-1]->getObjectList(_object_type, ret_value);
-
       if (std::find(objects.begin(), objects.end(), _ti_name) != objects.end())
         return ret_value;
       else
