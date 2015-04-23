@@ -15,6 +15,7 @@
 #include <cstdlib> // *must* precede <cmath> for proper std:abs() on PGI, Sun Studio CC
 #include <cmath> // for isnan(), when it's defined
 #include "XFEMCutElem3D.h"
+#include "EFAfuncs.h"
 
 XFEMCutElem3D::XFEMCutElem3D(Elem* elem, const EFAelement3D * const CEMelem):
   XFEMCutElem(elem),
@@ -24,8 +25,7 @@ XFEMCutElem3D::XFEMCutElem3D(Elem* elem, const EFAelement3D * const CEMelem):
 }
 
 XFEMCutElem3D::~XFEMCutElem3D()
-{
-}
+{}
 
 Point
 XFEMCutElem3D::get_node_coords(EFAnode* CEMnode, MeshBase* displaced_mesh) const
@@ -173,6 +173,7 @@ XFEMCutElem3D::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
     }
     normal *= (1.0/cut_plane_points.size());
   }
+  normalize(normal);
   return normal;
 }
 
@@ -280,16 +281,6 @@ XFEMCutElem3D::polyhedron_volume_3d(double coord[], int order_max, int face_num,
 
   return volume;
 # undef DIM_NUM
-}
-
-Point
-XFEMCutElem3D::cross_product(Point p1, Point p2) const
-{
-  Point r(0.0,0.0,0.0);
-  r(0) = p1(1)*p2(2) - p1(2)*p2(1);
-  r(1) = p1(2)*p2(0) - p1(0)*p2(2);
-  r(2) = p1(0)*p2(1) - p1(1)*p2(0);
-  return r;
 }
 
 void

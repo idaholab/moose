@@ -136,9 +136,6 @@ XFEM::update(Real time)
   bool mesh_changed = false;
 
   build_efa_mesh();
-  // DEBUG
-//  std::cout << "***** after efa mesh built *****" << std::endl;
-//  _efa_mesh.printMesh();
   if (mark_cut_edges(time))
   {
     mesh_changed = cut_mesh_with_efa();

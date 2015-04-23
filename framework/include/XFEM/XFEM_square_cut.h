@@ -34,10 +34,7 @@ public:
 
 private:
 
-  Point _v1;
-  Point _v2;
-  Point _v3;
-  Point _v4;
+  std::vector<Point> _vertices;
   Point _center;
   Point _normal;
 
@@ -50,12 +47,9 @@ private:
   void r8vec_copy(int n, double a1[], double a2[]);
   bool r8vec_eq(int n, double a1[], double a2[]);
   double r8vec_dot_product(int n, double a1[], double a2[]);
-  Point cross_product(Point p1, Point p2);
-  Real dot_product(Point p1, Point p2);
   bool isInsideCutPlane(Point p);
   bool isInsideEdge(Point p1, Point p2, Point p);
   Real getRelativePosition(Point p1, Point p2, Point p);
-  void normalize(Point & p);
 };
 
 #endif

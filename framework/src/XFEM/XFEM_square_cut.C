@@ -14,18 +14,31 @@
 
 #include "libmesh/mesh_base.h"
 #include "XFEM_square_cut.h"
+#include "EFAfuncs.h"
 
 XFEM_square_cut::XFEM_square_cut(std::vector<Real> square_nodes):
   XFEM_geometric_cut(0.0, 0.0),
-  _v1(Point(square_nodes[0], square_nodes[1], square_nodes[2])),
-  _v2(Point(square_nodes[3], square_nodes[4], square_nodes[5])),
-  _v3(Point(square_nodes[6], square_nodes[7], square_nodes[8])),
-  _v4(Point(square_nodes[9], square_nodes[10], square_nodes[11]))
+  _vertices(4, Point(0.0,0.0,0.0)),
+  _center(Point(0.0,0.0,0.0)),
+  _normal(Point(0.0,0.0,0.0))
 {
-  _center = 0.25*(_v1 + _v2 + _v3 + _v4);
-  Point v1_to_v3 = _v3 - _v1;
-  Point v2_to_v4 = _v4 - _v2;
-  _normal = cross_product(v1_to_v3, v2_to_v4);
+  _vertices[0] = Point(square_nodes[0], square_nodes[1], square_nodes[2]);
+  _vertices[1] = Point(square_nodes[3], square_nodes[4], square_nodes[5]);
+  _vertices[2] = Point(square_nodes[6], square_nodes[7], square_nodes[8]);
+  _vertices[3] = Point(square_nodes[9], square_nodes[10], square_nodes[11]);
+
+  for (unsigned int i = 0; i < 4; ++i)
+    _center += _vertices[i];
+  _center *= 0.25;
+
+  for (unsigned int i = 0; i < 4; ++i)
+  {
+    unsigned int iplus1(i < 3 ? i+1 : 0);
+    Point ray1 = _vertices[i] - _center;
+    Point ray2 = _vertices[iplus1] - _center;
+    _normal += cross_product(ray1, ray2);
+  }
+  _normal *= 0.25;
   normalize(_normal);
 }
 
@@ -280,38 +293,16 @@ XFEM_square_cut::r8vec_dot_product(int n, double a1[], double a2[])
   return value;
 }
 
-Point
-XFEM_square_cut::cross_product(Point p1, Point p2)
-{
-  Point r(0.0,0.0,0.0);
-  r(0) = p1(1)*p2(2) - p1(2)*p2(1);
-  r(1) = p1(2)*p2(0) - p1(0)*p2(2);
-  r(2) = p1(0)*p2(1) - p1(1)*p2(0);
-  return r;
-}
-
-Real
-XFEM_square_cut::dot_product(Point p1, Point p2)
-{
-  return p1(0)*p2(0) + p1(1)*p2(1) + p1(2)*p2(2);
-}
-
 bool
 XFEM_square_cut::isInsideCutPlane(Point p)
 {
   bool inside = false;
-  std::vector<Point> square_nodes;
-  square_nodes.push_back(_v1);
-  square_nodes.push_back(_v2);
-  square_nodes.push_back(_v3);
-  square_nodes.push_back(_v4);
-
   unsigned int counter = 0;
   for (unsigned int i = 0; i < 4; ++i)
   {
     unsigned int iplus1(i < 3 ? i+1 : 0);
-    Point middle2p = p - 0.5*(square_nodes[i] + square_nodes[iplus1]);
-    Point side_tang = square_nodes[iplus1] - square_nodes[i];
+    Point middle2p = p - 0.5*(_vertices[i] + _vertices[iplus1]);
+    Point side_tang = _vertices[iplus1] - _vertices[i];
     Point side_norm = cross_product(side_tang, _normal);
     normalize(middle2p); // normalize
     normalize(side_norm); // normalize
@@ -345,12 +336,4 @@ XFEM_square_cut::getRelativePosition(Point p1, Point p2, Point p)
   Real full_len = std::sqrt((p2 - p1).size_sq());
   Real len_p1_p = std::sqrt((p - p1).size_sq());
   return len_p1_p/full_len;
-}
-
-void
-XFEM_square_cut::normalize(Point & p)
-{
-  Real len = std::sqrt(p.size_sq());
-  if (len != 0.0)
-    p = (1.0/len)*p;
 }

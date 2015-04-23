@@ -1,11 +1,16 @@
 #ifndef EFAFUNCS_H
 #define EFAFUNCS_H
 
+#include "libmesh/libmesh_common.h"
+#include "libmesh/libmesh.h" // libMesh::invalid_uint
+#include "libmesh/elem.h"
 #include <iostream>
 #include <map>
 #include <set>
 #include <vector>
 #include <algorithm>
+
+using namespace libMesh;
 
 template <typename T>
 static bool deleteFromMap(std::map<unsigned int, T*> &theMap, T* elemToDelete)
@@ -92,6 +97,30 @@ static linearTetShape3D(unsigned int node_id, std::vector<double> &xi_3d)
     vol_xi[i] = xi_3d[i];
   vol_xi[3] = 1.0 - xi_3d[0] - xi_3d[1] - xi_3d[2];
   return vol_xi[node_id];
+}
+
+void
+static normalize(Point & p)
+{
+  Real len = std::sqrt(p.size_sq());
+  if (len != 0.0)
+    p = (1.0/len)*p;
+}
+
+Point
+static cross_product(Point p1, Point p2)
+{
+  Point r(0.0,0.0,0.0);
+  r(0) = p1(1)*p2(2) - p1(2)*p2(1);
+  r(1) = p1(2)*p2(0) - p1(0)*p2(2);
+  r(2) = p1(0)*p2(1) - p1(1)*p2(0);
+  return r;
+}
+
+Real
+static dot_product(Point p1, Point p2)
+{
+  return p1(0)*p2(0) + p1(1)*p2(1) + p1(2)*p2(2);
 }
 
 #endif

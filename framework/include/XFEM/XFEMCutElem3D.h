@@ -39,7 +39,6 @@ public:
 private:
   double polyhedron_volume_3d(double coord[], int order_max, int face_num,
                               int node[], int node_num, int order[]) const;
-  Point cross_product(Point p1, Point p2) const;
   void i4vec_zero(int n, int a[]) const;
 };
 
