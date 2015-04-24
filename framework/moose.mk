@@ -14,6 +14,9 @@ pcre_csrcfiles := $(shell find $(pcre_DIR) -name "*.c")
 pcre_objects   := $(patsubst %.cc, %.$(obj-suffix), $(pcre_srcfiles))
 pcre_objects   += $(patsubst %.c, %.$(obj-suffix), $(pcre_csrcfiles))
 pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
+# dependency files
+pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
+                  $(patsubst %.c, %.$(obj-suffix).d, $(pcre_csrcfiles))
 
 moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d -not -path "*/.svn*")
@@ -105,8 +108,10 @@ endif
 exodiff_DIR := $(FRAMEWORK_DIR)/contrib/exodiff
 exodiff_APP := $(exodiff_DIR)/exodiff
 exodiff_srcfiles := $(shell find $(exodiff_DIR) -name "*.C")
-exodiff_objfiles := $(patsubst %.C, %.$(obj-suffix), $(exodiff_srcfiles))
+exodiff_objects  := $(patsubst %.C, %.$(obj-suffix), $(exodiff_srcfiles))
 exodiff_includes := $(app_INCLUDES) -I$(exodiff_DIR) $(libmesh_INCLUDE)
+# dependency files
+exodiff_deps := $(patsubst %.C, %.$(obj-suffix).d, $(exodiff_srcfiles))
 
 all:: exodiff
 
@@ -114,10 +119,10 @@ all:: exodiff
 exodiff: app_INCLUDES := $(exodiff_includes)
 exodiff: $(exodiff_APP)
 
-$(exodiff_APP): $(exodiff_objfiles)
+$(exodiff_APP): $(exodiff_objects)
 	@echo "Linking "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(exodiff_objfiles) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS)
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(exodiff_objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS)
 
 -include $(wildcard $(exodiff_DIR)/*.d)
 
@@ -127,9 +132,10 @@ $(exodiff_APP): $(exodiff_objfiles)
 .PHONY: clean clobber cleanall echo_include echo_library libmesh_submodule_status
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
-app_LIB := $(moose_LIBS) $(exodiff_APP) libmoose-$(METHOD).*
-app_objects := $(moose_objects)
-app_deps := $(moose_deps)
+app_EXEC := $(exodiff_APP)
+app_LIB  := $(moose_LIBS) $(pcre_LIB)
+app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects)
+app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps)
 
 # The clean target removes everything we can remove "easily",
 # i.e. stuff which we have Makefile variables for.  Notes:
@@ -140,7 +146,8 @@ app_deps := $(moose_deps)
 # .) Calling 'make clean' in an app should not remove MOOSE object
 #    files, libraries, etc.
 clean::
-	@rm -rf $(app_LIB) $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER)
+	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB)
+	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER)
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
 # bunch more stuff.  We have to write this target as though it could
