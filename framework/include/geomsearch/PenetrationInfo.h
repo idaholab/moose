@@ -28,10 +28,6 @@
 
 class PenetrationInfo;
 
-// Used for Restart
-template<> void dataStore(std::ostream & stream, PenetrationInfo * & pinfo, void * context);
-template<> void dataLoad(std::istream & stream, PenetrationInfo * & pinfo, void * context);
-
 /**
  * Data structure used to hold penetration information
  */
