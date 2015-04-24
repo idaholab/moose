@@ -90,7 +90,6 @@ GluedContactConstraint::timestepSetup()
     if (_t > _time_last_called)
     {
       beginning_of_step = true;
-      _penetration_locator.saveContactStateVars();
     }
     updateContactSet(beginning_of_step);
     _updateContactSet = false;
@@ -128,6 +127,10 @@ GluedContactConstraint::updateContactSet(bool beginning_of_step)
     {
       continue;
     }
+
+    // Skip this pinfo if there are no displacement DOFs on this node.
+    if ( pinfo->_node->n_dofs(_sys.number(), _vars(_component)) == 0 )
+      continue;
 
     const dof_id_type slave_node_num = it->first;
     std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);

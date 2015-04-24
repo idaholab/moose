@@ -187,19 +187,3 @@ PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
     mooseError("Invalid normal_smoothing_method: "<<nsmString);
   _do_normal_smoothing = true;
 }
-
-void
-PenetrationLocator::saveContactStateVars()
-{
-  std::map<dof_id_type, PenetrationInfo *>::iterator it = _penetration_info.begin();
-  const std::map<dof_id_type, PenetrationInfo *>::iterator it_end = _penetration_info.end();
-  for ( ; it != it_end; ++it )
-  {
-    if (it->second != NULL)
-    {
-//      it->second->_contact_force_old = it->second->_contact_force;
-//      it->second->_accumulated_slip_old = it->second->_accumulated_slip;
-//      it->second->_frictional_energy_old = it->second->_frictional_energy;
-    }
-  }
-}
