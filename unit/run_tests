@@ -17,8 +17,12 @@ then
   if [ $? -eq 0 ]
   then
     echo "unit" >> ../test_results.log
+  else
+    exit 1
   fi
 else
   echo "Executable missing!"
   exit 1
 fi
+
+exit 0
