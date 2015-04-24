@@ -128,7 +128,7 @@ class Tester(MooseObject):
       reason = 'skipped (' + test_reason + ')'
       return (False, reason)
     # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
-    elif options.store_time and self.specs['scale_refine'] == 0:
+    elif (options.store_time or options.scaling) and self.specs['scale_refine'] == 0:
       return (False, reason)
     # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
     elif options.valgrind_mode != '':

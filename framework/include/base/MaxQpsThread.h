@@ -21,6 +21,7 @@
 // libMesh includes
 #include "libmesh/node_range.h"
 #include "libmesh/system.h"
+#include "libmesh/quadrature.h"
 
 class FEProblem;
 
@@ -30,7 +31,7 @@ class FEProblem;
 class MaxQpsThread
 {
 public:
-  MaxQpsThread(FEProblem & fe_problem);
+  MaxQpsThread(FEProblem & fe_problem, QuadratureType type, Order order, Order face_order);
 
   // Splitting Constructor
   MaxQpsThread(MaxQpsThread & x, Threads::split split);
@@ -43,6 +44,10 @@ public:
 
 protected:
   FEProblem & _fe_problem;
+
+  QuadratureType _qtype;
+  Order _order;
+  Order _face_order;
 
   THREAD_ID _tid;
 

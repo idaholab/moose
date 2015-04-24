@@ -345,7 +345,7 @@ public:
    * @param name Name of the nodal variable being used for copying (name is from the exodusII file)
    * @param timestep Timestep in the file being used
    */
-  virtual void addVariableToCopy(const std::string & name, unsigned int timestep) = 0;
+  virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, unsigned int timestep) = 0;
 
   const std::vector<MooseVariable *> & getVariables(THREAD_ID tid) { return _vars[tid].variables(); }
   const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid) { return _vars[tid].scalars(); }
@@ -378,12 +378,14 @@ protected:
  * Information about variables that will be copied
  */
 struct VarCopyInfo {
-  VarCopyInfo(const std::string & name, unsigned int timestep) :
-    _name(name),
+  VarCopyInfo(const std::string & dest_name, const std::string & source_name, unsigned int timestep) :
+    _dest_name(dest_name),
+    _source_name(source_name),
     _timestep(timestep)
   {}
 
-  std::string _name;
+  std::string _dest_name;
+  std::string _source_name;
   unsigned int _timestep;
 };
 
@@ -552,9 +554,9 @@ public:
   virtual DofMap & dofMap() { return _sys.get_dof_map(); }
   virtual System & system() { return _sys; }
 
-  virtual void addVariableToCopy(const std::string & name, unsigned int timestep)
+  virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, unsigned int timestep)
   {
-    _var_to_copy.push_back(VarCopyInfo(name, timestep));
+    _var_to_copy.push_back(VarCopyInfo(dest_name, source_name, timestep));
   }
 
   void copyVars(ExodusII_IO & io)
@@ -566,10 +568,10 @@ public:
     {
       did_copy = true;
       VarCopyInfo & vci = *it;
-      if (getVariable(0, vci._name).isNodal())
-        io.copy_nodal_solution(_sys, vci._name, vci._timestep);
+      if (getVariable(0, vci._dest_name).isNodal())
+        io.copy_nodal_solution(_sys, vci._dest_name, vci._source_name, vci._timestep);
       else
-        io.copy_elemental_solution(_sys, vci._name, vci._name, vci._timestep);
+        io.copy_elemental_solution(_sys, vci._dest_name, vci._source_name, vci._timestep);
     }
 
     if (did_copy)

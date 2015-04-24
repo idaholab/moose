@@ -90,6 +90,7 @@ ParsedFunctionTest::advancedConstructor()
   params.set<SubProblem *>("_subproblem") = _fe_problem;
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
+  params.set<std::vector<std::string> >("vals") = std::vector<std::string>(1, "-1"); // Dummy value, will be overwritten in test below
   params.set<std::string>("name") = "test";
 
 
@@ -110,6 +111,7 @@ ParsedFunctionTest::advancedConstructor()
   params2.set<SubProblem *>("_subproblem") = _fe_problem;
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
+  params2.set<std::vector<std::string> >("vals") = std::vector<std::string>(3, "-1"); // Dummy values, will be overwritten in test below
   params2.set<std::string>("name") = "test";
 
   MooseParsedFunction f2("test", params2);
@@ -135,17 +137,18 @@ ParsedFunctionTest::advancedConstructor()
   f3.initialSetup();
   CPPUNIT_ASSERT( f3.value(0,2) == 5 );
 
-  //test the constructor with three variables, two that are set
-  std::vector<std::string> two_vals(2);
-  two_vals[0] = "1.5";
-  two_vals[1] = "1";
+  //test the constructor with three variables
+  std::vector<std::string> three_vals(3);
+  three_vals[0] = "1.5";
+  three_vals[1] = "1";
+  three_vals[2] = "0";
 
   InputParameters params4 = _factory->getValidParams("ParsedFunction");
   params4.set<FEProblem *>("_fe_problem") = _fe_problem;
   params4.set<SubProblem *>("_subproblem") = _fe_problem;
   params4.set<std::string>("value") = "q*x + y/r + w";
   params4.set<std::vector<std::string> >("vars") = three_vars;
-  params4.set<std::vector<std::string> >("vals") = two_vals;
+  params4.set<std::vector<std::string> >("vals") = three_vals;
   params4.set<std::string>("name") = "test";
 
   MooseParsedFunction f4("test", params4);
@@ -173,6 +176,7 @@ ParsedFunctionTest::testVariables()
   params.set<SubProblem *>("_subproblem") = _fe_problem;
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
+  params.set<std::vector<std::string> >("vals") = std::vector<std::string>(1, "-1"); // Dummy value, will be overwritten in test below
   params.set<std::string>("name") = "test";
 
   MooseParsedFunction f("test", params);
@@ -196,6 +200,7 @@ ParsedFunctionTest::testVariables()
   params2.set<SubProblem *>("_subproblem") = _fe_problem;
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
+  params2.set<std::vector<std::string> >("vals") = std::vector<std::string>(3, "-1"); // Dummy values, will be overwritten in test below
   params2.set<std::string>("name") = "test";
 
   MooseParsedFunction f2("test", params2);
