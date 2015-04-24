@@ -40,6 +40,7 @@ cd build
              --enable-unique-id \
              --disable-warnings \
              --disable-cxx11 \
+             --enable-unique-ptr \
              --enable-openmp $*
 
 # let LIBMESH_JOBS be either MOOSE_JOBS, or 1 if MOOSE_JOBS
