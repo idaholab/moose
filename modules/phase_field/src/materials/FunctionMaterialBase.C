@@ -59,9 +59,6 @@ FunctionMaterialBase::FunctionMaterialBase(const std::string & name,
       _args.push_back(&coupledValue(*it, j));
     }
   }
-  _nargs = _arg_names.size();
 
-  // check number of coupled variables
-  if (_nargs == 0)
-    mooseError("Need at least one coupled variable for Function Material " << name);
+  _nargs = _arg_names.size();
 }

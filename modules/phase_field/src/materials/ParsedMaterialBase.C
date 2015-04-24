@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<ParsedMaterialBase>()
 {
   InputParameters params = emptyInputParameters();
-  params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
+  params.addCoupledVar("args", "Arguments of F() - use vector coupling");
 
   // Constants and their values
   params.addParam<std::vector<std::string> >("constant_names", std::vector<std::string>(), "Vector of constants used in the parsed function (use this for kB etc.)");
@@ -23,7 +23,7 @@ InputParameters validParams<ParsedMaterialBase>()
   // Material properties
   params.addParam<std::vector<std::string> >(
     "material_property_names", std::vector<std::string>(),
-    "Vector of material properties used in the parsed function (these should have a zero gradient!)");
+    "Vector of material properties used in the parsed function");
 
   // Function expression
   params.addRequiredParam<std::string>("function", "FParser function expression for the phase free energy");
@@ -44,7 +44,4 @@ ParsedMaterialBase::ParsedMaterialBase(const std::string & /* name */,
   // get tolerance vectors
   _tol_names = parameters.get<std::vector<std::string> >("tol_names");
   _tol_values = parameters.get<std::vector<Real> >("tol_values");
-
-  // get material property names
-  _mat_prop_names = parameters.get<std::vector<std::string> >("material_property_names");
 }

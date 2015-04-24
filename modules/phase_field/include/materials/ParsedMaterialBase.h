@@ -36,9 +36,6 @@ protected:
   /// tolerance vectors
   std::vector<std::string> _tol_names;
   std::vector<Real> _tol_values;
-
-  /// material property names
-  std::vector<std::string> _mat_prop_names;
 };
 
 #endif //PARSEDMATERIALBASE_H

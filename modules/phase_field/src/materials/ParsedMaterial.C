@@ -23,6 +23,6 @@ ParsedMaterial::ParsedMaterial(const std::string & name,
   // Build function and optimize
   functionParse(_function,
                 _constant_names, _constant_expressions,
-                _mat_prop_names,
+                getParam<std::vector<std::string> >("material_property_names"),
                 _tol_names, _tol_values);
 }
