@@ -18,6 +18,8 @@
 #include "MaterialProperty.h"
 #include "FEProblem.h"
 
+#include <sstream>
+
 /**
  * Helper function templates to set a variable to zero.
  * Specializations may have to be implemented (for examples see
@@ -48,6 +50,12 @@ class DerivativeMaterialInterface : public T
 {
 public:
   DerivativeMaterialInterface(const std::string & name, InputParameters parameters);
+
+  /**
+   * Helper functions to generate the material property names for the
+   * arbitrary derivatives.
+   */
+  const std::string propertyName(const std::string &base, const std::vector<std::string> &c) const;
 
   /**
    * Helper functions to generate the material property names for the
@@ -89,12 +97,16 @@ public:
   const MaterialProperty<U> & getDefaultMaterialProperty(const std::string & name);
 
   template<typename U>
+  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::vector<std::string> &c);
+  template<typename U>
   MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1);
   template<typename U>
   MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
   template<typename U>
   MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
 
+  template<typename U>
+  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::vector<std::string> &c);
   template<typename U>
   const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1);
   template<typename U>
@@ -116,6 +128,46 @@ DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & 
 
 template<class T>
 const std::string
+DerivativeMaterialInterface<T>::propertyName(const std::string &base,const std::vector<std::string> &c) const
+{
+  // to obtain well defined names we sort alphabetically
+  std::vector<std::string> a(c);
+  std::sort(a.begin(), a.end());
+
+  // derivative order
+  unsigned int order = a.size();
+  if (order == 0)
+    return base;
+
+  // build the property name as a stringstream
+  std::stringstream name;
+
+  // build numerator
+  name << 'd';
+  if (order > 1)
+    name << '^' << order;
+  name << base << '/';
+
+  // build denominator with 'pretty' names using exponents rather than repeat multiplication
+  unsigned int exponent = 1;
+  for (unsigned i = 1; i <= order; ++i)
+  {
+    if (i == order || a[i-1] != a[i])
+    {
+      name << 'd' << a[i-1];
+      if (exponent > 1)
+        name << '^' << exponent;
+      exponent = 1;
+    }
+    else
+      exponent++;
+  }
+
+  return name.str();
+}
+
+template<class T>
+const std::string
 DerivativeMaterialInterface<T>::propertyNameFirst(const std::string &base, const std::string &c1) const
 {
   return "d" + base + "/d" + c1;
@@ -125,36 +177,21 @@ template<class T>
 const std::string
 DerivativeMaterialInterface<T>::propertyNameSecond(const std::string &base, const std::string &c1, const std::string &c2) const
 {
-  if (c1 == c2)
-    return "d^2" + base + "/d" + c1 + "^2";
-  else if (c1 < c2)
-    return "d^2" + base + "/d" + c1 + "d" + c2;
-  else
-    return "d^2" + base + "/d" + c2 + "d" + c1;
+  std::vector<std::string> c(2);
+  c[0] = c1;
+  c[1] = c2;
+  return propertyName(base, c);
 }
 
 template<class T>
 const std::string
 DerivativeMaterialInterface<T>::propertyNameThird(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3) const
 {
-  // to obtain well defined names we sort alphabetically
   std::vector<std::string> c(3);
   c[0] = c1;
   c[1] = c2;
   c[2] = c3;
-  std::sort(c.begin(), c.end());
-
-  std::string ret = "d^3" + base + "/d" + c[0];
-
-  // this generates 'pretty' names with exponents rather than repeat multiplication
-  if (c[0] == c[1] && c[1] == c[2])
-    return ret + "^3";
-  else if (c[0] == c[1])
-    return ret + "^2d" + c[2];
-  else if (c[1] == c[2])
-    return ret + "d" + c[1] + "^2";
-  else
-    return ret + "d" + c[1] + "d" + c[2];
+  return propertyName(base, c);
 }
 
 template<class T>

@@ -44,7 +44,8 @@ void DerivativeParsedMaterialHelper::functionsPostParse()
   functionsOptimize();
 }
 
-void DerivativeParsedMaterialHelper::functionsDerivative()
+void
+DerivativeParsedMaterialHelper::functionsDerivative()
 {
   unsigned int i, j, k;
 
@@ -85,7 +86,8 @@ void DerivativeParsedMaterialHelper::functionsDerivative()
   }
 }
 
-void DerivativeParsedMaterialHelper::functionsOptimize()
+void
+DerivativeParsedMaterialHelper::functionsOptimize()
 {
   unsigned int i, j, k;
 
@@ -166,8 +168,9 @@ DerivativeParsedMaterialHelper::computeProperties()
     }
 
     // insert material property values
-    for (i = 0; i < _nmat_props; ++i)
-      _func_params[i + _nargs] = (*_mat_props[i])[_qp];
+    unsigned int nmat_props = _mat_prop_descriptors.size();
+    for (i = 0; i < nmat_props; ++i)
+      _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
 
     // set function value
     if (_prop_F)
