@@ -28,7 +28,7 @@ void
 EBSDMeshErrorTest::setUp()
 {
   const char *argv[2] = { "foo", "\0" };
-  _app = AppFactory::createApp("MarmotUnitApp", 1, (char**)argv);
+  _app = AppFactory::createApp("MooseUnitApp", 1, (char**)argv);
   _factory = &_app->getFactory();
 }
 
@@ -44,7 +44,7 @@ void
 EBSDMeshErrorTest::fileDoesNotExist()
 {
   // generate input parameter set
-  InputParameters params = _factory->getValidParams("EBSDMesh");
+  InputParameters params = validParams<EBSDMesh>();
   params.addPrivateParam("_moose_app", _app);
   params.set<std::string>("name", "EBSD");
 
@@ -89,7 +89,7 @@ void
 EBSDMeshErrorTest::headerErrorHelper(const char * filename, const char * error)
 {
   // generate input parameter set
-  InputParameters params = _factory->getValidParams("EBSDMesh");
+  InputParameters params = validParams<EBSDMesh>();
   params.addPrivateParam("_moose_app", _app);
   params.set<std::string>("name", "EBSD");
 
@@ -136,7 +136,7 @@ EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list)
   for (unsigned int i = 0; i < nparam; ++i)
   {
     // generate input parameter set
-    InputParameters params = _factory->getValidParams("EBSDMesh");
+    InputParameters params = validParams<EBSDMesh>();
     params.addPrivateParam("_moose_app", _app);
     params.set<std::string>("name", "EBSD");
 
