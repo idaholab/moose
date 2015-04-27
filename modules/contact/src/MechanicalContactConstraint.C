@@ -100,7 +100,6 @@ MechanicalContactConstraint::timestepSetup()
     if (_t > _time_last_called)
     {
       beginning_of_step = true;
-      _penetration_locator.saveContactStateVars();
     }
     updateContactSet(beginning_of_step);
     _update_contact_set = false;
@@ -137,6 +136,12 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
     if (!pinfo)
       continue;
 
+    const Node * node = pinfo->_node;
+
+    // Skip this pinfo if there are no displacement DOFs on this node.
+    if ( node->n_dofs(_sys.number(), _vars(_component)) == 0 )
+      continue;
+
     const dof_id_type slave_node_num = it->first;
     std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
@@ -152,7 +157,6 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
       pinfo->_starting_closest_point_ref = it->second->_closest_point_ref;
     }
 
-    const Node * node = pinfo->_node;
     const Real area = nodalArea(*pinfo);
 
     if ((_model == CM_FRICTIONLESS && _formulation == CF_DEFAULT) ||

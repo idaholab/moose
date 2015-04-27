@@ -98,39 +98,45 @@ PenetrationAux::timestepSetup()
     for ( PenetrationMap::iterator it = begin; it != end; ++it )
     {
       PenetrationInfo * pinfo = it->second;
-      if ( pinfo )
-      {
-        // We have to re-get the node here because getNodalValueOld asserts isSemiLocal based on a
-        // pointer to the node rather than the node's ID. So we need a reference to the actual node
-        // held by the mesh rather than the displaced copy of the node stored in the pinfo.
-        Node & node = displaced_problem.refMesh().node( pinfo->_node->id() );
-        Real old_value = _var.getNodalValueOld(node);
+      if ( ! pinfo )
+        continue;
 
-        switch (_quantity)
-        {
-          case PA_FORCE_X:
-            pinfo->_contact_force_old(0) = old_value;
-            pinfo->_contact_force(0) = pinfo->_contact_force_old(0);
-            break;
-          case PA_FORCE_Y:
-            pinfo->_contact_force_old(1) = old_value;
-            pinfo->_contact_force(1) = pinfo->_contact_force_old(1);
-            break;
-          case PA_FORCE_Z:
-            pinfo->_contact_force_old(2) = old_value;
-            pinfo->_contact_force(2) = pinfo->_contact_force_old(2);
-            break;
-          case PA_ACCUMULATED_SLIP:
-            pinfo->_accumulated_slip_old = old_value;
-            pinfo->_accumulated_slip = pinfo->_accumulated_slip_old;
-            break;
-          case PA_FRICTIONAL_ENERGY:
-            pinfo->_frictional_energy_old = old_value;
-            pinfo->_frictional_energy = pinfo->_frictional_energy_old;
-            break;
-          default:
-            ; // Suppress the warning for unhandled cases.
-        }
+      // We have to re-get the node here because getNodalValueOld asserts isSemiLocal based on a
+      // pointer to the node rather than the node's ID. So we need a reference to the actual node
+      // held by the mesh rather than the displaced copy of the node stored in the pinfo.
+      Node & node = displaced_problem.refMesh().node( pinfo->_node->id() );
+
+      // Now make sure this node actually has a DOF for this variable. It may not have a DOF if, for
+      // example, the mesh is 2nd order but the variables are 1st order.
+      if ( node.n_dofs(_sys.number(), _var.number()) == 0 )
+        continue;
+
+      Real old_value = _var.getNodalValueOld(node);
+
+      switch (_quantity)
+      {
+        case PA_FORCE_X:
+          pinfo->_contact_force_old(0) = old_value;
+          pinfo->_contact_force(0) = pinfo->_contact_force_old(0);
+          break;
+        case PA_FORCE_Y:
+          pinfo->_contact_force_old(1) = old_value;
+          pinfo->_contact_force(1) = pinfo->_contact_force_old(1);
+          break;
+        case PA_FORCE_Z:
+          pinfo->_contact_force_old(2) = old_value;
+          pinfo->_contact_force(2) = pinfo->_contact_force_old(2);
+          break;
+        case PA_ACCUMULATED_SLIP:
+          pinfo->_accumulated_slip_old = old_value;
+          pinfo->_accumulated_slip = pinfo->_accumulated_slip_old;
+          break;
+        case PA_FRICTIONAL_ENERGY:
+          pinfo->_frictional_energy_old = old_value;
+          pinfo->_frictional_energy = pinfo->_frictional_energy_old;
+          break;
+        default:
+          ; // Suppress the warning for unhandled cases.
       }
     }
   }

@@ -64,7 +64,7 @@ dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, vo
   }
 }
 
-class PenetrationLocator : Restartable
+class PenetrationLocator
 {
 public:
   PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, const unsigned int master_id, const unsigned int slave_id, Order order, NearestNodeLocator & nearest_node);
@@ -105,22 +105,21 @@ public:
   NearestNodeLocator & _nearest_node;
 
   /// Data structure of nodes and their associated penetration information
-  std::map<dof_id_type, PenetrationInfo *> & _penetration_info;
+  std::map<dof_id_type, PenetrationInfo *> _penetration_info;
 
-  std::set<dof_id_type> & _has_penetrated;
-  std::map<dof_id_type, unsigned int> & _locked_this_step;
-  std::map<dof_id_type, unsigned int> & _unlocked_this_step;
-  std::map<dof_id_type, Real> & _lagrange_multiplier;
+  std::set<dof_id_type> _has_penetrated;
+  std::map<dof_id_type, unsigned int> _locked_this_step;
+  std::map<dof_id_type, unsigned int> _unlocked_this_step;
+  std::map<dof_id_type, Real> _lagrange_multiplier;
 
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);
   void setNormalSmoothingDistance(Real normal_smoothing_distance);
   void setNormalSmoothingMethod(std::string nsmString);
-  void saveContactStateVars();
   Real getTangentialTolerance() {return _tangential_tolerance;}
 
 protected:
-  bool & _update_location; // Update the penetration location for nodes found last time
+  bool _update_location; // Update the penetration location for nodes found last time
   Real _tangential_tolerance; // Tangential distance a node can be from a face and still be in contact
   bool _do_normal_smoothing;  // Should we do contact normal smoothing?
   Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to perform normal smoothing
