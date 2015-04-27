@@ -1,0 +1,232 @@
+\documentclass[preprint,5p]{elsarticle}
+%\documentclass[preprint,3p]{elsarticle}
+
+\usepackage{amsmath,amsfonts,graphicx}
+\usepackage{pslatex}
+%\usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
+\usepackage{setspace}
+\usepackage{bm}
+\usepackage{caption}
+\usepackage{subfigure}
+
+\bibliographystyle{unsrt}
+% Reference style "model1a-num-names" is used by J. Nuc. Mat.
+%\bibliographystyle{model1a-num-names}
+
+\graphicspath{
+{figures/}
+}
+
+\newcommand{\uo}{\ensuremath{\mbox{UO}_2}}
+
+\begin{document}
+
+\begin{frontmatter}
+\title{The Module Called Heat Conduction}
+\end{frontmatter}
+
+\section{The Heat Equation}
+The heat conduction module in MOOSE is primarily focused on solving the heat equation:
+
+\begin{equation}
+\rho C_p \frac{\partial T}{\partial t} + \nabla \cdot \mathbf{q} - Q = 0,
+\label{heat_eqn}
+\end{equation}
+with boundary conditions:
+\begin{equation}
+\label{dir_temp_bc}
+T|_{\partial\Omega_1} = g_1
+\end{equation}
+\begin{equation}
+\label{flux_temp_bc}
+\nabla T\cdot \hat{\bm{n}} |_{\partial\Omega_2} = g_2
+\end{equation}
+
+where $T$, $\rho$ and $C_p$ are the temperature, density and specific heat, respectively, $Q$ is a volumetric heat source. The equations \ref{dir_temp_bc} and \ref{flux_temp_bc} are the Dirichlet and Neumann boundary conditions respectively, applied to boundaries $\partial\Omega_1$ and $\partial\Omega_2$. $g_1$ and $g_2$ are the values of the boundary conditions and $\hat{\bm{n}}$ is the normal to boundary $\partial\Omega_2$.
+
+The heat equation describes heat conducting through a material and does so in terms of heat flux. Heat flux is the heat transfer rate per unit area perpendicular to the direction of heat transfer. The divergence of heat flux describes the conduction of heat:
+\begin{equation}
+\nabla \cdot \mathbf{q},
+\end{equation}
+
+where the heat flux $\mathbf{q}$ is defined as:
+
+\begin{equation}
+\mathbf{q} = - k\nabla T.
+\end{equation}
+
+The heat equation can be rewritten as follows:
+
+\begin{equation}
+\label{heat_eqn_div_grad}
+\rho C_p\frac{\partial T}{\partial t} - \nabla\cdot k\nabla T - Q = 0
+\end{equation}
+
+
+\section{Overview}
+The following list contains the names of objects relevant the solving the heat equation. It includes each kernel in the heat equation (\ref{heat_eqn_div_grad}), the applicable boundary conditions, some material models used by the kernels, and models that simulate heat transfer across a gap i.e. thermal contact. The following is an alphabetical list of the objects found in the module \textit{heat\_conduction}:
+\begin{itemize}
+\item \textbf{AnisotropicHeatConduction}
+\item \textbf{AnisotropicHeatConductionMaterial}
+\item \textbf{ConvectiveFluxFuntion}
+\item \textbf{CoupledConvectiveFlux}
+\item \textbf{GapConductance}
+\item \textbf{GapConductanceConstraint}
+\item \textbf{GapHeatPointSourceMaster}
+\item \textbf{GapHeatTransfer}
+\item \textbf{HeatConduction}
+\item \textbf{HeatConductionBC}
+\item \textbf{HeatConductionMaterial}
+\item \textbf{HeatConductionTimeDerivative}
+\item \textbf{HeatSource}
+\item \textbf{ThermalCond}
+\end{itemize}
+
+\subsection{AnisotropicHeatConduction}
+Considering only the conduction of heat through a material with thermal conductivity $k$, Equation \ref{heat_eqn_div_grad} can be written as:
+\begin{equation}
+\label{just_conduction}
+- \nabla \cdot  k\nabla T = 0
+\end{equation}
+
+For the AnisotropicHeatConcuction object, an independent thermal conductivity can be defined in each coordinate direction, i.e.:
+
+\begin{equation}
+\label{just_conduction_aniso}
+- \nabla \cdot  k_i\nabla T = 0
+\end{equation}
+
+where $i$ is 0, 1, or 2 corresponding to the coordinate directions $x$, $y$, and $z$ respectively.
+
+\subsection{AnisotropicHeatConductionMaterial}
+The individual terms in the heat equation may require material properties. The object called AnisotropicHeatConduction enables the assignment of thermal conductivity in each of the coordinate directions, such that $k_x$, $k_y$, and $k_z$ are defined and used to define anisotropic properties when solving the heat equation.
+
+\subsection{ConvectiveFluxFunction}
+When simulating convective flux on a boundary, the boundary condition object ConvectiveFluxFunction returns the convective flux:
+
+\begin{equation}
+\label{convec_flux_func}
+h(t)\cdot(T-T_\infty)
+\end{equation}
+
+Where $h(t)$ is the convective heat transfer coefficient that is assigned values from a user-defined function of time, $T$ is the temperature at the domain boundary, and $T_\infty$ is the far-field temperature.
+
+\subsection{CoupledConvectiveFlux}
+The convective flux boundary condition can be defined with a user-defined constant for the heat transfer coefficient $h$ with the object CoupledConvectiveFlux. The equation for convective flux \ref{convec_flux_func} can be rewritten with $h$ as a constant:
+
+\begin{equation}
+\label{convec_flux_const}
+h\cdot(T-T_\infty)
+\end{equation}
+%why is this called ``coupled'' convective flux? what is coupled about %it. why isn't it combined with ConvectiveFluxFunction and just called %ConvecitveFlux?
+
+
+\subsection{\textbf{ThermalContact}}
+\label{thermalcontact}
+The following sections outline models for heat transfer across a gap, otherwise known as thermal contact. The principle is that the heat leaving one body must equal that entering another.  For bodies $i$ and $j$ with heat transfer surface $\Gamma$:
+\begin{equation*}
+\int_{\Gamma_i} h \Delta T dA_i = \int_{\Gamma_j} h \Delta T dA_j
+\end{equation*}
+where the term $h \Delta T$ is the heat transfer coefficient multiplied by the change in temperature, otherwise described as the heat leaving or entering a system.
+
+Gap heat transfer is modeled using the
+equation,
+\begin{equation*}
+h_{gap} = h_g + h_s + h_r
+\end{equation*}
+where $h_{gap}$ is the total conductance across the gap, $h_g$ is the conductance of the gap itself (i.e. the material in the gap), $h_s$ is the increased conductance due to solid-solid contact, and $h_r$ is the conductance due to radiant heat transfer.
+In MOOSE Modules, the conductance $h_g$ and $h_r$ are available. BISON contains a model for $h_s$.
+
+The form of $h_g$ in MOOSE Modules is
+\begin{equation*}
+h_g = \frac{k_g}{d_g}
+\end{equation*}
+where $k_g$ is the conductivity in the gap and $d_g$ is the gap distance.
+
+This model is applied between two independently meshed domains such that the gap itself is not meshed. This capability is used in BISON to simulate heat transfer from nuclear fuel to the cladding.
+
+\subsubsection{GapConductance}
+The GapConductance object calculates $h_g$ and $h_r$. For $h_g$, the thermal conductivity of the gap is defined by the user as a constant. The size of the gap is based upon geometry type. For the case of cartesian geometry, the gap is defined by the distance between the domains. In the case of cylindrical geometry, the gap size is:
+
+\begin{equation*}
+d_g = r\cdot \ln \frac{r_2}{r_1}
+\end{equation*}
+
+where $r$ is the variable coordinate location between inner and outer radii, $r_1$ is the inner radius and $r_2$ is the outer radius.
+%need a figure here
+
+For the case of spherical geometry, the gap size is:
+
+\begin{equation*}
+d_g = r^2\cdot \big[ \frac{1}{r_1} - \frac{1}{r_2} \big]
+\end{equation*}
+
+and $r$, $r_1$, and $r_2$ have the same definitions as the cylindrical case.
+
+The radiant conductance is defined only for parallel plates as:
+
+\begin{equation*}
+h_r = \sigma F_e (T_1^2 + T_2^2)(T_1+T_2)
+\end{equation*}
+
+where $\sigma$ is the Stefan-Boltzman constant and $F_e$ is:
+
+\begin{equation*}
+F_e = \frac{1}{\frac{1}{\epsilon_1} + \frac{1}{\epsilon_2} - 1}
+\end{equation*}
+
+The values $\epsilon_1$ and $\epsilon_2$ are the emissivity of the surfaces in thermal contact.
+
+\subsubsection{GapConductanceConstraint}
+Mortar method of thermal contact.
+%David Andrs should write this section
+
+\subsubsection{GapHeatPointSourceMaster}
+One of two ways to transfer heat from one boundary to another. In this case the flux is calculated on the slave surface, and copied to the master. The other form of transferring heat across a gap is described in the GapHeatTransfer section.
+%not sure if you want to mention this or even get into the details of %how we do this. Jason Hales may want to weigh-in here
+
+\subsubsection{GapHeatTransfer}
+In this method of transferring heat across a gap, the flux $h\Delta T$ is calculated on each side of the gap. The flux on one side of the gap depends on the flux from the opposite side. This is the most accurate way to calculate gap heat transfer.
+%This could include more detail if you want. If you do want more %detail, Jason Hales should do it.
+
+\subsection{HeatConduction}
+The HeatConduction object is the term in the heat equation (\ref{heat_eqn_div_grad}) regarding heat diffusion.
+
+\begin{equation}
+- \nabla \cdot  k\nabla T,
+\end{equation}
+
+This equation is for isotropic heat transfer, vs. anisotropic heat transfer defined by Equation \ref{just_conduction_aniso}.
+
+\subsection{HeatConductionBC}
+This object returns the heat flux at a boundary that depends on the thermal conductivity of the domain and local temperature:
+
+\begin{equation}
+- k\nabla T,
+\end{equation}
+
+where the thermal conductivity $k$ is defined as a material property.
+
+\subsection{HeatConductionMaterial}
+Using the object HeatConductionMaterial, users can define the material properties thermal conductivity $k(T)$ and specific heat $C_p(T)$ as user-defined functions of temperature, or constants $k$ and $C_p$.
+
+\subsection{HeatConductionTimeDerivative}
+The inertial term in Equations \ref{heat_eqn} and \ref{heat_eqn_div_grad} is represented by the object HeatConductionTimeDerivative:
+
+\begin{equation}
+\rho C_p \frac{\partial T}{\partial t}
+\end{equation}
+
+where, again $\rho$ is the mass density, $C_p$ is the specific heat. The material properties $\rho$ and $C_p$ can be defined individually, or as a product called heat capacity $\rho  C$. This equation enables the simulation of transients in the heat equation.
+
+\subsection{HeatSource}
+The driver or source term in Equations \ref{heat_eqn} and \ref{heat_eqn_div_grad}, represented by the symbol $Q$, is simulated by invoking the HeatSource object. This is a volumetric source (power per volume). $Q$ can be a user-defined constant, or function of time.
+
+\subsection{ThermalCond}
+In the Phase Field Module, thermal conductivity on a boundary is required. The object ThermalCond enables this calculation. ThermalCond is a Postprocessor object. It takes the average of a local field variable (temperature), a user-supplied flux, length, and reference temperature and returns the conductivity on a user-specified boundary.
+%Mike Tonks may want edit.
+
+%\section*{References}
+\bibliography{../../../projects/trunk/papers/bibtex/mrabbrev,../../../projects/trunk/papers/bibtex/localabbrev,../../../projects/trunk/papers/bibtex/conferences,../../../projects/trunk/papers/bibtex/external,../../../projects/trunk/papers/bibtex/mmg_journals,../../../projects/trunk/papers/bibtex/Microstructure,../../../projects/trunk/papers/bibtex/reports}
+
+\end{document}
