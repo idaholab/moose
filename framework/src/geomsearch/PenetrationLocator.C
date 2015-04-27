@@ -32,19 +32,18 @@ std::string _PLBoundaryFuser(unsigned int boundary1, unsigned int boundary2)
 }
 
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & /*geom_search_data*/, MooseMesh & mesh, const unsigned int master_id, const unsigned int slave_id, Order order, NearestNodeLocator & nearest_node) :
-    Restartable(_PLBoundaryFuser(master_id, slave_id), "PenetrationLocator", subproblem, 0),
     _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master_id),
     _slave_boundary(slave_id),
     _fe_type(order),
     _nearest_node(nearest_node),
-    _penetration_info(declareRestartableDataWithContext<std::map<dof_id_type, PenetrationInfo *> >("penetration_info", &_mesh)),
-    _has_penetrated(declareRestartableData<std::set<dof_id_type> >("has_penetrated")),
-    _locked_this_step(declareRestartableData<std::map<dof_id_type, unsigned int> >("locked_this_step")),
-    _unlocked_this_step(declareRestartableData<std::map<dof_id_type, unsigned int> >("unlocked_this_step")),
-    _lagrange_multiplier(declareRestartableData<std::map<dof_id_type, Real> >("lagrange_multiplier")),
-    _update_location(declareRestartableData<bool>("update_location", true)),
+    _penetration_info(),
+    _has_penetrated(),
+    _locked_this_step(),
+    _unlocked_this_step(),
+    _lagrange_multiplier(),
+    _update_location(true),
     _tangential_tolerance(0.0),
     _do_normal_smoothing(false),
     _normal_smoothing_distance(0.0),
@@ -186,20 +185,4 @@ PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
   else
     mooseError("Invalid normal_smoothing_method: "<<nsmString);
   _do_normal_smoothing = true;
-}
-
-void
-PenetrationLocator::saveContactStateVars()
-{
-  std::map<dof_id_type, PenetrationInfo *>::iterator it = _penetration_info.begin();
-  const std::map<dof_id_type, PenetrationInfo *>::iterator it_end = _penetration_info.end();
-  for ( ; it != it_end; ++it )
-  {
-    if (it->second != NULL)
-    {
-//      it->second->_contact_force_old = it->second->_contact_force;
-//      it->second->_accumulated_slip_old = it->second->_accumulated_slip;
-//      it->second->_frictional_energy_old = it->second->_frictional_energy;
-    }
-  }
 }

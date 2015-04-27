@@ -116,7 +116,6 @@ ContactMaster::timestepSetup()
     if (_t > _time_last_called)
     {
       beginning_of_step = true;
-      _penetration_locator.saveContactStateVars();
     }
     updateContactSet(beginning_of_step);
     _updateContactSet = false;
@@ -144,6 +143,10 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     {
       continue;
     }
+
+    // Skip this pinfo if there are no displacement DOFs on this node.
+    if ( pinfo->_node->n_dofs(_sys.number(), _vars(_component)) == 0 )
+      continue;
 
     Real area = nodalArea(*pinfo);
 
@@ -259,6 +262,9 @@ ContactMaster::addPoints()
     if (!pinfo)
       continue;
 
+    // Skip this pinfo if there are no displacement DOFs on this node.
+    if ( pinfo->_node->n_dofs(_sys.number(), _vars(_component)) == 0 )
+      continue;
 
     dof_id_type slave_node_num = it->first;
 
