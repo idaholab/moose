@@ -98,19 +98,16 @@ PenetrationAux::timestepSetup()
     for ( PenetrationMap::iterator it = begin; it != end; ++it )
     {
       PenetrationInfo * pinfo = it->second;
-      if ( ! pinfo )
+
+      // Make sure this node actually has a DOF for this variable. It may not have a DOF if, for
+      // example, the mesh is 2nd order but the variables are 1st order.
+      if ( ! pinfo || pinfo->_node->n_comp(_sys.number(),_var.number()) < 1 )
         continue;
 
       // We have to re-get the node here because getNodalValueOld asserts isSemiLocal based on a
       // pointer to the node rather than the node's ID. So we need a reference to the actual node
       // held by the mesh rather than the displaced copy of the node stored in the pinfo.
       Node & node = displaced_problem.refMesh().node( pinfo->_node->id() );
-
-      // Now make sure this node actually has a DOF for this variable. It may not have a DOF if, for
-      // example, the mesh is 2nd order but the variables are 1st order.
-      if ( node.n_dofs(_sys.number(), _var.number()) == 0 )
-        continue;
-
       Real old_value = _var.getNodalValueOld(node);
 
       switch (_quantity)

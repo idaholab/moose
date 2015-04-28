@@ -81,10 +81,9 @@ MultiDContactConstraint::updateContactSet()
   {
     PenetrationInfo * pinfo = it->second;
 
-    if (!pinfo)
-    {
+    // Skip this pinfo if there are no DOFs on this node.
+    if ( ! pinfo || pinfo->_node->n_comp(_sys.number(), _vars(_component)) < 1 )
       continue;
-    }
 
     const Node * node = pinfo->_node;
 
