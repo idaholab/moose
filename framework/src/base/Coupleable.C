@@ -21,11 +21,10 @@ Coupleable::Coupleable(const InputParameters & parameters, bool nodal) :
     _c_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _nodal(nodal),
     _c_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
-    _coupleable_params(parameters)
+    _coupleable_params(parameters),
+    _coupleable_max_qps(_c_fe_problem.getMaxQps())
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
-
-  _coupleable_max_qps = _c_fe_problem.getMaxQps();
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 

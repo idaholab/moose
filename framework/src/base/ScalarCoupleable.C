@@ -15,11 +15,13 @@
 #include "ScalarCoupleable.h"
 #include "Problem.h"
 #include "SubProblem.h"
+#include "FEProblem.h"
 
 ScalarCoupleable::ScalarCoupleable(const InputParameters & parameters) :
-    _sc_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true)
+    _sc_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _sc_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
+    _coupleable_params(parameters)
 {
-
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
 
   THREAD_ID tid = parameters.have_parameter<THREAD_ID>("_tid") ? parameters.get<THREAD_ID>("_tid") : 0;
@@ -77,10 +79,25 @@ ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp)
   return getScalarVar(var_name, comp)->number();
 }
 
+VariableValue *
+ScalarCoupleable::getDefaultValue(const std::string & var_name)
+{
+  std::map<std::string, VariableValue *>::iterator default_value_it = _default_value.find(var_name);
+  if (default_value_it == _default_value.end())
+  {
+    VariableValue * value = new VariableValue(_sc_fe_problem.getMaxScalarOrder(), _coupleable_params.defaultCoupledValue(var_name));
+    default_value_it = _default_value.insert(std::make_pair(var_name, value)).first;
+  }
+
+  return default_value_it->second;
+}
 
 VariableValue &
 ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupledScalar(var_name, comp))
+    return *getDefaultValue(var_name);
+
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return (_sc_is_implicit) ? var->sln() : var->slnOld();
 }
@@ -88,6 +105,9 @@ ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int 
 VariableValue &
 ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupledScalar(var_name, comp))
+    return *getDefaultValue(var_name);
+
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return (_sc_is_implicit) ? var->slnOld() : var->slnOlder();
 }

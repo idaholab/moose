@@ -19,7 +19,6 @@
 #include "MooseVariableScalar.h"
 #include "InputParameters.h"
 
-
 /**
  * Interface for objects that needs coupling capabilities
  *
@@ -216,7 +215,7 @@ protected:
   /// True if implicit value is required
   bool _c_is_implicit;
 
-  /// Reference to the InputParameters
+  /// Local InputParameters
   InputParameters _coupleable_params;
 
   /// Will hold the default value for optional coupled variables.
