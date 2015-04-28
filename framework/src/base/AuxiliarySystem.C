@@ -228,22 +228,42 @@ AuxiliarySystem::serializeSolution()
 void
 AuxiliarySystem::compute(ExecFlagType type/* = EXEC_LINEAR*/)
 {
+  // avoid division by dt which might be zero.
+  if (_mproblem.dt() > 0.)
+    _time_integrator->preStep();
+
+  // We need to compute time derivatives every time each kind of the variables is finished, because:
+  //
+  //  a) the user might want to use the aux variable value somewhere, thus we need to provide the up-to-date value
+  //  b) time integration system works with the whole vectors of solutions, thus we cannot update only a part of the vector
+  //
+
   if (_vars[0].scalars().size() > 0)
+  {
     computeScalarVars(type);
+    // compute time derivatives of scalar aux variables _after_ the values were updated
+    if (_mproblem.dt() > 0.)
+      _time_integrator->computeTimeDerivatives();
+  }
 
   if (_vars[0].variables().size() > 0)
   {
     computeNodalVars(type);
+    // compute time derivatives of nodal aux variables _after_ the values were updated
+    if (_mproblem.dt() > 0.)
+      _time_integrator->computeTimeDerivatives();
+  }
+
+  if (_vars[0].variables().size() > 0)
+  {
     computeElementalVars(type);
+    // compute time derivatives of elemental aux variables _after_ the values were updated
+    if (_mproblem.dt() > 0.)
+      _time_integrator->computeTimeDerivatives();
   }
 
   if (_need_serialized_solution)
     serializeSolution();
-
-  // can compute time derivatives _after_ the current values were updated
-  // also, at the very beginning, avoid division by dt which might be zero.
-  if (_mproblem.dt() > 0.)
-    _time_integrator->computeTimeDerivatives();
 }
 
 std::set<std::string>
