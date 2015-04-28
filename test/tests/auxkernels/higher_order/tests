@@ -1,0 +1,19 @@
+[Tests]
+  [./high_order_with_oversample]
+    type = 'Exodiff'
+    input = 'high_order_over_sample.i'
+    exodiff = 'high_order_over_sample_oversample.e'
+  [../]
+
+  [./high_order_test]
+    type = 'Exodiff'
+    input = 'element_high_order_aux_test.i'
+    exodiff = 'ho.e'
+  [../]
+
+  [./high_order_l2_test]
+    type = 'Exodiff'
+    input = 'l2_element_aux_var_test.i'
+    exodiff = 'l2elemaux.e'
+  [../]
+[]
