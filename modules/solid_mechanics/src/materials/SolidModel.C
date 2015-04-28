@@ -58,6 +58,8 @@ InputParameters validParams<SolidModel>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addCoupledVar("strain_zz", "The zz strain");
+  params.addCoupledVar("scalar_strain_zz", "The zz strain (scalar variable)");
   params.addParam<std::vector<std::string> >("volumetric_strain", "Names of volumetric strain contributions");
 
   params.addParam<std::string>("constitutive_model", "ConstitutiveModel to use (optional)");
