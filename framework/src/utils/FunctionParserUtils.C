@@ -44,7 +44,7 @@ FunctionParserUtils::FunctionParserUtils(const std::string & /* name */,
     _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
     _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
     _nan(std::numeric_limits<Real>::quiet_NaN()),
-    _func_params(NULL)
+    _func_params()
 {
 }
 
@@ -55,7 +55,7 @@ FunctionParserUtils::evaluate(ADFunction * parser)
   if (parser == NULL) return 0.0;
 
   // evaluate expression
-  Real result = parser->Eval(_func_params);
+  Real result = parser->Eval(&_func_params[0]);
 
   // fetch fparser evaluation error
   int error_code = parser->EvalError();

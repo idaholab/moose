@@ -99,8 +99,8 @@ ParsedODEKernel::ParsedODEKernel(const std::string & name, InputParameters param
       _func_dFdarg[i]->JITCompile();
   }
 
-  // reserve storage for parameter passing bufefr
-  _func_params = new Real[_nargs + 1];
+  // reserve storage for parameter passing buffer
+  _func_params.resize(_nargs + 1);
 }
 
 ParsedODEKernel::~ParsedODEKernel()
@@ -109,8 +109,6 @@ ParsedODEKernel::~ParsedODEKernel()
   delete _func_dFdu;
   for (unsigned int i = 0; i < _nargs; ++i)
     delete _func_dFdarg[i];
-
-  delete[] _func_params;
 }
 
 void
