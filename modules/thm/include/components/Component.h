@@ -156,9 +156,9 @@ protected:
   Factory & _factory;
 
   /// Global mesh this component works on
-  MooseMesh & _mesh;
+  RELAP7Mesh & _mesh;
   /// Global physical mesh this component works on
-  MooseMesh * & _phys_mesh;
+  RELAP7Mesh * & _phys_mesh;
 
   /// List of subdomain IDs this components owns
   std::vector<unsigned int> _subdomains;
