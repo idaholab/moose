@@ -85,6 +85,8 @@ public:
    * Get the volume fraction of an element that is physical
    */
   Real get_elem_phys_volfrac(const Elem* elem) const;
+  Real get_elem_new_weights(const Elem* elem, unsigned int i_qp) const; // ZZY
+  Real flag_qp_inside(const Elem* elem, const Point & p) const; // ZZY code
 
   /**
    * Get specified component of normal or origin for cut plane for a given element

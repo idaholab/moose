@@ -17,11 +17,12 @@
 #include "XFEMCutElem3D.h"
 #include "EFAfuncs.h"
 
-XFEMCutElem3D::XFEMCutElem3D(Elem* elem, const EFAelement3D * const CEMelem):
-  XFEMCutElem(elem),
+XFEMCutElem3D::XFEMCutElem3D(Elem* elem, const EFAelement3D * const CEMelem, unsigned int n_qpoints):
+  XFEMCutElem(elem, n_qpoints),
   _efa_elem3d(CEMelem, true)
 {
   calc_physical_volfrac();
+  calc_mf_weights();
 }
 
 XFEMCutElem3D::~XFEMCutElem3D()
@@ -96,6 +97,13 @@ XFEMCutElem3D::calc_physical_volfrac()
   // compute fragment volume and volume fraction
   frag_vol = polyhedron_volume_3d(coord, order_max, face_num, node, node_num, order);
   _physical_volfrac = frag_vol/_elem_volume;
+}
+
+void
+XFEMCutElem3D::calc_mf_weights()
+{
+  // TODO: 3D moment fitting method nod coded yet - use volume fraction for now
+  _new_weights.resize(_n_qpoints, _physical_volfrac);
 }
 
 Point
@@ -183,6 +191,17 @@ XFEMCutElem3D::get_efa_elem() const
   return &_efa_elem3d;
 }
 
+unsigned int
+XFEMCutElem3D::num_cut_planes() const
+{
+  unsigned int counter = 0;
+  for (unsigned int i = 0; i < _efa_elem3d.get_fragment(0)->num_faces(); ++i)
+    if (_efa_elem3d.get_fragment(0)->is_face_interior(i))
+      counter += 1;
+  return counter;
+}
+
+// ****** private geometry toolkit ******
 double
 XFEMCutElem3D::polyhedron_volume_3d(double coord[], int order_max, int face_num,
                                     int node[], int node_num, int order[]) const

@@ -22,7 +22,8 @@ using namespace libMesh;
 class XFEMCutElem2D : public XFEMCutElem
 {
 public:
-  XFEMCutElem2D(Elem* elem, const EFAelement2D * const CEMelem);
+
+  XFEMCutElem2D(Elem* elem, const EFAelement2D * const CEMelem, unsigned int n_qpoints);
   ~XFEMCutElem2D();
 
 private:
@@ -31,10 +32,21 @@ private:
   virtual Point get_node_coords(EFAnode* node, MeshBase* displaced_mesh = NULL) const;
 
 public:
+
   virtual void calc_physical_volfrac();
+  virtual void calc_mf_weights();
   virtual Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
   virtual Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
   virtual const EFAelement * get_efa_elem() const;
+  virtual unsigned int num_cut_planes() const;
+
+private:
+
+  void new_weight_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &elem_nodes,
+                     std::vector<std::vector<Real> > &wsg);
+  void partial_gauss(unsigned int nen, std::vector<std::vector<Real> > &tsg);
+  void solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &elem_nodes,
+                std::vector<std::vector<Real> > &tsg, std::vector<std::vector<Real> > &wsg);
 };
 
 #endif

@@ -30,29 +30,37 @@
 
 #include "MaterialData.h"
 #include "ElementFragmentAlgorithm.h"
+#include "EFAfuncs.h"
 
 using namespace libMesh;
 
 class XFEMCutElem
 {
 public:
-  XFEMCutElem(Elem* elem);
+
+  XFEMCutElem(Elem* elem, unsigned int n_qpoints);
   virtual ~XFEMCutElem();
 
 protected:
 
   unsigned int _n_nodes;
+  unsigned int _n_qpoints;
   std::vector<Node*> _nodes;
   Real _elem_volume;
   Real _physical_volfrac;
+  std::vector<Real> _new_weights; // quadrature weights from moment fitting
   virtual Point get_node_coords(EFAnode* node, MeshBase* displaced_mesh = NULL) const = 0;
 
 public:
+
   virtual void calc_physical_volfrac() = 0;
   Real get_physical_volfrac() const;
+  virtual void calc_mf_weights() = 0; // ZZY
+  Real get_mf_weights(unsigned int i_qp) const; // ZZY
   virtual Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const = 0;
   virtual Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const = 0;
   virtual const EFAelement * get_efa_elem() const = 0;
+  virtual unsigned int num_cut_planes() const = 0;
 };
 
 #endif

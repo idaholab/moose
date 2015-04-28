@@ -16,6 +16,7 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 #include "Problem.h"
+#include "DisplacedProblem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 
@@ -28,6 +29,7 @@ InputParameters validParams<Kernel>()
 {
   InputParameters params = validParams<KernelBase>();
   params.registerBase("Kernel");
+  params.addParam<std::string>("xfem_qrule", "volfrac", "The type of XFEM quadrature rule");
   return params;
 }
 
@@ -36,7 +38,8 @@ Kernel::Kernel(const InputParameters & parameters) :
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu())
+    _du_dot_du(_var.duDotDu()),
+    _xfem_qrule(getParam<std::string>("xfem_qrule"))
 {
 }
 
@@ -50,11 +53,12 @@ Kernel::computeResidual()
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   _local_re.resize(re.size());
   _local_re.zero();
+  get_xfem_weights(_xfem_weights); // ZZY
 
   precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual() * _xfem_weights[_qp];
 
   re += _local_re;
 
@@ -72,11 +76,12 @@ Kernel::computeJacobian()
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
+  get_xfem_weights(_xfem_weights); // ZZY
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian() * _xfem_weights[_qp];
 
   ke += _local_ke;
 
@@ -101,12 +106,13 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
   else
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    get_xfem_weights(_xfem_weights); // ZZY
 
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         {
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar) * _xfem_weights[_qp];
         }
   }
 }
@@ -116,11 +122,12 @@ Kernel::computeOffDiagJacobianScalar(unsigned int jvar)
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
+  get_xfem_weights(_xfem_weights); // ZZY
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jv.order(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar) * _xfem_weights[_qp];
 }
 
 Real
@@ -140,3 +147,30 @@ Kernel::precalculateResidual()
 {
 }
 
+void
+Kernel::get_xfem_weights(std::vector<Real> & _xfem_weights)
+{
+  XFEM* xfem = _fe_problem.get_xfem();
+  _xfem_weights.resize(_qrule->n_points(), 1.0);
+
+  const Elem * undisplaced_elem  = NULL;
+  if (getParam<bool>("use_displaced_mesh") && _fe_problem.getDisplacedProblem() != NULL)
+  {
+    DisplacedProblem & displaced_problem = dynamic_cast< DisplacedProblem & >(_subproblem);
+    undisplaced_elem = displaced_problem.refMesh().elem(_current_elem->id());
+  }
+  else
+    undisplaced_elem = _current_elem;
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    if (_xfem_qrule == "volfrac")
+      _xfem_weights[_qp] = xfem->get_elem_phys_volfrac(undisplaced_elem);
+    else if (_xfem_qrule == "moment_fitting")
+      _xfem_weights[_qp] = xfem->get_elem_new_weights(undisplaced_elem, _qp);
+    else if (_xfem_qrule == "direct") // remove q-points outside the elem real domain by force
+      _xfem_weights[_qp] = xfem->flag_qp_inside(undisplaced_elem, _q_point[_qp]);
+    else
+      mooseError("unrecognized XFEM qrule option!");
+  }
+}

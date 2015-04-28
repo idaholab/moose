@@ -51,7 +51,5 @@ private:
   const unsigned int _temp_var;
   const Real _zeta;
   const Real _alpha;
-  bool _has_xfem_volfrac;
-  VariableValue & _xfem_volfrac;
 };
 #endif //STRESSDIVERGENCE_H

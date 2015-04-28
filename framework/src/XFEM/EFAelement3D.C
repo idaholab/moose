@@ -1341,8 +1341,7 @@ EFAelement3D::getFragmentFaceEdgeID(unsigned int ElemFaceID, unsigned int ElemFa
 bool
 EFAelement3D::is_real_edge_cut(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID, double position) const
 {
-  unsigned int FragFaceID = 99999;
-  unsigned int FragFaceEdgeID = 99999;
+  unsigned int FragFaceID = 99999, FragFaceEdgeID = 99999;
   bool is_in_real = false;
   if (_fragments.size() == 0)
   {

@@ -671,7 +671,7 @@ XFEM::cut_mesh_with_efa()
         libMesh::err << " ERROR: dynamic_cast to new_efa_elem2d fails" <<std::endl;
         exit(1);
       }
-      xfce = new XFEMCutElem2D(libmesh_elem, new_efa_elem2d);
+      xfce = new XFEMCutElem2D(libmesh_elem, new_efa_elem2d, _material_data[0]->nQPoints());
     }
     else if (_mesh->mesh_dimension() == 3)
     {
@@ -681,7 +681,7 @@ XFEM::cut_mesh_with_efa()
         libMesh::err << " ERROR: dynamic_cast to new_efa_elem3d fails" <<std::endl;
         exit(1);
       }
-      xfce = new XFEMCutElem3D(libmesh_elem, new_efa_elem3d);
+      xfce = new XFEMCutElem3D(libmesh_elem, new_efa_elem3d, _material_data[0]->nQPoints());
     }
     _cut_elem_map.insert(std::pair<Elem*,XFEMCutElem*>(libmesh_elem, xfce));
     efa_id_to_new_elem.insert(std::make_pair(efa_child_id, libmesh_elem));
@@ -783,8 +783,6 @@ XFEM::cut_mesh_with_efa()
   //store virtual nodes
   //store cut edge info
 
-//  std::cout << _efa_mesh << std::endl;
-
   return mesh_changed;
 }
 
@@ -836,6 +834,47 @@ XFEM::get_elem_phys_volfrac(const Elem* elem) const
   }
 
   return phys_volfrac;
+}
+
+Real
+XFEM::get_elem_new_weights(const Elem* elem, unsigned int i_qp) const // ZZY
+{
+  Real qp_weight = 1.0;
+  std::map<const Elem*, XFEMCutElem*>::const_iterator it;
+  it = _cut_elem_map.find(elem);
+  if (it != _cut_elem_map.end())
+  {
+    const XFEMCutElem *xfce = it->second;
+    qp_weight = xfce->get_mf_weights(i_qp);
+  }
+  return qp_weight;
+}
+
+Real
+XFEM::flag_qp_inside(const Elem* elem, const Point & p) const
+{
+  // ZZY code to get the flag indicating if a QP is inside the physical domain of a partial element
+  Real flag = 1.0; // default value - qp inside physical domain
+  std::map<const Elem*, XFEMCutElem*>::const_iterator it;
+  it = _cut_elem_map.find(elem);
+  if (it != _cut_elem_map.end())
+  {
+    const XFEMCutElem *xfce = it->second;
+    unsigned int n_cut_planes = xfce->num_cut_planes();
+    for (unsigned int plane_id = 0; plane_id < n_cut_planes; ++plane_id)
+    {
+      Point origin = xfce->get_origin(plane_id);
+      Point normal = xfce->get_normal(plane_id);
+      Point origin2qp = p - origin;
+      normalize(origin2qp);
+      if (dot_product(origin2qp, normal) > 0.0)
+      {
+        flag = 0.0; // QP outside pysical domain
+        break;
+      }
+    } // plane_id
+  }
+  return flag;
 }
 
 Real

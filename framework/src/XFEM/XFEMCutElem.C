@@ -14,8 +14,9 @@
 
 #include "XFEMCutElem.h"
 
-XFEMCutElem::XFEMCutElem(Elem* elem):
+XFEMCutElem::XFEMCutElem(Elem* elem, unsigned int n_qpoints):
   _n_nodes(elem->n_nodes()),
+  _n_qpoints(n_qpoints),
   _nodes(_n_nodes,NULL)
 {
   for (unsigned int i = 0; i < _n_nodes; ++i)
@@ -31,4 +32,10 @@ Real
 XFEMCutElem::get_physical_volfrac() const
 {
   return _physical_volfrac;
+}
+
+Real
+XFEMCutElem::get_mf_weights(unsigned int i_qp) const
+{
+  return _new_weights[i_qp];
 }

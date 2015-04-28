@@ -22,7 +22,7 @@ using namespace libMesh;
 class XFEMCutElem3D : public XFEMCutElem
 {
 public:
-  XFEMCutElem3D(Elem* elem, const EFAelement3D * const CEMelem);
+  XFEMCutElem3D(Elem* elem, const EFAelement3D * const CEMelem, unsigned int n_qpoints);
   ~XFEMCutElem3D();
 
 private:
@@ -32,9 +32,11 @@ private:
 
 public:
   virtual void calc_physical_volfrac();
+  virtual void calc_mf_weights();
   virtual Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
   virtual Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const;
   virtual const EFAelement * get_efa_elem() const;
+  virtual unsigned int num_cut_planes() const;
 
 private:
   double polyhedron_volume_3d(double coord[], int order_max, int face_num,

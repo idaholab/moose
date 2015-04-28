@@ -60,6 +60,11 @@ protected:
 
   /// Derivative of u_dot with respect to u
   VariableValue & _du_dot_du;
+
+  /// XFEM quadrature rule
+  std::string _xfem_qrule;
+  std::vector<Real> _xfem_weights;
+  void get_xfem_weights(std::vector<Real> & _xfem_weights);
 };
 
 #endif /* KERNEL_H */
