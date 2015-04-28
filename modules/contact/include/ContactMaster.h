@@ -70,7 +70,7 @@ protected:
 
   const unsigned int _mesh_dimension;
 
-  RealVectorValue _vars;
+  VectorValue<unsigned> _vars;
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;

@@ -49,7 +49,7 @@ protected:
   const unsigned int _y_var;
   const unsigned int _z_var;
 
-  const RealVectorValue _vars;
+  const VectorValue<unsigned> _vars;
 
   const unsigned int _mesh_dimension;
 

@@ -133,14 +133,12 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
   for (; it!=end; ++it)
   {
     PenetrationInfo * pinfo = it->second;
-    if (!pinfo)
+
+    // Skip this pinfo if there are no DOFs on this node.
+    if ( ! pinfo || pinfo->_node->n_comp(_sys.number(), _vars(_component)) < 1 )
       continue;
 
     const Node * node = pinfo->_node;
-
-    // Skip this pinfo if there are no displacement DOFs on this node.
-    if ( node->n_dofs(_sys.number(), _vars(_component)) == 0 )
-      continue;
 
     const dof_id_type slave_node_num = it->first;
     std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
