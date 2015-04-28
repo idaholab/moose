@@ -65,13 +65,12 @@ ParsedAux::ParsedAux(const std::string & name, InputParameters parameters) :
     _func_F->JITCompile();
 
   // reserve storage for parameter passing bufefr
-  _func_params = new Real[_nargs];
+  _func_params.resize(_nargs);
 }
 
 ParsedAux::~ParsedAux()
 {
   delete _func_F;
-  delete[] _func_params;
 }
 
 Real
