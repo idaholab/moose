@@ -67,7 +67,7 @@ protected:
   unsigned int _y_var;
   unsigned int _z_var;
 
-  RealVectorValue _vars;
+  VectorValue<unsigned> _vars;
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;

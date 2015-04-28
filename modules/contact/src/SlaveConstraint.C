@@ -89,13 +89,8 @@ SlaveConstraint::addPoints()
   {
     PenetrationInfo * pinfo = it->second;
 
-    if (!pinfo)
-    {
-      continue;
-    }
-
-    // Skip this pinfo if there are no displacement DOFs on this node.
-    if ( pinfo->_node->n_dofs(_sys.number(), _vars(_component)) == 0 )
+    // Skip this pinfo if there are no DOFs on this node.
+    if ( ! pinfo || pinfo->_node->n_comp(_sys.number(), _vars(_component)) < 1 )
       continue;
 
     dof_id_type slave_node_num = it->first;

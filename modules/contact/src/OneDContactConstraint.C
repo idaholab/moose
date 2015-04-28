@@ -54,10 +54,9 @@ OneDContactConstraint::updateContactSet()
   {
     PenetrationInfo * pinfo = it->second;
 
-    if (!pinfo)
-    {
+    // Skip this pinfo if there are no DOFs on this node.
+    if ( ! pinfo || pinfo->_node->n_comp(_sys.number(), _var.number()) < 1 )
       continue;
-    }
 
     if (pinfo->_distance > 0)
     {
