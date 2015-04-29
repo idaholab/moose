@@ -150,6 +150,16 @@ OutputWarehouse::outputStep(ExecFlagType type)
 
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->outputStep(type);
+
+  /**
+   * This is one of three locations where we explicitly flush the output buffers during a simulation:
+   * PetscOutput::petscNonlinearOutput()
+   * PetscOutput::petscLinearOutput()
+   * OutputWarehouse::outputStep()
+   *
+   * All other Console output _should_ be using newlines to avoid covering buffer errors
+   * and to avoid excessive I/O
+   */
   flushConsoleBuffer();
 
   // Reset force output flag

@@ -165,6 +165,18 @@ PetscOutput::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * voi
   // Perform the output
   ptr->outputStep(EXEC_NONLINEAR);
 
+  /**
+   * This is one of three locations where we explicitly flush the output buffers during a simulation:
+   * PetscOutput::petscNonlinearOutput()
+   * PetscOutput::petscLinearOutput()
+   * OutputWarehouse::outputStep()
+   *
+   * All other Console output _should_ be using newlines to avoid covering buffer errors
+   * and to avoid excessive I/O. This call is necessary. In the PETSc callback the
+   * context bypasses the OutputWarehouse.
+   */
+  ptr->_app.getOutputWarehouse().flushConsoleBuffer();
+
   // Reset the non-linear output flag and the simulation time
   ptr->_on_nonlinear_residual = false;
 
@@ -190,6 +202,18 @@ PetscOutput::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void * void_pt
 
   // Perform the output
   ptr->outputStep(EXEC_LINEAR);
+
+  /**
+   * This is one of three locations where we explicitly flush the output buffers during a simulation:
+   * PetscOutput::petscNonlinearOutput()
+   * PetscOutput::petscLinearOutput()
+   * OutputWarehouse::outputStep()
+   *
+   * All other Console output _should_ be using newlines to avoid covering buffer errors
+   * and to avoid excessive I/O. This call is necessary. In the PETSc callback the
+   * context bypasses the OutputWarehouse.
+   */
+  ptr->_app.getOutputWarehouse().flushConsoleBuffer();
 
   // Reset the linear output flag and the simulation time
   ptr->_on_linear_residual = false;

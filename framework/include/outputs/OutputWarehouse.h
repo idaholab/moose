@@ -350,7 +350,7 @@ private:
   friend class OutputInterface;
 
   // Console for calling flushConsoleBuffer()
-  friend class Console;
+  friend class PetscOutput;
 };
 
 template<typename T>
