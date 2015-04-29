@@ -22,6 +22,7 @@ public:
   virtual double untrCdfComplement(double x);
   virtual double untrInverseCdf(double x);
   virtual double untrMean();
+  virtual double untrStdDev();
   virtual double untrMedian();
   virtual double untrMode();
   virtual double untrHazard(double x);
@@ -41,6 +42,7 @@ public:
   virtual double untrCdfComplement(double x);
   virtual double untrInverseCdf(double x);
   virtual double untrMean();
+  virtual double untrStdDev();
   virtual double untrMedian();
   virtual double untrMode();
   virtual double untrHazard(double x);
@@ -283,6 +285,7 @@ public:
   double untrCdfComplement(double x);
   double untrInverseCdf(double);
   double untrMean();
+  double untrStdDev();
   double untrMedian();
   double untrMode();
   double untrHazard(double x);

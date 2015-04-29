@@ -44,6 +44,7 @@ public:
   virtual double cdfComplement(double x) = 0;
   virtual double quantile(double x) = 0;
   virtual double mean() = 0;
+  virtual double standard_deviation() = 0;
   virtual double median() = 0;
   virtual double mode() = 0;
   virtual double hazard(double x) = 0;
@@ -154,6 +155,10 @@ double BasicTruncatedDistribution::untrMean() {
   return _backend->mean();
 }
 
+double BasicTruncatedDistribution::untrStdDev() {
+  return _backend->standard_deviation();
+}
+
 double BasicTruncatedDistribution::untrMedian() {
   return _backend->median();
 }
@@ -194,6 +199,10 @@ double BasicDiscreteDistribution::untrMean() {
   return _backend->mean();
 }
 
+double BasicDiscreteDistribution::untrStdDev() {
+  return _backend->standard_deviation();
+}
+
 double BasicDiscreteDistribution::untrMedian() {
   return _backend->median();
 }
@@ -231,6 +240,7 @@ public:
   double cdfComplement(double x) { return boost::math::cdf(boost::math::complement(*_backend, x)); };
   double quantile(double x) { return boost::math::quantile(*_backend, x); };
   double mean() { return boost::math::mean(*_backend); };
+  double standard_deviation() { return boost::math::standard_deviation(*_backend); };
   double median() { return boost::math::median(*_backend); };
   double mode() { return boost::math::mode(*_backend); };
   double hazard(double x) { return boost::math::hazard(*_backend, x); };
@@ -1101,6 +1111,10 @@ double BasicConstantDistribution::untrInverseCdf(double){
 
 double BasicConstantDistribution::untrMean(){
   return _value;
+}
+
+double BasicConstantDistribution::untrStdDev(){
+  return 0.0;
 }
 
 double BasicConstantDistribution::untrMedian(){
