@@ -64,7 +64,7 @@ moose_revision:
 	  $(moose_revision_header) MOOSE)
 
 # libmesh submodule status
-libmesh_status := $(shell pushd $(MOOSE_DIR); git submodule status libmesh; popd)
+libmesh_status := $(shell git -C $(MOOSE_DIR) submodule status)
 ifneq (,$(findstring +,$(libmesh_status)))
 	libmesh_message = "\n***WARNING***\nYour libmesh is out of date.\nYou need to run update_and_rebuild_libmesh.sh in the scripts directory.\n\n"
 endif
