@@ -35,6 +35,10 @@ public:
    virtual double untrCdfComplement(double x)  = 0;
    virtual double untrInverseCdf(double x) = 0;
    virtual double untrMean() = 0;
+   /**
+      Calculates the untruncated standard deviation
+      \return the standard deviation
+    */
    virtual double untrStdDev() = 0;
    virtual double untrMedian() = 0;
    virtual double untrMode() = 0;

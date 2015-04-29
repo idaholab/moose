@@ -155,6 +155,10 @@ double BasicTruncatedDistribution::untrMean() {
   return _backend->mean();
 }
 
+/**
+   Calculates the untruncated standard deviation
+   \return the standard deviation
+*/
 double BasicTruncatedDistribution::untrStdDev() {
   return _backend->standard_deviation();
 }
@@ -199,6 +203,10 @@ double BasicDiscreteDistribution::untrMean() {
   return _backend->mean();
 }
 
+/**
+   Calculates the untruncated standard deviation
+   \return the standard deviation
+*/
 double BasicDiscreteDistribution::untrStdDev() {
   return _backend->standard_deviation();
 }
@@ -1113,6 +1121,10 @@ double BasicConstantDistribution::untrMean(){
   return _value;
 }
 
+/**
+   Calculates the untruncated standard deviation
+   \return the standard deviation
+*/
 double BasicConstantDistribution::untrStdDev(){
   return 0.0;
 }
