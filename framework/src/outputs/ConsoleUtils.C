@@ -264,13 +264,12 @@ std::string outputLegacyInformation(FEProblem & problem)
 
   if (problem.legacyUoAuxComputation() || problem.legacyUoInitialization())
   {
-    oss << COLOR_RED << "LEGACY MODES ENABLED:\n";
+    oss << COLOR_RED << "LEGACY MODES ENABLED:" << COLOR_DEFAULT << '\n';
     if (problem.legacyUoAuxComputation())
-      oss << COLOR_RED << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed.\n";
+      oss << COLOR_RED << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed." << COLOR_DEFAULT << '\n';
     if (problem.legacyUoInitialization())
-      oss << COLOR_RED << "  Computing all UserObjects during initial setup.\n";
+      oss << COLOR_RED << "  Computing all UserObjects during initial setup." << COLOR_DEFAULT << '\n';
   }
-  oss << COLOR_DEFAULT;
 
   return oss.str();
 }
