@@ -9,139 +9,104 @@
 template<>
 InputParameters validParams<DerivativeParsedMaterialHelper>()
 {
-  InputParameters params = ParsedMaterialHelper<DerivativeFunctionMaterialBase>::validParams();
+  InputParameters params = ParsedMaterialHelper<FunctionMaterialBase>::validParams();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
+  params.addParam<unsigned int>("derivative_order", 3, "Maximum order of derivatives taken");
+
   return params;
 }
 
 DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string & name,
                                                                InputParameters parameters,
                                                                VariableNameMappingMode map_mode) :
-    ParsedMaterialHelper<DerivativeFunctionMaterialBase>(name, parameters, map_mode)
+    ParsedMaterialHelper<FunctionMaterialBase>(name, parameters, map_mode),
+    _derivative_order(getParam<unsigned int>("derivative_order"))
 {
 }
 
 DerivativeParsedMaterialHelper::~DerivativeParsedMaterialHelper()
 {
-  for (unsigned int i = 0; i < _nargs; ++i)
-  {
-    delete _func_dF[i];
-
-    for (unsigned int j = i; j < _nargs; ++j)
-    {
-      delete _func_d2F[i][j];
-
-      if (_third_derivatives)
-        for (unsigned int k = j; k < _nargs; ++k)
-          delete _func_d3F[i][j][k];
-    }
-  }
+  for (unsigned int i = 0; i < _derivatives.size(); ++i)
+    delete _derivatives[i].second;
 }
 
 void DerivativeParsedMaterialHelper::functionsPostParse()
 {
-  functionsDerivative();
-  functionsOptimize();
+  // optimize base function
+  ParsedMaterialHelper<FunctionMaterialBase>::functionsOptimize();
+
+  // generate derivatives
+  assembleDerivatives();
 }
 
+/**
+ * Peform a breadth first construction of all requeste derivatives.
+ */
 void
-DerivativeParsedMaterialHelper::functionsDerivative()
+DerivativeParsedMaterialHelper::assembleDerivatives()
 {
-  unsigned int i, j, k;
+  // need to check for zero derivatives here, otherwise at least one order is generated
+  if (_derivative_order < 1) return;
 
-  // first derivatives
-  _func_dF.resize(_nargs);
-  _func_d2F.resize(_nargs);
-  _func_d3F.resize(_nargs);
-  for (i = 0; i < _nargs; ++i)
+  // set up deque
+  std::deque<QueueItem> queue;
+  queue.push_back(QueueItem(_func_F));
+
+  // generate derivatives until the queue is exhausted
+  while(!queue.empty())
   {
-    _func_dF[i] = new ADFunction(*_func_F);
-    if (_func_dF[i]->AutoDiff(_arg_names[i]) != -1)
-      mooseError("Failed to take first derivative w.r.t. "
-                 << _arg_names[i]);
+    QueueItem current = queue.front();
+    queue.pop_front();
 
-    // second derivatives
-    _func_d2F[i].resize(_nargs);
-    _func_d3F[i].resize(_nargs);
-    for (j = i; j < _nargs; ++j)
+    // all permutations of one set of derivatives are equal, so we make sure to generate only one each
+    unsigned int first = current._dargs.empty() ? 0 : current._dargs.back();
+
+    // add necessary derivative stepos
+    for (int i = first; i < _nargs; ++i)
     {
-      _func_d2F[i][j] = new ADFunction(*_func_dF[i]);
-      if (_func_d2F[i][j]->AutoDiff(_arg_names[j]) != -1)
-        mooseError("Failed to take second derivative w.r.t. "
-                   << _arg_names[i] << " and " << _arg_names[j]);
+      // here we will eventually check if we need to create more variables to hold material property derivatives
+      // if material property derivative needed)
+      // {
+      //   // add variable to the current parent and..
+      //   current._F->AddVariable(newvarname);
+      //
+      //   // ..all siblings in the queue
+      //   for (std::deque<QueueItem>::iterator j = queue.begin(); j != queue.end(); ++j)
+      //     j->_F->AddVariable(newvarname);
+      // }
 
-      // third derivatives
-      if (_third_derivatives)
-      {
-        _func_d3F[i][j].resize(_nargs);
-        for (k = j; k < _nargs; ++k)
-        {
-          _func_d3F[i][j][k] = new ADFunction(*_func_d2F[i][j]);
-          if (_func_d3F[i][j][k]->AutoDiff(_arg_names[k]) != -1)
-            mooseError("Failed to take third derivative w.r.t. "
-                       << _arg_names[i] << ", " << _arg_names[j] << ", and " << _arg_names[k]);
-        }
-      }
-    }
-  }
-}
+      // construct new derivative
+      QueueItem newitem = current;
+      newitem._dargs.push_back(i);
 
-void
-DerivativeParsedMaterialHelper::functionsOptimize()
-{
-  unsigned int i, j, k;
+      // build derivative
+      newitem._F = new ADFunction(*current._F);
+      if (newitem._F->AutoDiff(_arg_names[i]) != -1)
+        mooseError("Failed to take order " << newitem._dargs.size() << " derivative in material " << _name);
 
-  // base function
-  ParsedMaterialHelper<DerivativeFunctionMaterialBase>::functionsOptimize();
-
-  // optimize first derivatives
-  for (i = 0; i < _nargs; ++i)
-  {
-    if (!_disable_fpoptimizer)
-      _func_dF[i]->Optimize();
-    if (_enable_jit && !_func_dF[i]->JITCompile())
-      mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
-
-    // if the derivative vanishes set the function back to NULL
-    if (_func_dF[i]->isZero())
-    {
-      delete _func_dF[i];
-      _func_dF[i] = NULL;
-    }
-
-    // optimize second derivatives
-    for (j = i; j < _nargs; ++j)
-    {
+      // optimize and compile
       if (!_disable_fpoptimizer)
-        _func_d2F[i][j]->Optimize();
-      if (_enable_jit && !_func_d2F[i][j]->JITCompile())
+        newitem._F->Optimize();
+      if (_enable_jit && !newitem._F->JITCompile())
         mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 
-      // if the derivative vanishes set the function back to NULL
-      if (_func_d2F[i][j]->isZero())
+      // generate material property argument vector
+      std::vector<std::string> darg_names;
+      for (unsigned int j = 0; j < newitem._dargs.size(); ++j)
+        darg_names.push_back(_arg_names[j]);
+
+      // append to list of derivatives if the derivative is non-vanishing
+      if (!newitem._F->isZero())
       {
-        delete _func_d2F[i][j];
-        _func_d2F[i][j] = NULL;
+        Derivative newderivative;
+        newderivative.first = &declarePropertyDerivative<Real>(_F_name, darg_names);
+        newderivative.second = newitem._F;
+        _derivatives.push_back(newderivative);
       }
 
-      // optimize third derivatives
-      if (_third_derivatives)
-      {
-        for (k = j; k < _nargs; ++k)
-        {
-          if (!_disable_fpoptimizer)
-            _func_d3F[i][j][k]->Optimize();
-          if (_enable_jit && !_func_d3F[i][j][k]->JITCompile())
-            mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
-
-          // if the derivative vanishes set the function back to NULL
-          if (_func_d3F[i][j][k]->isZero())
-          {
-            delete _func_d3F[i][j][k];
-            _func_d3F[i][j][k] = NULL;
-          }
-        }
-      }
+      // push item to queue if further differentiation is required
+      if (newitem._dargs.size() < _derivative_order)
+        queue.push_back(newitem);
     }
   }
 }
@@ -176,23 +141,8 @@ DerivativeParsedMaterialHelper::computeProperties()
     if (_prop_F)
       (*_prop_F)[_qp] = evaluate(_func_F);
 
-    for (i = 0; i < _nargs; ++i)
-    {
-      if (_prop_dF[i])
-        (*_prop_dF[i])[_qp] = evaluate(_func_dF[i]);
-
-      // second derivatives
-      for (j = i; j < _nargs; ++j)
-      {
-        if (_prop_d2F[i][j])
-          (*_prop_d2F[i][j])[_qp] = evaluate(_func_d2F[i][j]);
-
-        // third derivatives
-        if (_third_derivatives)
-          for (k = j; k < _nargs; ++k)
-            if (_prop_d3F[i][j][k])
-              (*_prop_d3F[i][j][k])[_qp] = evaluate(_func_d3F[i][j][k]);
-      }
-    }
+    // set derivatives
+    for (i = 0; i < _derivatives.size(); ++i)
+      (*_derivatives[i].first)[_qp] = evaluate(_derivatives[i].second);
   }
 }
