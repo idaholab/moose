@@ -20,7 +20,7 @@ InputParameters validParams<DerivativeParsedMaterialHelper>();
 /**
  * Helper class to perform the auto derivative taking.
  */
-class DerivativeParsedMaterialHelper : public ParsedMaterialHelper<FunctionMaterialBase>
+class DerivativeParsedMaterialHelper : public ParsedMaterialHelper
 {
 public:
   DerivativeParsedMaterialHelper(const std::string & name,
@@ -47,8 +47,8 @@ protected:
 };
 
 struct DerivativeParsedMaterialHelper::QueueItem {
-  QueueItem() {}
-  QueueItem(ADFunction * F) : _F(F) {}
+  QueueItem() : _F(NULL), _dargs(0) {}
+  QueueItem(ADFunction * F) : _F(F), _dargs(0) {}
   QueueItem(const QueueItem & rhs) : _F(rhs._F), _dargs(rhs._dargs) {}
 
   ADFunction * _F;

@@ -256,6 +256,15 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
 template<class T>
 template<typename U>
 MaterialProperty<U> &
+DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::vector<std::string> &c)
+{
+  return this->template declareProperty<U>(propertyName(base, c));
+}
+
+
+template<class T>
+template<typename U>
+MaterialProperty<U> &
 DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::string &c1)
 {
   return this->template declareProperty<U>(propertyNameFirst(base, c1));

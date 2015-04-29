@@ -9,8 +9,9 @@
 template<>
 InputParameters validParams<DerivativeParsedMaterialHelper>()
 {
-  InputParameters params = ParsedMaterialHelper<FunctionMaterialBase>::validParams();
+  InputParameters params = validParams<ParsedMaterialHelper>();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
+  params.addDeprecatedParam<bool>("third_derivatives", "Flag to indicate if third derivatives are needed", "Use derivative_order instead.");
   params.addParam<unsigned int>("derivative_order", 3, "Maximum order of derivatives taken");
 
   return params;
@@ -19,8 +20,9 @@ InputParameters validParams<DerivativeParsedMaterialHelper>()
 DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string & name,
                                                                InputParameters parameters,
                                                                VariableNameMappingMode map_mode) :
-    ParsedMaterialHelper<FunctionMaterialBase>(name, parameters, map_mode),
-    _derivative_order(getParam<unsigned int>("derivative_order"))
+    ParsedMaterialHelper(name, parameters, map_mode),
+    //_derivative_order(getParam<unsigned int>("derivative_order"))
+    _derivative_order(isParamValid("third_derivatives") ? (getParam<bool>("third_derivatives") ? 3 : 2) : getParam<unsigned int>("derivative_order"))
 {
 }
 
@@ -33,7 +35,7 @@ DerivativeParsedMaterialHelper::~DerivativeParsedMaterialHelper()
 void DerivativeParsedMaterialHelper::functionsPostParse()
 {
   // optimize base function
-  ParsedMaterialHelper<FunctionMaterialBase>::functionsOptimize();
+  ParsedMaterialHelper::functionsOptimize();
 
   // generate derivatives
   assembleDerivatives();
@@ -91,9 +93,9 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
         mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 
       // generate material property argument vector
-      std::vector<std::string> darg_names;
+      std::vector<std::string> darg_names(0);
       for (unsigned int j = 0; j < newitem._dargs.size(); ++j)
-        darg_names.push_back(_arg_names[j]);
+        darg_names.push_back(_arg_names[newitem._dargs[j]]);
 
       // append to list of derivatives if the derivative is non-vanishing
       if (!newitem._F->isZero())
