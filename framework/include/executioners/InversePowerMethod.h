@@ -34,8 +34,8 @@ public:
 protected:
   virtual void takeStep();
 
-  /// postprocessor for evaluating |x-xprevious|
-  Real * _solution_diff;
+  /// name of the postprocessor for evaluating |x-xprevious|; empty means that no postprocessor is provided and power iteration will not check convergence based on it
+  std::string _solution_diff_name;
   /// minimum number of power iterations
   const unsigned int & _min_iter;
   /// maximum number of power iterations
@@ -48,10 +48,6 @@ protected:
   const Real & _pfactor;
   /// indicating if Chebyshev acceleration is turned on
   const bool & _cheb_on;
-  /// wheather or not to output solutions during power iteration
-  bool _output_pi;
-  /// exec flag of the postprocessor of |x-xprevious|
-  ExecFlagType _xdiff_execflag;
 };
 
 #endif //INVERSEPOWERMETHOD_H

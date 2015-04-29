@@ -18,11 +18,11 @@ template<>
 InputParameters validParams<InversePowerMethod>()
 {
   InputParameters params = validParams<EigenExecutionerBase>();
-  params.addParam<PostprocessorName>("xdiff", "To evaluate |x-x_previous| for power iterations");
+  params.addParam<PostprocessorName>("xdiff", "", "To evaluate |x-x_previous| for power iterations");
   params.addParam<unsigned int>("max_power_iterations", 300, "The maximum number of power iterations");
   params.addParam<unsigned int>("min_power_iterations", 1, "Minimum number of power iterations");
   params.addParam<Real>("eig_check_tol", 1e-6, "Eigenvalue convergence tolerance");
-  params.addParam<Real>("sol_check_tol", std::numeric_limits<Real>::max(), "|x-x_previous| convergence tolerance");
+  params.addParam<Real>("sol_check_tol", std::numeric_limits<Real>::max(), "Convergence tolerance on |x-x_previous| when provided");
   params.addParam<Real>("pfactor", 1e-2, "Reduce residual norm per power iteration by this factor");
   params.addParam<bool>("Chebyshev_acceleration_on", true, "If Chebyshev acceleration is turned on");
   params.addParam<Real>("k0", 1.0, "Initial guess of the eigenvalue");
@@ -31,7 +31,7 @@ InputParameters validParams<InversePowerMethod>()
 
 InversePowerMethod::InversePowerMethod(const std::string & name, InputParameters parameters)
     :EigenExecutionerBase(name, parameters),
-     _solution_diff(isParamValid("xdiff") ? &getPostprocessorValue("xdiff") : NULL),
+     _solution_diff_name(getParam<PostprocessorName>("xdiff")),
      _min_iter(getParam<unsigned int>("min_power_iterations")),
      _max_iter(getParam<unsigned int>("max_power_iterations")),
      _eig_check_tol(getParam<Real>("eig_check_tol")),
@@ -64,10 +64,9 @@ InversePowerMethod::takeStep()
   _problem.advanceState();
 
   preSolve();
-  // we currently do not check the solution difference
   Real initial_res;
   inversePowerIteration(_min_iter, _max_iter, _pfactor, _cheb_on, _eig_check_tol, true,
-                        getParam<PostprocessorName>("xdiff"), _sol_check_tol,
+                        _solution_diff_name, _sol_check_tol,
                         _eigenvalue, initial_res);
   postSolve();
   printEigenvalue();

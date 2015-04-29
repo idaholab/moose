@@ -561,7 +561,7 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
 {
   makeBXConsistent(k);
 
-  // turn on nonlinear flag so that RHS kernels opterate on the current solutions
+  // turn on nonlinear flag so that eigen kernels opterate on the current solutions
   _eigen_sys.eigenKernelOnCurrent();
 
   // set nonlinear solver controls
