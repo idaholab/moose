@@ -31,14 +31,16 @@
      # Test that top residuals are displayed using DebugOutput object via Outputs block
      type = RunApp
      input = show_top_residuals.i
-     expect_out = "\[DBG\]\[0\].*'u'.*at node"
+     expect_out = "\[DBG\]\[\d+\].*'u'.*at node"
+     max_parallel = 1
    [../]
 
    [./show_top_residuals_debug]
      # Test that top residuals are displayed using DebugOutput object via Debug block
      type = RunApp
      input = show_top_residuals_debug.i
-     expect_out = "\[DBG\]\[0\].*'u'.*at node"
+     expect_out = "\[DBG\]\[\d+\].*'u'.*at node"
+     max_parallel = 1
    [../]
 
    [./show_top_residuals_nonlinear_only]
@@ -46,20 +48,22 @@
      type = RunApp
      input = show_top_residuals_nonlinear_only.i
      expect_out = "0 Linear[^\n]*\n[^\n]*1 Linear"
+     max_parallel = 1
    [../]
 
    [./show_top_residuals_scalar]
      # Test that top residuals of scalar variables are displayed using DebugOutput object via Outputs block
      type = RunApp
      input = show_top_residuals_scalar.i
-     expect_out = "\[DBG\]\[0\].*'lambda' \(SCALAR\)"
+     expect_out = "\[DBG\]\[\d+\].*'lambda' \(SCALAR\)"
+     max_parallel = 1
    [../]
 
    [./show_top_residuals_scalar_debug]
      # Test that top residuals of scalar variables are displayed using DebugOutput object via Debug block
      type = RunApp
      input = show_top_residuals_scalar_debug.i
-     expect_out = "\[DBG\]\[0\].*'lambda' \(SCALAR\)"
+     expect_out = "\[DBG\]\[\d+\].*'lambda' \(SCALAR\)"
+     max_parallel = 1
    [../]
-
 []
