@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "SplitCHCRes.h"
-// The couple, SplitCHCRes and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
+
 template<>
 InputParameters validParams<SplitCHCRes>()
 {

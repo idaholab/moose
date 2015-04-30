@@ -4,7 +4,6 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #ifndef FEATUREFLOODCOUNT_H
 #define FEATUREFLOODCOUNT_H
 

@@ -6,8 +6,6 @@
 /****************************************************************/
 #include "ACGrGrPoly.h"
 
-//#include "Material.h"
-
 template<>
 InputParameters validParams<ACGrGrPoly>()
 {

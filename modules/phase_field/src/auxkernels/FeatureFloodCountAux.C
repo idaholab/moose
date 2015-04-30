@@ -4,8 +4,6 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
-
 #include "FeatureFloodCountAux.h"
 #include "FeatureFloodCount.h"
 #include "MooseEnum.h"
