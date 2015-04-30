@@ -1,6 +1,7 @@
 #include "DerivativeMaterialPropertyNameInterface.h"
 
 #include <sstream>
+#include <algorithm>
 
 const std::string
 DerivativeMaterialPropertyNameInterface::propertyName(const std::string &base,const std::vector<std::string> &c) const
