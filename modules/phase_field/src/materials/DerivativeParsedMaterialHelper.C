@@ -55,7 +55,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   queue.push_back(QueueItem(_func_F));
 
   // generate derivatives until the queue is exhausted
-  while(!queue.empty())
+  while (!queue.empty())
   {
     QueueItem current = queue.front();
     queue.pop_front();
