@@ -18,9 +18,8 @@ InputParameters validParams<PolycrystalVoronoiVoidIC>()
   return params;
 }
 
-PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const std::string & name,
-                                     InputParameters parameters) :
-    MultiSmoothCircleIC(name, parameters),
+PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const InputParameters & parameters) :
+    MultiSmoothCircleIC(parameters),
     _structure_type(getParam<MooseEnum>("structure_type")),
     _op_num(getParam<unsigned int>("op_num")),
     _grain_num(getParam<unsigned int>("grain_num")),

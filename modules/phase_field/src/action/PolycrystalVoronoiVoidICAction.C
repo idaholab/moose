@@ -2,6 +2,7 @@
 #include "Factory.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -44,8 +45,8 @@ InputParameters validParams<PolycrystalVoronoiVoidICAction>()
   return params;
 }
 
-PolycrystalVoronoiVoidICAction::PolycrystalVoronoiVoidICAction(const std::string & name, InputParameters params) :
-    Action(name, params),
+PolycrystalVoronoiVoidICAction::PolycrystalVoronoiVoidICAction(const InputParameters & params) :
+    Action(params),
     _op_num(getParam<unsigned int>("op_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
     _var_name_base(getParam<std::string>("var_name_base"))
@@ -87,6 +88,6 @@ PolycrystalVoronoiVoidICAction::act()
     poly_params.set<MooseEnum>("radius_variation_type") = getParam<MooseEnum>("radius_variation_type");
 
     //Add initial condition
-    _problem->addInitialCondition("PolycrystalVoronoiVoidIC", "InitialCondition", poly_params);
+    _problem->addInitialCondition("PolycrystalVoronoiVoidIC", name() + "_" + Moose::stringify(op), poly_params);
   }
 }
