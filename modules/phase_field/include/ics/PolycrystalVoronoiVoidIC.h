@@ -18,8 +18,7 @@ class PolycrystalVoronoiVoidIC :
   public MultiSmoothCircleIC
 {
 public:
-  PolycrystalVoronoiVoidIC(const std::string & name,
-                InputParameters parameters);
+  PolycrystalVoronoiVoidIC(const InputParameters & parameters);
 
 private:
 
