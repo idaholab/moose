@@ -66,6 +66,12 @@ public:
    */
   InputParameters & parameters() { return _pars; }
 
+  /**
+   * Get the type of this object as a string
+   * @return The the type of the object
+   */
+  const std::string & type() const { return _type; }
+
   ///@{
   /**
    * Retrieve a parameter for the object
@@ -330,6 +336,9 @@ protected:
 
   /// Parameters of this object
   InputParameters _pars;
+
+  /// The string representation of the type of this object as registered (see registerApp(AppName))
+  const std::string _type;
 
   /// The MPI communicator this App is going to use
   const MooseSharedPointer<Parallel::Communicator> _comm;

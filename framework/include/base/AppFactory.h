@@ -96,7 +96,7 @@ public:
    * @param parameters Parameters this object should have
    * @return The created object
    */
-  virtual MooseApp *create(const std::string & obj_name, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
+  MooseApp *create(const std::string & app_type, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
 
   ///@{
   /**
