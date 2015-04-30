@@ -9,7 +9,7 @@
 template<>
 InputParameters validParams<ParsedMaterial>()
 {
-  InputParameters params = ParsedMaterialHelper<FunctionMaterialBase>::validParams();
+  InputParameters params = validParams<ParsedMaterialHelper>();
   params += validParams<ParsedMaterialBase>();
   params.addClassDescription("Parsed Function Material.");
   return params;
@@ -17,7 +17,7 @@ InputParameters validParams<ParsedMaterial>()
 
 ParsedMaterial::ParsedMaterial(const std::string & name,
                                InputParameters parameters) :
-    ParsedMaterialHelper<FunctionMaterialBase>(name, parameters, USE_MOOSE_NAMES),
+    ParsedMaterialHelper(name, parameters, USE_MOOSE_NAMES),
     ParsedMaterialBase(name, parameters)
 {
   // Build function and optimize

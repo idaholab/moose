@@ -53,7 +53,7 @@
 
 [Materials]
   [./mask]
-    type = DerivativeParsedMaterial
+    type = ParsedMaterial
     block = 0
     function = if(c>0.5,0,1)
     f_name = mask

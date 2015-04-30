@@ -20,7 +20,7 @@ InputParameters validParams<DerivativeParsedMaterialHelper>();
 /**
  * Helper class to perform the auto derivative taking.
  */
-class DerivativeParsedMaterialHelper : public ParsedMaterialHelper<DerivativeFunctionMaterialBase>
+class DerivativeParsedMaterialHelper : public ParsedMaterialHelper
 {
 public:
   DerivativeParsedMaterialHelper(const std::string & name,
@@ -34,17 +34,25 @@ protected:
 
   virtual void functionsPostParse();
 
-  void functionsDerivative();
-  void functionsOptimize();
+  void assembleDerivatives();
 
-  /// The first derivatives of the free energy (function parser objects).
-  std::vector<ADFunction *> _func_dF;
+  struct QueueItem;
+  typedef std::pair<MaterialProperty<Real> *,ADFunction *> Derivative;
 
-  /// The second derivatives of the free energy (function parser objects).
-  std::vector<std::vector<ADFunction *> > _func_d2F;
+  /// The requested derivatives of the free energy
+  std::vector<Derivative> _derivatives;
 
-  /// The third derivatives of the free energy (function parser objects).
-  std::vector<std::vector<std::vector<ADFunction *> > > _func_d3F;
+  /// maximum derivative order
+  unsigned int _derivative_order;
+};
+
+struct DerivativeParsedMaterialHelper::QueueItem {
+  QueueItem() : _F(NULL), _dargs(0) {}
+  QueueItem(ADFunction * F) : _F(F), _dargs(0) {}
+  QueueItem(const QueueItem & rhs) : _F(rhs._F), _dargs(rhs._dargs) {}
+
+  ADFunction * _F;
+  std::vector<unsigned int> _dargs;
 };
 
 #endif // DERIVATIVEPARSEDMATERIALHELPER_H

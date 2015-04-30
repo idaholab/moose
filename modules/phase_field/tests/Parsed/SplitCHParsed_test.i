@@ -76,7 +76,7 @@
     constant_names       = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
-    third_derivatives = false
+    derivative_order = 2
   [../]
 []
 

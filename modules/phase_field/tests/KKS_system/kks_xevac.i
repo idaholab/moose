@@ -83,7 +83,7 @@
     block = 0
     T = 300
     outputs = exodus
-    third_derivatives = false
+    derivative_order = 2
   [../]
 []
 

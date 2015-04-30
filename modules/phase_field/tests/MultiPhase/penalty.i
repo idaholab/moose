@@ -178,7 +178,7 @@
     f_name = Fa
     args = 'c'
     function = '(c-0.1)^2'
-    third_derivatives = false
+    derivative_order = 2
   [../]
   [./free_energy_B]
     type = DerivativeParsedMaterial
@@ -186,7 +186,7 @@
     f_name = Fb
     args = 'c'
     function = '(c-0.9)^2'
-    third_derivatives = false
+    derivative_order = 2
   [../]
 
   [./free_energy]
@@ -197,7 +197,7 @@
     hi_names = 'h1   h2'
     etas     = 'eta1 eta2'
     args = 'c'
-    third_derivatives = false
+    derivative_order = 2
   [../]
 []
 

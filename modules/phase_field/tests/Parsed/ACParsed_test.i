@@ -68,7 +68,7 @@
     f_name = F
     args = 'eta'
     function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
-    third_derivatives = false
+    derivative_order = 2
   [../]
 []
 

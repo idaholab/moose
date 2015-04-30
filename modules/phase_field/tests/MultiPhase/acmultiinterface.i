@@ -208,7 +208,7 @@
     etas     = 'eta1 eta2 eta3'
     # the free energy is given by the MultiBarrierFunctionMaterial only
     W = 1
-    third_derivatives = false
+    derivative_order = 2
   [../]
 []
 

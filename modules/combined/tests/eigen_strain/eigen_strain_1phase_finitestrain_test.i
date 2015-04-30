@@ -93,9 +93,10 @@
     function = 0.01*c^2
     args = c
     outputs = exodus
+    output_properties = 'var_dep'
     f_name = var_dep
     enable_jit = true
-    third_derivatives = false
+    derivative_order = 2
   [../]
   [./eigen_strain]
     type = Compute1PhaseEigenStrain
@@ -167,4 +168,3 @@
     output_on = 'initial timestep_end failed nonlinear'
   [../]
 []
-

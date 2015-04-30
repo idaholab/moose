@@ -35,7 +35,7 @@
 
 [GlobalParams]
   # CHParsed needs the third derivatives
-  third_derivatives = true
+  derivative_order = 3
   enable_jit = true
 []
 
@@ -333,7 +333,7 @@
     f_name = Fc1
     function = '4*c^2'
     args = 'c'
-    third_derivatives = false
+    derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
@@ -341,7 +341,7 @@
     f_name = Fc2
     function = '(c-0.9)^2-0.4'
     args = 'c'
-    third_derivatives = false
+    derivative_order = 2
   [../]
   [./chemical_free_energy_3]
     type = DerivativeParsedMaterial
@@ -349,7 +349,7 @@
     f_name = Fc3
     function = '(c-0.9)^2-0.5'
     args = 'c'
-    third_derivatives = false
+    derivative_order = 2
   [../]
 
   # elastic free energies
@@ -358,7 +358,7 @@
     base_name = phase1
     f_name = Fe1
     block = 0
-    third_derivatives = false
+    derivative_order = 2
     args = 'c' # should be empty
   [../]
   [./elastic_free_energy_2]
@@ -366,7 +366,7 @@
     base_name = phase2
     f_name = Fe2
     block = 0
-    third_derivatives = false
+    derivative_order = 2
     args = 'c' # should be empty
   [../]
   [./elastic_free_energy_3]
@@ -374,7 +374,7 @@
     base_name = phase3
     f_name = Fe3
     block = 0
-    third_derivatives = false
+    derivative_order = 2
     args = 'c' # should be empty
   [../]
 
@@ -385,7 +385,7 @@
     f_name = F1
     sum_materials = 'Fc1 Fe1'
     args = 'c'
-    third_derivatives = false
+    derivative_order = 2
   [../]
   [./phase_free_energy_2]
     type = DerivativeSumMaterial
@@ -393,7 +393,7 @@
     f_name = F2
     sum_materials = 'Fc2 Fe2'
     args = 'c'
-    third_derivatives = false
+    derivative_order = 2
   [../]
   [./phase_free_energy_3]
     type = DerivativeSumMaterial
@@ -401,7 +401,7 @@
     f_name = F3
     sum_materials = 'Fc3 Fe3'
     args = 'c'
-    third_derivatives = false
+    derivative_order = 2
   [../]
 
   # global free energy
