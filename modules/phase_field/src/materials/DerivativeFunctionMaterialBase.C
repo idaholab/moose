@@ -11,14 +11,15 @@ InputParameters validParams<DerivativeFunctionMaterialBase>()
 {
   InputParameters params = validParams<FunctionMaterialBase>();
   params.addClassDescription("Material to provide a function (such as a free energy) and its derivatives w.r.t. the coupled variables");
-  params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
+  params.addDeprecatedParam<bool>("third_derivatives", "Flag to indicate if third derivatives are needed", "Use derivative_order instead.");
+  params.addRangeCheckedParam<unsigned int>("derivative_order", 3, "derivative_order>=2 & derivative_order<=3", "Maximum order of derivatives taken (2 or 3)");
   return params;
 }
 
 DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const std::string & name,
                                                                InputParameters parameters) :
     FunctionMaterialBase(name, parameters),
-    _third_derivatives(getParam<bool>("third_derivatives"))
+    _third_derivatives(isParamValid("third_derivatives") ? getParam<bool>("third_derivatives") : (getParam<unsigned int>("derivative_order")==3))
 {
   // loop counters
   unsigned int i, j, k;
