@@ -17,7 +17,7 @@
 []
 
 [GlobalParams]
-  third_derivatives = false
+  derivative_order = 2
 []
 
 [Variables]

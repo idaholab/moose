@@ -148,7 +148,7 @@
     eta = eta
     args = ''
     W = 0.1
-    third_derivatives = false
+    derivative_order = 2
   [../]
 
   # Generate the global stress from the phase stresses
