@@ -120,6 +120,9 @@ public:
     return *_value;
   }
 
+  /// take another derivative
+  void addDerivative(const std::string & var) { _derivative_vars.push_back(var); }
+
 private:
   void parseDerivative(const std::string &);
   void parseDependentVariables(const std::string &);
