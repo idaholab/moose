@@ -19,8 +19,6 @@
 #include "FEProblem.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
-#include <sstream>
-
 /**
  * Helper function templates to set a variable to zero.
  * Specializations may have to be implemented (for examples see
