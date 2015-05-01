@@ -78,6 +78,8 @@ Steady::execute()
 
   preExecute();
 
+  _problem.advanceState();
+
   // first step in any steady state solve is always 1 (preserving backwards compatibility)
   _time_step = 1;
   _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
