@@ -1,17 +1,9 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #ifndef LINEARISOELASTICPFDAMAGE_H
 #define LINEARISOELASTICPFDAMAGE_H
 
@@ -24,7 +16,6 @@
  * Small strain Isotropic Elastic formulation
  * Stiffness matrix scaled for heterogeneous elasticity property
  */
-
 class LinearIsoElasticPFDamage : public LinearElasticMaterial
 {
 public:
@@ -47,8 +38,8 @@ protected:
   MaterialProperty<RankTwoTensor> & _dstress_dc;
   MaterialProperty<Real> & _G0_pos;
   MaterialProperty<RankTwoTensor> & _dG0_pos_dstrain;
-  ///Small number to avoid non-positive definiteness at or near complete damage
 
+  /// Small number to avoid non-positive definiteness at or near complete damage
   Real _scaling;
   std::vector<RankTwoTensor> _etens;
   std::vector<Real> _epos;

@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "PFFracCoupledInterface.h"
 
 template<>
@@ -5,7 +11,6 @@ InputParameters validParams<PFFracCoupledInterface>()
 {
   InputParameters params = validParams<KernelGrad>();
   params.addRequiredCoupledVar("c", "Order parameter for damage");
-
   return params;
 }
 

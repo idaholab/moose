@@ -4,8 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef BndsCalcAux_H
-#define BndsCalcAux_H
+#ifndef BNDSCALCAUX_H
+#define BNDSCALCAUX_H
 
 #include "AuxKernel.h"
 
@@ -28,4 +28,4 @@ protected:
   unsigned int _ncrys;
 };
 
-#endif //BndsCalcAux_H
+#endif //BNDSCALCAUX_H

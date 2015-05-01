@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ACGBPoly.h"
-
 #include "Material.h"
 
 template<>

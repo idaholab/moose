@@ -10,7 +10,6 @@ template<>
 InputParameters validParams<CHMath>()
 {
   InputParameters params = validParams<CHBulk>();
-
   return params;
 }
 
