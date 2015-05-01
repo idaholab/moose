@@ -177,7 +177,7 @@ XFEMCutElem3D::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
       unsigned int iplus1(i < cut_plane_points.size()-1 ? i+1 : 0);
       Point ray1 = cut_plane_points[i] - center;
       Point ray2 = cut_plane_points[iplus1] - center;
-      normal += cross_product(ray1, ray2);
+      normal += ray1.cross(ray2);
     }
     normal *= (1.0/cut_plane_points.size());
   }

@@ -36,7 +36,7 @@ XFEM_square_cut::XFEM_square_cut(std::vector<Real> square_nodes):
     unsigned int iplus1(i < 3 ? i+1 : 0);
     Point ray1 = _vertices[i] - _center;
     Point ray2 = _vertices[iplus1] - _center;
-    _normal += cross_product(ray1, ray2);
+    _normal += ray1.cross(ray2);
   }
   _normal *= 0.25;
   normalize(_normal);
@@ -303,11 +303,10 @@ XFEM_square_cut::isInsideCutPlane(Point p)
     unsigned int iplus1(i < 3 ? i+1 : 0);
     Point middle2p = p - 0.5*(_vertices[i] + _vertices[iplus1]);
     Point side_tang = _vertices[iplus1] - _vertices[i];
-    Point side_norm = cross_product(side_tang, _normal);
+    Point side_norm = side_tang.cross(_normal);
     normalize(middle2p); // normalize
     normalize(side_norm); // normalize
-    Real dotp = dot_product(middle2p, side_norm);
-    if (dotp <= 0.0)
+    if (middle2p*side_norm <= 0.0)
       counter += 1;
   }
   if (counter == 4)
@@ -321,8 +320,8 @@ XFEM_square_cut::isInsideEdge(Point p1, Point p2, Point p)
   Point p1_to_p2 = p2 - p1;
   Point p_to_p1 = p1 - p;
   Point p_to_p2 = p2 - p;
-  Real dotp1 = dot_product(p_to_p1, p1_to_p2);
-  Real dotp2 = dot_product(p_to_p2, p1_to_p2);
+  Real dotp1 = p_to_p1*p1_to_p2;
+  Real dotp2 = p_to_p2*p1_to_p2;
   if (dotp1*dotp2 <= 0.0)
     return true;
   else

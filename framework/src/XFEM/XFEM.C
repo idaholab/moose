@@ -867,7 +867,7 @@ XFEM::flag_qp_inside(const Elem* elem, const Point & p) const
       Point normal = xfce->get_normal(plane_id);
       Point origin2qp = p - origin;
       normalize(origin2qp);
-      if (dot_product(origin2qp, normal) > 0.0)
+      if (origin2qp*normal > 0.0)
       {
         flag = 0.0; // QP outside pysical domain
         break;
