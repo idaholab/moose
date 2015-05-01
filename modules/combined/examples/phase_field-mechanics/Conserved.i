@@ -123,7 +123,7 @@
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     enable_jit = true
-    third_derivatives = false
+    derivative_order = 2
   [../]
 
   # undersized solute (voidlike)
@@ -152,7 +152,7 @@
     f_name = Fe
     block = 0
     args = 'c'
-    third_derivatives = false
+    derivative_order = 2
   [../]
 
   # Sum up chemical and elastic contributions
@@ -162,7 +162,7 @@
     f_name = F
     sum_materials = 'Fc Fe'
     args = 'c'
-    third_derivatives = false
+    derivative_order = 2
   [../]
 []
 

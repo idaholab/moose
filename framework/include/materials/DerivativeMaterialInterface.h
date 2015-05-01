@@ -17,8 +17,7 @@
 #include "Material.h"
 #include "MaterialProperty.h"
 #include "FEProblem.h"
-
-#include <sstream>
+#include "DerivativeMaterialPropertyNameInterface.h"
 
 /**
  * Helper function templates to set a variable to zero.
@@ -46,37 +45,12 @@ void mooseSetToZero(T* &)
  * material property names, and guarded getMaterialPropertyPointer calls
  */
 template<class T>
-class DerivativeMaterialInterface : public T
+class DerivativeMaterialInterface :
+  public T,
+  public DerivativeMaterialPropertyNameInterface
 {
 public:
   DerivativeMaterialInterface(const std::string & name, InputParameters parameters);
-
-  /**
-   * Helper functions to generate the material property names for the
-   * arbitrary derivatives.
-   */
-  const std::string propertyName(const std::string &base, const std::vector<std::string> &c) const;
-
-  /**
-   * Helper functions to generate the material property names for the
-   * first derivatives.
-   */
-  const std::string propertyNameFirst(const std::string &base,
-    const std::string &c1) const;
-
-  /**
-   * Helper functions to generate the material property names for the
-   * second derivatives.
-   */
-  const std::string propertyNameSecond(const std::string &base,
-    const std::string &c1, const std::string &c2) const;
-
-  /**
-   * Helper functions to generate the material property names for the
-   * third derivatives.
-   */
-  const std::string propertyNameThird(const std::string &base,
-    const std::string &c1, const std::string &c2, const std::string &c3) const;
 
   // Interface style (1)
   // return null pointers for non-existing material properties
@@ -124,74 +98,6 @@ DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & 
     T(name, parameters),
     _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
-}
-
-template<class T>
-const std::string
-DerivativeMaterialInterface<T>::propertyName(const std::string &base,const std::vector<std::string> &c) const
-{
-  // to obtain well defined names we sort alphabetically
-  std::vector<std::string> a(c);
-  std::sort(a.begin(), a.end());
-
-  // derivative order
-  unsigned int order = a.size();
-  if (order == 0)
-    return base;
-
-  // build the property name as a stringstream
-  std::stringstream name;
-
-  // build numerator
-  name << 'd';
-  if (order > 1)
-    name << '^' << order;
-  name << base << '/';
-
-  // build denominator with 'pretty' names using exponents rather than repeat multiplication
-  unsigned int exponent = 1;
-  for (unsigned i = 1; i <= order; ++i)
-  {
-    if (i == order || a[i-1] != a[i])
-    {
-      name << 'd' << a[i-1];
-      if (exponent > 1)
-        name << '^' << exponent;
-      exponent = 1;
-    }
-    else
-      exponent++;
-  }
-
-  return name.str();
-}
-
-template<class T>
-const std::string
-DerivativeMaterialInterface<T>::propertyNameFirst(const std::string &base, const std::string &c1) const
-{
-  return "d" + base + "/d" + c1;
-}
-
-template<class T>
-const std::string
-DerivativeMaterialInterface<T>::propertyNameSecond(const std::string &base, const std::string &c1, const std::string &c2) const
-{
-  std::vector<std::string> c(2);
-  c[0] = c1;
-  c[1] = c2;
-  return propertyName(base, c);
-}
-
-template<class T>
-const std::string
-DerivativeMaterialInterface<T>::propertyNameThird(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3) const
-{
-  std::vector<std::string> c(3);
-  c[0] = c1;
-  c[1] = c2;
-  c[2] = c3;
-  return propertyName(base, c);
 }
 
 template<class T>
@@ -252,6 +158,15 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
   // return a reference to a static zero property
   return _zero;
 }
+
+template<class T>
+template<typename U>
+MaterialProperty<U> &
+DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::vector<std::string> &c)
+{
+  return this->template declareProperty<U>(propertyName(base, c));
+}
+
 
 template<class T>
 template<typename U>

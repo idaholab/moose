@@ -121,7 +121,7 @@
     f_name = Fa
     args = 'c'
     function = '(c-0.1)^2*(c-1)^2 + c*0.01'
-    third_derivatives = false
+    derivative_order = 2
     enable_jit = true
   [../]
   [./free_energy_B]
@@ -130,7 +130,7 @@
     f_name = Fb
     args = 'c'
     function = 'c^2*(c-0.9)^2 + (1-c)*0.01'
-    third_derivatives = false
+    derivative_order = 2
     enable_jit = true
   [../]
 
@@ -142,7 +142,7 @@
     fb_name = Fb
     args = 'c'
     eta = eta
-    third_derivatives = false
+    derivative_order = 2
     outputs = exodus
     output_properties = 'F dF/dc dF/deta d^2F/dc^2 d^2F/dcdeta d^2F/deta^2'
   [../]

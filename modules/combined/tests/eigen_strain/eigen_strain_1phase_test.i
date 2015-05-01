@@ -84,9 +84,10 @@
     function = 0.5*c^2
     args = c
     outputs = exodus
+    output_properties = 'var_dep'
     f_name = var_dep
     enable_jit = true
-    third_derivatives = false
+    derivative_order = 2
   [../]
   [./eigen_strain]
     type = Compute1PhaseEigenStrain
@@ -172,4 +173,3 @@
     type = SmoothCircleIC
   [../]
 []
-
