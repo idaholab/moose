@@ -4,8 +4,6 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
-
 #ifndef IMAGEMESH_H
 #define IMAGEMESH_H
 

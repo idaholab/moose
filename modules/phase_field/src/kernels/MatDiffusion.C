@@ -6,7 +6,6 @@
 /****************************************************************/
 #include "MatDiffusion.h"
 
-
 template<>
 InputParameters validParams<MatDiffusion>()
 {

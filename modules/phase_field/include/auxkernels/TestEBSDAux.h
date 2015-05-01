@@ -1,10 +1,16 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef TESTEBSDAUX_H
 #define TESTEBSDAUX_H
 
 #include "AuxKernel.h"
 #include "EBSDReader.h"
 
-// Forward Declarations
+//Forward Declarations
 class TestEBSDAux;
 
 template<>

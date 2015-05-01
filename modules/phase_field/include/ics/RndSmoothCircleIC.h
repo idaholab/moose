@@ -48,4 +48,4 @@ private:
   Real _variation_outvalue;
 };
 
-#endif //SMOOTHCIRCLEIC_H
+#endif //RNDSMOOTHCIRCLEIC_H
