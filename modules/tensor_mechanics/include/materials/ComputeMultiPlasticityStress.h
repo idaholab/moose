@@ -4,19 +4,19 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef FINITESTRAINMULTIPLASTICITY
-#define FINITESTRAINMULTIPLASTICITY
+#ifndef COMPUTEMULTIPLASTICITYSTRESS_H
+#define COMPUTEMULTIPLASTICITYSTRESS_H
 
-#include "FiniteStrainMaterial.h"
+#include "ComputeStressBase.h"
 #include "MultiPlasticityDebugger.h"
 
-class FiniteStrainMultiPlasticity;
+class ComputeMultiPlasticityStress;
 
 template<>
-InputParameters validParams<FiniteStrainMultiPlasticity>();
+InputParameters validParams<ComputeMultiPlasticityStress>();
 
 /**
- * FiniteStrainMultiPlasticity is performs the return-map
+ * ComputeMultiPlasticityStress performs the return-map
  * algorithm and associated stress updates for plastic
  * models defined by a General User Objects
  *
@@ -25,12 +25,12 @@ InputParameters validParams<FiniteStrainMultiPlasticity>();
  * explicitly compute 0/0 and 1/0, and this causes
  * Libmesh to trap the floating-point exceptions
  */
-class FiniteStrainMultiPlasticity :
-  public FiniteStrainMaterial,
+class ComputeMultiPlasticityStress :
+  public ComputeStressBase,
   public MultiPlasticityDebugger
 {
 public:
-  FiniteStrainMultiPlasticity(const std::string & name, InputParameters parameters);
+  ComputeMultiPlasticityStress(const std::string & name, InputParameters parameters);
 
 protected:
   virtual void computeQpStress();
@@ -96,6 +96,27 @@ protected:
 
   /// old value of transverse direction
   MaterialProperty<RealVectorValue> & _n_old;
+
+  /// strain increment (coming from ComputeIncrementalSmallStrain, for example)
+  const MaterialProperty<RankTwoTensor> & _strain_increment;
+
+  /// Old value of total strain (coming from ComputeIncrementalSmallStrain, for example)
+  const MaterialProperty<RankTwoTensor> & _total_strain_old;
+
+  /// Rotation increment (coming from ComputeIncrementalSmallStrain, for example)
+  const MaterialProperty<RankTwoTensor> & _rotation_increment;
+
+  /// Old value of stress
+  MaterialProperty<RankTwoTensor> & _stress_old;
+
+  /// Old value of elastic strain
+  MaterialProperty<RankTwoTensor> & _elastic_strain_old;
+
+  /// Elasticity tensor that can be rotated by this class (ie, its not const)
+  ElasticityTensorR4 _my_elasticity_tensor;
+
+  /// Strain increment that can be rotated by this class, and split into multiple increments (ie, its not const)
+  RankTwoTensor _my_strain_increment;
 
 
 
@@ -313,4 +334,4 @@ protected:
   unsigned int activeCombinationNumber(const std::vector<bool> & act);
 };
 
-#endif //FINITESTRAINMULTIPLASTICITY
+#endif //COMPUTEMULTIPLASTICITYSTRESS_H

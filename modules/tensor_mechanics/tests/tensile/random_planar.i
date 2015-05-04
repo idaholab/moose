@@ -278,15 +278,22 @@
 []
 
 [Materials]
-  [./multi]
-    type = FiniteStrainMultiPlasticity
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    block = 0
+    fill_method = symmetric_isotropic
+    C_ijkl = '1E9 1.3E9'
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
     block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    fill_method = symmetric_isotropic
-    C_ijkl = '1E9 1.3E9'
-    #C_ijkl = '0 1.3E9'
+  [../]
+  [./multi]
+    type = ComputeMultiPlasticityStress
+    block = 0
     deactivation_scheme = 'safe_to_dumb'
     ep_plastic_tolerance = 1E-7
     plastic_models = 'tensile'

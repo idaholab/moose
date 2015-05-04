@@ -249,37 +249,35 @@
 []
 
 [Materials]
-  active = 'single'
-  [./elastic_model]
-    type = FiniteStrainMultiPlasticity
+  active = 'elasticity_tensor strain single'
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    block = 0
+    fill_method = symmetric_isotropic
+    C_ijkl = '0 0.5E6'
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
     block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    fill_method = symmetric_isotropic
-    C_ijkl = '0 0.5E6'
+  [../]
+  [./elastic_model]
+    type = ComputeMultiPlasticityStress
+    block = 0
     ep_plastic_tolerance = 1E-7
     plastic_models = 'simple0'
   [../]
   [./single]
-    type = FiniteStrainMultiPlasticity
+    type = ComputeMultiPlasticityStress
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    fill_method = symmetric_isotropic
-    C_ijkl = '0 0.5E6'
     ep_plastic_tolerance = 1E-7
     plastic_models = 'simple1'
   [../]
   [./double]
-    type = FiniteStrainMultiPlasticity
+    type = ComputeMultiPlasticityStress
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    fill_method = symmetric_isotropic
-    C_ijkl = '0 0.5E6'
     ep_plastic_tolerance = 1E-7
     plastic_models = 'simple1 simple2'
   [../]
