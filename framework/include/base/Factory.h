@@ -216,6 +216,11 @@ protected:
    */
   void deprecatedMessage(const std::string obj_name);
 
+  /**
+   * Prints error information when an object is not registered
+   */
+  void reportUnregisteredError(const std::string & obj_name) const;
+
   /// Reference to the application
   MooseApp & _app;
 

@@ -481,7 +481,34 @@ MooseApp::libNameToAppName(const std::string & library_name) const
 }
 
 void
-MooseApp::dynamicRegistration(const std::string & app_name, Moose::RegistrationType reg_type, std::string library_path)
+MooseApp::dynamicObjectRegistration(const std::string & app_name, Factory * factory, std::string library_path)
+{
+  dynamicRegistration(app_name, app_name + "__registerObjects", factory, library_path);
+}
+
+void
+MooseApp::dynamicAppRegistration(const std::string & app_name, std::string library_path)
+{
+  dynamicRegistration(app_name, app_name + "__registerApps", NULL, library_path);
+
+  // At this point the application should be registered so check it
+  if (!AppFactory::instance().isRegistered(app_name))
+  {
+    std::ostringstream oss;
+    std::vector<std::string> paths = getLoadedLibraryPaths();
+
+    oss << "Unable to locate library for \"" << app_name << "\".\nWe attempted to locate the library \"" << appNameToLibName(app_name)
+        << "\" in the following paths:\n\t";
+    std::copy(paths.begin(), paths.end(), infix_ostream_iterator<std::string>(oss, "\n\t"));
+    oss << "\n\nMake sure you have compiled the library and either set the \"library_path\" variable "
+        << "in your input file or exported \"MOOSE_LIBRARY_PATH\".\n"
+        << "Compiled in debug mode to see the list of libraries checked for dynamic loading methods.";
+    mooseError(oss.str());
+  }
+}
+
+void
+MooseApp::dynamicRegistration(const std::string & app_name, const std::string & registration_method, Factory * factory, std::string library_path)
 {
   // first convert the app name to a library name
   std::string library_name = appNameToLibName(app_name);
@@ -507,23 +534,13 @@ MooseApp::dynamicRegistration(const std::string & app_name, Moose::RegistrationT
   // Attempt to dynamically load the library
   for (std::vector<std::string>::const_iterator path_it = paths.begin(); path_it != paths.end(); ++path_it)
     if (MooseUtils::checkFileReadable(*path_it + '/' + library_name, false, false))
-      loadLibraryAndDependencies(*path_it + '/' + library_name);
-
-  // At this point the application should be registered so check it
-  if (!AppFactory::instance().isRegistered(app_name))
-  {
-    std::ostringstream oss;
-
-    oss << "Unable to locate library for \"" << app_name << "\".\nWe attempted to locate the library \"" << library_name << "\" in the following paths:\n\t";
-    std::copy(paths.begin(), paths.end(), infix_ostream_iterator<std::string>(oss, "\n\t"));
-    oss << "\n\nMake sure you have compiled the library and either set the \"library_path\" variable "
-        << "in your input file or exported \"MOOSE_LIBRARY_PATH\".";
-    mooseError(oss.str());
-  }
+      loadLibraryAndDependencies(*path_it + '/' + library_name, registration_method, factory);
+    else
+      mooseWarning("Unable to open library file \"" << *path_it + '/' + library_name << "\". Double check for spelling errors.");
 }
 
 void
-MooseApp::loadLibraryAndDependencies(const std::string & library_filename)
+MooseApp::loadLibraryAndDependencies(const std::string & library_filename, const std::string & registration_method_name, Factory * factory)
 {
   std::string line;
   std::string dl_lib_filename;
@@ -547,7 +564,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename)
         pcrecpp::StringPiece depend_library;
         while (re_deps.FindAndConsume(&input, &depend_library))
           // Recurse here to load dependent libraries in depth-first order
-          loadLibraryAndDependencies(depend_library.as_string());
+          loadLibraryAndDependencies(depend_library.as_string(), registration_method_name, factory);
 
         // There's only one line in the .la file containing the dependency libs so break after finding it
         break;
@@ -567,33 +584,73 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename)
 
     void * handle = dlopen(dl_lib_full_path.c_str(), RTLD_LAZY);
     if (!handle)
-      mooseError("Cannot open library: " << dlerror());
+      mooseError("Cannot open library:\n" << dlerror());
 
     // Reset errors
     dlerror();
 
     // get the name of the unique registration method
-    std::string reg_function = libNameToAppName(lib_name_parts.second) + "App__registerApps";
+//    std::string reg_function = libNameToAppName(lib_name_parts.second) + "App__registerApps";
 
     // get the pointer to the method in the library
-    void * registration_method = dlsym(handle, reg_function.c_str());
+    void * registration_method = dlsym(handle, registration_method_name.c_str());
 
-    // Get the pointer and cast it to function pointer with return type "void" taking no arguments
-    typedef void (*register_app_t)();
-    register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
+    // Choose the function signature based on whether or not factory parameter to this method is NULL
+    if (factory)
+    {
+      typedef void (*register_app_t)(Factory *);
+      register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
 
-    // Catch errors
-    const char *dlsym_error = dlerror();
-    if (dlsym_error)
-      // We found a dynamic library that doesn't have registerApps() in it. This isn't an error so we'll just move on
-      dlclose(handle);
+      // Catch errors
+      const char *dlsym_error = dlerror();
+      if (dlsym_error)
+      {
+#ifdef DEBUG
+        mooseWarning("Unable to find extern \"C\" method \"" << registration_method_name << "\" in library: " << dl_lib_full_path << ".\n"
+                     << "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
+#endif
+        // We found a dynamic library that doesn't have a dynamic registration method in it. This shouldn't be an error so we'll just move on
+        dlclose(handle);
+      }
+      else
+      {
+        // call the method through the function pointer
+        (*reg_ptr)(factory);
+
+        // Store the handle so we can close it later
+        _lib_handles.insert(std::make_pair(library_filename, handle));
+      }
+    }
     else
     {
-      // Call the registration method
-      (*reg_ptr)();
+      typedef void (*register_app_t)();
+      register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
 
-      // Store the handle so we can close it later
-      _lib_handles.insert(std::make_pair(library_filename, handle));
+      // Catch errors
+      const char *dlsym_error = dlerror();
+      if (dlsym_error)
+        // We found a dynamic library that doesn't have registerApps() in it. This isn't an error so we'll just move on
+        dlclose(handle);
+      else
+      {
+        // call the method through the function pointer
+        (*reg_ptr)();
+
+        // Store the handle so we can close it later
+        _lib_handles.insert(std::make_pair(library_filename, handle));
+      }
     }
   }
+}
+
+std::vector<std::string>
+MooseApp::getLoadedLibraryPaths() const
+{
+  // Return the paths but not the open file handles
+  std::vector<std::string> paths;
+  paths.reserve(_lib_handles.size());
+  for (std::map<std::string, void *>::const_iterator it = _lib_handles.begin(); it != _lib_handles.end(); ++it)
+    paths.push_back(it->first);
+
+  return paths;
 }

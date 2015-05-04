@@ -349,39 +349,44 @@ Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
 
   /**
    * There are a few order dependent actions that have to be built first in
-   * order for the parser to function properly:
+   * order for the parser and application to function properly:
    *
    * SetupDebugAction: This action can contain an option for monitoring the parser progress. It must be parsed first
    *                   to capture all of the parsing output.
    *
-   * GlobalParamsAction: This block is checked during the parameter extraction routines of all subsequent blocks.
+   * GlobalParamsAction: This action is checked during the parameter extraction routines of all subsequent blocks.
    *                     It must be parsed early since it must exist during subsequent parameter extraction.
    *
+   * DynamicObjectRegistration: This action must be built before any MooseObjectActions are built. This is because
+   *                            we retrieve valid parameters from the Factory during parse time. Objects must
+   *                            be registered before validParameters can be retrieved.
+   */
+
+  // Reverse order here since each call to reoderHelper moves the requested Action to the front
+  reorderHelper(section_names, "DynamicObjectRegistrationAction", "dynamic_object_registration");
+  reorderHelper(section_names, "GlobalParamsAction", "set_global_params");
+  reorderHelper(section_names, "SetupDebugAction", "setup_debug");
+}
+
+void
+Parser::reorderHelper(std::vector<std::string> & section_names, const std::string & action, const std::string & task) const
+{
+  /**
    * Note: I realize that doing inserts and deletes in a vector are "slow".  Swapping is not an option due to the
    *       way that active_lists are constructed.  These are small vectors ;)
    */
-  // Locate the global params section
-  std::string global_syntax = _syntax.getSyntaxByAction("GlobalParamsAction", "set_global_params");
-  global_syntax += '/';   // section names *always* have trailing slashes
+  std::string syntax = _syntax.getSyntaxByAction(action, task);
+  syntax += '/';   // section names *always* have trailing slashes
 
-  std::vector<std::string>::iterator pos = std::find(section_names.begin(), section_names.end(), global_syntax);
+  std::vector<std::string>::iterator pos = std::find(section_names.begin(), section_names.end(), syntax);
   if (pos != section_names.end())
   {
     section_names.erase(pos);
-    section_names.insert(section_names.begin(), global_syntax);
-  }
-
-  // Locate the debug action (See Moose.C for registration)
-  std::string debug_syntax = _syntax.getSyntaxByAction("SetupDebugAction", "setup_debug");
-  debug_syntax += '/';   // section names *always* have trailing slashes
-
-  pos = std::find(section_names.begin(), section_names.end(), debug_syntax);
-  if (pos != section_names.end())
-  {
-    section_names.erase(pos);
-    section_names.insert(section_names.begin(), debug_syntax);
+    section_names.insert(section_names.begin(), syntax);
   }
 }
+
+
 
 void
 Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)

@@ -85,3 +85,8 @@
   print_linear_residuals = true
   print_perf_log = true
 []
+
+[Problem]
+  register_objects_from = 'PhaseFieldApp'
+  library_path = '../../../../phase_field/lib'
+[]

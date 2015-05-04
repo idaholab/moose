@@ -147,7 +147,7 @@ MultiApp::initialSetup()
 
   // If the user provided an unregistered app type, see if we can load it dynamically
   if (!AppFactory::instance().isRegistered(_app_type))
-    _app.dynamicRegistration(_app_type, Moose::APPLICATION, getParam<std::string>("library_path"));
+    _app.dynamicAppRegistration(_app_type, getParam<std::string>("library_path"));
 
   for (unsigned int i=0; i<_my_num_apps; i++)
     createApp(i, _app.getGlobalTimeOffset());

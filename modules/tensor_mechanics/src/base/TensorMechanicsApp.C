@@ -92,6 +92,7 @@ TensorMechanicsApp::~TensorMechanicsApp()
 {
 }
 
+// External entry point for dynamic application loading
 extern "C" void TensorMechanicsApp_registerApps() { TensorMechanicsApp::registerApps(); }
 void
 TensorMechanicsApp::registerApps()
@@ -99,6 +100,8 @@ TensorMechanicsApp::registerApps()
   registerApp(TensorMechanicsApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void TensorMechanicsApp__registerObjects(Factory & factory) { TensorMechanicsApp::registerObjects(factory); }
 void
 TensorMechanicsApp::registerObjects(Factory & factory)
 {

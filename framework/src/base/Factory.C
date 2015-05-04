@@ -14,6 +14,8 @@
 
 #include "Factory.h"
 #include "MooseApp.h"
+#include "InfixIterator.h"
+
 
 Factory::Factory(MooseApp & app):
     _app(app),
@@ -33,7 +35,7 @@ Factory::getValidParams(const std::string & obj_name)
 
   // Check if the object is registered
   if (it == _name_to_params_pointer.end())
-    mooseError(std::string("A '") + obj_name + "' is not a registered object\n\n");
+    reportUnregisteredError(obj_name);
 
   // Print out deprecated message, if it exists
   deprecatedMessage(obj_name);
@@ -52,7 +54,7 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
 
   // Check if the object is registered
   if (it == _name_to_build_pointer.end())
-    mooseError("Object '" + obj_name + "' was not registered.");
+    reportUnregisteredError(obj_name);
 
   // Print out deprecated message, if it exists
   deprecatedMessage(obj_name);
@@ -142,4 +144,21 @@ void Factory::deprecatedMessage(const std::string obj_name)
     // Produce the error message
     mooseDoOnce(mooseWarning(msg.str()));
   }
+}
+
+void
+Factory::reportUnregisteredError(const std::string & obj_name) const
+{
+  std::ostringstream oss;
+  std::vector<std::string> paths = _app.getLoadedLibraryPaths();
+
+  oss << "A '" + obj_name + "' is not a registered object.\n"
+      << "\nWe loaded objects from the following libraries and still couldn't find your object:\n\t";
+  std::copy(paths.begin(), paths.end(), infix_ostream_iterator<std::string>(oss, "\n\t"));
+  if (paths.empty())
+    oss << "(NONE)\n";
+  oss << "\n\nMake sure you have compiled the library and either set the \"library_path\" variable "
+      << "in your input file or exported \"MOOSE_LIBRARY_PATH\".";
+
+  mooseError(oss.str());
 }

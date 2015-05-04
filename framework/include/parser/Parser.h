@@ -117,6 +117,9 @@ protected:
   /// Appends sections from the CLI Reorders section names so that Debugging options can be enabled before parsing begins
   void appendAndReorderSectionNames(std::vector<std::string> & section_names);
 
+  /// Reorders specified tasks in the section names list (helper method called from appednAndReorderSectionNames
+  void reorderHelper(std::vector<std::string> & section_names, const std::string & action, const std::string & task) const;
+
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are called only from this Object
