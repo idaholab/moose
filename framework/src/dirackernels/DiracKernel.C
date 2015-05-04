@@ -162,10 +162,19 @@ DiracKernel::addPoint(Point p, unsigned id)
     // OK, the user gave us an ID, let's see if we already have it...
     point_cache_t::iterator it = _point_cache.find(id);
 
+    // Was the point found in a _point_cache on at least one processor?
+    unsigned int i_found_it = static_cast<unsigned int>(it != _point_cache.end());
+    unsigned int we_found_it = i_found_it;
+    comm().max(we_found_it);
+
+    // If the point was found in a cache, but not my cache, I'm not responsible for it.
+    if (we_found_it && !i_found_it)
+      return NULL;
+
     // Now that we only cache local data, some processors may enter
     // this if statement and some may not.  Therefore we can't call
     // any parallel_only() functions inside this if statement.
-    if (it != _point_cache.end())
+    if (i_found_it)
     {
       // We have something cached, now make sure it's actually the same Point.
       // TODO: we should probably use this same comparison in the DiracKernelInfo code!
