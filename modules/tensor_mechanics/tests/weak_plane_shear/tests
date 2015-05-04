@@ -7,7 +7,7 @@
   [./except2]
     type = 'RunException'
     input = 'except2.i'
-    expect_err = 'MultiPlasticity: transverse_direction vector must not have zero length'
+    expect_err = 'ComputeMultiPlasticityStress: transverse_direction vector must not have zero length'
   [../]
 
   [./small1]

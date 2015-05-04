@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<ComputeMultiPlasticityStress>();
 
 /**
- * ComputeMultiPlasticityStress is performs the return-map
+ * ComputeMultiPlasticityStress performs the return-map
  * algorithm and associated stress updates for plastic
  * models defined by a General User Objects
  *

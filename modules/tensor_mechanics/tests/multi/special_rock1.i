@@ -281,14 +281,22 @@
 []
 
 [Materials]
-  [./multi]
-    type = FiniteStrainMultiPlasticity
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    block = 0
+    fill_method = symmetric_isotropic
+    C_ijkl = '1.0E9 1.3E9'
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
     block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    fill_method = symmetric_isotropic
-    C_ijkl = '1.0E9 1.3E9'
+  [../]
+  [./multi]
+    type = ComputeMultiPlasticityStress
+    block = 0
     ep_plastic_tolerance = 1E-5  # Note larger value, to match the larger yield_function_tolerances
 
     #plastic_models = 'tensile_smooth mc_smooth'

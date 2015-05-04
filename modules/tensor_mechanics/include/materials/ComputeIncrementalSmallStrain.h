@@ -15,7 +15,7 @@
 class ComputeIncrementalSmallStrain : public ComputeSmallStrain
 {
 public:
-  ComputeIncrementalSmallStrain(const std:: string & name, InputParameters parameters);
+  ComputeIncrementalSmallStrain(const std::string & name, InputParameters parameters);
 
 protected:
   virtual void initQpStatefulProperties();
