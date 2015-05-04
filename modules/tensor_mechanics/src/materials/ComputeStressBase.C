@@ -45,6 +45,7 @@ ComputeStressBase::initQpStatefulProperties()
     for (unsigned i = 0 ; i < 3 ; ++i)
       for (unsigned j = 0 ; j < 3 ; ++j)
         _stress[_qp](i, j) = _initial_stress[i*3 + j]->value(_t, _q_point[_qp]);
+  _elastic_strain[_qp].zero();
 }
 
 void

@@ -206,14 +206,22 @@
 []
 
 [Materials]
-  [./mc]
-    type = FiniteStrainMultiPlasticity
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    block = 1
+    fill_method = symmetric_isotropic
+    C_ijkl = '0 5E9' # young = 10Gpa, poisson = 0.0
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
     block = 1
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    fill_method = symmetric_isotropic
-    C_ijkl = '0 5E9' # young = 10Gpa, poisson = 0.0
+  [../]
+  [./mc]
+    type = ComputeMultiPlasticityStress
+    block = 1
     ep_plastic_tolerance = 1E-11
     plastic_models = mc
     max_NR_iterations = 1000

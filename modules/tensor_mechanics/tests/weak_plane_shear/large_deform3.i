@@ -145,15 +145,23 @@
 []
 
 [Materials]
-  [./mc]
-    type = FiniteStrainMultiPlasticity
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    block = 0
+    # the following is transversely isotropic, i think.
+    fill_method = symmetric9
+    C_ijkl = '3E9 1E9 3E9 3E9 3E9 6E9 1E9 1E9 9E9'
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
     block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    # the following is transversely isotropic, i think.
-    fill_method = symmetric9
-    C_ijkl = '3E9 1E9 3E9 3E9 3E9 6E9 1E9 1E9 9E9'
+  [../]
+  [./mc]
+    type = ComputeMultiPlasticityStress
+    block = 0
     plastic_models = wps
     transverse_direction = '0 0 1'
     max_NR_iterations = 100

@@ -160,14 +160,22 @@
 []
 
 [Materials]
-  [./mc]
-    type = FiniteStrainMultiPlasticity
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    block = 0
+    fill_method = symmetric_isotropic
+    C_ijkl = '0 1E7'
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
     block = 0
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
-    fill_method = symmetric_isotropic
-    C_ijkl = '0 1E7'
+  [../]
+  [./mc]
+    type = ComputeMultiPlasticityStress
+    block = 0
     plastic_models = wpt
     transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-11
