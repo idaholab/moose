@@ -319,7 +319,33 @@ public:
    */
   SystemInfo * getSystemInfo() { return _sys_info.get(); }
 
+  /**
+   * This method is called to register applications on demand. If an application is listed in
+   * the MultiApps section but is not compiled into the project, this method attempts to
+   * load a dynamic library and register it when it is needed. Throws an error if
+   * no suitable library is found that contains the app_name in question.
+   */
+  void dynamicRegistration(const std::string & app_name, Moose::RegistrationType reg_type, std::string library_path);
+
+  /**
+   * Converts an application name to a library name:
+   * Examples:
+   *   AnimalApp -> libanimal-oprof.la (assuming METHOD=oprof)
+   *   ThreeWordAnimalApp -> libthree_word_animal-dbg.la (assuming METHOD=dbg)
+   */
+  std::string appNameToLibName(const std::string & app_name) const;
+
+  /**
+   * Converts a library name to an application name:
+   */
+  std::string libNameToAppName(const std::string & library_name) const;
+
 protected:
+  /**
+   * Recursively loads libraries and dependencies in the proper order to fully register a
+   * MOOSE application that may have several dependencies. REQUIRES: dynamic linking loader support.
+   */
+  void loadLibraryAndDependencies(const std::string & library_filename);
 
   MooseApp(const std::string & name, InputParameters parameters);
 
@@ -423,6 +449,9 @@ protected:
 
   /// true if we want to just check the input file
   bool _check_input;
+
+  /// Dynamic libraries, dependencies and their file handles
+  std::map<std::string, void *> _lib_handles;
 
 private:
 
