@@ -54,6 +54,7 @@ public:
   bool isPointWithIndexOnIntersectingBoundary(const unsigned int point_index) const;
   Real getCrackFrontTangentialStrain(const unsigned int node_index) const;
   bool hasCrackFrontNodes() const { return _geom_definition_method == CRACK_FRONT_NODES; }
+  bool isNodeInRing(const unsigned int ring_index, const dof_id_type connected_node_id, const unsigned int node_index) const;
 
 protected:
 
@@ -118,6 +119,9 @@ protected:
   std::string _disp_y_var_name;
   std::string _disp_z_var_name;
   bool _t_stress;
+  bool _q_function_rings;
+  unsigned int _last_ring;
+  std::map<std::pair<dof_id_type,unsigned int>, std::set<dof_id_type> > _crack_front_node_to_node_map;
 
   void getCrackFrontNodes(std::set<dof_id_type>& nodes);
   void orderCrackFrontNodes(std::set<dof_id_type>& nodes);
@@ -133,6 +137,13 @@ protected:
                                                const RealVectorValue& tangent_direction,
                                                const CRACK_NODE_TYPE ntype) const;
   void calculateTangentialStrainAlongFront();
+  void createQFunctionRings();
+  void addNodesToQFunctionRing(std::set<dof_id_type>& nodes_new_ring,
+                               const std::set<dof_id_type>& nodes_old_ring,
+                               const std::set<dof_id_type>& nodes_all_rings,
+                               const std::set<dof_id_type>& nodes_neighbor1,
+                               const std::set<dof_id_type>& nodes_neighbor2,
+                               std::vector<std::vector<const Elem *> >& nodes_to_elem_map);
 };
 
 
