@@ -24,7 +24,7 @@ ComputeSmallStrain::ComputeSmallStrain(const std::string & name,
 void
 ComputeSmallStrain::computeProperties()
 {
-  for (unsigned int _qp = 0; _qp < _qrule->n_points(); ++_qp)
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     //strain = (grad_disp + grad_disp^T)/2
     RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
