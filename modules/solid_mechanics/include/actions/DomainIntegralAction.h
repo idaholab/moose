@@ -33,6 +33,12 @@ protected:
     INTERACTION_INTEGRAL_T
   };
 
+  enum Q_FUNCTION_TYPE
+  {
+    GEOMETRY,
+    TOPOLOGY
+  };
+
   unsigned int calcNumCrackFrontPoints();
 
   std::set<INTEGRAL> _integrals;
@@ -54,6 +60,8 @@ protected:
   unsigned int _axis_2d;
   std::vector<Real> _radius_inner;
   std::vector<Real> _radius_outer;
+  unsigned int _ring_first;
+  unsigned int _ring_last;
   std::vector<VariableName> _output_variables;
   Real _poissons_ratio;
   Real _youngs_modulus;
@@ -65,7 +73,9 @@ protected:
   bool _has_symmetry_plane;
   unsigned int _symmetry_plane;
   MooseEnum _position_type;
+  MooseEnum _q_function_type;
   bool _use_displaced_mesh;
+  std::vector<unsigned int> _ring_vec;
 };
 
 #endif //DOMAININTEGRALACTION_H

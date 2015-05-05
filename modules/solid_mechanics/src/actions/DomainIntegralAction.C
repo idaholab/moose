@@ -24,8 +24,10 @@ InputParameters validParams<DomainIntegralAction>()
   params.addParam<std::vector<Point> >("crack_front_points", "Set of points to define crack front");
   params.addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for q AuxVariables");
   params.addParam<std::string>("family", "LAGRANGE", "Specifies the family of FE shape functions to use for q AuxVariables");
-  params.addRequiredParam<std::vector<Real> >("radius_inner", "Inner radius for volume integral domain");
-  params.addRequiredParam<std::vector<Real> >("radius_outer", "Outer radius for volume integral domain");
+  params.addParam<std::vector<Real> >("radius_inner", "Inner radius for volume integral domain");
+  params.addParam<std::vector<Real> >("radius_outer", "Outer radius for volume integral domain");
+  params.addParam<unsigned int>("ring_first","The first ring of elements for volume integral domain");
+  params.addParam<unsigned int>("ring_last","The last ring of elements for volume integral domain");
   params.addParam<std::vector<VariableName> >("output_variable", "Variable values to be reported along the crack front");
   params.addParam<bool>("convert_J_to_K",false,"Convert J-integral to stress intensity factor K.");
   params.addParam<Real>("poissons_ratio","Poisson's ratio");
@@ -36,6 +38,8 @@ InputParameters validParams<DomainIntegralAction>()
   params.addParam<VariableName>("disp_z", "", "The z displacement");
   MooseEnum position_type("Angle Distance","Distance");
   params.addParam<MooseEnum>("position_type", position_type, "The method used to calculate position along crack front.  Options are: "+position_type.getRawNames());
+  MooseEnum q_function_type("Geometry Topology","Geometry");
+  params.addParam<MooseEnum>("q_function_type",q_function_type,"The method used to define the integration domain. Options are: "+q_function_type.getRawNames());
   return params;
 }
 
@@ -51,14 +55,40 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
   _have_crack_direction_vector_end_2(false),
   _treat_as_2d(getParam<bool>("2d")),
   _axis_2d(getParam<unsigned int>("axis_2d")),
-  _radius_inner(getParam<std::vector<Real> >("radius_inner")),
-  _radius_outer(getParam<std::vector<Real> >("radius_outer")),
   _convert_J_to_K(false),
   _has_symmetry_plane(isParamValid("symmetry_plane")),
   _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane") : std::numeric_limits<unsigned int>::max()),
   _position_type(getParam<MooseEnum>("position_type")),
+  _q_function_type(getParam<MooseEnum>("q_function_type")),
   _use_displaced_mesh(false)
 {
+  if (_q_function_type == GEOMETRY)
+  {
+    if (isParamValid("radius_inner") && isParamValid("radius_outer"))
+    {
+      _radius_inner = getParam<std::vector<Real> >("radius_inner");
+      _radius_outer = getParam<std::vector<Real> >("radius_outer");
+    }
+    else
+      mooseError("DomainIntegral error: must set radius_inner and radius_outer.");
+    for (unsigned int i=0; i<_radius_inner.size(); ++i)
+      _ring_vec.push_back(i+1);
+  }
+  else if (_q_function_type == TOPOLOGY)
+  {
+    if (isParamValid("ring_first") && isParamValid("ring_last"))
+    {
+      _ring_first = getParam<unsigned int>("ring_first");
+      _ring_last = getParam<unsigned int>("ring_last");
+    }
+    else
+      mooseError("DomainIntegral error: must set ring_first and ring_last if q_function_type = Topology.");
+    for (unsigned int i=_ring_first; i<=_ring_last; ++i)
+      _ring_vec.push_back(i);
+  }
+  else
+    mooseError("DomainIntegral error: invalid q_function_type.");
+
   if (isParamValid("crack_front_points"))
   {
     _crack_front_points = getParam<std::vector<Point> >("crack_front_points");
@@ -136,7 +166,6 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
     if (!poissons_ratio_set)
       _poissons_ratio = getParam<Real>("poissons_ratio");
   }
-
 }
 
 DomainIntegralAction::~DomainIntegralAction()
@@ -188,17 +217,22 @@ DomainIntegralAction::act()
         params.set<VariableName>("disp_z") = _disp_z;
       params.set<bool>("t_stress") = true;
     }
+    if (_q_function_type == TOPOLOGY)
+    {
+      params.set<bool>("q_function_rings") = true;
+      params.set<unsigned int>("last_ring") = _ring_last;
+    }
 
     _problem->addUserObject(uo_type_name, uo_name, params);
   }
   else if (_current_task == "add_aux_variable")
   {
-    for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
+    for (unsigned int ring_index=0; ring_index<_ring_vec.size(); ++ring_index)
     {
       if (_treat_as_2d)
       {
         std::ostringstream av_name_stream;
-        av_name_stream<<av_base_name<<"_"<<ring_index+1;
+        av_name_stream<<av_base_name<<"_"<<_ring_vec[ring_index];
         _problem->addAuxVariable(av_name_stream.str(),
                                  FEType(Utility::string_to_enum<Order>(_order),
                                         Utility::string_to_enum<FEFamily>(_family)));
@@ -208,7 +242,7 @@ DomainIntegralAction::act()
         for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
         {
           std::ostringstream av_name_stream;
-          av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
+          av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<_ring_vec[ring_index];
           _problem->addAuxVariable(av_name_stream.str(),
                                    FEType(Utility::string_to_enum<Order>(_order),
                                           Utility::string_to_enum<FEFamily>(_family)));
@@ -218,22 +252,42 @@ DomainIntegralAction::act()
   }
   else if (_current_task == "add_aux_kernel")
   {
-    const std::string ak_type_name("DomainIntegralQFunction");
+    std::string ak_type_name;
+    unsigned int nrings;
+    if (_q_function_type == GEOMETRY)
+    {
+      ak_type_name = "DomainIntegralQFunction";
+      nrings = _ring_vec.size();
+    }
+    else if (_q_function_type == TOPOLOGY)
+    {
+      ak_type_name = "DomainIntegralTopologicalQFunction";
+      nrings = _ring_last - _ring_first + 1;
+    }
+
     InputParameters params = _factory.getValidParams(ak_type_name);
     params.set<MultiMooseEnum>("execute_on") = "initial";
     params.set<UserObjectName>("crack_front_definition") = uo_name;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
-    for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
+    for (unsigned int ring_index=0; ring_index<nrings; ++ring_index)
     {
-      params.set<Real>("j_integral_radius_inner") = _radius_inner[ring_index];
-      params.set<Real>("j_integral_radius_outer") = _radius_outer[ring_index];
+      if (_q_function_type == GEOMETRY)
+      {
+        params.set<Real>("j_integral_radius_inner") = _radius_inner[ring_index];
+        params.set<Real>("j_integral_radius_outer") = _radius_outer[ring_index];
+      }
+      else if (_q_function_type == TOPOLOGY)
+      {
+        params.set<unsigned int>("ring_index") = _ring_first + ring_index;
+      }
+
       if (_treat_as_2d)
       {
         std::ostringstream ak_name_stream;
-        ak_name_stream<<ak_base_name<<"_"<<ring_index+1;
+        ak_name_stream<<ak_base_name<<"_"<<_ring_vec[ring_index];
         std::ostringstream av_name_stream;
-        av_name_stream<<av_base_name<<"_"<<ring_index+1;
+        av_name_stream<<av_base_name<<"_"<<_ring_vec[ring_index];
         params.set<AuxVariableName>("variable") = av_name_stream.str();
         _problem->addAuxKernel(ak_type_name, ak_name_stream.str(), params);
       }
@@ -242,9 +296,9 @@ DomainIntegralAction::act()
         for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
         {
           std::ostringstream ak_name_stream;
-          ak_name_stream<<ak_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
+          ak_name_stream<<ak_base_name<<"_"<<cfp_index+1<<"_"<<_ring_vec[ring_index];
           std::ostringstream av_name_stream;
-          av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
+          av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<_ring_vec[ring_index];
           params.set<AuxVariableName>("variable") = av_name_stream.str();
           params.set<unsigned int>("crack_front_point_index") = cfp_index;
           _problem->addAuxKernel(ak_type_name, ak_name_stream.str(), params);
@@ -274,14 +328,14 @@ DomainIntegralAction::act()
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
-      for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
+      for (unsigned int ring_index=0; ring_index<_ring_vec.size(); ++ring_index)
       {
         if (_treat_as_2d)
         {
           std::ostringstream av_name_stream;
-          av_name_stream<<av_base_name<<"_"<<ring_index+1;
+          av_name_stream<<av_base_name<<"_"<<_ring_vec[ring_index];
           std::ostringstream pp_name_stream;
-          pp_name_stream<<pp_base_name<<"_"<<ring_index+1;
+          pp_name_stream<<pp_base_name<<"_"<<_ring_vec[ring_index];
           std::vector<VariableName> qvars;
           qvars.push_back(av_name_stream.str());
           params.set<std::vector<VariableName> >("q") = qvars;
@@ -292,9 +346,9 @@ DomainIntegralAction::act()
           for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
           {
             std::ostringstream av_name_stream;
-            av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
+            av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<_ring_vec[ring_index];
             std::ostringstream pp_name_stream;
-            pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
+            pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<_ring_vec[ring_index];
             std::vector<VariableName> qvars;
             qvars.push_back(av_name_stream.str());
             params.set<std::vector<VariableName> >("q") = qvars;
@@ -362,14 +416,14 @@ DomainIntegralAction::act()
           break;
         }
 
-        for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
+        for (unsigned int ring_index=0; ring_index<_ring_vec.size(); ++ring_index)
         {
           if (_treat_as_2d)
           {
             std::ostringstream av_name_stream;
-            av_name_stream<<av_base_name<<"_"<<ring_index+1;
+            av_name_stream<<av_base_name<<"_"<<_ring_vec[ring_index];
             std::ostringstream pp_name_stream;
-            pp_name_stream<<pp_base_name<<"_"<<ring_index+1;
+            pp_name_stream<<pp_base_name<<"_"<<_ring_vec[ring_index];
             std::string aux_stress_name = aux_stress_base_name + aux_mode_name + "1";
             std::string aux_grad_disp_name = aux_grad_disp_base_name + aux_mode_name + "1";
             params.set<std::string>("aux_stress") = aux_stress_name;
@@ -384,9 +438,9 @@ DomainIntegralAction::act()
             for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
             {
               std::ostringstream av_name_stream;
-              av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
+              av_name_stream<<av_base_name<<"_"<<cfp_index+1<<"_"<<_ring_vec[ring_index];
               std::ostringstream pp_name_stream;
-              pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
+              pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<_ring_vec[ring_index];
               std::ostringstream cfn_index_stream;
               cfn_index_stream<<cfp_index+1;
               std::ostringstream aux_stress_name_stream;
@@ -466,15 +520,15 @@ DomainIntegralAction::act()
         params.set<UserObjectName>("crack_front_definition") = uo_name;
         params.set<MooseEnum>("sort_by") = "id";
         params.set<MooseEnum>("position_type") = _position_type;
-        for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
+        for (unsigned int ring_index=0; ring_index<_ring_vec.size(); ++ring_index)
         {
           std::vector<PostprocessorName> postprocessor_names;
           std::ostringstream vpp_name_stream;
-          vpp_name_stream<<pp_base_name<<"_"<<ring_index+1;
+          vpp_name_stream<<pp_base_name<<"_"<<_ring_vec[ring_index];
           for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
           {
             std::ostringstream pp_name_stream;
-            pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<ring_index+1;
+            pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<_ring_vec[ring_index];
             postprocessor_names.push_back(pp_name_stream.str());
           }
           params.set<std::vector<PostprocessorName> >("postprocessors") = postprocessor_names;

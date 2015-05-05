@@ -14,10 +14,20 @@
    input = 'j_integral_2d_mouth_dir.i'
    exodiff = 'j_integral_2d_mouth_dir_out.e'
  [../]
+ [./j_2d_topo_q]
+   type = 'Exodiff'
+   input = 'j_integral_2d_topo_q_func.i'
+   exodiff = 'j_integral_2d_topo_q_func_out.e'
+ [../]
  [./j_3d_as_2d]
    type = 'Exodiff'
    input = 'j_integral_3d_as_2d.i'
    exodiff = 'j_integral_3d_as_2d_out.e'
+ [../]
+ [./j_3d_as_2d_topo_q]
+   type = 'Exodiff'
+   input = 'j_integral_3d_as_2d_topo_q_func.i'
+   exodiff = 'j_integral_3d_as_2d_topo_q_func_out.e'
  [../]
  [./j_3d]
    type = 'Exodiff'
@@ -38,5 +48,10 @@
    type = 'Exodiff'
    input = 'j_integral_3d_mouth_dir_end_dir_vec.i'
    exodiff = 'j_integral_3d_mouth_dir_end_dir_vec_out.e'
+ [../]
+ [./j_3d_topo_q]
+   type = 'Exodiff'
+   input = 'j_integral_3d_topo_q_func.i'
+   exodiff = 'j_integral_3d_topo_q_func_out.e'
  [../]
 []

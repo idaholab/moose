@@ -44,6 +44,7 @@
 #include "NewmarkAccelAux.h"
 #include "NewmarkVelAux.h"
 #include "DomainIntegralQFunction.h"
+#include "DomainIntegralTopologicalQFunction.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
@@ -118,6 +119,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerAux(NewmarkAccelAux);
   registerAux(NewmarkVelAux);
   registerAux(DomainIntegralQFunction);
+  registerAux(DomainIntegralTopologicalQFunction);
   registerAux(ElementsOnLineAux);
 
   registerBoundaryCondition(DashpotBC);
