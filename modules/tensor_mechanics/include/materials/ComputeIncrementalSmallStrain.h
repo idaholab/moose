@@ -20,7 +20,6 @@ public:
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeProperties();
-  virtual void computeQpStrain(const RankTwoTensor & change_grad_disp);
 
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
