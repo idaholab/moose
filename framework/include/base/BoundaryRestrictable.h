@@ -81,7 +81,7 @@ public:
 
   /**
    * Return the number of boundaries for this object
-   * @return The number of subdomains
+   * @return The number of boundary ids
    */
   unsigned int numBoundaryIDs() const;
 
