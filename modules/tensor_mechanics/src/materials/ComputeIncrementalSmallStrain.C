@@ -40,26 +40,20 @@ ComputeIncrementalSmallStrain::initQpStatefulProperties()
   _total_strain_old[_qp] = _total_strain[_qp];
 }
 
-void
-ComputeIncrementalSmallStrain::computeProperties()
-{
-  for (unsigned int _qp = 0; _qp < _qrule->n_points(); ++_qp)
-  {
-    //Deformation gradient
-    RankTwoTensor A(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]); //Deformation gradient
-    RankTwoTensor Fbar(_grad_disp_x_old[_qp], _grad_disp_y_old[_qp], _grad_disp_z_old[_qp]); //Old Deformation gradient
-
-    _deformation_gradient[_qp] = A;
-    _deformation_gradient[_qp].addIa(1.0); //Gauss point deformation gradient
-
-    computeQpStrain(A - Fbar);
-  }
-}
 
 void
-ComputeIncrementalSmallStrain::computeQpStrain(const RankTwoTensor & change_grad_disp)
+ComputeIncrementalSmallStrain::computeQpProperties()
 {
-  _strain_increment[_qp] = 0.5*(change_grad_disp + change_grad_disp.transpose());
+  //Deformation gradient
+  RankTwoTensor A(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]); //Deformation gradient
+  RankTwoTensor Fbar(_grad_disp_x_old[_qp], _grad_disp_y_old[_qp], _grad_disp_z_old[_qp]); //Old Deformation gradient
+
+  _deformation_gradient[_qp] = A;
+  _deformation_gradient[_qp].addIa(1.0); //Gauss point deformation gradient
+
+  A -= Fbar; // A = grad_disp - grad_disp_old
+
+  _strain_increment[_qp] = 0.5*(A + A.transpose());
 
   //Remove thermal expansion
   _strain_increment[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T_old[_qp]));
