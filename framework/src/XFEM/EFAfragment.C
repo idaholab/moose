@@ -25,7 +25,6 @@ EFAfragment::~EFAfragment()
 std::vector<EFAnode*>
 EFAfragment::get_common_nodes(EFAfragment* other) const
 {
-  bool edge_found = false;
   std::set<EFAnode*> frag1_nodes = get_all_nodes();
   std::set<EFAnode*> frag2_nodes = other->get_all_nodes();
   std::vector<EFAnode*> common_nodes = get_common_elems(frag1_nodes, frag2_nodes);

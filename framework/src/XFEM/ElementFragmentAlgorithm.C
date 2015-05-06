@@ -251,8 +251,8 @@ ElementFragmentAlgorithm::addElemFaceIntersection(unsigned int elemid, unsigned 
 }
 
 void
-ElementFragmentAlgorithm::addFragFaceIntersection(unsigned int ElemID, unsigned int FragFaceID,
-                                                  std::vector<unsigned int> FragFaceEdgeID, std::vector<double> position)
+ElementFragmentAlgorithm::addFragFaceIntersection(unsigned int /*ElemID*/, unsigned int /*FragFaceID*/,
+                                                  std::vector<unsigned int> /*FragFaceEdgeID*/, std::vector<double> /*position*/)
 {
   // TODO: need to finish this for 3D problems
 }
@@ -409,7 +409,7 @@ ElementFragmentAlgorithm::connectFragments(bool mergeUncutVirtualEdges)
   for (unsigned int elem_iter = 0; elem_iter < _child_elements.size(); elem_iter++)
   {
     EFAelement *childElem = _child_elements[elem_iter];
-    childElem->connect_neighbors(_permanent_nodes, _embedded_nodes, _temp_nodes,
+    childElem->connect_neighbors(_permanent_nodes, _temp_nodes,
                                  _inverse_connectivity, mergeUncutVirtualEdges);
   } // loop over child elements
 

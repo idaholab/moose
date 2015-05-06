@@ -147,16 +147,20 @@ EFAelement3D::get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes) con
 
   //Now delete any nodes that are contained in fragments
   std::set<EFAnode*>::iterator sit;
-  for (sit = non_physical_nodes.begin(); sit != non_physical_nodes.end(); ++sit)
+  for (sit = non_physical_nodes.begin(); sit != non_physical_nodes.end(); )
   {
+    bool erased = false;
     for (unsigned int i = 0; i < _fragments.size(); ++i)
     {
       if (_fragments[i]->containsNode(*sit))
       {
-        non_physical_nodes.erase(sit);
+        non_physical_nodes.erase(sit++);
+        erased = true;
         break;
       }
     }
+    if (!erased)
+      ++sit;
   }
 }
 
@@ -830,7 +834,6 @@ EFAelement3D::remove_phantom_embedded_nodes()
 
 void
 EFAelement3D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
-                                std::map<unsigned int, EFAnode*> &EmbeddedNodes,
                                 std::map<unsigned int, EFAnode*> &TempNodes,
                                 std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap,
                                 bool merge_phantom_faces)
@@ -1597,9 +1600,9 @@ EFAelement3D::addFaceEdgeCut(unsigned int face_id, unsigned int edge_id, double 
 }
 
 void
-EFAelement3D::addFragFaceEdgeCut(unsigned int frag_face_id, unsigned int frag_edge_id, double position,
-                                std::map<unsigned int, EFAnode*> &EmbeddedNodes, bool add_to_neighbor,
-                                bool add_to_adjacent)
+EFAelement3D::addFragFaceEdgeCut(unsigned int /*frag_face_id*/, unsigned int /*frag_edge_id*/, double /*position*/,
+                                std::map<unsigned int, EFAnode*> &/*EmbeddedNodes*/, bool /*add_to_neighbor*/,
+                                bool /*add_to_adjacent*/)
 {
   // TODO: mark frag face edges
   // also need to check if cut has been added to this frag face edge or neighbor edge of adjacent face

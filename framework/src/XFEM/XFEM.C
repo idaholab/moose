@@ -34,6 +34,7 @@
 
 #include "XFEM.h"
 #include "XFEM_geometric_cut.h"
+#include "EFAfuncs.h"
 
 #ifdef DEBUG
 // Some extra validation for ParallelMesh

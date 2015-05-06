@@ -108,7 +108,6 @@ public:
                             std::map<unsigned int, EFAnode*> &TempNodes) = 0;
   virtual void remove_phantom_embedded_nodes() = 0;
   virtual void connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
-                                 std::map<unsigned int, EFAnode*> &EmbeddedNodes,
                                  std::map<unsigned int, EFAnode*> &TempNodes,
                                  std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap,
                                  bool merge_phantom_edges) = 0;

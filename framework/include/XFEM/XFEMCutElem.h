@@ -30,7 +30,6 @@
 
 #include "MaterialData.h"
 #include "ElementFragmentAlgorithm.h"
-#include "EFAfuncs.h"
 
 using namespace libMesh;
 

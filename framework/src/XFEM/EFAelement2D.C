@@ -158,16 +158,20 @@ EFAelement2D::get_non_physical_nodes(std::set<EFAnode*> &non_physical_nodes) con
 
   //Now delete any nodes that are contained in fragments
   std::set<EFAnode*>::iterator sit;
-  for (sit = non_physical_nodes.begin(); sit != non_physical_nodes.end(); ++sit)
+  for (sit = non_physical_nodes.begin(); sit != non_physical_nodes.end(); )
   {
+    bool erased = false;
     for (unsigned int i = 0; i < _fragments.size(); ++i)
     {
       if (_fragments[i]->containsNode(*sit))
       {
-        non_physical_nodes.erase(sit);
+        non_physical_nodes.erase(sit++);
+        erased = true;
         break;
       }
     }
+    if (!erased)
+      ++sit;
   }
 }
 
@@ -948,7 +952,6 @@ EFAelement2D::remove_phantom_embedded_nodes()
 
 void
 EFAelement2D::connect_neighbors(std::map<unsigned int, EFAnode*> &PermanentNodes,
-                                std::map<unsigned int, EFAnode*> &EmbeddedNodes,
                                 std::map<unsigned int, EFAnode*> &TempNodes,
                                 std::map<EFAnode*, std::set<EFAelement*> > &InverseConnectivityMap,
                                 bool merge_phantom_edges)
