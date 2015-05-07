@@ -12,29 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ProblemRealParameter_H
-#define ProblemRealParameter_H
-
-#include "GeneralPostprocessor.h"
-
-//Forward Declarations
-class ProblemRealParameter;
+// MOOSE includes
+#include "EigenValueReporter.h"
+#include "EigenExecutionerBase.h"
+#include "MooseApp.h"
 
 template<>
-InputParameters validParams<ProblemRealParameter>();
-
-class ProblemRealParameter : public GeneralPostprocessor
+InputParameters validParams<EigenValueReporter>()
 {
-public:
-  ProblemRealParameter(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<GeneralPostprocessor>();
+  return params;
+}
 
-  virtual void initialize() {}
-  virtual void execute() {}
+EigenValueReporter::EigenValueReporter(const std::string & name, InputParameters parameters) :
+    GeneralPostprocessor(name, parameters),
+    _eigen_executioner(NULL)
+{
+}
 
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
-};
+void
+EigenValueReporter::initialSetup()
+{
+  _eigen_executioner = dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner());
+  if (_eigen_executioner == NULL)
+    mooseError("EigenValueReporter requires an EigenExeuctioner.");
+}
 
-#endif //ProblemRealParameter_H
+
+PostprocessorValue
+EigenValueReporter::getValue()
+{
+  return _eigen_executioner->eigenValue();
+}

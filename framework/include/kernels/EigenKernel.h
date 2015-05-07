@@ -34,12 +34,14 @@ class EigenKernel : public KernelBase
 {
 public:
   // See KernelBase base for documentation of these overridden methods
+  virtual void initialSetup();
   virtual void computeResidual();
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int /*jvar*/) {}
   virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
 
-  EigenKernel(const std::string & name, InputParameters parameters);
+  EigenKernel(const InputParameters & parameters);
+  EigenKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual bool isActive();
 
 protected:
@@ -62,6 +64,7 @@ protected:
   PostprocessorName _eigen_pp;
 
   /// eigenvalue
+  const Real _one;
   const Real * _eigenvalue;
 };
 
