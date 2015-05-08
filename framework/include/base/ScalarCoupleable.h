@@ -20,7 +20,7 @@
 #include "InputParameters.h"
 
 /**
- * Interface for objects that needs scakar coupling capabilities
+ * Interface for objects that needs scalar coupling capabilities
  *
  */
 class ScalarCoupleable
@@ -99,14 +99,31 @@ protected:
   virtual VariableValue & coupledScalarDotDu(const std::string & var_name, unsigned int comp = 0);
 
 protected:
+  // Reference to FEProblem
+  FEProblem & _sc_fe_problem;
+
   /// Coupled vars whose values we provide
   std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;
+
+  /// Will hold the default value for optional coupled scalar variables.
+  std::map<std::string, VariableValue *> _default_value;
 
   /// Vector of coupled variables
   std::vector<MooseVariableScalar *> _coupled_moose_scalar_vars;
 
   /// True if implicit value is required
   bool _sc_is_implicit;
+
+  /// Local InputParameters
+  InputParameters _coupleable_params;
+
+  /**
+   * Helper method to return (and insert if necessary) the default value
+   * for an uncoupled variable.
+   * @param var_name the name of the variable for which to retrieve a default value
+   * @return VariableValue * a pointer to the associated VarirableValue.
+   */
+  VariableValue * getDefaultValue(const std::string & var_name);
 
   /**
    * Extract pointer to a scalar coupled variable

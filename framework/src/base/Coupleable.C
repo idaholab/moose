@@ -21,11 +21,10 @@ Coupleable::Coupleable(const InputParameters & parameters, bool nodal) :
     _c_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _nodal(nodal),
     _c_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
-    _coupleable_params(parameters)
+    _coupleable_params(parameters),
+    _coupleable_max_qps(_c_fe_problem.getMaxQps())
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
-
-  _coupleable_max_qps = _c_fe_problem.getMaxQps();
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
@@ -135,19 +134,24 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
   mooseError("Unknown variable kind. Corrupted binary?");
 }
 
+VariableValue *
+Coupleable::getDefaultValue(const std::string & var_name)
+{
+  std::map<std::string, VariableValue *>::iterator default_value_it = _default_value.find(var_name);
+  if (default_value_it == _default_value.end())
+  {
+    VariableValue * value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+    default_value_it = _default_value.insert(std::make_pair(var_name, value)).first;
+  }
+
+  return default_value_it->second;
+}
+
 VariableValue &
 Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
-  {
-    VariableValue * value = _default_value[var_name];
-    if (value == NULL)
-    {
-      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
-      _default_value[var_name] = value;
-    }
-    return *_default_value[var_name];
-  }
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
 
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
@@ -160,16 +164,8 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
-  {
-    VariableValue * value = _default_value[var_name];
-    if (value == NULL)
-    {
-      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
-      _default_value[var_name] = value;
-    }
-    return *_default_value[var_name];
-  }
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);
@@ -183,16 +179,8 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
-  {
-    VariableValue * value = _default_value[var_name];
-    if (value == NULL)
-    {
-      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
-      _default_value[var_name] = value;
-    }
-    return *_default_value[var_name];
-  }
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);
@@ -339,16 +327,8 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
-  {
-    VariableValue * value = _default_value[var_name];
-    if (value == NULL)
-    {
-      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
-      _default_value[var_name] = value;
-    }
-    return *_default_value[var_name];
-  }
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
 
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
@@ -358,16 +338,8 @@ Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
-  {
-    VariableValue * value = _default_value[var_name];
-    if (value == NULL)
-    {
-      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
-      _default_value[var_name] = value;
-    }
-    return *_default_value[var_name];
-  }
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);
@@ -378,16 +350,8 @@ Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp
 VariableValue &
 Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
-  {
-    VariableValue * value = _default_value[var_name];
-    if (value == NULL)
-    {
-      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
-      _default_value[var_name] = value;
-    }
-    return *_default_value[var_name];
-  }
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);

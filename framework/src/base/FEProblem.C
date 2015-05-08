@@ -145,6 +145,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _has_jacobian(false),
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
+    _max_scalar_order(INVALID_ORDER),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
@@ -657,6 +658,12 @@ FEProblem::getMaxQps() const
   if (_max_qps == std::numeric_limits<unsigned int>::max())
     mooseError("Max QPS uninitialized");
   return _max_qps;
+}
+
+Order
+FEProblem::getMaxScalarOrder() const
+{
+  return _max_scalar_order;
 }
 
 void
@@ -1263,6 +1270,9 @@ FEProblem::addVariable(const std::string & var_name, const FEType & type, Real s
 void
 FEProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
+  if (order > _max_scalar_order)
+    _max_scalar_order = order;
+
   _nl.addScalarVariable(var_name, order, scale_factor, active_subdomains);
   if (_displaced_problem)
     _displaced_problem->addScalarVariable(var_name, order, scale_factor, active_subdomains);
