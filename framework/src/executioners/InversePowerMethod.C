@@ -40,7 +40,7 @@ InversePowerMethod::InversePowerMethod(const std::string & name, InputParameters
     _cheb_on(getParam<bool>("Chebyshev_acceleration_on"))
 {
   _eigenvalue = getParam<Real>("k0");
-  addEigenValueReporter();
+  addAttributeReporter("eigenvalue", _eigenvalue);
 
   if (_max_iter<_min_iter) mooseError("max_power_iterations<min_power_iterations!");
   if (_eig_check_tol<0.0) mooseError("eig_check_tol<0!");

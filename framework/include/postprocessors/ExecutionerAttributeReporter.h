@@ -12,50 +12,57 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EIGENVALUEREPORTER_H
-#define EIGENVALUEREPORTER_H
+#ifndef EXECUTIONERATTRIBUTEREPORTER_H
+#define EXECUTIONERATTRIBUTEREPORTER_H
 
 // MOOSE includes
 #include "GeneralPostprocessor.h"
 
 // Forward declarations
-class EigenValueReporter;
+class ExecutionerAttributeReporter;
 class EigenExecutionerBase;
 
 template<>
-InputParameters validParams<EigenValueReporter>();
+InputParameters validParams<ExecutionerAttributeReporter>();
 
 /**
- * A class to report the Eigen value from the EigenExecutionerBase object.
+ * A class to report class attributes value from Executioners
+ *
+ * This postprocessor is only designed to be instantiated by
+ * Executioner objects. It will produce an error
+ *
  */
-class EigenValueReporter : public GeneralPostprocessor
+class ExecutionerAttributeReporter : public GeneralPostprocessor
 {
 public:
 
   /**
    * Class constructor
+   * @param
    * @param parameters
    */
-  EigenValueReporter(const std::string & name, InputParameters parameters);
+  ExecutionerAttributeReporter(const std::string & name, InputParameters parameters);
 
   /**
    * Class destructor
    */
-  virtual ~EigenValueReporter(){}
+  virtual ~ExecutionerAttributeReporter(){}
 
   /**
-   * Populates the pointer to the executioner that holds the eigen value
+   * Stores a value of the attribute pointed to by _value to a local variable for
+   * aggregation in finalize()
    */
-  virtual void initialSetup();
+  virtual void execute();
 
-  ///@{
   /**
-   * Un-used methods required to be defined
+   * Perform the desired aggregation, this is determined by the "aggregation" parameter
    */
-  virtual void execute(){}
+  virtual void finalize();
+
+  /**
+   * Un-used method required to be defined
+   */
   virtual void initialize(){}
-  virtual void finalize(){}
-  ///@}
 
   /**
    * Returns the value of the eigen value as computed
@@ -65,8 +72,16 @@ public:
 
 private:
 
-  /// Pointer to the EigenExecutionerBase where the eigen value is computed and stored
-  EigenExecutionerBase * _eigen_executioner;
+  /// The type of parallel aggregation to perform (none, sum, min, max)
+  MooseEnum _aggregation;
+
+  /// Pointer to the attribute to report, this is assigned via the "value" parameter
+  Real * _value;
+
+  /// Local attribute value update via execute(), this value is aggregated in finalize() and
+  /// threadJoin and returned by getValue()
+  Real _return_value;
+
 };
 
 #endif //EIGENVALUEREPORTER_H

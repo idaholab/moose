@@ -105,6 +105,15 @@ public:
    */
   virtual void parentOutputPositionChanged() {}
 
+  /**
+   * Adds a postprocessor to report the a Real class attribute
+   * @param name The name of the postprocessor to create
+   * @param attribute The Real class attribute to report
+   * @param aggregation The parallel aggregation to perform: "min", "max", "sum", or "none (default)"
+   * @param execute_on The "execute_on" settings for the postprocessor (default: "initial timestep_end")
+   */
+  virtual void addAttributeReporter(const std::string & name, Real & attribute, std::string aggregation = "none", std::string execute_on = "initial timestep_end");
+
 protected:
 
   /// Initial Residual Variables

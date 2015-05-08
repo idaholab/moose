@@ -61,11 +61,6 @@ public:
   virtual void checkIntegrity();
 
   /**
-   * Adds a postprocessor to report the Eigen value
-   */
-  virtual void addEigenValueReporter();
-
-  /**
    * Perform inverse power iterations with the initial guess of the solution
    *
    * @param min_iter The minimum number of power iterations.

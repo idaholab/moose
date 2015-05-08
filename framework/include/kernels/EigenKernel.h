@@ -40,8 +40,7 @@ public:
   virtual void computeOffDiagJacobian(unsigned int /*jvar*/) {}
   virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
 
-  EigenKernel(const InputParameters & parameters);
-  EigenKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
+  EigenKernel(const std::string & name, InputParameters parameters);
   virtual bool isActive();
 
 protected:
@@ -63,9 +62,11 @@ protected:
   /// name of the postprocessor for evaluating eigenvalue
   PostprocessorName _eigen_pp;
 
-  /// eigenvalue
-  const Real _one;
-  const Real * _eigenvalue;
+  /// A value of one, the default for the _eigenvalue attribute
+  Real _one;
+
+  /// Pointer to a constant Real that stores the eigen value
+  Real const * _eigenvalue;
 };
 
 #endif //EIGENKERNEL_H

@@ -34,7 +34,6 @@ InputParameters validParams<EigenExecutionerBase>()
   params.addParamNamesToGroup("auto_initialization time", "Advanced");
 
   params.addParam<bool>("output_on_final", false, "True to disable all the intemediate exodus outputs");
-  params.addPrivateParam<bool>("_eigen", true);
 
   return params;
 }
@@ -167,14 +166,6 @@ EigenExecutionerBase::checkIntegrity()
     mooseError("You have not specified any eigen kernels in your eigenvalue simulation");
 }
 
-void
-EigenExecutionerBase::addEigenValueReporter()
-{
-  InputParameters params = _app.getFactory().getValidParams("EigenValueReporter");
-  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
-  _problem.addPostprocessor("EigenValueReporter", "eigenvalue", params);
-}
 
 void
 EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
@@ -230,7 +221,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // some iteration variables
   Real k_old = 0.0;
-  Real source_integral_old = getPostprocessorValueOld("bx_norm");
+  Real & source_integral_old = getPostprocessorValueOld("bx_norm");
   Real saved_source_integral_old = source_integral_old;
   Chebyshev_Parameters chebyshev_parameters;
 

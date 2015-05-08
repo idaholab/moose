@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'RunException'
+    input = 'execution_attribute_error.i'
+    expect_err = 'Invalid pointer to an attribute, this object should only be created via Executioner::addAttributeReporter'
+  [../]
+[]

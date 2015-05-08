@@ -27,8 +27,8 @@ InputParameters validParams<EigenKernel>()
   return params;
 }
 
-EigenKernel::EigenKernel(const std::string & deprecated_name, InputParameters parameters) :
-    KernelBase(deprecated_name, parameters),
+EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
+    KernelBase(name, parameters),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
