@@ -55,6 +55,11 @@ ScalarCoupleable::ScalarCoupleable(const InputParameters & parameters) :
 
 ScalarCoupleable::~ScalarCoupleable()
 {
+  for (std::map<std::string, VariableValue *>::iterator it = _default_value.begin(); it != _default_value.end(); ++it)
+  {
+    it->second->release();
+    delete it->second;
+  }
 }
 
 const std::vector<MooseVariableScalar *> &
