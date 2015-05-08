@@ -4,4 +4,10 @@
     input = 'coupled_scalar.i'
     exodiff = 'coupled_scalar_out.e'
   [../]
+
+  [./test_default]
+    type = 'Exodiff'
+    input = 'coupled_scalar_default.i'
+    exodiff = 'coupled_scalar_default_out.e'
+  [../]
 []
