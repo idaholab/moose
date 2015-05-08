@@ -61,6 +61,7 @@
 #include "DisplacementAboutAxisAction.h"
 #include "InteractionIntegralBenchmarkBC.h"
 #include "TorqueReaction.h"
+#include "MaterialTensorIntegral.h"
 #include "CrackDataSampler.h"
 #include "SolidMechanicsAction.h"
 #include "DomainIntegralAction.h"
@@ -68,6 +69,7 @@
 #include "SolidMechImplicitEuler.h"
 #include "SolidModel.h"
 #include "StressDivergence.h"
+#include "OutOfPlaneStress.h"
 #include "StressDivergenceRZ.h"
 #include "StressDivergenceRSpherical.h"
 #include "StressDivergenceTruss.h"
@@ -157,6 +159,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerKernel(SolidMechImplicitEuler);
   registerKernel(SolidMechInertialForce);
   registerKernel(StressDivergence);
+  registerKernel(OutOfPlaneStress);
   registerKernel(StressDivergenceRZ);
   registerKernel(StressDivergenceRSpherical);
   registerKernel(StressDivergenceTruss);
@@ -170,6 +173,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(InteractionIntegral);
   registerPostprocessor(CavityPressurePostprocessor);
   registerPostprocessor(TorqueReaction);
+  registerPostprocessor(MaterialTensorIntegral);
 
   registerVectorPostprocessor(CrackDataSampler);
   registerVectorPostprocessor(LineMaterialSymmTensorSampler);
