@@ -60,6 +60,10 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _need_nodal_u_old(false),
     _need_nodal_u_older(false),
 
+    _need_nodal_u_neighbor(false),
+    _need_nodal_u_old_neighbor(false),
+    _need_nodal_u_older_neighbor(false),
+
     _phi(_assembly.fePhi(_fe_type)),
     _grad_phi(_assembly.feGradPhi(_fe_type)),
 
@@ -101,7 +105,10 @@ MooseVariable::~MooseVariable()
   _second_u_older.release(); _second_u_older_bak.release();
 
   _u_dot.release(); _u_dot_bak.release();
+  _u_dot_neighbor.release(); _u_dot_bak_neighbor.release();
+
   _du_dot_du.release(); _du_dot_du_bak.release();
+  _du_dot_du_neighbor.release(); _du_dot_du_bak_neighbor.release();
 
   _nodal_u.release();
   _nodal_u_old.release();
@@ -112,6 +119,8 @@ MooseVariable::~MooseVariable()
   _nodal_u_neighbor.release();
   _nodal_u_old_neighbor.release();
   _nodal_u_older_neighbor.release();
+  _nodal_u_dot_neighbor.release();
+  _nodal_du_dot_du_neighbor.release();
 
   _increment.release();
 
@@ -409,6 +418,42 @@ MooseVariable::nodalValueOlder()
   {
     _need_nodal_u_older = true;
     return _nodal_u_older;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+}
+
+VariableValue &
+MooseVariable::nodalValueNeighbor()
+{
+  if (isNodal())
+  {
+    _need_nodal_u_neighbor = true;
+    return _nodal_u_neighbor;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+}
+
+VariableValue &
+MooseVariable::nodalValueOldNeighbor()
+{
+  if (isNodal())
+  {
+    _need_nodal_u_old_neighbor = true;
+    return _nodal_u_old_neighbor;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+}
+
+VariableValue &
+MooseVariable::nodalValueOlderNeighbor()
+{
+  if (isNodal())
+  {
+    _need_nodal_u_older_neighbor = true;
+    return _nodal_u_older_neighbor;
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
@@ -1027,6 +1072,9 @@ MooseVariable::computeNeighborValuesFace()
 
   if (is_transient)
   {
+    _u_dot_neighbor.resize(nqp);
+    _du_dot_du_neighbor.resize(nqp);
+
     if (_need_u_old_neighbor)
       _u_old_neighbor.resize(nqp);
 
@@ -1056,6 +1104,9 @@ MooseVariable::computeNeighborValuesFace()
 
     if (_subproblem.isTransient())
     {
+      _u_dot_neighbor[i] = 0;
+      _du_dot_du_neighbor[i] = 0;
+
       if (_need_u_old_neighbor)
         _u_old_neighbor[i] = 0;
 
@@ -1081,11 +1132,14 @@ MooseVariable::computeNeighborValuesFace()
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
+  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
+  const Real & du_dot_du                       = _sys.duDotDu();
 
   dof_id_type idx;
   Real soln_local;
   Real soln_old_local=0;
   Real soln_older_local=0;
+  Real u_dot_local = 0;
 
   Real phi_local;
   RealGradient dphi_local;
@@ -1103,6 +1157,8 @@ MooseVariable::computeNeighborValuesFace()
 
       if (_need_u_older_neighbor || _need_grad_older_neighbor || _need_second_older_neighbor)
         soln_older_local = solution_older(idx);
+
+      u_dot_local = u_dot(idx);
     }
 
     for (unsigned int qp=0; qp < nqp; ++qp)
@@ -1121,6 +1177,9 @@ MooseVariable::computeNeighborValuesFace()
 
       if (is_transient)
       {
+        _u_dot_neighbor[qp]        += phi_local * u_dot_local;
+        _du_dot_du_neighbor[qp]    = du_dot_du;
+
         if (_need_u_old_neighbor)
           _u_old_neighbor[qp]        += phi_local * soln_old_local;
 
@@ -1322,10 +1381,16 @@ MooseVariable::computeNodalNeighborValues()
     {
       _nodal_u_old_neighbor.resize(n);
       _nodal_u_older_neighbor.resize(n);
-      _sys.solutionOld().get(_dof_indices_neighbor,
-                             &_nodal_u_old_neighbor[0]);
-      _sys.solutionOlder().get(_dof_indices_neighbor,
-                               &_nodal_u_older_neighbor[0]);
+      _sys.solutionOld().get(_dof_indices_neighbor, &_nodal_u_old_neighbor[0]);
+      _sys.solutionOlder().get(_dof_indices_neighbor, &_nodal_u_older_neighbor[0]);
+
+      _nodal_u_dot_neighbor.resize(n);
+      _nodal_du_dot_du_neighbor.resize(n);
+      for (unsigned int i = 0; i < n; i++)
+      {
+        _nodal_u_dot_neighbor[i] = _sys.solutionUDot()(_dof_indices_neighbor[i]);
+        _nodal_du_dot_du_neighbor[i] = _sys.duDotDu();
+      }
     }
   }
 }

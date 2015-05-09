@@ -173,6 +173,7 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
       for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
       {
         DGKernel * dg = *it;
