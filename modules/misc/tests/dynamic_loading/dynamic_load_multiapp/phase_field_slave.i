@@ -1,4 +1,4 @@
-# This input file contains objects only availabe in phase_field
+# This input file contains objects only available in phase_field
 [Mesh]
   type = GeneratedMesh
   dim = 2

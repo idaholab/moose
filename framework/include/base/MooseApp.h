@@ -319,7 +319,46 @@ public:
    */
   SystemInfo * getSystemInfo() { return _sys_info.get(); }
 
+  ///@{
+  /**
+   * Thes methods are called to register applications or objects on demand. This method
+   * attempts to load a dynamic library and register it when it is needed. Throws an error if
+   * no suitable library is found that contains the app_name in question.
+   */
+  void dynamicObjectRegistration(const std::string & app_name, Factory * factory, std::string library_path);
+  void dynamicAppRegistration(const std::string & app_name, std::string library_path);
+  ///@}
+
+  /**
+   * Converts an application name to a library name:
+   * Examples:
+   *   AnimalApp -> libanimal-oprof.la (assuming METHOD=oprof)
+   *   ThreeWordAnimalApp -> libthree_word_animal-dbg.la (assuming METHOD=dbg)
+   */
+  std::string appNameToLibName(const std::string & app_name) const;
+
+  /**
+   * Converts a library name to an application name:
+   */
+  std::string libNameToAppName(const std::string & library_name) const;
+
+  /**
+   * Return the loaded library filenames in a std::vector
+   */
+  std::vector<std::string> getLoadedLibraryPaths() const;
+
 protected:
+
+  /**
+   * Helper method for dynamic loading of objects
+   */
+  void dynamicRegistration(const std::string & app_name, const std::string & registration_method, Factory * factory, std::string library_path);
+
+  /**
+   * Recursively loads libraries and dependencies in the proper order to fully register a
+   * MOOSE application that may have several dependencies. REQUIRES: dynamic linking loader support.
+   */
+  void loadLibraryAndDependencies(const std::string & library_filename, const std::string & registration_method_name, Factory * factory);
 
   MooseApp(const std::string & name, InputParameters parameters);
 
@@ -423,6 +462,9 @@ protected:
 
   /// true if we want to just check the input file
   bool _check_input;
+
+  /// Dynamic libraries, dependencies and their file handles
+  std::map<std::string, void *> _lib_handles;
 
 private:
 
