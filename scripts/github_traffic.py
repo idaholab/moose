@@ -36,7 +36,6 @@ def webBrowser():
 def authenticatePage(args):
   browser = webBrowser()
   browser.form['login'] = args.user
-  args.password = getpass.getpass('Password for UserID ' + args.user + ' :',)
   browser.form['password'] = args.password
   browser.submit()
   return browser
@@ -63,13 +62,26 @@ def verifyArgs(args):
   if args.repo is None or len(args.repo.split('/')) != 2:
     print '\nYou must specify a repository you are insterested in scrapeing:\n\t --repo foo/bar\n\nNote: GitHub is case-sensitive, so your arguments must be too'
     sys.exit(1)
+  if args.user is '':
+    print '\nYou must specify a user to authenticate with'
+    sys.exit(1)
+  try:
+    while args.password is '':
+      args.password = getpass.getpass('Password for UserID ' + args.user + ' :',)
+  except KeyboardInterrupt:
+    print ''
+    sys.exit(0)
   return args
 
 def parseArgs(args=None):
   # Traffic Stats URL: https://github.com/idaholab/moose/graphs/clone-activity-data
   parser = argparse.ArgumentParser(description='Scrape GitHub for a webpage requiring authentication')
-  parser.add_argument('--repo', nargs='?', help='Repository (example: foo/bar)')
-  parser.add_argument('--user', nargs='?', default=os.getenv('USER'), help='Authenticate using specified user. (' + os.getenv('USER') + ')')
+  parser.add_argument('--repo', '-r', nargs='?', help='Repository (example: foo/bar)')
+  try:
+    parser.add_argument('--user', '-u', nargs='?', default=os.getenv('USER'), help='Authenticate using specified user. Defaults to: (' + os.getenv('USER') + ')')
+  except TypeError:
+    parser.add_argument('--user', '-u', nargs='?', default='', help='Authenticate using specified user')
+  parser.add_argument('--password', '-p', nargs='?', default='', help='Authenticate using specified password')
   return verifyArgs(parser.parse_args(args))
 
 if __name__ == '__main__':
