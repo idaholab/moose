@@ -135,19 +135,30 @@ public:
   template<typename T>
   void reg(const std::string & obj_name)
   {
-    if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
+    /**
+     * If _registerable_objects has been set the user has requested that we only register some subset
+     * of the objects for a dynamically loaded application. The objects listed in *this* application's
+     * registerObjects() method will have already been registered before that member was set.
+     *
+     * If _registerable_objects is empty, the factory is unrestricted
+     */
+    if (_registerable_objects.empty() || _registerable_objects.find(obj_name) != _registerable_objects.end())
     {
-      _name_to_build_pointer[obj_name] = &buildObject<T>;
-      _name_to_params_pointer[obj_name] = &validParams<T>;
+      if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
+      {
+        _name_to_build_pointer[obj_name] = &buildObject<T>;
+        _name_to_params_pointer[obj_name] = &validParams<T>;
+      }
+      else
+        mooseError("Object '" + obj_name + "' already registered.");
     }
-    else
-      mooseError("Object '" + obj_name + "' already registered.");
+    // TODO: Possibly store and print information about objects that are skipped here?
   }
 
   /**
    * Register a deprecated object that expires
    * @param obj_name The name of the object to register
-   * @param t_str String contiaining the experiation date for the object
+   * @param t_str String containing the expiration date for the object
    */
   template<typename T>
   void regDeprecated(const std::string & obj_name, const std::string t_str)
@@ -190,6 +201,13 @@ public:
    * @return The created object
    */
   MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Calling this object with a non-empty vector will cause this factory to ignore registrations from any object
+   * not contained within the list.
+   * @param names a vector containing the names of objects that this factory will register
+   */
+  void restrictRegisterableObjects(const std::vector<std::string> & names);
 
   /**
    * Access to registered object iterator (begin)
@@ -235,6 +253,9 @@ protected:
 
   /// Storage for the deprecated objects that have replacements
   std::map<std::string, std::string> _deprecated_name;
+
+  /// The list of objects that may be registered
+  std::set<std::string> _registerable_objects;
 
   /// Object id count
   MooseObjectID _object_count;

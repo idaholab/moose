@@ -23,6 +23,7 @@ InputParameters validParams<DynamicObjectRegistrationAction>()
   InputParameters params = validParams<Action>();
 
   params.addParam<std::vector<std::string> >("register_objects_from", "The names of other applications from which objects will be registered from (dynamic registration).");
+  params.addParam<std::vector<std::string> >("object_names", "The names of the objects to register (Default: register all).");
   params.addParam<std::string>("library_path", "", "Path to search for dynamic libraries (please avoid committing absolute paths in addition to MOOSE_LIBRARY_PATH)");
   return params;
 }
@@ -37,6 +38,10 @@ DynamicObjectRegistrationAction::DynamicObjectRegistrationAction(const std::stri
    */
   if (isParamValid("register_objects_from"))
   {
+    // Only register the requested objects
+    if (isParamValid("object_names"))
+      _factory.restrictRegisterableObjects(getParam<std::vector<std::string> >("object_names"));
+
     std::vector<std::string> application_names = getParam<std::vector<std::string> >("register_objects_from");
     for (unsigned int i = 0; i < application_names.size(); ++i)
       _app.dynamicObjectRegistration(application_names[i], &_factory, getParam<std::string>("library_path"));

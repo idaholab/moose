@@ -73,6 +73,12 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   return (*func)(name, parameters);
 }
 
+void
+Factory::restrictRegisterableObjects(const std::vector<std::string> & names)
+{
+  _registerable_objects.insert(names.begin(), names.end());
+}
+
 time_t Factory::parseTime(const std::string t_str)
 {
   // The string must be a certain length to be valid
