@@ -27,9 +27,9 @@ InputParameters validParams<NonlinearEigen>()
   return params;
 }
 
-NonlinearEigen::NonlinearEigen(const std::string & name, InputParameters parameters)
-    :EigenExecutionerBase(name, parameters),
-     // local static memebers
+NonlinearEigen::NonlinearEigen(const std::string & name, InputParameters parameters) :
+    EigenExecutionerBase(name, parameters),
+    // local static memebers
      _free_iter(getParam<unsigned int>("free_power_iterations")),
      _abs_tol(getParam<Real>("source_abs_tol")),
      _rel_tol(getParam<Real>("source_rel_tol")),
@@ -37,7 +37,13 @@ NonlinearEigen::NonlinearEigen(const std::string & name, InputParameters paramet
      _output_after_pi(getParam<bool>("output_after_power_iterations"))
 {
   _eigenvalue = getParam<Real>("k0");
-  addRealParameterReporter("eigenvalue");
+  addAttributeReporter("eigenvalue", _eigenvalue);
+
+  if (getParam<bool>("output_on_final") && _output_pi)
+  {
+    mooseWarning("Only final solution will be outputted, output_pi_history=true will be ignored!");
+    _output_pi = false;
+  }
 }
 
 void

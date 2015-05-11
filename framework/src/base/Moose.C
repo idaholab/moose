@@ -162,7 +162,6 @@
 #include "NumNodes.h"
 #include "NumNonlinearIterations.h"
 #include "NumLinearIterations.h"
-#include "ProblemRealParameter.h"
 #include "Residual.h"
 #include "ScalarVariable.h"
 #include "NumVars.h"
@@ -189,6 +188,7 @@
 #include "DifferencePostprocessor.h"
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
+#include "ExecutionerAttributeReporter.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -534,7 +534,6 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumNodes);
   registerPostprocessor(NumNonlinearIterations);
   registerPostprocessor(NumLinearIterations);
-  registerPostprocessor(ProblemRealParameter);
   registerPostprocessor(Residual);
   registerPostprocessor(ScalarVariable);
   registerPostprocessor(NumVars);
@@ -560,6 +559,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(DifferencePostprocessor);
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
+  registerPostprocessor(ExecutionerAttributeReporter);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);

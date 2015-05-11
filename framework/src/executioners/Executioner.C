@@ -85,3 +85,14 @@ Executioner::getTimeStepperName()
 {
   return std::string();
 }
+
+void
+Executioner::addAttributeReporter(const std::string & name, Real & attribute, std::string aggregation /* = "none"*/, std::string execute_on /*= "initial timestep_end"*/)
+{
+  FEProblem * problem = parameters().getCheckedPointerParam<FEProblem *>("_fe_problem", "Failed to retrieve FEProblem when adding a attribute reporter in Executioner");
+  InputParameters params = _app.getFactory().getValidParams("ExecutionerAttributeReporter");
+  params.set<MultiMooseEnum>("execute_on") = execute_on;
+  params.set<MooseEnum>("aggregation") = aggregation;
+  params.set<Real *>("value") = &attribute;
+  problem->addPostprocessor("ExecutionerAttributeReporter", name, params);
+}
