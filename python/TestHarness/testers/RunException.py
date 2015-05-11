@@ -22,7 +22,7 @@ class RunException(RunApp):
     if options.enable_recover:
       reason = 'skipped (RunException RECOVER)'
       return (False, reason)
-    return (True, '')
+    return RunApp.checkRunnable(self, options)
 
   def processResults(self, moose_dir, retcode, options, output):
     reason = ''
