@@ -97,8 +97,6 @@ public:
    */
   virtual std::string getTimeStepperName();
 
-  void outputInitial(bool out_init);
-
   /**
    * Can be used by subsclasses to call parentOutputPositionChanged()
    * on the underlying FEProblem.
@@ -106,6 +104,14 @@ public:
   virtual void parentOutputPositionChanged() {}
 
 protected:
+
+  /**
+   * Adds a postprocessor to report the a Real class attribute
+   * @param name The name of the postprocessor to create
+   * @param attribute The Real class attribute to report
+   * @param execute_on When to execute the postprocessor that is created
+   */
+  virtual void addAttributeReporter(const std::string & name, Real & attribute, const std::string execute_on = "");
 
   /// Initial Residual Variables
   Real _initial_residual_norm;
