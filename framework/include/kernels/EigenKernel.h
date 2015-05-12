@@ -34,6 +34,7 @@ class EigenKernel : public KernelBase
 {
 public:
   // See KernelBase base for documentation of these overridden methods
+  virtual void initialSetup();
   virtual void computeResidual();
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int /*jvar*/) {}
@@ -62,6 +63,7 @@ protected:
   PostprocessorName _eigen_pp;
 
   /// eigenvalue
+  const Real _one;
   const Real * _eigenvalue;
 };
 

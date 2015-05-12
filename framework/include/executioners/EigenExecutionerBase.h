@@ -61,9 +61,9 @@ public:
   virtual void checkIntegrity();
 
   /**
-   * Add postprocessors to report problem parameters including the eigenvalue
+   * Adds a postprocessor to report the Eigen value
    */
-  virtual void addRealParameterReporter(const std::string & param_name);
+  virtual void addEigenValueReporter();
 
   /**
    * Perform inverse power iterations with the initial guess of the solution
@@ -116,6 +116,11 @@ public:
    */
   virtual void nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k);
 
+  /**
+   * A method for passing the eigen value to the EigenKernel
+   */
+  Real & eigenValue() { return _eigenvalue; }
+
 protected:
 
   /**
@@ -128,13 +133,13 @@ protected:
   EigenSystem & _eigen_sys;
 
   // eigenvalue
-  Real & _eigenvalue;
+  Real _eigenvalue;
 
   // postprocessor for eigenvalue
   const Real & _source_integral;
 
   // postprocessor for normalization
-  Real & _normalization;
+  const Real & _normalization;
   ExecFlagType _norm_execflag;
 
   // Chebyshev acceleration

@@ -153,7 +153,6 @@
 #include "ElementVectorL2Error.h"
 #include "EmptyPostprocessor.h"
 #include "NodalVariableValue.h"
-
 #include "NumDOFs.h"
 #include "TimestepSize.h"
 #include "RunTime.h"
@@ -189,6 +188,7 @@
 #include "DifferencePostprocessor.h"
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
+#include "EigenValueReporter.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -561,6 +561,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(DifferencePostprocessor);
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
+  registerPostprocessor(EigenValueReporter);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
