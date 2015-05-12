@@ -145,9 +145,11 @@ MooseApp::~MooseApp()
   // MUST be deleted before _comm is destroyed!
   delete _output_warehouse;
 
+#ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
   for (std::map<std::string, void *>::iterator it = _lib_handles.begin(); it != _lib_handles.end(); ++it)
     dlclose(it->second);
+#endif
 }
 
 void
@@ -582,57 +584,62 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename, const
     // Assemble the actual filename using the base path of the *.la file and the dl_lib_filename
     std::string dl_lib_full_path = lib_name_parts.first + '/' + dl_lib_filename;
 
+#ifdef LIBMESH_HAVE_DLOPEN
     void * handle = dlopen(dl_lib_full_path.c_str(), RTLD_LAZY);
-    if (!handle)
-      mooseError("Cannot open library:\n" << dlerror());
+#else
+    void * handle = NULL;
+#endif
 
-    // Reset errors
-    dlerror();
+    if (!handle)
+      mooseError("Cannot open library: " << dl_lib_full_path.c_str() << "\n");
 
     // get the name of the unique registration method
 //    std::string reg_function = libNameToAppName(lib_name_parts.second) + "App__registerApps";
 
-    // get the pointer to the method in the library
+    // get the pointer to the method in the library.  The dlsym()
+    // function returns a null pointer if the symbol cannot be found,
+    // we also explicitly set the pointer to NULL if dlsym is not
+    // available.
+#ifdef LIBMESH_HAVE_DLOPEN
     void * registration_method = dlsym(handle, registration_method_name.c_str());
-
-    // Choose the function signature based on whether or not factory parameter to this method is NULL
-    if (factory)
-    {
-      typedef void (*register_app_t)(Factory *);
-      register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
-
-      // Catch errors
-      const char *dlsym_error = dlerror();
-      if (dlsym_error)
-      {
-#ifdef DEBUG
-        mooseWarning("Unable to find extern \"C\" method \"" << registration_method_name << "\" in library: " << dl_lib_full_path << ".\n"
-                     << "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
+#else
+    void * registration_method = NULL;
 #endif
-        // We found a dynamic library that doesn't have a dynamic registration method in it. This shouldn't be an error so we'll just move on
-        dlclose(handle);
-      }
-      else
+
+    if (!registration_method)
+    {
+      // We found a dynamic library that doesn't have a dynamic
+      // registration method in it. This shouldn't be an error, so
+      // we'll just move on.
+#ifdef DEBUG
+      mooseWarning("Unable to find extern \"C\" method \"" << registration_method_name \
+                   << "\" in library: " << dl_lib_full_path << ".\n" \
+                   << "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
+#endif
+
+#ifdef LIBMESH_HAVE_DLOPEN
+      dlclose(handle);
+#endif
+    }
+    else // registration_method is valid!
+    {
+      // Choose the function signature based on whether or not factory parameter to this method is NULL
+      if (factory)
       {
+        typedef void (*register_app_t)(Factory *);
+        register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
+
         // call the method through the function pointer
         (*reg_ptr)(factory);
 
         // Store the handle so we can close it later
         _lib_handles.insert(std::make_pair(library_filename, handle));
       }
-    }
-    else
-    {
-      typedef void (*register_app_t)();
-      register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
-
-      // Catch errors
-      const char *dlsym_error = dlerror();
-      if (dlsym_error)
-        // We found a dynamic library that doesn't have registerApps() in it. This isn't an error so we'll just move on
-        dlclose(handle);
-      else
+      else // !factory
       {
+        typedef void (*register_app_t)();
+        register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
+
         // call the method through the function pointer
         (*reg_ptr)();
 
