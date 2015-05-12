@@ -41,6 +41,8 @@ public:
 protected:
   AuxVariableName _to_var_name;
   std::string _user_object_name;
+  /// true if we need to check that values are inside the app's bounding box
+  bool _check_bb;
 
   bool _displaced_target_mesh;
 };
