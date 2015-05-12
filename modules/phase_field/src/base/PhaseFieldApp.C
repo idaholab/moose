@@ -154,6 +154,7 @@ PhaseFieldApp::~PhaseFieldApp()
 {
 }
 
+// External entry point for dynamic application loading
 extern "C" void PhaseFieldApp__registerApps() { PhaseFieldApp::registerApps(); }
 void
 PhaseFieldApp::registerApps()
@@ -161,6 +162,8 @@ PhaseFieldApp::registerApps()
   registerApp(PhaseFieldApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void PhaseFieldApp__registerObjects(Factory & factory) { PhaseFieldApp::registerObjects(factory); }
 void
 PhaseFieldApp::registerObjects(Factory & factory)
 {

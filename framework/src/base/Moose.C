@@ -346,6 +346,7 @@
 #include "AddConstraintAction.h"
 #include "InitDisplacedProblemAction.h"
 #include "CreateProblemAction.h"
+#include "DynamicObjectRegistrationAction.h"
 #include "AddUserObjectAction.h"
 #include "AddElementalFieldAction.h"
 #include "AddIndicatorAction.h"
@@ -768,6 +769,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_output",                   Output,                 false);
 
+  registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
   registerTask("setup_recover_file_base", true);
 
@@ -828,6 +830,7 @@ addActionTypes(Syntax & syntax)
    */
   syntax.addDependencySets(
 "(meta_action)"
+"(dynamic_object_registration)"
 "(common_output)"
 "(set_global_params)"
 "(setup_recover_file_base)"
@@ -925,6 +928,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(DetermineSystemType, "determine_system_type");
   registerAction(CreateProblemAction, "create_problem");
+  registerAction(DynamicObjectRegistrationAction, "dynamic_object_registration");
   registerAction(AddOutputAction, "add_output");
   registerAction(CommonOutputAction, "common_output");
   registerAction(SetupRecoverFileBaseAction, "setup_recover_file_base");

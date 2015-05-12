@@ -42,6 +42,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddBCAction", "BCs/*", "add_bc");
 
   syntax.registerActionSyntax("CreateProblemAction", "Problem");
+  syntax.registerActionSyntax("DynamicObjectRegistrationAction", "Problem");
   syntax.registerActionSyntax("SetupMeshAction", "Mesh");
   syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh");
 //  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "prepare_mesh");

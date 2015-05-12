@@ -15,6 +15,7 @@ class RunApp(Tester):
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
     params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
     params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
+    params.addParam('executable_pattern', "A test that only runs if the exectuable name matches the given pattern")
 
     params.addParam('walltime',           "The max time as pbs understands it")
     params.addParam('job_name',           "The test name as pbs understands it")
@@ -50,6 +51,11 @@ class RunApp(Tester):
       if self.specs.isValid('expect_out') or self.specs['should_crash'] == True:
         reason = 'skipped (expect_out RECOVER)'
         return (False, reason)
+
+    if self.specs.isValid('executable_pattern') and re.search(self.specs['executable_pattern'], self.specs['executable']) == None:
+      reason = 'skipped (EXECUTABLE PATTERN)'
+      return (False, reason)
+
     return (True, '')
 
 
