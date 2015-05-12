@@ -147,9 +147,11 @@ MooseApp::~MooseApp()
   // MUST be deleted before _comm is destroyed!
   delete _output_warehouse;
 
+#ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
   for (std::map<std::pair<std::string, std::string>, void *>::iterator it = _lib_handles.begin(); it != _lib_handles.end(); ++it)
     dlclose(it->second);
+#endif
 }
 
 void
@@ -616,96 +618,72 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename, const
     // Assemble the actual filename using the base path of the *.la file and the dl_lib_filename
     std::string dl_lib_full_path = lib_name_parts.first + '/' + dl_lib_filename;
 
+#ifdef LIBMESH_HAVE_DLOPEN
     void * handle = dlopen(dl_lib_full_path.c_str(), RTLD_LAZY);
+#else
+    void * handle = NULL;
+#endif
+
     if (!handle)
-      mooseError("Cannot open library:\n" << dlerror());
+      mooseError("Cannot open library: " << dl_lib_full_path.c_str() << "\n");
 
-    // Reset errors
-    dlerror();
-
+    // get the pointer to the method in the library.  The dlsym()
+    // function returns a null pointer if the symbol cannot be found,
+    // we also explicitly set the pointer to NULL if dlsym is not
+    // available.
+#ifdef LIBMESH_HAVE_DLOPEN
     void * registration_method = dlsym(handle, registration_method_name.c_str());
-
-    // TODO: Look into cleaning this up
-    switch (params.get<RegistrationType>("reg_type"))
-    {
-    case APPLICATION:
-    {
-      typedef void (*register_app_t)();
-      register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
-
-      // Catch errors
-      const char *dlsym_error = dlerror();
-      if (dlsym_error)
-      {
-#ifdef DEBUG
-        mooseWarning("Unable to find extern \"C\" method \"" << registration_method_name << "\" in library: " << dl_lib_full_path << ".\n"
-                     << "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
+#else
+    void * registration_method = NULL;
 #endif
-        // We found a dynamic library that doesn't have a dynamic registration method in it. This shouldn't be an error so we'll just move on
-        dlclose(handle);
-      }
-      else
+
+    if (!registration_method)
+    {
+      // We found a dynamic library that doesn't have a dynamic
+      // registration method in it. This shouldn't be an error, so
+      // we'll just move on.
+#ifdef DEBUG
+      mooseWarning("Unable to find extern \"C\" method \"" << registration_method_name \
+                   << "\" in library: " << dl_lib_full_path << ".\n" \
+                   << "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
+#endif
+
+#ifdef LIBMESH_HAVE_DLOPEN
+      dlclose(handle);
+#endif
+    }
+    else // registration_method is valid!
+    {
+      // TODO: Look into cleaning this up
+      switch (params.get<RegistrationType>("reg_type"))
       {
+      case APPLICATION:
+      {
+        typedef void (*register_app_t)();
+        register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
         (*reg_ptr)();
-
-        // Store the handle so we can close it later
-        _lib_handles.insert(std::make_pair(std::make_pair(library_filename, registration_method_name), handle));
+        break;
       }
-      break;
-    }
-    case OBJECT:
-    {
-      typedef void (*register_app_t)(Factory *);
-      register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
-
-      // Catch errors
-      const char *dlsym_error = dlerror();
-      if (dlsym_error)
+      case OBJECT:
       {
-#ifdef DEBUG
-        mooseWarning("Unable to find extern \"C\" method \"" << registration_method_name << "\" in library: " << dl_lib_full_path << ".\n"
-                     << "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
-#endif
-        // We found a dynamic library that doesn't have a dynamic registration method in it. This shouldn't be an error so we'll just move on
-        dlclose(handle);
-      }
-      else
-      {
+        typedef void (*register_app_t)(Factory *);
+        register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
         (*reg_ptr)(params.get<Factory *>("factory"));
-
-        // Store the handle so we can close it later
-        _lib_handles.insert(std::make_pair(std::make_pair(library_filename, registration_method_name), handle));
-
+        break;
       }
-      break;
-    }
-    case SYNTAX:
-    {
-      typedef void (*register_app_t)(Syntax *, ActionFactory *);
-      register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
-
-      // Catch errors
-      const char *dlsym_error = dlerror();
-      if (dlsym_error)
+      case SYNTAX:
       {
-#ifdef DEBUG
-        mooseWarning("Unable to find extern \"C\" method \"" << registration_method_name << "\" in library: " << dl_lib_full_path << ".\n"
-                     << "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
-#endif
-        // We found a dynamic library that doesn't have a dynamic registration method in it. This shouldn't be an error so we'll just move on
-        dlclose(handle);
-      }
-      else
-      {
+        typedef void (*register_app_t)(Syntax *, ActionFactory *);
+        register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
         (*reg_ptr)(params.get<Syntax *>("syntax"), params.get<ActionFactory *>("action_factory"));
-
-        // Store the handle so we can close it later
-        _lib_handles.insert(std::make_pair(std::make_pair(library_filename, registration_method_name), handle));
+        break;
       }
-      break;
-    }
-    default:
-      mooseError("Unhandled RegistrationTyep");
+      default:
+        mooseError("Unhandled RegistrationTyep");
+      }
+
+      // Store the handle so we can close it later
+      _lib_handles.insert(std::make_pair(std::make_pair(library_filename, registration_method_name), handle));
     }
   }
 }
