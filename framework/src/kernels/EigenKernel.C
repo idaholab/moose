@@ -23,6 +23,7 @@ InputParameters validParams<EigenKernel>()
 {
   InputParameters params = validParams<KernelBase>();
   params.addParam<bool>("eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
+  params.addParam<PostprocessorName>("eigen_postprocessor", "The name of the postprocessor that provides the eigenvalue.");
   params.registerBase("EigenKernel");
   return params;
 }
@@ -32,28 +33,10 @@ EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
-    _eigen_sys(NULL),
-    _one(1.0),
-    _eigenvalue(&_one)
+    _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem())),
+    _eigenvalue(_is_implicit ? getPostprocessorValue("eigen_postprocessor") :
+                getPostprocessorValueOld("eigen_postprocessor"))
 {
-}
-
-void
-EigenKernel::initialSetup()
-{
-  EigenExecutionerBase * exec = dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner());
-
-  if (_eigen)
-  {
-    _eigen_sys = static_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem());
-    _eigen_pp = exec->getParam<PostprocessorName>("bx_norm");
-    if (_is_implicit)
-      _eigenvalue = &getPostprocessorValueByName(_eigen_pp);
-    else
-      _eigenvalue = &getPostprocessorValueOldByName(_eigen_pp);
-  }
-  else
-    _eigenvalue = &getPostprocessorValueByName("eigenvalue");
 }
 
 void
@@ -64,7 +47,7 @@ EigenKernel::computeResidual()
   _local_re.zero();
 
   Real one_over_eigen = 1.0;
-  one_over_eigen /= *_eigenvalue;
+  one_over_eigen /= _eigenvalue;
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpResidual();
@@ -89,7 +72,7 @@ EigenKernel::computeJacobian()
   _local_ke.zero();
 
   Real one_over_eigen = 1.0;
-  one_over_eigen /= *_eigenvalue;
+  one_over_eigen /= _eigenvalue;
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
