@@ -86,12 +86,11 @@
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=PRISM6 Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_prism6_refine_out'
   [../]
 
-  # Libmesh does not support uniform or adaptive refinement of Prism15 elements.
-  [./test_prism15]
+  [./test_prism15_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
-    exodiff = 'high_order_elems_prism15_out.e'
-    cli_args = 'Mesh/elem_type=PRISM15 Variables/u/order=SECOND Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_prism15_out'
+    exodiff = 'high_order_elems_prism15_refine_out.e'
+    cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=PRISM15 Variables/u/order=SECOND Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_prism15_refine_out'
   [../]
 
   # Note: Paraview (as of version 4.1.0) does not correctly display Prism18 elements
