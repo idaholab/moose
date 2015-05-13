@@ -67,7 +67,10 @@ public:
 private:
 
   /// Pointer to the EigenExecutionerBase where the eigen value is stored
-  EigenExecutionerBase * _eigen_executioner;
+  //EigenExecutionerBase * _eigen_executioner;
+
+  Real _default;
+  Real * _eigenvalue;
 };
 
 #endif //EIGENVALUEREPORTER_H

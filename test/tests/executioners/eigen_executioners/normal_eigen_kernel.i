@@ -39,6 +39,7 @@
     type = MassEigenKernel
     variable = u
     eigen = false
+    eigen_postprocessor = 1.0
   [../]
 
   [./rea1]
@@ -75,7 +76,6 @@
 
 [Outputs]
   file_base = normal_eigen_kernel
-  interval = 1
   exodus = true
   output_initial = true
   print_linear_residuals = true

@@ -12,38 +12,40 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef SETUPEIGENACTION_H
+#define SETUPEIGENACTION_H
+
 // MOOSE includes
-#include "EigenValueReporter.h"
-#include "EigenExecutionerBase.h"
-#include "MooseApp.h"
+#include "Action.h"
+
+// Forward declerations
+class SetupEigenAction;
 
 template<>
-InputParameters validParams<EigenValueReporter>()
+InputParameters validParams<SetupEigenAction>();
+
+/**
+ *
+ */
+class SetupEigenAction : public Action
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
-  params.addParam<Real>("default", 1.0, "The default eigenvalue");
-  return params;
-}
+public:
 
-EigenValueReporter::EigenValueReporter(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
-    _default(getParam<Real>("default")),
-    _eigenvalue(&_default)
-{
-}
+  /**
+   * Class constructor
+   * @param name
+   */
+  SetupEigenAction(const std::string & name, InputParameters parameters);
 
-void
-EigenValueReporter::initialSetup()
-{
-  EigenExecutionerBase * exec = dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner());
-  if (exec)
-    _eigenvalue = &exec->eigenValue();
+  /**
+   * Class destructor
+   */
+  virtual ~SetupEigenAction(){};
 
-}
+  /**
+   *
+   */
+  virtual void act();
+};
 
-
-PostprocessorValue
-EigenValueReporter::getValue()
-{
-  return *_eigenvalue;
-}
+#endif //SETUPEIGENACTION_H
