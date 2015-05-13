@@ -33,21 +33,84 @@ EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
-    _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem())),
-    _eigenvalue(_is_implicit ? getPostprocessorValue("eigen_postprocessor") :
-                getPostprocessorValueOld("eigen_postprocessor"))
+    _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem()))//,
+    //  _eigenvalue(_is_implicit ? &getPostprocessorValue("eigen_postprocessor") :
+    //            &getPostprocessorValueOld("eigen_postprocessor"))
 {
 }
+
+
+void
+EigenKernel::initialSetup()
+{
+
+
+  std::string pp_name;
+
+
+  if (isParamValid("eigen_postprocessor"))
+    pp_name = getParam<PostprocessorName>("eigen_postprocessor");
+
+  else
+  {
+    EigenExecutionerBase * exec = dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner());
+
+    if (exec)
+      pp_name = exec->getParam<PostprocessorName>("bx_norm");
+/*
+    else
+    {
+      pp_name = "eigenvalue";
+
+      if (!_fe_problem.hasPostprocessor(pp_name))
+      {
+
+        InputParameters pp_params = _app.getFactory().getValidParams("EigenValueReporter");
+        pp_params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
+        pp_params.set<std::vector<OutputName> >("outputs") = std::vector<OutputName>(1, "none");
+        _fe_problem.addPostprocessor("EigenValueReporter", pp_name, pp_params);
+      }
+    }
+*/
+  }
+
+  if (pp_name.empty())
+    mooseError("Failed to determine proper pp...");
+
+
+
+  if (!hasPostprocessorByName(pp_name) && parameters().hasDefaultPostprocessorValue("eigen_postprocessor"))
+    _eigenvalue = &parameters().defaultPostprocessorValue("eigen_postprocessor");
+
+  else
+  {
+
+  if (_is_implicit)
+    _eigenvalue = &getPostprocessorValueByName(pp_name);
+  else
+    _eigenvalue = &getPostprocessorValueOldByName(pp_name);
+  }
+
+  std::cout << "_eigenvalue = " << *_eigenvalue << std::endl;
+}
+
+const Real &
+EigenKernel::eigenvalue()
+{
+  return *_eigenvalue;
+}
+
 
 void
 EigenKernel::computeResidual()
 {
+
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   _local_re.resize(re.size());
   _local_re.zero();
 
   Real one_over_eigen = 1.0;
-  one_over_eigen /= _eigenvalue;
+  one_over_eigen /= eigenvalue();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpResidual();
@@ -72,7 +135,7 @@ EigenKernel::computeJacobian()
   _local_ke.zero();
 
   Real one_over_eigen = 1.0;
-  one_over_eigen /= _eigenvalue;
+  one_over_eigen /= eigenvalue();
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)

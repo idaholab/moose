@@ -31,6 +31,8 @@ SetupEigenAction::SetupEigenAction(const std::string & name, InputParameters par
 void
 SetupEigenAction::act()
 {
+
+/*
   MooseSharedPointer<EigenExecutionerBase> exec = MooseSharedNamespace::dynamic_pointer_cast<EigenExecutionerBase>(_executioner);
 
 
@@ -52,11 +54,16 @@ SetupEigenAction::act()
         if (!params.isParamValid("eigen_postprocessor"))
         {
 
-          PostprocessorName pp_name = "1.0";
+          PostprocessorName pp_name = "eigenvalue";
           if (exec)
             pp_name = exec->getParam<PostprocessorName>("bx_norm");
           else if (!_problem->hasPostprocessor(pp_name))
-            _problem->addPostprocessor("EigenValueReporter", pp_name, _factory.getValidParams("EigenValueReporter"));
+          {
+            InputParameters pp_params = _factory.getValidParams("EigenValueReporter");
+            pp_params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
+            pp_params.set<std::vector<OutputName> >("outputs") = std::vector<OutputName>(1, "none");
+            _problem->addPostprocessor("EigenValueReporter", pp_name, pp_params);
+          }
 
 
           params.set<PostprocessorName>("eigen_postprocessor") = pp_name;
@@ -65,4 +72,5 @@ SetupEigenAction::act()
       }
     }
   }
+*/
 }

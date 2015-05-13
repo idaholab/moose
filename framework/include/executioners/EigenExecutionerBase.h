@@ -45,6 +45,9 @@ public:
 
   virtual Problem & problem() { return _problem; }
 
+  void addRealParameterReporter(const std::string & param_name);
+
+
   /**
    * Initialization
    */

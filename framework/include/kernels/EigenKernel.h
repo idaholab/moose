@@ -34,7 +34,6 @@ class EigenKernel : public KernelBase
 {
 public:
   // See KernelBase base for documentation of these overridden methods
-//  virtual void initialSetup();
   virtual void computeResidual();
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int /*jvar*/) {}
@@ -44,8 +43,13 @@ public:
   virtual bool isActive();
 
 protected:
+  virtual void initialSetup();
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
+
+  const Real & eigenvalue();
+
+
 
   /// Holds the solution at current quadrature points
   VariableValue & _u;
@@ -60,7 +64,7 @@ protected:
   EigenSystem * _eigen_sys;
 
   /// eigenvalue
-  const Real & _eigenvalue;
+  const Real * _eigenvalue;
 };
 
 #endif //EIGENKERNEL_H
