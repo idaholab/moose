@@ -51,7 +51,6 @@ GluedContactConstraint::GluedContactConstraint(const std::string & name, InputPa
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _tension_release(getParam<Real>("tension_release")),
     _updateContactSet(true),
-    _time_last_called(-std::numeric_limits<Real>::max()),
     _residual_copy(_sys.residualGhosted()),
     _x_var(isCoupled("disp_x") ? coupled("disp_x") : libMesh::invalid_uint),
     _y_var(isCoupled("disp_y") ? coupled("disp_y") : libMesh::invalid_uint),
@@ -84,16 +83,8 @@ GluedContactConstraint::timestepSetup()
 {
   if (_component == 0)
   {
-    _penetration_locator._unlocked_this_step.clear();
-    _penetration_locator._locked_this_step.clear();
-    bool beginning_of_step = false;
-    if (_t > _time_last_called)
-    {
-      beginning_of_step = true;
-    }
-    updateContactSet(beginning_of_step);
+    updateContactSet(true);
     _updateContactSet = false;
-    _time_last_called = _t;
   }
 }
 
@@ -132,11 +123,6 @@ GluedContactConstraint::updateContactSet(bool beginning_of_step)
 
     if (beginning_of_step)
     {
-      if (hpit != has_penetrated.end())
-        pinfo->_penetrated_at_beginning_of_step = true;
-      else
-        pinfo->_penetrated_at_beginning_of_step = false;
-
       pinfo->_starting_elem = it->second->_elem;
       pinfo->_starting_side_num = it->second->_side_num;
       pinfo->_starting_closest_point_ref = it->second->_closest_point_ref;

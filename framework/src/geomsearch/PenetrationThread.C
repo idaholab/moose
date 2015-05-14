@@ -128,7 +128,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
     {
       FEBase * fe = _fes[_tid][info->_side->dim()];
 
-      if ((!_update_location || !info->_update) && info->_distance >= 0)
+      if (!_update_location && (info->_distance >= 0 || info->isCaptured()))
       {
         const Point contact_ref = info->_closest_point_ref;
         bool contact_point_on_side(false);
@@ -434,8 +434,16 @@ PenetrationThread::switchInfo( PenetrationInfo * & info,
     infoNew->_starting_elem = info->_starting_elem;
     infoNew->_starting_side_num = info->_starting_side_num;
     infoNew->_starting_closest_point_ref = info->_starting_closest_point_ref;
+    infoNew->_incremental_slip = info->_incremental_slip;
+    infoNew->_accumulated_slip = info->_accumulated_slip;
+    infoNew->_accumulated_slip_old = info->_accumulated_slip_old;
+    infoNew->_frictional_energy = info->_frictional_energy;
+    infoNew->_frictional_energy_old = info->_frictional_energy_old;
     infoNew->_contact_force = info->_contact_force;
     infoNew->_contact_force_old = info->_contact_force_old;
+    infoNew->_lagrange_multiplier = info->_lagrange_multiplier;
+    infoNew->_locked_this_step = info->_locked_this_step;
+    infoNew->_mech_status = info->_mech_status;
   }
   else
   {
@@ -1184,7 +1192,7 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
   fe.reinit(side.get(), &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];
-  if (info._mech_status != PenetrationInfo::MS_NO_CONTACT)
+  if (info.isCaptured())
   {
     info._frictional_energy = info._frictional_energy_old + info._contact_force*info._incremental_slip;
     info._accumulated_slip = info._accumulated_slip_old + info._incremental_slip.size();

@@ -54,8 +54,6 @@ MultiDContactConstraint::timestepSetup()
 {
   if (_component == 0)
   {
-    _penetration_locator._unlocked_this_step.clear();
-    _penetration_locator._locked_this_step.clear();
     updateContactSet();
   }
 }
@@ -71,7 +69,6 @@ void
 MultiDContactConstraint::updateContactSet()
 {
   std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
-  std::map<dof_id_type, unsigned int> & locked_this_step = _penetration_locator._unlocked_this_step;
 
   std::map<dof_id_type, PenetrationInfo *>::iterator
     it  = _penetration_locator._penetration_info.begin(),
@@ -132,7 +129,6 @@ MultiDContactConstraint::updateContactSet()
 //      Moose::err<<std::endl<<"Locking node "<<node->id()<<" because distance: "<<pinfo->_distance<<std::endl<<std::endl;
 
       has_penetrated.insert(slave_node_num);
-      locked_this_step[slave_node_num] = true;
     }
   }
 }

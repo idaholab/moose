@@ -13,38 +13,28 @@
 /****************************************************************/
 
 #include "PenetrationLocator.h"
+
 #include "ArbitraryQuadrature.h"
-#include "LineSegment.h"
-#include "NearestNodeLocator.h"
-#include "MooseMesh.h"
-#include "SubProblem.h"
+#include "Conversion.h"
 #include "GeometricSearchData.h"
+#include "LineSegment.h"
+#include "MooseMesh.h"
+#include "NearestNodeLocator.h"
 #include "PenetrationThread.h"
-#include "Moose.h"
-
-std::string _PLBoundaryFuser(unsigned int boundary1, unsigned int boundary2)
-{
-  std::stringstream ss;
-
-  ss << boundary1 << "to" << boundary2;
-
-  return ss.str();
-}
+#include "SubProblem.h"
 
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & /*geom_search_data*/, MooseMesh & mesh, const unsigned int master_id, const unsigned int slave_id, Order order, NearestNodeLocator & nearest_node) :
+    Restartable(Moose::stringify(master_id) + "to" + Moose::stringify(slave_id), "PenetrationLocator", subproblem, 0),
     _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master_id),
     _slave_boundary(slave_id),
     _fe_type(order),
     _nearest_node(nearest_node),
-    _penetration_info(),
-    _has_penetrated(),
-    _locked_this_step(),
-    _unlocked_this_step(),
-    _lagrange_multiplier(),
     _check_whether_reasonable(true),
-    _update_location(true),
+    _penetration_info(declareRestartableDataWithContext<std::map<dof_id_type, PenetrationInfo *> >("penetration_info", &_mesh)),
+    _has_penetrated(declareRestartableData<std::set<dof_id_type> >("has_penetrated")),
+    _update_location(declareRestartableData<bool>("update_location", true)),
     _tangential_tolerance(0.0),
     _do_normal_smoothing(false),
     _normal_smoothing_distance(0.0),
@@ -127,9 +117,6 @@ PenetrationLocator::reinit()
 {
   _penetration_info.clear();
   _has_penetrated.clear();
-  _locked_this_step.clear();
-  _unlocked_this_step.clear();
-  _lagrange_multiplier.clear();
 
   detectPenetration();
 }

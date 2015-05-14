@@ -326,7 +326,6 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
         ++plit)
     {
       PenetrationLocator & pen_loc = *plit->second;
-      std::set<dof_id_type> & has_penetrated = pen_loc._has_penetrated;
 
       bool frictional_contact_this_interaction = false;
 
@@ -349,9 +348,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
           {
             PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-            std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
-
-            if (hpit != has_penetrated.end())
+            if (info.isCaptured())
             {
 //              _console<<"Slave node: "<<slave_node_num<<std::endl;
               const Node * node = info._node;
@@ -459,7 +456,6 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
       ++plit)
     {
       PenetrationLocator & pen_loc = *plit->second;
-      std::set<dof_id_type> & has_penetrated = pen_loc._has_penetrated;
 
       bool frictional_contact_this_interaction = false;
 
@@ -492,9 +488,7 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
             if (node->processor_id() == processor_id())
             {
 
-              std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
-
-              if (hpit != has_penetrated.end())
+              if (info.isCaptured())
               {
                 _num_contact_nodes++;
 
@@ -761,23 +755,16 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
 
     if (frictional_contact_this_interaction)
     {
-      std::set<dof_id_type> & has_penetrated = pen_loc._has_penetrated;
-
       std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
 
-        if (pen_loc._penetration_info[slave_node_num])
-        {
-          std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
-
-          if (hpit != has_penetrated.end())
-          {
+        PenetrationInfo * pinfo = pen_loc._penetration_info[slave_node_num];
+        if (pinfo)
+          if (pinfo->isCaptured())
             ++num_constraints;
-          }
-        }
       }
     }
   }
@@ -940,8 +927,6 @@ FrictionalContactProblem::updateIncrementalSlip()
 
     if (frictional_contact_this_interaction)
     {
-      std::set<dof_id_type> & has_penetrated = pen_loc._has_penetrated;
-
       std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
       for (unsigned int i=0; i<slave_nodes.size(); i++)
@@ -952,9 +937,7 @@ FrictionalContactProblem::updateIncrementalSlip()
         {
           PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-          std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
-
-          if (hpit != has_penetrated.end())
+          if (info.isCaptured())
           {
             const Node * node = info._node;
             VectorValue<dof_id_type> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->number(), 0),

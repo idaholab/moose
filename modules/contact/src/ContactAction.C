@@ -22,7 +22,6 @@ InputParameters validParams<ContactAction>()
   MooseEnum system("DiracKernel Constraint", "DiracKernel");
 
   InputParameters params = validParams<Action>();
-  params += validParams<OutputInterface>();
 
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
@@ -40,16 +39,11 @@ InputParameters validParams<ContactAction>()
   params.addParam<MooseEnum>("formulation", formulation, "The contact formulation: default, penalty, augmented_lagrange");
   params.addParam<MooseEnum>("system", system, "System to use for constraint enforcement.  Options are: " + system.getRawNames());
 
-  // Hide the auto-generated aux variables.
-  params.set<std::vector<OutputName> >("outputs") = std::vector<OutputName>(1, "none");
-  params.addParam<bool>("output_penetration_info_vars", false, "Show the aux variables for the PenetrationInfo objects in the output files.");
-
   return params;
 }
 
 ContactAction::ContactAction(const std::string & name, InputParameters params) :
   Action(name, params),
-  OutputInterface(params, false),
   _master(getParam<BoundaryName>("master")),
   _slave(getParam<BoundaryName>("slave")),
   _disp_x(getParam<NonlinearVariableName>("disp_x")),
@@ -86,77 +80,7 @@ ContactAction::act()
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
 
-  std::vector<AuxVariableName> contact_force_component_name(numdims);
-  std::vector<std::string> contact_force_arg_name(numdims);
-  const std::string dim_to_letter[] = { "x", "y", "z" };
-  for ( unsigned dim = 0; dim < numdims; ++dim )
-  {
-    contact_force_component_name[dim] = action_name + "_contact_force_" + Moose::stringify(dim);
-    contact_force_arg_name[dim] = "force_" + dim_to_letter[dim];
-  }
-  AuxVariableName accumulated_slip_name = action_name + "_accumulated_slip";
-  AuxVariableName frictional_energy_name = action_name + "_frictional_energy";
-
-  // By default, we hide the state variables for the PenetrationInfo so that they do not add bulk
-  // to the output files.
-  std::set<std::string> hidden_variables;
-  hidden_variables.insert(contact_force_component_name.begin(),contact_force_component_name.end());
-  hidden_variables.insert(accumulated_slip_name);
-  hidden_variables.insert(frictional_energy_name);
-
-  if ( _current_task == "add_aux_variable" )
-  {
-    const FEType fetype(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-      Utility::string_to_enum<FEFamily>("LAGRANGE"));
-
-    for ( unsigned dim = 0; dim < numdims; ++dim )
-      _problem->addAuxVariable( contact_force_component_name[dim], fetype );
-    _problem->addAuxVariable( accumulated_slip_name, fetype );
-    _problem->addAuxVariable( frictional_energy_name, fetype );
-  }
-
-  else if ( _current_task == "add_aux_kernel" )
-  {
-    // Add the aux kernels that take care of state in PenetrationInfo.
-    {
-      InputParameters params = _factory.getValidParams("PenetrationAux");
-
-      // Extract global params
-      _app.parser().extractParams(_name, params);
-
-      params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,_slave);
-      params.set<BoundaryName>("paired_boundary") = _master;
-      params.set<MooseEnum>("order") = _order;
-      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
-      params.set<bool>("added_by_contact_action") = true;
-
-      for ( unsigned dim = 0; dim < numdims; ++dim )
-      {
-        params.set<AuxVariableName>("variable") = contact_force_component_name[dim];
-        params.set<MooseEnum>("quantity") = contact_force_arg_name[dim];
-        const std::string kernel_name = action_name + "_penetration_aux_force_" + dim_to_letter[dim];
-        _problem->addAuxKernel("PenetrationAux", kernel_name, params);
-      }
-
-      params.set<AuxVariableName>("variable") = accumulated_slip_name;
-      params.set<MooseEnum>("quantity") = "accumulated_slip";
-      _problem->addAuxKernel("PenetrationAux", action_name + "_penetration_aux_accumulated_slip", params);
-
-      params.set<AuxVariableName>("variable") = frictional_energy_name;
-      params.set<MooseEnum>("quantity") = "frictional_energy";
-      _problem->addAuxKernel("PenetrationAux", action_name + "_penetration_aux_frictional_energy", params);
-    }
-  }
-
-  else if ( _current_task == "output_penetration_info_vars" )
-  {
-    // The hide list has to be built after the outputs are built, therefore it has to be in this
-    // task rather than in the add_aux_variable task.
-    if ( ! getParam<bool>("output_penetration_info_vars") )
-      buildOutputHideVariableList(hidden_variables);
-  }
-
-  else if ( _current_task == "add_dirac_kernel" )
+  if ( _current_task == "add_dirac_kernel" )
   {
     // MechanicalContactConstraint has to be added after the init_problem task, so it cannot be
     // added for the add_constraint task.

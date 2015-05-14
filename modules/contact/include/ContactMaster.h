@@ -47,6 +47,7 @@ public:
 protected:
 
   Real nodalArea(PenetrationInfo & pinfo);
+  Real getPenalty(PenetrationInfo & pinfo);
 
   const unsigned int _component;
   const ContactModel _model;
@@ -58,7 +59,6 @@ protected:
   const Real _friction_coefficient;
   const Real _tension_release;
   bool _updateContactSet;
-  Real _time_last_called;
 
   NumericVector<Number> & _residual_copy;
 

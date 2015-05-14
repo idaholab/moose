@@ -80,8 +80,6 @@ SlaveConstraint::addPoints()
 {
   _point_to_info.clear();
 
-  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
-
   std::map<dof_id_type, PenetrationInfo *>::iterator
     it  = _penetration_locator._penetration_info.begin(),
     end = _penetration_locator._penetration_info.end();
@@ -94,11 +92,9 @@ SlaveConstraint::addPoints()
       continue;
 
     dof_id_type slave_node_num = it->first;
-
     const Node * node = pinfo->_node;
 
-    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
-    if (hpit != has_penetrated.end() && node->processor_id() == processor_id())
+    if (pinfo->isCaptured() && node->processor_id() == processor_id())
     {
       // Find an element that is connected to this node that and that is also on this processor
 
