@@ -47,6 +47,9 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const std::string &
 void
 MultiAppPostprocessorTransfer::execute()
 {
+  std::cout << "MultiAppPostprocessorTransfer::execute()" << std::endl;
+
+
   switch (_direction)
   {
     case TO_MULTIAPP:

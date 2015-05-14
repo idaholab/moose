@@ -98,6 +98,7 @@ void
 NonlinearEigen::takeStep()
 {
   _console << " Nonlinear iteration starts"  << std::endl;
+  std::cout << "  _eigenvalue = " << _eigenvalue << std::endl;
 
   // nonlinear solve
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);

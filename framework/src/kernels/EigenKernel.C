@@ -76,11 +76,14 @@ EigenKernel::initialSetup()
 */
   }
 
-  std::cout << "pp_name = " << pp_name << std::endl;
 
 
   if (pp_name.empty() && parameters().hasDefaultPostprocessorValue("eigen_postprocessor"))
+  {
     _eigenvalue = &parameters().defaultPostprocessorValue("eigen_postprocessor");
+    std::cout << "Using default" << std::endl;
+  }
+
 
   else if (pp_name.empty())
     mooseError("Failed to determine proper pp for " << name());
@@ -95,6 +98,9 @@ EigenKernel::initialSetup()
   }
 
   std::cout << "_eigenvalue = " << *_eigenvalue << std::endl;
+  std::cout << "  name = " << name() << std::endl;
+  std::cout << "  pp_name = " << pp_name << std::endl;
+
 }
 
 const Real &

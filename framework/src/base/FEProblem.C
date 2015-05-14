@@ -2698,6 +2698,8 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
 void
 FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & name, InputParameters parameters)
 {
+  std::cout << "addMultiApp: " << multi_app_name << " " << name << std::endl;
+
   _has_multiapps = true;
 
   parameters.set<FEProblem *>("_fe_problem") = this;
