@@ -37,10 +37,12 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_abs_step_tol", 1.0e-50,  "Nonlinear Absolute step Tolerance");
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
+  params.addParam<bool>        ("use_initial_residual_before_preset_bcs", true, "Use the residual norm from *before* setting PresetBCs to detect relative convergence");
 
   CreateExecutionerAction::populateCommonExecutionerParams(params);
 
-  params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol", "Solver");
+  params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
+                              "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol use_initial_residual_before_preset_bcs", "Solver");
   params.addParamNamesToGroup("no_fe_reinit", "Advanced");
 
   return params;
@@ -133,6 +135,7 @@ CreateExecutionerAction::act()
     _problem->getNonlinearSystem()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
 #endif
 
+    _problem->getNonlinearSystem()._use_initial_residual_before_preset_bcs = getParam<bool>("use_initial_residual_before_preset_bcs");
   }
 
   _awh.executioner() = executioner;

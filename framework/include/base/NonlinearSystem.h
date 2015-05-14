@@ -422,9 +422,11 @@ public:
   Real _last_rnorm;
   Real _last_nl_rnorm;
   Real _l_abs_step_tol;
-  Real _initial_residual;
+  Real _initial_residual_before_preset_bcs;
+  Real _initial_residual_after_preset_bcs;
   std::vector<unsigned int> _current_l_its;
   unsigned int _current_nl_its;
+  bool _use_initial_residual_before_preset_bcs;
 
 protected:
   /**

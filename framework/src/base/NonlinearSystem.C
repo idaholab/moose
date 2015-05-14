@@ -112,8 +112,10 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _last_rnorm(0.),
     _last_nl_rnorm(0.),
     _l_abs_step_tol(1e-10),
-    _initial_residual(0.),
+    _initial_residual_before_preset_bcs(0.),
+    _initial_residual_after_preset_bcs(0.),
     _current_nl_its(0),
+    _use_initial_residual_before_preset_bcs(true),
     _current_solution(NULL),
     _residual_ghosted(addVector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
@@ -206,7 +208,7 @@ NonlinearSystem::solve()
       _fe_problem.computeResidual(_sys, *_current_solution, *_sys.rhs);
       _computing_initial_residual = false;
       _sys.rhs->close();
-      _initial_residual = _sys.rhs->l2_norm();
+      _initial_residual_before_preset_bcs = _sys.rhs->l2_norm();
     }
   }
   catch (MooseException & e)
