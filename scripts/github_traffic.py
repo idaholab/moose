@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import cookielib
-import sys, os, time, argparse, getpass
+import sys, os, time, argparse, getpass, re
 
 try:
   import mechanize
@@ -73,10 +73,45 @@ def verifyArgs(args):
     sys.exit(0)
   return args
 
+def writeFile(args, stats):
+  if os.path.isfile(args.write):
+    log_file = open(args.write, 'r')
+    file_data = log_file.read()
+    log_file.close()
+    # True if the file header contains the same name as --repo
+    if args.repo == file_data.split('\n')[0]:
+      old_clones = eval(re.findall(r'(\[.*\])', file_data.split('\n')[1])[0])
+      old_visitors = eval(re.findall(r'(\[.*\])', file_data.split('\n')[2])[0])
+
+      # Remove overlapping list items based on date in our old list. Store this old data in a new list
+      tmp_clones = old_clones[old_clones.index(stats['clones'][len(stats['clones'])-3]) + 3:]
+      tmp_visitors = old_visitors[old_visitors.index(stats['visitors'][len(stats['visitors'])-3]) + 3:]
+
+      # Insert the new data at index 0 (GitHub reports newest items at the begining of the list) into our old list
+      tmp_clones[0:0] = stats['clones']
+      tmp_visitors[0:0] = stats['visitors']
+
+      # write the new data into file, overwriting any previous data
+      log_file = open(args.write, 'w')
+      log_file.write(args.repo + '\nclones = ' + str(tmp_clones) + '\nvisitors = ' + str(tmp_visitors) + '\n')
+      log_file.close()
+      sys.exit(0)
+
+    else:
+      print 'The file you attempted to write to contains stats for another repository (' + file_data.split('\n')[0] + \
+            ')\nwhile you supplied arguments to gather stats for (' + args.repo + \
+            ').\n\n... Or this is probably not the file you wanted to overwrite:\n\t', args.write, '\nExiting just to be safe...\n'
+      sys.exit(1)
+  else:
+    log_file = open(args.write, 'w')
+    log_file.write(args.repo + '\nclones = ' + str(stats['clones']) + '\nvisitors = ' + str(stats['visitors']) + '\n')
+    log_file.close()
+
 def parseArgs(args=None):
   # Traffic Stats URL: https://github.com/idaholab/moose/graphs/clone-activity-data
   parser = argparse.ArgumentParser(description='Scrape GitHub for a webpage requiring authentication')
   parser.add_argument('--repo', '-r', nargs='?', help='Repository (example: foo/bar)')
+  parser.add_argument('--write', '-w', nargs='?', help='Write to a file')
   try:
     parser.add_argument('--user', '-u', nargs='?', default=os.getenv('USER'), help='Authenticate using specified user. Defaults to: (' + os.getenv('USER') + ')')
   except TypeError:
@@ -88,11 +123,15 @@ if __name__ == '__main__':
   args = parseArgs()
   web_page = authenticatePage(args)
   payload = readPage(web_page, args)
-  clones = []
-  visitors = []
+  stats = {'clones'   : [],
+           'visitors' : []}
   for point in payload['Clones']['counts']:
-    clones.extend([time.strftime("%Y-%b-%d", time.gmtime(point['bucket'])), str(point['total']), str(point['unique'])])
+    stats['clones'].extend([time.strftime("%Y-%b-%d", time.gmtime(point['bucket'])), str(point['total']), str(point['unique'])])
   for point in payload['Visitors']['counts']:
-    visitors.extend([time.strftime("%Y-%b-%d", time.gmtime(point['bucket'])), str(point['total']), str(point['unique'])])
-  print 'clones =', clones, '\n\n'
-  print 'visitors =', visitors
+    stats['visitors'].extend([time.strftime("%Y-%b-%d", time.gmtime(point['bucket'])), str(point['total']), str(point['unique'])])
+
+  if args.write:
+    writeFile(args, stats)
+  else:
+    print '\nClones: (date, total, unique)\n', stats['clones']
+    print '\nVisitors: (date, total, unique)\n', stats['visitors']
