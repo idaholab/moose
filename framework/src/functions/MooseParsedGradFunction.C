@@ -68,9 +68,13 @@ MooseParsedGradFunction::vectorValue(Real /*t*/, const Point & /*p*/)
 void
 MooseParsedGradFunction::initialSetup()
 {
+  THREAD_ID tid = 0;
+  if (isParamValid("_tid"))
+    tid = getParam<THREAD_ID>("_tid");
+
   if (_function_ptr == NULL)
-    _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _value, _vars, _vals);
+    _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _value, _vars, _vals, tid);
 
   if (_grad_function_ptr == NULL)
-    _grad_function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _grad_value, _vars, _vals);
+    _grad_function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _grad_value, _vars, _vals, tid);
 }
