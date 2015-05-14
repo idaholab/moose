@@ -189,6 +189,7 @@
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
 #include "EigenValueReporter.h"
+#include "ExecutionerAttributeReporter.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -563,6 +564,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
   registerPostprocessor(EigenValueReporter);
+  registerPostprocessor(ExecutionerAttributeReporter);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);

@@ -23,7 +23,7 @@ InputParameters validParams<EigenKernel>()
 {
   InputParameters params = validParams<KernelBase>();
   params.addParam<bool>("eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
-  params.addParam<PostprocessorName>("eigen_postprocessor", "The name of the postprocessor that provides the eigenvalue.");
+  params.addParam<PostprocessorName>("eigen_postprocessor", 1.0, "The name of the postprocessor that provides the eigenvalue.");
   params.registerBase("EigenKernel");
   return params;
 }
@@ -47,9 +47,11 @@ EigenKernel::initialSetup()
 
   std::string pp_name;
 
-
-  if (isParamValid("eigen_postprocessor"))
+  // If the PP exists, use it. isParamValid does not work here because of the default value, which
+  // you don't want to use if an EigenExecutioner exists.
+  if (hasPostprocessor("eigen_postprocessor"))
     pp_name = getParam<PostprocessorName>("eigen_postprocessor");
+
 
   else
   {
@@ -74,13 +76,14 @@ EigenKernel::initialSetup()
 */
   }
 
-  if (pp_name.empty())
-    mooseError("Failed to determine proper pp...");
+  std::cout << "pp_name = " << pp_name << std::endl;
 
 
-
-  if (!hasPostprocessorByName(pp_name) && parameters().hasDefaultPostprocessorValue("eigen_postprocessor"))
+  if (pp_name.empty() && parameters().hasDefaultPostprocessorValue("eigen_postprocessor"))
     _eigenvalue = &parameters().defaultPostprocessorValue("eigen_postprocessor");
+
+  else if (pp_name.empty())
+    mooseError("Failed to determine proper pp for " << name());
 
   else
   {

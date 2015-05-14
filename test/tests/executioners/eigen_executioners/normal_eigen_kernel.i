@@ -39,7 +39,6 @@
     type = MassEigenKernel
     variable = u
     eigen = false
-    eigen_postprocessor = 1.0
   [../]
 
   [./rea1]
