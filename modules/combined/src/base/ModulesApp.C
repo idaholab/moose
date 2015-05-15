@@ -17,7 +17,6 @@
 #include "ChemicalReactionsApp.h"
 #include "ContactApp.h"
 #include "HeatConductionApp.h"
-#include "LinearElasticityApp.h"
 #include "MiscApp.h"
 #include "NavierStokesApp.h"
 #include "PhaseFieldApp.h"
