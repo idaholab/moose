@@ -25,6 +25,8 @@ public:
   EBSDReader(const std::string & name, InputParameters params);
   virtual ~EBSDReader();
 
+  virtual void initialSetup();
+
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
