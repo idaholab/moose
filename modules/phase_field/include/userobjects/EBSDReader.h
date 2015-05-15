@@ -76,56 +76,47 @@ protected:
   MooseMesh & _mesh;
   NonlinearSystem & _nl;
 
-  // Variables needed to determine reduced order parameter values
+  /// Variables needed to determine reduced order parameter values
   unsigned int _op_num;
   unsigned int _feature_num;
   Point _bottom_left;
   Point _top_right;
   Point _range;
 
-  // Logically three-dimensional data indexed by geometric points in a 1D vector
+  /// Logically three-dimensional data indexed by geometric points in a 1D vector
   std::vector<EBSDPointData> _data;
 
-  // Averages by feature ID
+  /// Averages by feature ID
   std::vector<EBSDAvgData> _avg_data;
 
-  // feature ID for given phases and grains
+  /// feature ID for given phases and grains
   std::vector<std::vector<unsigned int> > _feature_id;
 
-  // Map of grain weights per node
+  /// Map of grain weights per node
   std::map<dof_id_type, std::vector<Real> > _node_to_grn_weight_map;
 
-  // Dimension of the problem domain
+  /// Dimension of the problem domain
   unsigned int _mesh_dimension;
 
-  // The number of values in the x, y and z directions.
+  /// The number of values in the x, y and z directions.
   unsigned _nx, _ny, _nz;
 
-  // The spacing of the values in x, y and z directions.
+  /// The spacing of the values in x, y and z directions.
   Real _dx, _dy, _dz;
 
-  // Grid origin
+  /// Grid origin
   Real _minx, _miny, _minz;
 
-  // Maximum grid extent
+  /// Maximum grid extent
   Real _maxx, _maxy, _maxz;
 
-/*  // Initial condition values of EBSD variables
-  std::vector<Real> _phi1_ic, _PHI_ic, _phi2_ic, _x_ic, _y_ic, _z_ic;
-  std::vector<unsigned int> _grn_ic, _phase_ic, _sym_ic;
-
-  // Grain averaged values of EBSD variables
-  std::vector<Real> _avg_phi1, _avg_PHI, _avg_phi2, _avg_x, _avg_y, _avg_z;
-  std::vector<unsigned int> _avg_phase, _avg_sym;
-  */
-
-  // Computes a global index in the _data array given an input *centroid* point
+  /// Computes a global index in the _data array given an input *centroid* point
   unsigned indexFromPoint(const Point & p) const;
 
-  // Transfer the index into the _avg_data array from given index
+  /// Transfer the index into the _avg_data array from given index
   unsigned indexFromIndex(unsigned int var) const;
 
-  // Build map
+  /// Build map
   void buildNodeToGrainWeightMap();
 };
 

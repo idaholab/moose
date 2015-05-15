@@ -41,15 +41,6 @@ private:
   unsigned int _op_index;
 
   unsigned int _grain_num;
-  //Point _bottom_left;
-  //Point _top_right;
-  //Point _range;
-
-  //struct GrainPoint {
-  //  unsigned int grain;
-  //  Point p;
-  //};
-  //std::map<unsigned int, GrainPoint> _gp;
 
   std::vector<Point> _centerpoints;
   std::vector<Real> _assigned_op;
