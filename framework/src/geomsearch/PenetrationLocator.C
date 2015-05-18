@@ -43,6 +43,7 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
     _locked_this_step(),
     _unlocked_this_step(),
     _lagrange_multiplier(),
+    _check_whether_reasonable(true),
     _update_location(true),
     _tangential_tolerance(0.0),
     _do_normal_smoothing(false),
@@ -102,6 +103,7 @@ PenetrationLocator::detectPenetration()
                        _master_boundary,
                        _slave_boundary,
                        _penetration_info,
+                       _check_whether_reasonable,
                        _update_location,
                        _tangential_tolerance,
                        _do_normal_smoothing,
@@ -153,6 +155,12 @@ PenetrationLocator::penetrationNormal(dof_id_type node_id)
     return found_it->second->_normal;
   else
     return RealVectorValue(0, 0, 0);
+}
+
+void
+PenetrationLocator::setCheckWhetherReasonable(bool state)
+{
+  _check_whether_reasonable = state;
 }
 
 void
