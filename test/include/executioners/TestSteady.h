@@ -11,32 +11,37 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "ExceptionSteady.h"
+#ifndef TESTSTEADY_H
+#define TESTSTEADY_H
+
+#include "Steady.h"
+
+class TestSteady;
 
 template<>
-InputParameters validParams<ExceptionSteady>()
-{
-  return validParams<Steady>();
-}
+InputParameters validParams<TestSteady>();
 
-ExceptionSteady::ExceptionSteady(const std::string & name, InputParameters parameters) :
-    Steady(name, parameters)
+/**
+ * Test executioner to show exception handling
+ */
+class TestSteady : public Steady
 {
-}
+public:
+  TestSteady(const std::string & name, InputParameters parameters);
+  virtual ~TestSteady();
 
-ExceptionSteady::~ExceptionSteady()
-{
-}
+  /**
+   * This will call solve() on the NonlinearSystem.
+   */
+  virtual void execute();
 
-void
-ExceptionSteady::execute()
-{
-  try
-  {
-    Steady::execute();
-  }
-  catch (MooseException & e)
-  {
-    Moose::err << "Caught exception " << e << std::endl;
-  }
-}
+private:
+
+  /// The type of test that this object is to perform
+  MooseEnum _test_type;
+
+  /// A value to report (used for addAttributeReporter test)
+  Real _some_value_that_needs_to_be_reported;
+};
+
+#endif /* TESTSTEADY_H */
