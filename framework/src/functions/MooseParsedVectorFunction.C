@@ -56,5 +56,11 @@ void
 MooseParsedVectorFunction::initialSetup()
 {
   if (_function_ptr == NULL)
-    _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _vector_value, _vars, _vals);
+  {
+    THREAD_ID tid = 0;
+    if (isParamValid("_tid"))
+      tid = getParam<THREAD_ID>("_tid");
+
+    _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _vector_value, _vars, _vals, tid);
+  }
 }

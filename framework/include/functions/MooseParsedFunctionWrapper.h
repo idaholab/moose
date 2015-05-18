@@ -48,7 +48,8 @@ public:
   MooseParsedFunctionWrapper(FEProblem & feproblem,
                               const std::string & function_str,
                               const std::vector<std::string> & vars,
-                              const std::vector<std::string> & vals);
+                              const std::vector<std::string> & vals,
+                              const THREAD_ID tid = 0);
 
   /**
    * Class destruction
@@ -103,8 +104,17 @@ private:
   /// Vector of pointers to PP values
   std::vector<Real *> _pp_vals;
 
+  /// Stores the relative location of variables (in _vars) that are connected to Postprocessors
+  std::vector<unsigned int> _scalar_index;
+
+  /// Vector of pointers to PP values
+  std::vector<Real *> _scalar_vals;
+
   /// Vector of pointers to the variables in libMesh::ParsedFunction
   std::vector<Real *> _addr;
+
+  /// The thread id passed from owning Function object
+  const THREAD_ID _tid;
 
   /**
    * Initialization method that prepares the vars and vals for use
