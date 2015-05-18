@@ -401,10 +401,15 @@ void FEProblem::initialSetup()
     _user_objects(EXEC_CUSTOM)[i].initialSetup();
   }
 
+  // Initialize scalars so they are properly sized for use as input into ParsedFunctions
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
+    reinitScalars(tid);
+
   // Call the initialSetup methods for functions
   for (unsigned int i=0; i<n_threads; i++)
     for (std::map<std::string, MooseSharedPointer<Function> >::iterator vit = _functions[i].begin(); vit != _functions[i].end(); ++vit)
       vit->second->initialSetup();
+
 
   if (!_app.isRecovering())
   {
