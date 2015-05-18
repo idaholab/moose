@@ -45,7 +45,8 @@ class JacobianBlock;
  *
  * It is a part of FEProblem ;-)
  */
-class NonlinearSystem : public SystemTempl<TransientNonlinearImplicitSystem>
+class NonlinearSystem : public SystemTempl<TransientNonlinearImplicitSystem>,
+                        public ConsoleStreamInterface
 {
 public:
   NonlinearSystem(FEProblem & problem, const std::string & name);

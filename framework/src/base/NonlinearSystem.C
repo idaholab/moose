@@ -108,6 +108,7 @@ namespace Moose {
 
 NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & name) :
     SystemTempl<TransientNonlinearImplicitSystem>(fe_problem, name, Moose::VAR_NONLINEAR),
+    ConsoleStreamInterface(fe_problem.getMooseApp()),
     _fe_problem(fe_problem),
     _last_rnorm(0.),
     _last_nl_rnorm(0.),
@@ -209,6 +210,8 @@ NonlinearSystem::solve()
       _computing_initial_residual = false;
       _sys.rhs->close();
       _initial_residual_before_preset_bcs = _sys.rhs->l2_norm();
+      if (_compute_initial_residual_before_preset_bcs)
+        _console << "Initial residual before setting preset BCs: " << _initial_residual_before_preset_bcs << '\n';
     }
   }
   catch (MooseException & e)
