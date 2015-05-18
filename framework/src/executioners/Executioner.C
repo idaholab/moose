@@ -85,3 +85,12 @@ Executioner::getTimeStepperName()
 {
   return std::string();
 }
+
+void
+Executioner::addAttributeReporter(const std::string & name, Real & attribute)
+{
+  FEProblem * problem = parameters().getCheckedPointerParam<FEProblem *>("_fe_problem", "Failed to retrieve FEProblem when adding a attribute reporter in Executioner");
+  InputParameters params = _app.getFactory().getValidParams("ExecutionerAttributeReporter");
+  params.set<Real *>("value") = &attribute;
+  problem->addPostprocessor("ExecutionerAttributeReporter", name, params);
+}

@@ -43,8 +43,13 @@ public:
   virtual bool isActive();
 
 protected:
+  virtual void initialSetup();
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
+
+  const Real & eigenvalue();
+
+
 
   /// Holds the solution at current quadrature points
   VariableValue & _u;
@@ -57,9 +62,6 @@ protected:
 
   /// EigenKernel always lives in EigenSystem
   EigenSystem * _eigen_sys;
-
-  /// name of the postprocessor for evaluating eigenvalue
-  PostprocessorName _eigen_pp;
 
   /// eigenvalue
   const Real * _eigenvalue;

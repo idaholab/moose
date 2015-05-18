@@ -37,8 +37,16 @@ NonlinearEigen::NonlinearEigen(const std::string & name, InputParameters paramet
      _output_after_pi(getParam<bool>("output_after_power_iterations"))
 {
   _eigenvalue = getParam<Real>("k0");
-  addRealParameterReporter("eigenvalue");
+
+  addEigenValueReporter();
+
+  if (getParam<bool>("output_on_final") && _output_pi)
+  {
+    mooseWarning("Only final solution will be outputted, output_pi_history=true will be ignored!");
+    _output_pi = false;
+  }
 }
+
 
 void
 NonlinearEigen::init()
@@ -90,6 +98,7 @@ void
 NonlinearEigen::takeStep()
 {
   _console << " Nonlinear iteration starts"  << std::endl;
+  std::cout << "  _eigenvalue = " << _eigenvalue << std::endl;
 
   // nonlinear solve
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);

@@ -210,7 +210,6 @@ Transient::init()
 void
 Transient::execute()
 {
-
   preExecute();
 
   // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.

@@ -153,7 +153,6 @@
 #include "ElementVectorL2Error.h"
 #include "EmptyPostprocessor.h"
 #include "NodalVariableValue.h"
-
 #include "NumDOFs.h"
 #include "TimestepSize.h"
 #include "RunTime.h"
@@ -189,6 +188,8 @@
 #include "DifferencePostprocessor.h"
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
+#include "EigenValueReporter.h"
+#include "ExecutionerAttributeReporter.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -364,6 +365,7 @@
 #include "MaterialOutputAction.h"
 #include "CheckOutputAction.h"
 #include "SetupRecoverFileBaseAction.h"
+#include "SetupEigenAction.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -561,6 +563,8 @@ registerObjects(Factory & factory)
   registerPostprocessor(DifferencePostprocessor);
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
+  registerPostprocessor(EigenValueReporter);
+  registerPostprocessor(ExecutionerAttributeReporter);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
@@ -817,6 +821,9 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_material_output", true);
   registerTask("check_output", true);
 
+  // Eigen related setup
+  registerTask("setup_eigen", true);
+
   /**************************/
   /****** Dependencies ******/
   /**************************/
@@ -874,6 +881,7 @@ addActionTypes(Syntax & syntax)
 "(init_problem)"
 "(setup_debug)"
 "(add_output)"
+"(setup_eigen)"
 "(add_postprocessor)"
 "(add_vector_postprocessor)"
 "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
@@ -936,6 +944,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupPredictorAction, "setup_predictor");
   registerAction(MaterialOutputAction, "setup_material_output");
   registerAction(CheckOutputAction, "check_output");
+  registerAction(SetupEigenAction, "setup_eigen");
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");
