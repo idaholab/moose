@@ -816,7 +816,6 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_material_output", true);
   registerTask("check_output", true);
 
-
   /**************************/
   /****** Dependencies ******/
   /**************************/
