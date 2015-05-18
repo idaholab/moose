@@ -283,6 +283,9 @@ protected:
   ///Seed value
   unsigned int _rndm_seed;
 
+  ///Maximum number of substep iterations
+  unsigned int _max_substep_iter;
+
   MaterialProperty<RankTwoTensor> & _fp;
   MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _pk2;
@@ -295,6 +298,7 @@ protected:
   MaterialProperty<Real> & _acc_slip_old;
   MaterialProperty<RankTwoTensor> & _update_rot;
   MaterialProperty<RankTwoTensor> & _update_rot_old;
+  MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
 
   ///Save Euler angles for output only when save_euler_angle = true in .i file
   MaterialProperty< std::vector<Real> > * _euler_ang;
@@ -318,9 +322,10 @@ protected:
   std::vector< Real > _slip_incr, _tau, _dslipdtau;
   std::vector<RankTwoTensor> _s0;
 
-  RankTwoTensor _pk2_tmp;
+  RankTwoTensor _pk2_tmp, _pk2_tmp_old;
   Real _accslip_tmp, _accslip_tmp_old;
   std::vector<Real> _gss_tmp;
+  std::vector<Real> _gss_tmp_old;
 
   std::vector<Real> _slip_sys_props;
 
@@ -328,6 +333,12 @@ protected:
 
   bool _err_tol;///Flag to check whether convergence is achieved
 
+  ///Used for substepping; Uniformly divides the increment in deformation gradient
+  RankTwoTensor _delta_dfgrd, _dfgrd_tmp_old;
+  ///Scales the substepping increment to obtain deformation gradient at a substep iteration
+  Real _dfgrd_scale_factor;
+  ///Flags to reset variables and reinitialize variables
+  bool _first_step_iter, _last_step_iter, _first_substep;
 };
 
 #endif //FINITESTRAINCRYSTALPLASTICITY_H
