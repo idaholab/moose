@@ -112,6 +112,7 @@ public:
   std::map<dof_id_type, unsigned int> _unlocked_this_step;
   std::map<dof_id_type, Real> _lagrange_multiplier;
 
+  void setCheckWhetherReasonable(bool state);
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);
   void setNormalSmoothingDistance(Real normal_smoothing_distance);
@@ -119,6 +120,8 @@ public:
   Real getTangentialTolerance() {return _tangential_tolerance;}
 
 protected:
+  /// Check whether found candidates are reasonable
+  bool _check_whether_reasonable;
   bool _update_location; // Update the penetration location for nodes found last time
   Real _tangential_tolerance; // Tangential distance a node can be from a face and still be in contact
   bool _do_normal_smoothing;  // Should we do contact normal smoothing?
