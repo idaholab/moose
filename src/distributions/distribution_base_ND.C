@@ -160,10 +160,6 @@ double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
 
 //std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){
 std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & F, double & g){
- //return dist.InverseCdf(min, max);
- //return std::vector<double>(2,-1.0);
- //return dist.InverseCdf((max-min)/2.0, (max-min), 10);
- //return dist.InverseCdf((max-min)/2.0);
 	return dist.InverseCdf(F,g);
 }
 
@@ -301,6 +297,7 @@ double BasicMultivariateNormal::Cdf(std::vector<double> x){
 }
 
 std::vector<double> BasicMultivariateNormal::InverseCdf(double F, double g){
+	std::cout<<"BasicMultivariateNormal::InverseCdf"<< std::endl;
 	return _cartesianDistribution.InverseCdf(F,g);
 }
 
