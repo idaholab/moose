@@ -253,6 +253,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMesh(ImageMesh);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void PhaseFieldApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { PhaseFieldApp::associateSyntax(syntax, action_factory); }
 void
 PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

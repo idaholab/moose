@@ -156,7 +156,7 @@ void
 Factory::reportUnregisteredError(const std::string & obj_name) const
 {
   std::ostringstream oss;
-  std::vector<std::string> paths = _app.getLoadedLibraryPaths();
+  std::set<std::string> paths = _app.getLoadedLibraryPaths();
 
   oss << "A '" + obj_name + "' is not a registered object.\n"
       << "\nWe loaded objects from the following libraries and still couldn't find your object:\n\t";

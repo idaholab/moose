@@ -9,6 +9,16 @@
     executable_pattern = 'misc-\w+$'
   [../]
 
+  [./dynamic_object_loading_synax]
+    type = 'Exodiff'
+    input = 'dynamic_syntax.i'
+    exodiff = 'dynamic_syntax_out.e'
+    library_mode = 'DYNAMIC'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+  [../]
+
   [./dynamic_object_restrict]
     type = 'Exodiff'
     input = 'dynamic_objects.i'
