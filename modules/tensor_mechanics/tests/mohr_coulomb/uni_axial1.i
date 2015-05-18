@@ -273,7 +273,7 @@
   # solution vector.  This gives us a chance of converging in this
   # problem using a relative tolerance, and lets us avoid using
   # absolute tolerances.
-  use_initial_residual_before_preset_bcs = false
+  compute_initial_residual_before_preset_bcs = false
 
   petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
   petsc_options_value = ' asm      2              lu            gmres     200'

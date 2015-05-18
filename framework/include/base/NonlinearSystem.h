@@ -426,7 +426,7 @@ public:
   Real _initial_residual_after_preset_bcs;
   std::vector<unsigned int> _current_l_its;
   unsigned int _current_nl_its;
-  bool _use_initial_residual_before_preset_bcs;
+  bool _compute_initial_residual_before_preset_bcs;
 
 protected:
   /**

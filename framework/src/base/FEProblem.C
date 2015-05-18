@@ -3859,8 +3859,8 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
 
   // This is the first residual before any iterations have been done,
   // but after PresetBCs (if any) have been imposed on the solution
-  // vector.  We save it, and use it to detect convergence if the user
-  // has set use_initial_residual_before_preset_bcs=false.
+  // vector.  We save it, and use it to detect convergence if
+  // compute_initial_residual_before_preset_bcs=false.
   if (it==0)
     system._initial_residual_after_preset_bcs = fnorm;
 
@@ -3890,9 +3890,9 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
 
   if (it && !reason)
   {
-    // If the user has set use_initial_residual_before_preset_bcs==false, then use the
+    // If compute_initial_residual_before_preset_bcs==false, then use the
     // first residual computed by Petsc to determine convergence.
-    Real the_residual = system._use_initial_residual_before_preset_bcs ? initial_residual_before_preset_bcs : system._initial_residual_after_preset_bcs;
+    Real the_residual = system._compute_initial_residual_before_preset_bcs ? initial_residual_before_preset_bcs : system._initial_residual_after_preset_bcs;
     if (fnorm <= the_residual*rtol)
     {
       oss << "Converged due to function norm " << fnorm << " < " << " (relative tolerance)\n";

@@ -115,7 +115,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _initial_residual_before_preset_bcs(0.),
     _initial_residual_after_preset_bcs(0.),
     _current_nl_its(0),
-    _use_initial_residual_before_preset_bcs(true),
+    _compute_initial_residual_before_preset_bcs(true),
     _current_solution(NULL),
     _residual_ghosted(addVector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
