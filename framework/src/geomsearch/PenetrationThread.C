@@ -32,6 +32,7 @@ PenetrationThread::PenetrationThread(SubProblem & subproblem,
                                      BoundaryID master_boundary,
                                      BoundaryID slave_boundary,
                                      std::map<dof_id_type, PenetrationInfo *> & penetration_info,
+                                     bool check_whether_reasonable,
                                      bool update_location,
                                      Real tangential_tolerance,
                                      bool do_normal_smoothing,
@@ -49,6 +50,7 @@ PenetrationThread::PenetrationThread(SubProblem & subproblem,
   _master_boundary(master_boundary),
   _slave_boundary(slave_boundary),
   _penetration_info(penetration_info),
+  _check_whether_reasonable(check_whether_reasonable),
   _update_location(update_location),
   _tangential_tolerance(tangential_tolerance),
   _do_normal_smoothing(do_normal_smoothing),
@@ -75,6 +77,7 @@ PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*spl
   _master_boundary(x._master_boundary),
   _slave_boundary(x._slave_boundary),
   _penetration_info(x._penetration_info),
+  _check_whether_reasonable(x._check_whether_reasonable),
   _update_location(x._update_location),
   _tangential_tolerance(x._tangential_tolerance),
   _do_normal_smoothing(x._do_normal_smoothing),
@@ -187,8 +190,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
         std::vector<PenetrationInfo*> thisElemInfo;
         std::vector<const Node*> nodesThatMustBeOnSide;
         nodesThatMustBeOnSide.push_back(closest_node);
-        bool check_whether_reasonable = true;
-        createInfoForElem(thisElemInfo, p_info, &node, elem, nodesThatMustBeOnSide, check_whether_reasonable);
+        createInfoForElem(thisElemInfo, p_info, &node, elem, nodesThatMustBeOnSide, _check_whether_reasonable);
       }
 
       if (p_info.size() == 1)

@@ -28,6 +28,7 @@ public:
                     BoundaryID master_boundary,
                     BoundaryID slave_boundary,
                     std::map<dof_id_type, PenetrationInfo *> & penetration_info,
+                    bool check_whether_reasonable,
                     bool update_location,
                     Real tangential_tolerance,
                     bool do_normal_smoothing,
@@ -58,6 +59,7 @@ protected:
   // This is the info map we're actually filling here
   std::map<dof_id_type, PenetrationInfo *> & _penetration_info;
 
+  bool _check_whether_reasonable;
   bool _update_location;
   Real _tangential_tolerance;
   bool _do_normal_smoothing;
