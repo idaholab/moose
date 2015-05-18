@@ -34,6 +34,13 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   [../]
+  [./small2_small_strain]
+    type = 'CSVDiff'
+    input = 'small_deform2_small_strain.i'
+    csvdiff = 'small_deform2.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
   [./small3]
     type = 'CSVDiff'
     input = 'small_deform3.i'
@@ -122,6 +129,13 @@
   [./uni_axial1]
     type = 'CSVDiff'
     input = 'uni_axial1.i'
+    csvdiff = 'uni_axial1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-3
+  [../]
+  [./uni_axial1_small_strain]
+    type = 'CSVDiff'
+    input = 'uni_axial1_small_strain.i'
     csvdiff = 'uni_axial1.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-3

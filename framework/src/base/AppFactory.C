@@ -51,10 +51,13 @@ AppFactory::getValidParams(const std::string & name)
 }
 
 MooseApp *
-AppFactory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN)
+AppFactory::create(const std::string & app_type, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN)
 {
-  if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
-    mooseError("Object '" + obj_name + "' was not registered.");
+  if (_name_to_build_pointer.find(app_type) == _name_to_build_pointer.end())
+    mooseError("Object '" + app_type + "' was not registered.");
+
+  // Take the app_type and add it to the parameters so that it can be retrieved in the Application
+  parameters.set<std::string>("_type") = app_type;
 
   // Check to make sure that all required parameters are supplied
   parameters.checkParams("");
@@ -70,7 +73,7 @@ AppFactory::create(const std::string & obj_name, const std::string & name, Input
   command_line->addCommandLineOptionsFromParams(parameters);
   command_line->populateInputParams(parameters);
 
-  return (*_name_to_build_pointer[obj_name])(name, parameters);
+  return (*_name_to_build_pointer[app_type])(name, parameters);
 }
 
 bool
