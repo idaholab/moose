@@ -333,6 +333,7 @@ public:
    */
   void dynamicObjectRegistration(const std::string & app_name, Factory * factory, std::string library_path);
   void dynamicAppRegistration(const std::string & app_name, std::string library_path);
+  void dynamicSyntaxAssociation(const std::string & app_name, Syntax * syntax, ActionFactory * action_factory, std::string library_path);
   ///@}
 
   /**
@@ -351,23 +352,26 @@ public:
   /**
    * Return the loaded library filenames in a std::vector
    */
-  std::vector<std::string> getLoadedLibraryPaths() const;
+  std::set<std::string> getLoadedLibraryPaths() const;
 
 protected:
 
   /**
    * Helper method for dynamic loading of objects
    */
-  void dynamicRegistration(const std::string & app_name, const std::string & registration_method, Factory * factory, std::string library_path);
+  void dynamicRegistration(const Parameters & params);
 
   /**
    * Recursively loads libraries and dependencies in the proper order to fully register a
    * MOOSE application that may have several dependencies. REQUIRES: dynamic linking loader support.
    */
-  void loadLibraryAndDependencies(const std::string & library_filename, const std::string & registration_method_name, Factory * factory);
+  //void loadLibraryAndDependencies(const std::string & library_filename, const std::string & registration_method_name, Factory * factory);
+  void loadLibraryAndDependencies(const std::string & library_filename, const Parameters & params);
 
+  /// Constructor is protected so that this object is constructed through the AppFactory object
   MooseApp(const std::string & name, InputParameters parameters);
 
+  /// Don't run the simulation, just complete all of the mesh preperation steps and exit
   virtual void meshOnly(std::string mesh_file_name);
 
   /// The name of this object
@@ -472,10 +476,13 @@ protected:
   /// true if we want to just check the input file
   bool _check_input;
 
-  /// Dynamic libraries, dependencies and their file handles
-  std::map<std::string, void *> _lib_handles;
+  /// The library, registration method and the handle to the method
+  std::map<std::pair<std::string, std::string>, void *> _lib_handles;
 
 private:
+
+  /// Enumeration for holding the valid types of dynamic registrations allowed
+  enum RegistrationType { APPLICATION, OBJECT, SYNTAX };
 
   ///@{
   /**
