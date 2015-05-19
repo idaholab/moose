@@ -159,21 +159,14 @@ clean::
 # .) .git  (don't accidentally delete any of git's metadata)
 # .) .svn  (don't accidentally delete any of svn's metadata)
 # Notes:
-# .) -exec rm is the only way to delete stuff, it won't work right if
-#    you pipe the output of find to 'xargs rm -rf' or pass the -delete
-#    flag to find
 # .) The ./ in front of the path names is absolutely required for the
 #    find command to work correctly.
 # .) Be careful: running 'make -n clobber' will actually delete files!
-# .) Running 'make clobber' is a good way to clean up outdated
-#    dependency and object files when you upgrade OSX versions or as
-#    source files are deleted over time.
 # .) 'make clobber' does not respect $(METHOD), it just deletes
 #    everything it can find!
-# .) We send any errors from the find command to /dev/null, since we
-#    don't really care about them and find has this annoying "feature"
-#    where it tries to search in directories it has already deleted (in
-#    this case .libs) and prints an error message about it.
+# .) Running 'make clobberall' is a good way to clean up outdated
+#    dependency and object files when you upgrade OSX versions or as
+#    source files are deleted over time.
 clobber:: clean
 	$(shell find $(CURDIR) \( -path ./moose -or -path ./.git -or -path ./.svn \) -prune -or \
           \( -name "*~" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.so*" -or -name "*.a" \
