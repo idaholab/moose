@@ -7,15 +7,15 @@
 #ifndef SOLIDMODEL_H
 #define SOLIDMODEL_H
 
-#include "Material.h"
+#include "DerivativeMaterialInterface.h"
 #include "SymmTensor.h"
 
 // Forward declarations
 class ConstitutiveModel;
 class SolidModel;
 class SymmElasticityTensor;
-class VolumetricModel;
 class PiecewiseLinear;
+class VolumetricModel;
 namespace SolidMechanics
 {
 class Element;
@@ -28,7 +28,7 @@ InputParameters validParams<SolidModel>();
 /**
  * SolidModel is the base class for all this module's solid mechanics material models.
  */
-class SolidModel : public Material
+class SolidModel : public DerivativeMaterialInterface<Material>
 {
 public:
   SolidModel( const std::string & name,
@@ -109,8 +109,7 @@ protected:
   Real _ref_temp;
 
   std::map<SubdomainID, std::vector<VolumetricModel*> > _volumetric_models;
-  std::vector<MaterialProperty<Real>*> _volumetric_strain;
-  std::vector<MaterialProperty<Real>*> _volumetric_strain_old;
+  std::set<std::string> _dep_matl_props;
 
   MaterialProperty<SymmTensor> & _stress;
 private:

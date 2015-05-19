@@ -4,7 +4,7 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "VolumetricModel.h"
+#include "SolidModel.h"
 
 #ifndef ABAQUSCREEPMATERIAL_H
 #define ABAQUSCREEPMATERIAL_H
@@ -18,7 +18,8 @@ template<>
 InputParameters validParams<AbaqusCreepMaterial>();
 
 //class define a property
-class AbaqusCreepMaterial : public VolumetricModel
+//class AbaqusCreepMaterial : public VolumetricModel
+class AbaqusCreepMaterial : public SolidModel
 {
 public:
   AbaqusCreepMaterial(const std::string & name,
@@ -50,10 +51,11 @@ protected:
   Real _ebulk3, _eg2, _eg, _eg3, _elam, _elasticity_tensor[3], _stress_component[6];
 
   virtual void initStatefulProperties(unsigned n_points);
-  virtual void modifyStrain(const unsigned int qp,
-                            const Real /*scale_factor*/,
-                            SymmTensor & strain_increment,
-                            SymmTensor & dstrain_increment_dT);
+  // virtual void modifyStrain(const unsigned int qp,
+  //                           const Real /*scale_factor*/,
+  //                           SymmTensor & strain_increment,
+  //                           SymmTensor & dstrain_increment_dT);
+  void computeStress();
 
   MaterialProperty<std::vector<Real> > & _state_var;
   MaterialProperty<std::vector<Real> > & _state_var_old;
