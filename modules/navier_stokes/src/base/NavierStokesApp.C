@@ -104,12 +104,16 @@ NavierStokesApp::~NavierStokesApp()
 {
 }
 
+// External entry point for dynamic application loading
+extern "C" void NavierStokesApp__registerApps() { NavierStokesApp::registerApps(); }
 void
 NavierStokesApp::registerApps()
 {
   registerApp(NavierStokesApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void NavierStokesApp__registerObjects(Factory & factory) { NavierStokesApp::registerObjects(factory); }
 void
 NavierStokesApp::registerObjects(Factory & factory)
 {
@@ -184,6 +188,8 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerPostprocessor(INSExplicitTimestepSelector);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { NavierStokesApp::associateSyntax(syntax, action_factory); }
 void
 NavierStokesApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {

@@ -60,12 +60,16 @@ ChemicalReactionsApp::~ChemicalReactionsApp()
 {
 }
 
+// External entry point for dynamic application loading
+extern "C" void ChemicalReactionsApp__registerApps() { ChemicalReactionsApp::registerApps(); }
 void
 ChemicalReactionsApp::registerApps()
 {
   registerApp(ChemicalReactionsApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void ChemicalReactionsApp__registerObjects(Factory & factory) { ChemicalReactionsApp::registerObjects(factory); }
 void
 ChemicalReactionsApp::registerObjects(Factory & factory)
 {
@@ -89,6 +93,8 @@ ChemicalReactionsApp::registerObjects(Factory & factory)
   registerMaterial(MollifiedLangmuirMaterial);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void ChemicalReactionsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { ChemicalReactionsApp::associateSyntax(syntax, action_factory); }
 void
 ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

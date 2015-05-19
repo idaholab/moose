@@ -42,12 +42,16 @@ LinearElasticityApp::~LinearElasticityApp()
 {
 }
 
+// External entry point for dynamic application loading
+extern "C" void LinearElasticityApp__registerApps() { LinearElasticityApp::registerApps(); }
 void
 LinearElasticityApp::registerApps()
 {
   registerApp(LinearElasticityApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void LinearElasticityApp__registerObjects(Factory & factory) { LinearElasticityApp::registerObjects(factory); }
 void
 LinearElasticityApp::registerObjects(Factory & factory)
 {
@@ -60,6 +64,8 @@ LinearElasticityApp::registerObjects(Factory & factory)
   registerKernel(SolidMechTempCoupleZ);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void LinearElasticityApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { LinearElasticityApp::associateSyntax(syntax, action_factory); }
 void
 LinearElasticityApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
