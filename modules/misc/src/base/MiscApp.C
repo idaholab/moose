@@ -50,6 +50,7 @@ MiscApp::~MiscApp()
 {
 }
 
+// External entry point for dynamic application loading
 extern "C" void MiscApp__registerApps() { MiscApp::registerApps(); }
 void
 MiscApp::registerApps()
@@ -57,6 +58,8 @@ MiscApp::registerApps()
   registerApp(MiscApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void MiscApp__registerObjects(Factory & factory) { MiscApp::registerObjects(factory); }
 void
 MiscApp::registerObjects(Factory & factory)
 {
@@ -83,6 +86,8 @@ MiscApp::registerObjects(Factory & factory)
   registerPostprocessor(CInterfacePosition);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void MiscApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { MiscApp::associateSyntax(syntax, action_factory); }
 void
 MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {

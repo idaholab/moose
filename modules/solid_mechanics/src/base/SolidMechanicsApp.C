@@ -104,12 +104,16 @@ SolidMechanicsApp::~SolidMechanicsApp()
 {
 }
 
+// External entry point for dynamic application loading
+extern "C" void SolidMechanicsApp__registerApps() { SolidMechanicsApp::registerApps(); }
 void
 SolidMechanicsApp::registerApps()
 {
   registerApp(SolidMechanicsApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void SolidMechanicsApp__registerObjects(Factory & factory) { SolidMechanicsApp::registerObjects(factory); }
 void
 SolidMechanicsApp::registerObjects(Factory & factory)
 {
@@ -183,6 +187,8 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(CrackFrontDefinition);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void SolidMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { SolidMechanicsApp::associateSyntax(syntax, action_factory); }
 void
 SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

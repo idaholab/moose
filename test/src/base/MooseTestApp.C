@@ -241,13 +241,16 @@ MooseTestApp::~MooseTestApp()
 {
 }
 
-
+// External entry point for dynamic application loading
+extern "C" void MooseTestApp__registerApps() { MooseTestApp::registerApps(); }
 void
 MooseTestApp::registerApps()
 {
   registerApp(MooseTestApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void MooseTestApp__registerObjects(Factory & factory) { MooseTestApp::registerObjects(factory); }
 void
 MooseTestApp::registerObjects(Factory & factory)
 {
@@ -443,6 +446,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerOutput(OutputObjectTest);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void MooseTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { MooseTestApp::associateSyntax(syntax, action_factory); }
 void
 MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
