@@ -55,12 +55,16 @@ HeatConductionApp::~HeatConductionApp()
 {
 }
 
+// External entry point for dynamic application loading
+extern "C" void HeatConductionApp__registerApps() { HeatConductionApp::registerApps(); }
 void
 HeatConductionApp::registerApps()
 {
   registerApp(HeatConductionApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void HeatConductionApp__registerObjects(Factory & factory) { HeatConductionApp::registerObjects(factory); }
 void
 HeatConductionApp::registerObjects(Factory & factory)
 {
@@ -80,6 +84,8 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerConstraint(GapConductanceConstraint);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void HeatConductionApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { HeatConductionApp::associateSyntax(syntax, action_factory); }
 void
 HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

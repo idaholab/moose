@@ -50,12 +50,16 @@ ModulesApp::~ModulesApp()
 {
 }
 
+// External entry point for dynamic application loading
+extern "C" void ModulesApp__registerApps() { ModulesApp::registerApps(); }
 void
 ModulesApp::registerApps()
 {
   registerApp(ModulesApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void ModulesApp__registerObjects(Factory & factory) { ModulesApp::registerObjects(factory); }
 void
 ModulesApp::registerObjects(Factory & factory)
 {
@@ -77,6 +81,8 @@ ModulesApp::registerObjects(Factory & factory)
   WaterSteamEOSApp::registerObjects(factory);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void ModulesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { ModulesApp::associateSyntax(syntax, action_factory); }
 void
 ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

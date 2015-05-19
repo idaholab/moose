@@ -54,12 +54,16 @@ ContactApp::~ContactApp()
 {
 }
 
+// External entry point for dynamic application loading
+extern "C" void ContactApp__registerApps() { ContactApp::registerApps(); }
 void
 ContactApp::registerApps()
 {
   registerApp(ContactApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void ContactApp__registerObjects(Factory & factory) { ContactApp::registerObjects(factory); }
 void
 ContactApp::registerObjects(Factory & factory)
 {
@@ -76,6 +80,8 @@ ContactApp::registerObjects(Factory & factory)
   registerAux(ContactPressureAux);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void ContactApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { ContactApp::associateSyntax(syntax, action_factory); }
 void
 ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

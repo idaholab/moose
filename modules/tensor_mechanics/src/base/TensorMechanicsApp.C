@@ -160,6 +160,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(PressureTM);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void TensorMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { TensorMechanicsApp::associateSyntax(syntax, action_factory); }
 void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
