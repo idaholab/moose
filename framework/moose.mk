@@ -159,28 +159,21 @@ clean::
 # .) .git  (don't accidentally delete any of git's metadata)
 # .) .svn  (don't accidentally delete any of svn's metadata)
 # Notes:
-# .) -exec rm is the only way to delete stuff, it won't work right if
-#    you pipe the output of find to 'xargs rm -rf' or pass the -delete
-#    flag to find
 # .) The ./ in front of the path names is absolutely required for the
 #    find command to work correctly.
 # .) Be careful: running 'make -n clobber' will actually delete files!
-# .) Running 'make clobber' is a good way to clean up outdated
-#    dependency and object files when you upgrade OSX versions or as
-#    source files are deleted over time.
 # .) 'make clobber' does not respect $(METHOD), it just deletes
 #    everything it can find!
-# .) We send any errors from the find command to /dev/null, since we
-#    don't really care about them and find has this annoying "feature"
-#    where it tries to search in directories it has already deleted (in
-#    this case .libs) and prints an error message about it.
+# .) Running 'make clobberall' is a good way to clean up outdated
+#    dependency and object files when you upgrade OSX versions or as
+#    source files are deleted over time.
 clobber:: clean
-	$(shell find . \( -path ./moose -or -path ./.git -or -path ./.svn \) -prune -or \
+	$(shell find $(CURDIR) \( -path ./moose -or -path ./.git -or -path ./.svn \) -prune -or \
           \( -name "*~" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.so*" -or -name "*.a" \
           -or -name "*-opt" -or -name "*-dbg" -or -name "*-oprof" \
           -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" -or -name "*.plist" \
-          -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.gch" -or -name .libs \) \
-          -exec rm -rf '{}' \; 2>/dev/null)
+          -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.gch" -or -name .libs -or -path "*/.libs/*" \) \
+          -delete)
 
 # cleanall runs 'make clean' in all dependent application directories
 cleanall:: clean
@@ -188,6 +181,14 @@ cleanall:: clean
 	@for dir in $(app_DIRS); do \
           echo \ $$dir; \
           make -C $$dir clean ; \
+        done
+
+# clobberall runs 'make clobber' in all dependent application directories
+clobberall:: clobber
+	@echo "Clobbering in:"
+	@for dir in $(app_DIRS); do \
+          echo \ $$dir; \
+          make -C $$dir clobber ; \
         done
 
 # Debugging stuff
