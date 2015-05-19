@@ -66,16 +66,16 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    execute_on = timestep_end
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
+    execute_on = 'initial timestep_end'
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
-    execute_on = timestep_end
     bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -111,6 +111,7 @@
     enable_var_coloring = true
     condense_map_info = true
     connecting_threshold = 0.08
+    execute_on = 'initial timestep_end'
   [../]
   [./dt]
     # Outputs the current time step

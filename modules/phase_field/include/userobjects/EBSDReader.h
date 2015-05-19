@@ -25,6 +25,8 @@ public:
   EBSDReader(const std::string & name, InputParameters params);
   virtual ~EBSDReader();
 
+  virtual void initialSetup();
+
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
@@ -65,26 +67,35 @@ public:
    */
   unsigned int getGrainNum(unsigned int phase) const;
 
+  /**
+   * Creates a map consisting of the node index followd by
+   * a vector of all grain weights for that node
+   */
+   const std::map<dof_id_type, std::vector<Real> > & getNodeToGrainWeightMap() const;
+
 protected:
   // MooseMesh Variables
   MooseMesh & _mesh;
   NonlinearSystem & _nl;
 
-  // Variables needed to determine reduced order parameter values
+  /// Variables needed to determine reduced order parameter values
   unsigned int _op_num;
   unsigned int _feature_num;
   Point _bottom_left;
   Point _top_right;
   Point _range;
 
-  // Logically three-dimensional data indexed by geometric points in a 1D vector
+  /// Logically three-dimensional data indexed by geometric points in a 1D vector
   std::vector<EBSDPointData> _data;
 
-  // Averages by feature ID
+  /// Averages by feature ID
   std::vector<EBSDAvgData> _avg_data;
 
-  // feature ID for given phases and grains
+  /// feature ID for given phases and grains
   std::vector<std::vector<unsigned int> > _feature_id;
+
+  /// Map of grain weights per node
+  std::map<dof_id_type, std::vector<Real> > _node_to_grn_weight_map;
 
   /// Dimension of the problem domain
   unsigned int _mesh_dimension;
@@ -101,19 +112,14 @@ protected:
   /// Maximum grid extent
   Real _maxx, _maxy, _maxz;
 
-  // Initial condition values of EBSD variables
-  std::vector<Real> _phi1_ic, _PHI_ic, _phi2_ic, _x_ic, _y_ic, _z_ic;
-  std::vector<unsigned int> _grn_ic, _phase_ic, _sym_ic;
-
-  // Grain averaged values of EBSD variables
-  std::vector<Real> _avg_phi1, _avg_PHI, _avg_phi2, _avg_x, _avg_y, _avg_z;
-  std::vector<unsigned int> _avg_phase, _avg_sym;
-
   /// Computes a global index in the _data array given an input *centroid* point
   unsigned indexFromPoint(const Point & p) const;
 
   /// Transfer the index into the _avg_data array from given index
   unsigned indexFromIndex(unsigned int var) const;
+
+  /// Build map
+  void buildNodeToGrainWeightMap();
 };
 
 #endif // EBSDREADER_H

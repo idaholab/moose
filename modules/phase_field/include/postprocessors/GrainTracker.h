@@ -107,6 +107,8 @@ protected:
    */
   Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const;
 
+  Point centerOfMass(UniqueGrain & grain) const;
+
   virtual unsigned long calculateUsage() const;
 
   /*************************************************
@@ -130,6 +132,13 @@ protected:
 
   /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
   std::map<unsigned int, UniqueGrain *> & _unique_grains;
+
+  /**
+   * This data structure holds unique grain to EBSD data map information. It's possible when using 2D scans of 3D microstructures
+   * to end up with disjoint grains with the same orientation in a single slice. To properly handle this in the grain tracker
+   * we need yet another map that takes a unique_grain number and retrieves the proper EBSD numbering (non-unique)
+   */
+  std::map<unsigned int, unsigned int> _unique_grain_to_ebsd_num;
 
   /// Optional ESBD Reader
   const EBSDReader * _ebsd_reader;
@@ -170,6 +179,8 @@ public:
   };
 
   bool _compute_op_maps;
+
+  bool _center_mass_tracking;
 
   /**
    * Data structure for active order parameter information on elements:
