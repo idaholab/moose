@@ -429,11 +429,9 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
   int vertexLoc = (int)pow(2,i);
   dxs[i] = cell[vertexLoc][i] - cell[0][i];
 
-  //std::cout<< "dx " << dxs[i] << std::endl;
-
   double randomDisplacement = _randomDouble->random();
 
-  //std::cout<< "random " << randomDisplacement << std::endl;
+  std::cout<< "random " << randomDisplacement << std::endl;
 
   center[i] = cell[0][i] + randomDisplacement * dxs[i];
  }
