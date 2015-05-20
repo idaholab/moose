@@ -1,0 +1,32 @@
+[Tests]
+  [./split_order4]
+    type = 'Exodiff'
+    input = 'split_order4_test.i'
+    exodiff = 'split_order4_test_out.e'
+  [../]
+  [./split_order6]
+    type = 'Exodiff'
+    input = 'split_order6_test.i'
+    exodiff = 'split_order6_test_out.e'
+  [../]
+  [./split_order8]
+    type = 'Exodiff'
+    input = 'split_order8_test.i'
+    exodiff = 'split_order8_test_out.e'
+  [../]
+  [./direct_order4]
+    type = 'Exodiff'
+    input = 'direct_order4_test.i'
+    exodiff = 'direct_order4_test_out.e'
+  [../]
+  [./direct_order6]
+    type = 'Exodiff'
+    input = 'direct_order6_test.i'
+    exodiff = 'direct_order6_test_out.e'
+  [../]
+  [./direct_order8]
+    type = 'Exodiff'
+    input = 'direct_order8_test.i'
+    exodiff = 'direct_order8_test_out.e'
+  [../]
+[]
