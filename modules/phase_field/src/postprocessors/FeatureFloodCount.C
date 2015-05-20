@@ -394,67 +394,154 @@ FeatureFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 }
 
 void
+FeatureFloodCount::communicateOneList(std::list<BubbleData> & list, unsigned int owner_id, unsigned int map_num)
+{
+  Moose::perf_log.push("communicateOneList()", "FeatureFloodCount");
+
+  mooseAssert(!_single_map_mode, "This routine only works in single map mode");
+  std::vector<dof_id_type> packed_data;
+  unsigned int total_size = 0;
+
+  if (owner_id == processor_id())
+  {
+    // First resize our vector to hold our packed data
+    for (std::list<BubbleData>::iterator list_it = list.begin(); list_it != list.end(); ++list_it)
+      total_size += list_it->_entity_ids.size() + 1; // The +1 is for the markers between individual sets
+    packed_data.resize(total_size);
+
+    // Now fill in the packed_data data structure
+    unsigned int counter = 0;
+    for (std::list<BubbleData>::iterator list_it = list.begin(); list_it != list.end(); ++list_it)
+    {
+      packed_data[counter++] = list_it->_entity_ids.size();
+      for (std::set<dof_id_type>::iterator set_it = list_it->_entity_ids.begin(); set_it != list_it->_entity_ids.end(); ++set_it)
+        packed_data[counter++] = *set_it;
+    }
+  }
+
+  _communicator.broadcast(total_size, owner_id);
+  packed_data.resize(total_size);
+  _communicator.broadcast(packed_data, owner_id);
+
+  // Unpack
+  if (owner_id != processor_id())
+  {
+    list.clear();
+
+    bool start_next_set = true;
+    bool has_data_to_save = false;
+
+    unsigned int curr_set_length = 0;
+    std::set<dof_id_type> curr_set;
+
+    for (unsigned int i = 0; i < packed_data.size(); ++i)
+    {
+      if (start_next_set)
+      {
+        if (has_data_to_save)
+        {
+          list.push_back(BubbleData(curr_set, map_num)); // map_num == var_idx in multi_map mode
+          curr_set.clear();
+        }
+
+        // Get the length of the next set
+        curr_set_length = packed_data[i];
+      }
+      else
+      {
+        // unpack each bubble
+        curr_set.insert(packed_data[i]);
+        --curr_set_length;
+      }
+
+      start_next_set = !(curr_set_length);
+      has_data_to_save = true;
+    }
+
+    if (has_data_to_save)
+      list.push_back(BubbleData(curr_set, map_num)); // map_num == var_idx in multi_map mode
+
+    mooseAssert(curr_set_length == 0, "Error in unpacking data");
+  }
+  Moose::perf_log.pop("communicateOneList()", "FeatureFloodCount");
+}
+
+void
 FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 {
   Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
   std::set<dof_id_type> set_union;
   std::insert_iterator<std::set<dof_id_type> > set_union_inserter(set_union, set_union.begin());
 
+  /**
+   * If map_num <= n_processors (normal case), each processor up to map_num will handle one list
+   * of nodes and receive the merged nodes from other processors for all other lists.
+   */
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
-    // Get an iterator pointing to the end of the list, we'll reuse it several times in the merge algorithm below
-    std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
-
-    // Next add periodic neighbor information if requested to the BubbleData objects
-    if (use_periodic_boundary_info)
-      for (std::list<BubbleData>::iterator it = _bubble_sets[map_num].begin(); it != end; ++it)
-        appendPeriodicNeighborNodes(*it);
-
-    // Finally start our merge loops
-    for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; /* No increment */)
+    unsigned int owner_id = map_num % _app.n_processors();
+    if (_single_map_mode || owner_id == processor_id())
     {
-      bool need_it1_increment = true;
+      // Get an iterator pointing to the end of the list, we'll reuse it several times in the merge algorithm below
+      std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
 
-      for (std::list<BubbleData>::iterator it2 = it1; it2 != end; ++it2)
+      // Next add periodic neighbor information if requested to the BubbleData objects
+      if (use_periodic_boundary_info)
+        for (std::list<BubbleData>::iterator it = _bubble_sets[map_num].begin(); it != end; ++it)
+          appendPeriodicNeighborNodes(*it);
+
+      // Finally start our merge loops
+      for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; /* No increment */)
       {
-        if (it1 != it2 &&                                                               // Make sure that these iterators aren't pointing at the same set
-            it1->_var_idx == it2->_var_idx &&                                           // and that the sets have matching variable indices...
-            (setsIntersect(it1->_entity_ids.begin(), it1->_entity_ids.end(),            // Do they overlap on the current entity type? OR..
-                           it2->_entity_ids.begin(), it2->_entity_ids.end()) ||
-               (use_periodic_boundary_info &&                                           // Are we merging across periodic boundaries? AND
-               setsIntersect(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(),  // Do they overlap on periodic nodes?
-                             it2->_periodic_nodes.begin(), it2->_periodic_nodes.end())
-               )
-            )
-          )
+        bool need_it1_increment = true;
+
+        for (std::list<BubbleData>::iterator it2 = it1; it2 != end; ++it2)
         {
-          // Merge these two entity sets
-          set_union.clear();
-          std::set_union(it1->_entity_ids.begin(), it1->_entity_ids.end(), it2->_entity_ids.begin(), it2->_entity_ids.end(), set_union_inserter);
-          // Put the merged set in the latter iterator so that we'll compare earlier sets to it again
-          it2->_entity_ids = set_union;
-
-          // If we are merging periodic boundaries we'll need to merge those nodes too
-          if (use_periodic_boundary_info)
+          if (it1 != it2 &&                                                               // Make sure that these iterators aren't pointing at the same set
+              it1->_var_idx == it2->_var_idx &&                                           // and that the sets have matching variable indices...
+              (setsIntersect(it1->_entity_ids.begin(), it1->_entity_ids.end(),            // Do they overlap on the current entity type? OR..
+                             it2->_entity_ids.begin(), it2->_entity_ids.end()) ||
+                 (use_periodic_boundary_info &&                                           // Are we merging across periodic boundaries? AND
+                 setsIntersect(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(),  // Do they overlap on periodic nodes?
+                               it2->_periodic_nodes.begin(), it2->_periodic_nodes.end())
+                 )
+              )
+            )
           {
+            // Merge these two entity sets
             set_union.clear();
-            std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(), set_union_inserter);
-            it2->_periodic_nodes = set_union;
+            std::set_union(it1->_entity_ids.begin(), it1->_entity_ids.end(), it2->_entity_ids.begin(), it2->_entity_ids.end(), set_union_inserter);
+            // Put the merged set in the latter iterator so that we'll compare earlier sets to it again
+            it2->_entity_ids = set_union;
+
+            // If we are merging periodic boundaries we'll need to merge those nodes too
+            if (use_periodic_boundary_info)
+            {
+              set_union.clear();
+              std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(), set_union_inserter);
+              it2->_periodic_nodes = set_union;
+            }
+
+            // Now remove the merged set, the one we didn't update (it1)
+            _bubble_sets[map_num].erase(it1++);
+            // don't increment the outer loop since we just deleted it incremented
+            need_it1_increment = false;
+            // break out of the inner loop and move on
+            break;
           }
-
-          // Now remove the merged set, the one we didn't update (it1)
-          _bubble_sets[map_num].erase(it1++);
-          // don't increment the outer loop since we just deleted it incremented
-          need_it1_increment = false;
-          // break out of the inner loop and move on
-          break;
         }
-      }
 
-      if (need_it1_increment)
-        ++it1;
+        if (need_it1_increment)
+          ++it1;
+      }
     }
   }
+
+  if (!_single_map_mode)
+    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+      // Now communicate this list with all the other processors
+      communicateOneList(_bubble_sets[map_num], map_num % _app.n_processors(), map_num);
+
   Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
 
