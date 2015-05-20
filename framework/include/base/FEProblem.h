@@ -146,7 +146,7 @@ public:
    * @param abstol         Absolute residual convergence tolerance
    * @param nfuncs         Number of function evaluations
    * @param max_funcs      Maximum Number of function evaluations
-   * @param ref_resid      Reference residual to be used in relative convergence check
+   * @param initial_residual_before_preset_bcs      Residual norm prior to imposition of PresetBC values on solution vector
    * @param div_threshold  Maximum value of residual before triggering divergence check
    */
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
@@ -159,7 +159,7 @@ public:
                                                                     const Real abstol,
                                                                     const PetscInt nfuncs,
                                                                     const PetscInt max_funcs,
-                                                                    const Real ref_resid,
+                                                                    const Real initial_residual_before_preset_bcs,
                                                                     const Real div_threshold);
 
   /**

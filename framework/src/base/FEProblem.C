@@ -3856,11 +3856,18 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
                                      const Real abstol,
                                      const PetscInt nfuncs,
                                      const PetscInt max_funcs,
-                                     const Real ref_resid,
+                                     const Real initial_residual_before_preset_bcs,
                                      const Real div_threshold)
 {
   NonlinearSystem & system = getNonlinearSystem();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
+
+  // This is the first residual before any iterations have been done,
+  // but after PresetBCs (if any) have been imposed on the solution
+  // vector.  We save it, and use it to detect convergence if
+  // compute_initial_residual_before_preset_bcs=false.
+  if (it==0)
+    system._initial_residual_after_preset_bcs = fnorm;
 
   std::ostringstream oss;
   if (fnorm != fnorm)
@@ -3888,7 +3895,10 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
 
   if (it && !reason)
   {
-    if (fnorm <= ref_resid*rtol)
+    // If compute_initial_residual_before_preset_bcs==false, then use the
+    // first residual computed by Petsc to determine convergence.
+    Real the_residual = system._compute_initial_residual_before_preset_bcs ? initial_residual_before_preset_bcs : system._initial_residual_after_preset_bcs;
+    if (fnorm <= the_residual*rtol)
     {
       oss << "Converged due to function norm " << fnorm << " < " << " (relative tolerance)\n";
       reason = MOOSE_CONVERGED_FNORM_RELATIVE;
