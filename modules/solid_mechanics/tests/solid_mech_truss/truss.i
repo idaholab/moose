@@ -153,7 +153,7 @@
     block = 1
     variable = area
     value = 0.8
-    execute_on = timestep_begin
+    execute_on = 'initial timestep_begin'
   [../]
 []
 

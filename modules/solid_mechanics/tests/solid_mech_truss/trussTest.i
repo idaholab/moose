@@ -143,14 +143,14 @@
     block = 1
     variable = area
     value = 1.0
-    execute_on = timestep_begin
+    execute_on = 'initial timestep_begin'
   [../]
   [./area2]
     type = ConstantAux
     block = 2
     variable = area
     value = 0.25
-    execute_on = timestep_begin
+    execute_on = 'initial timestep_begin'
   [../]
 []
 

@@ -86,6 +86,7 @@
 [Postprocessors]
   [./total_c]
     type = ElementIntegralVariablePostprocessor
+    execute_on = 'initial timestep_end'
     variable = c
   [../]
 []

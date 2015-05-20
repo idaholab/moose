@@ -68,7 +68,7 @@
   [./bubbles]
     type = FeatureFloodCount
     variable = c
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
 []
 
