@@ -121,15 +121,18 @@
     type = PlotFunction
     function = 1000
     outputs = none
+    execute_on = 'initial timestep_end'
   [../]
   [./tcy]
     type = PlotFunction
     function = 100
     outputs = none
+    execute_on = 'initial timestep_end'
   [../]
   [./tcz]
     type = PlotFunction
     function = 10
     outputs = none
+    execute_on = 'initial timestep_end'
   [../]
 []

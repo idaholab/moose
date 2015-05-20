@@ -36,6 +36,7 @@
     type = NodalArea
     variable = nodal_area
     boundary = 1
+    execute_on = 'initial timestep_end'
   [../]
 []
 

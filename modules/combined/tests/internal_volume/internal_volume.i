@@ -132,6 +132,7 @@
     boundary = 100
     scale_factor = 2
     addition = -7
+    execute_on = 'initial timestep_end'
   [../]
 
   [./dispZ]
