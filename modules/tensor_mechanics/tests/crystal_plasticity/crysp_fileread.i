@@ -165,22 +165,22 @@
   [./stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-    block = 'ANY_BLOCK_ID 0'
+    execute_on = 'initial timestep_end'
   [../]
   [./fp_zz]
     type = ElementAverageValue
     variable = fp_zz
-    block = 'ANY_BLOCK_ID 0'
+    execute_on = 'initial timestep_end'
   [../]
   [./e_zz]
     type = ElementAverageValue
     variable = e_zz
-    block = 'ANY_BLOCK_ID 0'
+    execute_on = 'initial timestep_end'
   [../]
   [./gss1]
     type = ElementAverageValue
     variable = gss1
-    block = 'ANY_BLOCK_ID 0'
+    execute_on = 'initial timestep_end'
   [../]
 []
 
