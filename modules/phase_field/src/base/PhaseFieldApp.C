@@ -71,6 +71,7 @@
 #include "GBEvolution.h"
 #include "KKSXeVacSolidMaterial.h"
 #include "LinearIsoElasticPFDamage.h"
+#include "MathEBFreeEnergy.h"
 #include "MathFreeEnergy.h"
 #include "MultiBarrierFunctionMaterial.h"
 #include "ParsedMaterial.h"
@@ -223,6 +224,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(GBEvolution);
   registerMaterial(KKSXeVacSolidMaterial);
   registerMaterial(LinearIsoElasticPFDamage);
+  registerMaterial(MathEBFreeEnergy);
   registerMaterial(MathFreeEnergy);
   registerMaterial(MultiBarrierFunctionMaterial);
   registerMaterial(ParsedMaterial);
