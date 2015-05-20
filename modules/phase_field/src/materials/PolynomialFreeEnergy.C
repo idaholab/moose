@@ -24,11 +24,10 @@ PolynomialFreeEnergy::PolynomialFreeEnergy(const std::string & name,
     _W(_W_name.c_str()),
     _order(getParam<MooseEnum>("polynomial_order"))
 {
-  std::cout << "HERE" << std::endl;
   EBFunction free_energy;
 
   // Free energy
-  switch(_order)
+  switch (_order)
   {
     case 0: //4th order
       free_energy(_c, _W, _a) = pow(2.0, 4.0)*_W*pow(_c - _a, 2)*pow(1 - _c - _a, 2);

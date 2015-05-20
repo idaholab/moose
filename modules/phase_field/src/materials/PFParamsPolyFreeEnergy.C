@@ -58,7 +58,7 @@ PFParamsPolyFreeEnergy::computeQpProperties()
   //Compute free energy integral constant, such that int^1_0 f_loc = KN*sqrt(W)
   Real KN = 0.0;
 
-  switch(_order)
+  switch (_order)
   {
     case 0: //Fourth oder
       KN = 2.0/3.0;
@@ -83,7 +83,7 @@ PFParamsPolyFreeEnergy::computeQpProperties()
   Real Co = 0.0;
   Real a = _c_eq[_qp];
 
-  switch(_order)
+  switch (_order)
   {
     case 0: //4th order polynomial
       Co = std::pow(2.0, 5.0)*( 1.0 + 2.0*a - 2.0*a*a );

@@ -22,7 +22,6 @@ public:
 protected:
   virtual void computeQpProperties();
 
-private:
   ///Variable values
   VariableValue & _c;
   VariableValue & _T;
