@@ -116,6 +116,7 @@
   [../]
   [./DOFs]
     type = NumDOFs
+    execute_on = 'initial timestep_end'
   [../]
 []
 

@@ -78,7 +78,7 @@
 
 [Postprocessors]
   [./flood_count_pp]
-    execute_on = 'TIMESTEP'
+    execute_on = 'timestep_end'
     type = FeatureFloodCount
     variable = u
     # For some reason I don't understand yet, the ImageFunction thing
@@ -100,6 +100,7 @@
 [Problem]
   type = FEProblem
   solve = false
+  use_legacy_uo_initialization = true
 [../]
 
 [Executioner]
