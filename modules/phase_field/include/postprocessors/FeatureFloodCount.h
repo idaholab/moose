@@ -107,6 +107,15 @@ protected:
   void mergeSets(bool use_periodic_boundary_info);
 
   /**
+   * This routine broadcasts a std::list<BubbleData> to other ranks. It includes both the
+   * serialization and de-serialization routines.
+   * @param list the list to broadcast
+   * @owner_id the rank initiating the broadcast
+   * @map_num the number in the _bubble_sets datastructure that will be replaced by the results of the broadcast
+   */
+  void communicateOneList(std::list<BubbleData> & list, unsigned int owner_id, unsigned int map_num);
+
+  /**
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
