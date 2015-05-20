@@ -328,10 +328,6 @@ PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, 
   // Error message that will be set by the FEProblem.
   std::string msg;
 
-  // MOOSE-specific parameters
-  const Real ref_resid = system._initial_residual;
-  const Real div_threshold = system._initial_residual*(1.0/rtol);
-
   // xnorm: 2-norm of current iterate
   // snorm: 2-norm of current step
   // fnorm: 2-norm of function at current iterate
@@ -345,8 +341,8 @@ PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, 
                                                                                    atol,
                                                                                    nfuncs,
                                                                                    maxf,
-                                                                                   ref_resid,
-                                                                                   div_threshold);
+                                                                                   system._initial_residual_before_preset_bcs,
+                                                                                   /*div_threshold=*/(1.0/rtol)*system._initial_residual_before_preset_bcs);
 
   if (msg.length() > 0)
     PetscInfo(snes, msg.c_str());
