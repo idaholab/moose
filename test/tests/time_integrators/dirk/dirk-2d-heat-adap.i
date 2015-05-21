@@ -27,7 +27,6 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    # dudt = 3*t^2*(x^2 + y^2)
     value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
   [../]
 
