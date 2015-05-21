@@ -1,0 +1,7 @@
+[Tests]
+  [./dirk-2d-heat]
+    type = 'Exodiff'
+    input = 'dirk-2d-heat.i'
+    exodiff = 'dirk-2d-heat_out.e'
+  [../]
+[]
