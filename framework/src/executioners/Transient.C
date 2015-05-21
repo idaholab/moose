@@ -40,7 +40,7 @@ InputParameters validParams<Transient>()
   InputParameters params = validParams<Executioner>();
   std::vector<Real> sync_times(1);
   sync_times[0] = -std::numeric_limits<Real>::max();
-  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 rk-2", "implicit-euler");
+  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 rk-2 dirk", "implicit-euler");
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
@@ -667,6 +667,7 @@ Transient::setupTimeIntegrator()
   case 2: ti_str = "CrankNicolson"; break;
   case 3: ti_str = "BDF2"; break;
   case 4: ti_str = "RungeKutta2"; break;
+  case 5: ti_str = "DIRK"; break;
   default: mooseError("Unknown scheme"); break;
   }
 
