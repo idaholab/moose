@@ -3,7 +3,7 @@
 ###############################################################################
 #
 # Required Environment variables (one of the following)
-# PACKAGE_DIR   - Location of the MOOSE redistributable package 
+# PACKAGES_DIR  - Location of the MOOSE redistributable package 
 # CPPUNIT_DIR   - Location of CPPUNIT
 #
 # Optional Environment variables

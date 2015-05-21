@@ -191,6 +191,15 @@ clobberall:: clobber
           make -C $$dir clobber ; \
         done
 
+# clang_complete builds a clang configuration file for various clang-based autocompletion plugins
+clang_complete:
+	@echo "Building .clang_complete file"
+	@echo "-xc++" > .clang_complete
+	@echo "-std=c++11" >> .clang_complete
+	@for item in $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES); do \
+          echo $$item >> .clang_complete;  \
+        done
+
 # Debugging stuff
 echo_include:
 	@echo $(app_INCLUDES) $(libmesh_INCLUDE)
