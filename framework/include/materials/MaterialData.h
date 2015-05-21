@@ -36,6 +36,9 @@ public:
   MaterialData(MaterialPropertyStorage & storage);
   virtual ~MaterialData();
 
+  /**
+   * Calls the destroy() methods for the properties currently stored
+   */
   void release();
 
   /**
@@ -78,35 +81,53 @@ public:
 
   // material properties for given element (and possible side)
   void swap(const Elem & elem, unsigned int side = 0);
+
   // Reinit material properties for given element (and possible side)
   void reinit(std::vector<Material *> & mats);
+
   // material properties for given element (and possible side)
   void swapBack(const Elem & elem, unsigned int side = 0);
 
+  ///@{
+  /**
+   *  Methods for retrieving MaterialProperties object
+   */
   MaterialProperties & props() { return _props; }
   MaterialProperties & propsOld() { return _props_old; }
   MaterialProperties & propsOlder() { return _props_older; }
+  ///@}
 
+  ///@{
+  /**
+   * Methods for testing the existence of a property
+   * @return True if the property exists
+   */
   template <typename T>
   bool haveProperty(const std::string & prop_name) const;
-
   template <typename T>
   bool havePropertyOld(const std::string & prop_name) const;
-
   template <typename T>
   bool havePropertyOlder(const std::string & prop_name) const;
+  ///@}
 
+  ///@{
+  /**
+   * Methods for retieving a MaterialProperty object
+   * @tparam T The type of the property
+   * @param prop_name The name of the property
+   * @return The property for the supplied type and name
+   */
   template <typename T>
   MaterialProperty<T> & getProperty(const std::string & prop_name);
-
   template <typename T>
   MaterialProperty<T> & getPropertyOld(const std::string & prop_name);
-
   template <typename T>
   MaterialProperty<T> & getPropertyOlder(const std::string & prop_name);
+  ///@}
 
-  /** Return the swapped status of material
-   * \return Returns true of the stateful material is swapped
+  /**
+   * Return the swapped status of material
+   * @return Returns true of the stateful material is swapped
    */
   bool isSwapped();
 
@@ -117,15 +138,23 @@ public:
 
 protected:
 
+  /// Reference to the MaterialStorage class
   MaterialPropertyStorage & _storage;
+
   /// Number of quadrature points
   unsigned int _n_qpoints;
 
-  // holds material properties for currently selected element (and possibly a side), they are being copied from _storage
+  ///@{
+  /// Holds material properties for currently selected element (and possibly a side), they are being copied from _storage
   MaterialProperties _props;
   MaterialProperties _props_old;
   MaterialProperties _props_older;
+  ///@}
 
+  /**
+   * Resizes the properties to the specified size
+   * @param size The size of the properties to set
+   */
   template<typename T>
   void resizeProps(unsigned int size);
 

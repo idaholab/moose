@@ -178,7 +178,7 @@ BlkResTestDiffusion::BlkResTestDiffusion(const std::string & name, InputParamete
   // Test that hasMaterialPropertyBlock is working properly
   else if (test == "hasBlockMaterialProperty_true")
   {
-    if (hasBlockMaterialProperty("a"))
+    if (hasBlockMaterialProperty<Real>("a"))
       mooseError("hasBlockMaterialProperty is true, test passed"); // expected error
     else
       mooseError("hasBlockMaterialProperty is false, test failed");
@@ -186,7 +186,7 @@ BlkResTestDiffusion::BlkResTestDiffusion(const std::string & name, InputParamete
 
   else if (test == "hasBlockMaterialProperty_false")
   {
-    if (hasBlockMaterialProperty("b"))
+    if (hasBlockMaterialProperty<Real>("b"))
       mooseError("hasBlockMaterialProperty is true, test failed");
     else
       mooseError("hasBlockMaterialProperty is false, test passed"); // expected error

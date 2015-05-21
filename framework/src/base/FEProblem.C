@@ -1669,38 +1669,11 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
   }
 }
 
-const std::vector<Material *> &
-FEProblem::getMaterialsByName(const std::string & name, THREAD_ID tid)
-{
-  return _materials[tid].getMaterialsByName(name);
-}
-
-const std::vector<Material*> &
-FEProblem::getMaterials(SubdomainID block_id, THREAD_ID tid)
+MaterialWarehouse &
+FEProblem::getMaterialWarehouse(THREAD_ID tid)
 {
   mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
-  return _materials[tid].getMaterials(block_id);
-}
-
-const std::vector<Material*> &
-FEProblem::getFaceMaterials(SubdomainID block_id, THREAD_ID tid)
-{
-  mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
-  return _materials[tid].getFaceMaterials(block_id);
-}
-
-const std::vector<Material*> &
-FEProblem::getBndMaterials(BoundaryID boundary_id, THREAD_ID tid)
-{
-  mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
-  return _materials[tid].getBoundaryMaterials(boundary_id);
-}
-
-const std::vector<Material*> &
-FEProblem::getNeighborMaterials(SubdomainID block_id, THREAD_ID tid)
-{
-  mooseAssert(tid < _materials.size(), "Requesting a material warehouse that does not exist");
-  return _materials[tid].getNeighborMaterials(block_id);
+  return _materials[tid];
 }
 
 void

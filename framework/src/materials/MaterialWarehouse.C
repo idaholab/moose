@@ -255,7 +255,7 @@ MaterialWarehouse::checkDependMaterials(const std::map<SubdomainID, std::vector<
 {
   for (std::map<SubdomainID, std::vector<Material *> >::const_iterator j = materials_map.begin(); j != materials_map.end(); ++j)
   {
-    /// These two sets are used to make sure that all depenedent props on a block are actually supplied
+    /// These two sets are used to make sure that all dependent props on a block are actually supplied
     std::set<std::string> block_depend_props, block_supplied_props;
 
     for (std::vector<Material *>::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
@@ -274,7 +274,7 @@ MaterialWarehouse::checkDependMaterials(const std::map<SubdomainID, std::vector<
       }
     }
 
-    // Error check to make sure all propoerites consumed by materials are supplied on this block
+    // Error check to make sure all properties consumed by materials are supplied on this block
     std::set<std::string> difference;
     std::set_difference(block_depend_props.begin(), block_depend_props.end(), block_supplied_props.begin(), block_supplied_props.end(),
                         std::inserter(difference, difference.end()));
