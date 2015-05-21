@@ -85,6 +85,9 @@ Material::Material(const std::string & name, InputParameters parameters) :
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
   for (unsigned int i=0; i<coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
+
+  // Update the MaterialData pointer in BlockRestrictable to use the correct MaterialData object
+  _blk_material_data = &_material_data;
 }
 
 Material::~Material()
@@ -166,4 +169,62 @@ std::set<OutputName>
 Material::getOutputs()
 {
   return std::set<OutputName>(getParam<std::vector<OutputName> >("outputs").begin(), getParam<std::vector<OutputName> >("outputs").end());
+}
+
+bool
+Material::hasBlockMaterialPropertyHelper(const std::string & name)
+{
+  // Reference to MaterialWarehouse for testing and retrieving block ids
+  MaterialWarehouse & material_warehouse = _fe_problem.getMaterialWarehouse(_tid);
+
+  // Complete set of ids that this object is active
+  const std::set<SubdomainID> & ids = hasBlocks(Moose::ANY_BLOCK_ID) ? meshBlockIDs() : blockIDs();
+
+  // Flags for the various material types
+  bool neighbor = getParam<bool>("_neighbor");
+  bool bnd = getParam<bool>("_bnd");
+
+  // Define function pointers to the correct has/get methods for the type of material
+  bool(MaterialWarehouse::*has_func)(SubdomainID) const;
+  std::vector<Material *> & (MaterialWarehouse::*get_func)(SubdomainID);
+  if (bnd && neighbor)
+  {
+    has_func = &MaterialWarehouse::hasNeighborMaterials;
+    get_func = &MaterialWarehouse::getNeighborMaterials;
+  }
+  else if (bnd && !neighbor)
+  {
+    has_func = &MaterialWarehouse::hasFaceMaterials;
+    get_func = &MaterialWarehouse::getFaceMaterials;
+  }
+  else
+  {
+    has_func = &MaterialWarehouse::hasMaterials;
+    get_func = &MaterialWarehouse::getMaterials;
+  }
+
+  // Loop over each id for this object
+  for (std::set<SubdomainID>::const_iterator id_it = ids.begin(); id_it != ids.end(); ++id_it)
+  {
+    // Storage of material properties that have been DECLARED on this id
+    std::set<std::string> declared_props;
+
+    // If block materials exist, populated the set of properties that were declared
+    if ((material_warehouse.*has_func)(*id_it))
+    {
+      std::vector<Material *> mats = (material_warehouse.*get_func)(*id_it);
+      for (std::vector<Material *>::iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
+      {
+        const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();
+        declared_props.insert(mat_props.begin(), mat_props.end());
+      }
+    }
+
+    // If the supplied property is not in the list of properties on the current id, return false
+    if (declared_props.find(name) == declared_props.end())
+      return false;
+  }
+
+  // If you get here the supplied property is defined on all blocks
+  return true;
 }

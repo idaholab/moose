@@ -5,4 +5,10 @@
     exodiff = 'test_out.e'
     recover = false
   [../]
+
+  [./mutliblock]
+    # Test the default property behavior of DerivativeMaterialInterface
+    type = 'RunApp'
+    input = 'multiblock.i'
+  [../]
 []

@@ -868,13 +868,9 @@ SolidModel::initialSetup()
   {
     const std::vector<Material*> * mats_p;
     if (_bnd)
-    {
-      mats_p = &_fe_problem.getFaceMaterials( _block_id[i], _tid );
-    }
+      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getFaceMaterials(_block_id[i]);
     else
-    {
-      mats_p = &_fe_problem.getMaterials( _block_id[i], _tid );
-    }
+      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getMaterials(_block_id[i]);
 
     const std::vector<Material*> & mats = *mats_p;
     for (unsigned int j=0; j < mats.size(); ++j)

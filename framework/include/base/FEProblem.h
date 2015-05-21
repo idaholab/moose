@@ -163,7 +163,7 @@ public:
                                                                     const Real div_threshold);
 
   /**
-   * Check for converence of the linear solution
+   * Check for convergence of the linear solution
    * @param msg            Error message that gets sent back to the solver
    * @param n              Iteration counter
    * @param rnorm          Norm of the residual vector
@@ -393,18 +393,6 @@ public:
 
   // Materials /////
   void addMaterial(const std::string & kernel_name, const std::string & name, InputParameters parameters);
-
-  /**
-   * Get list of materials with specified name
-   * @param name The name of the material
-   * @param tid Thread ID
-   * @return The list of materials with the name 'name'
-   */
-  virtual const std::vector<Material*> & getMaterialsByName(const std::string & name, THREAD_ID tid);
-  virtual const std::vector<Material*> & getMaterials(SubdomainID block_id, THREAD_ID tid);
-  virtual const std::vector<Material*> & getFaceMaterials(SubdomainID block_id, THREAD_ID tid);
-  virtual const std::vector<Material*> & getBndMaterials(BoundaryID block_id, THREAD_ID tid);
-  virtual const std::vector<Material*> & getNeighborMaterials(SubdomainID block_id, THREAD_ID tid);
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
@@ -841,7 +829,7 @@ public:
   /*
    * Return a reference to the MaterialWarehouse
    */
-  MaterialWarehouse & getMaterialWarehouse(THREAD_ID tid) { return _materials[tid]; }
+  MaterialWarehouse & getMaterialWarehouse(THREAD_ID tid);
 
   /*
    * Return a pointer to the MaterialData
@@ -1008,6 +996,7 @@ protected:
 
   /// true if the Jacobian is constant
   bool _const_jacobian;
+
   /// Indicates if the Jacobian was computed
   bool _has_jacobian;
 

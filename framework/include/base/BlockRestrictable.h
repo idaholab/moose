@@ -19,6 +19,7 @@
 #include "InputParameters.h"
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "MaterialData.h"
 
 // Forward declarations
 class BlockRestrictable;
@@ -152,22 +153,34 @@ public:
   /**
    * Check if a material property is valid for all blocks of this object
    *
-   * This method returns true if the block ids for this object are a subset of the blocks
-   * associated with the material property for the supplied property name. This function
-   * will return false it the getMaterialPropertyBlocks for the same name is empty.
+   * This method returns true if the supplied property name has been declared
+   * in a Material object on the block ids for this object.
    *
-   * @param name the name of the property to query
+   * @tparam T The type of material property
+   * @param prop_name the name of the property to query
    * @return true if the property exists for all block ids of the object, otherwise false
-   * \see MaterialPropertyInterface::getMaterialPropertyBlocks
-   * \see isBlockSubet
+   *
+   * @see Material::hasBlockMaterialProperty
    */
-  bool hasBlockMaterialProperty(const std::string & name) const;
+  template<typename T> bool hasBlockMaterialProperty(const std::string & prop_name);
 
   /**
    * Return all of the SubdomainIDs for the mesh
    * @return A set of all subdomians for the entire domain
    */
   const std::set<SubdomainID> & meshBlockIDs();
+
+protected:
+
+  /// Pointer to the MaterialData class for this object
+  MaterialData * _blk_material_data;
+
+  /**
+   * A helper method to allow the Material object to specialize the behavior
+   * of hasBlockMaterialProperty. It also avoid circular #include problems.
+   * @see hasBlockMaterialProperty
+   */
+  virtual bool hasBlockMaterialPropertyHelper(const std::string & prop_name);
 
 private:
 
@@ -192,6 +205,9 @@ private:
   /// Reference to the boundary_ids, defaults to an empty set if not provided
   const std::set<BoundaryID> & _boundary_ids;
 
+  /// Thread id for this object
+  THREAD_ID _blk_tid;
+
   /**
    * An initialization routine needed for dual constructors
    */
@@ -202,6 +218,15 @@ private:
    * @param parameters A reference to the input parameters supplied to the object
    */
   std::set<SubdomainID> variableSubdomainIDs(const InputParameters & parameters) const;
+
 };
+
+template<typename T>
+bool
+BlockRestrictable::hasBlockMaterialProperty(const std::string & prop_name)
+{
+  mooseAssert(_blk_material_data != NULL, "MaterialData pointer is not defined");
+  return hasBlockMaterialPropertyHelper(prop_name) && _blk_material_data->haveProperty<T>(prop_name);
+}
 
 #endif // BLOCKRESTRICTABLE_H
