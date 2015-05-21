@@ -14,7 +14,7 @@ InputParameters validParams<PolynomialFreeEnergy>();
  * Derivative free energy material defining polynomial free energies for single component materials
  */
 class PolynomialFreeEnergy : public DerivativeParsedMaterialHelper,
-                                   public ExpressionBuilder
+                             public ExpressionBuilder
 {
 public:
   PolynomialFreeEnergy(const std::string & name, InputParameters parameters);
@@ -35,7 +35,6 @@ protected:
 
   ///Polynomial order
   MooseEnum _order;
-
 };
 
 #endif //POLYNOMIALFREEENERGY_H

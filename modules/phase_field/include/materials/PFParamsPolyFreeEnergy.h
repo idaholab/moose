@@ -11,13 +11,12 @@ InputParameters validParams<PFParamsPolyFreeEnergy>();
 
 /**
  * Calculated properties for a single component phase field model using polynomial free energies
- **/
-
+ */
 class PFParamsPolyFreeEnergy : public Material
 {
 public:
   PFParamsPolyFreeEnergy(const std::string & name,
-          InputParameters parameters);
+                         InputParameters parameters);
 
 protected:
   virtual void computeQpProperties();

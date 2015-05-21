@@ -20,7 +20,7 @@ InputParameters validParams<PFParamsPolyFreeEnergy>()
 }
 
 PFParamsPolyFreeEnergy::PFParamsPolyFreeEnergy(const std::string & name,
-                             InputParameters parameters) :
+                                               InputParameters parameters) :
     Material(name, parameters),
     _c(coupledValue("c")),
     _T(coupledValue("T")),
