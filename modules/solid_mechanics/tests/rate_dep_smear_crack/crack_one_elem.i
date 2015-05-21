@@ -279,36 +279,17 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
   petsc_options_iname = '-ksp_gmres_restart -pc_type'
   petsc_options_value = '101                lu'
 
   line_search = 'none'
-
-  l_max_its = 100
-
-  nl_max_its = 100
-  nl_rel_tol = 1e-8
-  nl_rel_step_tol = 1e-8
-
-  start_time = 0.0
-  end_time = 3.0
+  nl_max_its = 10
+  nl_rel_tol = 1e-11
 
   dt = 0.05
-  dtmin = 1e-8
-
-#  [./TimeStepper]
-#  type = IterationAdaptiveDT
-#  reset_dt = true
-#  dt = 0.05
-#  time_t = '0.0 0.3'
-#  time_dt = '0.05 1e-2'
-#  growth_factor = 1.8
-#  cutback_factor = 0.5
-#  [../]
-
+  dtmin = 1e-3
   num_steps = 30
 []
 
