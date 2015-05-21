@@ -170,11 +170,13 @@
     type = NodalSum
     variable = react_x
     boundary = 1
+    execute_on = 'initial timestep_end'
   [../]
   [./total_area]
     type = NodalSum
     variable = nodal_area_dummy_name
     boundary = 2
+    execute_on = 'initial timestep_end'
   [../]
 []
 

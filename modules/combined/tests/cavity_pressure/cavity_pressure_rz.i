@@ -191,14 +191,14 @@
   [./internalVolume]
     type = InternalVolume
     boundary = 2
-    execute_on = linear
+    execute_on = 'initial linear'
   [../]
 
   [./aveTempInterior]
     type = SideAverageValue
     boundary = 2
     variable = temp
-    execute_on = linear
+    execute_on = 'initial linear'
   [../]
 
 []

@@ -200,12 +200,14 @@
     type = SideAverageValue
     boundary = 2
     variable = temp
+    execute_on = 'initial timestep_end'
   [../]
 
   [./temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
+    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_left]
@@ -213,6 +215,7 @@
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
+    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_right]
@@ -220,18 +223,21 @@
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
+    execute_on = 'initial timestep_end'
   [../]
 
   [./temp_left2]
     type = SideAverageValue
     boundary = 2
     variable = temp2
+    execute_on = 'initial timestep_end'
   [../]
 
   [./temp_right2]
     type = SideAverageValue
     boundary = 3
     variable = temp2
+    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_left2]
@@ -239,6 +245,7 @@
     variable = temp2
     boundary = 2
     diffusivity = thermal_conductivity
+    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_right2]
@@ -246,6 +253,7 @@
     variable = temp2
     boundary = 3
     diffusivity = thermal_conductivity
+    execute_on = 'initial timestep_end'
   [../]
 
 []

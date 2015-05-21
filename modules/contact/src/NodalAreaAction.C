@@ -42,7 +42,12 @@ NodalAreaAction::act()
   _moose_object_pars.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,getParam<BoundaryName>("slave"));
   _moose_object_pars.set<VariableName>("variable") = "nodal_area_"+short_name;
 
-  _moose_object_pars.set<MultiMooseEnum>("execute_on") = "timestep_begin";
+  mooseAssert(_problem, "Problem pointer is NULL");
+  if (_problem->legacyUoInitialization())
+    _moose_object_pars.set<MultiMooseEnum>("execute_on") = "timestep_begin";
+  else
+    _moose_object_pars.set<MultiMooseEnum>("execute_on") = "initial timestep_begin";
+
   _moose_object_pars.set<bool>("use_displaced_mesh") = true;
 
   _problem->addUserObject("NodalArea",
