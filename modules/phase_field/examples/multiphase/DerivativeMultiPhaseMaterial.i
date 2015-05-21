@@ -88,7 +88,7 @@
       type = FunctionIC
       #
       # Note: this initial conditions sets up a _sharp_ interface. Ideally
-      # we should start with a smooth interface with a with a width consistent
+      # we should start with a smooth interface with a width consistent
       # with the kappa parameter supplied for the given interface.
       #
       function = 'r:=sqrt(x^2+y^2);if(r<=4,1,0)'
