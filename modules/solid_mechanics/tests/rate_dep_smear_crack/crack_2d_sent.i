@@ -199,24 +199,17 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm         31   preonly   lu      1'
+  petsc_options_value = 'asm      31                  preonly       lu           1'
 
-  line_search = 'none' #'bt'
-
-  l_max_its = 100
-
+  line_search = 'none'
   nl_max_its = 10
-  nl_rel_tol = 1e-6
-  nl_rel_step_tol = 1e-6
+  nl_rel_tol = 1e-10
 
-  start_time = 0.0
-  end_time = 100.0
   dt = 0.05
-  dtmin = 1e-8
+  dtmin = 0.05
   num_steps = 2
 []
 
