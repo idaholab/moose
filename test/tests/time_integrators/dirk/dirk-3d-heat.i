@@ -35,7 +35,7 @@
     type = ParsedFunction
     value = sin(pi*x)*sin(pi*y)*sin(pi*z)*cos(t)
   [../]
-  
+
   [./forcing_fn]
     type = ParsedFunction
     value = sin(pi*x)*sin(pi*y)*sin(pi*z)*(3.0*pi*pi*cos(t)-sin(t))
@@ -52,7 +52,7 @@
     type     = Diffusion
     variable = u
   [../]
-  
+
   [./ffn]
     type     = UserForcingFunction
     variable = u

@@ -41,15 +41,15 @@ DIRK::~DIRK()
 void
 DIRK::computeTimeDerivatives()
 {
-  
+
   _u_dot  = *_solution;
-  
+
   if (_stage==1) {
     // Compute stage U_1
     _u_dot -= _solution_start;
     _u_dot *= 3. / _dt;
     _u_dot.close();
-    
+
     _du_dot_du = 3. / _dt;
   }
   else if (_stage==2) {
@@ -57,7 +57,7 @@ DIRK::computeTimeDerivatives()
     _u_dot -= _solution_start;
     _u_dot *= 2. / _dt;
     _u_dot.close();
-    
+
     _du_dot_du = 2. / _dt;
   }
   else if (_stage==3) {
@@ -65,33 +65,33 @@ DIRK::computeTimeDerivatives()
     _u_dot -= _solution_start;
     _u_dot *= 4. / _dt;
     _u_dot.close();
-    
+
     _du_dot_du = 4. / _dt;
   }
   else {
     mooseError("DIRK::computeTimeDerivatives(): Member variable _stage can only have values 1, 2 or 3.");
   }
-      
+
   _u_dot.close();
-  
+
 }
 
 
 void
 DIRK::solve() {
-  
+
   // Time at end of step
   Real time = _fe_problem.time();
-  
+
   // Time at beginning of step
   Real time_old = _fe_problem.timeOld();
 
   // Time at stage 1
   Real time_stage1 = time_old + (1./3.)*_dt;
-  
+
   // Solution at beginning of time step; store it because it is needed in update step
   _solution_start = _solution_old;
-  
+
   // Compute first stage
   _console << "DIRK: 1. stage" << std::endl;
   _stage = 1;
@@ -99,13 +99,13 @@ DIRK::solve() {
   _fe_problem.getNonlinearSystem().sys().solve();
 
   _fe_problem.initPetscOutput();
- 
+
   // Compute second stage
   _console << "DIRK: 2. stage" << std::endl;
   _stage = 2;
   _fe_problem.timeOld() = time_stage1;
   _fe_problem.time()    = time;
-  
+
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::petscSetOptions(_fe_problem);
 #endif
@@ -117,7 +117,7 @@ DIRK::solve() {
   // Compute update
   _console << "DIRK: 3. stage" << std::endl;
   _stage = 3;
-  
+
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::petscSetOptions(_fe_problem);
 #endif
@@ -126,13 +126,13 @@ DIRK::solve() {
 
   // Reset time at beginning of step to its original value
   _fe_problem.timeOld() = time_old;
-  
+
 }
 
 void
 DIRK::postStep(NumericVector<Number> & residual)
 {
-  
+
   if (_stage==1) {
 
     residual += _Re_time;
@@ -144,12 +144,12 @@ DIRK::postStep(NumericVector<Number> & residual)
 
   }
   else if (_stage==2) {
-    
+
     residual += _Re_time;
     residual += _Re_non_time;
     residual += _residual_stage1;
     residual.close();
-    
+
     _residual_stage2 = _Re_non_time;
     _residual_stage2.close();
   }

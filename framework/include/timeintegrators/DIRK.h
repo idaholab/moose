@@ -37,16 +37,16 @@ public:
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-  
+
   //! Indicates stage or, if _stage==3, the update step.
   unsigned int _stage;
 
   //! Buffer to store non-time residual from first stage solve.
   NumericVector<Number> & _residual_stage1;
-  
+
   //! Buffer to store non-time residual from second stage solve
   NumericVector<Number> & _residual_stage2;
-  
+
   //! Buffer to store solution at beginning of time step
   NumericVector<Number> & _solution_start;
 };
