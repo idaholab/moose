@@ -279,6 +279,7 @@
 #include "CrankNicolson.h"
 #include "ExplicitEuler.h"
 #include "RungeKutta2.h"
+#include "Dirk.h"
 //
 #include "SimplePredictor.h"
 #include "AdamsPredictor.h"
@@ -654,6 +655,7 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(CrankNicolson);
   registerTimeIntegrator(ExplicitEuler);
   registerTimeIntegrator(RungeKutta2);
+  registerTimeIntegrator (Dirk);
   // predictors
   registerPredictor(SimplePredictor);
   registerPredictor(AdamsPredictor);
