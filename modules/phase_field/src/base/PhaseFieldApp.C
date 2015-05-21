@@ -76,6 +76,8 @@
 #include "ParsedMaterial.h"
 #include "PFFracBulkRateMaterial.h"
 #include "PFMobility.h"
+#include "PFParamsPolyFreeEnergy.h"
+#include "PolynomialFreeEnergy.h"
 #include "SwitchingFunctionMaterial.h"
 
 /*
@@ -226,6 +228,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(ParsedMaterial);
   registerMaterial(PFFracBulkRateMaterial);
   registerMaterial(PFMobility);
+  registerMaterial(PFParamsPolyFreeEnergy);
+  registerMaterial(PolynomialFreeEnergy);
   registerMaterial(SwitchingFunctionMaterial);
 
   registerDeprecatedObjectName(FeatureFloodCount, "NodalFloodCount", "06/01/2015 00:00");
