@@ -12,10 +12,10 @@
 #include "Linear.h"
 #include "Nonlinear3D.h"
 #include "PlaneStrain.h"
+#include "VolumetricModel.h"
 
 #include "ConstitutiveModel.h"
 #include "SymmIsotropicElasticityTensor.h"
-#include "VolumetricModel.h"
 
 #include "MooseApp.h"
 #include "Problem.h"
@@ -60,7 +60,7 @@ InputParameters validParams<SolidModel>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("strain_zz", "The zz strain");
   params.addCoupledVar("scalar_strain_zz", "The zz strain (scalar variable)");
-  params.addParam<std::vector<std::string> >("volumetric_strain", "Names of volumetric strain contributions");
+  params.addParam<std::vector<std::string> >("dep_matl_props", "Names of material properties this material depends on.");
 
   params.addParam<std::string>("constitutive_model", "ConstitutiveModel to use (optional)");
   return params;
@@ -96,7 +96,7 @@ namespace
 
 SolidModel::SolidModel( const std::string & name,
                         InputParameters parameters ) :
-  Material( name, parameters ),
+  DerivativeMaterialInterface<Material>( name, parameters ),
   _appended_property_name( getParam<std::string>("appended_property_name") ),
   _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
   _lambda_set( parameters.isParamValid("lambda") ),
@@ -130,8 +130,7 @@ SolidModel::SolidModel( const std::string & name,
   _stress_free_temp(0.0),
   _ref_temp(0.0),
   _volumetric_models(),
-  _volumetric_strain(),
-  _volumetric_strain_old(),
+  _dep_matl_props(),
   _stress(createProperty<SymmTensor>("stress")),
   _stress_old_prop(createPropertyOld<SymmTensor>("stress")),
   _stress_old(0),
@@ -177,14 +176,13 @@ SolidModel::SolidModel( const std::string & name,
   _coord_type = _subproblem.getCoordSystem(_block_id[0]);
   _element = createElement(name, parameters);
 
-  if (isParamValid("volumetric_strain"))
+  const std::vector<std::string> & dmp = getParam<std::vector<std::string> >("dep_matl_props");
+  _dep_matl_props.insert(dmp.begin(), dmp.end());
+  for (std::set<std::string>::const_iterator i = _dep_matl_props.begin();
+       i != _dep_matl_props.end(); ++i)
   {
-    const std::vector<std::string> & vs = getParam<std::vector<std::string> >("volumetric_strain");
-    for (unsigned i = 0; i < vs.size(); ++i)
-    {
-      _volumetric_strain.push_back( &getMaterialProperty<Real>( vs[i] ) );
-      _volumetric_strain_old.push_back( &getMaterialPropertyOld<Real>( vs[i] ) );
-    }
+    // Tell MOOSE that we need this MaterialProperty.  This enables dependency checking.
+    getMaterialProperty<Real>( *i );
   }
 
 
@@ -551,15 +549,7 @@ SolidModel::applyThermalStrain()
 void
 SolidModel::applyVolumetricStrain()
 {
-  const Real oneThird = 1./3.;
   const Real V0Vold = 1/_element->volumeRatioOld(_qp);
-  for (unsigned i = 0; i < _volumetric_strain.size(); ++i)
-  {
-    const Real v_strain = std::pow(( (*_volumetric_strain[i])[_qp]    +1) * V0Vold, oneThird) -
-                          std::pow(( (*_volumetric_strain_old[i])[_qp]+1) * V0Vold, oneThird);
-    _strain_increment.addDiag( -v_strain );
-  }
-
   const SubdomainID current_block = _current_elem->subdomain_id();
   const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
   for (unsigned int i(0); i < vm.size(); ++i)
@@ -872,7 +862,7 @@ SolidModel::initialSetup()
 
   createElasticityTensor();
 
-  // Load in the volumetric models or constitutive model
+  // Load in the volumetric models and constitutive models
 
   for (unsigned i(0); i < _block_id.size(); ++i)
   {
@@ -892,10 +882,19 @@ SolidModel::initialSetup()
       VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[j]));
       if (vm)
       {
+        const std::vector<std::string> & dep_matl_props = vm->getDependentMaterialProperties();
+        for (unsigned k = 0; k < dep_matl_props.size(); ++k)
+        {
+          if ("" != dep_matl_props[k] &&
+            _dep_matl_props.find(dep_matl_props[k]) == _dep_matl_props.end())
+          {
+            mooseError("A VolumetricModel depends on " + dep_matl_props[k] +
+                       ", but that material property was not given in the dep_matl_props line.");
+          }
+        }
         _volumetric_models[_block_id[i]].push_back( vm );
       }
     }
-
     if (isParamValid("constitutive_model") && !_constitutive_active)
     {
       const std::string & constitutive_model = getParam<std::string>("constitutive_model");

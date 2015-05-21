@@ -27,6 +27,12 @@ public:
                             const Real scale_factor,
                             SymmTensor & strain_increment,
                             SymmTensor & dstrain_increment_dT) = 0;
+
+  virtual std::vector<std::string> getDependentMaterialProperties() const
+  {
+    return std::vector<std::string>(1, "");
+  }
+
 private:
   using Material::_qp;
 };
