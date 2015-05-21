@@ -30,6 +30,7 @@ PFParamsPolyFreeEnergy::PFParamsPolyFreeEnergy(const std::string & name,
     _c_eq(declareProperty<Real>("c_eq")),
     _W(declareProperty<Real>("barr_height")),
     _Qstar(declareProperty<Real>("Qstar")),
+    _D(declareProperty<Real>("D")),
     _int_width(getParam<Real>("int_width")),
     _length_scale(getParam<Real>("length_scale")),
     _time_scale(getParam<Real>("time_scale")),
@@ -53,7 +54,7 @@ PFParamsPolyFreeEnergy::computeQpProperties()
 
   //Compute equilibrium concentration and diffusivity
   _c_eq[_qp] = std::exp(-_Ef/kbT);
-  Real D = D0_c*std::exp(-_Em/kbT);
+  _D[_qp] = D0_c*std::exp(-_Em/kbT);
 
   //Compute free energy integral constant, such that int^1_0 f_loc = KN*sqrt(W)
   Real KN = 0.0;
@@ -98,7 +99,7 @@ PFParamsPolyFreeEnergy::computeQpProperties()
       mooseError("Error in PFParamsPolyFreeEnergy: incorrect polynomial order");
   }
 
-  _M[_qp] = KN/Co*(D*_int_width/surf_energy);
+  _M[_qp] = KN/Co*(_D[_qp]*_int_width/surf_energy);
   _grad_M[_qp] = 0.0;
 
   _Qstar[_qp] = -4.0; // eV
