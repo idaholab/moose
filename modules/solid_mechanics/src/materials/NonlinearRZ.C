@@ -10,7 +10,6 @@
 
 #include "Problem.h"
 #include "SymmIsotropicElasticityTensor.h"
-#include "VolumetricModel.h"
 
 namespace SolidMechanics
 {

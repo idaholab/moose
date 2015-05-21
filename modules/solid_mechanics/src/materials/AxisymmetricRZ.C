@@ -8,7 +8,6 @@
 #include "SolidModel.h"
 
 #include "Problem.h"
-#include "VolumetricModel.h"
 
 namespace SolidMechanics
 {

@@ -7,7 +7,6 @@
 #include "SphericalR.h"
 
 #include "Problem.h"
-#include "VolumetricModel.h"
 #include "SolidModel.h"
 
 namespace SolidMechanics
