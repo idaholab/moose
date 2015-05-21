@@ -317,6 +317,7 @@
     dy_yy = dy_yy
     dx_xy = dx_xy
     dy_xy = dy_xy
+    execute_on = 'initial timestep_end'
   [../]
 
   [./E2222]
@@ -331,6 +332,7 @@
     dy_yy = dy_yy
     dx_xy = dx_xy
     dy_xy = dy_xy
+    execute_on = 'initial timestep_end'
   [../]
 
   [./E1122]
@@ -345,6 +347,7 @@
     dy_yy = dy_yy
     dx_xy = dx_xy
     dy_xy = dy_xy
+    execute_on = 'initial timestep_end'
   [../]
 
 
@@ -360,6 +363,7 @@
     dy_yy = dy_yy
     dx_xy = dx_xy
     dy_xy = dy_xy
+    execute_on = 'initial timestep_end'
   [../]
 
   [./E1212]
@@ -374,6 +378,7 @@
     dy_yy = dy_yy
     dx_xy = dx_xy
     dy_xy = dy_xy
+    execute_on = 'initial timestep_end'
   [../]
 
 []

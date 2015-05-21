@@ -225,5 +225,6 @@
   [./Mass]
     type = Mass
     variable = disp_x
+    execute_on = 'initial timestep_end'
   [../]
 []

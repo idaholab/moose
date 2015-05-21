@@ -108,6 +108,7 @@
   [./internalVolume]
     type = InternalVolume
     boundary = 1
+    execute_on = 'initial timestep_end'
   [../]
 []
 
