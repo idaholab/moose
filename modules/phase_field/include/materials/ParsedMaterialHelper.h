@@ -61,6 +61,9 @@ protected:
   /// The undiffed free energy function parser object.
   ADFunction * _func_F;
 
+  /// variable names used in the expression (depends on the map_mode)
+  std::vector<std::string> _variable_names;
+
   /// Material property descriptors (obtained by parsing _mat_prop_expressions)
   std::vector<FunctionMaterialPropertyDescriptor> _mat_prop_descriptors;
 

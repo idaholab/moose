@@ -21,6 +21,7 @@ ParsedMaterialHelper::ParsedMaterialHelper(const std::string & name,
     FunctionMaterialBase(name, parameters),
     FunctionParserUtils(name, parameters),
     _func_F(NULL),
+    _variable_names(_nargs),
     _mat_prop_descriptors(0),
     _tol(0),
     _map_mode(map_mode)
@@ -65,6 +66,27 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   // initialize constants
   addFParserConstants(_func_F, constant_names, constant_expressions);
 
+  // set variable names based on map_mode
+  switch (_map_mode)
+  {
+    case USE_MOOSE_NAMES:
+      for (unsigned i = 0; i < _nargs; ++i)
+        _variable_names[i] = _arg_names[i];
+      break;
+
+    case USE_PARAM_NAMES:
+      // we do not allow vector coupling in this mode
+      if (!_mapping_is_unique)
+        mooseError("Derivative parsed materials must couple exactly one non-linear variable per coupled variable input parameter.");
+
+      for (unsigned i = 0; i < _nargs; ++i)
+        _variable_names[i] = _arg_param_names[i];
+      break;
+
+    default:
+      mooseError("Unnknown variable mapping mode.");
+  }
+
   // tolerance vectors
   if (tol_names.size() != tol_values.size())
     mooseError("The parameter vectors tol_names and tol_values must have equal length.");
@@ -77,7 +99,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
 
     // for every argument look throug the entire tolerance vector to find a match
     for (unsigned int j = 0; j < tol_names.size(); ++j)
-      if (_arg_names[i] == tol_names[j])
+      if (_variable_names[i] == tol_names[j])
       {
         _tol[i] = tol_values[j];
         break;
@@ -86,25 +108,8 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
 
   // build 'variables' argument for fparser
   std::string variables;
-  switch (_map_mode)
-  {
-    case USE_MOOSE_NAMES:
-      for (unsigned i = 0; i < _nargs; ++i)
-        variables += "," + _arg_names[i];
-      break;
-
-    case USE_PARAM_NAMES:
-      // we do not allow vector coupling in this mode
-      if (!_mapping_is_unique)
-        mooseError("Derivative parsed materials must couple exactly one non-linear variable per coupled variable input parameter.");
-
-      for (unsigned i = 0; i < _nargs; ++i)
-        variables += "," + _arg_param_names[i];
-      break;
-
-    default:
-      mooseError("Unnknown variable mapping mode.");
-  }
+  for (unsigned i = 0; i < _nargs; ++i)
+    variables += "," + _variable_names[i];
 
   // get all material properties
   unsigned int nmat_props = mat_prop_expressions.size();
