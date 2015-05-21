@@ -20,6 +20,7 @@
 #include "MooseTypes.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
+#include "MaterialData.h"
 
 // Forward declarations
 class BoundaryRestrictable;
@@ -147,21 +148,26 @@ public:
   /**
    * Check if a material property is valid for all boundaries of this object
    *
-   * This method returns true if the boundary ids for this object are a subset of the boundaries
-   * associated with the material property for the supplied property name
+   * This method returns true if the supplied property name has been declared
+   * in a Material object on the boundary ids for this object.
    *
-   * @param name the name of the property to query
-   * @return true if the property exists for all block ids of the object, otherwise false
-   * \see MaterialPropertyInterface::getMaterialPropertyBoundaryIDs
-   * \see isBoundarySubet
+   * @tparam T The type of material property
+   * @param prop_name the name of the property to query
+   * @return true if the property exists for all boundary ids of the object, otherwise false
    */
-  template<typename T>
-  bool hasBoundaryMaterialProperty(const std::string & name) const;
+  template<typename T> bool hasBoundaryMaterialProperty(const std::string & prop_name) const;
 
   /**
    * Returns true if this object has been restricted to a boundary
    */
   bool boundaryRestricted() { return _boundary_restricted; }
+
+  /**
+   * Returns the set of all boundary ids for the entire mesh
+   * @return A const reference the the boundary ids for the entire mesh
+   */
+  const std::set<BoundaryID> & meshBoundaryIDs() const;
+
 
 private:
 
@@ -192,6 +198,9 @@ private:
   /// Reference to the block_ids, defaults to an empty set if not provided
   const std::set<SubdomainID> & _block_ids;
 
+  /// Thread id for this object
+  THREAD_ID _bnd_tid;
+
   /**
    * An initialization routine needed for dual constructors
    */
@@ -199,17 +208,22 @@ private:
 
 protected:
 
+  /**
+   * A helper method to avoid circular #include problems.
+   * @see hasBoundaryMaterialProperty
+   */
+  bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
+
   /// Reference to active boundary id
   const BoundaryID & _current_boundary_id;
-
 };
 
 template<typename T>
 bool
-BoundaryRestrictable::hasBoundaryMaterialProperty(const std::string & name) const
+BoundaryRestrictable::hasBoundaryMaterialProperty(const std::string & prop_name) const
 {
-  // Return true if the boundaries for this object are a subset of the boundaries for the material
-  return isBoundarySubset(_bnd_feproblem->getMaterialPropertyBoundaryIDs(name));
+  // If you get here the supplied property is defined on all boundaries, but is still subject existence in the MateialData class
+  return hasBoundaryMaterialPropertyHelper(prop_name) && _bnd_feproblem->getBoundaryMaterialData(_bnd_tid)->haveProperty<T>(prop_name);
 }
 
 #endif // BOUNDARYRESTRICTABLE_H

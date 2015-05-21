@@ -10,7 +10,7 @@ InputParameters validParams<DefaultMatPropConsumerKernel>()
 
 DefaultMatPropConsumerKernel::DefaultMatPropConsumerKernel(const std::string & name, InputParameters parameters) :
     DerivativeMaterialInterface<Kernel>(name, parameters),
-		_prop_name(getParam<std::string>("mat_prop")),
-		_prop(getDefaultMaterialProperty<Real>(_prop_name))
+    _prop_name(getParam<std::string>("mat_prop")),
+    _prop(getDefaultMaterialProperty<Real>(_prop_name))
 {
 }

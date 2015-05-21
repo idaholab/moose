@@ -27,6 +27,24 @@
     mat_prop = prop2
     block = 2
   [../]
+
+  [./generic]
+    type = GenericConstantMaterial
+    block = '1 2'
+    prop_names = prop3
+    prop_values = 9
+  [../]
+
+  [./mat1c]
+    type = DefaultMatPropConsumerMaterial
+    mat_prop = prop3
+    block = 1
+  [../]
+  [./mat2c]
+    type = DefaultMatPropConsumerMaterial
+    mat_prop = prop3
+    block = 2
+  [../]
 []
 
 [Kernels]
