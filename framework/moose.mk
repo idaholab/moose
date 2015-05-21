@@ -159,8 +159,6 @@ clean::
 # .) .git  (don't accidentally delete any of git's metadata)
 # .) .svn  (don't accidentally delete any of svn's metadata)
 # Notes:
-# .) The ./ in front of the path names is absolutely required for the
-#    find command to work correctly.
 # .) Be careful: running 'make -n clobber' will actually delete files!
 # .) 'make clobber' does not respect $(METHOD), it just deletes
 #    everything it can find!
@@ -168,7 +166,7 @@ clean::
 #    dependency and object files when you upgrade OSX versions or as
 #    source files are deleted over time.
 clobber:: clean
-	$(shell find $(CURDIR) \( -path ./moose -or -path ./.git -or -path ./.svn \) -prune -or \
+	$(shell find $(CURDIR) \( -path $(CURDIR)/moose -or -path $(CURDIR)/.git -or -path $(CURDIR)/.svn \) -prune -or \
           \( -name "*~" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.so*" -or -name "*.a" \
           -or -name "*-opt" -or -name "*-dbg" -or -name "*-oprof" \
           -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" -or -name "*.plist" \
