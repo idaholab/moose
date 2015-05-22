@@ -1,0 +1,17 @@
+[Tests]
+  [./axisymmetric_2d3d_solution_function_2d]
+    type = 'Exodiff'
+    input = '2d.i'
+    exodiff = '2d_out.e'
+  [../]
+  [./axisymmetric_2d3d_solution_function_3dy]
+    type = 'Exodiff'
+    input = '3dy.i'
+    exodiff = '3dy_out.e'
+  [../]
+  [./axisymmetric_2d3d_solution_function_3dz]
+    type = 'Exodiff'
+    input = '3dz.i'
+    exodiff = '3dz_out.e'
+  [../]
+[]

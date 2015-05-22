@@ -125,7 +125,7 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
     r_dir_3d = p;
     r_dir_3d(1) = 0;
     Real r = r_dir_3d.size();
-    if (absoluteFuzzyGreaterThan(r,0.0))
+    if (MooseUtils::absoluteFuzzyGreaterThan(r,0.0))
     {
       r_gt_zero = true;
       r_dir_3d /= r;
@@ -144,7 +144,7 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
     Point axis_proj = _3d_axis_point1 + z*z_dir_3d;  //projection of point onto axis
     Point axis_proj_to_p = p - axis_proj;
     Real r = axis_proj_to_p.size();
-    if (absoluteFuzzyGreaterThan(r,0.0))
+    if (MooseUtils::absoluteFuzzyGreaterThan(r,0.0))
     {
       r_gt_zero = true;
       r_dir_3d = axis_proj_to_p/r;
@@ -169,7 +169,7 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
     Point val_vec_rz;
     val_vec_rz(0) = r_dir_2d(0)*val_x + r_dir_2d(1)*val_y;
     val_vec_rz(1) = z_dir_2d(0)*val_x + z_dir_2d(1)*val_y;
-    if (!r_gt_zero && !absoluteFuzzyEqual(val_vec_rz(0),0))
+    if (!r_gt_zero && !MooseUtils::absoluteFuzzyEqual(val_vec_rz(0),0.0))
       mooseError("In Axisymmetric2D3DSolutionFunction r=0 and r component of value vector != 0");
     Point val_vec_3d = val_vec_rz(0)*r_dir_3d + val_vec_rz(1)*z_dir_3d;
 

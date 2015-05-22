@@ -1,0 +1,26 @@
+## /Applications/Cubit-14.0/Cubit.app/Contents/MacOS/cubitclx
+## Cubit Version 14.0
+## Cubit Build 387010
+## Revised 2013-06-11 10:13:37 -0600 (Tue, 11 Jun 2013)
+## Running 05/19/2015 12:08:32 PM
+## Command Options:
+## -warning = On
+## -information = On
+create vertex 2.2 -0.025
+create vertex 2.4 -0.025
+create vertex 2.4 0.025
+create vertex 2.2 0.025
+create curve vertex 1 2
+create curve vertex 2 3
+create curve vertex 3 4
+create curve vertex 4 1
+create surface curve 1 2 3 4
+surface 1 size 0.01
+mesh surface 1
+block 1 surface 1
+block 1 element type QUAD4
+sideset 1 curve 1
+sideset 2 curve 2
+sideset 3 curve 3
+sideset 4 curve 4
+export mesh "2d.e" overwrite
