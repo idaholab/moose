@@ -492,6 +492,14 @@ public:
   PostprocessorValue & getPostprocessorValueOld(const std::string & name, THREAD_ID tid = 0);
 
   /**
+   * Get the reference to the older value of a post-processor
+   * @param name The name of the post-processor
+   * @param tid Thread ID
+   * @return The reference to the old value
+   */
+  PostprocessorValue & getPostprocessorValueOlder(const std::string & name, THREAD_ID tid = 0);
+
+  /**
    * Get a reference to the PostprocessorWarehouse ExecStore object
    */
   ExecStore<PostprocessorWarehouse> & getPostprocessorWarehouse();

@@ -38,41 +38,51 @@ public:
   void init(const std::string & name);
 
   /**
-   * Returns a true value if the postprocessor exists
+   * Returns a true value if the Postprocessor exists
    */
   bool hasPostprocessor(const std::string & name);
 
   /**
-   * Return the value for the post processor
+   * Return the value for the Postprocessor
    */
   PostprocessorValue & getPostprocessorValue(const PostprocessorName & name);
 
   /**
-   * The the old value of an post-processor
-   * @param name The name of the post-processor
+   * The the old value of an Postprocessor
+   * @param name The name of the Postprocessor
    * @return The reference to the old value
    */
-  PostprocessorValue & getPostprocessorValueOld(const std::string & name);
+  PostprocessorValue & getPostprocessorValueOld(const PostprocessorName & name);
+
+  /**
+   * The the older value of an Postprocessor
+   * @param name The name of the Postprocessor
+   * @return The reference to the older value
+   */
+  PostprocessorValue & getPostprocessorValueOlder(const PostprocessorName & name);
 
   void storeValue(const std::string & name, PostprocessorValue value);
 
   /**
-   * Get the map of names -> postprocessor values. Exposed for error checking.
+   * Get the map of names -> Postprocessor values. Exposed for error checking.
    */
   const std::map<std::string, PostprocessorValue*> & values() const { return _values; }
 
   /**
-   * Copy the current post-processor values into old (i.e. shift it "back in time")
+   * Copy the current Postprocessor values into old (i.e. shift it "back in time")
    */
   void copyValuesBack();
 
 protected:
 
-  /// Values of the post-processor at the current time
+  /// Values of the Postprocessor at the current time
   std::map<std::string, PostprocessorValue*> _values;
 
-  /// Values of the post-processors at the time t-1
+  /// Values of the Postprocessors at the time t-1
   std::map<std::string, PostprocessorValue*> _values_old;
+
+  /// Values of the Postprocessors at the time t-2
+  std::map<std::string, PostprocessorValue*> _values_older;
 };
 
 #endif //POSTPROCESSORDATA_H
