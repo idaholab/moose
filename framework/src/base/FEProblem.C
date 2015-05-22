@@ -638,16 +638,18 @@ void FEProblem::timestepSetup()
   _aux.timestepSetup();
   _nl.timestepSetup();
 
+  // Random interface objects
+  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
+       it != _random_data_objects.end();
+       ++it)
+    it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
+
   for (unsigned int i=0; i<n_threads; i++)
   {
     _indicators[i].timestepSetup();
     _markers[i].timestepSetup();
 
-    // Random interface objects
-    for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-         it != _random_data_objects.end();
-         ++it)
-      it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
+    _materials[i].timestepSetup();
 
     // Timestep setup of all UserObjects
     for (unsigned int j = 0; j < Moose::exec_types.size(); j++)
@@ -3157,9 +3159,6 @@ FEProblem::advanceState()
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     _pps_data[tid]->copyValuesBack();
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _materials[tid].timestepSetup();
 
   if (_material_props.hasStatefulProperties())
     _material_props.shift();
