@@ -17,6 +17,8 @@
 #include "Material.h"
 #include "MaterialProperty.h"
 #include "FEProblem.h"
+#include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
 /**
@@ -70,6 +72,13 @@ public:
   template<typename U>
   const MaterialProperty<U> & getDefaultMaterialProperty(const std::string & name);
 
+  ///@{
+  /**
+   * Methods for declaring derivative material properties
+   * @tparam U The material property type
+   * @param base The name of the property to take the derivative of
+   * @param c The variable(s) to take the derivatives with respect to
+   */
   template<typename U>
   MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::vector<std::string> &c);
   template<typename U>
@@ -78,7 +87,15 @@ public:
   MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
   template<typename U>
   MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
+  ///@}
 
+  ///@{
+  /**
+   * Methods for retreiving derivative material properties
+   * @tparam U The material property type
+   * @param base The name of the property to take the derivative of
+   * @param c The variable(s) to take the derivatives with respect to
+   */
   template<typename U>
   const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::vector<std::string> &c);
   template<typename U>
@@ -87,16 +104,22 @@ public:
   const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
   template<typename U>
   const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
-
+  ///@}
 private:
+
+  /// Reference to FEProblem
   FEProblem & _dmi_fe_problem;
+
+  /// Reference to this objects MaterialData object
+  MaterialData & _dmi_material_data;
 };
 
 
 template<class T>
 DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & name, InputParameters parameters) :
     T(name, parameters),
-    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
+    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _dmi_material_data(*parameters.getCheckedPointerParam<MaterialData *>("_material_data"))
 {
 }
 
@@ -112,14 +135,18 @@ DerivativeMaterialInterface<T>::getMaterialPropertyPointer(const std::string & n
 template<>
 template<typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterface<Material>::getDefaultMaterialProperty(const std::string & name)
+DerivativeMaterialInterface<Material>::getDefaultMaterialProperty(const std::string & prop_name)
 {
+
   // if found return the requested property
-  if (this->template hasMaterialProperty<U>(name))
-    return this->template getMaterialProperty<U>(name);
+  if (this->boundaryRestricted() && this->template hasBoundaryMaterialProperty<U>(prop_name))
+    return this->template getMaterialProperty<U>(prop_name);
+
+  else if (this->template hasBlockMaterialProperty<U>(prop_name))
+    return this->template getMaterialProperty<U>(prop_name);
 
   // declare this material property
-  MaterialProperty<U> & preload_with_zero = this->template declareProperty<U>(name);
+  MaterialProperty<U> & preload_with_zero = this->template declareProperty<U>(prop_name);
 
   // resize to accomodate maximum number of qpoints
   unsigned int nqp = _dmi_fe_problem.getMaxQps();
@@ -135,13 +162,21 @@ DerivativeMaterialInterface<Material>::getDefaultMaterialProperty(const std::str
 template<class T>
 template<typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & name)
+DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & prop_name)
 {
   static MaterialProperty<U> _zero;
 
-  // if found return the requested property
-  if (this->template hasMaterialProperty<U>(name))
-    return this->template getMaterialProperty<U>(name);
+  // Call the correct method to test for material property declarations
+  BlockRestrictable * blk = dynamic_cast<BlockRestrictable *>(this);
+  BoundaryRestrictable * bnd = dynamic_cast<BoundaryRestrictable *>(this);
+  if (bnd && bnd->boundaryRestricted() && bnd->template hasBoundaryMaterialProperty<U>(prop_name))
+    return this->template getMaterialProperty<U>(prop_name);
+
+  else if (blk && blk->template hasBlockMaterialProperty<U>(prop_name))
+    return this->template getMaterialProperty<U>(prop_name);
+
+  else if (this->template hasMaterialProperty<U>(prop_name))
+    return this->template getMaterialProperty<U>(prop_name);
 
   // make sure _zero is in a sane state
   unsigned int nqp = _dmi_fe_problem.getMaxQps();

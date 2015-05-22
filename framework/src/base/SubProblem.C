@@ -260,9 +260,9 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
 
   // Set flag for type: block/boundary
   bool block_type;
-  if (type.compare("block") == 0)
+  if (type == "block")
     block_type = true;
-  else if (type.compare("boundary") == 0)
+  else if (type == "boundary")
     block_type = false;
   else
     mooseError("Unknown type argument, it must be 'block' or 'boundary'");

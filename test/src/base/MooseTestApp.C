@@ -69,6 +69,7 @@
 #include "CoupledEigenKernel.h"
 #include "ConsoleMessageKernel.h"
 #include "WrongJacobianDiffusion.h"
+#include "DefaultMatPropConsumerKernel.h"
 
 #include "CoupledAux.h"
 #include "CoupledScalarAux.h"
@@ -124,6 +125,7 @@
 #include "VecRangeCheckMaterial.h"
 #include "DerivativeMaterialInterfaceTestProvider.h"
 #include "DerivativeMaterialInterfaceTestClient.h"
+#include "DefaultMatPropConsumerMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -305,6 +307,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(CoupledEigenKernel);
   registerKernel(ConsoleMessageKernel);
   registerKernel(WrongJacobianDiffusion);
+  registerKernel(DefaultMatPropConsumerKernel);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -373,6 +376,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(VecRangeCheckMaterial);
   registerMaterial(DerivativeMaterialInterfaceTestProvider);
   registerMaterial(DerivativeMaterialInterfaceTestClient);
+  registerKernel(DefaultMatPropConsumerMaterial);
 
 
   registerScalarKernel(ExplicitODE);

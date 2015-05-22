@@ -99,39 +99,60 @@ public:
    */
   virtual void initStatefulProperties(unsigned int n_points);
 
+  ///@{
   /**
    * Retrieve the property named "name"
    */
   template<typename T>
   MaterialProperty<T> & getMaterialProperty(const std::string & prop_name);
-
   template<typename T>
   MaterialProperty<T> & getMaterialPropertyOld(const std::string & prop_name);
-
   template<typename T>
   MaterialProperty<T> & getMaterialPropertyOlder(const std::string & prop_name);
+  ///@}
 
+  ///@{
   /**
    * Declare the property named "name"
    */
   template<typename T>
   MaterialProperty<T> & declareProperty(const std::string & prop_name);
-
   template<typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
-
   template<typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
+  ///@}
 
+  /**
+   * Return a set of properties accessed with getMaterialProperty
+   * @return A reference to the set of properties with calls to getMaterialProperty
+   */
   virtual
   const std::set<std::string> &
-  getRequestedItems() { return _depend_props; }
+  getRequestedItems() { return _requested_props; }
 
+  /**
+   * Return a set of properties accessed with declareProperty
+   * @return A reference to the set of properties with calls to declareProperty
+   */
   virtual
   const std::set<std::string> &
   getSuppliedItems() { return _supplied_props; }
 
   void checkStatefulSanity() const;
+
+  /**
+   * Check if a material property is valid for all blocks of this Material
+   *
+   * This method returns true if the supplied property name has been declared
+   * in a Material object on the block ids for this object.
+   *
+   * @param prop_name the name of the property to query
+   * @return true if the property exists for all block ids of the object, otherwise false
+   *
+   * @see BlockRestrictable::hasBlockMaterialPropertyHelper
+   */
+  virtual bool hasBlockMaterialPropertyHelper(const std::string & prop_name);
 
   /**
    * Get the list of output objects that this class is restricted
@@ -164,13 +185,14 @@ protected:
   unsigned int & _current_side;
 
   MooseMesh & _mesh;
-//  unsigned int _dim;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
 
-  std::set<std::string> _depend_props;
+  /// Set of properties accessed via get method
+  std::set<std::string> _requested_props;
 
+  /// Set of properties declared
   std::set<std::string> _supplied_props;
 
   enum QP_Data_Type {
@@ -224,7 +246,7 @@ MaterialProperty<T> &
 Material::getMaterialProperty(const std::string & prop_name)
 {
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
-  _depend_props.insert(prop_name);
+  _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::CURRENT);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getProperty<T>(prop_name);
@@ -234,7 +256,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & prop_name)
 {
-  _depend_props.insert(prop_name);
+  _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLD);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getPropertyOld<T>(prop_name);
@@ -244,7 +266,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::getMaterialPropertyOlder(const std::string & prop_name)
 {
-  _depend_props.insert(prop_name);
+  _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLDER);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getPropertyOlder<T>(prop_name);
