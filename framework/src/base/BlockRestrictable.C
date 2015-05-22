@@ -14,6 +14,7 @@
 
 // MOOSE Includes
 #include "BlockRestrictable.h"
+#include "Material.h"
 
 template<>
 InputParameters validParams<BlockRestrictable>()
@@ -35,20 +36,24 @@ InputParameters validParams<BlockRestrictable>()
 
 // Standard constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
+    _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
-    _boundary_ids(_empty_boundary_ids)
+    _boundary_ids(_empty_boundary_ids),
+    _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
 {
   initializeBlockRestrictable(parameters);
 }
 
 // Dual restricted constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids) :
+    _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
-    _boundary_ids(boundary_ids)
+    _boundary_ids(boundary_ids),
+    _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
 {
   initializeBlockRestrictable(parameters);
 }
@@ -66,6 +71,10 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
   // Check that the mesh pointer was defined, it is required for this class to operate
   if (_blk_mesh == NULL)
     mooseError("The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+
+  // Populate the MaterialData pointer
+  if (_blk_feproblem != NULL)
+    _blk_material_data = _blk_feproblem->getMaterialData(_blk_tid);
 
   // The 'block' input is defined
   if (parameters.isParamValid("block"))
@@ -237,22 +246,44 @@ BlockRestrictable::variableSubdomainIDs(const InputParameters & parameters) cons
   return sys->getSubdomainsForVar(var->number());
 }
 
-bool
-BlockRestrictable::hasBlockMaterialProperty(const std::string & name) const
-{
-  // Get reference to the blocks for the material
-  const std::set<SubdomainID> & mat_blk = _blk_feproblem->getMaterialPropertyBlocks(name);
-
-  // If material blocks are empty return false, otherwise test if the materials are a subset
-  // of the blocks for this object
-  if (mat_blk.empty())
-    return false;
-  else
-    return isBlockSubset(mat_blk);
-}
-
 const std::set<SubdomainID> &
 BlockRestrictable::meshBlockIDs()
 {
   return _blk_mesh->meshSubdomains();
+}
+
+bool
+BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
+{
+
+// Reference to MaterialWarehouse for testing and retrieving block ids
+  MaterialWarehouse & material_warehouse = _blk_feproblem->getMaterialWarehouse(_blk_tid);
+
+  // Complete set of ids that this object is active
+  const std::set<SubdomainID> & ids = hasBlocks(Moose::ANY_BLOCK_ID) ? meshBlockIDs() : blockIDs();
+
+  // Loop over each id for this object
+  for (std::set<SubdomainID>::const_iterator id_it = ids.begin(); id_it != ids.end(); ++id_it)
+  {
+    // Storage of material properties that have been DECLARED on this id
+    std::set<std::string> declared_props;
+
+    // If block materials exist, populated the set of properties that were declared
+    if (material_warehouse.hasMaterials(*id_it))
+    {
+      std::vector<Material *> mats = material_warehouse.getMaterials(*id_it);
+      for (std::vector<Material *>::iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
+      {
+        const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();
+        declared_props.insert(mat_props.begin(), mat_props.end());
+      }
+    }
+
+    // If the supplied property is not in the list of properties on the current id, return false
+    if (declared_props.find(prop_name) == declared_props.end())
+      return false;
+  }
+
+  // If you get here the supplied property is defined on all blocks
+  return true;
 }

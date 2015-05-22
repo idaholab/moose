@@ -27,10 +27,7 @@
 // Forward declarations
 class BlockRestrictable;
 class BoundaryRestrictable;
-
 class InterfaceCommunicationHelper;
-
-
 
 /**
  * \class MaterialPropertyInterface

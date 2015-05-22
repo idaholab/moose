@@ -55,6 +55,6 @@
   [./check_test]
     type = 'RunException'
     input = 'material_check_test.i'
-    expect_err = 'The required material property, prop, is not defined on all blocks for AuxKernel mat'
+    expect_err = 'The following blocks from your input mesh do not contain an active material: 0'
   [../]
 []

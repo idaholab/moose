@@ -14,6 +14,7 @@
 
 // MOOSE includes
 #include "BoundaryRestrictable.h"
+#include "Material.h"
 
 template<>
 InputParameters validParams<BoundaryRestrictable>()
@@ -40,6 +41,7 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters) :
     _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
     _boundary_restricted(false),
     _block_ids(_empty_block_ids),
+    _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
     _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
 {
   initializeBoundaryRestrictable(parameters);
@@ -53,6 +55,7 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, c
     _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
     _boundary_restricted(false),
     _block_ids(block_ids),
+    _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
     _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
 {
   initializeBoundaryRestrictable(parameters);
@@ -225,4 +228,45 @@ BoundaryRestrictable::isBoundarySubset(std::vector<BoundaryID> ids) const
 {
   std::set<BoundaryID> ids_set(ids.begin(), ids.end());
   return isBoundarySubset(ids_set);
+}
+
+const std::set<BoundaryID> &
+BoundaryRestrictable::meshBoundaryIDs() const
+{
+  return _bnd_mesh->getBoundaryIDs();
+}
+
+bool
+BoundaryRestrictable::hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const
+{
+  // Reference to MaterialWarehouse for testing and retrieving boundary ids
+  MaterialWarehouse & material_warehouse = _bnd_feproblem->getMaterialWarehouse(_bnd_tid);
+
+  // Complete set of BoundaryIDs that this object is defined
+  const std::set<BoundaryID> & ids = hasBoundary(Moose::ANY_BOUNDARY_ID) ? meshBoundaryIDs() : boundaryIDs();
+
+  // Loop over each BoundaryID for this object
+  for (std::set<BoundaryID>::const_iterator id_it = ids.begin(); id_it != ids.end(); ++id_it)
+  {
+    // Storage of material properties that have been DECLARED on this BoundaryID
+    std::set<std::string> declared_props;
+
+    // If boundary materials exist, populated the set of properties that were declared
+    if (material_warehouse.hasBoundaryMaterials(*id_it))
+    {
+      std::vector<Material *> mats = material_warehouse.getBoundaryMaterials(*id_it);
+      for (std::vector<Material *>::iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
+      {
+        const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();
+        declared_props.insert(mat_props.begin(), mat_props.end());
+      }
+    }
+
+    // If the supplied property is not in the list of properties on the current id, return false
+    if (declared_props.find(prop_name) == declared_props.end())
+      return false;
+  }
+
+  // If you get here the supplied property is defined on all boundaries
+  return true;
 }

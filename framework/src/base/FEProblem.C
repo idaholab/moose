@@ -638,16 +638,18 @@ void FEProblem::timestepSetup()
   _aux.timestepSetup();
   _nl.timestepSetup();
 
+  // Random interface objects
+  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
+       it != _random_data_objects.end();
+       ++it)
+    it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
+
   for (unsigned int i=0; i<n_threads; i++)
   {
     _indicators[i].timestepSetup();
     _markers[i].timestepSetup();
 
-    // Random interface objects
-    for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-         it != _random_data_objects.end();
-         ++it)
-      it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
+    _materials[i].timestepSetup();
 
     // Timestep setup of all UserObjects
     for (unsigned int j = 0; j < Moose::exec_types.size(); j++)
@@ -1669,38 +1671,11 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
   }
 }
 
-const std::vector<Material *> &
-FEProblem::getMaterialsByName(const std::string & name, THREAD_ID tid)
-{
-  return _materials[tid].getMaterialsByName(name);
-}
-
-const std::vector<Material*> &
-FEProblem::getMaterials(SubdomainID block_id, THREAD_ID tid)
+MaterialWarehouse &
+FEProblem::getMaterialWarehouse(THREAD_ID tid)
 {
   mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
-  return _materials[tid].getMaterials(block_id);
-}
-
-const std::vector<Material*> &
-FEProblem::getFaceMaterials(SubdomainID block_id, THREAD_ID tid)
-{
-  mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
-  return _materials[tid].getFaceMaterials(block_id);
-}
-
-const std::vector<Material*> &
-FEProblem::getBndMaterials(BoundaryID boundary_id, THREAD_ID tid)
-{
-  mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
-  return _materials[tid].getBoundaryMaterials(boundary_id);
-}
-
-const std::vector<Material*> &
-FEProblem::getNeighborMaterials(SubdomainID block_id, THREAD_ID tid)
-{
-  mooseAssert(tid < _materials.size(), "Requesting a material warehouse that does not exist");
-  return _materials[tid].getNeighborMaterials(block_id);
+  return _materials[tid];
 }
 
 void
@@ -3157,9 +3132,6 @@ FEProblem::advanceState()
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     _pps_data[tid]->copyValuesBack();
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _materials[tid].timestepSetup();
 
   if (_material_props.hasStatefulProperties())
     _material_props.shift();

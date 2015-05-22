@@ -45,13 +45,9 @@ CombinedCreepPlasticity::initialSetup()
   {
     const std::vector<Material*> * mats_p;
     if (_bnd)
-    {
-      mats_p = &_fe_problem.getFaceMaterials( block_id[i], _tid );
-    }
+      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getFaceMaterials(block_id[i]);
     else
-    {
-      mats_p = &_fe_problem.getMaterials( block_id[i], _tid );
-    }
+      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getMaterials(block_id[i]);
 
     const std::vector<Material*> & mats = *mats_p;
     for (unsigned int i_name(0); i_name < submodels.size(); ++i_name)
