@@ -33,6 +33,7 @@ protected:
   MaterialProperty<Real> & _c_eq;
   MaterialProperty<Real> & _W;
   MaterialProperty<Real> & _Qstar;
+  MaterialProperty<Real> & _D;
 
   ///Input parameters
   Real _int_width;

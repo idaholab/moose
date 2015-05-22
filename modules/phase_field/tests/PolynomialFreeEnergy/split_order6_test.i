@@ -63,13 +63,11 @@
     Em = 0.71 # in eV, from Balluffi1978 Table 2
     Ef = 1.28 # in eV, from Balluffi1978 Table 2
     surface_energy = 0.7 # Total guess
-    outputs = exodus
   [../]
   [./free_energy]
     type = PolynomialFreeEnergy
     block = 0
     c = c
-    outputs = exodus
     derivative_order = 2
     T = 1000
   [../]
@@ -102,4 +100,3 @@
   exodus = true
   print_perf_log = true
 []
-
