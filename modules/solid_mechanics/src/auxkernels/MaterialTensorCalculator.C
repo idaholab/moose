@@ -117,7 +117,6 @@ MaterialTensorCalculator::getTensorQuantity(const SymmTensor & tensor,
     // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
     // axis closest to p0 is found by the following for t:
     const Point p2p1( _p2 - _p1 );
-    const Point p2p0( _p2 - p0 );
     const Point p1p0( _p1 - p0 );
     const Real t( -(p1p0*p2p1)/p2p1.size_sq() );
     // The nearest point on the cylindrical axis to p0 is p.
@@ -166,7 +165,6 @@ MaterialTensorCalculator::getTensorQuantity(const SymmTensor & tensor,
     // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
     // axis closest to p0 is found by the following for t:
     const Point p2p1( _p2 - _p1 );
-    const Point p2p0( _p2 - p0 );
     const Point p1p0( _p1 - p0 );
     const Real t( -(p1p0*p2p1)/p2p1.size_sq() );
     // The nearest point on the cylindrical axis to p0 is p.

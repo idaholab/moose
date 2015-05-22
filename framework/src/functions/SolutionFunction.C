@@ -24,7 +24,7 @@ InputParameters validParams<SolutionFunction>()
 
   // Add required parameters
   params.addRequiredParam<UserObjectName>("solution", "The SolutionUserObject to extract data from.");
-  params.addParam<std::string>("from_variable", "The name of the variable in the file that is too be extracted");
+  params.addParam<std::string>("from_variable", "The name of the variable in the file that is to be extracted");
 
   // Add optional paramters
   params.addParam<Real>("scale_factor", 1.0, "Scale factor (a) to be applied to the solution (x): ax+b, where b is the 'add_factor'");
