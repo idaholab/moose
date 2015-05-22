@@ -37,15 +37,13 @@ public:
    */
   Receiver(const std::string & name, InputParameters parameters);
 
+  ///@{
   /**
    * No action taken
    */
   virtual void initialize() {}
-
-  /**
-   * No action taken
-   */
   virtual void execute() {}
+  ///@}
 
   /**
    * Returns the value stored in _my_value
@@ -58,11 +56,13 @@ public:
    */
   virtual void initialSetup();
 
-protected:
+private:
+
+  /// Flag for initializing the old value
+  bool _initialize_old;
 
   /// Reference to the value being stored in the associated PostprocessorData class
   const PostprocessorValue & _my_value;
-
 };
 
 #endif //RECEIVER_H
