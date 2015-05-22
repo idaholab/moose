@@ -38,7 +38,7 @@ PostprocessorData::getPostprocessorValue(const PostprocessorName & name)
 }
 
 PostprocessorValue &
-PostprocessorData::getPostprocessorValueOld(const std::string & name)
+PostprocessorData::getPostprocessorValueOld(const PostprocessorName & name)
 {
   PostprocessorValue * & pp_val = _values_old[name];
 
@@ -48,12 +48,23 @@ PostprocessorData::getPostprocessorValueOld(const std::string & name)
   return *pp_val;
 }
 
+PostprocessorValue &
+PostprocessorData::getPostprocessorValueOlder(const PostprocessorName & name)
+{
+  PostprocessorValue * & pp_val = _values_older[name];
+
+  if (pp_val == NULL)
+    pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values_older");
+
+  return *pp_val;
+}
 
 void
 PostprocessorData::init(const std::string & name)
 {
   getPostprocessorValue(name) = 0.0;
   getPostprocessorValueOld(name) = 0.0;
+  getPostprocessorValueOlder(name) = 0.0;
 }
 
 void
@@ -66,5 +77,8 @@ void
 PostprocessorData::copyValuesBack()
 {
   for (std::map<std::string, PostprocessorValue*>::iterator it = _values.begin(); it != _values.end(); ++it)
+  {
+    getPostprocessorValueOlder(it->first) = getPostprocessorValueOld(it->first);
     getPostprocessorValueOld(it->first) = getPostprocessorValue(it->first);
+  }
 }

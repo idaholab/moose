@@ -35,7 +35,9 @@ public:
   virtual Real getValue();
 
 protected:
+  const bool _use_older;
   const PostprocessorValue & _old_val;
+  const PostprocessorValue & _older_val;
 };
 
 

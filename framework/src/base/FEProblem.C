@@ -2137,6 +2137,12 @@ FEProblem::getPostprocessorValueOld(const std::string & name, THREAD_ID tid)
   return _pps_data[tid]->getPostprocessorValueOld(name);
 }
 
+PostprocessorValue &
+FEProblem::getPostprocessorValueOlder(const std::string & name, THREAD_ID tid)
+{
+  return _pps_data[tid]->getPostprocessorValueOlder(name);
+}
+
 bool
 FEProblem::hasVectorPostprocessor(const std::string & name)
 {

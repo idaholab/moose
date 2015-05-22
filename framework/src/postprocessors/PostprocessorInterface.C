@@ -35,12 +35,6 @@ PostprocessorInterface::getPostprocessorValue(const std::string & name)
     return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
 
-const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & name)
-{
-  return _pi_feproblem.getPostprocessorValue(name, _pi_tid);
-}
-
 PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
 {
@@ -52,10 +46,34 @@ PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
     return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
 
+PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueOlder(const std::string & name)
+{
+  // Return the default if the Postprocessor does not exist and a default does, otherwise
+  // continue as usual
+  if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
+    return _ppi_params.defaultPostprocessorValue(name);
+  else
+    return _pi_feproblem.getPostprocessorValueOlder(_ppi_params.get<PostprocessorName>(name), _pi_tid);
+}
+
+
+const PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & name)
+{
+  return _pi_feproblem.getPostprocessorValue(name, _pi_tid);
+}
+
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOldByName(const PostprocessorName & name)
 {
   return _pi_feproblem.getPostprocessorValueOld(name, _pi_tid);
+}
+
+const PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueOlderByName(const PostprocessorName & name)
+{
+  return _pi_feproblem.getPostprocessorValueOlder(name, _pi_tid);
 }
 
 bool

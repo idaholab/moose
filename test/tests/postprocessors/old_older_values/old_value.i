@@ -12,7 +12,12 @@
 
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = CoefDiffusion
+    variable = u
+    coef = 0.1
+  [../]
+  [./time]
+    type = TimeDerivative
     variable = u
   [../]
 []
@@ -35,13 +40,14 @@
 [Postprocessors]
   [./grow]
     type = GrowPP
-    execute_on = 'TIMESTEP_END initial'
+    execute_on = 'initial timestep_end'
   [../]
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
-  type = Steady
+  type = Transient
+  num_steps = 10
+  dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -51,6 +57,4 @@
   output_initial = true
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []
-

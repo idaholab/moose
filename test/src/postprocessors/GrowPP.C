@@ -17,14 +17,18 @@
 template<>
 InputParameters validParams<GrowPP>()
 {
-InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = validParams<GeneralPostprocessor>();
+  params.addParam<bool>("use_older_value", false, "Use the older value of the postprocessor for this test");
   return params;
 }
 
 GrowPP::GrowPP(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
-    _old_val(getPostprocessorValueOldByName(name))
-{}
+    _use_older(getParam<bool>("use_older_value")),
+    _old_val(getPostprocessorValueOldByName(name)),
+    _older_val(getPostprocessorValueOlderByName(name))
+{
+}
 
 GrowPP::~GrowPP()
 {
@@ -46,5 +50,8 @@ GrowPP::getValue()
   if (_t_step == 0)
     return 1;
 
-  return _old_val + 1;
+  if (_use_older)
+    return _old_val + _older_val;
+  else
+    return _old_val + 1;
 }
