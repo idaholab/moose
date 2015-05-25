@@ -190,7 +190,12 @@ class InputFileWidget(QtGui.QWidget):
       counter+=1
       progress.setValue(counter)
 
-      self.input_file_root_node = readInputFile(file_name)
+      try:
+          self.input_file_root_node = readInputFile(file_name)
+      except Exception as e:
+          print '\nError parsing input file: \n', e.msg, '\n'
+          raise e
+
       self.input_file_getpot_data = GetPotData(self.input_file_root_node, self)
 
       counter+=1
