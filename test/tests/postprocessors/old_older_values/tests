@@ -2,13 +2,14 @@
   [./test_old]
     type = 'Exodiff'
     input = 'old_value.i'
+    cli_args = 'Postprocessors/grow/test_type=grow'
     exodiff = 'old_value_out.e'
   [../]
 
   [./test_older]
     type = 'Exodiff'
     input = 'old_value.i'
-    cli_args = 'Postprocessors/grow/use_older_value=true Outputs/file_base=older_value_out'
+    cli_args = 'Postprocessors/grow/test_type=use_older_value Outputs/file_base=older_value_out'
     exodiff = 'older_value_out.e'
   [../]
 []

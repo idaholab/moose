@@ -170,7 +170,7 @@
 #include "NumElemQPs.h"
 #include "NumSideQPs.h"
 #include "ElementL2Diff.h"
-#include "GrowPP.h"
+#include "TestPostprocessor.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -434,7 +434,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(NumElemQPs);
   registerPostprocessor(NumSideQPs);
   registerPostprocessor(ElementL2Diff);
-  registerPostprocessor(GrowPP);
+  registerPostprocessor(TestPostprocessor);
 
   registerMarker(RandomHitMarker);
   registerMarker(QPointMarker);
