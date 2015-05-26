@@ -12,46 +12,52 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GrowPP.h"
+#include "TestPostprocessor.h"
 
 template<>
-InputParameters validParams<GrowPP>()
+InputParameters validParams<TestPostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addParam<bool>("use_older_value", false, "Use the older value of the postprocessor for this test");
+  MooseEnum test_type("grow use_older_value report_old");
+  params.addRequiredParam<MooseEnum>("test_type", test_type, "The type of test to perform");
+  params.addParam<PostprocessorName>("report_name", "The name of the postprocessor value to report");
   return params;
 }
 
-GrowPP::GrowPP(const std::string & name, InputParameters parameters) :
+TestPostprocessor::TestPostprocessor(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
-    _use_older(getParam<bool>("use_older_value")),
+    _test_type(getParam<MooseEnum>("test_type")),
     _old_val(getPostprocessorValueOldByName(name)),
     _older_val(getPostprocessorValueOlderByName(name))
 {
-}
-
-GrowPP::~GrowPP()
-{
-}
-
-void
-GrowPP::initialize()
-{
-}
-
-void
-GrowPP::execute()
-{
+  if (_test_type == "report_old" && !isParamValid("report_name"))
+    mooseError("Must set 'report_name' parameter when using the 'report_old' test type.");
 }
 
 Real
-GrowPP::getValue()
+TestPostprocessor::getValue()
 {
-  if (_t_step == 0)
-    return 1;
-
-  if (_use_older)
-    return _old_val + _older_val;
-  else
+  if (_test_type == "grow")
+  {
+    if (_t_step == 0)
+      return 1;
     return _old_val + 1;
+  }
+
+  else if (_test_type == "use_older_value")
+  {
+    if (_t_step == 0)
+      return 1;
+    return _old_val + _older_val;
+  }
+
+  else if (_test_type == "report_old")
+    return getPostprocessorValueOld("report_name");
+
+  // This should not be attainable
+  else
+  {
+    mooseError("Invalid test type.");
+    return 0.0;
+  }
 }

@@ -12,33 +12,56 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GROWPP_H
-#define GROWPP_H
+#ifndef TESTPOSTPROCESSOR_H
+#define TESTPOSTPROCESSOR_H
 
 #include "GeneralPostprocessor.h"
 
-class GrowPP;
+class TestPostprocessor;
 
 template<>
-InputParameters validParams<GrowPP>();
+InputParameters validParams<TestPostprocessor>();
 
 /**
- * A postprocessor for testing initial solution equality (see #1396)
+ * A postprocessor for testing
+ *
+ * The type of test that this Postprocessor is used for may be altered using the
+ * "test_type" parameter, the following are available:
+ *
+ * "grow" Tests the initial solution equality (see #1396)
+ * "report_old" Test the setting of old values in the Postprocessors (see #5106)
  */
-class GrowPP : public GeneralPostprocessor
+class TestPostprocessor : public GeneralPostprocessor
 {
 public:
-  GrowPP(const std::string & name, InputParameters parameters);
-  virtual ~GrowPP();
-  virtual void initialize();
-  virtual void execute();
+  TestPostprocessor(const std::string & name, InputParameters parameters);
+
+  ///@{
+  /**
+   * These methods are intentionally empty
+   */
+  virtual ~TestPostprocessor(){};
+  virtual void initialize(){};
+  virtual void execute(){};
+  ///@}
+
+  /**
+   * Returns the postprocessor depending on the 'test_type' parameter
+   * @return The postprocessor value
+   */
   virtual Real getValue();
 
-protected:
-  const bool _use_older;
+private:
+
+  /// Type of testing action to perform
+  MooseEnum _test_type;
+
+  ///@{
+  /// Reference to the old/older value
   const PostprocessorValue & _old_val;
   const PostprocessorValue & _older_val;
+  ///@}
 };
 
 
-#endif
+#endif // TESTPOSTPROCESSOR_H

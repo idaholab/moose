@@ -12,12 +12,7 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
-    variable = u
-    coef = 0.1
-  [../]
-  [./time]
-    type = TimeDerivative
+    type = Diffusion
     variable = u
   [../]
 []
@@ -38,16 +33,21 @@
 []
 
 [Postprocessors]
-  [./grow]
+  [./receiver]
+    type = Receiver
+    default = 12345
+    execute_on = 'timestep_end initial'
+  [../]
+  [./report_old]
     type = TestPostprocessor
-    execute_on = 'initial timestep_end'
+    execute_on = 'timestep_end initial'
+    test_type = report_old
+    report_name = receiver
   [../]
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 10
-  dt = 0.1
+  type = Steady
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -57,4 +57,5 @@
   output_initial = true
   exodus = true
   print_linear_residuals = true
+  print_perf_log = true
 []
