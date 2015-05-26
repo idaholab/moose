@@ -88,25 +88,19 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg      101'
-
-
   line_search = 'none'
 
-  nl_abs_tol = 1e-6
+  nl_rel_tol = 1e-12
   l_max_its = 100
-  nl_max_its = 200
+  nl_max_its = 10
+
   dt = 0.01
   end_time = 0.1
-  num_steps = 1000
-  dtmin = 0.00001
-  l_tol = 1e-3
 []
 
 [Outputs]
