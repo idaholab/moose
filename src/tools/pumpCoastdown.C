@@ -6,7 +6,7 @@
  */
 
 #include "pumpCoastdown.h"
-#include <math.h>
+#include <cmath>
 #include "CrowTools.h"
 
 /*

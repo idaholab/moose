@@ -7,7 +7,7 @@
 
 #include "Interpolation_Functions.h"
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <vector>
 #include <algorithm>

@@ -11,7 +11,6 @@
 
 #include "distribution_1D.h"
 #include "distributionFunctions.h"
-#include <math.h>
 #include <cmath>               // needed to use erfc error function
 #include <string>
 #include "dynamicArray.h"

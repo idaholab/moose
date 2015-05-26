@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include "MDreader.h"
 #include "distributionFunctions.h"
-#include <math.h>
 #include <cmath>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>

@@ -6,7 +6,7 @@
  */
 
 #include "decayHeat.h"
-#include <math.h>
+#include <cmath>
 #include "CrowTools.h"
 
 //enum{}
