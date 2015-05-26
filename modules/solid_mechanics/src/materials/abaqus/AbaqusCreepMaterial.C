@@ -15,7 +15,7 @@
 template<>
 InputParameters validParams<AbaqusCreepMaterial>()
 {
-  InputParameters params = validParams<VolumetricModel>();
+  InputParameters params = validParams<SolidModel>();
   params.addRequiredParam<FileName>("plugin", "The path to the compiled dynamic library for the plugin you want to use (without -opt.plugin or -dbg.plugin)");
   params.addRequiredParam<Real>("youngs_modulus", "Young's Modulus");
   params.addRequiredParam<Real>("poissons_ratio", "Poissons Ratio");
@@ -271,6 +271,25 @@ void AbaqusCreepMaterial::computeStress()
 
   // Modify strain increment
   _strain_increment += total_effects;
+
+  _stress_component[0] =
+    (_elasticity_tensor[0]*_strain_increment.component(0)) +
+    (_elasticity_tensor[1]*_strain_increment.component(1)) +
+    (_elasticity_tensor[1]*_strain_increment.component(2));
+
+  _stress_component[1] =
+    (_elasticity_tensor[1]*_strain_increment.component(0)) +
+    (_elasticity_tensor[0]*_strain_increment.component(1)) +
+    (_elasticity_tensor[1]*_strain_increment.component(2));
+
+  _stress_component[2] =
+    (_elasticity_tensor[1]*_strain_increment.component(0)) +
+    (_elasticity_tensor[1]*_strain_increment.component(1)) +
+    (_elasticity_tensor[0]*_strain_increment.component(2));
+
+  _stress_component[3] = (_elasticity_tensor[2]*_strain_increment.component(3));
+  _stress_component[4] = (_elasticity_tensor[2]*_strain_increment.component(4));
+  _stress_component[5] = (_elasticity_tensor[2]*_strain_increment.component(5));
 
   // Update Stress
   SymmTensor stressnew(_stress_component[0], _stress_component[1], _stress_component[2],

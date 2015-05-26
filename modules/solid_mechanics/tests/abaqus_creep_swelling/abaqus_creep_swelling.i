@@ -125,16 +125,19 @@
     num_state_vars = 0
     youngs_modulus = 209000
     solve_definition = 1
-  [../]
-  [./solid]
-    type = Elastic
-    block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    youngs_modulus = 209000
-    poissons_ratio = 0.3
   [../]
+  # [./solid]
+  #   type = Elastic
+  #   block = 0
+  #   disp_x = disp_x
+  #   disp_y = disp_y
+  #   disp_z = disp_z
+  #   youngs_modulus = 209000
+  #   poissons_ratio = 0.3
+  # [../]
 []
 
 [Executioner]
@@ -165,4 +168,3 @@
     elemental_as_nodal = true
   [../]
 []
-
