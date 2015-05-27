@@ -35,20 +35,15 @@ InputParameters validParams<EigenExecutionerBase>()
   return params;
 }
 
-EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParameters parameters)
-    :Executioner(name, parameters),
+EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParameters parameters) :
+    Executioner(name, parameters),
      _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
      _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
-     _eigenvalue(_problem.parameters().set<Real>("eigenvalue")), // used for storing the eigenvalue
+     _eigenvalue(1.0),
      _source_integral(getPostprocessorValue("bx_norm")),
      _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
                     : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
 {
-  _eigenvalue = 1.0;
-
-  // EigenKernel needs this postprocessor
-  _problem.parameters().set<PostprocessorName>("eigen_postprocessor")
-    = getParam<PostprocessorName>("bx_norm");
 
   //FIXME: currently we have to use old and older solution vectors for power iteration.
   //       We will need 'step' in the future.
@@ -166,17 +161,6 @@ EigenExecutionerBase::checkIntegrity()
     mooseError("You have specified time kernels in your steady state eigenvalue simulation");
   if (!_eigen_sys.containsEigenKernel())
     mooseError("You have not specified any eigen kernels in your eigenvalue simulation");
-}
-
-void
-EigenExecutionerBase::addRealParameterReporter(const std::string & param_name)
-{
-  InputParameters params = _app.getFactory().getValidParams("ProblemRealParameter");
-  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep_end linear";
-  params.set<MultiMooseEnum>("execute_on") = execute_options;
-  params.set<std::string>("param_name") = param_name;
-  _problem.addPostprocessor("ProblemRealParameter", param_name, params);
 }
 
 void

@@ -37,7 +37,7 @@ NonlinearEigen::NonlinearEigen(const std::string & name, InputParameters paramet
      _output_after_pi(getParam<bool>("output_after_power_iterations"))
 {
   _eigenvalue = getParam<Real>("k0");
-  addRealParameterReporter("eigenvalue");
+  addAttributeReporter("eigenvalue", _eigenvalue);
 }
 
 void

@@ -1,46 +1,40 @@
 [Mesh]
-  file = 2squares.e
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
 []
 
 [Variables]
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./exception]
-    type = ExceptionKernel
-    variable = u
-    block = 1
-    when = initial_condition
-  [../]
   [./diff]
     type = Diffusion
     variable = u
-    block = 2
   [../]
 []
 
 [BCs]
+  [./left]
+    type = DirichletBC
+    variable = u
+    boundary = left
+    value = 0
+  [../]
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = right
     value = 1
-  [../]
-  [./right2]
-    type = DirichletBC
-    variable = u
-    boundary = 1
-    value = 0
   [../]
 []
 
 [Executioner]
   type = TestSteady
-  test_type = "Exception"
+  test_type = addAttributeReporter
   solve_type = 'PJFNK'
 []
 
