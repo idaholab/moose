@@ -72,9 +72,9 @@ GeometricalComponent::displaceMesh()
 }
 
 const std::vector<RELAP7::Connection> &
-GeometricalComponent::getConnections(RELAP7::EEndType id)
+GeometricalComponent::getConnections(RELAP7::EEndType id) const
 {
-  std::map<RELAP7::EEndType, std::vector<RELAP7::Connection> >::iterator it = _connections.find(id);
+  std::map<RELAP7::EEndType, std::vector<RELAP7::Connection> >::const_iterator it = _connections.find(id);
   if (it != _connections.end())
     return it->second;
   else

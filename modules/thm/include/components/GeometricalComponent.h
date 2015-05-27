@@ -26,7 +26,7 @@ public:
   virtual RealVectorValue getDirection() { return _dir; }
   virtual Real getRotation() { return _rotation; }
 
-  virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id);
+  virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id) const;
 
 protected:
   /// Node IDs
