@@ -19,7 +19,7 @@ InputParameters validParams<FlowJunction>()
   sf4[2] = 1.e+6;
   sf4[3] = 1.;
   params.addParam<std::vector<Real> >("scaling_factor_bcs", sf4, "Scaling factors for the BCs");
-  params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
+  params.addRequiredParam<UserObjectName>("fp", "The name of fluid properties user object to use.");
   return params;
 }
 
@@ -48,13 +48,11 @@ FlowJunction::addVariables()
   switch (_model_type)
   {
   case FlowModel::EQ_MODEL_2:
-    _sim.addVariable(true, _lm_name,  FEType(SECOND, SCALAR),
-                     connected_subdomains, _scaling_factor);
+    _sim.addVariable(true, _lm_name,  FEType(SECOND, SCALAR), connected_subdomains, _scaling_factor);
     break;
 
   case FlowModel::EQ_MODEL_3:
-    _sim.addVariable(true, _lm_name,  FEType(THIRD, SCALAR),
-                     connected_subdomains, _scaling_factor);
+    _sim.addVariable(true, _lm_name,  FEType(THIRD, SCALAR), connected_subdomains, _scaling_factor);
     break;
 
   default:
@@ -87,7 +85,6 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<unsigned int> >("r7:boundary") = _bnd_id;
     params.set<MultiMooseEnum>("execute_on") = execute_options;
     params.set<std::string>("r7:output") = "none";
-    params.set<UserObjectName>("eos")  = getParam<UserObjectName>("eos");
     // coupling
     params.set<std::vector<VariableName> >("area") = cv_area;
 
@@ -104,7 +101,7 @@ FlowJunction::addMooseObjects()
       InputParameters params = _factory.getValidParams("OneDFreeMassBC");
       params.set<NonlinearVariableName>("variable") = FlowModel::RHOA;
       params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
-      params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
+      params.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
       params.set<PostprocessorName>("c") = c_pps;
       params.set<std::vector<Real> >("scaling_factors") = _scaling_factor_bcs;
       // coupling
@@ -129,7 +126,7 @@ FlowJunction::addMooseObjects()
       InputParameters params = _factory.getValidParams("OneDFreeMomentumBC");
       params.set<NonlinearVariableName>("variable") = FlowModel::RHOUA;
       params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
-      params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
+      params.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
       params.set<PostprocessorName>("c") = c_pps;
       params.set<std::vector<Real> >("scaling_factors") = _scaling_factor_bcs;
       // coupling
@@ -156,7 +153,7 @@ FlowJunction::addMooseObjects()
       InputParameters params = _factory.getValidParams("OneDFreeEnergyBC");
       params.set<NonlinearVariableName>("variable") = FlowModel::RHOEA;
       params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
-      params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
+      params.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
       // coupling
       params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName> >("rhouA") = cv_rhouA;
@@ -183,7 +180,7 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<dof_id_type> >("nodes") = _nodes;
     params.set<std::vector<Real> >("normals") = _normals;
     params.set<std::vector<Real> >("K") = _K;
-    params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
+    params.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
     // coupling
     params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
     params.set<std::vector<VariableName> >("rhouA") = cv_rhouA;
