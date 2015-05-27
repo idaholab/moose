@@ -106,7 +106,7 @@ public:
 protected:
 
   /**
-   * Adds a postprocessor to report the a Real class attribute
+   * Adds a postprocessor to report a Real class attribute
    * @param name The name of the postprocessor to create
    * @param attribute The Real class attribute to report
    * @param execute_on When to execute the postprocessor that is created
