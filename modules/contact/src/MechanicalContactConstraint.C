@@ -173,8 +173,14 @@ MechanicalContactConstraint::shouldApply()
   if ( found != _penetration_locator._penetration_info.end() )
   {
     PenetrationInfo * pinfo = found->second;
-    if ( pinfo != NULL )
-      in_contact = pinfo->isCaptured();
+    if ( pinfo != NULL && pinfo->isCaptured() )
+    {
+      in_contact = true;
+
+      // This does the contact force once per constraint, rather than once per quad point and for
+      // both master and slave cases.
+      computeContactForce(pinfo);
+    }
   }
 
   return in_contact;
@@ -293,7 +299,6 @@ Real
 MechanicalContactConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
-  computeContactForce(pinfo);
   Real resid = pinfo->_contact_force(_component);
 
   switch (type)
