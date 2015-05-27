@@ -69,7 +69,6 @@
     block = 0
     c = c
     derivative_order = 2
-    T = 1000
   [../]
 []
 

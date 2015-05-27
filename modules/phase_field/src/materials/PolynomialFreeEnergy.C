@@ -7,10 +7,9 @@ InputParameters validParams<PolynomialFreeEnergy>()
   params.addClassDescription("Polynomial free energy for single component systems");
   MooseEnum poly_order("4 6 8");
   params.addRequiredParam<MooseEnum>("polynomial_order", poly_order, "Order of polynomial free energy");
-  params.addParam<std::string>("c_eq_name", "c_eq", "Material name storing the equilibrium concentration");
-  params.addParam<std::string>("W_name", "barr_height", "Material name storing the equilibrium concentration");
+  params.addParam<std::string>("c_eq_name", "c_eq", "Name of material property storing the equilibrium concentration");
+  params.addParam<std::string>("W_name", "barr_height", "Name of the material property storing the barrier height");
   params.addRequiredCoupledVar("c", "Concentration");
-  params.addRequiredCoupledVar("T", "Temperature");
   return params;
 }
 
