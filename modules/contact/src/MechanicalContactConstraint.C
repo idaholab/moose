@@ -70,7 +70,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian"))
 {
   _overwrite_slave_residual = false;
-
+  _penetration_locator.skipOffProcessSlaveNodes();
   if (parameters.isParamValid("tangential_tolerance"))
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
 

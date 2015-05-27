@@ -40,7 +40,8 @@ public:
                     std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
                     std::vector<dof_id_type> & elem_list,
                     std::vector<unsigned short int> & side_list,
-                    std::vector<boundary_id_type> & id_list);
+                    std::vector<boundary_id_type> & id_list,
+                    bool skip_off_process_slaves);
 
   // Splitting Constructor
   PenetrationThread(PenetrationThread & x, Threads::split split);
@@ -80,10 +81,9 @@ protected:
   std::vector<dof_id_type> & _elem_list;
   std::vector<unsigned short int> & _side_list;
   std::vector<boundary_id_type> & _id_list;
-
   unsigned int _n_elems;
-
   THREAD_ID _tid;
+  bool _skip_off_process_slaves;
 
   enum CompeteInteractionResult
   {

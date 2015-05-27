@@ -27,46 +27,49 @@
 // Mutex to use when accessing _penetration_info;
 Threads::spin_mutex pinfo_mutex;
 
-PenetrationThread::PenetrationThread(SubProblem & subproblem,
-                                     const MooseMesh & mesh,
-                                     BoundaryID master_boundary,
-                                     BoundaryID slave_boundary,
-                                     std::map<dof_id_type, PenetrationInfo *> & penetration_info,
-                                     bool check_whether_reasonable,
-                                     bool update_location,
-                                     Real tangential_tolerance,
-                                     bool do_normal_smoothing,
-                                     Real normal_smoothing_distance,
-                                     PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
-                                     std::vector<std::vector<FEBase *> > & fes,
-                                     FEType & fe_type,
-                                     NearestNodeLocator & nearest_node,
-                                     std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
-                                     std::vector<dof_id_type> & elem_list,
-                                     std::vector<unsigned short int> & side_list,
-                                     std::vector<boundary_id_type> & id_list) :
-  _subproblem(subproblem),
-  _mesh(mesh),
-  _master_boundary(master_boundary),
-  _slave_boundary(slave_boundary),
-  _penetration_info(penetration_info),
-  _check_whether_reasonable(check_whether_reasonable),
-  _update_location(update_location),
-  _tangential_tolerance(tangential_tolerance),
-  _do_normal_smoothing(do_normal_smoothing),
-  _normal_smoothing_distance(normal_smoothing_distance),
-  _normal_smoothing_method(normal_smoothing_method),
-  _nodal_normal_x(NULL),
-  _nodal_normal_y(NULL),
-  _nodal_normal_z(NULL),
-  _fes(fes),
-  _fe_type(fe_type),
-  _nearest_node(nearest_node),
-  _node_to_elem_map(node_to_elem_map),
-  _elem_list(elem_list),
-  _side_list(side_list),
-  _id_list(id_list),
-  _n_elems(elem_list.size())
+PenetrationThread::PenetrationThread(
+  SubProblem & subproblem,
+  const MooseMesh & mesh,
+  BoundaryID master_boundary,
+  BoundaryID slave_boundary,
+  std::map<dof_id_type, PenetrationInfo *> & penetration_info,
+  bool check_whether_reasonable,
+  bool update_location,
+  Real tangential_tolerance,
+  bool do_normal_smoothing,
+  Real normal_smoothing_distance,
+  PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
+  std::vector<std::vector<FEBase *> > & fes,
+  FEType & fe_type,
+  NearestNodeLocator & nearest_node,
+  std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
+  std::vector<dof_id_type> & elem_list,
+  std::vector<unsigned short int> & side_list,
+  std::vector<boundary_id_type> & id_list,
+  bool skip_off_process_slaves)
+  : _subproblem(subproblem),
+    _mesh(mesh),
+    _master_boundary(master_boundary),
+    _slave_boundary(slave_boundary),
+    _penetration_info(penetration_info),
+    _check_whether_reasonable(check_whether_reasonable),
+    _update_location(update_location),
+    _tangential_tolerance(tangential_tolerance),
+    _do_normal_smoothing(do_normal_smoothing),
+    _normal_smoothing_distance(normal_smoothing_distance),
+    _normal_smoothing_method(normal_smoothing_method),
+    _nodal_normal_x(NULL),
+    _nodal_normal_y(NULL),
+    _nodal_normal_z(NULL),
+    _fes(fes),
+    _fe_type(fe_type),
+    _nearest_node(nearest_node),
+    _node_to_elem_map(node_to_elem_map),
+    _elem_list(elem_list),
+    _side_list(side_list),
+    _id_list(id_list),
+    _n_elems(elem_list.size()),
+    _skip_off_process_slaves(skip_off_process_slaves)
 {
 }
 
@@ -90,7 +93,8 @@ PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*spl
   _elem_list(x._elem_list),
   _side_list(x._side_list),
   _id_list(x._id_list),
-  _n_elems(x._n_elems)
+  _n_elems(x._n_elems),
+  _skip_off_process_slaves(x._skip_off_process_slaves)
 {
 }
 
@@ -112,6 +116,12 @@ PenetrationThread::operator() (const NodeIdRange & range)
   for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
   {
     const Node & node = _mesh.node(*nd);
+
+    // Never allocate pinfos for off-process slave nodes. This is because when the constraints get
+    // applied, we loop over local slave nodes, never over master nodes. So we only ever use the
+    // pinfos that are on nodes owned by this process.
+    if ( _skip_off_process_slaves && node.processor_id() != _subproblem.processor_id())
+      continue;
 
     // We're going to get a reference to the pointer for the pinfo for this node
     // This will allow us to manipulate this pointer without having to go through

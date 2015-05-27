@@ -86,6 +86,7 @@ public:
   void setNormalSmoothingDistance(Real normal_smoothing_distance);
   void setNormalSmoothingMethod(std::string nsmString);
   Real getTangentialTolerance() {return _tangential_tolerance;}
+  void skipOffProcessSlaveNodes( bool skip_them = true );
 
 protected:
   /// Check whether found candidates are reasonable
@@ -95,6 +96,7 @@ protected:
   bool _do_normal_smoothing;  // Should we do contact normal smoothing?
   Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to perform normal smoothing
   NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
+  bool _skip_off_process_slaves; // Do not PenetrationInfos for nodes that are not locally owned.
 };
 
 /**
