@@ -6,12 +6,12 @@
 
 import os, sys, re, subprocess
 
-def findDepApps(dep_names):
+def findDepApps(dep_names, use_current_only=False):
   dep_name = dep_names.split('~')[0]
 
   app_dirs = []
   moose_apps = ['framework', 'moose', 'test', 'unit', 'modules', 'examples']
-  apps = moose_apps[:]
+  apps = []
 
   # First see if we are in a git repo
   p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -19,27 +19,25 @@ def findDepApps(dep_names):
   if p.returncode == 0:
     git_dir = p.communicate()[0]
     root_dir = os.path.abspath(os.path.join(os.getcwd(), git_dir)).rstrip()
-    app_dirs.append(os.path.abspath(os.path.join(root_dir, '..')))
 
-  # Now see if we can find .build_apps which exists in the herd repo
-  apps_file = '.build_apps'
-  apps_file_path = ''
-  apps_dir = os.getcwd()
+    # Assume that any application we care about is always a peer
+    dir_to_append = '.' if use_current_only else '..'
+    app_dirs.append(os.path.abspath(os.path.join(root_dir, dir_to_append)))
+
+  # Now see if we can find .build_apps in a parent directory from where we are at, usually "projects"
+  restrict_file = '.build_apps'
+  restrict_file_path = ''
+  restrict_dir = ''
+
+  next_dir = os.getcwd()
   for i in range(4):
-    apps_dir = os.path.join(apps_dir, "..")
-    if os.path.isfile(os.path.join(apps_dir, apps_file)):
-      apps_file_path = os.path.join(apps_dir, apps_file)
+    next_dir = os.path.join(next_dir, "..")
+    if os.path.isfile(os.path.join(next_dir, restrict_file)):
+      restrict_file_path = os.path.join(next_dir, restrict_file)
       break
-  if apps_file_path != '':
-    app_dirs.append(os.path.abspath(os.path.join(apps_dir, '..')))
-
-  # Finally see if HERD_TRUNK_DIR is defined
-  herd_trunk = os.environ.get('HERD_TRUNK_DIR')
-  if herd_trunk != None:
-    app_dirs.append(herd_trunk)
-    if os.path.isfile(os.path.join(herd_trunk, apps_file)):
-      apps_file_path = os.path.join(herd_trunk, apps_file)
-
+  if restrict_file_path != '':
+    restrict_dir = os.path.dirname(os.path.abspath(restrict_file_path))
+    app_dirs.append(restrict_dir)
 
   # Make sure that we found at least one directory to search
   if len(app_dirs) == 0:
@@ -64,8 +62,8 @@ def findDepApps(dep_names):
   # set difference
   unique_dirs = unique_dirs - remove_dirs
 
-  if apps_file_path != '':
-    f = open(apps_file_path)
+  if restrict_file_path != '':
+    f = open(restrict_file_path)
     apps.extend(f.read().splitlines())
     f.close()
 
@@ -83,12 +81,13 @@ def findDepApps(dep_names):
   else:
     dep_app_re=re.compile(r"^\s*APPLICATION_NAME\s*:=\s*"+dep_name,re.MULTILINE)
 
-  ignores = ['.git', '.svn', '.libs', 'gold', 'src', 'include', 'contrib', 'tests', 'bak']
+  ignores = ['.git', '.svn', '.libs', 'gold', 'src', 'include', 'contrib', 'tests', 'bak', 'tutorials']
+
   for dir in unique_dirs:
     startinglevel = dir.count(os.sep)
     for dirpath, dirnames, filenames in os.walk(dir, topdown=True):
       # Don't traverse too deep!
-      if dirpath.count(os.sep) - startinglevel >= 3: # 2 levels outta be enough for anybody
+      if dirpath.count(os.sep) - startinglevel >= 2: # 2 levels outta be enough for anybody
         dirnames[:] = []
 
       # Don't traverse into ignored directories
@@ -101,6 +100,14 @@ def findDepApps(dep_names):
         dirnames[:] = []
         continue
 
+      # Don't traverse into submodules
+      if os.path.isfile(os.path.join(dirpath, '.gitmodules')):
+        f = open(os.path.join(dirpath, '.gitmodules'))
+        content = f.read()
+        f.close()
+        sub_mods = re.findall(r'path = (\w+)', content)
+        dirnames[:] = [x for x in dirnames if x not in sub_mods]
+
       potential_makefile = os.path.join(dirpath, 'Makefile')
 
       if os.path.isfile(potential_makefile):
@@ -111,13 +118,13 @@ def findDepApps(dep_names):
         # We only want to build certain applications, look at the path to make a decision
         # If we are in trunk, we will honor .build_apps.  If we aren't, then we'll add it
         eligible_app = dirpath.split('/')[-1]
-        if dep_app_re.search(lines) and (eligible_app in apps or '/trunk/' not in dirpath):
+
+        if dep_app_re.search(lines) and ((len(apps) == 0 or eligible_app in apps) or ('/moose/' in dirpath and eligible_app in moose_apps)):
           dep_apps.add(eligible_app)
           dep_dirs.add(dirpath)
 
           # Don't traverse once we've found a dependency
           dirnames[:] = []
-
 
   # Now we need to filter out duplicate moose apps
   moose_dir = os.environ.get('MOOSE_DIR')
@@ -125,5 +132,5 @@ def findDepApps(dep_names):
 
 if __name__ == '__main__':
   if len(sys.argv) == 2:
-    dep_apps = findDepApps(sys.argv[1])
+    dep_apps = findDepApps(sys.argv[1], False)
     print dep_apps
