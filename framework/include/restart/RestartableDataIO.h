@@ -21,6 +21,7 @@
 #include <list>
 
 class RestartableDatas;
+class RestartableDataValue;
 
 class FEProblem;
 
@@ -52,6 +53,11 @@ public:
   void readRestartableData(RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data);
 
 private:
+  /**
+   * Serializes the data for the tid thread into the stream object.
+   */
+  void serializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::ostream & stream);
+
   /// Reference to a FEProblem being restarted
   FEProblem & _fe_problem;
 

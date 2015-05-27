@@ -38,15 +38,10 @@ void
 RestartableDataIO::writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & /*_recoverable_data*/)
 {
   unsigned int n_threads = libMesh::n_threads();
-  processor_id_type n_procs = _fe_problem.n_processors();
   processor_id_type proc_id = _fe_problem.processor_id();
 
   for (unsigned int tid=0; tid<n_threads; tid++)
   {
-    const std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
-
-    const unsigned int file_version = 1;
-
     std::ofstream out;
 
     std::ostringstream file_name_stream;
@@ -58,64 +53,75 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
       file_name_stream << "-" << tid;
 
     std::string file_name = file_name_stream.str();
+    out.open(file_name.c_str(), std::ios::out | std::ios::binary);
 
-    { // Write out header
-      out.open(file_name.c_str(), std::ios::out | std::ios::binary);
+    serializeRestartableData(restartable_datas[tid], out);
 
-      char id[2];
-
-      // header
-      id[0] = 'R';
-      id[1] = 'D';
-
-      out.write(id, 2);
-      out.write((const char *)&file_version, sizeof(file_version));
-
-      out.write((const char *)&n_procs, sizeof(n_procs));
-      out.write((const char *)&n_threads, sizeof(n_threads));
-
-      // number of RestartableData
-      unsigned int n_data = restartable_data.size();
-      out.write((const char *) &n_data, sizeof(n_data));
-
-      // data names
-      for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
-           it != restartable_data.end();
-           ++it)
-      {
-        std::string name = it->first;
-        out.write(name.c_str(), name.length() + 1); // trailing 0!
-      }
-    }
-    {
-      std::ostringstream data_blk;
-
-      for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
-           it != restartable_data.end();
-           ++it)
-      {
-        // Moose::out<<"Storing "<<it->first<<std::endl;
-
-        std::ostringstream data;
-        it->second->store(data);
-
-        // Store the size of the data then the data
-        unsigned int data_size = static_cast<unsigned int>(data.tellp());
-        data_blk.write((const char *) &data_size, sizeof(data_size));
-        data_blk << data.str();
-      }
-
-      // Write out this proc's block size
-      unsigned int data_blk_size = static_cast<unsigned int>(data_blk.tellp());
-      out.write((const char *) &data_blk_size, sizeof(data_blk_size));
-
-      // Write out the values
-      out << data_blk.str();
-
-      out.close();
-    }
+    out.close();
   }
 }
+
+void
+RestartableDataIO::serializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::ostream & stream)
+{
+  unsigned int n_threads = libMesh::n_threads();
+  processor_id_type n_procs = _fe_problem.n_processors();
+
+  const unsigned int file_version = 1;
+
+  { // Write out header
+    char id[2];
+
+    // header
+    id[0] = 'R';
+    id[1] = 'D';
+
+    stream.write(id, 2);
+    stream.write((const char *)&file_version, sizeof(file_version));
+
+    stream.write((const char *)&n_procs, sizeof(n_procs));
+    stream.write((const char *)&n_threads, sizeof(n_threads));
+
+    // number of RestartableData
+    unsigned int n_data = restartable_data.size();
+    stream.write((const char *) &n_data, sizeof(n_data));
+
+    // data names
+    for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
+         it != restartable_data.end();
+         ++it)
+    {
+      std::string name = it->first;
+      stream.write(name.c_str(), name.length() + 1); // trailing 0!
+    }
+  }
+  {
+    std::ostringstream data_blk;
+
+    for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
+         it != restartable_data.end();
+         ++it)
+    {
+      // Moose::out<<"Storing "<<it->first<<std::endl;
+
+      std::ostringstream data;
+      it->second->store(data);
+
+      // Store the size of the data then the data
+      unsigned int data_size = static_cast<unsigned int>(data.tellp());
+      data_blk.write((const char *) &data_size, sizeof(data_size));
+      data_blk << data.str();
+    }
+
+    // Write out this proc's block size
+    unsigned int data_blk_size = static_cast<unsigned int>(data_blk.tellp());
+    stream.write((const char *) &data_blk_size, sizeof(data_blk_size));
+
+    // Write out the values
+    stream << data_blk.str();
+  }
+}
+
 
 void
 RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
