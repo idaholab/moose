@@ -14,38 +14,61 @@
 
 #include "EigenKernel.h"
 #include "EigenSystem.h"
+#include "MooseApp.h"
+#include "Executioner.h"
+#include "EigenExecutionerBase.h"
 
 template<>
 InputParameters validParams<EigenKernel>()
 {
   InputParameters params = validParams<KernelBase>();
   params.addParam<bool>("eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
+  params.addParam<PostprocessorName>("eigen_postprocessor", 1.0, "The name of the postprocessor that provides the eigenvalue.");
   params.registerBase("EigenKernel");
   return params;
 }
 
 EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
-    KernelBase(name,parameters),
+    KernelBase(name, parameters),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
-    _eigen_sys(NULL),
+    _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem())),
     _eigenvalue(NULL)
 {
-  if (_eigen)
-  {
-    _eigen_sys = static_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem());
-    _eigen_pp = _fe_problem.parameters().get<PostprocessorName>("eigen_postprocessor");
-    if (_is_implicit)
-      _eigenvalue = &getPostprocessorValueByName(_eigen_pp);
-    else
-      _eigenvalue = &getPostprocessorValueOldByName(_eigen_pp);
-  }
+}
+
+void
+EigenKernel::initialSetup()
+{
+  // The name to the postprocessor storing the eigenvalue
+  std::string eigen_pp_name;
+
+  // If the "eigen_postprocessor" is given, use it. The isParamValid does not work here because of the default value, which
+  // you don't want to use if an EigenExecutioner exists.
+  if (hasPostprocessor("eigen_postprocessor"))
+    eigen_pp_name = getParam<PostprocessorName>("eigen_postprocessor");
+
+  // Attempt to extract the eigenvalue postprocessor from the Executioner
   else
   {
-    if (!_fe_problem.parameters().isParamValid("eigenvalue"))
-      _fe_problem.parameters().set<Real>("eigenvalue") = 1.0;
-    _eigenvalue = &_fe_problem.parameters().get<Real>("eigenvalue");
+    EigenExecutionerBase * exec = dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner());
+    if (exec)
+      eigen_pp_name = exec->getParam<PostprocessorName>("bx_norm");
+  }
+
+  // If the postprocessor name was not provided and an EigenExecutionerBase is not being used,
+  // use the default value from the "eigen_postprocessor" parameter
+  if (eigen_pp_name.empty())
+    _eigenvalue = &parameters().defaultPostprocessorValue("eigen_postprocessor");
+
+  // If the name does exist, then use the postprocessor value
+  else
+  {
+    if (_is_implicit)
+      _eigenvalue = &getPostprocessorValueByName(eigen_pp_name);
+    else
+      _eigenvalue = &getPostprocessorValueOldByName(eigen_pp_name);
   }
 }
 
@@ -56,8 +79,8 @@ EigenKernel::computeResidual()
   _local_re.resize(re.size());
   _local_re.zero();
 
-  Real one_over_eigen = 1.0;
-  one_over_eigen /= *_eigenvalue;
+  mooseAssert(*_eigenvalue != 0.0, "Can't divide by zero eigenvalue in EigenKernel!");
+  Real one_over_eigen = 1.0 / *_eigenvalue;
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpResidual();
@@ -81,8 +104,8 @@ EigenKernel::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
-  Real one_over_eigen = 1.0;
-  one_over_eigen /= *_eigenvalue;
+  mooseAssert(*_eigenvalue != 0.0, "Can't divide by zero eigenvalue in EigenKernel!");
+  Real one_over_eigen = 1.0 / *_eigenvalue;
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)

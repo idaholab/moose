@@ -61,11 +61,6 @@ public:
   virtual void checkIntegrity();
 
   /**
-   * Add postprocessors to report problem parameters including the eigenvalue
-   */
-  virtual void addRealParameterReporter(const std::string & param_name);
-
-  /**
    * Perform inverse power iterations with the initial guess of the solution
    *
    * @param min_iter The minimum number of power iterations.
@@ -116,6 +111,12 @@ public:
    */
   virtual void nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k);
 
+  /**
+   * A method for returning the eigenvalue computed by the executioner
+   * @return A reference to the eigenvalue stored withing the executioner
+   */
+  Real & eigenValue() { return _eigenvalue; }
+
 protected:
 
   /**
@@ -127,14 +128,14 @@ protected:
   FEProblem & _problem;
   EigenSystem & _eigen_sys;
 
-  // eigenvalue
-  Real & _eigenvalue;
+  /// Storage for the eigenvalue computed by the executioner
+  Real _eigenvalue;
 
   // postprocessor for eigenvalue
   const Real & _source_integral;
 
-  // postprocessor for normalization
-  Real & _normalization;
+  /// Postprocessor for normalization
+  const Real & _normalization;
   ExecFlagType _norm_execflag;
 
   // Chebyshev acceleration

@@ -12,29 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ProblemRealParameter_H
-#define ProblemRealParameter_H
-
-#include "GeneralPostprocessor.h"
-
-//Forward Declarations
-class ProblemRealParameter;
+// MOOSE includes
+#include "ExecutionerAttributeReporter.h"
+#include "EigenExecutionerBase.h"
+#include "MooseApp.h"
 
 template<>
-InputParameters validParams<ProblemRealParameter>();
-
-class ProblemRealParameter : public GeneralPostprocessor
+InputParameters validParams<ExecutionerAttributeReporter>()
 {
-public:
-  ProblemRealParameter(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<GeneralPostprocessor>();
 
-  virtual void initialize() {}
-  virtual void execute() {}
+  // Parameter for passing in a pointer the attribute being reported (see Executioner::addAttributeReporter)
+  params.addPrivateParam<Real *>("value", NULL);
+  return params;
+}
 
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
-};
+ExecutionerAttributeReporter::ExecutionerAttributeReporter(const std::string & name, InputParameters parameters) :
+    GeneralPostprocessor(name, parameters),
+    _value(parameters.getCheckedPointerParam<Real *>("value", "Invalid pointer to an attribute, this object should only be created via Executioner::addAttributeReporter"))
+{
+}
 
-#endif //ProblemRealParameter_H
+PostprocessorValue
+ExecutionerAttributeReporter::getValue()
+{
+  return *_value;
+}

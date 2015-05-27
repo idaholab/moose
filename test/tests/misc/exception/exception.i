@@ -29,9 +29,8 @@
 []
 
 [Executioner]
-  type = ExceptionSteady
-
-  # Preconditioned JFNK (default)
+  type = TestSteady
+  test_type = "Exception"
   solve_type = 'PJFNK'
 []
 
