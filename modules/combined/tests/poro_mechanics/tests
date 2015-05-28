@@ -25,6 +25,11 @@
     input = pp_generation_unconfined.i
     csvdiff = pp_generation_unconfined.csv
   [../]
+  [./pp_generation_unconfined_action]
+    type = CSVDiff
+    input = pp_generation_unconfined_action.i
+    csvdiff = pp_generation_unconfined_action.csv
+  [../]
   [./unconsolidated_undrained]
     type = CSVDiff
     input = unconsolidated_undrained.i

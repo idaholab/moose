@@ -4,4 +4,9 @@
     input = 'vol_expansion.i'
     exodiff = 'vol_expansion.e'
   [../]
+  [./vol_expansion_action]
+    type = 'Exodiff'
+    input = 'vol_expansion_action.i'
+    exodiff = 'vol_expansion_action.e'
+  [../]
 []

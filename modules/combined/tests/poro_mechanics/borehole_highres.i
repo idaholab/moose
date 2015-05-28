@@ -1,6 +1,6 @@
 # Poroelastic response of a borehole.
 #
-# HIGHRES VERSION: this version does not give perfect agreement with the analytical solution
+# HIGHRES VERSION: this version gives good agreement with the analytical solution, but it takes a while so is a "heavy" test
 #
 # A fully-saturated medium contains a fluid with a homogeneous porepressure,
 # but an anisitropic insitu stress.  A infinitely-long borehole aligned with
@@ -182,14 +182,18 @@
 []
 
 [Materials]
-  [./no_plasticity]
-    type = FiniteStrainMultiPlasticity
-    initial_stress = '-1.35E6 0 0  0 -3.35E6 0  0 0 0' # remember this is the effective stress
-
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
     C_ijkl = '0.5E9 1.5E9'
     # bulk modulus is lambda + 2*mu/3 = 0.5 + 2*1.5/3 = 1.5E9
     fill_method = symmetric_isotropic
-
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+  [../]
+  [./no_plasticity]
+    type = ComputeMultiPlasticityStress
+    initial_stress = '-1.35E6 0 0  0 -3.35E6 0  0 0 0' # remember this is the effective stress
     ep_plastic_tolerance = 1E-6
     plastic_models = fake_plasticity
   [../]

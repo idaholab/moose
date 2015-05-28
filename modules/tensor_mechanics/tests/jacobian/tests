@@ -141,6 +141,7 @@
     difference_tol = 1E10
     cli_args = '--no-trap-fpe'
   [../]
+
   [./poro01]
     type = 'PetscJacobianTester'
     input = 'poro01.i'
