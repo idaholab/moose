@@ -269,12 +269,6 @@
   l_max_its = 200
   nl_max_its = 10
 
-  # Use the residual from *after* the PresetBC values are set in the
-  # solution vector.  This gives us a chance of converging in this
-  # problem using a relative tolerance, and lets us avoid using
-  # absolute tolerances.
-  compute_initial_residual_before_preset_bcs = false
-
   petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
   petsc_options_value = ' asm      2              lu            gmres     200'
 []

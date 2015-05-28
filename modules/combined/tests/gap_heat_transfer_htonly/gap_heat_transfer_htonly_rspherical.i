@@ -41,7 +41,6 @@
 []
 
 [Functions]
-
   [./temp]
     type = PiecewiseLinear
     x = '0   1   2'
@@ -122,27 +121,23 @@
 
 [Executioner]
   type = Transient
-#  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-
-#  petsc_options_iname = '-snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-#  petsc_options_value = 'ls         basic    basic                    201                hypre    boomeramg      4'
-#  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-#  petsc_options_value = '201                hypre    boomeramg      4'
-
+  # I don't know enough about this test to say why it needs such a
+  # loose nl_abs_tol... after timestep 10 the residual basically can't
+  # be reduced much beyond the initial residual.  The test probably
+  # needs to be revisited to determine why.
   nl_abs_tol = 5e-2
-  nl_rel_tol = 1e-8
-
+  nl_rel_tol = 1e-10
   l_tol = 1e-6
   l_max_its = 100
+  line_search = 'none'
+  nl_max_its = 10
 
-  start_time = 0.0
   dt = 1e-1
+  dtmin = 1e-1
   end_time = 2.0
 []
 
@@ -181,6 +176,7 @@
 
 [Outputs]
   output_initial = true
+  print_linear_residuals = true
   exodus = true
   print_perf_log = true
 []

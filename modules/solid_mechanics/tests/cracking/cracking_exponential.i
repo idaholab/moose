@@ -209,28 +209,26 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
   petsc_options_iname = '-ksp_gmres_restart -pc_type'
   petsc_options_value = '101                lu'
 
-
   line_search = 'none'
-
-
   l_max_its = 100
   l_tol = 1e-6
 
-  nl_max_its = 100
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-4
+  nl_max_its = 10
+  nl_rel_tol = 1e-12
+
+  # Some timesteps in this example start from very small initial
+  # residuals, so it is legitimate to use a (very small) nl_abs_tol.
+  nl_abs_tol = 1.e-20
 
   start_time = 0.0
-  end_time = 6.0
   dt = 0.005
+  dtmin = 0.005
+  num_steps = 1200
 []
 
 [Outputs]

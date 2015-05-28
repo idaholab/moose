@@ -115,7 +115,7 @@ FiniteStrainMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   B.addIa(-0.75);
   _strain_increment[_qp] = -B*A;*/
 
-  RankTwoTensor D = _strain_increment[_qp]/_t_step;
+  RankTwoTensor D = _strain_increment[_qp]/_dt;
   _strain_rate[_qp] = D;
 
   //Calculate rotation R_incr

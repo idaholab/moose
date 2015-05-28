@@ -263,11 +263,11 @@
   solve_type = PJFNK
   type = Transient
 
-  nl_abs_tol = 1E-4
-  nl_rel_tol = 1E-8
+  line_search = 'none'
+  nl_rel_tol = 1E-10
   l_tol = 1E-3
   l_max_its = 200
-  nl_max_its = 400
+  nl_max_its = 10
 
   petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
   petsc_options_value = ' asm      2              lu            gmres     200'

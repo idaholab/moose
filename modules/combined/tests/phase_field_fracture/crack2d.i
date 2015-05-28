@@ -164,19 +164,18 @@
 
 [Executioner]
   type = Transient
-  dt = 1e-4
-  l_max_its = 50
-  nl_max_its = 20
-  petsc_options = ksp_monitor
+
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm         31   preonly   lu      1'
-  end_time = 1
-  dtmax = 100.0
-  dtmin = 1e-8
+  petsc_options_value = 'asm      31                  preonly       lu           1'
+
+  nl_rel_tol = 1e-8
+  l_max_its = 10
+  nl_max_its = 10
+
+  dt = 1e-4
+  dtmin = 1.e-4
   num_steps = 2
-  nl_rel_step_tol = 1e-4
-  nl_rel_tol = 1e-4
 []
 
 [Outputs]
