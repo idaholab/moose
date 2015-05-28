@@ -155,7 +155,7 @@
 
   l_max_its = 50
   nl_max_its = 20
-  nl_abs_tol = 1e-5
+  nl_rel_tol = 1e-12
   l_tol = 1e-2
 
   start_time = 0.0

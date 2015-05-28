@@ -179,24 +179,23 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-ksp_gmres_restart -pc_type'
   petsc_options_value = '101                lu'
 
-
   line_search = 'none'
-
-
   l_max_its = 100
   l_tol = 1e-6
 
-  nl_max_its = 100
-  nl_abs_tol = 1e-10
-  nl_rel_tol = 1e-4
+  nl_max_its = 10
+  nl_rel_tol = 1e-12
+
+  # This test takes hundreds of timesteps where the initial nonlinear
+  # residual is something like 1.e-25, so setting an absolute tolerance
+  # is legitimate here.
+  nl_abs_tol = 1e-20
 
   start_time = 0.0
   end_time = 6.0
