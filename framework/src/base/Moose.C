@@ -121,6 +121,7 @@
 #include "CoupledTransientExecutioner.h"
 
 // functions
+#include "Axisymmetric2D3DSolutionFunction.h"
 #include "ConstantFunction.h"
 #include "CompositeFunction.h"
 #include "MooseParsedFunction.h"
@@ -493,6 +494,7 @@ registerObjects(Factory & factory)
 #endif
 
   // functions
+  registerFunction(Axisymmetric2D3DSolutionFunction);
   registerFunction(ConstantFunction);
   registerFunction(CompositeFunction);
   registerNamedFunction(MooseParsedFunction, "ParsedFunction");
