@@ -130,7 +130,7 @@ protected:
   /**
    * This routine uses the bubble_sets data structure to calculate the volume of each stored bubble.
    */
-  void calculateBubbleVolumes();
+  virtual void calculateBubbleVolumes();
 
   /**
    * This routine writes out data to a CSV file.  It is designed to be extended to derived classes
