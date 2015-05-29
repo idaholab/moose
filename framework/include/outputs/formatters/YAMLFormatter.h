@@ -30,7 +30,7 @@ public:
   virtual std::string postscript() const;
 
   virtual std::string preTraverse(short depth) const;
-  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string &type) const;
+  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string & doc) const;
   virtual std::string printBlockClose(const std::string &name, short depth) const;
   virtual std::string printParams(const std::string &prefix, const std::string &fully_qualified_name, InputParameters &params, short depth, const std::string &search_string, bool &found);
 

@@ -127,14 +127,17 @@ YAMLFormatter::preTraverse(short depth) const
 
 
 std::string
-YAMLFormatter::printBlockOpen(const std::string &name, short depth, const std::string &type) const
+YAMLFormatter::printBlockOpen(const std::string &name, short depth, const std::string & doc) const
 {
   std::ostringstream oss;
   std::string indent(depth*2, ' ');
 
-  oss << indent << "- name: " << (name == "*" ? type : name) << "\n";
-  oss << indent << "  description: !!str\n";
-  oss << indent << "  type: " << type << "\n";
+  std::string docEscaped = doc;
+  MooseUtils::escape(docEscaped);
+
+  oss << indent << "- name: " << name << "\n";
+  oss << indent << "  description: |\n"
+      << indent << "    " << docEscaped << "\n";
   oss << indent << "  parameters:\n";
 
   return oss.str();
