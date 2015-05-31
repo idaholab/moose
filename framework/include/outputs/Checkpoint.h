@@ -20,7 +20,6 @@
 #include "FileOutput.h"
 #include "MaterialPropertyStorage.h"
 #include "RestartableData.h"
-#include "MaterialPropertyIO.h"
 #include "RestartableDataIO.h"
 
 #include <deque>
@@ -113,9 +112,6 @@ private:
 
   /// Reference to the boundary material property storage
   const MaterialPropertyStorage & _bnd_material_property_storage;
-
-  /// MaterialProperty input/output interface
-  MaterialPropertyIO _material_property_io;
 
   /// RestrableData input/output interface
   RestartableDataIO _restartable_data_io;

@@ -121,6 +121,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _aux(*this, name_sys("aux", _n)),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
+    _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
+    _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif
@@ -459,25 +461,6 @@ void FEProblem::initialSetup()
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
 
-  if (_app.isRestarting() || _app.isRecovering())
-  {
-    // now if restarting and we have stateful material properties, go overwrite the values with the ones
-    // from the restart file.  We need to do it this way, since we have no idea about sizes of user-defined material
-    // properties (i.e. things like std:vector<std::vector<SymmTensor> >)
-    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
-    {
-      // load the stateful material props from a file
-      _resurrector->restartStatefulMaterialProps();
-    }
-
-    // TODO: Reenable restarting for UserObjects!
-//    if (_user_objects[0].size() > 0)
-//      _resurrector->restartUserData();
-  }
-
-//  // RUN initial postprocessors
-//  computePostprocessors(EXEC_INITIAL);
-
   _nl.setSolution(*(_nl.sys().current_local_solution.get()));
 
   Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
@@ -582,15 +565,10 @@ void FEProblem::initialSetup()
   // during initialSetup by calls to computeProperties.
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
   {
-    if (_app.isRestarting() || _app.isRecovering())
-      _resurrector->restartStatefulMaterialProps();
-    else
-    {
-      ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-      ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                       _material_props, _bnd_material_props, _materials, _assembly);
-      Threads::parallel_reduce(elem_range, cmt);
-    }
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
+                                     _material_props, _bnd_material_props, _materials, _assembly);
+    Threads::parallel_reduce(elem_range, cmt);
   }
 
   if (_app.isRestarting() || _app.isRecovering())
@@ -4031,6 +4009,8 @@ FEProblem::FEProblem(const std::string & deprecated_name, InputParameters parame
     _aux(*this, name_sys("aux", _n)),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
+    _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
+    _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif

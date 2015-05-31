@@ -25,7 +25,6 @@ const std::string Resurrector::RESTARTABLE_DATA_EXT(".rd");
 
 Resurrector::Resurrector(FEProblem & fe_problem) :
     _fe_problem(fe_problem),
-    _mat(_fe_problem),
     _restartable(_fe_problem)
 {
 }
@@ -50,15 +49,6 @@ Resurrector::restartFromFile()
   _fe_problem._eq.read(file_name, DECODE, EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA, _fe_problem.adaptivity().isOn());
   _fe_problem._nl.update();
   Moose::setup_perf_log.pop("restartFromFile()","Resurrector");
-}
-
-void
-Resurrector::restartStatefulMaterialProps()
-{
-  Moose::setup_perf_log.push("restartStatefulMaterialProps()","Resurrector");
-  std::string file_name(_restart_file_base + MAT_PROP_EXT);
-  _mat.read(file_name);
-  Moose::setup_perf_log.pop("restartStatefulMaterialProps()","Resurrector");
 }
 
 void

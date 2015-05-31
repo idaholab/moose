@@ -19,7 +19,7 @@
 
 #include "MooseArray.h"
 #include "ColumnMajorMatrix.h"
-#include "MaterialPropertyIO.h"
+#include "DataIO.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/tensor_value.h"

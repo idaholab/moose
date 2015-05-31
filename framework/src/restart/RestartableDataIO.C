@@ -67,7 +67,7 @@ RestartableDataIO::serializeRestartableData(const std::map<std::string, Restarta
   unsigned int n_threads = libMesh::n_threads();
   processor_id_type n_procs = _fe_problem.n_processors();
 
-  const unsigned int file_version = 1;
+  const unsigned int file_version = 2;
 
   { // Write out header
     char id[2];
@@ -143,7 +143,7 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 
     MooseUtils::checkFileReadable(file_name);
 
-    const unsigned int file_version = 1;
+    const unsigned int file_version = 2;
 
     mooseAssert(_in_file_handles[tid] == NULL, "Looks like you might be leaking in RestartableDataIO.C");
     _in_file_handles[tid] = new std::ifstream(file_name.c_str(), std::ios::in | std::ios::binary);

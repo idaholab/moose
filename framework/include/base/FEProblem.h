@@ -928,8 +928,8 @@ protected:
   std::vector<InitialConditionWarehouse> _ics;
 
   // material properties
-  MaterialPropertyStorage _material_props;
-  MaterialPropertyStorage _bnd_material_props;
+  MaterialPropertyStorage & _material_props;
+  MaterialPropertyStorage & _bnd_material_props;
 
   std::vector<MaterialData *> _material_data;
   std::vector<MaterialData *> _bnd_material_data;
@@ -1075,7 +1075,6 @@ private:
   friend class NonlinearSystem;
   friend class EigenSystem;
   friend class Resurrector;
-  friend class MaterialPropertyIO;
   friend class RestartableDataIO;
   friend class ComputeInitialConditionThread;
   friend class ComputeBoundaryInitialConditionThread;

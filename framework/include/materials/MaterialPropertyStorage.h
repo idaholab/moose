@@ -22,6 +22,7 @@
 //libMesh
 #include "libmesh/elem.h"
 #include "libmesh/quadrature.h"
+#include "libmesh/mesh.h"
 
 #include <vector>
 #include <map>
@@ -212,6 +213,33 @@ protected:
 
   void sizeProps(MaterialProperties & mp, unsigned int size);
 };
+
+template<>
+inline void
+dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
+{
+  libMesh::Mesh & mesh = *(static_cast<libMesh::Mesh *>(context));
+
+
+  dataStore(stream, storage.props(), context);
+  dataStore(stream, storage.propsOld(), context);
+
+  if (storage.hasOlderProperties())
+    dataStore(stream, storage.propsOlder(), context);
+}
+
+template<>
+inline void
+dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
+{
+  libMesh::Mesh & mesh = *(static_cast<libMesh::Mesh *>(context));
+
+  dataLoad(stream, storage.props(), context);
+  dataLoad(stream, storage.propsOld(), context);
+
+  if (storage.hasOlderProperties())
+    dataLoad(stream, storage.propsOlder(), context);
+}
 
 
 #endif /* MATERIALPROPERTYSTORAGE_H */
