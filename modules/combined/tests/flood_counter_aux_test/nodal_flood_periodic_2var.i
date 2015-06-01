@@ -131,7 +131,7 @@
 
 [AuxKernels]
   [./mapper0]
-    type = NodalFloodCountAux
+    type = FeatureFloodCountAux
     variable = bubble_map0
     execute_on = timestep_end
     bubble_object = bubbles
@@ -139,7 +139,7 @@
   [../]
 
   [./mapper1]
-    type = NodalFloodCountAux
+    type = FeatureFloodCountAux
     variable = bubble_map1
     execute_on = timestep_end
     bubble_object = bubbles
@@ -158,7 +158,7 @@
 
 [UserObjects]
   [./bubbles]
-    type = NodalFloodCount
+    type = FeatureFloodCount
     variable = 'u v'
     threshold = 0.3
     execute_on = timestep_end

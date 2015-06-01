@@ -83,7 +83,7 @@
   active = 'bubbles'
 
   [./bubbles]
-    type = NodalFloodCount
+    type = FeatureFloodCount
     variable = u
     threshold = 0.3
     execute_on = timestep_end
