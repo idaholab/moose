@@ -30,6 +30,8 @@ public:
 
   virtual void act();
 
+  static MultiMooseEnum getCommonPetscOptions();
+
   static void populateCommonExecutionerParams(InputParameters & params);
   static void    storeCommonExecutionerParams(FEProblem & problem, InputParameters & params);
 };
