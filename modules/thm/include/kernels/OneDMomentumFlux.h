@@ -4,7 +4,7 @@
 #include "Kernel.h"
 
 class OneDMomentumFlux;
-class EquationOfState;
+class SinglePhaseFluidProperties;
 
 template<>
 InputParameters validParams<OneDMomentumFlux>();
@@ -30,22 +30,20 @@ protected:
   VariableValue & _rhou;
   VariableValue & _rhoE;
 
-  VariableValue & _rhoA;  // For computing Jacobians
-  VariableValue & _rhoEA; // For computing Jacobians
+  VariableValue & _rhoA;
+  VariableValue & _rhoEA;
 
   VariableValue & _u_vel;
   VariableValue & _pressure;
   VariableValue & _area;
 
-  // IDs of coupled variables (for computing Jacobians)
   unsigned int _rhoA_var_number;
   unsigned int _rhoEA_var_number;
   bool _has_alpha_A;
   unsigned int _alpha_A_liquid_var_number;
   MaterialProperty<Real> * _dp_dalphaA_liquid;
 
-  const EquationOfState & _eos;
+  const SinglePhaseFluidProperties & _spfp;
 };
-
 
 #endif /* ONEDMOMENTUMFLUX_H */

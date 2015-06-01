@@ -1,5 +1,5 @@
 #include "OneDMomentumFlux.h"
-#include "EquationOfState.h"
+#include "SinglePhaseFluidProperties.h"
 
 template<>
 InputParameters validParams<OneDMomentumFlux>()
@@ -21,7 +21,7 @@ InputParameters validParams<OneDMomentumFlux>()
 
   params.addRequiredParam<bool>("is_liquid", "True for liquid, false for vapor");
 
-  params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
+  params.addRequiredParam<UserObjectName>("fp", "The name of fluid properties object to use.");
 
   return params;
 }
@@ -46,7 +46,7 @@ OneDMomentumFlux::OneDMomentumFlux(const std::string & name, InputParameters par
     _dp_dalphaA_liquid(_has_alpha_A ?
         (_is_liquid ? &getMaterialProperty<Real>("dp_L_d_alphaA_L") : &getMaterialProperty<Real>("dp_V_d_alphaA_L")) :
         NULL),
-    _eos(getUserObject<EquationOfState>("eos"))
+    _spfp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 
@@ -68,7 +68,7 @@ Real
 OneDMomentumFlux::computeQpJacobian()
 {
   // Derivatives wrt rho*u
-  Real dp_drhou = _eos.dp_drhou(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
+  Real dp_drhou = _spfp.dp_drhou(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
 
   // (2,2) entry of flux Jacobian is the same as the constant area case, p_1 + 2*u
   Real A22 = 2. * _u_vel[_qp] + dp_drhou;
@@ -83,7 +83,7 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _rhoA_var_number)
   {
     // Derivatives wrt rho
-    Real dp_drho = _eos.dp_drho(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
+    Real dp_drho = _spfp.dp_drho(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
 
     // (2,1) entry of flux Jacobian is the same as the constant area case, p_0 - u^2
     Real A21 = dp_drho - _u_vel[_qp] * _u_vel[_qp];
@@ -94,7 +94,7 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
   else if (jvar == _rhoEA_var_number)
   {
     // Derivatives wrt rhoE
-    Real dp_drhoE = _eos.dp_drhoE(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
+    Real dp_drhoE = _spfp.dp_drhoE(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
 
     // (2,3) entry of flux Jacobian is the same as the constant area case, p_2
     Real A23 = dp_drhoE;
