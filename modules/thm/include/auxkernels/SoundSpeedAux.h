@@ -4,7 +4,7 @@
 #include "AuxKernel.h"
 
 class SoundSpeedAux;
-class EquationOfState;
+class SinglePhaseFluidProperties;
 
 template<>
 InputParameters validParams<SoundSpeedAux>();
@@ -25,7 +25,7 @@ protected:
   VariableValue & _rhou;
   VariableValue & _rhoE;
 
-  const EquationOfState & _eos;
+  const SinglePhaseFluidProperties & _spfp;
 };
 
 #endif /* SOUNDSPEEDAUX_H */
