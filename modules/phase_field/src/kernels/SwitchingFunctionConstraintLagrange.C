@@ -13,7 +13,7 @@ InputParameters validParams<SwitchingFunctionConstraintLagrange>()
   params.addClassDescription("Lagrange multiplier kernel to constrain the sum of all switching functions in a multiphase system. This kernel acts on the lagrange multiplier variable.");
   params.addParam<std::vector<std::string> >("h_names", "Switching Function Materials that provide h(eta_i)");
   params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
-  params.addParam<Real>("epsilon", 1e9, "Shift factor to avoid a zero pivot");
+  params.addParam<Real>("epsilon", 1e-9, "Shift factor to avoid a zero pivot");
   return params;
 }
 
