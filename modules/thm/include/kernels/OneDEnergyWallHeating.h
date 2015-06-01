@@ -3,10 +3,9 @@
 
 #include "Kernel.h"
 
-
 // Forward Declarations
 class OneDEnergyWallHeating;
-class EquationOfState;
+class SinglePhaseFluidProperties;
 
 template<>
 InputParameters validParams<OneDEnergyWallHeating>();
@@ -16,6 +15,7 @@ class OneDEnergyWallHeating : public Kernel
 {
 public:
   OneDEnergyWallHeating(const std::string & name, InputParameters parameters);
+  virtual ~OneDEnergyWallHeating();
 
 protected:
   virtual Real computeQpResidual();
@@ -42,7 +42,7 @@ protected:
   // Heat flux perimeter
   VariableValue & _Phf;
 
-  const EquationOfState & _eos;
+  const SinglePhaseFluidProperties & _spfp;
 };
 
-#endif //ONEDENERGYWALLHEATING_H//
+#endif //ONEDENERGYWALLHEATING_H

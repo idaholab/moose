@@ -1,11 +1,10 @@
 #include "OneDEnergyWallHeating.h"
-#include "EquationOfState.h"
+#include "SinglePhaseFluidProperties.h"
 
 template<>
 InputParameters validParams<OneDEnergyWallHeating>()
 {
   InputParameters params = validParams<Kernel>();
-
   params.addRequiredCoupledVar("rhoA", "");
   params.addRequiredCoupledVar("rhouA", "");
   params.addRequiredCoupledVar("rho", "density");
@@ -14,15 +13,9 @@ InputParameters validParams<OneDEnergyWallHeating>()
   params.addRequiredCoupledVar("temperature", "Fluid temperature");
   params.addRequiredCoupledVar("heat_transfer_coefficient", "convective heat transfer coefficient, W/m^2-K");
   params.addRequiredCoupledVar("heat_flux_perimeter", "heat flux perimeter");
-
-  // Required parameters
   params.addCoupledVar("Tw", 0, "Wall temperature (const)");
-
-  // Optional coupled variables
   params.addRequiredCoupledVar("area", "area of the pipe, coupled as an aux variable");
-
-  params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
-
+  params.addRequiredParam<UserObjectName>("fp", "The name of fluid properties user object to use.");
   return params;
 }
 
@@ -38,9 +31,13 @@ OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputPara
     _rhoA_var_number(coupled("rhoA")),
     _rhouA_var_number(coupled("rhouA")),
     _Phf(coupledValue("heat_flux_perimeter")),
-    _eos(getUserObject<EquationOfState>("eos"))
-{}
+    _spfp(getUserObject<SinglePhaseFluidProperties>("fp"))
+{
+}
 
+OneDEnergyWallHeating::~OneDEnergyWallHeating()
+{
+}
 
 
 Real
@@ -50,39 +47,22 @@ OneDEnergyWallHeating::computeQpResidual()
 }
 
 
-
 Real
 OneDEnergyWallHeating::computeQpJacobian()
 {
   // Derivatives wrt rho*E.
-  return
-    _heat_transfer_coefficient[_qp] *
-    _Phf[_qp] *
-    (_eos.dT_drhoE(_rho[_qp], _rhou[_qp], _rhoE[_qp]) / _area[_qp]) *
-    _phi[_j][_qp] *
-    _test[_i][_qp];
+  return _heat_transfer_coefficient[_qp] * _Phf[_qp] * (_spfp.dT_drhoE(_rho[_qp], _rhou[_qp], _rhoE[_qp]) / _area[_qp]) * _phi[_j][_qp] * _test[_i][_qp];
 }
-
 
 
 Real
 OneDEnergyWallHeating::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _rhoA_var_number)  // Derivative wrt rho
-    return
-      _heat_transfer_coefficient[_qp] *
-      _Phf[_qp] *
-      (_eos.dT_drho(_rho[_qp], _rhou[_qp], _rhoE[_qp]) / _area[_qp]) *
-      _phi[_j][_qp] *
-      _test[_i][_qp];
+    return _heat_transfer_coefficient[_qp] * _Phf[_qp] * (_spfp.dT_drho(_rho[_qp], _rhou[_qp], _rhoE[_qp]) / _area[_qp]) * _phi[_j][_qp] * _test[_i][_qp];
 
   else if (jvar == _rhouA_var_number)  // Derivative wrt rhou
-    return
-      _heat_transfer_coefficient[_qp] *
-      _Phf[_qp] *
-      (_eos.dT_drhou(_rho[_qp], _rhou[_qp], _rhoE[_qp]) / _area[_qp]) *
-      _phi[_j][_qp] *
-      _test[_i][_qp];
+    return _heat_transfer_coefficient[_qp] * _Phf[_qp] * (_spfp.dT_drhou(_rho[_qp], _rhou[_qp], _rhoE[_qp]) / _area[_qp]) * _phi[_j][_qp] * _test[_i][_qp];
 
   else
     return 0.;

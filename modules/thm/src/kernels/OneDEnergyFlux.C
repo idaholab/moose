@@ -1,5 +1,5 @@
 #include "OneDEnergyFlux.h"
-#include "EquationOfState.h"
+#include "SinglePhaseFluidProperties.h"
 
 template<>
 InputParameters validParams<OneDEnergyFlux>()
@@ -21,7 +21,7 @@ InputParameters validParams<OneDEnergyFlux>()
   params.addCoupledVar("alpha", 1., "Volume fraction");
   params.addCoupledVar("alpha_A_liquid", "Volume fraction of liquid");
 
-  params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
+  params.addRequiredParam<UserObjectName>("fp", "The name of fluid properties object to use.");
 
   return params;
 }
@@ -46,7 +46,7 @@ OneDEnergyFlux::OneDEnergyFlux(const std::string & name, InputParameters paramet
         (_is_liquid ? &getMaterialProperty<Real>("dp_L_d_alphaA_L") : &getMaterialProperty<Real>("dp_V_d_alphaA_L")) :
         NULL),
     _alpha(coupledValue("alpha")),
-    _eos(getUserObject<EquationOfState>("eos"))
+    _spfp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 
@@ -63,7 +63,7 @@ OneDEnergyFlux::computeQpResidual()
 Real
 OneDEnergyFlux::computeQpJacobian()
 {
-  Real A33 = _u_vel[_qp] * (1. + _eos.dp_drhoE(_rho[_qp], _rhou[_qp], _rhoE[_qp]));
+  Real A33 = _u_vel[_qp] * (1. + _spfp.dp_drhoE(_rho[_qp], _rhou[_qp], _rhoE[_qp]));
   return -A33 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
 }
 
@@ -72,12 +72,12 @@ OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _rhoA_var_number)
   {
-    Real A31 = _u_vel[_qp] * (_eos.dp_drho(_rho[_qp], _rhou[_qp], _rhoE[_qp]) - _enthalpy[_qp]);
+    Real A31 = _u_vel[_qp] * (_spfp.dp_drho(_rho[_qp], _rhou[_qp], _rhoE[_qp]) - _enthalpy[_qp]);
     return -A31 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else if (jvar == _rhouA_var_number)
   {
-    Real A32 = _u_vel[_qp] * _eos.dp_drhou(_rho[_qp], _rhou[_qp], _rhoE[_qp]) + _enthalpy[_qp];
+    Real A32 = _u_vel[_qp] * _spfp.dp_drhou(_rho[_qp], _rhou[_qp], _rhoE[_qp]) + _enthalpy[_qp];
     return -A32 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else if (jvar == _alpha_A_liquid_var_number)

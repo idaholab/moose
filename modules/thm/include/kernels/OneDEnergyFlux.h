@@ -4,7 +4,7 @@
 #include "Kernel.h"
 
 class OneDEnergyFlux;
-class EquationOfState;
+class SinglePhaseFluidProperties;
 
 template<>
 InputParameters validParams<OneDEnergyFlux>();
@@ -44,7 +44,7 @@ protected:
 
   VariableValue & _alpha;
 
-  const EquationOfState & _eos;
+  const SinglePhaseFluidProperties & _spfp;
 };
 
 
