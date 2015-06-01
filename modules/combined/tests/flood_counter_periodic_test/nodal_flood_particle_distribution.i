@@ -46,7 +46,7 @@
   active = 'bubbles'
 
   [./bubbles]
-    type = NodalFloodCount
+    type = FeatureFloodCount
     variable = u
     threshold = 0.9
     bubble_volume_file = nodal_flood_particle_distribution.csv

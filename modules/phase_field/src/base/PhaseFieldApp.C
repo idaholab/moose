@@ -234,7 +234,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PolynomialFreeEnergy);
   registerMaterial(SwitchingFunctionMaterial);
 
-  registerDeprecatedObjectName(FeatureFloodCount, "NodalFloodCount", "06/01/2015 00:00");
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
   registerPostprocessor(NodalVolumeFraction);
@@ -242,7 +241,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
   registerAux(KKSGlobalFreeEnergy);
-  registerDeprecatedObjectName(FeatureFloodCountAux, "NodalFloodCountAux", "06/01/2015 00:00");
   registerAux(FeatureFloodCountAux);
   registerAux(TotalFreeEnergy);
 
