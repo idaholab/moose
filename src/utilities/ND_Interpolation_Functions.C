@@ -37,8 +37,6 @@ void NDInterpolation::fit(std::vector< std::vector<double> > coordinates, std::v
 void NDInterpolation::updateRNGparameters(double tolerance, double initial_divisions){
 	_tolerance = tolerance;
 	_initial_divisions = (int)initial_divisions;
-
-	//std::cout<<"c++ NDInterpolation updateRNGparameter" << _tolerance << _initial_divisions << std::endl;
 }
 
 
@@ -47,6 +45,7 @@ NDInterpolation::NDInterpolation()
 	  _tolerance = 0.1;
 	  _initial_divisions = 10;
 	  _randomDouble = new RandomClass();
+	  _randomDouble->seed(0);
 }
 NDInterpolation::~NDInterpolation()
 {
@@ -430,8 +429,6 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
   dxs[i] = cell[vertexLoc][i] - cell[0][i];
 
   double randomDisplacement = _randomDouble->random();
-
-  std::cout<< "random " << randomDisplacement << std::endl;
 
   center[i] = cell[0][i] + randomDisplacement * dxs[i];
  }
