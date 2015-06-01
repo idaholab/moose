@@ -42,7 +42,6 @@
 
 // problems
 #include "FEProblem.h"
-#include "CoupledProblem.h"
 
 // kernels
 #include "TimeDerivative.h"
@@ -118,7 +117,6 @@
 #include "InversePowerMethod.h"
 #include "NonlinearEigen.h"
 #include "PetscTSExecutioner.h"
-#include "CoupledTransientExecutioner.h"
 
 // functions
 #include "Axisymmetric2D3DSolutionFunction.h"
@@ -353,8 +351,6 @@
 #include "AddIndicatorAction.h"
 #include "AddMarkerAction.h"
 #include "SetAdaptivityOptionsAction.h"
-#include "AddFEProblemAction.h"
-#include "AddCoupledVariableAction.h"
 #include "AddMultiAppAction.h"
 #include "AddTransferAction.h"
 #include "AddNodalNormalsAction.h"
@@ -412,7 +408,6 @@ registerObjects(Factory & factory)
 
   // problems
   registerProblem(FEProblem);
-  registerProblem(CoupledProblem);
 
   // kernels
   registerKernel(TimeDerivative);
@@ -486,7 +481,6 @@ registerObjects(Factory & factory)
   registerExecutioner(Transient);
   registerExecutioner(InversePowerMethod);
   registerExecutioner(NonlinearEigen);
-  registerExecutioner(CoupledTransientExecutioner);
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
 #if 0 // This seems to be broken right now -- doesn't work wiith petsc >= 3.4 either
   registerExecutioner(PetscTSExecutioner);
@@ -741,7 +735,6 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
-  registerMooseObjectTask("add_coupled_variable",         AuxKernel,              false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
@@ -776,7 +769,6 @@ addActionTypes(Syntax & syntax)
   registerTask("common_output", true);
   registerTask("setup_recover_file_base", true);
 
-  registerTask("add_feproblem", false);
   registerTask("add_bounds_vectors", false);
   registerTask("add_periodic_bc", false);
   registerTask("add_aux_variable", false);
@@ -849,12 +841,10 @@ addActionTypes(Syntax & syntax)
 "(setup_executioner)"
 "(setup_time_stepper)"
 "(setup_predictor)"
-"(add_feproblem)"
 "(setup_postprocessor_data)"
 "(setup_time_periods)"
 "(init_displaced_problem)"
 "(add_aux_variable, add_variable, add_elemental_field_variable)"
-"(add_coupled_variable)"
 "(setup_variable_complete)"
 "(setup_quadrature)"
 "(add_function)"
@@ -998,12 +988,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(InitProblemAction, "init_problem");
   registerAction(CheckIntegrityAction, "check_integrity");
 
-  // coupling
-  registerAction(AddFEProblemAction, "add_feproblem");
-  registerAction(AddCoupledVariableAction, "add_coupled_variable");
-
   registerAction(AddMultiAppAction, "add_multi_app");
-
   registerAction(AddTransferAction, "add_transfer");
 
   // TODO: Why is this here?

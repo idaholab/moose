@@ -117,10 +117,6 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 //  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
 //  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_user_object");
 
-  // Coupling
-  syntax.registerActionSyntax("AddFEProblemAction", "CoupledProblems/*");
-  syntax.registerActionSyntax("AddCoupledVariableAction", "CoupledProblems/*/*");
-
   // Indicator
   syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
   syntax.registerActionSyntax("AddIndicatorAction", "Adaptivity/Indicators/*");

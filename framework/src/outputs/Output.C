@@ -23,7 +23,6 @@
 #include "Postprocessor.h"
 #include "Restartable.h"
 #include "FileMesh.h"
-#include "CoupledExecutioner.h"
 #include "MooseUtils.h"
 
 template<>

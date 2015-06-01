@@ -14,7 +14,6 @@
 
 #include "InitProblemAction.h"
 #include "FEProblem.h"
-#include "CoupledExecutioner.h"
 
 template<>
 InputParameters validParams<InitProblemAction>()
@@ -32,14 +31,8 @@ InitProblemAction::InitProblemAction(const std::string & name, InputParameters p
 void
 InitProblemAction::act()
 {
-  if (_problem.get() != NULL)
+  if (_problem.get())
     _problem->init();
   else
-  {
-    // init_problem is a mandatory action, we have an executioner at this point and all FEProblems are
-    // already added, we build the coupled system
-    CoupledExecutioner * ex = dynamic_cast<CoupledExecutioner *>(_executioner.get());
-    if (ex != NULL)
-      ex->build();
-  }
+    mooseError("Problem doesn't exist in InitProblemAction!");
 }

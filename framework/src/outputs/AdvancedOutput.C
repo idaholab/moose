@@ -22,7 +22,6 @@
 #include "Postprocessor.h"
 #include "Restartable.h"
 #include "FileMesh.h"
-#include "CoupledExecutioner.h"
 #include "VectorPostprocessor.h"
 #include "MooseUtils.h"
 #include "InfixIterator.h"
