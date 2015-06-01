@@ -164,8 +164,8 @@ void petscSetupDM (NonlinearSystem & nl) {
 void
 petscSetOptions(FEProblem & problem)
 {
-        MultiMooseEnum             petsc_options = problem.parameters().get<MultiMooseEnum>("petsc_options");
-  const std::vector<std::string> & petsc_options_inames = problem.parameters().get<std::vector<std::string> >("petsc_inames");
+  MultiMooseEnum                   petsc_options = problem.parameters().get<MultiMooseEnum>("petsc_options");
+  MultiMooseEnum                   petsc_options_inames = problem.parameters().get<MultiMooseEnum>("petsc_inames");
   const std::vector<std::string> & petsc_options_values = problem.parameters().get<std::vector<std::string> >("petsc_values");
 
   if (petsc_options_inames.size() != petsc_options_values.size())
