@@ -38,19 +38,34 @@ class Split :
   };
 
   FEProblem& _fe_problem;
-  std::string _name;
+
+  /// "Variables Split operates on
   std::vector<NonlinearVariableName> _vars;
-  std::vector<std::string> _blocks;
-  std::vector<std::string> _sides;
-  std::vector<std::string> _unsides;
+
+  ///@{
+  /// Block and bounrdary restrictions for the split
+  std::vector<SubdomainName> _blocks;
+  std::vector<BoundaryName> _sides;
+  std::vector<BoundaryName> _unsides;
+  ///@}
+
+  /// Split subsystem list
   std::vector<std::string> _splitting;
+
+  ///@{
+  /// Splitting type and (in case of Schur split) options
   MooseEnum _splitting_type;
   MooseEnum _schur_type;
   MooseEnum _schur_pre;
   MooseEnum _schur_ainv;
+  ///@}
+
+  ///@{
+  /// Additional PETSc options
   std::vector<std::string> _petsc_options;
   std::vector<std::string> _petsc_options_iname;
   std::vector<std::string> _petsc_options_value;
+  ///@}
 #endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 };
 

@@ -23,9 +23,9 @@ InputParameters validParams<Split>()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<NonlinearVariableName> >("vars", "Variables Split operates on (omitting this implies \"all variables\"");
-  params.addParam<std::vector<std::string> >("blocks", "Mesh blocks Split operates on (omitting this implies \"all blocks\"");
-  params.addParam<std::vector<std::string> >("sides", "Sidesets Split operates on (omitting this implies \"no sidesets\"");
-  params.addParam<std::vector<std::string> >("unsides", "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\"");
+  params.addParam<std::vector<SubdomainName> >("blocks", "Mesh blocks Split operates on (omitting this implies \"all blocks\"");
+  params.addParam<std::vector<BoundaryName> >("sides", "Sidesets Split operates on (omitting this implies \"no sidesets\"");
+  params.addParam<std::vector<BoundaryName> >("unsides", "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\"");
   params.addParam<std::vector<std::string> >("splitting", "The names of the splits (subsystems) in the decomposition of this split");
 
   MooseEnum SplittingTypeEnum("additive multiplicative symmetric_multiplicative schur", "additive");
@@ -59,9 +59,9 @@ Split::Split(const std::string & name, InputParameters params) :
     Restartable(params, "Splits"),
     _fe_problem(*params.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _vars(getParam<std::vector<NonlinearVariableName> >("vars")),
-    _blocks(getParam<std::vector<std::string> >("blocks")),
-    _sides(getParam<std::vector<std::string> >("sides")),
-    _unsides(getParam<std::vector<std::string> >("unsides")),
+    _blocks(getParam<std::vector<SubdomainName> >("blocks")),
+    _sides(getParam<std::vector<BoundaryName> >("sides")),
+    _unsides(getParam<std::vector<BoundaryName> >("unsides")),
     _splitting(getParam<std::vector<std::string> >("splitting")),
     _splitting_type(getParam<MooseEnum>("splitting_type")),
     _schur_type(getParam<MooseEnum>("schur_type")),
@@ -83,10 +83,8 @@ Split::setup(const std::string& prefix)
   if (_vars.size()) {
     opt = dmprefix + "vars";
     val="";
-    for (unsigned int j = 0; j < _vars.size(); ++j) {
-      if (j) val += ",";
-      val += _vars[j];
-    }
+    for (unsigned int j = 0; j < _vars.size(); ++j)
+      val += (j ? "," : "") + _vars[j];
     ierr = PetscOptionsSetValue(opt.c_str(), val.c_str());
     CHKERRABORT(_communicator.get(), ierr);
   }
@@ -95,10 +93,8 @@ Split::setup(const std::string& prefix)
   if (_blocks.size()) {
     opt = dmprefix + "blocks";
     val = "";
-    for (unsigned int j = 0; j < _blocks.size(); ++j) {
-      if (j) val += ",";
-      val += _blocks[j];
-    }
+    for (unsigned int j = 0; j < _blocks.size(); ++j)
+      val += (j ? "," : "") + _blocks[j];
     ierr = PetscOptionsSetValue(opt.c_str(), val.c_str());
     CHKERRABORT(_communicator.get(), ierr);
   }
@@ -107,10 +103,8 @@ Split::setup(const std::string& prefix)
   if (_sides.size()) {
     opt = dmprefix + "sides";
     val = "";
-    for (unsigned int j = 0; j < _sides.size(); ++j) {
-      if (j) val += ",";
-      val += _sides[j];
-    }
+    for (unsigned int j = 0; j < _sides.size(); ++j)
+      val += (j ? "," : "") + _sides[j];
     ierr = PetscOptionsSetValue(opt.c_str(), val.c_str());
     CHKERRABORT(_communicator.get(), ierr);
   }
@@ -119,10 +113,8 @@ Split::setup(const std::string& prefix)
   if (_unsides.size()) {
     opt = dmprefix + "unsides";
     val = "";
-    for (unsigned int j = 0; j < _unsides.size(); ++j) {
-      if (j) val += ",";
-      val += _unsides[j];
-    }
+    for (unsigned int j = 0; j < _unsides.size(); ++j)
+      val += (j ? "," : "") + _unsides[j];
     ierr = PetscOptionsSetValue(opt.c_str(), val.c_str());
     CHKERRABORT(_communicator.get(), ierr);
   }
@@ -195,10 +187,7 @@ Split::setup(const std::string& prefix)
     opt = dmprefix + "fieldsplit_names";
     val = "";
     for (unsigned int i = 0; i < _splitting.size(); ++i)
-    {
-      if (i) val += ",";
-      val += _splitting[i];
-    }
+      val += (i ? "," : "") + _splitting[i];
     ierr = PetscOptionsSetValue(opt.c_str(), val.c_str());
     CHKERRABORT(_communicator.get(), ierr);
 
