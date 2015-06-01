@@ -181,7 +181,7 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 }
 
 void
-RestartableDataIO::readRestartableData(RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data)
+RestartableDataIO::readRestartableData(const RestartableDatas & restartable_datas, const std::set<std::string> & _recoverable_data)
 {
   bool recovering = _fe_problem.getMooseApp().isRecovering();
 
@@ -191,7 +191,7 @@ RestartableDataIO::readRestartableData(RestartableDatas & restartable_datas, std
 
   for (unsigned int tid=0; tid<n_threads; tid++)
   {
-    std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
+    const std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
     if (!_in_file_handles[tid]->is_open())
       mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling readRestartableData()");
@@ -235,8 +235,15 @@ RestartableDataIO::readRestartableData(RestartableDatas & restartable_datas, std
       {
         // Moose::out<<"Loading "<<current_name<<std::endl;
 
-        RestartableDataValue * current_data = restartable_data[current_name];
-        current_data->load(*_in_file_handles[tid]);
+        try
+        {
+          RestartableDataValue * current_data = restartable_data.at(current_name);
+          current_data->load(*_in_file_handles[tid]);
+        }
+        catch(...)
+        {
+          mooseError("restartable_data missing " << current_name << std::endl);
+        }
       }
       else
       {

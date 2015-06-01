@@ -3768,23 +3768,6 @@ FEProblem::setRestartFile(const std::string & file_name)
   _resurrector->setRestartFile(file_name);
 }
 
-void
-FEProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
-{
-  std::map<std::string, RestartableDataValue *> & restartable_data = _restartable_data[tid];
-
-  if (restartable_data.find(name) != restartable_data.end())
-    mooseError("Attempted to declare restartable twice with the same name: " << name);
-
-  restartable_data[name] = data;
-}
-
-void
-FEProblem::registerRecoverableData(std::string name)
-{
-  _recoverable_data.insert(name);
-}
-
 std::vector<VariableName>
 FEProblem::getVariableNames()
 {

@@ -50,7 +50,7 @@ public:
   /**
    * Read the restartable data.
    */
-  void readRestartableData(RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data);
+  void readRestartableData(const RestartableDatas & restartable_datas, const std::set<std::string> & _recoverable_data);
 
 private:
   /**

@@ -55,6 +55,6 @@ void
 Resurrector::restartRestartableData()
 {
   Moose::setup_perf_log.push("restartRestartableData()","Resurrector");
-  _restartable.readRestartableData(_fe_problem._restartable_data, _fe_problem._recoverable_data);
+  _restartable.readRestartableData(_fe_problem.getMooseApp().getRestartableData(), _fe_problem.getMooseApp().getRecoverableData());
   Moose::setup_perf_log.pop("restartRestartableData()","Resurrector");
 }

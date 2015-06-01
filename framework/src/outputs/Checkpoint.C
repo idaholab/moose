@@ -45,8 +45,8 @@ Checkpoint::Checkpoint(const InputParameters & parameters) :
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
-    _restartable_data(_problem_ptr->getRestartableData()),
-    _recoverable_data(_problem_ptr->getRecoverableData()),
+    _restartable_data(_app.getRestartableData()),
+    _recoverable_data(_app.getRecoverableData()),
     _material_property_storage(_problem_ptr->getMaterialPropertyStorage()),
     _bnd_material_property_storage(_problem_ptr->getBndMaterialPropertyStorage()),
     _restartable_data_io(RestartableDataIO(*_problem_ptr))

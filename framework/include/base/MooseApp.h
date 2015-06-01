@@ -29,6 +29,7 @@
 #include "ActionFactory.h"
 #include "OutputWarehouse.h"
 #include "InputParameterWarehouse.h"
+#include "RestartableData.h"
 
 // libMesh includes
 #include "libmesh/parallel_object.h"
@@ -354,6 +355,28 @@ public:
    */
   bool usingLegacyConstructors() { return _legacy_constructors; }
 
+  /*
+   * Register a piece of restartable data.  This is data that will get
+   * written / read to / from a restart file.
+   *
+   * @param name The full (unique) name.
+   * @param data The actual data object.
+   * @param tid The thread id of the object.  Use 0 if the object is not threaded.
+   */
+  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
+
+  /**
+   * Return reference to the restatable data object
+   * @return A const reference to the restatable data object
+   */
+  const RestartableDatas & getRestartableData() { return _restartable_data; }
+
+  /**
+   * Return a reference to the recoverable data object
+   * @return A const reference to the recoverable data
+   */
+  std::set<std::string> & getRecoverableData() { return _recoverable_data; }
+
 protected:
 
   /**
@@ -374,6 +397,18 @@ protected:
 
   /// Don't run the simulation, just complete all of the mesh preperation steps and exit
   virtual void meshOnly(std::string mesh_file_name);
+
+  /**
+   * NOTE: This is an internal function meant for MOOSE use only!
+   *
+   * Register a piece of recoverable data.  This is data that will get
+   * written / read to / from a restart file.
+   *
+   * However, this data will ONLY get read from the restart file during a RECOVERY operation!
+   *
+   * @param name The full (unique) name.
+   */
+  virtual void registerRecoverableData(std::string name);
 
   /// The name of this object
   std::string _name;
@@ -485,6 +520,11 @@ protected:
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
 
 private:
+  /// Where the restartable data is held (indexed on tid)
+  RestartableDatas _restartable_data;
+
+  /// Data names that will only be read from the restart file during RECOVERY
+  std::set<std::string> _recoverable_data;
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
   enum RegistrationType { APPLICATION, OBJECT, SYNTAX };
@@ -500,6 +540,8 @@ private:
 
   // Allow FEProblem to set the recover/restart state, so make it a friend
   friend class FEProblem;
+  friend class Restartable;
+  friend class SubProblem;
 };
 
 template <typename T>

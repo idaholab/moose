@@ -33,7 +33,6 @@
 #include "MultiAppWarehouse.h"
 #include "TransferWarehouse.h"
 #include "MooseEnum.h"
-#include "RestartableData.h"
 #include "Resurrector.h"
 #include "UserObjectWarehouse.h"
 #include "NonlinearSystem.h"
@@ -738,28 +737,6 @@ public:
    */
   void setRestartFile(const std::string & file_name);
 
-  /**
-   * Register a piece of restartable data.  This is data that will get
-   * written / read to / from a restart file.
-   *
-   * @param name The full (unique) name.
-   * @param data The actual data object.
-   * @param tid The thread id of the object.  Use 0 if the object is not threaded.
-   */
-  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
-
-  /**
-   * Return reference to the restatable data object
-   * @return A const reference to the restatable data object
-   */
-  const RestartableDatas & getRestartableData() { return _restartable_data; }
-
-  /**
-   * Return a reference to the recoverable data object
-   * @return A const reference to the recoverable data
-   */
-  std::set<std::string> & getRecoverableData() { return _recoverable_data; }
-
   ///@{
   /**
    * Return a reference to the material property storage
@@ -886,9 +863,6 @@ public:
 
 
 protected:
-  /// Data names that will only be read from the restart file during RECOVERY
-  std::set<std::string> _recoverable_data;
-
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
@@ -1058,18 +1032,6 @@ private:
   bool _use_legacy_uo_initialization;
 
   bool _error_on_jacobian_nonzero_reallocation;
-
-  /**
-   * NOTE: This is an internal function meant for MOOSE use only!
-   *
-   * Register a piece of recoverable data.  This is data that will get
-   * written / read to / from a restart file.
-   *
-   * However, this data will ONLY get read from the restart file during a RECOVERY operation!
-   *
-   * @param name The full (unique) name.
-   */
-  virtual void registerRecoverableData(std::string name);
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;
