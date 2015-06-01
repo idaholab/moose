@@ -14,6 +14,7 @@
 
 #include "Split.h"
 #include "InputParameters.h"
+#include "CreateExecutionerAction.h"
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 // petsc 3.3.0 or later needed
@@ -46,8 +47,8 @@ InputParameters validParams<Split>()
   MooseEnum SchurAInvEnum("diag lump", "diag");
   params.addParam<MooseEnum>("schur_ainv", SchurAInvEnum, "Type of approximation to inv(A) used when forming S = D - C inv(A) B");
 
-  params.addParam<std::vector<std::string> >("petsc_options", "PETSc flags for the FieldSplit solver");
-  params.addParam<std::vector<std::string> >("petsc_options_iname", "PETSc option names for the FieldSplit solver");
+  params.addParam<MultiMooseEnum>("petsc_options", CreateExecutionerAction::getCommonPetscOptions(), "PETSc flags for the FieldSplit solver");
+  params.addParam<MultiMooseEnum>("petsc_options_iname", CreateExecutionerAction::getCommonPetscOptionsIname(), "PETSc option names for the FieldSplit solver");
   params.addParam<std::vector<std::string> >("petsc_options_value", "PETSc option values for the FieldSplit solver");
 
   params.registerBase("Split");
@@ -67,8 +68,8 @@ Split::Split(const std::string & name, InputParameters params) :
     _schur_type(getParam<MooseEnum>("schur_type")),
     _schur_pre(getParam<MooseEnum>("schur_pre")),
     _schur_ainv(getParam<MooseEnum>("schur_ainv")),
-    _petsc_options(getParam<std::vector<std::string> >("petsc_options")),
-    _petsc_options_iname(getParam<std::vector<std::string> >("petsc_options_iname")),
+    _petsc_options(getParam<MultiMooseEnum>("petsc_options")),
+    _petsc_options_iname(getParam<MultiMooseEnum>("petsc_options_iname")),
     _petsc_options_value(getParam<std::vector<std::string> >("petsc_options_value"))
 {
 }
