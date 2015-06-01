@@ -36,49 +36,18 @@ class Split :
     SplittingTypeSymmetricMultiplicative,
     SplittingTypeSchur
   };
-  SplittingType
-    getSplittingType(const std::string& str, std::string& petsc_str);
-
-  /// Which Schur factorization  to use.
-  enum SchurType {
-    SchurTypeDiag,
-    SchurTypeUpper,
-    SchurTypeLower,
-    SchurTypeFull
-  };
-  SchurType
-    getSchurType(const std::string& str, std::string& petsc_str);
-
-  /// Which preconditioning matrix to use with S = D - CA^{-1}B
-  /// 'Self' means use S to build the preconditioner.
-  ///  limited choices here: PCNONE and PCLSC in PETSc
-  /// 'D' means the lower-right block in splitting J = [A B; C D]
-  enum SchurPre {
-    SchurPreS,
-    SchurPreSp,
-    SchurPreA11
-  };
-  SchurPre
-    getSchurPre(const std::string& str, std::string& petsc_str);
-
-  enum SchurAinv {
-    SchurAdiag,
-    SchurAlump
-  };
-  SchurAinv
-    getSchurAinv(const std::string& str, std::string& petsc_str);
 
   FEProblem& _fe_problem;
   std::string _name;
-  std::vector<std::string> _vars;
+  std::vector<NonlinearVariableName> _vars;
   std::vector<std::string> _blocks;
   std::vector<std::string> _sides;
   std::vector<std::string> _unsides;
   std::vector<std::string> _splitting;
-  std::string              _splitting_type;
-  std::string              _schur_type;
-  std::string              _schur_pre;
-  std::string              _schur_ainv;
+  MooseEnum _splitting_type;
+  MooseEnum _schur_type;
+  MooseEnum _schur_pre;
+  MooseEnum _schur_ainv;
   std::vector<std::string> _petsc_options;
   std::vector<std::string> _petsc_options_iname;
   std::vector<std::string> _petsc_options_value;
