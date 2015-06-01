@@ -69,6 +69,7 @@ public:
     general_isotropic,
     symmetric_isotropic,
     antisymmetric_isotropic,
+    axisymmetric_rz,
     general
   };
 
@@ -194,6 +195,7 @@ public:
    *             general_isotropic (use fillGeneralIsotropicFrominputVector)
    *             symmetric_isotropic (use fillSymmetricIsotropicFromInputVector)
    *             antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
+   *             AxisymmetricRZ (use fillAxisymmetricRZFromInputVector)
    *             general (use fillGeneralFromInputVector)
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
@@ -267,6 +269,17 @@ protected:
    * No symmetries are explicitly maintained
    * @param input  C[i][j][k][l] = input[i*N*N*N + j*N*N + k*N + l]
    */
+
+  void fillAxisymmetricRZFromInputVector(const std::vector<Real> & input);
+
+  /**
+  fillAxisymmetricRZFromInputVector takes 5 inputs to fill the axisymmetric
+  Rank-4 tensor with the appropriate symmetries maintatined for use with
+  axisymmetric problems using coord_type = RZ.
+  I.e. C1111 = C2222, C1133 = C2233, C2323 = C3131 and C1212 = 0.5*(C1111-C1122)
+  @param input this is C1111, C1122, C1133, C3333, C2323.
+   */
+
   void fillGeneralFromInputVector(const std::vector<Real> & input);
 
 private:
