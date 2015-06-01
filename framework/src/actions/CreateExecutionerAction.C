@@ -75,9 +75,7 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
   params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
 
 #ifdef LIBMESH_HAVE_PETSC
-  MultiMooseEnum common_petsc_options("", "", true);
-
-  params.addParam<MultiMooseEnum>("petsc_options", common_petsc_options, "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>("petsc_options", getCommonPetscOptions(), "Singleton PETSc options");
   params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of PETSc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
@@ -86,6 +84,16 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
 CreateExecutionerAction::CreateExecutionerAction(const std::string & name, InputParameters params) :
     MooseObjectAction(name, params)
 {
+}
+
+MultiMooseEnum
+CreateExecutionerAction::getCommonPetscOptions()
+{
+  return MultiMooseEnum(
+    "-dm_moose_print_embedding -dm_view -ksp_converged_reason -ksp_gmres_modifiedgramschmidt"
+    "-ksp_monitor -ksp_monitor_snes_lg-snes_ksp_ew -ksp_snes_ew -snes_converged_reason"
+    "-snes_ksp -snes_ksp_ew -snes_linesearch_monitor -snes_mf -snes_mf_operator -snes_monitor"
+    "-snes_test_display -snes_view -snew_ksp_ew", "", true);
 }
 
 void
