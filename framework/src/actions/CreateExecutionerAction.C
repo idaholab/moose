@@ -49,62 +49,9 @@ InputParameters validParams<CreateExecutionerAction>()
   return params;
 }
 
-void
-CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & params)
-{
-  MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
-  params.addParam<MooseEnum>   ("solve_type",      solve_type,
-                                "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
-                                "JFNK: Jacobian-Free Newton Krylov "
-                                "NEWTON: Full Newton Solve "
-                                "FD: Use finite differences to compute Jacobian "
-                                "LINEAR: Solving a linear problem");
-
-  // Line Search Options
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3,3,0)
-  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
-#else
-  MooseEnum line_search("default shell none basic l2 bt cp", "default");
-#endif
-  std::string addtl_doc_str(" (Note: none = basic)");
-#else
-  MooseEnum line_search("default", "default");
-  std::string addtl_doc_str("");
-#endif
-  params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
-
-#ifdef LIBMESH_HAVE_PETSC
-  params.addParam<MultiMooseEnum>("petsc_options", getCommonPetscOptions(), "Singleton PETSc options");
-  params.addParam<MultiMooseEnum>("petsc_options_iname", getCommonPetscOptionsIname(), "Names of PETSc name/value pairs");
-  params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-#endif //LIBMESH_HAVE_PETSC
-}
-
 CreateExecutionerAction::CreateExecutionerAction(const std::string & name, InputParameters params) :
     MooseObjectAction(name, params)
 {
-}
-
-MultiMooseEnum
-CreateExecutionerAction::getCommonPetscOptions()
-{
-  return MultiMooseEnum(
-    "-dm_moose_print_embedding -dm_view -ksp_converged_reason -ksp_gmres_modifiedgramschmidt"
-    "-ksp_monitor -ksp_monitor_snes_lg-snes_ksp_ew -ksp_snes_ew -snes_converged_reason"
-    "-snes_ksp -snes_ksp_ew -snes_linesearch_monitor -snes_mf -snes_mf_operator -snes_monitor"
-    "-snes_test_display -snes_view -snew_ksp_ew", "", true);
-}
-
-MultiMooseEnum
-CreateExecutionerAction::getCommonPetscOptionsIname()
-{
-  return MultiMooseEnum(
-    "-ksp_atol -ksp_gmres_restart -ksp_grmres_restart -ksp_max_it -ksp_pc_side -ksp_rtol"
-    "-ksp_type -mat_fd_coloring_err -mat_fd_type -mat_mffd_type -pc_asm_overlap -pc_factor_levels"
-    "-pc_factor_mat_ordering_type -pc_hypre_boomeramg_grid_sweeps_all -pc_hypre_boomeramg_max_iter"
-    "-pc_hypre_boomeramg_strong_threshold -pc_hypre_type -pc_type -snes_atol -snes_linesearch_type"
-    "-snes_ls -snes_max_it -snes_rtol -snes_type -sub_ksp_type -sub_pc_type", "", true);
 }
 
 void
@@ -161,6 +108,37 @@ CreateExecutionerAction::act()
   _awh.executioner() = executioner;
 }
 
+void
+CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & params)
+{
+  MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
+  params.addParam<MooseEnum>   ("solve_type",      solve_type,
+                                "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
+                                "JFNK: Jacobian-Free Newton Krylov "
+                                "NEWTON: Full Newton Solve "
+                                "FD: Use finite differences to compute Jacobian "
+                                "LINEAR: Solving a linear problem");
+
+  // Line Search Options
+#ifdef LIBMESH_HAVE_PETSC
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
+#else
+  MooseEnum line_search("default shell none basic l2 bt cp", "default");
+#endif
+  std::string addtl_doc_str(" (Note: none = basic)");
+#else
+  MooseEnum line_search("default", "default");
+  std::string addtl_doc_str("");
+#endif
+  params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
+
+#ifdef LIBMESH_HAVE_PETSC
+  params.addParam<MultiMooseEnum>("petsc_options", Moose::PetscSupport::getCommonPetscOptions(), "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>("petsc_options_iname", Moose::PetscSupport::getCommonPetscOptionsIname(), "Names of PETSc name/value pairs");
+  params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+#endif //LIBMESH_HAVE_PETSC
+}
 
 void
 CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, InputParameters & params)
