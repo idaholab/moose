@@ -18,6 +18,7 @@
 #include "Factory.h"
 #include "OutputWarehouse.h"
 #include "Output.h"
+#include "Exodus.h"
 #include "MooseApp.h"
 #include "FileMesh.h"
 #include "MooseApp.h"
@@ -87,4 +88,16 @@ AddOutputAction::act()
   // Create the object and add it to the warehouse
   MooseSharedPointer<Output> output = MooseSharedNamespace::static_pointer_cast<Output>(_factory.create(_type, object_name, _moose_object_pars));
   output_warehouse.addOutput(output);
+
+  // If creating an Exodus output and "ensight_time" is enabled, create a postprocessor for reporting the time
+  MooseSharedPointer<Exodus> exodus = MooseSharedNamespace::dynamic_pointer_cast<Exodus>(output);
+  if (exodus && exodus->getParam<bool>("ensight_time"))
+  {
+    InputParameters params = _factory.getValidParams("TimePostprocessor");
+    params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
+    params.set<MooseEnum>("time_part") = "integer";
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time_integer", params);
+    params.set<MooseEnum>("time_part") = "fractional";
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time_fractional", params);
+  }
 }

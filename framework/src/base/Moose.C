@@ -187,6 +187,7 @@
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
+#include "TimePostprocessor.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -557,6 +558,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
   registerPostprocessor(ExecutionerAttributeReporter);
+  registerPostprocessor(TimePostprocessor);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
