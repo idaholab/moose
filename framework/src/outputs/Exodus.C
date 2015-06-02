@@ -33,6 +33,9 @@ InputParameters validParams<Exodus>()
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;
 
+  // Add parameter to handle EnSight timestep related output
+  params.addParam<bool>("ensight_time", false, "Control the use of timesteps that are compatible for EnSight, this is only needed if the timesteps can not be stored with single precision");
+
   // Add description for the Exodus class
   params.addClassDescription("Object for output data in the Exodus II format");
 
@@ -49,7 +52,8 @@ Exodus::Exodus(const std::string & name, InputParameters parameters) :
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
     _recovering(_app.isRecovering()),
     _exodus_mesh_changed(declareRestartableData<bool>("exodus_mesh_changed", true)),
-    _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : _use_displaced ? true : false)
+    _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : _use_displaced ? true : false),
+    _ensight_time(getParam<bool>("ensight_time"))
 {
 }
 
@@ -150,7 +154,7 @@ Exodus::outputNodalVariables()
   _exodus_io_ptr->set_output_variables(nodal);
 
   // Write the data via libMesh::ExodusII_IO
-  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
+  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time());
   _exodus_num++;
 
   // This satisfies the initialization of the ExodusII_IO object
@@ -302,7 +306,16 @@ Exodus::outputEmptyTimestep()
 {
   // Write a timestep with no variables
   _exodus_io_ptr->set_output_variables(std::vector<std::string>());
-  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
+  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time());
   _exodus_num++;
   _exodus_initialized = true;
+}
+
+Real
+Exodus::time()
+{
+  if (_ensight_time)
+    return _t_step;
+  else
+    return OversampleOutput::time() + _app.getGlobalTimeOffset();
 }
