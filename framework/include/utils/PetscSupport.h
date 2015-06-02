@@ -54,6 +54,11 @@ void outputNorm(Real old_norm, Real norm, bool use_color = false);
  */
 PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *void_ptr);
 
+/// construct a MultiMooseEnum with commonly used PETSc options
+MultiMooseEnum getCommonPetscOptions();
+
+/// construct a MultiMooseEnum with commonly used PETSc iname options (keys in key-value pairs)
+MultiMooseEnum getCommonPetscOptionsIname();
 }
 }
 
