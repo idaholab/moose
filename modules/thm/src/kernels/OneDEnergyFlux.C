@@ -1,5 +1,5 @@
 #include "OneDEnergyFlux.h"
-#include "SinglePhaseFluidProperties.h"
+#include "SinglePhaseCommonFluidProperties.h"
 
 template<>
 InputParameters validParams<OneDEnergyFlux>()
@@ -46,7 +46,7 @@ OneDEnergyFlux::OneDEnergyFlux(const std::string & name, InputParameters paramet
         (_is_liquid ? &getMaterialProperty<Real>("dp_L_d_alphaA_L") : &getMaterialProperty<Real>("dp_V_d_alphaA_L")) :
         NULL),
     _alpha(coupledValue("alpha")),
-    _spfp(getUserObject<SinglePhaseFluidProperties>("fp"))
+    _spfp(getUserObject<SinglePhaseCommonFluidProperties>("fp"))
 {
 }
 

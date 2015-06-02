@@ -5,7 +5,7 @@
 
 // Forward Declarations
 class OneDEnergyWallHeating;
-class SinglePhaseFluidProperties;
+class SinglePhaseCommonFluidProperties;
 
 template<>
 InputParameters validParams<OneDEnergyWallHeating>();
@@ -42,7 +42,7 @@ protected:
   // Heat flux perimeter
   VariableValue & _Phf;
 
-  const SinglePhaseFluidProperties & _spfp;
+  const SinglePhaseCommonFluidProperties & _spfp;
 };
 
 #endif //ONEDENERGYWALLHEATING_H

@@ -1,5 +1,5 @@
 #include "OneDEnergyWallHeating.h"
-#include "SinglePhaseFluidProperties.h"
+#include "SinglePhaseCommonFluidProperties.h"
 
 template<>
 InputParameters validParams<OneDEnergyWallHeating>()
@@ -31,7 +31,7 @@ OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputPara
     _rhoA_var_number(coupled("rhoA")),
     _rhouA_var_number(coupled("rhouA")),
     _Phf(coupledValue("heat_flux_perimeter")),
-    _spfp(getUserObject<SinglePhaseFluidProperties>("fp"))
+    _spfp(getUserObject<SinglePhaseCommonFluidProperties>("fp"))
 {
 }
 
