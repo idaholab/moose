@@ -24,7 +24,7 @@ void mooseSetToZero<RankFourTensor>(RankFourTensor & v)
 MooseEnum
 RankFourTensor::fillMethodEnum()
 {
-  return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic antisymmetric_isotropic general");
+  return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic antisymmetric_isotropic axisymmetric_rz general");
 }
 
 RankFourTensor::RankFourTensor()
@@ -555,6 +555,9 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod 
     case antisymmetric_isotropic:
       fillAntisymmetricIsotropicFromInputVector(input);
       break;
+    case axisymmetric_rz:
+      fillAxisymmetricRZFromInputVector(input);
+      break;
     case general:
       fillGeneralFromInputVector(input);
       break;
@@ -738,6 +741,24 @@ RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> & 
   input3.push_back(input[1]);
   input3.push_back(0);
   fillGeneralIsotropicFromInputVector(input3);
+}
+
+void
+RankFourTensor::fillAxisymmetricRZFromInputVector(const std::vector<Real> & input)
+{
+  if (input.size() != 5)
+    mooseError("To use fillAxisymmetricRZFromInputVector, your input must have size 5.  Your vector has size " << input.size());
+  std::vector<Real> input9(9);
+  input9[0] = input[0];  // C1111
+  input9[1] = input[1];  // C1122
+  input9[2] = input[2];  // C1133
+  input9[3] = input[0];  // C2222
+  input9[4] = input[2];  // C2233 = C1133
+  input9[5] = input[3];  // C3333
+  input9[6] = input[4];  // C2323
+  input9[7] = input[4];  // C3131 = C2323
+  input9[8] = (input[0]-input[1])*0.5;  // C1212
+  fillSymmetricFromInputVector(input9, false);
 }
 
 void

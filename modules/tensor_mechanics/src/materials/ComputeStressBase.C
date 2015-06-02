@@ -56,4 +56,3 @@ ComputeStressBase::computeQpProperties()
   //Add in extra stress
   _stress[_qp] += _extra_stress[_qp];
 }
-
