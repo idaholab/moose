@@ -233,9 +233,8 @@
   [./andy]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-15 1E-15 10000'
+    petsc_options_iname = '-pc_factor_shift_type'
+    petsc_options_value = 'nonzero'
   [../]
 []
 
@@ -244,7 +243,10 @@
   solve_type = Newton
   end_time = 1E6
   dt = 1E6
+  dtmin = 1E6
 
+  nl_rel_tol = 1.e-6
+  nl_max_its = 10
   #[./TimeStepper]
   #  type = FunctionDT
   #  time_dt = '1E-2 1E-1 1E0 1E1 1E3 1E4 1E5 1E6 1E7'

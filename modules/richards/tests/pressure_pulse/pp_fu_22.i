@@ -172,16 +172,18 @@
   [./andy]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-13 1E-13 100'
+    petsc_options_iname = '-pc_factor_shift_type'
+    petsc_options_value = 'nonzero'
   [../]
 []
 
 [Executioner]
   type = Transient
   solve_type = Newton
+  nl_rel_tol = 1.e-9
+  nl_max_its = 20
   dt = 1E3
+  dtmin = 1E3
   end_time = 1E4
 []
 

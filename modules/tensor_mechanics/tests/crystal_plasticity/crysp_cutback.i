@@ -197,11 +197,11 @@
   type = Transient
   dt = 1.0
 
-  #Preconditioned JFNK (default)
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options_iname = -pc_hypre_type
-  petsc_options_value = boomerang
+  petsc_options_iname = '-pc_factor_shift_type'
+  petsc_options_value = 'nonzero'
   nl_abs_tol = 1e-10
   nl_rel_step_tol = 1e-10
   dtmax = 10.0
