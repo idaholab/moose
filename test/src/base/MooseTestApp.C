@@ -197,7 +197,6 @@
 #include "StripeMesh.h"
 
 #include "TestSteady.h"
-#include "SteadyTransientExecutioner.h"
 #include "AdaptAndModify.h"
 
 // problems
@@ -440,7 +439,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMarker(QPointMarker);
 
   registerExecutioner(TestSteady);
-  registerExecutioner(SteadyTransientExecutioner);
   registerExecutioner(AdaptAndModify);
 
   registerProblem(MooseTestProblem);
