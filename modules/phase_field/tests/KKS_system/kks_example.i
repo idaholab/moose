@@ -194,6 +194,9 @@
   type = Transient
   solve_type = 'PJFNK'
 
+  petsc_options_iname = '-pc_factor_shift_type'
+  petsc_options_value = 'nonzero'
+
   l_max_its = 100
   nl_max_its = 100
   nl_rel_tol = 1e-4
@@ -201,6 +204,7 @@
   num_steps = 1
 
   dt = 0.01
+  dtmin = 0.01
 []
 
 #
