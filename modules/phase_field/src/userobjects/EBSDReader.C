@@ -8,8 +8,6 @@
 #include "EBSDMesh.h"
 #include "MooseMesh.h"
 
-#include <Eigen/Geometry>
-
 template<>
 InputParameters validParams<EBSDReader>()
 {
