@@ -1,5 +1,5 @@
 #include "OneDMomentumFlux.h"
-#include "SinglePhaseFluidProperties.h"
+#include "SinglePhaseCommonFluidProperties.h"
 
 template<>
 InputParameters validParams<OneDMomentumFlux>()
@@ -46,7 +46,7 @@ OneDMomentumFlux::OneDMomentumFlux(const std::string & name, InputParameters par
     _dp_dalphaA_liquid(_has_alpha_A ?
         (_is_liquid ? &getMaterialProperty<Real>("dp_L_d_alphaA_L") : &getMaterialProperty<Real>("dp_V_d_alphaA_L")) :
         NULL),
-    _spfp(getUserObject<SinglePhaseFluidProperties>("fp"))
+    _spfp(getUserObject<SinglePhaseCommonFluidProperties>("fp"))
 {
 }
 
