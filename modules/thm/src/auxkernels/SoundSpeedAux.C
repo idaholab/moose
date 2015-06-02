@@ -1,5 +1,5 @@
 #include "SoundSpeedAux.h"
-#include "SinglePhaseFluidProperties.h"
+#include "SinglePhaseCommonFluidProperties.h"
 
 template<>
 InputParameters validParams<SoundSpeedAux>()
@@ -18,7 +18,7 @@ SoundSpeedAux::SoundSpeedAux(const std::string & name, InputParameters parameter
     _rho(coupledValue("rho")),
     _rhou(coupledValue("rhou")),
     _rhoE(coupledValue("rhoE")),
-    _spfp(getUserObject<SinglePhaseFluidProperties>("fp"))
+    _spfp(getUserObject<SinglePhaseCommonFluidProperties>("fp"))
 {
 }
 

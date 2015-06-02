@@ -6,7 +6,7 @@
 // Forward Declarations
 class PressureAux;
 class Function;
-class SinglePhaseFluidProperties;
+class SinglePhaseCommonFluidProperties;
 
 template<>
 InputParameters validParams<PressureAux>();
@@ -27,7 +27,7 @@ protected:
   VariableValue & _rhou;
   VariableValue & _rhoE;
 
-  const SinglePhaseFluidProperties & _spfp;
+  const SinglePhaseCommonFluidProperties & _spfp;
 };
 
 #endif

@@ -1,5 +1,5 @@
 #include "TemperatureAux.h"
-#include "SinglePhaseFluidProperties.h"
+#include "SinglePhaseCommonFluidProperties.h"
 
 template<>
 InputParameters validParams<TemperatureAux>()
@@ -19,7 +19,7 @@ TemperatureAux::TemperatureAux(const std::string & name, InputParameters paramet
     _rho(coupledValue("rho")),
     _rhou(coupledValue("rhou")),
     _rhoE(coupledValue("rhoE")),
-    _spfp(getUserObject<SinglePhaseFluidProperties>("fp"))
+    _spfp(getUserObject<SinglePhaseCommonFluidProperties>("fp"))
 {
 }
 

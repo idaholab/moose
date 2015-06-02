@@ -6,7 +6,7 @@
 // Forward Declarations
 class TemperatureAux;
 class Function;
-class SinglePhaseFluidProperties;
+class SinglePhaseCommonFluidProperties;
 
 template<>
 InputParameters validParams<TemperatureAux>();
@@ -27,7 +27,7 @@ protected:
   VariableValue & _rhou;
   VariableValue & _rhoE;
 
-  const SinglePhaseFluidProperties & _spfp;
+  const SinglePhaseCommonFluidProperties & _spfp;
 };
 
 #endif

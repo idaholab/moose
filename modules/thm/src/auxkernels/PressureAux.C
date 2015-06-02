@@ -1,5 +1,5 @@
 #include "PressureAux.h"
-#include "SinglePhaseFluidProperties.h"
+#include "SinglePhaseCommonFluidProperties.h"
 
 template<>
 InputParameters validParams<PressureAux>()
@@ -18,7 +18,7 @@ PressureAux::PressureAux(const std::string & name, InputParameters parameters) :
     _rho(coupledValue("rho")),
     _rhou(isCoupled("rhou") ? coupledValue("rhou") : _zero),
     _rhoE(isCoupled("rhoE") ? coupledValue("rhoE") : _zero),
-    _spfp(getUserObject<SinglePhaseFluidProperties>("fp"))
+    _spfp(getUserObject<SinglePhaseCommonFluidProperties>("fp"))
 {
 }
 
