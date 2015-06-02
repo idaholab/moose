@@ -6,7 +6,8 @@ parser = argparse.ArgumentParser(description="Combine series of csv outputs in s
 parser.add_argument("-d", "--delimiter", type = str, help="delimiter for output file")
 parser.add_argument("-w", "--write_header", action="store_true", help="write header in output file")
 parser.add_argument("-o", "--output", type = str, help="output file", required=True)
-parser.add_argument("-v", "--variable", type = str, help="variable name", required=True)
+parser.add_argument("-x", "--x_variable", type = str, help="x variable name")
+parser.add_argument("-y", "--y_variable", type = str, help="y variable name", required=True)
 parser.add_argument("-l", "--last", type = int, help="take last n steps")
 parser.add_argument("-s", "--start", type = int, help="start at step")
 parser.add_argument("-e", "--end", type = int, help="end at step")
@@ -14,7 +15,8 @@ parser.add_argument("basename", type = str, help="Basename of csv file time seri
 
 args=parser.parse_args()
 basename = args.basename
-varname = args.variable
+x_varname = args.x_variable
+y_varname = args.y_variable
 outfilename = args.output
 lastn = args.last
 startt = args.start
@@ -59,17 +61,9 @@ if len(csvfiles) == 0:
   sys.stderr.write("No files to combine\n")
   sys.exit(1)
 
-found_position = False
-found_data = False
-
-#Check to make sure the files contain our data
-for i, fieldname in enumerate(csvdictreaders[0].fieldnames):
-  if fieldname == 'id':
-    found_position = True
-  elif fieldname == varname:
-    found_data = True
-
-fieldnames = ['id']
+fieldnames = []
+if x_varname != None:
+  fieldnames += [x_varname]
 fieldnames += times
 
 outfile = open(outfilename,'w')
@@ -88,22 +82,23 @@ while (keep_reading):
       break
     if icsv == 0:
       line_data = {}
-    try:
-      cur_id = curr_line_data['id']
-    except KeyError:
-      sys.stderr.write("Cannot find 'id' field in file: "+csvfile_names[icsv]+"\n")
-      sys.exit(1)
-    if icsv == 0:
-      line_data['id'] = cur_id
-    else:
-      if cur_id != line_data['id']:
-        sys.stderr.write("Inconsistent value for 'id' field in file: "+csvfile_names[icsv]+"\n")
-        sys.stderr.write("line: "+str(iline)+" cur: "+cur_id+" orig: "+line_data['id']+"\n")
+    if x_varname != None:
+      try:
+        cur_xvar = curr_line_data[x_varname]
+      except KeyError:
+        sys.stderr.write("Cannot find '"+x_varname+"' field in file: "+csvfile_names[icsv]+"\n")
         sys.exit(1)
+      if icsv == 0:
+        line_data[x_varname] = cur_xvar
+      else:
+        if cur_xvar != line_data[x_varname]:
+          sys.stderr.write("Inconsistent value for '"+x_varname+"' field in file: "+csvfile_names[icsv]+"\n")
+          sys.stderr.write("line: "+str(iline)+" cur: "+cur_xvar+" orig: "+line_data[x_varname]+"\n")
+          sys.exit(1)
     try:
-      cur_data = curr_line_data[varname]
+      cur_data = curr_line_data[y_varname]
     except KeyError:
-      sys.stderr.write("Cannot find '"+varname+"' field in file: "+csvfile_names[i]+"\n")
+      sys.stderr.write("Cannot find '"+y_varname+"' field in file: "+csvfile_names[i]+"\n")
       sys.exit(1)
     if icsv == 0:
       line_data[times[icsv]] = cur_data
