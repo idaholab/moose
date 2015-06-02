@@ -44,6 +44,10 @@ void petscSetupDM(NonlinearSystem & nl);
 
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 
+MultiMooseEnum getCommonPetscOptions();
+
+MultiMooseEnum getCommonPetscOptionsIname();
+
 /**
  * Helper function for outputing the norm values with/without color
  */

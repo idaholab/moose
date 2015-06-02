@@ -155,7 +155,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
   this->parameters().set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
-  this->parameters().set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
+  this->parameters().set<MultiMooseEnum>("petsc_inames") = MultiMooseEnum("", "", true);
   this->parameters().set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
 #endif
 
@@ -3944,7 +3944,7 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
 #ifdef LIBMESH_HAVE_PETSC
 void
 FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options,
-                             const std::vector<std::string> & petsc_options_inames,
+                             const MultiMooseEnum & petsc_options_inames,
                              const std::vector<std::string> & petsc_options_values)
 {
   MultiMooseEnum & po = parameters().set<MultiMooseEnum>("petsc_options");         // set because we need a writable reference
@@ -3975,7 +3975,7 @@ FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options,
       po.push_back(*it);
   }
 
-  std::vector<std::string> & pn = parameters().set<std::vector<std::string> >("petsc_inames");         // set because we need a writable reference
+  MultiMooseEnum & pn           = parameters().set<MultiMooseEnum>("petsc_inames");                    // set because we need a writable reference
   std::vector<std::string> & pv = parameters().set<std::vector<std::string> >("petsc_values");         // set because we need a writable reference
 
   if (petsc_options_inames.size() != petsc_options_values.size())

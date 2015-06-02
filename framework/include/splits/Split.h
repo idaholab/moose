@@ -62,8 +62,8 @@ class Split :
 
   ///@{
   /// Additional PETSc options
-  std::vector<std::string> _petsc_options;
-  std::vector<std::string> _petsc_options_iname;
+  MultiMooseEnum _petsc_options;
+  MultiMooseEnum _petsc_options_iname;
   std::vector<std::string> _petsc_options_value;
   ///@}
 #endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
