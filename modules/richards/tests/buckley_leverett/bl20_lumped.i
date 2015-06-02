@@ -194,17 +194,15 @@
   # must use --use-petsc-dm command line argument
     type = SMP
     full = true
-    petsc_options = '-snes_converged_reason'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type -ksp_rtol -ksp_atol'
-    petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 50 vinewtonssls 1E-20 1E-20'
+    petsc_options_iname = '-snes_type   -pc_factor_shift_type'
+    petsc_options_value = 'vinewtonssls nonzero'
   [../]
 
   [./standard]
     type = SMP
     full = true
-    petsc_options = '-snes_converged_reason'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_rtol -ksp_atol'
-    petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 2000 1E-20 1E-20'
+    petsc_options_iname = '-pc_factor_shift_type'
+    petsc_options_value = 'nonzero'
   [../]
 
 []
@@ -213,6 +211,9 @@
   type = Transient
   solve_type = NEWTON
   end_time = 50
+
+  nl_rel_tol = 1.e-9
+  nl_max_its = 10
 
   [./TimeStepper]
     type = FunctionDT
