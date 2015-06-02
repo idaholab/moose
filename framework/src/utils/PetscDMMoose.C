@@ -21,7 +21,11 @@
 
 // PETSc includes
 #include <petscerror.h>
-#include <petsc-private/dmimpl.h>
+#if !PETSC_RELEASE_LESS_THAN(3,6,0)
+# include <petsc/private/dmimpl.h>
+#else
+# include <petsc-private/dmimpl.h>
+#endif
 
 // libMesh Includes
 #include "libmesh/nonlinear_implicit_system.h"
@@ -1380,7 +1384,11 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
 
 #undef __FUNCT__
 #define __FUNCT__ "DMSetFromOptions_Moose"
+#if !PETSC_RELEASE_LESS_THAN(3,6,0)
+PetscErrorCode  DMSetFromOptions_Moose(PetscOptions * options, DM dm)
+#else
 PetscErrorCode  DMSetFromOptions_Moose(DM dm)
+#endif
 {
   PetscErrorCode ierr;
   PetscBool      ismoose;
