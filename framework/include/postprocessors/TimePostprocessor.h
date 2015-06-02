@@ -58,6 +58,14 @@ public:
    * Returns the current simulation time
    */
   virtual PostprocessorValue getValue();
+
+private:
+
+  /// Flag for selecting the portion of the time
+  MooseEnum _time_part;
+
+  /// Fractional scale Factory
+  Real _fractional_scale;
 };
 
 #endif //TIMEPOSTPROCESSOR_H

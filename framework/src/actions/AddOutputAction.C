@@ -94,7 +94,10 @@ AddOutputAction::act()
   if (exodus && exodus->getParam<bool>("ensight_time"))
   {
     InputParameters params = _factory.getValidParams("TimePostprocessor");
-    params.set<MultiMooseEnum>("execut_on") = "initial timestep_end";
-    _problem->addPostprocessor("TimePostprocessor", "simulation_time", params);
+    params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
+    params.set<MooseEnum>("time_part") = "integer";
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time_integer", params);
+    params.set<MooseEnum>("time_part") = "fractional";
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time_fractional", params);
   }
 }
