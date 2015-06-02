@@ -1,5 +1,4 @@
 #include "OneDMomentumFriction.h"
-#include "EquationOfState.h"
 
 template<>
 InputParameters validParams<OneDMomentumFriction>()
