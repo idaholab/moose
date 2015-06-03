@@ -12,6 +12,7 @@
 #include "SubProblem.h"
 #include "Function.h"
 #include "MooseApp.h"
+#include "MooseException.h"
 
 //libMesh includes
 #include "libmesh/implicit_system.h"

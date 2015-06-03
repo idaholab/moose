@@ -13,13 +13,11 @@
   [./exception]
     type = ExceptionKernel
     variable = u
-    block = 1
     when = residual
   [../]
   [./diff]
     type = Diffusion
     variable = u
-    block = 2
   [../]
 []
 

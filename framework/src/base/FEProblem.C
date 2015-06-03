@@ -3105,7 +3105,7 @@ FEProblem::solve()
 
 
 void
-FEProblem::setException(std::string & message)
+FEProblem::setException(const std::string & message)
 {
   _has_exception = true;
   _exception_message = message;
@@ -3115,8 +3115,8 @@ FEProblem::setException(std::string & message)
 void
 FEProblem::checkExceptionAndStopSolve()
 {
-  // See if any processor had an exception.  If it did, get back the processor that the exception occurred on.
-
+  // See if any processor had an exception.  If it did, get back the
+  // processor that the exception occurred on.
   unsigned int processor_id;
 
   _communicator.maxloc(_has_exception, processor_id);
@@ -3125,16 +3125,20 @@ FEProblem::checkExceptionAndStopSolve()
   {
     _communicator.broadcast(_exception_message, processor_id);
 
-    print_trace();
-
     // Print the message
     if (_communicator.rank() == 0)
-      std::cerr<<_exception_message<<std::endl;
+      Moose::err << _exception_message << std::endl;
 
-    // Stop the solve
-    // _nl.stopSolve();
+    // Stop the solve -- this entails setting
+    // SNESSetFunctionDomainError() or directly inserting NaNs in the
+    // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
+    _nl.stopSolve();
 
-    // Throw the error
+    // We've handled this exception, so we no longer have one.
+    _has_exception = false;
+
+    // Repropagate the exception, so it can be caught at a higher level, typically
+    // this is NonlinearSystem::computeResidual().
     throw MooseException(_exception_message);
   }
 }

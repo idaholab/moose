@@ -1,47 +1,30 @@
 [Tests]
-  [./exception_test]
-    type = 'RunException'
-    input = 'exception.i'
-    expect_err = "Caught exception"
-    petsc_version = '>=3.1.0'
-    should_crash = false
-    max_threads = 1
-    deleted = 'refs #2225'
+  # This example throws an exception during computeResidual() in the
+  # first timestep, and then continues running with a reduced
+  # timestep.  This example requires PETSc >= 3.6, otherwise you get:
+  # PETSC ERROR: Petsc has generated inconsistent data
+  # PETSC ERROR: Computed Nan differencing parameter h
+  [./parallel_exception_residual_transient]
+    type = 'Exodiff'
+    input = 'parallel_exception_residual_transient.i'
+    petsc_version = '>=3.6.0'
+    exodiff = 'parallel_exception_residual_transient_out.e'
   [../]
 
-  [./parallel_exception_residual]
-    type = 'RunException'
-    input = 'parallel_exception_residual.i'
-    expect_err = "Caught exception 2"
-    petsc_version = '>=3.1.0'
-    min_parallel = 2
-    should_crash = false
-    compiler = 'GCC INTEL'
-    max_threads = 1
-    deleted = 'refs #2269'
+  # This example throws an exception during computeJacobian() in the
+  # first timestep, and then continues running with a reduced
+  # timestep.
+  [./parallel_exception_jacobian_transient]
+    type = 'Exodiff'
+    input = 'parallel_exception_jacobian_transient.i'
+    petsc_version = '>=3.6.0'
+    exodiff = 'parallel_exception_jacobian_transient_out.e'
   [../]
 
   [./parallel_exception_initial_condition]
-    type = 'RunException'
+    type = RunApp
     input = 'parallel_exception_initial_condition.i'
-    expect_err = "Caught exception 1"
-    petsc_version = '>=3.1.0'
-    min_parallel = 2
-    should_crash = false
-    compiler = 'GCC INTEL'
-    max_threads = 1
-    deleted = 'refs #2269'
-  [../]
-
-  [./parallel_exception_jacobian]
-    type = 'RunException'
-    input = 'parallel_exception_jacobian.i'
-    expect_err = "Caught exception 3"
-    petsc_version = '>=3.1.0'
-    min_parallel = 2
-    should_crash = false
-    compiler = 'GCC INTEL'
-    max_threads = 1
-    deleted = 'refs #2269'
+    petsc_version = '>=3.5.0'
+    expect_out = 'MooseException thrown during initial condition computation'
   [../]
 []
