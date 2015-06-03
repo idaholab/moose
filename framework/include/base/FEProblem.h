@@ -290,7 +290,7 @@ public:
    *
    * @param message The error message about the exception.
    */
-  virtual void setException(std::string & message);
+  virtual void setException(const std::string & message);
 
   /**
    * Whether or not an exception has occurred.
