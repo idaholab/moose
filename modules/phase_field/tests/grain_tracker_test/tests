@@ -3,6 +3,9 @@
     type = 'Exodiff'
     input = 'grain_tracker_same.i'
     exodiff = 'grain_tracker_same_out.e'
+
+    # integer based maps can shift slightly in parallel
+    max_parallel = 1
   [../]
 
   [./test_elemental]
@@ -10,6 +13,14 @@
     input = 'grain_tracker_test_elemental.i'
     exodiff = 'grain_tracker_test_elemental_out.e-s002'
     method = 'OPT OPROF' # slow test
+  [../]
+
+  [./test_elemental_csv]
+    type = 'CSVDiff'
+    input = 'grain_tracker_test_elemental.i'
+    csvdiff = 'grain_volumes.csv'
+    method = 'OPT OPROF' # slow test
+    cli_args = 'Outputs/exodus=false'
   [../]
 
   [./test_recover]

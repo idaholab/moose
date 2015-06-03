@@ -109,6 +109,11 @@ protected:
 
   Point centerOfMass(UniqueGrain & grain) const;
 
+  /**
+   * Calculate the volume of each grain maintaining proper order and dumping results to CSV
+   */
+  virtual void calculateBubbleVolumes();
+
   virtual unsigned long calculateUsage() const;
 
   /*************************************************
@@ -175,7 +180,7 @@ public:
      * after new sets are built before "trackGrains" has been re-run.  This is intentional and lets us
      * avoid making unnecessary copies of the set when we don't need it.
      */
-    const std::set<dof_id_type> *nodes_ptr;
+    const std::set<dof_id_type> *entities_ptr;
   };
 
   bool _compute_op_maps;

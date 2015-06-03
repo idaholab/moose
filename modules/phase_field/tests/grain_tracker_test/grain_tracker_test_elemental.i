@@ -111,6 +111,7 @@
     enable_var_coloring = true
     condense_map_info = true
     flood_entity_type = ELEMENTAL
+    bubble_volume_file = grain_volumes.csv
   [../]
   [./DOFs]
     type = NumDOFs
