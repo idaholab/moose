@@ -245,6 +245,8 @@ protected:
    */
   void validateExecutionerType(const std::string & name) const;
 
+  /// Whether or not this object is a "neighbor" object: ie all of it's coupled values should be neighbor values
+  bool _coupleable_neighbor;
 private:
 
   /**

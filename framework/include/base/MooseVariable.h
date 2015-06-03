@@ -148,6 +148,10 @@ public:
   VariableValue & nodalValueOld();
   VariableValue & nodalValueOlder();
 
+  VariableValue & nodalValueNeighbor();
+  VariableValue & nodalValueOldNeighbor();
+  VariableValue & nodalValueOlderNeighbor();
+
   VariableValue & slnNeighbor() { return _u_neighbor; }
   VariableValue & slnOldNeighbor() { _need_u_old_neighbor = true; return _u_old_neighbor; }
   VariableValue & slnOlderNeighbor() { _need_u_older_neighbor = true; return _u_older_neighbor; }
@@ -158,12 +162,17 @@ public:
   VariableSecond & secondSlnOldNeighbor() { _need_second_old_neighbor = true; secondPhiFaceNeighbor(); return _second_u_old_neighbor; }
   VariableSecond & secondSlnOlderNeighbor() { _need_second_older_neighbor = true; secondPhiFaceNeighbor(); return _second_u_older_neighbor; }
 
+  VariableValue & uDotNeighbor() { return _u_dot_neighbor; }
+  VariableValue & duDotDuNeighbor() { return _du_dot_du_neighbor; }
+
   const Node * & nodeNeighbor() { return _node_neighbor; }
   dof_id_type & nodalDofIndexNeighbor() { return _nodal_dof_index_neighbor; }
   bool isNodalNeighborDefined() { return _is_defined_neighbor; }
   VariableValue & nodalSlnNeighbor() { return _nodal_u_neighbor; }
   VariableValue & nodalSlnOldNeighbor() { return _nodal_u_old_neighbor; }
   VariableValue & nodalSlnOlderNeighbor() { return _nodal_u_older_neighbor; }
+  VariableValue & nodalSlnDotNeighbor() { return _nodal_u_dot_neighbor; }
+  VariableValue & nodalSlnDuDotDuNeighbor() { return _nodal_du_dot_du_neighbor; }
 
   /**
    * Compute values at interior quadrature points
@@ -343,6 +352,10 @@ protected:
   bool _need_nodal_u_old;
   bool _need_nodal_u_older;
 
+  bool _need_nodal_u_neighbor;
+  bool _need_nodal_u_old_neighbor;
+  bool _need_nodal_u_older_neighbor;
+
   // Shape function values, gradients. second derivatives
   const VariablePhiValue & _phi;
   const VariablePhiGradient & _grad_phi;
@@ -385,8 +398,11 @@ protected:
 
   /// u_dot (time derivative)
   VariableValue _u_dot, _u_dot_bak;
+  VariableValue _u_dot_neighbor, _u_dot_bak_neighbor;
+
   /// derivative of u_dot wrt u
   VariableValue _du_dot_du, _du_dot_du_bak;
+  VariableValue _du_dot_du_neighbor, _du_dot_du_bak_neighbor;
 
   // nodal stuff
 
@@ -400,6 +416,7 @@ protected:
   VariableValue _nodal_u;
   VariableValue _nodal_u_old;
   VariableValue _nodal_u_older;
+
   /// nodal values of u_dot
   VariableValue _nodal_u_dot;
   /// nodal values of derivative of u_dot wrt u
@@ -412,6 +429,8 @@ protected:
   VariableValue _nodal_u_neighbor;
   VariableValue _nodal_u_old_neighbor;
   VariableValue _nodal_u_older_neighbor;
+  VariableValue _nodal_u_dot_neighbor;
+  VariableValue _nodal_du_dot_du_neighbor;
 
   /// if variable is nodal
   bool _is_nodal;

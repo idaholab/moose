@@ -75,10 +75,8 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
   params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
 
 #ifdef LIBMESH_HAVE_PETSC
-  MultiMooseEnum common_petsc_options("", "", true);
-
-  params.addParam<MultiMooseEnum>("petsc_options", common_petsc_options, "Singleton PETSc options");
-  params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of PETSc name/value pairs");
+  params.addParam<MultiMooseEnum>("petsc_options", Moose::PetscSupport::getCommonPetscOptions(), "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>("petsc_options_iname", Moose::PetscSupport::getCommonPetscOptionsIname(), "Names of PETSc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
 }
@@ -142,7 +140,6 @@ CreateExecutionerAction::act()
   _awh.executioner() = executioner;
 }
 
-
 void
 CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, InputParameters & params)
 {
@@ -160,7 +157,7 @@ CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, In
 
 #ifdef LIBMESH_HAVE_PETSC
   MultiMooseEnum           petsc_options       = params.get<MultiMooseEnum>("petsc_options");
-  std::vector<std::string> petsc_options_iname = params.get<std::vector<std::string> >("petsc_options_iname");
+  MultiMooseEnum           petsc_options_iname = params.get<MultiMooseEnum>("petsc_options_iname");
   std::vector<std::string> petsc_options_value = params.get<std::vector<std::string> >("petsc_options_value");
 
   fe_problem.storePetscOptions(petsc_options, petsc_options_iname, petsc_options_value);
