@@ -20,6 +20,7 @@
     exodiff = 'gap_heat_transfer_htonly_rz_test_out.e'
     abs_zero = 1e-9
     rel_err = 5e-3
+    compiler = 'CLANG GCC'
   [../]
 
   [./RSpherical]
