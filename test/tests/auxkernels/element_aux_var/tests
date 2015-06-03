@@ -11,18 +11,6 @@
     exodiff = 'elemental_sort_test_out.e'
   [../]
 
-  [./high_order_test]
-    type = 'Exodiff'
-    input = 'element_high_order_aux_test.i'
-    exodiff = 'ho.e'
-  [../]
-
-  [./high_order_l2_test]
-    type = 'Exodiff'
-    input = 'l2_element_aux_var_test.i'
-    exodiff = 'l2elemaux.e'
-  [../]
-
   [./block_global_depend_resolve]
     type = 'Exodiff'
     input = 'block_global_depend_elem_aux.i'
