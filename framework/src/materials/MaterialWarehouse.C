@@ -29,7 +29,9 @@ MaterialWarehouse::MaterialWarehouse() :
 }
 
 MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs) :
-    Warehouse<Material>()
+    Warehouse<Material>(),
+    _iterative_warning(true),
+    _debug_depend(false)
 {
   _all_objects = rhs._all_objects;
   _active_materials = rhs._active_materials;
@@ -38,7 +40,6 @@ MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs) :
   _active_boundary_materials = rhs._active_boundary_materials;
   _blocks = rhs._blocks;
   _boundaries = rhs._boundaries;
-
   _master_list.reserve(3);
   _master_list.push_back(&_active_materials);
   _master_list.push_back(&_active_face_materials);
@@ -111,13 +112,6 @@ MaterialWarehouse::hasBoundaryMaterials(BoundaryID boundary_id) const
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getMaterials()
-{
-  mooseDeprecated("MaterialWarehouse::getMaterials() is deprecated - use MaterialWarehouse::all() instead");
-  return _all_objects;
-}
-
-std::vector<Material *> &
 MaterialWarehouse::getMaterials(SubdomainID block_id)
 {
   std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_materials.find(block_id);
@@ -167,16 +161,6 @@ MaterialWarehouse::getBoundaryMaterials(BoundaryID boundary_id)
     mooseError(oss.str());
   }
   return mat_iter->second;
-}
-
-std::vector<Material *> &
-MaterialWarehouse::active(SubdomainID block_id)
-{
-  std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_materials.find(block_id);
-  if (it  == _active_materials.end())
-    mooseError("Active Material missing for block_id: " << block_id);
-
-  return it->second;
 }
 
 void
@@ -296,7 +280,7 @@ MaterialWarehouse::sortMaterials(std::vector<Material *> & materials_vector)
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort(materials_vector.begin(), materials_vector.end());
+    DependencyResolverInterface::sort(materials_vector.begin(), materials_vector.end(), _iterative_warning, _debug_depend);
   }
   catch(CyclicDependencyException<DependencyResolverInterface *> & e)
   {

@@ -89,8 +89,9 @@ public:
   virtual ~Material();
 
   /**
-   * All materials must override this virtual.
-   * This is where they fill up the vectors with values.
+   * Compute the all the properties at all for the quadrature points.
+   *
+   * By default this loops over the quadrature points and calls computeQpProperties
    */
   virtual void computeProperties();
 
@@ -124,12 +125,34 @@ public:
   ///@}
 
   /**
+   * Get the material property id
+   * @param prop_name The name of the property to which you want the id
+   */
+   template<typename T>
+   unsigned int materialProperty(const std::string & prop_name);
+
+  /**
    * Return a set of properties accessed with getMaterialProperty
    * @return A reference to the set of properties with calls to getMaterialProperty
+   *
+   * This method is used to test for cyclic dependencies, which in the case
+   * of properties that are being recomputed is different from the set
+   * provided by getDependItems. The set returned by getRequestedItems does
+   * not include properties that have calls to 'materialProperty'.
    */
   virtual
   const std::set<std::string> &
   getRequestedItems() { return _requested_props; }
+
+  /**
+   * Return a set of properties for dependency resolution
+   * @return The set of property names with calls to materialProperty
+   *
+   * @see getRequestedItems
+   */
+  virtual
+  const std::set<std::string> &
+  getIterativeItems(){ return _iterative_props; }
 
   /**
    * Return a set of properties accessed with declareProperty
@@ -161,35 +184,52 @@ public:
   std::set<OutputName> getOutputs();
 
 protected:
+
+  /// Reference to the SubProblem
   SubProblem & _subproblem;
 
+  /// Reference to the FEProblem object
   FEProblem & _fe_problem;
+
+  /// Objects thread id
   THREAD_ID _tid;
+
+  /// Assembly object
   Assembly & _assembly;
+
+  /// Flag indicating that the Material object is a Boundary material
   bool _bnd;
+
+  /// Flag indicating that the Material is a Neighbor material
   bool _neighbor;
+
+  /// Reference to the correct MaterialData object
   MaterialData & _material_data;
 
+  /// The quadrature point index
   unsigned int _qp;
 
+  ///@{
+  /// Current quadrature rule and other FE items
   QBase * & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
   const MooseArray<Point> & _q_point;
-  /// normals at quadrature points (valid only in boundary materials)
   const MooseArray<Point> & _normals;
-
   const Elem * & _current_elem;
-
-  /// current side of the current element
   unsigned int & _current_side;
+  ///@}
 
+  /// Reference to the Mesh
   MooseMesh & _mesh;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
 
   /// Set of properties accessed via get method
+  std::set<std::string> _iterative_props;
+
+  /// Set of properties accessed via get method and not the 'materialProperty' method
   std::set<std::string> _requested_props;
 
   /// Set of properties declared
@@ -228,26 +268,63 @@ protected:
    */
   virtual QpData * createData();
 
+  ///@{
+  /**
+   * Recalculate the specified material object given a property id
+   * @param prop_id The property id(s) of interest that needs to be recomputed, this id should be retrieved with
+   *                a call to `materialProperty`.
+   * @param qp The quadrature point index at which to recompute the properties
+   *
+   * Note, this method calls computeQpProperties on the Material object responsible for computing the supplied property;
+   * hence, this will also compute all other properties as well.
+   */
+  void recomputeMaterial(const unsigned int & prop_id, unsigned int qp);
+  void recomputeMaterial(const std::vector<unsigned int> & prop_id, unsigned int qp);
+  ///@}
+
+  ///@{
+  /// Maps to quadrature point information
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
+  ///@}
 
 private:
-  /**
-   * Small helper function to call storeMatPropName
-   */
-  void registerPropName(std::string prop_name, bool is_get, Prop_State state);
 
+  /**
+   * A helper function for recomputing the material properties at a specific quadrature point
+   * @param qp The quadrature point to recompute
+   */
+  void computeProperties(unsigned int qp);
+
+  /**
+   * Helper functions to call storeMatPropName
+   */
+  void registerPropName(const std::string & prop_name);
+  void registerSuppliedPropName(const std::string & prop_name, Prop_State state);
+
+  /// Reference to the MaterialWarehouse
+  MaterialWarehouse & _material_warehouse;
+
+  /// True when the material object contains stateful properties
   bool _has_stateful_property;
 };
 
+template<typename T>
+unsigned int
+Material::materialProperty(const std::string & prop_name)
+{
+  _iterative_props.insert(prop_name);
+  registerPropName(prop_name);
+  _fe_problem.markMatPropRequested(prop_name);
+  return _material_data.getPropertyId(prop_name);
+}
 
 template<typename T>
 MaterialProperty<T> &
 Material::getMaterialProperty(const std::string & prop_name)
 {
-  // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, Material::CURRENT);
+  registerPropName(prop_name);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getProperty<T>(prop_name);
 }
@@ -256,8 +333,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & prop_name)
 {
-  _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, Material::OLD);
+  registerPropName(prop_name);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getPropertyOld<T>(prop_name);
 }
@@ -266,8 +342,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::getMaterialPropertyOlder(const std::string & prop_name)
 {
-  _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, Material::OLDER);
+  registerPropName(prop_name);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getPropertyOlder<T>(prop_name);
 }
@@ -276,7 +351,8 @@ template<typename T>
 MaterialProperty<T> &
 Material::declareProperty(const std::string & prop_name)
 {
-  registerPropName(prop_name, false, Material::CURRENT);
+  _supplied_props.insert(prop_name);
+  registerSuppliedPropName(prop_name, Material::CURRENT);
   return _material_data.declareProperty<T>(prop_name);
 }
 
@@ -284,7 +360,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::declarePropertyOld(const std::string & prop_name)
 {
-  registerPropName(prop_name, false, Material::OLD);
+  registerSuppliedPropName(prop_name, Material::OLD);
   return _material_data.declarePropertyOld<T>(prop_name);
 }
 
@@ -292,9 +368,8 @@ template<typename T>
 MaterialProperty<T> &
 Material::declarePropertyOlder(const std::string & prop_name)
 {
-  registerPropName(prop_name, false, Material::OLDER);
+  registerSuppliedPropName(prop_name, Material::OLDER);
   return _material_data.declarePropertyOlder<T>(prop_name);
 }
-
 
 #endif //MATERIAL_H

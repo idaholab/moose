@@ -210,6 +210,7 @@ SubProblem::checkBoundaryMatProps()
   checkMatProps(_map_boundary_material_props, _map_boundary_material_props_check, "boundary");
 }
 
+
 void
 SubProblem::markMatPropRequested(const std::string & prop_name)
 {
