@@ -90,6 +90,9 @@
   solve_type = 'PJFNK'
   nl_abs_tol = 1e-10
   num_steps = 1
+
+  petsc_options_iname = '-pc_factor_shift_type'
+  petsc_options_value = 'nonzero'
 []
 
 [Outputs]
