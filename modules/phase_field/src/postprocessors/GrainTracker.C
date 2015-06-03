@@ -26,7 +26,7 @@ template<> void dataStore(std::ostream & stream, GrainTracker::UniqueGrain * & u
   storeHelper(stream, unique_grain->status, context);
   storeHelper(stream, unique_grain->sphere_ptrs, context);
 
-  // We do not need to store the nodes_ptrs structure. This information is not necessary for restart.
+  // We do not need to store the entities_ptrs structure. This information is not necessary for restart.
 }
 
 template<> void dataLoad(std::istream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context)
@@ -211,8 +211,8 @@ GrainTracker::finalize()
     {
       if (grain_it->second->status != INACTIVE)
       {
-        std::set<dof_id_type>::const_iterator elem_it_end = grain_it->second->nodes_ptr->end();
-        for (std::set<dof_id_type>::const_iterator elem_it = grain_it->second->nodes_ptr->begin(); elem_it != elem_it_end; ++elem_it)
+        std::set<dof_id_type>::const_iterator elem_it_end = grain_it->second->entities_ptr->end();
+        for (std::set<dof_id_type>::const_iterator elem_it = grain_it->second->entities_ptr->begin(); elem_it != elem_it_end; ++elem_it)
           _elemental_data[*elem_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
       }
     }
@@ -345,7 +345,7 @@ GrainTracker::centerOfMass(UniqueGrain & grain) const
     mooseError("Not intended to work with Nodal Floods");
 
   Point center_of_mass;
-  for (std::set<dof_id_type>::const_iterator entity_it = grain.nodes_ptr->begin(); entity_it != grain.nodes_ptr->end(); ++entity_it)
+  for (std::set<dof_id_type>::const_iterator entity_it = grain.entities_ptr->begin(); entity_it != grain.entities_ptr->end(); ++entity_it)
   {
     Elem *elem = _mesh.elem(*entity_it);
     if (!elem)
@@ -353,7 +353,7 @@ GrainTracker::centerOfMass(UniqueGrain & grain) const
 
     center_of_mass += elem->centroid();
   }
-  center_of_mass /= static_cast<Real>(grain.nodes_ptr->size());
+  center_of_mass /= static_cast<Real>(grain.entities_ptr->size());
 
   return center_of_mass;
 }
@@ -779,8 +779,8 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
 
   // Remap the grain
   std::set<Node *> updated_nodes_tmp; // Used only in the elemental case
-  for (std::set<dof_id_type>::const_iterator entity_it = grain_it1->second->nodes_ptr->begin();
-       entity_it != grain_it1->second->nodes_ptr->end(); ++entity_it)
+  for (std::set<dof_id_type>::const_iterator entity_it = grain_it1->second->entities_ptr->begin();
+       entity_it != grain_it1->second->entities_ptr->end(); ++entity_it)
   {
     Node *curr_node = NULL;
 
@@ -871,8 +871,8 @@ GrainTracker::updateFieldInfo()
     if (grain_it->second->status == INACTIVE)
       continue;
 
-    for (std::set<dof_id_type>::iterator entity_it = grain_it->second->nodes_ptr->begin();
-         entity_it != grain_it->second->nodes_ptr->end(); ++entity_it)
+    for (std::set<dof_id_type>::iterator entity_it = grain_it->second->entities_ptr->begin();
+         entity_it != grain_it->second->entities_ptr->end(); ++entity_it)
     {
       // Highest variable value at this entity wins
       Number entity_value = -std::numeric_limits<Number>::max();
@@ -937,7 +937,58 @@ GrainTracker::boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres
   return min_distance;
 }
 
+void
+GrainTracker::calculateBubbleVolumes()
+{
+  Moose::perf_log.push("calculateBubbleVolumes()", "GrainTracker");
 
+  // The size of the bubble array will be sized to the max index of the unique grains map
+  unsigned int max_id = _unique_grains.size() ? _unique_grains.rbegin()->first + 1 : 0;
+  _all_bubble_volumes.resize(max_id, 0);
+
+  const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
+  for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
+  {
+    Elem * elem = *el;
+    unsigned int elem_n_nodes = elem->n_nodes();
+    Real curr_volume = elem->volume();
+
+    for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
+    {
+      if (_is_elemental)
+      {
+        dof_id_type elem_id = elem->id();
+        if (it->second->entities_ptr->find(elem_id) != it->second->entities_ptr->end())
+        {
+          mooseAssert(it->first < _all_bubble_volumes.size(), "_all_bubble_volumes access out of bounds");
+          _all_bubble_volumes[it->first] += curr_volume;
+          break;
+        }
+      }
+      else
+      {
+        // Count the number of nodes on this element which are flooded.
+        unsigned int flooded_nodes = 0;
+        for (unsigned int node = 0; node < elem_n_nodes; ++node)
+        {
+          dof_id_type node_id = elem->node(node);
+          if (it->second->entities_ptr->find(node_id) != it->second->entities_ptr->end())
+            ++flooded_nodes;
+        }
+
+        // If a majority of the nodes for this element are flooded,
+        // assign its volume to the current bubble_counter entry.
+        if (flooded_nodes >= elem_n_nodes / 2)
+          _all_bubble_volumes[it->first] += curr_volume;
+      }
+    }
+  }
+
+  // do all the sums!
+  _communicator.sum(_all_bubble_volumes);
+
+  Moose::perf_log.pop("calculateBubbleVolumes()", "GrainTracker");
+}
 
 unsigned long
 GrainTracker::calculateUsage() const
@@ -966,12 +1017,12 @@ GrainTracker::BoundingSphereInfo::BoundingSphereInfo(unsigned int node_id, const
 // Unique Grain
 GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx,
                                        const std::vector<BoundingSphereInfo *> & b_sphere_ptrs,
-                                       const std::set<dof_id_type> *nodes_pt,
+                                       const std::set<dof_id_type> *entities_pt,
                                        STATUS status) :
     variable_idx(var_idx),
     sphere_ptrs(b_sphere_ptrs),
     status(status),
-    nodes_ptr(nodes_pt)
+    entities_ptr(entities_pt)
 {}
 
 GrainTracker::UniqueGrain::~UniqueGrain()
