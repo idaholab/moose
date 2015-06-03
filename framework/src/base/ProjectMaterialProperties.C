@@ -143,7 +143,7 @@ ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, Bound
 }
 
 void
-ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int /*side*/)
+ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int side)
 {
   if (_need_internal_side_material && _refine) // If we're refining then we need to also project "internal" child sides.
   {
@@ -151,19 +151,31 @@ ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int /*side*
     {
       Elem * child_elem = elem->child(child);
 
-      for (unsigned int side=0; side<child_elem->n_sides(); side++)
+      for (unsigned int child_side=0; child_side < child_elem->n_sides(); child_side++)
       {
-        if (!elem->is_child_on_side(child, side)) // Otherwise we already projected it
+        if (!elem->is_child_on_side(child, child_side)) // Otherwise we already projected it
         {
-          const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, -1, child, side);
-
+          const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, -1, child, child_side);
           _bnd_material_props.prolongStatefulProps(refinement_map,
                                                    *_assembly[_tid]->qRule(),
                                                    *_assembly[_tid]->qRuleFace(),
                                                    _material_props, // Passing in the same properties to do side_to_side projection
                                                    *_bnd_material_data[_tid],
                                                    *elem,
-                                                   -1,child,side); // Gets us volume to side projection
+                                                   -1,child,child_side); // Gets us volume to side projection
+        }
+
+        // This catches internal sides that have neighbors
+        else if (child_elem->neighbor(child_side) != NULL)
+        {
+          const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, side, -1, side);
+          _bnd_material_props.prolongStatefulProps(refinement_map,
+                                                   *_assembly[_tid]->qRule(),
+                                                   *_assembly[_tid]->qRuleFace(),
+                                                   _bnd_material_props, // Passing in the same properties to do side_to_side projection
+                                                   *_bnd_material_data[_tid],
+                                                   *elem,
+                                                   side,child,child_side); // Gets us parent side to child side projection
         }
       }
     }
