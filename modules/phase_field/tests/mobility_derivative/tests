@@ -1,0 +1,7 @@
+[Tests]
+  [./split]
+    type = 'Exodiff'
+    input = 'mobility_derivative_test.i'
+    exodiff = 'mobility_derivative_test_out.e'
+  [../]
+[]
