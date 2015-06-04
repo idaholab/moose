@@ -1,0 +1,12 @@
+[Tests]
+  [./mass_lumping]
+    type = 'Exodiff'
+    input = 'mass_lumping.i'
+    exodiff = 'mass_lumping_out.e'
+  [../]
+
+  [./mass_lumping_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'mass_lumping_jacobian.i'
+  [../]
+[]

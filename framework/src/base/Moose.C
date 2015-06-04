@@ -45,6 +45,7 @@
 
 // kernels
 #include "TimeDerivative.h"
+#include "MassLumpedTimeDerivative.h"
 #include "Diffusion.h"
 #include "AnisotropicDiffusion.h"
 #include "CoupledForce.h"
@@ -412,6 +413,7 @@ registerObjects(Factory & factory)
 
   // kernels
   registerKernel(TimeDerivative);
+  registerKernel(MassLumpedTimeDerivative);
   registerKernel(Diffusion);
   registerKernel(AnisotropicDiffusion);
   registerKernel(CoupledForce);
