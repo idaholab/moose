@@ -48,7 +48,7 @@ void mooseSetToZero<RankFourTensor>(RankFourTensor & v);
 class RankFourTensor
 {
 public:
-  // Select initialization
+  /// Initialization method
   enum InitMethod
   {
     initNone,
@@ -92,10 +92,8 @@ public:
   static RankFourTensor Identity() { return RankFourTensor(initIdentity); }
   static RankFourTensor IdentityFour() { return RankFourTensor(initIdentityFour); };
 
-//private:
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
-public:
 
   /**
    * Gets the value for the index specified.  Takes index = 0,1,2
@@ -173,12 +171,12 @@ public:
    * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l = 3).
    * Fill method depends on size of input
    * Input size = 2.  Then C_1111 = C_2222 = input[0], and C_1122 = input[1], and C_1212 = (input[0] + input[1])/2,
-                      and C_ijkl = C_jikl = C_ijlk = C_klij, and C_1211 = C_1222 = 0.
+   *                  and C_ijkl = C_jikl = C_ijlk = C_klij, and C_1211 = C_1222 = 0.
    * Input size = 9.  Then C_1111 = input[0], C_1112 = input[1], C_1122 = input[3],
-                           C_1212 = input[4], C_1222 = input[5], C_1211 = input[6]
-                           C_2211 = input[7], C_2212 = input[8], C_2222 = input[9]
-                           and C_ijkl = C_jikl = C_ijlk
-  */
+   *                       C_1212 = input[4], C_1222 = input[5], C_1211 = input[6]
+   *                       C_2211 = input[7], C_2212 = input[8], C_2222 = input[9]
+   *                       and C_ijkl = C_jikl = C_ijlk
+   */
   virtual void surfaceFillFromInputVector(const std::vector<Real> & input);
 
   /// Static method for use in validParams for getting the "fill_method"
@@ -195,13 +193,12 @@ public:
    *             general_isotropic (use fillGeneralIsotropicFrominputVector)
    *             symmetric_isotropic (use fillSymmetricIsotropicFromInputVector)
    *             antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
-   *             AxisymmetricRZ (use fillAxisymmetricRZFromInputVector)
+   *             axisymmetric_rz (use fillAxisymmetricRZFromInputVector)
    *             general (use fillGeneralFromInputVector)
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
 protected:
-
   /// Dimensionality of rank-four tensor
   static const unsigned int N = LIBMESH_DIM;
 
@@ -221,11 +218,11 @@ protected:
   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
   * C_ijkl = C_ijlk, C_ijkl = C_jikl
   * @param input If all==true then this is
-                   C1111 C1122 C1133 C2222 C2233 C3333 C2323 C1313 C1212
-                   In the isotropic case this is (la is first Lame constant, mu is second (shear) Lame constant)
-                   la+2mu la la la+2mu la la+2mu mu mu mu
-                 If all==false then this is
-                   C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323 C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
+  *                C1111 C1122 C1133 C2222 C2233 C3333 C2323 C1313 C1212
+  *                In the isotropic case this is (la is first Lame constant, mu is second (shear) Lame constant)
+  *                la+2mu la la la+2mu la la+2mu mu mu mu
+  *              If all==false then this is
+  *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323 C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
   */
   void fillSymmetricFromInputVector(const std::vector<Real> & input, bool all);
 
@@ -269,21 +266,16 @@ protected:
    * No symmetries are explicitly maintained
    * @param input  C[i][j][k][l] = input[i*N*N*N + j*N*N + k*N + l]
    */
-
   void fillAxisymmetricRZFromInputVector(const std::vector<Real> & input);
 
   /**
-  fillAxisymmetricRZFromInputVector takes 5 inputs to fill the axisymmetric
-  Rank-4 tensor with the appropriate symmetries maintatined for use with
-  axisymmetric problems using coord_type = RZ.
-  I.e. C1111 = C2222, C1133 = C2233, C2323 = C3131 and C1212 = 0.5*(C1111-C1122)
-  @param input this is C1111, C1122, C1133, C3333, C2323.
+   * fillAxisymmetricRZFromInputVector takes 5 inputs to fill the axisymmetric
+   * Rank-4 tensor with the appropriate symmetries maintatined for use with
+   * axisymmetric problems using coord_type = RZ.
+   * I.e. C1111 = C2222, C1133 = C2233, C2323 = C3131 and C1212 = 0.5*(C1111-C1122)
+   * @param input this is C1111, C1122, C1133, C3333, C2323.
    */
-
   void fillGeneralFromInputVector(const std::vector<Real> & input);
-
-private:
-
 };
 
 inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a; }
