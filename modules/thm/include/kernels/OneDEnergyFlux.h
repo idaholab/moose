@@ -4,7 +4,6 @@
 #include "Kernel.h"
 
 class OneDEnergyFlux;
-class SinglePhaseCommonFluidProperties;
 
 template<>
 InputParameters validParams<OneDEnergyFlux>();
@@ -25,27 +24,20 @@ protected:
 
   bool _is_liquid;
   Real _sign;
-
   VariableValue & _rhouA;
-
   VariableValue & _area;
-  VariableValue & _rho;
-  VariableValue & _rhou;
-  VariableValue & _rhoE;
   VariableValue & _u_vel;
   VariableValue & _enthalpy;
-  VariableValue & _pressure;
-
+  MaterialProperty<Real> & _pressure;
+  MaterialProperty<Real> & _dp_drho;
+  MaterialProperty<Real> & _dp_drhou;
+  MaterialProperty<Real> & _dp_drhoE;
   unsigned _rhoA_var_number;
   unsigned _rhouA_var_number;
   bool _has_alpha_A;
   unsigned int _alpha_A_liquid_var_number;
   MaterialProperty<Real> * _dp_dalphaA_liquid;
-
   VariableValue & _alpha;
-
-  const SinglePhaseCommonFluidProperties & _spfp;
 };
-
 
 #endif /* ONEDENERGYFLUX_H */
