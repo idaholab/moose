@@ -90,7 +90,7 @@ public:
    *
    * @param e The MooseException
    */
-  virtual void caughtMooseException(MooseException & e) {};
+  virtual void caughtMooseException(MooseException &) {};
 
   /**
    * Whether or not the loop should continue.
