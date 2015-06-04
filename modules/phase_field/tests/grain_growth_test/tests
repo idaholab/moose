@@ -36,6 +36,7 @@
     type = 'Exodiff'
     input = 'GrGr_boundingbox_test.i'
     exodiff = 'bounding_box.e-s003'
+    recover = false # See 5207
   [../]
 
   [./GBEvolution_test]

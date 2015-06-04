@@ -47,7 +47,8 @@ StressDivergenceTruss::StressDivergenceTruss(const std::string & name, InputPara
 void
 StressDivergenceTruss::initialSetup()
 {
-  _orientation = &_subproblem.assembly(_tid).getFE(FEType(), _current_elem->dim())->get_dxyzdxi();
+  // Assume that all trusses are one dimensional in the call below
+  _orientation = &_subproblem.assembly(_tid).getFE(FEType(), 1)->get_dxyzdxi();
 }
 
 

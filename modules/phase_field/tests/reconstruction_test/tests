@@ -4,20 +4,22 @@
     input = '1phase_reconstruction_test.i'
     exodiff = '1phase_reconstruction_test_out.e'
     max_time = 1000
+    recover = false # issue #5188
   [../]
 
   [./2phase_reconstruction_test]
     type = 'Exodiff'
     input = '2phase_reconstruction_test.i'
     exodiff = '2phase_reconstruction_test_out.e'
-    max_time = 1000 
-  [../]
+    max_time = 1000
+    recover = false # issue #5188
+[../]
 
   [./many_grains_test]
     type = 'Exodiff'
     input = 'reconstruction_many_grains_test.i'
     exodiff = 'many_grains.e'
-    max_time = 1000 
+    max_time = 1000
     skip = 'Needs Updating'
   [../]
 
@@ -25,7 +27,7 @@
     type = 'Exodiff'
     input = 'reconstruction_many_grains_conc_test.i'
     exodiff = 'many_grains_conc.e'
-    max_time = 1000 
+    max_time = 1000
     skip = 'Needs Updating'
   [../]
 []
