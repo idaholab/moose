@@ -1,11 +1,13 @@
 [Tests]
   # This example throws an exception during computeResidual() in the
   # first timestep, and then continues running with a reduced
-  # timestep.
+  # timestep.  This example requires PETSc >= 3.6, otherwise you get:
+  # PETSC ERROR: Petsc has generated inconsistent data
+  # PETSC ERROR: Computed Nan differencing parameter h
   [./parallel_exception_residual_transient]
     type = 'Exodiff'
     input = 'parallel_exception_residual_transient.i'
-    petsc_version = '>=3.5.0'
+    petsc_version = '>=3.6.0'
     exodiff = 'parallel_exception_residual_transient_out.e'
   [../]
 
