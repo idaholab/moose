@@ -44,6 +44,19 @@ namespace MooseUtils
   std::string trim(std::string str, const std::string &white_space = " \t\n\v\f\r");
 
   /**
+   * A debugging tool for dumping the contents of a container to a string
+   */
+  template<typename T>
+  static
+  std::string dump(const T & items)
+  {
+    std::ostringstream oss;
+    for (typename T::const_iterator it = items.begin(); it != items.end(); ++it)
+      oss << " " << *it;
+    return oss.str();
+  }
+
+  /**
    * This function tokenizes a path and checks to see if it contains the string to look for
    */
   bool pathContains(const std::string &expression, const std::string &string_to_find, const std::string &delims = "/");

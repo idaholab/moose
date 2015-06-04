@@ -30,6 +30,7 @@ InputParameters validParams<SetupDebugAction>()
   params.addParam<bool>("show_actions", false, "Print out the actions being executed");
   params.addParam<bool>("show_parser", false, "Shows parser block extraction and debugging information");
   params.addParam<bool>("show_material_props", false, "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
+  params.addParam<bool>("show_material_dependency", false, "Print out the material object dependency information");
   return params;
 }
 
@@ -65,6 +66,11 @@ SetupDebugAction::act()
     MooseObjectAction * action = createOutputAction("TopResidualDebugOutput", "_moose_top_residual_debug_output");
     action->getObjectParams().set<unsigned int>("num_residuals") = _pars.get<unsigned int>("show_top_residuals");
   }
+
+  // Material dependency
+  if (_pars.get<bool>("show_material_dependency"))
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+      _problem->getMaterialWarehouse(tid).setDebugDependency(true);
 }
 
 

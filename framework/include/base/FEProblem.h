@@ -828,6 +828,13 @@ public:
   const BoundaryID & getCurrentBoundaryID(){ return _current_boundary_id; }
 
   /**
+   * Metod for retrieving the current SubdomainID
+   *
+   * The value that is returned is set when FEProblem::subdomainChanged()
+   */
+   const SubdomainID & getCurrentSubdomainID(THREAD_ID tid){ return _current_block_id[tid]; }
+
+  /**
    * Calls parentOutputPositionChanged() on all sub apps.
    */
   void parentOutputPositionChanged();
@@ -1061,6 +1068,9 @@ private:
   bool _use_legacy_uo_initialization;
 
   bool _error_on_jacobian_nonzero_reallocation;
+
+  // The current block id, set by subdomainChanged
+  std::vector<SubdomainID> _current_block_id;
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
