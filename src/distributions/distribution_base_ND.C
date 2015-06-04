@@ -80,6 +80,12 @@ BasicDistributionND::getType(){
 }
 
 double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
+	  /**
+	   * This function calculates the integral of the pdf in a cell region
+	   * In the 1D case a cell region is an interval [a,b], thus the integral of the pdf in such interval is
+	   * calculated as CDF(b)-CDF(a). This functions perform a similar evolution but for a generic ND cell
+	   */
+
 	double value = 0.0;
 
 	int numberOfVerteces = (int)pow(2,center.size());
@@ -98,13 +104,13 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
 				NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
 		}
 		value += Cdf(NDcoordinate) * sign;
-		//std::cout<< "i: " << i <<  " - index: " << index.at(0) <<" "<< index.at(1) << " - " << NDcoordinate.at(0) << " - " << NDcoordinate.at(1) << " ; CDFweight = "<< Cdf(NDcoordinate) * sign << std::endl;
+
 		sign = sign * (-1.0);
 		counter++;
 		if (counter%2)
 			sign = sign * (-1.0);
 	}
-	//std::cout<< "weights: " << center.at(0) <<" "<< center.at(1) << " ; value = "<< value << std::endl;
+
 	return value;
 }
 
@@ -163,6 +169,10 @@ std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & 
 }
 
 void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vector<int> & value_baseN){
+	  /**
+	   * This function convert a number in base 10 to a new number in any base N
+	   */
+
 	   int index = 0 ;
 
 	   if (value_base10 == 0)
@@ -178,6 +188,10 @@ void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vec
 }
 
 void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu){
+	  /**
+	   * This is the base function that initializes the Multivariate normal distribution
+	   */
+
    _mu = mu;
 
    int rows,columns;
@@ -250,15 +264,29 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_file
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std::vector<double> mu){
+	  /**
+	   * This is the function that initializes the Multivariate normal distribution given:
+	   * - data_filename: it specifies the covariance matrix
+	   * - mu: the mean value vector
+	   */
 	BasicMultivariateNormal_init(data_filename, mu);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(const char * data_filename, std::vector<double> mu){
+	  /**
+	   * This is the function that initializes the Multivariate normal distribution given:
+	   * - data_filename: it specifies the covariance matrix
+	   * - mu: the mean value vector
+	   */
 	BasicMultivariateNormal_init(std::string(data_filename) , mu);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu){
-
+  /**
+   * This is the function that initializes the Multivariate normal distribution given:
+   * - covMatrix: covariance matrix
+   * - mu: the mean value vector
+   */
   _mu = mu;
   _cov_matrix = covMatrix;
 
@@ -268,6 +296,10 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double>
 }
 
 double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix){
+  /**
+   * This function calculates the pdf values at x of a MVN distribution
+   */
+
 	double value = 0;
 
    if(mu.size() == x.size()){
@@ -288,31 +320,52 @@ double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double
 
 
 double BasicMultivariateNormal::Pdf(std::vector<double> x){
+	  /**
+	   * This function calculates the pdf values at x of a MVN distribution
+	   */
 	return getPdf(x, _mu, _inverse_cov_matrix);
 }
 
 double BasicMultivariateNormal::Cdf(std::vector<double> x){
+	  /**
+	   * This function calculates the Cdf values at x of a MVN distribution
+	   */
 	return _cartesianDistribution.Cdf(x);
 }
 
 std::vector<double> BasicMultivariateNormal::InverseCdf(double F, double g){
+	  /**
+	   * This function calculates the inverse CDF values at F of a MVN distribution
+	   */
 	std::cout<<"BasicMultivariateNormal::InverseCdf"<< std::endl;
 	return _cartesianDistribution.InverseCdf(F,g);
 }
 
 double BasicMultivariateNormal::inverseMarginal(double F, int dimension){
+	  /**
+	   * This function calculates the inverse marginal distribution at F for a specific dimension of a MVN distribution
+	   */
 	return _cartesianDistribution.inverseMarginal(F,dimension);
 }
 
 int BasicMultivariateNormal::returnDimensionality(){
+	  /**
+	   * This function returns the dimensionality of a MVN distribution
+	   */
 	return _mu.size();
 }
 
 void BasicMultivariateNormal::updateRNGparameter(double tolerance, double initial_divisions){
+	  /**
+	   * This function updates the random number generator parameters of a MVN distribution
+	   */
 	return _cartesianDistribution.updateRNGparameter(tolerance,initial_divisions);
 }
 
 double BasicMultivariateNormal::Marginal(double x, int dimension){
+	  /**
+	   * This function calculates the marginal distribution at x for a specific dimension of a MVN distribution
+	   */
 	return _cartesianDistribution.Marginal(x,dimension);
 }
 

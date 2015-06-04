@@ -3,6 +3,12 @@
 
 class RandomClassImpl;
 
+
+/**
+ * The RandomClass class allows to create a random number generator instance
+ * anywhere in crow
+ */
+
 class RandomClass {
   RandomClassImpl *rng;
   const double range;

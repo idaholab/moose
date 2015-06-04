@@ -225,6 +225,10 @@ double NDInterpolation::vectorNorm(std::vector<double> point, double p){
 
 
 double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
+  /**
+   * This function calculates the integral value of an ND function within a cell
+   */
+
 	double value = 0.0;
 
 	int numberOfVerteces = cell.size();
@@ -240,7 +244,6 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
 			sign = sign * (-1.0);
 		}
 	}
-	//std::cout<< cell.at(0).at(0) << " " << cell.at(0).at(1) << " " << value << std::endl;
 
 	return value;
 }
@@ -273,20 +276,22 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
 
 
 int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices,double g){
+  /**
+   * This function randomly picks a cell weighted by the integral value of the ND function within each cell
+   */
+
 	std::vector<double> cellAvgValues (vertices.size());
 	double cumulativeValue = 0.0;
 
 	for(unsigned int i=0; i<vertices.size(); i++){
 		cellAvgValues.at(i) = integralCellValue(vertices.at(i));
-		//std::cout<<cellAvgValues.at(i)<<std::endl;
 		cumulativeValue += cellAvgValues.at(i);
 	}
-	//std::cout<<"===="<<std::endl;
+
 	for(unsigned int i=0; i<vertices.size(); i++){
 		cellAvgValues.at(i) = cellAvgValues.at(i)/cumulativeValue;
-		//std::cout<< i << ": " << cellAvgValues.at(i) << std::endl;
-	}
 
+	}
 
 	int index=0;
 	double cumulativeIndex = 0.0;
@@ -297,7 +302,7 @@ int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<doub
 			break;
 		}
 	}
-	//std::cout<<"g " << g << " " << index << std::endl;
+
 	return index;
 }
 
@@ -342,6 +347,9 @@ void NDInterpolation::cellsFilter(std::vector<std::vector<std::vector<double> > 
 }
 
 void NDInterpolation::refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > & cell, int divisions){
+  /**
+   * This function partition the original cell into subcells (each dimensions is partitioned into "divisions" intervals)
+   */
 
  std::vector<double> dxs (_dimensions);
 
@@ -400,23 +408,27 @@ std::vector<std::vector<double> > NDInterpolation::generateNewCell(std::vector<i
 
   verteces.push_back(vertexRealCoordinate);
  }
- //std::cout<<" " << std::endl;
+
  return verteces;
 }
 
 std::vector<std::vector<double> > NDInterpolation::pickNewCell(std::vector<std::vector<std::vector<double> > > & cellsSet, double g){
+	/**
+	* This function picks a cell given a number in the [0,1] interval
+	*/
+
  double numberOfCells = (double)cellsSet.size();
 
  int pickedCell = (int)(g * numberOfCells);
-
- //std::cout<<"g " << g <<std::endl;
- //std::cout<<"pickedCell " << pickedCell <<std::endl;
- //std::cout<<"numberOfCells " << numberOfCells <<std::endl;
 
  return cellsSet.at(pickedCell);
 }
 
 std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<double> > & cell){
+  /**
+   * This function return a random ND point contained into the cell
+   */
+
  std::vector<double> dxs (_dimensions);
  std::vector<double> center (_dimensions);
 

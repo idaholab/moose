@@ -2,6 +2,9 @@
 #include <boost/random/mersenne_twister.hpp>
 
 class RandomClassImpl {
+  /**
+   * This class create the instance of a mersenne-twister random number generator (BOOST)
+   */
 public:
   boost::random::mt19937 backend;
 };
