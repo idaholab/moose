@@ -16,7 +16,9 @@
 #define RESTARTABLEDATAIO_H
 
 #include "Moose.h"
+#include "DataIO.h"
 
+#include <sstream>
 #include <string>
 #include <list>
 
@@ -24,6 +26,35 @@ class RestartableDatas;
 class RestartableDataValue;
 
 class FEProblem;
+
+/**
+ * Helper class to hold streams for Backup and Restore operations.
+ */
+class Backup
+{
+public:
+  Backup() {}
+
+  std::stringstream _system_data;
+
+  std::vector<std::stringstream> _restartable_data;
+};
+
+template<>
+inline void
+dataStore(std::ostream & stream, Backup * & backup, void * context)
+{
+  std::cout<<"Storing Backup!"<<std::endl;
+//  dataStore(stream, v._i, context);
+}
+
+template<>
+inline void
+dataLoad(std::istream & stream, Backup * & backup, void * context)
+{
+//  dataLoad(stream, v._i, context);
+}
+
 
 /**
  * Class for doing restart.
@@ -52,11 +83,36 @@ public:
    */
   void readRestartableData(const RestartableDatas & restartable_datas, const std::set<std::string> & _recoverable_data);
 
+  /**
+   * Create a Backup for the current system.
+   */
+  Backup * createBackup();
+
+  /**
+   * Restore a Backup for the current system.
+   */
+  void restoreBackup(Backup * backup);
+
 private:
   /**
-   * Serializes the data for the tid thread into the stream object.
+   * Serializes the data into the stream object.
    */
   void serializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::ostream & stream);
+
+  /**
+   * Deserializes the data from the stream object.
+   */
+  void deserializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::istream & stream, const std::set<std::string> & recoverable_data);
+
+  /**
+   * Serializes the data for the Systems in FEProblem
+   */
+  void serializeSystems(std::ostream & stream);
+
+  /**
+   * Deserializes the data for the Systems in FEProblem
+   */
+  void deserializeSystems(std::istream & stream);
 
   /// Reference to a FEProblem being restarted
   FEProblem & _fe_problem;

@@ -2667,10 +2667,10 @@ FEProblem::getMultiApp(const std::string & multi_app_name)
   mooseError("MultiApp "<<multi_app_name<<" not found!");
 }
 
-void
+bool
 FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 {
- std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
 
   // Do anything that needs to be done to Apps before transfers
   for (unsigned int i=0; i<multi_apps.size(); i++)
@@ -2688,11 +2688,18 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     _console << "Executing MultiApps" << std::endl;
 
-    for (unsigned int i=0; i<multi_apps.size(); i++)
-      multi_apps[i]->solveStep(_dt, _time, auto_advance);
+    bool success = true;
+
+    for (unsigned int i=0; success && i<multi_apps.size(); i++)
+      success = multi_apps[i]->solveStep(_dt, _time, auto_advance);
 
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
+
+    _communicator.max(success);
+
+    if (!success)
+      return false;
 
     _console << "Finished Executing MultiApps" << std::endl;
   }
@@ -2712,6 +2719,9 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
       _console << "Transfers Are Finished" << std::endl;
     }
   }
+
+  // If we made it here then everything passed
+  return true;
 }
 
 void
@@ -2730,6 +2740,44 @@ FEProblem::advanceMultiApps(ExecFlagType type)
     MooseUtils::parallelBarrierNotify(_communicator);
 
     _console << "Finished Advancing MultiApps" << std::endl;
+  }
+}
+
+void
+FEProblem::backupMultiApps(ExecFlagType type)
+{
+  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+
+  if (multi_apps.size())
+  {
+    _console << "Backing Up MultiApps" << std::endl;
+
+    for (unsigned int i=0; i<multi_apps.size(); i++)
+      multi_apps[i]->backup();
+
+    _console << "Waiting For Other Processors To Finish" << std::endl;
+    MooseUtils::parallelBarrierNotify(_communicator);
+
+    _console << "Finished Backing Up MultiApps" << std::endl;
+  }
+}
+
+void
+FEProblem::restoreMultiApps(ExecFlagType type)
+{
+  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+
+  if (multi_apps.size())
+  {
+    _console << "Restoring MultiApps" << std::endl;
+
+    for (unsigned int i=0; i<multi_apps.size(); i++)
+      multi_apps[i]->restore();
+
+    _console << "Waiting For Other Processors To Finish" << std::endl;
+    MooseUtils::parallelBarrierNotify(_communicator);
+
+    _console << "Finished Restoring MultiApps" << std::endl;
   }
 }
 

@@ -102,8 +102,6 @@ RestartableDataIO::serializeRestartableData(const std::map<std::string, Restarta
          it != restartable_data.end();
          ++it)
     {
-      // Moose::out<<"Storing "<<it->first<<std::endl;
-
       std::ostringstream data;
       it->second->store(data);
 
@@ -122,6 +120,97 @@ RestartableDataIO::serializeRestartableData(const std::map<std::string, Restarta
   }
 }
 
+void
+RestartableDataIO::deserializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::istream & stream, const std::set<std::string> & recoverable_data)
+{
+  bool recovering = _fe_problem.getMooseApp().isRecovering();
+
+  std::vector<std::string> ignored_data;
+
+  // number of data
+  unsigned int n_data = 0;
+  stream.read((char *) &n_data, sizeof(n_data));
+
+  // data names
+  std::vector<std::string> data_names(n_data);
+
+  for (unsigned int i=0; i < n_data; i++)
+  {
+    std::string data_name;
+    char ch = 0;
+    do {
+      stream.read(&ch, 1);
+      if (ch != '\0')
+        data_name += ch;
+    } while (ch != '\0');
+    data_names[i] = data_name;
+  }
+
+  // Grab this processor's block size
+  unsigned int data_blk_size = 0;
+  stream.read((char *) &data_blk_size, sizeof(data_blk_size));
+
+  for (unsigned int i=0; i < n_data; i++)
+  {
+    std::string current_name = data_names[i];
+
+    unsigned int data_size = 0;
+    stream.read((char *) &data_size, sizeof(data_size));
+
+    // Determine if the current data is recoverable
+    bool is_data_restartable = restartable_data.find(current_name) != restartable_data.end();
+    bool is_data_recoverable = recoverable_data.find(current_name) != recoverable_data.end();
+    if (is_data_restartable // Only restore values if they're currently being used
+        && (recovering || !is_data_recoverable)) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
+
+    {
+      // Moose::out<<"Loading "<<current_name<<std::endl;
+
+      try
+      {
+        RestartableDataValue * current_data = restartable_data.at(current_name);
+        current_data->load(stream);
+      }
+      catch(...)
+      {
+        mooseError("restartable_data missing " << current_name << std::endl);
+      }
+    }
+    else
+    {
+      // Skip this piece of data and do not report if restarting and recoverable data is not used
+      stream.seekg(data_size, std::ios_base::cur);
+      if (recovering && !is_data_recoverable)
+        ignored_data.push_back(current_name);
+
+    }
+  }
+
+  // Produce a warning if restarting and restart data is being skipped
+  // Do not produce the warning with recovery b/c in cases the parent defines a something as recoverable,
+  // but only certain child classes use the value in recovery (i.e., FileOutput::_num_files is needed by Exodus but not Checkpoint)
+  if (ignored_data.size() && !recovering)
+  {
+    std::ostringstream names;
+    for (unsigned int i=0; i<ignored_data.size(); i++)
+      names << ignored_data[i] << "\n";
+    mooseWarning("The following RestartableData was found in restart file but is being ignored:\n" << names.str());
+  }
+}
+
+void
+RestartableDataIO::serializeSystems(std::ostream & stream)
+{
+  storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystem()), NULL);
+  storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem()), NULL);
+}
+
+void
+RestartableDataIO::deserializeSystems(std::istream & stream)
+{
+  loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystem()), NULL);
+  loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem()), NULL);
+}
 
 void
 RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
@@ -181,7 +270,7 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 }
 
 void
-RestartableDataIO::readRestartableData(const RestartableDatas & restartable_datas, const std::set<std::string> & _recoverable_data)
+RestartableDataIO::readRestartableData(const RestartableDatas & restartable_datas, const std::set<std::string> & recoverable_data)
 {
   bool recovering = _fe_problem.getMooseApp().isRecovering();
 
@@ -196,76 +285,61 @@ RestartableDataIO::readRestartableData(const RestartableDatas & restartable_data
     if (!_in_file_handles[tid]->is_open())
       mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling readRestartableData()");
 
-    // number of data
-    unsigned int n_data = 0;
-    _in_file_handles[tid]->read((char *) &n_data, sizeof(n_data));
-
-    // data names
-    std::vector<std::string> data_names(n_data);
-
-    for (unsigned int i=0; i < n_data; i++)
-    {
-      std::string data_name;
-      char ch = 0;
-      do {
-        _in_file_handles[tid]->read(&ch, 1);
-        if (ch != '\0')
-          data_name += ch;
-      } while (ch != '\0');
-      data_names[i] = data_name;
-    }
-
-    // Grab this processor's block size
-    unsigned int data_blk_size = 0;
-    _in_file_handles[tid]->read((char *) &data_blk_size, sizeof(data_blk_size));
-
-    for (unsigned int i=0; i < n_data; i++)
-    {
-      std::string current_name = data_names[i];
-
-      unsigned int data_size = 0;
-      _in_file_handles[tid]->read((char *) &data_size, sizeof(data_size));
-
-      // Determine if the current data is recoverable
-      bool is_data_restartable = restartable_data.find(current_name) != restartable_data.end();
-      bool is_data_recoverable = _recoverable_data.find(current_name) != _recoverable_data.end();
-      if (is_data_restartable // Only restore values if they're currently being used
-          && (recovering || !is_data_recoverable)) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
-
-      {
-        // Moose::out<<"Loading "<<current_name<<std::endl;
-
-        try
-        {
-          RestartableDataValue * current_data = restartable_data.at(current_name);
-          current_data->load(*_in_file_handles[tid]);
-        }
-        catch(...)
-        {
-          mooseError("restartable_data missing " << current_name << std::endl);
-        }
-      }
-      else
-      {
-        // Skip this piece of data and do not report if restarting and recoverable data is not used
-        _in_file_handles[tid]->seekg(data_size, std::ios_base::cur);
-        if (recovering && !is_data_recoverable)
-          ignored_data.push_back(current_name);
-
-      }
-    }
+    deserializeRestartableData(restartable_data, *_in_file_handles[tid], recoverable_data);
 
     _in_file_handles[tid]->close();
   }
+}
 
-  // Produce a warning if restarting and restart data is being skipped
-  // Do not produce the warning with recovery b/c in cases the parent defines a something as recoverable,
-  // but only certain child classes use the value in recovery (i.e., FileOutput::_num_files is needed by Exodus but not Checkpoint)
-  if (ignored_data.size() && !recovering)
+Backup *
+RestartableDataIO::createBackup()
+{
+  Backup * backup = new Backup;
+
+  std::cout<<"Backing up systems"<<std::endl;
+
+  serializeSystems(backup->_system_data);
+
+  const RestartableDatas & restartable_datas = _fe_problem.getMooseApp().getRestartableData();
+
+  unsigned int n_threads = libMesh::n_threads();
+  processor_id_type proc_id = _fe_problem.processor_id();
+
+  backup->_restartable_data.resize(n_threads);
+
+  for (unsigned int tid=0; tid<n_threads; tid++)
+    serializeRestartableData(restartable_datas[tid], backup->_restartable_data[tid]);
+
+  return backup;
+}
+
+void
+RestartableDataIO::restoreBackup(Backup * backup)
+{
+  std::cout<<"Restoring systems"<<std::endl;
+
+  deserializeSystems(backup->_system_data);
+
+  const RestartableDatas & restartable_datas = _fe_problem.getMooseApp().getRestartableData();
+
+  unsigned int n_threads = libMesh::n_threads();
+  processor_id_type proc_id = _fe_problem.processor_id();
+
+  for (unsigned int tid=0; tid<n_threads; tid++)
   {
-    std::ostringstream names;
-    for (unsigned int i=0; i<ignored_data.size(); i++)
-      names << ignored_data[i] << "\n";
-    mooseWarning("The following RestartableData was found in restart file but is being ignored:\n" << names.str());
+    // header
+    char id[2];
+    backup->_restartable_data[tid].read(id, 2);
+
+    unsigned int this_file_version;
+    backup->_restartable_data[tid].read((char *)&this_file_version, sizeof(this_file_version));
+
+    processor_id_type this_n_procs = 0;
+    unsigned int this_n_threads = 0;
+
+    backup->_restartable_data[tid].read((char *)&this_n_procs, sizeof(this_n_procs));
+    backup->_restartable_data[tid].read((char *)&this_n_threads, sizeof(this_n_threads));
+
+    deserializeRestartableData(restartable_datas[tid], backup->_restartable_data[tid], std::set<std::string>());
   }
 }

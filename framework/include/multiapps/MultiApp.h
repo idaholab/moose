@@ -18,6 +18,7 @@
 #include "MooseEnum.h"
 #include "SetupInterface.h"
 #include "Restartable.h"
+#include "RestartableDataIO.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
@@ -69,8 +70,10 @@ public:
    *
    * Note that auto_advance=false might not be compatible with
    * the options for the MultiApp
+   *
+   * @return Whether or not all of the solves were successful (i.e. all solves made it to the target_time)
    */
-  virtual void solveStep(Real dt, Real target_time, bool auto_advance=true) = 0;
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true) = 0;
 
   /**
    * Actually advances time and causes output.
@@ -79,6 +82,20 @@ public:
    * will do nothing.
    */
   virtual void advanceStep() = 0;
+
+  /**
+   * Save off the state of every Sub App
+   *
+   * This allows us to "Restore" this state later
+   */
+  virtual void backup();
+
+  /**
+   * Restore the state of every Sub App
+   *
+   * This allows us to "Restore" this state later
+   */
+  virtual void restore();
 
   /**
    * @param app The global app number to get the Executioner for
@@ -158,6 +175,12 @@ public:
    * @return True if the global app is on this processor
    */
   bool hasLocalApp(unsigned int global_app);
+
+  /**
+   * Get the local MooseApp object
+   * @param local_app The local app number
+   */
+  MooseApp * localApp(unsigned int local_app);
 
   /**
    * The physical position of a global App number
@@ -315,6 +338,33 @@ protected:
 
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;
+
+  /// Backups for each local App
+  std::vector<Backup *> & _backups;
 };
+
+template<>
+inline void
+dataStore(std::ostream & stream, std::vector<Backup> & backups, void * context)
+{
+  std::cout<<"Storing Backup Vector!"<<std::endl;
+
+  MultiApp * multi_app = static_cast<MultiApp *>(context);
+
+  if (!multi_app)
+    mooseError("Error storing std::vector<Backup*>");
+
+  for (unsigned int i=0; i<backups.size(); i++)
+    storeHelper(stream, backups[i], context);
+
+//  dataStore(stream, v._i, context);
+}
+
+template<>
+inline void
+dataLoad(std::istream & stream, std::vector<Backup> & backup, void * context)
+{
+//  dataLoad(stream, v._i, context);
+}
 
 #endif // MULTIAPP_H

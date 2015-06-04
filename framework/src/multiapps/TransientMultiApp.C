@@ -125,17 +125,18 @@ TransientMultiApp::initialSetup()
   Moose::swapLibMeshComm(swapped);
 }
 
-void
+bool
 TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
+  /*
   if (_sub_cycling && !auto_advance)
     mooseError("TransientMultiApp with sub_cycling=true is not compatible with auto_advance=false");
 
   if (_catch_up && !auto_advance)
     mooseError("TransientMultiApp with catch_up=true is not compatible with auto_advance=false");
-
+  */
   if (!_has_an_app)
-    return;
+    return true;
 
   _auto_advance = auto_advance;
 
@@ -149,6 +150,22 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   int rank;
   int ierr;
   ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
+
+  /*
+  std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "<<std::endl;
+
+  if (_sub_cycling || _catch_up)
+  {
+    std::cout<<"********** "<<_first_step_this_timestep<<std::endl;
+
+    // Make a backup before we ever try to solve this timestep
+    if (_first_step_this_timestep)
+    {
+      for (unsigned int i=0; i<_my_num_apps; i++)
+        _backups[i] = _apps[i]->backup();
+    }
+  }
+  */
 
   for (unsigned int i=0; i<_my_num_apps; i++)
   {
@@ -260,7 +277,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           _failures++;
 
           if (_failures > _max_failures)
-            mooseError("While sub_cycling " << name() << _first_local_app+i << " REALLY failed!" << std::endl);
+          {
+            mooseWarning("While sub_cycling "<< name() << _first_local_app+i <<" REALLY failed!" << std::endl);
+            return false;
+          }
         }
 
         Real solution_change_norm = ex->getSolutionChangeNorm();
@@ -349,8 +369,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
 
             if (!caught_up)
-              mooseError(name() << " Failed to catch up!\n");
-
+            {
+              mooseWarning(name() << " Failed to catch up!\n");
+              return false;
+            }
           }
         }
       }
@@ -369,6 +391,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   _transferred_vars.clear();
 
   _console << "Finished Solving MultiApp " << name() << std::endl;
+
+  return true;
 }
 
 void

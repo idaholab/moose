@@ -91,6 +91,7 @@ Transient::Transient(const InputParameters & parameters) :
     _unconstrained_dt(declareRestartableData<Real>("unconstrained_dt", -1)),
     _at_sync_point(declareRestartableData<bool>("at_sync_point", false)),
     _first(declareRecoverableData<bool>("first", true)),
+    _multiapps_converged(declareRestartableData<bool>("multiapps_converged", true)),
     _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
     _end_time(getParam<Real>("end_time")),
     _dtmin(getParam<Real>("dtmin")),
@@ -232,6 +233,9 @@ Transient::execute()
 
     computeDT();
 
+    _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
+    _problem.backupMultiApps(EXEC_TIMESTEP_END);
+
     takeStep();
 
     endStep();
@@ -267,6 +271,8 @@ Transient::incrementStepOrReject()
   }
   else
   {
+    _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
+    _problem.restoreMultiApps(EXEC_TIMESTEP_END);
     _time_stepper->rejectStep();
     _time = _time_old;
   }
@@ -283,6 +289,13 @@ Transient::takeStep(Real input_dt)
   {
     if (_picard_max_its > 1)
       _console << "Beginning Picard Iteration " << _picard_it << "\n" << std::endl;
+
+    // For every iteration other than the first, we need to restore the state of the MultiApps
+    if (_picard_it > 0)
+    {
+      _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
+      _problem.restoreMultiApps(EXEC_TIMESTEP_END);
+    }
 
     solveStep(input_dt);
     ++_picard_it;
@@ -307,7 +320,10 @@ Transient::solveStep(Real input_dt)
   _time = _time_old + _dt;
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
-  _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
+  _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
+
+  if (!_multiapps_converged)
+    return;
 
   preSolve();
   _time_stepper->preSolve();
@@ -373,7 +389,10 @@ Transient::solveStep(Real input_dt)
     _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
     _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
     _problem.execTransfers(EXEC_TIMESTEP_END);
-    _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
+    _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
+
+    if (!_multiapps_converged)
+      return;
   }
   else
   {
@@ -607,7 +626,7 @@ Transient::estimateTimeError()
 bool
 Transient::lastSolveConverged()
 {
-  return _time_stepper->converged();
+  return _multiapps_converged && _time_stepper->converged();
 }
 
 void

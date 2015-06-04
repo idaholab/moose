@@ -37,6 +37,8 @@
 class Executioner;
 class MooseApp;
 class RecoverBaseAction;
+class Backup;
+class FEProblem;
 
 template<>
 InputParameters validParams<MooseApp>();
@@ -376,6 +378,17 @@ public:
    * @return A const reference to the recoverable data
    */
   std::set<std::string> & getRecoverableData() { return _recoverable_data; }
+
+  /**
+   * Create a Backup from the current App.  A Backup contains all the data necessary to be able
+   * to restore the state of an App.
+   */
+  Backup * backup();
+
+  /**
+   * Restore a Backup.  This sets the App's state.
+   */
+  void restore(Backup * backup);
 
 protected:
 

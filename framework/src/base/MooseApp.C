@@ -457,6 +457,30 @@ MooseApp::registerRecoverableData(std::string name)
   _recoverable_data.insert(name);
 }
 
+Backup *
+MooseApp::backup()
+{
+  FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
+
+  RestartableDataIO rdio(fe_problem);
+
+  std::cout<<"Creating backup!"<<std::endl;
+
+  return rdio.createBackup();
+}
+
+void
+MooseApp::restore(Backup * backup)
+{
+  FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
+
+  RestartableDataIO rdio(fe_problem);
+
+  std::cout<<"Restoring backup!"<<std::endl;
+
+  return rdio.restoreBackup(backup);
+}
+
 void
 MooseApp::setCheckUnusedFlag(bool warn_is_error)
 {

@@ -65,17 +65,17 @@ FullSolveMultiApp::initialSetup()
   }
 }
 
-void
+bool
 FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advance)
 {
   if (!auto_advance)
     mooseError("FullSolveMultiApp is not compatible with auto_advance=false");
 
   if (!_has_an_app)
-    return;
+    return true;
 
   if (_solved)
-    return;
+    return true;
 
   _console << "Fully Solving MultiApp " << name() << std::endl;
 
@@ -97,6 +97,9 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
   _solved = true;
 
   _console << "Finished Solving MultiApp " << name() << std::endl;
+
+  // TODO: Do soemthing better than this
+  return true;
 }
 
 

@@ -238,6 +238,9 @@ protected:
   /// Is it our first time through the execution loop?
   bool & _first;
 
+  /// Whether or not the multiapps failed during the last timestem
+  bool & _multiapps_converged;
+
   /// Whether or not the last solve converged
   bool & _last_solve_converged;
 

@@ -373,6 +373,43 @@ protected:
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
 };
 
+
+template<>
+inline void
+dataStore(std::ostream & stream, SystemBase & system_base, void * context)
+{
+  std::cout<<"Storing System!"<<std::endl;
+
+  System & libmesh_system = system_base.system();
+
+  NumericVector<Real> & solution = *(libmesh_system.solution.get());
+
+  dataStore(stream, solution, context);
+
+  for (System::vectors_iterator it = libmesh_system.vectors_begin();
+       it != libmesh_system.vectors_end();
+       it++)
+    dataStore(stream, *(it->second), context);
+}
+
+template<>
+inline void
+dataLoad(std::istream & stream, SystemBase & system_base, void * context)
+{
+  System & libmesh_system = system_base.system();
+
+  NumericVector<Real> & solution = *(libmesh_system.solution.get());
+
+  dataLoad(stream, solution, context);
+
+  for (System::vectors_iterator it = libmesh_system.vectors_begin();
+       it != libmesh_system.vectors_end();
+       it++)
+    dataLoad(stream, *(it->second), context);
+
+  system_base.update();
+}
+
 /**
  * Information about variables that will be copied
  */
