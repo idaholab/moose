@@ -7,12 +7,12 @@
 #ifndef COMPUTECONCENTRATIONDEPENDENTELASTICITYTENSOR_H
 #define COMPUTECONCENTRATIONDEPENDENTELASTICITYTENSOR_H
 
-#include "ComputeElasticityTensor.h"
+#include "ComputeRotatedElasticityTensorBase.h"
 
 /**
  * ComputeElasticityTensor defines an elasticity tensor material object with a given base name.
  */
-class ComputeConcentrationDependentElasticityTensor : public ComputeElasticityTensor
+class ComputeConcentrationDependentElasticityTensor : public ComputeRotatedElasticityTensorBase
 {
 public:
   ComputeConcentrationDependentElasticityTensor(const std:: string & name, InputParameters parameters);
@@ -27,7 +27,6 @@ protected:
   VariableName _c_name;
 
   MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
-
 };
 
-#endif //COMPUTEELASTICITYTENSOR_H
+#endif //COMPUTECONCENTRATIONDEPENDENTELASTICITYTENSOR_H

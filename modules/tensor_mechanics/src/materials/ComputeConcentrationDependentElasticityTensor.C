@@ -10,23 +10,21 @@
 template<>
 InputParameters validParams<ComputeConcentrationDependentElasticityTensor>()
 {
-  InputParameters params = validParams<ComputeElasticityTensor>();
+  InputParameters params = validParams<ComputeRotatedElasticityTensorBase>();
   params.addClassDescription("Compute concentration dependent elasticity tensor.");
-  params.suppressParameter<std::vector<Real> >("C_ijkl");
-  params.suppressParameter<MooseEnum>("fill_method");
   params.addRequiredParam<std::vector<Real> >("C0_ijkl", "Stiffness tensor for zero concentration phase");
   params.addRequiredParam<std::vector<Real> >("C1_ijkl", "Stiffness tensor for phase having concentration 1.0");
-  params.addParam<MooseEnum>("fill_method_phase0", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
-  params.addParam<MooseEnum>("fill_method_phase1", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
+  params.addParam<MooseEnum>("fill_method0", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
+  params.addParam<MooseEnum>("fill_method1", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
   params.addRequiredCoupledVar("c", "Concentration");
   return params;
 }
 
 ComputeConcentrationDependentElasticityTensor::ComputeConcentrationDependentElasticityTensor(const std::string & name,
                                                                                              InputParameters parameters) :
-    ComputeElasticityTensor(name, parameters),
-    _Cijkl0(getParam<std::vector<Real> >("C0_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method_phase0")),
-    _Cijkl1(getParam<std::vector<Real> >("C1_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method_phase1")),
+    ComputeRotatedElasticityTensorBase(name, parameters),
+    _Cijkl0(getParam<std::vector<Real> >("C0_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method0")),
+    _Cijkl1(getParam<std::vector<Real> >("C1_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method1")),
     _c(coupledValue("c")),
     _c_name(getVar("c", 0)->name()),
     _delasticity_tensor_dc(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name))
@@ -35,8 +33,8 @@ ComputeConcentrationDependentElasticityTensor::ComputeConcentrationDependentElas
   RotationTensor R(_Euler_angles); // R type: RealTensorValue
 
   // Rotate tensors
-  C0_ijkl.rotate(R);
-  C1_ijkl.rotate(R);
+  _Cijkl0.rotate(R);
+  _Cijkl1.rotate(R);
 }
 
 void
