@@ -4,7 +4,6 @@
 #include "Kernel.h"
 
 class OneDMomentumFlux;
-class SinglePhaseCommonFluidProperties;
 
 template<>
 InputParameters validParams<OneDMomentumFlux>();
@@ -26,15 +25,11 @@ protected:
   bool _is_liquid;
   Real _sign;
   VariableValue & _alpha;
-  VariableValue & _rho;
-  VariableValue & _rhou;
-  VariableValue & _rhoE;
-
-  VariableValue & _rhoA;
-  VariableValue & _rhoEA;
-
   VariableValue & _u_vel;
-  VariableValue & _pressure;
+  MaterialProperty<Real> & _pressure;
+  MaterialProperty<Real> & _dp_drho;
+  MaterialProperty<Real> & _dp_drhou;
+  MaterialProperty<Real> & _dp_drhoE;
   VariableValue & _area;
 
   unsigned int _rhoA_var_number;
@@ -42,8 +37,6 @@ protected:
   bool _has_alpha_A;
   unsigned int _alpha_A_liquid_var_number;
   MaterialProperty<Real> * _dp_dalphaA_liquid;
-
-  const SinglePhaseCommonFluidProperties & _spfp;
 };
 
 #endif /* ONEDMOMENTUMFLUX_H */

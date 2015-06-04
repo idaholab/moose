@@ -1,5 +1,4 @@
 #include "OneDMomentumFlux.h"
-#include "SinglePhaseCommonFluidProperties.h"
 
 template<>
 InputParameters validParams<OneDMomentumFlux>()
@@ -7,21 +6,11 @@ InputParameters validParams<OneDMomentumFlux>()
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("alpha", 1.0, "Volume fraction");
   params.addCoupledVar("alpha_A_liquid", "Volume fraction of liquid");
-
-  params.addRequiredCoupledVar("rho", "density");
-  params.addRequiredCoupledVar("rhou", "momentum");
-  params.addCoupledVar("rhoE", "total energy");
-
   params.addRequiredCoupledVar("rhoA", "density multiplied by area");
   params.addCoupledVar("rhoEA", "total energy multiplied by area");
-
   params.addRequiredCoupledVar("u", "velocity");
-  params.addRequiredCoupledVar("pressure", "pressure");
   params.addRequiredCoupledVar("area", "cross-sectional area");
-
   params.addRequiredParam<bool>("is_liquid", "True for liquid, false for vapor");
-
-  params.addRequiredParam<UserObjectName>("fp", "The name of fluid properties object to use.");
 
   return params;
 }
@@ -31,13 +20,11 @@ OneDMomentumFlux::OneDMomentumFlux(const std::string & name, InputParameters par
     _is_liquid(getParam<bool>("is_liquid")),
     _sign(_is_liquid ? 1. : -1.),
     _alpha(coupledValue("alpha")),
-    _rho(coupledValue("rho")),
-    _rhou(coupledValue("rhou")),
-    _rhoE(isCoupled("rhoE") ? coupledValue("rhoE") : _zero),
-    _rhoA(coupledValue("rhoA")),
-    _rhoEA(isCoupled("rhoEA") ? coupledValue("rhoEA") : _zero),
     _u_vel(coupledValue("u")),
-    _pressure(coupledValue("pressure")),
+    _pressure(_is_liquid ? getMaterialProperty<Real>("pressure_liquid") : getMaterialProperty<Real>("pressure_vapor")),
+    _dp_drho(_is_liquid ? getMaterialProperty<Real>("dpL_drho") : getMaterialProperty<Real>("dpV_drho")),
+    _dp_drhou(_is_liquid ? getMaterialProperty<Real>("dpL_drhou") : getMaterialProperty<Real>("dpV_drhou")),
+    _dp_drhoE(_is_liquid ? getMaterialProperty<Real>("dpL_drhoE") : getMaterialProperty<Real>("dpV_drhoE")),
     _area(coupledValue("area")),
     _rhoA_var_number(coupled("rhoA")),
     _rhoEA_var_number(isCoupled("rhoEA") ? coupled("rhoEA") : libMesh::invalid_uint),
@@ -45,8 +32,7 @@ OneDMomentumFlux::OneDMomentumFlux(const std::string & name, InputParameters par
     _alpha_A_liquid_var_number(_has_alpha_A ? coupled("alpha_A_liquid") : libMesh::invalid_uint),
     _dp_dalphaA_liquid(_has_alpha_A ?
         (_is_liquid ? &getMaterialProperty<Real>("dp_L_d_alphaA_L") : &getMaterialProperty<Real>("dp_V_d_alphaA_L")) :
-        NULL),
-    _spfp(getUserObject<SinglePhaseCommonFluidProperties>("fp"))
+        NULL)
 {
 }
 
@@ -67,11 +53,8 @@ OneDMomentumFlux::computeQpResidual()
 Real
 OneDMomentumFlux::computeQpJacobian()
 {
-  // Derivatives wrt rho*u
-  Real dp_drhou = _spfp.dp_drhou(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
-
   // (2,2) entry of flux Jacobian is the same as the constant area case, p_1 + 2*u
-  Real A22 = 2. * _u_vel[_qp] + dp_drhou;
+  Real A22 = 2. * _u_vel[_qp] + _dp_drhou[_qp];
 
   // Negative sign comes from integration by parts
   return -A22 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
@@ -82,22 +65,16 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _rhoA_var_number)
   {
-    // Derivatives wrt rho
-    Real dp_drho = _spfp.dp_drho(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
-
     // (2,1) entry of flux Jacobian is the same as the constant area case, p_0 - u^2
-    Real A21 = dp_drho - _u_vel[_qp] * _u_vel[_qp];
+    Real A21 = _dp_drho[_qp] - _u_vel[_qp] * _u_vel[_qp];
 
     // The contribution from the convective flux term.  Negative sign comes from integration by parts.
     return -A21 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else if (jvar == _rhoEA_var_number)
   {
-    // Derivatives wrt rhoE
-    Real dp_drhoE = _spfp.dp_drhoE(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
-
     // (2,3) entry of flux Jacobian is the same as the constant area case, p_2
-    Real A23 = dp_drhoE;
+    Real A23 = _dp_drhoE[_qp];
 
     // Contribution due to convective flux.  Negative sign comes from integration by parts.
     return -A23 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
