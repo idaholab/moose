@@ -18,6 +18,7 @@
 #include "ParallelUniqueId.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
+#include "MooseException.h"
 
 /**
  * Base class for assembling-like calculations
@@ -84,6 +85,20 @@ public:
    */
   virtual void subdomainChanged();
 
+  /**
+   * Called if a MooseException is caught anywhere during the computation.
+   *
+   * @param e The MooseException
+   */
+  virtual void caughtMooseException(MooseException &) {};
+
+  /**
+   * Whether or not the loop should continue.
+   *
+   * @return true to keep going, false to stop.
+   */
+  virtual bool keepGoing() { return true; }
+
 protected:
   MooseMesh & _mesh;
   THREAD_ID _tid;
@@ -117,42 +132,52 @@ template<typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range, bool bypass_threading)
 {
-  ParallelUniqueId puid;
-  _tid = bypass_threading ? 0 : puid.id;
-
-  pre();
-
-  _subdomain = std::numeric_limits<SubdomainID>::max();
-  typename RangeType::const_iterator el = range.begin();
-  for (el = range.begin() ; el != range.end(); ++el)
+  try
   {
-    const Elem* elem = *el;
-    unsigned int cur_subdomain = elem->subdomain_id();
+    ParallelUniqueId puid;
+    _tid = bypass_threading ? 0 : puid.id;
 
-    _old_subdomain = _subdomain;
-    _subdomain = cur_subdomain;
+    pre();
 
-    if (_subdomain != _old_subdomain)
-      subdomainChanged();
-
-    onElement(elem);
-
-    for (unsigned int side=0; side<elem->n_sides(); side++)
+    _subdomain = std::numeric_limits<SubdomainID>::max();
+    typename RangeType::const_iterator el = range.begin();
+    for (el = range.begin() ; el != range.end(); ++el)
     {
-      std::vector<BoundaryID> boundary_ids = _mesh.boundaryIDs(elem, side);
+      if (!keepGoing())
+        break;
 
-      if (boundary_ids.size() > 0)
-        for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-          onBoundary(elem, side, *it);
+      const Elem* elem = *el;
+      unsigned int cur_subdomain = elem->subdomain_id();
 
-      if (elem->neighbor(side) != NULL)
-        onInternalSide(elem, side);
-    } // sides
-    postElement(elem);
+      _old_subdomain = _subdomain;
+      _subdomain = cur_subdomain;
 
-  } // range
+      if (_subdomain != _old_subdomain)
+        subdomainChanged();
 
-  post();
+      onElement(elem);
+
+      for (unsigned int side=0; side<elem->n_sides(); side++)
+      {
+        std::vector<BoundaryID> boundary_ids = _mesh.boundaryIDs(elem, side);
+
+        if (boundary_ids.size() > 0)
+          for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+            onBoundary(elem, side, *it);
+
+        if (elem->neighbor(side) != NULL)
+          onInternalSide(elem, side);
+      } // sides
+      postElement(elem);
+
+    } // range
+
+    post();
+  }
+  catch (MooseException & e)
+  {
+    caughtMooseException(e);
+  }
 }
 
 template<typename RangeType>

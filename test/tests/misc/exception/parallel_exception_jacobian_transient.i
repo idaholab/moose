@@ -3,8 +3,6 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -17,6 +15,14 @@
     variable = u
     when = jacobian
   [../]
+  [./diff]
+    type = Diffusion
+    variable = u
+  [../]
+  [./time_deriv]
+    type = TimeDerivative
+    variable = u
+  [../]
 []
 
 [BCs]
@@ -26,11 +32,19 @@
     boundary = 2
     value = 1
   [../]
+  [./right2]
+    type = DirichletBC
+    variable = u
+    boundary = 1
+    value = 0
+  [../]
 []
 
 [Executioner]
-  type = TestSteady
-  test_type = "Exception"
+  type = Transient
+  num_steps = 5
+  dt = 0.01
+  dtmin = 0.005
   solve_type = 'PJFNK'
 []
 

@@ -130,7 +130,7 @@ protected:
   void computeNodalVars(ExecFlagType type);
   void computeElementalVars(ExecFlagType type);
 
-  FEProblem & _mproblem;
+  FEProblem & _fe_problem;
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;

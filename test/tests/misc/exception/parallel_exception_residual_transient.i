@@ -13,10 +13,14 @@
   [./exception]
     type = ExceptionKernel
     variable = u
-    when = initial_condition
+    when = residual
   [../]
   [./diff]
     type = Diffusion
+    variable = u
+  [../]
+  [./time_deriv]
+    type = TimeDerivative
     variable = u
   [../]
 []
@@ -37,7 +41,10 @@
 []
 
 [Executioner]
-  type = TestSteady
+  type = Transient
+  num_steps = 5
+  dt = 0.01
+  dtmin = 0.005
   solve_type = 'PJFNK'
 []
 

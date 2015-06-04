@@ -13,13 +13,11 @@
   [./exception]
     type = ExceptionKernel
     variable = u
-    block = 1
     when = residual
   [../]
   [./diff]
     type = Diffusion
     variable = u
-    block = 2
   [../]
 []
 
@@ -40,7 +38,6 @@
 
 [Executioner]
   type = TestSteady
-  test_type = "Exception"
   solve_type = 'PJFNK'
 []
 
