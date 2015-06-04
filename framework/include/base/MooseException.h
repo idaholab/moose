@@ -31,6 +31,15 @@ public:
   {}
 
   /**
+   * For some reason, on GCC 4.6.3, I get 'error: looser throw
+   * specifier' when deriving from std::exception unless I declare
+   * that the destructor *won't* throw by adding the throw()
+   * specification.  Clang doesn't seem to care about this line of
+   * code.
+   */
+  ~MooseException() throw() {}
+
+  /**
    * Get out the error message.
    *
    * Satisfies the interface of std::exception
