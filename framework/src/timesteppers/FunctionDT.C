@@ -24,6 +24,7 @@ InputParameters validParams<FunctionDT>()
   params.addParam<std::vector<Real> >("time_dt", "The values of dt");
   params.addParam<Real>("growth_factor", 2, "Maximum ratio of new to previous timestep sizes following a step that required the time step to be cut due to a failed solve.");
   params.addParam<Real>("min_dt", 0, "The minimal dt to take.");
+  params.addParam<bool>("interpolate", true, "Whether or not to interpolate DT between times.  This is true by default for historical reasons.");
 
   return params;
 }
@@ -31,10 +32,12 @@ InputParameters validParams<FunctionDT>()
 FunctionDT::FunctionDT(const InputParameters & parameters) :
     TimeStepper(parameters),
     _time_t(getParam<std::vector<Real> >("time_t")),
+    _time_dt(getParam<std::vector<Real> >("time_dt")),
     _time_ipol(_time_t, getParam<std::vector<Real> >("time_dt")),
     _growth_factor(getParam<Real>("growth_factor")),
     _cutback_occurred(false),
-    _min_dt(getParam<Real>("min_dt"))
+    _min_dt(getParam<Real>("min_dt")),
+    _interpolate(getParam<bool>("interpolate"))
 {
   _time_knots = _time_t;
 }
@@ -67,7 +70,23 @@ FunctionDT::computeInitialDT()
 Real
 FunctionDT::computeDT()
 {
-  Real local_dt = _time_ipol.sample(_time);
+  Real local_dt = 0;
+
+  if (_interpolate)
+    local_dt = _time_ipol.sample(_time);
+  else // Find where we are
+  {
+    unsigned int i=0;
+    for (; i < _time_t.size(); i++)
+      if (MooseUtils::relativeFuzzyGreaterEqual(_time, _time_t[i]))
+        break;
+
+    // Use the last dt after the end
+    if (i == _time_t.size())
+      local_dt = _time_dt.back();
+    else
+      local_dt = _time_dt[i];
+  }
 
   // sync to time knot
   if ((_time_knots.size() > 0) && (_time + local_dt >= (*_time_knots.begin())))
