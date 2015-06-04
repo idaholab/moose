@@ -23,6 +23,7 @@ protected:
   virtual void computeQpElasticityTensor() = 0;
 
   std::string _base_name;
+  std::string _elasticity_tensor_name;
 
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
 
