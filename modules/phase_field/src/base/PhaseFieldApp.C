@@ -184,6 +184,7 @@
 #include "GrainTrackerElasticity.h"
 #include "FauxGrainTracker.h"
 #include "PFCElementEnergyIntegral.h"
+#include "TimeSeriesAverage.h"
 
 /*
  * AuxKernels
@@ -473,6 +474,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
   registerPostprocessor(PFCElementEnergyIntegral);
+  registerPostprocessor(TimeSeriesAverage);
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
