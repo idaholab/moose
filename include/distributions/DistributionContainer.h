@@ -5,10 +5,11 @@
 #include <vector>
 #include <map>
 #include "distribution.h"
+#include "randomClass.h"
 
-class RandomClass;
 class BasicDistribution;
 class BasicDistributionND;
+
 
 #ifdef LIBMESH_HAVE_CXX11_SHARED_PTR
 #  include <memory>

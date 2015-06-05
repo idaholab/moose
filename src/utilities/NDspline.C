@@ -175,9 +175,9 @@ double NDSpline::spline_cartesian_interpolation(std::vector<double> point_coordi
 void NDSpline::calculateCoefficients(){
  std::vector<int> loop_locator (_dimensions);
 
- std::cerr << "calculateCoefficients" << std::endl;
+ //std::cerr << "calculateCoefficients" << std::endl;
  std::vector<double> coeff = fillArrayCoefficient(_dimensions, _values, loop_locator);
- std::cerr << " done calculateCoefficients" << std::endl;
+ //std::cerr << " done calculateCoefficients" << std::endl;
  _spline_coefficients = coeff;
 }
 

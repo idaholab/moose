@@ -11,7 +11,6 @@
 
 #include "distribution_1D.h"
 #include "distributionFunctions.h"
-#include <math.h>
 #include <cmath>               // needed to use erfc error function
 #include <string>
 #include "dynamicArray.h"
@@ -842,7 +841,7 @@ BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double s
     _dist_parameters["beta" ] = beta;
     _dist_parameters["scale"] = scale;
     _dist_parameters["low"  ] = low;
-    
+
     if ((alpha<0) || (beta<0))
     throwError("ERROR: incorrect value of alpha or beta for beta distribution");
 

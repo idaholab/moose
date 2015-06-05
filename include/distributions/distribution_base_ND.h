@@ -196,8 +196,9 @@ public:
   {
 	  if (_CDFprovided == true)
 		  return _interpolator.NDinverseFunctionGrid(F,g);
-	  else
+	  else{
 		  return _CDFinterpolator.NDinverseFunctionGrid(F,g);
+	  }
   };
 
   double inverseMarginal(double F, int dimension){
@@ -390,7 +391,6 @@ public:
 	  if (_CDFprovided)
 		  return _interpolator.NDinverseFunctionGrid(F,g);
 	  else{
-		  //std::cout<<"BasicMultiDimensionalInverseWeight - InverseCdf: " << _CDFspline.returnDimensionality() <<std::endl;
 		  return _CDFspline.InverseCdf(F,g);
 	  }
   };
@@ -433,36 +433,18 @@ public:
   BasicMultivariateNormal(const char * data_filename, std::vector<double> mu);
   BasicMultivariateNormal(std::string data_filename, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
+
+  void BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu);
+
   virtual ~BasicMultivariateNormal();
   double  Pdf(std::vector<double> x);
   double  Cdf(std::vector<double> x);
+  std::vector<double> InverseCdf(double F, double g);
+  double inverseMarginal(double F, int dimension);
+  void updateRNGparameter(double tolerance, double initial_divisions);
+  double Marginal(double x, int dimension);
 
-//  std::vector<double>
-//  InverseCdf(double /*min*/, double /*max*/)
-//  {
-//    return std::vector<double>(2,-1.0);
-//  };
-
-
-  double
-    inverseMarginal(double /* F */, int /* dimension */)
-  {
-	  throwError("BasicMultivariateNormal: inverseMarginal not available");
-	  return 0.0;
-  }
-
-  std::vector<double>
-    InverseCdf(double /* F */, double /* g */)
-  {
-	  throwError("BasicMultivariateNormal: InverseCdf not available");
-	  return std::vector<double>(2,-1.0);
-  };
-
-  int
-  returnDimensionality()
-  {
-	  return _mu.size();
-  }
+  int returnDimensionality();
 
   //double MVNDST(std::vector<double> a, std::vector<double> b, double alpha, double epsilon, int Nmax);
   double phi(double x);
@@ -471,12 +453,18 @@ public:
   double * cholesky(double *A, int n);
   std::vector<std::vector<double> > choleskyDecomposition(std::vector<std::vector<double> > matrix);
   void show_matrix(double *A, int n);
+
 private:
   std::vector<double> _mu;
   std::vector<std::vector<double> > _cov_matrix;
   std::vector<std::vector<double> > _inverse_cov_matrix;
   std::vector<std::vector<double> > _cholesky_C;
   double _determinant_cov_matrix;
+
+  BasicMultiDimensionalCartesianSpline _cartesianDistribution;
+
+  void base10tobaseN(int value_base10, int base, std::vector<int> & value_baseN);
+  double getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix);
 };
 
 

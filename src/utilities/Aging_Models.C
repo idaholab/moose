@@ -4,7 +4,7 @@
  *  Created on: June 19, 2014
  */
 
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <vector>
 

@@ -19,6 +19,7 @@
 #include <string>
 #include <iostream>
 #include <stdio.h>
+#include "randomClass.h"
 
 bool checkUpperBound(double upper_bound, std::vector<double> values);
 bool checkLowerBound(double lower_bound, std::vector<double> values);
@@ -30,7 +31,7 @@ public:
   virtual double interpolateAt(std::vector<double> point_coordinate);
   virtual double getGradientAt(std::vector<double> point_coordinate);
   virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-  std::vector<double> NDinverseFunction(double F_min, double F_max);
+  //std::vector<double> NDinverseFunction(double F_min, double F_max);
   std::vector<double> NDinverseFunctionGrid(double F, double g);
 
   double averageCellValue(std::vector<double> center, std::vector<double> dx);
@@ -38,7 +39,6 @@ public:
   void updateRNGparameters(double tolerance, double initial_divisions);
 
   double NDderivative(std::vector<double> coordinate);
-  double integral(std::vector<double> coordinate, int samples=1000);
 
   int returnDimensionality(){return _dimensions;};
 
@@ -46,6 +46,7 @@ public:
   virtual ~NDInterpolation();
 
 protected:
+  RandomClass * _randomDouble;
   std::string _data_filename;
   bool _completed_init;
   int _dimensions;
@@ -62,17 +63,17 @@ protected:
   bool pivotCellCheck(std::vector<std::vector<double> >& cell, double F);
   int vertexOutcome(std::vector<double>& vertex, double F);
   void cellsFilter(std::vector<std::vector<std::vector<double> > >& vertices, double F);
-  void refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > cell, int divisions);
+  void refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > & cell, int divisions);
   std::vector<int> arrayConverter(int oneDcoordinate, int divisions, int n_dimensions);
   std::vector<std::vector<double> > generateNewCell(std::vector<int> NDcoordinate, std::vector<double> coordinateOfPointZero, std::vector<double> dxs, int n_dimensions);
-  std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > cellsSet, double g);
-  std::vector<double> getCellCenter(std::vector<std::vector<double> > cell);
+  std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > & cellsSet, double g);
+  std::vector<double> getCellCenter(std::vector<std::vector<double> > & cell);
 
   double OneDderivative(double fxph, double fx, double fxmh);
   double derivativeStep(std::vector<double> coordinate, int loop);
 
-  int CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices, double F);
-  double avgCDfValue(std::vector<std::vector<double> > cell);
+  int CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices, double g);
+  double integralCellValue(std::vector<std::vector<double> > cell);
 };
 
 /*
@@ -208,7 +209,7 @@ public:
   double interpolateAt(std::vector<double> point_coordinate);
   double getGradientAt(std::vector<double> point_coordinate);
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-  std::vector<double> NDinverseFunction(double F_min, double F_max);
+  //std::vector<double> NDinverseFunction(double F_min, double F_max);
   InverseDistanceWeighting(std::string filename, double p);
   InverseDistanceWeighting(double p);
   virtual ~InverseDistanceWeighting() {};

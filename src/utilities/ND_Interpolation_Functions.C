@@ -5,10 +5,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <vector>
-#include <math.h>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real_distribution.hpp>
+#include <cmath>
 #include <ctime>
 
 
@@ -20,12 +17,12 @@ double NDInterpolation::interpolateAt(std::vector<double> point_coordinate){
   return -1;
 }
 
-std::vector<double> NDInterpolation::NDinverseFunction(double F_min, double F_max){
-  throw ("Error in NDinverseFunction: NOT IMPLEMENTED!!!!");
-  std::vector<double> a;
-  a.push_back(-1);
-  return a;
-}
+//std::vector<double> NDInterpolation::NDinverseFunction(double F_min, double F_max){
+//  throw ("Error in NDinverseFunction: NOT IMPLEMENTED!!!!");
+//  std::vector<double> a;
+//  a.push_back(-1);
+//  return a;
+//}
 
 
 double NDInterpolation::getGradientAt(std::vector<double> point_coordinate){
@@ -40,8 +37,6 @@ void NDInterpolation::fit(std::vector< std::vector<double> > coordinates, std::v
 void NDInterpolation::updateRNGparameters(double tolerance, double initial_divisions){
 	_tolerance = tolerance;
 	_initial_divisions = (int)initial_divisions;
-
-	//std::cout<<"c++ NDInterpolation updateRNGparameter" << _tolerance << _initial_divisions << std::endl;
 }
 
 
@@ -49,6 +44,8 @@ NDInterpolation::NDInterpolation()
 {
 	  _tolerance = 0.1;
 	  _initial_divisions = 10;
+	  _randomDouble = new RandomClass();
+	  _randomDouble->seed(0);
 }
 NDInterpolation::~NDInterpolation()
 {
@@ -128,135 +125,184 @@ double NDInterpolation::vectorNorm(std::vector<double> point, double p){
  return norm;
 }
 
-std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, double F_max){
- // iterative procedure of linear interpolation to determine a nextPoint between firstPoint and secondPoint until CDF(nextPoint) lies between F_min and F_max
-
- double referenceCDF = (F_max-F_min)/2;
-
- boost::random::mt19937 rng;
- rng.seed(time(NULL));
- double range = rng.max() - rng.min();
-
-    // check input values inconsistencies
-
-    if (F_min > F_max)
-        throwError("ND RNG function: invalid param (F_min > F_max)");
-
-    std::vector<double> min_values (_dimensions);
-    std::vector<double> max_values (_dimensions);
-
-    // Find extreme points
-
-    for (int nDim=0; nDim<_dimensions; nDim++){
-        for (int nPoints=0; nPoints<_number_of_points; nPoints++){
-            if (_point_coordinates[nPoints][nDim] < min_values[nDim])
-                min_values[nDim] = _point_coordinates[nPoints][nDim];
-            if (_point_coordinates[nPoints][nDim] > max_values[nDim])
-                max_values[nDim] = _point_coordinates[nPoints][nDim];
-        }
-    }
-
-    std::vector<double> firstPoint  (_dimensions);
-    std::vector<double> secondPoint (_dimensions);
-    std::vector<double> nextPoint   (_dimensions);
-
-
-    // Randomly pick the fistPoint
-    for (int nDim=0; nDim<_dimensions; nDim++){
-     double temp = (rng()-rng.min())/range;;
-        firstPoint[nDim] = min_values[nDim] + (max_values[nDim]-min_values[nDim]) * temp;
-    }
-
-    int min_index, max_index = 0;
-
-    double min_value , max_value = 0.0;
-    for (int n=0; n<_number_of_points; n++){
-        if (_values[n] < min_value){
-         min_index = n;
-            min_value = _values[min_index];
-        }
-        if (_values[n] > max_value){
-         max_index = n;
-            max_value = _values[max_index];
-        }
-    }
-
-    bool convergence;
-
-    double valueFirstPoint = interpolateAt(firstPoint);
-    double valueSecondPoint;
-    double valueNextPoint;
-
-    if (valueFirstPoint < F_min && valueFirstPoint < F_max){
-        secondPoint = max_values;
-        valueSecondPoint = 1.0;
-        convergence = false;
-    } else if (interpolateAt(firstPoint) > F_min && interpolateAt(firstPoint) > F_max){
-        secondPoint = min_values;
-        valueSecondPoint = 0.0;
-        convergence = false;
-    } else {
-     nextPoint = firstPoint;
-        convergence = true;
-    }
-
-    while (convergence){
-        // Determine next point
-
-        for (int nDim=0; nDim<_dimensions; nDim++)
-            nextPoint[nDim] = (firstPoint[nDim]-secondPoint[nDim])*(valueFirstPoint-valueSecondPoint)/(referenceCDF-valueSecondPoint)+secondPoint[nDim];
-        valueNextPoint = interpolateAt(nextPoint);
-
-        if (referenceCDF>valueFirstPoint && referenceCDF<valueSecondPoint){
-            firstPoint = nextPoint;
-            // secondPoint remains
-        } else if (referenceCDF>valueSecondPoint && referenceCDF<valueFirstPoint) {
-            // firstPoint remains;
-            secondPoint = nextPoint;
-        } else
-            throwError("Computational error in NDinverse");
-
-        // test convergence
-        if (valueNextPoint > F_min && valueNextPoint < F_max)
-            convergence = true;
-        else
-            convergence = false;
-    }
-
-    return nextPoint;
-}
-
-
+//std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, double F_max){
+// // iterative procedure of linear interpolation to determine a nextPoint between firstPoint and secondPoint until CDF(nextPoint) lies between F_min and F_max
+//
+// double referenceCDF = (F_max-F_min)/2;
+//
+// boost::random::mt19937 rng;
+// rng.seed(time(NULL));
+// double range = rng.max() - rng.min();
+//
+//    // check input values inconsistencies
+//
+//    if (F_min > F_max)
+//        throwError("ND RNG function: invalid param (F_min > F_max)");
+//
+//    std::vector<double> min_values (_dimensions);
+//    std::vector<double> max_values (_dimensions);
+//
+//    // Find extreme points
+//
+//    for (int nDim=0; nDim<_dimensions; nDim++){
+//        for (int nPoints=0; nPoints<_number_of_points; nPoints++){
+//            if (_point_coordinates[nPoints][nDim] < min_values[nDim])
+//                min_values[nDim] = _point_coordinates[nPoints][nDim];
+//            if (_point_coordinates[nPoints][nDim] > max_values[nDim])
+//                max_values[nDim] = _point_coordinates[nPoints][nDim];
+//        }
+//    }
+//
+//    std::vector<double> firstPoint  (_dimensions);
+//    std::vector<double> secondPoint (_dimensions);
+//    std::vector<double> nextPoint   (_dimensions);
+//
+//
+//    // Randomly pick the fistPoint
+//    for (int nDim=0; nDim<_dimensions; nDim++){
+//     double temp = (rng()-rng.min())/range;;
+//        firstPoint[nDim] = min_values[nDim] + (max_values[nDim]-min_values[nDim]) * temp;
+//    }
+//
+//    int min_index, max_index = 0;
+//
+//    double min_value , max_value = 0.0;
+//    for (int n=0; n<_number_of_points; n++){
+//        if (_values[n] < min_value){
+//         min_index = n;
+//            min_value = _values[min_index];
+//        }
+//        if (_values[n] > max_value){
+//         max_index = n;
+//            max_value = _values[max_index];
+//        }
+//    }
+//
+//    bool convergence;
+//
+//    double valueFirstPoint = interpolateAt(firstPoint);
+//    double valueSecondPoint;
+//    double valueNextPoint;
+//
+//    if (valueFirstPoint < F_min && valueFirstPoint < F_max){
+//        secondPoint = max_values;
+//        valueSecondPoint = 1.0;
+//        convergence = false;
+//    } else if (interpolateAt(firstPoint) > F_min && interpolateAt(firstPoint) > F_max){
+//        secondPoint = min_values;
+//        valueSecondPoint = 0.0;
+//        convergence = false;
+//    } else {
+//     nextPoint = firstPoint;
+//        convergence = true;
+//    }
+//
+//    while (convergence){
+//        // Determine next point
+//
+//        for (int nDim=0; nDim<_dimensions; nDim++)
+//            nextPoint[nDim] = (firstPoint[nDim]-secondPoint[nDim])*(valueFirstPoint-valueSecondPoint)/(referenceCDF-valueSecondPoint)+secondPoint[nDim];
+//        valueNextPoint = interpolateAt(nextPoint);
+//
+//        if (referenceCDF>valueFirstPoint && referenceCDF<valueSecondPoint){
+//            firstPoint = nextPoint;
+//            // secondPoint remains
+//        } else if (referenceCDF>valueSecondPoint && referenceCDF<valueFirstPoint) {
+//            // firstPoint remains;
+//            secondPoint = nextPoint;
+//        } else
+//            throwError("Computational error in NDinverse");
+//
+//        // test convergence
+//        if (valueNextPoint > F_min && valueNextPoint < F_max)
+//            convergence = true;
+//        else
+//            convergence = false;
+//    }
+//
+//    return nextPoint;
+//}
 
 
-double NDInterpolation::avgCDfValue(std::vector<std::vector<double> > cell){
+double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
+  /**
+   * This function calculates the integral value of an ND function within a cell
+   */
+
 	double value = 0.0;
-	for(unsigned int i=0; i<cell.size(); i++)
-		value += interpolateAt(cell.at(i));
-	value = value/((double)cell.size());
+
+	int numberOfVerteces = cell.size();
+	double sign = 1.0;
+
+	int counter = 1;
+
+	for(int i=numberOfVerteces; i>0; i--){
+		value += interpolateAt(cell.at(i-1)) * sign;
+		sign = sign * (-1.0);
+		counter++;
+		if (counter%2){
+			sign = sign * (-1.0);
+		}
+	}
+
 	return value;
 }
 
-int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices, double F){
+//double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
+//	double value = 0.0;
+//
+//	int numberOfVerteces = cell.size();
+//	double sign = 1.0;
+//
+//	for(int i=numberOfVerteces; i>0; i--){
+//		value += interpolateAt(cell.at(i-1)) * sign;
+//		sign = sign * (-1.0);
+//	}
+//	std::cout<< cell.at(0).at(0) << " " << cell.at(3).at(1) << " " << value << std::endl;
+//	return value;
+//}
+
+//double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
+//	double value = 0.0;
+//
+//	int numberOfVerteces = cell.size();
+//
+//	for(int i=0; i<numberOfVerteces; i++){
+//		value += interpolateAt(cell.at(i));
+//	}
+//	//std::cout<< cell.at(3).at(0) << " " << cell.at(3).at(1) << " " << value/(double)numberOfVerteces << std::endl;
+//	return value/(double)numberOfVerteces;
+//}
+
+
+int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices,double g){
+  /**
+   * This function randomly picks a cell weighted by the integral value of the ND function within each cell
+   */
+
 	std::vector<double> cellAvgValues (vertices.size());
 	double cumulativeValue = 0.0;
+
 	for(unsigned int i=0; i<vertices.size(); i++){
-		cellAvgValues.at(i) = avgCDfValue(vertices.at(i));
+		cellAvgValues.at(i) = integralCellValue(vertices.at(i));
 		cumulativeValue += cellAvgValues.at(i);
 	}
+
 	for(unsigned int i=0; i<vertices.size(); i++){
 		cellAvgValues.at(i) = cellAvgValues.at(i)/cumulativeValue;
+
 	}
 
-	double RNGValue= 1.0;
 	int index=0;
 	double cumulativeIndex = 0.0;
 	for(unsigned int i=0; i<vertices.size(); i++){
 		cumulativeIndex += cellAvgValues.at(i);
-		index=i;
-		if (RNGValue > cumulativeIndex)
+		if (cumulativeIndex > g){
+			index=i;
 			break;
+		}
 	}
+
 	return index;
 }
 
@@ -300,7 +346,10 @@ void NDInterpolation::cellsFilter(std::vector<std::vector<std::vector<double> > 
  }
 }
 
-void NDInterpolation::refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > cell, int divisions){
+void NDInterpolation::refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > & cell, int divisions){
+  /**
+   * This function partition the original cell into subcells (each dimensions is partitioned into "divisions" intervals)
+   */
 
  std::vector<double> dxs (_dimensions);
 
@@ -316,7 +365,7 @@ void NDInterpolation::refinedCellDivision(std::vector<std::vector<std::vector<do
 
  for (int n=0; n<numberNewCells; n++){
   std::vector<int> NDcoordinate = arrayConverter(n,divisions,_dimensions);
-  std::vector<std::vector<double> > newCell = generateNewCell(NDcoordinate, cell[0], dxs, _dimensions);
+  std::vector<std::vector<double> > newCell = generateNewCell(NDcoordinate, cell.at(0), dxs, _dimensions);
   refinedCell.push_back(newCell);
  }
 
@@ -359,37 +408,41 @@ std::vector<std::vector<double> > NDInterpolation::generateNewCell(std::vector<i
 
   verteces.push_back(vertexRealCoordinate);
  }
- //std::cout<<" " << std::endl;
+
  return verteces;
 }
 
-std::vector<std::vector<double> > NDInterpolation::pickNewCell(std::vector<std::vector<std::vector<double> > > cellsSet, double g){
- int numberOfCells = cellsSet.size();
+std::vector<std::vector<double> > NDInterpolation::pickNewCell(std::vector<std::vector<std::vector<double> > > & cellsSet, double g){
+	/**
+	* This function picks a cell given a number in the [0,1] interval
+	*/
 
- // generate RN in [0,1]
-// int seed = time(0);
-// boost::random::mt19937 rng;
-// rng.seed(seed);
-// boost::random::uniform_int_distribution<> dist(1, numberOfCells);
-//
-// int pickedCell = dist(rng)-1;
+ double numberOfCells = (double)cellsSet.size();
 
- int pickedCell = (int)floor(g * numberOfCells);
+ int pickedCell = (int)(g * numberOfCells);
 
- return cellsSet[pickedCell];
+ return cellsSet.at(pickedCell);
 }
 
-std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<double> > cell){
+std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<double> > & cell){
+  /**
+   * This function return a random ND point contained into the cell
+   */
+
  std::vector<double> dxs (_dimensions);
  std::vector<double> center (_dimensions);
 
+// for (unsigned int i=0; i<cell.size(); i++){
+//	 std::cout<< "cc: " << cell.at(i).at(0) << " " << cell.at(i).at(1) << std::endl;
+// }
+
  for (int i=0; i<_dimensions; i++){
   int vertexLoc = (int)pow(2,i);
-  dxs[i] = (cell[vertexLoc][i] - cell[0][i])/2.0;
+  dxs[i] = cell[vertexLoc][i] - cell[0][i];
 
-  center[i] = cell[0][i] + dxs[i];
+  double randomDisplacement = _randomDouble->random();
 
-  //std::cout << "center: "<< center[i]<< std::endl;
+  center[i] = cell[0][i] + randomDisplacement * dxs[i];
  }
  return center;
 }
@@ -432,35 +485,12 @@ double NDInterpolation::derivativeStep(std::vector<double> coordinate, int loop)
 }
 
 
-double NDInterpolation::integral(std::vector<double> coordinate, int samples){
- double value;
- double volume=1;
- double sum=0;
- std::vector<double> cellrange (_dimensions);
- std::vector<double> sampleCoordinate (_dimensions);
-
- boost::random::mt19937 rng;
- boost::random::uniform_real_distribution<> zeroOne(0,1);
-
- for (int i=0; i<_dimensions; i++){
-  cellrange[i] = coordinate[i]-_cellPoint0[i];
-  volume = volume * cellrange[i];
- }
-
- for (int n=0; n<samples; n++){
-  for (int i=0; i<_dimensions; i++)
-   sampleCoordinate[i] = _cellPoint0[i] + zeroOne(rng)  * cellrange[i];
-
-  sum = sum + interpolateAt(sampleCoordinate);
- }
- return value = volume/samples * sum;
-}
 
 
 std::vector<double> int2binary(int value, int size){
 	std::vector<double> binary(size);
 	for (int i = 0; i < size; i++) {
-		binary[i] = value & (1 << i) ? 1 : 0;
+		binary.at(size-i-1) = value & (1 << i) ? 1 : 0;
 	}
 	return binary;
 }
@@ -492,13 +522,14 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  int last_divisions = (int)round(1.0/_tolerance);
 
- std::vector<double> pointMax(_dimensions);
- for(int i=0; i< _dimensions; i++){
-	 pointMax.at(i) = _cellPoint0.at(i)+_cellDxs.at(i);
- }
- F = interpolateAt(_cellPoint0) + F * (interpolateAt(pointMax) - interpolateAt(_cellPoint0));
+ //std::cout<<"last_divisions " << last_divisions << std::endl;
 
- // Create basic cell
+ std::vector<double> pointMax(_dimensions);
+ for(int i=0; i< _dimensions; i++)
+	 pointMax.at(i) = _cellPoint0.at(i)+_cellDxs.at(i);
+
+ //F = interpolateAt(_cellPoint0) + F * (interpolateAt(pointMax) - interpolateAt(_cellPoint0));
+
  std::vector<std::vector<double> > basic_cell;
  std::vector<int> NDcoordinate (_dimensions);
 
@@ -507,24 +538,66 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
  }
 
  basic_cell = generateNewCell(NDcoordinate, _cellPoint0, _cellDxs, _dimensions);
- 	 // Divide input space into cells
+
  std::vector<std::vector<std::vector<double> > > coarseCell;
  refinedCellDivision(coarseCell, basic_cell, _initial_divisions);
- 	 // Select pivot cells
- cellsFilter(coarseCell, F);
- 	 // Subdivide pivot cells into sub-cells
+
+ // ==> cellsFilter(coarseCell, F);
+
+ int pickedCell = CDFweightedPicking(coarseCell,g);
+
  std::vector<std::vector<std::vector<double> > > refinedCell;
- for (unsigned int i=0; i<coarseCell.size(); i++){
-	 refinedCellDivision(refinedCell, coarseCell[i], last_divisions);
- }
- 	 // Select pivot sub-cells
- cellsFilter(refinedCell, F);
- 	 // Randomly pick a pivot sub-cell
- std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
- 	 // Get center of the picked cell
- std::vector<double> randomVector = getCellCenter(pivotSubcell);
+
+ refinedCellDivision(refinedCell, coarseCell.at(pickedCell), last_divisions);
+
+ /// ===>cellsFilter(refinedCell,F);
+
+ //std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
+ int pickedSubCell = CDFweightedPicking(refinedCell,F);
+ std::vector<double> randomVector = getCellCenter(refinedCell.at(pickedSubCell));
+
  return randomVector;
 }
+
+
+
+//std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
+//
+// int last_divisions = (int)round(1.0/_tolerance);
+//
+// std::vector<double> pointMax(_dimensions);
+// for(int i=0; i< _dimensions; i++){
+//	 pointMax.at(i) = _cellPoint0.at(i)+_cellDxs.at(i);
+// }
+// F = interpolateAt(_cellPoint0) + F * (interpolateAt(pointMax) - interpolateAt(_cellPoint0));
+//
+// // Create basic cell
+// std::vector<std::vector<double> > basic_cell;
+// std::vector<int> NDcoordinate (_dimensions);
+//
+// for (int n=0; n<_dimensions; n++){
+//  NDcoordinate.at(n) = 0;
+// }
+//
+// basic_cell = generateNewCell(NDcoordinate, _cellPoint0, _cellDxs, _dimensions);
+// 	 // Divide input space into cells
+// std::vector<std::vector<std::vector<double> > > coarseCell;
+// refinedCellDivision(coarseCell, basic_cell, _initial_divisions);
+// 	 // Select pivot cells
+// cellsFilter(coarseCell, F);
+// 	 // Subdivide pivot cells into sub-cells
+// std::vector<std::vector<std::vector<double> > > refinedCell;
+// for (unsigned int i=0; i<coarseCell.size(); i++){
+//	 refinedCellDivision(refinedCell, coarseCell[i], last_divisions);
+// }
+// 	 // Select pivot sub-cells
+// cellsFilter(refinedCell, F);
+// 	 // Randomly pick a pivot sub-cell
+// std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
+// 	 // Get center of the picked cell
+// std::vector<double> randomVector = getCellCenter(pivotSubcell);
+// return randomVector;
+//}
 
 
 

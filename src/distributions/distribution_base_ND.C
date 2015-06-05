@@ -79,29 +79,63 @@ BasicDistributionND::getType(){
    return _type;
 }
 
-
 double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
-	double value=0.0;
+	  /**
+	   * This function calculates the integral of the pdf in a cell region
+	   * In the 1D case a cell region is an interval [a,b], thus the integral of the pdf in such interval is
+	   * calculated as CDF(b)-CDF(a). This functions perform a similar evolution but for a generic ND cell
+	   */
+
+	double value = 0.0;
 
 	int numberOfVerteces = (int)pow(2,center.size());
+	double sign = 1.0;
 
-	for(int i=0; i<numberOfVerteces; i++){
-		std::vector<double> index = int2binary(i,center.size());
+	int counter=1;
+
+	for(int i=numberOfVerteces; i>0; i--){
+		std::vector<double> index = int2binary(i-1,center.size());
 		std::vector<double> NDcoordinate(center.size());
 
 		for(unsigned int j=0; j<center.size(); j++){
-			if (index[j]==0)
+			if (index.at(j)==0)
 				NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
 			else
 				NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
 		}
-		value += Cdf(NDcoordinate);
-	}
+		value += Cdf(NDcoordinate) * sign;
 
-	value = value/numberOfVerteces;
+		sign = sign * (-1.0);
+		counter++;
+		if (counter%2)
+			sign = sign * (-1.0);
+	}
 
 	return value;
 }
+
+//double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
+//	double value=0.0;
+//
+//	int numberOfVerteces = (int)pow(2,center.size());
+//
+//	for(int i=0; i<numberOfVerteces; i++){
+//		std::vector<double> index = int2binary(i,center.size());
+//		std::vector<double> NDcoordinate(center.size());
+//
+//		for(unsigned int j=0; j<center.size(); j++){
+//			if (index[j]==0)
+//				NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
+//			else
+//				NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
+//		}
+//		value += Cdf(NDcoordinate);
+//	}
+//
+//	value = value/numberOfVerteces;
+//
+//	return value;
+//}
 
 
 double
@@ -131,204 +165,288 @@ double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
 
 //std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){
 std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & F, double & g){
- //return dist.InverseCdf(min, max);
- //return std::vector<double>(2,-1.0);
- //return dist.InverseCdf((max-min)/2.0, (max-min), 10);
- //return dist.InverseCdf((max-min)/2.0);
 	return dist.InverseCdf(F,g);
 }
 
-BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std::vector<double> mu){
-  _mu = mu;
+void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vector<int> & value_baseN){
+	  /**
+	   * This function convert a number in base 10 to a new number in any base N
+	   */
 
-  int rows,columns;
-  readMatrix(data_filename, rows, columns, _cov_matrix);
-  std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
+	   int index = 0 ;
 
-  std::cerr<< "Computing inverse and determinant"<< std::endl;
-
-  computeInverse(_cov_matrix, inverseCovMatrix);
-
-  for (int i=0;i<rows;i++){
-   std::vector<double> temp;
-     for (int j=0;j<columns;j++)
-      temp.push_back(inverseCovMatrix[i][j]);
-     _inverse_cov_matrix.push_back(temp);
-  }
-
-  int dimensions = _mu.size();
-  for(int i=0; i<dimensions; i++)
-   for(int j=0; j<dimensions; j++)
-    std::cerr<<_inverse_cov_matrix[i][j]<<std::endl;
-
-  std::cerr<< "_inverseCovMatrix completed"<< std::endl;
-
-  _determinant_cov_matrix = getDeterminant(_cov_matrix);
-  std::cerr<< "_determinantCovMatrix completed";
-
-  if(rows != columns)
-          throwError("MultivariateNormal error: covariance matrix in " << data_filename << " is not a square matrix.");
+	   if (value_base10 == 0)
+		   value_baseN.push_back(0);
+	   else{
+		   while ( value_base10 != 0 ){
+			   int remainder = value_base10 % base ;  // assume K > 1
+			   value_base10  = value_base10 / base ;  // integer division
+			   value_baseN.push_back(remainder);
+			   index++ ;
+			}
+	   }
 }
 
-BasicMultivariateNormal::BasicMultivariateNormal(const char * data_filename, std::vector<double> mu){
-   //std::string str(data_filename);
-   //std::cerr<< data_filename << std::endl;
-
-   //std::stringstream ss;
-   //ss.str(data_filename);
-   //std::string filename = ss.str();
-   //std::cerr<< filename << std::endl;
-   //std::cerr<< typeof(filename) << std::endl;
+void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu){
+	  /**
+	   * This is the base function that initializes the Multivariate normal distribution
+	   */
 
    _mu = mu;
 
    int rows,columns;
-   readMatrix(std::string(data_filename), rows, columns, _cov_matrix);
-   //readMatrix(data_filename, rows, columns, _cov_matrix);
+   readMatrix(data_filename, rows, columns, _cov_matrix);
    std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
-
-   std::cerr<< "Computing inverse and determinant"<< std::endl;
 
    computeInverse(_cov_matrix, inverseCovMatrix);
 
    for (int i=0;i<rows;i++){
-    std::vector<double> temp;
-      for (int j=0;j<columns;j++)
-       temp.push_back(inverseCovMatrix.at(i).at(j));
-      _inverse_cov_matrix.push_back(temp);
+	std::vector<double> temp;
+	  for (int j=0;j<columns;j++)
+	   temp.push_back(inverseCovMatrix.at(i).at(j));
+	  _inverse_cov_matrix.push_back(temp);
    }
 
    int dimensions = _mu.size();
-   for(int i=0; i<dimensions; i++)
-    for(int j=0; j<dimensions; j++)
-     std::cerr<<_inverse_cov_matrix[i][j]<<std::endl;
-
-   std::cerr<< "_inverseCovMatrix completed"<< std::endl;
+   //for(int i=0; i<dimensions; i++)
+	//for(int j=0; j<dimensions; j++)
+	 //std::cerr<<_inverse_cov_matrix[i][j]<<std::endl;
 
    _determinant_cov_matrix = getDeterminant(_cov_matrix);
 
-   std::cerr<< "_determinantCovMatrix completed";
-
-   std::cout<< "choleskyDecomposition initiated";
    _cholesky_C = choleskyDecomposition(_cov_matrix);
-   std::cout<< "choleskyDecomposition completed";
 
    if(rows != columns)
-           throwError("MultivariateNormal error: covariance matrix in " << data_filename << " is not a square matrix.");
+	   throwError("MultivariateNormal error: covariance matrix in " << data_filename << " is not a square matrix.");
+
+   // Creation BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool CDFprovided)
+   // number of discretizations in sigma/2 units; plus/minus six sigma
+
+   int numberValues=1;
+   std::vector< std::vector<double> > discretizations;
+   std::vector<double> alpha (_mu.size());
+   std::vector<double> beta (_mu.size());
+
+   for(int i=0; i<dimensions; i++){
+	   alpha.at(i) = 0.0;
+	   beta.at(i)  = 0.0;
+
+	   numberValues = numberValues * 25;
+
+	   std::vector<double> discretization_temp;
+	   double sigma = sqrt(_cov_matrix[i][i]);
+	   for(int n=0; n<25; n++){
+		   double disc_value = mu.at(i) - 6.0 * sigma + sigma * (double)n /2.0;
+		   discretization_temp.push_back(disc_value);
+	   }
+	   discretizations.push_back(discretization_temp);
+   }
+
+   std::vector< double > values (numberValues);
+   for(int i=0; i<numberValues; i++){
+	   std::vector<int> intCoordinates;
+	   base10tobaseN(i,25,intCoordinates);
+
+	   std::vector<double> pointCoordinates(dimensions);
+	   std::vector<int> intCoordinatesFormatted(dimensions);
+
+	   for(unsigned int j=0; j<dimensions; j++)
+		   intCoordinatesFormatted.at(j) = 0;
+	   for(unsigned int j=0; j<intCoordinates.size(); j++)
+		   intCoordinatesFormatted.at(j) = intCoordinates.at(j);
+
+	   for(unsigned int j=0; j<intCoordinates.size(); j++)
+		   pointCoordinates.at(j) = discretizations.at(j).at(intCoordinatesFormatted.at(j));
+
+	   values.at(i) = getPdf(pointCoordinates, _mu, _inverse_cov_matrix);
+   }
+   _cartesianDistribution = BasicMultiDimensionalCartesianSpline(discretizations,values,alpha,beta,false);
 }
 
+BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std::vector<double> mu){
+	  /**
+	   * This is the function that initializes the Multivariate normal distribution given:
+	   * - data_filename: it specifies the covariance matrix
+	   * - mu: the mean value vector
+	   */
+	BasicMultivariateNormal_init(data_filename, mu);
+}
+
+BasicMultivariateNormal::BasicMultivariateNormal(const char * data_filename, std::vector<double> mu){
+	  /**
+	   * This is the function that initializes the Multivariate normal distribution given:
+	   * - data_filename: it specifies the covariance matrix
+	   * - mu: the mean value vector
+	   */
+	BasicMultivariateNormal_init(std::string(data_filename) , mu);
+}
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu){
-
+  /**
+   * This is the function that initializes the Multivariate normal distribution given:
+   * - covMatrix: covariance matrix
+   * - mu: the mean value vector
+   */
   _mu = mu;
   _cov_matrix = covMatrix;
 
   computeInverse(_cov_matrix, _inverse_cov_matrix);
 
-  std::cerr<< "_inverseCovMatrix completed";
-
   _determinant_cov_matrix = getDeterminant(_cov_matrix);
-  std::cerr<< "_determinantCovMatrix completed";
 }
 
+double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix){
+  /**
+   * This function calculates the pdf values at x of a MVN distribution
+   */
+
+	double value = 0;
+
+   if(mu.size() == x.size()){
+	   int dimensions = mu.size();
+	   double expTerm=0;
+	   std::vector<double> tempVector (dimensions);
+	   for(int i=0; i<dimensions; i++){
+		   tempVector[i]=0;
+		   for(int j=0; j<dimensions; j++)
+			   tempVector[i] += inverse_cov_matrix[i][j]*(x[j]-mu[j]);
+		   expTerm += tempVector[i]*(x[i]-mu[i]);
+	   }
+	   value = 1/sqrt(_determinant_cov_matrix*pow(2*M_PI,dimensions))*exp(-0.5*expTerm);
+   }else
+	   throwError("MultivariateNormal PDF error: evaluation point dimensionality is not correct");
+   return value;
+}
+
+
 double BasicMultivariateNormal::Pdf(std::vector<double> x){
-        double value = 0;
-
-        if(_mu.size() == x.size()){
-   int dimensions = _mu.size();
-   double expTerm=0;
-   std::vector<double> tempVector (dimensions);
-   for(int i=0; i<dimensions; i++){
-    tempVector[i]=0;
-    for(int j=0; j<dimensions; j++)
-     tempVector[i] += _inverse_cov_matrix[i][j]*(x[j]-_mu[j]);
-    expTerm += tempVector[i]*(x[i]-_mu[i]);
-   }
-   value = 1/sqrt(_determinant_cov_matrix*pow(2*M_PI,dimensions))*exp(-0.5*expTerm);
-        }else
-         throwError("MultivariateNormal PDF error: evaluation point dimensionality is not correct");
-
-        return value;
+	  /**
+	   * This function calculates the pdf values at x of a MVN distribution
+	   */
+	return getPdf(x, _mu, _inverse_cov_matrix);
 }
 
 double BasicMultivariateNormal::Cdf(std::vector<double> x){
-// if(_mu.size() == x.size()){
-//  int dimensions = _mu.size();
-//  //boost::math::chi_squared chiDistribution(dimensions);
-//
-//  double mahalanobis=0.0;
-//  std::vector<double> tempVector (dimensions);
-//  for(int i=0; i<dimensions; i++)
-//   tempVector[i]=0.0;
-//
-//  for(int i=0; i<dimensions; i++){
-//   tempVector[i]=0.0;
-//   for(int j=0; j<dimensions; j++)
-//    tempVector[i] += _inverseCovMatrix[i][j]*(x[j]-_mu[j]);
-//   mahalanobis += tempVector[i]*(x[i]-_mu[i]);
-//  }
-//  value = boost::math::gamma_p<double,double>(dimensions/2,mahalanobis/2);
-// }else
-//  throwError("MultivariateNormal CDF error: evaluation point dimensionality is not correct");
-
- double alpha = 2.5;
- int Nmax = 50;
- double epsilon= 0.01;
- double delta;
-
- int dimensions = _cov_matrix.size();
- double Intsum=0;
- double Varsum=0;
- int N = 0;
- double error=10*epsilon;
- std::vector<double> d (dimensions);
- std::vector<double> e (dimensions);
- std::vector<double> f (dimensions);
-
- d[0] = 0.0;
- e[0] = phi(x[0]/_cholesky_C[0][0]);
- f[0] = e[0] - d[0];
-
- boost::random::mt19937 rng;
- rng.seed(time(NULL));
- double range = rng.max() - rng.min();
-
- while (error>epsilon or N<Nmax){
-  std::vector<double> w (dimensions-1);
-
-  for (int i=0; i<(dimensions-1); i++){
-   w.at(i) = (rng()-rng.min())/range;
-   //std::cout<< "value: " << w.at(i) << std::endl;
-  }
-
-  std::vector<double> y (dimensions-1);
-
-  for (int i=1; i<dimensions; i++){
-   double tempY = d.at(i-1) + w.at(i-1) * (e.at(i-1)-d.at(i-1));
-
-   y.at(i-1) = phi_inv(tempY);
-
-   double tempE = x.at(i);
-
-   for (int j=0; j<(i-1); j++)
-    tempE = tempE - _cholesky_C[i][j] * y.at(j) / _cholesky_C[i][i];
-
-   e.at(i)=phi(tempE);
-   d.at(i)=0.0;
-   f.at(i)=(e.at(i)-d.at(i))*f.at(i-1);
-  }
-
-  N++;
-  delta = (f.at(dimensions-1)-Intsum)/double(N);
-  Intsum = Intsum + delta;
-  Varsum = (double(N-2))*Varsum/double(N) + delta*delta;
-  error = alpha * sqrt(Varsum);
-
-  std::cout << "N " << N << " ; f: " << f.at(dimensions-1) << " ; delta: " << delta << " ; Intsum: " << Intsum << " ; Varsum: " << Varsum << "; error: " << error << std::endl;
- }
-
- return Intsum;
+	  /**
+	   * This function calculates the Cdf values at x of a MVN distribution
+	   */
+	return _cartesianDistribution.Cdf(x);
 }
+
+std::vector<double> BasicMultivariateNormal::InverseCdf(double F, double g){
+	  /**
+	   * This function calculates the inverse CDF values at F of a MVN distribution
+	   */
+	std::cout<<"BasicMultivariateNormal::InverseCdf"<< std::endl;
+	return _cartesianDistribution.InverseCdf(F,g);
+}
+
+double BasicMultivariateNormal::inverseMarginal(double F, int dimension){
+	  /**
+	   * This function calculates the inverse marginal distribution at F for a specific dimension of a MVN distribution
+	   */
+	return _cartesianDistribution.inverseMarginal(F,dimension);
+}
+
+int BasicMultivariateNormal::returnDimensionality(){
+	  /**
+	   * This function returns the dimensionality of a MVN distribution
+	   */
+	return _mu.size();
+}
+
+void BasicMultivariateNormal::updateRNGparameter(double tolerance, double initial_divisions){
+	  /**
+	   * This function updates the random number generator parameters of a MVN distribution
+	   */
+	return _cartesianDistribution.updateRNGparameter(tolerance,initial_divisions);
+}
+
+double BasicMultivariateNormal::Marginal(double x, int dimension){
+	  /**
+	   * This function calculates the marginal distribution at x for a specific dimension of a MVN distribution
+	   */
+	return _cartesianDistribution.Marginal(x,dimension);
+}
+
+//double BasicMultivariateNormal::Cdf_(std::vector<double> x){
+//// if(_mu.size() == x.size()){
+////  int dimensions = _mu.size();
+////  //boost::math::chi_squared chiDistribution(dimensions);
+////
+////  double mahalanobis=0.0;
+////  std::vector<double> tempVector (dimensions);
+////  for(int i=0; i<dimensions; i++)
+////   tempVector[i]=0.0;
+////
+////  for(int i=0; i<dimensions; i++){
+////   tempVector[i]=0.0;
+////   for(int j=0; j<dimensions; j++)
+////    tempVector[i] += _inverseCovMatrix[i][j]*(x[j]-_mu[j]);
+////   mahalanobis += tempVector[i]*(x[i]-_mu[i]);
+////  }
+////  value = boost::math::gamma_p<double,double>(dimensions/2,mahalanobis/2);
+//// }else
+////  throwError("MultivariateNormal CDF error: evaluation point dimensionality is not correct");
+//
+// double alpha = 2.5;
+// int Nmax = 50;
+// double epsilon= 0.01;
+// double delta;
+//
+// int dimensions = _cov_matrix.size();
+// double Intsum=0;
+// double Varsum=0;
+// int N = 0;
+// double error=10*epsilon;
+// std::vector<double> d (dimensions);
+// std::vector<double> e (dimensions);
+// std::vector<double> f (dimensions);
+//
+// d[0] = 0.0;
+// e[0] = phi(x[0]/_cholesky_C[0][0]);
+// f[0] = e[0] - d[0];
+//
+// boost::random::mt19937 rng;
+// rng.seed(time(NULL));
+// double range = rng.max() - rng.min();
+//
+// while (error>epsilon or N<Nmax){
+//  std::vector<double> w (dimensions-1);
+//
+//  for (int i=0; i<(dimensions-1); i++){
+//   w.at(i) = (rng()-rng.min())/range;
+//   //std::cout<< "value: " << w.at(i) << std::endl;
+//  }
+//
+//  std::vector<double> y (dimensions-1);
+//
+//  for (int i=1; i<dimensions; i++){
+//   double tempY = d.at(i-1) + w.at(i-1) * (e.at(i-1)-d.at(i-1));
+//
+//   y.at(i-1) = phi_inv(tempY);
+//
+//   double tempE = x.at(i);
+//
+//   for (int j=0; j<(i-1); j++)
+//    tempE = tempE - _cholesky_C[i][j] * y.at(j) / _cholesky_C[i][i];
+//
+//   e.at(i)=phi(tempE);
+//   d.at(i)=0.0;
+//   f.at(i)=(e.at(i)-d.at(i))*f.at(i-1);
+//  }
+//
+//  N++;
+//  delta = (f.at(dimensions-1)-Intsum)/double(N);
+//  Intsum = Intsum + delta;
+//  Varsum = (double(N-2))*Varsum/double(N) + delta*delta;
+//  error = alpha * sqrt(Varsum);
+//
+//  std::cout << "N " << N << " ; f: " << f.at(dimensions-1) << " ; delta: " << delta << " ; Intsum: " << Intsum << " ; Varsum: " << Varsum << "; error: " << error << std::endl;
+// }
+//
+// return Intsum;
+//}
 
 BasicMultivariateNormal::~BasicMultivariateNormal(){
 
@@ -344,7 +462,6 @@ double BasicMultivariateNormal::phi(double x){
 double BasicMultivariateNormal::phi_inv(double x){
  normal s;
  double value = quantile(s,x);
- //std::cout << "x: " << x << " ; value: " << value << std::endl;
  return value;
 }
 
@@ -444,8 +561,8 @@ std::vector<std::vector<double> > BasicMultivariateNormal::choleskyDecomposition
    m1[r*dimensions+c] = matrix[r][c];
 
  double *c1 = cholesky(m1, dimensions);
- std::cout << "choleskyDecomposition" << std::endl;
- show_matrix(c1,dimensions);
+ //std::cout << "choleskyDecomposition" << std::endl;
+ //show_matrix(c1,dimensions);
 
  for (int r=0; r<dimensions; r++){
   std::vector<double> temp;
@@ -453,13 +570,10 @@ std::vector<std::vector<double> > BasicMultivariateNormal::choleskyDecomposition
    temp.push_back(c1[r*dimensions+c]);
   cholesky_C.push_back(temp);
  }
-
  return cholesky_C;
 }
 
 void BasicMultivariateNormal::show_matrix(double *A, int n) {
- printf("Cholesky Decompostion");
- printf("\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++)
             printf("%2.5f ", A[i * n + j]);

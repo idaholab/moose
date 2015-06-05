@@ -12,24 +12,11 @@
 #include <vector>
 #include <map>
 //#include <MooseRandom.h>
-#include <boost/random/mersenne_twister.hpp>
 
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 class DistributionContainer;
 
-class RandomClass {
-  boost::random::mt19937 rng;
-  const double range;
-public:
-  RandomClass() : range(rng.max() - rng.min()) {};
-  void seed(unsigned int seed) {
-    rng.seed(seed);
-  }
-  double random() {
-    return (rng()-rng.min())/range;
-  }
-};
 
 DistributionContainer::DistributionContainer()
 {

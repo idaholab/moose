@@ -178,7 +178,7 @@ void import_matrix_from_txt_file(const std::string filename_X, std::vector <doub
         getline(file_X, line);
 
         cols =ReadNumbers( line, v );
-        std::cout << "cols:" << cols << std::endl;
+        //std::cout << "cols:" << cols << std::endl;
 
         for ( i=1;i<32767;i++){
             if ( getline(file_X, line) == 0 ) break;
@@ -186,7 +186,7 @@ void import_matrix_from_txt_file(const std::string filename_X, std::vector <doub
         }
 
         rows=i;
-        std::cout << "rows :" << rows << std::endl;
+        //std::cout << "rows :" << rows << std::endl;
         if(rows >32766) std::cout<< "N must be smaller than MAX_INT";
 
         file_X.close();
@@ -194,11 +194,11 @@ void import_matrix_from_txt_file(const std::string filename_X, std::vector <doub
     else{
      throwError("Failure to open file:" << filename_X);
     }
-    for (int i=0;i<rows;i++){
-        for (int j=0;j<cols;j++)
-          std::cout << v[i*cols+j] << "\t" ;
-        std::cout << std::endl;
-    }
+//    for (int i=0;i<rows;i++){
+//        for (int j=0;j<cols;j++)
+//          std::cout << v[i*cols+j] << "\t" ;
+//        std::cout << std::endl;
+//    }
 }
 
 

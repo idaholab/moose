@@ -24,7 +24,6 @@
 #include <string>
 #include <iostream>
 #include <stdio.h>
-#include <math.h>
 #include <cmath> // to use erfc error function
 #include <ctime> // for rand() and srand()
 #include <cstdio>
