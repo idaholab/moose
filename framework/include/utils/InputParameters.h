@@ -562,7 +562,7 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
 {
   mooseAssert(param, "Parameter is NULL");
 
-  if (_range_functions.find(short_name) == _range_functions.end())
+  if (_range_functions.find(short_name) == _range_functions.end() || !isParamValid(short_name))
     return;
 
   /**
@@ -663,7 +663,7 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
 {
   mooseAssert(param, "Parameter is NULL");
 
-  if (_range_functions.find(short_name) == _range_functions.end())
+  if (_range_functions.find(short_name) == _range_functions.end() || !isParamValid(short_name))
     return;
 
   // Parse the expression
