@@ -325,6 +325,20 @@ PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, 
   ierr = SNESGetNumberFunctionEvals(snes, &nfuncs);
   CHKERRABORT(problem.comm().get(),ierr);
 
+  // See if SNESSetFunctionDomainError() has been called.  We guard
+  // this for pre-3.0.0 versions of PETSc in other parts of the code,
+  // so we'll do the same here.
+#if !PETSC_VERSION_LESS_THAN(3,0,0)
+  PetscBool domainerror;
+  ierr = SNESGetFunctionDomainError(snes, &domainerror);
+  CHKERRABORT(problem.comm().get(),ierr);
+  if (domainerror)
+    {
+      *reason = SNES_DIVERGED_FUNCTION_DOMAIN;
+      return 0;
+    }
+#endif
+
   // Error message that will be set by the FEProblem.
   std::string msg;
 
