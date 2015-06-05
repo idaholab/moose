@@ -46,8 +46,13 @@ public:
   {
     MS_NO_CONTACT=0,
     MS_STICKING,
-    MS_SLIPPING
+    MS_SLIPPING,
+    MS_CONTACT // In contact, but unknown yet whether slipping or sticking.
   };
+
+  bool isCaptured() const { return _mech_status != MS_NO_CONTACT; }
+  void capture() { _mech_status = MS_CONTACT; }
+  void release() { _mech_status = MS_NO_CONTACT; }
 
   const Node * _node;
   const Elem * _elem;
@@ -74,10 +79,13 @@ public:
   Real _frictional_energy_old;
   RealVectorValue _contact_force;
   RealVectorValue _contact_force_old;
-  bool _update;
-  bool _penetrated_at_beginning_of_step;
+  Real _lagrange_multiplier;
+  unsigned int _locked_this_step;
   MECH_STATUS_ENUM _mech_status;
 };
 
+// Used for Restart
+template<> void dataStore(std::ostream & stream, PenetrationInfo * & pinfo, void * context);
+template<> void dataLoad(std::istream & stream, PenetrationInfo * & pinfo, void * context);
 
 #endif //PENETRATIONINFO_H
