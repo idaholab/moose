@@ -27,30 +27,40 @@ InputParameters validParams<ExceptionKernel>()
 ExceptionKernel::ExceptionKernel(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _when(static_cast<WhenType>((int) getParam<MooseEnum>("when"))),
-    _call_no(0)
+    _call_no(0),
+    _jac_call_no(0)
 {
 }
 
 Real
 ExceptionKernel::computeQpResidual()
 {
-  if (_when == INITIAL_CONDITION)
-    throw MooseException(1);
-  else if (_when == RESIDUAL)
-  {
-    if (_call_no == 1000)                 // 1000 calls to computeQpResidual is enough to get us into linear solve
-      throw MooseException(2);
-  }
+  // Increment the call number *before* we possibly throw an
+  // exception, so this function can continue to be used after that.
   _call_no++;
 
-  return 0.;
+  if (_when == INITIAL_CONDITION)
+    throw MooseException("MooseException thrown during initial condition computation");
+
+  // Make sure we have called computeQpResidual enough times to
+  // guarantee that we are in the middle of a linear solve, to verify
+  // that we can throw an exception at that point.
+  else if (_when == RESIDUAL && _call_no == 3240)
+    throw MooseException("MooseException thrown during residual calculation");
+
+  else
+    return 0;
 }
 
 Real
 ExceptionKernel::computeQpJacobian()
 {
-  if (_when == JACOBIAN)
-    throw MooseException(3);
+  // Increment the call number *before* we possibly throw an
+  // exception, so this function can continue to be used after that.
+  _jac_call_no++;
+
+  if (_when == JACOBIAN && _jac_call_no == 5000)
+    throw MooseException("MooseException thrown during Jacobian calculation");
 
   return 0.;
 }

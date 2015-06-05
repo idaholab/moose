@@ -40,17 +40,5 @@ TestSteady::~TestSteady()
 void
 TestSteady::execute()
 {
-  if (_test_type == "Exception")
-  {
-    try
-    {
-      Steady::execute();
-    }
-    catch (MooseException & e)
-    {
-      Moose::err << "Caught exception " << e << std::endl;
-    }
-  }
-
   Steady::execute();
 }

@@ -39,8 +39,12 @@ protected:
     JACOBIAN,
     INITIAL_CONDITION
   } _when;
-  /// Counter for the number of calls
+
+  /// Counter for the number of computeQpResidual calls
   unsigned int _call_no;
+
+  /// Counter for the number of computeQpJacobian calls
+  unsigned int _jac_call_no;
 };
 
 #endif /* EXCEPTIONKERNEL_H */
