@@ -97,7 +97,6 @@ protected:
   const Real _friction_coefficient;
   const Real _tension_release;
   bool _update_contact_set;
-  Real _time_last_called;
 
   NumericVector<Number> & _residual_copy;
 //  std::map<Point, PenetrationInfo *> _point_to_info;
