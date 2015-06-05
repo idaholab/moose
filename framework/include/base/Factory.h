@@ -15,6 +15,7 @@
 #ifndef FACTORY_H
 #define FACTORY_H
 
+#include <set>
 #include <vector>
 #include <time.h>
 
@@ -219,6 +220,11 @@ public:
    */
   registeredMooseObjectIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
 
+  /**
+   * Get a list of all constructed Moose Object types
+   */
+  std::vector<std::string> getConstructedObjects() const;
+
 protected:
 
   /**
@@ -259,6 +265,9 @@ protected:
 
   /// Object id count
   MooseObjectID _object_count;
+
+  /// Constructed Moose Object types
+  std::set<std::string> _constructed_types;
 };
 
 #endif /* FACTORY_H */
