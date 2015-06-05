@@ -31,6 +31,7 @@ InputParameters validParams<MultiAppUserObjectTransfer>()
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<UserObjectName>("user_object", "The UserObject you want to transfer values from.  Note: This might be a UserObject from your MultiApp's input file!");
+  params.addParam<bool>("check_bb", true, "True for checking the bounding box, false otherwise.");
 
   params.addParam<bool>("displaced_target_mesh", false, "Whether or not to use the displaced mesh for the target mesh.");
 
@@ -41,6 +42,7 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const std::string & name,
     MultiAppTransfer(name, parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _user_object_name(getParam<UserObjectName>("user_object")),
+    _check_bb(getParam<bool>("check_bb")),
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
 {
   // This transfer does not work with ParallelMesh
@@ -203,7 +205,7 @@ MultiAppUserObjectTransfer::execute()
             if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
             {
               // See if this node falls in this bounding box
-              if (app_box.contains_point(*node))
+              if (!_check_bb || app_box.contains_point(*node))
               {
                 dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
 
@@ -230,7 +232,7 @@ MultiAppUserObjectTransfer::execute()
               Point centroid = elem->centroid();
 
               // See if this elem falls in this bounding box
-              if (app_box.contains_point(centroid))
+              if (!_check_bb || app_box.contains_point(centroid))
               {
                 dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
 
