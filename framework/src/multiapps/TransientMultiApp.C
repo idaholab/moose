@@ -128,13 +128,6 @@ TransientMultiApp::initialSetup()
 bool
 TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
-  /*
-  if (_sub_cycling && !auto_advance)
-    mooseError("TransientMultiApp with sub_cycling=true is not compatible with auto_advance=false");
-
-  if (_catch_up && !auto_advance)
-    mooseError("TransientMultiApp with catch_up=true is not compatible with auto_advance=false");
-  */
   if (!_has_an_app)
     return true;
 
@@ -150,22 +143,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   int rank;
   int ierr;
   ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
-
-  /*
-  std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "<<std::endl;
-
-  if (_sub_cycling || _catch_up)
-  {
-    std::cout<<"********** "<<_first_step_this_timestep<<std::endl;
-
-    // Make a backup before we ever try to solve this timestep
-    if (_first_step_this_timestep)
-    {
-      for (unsigned int i=0; i<_my_num_apps; i++)
-        _backups[i] = _apps[i]->backup();
-    }
-  }
-  */
 
   for (unsigned int i=0; i<_my_num_apps; i++)
   {
@@ -301,7 +278,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           ex->endStep(target_time-app_time_offset);
         }
         else
+        {
           ex->endStep();
+        }
       }
 
       // If we were looking for a steady state, but didn't reach one, we still need to output one more time, regardless of interval
@@ -398,7 +377,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 void
 TransientMultiApp::advanceStep()
 {
-  if (!_auto_advance)
+  if (!_auto_advance && !_sub_cycling)
   {
     for (unsigned int i=0; i<_my_num_apps; i++)
     {

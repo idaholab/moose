@@ -318,12 +318,17 @@ RestartableDataIO::restoreBackup(Backup * backup)
 {
   std::cout<<"Restoring systems"<<std::endl;
 
+  unsigned int n_threads = libMesh::n_threads();
+  processor_id_type proc_id = _fe_problem.processor_id();
+
+  // Make sure we read from the beginning
+  backup->_system_data.seekg(0);
+  for (unsigned int tid=0; tid<n_threads; tid++)
+    backup->_restartable_data[tid].seekg(0);
+
   deserializeSystems(backup->_system_data);
 
   const RestartableDatas & restartable_datas = _fe_problem.getMooseApp().getRestartableData();
-
-  unsigned int n_threads = libMesh::n_threads();
-  processor_id_type proc_id = _fe_problem.processor_id();
 
   for (unsigned int tid=0; tid<n_threads; tid++)
   {
