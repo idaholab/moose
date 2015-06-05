@@ -23,7 +23,6 @@
 #include "ParallelUniqueId.h"
 #include "SubProblem.h"
 #include "MooseVariableScalar.h"
-#include "MooseException.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -403,8 +402,7 @@ public:
       _solution(*_sys.solution),
       _solution_old(*_sys.old_local_solution),
       _solution_older(*_sys.older_local_solution),
-      _dummy_vec(NULL),
-      _exception(0)
+      _dummy_vec(NULL)
   {
   }
 
@@ -591,42 +589,12 @@ protected:
   NumericVector<Number> * _dummy_vec;                     // to satisfy the interface
 
   std::vector<VarCopyInfo> _var_to_copy;
-
-  MooseException _exception;
 };
 
 
-// Parallel exception handling
+#define PARALLEL_TRY
 
-#define PARALLEL_TRY        try
-#ifdef LIBMESH_HAVE_TBB_API
-// with TBB, our exceptions got turned into tbb::captured_exception thus we need to reconvert them
-// however we loose the number thrown by user code
-#define PARALLEL_CATCH                                                                  \
-  catch (tbb::captured_exception & ex)                                                  \
-  {                                                                                     \
-    _exception = MooseException(1);                                                     \
-  }                                                                                     \
-  catch (MooseException & e)                                                            \
-  {                                                                                     \
-    _exception = e;                                                                     \
-  }                                                                                     \
-  {                                                                                     \
-    _communicator.max<MooseException>(_exception);                                      \
-    if (_exception > 0)                                                                 \
-      throw _exception;                                                                 \
-  }
-#else
-#define PARALLEL_CATCH                                                                  \
-  catch (MooseException & e)                                                            \
-  {                                                                                     \
-    _exception = e;                                                                     \
-  }                                                                                     \
-  {                                                                                     \
-    _communicator.max<MooseException>(_exception);                                      \
-    if (_exception > 0)                                                                 \
-      throw _exception;                                                                 \
-  }
-#endif
+#define PARALLEL_CATCH _fe_problem.checkExceptionAndStopSolve();
+
 
 #endif /* SYSTEMBASE_H */

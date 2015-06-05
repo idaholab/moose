@@ -147,6 +147,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
+    _has_exception(false),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
@@ -3102,6 +3103,47 @@ FEProblem::solve()
     _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
 }
 
+
+void
+FEProblem::setException(const std::string & message)
+{
+  _has_exception = true;
+  _exception_message = message;
+}
+
+
+void
+FEProblem::checkExceptionAndStopSolve()
+{
+  // See if any processor had an exception.  If it did, get back the
+  // processor that the exception occurred on.
+  unsigned int processor_id;
+
+  _communicator.maxloc(_has_exception, processor_id);
+
+  if (_has_exception)
+  {
+    _communicator.broadcast(_exception_message, processor_id);
+
+    // Print the message
+    if (_communicator.rank() == 0)
+      Moose::err << _exception_message << std::endl;
+
+    // Stop the solve -- this entails setting
+    // SNESSetFunctionDomainError() or directly inserting NaNs in the
+    // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
+    _nl.stopSolve();
+
+    // We've handled this exception, so we no longer have one.
+    _has_exception = false;
+
+    // Repropagate the exception, so it can be caught at a higher level, typically
+    // this is NonlinearSystem::computeResidual().
+    throw MooseException(_exception_message);
+  }
+}
+
+
 bool
 FEProblem::converged()
 {
@@ -3247,7 +3289,14 @@ FEProblem::computeResidualL2Norm()
 void
 FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
-  computeResidualType(soln, residual, _kernel_type);
+  try
+  {
+    computeResidualType(soln, residual, _kernel_type);
+  }
+  catch(MooseException & e)
+  {
+    // Blank on purpose because this error should have already been dealt with
+  }
 }
 
 void
@@ -3407,33 +3456,22 @@ void
 FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number>& lower, NumericVector<Number>& upper)
 {
   if (!_nl.hasVector("lower_bound") || !_nl.hasVector("upper_bound")) return;
-  try
+
+  NumericVector<Number> & _lower = _nl.getVector("lower_bound");
+  NumericVector<Number> & _upper = _nl.getVector("upper_bound");
+  _lower.swap(lower);
+  _upper.swap(upper);
+  unsigned int n_threads = libMesh::n_threads();
+  for (unsigned int i=0; i<n_threads; i++)
   {
-    NumericVector<Number> & _lower = _nl.getVector("lower_bound");
-    NumericVector<Number> & _upper = _nl.getVector("upper_bound");
-    _lower.swap(lower);
-    _upper.swap(upper);
-    unsigned int n_threads = libMesh::n_threads();
-    for (unsigned int i=0; i<n_threads; i++)
-    {
-      _materials[i].residualSetup();
-    }
-    _aux.residualSetup();
-    _aux.compute(EXEC_LINEAR);
-    _lower.swap(lower);
-    _upper.swap(upper);
+    _materials[i].residualSetup();
   }
-  catch (MooseException & e)
-  {
-    // tell solver to stop
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3,0,0)
-#else
-    PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_nl.sys().nonlinear_solver);
-    SNESSetFunctionDomainError(solver.snes());
-#endif
-#endif
-  }
+  _aux.residualSetup();
+  _aux.compute(EXEC_LINEAR);
+  _lower.swap(lower);
+  _upper.swap(upper);
+
+  checkExceptionAndStopSolve();
 }
 
 void

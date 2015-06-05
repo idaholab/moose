@@ -199,25 +199,17 @@ NonlinearSystem::init()
 void
 NonlinearSystem::solve()
 {
-  try
+  if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
-    if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
-    {
-      //Calculate the initial residual for use in the convergence criterion.  The initial
-      //residual
-      _computing_initial_residual = true;
-      _fe_problem.computeResidual(_sys, *_current_solution, *_sys.rhs);
-      _computing_initial_residual = false;
-      _sys.rhs->close();
-      _initial_residual_before_preset_bcs = _sys.rhs->l2_norm();
-      if (_compute_initial_residual_before_preset_bcs)
-        _console << "Initial residual before setting preset BCs: " << _initial_residual_before_preset_bcs << '\n';
-    }
-  }
-  catch (MooseException & e)
-  {
-    // re-throw the exception, we can do this since we did not enter the solve() call yet
-    throw;
+    // Calculate the initial residual for use in the convergence criterion.
+    _computing_initial_residual = true;
+    _fe_problem.computeResidual(_sys, *_current_solution, *_sys.rhs);
+    _computing_initial_residual = false;
+    _sys.rhs->close();
+    _initial_residual_before_preset_bcs = _sys.rhs->l2_norm();
+    if (_compute_initial_residual_before_preset_bcs)
+      _console << "Initial residual before setting preset BCs: "
+               << _initial_residual_before_preset_bcs << '\n';
   }
 
   // Clear the iteration counters
@@ -252,10 +244,6 @@ NonlinearSystem::solve()
     MatFDColoringDestroy(&_fdcoloring);
 #endif
 #endif
-
-  // we are back from the libMesh solve, so re-throw the exception if we got one;
-  if (_exception > 0)
-    throw _exception;
 }
 
 void
@@ -266,6 +254,34 @@ NonlinearSystem::restoreSolutions()
   // and update _current_solution
   _current_solution = _sys.current_local_solution.get();
 }
+
+
+void
+NonlinearSystem::stopSolve()
+{
+#ifdef LIBMESH_HAVE_PETSC
+#if PETSC_VERSION_LESS_THAN(3,0,0)
+#else
+  PetscNonlinearSolver<Real> & solver =
+    static_cast<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
+  SNESSetFunctionDomainError(solver.snes());
+#endif
+#endif
+
+  // Insert a NaN into the residual vector.  As of PETSc-3.6, this
+  // should make PETSc return DIVERGED_NANORINF the next time it does
+  // a reduction.  We'll write to the first local dof on every
+  // processor I guess?
+  _sys.rhs->set(_sys.rhs->first_local_index(), std::numeric_limits<Real>::quiet_NaN());
+  _sys.rhs->close();
+
+  // Clean up by getting other vectors into a valid state for a
+  // (possible) subsequent solve.  There may be more than just
+  // these...
+  residualVector(Moose::KT_TIME).close();
+  residualVector(Moose::KT_NONTIME).close();
+}
+
 
 void
 NonlinearSystem::initialSetup()
@@ -464,6 +480,9 @@ NonlinearSystem::setupSplitBasedPreconditioner()
 bool
 NonlinearSystem::converged()
 {
+  if (_fe_problem.hasException())
+    return false;
+
   return _sys.nonlinear_solver->converged;
 }
 
@@ -698,19 +717,9 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
   }
   catch (MooseException & e)
   {
-    residual.close();
-    if (!_computing_initial_residual)
-    {
-      // tell solver to stop
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3,0,0)
-#else
-      PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_sys.nonlinear_solver);
-      SNESSetFunctionDomainError(solver.snes());
-#endif
-#endif
-    }
-    throw;
+    // The buck stops here, we have already handled the exception by
+    // calling stopSolve(), it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
   }
 
   Moose::enableFPE(false);
@@ -1912,16 +1921,9 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   }
   catch (MooseException & e)
   {
-    jacobian.close();
-    // tell solver to stop
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3,0,0)
-#else
-    PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_sys.nonlinear_solver);
-    SNESSetFunctionDomainError(solver.snes());
-#endif
-#endif
-    throw;
+    // The buck stops here, we have already handled the exception by
+    // calling stopSolve(), it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
   }
 
   Moose::enableFPE(false);
