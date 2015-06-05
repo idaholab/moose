@@ -3875,9 +3875,6 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
                                      const Real initial_residual_before_preset_bcs,
                                      const Real div_threshold)
 {
-  if (_has_exception)
-    return MOOSE_DIVERGED_FNORM_NAN;
-
   NonlinearSystem & system = getNonlinearSystem();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
 
@@ -3948,9 +3945,6 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
                                   const Real /*dtol*/,
                                   const PetscInt maxits)
 {
-  if (_has_exception)
-    return MOOSE_DIVERGED_NULL;
-
   // We initialize the reason to something that basically means MOOSE
   // has not made a decision on convergence yet.
   MooseLinearConvergenceReason reason = MOOSE_LINEAR_ITERATING;
