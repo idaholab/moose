@@ -378,8 +378,6 @@ template<>
 inline void
 dataStore(std::ostream & stream, SystemBase & system_base, void * context)
 {
-  std::cout<<"Storing System!"<<std::endl;
-
   System & libmesh_system = system_base.system();
 
   NumericVector<Real> & solution = *(libmesh_system.solution.get());

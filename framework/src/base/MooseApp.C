@@ -464,8 +464,6 @@ MooseApp::backup()
 
   RestartableDataIO rdio(fe_problem);
 
-  std::cout<<"Creating backup!"<<std::endl;
-
   return rdio.createBackup();
 }
 
@@ -475,8 +473,6 @@ MooseApp::restore(Backup * backup)
   FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
 
   RestartableDataIO rdio(fe_problem);
-
-  std::cout<<"Restoring backup!"<<std::endl;
 
   return rdio.restoreBackup(backup);
 }

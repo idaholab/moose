@@ -347,8 +347,6 @@ template<>
 inline void
 dataStore(std::ostream & stream, std::vector<Backup> & backups, void * context)
 {
-  std::cout<<"Storing Backup Vector!"<<std::endl;
-
   MultiApp * multi_app = static_cast<MultiApp *>(context);
 
   if (!multi_app)

@@ -44,7 +44,6 @@ template<>
 inline void
 dataStore(std::ostream & stream, Backup * & backup, void * context)
 {
-  std::cout<<"Storing Backup!"<<std::endl;
 //  dataStore(stream, v._i, context);
 }
 

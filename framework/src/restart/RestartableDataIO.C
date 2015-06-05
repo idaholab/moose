@@ -296,8 +296,6 @@ RestartableDataIO::createBackup()
 {
   Backup * backup = new Backup;
 
-  std::cout<<"Backing up systems"<<std::endl;
-
   serializeSystems(backup->_system_data);
 
   const RestartableDatas & restartable_datas = _fe_problem.getMooseApp().getRestartableData();
@@ -316,8 +314,6 @@ RestartableDataIO::createBackup()
 void
 RestartableDataIO::restoreBackup(Backup * backup)
 {
-  std::cout<<"Restoring systems"<<std::endl;
-
   unsigned int n_threads = libMesh::n_threads();
   processor_id_type proc_id = _fe_problem.processor_id();
 
