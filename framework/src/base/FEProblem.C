@@ -96,6 +96,7 @@ InputParameters validParams<FEProblem>()
   params.addParam<bool>("solve", true, "Whether or not to actually solve the Nonlinear system.  This is handy in the case that all you want to do is execute AuxKernels, Transfers, etc. without actually solving anything");
   params.addParam<bool>("use_nonlinear", true, "Determines whether to use a Nonlinear vs a Eigenvalue system (Automatically determined based on executioner)");
   params.addParam<bool>("error_on_jacobian_nonzero_reallocation", false, "This causes PETSc to error if it had to reallocate memory in the Jacobian matrix due to not having enough nonzeros");
+  params.addParam<bool>("show_material_iterative_warning", true, "Flag for enabling/disabling iterative material property warning message"); // see DependencyResolverInterface
 
   return params;
 }
@@ -150,7 +151,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _has_exception(false),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
-    _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
+    _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
+    _current_block_id(std::vector<SubdomainID>(libMesh::n_threads(), Moose::INVALID_BLOCK_ID))
 {
 
 #ifdef LIBMESH_HAVE_PETSC
@@ -230,6 +232,11 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
+
+  // Set MaterialWarehouse warning flag
+  bool warn = getParam<bool>("show_material_iterative_warning");
+  for (unsigned int i = 0; i < n_threads; i++)
+    _materials[i].setIterativeWarning(warn);
 }
 
 FEProblem::~FEProblem()
@@ -1145,19 +1152,14 @@ FEProblem::clearDiracInfo()
 void
 FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
+  // Set current SubdomainID, this is needed by the material objects if Material::recomputeMaterial
+  _current_block_id[tid] = subdomain;
+
+  // Call subdomain setup on each material object
   if (_materials[tid].hasMaterials(subdomain))
-  {
-    // call subdomainSetup
     for (std::vector<Material *>::const_iterator it = _materials[tid].getMaterials(subdomain).begin(); it != _materials[tid].getMaterials(subdomain).end(); ++it)
       (*it)->subdomainSetup();
 
-    // Need to reinitialize the material properties in case subdomain setup for a Kernel needs it
-    // TODO: This means we are doing one more materialReinit than is necessary.  Need to refactor this to
-    // keep that from happening
-
-    // FIXME: cannot do this b/c variables are not computed => potential NaNs will pop-up
-//    reinitMaterials(subdomain, tid);
-  }
 
   // Call the subdomain methods of the output system, these are not threaded so only call it once
   if (tid == 0)
@@ -4013,7 +4015,7 @@ FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options,
       po.push_back(*it);
   }
 
-  MultiMooseEnum & pn           = parameters().set<MultiMooseEnum>("petsc_inames");                    // set because we need a writable reference
+  MultiMooseEnum & pn = parameters().set<MultiMooseEnum>("petsc_inames");         // set because we need a writable reference
   std::vector<std::string> & pv = parameters().set<std::vector<std::string> >("petsc_values");         // set because we need a writable reference
 
   if (petsc_options_inames.size() != petsc_options_values.size())

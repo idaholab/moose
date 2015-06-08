@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<GeneralUserObject>()
 {
   InputParameters params = validParams<UserObject>();
+  params += validParams<DependencyResolverInterface>();
   return params;
 }
 
@@ -25,7 +26,7 @@ GeneralUserObject::GeneralUserObject(const std::string & name, InputParameters p
     UserObject(name, parameters),
     MaterialPropertyInterface(parameters),
     TransientInterface(parameters, "general_user_objects"),
-    DependencyResolverInterface(),
+    DependencyResolverInterface(parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
     VectorPostprocessorInterface(parameters)

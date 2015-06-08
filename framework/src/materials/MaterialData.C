@@ -95,3 +95,40 @@ MaterialData::isSwapped()
 {
   return _swapped;
 }
+
+void
+MaterialData::registerMatPropWithMaterial(const std::string & name, Material * mat)
+{
+  unsigned int prop_id = getPropertyId(name);
+  _material_to_prop_id[mat].insert(prop_id);
+}
+
+void
+MaterialData::reinitMatPropWithMaterial(const std::vector<Material *> & mats)
+{
+  _active_prop_id_to_material.resize(_storage.numProperties(), NULL);
+
+  for (std::vector<Material *>::const_iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
+  {
+    const std::set<unsigned int> & ids = _material_to_prop_id[*mat_it];
+    for (std::set<unsigned int>::const_iterator id_it = ids.begin(); id_it != ids.end(); ++id_it)
+      _active_prop_id_to_material[*id_it] = *mat_it;
+  }
+}
+
+Material *
+MaterialData::getActiveMaterial(const unsigned int & prop_id)
+{
+  Material * mat = _active_prop_id_to_material[prop_id];
+  if (mat == NULL)
+  {
+    mooseError("The material property, '" << _storage.getPropertyName(prop_id) << "', is not defined on an active Material.");
+  }
+  return mat;
+}
+
+unsigned int
+MaterialData::getPropertyId(const std::string & prop_name)
+{
+  return _storage.getPropertyId(prop_name);
+}

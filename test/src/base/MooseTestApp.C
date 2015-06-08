@@ -126,21 +126,20 @@
 #include "DerivativeMaterialInterfaceTestProvider.h"
 #include "DerivativeMaterialInterfaceTestClient.h"
 #include "DefaultMatPropConsumerMaterial.h"
-
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
 #include "CoupledKernelGradBC.h"
 #include "PenaltyDirichletBC.h"
 #include "FunctionPenaltyDirichletBC.h"
-
 #include "ExplicitODE.h"
 #include "ImplicitODEx.h"
 #include "ImplicitODEy.h"
 #include "AlphaCED.h"
 #include "PostprocessorCED.h"
-
 #include "EqualValueNodalConstraint.h"
+#include "RecomputeMaterial.h"
+#include "NewtonMaterial.h"
 
 // user objects
 #include "MTUserObject.h"
@@ -375,8 +374,9 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(VecRangeCheckMaterial);
   registerMaterial(DerivativeMaterialInterfaceTestProvider);
   registerMaterial(DerivativeMaterialInterfaceTestClient);
-  registerKernel(DefaultMatPropConsumerMaterial);
-
+  registerMaterial(DefaultMatPropConsumerMaterial);
+  registerMaterial(RecomputeMaterial);
+  registerMaterial(NewtonMaterial);
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);

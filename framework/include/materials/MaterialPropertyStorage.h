@@ -169,7 +169,24 @@ public:
   std::vector<unsigned int> & statefulProps() { return _stateful_prop_id_to_prop_id; }
   std::map<unsigned int, std::string> statefulPropNames() { return _prop_names; }
 
+  /**
+   * Get the unique property id
+   * @param prop_name The name of the property
+   * @return The unique id of the property
+   */
   unsigned int getPropertyId (const std::string & prop_name);
+
+  /**
+   * The number of properties that exist
+   */
+  unsigned int numProperties(){ return _prop_names.size(); }
+
+  /**
+   * Get the name of the property given the id
+   * @param prop_id The unique property id
+   * @return The name of the property
+   */
+  const std::string & getPropertyName(const unsigned int & prop_id){ return _prop_names[prop_id]; }
 
 protected:
   // indexing: [element][side]->material_properties

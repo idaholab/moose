@@ -1,0 +1,27 @@
+[Tests]
+  [./newton_iteration]
+    # Test the ability to compute material properties in an iterative manner
+    type = 'Exodiff'
+    input = 'recompute.i'
+    exodiff = 'recompute_out.e'
+  [../]
+
+  [./dependency_warning]
+    # Test that the iteration warning is picked up in the dependency sort
+    type = 'RunApp'
+    input = 'recompute.i'
+    expect_out = 'The following items are marked as iterable'
+    prereq = newton_iteration
+    cli_args = 'Problem/show_material_iterative_warning=true'
+  [../]
+
+  [./debug]
+    # Test that the debugging messages are working
+    type = 'RunApp'
+    input = 'recompute.i'
+    expect_out = 'newton -> recompute_prop'
+    cli_args = 'Debug/show_material_dependency=true'
+    prereq = dependency_warning
+  [../]
+
+[]

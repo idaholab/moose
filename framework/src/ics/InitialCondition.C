@@ -25,6 +25,7 @@ InputParameters validParams<InitialCondition>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
+  params += validParams<DependencyResolverInterface>();
 
   params.addRequiredParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
 
@@ -40,7 +41,7 @@ InitialCondition::InitialCondition(const std::string & name, InputParameters par
     UserObjectInterface(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters),
-    DependencyResolverInterface(),
+    DependencyResolverInterface(parameters),
     Restartable(parameters, "InitialConditions"),
     ZeroInterface(parameters),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
