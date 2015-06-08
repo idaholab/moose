@@ -18,7 +18,9 @@ for INPUT in $@
 do
   if [ $n -ge 2 ]
   then
-    $1 -i $INPUT --list-constructed-objects | sed -e '1,/\*\*START OBJECT DATA\*\*/d' -e '/\*\*END OBJECT DATA\*\*/,$d' | grep '^'$OBJ'$' > /dev/null 2>&1
+    $APP -i $INPUT --list-constructed-objects \
+      | sed -n -e '/\*\*START OBJECT DATA\*\*/,/\*\*END OBJECT DATA\*\*/{//!p}' \
+      | grep '^'$OBJ'$' > /dev/null 2>&1
     if [ $? -eq 0 ]
     then
       echo $INPUT: $OBJ
