@@ -8,7 +8,7 @@ unsigned int Component::bc_ids = 0;
 template<>
 InputParameters validParams<Component>()
 {
-  InputParameters params = validParams<R7Object>();
+  InputParameters params = validParams<RELAP7Object>();
   params.addPrivateParam<Simulation *>("_sim");
   params.addPrivateParam<std::string>("built_by_action", "add_component");
 
@@ -84,7 +84,7 @@ Component::split(const std::string & rname)
 }
 
 Component::Component(const std::string & name, InputParameters parameters) :
-    R7Object(name, parameters),
+    RELAP7Object(name, parameters),
     _id(comp_id++),
     _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent") : NULL),
     _sim(*getParam<Simulation *>("_sim")),

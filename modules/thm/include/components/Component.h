@@ -2,7 +2,7 @@
 #define COMPONENT_H
 
 #include "Relap7App.h"
-#include "R7Object.h"
+#include "RELAP7Object.h"
 #include "ActionWarehouse.h"
 #include "FlowModel.h"
 #include "Simulation.h"
@@ -16,7 +16,7 @@ InputParameters validParams<Component>();
 /**
  * Base class for R7 components
  */
-class Component : public R7Object
+class Component : public RELAP7Object
 {
 public:
   struct ControlLogicNameEntry
