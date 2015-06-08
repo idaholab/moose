@@ -25,6 +25,11 @@ class MultiApp;
 class TransientMultiApp;
 
 /**
+ * Typedef for registered Object iterator
+ */
+typedef std::vector<MooseSharedPointer<MultiApp> >::const_iterator MultiAppIter;
+
+/**
  * Holds MultiApps and provides some services
  */
 class MultiAppWarehouse : public Warehouse<MultiApp>
@@ -63,6 +68,16 @@ public:
    * @return A pointer to the MultiApp
    */
   MultiApp * getMultiApp(const std::string & multi_app_name) const;
+
+  /**
+   * Get a const iterator for the first sub app
+   */
+  MultiAppIter subAppsBegin() const { return _all_ptrs.begin(); }
+
+  /**
+   * Get a const iterator for the first sub app
+   */
+  MultiAppIter subAppsEnd() const { return _all_ptrs.end(); }
 
   /**
    * Gets called when the output position has changed for the parent app.
