@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<RankTwoScalarAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Compute a scalar property of a RankTwoTensor");
   params.addRequiredParam<std::string>("rank_two_tensor", "The rank two material tensor name");
   MooseEnum scalar_options("VonMisesStress EquivalentPlasticStrain Hydrostatic L2norm");
   params.addParam<MooseEnum>("scalar_type", scalar_options, "Type of scalar output");

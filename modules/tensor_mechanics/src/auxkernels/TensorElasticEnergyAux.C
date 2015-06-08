@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<TensorElasticEnergyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Compute the local elastic energy");
   return params;
 }
 

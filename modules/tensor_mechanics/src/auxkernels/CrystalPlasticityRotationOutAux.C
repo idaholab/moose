@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<CrystalPlasticityRotationOutAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Access a component of a slip system vector property");
   params.addParam<FileName>("rotout_file_name", "rot.out", "Name of rotation output file: Default rot.out");
   params.addParam<unsigned int>("output_frequency", 1, "Frequency of Output");
   return params;

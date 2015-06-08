@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<RankTwoAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Access a component of a RankTwoTensor");
   params.addRequiredParam<std::string>("rank_two_tensor", "The rank two material tensor name");
   params.addRequiredRangeCheckedParam<unsigned int>("index_i", "index_i >= 0 & index_i <= 2", "The index i of ij for the tensor to output (0, 1, 2)");
   params.addRequiredRangeCheckedParam<unsigned int>("index_j", "index_j >= 0 & index_j <= 2", "The index j of ij for the tensor to output (0, 1, 2)");

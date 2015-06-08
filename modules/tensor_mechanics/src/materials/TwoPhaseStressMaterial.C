@@ -12,6 +12,7 @@ template<>
 InputParameters validParams<TwoPhaseStressMaterial>()
 {
   InputParameters params = validParams<Material>();
+  params.addClassDescription("Compute a global stress in a two phase model");
   params.addParam<std::string>("h", "h", "Switching Function Material that provides h(eta)");
   params.addRequiredParam<std::string>("base_A", "Base name for the Phase A strain.");
   params.addRequiredParam<std::string>("base_B", "Base name for the Phase B strain.");

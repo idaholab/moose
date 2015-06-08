@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<RankFourAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Access a component of a RankFourTensor");
 
   //add stuff here
   params.addRequiredParam<std::string>("rank_four_tensor", "The rank four material tensor name");
