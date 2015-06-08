@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<ImageMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
+  params.addClassDescription("Generated mesh with the aspect ratio of a given image stack");
 
   // Add parameters associated with file ranges
   addFileRangeParams(params);

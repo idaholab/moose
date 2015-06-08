@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<ACParsed>()
 {
   InputParameters params = DerivativeKernelInterface<ACBulk>::validParams();
+  params.addClassDescription("Allen-Cahn Kernel that uses a DerivativeMaterial Free Energy");
   params.addCoupledVar("args", "Vector of additional arguments to F");
   return params;
 }

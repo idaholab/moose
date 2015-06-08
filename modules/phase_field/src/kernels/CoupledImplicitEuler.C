@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<CoupledImplicitEuler>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Time derivative Kernel that acts on a coupled variable");
   params.addRequiredCoupledVar("v", "Coupled variable");
   return params;
 }

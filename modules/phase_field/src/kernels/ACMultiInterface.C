@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<ACMultiInterface>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Gradient energy Allen-Cahn Kernel with cross terms");
   params.addRequiredCoupledVar("etas", "All eta_i order parameters of the multiphase problem");
   params.addRequiredParam<std::vector<std::string> >("kappa_names", "The kappa used with the kernel");
   params.addParam<std::string>("mob_name", "L", "The mobility used with the kernel");

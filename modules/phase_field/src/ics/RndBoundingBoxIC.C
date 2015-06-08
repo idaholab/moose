@@ -11,6 +11,8 @@ template<>
 InputParameters validParams<RndBoundingBoxIC>()
 {
   InputParameters params = validParams<InitialCondition>();
+  params.addClassDescription("Random noise with different min/max inside/outside of a bounding box");
+
   params.addRequiredParam<Real>("x1", "The x coordinate of the lower left-hand corner of the box");
   params.addRequiredParam<Real>("y1", "The y coordinate of the lower left-hand corner of the box");
   params.addParam<Real>("z1", 0.0, "The z coordinate of the lower left-hand corner of the box");

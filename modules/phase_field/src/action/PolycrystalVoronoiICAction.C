@@ -26,15 +26,13 @@ template<>
 InputParameters validParams<PolycrystalVoronoiICAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Random Voronoi tesselation polycrystal action");
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<unsigned int>("grain_num", "number of grains to create, if it is going to greater than op_num");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
-
   params.addParam<bool>("cody_test", false, "Use set grain center points for Cody's test. Grain num MUST equal 10");
-
   params.addParam<bool>("columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
-
   return params;
 }
 

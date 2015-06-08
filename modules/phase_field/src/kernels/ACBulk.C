@@ -10,8 +10,8 @@ template<>
 InputParameters validParams<ACBulk>()
 {
   InputParameters params = validParams<KernelValue>();
+  params.addClassDescription("Allen-Cahn Kernel");
   params.addParam<std::string>("mob_name", "L", "The mobility used with the kernel");
-
   return params;
 }
 

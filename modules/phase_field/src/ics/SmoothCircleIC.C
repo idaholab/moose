@@ -10,12 +10,11 @@ template<>
 InputParameters validParams<SmoothCircleIC>()
 {
   InputParameters params = validParams<SmoothCircleBaseIC>();
+  params.addClassDescription("Circle with a smooth interface");
   params.addRequiredParam<Real>("x1", "The x coordinate of the circle center");
   params.addRequiredParam<Real>("y1", "The y coordinate of the circle center");
   params.addParam<Real>("z1", 0.0, "The z coordinate of the circle center");
-
   params.addRequiredParam<Real>("radius", "The radius of a circle");
-
   return params;
 }
 

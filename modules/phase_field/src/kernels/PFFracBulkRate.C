@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<PFFracBulkRate>()
 {
   InputParameters params = validParams<KernelValue>();
+  params.addClassDescription("Phase field based fracture model c residual for bulk free energy contribution");
   params.addRequiredParam<Real>("l","Interface width");
   params.addRequiredParam<Real>("visco","Viscosity parameter");
   params.addRequiredCoupledVar("beta", "Auxiliary variable");

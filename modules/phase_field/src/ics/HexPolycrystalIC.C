@@ -13,6 +13,7 @@ template<>
 InputParameters validParams<HexPolycrystalIC>()
 {
   InputParameters params = validParams<PolycrystalReducedIC>();
+  params.addClassDescription("Perturbed hexagonal polycrystal");
 
   params.addParam<Real>("x_offset", 0.5, "Specifies offset of hexagon grid in x-direction");
   params.addParam<Real>("perturbation_percent", 0.0, "The percent to randomly perturbate centers of grains relative to the size of the grain");

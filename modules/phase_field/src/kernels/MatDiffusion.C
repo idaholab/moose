@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<MatDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
+  params.addClassDescription("Diffusion equation Kernel that takes teh Diffusivity from a material property");
   params.addParam<std::string>("D_name", "D", "The name of the diffusivity");
   return params;
 }

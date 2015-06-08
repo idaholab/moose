@@ -10,10 +10,9 @@ template<>
 InputParameters validParams<SplitCHCRes>()
 {
   InputParameters params = validParams<SplitCHBase>();
-
+  params.addClassDescription("Split formulation Cahn-Hilliard Kernel");
   params.addRequiredCoupledVar("w", "chem poten");
   params.addRequiredParam<std::string>("kappa_name", "The kappa used with the kernel");
-
   return params;
 }
 
