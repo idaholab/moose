@@ -136,7 +136,7 @@ SyntaxTree::TreeNode::insertParams(const std::string &action, bool is_action_par
 std::string
 SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool &found)
 {
-  std::string type;
+  std::string doc;
   std::string long_name(getLongName());
   std::string name(_syntax_tree.isLongNames() ? long_name : _name);
   std::string out;
@@ -155,8 +155,8 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
   }
 
   // GlobalParamsAction is special - we need to just always print it out
-//  if (_name == "GlobalParamsAction")
-//    found = true;
+  // if (_name == "GlobalParamsAction")
+  //   found = true;
 
   std::string indent((depth+1)*2, ' ');
 
@@ -174,7 +174,12 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
     else
       local_search_string = search_string;
 
-    local_out += _syntax_tree.printBlockOpen(name, depth, type);
+    if (it != _moose_object_params.end())
+      doc = it->second->getClassDescription();
+    else
+      doc = "";
+
+    local_out += _syntax_tree.printBlockOpen(name, depth, doc);
 
     for (std::multimap<std::string, InputParameters *>::const_iterator a_it = _action_params.begin(); a_it != _action_params.end(); ++a_it)
       if (a_it->first != "EmptyAction")
