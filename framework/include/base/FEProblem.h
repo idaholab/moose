@@ -84,7 +84,7 @@ enum MooseLinearConvergenceReason
   // MOOSE_CONVERGED_CG_CONSTRAINED     =  6,
   // MOOSE_CONVERGED_STEP_LENGTH        =  7,
   // MOOSE_CONVERGED_HAPPY_BREAKDOWN    =  8,
-  MOOSE_DIVERGED_NULL                   = -2,
+  MOOSE_DIVERGED_NULL                   = -2
   // MOOSE_DIVERGED_ITS                 = -3,
   // MOOSE_DIVERGED_DTOL                = -4,
   // MOOSE_DIVERGED_BREAKDOWN           = -5,
