@@ -5,8 +5,8 @@
       % if block['description'] != '':
         <li><div><a><b>Description: ${block['description']}</b></a></div></li>
       % endif
-      % if block['type'] != None:
-        <li><div class="required"><a>type = ${block['type']}</a></div></li>
+      % if type in block and block['type'] != None:
+        <Li><div class="required"><a>type = ${block['type']}</a></div></li>
       % endif
 
       <%doc>Generate parameters, required ones are red</%doc>
@@ -44,8 +44,8 @@
   <link rel="stylesheet" href="static/themes/default/style.css" />
 
   <!-- based off of http://www.jstree.com/documentation/core -->
-  <script type="text/javascript" src="static/jquery.min.js"></script> 
-  <script type="text/javascript" src="static/jstree.min.js"></script> 
+  <script type="text/javascript" src="static/jquery.min.js"></script>
+  <script type="text/javascript" src="static/jstree.min.js"></script>
 </head>
 <body>
   <h1>${project} Input File Syntax</h1>
@@ -60,7 +60,7 @@
     <input type="button" value="Clear" id="clear"/>
     <span id="results"> </span>
   </form>
-  
+
   <div id="openclose">
     <a href='javascript:openAll();'>[expand all]</a>
     <a href='javascript:closeAll();'>[collapse all]</a>
@@ -74,7 +74,7 @@
     </ul>
   </div>
 
-  <script type="text/javascript" class="source"> 
+  <script type="text/javascript" class="source">
   $(function () {
     //initialize jstree
     $("#tree")
@@ -117,7 +117,7 @@
     $("#tree").jstree("close_all");
   }
 
-  </script> 
+  </script>
 
   <div id="footer">
     <hr/>
