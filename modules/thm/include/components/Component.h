@@ -1,7 +1,7 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include "Relap7App.h"
+#include "RELAP7App.h"
 #include "RELAP7Object.h"
 #include "ActionWarehouse.h"
 #include "FlowModel.h"

@@ -1,5 +1,5 @@
 #include "IntegrityCheckAction.h"
-#include "Relap7App.h"
+#include "RELAP7App.h"
 
 template<>
 InputParameters validParams<IntegrityCheckAction>()
@@ -21,9 +21,8 @@ IntegrityCheckAction::~IntegrityCheckAction()
 void
 IntegrityCheckAction::act()
 {
-  Relap7App & app = dynamic_cast<Relap7App &>(_app);
+  RELAP7App & app = dynamic_cast<RELAP7App &>(_app);
 
   if (!app.checkJacobian())
     _simulation.integrityCheck();
 }
-

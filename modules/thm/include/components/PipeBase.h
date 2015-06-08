@@ -4,7 +4,7 @@
 #include "libmesh/point.h"
 #include "libmesh/vector_value.h"
 
-#include "Relap7App.h"
+#include "RELAP7App.h"
 #include "GeometricalComponent.h"
 #include "FlowModel.h"
 
