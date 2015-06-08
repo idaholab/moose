@@ -345,24 +345,35 @@ protected:
 
 template<>
 inline void
-dataStore(std::ostream & stream, std::vector<Backup> & backups, void * context)
+dataStore(std::ostream & stream, std::vector<Backup *> & backups, void * context)
 {
   MultiApp * multi_app = static_cast<MultiApp *>(context);
+
+  multi_app->backup();
 
   if (!multi_app)
     mooseError("Error storing std::vector<Backup*>");
 
   for (unsigned int i=0; i<backups.size(); i++)
-    storeHelper(stream, backups[i], context);
-
-//  dataStore(stream, v._i, context);
+    dataStore(stream, backups[i], context);
 }
 
 template<>
 inline void
-dataLoad(std::istream & stream, std::vector<Backup> & backup, void * context)
+dataLoad(std::istream & stream, std::vector<Backup *> & backups, void * context)
 {
-//  dataLoad(stream, v._i, context);
+  MultiApp * multi_app = static_cast<MultiApp *>(context);
+
+  std::cout<<multi_app->name()<<" dataLoad(std::istream & stream, std::vector<Backup *> & backups, void * context)"<<std::endl;
+
+
+  if (!multi_app)
+    mooseError("Error loading std::vector<Backup*>");
+
+  for (unsigned int i=0; i<backups.size(); i++)
+    dataLoad(stream, backups[i], context);
+
+  multi_app->restore();
 }
 
 #endif // MULTIAPP_H

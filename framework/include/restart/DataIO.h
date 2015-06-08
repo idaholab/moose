@@ -225,6 +225,7 @@ template<> void dataStore(std::ostream & stream, const Elem * & e, void * contex
 template<> void dataStore(std::ostream & stream, const Node * & n, void * context);
 template<> void dataStore(std::ostream & stream, Elem * & e, void * context);
 template<> void dataStore(std::ostream & stream, Node * & n, void * context);
+template<> void dataStore(std::ostream & stream, std::stringstream & s, void * context);
 
 // global load functions
 
@@ -342,6 +343,7 @@ template<> void dataLoad(std::istream & stream, const Elem * & e, void * context
 template<> void dataLoad(std::istream & stream, const Node * & e, void * context);
 template<> void dataLoad(std::istream & stream, Elem * & e, void * context);
 template<> void dataLoad(std::istream & stream, Node * & e, void * context);
+template<> void dataLoad(std::istream & stream, std::stringstream & s, void * context);
 
 // Scalar Helper Function
 template<typename P>

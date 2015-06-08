@@ -218,9 +218,6 @@ template<>
 inline void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  libMesh::Mesh & mesh = *(static_cast<libMesh::Mesh *>(context));
-
-
   dataStore(stream, storage.props(), context);
   dataStore(stream, storage.propsOld(), context);
 
@@ -232,8 +229,6 @@ template<>
 inline void
 dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  libMesh::Mesh & mesh = *(static_cast<libMesh::Mesh *>(context));
-
   dataLoad(stream, storage.props(), context);
   dataLoad(stream, storage.propsOld(), context);
 

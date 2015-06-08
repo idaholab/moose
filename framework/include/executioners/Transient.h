@@ -277,10 +277,10 @@ protected:
    * Picard Related
    */
   /// Number of Picard iterations to perform
-  int  _picard_it;
+  int  & _picard_it;
   Real _picard_max_its;
-  bool _picard_converged;
-  Real _picard_initial_norm;
+  bool & _picard_converged;
+  Real & _picard_initial_norm;
   Real _picard_rel_tol;
   Real _picard_abs_tol;
 

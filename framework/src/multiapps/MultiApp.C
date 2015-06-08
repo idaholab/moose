@@ -235,6 +235,8 @@ MultiApp::backup()
 void
 MultiApp::restore()
 {
+  std::cout<<name()<<" MultiApp::restore()"<<std::endl;
+
   for (unsigned int i=0; i<_my_num_apps; i++)
     _apps[i]->restore(_backups[i]);
 }
@@ -562,6 +564,7 @@ MultiApp::MultiApp(const std::string & deprecated_name, InputParameters paramete
     _move_apps(getParam<std::vector<unsigned int> >("move_apps")),
     _move_positions(getParam<std::vector<Point> >("move_positions")),
     _move_happened(false),
-    _has_an_app(true)
+    _has_an_app(true),
+    _backups(declareRestartableDataWithContext<std::vector<Backup *> >("backups", this))
 {
 }

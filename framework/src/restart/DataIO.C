@@ -195,6 +195,18 @@ dataStore(std::ostream & stream, Node * & n, void * context)
   storeHelper(stream, id, context);
 }
 
+template<>
+void
+dataStore(std::ostream & stream, std::stringstream & s, void * context)
+{
+  const std::string & s_str = s.str();
+
+  size_t s_size = s_str.size();
+  stream.write((char *) &s_size, sizeof(s_size));
+
+  stream.write(s_str.c_str(), sizeof(char)*(s_str.size()));
+}
+
 // global load functions
 
 template<>
@@ -422,4 +434,19 @@ dataLoad(std::istream & stream, Node * & n, void * context)
     n = NULL;
     // Moose::out<<"NULL Node"<<std::endl;
   }
+}
+
+template<>
+void
+dataLoad(std::istream & stream, std::stringstream & s, void * context)
+{
+  size_t s_size = 0;
+
+  stream.read((char *) & s_size, sizeof(s_size));
+
+  char * s_s = new char[s_size];
+
+  stream.read(s_s, s_size);
+
+  s.write(s_s, s_size);
 }
