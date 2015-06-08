@@ -67,6 +67,9 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   // Increment object counter
   _object_count++;
 
+  // register type name as constructed
+  _constructed_types.insert(obj_name);
+
   // Actually call the function pointer.  You can do this in one line,
   // but it's a bit more obvious what's happening if you do it in two...
   buildPtr & func = it->second;
@@ -167,4 +170,13 @@ Factory::reportUnregisteredError(const std::string & obj_name) const
       << "in your input file or exported \"MOOSE_LIBRARY_PATH\".";
 
   mooseError(oss.str());
+}
+
+std::vector<std::string>
+Factory::getConstructedObjects() const
+{
+  std::vector<std::string> list;
+  for (std::set<std::string>::iterator i = _constructed_types.begin(); i != _constructed_types.end(); ++i)
+    list.push_back(*i);
+  return list;
 }

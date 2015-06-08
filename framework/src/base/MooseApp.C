@@ -56,6 +56,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<std::string>("yaml", "--yaml", "Dumps input file syntax in YAML format.");
   params.addCommandLineParam<bool>("syntax", "--syntax", false, "Dumps the associated Action syntax paths ONLY");
   params.addCommandLineParam<bool>("check_input", "--check-input", false, "Check the input file (i.e. requires -i <filename>) and quit.");
+  params.addCommandLineParam<bool>("list_constructed_objects", "--list-constructed-objects", false, "List all moose object type names constructed by the master app factory.");
 
   params.addCommandLineParam<unsigned int>("n_threads", "--n-threads=<n>", 1, "Runs the specified number of threads per process");
 
@@ -289,6 +290,21 @@ MooseApp::runInputFile()
 
   _action_warehouse.executeAllActions();
   _executioner = _action_warehouse.executioner();
+
+  if (getParam<bool>("list_constructed_objects"))
+  {
+    // TODO: ask multiapps for their constructed objects
+    std::vector<std::string> obj_list = _factory.getConstructedObjects();
+    Moose::out << "**START OBJECT DATA**\n";
+    for (unsigned int i = 0; i < obj_list.size(); ++i)
+    {
+      Moose::out << obj_list[i] << "\n";
+    }
+    Moose::out << "**END OBJECT DATA**\n" << std::endl;
+    _ready_to_exit = true;
+    return;
+  }
+
 
   bool error_unused = getParam<bool>("error_unused") || _enable_unused_check == ERROR_UNUSED;
   bool warn_unused = getParam<bool>("warn_unused") || _enable_unused_check == WARN_UNUSED;
