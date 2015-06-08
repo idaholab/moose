@@ -10,22 +10,16 @@
 template<>
 InputParameters validParams<ComputeElasticityTensor>()
 {
-  InputParameters params = validParams<ComputeElasticityTensorBase>();
+  InputParameters params = validParams<ComputeRotatedElasticityTensorBase>();
   params.addClassDescription("Compute an elasticity tensor.");
   params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addParam<MooseEnum>("fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
-  params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
-  params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
-  params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3");
   return params;
 }
 
 ComputeElasticityTensor::ComputeElasticityTensor(const std::string & name,
                                                  InputParameters parameters) :
-    ComputeElasticityTensorBase(name, parameters),
-    _Euler_angles(getParam<Real>("euler_angle_1"),
-                  getParam<Real>("euler_angle_2"),
-                  getParam<Real>("euler_angle_3")),
+    ComputeRotatedElasticityTensorBase(name, parameters),
     _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
 {
   // Define a rotation according to Euler angle parameters
