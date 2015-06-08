@@ -10,7 +10,7 @@
 #include "ComputeElasticityTensorBase.h"
 
 /**
- * ComputeRotatedElasticityTensorBase defines an elasticity tensor material object with a given base name.
+ * ComputeRotatedElasticityTensorBase is an intermediate base class that rotates an elasticity tensor based on euler angles.
  */
 class ComputeRotatedElasticityTensorBase : public ComputeElasticityTensorBase
 {

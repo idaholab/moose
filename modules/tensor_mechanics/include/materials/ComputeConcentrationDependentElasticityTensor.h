@@ -10,7 +10,7 @@
 #include "ComputeRotatedElasticityTensorBase.h"
 
 /**
- * ComputeElasticityTensor defines an elasticity tensor material object with a given base name.
+ * ComputeElasticityTensor defines an elasticity tensor material object as a function of concentration field.
  */
 class ComputeConcentrationDependentElasticityTensor : public ComputeRotatedElasticityTensorBase
 {
@@ -20,12 +20,15 @@ public:
 protected:
   virtual void computeQpElasticityTensor();
 
-  // Individual material information
+  /// Elasticity tensor for phase with zero concentration.
   ElasticityTensorR4 _Cijkl0;
+  /// Elasticity tensor for phase with concentration 1.
   ElasticityTensorR4 _Cijkl1;
+  /// Concentration variable.
   VariableValue & _c;
   VariableName _c_name;
 
+  /// Derivative of elasticity tensor with respect to concentration.
   MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
 };
 

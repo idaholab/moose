@@ -42,5 +42,6 @@ ComputeConcentrationDependentElasticityTensor::computeQpElasticityTensor()
 {
   // Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl0 + (_Cijkl1 - _Cijkl0)*_c[_qp];
+  // Define derivative of elasticity tensor with respect to concentration.
   _delasticity_tensor_dc[_qp] = (_Cijkl1 - _Cijkl0);
 }
