@@ -7,20 +7,18 @@
 #ifndef COMPUTEELASTICITYTENSOR_H
 #define COMPUTEELASTICITYTENSOR_H
 
-#include "ComputeElasticityTensorBase.h"
+#include "ComputeRotatedElasticityTensorBase.h"
 
 /**
  * ComputeElasticityTensor defines an elasticity tensor material object with a given base name.
  */
-class ComputeElasticityTensor : public ComputeElasticityTensorBase
+class ComputeElasticityTensor : public ComputeRotatedElasticityTensorBase
 {
 public:
   ComputeElasticityTensor(const std:: string & name, InputParameters parameters);
 
 protected:
   virtual void computeQpElasticityTensor();
-
-  RealVectorValue _Euler_angles;
 
   /// Individual material information
   ElasticityTensorR4 _Cijkl;
