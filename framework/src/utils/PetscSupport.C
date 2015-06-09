@@ -325,10 +325,10 @@ PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, 
   ierr = SNESGetNumberFunctionEvals(snes, &nfuncs);
   CHKERRABORT(problem.comm().get(),ierr);
 
-  // See if SNESSetFunctionDomainError() has been called.  We guard
-  // this for pre-3.0.0 versions of PETSc in other parts of the code,
-  // so we'll do the same here.
-#if !PETSC_VERSION_LESS_THAN(3,0,0)
+  // See if SNESSetFunctionDomainError() has been called.  Note:
+  // SNESSetFunctionDomainError() and SNESGetFunctionDomainError()
+  // were added in different releases of PETSc.
+#if !PETSC_VERSION_LESS_THAN(3,3,0)
   PetscBool domainerror;
   ierr = SNESGetFunctionDomainError(snes, &domainerror);
   CHKERRABORT(problem.comm().get(),ierr);
