@@ -44,4 +44,10 @@
     rel_err = 1.0E-5
   [../]
 
+  [./s05]
+    type = 'CSVDiff'
+    input = 's05.i'
+    csvdiff = 's05.csv'
+    rel_err = 1.0E-5
+  [../]
 []
