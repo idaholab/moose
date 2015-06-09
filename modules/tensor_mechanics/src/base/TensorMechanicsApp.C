@@ -44,6 +44,7 @@
 #include "ComputeEigenstrain.h"
 #include "ComputeVariableEigenstrain.h"
 #include "ComputeConcentrationDependentElasticityTensor.h"
+#include "FiniteStrainHyperElasticViscoPlastic.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -60,6 +61,9 @@
 #include "TensorMechanicsHardeningCutExponential.h"
 #include "TensorMechanicsHardeningCubic.h"
 #include "ElementPropertyReadFile.h"
+#include "HyperElasticStress.h"
+#include "FlowRateModel.h"
+#include "RambergOsgoodHardening.h"
 
 #include "RankTwoAux.h"
 #include "RealTensorValueAux.h"
@@ -143,6 +147,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeEigenstrain);
   registerMaterial(ComputeVariableEigenstrain);
   registerMaterial(ComputeConcentrationDependentElasticityTensor);
+  registerMaterial(FiniteStrainHyperElasticViscoPlastic);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
@@ -159,6 +164,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsHardeningCutExponential);
   registerUserObject(TensorMechanicsHardeningCubic);
   registerUserObject(ElementPropertyReadFile);
+  registerUserObject(HyperElasticStress);
+  registerUserObject(FlowRateModel);
+  registerUserObject(RambergOsgoodHardening);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);
