@@ -4,6 +4,7 @@
     input = 'pbp_test.i'
     exodiff = 'out.e'
     max_parallel = 1
+    deleted = '#5153'
   [../]
 
   [./pbp_adapt_test]

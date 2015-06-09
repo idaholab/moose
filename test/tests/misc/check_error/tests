@@ -1,4 +1,10 @@
 [Tests]
+  [./steady_no_converge]
+    type = 'RunApp'
+    input = 'steady_no_converge.i'
+    expect_out = 'Aborting as solve did not converge'
+  [../]
+
   [./range_check_param]
     type = 'RunException'
     input = 'range_check_param.i'

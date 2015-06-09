@@ -99,6 +99,12 @@ Steady::execute()
     _problem.solve();
     postSolve();
 
+    if (!_problem.converged())
+    {
+      _console << "Aborting as solve did not converge\n";
+      break;
+    }
+
     _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
     _problem.onTimestepEnd();
 
