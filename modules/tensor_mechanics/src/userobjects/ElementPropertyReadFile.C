@@ -15,13 +15,9 @@ InputParameters validParams<ElementPropertyReadFile>()
   params.addParam<std::string>("prop_file_name", "", "Name of the property file name");
   params.addRequiredParam<unsigned int>("nprop", "Number of tabulated property values");
   params.addParam<unsigned int>("ngrain", 0, "Number of grains");
-  MooseEnum read_options("element grain none", "none");
-  params.addParam<MooseEnum>("read_type", read_options, "Type of property distribution: element:element by element property variation; grain:voronoi grain structure");
+  params.addParam<MooseEnum>("read_type", MooseEnum("element grain none", "none"), "Type of property distribution: element:element by element property variation; grain:voronoi grain structure");
   params.addParam<unsigned int>("rand_seed", 2000, "random seed");
-  MooseEnum rve_options("periodic none","none");
-  params.addParam<MooseEnum>("rve_type",rve_options , "Periodic or non-periodic grain distribution: Default is non-periodic");
-  MooseEnum rve_options("periodic none", "none");
-  params.addParam<MooseEnum>("rve_type", rve_options, "Periodic or non-periodic grain distribution: Default is non-periodic");
+  params.addParam<MooseEnum>("rve_type", MooseEnum("periodic none", "none"), "Periodic or non-periodic grain distribution: Default is non-periodic");
   return params;
 }
 
