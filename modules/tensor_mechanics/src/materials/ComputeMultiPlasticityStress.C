@@ -39,7 +39,7 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const std::string & n
 
     _epp_tol(getParam<Real>("ep_plastic_tolerance")),
 
-    _deactivation_scheme(getParam<MooseEnum>("deactivation_scheme")),
+    _deactivation_scheme((DeactivationSchemeEnum)(int)getParam<MooseEnum>("deactivation_scheme")),
 
     _n_supplied(parameters.isParamValid("transverse_direction")),
     _n_input(_n_supplied ? getParam<RealVectorValue>("transverse_direction") : RealVectorValue()),
@@ -77,7 +77,7 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const std::string & n
   }
 
   if (_num_surfaces == 1)
-    _deactivation_scheme = "safe";
+    _deactivation_scheme = safe;
 }
 
 
@@ -357,7 +357,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
   // Kuhn-Tucker conditions must also be satisfied
   // These are:
   // pm>=0, which may not hold upon exit of the NR loops
-  //     due to _deactivation_scheme!="optimized";
+  //     due to _deactivation_scheme!=optimized;
   // pm*f=0 (up to tolerances), which may not hold upon exit
   //     of the NR loops if a constraint got deactivated
   //     due to linear dependence, and then f<0, and its pm>0
@@ -411,33 +411,39 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
   bool single_step_success = true;
 
   // deactivation scheme
-  MooseEnum deact_scheme = _deactivation_scheme;
+  DeactivationSchemeEnum deact_scheme = _deactivation_scheme;
 
   // For complicated deactivation schemes we have to record the initial active set
   std::vector<bool> initial_act;
   initial_act.resize(_num_surfaces);
-  if (_deactivation_scheme == "optimized_to_safe" || _deactivation_scheme == "optimized_to_safe_to_dumb" || _deactivation_scheme == "optimized_to_dumb")
+  if (_deactivation_scheme == optimized_to_safe ||
+      _deactivation_scheme == optimized_to_safe_to_dumb ||
+      _deactivation_scheme == optimized_to_dumb)
   {
     // if "optimized" fails we can change the deactivation scheme to "safe", etc
-    deact_scheme = "optimized";
+    deact_scheme = optimized;
     for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
       initial_act[surface] = act[surface];
   }
 
-  if (_deactivation_scheme == "safe_to_dumb")
-    deact_scheme = "safe";
+  if (_deactivation_scheme == safe_to_dumb)
+    deact_scheme = safe;
 
   // For "dumb" deactivation, the active set takes all combinations until a solution is found
   int dumb_iteration = 0;
   std::vector<unsigned int> dumb_order;
-  if (_deactivation_scheme == "dumb" || (_deactivation_scheme == "optimized_to_safe_to_dumb" && can_revert_to_dumb) || (_deactivation_scheme == "safe_to_dumb" && can_revert_to_dumb) || (_deactivation_scheme == "optimized_to_dumb" && can_revert_to_dumb))
+
+  if (    _deactivation_scheme == dumb
+      || (_deactivation_scheme == optimized_to_safe_to_dumb && can_revert_to_dumb)
+      || (_deactivation_scheme == safe_to_dumb && can_revert_to_dumb)
+      || (_deactivation_scheme == optimized_to_dumb && can_revert_to_dumb))
     buildDumbOrder(stress, intnl, dumb_order);
-  if (_deactivation_scheme == "dumb")
+
+  if (_deactivation_scheme == dumb)
   {
     incrementDumb(dumb_iteration, dumb_order, act);
     yieldFunction(stress, intnl, act, f);
   }
-
 
   // To avoid any re-trials of "act" combinations that
   // we've already tried and rejected, i record the
@@ -473,7 +479,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
 
     iter += local_iter;
 
-    // 'act' might have changed due to using deact_scheme = "optimized", so
+    // 'act' might have changed due to using deact_scheme = optimized, so
     actives_tried.insert(activeCombinationNumber(act));
 
 
@@ -487,7 +493,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
       bool change_scheme = false;
       bool increment_dumb = false;
       change_scheme = canChangeScheme(deact_scheme, can_revert_to_dumb);
-      if (!change_scheme && deact_scheme == "dumb")
+      if (!change_scheme && deact_scheme == dumb)
         increment_dumb = canIncrementDumb(dumb_iteration);
 
       still_finding_solution = (change_scheme || increment_dumb);
@@ -512,7 +518,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
       kt_good = checkKuhnTucker(f, pm, act);
       if (!kt_good)
       {
-        if (deact_scheme != "dumb")
+        if (deact_scheme != dumb)
         {
           applyKuhnTucker(f, pm, act);
           still_finding_solution = (actives_tried.find(activeCombinationNumber(act)) == actives_tried.end()); // true if we haven't tried this active set before
@@ -561,7 +567,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
         // Not admissible.
         // We can try adding constraints back in
         // We can try changing the deactivation scheme
-        // Or, if deact_scheme == "dumb", just increase dumb_iteration
+        // Or, if deact_scheme == dumb, just increase dumb_iteration
         bool add_constraints = canAddConstraints(act, all_f);
         if (add_constraints)
         {
@@ -586,7 +592,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
 
         if (!add_constraints)
           change_scheme = canChangeScheme(deact_scheme, can_revert_to_dumb);
-        if (!add_constraints && !change_scheme && deact_scheme == "dumb")
+        if (!add_constraints && !change_scheme && deact_scheme == dumb)
           increment_dumb = canIncrementDumb(dumb_iteration);
 
         still_finding_solution = (add_constraints || change_scheme || increment_dumb);
@@ -673,33 +679,34 @@ ComputeMultiPlasticityStress::canAddConstraints(const std::vector<bool> & act, c
 }
 
 bool
-ComputeMultiPlasticityStress::canChangeScheme(const MooseEnum & current_deactivation_scheme, const bool & can_revert_to_dumb)
+ComputeMultiPlasticityStress::canChangeScheme(DeactivationSchemeEnum current_deactivation_scheme, const bool & can_revert_to_dumb)
 {
-  if (current_deactivation_scheme == "optimized" && _deactivation_scheme == "optimized_to_safe")
+  if (current_deactivation_scheme == optimized && _deactivation_scheme == optimized_to_safe)
     return true;
-  if (current_deactivation_scheme == "optimized" && _deactivation_scheme == "optimized_to_safe_to_dumb")
+  if (current_deactivation_scheme == optimized && _deactivation_scheme == optimized_to_safe_to_dumb)
     return true;
-  if (current_deactivation_scheme == "safe" && _deactivation_scheme == "safe_to_dumb" && can_revert_to_dumb)
+  if (current_deactivation_scheme == safe && _deactivation_scheme == safe_to_dumb && can_revert_to_dumb)
     return true;
-  if (current_deactivation_scheme == "safe" && _deactivation_scheme == "optimized_to_safe_to_dumb" && can_revert_to_dumb)
+  if (current_deactivation_scheme == safe && _deactivation_scheme == optimized_to_safe_to_dumb && can_revert_to_dumb)
     return true;
-  if (current_deactivation_scheme == "optimized" && _deactivation_scheme == "optimized_to_dumb" && can_revert_to_dumb)
+  if (current_deactivation_scheme == optimized && _deactivation_scheme == optimized_to_dumb && can_revert_to_dumb)
     return true;
   return false;
 }
 
 void
-ComputeMultiPlasticityStress::changeScheme(const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, MooseEnum & current_deactivation_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> & dumb_order)
+ComputeMultiPlasticityStress::changeScheme(const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, DeactivationSchemeEnum current_deactivation_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> & dumb_order)
 {
-  if (current_deactivation_scheme == "optimized" && (_deactivation_scheme == "optimized_to_safe" || _deactivation_scheme == "optimized_to_safe_to_dumb"))
+  if (current_deactivation_scheme == optimized && (_deactivation_scheme == optimized_to_safe || _deactivation_scheme == optimized_to_safe_to_dumb))
   {
-    current_deactivation_scheme = "safe";
+    current_deactivation_scheme = safe;
     for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
       act[surface] = initial_act[surface];
   }
-  else if ((current_deactivation_scheme == "safe" && (_deactivation_scheme == "optimized_to_safe_to_dumb" || _deactivation_scheme == "safe_to_dumb") && can_revert_to_dumb) || (current_deactivation_scheme == "optimized" && _deactivation_scheme == "optimized_to_dumb" && can_revert_to_dumb))
+  else if (   (current_deactivation_scheme == safe && (_deactivation_scheme == optimized_to_safe_to_dumb || _deactivation_scheme == safe_to_dumb) && can_revert_to_dumb)
+           || (current_deactivation_scheme == optimized && _deactivation_scheme == optimized_to_dumb && can_revert_to_dumb))
   {
-    current_deactivation_scheme = "dumb";
+    current_deactivation_scheme = dumb;
     dumb_iteration = 0;
     buildDumbOrder(initial_stress, intnl_old, dumb_order);
     incrementDumb(dumb_iteration, dumb_order, act);
@@ -707,7 +714,7 @@ ComputeMultiPlasticityStress::changeScheme(const std::vector<bool> & initial_act
 }
 
 bool
-ComputeMultiPlasticityStress::singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, const MooseEnum & deactivation_scheme, bool & linesearch_needed, bool & ld_encountered)
+ComputeMultiPlasticityStress::singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, DeactivationSchemeEnum deactivation_scheme, bool & linesearch_needed, bool & ld_encountered)
 {
   bool successful_step;  // return value
 
@@ -718,7 +725,7 @@ ComputeMultiPlasticityStress::singleStep(Real & nr_res2, RankTwoTensor & stress,
   RankTwoTensor delta_dp_before_step;
 
 
-  if (deactivation_scheme == "optimized")
+  if (deactivation_scheme == optimized)
   {
     // we potentially use the "before_step" quantities, so record them here
     stress_before_step = stress;
@@ -751,12 +758,9 @@ ComputeMultiPlasticityStress::singleStep(Real & nr_res2, RankTwoTensor & stress,
    * re-done starting from the _before_step quantities recorded above
    */
   bool constraints_changing = true;
-
   bool reinstated_actives;
-
   while (constraints_changing)
   {
-
     // calculate dstress, dpm and dintnl for one full Newton-Raphson step
     nrStep(stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, active, deact_ld);
 
@@ -780,7 +784,7 @@ ComputeMultiPlasticityStress::singleStep(Real & nr_res2, RankTwoTensor & stress,
 
     // See if any active constraints need to be removed, and the step re-done
     constraints_changing = false;
-    if (deactivation_scheme == "optimized")
+    if (deactivation_scheme == optimized)
     {
       for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
         if (active[surface] && pm[surface] < 0.0)

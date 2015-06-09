@@ -51,8 +51,11 @@ protected:
   /// Tolerance on the plastic strain increment ("direction") constraint
   Real _epp_tol;
 
+  /// @{
   /// When in the Newton-Raphson to deactivate constraints
-  MooseEnum _deactivation_scheme;
+  enum DeactivationSchemeEnum {optimized, safe, dumb, optimized_to_safe, safe_to_dumb, optimized_to_safe_to_dumb, optimized_to_dumb};
+  DeactivationSchemeEnum _deactivation_scheme;
+  /// }@
 
   /// User supplied the transverse direction vector
   bool _n_supplied;
@@ -222,7 +225,7 @@ protected:
    * @param ld_encountered (output) True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
    * @return true if the step was successful, ie, if the linesearch was successful and the number of constraints wasn't reduced to zero via deactivation
    */
-  virtual bool singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, const MooseEnum & deactivation_scheme, bool & linesearch_needed, bool & ld_encountered);
+  virtual bool singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, DeactivationSchemeEnum deactivation_scheme, bool & linesearch_needed, bool & ld_encountered);
 
   /**
    * Checks whether the yield functions are in the admissible region
@@ -321,13 +324,13 @@ protected:
    */
   virtual bool plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added);
 
-  //  bool checkAndModifyConstraints(const bool & nr_exit_condition, const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, const std::vector<Real> & f, MooseEnum & deact_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> dumb_order, bool & die);
+  //  bool checkAndModifyConstraints(const bool & nr_exit_condition, const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, const std::vector<Real> & f, DeactivationSchemeEnum deact_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> dumb_order, bool & die);
 
-  bool canChangeScheme(const MooseEnum & current_deactivation_scheme, const bool & can_revert_to_dumb);
+  bool canChangeScheme(DeactivationSchemeEnum current_deactivation_scheme, const bool & can_revert_to_dumb);
 
   bool canIncrementDumb(const int & dumb_iteration);
 
-  void changeScheme(const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, MooseEnum & current_deactivation_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> & dumb_order);
+  void changeScheme(const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, DeactivationSchemeEnum current_deactivation_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> & dumb_order);
 
   bool canAddConstraints(const std::vector<bool> & act, const std::vector<Real> & all_f);
 
