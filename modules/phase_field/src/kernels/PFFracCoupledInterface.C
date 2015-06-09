@@ -10,9 +10,8 @@ template<>
 InputParameters validParams<PFFracCoupledInterface>()
 {
   InputParameters params = validParams<KernelGrad>();
-  params.addClassDescription("Phase-field fracture residual for beta");
-  params.addRequiredCoupledVar("c", "Order parameter for damage");
   params.addClassDescription("Phase-field fracture residual for beta variable: Contribution from gradient of damage order parameter");
+  params.addRequiredCoupledVar("c", "Order parameter for damage");
 
   return params;
 }

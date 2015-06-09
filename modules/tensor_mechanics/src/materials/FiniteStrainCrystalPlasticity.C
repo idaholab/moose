@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<FiniteStrainCrystalPlasticity>()
 {
   InputParameters params = validParams<FiniteStrainMaterial>();
-
+  params.addClassDescription("Crystal Plasticity base class: FCC system with power law flow rule implemented");
   params.addRequiredParam<int >("nss", "Number of slip systems");
   params.addParam<std::vector<Real> >("gprops", "Initial values of slip system resistances");
   params.addParam<std::vector<Real> >("hprops", "Hardening properties");
@@ -38,7 +38,6 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   params.addParam<Real>("random_scaling_var", 1e9, "Random scaling variable: Large value can cause non-positive definiteness");
   params.addParam<unsigned int>("random_seed", 2000, "Random integer used to generate random stress when constitutive failure occurs");
   params.addParam<unsigned int>("maximum_substep_iteration", 1, "Maximum number of substep iteration");
-  params.addClassDescription("Crystal Plasticity base class: FCC system with power law flow rule implemented");
 
   return params;
 }

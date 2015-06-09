@@ -10,10 +10,9 @@ template<>
 InputParameters validParams<LinearIsoElasticPFDamage>()
 {
   InputParameters params = validParams<LinearElasticMaterial>();
-  params.addClassDescription("Phase-field fracture model energy contribution to damage growth");
+  params.addClassDescription("Phase-field fracture model energy contribution to damage growth-isotropic elasticity and undamaged stress under compressive strain");
   params.addRequiredCoupledVar("c","Order parameter for damage");
   params.addParam<Real>("kdamage",1e-6,"Stiffness of damaged matrix");
-  params.addClassDescription("Strain energy density in damaged isotropic elastic material - undamaged stress under compressive strain");
 
   return params;
 }

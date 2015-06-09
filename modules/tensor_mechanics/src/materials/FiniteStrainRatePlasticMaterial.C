@@ -19,11 +19,10 @@ template<>
 InputParameters validParams<FiniteStrainRatePlasticMaterial>()
 {
   InputParameters params = validParams<FiniteStrainPlasticMaterial>();
-
+  params.addClassDescription("Associative rate dependent J2 plasticity with isotropic hardening: Overstress based on Perzyna model");
   params.addRequiredParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addRequiredParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addClassDescription("Associative rate dependent J2 plasticity with isotropic hardening: Overstress based on Perzyna model");
-
+  
   return params;
 }
 

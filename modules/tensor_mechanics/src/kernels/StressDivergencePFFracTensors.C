@@ -5,10 +5,10 @@ template<>
 InputParameters validParams<StressDivergencePFFracTensors>()
 {
   InputParameters params = validParams<StressDivergenceTensors>();
+  params.addClassDescription("Stress divergence kernel for phase-field fracture: Additionally computes off diagonal damage dependent Jacobian components");
   params.addClassDescription("Phase field fracture model stress divergence kernel");
   params.addCoupledVar("c", "Phase field damage variable: Used to indicate calculation of Off Diagonal Jacobian term");
   params.addParam<std::string>("pff_jac_prop_name","","Name of property variable containing d_stress_d_c");
-  params.addClassDescription("Stress divergence kernel for phase-field fracture that additionally computes off diagonal damage dependent Jacobian components");
 
   return params;
 }
