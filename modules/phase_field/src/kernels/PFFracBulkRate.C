@@ -17,6 +17,7 @@ InputParameters validParams<PFFracBulkRate>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addClassDescription("Kernel to compute bulk energy contribution to damage order parameter residual equation");
 
   return params;
 }

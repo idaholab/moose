@@ -12,6 +12,8 @@ InputParameters validParams<ElementPropertyReadFileTest>()
 {
   InputParameters params = validParams<FiniteStrainElasticMaterial>();
   params.addParam<UserObjectName>("read_prop_user_object","The ElementReadPropertyFile GeneralUserObject to read element specific property values from file");
+  params.addClassDescription("Material class to test ElementPropertyReadFile User Object");
+
   return params;
 }
 

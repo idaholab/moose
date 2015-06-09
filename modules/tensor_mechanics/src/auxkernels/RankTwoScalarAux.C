@@ -13,6 +13,7 @@ InputParameters validParams<RankTwoScalarAux>()
   params.addRequiredParam<std::string>("rank_two_tensor", "The rank two material tensor name");
   MooseEnum scalar_options("VonMisesStress EquivalentPlasticStrain Hydrostatic L2norm");
   params.addParam<MooseEnum>("scalar_type", scalar_options, "Type of scalar output");
+  params.addClassDescription("Auxkernel to evaluate scalar norms of Rank Two Tensors");
 
   return params;
 }

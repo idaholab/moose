@@ -19,6 +19,7 @@ InputParameters validParams<ElementPropertyReadFile>()
   params.addParam<unsigned int>("rand_seed", 2000, "random seed");
   MooseEnum rve_options("periodic none","none");
   params.addParam<MooseEnum>("rve_type",rve_options , "Periodic or non-periodic grain distribution: Default is non-periodic");
+  params.addClassDescription("User Object to read property data from an external file and assign to elements: Works only for Rectangular geometry (2D-3D)");
 
   return params;
 }
@@ -33,9 +34,6 @@ ElementPropertyReadFile::ElementPropertyReadFile(const std::string & name, Input
     _rve_type(getParam<MooseEnum>("rve_type")),
     _mesh(_fe_problem.mesh())
 {
-
-  mooseWarning("Works only for Rectangular geometry (2D-3D)");
-
   _nelem = _mesh.nElem();
 
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)

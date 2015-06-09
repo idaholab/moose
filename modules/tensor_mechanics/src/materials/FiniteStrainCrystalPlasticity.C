@@ -38,6 +38,7 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   params.addParam<Real>("random_scaling_var", 1e9, "Random scaling variable: Large value can cause non-positive definiteness");
   params.addParam<unsigned int>("random_seed", 2000, "Random integer used to generate random stress when constitutive failure occurs");
   params.addParam<unsigned int>("maximum_substep_iteration", 1, "Maximum number of substep iteration");
+  params.addClassDescription("Crystal Plasticity base class: FCC system with power law flow rule implemented");
 
   return params;
 }
