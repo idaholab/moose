@@ -12,6 +12,8 @@
 #include "SideIntegralVariablePostprocessor.h"
 #include "RichardsVarNames.h"
 
+class Function;
+
 //Forward Declarations
 class RichardsHalfGaussianSinkFlux;
 
@@ -22,6 +24,8 @@ InputParameters validParams<RichardsHalfGaussianSinkFlux>();
  * Postprocessor that records the mass flux from porespace to
  * a half-gaussian sink.  (Positive if fluid is being removed from porespace.)
  * flux out = max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and flux out = max otherwise
+ * If a function, _m_func, is used then the flux is multiplied by _m_func.
+ * The result is the flux integrated over the specified sideset.
  */
 class RichardsHalfGaussianSinkFlux: public SideIntegralVariablePostprocessor
 {
@@ -56,6 +60,9 @@ protected:
    * This is used to index correctly into _viscosity, _seff, etc
    */
   unsigned int _pvar;
+
+  /// the multiplier function
+  Function & _m_func;
 
   /// porepressure (or porepressure vector for multiphase problems)
   MaterialProperty<std::vector<Real> > & _pp;
