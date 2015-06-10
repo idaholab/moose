@@ -30,7 +30,7 @@ protected:
   virtual Real scaling();
 
 private:
-  MaterialProperty<Real> & _density;
+  const MaterialProperty<Real> & _density;
   const bool _artificial_scaling_set;
   const Real _artificial_scaling;
 };

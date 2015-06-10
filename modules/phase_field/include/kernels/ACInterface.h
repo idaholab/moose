@@ -33,8 +33,8 @@ protected:
 
 
 private:
-  MaterialProperty<Real> & _kappa;
-  MaterialProperty<Real> & _L;
+  const MaterialProperty<Real> & _kappa;
+  const MaterialProperty<Real> & _L;
 };
 
 #endif //ACInterface_H

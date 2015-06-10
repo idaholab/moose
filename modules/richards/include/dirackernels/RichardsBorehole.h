@@ -149,31 +149,31 @@ protected:
   RealVectorValue _borehole_direction;
 
   /// fluid porepressure (or porepressures in case of multiphase)
-  MaterialProperty<std::vector<Real> > & _pp;
+  const MaterialProperty<std::vector<Real> > & _pp;
 
   /// d(porepressure_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
 
   /// fluid viscosity
-  MaterialProperty<std::vector<Real> > & _viscosity;
+  const MaterialProperty<std::vector<Real> > & _viscosity;
 
   /// material permeability
-  MaterialProperty<RealTensorValue> & _permeability;
+  const MaterialProperty<RealTensorValue> & _permeability;
 
   /// deriviatves of Seff wrt variables
-  MaterialProperty<std::vector<std::vector<Real> > > & _dseff_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dseff_dv;
 
   /// relative permeability
-  MaterialProperty<std::vector<Real> > & _rel_perm;
+  const MaterialProperty<std::vector<Real> > & _rel_perm;
 
   /// d(relperm_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > & _drel_perm_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _drel_perm_dv;
 
   /// fluid density
-  MaterialProperty<std::vector<Real> > & _density;
+  const MaterialProperty<std::vector<Real> > & _density;
 
   /// d(density_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dv;
 
   /**
    * This is used to hold the total fluid flowing into the borehole

@@ -74,7 +74,7 @@ private:
   std::vector<Real> _sto_v;
 
   /// Material property of porosity.
-  MaterialProperty<Real> & _porosity;
+  const MaterialProperty<Real> & _porosity;
 
   std::vector<unsigned int> _vars;
   /// Coupled primary species concentrations.

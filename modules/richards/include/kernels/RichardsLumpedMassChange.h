@@ -61,10 +61,10 @@ protected:
   unsigned int _pvar;
 
   /// current value of the porosity
-  MaterialProperty<Real> &_porosity;
+  const MaterialProperty<Real> &_porosity;
 
   /// value of the porosity at the start of the timestep
-  MaterialProperty<Real> &_porosity_old;
+  const MaterialProperty<Real> &_porosity_old;
 
   /// The userobject that computes effective saturation (as a function of porepressure(s)) for this variable
   const RichardsSeff * _seff_UO;
@@ -86,10 +86,8 @@ protected:
   /// Holds the nodal values of pressures at timestep_begin, in same way as _ps_at_nodes
   std::vector<VariableValue *> _ps_old_at_nodes;
 
-
   /// holds nodal values of d(Seff)/dP_i
   std::vector<Real> _dseff;
-
 };
 
 #endif //RICHARDSLUMPEDMASSCHANGE

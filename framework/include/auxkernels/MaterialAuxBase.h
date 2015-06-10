@@ -57,7 +57,7 @@ public:
 protected:
 
   /// Reference to the material property for this AuxKernel
-  MaterialProperty<T> & _prop;
+  const MaterialProperty<T> & _prop;
 
   // Value to be added to the material property
   const Real _factor;

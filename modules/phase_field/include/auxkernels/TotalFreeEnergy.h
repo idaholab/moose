@@ -27,7 +27,7 @@ protected:
   virtual Real computeValue();
 
   /// Bulk free energy material property
-  MaterialProperty<Real> & _F;
+  const MaterialProperty<Real> & _F;
 
   /// Gradient interface free energy coefficients
   std::vector<const MaterialProperty<Real> *> _kappas;

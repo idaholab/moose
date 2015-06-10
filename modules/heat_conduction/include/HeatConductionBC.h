@@ -27,7 +27,7 @@ protected:
   virtual RealGradient computeQpFluxResidual();
   virtual RealGradient computeQpFluxJacobian();
 
-  MaterialProperty<Real> & _k;
+  const MaterialProperty<Real> & _k;
 };
 
 

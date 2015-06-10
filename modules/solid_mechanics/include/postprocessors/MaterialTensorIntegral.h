@@ -31,7 +31,7 @@ protected:
   virtual Real computeQpIntegral();
 
   MaterialTensorCalculator _material_tensor_calculator;
-  MaterialProperty<SymmTensor> & _tensor;
+  const MaterialProperty<SymmTensor> & _tensor;
 };
 
 #endif

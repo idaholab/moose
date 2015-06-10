@@ -36,8 +36,8 @@ protected:
   bool _has_crack_front_point_index;
   const unsigned int _crack_front_point_index;
   bool _treat_as_2d;
-  MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
-  MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
+  const MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
+  const MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
   bool _convert_J_to_K;
   bool _has_symmetry_plane;
   Real _poissons_ratio;

@@ -120,34 +120,34 @@ protected:
   std::vector<std::vector<Real> > _dnodal_relperm_dv;
 
   /// porepressure values (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > & _pp;
+  const MaterialProperty<std::vector<Real> > & _pp;
 
   /// d(porepressure_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
 
   /// viscosity (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > & _viscosity;
+  const MaterialProperty<std::vector<Real> > & _viscosity;
 
   /// permeability
-  MaterialProperty<RealTensorValue> & _permeability;
+  const MaterialProperty<RealTensorValue> & _permeability;
 
   /**
    * derivative of effective saturation wrt variables
    * only _dseff_dv[_pvar][i] is used for i being all variables
    */
-  MaterialProperty<std::vector<std::vector<Real> > > & _dseff_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dseff_dv;
 
   /// relative permeability (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > & _rel_perm;
+  const MaterialProperty<std::vector<Real> > & _rel_perm;
 
   /// d(relperm_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > & _drel_perm_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _drel_perm_dv;
 
   /// fluid density (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > & _density;
+  const MaterialProperty<std::vector<Real> > & _density;
 
   /// d(density_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dv;
 
   /**
    * Holds the values of pressures at all the nodes of the element
@@ -164,8 +164,6 @@ protected:
 
   /// derivative of residual wrt the wrt_num Richards variable
   Real jac(unsigned int wrt_num);
-
-
 };
 
 #endif //RichardsPiecewiseLinearSink

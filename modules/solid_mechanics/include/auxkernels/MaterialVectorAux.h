@@ -32,11 +32,10 @@ protected:
 
   virtual Real computeValue();
 
-  MaterialProperty<RealVectorValue> & _vector;
+  const MaterialProperty<RealVectorValue> & _vector;
   const int _index;
   MooseEnum _quantity_moose_enum;
   MVA_ENUM _quantity;
-
 };
 
 #endif // MATERIALVECTORAUX_H

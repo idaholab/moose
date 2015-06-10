@@ -36,7 +36,7 @@ protected:
   virtual Real computeQpIntegral();
 
   std::string _diffusivity;
-  MaterialProperty<Real> & _diffusion_coef;
+  const MaterialProperty<Real> & _diffusion_coef;
 };
 
 #endif // SIDEFLUXINTEGRAL_H

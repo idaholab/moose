@@ -88,7 +88,7 @@ public:
 
   virtual Real stiffness( const unsigned int i, const unsigned int j,
                           const RealGradient & test,
-                          const RealGradient & phi );
+                          const RealGradient & phi ) const;
 
   SymmElasticityTensor operator+(const SymmElasticityTensor & rhs) const
     {

@@ -46,7 +46,7 @@ public:
    * @param curr_point The point corresponding to this material property
    * @return A scalar value from this material property to be output
    */
-  virtual Real getScalarFromProperty(SymmTensor &property, const Point * curr_point);
+  virtual Real getScalarFromProperty(const SymmTensor &property, const Point * curr_point);
 };
 
 #endif

@@ -52,8 +52,8 @@ protected:
 
   Real _density;
 
-  MaterialProperty<Real> & _E_prop;
-  MaterialProperty<Real> & _nu_prop;
+  const MaterialProperty<Real> & _E_prop;
+  const MaterialProperty<Real> & _nu_prop;
 
   bool _constant_properties;
 };

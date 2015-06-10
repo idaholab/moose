@@ -36,7 +36,7 @@ protected:
   std::map<std::pair<unsigned int,unsigned int>,Real> _value;
 
   MaterialTensorCalculator _material_tensor_calculator;
-  MaterialProperty<SymmTensor> & _tensor;
+  const MaterialProperty<SymmTensor> & _tensor;
 
   const Point _lp1;
   const Point _lp2;
@@ -51,7 +51,3 @@ private:
 };
 
 #endif
-
-
-
-

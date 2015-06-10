@@ -27,7 +27,7 @@ protected:
 private:
   std::string _rotout_file_name;
   unsigned int _out_freq;
-  MaterialProperty<RankTwoTensor> & _update_rot;
+  const MaterialProperty<RankTwoTensor> & _update_rot;
 };
 
 #endif //CRYSTALPLASTICITYROTATIONOUTAUX_H//

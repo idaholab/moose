@@ -53,7 +53,7 @@ Real NSEnergyViscousFlux::computeQpJacobian()
 Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Convenience variables
-  RealTensorValue & tau = _viscous_stress_tensor[_qp];
+  const RealTensorValue & tau = _viscous_stress_tensor[_qp];
 
   Real rho  = _rho[_qp];
   Real phij = _phi[_j][_qp];

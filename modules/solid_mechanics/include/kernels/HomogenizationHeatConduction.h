@@ -25,7 +25,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  MaterialProperty<Real> & _diffusion_coefficient;
+  const MaterialProperty<Real> & _diffusion_coefficient;
 
 private:
   const unsigned int _component;

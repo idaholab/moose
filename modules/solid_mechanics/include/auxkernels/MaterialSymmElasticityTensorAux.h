@@ -41,7 +41,7 @@ protected:
 
 private:
 
-  MaterialProperty<SymmElasticityTensor> & _tensor_prop;
+  const MaterialProperty<SymmElasticityTensor> & _tensor_prop;
 };
 
 #endif //MATERIALSYMMELASTICITYTENSORAUX_H

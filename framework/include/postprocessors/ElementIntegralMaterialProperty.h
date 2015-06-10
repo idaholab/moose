@@ -30,7 +30,7 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  MaterialProperty<Real> & _scalar;
+  const MaterialProperty<Real> & _scalar;
 };
 
 #endif

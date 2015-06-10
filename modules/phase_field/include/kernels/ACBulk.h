@@ -32,7 +32,7 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type) = 0;
 
   std::string _mob_name;
-  MaterialProperty<Real> & _L;
+  const MaterialProperty<Real> & _L;
 };
 
 #endif //ACBULK_H

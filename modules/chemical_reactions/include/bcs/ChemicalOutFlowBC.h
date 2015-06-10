@@ -43,8 +43,8 @@ private:
   /**
    * Vector to dot with the normal.
    */
-  MaterialProperty<Real> & _diff;
-  MaterialProperty<Real> & _porosity;
+  const MaterialProperty<Real> & _diff;
+  const MaterialProperty<Real> & _porosity;
 
 //  std::vector<RealGradient> & _grad_p;
 

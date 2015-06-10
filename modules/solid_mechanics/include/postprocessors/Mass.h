@@ -26,7 +26,7 @@ public:
 
 protected:
   virtual Real computeQpIntegral();
-  MaterialProperty<Real> & _density;
+  const MaterialProperty<Real> & _density;
 };
 
 #endif

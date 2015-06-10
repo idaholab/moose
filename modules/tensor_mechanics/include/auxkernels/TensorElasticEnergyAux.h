@@ -27,8 +27,8 @@ protected:
   virtual Real computeValue();
 
 private:
-  MaterialProperty<RankTwoTensor> & _stress;
-  MaterialProperty<RankTwoTensor> & _elastic_strain;
+  const MaterialProperty<RankTwoTensor> & _stress;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
 #endif // TENSORELASTICENERGYAUX_H

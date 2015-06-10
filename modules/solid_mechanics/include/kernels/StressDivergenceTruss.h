@@ -32,8 +32,8 @@ protected:
 
   void computeStiffness(ColumnMajorMatrix & stiff_global);
 
-  MaterialProperty<Real> & _axial_stress;
-  MaterialProperty<Real> & _E_over_L;
+  const MaterialProperty<Real> & _axial_stress;
+  const MaterialProperty<Real> & _E_over_L;
 
 private:
   const unsigned int _component;

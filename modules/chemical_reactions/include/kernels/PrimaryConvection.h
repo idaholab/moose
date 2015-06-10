@@ -57,7 +57,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Material property of hydraulic conductivity
-  MaterialProperty<Real> & _cond;
+  const MaterialProperty<Real> & _cond;
 
 private:
   /**
@@ -69,4 +69,5 @@ private:
   /// Coupled gradient of hydraulic head.
   VariableGradient & _grad_p;
 };
+
 #endif //PRIMARYCONVECTION_H

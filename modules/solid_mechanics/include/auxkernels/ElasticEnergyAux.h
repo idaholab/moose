@@ -26,9 +26,8 @@ public:
 protected:
   virtual Real computeValue();
 
-  MaterialProperty<SymmTensor> & _stress;
-  MaterialProperty<SymmTensor> & _elastic_strain;
-
+  const MaterialProperty<SymmTensor> & _stress;
+  const MaterialProperty<SymmTensor> & _elastic_strain;
 };
 
 #endif // ELASTICENERGYAUX_H
