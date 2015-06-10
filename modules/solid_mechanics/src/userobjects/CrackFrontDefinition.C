@@ -42,7 +42,7 @@ void addCrackFrontDefinitionParams(InputParameters& params)
   params.addParam<VariableName>("disp_z","Variable containing the z displacement");
 }
 
-const Real CrackFrontDefinition::_tol = 1e-14;
+const Real CrackFrontDefinition::_tol = 1e-10;
 
 CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParameters parameters) :
     GeneralUserObject(name, parameters),
@@ -1124,20 +1124,30 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
   //system the qp is located
   if (r > 0)
   {
+    Real theta_quadrant1(0.0);
+    if (MooseUtils::absoluteFuzzyEqual(r, p_to_plane_dist, _tol))
+      theta_quadrant1 = 0.5*libMesh::pi;
+    else if (p_to_plane_dist > r)
+      mooseError("Invalid distance p_to_plane_dist in CrackFrontDefinition::calculateRThetaToCrackFront");
+    else
+      theta_quadrant1 = std::asin(p_to_plane_dist/r);
+
     if (x_local >= 0 && y_local >= 0)
-      theta = std::asin(p_to_plane_dist/r);
+      theta = theta_quadrant1;
 
     else if (x_local < 0 && y_local >= 0)
-      theta = libMesh::pi - std::asin(p_to_plane_dist/r);
+      theta = libMesh::pi - theta_quadrant1;
 
     else if (x_local < 0 && y_local < 0)
-      theta = -(libMesh::pi - std::asin(p_to_plane_dist/r));
+      theta = -(libMesh::pi - theta_quadrant1);
 
     else if (x_local >= 0 && y_local < 0)
-      theta = -std::asin(p_to_plane_dist/r);
+      theta = -theta_quadrant1;
   }
   else if (r == 0)
     theta = 0;
+  else
+    mooseError("Invalid distance r in CrackFrontDefinition::calculateRThetaToCrackFront");
 }
 
 bool
