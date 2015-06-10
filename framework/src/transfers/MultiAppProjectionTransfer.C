@@ -59,6 +59,15 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & name,
     _proj_type(getParam<MooseEnum>("proj_type")),
     _compute_matrix(true)
 {
+}
+
+MultiAppProjectionTransfer::~MultiAppProjectionTransfer()
+{
+}
+
+void
+MultiAppProjectionTransfer::initialSetup()
+{
   switch (_direction)
   {
     case TO_MULTIAPP:
@@ -79,11 +88,12 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & name,
             FEProblem & to_problem = *_multi_app->appProblem(app);
             FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                            Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
-            to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
+            //to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
 
             EquationSystems & to_es = to_problem.es();
             LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
-                                                                                           + "-" + Utility::enum_to_string<Order>(fe_type.order));
+                                                                                           + "-" + Utility::enum_to_string<Order>(fe_type.order)
+                                                                                           + "-" + name());
             _proj_var_num = proj_sys.add_variable("var", fe_type);
             proj_sys.attach_assemble_function(assemble_l2_to);
 
@@ -117,24 +127,22 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & name,
         FEProblem & to_problem = *_multi_app->problem();
         FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                        Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
-        to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
+        //to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
 
         EquationSystems & to_es = to_problem.es();
         LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
-                                                                                       + "-" + Utility::enum_to_string<Order>(fe_type.order));
+                                                                                       + "-" + Utility::enum_to_string<Order>(fe_type.order)
+                                                                                           + "-" + name());
         _proj_var_num = proj_sys.add_variable("var", fe_type);
         proj_sys.attach_assemble_function(assemble_l2_from);
 
         _proj_sys[0] = &proj_sys;
 
         // to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
+        to_es.reinit();
       }
       break;
   }
-}
-
-MultiAppProjectionTransfer::~MultiAppProjectionTransfer()
-{
 }
 
 void
@@ -215,6 +223,7 @@ MultiAppProjectionTransfer::assembleL2To(EquationSystems & es, const std::string
       system.rhs->add_vector(Fe, dof_indices);
     }
   }
+  delete serialized_from_solution;
 }
 
 void

@@ -14,6 +14,21 @@
   [../]
 []
 
+[AuxVariables]
+  [./v_nodal]
+  [../]
+  [./v_elemental]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./x_nodal]
+  [../]
+  [./x_elemental]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = Diffusion

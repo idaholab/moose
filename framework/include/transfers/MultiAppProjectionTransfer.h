@@ -31,6 +31,8 @@ public:
   MultiAppProjectionTransfer(const std::string & name, InputParameters parameters);
   virtual ~MultiAppProjectionTransfer();
 
+  virtual void initialSetup();
+
   virtual void execute();
 
 protected:
