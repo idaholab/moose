@@ -99,7 +99,7 @@ public:
    * Override functions from MaterialPropertyInterface for error checking
    */
   template<typename T>
-  MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template<typename T>
   MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template<typename T>
@@ -193,7 +193,7 @@ protected:
 };
 
 template<typename T>
-MaterialProperty<T> &
+const MaterialProperty<T> &
 AuxKernel::getMaterialProperty(const std::string & name)
 {
   if (isNodal())
