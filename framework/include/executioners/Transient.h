@@ -281,6 +281,8 @@ protected:
   Real _picard_max_its;
   bool & _picard_converged;
   Real & _picard_initial_norm;
+  Real & _picard_timestep_begin_norm;
+  Real & _picard_timestep_end_norm;
   Real _picard_rel_tol;
   Real _picard_abs_tol;
 

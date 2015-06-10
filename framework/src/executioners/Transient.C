@@ -114,6 +114,8 @@ Transient::Transient(const InputParameters & parameters) :
     _picard_max_its(getParam<unsigned int>("picard_max_its")),
     _picard_converged(declareRestartableData<bool>("picard_converged", false)),
     _picard_initial_norm(declareRestartableData<Real>("picard_initial_norm", 0.0)),
+    _picard_timestep_begin_norm(declareRestartableData<Real>("picard_timestep_begin_norm", 0.0)),
+    _picard_timestep_end_norm(declareRestartableData<Real>("picard_timestep_end_norm", 0.0)),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose"))
@@ -312,13 +314,15 @@ Transient::takeStep(Real input_dt)
 
     if (_picard_max_its > 1)
     {
-      Real current_norm = _problem.computeResidualL2Norm();
+      _picard_timestep_end_norm = _problem.computeResidualL2Norm();
 
-      _console << "Current Picard Norm: " << current_norm << '\n';
+      _console << "Picard Norm after TIMESTEP_END MultiApps: " << _picard_timestep_end_norm << '\n';
 
-      Real relative_drop = current_norm / _picard_initial_norm;
+      Real max_norm = std::max(_picard_timestep_begin_norm, _picard_timestep_end_norm);
 
-      if (current_norm < _picard_abs_tol || relative_drop < _picard_rel_tol)
+      Real max_relative_drop = max_norm / _picard_initial_norm;
+
+      if (max_norm < _picard_abs_tol || max_relative_drop < _picard_rel_tol)
       {
         _console << "Picard converged!" << std::endl;
 
@@ -367,6 +371,13 @@ Transient::solveStep(Real input_dt)
 
   // Compute Post-Aux User Objects (Timestep begin)
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
+
+  if (_picard_max_its > 1)
+  {
+    _picard_timestep_begin_norm = _problem.computeResidualL2Norm();
+
+    _console << "Picard Norm after TIMESTEP_BEGIN MultiApps: " << _picard_timestep_begin_norm << '\n';
+  }
 
   // Perform output for timestep begin
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
@@ -749,6 +760,8 @@ Transient::Transient(const std::string & deprecated_name, InputParameters parame
     _picard_max_its(getParam<unsigned int>("picard_max_its")),
     _picard_converged(declareRestartableData<bool>("picard_converged", false)),
     _picard_initial_norm(declareRestartableData<Real>("picard_initial_norm", 0.0)),
+    _picard_timestep_begin_norm(declareRestartableData<Real>("picard_timestep_begin_norm", 0.0)),
+    _picard_timestep_end_norm(declareRestartableData<Real>("picard_timestep_end_norm", 0.0)),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose"))
