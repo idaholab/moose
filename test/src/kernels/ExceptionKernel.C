@@ -27,27 +27,27 @@ InputParameters validParams<ExceptionKernel>()
 ExceptionKernel::ExceptionKernel(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _when(static_cast<WhenType>((int) getParam<MooseEnum>("when"))),
-    _call_no(0),
-    _jac_call_no(0)
+    _res_has_thrown(false),
+    _jac_has_thrown(false)
 {
 }
 
 Real
 ExceptionKernel::computeQpResidual()
 {
-  // Increment the call number *before* we possibly throw an
-  // exception, so this function can continue to be used after that.
-  _call_no++;
-
   if (_when == INITIAL_CONDITION)
     throw MooseException("MooseException thrown during initial condition computation");
 
   // Make sure we have called computeQpResidual enough times to
   // guarantee that we are in the middle of a linear solve, to verify
   // that we can throw an exception at that point.
-  else if (_when == RESIDUAL && _call_no == 3240)
-    throw MooseException("MooseException thrown during residual calculation");
+  else if (_when == RESIDUAL && !_res_has_thrown && time_to_throw())
+  {
+    // The residual has now thrown
+    _res_has_thrown = true;
 
+    throw MooseException("MooseException thrown during residual calculation");
+  }
   else
     return 0;
 }
@@ -55,12 +55,21 @@ ExceptionKernel::computeQpResidual()
 Real
 ExceptionKernel::computeQpJacobian()
 {
-  // Increment the call number *before* we possibly throw an
-  // exception, so this function can continue to be used after that.
-  _jac_call_no++;
+  // Throw on the first nonlinear step of the first timestep -- should
+  // hopefully be the same in both serial and parallel.
+  if (_when == JACOBIAN && !_jac_has_thrown && time_to_throw())
+  {
+    // The Jacobian has now thrown
+    _jac_has_thrown = true;
 
-  if (_when == JACOBIAN && _jac_call_no == 5000)
     throw MooseException("MooseException thrown during Jacobian calculation");
+  }
 
   return 0.;
+}
+
+bool
+ExceptionKernel::time_to_throw()
+{
+  return (_t_step==1 && _fe_problem.getNonlinearSystem().getCurrentNonlinearIterationNumber()==1);
 }
