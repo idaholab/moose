@@ -58,6 +58,8 @@ endif
 
 CROW_LIB_INCLUDE_DIR := $(CROW_DIR)/contrib/include
 
+python_crow_modules :: $(PYTHON_MODULES)
+
 ifeq  ($(UNAME),Darwin)
 crow_shared_ext := dylib
 else
