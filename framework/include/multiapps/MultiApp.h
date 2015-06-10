@@ -364,9 +364,6 @@ dataLoad(std::istream & stream, std::vector<Backup *> & backups, void * context)
 {
   MultiApp * multi_app = static_cast<MultiApp *>(context);
 
-  std::cout<<multi_app->name()<<" dataLoad(std::istream & stream, std::vector<Backup *> & backups, void * context)"<<std::endl;
-
-
   if (!multi_app)
     mooseError("Error loading std::vector<Backup*>");
 

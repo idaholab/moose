@@ -235,8 +235,6 @@ MultiApp::backup()
 void
 MultiApp::restore()
 {
-  std::cout<<name()<<" MultiApp::restore()"<<std::endl;
-
   for (unsigned int i=0; i<_my_num_apps; i++)
     _apps[i]->restore(_backups[i]);
 }

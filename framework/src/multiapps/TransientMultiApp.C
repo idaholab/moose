@@ -154,9 +154,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
     // The App might have a different local time from the rest of the problem
     Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
-    std::cout<<"App Time: "<<ex->getTime()<<std::endl;
-    std::cout<<"Target Time: "<<target_time<<std::endl;
-
     if ((ex->getTime() + app_time_offset) + 2e-14 >= target_time) // Maybe this MultiApp was already solved
       continue;
 

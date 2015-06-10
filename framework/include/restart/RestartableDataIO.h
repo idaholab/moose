@@ -44,8 +44,6 @@ template<>
 inline void
 dataStore(std::ostream & stream, Backup * & backup, void * context)
 {
-  std::cout<<"Storing Backup!"<<std::endl;
-
   dataStore(stream, backup->_system_data, context);
 
   for (unsigned int i=0; i<backup->_restartable_data.size(); i++)
@@ -56,8 +54,6 @@ template<>
 inline void
 dataLoad(std::istream & stream, Backup * & backup, void * context)
 {
-  std::cout<<"Loading Backup!"<<std::endl;
-
   dataLoad(stream, backup->_system_data, context);
 
   for (unsigned int i=0; i<backup->_restartable_data.size(); i++)
