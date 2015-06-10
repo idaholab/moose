@@ -996,6 +996,28 @@ InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/,
   l_value = oss.str();
 }
 
+template<>
+inline
+void
+InputParameters::setParamHelper<MaterialPropertyName, Real>(const std::string & /*name*/, MaterialPropertyName & l_value, const Real &r_value)
+{
+  // Assign the default value so that it appears in the dump
+  std::ostringstream oss;
+  oss << r_value;
+  l_value = oss.str();
+}
+
+template<>
+inline
+void
+InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /*name*/, MaterialPropertyName & l_value, const int &r_value)
+{
+  // Assign the default value so that it appears in the dump
+  std::ostringstream oss;
+  oss << r_value;
+  l_value = oss.str();
+}
+
 template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T*)

@@ -372,6 +372,8 @@ InputParameters::getMooseType(const std::string &name) const
     var = get<NonlinearVariableName>(name);
   else if (have_parameter<AuxVariableName>(name))
     var = get<AuxVariableName>(name);
+  else if (have_parameter<MaterialPropertyName>(name))
+    var = get<MaterialPropertyName>(name);
   else if (have_parameter<std::string>(name))
     var = get<std::string>(name);
 
@@ -396,6 +398,11 @@ InputParameters::getVecMooseType(const std::string &name) const
   else if (have_parameter<std::vector<AuxVariableName> >(name))
   {
     std::vector<AuxVariableName> vars = get<std::vector<AuxVariableName> >(name);
+    std::copy(vars.begin(), vars.end(), std::back_inserter(svars));
+  }
+  else if (have_parameter<std::vector<MaterialPropertyName> >(name))
+  {
+    std::vector<MaterialPropertyName> vars = get<std::vector<MaterialPropertyName> >(name);
     std::copy(vars.begin(), vars.end(), std::back_inserter(svars));
   }
   else if (have_parameter<std::vector<std::string> >(name))
