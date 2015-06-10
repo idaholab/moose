@@ -51,11 +51,11 @@ protected:
   /// Tolerance on the plastic strain increment ("direction") constraint
   Real _epp_tol;
 
-  /// @{
   /// When in the Newton-Raphson to deactivate constraints
-  enum DeactivationSchemeEnum {optimized, safe, dumb, optimized_to_safe, safe_to_dumb, optimized_to_safe_to_dumb, optimized_to_dumb};
-  DeactivationSchemeEnum _deactivation_scheme;
-  /// }@
+  enum DeactivationSchemeEnum {
+    optimized, safe, dumb, optimized_to_safe, safe_to_dumb,
+    optimized_to_safe_to_dumb, optimized_to_dumb
+  } _deactivation_scheme;
 
   /// User supplied the transverse direction vector
   bool _n_supplied;
@@ -146,7 +146,10 @@ protected:
    * @param active true if constraint is active
    * @param deactivated_due_to_ld true if constraint has been temporarily deactivated due to linear dependence of flow directions
    */
-  virtual Real residual2(const std::vector<Real> & pm, const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld);
+  virtual Real residual2(const std::vector<Real> & pm, const std::vector<Real> & f,
+                         const RankTwoTensor & epp, const std::vector<Real> & ic,
+                         const std::vector<bool> & active,
+                         const std::vector<bool> & deactivated_due_to_ld);
 
 
   /**
@@ -172,7 +175,12 @@ protected:
    * @param constraints_added (output) True if constraints were added into the active set at any stage during the Newton-Raphson proceedure
    * @return true if the stress was successfully returned to the yield surface
    */
-  virtual bool returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added);
+  virtual bool returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress,
+                         const std::vector<Real> & intnl_old, std::vector<Real> & intnl,
+                         const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain,
+                         const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment,
+                         std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb,
+                         bool & linesearch_needed, bool & ld_encountered, bool & constraints_added);
 
 
   /**
@@ -202,7 +210,13 @@ protected:
    * @param linesearch_needed (output) True if the full Newton-Raphson step was cut by the linesearch
    * @return true if successfully found a step that reduces the residual-squared
    */
-  virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld, bool & linesearch_needed);
+  virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old,
+                          std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv,
+                          RankTwoTensor & delta_dp, const RankTwoTensor & dstress,
+                          const std::vector<Real> & dpm, const std::vector<Real> & dintnl,
+                          std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic,
+                          const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld,
+                          bool & linesearch_needed);
 
 
   /**
@@ -225,7 +239,12 @@ protected:
    * @param ld_encountered (output) True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
    * @return true if the step was successful, ie, if the linesearch was successful and the number of constraints wasn't reduced to zero via deactivation
    */
-  virtual bool singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, DeactivationSchemeEnum deactivation_scheme, bool & linesearch_needed, bool & ld_encountered);
+  virtual bool singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old,
+                          std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp,
+                          const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp,
+                          std::vector<Real> & ic, std::vector<bool> & active,
+                          DeactivationSchemeEnum deactivation_scheme,
+                          bool & linesearch_needed, bool & ld_encountered);
 
   /**
    * Checks whether the yield functions are in the admissible region
@@ -234,7 +253,8 @@ protected:
    * @param all_f (output) the values of all the yield functions
    * @return return false if any yield functions exceed their tolerance
    */
-  virtual bool checkAdmissible(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<Real> & all_f);
+  virtual bool checkAdmissible(const RankTwoTensor & stress, const std::vector<Real> & intnl,
+                               std::vector<Real> & all_f);
 
 
   /**
@@ -243,7 +263,8 @@ protected:
    * @param intnl internal parameters to evaluate yield functions and derivatives at
    * @param dumb_order (output) dumb_order[0] will be the yield surface furthest away from (stress, intnl), dumb_order[1] will be the next yield surface, etc.  The distance measure used is f/|df_dstress|.  This array can then be fed into incrementDumb in order to first try the yield surfaces which are farthest away from the (stress, intnl).
    */
-  void buildDumbOrder(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<unsigned int> & dumb_order);
+  void buildDumbOrder(const RankTwoTensor & stress, const std::vector<Real> & intnl,
+                      std::vector<unsigned int> & dumb_order);
 
   /**
    * Increments "dumb_iteration" by 1, and sets "act" appropriately
@@ -251,7 +272,8 @@ protected:
    * @param (input/output) dumb_iteration Used to set act bitwise - the "dumb" scheme tries all possible combinations of act until a successful return
    * @param (output) act active constraints
    */
-  virtual void incrementDumb(int & dumb_iteration, const std::vector<unsigned int> & dumb_order, std::vector<bool> & act);
+  virtual void incrementDumb(int & dumb_iteration, const std::vector<unsigned int> & dumb_order,
+                             std::vector<bool> & act);
 
   /**
    * Checks Kuhn-Tucker conditions, and alters "active" if appropriate.
@@ -265,7 +287,8 @@ protected:
    * @param active the active constraints (true if active)
    * @return return false if any of the Kuhn-Tucker conditions were violated (and hence the set of active constraints was changed)
    */
-  virtual bool checkKuhnTucker(const std::vector<Real> & f, const std::vector<Real> & pm, const std::vector<bool> & active);
+  virtual bool checkKuhnTucker(const std::vector<Real> & f, const std::vector<Real> & pm,
+                               const std::vector<bool> & active);
 
   /**
    * Checks Kuhn-Tucker conditions, and alters "active" if appropriate.
@@ -279,7 +302,8 @@ protected:
    * @param active the active constraints (true if active)
    * @return return false if any of the Kuhn-Tucker conditions were violated (and hence the set of active constraints was changed)
    */
-  virtual void applyKuhnTucker(const std::vector<Real> & f, const std::vector<Real> & pm, std::vector<bool> & active);
+  virtual void applyKuhnTucker(const std::vector<Real> & f, const std::vector<Real> & pm,
+                               std::vector<bool> & active);
 
   // gets called before any return-map
   virtual void preReturnMap();
@@ -302,7 +326,11 @@ protected:
    * @param iterations (output) zero
    * @return true if the (stress, intnl) are admissible
    */
-  virtual bool elasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations);
+  virtual bool elasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress,
+                           const std::vector<Real> & intnl_old, std::vector<Real> & intnl,
+                           const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain,
+                           const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment,
+                           std::vector<Real> & yf, unsigned int & iterations);
 
   /*
    * performs a plastic step
@@ -322,7 +350,12 @@ protected:
    * @param constraints_added (output) True if constraints were added into the active set at any stage during the Newton-Raphson proceedure
    * @return true if the (stress, intnl) are admissible.  Otherwise, if _ignore_failures==true, the output variables will be the best admissible ones found during the return-map.  Otherwise, if _ignore_failures==false, this routine will perform some finite-diference checks and call mooseError
    */
-  virtual bool plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added);
+  virtual bool plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress,
+                           const std::vector<Real> & intnl_old, std::vector<Real> & intnl,
+                           const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain,
+                           const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment,
+                           std::vector<Real> & yf, unsigned int & iterations, bool & linesearch_needed,
+                           bool & ld_encountered, bool & constraints_added);
 
   //  bool checkAndModifyConstraints(const bool & nr_exit_condition, const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, const std::vector<Real> & f, DeactivationSchemeEnum deact_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> dumb_order, bool & die);
 
@@ -330,7 +363,10 @@ protected:
 
   bool canIncrementDumb(const int & dumb_iteration);
 
-  void changeScheme(const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, DeactivationSchemeEnum current_deactivation_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> & dumb_order);
+  void changeScheme(const std::vector<bool> & initial_act, const bool & can_revert_to_dumb,
+                    const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old,
+                    DeactivationSchemeEnum & current_deactivation_scheme, std::vector<bool> & act,
+                    int & dumb_iteration, std::vector<unsigned int> & dumb_order);
 
   bool canAddConstraints(const std::vector<bool> & act, const std::vector<Real> & all_f);
 
