@@ -45,7 +45,7 @@ public:
 
 protected:
 
-  MaterialProperty<Real> & _mat_prop;
+  const MaterialProperty<Real> & _mat_prop;
 
   std::vector<Real> _elem_integrals;
 };

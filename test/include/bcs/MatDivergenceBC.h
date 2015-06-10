@@ -34,7 +34,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  MaterialProperty<Real> & _mat;
+  const MaterialProperty<Real> & _mat;
 };
 
 #endif /* MATDIVERGENCEBC_H */
