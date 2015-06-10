@@ -48,6 +48,11 @@ public:
    */
   MultiMooseEnum(const MultiMooseEnum & other_enum);
 
+  /**
+   * Named constructor to build a MultiMooseEnum with the names taken from a MooseEnum
+   */
+  static MultiMooseEnum withNamesFrom(const MooseEnumBase & other_enum);
+
   virtual ~MultiMooseEnum();
 
   ///@{
@@ -168,6 +173,12 @@ private:
    * Private constructor for use by libmesh::Parameters
    */
   MultiMooseEnum();
+
+  /**
+   * Private constructor that can accept a MooseEnumBase for ::withOptionsFrom()
+   * @param other_enum - MooseEnumBase type to copy names and out-of-range data from
+   */
+  MultiMooseEnum(const MooseEnumBase & other_enum);
 
   /**
    * Helper method for all inserts and assignment operators

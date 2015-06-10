@@ -44,6 +44,11 @@ public:
    */
   MooseEnum(const MooseEnum & other_enum);
 
+  /**
+   * Named constructor to build a MultiMooseEnum with the names taken from a MooseEnum
+   */
+  static MooseEnum withNamesFrom(const MooseEnumBase & other_enum);
+
   virtual ~MooseEnum();
 
   /**
@@ -98,6 +103,12 @@ private:
    * Private constructor for use by libmesh::Parameters
    */
   MooseEnum();
+
+  /**
+   * Private constructor that can accept a MooseEnumBase for ::withOptionsFrom()
+   * @param other_enum - MooseEnumBase type to copy names and out-of-range data from
+   */
+  MooseEnum(const MooseEnumBase & other_enum);
 
   /// The current id
   int _current_id;
