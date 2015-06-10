@@ -59,8 +59,6 @@
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
 #include "TensorElasticEnergyAux.h"
-#include "FiniteStrainPlasticAux.h"
-#include "CrystalPlasticitySlipSysAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
 #include "RankTwoScalarAux.h"
 #include "StressDivergencePFFracTensors.h"
@@ -156,8 +154,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(RealTensorValueAux);
   registerAux(RankFourAux);
   registerAux(TensorElasticEnergyAux);
-  registerAux(FiniteStrainPlasticAux);
-  registerAux(CrystalPlasticitySlipSysAux);
   registerAux(CrystalPlasticityRotationOutAux);
   registerAux(RankTwoScalarAux);
 
