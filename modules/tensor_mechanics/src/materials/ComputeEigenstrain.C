@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<ComputeEigenstrain>()
 {
   InputParameters params = validParams<ComputeStressFreeStrainBase>();
-  params.addClassDescription("Computes an Eigenstrain and its derivatives that is a function of one variable, where the scaler dependence is defined in a derivative material.");
+  params.addClassDescription("Computes a constant Eigenstrain");
   params.addRequiredParam<std::vector<Real> >("eigen_base","Vector of values defining the constant base tensor for the Eigenstrain");
   params.addParam<std::string>("prefactor", "var_dep", "Name of material defining the variable dependence");
   return params;

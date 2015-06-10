@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<ComputeVariableEigenstrain>()
 {
   InputParameters params = validParams<ComputeEigenstrain>();
-  params.addClassDescription("Computes an Eigenstrain and its derivatives that is a function of multiple variables, where the prefactor is defined in a derivative material.");
+  params.addClassDescription("Computes an Eigenstrain and its derivatives that is a function of multiple variables, where the prefactor is defined in a derivative material");
   params.addRequiredCoupledVar("args", "variable dependencies for the prefactor");
   return params;
 }
