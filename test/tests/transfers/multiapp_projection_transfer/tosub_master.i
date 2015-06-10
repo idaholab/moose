@@ -65,7 +65,6 @@
   dt = 1
 
   solve_type = 'NEWTON'
-  print_linear_residuals = true
 []
 
 [Outputs]

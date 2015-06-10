@@ -31,6 +31,8 @@ public:
   MultiAppProjectionTransfer(const InputParameters & parameters);
   virtual ~MultiAppProjectionTransfer();
 
+  virtual void initialSetup();
+
   virtual void execute();
 
 protected:
