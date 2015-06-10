@@ -1,55 +1,49 @@
 [Tests]
-  [./boxIC_test]
+  [./CH_BndingBoxIC_test]
     type = 'Exodiff'
     input = 'CH_BndingBoxIC_test.i'
-    exodiff = 'box.e'
-    group = 'adaptive'
+    exodiff = 'CH_BndingBoxIC_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
   [../]
 
-  [./crossIC_test]
+  [./CH_CrossIC_test]
     type = 'Exodiff'
     input = 'CH_CrossIC_test.i'
-    exodiff = 'cross.e-s002'
-    group = 'adaptive'
+    exodiff = 'CH_CrossIC_test_out.e'
     scale_refine = 1
-    valgrind = 'HEAVY'
   [../]
 
-  [./circleIC_test]
+  [./CH_CircleIC_test]
     type = 'Exodiff'
     input = 'CH_CircleIC_test.i'
-    exodiff = 'circle_oversample.e'
-    group = 'adaptive'
+    exodiff = 'CH_CircleIC_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
   [../]
 
-  [./rndboxIC_test]
+  [./CH_RndBndingBoxIC_test]
     type = 'Exodiff'
     input = 'CH_RndBndingBoxIC_test.i'
-    exodiff = 'rndbox.e'
-    group = 'adaptive'
+    exodiff = 'CH_RndBndingBoxIC_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
     max_parallel = 1
     recover = false # See #5207
   [../]
 
-  [./circleIC_3D_test]
+  [./SmoothCircleIC_3D_test]
     type = 'Exodiff'
     input = 'SmoothCircleIC_3D_test.i'
-    exodiff = 'circle_3D.e'
+    exodiff = 'SmoothCircleIC_3D_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
   [../]
 
-  [./rndcircleIC_test]
+  [./CH_RndCircleIC_test]
     type = 'Exodiff'
     input = 'CH_RndCircleIC_test.i'
-    exodiff = 'rnd_circle.e'
-    group = 'adaptive'
+    exodiff = 'CH_RndCircleIC_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
     max_parallel = 1

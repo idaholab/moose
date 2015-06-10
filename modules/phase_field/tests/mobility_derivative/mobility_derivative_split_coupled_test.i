@@ -13,6 +13,8 @@
   [../]
   [./w]
   [../]
+  [./d]
+  [../]
 []
 
 [ICs]
@@ -23,6 +25,16 @@
     y1 = 0.0
     y2 = 30.0
     variable = c
+  [../]
+  [./d_IC]
+    type = BoundingBoxIC
+    x1 = 0.0
+    x2 = 15.0
+    y1 = 0.0
+    y2 = 30.0
+    inside = 1.0
+    outside = 0.0
+    variable = d
   [../]
 []
 
@@ -38,12 +50,21 @@
     type = SplitCHWRes
     variable = w
     mob_name = M
-    args = c
+    args = 'c d'
   [../]
   [./time]
     type = CoupledImplicitEuler
     variable = w
     v = c
+  [../]
+  [./d_dot]
+    type = TimeDerivative
+    variable = d
+  [../]
+  [./d_diff]
+    type = MatDiffusion
+    variable = d
+    D_name = diffusivity
   [../]
 []
 
@@ -66,8 +87,8 @@
     type = DerivativeParsedMaterial
     block = 0
     f_name = M
-    args = c
-    function = '1-0.9*c^2'
+    args = 'c d'
+    function = 'if(d>0.001,d,0.001)*(1-0.5*c^2)'
     outputs = exodus
     derivative_order = 1
   [../]
@@ -77,13 +98,18 @@
     f_name = F
     c = c
   [../]
+  [./d_diff]
+    type = GenericConstantMaterial
+    prop_names = diffusivity
+    prop_values = 0.1
+    block = 0
+  [../]
 []
 
 [Preconditioning]
   [./SMP]
    type = SMP
-   off_diag_row = 'w c'
-   off_diag_column = 'c w'
+   full = true
   [../]
 []
 

@@ -21,7 +21,7 @@ InputParameters validParams<KKSCHBulk>()
 }
 
 KKSCHBulk::KKSCHBulk(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<CHBulk> >(name, parameters),
+    CHBulk(name, parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _Fa_name(getParam<std::string>("fa_name")),
