@@ -19,6 +19,12 @@ void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v)
   v.zero();
 }
 
+MooseEnum
+RankTwoTensor::fillMethodEnum()
+{
+  return MooseEnum("autodetect=0 isotropic1=1 diagonal3=3 symmetric6=6 general=9", "autodetect");
+}
+
 RankTwoTensor::RankTwoTensor()
 {
   mooseAssert(N == 3, "RankTwoTensor is currently only tested for 3 dimensions.");
@@ -116,31 +122,51 @@ RankTwoTensor::zero()
 }
 
 void
-RankTwoTensor::fillFromInputVector(const std::vector<Real> & input)
+RankTwoTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method)
 {
-  if (input.size() == 6)
+  if (fill_method != autodetect && fill_method != input.size())
+    mooseError("Expected an input vector size of " << fill_method << " to fill the RankTwoTensor");
+
+  switch (input.size())
   {
-    _vals[0][0] = input[0]; //S11
-    _vals[1][1] = input[1]; //S22
-    _vals[2][2] = input[2]; //S33
-    _vals[1][2] = _vals[2][1] = input[3]; //S23
-    _vals[0][2] = _vals[2][0] = input[4]; //S13
-    _vals[0][1] = _vals[1][0] = input[5]; //S12
+    case 1:
+      zero();
+      _vals[0][0] = input[0]; //S11
+      _vals[1][1] = input[0]; //S22
+      _vals[2][2] = input[0]; //S33
+      break;
+
+    case 3:
+      zero();
+      _vals[0][0] = input[0]; //S11
+      _vals[1][1] = input[1]; //S22
+      _vals[2][2] = input[2]; //S33
+      break;
+
+    case 6:
+      _vals[0][0] = input[0]; //S11
+      _vals[1][1] = input[1]; //S22
+      _vals[2][2] = input[2]; //S33
+      _vals[1][2] = _vals[2][1] = input[3]; //S23
+      _vals[0][2] = _vals[2][0] = input[4]; //S13
+      _vals[0][1] = _vals[1][0] = input[5]; //S12
+      break;
+
+    case 9:
+      _vals[0][0] = input[0]; //S11
+      _vals[1][0] = input[1]; //S21
+      _vals[2][0] = input[2]; //S31
+      _vals[0][1] = input[3]; //S12
+      _vals[1][1] = input[4]; //S22
+      _vals[2][1] = input[5]; //S32
+      _vals[0][2] = input[6]; //S13
+      _vals[1][2] = input[7]; //S23
+      _vals[2][2] = input[8]; //S33
+      break;
+
+    default:
+      mooseError("Please check the number of entries in the input vecto for building a RankTwoTensor. It must be 1, 3, 6, or 9");
   }
-  else if (input.size() == 9)
-  {
-    _vals[0][0] = input[0]; //S11
-    _vals[1][0] = input[1]; //S21
-    _vals[2][0] = input[2]; //S31
-    _vals[0][1] = input[3]; //S12
-    _vals[1][1] = input[4]; //S22
-    _vals[2][1] = input[5]; //S32
-    _vals[0][2] = input[6]; //S13
-    _vals[1][2] = input[7]; //S23
-    _vals[2][2] = input[8]; //S33
-  }
-  else
-    mooseError("Please check the number of entries in the eigenstrain input vector.  It must be 6 or 9");
 }
 
 TypeVector<Real>

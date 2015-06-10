@@ -59,6 +59,20 @@ public:
   RankTwoTensor(const InitMethod);
 
   /**
+   * To fill up the 9 entries in the 2nd-order tensor, fillFromInputVector
+   * is called with one of the following fill_methods.
+   * See the fill*FromInputVector functions for more details
+   */
+  enum FillMethod
+  {
+    autodetect = 0,
+    isotropic1 = 1,
+    diagonal3  = 3,
+    symmetric6 = 6,
+    general    = 9
+  };
+
+  /**
    * Constructor that takes in 3 vectors and uses them to create rows
    * _vals[0][i] = row1(i), _vals[1][i] = row2(i), _vals[2][i] = row3(i)
    */
@@ -91,6 +105,9 @@ public:
   /// zeroes all _vals components
   void zero();
 
+  /// Static method for use in validParams for getting the "fill_method"
+  static MooseEnum fillMethodEnum();
+
   /**
   * fillFromInputVector takes 6 or 9 inputs to fill in the Rank-2 tensor.
   * If 6 inputs, then symmetry is assumed S_ij = S_ji, and
@@ -102,7 +119,7 @@ public:
   *   _vals[0][1] = input[5]
   * If 9 inputs then input order is [0][0], [1][0], [2][0], [0][1], [1][1], ..., [2][2]
   */
-  void fillFromInputVector(const std::vector<Real> & input);
+  void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method = autodetect);
 
 public:
   /// returns _vals[r][i], ie, row r, with r = 0, 1, 2
