@@ -34,4 +34,9 @@
     input = 'crysp_substep.i'
     exodiff = 'crysp_substep_out.e'
   [../]
+  [./test_linesearch]
+    type = 'Exodiff'
+    input = 'crysp_linesearch.i'
+    exodiff = 'crysp_lsearch_out.e'
+  [../]
 []
