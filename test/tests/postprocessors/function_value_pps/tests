@@ -1,7 +1,7 @@
 [Tests]
   [./test]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'function_value_pps.i'
-    exodiff = 'function_value_pps_out.e'
+    csvdiff = 'function_value_pps_out.csv'
   [../]
 []

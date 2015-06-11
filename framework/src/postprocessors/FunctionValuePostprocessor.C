@@ -46,7 +46,7 @@ FunctionValuePostprocessor::execute()
 PostprocessorValue
 FunctionValuePostprocessor::getValue()
 {
-  return _function.value(_t, 0);         //Pass 0 instead of Point(0,0,0) because postprocessors take a single, scalar value.
+  return _function.value(_t, 0);         //Pass 0 instead of Point(0,0,0) because postprocessors return a single scalar value.
 }
 
 void

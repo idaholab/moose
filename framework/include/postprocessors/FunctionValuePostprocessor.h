@@ -23,7 +23,9 @@ template<>
 InputParameters validParams<FunctionValuePostprocessor>();
 
 /**
- * Displays a value as supplied by the function FunctionName
+ * This postprocessor displays a single value which is supplied by a MooseFunction.
+ * It is designed to prevent the need to create additional
+ * postprocessors like DifferencePostprocessor.
  */
 class FunctionValuePostprocessor : public GeneralPostprocessor
 {
@@ -37,10 +39,7 @@ public:
   virtual void threadJoin(const UserObject & uo);
 
 protected:
-  //const PostprocessorValue & _value1;
   Function & _function;
-
 };
-
 
 #endif /* FUNCTIONVALUEPOSTPROCESSOR_H */

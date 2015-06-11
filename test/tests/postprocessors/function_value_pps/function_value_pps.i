@@ -20,7 +20,7 @@
 []
 
 [Functions]
-  [./ConstantFunction]
+  [./constant_func]
     type = ConstantFunction
     value = 2.798
   [../]
@@ -67,21 +67,30 @@
 []
 
 [Postprocessors]
-  [./FunctionValuePostprocessor]
+  [./value1]
     type = FunctionValuePostprocessor
-    function = ConstantFunction
+    function = constant_func
+    execute_on = 'initial timestep_end'
+  [../]
+  [./value2]
+    type = FunctionValuePostprocessor
+    function = 2*t
     execute_on = 'initial timestep_end'
   [../]
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 5
 []
 
 [Outputs]
   output_initial = true
-  exodus = true
   print_linear_residuals = true
   print_perf_log = true
   csv = true
+[]
+
+[Problem]
+  solve = false
 []
