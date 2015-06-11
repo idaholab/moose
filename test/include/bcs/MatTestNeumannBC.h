@@ -36,7 +36,7 @@ protected:
 
   const std::string _prop_name;
 
-  MaterialProperty<Real> * _value;
+  const MaterialProperty<Real> * _value;
 };
 
 #endif /* MATTESTNEUMANNBC_H */

@@ -29,7 +29,7 @@ protected:
   virtual Real computeValue();
 
 private:
-  MaterialProperty<RealTensorValue> & _tensor;
+  const MaterialProperty<RealTensorValue> & _tensor;
   const unsigned int _i;
   const unsigned int _j;
 };

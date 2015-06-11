@@ -33,9 +33,9 @@ private:
   std::vector<VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;
 
-  MaterialProperty<Real> & _mu;
-  MaterialProperty<Real> & _gamma;
-  MaterialProperty<Real> & _tgrad_corr_mult;
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _gamma;
+  const MaterialProperty<Real> & _tgrad_corr_mult;
 
   bool _has_T;
   VariableGradient * _grad_T;

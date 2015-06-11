@@ -61,7 +61,7 @@ SymmElasticityTensor::operator*( const SymmTensor & x ) const
 Real
 SymmElasticityTensor::stiffness( const unsigned int i, const unsigned int j,
                                  const RealGradient & test,
-                                 const RealGradient & phi )
+                                 const RealGradient & phi ) const
 {
   RealGradient b;
   if (0 == i && 0 == j)

@@ -64,8 +64,8 @@ protected:
   unsigned _rhoe_var_number;
 
   // Integrated BC can use Mat. properties...
-  MaterialProperty<Real> & _dynamic_viscosity;
-  MaterialProperty<RealTensorValue> & _viscous_stress_tensor; // Includes _dynamic_viscosity
+  const MaterialProperty<Real> & _dynamic_viscosity;
+  const MaterialProperty<RealTensorValue> & _viscous_stress_tensor; // Includes _dynamic_viscosity
 
   // Required parameters
   Real _gamma;

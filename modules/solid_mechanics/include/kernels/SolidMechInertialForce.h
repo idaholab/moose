@@ -28,7 +28,7 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  MaterialProperty<Real> & _density;
+  const MaterialProperty<Real> & _density;
   const VariableValue & _u_old;
   const VariableValue & _vel_old;
   const VariableValue & _accel_old;

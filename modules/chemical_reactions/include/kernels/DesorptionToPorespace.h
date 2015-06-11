@@ -39,13 +39,13 @@ protected:
   unsigned int _conc_var;
 
   /// mass flow rate from matrix = mass flow rate to porespace
-  MaterialProperty<Real> & _mass_rate_from_matrix;
+  const MaterialProperty<Real> & _mass_rate_from_matrix;
 
   /// derivative of mass flow rate from matrix wrt concentration
-  MaterialProperty<Real> & _dmass_rate_from_matrix_dC;
+  const MaterialProperty<Real> & _dmass_rate_from_matrix_dC;
 
   /// derivative of mass flow rate from matrix wrt pressure
-  MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
+  const MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
 #endif //DESORPTIONTOPORESPACE

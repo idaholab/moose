@@ -83,7 +83,7 @@ private:
   std::vector<Real> _sto_v;
 
   /// Material property of hydraulic conductivity.
-  MaterialProperty<Real> & _cond;
+  const MaterialProperty<Real> & _cond;
   /// Coupled gradient of hydraulic head.
   VariableGradient & _grad_p;
 

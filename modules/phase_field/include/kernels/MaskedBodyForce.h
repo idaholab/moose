@@ -32,7 +32,7 @@ protected:
   virtual Real computeQpResidual();
 
   std::string _mask_property_name;
-  MaterialProperty<Real> & _mask;
+  const MaterialProperty<Real> & _mask;
 };
 
 #endif

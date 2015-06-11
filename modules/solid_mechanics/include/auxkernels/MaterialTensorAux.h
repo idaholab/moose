@@ -29,7 +29,7 @@ protected:
   virtual Real computeValue();
 
   MaterialTensorCalculator _material_tensor_calculator;
-  MaterialProperty<SymmTensor> & _tensor;
+  const MaterialProperty<SymmTensor> & _tensor;
 
   const bool _has_qp_select;
   const unsigned int _qp_select;

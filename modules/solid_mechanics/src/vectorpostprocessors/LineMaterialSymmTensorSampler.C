@@ -23,7 +23,7 @@ LineMaterialSymmTensorSampler::LineMaterialSymmTensorSampler(const std::string &
 }
 
 Real
-LineMaterialSymmTensorSampler::getScalarFromProperty(SymmTensor &property, const Point * curr_point)
+LineMaterialSymmTensorSampler::getScalarFromProperty(const SymmTensor &property, const Point * curr_point)
 {
   RealVectorValue direction;
   return getTensorQuantity(property, curr_point, direction);

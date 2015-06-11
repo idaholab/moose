@@ -87,7 +87,7 @@ public:
    * @param curr_point The point corresponding to this material property
    * @return A scalar value from this material property to be output
    */
-  virtual Real getScalarFromProperty(T & property, const Point * curr_point) = 0;
+  virtual Real getScalarFromProperty(const T & property, const Point * curr_point) = 0;
 
 protected:
   /// The beginning of the line
@@ -97,7 +97,7 @@ protected:
   Point _end;
 
   /// The material properties to be output
-  std::vector<MaterialProperty<T> *> _material_properties;
+  std::vector<const MaterialProperty<T> *> _material_properties;
 
   /// The mesh
   MooseMesh & _mesh;

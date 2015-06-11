@@ -38,7 +38,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  MaterialProperty<RankTwoTensor> * _d_stress_dc;
+  const MaterialProperty<RankTwoTensor> * _d_stress_dc;
   std::string _pff_jac_prop_name;
 
   const bool _c_coupled;

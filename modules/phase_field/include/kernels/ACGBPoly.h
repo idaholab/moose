@@ -34,8 +34,8 @@ private:
   VariableValue & _c;
   unsigned int _c_var;
 
-  MaterialProperty<Real> & _mu;
-  MaterialProperty<Real> & _gamma;
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _gamma;
 
   Real _en_ratio;
 };

@@ -33,7 +33,7 @@ private:
   VariableGradient & _grad_temp_y;
   VariableGradient & _grad_temp_z;
   const unsigned int _component;
-  MaterialProperty<Real> & _diffusion_coefficient;
+  const MaterialProperty<Real> & _diffusion_coefficient;
   Real _volume;
   Real _integral_value;
   const Real _scale;

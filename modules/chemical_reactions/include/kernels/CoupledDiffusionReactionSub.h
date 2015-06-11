@@ -66,7 +66,7 @@ private:
    * constructor!
    */
   /// Material property of dispersion-diffusion coefficient.
-  MaterialProperty<Real> & _diffusivity;
+  const MaterialProperty<Real> & _diffusivity;
 
   /// Weight of the equilibrium species concentration in the total primary species concentration.
   Real _weight;

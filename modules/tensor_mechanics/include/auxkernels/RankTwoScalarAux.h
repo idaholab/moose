@@ -28,7 +28,7 @@ public:
 
 protected:
   virtual Real computeValue();
-  MaterialProperty<RankTwoTensor> & _tensor;
+  const MaterialProperty<RankTwoTensor> & _tensor;
   MooseEnum _scalar_type;
 
 private:

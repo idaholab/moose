@@ -69,7 +69,7 @@ public:
    * @return Reference to the desired material property
    */
   template<typename T>
-  MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
 
   /**
    * Retrieve reference to material property (old time)
@@ -193,7 +193,7 @@ private:
 };
 
 template<typename T>
-MaterialProperty<T> &
+const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
   checkMaterialProperty(name);

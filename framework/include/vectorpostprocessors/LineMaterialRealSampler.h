@@ -48,7 +48,7 @@ public:
    * @param curr_point The point corresponding to this material property
    * @return A scalar value from this material property to be output
    */
-  virtual Real getScalarFromProperty(Real &property, const Point * /*curr_point*/);
+  virtual Real getScalarFromProperty(const Real & property, const Point * /*curr_point*/);
 };
 
 #endif

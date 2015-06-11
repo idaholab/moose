@@ -10,18 +10,18 @@
 #include "Diffusion.h"
 #include "Material.h"
 
-/**
- * Note: This class is named HeatConductionKernel instead of HeatConduction
- * to avoid a class with the namespace HeatConduction.  It is registered
- * as HeatConduction, which means it can be used by that name in the input
- * file.
- */
 //Forward Declarations
 class HeatConductionKernel;
 
 template<>
 InputParameters validParams<HeatConductionKernel>();
 
+/**
+ * Note: This class is named HeatConductionKernel instead of HeatConduction
+ * to avoid a class with the namespace HeatConduction.  It is registered
+ * as HeatConduction, which means it can be used by that name in the input
+ * file.
+ */
 class HeatConductionKernel : public Diffusion
 {
 public:
@@ -35,8 +35,8 @@ protected:
 
 private:
   const unsigned _dim;
-  MaterialProperty<Real> & _diffusion_coefficient;
-  MaterialProperty<Real> * const _diffusion_coefficient_dT;
-
+  const MaterialProperty<Real> & _diffusion_coefficient;
+  const MaterialProperty<Real> * const _diffusion_coefficient_dT;
 };
+
 #endif //HEATCONDUCTIONKERNEL_H

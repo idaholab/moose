@@ -118,16 +118,16 @@ protected:
   const RichardsRelPerm & _relperm_UO;
 
   /// viscosities
-  MaterialProperty<std::vector<Real> > &_viscosity;
+  const MaterialProperty<std::vector<Real> > &_viscosity;
 
   /// permeability*(grad(pressure) - density*gravity)  (a vector of these in the multiphase case)
-  MaterialProperty<std::vector<RealVectorValue> > & _flux_no_mob;
+  const MaterialProperty<std::vector<RealVectorValue> > & _flux_no_mob;
 
   /// d(_flux_no_mob)/d(variable)
-  MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dflux_no_mob_dv;
+  const MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dflux_no_mob_dv;
 
   /// d(_flux_no_mob)/d(grad(variable))
-  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dflux_no_mob_dgradv;
+  const MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dflux_no_mob_dgradv;
 
   /// number of nodes in this element
   unsigned int _num_nodes;

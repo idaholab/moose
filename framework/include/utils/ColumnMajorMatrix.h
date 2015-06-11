@@ -166,7 +166,7 @@ public:
   /**
    * Double contraction of two matrices ie A : B = Sum(A_ab * B_ba)
    */
-  Real doubleContraction(const ColumnMajorMatrix & rhs);
+  Real doubleContraction(const ColumnMajorMatrix & rhs) const;
 
   /**
    * The Euclidean norm of the matrix.
@@ -529,7 +529,7 @@ ColumnMajorMatrix::identity()
 }
 
 inline Real
-ColumnMajorMatrix::doubleContraction(const ColumnMajorMatrix & rhs)
+ColumnMajorMatrix::doubleContraction(const ColumnMajorMatrix & rhs) const
 {
   mooseAssert(_n_rows == rhs._n_cols && _n_cols == rhs._n_rows, "Matrices must be the same shape for a double contraction!");
 

@@ -44,7 +44,7 @@ protected:
 
   Real _value;
   std::string _diffusivity;
-  MaterialProperty<Real> * _diffusivity_prop;
+  const MaterialProperty<Real> * _diffusivity_prop;
 };
 
 #endif /* INSIDEUSEROBJECT_H */

@@ -42,7 +42,7 @@ private:
    */
   Real _value;
   std::string _prop_name;
-  MaterialProperty<Real> & _mat;
+  const MaterialProperty<Real> & _mat;
 };
 
 #endif //NEUMANNBC_H

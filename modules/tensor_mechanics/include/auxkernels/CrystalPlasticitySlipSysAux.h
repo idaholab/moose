@@ -25,7 +25,7 @@ class CrystalPlasticitySlipSysAux : public AuxKernel
   virtual Real computeValue();
 
  private:
-  MaterialProperty< std::vector<Real> > & _slipsysvar;
+  const MaterialProperty< std::vector<Real> > & _slipsysvar;
   const unsigned int _i;
 };
 

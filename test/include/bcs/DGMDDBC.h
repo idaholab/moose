@@ -54,7 +54,7 @@ private:
   Function & _func;
 
   std::string _prop_name;                       // name of the material property
-  MaterialProperty<Real> & _diff;               // diffusivity
+  const MaterialProperty<Real> & _diff;               // diffusivity
 
   Real _epsilon;
   Real _sigma;
