@@ -12,6 +12,12 @@ class PetscJacobianTester(RunApp):
 
     return params
 
+  def checkRunnable(self, options):
+    if options.enable_recover:
+      reason = 'skipped (PetscJacTester RECOVER)'
+      return (False, reason)
+    return RunApp.checkRunnable(self, options)
+
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
     self.specs['cli_args'].append('-snes_type test')

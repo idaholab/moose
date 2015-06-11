@@ -18,6 +18,7 @@
     input = 'cavity_pressure_rz.i'
     exodiff = 'cavity_pressure_rz_out.e'
     abs_zero = 1e-10
+    recover = false
   [../]
 
   [./test_rz_restart1]
@@ -25,6 +26,7 @@
     prereq = test_rz
     input = 'cavity_pressure_rz.i'
     cli_args = 'Executioner/num_steps=1'
+    recover = false
   [../]
 
   [./test_rz_restart2]

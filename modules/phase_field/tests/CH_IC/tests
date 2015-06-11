@@ -34,6 +34,7 @@
     scale_refine = 1
     valgrind = 'HEAVY'
     max_parallel = 1
+    recover = false # See #5207
   [../]
 
   [./circleIC_3D_test]

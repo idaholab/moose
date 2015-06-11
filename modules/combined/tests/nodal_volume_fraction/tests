@@ -11,5 +11,6 @@
    input = 'Avrami.i'
    csvdiff = 'Avrami.csv'
    rel_err = 1.0e-02
+   recover = false
   [../]
 []
