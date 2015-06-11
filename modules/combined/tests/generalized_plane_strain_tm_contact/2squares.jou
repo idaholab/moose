@@ -1,0 +1,23 @@
+reset
+create surface rectangle width 1 height 1
+volume 1 move 0.5 0.5
+create surface rectangle width 1 height 1
+volume 2 move 1.52 0.5
+volume all size 0.5
+
+mesh surface all
+
+block 1 surface 1
+block 2 surface 2
+block all element type QUAD4
+sideset 1 curve 3
+sideset 2 curve 4
+sideset 3 curve 1
+sideset 4 curve 2
+sideset 5 curve 7
+sideset 6 curve 8
+sideset 7 curve 5
+sideset 8 curve 6
+nodeset 10 surface 1 2
+
+export mesh '2squares.e' overwrite
