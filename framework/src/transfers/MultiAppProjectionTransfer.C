@@ -14,11 +14,13 @@
 #include "MultiAppProjectionTransfer.h"
 #include "FEProblem.h"
 #include "AddVariableAction.h"
+#include "MooseError.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/parallel_algebra.h"
 
 
 void assemble_l2_from(EquationSystems & es, const std::string & system_name)
@@ -229,44 +231,93 @@ MultiAppProjectionTransfer::assembleL2To(EquationSystems & es, const std::string
 void
 MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::string & system_name)
 {
-  unsigned int n_apps = _multi_app->numGlobalApps();
-  std::vector<NumericVector<Number> *> from_slns(n_apps, NULL);
-  std::vector<MeshFunction *> from_fns(n_apps, NULL);
-  std::vector<MeshTools::BoundingBox *> from_bbs(n_apps, NULL);
+  /********************
+  First step, get the bounding boxes and mesh functions for all the sub apps on
+  this processor.
+  ********************/
+  const unsigned int n_global_apps = _multi_app->numGlobalApps();
+  const unsigned int n_local_apps = _multi_app->numLocalApps();
+  std::vector<NumericVector<Number> *> from_slns(n_local_apps, NULL);
+  std::vector<MeshFunction *> from_fns(n_local_apps, NULL);
+  std::vector<std::pair<Point, Point> > bb_points(n_local_apps);
+  std::vector<MeshTools::BoundingBox> from_bbs(n_local_apps);
 
-  // get bounding box, mesh function and solution for each subapp
-  for (unsigned int i = 0; i < n_apps; i++)
+  unsigned int i_local = 0;
+  for (unsigned int i_global = 0; i_global < n_global_apps; i_global++)
   {
-    if (!_multi_app->hasLocalApp(i))
+    if (!_multi_app->hasLocalApp(i_global))
       continue;
 
     MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-    FEProblem & from_problem = *_multi_app->appProblem(i);
+    // Get the bounding box.
+    FEProblem & from_problem = *_multi_app->appProblem(i_global);
     EquationSystems & from_es = from_problem.es();
     MeshBase & from_mesh = from_es.get_mesh();
-    MeshTools::BoundingBox * app_box = new MeshTools::BoundingBox(MeshTools::processor_bounding_box(from_mesh, from_mesh.processor_id()));
-    from_bbs[i] = app_box;
+    MeshTools::BoundingBox app_box = MeshTools::BoundingBox(MeshTools::processor_bounding_box(from_mesh, from_mesh.processor_id()));
 
+    // Cast the bounding box into a pair of points to simplify MPI
+    // communication.  Translate the bounding box to the app's position.
+    bb_points[i_local] = static_cast<std::pair<Point, Point> >(app_box);
+    bb_points[i_local].first = bb_points[i_local].first + _multi_app->position(i_global);
+    bb_points[i_local].second = bb_points[i_local].second + _multi_app->position(i_global);
+    //from_bbs[i_local] = app_box;
+    from_bbs[i_local] = static_cast<MeshTools::BoundingBox>(bb_points[i_local]);
+
+    // Get a serialized copy of the subapp's solution vector.
     MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
     NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build(from_sys.comm()).release();
     serialized_from_solution->init(from_sys.n_dofs(), false, SERIAL);
-    // Need to pull down a full copy of this vector on every processor so we can get values in parallel
     from_sys.solution->localize(*serialized_from_solution);
-    from_slns[i] = serialized_from_solution;
+    from_slns[i_local] = serialized_from_solution;
 
+    // Get the subapp's mesh function.
     MeshFunction * from_func = new MeshFunction(from_es, *serialized_from_solution, from_sys.get_dof_map(), from_var_num);
     from_func->init(Trees::ELEMENTS);
     from_func->enable_out_of_mesh_mode(OutOfMeshValue);
-    from_fns[i] = from_func;
+    from_fns[i_local] = from_func;
 
     Moose::swapLibMeshComm(swapped);
+
+    i_local++;
   }
 
+  /********************
+  Next, serialize the bounding boxes, and keep track of how many apps (i.e. how
+  many bounding boxes) each processor has.
+  ********************/
+  std::vector<unsigned int> apps_per_proc(1, n_local_apps);
 
+  _communicator.allgather(bb_points);
+  _communicator.allgather(apps_per_proc, true);
+
+  if (apps_per_proc.size() != n_processors())
+    mooseError("Transfer failed to gather data from all processors.");
+
+  unsigned int n_sources = 0;
+  for (unsigned int i=0; i<n_processors(); i++)
+  {
+    n_sources += apps_per_proc[i];
+  }
+
+  if (bb_points.size() != n_sources)
+    mooseError("Transfer failed to gather data from all processors.");
+
+  std::vector<MeshTools::BoundingBox> bboxes(n_sources);
+  for (unsigned int i=0; i<n_sources; i++)
+  {
+    bboxes[i] = static_cast<MeshTools::BoundingBox>(bb_points[i]);
+  }
+
+  /********************
+  Now, check all the elements local to this processor and see if they overlap
+  with any of the bounding boxes from other processors.  Keep track of which
+  elements overlap with which processors.  Build vectors of quadrature points to
+  send to other processors for mesh function evaluations.
+  ********************/
   const MeshBase& mesh = es.get_mesh();
   const unsigned int dim = mesh.mesh_dimension();
 
@@ -276,21 +327,131 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   UniquePtr<FEBase> fe(FEBase::build(dim, fe_type));
   QGauss qrule(dim, fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule);
-  const std::vector<Real> & JxW = fe->get_JxW();
-  const std::vector<std::vector<Real> > & phi = fe->get_phi();
   const std::vector<Point> & xyz = fe->get_xyz();
+  std::vector<std::vector<Point> > outgoing_qps(n_processors());
+  std::vector< std::unordered_map<unsigned int, unsigned int> > element_index_map(n_processors());
+
+  for (unsigned int i_proc = 0, app0 = 0;
+       i_proc < n_processors();
+       i_proc++, app0 += apps_per_proc[i_proc])
+  {
+    MeshBase::const_element_iterator       el     = mesh.active_local_elements_begin();
+    const MeshBase::const_element_iterator end_el = mesh.active_local_elements_end();
+    for ( ; el != end_el; ++el)
+    {
+      const Elem* elem = *el;
+      fe->reinit (elem);
+
+      bool qp_hit = false;
+      for (unsigned int i_app = 0;
+           i_app < apps_per_proc[i_proc] && ! qp_hit; i_app++)
+      {
+        for (unsigned int qp = 0;
+             qp < qrule.n_points() && ! qp_hit; qp ++)
+        {
+          Point qpt = xyz[qp];
+          if (bboxes[app0 + i_app].contains_point(qpt))
+            qp_hit = true;
+        }
+      }
+
+      if (qp_hit)
+      {
+        // This processor's bounding box contains at least one qudrature point
+        // from this element.
+        element_index_map[i_proc][elem->id()] = outgoing_qps[i_proc].size();
+        for (unsigned int qp = 0; qp < qrule.n_points(); qp ++)
+        {
+          Point qpt = xyz[qp];
+          outgoing_qps[i_proc].push_back(qpt);
+        }
+      }
+    }
+  }
+
+  /********************
+  Request quadrature point evaluations from other processors and handle requests
+  sent to this processor.
+  ********************/
+  std::vector<std::vector<Real> > incoming_evals(n_processors());
+  std::vector<std::vector<unsigned int> > incoming_app_ids(n_processors());
+  for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
+  {
+    if (i_proc == processor_id())
+      continue;
+
+    //_console << "Processor " << processor_id() << " sending " << outgoing_qps[i_proc].size() << " points to processor " << i_proc << std::endl;
+    _communicator.send(i_proc, outgoing_qps[i_proc]);
+  }
+
+  for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
+  {
+    std::vector<Point> incoming_qps;
+    if (i_proc == processor_id())
+      incoming_qps = outgoing_qps[i_proc];
+    else
+      _communicator.receive(i_proc, incoming_qps);
+
+    std::vector<Real> outgoing_evals(incoming_qps.size(), OutOfMeshValue);
+    std::vector<unsigned int> outgoing_ids(incoming_qps.size(), -1); // -1 = largest unsigned int
+    for (unsigned int qp = 0; qp < incoming_qps.size(); qp++)
+    {
+      Point qpt = incoming_qps[qp];
+
+      // Loop until we've found the lowest-ranked app that actually contains
+      // the quadrature point.
+      for (unsigned int i_global = 0, i_local = 0;
+           i_global < n_global_apps && outgoing_evals[qp] == OutOfMeshValue;
+           i_global++)
+      {
+        if (!_multi_app->hasLocalApp(i_global))
+          continue;
+        if (from_bbs[i_local].contains_point(qpt))
+        {
+          outgoing_evals[qp] = (* from_fns[i_local])(qpt - _multi_app->position(i_global));
+          outgoing_ids[qp] = i_global;
+        }
+        i_local ++;
+      }
+    }
+
+    if (i_proc == processor_id())
+    {
+      incoming_evals[i_proc] = outgoing_evals;
+      incoming_app_ids[i_proc] = outgoing_ids;
+    }
+    else
+    {
+      _communicator.send(i_proc, outgoing_evals);
+      _communicator.send(i_proc, outgoing_ids);
+    }
+  }
+
+  /********************
+  Gather all of the qp evaluations, find the best one for each qp, and define
+  the system.
+  ********************/
+  for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
+  {
+    if (i_proc == processor_id())
+      continue;
+
+    _communicator.receive(i_proc, incoming_evals[i_proc]);
+    _communicator.receive(i_proc, incoming_app_ids[i_proc]);
+  }
 
   const DofMap& dof_map = system.get_dof_map();
   DenseMatrix<Number> Ke;
   DenseVector<Number> Fe;
   std::vector<dof_id_type> dof_indices;
+  const std::vector<Real> & JxW = fe->get_JxW();
+  const std::vector<std::vector<Real> > & phi = fe->get_phi();
 
   MeshBase::const_element_iterator       el     = mesh.active_local_elements_begin();
   const MeshBase::const_element_iterator end_el = mesh.active_local_elements_end();
   for ( ; el != end_el; ++el)
   {
     const Elem* elem = *el;
-
     fe->reinit (elem);
 
     dof_map.dof_indices (elem, dof_indices);
@@ -300,24 +461,36 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
     for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
     {
       Point qpt = xyz[qp];
-      Real f = 0.;
-      for (unsigned int app = 0; app < n_apps; app++)
+
+      unsigned int lowest_app_rank = -1; // -1 = largest unsigned int
+      Real meshfun_eval = 0.;
+      for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
       {
-        Point pt = qpt - _multi_app->position(app);
-        if (from_bbs[app] != NULL && from_bbs[app]->contains_point(pt))
-        {
-          MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-          f = (*from_fns[app])(pt);
-          Moose::swapLibMeshComm(swapped);
-          break;
-        }
+        std::unordered_map<unsigned int, unsigned int> & map = element_index_map[i_proc];
+        // Ignore this processor if the element wasn't found in it's bounding
+        // box.
+        if (map.find(elem->id()) == map.end())
+          continue;
+        unsigned int qp0 = map[elem->id()];
+
+        // Ignore this processor if it's app has a higher rank than the
+        // previously found lowest app rank.
+        if (incoming_app_ids[i_proc][qp0 + qp] >= lowest_app_rank)
+          continue;
+
+        // Ignore this processor if the qp was actually outside the processor's
+        // mesh.
+        if (incoming_evals[i_proc][qp0 + qp] == OutOfMeshValue)
+          continue;
+
+        meshfun_eval = incoming_evals[i_proc][qp0 + qp];
       }
 
       // Now compute the element matrix and RHS contributions.
       for (unsigned int i=0; i<phi.size(); i++)
       {
         // RHS
-        Fe(i) += JxW[qp] * (f * phi[i][qp]);
+        Fe(i) += JxW[qp] * (meshfun_eval * phi[i][qp]);
 
         if (_compute_matrix)
           for (unsigned int j = 0; j < phi.size(); j++)
@@ -334,10 +507,9 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
     }
   }
 
-  for (unsigned int i = 0; i < n_apps; i++)
+  for (unsigned int i = 0; i < n_local_apps; i++)
   {
     delete from_fns[i];
-    delete from_bbs[i];
     delete from_slns[i];
   }
 }
