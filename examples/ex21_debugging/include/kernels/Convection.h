@@ -37,7 +37,7 @@ protected:
 
 private:
 
-  MaterialProperty<RealGradient> & _velocity;
+  const MaterialProperty<RealGradient> & _velocity;
 };
 
 #endif //CONVECTION_H

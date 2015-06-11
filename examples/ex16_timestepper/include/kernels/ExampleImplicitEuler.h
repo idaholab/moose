@@ -34,7 +34,7 @@ protected:
 
   virtual Real computeQpJacobian();
 
-  MaterialProperty<Real> & _time_coefficient;
+  const MaterialProperty<Real> & _time_coefficient;
 };
 
 #endif //EXAMPLEIMPLICITEULER
