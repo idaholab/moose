@@ -18,11 +18,11 @@ protected:
 
 private:
   unsigned int _sd;
-  MaterialProperty<Real> & _phi1;
-  MaterialProperty<Real> & _phi;
-  MaterialProperty<Real> & _phi2;
-  MaterialProperty<unsigned int> & _phase;
-  MaterialProperty<unsigned int> & _sym;
+  const MaterialProperty<Real> & _phi1;
+  const MaterialProperty<Real> & _phi;
+  const MaterialProperty<Real> & _phi2;
+  const MaterialProperty<unsigned int> & _phase;
+  const MaterialProperty<unsigned int> & _sym;
 };
 
 #endif //EULER2RGBAUX_H
