@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'function_value_pps.i'
+    exodiff = 'function_value_pps_out.e'
+  [../]
+[]
