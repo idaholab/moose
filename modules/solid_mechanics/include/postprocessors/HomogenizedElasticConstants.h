@@ -59,7 +59,7 @@ private:
   VariableGradient & _grad_disp_y_zx;
   VariableGradient & _grad_disp_z_zx;
 
-  MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
+  const MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
   const unsigned int _column, _row;
   unsigned _I, _J;
   unsigned _l, _k;

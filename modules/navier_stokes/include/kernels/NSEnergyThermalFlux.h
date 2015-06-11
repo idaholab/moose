@@ -37,7 +37,7 @@ protected:
   VariableGradient& _grad_temp;
 
   // Material properties
-  MaterialProperty<Real> &_thermal_conductivity;
+  const MaterialProperty<Real> &_thermal_conductivity;
 
   // A helper object for computing temperature gradient and Hessians.
   // Constructed via a reference to ourself so we can access all of our data.

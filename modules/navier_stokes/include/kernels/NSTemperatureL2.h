@@ -47,7 +47,7 @@ protected:
   unsigned int _w_vel_var;
   VariableValue & _w_vel;
 
-  MaterialProperty<Real> & _c_v;
+  const MaterialProperty<Real> & _c_v;
 };
 
 #endif

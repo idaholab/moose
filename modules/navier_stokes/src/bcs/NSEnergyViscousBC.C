@@ -103,7 +103,7 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
   // Note: This function requires both _vst_derivs *and* _temp_derivs
 
   // Convenience variables
-  RealTensorValue& tau = _viscous_stress_tensor[_qp];
+  const RealTensorValue & tau = _viscous_stress_tensor[_qp];
 
   Real rho  = _rho[_qp];
   Real phij = _phi[_j][_qp];

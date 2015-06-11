@@ -36,7 +36,7 @@ NSMomentumViscousFlux::NSMomentumViscousFlux(const std::string & name, InputPara
 Real NSMomentumViscousFlux::computeQpResidual()
 {
   // Yay for less typing!
-  RealTensorValue & vst = _viscous_stress_tensor[_qp];
+  const RealTensorValue & vst = _viscous_stress_tensor[_qp];
 
   // _component'th column of vst...
   RealVectorValue vec(vst(0,_component),

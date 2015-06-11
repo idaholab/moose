@@ -32,7 +32,7 @@ protected:
   virtual Real computeQpResidual();
 
   std::string _propname;
-  MaterialProperty<Real> & _mat;
+  const MaterialProperty<Real> & _mat;
 };
 
 #endif //MATERIALEIGENKERNEL_H

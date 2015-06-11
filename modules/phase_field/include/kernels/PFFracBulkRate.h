@@ -39,11 +39,11 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   virtual Real computeDFDOP(PFFunctionType type);
   ///Critical energy release rate for fracture
-  MaterialProperty<Real> & _gc_prop;
+  const MaterialProperty<Real> & _gc_prop;
   ///Contribution from positive component of strain to energy
-  MaterialProperty<Real> & _G0_pos;
+  const MaterialProperty<Real> & _G0_pos;
   ///Variation of positive component of energy with strain
-  MaterialProperty<RankTwoTensor> & _dG0_pos_dstrain;
+  const MaterialProperty<RankTwoTensor> & _dG0_pos_dstrain;
   ///Auxiliary variable: beta = Laplacian of c
   VariableValue & _betaval;
   unsigned int _beta_var;

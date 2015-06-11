@@ -35,7 +35,7 @@ protected:
   virtual Real computeQpJacobian();
 
   std::string _prop_name;
-  MaterialProperty<Real> * _diff;
+  const MaterialProperty<Real> * _diff;
 };
 
 #endif //MATDIFFUSION_H

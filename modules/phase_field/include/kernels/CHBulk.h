@@ -39,11 +39,11 @@ protected:
   virtual RealGradient precomputeQpJacobian();
   virtual RealGradient computeGradDFDCons(PFFunctionType type) = 0;
 
-  MaterialProperty<Real> & _M;
+  const MaterialProperty<Real> & _M;
 
 private:
   bool _has_MJac;
-  MaterialProperty<Real> * _DM;
+  const MaterialProperty<Real> * _DM;
 };
 
 #endif //CHBULK_H

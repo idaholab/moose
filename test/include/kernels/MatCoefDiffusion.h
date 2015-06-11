@@ -34,7 +34,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   std::string _prop_name;
-  MaterialProperty<Real> * _coef;
+  const MaterialProperty<Real> * _coef;
 };
 
 #endif //MATCOEFDIFFUSION_H

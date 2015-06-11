@@ -36,8 +36,8 @@ protected:
 
   std::string _base_name;
 
-  MaterialProperty<RankTwoTensor> & _stress;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  const MaterialProperty<RankTwoTensor> & _stress;
+  const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
   const unsigned int _component;

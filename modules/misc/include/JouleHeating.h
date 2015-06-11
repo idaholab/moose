@@ -28,7 +28,7 @@ protected:
   virtual Real computeQpResidual();
 
   VariableGradient& _grad_potential;
-  MaterialProperty<Real> & _thermal_conductivity;
+  const MaterialProperty<Real> & _thermal_conductivity;
 };
 
 #endif

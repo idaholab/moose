@@ -32,7 +32,7 @@ protected:
 
 private:
 
-  MaterialProperty<RankTwoTensor> & _tensor;
+  const MaterialProperty<RankTwoTensor> & _tensor;
   const unsigned int _i;
   const unsigned int _j;
 };

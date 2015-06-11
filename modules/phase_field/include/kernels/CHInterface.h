@@ -35,13 +35,13 @@ private:
   std::string _Dmob_name;
   std::string _grad_mob_name;
 
-  MaterialProperty<Real> & _kappa;
-  MaterialProperty<Real> & _M;
+  const MaterialProperty<Real> & _kappa;
+  const MaterialProperty<Real> & _M;
   bool _has_MJac;
-  MaterialProperty<Real> * _DM;
-  MaterialProperty<RealGradient> & _grad_M;
-  MaterialProperty<RealGradient> * _Dgrad_Mnp;
-  MaterialProperty<Real> * _Dgrad_Mngp;
+  const MaterialProperty<Real> * _DM;
+  const MaterialProperty<RealGradient> & _grad_M;
+  const MaterialProperty<RealGradient> * _Dgrad_Mnp;
+  const MaterialProperty<Real> * _Dgrad_Mngp;
 
   VariableSecond & _second_u;
   VariableTestSecond & _second_test;

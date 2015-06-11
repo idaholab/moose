@@ -37,25 +37,25 @@ protected:
   //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // Material properties
-  MaterialProperty<RealTensorValue>& _viscous_stress_tensor;
-  MaterialProperty<Real>& _dynamic_viscosity;
-  MaterialProperty<Real>& _thermal_conductivity;
+  const MaterialProperty<RealTensorValue>& _viscous_stress_tensor;
+  const MaterialProperty<Real>& _dynamic_viscosity;
+  const MaterialProperty<Real>& _thermal_conductivity;
 
   // SUPG-related material properties.
-  MaterialProperty<Real> & _hsupg;
-  MaterialProperty<Real> & _tauc;
-  MaterialProperty<Real> & _taum;
-  MaterialProperty<Real> & _taue;
-  MaterialProperty<std::vector<Real> > & _strong_residuals;
+  const MaterialProperty<Real> & _hsupg;
+  const MaterialProperty<Real> & _tauc;
+  const MaterialProperty<Real> & _taum;
+  const MaterialProperty<Real> & _taue;
+  const MaterialProperty<std::vector<Real> > & _strong_residuals;
 
   // Momentum equation inviscid flux matrices
-  MaterialProperty<std::vector<RealTensorValue> >& _calA;
+  const MaterialProperty<std::vector<RealTensorValue> >& _calA;
 
   // "velocity column" matrices
-  MaterialProperty<std::vector<RealTensorValue> >& _calC;
+  const MaterialProperty<std::vector<RealTensorValue> >& _calC;
 
   // Energy equation inviscid flux matrices
-  MaterialProperty<std::vector<std::vector<RealTensorValue> > >& _calE;
+  const MaterialProperty<std::vector<std::vector<RealTensorValue> > >& _calE;
 
   // "Old" (from previous timestep) coupled variable values.
 //  VariableValue& _rho_old;

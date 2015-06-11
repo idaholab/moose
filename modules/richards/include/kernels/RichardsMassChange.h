@@ -51,22 +51,22 @@ protected:
   bool _use_supg;
 
   /// fluid mass (or fluid masses in multiphase) at quadpoints
-  MaterialProperty<std::vector<Real> > & _mass;
+  const MaterialProperty<std::vector<Real> > & _mass;
 
   /// d(fluid mass_i)/d(var_j)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dmass;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dmass;
 
   /// old value of fluid mass (or fluid masses in multiphase) at quadpoints
-  MaterialProperty<std::vector<Real> > & _mass_old;
+  const MaterialProperty<std::vector<Real> > & _mass_old;
 
   /// tau_SUPG
-  MaterialProperty<std::vector<RealVectorValue> > & _tauvel_SUPG;
+  const MaterialProperty<std::vector<RealVectorValue> > & _tauvel_SUPG;
 
   /// derivative of tau_SUPG wrt grad(variable)
-  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dtauvel_SUPG_dgradv;
+  const MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dtauvel_SUPG_dgradv;
 
   /// deriv of tau_SUPG wrt variable
-  MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dtauvel_SUPG_dv;
+  const MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dtauvel_SUPG_dv;
 
   /**
    * Derivative of residual with respect to wrt_num Richards variable

@@ -32,9 +32,9 @@ protected:
 
   Real calculateJacobian( unsigned int ivar, unsigned int jvar );
 
-  MaterialProperty<SymmTensor> & _stress;
-  MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
-  MaterialProperty<SymmTensor> & _d_stress_dT;
+  const MaterialProperty<SymmTensor> & _stress;
+  const MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
+  const MaterialProperty<SymmTensor> & _d_stress_dT;
 
 private:
   const unsigned int _component;

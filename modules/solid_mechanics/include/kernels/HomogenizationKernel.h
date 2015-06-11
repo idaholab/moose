@@ -27,7 +27,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
+  const MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
 
 private:
   const unsigned int _component;

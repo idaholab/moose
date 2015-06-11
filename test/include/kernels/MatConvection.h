@@ -33,14 +33,13 @@ protected:
   virtual Real computeQpJacobian();
 
   std::string _conv_prop_name;
-  MaterialProperty<Real> & _conv_prop;
+  const MaterialProperty<Real> & _conv_prop;
 
   RealVectorValue _velocity;
 
   Real _x;
   Real _y;
   Real _z;
-
 };
 
 #endif // MATCONVECTION_H

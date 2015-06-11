@@ -65,10 +65,10 @@ protected:
   unsigned int _pvar;
 
   /// fluid porepressure (or porepressures in case of multiphase)
-  MaterialProperty<std::vector<Real> > &_pp;
+  const MaterialProperty<std::vector<Real> > &_pp;
 
   /// d(porepressure_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_dpp_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > &_dpp_dv;
 
   /// vector of Dirac Points' x positions
   std::vector<Real> _xs;

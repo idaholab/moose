@@ -30,7 +30,7 @@ protected:
   virtual Real computeValue();
 
 private:
-  MaterialProperty<Real> & _eqv_plastic_strain;
+  const MaterialProperty<Real> & _eqv_plastic_strain;
 };
 
 #endif // FINITESTRAINPLASTICAUX_H

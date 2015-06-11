@@ -65,7 +65,7 @@ protected:
   Function & _m_func;
 
   /// porepressure (or porepressure vector for multiphase problems)
-  MaterialProperty<std::vector<Real> > & _pp;
+  const MaterialProperty<std::vector<Real> > & _pp;
 
 };
 

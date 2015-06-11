@@ -28,10 +28,10 @@ public:
 protected:
   virtual Real computeValue();
 
-  MaterialProperty<Real> & _prop_fa;
-  MaterialProperty<Real> & _prop_fb;
-  MaterialProperty<Real> & _prop_h;
-  MaterialProperty<Real> & _prop_g;
+  const MaterialProperty<Real> & _prop_fa;
+  const MaterialProperty<Real> & _prop_fb;
+  const MaterialProperty<Real> & _prop_h;
+  const MaterialProperty<Real> & _prop_g;
 
   Real _w;
 };

@@ -66,10 +66,10 @@ protected:
   unsigned int _pvar;
 
   /// porepressure (or porepressure vector for multiphase problems)
-  MaterialProperty<std::vector<Real> > & _pp;
+  const MaterialProperty<std::vector<Real> > & _pp;
 
   /// d(porepressure_i)/dvariable_j
-  MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
 };
 
 #endif //RICHARDSHALFGAUSSIANSINK

@@ -56,7 +56,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Material property of porosity
-  MaterialProperty<Real> & _porosity;
+  const MaterialProperty<Real> & _porosity;
 };
 
 #endif // PRIMARYTIMEDERIVATIVE

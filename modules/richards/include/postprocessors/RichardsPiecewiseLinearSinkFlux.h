@@ -62,19 +62,19 @@ protected:
   unsigned int _pvar;
 
   /// porepressure values (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > &_pp;
+  const MaterialProperty<std::vector<Real> > &_pp;
 
   /// fluid viscosity
-  MaterialProperty<std::vector<Real> > &_viscosity;
+  const MaterialProperty<std::vector<Real> > &_viscosity;
 
   /// medium permeability
-  MaterialProperty<RealTensorValue> & _permeability;
+  const MaterialProperty<RealTensorValue> & _permeability;
 
   /// fluid relative permeability
-  MaterialProperty<std::vector<Real> > &_rel_perm;
+  const MaterialProperty<std::vector<Real> > &_rel_perm;
 
   /// fluid density
-  MaterialProperty<std::vector<Real> > &_density;
+  const MaterialProperty<std::vector<Real> > &_density;
 
 };
 

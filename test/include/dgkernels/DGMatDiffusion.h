@@ -46,8 +46,8 @@ protected:
   Real _sigma;
 
   std::string _prop_name;                       // name of the material property
-  MaterialProperty<Real> & _diff;               // diffusivity
-  MaterialProperty<Real> & _diff_neighbor;      // diffusivity
+  const MaterialProperty<Real> & _diff;               // diffusivity
+  const MaterialProperty<Real> & _diff_neighbor;      // diffusivity
 };
 
 #endif

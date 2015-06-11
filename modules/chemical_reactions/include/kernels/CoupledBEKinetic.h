@@ -51,7 +51,7 @@ protected:
 
 private:
   /// Material property of porosity.
-  MaterialProperty<Real> & _porosity;
+  const MaterialProperty<Real> & _porosity;
 
   /// Weight of the kinetic mineral concentration in the total primary species concentration.
   std::vector<Real> _weight;

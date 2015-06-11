@@ -38,7 +38,7 @@ protected:
 
   std::string _prop_name;
 
-  MaterialProperty<Real> & _prop;
+  const MaterialProperty<Real> & _prop;
 };
 
 #endif //REALPROPERTYOUTPUT_H

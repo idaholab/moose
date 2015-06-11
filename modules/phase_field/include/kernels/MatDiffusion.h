@@ -28,7 +28,7 @@ protected:
 private:
   std::string _D_name;
 
-  MaterialProperty<Real> & _D;
+  const MaterialProperty<Real> & _D;
 };
 
 #endif //MATDIFFUSION_H
