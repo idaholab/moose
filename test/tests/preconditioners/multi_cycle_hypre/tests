@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'multi_cycle_hypre.i'
+    exodiff = 'multi_cycle_hypre_out.e'
+  [../]
+[]
