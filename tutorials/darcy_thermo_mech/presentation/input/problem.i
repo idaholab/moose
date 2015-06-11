@@ -2,10 +2,7 @@
   style = 'inl'
   [./problem]
     type = INLDjangoWikiSet
-    wiki = 'MooseTutorials/DarcyThermoMechanical/Problem'
-    title = 'Problem Statement'
-    [./Images]
-      width = 570px
-    [../]
+    wiki = 'MooseTutorials/DarcyThermoMechanical'
+    active = 'problem-overview'
   [../]
 []

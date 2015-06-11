@@ -151,22 +151,6 @@ class RemarkSlide(MooseObject):
 
     return markdown
 
-
-  ##
-  # Parse the markdown
-  #
-  # This method should overloaded to handle special syntax
-  def parse(self, markdown):
-
-    # Insert prefix markdown
-    if self.isParamValid('prefix'):
-      markdown = self.getParam('prefix') + '\n' + markdown
-
-    # Print a message of the slide that is being created
-    print ' '*4, 'SLIDE:', self.name()
-    return markdown
-
-
   ##
   # Parse the markdown
   #
@@ -217,13 +201,6 @@ class RemarkSlide(MooseObject):
     for key in self.parameters().groupKeys('properties'):
       if self.isParamValid(key):
           markdown = key + ':' + self.parameters()[key] + '\n' + markdown
-
-    # Adjust code starting with *
-    # Remark automatically highlights code lines starting with *, this is disabled
-    # by removing the background in the css and adding an extract *, I hope Remark
-    # will get updated so this is not necessary.
-    regex = r'```.*?```'
-    markdown = re.sub(regex, self.__subLineHighlight, markdown, flags = re.DOTALL | re.MULTILINE)
 
     # Search for github code urls
     if self.getParam('auto_insert_github_code'):
@@ -308,6 +285,10 @@ class RemarkSlide(MooseObject):
     # Insert link at bottom
     if link == 'bottom':
       block += match.group(0)
+
+    # Scrolling not automatic with input files for some reason, so make sure it works
+    if language == 'text':
+      block = '.scroll[\n' + block + '\n]\n'
 
     return block
 

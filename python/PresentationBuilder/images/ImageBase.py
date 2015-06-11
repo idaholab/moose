@@ -1,4 +1,4 @@
-import urllib
+import urllib, re
 from FactorySystem import MooseObject
 import utils
 
@@ -38,6 +38,10 @@ class ImageBase(MooseObject):
     self._download = True
     if self.isParamValid('download'):
       self.__download = self.parameters()['download']
+
+    # Images are formated has html, if backticks where added to equations then need to be removed
+    if self.isParamValid('caption'):
+      self._pars['caption'] = re.sub(r'`(\$.*?\$)`', r'\1', self._pars['caption'])
 
   ##
   # Perform the matching
