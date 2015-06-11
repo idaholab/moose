@@ -16,6 +16,12 @@ class PetscJacobianTester(RunApp):
     RunApp.__init__(self, name, params)
     self.specs['cli_args'].append('-snes_type test')
 
+  def checkRunnable(self, options):
+    if options.enable_recover:
+      reason = 'skipped (RunException RECOVER)'
+      return (False, reason)
+    return RunApp.checkRunnable(self, options)
+
   def processResults(self, moose_dir, retcode, options, output):
     m = re.search("Norm of matrix ratio (\S+) difference (\S+) \(user-defined state\)", output, re.MULTILINE | re.DOTALL);
     if m:
