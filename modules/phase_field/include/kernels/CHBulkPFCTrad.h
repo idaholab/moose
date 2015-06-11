@@ -18,9 +18,9 @@ protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);
 
 private:
-  MaterialProperty<Real> & _C0;
-  MaterialProperty<Real> & _a;
-  MaterialProperty<Real> & _b;
+  const MaterialProperty<Real> & _C0;
+  const MaterialProperty<Real> & _a;
+  const MaterialProperty<Real> & _b;
 };
 
 #endif //CHBULKPFCTRAD_H

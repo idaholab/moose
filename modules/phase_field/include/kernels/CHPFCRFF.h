@@ -28,9 +28,9 @@ protected:
 
 private:
 
-  MaterialProperty<Real> & _M;
+  const MaterialProperty<Real> & _M;
   bool _has_MJac;
-  MaterialProperty<Real> * _DM;
+  const MaterialProperty<Real> * _DM;
   MooseEnum _log_approach;
   Real _tol;
   std::vector<unsigned int> _vals_var;

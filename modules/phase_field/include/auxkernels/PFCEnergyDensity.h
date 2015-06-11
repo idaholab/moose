@@ -18,11 +18,11 @@ protected:
   virtual Real computeValue();
 
   std::vector<VariableValue *> _vals;
-  std::vector<MaterialProperty<Real>* > _coeff;
+  std::vector<const MaterialProperty<Real>* > _coeff;
 
   unsigned int _order;
-  MaterialProperty<Real> & _a;
-  MaterialProperty<Real> & _b;
+  const MaterialProperty<Real> & _a;
+  const MaterialProperty<Real> & _b;
 };
 
 #endif //PFC_ENERGY_DENSITY_H

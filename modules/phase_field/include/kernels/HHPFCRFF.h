@@ -23,7 +23,7 @@ protected:
   Real _kernel_sign;
 
   std::string _prop_name;
-  MaterialProperty<Real> & _prop;
+  const MaterialProperty<Real> & _prop;
 
   bool _has_coupled_var;
   VariableValue * _coupled_var;

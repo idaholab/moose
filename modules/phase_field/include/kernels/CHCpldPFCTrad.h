@@ -20,7 +20,7 @@ protected:
 
 private:
   std::string _coeff_name;
-  MaterialProperty<Real> & _coeff;
+  const MaterialProperty<Real> & _coeff;
 };
 
 #endif //CHCPLDPFCTRAD_H
