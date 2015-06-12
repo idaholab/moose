@@ -88,6 +88,7 @@ public:
   std::set<EFAnode*> get_edge_nodes(unsigned int edge_id) const;
   bool getEdgeNodeParaCoor(EFAnode* node, std::vector<double> &para_coor) const;
   FaceNode* get_interior_node(unsigned int interior_node_id) const;
+  void delete_interior_nodes();
 
   unsigned int num_edges() const;
   void set_edge(unsigned int edge_id, EFAedge* edge);

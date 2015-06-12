@@ -44,6 +44,7 @@ public:
   virtual unsigned int get_num_cuts() const;
   virtual std::set<EFAnode*> get_all_nodes() const;
   virtual bool isConnected(EFAfragment *other_fragment) const;
+  virtual void remove_invalid_embedded(std::map<unsigned int, EFAnode*> &EmbeddedNodes);
 
   // EFAfragment2D specific methods
   void combine_tip_edges();

@@ -699,23 +699,8 @@ EFAelement2D::update_fragments(const std::set<EFAelement*> &CrackTipElements,
 
   // if a fragment only has 1 intersection which is in an interior edge
   // remove this embedded node (MUST DO THIS AFTER combine_tip_edges())
-  if (_fragments.size() == 1 && _fragments[0]->get_num_cuts() == 1)
-  {
-    for (unsigned int i = 0; i < _fragments[0]->num_edges(); ++i)
-    {
-      if (_fragments[0]->is_edge_interior(i) &&
-          _fragments[0]->get_edge(i)->has_intersection())
-      {
-        if (_interior_nodes.size() != 1)
-          mooseError("The element must have 1 interior node at this point");
-        deleteFromMap(EmbeddedNodes,_fragments[0]->get_edge(i)->get_embedded_node(0));
-        _fragments[0]->get_edge(i)->remove_embedded_node(); // set pointer to NULL
-        delete _interior_nodes[0];
-        _interior_nodes.clear();
-        break;
-      }
-    } // i
-  }
+  if (_fragments.size() == 1)
+    _fragments[0]->remove_invalid_embedded(EmbeddedNodes);
 
   // for an element with no fragment, create one fragment identical to the element
   if (_fragments.size() == 0)
@@ -1187,6 +1172,14 @@ EFAelement2D::get_interior_node(unsigned int interior_node_id) const
     return _interior_nodes[interior_node_id];
   else
     mooseError("interior_node_id out of bounds");
+}
+
+void
+EFAelement2D::delete_interior_nodes()
+{
+  for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
+    delete _interior_nodes[i];
+  _interior_nodes.clear();
 }
 
 unsigned int

@@ -42,6 +42,7 @@ public:
   virtual unsigned int get_num_cuts() const;
   virtual std::set<EFAnode*> get_all_nodes() const;
   virtual bool isConnected(EFAfragment *other_fragment) const;
+  virtual void remove_invalid_embedded(std::map<unsigned int, EFAnode*> &EmbeddedNodes);
 
   // EFAfragment3D specific methods
   void combine_tip_faces();
@@ -57,7 +58,6 @@ public:
   std::vector<EFAfragment3D*> split();
   void create_adjacent_face_ix();
   EFAface* get_adjacent_face(unsigned int face_id, unsigned int edge_id) const;
-  void remove_invalid_embedded(std::map<unsigned int, EFAnode*> &EmbeddedNodes);
   void remove_embedded_node(EFAnode* emb_node);
   bool hasFaceWithOneCut() const;
   void get_node_info(std::vector<std::vector<unsigned int> > &face_node_ix,

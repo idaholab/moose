@@ -19,20 +19,20 @@
 
 class FaceNode
 {
-  public:
+public:
 
   FaceNode(EFAnode* node, double xi, double eta);
   FaceNode(const FaceNode & other_face_node);
 
   ~FaceNode();
 
-  private:
+private:
 
   EFAnode * _node;
   double _xi;
   double _eta;
 
-  public:
+public:
 
   EFAnode * get_node();
   double get_para_coords(unsigned int i);

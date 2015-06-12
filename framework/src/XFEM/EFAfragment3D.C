@@ -120,6 +120,57 @@ EFAfragment3D::isConnected(EFAfragment* other_fragment) const
 }
 
 void
+EFAfragment3D::remove_invalid_embedded(std::map<unsigned int, EFAnode*> &EmbeddedNodes)
+{
+  // N.B. this method is only called before we update fragments
+  // N.B. an embedded node is valid IF at least one of its host faces is exterior and has more than 1 cuts
+  // TODO: the invalid cases are generalized from 2D. The method may need improvements in 3D
+  if (hasFaceWithOneCut())
+  {
+    // build a local inverse map for all emb cut nodes in this fragment
+    std::map<EFAnode*, std::vector<EFAface*> > emb_inverse_map;
+    for (unsigned int i = 0; i < _faces.size(); ++i)
+    {
+      for (unsigned int j = 0; j < _faces[i]->num_edges(); ++j)
+      {
+        if (_faces[i]->get_edge(j)->has_intersection())
+        {
+          EFAnode* emb_node = _faces[i]->get_edge(j)->get_embedded_node(0);
+          emb_inverse_map[emb_node].push_back(_faces[i]);
+        }
+      } // i
+    } // j
+
+    // find all invalid embedded nodes
+    std::vector<EFAnode*> invalid_emb;
+    std::map<EFAnode*, std::vector<EFAface*> >::iterator it;
+    for (it = emb_inverse_map.begin(); it != emb_inverse_map.end(); ++it)
+    {
+      EFAnode* emb_node = it->first;
+      std::vector<EFAface*> &emb_faces = it->second;
+      if (emb_faces.size() != 2)
+        mooseError("one embedded node must be owned by 2 faces");
+      unsigned int counter = 0;
+      for (unsigned int i = 0; i < emb_faces.size(); ++i)
+      {
+        unsigned int face_id = get_face_id(emb_faces[i]);
+        if (!is_face_interior(face_id) && emb_faces[i]->has_intersection())
+          counter += 1; // count the appropriate emb's faces
+      } // i
+      if (counter == 0)
+        invalid_emb.push_back(emb_node);
+    } // it
+
+    // delete all invalid emb nodes
+    for (unsigned int i = 0; i < invalid_emb.size(); ++i)
+    {
+      deleteFromMap(EmbeddedNodes, invalid_emb[i]);
+      _host_elem->remove_embedded_node(invalid_emb[i], true); // also remove from neighbors
+    } // i
+  }
+}
+
+void
 EFAfragment3D::combine_tip_faces()
 {
   if (!_host_elem)
@@ -305,57 +356,6 @@ EFAface*
 EFAfragment3D::get_adjacent_face(unsigned int face_id, unsigned int edge_id) const
 {
   return _adjacent_face_ix[face_id][edge_id]; // possibly NULL
-}
-
-void
-EFAfragment3D::remove_invalid_embedded(std::map<unsigned int, EFAnode*> &EmbeddedNodes)
-{
-  // N.B. this method is only called before we update fragments
-  // N.B. an embedded node is valid IF at least one of its host faces is exterior and has more than 1 cuts
-  // TODO: the invalid cases are generalized from 2D. The method may need improvements in 3D
-  if (hasFaceWithOneCut())
-  {
-    // build a local inverse map for all emb cut nodes in this fragment
-    std::map<EFAnode*, std::vector<EFAface*> > emb_inverse_map;
-    for (unsigned int i = 0; i < _faces.size(); ++i)
-    {
-      for (unsigned int j = 0; j < _faces[i]->num_edges(); ++j)
-      {
-        if (_faces[i]->get_edge(j)->has_intersection())
-        {
-          EFAnode* emb_node = _faces[i]->get_edge(j)->get_embedded_node(0);
-          emb_inverse_map[emb_node].push_back(_faces[i]);
-        }
-      } // i
-    } // j
-
-    // find all invalid embedded nodes
-    std::vector<EFAnode*> invalid_emb;
-    std::map<EFAnode*, std::vector<EFAface*> >::iterator it;
-    for (it = emb_inverse_map.begin(); it != emb_inverse_map.end(); ++it)
-    {
-      EFAnode* emb_node = it->first;
-      std::vector<EFAface*> &emb_faces = it->second;
-      if (emb_faces.size() != 2)
-        mooseError("one embedded node must be owned by 2 faces");
-      unsigned int counter = 0;
-      for (unsigned int i = 0; i < emb_faces.size(); ++i)
-      {
-        unsigned int face_id = get_face_id(emb_faces[i]);
-        if (!is_face_interior(face_id) && emb_faces[i]->has_intersection())
-          counter += 1; // count the appropriate emb's faces
-      } // i
-      if (counter == 0)
-        invalid_emb.push_back(emb_node);
-    } // it
-
-    // delete all invalid emb nodes
-    for (unsigned int i = 0; i < invalid_emb.size(); ++i)
-    {
-      deleteFromMap(EmbeddedNodes, invalid_emb[i]);
-      _host_elem->remove_embedded_node(invalid_emb[i], true); // also remove from neighbors
-    } // i
-  }
 }
 
 void

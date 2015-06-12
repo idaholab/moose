@@ -14,6 +14,7 @@
 
 #include "EFAelement2D.h"
 #include "EFAfragment2D.h"
+#include "EFAfuncs.h"
 #include <typeinfo>
 
 EFAfragment2D::EFAfragment2D(EFAelement2D * host, bool create_boundary_edges,
@@ -127,6 +128,28 @@ EFAfragment2D::isConnected(EFAfragment* other_fragment) const
     if (is_connected) break;
   } // i
   return is_connected;
+}
+
+void
+EFAfragment2D::remove_invalid_embedded(std::map<unsigned int, EFAnode*> &EmbeddedNodes)
+{
+  // if a fragment only has 1 intersection which is in an interior edge
+  // remove this embedded node (MUST DO THIS AFTER combine_tip_edges())
+  if (get_num_cuts() == 1)
+  {
+    for (unsigned int i = 0; i < _boundary_edges.size(); ++i)
+    {
+      if (is_edge_interior(i) && _boundary_edges[i]->has_intersection())
+      {
+        if (_host_elem->num_interior_nodes() != 1)
+          mooseError("host element must have 1 interior node at this point");
+        deleteFromMap(EmbeddedNodes, _boundary_edges[i]->get_embedded_node(0));
+        _boundary_edges[i]->remove_embedded_node();
+        _host_elem->delete_interior_nodes();
+        break;
+      }
+    } // i
+  }
 }
 
 void

@@ -29,6 +29,7 @@ public:
   virtual unsigned int get_num_cuts() const = 0;
   virtual std::set<EFAnode*> get_all_nodes() const = 0;
   virtual bool isConnected(EFAfragment *other_fragment) const = 0;
+  virtual void remove_invalid_embedded(std::map<unsigned int, EFAnode*> &EmbeddedNodes) = 0;
 
   // common methods
   std::vector<EFAnode*> get_common_nodes(EFAfragment* other) const;
