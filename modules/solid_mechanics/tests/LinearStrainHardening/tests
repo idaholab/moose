@@ -2,6 +2,7 @@
   [./testRestart1]
     type = 'RunApp'
     input = 'LinearStrainHardeningRestart1.i'
+    recover = false
   [../]
 
   [./testRestart2]
@@ -11,6 +12,7 @@
     exodiff_opts = '-TM'
     abs_zero = 1e-09
     prereq = 'testRestart1'
+    recover = false
   [../]
 
   [./test_lsh]
@@ -20,6 +22,7 @@
     abs_zero = 1e-09
     prereq = 'testRestart2'
     scale_refine = 2
+    recover = false
   [../]
 
   [./test_lsh_pressure]

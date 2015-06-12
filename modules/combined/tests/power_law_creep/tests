@@ -8,6 +8,7 @@
     type = 'RunApp'
     input = 'power_law_creep_restart1.i'
     prereq = test
+    recover = false
   [../]
   [./testRestart2]
     type = 'Exodiff'

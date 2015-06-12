@@ -4,6 +4,7 @@
     input = 'misc_master.i'
     exodiff = 'misc_master_out.e misc_master_out_sub_app0.e'
     library_mode = 'DYNAMIC'
+    recover = false # See #5207
   [../]
 
   [./dynamic_load_error_check]

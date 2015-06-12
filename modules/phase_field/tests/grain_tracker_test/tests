@@ -21,6 +21,7 @@
     csvdiff = 'grain_volumes.csv'
     method = 'OPT OPROF' # slow test
     cli_args = 'Outputs/exodus=false'
+    recover = false  # grain tracker CSV output isn't designed to work with recover
   [../]
 
   [./test_recover]

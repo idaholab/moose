@@ -27,12 +27,14 @@
     input = 'large_deform1.i'
     exodiff = 'large_deform1.e'
     abs_zero = 1.0E-6
+    recover = false
   [../]
   [./large2]
     type = 'Exodiff'
     input = 'large_deform2.i'
     exodiff = 'large_deform2.e'
     abs_zero = 1.0E-6
+    recover = false
   [../]
 
   [./small_hard1]
@@ -40,23 +42,27 @@
     input = 'small_deform_hard1.i'
     csvdiff = 'small_deform_hard1.csv'
     rel_err = 1.0E-5
+    recover = false
   [../]
   [./small_hard2]
     type = 'CSVDiff'
     input = 'small_deform_hard2.i'
     csvdiff = 'small_deform_hard2.csv'
     rel_err = 1.0E-5
+    recover = false
   [../]
   [./small_hard3]
     type = 'CSVDiff'
     input = 'small_deform_hard3.i'
     csvdiff = 'small_deform_hard3.csv'
     rel_err = 1.0E-5
+    recover = false
   [../]
   [./small_hard_cubic]
     type = 'CSVDiff'
     input = 'small_deform_hard_cubic.i'
     csvdiff = 'small_deform_hard_cubic.csv'
     rel_err = 1.0E-5
+    recover = false
   [../]
 []

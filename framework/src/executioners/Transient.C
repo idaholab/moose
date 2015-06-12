@@ -240,7 +240,8 @@ Transient::execute()
     _steps_taken++;
   }
 
-  _problem.outputStep(EXEC_FINAL);
+  if (!_app.halfTransient())
+    _problem.outputStep(EXEC_FINAL);
   postExecute();
 }
 

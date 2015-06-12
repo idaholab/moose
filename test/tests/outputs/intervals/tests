@@ -19,6 +19,10 @@
     type = 'Exodiff'
     input = 'output_final.i'
     exodiff = 'output_final_out.e'
+
+    # There is no timestep output at all during the first stage of this test
+    # so recover does not work with this input file.
+    recover = false
   [../]
   [./sync_times]
     # Test useage of sync times in an output object

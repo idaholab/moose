@@ -50,6 +50,7 @@
     min_parallel = 3
     max_parallel = 3
     vtk = true
+    recover = false
   [../]
   [./threshold_adapt_parallel_check_files]
     # Test the ability to threshold the image and adapt
@@ -60,6 +61,7 @@
     max_parallel = 3
     cli_args = Outputs/nemesis=true
     vtk = true
+    recover = false
   [../]
   [./component]
     # Test ability to read in a single component from a 20x20 image
