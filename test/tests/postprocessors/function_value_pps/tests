@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'function_value_pps.i'
+    csvdiff = 'function_value_pps_out.csv'
+  [../]
+[]
