@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<FunctionValuePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addParam<FunctionName>("function", "The function which supplies the postprocessor value.");
+  params.addRequiredParam<FunctionName>("function", "The function which supplies the postprocessor value.");
 
   return params;
 }
