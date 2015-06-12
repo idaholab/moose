@@ -107,7 +107,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
     _move_positions(getParam<std::vector<Point> >("move_positions")),
     _move_happened(false),
     _has_an_app(true),
-    _backups(declareRestartableDataWithContext<std::vector<Backup *> >("backups", this))
+    _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
 {
 }
 
@@ -563,6 +563,6 @@ MultiApp::MultiApp(const std::string & deprecated_name, InputParameters paramete
     _move_positions(getParam<std::vector<Point> >("move_positions")),
     _move_happened(false),
     _has_an_app(true),
-    _backups(declareRestartableDataWithContext<std::vector<Backup *> >("backups", this))
+    _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
 {
 }

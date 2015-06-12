@@ -207,6 +207,13 @@ dataStore(std::ostream & stream, std::stringstream & s, void * context)
   stream.write(s_str.c_str(), sizeof(char)*(s_str.size()));
 }
 
+template<>
+void
+dataStore(std::ostream & stream, std::stringstream * & s, void * context)
+{
+  dataStore(stream, *s, context);
+}
+
 // global load functions
 
 template<>
@@ -449,4 +456,11 @@ dataLoad(std::istream & stream, std::stringstream & s, void * context)
   stream.read(s_s, s_size);
 
   s.write(s_s, s_size);
+}
+
+template<>
+void
+dataLoad(std::istream & stream, std::stringstream * & s, void * context)
+{
+  dataLoad(stream, *s, context);
 }

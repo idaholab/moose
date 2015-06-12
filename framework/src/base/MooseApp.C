@@ -457,7 +457,7 @@ MooseApp::registerRecoverableData(std::string name)
   _recoverable_data.insert(name);
 }
 
-Backup *
+MooseSharedPointer<Backup>
 MooseApp::backup()
 {
   FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
@@ -468,7 +468,7 @@ MooseApp::backup()
 }
 
 void
-MooseApp::restore(Backup * backup)
+MooseApp::restore(MooseSharedPointer<Backup> backup)
 {
   FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
 

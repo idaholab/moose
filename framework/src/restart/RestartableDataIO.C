@@ -291,10 +291,10 @@ RestartableDataIO::readRestartableData(const RestartableDatas & restartable_data
   }
 }
 
-Backup *
+MooseSharedPointer<Backup>
 RestartableDataIO::createBackup()
 {
-  Backup * backup = new Backup;
+  MooseSharedPointer<Backup> backup(new Backup);
 
   serializeSystems(backup->_system_data);
 
@@ -306,13 +306,13 @@ RestartableDataIO::createBackup()
   backup->_restartable_data.resize(n_threads);
 
   for (unsigned int tid=0; tid<n_threads; tid++)
-    serializeRestartableData(restartable_datas[tid], backup->_restartable_data[tid]);
+    serializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid]);
 
   return backup;
 }
 
 void
-RestartableDataIO::restoreBackup(Backup * backup)
+RestartableDataIO::restoreBackup(MooseSharedPointer<Backup> backup)
 {
   unsigned int n_threads = libMesh::n_threads();
   processor_id_type proc_id = _fe_problem.processor_id();
@@ -320,7 +320,7 @@ RestartableDataIO::restoreBackup(Backup * backup)
   // Make sure we read from the beginning
   backup->_system_data.seekg(0);
   for (unsigned int tid=0; tid<n_threads; tid++)
-    backup->_restartable_data[tid].seekg(0);
+    backup->_restartable_data[tid]->seekg(0);
 
   deserializeSystems(backup->_system_data);
 
@@ -330,17 +330,17 @@ RestartableDataIO::restoreBackup(Backup * backup)
   {
     // header
     char id[2];
-    backup->_restartable_data[tid].read(id, 2);
+    backup->_restartable_data[tid]->read(id, 2);
 
     unsigned int this_file_version;
-    backup->_restartable_data[tid].read((char *)&this_file_version, sizeof(this_file_version));
+    backup->_restartable_data[tid]->read((char *)&this_file_version, sizeof(this_file_version));
 
     processor_id_type this_n_procs = 0;
     unsigned int this_n_threads = 0;
 
-    backup->_restartable_data[tid].read((char *)&this_n_procs, sizeof(this_n_procs));
-    backup->_restartable_data[tid].read((char *)&this_n_threads, sizeof(this_n_threads));
+    backup->_restartable_data[tid]->read((char *)&this_n_procs, sizeof(this_n_procs));
+    backup->_restartable_data[tid]->read((char *)&this_n_threads, sizeof(this_n_threads));
 
-    deserializeRestartableData(restartable_datas[tid], backup->_restartable_data[tid], std::set<std::string>());
+    deserializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid], std::set<std::string>());
   }
 }

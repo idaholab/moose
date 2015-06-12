@@ -383,12 +383,12 @@ public:
    * Create a Backup from the current App.  A Backup contains all the data necessary to be able
    * to restore the state of an App.
    */
-  Backup * backup();
+  MooseSharedPointer<Backup> backup();
 
   /**
    * Restore a Backup.  This sets the App's state.
    */
-  void restore(Backup * backup);
+  void restore(MooseSharedPointer<Backup> backup);
 
 protected:
 

@@ -35,6 +35,12 @@ template<>
 InputParameters validParams<MultiApp>();
 
 /**
+ * Helper class for holding Sub-app backups
+ */
+class SubAppBackups : public std::vector<MooseSharedPointer<Backup> >
+{};
+
+/**
  * A MultiApp represents one or more MOOSE applications that are running simultaneously.
  * These other MOOSE apps generally represent some "sub-solve" or "embedded-solves"
  * of the overall nonlinear solve. If your system support dynamic libraries unregistered
@@ -340,12 +346,12 @@ protected:
   bool _has_an_app;
 
   /// Backups for each local App
-  std::vector<Backup *> & _backups;
+  SubAppBackups & _backups;
 };
 
 template<>
 inline void
-dataStore(std::ostream & stream, std::vector<Backup *> & backups, void * context)
+dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
 {
   MultiApp * multi_app = static_cast<MultiApp *>(context);
 
@@ -360,7 +366,7 @@ dataStore(std::ostream & stream, std::vector<Backup *> & backups, void * context
 
 template<>
 inline void
-dataLoad(std::istream & stream, std::vector<Backup *> & backups, void * context)
+dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
 {
   MultiApp * multi_app = static_cast<MultiApp *>(context);
 
