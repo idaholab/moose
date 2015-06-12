@@ -147,10 +147,12 @@ public:
   VariableValue & nodalValue();
   VariableValue & nodalValueOld();
   VariableValue & nodalValueOlder();
+  VariableValue & nodalValueDot();
 
   VariableValue & nodalValueNeighbor();
   VariableValue & nodalValueOldNeighbor();
   VariableValue & nodalValueOlderNeighbor();
+  VariableValue & nodalValueDotNeighbor();
 
   VariableValue & slnNeighbor() { return _u_neighbor; }
   VariableValue & slnOldNeighbor() { _need_u_old_neighbor = true; return _u_old_neighbor; }
@@ -351,10 +353,12 @@ protected:
   bool _need_nodal_u;
   bool _need_nodal_u_old;
   bool _need_nodal_u_older;
+  bool _need_nodal_u_dot;
 
   bool _need_nodal_u_neighbor;
   bool _need_nodal_u_old_neighbor;
   bool _need_nodal_u_older_neighbor;
+  bool _need_nodal_u_dot_neighbor;
 
   // Shape function values, gradients. second derivatives
   const VariablePhiValue & _phi;

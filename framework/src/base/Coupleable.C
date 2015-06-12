@@ -467,6 +467,21 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
     mooseError("Older values not available for explicit schemes");
 }
 
+VariableValue &
+Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
+  coupledCallback(var_name, false);
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+    return var->nodalValueDot();
+  else
+    return var->nodalValueDotNeighbor();
+}
+
 void
 Coupleable::validateExecutionerType(const std::string & name) const
 {
