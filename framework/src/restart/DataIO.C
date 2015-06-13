@@ -42,7 +42,7 @@ dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/)
 
   numeric_index_type size = v.local_size();
 
-  for (numeric_index_type i = v.first_local_index(); i < size; i++)
+  for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
   {
     Real r = v(i);
     stream.write((char *) &r, sizeof(r));
@@ -253,10 +253,11 @@ dataLoad(std::istream & stream, NumericVector<Real> & v, void * /*context*/)
 {
   numeric_index_type size = v.local_size();
 
-  for (numeric_index_type i = v.first_local_index(); i < size; i++)
+  for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
   {
     Real r = 0;
     stream.read((char *) &r, sizeof(r));
+
     v.set(i, r);
   }
 
