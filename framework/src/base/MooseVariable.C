@@ -64,6 +64,7 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _need_nodal_u_neighbor(false),
     _need_nodal_u_old_neighbor(false),
     _need_nodal_u_older_neighbor(false),
+    _need_nodal_u_dot_neighbor(false),
 
     _phi(_assembly.fePhi(_fe_type)),
     _grad_phi(_assembly.feGradPhi(_fe_type)),
