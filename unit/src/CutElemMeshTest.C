@@ -541,9 +541,42 @@ void CutElemMeshTest::CutElemMeshTest5b()
   MyMesh.printMesh();
 }
 
+void CutElemMeshTest::CutElemMeshTest5c()
+{
+  // 0 ----- 1 ----- 2 ----- 3
+  // |       |       |       |
+  // x ----- x --x-- x ----- x
+  // |       |   |   |       |
+  // 4 ----- 5 --x-- 6 ----- 7
+  // |       |   |   |       |
+  // |       |   |   |       |
+  // |       |   |   |       |
+  // 8 ----- 9 --x--10 -----11
+
+  ElementFragmentAlgorithm MyMesh;
+  case5Mesh(MyMesh);
+
+  // add the horizontal cut
+  std::cout<<"\n ***** Running case 5c *****"<<std::endl;
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,0,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 0,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,1,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 1,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 2,2,0.5);
+  MyMesh.addElemEdgeIntersection((unsigned int) 4,1,0.5);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+  MyMesh.printMesh();
+}
+
 void
 CutElemMeshTest::case6Mesh(ElementFragmentAlgorithm &MyMesh)
 {
+  // 3D test
   unsigned int q1[] = {0,1,4,3,9,10,13,12};
   std::vector<unsigned int> v1 (q1, q1 + sizeof(q1) / sizeof(unsigned int) );
   MyMesh.add3DElement(v1, 0);

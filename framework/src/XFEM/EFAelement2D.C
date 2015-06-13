@@ -711,7 +711,7 @@ EFAelement2D::update_fragments(const std::set<EFAelement*> &CrackTipElements,
   // count fragment's cut edges
   unsigned int num_cut_frag_edges = _fragments[0]->get_num_cuts();
   unsigned int num_frag_edges = _fragments[0]->num_edges();
-  if (num_cut_frag_edges > 2)
+  if (num_cut_frag_edges > 3)
     mooseError("In element " << _id <<" there are more than 2 cut fragment edges");
 
   if (num_cut_frag_edges == 0)
@@ -727,17 +727,17 @@ EFAelement2D::update_fragments(const std::set<EFAelement*> &CrackTipElements,
     return;
   }
 
-  // split one fragment into one or two new fragments
-  std::vector<EFAfragment2D*> new_frags = _fragments[0]->split();
-  if (new_frags.size() == 1 || new_frags.size() == 2)
-  {
-    delete _fragments[0]; // delete the old fragment
-    _fragments.clear();
-    for (unsigned int i = 0; i < new_frags.size(); ++i)
-      _fragments.push_back(new_frags[i]);
-  }
+  // split one fragment into one, two or three new fragments
+  std::vector<EFAfragment2D*> new_frags;
+  if (num_cut_frag_edges == 3)
+    new_frags = branching_split(EmbeddedNodes);
   else
-    mooseError("Number of fragments must be 1 or 2 at this point");
+    new_frags = _fragments[0]->split();
+
+  delete _fragments[0]; // delete the old fragment
+  _fragments.clear();
+  for (unsigned int i = 0; i < new_frags.size(); ++i)
+    _fragments.push_back(new_frags[i]);
 
   fragment_sanity_check(num_frag_edges, num_cut_frag_edges);
 }
@@ -746,8 +746,8 @@ void
 EFAelement2D::fragment_sanity_check(unsigned int n_old_frag_edges,
                                     unsigned int n_old_frag_cuts) const
 {
-  if (n_old_frag_cuts > 2)
-    mooseError("Sanity check: in element " << _id << " frag has more than 2 cut edges");
+  if (n_old_frag_cuts > 3)
+    mooseError("Sanity check: in element " << _id << " frag has more than 3 cut edges");
 
   // count permanent and embedded nodes for new fragments
   std::vector<unsigned int> num_emb;
@@ -796,6 +796,12 @@ EFAelement2D::fragment_sanity_check(unsigned int n_old_frag_edges,
     if (_fragments.size() != 2 ||
        (_fragments[0]->num_edges()+_fragments[1]->num_edges()) != n_old_frag_edges+4)
       mooseError("Incorrect link size for element with 2 cuts");
+  }
+  else if (n_old_frag_cuts == 3)
+  {
+    if (_fragments.size() != 3 ||
+       (_fragments[0]->num_edges()+_fragments[1]->num_edges()+_fragments[2]->num_edges()) != n_old_frag_edges+9)
+      mooseError("Incorrect link size for element with 3 cuts");
   }
   else
    mooseError("Unexpected number of old fragment cuts");
@@ -854,8 +860,8 @@ EFAelement2D::create_child(const std::set<EFAelement*> &CrackTipElements,
 
   if (_fragments.size() > 1 || should_duplicate_for_crack_tip(CrackTipElements))
   {
-    if (_fragments.size() > 2)
-      mooseError("More than 2 fragments not yet supported");
+    if (_fragments.size() > 3)
+      mooseError("More than 3 fragments not yet supported");
 
     //set up the children
     ParentElements.push_back(this);
@@ -1570,7 +1576,7 @@ EFAelement2D::add_frag_edge_cut(unsigned int frag_edge_id, double position,
       // create the embedded node and add it to the fragment's boundary edge
       unsigned int new_node_id = getNewID(EmbeddedNodes);
       local_embedded = new EFAnode(new_node_id,N_CATEGORY_EMBEDDED);
-      EmbeddedNodes.insert(std::make_pair(new_node_id,local_embedded));
+      EmbeddedNodes.insert(std::make_pair(new_node_id, local_embedded));
       frag_edge->add_intersection(position, local_embedded, edge_node1);
 
       // save this interior embedded node to FaceNodes
@@ -1592,6 +1598,95 @@ EFAelement2D::add_frag_edge_cut(unsigned int frag_edge_id, double position,
     // neighbor fragment, the neighbor has already been treated in addEdgeIntersection;
     // for an interior edge, there is no neighbor fragment
   }
+}
+
+std::vector<EFAfragment2D*>
+EFAelement2D::branching_split(std::map<unsigned int, EFAnode*> &EmbeddedNodes)
+{
+  if (is_partial())
+    mooseError("branching is only allowed for an uncut element");
+  
+  // collect all emb nodes counterclockwise
+  std::vector<EFAnode*> three_nodes;
+  for (unsigned int i = 0; i < _edges.size(); ++i)
+  {
+    EFAnode* node1 = _edges[i]->get_node(0);
+    if (_edges[i]->num_embedded_nodes() == 1)
+      three_nodes.push_back(_edges[i]->get_embedded_node(0));
+    else if (_edges[i]->num_embedded_nodes() == 2)
+    {
+      unsigned int id0(_edges[i]->get_intersection(0,node1) < _edges[i]->get_intersection(1,node1) ? 0:1);
+      unsigned int id1 = 1 - id0;
+      three_nodes.push_back(_edges[i]->get_embedded_node(id0));
+      three_nodes.push_back(_edges[i]->get_embedded_node(id1));
+    }
+  }
+  if (three_nodes.size() != 3)
+    mooseError("three_nodes.size() != 3");
+  
+  // get the parent coords of the braycenter of the three nodes
+  // TODO: may need a better way to compute this "branching point"
+  std::vector<double> center_xi(2,0.0);
+  for (unsigned int i = 0; i < 3; ++i)
+  {
+    std::vector<double> xi_2d(2,0.0);
+    getEdgeNodeParaCoor(three_nodes[i], xi_2d);
+    center_xi[0] += xi_2d[0];
+    center_xi[1] += xi_2d[1];
+  }
+  center_xi[0] /= 3.0;
+  center_xi[1] /= 3.0;
+
+  // create a new interior node for current element
+  unsigned int new_node_id = getNewID(EmbeddedNodes);
+  EFAnode* new_emb = new EFAnode(new_node_id, N_CATEGORY_EMBEDDED);
+  EmbeddedNodes.insert(std::make_pair(new_node_id, new_emb));
+  _interior_nodes.push_back(new FaceNode(new_emb, center_xi[0], center_xi[1]));
+
+  // generate the three fragments
+  std::vector<EFAfragment2D*> new_fragments;
+  for (unsigned int i = 0; i < 3; ++i) // loop over 3 sectors
+  {
+    EFAfragment2D* new_frag = new EFAfragment2D(this, false, NULL);
+    unsigned int iplus1(i<2 ? i+1 : 0);
+    new_frag->add_edge(new EFAedge(three_nodes[iplus1], new_emb));
+    new_frag->add_edge(new EFAedge(new_emb, three_nodes[i]));
+
+    unsigned int iedge = 0;
+    bool add_more_edges = true;
+    for (unsigned int j = 0; j < _edges.size(); ++j)
+    {
+      if (_edges[j]->containsNode(three_nodes[i]))
+      {
+        if (_edges[j]->containsNode(three_nodes[iplus1]))
+        {
+          new_frag->add_edge(new EFAedge(three_nodes[i], three_nodes[iplus1]));
+          add_more_edges = false;
+        }
+        else
+        {
+          new_frag->add_edge(new EFAedge(three_nodes[i], _edges[j]->get_node(1)));
+        }
+        iedge = j;
+        break;
+      }
+    } // j
+    while (add_more_edges)
+    {
+      iedge += 1;
+      if (iedge == _edges.size())
+        iedge = 0;
+      if (_edges[iedge]->containsNode(three_nodes[iplus1]))
+      {
+        new_frag->add_edge(new EFAedge(_edges[iedge]->get_node(0), three_nodes[iplus1]));
+        add_more_edges = false;
+      }
+      else
+        new_frag->add_edge(new EFAedge(_edges[iedge]->get_node(0), _edges[iedge]->get_node(1)));
+    }
+    new_fragments.push_back(new_frag);
+  } // i
+  return new_fragments;  
 }
 
 void

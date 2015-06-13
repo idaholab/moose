@@ -113,6 +113,7 @@ public:
                     std::map< unsigned int, EFAnode*> &EmbeddedNodes, bool add_to_neighbor);
   void add_frag_edge_cut(unsigned int frag_edge_id, double position,
                          std::map< unsigned int, EFAnode*> &EmbeddedNodes);
+  std::vector<EFAfragment2D*> branching_split(std::map<unsigned int, EFAnode*> &EmbeddedNodes);
 
 private:
 

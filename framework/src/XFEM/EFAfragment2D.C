@@ -369,7 +369,7 @@ EFAfragment2D::split()
           {
             second_node_on_edge = _boundary_edges[iedge]->get_node(0);
             if (!_boundary_edges[inextedge]->containsNode(second_node_on_edge))
-              mooseError("Previous edge does not contain either of the nodes in this edge");
+              mooseError("Next edge does not contain either of the nodes in this edge");
           }
           new_frag->add_edge(new EFAedge(embedded_node2, second_node_on_edge));
         }
