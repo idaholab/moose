@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "ColumnMajorMatrix.h"
+#include "MooseException.h"
 
 #include "libmesh/petsc_macro.h"
 #include <petscsys.h>
@@ -265,5 +266,5 @@ ColumnMajorMatrix::inverse(ColumnMajorMatrix & invA) const
 #endif
 
   if (return_value)
-    mooseError("error in lapack inverse solve");
+    throw MooseException("Error in LAPACK matrix-inverse calculation");
 }
