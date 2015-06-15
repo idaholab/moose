@@ -85,8 +85,6 @@ MultiAppProjectionTransfer::initialSetup()
         {
           if (_multi_app->hasLocalApp(app))
           {
-            MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-
             FEProblem & to_problem = *_multi_app->appProblem(app);
             FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                            Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
@@ -106,8 +104,6 @@ MultiAppProjectionTransfer::initialSetup()
             augmented_es.insert(&to_es);
 
             //to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
-
-            Moose::swapLibMeshComm(swapped);
           }
         }
 
@@ -232,23 +228,39 @@ void
 MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::string & system_name)
 {
   /********************
+  In order to assemble the system we need to evaluate the sub app solutions at
+  quadrature points in the master domain.  This is complicated by the fact that
+  each app is on its own MPI communicator.
+
+  Each processor will
+  1. Generate bounding boxes and mesh functions for it's local sub apps
+  2. Send the bounding boxes to the other processors in an all-to-all comm
+  3. Check its local quadrature points in the master domain to see which
+     bounding boxes they lie in
+  4. Send quadrature points to the processors with the containing bounding boxes
+  5. Recieve quadrature points from other processors, evaluate its mesh
+     functions at those points, and send the values back to the proper processor
+  6. Recieve mesh function evaluations from all relevant processors and decide
+     which one to use at every quadrature point (the lowest global app index
+     always wins)
+  7. And assemble the L2 system at its local quadrature points
+  ********************/
+
+  /********************
   First step, get the bounding boxes and mesh functions for all the sub apps on
   this processor.
   ********************/
   const unsigned int n_global_apps = _multi_app->numGlobalApps();
   const unsigned int n_local_apps = _multi_app->numLocalApps();
-  std::vector<NumericVector<Number> *> from_slns(n_local_apps, NULL);
-  std::vector<MeshFunction *> from_fns(n_local_apps, NULL);
+  std::vector<MeshFunction *> local_meshfuns(n_local_apps, NULL);
+  std::vector<MeshTools::BoundingBox> local_bboxes(n_local_apps);
   std::vector<std::pair<Point, Point> > bb_points(n_local_apps);
-  std::vector<MeshTools::BoundingBox> from_bbs(n_local_apps);
 
   unsigned int i_local = 0;
   for (unsigned int i_global = 0; i_global < n_global_apps; i_global++)
   {
     if (!_multi_app->hasLocalApp(i_global))
       continue;
-
-    MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
     // Get the bounding box.
     FEProblem & from_problem = *_multi_app->appProblem(i_global);
@@ -261,8 +273,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
     bb_points[i_local] = static_cast<std::pair<Point, Point> >(app_box);
     bb_points[i_local].first = bb_points[i_local].first + _multi_app->position(i_global);
     bb_points[i_local].second = bb_points[i_local].second + _multi_app->position(i_global);
-    //from_bbs[i_local] = app_box;
-    from_bbs[i_local] = static_cast<MeshTools::BoundingBox>(bb_points[i_local]);
+    local_bboxes[i_local] = static_cast<MeshTools::BoundingBox>(bb_points[i_local]);
 
     // Get a serialized copy of the subapp's solution vector.
     MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
@@ -272,15 +283,12 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
     NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build(from_sys.comm()).release();
     serialized_from_solution->init(from_sys.n_dofs(), false, SERIAL);
     from_sys.solution->localize(*serialized_from_solution);
-    from_slns[i_local] = serialized_from_solution;
 
     // Get the subapp's mesh function.
     MeshFunction * from_func = new MeshFunction(from_es, *serialized_from_solution, from_sys.get_dof_map(), from_var_num);
     from_func->init(Trees::ELEMENTS);
     from_func->enable_out_of_mesh_mode(OutOfMeshValue);
-    from_fns[i_local] = from_func;
-
-    Moose::swapLibMeshComm(swapped);
+    local_meshfuns[i_local] = from_func;
 
     i_local++;
   }
@@ -294,23 +302,13 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   _communicator.allgather(bb_points);
   _communicator.allgather(apps_per_proc, true);
 
-  if (apps_per_proc.size() != n_processors())
-    mooseError("Transfer failed to gather data from all processors.");
-
   unsigned int n_sources = 0;
   for (unsigned int i=0; i<n_processors(); i++)
-  {
     n_sources += apps_per_proc[i];
-  }
-
-  if (bb_points.size() != n_sources)
-    mooseError("Transfer failed to gather data from all processors.");
 
   std::vector<MeshTools::BoundingBox> bboxes(n_sources);
   for (unsigned int i=0; i<n_sources; i++)
-  {
     bboxes[i] = static_cast<MeshTools::BoundingBox>(bb_points[i]);
-  }
 
   /********************
   Now, check all the elements local to this processor and see if they overlap
@@ -330,6 +328,8 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   const std::vector<Point> & xyz = fe->get_xyz();
   std::vector<std::vector<Point> > outgoing_qps(n_processors());
   std::vector< std::unordered_map<unsigned int, unsigned int> > element_index_map(n_processors());
+  // element_index_map[element.id] = index
+  // outgoing_qps[index] is the first quadrature point in element
 
   for (unsigned int i_proc = 0, app0 = 0;
        i_proc < n_processors();
@@ -357,8 +357,9 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
 
       if (qp_hit)
       {
-        // This processor's bounding box contains at least one qudrature point
-        // from this element.
+        // The selected processor's bounding box contains at least one
+        // quadrature point from this element.  Send all qps from this element
+        // and remember where they are in the array using the map.
         element_index_map[i_proc][elem->id()] = outgoing_qps[i_proc].size();
         for (unsigned int qp = 0; qp < qrule.n_points(); qp ++)
         {
@@ -379,8 +380,6 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   {
     if (i_proc == processor_id())
       continue;
-
-    //_console << "Processor " << processor_id() << " sending " << outgoing_qps[i_proc].size() << " points to processor " << i_proc << std::endl;
     _communicator.send(i_proc, outgoing_qps[i_proc]);
   }
 
@@ -406,9 +405,9 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
       {
         if (!_multi_app->hasLocalApp(i_global))
           continue;
-        if (from_bbs[i_local].contains_point(qpt))
+        if (local_bboxes[i_local].contains_point(qpt))
         {
-          outgoing_evals[qp] = (* from_fns[i_local])(qpt - _multi_app->position(i_global));
+          outgoing_evals[qp] = (* local_meshfuns[i_local])(qpt - _multi_app->position(i_global));
           outgoing_ids[qp] = i_global;
         }
         i_local ++;
@@ -467,19 +466,19 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
       for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
       {
         std::unordered_map<unsigned int, unsigned int> & map = element_index_map[i_proc];
-        // Ignore this processor if the element wasn't found in it's bounding
-        // box.
+        // Ignore the selected processor if the element wasn't found in it's
+        // bounding box.
         if (map.find(elem->id()) == map.end())
           continue;
         unsigned int qp0 = map[elem->id()];
 
-        // Ignore this processor if it's app has a higher rank than the
+        // Ignore the selected processor if it's app has a higher rank than the
         // previously found lowest app rank.
         if (incoming_app_ids[i_proc][qp0 + qp] >= lowest_app_rank)
           continue;
 
-        // Ignore this processor if the qp was actually outside the processor's
-        // mesh.
+        // Ignore the selected processor if the qp was actually outside the
+        // processor's subapp's mesh.
         if (incoming_evals[i_proc][qp0 + qp] == OutOfMeshValue)
           continue;
 
@@ -509,8 +508,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
 
   for (unsigned int i = 0; i < n_local_apps; i++)
   {
-    delete from_fns[i];
-    delete from_slns[i];
+    delete local_meshfuns[i];
   }
 }
 
@@ -600,9 +598,7 @@ MultiAppProjectionTransfer::toMultiApp()
   {
     if (_multi_app->hasLocalApp(app))
     {
-      MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
       projectSolution(*_multi_app->appProblem(app), app);
-      Moose::swapLibMeshComm(swapped);
     }
   }
 }
