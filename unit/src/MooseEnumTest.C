@@ -117,6 +117,67 @@ MooseEnumTest::multiTestOne()
 }
 
 void
+MooseEnumTest::withNamesFromTest()
+{
+  //
+  // Construct MultiMooseEnum from MooseEnum
+  //
+  MooseEnum me1("one two three four");
+  MultiMooseEnum mme1 = MultiMooseEnum::withNamesFrom(me1);
+
+  // set in-range values
+  mme1 = "one two";
+  CPPUNIT_ASSERT( mme1.contains("one") == true );
+  CPPUNIT_ASSERT( mme1.contains("two") == true );
+  CPPUNIT_ASSERT( mme1.contains("three") == false );
+  CPPUNIT_ASSERT( mme1.contains("four") == false );
+
+  // set out-of-range values
+  try
+  {
+    mme1 = "five";
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT( msg.find("Invalid option") != std::string::npos );
+  }
+
+  // construct mme with out-of-range-allowed
+  MooseEnum me2("one two three four", "", true);
+  MultiMooseEnum mme2 = MultiMooseEnum::withNamesFrom(me2);
+  mme2 = "six";
+  CPPUNIT_ASSERT( mme2.contains("six") == true );
+
+  //
+  // Construct MooseEnum from MultiMooseEnum
+  //
+  MultiMooseEnum mme3("one two three four");
+  MooseEnum me3 = MooseEnum::withNamesFrom(mme3);
+
+  // set in-range values
+  me3 = "one";
+  CPPUNIT_ASSERT( me3 == "one" );
+
+  // set out-of-range values
+  try
+  {
+    me3 = "five";
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT( msg.find("Invalid option") != std::string::npos );
+  }
+
+  // construct mme with out-of-range-allowed
+  MultiMooseEnum mme4("one two three four", "", true);
+  MooseEnum me4 = MooseEnum::withNamesFrom(mme4);
+  me4 = "six";
+  CPPUNIT_ASSERT( me4 == "six" );
+}
+
+void
 MooseEnumTest::testErrors()
 {
   // Assign invalid item

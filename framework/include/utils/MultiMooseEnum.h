@@ -48,6 +48,13 @@ public:
    */
   MultiMooseEnum(const MultiMooseEnum & other_enum);
 
+  /**
+   * Named constructor to build an empty MultiMooseEnum with only the
+   * valid names and the allow_out_of_range flag taken from another enumeration
+   * @param other_enum - The other enumeration to copy the validity checking data from
+   */
+  static MultiMooseEnum withNamesFrom(const MooseEnumBase & other_enum);
+
   virtual ~MultiMooseEnum();
 
   ///@{
@@ -168,6 +175,12 @@ private:
    * Private constructor for use by libmesh::Parameters
    */
   MultiMooseEnum();
+
+  /**
+   * Private constructor that can accept a MooseEnumBase for ::withOptionsFrom()
+   * @param other_enum - MooseEnumBase type to copy names and out-of-range data from
+   */
+  MultiMooseEnum(const MooseEnumBase & other_enum);
 
   /**
    * Helper method for all inserts and assignment operators
