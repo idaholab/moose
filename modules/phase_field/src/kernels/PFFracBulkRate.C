@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<PFFracBulkRate>()
 {
   InputParameters params = validParams<KernelValue>();
+  params.addClassDescription("Kernel to compute bulk energy contribution to damage order parameter residual equation");
   params.addRequiredParam<Real>("l","Interface width");
   params.addRequiredParam<Real>("visco","Viscosity parameter");
   params.addRequiredCoupledVar("beta", "Auxiliary variable");

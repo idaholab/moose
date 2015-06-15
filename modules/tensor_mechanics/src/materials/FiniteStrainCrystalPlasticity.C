@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<FiniteStrainCrystalPlasticity>()
 {
   InputParameters params = validParams<FiniteStrainMaterial>();
-
+  params.addClassDescription("Crystal Plasticity base class: FCC system with power law flow rule implemented");
   params.addRequiredParam<int >("nss", "Number of slip systems");
   params.addParam<std::vector<Real> >("gprops", "Initial values of slip system resistances");
   params.addParam<std::vector<Real> >("hprops", "Hardening properties");

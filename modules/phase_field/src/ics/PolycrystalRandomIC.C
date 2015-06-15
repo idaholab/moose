@@ -13,9 +13,7 @@ InputParameters validParams<PolycrystalRandomIC>()
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
-
-  params.addRequiredParam<unsigned int>("typ", "Type of random grain structure");
-
+  params.addRequiredParam<unsigned int>("typ", "Type of random grain structure"); //TODO: this should be called "type"!
   return params;
 }
 

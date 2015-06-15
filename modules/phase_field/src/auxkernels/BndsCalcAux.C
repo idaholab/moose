@@ -11,6 +11,7 @@ template<>
 InputParameters validParams<BndsCalcAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Calculate location of grain boundaries in a polycrystalline sample");
   params.addCoupledVar("v", "Array of coupled variables");
   params.addRequiredParam<unsigned int>("op_num", "number of grains");
   params.addRequiredParam<std::string>("var_name_base", "base for variable names");

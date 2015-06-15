@@ -12,6 +12,7 @@ template<>
 InputParameters validParams<StressDivergenceTensors>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Stress divergence kernel (used by the TensorMechanics action)");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");

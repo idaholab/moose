@@ -12,6 +12,7 @@ template<>
 InputParameters validParams<FiniteStrainMaterial>()
 {
   InputParameters params = validParams<TensorMechanicsMaterial>();
+  params.addClassDescription("Computes incremental strain and deformation gradient for finite deformation");
   return params;
 }
 

@@ -11,6 +11,7 @@ template<>
 InputParameters validParams<SpecifiedSmoothCircleIC>()
 {
   InputParameters params = validParams<SmoothCircleBaseIC>();
+  params.addClassDescription("Multiple smooth circles with manually specified radii and center points");
   params.addRequiredParam<std::vector<Real> >("x_positions", "The x-coordinate for each circle center");
   params.addRequiredParam<std::vector<Real> >("y_positions", "The y-coordinate for each circle center");
   params.addRequiredParam<std::vector<Real> >("z_positions", "The z-coordinate for each circle center");

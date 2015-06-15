@@ -10,7 +10,9 @@ template<>
 InputParameters validParams<PFFracCoupledInterface>()
 {
   InputParameters params = validParams<KernelGrad>();
+  params.addClassDescription("Phase-field fracture residual for beta variable: Contribution from gradient of damage order parameter");
   params.addRequiredCoupledVar("c", "Order parameter for damage");
+
   return params;
 }
 
@@ -36,7 +38,7 @@ PFFracCoupledInterface::precomputeQpJacobian()
 }
 /**
  * Contributes only to the off-diagonal Jacobian term
- * for auxiliary variable beta
+ * for variable beta
  */
 Real
 PFFracCoupledInterface::computeQpOffDiagJacobian(unsigned int jvar)

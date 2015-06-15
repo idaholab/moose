@@ -11,11 +11,11 @@
 template<>
 InputParameters validParams<FeatureFloodCountAux>()
 {
-  MooseEnum field_display("UNIQUE_REGION VARIABLE_COLORING ACTIVE_BOUNDS CENTROID", "UNIQUE_REGION");
-
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Feature detection by connectivity analysis");
   params.addRequiredParam<UserObjectName>("bubble_object", "The FeatureFloodCount UserObject to get values from.");
   params.addParam<unsigned int>("map_index", 0, "The index of which map to retrieve values from when using FeatureFloodCount with multiple maps.");
+  MooseEnum field_display("UNIQUE_REGION VARIABLE_COLORING ACTIVE_BOUNDS CENTROID", "UNIQUE_REGION");
   params.addParam<MooseEnum>("field_display", field_display, "Determines how the auxilary field should be colored. (UNIQUE_REGION and VARIABLE_COLORING are nodal, CENTROID is elemental, default: UNIQUE_REGION)");
   return params;
 }

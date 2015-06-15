@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<ACInterface>()
 {
   InputParameters params = validParams<KernelGrad>();
+  params.addClassDescription("Gradient energy Allen-Cahn Kernel");
   params.addParam<std::string>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<std::string>("kappa_name", "kappa_op", "The kappa used with the kernel");
   return params;

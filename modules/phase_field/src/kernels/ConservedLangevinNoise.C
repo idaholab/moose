@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<ConservedLangevinNoise>()
 {
   InputParameters params = validParams<LangevinNoise>();
+  params.addClassDescription("Source term for noise from a ConservativeNoise userobject");
   params.addRequiredParam<UserObjectName>("noise", "ConservativeNoise userobject that produces the random numbers");
   return params;
 }

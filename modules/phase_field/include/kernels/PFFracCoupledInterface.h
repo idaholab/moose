@@ -11,7 +11,7 @@
 
 /**
  * Phase-field fracture model
- * This class computes the contribution to residual and jacobian of the auxiliary variable beta
+ * This class computes the contribution to residual and jacobian of the variable beta
  * by the grad of c (damage variable)
  * Refer to formulation: Miehe et. al., Int. J. Num. Methods Engg., 2010, 83. 1273-1311 Equation 63
  */

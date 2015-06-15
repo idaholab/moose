@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<ThumbIC>()
 {
   InputParameters params = validParams<InitialCondition>();
+  params.addClassDescription("Thumb shaped bicrystal for grain boundary mobility tests");
   params.addRequiredParam<Real>("xcoord", "The x coordinate of the circle center");
   params.addRequiredParam<Real>("width", "The y coordinate of the circle center");
   params.addRequiredParam<Real>("height", "The z coordinate of the circle center");

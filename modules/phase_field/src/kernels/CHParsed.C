@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<CHParsed>()
 {
   InputParameters params = DerivativeKernelInterface<CHBulk>::validParams();
+  params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy");
   params.addCoupledVar("args", "Vector of additional arguments to F");
   return params;
 }

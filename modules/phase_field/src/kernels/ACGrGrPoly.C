@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<ACGrGrPoly>()
 {
   InputParameters params = validParams<ACBulk>();
+  params.addClassDescription("Grain-Boundary model poly crystaline interface Allen-Cahn Kernel");
   params.addRequiredCoupledVar("v", "Array of coupled variable names");
   params.addCoupledVar("T", "temperature");
   return params;

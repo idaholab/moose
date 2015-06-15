@@ -14,6 +14,8 @@ template<>
 InputParameters validParams<PressureActionTM>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Set up PressureTM boundary conditions");
+
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
   params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
   params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");

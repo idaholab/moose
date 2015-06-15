@@ -11,6 +11,7 @@ template<>
 InputParameters validParams<LangevinNoise>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Source term for non-conserved Langevin noise");
   params.addRequiredParam<Real>("amplitude", "Amplitude"); // per sqrt(time)");
   params.addParam<std::string>("multiplier", "Material property to multiply the random numbers with (defaults to 1.0 if omitted)");
   return params;
