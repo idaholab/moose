@@ -44,7 +44,7 @@ protected:
   virtual Real computeQpJacobian();
 
   /// Thermal conductivity of the material
-  MaterialProperty<Real> & _thermal_conductivity;
+  const MaterialProperty<Real> & _thermal_conductivity;
 };
 
 

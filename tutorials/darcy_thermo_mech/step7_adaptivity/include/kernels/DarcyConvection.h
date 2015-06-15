@@ -48,11 +48,11 @@ protected:
    * These references will be set by the initialization list so that
    * values can be pulled from the Material system.
    */
-  MaterialProperty<Real> & _permeability;
-  MaterialProperty<Real> & _porosity;
-  MaterialProperty<Real> & _viscosity;
-  MaterialProperty<Real> & _density;
-  MaterialProperty<Real> & _heat_capacity;
+  const MaterialProperty<Real> & _permeability;
+  const MaterialProperty<Real> & _porosity;
+  const MaterialProperty<Real> & _viscosity;
+  const MaterialProperty<Real> & _density;
+  const MaterialProperty<Real> & _heat_capacity;
 };
 
 #endif //DARCYCONVECTION_H

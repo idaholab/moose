@@ -48,8 +48,8 @@ protected:
   VariableGradient & _pressure_gradient;
 
   /// Holds the permeability and viscosity from the material system
-  MaterialProperty<Real> & _permeability;
-  MaterialProperty<Real> & _viscosity;
+  const MaterialProperty<Real> & _permeability;
+  const MaterialProperty<Real> & _viscosity;
 };
 
 #endif //DARCYVELOCITY_H

@@ -52,8 +52,8 @@ protected:
    * These references will be set by the initialization list so that
    * values can be pulled from the Material system.
    */
-  MaterialProperty<Real> & _permeability;
-  MaterialProperty<Real> & _viscosity;
+  const MaterialProperty<Real> & _permeability;
+  const MaterialProperty<Real> & _viscosity;
 };
 
 
