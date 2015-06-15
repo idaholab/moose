@@ -13,6 +13,7 @@ template<>
 InputParameters validParams<ClosePackIC>()
 {
   InputParameters params = validParams<SmoothCircleBaseIC>();
+  params.addClassDescription("Close packed arrangement of smooth circles");
   params.addRequiredParam<Real>("radius", "The radius of a circle");
   return params;
 }

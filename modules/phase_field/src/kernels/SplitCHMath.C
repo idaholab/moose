@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<SplitCHMath>()
 {
   InputParameters params = validParams<SplitCHCRes>();
-
+  params.addClassDescription("Simple demonstration split formulation Cahn-Hilliard Kernel using an algebraic double-well potential");
   return params;
 }
 

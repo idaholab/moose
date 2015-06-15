@@ -28,6 +28,7 @@ template<>
 InputParameters validParams<CrossIC>()
 {
   InputParameters params = validParams<C1ICBase>();
+  params.addClassDescription("Cross-shaped initial condition");
   params.addParam<Real>("x1", 0.0, "The x coordinate of the lower left-hand corner of the box");
   params.addParam<Real>("y1", 0.0, "The y coordinate of the lower left-hand corner of the box");
 

@@ -11,9 +11,9 @@ template<>
 InputParameters validParams<Tricrystal2CircleGrainsIC>()
 {
   InputParameters params = validParams<InitialCondition>();
+  params.addClassDescription("Tricrystal with two circles/bubbles");
   params.addRequiredParam<unsigned int>("op_num", "Number of grain order parameters");
   params.addRequiredParam<unsigned int>("op_index", "Index for the current grain order parameter");
-
   return params;
 }
 

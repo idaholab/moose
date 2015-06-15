@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<CHInterface>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Gradient energy Cahn-Hilliard Kernel");
   params.addRequiredParam<std::string>("kappa_name", "The kappa used with the kernel");
   params.addRequiredParam<std::string>("mob_name", "The mobility used with the kernel");
   params.addParam<std::string>("Dmob_name", "DM", "The D mobility used with the kernel");

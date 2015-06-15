@@ -14,6 +14,7 @@ InputParameters validParams<ImageFunction>()
 {
   // Define the general parameters
   InputParameters params = validParams<Function>();
+  params.addClassDescription("Function with values sampled from a given image stack");
 
   // Add parameters associated with file ranges
   addFileRangeParams(params);

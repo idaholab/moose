@@ -11,6 +11,7 @@ template<>
 InputParameters validParams<ACGBPoly>()
 {
   InputParameters params = validParams<ACBulk>();
+  params.addClassDescription("Grain-Boundary model concentration dependent residual");
   params.addRequiredCoupledVar("c", "Other species concentration");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface energy to GB energy");
   return params;

@@ -26,12 +26,12 @@ template<>
 InputParameters validParams<PolycrystalVariablesAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Set up order parameter variables for a polycrystal sample");
   params.addParam<std::string>("family", "LAGRANGE", "Specifies the family of FE shape functions to use for this variable");
   params.addParam<std::string>("order", "FIRST", "Specifies the order of the FE shape function to use for this variable");
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
   params.addRequiredParam<unsigned int>("op_num", "specifies the number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
-
   return params;
 }
 

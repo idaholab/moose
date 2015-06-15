@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<SplitCHParsed>()
 {
   InputParameters params = DerivativeKernelInterface<SplitCHCRes>::validParams();
+  params.addClassDescription("Split formulation Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy");
   params.addCoupledVar("args", "Vector of additional arguments to F");
   return params;
 }

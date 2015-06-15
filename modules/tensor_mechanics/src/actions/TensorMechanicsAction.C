@@ -14,6 +14,7 @@ template<>
 InputParameters validParams<TensorMechanicsAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Set up stress divergence kernels");
   params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
   params.addParam<NonlinearVariableName>("disp_y", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "The z displacement");

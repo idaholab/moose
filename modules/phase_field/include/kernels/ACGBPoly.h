@@ -24,13 +24,6 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-private:
-  /**
-   * Coupled things come through as std::vector _refernces_.
-   *
-   * Since this is a reference it MUST be set in the Initialization List of the
-   * constructor!
-   */
   VariableValue & _c;
   unsigned int _c_var;
 

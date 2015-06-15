@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<PFFracBulkRateMaterial>()
 {
   InputParameters params = validParams<Material>();
+  params.addClassDescription("Material properties used in phase-field fracture damage evolution kernel");
   params.addParam<FunctionName>("function", "", "Function describing energy release rate type parameter distribution");
   params.addParam<Real>("gc", 1.0, "Energy release rate type parameter");
 

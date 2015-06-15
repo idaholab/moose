@@ -11,9 +11,10 @@ template<>
 InputParameters validParams<RndSmoothCircleIC>()
 {
   InputParameters params = validParams<SmoothCircleIC>();
+  params.addClassDescription("Random noise with different min/max inside/outside of a smooth circle");
+
   params.addRequiredParam<Real>("variation_invalue", "Plus or minus this amount on the invalue");
   params.addRequiredParam<Real>("variation_outvalue", "Plus or minus this amount on the outvalue");
-
   params.addParam<unsigned int>("rand_seed", 12345, "Seed value for the random number generator");
   return params;
 }

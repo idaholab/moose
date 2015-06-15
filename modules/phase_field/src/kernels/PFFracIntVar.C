@@ -10,6 +10,8 @@ template<>
 InputParameters validParams<PFFracIntVar>()
 {
   InputParameters params = validParams<KernelValue>();
+  params.addClassDescription("Phase-field fracture residual for beta variable: Contribution from beta");
+
   return params;
 }
 

@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<CHMath>()
 {
   InputParameters params = validParams<CHBulk>();
+  params.addClassDescription("Simple demonstration Cahn-Hilliard Kernel using an algebraic double-well potential");
   return params;
 }
 

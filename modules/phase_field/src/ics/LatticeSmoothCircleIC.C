@@ -11,6 +11,7 @@ template<>
 InputParameters validParams<LatticeSmoothCircleIC>()
 {
   InputParameters params = validParams<SmoothCircleBaseIC>();
+  params.addClassDescription("Perturbed square lattice of smooth circles");
   params.addParam<Real>("Rnd_variation", 0.0, "Variation from central lattice position");
   params.addRequiredParam<std::vector<unsigned int> >("circles_per_side", "Vector containing the number of bubbles along each side");
   params.addParam<unsigned int>("rand_seed", 2000, "random seed");

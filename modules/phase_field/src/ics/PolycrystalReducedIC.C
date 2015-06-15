@@ -12,16 +12,13 @@ template<>
 InputParameters validParams<PolycrystalReducedIC>()
 {
   InputParameters params = validParams<InitialCondition>();
+  params.addClassDescription("Random Voronoi tesselation polycrystal (used by PolycrystalVoronoiICAction)");
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>("grain_num", "Number of grains being represented by the order parameters");
   params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
-
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
-
   params.addParam<bool>("cody_test", false, "Use set grain center points for Cody's test. Grain num MUST equal 10");
-
   params.addParam<bool>("columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
-
   return params;
 }
 
@@ -63,7 +60,6 @@ PolycrystalReducedIC::initialSetup()
   _centerpoints.resize(_grain_num);
   _assigned_op.resize(_grain_num);
   std::vector<Real> distances(_grain_num);
-
 
   std::vector<Point> holder;
 
