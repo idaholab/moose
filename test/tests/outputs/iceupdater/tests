@@ -1,0 +1,11 @@
+[Tests]
+	[./testupdater]
+		type = 'ICEUpdaterTester'
+		input = 'ice_updater_test.i'
+		nPosts = 4 # start, stop, 2 postprocessor posts
+		
+		# If you change this, make sure you change 
+		# it in ice_updater_test.i:Outputs/ICEUpdater/url
+		port = 8181 
+	[../]
+[]

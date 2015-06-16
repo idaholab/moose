@@ -395,6 +395,7 @@
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
 #include "DOFMapOutput.h"
+#include "ICEUpdater.h"
 
 // Controls
 #include "RealFunctionControl.h"
@@ -726,6 +727,7 @@ registerObjects(Factory & factory)
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
   registerNamedOutput(DOFMapOutput, "DOFMap");
+  registerOutput(ICEUpdater);
 
   // Controls
   registerControl(RealFunctionControl);
