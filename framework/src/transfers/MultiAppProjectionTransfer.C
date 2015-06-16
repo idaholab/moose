@@ -332,40 +332,42 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   // element_index_map[element.id] = index
   // outgoing_qps[index] is the first quadrature point in element
 
-  for (unsigned int i_proc = 0, app0 = 0;
-       i_proc < n_processors();
-       i_proc++, app0 += apps_per_proc[i_proc])
-  {
-    MeshBase::const_element_iterator       el     = mesh.active_local_elements_begin();
-    const MeshBase::const_element_iterator end_el = mesh.active_local_elements_end();
-    for ( ; el != end_el; ++el)
+  {unsigned int app0 = 0;
+    for (processor_id_type i_proc = 0;
+         i_proc < n_processors();
+         app0 += apps_per_proc[i_proc], i_proc++)
     {
-      const Elem* elem = *el;
-      fe->reinit (elem);
-
-      bool qp_hit = false;
-      for (unsigned int i_app = 0;
-           i_app < apps_per_proc[i_proc] && ! qp_hit; i_app++)
+      MeshBase::const_element_iterator       el     = mesh.active_local_elements_begin();
+      const MeshBase::const_element_iterator end_el = mesh.active_local_elements_end();
+      for ( ; el != end_el; ++el)
       {
-        for (unsigned int qp = 0;
-             qp < qrule.n_points() && ! qp_hit; qp ++)
+        const Elem* elem = *el;
+        fe->reinit (elem);
+
+        bool qp_hit = false;
+        for (unsigned int i_app = 0;
+             i_app < apps_per_proc[i_proc] && ! qp_hit; i_app++)
         {
-          Point qpt = xyz[qp];
-          if (bboxes[app0 + i_app].contains_point(qpt))
-            qp_hit = true;
+          for (unsigned int qp = 0;
+               qp < qrule.n_points() && ! qp_hit; qp ++)
+          {
+            Point qpt = xyz[qp];
+            if (bboxes[app0 + i_app].contains_point(qpt))
+              qp_hit = true;
+          }
         }
-      }
 
-      if (qp_hit)
-      {
-        // The selected processor's bounding box contains at least one
-        // quadrature point from this element.  Send all qps from this element
-        // and remember where they are in the array using the map.
-        element_index_map[i_proc][elem->id()] = outgoing_qps[i_proc].size();
-        for (unsigned int qp = 0; qp < qrule.n_points(); qp ++)
+        if (qp_hit)
         {
-          Point qpt = xyz[qp];
-          outgoing_qps[i_proc].push_back(qpt);
+          // The selected processor's bounding box contains at least one
+          // quadrature point from this element.  Send all qps from this element
+          // and remember where they are in the array using the map.
+          element_index_map[i_proc][elem->id()] = outgoing_qps[i_proc].size();
+          for (unsigned int qp = 0; qp < qrule.n_points(); qp ++)
+          {
+            Point qpt = xyz[qp];
+            outgoing_qps[i_proc].push_back(qpt);
+          }
         }
       }
     }
@@ -377,14 +379,14 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   ********************/
   std::vector<std::vector<Real> > incoming_evals(n_processors());
   std::vector<std::vector<unsigned int> > incoming_app_ids(n_processors());
-  for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
+  for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {
     if (i_proc == processor_id())
       continue;
     _communicator.send(i_proc, outgoing_qps[i_proc]);
   }
 
-  for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
+  for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {
     std::vector<Point> incoming_qps;
     if (i_proc == processor_id())
@@ -431,7 +433,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   Gather all of the qp evaluations, find the best one for each qp, and define
   the system.
   ********************/
-  for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
+  for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {
     if (i_proc == processor_id())
       continue;
@@ -466,9 +468,9 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
       Real meshfun_eval = 0.;
       for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
       {
-        std::unordered_map<unsigned int, unsigned int> & map = element_index_map[i_proc];
         // Ignore the selected processor if the element wasn't found in it's
         // bounding box.
+        std::unordered_map<unsigned int, unsigned int> & map = element_index_map[i_proc];
         if (map.find(elem->id()) == map.end())
           continue;
         unsigned int qp0 = map[elem->id()];
