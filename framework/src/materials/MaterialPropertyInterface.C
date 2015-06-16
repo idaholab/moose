@@ -97,6 +97,15 @@ MaterialPropertyInterface::initializeMaterialPropertyInterface(const InputParame
   }
 }
 
+std::string
+MaterialPropertyInterface::deducePropertyName(const std::string & name)
+{
+  if (_mi_params.have_parameter<MaterialPropertyName>(name))
+    return _mi_params.get<MaterialPropertyName>(name);
+  else
+    return name;
+}
+
 template<>
 const MaterialProperty<Real> *
 MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
@@ -106,8 +115,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
-  {
-    MooseSharedPointer<MaterialProperty<Real> > default_property(new MaterialProperty<Real>);
+  {    MooseSharedPointer<MaterialProperty<Real> > default_property(new MaterialProperty<Real>);
 
     // resize to accomodate maximum number of qpoints
     unsigned int nqp = _mi_feproblem.getMaxQps();
@@ -125,51 +133,6 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
   }
 
   return NULL;
-}
-
-template<>
-const MaterialProperty<Real> &
-MaterialPropertyInterface::getMaterialProperty(const std::string & name)
-{
-  // First see if it's just a constant.
-  const MaterialProperty<Real> * default_property = defaultMaterialProperty<Real>(name);
-  if (default_property)
-    return *default_property;
-
-  if (_mi_params.have_parameter<MaterialPropertyName>(name))
-    return getMaterialPropertyByName<Real>(_mi_params.get<MaterialPropertyName>(name));
-  else
-    return getMaterialPropertyByName<Real>(name);
-}
-
-template<>
-const MaterialProperty<Real> &
-MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
-{
-  // First see if it's just a constant.
-  const MaterialProperty<Real> * default_property = defaultMaterialProperty<Real>(name);
-  if (default_property)
-    return *default_property;
-
-  if (_mi_params.have_parameter<MaterialPropertyName>(name))
-    return getMaterialPropertyOldByName<Real>(_mi_params.get<MaterialPropertyName>(name));
-  else
-    return getMaterialPropertyOldByName<Real>(name);
-}
-
-template<>
-const MaterialProperty<Real> &
-MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
-{
-  // First see if it's just a constant.
-  const MaterialProperty<Real> * default_property = defaultMaterialProperty<Real>(name);
-  if (default_property)
-    return *default_property;
-
-  if (_mi_params.have_parameter<MaterialPropertyName>(name))
-    return getMaterialPropertyOlderByName<Real>(_mi_params.get<MaterialPropertyName>(name));
-  else
-    return getMaterialPropertyOlderByName<Real>(name);
 }
 
 std::set<SubdomainID>

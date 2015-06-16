@@ -168,6 +168,18 @@ protected:
   void markMatPropRequested(const std::string &);
 
   /**
+   * Small helper to look up a material property name through the input parameter keys
+   */
+  std::string deducePropertyName(const std::string & name);
+
+  /**
+   * Helper function to parse default material property values. This is implemented
+   * as a specialization for supported types and returns NULL in all other cases.
+   */
+  template<typename T>
+  const MaterialProperty <T> * defaultMaterialProperty(const std::string & name);
+
+  /**
    * True by default. If false, this class throws an error if any of
    * the stateful material properties interfaces are used.
    */
@@ -189,14 +201,6 @@ private:
    */
   void initializeMaterialPropertyInterface(const InputParameters & parameters);
 
-  /**
-   * Helper function to parse default material property values. This is implemented
-   * as a specialization for supported types only.
-   */
-  template<typename T>
-  const MaterialProperty <T> * defaultMaterialProperty(const std::string & name);
-
-
   /// Empty sets for referencing when ids is not included
   const std::set<SubdomainID> _empty_block_ids;
 
@@ -217,31 +221,59 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
-  if (_mi_params.have_parameter<MaterialPropertyName>(name))
-    return getMaterialPropertyByName<T>(_mi_params.get<MaterialPropertyName>(name));
-  else
-    return getMaterialPropertyByName<T>(name);
+  // Check if the supplied parameter is a valid imput parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return getMaterialPropertyByName<T>(prop_name);
 }
 
 template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
-  if (_mi_params.have_parameter<MaterialPropertyName>(name))
-    return getMaterialPropertyOldByName<T>(_mi_params.get<MaterialPropertyName>(name));
-  else
-    return getMaterialPropertyOldByName<T>(name);
+  // Check if the supplied parameter is a valid imput parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return getMaterialPropertyOldByName<T>(prop_name);
 }
 
 template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
-  if (_mi_params.have_parameter<MaterialPropertyName>(name))
-    return getMaterialPropertyOlderByName<T>(_mi_params.get<MaterialPropertyName>(name));
-  else
-    return getMaterialPropertyOlderByName<T>(name);
+  // Check if the supplied parameter is a valid imput parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return getMaterialPropertyOlderByName<T>(prop_name);
 }
+
+// General version for types that do not accept default values
+template<typename T>
+const MaterialProperty<T> *
+MaterialPropertyInterface::defaultMaterialProperty(const std::string & /*name*/)
+{
+  return NULL;
+}
+
+// Forward declare explicit specializations
+template<>
+const MaterialProperty<Real> *
+MaterialPropertyInterface::defaultMaterialProperty(const std::string & name);
 
 template<typename T>
 const MaterialProperty<T> &
