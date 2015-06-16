@@ -26,17 +26,17 @@ protected:
   Real _sign;
   VariableValue & _alpha;
   VariableValue & _u_vel;
-  MaterialProperty<Real> & _pressure;
-  MaterialProperty<Real> & _dp_drho;
-  MaterialProperty<Real> & _dp_drhou;
-  MaterialProperty<Real> & _dp_drhoE;
+  const MaterialProperty<Real> & _pressure;
+  const MaterialProperty<Real> & _dp_drho;
+  const MaterialProperty<Real> & _dp_drhou;
+  const MaterialProperty<Real> & _dp_drhoE;
   VariableValue & _area;
 
   unsigned int _rhoA_var_number;
   unsigned int _rhoEA_var_number;
   bool _has_alpha_A;
   unsigned int _alpha_A_liquid_var_number;
-  MaterialProperty<Real> * _dp_dalphaA_liquid;
+  const MaterialProperty<Real> * _dp_dalphaA_liquid;
 };
 
 #endif /* ONEDMOMENTUMFLUX_H */

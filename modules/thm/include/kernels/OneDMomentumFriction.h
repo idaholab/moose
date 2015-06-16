@@ -33,7 +33,7 @@ protected:
   unsigned _rhoA_var_number;
 
   // Material properties
-  MaterialProperty<Real> & _friction;
+  const MaterialProperty<Real> & _friction;
 };
 
 #endif
