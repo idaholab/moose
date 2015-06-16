@@ -45,7 +45,6 @@
 
 // kernels
 #include "TimeDerivative.h"
-#include "MassLumpedTimeDerivative.h"
 #include "Diffusion.h"
 #include "AnisotropicDiffusion.h"
 #include "CoupledForce.h"
@@ -152,7 +151,6 @@
 #include "ElementL2Error.h"
 #include "ElementVectorL2Error.h"
 #include "EmptyPostprocessor.h"
-#include "FunctionValuePostprocessor.h"
 #include "NodalVariableValue.h"
 #include "NumDOFs.h"
 #include "TimestepSize.h"
@@ -383,6 +381,7 @@
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
 #include "DOFMapOutput.h"
+#include "ICEUpdater.h"
 
 namespace Moose {
 
@@ -414,7 +413,6 @@ registerObjects(Factory & factory)
 
   // kernels
   registerKernel(TimeDerivative);
-  registerKernel(MassLumpedTimeDerivative);
   registerKernel(Diffusion);
   registerKernel(AnisotropicDiffusion);
   registerKernel(CoupledForce);
@@ -558,7 +556,6 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalExtremeValue);
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
-  registerPostprocessor(FunctionValuePostprocessor);
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
   registerPostprocessor(ExecutionerAttributeReporter);
@@ -702,6 +699,7 @@ registerObjects(Factory & factory)
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
   registerNamedOutput(DOFMapOutput, "DOFMap");
+  registerOutput(ICEUpdater);
 
   registered = true;
 }
