@@ -26,7 +26,7 @@ protected:
   unsigned int _num_materials;
 
   /// arguments to construct a sum of the form \f$ c+\gamma\sum_iF_i \f$
-  Real _prefactor;
+  std::vector<Real> _prefactor;
   Real _constant;
 
   /// Function values of the summands.
