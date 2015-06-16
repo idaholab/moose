@@ -219,6 +219,11 @@ protected:
    */
   void calc_schmid_tensor();
 
+  /**
+   * This function performs the line search update
+   */
+  bool line_search_update(const Real, const RankTwoTensor);
+
   /// Number of slip system resistance
   const unsigned int _nss;
 
@@ -241,8 +246,10 @@ protected:
   ///The hardening parameters in this class are read from .i file. The user can override to read from file.
   std::string _slip_sys_hard_prop_file_name;
 
-  ///Stress residual equation tolerance
+  ///Stress residual equation relative tolerance
   Real _rtol;
+  ///Stress residual equation absolute tolerance
+  Real _abs_tol;
   ///Internal variable update equation tolerance
   Real _gtol;
   ///Slip increment tolerance
@@ -285,6 +292,12 @@ protected:
 
   ///Maximum number of substep iterations
   unsigned int _max_substep_iter;
+
+  ///Flag to activate line serach
+  bool _use_line_search;
+
+  ///Minimum line search step size
+  Real _min_lsrch_step;
 
   MaterialProperty<RankTwoTensor> & _fp;
   MaterialProperty<RankTwoTensor> & _fp_old;
