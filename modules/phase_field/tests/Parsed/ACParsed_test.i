@@ -50,7 +50,7 @@
   [./ACInterface]
     type = ACInterface
     variable = eta
-    kappa_name = kappa
+    kappa_name = 1
   [../]
 []
 
@@ -58,8 +58,8 @@
   [./consts]
     type = GenericConstantMaterial
     block = 0
-    prop_names  = 'L kappa'
-    prop_values = '1 1'
+    prop_names  = 'L'
+    prop_values = '1'
   [../]
 
   [./free_energy]
