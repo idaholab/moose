@@ -91,9 +91,9 @@ MultiAppProjectionTransfer::initialSetup()
             //to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
 
             EquationSystems & to_es = to_problem.es();
-            LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
-                                                                                           + "-" + Utility::enum_to_string<Order>(fe_type.order)
-                                                                                           + "-" + name());
+            LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>(
+                 "proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
+                 + "-" + Utility::enum_to_string<Order>(fe_type.order) + "-" + name());
             _proj_var_num = proj_sys.add_variable("var", fe_type);
             proj_sys.attach_assemble_function(assemble_l2_to);
 
@@ -128,9 +128,9 @@ MultiAppProjectionTransfer::initialSetup()
         //to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
 
         EquationSystems & to_es = to_problem.es();
-        LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
-                                                                                       + "-" + Utility::enum_to_string<Order>(fe_type.order)
-                                                                                           + "-" + name());
+        LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>(
+             "proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
+             + "-" + Utility::enum_to_string<Order>(fe_type.order) + "-" + name());
         _proj_var_num = proj_sys.add_variable("var", fe_type);
         proj_sys.attach_assemble_function(assemble_l2_from);
 
@@ -252,6 +252,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   ********************/
   const unsigned int n_global_apps = _multi_app->numGlobalApps();
   const unsigned int n_local_apps = _multi_app->numLocalApps();
+  std::vector<NumericVector<Number> *> serialized_from_solutions(n_local_apps, NULL);
   std::vector<MeshFunction *> local_meshfuns(n_local_apps, NULL);
   std::vector<MeshTools::BoundingBox> local_bboxes(n_local_apps);
   std::vector<std::pair<Point, Point> > bb_points(n_local_apps);
@@ -280,12 +281,12 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-    NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build(from_sys.comm()).release();
-    serialized_from_solution->init(from_sys.n_dofs(), false, SERIAL);
-    from_sys.solution->localize(*serialized_from_solution);
+    serialized_from_solutions[i_local] = NumericVector<Number>::build(from_sys.comm()).release();
+    serialized_from_solutions[i_local]->init(from_sys.n_dofs(), false, SERIAL);
+    from_sys.solution->localize(*serialized_from_solutions[i_local]);
 
     // Get the subapp's mesh function.
-    MeshFunction * from_func = new MeshFunction(from_es, *serialized_from_solution, from_sys.get_dof_map(), from_var_num);
+    MeshFunction * from_func = new MeshFunction(from_es, *serialized_from_solutions[i_local], from_sys.get_dof_map(), from_var_num);
     from_func->init(Trees::ELEMENTS);
     from_func->enable_out_of_mesh_mode(OutOfMeshValue);
     local_meshfuns[i_local] = from_func;
@@ -509,6 +510,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   for (unsigned int i = 0; i < n_local_apps; i++)
   {
     delete local_meshfuns[i];
+    delete serialized_from_solutions[i];
   }
 }
 
