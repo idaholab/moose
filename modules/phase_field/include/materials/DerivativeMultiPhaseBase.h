@@ -71,7 +71,7 @@ protected:
   std::string _g_name;
 
   /// Barrier function \f$ g(\eta_0, \eta_1, \dots, \eta_{n-1}) \f$
-  MaterialProperty<Real> & _g;
+  const MaterialProperty<Real> & _g;
 
   /// Barrier function derivatives.
   std::vector<const MaterialProperty<Real> *> _dg;

@@ -36,10 +36,10 @@ protected:
   MaterialProperty<Real> & _mat_prop;
 
   std::string _coupled_mat_prop_name;
-  MaterialProperty<Real> & _coupled_mat_prop;
+  const MaterialProperty<Real> & _coupled_mat_prop;
 
   std::string _coupled_mat_prop_name2;
-  MaterialProperty<Real> & _coupled_mat_prop2;
+  const MaterialProperty<Real> & _coupled_mat_prop2;
 };
 
 #endif //COUPLEDMATERIAL2_H
