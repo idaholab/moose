@@ -36,6 +36,7 @@
 #include "CrackFrontDefinition.h"
 #include "InteractionIntegral.h"
 #include "InteractionIntegralAuxFields.h"
+#include "MixedModeEffectiveK.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
 #include "MaterialTensorOnLine.h"
@@ -178,6 +179,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(CavityPressurePostprocessor);
   registerPostprocessor(TorqueReaction);
   registerPostprocessor(MaterialTensorIntegral);
+  registerPostprocessor(MixedModeEffectiveK);
 
   registerVectorPostprocessor(CrackDataSampler);
   registerVectorPostprocessor(LineMaterialSymmTensorSampler);
