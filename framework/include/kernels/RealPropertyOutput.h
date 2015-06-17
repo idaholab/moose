@@ -17,7 +17,6 @@
 
 #include "Kernel.h"
 
-
 // Forward Declaration
 class RealPropertyOutput;
 
@@ -33,10 +32,7 @@ public:
 
 protected:
   virtual Real computeQpResidual();
-
   virtual Real computeQpJacobian();
-
-  std::string _prop_name;
 
   const MaterialProperty<Real> & _prop;
 };

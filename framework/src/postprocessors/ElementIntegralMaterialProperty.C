@@ -18,13 +18,13 @@ template<>
 InputParameters validParams<ElementIntegralMaterialProperty>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addRequiredParam<std::string>("mat_prop", "The name of the material property");
+  params.addRequiredParam<MaterialPropertyName>("mat_prop", "The name of the material property");
   return params;
 }
 
 ElementIntegralMaterialProperty::ElementIntegralMaterialProperty(const std::string & name, InputParameters parameters) :
     ElementIntegralPostprocessor(name, parameters),
-    _scalar(getMaterialProperty<Real>(getParam<std::string>("mat_prop")))
+    _scalar(getMaterialProperty<Real>("mat_prop"))
 {}
 
 Real
