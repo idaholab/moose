@@ -38,11 +38,12 @@ DerivativeSumMaterial::DerivativeSumMaterial(const std::string & name,
     mooseError("Please supply at least one material to sum in DerivativeSumMaterial " << name);
 
   // get prefactor values if not 1.0
-    std::vector<Real> p = getParam<std::vector<Real> >("prefactor");
+  std::vector<Real> p = getParam<std::vector<Real> >("prefactor");
+  
   // if prefactor is used we need the same number of prefactors as sum materials
-  if (_num_materials != p.size())
-      _prefactor = p;
-    else if (p.size() != 0)
+  if (_num_materials == p.size())
+    _prefactor = p;
+  else if (p.size() != 0)
     mooseError("Supply the same nummber of sum materials and prefactors.");
 
   // reserve space for summand material properties
