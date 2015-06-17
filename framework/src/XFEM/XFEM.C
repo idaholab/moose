@@ -253,21 +253,7 @@ XFEM::mark_cut_edges_by_geometry(Real time)
       continue;
 
     // get fragment edges
-    if (CEMElem->num_frags() > 0)
-    {
-      if (CEMElem->num_frags() > 1)
-      {
-        libMesh::err << " ERROR: element "<<elem->id()<<" has more than one fragments at this point"<<std::endl;
-        exit(1);
-      }
-      for (unsigned int i = 0; i < CEMElem->get_fragment(0)->num_edges(); ++i)
-      {
-        std::vector<Point> p_line(2,Point(0.0,0.0,0.0));
-        p_line[0] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(0), CEMElem, elem);
-        p_line[1] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(1), CEMElem, elem);
-        frag_edges.push_back(p_line);
-      } // i
-    }
+    get_frag_edges(elem, CEMElem, frag_edges);
 
     // mark cut edges for the element and its fragment
     for (unsigned int i=0; i<_geometric_cuts.size(); ++i)
@@ -277,7 +263,7 @@ XFEM::mark_cut_edges_by_geometry(Real time)
         _geometric_cuts[i]->cut_frag_by_geometry(frag_edges, fragCutEdges, time);
     }
 
-    for (unsigned int i = 0; i < elemCutEdges.size(); ++i)
+    for (unsigned int i = 0; i < elemCutEdges.size(); ++i) // mark element edges
     {
       if (!CEMElem->is_edge_phantom(elemCutEdges[i].host_side_id)) // must not be phantom edge
       {
@@ -473,22 +459,7 @@ XFEM::mark_cut_faces_by_geometry(Real time)
       continue;
 
     // get fragment faces
-    if (CEMElem->num_frags() > 0)
-    {
-      if (CEMElem->num_frags() > 1)
-      {
-        libMesh::err << " ERROR: element "<<elem->id()<<" has more than one fragments at this point"<<std::endl;
-        exit(1);
-      }
-      for (unsigned int i = 0; i < CEMElem->get_fragment(0)->num_faces(); ++i)
-      {
-        unsigned int num_face_nodes = CEMElem->get_frag_face(0,i)->num_nodes();
-        std::vector<Point> p_line(num_face_nodes, Point(0.0,0.0,0.0));
-        for (unsigned int j = 0; j < num_face_nodes; ++j)
-          p_line[j] = get_efa_node_coor(CEMElem->get_frag_face(0,i)->get_node(j), CEMElem, elem);
-        frag_faces.push_back(p_line);
-      } // i
-    }
+    get_frag_faces(elem, CEMElem, frag_faces);
 
     // mark cut faces for the element and its fragment
     for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
@@ -498,7 +469,7 @@ XFEM::mark_cut_faces_by_geometry(Real time)
         _geometric_cuts[i]->cut_frag_by_geometry(frag_faces, fragCutFaces, time);
     }
 
-    for (unsigned int i = 0; i < elemCutFaces.size(); ++i)
+    for (unsigned int i = 0; i < elemCutFaces.size(); ++i) // mark element faces
     {
       if (!CEMElem->is_face_phantom(elemCutFaces[i].face_id)) // must not be phantom face
       {
@@ -789,7 +760,7 @@ XFEM::cut_mesh_with_efa()
 
 Point
 XFEM::get_efa_node_coor(EFAnode* CEMnode, EFAelement* CEMElem,
-                        const Elem *elem, MeshBase* displaced_mesh)
+                        const Elem *elem, MeshBase* displaced_mesh) const
 {
   Point node_coor(0.0,0.0,0.0);
   std::vector<EFAnode*> master_nodes;
@@ -934,4 +905,55 @@ XFEM::is_elem_cut(const Elem* elem) const
       is_cut = true;
   }
   return is_cut;
+}
+
+void
+XFEM::get_frag_faces(const Elem* elem, std::vector<std::vector<Point> > &frag_faces) const
+{
+  std::map<const Elem*, XFEMCutElem*>::const_iterator it;
+  it = _cut_elem_map.find(elem);
+  if (it != _cut_elem_map.end())
+  {
+    const XFEMCutElem *xfce = it->second;
+    xfce->get_frag_faces(frag_faces);
+  }
+}
+
+void
+XFEM::get_frag_edges(const Elem* elem, EFAelement2D* CEMElem, std::vector<std::vector<Point> > &frag_edges) const
+{
+  // N.B. CEMElem here has global EFAnode
+  frag_edges.clear();
+  if (CEMElem->num_frags() > 0)
+  {
+    if (CEMElem->num_frags() > 1)
+      mooseError("element " << elem->id() << " has more than one fragments at this point");
+    for (unsigned int i = 0; i < CEMElem->get_fragment(0)->num_edges(); ++i)
+    {
+      std::vector<Point> p_line(2,Point(0.0,0.0,0.0));
+      p_line[0] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(0), CEMElem, elem);
+      p_line[1] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(1), CEMElem, elem);
+      frag_edges.push_back(p_line);
+    } // i
+  }
+}
+
+void
+XFEM::get_frag_faces(const Elem* elem, EFAelement3D* CEMElem, std::vector<std::vector<Point> > &frag_faces) const
+{
+  // N.B. CEMElem here has global EFAnode
+  frag_faces.clear();
+  if (CEMElem->num_frags() > 0)
+  {
+    if (CEMElem->num_frags() > 1)
+      mooseError("element " << elem->id() << " has more than one fragments at this point");
+    for (unsigned int i = 0; i < CEMElem->get_fragment(0)->num_faces(); ++i)
+    {
+      unsigned int num_face_nodes = CEMElem->get_frag_face(0,i)->num_nodes();
+      std::vector<Point> p_line(num_face_nodes, Point(0.0,0.0,0.0));
+      for (unsigned int j = 0; j < num_face_nodes; ++j)
+        p_line[j] = get_efa_node_coor(CEMElem->get_frag_face(0,i)->get_node(j), CEMElem, elem);
+      frag_faces.push_back(p_line);
+    } // i
+  }
 }

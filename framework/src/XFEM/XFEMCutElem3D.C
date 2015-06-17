@@ -185,6 +185,13 @@ XFEMCutElem3D::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
   return normal;
 }
 
+void
+XFEMCutElem3D::get_frag_faces(std::vector<std::vector<Point> > &frag_faces, MeshBase* displaced_mesh) const
+{
+  // TODO: need to finish this in the future
+  mooseError("not available for XFEMCutElem3D for now");
+}
+
 const EFAelement*
 XFEMCutElem3D::get_efa_elem() const
 {

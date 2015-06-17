@@ -156,6 +156,19 @@ XFEMCutElem2D::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
   return normal;
 }
 
+void
+XFEMCutElem2D::get_frag_faces(std::vector<std::vector<Point> > &frag_faces, MeshBase* displaced_mesh) const
+{
+  frag_faces.clear();
+  for (unsigned int i = 0; i < _efa_elem2d.get_fragment(0)->num_edges(); ++i)
+  {
+    std::vector<Point> edge_points(2, Point(0.0,0.0,0.0));
+    edge_points[0] = get_node_coords(_efa_elem2d.get_frag_edge(0,i)->get_node(0), displaced_mesh);
+    edge_points[1] = get_node_coords(_efa_elem2d.get_frag_edge(0,i)->get_node(1), displaced_mesh);
+    frag_faces.push_back(edge_points);
+  }
+}
+
 const EFAelement*
 XFEMCutElem2D::get_efa_elem() const
 {

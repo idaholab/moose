@@ -79,7 +79,7 @@ public:
                                  Point edge_p1, Point edge_p2, Real & dist);
   bool cut_mesh_with_efa();
   Point get_efa_node_coor(EFAnode* CEMnode, EFAelement* CEMElem,
-                          const Elem *elem, MeshBase* displaced_mesh = NULL);
+                          const Elem *elem, MeshBase* displaced_mesh = NULL) const;
 
   /**
    * Get the volume fraction of an element that is physical
@@ -96,6 +96,14 @@ public:
 
   bool is_elem_at_crack_tip(const Elem* elem) const;
   bool is_elem_cut(const Elem* elem) const;
+  void get_frag_faces(const Elem* elem, std::vector<std::vector<Point> > &frag_faces) const;
+
+private:
+
+  void get_frag_edges(const Elem* elem, EFAelement2D* CEMElem,
+                      std::vector<std::vector<Point> > &frag_edges) const;
+  void get_frag_faces(const Elem* elem, EFAelement3D* CEMElem,
+                      std::vector<std::vector<Point> > &frag_faces) const;
 
 private:
   std::vector<MaterialData *> & _material_data;
