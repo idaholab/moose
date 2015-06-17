@@ -155,12 +155,7 @@ MultiAppProjectionTransfer::assembleL2To(EquationSystems & es, const std::string
   System & from_sys = from_var.sys().system();
   unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-  NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build(from_sys.comm()).release();
-  serialized_from_solution->init(from_sys.n_dofs(), false, SERIAL);
-  // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-  from_sys.solution->localize(*serialized_from_solution);
-
-  MeshFunction from_func(from_es, *serialized_from_solution, from_sys.get_dof_map(), from_var_num);
+  MeshFunction from_func(from_es, *_serialized_master_solution, from_sys.get_dof_map(), from_var_num);
   from_func.init(Trees::ELEMENTS);
   from_func.enable_out_of_mesh_mode(0.);
 
@@ -221,7 +216,6 @@ MultiAppProjectionTransfer::assembleL2To(EquationSystems & es, const std::string
       system.rhs->add_vector(Fe, dof_indices);
     }
   }
-  delete serialized_from_solution;
 }
 
 void
@@ -598,6 +592,14 @@ MultiAppProjectionTransfer::toMultiApp()
 {
   _console << "Projecting solution" << std::endl;
 
+  // Serialize the master solution
+  FEProblem & from_problem = *_multi_app->problem();
+  MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
+  System & from_sys = from_var.sys().system();
+  _serialized_master_solution = NumericVector<Number>::build(from_sys.comm()).release();
+  _serialized_master_solution->init(from_sys.n_dofs(), false, SERIAL);
+  from_sys.solution->localize(*_serialized_master_solution);
+
   for (unsigned int app = 0; app < _multi_app->numGlobalApps(); app++)
   {
     if (_multi_app->hasLocalApp(app))
@@ -605,6 +607,8 @@ MultiAppProjectionTransfer::toMultiApp()
       projectSolution(*_multi_app->appProblem(app), app);
     }
   }
+
+  delete _serialized_master_solution;
 }
 
 void

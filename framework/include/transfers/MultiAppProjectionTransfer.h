@@ -59,6 +59,8 @@ protected:
   friend void assemble_l2_from(EquationSystems & es, const std::string & system_name);
   friend void assemble_l2_to(EquationSystems & es, const std::string & system_name);
 
+  NumericVector<Number> * _serialized_master_solution;
+
 };
 
 
