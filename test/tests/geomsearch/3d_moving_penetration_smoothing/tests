@@ -29,6 +29,7 @@
     exodiff = 'pl_test3nstt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    abs_zero = 1e-9
   [../]
 
   [./pl_test3qns]
@@ -80,6 +81,7 @@
     exodiff = 'pl_test4nstt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    abs_zero = 1e-9
   [../]
 
   [./pl_test4qns]

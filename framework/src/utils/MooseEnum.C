@@ -38,11 +38,22 @@ MooseEnum::MooseEnum(const MooseEnum & other_enum) :
 {
 }
 
+MooseEnum
+MooseEnum::withNamesFrom(const MooseEnumBase & other_enum)
+{
+  return MooseEnum(other_enum);
+}
+
 /**
  * Private constuctor for use by libmesh::Parameters
  */
 MooseEnum::MooseEnum() :
     _current_id(INVALID_ID)
+{
+}
+
+MooseEnum::MooseEnum(const MooseEnumBase & other_enum) :
+    MooseEnumBase(other_enum)
 {
 }
 
