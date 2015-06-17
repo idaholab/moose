@@ -20,7 +20,7 @@ public:
 protected:
   virtual void computeQpStressFreeStrain();
 
-  std::string _prefactor_name;
+  MaterialPropertyName _prefactor_name;
   const MaterialProperty<Real> & _prefactor;
 
   RankTwoTensor _eigen_base_tensor;

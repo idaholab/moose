@@ -55,9 +55,9 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const std::string & n
     _n(declareProperty<RealVectorValue>("plastic_transverse_direction")),
     _n_old(declarePropertyOld<RealVectorValue>("plastic_transverse_direction")),
 
-    _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
-    _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
+    _total_strain_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "total_strain")),
+    _rotation_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
 
     _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),

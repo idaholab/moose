@@ -17,8 +17,8 @@ InputParameters validParams<ComputeFiniteStrainElasticStress>()
 ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(const std::string & name,
                                                  InputParameters parameters) :
     ComputeStressBase(name, parameters),
-    _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
+    _rotation_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
     _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress"))
 {
 }
