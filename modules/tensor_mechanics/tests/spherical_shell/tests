@@ -1,0 +1,9 @@
+[Tests]
+
+  [./AxisymmetricRZ]
+    type = Exodiff
+    input = '2D-RZ_test.i'
+    exodiff = '2D-RZ_test_out.e'
+  [../]
+
+[]
