@@ -1,10 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 40
-  ny = 8
+  nx = 25
+  ny = 25
   xmax = 50
-  ymax = 25
+  ymax = 50
   elem_type = QUAD4
 []
 
@@ -16,16 +16,12 @@
 []
 
 [ICs]
-  [./InitialCondition]
-    type = RndBoundingBoxIC
-    x1 = 15.0
-    x2 = 35.0
+  [./c_IC]
+    type = CrossIC
+    x1 = 0.0
+    x2 = 50.0
     y1 = 0.0
-    y2 = 25.0
-    mx_invalue = 1.0
-    mn_invalue = 0.9
-    mx_outvalue = -0.7
-    mn_outvalue = -0.8
+    y2 = 50.0
     variable = c
   [../]
 []
@@ -57,11 +53,20 @@
 []
 
 [Materials]
-  [./constant]
-    type = PFMobility
+  [./kappa]
+    type = GenericConstantMaterial
     block = 0
-    mob = 1.0
-    kappa = 1.0
+    prop_names = 'kappa_c'
+    prop_values = '2.0'
+  [../]
+  [./mob]
+    type = DerivativeParsedMaterial
+    block = 0
+    f_name = M
+    args = c
+    function = 'if(c<-1,0.1,if(c>1,0.1,1-.9*c^2))'
+    outputs = exodus
+    derivative_order = 2
   [../]
 []
 
@@ -74,11 +79,13 @@
   petsc_options_value = 'hypre boomeramg 31'
 
   l_max_its = 15
+  l_tol = 1.0e-4
   nl_max_its = 10
+  nl_rel_tol = 1.0e-8
 
   start_time = 0.0
-  num_steps = 4
-  dt = 5.0
+  num_steps = 2
+  dt = 0.9
 []
 
 [Outputs]

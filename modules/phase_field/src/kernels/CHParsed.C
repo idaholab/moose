@@ -9,14 +9,16 @@
 template<>
 InputParameters validParams<CHParsed>()
 {
-  InputParameters params = DerivativeKernelInterface<CHBulk>::validParams();
+  InputParameters params = validParams<CHBulk>();
   params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy");
-  params.addCoupledVar("args", "Vector of additional arguments to F");
+  params.addRequiredParam<std::string>("f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
   return params;
 }
 
 CHParsed::CHParsed(const std::string & name, InputParameters parameters) :
-    DerivativeKernelInterface<JvarMapInterface<CHBulk> >(name, parameters),
+    CHBulk(name, parameters),
+    _F_name(getParam<std::string>("f_name")),
+    _nvar(_coupled_moose_vars.size()),
     _second_derivatives(_nvar+1),
     _third_derivatives(_nvar+1),
     _third_cross_derivatives(_nvar),
@@ -54,13 +56,13 @@ CHParsed::computeGradDFDCons(PFFunctionType type)
   {
     case Residual:
       for (unsigned int i = 0; i <= _nvar; ++i)
-        res += (*_grad_vars[i])[_qp] * (*_second_derivatives[i])[_qp];
+        res += (*_grad_vars[i])[_qp]*(*_second_derivatives[i])[_qp];
       return res;
 
     case Jacobian:
-      res = _grad_phi[_j][_qp] * (*_second_derivatives[0])[_qp];
+      res = _grad_phi[_j][_qp]*(*_second_derivatives[0])[_qp];
       for (unsigned int i = 0; i <= _nvar; ++i)
-        res += _phi[_j][_qp] * (*_grad_vars[i])[_qp] * (*_third_derivatives[i])[_qp];
+        res += _phi[_j][_qp]*(*_grad_vars[i])[_qp]*(*_third_derivatives[i])[_qp];
       return res;
   }
 
@@ -75,11 +77,11 @@ CHParsed::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  RealGradient J =   _grad_u[_qp] * _phi[_j][_qp] * (*_third_derivatives[cvar+1])[_qp]
-                   + _grad_phi[_j][_qp] * (*_second_derivatives[cvar+1])[_qp];
+  RealGradient J =   _grad_u[_qp]*_phi[_j][_qp]*(*_third_derivatives[cvar+1])[_qp]
+                   + _grad_phi[_j][_qp]*(*_second_derivatives[cvar+1])[_qp];
 
   for (unsigned int i = 0; i < _nvar; ++i)
-    J += _phi[_j][_qp] * (*_grad_vars[i+1])[_qp] * (*_third_cross_derivatives[i][cvar])[_qp];
+    J += _phi[_j][_qp]*(*_grad_vars[i+1])[_qp]*(*_third_cross_derivatives[i][cvar])[_qp];
 
-  return _grad_test[_i][_qp] * _M[_qp] * J;
+  return CHBulk::computeQpOffDiagJacobian(jvar) + _grad_test[_i][_qp]*_M[_qp]*J;
 }

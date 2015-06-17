@@ -8,8 +8,6 @@
 #define CHPARSED_H
 
 #include "CHBulk.h"
-#include "DerivativeKernelInterface.h"
-#include "JvarMapInterface.h"
 
 //Forward Declarations
 class CHParsed;
@@ -22,7 +20,7 @@ InputParameters validParams<CHParsed>();
  * provided by a DerivativeParsedMaterial.
  * \see SplitCHParsed
  */
-class CHParsed : public DerivativeKernelInterface<JvarMapInterface<CHBulk> >
+class CHParsed : public CHBulk
 {
 public:
   CHParsed(const std::string & name, InputParameters parameters);
@@ -32,6 +30,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
+  const std::string _F_name;
+  const unsigned int _nvar;
   std::vector<const MaterialProperty<Real>* > _second_derivatives;
   std::vector<const MaterialProperty<Real>* > _third_derivatives;
   std::vector<std::vector<const MaterialProperty<Real>* > > _third_cross_derivatives;

@@ -8,8 +8,6 @@
 #define KKSCHBULK_H
 
 #include "CHBulk.h"
-#include "JvarMapInterface.h"
-#include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
 class KKSCHBulk;
@@ -29,10 +27,7 @@ InputParameters validParams<KKSCHBulk>();
  * The user picks one phase free energy \f$ F_a \f$ (f_base) and its corresponding
  * phase concentration \f$ c_a \f$
  */
-class KKSCHBulk : public DerivativeMaterialInterface<
-                         JvarMapInterface<
-                         CHBulk
-                         > >
+class KKSCHBulk : public CHBulk
 {
 public:
   KKSCHBulk(const std::string & name, InputParameters parameters);
