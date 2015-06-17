@@ -115,27 +115,6 @@
     boundary = 3
     value = 0
   [../]
-
-  [./fixDummyHex_x]
-    type = DirichletBC
-    variable = disp_x
-    boundary = 1000
-    value = 0
-  [../]
-
-  [./fixDummyHex_y]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 1000
-    value = 0
-  [../]
-
-  [./fixDummyHex_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 1000
-    value = 0
-  [../]
 []
 
 [AuxKernels]
@@ -213,35 +192,7 @@
   [../]
 []
 
-[SolidMechanics]
-#  [./solid]
-#    type = truss
-#    disp_x = disp_x
-#    disp_y = disp_y
-#    disp_z = disp_z
-#    area = area
-#    save_in = react_x
-#    save_in = react_y
-#    save_in = react_z
-#  [../]
-  [./dummyHex]
-    block = 1000
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-  [../]
-[]
-
 [Materials]
-  [./goo]
-    type = Elastic
-    block = 1000
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    youngs_modulus = 1e6
-    poissons_ratio = 0
-  [../]
   [./linelast]
     type = TrussMaterial
     block = '1 2'
