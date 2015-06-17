@@ -10,20 +10,20 @@ template<>
 InputParameters validParams<KKSGlobalFreeEnergy>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
-  params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
-  params.addParam<std::string>("h_name", "h", "Base name for the switching function h(eta)");
-  params.addParam<std::string>("g_name", "g", "Base name for the double well function g(eta)");
+  params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
+  params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
+  params.addParam<MaterialPropertyName>("h_name", "h", "Base name for the switching function h(eta)");
+  params.addParam<MaterialPropertyName>("g_name", "g", "Base name for the double well function g(eta)");
   params.addRequiredParam<Real>("w", "Double well height parameter");
   return params;
 }
 
 KKSGlobalFreeEnergy::KKSGlobalFreeEnergy(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _prop_fa(getMaterialProperty<Real>(getParam<std::string>("fa_name"))),
-    _prop_fb(getMaterialProperty<Real>(getParam<std::string>("fb_name"))),
-    _prop_h(getMaterialProperty<Real>(getParam<std::string>("h_name"))),
-    _prop_g(getMaterialProperty<Real>(getParam<std::string>("g_name"))),
+    _prop_fa(getMaterialProperty<Real>("fa_name")),
+    _prop_fb(getMaterialProperty<Real>("fb_name")),
+    _prop_h(getMaterialProperty<Real>("h_name")),
+    _prop_g(getMaterialProperty<Real>("g_name")),
     _w(getParam<Real>("w"))
 {
 }

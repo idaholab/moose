@@ -30,7 +30,7 @@ CrossTermGradientFreeEnergy::CrossTermGradientFreeEnergy(const std::string & nam
     _kappas[i].resize(_nvars);
 
     for (unsigned int j = 0; j < _nvars; ++j)
-      _kappas[i][j] = &getMaterialProperty<Real>(_kappa_names[i * _nvars + j]);
+      _kappas[i][j] = &getMaterialPropertyByName<Real>(_kappa_names[i * _nvars + j]);
   }
 }
 

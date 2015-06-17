@@ -31,7 +31,6 @@ protected:
   virtual Real precomputeQpJacobian();
   virtual Real computeDFDOP(PFFunctionType type) = 0;
 
-  std::string _mob_name;
   const MaterialProperty<Real> & _L;
 };
 

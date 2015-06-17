@@ -11,14 +11,13 @@ InputParameters validParams<MatDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
   params.addClassDescription("Diffusion equation Kernel that takes teh Diffusivity from a material property");
-  params.addParam<std::string>("D_name", "D", "The name of the diffusivity");
+  params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
   return params;
 }
 
 MatDiffusion::MatDiffusion(const std::string & name, InputParameters parameters) :
     Diffusion(name, parameters),
-    _D_name(getParam<std::string>("D_name")),
-    _D(getMaterialProperty<Real>(_D_name))
+    _D(getMaterialProperty<Real>("D_name"))
 {}
 
 Real

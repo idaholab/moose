@@ -25,9 +25,6 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-private:
-  std::string _D_name;
-
   const MaterialProperty<Real> & _D;
 };
 

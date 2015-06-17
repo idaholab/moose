@@ -11,17 +11,15 @@ InputParameters validParams<ACInterface>()
 {
   InputParameters params = validParams<KernelGrad>();
   params.addClassDescription("Gradient energy Allen-Cahn Kernel");
-  params.addParam<std::string>("mob_name", "L", "The mobility used with the kernel");
-  params.addParam<std::string>("kappa_name", "kappa_op", "The kappa used with the kernel");
+  params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
+  params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa used with the kernel");
   return params;
 }
 
 ACInterface::ACInterface(const std::string & name, InputParameters parameters) :
     KernelGrad(name, parameters),
-    _mob_name(getParam<std::string>("mob_name")),
-    _kappa_name(getParam<std::string>("kappa_name")),
-    _kappa(getMaterialProperty<Real>(_kappa_name)),
-    _L(getMaterialProperty<Real>(_mob_name))
+    _kappa(getMaterialProperty<Real>("kappa_name")),
+    _L(getMaterialProperty<Real>("mob_name"))
 {
 }
 

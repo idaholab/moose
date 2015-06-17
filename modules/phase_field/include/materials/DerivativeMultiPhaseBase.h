@@ -25,7 +25,7 @@ class DerivativeMultiPhaseBase : public DerivativeFunctionMaterialBase
 {
 public:
   DerivativeMultiPhaseBase(const std::string & name,
-                             InputParameters parameters);
+                           InputParameters parameters);
 
 protected:
   virtual Real computeF();
@@ -45,7 +45,7 @@ protected:
   std::vector<unsigned int> _eta_vars;
 
   /// phase derivative material names
-  std::vector<std::string> _fi_names;
+  std::vector<MaterialPropertyName> _fi_names;
   unsigned int _num_fi;
 
   /// Function value of the i phase.
@@ -61,14 +61,14 @@ protected:
   std::vector<std::vector<std::vector<std::vector<const MaterialProperty<Real> *> > > > _prop_d3Fi;
 
   /// phase switching function names
-  std::vector<std::string> _hi_names;
+  std::vector<MaterialPropertyName> _hi_names;
   unsigned int _num_hi;
 
   /// Switching functions
   std::vector<const MaterialProperty<Real> *> _hi;
 
   /// Barrier function name
-  std::string _g_name;
+  MaterialPropertyName _g_name;
 
   /// Barrier function \f$ g(\eta_0, \eta_1, \dots, \eta_{n-1}) \f$
   const MaterialProperty<Real> & _g;

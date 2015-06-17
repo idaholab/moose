@@ -12,8 +12,8 @@ InputParameters validParams<ACMultiInterface>()
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Gradient energy Allen-Cahn Kernel with cross terms");
   params.addRequiredCoupledVar("etas", "All eta_i order parameters of the multiphase problem");
-  params.addRequiredParam<std::vector<std::string> >("kappa_names", "The kappa used with the kernel");
-  params.addParam<std::string>("mob_name", "L", "The mobility used with the kernel");
+  params.addRequiredParam<std::vector<MaterialPropertyName> >("kappa_names", "The kappa used with the kernel");
+  params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   return params;
 }
 
@@ -23,9 +23,9 @@ ACMultiInterface::ACMultiInterface(const std::string & name, InputParameters par
     _eta(_num_etas),
     _grad_eta(_num_etas),
     _eta_vars(_fe_problem.getNonlinearSystem().nVariables(), -1),
-    _kappa_names(getParam<std::vector<std::string> >("kappa_names")),
+    _kappa_names(getParam<std::vector<MaterialPropertyName> >("kappa_names")),
     _kappa(_num_etas),
-    _L(getMaterialProperty<Real>(getParam<std::string>("mob_name")))
+    _L(getMaterialProperty<Real>("mob_name"))
 {
   if (_num_etas != _kappa_names.size())
     mooseError("Supply the same nummber of etas and kappa_names.");
@@ -49,7 +49,7 @@ ACMultiInterface::ACMultiInterface(const std::string & name, InputParameters par
       a = i;
 
     // get gradient prefactors
-    _kappa[i] = &getMaterialProperty<Real>(_kappa_names[i]);
+    _kappa[i] = &getMaterialPropertyByName<Real>(_kappa_names[i]);
   }
 
   if (a < 0)

@@ -32,7 +32,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int);
 
   /// Switching function names
-  std::vector<std::string> _h_names;
+  std::vector<MaterialPropertyName> _h_names;
   unsigned int _num_h;
 
   /// Switching functions and their drivatives

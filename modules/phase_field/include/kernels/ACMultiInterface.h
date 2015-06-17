@@ -46,7 +46,7 @@ protected:
   unsigned int _a;
 
   /// Interface gradient prefactor
-  std::vector<std::string> _kappa_names;
+  std::vector<MaterialPropertyName> _kappa_names;
   std::vector<const MaterialProperty<Real> *> _kappa;
 
   /// Mobility
