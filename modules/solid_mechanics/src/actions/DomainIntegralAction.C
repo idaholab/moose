@@ -426,8 +426,8 @@ DomainIntegralAction::act()
             pp_name_stream<<pp_base_name<<"_"<<_ring_vec[ring_index];
             std::string aux_stress_name = aux_stress_base_name + aux_mode_name + "1";
             std::string aux_grad_disp_name = aux_grad_disp_base_name + aux_mode_name + "1";
-            params.set<std::string>("aux_stress") = aux_stress_name;
-            params.set<std::string>("aux_grad_disp") = aux_grad_disp_name;
+            params.set<MaterialPropertyName>("aux_stress") = aux_stress_name;
+            params.set<MaterialPropertyName>("aux_grad_disp") = aux_grad_disp_name;
             std::vector<VariableName> qvars;
             qvars.push_back(av_name_stream.str());
             params.set<std::vector<VariableName> >("q") = qvars;

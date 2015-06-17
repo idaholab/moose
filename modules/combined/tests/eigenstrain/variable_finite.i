@@ -104,6 +104,7 @@
     eigen_base = '1 1 1 0 0 0'
     args = c
     incremental_form = true
+    prefactor = var_dep
   [../]
   [./strain]
     type = ComputeFiniteStrain

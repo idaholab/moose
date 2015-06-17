@@ -11,8 +11,8 @@ InputParameters validParams<HeatConductionKernel>()
 {
   InputParameters params = validParams<Diffusion>();
   params.addClassDescription("Compute thermal conductivity "); // Add a description of what this kernel does
-  params.addParam<std::string>("diffusion_coefficient_name", "thermal_conductivity", "Property name of the diffusivity (Default: thermal_conductivity");
-  params.addParam<std::string>("diffusion_coefficient_dT_name", "thermal_conductivity_dT", "Property name of the derivative of the diffusivity with respect to the variable (Default: thermal_conductivity_dT");
+  params.addParam<MaterialPropertyName>("diffusion_coefficient_name", "thermal_conductivity", "Property name of the diffusivity (Default: thermal_conductivity");
+  params.addParam<MaterialPropertyName>("diffusion_coefficient_dT_name", "thermal_conductivity_dT", "Property name of the derivative of the diffusivity with respect to the variable (Default: thermal_conductivity_dT");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -20,8 +20,8 @@ InputParameters validParams<HeatConductionKernel>()
 HeatConductionKernel::HeatConductionKernel(const std::string & name, InputParameters parameters) :
   Diffusion(name, parameters),
   _dim(_subproblem.mesh().dimension()),
-  _diffusion_coefficient(getMaterialProperty<Real>(getParam<std::string>("diffusion_coefficient_name"))),
-  _diffusion_coefficient_dT(hasMaterialProperty<Real>(getParam<std::string>("diffusion_coefficient_dT_name")) ? &getMaterialProperty<Real>(getParam<std::string>("diffusion_coefficient_dT_name")) : NULL)
+  _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
+  _diffusion_coefficient_dT(hasMaterialProperty<Real>(getParam<MaterialPropertyName>("diffusion_coefficient_dT_name")) ? &getMaterialProperty<Real>("diffusion_coefficient_dT_name") : NULL)
 {
 }
 
