@@ -11,8 +11,8 @@ InputParameters validParams<CHInterface>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Gradient energy Cahn-Hilliard Kernel");
-  params.addRequiredParam<std::string>("kappa_name", "The kappa used with the kernel");
-  params.addRequiredParam<std::string>("mob_name", "The mobility used with the kernel");
+  params.addRequiredParam<MaterialPropertyName>("kappa_name", "The kappa used with the kernel");
+  params.addRequiredParam<MaterialPropertyName>("mob_name", "The mobility used with the kernel");
   params.addCoupledVar("args", "Vector of arguments to mobility");
 
   return params;
@@ -20,10 +20,9 @@ InputParameters validParams<CHInterface>()
 
 CHInterface::CHInterface(const std::string & name, InputParameters parameters) :
     DerivativeMaterialInterface<JvarMapInterface<Kernel> >(name, parameters),
-    _kappa_name(getParam<std::string>("kappa_name")),
-    _mob_name(getParam<std::string>("mob_name")),
-    _kappa(getMaterialProperty<Real>(_kappa_name)),
-    _M(getMaterialProperty<Real>(_mob_name)),
+    _kappa(getMaterialProperty<Real>("kappa_name")),
+    _mob_name(getParam<MaterialPropertyName>("mob_name")),
+    _M(getMaterialPropertyByName<Real>(_mob_name)),
     _dMdc(getMaterialPropertyDerivative<Real>(_mob_name, _var.name())),
     _d2Mdc2(getMaterialPropertyDerivative<Real>(_mob_name, _var.name(), _var.name())),
     _second_u(second()),
@@ -53,12 +52,15 @@ CHInterface::CHInterface(const std::string & name, InputParameters parameters) :
 Real
 CHInterface::computeQpResidual()
 {
-  RealGradient grad_M = _dMdc[_qp]*_grad_u[_qp];
+  RealGradient grad_M = _dMdc[_qp] * _grad_u[_qp];
   for (unsigned int i = 0; i < _nvar; ++i)
-    grad_M += (*_dMdarg[i])[_qp]*(*_coupled_grad_vars[i])[_qp];
+    grad_M += (*_dMdarg[i])[_qp] * (*_coupled_grad_vars[i])[_qp];
 
-  return _kappa[_qp]*_second_u[_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr()
-                                          + grad_M*_grad_test[_i][_qp]);
+  return   _kappa[_qp] * _second_u[_qp].tr()
+         * (
+               _M[_qp] * _second_test[_i][_qp].tr()
+             + grad_M * _grad_test[_i][_qp]
+           );
 }
 
 Real
@@ -67,20 +69,26 @@ CHInterface::computeQpJacobian()
   // Set the gradient and gradient derivative values
   RealGradient grad_M = _dMdc[_qp]*_grad_u[_qp];
 
-  RealGradient dgrad_Mdc = _d2Mdc2[_qp]*_phi[_j][_qp]*_grad_u[_qp]
-                           + _dMdc[_qp]*_grad_phi[_j][_qp];
+  RealGradient dgrad_Mdc =   _d2Mdc2[_qp] * _phi[_j][_qp] * _grad_u[_qp]
+                           + _dMdc[_qp] * _grad_phi[_j][_qp];
 
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    grad_M += (*_dMdarg[i])[_qp]*(*_coupled_grad_vars[i])[_qp];
-    dgrad_Mdc += (*_d2Mdcdarg[i])[_qp]*_phi[_j][_qp]*(*_coupled_grad_vars[i])[_qp];
+    grad_M += (*_dMdarg[i])[_qp] * (*_coupled_grad_vars[i])[_qp];
+    dgrad_Mdc += (*_d2Mdcdarg[i])[_qp] * _phi[_j][_qp] * (*_coupled_grad_vars[i])[_qp];
   }
 
   //Jacobian value using product rule
-  Real value = _kappa[_qp]*_second_phi[_j][_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr()
-                                                      + grad_M*_grad_test[_i][_qp])
-               + _kappa[_qp]*_second_u[_qp].tr()*(_dMdc[_qp]*_phi[_j][_qp]*_second_test[_i][_qp].tr()
-                                                  + dgrad_Mdc*_grad_test[_i][_qp]);
+  Real value =   _kappa[_qp] * _second_phi[_j][_qp].tr()
+               * (
+                     _M[_qp] * _second_test[_i][_qp].tr()
+                   + grad_M * _grad_test[_i][_qp]
+                 )
+               + _kappa[_qp] * _second_u[_qp].tr()
+               * (
+                     _dMdc[_qp] * _phi[_j][_qp] * _second_test[_i][_qp].tr()
+                   + dgrad_Mdc * _grad_test[_i][_qp]
+                 );
 
   return value;
 }
@@ -94,16 +102,18 @@ CHInterface::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 
   // Set the gradient derivative
-  RealGradient dgrad_Mdarg = (*_d2Mdcdarg[cvar])[_qp]*_phi[_j][_qp]*_grad_u[_qp] +
-                             (*_dMdarg[cvar])[_qp]*_grad_phi[_j][_qp];
+  RealGradient dgrad_Mdarg =   (*_d2Mdcdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp]
+                             + (*_dMdarg[cvar])[_qp] * _grad_phi[_j][_qp];
 
   for (unsigned int i = 0; i < _nvar; ++i)
-    dgrad_Mdarg += (*_d2Mdargdarg[cvar][i])[_qp]*_phi[_j][_qp]*(*_coupled_grad_vars[cvar])[_qp];
+    dgrad_Mdarg += (*_d2Mdargdarg[cvar][i])[_qp] * _phi[_j][_qp] * (*_coupled_grad_vars[cvar])[_qp];
 
   //Jacobian value using product rule
-  Real value = _kappa[_qp]*_second_u[_qp].tr()*((*_dMdarg[cvar])[_qp]*_phi[_j][_qp]*_second_test[_i][_qp].tr()
-                                                + dgrad_Mdarg*_grad_test[_i][_qp]);
+  Real value =   _kappa[_qp] * _second_u[_qp].tr()
+               * (
+                     (*_dMdarg[cvar])[_qp] * _phi[_j][_qp] * _second_test[_i][_qp].tr()
+                   + dgrad_Mdarg * _grad_test[_i][_qp]
+                 );
 
   return value;
-
 }

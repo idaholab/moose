@@ -11,18 +11,18 @@ InputParameters validParams<CHBulk>()
 {
   InputParameters params = validParams<KernelGrad>();
   params.addClassDescription("Cahn-Hilliard Kernel");
-  params.addParam<std::string>("mob_name", "M", "The mobility used with the kernel");
+  params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel");
   params.addCoupledVar("args", "Vector of arguments to mobility");
   return params;
 }
 
 CHBulk::CHBulk(const std::string & name, InputParameters parameters) :
     DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(name, parameters),
-    _mob_name(getParam<std::string>("mob_name")),
+    _mob_name(getParam<MaterialPropertyName>("mob_name")),
     _M(getMaterialProperty<Real>(_mob_name)),
     _dMdc(getMaterialPropertyDerivative<Real>(_mob_name, _var.name()))
 {
-  //Get number of coupled variables
+  // Get number of coupled variables
   unsigned int nvar = _coupled_moose_vars.size();
 
   // reserve space for derivatives
@@ -42,10 +42,10 @@ CHBulk::precomputeQpResidual()
 RealGradient
 CHBulk::precomputeQpJacobian()
 {
-  RealGradient grad_value = _M[_qp]*computeGradDFDCons(Jacobian)
-                            + _dMdc[_qp]*_phi[_j][_qp]*computeGradDFDCons(Residual);
+  RealGradient grad_value =   _M[_qp] * computeGradDFDCons(Jacobian)
+                            + _dMdc[_qp] * _phi[_j][_qp] * computeGradDFDCons(Residual);
 
-  return grad_value; //Return jacobian
+  return grad_value;
 }
 
 Real
@@ -56,5 +56,5 @@ CHBulk::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  return (*_dMdarg[cvar])[_qp]*_phi[_j][_qp]*computeGradDFDCons(Residual)*_grad_test[_i][_qp];
+  return (*_dMdarg[cvar])[_qp] * _phi[_j][_qp] * computeGradDFDCons(Residual) * _grad_test[_i][_qp];
 }
