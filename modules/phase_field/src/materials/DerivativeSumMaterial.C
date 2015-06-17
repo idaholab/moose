@@ -39,7 +39,7 @@ DerivativeSumMaterial::DerivativeSumMaterial(const std::string & name,
 
   // get prefactor values if not 1.0
   std::vector<Real> p = getParam<std::vector<Real> >("prefactor");
-  
+
   // if prefactor is used we need the same number of prefactors as sum materials
   if (_num_materials == p.size())
     _prefactor = p;
