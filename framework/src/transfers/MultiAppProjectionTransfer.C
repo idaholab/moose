@@ -322,7 +322,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   fe->attach_quadrature_rule(&qrule);
   const std::vector<Point> & xyz = fe->get_xyz();
   std::vector<std::vector<Point> > outgoing_qps(n_processors());
-  std::vector< std::unordered_map<unsigned int, unsigned int> > element_index_map(n_processors());
+  std::vector< std::map<unsigned int, unsigned int> > element_index_map(n_processors());
   // element_index_map[element.id] = index
   // outgoing_qps[index] is the first quadrature point in element
 
@@ -464,7 +464,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
       {
         // Ignore the selected processor if the element wasn't found in it's
         // bounding box.
-        std::unordered_map<unsigned int, unsigned int> & map = element_index_map[i_proc];
+        std::map<unsigned int, unsigned int> & map = element_index_map[i_proc];
         if (map.find(elem->id()) == map.end())
           continue;
         unsigned int qp0 = map[elem->id()];
