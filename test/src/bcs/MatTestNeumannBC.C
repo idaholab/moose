@@ -28,7 +28,7 @@ MatTestNeumannBC::MatTestNeumannBC(const std::string & name, InputParameters par
     _prop_name(getParam<std::string>("mat_prop"))
 {
   if (hasBoundaryMaterialProperty<Real>(_prop_name))
-    _value = &getMaterialProperty<Real>(_prop_name);
+    _value = &getMaterialPropertyByName<Real>(_prop_name);
 
   else
     mooseError("The material property " << _prop_name << " is not defined on all boundaries of this object");

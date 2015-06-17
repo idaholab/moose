@@ -17,14 +17,14 @@ template<>
 InputParameters validParams<MatDivergenceBC>()
 {
   InputParameters params = validParams<DivergenceBC>();
-  params.addRequiredParam<std::string>("prop_name", "The name of the material property");
+  params.addRequiredParam<MaterialPropertyName>("prop_name", "The name of the material property");
 
   return params;
 }
 
 MatDivergenceBC::MatDivergenceBC(const std::string & name, InputParameters parameters) :
     DivergenceBC(name, parameters),
-    _mat(getMaterialProperty<Real>(getParam<std::string>("prop_name")))
+    _mat(getMaterialProperty<Real>("prop_name"))
 {
 }
 
