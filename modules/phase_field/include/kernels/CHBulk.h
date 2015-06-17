@@ -8,6 +8,8 @@
 #define CHBULK_H
 
 #include "KernelGrad.h"
+#include "JvarMapInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
 class CHBulk;
@@ -20,30 +22,31 @@ InputParameters validParams<CHBulk>();
  *  CHBulk.  Use CHMath as an example of how this works.
  **/
 
-class CHBulk : public KernelGrad
+class CHBulk : public DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >
 {
 public:
 
   CHBulk(const std::string & name, InputParameters parameters);
 
 protected:
-  std::string _mob_name;
-  std::string _Dmob_name;
+
+  virtual RealGradient precomputeQpResidual();
+  virtual RealGradient precomputeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   enum PFFunctionType
   {
     Jacobian,
     Residual
   };
-  virtual RealGradient precomputeQpResidual();
-  virtual RealGradient precomputeQpJacobian();
+
   virtual RealGradient computeGradDFDCons(PFFunctionType type) = 0;
 
+  const std::string _mob_name;
   const MaterialProperty<Real> & _M;
+  const MaterialProperty<Real> & _dMdc;
 
-private:
-  bool _has_MJac;
-  const MaterialProperty<Real> * _DM;
+  std::vector<const MaterialProperty<Real> *> _dMdarg;
 };
 
 #endif //CHBULK_H

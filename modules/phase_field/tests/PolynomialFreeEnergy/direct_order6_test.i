@@ -41,7 +41,6 @@
     variable = c
     mob_name = M
     kappa_name = kappa
-    grad_mob_name = grad_M
   [../]
   [./cdot]
     type = TimeDerivative
@@ -74,15 +73,18 @@
 [Executioner]
   type = Transient
   scheme = bdf2
+
   solve_type = NEWTON
+  petsc_options_iname = -pc_type
+  petsc_options_value = lu
+
   l_max_its = 30
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-8
+
   start_time = 0.0
   num_steps = 100
   dt = 4
-  petsc_options_iname = -pc_type
-  petsc_options_value = lu
 []
 
 [Outputs]

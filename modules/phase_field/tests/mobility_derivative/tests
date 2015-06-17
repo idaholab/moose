@@ -1,7 +1,22 @@
 [Tests]
-  [./split]
+  [./mobility_derivative_test]
     type = 'Exodiff'
     input = 'mobility_derivative_test.i'
     exodiff = 'mobility_derivative_test_out.e'
+  [../]
+  [./mobility_derivative_split_coupled_test]
+      type = 'Exodiff'
+      input = 'mobility_derivative_split_coupled_test.i'
+      exodiff = 'mobility_derivative_split_coupled_test_out.e'
+  [../]
+  [./mobility_derivative_direct_test]
+    type = 'Exodiff'
+    input = 'mobility_derivative_direct_test.i'
+    exodiff = 'mobility_derivative_direct_test_out.e'
+  [../]
+  [./mobility_derivative_direct_coupled_test]
+    type = 'Exodiff'
+    input = 'mobility_derivative_direct_coupled_test.i'
+    exodiff = 'mobility_derivative_direct_coupled_test_oversample.e'
   [../]
 []
