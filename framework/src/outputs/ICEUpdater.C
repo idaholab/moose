@@ -60,13 +60,11 @@ void ICEUpdater::initialSetup() {
 void ICEUpdater::outputPostprocessors() {
 	// List of desired postprocessor outputs
 	const std::set<std::string> & pps = getPostprocessorOutput();
-
-	iceUpdater->postMessage("HELLO TO THE ICE CORE FROM MOOSE");
-	iceUpdater->postFileCreated("/path/to/file");
-
 	for (std::set<std::string>::const_iterator it = pps.begin();
 			it != pps.end(); ++it) {
 		PostprocessorValue value = _problem_ptr->getPostprocessorValue(*it);
-		Moose::out << "PP Value: " << *it << " = " << value << "\n";
+		std::stringstream ss;
+		ss << *it << ":" << _time << ":" << value;
+		iceUpdater->postMessage(ss.str());
 	}
 }
