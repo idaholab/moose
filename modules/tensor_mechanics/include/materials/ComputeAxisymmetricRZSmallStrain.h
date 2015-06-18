@@ -11,8 +11,6 @@
 
 /**
  * ComputeAxisymmetricRZSmallStrain defines small strains in an Axisymmetric system.
- * Within this material, '_disp_x' refers to displacement in the radial direction,
- * u_r, and '_disp_y' refers to displacement in the axial direction, u_z.
  * The COORD_TYPE in the Problem block must be set to RZ.
  */
 class ComputeAxisymmetricRZSmallStrain : public Compute2DSmallStrain

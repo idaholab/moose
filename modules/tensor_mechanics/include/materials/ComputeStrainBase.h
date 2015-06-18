@@ -29,6 +29,7 @@ protected:
   /// Coupled displacement variables
   unsigned int _ndisp;
   std::vector<VariableValue *> _disp;
+  std::vector<VariableValue *> _disp_old;
   std::vector<VariableGradient *> _grad_disp;
   std::vector<VariableGradient *> _grad_disp_old;
 

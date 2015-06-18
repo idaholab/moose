@@ -27,7 +27,7 @@ Compute2DSmallStrain::computeProperties()
   {
     _total_strain[_qp](0,0) = (*_grad_disp[0])[_qp](0);
     _total_strain[_qp](1,1) = (*_grad_disp[1])[_qp](1);
-    _total_strain[_qp](0,1) = ((*_grad_disp[0])[_qp](1) + (*_grad_disp[1])[_qp](0) ) / 2.0;
+    _total_strain[_qp](0,1) = ((*_grad_disp[0])[_qp](1) + (*_grad_disp[1])[_qp](0)) / 2.0;
     _total_strain[_qp](1,0) = _total_strain[_qp](0,1);  //force the symmetrical strain tensor
     _total_strain[_qp](2,2) = computeStrainZZ();
 

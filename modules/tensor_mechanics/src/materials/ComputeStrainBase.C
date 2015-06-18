@@ -23,6 +23,7 @@ ComputeStrainBase::ComputeStrainBase(const std::string & name,
     DerivativeMaterialInterface<Material>(name, parameters),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
+    _disp_old(3),
     _grad_disp(3),
     _grad_disp_old(3),
     _T(coupledValue("temperature")),
@@ -42,13 +43,20 @@ ComputeStrainBase::ComputeStrainBase(const std::string & name,
     _disp[i] = &coupledValue("displacements", i);
     _grad_disp[i] = &coupledGradient("displacements", i);
     if (_fe_problem.isTransient())
+    {
+      _disp_old[i] = &coupledValueOld("displacements", i);
       _grad_disp_old[i] = &coupledGradientOld("displacements" ,i);
+    }
     else
+    {
+      _disp_old[i] = &_zero;
       _grad_disp_old[i] = &_grad_zero;
+    }
   }
   if (_ndisp < 3)
   {
     _disp[2] = &_zero;
+    _disp_old[2] = &_zero;
     _grad_disp[2] = &_grad_zero;
     _grad_disp_old[2] = &_grad_zero;
   }
