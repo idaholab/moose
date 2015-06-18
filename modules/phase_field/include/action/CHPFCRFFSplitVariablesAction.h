@@ -26,7 +26,7 @@ private:
   unsigned int _num_L;
   std::string _L_name_base;
   std::vector<std::string> _sub_filenames;
-  std::string _n_name;
+  AuxVariableName _n_name;
 };
 
 #endif //CHPFCRFFSPLITVARIABLESACTION_H

@@ -9,6 +9,9 @@ class HHPFCRFF;
 template<>
 InputParameters validParams<HHPFCRFF>();
 
+/**
+ * TODO: This Kernel needs Documentation!!!
+ */
 class HHPFCRFF : public KernelValue
 {
 public:
@@ -22,7 +25,6 @@ protected:
   bool _positive;
   Real _kernel_sign;
 
-  std::string _prop_name;
   const MaterialProperty<Real> & _prop;
 
   bool _has_coupled_var;

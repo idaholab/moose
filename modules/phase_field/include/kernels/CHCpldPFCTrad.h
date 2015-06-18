@@ -19,7 +19,6 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  std::string _coeff_name;
   const MaterialProperty<Real> & _coeff;
 };
 

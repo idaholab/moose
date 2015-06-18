@@ -9,7 +9,7 @@ InputParameters validParams<HHPFCRFFSplitKernelAction>()
   InputParameters params = validParams<Action>();
 
   params.addRequiredParam<unsigned int>("num_L", "specifies the number of complex L variables will be solved for");
-  params.addRequiredParam<std::string>("n_name", "Variable name used for the n variable");
+  params.addRequiredParam<VariableName>("n_name", "Variable name used for the n variable");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
   params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used for n in this model");
   MooseEnum log_options("tolerance cancelation expansion");
@@ -17,7 +17,6 @@ InputParameters validParams<HHPFCRFFSplitKernelAction>()
   params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
   params.addParam<Real>("n_exp_terms", 4, "Number of terms used in the Taylor expansion of the natural log term");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-
   return params;
 }
 
@@ -26,7 +25,7 @@ HHPFCRFFSplitKernelAction::HHPFCRFFSplitKernelAction(const std::string & name,
     Action(name, params),
     _num_L(getParam<unsigned int>("num_L")),
     _L_name_base(getParam<std::string>("L_name_base")),
-    _n_name(getParam<std::string>("n_name"))
+    _n_name(getParam<VariableName>("n_name"))
 {
 }
 
@@ -71,7 +70,7 @@ HHPFCRFFSplitKernelAction::act()
 
     std::string pname = "alpha_R_";
     pname.append(out.str());
-    poly_params.set<std::string>("prop_name") = pname;
+    poly_params.set<MaterialPropertyName>("prop_name") = pname;
     poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     kernel_name = "HH1_";
@@ -90,7 +89,7 @@ HHPFCRFFSplitKernelAction::act()
 
       pname = "alpha_I_";
       pname.append(out.str());
-      poly_params.set<std::string>("prop_name") = pname;
+      poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
       kernel_name = "HH2_";
       kernel_name.append(real_name);
@@ -107,7 +106,7 @@ HHPFCRFFSplitKernelAction::act()
 
     pname = "A_R_";
     pname.append(out.str());
-    poly_params.set<std::string>("prop_name") = pname;
+    poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
     kernel_name = "HH3_";
     kernel_name.append(real_name);
@@ -134,7 +133,7 @@ HHPFCRFFSplitKernelAction::act()
 
       pname = "alpha_R_";
       pname.append(out.str());
-      poly_params.set<std::string>("prop_name") = pname;
+      poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
       kernel_name = "HH1_";
       kernel_name.append(imag_name);
@@ -150,7 +149,7 @@ HHPFCRFFSplitKernelAction::act()
 
       pname = "alpha_I_";
       pname.append(out.str());
-      poly_params.set<std::string>("prop_name") = pname;
+      poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
       kernel_name = "HH2_";
       kernel_name.append(imag_name);
@@ -166,7 +165,7 @@ HHPFCRFFSplitKernelAction::act()
 
       pname = "A_I_";
       pname.append(out.str());
-      poly_params.set<std::string>("prop_name") = pname;
+      poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
       kernel_name = "HH3_";
       kernel_name.append(imag_name);

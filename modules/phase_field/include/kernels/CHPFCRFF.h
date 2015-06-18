@@ -15,22 +15,18 @@ InputParameters validParams<CHPFCRFF>();
 class CHPFCRFF : public Kernel
 {
 public:
-
   CHPFCRFF(const std::string & name, InputParameters parameters);
 
 protected:
-
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  std::string _mob_name;
-  std::string _Dmob_name;
 
 private:
-
   const MaterialProperty<Real> & _M;
   bool _has_MJac;
   const MaterialProperty<Real> * _DM;
+
   MooseEnum _log_approach;
   Real _tol;
   std::vector<unsigned int> _vals_var;

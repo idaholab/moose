@@ -2,6 +2,7 @@
 #include "Factory.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "AddVariableAction.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -15,13 +16,15 @@ template<>
 InputParameters validParams<CHPFCRFFSplitVariablesAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::string>("family", "LAGRANGE", "Specifies the family of FE shape functions to use for the L variables");
-  params.addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for the L variables");
+  MooseEnum familyEnum = AddVariableAction::getNonlinearVariableFamilies();
+  params.addParam<MooseEnum>("family", familyEnum, "Specifies the family of FE shape functions to use for the L variables");
+  MooseEnum orderEnum = AddVariableAction::getNonlinearVariableOrders();
+  params.addParam<MooseEnum>("order", orderEnum,  "Specifies the order of the FE shape function to use for the L variables");
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to the L variables");
   params.addRequiredParam<unsigned int>("num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
   params.addRequiredParam<std::vector<std::string> >("sub_filenames", "This is the filename of the sub.i file");
-  params.addRequiredParam<std::string>("n_name", "Name of atomic density variable");
+  params.addRequiredParam<AuxVariableName>("n_name", "Name of atomic density variable");
 
   return params;
 }
@@ -32,7 +35,7 @@ CHPFCRFFSplitVariablesAction::CHPFCRFFSplitVariablesAction(const std::string & n
     _num_L(getParam<unsigned int>("num_L")),
     _L_name_base(getParam<std::string>("L_name_base")),
     _sub_filenames(getParam<std::vector<std::string> >("sub_filenames")),
-    _n_name(getParam<std::string>("n_name"))
+    _n_name(getParam<AuxVariableName>("n_name"))
 {
 }
 
@@ -72,13 +75,11 @@ CHPFCRFFSplitVariablesAction::act()
 
   _problem->addTransfer("MultiAppNearestNodeTransfer", trans_name, poly_params);
 
-
-
 #ifdef DEBUG
   Moose::err << "Inside the CHPFCRFFSplitVariablesAction Object\n";
   Moose::err << "VariableBase: " << _L_name_base
-            << "\torder: " << getParam<std::string>("order")
-            << "\tfamily: " << getParam<std::string>("family") << std::endl;
+            << "\torder: " << getParam<MooseEnum>("order")
+            << "\tfamily: " << getParam<MooseEnum>("family") << std::endl;
 #endif
 
   // Loop through the number of L variables
@@ -100,8 +101,8 @@ CHPFCRFFSplitVariablesAction::act()
 #endif
 
     _problem->addAuxVariable(real_name,
-                             FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                                    Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))));
+                             FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+                                    Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))));
 
     poly_params = _factory.getValidParams("MultiAppNearestNodeTransfer");
     poly_params.set<MooseEnum>("direction") = "from_multiapp";
@@ -127,8 +128,8 @@ CHPFCRFFSplitVariablesAction::act()
 #endif
 
       _problem->addAuxVariable(imag_name,
-                               FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                                      Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))));
+                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+                                      Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))));
 
       poly_params = _factory.getValidParams("MultiAppNearestNodeTransfer");
       poly_params.set<MooseEnum>("direction") = "from_multiapp";

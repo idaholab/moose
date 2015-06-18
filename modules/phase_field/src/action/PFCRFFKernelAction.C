@@ -109,7 +109,7 @@ PFCRFFKernelAction::act()
 
     std::string pname = "alpha_R_";
     pname.append(out.str());
-    poly_params.set<std::string>("prop_name") = pname;
+    poly_params.set<MaterialPropertyName>("prop_name") = pname;
     poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     kernel_name = "HH1_";
@@ -128,7 +128,7 @@ PFCRFFKernelAction::act()
 
       pname = "alpha_I_";
       pname.append(out.str());
-      poly_params.set<std::string>("prop_name") = pname;
+      poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
       kernel_name = "HH2_";
       kernel_name.append(real_name);
@@ -145,7 +145,7 @@ PFCRFFKernelAction::act()
 
     pname = "A_R_";
     pname.append(out.str());
-    poly_params.set<std::string>("prop_name") = pname;
+    poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
     kernel_name = "HH3_";
     kernel_name.append(real_name);
@@ -171,7 +171,7 @@ PFCRFFKernelAction::act()
 
       pname = "alpha_R_";
       pname.append(out.str());
-      poly_params.set<std::string>("prop_name") = pname;
+      poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
       kernel_name = "HH1_";
       kernel_name.append(imag_name);
@@ -187,7 +187,7 @@ PFCRFFKernelAction::act()
 
       pname = "alpha_I_";
       pname.append(out.str());
-      poly_params.set<std::string>("prop_name") = pname;
+      poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
       kernel_name = "HH2_";
       kernel_name.append(imag_name);
@@ -203,7 +203,7 @@ PFCRFFKernelAction::act()
 
       pname = "A_I_";
       pname.append(out.str());
-      poly_params.set<std::string>("prop_name") = pname;
+      poly_params.set<MaterialPropertyName>("prop_name") = pname;
 
       kernel_name = "HH3_";
       kernel_name.append(imag_name);

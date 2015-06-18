@@ -4,15 +4,14 @@ template<>
 InputParameters validParams<CHCpldPFCTrad>()
 {
   InputParameters params = validParams<CHSplitVar>();
-  params.addRequiredParam<std::string>("coeff_name", "Name of coefficient");
+  params.addRequiredParam<MaterialPropertyName>("coeff_name", "Name of coefficient");
   return params;
 }
 
 CHCpldPFCTrad::CHCpldPFCTrad(const std::string & name,
                              InputParameters parameters) :
     CHSplitVar(name, parameters),
-    _coeff_name(getParam<std::string>("coeff_name")),
-    _coeff(getMaterialProperty<Real>(_coeff_name))
+    _coeff(getMaterialProperty<Real>("coeff_name"))
 {
 }
 

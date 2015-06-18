@@ -5,7 +5,7 @@ InputParameters validParams<HHPFCRFF>()
 {
   InputParameters params = validParams<KernelValue>();
   params.addCoupledVar("coupled_var", "The name of the coupled variable, if one is used in the kernel");
-  params.addRequiredParam<std::string>("prop_name", "Name of material property to be used in the kernel");
+  params.addRequiredParam<MaterialPropertyName>("prop_name", "Name of material property to be used in the kernel");
   params.addRequiredParam<bool>("positive", "If the kernel is positive, this is true, if negative, it is false");
   return params;
 }
@@ -13,8 +13,7 @@ InputParameters validParams<HHPFCRFF>()
 HHPFCRFF::HHPFCRFF(const std::string & name, InputParameters parameters) :
     KernelValue(name, parameters),
     _positive(getParam<bool>("positive")),
-    _prop_name(getParam<std::string>("prop_name")),
-    _prop(getMaterialProperty<Real>(_prop_name)),
+    _prop(getMaterialProperty<Real>("prop_name")),
     _has_coupled_var(isCoupled("coupled_var")),
     _coupled_var(_has_coupled_var ? &coupledValue("coupled_var") : NULL),
     _coupled_var_var(_has_coupled_var ? coupled("coupled_var") : 0)

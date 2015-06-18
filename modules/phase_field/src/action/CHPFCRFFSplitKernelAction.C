@@ -9,7 +9,7 @@ InputParameters validParams<CHPFCRFFSplitKernelAction>()
   InputParameters params = validParams<Action>();
 
   params.addRequiredParam<unsigned int>("num_L", "specifies the number of complex L variables will be solved for");
-  params.addRequiredParam<std::string>("n_name", "Variable name used for the n variable");
+  params.addRequiredParam<NonlinearVariableName>("n_name", "Variable name used for the n variable");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
   params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used for n in this model");
   MooseEnum log_options("tolerance cancelation expansion");
@@ -25,7 +25,7 @@ CHPFCRFFSplitKernelAction::CHPFCRFFSplitKernelAction(const std::string & name,
     Action(name, params),
     _num_L(getParam<unsigned int>("num_L")),
     _L_name_base(getParam<std::string>("L_name_base")),
-    _n_name(getParam<std::string>("n_name"))
+    _n_name(getParam<NonlinearVariableName>("n_name"))
 {
 }
 

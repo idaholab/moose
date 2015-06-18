@@ -19,7 +19,7 @@ public:
 private:
   unsigned int _num_L;
   std::string _L_name_base;
-  std::string _n_name;
+  VariableName _n_name;
 };
 
 #endif //HHPFCRFFSPLITKERNELACTION_H
