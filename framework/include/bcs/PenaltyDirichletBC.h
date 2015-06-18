@@ -11,33 +11,42 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "FunctionPenaltyDirichletBC.h"
-#include "Function.h"
+#ifndef PENALTYDIRICHLETBC_H
+#define PENALTYDIRICHLETBC_H
+
+#include "IntegratedBC.h"
+
+class PenaltyDirichletBC;
+class Function;
 
 template<>
-InputParameters validParams<FunctionPenaltyDirichletBC>()
+InputParameters validParams<PenaltyDirichletBC>();
+
+/**
+ * A different approach to applying Dirichlet BCs
+ *
+ * uses \int(p u \cdot \phi)=\int(p f \cdot \phi) on d\omega
+ *
+ */
+
+class PenaltyDirichletBC : public IntegratedBC
 {
-  InputParameters params = validParams<IntegratedBC>();
-  params.addParam<Real>("penalty",1e6,"Penalty scalar");
-  params.addRequiredParam<FunctionName>("function", "Forcing function");
+public:
 
-  return params;
-}
+  /**
+   * Factory constructor, takes parameters so that all derived classes can be built using the same constructor.
+   */
+  PenaltyDirichletBC(const std::string & name, InputParameters parameters);
 
-FunctionPenaltyDirichletBC::FunctionPenaltyDirichletBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
-    _func(getFunction("function")),
-    _p(getParam<Real>("penalty"))
-{}
+  virtual ~PenaltyDirichletBC() {}
 
-Real
-FunctionPenaltyDirichletBC::computeQpResidual()
-{
-  return _p*_test[_i][_qp]*(-_func.value(_t,_q_point[_qp]) + _u[_qp] );
-}
+protected:
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
 
-Real
-FunctionPenaltyDirichletBC::computeQpJacobian()
-{
-  return _p*_phi[_j][_qp]*_test[_i][_qp];
-}
+private:
+  Real _p;
+  Real _v;
+};
+
+#endif
