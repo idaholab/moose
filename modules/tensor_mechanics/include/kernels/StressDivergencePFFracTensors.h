@@ -35,17 +35,12 @@ public:
   StressDivergencePFFracTensors(const std::string & name, InputParameters parameters);
 
 protected:
-
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const MaterialProperty<RankTwoTensor> * _d_stress_dc;
-  std::string _pff_jac_prop_name;
 
   const bool _c_coupled;
   const unsigned int _c_var;
-
-private:
-
 };
 
 #endif //STRESSDIVERGENCEPFFRACTENSORS_H

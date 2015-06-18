@@ -14,7 +14,7 @@ InputParameters validParams<MaterialTensorAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params += validParams<MaterialTensorCalculator>();
-  params.addRequiredParam<std::string>("tensor", "The material tensor name.");
+  params.addRequiredParam<MaterialPropertyName>("tensor", "The material tensor name.");
   params.addParam<unsigned int>("qp_select", "The quad point you want evaluated");
   return params;
 }
@@ -22,7 +22,7 @@ InputParameters validParams<MaterialTensorAux>()
 MaterialTensorAux::MaterialTensorAux( const std::string & name, InputParameters parameters ) :
     AuxKernel(name, parameters),
     _material_tensor_calculator(name, parameters),
-    _tensor(getMaterialProperty<SymmTensor>(getParam<std::string>("tensor"))),
+    _tensor(getMaterialProperty<SymmTensor>("tensor")),
     _has_qp_select(isParamValid("qp_select")),
     _qp_select(_has_qp_select ? getParam<unsigned int>("qp_select") : 0)
 {

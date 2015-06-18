@@ -37,12 +37,12 @@ protected:
   unsigned int _n_phase;
 
   /// switching functions
-  std::vector<MaterialProperty<Real> *> _h_eta;
+  std::vector<const MaterialProperty<Real> *> _h_eta;
 
   // phase material properties
   std::vector<std::string> _phase_base;
-  std::vector<MaterialProperty<RankTwoTensor> *> _phase_stress;
-  std::vector<MaterialProperty<ElasticityTensorR4> *> _dphase_stress_dstrain;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _phase_stress;
+  std::vector<const MaterialProperty<ElasticityTensorR4> *> _dphase_stress_dstrain;
 
   // global material properties
   std::string _base_name;

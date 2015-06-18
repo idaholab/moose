@@ -41,18 +41,15 @@ private:
   unsigned int _nvar;
 
   /// free energy function material property base names
-  std::string _Fa_name;
+  MaterialPropertyName _Fa_name;
 
   /// free energy function material property base names
-  std::string _Fb_name;
-
-  /// switching function material property base name
-  std::string _h_name;
+  MaterialPropertyName _Fb_name;
 
   unsigned int _ca_var;
-  std::string _ca_name;
+  const VariableName _ca_name;
   unsigned int _cb_var;
-  std::string _cb_name;
+  const VariableName _cb_name;
 
   /// Derivatives of \f$ dFa/dca \f$ with respect to all coupled variables
   std::vector<const MaterialProperty<Real> *> _second_derivatives;

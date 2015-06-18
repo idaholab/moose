@@ -11,7 +11,7 @@ InputParameters validParams<TotalFreeEnergy>()
 {
   InputParameters params = validParams<TotalFreeEnergyBase>();
   params.addClassDescription("Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined in a material");
-  params.addParam<std::string>("f_name", "F"," Base name of the free energy function");
+  params.addParam<MaterialPropertyName>("f_name", "F"," Base name of the free energy function");
   params.addParam< std::vector<std::string> >("kappa_names", std::vector<std::string>(), "Vector of kappa names corresponding to each variable name in interfacial_vars in the same order.");
   return params;
 }
@@ -19,7 +19,7 @@ InputParameters validParams<TotalFreeEnergy>()
 TotalFreeEnergy::TotalFreeEnergy(const std::string & name,
                                  InputParameters parameters) :
     TotalFreeEnergyBase(name, parameters),
-    _F(getMaterialProperty<Real>(getParam<std::string>("f_name")) ),
+    _F(getMaterialProperty<Real>("f_name")),
     _kappas(_nkappas)
 {
   //Error check to ensure size of interfacial_vars is the same as kappa_names
@@ -28,7 +28,7 @@ TotalFreeEnergy::TotalFreeEnergy(const std::string & name,
 
   // Assign kappa values
   for (unsigned int i = 0; i < _nkappas; ++i)
-    _kappas[i] = &getMaterialProperty<Real>(_kappa_names[i]);
+    _kappas[i] = &getMaterialPropertyByName<Real>(_kappa_names[i]);
 }
 
 Real

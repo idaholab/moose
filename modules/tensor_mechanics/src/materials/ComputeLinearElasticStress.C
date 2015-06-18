@@ -17,7 +17,7 @@ InputParameters validParams<ComputeLinearElasticStress>()
 ComputeLinearElasticStress::ComputeLinearElasticStress(const std::string & name,
                                                  InputParameters parameters) :
     ComputeStressBase(name, parameters),
-    _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _total_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "total_strain")),
     _is_finite_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
 {
   if (_is_finite_strain)

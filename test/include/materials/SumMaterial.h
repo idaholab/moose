@@ -38,8 +38,8 @@ protected:
   std::string _mp2_prop_name;
 
   MaterialProperty<Real> & _sum;
-  MaterialProperty<Real> & _mp1;
-  MaterialProperty<Real> & _mp2;
+  const MaterialProperty<Real> & _mp1;
+  const MaterialProperty<Real> & _mp2;
 
   Real _val_mp1;
   Real _val_mp2;

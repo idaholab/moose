@@ -11,12 +11,12 @@ InputParameters validParams<KKSSplitCHCRes>()
 {
   InputParameters params = validParams<SplitCHBase>();
   params.addClassDescription("KKS model kernel for the split Bulk Cahn-Hilliard term. This operates on the chemical potential 'c' as the non-linear variable");
-  params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
-  params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
+  params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
+  params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
   params.addRequiredCoupledVar("ca", "phase concentration corresponding to the non-linear variable of this kernel");
   params.addRequiredCoupledVar("cb", "phase concentration corresponding to the non-linear variable of this kernel");
   params.addCoupledVar("args_a", "Vector of additional arguments to Fa");
-  params.addParam<std::string>("h_name", "h", "Base name for the switching function h(eta)");
+  params.addParam<MaterialPropertyName>("h_name", "h", "Base name for the switching function h(eta)");
   params.addRequiredCoupledVar("w", "Chemical potenial non-linear helper variable for the split solve");
 
   return params;
@@ -26,14 +26,13 @@ KKSSplitCHCRes::KKSSplitCHCRes(const std::string & name, InputParameters paramet
     DerivativeMaterialInterface<SplitCHBase>(name, parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
-    _Fa_name(getParam<std::string>("fa_name")),
-    _Fb_name(getParam<std::string>("fb_name")),
-    _h_name(getParam<std::string>("h_name")),
+    _Fa_name(getParam<MaterialPropertyName>("fa_name")),
+    _Fb_name(getParam<MaterialPropertyName>("fb_name")),
     _ca_var(coupled("ca")),
     _ca_name(getVar("ca", 0)->name()),
     _cb_var(coupled("cb")),
     _cb_name(getVar("cb", 0)->name()),
-    _prop_h(getMaterialProperty<Real>(_h_name)),
+    _prop_h(getMaterialProperty<Real>("h_name")),
     _first_derivative_Fa(getMaterialPropertyDerivative<Real>(_Fa_name, _ca_name)),
     _second_derivative_Fa(getMaterialPropertyDerivative<Real>(_Fa_name, _ca_name, _ca_name)),
     _second_derivative_Fb(getMaterialPropertyDerivative<Real>(_Fb_name, _cb_name, _cb_name)),

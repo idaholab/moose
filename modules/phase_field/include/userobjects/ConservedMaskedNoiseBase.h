@@ -42,7 +42,6 @@ public:
 protected:
   LIBMESH_BEST_UNORDERED_MAP<dof_id_type, std::vector<std::pair<Real, Real> > > _random_data;
 
-  std::string _mask_property_name;
   const MaterialProperty<Real> & _mask;
 };
 

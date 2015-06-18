@@ -11,14 +11,13 @@ InputParameters validParams<ACBulk>()
 {
   InputParameters params = validParams<KernelValue>();
   params.addClassDescription("Allen-Cahn Kernel");
-  params.addParam<std::string>("mob_name", "L", "The mobility used with the kernel");
+  params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   return params;
 }
 
 ACBulk::ACBulk(const std::string & name, InputParameters parameters) :
     KernelValue(name, parameters),
-    _mob_name(getParam<std::string>("mob_name")),
-    _L(getMaterialProperty<Real>(_mob_name))
+    _L(getMaterialProperty<Real>("mob_name"))
 {
 }
 

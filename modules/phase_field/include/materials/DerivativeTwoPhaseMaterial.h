@@ -43,23 +43,27 @@ protected:
   unsigned int _eta_var;
 
   /// A-phase derivative material name
-  std::string _fa_name;
+  MaterialPropertyName _fa_name;
   /// B-phase derivative material name
-  std::string _fb_name;
+  MaterialPropertyName _fb_name;
 
-  // h(eta) switching function
-  std::string _h_name;
+  ///@{
+  /// h(eta) switching function
+  MaterialPropertyName _h_name;
   const MaterialProperty<Real> & _h;
   const MaterialProperty<Real> & _dh;
   const MaterialProperty<Real> & _d2h;
   const MaterialProperty<Real> & _d3h;
+  ///@}
 
-  // g(eta) switching function
-  std::string _g_name;
+  ///@{
+  /// g(eta) switching function
+  MaterialPropertyName _g_name;
   const MaterialProperty<Real> & _g;
   const MaterialProperty<Real> & _dg;
   const MaterialProperty<Real> & _d2g;
   const MaterialProperty<Real> & _d3g;
+  ///@}
 
   /// Phase transformatuion energy barrier
   Real _W;

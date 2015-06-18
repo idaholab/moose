@@ -105,8 +105,8 @@ public:
   template<typename U>
   const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
   ///@}
-private:
 
+private:
   /// Reference to FEProblem
   FEProblem & _dmi_fe_problem;
 

@@ -18,14 +18,14 @@ template<>
 InputParameters validParams<MaterialEigenKernel>()
 {
   InputParameters params = validParams<EigenKernel>();
-  params.addParam<std::string>("mat", "Material property name (pseudo-stateful)");
+  params.addParam<MaterialPropertyName>("mat", "Material property name (pseudo-stateful)");
   return params;
 }
 
 MaterialEigenKernel::MaterialEigenKernel(const std::string & name, InputParameters parameters) :
     EigenKernel(name,parameters),
-    _propname(getParam<std::string>("mat")),
-    _mat(_is_implicit ? getMaterialProperty<Real>(_propname) : getMaterialProperty<Real>(_propname+"_old"))
+    _propname(getParam<MaterialPropertyName>("mat")),
+    _mat(_is_implicit ? getMaterialPropertyByName<Real>(_propname) : getMaterialPropertyByName<Real>(_propname+"_old"))
 {
 }
 

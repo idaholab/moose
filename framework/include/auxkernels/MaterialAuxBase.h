@@ -70,7 +70,7 @@ protected:
 template<typename T>
 MaterialAuxBase<T>::MaterialAuxBase(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _prop(getMaterialProperty<T>(getParam<std::string>("property"))),
+    _prop(getMaterialProperty<T>("property")),
     _factor(getParam<Real>("factor")),
     _offset(getParam<Real>("offset"))
 {

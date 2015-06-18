@@ -258,4 +258,7 @@ DerivativeStringClass(MultiAppName);
 /// Used for objects the require Output object names
 DerivativeStringClass(OutputName);
 
+/// Used for objects that expect MaterialProperty names
+DerivativeStringClass(MaterialPropertyName);
+
 #endif // MOOSETYPES_H

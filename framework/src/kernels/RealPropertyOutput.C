@@ -20,24 +20,24 @@ template<>
 InputParameters validParams<RealPropertyOutput>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<std::string>("prop_name","The Real material property you would like to output");
+  params.addRequiredParam<MaterialPropertyName>("prop_name", "The Real material property you would like to output");
   return params;
 }
 
-RealPropertyOutput::RealPropertyOutput(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
-   _prop_name(getParam<std::string>("prop_name")),
-   _prop(getMaterialProperty<Real>(_prop_name))
-{}
+RealPropertyOutput::RealPropertyOutput(const std::string & name, InputParameters parameters) :
+    Kernel(name, parameters),
+    _prop(getMaterialProperty<Real>("prop_name"))
+{
+}
 
 Real
 RealPropertyOutput::computeQpResidual()
 {
-  return _test[_i][_qp]*(_u[_qp] - _prop[_qp]);
+  return _test[_i][_qp] * (_u[_qp] - _prop[_qp]);
 }
 
 Real
 RealPropertyOutput::computeQpJacobian()
 {
-  return _test[_i][_qp]*_phi[_j][_qp];
+  return _test[_i][_qp] * _phi[_j][_qp];
 }

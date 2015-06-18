@@ -12,14 +12,13 @@ InputParameters validParams<MaskedBodyForce>()
 {
   InputParameters params = validParams<BodyForce>();
   params.addClassDescription("Kernel that defines a body force modified by a material mask");
-  params.addParam<std::string>("mask", "Material property defining the mask");
+  params.addParam<MaterialPropertyName>("mask", "Material property defining the mask");
   return params;
 }
 
 MaskedBodyForce::MaskedBodyForce(const std::string & name, InputParameters parameters) :
     BodyForce(name, parameters),
-    _mask_property_name(getParam<std::string>("mask")),
-    _mask(getMaterialProperty<Real>(_mask_property_name))
+    _mask(getMaterialProperty<Real>("mask"))
 {
 }
 

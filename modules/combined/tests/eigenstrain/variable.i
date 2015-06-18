@@ -93,6 +93,7 @@
     type = ComputeVariableEigenstrain
     block = 0
     eigen_base = '1 1 1 0 0 0'
+    prefactor = var_dep
     args = c
   [../]
   [./strain]

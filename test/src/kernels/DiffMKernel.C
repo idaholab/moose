@@ -17,16 +17,15 @@ template<>
 InputParameters validParams<DiffMKernel>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<std::string>("mat_prop", "the name of the material property we are going to use");
+  params.addRequiredParam<MaterialPropertyName>("mat_prop", "the name of the material property we are going to use");
   params.addParam<Real>("offset", 4.0, "Offset on residual evaluation");
   return params;
 }
 
 
-DiffMKernel::DiffMKernel(const std::string & name, InputParameters parameters)
-  : Kernel(name, parameters),
-    _prop_name(getParam<std::string>("mat_prop")),
-    _diff(getMaterialProperty<Real>(_prop_name)),
+DiffMKernel::DiffMKernel(const std::string & name, InputParameters parameters) :
+    Kernel(name, parameters),
+    _diff(getMaterialProperty<Real>("mat_prop")),
     _offset(getParam<Real>("offset"))
 {
 }

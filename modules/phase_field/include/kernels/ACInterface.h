@@ -28,11 +28,7 @@ protected:
   };
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
-  std::string _mob_name;
-  std::string _kappa_name;
 
-
-private:
   const MaterialProperty<Real> & _kappa;
   const MaterialProperty<Real> & _L;
 };

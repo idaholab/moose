@@ -31,7 +31,7 @@ protected:
   virtual void computeQpProperties();
 
   // switching function
-  MaterialProperty<Real> & _h_eta;
+  const MaterialProperty<Real> & _h_eta;
 
   // phase A material properties
   std::string _base_A;

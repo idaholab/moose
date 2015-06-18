@@ -32,30 +32,34 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-private:
-  std::string _kappa_name;
-  std::string _mob_name;
-
-  ///Material property values
   const MaterialProperty<Real> & _kappa;
+
+  ///@{
+  /// Mobility material property name, value, and concentration derivatives
+  MaterialPropertyName _mob_name;
   const MaterialProperty<Real> & _M;
   const MaterialProperty<Real> & _dMdc;
   const MaterialProperty<Real> & _d2Mdc2;
+  ///@}
 
-  ///Variables for second order derivatives
+  ///@{
+  /// Variables for second order derivatives
   VariableSecond & _second_u;
   VariableTestSecond & _second_test;
   VariablePhiSecond & _second_phi;
+  ///@}
 
   ///Number of variables
   unsigned int _nvar;
 
-  ///Material property vectors
+  ///@{
+  /// Mobility derivatives w.r.t. its dependent variables
   std::vector<const MaterialProperty<Real> *> _dMdarg;
   std::vector<const MaterialProperty<Real> *> _d2Mdcdarg;
   std::vector<std::vector<const MaterialProperty<Real>* > > _d2Mdargdarg;
+  ///@}
 
-  ///Coupled variables used in mobility
+  /// Coupled variables used in mobility
   std::vector<VariableGradient *> _coupled_grad_vars;
 };
 

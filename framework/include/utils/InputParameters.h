@@ -890,111 +890,58 @@ InputParameters::addDeprecatedParam(const std::string &name, const std::string &
   _deprecated_params.insert(std::make_pair(name, deprecation_message));
 }
 
-// Specializations for MooseEnum
+
+// Forward declare MooseEnum specializations for add*Param
 template <>
-inline
 void
-InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
-{
-  InputParameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
-  _required_params.insert(name);
-  _doc_string[name] = doc_string;
-}
+InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string);
 
 template <>
-inline
 void
-InputParameters::addRequiredParam<MultiMooseEnum>(const std::string &name, const MultiMooseEnum &moose_enum, const std::string &doc_string)
-{
-  InputParameters::set<MultiMooseEnum>(name) = moose_enum;               // valid parameter is set by set_attributes
-  _required_params.insert(name);
-  _doc_string[name] = doc_string;
-}
+InputParameters::addRequiredParam<MultiMooseEnum>(const std::string &name, const MultiMooseEnum &moose_enum, const std::string &doc_string);
 
 template <>
-inline
 void
-InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string)
-{
-  InputParameters::set<std::vector<MooseEnum> >(name) = moose_enums;    // valid parameter is set by set_attributes
-  _required_params.insert(name);
-  _doc_string[name] = doc_string;
-}
+InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string);
 
 template <>
-inline
 void
-InputParameters::addParam<MooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
-{
-  mooseError("You must supply a MooseEnum object when using addParam, even if the parameter is not required!");
-}
+InputParameters::addParam<MooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/);
 
 template <>
-inline
 void
-InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
-{
-  mooseError("You must supply a MultiMooseEnum object when using addParam, even if the parameter is not required!");
-}
+InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/);
 
 template <>
-inline
 void
-InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/, const std::string & /*doc_string*/)
-{
-  mooseError("You must supply a vector of MooseEnum object(s) when using addParam, even if the parameter is not required!");
-}
+InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/, const std::string & /*doc_string*/);
 
-// Specialization for setParamHelper
+
+// Forward declare specializations for setParamHelper
 template<>
-inline
 void
-InputParameters::setParamHelper<PostprocessorName, Real>(const std::string &name, PostprocessorName & l_value, const Real &r_value)
-{
-  // Store the default value
-  _default_postprocessor_value[name] = r_value;
-
-  // Assign the default value so that it appears in the dump
-  std::ostringstream oss;
-  oss << r_value;
-  l_value = oss.str();
-}
+InputParameters::setParamHelper<PostprocessorName, Real>(const std::string &name, PostprocessorName & l_value, const Real &r_value);
 
 template<>
-inline
 void
-InputParameters::setParamHelper<PostprocessorName, int>(const std::string &name, PostprocessorName & l_value, const int &r_value)
-{
-  // Store the default value
-  _default_postprocessor_value[name] = r_value;
-
-  // Assign the default value so that it appears in the dump
-  std::ostringstream oss;
-  oss << r_value;
-  l_value = oss.str();
-}
+InputParameters::setParamHelper<PostprocessorName, int>(const std::string &name, PostprocessorName & l_value, const int &r_value);
 
 template<>
-inline
 void
-InputParameters::setParamHelper<FunctionName, Real>(const std::string & /*name*/, FunctionName & l_value, const Real &r_value)
-{
-  // Assign the default value so that it appears in the dump
-  std::ostringstream oss;
-  oss << r_value;
-  l_value = oss.str();
-}
+InputParameters::setParamHelper<FunctionName, Real>(const std::string & /*name*/, FunctionName & l_value, const Real &r_value);
 
 template<>
-inline
 void
-InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/, FunctionName & l_value, const int &r_value)
-{
-  // Assign the default value so that it appears in the dump
-  std::ostringstream oss;
-  oss << r_value;
-  l_value = oss.str();
-}
+InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/, FunctionName & l_value, const int &r_value);
+
+template<>
+void
+InputParameters::setParamHelper<MaterialPropertyName, Real>(const std::string & /*name*/, MaterialPropertyName & l_value, const Real &r_value);
+
+template<>
+void
+InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /*name*/, MaterialPropertyName & l_value, const int &r_value);
+
 
 template <typename T>
 const T &
