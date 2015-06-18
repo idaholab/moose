@@ -11,7 +11,7 @@ InputParameters validParams<CHPFCRFF>()
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
   params.addParam<Real>("n_exp_terms", 4, "Number of terms used in the Taylor expansion of the natural log term");
-  params.addParam<std::string>("mob_name", "M", "The mobility used with the kernel");
+  params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel");
   params.addParam<std::string>("Dmob_name", "DM", "The D mobility used with the kernel");
   params.addParam<bool>("has_MJac",false,"Jacobian information for the mobility is defined");
   params.addParam<Real>("a", 1.0, "Constants on Taylor Series");
@@ -22,7 +22,7 @@ InputParameters validParams<CHPFCRFF>()
 
 CHPFCRFF::CHPFCRFF(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
-    _mob_name(getParam<std::string>("mob_name")),
+    _mob_name(getParam<MaterialPropertyName>("mob_name")),
     _Dmob_name(getParam<std::string>("Dmob_name")),
     _M(getMaterialProperty<Real>(_mob_name)),
     _has_MJac(getParam<bool>("has_MJac")),

@@ -11,7 +11,7 @@ InputParameters validParams<HHPFCRFFSplitKernelAction>()
   params.addRequiredParam<unsigned int>("num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<std::string>("n_name", "Variable name used for the n variable");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
-  params.addParam<std::string>("mob_name", "M", "The mobility used for n in this model");
+  params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used for n in this model");
   MooseEnum log_options("tolerance cancelation expansion");
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");

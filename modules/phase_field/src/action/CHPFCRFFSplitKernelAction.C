@@ -11,7 +11,7 @@ InputParameters validParams<CHPFCRFFSplitKernelAction>()
   params.addRequiredParam<unsigned int>("num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<std::string>("n_name", "Variable name used for the n variable");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
-  params.addParam<std::string>("mob_name", "M", "The mobility used for n in this model");
+  params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used for n in this model");
   MooseEnum log_options("tolerance cancelation expansion");
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
@@ -60,7 +60,7 @@ CHPFCRFFSplitKernelAction::act()
   poly_params = _factory.getValidParams("CHPFCRFF");
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
   poly_params.set<std::vector<VariableName> >("v") = real_v;
-  poly_params.set<std::string>("mob_name") = getParam<std::string>("mob_name");
+  poly_params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mob_name");
   poly_params.set<MooseEnum>("log_approach") = getParam<MooseEnum>("log_approach");
   poly_params.set<Real>("tol") = getParam<Real>("tol");
   poly_params.set<Real>("n_exp_terms") = getParam<Real>("n_exp_terms");
