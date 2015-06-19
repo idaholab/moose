@@ -40,7 +40,7 @@ InputParameters validParams<DomainIntegralAction>()
   params.addParam<MooseEnum>("position_type", position_type, "The method used to calculate position along crack front.  Options are: "+position_type.getRawNames());
   MooseEnum q_function_type("Geometry Topology","Geometry");
   params.addParam<MooseEnum>("q_function_type",q_function_type,"The method used to define the integration domain. Options are: "+q_function_type.getRawNames());
-  params.addParam<bool>("effective_k",false,"Calculate an effective K from KI, KII and KIII, assuming self-similar crack growth.");
+  params.addParam<bool>("equivalent_k",false,"Calculate an equivalent K from KI, KII and KIII, assuming self-similar crack growth.");
   return params;
 }
 
@@ -61,7 +61,7 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
   _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane") : std::numeric_limits<unsigned int>::max()),
   _position_type(getParam<MooseEnum>("position_type")),
   _q_function_type(getParam<MooseEnum>("q_function_type")),
-  _get_effective_k(getParam<bool>("effective_k")),
+  _get_equivalent_k(getParam<bool>("equivalent_k")),
   _use_displaced_mesh(false)
 {
   if (_q_function_type == GEOMETRY)
@@ -150,8 +150,8 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
     _integrals.insert(INTEGRAL(int(integral_moose_enums.get(i))));
   }
 
-  if (_get_effective_k && (_integrals.count(INTERACTION_INTEGRAL_KI) == 0 || _integrals.count(INTERACTION_INTEGRAL_KII) == 0 || _integrals.count(INTERACTION_INTEGRAL_KIII) == 0))
-    mooseError("DomainIntegral error: must calculate KI, KII and KIII to get effective K.");
+  if (_get_equivalent_k && (_integrals.count(INTERACTION_INTEGRAL_KI) == 0 || _integrals.count(INTERACTION_INTEGRAL_KII) == 0 || _integrals.count(INTERACTION_INTEGRAL_KIII) == 0))
+    mooseError("DomainIntegral error: must calculate KI, KII and KIII to get equivalent K.");
 
   if (isParamValid("output_variable"))
   {
@@ -490,10 +490,10 @@ DomainIntegralAction::act()
         }
       }
     }
-    if (_get_effective_k)
+    if (_get_equivalent_k)
     {
-      std::string pp_base_name("Keff");
-      const std::string pp_type_name("MixedModeEffectiveK");
+      std::string pp_base_name("Keq");
+      const std::string pp_type_name("MixedModeEquivalentK");
       InputParameters params = _factory.getValidParams(pp_type_name);
       params.set<MultiMooseEnum>("execute_on") = "timestep_end";
       params.set<Real>("poissons_ratio") = _poissons_ratio;
@@ -598,6 +598,30 @@ DomainIntegralAction::act()
         {
           std::ostringstream pp_name_stream;
           pp_name_stream<<vpp_name_stream.str()<<"_"<<cfp_index+1;
+          postprocessor_names.push_back(pp_name_stream.str());
+        }
+        params.set<std::vector<PostprocessorName> >("postprocessors") = postprocessor_names;
+        _problem->addVectorPostprocessor(vpp_type_name,vpp_name_stream.str(),params);
+      }
+    }
+    if (_get_equivalent_k && !_treat_as_2d)
+    {
+      std::string pp_base_name("Keq");
+      const std::string vpp_type_name("CrackDataSampler");
+      InputParameters params = _factory.getValidParams(vpp_type_name);
+      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+      params.set<UserObjectName>("crack_front_definition") = uo_name;
+      params.set<MooseEnum>("sort_by") = "id";
+      params.set<MooseEnum>("position_type") = _position_type;
+      for (unsigned int ring_index=0; ring_index<_ring_vec.size(); ++ring_index)
+      {
+        std::vector<PostprocessorName> postprocessor_names;
+        std::ostringstream vpp_name_stream;
+        vpp_name_stream<<pp_base_name<<"_"<<_ring_vec[ring_index];
+        for (unsigned int cfp_index=0; cfp_index<num_crack_front_points; ++cfp_index)
+        {
+          std::ostringstream pp_name_stream;
+          pp_name_stream<<pp_base_name<<"_"<<cfp_index+1<<"_"<<_ring_vec[ring_index];
           postprocessor_names.push_back(pp_name_stream.str());
         }
         params.set<std::vector<PostprocessorName> >("postprocessors") = postprocessor_names;

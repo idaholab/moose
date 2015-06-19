@@ -6,21 +6,21 @@
 /****************************************************************/
 
 
-#ifndef MIXEDMODEEFFECTIVEK_H
-#define MIXEDMODEEFFECTIVEK_H
+#ifndef MIXEDMODEEQUIVALENTK_H
+#define MIXEDMODEEQUIVALENTK_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class MixedModeEffectiveK;
+class MixedModeEquivalentK;
 
 template<>
-InputParameters validParams<MixedModeEffectiveK>();
+InputParameters validParams<MixedModeEquivalentK>();
 
-class MixedModeEffectiveK : public GeneralPostprocessor
+class MixedModeEquivalentK : public GeneralPostprocessor
 {
 public:
-  MixedModeEffectiveK(const std::string & name, InputParameters parameters);
+  MixedModeEquivalentK(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
   virtual void execute() {}
@@ -37,4 +37,4 @@ protected:
   Real _poissons_ratio;
 };
 
-#endif //MIXEDMODEEFFECTIVEK_H
+#endif //MIXEDMODEEQUIVALENTK_H

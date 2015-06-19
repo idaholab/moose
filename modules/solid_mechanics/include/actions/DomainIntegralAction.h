@@ -74,7 +74,7 @@ protected:
   unsigned int _symmetry_plane;
   MooseEnum _position_type;
   MooseEnum _q_function_type;
-  bool _get_effective_k;
+  bool _get_equivalent_k;
   bool _use_displaced_mesh;
   std::vector<unsigned int> _ring_vec;
 };

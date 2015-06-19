@@ -6,10 +6,10 @@
 /****************************************************************/
 
 
-#include "MixedModeEffectiveK.h"
+#include "MixedModeEquivalentK.h"
 
 template<>
-InputParameters validParams<MixedModeEffectiveK>()
+InputParameters validParams<MixedModeEquivalentK>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<PostprocessorName>("KI_name","The name of the KI postprocessor");
@@ -19,7 +19,7 @@ InputParameters validParams<MixedModeEffectiveK>()
   return params;
 }
 
-MixedModeEffectiveK::MixedModeEffectiveK(const std::string & name, InputParameters parameters) :
+MixedModeEquivalentK::MixedModeEquivalentK(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _ki_value(getPostprocessorValue("KI_name")),
     _kii_value(getPostprocessorValue("KII_name")),
@@ -29,7 +29,7 @@ MixedModeEffectiveK::MixedModeEffectiveK(const std::string & name, InputParamete
 }
 
 Real
-MixedModeEffectiveK::getValue()
+MixedModeEquivalentK::getValue()
 {
   return std::sqrt(_ki_value*_ki_value + _kii_value*_kii_value + 1/(1-_poissons_ratio)*_kiii_value*_kiii_value);
 }
