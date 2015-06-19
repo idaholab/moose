@@ -8,6 +8,7 @@
   ymin = 0
   ymax = 1
   elem_type = QUAD4
+  displacements = 'disp_x disp_y'
 []
 
 [Functions]
@@ -35,8 +36,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -78,8 +78,7 @@
   [./strain]
     type = ComputeSmallStrain
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y'
   [../]
   [./stress]
     type = ComputeLinearElasticStress

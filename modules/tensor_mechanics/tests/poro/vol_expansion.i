@@ -25,9 +25,9 @@
 []
 
 [GlobalParams]
-  disp_z = disp_z
-  disp_y = disp_y
   disp_x = disp_x
+  disp_y = disp_y
+  disp_z = disp_z
   block = 0
 []
 
@@ -74,20 +74,8 @@
     type = Diffusion
     variable = p
   [../]
-  [./grad_stress_x]
-    type = StressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./grad_stress_y]
-    type = StressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-  [./grad_stress_z]
-    type = StressDivergenceTensors
-    variable = disp_z
-    component = 2
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./poro_x]
     type = PoroMechanicsCoupling
@@ -209,6 +197,7 @@
   [../]
   [./strain]
     type = ComputeSmallStrain
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     type = ComputeLinearElasticStress

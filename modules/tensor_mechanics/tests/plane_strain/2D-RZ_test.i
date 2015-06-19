@@ -19,7 +19,7 @@
 
 [Mesh]
   file = 2D-RZ_mesh.e
-  displacements = 'disp_x disp_y'
+  displacements = 'disp_r disp_z'
 []
 
 [Problem]
@@ -27,31 +27,19 @@
 []
 
 [Variables]
-  [./disp_x]
+  [./disp_r]
     order = SECOND
     family = LAGRANGE
   [../]
-  [./disp_y]
+  [./disp_z]
     order = SECOND
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./AxisymmetricRZx]
-    type = StressDivergenceRZTensors
-    variable = disp_x
-    disp_x = disp_x
-    disp_y = disp_y
-    component = 0
-    use_displaced_mesh = true
-  [../]
-  [./AxisymmetricRZy]
-    type = StressDivergenceRZTensors
-    variable = disp_y
-    disp_x = disp_x
-    disp_y = disp_y
-    component = 1
+  [./AxisymmetricRZ]
+    displacements = 'disp_r disp_z'
     use_displaced_mesh = true
   [../]
 []
@@ -84,9 +72,7 @@
 
   [./small_strain_arz]
     type = ComputeAxisymmetricRZSmallStrain
-    disp_x = disp_x
-    disp_y = disp_y
-#    thermal_expansion_coeff = 0
+    displacements = 'disp_r disp_z'
     block = 1
   [../]
 
@@ -98,48 +84,48 @@
 
 [BCs]
 # pin particle along symmetry planes
-  [./no_disp_x]
+  [./no_disp_r]
     type = DirichletBC
-    variable = disp_x
+    variable = disp_r
     boundary = xzero
     value = 0.0
   [../]
 
-  [./no_disp_y]
+  [./no_disp_z]
     type = DirichletBC
-    variable = disp_y
+    variable = disp_z
     boundary = yzero
     value = 0.0
   [../]
 
 # exterior and internal pressures
-  [./exterior_pressure_x]
+  [./exterior_pressure_r]
     type = PressureTM
-    variable = disp_x
+    variable = disp_r
     boundary = outer
     component = 0
     factor = 200000
   [../]
 
- [./exterior_pressure_y]
+ [./exterior_pressure_z]
     type = PressureTM
-    variable = disp_y
+    variable = disp_z
     boundary = outer
     component = 1
     factor = 200000
   [../]
 
-  [./interior_pressure_x]
+  [./interior_pressure_r]
     type = PressureTM
-    variable = disp_x
+    variable = disp_r
     boundary = inner
     component = 0
     factor = 100000
   [../]
 
-  [./interior_pressure_y]
+  [./interior_pressure_z]
     type = PressureTM
-    variable = disp_y
+    variable = disp_z
     boundary = inner
     component = 1
     factor = 100000

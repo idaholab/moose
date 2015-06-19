@@ -55,13 +55,13 @@ StressDivergenceRZTensors::computeQpJacobian()
 Real
 StressDivergenceRZTensors::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_xdisp_coupled && jvar == _xdisp_var)
-    return calculateJacobian( _component, 0 );
+  for (unsigned int i = 0; i < _ndisp; ++i)
+  {
+    if (jvar == _disp_var[i])
+      return calculateJacobian( _component, i);
+  }
 
-  else if (_ydisp_coupled && jvar == _ydisp_var)
-    return calculateJacobian( _component, 1 );
-
-  else if (_temp_coupled && jvar == _temp_var)
+  if (_temp_coupled && jvar == _temp_var)
     return 0.0;
 
   return 0;
@@ -72,7 +72,7 @@ StressDivergenceRZTensors::calculateJacobian(unsigned int ivar, unsigned int jva
 {
   RealGradient test, test_z, phi, phi_z;
 
-  if ( ivar == 0 )  //Case grad_test for x, requires contributions from stress_xx, stress_xy, and stress_zz
+  if (ivar == 0)  //Case grad_test for x, requires contributions from stress_xx, stress_xy, and stress_zz
   {
     test(0) = _grad_test[_i][_qp](0);
     test(1) = _grad_test[_i][_qp](1);
@@ -84,7 +84,7 @@ StressDivergenceRZTensors::calculateJacobian(unsigned int ivar, unsigned int jva
     test(1) = _grad_test[_i][_qp](1);
   }
 
-  if ( jvar == 0 )
+  if (jvar == 0)
   {
     phi(0) = _grad_phi[_j][_qp](0);
     phi(1) = _grad_phi[_j][_qp](1);
@@ -96,7 +96,7 @@ StressDivergenceRZTensors::calculateJacobian(unsigned int ivar, unsigned int jva
     phi(1) = _grad_phi[_j][_qp](1);
   }
 
-  if ( ivar == 0 && jvar == 0 )  // Case when both phi and test are functions of x and z; requires four terms
+  if (ivar == 0 && jvar == 0)  // Case when both phi and test are functions of x and z; requires four terms
   {
     const Real first_sum = _Jacobian_mult[_qp].elasticJacobian(ivar, jvar, test, phi); //test_x and phi_x
     const Real second_sum = _Jacobian_mult[_qp].elasticJacobian(2, 2, test_z, phi_z); //test_z and phi_z
@@ -105,21 +105,21 @@ StressDivergenceRZTensors::calculateJacobian(unsigned int ivar, unsigned int jva
 
     return first_sum + second_sum + mixed_sum1 + mixed_sum2;
   }
-  else if ( ivar == 0 && jvar == 1 )
+  else if (ivar == 0 && jvar == 1)
   {
     const Real first_sum = _Jacobian_mult[_qp].elasticJacobian(ivar, jvar, test, phi); //test_x and phi_y
     const Real mixed_sum2 = _Jacobian_mult[_qp].elasticJacobian(2, jvar, test_z, phi); //test_z and phi_y
 
     return first_sum + mixed_sum2;
   }
-  else if ( ivar == 1 && jvar == 0 )
+  else if (ivar == 1 && jvar == 0)
   {
     const Real second_sum = _Jacobian_mult[_qp].elasticJacobian(ivar, jvar, test, phi); //test_y and phi_x
     const Real mixed_sum1 = _Jacobian_mult[_qp].elasticJacobian(ivar, 2, test, phi_z); //test_y and phi_z
 
     return second_sum + mixed_sum1;
   }
-  else if ( ivar == 1 && jvar == 1 )
+  else if (ivar == 1 && jvar == 1)
     return _Jacobian_mult[_qp].elasticJacobian(ivar, jvar, test, phi); //test_y and phi_y
 
   else

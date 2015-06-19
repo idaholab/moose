@@ -41,9 +41,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    displacements = 'x_disp y_disp z_disp'
   [../]
 []
 
@@ -166,9 +164,7 @@
   [./strain]
     type = ComputeFiniteStrain
     block = 0
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    displacements = 'x_disp y_disp z_disp'
   [../]
   [./mc]
     type = ComputeMultiPlasticityStress

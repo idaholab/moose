@@ -57,8 +57,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -155,8 +154,7 @@
   [./small_strain]
     type = ComputePlaneSmallStrain
     block = 1
-    disp_y = disp_y
-    disp_x = disp_x
+    displacements = 'disp_x disp_y'
   [../]
   [./linear_stress]
     type = ComputeLinearElasticStress
