@@ -44,6 +44,7 @@
   block = 1
   2d = true
   axis_2d = 2
+  equivalent_k = True
 []
 
 [AuxVariables]

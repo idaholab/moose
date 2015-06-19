@@ -869,6 +869,7 @@ NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian
       }
     }
   }
+  jacobian.close();
 }
 
 void
