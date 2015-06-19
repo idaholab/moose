@@ -25,7 +25,7 @@ protected:
   virtual Real computeQpResidual();
 
   const Real _amplitude;
-  const MaterialProperty<Real> * _multiplier_prop;
+  const MaterialProperty<Real> & _multiplier_prop;
 };
 
 #endif //LANGEVINNOISE_H

@@ -32,7 +32,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  const std::string _mob_name;
+  const MaterialPropertyName _mob_name;
   const MaterialProperty<Real> & _mob;
 
   std::vector<const MaterialProperty<Real> *> _dmobdarg;

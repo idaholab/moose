@@ -101,14 +101,27 @@ public:
 
   ///@{
   /**
+   * Retrieve the property throgh a given input parameter key with a fallback
+   * to getting it by name
+   */
+  template<typename T>
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  template<typename T>
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  template<typename T>
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  ///@}
+
+  ///@{
+  /**
    * Retrieve the property named "name"
    */
   template<typename T>
-  MaterialProperty<T> & getMaterialProperty(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name);
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOld(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name);
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
   ///@}
 
   ///@{
@@ -240,10 +253,54 @@ private:
   bool _has_stateful_property;
 };
 
+template<typename T>
+const MaterialProperty<T> &
+Material::getMaterialProperty(const std::string & name)
+{
+  // Check if the supplied parameter is a valid imput parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant.
+  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return getMaterialPropertyByName<T>(prop_name);
+}
 
 template<typename T>
-MaterialProperty<T> &
-Material::getMaterialProperty(const std::string & prop_name)
+const MaterialProperty<T> &
+Material::getMaterialPropertyOld(const std::string & name)
+{
+  // Check if the supplied parameter is a valid imput parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant.
+  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return getMaterialPropertyOldByName<T>(prop_name);
+}
+
+template<typename T>
+const MaterialProperty<T> &
+Material::getMaterialPropertyOlder(const std::string & name)
+{
+  // Check if the supplied parameter is a valid imput parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant.
+  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return getMaterialPropertyOlderByName<T>(prop_name);
+}
+
+template<typename T>
+const MaterialProperty<T> &
+Material::getMaterialPropertyByName(const std::string & prop_name)
 {
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
   _requested_props.insert(prop_name);
@@ -253,8 +310,8 @@ Material::getMaterialProperty(const std::string & prop_name)
 }
 
 template<typename T>
-MaterialProperty<T> &
-Material::getMaterialPropertyOld(const std::string & prop_name)
+const MaterialProperty<T> &
+Material::getMaterialPropertyOldByName(const std::string & prop_name)
 {
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLD);
@@ -263,14 +320,15 @@ Material::getMaterialPropertyOld(const std::string & prop_name)
 }
 
 template<typename T>
-MaterialProperty<T> &
-Material::getMaterialPropertyOlder(const std::string & prop_name)
+const MaterialProperty<T> &
+Material::getMaterialPropertyOlderByName(const std::string & prop_name)
 {
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLDER);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getPropertyOlder<T>(prop_name);
 }
+
 
 template<typename T>
 MaterialProperty<T> &

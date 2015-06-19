@@ -12,14 +12,14 @@ InputParameters validParams<DerivativeMultiPhaseBase>()
   InputParameters params = validParams<DerivativeFunctionMaterialBase>();
 
   // Phase materials 1-n
-  params.addRequiredParam<std::vector<std::string> >("fi_names", "List of free energies for the n phases");
-  params.addParam<std::vector<std::string> >("hi_names", "Switching Function Materials that provide h(eta_i)");
+  params.addRequiredParam<std::vector<MaterialPropertyName> >("fi_names", "List of free energies for the n phases");
+  params.addParam<std::vector<MaterialPropertyName> >("hi_names", "Switching Function Materials that provide h(eta_i)");
 
   // All arguments to the phase free energies
   params.addCoupledVar("args", "Arguments of the fi free energies - use vector coupling");
 
   // Barrier
-  params.addParam<std::string>("g", "g", "Barrier Function Material that provides g(eta_i)");
+  params.addParam<MaterialPropertyName>("g", "g", "Barrier Function Material that provides g(eta_i)");
   params.addParam<Real>("W", 0.0, "Energy barrier for the phase transformation from A to B");
 
   return params;
@@ -32,17 +32,17 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const std::string & name,
     _num_etas(coupledComponents("etas")),
     _eta_names(_num_etas),
     _eta_vars(_num_etas),
-    _fi_names(getParam<std::vector<std::string> >("fi_names")),
+    _fi_names(getParam<std::vector<MaterialPropertyName> >("fi_names")),
     _num_fi(_fi_names.size()),
     _prop_Fi(_num_fi),
     _prop_dFi(_num_fi),
     _prop_d2Fi(_num_fi),
     _prop_d3Fi(_num_fi),
-    _hi_names(getParam<std::vector<std::string> >("hi_names")),
+    _hi_names(getParam<std::vector<MaterialPropertyName> >("hi_names")),
     _num_hi(_hi_names.size()),
     _hi(_num_hi),
-    _g_name(getParam<std::string>("g")),
-    _g(getMaterialProperty<Real>(_g_name)),
+    _g_name(getParam<MaterialPropertyName>("g")),
+    _g(getMaterialPropertyByName<Real>(_g_name)),
     _dg(_num_etas),
     _d2g(_num_etas),
     _d3g(_num_etas),
@@ -86,13 +86,13 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const std::string & name,
   for (unsigned int n = 0; n < _num_fi; ++n)
   {
     // get phase free energy
-    _prop_Fi[n] = &getMaterialProperty<Real>(_fi_names[n]);
+    _prop_Fi[n] = &getMaterialPropertyByName<Real>(_fi_names[n]);
     _prop_dFi[n].resize(_nargs);
     _prop_d2Fi[n].resize(_nargs);
     _prop_d3Fi[n].resize(_nargs);
 
     // get switching function
-    _hi[n] = &getMaterialProperty<Real>(_hi_names[n]);
+    _hi[n] = &getMaterialPropertyByName<Real>(_hi_names[n]);
 
     for (unsigned int i = 0; i < _nargs; ++i)
     {

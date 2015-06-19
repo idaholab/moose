@@ -11,14 +11,14 @@ InputParameters validParams<CrystalPlasticitySlipSysAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addClassDescription("Access a component of a slip system vector property");
-  params.addRequiredParam<std::string>("slipsysvar", "The slip system variable name");
+  params.addRequiredParam<MaterialPropertyName>("slipsysvar", "The slip system variable name");
   params.addRequiredRangeCheckedParam<unsigned int>("index_i", "index_i != 0", "The slip system i");
   return params;
 }
 
 CrystalPlasticitySlipSysAux::CrystalPlasticitySlipSysAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _slipsysvar(getMaterialProperty<std::vector<Real> >(getParam<std::string>("slipsysvar"))),
+    _slipsysvar(getMaterialProperty<std::vector<Real> >("slipsysvar")),
     _i(getParam<unsigned int>("index_i"))
 {
 }

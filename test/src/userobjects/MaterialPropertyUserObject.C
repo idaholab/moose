@@ -18,13 +18,13 @@ template<>
 InputParameters validParams<MaterialPropertyUserObject>()
 {
   InputParameters params = validParams<ElementIntegralUserObject>();
-  params.addRequiredParam<std::string>("mat_prop", "the name of the material property we are going to use");
+  params.addRequiredParam<MaterialPropertyName>("mat_prop", "the name of the material property we are going to use");
   return params;
 }
 
 MaterialPropertyUserObject::MaterialPropertyUserObject(const std::string & name, InputParameters parameters) :
     ElementIntegralUserObject(name, parameters),
-    _mat_prop(getMaterialProperty<Real>(getParam<std::string>("mat_prop")))
+    _mat_prop(getMaterialProperty<Real>("mat_prop"))
 {
 }
 

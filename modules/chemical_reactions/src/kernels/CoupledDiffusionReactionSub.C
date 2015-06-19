@@ -17,14 +17,14 @@ InputParameters validParams<CoupledDiffusionReactionSub>()
   params.addParam<Real>("log_k",0.0,"Equilibrium constant of the equilbrium reaction in dissociation form");
   params.addParam<Real>("sto_u",1.0,"Stochiometric coef of the primary species this kernel operates on in the equilibrium reaction");
   params.addRequiredParam<std::vector<Real> >("sto_v","The stochiometric coefficients of coupled primary species");
-  params.addParam<std::string>("diffusivity","diffusivity","The real material property to use as the diffusivity of this particular species");
+  params.addParam<MaterialPropertyName>("diffusivity","diffusivity","The real material property to use as the diffusivity of this particular species");
   params.addCoupledVar("v","List of coupled primary species in this equilibrium species");
   return params;
 }
 
 CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const std::string & name, InputParameters parameters)
   :Kernel(name,parameters),
-   _diffusivity(getMaterialProperty<Real>(getParam<std::string>("diffusivity"))),
+   _diffusivity(getMaterialProperty<Real>("diffusivity")),
    _weight(getParam<Real>("weight")),
    _log_k(getParam<Real>("log_k")),
    _sto_u(getParam<Real>("sto_u")),

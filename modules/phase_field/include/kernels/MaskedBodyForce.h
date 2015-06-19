@@ -31,7 +31,6 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  std::string _mask_property_name;
   const MaterialProperty<Real> & _mask;
 };
 

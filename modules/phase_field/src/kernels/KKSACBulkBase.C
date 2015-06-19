@@ -11,9 +11,9 @@ InputParameters validParams<KKSACBulkBase>()
 {
   InputParameters params = validParams<ACBulk>();
   params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
-  params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
-  params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
-  params.addParam<std::string>("h_name", "h", "Base name for the switching function h(eta)");
+  params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
+  params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
+  params.addParam<MaterialPropertyName>("h_name", "h", "Base name for the switching function h(eta)");
   params.addCoupledVar("args", "coupled variables i.e. concentrations");
   return params;
 }
@@ -23,11 +23,11 @@ KKSACBulkBase::KKSACBulkBase(const std::string & name, InputParameters parameter
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _eta_name(_var.name()),
-    _Fa_name(getParam<std::string>("fa_name")),
-    _Fb_name(getParam<std::string>("fa_name")),
-    _h_name(getParam<std::string>("h_name")),
-    _prop_Fa(getMaterialProperty<Real>(_Fa_name)),
-    _prop_Fb(getMaterialProperty<Real>(_Fb_name)),
+    _Fa_name(getParam<MaterialPropertyName>("fa_name")),
+    _Fb_name(getParam<MaterialPropertyName>("fb_name")),
+    _h_name(getParam<MaterialPropertyName>("h_name")),
+    _prop_Fa(getMaterialPropertyByName<Real>(_Fa_name)),
+    _prop_Fb(getMaterialPropertyByName<Real>(_Fb_name)),
     _prop_dFa(getMaterialPropertyDerivative<Real>(_Fa_name, _eta_name)),
     _prop_dFb(getMaterialPropertyDerivative<Real>(_Fb_name, _eta_name)),
     _prop_dh(getMaterialPropertyDerivative<Real>(_h_name, _eta_name)),

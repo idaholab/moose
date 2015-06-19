@@ -13,7 +13,7 @@ InputParameters validParams<RankFourAux>()
   params.addClassDescription("Access a component of a RankFourTensor");
 
   //add stuff here
-  params.addRequiredParam<std::string>("rank_four_tensor", "The rank four material tensor name");
+  params.addRequiredParam<MaterialPropertyName>("rank_four_tensor", "The rank four material tensor name");
   params.addRequiredRangeCheckedParam<unsigned int>("index_i", "index_i >= 0 & index_i <= 2", "The index i of ijkl for the tensor to output (0, 1, 2)");
   params.addRequiredRangeCheckedParam<unsigned int>("index_j", "index_j >= 0 & index_j <= 2", "The index j of ijkl for the tensor to output (0, 1, 2)");
   params.addRequiredRangeCheckedParam<unsigned int>("index_k", "index_k >= 0 & index_k <= 2", "The index k of ijkl for the tensor to output (0, 1, 2)");
@@ -24,7 +24,7 @@ InputParameters validParams<RankFourAux>()
 
 RankFourAux::RankFourAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _tensor(getMaterialProperty<ElasticityTensorR4>(getParam<std::string>("rank_four_tensor"))),
+    _tensor(getMaterialProperty<ElasticityTensorR4>("rank_four_tensor")),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j")),
     _k(getParam<unsigned int>("index_k")),

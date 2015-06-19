@@ -11,7 +11,7 @@ InputParameters validParams<DoubleWellPotential>()
 {
   InputParameters params = validParams<KernelValue>();
   params.addClassDescription("Simple demonstration Allen-Cahn Kernel using an algebraic double-well potential");
-  params.addParam<std::string>("mob_name", "L", "The mobility used with the kernel");
+  params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
 
   return params;
 }

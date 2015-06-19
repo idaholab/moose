@@ -31,10 +31,8 @@ public:
 
 protected:
   virtual Real computeQpResidual();
-
   virtual Real computeQpJacobian();
 
-  std::string _prop_name;
   const MaterialProperty<Real> & _diff;
   Real _offset;
 };

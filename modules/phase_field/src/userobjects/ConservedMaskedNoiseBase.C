@@ -14,14 +14,13 @@ InputParameters validParams<ConservedMaskedNoiseBase>()
   MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
   setup_options = "timestep_begin";
   params.set<MultiMooseEnum>("execute_on") = setup_options;
-  params.addParam<std::string>("mask", "Material property to multiply the random numbers with");
+  params.addParam<MaterialPropertyName>("mask", "Material property to multiply the random numbers with");
   return params;
 }
 
 ConservedMaskedNoiseBase::ConservedMaskedNoiseBase(const std::string & name, InputParameters parameters) :
     ConservedNoiseInterface(name, parameters),
-    _mask_property_name(getParam<std::string>("mask")),
-    _mask(getMaterialProperty<Real>(_mask_property_name))
+    _mask(getMaterialProperty<Real>("mask"))
 {
 }
 

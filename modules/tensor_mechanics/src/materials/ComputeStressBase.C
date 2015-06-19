@@ -19,10 +19,10 @@ ComputeStressBase::ComputeStressBase(const std::string & name,
                                                  InputParameters parameters) :
     DerivativeMaterialInterface<Material>(name, parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
-    _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _total_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "total_strain")),
     _stress(declareProperty<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain(declareProperty<RankTwoTensor>(_base_name + "elastic_strain")),
-    _elasticity_tensor(getMaterialProperty<ElasticityTensorR4>(_base_name + "elasticity_tensor")),
+    _elasticity_tensor(getMaterialPropertyByName<ElasticityTensorR4>(_base_name + "elasticity_tensor")),
     _extra_stress(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "extra_stress")),
     _Jacobian_mult(declareProperty<ElasticityTensorR4>(_base_name + "Jacobian_mult"))
 {

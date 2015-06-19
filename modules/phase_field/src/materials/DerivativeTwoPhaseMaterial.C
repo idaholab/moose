@@ -13,10 +13,10 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>()
   params.addClassDescription("Two phase material that combines two single phase materials using a switching function.");
 
   // Two base materials
-  params.addRequiredParam<std::string>("fa_name", "Phase A material (at eta=0)");
-  params.addRequiredParam<std::string>("fb_name", "Phase A material (at eta=1)");
-  params.addParam<std::string>("h", "h", "Switching Function Material that provides h(eta)");
-  params.addParam<std::string>("g", "g", "Barrier Function Material that provides g(eta)");
+  params.addRequiredParam<MaterialPropertyName>("fa_name", "Phase A material (at eta=0)");
+  params.addRequiredParam<MaterialPropertyName>("fb_name", "Phase A material (at eta=1)");
+  params.addParam<MaterialPropertyName>("h", "h", "Switching Function Material that provides h(eta)");
+  params.addParam<MaterialPropertyName>("g", "g", "Barrier Function Material that provides g(eta)");
 
   // All arguments to the phase free energies
   params.addCoupledVar("args", "Arguments of fa and fb - use vector coupling");
@@ -36,21 +36,21 @@ DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
     _eta(coupledValue("eta")),
     _eta_name(getVar("eta", 0)->name()),
     _eta_var(coupled("eta")),
-    _fa_name(getParam<std::string>("fa_name")),
-    _fb_name(getParam<std::string>("fb_name")),
-    _h_name(getParam<std::string>("h")),
-    _h(getMaterialProperty<Real>(_h_name)),
+    _fa_name(getParam<MaterialPropertyName>("fa_name")),
+    _fb_name(getParam<MaterialPropertyName>("fb_name")),
+    _h_name(getParam<MaterialPropertyName>("h")),
+    _h(getMaterialPropertyByName<Real>(_h_name)),
     _dh(getMaterialPropertyDerivative<Real>(_h_name, _eta_name)),
     _d2h(getMaterialPropertyDerivative<Real>(_h_name, _eta_name, _eta_name)),
     _d3h(getMaterialPropertyDerivative<Real>(_h_name, _eta_name, _eta_name, _eta_name)),
-    _g_name(getParam<std::string>("g")),
-    _g(getMaterialProperty<Real>(_g_name)),
+    _g_name(getParam<MaterialPropertyName>("g")),
+    _g(getMaterialPropertyByName<Real>(_g_name)),
     _dg(getMaterialPropertyDerivative<Real>(_g_name, _eta_name)),
     _d2g(getMaterialPropertyDerivative<Real>(_g_name, _eta_name, _eta_name)),
     _d3g(getMaterialPropertyDerivative<Real>(_g_name, _eta_name, _eta_name, _eta_name)),
     _W(getParam<Real>("W")),
-    _prop_Fa(getMaterialProperty<Real>(_fa_name)),
-    _prop_Fb(getMaterialProperty<Real>(_fb_name))
+    _prop_Fa(getMaterialProperty<Real>("fa_name")),
+    _prop_Fb(getMaterialProperty<Real>("fb_name"))
 {
   // reserve space for phase A and B material properties
   _prop_dFa.resize(_nargs);

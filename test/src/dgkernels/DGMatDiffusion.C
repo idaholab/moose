@@ -23,7 +23,7 @@ InputParameters validParams<DGMatDiffusion>()
   // See header file for sigma and epsilon
   params.addRequiredParam<Real>("sigma", "sigma");
   params.addRequiredParam<Real>("epsilon", "epsilon");
-  params.addRequiredParam<std::string>("prop_name", "diff1");
+  params.addRequiredParam<MaterialPropertyName>("prop_name", "diff1");
   return params;
 }
 
@@ -31,8 +31,8 @@ DGMatDiffusion::DGMatDiffusion(const std::string & name, InputParameters paramet
   :DGKernel(name, parameters),
    _epsilon(getParam<Real>("epsilon")),
    _sigma(getParam<Real>("sigma")),
-   _prop_name(getParam<std::string>("prop_name")),
-   _diff(getMaterialProperty<Real>(_prop_name)),
+   _prop_name(getParam<MaterialPropertyName>("prop_name")),
+   _diff(getMaterialPropertyByName<Real>(_prop_name)),
    _diff_neighbor(getNeighborMaterialProperty<Real>(_prop_name))
 {
 }

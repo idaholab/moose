@@ -15,7 +15,7 @@ InputParameters validParams<ConservedLangevinNoise>()
   return params;
 }
 ConservedLangevinNoise::ConservedLangevinNoise(const std::string & name,
-                             InputParameters parameters) :
+                                               InputParameters parameters) :
     LangevinNoise(name, parameters),
     _noise(getUserObject<ConservedNoiseInterface>("noise"))
 {
@@ -24,5 +24,5 @@ ConservedLangevinNoise::ConservedLangevinNoise(const std::string & name,
 Real
 ConservedLangevinNoise::computeQpResidual()
 {
-  return -_test[_i][_qp] * _noise.getQpValue(_current_elem->id(), _qp) * _amplitude * (_multiplier_prop == NULL ? 1.0 : (*_multiplier_prop)[_qp]);
+  return -_test[_i][_qp] * _noise.getQpValue(_current_elem->id(), _qp) * _amplitude * _multiplier_prop[_qp];
 }

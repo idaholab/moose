@@ -12,15 +12,15 @@ InputParameters validParams<ComputeEigenstrain>()
   InputParameters params = validParams<ComputeStressFreeStrainBase>();
   params.addClassDescription("Computes a constant Eigenstrain");
   params.addRequiredParam<std::vector<Real> >("eigen_base","Vector of values defining the constant base tensor for the Eigenstrain");
-  params.addParam<std::string>("prefactor", "var_dep", "Name of material defining the variable dependence");
+  params.addParam<MaterialPropertyName>("prefactor", 1.0, "Name of material defining the variable dependence");
   return params;
 }
 
 ComputeEigenstrain::ComputeEigenstrain(const std::string & name,
                                        InputParameters parameters) :
     ComputeStressFreeStrainBase(name, parameters),
-    _prefactor_name(getParam<std::string>("prefactor")),
-    _prefactor(getMaterialProperty<Real>(_prefactor_name))
+    _prefactor_name(getParam<MaterialPropertyName>("prefactor")),
+    _prefactor(getMaterialProperty<Real>("prefactor"))
 {
   _eigen_base_tensor.fillFromInputVector(getParam<std::vector<Real> >("eigen_base"));
 }

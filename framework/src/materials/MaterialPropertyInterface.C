@@ -24,7 +24,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & par
     _stateful_allowed(true),
     _get_material_property_called(false),
     _mi_block_ids(_empty_block_ids),
-    _mi_boundary_ids(_empty_boundary_ids)
+    _mi_boundary_ids(_empty_boundary_ids),
+    _mi_params(parameters)
 {
   initializeMaterialPropertyInterface(parameters);
 }
@@ -36,8 +37,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & par
     _stateful_allowed(true),
     _get_material_property_called(false),
     _mi_block_ids(block_ids),
-    _mi_boundary_ids(_empty_boundary_ids)
-
+    _mi_boundary_ids(_empty_boundary_ids),
+    _mi_params(parameters)
 {
   initializeMaterialPropertyInterface(parameters);
 }
@@ -49,8 +50,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & par
     _stateful_allowed(true),
     _get_material_property_called(false),
     _mi_block_ids(_empty_block_ids),
-    _mi_boundary_ids(boundary_ids)
-
+    _mi_boundary_ids(boundary_ids),
+    _mi_params(parameters)
 {
   initializeMaterialPropertyInterface(parameters);
 }
@@ -64,8 +65,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & par
     _stateful_allowed(true),
     _get_material_property_called(false),
     _mi_block_ids(block_ids),
-    _mi_boundary_ids(boundary_ids)
-
+    _mi_boundary_ids(boundary_ids),
+    _mi_params(parameters)
 {
   initializeMaterialPropertyInterface(parameters);
 }
@@ -94,6 +95,44 @@ MaterialPropertyInterface::initializeMaterialPropertyInterface(const InputParame
     else
       _material_data = _mi_feproblem.getMaterialData(tid);
   }
+}
+
+std::string
+MaterialPropertyInterface::deducePropertyName(const std::string & name)
+{
+  if (_mi_params.have_parameter<MaterialPropertyName>(name))
+    return _mi_params.get<MaterialPropertyName>(name);
+  else
+    return name;
+}
+
+template<>
+const MaterialProperty<Real> *
+MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
+{
+  std::istringstream ss(name);
+  Real real_value;
+
+  // check if the string parsed cleanly into a Real number
+  if (ss >> real_value && ss.eof())
+  {    MooseSharedPointer<MaterialProperty<Real> > default_property(new MaterialProperty<Real>);
+
+    // resize to accomodate maximum number of qpoints
+    unsigned int nqp = _mi_feproblem.getMaxQps();
+    default_property->resize(nqp);
+
+    // set values for all qpoints to the given default
+    for (unsigned int qp = 0; qp < nqp; ++qp)
+    (*default_property)[qp] = real_value;
+
+    // add to the default property storage
+    _default_real_properties.push_back(default_property);
+
+    // return the raw pointer inside the shared pointer
+    return default_property.get();
+  }
+
+  return NULL;
 }
 
 std::set<SubdomainID>

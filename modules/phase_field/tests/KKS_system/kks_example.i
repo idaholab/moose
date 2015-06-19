@@ -121,8 +121,8 @@
   [./constants]
     type = GenericConstantMaterial
     block = 0
-    prop_names  = 'M   L   kappa'
-    prop_values = '0.7 0.7 0.4  '
+    prop_names  = 'L   '
+    prop_values = '0.7 '
   [../]
 []
 
@@ -155,6 +155,7 @@
     cb       = cd
     fa_name  = fm
     fb_name  = fd
+    mob_name = 0.7
   [../]
   [./dcdt]
     type = TimeDerivative
@@ -182,7 +183,7 @@
   [./ACInterface]
     type = ACInterface
     variable = eta
-    kappa_name = kappa
+    kappa_name = 0.4
   [../]
   [./detadt]
     type = TimeDerivative

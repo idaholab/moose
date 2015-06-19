@@ -74,7 +74,7 @@ private:
   std::vector<std::string> _derivative_vars;
 
   /// material property value
-  MaterialProperty<Real> * _value;
+  const MaterialProperty<Real> * _value;
 };
 
 #endif // FUNCTIONMATERIALPROPERTYDESCRIPTOR_H

@@ -57,6 +57,7 @@
   [./dummy]
     type = MatDiffusion
     variable = c
+    D_name = 0
   [../]
 []
 
@@ -76,12 +77,6 @@
     block = 0
     args = 'c'
     outputs = exodus
-  [../]
-  [./genconst]
-    type = GenericConstantMaterial
-    block = 0
-    prop_names  = 'D'
-    prop_values = '0'
   [../]
 []
 
