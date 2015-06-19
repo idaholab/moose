@@ -180,7 +180,8 @@
     index_j = 2
   [../]
   [./eqv_plastic_strain]
-    type = FiniteStrainPlasticAux
+    type = MaterialRealAux
+    property = eqv_plastic_strain
     variable = peeq
   [../]
 []

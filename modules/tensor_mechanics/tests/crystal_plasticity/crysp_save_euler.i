@@ -111,10 +111,10 @@
     block = 0
   [../]
   [./gss1]
-    type = CrystalPlasticitySlipSysAux
+    type = MaterialStdVectorAux
     variable = gss1
-    slipsysvar = gss
-    index_i = 1
+    property = gss
+    index = 0
     execute_on = timestep_end
     block = 0
   [../]
