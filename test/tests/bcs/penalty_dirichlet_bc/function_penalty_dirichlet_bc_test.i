@@ -56,6 +56,7 @@
     variable = u
     function = solution
     boundary = 'top left right bottom'
+    penalty = 1e6
   [../]
 []
 

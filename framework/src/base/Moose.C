@@ -58,9 +58,11 @@
 // bcs
 #include "ConvectiveFluxBC.h"
 #include "DirichletBC.h"
+#include "PenaltyDirichletBC.h"
 #include "PresetBC.h"
 #include "NeumannBC.h"
 #include "FunctionDirichletBC.h"
+#include "FunctionPenaltyDirichletBC.h"
 #include "FunctionPresetBC.h"
 #include "FunctionNeumannBC.h"
 #include "MatchedValueBC.h"
@@ -427,9 +429,11 @@ registerObjects(Factory & factory)
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
   registerBoundaryCondition(DirichletBC);
+  registerBoundaryCondition(PenaltyDirichletBC);
   registerBoundaryCondition(PresetBC);
   registerBoundaryCondition(NeumannBC);
   registerBoundaryCondition(FunctionDirichletBC);
+  registerBoundaryCondition(FunctionPenaltyDirichletBC);
   registerBoundaryCondition(FunctionPresetBC);
   registerBoundaryCondition(FunctionNeumannBC);
   registerBoundaryCondition(MatchedValueBC);

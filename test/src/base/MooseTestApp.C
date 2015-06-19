@@ -131,8 +131,6 @@
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
 #include "CoupledKernelGradBC.h"
-#include "PenaltyDirichletBC.h"
-#include "FunctionPenaltyDirichletBC.h"
 
 #include "ExplicitODE.h"
 #include "ImplicitODEx.h"
@@ -341,8 +339,6 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerBoundaryCondition(DGMDDBC);
   registerBoundaryCondition(DGFunctionConvectionDirichletBC);
-  registerBoundaryCondition(PenaltyDirichletBC);
-  registerBoundaryCondition(FunctionPenaltyDirichletBC);
 
   registerBoundaryCondition(CoupledKernelGradBC);
 

@@ -18,16 +18,14 @@ template<>
 InputParameters validParams<PenaltyDirichletBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.addParam<Real>("penalty",1e5,"Penalty scalar");
+  params.addRequiredParam<Real>("penalty", "Penalty scalar");
   params.addParam<Real>("value", 0.0, "Boundary value of the variable");
-  params.addRequiredParam<FunctionName>("function", "Forcing function");
 
   return params;
 }
 
 PenaltyDirichletBC::PenaltyDirichletBC(const std::string & name, InputParameters parameters) :
     IntegratedBC(name, parameters),
-    _func(getFunction("function")),
     _p(getParam<Real>("penalty")),
     _v(getParam<Real>("value"))
 {}
