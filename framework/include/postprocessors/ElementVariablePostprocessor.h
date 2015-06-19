@@ -41,9 +41,6 @@ protected:
   /// This is what derived classes should override to do something on every quadrature point on every element
   virtual void computeQpValue() = 0;
 
-  /// The MooseVariable the object is acting on
-  MooseVariable & _var;
-
   /// Holds the solution at current quadrature points
   VariableValue & _u;
 

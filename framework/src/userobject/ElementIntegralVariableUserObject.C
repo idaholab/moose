@@ -18,16 +18,15 @@ template<>
 InputParameters validParams<ElementIntegralVariableUserObject>()
 {
   InputParameters params = validParams<ElementIntegralUserObject>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this object operates on");
+  params.addCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }
 
 ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(const std::string & name, InputParameters parameters) :
     ElementIntegralUserObject(name, parameters),
     MooseVariableInterface(parameters, false),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
-    _u(_var.sln()),
-    _grad_u(_var.gradSln())
+    _u(coupledValue("variable")),
+    _grad_u(coupledGradient("variable"))
 {
   addMooseVariableDependency(mooseVariable());
 }

@@ -18,16 +18,15 @@ template<>
 InputParameters validParams<SideIntegralVariableUserObject>()
 {
   InputParameters params = validParams<SideIntegralUserObject>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this boundary condition applies to");
+  params.addCoupledVar("variable", "The name of the variable that this boundary condition applies to");
   return params;
 }
 
 SideIntegralVariableUserObject::SideIntegralVariableUserObject(const std::string & name, InputParameters parameters) :
     SideIntegralUserObject(name, parameters),
     MooseVariableInterface(parameters, false),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
-    _u(_var.sln()),
-    _grad_u(_var.gradSln())
+    _u(coupledValue("variable")),
+    _grad_u(coupledGradient("variable"))
 {
   addMooseVariableDependency(mooseVariable());
 }

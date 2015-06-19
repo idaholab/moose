@@ -87,7 +87,6 @@ protected:
 
   /// The element that contains the located point
   dof_id_type _elem_id;
-
 };
 
 #endif /* POINTVALUE_H */

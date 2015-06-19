@@ -33,8 +33,6 @@ public:
   NodalVariablePostprocessor(const std::string & name, InputParameters parameters);
 
 protected:
-  MooseVariable & _var;
-
   /// Holds the solution at current quadrature points
   VariableValue & _u;
 };
