@@ -1,0 +1,39 @@
+reset
+# Geometry
+create cylinder height 1 radius 10.0
+create cylinder height 1 radius 5.0
+subtract volume 2 from volume 1 keep
+delete volume 1
+delete volume 2
+webcut volume all with plane xplane offset 0 noimprint nomerge
+delete volume 4
+Webcut volume all with plane yplane offset 0 noimprint nomerge
+delete volume 3
+compress
+
+# Mesh
+curve 4 7 interval 12
+curve 4 7 scheme equal
+curve 10 12 interval 10
+curve 10 12 scheme equal
+mesh surface 6
+
+# Sidesets
+sideset 11 curve 4
+sideset 11 name 'xzero'
+
+sideset 12 curve 7
+sideset 12 name 'yzero'
+
+sideset 13 curve 10
+sideset 13 name 'outer'
+
+sideset 14 curve 12
+sideset 14 name 'inner'
+
+# Blocks
+block 1 surface 6
+
+block all element type quad8
+
+export Genesis "2D-RZ_mesh.e" overwrite

@@ -13,6 +13,7 @@
 
 #include "StressDivergenceTensors.h"
 #include "CosseratStressDivergenceTensors.h"
+#include "StressDivergenceRZTensors.h"
 #include "MomentBalancing.h"
 #include "GravityTM.h"
 
@@ -31,6 +32,8 @@
 #include "ComputeElasticityTensor.h"
 #include "ComputeIsotropicElasticityTensor.h"
 #include "ComputeSmallStrain.h"
+#include "ComputePlaneSmallStrain.h"
+#include "ComputeAxisymmetricRZSmallStrain.h"
 #include "ComputeIncrementalSmallStrain.h"
 #include "ComputeFiniteStrain.h"
 #include "ComputeLinearElasticStress.h"
@@ -107,6 +110,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
 {
   registerKernel(StressDivergenceTensors);
   registerKernel(CosseratStressDivergenceTensors);
+  registerKernel(StressDivergenceRZTensors);
   registerKernel(MomentBalancing);
   registerKernel(StressDivergencePFFracTensors);
   registerKernel(GravityTM);
@@ -126,6 +130,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeElasticityTensor);
   registerMaterial(ComputeIsotropicElasticityTensor);
   registerMaterial(ComputeSmallStrain);
+  registerMaterial(ComputePlaneSmallStrain);
+  registerMaterial(ComputeAxisymmetricRZSmallStrain);
   registerMaterial(ComputeIncrementalSmallStrain);
   registerMaterial(ComputeFiniteStrain);
   registerMaterial(ComputeLinearElasticStress);
