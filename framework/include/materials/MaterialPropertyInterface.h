@@ -124,6 +124,7 @@ public:
    */
   std::vector<BoundaryName> getMaterialPropertyBoundaryNames(const std::string & name);
 
+  ///@{
   /**
    * Check if the material property exists
    * @param name the name of the property to query
@@ -131,6 +132,9 @@ public:
    */
   template<typename T>
   bool hasMaterialProperty(const std::string & name);
+  template<typename T>
+  bool hasMaterialPropertyByName(const std::string & name);
+  ///@}
 
   /**
    * Derived classes can declare whether or not they work with
@@ -236,7 +240,7 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant
@@ -323,6 +327,15 @@ MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialProperty
 template<typename T>
 bool
 MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+  return _material_data->haveProperty<T>(prop_name);
+}
+
+template<typename T>
+bool
+MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name)
 {
   return _material_data->haveProperty<T>(name);
 }
