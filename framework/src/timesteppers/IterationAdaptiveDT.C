@@ -327,8 +327,8 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
         if (limitedDT > _times[i+1] - _time - _timestep_tolerance)
         {
           limitedDT = _times[i+1] - _time;
+          _at_function_point = true;
         }
-        _at_function_point = true;
         break;
       }
     }
