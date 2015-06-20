@@ -21,42 +21,21 @@ HeatConductionKernel::HeatConductionKernel(const std::string & name, InputParame
   Diffusion(name, parameters),
   _dim(_subproblem.mesh().dimension()),
   _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
-  _diffusion_coefficient_dT(hasMaterialProperty<Real>(getParam<MaterialPropertyName>("diffusion_coefficient_dT_name")) ? &getMaterialProperty<Real>("diffusion_coefficient_dT_name") : NULL)
+  _diffusion_coefficient_dT(hasMaterialProperty<Real>("diffusion_coefficient_dT_name") ? &getMaterialProperty<Real>("diffusion_coefficient_dT_name") : NULL)
 {
 }
 
 Real
 HeatConductionKernel::computeQpResidual()
 {
-  Real r(0);
-//   r = diffusion_coefficient[_qp]*Diffusion::computeQpResidual();
-//   if (!libmesh_isnan(r))
-//   {
-//   }
-//   else
-//   {
-//     Moose::err << "NaN found at " << __LINE__ << " in " << __FILE__ << "!\n"
-//               << "Processor: " << libMesh::processor_id() << "\n"
-//               << "_diffusion_coefficient[_qp]: " << _diffusion_coefficient[_qp] << "\n"
-//               << "Diffusion resid: " << Diffusion::computeQpResidual() << "\n"
-//               << "Elem: " << _current_elem->id() << "\n"
-//               << "Qp: " << _qp << "\n"
-//               << "Qpoint: " << _q_point[_qp] << "\n"
-//               << std::endl;
-//   }
-//   return r;
-  r = _diffusion_coefficient[_qp]*Diffusion::computeQpResidual();
-  return r;
+  return _diffusion_coefficient[_qp]*Diffusion::computeQpResidual();
 }
 
 Real
 HeatConductionKernel::computeQpJacobian()
 {
-  Real jac(0);
-  jac = _diffusion_coefficient[_qp] * Diffusion::computeQpJacobian();
-  if ( _diffusion_coefficient_dT )
-  {
+  Real jac = _diffusion_coefficient[_qp] * Diffusion::computeQpJacobian();
+  if (_diffusion_coefficient_dT)
     jac += (*_diffusion_coefficient_dT)[_qp] * _phi[_j][_qp] * Diffusion::computeQpResidual();
-  }
   return jac;
 }
