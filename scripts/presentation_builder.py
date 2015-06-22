@@ -2,8 +2,18 @@
 import os, sys
 import argparse
 
-# Locate the moose/python directory
-sys.path.append(os.path.join(os.path.abspath('..'), 'python'))
+# Determine the MOOSE Directory
+MOOSE_PYTHON_DIR = None
+if os.environ.has_key('MOOSE_DIR'):
+  MOOSE_PYTHON_DIR = os.path.join(os.environ['MOOSE_DIR'], 'python')
+else:
+  MOOSE_PYTHON_DIR = os.path.join(os.environ['HOME'], 'projects', 'moose', 'python')
+
+# Add moose/python to path
+if os.path.exists(MOOSE_PYTHON_DIR):
+  sys.path.append(MOOSE_PYTHON_DIR)
+else:
+  raise Exception('Unable to locate moose/python directory, please set MOOSE_DIR environment variable')
 
 # Load the required moose/python packages
 from FactorySystem import ParseGetPot
