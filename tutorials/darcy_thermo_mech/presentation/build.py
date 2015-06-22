@@ -24,7 +24,7 @@ if __name__ == '__main__':
            'input/kernels.i',
            'input/coords.i',
            'input/step01.i',
-#           'input/peacock.i',
+           'input/peacock.i',
            'input/input_parameters.i',
            'input/step02.i',
            'input/materials.i',

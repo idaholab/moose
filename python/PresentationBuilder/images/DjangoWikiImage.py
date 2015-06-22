@@ -31,11 +31,15 @@ class DjangoWikiImage(ImageBase):
 
     # Apply the settings from the DjangoSlideSet
     if image_settings['settings']:
-      print ' '*8 + 'Appling image settings from wiki'
-    for pair in image_settings['settings'].split():
-      k,v = pair.strip().split(':')
-      if k in params:
-        params[k] = v
+      print ' '*8 + 'Applying image settings from wiki'
+      for pair in image_settings['settings'].split():
+        k,v = pair.strip().split(':')
+        if k in params:
+          params[k] = v
+
+    #for key in params.valid_keys():
+    #  print ' '*10, key, '=', params[key]
+
 
   ##
   # Performs the regex matching for Django images

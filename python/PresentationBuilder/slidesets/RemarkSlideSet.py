@@ -144,11 +144,6 @@ class RemarkSlideSet(MooseObject):
     params = self.__factory.validParams('RemarkSlide')
     params.applyParams(self.parameters())
 
-    # Apply the common properties from this class
-    #for key in params.groupKeys('properties'):
-    #  if self.isParamValid(key):
-    #    params[key] = self.getParam(key)
-
     # Add the parent and markdown parameters
     params.addPrivateParam('_parent', self)
 
