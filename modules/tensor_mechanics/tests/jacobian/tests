@@ -35,4 +35,112 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
+
+# The --no-trap-fpe is necessary because when performing a singular value decomposition PETSc/LAPACK/BLAS checks 0/0, 1/0, etc, and Libmesh would trap these checks
+  [./cto01]
+    type = 'PetscJacobianTester'
+    input = 'cto01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto02]
+    type = 'PetscJacobianTester'
+    input = 'cto02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto03]
+    type = 'PetscJacobianTester'
+    input = 'cto03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto04]
+    type = 'PetscJacobianTester'
+    input = 'cto04.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto05]
+    type = 'PetscJacobianTester'
+    input = 'cto05.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto06]
+    type = 'PetscJacobianTester'
+    input = 'cto06.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto07]
+    type = 'PetscJacobianTester'
+    input = 'cto07.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto08]
+    type = 'PetscJacobianTester'
+    input = 'cto08.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto09]
+    type = 'PetscJacobianTester'
+    input = 'cto09.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto10]
+    type = 'PetscJacobianTester'
+    input = 'cto10.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto11]
+    type = 'PetscJacobianTester'
+    input = 'cto11.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto12]
+    type = 'PetscJacobianTester'
+    input = 'cto12.i'
+    ratio_tol = 1E-6 # this is a very nonlinear test
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto13]
+    type = 'PetscJacobianTester'
+    input = 'cto13.i'
+    ratio_tol = 1E-5 # this is a very nonlinear test
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto14]
+    type = 'PetscJacobianTester'
+    input = 'cto14.i'
+    ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around an edge where some derivatives are not defined
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto15]
+    type = 'PetscJacobianTester'
+    input = 'cto15.i'
+    ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around an edge where some derivatives are not defined
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+
 []
