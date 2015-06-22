@@ -35,7 +35,7 @@ RichardsPiecewiseLinearSinkFlux::RichardsPiecewiseLinearSinkFlux(const std::stri
     _m_func(getFunction("multiplying_fcn")),
 
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
-    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+    _pvar(_richards_name_UO.richards_var_num(coupled("variable"))),
 
     _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
 
