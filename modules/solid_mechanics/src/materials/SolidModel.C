@@ -12,6 +12,7 @@
 #include "Linear.h"
 #include "Nonlinear3D.h"
 #include "PlaneStrain.h"
+#include "NonlinearPlaneStrain.h"
 #include "VolumetricModel.h"
 
 #include "ConstitutiveModel.h"
@@ -24,7 +25,7 @@
 template<>
 InputParameters validParams<SolidModel>()
 {
-  MooseEnum formulation("Nonlinear3D NonlinearRZ AxisymmetricRZ SphericalR Linear PlaneStrain");
+  MooseEnum formulation("Nonlinear3D NonlinearRZ AxisymmetricRZ SphericalR Linear PlaneStrain NonlinearPlaneStrain");
 
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
@@ -1410,6 +1411,15 @@ SolidModel::createElement( const std::string & name,
       mooseError("PlaneStrain must define disp_x and disp_y");
     }
     element = new SolidMechanics::PlaneStrain(*this, name, parameters);
+  }
+  else if ( formulation == "nonlinearplanestrain" )
+  {
+    if ( !isCoupled("disp_x") ||
+         !isCoupled("disp_y") )
+    {
+      mooseError("NonlinearPlaneStrain must define disp_r and disp_z");
+    }
+    element = new SolidMechanics::NonlinearPlaneStrain(*this, name, parameters);
   }
   else if ( formulation == "linear" )
   {
