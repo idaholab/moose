@@ -197,7 +197,7 @@ dataStore(std::ostream & stream, Node * & n, void * context)
 
 template<>
 void
-dataStore(std::ostream & stream, std::stringstream & s, void * context)
+dataStore(std::ostream & stream, std::stringstream & s, void * /* context */)
 {
   const std::string & s_str = s.str();
 
@@ -446,7 +446,7 @@ dataLoad(std::istream & stream, Node * & n, void * context)
 
 template<>
 void
-dataLoad(std::istream & stream, std::stringstream & s, void * context)
+dataLoad(std::istream & stream, std::stringstream & s, void * /* context */)
 {
   size_t s_size = 0;
 

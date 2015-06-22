@@ -147,6 +147,10 @@ MultiApp::initialSetup()
   _apps.resize(_my_num_apps);
   _backups.resize(_my_num_apps);
 
+  // Initialize the backups
+  for (unsigned int i=0; i<_my_num_apps; i++)
+    _backups[i] = MooseSharedPointer<Backup>(new Backup);
+
   // If the user provided an unregistered app type, see if we can load it dynamically
   if (!AppFactory::instance().isRegistered(_app_type))
     _app.dynamicAppRegistration(_app_type, getParam<std::string>("library_path"));

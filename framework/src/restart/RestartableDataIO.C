@@ -272,11 +272,8 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 void
 RestartableDataIO::readRestartableData(const RestartableDatas & restartable_datas, const std::set<std::string> & recoverable_data)
 {
-  bool recovering = _fe_problem.getMooseApp().isRecovering();
-
   unsigned int n_threads = libMesh::n_threads();
   std::vector<std::string> ignored_data;
-//  std::vector<unsigned int> ignored_data_is_recoverable;
 
   for (unsigned int tid=0; tid<n_threads; tid++)
   {
@@ -301,7 +298,6 @@ RestartableDataIO::createBackup()
   const RestartableDatas & restartable_datas = _fe_problem.getMooseApp().getRestartableData();
 
   unsigned int n_threads = libMesh::n_threads();
-  processor_id_type proc_id = _fe_problem.processor_id();
 
   backup->_restartable_data.resize(n_threads);
 
@@ -315,7 +311,6 @@ void
 RestartableDataIO::restoreBackup(MooseSharedPointer<Backup> backup)
 {
   unsigned int n_threads = libMesh::n_threads();
-  processor_id_type proc_id = _fe_problem.processor_id();
 
   // Make sure we read from the beginning
   backup->_system_data.seekg(0);
