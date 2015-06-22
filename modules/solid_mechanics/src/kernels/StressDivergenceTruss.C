@@ -84,35 +84,16 @@ StressDivergenceTruss::computeStiffness(ColumnMajorMatrix & stiff_global)
   RealGradient orientation( (*_orientation)[0] );
   orientation /= orientation.size();
 
-  // Now get a rotation matrix
-  // The orientation is the first row of the matrix.
-  // Need two other directions.
-  VectorValue<Real> & row1( orientation );
-  VectorValue<Real> row3( row1 );
-  unsigned zero_index(0);
-  if (row3(1) != 0)
-  {
-    zero_index = 1;
-  }
-  if (row3(2) != 0)
-  {
-    zero_index = 2;
-  }
-  row3(zero_index) += 1;
-  VectorValue<Real> row2 = orientation.cross( row3 );
-  row3 = orientation.cross( row2 );
-
   Real k = _E_over_L[0] * _area[0];
-
-  stiff_global(0,0) = row1(0)*row1(0)*k;
-  stiff_global(0,1) = row1(0)*row2(0)*k;
-  stiff_global(0,2) = row1(0)*row3(0)*k;
-  stiff_global(1,0) = row2(0)*row1(0)*k;
-  stiff_global(1,1) = row2(0)*row2(0)*k;
-  stiff_global(1,2) = row2(0)*row3(0)*k;
-  stiff_global(2,0) = row3(0)*row1(0)*k;
-  stiff_global(2,1) = row3(0)*row2(0)*k;
-  stiff_global(2,2) = row3(0)*row3(0)*k;
+  stiff_global(0,0) = orientation(0)*orientation(0)*k;
+  stiff_global(0,1) = orientation(0)*orientation(1)*k;
+  stiff_global(0,2) = orientation(0)*orientation(2)*k;
+  stiff_global(1,0) = orientation(1)*orientation(0)*k;
+  stiff_global(1,1) = orientation(1)*orientation(1)*k;
+  stiff_global(1,2) = orientation(1)*orientation(2)*k;
+  stiff_global(2,0) = orientation(2)*orientation(0)*k;
+  stiff_global(2,1) = orientation(2)*orientation(1)*k;
+  stiff_global(2,2) = orientation(2)*orientation(2)*k;
 }
 
 void
