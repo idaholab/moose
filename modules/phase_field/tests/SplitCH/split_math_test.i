@@ -66,7 +66,7 @@ active = 'SMP'
   [../]
 
   [./time]
-    type = CoupledImplicitEuler
+    type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
