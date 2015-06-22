@@ -81,7 +81,7 @@
     type = DirichletBC
     variable = pressure
     boundary = left
-    value = 4000 # (Pa) From Figure 2 from paper.  First dot for 1mm balls.
+    value = 4000 # (Pa) From Figure 2 from paper.  First data point for 1mm balls.
   [../]
   [./outlet]
     type = DirichletBC
