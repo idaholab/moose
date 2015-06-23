@@ -22,9 +22,9 @@ InputParameters validParams<PercentChangePostprocessor>()
 }
 
 PercentChangePostprocessor::PercentChangePostprocessor(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
-    _postprocessor(getPostprocessorValue("postprocessor")),
-    _postprocessor_old(getPostprocessorValueOld("postprocessor"))
+  GeneralPostprocessor(name, parameters),
+  _postprocessor(getPostprocessorValue("postprocessor")),
+  _postprocessor_old(getPostprocessorValueOld("postprocessor"))
 
 {
 }
@@ -43,5 +43,5 @@ PercentChangePostprocessor::execute(){
 Real
 PercentChangePostprocessor::getValue()
 {
-  return fabs( ( fabs(_postprocessor)- fabs(_postprocessor_old) )*pow(fabs(_postprocessor),-1));
+  return fabs((fabs(_postprocessor) - fabs(_postprocessor_old) )*pow(fabs(_postprocessor),-1));
 }
