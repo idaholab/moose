@@ -24,23 +24,29 @@ template<>
 InputParameters validParams<HeatConductionOutflow>();
 
 /**
- * An IntegratedBC representing the "No BC" boundary condition for Heat Conduction.
+ * An IntegratedBC representing the "No BC" boundary condition for
+ * heat conduction.
  *
- * This is essentially -test*k*grad_u*normal... essentially completing the integration by parts.
- * This is a well accepted practice for truncating longer domains for convection/diffusion
- * problems as analyzed in: Griffiths, David F. "The ‘no boundary condition’outflow boundary condition." International journal for numerical methods in fluids 24.4 (1997): 393-411.
+ * The residual is simply -test*k*grad_u*normal... the term you get
+ * from integration by parts.  This is a standard technique for
+ * truncating longer domains when solving the convection/diffusion
+ * equation.
+ *
+ * See also: Griffiths, David F. "The 'no boundary condition' outflow
+ * boundary condition.", International Journal for Numerical Methods
+ * in Fluids, vol. 24, no. 4, 1997, pp. 393-411.
  */
 class HeatConductionOutflow : public IntegratedBC
 {
 public:
   HeatConductionOutflow(const std::string & name, InputParameters parameters);
 
-
 protected:
   /// This is called to integrate the residual across the boundary
   virtual Real computeQpResidual();
 
-  /// Optional (but recommended!) to compute the derivative of the residual with respect to _this_ variable
+  /// Optional (but recommended!) to compute the derivative of the
+  /// residual with respect to _this_ variable
   virtual Real computeQpJacobian();
 
   /// Thermal conductivity of the material

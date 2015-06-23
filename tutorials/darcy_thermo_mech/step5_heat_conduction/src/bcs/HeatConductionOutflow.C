@@ -21,9 +21,9 @@ InputParameters validParams<HeatConductionOutflow>()
   return params;
 }
 
-HeatConductionOutflow::HeatConductionOutflow(const std::string & name, InputParameters parameters) :
+HeatConductionOutflow::HeatConductionOutflow(const std::string & name,
+                                             InputParameters parameters) :
   IntegratedBC(name, parameters),
-
   // IntegratedBCs can retrieve material properties!
   _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
 {}
@@ -31,7 +31,6 @@ HeatConductionOutflow::HeatConductionOutflow(const std::string & name, InputPara
 Real
 HeatConductionOutflow::computeQpResidual()
 {
-  // See: Griffiths, David F. "The ‘no boundary condition’outflow boundary condition." International journal for numerical methods in fluids 24.4 (1997): 393-411.
   return -_test[_i][_qp]*_thermal_conductivity[_qp]*_grad_u[_qp]*_normals[_qp];
 }
 

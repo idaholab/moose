@@ -10,14 +10,19 @@ template<>
 InputParameters validParams<HeatConductionTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
-  // Density may be changing with deformation, so we must integrate over current volume
+  // Density may be changing with deformation, so we must integrate
+  // over current volume by setting the use_displaced_mesh flag.
   params.set<bool>("use_displaced_mesh") = true;
-  params.addParam<bool>("use_heat_capacity", false, "Use a single material property, 'heat_capacity', as the coefficient of the time derivative.");
+  params.addParam<bool>("use_heat_capacity",
+                        false,
+                        "Use a single material property, 'heat_capacity', "
+                        "as the coefficient of the time derivative.");
   return params;
 }
 
 
-HeatConductionTimeDerivative::HeatConductionTimeDerivative(const std::string & name, InputParameters parameters)
+HeatConductionTimeDerivative::HeatConductionTimeDerivative(const std::string & name,
+                                                           InputParameters parameters)
   : TimeDerivative(name, parameters),
    _use_heat_capacity(getParam<bool>("use_heat_capacity")),
    _specific_heat(NULL),
