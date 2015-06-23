@@ -190,6 +190,7 @@
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
 #include "TimePostprocessor.h"
+#include "PercentChangePostprocessor.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -563,6 +564,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(FunctionSideIntegral);
   registerPostprocessor(ExecutionerAttributeReporter);
   registerPostprocessor(TimePostprocessor);
+  registerPostprocessor(PercentChangePostprocessor);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
