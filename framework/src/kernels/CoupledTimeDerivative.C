@@ -4,10 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "CoupledImplicitEuler.h"
+#include "CoupledTimeDerivative.h"
 
 template<>
-InputParameters validParams<CoupledImplicitEuler>()
+InputParameters validParams<CoupledTimeDerivative>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Time derivative Kernel that acts on a coupled variable");
@@ -15,7 +15,7 @@ InputParameters validParams<CoupledImplicitEuler>()
   return params;
 }
 
-CoupledImplicitEuler::CoupledImplicitEuler(const std::string & name, InputParameters parameters) :
+CoupledTimeDerivative::CoupledTimeDerivative(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _v_dot(coupledDot("v")),
     _dv_dot(coupledDotDu("v")),
@@ -23,19 +23,19 @@ CoupledImplicitEuler::CoupledImplicitEuler(const std::string & name, InputParame
 {}
 
 Real
-CoupledImplicitEuler::computeQpResidual()
+CoupledTimeDerivative::computeQpResidual()
 {
   return _test[_i][_qp] * _v_dot[_qp];
 }
 
 Real
-CoupledImplicitEuler::computeQpJacobian()
+CoupledTimeDerivative::computeQpJacobian()
 {
   return 0.0;
 }
 
 Real
-CoupledImplicitEuler::computeQpOffDiagJacobian(unsigned int jvar)
+CoupledTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
     return _test[_i][_qp] * _phi[_j][_qp] * _dv_dot[_qp];

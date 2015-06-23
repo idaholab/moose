@@ -123,7 +123,7 @@
     mob_name = M
   [../]
   [./time1]
-    type = CoupledImplicitEuler
+    type = CoupledTimeDerivative
     variable = w
     v = c
   [../]

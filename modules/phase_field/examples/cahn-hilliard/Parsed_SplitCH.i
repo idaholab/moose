@@ -38,7 +38,7 @@
 
 [Kernels]
   [./c_dot]
-    type = CoupledImplicitEuler
+    type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
