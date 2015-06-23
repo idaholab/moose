@@ -172,7 +172,7 @@
   [../]
 
   [./dcdt]
-    type = CoupledImplicitEuler
+    type = CoupledTimeDerivative
     variable = w
     v = c
   [../]

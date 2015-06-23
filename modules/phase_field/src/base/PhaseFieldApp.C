@@ -20,7 +20,7 @@
 #include "CHMath.h"
 #include "CHParsed.h"
 #include "ConservedLangevinNoise.h"
-#include "CoupledImplicitEuler.h"
+#include "CoupledTimeDerivative.h"
 #include "KKSACBulkC.h"
 #include "KKSACBulkF.h"
 #include "KKSCHBulk.h"
@@ -179,7 +179,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHMath);
   registerKernel(CHParsed);
   registerKernel(ConservedLangevinNoise);
-  registerKernel(CoupledImplicitEuler);
+  registerDeprecatedObjectName(CoupledTimeDerivative, "CoupledImplicitEuler", "09/01/2015 00:00");
   registerKernel(KKSACBulkC);
   registerKernel(KKSACBulkF);
   registerKernel(KKSCHBulk);
