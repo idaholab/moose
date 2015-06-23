@@ -10,7 +10,7 @@ InputParameters validParams<OneDMomentumFlux>()
   params.addCoupledVar("rhoEA", "total energy multiplied by area");
   params.addRequiredCoupledVar("u", "velocity");
   params.addRequiredCoupledVar("area", "cross-sectional area");
-  params.addRequiredParam<bool>("is_liquid", "True for liquid, false for vapor");
+  params.addParam<bool>("is_liquid", true, "True for liquid, false for vapor");
 
   return params;
 }
