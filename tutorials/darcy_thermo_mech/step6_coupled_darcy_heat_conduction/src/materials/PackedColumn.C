@@ -18,21 +18,21 @@ InputParameters validParams<PackedColumn>()
 {
   InputParameters params = validParams<Material>();
 
-  // Add a parameter to get the radius of the balls in the column (used later to interpolate permeability).
-  params.addParam<Real>("ball_radius", "The radius of the steel balls that are packed in the column.  Used to interpolate _permeability.");
-
+  // Add a parameter to get the radius of the balls in the column
+  // (used later to interpolate permeability).
+  params.addParam<Real>("ball_radius",
+                        "The radius of the steel balls that are packed in the column. "
+                        "Used to interpolate _permeability.");
   return params;
 }
 
 
 PackedColumn::PackedColumn(const std::string & name, InputParameters parameters) :
     Material(name, parameters),
-
     // Get the one parameter from the input file
     _ball_radius(getParam<Real>("ball_radius")),
-
-    // Declare two material properties.  This returns references that we
-    // hold onto as member variables
+    // Declare two material properties.  This returns references that
+    // we hold onto as member variables.
     _permeability(declareProperty<Real>("permeability")),
     _porosity(declareProperty<Real>("porosity")),
     _viscosity(declareProperty<Real>("viscosity")),
@@ -40,7 +40,7 @@ PackedColumn::PackedColumn(const std::string & name, InputParameters parameters)
     _heat_capacity(declareProperty<Real>("heat_capacity")),
     _density(declareProperty<Real>("density"))
 {
-  // Sigh: Still can't depend on C++11....
+  // The media is modeled by spheres with different radii.
   std::vector<Real> ball_sizes(2);
   ball_sizes[0] = 1;
   ball_sizes[1] = 3;
@@ -57,7 +57,8 @@ PackedColumn::PackedColumn(const std::string & name, InputParameters parameters)
 void
 PackedColumn::computeQpProperties()
 {
-  _viscosity[_qp] = 7.98e-4; // (Pa*s) Water at 30 degrees C (Wikipedia)
+  // Viscosity of Water in Pa*s at 30 degrees C (Wikipedia)
+  _viscosity[_qp] = 7.98e-4;
 
   // Sample the LinearInterpolation object to get the permeability for the ball size
   _permeability[_qp] = _permeability_interpolation.sample(_ball_radius);
@@ -65,12 +66,14 @@ PackedColumn::computeQpProperties()
   // Compute the heat conduction material properties as a linear combination of
   // the material properties for water and steel.
 
-  // We're assuming close packing  so the porosity will be 1 - 0.74048 = 0.25952
-  // ( http://en.wikipedia.org/wiki/Close-packing_of_equal_spheres )
+  // We're assuming close packing, so the porosity will be
+  // approximately 1 - 0.74048 = 0.25952.  See:
+  // http://en.wikipedia.org/wiki/Close-packing_of_equal_spheres
   _porosity[_qp] = 0.25952;
 
-  // We will compute a "bulk" thermal conductivity, specific heat and density
-  // as a linear combination of the water and steel (all from Wikipedia):
+  // We will compute "bulk" thermal conductivity, specific heat, and
+  // density as linear combinations of the water and steel (all values
+  // are from Wikipedia).
   Real water_k = 0.6;  // (W/m*K)
   Real water_cp = 4181.3; // (J/kg*K)
   Real water_rho = 995.6502;  // (kg/m^3 @ 303K)

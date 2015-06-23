@@ -24,7 +24,7 @@ RichardsExcavFlow::RichardsExcavFlow(const std::string & name, InputParameters p
     SideIntegralVariablePostprocessor(name, parameters),
 
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
-    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+    _pvar(_richards_name_UO.richards_var_num(coupled("variable"))),
 
     _flux(getMaterialProperty<std::vector<RealVectorValue> >("flux")),
 

@@ -48,14 +48,25 @@ protected:
   /// Even if the returnMap fails, return the best values found for stress and internal parameters
   bool _ignore_failures;
 
+  /// The type of tangent operator to return.  tangent operator = d(stress_rate)/d(strain_rate).
+  enum TangentOperatorEnum {
+    elastic, linear, nonlinear
+  } _tangent_operator_type;
+
   /// Tolerance on the plastic strain increment ("direction") constraint
   Real _epp_tol;
 
-  /// When in the Newton-Raphson to deactivate constraints
+  /*
+   * Scheme by which constraints are deactivated.
+   * This enum is defined here for computational
+   * efficiency.  If you add to this list you must
+   * also add to the MooseEnum in the .C file
+   */
   enum DeactivationSchemeEnum {
     optimized, safe, dumb, optimized_to_safe, safe_to_dumb,
     optimized_to_safe_to_dumb, optimized_to_dumb
   } _deactivation_scheme;
+
 
   /// User supplied the transverse direction vector
   bool _n_supplied;
@@ -173,14 +184,12 @@ protected:
    * @param linesearch_needed (output) True if a linesearch was needed at any stage during the Newton-Raphson proceedure
    * @param ld_encountered (output) True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
    * @param constraints_added (output) True if constraints were added into the active set at any stage during the Newton-Raphson proceedure
+   * @param final_step Each strain increment may be decomposed into a sum of smaller increments if the return-map algorithm fails.  This flag indicates whether this is the last application of incremental strain
+   * @param consistent_tangent_operator (output) The consistent tangent operator d(stress_rate)/d(strain_rate).  This is only output if final_step=true, and the return value of returnMap is also true.
+   * @param cumulative_pm (input/output) Upon input: the plastic multipliers before the return map.  Upon output: the plastic multipliers after this return map, if the return map was successful
    * @return true if the stress was successfully returned to the yield surface
    */
-  virtual bool returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress,
-                         const std::vector<Real> & intnl_old, std::vector<Real> & intnl,
-                         const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain,
-                         const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment,
-                         std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb,
-                         bool & linesearch_needed, bool & ld_encountered, bool & constraints_added);
+  virtual bool returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added, const bool & final_step, RankFourTensor & consistent_tangent_operator, std::vector<Real> & cumulative_pm);
 
 
   /**
@@ -324,13 +333,10 @@ protected:
    * @param strain_increment   The applied strain increment
    * @param yf  (output) All the yield functions at (stress, intnl)
    * @param iterations (output) zero
+   * @param consistent_tangent_operator (output) The consistent tangent operator d(stress_rate)/d(strain_rate)
    * @return true if the (stress, intnl) are admissible
    */
-  virtual bool elasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress,
-                           const std::vector<Real> & intnl_old, std::vector<Real> & intnl,
-                           const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain,
-                           const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment,
-                           std::vector<Real> & yf, unsigned int & iterations);
+  virtual bool elasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations, RankFourTensor & consistent_tangent_operator);
 
   /*
    * performs a plastic step
@@ -348,14 +354,11 @@ protected:
    * @param linesearch_needed (output) True if a linesearch was needed at any stage during the Newton-Raphson proceedure
    * @param ld_encountered (output) True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
    * @param constraints_added (output) True if constraints were added into the active set at any stage during the Newton-Raphson proceedure
+   * @param consistent_tangent_operator (output) The consistent tangent operator d(stress_rate)/d(strain_rate)
    * @return true if the (stress, intnl) are admissible.  Otherwise, if _ignore_failures==true, the output variables will be the best admissible ones found during the return-map.  Otherwise, if _ignore_failures==false, this routine will perform some finite-diference checks and call mooseError
    */
-  virtual bool plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress,
-                           const std::vector<Real> & intnl_old, std::vector<Real> & intnl,
-                           const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain,
-                           const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment,
-                           std::vector<Real> & yf, unsigned int & iterations, bool & linesearch_needed,
-                           bool & ld_encountered, bool & constraints_added);
+  virtual bool plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added, RankFourTensor & consistent_tangent_operator);
+
 
   //  bool checkAndModifyConstraints(const bool & nr_exit_condition, const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, const std::vector<Real> & f, DeactivationSchemeEnum deact_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> dumb_order, bool & die);
 
@@ -371,6 +374,20 @@ protected:
   bool canAddConstraints(const std::vector<bool> & act, const std::vector<Real> & all_f);
 
   unsigned int activeCombinationNumber(const std::vector<bool> & act);
+
+  /*
+   * Computes the consistent tangent operator
+   * (another name for the jacobian = d(stress_rate)/d(strain_rate)
+   *
+   * The computations performed depend upon _tangent_operator_type
+   *
+   * @param stress The value of stress after the return map algorithm has converged
+   * @param intnl The internal parameters after the return map has converged
+   * @param E_ijkl The elasticity tensor (in the case of no plasticity this is the jacobian)
+   * @param pm_this_step The plastic multipliers coming from the final strain increment.  In many cases these will be equal to cumulative_pm, but in the case where the returnMap algorithm had to be performed in multiple substeps of smaller applied strain increments, pm_this_step are just the plastic multipliers for the final application of the strain incrment
+   * @param cumulative_pm The plastic multipliers needed for this current Return (this is the sum of the plastic multipliers over all substeps if the strain increment was applied in small substeps)
+   */
+  RankFourTensor consistentTangentOperator(const RankTwoTensor & stress, const std::vector<Real> & intnl, const RankFourTensor & E_ijkl, const std::vector<Real> & pm_this_step, const std::vector<Real> & cumulative_pm);
 };
 
 #endif //COMPUTEMULTIPLASTICITYSTRESS_H

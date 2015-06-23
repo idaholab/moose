@@ -6,6 +6,7 @@
 /****************************************************************/
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
+#include "MooseException.h"
 
 // Any other includes here
 #include "MaterialProperty.h"
@@ -66,6 +67,14 @@ RankFourTensor::RankFourTensor(const InitMethod init)
           for (unsigned int k = 0; k < N; ++k)
             for (unsigned int l = 0; l < N; ++l)
               _vals[i][j][k][l] = (i==k) && (j==l);
+      break;
+
+    case initIdentitySymmetricFour:
+      for (unsigned int i = 0; i < N; ++i)
+        for (unsigned int j = 0; j < N; ++j)
+          for (unsigned int k = 0; k < N; ++k)
+            for (unsigned int l = 0; l < N; ++l)
+              _vals[i][j][k][l] = 0.5*((i==k) && (j==l)) + 0.5*((i==l) && (j==k));
       break;
 
     default:
@@ -306,7 +315,8 @@ RankFourTensor::invSymm() const
 
   RankFourTensor result;
   const RankFourTensor & a = *this;
-  std::vector<PetscScalar> mat(ntens * ntens);
+  std::vector<PetscScalar> mat;
+  mat.assign(ntens * ntens, 0);
 
   // We use the LAPACK matrix inversion routine here.  Form the matrix
   //
@@ -381,20 +391,20 @@ RankFourTensor::invSymm() const
         {
           if (i==j)
             mat[k==l ? i*ntens+k
-                     : i*ntens+k+nskip+l] = a(i,j,k,l);
+                     : i*ntens+k+nskip+l] += a(i,j,k,l);
           else // i!=j
             mat[k==l ? (nskip+i+j)*ntens+k
                      : (nskip+i+j)*ntens+k+nskip+l] += a(i,j,k,l); // note the +=, which results in double-counting and is rectified below
         }
 
   for (unsigned int i = 3; i < ntens; ++i)
-    for (unsigned int j = 3; j < ntens; ++j)
+    for (unsigned int j = 0; j < ntens; ++j)
       mat[i*ntens+j] /= 2.0; // because of double-counting above
 
   // use LAPACK to find the inverse
   error = matrixInversion(mat, ntens);
   if (error != 0)
-    mooseError("Error in Matrix  Inversion in RankFourTensor");
+    throw MooseException("Error in Matrix  Inversion in RankFourTensor");
 
   // build the resulting rank-four tensor
   // using the inverse of the above algorithm

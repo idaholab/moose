@@ -30,7 +30,8 @@ DarcyConvection::DarcyConvection(const std::string & name, InputParameters param
     // Couple to the gradient of the pressure
     _pressure_gradient(coupledGradient("darcy_pressure")),
 
-    // Save off the coupled variable identifier for use in computeQpOffDiagJacobian
+    // Save off the coupled variable identifier for use in
+    // computeQpOffDiagJacobian
     _pressure_var(coupled("darcy_pressure")),
 
     // Grab necessary material properties
@@ -45,11 +46,15 @@ DarcyConvection::DarcyConvection(const std::string & name, InputParameters param
 Real
 DarcyConvection::computeQpResidual()
 {
-  // From "The Finite Difference Method For Transient Convection Diffusion", Ewa Majchrzak & Łukasz Turchan, 2012.
+  // See also: E. Majchrzak and L. Turchan, "The Finite Difference
+  // Method For Transient Convection Diffusion", Scientific Research
+  // of the Institute of Mathematics and Computer Science, vol. 1,
+  // no. 11, 2012, pp. 63-72.
   // http://srimcs.im.pcz.pl/2012_1/art_07.pdf
 
   // http://en.wikipedia.org/wiki/Superficial_velocity
-  RealVectorValue superficial_velocity = _porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp];
+  RealVectorValue superficial_velocity =
+    _porosity[_qp] * -(_permeability[_qp]/_viscosity[_qp]) * _pressure_gradient[_qp];
 
   return _heat_capacity[_qp] * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
 }
@@ -57,7 +62,8 @@ DarcyConvection::computeQpResidual()
 Real
 DarcyConvection::computeQpJacobian()
 {
-  RealVectorValue superficial_velocity = _porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp];
+  RealVectorValue superficial_velocity =
+    _porosity[_qp] * -(_permeability[_qp]/_viscosity[_qp]) * _pressure_gradient[_qp];
 
   return _heat_capacity[_qp] * superficial_velocity * _grad_phi[_j][_qp] * _test[_i][_qp];
 }
@@ -67,7 +73,8 @@ DarcyConvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _pressure_var)
   {
-    RealVectorValue superficial_velocity = _porosity[_qp]*-(_permeability[_qp]/_viscosity[_qp])*_grad_phi[_j][_qp];
+    RealVectorValue superficial_velocity =
+      _porosity[_qp] * -(_permeability[_qp]/_viscosity[_qp]) * _grad_phi[_j][_qp];
     return _heat_capacity[_qp] * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
   }
 

@@ -18,7 +18,7 @@ InputParameters validParams<HeatConductionKernel>();
 
 /**
  * Note: This class is named HeatConductionKernel instead of HeatConduction
- * to avoid a class with the namespace HeatConduction.  It is registered
+ * to avoid a clash with the HeatConduction namespace.  It is registered
  * as HeatConduction, which means it can be used by that name in the input
  * file.
  */

@@ -260,7 +260,7 @@
 [Executioner]
   end_time = 0.5
   dt = 0.05
-  solve_type = PJFNK
+  solve_type = NEWTON
   type = Transient
 
   line_search = 'none'

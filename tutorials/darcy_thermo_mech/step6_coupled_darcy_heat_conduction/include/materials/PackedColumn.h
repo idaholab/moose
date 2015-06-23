@@ -25,10 +25,10 @@ template<>
 InputParameters validParams<PackedColumn>();
 
 /**
- * Material objects inherit from Material and override computeQpProperties.
- *
- * Their job is to declare properties for use by other objects in the
- * calculation such as Kernels and BoundaryConditions.
+ * Material-derived objects override the computeQpProperties()
+ * function.  They must declare and compute material properties for
+ * use by other objects in the calculation such as Kernels and
+ * BoundaryConditions.
  */
 class PackedColumn : public Material
 {
@@ -45,7 +45,9 @@ protected:
   /// The radius of the balls in the column
   const Real & _ball_radius;
 
-  /// Based on the paper this will
+  /// The permeability of the medium is based on a linear
+  /// interpolation between the two different ball sizes which are
+  /// assumed to be present.
   LinearInterpolation _permeability_interpolation;
 
   /// The permeability (K)

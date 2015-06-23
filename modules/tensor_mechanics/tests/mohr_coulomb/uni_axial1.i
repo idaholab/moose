@@ -260,7 +260,7 @@
 [Executioner]
   end_time = 0.5
   dt = 0.05
-  solve_type = PJFNK
+  solve_type = PJFNK  # cannot use NEWTON because we are using ComputeFiniteStrain, and hence the Jacobian contributions will not be correct, even though ComputeMultiPlasticityStress will compute the correct consistent tangent operator for small strains
   type = Transient
 
   line_search = 'none'

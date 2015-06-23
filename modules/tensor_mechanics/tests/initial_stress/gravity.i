@@ -187,7 +187,7 @@
     C_ijkl = '0.4 0.4' # young's = 1, poisson = 0.25
   [../]
   [./strain]
-    type = ComputeFiniteStrain
+    type = ComputeIncrementalSmallStrain
     block = 0
     disp_x = disp_x
     disp_y = disp_y
@@ -217,7 +217,7 @@
 [Executioner]
   end_time = 1.0
   dt = 1.0
-  solve_type = PJFNK
+  solve_type = NEWTON
   type = Transient
 
   nl_abs_tol = 1E-8

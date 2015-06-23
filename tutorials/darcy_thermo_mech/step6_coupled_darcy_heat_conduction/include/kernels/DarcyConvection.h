@@ -24,7 +24,9 @@ template<>
 InputParameters validParams<DarcyConvection>();
 
 /**
- * Simple class to demonstrate off diagonal Jacobian contributions.
+ * Kernel which implements the convective term in the transient heat
+ * conduction equation, and provides coupling with the Darcy pressure
+ * equation.
  */
 class DarcyConvection : public Kernel
 {
@@ -41,7 +43,8 @@ protected:
   /// The gradient of pressure
   VariableGradient & _pressure_gradient;
 
-  /// Coupling identifier for the pressure.  This is used to uniquely identify a coupled variable
+  /// Coupling identifier for the pressure.  This is used to uniquely
+  /// identify a coupled variable
   unsigned int _pressure_var;
 
   /**
