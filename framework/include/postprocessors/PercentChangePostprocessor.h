@@ -35,7 +35,7 @@ InputParameters validParams<PercentChangePostprocessor>();
    virtual void execute();
    virtual Real getValue();
  protected:
-   const PostprocessorValue &_postprocessor,&_postprocessor_old;
+   const PostprocessorValue & _postprocessor, & _postprocessor_old;
  };
 
 #endif /* PERCENTCHANGEPOSTPROCESSOR_H */

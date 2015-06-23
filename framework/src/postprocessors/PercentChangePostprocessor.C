@@ -25,23 +25,25 @@ PercentChangePostprocessor::PercentChangePostprocessor(const std::string & name,
     GeneralPostprocessor(name, parameters),
     _postprocessor(getPostprocessorValue("postprocessor")),
     _postprocessor_old(getPostprocessorValueOld("postprocessor"))
-
 {
 }
 
-PercentChangePostprocessor::~PercentChangePostprocessor(){
+PercentChangePostprocessor::~PercentChangePostprocessor()
+{
 }
 
 void
-PercentChangePostprocessor::initialize(){
+PercentChangePostprocessor::initialize()
+{
 }
 
 void
-PercentChangePostprocessor::execute(){
+PercentChangePostprocessor::execute()
+{
 }
 
 Real
 PercentChangePostprocessor::getValue()
 {
-  return fabs( ( fabs(_postprocessor)- fabs(_postprocessor_old) )*pow(fabs(_postprocessor),-1));
+  return std::fabs((std::fabs(_postprocessor) - std::fabs(_postprocessor_old)) * std::pow(std::fabs(_postprocessor), -1));
 }
