@@ -55,8 +55,8 @@
     type = PenaltyDirichletBC
     variable = u
     value = 0
-    function = solution
     boundary = 'top left right bottom'
+    penalty = 1e5
   [../]
 []
 
