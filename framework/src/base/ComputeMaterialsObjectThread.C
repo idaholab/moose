@@ -72,6 +72,9 @@ ComputeMaterialsObjectThread::subdomainChanged()
 {
   _need_internal_side_material = _fe_problem.needMaterialOnSide(_subdomain, _tid);
   _fe_problem.subdomainSetup(_subdomain, _tid);
+
+  if (_materials[_tid].hasMaterials(_subdomain))
+    _material_data[_tid]->reinitMatPropWithMaterial(_materials[_tid].getMaterials(_subdomain));
 }
 
 void

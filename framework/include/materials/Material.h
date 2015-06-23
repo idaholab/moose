@@ -152,6 +152,21 @@ public:
   const std::set<std::string> &
   getSuppliedItems() { return _supplied_props; }
 
+  /**
+   * Return a set of propreties that have been accessed with materialProperty
+   * @return A reference to the properties with calls to materialProperty
+   */
+  virtual
+  const std::set<std::string> &
+  getIterativeItems() { return _iterative_props; }
+
+  /**
+   * Return the unique property id for the supplied property name
+   */
+  template<typename T>
+  unsigned int
+  materialProperty(const std::string & prop_name);
+
   void checkStatefulSanity() const;
 
   /**
@@ -208,6 +223,12 @@ protected:
   /// Set of properties declared
   std::set<std::string> _supplied_props;
 
+  /// Set of properties used for iteration
+  std::set<std::string> _iterative_props;
+
+  /// Reference to the MaterialWarehouse
+  MaterialWarehouse & _material_warehouse;
+
   enum QP_Data_Type {
     CURR,
     PREV
@@ -241,14 +262,38 @@ protected:
    */
   virtual QpData * createData();
 
+  ///@{
+  /**
+   * Recalculate the specified material object given a property id
+   * @param prop_id The property id(s) of interest that needs to be recomputed, this id should be retrieved with
+   *                a call to `materialProperty`.
+   * @param qp The quadrature point index at which to recompute the properties
+   *
+   * Note, this method calls computeQpProperties on the Material object responsible for computing the supplied property;
+   * hence, this will also compute all other properties as well.
+   */
+  void recomputeMaterial(const unsigned int & prop_id, unsigned int qp);
+  void recomputeMaterial(const std::vector<unsigned int> & prop_id, unsigned int qp);
+  ///@}
+
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
 
 private:
+
+  ///@{
   /**
-   * Small helper function to call storeMatPropName
+   * Helper functions to call storeMatPropName
    */
-  void registerPropName(std::string prop_name, bool is_get, Prop_State state);
+  void registerPropName(const std::string & prop_name);
+  void registerSuppliedPropName(const std::string & prop_name, Prop_State state);
+  ////@}
+
+  /**
+   * A helper function for recomputing the material properties at a specific quadrature point
+   * @param qp The quadrature point to recompute
+   */
+  void recomputeProperties(unsigned int qp);
 
   bool _has_stateful_property;
 };
@@ -266,6 +311,16 @@ Material::getMaterialProperty(const std::string & name)
     return *default_property;
 
   return getMaterialPropertyByName<T>(prop_name);
+}
+
+template<typename T>
+unsigned int
+Material::materialProperty(const std::string & prop_name)
+{
+  _iterative_props.insert(prop_name);
+  registerPropName(prop_name);
+  _fe_problem.markMatPropRequested(prop_name);
+  return _material_data.getPropertyId(prop_name);
 }
 
 template<typename T>
@@ -304,7 +359,7 @@ Material::getMaterialPropertyByName(const std::string & prop_name)
 {
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, Material::CURRENT);
+  registerPropName(prop_name);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getProperty<T>(prop_name);
 }
@@ -313,8 +368,7 @@ template<typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOldByName(const std::string & prop_name)
 {
-  _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, Material::OLD);
+  registerPropName(prop_name);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getPropertyOld<T>(prop_name);
 }
@@ -323,8 +377,7 @@ template<typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOlderByName(const std::string & prop_name)
 {
-  _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, Material::OLDER);
+  registerPropName(prop_name);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data.getPropertyOlder<T>(prop_name);
 }
@@ -334,7 +387,8 @@ template<typename T>
 MaterialProperty<T> &
 Material::declareProperty(const std::string & prop_name)
 {
-  registerPropName(prop_name, false, Material::CURRENT);
+  _supplied_props.insert(prop_name);
+  registerSuppliedPropName(prop_name, Material::CURRENT);
   return _material_data.declareProperty<T>(prop_name);
 }
 
@@ -342,7 +396,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::declarePropertyOld(const std::string & prop_name)
 {
-  registerPropName(prop_name, false, Material::OLD);
+  registerSuppliedPropName(prop_name, Material::OLD);
   return _material_data.declarePropertyOld<T>(prop_name);
 }
 
@@ -350,7 +404,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::declarePropertyOlder(const std::string & prop_name)
 {
-  registerPropName(prop_name, false, Material::OLDER);
+  registerSuppliedPropName(prop_name, Material::OLDER);
   return _material_data.declarePropertyOlder<T>(prop_name);
 }
 

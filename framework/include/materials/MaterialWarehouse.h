@@ -42,21 +42,26 @@ public:
 
   // Copy Constructor
   MaterialWarehouse(const MaterialWarehouse &rhs);
-
   virtual ~MaterialWarehouse();
 
-  // Setup /////
+  ///@{
+  /**
+   * Calls the various setup methods for the Material objects
+   */
   void initialSetup();
   void timestepSetup();
   void residualSetup();
   void jacobianSetup();
+  ///@}
 
+  ///@{
+  /**
+   * Return true if Materials exist on the supplied boundary/block id
+   */
   bool hasMaterials(SubdomainID block_id) const;
   bool hasFaceMaterials(SubdomainID block_id) const;
   bool hasNeighborMaterials(SubdomainID block_id) const;
   bool hasBoundaryMaterials(BoundaryID boundary_id) const;
-
-  const std::vector<Material *> & getMaterialsByName(const std::string & name) const;
 
   ///@{
   /**
@@ -64,19 +69,22 @@ public:
    * to compute properties during the system "solve".  The materials in these
    * vectors are asked to recompute their values.
    */
-  std::vector<Material *> & getMaterials();
   std::vector<Material *> & getMaterials(SubdomainID block_id);
   std::vector<Material *> & getFaceMaterials(SubdomainID block_id);
   std::vector<Material *> & getNeighborMaterials(SubdomainID block_id);
   std::vector<Material *> & getBoundaryMaterials(BoundaryID boundary_id);
+  const std::vector<Material *> & getMaterialsByName(const std::string & name) const;
   ///@}
 
-  std::vector<Material *> & active(SubdomainID block_id);
-
+  ///@{
+  /**
+   * Methods for adding material objects to the warehouse
+   */
   void addMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
   void addFaceMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
   void addNeighborMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
   void addBoundaryMaterial(std::vector<BoundaryID> boundaries, MooseSharedPointer<Material> & material);
+  ///@}
 
   /**
    * Get the list of blocks that materials are defined on
@@ -96,7 +104,16 @@ public:
   /// This method loops over all materials and calls checkStatefulSanity() on the individual materials
   void checkStatefulSanity() const;
 
+  ///@{
+  /**
+   * Controls for dependency warnings and debugging
+   */
+  void setIterativeWarning(bool state){ _iterative_warning = state; }
+  void setDebugDependency(bool state){ _debug_depend = state; }
+  ///@}
+
 protected:
+
   /// A list of material associated with the block (subdomain)
   std::map<SubdomainID, std::vector<Material *> > _active_materials;
 
@@ -122,6 +139,7 @@ protected:
   std::map<std::string, std::vector<Material *> > _mat_by_name;
 
 private:
+
   /**
    * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
    * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
@@ -139,6 +157,12 @@ private:
    * by other materials make sense for the given block.
    */
   void checkDependMaterials(const std::map<SubdomainID, std::vector<Material *> > & materials_map) const;
+
+  /// Flag for enabling dependency iterative warning
+  bool _iterative_warning;
+
+  /// Flag for enabling debugging of dependency
+  bool _debug_depend;
 };
 
 #endif // MATERIALWAREHOUSE_H

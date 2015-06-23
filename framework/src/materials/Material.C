@@ -79,6 +79,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _current_side(_neighbor ? _assembly.neighborSide() : _assembly.side()),
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
+    _material_warehouse(_fe_problem.getMaterialWarehouse(_tid)),
     _has_stateful_property(false)
 {
   // Fill in the MooseVariable dependencies
@@ -137,38 +138,61 @@ Material::checkStatefulSanity() const
 }
 
 void
-Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_State state)
+Material::registerSuppliedPropName(const std::string & prop_name, Prop_State state)
 {
-  if (!is_get)
-  {
-    _props_to_flags[prop_name] |= static_cast<int>(state);
-    if (static_cast<int>(state) % 2 == 0)
-      _has_stateful_property = true;
-  }
+  _props_to_flags[prop_name] |= static_cast<int>(state);
+  if (static_cast<int>(state) % 2 == 0)
+    _has_stateful_property = true;
+  _material_data.registerMatPropWithMaterial(prop_name, this);
+  registerPropName(prop_name);
+}
 
+void
+Material::registerPropName(const std::string & prop_name)
+{
   // Store material properties for block ids
   for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
-  {
-    // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
-    if (!is_get)
-      _supplied_props.insert(prop_name);
     _fe_problem.storeMatPropName(*it, prop_name);
-  }
 
   // Store material properties for the boundary ids
   for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
-  {
-    // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
-    if (!is_get)
-      _supplied_props.insert(prop_name);
     _fe_problem.storeMatPropName(*it, prop_name);
-  }
 }
 
 std::set<OutputName>
 Material::getOutputs()
 {
   return std::set<OutputName>(getParam<std::vector<OutputName> >("outputs").begin(), getParam<std::vector<OutputName> >("outputs").end());
+}
+
+void
+Material::recomputeProperties(unsigned int qp)
+{
+  _qp = qp;
+  computeQpProperties();
+}
+void
+Material::recomputeMaterial(const unsigned int & prop_id, unsigned int qp)
+{
+  Material * mat = _material_data.getActiveMaterial(prop_id);
+  mat->recomputeProperties(qp);
+}
+void
+Material::recomputeMaterial(const std::vector<unsigned int> & prop_id, unsigned int qp)
+{
+  // The complete list of all Material objects in the correct order for the current block
+  const SubdomainID & id = _fe_problem.getCurrentSubdomainID(_tid);
+  const std::vector<Material *> & all_mats = _material_warehouse.getMaterials(id);
+
+  // Build the set of Materials that need to be called, in no particular order
+  std::set<Material *> mats;
+  for (std::vector<unsigned int>::const_iterator it = prop_id.begin(); it != prop_id.end(); ++it)
+    mats.insert(_material_data.getActiveMaterial(*it));
+
+  // Call the Material objects compute method in the correct order
+  for (std::vector<Material *>::const_iterator it = all_mats.begin(); it != all_mats.end(); ++it)
+    if (mats.find(*it) != mats.end())
+      (*it)->recomputeProperties(qp);
 }
 
 bool

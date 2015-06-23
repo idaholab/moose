@@ -360,7 +360,6 @@ MaterialPropertyStorage::addProperty (const std::string & prop_name)
 {
   unsigned int prop_id = addPropertyId(prop_name);
   _prop_names[prop_id] = prop_name;
-
   return prop_id;
 }
 

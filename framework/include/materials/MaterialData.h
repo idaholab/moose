@@ -126,6 +126,13 @@ public:
   ///@}
 
   /**
+   * Return the material property ID
+   * @param prop_name The name of the property
+   * @return A unique id for the property
+   */
+  unsigned int getPropertyId(const std::string & name);
+
+  /**
    * Return the swapped status of material
    * @return Returns true of the stateful material is swapped
    */
@@ -135,6 +142,26 @@ public:
    * Provide read-only access to the underlying MaterialPropertyStorage object.
    */
   const MaterialPropertyStorage & getMaterialPropertyStorage() const { return _storage; }
+
+  /**
+   * Registers that the given property is owned by the given Material object
+   * @param prop_name The material property name
+   * @param mat The Material object that declares the property
+   */
+  void registerMatPropWithMaterial(const std::string & prop_name, Material * mat);
+
+  /**
+   * Reinitializes the list of material properties and which Material object is responsible for its computation
+   * @param mats The list of active Material objects
+   */
+  void reinitMatPropWithMaterial(const std::vector<Material *> & mats);
+
+  /**
+   * Returns the current Material object responsible for computing the supplied property
+   * @param prop_id The id of the property to which the responsible Material object is desired
+   * @return A pointer to the Material object that is currently responsible for computing the parameter
+   */
+  Material * getActiveMaterial(const unsigned int & prop_id);
 
 protected:
 
@@ -161,6 +188,11 @@ protected:
   /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
   bool _swapped;
 
+  /// Map of Material object the the properties that it computes
+  std::map<Material *, std::set<unsigned int> > _material_to_prop_id;
+
+  /// Vector of Material objects where the index is the the property id
+  std::map<unsigned int, Material *> _active_prop_id_to_material;
 };
 
 template <typename T>
