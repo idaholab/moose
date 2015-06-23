@@ -124,12 +124,12 @@ protected:
 
   /**
    * The active hardening potentials (one for each internal parameter and for each yield function)
-   * by assumption in the Userobjects, the h[a][alpha] is nonzero only for a = alpha, so we only calculate those here
+   * by assumption in the Userobjects, the h[a][alpha] is nonzero only if the surface alpha is part of model a, so we only calculate those here
    * @param stress the stress at which to calculate the hardening potential
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active hardening potentials are put into "h"
    * @param num_active number of active constraints
-   * @param h (output) the hardening potentials.  h[alpha] = hardening potential for yield fcn alpha and internal param a=alpha, by assumption in the userobjects this is only nonzero for a=alpha
+   * @param h (output) the hardening potentials.  h[alpha] = hardening potential for yield fcn alpha (and, by the above assumption we know which hardening parameter, a, this belongs to)
    */
   virtual void hardPotential(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<Real> & h);
 

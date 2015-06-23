@@ -53,7 +53,8 @@ public:
   {
     initNone,
     initIdentity,
-    initIdentityFour
+    initIdentityFour,
+    initIdentitySymmetricFour
   };
 
   /**
@@ -198,13 +199,6 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
-protected:
-  /// Dimensionality of rank-four tensor
-  static const unsigned int N = LIBMESH_DIM;
-
-  /// The values of the rank-four tensor
-  Real _vals[N][N][N][N];
-
   /**
    * Inverts the dense matrix A using LAPACK routines
    * @param A upon input this is a row vector representing an n-by-n matrix.  Upon output it is the inverse (as a row-vector)
@@ -212,6 +206,13 @@ protected:
    * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
    */
   int matrixInversion(std::vector<PetscScalar> & A, int n) const;
+
+protected:
+  /// Dimensionality of rank-four tensor
+  static const unsigned int N = LIBMESH_DIM;
+
+  /// The values of the rank-four tensor
+  Real _vals[N][N][N][N];
 
   /**
   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in

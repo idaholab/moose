@@ -213,7 +213,7 @@
     C_ijkl = '0 5E9' # young = 10Gpa, poisson = 0.0
   [../]
   [./strain]
-    type = ComputeFiniteStrain
+    type = ComputeIncrementalSmallStrain
     block = 1
     disp_x = disp_x
     disp_y = disp_y
@@ -241,7 +241,7 @@
 [Executioner]
   end_time = 0.5
   dt = 0.1
-  solve_type = PJFNK
+  solve_type = NEWTON
   type = Transient
 
   l_tol = 1E-2
