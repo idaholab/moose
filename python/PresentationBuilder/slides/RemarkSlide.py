@@ -254,9 +254,8 @@ class RemarkSlide(MooseObject):
       language = 'python'
     elif ext == '.i':
       language = 'text'
-    # Do nothing if the language is not detected
     else:
-      return match.group(0)
+      language = 'text'
 
     # Remove header
     strt = code.find('/********')
