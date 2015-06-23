@@ -18,16 +18,15 @@ template<>
 InputParameters validParams<SideIntegralVariablePostprocessor>()
 {
   InputParameters params = validParams<SideIntegralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this boundary condition applies to");
+  params.addCoupledVar("variable", "The name of the variable that this boundary condition applies to");
   return params;
 }
 
 SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(const std::string & name, InputParameters parameters) :
     SideIntegralPostprocessor(name, parameters),
     MooseVariableInterface(parameters, false),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
-    _u(_var.sln()),
-    _grad_u(_var.gradSln())
+    _u(coupledValue("variable")),
+    _grad_u(coupledGradient("variable"))
 {
   addMooseVariableDependency(mooseVariable());
 }

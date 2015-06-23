@@ -30,7 +30,7 @@ RichardsHalfGaussianSinkFlux::RichardsHalfGaussianSinkFlux(const std::string & n
     _sd(getParam<Real>("sd")),
     _centre(getParam<Real>("centre")),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
-    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+    _pvar(_richards_name_UO.richards_var_num(coupled("variable"))),
     _m_func(getFunction("multiplying_fcn")),
     _pp(getMaterialProperty<std::vector<Real> >("porepressure"))
 {}

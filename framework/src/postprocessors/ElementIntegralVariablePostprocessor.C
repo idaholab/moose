@@ -18,17 +18,16 @@ template<>
 InputParameters validParams<ElementIntegralVariablePostprocessor>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this object operates on");
+  params.addCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }
 
 ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(const std::string & name, InputParameters parameters) :
     ElementIntegralPostprocessor(name, parameters),
     MooseVariableInterface(parameters, false),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
-    _u(_var.sln()),
-    _grad_u(_var.gradSln()),
-    _u_dot(_var.uDot())
+    _u(coupledValue("variable")),
+    _grad_u(coupledGradient("variable")),
+    _u_dot(coupledDot("variable"))
 {
   addMooseVariableDependency(mooseVariable());
 }

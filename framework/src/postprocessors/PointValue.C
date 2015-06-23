@@ -57,7 +57,7 @@ PointValue::execute()
 void
 PointValue::finalize()
 {
-  // Gather a consist id for broadcasting the computed value
+  // Gather a consistent id for broadcasting the computed value
   gatherMin(_root_id);
 
   // Compute the value at the point
