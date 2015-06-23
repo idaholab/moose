@@ -10,7 +10,7 @@ InputParameters validParams<OneDEnergyFlux>()
   params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addRequiredCoupledVar("u", "velocity");
   params.addRequiredCoupledVar("enthalpy", "enthalpy");
-  params.addRequiredParam<bool>("is_liquid", "True for liquid, false for vapor");
+  params.addParam<bool>("is_liquid", true, "True for liquid, false for vapor");
   params.addCoupledVar("alpha", 1., "Volume fraction");
   params.addCoupledVar("alpha_A_liquid", "Volume fraction of liquid");
 
