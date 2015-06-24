@@ -994,7 +994,7 @@ protected:
   /**
    * Call when it is possible that the needs for ghosted elements has changed.
    */
-  void reinitBecauseOfGhosting();
+  void reinitBecauseOfGhostingOrNewGeomObjects();
 
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
