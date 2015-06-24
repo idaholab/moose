@@ -509,7 +509,7 @@ void FEProblem::initialSetup()
 
   Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
   // Possibly reinit one more time to get ghosting correct
-  reinitBecauseOfGhosting();
+  reinitBecauseOfGhostingOrNewGeomObjects();
   Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
 
 
@@ -2587,13 +2587,15 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP_END*/, UserObj
 }
 
 void
-FEProblem::reinitBecauseOfGhosting()
+FEProblem::reinitBecauseOfGhostingOrNewGeomObjects()
 {
-  // Need to see if _any_ processor has ghosted elems
-  dof_id_type ghosted = _ghosted_elems.size();
-  _communicator.sum(ghosted);
+  // Need to see if _any_ processor has ghosted elems or geometry objects.
+  bool needs_reinit = ! _ghosted_elems.empty();
+  needs_reinit = needs_reinit || ! _geometric_search_data._nearest_node_locators.empty();
+  needs_reinit = needs_reinit || ( _displaced_problem && ! _displaced_problem->geomSearchData()._nearest_node_locators.empty() );
+  _communicator.max(needs_reinit);
 
-  if (ghosted)
+  if (needs_reinit)
   {
     // Call reinit to get the ghosted vectors correct now that some geometric search has been done
     _eq.reinit();
@@ -3597,7 +3599,7 @@ FEProblem::possiblyRebuildGeomSearchPatches()
         _displaced_problem->geomSearchData().clearNearestNodeLocators();
         _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
 
-        reinitBecauseOfGhosting();
+        reinitBecauseOfGhostingOrNewGeomObjects();
 
         // This is needed to reinitialize PETSc output
         initPetscOutput();
@@ -3653,7 +3655,7 @@ FEProblem::meshChanged()
 
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
 
-  reinitBecauseOfGhosting();
+  reinitBecauseOfGhostingOrNewGeomObjects();
 
   // We need to create new storage for the new elements and copy stateful properties from the old elements.
   if (_has_initialized_stateful && (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
