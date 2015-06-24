@@ -2593,10 +2593,9 @@ FEProblem::reinitBecauseOfGhostingOrNewGeomObjects()
   bool needs_reinit = ! _ghosted_elems.empty();
   needs_reinit = needs_reinit || ! _geometric_search_data._nearest_node_locators.empty();
   needs_reinit = needs_reinit || ( _displaced_problem && ! _displaced_problem->geomSearchData()._nearest_node_locators.empty() );
-  dof_id_type do_reinit = static_cast<dof_id_type>(needs_reinit);
-  _communicator.sum(do_reinit);
+  _communicator.max(needs_reinit);
 
-  if (do_reinit)
+  if (needs_reinit)
   {
     // Call reinit to get the ghosted vectors correct now that some geometric search has been done
     _eq.reinit();
