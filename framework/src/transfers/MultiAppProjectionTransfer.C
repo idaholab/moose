@@ -97,6 +97,10 @@ MultiAppProjectionTransfer::initialSetup()
             _proj_var_num = proj_sys.add_variable("var", fe_type);
             proj_sys.attach_assemble_function(assemble_l2_to);
 
+            // Prevent the projection system from being written to checkpoint
+            // files.  (This makes recover/restart easier)
+            proj_sys.hide_output() = true;
+
             _proj_sys[app] = &proj_sys;
 
             // We'll defer to_es.reinit() so we don't do it multiple
@@ -133,6 +137,10 @@ MultiAppProjectionTransfer::initialSetup()
              + "-" + Utility::enum_to_string<Order>(fe_type.order) + "-" + name());
         _proj_var_num = proj_sys.add_variable("var", fe_type);
         proj_sys.attach_assemble_function(assemble_l2_from);
+
+        // Prevent the projection system from being written to checkpoint
+        // files.  (This makes recover/restart easier)
+        proj_sys.hide_output() = true;
 
         _proj_sys[0] = &proj_sys;
 
