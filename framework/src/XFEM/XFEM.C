@@ -182,16 +182,16 @@ void XFEM::initSolution(NonlinearSystem & nl, AuxiliarySystem & aux)
     {
       Node* new_node = getNodeFromUniqueID(nit->first);
       Node* parent_node = getNodeFromUniqueID(nit->second);
-      std::cout<<"BWS new node : "<<new_node->id() << " parent node: "<<parent_node->id()<<std::endl;
+//      std::cout<<"BWS new node : "<<new_node->id() << " parent node: "<<parent_node->id()<<std::endl;
       Point *new_point = new Point(*new_node);
       Point *parent_point = new Point(*parent_node);
       if (*new_point != *parent_point)
         mooseError("Points don't match");
       unsigned int new_node_dof = new_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
       unsigned int parent_node_dof = parent_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
-      std::cout<<"BWS setting soln : "<<new_node_dof<<" "<<parent_node_dof<<" "<<current_solution(parent_node_dof)<<std::endl;
+//      std::cout<<"BWS setting soln : "<<new_node_dof<<" "<<parent_node_dof<<" "<<current_solution(parent_node_dof)<<std::endl;
       current_solution.set(new_node_dof, current_solution(parent_node_dof));
-      std::cout<<"BWS setting old soln : "<<new_node_dof<<" "<<parent_node_dof<<" "<<old_solution(parent_node_dof)<<std::endl;
+//      std::cout<<"BWS setting old soln : "<<new_node_dof<<" "<<parent_node_dof<<" "<<old_solution(parent_node_dof)<<std::endl;
       old_solution.set(new_node_dof, old_solution(parent_node_dof));
     }
   }
@@ -591,13 +591,13 @@ XFEM::cut_mesh_with_efa()
 
   _efa_mesh.updatePhysicalLinksAndFragments();
   // DEBUG
-  _efa_mesh.printMesh();
-  std::cout<<"BWS before updateTopology"<<std::endl;
+//  _efa_mesh.printMesh();
+//  std::cout<<"BWS before updateTopology"<<std::endl;
 
   _efa_mesh.updateTopology();
   // DEBUG
-  _efa_mesh.printMesh();
-  std::cout<<"BWS cut done"<<std::endl;
+//  _efa_mesh.printMesh();
+//  std::cout<<"BWS cut done"<<std::endl;
 
   //Add new nodes
   const std::vector<EFAnode*> NewNodes = _efa_mesh.getNewNodes();
@@ -608,7 +608,7 @@ XFEM::cut_mesh_with_efa()
 
     Node *parent_node = _mesh->node_ptr(parent_id);
 
-    std::cout<<"BWS n_nodes: "<<_mesh->n_nodes()<<std::endl;
+//    std::cout<<"BWS n_nodes: "<<_mesh->n_nodes()<<std::endl;
     Point *new_point = new Point(*parent_node);
     Node *new_node = Node::build(*new_point,_mesh->n_nodes()).release();
     new_node->processor_id() = parent_node->processor_id();
@@ -632,7 +632,7 @@ XFEM::cut_mesh_with_efa()
 
       new_node2->set_n_systems(parent_node2->n_systems());
       efa_id_to_new_node2.insert(std::make_pair(new_node_id,new_node2));
-      std::cout<<"XFEM2 added new node: "<<new_node2->id()+1<<std::endl;
+//      std::cout<<"XFEM2 added new node: "<<new_node2->id()+1<<std::endl;
     }
   }
 
