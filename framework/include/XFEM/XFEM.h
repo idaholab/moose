@@ -17,6 +17,8 @@
 
 #include "XFEMCutElem2D.h"
 #include "XFEMCutElem3D.h"
+#include "AuxiliarySystem.h"
+#include "NonlinearSystem.h"
 
 enum XFEM_CUTPLANE_QUANTITY
 {
@@ -68,6 +70,13 @@ public:
    * Method to update the mesh due to modified cut planes
    */
   bool update(Real time);
+
+  /**
+   * Initialize the solution on newly created nodes
+   */
+  void initSolution(NonlinearSystem & nl, AuxiliarySystem & aux);
+
+  Node * getNodeFromUniqueID(unique_id_type uid);
 
   void build_efa_mesh();
   bool mark_cut_edges(Real time);
@@ -124,6 +133,8 @@ private:
 
   LocationMap<Node> _new_nodes_map;
   LocationMap<Node> _new_nodes_map2;
+
+  std::map<unique_id_type, unique_id_type> _new_node_to_parent_node;
 
   ElementFragmentAlgorithm _efa_mesh;
 };

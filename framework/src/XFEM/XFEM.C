@@ -164,6 +164,64 @@ XFEM::update(Real time)
   return mesh_changed;
 }
 
+void XFEM::initSolution(NonlinearSystem & nl, AuxiliarySystem & aux)
+{
+  const std::vector<MooseVariable *> & nl_vars = nl.getVariables(0); //TODO pass in real thread id?
+
+  nl.serializeSolution();
+//  NumericVector<Number> & c_solution = *nl.sys().solution;
+  NumericVector<Number> & current_solution = *nl.sys().current_local_solution;
+  NumericVector<Number> & old_solution = *nl.sys().old_local_solution;
+//  std::cout<<"pre mod current soln: "<<current_solution;
+//  std::cout<<"pre mod old soln: "<<old_solution;
+
+  for (std::map<unique_id_type, unique_id_type>::iterator nit = _new_node_to_parent_node.begin();
+       nit != _new_node_to_parent_node.end(); ++nit)
+  {
+    for (unsigned int ivar=0; ivar<nl_vars.size(); ++ivar)
+    {
+      Node* new_node = getNodeFromUniqueID(nit->first);
+      Node* parent_node = getNodeFromUniqueID(nit->second);
+      std::cout<<"BWS new node : "<<new_node->id() << " parent node: "<<parent_node->id()<<std::endl;
+      Point *new_point = new Point(*new_node);
+      Point *parent_point = new Point(*parent_node);
+      if (*new_point != *parent_point)
+        mooseError("Points don't match");
+      unsigned int new_node_dof = new_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
+      unsigned int parent_node_dof = parent_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
+      std::cout<<"BWS setting soln : "<<new_node_dof<<" "<<parent_node_dof<<" "<<current_solution(parent_node_dof)<<std::endl;
+      current_solution.set(new_node_dof, current_solution(parent_node_dof));
+      std::cout<<"BWS setting old soln : "<<new_node_dof<<" "<<parent_node_dof<<" "<<old_solution(parent_node_dof)<<std::endl;
+      old_solution.set(new_node_dof, old_solution(parent_node_dof));
+    }
+  }
+
+  current_solution.close();
+  old_solution.close();
+//  std::cout<<"post mod current soln: "<<current_solution;
+//  std::cout<<"post mod old soln: "<<old_solution;
+}
+
+Node * XFEM::getNodeFromUniqueID(unique_id_type uid)
+{
+  Node *matching_node = NULL;
+  MeshBase::node_iterator       node_it = _mesh->nodes_begin();
+  const MeshBase::node_iterator node_end = _mesh->nodes_end();
+
+  for ( node_it = _mesh->nodes_begin(); node_it != node_end; ++node_it)
+  {
+    Node *node = *node_it;
+    if (node->unique_id() == uid)
+    {
+      matching_node = node;
+      break;
+    }
+  }
+  if (!matching_node)
+    mooseError("Couldn't find node matching unique id: "<<uid);
+  return matching_node;
+}
+
 void XFEM::build_efa_mesh()
 {
   _efa_mesh.reset();
@@ -529,6 +587,7 @@ XFEM::cut_mesh_with_efa()
   std::map<unsigned int, Node*> efa_id_to_new_node;
   std::map<unsigned int, Node*> efa_id_to_new_node2;
   std::map<unsigned int, Elem*> efa_id_to_new_elem;
+  _new_node_to_parent_node.clear();
 
   _efa_mesh.updatePhysicalLinksAndFragments();
   // DEBUG
@@ -547,10 +606,15 @@ XFEM::cut_mesh_with_efa()
     unsigned int new_node_id = NewNodes[i]->id();
     unsigned int parent_id = NewNodes[i]->parent()->id();
 
-    const Node *parent_node = _mesh->node_ptr(parent_id);
+    Node *parent_node = _mesh->node_ptr(parent_id);
 
+    std::cout<<"BWS n_nodes: "<<_mesh->n_nodes()<<std::endl;
     Point *new_point = new Point(*parent_node);
-    Node *new_node = _mesh->add_point(*new_point, DofObject::invalid_id, parent_node->processor_id());
+    Node *new_node = Node::build(*new_point,_mesh->n_nodes()).release();
+    new_node->processor_id() = parent_node->processor_id();
+    _mesh->add_node(new_node);
+//    new_node->set_old_dof_object();
+    _new_node_to_parent_node[new_node->unique_id()] = parent_node->unique_id();
 
     new_node->set_n_systems(parent_node->n_systems());
     efa_id_to_new_node.insert(std::make_pair(new_node_id,new_node));
@@ -561,13 +625,25 @@ XFEM::cut_mesh_with_efa()
       const Node *parent_node2 = _mesh2->node_ptr(parent_id);
 
       Point *new_point2 = new Point(*parent_node2);
-      Node *new_node2 = _mesh2->add_point(*new_point2, DofObject::invalid_id, parent_node2->processor_id());
+      Node *new_node2 = Node::build(*new_point2,_mesh2->n_nodes()).release();
+      new_node2->processor_id() = parent_node2->processor_id();
+      _mesh2->add_node(new_node2);
+//      new_node2->set_old_dof_object();
 
       new_node2->set_n_systems(parent_node2->n_systems());
       efa_id_to_new_node2.insert(std::make_pair(new_node_id,new_node2));
       std::cout<<"XFEM2 added new node: "<<new_node2->id()+1<<std::endl;
     }
   }
+
+//  std::cout<<"BWS _new_node_to_parent_node:"<<std::endl;
+//  for (std::map<Node*, Node*>::iterator nit = _new_node_to_parent_node.begin();
+//       nit != _new_node_to_parent_node.end(); ++nit)
+//  {
+//    Node * new_node = nit->first;
+//    Node * parent_node = nit->second;
+//    std::cout<<"BWS new node : "<<new_node->id() << " parent node: "<<parent_node->id()<<std::endl;
+//  }
 
   //Add new elements
   const std::vector<EFAelement*> NewElements = _efa_mesh.getChildElements();

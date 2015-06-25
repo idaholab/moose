@@ -17,7 +17,7 @@ public:
 
 protected:
   MaterialTensorCalculator _material_tensor_calculator;
-  MaterialProperty<SymmTensor> & _tensor;
+  const MaterialProperty<SymmTensor> & _tensor;
   Real _threshold;
   bool _average;
   Real _random_range;
