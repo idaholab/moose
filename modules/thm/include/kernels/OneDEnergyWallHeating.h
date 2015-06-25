@@ -5,7 +5,6 @@
 
 // Forward Declarations
 class OneDEnergyWallHeating;
-class SinglePhaseCommonFluidProperties;
 
 template<>
 InputParameters validParams<OneDEnergyWallHeating>();
@@ -22,27 +21,22 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  // Coupled variables
-  VariableValue & _rho;
-  VariableValue & _rhou;
-  VariableValue & _rhoE;
-  VariableValue & _temperature;
+  bool _is_liquid;
+
+  const MaterialProperty<Real> & _temperature;
+  const MaterialProperty<Real> & _dT_drho;
+  const MaterialProperty<Real> & _dT_drhou;
+  const MaterialProperty<Real> & _dT_drhoE;
+
   VariableValue & _heat_transfer_coefficient;
   VariableValue & _Tw;
-
-  // If area is coupled, we assume we're using the variable-area
-  // equations.  When using the variable-area equations, there is an
-  // extra (1/A) present on all the Jacobian terms.
   VariableValue & _area;
+  VariableValue & _Phf;
 
   // For Jacobian terms
   unsigned _rhoA_var_number;
   unsigned _rhouA_var_number;
 
-  // Heat flux perimeter
-  VariableValue & _Phf;
-
-  const SinglePhaseCommonFluidProperties & _spfp;
 };
 
 #endif //ONEDENERGYWALLHEATING_H
