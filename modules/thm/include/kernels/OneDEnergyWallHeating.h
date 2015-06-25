@@ -21,8 +21,6 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  bool _is_liquid;
-
   const MaterialProperty<Real> & _temperature;
   const MaterialProperty<Real> & _dT_drho;
   const MaterialProperty<Real> & _dT_drhou;

@@ -36,7 +36,7 @@ protected:
   unsigned _rhouA_var_number;
   bool _has_alpha_A;
   unsigned int _alpha_A_liquid_var_number;
-  const MaterialProperty<Real> * _dp_dalphaA_liquid;
+  const MaterialProperty<Real> * _dp_dalphaAL;
   VariableValue & _alpha;
 };
 

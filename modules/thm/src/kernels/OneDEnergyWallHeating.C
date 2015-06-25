@@ -4,7 +4,6 @@ template<>
 InputParameters validParams<OneDEnergyWallHeating>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addParam<bool>("is_liquid", true, "true for liquid, false for vapor");
   params.addRequiredCoupledVar("rhoA", "");
   params.addRequiredCoupledVar("rhouA", "");
   params.addRequiredCoupledVar("heat_transfer_coefficient", "convective heat transfer coefficient, W/m^2-K");
@@ -16,11 +15,10 @@ InputParameters validParams<OneDEnergyWallHeating>()
 
 OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
-    _is_liquid(getParam<bool>("is_liquid")),
-    _temperature(_is_liquid ? getMaterialPropertyByName<Real>("temperature_liquid") : getMaterialPropertyByName<Real>("temperature_vapor")),
-    _dT_drho(_is_liquid ?  getMaterialPropertyByName<Real>("dTL_drho")  : getMaterialPropertyByName<Real>("dTV_drho")),
-    _dT_drhou(_is_liquid ? getMaterialPropertyByName<Real>("dTL_drhou") : getMaterialPropertyByName<Real>("dTV_drhou")),
-    _dT_drhoE(_is_liquid ? getMaterialPropertyByName<Real>("dTL_drhoE") : getMaterialPropertyByName<Real>("dTV_drhoE")),
+    _temperature(getMaterialPropertyByName<Real>("temperature")),
+    _dT_drho(getMaterialPropertyByName<Real>("dT_drho")),
+    _dT_drhou(getMaterialPropertyByName<Real>("dT_drhou")),
+    _dT_drhoE(getMaterialPropertyByName<Real>("dT_drhoE")),
     _heat_transfer_coefficient(coupledValue("heat_transfer_coefficient")),
     _Tw(coupledValue("Tw")),
     _area(coupledValue("area")),

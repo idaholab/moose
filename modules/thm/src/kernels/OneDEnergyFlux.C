@@ -13,6 +13,11 @@ InputParameters validParams<OneDEnergyFlux>()
   params.addParam<bool>("is_liquid", true, "True for liquid, false for vapor");
   params.addCoupledVar("alpha", 1., "Volume fraction");
   params.addCoupledVar("alpha_A_liquid", "Volume fraction of liquid");
+  params.addRequiredParam<MaterialPropertyName>("pressure", "Pressure");
+  params.addRequiredParam<MaterialPropertyName>("dp_drho", "Derivative of pressure w.r.t. density");
+  params.addRequiredParam<MaterialPropertyName>("dp_drhou", "Derivative of pressure w.r.t. momentum");
+  params.addRequiredParam<MaterialPropertyName>("dp_drhoE", "Derivative of pressure w.r.t. total energy");
+  params.addParam<MaterialPropertyName>("dp_dalphaAL", "Derivative of pressure w.r.t. alpha_A_liquid");
 
   return params;
 }
@@ -25,17 +30,15 @@ OneDEnergyFlux::OneDEnergyFlux(const std::string & name, InputParameters paramet
     _area(coupledValue("area")),
     _u_vel(coupledValue("u")),
     _enthalpy(coupledValue("enthalpy")),
-    _pressure(_is_liquid ? getMaterialProperty<Real>("pressure_liquid") : getMaterialProperty<Real>("pressure_vapor")),
-    _dp_drho(_is_liquid ? getMaterialProperty<Real>("dpL_drho") : getMaterialProperty<Real>("dpV_drho")),
-    _dp_drhou(_is_liquid ? getMaterialProperty<Real>("dpL_drhou") : getMaterialProperty<Real>("dpV_drhou")),
-    _dp_drhoE(_is_liquid ? getMaterialProperty<Real>("dpL_drhoE") : getMaterialProperty<Real>("dpV_drhoE")),
+    _pressure(getMaterialProperty<Real>("pressure")),
+    _dp_drho(getMaterialProperty<Real>("dp_drho")),
+    _dp_drhou(getMaterialProperty<Real>("dp_drhou")),
+    _dp_drhoE(getMaterialProperty<Real>("dp_drhoE")),
     _rhoA_var_number(coupled("rhoA")),
     _rhouA_var_number(coupled("rhouA")),
     _has_alpha_A(isCoupled("alpha_A_liquid")),
     _alpha_A_liquid_var_number(_has_alpha_A ? coupled("alpha_A_liquid") : libMesh::invalid_uint),
-    _dp_dalphaA_liquid(_has_alpha_A ?
-        (_is_liquid ? &getMaterialProperty<Real>("dp_L_d_alphaA_L") : &getMaterialProperty<Real>("dp_V_d_alphaA_L")) :
-        NULL),
+    _dp_dalphaAL(_has_alpha_A ? &getMaterialProperty<Real>("dp_dalphaAL") : NULL),
     _alpha(coupledValue("alpha"))
 {
 }
@@ -72,7 +75,7 @@ OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if (jvar == _alpha_A_liquid_var_number)
   {
-    return -(_u_vel[_qp] * (_sign * _pressure[_qp] + _alpha[_qp] * _area[_qp] * (*_dp_dalphaA_liquid)[_qp])) * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -(_u_vel[_qp] * (_sign * _pressure[_qp] + _alpha[_qp] * _area[_qp] * (*_dp_dalphaAL)[_qp])) * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else
     return 0.;
