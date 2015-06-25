@@ -103,6 +103,22 @@ namespace Moose {
     FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
     p->computeNearNullSpace(sys, sp);
   }
+
+  void compute_postcheck (const NumericVector<Number> & old_soln,
+                          NumericVector<Number> & search_direction,
+                          NumericVector<Number> & new_soln,
+                          bool & changed_search_direction,
+                          bool & changed_new_soln,
+                          NonlinearImplicitSystem & sys)
+  {
+    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    p->computePostCheck(sys,
+                        old_soln,
+                        search_direction,
+                        new_soln,
+                        changed_search_direction,
+                        changed_new_soln);
+  }
 } // namespace Moose
 
 
@@ -203,6 +219,13 @@ NonlinearSystem::init()
 void
 NonlinearSystem::solve()
 {
+  // Only attach the postcheck function to the solver if we actually
+  // have dampers or if the FEProblem needs to update the solution,
+  // which is also done during the linesearch postcheck.  It doesn't
+  // hurt to do this multiple times, it is just setting a pointer.
+  if (_fe_problem.hasDampers() || _fe_problem.shouldUpdateSolution())
+    _sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
+
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
     // Calculate the initial residual for use in the convergence criterion.
@@ -2266,11 +2289,6 @@ NonlinearSystem::setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc)
 void
 NonlinearSystem::setupDampers()
 {
-  // Set the callback for user_final_solver_defaults in libMesh
-#ifdef LIBMESH_HAVE_PETSC
-  _sys.nonlinear_solver->user_presolve = Moose::PetscSupport::petscSetupDampers;
-#endif
-
   _increment_vec = &_sys.add_vector("u_increment", true, GHOSTED);
 }
 

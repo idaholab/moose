@@ -3502,6 +3502,83 @@ FEProblem::computeNullSpace(NonlinearImplicitSystem & /*sys*/, std::vector<Numer
   }
 }
 
+void
+FEProblem::computePostCheck(NonlinearImplicitSystem & sys,
+                            const NumericVector<Number> & /*old_soln*/,
+                            NumericVector<Number> & search_direction,
+                            NumericVector<Number> & new_soln,
+                            bool & changed_search_direction,
+                            bool & changed_new_soln)
+{
+  // This function replaces the old PetscSupport::dampedCheck() function.
+  //
+  // 1.) Recreate code in PetscSupport::dampedCheck() for constructing
+  //     ghosted "soln" and "update" vectors.
+  // 2.) Call FEProblem::computeDamping() with these ghost vectors.
+  // 3.) Recreate the code in PetscSupport::dampedCheck() to actually update
+  //     the solution vector based on the damping, and set the "changed" flags
+  //     appropriately.
+  Moose::perf_log.push("computePostCheck()","Solve");
+
+  // MOOSE's FEProblem doesn't update the solution during the
+  // postcheck, but FEProblem-derived classes (see e.g.
+  // FrictionalContactProblem) might.
+  if (_has_dampers || shouldUpdateSolution())
+  {
+    // We need ghosted versions of new_soln and search_direction (the
+    // ones we get from libmesh/PETSc are PARALLEL vectors.  To make
+    // our lives simpler, we use the same ghosting pattern as the
+    // system's current_local_solution to create new ghosted vectors.
+
+    // Construct zeroed-out clones with the same ghosted dofs as the
+    // System's current_local_solution.
+    UniquePtr<NumericVector<Number> >
+      ghosted_solution = sys.current_local_solution->zero_clone(),
+      ghosted_search_direction = sys.current_local_solution->zero_clone();
+
+    // Copy values from input vectors into clones with ghosted values.
+    *ghosted_solution = new_soln;
+    *ghosted_search_direction = search_direction;
+
+    if (_has_dampers)
+    {
+      // Compute the damping coefficient using the ghosted vectors
+      Real damping = computeDamping(*ghosted_solution, *ghosted_search_direction);
+
+      // If some non-trivial damping was computed, update the new_soln
+      // vector accordingly.
+      if (damping < 1.0)
+      {
+        // Compute the new solution.  Note that:
+        // u_new <-- u_old + damping*delta_u
+        //       <-- u_old + damping*delta_u + delta_u - delta_u    (add/subtract delta_u)
+        //       <-- u_old + delta_u + (damping-1)*delta_u
+        //       <-- u_old + (u_new - u_old) + (damping-1)*delta_u
+        //       <-- u_new + (damping-1)*delta_u
+        new_soln.add(damping-1., search_direction);
+        changed_new_soln = true;
+      }
+    }
+
+    if (shouldUpdateSolution())
+    {
+      // Update the ghosted copy of the new solution, if necessary.
+      if (changed_new_soln)
+        *ghosted_solution = new_soln;
+
+      bool updated_solution = updateSolution(new_soln, *ghosted_solution);
+      if (updated_solution)
+        changed_new_soln = true;
+    }
+
+  }
+
+  // MOOSE doesn't change the search_direction
+  changed_search_direction = false;
+
+  Moose::perf_log.pop("computePostCheck()","Solve");
+}
+
 Real
 FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update)
 {
