@@ -11,7 +11,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
 class ACInterface;
 
 template<>
@@ -23,6 +22,8 @@ public:
   ACInterface(const std::string & name, InputParameters parameters);
 
 protected:
+
+  /// Enum of computeDFDOP inputs
   enum PFFunctionType
   {
     Jacobian,
@@ -32,11 +33,19 @@ protected:
   virtual RealGradient precomputeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  /// Interfacial parameter
   const MaterialProperty<Real> & _kappa;
+
+  /// Name of mobility material property
   const MaterialPropertyName _mob_name;
+
+  /// Mobility
   const MaterialProperty<Real> & _L;
+
+  /// Mobility derivative w.r.t. order parameter
   const MaterialProperty<Real> & _dLdop;
 
+  /// Mobility derivative w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dLdarg;
 };
 

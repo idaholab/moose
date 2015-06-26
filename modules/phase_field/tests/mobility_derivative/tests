@@ -26,4 +26,9 @@
     input = 'AC_mobility_derivative_test.i'
     exodiff = 'AC_mobility_derivative_test_out.e'
   [../]
+  [./AC_mobility_derivative_coupled_test]
+    type = 'Exodiff'
+    input = 'AC_mobility_derivative_coupled_test.i'
+    exodiff = 'AC_mobility_derivative_coupled_test_out.e'
+  [../]
 []

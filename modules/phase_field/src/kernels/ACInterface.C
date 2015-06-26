@@ -13,7 +13,7 @@ InputParameters validParams<ACInterface>()
   params.addClassDescription("Gradient energy Allen-Cahn Kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa used with the kernel");
-  params.addCoupledVar("args", "Vector of arguments to mobility");
+  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
   return params;
 }
 
@@ -38,12 +38,14 @@ ACInterface::ACInterface(const std::string & name, InputParameters parameters) :
 RealGradient
 ACInterface::precomputeQpResidual()
 {
+  // Set interfacial part of residual
   return _kappa[_qp] * _L[_qp] * _grad_u[_qp];
 }
 
 RealGradient
 ACInterface::precomputeQpJacobian()
 {
+  // Set Jacobian using product rule
   return _kappa[_qp] * (_L[_qp] * _grad_phi[_j][_qp] + _dLdop[_qp] * _phi[_j][_qp] * _grad_u[_qp]);
 }
 
@@ -55,5 +57,6 @@ ACInterface::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
+  // Set off-diagonal jaocbian terms from mobility dependence
   return _kappa[_qp] * (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
