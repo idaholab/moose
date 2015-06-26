@@ -607,7 +607,6 @@ XFEM::cut_mesh_with_efa()
     unsigned int parent_id = NewNodes[i]->parent()->id();
 
     Node *parent_node = _mesh->node_ptr(parent_id);
-
 //    std::cout<<"BWS n_nodes: "<<_mesh->n_nodes()<<std::endl;
     Point *new_point = new Point(*parent_node);
     Node *new_node = Node::build(*new_point,_mesh->n_nodes()).release();
@@ -830,7 +829,6 @@ XFEM::cut_mesh_with_efa()
 
   //store virtual nodes
   //store cut edge info
-
   return mesh_changed;
 }
 

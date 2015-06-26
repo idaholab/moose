@@ -292,10 +292,9 @@ ElementFragmentAlgorithm::updateTopology(bool mergeUncutVirtualEdges)
   for (mit = _permanent_nodes.begin(); mit != _permanent_nodes.end(); ++mit )
   {
     if (mit->first >= first_new_node_id)
-    {
       _new_nodes.push_back(mit->second);
-    }
   }
+  clearPotentialIsolatedNodes(); // _new_nodes and _permanent_nodes may change here
 }
 
 void
@@ -572,4 +571,44 @@ ElementFragmentAlgorithm::getElemIdByNodes(unsigned int * node_id)
     }
   }
   return elem_id;
+}
+
+void
+ElementFragmentAlgorithm::clearPotentialIsolatedNodes()
+{
+  // Collect all parent nodes that will be isolated
+  std::map<EFAnode*, std::vector<EFAnode*> > isolate_parent_to_child;
+  for (unsigned int i = 0; i < _new_nodes.size(); ++i)
+  {
+    EFAnode* parent_node = _new_nodes[i]->parent();
+    if (!parent_node)
+      mooseError("a new permanent node must have a parent node!");
+    bool isParentNodeInNewElem = false;
+    for (unsigned int j = 0; j < _child_elements.size(); ++j)
+    {
+      if (_child_elements[j]->containsNode(parent_node))
+      {
+        isParentNodeInNewElem = true;
+        break;
+      }
+    }
+    if (!isParentNodeInNewElem)
+      isolate_parent_to_child[parent_node].push_back(_new_nodes[i]);
+  }
+
+  // For each isolated parent node, pick one of its child new node
+  // Then, switch that child with its parent for all new elems
+  std::map<EFAnode*, std::vector<EFAnode*> >::iterator mit;
+  for (mit = isolate_parent_to_child.begin(); mit != isolate_parent_to_child.end(); ++mit)
+  {
+    EFAnode* parent_node = mit->first;
+    EFAnode* child_node = (mit->second)[0]; // need to discard it and swap it back to its parent
+    for (unsigned int i = 0; i < _child_elements.size(); ++i)
+    {
+      if (_child_elements[i]->containsNode(child_node))
+        _child_elements[i]->switchNode(parent_node, child_node, true);
+    }
+    _new_nodes.erase(std::remove(_new_nodes.begin(), _new_nodes.end(), child_node), _new_nodes.end());
+    deleteFromMap(_permanent_nodes, child_node);
+  }
 }

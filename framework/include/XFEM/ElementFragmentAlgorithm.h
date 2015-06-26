@@ -91,6 +91,7 @@ public:
   const std::set<EFAelement*> &getCrackTipElements(){return _crack_tip_elements;};
   EFAelement* getElemByID(unsigned int id);
   unsigned int getElemIdByNodes(unsigned int * node_id);
+  void clearPotentialIsolatedNodes();
 };
 
 #endif // #ifndef ELEMENTFRAGMENTALGORITHM_H

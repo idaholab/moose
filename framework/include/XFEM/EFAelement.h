@@ -46,6 +46,7 @@ public:
   unsigned int num_nodes() const;
   void set_node(unsigned int node_id, EFAnode* node);
   EFAnode* get_node(unsigned int node_id) const;
+  bool containsNode(EFAnode* node) const;
   void display_nodes() const;
   EFAnode * create_local_node_from_global_node(const EFAnode * global_node) const;
   EFAnode * get_global_node_from_local_node(const EFAnode * local_node) const;

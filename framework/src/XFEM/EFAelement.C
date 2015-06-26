@@ -50,6 +50,15 @@ EFAelement::get_node(unsigned int node_id) const
   return _nodes[node_id];
 }
 
+bool
+EFAelement::containsNode(EFAnode* node) const
+{
+  for (unsigned int i = 0; i < _nodes.size(); ++i)
+    if (_nodes[i] == node)
+      return true;
+  return false;
+}
+
 void
 EFAelement::display_nodes() const
 {
