@@ -8,6 +8,8 @@
 #define ACInterface_H
 
 #include "KernelGrad.h"
+#include "JvarMapInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
 class ACInterface;
@@ -15,7 +17,7 @@ class ACInterface;
 template<>
 InputParameters validParams<ACInterface>();
 
-class ACInterface : public KernelGrad
+class ACInterface : public DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >
 {
 public:
   ACInterface(const std::string & name, InputParameters parameters);
@@ -28,9 +30,14 @@ protected:
   };
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const MaterialProperty<Real> & _kappa;
+  const MaterialPropertyName _mob_name;
   const MaterialProperty<Real> & _L;
+  const MaterialProperty<Real> & _dLdop;
+
+  std::vector<const MaterialProperty<Real> *> _dLdarg;
 };
 
 #endif //ACInterface_H

@@ -8,8 +8,6 @@
 #define ACPARSED_H
 
 #include "ACBulk.h"
-#include "JvarMapInterface.h"
-#include "DerivativeKernelInterface.h"
 
 //Forward Declarations
 class ACParsed;
@@ -22,7 +20,7 @@ InputParameters validParams<ACParsed>();
  * provided by a DerivativeParsedMaterial to computer the
  * residual for the bulk part of the Allen-Cahn equation.
  */
-class ACParsed : public DerivativeKernelInterface<JvarMapInterface<ACBulk> >
+class ACParsed : public ACBulk
 {
 public:
   ACParsed(const std::string & name, InputParameters parameters);
@@ -32,6 +30,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
+  const std::string _F_name;
+  const unsigned int _nvar;
   const MaterialProperty<Real> & _dFdEta;
   const MaterialProperty<Real> & _d2FdEta2;
 

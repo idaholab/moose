@@ -19,7 +19,7 @@ InputParameters validParams<KKSACBulkBase>()
 }
 
 KKSACBulkBase::KKSACBulkBase(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<ACBulk> >(name, parameters),
+    ACBulk(name, parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _eta_name(_var.name()),
