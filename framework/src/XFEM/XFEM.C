@@ -982,14 +982,17 @@ XFEM::is_elem_cut(const Elem* elem) const
 }
 
 void
-XFEM::get_frag_faces(const Elem* elem, std::vector<std::vector<Point> > &frag_faces) const
+XFEM::get_frag_faces(const Elem* elem, std::vector<std::vector<Point> > &frag_faces, bool displaced_mesh) const
 {
   std::map<const Elem*, XFEMCutElem*>::const_iterator it;
   it = _cut_elem_map.find(elem);
   if (it != _cut_elem_map.end())
   {
     const XFEMCutElem *xfce = it->second;
-    xfce->get_frag_faces(frag_faces);
+    if (displaced_mesh)
+      xfce->get_frag_faces(frag_faces, _mesh2);
+    else
+      xfce->get_frag_faces(frag_faces);
   }
 }
 

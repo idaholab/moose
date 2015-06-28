@@ -105,7 +105,8 @@ public:
 
   bool is_elem_at_crack_tip(const Elem* elem) const;
   bool is_elem_cut(const Elem* elem) const;
-  void get_frag_faces(const Elem* elem, std::vector<std::vector<Point> > &frag_faces) const;
+  void get_frag_faces(const Elem* elem, std::vector<std::vector<Point> > &frag_faces,
+                      bool displaced_mesh = false) const;
 
 private:
 
