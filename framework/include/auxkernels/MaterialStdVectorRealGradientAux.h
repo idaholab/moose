@@ -12,31 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MATERIALSTDVECTORAUX_H
-#define MATERIALSTDVECTORAUX_H
+#ifndef MATERIALSTDVECTORREALGRADIENTAUX_H
+#define MATERIALSTDVECTORREALGRADIENTAUX_H
 
+// MOOSE includes
 #include "MaterialStdVectorAuxBase.h"
 
 // Forward declarations
-class MaterialStdVectorAux;
+class MaterialStdVectorRealGradientAux;
 
 template<>
-InputParameters validParams<MaterialStdVectorAux>();
+InputParameters validParams<MaterialStdVectorRealGradientAux>();
 
 /**
  * AuxKernel for outputting a std::vector material-property component to an AuxVariable
  */
-class MaterialStdVectorAux : public MaterialStdVectorAuxBase<>
+class MaterialStdVectorRealGradientAux : public MaterialStdVectorAuxBase<RealGradient>
 {
 public:
 
-  MaterialStdVectorAux(const std::string & name, InputParameters parameters);
+  MaterialStdVectorRealGradientAux(const std::string & name, InputParameters parameters);
 
-  virtual ~MaterialStdVectorAux();
+  virtual ~MaterialStdVectorRealGradientAux();
 
 protected:
-  /// Returns the value of the material property for the given index
+
+  /// Returns the value of the material property for the given index and component
   virtual Real getRealValue();
+
+  /// component of the real gradient to be extracted
+  unsigned int _component;
 };
 
-#endif //MATERIALSTDVECTORAUX_H
+#endif //MATERIALSTDVECTORREALGRADIENTAUX_H

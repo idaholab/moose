@@ -17,16 +17,13 @@
 template<>
 InputParameters validParams<MaterialStdVectorAux>()
 {
-  InputParameters params = validParams<MaterialAuxBase<std::vector<Real> > >();
-  params.addParam<unsigned int>("index", 0, "The index to consider for this kernel");
-  params.addClassDescription("Extracts a component of a material's std::vector<Real> to an aux variable.  If the std::vector is not of sufficient size then zero is returned");
-
+  InputParameters params = validParams<MaterialStdVectorAuxBase<> >();
+  params.addClassDescription("Extracts a component of a material type std::vector<Real> to an aux variable.  If the std::vector is not of sufficient size then zero is returned");
   return params;
 }
 
 MaterialStdVectorAux::MaterialStdVectorAux(const std::string & name, InputParameters parameters) :
-  MaterialAuxBase<std::vector<Real> >(name, parameters),
-    _index(getParam<unsigned int>("index"))
+  MaterialStdVectorAuxBase<Real>(name, parameters)
 {
 }
 
@@ -35,8 +32,7 @@ MaterialStdVectorAux::~MaterialStdVectorAux()
 }
 
 Real
-MaterialStdVectorAux::computeValue()
+MaterialStdVectorAux::getRealValue()
 {
-  mooseAssert(_prop[_qp].size() > _index, "MaterialStdVectorAux: You chose to extract component " << _index << " but your Material property only has size " << _prop[_qp].size());
-  return _factor * _prop[_qp][_index] + _offset;
+  return _prop[_qp][_index];
 }

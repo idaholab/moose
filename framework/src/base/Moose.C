@@ -90,6 +90,7 @@
 #include "MaterialRealTensorValueAux.h"
 #include "MaterialStdVectorAux.h"
 #include "MaterialRealDenseMatrixAux.h"
+#include "MaterialStdVectorRealGradientAux.h"
 #include "DebugResidualAux.h"
 #include "BoundsAux.h"
 #include "SpatialUserObjectAux.h"
@@ -467,6 +468,7 @@ registerObjects(Factory & factory)
   registerAux(MaterialRealTensorValueAux);
   registerAux(MaterialStdVectorAux);
   registerAux(MaterialRealDenseMatrixAux);
+  registerAux(MaterialStdVectorRealGradientAux);
   registerAux(DebugResidualAux);
   registerAux(BoundsAux);
   registerAux(SpatialUserObjectAux);

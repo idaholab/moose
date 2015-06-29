@@ -12,62 +12,51 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MATERIALAUXBASE_H
-#define MATERIALAUXBASE_H
+#ifndef MATERIALSTDVECTORAUXBASE_H
+#define MATERIALSTDVECTORAUXBASE_H
 
 // MOOSE includes
-#include "AuxKernel.h"
+#include "MaterialAuxBase.h"
 
 // Forward declarations
-template<typename T= Real>
-class MaterialAuxBase;
+template<typename T = Real>
+class MaterialStdVectorAuxBase;
 
 template<>
-InputParameters validParams<MaterialAuxBase<> >();
-
+InputParameters validParams<MaterialStdVectorAuxBase<> >();
 /**
  * A base class for the various Material related AuxKernal objects
  */
 template<typename T>
-class MaterialAuxBase : public AuxKernel
+class MaterialStdVectorAuxBase : public MaterialAuxBase<std::vector<T> >
 {
 public:
 
-  MaterialAuxBase(const std::string & name, InputParameters parameters);
+  MaterialStdVectorAuxBase(const std::string & name, InputParameters parameters);
 
-  virtual ~MaterialAuxBase(){}
+  virtual ~MaterialStdVectorAuxBase(){}
 
   virtual Real computeValue();
 
 protected:
-
-  /// Returns material property values at quadratute points
-  virtual Real getRealValue() = 0;
-  /// Reference to the material property for this AuxKernel
-  const MaterialProperty<T> & _prop;
-
-private:
-
-  /// Multiplier for the material property
-  const Real _factor;
-  /// Value to be added to the material property
-  const Real _offset;
+  /// index of the vecor element
+  unsigned int _index;
 };
 
 template<typename T>
-MaterialAuxBase<T>::MaterialAuxBase(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
-    _prop(getMaterialProperty<T>("property")),
-    _factor(getParam<Real>("factor")),
-    _offset(getParam<Real>("offset"))
+MaterialStdVectorAuxBase<T>::MaterialStdVectorAuxBase(const std::string & name, InputParameters parameters) :
+    MaterialAuxBase<std::vector<T> >(name, parameters),
+    _index(this->template getParam<unsigned int>("index"))
 {
 }
 
 template<typename T>
 Real
-MaterialAuxBase<T>::computeValue()
+MaterialStdVectorAuxBase<T>::computeValue()
 {
-  return _factor * getRealValue() + _offset;
+  mooseAssert(this->_prop[this->_qp].size() > _index, "MaterialStdVectorRealGradientAux: You chose to extract component " << _index << " but your Material property only has size " << this->_prop[this->_qp].size());
+  return MaterialAuxBase<std::vector<T> >::computeValue();
 }
 
-#endif //MATERIALAUXBASE_H
+
+#endif //MATERIALSTDVECTORAUXBASE_H
