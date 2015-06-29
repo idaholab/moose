@@ -1,0 +1,95 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
+
+#include "PoroFullSatMaterial.h"
+
+
+
+template<>
+InputParameters validParams<PoroFullSatMaterial>()
+{
+  InputParameters params = validParams<Material>();
+
+  params.addRequiredParam<Real>("porosity0", "The porosity of the material when porepressure and volumetric strain are zero.  Eg, 0.1");
+  params.addRequiredRangeCheckedParam<Real>("biot_coefficient", "biot_coefficient>=0 & biot_coefficient<=1", "The Biot coefficient.  Eg, 0.9");
+  params.addRequiredRangeCheckedParam<Real>("solid_bulk_compliance", "solid_bulk_compliance>=0", "The solid bulk compliance (the reciprocal of the solid bulk modulus)");
+  params.addRequiredRangeCheckedParam<Real>("fluid_bulk_compliance", "fluid_bulk_compliance>=0", "The fluid bulk compliance (the reciprocal of the fluid bulk modulus)");
+  params.addRequiredCoupledVar("porepressure", "The porepressure");
+  params.addRequiredCoupledVar("disp_x", "The x-displacement");
+  params.addRequiredCoupledVar("disp_y", "The y-displacement");
+  params.addRequiredCoupledVar("disp_z", "The z-displacement");
+  params.addParam<bool>("constant_porosity", false, "Set the porosity equal to porosity0 always");
+  params.addClassDescription("This Material is designed to calculate and store all the quantities needed for the fluid-flow part of poromechanics, assuming a fully-saturated, single-phase fluid with constant bulk modulus");
+  return params;
+}
+
+PoroFullSatMaterial::PoroFullSatMaterial(const std::string & name, InputParameters parameters) :
+    DerivativeMaterialInterface<Material>(name, parameters),
+
+    _phi0(getParam<Real>("porosity0")),
+    _alpha(getParam<Real>("biot_coefficient")),
+    _one_over_K(getParam<Real>("solid_bulk_compliance")),
+    _one_over_Kf(getParam<Real>("fluid_bulk_compliance")),
+    _constant_porosity(getParam<bool>("constant_porosity")),
+
+    _porepressure(coupledValue("porepressure")),
+    _porepressure_name(getVar("porepressure", 0)->name()),
+
+    _grad_disp_x(coupledGradient("disp_x")),
+    _grad_disp_y(coupledGradient("disp_y")),
+    _grad_disp_z(coupledGradient("disp_z")),
+
+    _vol_strain(declareProperty<Real>("volumetric_strain")),
+    _vol_strain_old(declarePropertyOld<Real>("volumetric_strain")),
+
+    _biot_coefficient(declareProperty<Real>("biot_coefficient")),
+
+    _porosity(declareProperty<Real>("porosity")),
+    _dporosity_dP(declarePropertyDerivative<Real>("porosity", _porepressure_name)),
+    _dporosity_dep(declarePropertyDerivative<Real>("porosity", "volumetric_strain")),
+
+    _one_over_biot_modulus(declareProperty<Real>("one_over_biot_modulus")),
+    _done_over_biot_modulus_dP(declarePropertyDerivative<Real>("one_over_biot_modulus", _porepressure_name)),
+    _done_over_biot_modulus_dep(declarePropertyDerivative<Real>("one_over_biot_modulus", "volumetric_strain"))
+{
+}
+
+void
+PoroFullSatMaterial::initQpStatefulProperties()
+{
+  _vol_strain[_qp] = 0.0;
+}
+
+void
+PoroFullSatMaterial::computeQpProperties()
+{
+  _biot_coefficient[_qp] = _alpha;
+
+  _vol_strain[_qp] = _grad_disp_x[_qp](0) + _grad_disp_y[_qp](1) + _grad_disp_z[_qp](2);
+
+  if (_constant_porosity)
+  {
+    _porosity[_qp] = _phi0;
+    _dporosity_dP[_qp] = 0;
+    _dporosity_dep[_qp] = 0;
+
+    _one_over_biot_modulus[_qp] = (1 - _alpha)*(_alpha - _porosity[_qp])*_one_over_K + _porosity[_qp]*_one_over_Kf;
+    _done_over_biot_modulus_dP[_qp] = 0;
+    _done_over_biot_modulus_dep[_qp] = 0;
+  }
+  else
+  {
+    _porosity[_qp] = _alpha + (_phi0 - _alpha)*std::exp( -(1 - _alpha)*_one_over_K*_porepressure[_qp] - _vol_strain[_qp]);
+    _dporosity_dP[_qp] = (_phi0 - _alpha)*(_alpha - 1)*_one_over_K*std::exp( -(1 - _alpha)*_one_over_K*_porepressure[_qp] - _vol_strain[_qp]);
+    _dporosity_dep[_qp] = -(_phi0 - _alpha)*std::exp( -(1 - _alpha)*_one_over_K*_porepressure[_qp] - _vol_strain[_qp]);
+
+    _one_over_biot_modulus[_qp] = (1 - _alpha)*(_alpha - _porosity[_qp])*_one_over_K + _porosity[_qp]*_one_over_Kf;
+    _done_over_biot_modulus_dP[_qp] = -(1 - _alpha)*_dporosity_dP[_qp]*_one_over_K + _dporosity_dP[_qp]*_one_over_Kf;
+    _done_over_biot_modulus_dep[_qp] = -(1 - _alpha)*_dporosity_dep[_qp]*_one_over_K + _dporosity_dep[_qp]*_one_over_Kf;
+  }
+}
