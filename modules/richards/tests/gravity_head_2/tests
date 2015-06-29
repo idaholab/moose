@@ -22,7 +22,6 @@
   [../]
   [./gh04]
     type = 'CSVDiff'
-    skip = 'This test fails badly for unknown reason on INL computers'
     input = 'gh04.i'
     csvdiff = 'gh04.csv'
     rel_err = 1e-5
