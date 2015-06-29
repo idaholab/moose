@@ -16,6 +16,7 @@
 #define MOOSEERROR_H
 
 #include "Moose.h"
+#include "MooseException.h"
 
 // temporary fix to allow merging moose PR #4278 until libmesh PR #415 is merged
 #ifndef __LIBMESH_TIME__
@@ -55,6 +56,17 @@
       exit(1);                                                                      \
     }                                                                               \
   } while (0)
+
+
+#define mooseException(msg)                                                         \
+  do                                                                                \
+  {                                                                                 \
+    std::ostringstream _exception_oss_;                                             \
+    _exception_oss_ << msg;                                                         \
+                                                                                    \
+    throw MooseException(_exception_oss_.str());                                    \
+  } while (0)
+
 
 #ifdef NDEBUG
 #define mooseAssert(asserted, msg)
