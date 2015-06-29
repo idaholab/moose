@@ -170,7 +170,7 @@
 
 [Outputs]
   file_base = th_lumped_01
-  output_initial = true
+  output_initial = false
   csv = true
   print_perf_log = true
 []
