@@ -169,7 +169,7 @@
 
 [Outputs]
   file_base = th01
-  output_initial = true
+  output_initial = false
   csv = true
   print_perf_log = true
 []
