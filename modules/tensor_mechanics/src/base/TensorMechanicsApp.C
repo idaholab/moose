@@ -10,12 +10,14 @@
 
 #include "TensorMechanicsAction.h"
 #include "PressureActionTM.h"
+#include "PoroMechanicsAction.h"
 
 #include "StressDivergenceTensors.h"
 #include "CosseratStressDivergenceTensors.h"
 #include "StressDivergenceRZTensors.h"
 #include "MomentBalancing.h"
 #include "GravityTM.h"
+#include "PoroMechanicsCoupling.h"
 
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
@@ -114,6 +116,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(MomentBalancing);
   registerKernel(StressDivergencePFFracTensors);
   registerKernel(GravityTM);
+  registerKernel(PoroMechanicsCoupling);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
@@ -176,6 +179,9 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("EmptyAction", "BCs/PressureTM");
   syntax.registerActionSyntax("PressureActionTM", "BCs/PressureTM/*");
 
+  syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
+
   registerAction(TensorMechanicsAction, "add_kernel");
   registerAction(PressureActionTM, "add_bc");
+  registerAction(PoroMechanicsAction, "add_kernel");
 }

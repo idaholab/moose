@@ -1,0 +1,39 @@
+reset
+undo on
+create surface circle radius 15 zplane
+create surface circle radius 1 zplane
+webcut body 1 tool body 2
+delete body 2 3
+
+sweep surface 3 perpendicular distance 1.0
+
+display
+
+curve 1 3 5 7 interval 20
+curve 1 3 5 7 scheme equal
+mesh curve 1 3 5 7
+
+surface 3 7 scheme hole rad_intervals 8 bias -8
+mesh surface 3 7
+
+
+curve 6 interval 1
+mesh volume 1
+
+
+sideset 1 surface 3
+sideset 1 name "zmax"
+sideset 2 surface 7
+sideset 2 name "zmin"
+sideset 3 surface 6
+sideset 3 name "bh_wall"
+sideset 4 surface 5
+sideset 4 name "outer"
+
+
+
+
+block 1 volume all
+set large exodus file on
+export mesh "borehole_lowres_input.e" overwrite
+
