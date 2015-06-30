@@ -1,0 +1,22 @@
+[Tests]
+  [./split]
+    type = 'Exodiff'
+    input = 'split.i'
+    exodiff = 'split_out.e'
+  [../]
+  [./split_temp]
+    type = 'Exodiff'
+    input = 'split_temp.i'
+    exodiff = 'split_temp_out.e'
+  [../]
+  [./direct]
+    type = 'Exodiff'
+    input = 'direct.i'
+    exodiff = 'direct_out.e'
+  [../]
+  [./direct_temp]
+    type = 'Exodiff'
+    input = 'direct_temp.i'
+    exodiff = 'direct_temp_out.e'
+  [../]
+[]
