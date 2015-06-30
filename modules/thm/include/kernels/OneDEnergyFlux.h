@@ -29,14 +29,14 @@ protected:
   VariableValue & _u_vel;
   VariableValue & _enthalpy;
   const MaterialProperty<Real> & _pressure;
-  const MaterialProperty<Real> & _dp_drho;
-  const MaterialProperty<Real> & _dp_drhou;
-  const MaterialProperty<Real> & _dp_drhoE;
+  const MaterialProperty<Real> & _dp_darhoA;
+  const MaterialProperty<Real> & _dp_darhouA;
+  const MaterialProperty<Real> & _dp_darhoEA;
   unsigned _rhoA_var_number;
   unsigned _rhouA_var_number;
   bool _has_alpha_A;
   unsigned int _alpha_A_liquid_var_number;
-  const MaterialProperty<Real> * _dp_dalphaAL;
+  const MaterialProperty<Real> * _dp_daAL;
   VariableValue & _alpha;
 };
 
