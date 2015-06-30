@@ -14,7 +14,6 @@
 #include "MultiAppProjectionTransfer.h"
 #include "FEProblem.h"
 #include "AddVariableAction.h"
-#include "MooseError.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/mesh_function.h"
@@ -88,7 +87,6 @@ MultiAppProjectionTransfer::initialSetup()
             FEProblem & to_problem = *_multi_app->appProblem(app);
             FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                            Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
-            //to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
 
             EquationSystems & to_es = to_problem.es();
             LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>(
@@ -106,8 +104,6 @@ MultiAppProjectionTransfer::initialSetup()
             // We'll defer to_es.reinit() so we don't do it multiple
             // times even if we add multiple new systems
             augmented_es.insert(&to_es);
-
-            //to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
           }
         }
 
@@ -129,7 +125,6 @@ MultiAppProjectionTransfer::initialSetup()
         FEProblem & to_problem = *_multi_app->problem();
         FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                        Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
-        //to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
 
         EquationSystems & to_es = to_problem.es();
         LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>(
@@ -144,7 +139,6 @@ MultiAppProjectionTransfer::initialSetup()
 
         _proj_sys[0] = &proj_sys;
 
-        // to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
         to_es.reinit();
       }
       break;
