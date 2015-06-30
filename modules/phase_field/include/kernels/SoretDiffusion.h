@@ -4,28 +4,30 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef SPLITCHSORET_H
-#define SPLITCHSORET_H
+#ifndef SORETDIFFUSION_H
+#define SORETDIFFUSION_H
 
 #include "Kernel.h"
 
 //Forward Declaration
-class SplitCHSoret;
+class SoretDiffusion;
 
 template<>
-InputParameters validParams<SplitCHSoret>();
+InputParameters validParams<SoretDiffusion>();
 /**
- * SplitCHSoret adds the soret effect in the split form of the Cahn-Hilliard
+ * SoretDiffusion adds the soret effect in the split form of the Cahn-Hilliard
  * equation.
  */
-class SplitCHSoret : public Kernel
+class SoretDiffusion : public Kernel
 {
 public:
-  SplitCHSoret(const std::string & name, InputParameters parameters);
+  SoretDiffusion(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpCJacobian();
 
   /// int label for temperature variable
   unsigned int _T_var;
@@ -52,4 +54,4 @@ protected:
   const Real _kb;
 };
 
-#endif //SPLITCHSORET_H
+#endif //SORETDIFFUSION_H

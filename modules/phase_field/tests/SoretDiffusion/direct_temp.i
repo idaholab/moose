@@ -1,7 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 60
+  nx = 30
   xmax = 500
   elem_type = EDGE
 []
@@ -12,9 +12,8 @@
 
 [Variables]
   [./c]
-  [../]
-  [./w]
-    scaling = 1.0e2
+    family = HERMITE
+    order = THIRD
   [../]
   [./T]
     initial_condition = 1000.0
@@ -36,30 +35,29 @@
 []
 
 [Kernels]
-  [./c_res]
-    type = SplitCHParsed
+  [./c_int]
+    type = CHInterface
     variable = c
     kappa_name = kappa
-    w = w
-    f_name = F
-  [../]
-  [./w_res]
-    type = SplitCHWRes
-    variable = w
     mob_name = M
   [../]
-  [./w_res_soret]
-    type = SplitCHSoret
-    variable = w
+  [./c_bulk]
+    type = CHParsed
+    variable = c
+    mob_name = M
+    f_name = F
+  [../]
+  [./c_soret]
+    type = SoretDiffusion
+    variable = c
     c = c
     T = T
     diff_name = D
     Q_name = Qstar
   [../]
-  [./time]
-    type = CoupledTimeDerivative
-    variable = w
-    v = c
+  [./c_dot]
+    type = TimeDerivative
+    variable = c
   [../]
   [./HtCond]
     type = MatDiffusion
@@ -110,7 +108,7 @@
     type = PolynomialFreeEnergy
     block = 0
     c = c
-    derivative_order = 2
+    derivative_order = 3
   [../]
 []
 
@@ -135,7 +133,7 @@
   nl_rel_tol = 1.0e-9
 
   num_steps = 60
-  dt = 20.0
+  dt = 8.0
 []
 
 [Outputs]
