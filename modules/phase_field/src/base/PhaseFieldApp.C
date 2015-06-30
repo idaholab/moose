@@ -35,6 +35,7 @@
 #include "PFFracIntVar.h"
 #include "SplitCHMath.h"
 #include "SplitCHParsed.h"
+#include "SplitCHSoret.h"
 #include "SplitCHWRes.h"
 #include "SwitchingFunctionConstraintEta.h"
 #include "SwitchingFunctionConstraintLagrange.h"
@@ -194,6 +195,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(PFFracIntVar);
   registerKernel(SplitCHMath);
   registerKernel(SplitCHParsed);
+  registerKernel(SplitCHSoret);
   registerKernel(SplitCHWRes);
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
