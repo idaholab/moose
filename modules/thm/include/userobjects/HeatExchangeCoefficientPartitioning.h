@@ -22,6 +22,7 @@ public:
   virtual void finalize() {};
 
   virtual Real getPartition(Real alpha_liquid, Real dalpha_liquid_dt) const;
+  virtual Real getPartitionDer(Real alpha_liquid, Real dalpha_liquid_dt, Real area) const;
 
 protected:
   /// Steepness off the exponential function

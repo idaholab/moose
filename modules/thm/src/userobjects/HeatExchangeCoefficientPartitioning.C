@@ -26,24 +26,41 @@ HeatExchangeCoefficientPartitioning::~HeatExchangeCoefficientPartitioning()
 Real
 HeatExchangeCoefficientPartitioning::getPartition(Real alpha_liquid, Real dalpha_liquid_dt) const
 {
-  Real c = 1;
-
   if ((alpha_liquid < _lower))
   {
     if (dalpha_liquid_dt < 0)
-      c = 1 - (1 - std::exp(-_k * (_lower - alpha_liquid) / _lower));
+      return 1 - (1 - std::exp(-_k * (_lower - alpha_liquid) / _lower));
     else
-      c = 1 - std::exp(-_k * alpha_liquid / _lower);
+      return 1 - std::exp(-_k * alpha_liquid / _lower);
   }
   else if ((alpha_liquid > _upper))
   {
     if (dalpha_liquid_dt > 0)
-      c = 1 - (1 - std::exp(-_k * (alpha_liquid - _upper) / _lower));
+      return 1 - (1 - std::exp(-_k * (alpha_liquid - _upper) / _lower));
     else
-      c = 1 - std::exp(-_k * (1 - alpha_liquid) / _lower);
+      return 1 - std::exp(-_k * (1 - alpha_liquid) / _lower);
   }
   else
-    c = 1.;
+    return 1.;
+}
 
-  return c;
+Real
+HeatExchangeCoefficientPartitioning::getPartitionDer(Real alpha_liquid, Real dalpha_liquid_dt, Real area) const
+{
+  if ((alpha_liquid < _lower))
+  {
+    if (dalpha_liquid_dt < 0)
+      return  std::exp(-_k * (_lower - alpha_liquid) / _lower) * (_k / _lower / area);
+    else
+      return -std::exp(-_k * alpha_liquid / _lower) * (-_k / _lower / area);
+  }
+  else if ((alpha_liquid > _upper))
+  {
+    if (dalpha_liquid_dt > 0)
+      return  std::exp(-_k * (alpha_liquid - _upper) / _lower) * (-_k / _lower / area);
+    else
+      return -std::exp(-_k * (1 - alpha_liquid) / _lower) * (_k / _lower / area);
+  }
+  else
+    return 0;
 }
