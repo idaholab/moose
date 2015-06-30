@@ -9,14 +9,16 @@
 template<>
 InputParameters validParams<ACParsed>()
 {
-  InputParameters params = DerivativeKernelInterface<ACBulk>::validParams();
+  InputParameters params = validParams<ACBulk>();
   params.addClassDescription("Allen-Cahn Kernel that uses a DerivativeMaterial Free Energy");
-  params.addCoupledVar("args", "Vector of additional arguments to F");
+  params.addRequiredParam<std::string>("f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
   return params;
 }
 
 ACParsed::ACParsed(const std::string & name, InputParameters parameters) :
-    DerivativeKernelInterface<JvarMapInterface<ACBulk> >(name, parameters),
+    ACBulk(name, parameters),
+    _F_name(getParam<std::string>("f_name")),
+    _nvar(_coupled_moose_vars.size()),
     _dFdEta(getMaterialPropertyDerivative<Real>(_F_name, _var.name())),
     _d2FdEta2(getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name()))
 {
@@ -51,5 +53,6 @@ ACParsed::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  return _L[_qp] * (*_d2FdEtadarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  return ACBulk::computeQpOffDiagJacobian(jvar) +
+         _L[_qp] * (*_d2FdEtadarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }

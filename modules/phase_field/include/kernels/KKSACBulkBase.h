@@ -8,8 +8,6 @@
 #define KKSACBULKBASE_H
 
 #include "ACBulk.h"
-#include "JvarMapInterface.h"
-#include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
 class KKSACBulkBase;
@@ -23,10 +21,7 @@ InputParameters validParams<KKSACBulkBase>();
  *
  * The non-linear variable for this Kernel is the order parameter 'eta'.
  */
-class KKSACBulkBase : public DerivativeMaterialInterface<
-                         JvarMapInterface<
-                         ACBulk
-                         > >
+class KKSACBulkBase : public ACBulk
 {
 public:
   KKSACBulkBase(const std::string & name, InputParameters parameters);

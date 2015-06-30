@@ -32,10 +32,22 @@ PolynomialFreeEnergy::PolynomialFreeEnergy(const std::string & name,
       free_energy(_c, _W, _a) = pow(2.0, 4.0)*_W*pow(_c - _a, 2)*pow(1 - _c - _a, 2);
       break;
     case 1: //6th order
-      free_energy(_c, _W, _a) = pow(2.0, 6.0)*_W*( 2.0*pow(_c, 6) - 6.0*pow(_c, 5) + (3.0*_a + 27.0/4.0 - 3.0*_a*_a)*pow(_c, 4) + (-6.0*_a - 7.0/2.0 + 6.0*_a*_a)*pow(_c, 3) + (9.0/2.0*_a - 9.0/2.0*_a*_a + 3.0/4.0)*pow(_c, 2) + (3.0/2.0*_a*_a - 3.0/2.0*_a)*_c);
+      free_energy(_c, _W, _a) = pow(2.0, 6.0)*_W*( 2.0*pow(_c, 6) -
+                                6.0*pow(_c, 5) +
+                                (3.0*_a + 27.0/4.0 - 3.0*_a*_a)*pow(_c, 4) +
+                                (-6.0*_a - 7.0/2.0 + 6.0*_a*_a)*pow(_c, 3) +
+                                (9.0/2.0*_a - 9.0/2.0*_a*_a + 3.0/4.0)*pow(_c, 2) +
+                                (3.0/2.0*_a*_a - 3.0/2.0*_a)*_c);
       break;
     case 2: //8th order
-      free_energy(_c, _W, _a) = pow(2.0, 8.0)*_W*(3.0*pow(_c, 8) - 12.0*pow(_c,7) + ( -4.0*_a*_a + 4.0*_a + 20.0 )*pow(_c, 6) + ( 12.0*_a*_a - 12.0*_a - 18.0 )*pow(_c, 5) + ( 15.0*_a + 75.0/8.0 - 15.0*_a*_a )*pow(_c, 4) + ( -10.0*_a - 11.0/4.0 + 10.0*_a*_a )*pow(_c, 3) + ( 15.0/4.0*_a - 15.0/4.0*_a*_a + 3.0/8.0 )*pow(_c, 2) + ( 3.0/4.0*_a*_a - 3.0/4.0*_a )*_c);
+      free_energy(_c, _W, _a) = pow(2.0, 8.0)*_W*(3.0*pow(_c, 8) -
+                                12.0*pow(_c,7) +
+                                ( -4.0*_a*_a + 4.0*_a + 20.0 )*pow(_c, 6) +
+                                ( 12.0*_a*_a - 12.0*_a - 18.0 )*pow(_c, 5) +
+                                ( 15.0*_a + 75.0/8.0 - 15.0*_a*_a )*pow(_c, 4) +
+                                ( -10.0*_a - 11.0/4.0 + 10.0*_a*_a )*pow(_c, 3) +
+                                ( 15.0/4.0*_a - 15.0/4.0*_a*_a + 3.0/8.0 )*pow(_c, 2) +
+                                ( 3.0/4.0*_a*_a - 3.0/4.0*_a )*_c);
       break;
     default:
       mooseError("Error in PolynomialFreeEnergy: incorrect polynomial order");
