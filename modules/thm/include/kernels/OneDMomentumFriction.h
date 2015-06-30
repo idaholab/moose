@@ -3,7 +3,6 @@
 
 #include "Kernel.h"
 
-
 // Forward Declarations
 class OneDMomentumFriction;
 
@@ -11,28 +10,25 @@ template<>
 InputParameters validParams<OneDMomentumFriction>();
 
 /**
- * The spatial part of the 1D momentum conservation for the variable-area Euler equations.
+ * Contribution due to wall friction
  */
 class OneDMomentumFriction : public Kernel
 {
 public:
-
   OneDMomentumFriction(const std::string & name, InputParameters parameters);
+  virtual ~OneDMomentumFriction();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  // Coupled variables
   VariableValue & _u_vel;
   VariableValue & _rhouA;
   VariableValue & _hydraulic_diameter;
 
-  // IDs of coupled variables (for computing Jacobians)
-  unsigned _rhoA_var_number;
+  unsigned int _rhoA_var_number;
 
-  // Material properties
   const MaterialProperty<Real> & _friction;
 };
 
