@@ -955,6 +955,9 @@ GrainTracker::calculateBubbleVolumes()
 
     for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
     {
+      if (it->second->status == INACTIVE)
+        continue;
+
       if (_is_elemental)
       {
         dof_id_type elem_id = elem->id();
