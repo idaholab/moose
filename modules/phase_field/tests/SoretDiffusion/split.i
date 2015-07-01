@@ -49,7 +49,7 @@
     mob_name = M
   [../]
   [./w_res_soret]
-    type = SplitCHSoret
+    type = SoretDiffusion
     variable = w
     c = c
     T = T
