@@ -24,7 +24,8 @@
 
 #include "libmesh/edge_edge2.h"
 #include "libmesh/cell_hex8.h"
-#include "libmesh/boundary_info.h"
+#include "libmesh/boundary_info.h"  
+using namespace std;
 
 /***********************************************************************************************/
 /* Peridynamic Code */
@@ -393,7 +394,7 @@ PeridynamicsMesh::buildMesh()
   unsigned int i,j,k,m,node_id = 0;
   unsigned int NodeNum,BondNum;
   Point mypoint(0.0,0.0,0.0);
-  
+       
   if (_dim == 2)
   {
   	_xmin = getParam<Real>("xmin");
@@ -432,7 +433,7 @@ PeridynamicsMesh::buildMesh()
   	}
   	BondNum = j / 2;
     mesh.reserve_elem (BondNum);
-    for (i=0; i<NodeNum; i++)
+    for (i=0,m=0; i<NodeNum; i++)
     {
       for(j=0; j<Node[i].BondsNumPerNode; j++)
       {
@@ -552,15 +553,8 @@ PeridynamicsMesh::buildMesh()
  		elem->set_node(i) = mesh.node_ptr(node_id+i);
  		boundary_info.add_node(mesh.node_ptr(node_id+i),100);
  	}
- 	boundary_info.nodeset_name(100) = "Hex";
-  //elem->set_node(1) = mesh.node_ptr(node_id+1);
-  //elem->set_node(2) = mesh.node_ptr(node_id+2);
-  //elem->set_node(3) = mesh.node_ptr(node_id+3);
-  //elem->set_node(4) = mesh.node_ptr(node_id+4);
-  //elem->set_node(5) = mesh.node_ptr(node_id+5);
-  //elem->set_node(6) = mesh.node_ptr(node_id+6);
-  //elem->set_node(7) = mesh.node_ptr(node_id+7); 
-  elem->subdomain_id() = 1;
+ 	boundary_info.nodeset_name(100) = "Hex"; 
+  elem->subdomain_id() = 100;
  	// Prepare for use //
   mesh.prepare_for_use (/*skip_renumber =*/ false);
   
