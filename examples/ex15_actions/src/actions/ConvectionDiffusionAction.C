@@ -55,12 +55,12 @@ ConvectionDiffusionAction::act()
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   {
-    InputParameters params = _factory.getValidParams("Convection");
+    InputParameters params = _factory.getValidParams("ExampleConvection");
     params.set<NonlinearVariableName>("variable") = variables[0];
 //    params.addCoupledVar("some_variable", "The gradient of this var");
     vel_vec_variable.push_back(variables[1]);
     params.set<std::vector<VariableName> >("some_variable") = vel_vec_variable;
-    _problem->addKernel("Convection", "conv", params);
+    _problem->addKernel("ExampleConvection", "conv", params);
   }
 
   // Setup out Diffusion Kernel on the "v" variable

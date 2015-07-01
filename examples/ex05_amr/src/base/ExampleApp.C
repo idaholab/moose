@@ -17,7 +17,7 @@
 #include "AppFactory.h"
 
 // Example 5 Registration
-#include "Convection.h"
+#include "ExampleConvection.h"
 #include "ExampleCoefDiffusion.h"
 
 template<>
@@ -49,7 +49,7 @@ ExampleApp::~ExampleApp()
 void
 ExampleApp::registerObjects(Factory & factory)
 {
-  registerKernel(Convection);
+  registerKernel(ExampleConvection);
   registerKernel(ExampleCoefDiffusion);
 }
 

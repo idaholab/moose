@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONVECTION_H
-#define CONVECTION_H
+#ifndef EXAMPLECONVECTION_H
+#define EXAMPLECONVECTION_H
 
 #include "Kernel.h"
 
@@ -24,14 +24,14 @@
  */
 
 // Forward Declarations
-class Convection;
+class ExampleConvection;
 
 /**
  * validParams returns the parameters that this Kernel accepts / needs
  * The actual body of the function MUST be in the .C file.
  */
 template<>
-InputParameters validParams<Convection>();
+InputParameters validParams<ExampleConvection>();
 
 /**
  * Define the Kernel for a convection operator that looks like:
@@ -40,7 +40,7 @@ InputParameters validParams<Convection>();
  *
  * where V is a given constant velocity field.
  */
-class Convection : public Kernel
+class ExampleConvection : public Kernel
 {
 public:
 
@@ -49,8 +49,8 @@ public:
    * string and a InputParameters object, just like other
    * Kernel-derived classes.
    */
-  Convection(const std::string & name,
-             InputParameters parameters);
+  ExampleConvection(const std::string & name,
+                    InputParameters parameters);
 
 protected:
   /**
@@ -79,4 +79,4 @@ private:
   RealVectorValue _velocity;
 };
 
-#endif // CONVECTION_H
+#endif // EXAMPLECONVECTION_H

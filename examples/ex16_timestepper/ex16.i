@@ -26,7 +26,7 @@
   [../]
 
   [./conv]
-    type = Convection
+    type = ExampleConvection
     variable = convected
     some_variable = diffused
   [../]

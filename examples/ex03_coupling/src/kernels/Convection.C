@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Convection.h"
+#include "ExampleConvection.h"
 
 template<>
-InputParameters validParams<Convection>()
+InputParameters validParams<ExampleConvection>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -23,18 +23,18 @@ InputParameters validParams<Convection>()
   return params;
 }
 
-Convection::Convection(const std::string & name,
-                       InputParameters parameters) :
+ExampleConvection::ExampleConvection(const std::string & name,
+                                     InputParameters parameters) :
     Kernel(name, parameters),
     _grad_some_variable(coupledGradient("some_variable"))
 {}
 
-Real Convection::computeQpResidual()
+Real ExampleConvection::computeQpResidual()
 {
   return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_u[_qp]);
 }
 
-Real Convection::computeQpJacobian()
+Real ExampleConvection::computeQpJacobian()
 {
   return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_phi[_j][_qp]);
 }

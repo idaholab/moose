@@ -11,22 +11,22 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef GAUSSCONTFORCING_H
-#define GAUSSCONTFORCING_H
+#ifndef EXAMPLEGAUSSCONTFORCING_H
+#define EXAMPLEGAUSSCONTFORCING_H
 
 #include "Kernel.h"
 
-class GaussContForcing;
+class ExampleGaussContForcing;
 
 template<>
-InputParameters validParams<GaussContForcing>();
+InputParameters validParams<ExampleGaussContForcing>();
 
 
-class GaussContForcing : public Kernel
+class ExampleGaussContForcing : public Kernel
 {
 public:
 
-  GaussContForcing(const std::string & name, InputParameters parameters);
+  ExampleGaussContForcing(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -48,4 +48,4 @@ protected:
   const Real _z_max;
 };
 
-#endif //GAUSSCONTFORCING_H
+#endif //EXAMPLEGAUSSCONTFORCING_H
