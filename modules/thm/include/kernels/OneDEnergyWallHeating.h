@@ -22,13 +22,12 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const MaterialProperty<Real> & _temperature;
-  const MaterialProperty<Real> & _dT_drho;
-  const MaterialProperty<Real> & _dT_drhou;
-  const MaterialProperty<Real> & _dT_drhoE;
+  const MaterialProperty<Real> & _dT_drhoA;
+  const MaterialProperty<Real> & _dT_drhouA;
+  const MaterialProperty<Real> & _dT_drhoEA;
 
   VariableValue & _heat_transfer_coefficient;
   VariableValue & _Tw;
-  VariableValue & _area;
   VariableValue & _Phf;
 
   // For Jacobian terms

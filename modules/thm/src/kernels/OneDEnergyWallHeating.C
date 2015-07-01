@@ -9,19 +9,17 @@ InputParameters validParams<OneDEnergyWallHeating>()
   params.addRequiredCoupledVar("heat_transfer_coefficient", "convective heat transfer coefficient, W/m^2-K");
   params.addRequiredCoupledVar("heat_flux_perimeter", "heat flux perimeter");
   params.addCoupledVar("Tw", 0, "Wall temperature (const)");
-  params.addRequiredCoupledVar("area", "area of the pipe, coupled as an aux variable");
   return params;
 }
 
 OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _temperature(getMaterialPropertyByName<Real>("temperature")),
-    _dT_drho(getMaterialPropertyByName<Real>("dT_drho")),
-    _dT_drhou(getMaterialPropertyByName<Real>("dT_drhou")),
-    _dT_drhoE(getMaterialPropertyByName<Real>("dT_drhoE")),
+    _dT_drhoA (getMaterialPropertyByName<Real>("dT_drhoA")),
+    _dT_drhouA(getMaterialPropertyByName<Real>("dT_drhouA")),
+    _dT_drhoEA(getMaterialPropertyByName<Real>("dT_drhoEA")),
     _heat_transfer_coefficient(coupledValue("heat_transfer_coefficient")),
     _Tw(coupledValue("Tw")),
-    _area(coupledValue("area")),
     _Phf(coupledValue("heat_flux_perimeter")),
     _rhoA_var_number(coupled("rhoA")),
     _rhouA_var_number(coupled("rhouA"))
@@ -43,7 +41,7 @@ OneDEnergyWallHeating::computeQpResidual()
 Real
 OneDEnergyWallHeating::computeQpJacobian()
 {
-  return _heat_transfer_coefficient[_qp] * _Phf[_qp] * _dT_drhoE[_qp] / _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  return _heat_transfer_coefficient[_qp] * _Phf[_qp] * _dT_drhoEA[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }
 
 
@@ -51,10 +49,10 @@ Real
 OneDEnergyWallHeating::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _rhoA_var_number)
-    return _heat_transfer_coefficient[_qp] * _Phf[_qp] * _dT_drho[_qp] / _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return _heat_transfer_coefficient[_qp] * _Phf[_qp] * _dT_drhoA[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 
   else if (jvar == _rhouA_var_number)
-    return _heat_transfer_coefficient[_qp] * _Phf[_qp] * _dT_drhou[_qp] / _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return _heat_transfer_coefficient[_qp] * _Phf[_qp] * _dT_drhouA[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 
   else
     return 0.;
