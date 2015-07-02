@@ -17,8 +17,8 @@
 #include "AppFactory.h"
 
 // Example 4 Includes
-#include "Convection.h"
-#include "GaussContForcing.h"
+#include "ExampleConvection.h"
+#include "ExampleGaussContForcing.h"
 #include "CoupledDirichletBC.h"
 #include "CoupledNeumannBC.h"
 
@@ -51,8 +51,8 @@ ExampleApp::~ExampleApp()
 void
 ExampleApp::registerObjects(Factory & factory)
 {
-  registerKernel(Convection);
-  registerKernel(GaussContForcing);                 // Extra forcing term
+  registerKernel(ExampleConvection);
+  registerKernel(ExampleGaussContForcing);                 // Extra forcing term
   registerBoundaryCondition(CoupledDirichletBC);    // Register our Boundary Conditions
   registerBoundaryCondition(CoupledNeumannBC);
 }

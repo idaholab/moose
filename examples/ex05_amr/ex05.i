@@ -20,7 +20,7 @@
     coef = 0.125
   [../]
   [./conv]
-    type = Convection
+    type = ExampleConvection
     variable = convected
     some_variable = diffused
   [../]

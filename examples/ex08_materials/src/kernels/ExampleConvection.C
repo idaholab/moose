@@ -11,41 +11,31 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef GAUSSCONTFORCING_H
-#define GAUSSCONTFORCING_H
 
-#include "Kernel.h"
-
-class GaussContForcing;
+#include "ExampleConvection.h"
 
 template<>
-InputParameters validParams<GaussContForcing>();
-
-
-class GaussContForcing : public Kernel
+InputParameters validParams<ExampleConvection>()
 {
-public:
+  InputParameters params = validParams<Kernel>();
+  return params;
+}
 
-  GaussContForcing(const std::string & name, InputParameters parameters);
+ExampleConvection::ExampleConvection(const std::string & name,
+                                     InputParameters parameters) :
+    Kernel(name, parameters),
 
-protected:
-  virtual Real computeQpResidual();
+    // Retrieve a gradient material property to use for the convection
+    // velocity
+    _velocity(getMaterialProperty<RealGradient>("convection_velocity"))
+{}
 
-  const Real _amplitude;
-  const Real _x_center;
-  const Real _y_center;
-  const Real _z_center;
+Real ExampleConvection::computeQpResidual()
+{
+  return _test[_i][_qp]*(_velocity[_qp]*_grad_u[_qp]);
+}
 
-  const Real _x_spread;
-  const Real _y_spread;
-  const Real _z_spread;
-
-  const Real _x_min;
-  const Real _x_max;
-  const Real _y_min;
-  const Real _y_max;
-  const Real _z_min;
-  const Real _z_max;
-};
-
-#endif //GAUSSCONTFORCING_H
+Real ExampleConvection::computeQpJacobian()
+{
+  return _test[_i][_qp]*(_velocity[_qp]*_grad_phi[_j][_qp]);
+}

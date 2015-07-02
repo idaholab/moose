@@ -12,29 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Convection.h"
+#include "ExampleConvection.h"
 
+/**
+ * This function defines the valid parameters for
+ * this Kernel and their default values
+ */
 template<>
-InputParameters validParams<Convection>()
+InputParameters validParams<ExampleConvection>()
 {
   InputParameters params = validParams<Kernel>();
-
-  params.addRequiredCoupledVar("some_variable", "The gradient of this variable will be used as the velocity vector.");
+  params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
   return params;
 }
 
-Convection::Convection(const std::string & name,
-                       InputParameters parameters) :
-    Kernel(name, parameters),
-    _some_variable(coupledGradient("some_variable"))
+ExampleConvection::ExampleConvection(const std::string & name,
+                                     InputParameters parameters) :
+  // You must call the constructor of the base class first
+  Kernel(name, parameters),
+   _velocity(getParam<RealVectorValue>("velocity"))
 {}
 
-Real Convection::computeQpResidual()
+Real ExampleConvection::computeQpResidual()
 {
-  return _test[_i][_qp]*(_some_variable[_qp]*_grad_u[_qp]);
+  // velocity * _grad_u[_qp] is actually doing a dot product
+  return _test[_i][_qp]*(_velocity*_grad_u[_qp]);
 }
 
-Real Convection::computeQpJacobian()
+Real ExampleConvection::computeQpJacobian()
 {
-  return _test[_i][_qp]*(_some_variable[_qp]*_grad_phi[_j][_qp]);
+  // the partial derivative of _grad_u is just _grad_phi[_j]
+  return _test[_i][_qp]*(_velocity*_grad_phi[_j][_qp]);
 }

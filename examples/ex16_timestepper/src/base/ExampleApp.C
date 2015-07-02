@@ -18,7 +18,7 @@
 // Example 16 Includes
 #include "TransientHalf.h"
 #include "ExampleDiffusion.h"
-#include "Convection.h"
+#include "ExampleConvection.h"
 #include "ExampleImplicitEuler.h"
 #include "ExampleMaterial.h"
 
@@ -60,7 +60,7 @@ ExampleApp::registerObjects(Factory & factory)
   // Register our new executioner
   registerTimeStepper(TransientHalf);
   registerKernel(ExampleDiffusion);
-  registerKernel(Convection);
+  registerKernel(ExampleConvection);
   registerKernel(ExampleImplicitEuler);
   registerMaterial(ExampleMaterial);
 }

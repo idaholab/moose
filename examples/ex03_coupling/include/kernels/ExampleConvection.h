@@ -12,22 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONVECTION_H
-#define CONVECTION_H
+#ifndef EXAMPLECONVECTION_H
+#define EXAMPLECONVECTION_H
 
 #include "Kernel.h"
 
-class Convection;
+class ExampleConvection;
 
 template<>
-InputParameters validParams<Convection>();
+InputParameters validParams<ExampleConvection>();
 
-class Convection : public Kernel
+class ExampleConvection : public Kernel
 {
 public:
 
-  Convection(const std::string & name,
-             InputParameters parameters);
+  ExampleConvection(const std::string & name,
+                    InputParameters parameters);
 
 protected:
 
@@ -37,7 +37,7 @@ protected:
 
 private:
 
-  VariableGradient & _some_variable;
+  VariableGradient & _grad_some_variable;
 };
 
-#endif //CONVECTION_H
+#endif //EXAMPLECONVECTION_H

@@ -16,7 +16,7 @@
 #include "AppFactory.h"
 
 // Example 3 Includes
-#include "Convection.h"
+#include "ExampleConvection.h"
 
 template<>
 InputParameters validParams<ExampleApp>()
@@ -47,7 +47,7 @@ ExampleApp::~ExampleApp()
 void
 ExampleApp::registerObjects(Factory & factory)
 {
-  registerKernel(Convection);
+  registerKernel(ExampleConvection);
 }
 
 void

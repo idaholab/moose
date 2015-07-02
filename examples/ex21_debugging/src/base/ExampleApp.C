@@ -18,7 +18,7 @@
 
 // Example 21 Includes
 #include "ExampleDiffusion.h"
-#include "Convection.h"
+#include "ExampleConvection.h"
 #include "ExampleMaterial.h"
 
 template<>
@@ -56,7 +56,7 @@ ExampleApp::registerApps()
 void
 ExampleApp::registerObjects(Factory & factory)
 {
-  registerKernel(Convection);
+  registerKernel(ExampleConvection);
   registerKernel(ExampleDiffusion);
   registerMaterial(ExampleMaterial);
 }

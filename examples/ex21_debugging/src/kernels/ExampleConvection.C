@@ -12,29 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Convection.h"
+#include "ExampleConvection.h"
 
 template<>
-InputParameters validParams<Convection>()
+InputParameters validParams<ExampleConvection>()
 {
   InputParameters params = validParams<Kernel>();
-
-  params.addRequiredCoupledVar("some_variable", "The gradient of this variable will be used as the velocity vector.");
   return params;
 }
 
-Convection::Convection(const std::string & name,
-                       InputParameters parameters) :
+ExampleConvection::ExampleConvection(const std::string & name,
+                                     InputParameters parameters) :
     Kernel(name, parameters),
-    _grad_some_variable(coupledGradient("some_variable"))
+
+    // Retrieve a gradient material property to use for the convection
+    // velocity
+    _velocity(getMaterialProperty<RealGradient>("convection_velocity"))
 {}
 
-Real Convection::computeQpResidual()
+Real ExampleConvection::computeQpResidual()
 {
-  return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_u[_qp]);
+  return _test[_i][_qp]*(_velocity[_qp]*_grad_u[_qp]);
 }
 
-Real Convection::computeQpJacobian()
+Real ExampleConvection::computeQpJacobian()
 {
-  return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_phi[_j][_qp]);
+  return _test[_i][_qp]*(_velocity[_qp]*_grad_phi[_j][_qp]);
 }
