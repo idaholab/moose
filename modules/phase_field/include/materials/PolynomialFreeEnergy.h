@@ -23,10 +23,6 @@ protected:
   ///Concentration variable used in the free energy expression
   EBTerm _c;
 
-  ///Material property names
-  const std::string _a_name;
-  const std::string _W_name;
-
   ///Equilibrium concentration
   EBTerm _a;
 
