@@ -135,6 +135,12 @@
  */
 #include "BicrystalBoundingBoxICAction.h"
 #include "BicrystalCircleGrainICAction.h"
+#include "CHPFCRFFSplitKernelAction.h"
+#include "CHPFCRFFSplitVariablesAction.h"
+#include "HHPFCRFFSplitKernelAction.h"
+#include "HHPFCRFFSplitVariablesAction.h"
+#include "PFCRFFKernelAction.h"
+#include "PFCRFFVariablesAction.h"
 #include "PolycrystalHexGrainICAction.h"
 #include "PolycrystalKernelAction.h"
 #include "PolycrystalRandomICAction.h"
@@ -286,24 +292,36 @@ extern "C" void PhaseFieldApp__associateSyntax(Syntax & syntax, ActionFactory & 
 void
 PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
-  syntax.registerActionSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
-  syntax.registerActionSyntax("EmptyAction", "ICs/PolycrystalICs");  // placeholder
-  syntax.registerActionSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
   syntax.registerActionSyntax("BicrystalBoundingBoxICAction", "ICs/PolycrystalICs/BicrystalBoundingBoxIC");
-  syntax.registerActionSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
+  syntax.registerActionSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
+  syntax.registerActionSyntax("CHPFCRFFSplitKernelAction", "Kernels/CHPFCRFFSplitKernel");
+  syntax.registerActionSyntax("CHPFCRFFSplitVariablesAction", "Variables/CHPFCRFFSplitVariables");
+  syntax.registerActionSyntax("EmptyAction", "ICs/PolycrystalICs");  // placeholder
+  syntax.registerActionSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
+  syntax.registerActionSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
+  syntax.registerActionSyntax("PFCRFFKernelAction", "Kernels/PFCRFFKernel");
+  syntax.registerActionSyntax("PFCRFFVariablesAction", "Variables/PFCRFFVariables");
   syntax.registerActionSyntax("PolycrystalHexGrainICAction", "ICs/PolycrystalICs/PolycrystalHexGrainIC");
-  syntax.registerActionSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
+  syntax.registerActionSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
   syntax.registerActionSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
+  syntax.registerActionSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
+  syntax.registerActionSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
   syntax.registerActionSyntax("ReconVarICAction", "ICs/PolycrystalICs/ReconVarIC");
+  syntax.registerActionSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
 
-  registerAction(PolycrystalKernelAction, "add_kernel");
-  registerAction(PolycrystalVariablesAction, "add_variable");
-  registerAction(BicrystalCircleGrainICAction, "add_ic");
   registerAction(BicrystalBoundingBoxICAction, "add_ic");
-  registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
+  registerAction(BicrystalCircleGrainICAction, "add_ic");
+  registerAction(CHPFCRFFSplitKernelAction, "add_kernel");
+  registerAction(CHPFCRFFSplitVariablesAction, "add_variable");
+  registerAction(HHPFCRFFSplitKernelAction, "add_kernel");
+  registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
+  registerAction(PFCRFFKernelAction, "add_kernel");
+  registerAction(PFCRFFVariablesAction, "add_variable");
   registerAction(PolycrystalHexGrainICAction, "add_ic");
-  registerAction(PolycrystalVoronoiICAction, "add_ic");
+  registerAction(PolycrystalKernelAction, "add_kernel");
   registerAction(PolycrystalRandomICAction, "add_ic");
+  registerAction(PolycrystalVariablesAction, "add_variable");
+  registerAction(PolycrystalVoronoiICAction, "add_ic");
   registerAction(ReconVarICAction, "add_ic");
+  registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
 }
