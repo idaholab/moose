@@ -1,0 +1,7 @@
+[Tests]
+  [./PFCRFF_split_test]
+    type = 'Exodiff'
+    input = 'PFCRFF_split_test_master.i'
+    exodiff = 'PFCRFF_split_test_master_out.e'
+  [../]
+[]
