@@ -25,7 +25,7 @@
   [../]
 
   [./forcing]
-    type = GaussContForcing
+    type = ExampleGaussContForcing
     variable = u
     x_center = 2
     y_center = 4

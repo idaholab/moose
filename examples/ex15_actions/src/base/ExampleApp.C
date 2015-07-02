@@ -18,7 +18,7 @@
 #include "Syntax.h"
 
 // Example 15 Includes
-#include "Convection.h"
+#include "ExampleConvection.h"
 #include "ConvectionDiffusionAction.h"
 
 template<>
@@ -57,7 +57,7 @@ ExampleApp::registerApps()
 void
 ExampleApp::registerObjects(Factory & factory)
 {
-  registerKernel(Convection);
+  registerKernel(ExampleConvection);
 }
 
 void

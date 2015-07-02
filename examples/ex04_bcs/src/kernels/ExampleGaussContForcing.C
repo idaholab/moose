@@ -11,10 +11,10 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "GaussContForcing.h"
+#include "ExampleGaussContForcing.h"
 
 template<>
-InputParameters validParams<GaussContForcing>()
+InputParameters validParams<ExampleGaussContForcing>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("amplitude", 1.0, "Aplitude of the bell curve");
@@ -27,7 +27,7 @@ InputParameters validParams<GaussContForcing>()
   return params;
 }
 
-GaussContForcing::GaussContForcing(const std::string & name, InputParameters parameters) :
+ExampleGaussContForcing::ExampleGaussContForcing(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _amplitude(getParam<Real>("amplitude")),
     _x_center(getParam<Real>("x_center")),
@@ -46,7 +46,7 @@ GaussContForcing::GaussContForcing(const std::string & name, InputParameters par
 }
 
 Real
-GaussContForcing::computeQpResidual()
+ExampleGaussContForcing::computeQpResidual()
 {
   Real x = _q_point[_qp](0);
   Real y = _q_point[_qp](1);

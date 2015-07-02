@@ -25,7 +25,7 @@
   [../]
 
   [./conv]
-    type = Convection
+    type = ExampleConvection
     variable = convected
 
     # Couple a variable into the convection kernel using local_name = simulationg_name syntax

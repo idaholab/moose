@@ -17,7 +17,7 @@
 #include "AppFactory.h"
 
 // Example 2 Includes
-#include "Convection.h"           // <- New include for our custom kernel
+#include "ExampleConvection.h"           // <- New include for our custom kernel
 
 template<>
 InputParameters validParams<ExampleApp>()
@@ -49,7 +49,7 @@ void
 ExampleApp::registerObjects(Factory & factory)
 {
   // Register any custom objects you have built on the MOOSE Framework
-  registerKernel(Convection);  // <- registration
+  registerKernel(ExampleConvection);  // <- registration
 }
 
 void

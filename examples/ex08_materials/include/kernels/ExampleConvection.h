@@ -12,35 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Convection.h"
+#ifndef EXAMPLECONVECTION_H
+#define EXAMPLECONVECTION_H
 
-/**
- * This function defines the valid parameters for
- * this Kernel and their default values
- */
+#include "Kernel.h"
+
+class ExampleConvection;
+
 template<>
-InputParameters validParams<Convection>()
-{
-  InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
-  return params;
-}
+InputParameters validParams<ExampleConvection>();
 
-Convection::Convection(const std::string & name,
-                       InputParameters parameters) :
-  // You must call the constructor of the base class first
-  Kernel(name, parameters),
-   _velocity(getParam<RealVectorValue>("velocity"))
-{}
-
-Real Convection::computeQpResidual()
+class ExampleConvection : public Kernel
 {
-  // velocity * _grad_u[_qp] is actually doing a dot product
-  return _test[_i][_qp]*(_velocity*_grad_u[_qp]);
-}
+public:
 
-Real Convection::computeQpJacobian()
-{
-  // the partial derivative of _grad_u is just _grad_phi[_j]
-  return _test[_i][_qp]*(_velocity*_grad_phi[_j][_qp]);
-}
+  ExampleConvection(const std::string & name,
+                    InputParameters parameters);
+
+protected:
+
+  virtual Real computeQpResidual();
+
+  virtual Real computeQpJacobian();
+
+private:
+
+  const MaterialProperty<RealGradient> & _velocity;
+};
+
+#endif //EXAMPLECONVECTION_H

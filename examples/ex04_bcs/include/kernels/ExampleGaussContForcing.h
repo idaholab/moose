@@ -11,31 +11,41 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef EXAMPLEGAUSSCONTFORCING_H
+#define EXAMPLEGAUSSCONTFORCING_H
 
-#include "Convection.h"
+#include "Kernel.h"
+
+class ExampleGaussContForcing;
 
 template<>
-InputParameters validParams<Convection>()
+InputParameters validParams<ExampleGaussContForcing>();
+
+
+class ExampleGaussContForcing : public Kernel
 {
-  InputParameters params = validParams<Kernel>();
-  return params;
-}
+public:
 
-Convection::Convection(const std::string & name,
-                       InputParameters parameters) :
-    Kernel(name, parameters),
+  ExampleGaussContForcing(const std::string & name, InputParameters parameters);
 
-    // Retrieve a gradient material property to use for the convection
-    // velocity
-    _velocity(getMaterialProperty<RealGradient>("convection_velocity"))
-{}
+protected:
+  virtual Real computeQpResidual();
 
-Real Convection::computeQpResidual()
-{
-  return _test[_i][_qp]*(_velocity[_qp]*_grad_u[_qp]);
-}
+  const Real _amplitude;
+  const Real _x_center;
+  const Real _y_center;
+  const Real _z_center;
 
-Real Convection::computeQpJacobian()
-{
-  return _test[_i][_qp]*(_velocity[_qp]*_grad_phi[_j][_qp]);
-}
+  const Real _x_spread;
+  const Real _y_spread;
+  const Real _z_spread;
+
+  const Real _x_min;
+  const Real _x_max;
+  const Real _y_min;
+  const Real _y_max;
+  const Real _z_min;
+  const Real _z_max;
+};
+
+#endif //EXAMPLEGAUSSCONTFORCING_H

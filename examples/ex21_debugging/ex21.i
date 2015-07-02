@@ -25,7 +25,7 @@
 [Kernels]
   #This Kernel consumes a real-gradient material property from the active material
   [./convection]
-    type = Convection
+    type = ExampleConvection
     variable = convected
   [../]
 

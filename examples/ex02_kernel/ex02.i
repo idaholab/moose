@@ -20,7 +20,7 @@
   [../]
 
   [./conv]
-    type = Convection
+    type = ExampleConvection
     variable = convected
     velocity = '0.0 0.0 1.0'
   [../]

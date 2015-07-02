@@ -17,7 +17,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 
-#include "Convection.h"
+#include "ExampleConvection.h"
 #include "ExampleDirac.h"
 
 template<>
@@ -55,7 +55,7 @@ ExampleApp::registerApps()
 void
 ExampleApp::registerObjects(Factory & factory)
 {
-  registerKernel(Convection);
+  registerKernel(ExampleConvection);
   registerDiracKernel(ExampleDirac);  // <- registration
 }
 
