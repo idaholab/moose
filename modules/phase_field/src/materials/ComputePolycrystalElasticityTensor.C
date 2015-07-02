@@ -8,6 +8,7 @@
 #include "AddV.h"
 #include "RotationTensor.h"
 #include "GrainTracker.h"
+#include "Conversion.h"
 
 template<>
 InputParameters validParams<ComputePolycrystalElasticityTensor>()
@@ -50,10 +51,10 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const std
   std::ifstream inFile(_Euler_angles_file_name.c_str());
 
   if (!inFile)
-    mooseError("Can't open input file ");
+    mooseError("Can't open " + _Euler_angles_file_name);
 
   for (unsigned int i = 0; i < 4; ++i)
-    inFile.ignore(255, '\n'); // ignore line
+    inFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // ignore line
 
   Real weight;
 
@@ -89,11 +90,13 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const std
     // Initialize variables
     _vals[op] = &coupledValue("v", op);
 
-    // Initialize D_elastic_tensor material
-    std::string material_name = "D_elastic_tensor";
-    std::stringstream out;
-    out << op;
-    material_name.append(out.str());
+    // Create variable name
+    std::string var_name = getParam<std::string>("var_name_base") + Moose::stringify(op);
+
+    // Create names of derivative properties of elasticity tensor
+    std::string material_name = propertyNameFirst(_elasticity_tensor_name, var_name);
+
+    // declare elasticity tensor derivative properties
     _D_elastic_tensor[op] = &declareProperty<ElasticityTensorR4>(material_name);
   }
 }

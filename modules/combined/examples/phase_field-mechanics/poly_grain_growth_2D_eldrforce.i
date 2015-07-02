@@ -1,36 +1,39 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 3
+  nx = 20
+  ny = 20
+  nz = 0
   xmax = 1000
   ymax = 1000
+  zmax = 0
   elem_type = QUAD4
   uniform_refine = 2
 []
 
 [GlobalParams]
-  op_num = 2
+  op_num = 15
   var_name_base = gr
-  Euler_angles_file_name = test.tex
+  grain_num = 36
+  use_displaced_mesh = true
 []
 
 [Variables]
   [./PolycrystalVariables]
   [../]
   [./disp_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./disp_y]
+    order = FIRST
+    family = LAGRANGE
   [../]
 []
 
 [ICs]
   [./PolycrystalICs]
-    [./BicrystalBoundingBoxIC]
-      x1 = 0
-      y1 = 0
-      x2 = 500
-      y2 = 1000
+    [./PolycrystalVoronoiIC]
     [../]
   [../]
 []
@@ -60,15 +63,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./centroids]
+  [./vonmises_stress]
     order = CONSTANT
     family = MONOMIAL
   [../]
   [./C1111]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./active_bounds_elemental]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -77,7 +76,7 @@
 [Kernels]
   [./PolycrystalKernel]
   [../]
-  [./PolycrystalElDrForce]
+  [./PolycrystalElasticDrivingForce]
   [../]
   [./TensorMechanics]
     disp_x = disp_x
@@ -86,7 +85,7 @@
 []
 
 [AuxKernels]
-  [./bnds_aux]
+  [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
@@ -129,13 +128,6 @@
     bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
-  [./centroids]
-    type = FeatureFloodCountAux
-    variable = centroids
-    execute_on = timestep_end
-    bubble_object = grain_tracker
-    field_display = CENTROID
-  [../]
   [./C1111]
     type = RankFourAux
     variable = C1111
@@ -146,20 +138,26 @@
     index_i = 0
     execute_on = timestep_end
   [../]
-  [./active_bounds_elemental]
-    type = FeatureFloodCountAux
-    variable = active_bounds_elemental
-    field_display = ACTIVE_BOUNDS
-    bubble_object = grain_tracker
+  [./vonmises_stress]
+    type = RankTwoScalarAux
+    variable = vonmises_stress
+    rank_two_tensor = stress
+    scalar_type = VonMisesStress
   [../]
 []
 
 [BCs]
+  [./Periodic]
+    [./All]
+      auto_direction = 'x'
+      variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7 gr8 gr9 gr10 gr11 gr12 gr13 gr14'
+    [../]
+  [../]
   [./top_displacement]
     type = PresetBC
     variable = disp_y
     boundary = top
-    value = -10.0
+    value = -50.0
   [../]
   [./x_anchor]
     type = PresetBC
@@ -180,11 +178,10 @@
     type = GBEvolution
     block = 0
     T = 500 # K
-    wGB = 75 # nm
-    GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
-    Q = 0.23 #Migration energy in eV
-    GBenergy = 0.708 #GB energy in J/m^2
-    time_scale = 1.0e-6
+    wGB = 15 # nm
+    GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
+    Q = 0.23 # Migration energy in eV
+    GBenergy = 0.708 # GB energy in J/m^2
   [../]
   [./ElasticityTensor]
     type = ComputePolycrystalElasticityTensor
@@ -193,7 +190,7 @@
     #reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
     Elastic_constants = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
     GrainTracker_object = grain_tracker
-    grain_num = 2
+    Euler_angles_file_name = grn_36_rand_2D.tex
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -207,10 +204,28 @@
   [../]
 []
 
+[Postprocessors]
+  [./ngrains]
+    type = FeatureFloodCount
+    variable = bnds
+    threshold = 0.7
+  [../]
+  [./dofs]
+    type = NumDOFs
+  [../]
+  [./dt]
+    type = TimestepSize
+  [../]
+  [./run_time]
+    type = RunTime
+    time_type = active
+  [../]
+[]
+
 [UserObjects]
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.1
+    threshold = 0.2
     convex_hull_buffer = 5.0
     use_single_map = false
     enable_var_coloring = true
@@ -222,50 +237,45 @@
   [../]
 []
 
-[Postprocessors]
-  [./dt]
-    type = TimestepSize
-  [../]
-  [./gr0_area]
-    type = ElementIntegralVariablePostprocessor
-    variable = gr0
-  [../]
-[]
-
 [Preconditioning]
   [./SMP]
-   type = SMP
-   off_diag_row = 'gr0 gr1 disp_x disp_y'
-   off_diag_column = 'gr1 gr0 disp_y disp_x'
+    type = SMP
+    off_diag_row = 'disp_x disp_y'
+    off_diag_column = 'disp_y disp_x'
   [../]
 []
 
 [Executioner]
   type = Transient
-
-  solve_type = 'PJFNK'
+  scheme = bdf2
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
-
+  l_tol = 1.0e-4
   l_max_its = 30
-  l_tol = 1e-4
-  nl_max_its = 30
-  nl_rel_tol = 1e-9
-
+  nl_max_its = 25
+  nl_rel_tol = 1.0e-7
   start_time = 0.0
-  num_steps = 6
-  dt = 0.2
-
+  num_steps = 50
+  [./TimeStepper]
+    type = IterationAdaptiveDT
+    dt = 1.5
+    growth_factor = 1.2
+    cutback_factor = 0.8
+    optimal_iterations = 8
+  [../]
   [./Adaptivity]
-   initial_adaptivity = 2
-    refine_fraction = 0.7
-    coarsen_fraction = 0.1
-    max_h_level = 2
+    initial_adaptivity = 2
+    refine_fraction = 0.8
+    coarsen_fraction = 0.05
+    max_h_level = 3
   [../]
 []
 
 [Outputs]
+  file_base = poly36_grtracker
   interval = 1
-  print_perf_log = true
   exodus = true
+  print_perf_log = true
+  output_initial = true
 []

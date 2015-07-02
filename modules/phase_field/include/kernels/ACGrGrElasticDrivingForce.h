@@ -1,24 +1,24 @@
-#ifndef ACGRGRELDRFORCE_H
-#define ACGRGRELDRFORCE_H
+#ifndef ACGRGRELASTICDRIVINGFORCE_H
+#define ACGRGRELASTICDRIVINGFORCE_H
 
 #include "ACBulk.h"
 
 //Forward Declarations
-class ACGrGrElDrForce;
+class ACGrGrElasticDrivingForce;
 class RankTwoTensor;
 class ElasticityTensorR4;
 
 template<>
-InputParameters validParams<ACGrGrElDrForce>();
+InputParameters validParams<ACGrGrElasticDrivingForce>();
 /**
  * Calculates the porton of the Allen-Cahn equation that results from the deformation energy.
  * Must access the elastic_strain stored as a material property
  * Requires the name of the elastic tensor derivative as an input.
  */
-class ACGrGrElDrForce : public ACBulk
+class ACGrGrElasticDrivingForce : public ACBulk
 {
 public:
-  ACGrGrElDrForce(const std::string & name, InputParameters parameters);
+  ACGrGrElasticDrivingForce(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);
@@ -28,4 +28,4 @@ private:
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
-#endif //ACGRGRELDRFORCE_H
+#endif //ACGRGRELASTICDRIVINGFORCE_H

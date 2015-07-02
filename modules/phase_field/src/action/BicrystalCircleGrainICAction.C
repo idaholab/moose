@@ -94,6 +94,6 @@ BicrystalCircleGrainICAction::act()
     }
 
     //Add initial condition
-    _problem->addInitialCondition("SmoothCircleIC", "InitialCondition", poly_params);
+    _problem->addInitialCondition("SmoothCircleIC", var_name + "_IC", poly_params);
   }
 }

@@ -30,7 +30,7 @@ protected:
   Real _length_scale;
   Real _pressure_scale;
 
-  std::string _Euler_angles_file_name;
+  FileName _Euler_angles_file_name;
 
   /// Grain tracker object
   const GrainTracker & _grain_tracker;

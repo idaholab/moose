@@ -1,11 +1,11 @@
-#include "ACGrGrElDrForce.h"
+#include "ACGrGrElasticDrivingForce.h"
 
 #include "Material.h"
 #include "ElasticityTensorR4.h"
 #include "RankTwoTensor.h"
 
 template<>
-InputParameters validParams<ACGrGrElDrForce>()
+InputParameters validParams<ACGrGrElasticDrivingForce>()
 {
   InputParameters params = validParams<ACBulk>();
   params.addClassDescription("Adds elastic energy contribution to the Allen-Cahn equation");
@@ -13,7 +13,7 @@ InputParameters validParams<ACGrGrElDrForce>()
   return params;
 }
 
-ACGrGrElDrForce::ACGrGrElDrForce(const std::string & name, InputParameters parameters) :
+ACGrGrElasticDrivingForce::ACGrGrElasticDrivingForce(const std::string & name, InputParameters parameters) :
     ACBulk(name,parameters),
     _D_elastic_tensor(getMaterialProperty<ElasticityTensorR4>("D_tensor_name")),
     _elastic_strain(getMaterialPropertyByName<RankTwoTensor>("elastic_strain"))
@@ -21,7 +21,7 @@ ACGrGrElDrForce::ACGrGrElDrForce(const std::string & name, InputParameters param
 }
 
 Real
-ACGrGrElDrForce::computeDFDOP(PFFunctionType type)
+ACGrGrElasticDrivingForce::computeDFDOP(PFFunctionType type)
 {
   // Access the heterogeneous strain calculated by the Solid Mechanics kernels
   RankTwoTensor strain(_elastic_strain[_qp]);
