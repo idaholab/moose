@@ -138,6 +138,23 @@ void computeInverse(const std::vector<std::vector<double> > & matrix, std::vecto
         matrixBackConversionBoost(inverted, inverse);
 }
 
+
+// Convert the vector of covariance to vector of vector of covariance 
+void  vectorToMatrix(int &rows,int &columns,std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix) {
+        std::cout << "function Test" << std::endl;
+        int dimensions = vecMatrix.size();
+        dimensions = sqrt(dimensions);
+        rows = dimensions;
+        columns = dimensions;
+        for (int row = 0; row < dimensions; ++row) {
+                std::vector<double> temp;
+                for (int colm = 0; colm < dimensions; ++colm) {
+                        temp.push_back(vecMatrix.at(colm+row*dimensions));        
+                } 
+                _cov_matrix.push_back(temp);
+        }
+}
+
 //See for example http://en.wikipedia.org/wiki/LU_decomposition or
 // http://programmingexamples.net/wiki/CPP/Boost/Math/uBLAS/determinant
 double getDeterminantBoost(matrixDouble & a)
