@@ -16,11 +16,16 @@
 #include "ACInterface.h"
 #include "ACMultiInterface.h"
 #include "ACParsed.h"
+#include "CHBulkPFCTrad.h"
+#include "CHCpldPFCTrad.h"
 #include "CHInterface.h"
 #include "CHMath.h"
 #include "CHParsed.h"
+#include "CHPFCRFF.h"
+#include "CHSplitVar.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledTimeDerivative.h"
+#include "HHPFCRFF.h"
 #include "KKSACBulkC.h"
 #include "KKSACBulkF.h"
 #include "KKSCHBulk.h"
@@ -49,6 +54,7 @@
 #include "HexPolycrystalIC.h"
 #include "LatticeSmoothCircleIC.h"
 #include "MultiSmoothCircleIC.h"
+#include "PFCFreezingIC.h"
 #include "PolycrystalRandomIC.h"
 #include "PolycrystalReducedIC.h"
 #include "ReconVarIC.h"
@@ -76,6 +82,8 @@
 #include "MathFreeEnergy.h"
 #include "MultiBarrierFunctionMaterial.h"
 #include "ParsedMaterial.h"
+#include "PFCRFFMaterial.h"
+#include "PFCTradMaterial.h"
 #include "PFFracBulkRateMaterial.h"
 #include "PFMobility.h"
 #include "PFParamsPolyFreeEnergy.h"
@@ -85,17 +93,20 @@
 /*
  * Postprocessors
  */
-#include "GrainTracker.h"
 #include "FeatureFloodCount.h"
+#include "GrainTracker.h"
 #include "NodalVolumeFraction.h"
+#include "PFCElementEnergyIntegral.h"
 
 /*
  * AuxKernels
  */
 #include "BndsCalcAux.h"
 #include "CrossTermGradientFreeEnergy.h"
-#include "KKSGlobalFreeEnergy.h"
 #include "FeatureFloodCountAux.h"
+#include "KKSGlobalFreeEnergy.h"
+#include "PFCEnergyDensity.h"
+#include "PFCRFFEnergyDensity.h"
 #include "TotalFreeEnergy.h"
 
 /*
@@ -176,11 +187,15 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACInterface);
   registerKernel(ACMultiInterface);
   registerKernel(ACParsed);
+  registerKernel(CHBulkPFCTrad);
+  registerKernel(CHCpldPFCTrad);
   registerKernel(CHInterface);
   registerKernel(CHMath);
   registerKernel(CHParsed);
+  registerKernel(CHPFCRFF);
+  registerKernel(CHSplitVar);
   registerKernel(ConservedLangevinNoise);
-  registerDeprecatedObjectName(CoupledTimeDerivative, "CoupledImplicitEuler", "09/01/2015 00:00");
+  registerKernel(HHPFCRFF);
   registerKernel(KKSACBulkC);
   registerKernel(KKSACBulkF);
   registerKernel(KKSCHBulk);
@@ -200,12 +215,14 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
+  registerDeprecatedObjectName(CoupledTimeDerivative, "CoupledImplicitEuler", "09/01/2015 00:00");
 
   registerInitialCondition(ClosePackIC);
   registerInitialCondition(CrossIC);
   registerInitialCondition(HexPolycrystalIC);
   registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(MultiSmoothCircleIC);
+  registerInitialCondition(PFCFreezingIC);
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalReducedIC);
   registerInitialCondition(ReconVarIC);
@@ -230,6 +247,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(MathFreeEnergy);
   registerMaterial(MultiBarrierFunctionMaterial);
   registerMaterial(ParsedMaterial);
+  registerMaterial(PFCRFFMaterial);
+  registerMaterial(PFCTradMaterial);
   registerMaterial(PFFracBulkRateMaterial);
   registerMaterial(PFMobility);
   registerMaterial(PFParamsPolyFreeEnergy);
@@ -239,11 +258,14 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
   registerPostprocessor(NodalVolumeFraction);
+  registerPostprocessor(PFCElementEnergyIntegral);
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
-  registerAux(KKSGlobalFreeEnergy);
   registerAux(FeatureFloodCountAux);
+  registerAux(KKSGlobalFreeEnergy);
+  registerAux(PFCEnergyDensity);
+  registerAux(PFCRFFEnergyDensity);
   registerAux(TotalFreeEnergy);
 
   registerUserObject(ConservedMaskedNormalNoise);
