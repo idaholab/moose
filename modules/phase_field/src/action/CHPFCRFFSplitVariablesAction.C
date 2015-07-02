@@ -47,7 +47,7 @@ CHPFCRFFSplitVariablesAction::act()
 
   // Setup MultiApp
   InputParameters poly_params = _factory.getValidParams("TransientMultiApp");
-  poly_params.set<MooseEnum>("app_type") = "MarmotApp";
+  poly_params.set<MooseEnum>("app_type") = "PhaseFieldApp";
   poly_params.set<MultiMooseEnum>("execute_on") = execute_options;
   poly_params.set<std::vector<std::string> >("input_files") = _sub_filenames;
   poly_params.set<unsigned int>("max_procs_per_app") = 1;

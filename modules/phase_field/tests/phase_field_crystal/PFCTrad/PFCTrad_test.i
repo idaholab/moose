@@ -114,10 +114,8 @@
 []
 
 [Outputs]
-  output_linear = true
   file_base = out
   output_initial = true
   exodus = true
-  perf_log = true
 []
 

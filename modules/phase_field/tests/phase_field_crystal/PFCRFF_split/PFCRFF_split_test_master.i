@@ -24,7 +24,7 @@
   [./CHPFCRFFSplitVariables]
     sub_filenames = PFCRFF_split_test_sub.i
     n_name = n
-    sub_file_name = test_sub.i
+    #sub_file_name = test_sub.i
   [../]
 []
 
