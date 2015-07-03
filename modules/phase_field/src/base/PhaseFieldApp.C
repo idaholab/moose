@@ -12,6 +12,7 @@
  * Kernels
  */
 #include "ACGBPoly.h"
+#include "ACGrGrElasticDrivingForce.h"
 #include "ACGrGrPoly.h"
 #include "ACInterface.h"
 #include "ACMultiInterface.h"
@@ -69,6 +70,7 @@
  * Materials
  */
 #include "BarrierFunctionMaterial.h"
+#include "ComputePolycrystalElasticityTensor.h"
 #include "DerivativeMultiPhaseMaterial.h"
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
@@ -141,6 +143,7 @@
 #include "HHPFCRFFSplitVariablesAction.h"
 #include "PFCRFFKernelAction.h"
 #include "PFCRFFVariablesAction.h"
+#include "PolycrystalElasticDrivingForceAction.h"
 #include "PolycrystalHexGrainICAction.h"
 #include "PolycrystalKernelAction.h"
 #include "PolycrystalRandomICAction.h"
@@ -189,6 +192,7 @@ void
 PhaseFieldApp::registerObjects(Factory & factory)
 {
   registerKernel(ACGBPoly);
+  registerKernel(ACGrGrElasticDrivingForce);
   registerKernel(ACGrGrPoly);
   registerKernel(ACInterface);
   registerKernel(ACMultiInterface);
@@ -240,6 +244,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(Tricrystal2CircleGrainsIC);
 
   registerMaterial(BarrierFunctionMaterial);
+  registerMaterial(ComputePolycrystalElasticityTensor);
   registerMaterial(DerivativeMultiPhaseMaterial);
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
@@ -301,6 +306,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
   syntax.registerActionSyntax("PFCRFFKernelAction", "Kernels/PFCRFFKernel");
   syntax.registerActionSyntax("PFCRFFVariablesAction", "Variables/PFCRFFVariables");
+  syntax.registerActionSyntax("PolycrystalElasticDrivingForceAction", "Kernels/PolycrystalElasticDrivingForce");
   syntax.registerActionSyntax("PolycrystalHexGrainICAction", "ICs/PolycrystalICs/PolycrystalHexGrainIC");
   syntax.registerActionSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
   syntax.registerActionSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
@@ -317,6 +323,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
   registerAction(PFCRFFKernelAction, "add_kernel");
   registerAction(PFCRFFVariablesAction, "add_variable");
+  registerAction(PolycrystalElasticDrivingForceAction, "add_kernel");
   registerAction(PolycrystalHexGrainICAction, "add_ic");
   registerAction(PolycrystalKernelAction, "add_kernel");
   registerAction(PolycrystalRandomICAction, "add_ic");
