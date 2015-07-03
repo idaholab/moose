@@ -12,15 +12,21 @@
  * Kernels
  */
 #include "ACGBPoly.h"
+#include "ACGrGrElasticDrivingForce.h"
 #include "ACGrGrPoly.h"
 #include "ACInterface.h"
 #include "ACMultiInterface.h"
 #include "ACParsed.h"
+#include "CHBulkPFCTrad.h"
+#include "CHCpldPFCTrad.h"
 #include "CHInterface.h"
 #include "CHMath.h"
 #include "CHParsed.h"
+#include "CHPFCRFF.h"
+#include "CHSplitVar.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledTimeDerivative.h"
+#include "HHPFCRFF.h"
 #include "KKSACBulkC.h"
 #include "KKSACBulkF.h"
 #include "KKSCHBulk.h"
@@ -49,6 +55,7 @@
 #include "HexPolycrystalIC.h"
 #include "LatticeSmoothCircleIC.h"
 #include "MultiSmoothCircleIC.h"
+#include "PFCFreezingIC.h"
 #include "PolycrystalRandomIC.h"
 #include "PolycrystalReducedIC.h"
 #include "ReconVarIC.h"
@@ -63,6 +70,7 @@
  * Materials
  */
 #include "BarrierFunctionMaterial.h"
+#include "ComputePolycrystalElasticityTensor.h"
 #include "DerivativeMultiPhaseMaterial.h"
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
@@ -76,6 +84,8 @@
 #include "MathFreeEnergy.h"
 #include "MultiBarrierFunctionMaterial.h"
 #include "ParsedMaterial.h"
+#include "PFCRFFMaterial.h"
+#include "PFCTradMaterial.h"
 #include "PFFracBulkRateMaterial.h"
 #include "PFMobility.h"
 #include "PFParamsPolyFreeEnergy.h"
@@ -85,17 +95,20 @@
 /*
  * Postprocessors
  */
-#include "GrainTracker.h"
 #include "FeatureFloodCount.h"
+#include "GrainTracker.h"
 #include "NodalVolumeFraction.h"
+#include "PFCElementEnergyIntegral.h"
 
 /*
  * AuxKernels
  */
 #include "BndsCalcAux.h"
 #include "CrossTermGradientFreeEnergy.h"
-#include "KKSGlobalFreeEnergy.h"
 #include "FeatureFloodCountAux.h"
+#include "KKSGlobalFreeEnergy.h"
+#include "PFCEnergyDensity.h"
+#include "PFCRFFEnergyDensity.h"
 #include "TotalFreeEnergy.h"
 
 /*
@@ -124,6 +137,13 @@
  */
 #include "BicrystalBoundingBoxICAction.h"
 #include "BicrystalCircleGrainICAction.h"
+#include "CHPFCRFFSplitKernelAction.h"
+#include "CHPFCRFFSplitVariablesAction.h"
+#include "HHPFCRFFSplitKernelAction.h"
+#include "HHPFCRFFSplitVariablesAction.h"
+#include "PFCRFFKernelAction.h"
+#include "PFCRFFVariablesAction.h"
+#include "PolycrystalElasticDrivingForceAction.h"
 #include "PolycrystalHexGrainICAction.h"
 #include "PolycrystalKernelAction.h"
 #include "PolycrystalRandomICAction.h"
@@ -172,15 +192,20 @@ void
 PhaseFieldApp::registerObjects(Factory & factory)
 {
   registerKernel(ACGBPoly);
+  registerKernel(ACGrGrElasticDrivingForce);
   registerKernel(ACGrGrPoly);
   registerKernel(ACInterface);
   registerKernel(ACMultiInterface);
   registerKernel(ACParsed);
+  registerKernel(CHBulkPFCTrad);
+  registerKernel(CHCpldPFCTrad);
   registerKernel(CHInterface);
   registerKernel(CHMath);
   registerKernel(CHParsed);
+  registerKernel(CHPFCRFF);
+  registerKernel(CHSplitVar);
   registerKernel(ConservedLangevinNoise);
-  registerDeprecatedObjectName(CoupledTimeDerivative, "CoupledImplicitEuler", "09/01/2015 00:00");
+  registerKernel(HHPFCRFF);
   registerKernel(KKSACBulkC);
   registerKernel(KKSACBulkF);
   registerKernel(KKSCHBulk);
@@ -200,12 +225,14 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
+  registerDeprecatedObjectName(CoupledTimeDerivative, "CoupledImplicitEuler", "09/01/2015 00:00");
 
   registerInitialCondition(ClosePackIC);
   registerInitialCondition(CrossIC);
   registerInitialCondition(HexPolycrystalIC);
   registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(MultiSmoothCircleIC);
+  registerInitialCondition(PFCFreezingIC);
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalReducedIC);
   registerInitialCondition(ReconVarIC);
@@ -217,6 +244,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(Tricrystal2CircleGrainsIC);
 
   registerMaterial(BarrierFunctionMaterial);
+  registerMaterial(ComputePolycrystalElasticityTensor);
   registerMaterial(DerivativeMultiPhaseMaterial);
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
@@ -230,6 +258,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(MathFreeEnergy);
   registerMaterial(MultiBarrierFunctionMaterial);
   registerMaterial(ParsedMaterial);
+  registerMaterial(PFCRFFMaterial);
+  registerMaterial(PFCTradMaterial);
   registerMaterial(PFFracBulkRateMaterial);
   registerMaterial(PFMobility);
   registerMaterial(PFParamsPolyFreeEnergy);
@@ -239,11 +269,14 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
   registerPostprocessor(NodalVolumeFraction);
+  registerPostprocessor(PFCElementEnergyIntegral);
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
-  registerAux(KKSGlobalFreeEnergy);
   registerAux(FeatureFloodCountAux);
+  registerAux(KKSGlobalFreeEnergy);
+  registerAux(PFCEnergyDensity);
+  registerAux(PFCRFFEnergyDensity);
   registerAux(TotalFreeEnergy);
 
   registerUserObject(ConservedMaskedNormalNoise);
@@ -264,24 +297,38 @@ extern "C" void PhaseFieldApp__associateSyntax(Syntax & syntax, ActionFactory & 
 void
 PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
-  syntax.registerActionSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
-  syntax.registerActionSyntax("EmptyAction", "ICs/PolycrystalICs");  // placeholder
-  syntax.registerActionSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
   syntax.registerActionSyntax("BicrystalBoundingBoxICAction", "ICs/PolycrystalICs/BicrystalBoundingBoxIC");
-  syntax.registerActionSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
+  syntax.registerActionSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
+  syntax.registerActionSyntax("CHPFCRFFSplitKernelAction", "Kernels/CHPFCRFFSplitKernel");
+  syntax.registerActionSyntax("CHPFCRFFSplitVariablesAction", "Variables/CHPFCRFFSplitVariables");
+  syntax.registerActionSyntax("EmptyAction", "ICs/PolycrystalICs");  // placeholder
+  syntax.registerActionSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
+  syntax.registerActionSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
+  syntax.registerActionSyntax("PFCRFFKernelAction", "Kernels/PFCRFFKernel");
+  syntax.registerActionSyntax("PFCRFFVariablesAction", "Variables/PFCRFFVariables");
+  syntax.registerActionSyntax("PolycrystalElasticDrivingForceAction", "Kernels/PolycrystalElasticDrivingForce");
   syntax.registerActionSyntax("PolycrystalHexGrainICAction", "ICs/PolycrystalICs/PolycrystalHexGrainIC");
-  syntax.registerActionSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
+  syntax.registerActionSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
   syntax.registerActionSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
+  syntax.registerActionSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
+  syntax.registerActionSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
   syntax.registerActionSyntax("ReconVarICAction", "ICs/PolycrystalICs/ReconVarIC");
+  syntax.registerActionSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
 
-  registerAction(PolycrystalKernelAction, "add_kernel");
-  registerAction(PolycrystalVariablesAction, "add_variable");
-  registerAction(BicrystalCircleGrainICAction, "add_ic");
   registerAction(BicrystalBoundingBoxICAction, "add_ic");
-  registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
+  registerAction(BicrystalCircleGrainICAction, "add_ic");
+  registerAction(CHPFCRFFSplitKernelAction, "add_kernel");
+  registerAction(CHPFCRFFSplitVariablesAction, "add_variable");
+  registerAction(HHPFCRFFSplitKernelAction, "add_kernel");
+  registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
+  registerAction(PFCRFFKernelAction, "add_kernel");
+  registerAction(PFCRFFVariablesAction, "add_variable");
+  registerAction(PolycrystalElasticDrivingForceAction, "add_kernel");
   registerAction(PolycrystalHexGrainICAction, "add_ic");
-  registerAction(PolycrystalVoronoiICAction, "add_ic");
+  registerAction(PolycrystalKernelAction, "add_kernel");
   registerAction(PolycrystalRandomICAction, "add_ic");
+  registerAction(PolycrystalVariablesAction, "add_variable");
+  registerAction(PolycrystalVoronoiICAction, "add_ic");
   registerAction(ReconVarICAction, "add_ic");
+  registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
 }

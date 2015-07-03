@@ -1,0 +1,7 @@
+[Tests]
+  [./bicrystal]
+    type = 'Exodiff'
+    input = 'bicrystal.i'
+    exodiff = 'bicrystal_out.e-s003'
+  [../]
+[]
