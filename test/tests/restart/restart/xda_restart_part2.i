@@ -30,10 +30,20 @@
     order = FIRST
     family = LAGRANGE
   [../]
+[]
 
+[AuxVariables]
   [./diffusivity]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./out_diffusivity]
+    type = MaterialRealAux
+    variable = diffusivity
+    property = diffusivity
   [../]
 []
 
@@ -58,12 +68,6 @@
   [./diff_v]
     type = Diffusion
     variable = v
-  [../]
-
-  [./out_diffusivity]
-    type = RealPropertyOutput
-    variable = diffusivity
-    prop_name = diffusivity
   [../]
 []
 
@@ -100,28 +104,27 @@
 [Preconditioning]
   [./PBP]
     type = PBP
-    solve_order = 'u v diffusivity'
-    preconditioner = 'AMG AMG AMG'
+    solve_order = 'u v'
+    preconditioner = 'AMG AMG'
   [../]
 []
 
 [Executioner]
   type = Transient
-
   solve_type = JFNK
-
   restart_file_base = out_xda_restart_part1_cp/0005
-
   start_time = 1
-
   dt = 0.1
   reset_dt = true #NECESSARY to force a change in DT when using restart!
-
   num_steps = 3
 []
 
 [Outputs]
   file_base = out_xda_restart_part2
   output_initial = true
-  exodus = true
+  [./out]
+    type = Exodus
+    elemental_as_nodal = true
+    output_elemental_on = none
+  [../]
 []

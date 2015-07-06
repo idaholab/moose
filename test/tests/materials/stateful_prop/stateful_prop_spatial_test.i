@@ -10,50 +10,44 @@
 []
 
 [Variables]
-  active = 'u prop1'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
+[]
 
+[AuxVariables]
   [./prop1]
-    order = FIRST
-    family = LAGRANGE
+    order = SECOND
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./prop1_output]
+    type = MaterialRealAux
+    variable = prop1
+    property = thermal_conductivity
   [../]
 []
 
 [Kernels]
-  active = 'heat ie prop1_output'
-
   [./heat]
     type = MatDiffusion
     variable = u
     prop_name = thermal_conductivity
   [../]
-
   [./ie]
     type = TimeDerivative
     variable = u
   [../]
-
-  [./prop1_output]
-    type = RealPropertyOutput
-    variable = prop1
-    prop_name = thermal_conductivity
-  [../]
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0.0
   [../]
-
   [./right]
     type = MTBC
     variable = u
@@ -64,8 +58,6 @@
 []
 
 [Materials]
-  active = 'stateful'
-
   [./stateful]
     type = StatefulSpatialTest
     block = 0
@@ -74,10 +66,7 @@
 
 [Executioner]
   type = Transient
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
   start_time = 0.0
   num_steps = 5
   dt = .1
@@ -86,6 +75,10 @@
 [Outputs]
   file_base = out_spatial
   output_initial = true
-  exodus = true
   print_perf_log = true
+  [./out]
+    type = Exodus
+    elemental_as_nodal = true
+    output_elemental_on = none
+  [../]
 []
