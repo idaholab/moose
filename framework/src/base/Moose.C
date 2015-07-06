@@ -53,7 +53,6 @@
 #include "UserForcingFunction.h"
 #include "BodyForce.h"
 #include "Reaction.h"
-#include "RealPropertyOutput.h"
 #include "MassEigenKernel.h"
 
 // bcs
@@ -426,7 +425,6 @@ registerObjects(Factory & factory)
   registerKernel(UserForcingFunction);
   registerKernel(BodyForce);
   registerKernel(Reaction);
-  registerKernel(RealPropertyOutput);
   registerKernel(MassEigenKernel);
 
   // bcs
