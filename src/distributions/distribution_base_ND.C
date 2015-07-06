@@ -191,6 +191,11 @@ void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vec
 void BasicMultivariateNormal::BasicMultivariateNormal_init(int &rows, int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu){
 	  /**
 	   * This is the base function that initializes the Multivariate normal distribution
+     * Input Parameter
+     * rows: first dimension of covariance matrix
+     * columns: second dimension of covariance matrix
+     * covMatrix: covariance matrix stored in vector<vector<double> >
+     * mu: mean value stored in vector<double>
 	   */
 
    _mu = mu;
@@ -313,12 +318,14 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double>
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu){
   /**
    * This is the function that initializes the Multivariate normal distribution given:
-   * - vecCovMatrix: in a vector form
+   * Input Parameters
+   * - vecCovMatrix: covariance matrix stored in a vector<double>
    * - mu: the mean value vector
    */
 
   int rows, columns;
   std::vector<std::vector<double> > covMatrix;
+  // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
 
 	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
