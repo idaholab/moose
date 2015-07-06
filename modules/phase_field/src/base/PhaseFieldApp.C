@@ -91,6 +91,7 @@
 #include "PFParamsPolyFreeEnergy.h"
 #include "PolynomialFreeEnergy.h"
 #include "SwitchingFunctionMaterial.h"
+#include "CrossTermBarrierFunctionMaterial.h"
 
 /*
  * Postprocessors
@@ -279,6 +280,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFParamsPolyFreeEnergy);
   registerMaterial(PolynomialFreeEnergy);
   registerMaterial(SwitchingFunctionMaterial);
+  registerMaterial(CrossTermBarrierFunctionMaterial);
 
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
