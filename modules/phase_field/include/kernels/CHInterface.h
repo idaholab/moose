@@ -35,8 +35,7 @@ protected:
   const MaterialProperty<Real> & _kappa;
 
   ///@{
-  /// Mobility material property name, value, and concentration derivatives
-  MaterialPropertyName _mob_name;
+  /// Mobility material property value and concentration derivatives
   const MaterialProperty<Real> & _M;
   const MaterialProperty<Real> & _dMdc;
   const MaterialProperty<Real> & _d2Mdc2;

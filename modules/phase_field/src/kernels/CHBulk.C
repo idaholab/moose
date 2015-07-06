@@ -18,9 +18,8 @@ InputParameters validParams<CHBulk>()
 
 CHBulk::CHBulk(const std::string & name, InputParameters parameters) :
     DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(name, parameters),
-    _mob_name(getParam<MaterialPropertyName>("mob_name")),
-    _M(getMaterialProperty<Real>(_mob_name)),
-    _dMdc(getMaterialPropertyDerivative<Real>(_mob_name, _var.name()))
+    _M(getMaterialProperty<Real>("mob_name")),
+    _dMdc(getMaterialPropertyDerivative<Real>("mob_name", _var.name()))
 {
   // Get number of coupled variables
   unsigned int nvar = _coupled_moose_vars.size();
@@ -30,7 +29,7 @@ CHBulk::CHBulk(const std::string & name, InputParameters parameters) :
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < nvar; ++i)
-    _dMdarg[i] = &getMaterialPropertyDerivative<Real>(_mob_name, _coupled_moose_vars[i]->name());
+    _dMdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
 }
 
 RealGradient

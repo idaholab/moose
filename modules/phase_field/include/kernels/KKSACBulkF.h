@@ -34,9 +34,6 @@ protected:
   /// double well height parameter
   Real _w;
 
-  /// double well function material property base names
-  std::string _g_name;
-
   /// Derivative of the double well function \f$ \frac d{d\eta} g(\eta) \f$
   const MaterialProperty<Real> & _prop_dg;
 

@@ -23,15 +23,12 @@ KKSACBulkBase::KKSACBulkBase(const std::string & name, InputParameters parameter
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _eta_name(_var.name()),
-    _Fa_name(getParam<MaterialPropertyName>("fa_name")),
-    _Fb_name(getParam<MaterialPropertyName>("fb_name")),
-    _h_name(getParam<MaterialPropertyName>("h_name")),
-    _prop_Fa(getMaterialPropertyByName<Real>(_Fa_name)),
-    _prop_Fb(getMaterialPropertyByName<Real>(_Fb_name)),
-    _prop_dFa(getMaterialPropertyDerivative<Real>(_Fa_name, _eta_name)),
-    _prop_dFb(getMaterialPropertyDerivative<Real>(_Fb_name, _eta_name)),
-    _prop_dh(getMaterialPropertyDerivative<Real>(_h_name, _eta_name)),
-    _prop_d2h(getMaterialPropertyDerivative<Real>(_h_name, _eta_name, _eta_name))
+    _prop_Fa(getMaterialProperty<Real>("fa_name")),
+    _prop_Fb(getMaterialProperty<Real>("fb_name")),
+    _prop_dFa(getMaterialPropertyDerivative<Real>("fa_name", _eta_name)),
+    _prop_dFb(getMaterialPropertyDerivative<Real>("fb_name", _eta_name)),
+    _prop_dh(getMaterialPropertyDerivative<Real>("h", _eta_name)),
+    _prop_d2h(getMaterialPropertyDerivative<Real>("h", _eta_name, _eta_name))
 {
   // reserve space for derivatives
   _derivatives_Fa.resize(_nvar);
@@ -44,8 +41,8 @@ KKSACBulkBase::KKSACBulkBase(const std::string & name, InputParameters parameter
     MooseVariable *cvar = _coupled_moose_vars[i];
 
     // get the first derivatives of Fa and Fb material property
-    _derivatives_Fa[i] = &getMaterialPropertyDerivative<Real>(_Fa_name, cvar->name());
-    _derivatives_Fb[i] = &getMaterialPropertyDerivative<Real>(_Fb_name, cvar->name());
+    _derivatives_Fa[i] = &getMaterialPropertyDerivative<Real>("fa_name", cvar->name());
+    _derivatives_Fb[i] = &getMaterialPropertyDerivative<Real>("fb_name", cvar->name());
 
     // get the gradient
     _grad_args[i] = &(cvar->gradSln());

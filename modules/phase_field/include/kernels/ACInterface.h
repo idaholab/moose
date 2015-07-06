@@ -36,9 +36,6 @@ protected:
   /// Interfacial parameter
   const MaterialProperty<Real> & _kappa;
 
-  /// Name of mobility material property
-  const MaterialPropertyName _mob_name;
-
   /// Mobility
   const MaterialProperty<Real> & _L;
 

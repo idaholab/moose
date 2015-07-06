@@ -28,7 +28,7 @@ ComputeVariableEigenstrain::ComputeVariableEigenstrain(const std::string & name,
   for (unsigned int i = 0; i < _num_args; ++i)
   {
     const std::string & iname = getVar("args", i)->name();
-    _dprefactor[i] = &getMaterialPropertyDerivative<Real>(_prefactor_name, iname);
+    _dprefactor[i] = &getMaterialPropertyDerivative<Real>("prefactor", iname);
     _delastic_strain[i] = &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", iname);
 
     _d2prefactor[i].resize(_num_args);
@@ -37,7 +37,7 @@ ComputeVariableEigenstrain::ComputeVariableEigenstrain(const std::string & name,
     for (unsigned int j = i; j < _num_args; ++j)
     {
       const std::string & jname = getVar("args", j)->name();
-      _d2prefactor[i][j] = &getMaterialPropertyDerivative<Real>(_prefactor_name, iname, jname);
+      _d2prefactor[i][j] = &getMaterialPropertyDerivative<Real>("prefactor", iname, jname);
       _d2elastic_strain[i][j] = &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", iname, jname);
     }
   }

@@ -12,14 +12,13 @@ InputParameters validParams<SplitCHCRes>()
   InputParameters params = validParams<SplitCHBase>();
   params.addClassDescription("Split formulation Cahn-Hilliard Kernel");
   params.addRequiredCoupledVar("w", "chem poten");
-  params.addRequiredParam<std::string>("kappa_name", "The kappa used with the kernel");
+  params.addRequiredParam<MaterialPropertyName>("kappa_name", "The kappa used with the kernel");
   return params;
 }
 
 SplitCHCRes::SplitCHCRes(const std::string & name, InputParameters parameters) :
     SplitCHBase(name, parameters),
-    _kappa_name(getParam<std::string>("kappa_name")),
-    _kappa(getMaterialProperty<Real>(_kappa_name)),
+    _kappa(getMaterialProperty<Real>("kappa_name")),
     _w_var(coupled("w")),
     _w(coupledValue("w"))
 {

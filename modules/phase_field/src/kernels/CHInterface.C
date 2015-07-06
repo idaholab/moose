@@ -14,17 +14,15 @@ InputParameters validParams<CHInterface>()
   params.addRequiredParam<MaterialPropertyName>("kappa_name", "The kappa used with the kernel");
   params.addRequiredParam<MaterialPropertyName>("mob_name", "The mobility used with the kernel");
   params.addCoupledVar("args", "Vector of arguments to mobility");
-
   return params;
 }
 
 CHInterface::CHInterface(const std::string & name, InputParameters parameters) :
     DerivativeMaterialInterface<JvarMapInterface<Kernel> >(name, parameters),
     _kappa(getMaterialProperty<Real>("kappa_name")),
-    _mob_name(getParam<MaterialPropertyName>("mob_name")),
-    _M(getMaterialPropertyByName<Real>(_mob_name)),
-    _dMdc(getMaterialPropertyDerivative<Real>(_mob_name, _var.name())),
-    _d2Mdc2(getMaterialPropertyDerivative<Real>(_mob_name, _var.name(), _var.name())),
+    _M(getMaterialProperty<Real>("mob_name")),
+    _dMdc(getMaterialPropertyDerivative<Real>("mob_name", _var.name())),
+    _d2Mdc2(getMaterialPropertyDerivative<Real>("mob_name", _var.name(), _var.name())),
     _second_u(second()),
     _second_test(secondTest()),
     _second_phi(secondPhi()),
@@ -38,11 +36,11 @@ CHInterface::CHInterface(const std::string & name, InputParameters parameters) :
   for (unsigned int i = 0; i < _nvar; ++i)
   {
     //Set material property values
-    _dMdarg[i] = &getMaterialPropertyDerivative<Real>(_mob_name, _coupled_moose_vars[i]->name());
-    _d2Mdcdarg[i] = &getMaterialPropertyDerivative<Real>(_mob_name, _var.name(), _coupled_moose_vars[i]->name());
+    _dMdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
+    _d2Mdcdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _var.name(), _coupled_moose_vars[i]->name());
     _d2Mdargdarg[i].resize(_nvar);
     for (unsigned int j = 0; j < _nvar; ++j)
-      _d2Mdargdarg[i][j] = &getMaterialPropertyDerivative<Real>(_mob_name, _coupled_moose_vars[i]->name(), _coupled_moose_vars[j]->name());
+      _d2Mdargdarg[i][j] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name(), _coupled_moose_vars[j]->name());
 
     //Set coupled variable gradients
     _coupled_grad_vars[i] = &coupledGradient("args", i);

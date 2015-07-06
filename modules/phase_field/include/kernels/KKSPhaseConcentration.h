@@ -49,9 +49,6 @@ private:
   VariableValue & _eta;
   unsigned int _eta_var;
 
-  /// switching function material property base names
-  std::string _h_name;
-
   /// Switching function \f$ h(\eta) \f$
   const MaterialProperty<Real> & _prop_h;
 

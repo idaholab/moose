@@ -19,7 +19,6 @@ InputParameters validParams<ComputeEigenstrain>()
 ComputeEigenstrain::ComputeEigenstrain(const std::string & name,
                                        InputParameters parameters) :
     ComputeStressFreeStrainBase(name, parameters),
-    _prefactor_name(getParam<MaterialPropertyName>("prefactor")),
     _prefactor(getMaterialProperty<Real>("prefactor"))
 {
   _eigen_base_tensor.fillFromInputVector(getParam<std::vector<Real> >("eigen_base"));
