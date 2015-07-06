@@ -44,7 +44,7 @@ void mooseSetToZero(T* &)
 
 /**
  * Interface class ("Veneer") to provide generator methods for derivative
- * material property names, and guarded getMaterialPropertyPointer calls
+ * material property names
  */
 template<class T>
 class DerivativeMaterialInterface :
@@ -54,23 +54,16 @@ class DerivativeMaterialInterface :
 public:
   DerivativeMaterialInterface(const std::string & name, InputParameters parameters);
 
-  // Interface style (1)
-  // return null pointers for non-existing material properties
-
   /**
-   * Fetch a pointer to a material property if it exists, otherwise return null
-   */
-  template<typename U>
-  MaterialProperty<U> * getMaterialPropertyPointer(const std::string & name);
-
-  // Interface style (2)
-  // return references to a zero material property for non-existing material properties
-
-  /**
-   * Fetch a material property if it exists, otherwise return a constant zero property
+   * Fetch a material property if it exists, otherwise return getZeroMaterialProperty.
+   * @param name The input parameter key of type MaterialPropertyName
    */
   template<typename U>
   const MaterialProperty<U> & getDefaultMaterialProperty(const std::string & name);
+
+  /// Fetch a material property by name if it exists, otherwise return getZeroMaterialProperty
+  template<typename U>
+  const MaterialProperty<U> & getDefaultMaterialPropertyByName(const std::string & name);
 
   ///@{
   /**
@@ -124,6 +117,14 @@ public:
   ///@}
 
 private:
+  /// Return a constant zero property
+  template<typename U>
+  const MaterialProperty<U> & getZeroMaterialProperty(const std::string & prop_name);
+
+  /// Check if a material property is present with the applicable restrictions
+  template<typename U>
+  bool haveMaterialProperty(const std::string & prop_name);
+
   /// Reference to FEProblem
   FEProblem & _dmi_fe_problem;
 
@@ -140,25 +141,11 @@ DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & 
 {
 }
 
-template<class T>
-template<typename U>
-MaterialProperty<U> *
-DerivativeMaterialInterface<T>::getMaterialPropertyPointer(const std::string & name)
-{
-  mooseDeprecated("getMaterialPropertyPointer is deprecated because it is construction order dependent. Use getDefaultMaterialProperty instead.");
-  return this->template hasMaterialProperty<U>(name) ? &(this->template getMaterialProperty<U>(name)) : NULL;
-}
-
 template<>
 template<typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterface<Material>::getDefaultMaterialProperty(const std::string & prop_name)
+DerivativeMaterialInterface<Material>::getZeroMaterialProperty(const std::string & prop_name)
 {
-  // if found return the requested property
-  if ((this->boundaryRestricted() && this->template hasBoundaryMaterialProperty<U>(prop_name)) ||
-      (this->template hasBlockMaterialProperty<U>(prop_name)))
-    return this->template getMaterialProperty<U>(prop_name);
-
   // declare this material property
   MaterialProperty<U> & preload_with_zero = this->template declareProperty<U>(prop_name);
 
@@ -176,17 +163,9 @@ DerivativeMaterialInterface<Material>::getDefaultMaterialProperty(const std::str
 template<class T>
 template<typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & prop_name)
+DerivativeMaterialInterface<T>::getZeroMaterialProperty(const std::string & /* prop_name */)
 {
   static MaterialProperty<U> _zero;
-
-  // Call the correct method to test for material property declarations
-  BlockRestrictable * blk = dynamic_cast<BlockRestrictable *>(this);
-  BoundaryRestrictable * bnd = dynamic_cast<BoundaryRestrictable *>(this);
-  if ((bnd && bnd->boundaryRestricted() && bnd->template hasBoundaryMaterialProperty<U>(prop_name)) ||
-      (blk && blk->template hasBlockMaterialProperty<U>(prop_name)) ||
-      (this->template hasMaterialProperty<U>(prop_name)))
-    return this->template getMaterialProperty<U>(prop_name);
 
   // make sure _zero is in a sane state
   unsigned int nqp = _dmi_fe_problem.getMaxQps();
@@ -203,6 +182,59 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & p
   // return a reference to a static zero property
   return _zero;
 }
+
+template<>
+template<typename U>
+bool
+DerivativeMaterialInterface<Material>::haveMaterialProperty(const std::string & prop_name)
+{
+  return ((this->boundaryRestricted() && this->template hasBoundaryMaterialProperty<U>(prop_name)) ||
+         (this->template hasBlockMaterialProperty<U>(prop_name)));
+}
+
+template<class T>
+template<typename U>
+bool
+DerivativeMaterialInterface<T>::haveMaterialProperty(const std::string & prop_name)
+{
+  // Call the correct method to test for material property declarations
+  BlockRestrictable * blk = dynamic_cast<BlockRestrictable *>(this);
+  BoundaryRestrictable * bnd = dynamic_cast<BoundaryRestrictable *>(this);
+  return ((bnd && bnd->boundaryRestricted() && bnd->template hasBoundaryMaterialProperty<U>(prop_name)) ||
+         (blk && blk->template hasBlockMaterialProperty<U>(prop_name)) ||
+         (this->template hasMaterialProperty<U>(prop_name)));
+}
+
+template<class T>
+template<typename U>
+const MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & name)
+{
+  // Check if it's just a constant
+  const MaterialProperty<U> * default_property = this->template defaultMaterialProperty<U>(name);
+  if (default_property)
+    return *default_property;
+
+  // if found return the requested property
+  MaterialPropertyName prop_name = this->deducePropertyName(name);
+  if (haveMaterialProperty<U>(prop_name))
+    return this->template getMaterialProperty<U>(prop_name);
+
+  return getZeroMaterialProperty<U>(prop_name);
+}
+
+template<class T>
+template<typename U>
+const MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getDefaultMaterialPropertyByName(const std::string & prop_name)
+{
+  // if found return the requested property
+  if (haveMaterialProperty<U>(prop_name))
+    return this->template getMaterialPropertyByName<U>(prop_name);
+
+  return getZeroMaterialProperty<U>(prop_name);
+}
+
 
 template<class T>
 template<typename U>
@@ -242,7 +274,7 @@ template<typename U>
 const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::vector<VariableName> &c)
 {
-  return getDefaultMaterialProperty<U>(propertyName(base, c));
+  return getDefaultMaterialPropertyByName<U>(propertyName(this->deducePropertyName(base), c));
 }
 
 template<class T>
@@ -250,7 +282,7 @@ template<typename U>
 const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const VariableName &c1)
 {
-  return getDefaultMaterialProperty<U>(propertyNameFirst(base, c1));
+  return getDefaultMaterialPropertyByName<U>(propertyNameFirst(this->deducePropertyName(base), c1));
 }
 
 template<class T>
@@ -258,17 +290,17 @@ template<typename U>
 const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2)
 {
-  return getDefaultMaterialProperty<U>(propertyNameSecond(base, c1, c2));
+  return getDefaultMaterialPropertyByName<U>(propertyNameSecond(this->deducePropertyName(base), c1, c2));
 }
-
 
 template<class T>
 template<typename U>
 const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2, const VariableName &c3)
 {
-  return getDefaultMaterialProperty<U>(propertyNameThird(base, c1, c2, c3));
+  return getDefaultMaterialPropertyByName<U>(propertyNameThird(this->deducePropertyName(base), c1, c2, c3));
 }
+
 
 template<class T>
 template<typename U>
