@@ -7,8 +7,8 @@ InputParameters validParams<PolynomialFreeEnergy>()
   params.addClassDescription("Polynomial free energy for single component systems");
   MooseEnum poly_order("4 6 8");
   params.addRequiredParam<MooseEnum>("polynomial_order", poly_order, "Order of polynomial free energy");
-  params.addParam<std::string>("c_eq_name", "c_eq", "Name of material property storing the equilibrium concentration");
-  params.addParam<std::string>("W_name", "barr_height", "Name of the material property storing the barrier height");
+  params.addParam<MaterialPropertyName>("c_eq_name", "c_eq", "Name of material property storing the equilibrium concentration");
+  params.addParam<MaterialPropertyName>("W_name", "barr_height", "Name of the material property storing the barrier height");
   params.addRequiredCoupledVar("c", "Concentration");
   return params;
 }
@@ -17,10 +17,8 @@ PolynomialFreeEnergy::PolynomialFreeEnergy(const std::string & name,
                                            InputParameters parameters) :
     DerivativeParsedMaterialHelper(name, parameters),
     _c("c"),
-    _a_name(getParam<std::string>("c_eq_name")),
-    _W_name(getParam<std::string>("W_name")),
-    _a(_a_name.c_str()),
-    _W(_W_name.c_str()),
+    _a("c_eq_name"),
+    _W("W_name"),
     _order(getParam<MooseEnum>("polynomial_order"))
 {
   EBFunction free_energy;
@@ -56,8 +54,8 @@ PolynomialFreeEnergy::PolynomialFreeEnergy(const std::string & name,
   std::vector<std::string> nil_str(0);
   std::vector<Real> nil_real(0);
   std::vector<std::string> mat_prop_names(2);
-  mat_prop_names[0] = _W_name;
-  mat_prop_names[1] = _a_name;
+  mat_prop_names[0] = "W_name";
+  mat_prop_names[1] = "c_eq_name";
 
   //Parse function
   functionParse(free_energy, nil_str, nil_str, mat_prop_names, nil_str, nil_real);
