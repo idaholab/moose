@@ -3,11 +3,11 @@
 #include <sstream>
 #include <algorithm>
 
-const std::string
-DerivativeMaterialPropertyNameInterface::propertyName(const std::string &base,const std::vector<std::string> &c) const
+const MaterialPropertyName
+DerivativeMaterialPropertyNameInterface::propertyName(const MaterialPropertyName &base,const std::vector<VariableName> &c) const
 {
   // to obtain well defined names we sort alphabetically
-  std::vector<std::string> a(c);
+  std::vector<VariableName> a(c);
   std::sort(a.begin(), a.end());
 
   // derivative order
@@ -42,25 +42,25 @@ DerivativeMaterialPropertyNameInterface::propertyName(const std::string &base,co
   return name.str();
 }
 
-const std::string
-DerivativeMaterialPropertyNameInterface::propertyNameFirst(const std::string &base, const std::string &c1) const
+const MaterialPropertyName
+DerivativeMaterialPropertyNameInterface::propertyNameFirst(const MaterialPropertyName &base, const VariableName &c1) const
 {
   return "d" + base + "/d" + c1;
 }
 
-const std::string
-DerivativeMaterialPropertyNameInterface::propertyNameSecond(const std::string &base, const std::string &c1, const std::string &c2) const
+const MaterialPropertyName
+DerivativeMaterialPropertyNameInterface::propertyNameSecond(const MaterialPropertyName &base, const VariableName &c1, const VariableName &c2) const
 {
-  std::vector<std::string> c(2);
+  std::vector<VariableName> c(2);
   c[0] = c1;
   c[1] = c2;
   return propertyName(base, c);
 }
 
-const std::string
-DerivativeMaterialPropertyNameInterface::propertyNameThird(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3) const
+const MaterialPropertyName
+DerivativeMaterialPropertyNameInterface::propertyNameThird(const MaterialPropertyName &base, const VariableName &c1, const VariableName &c2, const VariableName &c3) const
 {
-  std::vector<std::string> c(3);
+  std::vector<VariableName> c(3);
   c[0] = c1;
   c[1] = c2;
   c[2] = c3;

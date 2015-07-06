@@ -80,13 +80,13 @@ public:
    * @param c The variable(s) to take the derivatives with respect to
    */
   template<typename U>
-  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::vector<std::string> &c);
+  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::vector<VariableName> &c);
   template<typename U>
-  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1);
+  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const VariableName &c1);
   template<typename U>
-  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
+  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2);
   template<typename U>
-  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
+  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2, const VariableName &c3);
   ///@}
 
   ///@{
@@ -97,13 +97,30 @@ public:
    * @param c The variable(s) to take the derivatives with respect to
    */
   template<typename U>
-  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::vector<std::string> &c);
+  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::vector<VariableName> &c);
   template<typename U>
-  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1);
+  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const VariableName &c1);
   template<typename U>
-  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
+  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2);
   template<typename U>
-  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
+  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2, const VariableName &c3);
+  ///@}
+
+  ///@{
+  /**
+   * Methods for retreiving derivative material properties
+   * @tparam U The material property type
+   * @param base The name of the property to take the derivative of
+   * @param c The variable(s) to take the derivatives with respect to
+   */
+  template<typename U>
+  const MaterialProperty<U> & getMaterialPropertyDerivativeByName(const MaterialPropertyName &base, const std::vector<VariableName> &c);
+  template<typename U>
+  const MaterialProperty<U> & getMaterialPropertyDerivativeByName(const MaterialPropertyName &base, const VariableName &c1);
+  template<typename U>
+  const MaterialProperty<U> & getMaterialPropertyDerivativeByName(const MaterialPropertyName &base, const VariableName &c1, const VariableName &c2);
+  template<typename U>
+  const MaterialProperty<U> & getMaterialPropertyDerivativeByName(const MaterialPropertyName &base, const VariableName &c1, const VariableName &c2, const VariableName &c3);
   ///@}
 
 private:
@@ -137,12 +154,9 @@ template<typename U>
 const MaterialProperty<U> &
 DerivativeMaterialInterface<Material>::getDefaultMaterialProperty(const std::string & prop_name)
 {
-
   // if found return the requested property
-  if (this->boundaryRestricted() && this->template hasBoundaryMaterialProperty<U>(prop_name))
-    return this->template getMaterialProperty<U>(prop_name);
-
-  else if (this->template hasBlockMaterialProperty<U>(prop_name))
+  if ((this->boundaryRestricted() && this->template hasBoundaryMaterialProperty<U>(prop_name)) ||
+      (this->template hasBlockMaterialProperty<U>(prop_name)))
     return this->template getMaterialProperty<U>(prop_name);
 
   // declare this material property
@@ -169,13 +183,9 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & p
   // Call the correct method to test for material property declarations
   BlockRestrictable * blk = dynamic_cast<BlockRestrictable *>(this);
   BoundaryRestrictable * bnd = dynamic_cast<BoundaryRestrictable *>(this);
-  if (bnd && bnd->boundaryRestricted() && bnd->template hasBoundaryMaterialProperty<U>(prop_name))
-    return this->template getMaterialProperty<U>(prop_name);
-
-  else if (blk && blk->template hasBlockMaterialProperty<U>(prop_name))
-    return this->template getMaterialProperty<U>(prop_name);
-
-  else if (this->template hasMaterialProperty<U>(prop_name))
+  if ((bnd && bnd->boundaryRestricted() && bnd->template hasBoundaryMaterialProperty<U>(prop_name)) ||
+      (blk && blk->template hasBlockMaterialProperty<U>(prop_name)) ||
+      (this->template hasMaterialProperty<U>(prop_name)))
     return this->template getMaterialProperty<U>(prop_name);
 
   // make sure _zero is in a sane state
@@ -197,16 +207,15 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & p
 template<class T>
 template<typename U>
 MaterialProperty<U> &
-DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::vector<std::string> &c)
+DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::vector<VariableName> &c)
 {
   return this->template declareProperty<U>(propertyName(base, c));
 }
 
-
 template<class T>
 template<typename U>
 MaterialProperty<U> &
-DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::string &c1)
+DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const VariableName &c1)
 {
   return this->template declareProperty<U>(propertyNameFirst(base, c1));
 }
@@ -214,7 +223,7 @@ DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &bas
 template<class T>
 template<typename U>
 MaterialProperty<U> &
-DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2)
+DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2)
 {
   return this->template declareProperty<U>(propertyNameSecond(base, c1, c2));
 }
@@ -222,7 +231,7 @@ DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &bas
 template<class T>
 template<typename U>
 MaterialProperty<U> &
-DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
+DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2, const VariableName &c3)
 {
   return this->template declareProperty<U>(propertyNameThird(base, c1, c2, c3));
 }
@@ -231,7 +240,15 @@ DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &bas
 template<class T>
 template<typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1)
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::vector<VariableName> &c)
+{
+  return getDefaultMaterialProperty<U>(propertyName(base, c));
+}
+
+template<class T>
+template<typename U>
+const MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const VariableName &c1)
 {
   return getDefaultMaterialProperty<U>(propertyNameFirst(base, c1));
 }
@@ -239,7 +256,40 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 template<class T>
 template<typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2)
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2)
+{
+  return getDefaultMaterialProperty<U>(propertyNameSecond(base, c1, c2));
+}
+
+
+template<class T>
+template<typename U>
+const MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const VariableName &c1, const VariableName &c2, const VariableName &c3)
+{
+  return getDefaultMaterialProperty<U>(propertyNameThird(base, c1, c2, c3));
+}
+
+template<class T>
+template<typename U>
+const MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(const MaterialPropertyName &base, const std::vector<VariableName> &c)
+{
+  return getDefaultMaterialProperty<U>(propertyName(base, c));
+}
+
+template<class T>
+template<typename U>
+const MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(const MaterialPropertyName &base, const VariableName &c1)
+{
+  return getDefaultMaterialProperty<U>(propertyNameFirst(base, c1));
+}
+
+template<class T>
+template<typename U>
+const MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(const MaterialPropertyName &base, const VariableName &c1, const VariableName &c2)
 {
   return getDefaultMaterialProperty<U>(propertyNameSecond(base, c1, c2));
 }
@@ -247,7 +297,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 template<class T>
 template<typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(const MaterialPropertyName &base, const VariableName &c1, const VariableName &c2, const VariableName &c3)
 {
   return getDefaultMaterialProperty<U>(propertyNameThird(base, c1, c2, c3));
 }

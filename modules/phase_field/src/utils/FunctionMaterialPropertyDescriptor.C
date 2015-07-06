@@ -57,7 +57,10 @@ FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expressi
   else if (open != std::string::npos && close != std::string::npos && expression.substr(0, open) == "D")
   {
     // parse argument list 0 is the function and 1,.. ar the variable to take the derivative w.r.t.
-    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), _derivative_vars, 0, ",");
+    std::vector<std::string> buffer;
+    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), buffer, 0, ",");
+    _derivative_vars.resize(buffer.size());
+    std::copy(buffer.begin(), buffer.end(), _derivative_vars.begin());
 
     // check for empty [] brackets
     if (_derivative_vars.size() > 0)
@@ -91,7 +94,10 @@ FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & 
     _base_name = expression.substr(0, open);
 
     // parse argument list
-    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), _dependent_vars, 0, ",");
+    std::vector<std::string> buffer;
+    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), buffer, 0, ",");
+    _derivative_vars.resize(buffer.size());
+    std::copy(buffer.begin(), buffer.end(), _derivative_vars.begin());
 
     // cremove duplicates from dependent variable list
     std::sort(_dependent_vars.begin(), _dependent_vars.end());
