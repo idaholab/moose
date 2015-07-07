@@ -1,0 +1,27 @@
+[Tests]
+  [./test_inside_boundingbox]
+    type = 'Exodiff'
+    input = 'boundingbox_nodeset_inside_test.i'
+    exodiff = 'boundingbox_nodeset_inside_out.e'
+  [../]
+
+  [./test_outside_boundingbox]
+    type = 'Exodiff'
+    input = 'boundingbox_nodeset_outside_test.i'
+    exodiff = 'boundingbox_nodeset_outside_out.e'
+  [../]
+
+  [./test_bad_coord]
+    type = 'RunException'
+    input = 'boundingbox_nodeset_inside_test.i'
+    expect_err = "No element centroids found within the bounding box!"
+    cli_args = 'MeshModifiers/middle_node/bottom_left="1 1 0"'
+  [../]
+
+  [./test_bad_boundaryid]
+    type = 'RunException'
+    input = 'boundingbox_nodeset_inside_test.i'
+    expect_err = "Only one boundary ID can be assigned to a nodeset using a bounding box!"
+    cli_args = 'MeshModifiers/middle_node/new_boundary="middle_node bottom"'
+  [../]
+[]
