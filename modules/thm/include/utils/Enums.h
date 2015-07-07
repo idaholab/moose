@@ -57,7 +57,7 @@ namespace RELAP7
     INVALID = 4
   };
 
-  /// Type of fuel
+  /// Type of heat structure
   enum EHeatStructureType
   {
     HS_TYPE_INVALID,
