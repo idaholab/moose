@@ -34,9 +34,13 @@ protected:
 
 
   virtual void computeProperties();
+  virtual void initQpStatefulProperties();
 
   MaterialProperty<Real> & _axial_force;
   MaterialProperty<Real> & _stiff_elem;
+  MaterialProperty<Real> & _bond_status;
+  MaterialProperty<Real> & _bond_status_old;
+  
   Real _youngs_modulus;
   Real _poissons_ratio;
   Real _MeshSpacing;
@@ -44,6 +48,10 @@ protected:
   Real _ThicknessPerLayer;
   Real _VolumePerNode;
   Real _lamda;
+  Real _CriticalStretch;
+  
+  int _callnum;
+  
   bool _youngs_modulus_coupled;
   VariableValue & _youngs_modulus_var;
 

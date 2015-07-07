@@ -1,8 +1,8 @@
 [Mesh]
   type = PeridynamicsMesh
   dim = 2
-  nx = 50
-  ny = 50
+  nx = 25
+  ny = 25
   xmin = 0.0
   ymin = 0.0
   xmax = 100.0
@@ -34,6 +34,14 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./bond_status]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./failure_index]
+    order = FIRST
+    family = LAGRANGE
+  [../]
   [./react_x]
     order = FIRST
     family = LAGRANGE
@@ -45,6 +53,15 @@
   [./react_z]
     order = FIRST
     family = LAGRANGE
+  [../]
+[]
+
+[Functions]
+  [./bc_func]
+    type = ParsedFunction
+    value = t*d
+    vars = 'd'
+    vals = '1'
   [../]
 []
 
@@ -74,10 +91,10 @@
     value = 0.0
   [../]
   [./fixy1]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
-    value = 1.0
+    function = bc_func
   [../]
   [./fixz1]
     type = DirichletBC
@@ -121,6 +138,12 @@
     property = stiff_elem
     variable = stiff_elem
   [../]
+  [./bond_status]
+    type = MaterialRealAux
+    block = 0
+    property = bond_status
+    variable = bond_status
+  [../]
 []
 
 [Preconditioning]
@@ -132,6 +155,7 @@
 
 [Executioner]
   type = Transient
+  dt = 0.01
   solve_type = PJFNK
   nl_max_its = 100
   nl_rel_tol = 1e-6
@@ -200,8 +224,9 @@
     disp_z = disp_z
     youngs_modulus = 70000
     poissons_ratio = 0.33
-    MeshSpacing = 2.0                # MeshSpacing = (xmax - xmin) / nx;
+    MeshSpacing = 4.0                # MeshSpacing = (xmax - xmin) / nx
     ThicknessPerLayer = 1.0          # For 2D case, ThicknessPerLayer needs a value; For 3D case, ThicknessPerLayer = MeshSpacing
+    CriticalStretch = 0.01
   [../]
 []
 

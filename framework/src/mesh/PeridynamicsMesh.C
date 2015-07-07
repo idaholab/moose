@@ -460,6 +460,7 @@ PeridynamicsMesh::buildMesh()
   	}
   	boundary_info.nodeset_name(0) = "Bottom";
   	boundary_info.nodeset_name(1) = "Top";
+  	cout << "BondNum = " << BondNum << endl;
  	}
  	else if(_dim == 3)
  	{

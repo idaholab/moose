@@ -34,6 +34,7 @@ protected:
 
   const MaterialProperty<Real> & _axial_force;
   const MaterialProperty<Real> & _stiff_elem;
+  const MaterialProperty<Real> & _bond_status;
 
 private:
   const unsigned int _component;

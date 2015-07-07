@@ -8,7 +8,7 @@
 
 #include "Material.h"
 #include "SymmElasticityTensor.h"
-//using namespace std;
+using namespace std;
 
 template<>
 InputParameters validParams<StressDivergenceTrussPD>()
@@ -31,6 +31,7 @@ StressDivergenceTrussPD::StressDivergenceTrussPD(const std::string & name, Input
   :Kernel(name, parameters),
    _axial_force(getMaterialProperty<Real>("axial_force" + getParam<std::string>("appended_property_name"))),
    _stiff_elem(getMaterialProperty<Real>("stiff_elem" + getParam<std::string>("appended_property_name"))),
+   _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
    _component(getParam<unsigned int>("component")),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),
@@ -61,7 +62,7 @@ StressDivergenceTrussPD::computeResidual()
 
   RealGradient orientation( (*_orientation)[0] );
   orientation /= orientation.size();
-  VectorValue<Real> force_local = _axial_force[0] * orientation;
+  VectorValue<Real> force_local = _axial_force[0] * _bond_status[0] * orientation;
   int sign(-_test[0][0]/std::abs(_test[0][0]));
   _local_re(0) = sign * force_local(_component);
   _local_re(1) = -_local_re(0);
