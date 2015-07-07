@@ -10,11 +10,11 @@ template<>
 InputParameters validParams<SmoothCircleBaseIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-
   params.addRequiredParam<Real>("invalue", "The variable value inside the circle");
   params.addRequiredParam<Real>("outvalue", "The variable value outside the circle");
   params.addParam<Real>("int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
   params.addParam<bool>("3D_spheres", true, "in 3D, whether the objects are spheres or columns");
+  params.addParam<bool>("zero_gradient", false, "Set the gradient DOFs to zero. This can avoid numerical problems with higher order shape functions and overlapping circles.");
   return params;
 }
 
@@ -26,6 +26,7 @@ SmoothCircleBaseIC::SmoothCircleBaseIC(const std::string & name,
     _outvalue(parameters.get<Real>("outvalue")),
     _int_width(parameters.get<Real>("int_width")),
     _3D_spheres(parameters.get<bool>("3D_spheres")),
+    _zero_gradient(parameters.get<bool>("zero_gradient")),
     _num_dim(_3D_spheres ? 3 : 2)
 {
 }
@@ -64,7 +65,10 @@ SmoothCircleBaseIC::value(const Point & p)
 RealGradient
 SmoothCircleBaseIC::gradient(const Point & p)
 {
-  Point gradient = Gradient(0.0, 0.0, 0.0);
+  if (_zero_gradient)
+    return 0.0;
+
+  RealGradient gradient = 0.0;
   Real value = _outvalue;
   Real val2 = 0.0;
 
@@ -108,7 +112,7 @@ SmoothCircleBaseIC::computeCircleValue(const Point & p, const Point & center, co
     return value;
 }
 
-Point
+RealGradient
 SmoothCircleBaseIC::computeCircleGradient(const Point & p, const Point & center, const Real & radius)
 {
   Point l_center = center;
@@ -134,6 +138,5 @@ SmoothCircleBaseIC::computeCircleGradient(const Point & p, const Point & center,
   if (dist != 0.0)
     return _mesh.minPeriodicVector(_var.number(), center, p) * (DvalueDr / dist);
   else
-    return Gradient(0.0, 0.0, 0.0);
-
+    return 0.0;
 }
