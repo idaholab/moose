@@ -32,6 +32,7 @@
 #include "SideSetsFromPoints.h"
 #include "SideSetsFromNormals.h"
 #include "AddExtraNodeset.h"
+#include "BoundingBoxNodeSet.h"
 #include "Transform.h"
 #include "SideSetsAroundSubdomain.h"
 #include "SideSetsBetweenSubdomains.h"
@@ -404,6 +405,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(SideSetsFromPoints);
   registerMeshModifier(SideSetsFromNormals);
   registerMeshModifier(AddExtraNodeset);
+  registerMeshModifier(BoundingBoxNodeSet);
   registerMeshModifier(Transform);
   registerMeshModifier(SideSetsAroundSubdomain);
   registerMeshModifier(SideSetsBetweenSubdomains);
