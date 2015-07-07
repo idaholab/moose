@@ -4,6 +4,7 @@
 #include "Simulation.h"
 #include "FEProblem.h"
 #include "GeometricalComponent.h"
+#include "FluidPropertiesBase.h"
 #include <sstream>
 
 
@@ -26,7 +27,6 @@ InputParameters validParams<FlowJunction>()
 
 FlowJunction::FlowJunction(const std::string & name, InputParameters params) :
     Junction(name, params),
-    _model_type(_sim.getParam<FlowModel::EModelType>("model_type")),
     _lm_name(genName(name, "lm")),
     _K(getParam<std::vector<Real> >("K")),
     _scaling_factor(getParam<Real>("scaling_factor")),
@@ -36,6 +36,13 @@ FlowJunction::FlowJunction(const std::string & name, InputParameters params) :
 
 FlowJunction::~FlowJunction()
 {
+}
+
+void
+FlowJunction::init()
+{
+  const FluidPropertiesBase & fp = _sim.getUserObject<FluidPropertiesBase>(getParam<UserObjectName>("fp"));
+  _model_type = fp.modelType();
 }
 
 void

@@ -27,11 +27,13 @@ public:
   PipeBase(const std::string & name, InputParameters params);
   virtual ~PipeBase();
 
+  virtual void init();
+
   virtual const std::string & getType() { return _type; }
 
   // Pipe specific interface ----
   virtual Real getLength() = 0;
-  virtual UserObjectName getFluidPropertiesName() const = 0;
+  virtual UserObjectName getFluidPropertiesName() const;
 
 public:
   static const std::string _type;

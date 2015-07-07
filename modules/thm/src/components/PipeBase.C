@@ -23,3 +23,15 @@ PipeBase::PipeBase(const std::string & name, InputParameters params) :
 PipeBase::~PipeBase()
 {
 }
+
+void
+PipeBase::init()
+{
+  FlowModel::init();
+}
+
+UserObjectName
+PipeBase::getFluidPropertiesName() const
+{
+  return FlowModel::_fp_name;
+}

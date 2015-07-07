@@ -18,6 +18,7 @@ public:
   FlowJunction(const std::string & name, InputParameters params);
   virtual ~FlowJunction();
 
+  virtual void init();
   virtual void addVariables();
   virtual void addMooseObjects();
 
