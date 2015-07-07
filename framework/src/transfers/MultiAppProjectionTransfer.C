@@ -263,14 +263,15 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
     FEProblem & from_problem = *_multi_app->appProblem(i_global);
     EquationSystems & from_es = from_problem.es();
     MeshBase & from_mesh = from_es.get_mesh();
-    MeshTools::BoundingBox app_box = MeshTools::BoundingBox(MeshTools::processor_bounding_box(from_mesh, from_mesh.processor_id()));
+    MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(from_mesh, from_mesh.processor_id());
 
-    // Cast the bounding box into a pair of points to simplify MPI
-    // communication.  Translate the bounding box to the app's position.
+    // Translate the bounding box to the app's position.
+    app_box.first += _multi_app->position(i_global);
+    app_box.second += _multi_app->position(i_global);
+    local_bboxes[i_local] = app_box;
+
+    // Cast the bounding box into a pair of points to allow MPI communication.
     bb_points[i_local] = static_cast<std::pair<Point, Point> >(app_box);
-    bb_points[i_local].first = bb_points[i_local].first + _multi_app->position(i_global);
-    bb_points[i_local].second = bb_points[i_local].second + _multi_app->position(i_global);
-    local_bboxes[i_local] = static_cast<MeshTools::BoundingBox>(bb_points[i_local]);
 
     // Get a serialized copy of the subapp's solution vector.
     MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
@@ -294,10 +295,10 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   Next, serialize the bounding boxes, and keep track of how many apps (i.e. how
   many bounding boxes) each processor has.
   ********************/
-  std::vector<unsigned int> apps_per_proc(1, n_local_apps);
-
   _communicator.allgather(bb_points);
-  _communicator.allgather(apps_per_proc, true);
+
+  std::vector<unsigned int> apps_per_proc(n_processors());
+  _communicator.allgather(n_local_apps, apps_per_proc);
 
   unsigned int n_sources = 0;
   for (unsigned int i=0; i<n_processors(); i++)
