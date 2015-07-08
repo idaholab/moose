@@ -3,10 +3,27 @@
   dim = 2
   nx = 10
   ny = 10
+  xmax = 0.1
+  ymax = 0.1
+  displacements = 'disp_x disp_y'
 []
 
 [Variables]
   [./u]
+  [../]
+[]
+
+[AuxVariables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
+[]
+
+[Functions]
+  [./disp_fun]
+    type = ParsedFunction
+    value = 2*t
   [../]
 []
 
@@ -18,6 +35,14 @@
   [./td]
     type = TimeDerivative
     variable = u
+  [../]
+[]
+
+[AuxKernels]
+  [./disp_kern]
+    type = FunctionAux
+    variable = disp_x
+    function = disp_fun
   [../]
 []
 
@@ -40,10 +65,7 @@
   type = Transient
   num_steps = 4
   dt = 0.01
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
@@ -54,3 +76,4 @@
   print_linear_residuals = true
   print_perf_log = true
 []
+
