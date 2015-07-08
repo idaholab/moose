@@ -25,7 +25,7 @@ template<>
 InputParameters validParams<SetupPreconditionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-  CreateExecutionerAction::populateCommonExecutionerParams(params);
+  params += Moose::PetscSupport::getPetscValidParams();
 
   return params;
 }
@@ -52,6 +52,6 @@ SetupPreconditionerAction::act()
      * Go ahead and set common precondition options here.  The child classes will still be called
      * through the action warehouse
      */
-    CreateExecutionerAction::storeCommonExecutionerParams(*_problem, _pars);
+    Moose::PetscSupport::storePetscOptions(*_problem, _pars);
   }
 }

@@ -60,12 +60,9 @@ class Split :
   MooseEnum _schur_ainv;
   ///@}
 
-  ///@{
   /// Additional PETSc options
-  MultiMooseEnum _petsc_options;
-  MultiMooseEnum _petsc_options_iname;
-  std::vector<std::string> _petsc_options_value;
-  ///@}
+  Moose::PetscSupport::PetscOptions & _petsc_options;
+
 #endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 };
 
