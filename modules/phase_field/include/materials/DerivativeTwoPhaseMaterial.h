@@ -42,14 +42,8 @@ protected:
   /// libMesh variable number for eta
   unsigned int _eta_var;
 
-  /// A-phase derivative material name
-  MaterialPropertyName _fa_name;
-  /// B-phase derivative material name
-  MaterialPropertyName _fb_name;
-
   ///@{
   /// h(eta) switching function
-  MaterialPropertyName _h_name;
   const MaterialProperty<Real> & _h;
   const MaterialProperty<Real> & _dh;
   const MaterialProperty<Real> & _d2h;
@@ -58,7 +52,6 @@ protected:
 
   ///@{
   /// g(eta) switching function
-  MaterialPropertyName _g_name;
   const MaterialProperty<Real> & _g;
   const MaterialProperty<Real> & _dg;
   const MaterialProperty<Real> & _d2g;

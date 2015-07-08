@@ -20,9 +20,8 @@ InputParameters validParams<ACInterface>()
 ACInterface::ACInterface(const std::string & name, InputParameters parameters) :
     DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(name, parameters),
     _kappa(getMaterialProperty<Real>("kappa_name")),
-    _mob_name(getParam<MaterialPropertyName>("mob_name")),
-    _L(getMaterialProperty<Real>(_mob_name)),
-    _dLdop(getMaterialPropertyDerivative<Real>(_mob_name, _var.name()))
+    _L(getMaterialProperty<Real>("mob_name")),
+    _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name()))
 {
   // Get number of coupled variables
   unsigned int nvar = _coupled_moose_vars.size();
@@ -32,7 +31,7 @@ ACInterface::ACInterface(const std::string & name, InputParameters parameters) :
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < nvar; ++i)
-    _dLdarg[i] = &getMaterialPropertyDerivative<Real>(_mob_name, _coupled_moose_vars[i]->name());
+    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
 }
 
 RealGradient

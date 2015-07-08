@@ -47,13 +47,7 @@ protected:
 private:
   /// coupled variable for cb
   unsigned int _cb_var;
-  std::string _cb_name;
-
-
-  /// free energy function material property base name
-  std::string _Fa_name;
-  /// free energy function material property base name
-  std::string _Fb_name;
+  VariableName _cb_name;
 
   /// material properties we need to access
   const MaterialProperty<Real> & _dfadca;

@@ -26,7 +26,6 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  std::string _kappa_name;
   const MaterialProperty<Real> & _kappa;
   unsigned int _w_var;
   VariableValue & _w;

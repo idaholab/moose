@@ -31,16 +31,7 @@ protected:
   unsigned int _nvar;
 
   /// name of the order parameter (needed to retrieve the derivative material properties)
-  std::string _eta_name;
-
-  /// phase a free energy function material property base names
-  std::string _Fa_name;
-
-  /// phase b free energy function material property base names
-  std::string _Fb_name;
-
-  /// switching function material property base names
-  std::string _h_name;
+  VariableName _eta_name;
 
   /// Derivatives of \f$ F_a \f$ with respect to all coupled variables
   std::vector<const MaterialProperty<Real> *> _derivatives_Fa;

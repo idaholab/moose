@@ -43,19 +43,13 @@ private:
   /// Number of coupled variables
   unsigned int _nvar;
 
-  /// free energy function material property base names
-  std::string _Fa_name;
-
-  /// free energy function material property base names
-  std::string _Fb_name;
-
-  /// switching function material property base name
-  std::string _h_name;
-
+  ///@{
+  /// Phase concnetration variables
   unsigned int _ca_var;
-  std::string _ca_name;
+  VariableName _ca_name;
   unsigned int _cb_var;
-  std::string _cb_name;
+  VariableName _cb_name;
+  ///@}
 
   /// Derivatives of \f$ dFa/dca \f$ with respect to all coupled variables
   std::vector<const MaterialProperty<Real> *> _second_derivatives;

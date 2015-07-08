@@ -30,7 +30,6 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  const std::string _F_name;
   const unsigned int _nvar;
   std::vector<const MaterialProperty<Real>* > _second_derivatives;
   std::vector<const MaterialProperty<Real>* > _third_derivatives;

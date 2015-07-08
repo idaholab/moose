@@ -58,7 +58,7 @@ public:
   }
 
   /// take another derivative
-  void addDerivative(const std::string & var) { _derivative_vars.push_back(var); }
+  void addDerivative(const VariableName & var) { _derivative_vars.push_back(var); }
 
 private:
   void parseDerivative(const std::string &);
@@ -70,8 +70,8 @@ private:
   /// function material property base name
   std::string _base_name;
 
-  std::vector<std::string> _dependent_vars;
-  std::vector<std::string> _derivative_vars;
+  std::vector<VariableName> _dependent_vars;
+  std::vector<VariableName> _derivative_vars;
 
   /// material property value
   const MaterialProperty<Real> * _value;

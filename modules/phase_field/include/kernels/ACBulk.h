@@ -35,9 +35,6 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type) = 0;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// Name of mobility material property
-  const MaterialPropertyName _mob_name;
-
   /// Mobility
   const MaterialProperty<Real> & _L;
 

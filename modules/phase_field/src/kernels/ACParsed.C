@@ -11,23 +11,22 @@ InputParameters validParams<ACParsed>()
 {
   InputParameters params = validParams<ACBulk>();
   params.addClassDescription("Allen-Cahn Kernel that uses a DerivativeMaterial Free Energy");
-  params.addRequiredParam<std::string>("f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
+  params.addRequiredParam<MaterialPropertyName>("f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
   return params;
 }
 
 ACParsed::ACParsed(const std::string & name, InputParameters parameters) :
     ACBulk(name, parameters),
-    _F_name(getParam<std::string>("f_name")),
     _nvar(_coupled_moose_vars.size()),
-    _dFdEta(getMaterialPropertyDerivative<Real>(_F_name, _var.name())),
-    _d2FdEta2(getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name()))
+    _dFdEta(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
+    _d2FdEta2(getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name()))
 {
   // reserve space for derivatives
   _d2FdEtadarg.resize(_nvar);
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
-    _d2FdEtadarg[i] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _coupled_moose_vars[i]->name());
+    _d2FdEtadarg[i] = &getMaterialPropertyDerivative<Real>("f_name", _var.name(), _coupled_moose_vars[i]->name());
 }
 
 Real
