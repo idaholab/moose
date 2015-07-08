@@ -31,24 +31,14 @@ class MaterialRealVectorValueAux : public MaterialAuxBase<RealVectorValue>
 {
 public:
 
-  /**
-   * Class constructor
-   * @param name AuxKernel name
-   * @param parameters The input parameters for this object
-   */
   MaterialRealVectorValueAux(const std::string & name, InputParameters parameters);
 
-  /**
-   * Class destructor
-   */
   virtual ~MaterialRealVectorValueAux();
 
 protected:
 
-  /**
-   * Compute the value of the material property for the given component
-   */
-  virtual Real computeValue();
+  /// Returns the value of the material property for the given component
+  virtual Real getRealValue();
 
   /// The vector component to output
   unsigned int _component;
