@@ -17,8 +17,8 @@ template<>
 InputParameters validParams<CrossTermBarrierFunctionMaterial>();
 
 /**
- * MultiBarrierFunctionMaterial is a constraint kernel that acts on one of the eta_i variables to
- * enforce \f$ \sum_n h_i(\eta_i) \equiv 1 \f$.
+ * CrossTermBarrierFunctionMaterial is a constraint kernel that acts on one of the eta_i variables to
+ * enforce \f$ \sum_n g_i(\eta_i) \equiv 1 \f$.
  */
 class CrossTermBarrierFunctionMaterial : public DerivativeMaterialInterface<Material>
 {
@@ -31,7 +31,7 @@ protected:
   /// name of the function of eta (used to generate the material property names)
   std::string _function_name;
 
-  /// Polynomial order of the switching function \f$ h(\eta) \f$
+  /// Polynomial order of the barrier function \f$ g(\eta) \f$
   MooseEnum _g_order;
 
   ///barrier function height vector
@@ -41,7 +41,7 @@ protected:
   unsigned int _num_eta;
   std::vector<VariableValue *> _eta;
 
-  /// Switching functions and their drivatives
+  /// Barrier functions and their drivatives
   MaterialProperty<Real> & _prop_g;
   std::vector<MaterialProperty<Real> *> _prop_dg, _prop_d2g;
 };

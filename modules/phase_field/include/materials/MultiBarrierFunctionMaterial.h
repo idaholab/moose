@@ -32,14 +32,14 @@ protected:
   /// name of the function of eta (used to generate the material property names)
   std::string _function_name;
 
-  /// Polynomial order of the switching function \f$ h(\eta) \f$
+  /// Polynomial order of the barrier function \f$ g(\eta) \f$
   MooseEnum _g_order;
 
   /// order parameters
   unsigned int _num_eta;
   std::vector<VariableValue *> _eta;
 
-  /// Switching functions and their drivatives
+  /// Barrier functions and their drivatives
   MaterialProperty<Real> & _prop_g;
   std::vector<MaterialProperty<Real> *> _prop_dg, _prop_d2g;
 };
