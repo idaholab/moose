@@ -52,6 +52,6 @@ SetupPreconditionerAction::act()
      * Go ahead and set common precondition options here.  The child classes will still be called
      * through the action warehouse
      */
-    CreateExecutionerAction::storeCommonExecutionerParams(*_problem, _pars);
+    CreateExecutionerAction::storePetscOptions(*_problem, _pars);
   }
 }

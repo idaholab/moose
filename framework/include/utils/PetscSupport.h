@@ -34,6 +34,21 @@ namespace Moose
 {
 namespace PetscSupport
 {
+
+/**
+ * A struct for storing the various types of petsc options and values
+ */
+struct PetscOptions
+{
+  PetscOptions() :
+      flags("", "", true)
+  {}
+
+  std::vector<std::string> inames;
+  std::vector<std::string> values;
+  MultiMooseEnum flags;
+};
+
 void petscSetOptions(FEProblem & problem);
 
 void petscSetDefaults(FEProblem & problem);

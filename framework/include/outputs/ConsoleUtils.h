@@ -78,6 +78,11 @@ std::string outputLegacyInformation(FEProblem & problem);
 std::string outputSystemInformationHelper(const System & system);
 
 /**
+ * Outputs the PETSc settings used
+ */
+std::string outputPetscOptions(FEProblem & problem);
+
+/**
  * Helper function function for stringstream formatting
  */
 void insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & curr);

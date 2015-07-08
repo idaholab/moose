@@ -153,13 +153,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
 {
 
-#ifdef LIBMESH_HAVE_PETSC
-  // put in empty arrays for PETSc options
-  this->parameters().set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
-  this->parameters().set<MultiMooseEnum>("petsc_inames") = MultiMooseEnum("", "", true);
-  this->parameters().set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
-#endif
-
   _n++;
 
   _time = 0.0;

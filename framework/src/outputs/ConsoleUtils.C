@@ -274,6 +274,23 @@ std::string outputLegacyInformation(FEProblem & problem)
   return oss.str();
 }
 
+#ifdef LIBMESH_HAVE_PETSC
+std::string outputPetscOptions(FEProblem & problem)
+{
+  std::ostringstream oss;
+  Moose::PetscSupport::PetscOptions & options = problem.getPetscOptions();
+  for (MooseEnumIterator it = options.flags.begin(); it != options.flags.end(); ++it)
+    oss << " " << *it;
+  for (unsigned int i = 0; i < options.inames.size(); ++i)
+    oss << " " << options.inames[i] << " " << options.values[i];
+
+  std::string output = oss.str();
+  if (output.size() > 0)
+    return std::string("PETSc Options\n ") + output;
+  else
+    return "";
+}
+#endif //LIBMESH_HAVE_PETSC
 
 void
 insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)

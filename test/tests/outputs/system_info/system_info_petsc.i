@@ -15,10 +15,6 @@
     type = Diffusion
     variable = u
   [../]
-  [./td]
-    type = TimeDerivative
-    variable = u
-  [../]
 []
 
 [BCs]
@@ -37,19 +33,10 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 2
-  dt = 1
-  l_max_its = 4
-  nl_max_its = 2
-
-  # Preconditioned JFNK (default)
+  type = Steady
   solve_type = 'PJFNK'
-
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  petsc_options = '-test'
-  l_tol = 1e-12
 []
 
 [Outputs]
@@ -57,14 +44,8 @@
   exodus = true
   print_linear_residuals = true
   print_perf_log = true
-[]
-
-[MultiApps]
-  [./sub]
-    type = TransientMultiApp
-    app_type = MooseTestApp
-    execute_on = timestep_end
-    positions = '0 0 0'
-    input_files = sub.i
+  [./console]
+    type = Console
+    system_info = 'petsc'
   [../]
 []

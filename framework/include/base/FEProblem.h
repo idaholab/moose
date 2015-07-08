@@ -41,6 +41,7 @@
 #include "SolverParams.h"
 #include "OutputWarehouse.h"
 #include "MooseApp.h"
+#include "PetscSupport.h"
 
 class DisplacedProblem;
 
@@ -380,6 +381,13 @@ public:
   void initPetscOutput();
 
   virtual const std::vector<MooseObject *> & getObjectsByName(const std::string & name, THREAD_ID tid);
+
+#ifdef LIBMESH_HAVE_PETSC
+  /**
+   * Retrieve a writable referebce the PETSc options (used by PetscSupport)
+   */
+  Moose::PetscSupport::PetscOptions & getPetscOptions(){ return _petsc_options; }
+#endif //LIBMESH_HAVE_PETSC
 
   // Function /////
   virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
@@ -873,10 +881,14 @@ public:
    */
   MaterialData * getBoundaryMaterialData(THREAD_ID tid) { return _bnd_material_data[tid]; }
 
+  ///@{
   /**
    * Returns a short description of the active preconditioner
    */
   const std::string & getPreconditionerDescription() const { return _pc_description; }
+  void setPreconditionerDescription(std::string desc){ _pc_description = desc; }
+
+  ///@}
 
   /**
    * Will return True if the user wants to get an error when
@@ -1051,6 +1063,11 @@ protected:
 
   /// The error message to go with an exception
   std::string _exception_message;
+
+#ifdef LIBMESH_HAVE_PETSC
+  /// PETSc option storage
+  Moose::PetscSupport::PetscOptions _petsc_options;
+#endif //LIBMESH_HAVE_PETSC
 
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)

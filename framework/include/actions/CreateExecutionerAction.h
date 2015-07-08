@@ -29,9 +29,11 @@ public:
   CreateExecutionerAction(const std::string & name, InputParameters params);
 
   virtual void act();
-
   static void populateCommonExecutionerParams(InputParameters & params);
-  static void    storeCommonExecutionerParams(FEProblem & problem, InputParameters & params);
+
+#ifdef LIBMESH_HAVE_PETSC
+  static void storePetscOptions(FEProblem & fe_problem, const InputParameters & params);
+#endif
 };
 
 #endif // CREATEEXECUTIONERACTION_H

@@ -91,15 +91,12 @@ CreateExecutionerAction::act()
 {
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This parameter
   // is held in the child block Adaptivity and needs to be pulled early
-
-  Moose::setup_perf_log.push("Create Executioner","Setup");
-  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
-  MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create(_type, "Executioner", _moose_object_pars));
-  Moose::setup_perf_log.pop("Create Executioner","Setup");
-
   if (_problem.get() != NULL)
   {
-    storeCommonExecutionerParams(*_problem, _pars);
+    // Extract and store PETSc related settings on FEProblem
+#ifdef LIBMESH_HAVE_PETSC
+    storePetscOptions(*_problem, _pars);
+#endif //LIBMESH_HAVE_PETSC
 
     // solver params
     EquationSystems & es = _problem->es();
@@ -137,11 +134,17 @@ CreateExecutionerAction::act()
     _problem->getNonlinearSystem()._compute_initial_residual_before_preset_bcs = getParam<bool>("compute_initial_residual_before_preset_bcs");
   }
 
+  Moose::setup_perf_log.push("Create Executioner","Setup");
+  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
+  MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create(_type, "Executioner", _moose_object_pars));
+  Moose::setup_perf_log.pop("Create Executioner","Setup");
+
   _awh.executioner() = executioner;
 }
 
+#ifdef LIBMESH_HAVE_PETSC
 void
-CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, InputParameters & params)
+CreateExecutionerAction::storePetscOptions(FEProblem & fe_problem, const InputParameters & params)
 {
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("solve_type"))
@@ -151,15 +154,94 @@ CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, In
     fe_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
   }
 
-  MooseEnum line_search = params.get<MooseEnum>("line_search");
-  if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
-    fe_problem.solverParams()._line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
+  if (params.isParamValid("line_search"))
+  {
+      MooseEnum line_search = params.get<MooseEnum>("line_search");
+      if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
+        fe_problem.solverParams()._line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
+  }
 
-#ifdef LIBMESH_HAVE_PETSC
-  MultiMooseEnum           petsc_options       = params.get<MultiMooseEnum>("petsc_options");
-  MultiMooseEnum           petsc_options_iname = params.get<MultiMooseEnum>("petsc_options_iname");
-  std::vector<std::string> petsc_options_value = params.get<std::vector<std::string> >("petsc_options_value");
+  // The parameters contained in the Action
+  const MultiMooseEnum & petsc_options = params.get<MultiMooseEnum>("petsc_options");
+  const MultiMooseEnum & petsc_options_inames = params.get<MultiMooseEnum>("petsc_options_iname");
+  const std::vector<std::string> & petsc_options_values = params.get<std::vector<std::string> >("petsc_options_value");
 
-  fe_problem.storePetscOptions(petsc_options, petsc_options_iname, petsc_options_value);
-#endif //LIBMESH_HAVE_PETSC
+  // A reference to the PetscOptions object that contains the settings that will be used in the solve
+  Moose::PetscSupport::PetscOptions & po = fe_problem.getPetscOptions();
+
+  // Update the PETSc single flags
+  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
+  {
+    /**
+     * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
+     * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
+     */
+    if (*it == "-log_summary")
+      mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
+
+    // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
+    else
+    {
+      std::string help_string;
+      if (*it == "-snes" || *it == "-snes_mf" || *it == "-snes_mf_operator")
+        help_string = "Please set the solver type through \"solve_type\".";
+      else if (*it == "-ksp_monitor")
+        help_string = "Please use \"Outputs/print_linear_residuals=true\"";
+
+      if (help_string != "")
+        mooseWarning("The PETSc option " << *it << " should not be used directly in a MOOSE input file. " << help_string);
+    }
+
+    // Update the stored items, but do not create duplicates
+    if (find(po.flags.begin(), po.flags.end(), *it) == po.flags.end())
+      po.flags.push_back(*it);
+  }
+
+  // Check that the name value pairs are sized correctly
+  if (petsc_options_inames.size() != petsc_options_values.size())
+    mooseError("PETSc names and options are not the same length");
+
+  // Setup the name value pairs
+  bool boomeramg_found = false;
+  bool strong_threshold_found = false;
+  std::string pc_description = "";
+  for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
+  {
+    // Do not add duplicate settings
+    if (find(po.inames.begin(), po.inames.end(), petsc_options_inames[i]) == po.inames.end())
+    {
+      po.inames.push_back(petsc_options_inames[i]);
+      po.values.push_back(petsc_options_values[i]);
+
+      // Look for a pc description
+      if (petsc_options_inames[i] == "-pc_type" || petsc_options_inames[i] == "-pc_sub_type" || petsc_options_inames[i] == "-pc_hypre_type")
+        pc_description += petsc_options_values[i] + ' ';
+
+      // This special case is common enough that we'd like to handle it for the user.
+      if (petsc_options_inames[i] == "-pc_hypre_type" && petsc_options_values[i] == "boomeramg")
+        boomeramg_found = true;
+      if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
+        strong_threshold_found = true;
+    }
+    else
+    {
+      for (unsigned int j = 0; j < po.inames.size(); j++)
+        if (po.inames[j] == petsc_options_inames[i])
+          po.values[j] = petsc_options_values[i];
+    }
+  }
+
+
+  // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold value
+  // We will provide that for the user here if they haven't supplied it themselves.
+  if (boomeramg_found && !strong_threshold_found && fe_problem.mesh().dimension() == 3)
+  {
+    po.inames.push_back("-pc_hypre_boomeramg_strong_threshold");
+    po.values.push_back("0.7");
+    pc_description += "strong_threshold: 0.7 (auto)";
+  }
+
+  // Set Preconditioner description
+  fe_problem.setPreconditionerDescription(pc_description);
 }
+#endif

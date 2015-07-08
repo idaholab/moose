@@ -68,9 +68,7 @@ Split::Split(const std::string & name, InputParameters params) :
     _schur_type(getParam<MooseEnum>("schur_type")),
     _schur_pre(getParam<MooseEnum>("schur_pre")),
     _schur_ainv(getParam<MooseEnum>("schur_ainv")),
-    _petsc_options(getParam<MultiMooseEnum>("petsc_options")),
-    _petsc_options_iname(getParam<MultiMooseEnum>("petsc_options_iname")),
-    _petsc_options_value(getParam<std::vector<std::string> >("petsc_options_value"))
+    _petsc_options(_fe_problem.getPetscOptions())
 {
 }
 
@@ -202,24 +200,24 @@ Split::setup(const std::string& prefix)
   }
 
   // Now we set the user-specified petsc options for this split, possibly overriding the above settings.
-  for (unsigned j = 0; j < _petsc_options.size(); ++j)
+  for (unsigned j = 0; j < _petsc_options.flags.size(); ++j)
   {
     // Need to prepend the prefix and strip off the leading '-' on the option name.
-    const std::string & op = _petsc_options[j];
+    const std::string & op = _petsc_options.flags[j];
     if (op[0] != '-')
       mooseError("Invalid petsc option name " << op << " for Split " << _name);
     std::string opt = prefix + op.substr(1);
     ierr = PetscOptionsSetValue(opt.c_str(), PETSC_NULL);
     CHKERRABORT(_communicator.get(), ierr);
   }
-  for (unsigned j = 0; j < _petsc_options_iname.size(); ++j)
+  for (unsigned j = 0; j < _petsc_options.inames.size(); ++j)
   {
     // Need to prepend the prefix and strip off the leading '-' on the option name.
-    const std::string & op = _petsc_options_iname[j];
+    const std::string & op = _petsc_options.inames[j];
     if (op[0] != '-')
       mooseError("Invalid petsc option name " << op << " for Split " << _name);
     std::string opt = prefix + op.substr(1);
-    ierr = PetscOptionsSetValue(opt.c_str(), _petsc_options_value[j].c_str());
+    ierr = PetscOptionsSetValue(opt.c_str(), _petsc_options.values[j].c_str());
     CHKERRABORT(_communicator.get(), ierr);
   }
 }
