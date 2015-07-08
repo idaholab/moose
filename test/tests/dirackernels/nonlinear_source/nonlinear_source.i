@@ -92,17 +92,23 @@
     # called.  If you comment this out, you should see that this test
     # requires more linear and nonlinear iterations.
     full = true
+
+    # Added to test Jacobian contributions for Dirac Kernels
+    # Options that do not seem to do anything for this problem? -snes_check_jacobian -snes_check_jacobian_view
+    # petsc_options = '-snes_test_display' # print out all the matrix entries
+    # petsc_options_iname = '-snes_type'
+    # petsc_options_value = 'test'
   [../]
 []
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON' # NEWTON provides a more stringent test of off-diagonal Jacobians
   num_steps = 5
   dt = 1
+  dtmin = 1
   l_max_its = 100
   nl_max_its = 6
-  dtmin = 1.e-3
   nl_abs_tol = 1.e-13
 []
 

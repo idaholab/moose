@@ -133,7 +133,8 @@ ComputeDiracThread::onElement(const Elem * elem)
               // only want to call computeOffDiagJacobian() if both
               // variables are active on this subdomain, and the
               // off-diagonal variable actually has dofs.
-              if (ivariable->activeOnSubdomain(_subdomain)
+              if (dirac_kernel->variable().number() == ivariable->number()
+                  && ivariable->activeOnSubdomain(_subdomain)
                   && jvariable->activeOnSubdomain(_subdomain)
                   && (jvariable->numberOfDofs() > 0))
               {
