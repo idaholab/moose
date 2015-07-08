@@ -14,6 +14,8 @@
 #ifndef DERIVATIVEMATERIALPROPERTYNAMEINTERFACE_H
 #define DERIVATIVEMATERIALPROPERTYNAMEINTERFACE_H
 
+#include "MooseTypes.h"
+
 #include <string>
 #include <vector>
 
@@ -24,28 +26,28 @@ public:
    * Helper functions to generate the material property names for the
    * arbitrary derivatives.
    */
-  const std::string propertyName(const std::string &base, const std::vector<std::string> &c) const;
+  const MaterialPropertyName propertyName(const MaterialPropertyName &base, const std::vector<VariableName> &c) const;
 
   /**
    * Helper functions to generate the material property names for the
    * first derivatives.
    */
-  const std::string propertyNameFirst(const std::string &base,
-    const std::string &c1) const;
+  const MaterialPropertyName propertyNameFirst(const MaterialPropertyName &base,
+    const VariableName &c1) const;
 
   /**
    * Helper functions to generate the material property names for the
    * second derivatives.
    */
-  const std::string propertyNameSecond(const std::string &base,
-    const std::string &c1, const std::string &c2) const;
+  const MaterialPropertyName propertyNameSecond(const MaterialPropertyName &base,
+    const VariableName &c1, const VariableName &c2) const;
 
   /**
    * Helper functions to generate the material property names for the
    * third derivatives.
    */
-  const std::string propertyNameThird(const std::string &base,
-    const std::string &c1, const std::string &c2, const std::string &c3) const;
+  const MaterialPropertyName propertyNameThird(const MaterialPropertyName &base,
+    const VariableName &c1, const VariableName &c2, const VariableName &c3) const;
 };
 
 #endif // DERIVATIVEMATERIALPROPERTYNAMEINTERFACE_H

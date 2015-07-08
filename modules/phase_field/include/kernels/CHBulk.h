@@ -42,7 +42,6 @@ protected:
 
   virtual RealGradient computeGradDFDCons(PFFunctionType type) = 0;
 
-  const MaterialPropertyName _mob_name;
   const MaterialProperty<Real> & _M;
   const MaterialProperty<Real> & _dMdc;
 

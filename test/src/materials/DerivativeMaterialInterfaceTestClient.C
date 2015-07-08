@@ -17,18 +17,21 @@ template<>
 InputParameters validParams<DerivativeMaterialInterfaceTestClient>()
 {
   InputParameters params = validParams<Material>();
+  params.addParam<MaterialPropertyName>("prop_name", "", "Name of the property to be retrieved");
   return params;
 }
 
 DerivativeMaterialInterfaceTestClient::DerivativeMaterialInterfaceTestClient(const std::string & name,
                                                                                  InputParameters parameters) :
     DerivativeMaterialInterface<Material>(name, parameters),
-    _prop0(getMaterialPropertyDerivative<Real>("prop","c")), // fetch non-existing derivative
-    _prop1(getMaterialPropertyDerivative<Real>("prop","a")),
-    _prop2(getMaterialPropertyDerivative<Real>("prop","b")),
-    _prop3(getMaterialPropertyDerivative<Real>("prop","a", "b")), // fetch alphabetically sorted (but declared unsorted)
-    _prop4(getMaterialPropertyDerivative<Real>("prop","a", "c")),
-    _prop5(getMaterialPropertyDerivative<Real>("prop","c", "b", "a")) // fetch unsorted (declared unsorted, but differently unsorted)
+    _prop_name(getParam<MaterialPropertyName>("prop_name")),
+    _by_name(_prop_name == ""),
+    _prop0(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "c") : getMaterialPropertyDerivative<Real>("prop_name", "c")), // fetch non-existing derivative
+    _prop1(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a") : getMaterialPropertyDerivative<Real>("prop_name", "a")),
+    _prop2(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "b") : getMaterialPropertyDerivative<Real>("prop_name", "b")),
+    _prop3(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a", "b") : getMaterialPropertyDerivative<Real>("prop_name", "a", "b")), // fetch alphabetically sorted (but declared unsorted)
+    _prop4(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a", "c") : getMaterialPropertyDerivative<Real>("prop_name", "a", "c")),
+    _prop5(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "c", "b", "a") : getMaterialPropertyDerivative<Real>("prop_name", "c", "b", "a")) // fetch unsorted (declared unsorted, but differently unsorted)
 {
 }
 
@@ -38,7 +41,17 @@ DerivativeMaterialInterfaceTestClient::computeProperties()
 {
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    if (_prop0[_qp] != 0.0 || _prop1[_qp] != 1.0 || _prop2[_qp] != 2.0 || _prop3[_qp] != 3.0 || _prop4[_qp] != 4.0 || _prop5[_qp] != 5.0)
-      mooseError("Unexpected DerivativeMaterial property value.");
+    if (_by_name || _prop_name == "prop")
+    {
+      if (_prop0[_qp] != 0.0 || _prop1[_qp] != 1.0 || _prop2[_qp] != 2.0 || _prop3[_qp] != 3.0 || _prop4[_qp] != 4.0 || _prop5[_qp] != 5.0)
+        mooseError("Unexpected DerivativeMaterial property value.");
+    }
+    else if (_prop_name == "1.0")
+    {
+      if (_prop0[_qp] != 0.0 || _prop1[_qp] != 0.0 || _prop2[_qp] != 0.0 || _prop3[_qp] != 0.0 || _prop4[_qp] != 0.0 || _prop5[_qp] != 0.0)
+        mooseError("Unexpected DerivativeMaterial property value.");
+    }
+    else
+      mooseError("Unexpected DerivativeMaterial property name.");
   }
 }

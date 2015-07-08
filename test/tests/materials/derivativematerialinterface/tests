@@ -6,6 +6,13 @@
     recover = false
   [../]
 
+  [./new_getproperty_semantics]
+    type = 'Exodiff'
+    input = 'const.i'
+    exodiff = 'const_out.e'
+    recover = false
+  [../]
+
   [./mutliblock]
     # Test the default property behavior of DerivativeMaterialInterface
     type = 'RunApp'

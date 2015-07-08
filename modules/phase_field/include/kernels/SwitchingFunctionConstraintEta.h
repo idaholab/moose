@@ -32,8 +32,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int);
 
   /// Switching function name
-  std::string _h_name;
-  std::string _eta_name;
+  VariableName _eta_name;
 
   /// Switching function drivatives
   const MaterialProperty<Real> & _dh;
