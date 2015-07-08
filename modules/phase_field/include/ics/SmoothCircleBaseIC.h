@@ -48,6 +48,7 @@ protected:
   Real _outvalue;
   Real _int_width;
   bool _3D_spheres;
+  bool _zero_gradient;
 
   unsigned int _num_dim;
 
@@ -62,7 +63,7 @@ protected:
 
   virtual Real computeCircleValue(const Point & p, const Point & center, const Real & radius);
 
-  virtual Point computeCircleGradient(const Point & p, const Point & center, const Real & radius);
+  virtual RealGradient computeCircleGradient(const Point & p, const Point & center, const Real & radius);
 
   virtual void computeCircleRadii() = 0;
 
