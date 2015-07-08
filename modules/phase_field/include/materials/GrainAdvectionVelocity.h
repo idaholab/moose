@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<GrainAdvectionVelocity>();
 
 /**
- * This Material calculates the force density acting on a particle/grain
+ * This Material calculates the advection velocity and it's divergence acting on a particle/grain
  */
 class GrainAdvectionVelocity : public Material
 {
@@ -27,6 +27,7 @@ protected:
   const ComputeGrainCenterUserObject & _grain_data;
   const std::vector<Real> & _grain_volumes;
   const std::vector<Point> & _grain_centers;
+
   /// getting userobject for calculating grain forces and torques
   const ComputeGrainForceAndTorque & _grain_force_torque;
   const std::vector<RealGradient> & _grain_forces;
@@ -35,13 +36,19 @@ protected:
 private:
   /// equilibrium density at the grain boundaries
   Real _mt;
+
   /// thresold value for identifying grain boundaries
   Real _mr;
 
   unsigned int _ncrys;
   std::vector<VariableValue *> _vals;
-  /// material storing advection velocities of grains
+  std::vector<VariableGradient *> _grad_vals;
+
+  /// Material storing advection velocities of grains
   MaterialProperty<std::vector<RealGradient> > & _velocity_advection;
+
+  /// Material storing divergence of advection velocities of grains
+  MaterialProperty<std::vector<Real> > & _div_velocity_advection;
 };
 
 #endif //GRAINADVECTIONVELOCITY_H
