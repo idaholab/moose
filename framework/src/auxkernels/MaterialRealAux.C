@@ -27,7 +27,7 @@ MaterialRealAux::MaterialRealAux(const std::string & name, InputParameters param
 }
 
 Real
-MaterialRealAux::computeValue()
+MaterialRealAux::getRealValue()
 {
-  return _factor * _prop[_qp] + _offset;
+  return _prop[_qp];
 }

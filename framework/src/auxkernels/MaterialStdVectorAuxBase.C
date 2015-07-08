@@ -12,31 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MATERIALSTDVECTORAUX_H
-#define MATERIALSTDVECTORAUX_H
-
+// MOOSE includes
 #include "MaterialStdVectorAuxBase.h"
 
-// Forward declarations
-class MaterialStdVectorAux;
-
 template<>
-InputParameters validParams<MaterialStdVectorAux>();
-
-/**
- * AuxKernel for outputting a std::vector material-property component to an AuxVariable
- */
-class MaterialStdVectorAux : public MaterialStdVectorAuxBase<>
+InputParameters validParams<MaterialStdVectorAuxBase<> >()
 {
-public:
-
-  MaterialStdVectorAux(const std::string & name, InputParameters parameters);
-
-  virtual ~MaterialStdVectorAux();
-
-protected:
-  /// Returns the value of the material property for the given index
-  virtual Real getRealValue();
-};
-
-#endif //MATERIALSTDVECTORAUX_H
+  InputParameters params = validParams<MaterialAuxBase<> >();
+  params.addParam<unsigned int>("index", 0, "The index to consider for this kernel");
+  return params;
+}

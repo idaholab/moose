@@ -36,9 +36,6 @@ public:
   virtual void addPoints();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-
-  // The off-diagonal Jacobian stuff is not currently implemented in
-  // DiracKernel.h... so this will not be called
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 protected:

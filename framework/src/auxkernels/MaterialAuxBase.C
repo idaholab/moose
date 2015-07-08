@@ -15,39 +15,12 @@
 // MOOSE includes
 #include "MaterialAuxBase.h"
 
-/* Each AuxKernel that inherits from MaterialAuxBase must define a specialization
- * of the input parameters that includes the template parameter passed to MaterialAuxBase.
- */
 template<>
-InputParameters validParams<MaterialAuxBase<Real> >()
+InputParameters validParams<MaterialAuxBase<> >()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<MaterialPropertyName>("property", "The scalar material property name");
   params.addParam<Real>("factor", 1, "The factor by which to multiply your material property for visualization");
   params.addParam<Real>("offset", 0, "The offset to add to your material property for visualization");
   return params;
-}
-
-template<>
-InputParameters validParams<MaterialAuxBase<RealVectorValue> >()
-{
-  return validParams<MaterialAuxBase<Real> >();
-}
-
-template<>
-InputParameters validParams<MaterialAuxBase<RealTensorValue> >()
-{
-  return validParams<MaterialAuxBase<Real> >();
-}
-
-template<>
-InputParameters validParams<MaterialAuxBase<std::vector<Real> > >()
-{
-  return validParams<MaterialAuxBase<Real> >();
-}
-
-template<>
-InputParameters validParams<MaterialAuxBase<DenseMatrix<Real> > >()
-{
-  return validParams<MaterialAuxBase<Real> >();
 }

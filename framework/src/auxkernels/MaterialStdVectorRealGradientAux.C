@@ -12,31 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MaterialRealVectorValueAux.h"
+#include "MaterialStdVectorRealGradientAux.h"
 
 template<>
-InputParameters validParams<MaterialRealVectorValueAux>()
+InputParameters validParams<MaterialStdVectorRealGradientAux>()
 {
-  InputParameters params = validParams<MaterialAuxBase<> >();
-  params.addParam<unsigned int>("component", 0, "The vector component to consider for this kernel");
-
+  InputParameters params = validParams<MaterialStdVectorAuxBase<> >();
+  params.addClassDescription("Extracts a component of a material's std::vector<RealGradient> to an aux variable.  If the std::vector is not of sufficient size then zero is returned");
+  params.addParam<unsigned int>("component", 0, "The gradient component to be extracted for this kernel");
   return params;
 }
 
-MaterialRealVectorValueAux::MaterialRealVectorValueAux(const std::string & name, InputParameters parameters) :
-    MaterialAuxBase<RealVectorValue>(name, parameters),
+MaterialStdVectorRealGradientAux::MaterialStdVectorRealGradientAux(const std::string & name, InputParameters parameters) :
+  MaterialStdVectorAuxBase<RealGradient>(name, parameters),
     _component(getParam<unsigned int>("component"))
 {
   if (_component > LIBMESH_DIM)
     mooseError("The component " << _component << " does not exist for " << LIBMESH_DIM << " dimensional problems");
 }
 
-MaterialRealVectorValueAux::~MaterialRealVectorValueAux()
+MaterialStdVectorRealGradientAux::~MaterialStdVectorRealGradientAux()
 {
 }
 
 Real
-MaterialRealVectorValueAux::getRealValue()
+MaterialStdVectorRealGradientAux::getRealValue()
 {
-  return _prop[_qp](_component);
+  return _prop[_qp][_index](_component);
 }
