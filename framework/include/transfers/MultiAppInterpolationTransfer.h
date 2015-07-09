@@ -51,13 +51,10 @@ protected:
   AuxVariableName _to_var_name;
   VariableName _from_var_name;
 
-  bool _displaced_source_mesh;
-  bool _displaced_target_mesh;
-
   unsigned int _num_points;
   Real _power;
   MooseEnum _interp_type;
   Real _radius;
 };
 
-#endif /* MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H */
+#endif /* MULTIAPPINTERPOLATIONTRANSFER_H */
