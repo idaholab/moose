@@ -68,7 +68,7 @@ private:
 
   /// Chemical potential
   unsigned int _w_var;
-  VariableValue & _w;
+  const VariableValue & _w;
 };
 
 #endif //KKSSPLITCHCRES_H

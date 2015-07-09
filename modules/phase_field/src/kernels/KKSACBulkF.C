@@ -12,15 +12,15 @@ InputParameters validParams<KKSACBulkF>()
   InputParameters params = validParams<KKSACBulkBase>();
   // params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
   params.addRequiredParam<Real>("w", "Double well height parameter");
-  params.addParam<std::string>("g_name", "g", "Base name for the double well function g(eta)");
+  params.addParam<MaterialPropertyName>("g_name", "g", "Base name for the double well function g(eta)");
   return params;
 }
 
 KKSACBulkF::KKSACBulkF(const std::string & name, InputParameters parameters) :
     KKSACBulkBase(name, parameters),
     _w(getParam<Real>("w")),
-    _prop_dg(getMaterialPropertyDerivative<Real>("g", _eta_name)),
-    _prop_d2g(getMaterialPropertyDerivative<Real>("g", _eta_name, _eta_name))
+    _prop_dg(getMaterialPropertyDerivative<Real>("g_name", _eta_name)),
+    _prop_d2g(getMaterialPropertyDerivative<Real>("g_name", _eta_name, _eta_name))
 {
 }
 
@@ -37,7 +37,7 @@ KKSACBulkF::computeDFDOP(PFFunctionType type)
 
     case Jacobian:
     {
-      res =   _prop_d2h[_qp] * A1
+      res =  -_prop_d2h[_qp] * A1
             + _w * _prop_d2g[_qp];
 
       // the -\frac{dh}{d\eta}\left(\frac{dF_a}{d\eta}-\frac{dF_b}{d\eta}\right)
