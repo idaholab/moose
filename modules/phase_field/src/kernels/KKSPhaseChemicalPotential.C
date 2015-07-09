@@ -37,7 +37,9 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const std::string & name,
   MooseVariable *arg;
   unsigned int i;
 
-  _console << "DEBUG " << name << ' ' << _var.name() << ' ' << _cb_name << '\n';
+#ifdef DEBUG
+  _console << "KKSPhaseChemicalPotential(" << name << ") " << _var.name() << ' ' << _cb_name << '\n';
+#endif
 
   unsigned int nvar = _coupled_moose_vars.size();
   _off_diag_a.resize(nvar);
