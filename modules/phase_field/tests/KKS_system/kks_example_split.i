@@ -31,14 +31,14 @@
     family = LAGRANGE
   [../]
 
-  # chemical potential
-  [./w]
+  # hydrogen concentration
+  [./c]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  # hydrogen concentration
-  [./c]
+  # chemical potential
+  [./w]
     order = FIRST
     family = LAGRANGE
   [../]
