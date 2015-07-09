@@ -164,11 +164,10 @@ void petscSetupDM (NonlinearSystem & nl) {
 void
 petscSetOptions(FEProblem & problem)
 {
-  MultiMooseEnum                   petsc_options = problem.parameters().get<MultiMooseEnum>("petsc_options");
-  MultiMooseEnum                   petsc_options_inames = problem.parameters().get<MultiMooseEnum>("petsc_inames");
-  const std::vector<std::string> & petsc_options_values = problem.parameters().get<std::vector<std::string> >("petsc_values");
+  // Reference to the options stored in FEPRoblem
+  PetscOptions & petsc = problem.getPetscOptions();
 
-  if (petsc_options_inames.size() != petsc_options_values.size())
+  if (petsc.inames.size() != petsc.values.size())
     mooseError("PETSc names and options are not the same length");
 
   PetscOptionsClear();
@@ -184,10 +183,10 @@ petscSetOptions(FEProblem & problem)
   setSolverOptions(problem.solverParams());
 
   // Add any additional options specified in the input file
-  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
+  for (MooseEnumIterator it = petsc.flags.begin(); it != petsc.flags.end(); ++it)
     PetscOptionsSetValue(it->c_str(), PETSC_NULL);
-  for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
-    PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());
+  for (unsigned int i=0; i<petsc.inames.size(); ++i)
+    PetscOptionsSetValue(petsc.inames[i].c_str(), petsc.values[i].c_str());
 
   SolverParams& solver_params = problem.solverParams();
   if (solver_params._type != Moose::ST_JFNK  &&

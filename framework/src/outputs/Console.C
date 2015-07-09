@@ -74,7 +74,7 @@ InputParameters validParams<Console>()
   params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
 
   // System information controls
-  MultiMooseEnum info("framework mesh aux nonlinear execution output", "framework mesh aux nonlinear execution");
+  MultiMooseEnum info("framework mesh aux nonlinear execution output petsc", "framework mesh aux nonlinear execution");
   params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output')");
 
   // Advanced group
@@ -545,6 +545,11 @@ Console::outputSystemInformation()
 
   if (_system_info_flags.contains("output"))
     _console << ConsoleUtils::outputOutputInformation(_app);
+
+#ifdef LIBMESH_HAVE_PETSC
+  if (_system_info_flags.contains("petsc"))
+    _console << ConsoleUtils::outputPetscOptions(*_problem_ptr);
+#endif
 
   // Output the legacy flags, these cannot be turned off so they become annoying to people.
   _console << ConsoleUtils::outputLegacyInformation(*_problem_ptr);

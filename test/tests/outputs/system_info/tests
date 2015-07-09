@@ -2,13 +2,21 @@
   [./basic]
     # Tests that the various components of the simulation information header are printed to the screen
     type = RunApp
-    input = 'simulation_information.i'
+    input = 'system_info.i'
     expect_out = 'Framework\sInformation:.*?Mesh:.*?Nonlinear\sSystem:.*?Auxiliary\sSystem:.*?Execution\sInformation:'
   [../]
+
   [./mesh]
     # Check that simulation information may be printed with differing output_on
     type = RunApp
-    input = 'simulation_information_mesh_info.i'
+    input = 'system_info_mesh.i'
     expect_out = 'time\s=\s0.1.*?Nodes:.*?time\s=\s0.2.*?Nodes:.*?time\s=\s0.3.*?Nodes:'
+  [../]
+
+  [./pstec]
+    # Check that petsc information is output
+    type = RunApp
+    input = 'system_info_petsc.i'
+    expect_out = "-pc_type hypre -pc_hypre_type boomeramg"
   [../]
 []
