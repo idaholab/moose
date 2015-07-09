@@ -14,7 +14,6 @@ InputParameters validParams<KKSACBulkBase>()
   params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
   params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
   params.addParam<MaterialPropertyName>("h_name", "h", "Base name for the switching function h(eta)");
-  params.addCoupledVar("args", "coupled variables i.e. concentrations");
   return params;
 }
 
@@ -27,8 +26,8 @@ KKSACBulkBase::KKSACBulkBase(const std::string & name, InputParameters parameter
     _prop_Fb(getMaterialProperty<Real>("fb_name")),
     _prop_dFa(getMaterialPropertyDerivative<Real>("fa_name", _eta_name)),
     _prop_dFb(getMaterialPropertyDerivative<Real>("fb_name", _eta_name)),
-    _prop_dh(getMaterialPropertyDerivative<Real>("h", _eta_name)),
-    _prop_d2h(getMaterialPropertyDerivative<Real>("h", _eta_name, _eta_name))
+    _prop_dh(getMaterialPropertyDerivative<Real>("h_name", _eta_name)),
+    _prop_d2h(getMaterialPropertyDerivative<Real>("h_name", _eta_name, _eta_name))
 {
   // reserve space for derivatives
   _derivatives_Fa.resize(_nvar);
