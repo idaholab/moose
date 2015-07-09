@@ -474,7 +474,7 @@ MooseApp::restore(MooseSharedPointer<Backup> backup)
 
   RestartableDataIO rdio(fe_problem);
 
-  return rdio.restoreBackup(backup);
+  rdio.restoreBackup(backup);
 }
 
 void

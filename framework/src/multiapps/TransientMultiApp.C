@@ -255,7 +255,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           if (_failures > _max_failures)
           {
-            mooseWarning("While sub_cycling "<< name() << _first_local_app+i <<" REALLY failed!" << std::endl);
+            mooseWarning("While sub_cycling " << name() << _first_local_app+i << " REALLY failed!" << std::endl);
             return false;
           }
         }
@@ -278,9 +278,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           ex->endStep(target_time-app_time_offset);
         }
         else
-        {
           ex->endStep();
-        }
       }
 
       // If we were looking for a steady state, but didn't reach one, we still need to output one more time, regardless of interval
