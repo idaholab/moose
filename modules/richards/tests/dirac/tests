@@ -50,7 +50,7 @@
     input = 'bh27.i'
     exodiff = 'bh27.e'
     rel_err = 1E-5
-    skip = 'Needs DiracKernel::computeOffDiagQpJacobian - ticket #668'
+    heavy = true
   [../]
 
   [./bh_fu_02]
