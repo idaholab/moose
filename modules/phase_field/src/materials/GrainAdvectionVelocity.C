@@ -38,16 +38,6 @@ GrainAdvectionVelocity::GrainAdvectionVelocity(const std::string & name, InputPa
 }
 
 void
-GrainAdvectionVelocity::timestepSetup()
-{
-  for (_qp = 0; _qp < _velocity_advection.size(); ++_qp)
-  {
-    _velocity_advection[_qp].resize(_ncrys);
-    _div_velocity_advection[_qp].resize(_ncrys);
-  }
-}
-
-void
 GrainAdvectionVelocity::computeQpProperties()
 {
   RealGradient velocity_translation;
@@ -55,12 +45,15 @@ GrainAdvectionVelocity::computeQpProperties()
   RealGradient velocity_rotation;
   Real div_velocity_rotation;
 
+  _velocity_advection[_qp].resize(_ncrys);
+  _div_velocity_advection[_qp].resize(_ncrys);
+
   for (unsigned int i = 0; i < _ncrys; ++i)
   {
     velocity_translation = _mt / _grain_volumes[i] * ((*_vals[i])[_qp] * _grain_forces[i]);
     div_velocity_translation = _mt / _grain_volumes[i] * ((*_grad_vals[i])[_qp] * _grain_forces[i]);
-    velocity_rotation = _mr * (_grain_torques[i].cross(_q_point[_qp] - _grain_centers[i])) * (*_vals[i])[_qp] / _grain_volumes[i];
-    div_velocity_rotation = _mr * (_grain_torques[i].cross(_q_point[_qp] - _grain_centers[i])) * (*_grad_vals[i])[_qp] / _grain_volumes[i];
+    velocity_rotation = _mr / _grain_volumes[i] * (_grain_torques[i].cross(_q_point[_qp] - _grain_centers[i])) * (*_vals[i])[_qp];
+    div_velocity_rotation = _mr / _grain_volumes[i] * (_grain_torques[i].cross(_q_point[_qp] - _grain_centers[i])) * (*_grad_vals[i])[_qp] ;
     _velocity_advection[_qp][i] = velocity_translation + velocity_rotation;
     _div_velocity_advection[_qp][i] = div_velocity_translation + div_velocity_rotation;
   }

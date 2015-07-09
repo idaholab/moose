@@ -20,7 +20,6 @@ public:
   GrainAdvectionVelocity(const std::string & name, InputParameters parameters);
 
 protected:
-  virtual void timestepSetup();
   virtual void computeQpProperties();
 
   /// getting userobject for calculating grain centers and volumes

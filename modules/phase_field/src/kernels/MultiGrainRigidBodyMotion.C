@@ -11,33 +11,56 @@ InputParameters validParams<MultiGrainRigidBodyMotion>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Adds rigid mody motion to grains");
-  params.addParam<MaterialPropertyName>("advection_velocity", "Material property to multiply the random numbers with (defaults to 1.0 if omitted)");
+  params.addRequiredCoupledVar("c", "Concentration");
+  params.addParam<MaterialPropertyName>("advection_velocity", "Material property for advection velocities");
+  params.addParam<MaterialPropertyName>("advection_velocity_divergence", "Material property for divergence of advection velocities");
   return params;
 }
 
 MultiGrainRigidBodyMotion::MultiGrainRigidBodyMotion(const std::string & name,
                              InputParameters parameters) :
     Kernel(name, parameters),
-    _velocity_advection(getMaterialProperty<std::vector<RealGradient> >("advection_velocity"))
+    _c_var(coupled("c")),
+    _c(coupledValue("c")),
+    _grad_c(coupledGradient("c")),
+    _velocity_advection(getMaterialProperty<std::vector<RealGradient> >("advection_velocity")),
+    _div_velocity_advection(getMaterialProperty<std::vector<Real> >("advection_velocity_divergence"))
 {
 }
 
 Real
 MultiGrainRigidBodyMotion::computeQpResidual()
 {
-  RealGradient _vadv_total = 0.0;
+  RealGradient vadv_total = 0.0;
+  Real div_vadv_total = 0.0;
   for (unsigned int i = 0; i < _velocity_advection[_qp].size(); ++i)
-    _vadv_total += _velocity_advection[_qp][i];
+  {
+    vadv_total += _velocity_advection[_qp][i];
+    div_vadv_total += _div_velocity_advection[_qp][i];
+  }
 
-  return _vadv_total *  _grad_u[_qp] *_test[_i][_qp];
+  return vadv_total * _grad_c[_qp] * _test[_i][_qp] + div_vadv_total * _c[_qp] * _test[_i][_qp];
 }
 
 Real
 MultiGrainRigidBodyMotion::computeQpJacobian()
 {
-  RealGradient _vadv_total = 0.0;
-  for (unsigned int i = 0; i < _velocity_advection[_qp].size(); ++i)
-    _vadv_total += _velocity_advection[_qp][i];
+    if (_c_var == _var.number()) //Requires c jacobian
+      return computeQpCJacobian();
 
-  return  _vadv_total * _grad_phi[_j][_qp] * _test[_i][_qp];
+    return 0.0;
+}
+
+Real
+MultiGrainRigidBodyMotion::computeQpCJacobian()
+{
+  RealGradient vadv_total = 0.0;
+  Real div_vadv_total = 0.0;
+  for (unsigned int i = 0; i < _velocity_advection[_qp].size(); ++i)
+  {
+    vadv_total += _velocity_advection[_qp][i];
+    div_vadv_total += _div_velocity_advection[_qp][i];
+  }
+
+  return  vadv_total * _grad_phi[_j][_qp] * _test[_i][_qp] + div_vadv_total * _phi[_j][_qp] * _test[_i][_qp];
 }

@@ -23,9 +23,21 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpCJacobian();
 
-  unsigned int _total_grains;
+  /// int label for the Concentration
+  unsigned int _c_var;
+
+  /// Variable value for the concentration
+  VariableValue & _c;
+
+  /// Variable gradient for the concentration
+  VariableGradient & _grad_c;
+
+  /// Material property for advection velocities
   const MaterialProperty<std::vector<RealGradient> > & _velocity_advection;
+  /// Material property for divergence of advection velocities
+  const MaterialProperty<std::vector<Real> > & _div_velocity_advection;
 };
 
 #endif //MULTIGRAINRIGIDBODYMOTION_H

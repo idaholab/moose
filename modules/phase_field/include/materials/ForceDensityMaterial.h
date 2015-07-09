@@ -18,7 +18,6 @@ public:
   ForceDensityMaterial(const std::string & name, InputParameters parameters);
 
 protected:
-  virtual void timestepSetup();
   virtual void computeQpProperties();
 
 private:
