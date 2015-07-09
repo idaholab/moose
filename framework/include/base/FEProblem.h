@@ -181,12 +181,6 @@ public:
                                                               const Real dtol,
                                                               const PetscInt maxits);
 
-#ifdef LIBMESH_HAVE_PETSC
-  void storePetscOptions(const MultiMooseEnum & petsc_options,
-                         const MultiMooseEnum & petsc_options_inames,
-                         const std::vector<std::string> & petsc_options_values);
-#endif
-
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
   virtual bool hasScalarVariable(const std::string & var_name);
