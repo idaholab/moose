@@ -224,6 +224,8 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
+  petsc_options_iname = '-pc_factor_shift_type'
+  petsc_options_value = 'nonzero'
 
   l_max_its = 100
   nl_max_its = 100
