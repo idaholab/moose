@@ -58,5 +58,4 @@ MaterialStdVectorAuxBase<T>::computeValue()
   return MaterialAuxBase<std::vector<T> >::computeValue();
 }
 
-
 #endif //MATERIALSTDVECTORAUXBASE_H

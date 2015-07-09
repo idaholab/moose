@@ -40,7 +40,8 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<bool>        ("compute_initial_residual_before_preset_bcs", false,
                                 "Use the residual norm computed *before* PresetBCs are imposed in relative convergence check");
 
-  CreateExecutionerAction::populateCommonExecutionerParams(params);
+  // Adds the PETSc related options to the Executioner block
+  params += Moose::PetscSupport::getPetscValidParams();
 
   params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
                               "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol compute_initial_residual_before_preset_bcs", "Solver");
@@ -49,37 +50,6 @@ InputParameters validParams<CreateExecutionerAction>()
   return params;
 }
 
-void
-CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & params)
-{
-  MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
-  params.addParam<MooseEnum>   ("solve_type",      solve_type,
-                                "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
-                                "JFNK: Jacobian-Free Newton Krylov "
-                                "NEWTON: Full Newton Solve "
-                                "FD: Use finite differences to compute Jacobian "
-                                "LINEAR: Solving a linear problem");
-
-  // Line Search Options
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3,3,0)
-  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
-#else
-  MooseEnum line_search("default shell none basic l2 bt cp", "default");
-#endif
-  std::string addtl_doc_str(" (Note: none = basic)");
-#else
-  MooseEnum line_search("default", "default");
-  std::string addtl_doc_str("");
-#endif
-  params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
-
-#ifdef LIBMESH_HAVE_PETSC
-  params.addParam<MultiMooseEnum>("petsc_options", Moose::PetscSupport::getCommonPetscOptions(), "Singleton PETSc options");
-  params.addParam<MultiMooseEnum>("petsc_options_iname", Moose::PetscSupport::getCommonPetscOptionsIname(), "Names of PETSc name/value pairs");
-  params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-#endif //LIBMESH_HAVE_PETSC
-}
 
 CreateExecutionerAction::CreateExecutionerAction(const std::string & name, InputParameters params) :
     MooseObjectAction(name, params)
@@ -91,15 +61,12 @@ CreateExecutionerAction::act()
 {
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This parameter
   // is held in the child block Adaptivity and needs to be pulled early
-
-  Moose::setup_perf_log.push("Create Executioner","Setup");
-  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
-  MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create(_type, "Executioner", _moose_object_pars));
-  Moose::setup_perf_log.pop("Create Executioner","Setup");
-
   if (_problem.get() != NULL)
   {
-    storeCommonExecutionerParams(*_problem, _pars);
+    // Extract and store PETSc related settings on FEProblem
+#ifdef LIBMESH_HAVE_PETSC
+    Moose::PetscSupport::storePetscOptions(*_problem, _pars);
+#endif //LIBMESH_HAVE_PETSC
 
     // solver params
     EquationSystems & es = _problem->es();
@@ -137,29 +104,10 @@ CreateExecutionerAction::act()
     _problem->getNonlinearSystem()._compute_initial_residual_before_preset_bcs = getParam<bool>("compute_initial_residual_before_preset_bcs");
   }
 
+  Moose::setup_perf_log.push("Create Executioner","Setup");
+  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
+  MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create(_type, "Executioner", _moose_object_pars));
+  Moose::setup_perf_log.pop("Create Executioner","Setup");
+
   _awh.executioner() = executioner;
-}
-
-void
-CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, InputParameters & params)
-{
-  // Note: Options set in the Preconditioner block will override those set in the Executioner block
-  if (params.isParamValid("solve_type"))
-  {
-    // Extract the solve type
-    const std::string & solve_type = params.get<MooseEnum>("solve_type");
-    fe_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
-  }
-
-  MooseEnum line_search = params.get<MooseEnum>("line_search");
-  if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
-    fe_problem.solverParams()._line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
-
-#ifdef LIBMESH_HAVE_PETSC
-  MultiMooseEnum           petsc_options       = params.get<MultiMooseEnum>("petsc_options");
-  MultiMooseEnum           petsc_options_iname = params.get<MultiMooseEnum>("petsc_options_iname");
-  std::vector<std::string> petsc_options_value = params.get<std::vector<std::string> >("petsc_options_value");
-
-  fe_problem.storePetscOptions(petsc_options, petsc_options_iname, petsc_options_value);
-#endif //LIBMESH_HAVE_PETSC
 }

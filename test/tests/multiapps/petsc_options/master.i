@@ -48,6 +48,7 @@
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  petsc_options = '-test'
   l_tol = 1e-12
 []
 

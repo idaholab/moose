@@ -220,7 +220,7 @@ outputExecutionInformation(MooseApp & app, FEProblem & problem)
 
   oss << std::setw(console_field_width) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(problem.solverParams()._type) << '\n';
 
-  const std::string & pc_desc = problem.getPreconditionerDescription();
+  const std::string & pc_desc = problem.getPetscOptions().pc_description;
   if (!pc_desc.empty())
     oss << std::setw(console_field_width) << "  Preconditioner: " << pc_desc << '\n';
   oss << '\n';
@@ -273,7 +273,6 @@ std::string outputLegacyInformation(FEProblem & problem)
 
   return oss.str();
 }
-
 
 void
 insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)

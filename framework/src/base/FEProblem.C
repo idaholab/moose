@@ -153,13 +153,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
 {
 
-#ifdef LIBMESH_HAVE_PETSC
-  // put in empty arrays for PETSc options
-  this->parameters().set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
-  this->parameters().set<MultiMooseEnum>("petsc_inames") = MultiMooseEnum("", "", true);
-  this->parameters().set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
-#endif
-
   _n++;
 
   _time = 0.0;
@@ -3981,84 +3974,6 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
   return reason;
 }
 
-#ifdef LIBMESH_HAVE_PETSC
-void
-FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options,
-                             const MultiMooseEnum & petsc_options_inames,
-                             const std::vector<std::string> & petsc_options_values)
-{
-  MultiMooseEnum & po = parameters().set<MultiMooseEnum>("petsc_options");         // set because we need a writable reference
-
-  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
-  {
-    /**
-     * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
-     * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
-     */
-    if (*it == "-log_summary")
-      mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
-
-    // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
-    else
-    {
-      std::string help_string;
-      if (*it == "-snes" || *it == "-snes_mf" || *it == "-snes_mf_operator")
-        help_string = "Please set the solver type through \"solve_type\".";
-      else if (*it == "-ksp_monitor")
-        help_string = "Please use \"Outputs/console/type=Console Outputs/console/linear_residuals=true\"";
-
-      if (help_string != "")
-        mooseWarning("The PETSc option " << *it << " should not be used directly in a MOOSE input file. " << help_string);
-    }
-
-    if (find(po.begin(), po.end(), *it) == po.end())
-      po.push_back(*it);
-  }
-
-  MultiMooseEnum & pn           = parameters().set<MultiMooseEnum>("petsc_inames");                    // set because we need a writable reference
-  std::vector<std::string> & pv = parameters().set<std::vector<std::string> >("petsc_values");         // set because we need a writable reference
-
-  if (petsc_options_inames.size() != petsc_options_values.size())
-    mooseError("PETSc names and options are not the same length");
-
-  bool boomeramg_found = false;
-  bool strong_threshold_found = false;
-  _pc_description = "";
-  for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
-  {
-    if (find(pn.begin(), pn.end(), petsc_options_inames[i]) == pn.end())
-    {
-      pn.push_back(petsc_options_inames[i]);
-      pv.push_back(petsc_options_values[i]);
-
-      // Look for a pc description
-      if (petsc_options_inames[i] == "-pc_type" || petsc_options_inames[i] == "-pc_sub_type" || petsc_options_inames[i] == "-pc_hypre_type")
-        _pc_description += petsc_options_values[i] + ' ';
-
-      // This special case is common enough that we'd like to handle it for the user.
-      if (petsc_options_inames[i] == "-pc_hypre_type" && petsc_options_values[i] == "boomeramg")
-        boomeramg_found = true;
-      if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
-        strong_threshold_found = true;
-    }
-    else
-    {
-      for (unsigned int j = 0; j < pn.size(); j++)
-        if (pn[j] == petsc_options_inames[i])
-          pv[j] = petsc_options_values[i];
-    }
-  }
-
-  // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold value
-  // We will provide that for the user here if they haven't supplied it themselves.
-  if (boomeramg_found && !strong_threshold_found && _mesh.dimension() == 3)
-  {
-    pn.push_back("-pc_hypre_boomeramg_strong_threshold");
-    pv.push_back("0.7");
-    _pc_description += "strong_threshold: 0.7 (auto)";
-  }
-}
-#endif
 
 SolverParams &
 FEProblem::solverParams()
