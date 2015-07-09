@@ -52,10 +52,7 @@
   type = Transient
   num_steps = 4
   dt = 0.01
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
@@ -71,12 +68,15 @@
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    positions = '0 0 0'
+    positions = '0.1 0.45 0'
     input_files = fromsub_fixed_meshes_sub.i
   [../]
 []
 
 [Transfers]
+  # Note: it's not generally advised to use "fixed_meshes = true" with displaced
+  # meshes.  We only do that for this test to make sure the test will fail if
+  # "fixed_meshes" isn't working properly.
   [./from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
@@ -84,6 +84,7 @@
     source_variable = u
     variable = from_sub
     fixed_meshes = true
+    displaced_source_mesh = true
   [../]
   [./elemental_from_sub]
     type = MultiAppNearestNodeTransfer
@@ -92,5 +93,7 @@
     source_variable = u
     variable = elemental_from_sub
     fixed_meshes = true
+    displaced_source_mesh = true
   [../]
 []
+

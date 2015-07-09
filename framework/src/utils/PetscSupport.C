@@ -29,6 +29,7 @@
 #include "CommandLine.h"
 #include "Console.h"
 #include "MultiMooseEnum.h"
+#include "Conversion.h"
 
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
@@ -164,11 +165,10 @@ void petscSetupDM (NonlinearSystem & nl) {
 void
 petscSetOptions(FEProblem & problem)
 {
-  MultiMooseEnum                   petsc_options = problem.parameters().get<MultiMooseEnum>("petsc_options");
-  MultiMooseEnum                   petsc_options_inames = problem.parameters().get<MultiMooseEnum>("petsc_inames");
-  const std::vector<std::string> & petsc_options_values = problem.parameters().get<std::vector<std::string> >("petsc_values");
+  // Reference to the options stored in FEPRoblem
+  PetscOptions & petsc = problem.getPetscOptions();
 
-  if (petsc_options_inames.size() != petsc_options_values.size())
+  if (petsc.inames.size() != petsc.values.size())
     mooseError("PETSc names and options are not the same length");
 
   PetscOptionsClear();
@@ -184,10 +184,10 @@ petscSetOptions(FEProblem & problem)
   setSolverOptions(problem.solverParams());
 
   // Add any additional options specified in the input file
-  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
+  for (MooseEnumIterator it = petsc.flags.begin(); it != petsc.flags.end(); ++it)
     PetscOptionsSetValue(it->c_str(), PETSC_NULL);
-  for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
-    PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());
+  for (unsigned int i=0; i<petsc.inames.size(); ++i)
+    PetscOptionsSetValue(petsc.inames[i].c_str(), petsc.values[i].c_str());
 
   SolverParams& solver_params = problem.solverParams();
   if (solver_params._type != Moose::ST_JFNK  &&
@@ -561,8 +561,148 @@ void petscSetDefaults(FEProblem & problem)
 #endif
 }
 
+void
+storePetscOptions(FEProblem & fe_problem, const InputParameters & params)
+{
+  // Note: Options set in the Preconditioner block will override those set in the Executioner block
+  if (params.isParamValid("solve_type"))
+  {
+    // Extract the solve type
+    const std::string & solve_type = params.get<MooseEnum>("solve_type");
+    fe_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
+  }
+
+  if (params.isParamValid("line_search"))
+  {
+      MooseEnum line_search = params.get<MooseEnum>("line_search");
+      if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
+        fe_problem.solverParams()._line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
+  }
+
+  // The parameters contained in the Action
+  const MultiMooseEnum & petsc_options = params.get<MultiMooseEnum>("petsc_options");
+  const MultiMooseEnum & petsc_options_inames = params.get<MultiMooseEnum>("petsc_options_iname");
+  const std::vector<std::string> & petsc_options_values = params.get<std::vector<std::string> >("petsc_options_value");
+
+  // A reference to the PetscOptions object that contains the settings that will be used in the solve
+  Moose::PetscSupport::PetscOptions & po = fe_problem.getPetscOptions();
+
+  // Update the PETSc single flags
+  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
+  {
+    /**
+     * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
+     * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
+     */
+    if (*it == "-log_summary")
+      mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
+
+    // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
+    else
+    {
+      std::string help_string;
+      if (*it == "-snes" || *it == "-snes_mf" || *it == "-snes_mf_operator")
+        help_string = "Please set the solver type through \"solve_type\".";
+      else if (*it == "-ksp_monitor")
+        help_string = "Please use \"Outputs/print_linear_residuals=true\"";
+
+      if (help_string != "")
+        mooseWarning("The PETSc option " << *it << " should not be used directly in a MOOSE input file. " << help_string);
+    }
+
+    // Update the stored items, but do not create duplicates
+    if (find(po.flags.begin(), po.flags.end(), *it) == po.flags.end())
+      po.flags.push_back(*it);
+  }
+
+  // Check that the name value pairs are sized correctly
+  if (petsc_options_inames.size() != petsc_options_values.size())
+    mooseError("PETSc names and options are not the same length");
+
+  // Setup the name value pairs
+  bool boomeramg_found = false;
+  bool strong_threshold_found = false;
+  std::string pc_description = "";
+  for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
+  {
+    // Do not add duplicate settings
+    if (find(po.inames.begin(), po.inames.end(), petsc_options_inames[i]) == po.inames.end())
+    {
+      po.inames.push_back(petsc_options_inames[i]);
+      po.values.push_back(petsc_options_values[i]);
+
+      // Look for a pc description
+      if (petsc_options_inames[i] == "-pc_type" || petsc_options_inames[i] == "-pc_sub_type" || petsc_options_inames[i] == "-pc_hypre_type")
+        pc_description += petsc_options_values[i] + ' ';
+
+      // This special case is common enough that we'd like to handle it for the user.
+      if (petsc_options_inames[i] == "-pc_hypre_type" && petsc_options_values[i] == "boomeramg")
+        boomeramg_found = true;
+      if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
+        strong_threshold_found = true;
+    }
+    else
+    {
+      for (unsigned int j = 0; j < po.inames.size(); j++)
+        if (po.inames[j] == petsc_options_inames[i])
+          po.values[j] = petsc_options_values[i];
+    }
+  }
+
+
+  // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold value
+  // We will provide that for the user here if they haven't supplied it themselves.
+  if (boomeramg_found && !strong_threshold_found && fe_problem.mesh().dimension() == 3)
+  {
+    po.inames.push_back("-pc_hypre_boomeramg_strong_threshold");
+    po.values.push_back("0.7");
+    pc_description += "strong_threshold: 0.7 (auto)";
+  }
+
+  // Set Preconditioner description
+  po.pc_description = pc_description;
+}
+
+
+InputParameters
+getPetscValidParams()
+{
+  InputParameters params = emptyInputParameters();
+
+  MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
+  params.addParam<MooseEnum>   ("solve_type",      solve_type,
+                                "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
+                                "JFNK: Jacobian-Free Newton Krylov "
+                                "NEWTON: Full Newton Solve "
+                                "FD: Use finite differences to compute Jacobian "
+                                "LINEAR: Solving a linear problem");
+
+  // Line Search Options
+#ifdef LIBMESH_HAVE_PETSC
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
+#else
+  MooseEnum line_search("default shell none basic l2 bt cp", "default");
+#endif
+  std::string addtl_doc_str(" (Note: none = basic)");
+#else
+  MooseEnum line_search("default", "default");
+  std::string addtl_doc_str("");
+#endif
+  params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
+
+#ifdef LIBMESH_HAVE_PETSC
+  params.addParam<MultiMooseEnum>("petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>("petsc_options_iname", getCommonPetscOptionsKeys(), "Names of PETSc name/value pairs");
+  params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+#endif //LIBMESH_HAVE_PETSC
+
+  return params;
+}
+
+
 MultiMooseEnum
-getCommonPetscOptions()
+getCommonPetscFlags()
 {
   return MultiMooseEnum(
     "-dm_moose_print_embedding -dm_view -ksp_converged_reason -ksp_gmres_modifiedgramschmidt "
@@ -572,7 +712,7 @@ getCommonPetscOptions()
 }
 
 MultiMooseEnum
-getCommonPetscOptionsIname()
+getCommonPetscOptionsKeys()
 {
   return MultiMooseEnum(
     "-ksp_atol -ksp_gmres_restart -ksp_grmres_restart -ksp_max_it -ksp_pc_side -ksp_rtol "
@@ -581,6 +721,7 @@ getCommonPetscOptionsIname()
     "-pc_hypre_boomeramg_strong_threshold -pc_hypre_type -pc_type -snes_atol -snes_linesearch_type "
     "-snes_ls -snes_max_it -snes_rtol -snes_type -sub_ksp_type -sub_pc_type", "", true);
 }
+
 } // Namespace PetscSupport
 } // Namespace MOOSE
 
