@@ -181,6 +181,11 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
     _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
 
+  // To correctly compute the Jacobian terms,
+  // tell MOOSE that this DiracKernel depends on all the Richards Vars
+  const std::vector<MooseVariable *> & coupled_vars = _richards_name_UO.getCoupledMooseVars();
+  for (unsigned int i = 0; i < coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
 }
 
 bool
