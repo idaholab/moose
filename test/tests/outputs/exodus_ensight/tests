@@ -5,4 +5,11 @@
     input = exodus_ensight.i
     exodiff = exodus_ensight_out.e
   [../]
+
+  [./simulation_time_multiapps]
+    # Test that simulation time outputs as a postprocessor with multiapps and subcycling
+    type = Exodiff
+    input = exodus_ensight_master.i
+    exodiff = 'exodus_ensight_master_out.e exodus_ensight_master_out_sub0.e'
+  [../]
 []

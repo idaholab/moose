@@ -41,7 +41,7 @@
   # The combination of a large starting time and small dt causes EnSight to fail to read time
   type = Transient
   num_steps = 5
-  dt = 1e-6
+  dt = 1e-5
   start_time = 1.26228e8
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -55,5 +55,17 @@
   [./out]
     type = Exodus
     ensight_time = true
+  [../]
+[]
+
+[MultiApps]
+  [./sub]
+    type = TransientMultiApp
+    app_type = MooseTestApp
+    execute_on = timestep_end
+    positions = '0 0 0'
+    input_files = exodus_ensight_sub.i
+    sub_cycling = true
+    output_sub_cycles = true
   [../]
 []

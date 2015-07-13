@@ -95,9 +95,16 @@ AddOutputAction::act()
   {
     InputParameters params = _factory.getValidParams("TimePostprocessor");
     params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
-    params.set<MooseEnum>("time_part") = "integer";
-    _problem->addPostprocessor("TimePostprocessor", "simulation_time_integer", params);
-    params.set<MooseEnum>("time_part") = "fractional";
-    _problem->addPostprocessor("TimePostprocessor", "simulation_time_fractional", params);
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time", params); // The actual time
+    params.set<MooseEnum>("time_part") = "days";
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time_days", params);
+    params.set<MooseEnum>("time_part") = "hours";
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time_hours", params);
+    params.set<MooseEnum>("time_part") = "minutes";
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time_minutes", params);
+    params.set<MooseEnum>("time_part") = "seconds";
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time_seconds", params);
+    params.set<MooseEnum>("time_part") = "milliseconds";
+    _problem->addPostprocessor("TimePostprocessor", "simulation_time_milliseconds", params);
   }
 }

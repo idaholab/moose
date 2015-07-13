@@ -40,7 +40,7 @@
 [Executioner]
   # The combination of a large starting time and small dt causes EnSight to fail to read time
   type = Transient
-  num_steps = 5
+  num_steps = 10
   dt = 1e-6
   start_time = 1.26228e8
   solve_type = PJFNK

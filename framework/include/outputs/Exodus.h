@@ -83,7 +83,7 @@ public:
   virtual void sequence(bool state);
 
   /**
-   * Return the time for writting to the file
+   * Return the time for writing to the file
    */
   virtual Real time();
 
@@ -166,8 +166,11 @@ private:
   /// Sequence flag, if true each timestep is written to a new file
   bool _sequence;
 
-  /// Flag for using EnSignt compatible time
-  bool _ensight_time;
+  /// Flag for using EnSight compatible time
+  bool _enable_ensight_time;
+
+  /// Storage for EnSight time (global output count)
+  static unsigned int _ensight_time;
 };
 
 #endif /* EXODUS_H */
