@@ -187,15 +187,22 @@ void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vec
 	   }
 }
 
-void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu){
+//void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu){
+void BasicMultivariateNormal::BasicMultivariateNormal_init(int &rows, int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu){
 	  /**
 	   * This is the base function that initializes the Multivariate normal distribution
+     * Input Parameter
+     * rows: first dimension of covariance matrix
+     * columns: second dimension of covariance matrix
+     * covMatrix: covariance matrix stored in vector<vector<double> >
+     * mu: mean value stored in vector<double>
 	   */
 
    _mu = mu;
+   _cov_matrix = covMatrix;
 
-   int rows,columns;
-   readMatrix(data_filename, rows, columns, _cov_matrix);
+   //int rows,columns;
+   //readMatrix(data_filename, rows, columns, _cov_matrix);
    std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
 
    computeInverse(_cov_matrix, inverseCovMatrix);
@@ -217,7 +224,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_file
    _cholesky_C = choleskyDecomposition(_cov_matrix);
 
    if(rows != columns)
-	   throwError("MultivariateNormal error: covariance matrix in " << data_filename << " is not a square matrix.");
+	   throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
 
    // Creation BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool CDFprovided)
    // number of discretizations in sigma/2 units; plus/minus six sigma
@@ -269,7 +276,10 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std:
 	   * - data_filename: it specifies the covariance matrix
 	   * - mu: the mean value vector
 	   */
-	BasicMultivariateNormal_init(data_filename, mu);
+  int rows,columns;
+  std::vector<std::vector<double> > covMatrix;
+  readMatrix(data_filename, rows, columns, covMatrix);
+  BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(const char * data_filename, std::vector<double> mu){
@@ -278,7 +288,11 @@ BasicMultivariateNormal::BasicMultivariateNormal(const char * data_filename, std
 	   * - data_filename: it specifies the covariance matrix
 	   * - mu: the mean value vector
 	   */
-	BasicMultivariateNormal_init(std::string(data_filename) , mu);
+  int rows,columns;
+  std::vector<std::vector<double> > covMatrix;
+  readMatrix(std::string(data_filename), rows, columns, covMatrix);
+	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
+	//BasicMultivariateNormal_init(std::string(data_filename) , mu);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu){
@@ -287,12 +301,34 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double>
    * - covMatrix: covariance matrix
    * - mu: the mean value vector
    */
-  _mu = mu;
-  _cov_matrix = covMatrix;
+  int rows, columns;
+  rows = covMatrix.size();
+  columns = covMatrix.at(0).size();
 
-  computeInverse(_cov_matrix, _inverse_cov_matrix);
+	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
+  //_mu = mu;
+  //_cov_matrix = covMatrix;
 
-  _determinant_cov_matrix = getDeterminant(_cov_matrix);
+  //computeInverse(_cov_matrix, _inverse_cov_matrix);
+
+  //_determinant_cov_matrix = getDeterminant(_cov_matrix);
+}
+
+// Input Parameters: vectors of covariance and mu 
+BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu){
+  /**
+   * This is the function that initializes the Multivariate normal distribution given:
+   * Input Parameters
+   * - vecCovMatrix: covariance matrix stored in a vector<double>
+   * - mu: the mean value vector
+   */
+
+  int rows, columns;
+  std::vector<std::vector<double> > covMatrix;
+  // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
+  vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
+
+	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
 }
 
 double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix){
@@ -339,6 +375,7 @@ std::vector<double> BasicMultivariateNormal::InverseCdf(double F, double g){
 	   */
 	std::cout<<"BasicMultivariateNormal::InverseCdf"<< std::endl;
 	return _cartesianDistribution.InverseCdf(F,g);
+  std::cout << "test inverseCdf" << std::endl;
 }
 
 double BasicMultivariateNormal::inverseMarginal(double F, int dimension){
