@@ -46,6 +46,9 @@ InputParameters validParams<Exodus>()
   return params;
 }
 
+// Initialize the static EnSight "time" counter
+unsigned int Exodus::_ensight_time = 0;
+
 Exodus::Exodus(const std::string & name, InputParameters parameters) :
     AdvancedOutput<OversampleOutput>(name, parameters),
     _exodus_initialized(false),
@@ -53,7 +56,7 @@ Exodus::Exodus(const std::string & name, InputParameters parameters) :
     _recovering(_app.isRecovering()),
     _exodus_mesh_changed(declareRestartableData<bool>("exodus_mesh_changed", true)),
     _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : _use_displaced ? true : false),
-    _ensight_time(getParam<bool>("ensight_time"))
+    _enable_ensight_time(getParam<bool>("ensight_time"))
 {
 }
 
@@ -314,8 +317,8 @@ Exodus::outputEmptyTimestep()
 Real
 Exodus::time()
 {
-  if (_ensight_time)
-    return _t_step;
+  if (_enable_ensight_time)
+    return _ensight_time++;
   else
     return OversampleOutput::time() + _app.getGlobalTimeOffset();
 }
