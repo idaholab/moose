@@ -14,6 +14,13 @@ namespace RELAP7
     STABILIZATION_ENTROPY_VISCOSITY
   };
 
+  /// Type of the stabilization
+  enum EConvHeatTransGeom
+  {
+    CHTG_PIPE,
+    CHTG_VERT_BUNDLE_W_XFLOW
+  };
+
   ///< Type of the end
   enum EEndType
   {
