@@ -42,14 +42,13 @@ protected:
 
   const unsigned int _component;
 
-  const bool _xdisp_coupled;
-  const bool _ydisp_coupled;
-  const bool _zdisp_coupled;
+  /// Coupled displacement variables
+  unsigned int _ndisp;
+  std::vector<VariableValue *> _disp;
+  std::vector<unsigned int> _disp_var;
+
   const bool _temp_coupled;
 
-  const unsigned int _xdisp_var;
-  const unsigned int _ydisp_var;
-  const unsigned int _zdisp_var;
   const unsigned int _temp_var;
 
 private:

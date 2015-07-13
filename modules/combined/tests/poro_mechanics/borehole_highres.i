@@ -190,6 +190,7 @@
   [../]
   [./strain]
     type = ComputeFiniteStrain
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./no_plasticity]
     type = ComputeMultiPlasticityStress

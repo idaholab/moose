@@ -80,8 +80,7 @@
   [./PolycrystalElasticDrivingForce]
   [../]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -198,8 +197,7 @@
   [./strain]
     type = ComputeSmallStrain
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y'
   [../]
   [./stress]
     type = ComputeLinearElasticStress

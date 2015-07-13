@@ -5,9 +5,6 @@
 []
 
 [GlobalParams]
-  disp_z = disp_z
-  disp_y = disp_y
-  disp_x = disp_x
   block = 0
 []
 
@@ -43,9 +40,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
@@ -70,6 +65,7 @@
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./mc]
     type = ComputeMultiPlasticityStress

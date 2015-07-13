@@ -52,8 +52,7 @@
   [./solid_x]
     type = StressDivergencePFFracTensors
     variable = u
-    disp_x = u
-    disp_y = v
+    displacements = 'u v'
     component = 0
     block = 1
     save_in = resid_x
@@ -63,8 +62,7 @@
   [./solid_y]
     type = StressDivergencePFFracTensors
     variable = v
-    disp_x = u
-    disp_y = v
+    displacements = 'u v'
     component = 1
     block = 1
     save_in = resid_y

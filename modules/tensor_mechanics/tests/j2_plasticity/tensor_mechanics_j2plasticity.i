@@ -47,9 +47,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    displacements = 'x_disp y_disp z_disp'
     use_displaced_mesh = true
   [../]
 []

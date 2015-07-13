@@ -27,9 +27,9 @@
 []
 
 [GlobalParams]
-  disp_z = disp_z
-  disp_y = disp_y
   disp_x = disp_x
+  disp_y = disp_y
+  disp_z = disp_z
   block = 0
 []
 
@@ -182,6 +182,7 @@
   [../]
   [./strain]
     type = ComputeSmallStrain
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     type = ComputeLinearElasticStress

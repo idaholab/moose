@@ -22,9 +22,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_z = disp_z
-    disp_y = disp_y
-    disp_x = disp_x
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
@@ -68,10 +66,8 @@
 [Materials]
   [./strain]
     type = ComputeSmallStrain
+    displacements = 'disp_x disp_y disp_z'
     block = 0
-    disp_z = disp_z
-    disp_y = disp_y
-    disp_x = disp_x
   [../]
   [./stress]
     type = ComputeLinearElasticStress
