@@ -11,7 +11,6 @@
 [Mesh]
   type = FileMesh
   file = rotation_test.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -96,9 +95,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    displacements = 'disp_x disp_y disp_z'
     use_displaced_mesh = true
   [../]
 []
@@ -205,9 +202,7 @@
   [./strain]
     type = ComputeFiniteStrain
     block = 1
-    disp_z = disp_z
-    disp_y = disp_y
-    disp_x = disp_x
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress

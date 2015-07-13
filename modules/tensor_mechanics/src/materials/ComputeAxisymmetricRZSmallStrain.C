@@ -10,14 +10,13 @@ template<>
 InputParameters validParams<ComputeAxisymmetricRZSmallStrain>()
 {
   InputParameters params = validParams<Compute2DSmallStrain>();
-  params.addClassDescription("Compute a small strain in an Axisymmetric geometry. Note '_disp_x' refers to radial displacement and '_disp_y' refers to axial displacement and the coord_type = RZ.");
+  params.addClassDescription("Compute a small strain in an Axisymmetric geometry");
   return params;
 }
 
 ComputeAxisymmetricRZSmallStrain::ComputeAxisymmetricRZSmallStrain(const std::string & name,
     InputParameters parameters) :
-    Compute2DSmallStrain(name, parameters),
-    _disp_x(coupledValue("disp_x"))
+    Compute2DSmallStrain(name, parameters)
 {
 }
 
@@ -28,7 +27,7 @@ ComputeAxisymmetricRZSmallStrain::computeStrainZZ()
     mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
 
   if (_q_point[_qp](0) != 0.0)
-    return _disp_x[_qp] / _q_point[_qp](0);
+    return (*_disp[0])[_qp] / _q_point[_qp](0);
 
   else
     return 0.0;

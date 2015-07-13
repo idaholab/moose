@@ -6,9 +6,6 @@
 []
 
 [GlobalParams]
-  disp_z = disp_z
-  disp_y = disp_y
-  disp_x = disp_x
   block = 0
 []
 
@@ -57,17 +54,20 @@
   [../]
   [./grad_stress_x]
     type = StressDivergenceTensors
+    displacements = 'disp_x disp_y disp_z'
     variable = disp_x
     component = 0
   [../]
   [./grad_stress_y]
     type = StressDivergenceTensors
     variable = disp_y
+    displacements = 'disp_x disp_y disp_z'
     component = 1
   [../]
   [./grad_stress_z]
     type = StressDivergenceTensors
     variable = disp_z
+    displacements = 'disp_x disp_y disp_z'
     component = 2
   [../]
   [./poro_x]
@@ -117,6 +117,7 @@
   [../]
   [./strain]
     type = ComputeSmallStrain
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     type = ComputeLinearElasticStress

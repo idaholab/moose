@@ -115,8 +115,8 @@
   [./elastic]
     type = ElementPropertyReadFileTest
     block = 0
-    disp_y = disp_y
     disp_x = disp_x
+    disp_y = disp_y
     disp_z = disp_z
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
@@ -174,9 +174,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_y = disp_y
-    disp_x = disp_x
-    disp_z = disp_z
+    displacements = 'disp_x disp_y disp_z'
     use_displaced_mesh = true
   [../]
 []

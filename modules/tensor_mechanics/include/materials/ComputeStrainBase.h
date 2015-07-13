@@ -20,18 +20,17 @@ class ComputeStrainBase : public DerivativeMaterialInterface<Material>
 {
 public:
   ComputeStrainBase(const std:: string & name, InputParameters parameters);
+  virtual ~ComputeStrainBase() {}
 
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeProperties() = 0;
 
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
-
-  VariableGradient & _grad_disp_x_old;
-  VariableGradient & _grad_disp_y_old;
-  VariableGradient & _grad_disp_z_old;
+  /// Coupled displacement variables
+  unsigned int _ndisp;
+  std::vector<VariableValue *> _disp;
+  std::vector<VariableGradient *> _grad_disp;
+  std::vector<VariableGradient *> _grad_disp_old;
 
   VariableValue & _T;
   const Real _T0;

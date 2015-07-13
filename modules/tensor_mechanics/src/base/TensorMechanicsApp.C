@@ -9,6 +9,7 @@
 #include "AppFactory.h"
 
 #include "TensorMechanicsAction.h"
+#include "TensorMechanicsAxisymmetricRZAction.h"
 #include "PressureActionTM.h"
 #include "PoroMechanicsAction.h"
 
@@ -180,8 +181,10 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("PressureActionTM", "BCs/PressureTM/*");
 
   syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
+  syntax.registerActionSyntax("TensorMechanicsAxisymmetricRZAction", "Kernels/AxisymmetricRZ");
 
   registerAction(TensorMechanicsAction, "add_kernel");
   registerAction(PressureActionTM, "add_bc");
   registerAction(PoroMechanicsAction, "add_kernel");
+  registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
 }

@@ -170,8 +170,8 @@
   [./crysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
-    disp_y = disp_y
     disp_x = disp_x
+    disp_y = disp_y
     gtol = 1e-2
     slip_sys_file_name = input_slip_sys.txt
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
@@ -248,8 +248,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_y = disp_y
-    disp_x = disp_x
+    displacements = 'disp_x disp_y'
     use_displaced_mesh = true
   [../]
 []

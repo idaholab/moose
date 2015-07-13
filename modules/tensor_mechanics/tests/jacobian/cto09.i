@@ -1,7 +1,7 @@
 # checking jacobian for 3-plane linear plasticity using SimpleTester.
 #
 # This is like the test multi/three_surface14.i
-# Plasticit models:
+# Plasticity models:
 # SimpleTester0 with a = 0 and b = 1 and strength = 1
 # SimpleTester1 with a = 1 and b = 0 and strength = 1
 # SimpleTester2 with a = 1 and b = 1 and strength = 3
@@ -47,9 +47,6 @@
 []
 
 [GlobalParams]
-  disp_z = disp_z
-  disp_y = disp_y
-  disp_x = disp_x
   block = 0
 []
 
@@ -65,9 +62,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
@@ -106,6 +101,7 @@
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./multi]
     type = ComputeMultiPlasticityStress

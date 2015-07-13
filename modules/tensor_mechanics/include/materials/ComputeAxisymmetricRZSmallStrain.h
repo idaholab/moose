@@ -22,7 +22,6 @@ public:
 
 protected:
   virtual Real computeStrainZZ();
-  VariableValue & _disp_x;
 };
 
 #endif //COMPUTEAXISYMMETRICRZSMALLSTRAIN_H
