@@ -57,6 +57,38 @@ MooseEnumBase::~MooseEnumBase()
 }
 
 void
+MooseEnumBase::deprecate(const std::string & name, const std::string & new_name)
+{
+  std::string formal_name = formalize(name);
+  if (std::find(_names.begin(), _names.end(), formal_name) == _names.end())
+    mooseError("trying to deprecate a invalid name");
+
+  _deprecated_names[formal_name] = formalize(new_name);
+
+  // because this function is separated from the constructors, we need to check
+  // if the current name is deprecated or not.
+  checkDeprecatedCurrent();
+}
+
+std::set<std::string>
+MooseEnumBase::getDeprecatedNames() const
+{
+  std::set<std::string> names;
+  std::map<std::string, std::string>::const_iterator it = _deprecated_names.begin();
+  for (; it != _deprecated_names.end(); ++it)
+    names.insert(it->first);
+  return names;
+}
+
+bool
+MooseEnumBase::isDeprecated(const std::string & name) const
+{
+  std::string upper(name);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+  return (_deprecated_names.find(upper) != _deprecated_names.end());
+}
+
+void
 MooseEnumBase::fillNames(std::string names, std::string option_delim)
 {
   std::vector<std::string> elements;
@@ -91,12 +123,33 @@ MooseEnumBase::fillNames(std::string names, std::string option_delim)
       _raw_names += " ";
     _raw_names += name_value[0];
 
-    // convert name to uppercase
-    std::string upper(name_value[0]);
-    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
     // populate internal datastructures
-    _names[i] = upper;
-    _name_to_id[upper] = value++;
+    _names[i] = formalize(name_value[0]);
+    _name_to_id[_names[i]] = value++;
   }
+}
+
+std::string
+MooseEnumBase::formalize(const char * name) const
+{
+  std::string upper(name);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+  std::map<std::string, std::string>::const_iterator it = _deprecated_names.find(upper);
+  if (it != _deprecated_names.end())
+  {
+    if (it->second != "")
+    {
+      mooseWarning(upper+" is deprecated, consider using "+it->second);
+      upper = it->second;
+    }
+    else
+      mooseWarning(upper+" is deprecated");
+  }
+  return upper;
+}
+
+std::string
+MooseEnumBase::formalize(const std::string & name) const
+{
+  return formalize(name.c_str());
 }

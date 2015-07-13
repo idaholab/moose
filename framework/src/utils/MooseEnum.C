@@ -72,8 +72,7 @@ MooseEnum::operator=(const std::string & name)
     return *this;
   }
 
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+  std::string upper = formalize(name);
 
   _current_name = upper;
   _current_name_preserved = name;
@@ -100,10 +99,7 @@ MooseEnum::operator=(const std::string & name)
 bool
 MooseEnum::operator==(const char * name) const
 {
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-  return _current_name == upper;
+  return _current_name == formalize(name);
 }
 
 bool
@@ -142,4 +138,23 @@ bool MooseEnum::operator==(const MooseEnum & value) const
 bool MooseEnum::operator!=(const MooseEnum & value) const
 {
   return value._current_name != _current_name;
+}
+
+void
+MooseEnum::checkDeprecatedCurrent()
+{
+  std::map<std::string, std::string>::const_iterator it = _deprecated_names.find(_current_name);
+  if (it != _deprecated_names.end())
+  {
+    if (it->second != "")
+    {
+      mooseWarning(_current_name+" as the default enum is deprecated, consider using "+it->second);
+      _current_name = it->second;
+      _current_id = _name_to_id[_current_name];
+      // invalidate the preserved of the current name because it is never provided.
+      _current_name_preserved = "";
+    }
+    else
+      mooseWarning(_current_name+" as the default enum is deprecated");
+  }
 }

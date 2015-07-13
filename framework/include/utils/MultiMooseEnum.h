@@ -194,6 +194,11 @@ private:
   template<typename InputIterator>
   void remove(InputIterator first, InputIterator last);
 
+  /**
+   * Check if the current enums are deprecated or not
+   */
+  virtual void checkDeprecatedCurrent();
+
   /// The current id
   std::vector<int> _current_ids;
 

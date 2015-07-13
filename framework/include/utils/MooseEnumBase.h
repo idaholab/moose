@@ -59,6 +59,26 @@ public:
   const std::string & getRawNames() const { return _raw_names; }
 
   /**
+   * Make a name deprecated
+   * @param name - the name to be deprecated
+   * @param new_name - the optional new name of the deprecated name
+   */
+  void deprecate(const std::string & name, const std::string & new_name="");
+
+  /**
+   * Method for returning a set of deprecated enumeration names for this instance
+   * @return a set of names
+   */
+  std::set<std::string> getDeprecatedNames() const;
+
+  /**
+   * Check if a name deprecated
+   * @param name - the name to be checked
+   * @param new_name - the optional new name of the deprecated name
+   */
+  bool isDeprecated(const std::string & name) const;
+
+  /**
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
@@ -73,8 +93,28 @@ protected:
    */
   void fillNames(std::string names, std::string option_delim=" ");
 
+  /**
+   * Formalize a C name string used by MooseEnum by capitalizing letters and checking if the name is deprecated
+   * @param name - a name to be formalized
+   */
+  std::string formalize(const char * name) const;
+
+  /**
+   * Formalize a standard name string used by MooseEnum
+   * @param name - a name to be formalized
+   */
+  std::string formalize(const std::string & name) const;
+
+  /**
+   * Check if the current enum is deprecated or not
+   */
+  virtual void checkDeprecatedCurrent() = 0;
+
   /// The vector of enumeration names
   std::vector<std::string> _names;
+
+  /// The deprecated enumeration names possibly with the mapped new names
+  std::map<std::string, std::string> _deprecated_names;
 
   /// The raw string of names separated by spaces
   std::string _raw_names;
