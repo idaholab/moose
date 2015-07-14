@@ -35,26 +35,24 @@ ForceDensityMaterial::ForceDensityMaterial(const std::string & name, InputParame
 void
 ForceDensityMaterial::computeQpProperties()
 {
-  Real product_etas = 0.0;
-  RealGradient diff_grad_etas = 0.0;
-  Real product_eta_value = 0.0;
+  std::vector<Real> product_etas(_ncrys);
+  std::vector<RealGradient> sum_grad_etas(_ncrys);
 
   _dF[_qp].resize(_ncrys);
 
   for (unsigned int i = 0; i < _ncrys; ++i)
   {
+    product_etas[i] = 0;
+    sum_grad_etas[i] = 0;
     for (unsigned int j = 0; j < _ncrys; ++j)
     {
       if(j!=i)
       {
-        product_etas += (*_vals[i])[_qp] * (*_vals[j])[_qp]; //Sum all other order parameters
-        diff_grad_etas += ((*_grad_vals[i])[_qp] - (*_grad_vals[j])[_qp]);
+        product_etas[i] = (*_vals[i])[_qp] * (*_vals[j])[_qp] >= _cgb? 1 : 0; //Sum all other order parameters
+        sum_grad_etas[i] += product_etas[i] * ((*_grad_vals[i])[_qp] - (*_grad_vals[j])[_qp]);
       }
     }
-    if(product_etas >= _cgb)
-    {
-      product_eta_value = 1.0;
-    }
-   _dF[_qp][i] = _k * (_c[_qp] - _ceq) * product_eta_value * diff_grad_etas;
+
+   _dF[_qp][i] = _k * (_c[_qp] - _ceq) * sum_grad_etas[i];
   }
 }
