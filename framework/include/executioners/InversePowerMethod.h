@@ -29,6 +29,7 @@ public:
 
   InversePowerMethod(const std::string & name, InputParameters parameters);
 
+  virtual void init();
   virtual void execute();
 
 protected:

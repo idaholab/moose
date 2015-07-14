@@ -39,12 +39,26 @@ InversePowerMethod::InversePowerMethod(const std::string & name, InputParameters
     _pfactor(getParam<Real>("pfactor")),
     _cheb_on(getParam<bool>("Chebyshev_acceleration_on"))
 {
-  _eigenvalue = getParam<Real>("k0");
+  if (!_app.isRecovering() && ! _app.isRestarting())
+    _eigenvalue = getParam<Real>("k0");
+
   addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
 
   if (_max_iter<_min_iter) mooseError("max_power_iterations<min_power_iterations!");
   if (_eig_check_tol<0.0) mooseError("eig_check_tol<0!");
   if (_pfactor<0.0) mooseError("pfactor<0!");
+}
+
+void
+InversePowerMethod::init()
+{
+  if (_app.isRecovering())
+  {
+    _console << "\nCannot recover InversePowerMethod solves!\nExiting...\n" << std::endl;
+    return;
+  }
+
+  EigenExecutionerBase::init();
 }
 
 void
