@@ -49,8 +49,6 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const std::string &
     MultiAppTransfer(name, parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
-    _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
-    _displaced_target_mesh(getParam<bool>("displaced_target_mesh")),
     _num_points(getParam<unsigned int>("num_points")),
     _power(getParam<Real>("power")),
     _interp_type(getParam<MooseEnum>("interp_type")),
@@ -58,6 +56,8 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const std::string &
 {
   // This transfer does not work with ParallelMesh
   _fe_problem.mesh().errorIfParallelDistribution("MultiAppInterpolationTransfer");
+  _displaced_source_mesh = getParam<bool>("displaced_source_mesh");
+  _displaced_target_mesh = getParam<bool>("displaced_target_mesh");
 }
 
 void

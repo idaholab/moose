@@ -1,6 +1,5 @@
 [Mesh]
   file = 2blk.e
-  distribution = serial
 []
 
 [Variables]
