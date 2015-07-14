@@ -1,8 +1,0 @@
-[Tests]
-  [./simulation_time]
-    # Test that simulation time outputs as a postprocessor
-    type = Exodiff
-    input = exodus_ensight.i
-    exodiff = exodus_ensight_out.e
-  [../]
-[]
