@@ -129,7 +129,7 @@ protected:
   EigenSystem & _eigen_sys;
 
   /// Storage for the eigenvalue computed by the executioner
-  Real _eigenvalue;
+  Real & _eigenvalue;
 
   // postprocessor for eigenvalue
   const Real & _source_integral;

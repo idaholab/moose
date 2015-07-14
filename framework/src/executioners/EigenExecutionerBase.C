@@ -39,12 +39,11 @@ EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParame
     Executioner(name, parameters),
      _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
      _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
-     _eigenvalue(1.0),
+     _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
      _source_integral(getPostprocessorValue("bx_norm")),
      _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
                     : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
 {
-
   //FIXME: currently we have to use old and older solution vectors for power iteration.
   //       We will need 'step' in the future.
   _problem.transient(true);
@@ -76,12 +75,6 @@ EigenExecutionerBase::~EigenExecutionerBase()
 void
 EigenExecutionerBase::init()
 {
-  if (_app.isRecovering())
-  {
-    _console << "\nCannot recover eigenvalue solves!\nExiting...\n" << std::endl;
-    return;
-  }
-
   checkIntegrity();
   _eigen_sys.buildSystemDoFIndices(EigenSystem::EIGEN);
 

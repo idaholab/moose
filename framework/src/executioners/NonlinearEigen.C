@@ -36,13 +36,21 @@ NonlinearEigen::NonlinearEigen(const std::string & name, InputParameters paramet
      _pfactor(getParam<Real>("pfactor")),
      _output_after_pi(getParam<bool>("output_after_power_iterations"))
 {
-  _eigenvalue = getParam<Real>("k0");
+  if (!_app.isRecovering() && ! _app.isRestarting())
+    _eigenvalue = getParam<Real>("k0");
+
   addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
 }
 
 void
 NonlinearEigen::init()
 {
+  if (_app.isRecovering())
+  {
+    _console << "\nCannot recover NonlinearEigen solves!\nExiting...\n" << std::endl;
+    return;
+  }
+
   EigenExecutionerBase::init();
 
   if (_free_iter>0)
