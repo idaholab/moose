@@ -24,8 +24,8 @@ InputParameters validParams<QPointMarker>()
 }
 
 
-QPointMarker::QPointMarker(const std::string & name, InputParameters parameters) :
-    QuadraturePointMarker(name, parameters)
+QPointMarker::QPointMarker(const InputParameters & parameters) :
+    QuadraturePointMarker(parameters)
 {
 }
 

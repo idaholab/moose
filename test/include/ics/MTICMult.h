@@ -27,7 +27,7 @@ InputParameters validParams<MTICMult>();
 class MTICMult : public InitialCondition
 {
 public:
-  MTICMult(const std::string & name, InputParameters parameters);
+  MTICMult(const InputParameters & parameters);
   virtual ~MTICMult();
 
   virtual Real value(const Point & /*p*/);

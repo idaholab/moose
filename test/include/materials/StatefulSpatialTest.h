@@ -29,8 +29,7 @@ InputParameters validParams<StatefulSpatialTest>();
 class StatefulSpatialTest : public Material
 {
 public:
-  StatefulSpatialTest(const std::string & name,
-                      InputParameters parameters);
+  StatefulSpatialTest(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

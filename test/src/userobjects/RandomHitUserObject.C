@@ -23,8 +23,8 @@ InputParameters validParams<RandomHitUserObject>()
   return params;
 }
 
-RandomHitUserObject::RandomHitUserObject(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+RandomHitUserObject::RandomHitUserObject(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     _num_hits(parameters.get<unsigned int>("num_hits")),
     _hit_positions(_num_hits)
 {

@@ -30,7 +30,7 @@ InputParameters validParams<BndTestDirichletBC>();
 class BndTestDirichletBC : public NodalBC
 {
 public:
-  BndTestDirichletBC(const std::string & name, InputParameters parameters);
+  BndTestDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

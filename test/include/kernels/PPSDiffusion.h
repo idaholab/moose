@@ -26,7 +26,7 @@ InputParameters validParams<PPSDiffusion>();
 class PPSDiffusion : public Kernel
 {
 public:
-  PPSDiffusion(const std::string & name, InputParameters parameters);
+  PPSDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

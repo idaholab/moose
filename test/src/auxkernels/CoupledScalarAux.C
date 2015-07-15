@@ -26,8 +26,8 @@ InputParameters validParams<CoupledScalarAux>()
   return params;
 }
 
-CoupledScalarAux::CoupledScalarAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+CoupledScalarAux::CoupledScalarAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _coupled_val(coupledScalarValue("coupled")),
     _component(getParam<unsigned int>("component"))
 {

@@ -26,8 +26,8 @@ InputParameters validParams<CoupledGradAux>()
   return params;
 }
 
-CoupledGradAux::CoupledGradAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+CoupledGradAux::CoupledGradAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _grad(getParam<RealGradient>("grad")),
     _coupled(coupled("coupled")),
     _coupled_grad(coupledGradient("coupled"))

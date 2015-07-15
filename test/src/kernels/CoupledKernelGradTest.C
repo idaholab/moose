@@ -25,8 +25,8 @@ InputParameters validParams<CoupledKernelGradTest>()
 }
 
 
-CoupledKernelGradTest::CoupledKernelGradTest(const std::string & name, InputParameters parameters) :
-    KernelGrad(name, parameters),
+CoupledKernelGradTest::CoupledKernelGradTest(const InputParameters & parameters) :
+    KernelGrad(parameters),
     _var2(coupledValue("var2")),
     _var2_num(coupled("var2"))
 {

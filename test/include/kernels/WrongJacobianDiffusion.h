@@ -30,7 +30,7 @@ InputParameters validParams<WrongJacobianDiffusion>();
 class WrongJacobianDiffusion : public Kernel
 {
 public:
-  WrongJacobianDiffusion(const std::string & name, InputParameters parameters);
+  WrongJacobianDiffusion(const InputParameters & parameters);
 
 protected:
   /**

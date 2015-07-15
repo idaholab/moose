@@ -25,7 +25,7 @@ InputParameters validParams<CoupledKernelValueTest>();
 class CoupledKernelValueTest : public KernelValue
 {
 public:
-  CoupledKernelValueTest(const std::string & name, InputParameters parameters);
+  CoupledKernelValueTest(const InputParameters & parameters);
   virtual ~CoupledKernelValueTest();
 
 protected:

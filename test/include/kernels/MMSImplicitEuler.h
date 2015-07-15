@@ -24,7 +24,7 @@ InputParameters validParams<MMSImplicitEuler>();
 class MMSImplicitEuler : public TimeKernel
 {
 public:
-  MMSImplicitEuler(const std::string & name, InputParameters parameters);
+  MMSImplicitEuler(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

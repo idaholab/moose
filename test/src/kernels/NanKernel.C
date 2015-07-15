@@ -26,8 +26,8 @@ InputParameters validParams<NanKernel>()
 }
 
 
-NanKernel::NanKernel(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+NanKernel::NanKernel(const InputParameters & parameters) :
+    Kernel(parameters),
     _timestep_to_nan(getParam<unsigned int>("timestep_to_nan")),
     _deprecated_default(getParam<unsigned int>("deprecated_default")),
     _deprecated_no_default(isParamValid("deprecated_no_default") ? getParam<unsigned int>("deprecated_no_default") : 0)

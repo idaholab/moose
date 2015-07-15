@@ -21,8 +21,8 @@ InputParameters validParams<RestartDiffusion>()
   return params;
 }
 
-RestartDiffusion::RestartDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+RestartDiffusion::RestartDiffusion(const InputParameters & parameters) :
+    Kernel(parameters),
     _coef(getParam<Real>("coef")),
     _current_coef(declareRestartableData<Real>("current_coef", 1))
 {

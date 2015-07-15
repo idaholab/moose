@@ -25,8 +25,8 @@ InputParameters validParams<FluxAverageAux>()
   return params;
 }
 
-FluxAverageAux::FluxAverageAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+FluxAverageAux::FluxAverageAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _diffusivity(getParam<Real>("diffusivity")),
     _coupled_gradient(coupledGradient("coupled")),
     _coupled_var(*(getCoupledVars().find("coupled")->second)[0]),

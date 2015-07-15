@@ -31,7 +31,7 @@ public:
 class PointerStoreError : public GeneralUserObject
 {
 public:
-  PointerStoreError(const std::string & name, InputParameters params);
+  PointerStoreError(const InputParameters & params);
   virtual ~PointerStoreError();
 
   virtual void initialSetup();

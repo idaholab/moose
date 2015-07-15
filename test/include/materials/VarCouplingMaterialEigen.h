@@ -27,7 +27,7 @@ InputParameters validParams<VarCouplingMaterialEigen>();
 class VarCouplingMaterialEigen : public Material
 {
 public:
-  VarCouplingMaterialEigen(const std::string & name, InputParameters parameters);
+  VarCouplingMaterialEigen(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

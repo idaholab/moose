@@ -29,7 +29,7 @@ InputParameters validParams<DataStructIC>();
 class DataStructIC : public InitialCondition
 {
 public:
-  DataStructIC(const std::string & name, InputParameters parameters);
+  DataStructIC(const InputParameters & parameters);
   virtual ~DataStructIC();
 
   virtual void initialSetup();

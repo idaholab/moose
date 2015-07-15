@@ -24,7 +24,7 @@ InputParameters validParams<MMSForcing>();
 class MMSForcing : public Kernel
 {
 public:
-  MMSForcing(const std::string & name, InputParameters parameters);
+  MMSForcing(const InputParameters & parameters);
 
 protected:
   Real f();

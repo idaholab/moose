@@ -20,7 +20,7 @@
 class ConvDiffMetaAction : public Action
 {
 public:
-  ConvDiffMetaAction(const std::string & name, InputParameters params);
+  ConvDiffMetaAction(const InputParameters & params);
 
   virtual void act();
 };

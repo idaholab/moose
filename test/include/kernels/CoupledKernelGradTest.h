@@ -25,7 +25,7 @@ InputParameters validParams<CoupledKernelGradTest>();
 class CoupledKernelGradTest : public KernelGrad
 {
 public:
-  CoupledKernelGradTest(const std::string & name, InputParameters parameters);
+  CoupledKernelGradTest(const InputParameters & parameters);
   virtual ~CoupledKernelGradTest();
 
 protected:

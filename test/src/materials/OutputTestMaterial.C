@@ -26,8 +26,8 @@ InputParameters validParams<OutputTestMaterial>()
   return params;
 }
 
-OutputTestMaterial::OutputTestMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+OutputTestMaterial::OutputTestMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _real_property(declareProperty<Real>(getParam<std::string>("real_property_name"))),
     _vector_property(declareProperty<RealVectorValue>(getParam<std::string>("vector_property_name"))),
     _tensor_property(declareProperty<RealTensorValue>(getParam<std::string>("tensor_property_name"))),

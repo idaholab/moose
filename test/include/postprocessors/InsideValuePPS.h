@@ -29,7 +29,7 @@ InputParameters validParams<InsideValuePPS>();
 class InsideValuePPS : public GeneralPostprocessor
 {
 public:
-  InsideValuePPS(const std::string & name, InputParameters parameters);
+  InsideValuePPS(const InputParameters & parameters);
   virtual ~InsideValuePPS();
 
   virtual void initialize();

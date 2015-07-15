@@ -23,8 +23,8 @@ InputParameters validParams<MTICMult>()
   return params;
 }
 
-MTICMult::MTICMult(const std::string & name, InputParameters parameters) :
-    InitialCondition(name, parameters),
+MTICMult::MTICMult(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _var1(coupledValue("var1")),
     _factor(getParam<Real>("factor"))
 {

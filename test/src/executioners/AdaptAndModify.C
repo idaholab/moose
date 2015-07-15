@@ -25,8 +25,8 @@ InputParameters validParams<AdaptAndModify>()
   return params;
 }
 
-AdaptAndModify::AdaptAndModify(const std::string & name, InputParameters parameters) :
-    Transient(name, parameters),
+AdaptAndModify::AdaptAndModify(const InputParameters & parameters) :
+    Transient(parameters),
     _adapt_cycles(parameters.get<unsigned int>("adapt_cycles"))
 {}
 

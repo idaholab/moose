@@ -24,7 +24,7 @@ InputParameters validParams<PolyConvection>();
 class PolyConvection : public Kernel
 {
 public:
-  PolyConvection(const std::string & name, InputParameters parameters);
+  PolyConvection(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

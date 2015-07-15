@@ -24,8 +24,8 @@ InputParameters validParams<StripeMesh>()
   return params;
 }
 
-StripeMesh::StripeMesh(const std::string & name, InputParameters parameters) :
-    GeneratedMesh(name, parameters),
+StripeMesh::StripeMesh(const InputParameters & parameters) :
+    GeneratedMesh(parameters),
     _n_stripes(getParam<unsigned int>("stripes"))
 {
   // The StripeMesh class only works with SerialMesh

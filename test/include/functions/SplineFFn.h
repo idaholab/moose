@@ -29,7 +29,7 @@ InputParameters validParams<SplineFFn>();
 class SplineFFn : public Kernel
 {
 public:
-  SplineFFn(const std::string & name, InputParameters parameters);
+  SplineFFn(const InputParameters & parameters);
   virtual ~SplineFFn();
 
 protected:

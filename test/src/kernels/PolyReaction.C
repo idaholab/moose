@@ -20,8 +20,8 @@ InputParameters validParams<PolyReaction>()
   return params;
 }
 
-PolyReaction::PolyReaction(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+PolyReaction::PolyReaction(const InputParameters & parameters) :
+    Kernel(parameters)
 {}
 
 Real

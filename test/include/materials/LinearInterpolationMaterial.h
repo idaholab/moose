@@ -27,8 +27,7 @@ InputParameters validParams<LinearInterpolationMaterial>();
 class LinearInterpolationMaterial : public Material
 {
 public:
-  LinearInterpolationMaterial(const std::string & name,
-                              InputParameters parameters);
+  LinearInterpolationMaterial(const InputParameters & parameters);
 
   virtual ~LinearInterpolationMaterial();
 

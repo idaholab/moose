@@ -24,8 +24,8 @@ InputParameters validParams<MultipleUpdateElemAux>()
   return params;
 }
 
-MultipleUpdateElemAux::MultipleUpdateElemAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+MultipleUpdateElemAux::MultipleUpdateElemAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _n_vars(coupledComponents("vars"))
 {
   for (unsigned int i=0; i<_n_vars; i++)

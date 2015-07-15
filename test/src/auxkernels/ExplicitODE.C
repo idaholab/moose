@@ -22,8 +22,8 @@ InputParameters validParams<ExplicitODE>()
   return params;
 }
 
-ExplicitODE::ExplicitODE(const std::string & name, InputParameters parameters) :
-    AuxScalarKernel(name, parameters),
+ExplicitODE::ExplicitODE(const InputParameters & parameters) :
+    AuxScalarKernel(parameters),
     _lambda(getParam<Real>("lambda"))
 {
 }

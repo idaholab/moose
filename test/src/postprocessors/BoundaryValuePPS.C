@@ -26,8 +26,8 @@ InputParameters validParams<BoundaryValuePPS>()
   return params;
 }
 
-BoundaryValuePPS::BoundaryValuePPS(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+BoundaryValuePPS::BoundaryValuePPS(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _uo(getUserObject<BoundaryUserObject>("user_object")),
     _value(0.)
 {

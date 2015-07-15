@@ -28,7 +28,7 @@ class ForcingFunctionXYZ0 : public Kernel
 {
 public:
 
-  ForcingFunctionXYZ0(const std::string & name, InputParameters parameters);
+  ForcingFunctionXYZ0(const InputParameters & parameters);
 
 protected:
 

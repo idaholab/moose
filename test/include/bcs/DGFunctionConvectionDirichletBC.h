@@ -42,7 +42,7 @@ public:
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same constructor.
    */
-  DGFunctionConvectionDirichletBC( const std::string & name, InputParameters parameters);
+  DGFunctionConvectionDirichletBC( const InputParameters & parameters);
 
   virtual ~DGFunctionConvectionDirichletBC() {}
 

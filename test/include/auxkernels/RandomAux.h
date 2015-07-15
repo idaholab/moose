@@ -30,7 +30,7 @@ InputParameters validParams<RandomAux>();
 class RandomAux : public AuxKernel
 {
 public:
-  RandomAux(const std::string & name, InputParameters params);
+  RandomAux(const InputParameters & params);
 
   virtual ~RandomAux();
 

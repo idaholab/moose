@@ -92,7 +92,7 @@ dataLoad(std::istream & stream, DummyNeedingContext & v, void * context)
 class RestartableTypes : public GeneralUserObject
 {
 public:
-  RestartableTypes(const std::string & name, InputParameters params);
+  RestartableTypes(const InputParameters & params);
   virtual ~RestartableTypes();
 
   virtual void initialSetup();

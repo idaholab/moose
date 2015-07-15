@@ -24,8 +24,8 @@ InputParameters validParams<FailingProblem>()
   return params;
 }
 
-FailingProblem::FailingProblem(const std::string & name, InputParameters params) :
-    FEProblem(name, params),
+FailingProblem::FailingProblem(const InputParameters & params) :
+    FEProblem(params),
     _failed(false),
     _fail_step(getParam<unsigned int>("fail_step"))
 {}

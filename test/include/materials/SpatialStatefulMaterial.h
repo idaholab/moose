@@ -29,8 +29,7 @@ InputParameters validParams<SpatialStatefulMaterial>();
 class SpatialStatefulMaterial : public Material
 {
 public:
-  SpatialStatefulMaterial(const std::string & name,
-                  InputParameters parameters);
+  SpatialStatefulMaterial(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

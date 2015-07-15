@@ -33,7 +33,7 @@ class RandomHitSolutionModifier :
   public GeneralUserObject
 {
 public:
-  RandomHitSolutionModifier(const std::string & name, InputParameters parameters);
+  RandomHitSolutionModifier(const InputParameters & parameters);
 
   virtual ~RandomHitSolutionModifier() {}
 

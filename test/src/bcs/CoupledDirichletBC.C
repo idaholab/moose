@@ -22,8 +22,8 @@ InputParameters validParams<CoupledDirichletBC>()
   return params;
 }
 
-CoupledDirichletBC::CoupledDirichletBC(const std::string & name, InputParameters parameters) :
-    DirichletBC(name, parameters),
+CoupledDirichletBC::CoupledDirichletBC(const InputParameters & parameters) :
+    DirichletBC(parameters),
     _v(coupledValue("v")),
     _v_num(coupled("v")),
     _c(1.0)

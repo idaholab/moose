@@ -21,8 +21,8 @@ InputParameters validParams<TypesMaterial>()
   return params;
 }
 
-TypesMaterial::TypesMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+TypesMaterial::TypesMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _real_prop(declareProperty<Real>("real_prop")),
     _std_vec_prop(declareProperty<std::vector<Real> >("stdvec_prop")),
     _std_vec_grad_prop(declareProperty<std::vector<RealGradient> >("stdvec_grad_prop")),

@@ -31,7 +31,7 @@ InputParameters validParams<ExplicitODE>();
 class ExplicitODE : public AuxScalarKernel
 {
 public:
-  ExplicitODE(const std::string & name, InputParameters parameters);
+  ExplicitODE(const InputParameters & parameters);
   virtual ~ExplicitODE();
 
 protected:

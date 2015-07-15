@@ -29,7 +29,7 @@ InputParameters validParams<MTBC>();
 class MTBC : public IntegratedBC
 {
 public:
-  MTBC(const std::string & name, InputParameters parameters);
+  MTBC(const InputParameters & parameters);
 
   virtual ~MTBC() {}
 

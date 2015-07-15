@@ -21,8 +21,8 @@ InputParameters validParams<BadCachingPointSource>()
   return params;
 }
 
-BadCachingPointSource::BadCachingPointSource(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters)
+BadCachingPointSource::BadCachingPointSource(const InputParameters & parameters) :
+    DiracKernel(parameters)
 {
 }
 

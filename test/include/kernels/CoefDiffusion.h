@@ -26,7 +26,7 @@ class CoefDiffusion : public Kernel
 {
 public:
 
-  CoefDiffusion(const std::string & name, InputParameters parameters);
+  CoefDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

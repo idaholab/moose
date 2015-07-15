@@ -22,8 +22,8 @@ InputParameters validParams<ImplicitODEx>()
   return params;
 }
 
-ImplicitODEx::ImplicitODEx(const std::string & name, InputParameters parameters) :
-    ODEKernel(name, parameters),
+ImplicitODEx::ImplicitODEx(const InputParameters & parameters) :
+    ODEKernel(parameters),
     _y_var(coupledScalar("y")),
     _y(coupledScalarValue("y"))
 {

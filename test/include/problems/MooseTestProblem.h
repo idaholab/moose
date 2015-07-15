@@ -28,7 +28,7 @@ InputParameters validParams<MooseTestProblem>();
 class MooseTestProblem : public FEProblem
 {
 public:
-  MooseTestProblem(const std::string & name, InputParameters params);
+  MooseTestProblem(const InputParameters & params);
   virtual ~MooseTestProblem();
 };
 

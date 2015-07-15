@@ -23,8 +23,8 @@ InputParameters validParams<SumNodalValuesAux>()
   return params;
 }
 
-SumNodalValuesAux::SumNodalValuesAux(const std::string & name, InputParameters parameters) :
-    AuxNodalScalarKernel(name, parameters),
+SumNodalValuesAux::SumNodalValuesAux(const InputParameters & parameters) :
+    AuxNodalScalarKernel(parameters),
     _sum_var(coupledValue("sum_var"))
 {
 }

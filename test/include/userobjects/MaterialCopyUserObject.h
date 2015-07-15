@@ -28,7 +28,7 @@ class MaterialCopyUserObject :
   public GeneralUserObject
 {
 public:
-  MaterialCopyUserObject(const std::string & name, InputParameters parameters);
+  MaterialCopyUserObject(const InputParameters & parameters);
 
   virtual ~MaterialCopyUserObject() {}
 

@@ -22,8 +22,8 @@ InputParameters validParams<MTBC>()
   return params;
 }
 
-MTBC::MTBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+MTBC::MTBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _value(getParam<Real>("grad")),
     _mat(getMaterialProperty<Real>("prop_name"))
 {

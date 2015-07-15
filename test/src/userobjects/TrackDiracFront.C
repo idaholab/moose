@@ -24,8 +24,8 @@ InputParameters validParams<TrackDiracFront>()
   return params;
 }
 
-TrackDiracFront::TrackDiracFront(const std::string & name, InputParameters parameters) :
-    NodalUserObject(name, parameters),
+TrackDiracFront::TrackDiracFront(const InputParameters & parameters) :
+    NodalUserObject(parameters),
     _var_value(coupledValue("var"))
 {
 }

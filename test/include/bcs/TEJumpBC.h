@@ -34,7 +34,7 @@ public:
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same constructor.
    */
-  TEJumpBC( const std::string & name, InputParameters parameters);
+  TEJumpBC( const InputParameters & parameters);
 
   virtual ~TEJumpBC() {}
 

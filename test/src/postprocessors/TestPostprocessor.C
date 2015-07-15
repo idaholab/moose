@@ -24,11 +24,11 @@ InputParameters validParams<TestPostprocessor>()
   return params;
 }
 
-TestPostprocessor::TestPostprocessor(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+TestPostprocessor::TestPostprocessor(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _test_type(getParam<MooseEnum>("test_type")),
-    _old_val(getPostprocessorValueOldByName(name)),
-    _older_val(getPostprocessorValueOlderByName(name))
+    _old_val(getPostprocessorValueOldByName(name())),
+    _older_val(getPostprocessorValueOlderByName(name()))
 {
   if (_test_type == "report_old" && !isParamValid("report_name"))
     mooseError("Must set 'report_name' parameter when using the 'report_old' test type.");

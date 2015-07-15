@@ -21,8 +21,8 @@ InputParameters validParams<CoupledEigenKernel>()
   return params;
 }
 
-CoupledEigenKernel::CoupledEigenKernel(const std::string & name, InputParameters parameters) :
-    EigenKernel(name,parameters),
+CoupledEigenKernel::CoupledEigenKernel(const InputParameters & parameters) :
+    EigenKernel(parameters),
     _v(coupledValue("v"))
 {
 }

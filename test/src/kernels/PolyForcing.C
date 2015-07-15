@@ -20,8 +20,8 @@ InputParameters validParams<PolyForcing>()
   return params;
 }
 
-PolyForcing::PolyForcing(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+PolyForcing::PolyForcing(const InputParameters & parameters) :
+    Kernel(parameters)
 {
 }
 

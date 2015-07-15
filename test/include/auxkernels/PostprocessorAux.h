@@ -35,14 +35,14 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  PostprocessorAux(const std::string & name, InputParameters parameters);
+  PostprocessorAux(const InputParameters & parameters);
 
   virtual ~PostprocessorAux();
 
 protected:
   virtual Real computeValue();
 
-  Real & _pp_val;
+  const PostprocessorValue & _pp_val;
 };
 
 #endif //POSTPROCESSORAUX_H

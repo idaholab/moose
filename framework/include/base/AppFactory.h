@@ -92,7 +92,7 @@ public:
   template<typename T>
   void regLegacy(const std::string & name)
   {
-     if (_name_to_legacy_build_pointer.find(name) == _name_to_legacy_build_pointer.end())
+    if (_name_to_legacy_build_pointer.find(name) == _name_to_legacy_build_pointer.end())
     {
       _name_to_legacy_build_pointer[name] = &buildLegacyApp<T>;
       _name_to_params_pointer[name] = &validParams<T>;
@@ -140,7 +140,6 @@ protected:
 private:
   // Private constructor for singleton pattern
   AppFactory() {}
-
 };
 
 #endif /* APPFACTORY_H */

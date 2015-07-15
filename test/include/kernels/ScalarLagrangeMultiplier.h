@@ -27,7 +27,7 @@ InputParameters validParams<ScalarLagrangeMultiplier>();
 class ScalarLagrangeMultiplier : public Kernel
 {
 public:
-  ScalarLagrangeMultiplier(const std::string & name, InputParameters parameters);
+  ScalarLagrangeMultiplier(const InputParameters & parameters);
   virtual ~ScalarLagrangeMultiplier();
 
   virtual void computeOffDiagJacobianScalar(unsigned int jvar);

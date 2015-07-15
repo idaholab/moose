@@ -31,7 +31,7 @@ class TestBoundaryRestrictableAssert : public SideUserObject
 {
 public:
 
-  TestBoundaryRestrictableAssert(const std::string & name, InputParameters parameters);
+  TestBoundaryRestrictableAssert(const InputParameters & parameters);
   virtual ~TestBoundaryRestrictableAssert(){}
   virtual void execute();
   virtual void threadJoin(const UserObject & /*uo*/){}

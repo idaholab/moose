@@ -35,7 +35,7 @@ public:
    * Class constructor
    * @param prop_name
    */
-  OutputTestMaterial(const std::string & name, InputParameters parameters);
+  OutputTestMaterial(const InputParameters & parameters);
 
   /**
    * Class destructor

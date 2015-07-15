@@ -23,9 +23,8 @@ InputParameters validParams<CoefReaction>()
 }
 
 
-CoefReaction::CoefReaction(const std::string & name,
-                           InputParameters parameters)
-    : Reaction(name,parameters),
+CoefReaction::CoefReaction(const InputParameters & parameters)
+    : Reaction(parameters),
       _coef(getParam<Real>("coefficient"))
 {
 }
