@@ -42,7 +42,7 @@ protected:
   void assembleL2From(EquationSystems & es, const std::string & system_name);
   void assembleL2To(EquationSystems & es, const std::string & system_name);
 
-  void projectSolution(FEProblem & fep, unsigned int app);
+  void projectSolution(unsigned int to_problem);
 
   AuxVariableName _to_var_name;
   VariableName _from_var_name;
