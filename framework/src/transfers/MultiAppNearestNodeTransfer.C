@@ -70,7 +70,7 @@ MultiAppNearestNodeTransfer::execute()
   getAppInfo();
 
   // Get the bounding boxes for the "from" domains.
-  std::vector<MeshTools::BoundingBox> bboxes = getBboxes();
+  std::vector<MeshTools::BoundingBox> bboxes = getFromBoundingBoxes();
 
   // Figure out how many "from" domains each processor owns.
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();

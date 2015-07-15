@@ -85,9 +85,10 @@ protected:
   bool _displaced_target_mesh;
 
   /**
-   * Return all of the bounding boxes for each processor.
+   * Return the bounding boxes of all the "from" domains, including all the
+   * domains not local to this processor.
    */
-  std::vector<MeshTools::BoundingBox> getBboxes();
+  std::vector<MeshTools::BoundingBox> getFromBoundingBoxes();
 
   /**
    * Return the number of "from" domains that each processor owns.
