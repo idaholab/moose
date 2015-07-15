@@ -22,7 +22,8 @@ InputParameters validParams<ReferenceResidualProblem>();
 class ReferenceResidualProblem : public FEProblem
 {
 public:
-  ReferenceResidualProblem(const std::string & name, InputParameters params);
+  ReferenceResidualProblem(const InputParameters & params);
+  ReferenceResidualProblem(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ReferenceResidualProblem();
 
   virtual void initialSetup();

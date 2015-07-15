@@ -14,7 +14,8 @@
 class NodalAreaVarAction: public Action
 {
 public:
-  NodalAreaVarAction(const std::string & name, InputParameters params);
+  NodalAreaVarAction(const InputParameters & params);
+  NodalAreaVarAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

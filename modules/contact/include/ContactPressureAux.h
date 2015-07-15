@@ -16,7 +16,8 @@ class ContactPressureAux : public AuxKernel
 {
 public:
 
-  ContactPressureAux(const std::string & name, InputParameters parameters);
+  ContactPressureAux(const InputParameters & parameters);
+  ContactPressureAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ContactPressureAux();
 

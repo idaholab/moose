@@ -21,8 +21,8 @@ InputParameters validParams<ContactPressureAux>()
   return params;
 }
 
-ContactPressureAux::ContactPressureAux(const std::string & name, InputParameters params) :
-    AuxKernel(name, params),
+ContactPressureAux::ContactPressureAux(const InputParameters & params) :
+    AuxKernel(params),
     _nodal_area(coupledValue("nodal_area")),
     _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(getParam<MooseEnum>("order"))))
 {
@@ -50,4 +50,13 @@ ContactPressureAux::computeValue()
     value = -(pinfo->_contact_force * pinfo->_normal) / area;
   }
   return value;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ContactPressureAux::ContactPressureAux(const std::string & deprecated_name, InputParameters params) :
+    AuxKernel(deprecated_name, params),
+    _nodal_area(coupledValue("nodal_area")),
+    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(getParam<MooseEnum>("order"))))
+{
 }
