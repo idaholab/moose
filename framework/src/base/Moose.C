@@ -193,7 +193,6 @@
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
-#include "TimePostprocessor.h"
 #include "PercentChangePostprocessor.h"
 
 // vector PPS
@@ -571,7 +570,6 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
   registerPostprocessor(ExecutionerAttributeReporter);
-  registerPostprocessor(TimePostprocessor);
   registerPostprocessor(PercentChangePostprocessor);
 
   // vector PPS
