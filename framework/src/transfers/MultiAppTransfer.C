@@ -105,24 +105,24 @@ MultiAppTransfer::getAppInfo()
   {
     case TO_MULTIAPP:
       _from_problems.push_back(_multi_app->problem());
+      _from_positions.push_back(Point(0., 0., 0.));
       for (unsigned int i_app = 0; i_app < _multi_app->numGlobalApps(); i_app++)
       {
         if (!_multi_app->hasLocalApp(i_app)) continue;
         _local2global_map.push_back(i_app);
         _to_problems.push_back(_multi_app->appProblem(i_app));
         _to_positions.push_back(_multi_app->position(i_app));
-        _from_positions.push_back(Point(0., 0., 0.));
       }
       break;
 
     case FROM_MULTIAPP:
       _to_problems.push_back(_multi_app->problem());
+      _to_positions.push_back(Point(0., 0., 0.));
       for (unsigned int i_app = 0; i_app < _multi_app->numGlobalApps(); i_app++)
       {
         if (!_multi_app->hasLocalApp(i_app)) continue;
         _local2global_map.push_back(i_app);
         _from_problems.push_back(_multi_app->appProblem(i_app));
-        _to_positions.push_back(Point(0., 0., 0.));
         _from_positions.push_back(- _multi_app->position(i_app));
       }
       break;
@@ -149,7 +149,7 @@ MultiAppTransfer::getAppInfo()
 }
 
 std::vector<MeshTools::BoundingBox>
-MultiAppTransfer::getBboxes()
+MultiAppTransfer::getFromBoundingBoxes()
 {
   std::vector<std::pair<Point, Point> > bb_points(_from_meshes.size());
   for (unsigned int i = 0; i <  _from_meshes.size(); i++)
@@ -158,9 +158,9 @@ MultiAppTransfer::getBboxes()
     // processor.
     MeshTools::BoundingBox bbox = MeshTools::processor_bounding_box(* _from_meshes[i], processor_id());
 
-    // Translate the bounding box to the subapp's position.
-    bbox.first += _to_positions[i];
-    bbox.second += _to_positions[i];
+    // Translate the bounding box to the from domain's position.
+    bbox.first += _from_positions[i];
+    bbox.second += _from_positions[i];
 
     // Cast the bounding box into a pair of points (so it can be put through
     // MPI communication).
