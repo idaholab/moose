@@ -105,6 +105,7 @@
     type = PlotFunction
     function = exact_x_fn
     execute_on = timestep_end
+    point = '0 0 0'
   [../]
   # measure the error from exact solution in L2 norm
   [./l2err_x]
