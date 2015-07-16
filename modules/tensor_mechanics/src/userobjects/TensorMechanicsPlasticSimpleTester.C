@@ -22,9 +22,8 @@ InputParameters validParams<TensorMechanicsPlasticSimpleTester>()
   return params;
 }
 
-TensorMechanicsPlasticSimpleTester::TensorMechanicsPlasticSimpleTester(const std::string & name,
-                                                         InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters),
+TensorMechanicsPlasticSimpleTester::TensorMechanicsPlasticSimpleTester(const InputParameters & parameters) :
+    TensorMechanicsPlasticModel(parameters),
     _a(getParam<Real>("a")),
     _b(getParam<Real>("b")),
     _c(getParam<Real>("c")),
@@ -87,4 +86,18 @@ std::string
 TensorMechanicsPlasticSimpleTester::modelName() const
 {
   return "SimpleTester";
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsPlasticSimpleTester::TensorMechanicsPlasticSimpleTester(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsPlasticModel(deprecated_name, parameters),
+    _a(getParam<Real>("a")),
+    _b(getParam<Real>("b")),
+    _c(getParam<Real>("c")),
+    _d(getParam<Real>("d")),
+    _e(getParam<Real>("e")),
+    _f(getParam<Real>("f")),
+    _strength(getParam<Real>("strength"))
+{
 }

@@ -18,7 +18,8 @@
 class Compute2DSmallStrain : public ComputeSmallStrain
 {
 public:
-  Compute2DSmallStrain(const std:: string & name, InputParameters parameters);
+  Compute2DSmallStrain(const InputParameters & parameters);
+  Compute2DSmallStrain(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

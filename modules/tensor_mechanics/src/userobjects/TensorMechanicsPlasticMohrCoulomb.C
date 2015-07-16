@@ -26,9 +26,8 @@ InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>()
   return params;
 }
 
-TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const std::string & name,
-                                                         InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters),
+TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const InputParameters & parameters) :
+    TensorMechanicsPlasticModel(parameters),
     _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
     _phi(getUserObject<TensorMechanicsHardeningModel>("friction_angle")),
     _psi(getUserObject<TensorMechanicsHardeningModel>("dilation_angle")),
@@ -428,4 +427,47 @@ std::string
 TensorMechanicsPlasticMohrCoulomb::modelName() const
 {
   return "MohrCoulomb";
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsPlasticModel(deprecated_name, parameters),
+    _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
+    _phi(getUserObject<TensorMechanicsHardeningModel>("friction_angle")),
+    _psi(getUserObject<TensorMechanicsHardeningModel>("dilation_angle")),
+    _tip_scheme(getParam<MooseEnum>("tip_scheme")),
+    _small_smoother2(std::pow(getParam<Real>("mc_tip_smoother"), 2)),
+    _cap_start(getParam<Real>("cap_start")),
+    _cap_rate(getParam<Real>("cap_rate")),
+    _tt(getParam<Real>("mc_edge_smoother")*M_PI/180.0),
+    _costt(std::cos(_tt)),
+    _sintt(std::sin(_tt)),
+    _cos3tt(std::cos(3*_tt)),
+    _sin3tt(std::sin(3*_tt)),
+    _cos6tt(std::cos(6*_tt)),
+    _sin6tt(std::sin(6*_tt)),
+    _lode_cutoff(parameters.isParamValid("mc_lode_cutoff") ? getParam<Real>("mc_lode_cutoff") : 1.0E-5*std::pow(_f_tol, 2))
+
+{
+  if (_lode_cutoff < 0)
+    mooseError("mc_lode_cutoff must not be negative");
+
+  // With arbitary UserObjects, it is impossible to check everything, and
+  // I think this is the best I can do
+  if (phi(0) < 0 || psi(0) < 0 || phi(0) > M_PI/2.0 || psi(0) > M_PI/2.0)
+    mooseError("Mohr-Coulomb friction and dilation angles must lie in [0, Pi/2]");
+  if (phi(0) < psi(0))
+    mooseError("Mohr-Coulomb friction angle must not be less than Mohr-Coulomb dilation angle");
+  if (cohesion(0) < 0)
+    mooseError("Mohr-Coulomb cohesion must not be negative");
+
+  // check Abbo et al's convexity constraint (Eqn c.18 in their paper)
+  // With an arbitrary UserObject, it is impossible to check for all angles
+  // I think the following is the best we can do
+  Real sin_angle = std::sin(std::max(phi(0), psi(0)));
+  sin_angle = std::max(sin_angle, std::sin(std::max(phi(1E6), psi(1E6))));
+  Real rhs = std::sqrt(3)*(35*std::sin(_tt) + 14*std::sin(5*_tt) - 5*std::sin(7*_tt))/16/std::pow(std::cos(_tt), 5)/(11 - 10*std::cos(2*_tt));
+  if (rhs <= sin_angle)
+    mooseError("Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will result.  Please choose a larger value");
 }

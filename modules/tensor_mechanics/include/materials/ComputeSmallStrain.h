@@ -15,7 +15,8 @@
 class ComputeSmallStrain : public ComputeStrainBase
 {
 public:
-  ComputeSmallStrain(const std:: string & name, InputParameters parameters);
+  ComputeSmallStrain(const InputParameters & parameters);
+  ComputeSmallStrain(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

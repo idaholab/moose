@@ -36,7 +36,7 @@ InputParameters validParams<MultiPlasticityRawComponentAssembler>();
 class MultiPlasticityRawComponentAssembler
 {
 public:
-  MultiPlasticityRawComponentAssembler(const std::string & name, InputParameters parameters);
+  MultiPlasticityRawComponentAssembler(const InputParameters & parameters);
 
   virtual ~MultiPlasticityRawComponentAssembler() {}
 

@@ -14,9 +14,8 @@ InputParameters validParams<ComputeLinearElasticStress>()
   return params;
 }
 
-ComputeLinearElasticStress::ComputeLinearElasticStress(const std::string & name,
-                                                 InputParameters parameters) :
-    ComputeStressBase(name, parameters),
+ComputeLinearElasticStress::ComputeLinearElasticStress(const InputParameters & parameters) :
+    ComputeStressBase(parameters),
     _total_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "total_strain")),
     _is_finite_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
 {
@@ -35,4 +34,15 @@ ComputeLinearElasticStress::computeQpStress()
 
   //Compute dstress_dstrain
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeLinearElasticStress::ComputeLinearElasticStress(const std::string & deprecated_name, InputParameters parameters) :
+    ComputeStressBase(deprecated_name, parameters),
+    _total_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "total_strain")),
+    _is_finite_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
+{
+  if (_is_finite_strain)
+    mooseError("This linear elastic stress calculation only works for small strains");
 }

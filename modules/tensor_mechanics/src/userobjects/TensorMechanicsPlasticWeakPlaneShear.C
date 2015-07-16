@@ -23,9 +23,8 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>()
   return params;
 }
 
-TensorMechanicsPlasticWeakPlaneShear::TensorMechanicsPlasticWeakPlaneShear(const std::string & name,
-                                                         InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters),
+TensorMechanicsPlasticWeakPlaneShear::TensorMechanicsPlasticWeakPlaneShear(const InputParameters & parameters) :
+    TensorMechanicsPlasticModel(parameters),
     _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
     _tan_phi(getUserObject<TensorMechanicsHardeningModel>("tan_friction_angle")),
     _tan_psi(getUserObject<TensorMechanicsHardeningModel>("tan_dilation_angle")),
@@ -297,4 +296,26 @@ std::string
 TensorMechanicsPlasticWeakPlaneShear::modelName() const
 {
   return "WeakPlaneShear";
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsPlasticWeakPlaneShear::TensorMechanicsPlasticWeakPlaneShear(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsPlasticModel(deprecated_name, parameters),
+    _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
+    _tan_phi(getUserObject<TensorMechanicsHardeningModel>("tan_friction_angle")),
+    _tan_psi(getUserObject<TensorMechanicsHardeningModel>("tan_dilation_angle")),
+    _tip_scheme(getParam<MooseEnum>("tip_scheme")),
+    _small_smoother2(std::pow(getParam<Real>("smoother"), 2)),
+    _cap_start(getParam<Real>("cap_start")),
+    _cap_rate(getParam<Real>("cap_rate"))
+{
+  // With arbitary UserObjects, it is impossible to check everything, and
+  // I think this is the best I can do
+  if (tan_phi(0) < 0 || tan_psi(0) < 0)
+    mooseError("Weak-Plane-Shear friction and dilation angles must lie in [0, Pi/2]");
+  if (tan_phi(0) < tan_psi(0))
+    mooseError("Weak-Plane-Shear friction angle must not be less than Weak-Plane-Shear dilation angle");
+  if (cohesion(0) < 0)
+    mooseError("Weak-Plane-Shear cohesion must not be negative");
 }

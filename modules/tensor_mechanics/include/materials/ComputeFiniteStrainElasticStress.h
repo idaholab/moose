@@ -15,7 +15,8 @@
 class ComputeFiniteStrainElasticStress : public ComputeStressBase
 {
 public:
-  ComputeFiniteStrainElasticStress(const std:: string & name, InputParameters parameters);
+  ComputeFiniteStrainElasticStress(const InputParameters & parameters);
+  ComputeFiniteStrainElasticStress(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void initQpStatefulProperties();

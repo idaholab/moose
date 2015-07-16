@@ -17,9 +17,8 @@ InputParameters validParams<ComputeElasticityTensor>()
   return params;
 }
 
-ComputeElasticityTensor::ComputeElasticityTensor(const std::string & name,
-                                                 InputParameters parameters) :
-    ComputeRotatedElasticityTensorBase(name, parameters),
+ComputeElasticityTensor::ComputeElasticityTensor(const InputParameters & parameters) :
+    ComputeRotatedElasticityTensorBase(parameters),
     _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
 {
   // Define a rotation according to Euler angle parameters
@@ -34,4 +33,17 @@ ComputeElasticityTensor::computeQpElasticityTensor()
 {
   //Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeElasticityTensor::ComputeElasticityTensor(const std::string & deprecated_name, InputParameters parameters) :
+    ComputeRotatedElasticityTensorBase(deprecated_name, parameters),
+    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
+{
+  // Define a rotation according to Euler angle parameters
+  RotationTensor R(_Euler_angles); // R type: RealTensorValue
+
+  // rotate elasticity tensor
+  _Cijkl.rotate(R);
 }

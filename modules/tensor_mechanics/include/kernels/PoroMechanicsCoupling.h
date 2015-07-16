@@ -22,7 +22,8 @@ class PoroMechanicsCoupling : public Kernel
 {
 public:
 
-  PoroMechanicsCoupling(const std::string & name, InputParameters parameters);
+  PoroMechanicsCoupling(const InputParameters & parameters);
+  PoroMechanicsCoupling(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
  protected:
 

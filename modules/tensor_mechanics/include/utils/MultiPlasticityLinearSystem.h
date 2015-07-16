@@ -117,7 +117,7 @@ class MultiPlasticityLinearSystem:
   public MultiPlasticityRawComponentAssembler
 {
 public:
-  MultiPlasticityLinearSystem(const std::string & name, InputParameters parameters);
+  MultiPlasticityLinearSystem(const InputParameters & parameters);
 
 protected:
 

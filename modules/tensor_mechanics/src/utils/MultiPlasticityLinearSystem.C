@@ -20,9 +20,8 @@ InputParameters validParams<MultiPlasticityLinearSystem>()
   return params;
 }
 
-MultiPlasticityLinearSystem::MultiPlasticityLinearSystem(const std::string & name,
-                                         InputParameters parameters):
-    MultiPlasticityRawComponentAssembler(name, parameters),
+MultiPlasticityLinearSystem::MultiPlasticityLinearSystem(const InputParameters & parameters):
+    MultiPlasticityRawComponentAssembler(parameters),
     _svd_tol(parameters.get<Real>("linear_dependent")),
     _min_f_tol(-1.0)
 {

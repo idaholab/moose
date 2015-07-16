@@ -14,9 +14,8 @@ InputParameters validParams<ComputeIncrementalSmallStrain>()
   return params;
 }
 
-ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const std::string & name,
-                                                 InputParameters parameters) :
-    ComputeSmallStrain(name, parameters),
+ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParameters & parameters) :
+    ComputeSmallStrain(parameters),
     _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
@@ -69,4 +68,18 @@ ComputeIncrementalSmallStrain::computeProperties()
     //Update strain in intermediate configuration: rotations are not needed
     _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const std::string & deprecated_name, InputParameters parameters) :
+    ComputeSmallStrain(deprecated_name, parameters),
+    _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
+    _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
+    _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation gradient")),
+    _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
+    _T_old(coupledValueOld("temperature"))
+{
 }

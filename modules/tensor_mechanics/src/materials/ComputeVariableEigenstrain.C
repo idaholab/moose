@@ -15,9 +15,8 @@ InputParameters validParams<ComputeVariableEigenstrain>()
   return params;
 }
 
-ComputeVariableEigenstrain::ComputeVariableEigenstrain(const std::string & name,
-                                                       InputParameters parameters) :
-    ComputeEigenstrain(name, parameters),
+ComputeVariableEigenstrain::ComputeVariableEigenstrain(const InputParameters & parameters) :
+    ComputeEigenstrain(parameters),
     _num_args(coupledComponents("args")),
     _dprefactor(_num_args),
     _d2prefactor(_num_args),
@@ -54,5 +53,34 @@ ComputeVariableEigenstrain::computeQpStressFreeStrain()
     (*_delastic_strain[i])[_qp] = _eigen_base_tensor * (*_dprefactor[i])[_qp];
     for (unsigned int j = i; j < _num_args; ++j)
       (*_d2elastic_strain[i][j])[_qp] = _eigen_base_tensor * (*_d2prefactor[i][j])[_qp];
+  }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeVariableEigenstrain::ComputeVariableEigenstrain(const std::string & deprecated_name, InputParameters parameters) :
+    ComputeEigenstrain(deprecated_name, parameters),
+    _num_args(coupledComponents("args")),
+    _dprefactor(_num_args),
+    _d2prefactor(_num_args),
+    _delastic_strain(_num_args),
+    _d2elastic_strain(_num_args)
+{
+  // fetch prerequisite derivatives and build elastic_strain derivatrives and cross-derivatives
+  for (unsigned int i = 0; i < _num_args; ++i)
+  {
+    const std::string & iname = getVar("args", i)->name();
+    _dprefactor[i] = &getMaterialPropertyDerivative<Real>("prefactor", iname);
+    _delastic_strain[i] = &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", iname);
+
+    _d2prefactor[i].resize(_num_args);
+    _d2elastic_strain[i].resize(_num_args);
+
+    for (unsigned int j = i; j < _num_args; ++j)
+    {
+      const std::string & jname = getVar("args", j)->name();
+      _d2prefactor[i][j] = &getMaterialPropertyDerivative<Real>("prefactor", iname, jname);
+      _d2elastic_strain[i][j] = &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", iname, jname);
+    }
   }
 }

@@ -22,7 +22,8 @@ InputParameters validParams<ElementPropertyReadFileTest>();
 class ElementPropertyReadFileTest : public FiniteStrainElasticMaterial
 {
 public:
-  ElementPropertyReadFileTest(const std::string & name, InputParameters parameters);
+  ElementPropertyReadFileTest(const InputParameters & parameters);
+  ElementPropertyReadFileTest(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

@@ -18,9 +18,8 @@ InputParameters validParams<ComputeStrainBase>()
   return params;
 }
 
-ComputeStrainBase::ComputeStrainBase(const std::string & name,
-                                                 InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(name, parameters),
+ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _grad_disp(3),
@@ -58,4 +57,41 @@ void
 ComputeStrainBase::initQpStatefulProperties()
 {
   _total_strain[_qp].zero();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeStrainBase::ComputeStrainBase(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<Material>(deprecated_name, parameters),
+    _ndisp(coupledComponents("displacements")),
+    _disp(3),
+    _grad_disp(3),
+    _grad_disp_old(3),
+    _T(coupledValue("temperature")),
+    _T0(getParam<Real>("temperature_ref")),
+    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain"))
+{
+  if (isParamValid("displacements") == false)
+    mooseError("The displacement variables for the Compute*Strain Materials must be provided in a string: displacements = 'disp_x disp_y'");
+  // Checking for consistency between mesh size and length of the provided displacements vector
+  if (_ndisp != _mesh.dimension())
+    mooseError("The number of variables supplied in 'displacements' must match the mesh dimension.");
+
+  for (unsigned int i = 0; i < _ndisp; ++i)
+  {
+    _disp[i] = &coupledValue("displacements", i);
+    _grad_disp[i] = &coupledGradient("displacements", i);
+    if (_fe_problem.isTransient())
+      _grad_disp_old[i] = &coupledGradientOld("displacements" ,i);
+    else
+      _grad_disp_old[i] = &_grad_zero;
+  }
+  if (_ndisp < 3)
+  {
+    _disp[2] = &_zero;
+    _grad_disp[2] = &_grad_zero;
+    _grad_disp_old[2] = &_grad_zero;
+  }
 }

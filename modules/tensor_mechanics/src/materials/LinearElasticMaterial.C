@@ -25,9 +25,8 @@ InputParameters validParams<LinearElasticMaterial>()
   return params;
 }
 
-LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
-                                             InputParameters parameters) :
-    TensorMechanicsMaterial(name, parameters),
+LinearElasticMaterial::LinearElasticMaterial(const InputParameters & parameters) :
+    TensorMechanicsMaterial(parameters),
     _T(coupledValue("T")),
     _T0(getParam<Real>("T0")),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
@@ -78,4 +77,20 @@ LinearElasticMaterial::computeStressFreeStrain()
     stress_free_strain += _applied_strain_tensor;
 
   return stress_free_strain;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+LinearElasticMaterial::LinearElasticMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsMaterial(deprecated_name, parameters),
+    _T(coupledValue("T")),
+    _T0(getParam<Real>("T0")),
+    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
+    _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector"))
+{
+  //Initialize applied strain tensor from input vector
+  if (_applied_strain_vector.size() == 6)
+    _applied_strain_tensor.fillFromInputVector(_applied_strain_vector);
+  else
+    _applied_strain_tensor.zero();
 }

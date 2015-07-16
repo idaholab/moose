@@ -17,8 +17,8 @@ InputParameters validParams<TensorMechanicsHardeningConstant>()
   return params;
 }
 
-TensorMechanicsHardeningConstant::TensorMechanicsHardeningConstant(const std::string & name, InputParameters parameters) :
-  TensorMechanicsHardeningModel(name, parameters),
+TensorMechanicsHardeningConstant::TensorMechanicsHardeningConstant(const InputParameters & parameters) :
+  TensorMechanicsHardeningModel(parameters),
   _val(getParam<bool>("convert_to_radians") ? getParam<Real>("value")*M_PI/180.0 : getParam<Real>("value"))
 {
 }
@@ -33,4 +33,12 @@ Real
 TensorMechanicsHardeningConstant::derivative(const Real & /*intnl*/) const
 {
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsHardeningConstant::TensorMechanicsHardeningConstant(const std::string & deprecated_name, InputParameters parameters) :
+  TensorMechanicsHardeningModel(deprecated_name, parameters),
+  _val(getParam<bool>("convert_to_radians") ? getParam<Real>("value")*M_PI/180.0 : getParam<Real>("value"))
+{
 }

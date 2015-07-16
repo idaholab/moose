@@ -24,7 +24,8 @@ InputParameters validParams<TensorMechanicsPlasticSimpleTester>();
 class TensorMechanicsPlasticSimpleTester : public TensorMechanicsPlasticModel
 {
  public:
-  TensorMechanicsPlasticSimpleTester(const std::string & name, InputParameters parameters);
+  TensorMechanicsPlasticSimpleTester(const InputParameters & parameters);
+  TensorMechanicsPlasticSimpleTester(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// Returns the model name (SimpleTester)
   virtual std::string modelName() const;

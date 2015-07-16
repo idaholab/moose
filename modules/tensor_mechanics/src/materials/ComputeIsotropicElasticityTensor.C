@@ -19,9 +19,8 @@ InputParameters validParams<ComputeIsotropicElasticityTensor>()
   return params;
 }
 
-ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(const std::string & name,
-                                                 InputParameters parameters) :
-    ComputeElasticityTensorBase(name, parameters),
+ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(const InputParameters & parameters) :
+    ComputeElasticityTensorBase(parameters),
     _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
     _lambda_set( parameters.isParamValid("lambda") ),
     _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),
@@ -62,4 +61,43 @@ ComputeIsotropicElasticityTensor::computeQpElasticityTensor()
 {
   //Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(const std::string & deprecated_name, InputParameters parameters) :
+    ComputeElasticityTensorBase(deprecated_name, parameters),
+    _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
+    _lambda_set( parameters.isParamValid("lambda") ),
+    _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),
+    _shear_modulus_set( parameters.isParamValid("shear_modulus") ),
+    _youngs_modulus_set( parameters.isParamValid("youngs_modulus") ),
+    _bulk_modulus( _bulk_modulus_set ? getParam<Real>("bulk_modulus") : -1 ),
+    _lambda( _lambda_set ? getParam<Real>("lambda") : -1 ),
+    _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
+    _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
+    _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 )
+{
+  std::vector<Real> iso_const(2);
+
+  if (_lambda_set && _shear_modulus_set)
+  {
+    iso_const[0] = _lambda;
+    iso_const[1] = _shear_modulus;
+  }
+  else if (_youngs_modulus_set && _poissons_ratio_set)
+  {
+    iso_const[0] = _youngs_modulus*_poissons_ratio/((1 + _poissons_ratio)*(1 - 2*_poissons_ratio));
+    iso_const[1] = _youngs_modulus/(2*(1 + _poissons_ratio));
+  }
+  else if (_shear_modulus_set && _bulk_modulus_set)
+  {
+    iso_const[0] = _bulk_modulus - 2.0/3.0*_shear_modulus;
+    iso_const[1] = _shear_modulus;
+  }
+  else
+    mooseError("Incorrect combination of elastic properties in ComputeIsotropicElasticityTensor. Possible combinations are: lambda and shear_modulus, youngs_modulus and poissons_ratio, or bulk_modulus and shear_modulus.");
+
+  //Fill elasticity tensor
+  _Cijkl.fillFromInputVector(iso_const, RankFourTensor::symmetric_isotropic);
 }

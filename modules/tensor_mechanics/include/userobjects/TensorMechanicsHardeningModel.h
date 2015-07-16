@@ -23,7 +23,8 @@ InputParameters validParams<TensorMechanicsHardeningModel>();
 class TensorMechanicsHardeningModel : public GeneralUserObject
 {
  public:
-  TensorMechanicsHardeningModel(const std::string & name, InputParameters parameters);
+  TensorMechanicsHardeningModel(const InputParameters & parameters);
+  TensorMechanicsHardeningModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();
   void execute();

@@ -29,7 +29,8 @@ InputParameters validParams<TensorMechanicsPlasticTensile>();
 class TensorMechanicsPlasticTensile : public TensorMechanicsPlasticModel
 {
  public:
-  TensorMechanicsPlasticTensile(const std::string & name, InputParameters parameters);
+  TensorMechanicsPlasticTensile(const InputParameters & parameters);
+  TensorMechanicsPlasticTensile(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// Returns the model name (Tensile)
   virtual std::string modelName() const;
