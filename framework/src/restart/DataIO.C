@@ -39,6 +39,10 @@ template<>
 void
 dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * /*context*/)
 {
+  unsigned int m = v.m();
+  unsigned int n = v.n();
+  stream.write((char *) &m, sizeof(m));
+  stream.write((char *) &n, sizeof(n));
   for (unsigned int i = 0; i < v.m(); i++)
     for (unsigned int j = 0; j < v.n(); j++)
     {
@@ -213,6 +217,10 @@ template<>
 void
 dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/)
 {
+  unsigned int nr = 0, nc = 0;
+  stream.read((char *) &nr, sizeof(nr));
+  stream.read((char *) &nc, sizeof(nc));
+  v.resize(nr,nc);
   for (unsigned int i = 0; i < v.m(); i++)
     for (unsigned int j = 0; j < v.n(); j++)
     {
