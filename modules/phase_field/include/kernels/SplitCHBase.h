@@ -20,7 +20,8 @@ InputParameters validParams<SplitCHBase>();
 class SplitCHBase : public Kernel
 {
 public:
-  SplitCHBase(const std::string & name, InputParameters parameters);
+  SplitCHBase(const InputParameters & parameters);
+  SplitCHBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   enum PFFunctionType

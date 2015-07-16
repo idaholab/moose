@@ -22,9 +22,8 @@ InputParameters validParams<KKSPhaseChemicalPotential>()
   return params;
 }
 
-KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const std::string & name,
-                                                     InputParameters parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(name, parameters),
+KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
     _cb_var(coupled("cb")),
     _cb_name(getVar("cb", 0)->name()),
     // first derivatives
@@ -38,7 +37,7 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const std::string & name,
   unsigned int i;
 
 #ifdef DEBUG
-  _console << "KKSPhaseChemicalPotential(" << name << ") " << _var.name() << ' ' << _cb_name << '\n';
+  _console << "KKSPhaseChemicalPotential(" << name() << ") " << _var.name() << ' ' << _cb_name << '\n';
 #endif
 
   unsigned int nvar = _coupled_moose_vars.size();
@@ -79,4 +78,39 @@ KKSPhaseChemicalPotential::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 
   return _test[_i][_qp] * _phi[_j][_qp] * ((*_off_diag_a[cvar])[_qp] - (*_off_diag_b[cvar])[_qp]); // This contributes to a buggy Jacobian
+}
+
+
+// DEPRECATED CONSTRUCTOR
+KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(deprecated_name, parameters),
+    _cb_var(coupled("cb")),
+    _cb_name(getVar("cb", 0)->name()),
+    // first derivatives
+    _dfadca(getMaterialPropertyDerivative<Real>("fa_name", _var.name())),
+    _dfbdcb(getMaterialPropertyDerivative<Real>("fb_name", _cb_name)),
+    // second derivatives d2F/dx*dca for jacobian diagonal elements
+    _d2fadca2(getMaterialPropertyDerivative<Real>("fa_name", _var.name(), _var.name())),
+    _d2fbdcbca(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _var.name()))
+{
+  MooseVariable *arg;
+  unsigned int i;
+
+#ifdef DEBUG
+  _console << "KKSPhaseChemicalPotential(" << name() << ") " << _var.name() << ' ' << _cb_name << '\n';
+#endif
+
+  unsigned int nvar = _coupled_moose_vars.size();
+  _off_diag_a.resize(nvar);
+  _off_diag_b.resize(nvar);
+
+  for (i = 0; i < nvar; ++i)
+  {
+    // get the moose variable
+    arg = _coupled_moose_vars[i];
+
+    // lookup table for the material properties representing the derivatives needed for the off-diagonal jacobian
+    _off_diag_a[i] = &getMaterialPropertyDerivative<Real>("fa_name", _var.name(), arg->name());
+    _off_diag_b[i] = &getMaterialPropertyDerivative<Real>("fb_name", _cb_name, arg->name());
+  }
 }

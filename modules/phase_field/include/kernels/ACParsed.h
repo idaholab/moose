@@ -23,7 +23,8 @@ InputParameters validParams<ACParsed>();
 class ACParsed : public ACBulk
 {
 public:
-  ACParsed(const std::string & name, InputParameters parameters);
+  ACParsed(const InputParameters & parameters);
+  ACParsed(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);

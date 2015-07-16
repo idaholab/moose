@@ -21,7 +21,8 @@ InputParameters validParams<TotalFreeEnergy>();
 class TotalFreeEnergy : public TotalFreeEnergyBase
 {
 public:
-  TotalFreeEnergy(const std::string & name, InputParameters parameters);
+  TotalFreeEnergy(const InputParameters & parameters);
+  TotalFreeEnergy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

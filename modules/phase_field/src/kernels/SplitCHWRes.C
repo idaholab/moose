@@ -15,8 +15,8 @@ InputParameters validParams<SplitCHWRes>()
   return params;
 }
 
-SplitCHWRes::SplitCHWRes(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(name, parameters),
+SplitCHWRes::SplitCHWRes(const InputParameters & parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
     _mob_name(getParam<MaterialPropertyName>("mob_name")),
     _mob(getMaterialProperty<Real>("mob_name"))
 {
@@ -52,4 +52,22 @@ SplitCHWRes::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 
   return (*_dmobdarg[cvar])[_qp]*_phi[_j][_qp]*_grad_u[_qp]*_grad_test[_i][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SplitCHWRes::SplitCHWRes(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(deprecated_name, parameters),
+    _mob_name(getParam<MaterialPropertyName>("mob_name")),
+    _mob(getMaterialProperty<Real>("mob_name"))
+{
+  //Get number of coupled variables
+  unsigned int nvar = _coupled_moose_vars.size();
+
+  // reserve space for derivatives
+  _dmobdarg.resize(nvar);
+
+  // Iterate over all coupled variables
+  for (unsigned int i = 0; i < nvar; ++i)
+    _dmobdarg[i] = &getMaterialPropertyDerivative<Real>(_mob_name, _coupled_moose_vars[i]->name());
 }

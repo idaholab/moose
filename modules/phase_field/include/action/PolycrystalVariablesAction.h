@@ -16,7 +16,8 @@
 class PolycrystalVariablesAction: public Action
 {
 public:
-  PolycrystalVariablesAction(const std::string & name, InputParameters params);
+  PolycrystalVariablesAction(const InputParameters & params);
+  PolycrystalVariablesAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

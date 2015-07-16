@@ -18,7 +18,8 @@ InputParameters validParams<ACGBPoly>();
 class ACGBPoly : public ACBulk
 {
 public:
-  ACGBPoly(const std::string & name, InputParameters parameters);
+  ACGBPoly(const InputParameters & parameters);
+  ACGBPoly(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);

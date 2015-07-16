@@ -19,7 +19,8 @@ InputParameters validParams<ACInterface>();
 class ACInterface : public DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >
 {
 public:
-  ACInterface(const std::string & name, InputParameters parameters);
+  ACInterface(const InputParameters & parameters);
+  ACInterface(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

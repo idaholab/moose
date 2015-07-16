@@ -15,8 +15,8 @@ InputParameters validParams<MatDiffusion>()
   return params;
 }
 
-MatDiffusion::MatDiffusion(const std::string & name, InputParameters parameters) :
-    Diffusion(name, parameters),
+MatDiffusion::MatDiffusion(const InputParameters & parameters) :
+    Diffusion(parameters),
     _D(getMaterialProperty<Real>("D_name"))
 {}
 
@@ -31,3 +31,10 @@ MatDiffusion::computeQpJacobian()
 {
   return _D[_qp] * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+MatDiffusion::MatDiffusion(const std::string & deprecated_name, InputParameters parameters) :
+    Diffusion(deprecated_name, parameters),
+    _D(getMaterialProperty<Real>("D_name"))
+{}

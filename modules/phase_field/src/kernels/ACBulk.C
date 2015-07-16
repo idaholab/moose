@@ -16,8 +16,8 @@ InputParameters validParams<ACBulk>()
   return params;
 }
 
-ACBulk::ACBulk(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<KernelValue> >(name, parameters),
+ACBulk::ACBulk(const InputParameters & parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<KernelValue> >(parameters),
     _L(getMaterialProperty<Real>("mob_name")),
     _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name()))
 {
@@ -64,4 +64,22 @@ ACBulk::computeQpOffDiagJacobian(unsigned int jvar)
 
   // Set off-diagonal Jacobian term from mobility derivatives
   return (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * computeDFDOP(Residual) * _test[_i][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ACBulk::ACBulk(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<KernelValue> >(deprecated_name, parameters),
+    _L(getMaterialProperty<Real>("mob_name")),
+    _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name()))
+{
+  // Get number of coupled variables
+  unsigned int nvar = _coupled_moose_vars.size();
+
+  // reserve space for derivatives
+  _dLdarg.resize(nvar);
+
+  // Iterate over all coupled variables
+  for (unsigned int i = 0; i < nvar; ++i)
+    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
 }

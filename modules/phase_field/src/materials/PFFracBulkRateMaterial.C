@@ -17,9 +17,8 @@ InputParameters validParams<PFFracBulkRateMaterial>()
   return params;
 }
 
-PFFracBulkRateMaterial::PFFracBulkRateMaterial(const std::string & name,
-                                               InputParameters parameters) :
-  Material(name, parameters),
+PFFracBulkRateMaterial::PFFracBulkRateMaterial(const InputParameters & parameters) :
+  Material(parameters),
   _gc(getParam<Real>("gc")),
   _gc_prop(declareProperty<Real>("gc_prop"))
 {
@@ -40,4 +39,13 @@ PFFracBulkRateMaterial::computeQpProperties()
    * User should override this function if heterogenities needs consideration
    */
   getProp();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PFFracBulkRateMaterial::PFFracBulkRateMaterial(const std::string & deprecated_name, InputParameters parameters) :
+  Material(deprecated_name, parameters),
+  _gc(getParam<Real>("gc")),
+  _gc_prop(declareProperty<Real>("gc_prop"))
+{
 }

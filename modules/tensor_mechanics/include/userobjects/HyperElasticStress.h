@@ -26,7 +26,8 @@ InputParameters validParams<HyperElasticStress>();
 class HyperElasticStress : public GeneralUserObject
 {
  public:
-  HyperElasticStress(const std::string & name, InputParameters parameters);
+  HyperElasticStress(const InputParameters & parameters);
+  HyperElasticStress(const std::string & name, InputParameters parameters); // DEPRECATED
   virtual ~HyperElasticStress() {}
 
   void initialize() {}

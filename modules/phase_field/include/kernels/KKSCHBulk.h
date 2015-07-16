@@ -30,7 +30,8 @@ InputParameters validParams<KKSCHBulk>();
 class KKSCHBulk : public CHBulk
 {
 public:
-  KKSCHBulk(const std::string & name, InputParameters parameters);
+  KKSCHBulk(const InputParameters & parameters);
+  KKSCHBulk(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);

@@ -8,9 +8,8 @@ InputParameters validParams<PFCRFFMaterial>()
   return params;
 }
 
-PFCRFFMaterial::PFCRFFMaterial(const std::string & name,
-                               InputParameters parameters) :
-    Material(name, parameters),
+PFCRFFMaterial::PFCRFFMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _M(declareProperty<Real>("M")),
     _alpha_R_0(declareProperty<Real>("alpha_R_0")),
     _alpha_I_0(declareProperty<Real>("alpha_I_0")),
@@ -142,3 +141,32 @@ PFCRFFMaterial::computeQpProperties()
   }
 
 */
+
+
+// DEPRECATED CONSTRUCTOR
+PFCRFFMaterial::PFCRFFMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    Material(deprecated_name, parameters),
+    _M(declareProperty<Real>("M")),
+    _alpha_R_0(declareProperty<Real>("alpha_R_0")),
+    _alpha_I_0(declareProperty<Real>("alpha_I_0")),
+    _A_R_0(declareProperty<Real>("A_R_0")),
+    _A_I_0(declareProperty<Real>("A_I_0")),
+    _alpha_R_1(declareProperty<Real>("alpha_R_1")),
+    _alpha_I_1(declareProperty<Real>("alpha_I_1")),
+    _A_R_1(declareProperty<Real>("A_R_1")),
+    _A_I_1(declareProperty<Real>("A_I_1")),
+    _alpha_R_2(declareProperty<Real>("alpha_R_2")),
+    _alpha_I_2(declareProperty<Real>("alpha_I_2")),
+    _A_R_2(declareProperty<Real>("A_R_2")),
+    _A_I_2(declareProperty<Real>("A_I_2")),
+    _alpha_R_3(declareProperty<Real>("alpha_R_3")),
+    _alpha_I_3(declareProperty<Real>("alpha_I_3")),
+    _A_R_3(declareProperty<Real>("A_R_3")),
+    _A_I_3(declareProperty<Real>("A_I_3")),
+    _alpha_R_4(declareProperty<Real>("alpha_R_4")),
+    _alpha_I_4(declareProperty<Real>("alpha_I_4")),
+    _A_R_4(declareProperty<Real>("A_R_4")),
+    _A_I_4(declareProperty<Real>("A_I_4")),
+    _num_L(getParam<unsigned int>("num_L"))
+{
+}

@@ -24,7 +24,8 @@ class ReconVarIC : public InitialCondition
 {
 public:
 
-  ReconVarIC(const std::string & name, InputParameters parameters);
+  ReconVarIC(const InputParameters & parameters);
+  ReconVarIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialSetup();
   virtual Real value(const Point & /*p*/);

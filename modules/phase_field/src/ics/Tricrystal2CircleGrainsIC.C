@@ -17,9 +17,8 @@ InputParameters validParams<Tricrystal2CircleGrainsIC>()
   return params;
 }
 
-Tricrystal2CircleGrainsIC::Tricrystal2CircleGrainsIC(const std::string & name,
-                                                     InputParameters parameters) :
-    InitialCondition(name, parameters),
+Tricrystal2CircleGrainsIC::Tricrystal2CircleGrainsIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
     _op_num(getParam<unsigned int>("op_num")),
@@ -58,4 +57,25 @@ Tricrystal2CircleGrainsIC::value(const Point & p)
     return 1.0;
   else
     return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Tricrystal2CircleGrainsIC::Tricrystal2CircleGrainsIC(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _mesh(_fe_problem.mesh()),
+    _nl(_fe_problem.getNonlinearSystem()),
+    _op_num(getParam<unsigned int>("op_num")),
+    _op_index(getParam<unsigned int>("op_index"))
+{
+  if (_op_num != 3)
+    mooseError("Tricrystal ICs must have op_num = 3");
+
+  //Set up domain bounds with mesh tools
+  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  {
+    _bottom_left(i) = _mesh.getMinInDimension(i);
+    _top_right(i) = _mesh.getMaxInDimension(i);
+  }
+  _range = _top_right - _bottom_left;
 }

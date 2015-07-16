@@ -13,9 +13,8 @@ InputParameters validParams<FlowRateModel>()
   return params;
 }
 
-FlowRateModel::FlowRateModel(const std::string & name,
-                             InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+FlowRateModel::FlowRateModel(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     _ref_flow_rate(getParam<Real>("reference_flow_rate")),
     _flow_rate_exponent(getParam<Real>("flow_rate_exponent")),
     _flow_rate_tol(getParam<Real>("flow_rate_tol")),
@@ -151,4 +150,17 @@ FlowRateModel::computeEqvStress(const RankTwoTensor & pk2_dev, const RankTwoTens
   RankTwoTensor sdev = pk2_dev * ce;
   Real val = sdev.doubleContraction(sdev.transpose());
   return std::pow(3.0 * val/2.0, 0.5);
+}
+
+// DEPRECATED
+FlowRateModel::FlowRateModel(const std::string & name,
+                             InputParameters parameters) :
+    GeneralUserObject(name, parameters),
+    _ref_flow_rate(getParam<Real>("reference_flow_rate")),
+    _flow_rate_exponent(getParam<Real>("flow_rate_exponent")),
+    _flow_rate_tol(getParam<Real>("flow_rate_tol")),
+    _flow_stress_uo(getUserObject<TensorMechanicsHardeningModel>("flow_stress_user_object"))
+{
+  //Sets number of internal variables used by the user object
+  _num_internal_var = 1;
 }

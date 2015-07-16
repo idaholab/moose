@@ -20,9 +20,8 @@ InputParameters validParams<CHPFCRFFSplitKernelAction>()
   return params;
 }
 
-CHPFCRFFSplitKernelAction::CHPFCRFFSplitKernelAction(const std::string & name,
-                                                     InputParameters params) :
-    Action(name, params),
+CHPFCRFFSplitKernelAction::CHPFCRFFSplitKernelAction(const InputParameters & params) :
+    Action(params),
     _num_L(getParam<unsigned int>("num_L")),
     _L_name_base(getParam<std::string>("L_name_base")),
     _n_name(getParam<NonlinearVariableName>("n_name"))
@@ -78,4 +77,14 @@ CHPFCRFFSplitKernelAction::act()
     out << l;
     L_name.append(out.str());
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CHPFCRFFSplitKernelAction::CHPFCRFFSplitKernelAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params),
+    _num_L(getParam<unsigned int>("num_L")),
+    _L_name_base(getParam<std::string>("L_name_base")),
+    _n_name(getParam<NonlinearVariableName>("n_name"))
+{
 }

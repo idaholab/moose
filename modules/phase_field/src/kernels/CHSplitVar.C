@@ -9,8 +9,8 @@ InputParameters validParams<CHSplitVar>()
   return params;
 }
 
-CHSplitVar::CHSplitVar(const std::string & name, InputParameters parameters) :
-    KernelGrad(name, parameters),
+CHSplitVar::CHSplitVar(const InputParameters & parameters) :
+    KernelGrad(parameters),
     _var_c(coupled("c")),
     _grad_c(coupledGradient("c"))
 {
@@ -35,4 +35,13 @@ CHSplitVar::computeQpOffDiagJacobian(unsigned int jvar)
     return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CHSplitVar::CHSplitVar(const std::string & deprecated_name, InputParameters parameters) :
+    KernelGrad(deprecated_name, parameters),
+    _var_c(coupled("c")),
+    _grad_c(coupledGradient("c"))
+{
 }

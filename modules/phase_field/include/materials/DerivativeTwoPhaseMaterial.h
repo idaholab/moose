@@ -24,8 +24,8 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>();
 class DerivativeTwoPhaseMaterial : public DerivativeFunctionMaterialBase
 {
 public:
-  DerivativeTwoPhaseMaterial(const std::string & name,
-                             InputParameters parameters);
+  DerivativeTwoPhaseMaterial(const InputParameters & parameters);
+  DerivativeTwoPhaseMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeF();
