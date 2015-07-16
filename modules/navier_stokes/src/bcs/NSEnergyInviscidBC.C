@@ -19,8 +19,8 @@ InputParameters validParams<NSEnergyInviscidBC>()
 
 
 
-NSEnergyInviscidBC::NSEnergyInviscidBC(const std::string & name, InputParameters parameters)
-    : NSIntegratedBC(name, parameters),
+NSEnergyInviscidBC::NSEnergyInviscidBC(const InputParameters & parameters)
+    : NSIntegratedBC(parameters),
 
       // Aux Variables
       _temperature(coupledValue("temperature")),
@@ -223,3 +223,16 @@ NSEnergyInviscidBC::qp_jacobian_termC(unsigned var_number, Real un)
 
 
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSEnergyInviscidBC::NSEnergyInviscidBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSIntegratedBC(deprecated_name, parameters),
+
+      // Aux Variables
+      _temperature(coupledValue("temperature")),
+
+      // Object for computing deriviatives of pressure
+      _pressure_derivs(*this)
+{
+}

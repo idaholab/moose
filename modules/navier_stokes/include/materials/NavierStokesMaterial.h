@@ -34,7 +34,8 @@ InputParameters validParams<NavierStokesMaterial>();
 class NavierStokesMaterial : public Material
 {
 public:
-  NavierStokesMaterial(const std::string & name, InputParameters parameters);
+  NavierStokesMaterial(const InputParameters & parameters);
+  NavierStokesMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

@@ -22,8 +22,8 @@ InputParameters validParams<NSTemperatureL2>()
   return params;
 }
 
-NSTemperatureL2::NSTemperatureL2(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+NSTemperatureL2::NSTemperatureL2(const InputParameters & parameters)
+  :Kernel(parameters),
     _p_var(coupled("p")),
     _p(coupledValue("p")),
     _pe_var(coupled("pe")),
@@ -93,3 +93,20 @@ NSTemperatureL2::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NSTemperatureL2::NSTemperatureL2(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+    _p_var(coupled("p")),
+    _p(coupledValue("p")),
+    _pe_var(coupled("pe")),
+    _pe(coupledValue("pe")),
+    _u_vel_var(coupled("u")),
+    _u_vel(coupledValue("u")),
+    _v_vel_var(coupled("v")),
+    _v_vel(coupledValue("v")),
+    _w_vel_var(_mesh.dimension() == 3 ? coupled("w") : 0),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+    _c_v(getMaterialProperty<Real>("c_v"))
+{}

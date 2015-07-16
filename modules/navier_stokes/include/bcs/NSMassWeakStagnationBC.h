@@ -23,7 +23,8 @@ class NSMassWeakStagnationBC : public NSWeakStagnationBC
 {
 
 public:
-  NSMassWeakStagnationBC(const std::string & name, InputParameters parameters);
+  NSMassWeakStagnationBC(const InputParameters & parameters);
+  NSMassWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMassWeakStagnationBC(){}
 

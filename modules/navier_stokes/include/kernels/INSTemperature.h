@@ -22,7 +22,8 @@ InputParameters validParams<INSTemperature>();
 class INSTemperature : public Kernel
 {
 public:
-  INSTemperature(const std::string & name, InputParameters parameters);
+  INSTemperature(const InputParameters & parameters);
+  INSTemperature(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSTemperature(){}
 

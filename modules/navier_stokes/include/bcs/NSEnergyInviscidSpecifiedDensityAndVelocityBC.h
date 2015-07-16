@@ -24,7 +24,8 @@ class NSEnergyInviscidSpecifiedDensityAndVelocityBC : public NSEnergyInviscidBC
 {
 
 public:
-  NSEnergyInviscidSpecifiedDensityAndVelocityBC(const std::string & name, InputParameters parameters);
+  NSEnergyInviscidSpecifiedDensityAndVelocityBC(const InputParameters & parameters);
+  NSEnergyInviscidSpecifiedDensityAndVelocityBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSEnergyInviscidSpecifiedDensityAndVelocityBC(){}
 

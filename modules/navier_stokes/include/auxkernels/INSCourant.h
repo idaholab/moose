@@ -21,7 +21,8 @@ InputParameters validParams<INSCourant>();
 class INSCourant : public AuxKernel
 {
 public:
-  INSCourant(const std::string & name, InputParameters parameters);
+  INSCourant(const InputParameters & parameters);
+  INSCourant(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSCourant() {}
 

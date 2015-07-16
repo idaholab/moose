@@ -33,7 +33,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  NSEnthalpyAux(const std::string & name, InputParameters parameters);
+  NSEnthalpyAux(const InputParameters & parameters);
+  NSEnthalpyAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSEnthalpyAux() {}
 

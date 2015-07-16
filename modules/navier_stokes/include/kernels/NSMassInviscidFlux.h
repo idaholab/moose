@@ -20,7 +20,8 @@ class NSMassInviscidFlux : public NSKernel
 {
 public:
 
-  NSMassInviscidFlux(const std::string & name, InputParameters parameters);
+  NSMassInviscidFlux(const InputParameters & parameters);
+  NSMassInviscidFlux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

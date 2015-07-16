@@ -16,8 +16,8 @@ InputParameters validParams<NSEnergyInviscidFlux>()
   return params;
 }
 
-NSEnergyInviscidFlux::NSEnergyInviscidFlux(const std::string & name, InputParameters parameters)
-  : NSKernel(name, parameters),
+NSEnergyInviscidFlux::NSEnergyInviscidFlux(const InputParameters & parameters)
+  : NSKernel(parameters),
     _enthalpy(coupledValue("enthalpy"))
 {}
 
@@ -110,3 +110,10 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
   return 0;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSEnergyInviscidFlux::NSEnergyInviscidFlux(const std::string & deprecated_name, InputParameters parameters)
+  : NSKernel(deprecated_name, parameters),
+    _enthalpy(coupledValue("enthalpy"))
+{}

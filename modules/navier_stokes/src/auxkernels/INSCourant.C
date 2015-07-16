@@ -19,8 +19,8 @@ InputParameters validParams<INSCourant>()
   return params;
 }
 
-INSCourant::INSCourant(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
+INSCourant::INSCourant(const InputParameters & parameters)
+  :AuxKernel(parameters),
   _u_vel(coupledValue("u")),
   _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
   _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero)
@@ -38,3 +38,12 @@ INSCourant::computeValue()
 
   return _current_elem->hmin() / vel_mag;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+INSCourant::INSCourant(const std::string & deprecated_name, InputParameters parameters)
+  :AuxKernel(deprecated_name, parameters),
+  _u_vel(coupledValue("u")),
+  _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+  _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero)
+{}

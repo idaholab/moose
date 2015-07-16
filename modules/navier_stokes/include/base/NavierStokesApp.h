@@ -17,7 +17,8 @@ InputParameters validParams<NavierStokesApp>();
 class NavierStokesApp : public MooseApp
 {
 public:
-  NavierStokesApp(const std::string & name, InputParameters parameters);
+  NavierStokesApp(const InputParameters & parameters);
+  NavierStokesApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NavierStokesApp();
 
   static void registerApps();

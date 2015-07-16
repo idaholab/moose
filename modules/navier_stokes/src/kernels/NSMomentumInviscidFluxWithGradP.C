@@ -25,8 +25,8 @@ InputParameters validParams<NSMomentumInviscidFluxWithGradP>()
 
 
 
-NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const std::string & name, InputParameters parameters)
-    : NSKernel(name, parameters),
+NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const InputParameters & parameters)
+    : NSKernel(parameters),
 
       // Coupled gradients
       _grad_p(coupledGradient("pressure")),
@@ -189,3 +189,28 @@ Real NSMomentumInviscidFluxWithGradP::compute_pressure_jacobian_value(unsigned v
 
 
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const std::string & deprecated_name, InputParameters parameters)
+    : NSKernel(deprecated_name, parameters),
+
+      // Coupled gradients
+      _grad_p(coupledGradient("pressure")),
+
+      // Parameters
+      _component(getParam<Real>("component")),
+
+      // Derivative calculation helper object
+      _pressure_derivs(*this)
+{
+  // Store pointers to all variable gradients in a single vector.
+  // This is needed for computing pressure Hessian values with a small
+  // amount of code.
+  _gradU.resize(5);
+  _gradU[0] = &_grad_rho  ;
+  _gradU[1] = &_grad_rho_u;
+  _gradU[2] = &_grad_rho_v;
+  _gradU[3] = &_grad_rho_w;
+  _gradU[4] = &_grad_rho_e;
+}

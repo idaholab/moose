@@ -20,8 +20,8 @@ InputParameters validParams<NSMomentumInviscidBC>()
 
 
 
-NSMomentumInviscidBC::NSMomentumInviscidBC(const std::string & name, InputParameters parameters)
-    : NSIntegratedBC(name, parameters),
+NSMomentumInviscidBC::NSMomentumInviscidBC(const InputParameters & parameters)
+    : NSIntegratedBC(parameters),
 
       // Parameters to be specified in input file block...
       _component(getParam<unsigned>("component")),
@@ -124,4 +124,17 @@ Real NSMomentumInviscidBC::convective_qp_jacobian(unsigned var_number)
   // Return the result.  We could return it directly from the switch statement, but this is
   // convenient for printing...
   return conv_term;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSMomentumInviscidBC::NSMomentumInviscidBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSIntegratedBC(deprecated_name, parameters),
+
+      // Parameters to be specified in input file block...
+      _component(getParam<unsigned>("component")),
+
+      // Object for computing deriviatives of pressure
+      _pressure_derivs(*this)
+{
 }

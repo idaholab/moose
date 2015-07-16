@@ -14,8 +14,8 @@ InputParameters validParams<NSMassInviscidFlux>()
   return params;
 }
 
-NSMassInviscidFlux::NSMassInviscidFlux(const std::string & name, InputParameters parameters)
-    : NSKernel(name, parameters)
+NSMassInviscidFlux::NSMassInviscidFlux(const InputParameters & parameters)
+    : NSKernel(parameters)
 {}
 
 
@@ -83,3 +83,9 @@ NSMassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
   // won't get here
   return 0.;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NSMassInviscidFlux::NSMassInviscidFlux(const std::string & deprecated_name, InputParameters parameters)
+    : NSKernel(deprecated_name, parameters)
+{}

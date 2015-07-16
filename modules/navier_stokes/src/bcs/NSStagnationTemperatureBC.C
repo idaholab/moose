@@ -23,8 +23,8 @@ InputParameters validParams<NSStagnationTemperatureBC>()
 
 
 // Constructor, be sure to call the base class constructor first!
-NSStagnationTemperatureBC::NSStagnationTemperatureBC(const std::string & name, InputParameters parameters)
-    : NSStagnationBC(name, parameters),
+NSStagnationTemperatureBC::NSStagnationTemperatureBC(const InputParameters & parameters)
+    : NSStagnationBC(parameters),
 
       // Required parameters
       _desired_stagnation_temperature(getParam<Real>("desired_stagnation_temperature"))
@@ -49,3 +49,12 @@ Real NSStagnationTemperatureBC::computeQpResidual()
   return computed_stagnation_temperature - _desired_stagnation_temperature;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSStagnationTemperatureBC::NSStagnationTemperatureBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSStagnationBC(deprecated_name, parameters),
+
+      // Required parameters
+      _desired_stagnation_temperature(getParam<Real>("desired_stagnation_temperature"))
+{}

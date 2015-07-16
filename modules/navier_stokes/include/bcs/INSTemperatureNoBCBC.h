@@ -22,7 +22,8 @@ InputParameters validParams<INSTemperatureNoBCBC>();
 class INSTemperatureNoBCBC : public IntegratedBC
 {
 public:
-  INSTemperatureNoBCBC(const std::string & name, InputParameters parameters);
+  INSTemperatureNoBCBC(const InputParameters & parameters);
+  INSTemperatureNoBCBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSTemperatureNoBCBC(){}
 

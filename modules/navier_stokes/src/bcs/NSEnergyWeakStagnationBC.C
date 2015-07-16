@@ -16,8 +16,8 @@ InputParameters validParams<NSEnergyWeakStagnationBC>()
 
 
 
-NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const std::string & name, InputParameters parameters)
-    : NSWeakStagnationBC(name, parameters)
+NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & parameters)
+    : NSWeakStagnationBC(parameters)
 {
 }
 
@@ -65,3 +65,10 @@ Real NSEnergyWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 
 
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSWeakStagnationBC(deprecated_name, parameters)
+{
+}
