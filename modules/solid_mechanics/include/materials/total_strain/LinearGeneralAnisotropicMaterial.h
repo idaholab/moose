@@ -30,7 +30,8 @@ InputParameters validParams<LinearGeneralAnisotropicMaterial>();
 class LinearGeneralAnisotropicMaterial : public SolidMechanicsMaterial
 {
 public:
-  LinearGeneralAnisotropicMaterial(const std:: string & name, InputParameters parameters);
+  LinearGeneralAnisotropicMaterial(const InputParameters & parameters);
+  LinearGeneralAnisotropicMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

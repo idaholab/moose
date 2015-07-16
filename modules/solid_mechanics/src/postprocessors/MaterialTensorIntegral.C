@@ -20,9 +20,9 @@ InputParameters validParams<MaterialTensorIntegral>()
   return params;
 }
 
-MaterialTensorIntegral::MaterialTensorIntegral(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters),
-    _material_tensor_calculator(name, parameters),
+MaterialTensorIntegral::MaterialTensorIntegral(const InputParameters & parameters) :
+    ElementIntegralPostprocessor(parameters),
+    _material_tensor_calculator(parameters),
     _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) )
 {
 }
@@ -34,4 +34,13 @@ MaterialTensorIntegral::computeQpIntegral()
   return _material_tensor_calculator.getTensorQuantity(_tensor[_qp],
                                                        &_q_point[_qp],
                                                        direction);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MaterialTensorIntegral::MaterialTensorIntegral(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralPostprocessor(deprecated_name, parameters),
+    _material_tensor_calculator(parameters),
+    _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) )
+{
 }

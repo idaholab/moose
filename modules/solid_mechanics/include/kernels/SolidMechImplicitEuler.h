@@ -20,7 +20,8 @@ class SolidMechImplicitEuler : public SecondDerivativeImplicitEuler
 {
 public:
 
-  SolidMechImplicitEuler(const std::string & name, InputParameters parameters);
+  SolidMechImplicitEuler(const InputParameters & parameters);
+  SolidMechImplicitEuler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -18,7 +18,8 @@ InputParameters validParams<CavityPressureAction>();
 class CavityPressureAction: public Action
 {
 public:
-  CavityPressureAction(const std::string & name, InputParameters params);
+  CavityPressureAction(const InputParameters & params);
+  CavityPressureAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

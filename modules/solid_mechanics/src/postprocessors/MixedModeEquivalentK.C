@@ -19,8 +19,8 @@ InputParameters validParams<MixedModeEquivalentK>()
   return params;
 }
 
-MixedModeEquivalentK::MixedModeEquivalentK(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+MixedModeEquivalentK::MixedModeEquivalentK(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _ki_value(getPostprocessorValue("KI_name")),
     _kii_value(getPostprocessorValue("KII_name")),
     _kiii_value(getPostprocessorValue("KIII_name")),
@@ -32,4 +32,15 @@ Real
 MixedModeEquivalentK::getValue()
 {
   return std::sqrt(_ki_value*_ki_value + _kii_value*_kii_value + 1/(1-_poissons_ratio)*_kiii_value*_kiii_value);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MixedModeEquivalentK::MixedModeEquivalentK(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _ki_value(getPostprocessorValue("KI_name")),
+    _kii_value(getPostprocessorValue("KII_name")),
+    _kiii_value(getPostprocessorValue("KIII_name")),
+    _poissons_ratio(getParam<Real>("poissons_ratio"))
+{
 }

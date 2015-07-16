@@ -21,7 +21,7 @@ InputParameters validParams<ElementsOnLineAux>()
   return params;
 }
 
-ElementsOnLineAux::ElementsOnLineAux(const std::string & name, InputParameters parameters) : AuxKernel(name, parameters),
+ElementsOnLineAux::ElementsOnLineAux(const InputParameters & parameters) : AuxKernel(parameters),
 
   _line1( getParam<RealVectorValue>("line1") ),
   _line2( getParam<RealVectorValue>("line2") ),
@@ -65,4 +65,17 @@ ElementsOnLineAux::computeValue()
 {
   mooseError("From ElementsOnLineAux: computeValue() is not defined");
   return 0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementsOnLineAux::ElementsOnLineAux(const std::string & deprecated_name, InputParameters parameters) : AuxKernel(deprecated_name, parameters),
+
+  _line1( getParam<RealVectorValue>("line1") ),
+  _line2( getParam<RealVectorValue>("line2") ),
+  _dist_tol( getParam<Real>("dist_tol") ),
+  _line_id( getParam<int>("line_id"))
+
+{
+  if ( _nodal ) mooseError("From ElementsOnLineAux: element on line id must be an element property (use CONSTANT MONOMIAL)");
 }

@@ -20,9 +20,8 @@ InputParameters validParams<RateDepSmearIsoCrackModel>()
 
 }
 
-RateDepSmearIsoCrackModel::RateDepSmearIsoCrackModel(const std::string & name,
-                                                     InputParameters parameters) :
-  RateDepSmearCrackModel( name, parameters),
+RateDepSmearIsoCrackModel::RateDepSmearIsoCrackModel(const InputParameters & parameters) :
+  RateDepSmearCrackModel(parameters),
   _crit_energy(getParam<Real>("critical_energy")),
   _kfail(getParam<Real>("k_fail")),
   _upper_lim_damage(getParam<Real>("upper_limit_damage")),
@@ -155,4 +154,20 @@ RateDepSmearIsoCrackModel::postSolveStress( )
 
 RateDepSmearIsoCrackModel::~RateDepSmearIsoCrackModel()
 {
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RateDepSmearIsoCrackModel::RateDepSmearIsoCrackModel(const std::string & deprecated_name, InputParameters parameters) :
+  RateDepSmearCrackModel(deprecated_name, parameters),
+  _crit_energy(getParam<Real>("critical_energy")),
+  _kfail(getParam<Real>("k_fail")),
+  _upper_lim_damage(getParam<Real>("upper_limit_damage")),
+  _energy(declareProperty<Real>("energy")),
+  _energy_old(declarePropertyOld<Real>("energy"))
+{
+
+  if ( _nstate != 2 )
+    mooseError(" RateDpeSmearIsoCrackModel Error: Requires 2 state variables - nstate = 2");
+
 }

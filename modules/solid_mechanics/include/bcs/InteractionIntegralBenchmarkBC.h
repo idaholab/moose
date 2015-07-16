@@ -28,7 +28,8 @@ void addInteractionIntegralBenchmarkBCParams(InputParameters& params);
 class InteractionIntegralBenchmarkBC : public PresetNodalBC
 {
 public:
-  InteractionIntegralBenchmarkBC(const std::string & name, InputParameters parameters);
+  InteractionIntegralBenchmarkBC(const InputParameters & parameters);
+  InteractionIntegralBenchmarkBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

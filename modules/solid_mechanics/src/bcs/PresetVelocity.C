@@ -17,8 +17,8 @@ InputParameters validParams<PresetVelocity>()
 }
 
 
-PresetVelocity::PresetVelocity(const std::string & name, InputParameters parameters) :
-  PresetNodalBC(name, parameters),
+PresetVelocity::PresetVelocity(const InputParameters & parameters) :
+  PresetNodalBC(parameters),
   _u_old(valueOld()),
   _velocity(parameters.get<Real>("velocity")),
   _function(parameters.get<FunctionName>("function") != "" ? &getFunction("function") : NULL)
@@ -37,4 +37,14 @@ PresetVelocity::computeQpValue()
   }
 
   return _u_old[_qp] + _dt * vel;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PresetVelocity::PresetVelocity(const std::string & deprecated_name, InputParameters parameters) :
+  PresetNodalBC(deprecated_name, parameters),
+  _u_old(valueOld()),
+  _velocity(parameters.get<Real>("velocity")),
+  _function(parameters.get<FunctionName>("function") != "" ? &getFunction("function") : NULL)
+{
 }

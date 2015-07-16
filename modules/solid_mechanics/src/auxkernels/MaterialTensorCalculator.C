@@ -23,13 +23,15 @@ InputParameters validParams<MaterialTensorCalculator>()
   return params;
 }
 
-MaterialTensorCalculator::MaterialTensorCalculator(const std::string &name, InputParameters parameters):
+MaterialTensorCalculator::MaterialTensorCalculator(const InputParameters & parameters):
   _index(parameters.get<int>("index")),
   _quantity_moose_enum(parameters.get<MooseEnum>("quantity")),
   _p1(parameters.get<RealVectorValue>("point1")),
   _p2(parameters.get<RealVectorValue>("point2")),
   _direction(parameters.get<RealVectorValue>("direction")/parameters.get<RealVectorValue>("direction").size())
 {
+  const std::string & name = parameters.get<std::string>("name");
+
   if (_quantity_moose_enum.isValid())
   {
     if ( _index > 0 )

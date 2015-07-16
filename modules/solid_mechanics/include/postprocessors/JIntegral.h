@@ -23,7 +23,8 @@ InputParameters validParams<JIntegral>();
 class JIntegral: public ElementIntegralPostprocessor
 {
 public:
-  JIntegral(const std::string & name, InputParameters parameters);
+  JIntegral(const InputParameters & parameters);
+  JIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual Real getValue();
 
 protected:

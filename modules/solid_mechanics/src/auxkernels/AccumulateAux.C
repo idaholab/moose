@@ -16,8 +16,8 @@ InputParameters validParams<AccumulateAux>()
   return params;
 }
 
-AccumulateAux::AccumulateAux(const std::string & name, InputParameters parameters) :
-  AuxKernel(name, parameters),
+AccumulateAux::AccumulateAux(const InputParameters & parameters) :
+  AuxKernel(parameters),
   _accumulate_from(coupledValue("accumulate_from_variable"))
 {
 }
@@ -29,4 +29,12 @@ AccumulateAux::computeValue()
     return _var.nodalSln()[_qp] + _accumulate_from[_qp];
   else
     return _var.nodalSln()[0] + _accumulate_from[_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AccumulateAux::AccumulateAux(const std::string & deprecated_name, InputParameters parameters) :
+  AuxKernel(deprecated_name, parameters),
+  _accumulate_from(coupledValue("accumulate_from_variable"))
+{
 }

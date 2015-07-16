@@ -34,7 +34,8 @@ public:
     * @param name The name of the object
     * @param parameters The input parameters
     */
-  CrackDataSampler(const std::string & name, InputParameters parameters);
+  CrackDataSampler(const InputParameters & parameters);
+  CrackDataSampler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Destructor

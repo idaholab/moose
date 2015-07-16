@@ -23,7 +23,8 @@ InputParameters validParams<SolidMechanicsMaterial>();
 class SolidMechanicsMaterial : public Material
 {
 public:
-  SolidMechanicsMaterial(const std::string & name, InputParameters parameters);
+  SolidMechanicsMaterial(const InputParameters & parameters);
+  SolidMechanicsMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   const std::string _appended_property_name;

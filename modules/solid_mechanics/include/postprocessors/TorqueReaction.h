@@ -22,7 +22,8 @@ class TorqueReaction :
   public NodalPostprocessor
 {
 public:
-  TorqueReaction(const std::string & name, InputParameters parameters);
+  TorqueReaction(const InputParameters & parameters);
+  TorqueReaction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

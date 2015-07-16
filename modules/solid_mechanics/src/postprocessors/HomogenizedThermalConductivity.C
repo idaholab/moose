@@ -22,8 +22,8 @@ InputParameters validParams<HomogenizedThermalConductivity>()
   return params;
 }
 
-HomogenizedThermalConductivity::HomogenizedThermalConductivity(const std::string & name, InputParameters parameters)
-  :ElementAverageValue(name, parameters),
+HomogenizedThermalConductivity::HomogenizedThermalConductivity(const InputParameters & parameters)
+  :ElementAverageValue(parameters),
    _grad_temp_x(coupledGradient("temp_x")),
    _grad_temp_y(_subproblem.mesh().dimension() > 1 ? coupledGradient("temp_y") : _grad_zero),
    _grad_temp_z(_subproblem.mesh().dimension() == 3 ? coupledGradient("temp_z") : _grad_zero),
@@ -92,4 +92,23 @@ HomogenizedThermalConductivity::computeQpIntegral()
   }
 
   return _scale * _diffusion_coefficient[_qp] * value;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+HomogenizedThermalConductivity::HomogenizedThermalConductivity(const std::string & deprecated_name, InputParameters parameters)
+  :ElementAverageValue(deprecated_name, parameters),
+   _grad_temp_x(coupledGradient("temp_x")),
+   _grad_temp_y(_subproblem.mesh().dimension() > 1 ? coupledGradient("temp_y") : _grad_zero),
+   _grad_temp_z(_subproblem.mesh().dimension() == 3 ? coupledGradient("temp_z") : _grad_zero),
+   _component(getParam<unsigned int>("component")),
+   _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
+   _volume(0),
+   _integral_value(0),
+   _scale(getParam<Real>("scale_factor"))
+{
+  if (_component > 2)
+  {
+    mooseError("Component must be 0, 1, or 2 in HomogenizedThermalConductivity");
+  }
 }
