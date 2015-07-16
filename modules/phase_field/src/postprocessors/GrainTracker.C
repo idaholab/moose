@@ -7,7 +7,6 @@
 
 #include "GrainTracker.h"
 #include "MooseMesh.h"
-#include "AddV.h"
 #include "GeneratedMesh.h"
 #include "EBSDReader.h"
 
@@ -69,8 +68,6 @@ template<>
 InputParameters validParams<GrainTracker>()
 {
   InputParameters params = validParams<FeatureFloodCount>();
-  params.addRequiredParam<unsigned int>("op_num","number of grains");
-  params.addRequiredParam<std::string>("var_name_base","base for variable names");
   params.addParam<int>("tracking_step", 0, "The timestep for when we should start tracking grains");
   params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine"
                                                    "when features intersect");
@@ -82,6 +79,8 @@ InputParameters validParams<GrainTracker>()
                                                           "or center of mass calcuations for tracking grains");
   params.addParam<UserObjectName>("ebsd_reader", "Optional: EBSD Reader for initial condition");
 
+  params.addRequiredCoupledVarWithAutoBuild("variable", "var_name_base", "op_num", "Array of coupled variables");
+
   // We are using "addV" to add the variable parameter on the fly
   params.suppressParameter<std::vector<VariableName> >("variable");
 
@@ -89,7 +88,7 @@ InputParameters validParams<GrainTracker>()
 }
 
 GrainTracker::GrainTracker(const std::string & name, InputParameters parameters) :
-    FeatureFloodCount(name, AddV(parameters, "variable")),
+    FeatureFloodCount(name, parameters),
     _tracking_step(getParam<int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _remap(getParam<bool>("remap_grains")),
