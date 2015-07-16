@@ -35,8 +35,8 @@ InputParameters validParams<GMVOutput>()
   return params;
 }
 
-GMVOutput::GMVOutput(const std::string & name, InputParameters parameters) :
-    BasicOutput<OversampleOutput>(name, parameters),
+GMVOutput::GMVOutput(const InputParameters & parameters) :
+    BasicOutput<OversampleOutput>(parameters),
     _binary(getParam<bool>("binary"))
 {
 }
@@ -62,4 +62,11 @@ GMVOutput::filename()
          << std::right
          << _file_num;
   return output.str() + ".gmv";
+}
+
+// DEPRECATED CONSTRUCTOR
+GMVOutput::GMVOutput(const std::string & name, InputParameters parameters) :
+    BasicOutput<OversampleOutput>(name, parameters),
+    _binary(getParam<bool>("binary"))
+{
 }

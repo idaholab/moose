@@ -53,6 +53,11 @@ AppFactory::getValidParams(const std::string & name)
 MooseApp *
 AppFactory::create(const std::string & app_type, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN)
 {
+  // Invoke the legacy registration, if the object is located in the legacy build pointer list
+  if (_name_to_legacy_build_pointer.find(name) == _name_to_legacy_build_pointer.end())
+    return createLegacy(app_type, name, parameters, COMM_WORLD_IN);
+
+  // Error if the application type is not located
   if (_name_to_build_pointer.find(app_type) == _name_to_build_pointer.end())
     mooseError("Object '" + app_type + "' was not registered.");
 
@@ -65,6 +70,7 @@ AppFactory::create(const std::string & app_type, const std::string & name, Input
   MooseSharedPointer<Parallel::Communicator> comm(new Parallel::Communicator(COMM_WORLD_IN));
 
   parameters.set<MooseSharedPointer<Parallel::Communicator> >("_comm") = comm;
+  parameters.set<std::string>("name") = name;
 
   if (!parameters.isParamValid("_command_line"))
     mooseError("Valid CommandLine object required");
@@ -73,7 +79,34 @@ AppFactory::create(const std::string & app_type, const std::string & name, Input
   command_line->addCommandLineOptionsFromParams(parameters);
   command_line->populateInputParams(parameters);
 
-  return (*_name_to_build_pointer[app_type])(name, parameters);
+  return (*_name_to_build_pointer[app_type])(parameters);
+}
+
+MooseApp *
+AppFactory::createLegacy(const std::string & app_type, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN)
+{
+  if (_name_to_legacy_build_pointer.find(app_type) == _name_to_legacy_build_pointer.end())
+    mooseError("Legacy object '" + app_type + "' was not registered.");
+
+  // Take the app_type and add it to the parameters so that it can be retrieved in the Application
+  parameters.set<std::string>("_type") = app_type;
+
+  // Check to make sure that all required parameters are supplied
+  parameters.checkParams("");
+
+  MooseSharedPointer<Parallel::Communicator> comm(new Parallel::Communicator(COMM_WORLD_IN));
+
+  parameters.set<MooseSharedPointer<Parallel::Communicator> >("_comm") = comm;
+  parameters.set<std::string>("name") = name;
+
+  if (!parameters.isParamValid("_command_line"))
+    mooseError("Valid CommandLine object required");
+
+  MooseSharedPointer<CommandLine> command_line = parameters.get<MooseSharedPointer<CommandLine> >("_command_line");
+  command_line->addCommandLineOptionsFromParams(parameters);
+  command_line->populateInputParams(parameters);
+
+  return (*_name_to_legacy_build_pointer[app_type])(name, parameters);
 }
 
 bool

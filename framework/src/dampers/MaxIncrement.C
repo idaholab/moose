@@ -22,8 +22,8 @@ InputParameters validParams<MaxIncrement>()
   return params;
 }
 
-MaxIncrement::MaxIncrement(std::string name, InputParameters parameters) :
-    Damper(name, parameters),
+MaxIncrement::MaxIncrement(const InputParameters & parameters) :
+    Damper(parameters),
     _max_increment(parameters.get<Real>("max_increment"))
 {
 }
@@ -45,4 +45,9 @@ MaxIncrement::computeQpDamping()
 }
 
 
-
+// DEPRECATED CONSTRUCTOR
+MaxIncrement::MaxIncrement(const std::string & deprecated_name, InputParameters parameters) :
+    Damper(deprecated_name, parameters),
+    _max_increment(parameters.get<Real>("max_increment"))
+{
+}

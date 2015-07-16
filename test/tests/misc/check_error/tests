@@ -363,14 +363,14 @@
   [./subdomain_restricted_auxkernel_test]
     type = 'RunException'
     input = 'subdomain_restricted_auxkernel_mismatch.i'
-    expect_err = "In object \w+\ the defined blocks are outside of the domain of the variable"
+    expect_err = "In object AuxKernels/foo the defined blocks are outside of the domain of the variable"
     max_parallel = 1  # Error output can interleave on multiple processes
   [../]
 
   [./subdomain_restricted_kernel_test]
     type = 'RunException'
     input = 'subdomain_restricted_kernel_mismatch.i'
-    expect_err = "In object \w+\ the defined blocks are outside of the domain of the variable"
+    expect_err = "In object Kernels/body_force the defined blocks are outside of the domain of the variable"
   [../]
 
   [./unused_param_test]
@@ -380,6 +380,7 @@
     cli_args = '--warn-unused'
     # Don't allow --error-unused on this test
     skip_test_harness_cli_args = true
+    max_parallel = 1 # warning can mix on multiple processes
   [../]
 
   [./unused_param_test_cli]

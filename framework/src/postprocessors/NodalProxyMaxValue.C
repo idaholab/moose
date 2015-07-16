@@ -25,8 +25,8 @@ InputParameters validParams<NodalProxyMaxValue>()
   return params;
 }
 
-NodalProxyMaxValue::NodalProxyMaxValue(const std::string & name, InputParameters parameters) :
-    NodalVariablePostprocessor(name, parameters),
+NodalProxyMaxValue::NodalProxyMaxValue(const InputParameters & parameters) :
+    NodalVariablePostprocessor(parameters),
     _value(-std::numeric_limits<Real>::max())
 {
 }
@@ -71,4 +71,12 @@ NodalProxyMaxValue::threadJoin(const UserObject & y)
     _value = pps._value;
     _node_id = pps._node_id;
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NodalProxyMaxValue::NodalProxyMaxValue(const std::string & deprecated_name, InputParameters parameters) :
+    NodalVariablePostprocessor(deprecated_name, parameters),
+    _value(-std::numeric_limits<Real>::max())
+{
 }

@@ -26,9 +26,9 @@ InputParameters validParams<SideValueSampler>()
   return params;
 }
 
-SideValueSampler::SideValueSampler(const std::string & name, InputParameters parameters) :
-    SideVectorPostprocessor(name, parameters),
-    SamplerBase(name, parameters, this, _communicator)
+SideValueSampler::SideValueSampler(const InputParameters & parameters) :
+    SideVectorPostprocessor(parameters),
+    SamplerBase(parameters, this, _communicator)
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());
@@ -70,4 +70,20 @@ SideValueSampler::threadJoin(const UserObject & y)
   const SideValueSampler & vpp = static_cast<const SideValueSampler &>(y);
 
   SamplerBase::threadJoin(vpp);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SideValueSampler::SideValueSampler(const std::string & deprecated_name, InputParameters parameters) :
+    SideVectorPostprocessor(deprecated_name, parameters),
+    SamplerBase(parameters, this, _communicator)
+{
+  std::vector<std::string> var_names(_coupled_moose_vars.size());
+  _values.resize(_coupled_moose_vars.size());
+
+  for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
+    var_names[i] = _coupled_moose_vars[i]->name();
+
+  // Initialize the datastructions in SamplerBase
+  SamplerBase::setupVariables(var_names);
 }

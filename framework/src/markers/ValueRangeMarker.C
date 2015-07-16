@@ -32,8 +32,8 @@ InputParameters validParams<ValueRangeMarker>()
 }
 
 
-ValueRangeMarker::ValueRangeMarker(const std::string & name, InputParameters parameters) :
-    QuadraturePointMarker(name, parameters),
+ValueRangeMarker::ValueRangeMarker(const InputParameters & parameters) :
+    QuadraturePointMarker(parameters),
     _lower_bound(parameters.get<Real>("lower_bound")),
     _upper_bound(parameters.get<Real>("upper_bound")),
     _buffer_size(parameters.get<Real>("buffer_size")),
@@ -64,4 +64,25 @@ ValueRangeMarker::computeQpMarker()
 
   // Must be outside the range
   return _outside;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ValueRangeMarker::ValueRangeMarker(const std::string & deprecated_name, InputParameters parameters) :
+    QuadraturePointMarker(deprecated_name, parameters),
+    _lower_bound(parameters.get<Real>("lower_bound")),
+    _upper_bound(parameters.get<Real>("upper_bound")),
+    _buffer_size(parameters.get<Real>("buffer_size")),
+
+    _third_state((MarkerValue)(int)getParam<MooseEnum>("third_state")),
+    _inside(getParam<bool>("invert") ? COARSEN : REFINE),
+    _outside(getParam<bool>("invert") ? REFINE : COARSEN),
+
+    _u(coupledValue("variable"))
+{
+  if (_upper_bound < _lower_bound)
+    mooseError("Invalid bounds specified (upper_bound < lower_bound)");
+
+  if (_buffer_size < 0.0)
+    mooseError("Buffer size must be non-negative: " << _buffer_size);
 }

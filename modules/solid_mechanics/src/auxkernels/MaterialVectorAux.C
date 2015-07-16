@@ -18,9 +18,9 @@ InputParameters validParams<MaterialVectorAux>()
   return params;
 }
 
-MaterialVectorAux::MaterialVectorAux( const std::string & name,
+MaterialVectorAux::MaterialVectorAux( const std::string & obj_name,
                                       InputParameters parameters )
-  :AuxKernel( name, parameters ),
+  :AuxKernel( obj_name, parameters ),
    _vector( getMaterialProperty<RealVectorValue>( getParam<std::string>("vector") ) ),
    _index( getParam<int>("index") ),
    _quantity_moose_enum( getParam<MooseEnum>("quantity") )
@@ -28,14 +28,14 @@ MaterialVectorAux::MaterialVectorAux( const std::string & name,
   if (_quantity_moose_enum.isValid())
   {
     if ( _index > 0 )
-      mooseError("Cannot define an index and a quantity in " + _name);
+      mooseError("Cannot define an index and a quantity in " + name());
     else
       _quantity = MVA_ENUM(int(_quantity_moose_enum));
   }
   else
   {
     if ( _index < 0 )
-      mooseError("Neither an index nor a quantity listed for " + _name);
+      mooseError("Neither an index nor a quantity listed for " + name());
     else
       _quantity = MVA_COMPONENT;  // default
   }
@@ -65,5 +65,3 @@ MaterialVectorAux::computeValue()
   }
   return value;
 }
-
-

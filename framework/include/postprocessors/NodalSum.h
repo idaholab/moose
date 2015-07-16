@@ -27,7 +27,8 @@ InputParameters validParams<NodalSum>();
 class NodalSum : public NodalVariablePostprocessor
 {
 public:
-  NodalSum(const std::string & name, InputParameters parameters);
+  NodalSum(const InputParameters & parameters);
+  NodalSum(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

@@ -43,7 +43,8 @@ public:
    * @param name The name of the function
    * @param parameters The input parameters
    */
-  MooseParsedGradFunction(const std::string & name, InputParameters parameters);
+  MooseParsedGradFunction(const InputParameters & parameters);
+  MooseParsedGradFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

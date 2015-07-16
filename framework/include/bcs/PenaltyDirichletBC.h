@@ -33,10 +33,8 @@ class PenaltyDirichletBC : public IntegratedBC
 {
 public:
 
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same constructor.
-   */
-  PenaltyDirichletBC(const std::string & name, InputParameters parameters);
+  PenaltyDirichletBC(const InputParameters & parameters);
+  PenaltyDirichletBC(const std::string & name, InputParameters parameters); // DEPRECATED
 
   virtual ~PenaltyDirichletBC() {}
 

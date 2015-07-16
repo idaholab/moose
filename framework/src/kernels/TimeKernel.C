@@ -21,8 +21,8 @@ InputParameters validParams<TimeKernel>()
   return params;
 }
 
-TimeKernel::TimeKernel(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+TimeKernel::TimeKernel(const InputParameters & parameters) :
+    Kernel(parameters)
 {
 }
 
@@ -50,4 +50,11 @@ TimeKernel::computeResidual()
     for (unsigned int i=0; i<_save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TimeKernel::TimeKernel(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters)
+{
 }

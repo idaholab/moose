@@ -26,7 +26,8 @@ InputParameters validParams<AddMultiAppAction>();
 class AddMultiAppAction : public MooseObjectAction
 {
 public:
-  AddMultiAppAction(const std::string & name, InputParameters params);
+  AddMultiAppAction(InputParameters params);
+  AddMultiAppAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

@@ -22,7 +22,7 @@
 template<>
 InputParameters validParams<Split>()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = validParams<MooseObject>();
   params.addParam<std::vector<NonlinearVariableName> >("vars", "Variables Split operates on (omitting this implies \"all variables\"");
   params.addParam<std::vector<SubdomainName> >("blocks", "Mesh blocks Split operates on (omitting this implies \"all blocks\"");
   params.addParam<std::vector<BoundaryName> >("sides", "Sidesets Split operates on (omitting this implies \"no sidesets\"");
@@ -48,17 +48,36 @@ InputParameters validParams<Split>()
   params.addParam<MooseEnum>("schur_ainv", SchurAInvEnum, "Type of approximation to inv(A) used when forming S = D - C inv(A) B");
 
   params.addParam<MultiMooseEnum>("petsc_options", Moose::PetscSupport::getCommonPetscFlags(), "PETSc flags for the FieldSplit solver");
-  params.addParam<MultiMooseEnum>("petsc_options_iname", Moose::PetscSupport::getCommonPetscOptionsKeys(), "PETSc option names for the FieldSplit solver");
+  params.addParam<MultiMooseEnum>("petsc_options_iname", Moose::PetscSupport::getCommonPetscKeys(), "PETSc option names for the FieldSplit solver");
   params.addParam<std::vector<std::string> >("petsc_options_value", "PETSc option values for the FieldSplit solver");
 
   params.registerBase("Split");
   return params;
 }
 
-Split::Split(const std::string & name, InputParameters params) :
-    MooseObject(name, params),
-    Restartable(params, "Splits"),
-    _fe_problem(*params.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+Split::Split (const InputParameters & parameters) :
+    MooseObject(parameters),
+    Restartable(parameters, "Splits"),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _vars(getParam<std::vector<NonlinearVariableName> >("vars")),
+    _blocks(getParam<std::vector<SubdomainName> >("blocks")),
+    _sides(getParam<std::vector<BoundaryName> >("sides")),
+    _unsides(getParam<std::vector<BoundaryName> >("unsides")),
+    _splitting(getParam<std::vector<std::string> >("splitting")),
+    _splitting_type(getParam<MooseEnum>("splitting_type")),
+    _schur_type(getParam<MooseEnum>("schur_type")),
+    _schur_pre(getParam<MooseEnum>("schur_pre")),
+    _schur_ainv(getParam<MooseEnum>("schur_ainv")),
+    _petsc_options(_fe_problem.getPetscOptions())
+{
+}
+
+
+// DEPRECATED
+Split::Split (const std::string & name, InputParameters parameters) :
+    MooseObject(name, parameters),
+    Restartable(parameters, "Splits"),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _vars(getParam<std::vector<NonlinearVariableName> >("vars")),
     _blocks(getParam<std::vector<SubdomainName> >("blocks")),
     _sides(getParam<std::vector<BoundaryName> >("sides")),

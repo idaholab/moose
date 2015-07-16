@@ -28,7 +28,8 @@ InputParameters validParams<AddMortarInterfaceAction>();
 class AddMortarInterfaceAction : public Action
 {
 public:
-  AddMortarInterfaceAction(const std::string & name, InputParameters parameters);
+  AddMortarInterfaceAction(InputParameters parameters);
+  AddMortarInterfaceAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AddMortarInterfaceAction();
 
   virtual void act();

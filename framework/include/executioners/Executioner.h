@@ -32,6 +32,13 @@ template<>
 InputParameters validParams<Executioner>();
 
 /**
+ * A helper function for creating execution related parameters, these are needed by
+ * both Preconditioners and Executioners.
+ */
+InputParameters commonExecutionParameters();
+
+
+/**
  * Executioners are objects that do the actual work of solving your problem.
  *
  * In general there are two "sets" of Executioners: Steady and Transient.
@@ -54,7 +61,8 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  Executioner(const std::string & name, InputParameters parameters);
+  Executioner(const InputParameters & parameters);
+  Executioner(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Executioner();
 

@@ -22,13 +22,20 @@ InputParameters validParams<AddDiracKernelAction>()
   return params;
 }
 
-AddDiracKernelAction::AddDiracKernelAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddDiracKernelAction::AddDiracKernelAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddDiracKernelAction::act()
 {
-  _problem->addDiracKernel(_type, getShortName(), _moose_object_pars);
+  _problem->addDiracKernel(_type, _name, _moose_object_pars);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddDiracKernelAction::AddDiracKernelAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
 }

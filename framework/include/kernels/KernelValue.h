@@ -39,7 +39,8 @@ public:
    * @param name The name of this kernel.
    * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
    */
-  KernelValue(const std::string & name, InputParameters parameters);
+  KernelValue(const InputParameters & parameters);
+  KernelValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~KernelValue();
 

@@ -34,7 +34,8 @@ InputParameters validParams<LayeredSideIntegral>();
 class LayeredSideIntegral : public SideIntegralVariableUserObject, public LayeredBase
 {
 public:
-  LayeredSideIntegral(const std::string & name, InputParameters parameters);
+  LayeredSideIntegral(const InputParameters & parameters);
+  LayeredSideIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Given a Point return the integral value associated with the layer that point falls in.

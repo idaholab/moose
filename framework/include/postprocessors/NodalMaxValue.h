@@ -28,7 +28,8 @@ InputParameters validParams<NodalMaxValue>();
 class NodalMaxValue : public NodalVariablePostprocessor
 {
 public:
-  NodalMaxValue(const std::string & name, InputParameters parameters);
+  NodalMaxValue(const InputParameters & parameters);
+  NodalMaxValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

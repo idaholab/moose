@@ -45,7 +45,8 @@ class InternalSideUserObject :
   public ZeroInterface
 {
 public:
-  InternalSideUserObject(const std::string & name, InputParameters parameters);
+  InternalSideUserObject(const InputParameters & parameters);
+  InternalSideUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~InternalSideUserObject();
 
   /**

@@ -58,9 +58,6 @@ ConvDiffMetaAction::act()
   InputParameters variable_params = _action_factory.getValidParams("AddVariableAction");
   variable_params.set<ActionWarehouse *>("awh") = &_awh;
 
-//  for (unsigned int i=0; i<variable_params.size(); ++i)
-//  {
-
   // Create and Add First Variable Action
   action = _action_factory.create("AddVariableAction", "Variables/" + variables[0], variable_params);
   _awh.addActionBlock(action);
@@ -68,8 +65,6 @@ ConvDiffMetaAction::act()
   // Create and Add Second Variable Action
   action = _action_factory.create("AddVariableAction", "Variables/" + variables[1], variable_params);
   _awh.addActionBlock(action);
-//  }
-
 
   //*******************************************//
   //**************** Kernels ******************//
@@ -97,9 +92,10 @@ ConvDiffMetaAction::act()
   {
     InputParameters & params = moose_object_action->getObjectParams();
     params.set<NonlinearVariableName>("variable") = variables[1];
+    // add it to the warehouse
+    _awh.addActionBlock(action);
+
   }
-  // add it to the warehouse
-  _awh.addActionBlock(action);
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   action_params.set<std::string>("type") = "Convection";
@@ -114,7 +110,8 @@ ConvDiffMetaAction::act()
     params.set<std::vector<std::string> >("some_variable") = vel_vec_variable;
 
     params.set<RealVectorValue>("velocity") = RealVectorValue(0, 0, 0);
+    // add it to the warehouse
+    _awh.addActionBlock(action);
   }
-  // add it to the warehouse
-  _awh.addActionBlock(action);
+
 }

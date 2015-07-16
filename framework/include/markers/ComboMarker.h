@@ -31,7 +31,8 @@ InputParameters validParams<ComboMarker>();
 class ComboMarker : public Marker
 {
 public:
-  ComboMarker(const std::string & name, InputParameters parameters);
+  ComboMarker(const InputParameters & parameters);
+  ComboMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ComboMarker(){};
 
 protected:

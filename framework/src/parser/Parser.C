@@ -978,7 +978,7 @@ void Parser::setScalarParameter<PostprocessorName>(const std::string & full_name
   std::istringstream ss(pps_name);
 
   if (ss >> real_value && ss.eof())
-    _current_params->defaultPostprocessorValue(short_name, true) = real_value;
+    _current_params->setDefaultPostprocessorValue(short_name, real_value);
 
   if (in_global)
   {

@@ -26,7 +26,8 @@ InputParameters validParams<AddDiracKernelAction>();
 class AddDiracKernelAction : public MooseObjectAction
 {
 public:
-  AddDiracKernelAction(const std::string & name, InputParameters params);
+  AddDiracKernelAction(InputParameters params);
+  AddDiracKernelAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

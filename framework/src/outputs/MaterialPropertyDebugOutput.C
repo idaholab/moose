@@ -33,8 +33,8 @@ InputParameters validParams<MaterialPropertyDebugOutput>()
   return params;
 }
 
-MaterialPropertyDebugOutput::MaterialPropertyDebugOutput(const std::string & name, InputParameters & parameters) :
-    BasicOutput<Output>(name, parameters)
+MaterialPropertyDebugOutput::MaterialPropertyDebugOutput(const InputParameters & parameters) :
+    BasicOutput<Output>(parameters)
 {
   printMaterialMap();
 }

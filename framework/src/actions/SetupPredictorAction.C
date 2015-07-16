@@ -24,8 +24,8 @@ InputParameters validParams<SetupPredictorAction>()
   return params;
 }
 
-SetupPredictorAction::SetupPredictorAction(const std::string & name, InputParameters parameters) :
-    MooseObjectAction(name, parameters)
+SetupPredictorAction::SetupPredictorAction(InputParameters parameters) :
+    MooseObjectAction(parameters)
 {
 }
 
@@ -47,4 +47,11 @@ SetupPredictorAction::act()
     MooseSharedPointer<Predictor> predictor = MooseSharedNamespace::static_pointer_cast<Predictor>(_factory.create(_type, "Predictor", _moose_object_pars));
     _problem->getNonlinearSystem().setPredictor(predictor);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupPredictorAction::SetupPredictorAction(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObjectAction(deprecated_name, parameters)
+{
 }

@@ -27,7 +27,8 @@ InputParameters validParams<FileMesh>();
 class FileMesh : public MooseMesh
 {
 public:
-  FileMesh(const std::string & name, InputParameters parameters);
+  FileMesh(const InputParameters & parameters);
+  FileMesh(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   FileMesh(const FileMesh & other_mesh);
   virtual ~FileMesh();
 

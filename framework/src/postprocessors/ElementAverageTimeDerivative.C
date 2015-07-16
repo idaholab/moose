@@ -23,8 +23,8 @@ InputParameters validParams<ElementAverageTimeDerivative>()
 
 
 
-ElementAverageTimeDerivative::ElementAverageTimeDerivative(const std::string & name, InputParameters parameters) :
-    ElementAverageValue(name, parameters)
+ElementAverageTimeDerivative::ElementAverageTimeDerivative(const InputParameters & parameters) :
+    ElementAverageValue(parameters)
 {}
 
 
@@ -34,3 +34,9 @@ ElementAverageTimeDerivative::computeQpIntegral()
 {
   return _u_dot[_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ElementAverageTimeDerivative::ElementAverageTimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
+    ElementAverageValue(deprecated_name, parameters)
+{}

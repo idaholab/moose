@@ -23,8 +23,8 @@ InputParameters validParams<FunctionIC>()
   return params;
 }
 
-FunctionIC::FunctionIC(const std::string & name, InputParameters parameters) :
-    InitialCondition(name, parameters),
+FunctionIC::FunctionIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _func(getFunction("function"))
 {
 }
@@ -39,4 +39,12 @@ RealGradient
 FunctionIC::gradient(const Point & p)
 {
   return _func.gradient(_t, p);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FunctionIC::FunctionIC(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _func(getFunction("function"))
+{
 }

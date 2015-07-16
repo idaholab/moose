@@ -26,11 +26,17 @@ InputParameters validParams<MaterialStdVectorAux>();
 /**
  * AuxKernel for outputting a std::vector material-property component to an AuxVariable
  */
-class MaterialStdVectorAux : public MaterialStdVectorAuxBase<>
+class MaterialStdVectorAux : public MaterialStdVectorAuxBase<Real>
 {
 public:
 
-  MaterialStdVectorAux(const std::string & name, InputParameters parameters);
+  /**
+   * Class constructor
+   * @param name AuxKernel name
+   * @param parameters The input parameters for this object
+   */
+  MaterialStdVectorAux(const InputParameters & parameters);
+  MaterialStdVectorAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaterialStdVectorAux();
 

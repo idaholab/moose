@@ -21,8 +21,8 @@ InputParameters validParams<Reaction>()
   return params;
 }
 
-Reaction::Reaction(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+Reaction::Reaction(const InputParameters & parameters) :
+    Kernel(parameters)
 {}
 
 Real
@@ -36,3 +36,9 @@ Reaction::computeQpJacobian()
 {
   return _test[_i][_qp]*_phi[_j][_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+Reaction::Reaction(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters)
+{}

@@ -28,8 +28,8 @@ InputParameters validParams<SolutionAux>()
   return params;
 }
 
-SolutionAux::SolutionAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+SolutionAux::SolutionAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _solution_object(getUserObject<SolutionUserObject>("solution")),
     _direct(getParam<bool>("direct")),
     _scale_factor(getParam<Real>("scale_factor")),
@@ -95,4 +95,15 @@ SolutionAux::computeValue()
 
   // Apply factors and return the value
   return _scale_factor*output + _add_factor;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SolutionAux::SolutionAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _solution_object(getUserObject<SolutionUserObject>("solution")),
+    _direct(getParam<bool>("direct")),
+    _scale_factor(getParam<Real>("scale_factor")),
+    _add_factor(getParam<Real>("add_factor"))
+{
 }

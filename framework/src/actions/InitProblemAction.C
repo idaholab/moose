@@ -23,8 +23,8 @@ InputParameters validParams<InitProblemAction>()
 }
 
 
-InitProblemAction::InitProblemAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+InitProblemAction::InitProblemAction(InputParameters params) :
+    Action(params)
 {
 }
 
@@ -35,4 +35,11 @@ InitProblemAction::act()
     _problem->init();
   else
     mooseError("Problem doesn't exist in InitProblemAction!");
+}
+
+
+// DEPRECATED CONSTRUCTOR
+InitProblemAction::InitProblemAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

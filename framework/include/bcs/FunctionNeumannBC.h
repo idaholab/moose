@@ -30,7 +30,8 @@ InputParameters validParams<FunctionNeumannBC>();
 class FunctionNeumannBC : public IntegratedBC
 {
 public:
-  FunctionNeumannBC(const std::string & name, InputParameters parameters);
+  FunctionNeumannBC(const InputParameters & parameters);
+  FunctionNeumannBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

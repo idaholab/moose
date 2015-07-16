@@ -22,8 +22,16 @@ InputParameters validParams<ElementVectorPostprocessor>()
   return params;
 }
 
-ElementVectorPostprocessor::ElementVectorPostprocessor(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters),
-    VectorPostprocessor(name, parameters)
+ElementVectorPostprocessor::ElementVectorPostprocessor(const InputParameters & parameters) :
+    ElementUserObject(parameters),
+    VectorPostprocessor(parameters)
+{
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementVectorPostprocessor::ElementVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    ElementUserObject(deprecated_name, parameters),
+    VectorPostprocessor(parameters)
 {
 }

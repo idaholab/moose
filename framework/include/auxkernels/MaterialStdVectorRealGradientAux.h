@@ -30,7 +30,7 @@ InputParameters validParams<MaterialStdVectorRealGradientAux>();
 class MaterialStdVectorRealGradientAux : public MaterialStdVectorAuxBase<RealGradient>
 {
 public:
-
+  MaterialStdVectorRealGradientAux(const InputParameters & parameters);
   MaterialStdVectorRealGradientAux(const std::string & name, InputParameters parameters);
 
   virtual ~MaterialStdVectorRealGradientAux();

@@ -26,7 +26,8 @@ InputParameters validParams<SetAdaptivityOptionsAction>();
 class SetAdaptivityOptionsAction : public Action
 {
 public:
-  SetAdaptivityOptionsAction(const std::string & name, InputParameters params);
+  SetAdaptivityOptionsAction(InputParameters params);
+  SetAdaptivityOptionsAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

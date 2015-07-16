@@ -46,7 +46,8 @@ class Transfer :
   public Restartable
 {
 public:
-  Transfer(const std::string & name, InputParameters parameters);
+  Transfer(const InputParameters & parameters);
+  Transfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Transfer() {}
 
   /**

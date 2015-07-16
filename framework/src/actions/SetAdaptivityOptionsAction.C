@@ -33,8 +33,8 @@ InputParameters validParams<SetAdaptivityOptionsAction>()
   return params;
 }
 
-SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(InputParameters params) :
+    Action(params)
 {
 }
 
@@ -56,4 +56,11 @@ SetAdaptivityOptionsAction::act()
   adapt.setUseNewSystem();
 
   adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

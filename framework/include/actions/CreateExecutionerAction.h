@@ -26,7 +26,8 @@ InputParameters validParams<CreateExecutionerAction>();
 class CreateExecutionerAction : public MooseObjectAction
 {
 public:
-  CreateExecutionerAction(const std::string & name, InputParameters params);
+  CreateExecutionerAction(InputParameters params);
+  CreateExecutionerAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual void act();
 };
 

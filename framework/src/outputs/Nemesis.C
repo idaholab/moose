@@ -31,8 +31,8 @@ InputParameters validParams<Nemesis>()
   return params;
 }
 
-Nemesis::Nemesis(const std::string & name, InputParameters parameters) :
-    AdvancedOutput<OversampleOutput>(name, parameters),
+Nemesis::Nemesis(const InputParameters & parameters) :
+    AdvancedOutput<OversampleOutput>(parameters),
     _nemesis_io_ptr(NULL),
     _file_num(0),
     _nemesis_num(0),

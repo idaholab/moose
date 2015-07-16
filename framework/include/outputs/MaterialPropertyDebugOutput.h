@@ -40,7 +40,8 @@ public:
    * @param name Output object name
    * @param parameters Object input parameters
    */
-  MaterialPropertyDebugOutput(const std::string & name, InputParameters & parameters);
+  MaterialPropertyDebugOutput(const InputParameters & parameters);
+  MaterialPropertyDebugOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

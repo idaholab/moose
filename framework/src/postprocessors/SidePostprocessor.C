@@ -22,7 +22,14 @@ InputParameters validParams<SidePostprocessor>()
   return params;
 }
 
-SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters parameters) :
-    SideUserObject(name, parameters),
-    Postprocessor(name, parameters)
+SidePostprocessor::SidePostprocessor(const InputParameters & parameters) :
+    SideUserObject(parameters),
+    Postprocessor(parameters)
+{}
+
+
+// DEPRECATED CONSTRUCTOR
+SidePostprocessor::SidePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    SideUserObject(deprecated_name, parameters),
+    Postprocessor(parameters)
 {}

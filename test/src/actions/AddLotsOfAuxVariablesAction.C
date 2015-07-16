@@ -52,8 +52,8 @@ InputParameters validParams<AddLotsOfAuxVariablesAction>()
 }
 
 
-AddLotsOfAuxVariablesAction::AddLotsOfAuxVariablesAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddLotsOfAuxVariablesAction::AddLotsOfAuxVariablesAction(const std::string & name, InputParameters parameters) :
+    Action(parameters)
 {
 }
 

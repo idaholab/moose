@@ -22,8 +22,8 @@ InputParameters validParams<DiffusionFluxBC>()
   return params;
 }
 
-DiffusionFluxBC::DiffusionFluxBC(const std::string & name, InputParameters parameters) :
-    FluxBC(name, parameters)
+DiffusionFluxBC::DiffusionFluxBC(const InputParameters & parameters) :
+    FluxBC(parameters)
 {
 }
 
@@ -41,4 +41,11 @@ RealGradient
 DiffusionFluxBC::computeQpFluxJacobian()
 {
   return _grad_phi[_j][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+DiffusionFluxBC::DiffusionFluxBC(const std::string & deprecated_name, InputParameters parameters) :
+    FluxBC(deprecated_name, parameters)
+{
 }

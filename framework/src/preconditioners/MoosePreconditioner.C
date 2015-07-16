@@ -14,6 +14,7 @@
 
 #include "MoosePreconditioner.h"
 #include "FEProblem.h"
+#include "Executioner.h" // for common parameters, see validParams below
 
 template<>
 InputParameters validParams<MoosePreconditioner>()
@@ -23,15 +24,18 @@ InputParameters validParams<MoosePreconditioner>()
 
   MooseEnum pc_side("left right symmetric", "right");
   params.addParam<MooseEnum>("pc_side", pc_side, "Preconditioning side");
-
   params.registerBase("MoosePreconditioner");
+
+#ifdef LIBMESH_HAVE_PETSC
+  params += commonExecutionParameters();
+#endif //LIBMESH_HAVE_PETSC
 
   return params;
 }
 
 
-MoosePreconditioner::MoosePreconditioner(const std::string & name, InputParameters params) :
-    MooseObject(name, params),
+MoosePreconditioner::MoosePreconditioner(const InputParameters & params) :
+    MooseObject(params),
     Restartable(params, "Preconditioners"),
     _fe_problem(*params.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
@@ -91,4 +95,14 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
       }
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MoosePreconditioner::MoosePreconditioner(const std::string & deprecated_name, InputParameters params) :
+    MooseObject(deprecated_name, params),
+    Restartable(params, "Preconditioners"),
+    _fe_problem(*params.getCheckedPointerParam<FEProblem *>("_fe_problem"))
+{
+  _fe_problem.getNonlinearSystem().setPCSide(getParam<MooseEnum>("pc_side"));
 }

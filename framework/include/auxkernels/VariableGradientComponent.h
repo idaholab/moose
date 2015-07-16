@@ -36,7 +36,8 @@ public:
    * @param name AuxKernel object name
    * @param parameters Input parameters for the object
    */
-  VariableGradientComponent(const std::string & name, InputParameters parameters);
+  VariableGradientComponent(const InputParameters & parameters);
+  VariableGradientComponent(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

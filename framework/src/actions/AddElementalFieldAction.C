@@ -27,8 +27,8 @@ InputParameters validParams<AddElementalFieldAction>()
   return params;
 }
 
-AddElementalFieldAction::AddElementalFieldAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddElementalFieldAction::AddElementalFieldAction(InputParameters params) :
+    Action(params)
 {
 }
 
@@ -51,4 +51,11 @@ AddElementalFieldAction::act()
     _problem->addAuxVariable(variable, fe_type);
   else
     _problem->addAuxVariable(variable, fe_type, &blocks);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddElementalFieldAction::AddElementalFieldAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

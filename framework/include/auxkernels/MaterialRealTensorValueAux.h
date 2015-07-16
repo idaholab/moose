@@ -31,7 +31,12 @@ class MaterialRealTensorValueAux : public MaterialAuxBase<RealTensorValue>
 {
 public:
 
-  MaterialRealTensorValueAux(const std::string & name, InputParameters parameters);
+  /**
+   * Class constructor
+   * @param parameters The input parameters for this AuxKernel
+   */
+  MaterialRealTensorValueAux(const InputParameters & parameters);
+  MaterialRealTensorValueAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaterialRealTensorValueAux();
 

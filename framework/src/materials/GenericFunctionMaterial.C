@@ -24,8 +24,8 @@ InputParameters validParams<GenericFunctionMaterial>()
   return params;
 }
 
-GenericFunctionMaterial::GenericFunctionMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+GenericFunctionMaterial::GenericFunctionMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _prop_names(getParam<std::vector<std::string> >("prop_names")),
     _prop_values(getParam<std::vector<FunctionName> >("prop_values"))
 {
@@ -52,4 +52,29 @@ GenericFunctionMaterial::computeQpProperties()
 {
   for (unsigned int i=0; i<_num_props; i++)
     (*_properties[i])[_qp] = (*_functions[i]).value(_t, _q_point[_qp]);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+GenericFunctionMaterial::GenericFunctionMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    Material(deprecated_name, parameters),
+    _prop_names(getParam<std::vector<std::string> >("prop_names")),
+    _prop_values(getParam<std::vector<FunctionName> >("prop_values"))
+{
+  unsigned int num_names = _prop_names.size();
+  unsigned int num_values = _prop_values.size();
+
+  if (num_names != num_values)
+    mooseError("Number of prop_names much match the number of prop_values for a GenericFunctionMaterial!");
+
+  _num_props = num_names;
+
+  _properties.resize(num_names);
+  _functions.resize(num_names);
+
+  for (unsigned int i=0; i<_num_props; i++)
+  {
+    _properties[i] = &declareProperty<Real>(_prop_names[i]);
+    _functions[i] = &getFunctionByName(_prop_values[i]);
+  }
 }

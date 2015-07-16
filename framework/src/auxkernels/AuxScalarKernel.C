@@ -35,8 +35,8 @@ InputParameters validParams<AuxScalarKernel>()
   return params;
 }
 
-AuxScalarKernel::AuxScalarKernel(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters) :
+    MooseObject(parameters),
     ScalarCoupleable(parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
@@ -93,4 +93,27 @@ bool
 AuxScalarKernel::isActive()
 {
   return true;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AuxScalarKernel::AuxScalarKernel(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    ScalarCoupleable(parameters),
+    SetupInterface(parameters),
+    FunctionInterface(parameters),
+    UserObjectInterface(parameters),
+    PostprocessorInterface(parameters),
+    TransientInterface(parameters, "scalar_aux_kernels"),
+    ZeroInterface(parameters),
+    MeshChangedInterface(parameters),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _var(_sys.getScalarVariable(_tid, parameters.get<AuxVariableName>("variable"))),
+    _mesh(_subproblem.mesh()),
+    _u(_var.sln()),
+    _u_old(_var.slnOld())
+{
 }

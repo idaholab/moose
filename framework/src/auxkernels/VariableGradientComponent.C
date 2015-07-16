@@ -23,8 +23,8 @@ InputParameters validParams<VariableGradientComponent>()
   return params;
 }
 
-VariableGradientComponent::VariableGradientComponent(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+VariableGradientComponent::VariableGradientComponent(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _gradient(coupledGradient("gradient_variable")),
     _component(getParam<MooseEnum>("component"))
 {
@@ -34,4 +34,13 @@ Real
 VariableGradientComponent::computeValue()
 {
   return _gradient[_qp](_component);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+VariableGradientComponent::VariableGradientComponent(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _gradient(coupledGradient("gradient_variable")),
+    _component(getParam<MooseEnum>("component"))
+{
 }

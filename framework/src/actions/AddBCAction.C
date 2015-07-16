@@ -24,13 +24,20 @@ InputParameters validParams<AddBCAction>()
   return params;
 }
 
-AddBCAction::AddBCAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddBCAction::AddBCAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddBCAction::act()
 {
-  _problem->addBoundaryCondition(_type, getShortName(), _moose_object_pars);
+  _problem->addBoundaryCondition(_type, _name, _moose_object_pars);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddBCAction::AddBCAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
 }

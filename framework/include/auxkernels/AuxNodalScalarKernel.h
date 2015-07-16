@@ -33,7 +33,8 @@ class AuxNodalScalarKernel :
   public MooseVariableDependencyInterface
 {
 public:
-  AuxNodalScalarKernel(const std::string & name, InputParameters parameters);
+  AuxNodalScalarKernel(const InputParameters & parameters);
+  AuxNodalScalarKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AuxNodalScalarKernel();
 
   /**

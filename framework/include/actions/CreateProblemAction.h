@@ -25,7 +25,8 @@ InputParameters validParams<CreateProblemAction>();
 class CreateProblemAction : public MooseObjectAction
 {
 public:
-  CreateProblemAction(const std::string & name, InputParameters parameters);
+  CreateProblemAction(InputParameters parameters);
+  CreateProblemAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

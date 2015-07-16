@@ -40,15 +40,14 @@ InputParameters validParams<MultiAppNearestNodeTransfer>()
   return params;
 }
 
-MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
     _neighbors_cached(false)
 {
   // This transfer does not work with ParallelMesh
-  //_fe_problem.mesh().errorIfParallelDistribution("MultiAppNearestNodeTransfer");
   _displaced_source_mesh = getParam<bool>("displaced_source_mesh");
   _displaced_target_mesh = getParam<bool>("displaced_target_mesh");
 }
@@ -65,7 +64,7 @@ MultiAppNearestNodeTransfer::initialSetup()
 void
 MultiAppNearestNodeTransfer::execute()
 {
-  _console << "Beginning NearestNodeTransfer " << _name << std::endl;
+  _console << "Beginning NearestNodeTransfer " << name() << std::endl;
 
   getAppInfo();
 
@@ -447,7 +446,7 @@ MultiAppNearestNodeTransfer::execute()
   if (_fixed_meshes)
     _neighbors_cached = true;
 
-  _console << "Finished NearestNodeTransfer " << _name << std::endl;
+  _console << "Finished NearestNodeTransfer " << name() << std::endl;
 }
 
 Node *
@@ -585,4 +584,17 @@ MultiAppNearestNodeTransfer::getLocalNodes(MooseMesh * mesh, std::vector<Node *>
       local_nodes[i] = *node_it;
     }
   }
+}
+
+// DEPRECATED CONSTRUCTOR
+MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const std::string & name, InputParameters parameters) :
+    MultiAppTransfer(name, parameters),
+    _to_var_name(getParam<AuxVariableName>("variable")),
+    _from_var_name(getParam<VariableName>("source_variable")),
+    _fixed_meshes(getParam<bool>("fixed_meshes")),
+    _neighbors_cached(false)
+{
+  // This transfer does not work with ParallelMesh
+  _displaced_source_mesh = getParam<bool>("displaced_source_mesh");
+  _displaced_target_mesh = getParam<bool>("displaced_target_mesh");
 }

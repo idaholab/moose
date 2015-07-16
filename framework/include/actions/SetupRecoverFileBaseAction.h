@@ -36,7 +36,8 @@ public:
    * @param name Name of the action
    * @param params Input parameters for this action
    */
-  SetupRecoverFileBaseAction(const std::string & name, InputParameters params);
+  SetupRecoverFileBaseAction(InputParameters params);
+  SetupRecoverFileBaseAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

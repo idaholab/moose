@@ -34,8 +34,8 @@ InputParameters validParams<BoundaryCondition>()
   return params;
 }
 
-BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+BoundaryCondition::BoundaryCondition(const InputParameters & parameters) :
+    MooseObject(parameters),
     BoundaryRestrictableRequired(parameters),
     SetupInterface(parameters),
     FunctionInterface(parameters),
@@ -72,4 +72,28 @@ bool
 BoundaryCondition::shouldApply()
 {
   return true;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+BoundaryCondition::BoundaryCondition(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    BoundaryRestrictableRequired(parameters),
+    SetupInterface(parameters),
+    FunctionInterface(parameters),
+    UserObjectInterface(parameters),
+    TransientInterface(parameters, "bcs"),
+    PostprocessorInterface(parameters),
+    GeometricSearchInterface(parameters),
+    Restartable(parameters, "BCs"),
+    ZeroInterface(parameters),
+    MeshChangedInterface(parameters),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _mesh(_subproblem.mesh())
+{
 }

@@ -33,7 +33,8 @@ class ParsedAux :
   public FunctionParserUtils
 {
 public:
-  ParsedAux(const std::string & name, InputParameters parameters);
+  ParsedAux(const InputParameters & parameters);
+  ParsedAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ParsedAux();
 
 protected:

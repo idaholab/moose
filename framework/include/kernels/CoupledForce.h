@@ -29,7 +29,8 @@ InputParameters validParams<CoupledForce>();
 class CoupledForce : public Kernel
 {
 public:
-  CoupledForce(const std::string & name, InputParameters parameters);
+  CoupledForce(const InputParameters & parameters);
+  CoupledForce(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

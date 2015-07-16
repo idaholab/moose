@@ -29,8 +29,8 @@ InputParameters validParams<NearestPointLayeredAverage>()
   return params;
 }
 
-NearestPointLayeredAverage::NearestPointLayeredAverage(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariableUserObject(name, parameters)
+NearestPointLayeredAverage::NearestPointLayeredAverage(const InputParameters & parameters) :
+    ElementIntegralVariableUserObject(parameters)
 {
   const std::vector<Real> & points_vec = getParam<std::vector<Real> >("points");
 
@@ -50,7 +50,7 @@ NearestPointLayeredAverage::NearestPointLayeredAverage(const std::string & name,
 
   // Build each of the LayeredAverage objects:
   for (unsigned int i=0; i<_points.size(); i++)
-    _layered_averages.push_back(new LayeredAverage(name, parameters));
+    _layered_averages.push_back(new LayeredAverage(parameters));
 }
 
 NearestPointLayeredAverage::~NearestPointLayeredAverage()
@@ -108,4 +108,30 @@ NearestPointLayeredAverage::nearestLayeredAverage(const Point & p) const
   }
 
   return _layered_averages[closest];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NearestPointLayeredAverage::NearestPointLayeredAverage(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralVariableUserObject(deprecated_name, parameters)
+{
+  const std::vector<Real> & points_vec = getParam<std::vector<Real> >("points");
+
+  {
+    unsigned int num_vec_entries = points_vec.size();
+
+    mooseAssert(num_vec_entries % LIBMESH_DIM == 0, "Wrong number of entries in 'points'");
+
+    _points.reserve(num_vec_entries / LIBMESH_DIM);
+
+    // Read the points out of the vector
+    for (unsigned int i=0; i<num_vec_entries; i+=3)
+      _points.push_back(Point(points_vec[i], points_vec[i+1], points_vec[i+2]));
+  }
+
+  _layered_averages.reserve(_points.size());
+
+  // Build each of the LayeredAverage objects:
+  for (unsigned int i=0; i<_points.size(); i++)
+    _layered_averages.push_back(new LayeredAverage(parameters));
 }

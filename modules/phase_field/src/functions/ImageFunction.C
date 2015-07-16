@@ -98,7 +98,6 @@ ImageFunction::initialSetup()
 #endif
   }
 
-
   // An array of filenames, to be filled in
   std::vector<std::string> filenames;
 
@@ -108,7 +107,11 @@ ImageFunction::initialSetup()
   // Try to parse our own file range parameters.  If that fails, then
   // see if the associated Mesh is an ImageMesh and use its.  If that
   // also fails, then we have to throw an error...
-  int status = parseFileRange(_pars);
+  //
+  // The parseFileRange method sets parameters, thus a writable reference to the InputParameters
+  // object must be obtained from the warehouse. Generally, this should be avoided, but
+  // this is a special case.
+  int status = parseFileRange(_app.getInputParameterWarehouse().getInputParameters(_name));
 
   if (status != 0)
   {
@@ -119,7 +122,7 @@ ImageFunction::initialSetup()
 
     // Get the ImageMesh's parameters.  This should work, otherwise
     // errors would already have been thrown...
-    InputParameters & im_params = image_mesh->parameters();
+    const InputParameters & im_params = image_mesh->parameters();
     filenames = im_params.get<std::vector<std::string> >("filenames");
     file_suffix = im_params.get<std::string>("file_suffix");
   }

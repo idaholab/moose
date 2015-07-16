@@ -877,13 +877,13 @@ FeatureFloodCount::formatBytesUsed() const
   oss.precision(1);
   oss << std::fixed;
   if (_bytes_used >= 1<<30)
-    oss << _name << " Memory Used: " << _bytes_used / Real(1<<30) << " GB\n";
+    oss << name() << " Memory Used: " << _bytes_used / Real(1<<30) << " GB\n";
   else if (_bytes_used >= 1<<20)
-    oss << _name << " Memory Used: " << _bytes_used / Real(1<<20) << " MB\n";
+    oss << name() << " Memory Used: " << _bytes_used / Real(1<<20) << " MB\n";
   else if (_bytes_used >= 1<<10)
-    oss << _name << " Memory Used: " << _bytes_used / Real(1<<10) << " KB\n";
+    oss << name() << " Memory Used: " << _bytes_used / Real(1<<10) << " KB\n";
   else
-    oss << _name << " Memory Used: " << _bytes_used << " Bytes\n";
+    oss << name() << " Memory Used: " << _bytes_used << " Bytes\n";
   _console << oss.str() << std::endl;
 }
 

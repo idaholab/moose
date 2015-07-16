@@ -29,10 +29,6 @@ DotCouplingKernel::DotCouplingKernel(const std::string & name, InputParameters p
 {
 }
 
-DotCouplingKernel::~DotCouplingKernel()
-{
-}
-
 Real
 DotCouplingKernel::computeQpResidual()
 {

@@ -30,8 +30,8 @@ InputParameters validParams<PerformanceData>()
   return params;
 }
 
-PerformanceData::PerformanceData(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+PerformanceData::PerformanceData(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _column(getParam<MooseEnum>("column")),
     _event(getParam<std::string>("event"))
 {}
@@ -62,3 +62,11 @@ PerformanceData::getValue()
 
   mooseError("Invalid column!");
 }
+
+
+// DEPRECATED CONSTRUCTOR
+PerformanceData::PerformanceData(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _column(getParam<MooseEnum>("column")),
+    _event(getParam<std::string>("event"))
+{}

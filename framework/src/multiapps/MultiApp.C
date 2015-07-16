@@ -88,8 +88,8 @@ InputParameters validParams<MultiApp>()
   return params;
 }
 
-MultiApp::MultiApp(const std::string & name, InputParameters parameters):
-    MooseObject(name, parameters),
+MultiApp::MultiApp(const InputParameters & parameters):
+    MooseObject(parameters),
     SetupInterface(parameters),
     Restartable(parameters, "MultiApps"),
     _fe_problem(getParam<FEProblem *>("_fe_problem")),
@@ -130,7 +130,7 @@ MultiApp::initialSetup()
   fillPositions();
 
   if (_move_apps.size() != _move_positions.size())
-    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp "<<_name);
+    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp " << name());
 
   _total_num_apps = _positions.size();
   mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
@@ -190,7 +190,7 @@ MultiApp::fillPositions()
 
   }
   else
-    mooseError("Must supply either 'positions' or 'positions_file' for MultiApp "<<_name);
+    mooseError("Must supply either 'positions' or 'positions_file' for MultiApp " << name());
 }
 
 
@@ -218,7 +218,7 @@ Executioner *
 MultiApp::getExecutioner(unsigned int app)
 {
   if (!_has_an_app)
-    mooseError("No app for " << _name << " on processor " << _orig_rank);
+    mooseError("No app for " << name() << " on processor " << _orig_rank);
 
   return _apps[globalAppToLocal(app)]->getExecutioner();
 }
@@ -227,7 +227,7 @@ MeshTools::BoundingBox
 MultiApp::getBoundingBox(unsigned int app)
 {
   if (!_has_an_app)
-    mooseError("No app for " << _name << " on processor " << _orig_rank);
+    mooseError("No app for " << name() << " on processor " << _orig_rank);
 
   FEProblem * problem = appProblem(app);
 
@@ -276,7 +276,7 @@ FEProblem *
 MultiApp::appProblem(unsigned int app)
 {
   if (!_has_an_app)
-    mooseError("No app for " << _name << " on processor " << _orig_rank);
+    mooseError("No app for " << name() << " on processor " << _orig_rank);
 
   unsigned int local_app = globalAppToLocal(app);
 
@@ -290,7 +290,7 @@ const UserObject &
 MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 {
   if (!_has_an_app)
-    mooseError("No app for " << _name << " on processor " << _orig_rank);
+    mooseError("No app for " << MultiApp::name() << " on processor " << _orig_rank);
 
   return appProblem(app)->getUserObjectBase(name);
 }
@@ -299,7 +299,7 @@ Real
 MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
 {
   if (!_has_an_app)
-    mooseError("No app for " << _name << " on processor " << _orig_rank);
+    mooseError("No app for " << MultiApp::name() << " on processor " << _orig_rank);
 
   return appProblem(app)->getPostprocessorValue(name);
 }
@@ -373,7 +373,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // Define the app name
   std::ostringstream multiapp_name;
   std::string full_name;
-  multiapp_name << _name <<  std::setw(std::ceil(std::log10(_total_num_apps)))
+  multiapp_name << name() <<  std::setw(std::ceil(std::log10(_total_num_apps)))
            << std::setprecision(0) << std::setfill('0') << std::right << _first_local_app + i;
 
   // Only add parent name if it the parent is not the main app
@@ -519,4 +519,27 @@ MultiApp::globalAppToLocal(unsigned int global_app)
 
   _console << _first_local_app << " " << global_app << '\n';
   mooseError("Invalid global_app!");
+}
+
+// DEPRECATED CONSTRUCTOR
+MultiApp::MultiApp(const std::string & deprecated_name, InputParameters parameters):
+    MooseObject(deprecated_name, parameters),
+    SetupInterface(parameters),
+    Restartable(parameters, "MultiApps"),
+    _fe_problem(getParam<FEProblem *>("_fe_problem")),
+    _app_type(getParam<MooseEnum>("app_type")),
+    _input_files(getParam<std::vector<std::string> >("input_files")),
+    _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
+    _inflation(getParam<Real>("bounding_box_inflation")),
+    _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
+    _output_in_position(getParam<bool>("output_in_position")),
+    _reset_time(getParam<Real>("reset_time")),
+    _reset_apps(getParam<std::vector<unsigned int> >("reset_apps")),
+    _reset_happened(false),
+    _move_time(getParam<Real>("move_time")),
+    _move_apps(getParam<std::vector<unsigned int> >("move_apps")),
+    _move_positions(getParam<std::vector<Point> >("move_positions")),
+    _move_happened(false),
+    _has_an_app(true)
+{
 }

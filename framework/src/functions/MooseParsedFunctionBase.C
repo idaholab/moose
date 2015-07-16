@@ -38,7 +38,7 @@ InputParameters validParams<MooseParsedFunctionBase>()
   return params;
 }
 
-MooseParsedFunctionBase::MooseParsedFunctionBase(const std::string & /*name*/, InputParameters parameters) :
+MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & parameters) :
     _pfb_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _vars(parameters.get<std::vector<std::string> >("vars")),
     _vals(parameters.get<std::vector<std::string> >("vals"))

@@ -27,7 +27,8 @@ InputParameters validParams<VectorMagnitudeAux>();
 class VectorMagnitudeAux : public AuxKernel
 {
 public:
-  VectorMagnitudeAux(const std::string & name, InputParameters parameters);
+  VectorMagnitudeAux(const InputParameters & parameters);
+  VectorMagnitudeAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~VectorMagnitudeAux();
 
 protected:

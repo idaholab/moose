@@ -37,4 +37,3 @@ Convection::computeQpJacobian()
 {
   return _test[_i][_qp]*(_velocity*_grad_phi[_j][_qp]);
 }
-

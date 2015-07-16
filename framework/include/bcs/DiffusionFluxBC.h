@@ -28,7 +28,8 @@ InputParameters validParams<DiffusionFluxBC>();
 class DiffusionFluxBC : public FluxBC
 {
 public:
-  DiffusionFluxBC(const std::string & name, InputParameters parameters);
+  DiffusionFluxBC(const InputParameters & parameters);
+  DiffusionFluxBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~DiffusionFluxBC();
 
 protected:

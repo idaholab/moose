@@ -22,16 +22,13 @@ InputParameters validParams<Diffusion>()
   return p;
 }
 
-
-Diffusion::Diffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+Diffusion::Diffusion(const InputParameters & parameters) :
+    Kernel(parameters)
 {
-
 }
 
 Diffusion::~Diffusion()
 {
-
 }
 
 Real
@@ -44,4 +41,11 @@ Real
 Diffusion::computeQpJacobian()
 {
   return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Diffusion::Diffusion(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters)
+{
 }

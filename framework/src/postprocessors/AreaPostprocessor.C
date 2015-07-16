@@ -21,8 +21,8 @@ InputParameters params = validParams<SideIntegralPostprocessor>();
   return params;
 }
 
-AreaPostprocessor::AreaPostprocessor(const std::string & name, InputParameters parameters) :
-    SideIntegralPostprocessor(name, parameters)
+AreaPostprocessor::AreaPostprocessor(const InputParameters & parameters) :
+    SideIntegralPostprocessor(parameters)
 {}
 
 void
@@ -37,3 +37,9 @@ AreaPostprocessor::computeQpIntegral()
 {
   return 1.0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+AreaPostprocessor::AreaPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    SideIntegralPostprocessor(deprecated_name, parameters)
+{}

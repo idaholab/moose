@@ -73,7 +73,8 @@ public:
    * @param name The name of the boundary condition object
    * @param parameters The InputParameters for the object
    */
-  BoundaryCondition(const std::string & name, InputParameters parameters);
+  BoundaryCondition(const InputParameters & parameters);
+  BoundaryCondition(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Gets the variable this BC is active on

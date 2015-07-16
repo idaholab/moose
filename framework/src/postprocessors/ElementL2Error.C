@@ -23,8 +23,8 @@ InputParameters validParams<ElementL2Error>()
   return params;
 }
 
-ElementL2Error::ElementL2Error(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(name, parameters),
+ElementL2Error::ElementL2Error(const InputParameters & parameters) :
+    ElementIntegralVariablePostprocessor(parameters),
     _func(getFunction("function"))
 {
 }
@@ -40,4 +40,12 @@ ElementL2Error::computeQpIntegral()
 {
   Real diff = _u[_qp]-_func.value(_t, _q_point[_qp]);
   return diff*diff;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementL2Error::ElementL2Error(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralVariablePostprocessor(deprecated_name, parameters),
+    _func(getFunction("function"))
+{
 }

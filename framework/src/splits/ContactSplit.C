@@ -28,8 +28,8 @@ InputParameters validParams<ContactSplit>()
   return params;
 }
 
-ContactSplit::ContactSplit (const std::string & name, InputParameters params) :
-    Split(name, params),
+ContactSplit::ContactSplit (const InputParameters & params) :
+    Split(params),
     _contact_master(getParam<std::vector<std::string> >("contact_master")),
     _contact_slave(getParam<std::vector<std::string> >("contact_slave")),
     _contact_displaced(getParam<std::vector<bool> >("contact_displaced")),

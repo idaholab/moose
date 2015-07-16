@@ -30,7 +30,8 @@ InputParameters validParams<PostprocessorDirichletBC>();
 class PostprocessorDirichletBC : public NodalBC
 {
 public:
-  PostprocessorDirichletBC(const std::string & name, InputParameters parameters);
+  PostprocessorDirichletBC(const InputParameters & parameters);
+  PostprocessorDirichletBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

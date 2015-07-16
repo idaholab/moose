@@ -26,7 +26,8 @@ InputParameters validParams<AddMaterialAction>();
 class AddMaterialAction : public MooseObjectAction
 {
 public:
-  AddMaterialAction(const std::string & name, InputParameters params);
+  AddMaterialAction(InputParameters params);
+  AddMaterialAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

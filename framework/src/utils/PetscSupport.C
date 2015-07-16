@@ -30,6 +30,7 @@
 #include "Console.h"
 #include "MultiMooseEnum.h"
 #include "Conversion.h"
+#include "Executioner.h"
 
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
@@ -693,7 +694,7 @@ getPetscValidParams()
 
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<MultiMooseEnum>("petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
-  params.addParam<MultiMooseEnum>("petsc_options_iname", getCommonPetscOptionsKeys(), "Names of PETSc name/value pairs");
+  params.addParam<MultiMooseEnum>("petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
 
@@ -712,7 +713,7 @@ getCommonPetscFlags()
 }
 
 MultiMooseEnum
-getCommonPetscOptionsKeys()
+getCommonPetscKeys()
 {
   return MultiMooseEnum(
     "-ksp_atol -ksp_gmres_restart -ksp_grmres_restart -ksp_max_it -ksp_pc_side -ksp_rtol "

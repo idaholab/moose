@@ -37,7 +37,7 @@ InputParameters validParams<TransientMultiApp>()
 
   params.addParam<Real>("steady_state_tol", 1e-8, "The relative difference between the new solution and the old solution that will be considered to be at steady state");
 
-  params.addParam<bool>("output_sub_cycles", false, "If true when sub_cycling every sub-cycle will be output.");
+  params.addParam<bool>("output_sub_cycles", false, "If true then every sub-cycle will be output.");
   params.addParam<bool>("print_sub_cycles", true, "Toggle the display of sub-cycles on the screen.");
 
   params.addParam<unsigned int>("max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
@@ -52,8 +52,8 @@ InputParameters validParams<TransientMultiApp>()
 }
 
 
-TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters parameters):
-    MultiApp(name, parameters),
+TransientMultiApp::TransientMultiApp(const InputParameters & parameters):
+    MultiApp(parameters),
     _sub_cycling(getParam<bool>("sub_cycling")),
     _interpolate_transfers(getParam<bool>("interpolate_transfers")),
     _detect_steady_state(getParam<bool>("detect_steady_state")),
@@ -70,7 +70,7 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
 {
   // Transfer interpolation only makes sense for sub-cycling solves
   if (_interpolate_transfers && !_sub_cycling)
-    mooseError("MultiApp " << _name << " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
+    mooseError("MultiApp " << name() << " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
 }
 
 TransientMultiApp::~TransientMultiApp()
@@ -139,7 +139,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
   _auto_advance = auto_advance;
 
-  _console << "Solving MultiApp " << _name << std::endl;
+  _console << "Solving MultiApp " << name() << std::endl;
 
 // "target_time" must always be in global time
   target_time += _app.getGlobalTimeOffset();
@@ -256,11 +256,11 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
         if (!converged)
         {
-          mooseWarning("While sub_cycling "<<_name<<_first_local_app+i<<" failed to converge!"<<std::endl);
+          mooseWarning("While sub_cycling " << name() << _first_local_app+i << " failed to converge!" << std::endl);
           _failures++;
 
           if (_failures > _max_failures)
-            mooseError("While sub_cycling "<<_name<<_first_local_app+i<<" REALLY failed!"<<std::endl);
+            mooseError("While sub_cycling " << name() << _first_local_app+i << " REALLY failed!" << std::endl);
         }
 
         Real solution_change_norm = ex->getSolutionChangeNorm();
@@ -312,7 +312,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
         if (!ex->lastSolveConverged())
         {
-          mooseWarning(_name << _first_local_app+i << " failed to converge!" << std::endl);
+          mooseWarning(name() << _first_local_app+i << " failed to converge!" << std::endl);
 
           if (_catch_up)
           {
@@ -326,7 +326,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
             while (!caught_up && catch_up_step < _max_catch_up_steps)
             {
-              Moose::err << "Solving " << _name << "catch up step " << catch_up_step << std::endl;
+              Moose::err << "Solving " << name() << "catch up step " << catch_up_step << std::endl;
               ex->incrementStepOrReject();
 
               ex->computeDT();
@@ -349,7 +349,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
 
             if (!caught_up)
-              mooseError(_name << " Failed to catch up!\n");
+              mooseError(name() << " Failed to catch up!\n");
 
           }
         }
@@ -368,7 +368,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
   _transferred_vars.clear();
 
-  _console << "Finished Solving MultiApp " << _name << std::endl;
+  _console << "Finished Solving MultiApp " << name() << std::endl;
 }
 
 void
@@ -453,7 +453,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we 
   MooseApp * app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
   if (!ex)
-    mooseError("MultiApp " << _name << " is not using a Transient Executioner!");
+    mooseError("MultiApp " << name() << " is not using a Transient Executioner!");
 
   // Get the FEProblem for the current MultiApp
   FEProblem * problem = appProblem(_first_local_app + i);
@@ -479,4 +479,27 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we 
   ex->preExecute();
   problem->advanceState();
   _transient_executioners[i] = ex;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TransientMultiApp::TransientMultiApp(const std::string & deprecated_name, InputParameters parameters):
+    MultiApp(deprecated_name, parameters),
+    _sub_cycling(getParam<bool>("sub_cycling")),
+    _interpolate_transfers(getParam<bool>("interpolate_transfers")),
+    _detect_steady_state(getParam<bool>("detect_steady_state")),
+    _steady_state_tol(getParam<Real>("steady_state_tol")),
+    _output_sub_cycles(getParam<bool>("output_sub_cycles")),
+    _max_failures(getParam<unsigned int>("max_failures")),
+    _tolerate_failure(getParam<bool>("tolerate_failure")),
+    _failures(0),
+    _catch_up(getParam<bool>("catch_up")),
+    _max_catch_up_steps(getParam<Real>("max_catch_up_steps")),
+    _first(declareRestartableData<bool>("first", true)),
+    _auto_advance(false),
+    _print_sub_cycles(getParam<bool>("print_sub_cycles"))
+{
+  // Transfer interpolation only makes sense for sub-cycling solves
+  if (_interpolate_transfers && !_sub_cycling)
+    mooseError("MultiApp " << name() << " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
 }

@@ -91,7 +91,7 @@ ParsedFunctionTest::advancedConstructor()
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
   params.set<std::vector<std::string> >("vals") = std::vector<std::string>(1, "-1"); // Dummy value, will be overwritten in test below
-  params.set<std::string>("name") = "test";
+  params.set<std::string>("name") = "test1";
 
 
   MooseParsedFunction f("test", params);
@@ -112,7 +112,7 @@ ParsedFunctionTest::advancedConstructor()
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
   params2.set<std::vector<std::string> >("vals") = std::vector<std::string>(3, "-1"); // Dummy values, will be overwritten in test below
-  params2.set<std::string>("name") = "test";
+  params2.set<std::string>("name") = "test2";
 
   MooseParsedFunction f2("test", params2);
   f2.initialSetup();
@@ -131,7 +131,7 @@ ParsedFunctionTest::advancedConstructor()
   params3.set<std::string>("value") = "q*x";
   params3.set<std::vector<std::string> >("vars") = one_var;
   params3.set<std::vector<std::string> >("vals") = one_val;
-  params3.set<std::string>("name") = "test";
+  params3.set<std::string>("name") = "test3";
 
   MooseParsedFunction f3("test", params3);
   f3.initialSetup();
@@ -149,7 +149,7 @@ ParsedFunctionTest::advancedConstructor()
   params4.set<std::string>("value") = "q*x + y/r + w";
   params4.set<std::vector<std::string> >("vars") = three_vars;
   params4.set<std::vector<std::string> >("vals") = three_vals;
-  params4.set<std::string>("name") = "test";
+  params4.set<std::string>("name") = "test4";
 
   MooseParsedFunction f4("test", params4);
   f4.initialSetup();
@@ -177,7 +177,7 @@ ParsedFunctionTest::testVariables()
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
   params.set<std::vector<std::string> >("vals") = std::vector<std::string>(1, "-1"); // Dummy value, will be overwritten in test below
-  params.set<std::string>("name") = "test";
+  params.set<std::string>("name") = "test1";
 
   MooseParsedFunction f("test", params);
   f.initialSetup();
@@ -201,7 +201,7 @@ ParsedFunctionTest::testVariables()
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
   params2.set<std::vector<std::string> >("vals") = std::vector<std::string>(3, "-1"); // Dummy values, will be overwritten in test below
-  params2.set<std::string>("name") = "test";
+  params2.set<std::string>("name") = "test2";
 
   MooseParsedFunction f2("test", params2);
   f2.initialSetup();
@@ -228,7 +228,7 @@ ParsedFunctionTest::testConstants()
   //this functions tests that pi and e get correctly substituted
   //it also tests built in functions of the function parser
   InputParameters params = _factory->getValidParams("ParsedFunction");
-  params.set<std::string>("name") = "test";
+  params.set<std::string>("name") = "test1";
   params.set<FEProblem *>("_fe_problem") = _fe_problem;
   params.set<SubProblem *>("_subproblem") = _fe_problem;
   params.set<std::string>("value") = "log(e) + x";
@@ -238,7 +238,7 @@ ParsedFunctionTest::testConstants()
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 2, f.value(0,1), 0.0000001 );
 
   InputParameters params2 = _factory->getValidParams("ParsedFunction");
-  params2.set<std::string>("name") = "test";
+  params2.set<std::string>("name") = "test2";
   params2.set<FEProblem *>("_fe_problem") = _fe_problem;
   params2.set<SubProblem *>("_subproblem") = _fe_problem;
   params2.set<std::string>("value") = "sin(pi*x)";

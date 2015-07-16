@@ -32,10 +32,10 @@ InputParameters validParams<SolidModel>()
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
   params.addParam<Real>("lambda", "Lame's first parameter for the material.");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
-  params.addParam<FunctionName>("poissons_ratio_function", "", "Poisson's ratio as a function of temperature.");
+  params.addParam<FunctionName>("poissons_ratio_function", "Poisson's ratio as a function of temperature.");
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
-  params.addParam<FunctionName>("youngs_modulus_function", "", "Young's modulus as a function of temperature.");
+  params.addParam<FunctionName>("youngs_modulus_function", "Young's modulus as a function of temperature.");
   params.addParam<Real>("thermal_expansion", "The thermal expansion coefficient.");
   params.addParam<FunctionName>("thermal_expansion_function", "Thermal expansion coefficient as a function of temperature.");
   params.addCoupledVar("temp", "Coupled Temperature");
@@ -76,21 +76,13 @@ namespace
     std::transform( n.begin(), n.end(), n.begin(), ::tolower);
     SolidModel::CRACKING_RELEASE cm(SolidModel::CR_UNKNOWN);
     if (n == "abrupt")
-    {
       cm = SolidModel::CR_ABRUPT;
-    }
     else if (n == "exponential")
-    {
       cm = SolidModel::CR_EXPONENTIAL;
-    }
     else if (n == "power")
-    {
       cm = SolidModel::CR_POWER;
-    }
     if (cm == SolidModel::CR_UNKNOWN)
-    {
       mooseError("Unknown cracking model");
-    }
     return cm;
   }
 }
@@ -109,8 +101,8 @@ SolidModel::SolidModel( const std::string & name,
   _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
   _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
   _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
-  _youngs_modulus_function( getParam<FunctionName>("youngs_modulus_function") != "" ? &getFunction("youngs_modulus_function") : NULL),
-  _poissons_ratio_function( getParam<FunctionName>("poissons_ratio_function") != "" ? &getFunction("poissons_ratio_function") : NULL),
+  _youngs_modulus_function( isParamValid("youngs_modulus_function") ? &getFunction("youngs_modulus_function") : NULL),
+  _poissons_ratio_function( isParamValid("poissons_ratio_function") ? &getFunction("poissons_ratio_function") : NULL),
   _cracking_release( getCrackingModel( getParam<std::string>("cracking_release"))),
   _cracking_stress( parameters.isParamValid("cracking_stress") ?
                     (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
@@ -186,7 +178,6 @@ SolidModel::SolidModel( const std::string & name,
     getMaterialProperty<Real>( *i );
   }
 
-
   _cracking_alpha = -_youngs_modulus;
 
   if (_cracking_stress > 0)
@@ -209,15 +200,12 @@ SolidModel::SolidModel( const std::string & name,
     {
       const std::vector<unsigned int> & planes = getParam<std::vector<unsigned> >("active_crack_planes");
       for (unsigned i(0); i < 3; ++i)
-      {
         _active_crack_planes[i] = 0;
-      }
+
       for (unsigned i(0); i < planes.size(); ++i)
       {
         if (planes[i] > 2)
-        {
           mooseError("Active planes must be 0, 1, or 2");
-        }
         _active_crack_planes[planes[i]] = 1;
       }
     }
@@ -271,9 +259,8 @@ SolidModel::SolidModel( const std::string & name,
     mooseError("Must specify thermal_expansion_reference_temperature if thermal_expansion_function_type = mean");
 
   if (parameters.isParamValid("thermal_expansion") && parameters.isParamValid("thermal_expansion_function"))
-  {
     mooseError("Cannot specify both thermal_expansion and thermal_expansion_function");
-  }
+
   if (_compute_JIntegral)
   {
     _SED = &declareProperty<Real>("strain_energy_density");
@@ -303,7 +290,7 @@ SolidModel::checkElasticConstants()
   if ( num_elastic_constants != 2 )
   {
     std::string err("Exactly two elastic constants must be defined for material '");
-    err += _name;
+    err += name();
     err += "'.";
     mooseError(err);
   }
@@ -311,28 +298,28 @@ SolidModel::checkElasticConstants()
   if ( _bulk_modulus_set && _bulk_modulus <= 0 )
   {
     std::string err("Bulk modulus must be positive in material '");
-    err += _name;
+    err += name();
     err += "'.";
     mooseError(err);
   }
   if ( _poissons_ratio_set && (_poissons_ratio <= -1.0 || _poissons_ratio >= 0.5) )
   {
     std::string err("Poissons ratio must be greater than -1 and less than 0.5 in material '");
-    err += _name;
+    err += name();
     err += "'.";
     mooseError(err);
   }
   if ( _shear_modulus_set &&  _shear_modulus < 0 )
   {
     std::string err("Shear modulus must not be negative in material '");
-    err += _name;
+    err += name();
     err += "'.";
     mooseError(err);
   }
   if ( _youngs_modulus_set &&  _youngs_modulus <= 0 )
   {
     std::string err("Youngs modulus must be positive in material '");
-    err += _name;
+    err += name();
     err += "'.";
     mooseError(err);
   }
@@ -860,18 +847,21 @@ SolidModel::initialSetup()
 
   checkElasticConstants();
 
-
   createElasticityTensor();
 
   // Load in the volumetric models and constitutive models
-
   for (unsigned i(0); i < _block_id.size(); ++i)
   {
+
     const std::vector<Material*> * mats_p;
+    std::string suffix;
     if (_bnd)
-      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getFaceMaterials(_block_id[i]);
+    {
+      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getFaceMaterials( _block_id[i] );
+      suffix = "_face";
+    }
     else
-      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getMaterials(_block_id[i]);
+      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getMaterials( _block_id[i] );
 
     const std::vector<Material*> & mats = *mats_p;
     for (unsigned int j=0; j < mats.size(); ++j)
@@ -892,24 +882,26 @@ SolidModel::initialSetup()
         _volumetric_models[_block_id[i]].push_back( vm );
       }
     }
+
     if (isParamValid("constitutive_model") && !_constitutive_active)
     {
-      const std::string & constitutive_model = getParam<std::string>("constitutive_model");
+      // User-defined name of the constitutive model (a Material object)
+      std::string constitutive_model = getParam<std::string>("constitutive_model") + suffix;
 
       for (unsigned int j=0; j < mats.size(); ++j)
       {
         ConstitutiveModel * cm = dynamic_cast<ConstitutiveModel*>(mats[j]);
-        if (cm && cm->name() == constitutive_model)
+
+        if (cm && cm->name() ==constitutive_model)
         {
           _constitutive_model[_block_id[i]] = cm;
           _constitutive_active = true;
           break;
         }
       }
+
       if (!_constitutive_active)
-      {
-        mooseError("Unable to find constitutive model " + getParam<std::string>("constitutive_model"));
-      }
+        mooseError("Unable to find constitutive model " + constitutive_model);
     }
   }
 
@@ -920,7 +912,6 @@ SolidModel::initialSetup()
     Real dummy_temp = 0;
     _alpha_function->timeDerivative(dummy_temp,dummy_point);
   }
-
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1351,7 +1342,7 @@ SolidModel::getNumKnownCrackDirs() const
 }
 
 SolidMechanics::Element *
-SolidModel::createElement( const std::string & name,
+SolidModel::createElement( const std::string & mat_name,
                            InputParameters & parameters )
 {
   SolidMechanics::Element * element(NULL);
@@ -1361,56 +1352,41 @@ SolidModel::createElement( const std::string & name,
                   formulation.begin(), ::tolower );
   if ( formulation == "nonlinear3d" )
   {
-    if (!isCoupled("disp_x") ||
-        !isCoupled("disp_y") ||
-        !isCoupled("disp_z"))
-    {
+    if (!isCoupled("disp_x") || !isCoupled("disp_y") || !isCoupled("disp_z"))
       mooseError("Nonlinear3D requires all three displacements");
-    }
+
     if ( isCoupled("disp_r") )
-    {
       mooseError("Linear must not define disp_r");
-    }
+
     if ( _coord_type == Moose::COORD_RZ )
-    {
       mooseError("Nonlinear3D formulation requested for coord_type = RZ problem");
-    }
-    element = new SolidMechanics::Nonlinear3D(*this, name, parameters);
+
+    element = new SolidMechanics::Nonlinear3D(*this, mat_name, parameters);
   }
   else if ( formulation == "nonlinearrz" )
   {
-    if ( !isCoupled("disp_r") ||
-         !isCoupled("disp_z") )
-    {
+    if ( !isCoupled("disp_r") || !isCoupled("disp_z") )
       mooseError("NonlinearRZ must define disp_r and disp_z");
-    }
-    element = new SolidMechanics::NonlinearRZ(*this, name, parameters);
+
+    element = new SolidMechanics::NonlinearRZ(*this, mat_name, parameters);
   }
   else if ( formulation == "axisymmetricrz" )
   {
-    if ( !isCoupled("disp_r") ||
-         !isCoupled("disp_z") )
-    {
+    if ( !isCoupled("disp_r") || !isCoupled("disp_z") )
       mooseError("AxisymmetricRZ must define disp_r and disp_z");
-    }
-    element = new SolidMechanics::AxisymmetricRZ(*this, name, parameters);
+    element = new SolidMechanics::AxisymmetricRZ(*this, mat_name, parameters);
   }
   else if ( formulation == "sphericalr" )
   {
     if ( !isCoupled("disp_r") )
-    {
       mooseError("SphericalR must define disp_r");
-    }
-    element = new SolidMechanics::SphericalR(*this, name, parameters);
+    element = new SolidMechanics::SphericalR(*this, mat_name, parameters);
   }
   else if ( formulation == "planestrain" )
   {
-    if ( !isCoupled("disp_x") ||
-         !isCoupled("disp_y") )
-    {
+    if ( !isCoupled("disp_x") || !isCoupled("disp_y") )
       mooseError("PlaneStrain must define disp_x and disp_y");
-    }
-    element = new SolidMechanics::PlaneStrain(*this, name, parameters);
+    element = new SolidMechanics::PlaneStrain(*this, mat_name, parameters);
   }
   else if ( formulation == "nonlinearplanestrain" )
   {
@@ -1419,97 +1395,73 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("NonlinearPlaneStrain must define disp_r and disp_z");
     }
-    element = new SolidMechanics::NonlinearPlaneStrain(*this, name, parameters);
+    element = new SolidMechanics::NonlinearPlaneStrain(*this, mat_name, parameters);
   }
   else if ( formulation == "linear" )
   {
     if ( isCoupled("disp_r") )
-    {
       mooseError("Linear must not define disp_r");
-    }
     if ( _coord_type == Moose::COORD_RZ )
-    {
       mooseError("Linear formulation requested for coord_type = RZ problem");
-    }
-    element = new SolidMechanics::Linear(*this, name, parameters);
+    element = new SolidMechanics::Linear(*this, mat_name, parameters);
   }
   else if ( formulation != "" )
-  {
     mooseError("Unknown formulation: " + formulation);
-  }
 
   if ( !element && _coord_type == Moose::COORD_RZ )
   {
-    if ( !isCoupled("disp_r") ||
-         !isCoupled("disp_z") )
+    if ( !isCoupled("disp_r") || !isCoupled("disp_z") )
     {
-      std::string err(_name);
+      std::string err(name());
       err += ": RZ coord sys requires disp_r and disp_z for AxisymmetricRZ formulation";
       mooseError(err);
     }
-    element = new SolidMechanics::AxisymmetricRZ(*this, name, parameters);
+    element = new SolidMechanics::AxisymmetricRZ(*this, mat_name, parameters);
   }
   else if ( !element && _coord_type == Moose::COORD_RSPHERICAL )
   {
     if ( !isCoupled("disp_r") )
     {
-      std::string err(_name);
+      std::string err(name());
       err += ": RSPHERICAL coord sys requires disp_r for SphericalR formulation";
       mooseError(err);
     }
-    element = new SolidMechanics::SphericalR(*this, name, parameters);
+    element = new SolidMechanics::SphericalR(*this, mat_name, parameters);
   }
 
   if (!element)
   {
-    if (isCoupled("disp_x") &&
-        isCoupled("disp_y") &&
-        isCoupled("disp_z"))
+    if (isCoupled("disp_x") && isCoupled("disp_y") && isCoupled("disp_z"))
     {
       if (isCoupled("disp_r"))
-      {
-        mooseError("Error with displacement specification in material " + name);
-      }
-      element = new SolidMechanics::Nonlinear3D(*this, name, parameters);
+        mooseError("Error with displacement specification in material " + mat_name);
+      element = new SolidMechanics::Nonlinear3D(*this, mat_name, parameters);
     }
-    else if (isCoupled("disp_x") &&
-             isCoupled("disp_y"))
+    else if (isCoupled("disp_x") && isCoupled("disp_y"))
     {
       if (isCoupled("disp_r"))
-      {
-        mooseError("Error with displacement specification in material " + name);
-      }
-      element = new SolidMechanics::PlaneStrain(*this, name, parameters);
+        mooseError("Error with displacement specification in material " + mat_name);
+      element = new SolidMechanics::PlaneStrain(*this, mat_name, parameters);
     }
-    else if (isCoupled("disp_r") &&
-             isCoupled("disp_z"))
+    else if (isCoupled("disp_r") && isCoupled("disp_z"))
     {
       if ( _coord_type != Moose::COORD_RZ )
-      {
         mooseError("RZ coord system not specified, but disp_r and disp_z are");
-      }
-      element = new SolidMechanics::AxisymmetricRZ( *this, name, parameters );
+      element = new SolidMechanics::AxisymmetricRZ( *this, mat_name, parameters );
     }
     else if (isCoupled("disp_r"))
     {
       if ( _coord_type != Moose::COORD_RSPHERICAL )
-      {
         mooseError("RSPHERICAL coord system not specified, but disp_r is");
-      }
-      element = new SolidMechanics::SphericalR( *this, name, parameters );
+      element = new SolidMechanics::SphericalR( *this, mat_name, parameters );
     }
     else if (isCoupled("disp_x"))
-    {
-      element = new SolidMechanics::Linear( *this, name, parameters );
-    }
+      element = new SolidMechanics::Linear( *this, mat_name, parameters );
     else
-    {
-      mooseError("Unable to determine formulation for material " + name );
-    }
-
+      mooseError("Unable to determine formulation for material " + mat_name );
   }
 
-  mooseAssert( element, "No Element created for material " + name );
+  mooseAssert( element, "No Element created for material " + mat_name );
 
   return element;
 }
@@ -1519,11 +1471,11 @@ SolidModel::createConstitutiveModel(const std::string & cm_name, const InputPara
 {
 
   Factory & factory = _app.getFactory();
-  MooseSharedPointer<ConstitutiveModel> cm = MooseSharedNamespace::dynamic_pointer_cast<ConstitutiveModel>(factory.create(cm_name, _name+"Model", params));
+  MooseSharedPointer<ConstitutiveModel> cm = MooseSharedNamespace::dynamic_pointer_cast<ConstitutiveModel>(factory.create(cm_name, name()+"Model", params));
 
   if (!cm.get())
   {
-    mooseError("\""+_name+"\" is not a ConstitutiveModel");
+    mooseError("\""+name()+"\" is not a ConstitutiveModel");
   }
   _models_to_free.insert(cm);  // Keep track of the dynamic memory that is created internally to this object
 

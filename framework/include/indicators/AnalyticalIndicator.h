@@ -26,7 +26,8 @@ class AnalyticalIndicator :
   public ElementIntegralIndicator
 {
 public:
-  AnalyticalIndicator(const std::string & name, InputParameters parameters);
+  AnalyticalIndicator(const InputParameters & parameters);
+  AnalyticalIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AnalyticalIndicator(){};
 
 protected:

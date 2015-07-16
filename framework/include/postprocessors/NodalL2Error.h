@@ -28,7 +28,8 @@ InputParameters validParams<NodalL2Error>();
 class NodalL2Error : public NodalVariablePostprocessor
 {
 public:
-  NodalL2Error(const std::string & name, InputParameters parameters);
+  NodalL2Error(const InputParameters & parameters);
+  NodalL2Error(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalL2Error();
 
   virtual void initialize();

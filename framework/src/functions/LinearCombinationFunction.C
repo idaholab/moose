@@ -24,8 +24,8 @@ InputParameters validParams<LinearCombinationFunction>()
   return params;
 }
 
-LinearCombinationFunction::LinearCombinationFunction(const std::string & name, InputParameters parameters) :
-    Function(name, parameters),
+LinearCombinationFunction::LinearCombinationFunction(const InputParameters & parameters) :
+    Function(parameters),
     FunctionInterface(parameters),
     _w(getParam<std::vector<Real> >("w"))
 {
@@ -38,11 +38,11 @@ LinearCombinationFunction::LinearCombinationFunction(const std::string & name, I
   _f.resize(len);
   for (unsigned i = 0; i < len; ++i)
   {
-    if (_name == names[i])
+    if (name() == names[i])
       mooseError("A LinearCombinationFunction must not reference itself");
     Function * const f = &getFunctionByName(names[i]);
     if (!f)
-      mooseError("LinearCombinationFunction: The function " << names[i] << " (referenced by " << _name << ") cannot be found");
+      mooseError("LinearCombinationFunction: The function " << names[i] << " (referenced by " << name() << ") cannot be found");
     _f[i] = f;
   }
 }
@@ -58,4 +58,29 @@ LinearCombinationFunction::value(Real t, const Point & p)
   for (unsigned i = 0; i < _f.size(); ++i)
     val += _w[i]*_f[i]->value(t, p);
   return val;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+LinearCombinationFunction::LinearCombinationFunction(const std::string & deprecated_name, InputParameters parameters) :
+    Function(deprecated_name, parameters),
+    FunctionInterface(parameters),
+    _w(getParam<std::vector<Real> >("w"))
+{
+
+  const std::vector<FunctionName> & names(getParam<std::vector<FunctionName> >("functions"));
+  const unsigned len(names.size());
+  if (len != _w.size())
+    mooseError("LinearCombinationFunction: The number of functions must equal the number of w values");
+
+  _f.resize(len);
+  for (unsigned i = 0; i < len; ++i)
+  {
+    if (name() == names[i])
+      mooseError("A LinearCombinationFunction must not reference itself");
+    Function * const f = &getFunctionByName(names[i]);
+    if (!f)
+      mooseError("LinearCombinationFunction: The function " << names[i] << " (referenced by " << name() << ") cannot be found");
+    _f[i] = f;
+  }
 }

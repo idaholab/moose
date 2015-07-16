@@ -33,7 +33,12 @@ class MaterialAuxBase : public AuxKernel
 {
 public:
 
-  MaterialAuxBase(const std::string & name, InputParameters parameters);
+  /**
+   * Class constructor
+   * @param parameters The input parameters for this object
+   */
+  MaterialAuxBase(const InputParameters & parameters);
+  MaterialAuxBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaterialAuxBase(){}
 
@@ -41,8 +46,9 @@ public:
 
 protected:
 
-  /// Returns material property values at quadratute points
+  /// Returns material property values at quadrature points
   virtual Real getRealValue() = 0;
+
   /// Reference to the material property for this AuxKernel
   const MaterialProperty<T> & _prop;
 
@@ -50,13 +56,14 @@ private:
 
   /// Multiplier for the material property
   const Real _factor;
+
   /// Value to be added to the material property
   const Real _offset;
 };
 
 template<typename T>
-MaterialAuxBase<T>::MaterialAuxBase(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+MaterialAuxBase<T>::MaterialAuxBase(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _prop(getMaterialProperty<T>("property")),
     _factor(getParam<Real>("factor")),
     _offset(getParam<Real>("offset"))
@@ -68,6 +75,16 @@ Real
 MaterialAuxBase<T>::computeValue()
 {
   return _factor * getRealValue() + _offset;
+}
+
+// DEPRECATED CONSTRUCTOR
+template<typename T>
+MaterialAuxBase<T>::MaterialAuxBase(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _prop(getMaterialProperty<T>("property")),
+    _factor(getParam<Real>("factor")),
+    _offset(getParam<Real>("offset"))
+{
 }
 
 #endif //MATERIALAUXBASE_H

@@ -26,8 +26,8 @@ InputParameters validParams<NumPicardIterations>()
   return params;
 }
 
-NumPicardIterations::NumPicardIterations(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+NumPicardIterations::NumPicardIterations(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _transient_executioner(NULL)
 {
 }
@@ -46,4 +46,12 @@ Real
 NumPicardIterations::getValue()
 {
   return _transient_executioner->numPicardIts();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NumPicardIterations::NumPicardIterations(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _transient_executioner(NULL)
+{
 }

@@ -26,7 +26,6 @@ InputParameters validParams<Convection>();
 class Convection : public Kernel
 {
 public:
-
   Convection(const std::string & name, InputParameters parameters);
 
 protected:

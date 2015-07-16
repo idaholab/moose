@@ -31,8 +31,8 @@ InputParameters validParams<MultiAppVariableValueSampleTransfer>()
   return params;
 }
 
-MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
@@ -132,4 +132,13 @@ MultiAppVariableValueSampleTransfer::execute()
       break;
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const std::string & deprecated_name, InputParameters parameters) :
+    MultiAppTransfer(deprecated_name, parameters),
+    _to_var_name(getParam<AuxVariableName>("variable")),
+    _from_var_name(getParam<VariableName>("source_variable"))
+{
 }

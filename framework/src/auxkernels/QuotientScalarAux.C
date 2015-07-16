@@ -24,8 +24,8 @@ InputParameters validParams<QuotientScalarAux>()
   return params;
 }
 
-QuotientScalarAux::QuotientScalarAux(const std::string & name, InputParameters parameters) :
-    AuxScalarKernel(name, parameters),
+QuotientScalarAux::QuotientScalarAux(const InputParameters & parameters) :
+    AuxScalarKernel(parameters),
     _a(coupledScalarValue("numerator")),
     _b(coupledScalarValue("denominator"))
 {
@@ -39,4 +39,13 @@ Real
 QuotientScalarAux::computeValue()
 {
   return _a[0] / _b[0];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+QuotientScalarAux::QuotientScalarAux(const std::string & deprecated_name, InputParameters deprecated_parameters) :
+    AuxScalarKernel(deprecated_name, deprecated_parameters),
+    _a(coupledScalarValue("numerator")),
+    _b(coupledScalarValue("denominator"))
+{
 }

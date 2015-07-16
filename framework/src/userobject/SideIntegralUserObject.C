@@ -21,8 +21,8 @@ InputParameters validParams<SideIntegralUserObject>()
   return params;
 }
 
-SideIntegralUserObject::SideIntegralUserObject(const std::string & name, InputParameters parameters) :
-    SideUserObject(name, parameters),
+SideIntegralUserObject::SideIntegralUserObject(const InputParameters & parameters) :
+    SideUserObject(parameters),
     _qp(0),
     _integral_value(0)
 {}
@@ -61,3 +61,11 @@ SideIntegralUserObject::computeIntegral()
     sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
   return sum;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SideIntegralUserObject::SideIntegralUserObject(const std::string & deprecated_name, InputParameters parameters) :
+    SideUserObject(deprecated_name, parameters),
+    _qp(0),
+    _integral_value(0)
+{}

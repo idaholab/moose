@@ -22,8 +22,8 @@ InputParameters validParams<NumElems>()
   return params;
 }
 
-NumElems::NumElems(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+NumElems::NumElems(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters)
 {}
 
 Real
@@ -31,3 +31,9 @@ NumElems::getValue()
 {
   return _subproblem.mesh().nElem();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NumElems::NumElems(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters)
+{}

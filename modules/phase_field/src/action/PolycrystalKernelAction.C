@@ -78,7 +78,7 @@ PolycrystalKernelAction::act()
     if (_T != "NONE")
       poly_params.set<std::vector<VariableName> >("T").push_back(_T);
 
-    std::string kernel_name = "ACBulk_";
+    std::string kernel_name = "Kernels/ACBulk_";
     kernel_name.append(var_name);
 
     _problem->addKernel("ACGrGrPoly", kernel_name, poly_params);
@@ -90,7 +90,7 @@ PolycrystalKernelAction::act()
     poly_params.set<bool>("implicit")=getParam<bool>("implicit");
     poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
-    kernel_name = "ACInt_";
+    kernel_name = "Kernels/ACInt_";
     kernel_name.append(var_name);
 
     _problem->addKernel("ACInterface", kernel_name, poly_params);
@@ -101,7 +101,7 @@ PolycrystalKernelAction::act()
     poly_params.set<bool>("implicit") = true;
     poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
-    kernel_name = "IE_";
+    kernel_name = "Kernels/IE_";
     kernel_name.append(var_name);
 
     _problem->addKernel("TimeDerivative", kernel_name, poly_params);
@@ -115,7 +115,7 @@ PolycrystalKernelAction::act()
       poly_params.set<bool>("implicit")=getParam<bool>("implicit");
       poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
-      kernel_name = "ACBubInteraction_";
+      kernel_name = "Kernels/ACBubInteraction_";
       kernel_name.append(var_name);
 
       _problem->addKernel("ACGBPoly", kernel_name, poly_params);

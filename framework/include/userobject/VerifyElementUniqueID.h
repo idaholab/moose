@@ -27,7 +27,8 @@ InputParameters validParams<VerifyElementUniqueID>();
 class VerifyElementUniqueID : public ElementUserObject
 {
 public:
-  VerifyElementUniqueID(const std::string & name, InputParameters parameters);
+  VerifyElementUniqueID(const InputParameters & parameters);
+  VerifyElementUniqueID(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

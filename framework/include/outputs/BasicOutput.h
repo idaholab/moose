@@ -29,8 +29,8 @@
  *
  * @see Exodus Console CSV
  */
-template<class OutputBase>
-class BasicOutput : public OutputBase
+template<class T>
+class BasicOutput : public T
 {
 public:
 
@@ -42,8 +42,9 @@ public:
    *
    * @see initAvailable init separate
    */
-  BasicOutput(const std::string & name, InputParameters & parameters) :
-      OutputBase(name, parameters){}
+  BasicOutput(const InputParameters & parameters) : T(parameters) {}
+  BasicOutput(const std::string & name, InputParameters parameters): T(name, parameters) {}
+
 
 protected:
 

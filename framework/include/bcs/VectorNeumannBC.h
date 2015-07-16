@@ -39,7 +39,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  VectorNeumannBC(const std::string & name, InputParameters parameters);
+  VectorNeumannBC(const InputParameters & parameters);
+  VectorNeumannBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -26,7 +26,8 @@ class ElementIntegralIndicator :
   public ElementIndicator
 {
 public:
-  ElementIntegralIndicator(const std::string & name, InputParameters parameters);
+  ElementIntegralIndicator(const InputParameters & parameters);
+  ElementIntegralIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ElementIntegralIndicator(){};
 
   virtual void computeIndicator();

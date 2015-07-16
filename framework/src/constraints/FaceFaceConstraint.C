@@ -27,8 +27,8 @@ InputParameters validParams<FaceFaceConstraint>()
   return params;
 }
 
-FaceFaceConstraint::FaceFaceConstraint(const std::string & name, InputParameters parameters) :
-    Constraint(name, parameters),
+FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters) :
+    Constraint(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _dim(_mesh.dimension()),
@@ -221,4 +221,34 @@ Real
 FaceFaceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType /*side_type*/)
 {
   return 0.;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FaceFaceConstraint::FaceFaceConstraint(const std::string & deprecated_name, InputParameters parameters) :
+    Constraint(deprecated_name, parameters),
+    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
+    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _dim(_mesh.dimension()),
+
+    _q_point(_assembly.qPoints()),
+    _qrule(_assembly.qRule()),
+    _JxW(_assembly.JxW()),
+    _coord(_assembly.coordTransformation()),
+    _current_elem(_assembly.elem()),
+
+    _master_var(_subproblem.getVariable(_tid, getParam<VariableName>("master_variable"))),
+    _slave_var(isParamValid("slave_variable") ? _subproblem.getVariable(_tid, getParam<VariableName>("slave_variable")) : _subproblem.getVariable(_tid, getParam<VariableName>("master_variable"))),
+    _lambda(_var.sln()),
+
+    _iface(*_mesh.getMortarInterfaceByName(getParam<std::string>("interface"))),
+    _master_penetration_locator(getMortarPenetrationLocator(_iface._master, _iface._slave, Moose::Master, Order(_master_var.order()))),
+    _slave_penetration_locator(getMortarPenetrationLocator(_iface._master, _iface._slave, Moose::Slave, Order(_slave_var.order()))),
+
+    _test_master(_master_var.phi()),
+    _phi_master(_master_var.phi()),
+
+    _test_slave(_slave_var.phi()),
+    _phi_slave(_slave_var.phi())
+{
 }

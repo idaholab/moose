@@ -25,8 +25,8 @@ InputParameters validParams<SetupTimeStepperAction>()
   return params;
 }
 
-SetupTimeStepperAction::SetupTimeStepperAction(const std::string & name, InputParameters parameters) :
-    MooseObjectAction(name, parameters)
+SetupTimeStepperAction::SetupTimeStepperAction(InputParameters parameters) :
+    MooseObjectAction(parameters)
 {
 }
 
@@ -48,4 +48,11 @@ SetupTimeStepperAction::act()
     MooseSharedPointer<TimeStepper> ts = MooseSharedNamespace::static_pointer_cast<TimeStepper>(_factory.create(_type, "TimeStepper", _moose_object_pars));
     transient->setTimeStepper(ts);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupTimeStepperAction::SetupTimeStepperAction(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObjectAction(deprecated_name, parameters)
+{
 }

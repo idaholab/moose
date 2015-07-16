@@ -28,8 +28,8 @@ InputParameters validParams<Gnuplot>()
   return params;
 }
 
-Gnuplot::Gnuplot(const std::string & name, InputParameters & parameters) :
-    TableOutput(name, parameters),
+Gnuplot::Gnuplot(const InputParameters & parameters) :
+    TableOutput(parameters),
     _extension(getParam<MooseEnum>("extension"))
 {
 }

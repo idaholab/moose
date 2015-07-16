@@ -43,8 +43,8 @@ PiecewiseConstant::getDirection(const std::string & direction)
 }
 
 
-PiecewiseConstant::PiecewiseConstant(const std::string & name, InputParameters parameters) :
-  Piecewise(name, parameters),
+PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters) :
+  Piecewise(parameters),
   _direction(getDirection(getParam<MooseEnum>("direction")))
 {
 }
@@ -127,4 +127,12 @@ Real
 PiecewiseConstant::average()
 {
   return integral()/(domain(functionSize()-1) - domain(0));
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PiecewiseConstant::PiecewiseConstant(const std::string & deprecated_name, InputParameters parameters) :
+  Piecewise(deprecated_name, parameters),
+  _direction(getDirection(getParam<MooseEnum>("direction")))
+{
 }

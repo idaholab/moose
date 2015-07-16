@@ -30,7 +30,8 @@ InputParameters validParams<NumNonlinearIterations>();
 class NumNonlinearIterations : public GeneralPostprocessor
 {
 public:
-  NumNonlinearIterations(const std::string & name, InputParameters parameters);
+  NumNonlinearIterations(const InputParameters & parameters);
+  NumNonlinearIterations(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Initialization to be done at each timestep

@@ -36,8 +36,8 @@ InputParameters validParams<MaterialOutputAction>()
   return params;
 }
 
-MaterialOutputAction::MaterialOutputAction(const std::string & name, InputParameters params) :
-    Action(name, params),
+MaterialOutputAction::MaterialOutputAction(InputParameters params) :
+    Action(params),
     _output_warehouse(_app.getOutputWarehouse())
 {
 }
@@ -242,4 +242,12 @@ MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & 
       action->getObjectParams().set<unsigned int>("column") = j;
       _awh.addActionBlock(action);
     }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MaterialOutputAction::MaterialOutputAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params),
+    _output_warehouse(_app.getOutputWarehouse())
+{
 }
