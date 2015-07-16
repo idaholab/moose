@@ -22,9 +22,8 @@ InputParameters validParams<LinearElasticityMaterial>()
   return params;
 }
 
-LinearElasticityMaterial::LinearElasticityMaterial(const std::string & name,
-                   InputParameters parameters)
-  :Material(name, parameters),
+LinearElasticityMaterial::LinearElasticityMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _has_temp(isCoupled("temp")),
     _temp(_has_temp ? coupledValue("temp") : _zero),
     _my_thermal_expansion(getParam<Real>("thermal_expansion")),
@@ -53,3 +52,19 @@ LinearElasticityMaterial::computeProperties()
     _poissons_ratio[qp] = _my_poissons_ratio;
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+LinearElasticityMaterial::LinearElasticityMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    Material(deprecated_name, parameters),
+    _has_temp(isCoupled("temp")),
+    _temp(_has_temp ? coupledValue("temp") : _zero),
+    _my_thermal_expansion(getParam<Real>("thermal_expansion")),
+    _my_youngs_modulus(getParam<Real>("youngs_modulus")),
+    _my_poissons_ratio(getParam<Real>("poissons_ratio")),
+    _my_t_ref(getParam<Real>("t_ref")),
+    _thermal_strain(declareProperty<Real>("thermal_strain")),
+    _alpha(declareProperty<Real>("alpha")),
+    _youngs_modulus(declareProperty<Real>("youngs_modulus")),
+    _poissons_ratio(declareProperty<Real>("poissons_ratio"))
+  {}
