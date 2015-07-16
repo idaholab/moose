@@ -25,8 +25,8 @@ class DesorptionToPorespace : public Kernel
 {
 public:
 
-  DesorptionToPorespace(const std::string & name,
-                        InputParameters parameters);
+  DesorptionToPorespace(const InputParameters & parameters);
+  DesorptionToPorespace(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -20,8 +20,8 @@ InputParameters validParams<CoupledBEKinetic>()
   return params;
 }
 
-CoupledBEKinetic::CoupledBEKinetic(const std::string & name, InputParameters parameters)
-  :Kernel(name,parameters),
+CoupledBEKinetic::CoupledBEKinetic(const InputParameters & parameters)
+  :Kernel(parameters),
    _porosity(getMaterialProperty<Real>("porosity")),
    _weight(getParam<std::vector<Real> >("weight"))
 {
@@ -60,3 +60,23 @@ Real CoupledBEKinetic::computeQpOffDiagJacobian(unsigned int jvar)
       return _sto_v1*_test[_i][_qp]*_phi[_j][_qp]/_dt;
   }
 */
+
+
+// DEPRECATED CONSTRUCTOR
+CoupledBEKinetic::CoupledBEKinetic(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+   _porosity(getMaterialProperty<Real>("porosity")),
+   _weight(getParam<std::vector<Real> >("weight"))
+{
+  int n = coupledComponents("v");
+//    _vars.resize(n);
+    _vals.resize(n);
+    _vals_old.resize(n);
+
+  for (unsigned int i=0; i<_vals.size(); ++i)
+  {
+    //    _vars[i] = coupled("v", i);
+    _vals[i] = &coupledValue("v", i);
+    _vals_old[i] = &coupledValueOld("v", i);
+  }
+}

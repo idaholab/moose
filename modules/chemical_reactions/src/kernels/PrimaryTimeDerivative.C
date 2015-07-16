@@ -15,8 +15,8 @@ InputParameters validParams<PrimaryTimeDerivative>()
   return params;
 }
 
-PrimaryTimeDerivative::PrimaryTimeDerivative(const std::string & name, InputParameters parameters) :
-    TimeDerivative(name, parameters),
+PrimaryTimeDerivative::PrimaryTimeDerivative(const InputParameters & parameters) :
+    TimeDerivative(parameters),
     _porosity(getMaterialProperty<Real>("porosity"))
 {}
 
@@ -36,3 +36,10 @@ Real PrimaryTimeDerivative::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+PrimaryTimeDerivative::PrimaryTimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
+    TimeDerivative(deprecated_name, parameters),
+    _porosity(getMaterialProperty<Real>("porosity"))
+{}

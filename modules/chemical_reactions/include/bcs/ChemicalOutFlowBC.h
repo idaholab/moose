@@ -31,7 +31,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  ChemicalOutFlowBC(const std::string & name, InputParameters parameters);
+  ChemicalOutFlowBC(const InputParameters & parameters);
+  ChemicalOutFlowBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
  virtual ~ChemicalOutFlowBC(){}
 
