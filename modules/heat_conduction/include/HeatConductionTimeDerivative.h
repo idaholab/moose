@@ -37,7 +37,8 @@ public:
   /**
    * Contructor for Heat Equation time derivative term.
    */
-  HeatConductionTimeDerivative(const std::string & name, InputParameters parameters);
+  HeatConductionTimeDerivative(const InputParameters & parameters);
+  HeatConductionTimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

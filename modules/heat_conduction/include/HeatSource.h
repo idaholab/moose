@@ -18,7 +18,8 @@ InputParameters validParams<HeatSource>();
 class HeatSource : public BodyForce
 {
 public:
-  HeatSource(const std::string & name, InputParameters parameters);
+  HeatSource(const InputParameters & parameters);
+  HeatSource(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 };
 
 #endif
