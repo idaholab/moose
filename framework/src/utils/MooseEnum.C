@@ -78,6 +78,8 @@ MooseEnum::operator=(const std::string & name)
   _current_name = upper;
   _current_name_preserved = name;
 
+  checkDeprecatedBase(upper);
+
   if (std::find(_names.begin(), _names.end(), upper) == _names.end())
   {
     if (_out_of_range_index == 0)     // Are out of range values allowed?
@@ -129,17 +131,26 @@ MooseEnum::operator==(unsigned short value) const
   return value == _current_id;
 }
 
-bool MooseEnum::operator!=(unsigned short value) const
+bool
+MooseEnum::operator!=(unsigned short value) const
 {
   return value != _current_id;
 }
 
-bool MooseEnum::operator==(const MooseEnum & value) const
+bool
+MooseEnum::operator==(const MooseEnum & value) const
 {
   return value._current_name == _current_name;
 }
 
-bool MooseEnum::operator!=(const MooseEnum & value) const
+bool
+MooseEnum::operator!=(const MooseEnum & value) const
 {
   return value._current_name != _current_name;
+}
+
+void
+MooseEnum::checkDeprecated() const
+{
+  checkDeprecatedBase(_current_name);
 }

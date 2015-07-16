@@ -178,6 +178,58 @@ MooseEnumTest::withNamesFromTest()
 }
 
 void
+MooseEnumTest::testDeprecate()
+{
+  // Intentionally misspelling
+  MooseEnum me1("one too three four", "too");
+
+  try
+  {
+    me1.deprecate("too", "two");
+
+    // Unreachable
+    CPPUNIT_ASSERT( false );
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+
+    CPPUNIT_ASSERT( msg.find("is deprecated, consider using") != std::string::npos );
+  }
+
+  me1 = "one";
+  try
+  {
+    me1 = "too";
+
+    // Unreachable
+    CPPUNIT_ASSERT( false );
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT( msg.find("is deprecated, consider using") != std::string::npos );
+  }
+
+  MultiMooseEnum mme1("one too three four");
+  mme1.deprecate("too", "two");
+
+  mme1.push_back("one");
+  try
+  {
+    me1 = "too";
+
+    // Unreachable
+    CPPUNIT_ASSERT( false );
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT( msg.find("is deprecated, consider using") != std::string::npos );
+  }
+}
+
+void
 MooseEnumTest::testErrors()
 {
   // Assign invalid item
@@ -185,6 +237,9 @@ MooseEnumTest::testErrors()
   {
     MultiMooseEnum error_check("one two three");
     error_check = "four";
+
+    // Unreachable
+    CPPUNIT_ASSERT( false );
   }
   catch(const std::exception & e)
   {
@@ -196,6 +251,9 @@ MooseEnumTest::testErrors()
   try
   {
     MultiMooseEnum error_check("one= 1 two three");
+
+    // Unreachable
+    CPPUNIT_ASSERT( false );
   }
   catch(const std::exception & e)
   {
@@ -209,6 +267,9 @@ MooseEnumTest::testErrors()
   {
     MultiMooseEnum error_check("one two three");
     std::string invalid = error_check[3];
+
+    // Unreachable
+    CPPUNIT_ASSERT( false );
   }
   catch(const std::exception & e)
   {
@@ -221,6 +282,9 @@ MooseEnumTest::testErrors()
   {
     MultiMooseEnum error_check("one two three");
     unsigned int invalid = error_check.get(3);
+
+    // Unreachable
+    CPPUNIT_ASSERT( false );
   }
   catch(const std::exception & e)
   {

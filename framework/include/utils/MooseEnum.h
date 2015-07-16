@@ -99,6 +99,10 @@ public:
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MooseEnum & obj) { out << obj._current_name_preserved; return out; }
 
+protected:
+  /// Check whether the current value is deprecated when called
+  virtual void checkDeprecated() const;
+
 private:
 
   /**
