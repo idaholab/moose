@@ -162,7 +162,7 @@ public:
   void addCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string);
 
   /**
-   * These method adds a parameter to the InputParameters object which can be retrieved
+   * These method add a parameter to the InputParameters object which can be retrieved
    * like any other parameter.  This parameter however is not printed in the Input file syntax
    * dump or web page dump so does not take a documentation string.  The first version
    * of this function takes an optional default value.
@@ -277,6 +277,27 @@ public:
    */
   void addCoupledVar(const std::string &name, const Real value, const std::string &doc_string);
 
+  ///@{
+  /**
+   * These methods add a coupled variable name pair. The parser will look for variable
+   * name pair in the input file and can return a reference to the storage location
+   * for the coupled variable if found.
+   *
+   * This version of the method will build a vector if the given the base_name and num_name parameters exist
+   * in the input file:
+   *   e.g.
+   *   [./foo]
+   *     ...
+   *     some_base = base_
+   *     some_num  = 5
+   *   [../]
+   *
+   *   # The coupling parameter will be passed this vector: "base_0 base_1 base_2 base_3 base_4"
+   */
+  void addCoupledVarWithAutoBuild(const std::string &name, const std::string &base_name, const std::string &num_name, const std::string &doc_string);
+  void addRequiredCoupledVarWithAutoBuild(const std::string &name, const std::string &base_name, const std::string &num_name, const std::string &doc_string);
+  ///@}
+
   /**
    * Utility functions for retrieving one of the MooseTypes variables into the common "string" base class.
    * Scalar and Vector versions are supplied
@@ -288,7 +309,9 @@ public:
    * This method adds a coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable.  If the coupled variable is not supplied in the input
-   * file, and error is thrown
+   * file, and error is thrown.
+   *
+   * Version 2: An auto built vector will be built from the base_name and num_name param. See addCoupledVar for an example
    */
   void addRequiredCoupledVar(const std::string &name, const std::string &doc_string);
 
@@ -414,6 +437,11 @@ public:
   void defaultCoupledValue(const std::string & coupling_name, Real value);
 
   /**
+  * Returns the auto build vectors for all parameters.
+  */
+  const std::map<std::string, std::pair<std::string, std::string> > & getAutoBuildVectors() const;
+
+  /**
    * Get the default value for a postprocessor added with addPostprocessor
    * @param name The name of the postprocessor
    * @param suppress_error If true, the error check is suppressed
@@ -503,6 +531,9 @@ private:
 
   /// The map of functions used for range checked parameters
   std::map<std::string, std::string> _range_functions;
+
+  /// The map of auto build vectors (base_, 5 -> "base_0 base_1 base_2 base_3 base_4")
+  std::map<std::string, std::pair<std::string, std::string> > _auto_build_vectors;
 
   /// The parameter is used to restrict types that can be built.  Typically this
   /// is used for MooseObjectAction derived Actions.
