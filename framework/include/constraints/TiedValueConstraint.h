@@ -31,7 +31,8 @@ class TiedValueConstraint :
   public NodeFaceConstraint
 {
 public:
-  TiedValueConstraint(const std::string & name, InputParameters parameters);
+  TiedValueConstraint(const InputParameters & parameters);
+  TiedValueConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~TiedValueConstraint(){}
 
   virtual Real computeQpSlaveValue();

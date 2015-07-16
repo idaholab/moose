@@ -29,7 +29,8 @@ InputParameters validParams<AddFunctionAction>();
 class AddFunctionAction : public MooseObjectAction
 {
 public:
-  AddFunctionAction(const std::string & name, InputParameters params);
+  AddFunctionAction(InputParameters params);
+  AddFunctionAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

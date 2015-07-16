@@ -41,8 +41,8 @@ InputParameters validParams<Material>()
 }
 
 
-Material::Material(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+Material::Material(const InputParameters & parameters) :
+    MooseObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters, blockIDs()),
     SetupInterface(parameters),
@@ -112,7 +112,7 @@ Material::initStatefulProperties(unsigned int n_points)
 void
 Material::initQpStatefulProperties()
 {
-  mooseDoOnce(mooseWarning(std::string("Material \"") + _name + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
+  mooseDoOnce(mooseWarning(std::string("Material \"") + name() + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
 }
 
 void
@@ -132,7 +132,7 @@ Material::checkStatefulSanity() const
   for (std::map<std::string, int>::const_iterator it = _props_to_flags.begin(); it != _props_to_flags.end(); ++it)
   {
     if (static_cast<int>(it->second) % 2 == 0) // Only Stateful properties declared!
-      mooseError("Material '" << _name << "' has stateful properties declared but not associated \"current\" properties." << it->second);
+      mooseError("Material '" << name() << "' has stateful properties declared but not associated \"current\" properties." << it->second);
   }
 }
 
@@ -168,7 +168,8 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
 std::set<OutputName>
 Material::getOutputs()
 {
-  return std::set<OutputName>(getParam<std::vector<OutputName> >("outputs").begin(), getParam<std::vector<OutputName> >("outputs").end());
+  const std::vector<OutputName> & out = getParam<std::vector<OutputName> >("outputs");
+  return std::set<OutputName>(out.begin(), out.end());
 }
 
 bool
@@ -227,4 +228,51 @@ Material::hasBlockMaterialPropertyHelper(const std::string & name)
 
   // If you get here the supplied property is defined on all blocks
   return true;
+}
+
+// DEPRECATED CONSTRUCTOR
+Material::Material(const std::string & deprecated_name, InputParameters deprecated_parameters) :
+    MooseObject(deprecated_name, deprecated_parameters),
+    BlockRestrictable(parameters()),
+    BoundaryRestrictable(parameters(), blockIDs()),
+    SetupInterface(parameters()),
+    Coupleable(parameters(), false),
+    MooseVariableDependencyInterface(),
+    ScalarCoupleable(parameters()),
+    FunctionInterface(parameters()),
+    UserObjectInterface(parameters()),
+    TransientInterface(parameters(), "materials"),
+    MaterialPropertyInterface(parameters(), blockIDs(), boundaryIDs()),
+    PostprocessorInterface(parameters()),
+    DependencyResolverInterface(),
+    Restartable(parameters(), "Materials"),
+    ZeroInterface(parameters()),
+    MeshChangedInterface(parameters()),
+
+    // The false flag disables the automatic call  buildOutputVariableHideList;
+    // for Material objects the hide lists are handled by MaterialOutputAction
+    OutputInterface(parameters(), false),
+    _subproblem(*getParam<SubProblem *>("_subproblem")),
+    _fe_problem(*getParam<FEProblem *>("_fe_problem")),
+    _tid(getParam<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _bnd(getParam<bool>("_bnd")),
+    _neighbor(getParam<bool>("_neighbor")),
+    _material_data(*getParam<MaterialData *>("_material_data")),
+    _qp(std::numeric_limits<unsigned int>::max()),
+    _qrule(_bnd ? _assembly.qRuleFace() : _assembly.qRule()),
+    _JxW(_bnd ? _assembly.JxWFace() : _assembly.JxW()),
+    _coord(_assembly.coordTransformation()),
+    _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),
+    _normals(_assembly.normals()),
+    _current_elem(_neighbor ? _assembly.neighbor() : _assembly.elem()),
+    _current_side(_neighbor ? _assembly.neighborSide() : _assembly.side()),
+    _mesh(_subproblem.mesh()),
+    _coord_sys(_assembly.coordSystem()),
+    _has_stateful_property(false)
+{
+  // Fill in the MooseVariable dependencies
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
 }

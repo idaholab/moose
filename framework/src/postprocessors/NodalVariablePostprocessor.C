@@ -25,8 +25,17 @@ InputParameters validParams<NodalVariablePostprocessor>()
   return params;
 }
 
-NodalVariablePostprocessor::NodalVariablePostprocessor(const std::string & name, InputParameters parameters) :
-    NodalPostprocessor(name, parameters),
+NodalVariablePostprocessor::NodalVariablePostprocessor(const InputParameters & parameters) :
+    NodalPostprocessor(parameters),
+    MooseVariableInterface(parameters, true),
+    _u(coupledValue("variable"))
+{
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NodalVariablePostprocessor::NodalVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    NodalPostprocessor(deprecated_name, parameters),
     MooseVariableInterface(parameters, true),
     _u(coupledValue("variable"))
 {

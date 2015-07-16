@@ -22,8 +22,8 @@ InputParameters validParams<ElementIntegralIndicator>()
 }
 
 
-ElementIntegralIndicator::ElementIntegralIndicator(const std::string & name, InputParameters parameters) :
-    ElementIndicator(name, parameters)
+ElementIntegralIndicator::ElementIntegralIndicator(const InputParameters & parameters) :
+    ElementIndicator(parameters)
 {
 }
 
@@ -45,3 +45,10 @@ ElementIntegralIndicator::computeQpIntegral()
   return _u[_qp];
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+ElementIntegralIndicator::ElementIntegralIndicator(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIndicator(deprecated_name, parameters)
+{
+}

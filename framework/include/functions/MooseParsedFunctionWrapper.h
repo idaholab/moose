@@ -102,7 +102,7 @@ private:
   std::vector<unsigned int> _pp_index;
 
   /// Vector of pointers to PP values
-  std::vector<Real *> _pp_vals;
+  std::vector<const Real *> _pp_vals;
 
   /// Stores the relative location of variables (in _vars) that are connected to Postprocessors
   std::vector<unsigned int> _scalar_index;

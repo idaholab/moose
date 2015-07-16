@@ -28,7 +28,8 @@ InputParameters validParams<ValueThresholdMarker>();
 class ValueThresholdMarker : public QuadraturePointMarker
 {
 public:
-  ValueThresholdMarker(const std::string & name, InputParameters parameters);
+  ValueThresholdMarker(const InputParameters & parameters);
+  ValueThresholdMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ValueThresholdMarker(){};
 
 protected:

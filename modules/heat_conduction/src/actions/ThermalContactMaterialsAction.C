@@ -92,7 +92,9 @@ ThermalContactMaterialsAction::act()
 
   params.set<std::string>("conductivity_name") = getParam<std::string>("conductivity_name");
 
-  _problem->addMaterial(type, "gap_value_" + Moose::stringify(n), params);
+  std::string name;
+  name += "Materials/" + _name + "_" + "gap_value_" + Moose::stringify(n);
+  _problem->addMaterial(type, name, params);
 
   if (quadrature)
   {
@@ -103,7 +105,9 @@ ThermalContactMaterialsAction::act()
 
     params.set<std::string>("conductivity_name") = getParam<std::string>("conductivity_master_name");
 
-    _problem->addMaterial(type, "gap_value_master_" + Moose::stringify(n), params);
+    std::string master_name;
+    master_name += "Materials/" + _name + "_" + "gap_value_master_" + Moose::stringify(n);
+    _problem->addMaterial(type, master_name, params);
   }
 
   ++n;

@@ -99,18 +99,16 @@ bool isFlag(const std::string s)
   return s.length() && s[0] == '-';
 }
 
-MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
+MooseApp::MooseApp(InputParameters parameters) :
     ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
-    _name(name),
+    _name(parameters.get<std::string>("name")),
     _pars(parameters),
-    _type(getParam<std::string>("_type")),
     _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _alternate_output_warehouse(NULL),
-    _output_warehouse(new OutputWarehouse),
+    _input_parameter_warehouse(new InputParameterWarehouse()),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
@@ -126,6 +124,48 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _half_transient(false),
     _legacy_uo_aux_computation_default(getParam<bool>("use_legacy_uo_aux_computation")),
     _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
+    _legacy_constructors(false),
+    _check_input(getParam<bool>("check_input"))
+{
+  if (isParamValid("_argc") && isParamValid("_argv"))
+  {
+    int argc = getParam<int>("_argc");
+    char ** argv = getParam<char**>("_argv");
+
+    _sys_info = MooseSharedPointer<SystemInfo>(new SystemInfo(argc, argv));
+  }
+  if (isParamValid("_command_line"))
+    _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
+  else
+    mooseError("Valid CommandLine object required");
+}
+
+MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
+    ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
+    _name(parameters.get<std::string>("name")),
+    _pars(parameters),
+    _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
+    _output_position_set(false),
+    _start_time_set(false),
+    _start_time(0.0),
+    _global_time_offset(0.0),
+    _input_parameter_warehouse(new InputParameterWarehouse()),
+    _action_factory(*this),
+    _action_warehouse(*this, _syntax, _action_factory),
+    _parser(*this, _action_warehouse),
+    _use_nonlinear(true),
+    _enable_unused_check(WARN_UNUSED),
+    _factory(*this),
+    _error_overridden(false),
+    _ready_to_exit(false),
+    _initial_from_file(false),
+    _parallel_mesh_on_command_line(false),
+    _recover(false),
+    _restart(false),
+    _half_transient(false),
+    _legacy_uo_aux_computation_default(getParam<bool>("use_legacy_uo_aux_computation")),
+    _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
+    _legacy_constructors(true),
     _check_input(getParam<bool>("check_input"))
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
@@ -145,8 +185,7 @@ MooseApp::~MooseApp()
 {
   _action_warehouse.clear();
 
-  // MUST be deleted before _comm is destroyed!
-  delete _output_warehouse;
+  delete _input_parameter_warehouse;
 
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
@@ -277,6 +316,7 @@ MooseApp::getOutputFileBase()
 void
 MooseApp::runInputFile()
 {
+
   std::string mesh_file_name;
   if (isParamValid("mesh_only"))
   {
@@ -452,7 +492,7 @@ MooseApp::setOutputPosition(Point p)
 {
   _output_position_set = true;
   _output_position = p;
-  _output_warehouse->meshChanged();
+  _output_warehouse.meshChanged();
 
   if (_executioner.get() != NULL)
     _executioner->parentOutputPositionChanged();
@@ -467,10 +507,7 @@ MooseApp::getFileName(bool stripLeadingPath) const
 OutputWarehouse &
 MooseApp::getOutputWarehouse()
 {
-  if (_alternate_output_warehouse == NULL)
-    return *_output_warehouse;
-  else
-    return *_alternate_output_warehouse;
+  return _output_warehouse;
 }
 
 std::string
@@ -695,7 +732,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename, const
         break;
       }
       default:
-        mooseError("Unhandled RegistrationTyep");
+        mooseError("Unhandled RegistrationType");
       }
 
       // Store the handle so we can close it later
@@ -713,4 +750,10 @@ MooseApp::getLoadedLibraryPaths() const
     paths.insert(it->first.first);
 
   return paths;
+}
+
+InputParameterWarehouse &
+MooseApp::getInputParameterWarehouse()
+{
+  return *_input_parameter_warehouse;
 }

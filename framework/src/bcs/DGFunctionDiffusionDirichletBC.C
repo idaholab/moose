@@ -31,8 +31,8 @@ InputParameters validParams<DGFunctionDiffusionDirichletBC>()
   return params;
 }
 
-DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _func(getFunction("function")),
     _epsilon(getParam<Real>("epsilon")),
     _sigma(getParam<Real>("sigma"))
@@ -66,4 +66,14 @@ DGFunctionDiffusionDirichletBC::computeQpJacobian()
   r += _sigma/h_elem * _phi[_j][_qp] * _test[_i][_qp];
 
   return r;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const std::string & deprecated_name, InputParameters parameters) :
+    IntegratedBC(deprecated_name, parameters),
+    _func(getFunction("function")),
+    _epsilon(getParam<Real>("epsilon")),
+    _sigma(getParam<Real>("sigma"))
+{
 }

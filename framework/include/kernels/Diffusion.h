@@ -26,7 +26,8 @@ InputParameters validParams<Diffusion>();
 class Diffusion : public Kernel
 {
 public:
-  Diffusion(const std::string & name, InputParameters parameters);
+  Diffusion(const InputParameters & parameters);
+  Diffusion(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Diffusion();
 
 protected:

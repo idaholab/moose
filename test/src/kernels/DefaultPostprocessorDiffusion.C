@@ -29,7 +29,7 @@ DefaultPostprocessorDiffusion::DefaultPostprocessorDiffusion(const std::string &
 {
   // Test the error message for defaultPostprocessorValue
   if (getParam<bool>("test_default_error"))
-    parameters.defaultPostprocessorValue("invalid_postprocessor_name");
+    parameters.getDefaultPostprocessorValue("invalid_postprocessor_name");
 }
 
 Real

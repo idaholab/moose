@@ -39,8 +39,8 @@ InputParameters validParams<OrientedBoxMarker>()
 }
 
 
-OrientedBoxMarker::OrientedBoxMarker(const std::string & name, InputParameters parameters) :
-  Marker(name, parameters),
+OrientedBoxMarker::OrientedBoxMarker(const InputParameters & parameters) :
+  Marker(parameters),
   OrientedBoxInterface(parameters),
   _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
   _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside"))
@@ -59,4 +59,14 @@ OrientedBoxMarker::computeElementMarker()
     return _inside;
 
   return _outside;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+OrientedBoxMarker::OrientedBoxMarker(const std::string & deprecated_name, InputParameters parameters) :
+  Marker(deprecated_name, parameters),
+  OrientedBoxInterface(parameters),
+  _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
+  _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside"))
+{
 }

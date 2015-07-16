@@ -36,7 +36,8 @@ InputParameters validParams<SolutionUserObject>();
 class SolutionUserObject : public GeneralUserObject
 {
 public:
-  SolutionUserObject(const std::string & name, InputParameters parameters);
+  SolutionUserObject(const InputParameters & parameters);
+  SolutionUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Empty desctructor

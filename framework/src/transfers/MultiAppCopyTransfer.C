@@ -34,8 +34,8 @@ InputParameters validParams<MultiAppCopyTransfer>()
   return params;
 }
 
-MultiAppCopyTransfer::MultiAppCopyTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
@@ -52,7 +52,7 @@ MultiAppCopyTransfer::initialSetup()
 void
 MultiAppCopyTransfer::execute()
 {
-  _console << "Beginning CopyTransfer " << _name << std::endl;
+  _console << "Beginning CopyTransfer " << name() << std::endl;
 
   switch (_direction)
   {
@@ -249,5 +249,16 @@ MultiAppCopyTransfer::execute()
     }
   }
 
-  _console << "Finished CopyTransfer " << _name << std::endl;
+  _console << "Finished CopyTransfer " << name() << std::endl;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MultiAppCopyTransfer::MultiAppCopyTransfer(const std::string & deprecated_name, InputParameters parameters) :
+    MultiAppTransfer(deprecated_name, parameters),
+    _to_var_name(getParam<AuxVariableName>("variable")),
+    _from_var_name(getParam<VariableName>("source_variable"))
+{
+  // This transfer does not work with ParallelMesh
+  _fe_problem.mesh().errorIfParallelDistribution("MultiAppCopyTransfer");
 }

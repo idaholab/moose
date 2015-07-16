@@ -22,8 +22,8 @@ InputParameters validParams<MaterialStdVectorAux>()
   return params;
 }
 
-MaterialStdVectorAux::MaterialStdVectorAux(const std::string & name, InputParameters parameters) :
-  MaterialStdVectorAuxBase<Real>(name, parameters)
+MaterialStdVectorAux::MaterialStdVectorAux(const InputParameters & parameters) :
+    MaterialStdVectorAuxBase<Real>(parameters)
 {
 }
 
@@ -35,4 +35,10 @@ Real
 MaterialStdVectorAux::getRealValue()
 {
   return _prop[_qp][_index];
+}
+
+// DEPRECATED CONSTRUCTOR
+MaterialStdVectorAux::MaterialStdVectorAux(const std::string & deprecated_name, InputParameters parameters) :
+    MaterialStdVectorAuxBase<Real>(deprecated_name, parameters)
+{
 }

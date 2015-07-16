@@ -31,7 +31,8 @@ class MultiAppUserObjectTransfer :
   public MultiAppTransfer
 {
 public:
-  MultiAppUserObjectTransfer(const std::string & name, InputParameters parameters);
+  MultiAppUserObjectTransfer(const InputParameters & parameters);
+  MultiAppUserObjectTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppUserObjectTransfer() {}
 
   virtual void initialSetup();

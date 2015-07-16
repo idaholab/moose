@@ -25,8 +25,8 @@ InputParameters validParams<SetupResidualDebugAction>()
   return params;
 }
 
-SetupResidualDebugAction::SetupResidualDebugAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
+SetupResidualDebugAction::SetupResidualDebugAction(InputParameters parameters) :
+    Action(parameters),
     _show_var_residual(getParam<std::vector<NonlinearVariableName> >("show_var_residual"))
 {
 }
@@ -69,9 +69,15 @@ SetupResidualDebugAction::act()
     InputParameters params = _factory.getValidParams("DebugResidualAux");
     params.set<AuxVariableName>("variable") = aux_var_name;
     params.set<NonlinearVariableName>("debug_variable") = var.name();
-    params.set<MultiMooseEnum>("execute_on") = "linear";
-    _problem->addAuxKernel("DebugResidualAux", kern_name, params);
-    params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+    params.set<MultiMooseEnum>("execute_on") = "linear timestep_end";
     _problem->addAuxKernel("DebugResidualAux", kern_name, params);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupResidualDebugAction::SetupResidualDebugAction(const std::string & deprecated_name, InputParameters parameters) :
+    Action(deprecated_name, parameters),
+    _show_var_residual(getParam<std::vector<NonlinearVariableName> >("show_var_residual"))
+{
 }

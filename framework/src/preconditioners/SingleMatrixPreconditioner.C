@@ -28,8 +28,8 @@ InputParameters validParams<SingleMatrixPreconditioner>()
   return params;
 }
 
-SingleMatrixPreconditioner::SingleMatrixPreconditioner(const std::string & name, InputParameters params) :
-    MoosePreconditioner(name, params)
+SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & params) :
+    MoosePreconditioner(params)
 {
   NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();
@@ -64,4 +64,40 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const std::string & name,
 
 SingleMatrixPreconditioner::~SingleMatrixPreconditioner()
 {
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SingleMatrixPreconditioner::SingleMatrixPreconditioner(const std::string & deprecated_name, InputParameters params) :
+    MoosePreconditioner(deprecated_name, params)
+{
+  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+  unsigned int n_vars = nl.nVariables();
+
+  CouplingMatrix * cm = new CouplingMatrix(n_vars);
+  bool full = getParam<bool>("full");
+
+  if (!full)
+  {
+    // put 1s on diagonal
+    for (unsigned int i = 0; i < n_vars; i++)
+      (*cm)(i, i) = 1;
+
+    // off-diagonal entries
+    std::vector<std::vector<unsigned int> > off_diag(n_vars);
+    for (unsigned int i = 0; i < getParam<std::vector<std::string> >("off_diag_row").size(); i++)
+    {
+      unsigned int row = nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_row")[i]).number();
+      unsigned int column = nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_column")[i]).number();
+      (*cm)(row, column) = 1;
+    }
+  }
+  else
+  {
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
+        (*cm)(i,j) = 1;
+  }
+
+  _fe_problem.setCouplingMatrix(cm);
 }

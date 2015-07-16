@@ -29,7 +29,8 @@ InputParameters validParams<AreaPostprocessor>();
 class AreaPostprocessor : public SideIntegralPostprocessor
 {
 public:
-  AreaPostprocessor(const std::string & name, InputParameters parameters);
+  AreaPostprocessor(const InputParameters & parameters);
+  AreaPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void threadJoin(const UserObject & y);
 
 protected:

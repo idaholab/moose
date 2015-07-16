@@ -18,7 +18,7 @@
 #include "FEProblem.h"
 
 
-NeighborCoupleable::NeighborCoupleable(InputParameters & parameters, bool nodal, bool neighbor_nodal) :
+NeighborCoupleable::NeighborCoupleable(const InputParameters & parameters, bool nodal, bool neighbor_nodal) :
     Coupleable(parameters, nodal),
     _neighbor_nodal(neighbor_nodal)
 {

@@ -53,7 +53,8 @@ public:
    * \param name The name of the function
    * \param parameters The input parameters for the function
    */
-  Function(const std::string & name, InputParameters parameters);
+  Function(const InputParameters & parameters);
+  Function(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Function destructor

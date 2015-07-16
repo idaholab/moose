@@ -8,6 +8,7 @@
 #include "Factory.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -71,6 +72,6 @@ PolycrystalVoronoiICAction::act()
     poly_params.set<bool>("columnar_3D") = getParam<bool>("columnar_3D");
 
     //Add initial condition
-    _problem->addInitialCondition("PolycrystalReducedIC", "InitialCondition", poly_params);
+    _problem->addInitialCondition("PolycrystalReducedIC", "ICs/PolycrystalICs/PolycrystalVoronoiIC_" + Moose::stringify(op), poly_params);
   }
 }

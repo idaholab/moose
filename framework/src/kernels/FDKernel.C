@@ -29,8 +29,8 @@ InputParameters validParams<FDKernel>()
   return params;
 }
 
-FDKernel::FDKernel(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+FDKernel::FDKernel(const InputParameters & parameters) :
+    Kernel(parameters)
 {
   _scale = 1.490116119384766e-08; // HACK: sqrt of the machine epsilon for double precision
 #ifdef LIBMESH_HAVE_PETSC
@@ -109,4 +109,15 @@ FDKernel::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
   */
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FDKernel::FDKernel(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters)
+{
+  _scale = 1.490116119384766e-08; // HACK: sqrt of the machine epsilon for double precision
+#ifdef LIBMESH_HAVE_PETSC
+  _scale = PETSC_SQRT_MACHINE_EPSILON;
+#endif
 }

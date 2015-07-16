@@ -29,7 +29,8 @@ InputParameters validParams<ODEKernel>();
 class ODEKernel : public ScalarKernel
 {
 public:
-  ODEKernel(const std::string & name, InputParameters parameters);
+  ODEKernel(const InputParameters & parameters);
+  ODEKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ODEKernel();
 
   virtual void reinit();

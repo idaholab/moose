@@ -26,7 +26,8 @@ InputParameters validParams<AddUserObjectAction>();
 class AddUserObjectAction : public MooseObjectAction
 {
 public:
-  AddUserObjectAction(const std::string & name, InputParameters params);
+  AddUserObjectAction(InputParameters params);
+  AddUserObjectAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

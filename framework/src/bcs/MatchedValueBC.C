@@ -22,8 +22,8 @@ InputParameters validParams<MatchedValueBC>()
   return params;
 }
 
-MatchedValueBC::MatchedValueBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+MatchedValueBC::MatchedValueBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     _v(coupledValue("v")),
     _v_num(coupled("v"))
 {
@@ -42,4 +42,13 @@ MatchedValueBC::computeQpOffDiagJacobian(unsigned int jvar)
     return -1.0;
   else
     return 0.;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MatchedValueBC::MatchedValueBC(const std::string & deprecated_name, InputParameters parameters) :
+    NodalBC(deprecated_name, parameters),
+    _v(coupledValue("v")),
+    _v_num(coupled("v"))
+{
 }

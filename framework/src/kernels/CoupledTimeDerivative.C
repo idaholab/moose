@@ -15,8 +15,8 @@ InputParameters validParams<CoupledTimeDerivative>()
   return params;
 }
 
-CoupledTimeDerivative::CoupledTimeDerivative(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+CoupledTimeDerivative::CoupledTimeDerivative(const InputParameters & parameters) :
+    Kernel(parameters),
     _v_dot(coupledDot("v")),
     _dv_dot(coupledDotDu("v")),
     _v_var(coupled("v"))
@@ -42,3 +42,11 @@ CoupledTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0.0;
 }
+
+// DEPRECATED
+CoupledTimeDerivative::CoupledTimeDerivative(const std::string & name, InputParameters parameters) :
+    Kernel(name, parameters),
+    _v_dot(coupledDot("v")),
+    _dv_dot(coupledDotDu("v")),
+    _v_var(coupled("v"))
+{}

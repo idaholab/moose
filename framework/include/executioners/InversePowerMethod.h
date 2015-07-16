@@ -27,7 +27,8 @@ class InversePowerMethod : public EigenExecutionerBase
 {
 public:
 
-  InversePowerMethod(const std::string & name, InputParameters parameters);
+  InversePowerMethod(const InputParameters & parameters);
+  InversePowerMethod(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void init();
   virtual void execute();
@@ -37,6 +38,8 @@ protected:
 
   /// name of the postprocessor for evaluating |x-xprevious|; empty means that no postprocessor is provided and power iteration will not check convergence based on it
   std::string _solution_diff_name;
+  /// postprocessor for evaluating |x-xprevious|
+  const PostprocessorValue * _solution_diff;
   /// minimum number of power iterations
   const unsigned int & _min_iter;
   /// maximum number of power iterations

@@ -36,8 +36,8 @@ params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or n
 }
 
 
-ElementIndicator::ElementIndicator(const std::string & name, InputParameters parameters) :
-    Indicator(name, parameters),
+ElementIndicator::ElementIndicator(const InputParameters & parameters) :
+    Indicator(parameters),
     TransientInterface(parameters, "indicators"),
     PostprocessorInterface(parameters),
     Coupleable(parameters, false),
@@ -46,7 +46,42 @@ ElementIndicator::ElementIndicator(const std::string & name, InputParameters par
     MaterialPropertyInterface(parameters),
     ZeroInterface(parameters),
 
-    _field_var(_sys.getVariable(_tid, name)),
+    _field_var(_sys.getVariable(_tid, name())),
+
+    _current_elem(_field_var.currentElem()),
+    _current_elem_volume(_assembly.elemVolume()),
+    _q_point(_assembly.qPoints()),
+    _qrule(_assembly.qRule()),
+    _JxW(_assembly.JxW()),
+    _coord(_assembly.coordTransformation()),
+
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
+    _u_dot(_var.uDot()),
+    _du_dot_du(_var.duDotDu())
+{
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
+
+  addMooseVariableDependency(mooseVariable());
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementIndicator::ElementIndicator(const std::string & deprecated_name, InputParameters parameters) :
+    Indicator(deprecated_name, parameters),
+    TransientInterface(parameters, "indicators"),
+    PostprocessorInterface(parameters),
+    Coupleable(parameters, false),
+    ScalarCoupleable(parameters),
+    MooseVariableInterface(parameters, false),
+    MaterialPropertyInterface(parameters),
+    ZeroInterface(parameters),
+
+    _field_var(_sys.getVariable(_tid, name())),
 
     _current_elem(_field_var.currentElem()),
     _current_elem_volume(_assembly.elemVolume()),

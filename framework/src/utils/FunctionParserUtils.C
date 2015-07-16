@@ -37,14 +37,12 @@ const char * FunctionParserUtils::_eval_error_msg[] = {
   "Maximum recursion level reached"
 };
 
-FunctionParserUtils::FunctionParserUtils(const std::string & /* name */,
-                                         InputParameters parameters) :
+FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters) :
     _enable_jit(parameters.isParamValid("enable_jit") &&
                 parameters.get<bool>("enable_jit")),
     _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
     _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
-    _nan(std::numeric_limits<Real>::quiet_NaN()),
-    _func_params()
+    _nan(std::numeric_limits<Real>::quiet_NaN())
 {
 }
 
@@ -108,4 +106,14 @@ FunctionParserUtils::addFParserConstants(ADFunction * parser,
 
     delete expression;
   }
+}
+
+// DEPRECATED CONSTRUCTOR
+FunctionParserUtils::FunctionParserUtils(const std::string & /*name*/, InputParameters parameters) :
+    _enable_jit(parameters.isParamValid("enable_jit") &&
+                parameters.get<bool>("enable_jit")),
+    _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
+    _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
+    _nan(std::numeric_limits<Real>::quiet_NaN())
+{
 }

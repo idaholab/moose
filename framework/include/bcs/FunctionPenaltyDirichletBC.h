@@ -36,7 +36,8 @@ public:
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same constructor.
    */
-  FunctionPenaltyDirichletBC(const std::string & name, InputParameters parameters);
+  FunctionPenaltyDirichletBC(const InputParameters & parameters);
+  FunctionPenaltyDirichletBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~FunctionPenaltyDirichletBC() {}
 

@@ -22,8 +22,8 @@ InputParameters validParams<ConstantDamper>()
   return params;
 }
 
-ConstantDamper::ConstantDamper(const std::string & name, InputParameters parameters) :
-    Damper(name, parameters),
+ConstantDamper::ConstantDamper(const InputParameters & parameters) :
+    Damper(parameters),
     _damping(getParam<Real>("damping"))
 {
 }
@@ -36,3 +36,11 @@ ConstantDamper::computeQpDamping()
 
 
 
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantDamper::ConstantDamper(const std::string & deprecated_name, InputParameters parameters) :
+    Damper(deprecated_name, parameters),
+    _damping(getParam<Real>("damping"))
+{
+}

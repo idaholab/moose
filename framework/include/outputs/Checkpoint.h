@@ -62,7 +62,8 @@ public:
    * @param name
    * @param parameters
    */
-  Checkpoint(const std::string & name, InputParameters & parameters);
+  Checkpoint(const InputParameters & parameters);
+  Checkpoint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

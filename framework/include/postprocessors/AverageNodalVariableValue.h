@@ -27,7 +27,8 @@ InputParameters validParams<AverageNodalVariableValue>();
 class AverageNodalVariableValue : public NodalVariablePostprocessor
 {
 public:
-  AverageNodalVariableValue(const std::string & name, InputParameters parameters);
+  AverageNodalVariableValue(const InputParameters & parameters);
+  AverageNodalVariableValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

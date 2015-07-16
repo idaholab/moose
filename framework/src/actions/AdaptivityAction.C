@@ -50,8 +50,8 @@ InputParameters validParams<AdaptivityAction>()
   return params;
 }
 
-AdaptivityAction::AdaptivityAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AdaptivityAction::AdaptivityAction(InputParameters params) :
+    Action(params)
 {
 }
 

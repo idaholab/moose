@@ -23,8 +23,8 @@ InputParameters validParams<ConstantVectorPostprocessor>()
   return params;
 }
 
-ConstantVectorPostprocessor::ConstantVectorPostprocessor(const std::string & name, InputParameters parameters) :
-    GeneralVectorPostprocessor(name, parameters),
+ConstantVectorPostprocessor::ConstantVectorPostprocessor(const InputParameters & parameters) :
+    GeneralVectorPostprocessor(parameters),
     _value(declareVector("value"))
 {
   _value = getParam<VectorPostprocessorValue>("value");
@@ -37,3 +37,12 @@ ConstantVectorPostprocessor::initialize()
 void
 ConstantVectorPostprocessor::execute()
 {}
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantVectorPostprocessor::ConstantVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralVectorPostprocessor(deprecated_name, parameters),
+    _value(declareVector("value"))
+{
+  _value = getParam<VectorPostprocessorValue>("value");
+}

@@ -38,3 +38,10 @@ ExecutionerAttributeReporter::getValue()
 {
   return *_value;
 }
+
+// DEPRECATED CONSTRUCTOR
+ExecutionerAttributeReporter::ExecutionerAttributeReporter(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
+    _value(parameters.getCheckedPointerParam<Real *>("value", "Invalid pointer to an attribute, this object should only be created via Executioner::addAttributeReporter"))
+{
+}

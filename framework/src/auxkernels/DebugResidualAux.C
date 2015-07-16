@@ -23,8 +23,8 @@ InputParameters validParams<DebugResidualAux>()
   return params;
 }
 
-DebugResidualAux::DebugResidualAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+DebugResidualAux::DebugResidualAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _debug_var(_nl_sys.getVariable(_tid, getParam<NonlinearVariableName>("debug_variable"))),
     _residual_copy(_nl_sys.residualGhosted())
 {
@@ -40,4 +40,14 @@ DebugResidualAux::computeValue()
 {
   dof_id_type dof = _current_node->dof_number(_nl_sys.number(), _debug_var.number(), 0);
   return _residual_copy(dof);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+DebugResidualAux::DebugResidualAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _debug_var(_nl_sys.getVariable(_tid, getParam<NonlinearVariableName>("debug_variable"))),
+    _residual_copy(_nl_sys.residualGhosted())
+{
+  mooseAssert(_nodal == true, "Cannot use DebugResidualAux on elemental variables");
 }

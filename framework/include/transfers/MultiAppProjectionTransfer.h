@@ -28,7 +28,8 @@ InputParameters validParams<MultiAppProjectionTransfer>();
 class MultiAppProjectionTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppProjectionTransfer(const std::string & name, InputParameters parameters);
+  MultiAppProjectionTransfer(const InputParameters & parameters);
+  MultiAppProjectionTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppProjectionTransfer();
 
   virtual void execute();

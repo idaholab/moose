@@ -26,7 +26,8 @@ class JumpIndicator :
   public InternalSideIndicator
 {
 public:
-  JumpIndicator(const std::string & name, InputParameters parameters);
+  JumpIndicator(const InputParameters & parameters);
+  JumpIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~JumpIndicator(){};
 
 protected:

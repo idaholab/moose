@@ -24,8 +24,8 @@ InputParameters validParams<ElementW1pError>()
   return params;
 }
 
-ElementW1pError::ElementW1pError(const std::string & name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(name, parameters),
+ElementW1pError::ElementW1pError(const InputParameters & parameters) :
+    ElementIntegralVariablePostprocessor(parameters),
     _p(getParam<Real>("p")),
     _func(getFunction("function"))
 {
@@ -51,4 +51,13 @@ ElementW1pError::computeQpIntegral()
     val += std::pow(std::abs(graddiff(i)), _p);
 
   return val;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementW1pError::ElementW1pError(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralVariablePostprocessor(deprecated_name, parameters),
+    _p(getParam<Real>("p")),
+    _func(getFunction("function"))
+{
 }

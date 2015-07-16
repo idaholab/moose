@@ -39,7 +39,8 @@ InputParameters validParams<Action>();
 class Action : public ConsoleStreamInterface
 {
 public:
-  Action(const std::string & name, InputParameters params);
+  Action(InputParameters parameters);
+  Action(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Action() {}                  // empty virtual destructor for proper memory release
 
   virtual void act() = 0;
@@ -61,15 +62,10 @@ public:
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParam(const std::string & name);
-
-  template <typename T>
   const T & getParam(const std::string & name) const;
   ///@}
 
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
-
-  inline InputParameters & getParams() { return _pars; }
 
   /**
    * Returns the short name which is the final string after the last delimiter for the
@@ -90,12 +86,17 @@ public:
 
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
 
+
 protected:
-  /// The name of the action
-  std::string _name;
 
   /// Input parameters for the action
   InputParameters _pars;
+
+  /// The name of the action
+  std::string _name;
+
+  /// The short name of the action
+  std::string _short_name;
 
   // The registered syntax for this block if any
   std::string _registered_identifier;
@@ -135,20 +136,13 @@ protected:
 
   MooseSharedPointer<MooseMesh> & _mesh;
   MooseSharedPointer<MooseMesh> & _displaced_mesh;
-  /// Convenience reference to a problem this action works on
 
-public:
+  /// Convenience reference to a problem this action works on
   MooseSharedPointer<FEProblem> & _problem;
+
   /// Convenience reference to an executioner
   MooseSharedPointer<Executioner> & _executioner;
 };
-
-template <typename T>
-const T &
-Action::getParam(const std::string & name)
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
-}
 
 template <typename T>
 const T &

@@ -34,7 +34,8 @@ InputParameters validParams<LayeredIntegral>();
 class LayeredIntegral : public ElementIntegralVariableUserObject, public LayeredBase
 {
 public:
-  LayeredIntegral(const std::string & name, InputParameters parameters);
+  LayeredIntegral(const InputParameters & parameters);
+  LayeredIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Given a Point return the integral value associated with the layer that point falls in.

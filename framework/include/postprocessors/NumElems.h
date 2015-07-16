@@ -26,7 +26,8 @@ InputParameters validParams<NumElems>();
 class NumElems : public GeneralPostprocessor
 {
 public:
-  NumElems(const std::string & name, InputParameters parameters);
+  NumElems(const InputParameters & parameters);
+  NumElems(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
 

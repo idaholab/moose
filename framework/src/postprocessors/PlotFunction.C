@@ -26,8 +26,8 @@ InputParameters validParams<PlotFunction>()
   return params;
 }
 
-PlotFunction::PlotFunction(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+PlotFunction::PlotFunction(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _func(getFunction("function")),
     _point(isParamValid("point") ? getParam<Point>("point") : Point()),
     _scale_factor(getParam<Real>("scale_factor"))
@@ -52,4 +52,14 @@ Real
 PlotFunction::getValue()
 {
   return _scale_factor * _func.value(_t, _point);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PlotFunction::PlotFunction(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _func(getFunction("function")),
+    _point(isParamValid("point") ? getParam<Point>("point") : Point()),
+    _scale_factor(getParam<Real>("scale_factor"))
+{
 }

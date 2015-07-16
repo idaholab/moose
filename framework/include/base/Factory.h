@@ -19,21 +19,24 @@
 #include <vector>
 #include <time.h>
 
+// MOOSE includes
 #include "MooseObject.h"
 #include "InputParameters.h"
 #include "MooseTypes.h"
+#include "ParallelUniqueId.h"
 
 /**
  * Macros
  */
 #define stringifyName(name) #name
-#define registerObject(name)                        factory.reg<name>(stringifyName(name))
-#define registerNamedObject(obj, name)              factory.reg<obj>(name)
+#define registerObject(name)                        factory.regLegacy<name>(stringifyName(name))
+#define registerNamedObject(obj, name)              factory.regLegacy<obj>(name)
 
 // for backward compatibility
 #define registerKernel(name)                        registerObject(name)
 #define registerBoundaryCondition(name)             registerObject(name)
 #define registerAux(name)                           registerObject(name)
+#define registerAuxKernel(name)                     registerObject(name)
 #define registerMaterial(name)                      registerObject(name)
 #define registerPostprocessor(name)                 registerObject(name)
 #define registerVectorPostprocessor(name)           registerObject(name)
@@ -64,6 +67,7 @@
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
 #define registerNamedAux(obj, name)                 registerNamedObject(obj, name)
+#define registerNamedAuxKernel(name)                registerNamedObject(obj, name)
 #define registerNamedMaterial(obj, name)            registerNamedObject(obj, name)
 #define registerNamedPostprocessor(obj, name)       registerNamedObject(obj, name)
 #define registerNamedVectorPostprocessor(obj, name) registerNamedObject(obj, name)
@@ -80,16 +84,17 @@
 #define registerNamedPreconditioner(obj, name)      registerNamedObject(obj, name)
 #define registerNamedIndicator(obj, name)           registerNamedObject(obj, name)
 #define registerNamedMarker(obj, name)              registerNamedObject(obj, name)
+#define registerNamedProblem(obj, name)             registerNamedObject(obj, name)
+#define registerNamedMultiApp(obj, name)            registerNamedObject(obj, name)
 #define registerNamedTransfer(obj, name)            registerNamedObject(obj, name)
 #define registerNamedTimeStepper(obj, name)         registerNamedObject(obj, name)
 #define registerNamedTimeIntegrator(obj, name)      registerNamedObject(obj, name)
 #define registerNamedPredictor(obj, name)           registerNamedObject(obj, name)
+#define registerNamedSplit(obj, name)               registerNamedObject(obj, name)
 #define registerNamedOutput(obj, name)              registerNamedObject(obj, name)
 
-
-// Macros for registering deprecated objects
-#define registerDeprecatedObject(name, time)        factory.regDeprecated<name>(stringifyName(name), time)
-#define registerDeprecatedObjectName(obj, name, time)     factory.regReplaced<obj>(stringifyName(obj), name, time)
+#define registerDeprecatedObject(name, time)             factory.regDeprecated<name>(stringifyName(name), time)
+#define registerDeprecatedObjectName(obj, name, time)    factory.regReplaced<obj>(stringifyName(obj), name, time)
 
 /**
  * Typedef to wrap shared pointer type
@@ -99,7 +104,8 @@ typedef MooseSharedPointer<MooseObject> MooseObjectPtr;
 /**
  * Typedef for function to build objects
  */
-typedef MooseObjectPtr (*buildPtr)(const std::string & name, InputParameters parameters);
+typedef MooseObjectPtr (*buildPtr)(const InputParameters & parameters);
+typedef MooseObjectPtr (*buildLegacyPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef for validParams
@@ -115,7 +121,13 @@ typedef std::map<std::string, paramsPtr>::iterator registeredMooseObjectIterator
  * Build an object of type T
  */
 template<class T>
-MooseObjectPtr buildObject(const std::string & name, InputParameters parameters)
+MooseObjectPtr buildObject(const InputParameters & parameters)
+{
+  return MooseObjectPtr(new T(parameters));
+}
+
+template<class T>
+MooseObjectPtr buildLegacyObject(const std::string & name, InputParameters parameters)
 {
   return MooseObjectPtr(new T(name, parameters));
 }
@@ -136,7 +148,8 @@ public:
   template<typename T>
   void reg(const std::string & obj_name)
   {
-    /**
+
+    /*
      * If _registerable_objects has been set the user has requested that we only register some subset
      * of the objects for a dynamically loaded application. The objects listed in *this* application's
      * registerObjects() method will have already been registered before that member was set.
@@ -165,7 +178,7 @@ public:
   void regDeprecated(const std::string & obj_name, const std::string t_str)
   {
     // Register the name
-    reg<T>(obj_name);
+    regLegacy<T>(obj_name);
 
     // Store the time
     _deprecated_time[obj_name] = parseTime(t_str);
@@ -188,6 +201,24 @@ public:
   }
 
   /**
+   * Registration for legacy constructors
+   */
+  template<typename T>
+  void regLegacy(const std::string & obj_name)
+  {
+    if (_registerable_objects.empty() || _registerable_objects.find(obj_name) != _registerable_objects.end())
+    {
+      if (_name_to_legacy_build_pointer.find(obj_name) == _name_to_legacy_build_pointer.end())
+      {
+        _name_to_legacy_build_pointer[obj_name] = &buildLegacyObject<T>;
+        _name_to_params_pointer[obj_name] = &validParams<T>;
+      }
+      else
+        mooseError("Object '" + obj_name + "' already registered.");
+    }
+  }
+
+  /**
    * Get valid parameters for the object
    * @param name Name of the object whose parameter we are requesting
    * @return Parameters of the object
@@ -201,7 +232,8 @@ public:
    * @param parameters Parameters this object should have
    * @return The created object
    */
-  MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters);
+  MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
+  MooseSharedPointer<MooseObject> createLegacy(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
 
   /**
    * Calling this object with a non-empty vector will cause this factory to ignore registrations from any object
@@ -250,6 +282,7 @@ protected:
 
   /// Storage for pointers to the object
   std::map<std::string, buildPtr> _name_to_build_pointer;
+  std::map<std::string, buildLegacyPtr> _name_to_legacy_build_pointer;
 
   /// Storage for pointers to the parameters objects
   std::map<std::string, paramsPtr> _name_to_params_pointer;

@@ -21,13 +21,20 @@ InputParameters validParams<AddConstraintAction>()
   return validParams<MooseObjectAction>();
 }
 
-AddConstraintAction::AddConstraintAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddConstraintAction::AddConstraintAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
 AddConstraintAction::act()
 {
-  _problem->addConstraint(_type, getShortName(), _moose_object_pars);
+  _problem->addConstraint(_type, _name, _moose_object_pars);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddConstraintAction::AddConstraintAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
 }

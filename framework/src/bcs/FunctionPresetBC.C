@@ -23,8 +23,8 @@ InputParameters validParams<FunctionPresetBC>()
   return params;
 }
 
-FunctionPresetBC::FunctionPresetBC(const std::string & name, InputParameters parameters) :
-    PresetNodalBC(name, parameters),
+FunctionPresetBC::FunctionPresetBC(const InputParameters & parameters) :
+    PresetNodalBC(parameters),
     _func(getFunction("function"))
 {
 }
@@ -33,4 +33,12 @@ Real
 FunctionPresetBC::computeQpValue()
 {
   return _func.value(_t, *_current_node);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FunctionPresetBC::FunctionPresetBC(const std::string & deprecated_name, InputParameters parameters) :
+    PresetNodalBC(deprecated_name, parameters),
+    _func(getFunction("function"))
+{
 }

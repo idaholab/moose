@@ -122,18 +122,15 @@ void
 AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<AuxiliarySystem *>("_aux_sys") = this;
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
-
-    MooseSharedPointer<AuxKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxKernel>(_factory.create(kernel_name, name, parameters));
+    MooseSharedPointer<AuxKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxKernel>(_factory.create(kernel_name, name, parameters, tid));
 
     // Add this AuxKernel to multiple ExecStores
     const std::vector<ExecFlagType> & exec_flags = kernel->execFlags();
     for (unsigned int i=0; i<exec_flags.size(); ++i)
       _auxs(exec_flags[i])[tid].addAuxKernel(kernel);
-
-    _fe_problem._objects_by_name[tid][name].push_back(kernel.get());
 
     if (kernel->boundaryRestricted())
     {
@@ -149,16 +146,12 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name, const std::str
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<THREAD_ID>("_tid") = tid;
-
-    MooseSharedPointer<AuxScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxScalarKernel>(_factory.create(kernel_name, name, parameters));
+    MooseSharedPointer<AuxScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxScalarKernel>(_factory.create(kernel_name, name, parameters, tid));
 
     // Add this AuxKernel to multiple ExecStores
     const std::vector<ExecFlagType> & exec_flags = kernel->execFlags();
     for (unsigned int i=0; i<exec_flags.size(); ++i)
       _auxs(exec_flags[i])[tid].addScalarKernel(kernel);
-
-    _fe_problem._objects_by_name[tid][name].push_back(kernel.get());
   }
 }
 

@@ -26,7 +26,8 @@ InputParameters validParams<SetupTimePeriodsAction>();
 class SetupTimePeriodsAction : public Action
 {
 public:
-  SetupTimePeriodsAction(const std::string & name, InputParameters params);
+  SetupTimePeriodsAction(InputParameters params);
+  SetupTimePeriodsAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

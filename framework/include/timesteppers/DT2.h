@@ -29,7 +29,8 @@ InputParameters validParams<DT2>();
 class DT2 : public TimeStepper
 {
 public:
-  DT2(const std::string & name, InputParameters parameters);
+  DT2(const InputParameters & parameters);
+  DT2(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void preExecute();
   virtual void preSolve();

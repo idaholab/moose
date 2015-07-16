@@ -21,8 +21,8 @@ InputParameters validParams<MassLumpedTimeDerivative>()
   return params;
 }
 
-MassLumpedTimeDerivative::MassLumpedTimeDerivative(const std::string & name, InputParameters parameters) :
-    TimeKernel(name, parameters),
+MassLumpedTimeDerivative::MassLumpedTimeDerivative(const InputParameters & parameters) :
+    TimeKernel(parameters),
     _u_dot_nodal(_var.nodalValueDot())
 {
 }
@@ -47,4 +47,12 @@ MassLumpedTimeDerivative::computeJacobian()
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       ke(_i, _i) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MassLumpedTimeDerivative::MassLumpedTimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
+    TimeKernel(deprecated_name, parameters),
+    _u_dot_nodal(_var.nodalValueDot())
+{
 }

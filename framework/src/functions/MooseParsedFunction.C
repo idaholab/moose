@@ -24,9 +24,9 @@ InputParameters validParams<MooseParsedFunction>()
   return params;
 }
 
-MooseParsedFunction::MooseParsedFunction(const std::string & name, InputParameters parameters) :
-    Function(name, parameters),
-    MooseParsedFunctionBase(name, parameters),
+MooseParsedFunction::MooseParsedFunction(const InputParameters & parameters) :
+    Function(parameters),
+    MooseParsedFunctionBase(parameters),
     _value(verifyFunction(getParam<std::string>("value"))),
     _function_ptr(NULL)
 {
@@ -72,4 +72,14 @@ MooseParsedFunction::initialSetup()
 
     _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _value, _vars, _vals, tid);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MooseParsedFunction::MooseParsedFunction(const std::string & deprecated_name, InputParameters parameters) :
+    Function(deprecated_name, parameters),
+    MooseParsedFunctionBase(parameters),
+    _value(verifyFunction(getParam<std::string>("value"))),
+    _function_ptr(NULL)
+{
 }

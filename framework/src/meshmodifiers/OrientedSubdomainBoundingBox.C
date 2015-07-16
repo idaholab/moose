@@ -27,8 +27,8 @@ InputParameters validParams<OrientedSubdomainBoundingBox>()
   return params;
 }
 
-OrientedSubdomainBoundingBox::OrientedSubdomainBoundingBox(const std::string & name, InputParameters parameters) :
-    MeshModifier(name, parameters),
+OrientedSubdomainBoundingBox::OrientedSubdomainBoundingBox(const InputParameters & parameters) :
+    MeshModifier(parameters),
     OrientedBoxInterface(parameters),
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<SubdomainID>("block_id"))
@@ -59,4 +59,15 @@ OrientedSubdomainBoundingBox::modify()
     else if (!contains && _location == "OUTSIDE")
       (*el)->subdomain_id() = _block_id;
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+OrientedSubdomainBoundingBox::OrientedSubdomainBoundingBox(const std::string & deprecated_name, InputParameters parameters) :
+    MeshModifier(deprecated_name, parameters),
+    OrientedBoxInterface(parameters),
+    _location(parameters.get<MooseEnum>("location")),
+    _block_id(parameters.get<SubdomainID>("block_id"))
+
+{
 }

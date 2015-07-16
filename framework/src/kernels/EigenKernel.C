@@ -28,8 +28,8 @@ InputParameters validParams<EigenKernel>()
   return params;
 }
 
-EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
-    KernelBase(name, parameters),
+EigenKernel::EigenKernel(const InputParameters & parameters) :
+    KernelBase(parameters),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
@@ -60,7 +60,7 @@ EigenKernel::initialSetup()
   // If the postprocessor name was not provided and an EigenExecutionerBase is not being used,
   // use the default value from the "eigen_postprocessor" parameter
   if (eigen_pp_name.empty())
-    _eigenvalue = &parameters().defaultPostprocessorValue("eigen_postprocessor");
+    _eigenvalue = &getDefaultPostprocessorValue("eigen_postprocessor");
 
   // If the name does exist, then use the postprocessor value
   else
@@ -145,4 +145,16 @@ EigenKernel::isActive()
   }
   else
     return flag;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+EigenKernel::EigenKernel(const std::string & deprecated_name, InputParameters parameters) :
+    KernelBase(deprecated_name, parameters),
+    _u(_is_implicit ? _var.sln() : _var.slnOld()),
+    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
+    _eigen(getParam<bool>("eigen")),
+    _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem())),
+    _eigenvalue(NULL)
+{
 }

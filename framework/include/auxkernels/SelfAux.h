@@ -35,7 +35,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  SelfAux(const std::string & name, InputParameters parameters);
+  SelfAux(const InputParameters & parameters);
+  SelfAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SelfAux();
 

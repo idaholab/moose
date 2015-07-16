@@ -29,7 +29,8 @@ class NodalValueSampler :
   protected SamplerBase
 {
 public:
-  NodalValueSampler(const std::string & name, InputParameters parameters);
+  NodalValueSampler(const InputParameters & parameters);
+  NodalValueSampler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NodalValueSampler() {}
 

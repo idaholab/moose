@@ -25,8 +25,8 @@ InputParameters validParams<AddMeshModifierAction>()
   return params;
 }
 
-AddMeshModifierAction::AddMeshModifierAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+AddMeshModifierAction::AddMeshModifierAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
@@ -42,7 +42,7 @@ AddMeshModifierAction::act()
   _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh.get();
 
   // Create the modifier object and run it
-  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create(_type, getShortName(), _moose_object_pars));
+  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create(_type, _name, _moose_object_pars));
   mooseAssert(_mesh != NULL, "Mesh hasn't been created");
 
   // Run the modifier on the normal mesh
@@ -61,4 +61,11 @@ AddMeshModifierAction::act()
   }
 
   // mesh_modifier is deleted here
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddMeshModifierAction::AddMeshModifierAction(const std::string & deprecated_name, InputParameters params) :
+    MooseObjectAction(deprecated_name, params)
+{
 }

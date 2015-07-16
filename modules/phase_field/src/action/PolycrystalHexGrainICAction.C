@@ -8,6 +8,7 @@
 #include "Factory.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -75,6 +76,6 @@ PolycrystalHexGrainICAction::act()
     poly_params.set<Real>("perturbation_percent") = _perturbation_percent;
 
     //Add initial condition
-    _problem->addInitialCondition("HexPolycrystalIC", "InitialCondition", poly_params);
+    _problem->addInitialCondition("HexPolycrystalIC", "ICs/PolycrystalICs/PolycrystalHexGrainIC_" + Moose::stringify(op), poly_params);
   }
 }

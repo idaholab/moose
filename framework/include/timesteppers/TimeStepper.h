@@ -33,7 +33,8 @@ class TimeStepper :
   public Restartable
 {
 public:
-  TimeStepper(const std::string & name, InputParameters parameters);
+  TimeStepper(const InputParameters & parameters);
+  TimeStepper(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~TimeStepper();
 
   /**

@@ -36,7 +36,8 @@ public:
   /**
    * Class constructor
    */
-  Console(const std::string & name, InputParameters);
+  Console(const InputParameters & parameters);
+  Console(const std::string & deprecated_name, InputParameters deprecated_parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Destructor

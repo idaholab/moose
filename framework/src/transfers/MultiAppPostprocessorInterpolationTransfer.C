@@ -41,8 +41,8 @@ InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>()
   return params;
 }
 
-MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _postprocessor(getParam<PostprocessorName>("postprocessor")),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _num_points(getParam<unsigned int>("num_points")),
@@ -151,4 +151,17 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       break;
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTransfer(const std::string & deprecated_name, InputParameters parameters) :
+    MultiAppTransfer(deprecated_name, parameters),
+    _postprocessor(getParam<PostprocessorName>("postprocessor")),
+    _to_var_name(getParam<AuxVariableName>("variable")),
+    _num_points(getParam<unsigned int>("num_points")),
+    _power(getParam<Real>("power")),
+    _interp_type(getParam<MooseEnum>("interp_type")),
+    _radius(getParam<Real>("radius"))
+{
 }

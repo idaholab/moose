@@ -36,7 +36,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  ProcessorIDAux(const std::string & name, InputParameters parameters);
+  ProcessorIDAux(const InputParameters & parameters);
+  ProcessorIDAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ProcessorIDAux();
 

@@ -52,8 +52,8 @@ InputParameters validParams<TiledMesh>()
   return params;
 }
 
-TiledMesh::TiledMesh(const std::string & name, InputParameters parameters):
-    MooseMesh(name, parameters),
+TiledMesh::TiledMesh(const InputParameters & parameters):
+    MooseMesh(parameters),
     _x_width(getParam<Real>("x_width")),
     _y_width(getParam<Real>("y_width")),
     _z_width(getParam<Real>("z_width"))
@@ -137,4 +137,16 @@ TiledMesh::buildMesh()
       }
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TiledMesh::TiledMesh(const std::string & deprecated_name, InputParameters parameters):
+    MooseMesh(deprecated_name, parameters),
+    _x_width(getParam<Real>("x_width")),
+    _y_width(getParam<Real>("y_width")),
+    _z_width(getParam<Real>("z_width"))
+{
+  // The TiledMesh class only works with SerialMesh
+  errorIfParallelDistribution("TiledMesh");
 }

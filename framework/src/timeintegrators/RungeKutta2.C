@@ -25,8 +25,8 @@ InputParameters validParams<RungeKutta2>()
   return params;
 }
 
-RungeKutta2::RungeKutta2(const std::string & name, InputParameters parameters) :
-    TimeIntegrator(name, parameters),
+RungeKutta2::RungeKutta2(const InputParameters & parameters) :
+    TimeIntegrator(parameters),
     _stage(0)
 {
   _fe_problem.setConstJacobian(true);
@@ -95,4 +95,13 @@ RungeKutta2::postStep(NumericVector<Number> & residual)
     residual *= 0.5;
   residual += _Re_time;
   residual.close();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RungeKutta2::RungeKutta2(const std::string & deprecated_name, InputParameters parameters) :
+    TimeIntegrator(deprecated_name, parameters),
+    _stage(0)
+{
+  _fe_problem.setConstJacobian(true);
 }

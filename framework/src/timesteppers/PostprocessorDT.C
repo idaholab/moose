@@ -23,8 +23,8 @@ InputParameters validParams<PostprocessorDT>()
   return params;
 }
 
-PostprocessorDT::PostprocessorDT(const std::string & name, InputParameters parameters) :
-    TimeStepper(name, parameters),
+PostprocessorDT::PostprocessorDT(const InputParameters & parameters) :
+    TimeStepper(parameters),
     PostprocessorInterface(parameters),
     _pps_value(getPostprocessorValue("postprocessor")),
     _has_initial_dt(isParamValid("dt")),
@@ -45,4 +45,15 @@ Real
 PostprocessorDT::computeDT()
 {
   return _pps_value;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PostprocessorDT::PostprocessorDT(const std::string & deprecated_name, InputParameters parameters) :
+    TimeStepper(deprecated_name, parameters),
+    PostprocessorInterface(parameters),
+    _pps_value(getPostprocessorValue("postprocessor")),
+    _has_initial_dt(isParamValid("dt")),
+    _initial_dt(_has_initial_dt ? getParam<Real>("dt") : 0.)
+{
 }

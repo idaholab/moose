@@ -41,8 +41,8 @@ InputParameters validParams<AB2PredictorCorrector>()
   return params;
 }
 
-AB2PredictorCorrector::AB2PredictorCorrector(const std::string & name, InputParameters parameters) :
-    TimeStepper(name, parameters),
+AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters) :
+    TimeStepper(parameters),
     _u1(_fe_problem.getNonlinearSystem().addVector("u1", true, GHOSTED)),
     _aux1(_fe_problem.getAuxiliarySystem().addVector("aux1", true, GHOSTED)),
     _dt_full(declareRestartableData<Real>("dt_full", 0)),
@@ -215,4 +215,29 @@ AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
     break;
   }
   return -1;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AB2PredictorCorrector::AB2PredictorCorrector(const std::string & deprecated_name, InputParameters parameters) :
+    TimeStepper(deprecated_name, parameters),
+    _u1(_fe_problem.getNonlinearSystem().addVector("u1", true, GHOSTED)),
+    _aux1(_fe_problem.getAuxiliarySystem().addVector("aux1", true, GHOSTED)),
+    _dt_full(declareRestartableData<Real>("dt_full", 0)),
+    _error(declareRestartableData<Real>("error", 0)),
+    _e_tol(getParam<Real>("e_tol")),
+    _e_max(getParam<Real>("e_max")),
+    _max_increase(getParam<Real>("max_increase")),
+    _steps_between_increase(getParam<int>("steps_between_increase")),
+    _dt_steps_taken(declareRestartableData<int>("dt_steps_taken", 0)),
+    _start_adapting(getParam<int>("start_adapting")),
+    _my_dt_old(declareRestartableData<Real>("my_dt_old", 0)),
+    _infnorm(declareRestartableData<Real>("infnorm", 0)),
+    _scaling_parameter(getParam<Real>("scaling_parameter"))
+{
+  Real predscale = 1.;
+  InputParameters params = _app.getFactory().getValidParams("AdamsPredictor");
+  params.set<Real>("scale") = predscale;
+  _fe_problem.addPredictor("AdamsPredictor", "adamspredictor", params);
+
 }

@@ -35,7 +35,8 @@ InputParameters validParams<NearestPointLayeredAverage>();
 class NearestPointLayeredAverage : public ElementIntegralVariableUserObject
 {
 public:
-  NearestPointLayeredAverage(const std::string & name, InputParameters parameters);
+  NearestPointLayeredAverage(const InputParameters & parameters);
+  NearestPointLayeredAverage(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   ~NearestPointLayeredAverage();
 
   virtual void initialize();

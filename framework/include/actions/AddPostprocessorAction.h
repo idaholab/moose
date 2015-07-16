@@ -27,7 +27,8 @@ InputParameters validParams<AddPostprocessorAction>();
 class AddPostprocessorAction: public MooseObjectAction
 {
 public:
-  AddPostprocessorAction(const std::string & name, InputParameters params);
+  AddPostprocessorAction(InputParameters params);
+  AddPostprocessorAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

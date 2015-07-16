@@ -31,7 +31,8 @@ class PostprocessorDT :
     public PostprocessorInterface
 {
 public:
-  PostprocessorDT(const std::string & name, InputParameters parameters);
+  PostprocessorDT(const InputParameters & parameters);
+  PostprocessorDT(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeInitialDT();

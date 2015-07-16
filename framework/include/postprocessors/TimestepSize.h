@@ -26,7 +26,8 @@ InputParameters validParams<TimestepSize>();
 class TimestepSize : public GeneralPostprocessor
 {
 public:
-  TimestepSize(const std::string & name, InputParameters parameters);
+  TimestepSize(const InputParameters & parameters);
+  TimestepSize(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

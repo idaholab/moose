@@ -28,7 +28,8 @@ InputParameters validParams<Dirk>();
 class Dirk : public TimeIntegrator
 {
 public:
-  Dirk(const std::string & name, InputParameters parameters);
+  Dirk(const InputParameters & parameters);
+  Dirk(const std::string & name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Dirk();
 
   virtual int order() { return 2; }

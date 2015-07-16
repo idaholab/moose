@@ -27,7 +27,8 @@ template<> InputParameters validParams<ConstantFunction>();
 class ConstantFunction : public Function
 {
 public:
-  ConstantFunction(const std::string & name, InputParameters parameters);
+  ConstantFunction(const InputParameters & parameters);
+  ConstantFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(Real t, const Point & p);
 

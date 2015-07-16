@@ -30,7 +30,8 @@ InputParameters validParams<FunctionSideIntegral>();
 class FunctionSideIntegral : public SideIntegralPostprocessor
 {
 public:
-  FunctionSideIntegral(const std::string & name, InputParameters parameters);
+  FunctionSideIntegral(const InputParameters & parameters);
+  FunctionSideIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void threadJoin(const UserObject & y);
 
 protected:

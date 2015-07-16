@@ -30,7 +30,7 @@ PostprocessorInterface::getPostprocessorValue(const std::string & name)
   // Return the default if the Postprocessor does not exist and a default does, otherwise
   // continue as usual
   if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
-    return _ppi_params.defaultPostprocessorValue(name);
+    return _ppi_params.getDefaultPostprocessorValue(name);
   else
     return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
@@ -41,7 +41,7 @@ PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
   // Return the default if the Postprocessor does not exist and a default does, otherwise
   // continue as usual
   if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
-    return _ppi_params.defaultPostprocessorValue(name);
+    return _ppi_params.getDefaultPostprocessorValue(name);
   else
     return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
@@ -52,11 +52,10 @@ PostprocessorInterface::getPostprocessorValueOlder(const std::string & name)
   // Return the default if the Postprocessor does not exist and a default does, otherwise
   // continue as usual
   if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
-    return _ppi_params.defaultPostprocessorValue(name);
+    return _ppi_params.getDefaultPostprocessorValue(name);
   else
     return _pi_feproblem.getPostprocessorValueOlder(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
-
 
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & name)
@@ -77,14 +76,19 @@ PostprocessorInterface::getPostprocessorValueOlderByName(const PostprocessorName
 }
 
 bool
-PostprocessorInterface::hasPostprocessor(const std::string & name)
+PostprocessorInterface::hasPostprocessor(const std::string & name) const
 {
   return _pi_feproblem.hasPostprocessor(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
-
 
 bool
 PostprocessorInterface::hasPostprocessorByName(const PostprocessorName & name)
 {
   return _pi_feproblem.hasPostprocessor(name, _pi_tid);
+}
+
+const PostprocessorValue &
+PostprocessorInterface::getDefaultPostprocessorValue(const std::string & name)
+{
+  return _ppi_params.getDefaultPostprocessorValue(name);
 }

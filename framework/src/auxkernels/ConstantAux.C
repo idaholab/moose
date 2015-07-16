@@ -22,8 +22,8 @@ InputParameters validParams<ConstantAux>()
   return params;
 }
 
-ConstantAux::ConstantAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+ConstantAux::ConstantAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _value(getParam<Real>("value"))
 {
 }
@@ -33,4 +33,12 @@ Real
 ConstantAux::computeValue()
 {
   return _value;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ConstantAux::ConstantAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _value(getParam<Real>("value"))
+{
 }

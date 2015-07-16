@@ -33,7 +33,8 @@ class UserForcingFunction : public Kernel
 {
 public:
 
-  UserForcingFunction(const std::string & name, InputParameters parameters);
+  UserForcingFunction(const InputParameters & parameters);
+  UserForcingFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

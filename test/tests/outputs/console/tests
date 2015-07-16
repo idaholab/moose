@@ -25,6 +25,7 @@
     cli_args = 'Outputs/console=true Outputs/screen/file_base=console_warning_out'
     expect_out = 'Multiple \(3\) Console output objects are writing to the screen, this will likely cause duplicate messages printed.'
     allow_warnings = true
+    max_parallel = 1 # warning can mix on multiple processes
   [../]
   [./file_system_information]
     # Test that file contains regex

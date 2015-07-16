@@ -42,7 +42,8 @@ class MoosePreconditioner :
   public Restartable
 {
 public:
-  MoosePreconditioner(const std::string & name, InputParameters params);
+  MoosePreconditioner(const InputParameters & params);
+  MoosePreconditioner(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual ~MoosePreconditioner();
 
   /**

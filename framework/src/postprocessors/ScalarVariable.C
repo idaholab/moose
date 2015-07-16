@@ -24,8 +24,8 @@ InputParameters validParams<ScalarVariable>()
   return params;
 }
 
-ScalarVariable::ScalarVariable(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+ScalarVariable::ScalarVariable(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
     _idx(getParam<unsigned int>("component"))
 {
@@ -50,4 +50,13 @@ ScalarVariable::getValue()
 {
   _var.reinit();
   return _var.sln()[_idx];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ScalarVariable::ScalarVariable(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralPostprocessor(deprecated_name, parameters),
+    _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
+    _idx(getParam<unsigned int>("component"))
+{
 }

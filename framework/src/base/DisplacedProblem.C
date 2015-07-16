@@ -27,7 +27,7 @@ InputParameters validParams<DisplacedProblem>()
 }
 
 DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, InputParameters params) :
-    SubProblem(mproblem.name() + "_disp", params),
+    SubProblem(params),
     _mproblem(mproblem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),

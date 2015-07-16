@@ -21,8 +21,8 @@ InputParameters validParams<ProcessorIDAux>()
   return params;
 }
 
-ProcessorIDAux::ProcessorIDAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters)
+ProcessorIDAux::ProcessorIDAux(const InputParameters & parameters) :
+    AuxKernel(parameters)
 {
 }
 
@@ -37,4 +37,11 @@ ProcessorIDAux::computeValue()
     return _current_node->processor_id();
   else
     return _current_elem->processor_id();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ProcessorIDAux::ProcessorIDAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters)
+{
 }

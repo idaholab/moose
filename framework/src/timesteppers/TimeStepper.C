@@ -28,8 +28,8 @@ InputParameters validParams<TimeStepper>()
   return params;
 }
 
-TimeStepper::TimeStepper(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+TimeStepper::TimeStepper(const InputParameters & parameters) :
+    MooseObject(parameters),
     Restartable(parameters, "TimeSteppers"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _executioner(*parameters.getCheckedPointerParam<Transient *>("_executioner")),
@@ -235,4 +235,28 @@ void
 TimeStepper::addSyncTime(Real sync_time)
 {
   _sync_times.insert(sync_time);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TimeStepper::TimeStepper(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    Restartable(parameters, "TimeSteppers"),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _executioner(*parameters.getCheckedPointerParam<Transient *>("_executioner")),
+    _time(_fe_problem.time()),
+    _time_old(_fe_problem.timeOld()),
+    _t_step(_fe_problem.timeStep()),
+    _dt(_fe_problem.dt()),
+    _dt_min(_executioner.dtMin()),
+    _dt_max(_executioner.dtMax()),
+    _end_time(_executioner.endTime()),
+    _sync_times(_app.getOutputWarehouse().getSyncTimes()),
+    _timestep_tolerance(_executioner.timestepTol()),
+    _verbose(_executioner.verbose()),
+    _converged(true),
+    _reset_dt(getParam<bool>("reset_dt")),
+    _has_reset_dt(false),
+    _current_dt(declareRestartableData("current_dt", 1.0))
+{
 }

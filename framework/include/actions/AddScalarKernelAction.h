@@ -26,7 +26,8 @@ InputParameters validParams<AddScalarKernelAction>();
 class AddScalarKernelAction : public MooseObjectAction
 {
 public:
-  AddScalarKernelAction(const std::string & name, InputParameters params);
+  AddScalarKernelAction(InputParameters params);
+  AddScalarKernelAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

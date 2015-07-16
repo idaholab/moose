@@ -33,7 +33,8 @@ class ParsedODEKernel :
   public FunctionParserUtils
 {
 public:
-  ParsedODEKernel(const std::string & name, InputParameters parameters);
+  ParsedODEKernel(const InputParameters & parameters);
+  ParsedODEKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ParsedODEKernel();
 
 protected:

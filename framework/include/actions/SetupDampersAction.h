@@ -26,7 +26,8 @@ InputParameters validParams<SetupDampersAction>();
 class SetupDampersAction : public Action
 {
 public:
-  SetupDampersAction(const std::string & name, InputParameters params);
+  SetupDampersAction(InputParameters params);
+  SetupDampersAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

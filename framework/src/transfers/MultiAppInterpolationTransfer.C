@@ -45,8 +45,8 @@ InputParameters validParams<MultiAppInterpolationTransfer>()
   return params;
 }
 
-MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
+MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParameters & parameters) :
+    MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
     _num_points(getParam<unsigned int>("num_points")),
@@ -72,7 +72,7 @@ MultiAppInterpolationTransfer::initialSetup()
 void
 MultiAppInterpolationTransfer::execute()
 {
-  _console << "Beginning InterpolationTransfer " << _name << std::endl;
+  _console << "Beginning InterpolationTransfer " << name() << std::endl;
 
   switch (_direction)
   {
@@ -445,7 +445,7 @@ MultiAppInterpolationTransfer::execute()
     }
   }
 
-  _console << "Finished InterpolationTransfer " << _name << std::endl;
+  _console << "Finished InterpolationTransfer " << name() << std::endl;
 }
 
 Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)
@@ -465,4 +465,21 @@ Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & dis
   }
 
   return nearest;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const std::string & name, InputParameters parameters) :
+    MultiAppTransfer(name, parameters),
+    _to_var_name(getParam<AuxVariableName>("variable")),
+    _from_var_name(getParam<VariableName>("source_variable")),
+    _num_points(getParam<unsigned int>("num_points")),
+    _power(getParam<Real>("power")),
+    _interp_type(getParam<MooseEnum>("interp_type")),
+    _radius(getParam<Real>("radius"))
+{
+  // This transfer does not work with ParallelMesh
+  _fe_problem.mesh().errorIfParallelDistribution("MultiAppInterpolationTransfer");
+  _displaced_source_mesh = getParam<bool>("displaced_source_mesh");
+  _displaced_target_mesh = getParam<bool>("displaced_target_mesh");
 }

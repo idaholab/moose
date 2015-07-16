@@ -21,8 +21,8 @@ InputParameters params = validParams<ElementIntegralPostprocessor>();
   return params;
 }
 
-VolumePostprocessor::VolumePostprocessor(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters)
+VolumePostprocessor::VolumePostprocessor(const InputParameters & parameters) :
+    ElementIntegralPostprocessor(parameters)
 {}
 
 void
@@ -37,3 +37,9 @@ VolumePostprocessor::computeQpIntegral()
 {
   return 1.0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+VolumePostprocessor::VolumePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralPostprocessor(deprecated_name, parameters)
+{}

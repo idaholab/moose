@@ -28,8 +28,8 @@ InputParameters validParams<NearestNodeValueAux>()
   return params;
 }
 
-NearestNodeValueAux::NearestNodeValueAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"),
                                         boundaryNames()[0])),
     _serialized_solution(_nl_sys.currentSolution()),
@@ -52,4 +52,17 @@ NearestNodeValueAux::computeValue()
   dof_id_type dof_number = nearest->dof_number(_nl_sys.number(), _paired_variable, 0);
 
   return (*_serialized_solution)(dof_number);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NearestNodeValueAux::NearestNodeValueAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"),
+                                        boundaryNames()[0])),
+    _serialized_solution(_nl_sys.currentSolution()),
+    _paired_variable(coupled("paired_variable"))
+{
+  if (boundaryNames().size() > 1)
+    mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
 }

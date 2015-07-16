@@ -23,8 +23,8 @@ InputParameters validParams<EqualValueBoundaryConstraint>()
   return params;
 }
 
-EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const std::string & name, InputParameters parameters) :
-    NodalConstraint(name, parameters),
+EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters) :
+    NodalConstraint(parameters),
     _slave_boundary_id(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
     _penalty(getParam<Real>("penalty"))
 {
@@ -92,4 +92,38 @@ EqualValueBoundaryConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
   }
 
   return 0.;
+}
+
+
+
+// DEPRECATED CONSTRUCTOR
+EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const std::string & deprecated_name, InputParameters deprecated_parameters) :
+    NodalConstraint(deprecated_name, deprecated_parameters),
+    _slave_boundary_id(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
+    _penalty(getParam<Real>("penalty"))
+{
+
+  std::vector<dof_id_type> nodelist;
+  std::vector<boundary_id_type> boundary_id_list;
+  _mesh.getMesh().boundary_info->build_node_list(nodelist,boundary_id_list);
+
+  std::vector<dof_id_type>::iterator in;
+  std::vector<boundary_id_type>::iterator ib;
+
+  for (in = nodelist.begin(), ib = boundary_id_list.begin();
+       in != nodelist.end() && ib != boundary_id_list.end();
+       ++in, ++ib)
+  {
+    bool slave_local(_mesh.node(*in).processor_id() == _subproblem.processor_id());
+    if (*ib == _slave_boundary_id &&
+        *in != _master_node_id &&
+        slave_local)
+    {
+      _connected_nodes.push_back(*in);
+
+      std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[_master_node_id];
+      for (unsigned int i = 0; i < elems.size(); ++i)
+        _subproblem.addGhostedElem(elems[i]);
+    }
+  }
 }

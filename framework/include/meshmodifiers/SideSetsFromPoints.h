@@ -27,7 +27,8 @@ class SideSetsFromPoints :
   public AddSideSetsBase
 {
 public:
-  SideSetsFromPoints(const std::string & name, InputParameters parameters);
+  SideSetsFromPoints(const InputParameters & parameters);
+  SideSetsFromPoints(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SideSetsFromPoints();
 

@@ -30,13 +30,13 @@ InputParameters validParams<SetupTimePeriodsAction>()
 }
 
 
-SetupTimePeriodsAction::SetupTimePeriodsAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+SetupTimePeriodsAction::SetupTimePeriodsAction(InputParameters params) :
+    Action(params)
 {
   if (params.isParamValid("active_kernels") && params.isParamValid("inactive_kernels"))
-    mooseError(std::string("Either active or inactive kernels may be supplied for time period \"") + name + "\", not both");
+    mooseError(std::string("Either active or inactive kernels may be supplied for time period \"") + name() + "\", not both");
   if (params.isParamValid("active_bcs") && params.isParamValid("inactive_bcs"))
-    mooseError(std::string("Either active or inactive bcs may be supplied for time period \"") + name + "\", not both");
+    mooseError(std::string("Either active or inactive bcs may be supplied for time period \"") + name() + "\", not both");
 }
 
 void
@@ -44,7 +44,7 @@ SetupTimePeriodsAction::act()
 {
   if (_problem.get() != NULL)
   {
-    TimePeriod & tp = _problem->addTimePeriod(getShortName(), getParam<Real>("start"));
+    TimePeriod & tp = _problem->addTimePeriod(_name, getParam<Real>("start"));
 
     if (_pars.isParamValid("active_kernels"))
       tp.addActiveObjects("kernels", getParam<std::vector<std::string> >("active_kernels"));
@@ -56,4 +56,15 @@ SetupTimePeriodsAction::act()
     else if (_pars.isParamValid("inactive_bcs"))
       tp.addInactiveObjects("bcs", getParam<std::vector<std::string> >("inactive_bcs"));
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupTimePeriodsAction::SetupTimePeriodsAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
+  if (params.isParamValid("active_kernels") && params.isParamValid("inactive_kernels"))
+    mooseError(std::string("Either active or inactive kernels may be supplied for time period \"") + name() + "\", not both");
+  if (params.isParamValid("active_bcs") && params.isParamValid("inactive_bcs"))
+    mooseError(std::string("Either active or inactive bcs may be supplied for time period \"") + name() + "\", not both");
 }

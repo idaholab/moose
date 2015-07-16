@@ -50,38 +50,39 @@ class ElementIndicator :
   public ZeroInterface
 {
 public:
-    ElementIndicator(const std::string & name, InputParameters parameters);
-    virtual ~ElementIndicator(){};
+  ElementIndicator(const InputParameters & parameters);
+  ElementIndicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
+  virtual ~ElementIndicator(){};
 
 protected:
-    MooseVariable & _field_var;
+  MooseVariable & _field_var;
 
-    const Elem * & _current_elem;
-    /// Volume of the current element
-    const Real & _current_elem_volume;
+  const Elem * & _current_elem;
+  /// Volume of the current element
+  const Real & _current_elem_volume;
 
-    unsigned int _qp;
-    const MooseArray< Point > & _q_point;
-    QBase * & _qrule;
-    const MooseArray<Real> & _JxW;
-    const MooseArray<Real> & _coord;
+  unsigned int _qp;
+  const MooseArray< Point > & _q_point;
+  QBase * & _qrule;
+  const MooseArray<Real> & _JxW;
+  const MooseArray<Real> & _coord;
 
-    MooseVariable & _var;
+  MooseVariable & _var;
 
 
-    /// Holds the solution at current quadrature points
-    VariableValue & _u;
-    /// Holds the solution gradient at the current quadrature points
-    VariableGradient & _grad_u;
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
+  /// Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u;
 
-    /// Time derivative of u
-    VariableValue & _u_dot;
-    /// Derivative of u_dot wrt u
-    VariableValue & _du_dot_du;
+  /// Time derivative of u
+  VariableValue & _u_dot;
+  /// Derivative of u_dot wrt u
+  VariableValue & _du_dot_du;
 
-    /// Holds local indicator entries as their accumulated by this ElementIndicator
-    DenseVector<Number> _local_indtr;
-    //  Real _local_indtr;
+  /// Holds local indicator entries as their accumulated by this ElementIndicator
+  DenseVector<Number> _local_indtr;
+  //  Real _local_indtr;
 };
 
 #endif /* ELEMENTINDICATOR_H */

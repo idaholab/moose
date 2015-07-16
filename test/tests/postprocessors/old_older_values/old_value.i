@@ -41,6 +41,7 @@
   [./grow]
     type = TestPostprocessor
     execute_on = 'initial timestep_end'
+    test_type = 'grow'
   [../]
 []
 

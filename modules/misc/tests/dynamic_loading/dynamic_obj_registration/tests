@@ -9,7 +9,7 @@
     executable_pattern = 'misc-\w+$'
   [../]
 
-  [./dynamic_object_loading_synax]
+  [./dynamic_object_loading_syntax]
     type = 'Exodiff'
     input = 'dynamic_syntax.i'
     exodiff = 'dynamic_syntax_out.e'

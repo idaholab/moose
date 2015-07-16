@@ -25,8 +25,8 @@ InputParameters validParams<TimeIntegrator>()
   return params;
 }
 
-TimeIntegrator::TimeIntegrator(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
+TimeIntegrator::TimeIntegrator(const InputParameters & parameters) :
+    MooseObject(parameters),
     Restartable(parameters, "TimeIntegrators"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
@@ -52,4 +52,25 @@ void
 TimeIntegrator::solve()
 {
   _nl.sys().solve();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TimeIntegrator::TimeIntegrator(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObject(deprecated_name, parameters),
+    Restartable(parameters, "TimeIntegrators"),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
+    _nl(_fe_problem.getNonlinearSystem()),
+    _u_dot(_sys.solutionUDot()),
+    _du_dot_du(_sys.duDotDu()),
+    _solution(_sys.currentSolution()),
+    _solution_old(_sys.solutionOld()),
+    _solution_older(_sys.solutionOlder()),
+    _t_step(_fe_problem.timeStep()),
+    _dt(_fe_problem.dt()),
+    _dt_old(_fe_problem.dtOld()),
+    _Re_time(_nl.residualVector(Moose::KT_TIME)),
+    _Re_non_time(_nl.residualVector(Moose::KT_NONTIME))
+{
 }

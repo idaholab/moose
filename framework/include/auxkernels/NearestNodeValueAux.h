@@ -35,7 +35,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  NearestNodeValueAux(const std::string & name, InputParameters parameters);
+  NearestNodeValueAux(const InputParameters & parameters);
+  NearestNodeValueAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NearestNodeValueAux();
 

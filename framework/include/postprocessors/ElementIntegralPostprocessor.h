@@ -32,7 +32,8 @@ InputParameters validParams<ElementIntegralPostprocessor>();
 class ElementIntegralPostprocessor : public ElementPostprocessor
 {
 public:
-  ElementIntegralPostprocessor(const std::string & name, InputParameters parameters);
+  ElementIntegralPostprocessor(const InputParameters & parameters);
+  ElementIntegralPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

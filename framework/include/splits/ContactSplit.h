@@ -20,7 +20,8 @@
 
 class ContactSplit : public Split {
  public:
-  ContactSplit(const std::string& name, InputParameters params);
+  ContactSplit(const InputParameters & params);
+  ContactSplit(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual void setup(const std::string& prefix = "-");
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)

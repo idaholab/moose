@@ -23,8 +23,8 @@ InputParameters validParams<SetupPostprocessorDataAction>()
   return params;
 }
 
-SetupPostprocessorDataAction::SetupPostprocessorDataAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+SetupPostprocessorDataAction::SetupPostprocessorDataAction(InputParameters params) :
+  Action(params)
 {
 }
 
@@ -35,5 +35,12 @@ SetupPostprocessorDataAction::~SetupPostprocessorDataAction()
 void
 SetupPostprocessorDataAction::act()
 {
-  _problem->initPostprocessorData(getShortName());
+  _problem->initPostprocessorData(MooseUtils::shortName(_name));
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupPostprocessorDataAction::SetupPostprocessorDataAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
 }

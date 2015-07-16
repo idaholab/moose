@@ -43,7 +43,8 @@ class ElementW1pError :
   public ElementIntegralVariablePostprocessor
 {
 public:
-  ElementW1pError(const std::string & name, InputParameters parameters);
+  ElementW1pError(const InputParameters & parameters);
+  ElementW1pError(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real getValue();
 

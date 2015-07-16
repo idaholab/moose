@@ -91,14 +91,14 @@ EBSDMeshErrorTest::headerErrorHelper(const char * filename, const char * error)
   // generate input parameter set
   InputParameters params = validParams<EBSDMesh>();
   params.addPrivateParam("_moose_app", _app);
-  params.set<std::string>("name", "EBSD");
+  params.set<std::string>("name") = filename; // use the filename to define a unique name
 
   // set filename
   params.set<FileName>("filename") = filename;
   params.set<unsigned int>("uniform_refine") = 2;
 
   // construct mesh object
-  EBSDMesh * mesh = new EBSDMesh("unit_test_mesh", params);
+  EBSDMesh * mesh = new EBSDMesh(filename, params);
 
   try
   {
@@ -121,24 +121,28 @@ EBSDMeshErrorTest::geometrySpecifiedError()
   // test all these Real parameters
   const unsigned int nreal = 6;
   const char * real_params[nreal] = {"xmin", "xmax", "ymin", "ymax", "zmin", "zmax"};
-  testParam<Real>(nreal, real_params);
+  testParam<Real>(nreal, real_params, "TestA");
 
   // test all these int parameters
   const unsigned int nint = 3;
   const char * int_params[nint] = {"nx", "ny", "nz"};
-  testParam<int>(nint, int_params);
+  testParam<int>(nint, int_params, "TestB");
 }
 
 template<typename T>
 void
-EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list)
+EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list, std::string name)
 {
   for (unsigned int i = 0; i < nparam; ++i)
   {
+    // create a unique name
+    std::ostringstream oss;
+    oss << name << "_" << i;
+
     // generate input parameter set
     InputParameters params = validParams<EBSDMesh>();
     params.addPrivateParam("_moose_app", _app);
-    params.set<std::string>("name", "EBSD");
+    params.set<std::string>("name") = oss.str();
 
     // set a single parameter
     params.set<T>(param_list[i]) = T(1.0);
@@ -149,7 +153,7 @@ EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list)
     try
     {
       // construct mesh object
-      EBSDMesh * mesh = new EBSDMesh("unit_test_mesh", params);
+      EBSDMesh * mesh = new EBSDMesh(oss.str(), params);
       delete mesh;
     }
     catch(const std::exception & e)

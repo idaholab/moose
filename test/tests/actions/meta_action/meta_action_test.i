@@ -13,6 +13,24 @@
     variables = 'convected diffused'
 []
 
+#[Variables]
+#  [./convected]
+#  [../]
+#  [./diffused]
+#  [../]
+#[]
+#
+#[Kernels]
+#  [./diff_v]
+#    type = Diffusion
+#    variable = convected
+#  [../]
+#  [./diff_u]
+#    type = Diffusion
+#    variable = diffused
+#  [../]
+#[]
+
 [BCs]
   active = 'left_convected right_convected left_diffused right_diffused'
 

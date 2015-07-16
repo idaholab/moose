@@ -35,8 +35,8 @@ InputParameters validParams<AddNodalNormalsAction>()
   return params;
 }
 
-AddNodalNormalsAction::AddNodalNormalsAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
+AddNodalNormalsAction::AddNodalNormalsAction(InputParameters parameters) :
+    Action(parameters),
     _boundary(getParam<std::vector<BoundaryName> >("boundary")),
     _has_corners(isParamValid("corner_boundary")),
     _corner_boundary(_has_corners ? getParam<BoundaryName>("corner_boundary") : BoundaryName())
@@ -102,4 +102,14 @@ AddNodalNormalsAction::act()
       _problem->addUserObject("NodalNormalsEvaluator", "nodal_normals_evaluator", pars);
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddNodalNormalsAction::AddNodalNormalsAction(const std::string & deprecated_name, InputParameters parameters) :
+    Action(deprecated_name, parameters),
+    _boundary(getParam<std::vector<BoundaryName> >("boundary")),
+    _has_corners(isParamValid("corner_boundary")),
+    _corner_boundary(_has_corners ? getParam<BoundaryName>("corner_boundary") : BoundaryName())
+{
 }

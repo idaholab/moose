@@ -22,8 +22,8 @@ InputParameters validParams<RestartableTypesChecker>()
 }
 
 
-RestartableTypesChecker::RestartableTypesChecker(const std::string & name, InputParameters params) :
-    RestartableTypes(name, params),
+RestartableTypesChecker::RestartableTypesChecker(const std::string & name, InputParameters parameters) :
+    RestartableTypes(name, parameters),
     _first(true)
 {
 }

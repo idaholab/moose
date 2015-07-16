@@ -26,7 +26,8 @@ InputParameters validParams<InitProblemAction>();
 class InitProblemAction : public Action
 {
 public:
-  InitProblemAction(const std::string & name, InputParameters params);
+  InitProblemAction(InputParameters params);
+  InitProblemAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };
