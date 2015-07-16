@@ -4049,6 +4049,8 @@ FEProblem::FEProblem(const std::string & deprecated_name, InputParameters parame
     _has_jacobian(false),
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
+    _max_scalar_order(INVALID_ORDER),
+    _has_exception(false),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
