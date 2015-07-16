@@ -20,7 +20,8 @@ InputParameters validParams<RobinBC>();
 class RobinBC : public IntegratedBC
 {
 public:
-  RobinBC(const std::string & name, InputParameters parameters);
+  RobinBC(const InputParameters & parameters);
+  RobinBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 
 protected:

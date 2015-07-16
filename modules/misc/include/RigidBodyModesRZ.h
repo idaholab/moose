@@ -21,7 +21,8 @@ class RigidBodyModesRZ :
   public NodalUserObject
 {
 public:
-  RigidBodyModesRZ(const std::string & name, InputParameters parameters);
+  RigidBodyModesRZ(const InputParameters & parameters);
+  RigidBodyModesRZ(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * This function will get called on each node.

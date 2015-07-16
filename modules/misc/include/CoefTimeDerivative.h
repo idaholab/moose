@@ -25,8 +25,8 @@ class CoefTimeDerivative : public TimeDerivative
 {
 public:
 
-  CoefTimeDerivative(const std::string & name,
-                   InputParameters parameters);
+  CoefTimeDerivative(const InputParameters & parameters);
+  CoefTimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

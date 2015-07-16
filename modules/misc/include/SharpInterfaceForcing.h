@@ -22,7 +22,8 @@ class SharpInterfaceForcing : public Kernel
 {
 public:
 
-  SharpInterfaceForcing(const std::string & name, InputParameters parameters);
+  SharpInterfaceForcing(const InputParameters & parameters);
+  SharpInterfaceForcing(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

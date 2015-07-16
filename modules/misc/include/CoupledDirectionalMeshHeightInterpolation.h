@@ -37,7 +37,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  CoupledDirectionalMeshHeightInterpolation(const std::string & name, InputParameters parameters);
+  CoupledDirectionalMeshHeightInterpolation(const InputParameters & parameters);
+  CoupledDirectionalMeshHeightInterpolation(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~CoupledDirectionalMeshHeightInterpolation() {}
 
