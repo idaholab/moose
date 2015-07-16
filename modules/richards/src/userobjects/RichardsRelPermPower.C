@@ -20,8 +20,8 @@ InputParameters validParams<RichardsRelPermPower>()
   return params;
 }
 
-RichardsRelPermPower::RichardsRelPermPower(const std::string & name, InputParameters parameters) :
-    RichardsRelPerm(name, parameters),
+RichardsRelPermPower::RichardsRelPermPower(const InputParameters & parameters) :
+    RichardsRelPerm(parameters),
     _simm(getParam<Real>("simm")),
     _n(getParam<Real>("n"))
 {
@@ -76,3 +76,12 @@ RichardsRelPermPower::d2relperm(Real seff) const
   return krelpp/std::pow(1.0 - _simm, 2);
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsRelPermPower::RichardsRelPermPower(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsRelPerm(deprecated_name, parameters),
+    _simm(getParam<Real>("simm")),
+    _n(getParam<Real>("n"))
+{
+}

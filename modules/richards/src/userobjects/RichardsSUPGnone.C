@@ -18,8 +18,8 @@ InputParameters validParams<RichardsSUPGnone>()
   return params;
 }
 
-RichardsSUPGnone::RichardsSUPGnone(const std::string & name, InputParameters parameters) :
-    RichardsSUPG(name, parameters)
+RichardsSUPGnone::RichardsSUPGnone(const InputParameters & parameters) :
+    RichardsSUPG(parameters)
 {}
 
 RealVectorValue
@@ -87,3 +87,9 @@ RichardsSUPGnone::SUPG_trivial() const
   return true;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSUPGnone::RichardsSUPGnone(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsSUPG(deprecated_name, parameters)
+{}

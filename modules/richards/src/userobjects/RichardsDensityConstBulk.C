@@ -20,8 +20,8 @@ InputParameters validParams<RichardsDensityConstBulk>()
   return params;
 }
 
-RichardsDensityConstBulk::RichardsDensityConstBulk(const std::string & name, InputParameters parameters) :
-    RichardsDensity(name, parameters),
+RichardsDensityConstBulk::RichardsDensityConstBulk(const InputParameters & parameters) :
+    RichardsDensity(parameters),
     _dens0(getParam<Real>("dens0")),
     _bulk(getParam<Real>("bulk_mod"))
 {}
@@ -45,3 +45,11 @@ RichardsDensityConstBulk::d2density(Real p) const
   return density(p)/_bulk/_bulk;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsDensityConstBulk::RichardsDensityConstBulk(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsDensity(deprecated_name, parameters),
+    _dens0(getParam<Real>("dens0")),
+    _bulk(getParam<Real>("bulk_mod"))
+{}

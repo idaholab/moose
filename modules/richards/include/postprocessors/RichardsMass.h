@@ -25,7 +25,8 @@ InputParameters validParams<RichardsMass>();
 class RichardsMass: public ElementIntegralVariablePostprocessor
 {
 public:
-  RichardsMass(const std::string & name, InputParameters parameters);
+  RichardsMass(const InputParameters & parameters);
+  RichardsMass(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

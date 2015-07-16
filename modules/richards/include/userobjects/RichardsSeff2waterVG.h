@@ -26,7 +26,8 @@ InputParameters validParams<RichardsSeff2waterVG>();
 class RichardsSeff2waterVG : public RichardsSeff
 {
 public:
-  RichardsSeff2waterVG(const std::string & name, InputParameters parameters);
+  RichardsSeff2waterVG(const InputParameters & parameters);
+  RichardsSeff2waterVG(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * water effective saturation

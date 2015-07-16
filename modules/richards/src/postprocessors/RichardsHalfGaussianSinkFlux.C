@@ -23,8 +23,8 @@ InputParameters validParams<RichardsHalfGaussianSinkFlux>()
   return params;
 }
 
-RichardsHalfGaussianSinkFlux::RichardsHalfGaussianSinkFlux(const std::string & name, InputParameters parameters) :
-    SideIntegralVariablePostprocessor(name, parameters),
+RichardsHalfGaussianSinkFlux::RichardsHalfGaussianSinkFlux(const InputParameters & parameters) :
+    SideIntegralVariablePostprocessor(parameters),
     _feproblem(dynamic_cast<FEProblem &>(_subproblem)),
     _maximum(getParam<Real>("max")),
     _sd(getParam<Real>("sd")),
@@ -43,3 +43,17 @@ RichardsHalfGaussianSinkFlux::computeQpIntegral()
   else
     return _maximum*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2))*_dt*_m_func.value(_t, _q_point[_qp]);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsHalfGaussianSinkFlux::RichardsHalfGaussianSinkFlux(const std::string & deprecated_name, InputParameters parameters) :
+    SideIntegralVariablePostprocessor(deprecated_name, parameters),
+    _feproblem(dynamic_cast<FEProblem &>(_subproblem)),
+    _maximum(getParam<Real>("max")),
+    _sd(getParam<Real>("sd")),
+    _centre(getParam<Real>("centre")),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(coupled("variable"))),
+    _m_func(getFunction("multiplying_fcn")),
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure"))
+{}

@@ -20,8 +20,8 @@ InputParameters validParams<RichardsSeff2waterVG>()
   return params;
 }
 
-RichardsSeff2waterVG::RichardsSeff2waterVG(const std::string & name, InputParameters parameters) :
-    RichardsSeff(name, parameters),
+RichardsSeff2waterVG::RichardsSeff2waterVG(const InputParameters & parameters) :
+    RichardsSeff(parameters),
     _al(getParam<Real>("al")),
     _m(getParam<Real>("m"))
 {
@@ -52,4 +52,13 @@ RichardsSeff2waterVG::d2seff(std::vector<VariableValue *> p, unsigned int qp, st
   result[0][1] = -result[0][0];
   result[1][0] = -result[0][0];
   result[1][1] = result[0][0];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSeff2waterVG::RichardsSeff2waterVG(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsSeff(deprecated_name, parameters),
+    _al(getParam<Real>("al")),
+    _m(getParam<Real>("m"))
+{
 }

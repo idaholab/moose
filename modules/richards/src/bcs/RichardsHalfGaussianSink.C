@@ -24,8 +24,8 @@ InputParameters validParams<RichardsHalfGaussianSink>()
   return params;
 }
 
-RichardsHalfGaussianSink::RichardsHalfGaussianSink(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name,parameters),
+RichardsHalfGaussianSink::RichardsHalfGaussianSink(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _maximum(getParam<Real>("max")),
     _sd(getParam<Real>("sd")),
     _centre(getParam<Real>("centre")),
@@ -72,3 +72,17 @@ RichardsHalfGaussianSink::computeQpOffDiagJacobian(unsigned int jvar)
   else
     return -test_fcn_f*_maximum*(_pp[_qp][_pvar] - _centre)/std::pow(_sd, 2)*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2))*_phi[_j][_qp]*_dpp_dv[_qp][_pvar][dvar];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsHalfGaussianSink::RichardsHalfGaussianSink(const std::string & deprecated_name, InputParameters parameters) :
+    IntegratedBC(deprecated_name, parameters),
+    _maximum(getParam<Real>("max")),
+    _sd(getParam<Real>("sd")),
+    _centre(getParam<Real>("centre")),
+    _m_func(getFunction("multiplying_fcn")),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
+    _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv"))
+{}

@@ -21,8 +21,8 @@ InputParameters validParams<RichardsMassChange>()
   return params;
 }
 
-RichardsMassChange::RichardsMassChange(const std::string & name, InputParameters parameters) :
-    TimeDerivative(name,parameters),
+RichardsMassChange::RichardsMassChange(const InputParameters & parameters) :
+    TimeDerivative(parameters),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
@@ -80,4 +80,23 @@ RichardsMassChange::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
   return computeQpJac(dvar);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsMassChange::RichardsMassChange(const std::string & deprecated_name, InputParameters parameters) :
+    TimeDerivative(deprecated_name, parameters),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+
+    _use_supg(getParam<bool>("use_supg")),
+
+    _mass(getMaterialProperty<std::vector<Real> >("mass")),
+    _dmass(getMaterialProperty<std::vector<std::vector<Real> > >("dmass")),
+    _mass_old(getMaterialProperty<std::vector<Real> >("mass_old")),
+
+    _tauvel_SUPG(getMaterialProperty<std::vector<RealVectorValue> >("tauvel_SUPG")),
+    _dtauvel_SUPG_dgradv(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dtauvel_SUPG_dgradv")),
+    _dtauvel_SUPG_dv(getMaterialProperty<std::vector<std::vector<RealVectorValue> > >("dtauvel_SUPG_dv"))
+{
 }
