@@ -198,20 +198,14 @@ Component::hasRParam(const std::string & param_name)
 
   std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
 
+  THREAD_ID = 0;
   const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
   for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
-    const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(it->_object_name, 0);
-    if (objs.size() > 0)
-    {
-      std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
-      for (std::vector<MooseObject *>::const_iterator jt = objs.begin() ; jt != objs.end(); ++jt)
-      {
-        MooseObject * obj = *jt;
-        if (obj->parameters().have_parameter<T>(par_name))
-          return true;
-      }
-    }
+    InputParameters & params = _app.getInputParameterWarehouse().getInputParameters(it->_object_name, tid);
+    std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
+    if (params.have_parameter<T>(par_name))
+      return true;
   }
 
   // look for the parameter in this components' input parameters
@@ -251,20 +245,14 @@ Component::getRParam(const std::string & param_name)
 
   std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
 
+  THREAD_ID tid = 0;
   const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
   for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
-    const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(it->_object_name, 0);
-    if (objs.size() > 0)
-    {
-      std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
-      for (std::vector<MooseObject *>::const_iterator jt = objs.begin() ; jt != objs.end(); ++jt)
-      {
-        MooseObject * obj = *jt;
-        if (obj->parameters().have_parameter<T>(par_name))
-          return obj->parameters().get<T>(par_name);
-      }
-    }
+    InputParameters & params = _app.getInputParameterWarehouse().getInputParameters(it->_object_name, tid);
+    std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
+    if (params.have_parameter<T>(par_name))
+      return params.get<T>(par_name);
   }
 
   // look for the parameter in this components' input parameters
@@ -301,29 +289,26 @@ Component::setRParam(const std::string & param_name, const T & value)
 {
   std::vector<std::string> s = split(param_name);
 
+  InputParameterWarehouse ipw = _app.getInputParameterWarehouse();
   std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
   const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
   for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(it->_object_name, tid);
+      InputParameters & params = ipw.getInputParameters(it->_object_name, tid);
       std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
-      for (std::vector<MooseObject *>::const_iterator jt = objs.begin(); jt != objs.end(); ++jt)
-      {
-        MooseObject * obj = *jt;
-        if (obj->parameters().have_parameter<T>(par_name))
-        {
-          obj->parameters().set<T>(par_name) = value;
-        }
-      }
+      if (params.have_parameter<T>(par_name))
+        params.set<T>(par_name) = value;
     }
   }
 
+  THREAD_ID tid = 0;
   // look for the parameter in this components' input parameters
   if (this->parameters().have_parameter<T>(param_name))
   {
-    this->parameters().set<T>(param_name) = value;
+    InputParameters & params = ipw.getInputParameters(name(), tid);
+    params.set<T>(param_name) = value;
   }
   else
   {
@@ -334,7 +319,10 @@ Component::setRParam(const std::string & param_name, const T & value)
       Component * comp = it->second.first;
       std::string par_name = it->second.second;
       if (comp->parameters().have_parameter<T>(par_name))
-        comp->parameters().set<T>(par_name) = value;
+      {
+        InputParameters & params = ipw.getInputParameters(comp->name(), tid);
+        params.set<T>(param_name) = value;
+      }
     }
   }
 
@@ -346,7 +334,9 @@ Component::setRParam(const std::string & param_name, const T & value)
     {
       std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());
       tempp[name_cont.getControllableParPosition()] = value;
-      parameters().set<std::vector<T> >(name_cont.getControllableParName()) = tempp;
+
+      InputParameters & params = _app.getInputParameterWarehouse().getInputParameters(name(), tid);
+      params.set<std::vector<T> >(name_cont.getControllableParName()) = tempp;
     }
   }
 }
