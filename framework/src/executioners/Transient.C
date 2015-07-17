@@ -380,8 +380,6 @@ Transient::solveStep(Real input_dt)
   Real current_dt = _dt;
 
   _problem.onTimestepBegin();
-  if (lastSolveConverged() && !_xfem_repeat_step)
-    _problem.advanceState();
 
   // Increment time
   _time = _time_old + _dt;
