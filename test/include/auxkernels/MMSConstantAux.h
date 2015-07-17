@@ -26,7 +26,7 @@ class MMSConstantAux : public AuxKernel
 {
 public:
 
- MMSConstantAux(const std::string & name, InputParameters parameters);
+ MMSConstantAux(const InputParameters & parameters);
 
   virtual ~MMSConstantAux() {}
 

@@ -45,7 +45,7 @@ GeneralUserObject::getSuppliedItems()
   return _supplied_vars;
 }
 
-PostprocessorValue &
+const PostprocessorValue &
 GeneralUserObject::getPostprocessorValue(const std::string & name)
 {
   _depend_vars.insert(_pars.get<PostprocessorName>(name));

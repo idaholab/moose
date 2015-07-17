@@ -27,8 +27,7 @@ class CoefReaction : public Reaction
 {
 public:
 
-  CoefReaction(const std::string & name,
-               InputParameters parameters);
+  CoefReaction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

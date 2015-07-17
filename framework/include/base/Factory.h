@@ -29,8 +29,10 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerObject(name)                        factory.regLegacy<name>(stringifyName(name))
-#define registerNamedObject(obj, name)              factory.regLegacy<obj>(name)
+#define registerObject(name)                          factory.regLegacy<name>(stringifyName(name))
+#define registerNamedObject(obj, name)                factory.regLegacy<obj>(name)
+#define registerDeprecatedObject(name, time)          factory.regLegacyDeprecated<name>(stringifyName(name), time)
+#define registerDeprecatedObjectName(obj, name, time) factory.regLegacyReplaced<obj>(stringifyName(obj), name, time)
 
 // for backward compatibility
 #define registerKernel(name)                        registerObject(name)
@@ -93,8 +95,6 @@
 #define registerNamedSplit(obj, name)               registerNamedObject(obj, name)
 #define registerNamedOutput(obj, name)              registerNamedObject(obj, name)
 
-#define registerDeprecatedObject(name, time)             factory.regDeprecated<name>(stringifyName(name), time)
-#define registerDeprecatedObjectName(obj, name, time)    factory.regReplaced<obj>(stringifyName(obj), name, time)
 
 /**
  * Typedef to wrap shared pointer type
@@ -178,7 +178,7 @@ public:
   void regDeprecated(const std::string & obj_name, const std::string t_str)
   {
     // Register the name
-    regLegacy<T>(obj_name);
+    reg<T>(obj_name);
 
     // Store the time
     _deprecated_time[obj_name] = parseTime(t_str);
@@ -216,6 +216,26 @@ public:
       else
         mooseError("Object '" + obj_name + "' already registered.");
     }
+  }
+
+  template<typename T>
+  void regLegacyDeprecated(const std::string & obj_name, const std::string t_str)
+  {
+    // Register the name
+    regLegacy<T>(obj_name);
+
+    // Store the time
+    _deprecated_time[obj_name] = parseTime(t_str);
+  }
+
+  template<typename T>
+  void regLegacyReplaced(const std::string & obj_name, const std::string & name, const std::string t_str)
+  {
+    // Register the name
+    regLegacyDeprecated<T>(name, t_str);
+
+    // Store the new name
+    _deprecated_name[name] = obj_name;
   }
 
   /**

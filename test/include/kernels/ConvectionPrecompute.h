@@ -26,8 +26,7 @@ class ConvectionPrecompute : public KernelValue
 {
 public:
 
-  ConvectionPrecompute(const std::string & name,
-             InputParameters parameters);
+  ConvectionPrecompute(const InputParameters & parameters);
 
 protected:
   virtual Real precomputeQpResidual();

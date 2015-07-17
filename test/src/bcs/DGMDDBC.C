@@ -30,8 +30,8 @@ InputParameters validParams<DGMDDBC>()
   return params;
 }
 
-DGMDDBC::DGMDDBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+DGMDDBC::DGMDDBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _func(getFunction("function")),
     _diff(getMaterialProperty<Real>("prop_name")),
     _epsilon(getParam<Real>("epsilon")),

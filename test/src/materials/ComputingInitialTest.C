@@ -20,8 +20,8 @@ InputParameters validParams<ComputingInitialTest>()
   return params;
 }
 
-ComputingInitialTest::ComputingInitialTest(const std::string & name, InputParameters parameters)
-  :Material(name, parameters),
+ComputingInitialTest::ComputingInitialTest(const InputParameters & parameters)
+  :Material(parameters),
    _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
    _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity"))
 {}

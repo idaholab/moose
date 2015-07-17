@@ -29,7 +29,7 @@ InputParameters validParams<RandomElementalUserObject>();
 class RandomElementalUserObject : public ElementUserObject
 {
 public:
-  RandomElementalUserObject(const std::string & name, InputParameters parameters);
+  RandomElementalUserObject(const InputParameters & parameters);
 
   virtual ~RandomElementalUserObject();
 

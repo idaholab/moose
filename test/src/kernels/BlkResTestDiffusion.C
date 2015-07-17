@@ -24,9 +24,12 @@ InputParameters validParams<BlkResTestDiffusion>()
   return params;
 }
 
-// A function to modify the paramters for testing purposes
-InputParameters & modifyParams(InputParameters & params)
+// A function to modify the parameters for testing purposes
+InputParameters & modifyParams(const InputParameters & parameters)
 {
+  // This is only a test, so hack it up
+  InputParameters & params = const_cast<InputParameters &>(parameters);
+
   // Get the FEProblem pointer
   FEProblem* fe_ptr = params.get<FEProblem*>("_fe_problem");
 
@@ -61,8 +64,8 @@ InputParameters & modifyParams(InputParameters & params)
 }
 
 
-BlkResTestDiffusion::BlkResTestDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, modifyParams(parameters))
+BlkResTestDiffusion::BlkResTestDiffusion(const InputParameters & parameters) :
+    Kernel(modifyParams(parameters))
 {
 
   // Get an test enum from the kernel parameters

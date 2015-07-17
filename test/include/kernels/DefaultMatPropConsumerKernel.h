@@ -13,7 +13,7 @@ InputParameters validParams<DefaultMatPropConsumerKernel>();
 class DefaultMatPropConsumerKernel : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  DefaultMatPropConsumerKernel(const std::string & name, InputParameters parameters);
+  DefaultMatPropConsumerKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() { return 0.0; };

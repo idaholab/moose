@@ -22,8 +22,8 @@ InputParameters validParams<OnOffDirichletBC>()
   return params;
 }
 
-OnOffDirichletBC::OnOffDirichletBC(const std::string & name, InputParameters parameters) :
-    DirichletBC(name, parameters)
+OnOffDirichletBC::OnOffDirichletBC(const InputParameters & parameters) :
+    DirichletBC(parameters)
 {
 }
 

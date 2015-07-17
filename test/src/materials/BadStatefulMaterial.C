@@ -22,8 +22,8 @@ InputParameters validParams<BadStatefulMaterial>()
   return params;
 }
 
-BadStatefulMaterial::BadStatefulMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+BadStatefulMaterial::BadStatefulMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _prop_old(getParam<bool>("declare_only_older") ? declarePropertyOlder<Real>("property") : declarePropertyOld<Real>("property"))
 {}
 

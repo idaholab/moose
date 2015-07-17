@@ -24,8 +24,8 @@ InputParameters validParams<OptionallyCoupledForce>()
   return params;
 }
 
-OptionallyCoupledForce::OptionallyCoupledForce(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+OptionallyCoupledForce::OptionallyCoupledForce(const InputParameters & parameters) :
+    Kernel(parameters),
     _v_var(coupled("v")),
     _v(coupledValue("v")),
     _grad_v(coupledGradient("v")),

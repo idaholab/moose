@@ -31,7 +31,7 @@ InputParameters validParams<ReportingConstantSource>();
 class ReportingConstantSource : public DiracKernel
 {
 public:
-  ReportingConstantSource(const std::string & name, InputParameters parameters);
+  ReportingConstantSource(const InputParameters & parameters);
   virtual void addPoints();
   virtual Real computeQpResidual();
 

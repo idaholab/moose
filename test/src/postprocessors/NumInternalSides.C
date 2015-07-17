@@ -21,8 +21,8 @@ InputParameters validParams<NumInternalSides>()
   return params;
 }
 
-NumInternalSides::NumInternalSides(const std::string & name, InputParameters parameters) :
-    InternalSidePostprocessor(name, parameters),
+NumInternalSides::NumInternalSides(const InputParameters & parameters) :
+    InternalSidePostprocessor(parameters),
     _count(0)
 {
 }

@@ -31,7 +31,7 @@ InputParameters validParams<NonlinearSource>();
 class NonlinearSource : public DiracKernel
 {
 public:
-  NonlinearSource(const std::string & name, InputParameters parameters);
+  NonlinearSource(const InputParameters & parameters);
 
   virtual void addPoints();
   virtual Real computeQpResidual();

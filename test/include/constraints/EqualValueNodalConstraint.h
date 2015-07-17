@@ -25,7 +25,7 @@ InputParameters validParams<EqualValueNodalConstraint>();
 class EqualValueNodalConstraint : public NodalConstraint
 {
 public:
-  EqualValueNodalConstraint(const std::string & name, InputParameters parameters);
+  EqualValueNodalConstraint(const InputParameters & parameters);
   virtual ~EqualValueNodalConstraint();
 
 protected:

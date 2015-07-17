@@ -25,7 +25,7 @@ InputParameters validParams<CoupledKernelGradBC>();
 class CoupledKernelGradBC : public IntegratedBC
 {
 public:
-  CoupledKernelGradBC(const std::string & name, InputParameters parameters);
+  CoupledKernelGradBC(const InputParameters & parameters);
 
   virtual ~CoupledKernelGradBC();
 

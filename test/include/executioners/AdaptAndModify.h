@@ -27,7 +27,7 @@ class AdaptAndModify: public Transient
 {
 public:
 
-  AdaptAndModify(const std::string & name, InputParameters parameters);
+  AdaptAndModify(const InputParameters & parameters);
 
   virtual void incrementStepOrReject();
 

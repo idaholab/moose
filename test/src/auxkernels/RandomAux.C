@@ -25,8 +25,8 @@ InputParameters validParams<RandomAux>()
   return params;
 }
 
-RandomAux::RandomAux(const std::string & name, InputParameters params) :
-    AuxKernel(name, params),
+RandomAux::RandomAux(const InputParameters & params) :
+    AuxKernel(params),
     _random_uo(params.isParamValid("random_user_object") ? &getUserObject<RandomElementalUserObject>("random_user_object") : NULL),
     _generate_ints(getParam<bool>("generate_integers"))
 {

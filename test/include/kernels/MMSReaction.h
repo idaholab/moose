@@ -24,7 +24,7 @@ InputParameters validParams<MMSReaction>();
 class MMSReaction : public Kernel
 {
 public:
-  MMSReaction(const std::string & name, InputParameters parameters);
+  MMSReaction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

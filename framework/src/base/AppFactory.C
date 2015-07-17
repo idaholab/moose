@@ -54,7 +54,7 @@ MooseApp *
 AppFactory::create(const std::string & app_type, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN)
 {
   // Invoke the legacy registration, if the object is located in the legacy build pointer list
-  if (_name_to_legacy_build_pointer.find(name) == _name_to_legacy_build_pointer.end())
+  if (_name_to_legacy_build_pointer.find(app_type) != _name_to_legacy_build_pointer.end())
     return createLegacy(app_type, name, parameters, COMM_WORLD_IN);
 
   // Error if the application type is not located

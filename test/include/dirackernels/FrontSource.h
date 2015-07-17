@@ -34,7 +34,7 @@ InputParameters validParams<FrontSource>();
 class FrontSource : public DiracKernel
 {
 public:
-  FrontSource(const std::string & name, InputParameters parameters);
+  FrontSource(const InputParameters & parameters);
   virtual void addPoints();
   virtual Real computeQpResidual();
 

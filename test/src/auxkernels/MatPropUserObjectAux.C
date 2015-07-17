@@ -23,8 +23,8 @@ InputParameters validParams<MatPropUserObjectAux>()
   return params;
 }
 
-MatPropUserObjectAux::MatPropUserObjectAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+MatPropUserObjectAux::MatPropUserObjectAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _mat_uo(getUserObject<MaterialPropertyUserObject>("material_user_object"))
 {
 }

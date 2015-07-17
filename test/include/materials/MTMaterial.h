@@ -30,7 +30,7 @@ InputParameters validParams<MTMaterial>();
 class MTMaterial : public Material
 {
 public:
-  MTMaterial(const std::string & name, InputParameters parameters);
+  MTMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

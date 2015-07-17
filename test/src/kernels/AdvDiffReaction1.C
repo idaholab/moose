@@ -39,8 +39,8 @@ InputParameters validParams<AdvDiffReaction1>()
   return params;
 }
 
-AdvDiffReaction1::AdvDiffReaction1(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters)
+AdvDiffReaction1::AdvDiffReaction1(const InputParameters & parameters)
+  :Kernel(parameters)
 {
   _A0 = getParam<Real>("A0");
   _B0 = getParam<Real>("B0");

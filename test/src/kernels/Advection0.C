@@ -30,8 +30,8 @@ InputParameters validParams<Advection0>()
   return params;
 }
 
-Advection0::Advection0(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters)
+Advection0::Advection0(const InputParameters & parameters)
+  :Kernel(parameters)
 {
   _Au = getParam<Real>("Au");
   _Bu = getParam<Real>("Bu");

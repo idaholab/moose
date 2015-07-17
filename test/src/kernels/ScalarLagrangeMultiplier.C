@@ -22,8 +22,8 @@ InputParameters validParams<ScalarLagrangeMultiplier>()
   return params;
 }
 
-ScalarLagrangeMultiplier::ScalarLagrangeMultiplier(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+ScalarLagrangeMultiplier::ScalarLagrangeMultiplier(const InputParameters & parameters) :
+    Kernel(parameters),
     _lambda_var(coupledScalar("lambda")),
     _lambda(coupledScalarValue("lambda"))
 {

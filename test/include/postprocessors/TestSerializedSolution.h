@@ -28,7 +28,7 @@ InputParameters validParams<TestSerializedSolution>();
 class TestSerializedSolution : public GeneralPostprocessor
 {
 public:
-  TestSerializedSolution(const std::string & name, InputParameters parameters);
+  TestSerializedSolution(const InputParameters & parameters);
 
   /**
    * Reset data

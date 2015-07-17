@@ -24,7 +24,7 @@ InputParameters validParams<PolyCoupledDirichletBC>();
 class PolyCoupledDirichletBC : public NodalBC
 {
 public:
-  PolyCoupledDirichletBC(const std::string & name, InputParameters parameters);
+  PolyCoupledDirichletBC(const InputParameters & parameters);
 
   virtual ~PolyCoupledDirichletBC(){}
 

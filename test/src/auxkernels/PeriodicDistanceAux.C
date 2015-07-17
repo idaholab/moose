@@ -23,8 +23,8 @@ InputParameters validParams<PeriodicDistanceAux>()
   return params;
 }
 
-PeriodicDistanceAux::PeriodicDistanceAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+PeriodicDistanceAux::PeriodicDistanceAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _point(getParam<Point>("point"))
 {
   // Make sure the point is in the domain

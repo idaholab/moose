@@ -21,8 +21,8 @@ InputParameters validParams<NumSideQPs>()
   return params;
 }
 
-NumSideQPs::NumSideQPs(const std::string & name, InputParameters parameters) :
-    SideIntegralPostprocessor(name, parameters)
+NumSideQPs::NumSideQPs(const InputParameters & parameters) :
+    SideIntegralPostprocessor(parameters)
 {
 }
 

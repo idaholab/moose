@@ -21,9 +21,8 @@ InputParameters validParams<DerivativeMaterialInterfaceTestClient>()
   return params;
 }
 
-DerivativeMaterialInterfaceTestClient::DerivativeMaterialInterfaceTestClient(const std::string & name,
-                                                                                 InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(name, parameters),
+DerivativeMaterialInterfaceTestClient::DerivativeMaterialInterfaceTestClient(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
     _prop_name(getParam<MaterialPropertyName>("prop_name")),
     _by_name(_prop_name == ""),
     _prop0(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "c") : getMaterialPropertyDerivative<Real>("prop_name", "c")), // fetch non-existing derivative

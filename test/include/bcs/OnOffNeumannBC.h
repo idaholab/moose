@@ -28,7 +28,7 @@ InputParameters validParams<OnOffNeumannBC>();
 class OnOffNeumannBC : public NeumannBC
 {
 public:
-  OnOffNeumannBC(const std::string & name, InputParameters parameters);
+  OnOffNeumannBC(const InputParameters & parameters);
 
   virtual bool shouldApply();
 

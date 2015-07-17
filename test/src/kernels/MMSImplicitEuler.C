@@ -20,8 +20,8 @@ InputParameters validParams<MMSImplicitEuler>()
   return params;
 }
 
-MMSImplicitEuler::MMSImplicitEuler(const std::string & name, InputParameters parameters) :
-    TimeKernel(name, parameters),
+MMSImplicitEuler::MMSImplicitEuler(const InputParameters & parameters) :
+    TimeKernel(parameters),
     _u_old(valueOld())
 {}
 

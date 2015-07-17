@@ -31,7 +31,7 @@ class DiffTensorKernel : public Kernel
 {
 public:
   /** Class constructor */
-  DiffTensorKernel(const std::string & name, InputParameters parameters);
+  DiffTensorKernel(const InputParameters & parameters);
 
   /** Class destructor */
   virtual ~DiffTensorKernel();

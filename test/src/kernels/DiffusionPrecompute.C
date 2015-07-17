@@ -22,8 +22,8 @@ InputParameters validParams<DiffusionPrecompute>()
 }
 
 
-DiffusionPrecompute::DiffusionPrecompute(const std::string & name, InputParameters parameters) :
-    KernelGrad(name, parameters)
+DiffusionPrecompute::DiffusionPrecompute(const InputParameters & parameters) :
+    KernelGrad(parameters)
 {
 }
 

@@ -35,7 +35,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  CoupledAux(const std::string & name, InputParameters parameters);
+  CoupledAux(const InputParameters & parameters);
 
   virtual ~CoupledAux() {}
 

@@ -29,7 +29,7 @@ InputParameters validParams<OptionallyCoupledForce>();
 class OptionallyCoupledForce : public Kernel
 {
 public:
-  OptionallyCoupledForce(const std::string & name, InputParameters parameters);
+  OptionallyCoupledForce(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

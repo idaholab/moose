@@ -23,8 +23,8 @@ InputParameters validParams<DiffMKernel>()
 }
 
 
-DiffMKernel::DiffMKernel(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+DiffMKernel::DiffMKernel(const InputParameters & parameters) :
+    Kernel(parameters),
     _diff(getMaterialProperty<Real>("mat_prop")),
     _offset(getParam<Real>("offset"))
 {

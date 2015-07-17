@@ -26,7 +26,7 @@ InputParameters validParams<MatConvection>();
 class MatConvection : public Kernel
 {
 public:
-  MatConvection(const std::string & name, InputParameters parameters);
+  MatConvection(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

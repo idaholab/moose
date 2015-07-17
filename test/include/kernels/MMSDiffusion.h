@@ -25,7 +25,7 @@ InputParameters validParams<MMSDiffusion>();
 class MMSDiffusion : public Kernel
 {
 public:
-  MMSDiffusion(const std::string & name, InputParameters parameters);
+  MMSDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

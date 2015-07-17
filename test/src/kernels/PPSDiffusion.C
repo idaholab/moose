@@ -22,8 +22,8 @@ InputParameters validParams<PPSDiffusion>()
 }
 
 
-PPSDiffusion::PPSDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+PPSDiffusion::PPSDiffusion(const InputParameters & parameters) :
+    Kernel(parameters),
     _pps_value(getPostprocessorValue("pps_name"))
 {
 }

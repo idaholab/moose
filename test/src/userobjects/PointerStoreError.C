@@ -22,8 +22,8 @@ InputParameters validParams<PointerStoreError>()
 }
 
 
-PointerStoreError::PointerStoreError(const std::string & name, InputParameters params) :
-    GeneralUserObject(name, params),
+PointerStoreError::PointerStoreError(const InputParameters & params) :
+    GeneralUserObject(params),
     _pointer_data(declareRestartableData<ReallyDumb *>("pointer_data"))
 {
   _pointer_data = new ReallyDumb;

@@ -23,8 +23,8 @@ InputParameters validParams<SplineFFn>()
   return params;
 }
 
-SplineFFn::SplineFFn(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+SplineFFn::SplineFFn(const InputParameters & parameters) :
+    Kernel(parameters),
     _fn(dynamic_cast<SplineFunction &>(getFunction("function")))
 {
 }

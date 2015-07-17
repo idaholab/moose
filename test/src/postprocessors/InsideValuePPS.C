@@ -24,8 +24,8 @@ InputParameters validParams<InsideValuePPS>()
   return params;
 }
 
-InsideValuePPS::InsideValuePPS(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+InsideValuePPS::InsideValuePPS(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _uo(getUserObject<InsideUserObject>("user_object")),
     _value(0.)
 {

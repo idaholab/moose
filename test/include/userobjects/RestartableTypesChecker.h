@@ -29,7 +29,7 @@ InputParameters validParams<RestartableTypesChecker>();
 class RestartableTypesChecker : public RestartableTypes
 {
 public:
-  RestartableTypesChecker(const std::string & name, InputParameters parameters);
+  RestartableTypesChecker(const InputParameters & parameters);
   virtual ~RestartableTypesChecker();
 
   virtual void initialSetup();

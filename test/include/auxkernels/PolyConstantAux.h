@@ -24,7 +24,7 @@ InputParameters validParams<PolyConstantAux>();
 class PolyConstantAux : public AuxKernel
 {
 public:
-  PolyConstantAux(const std::string & name, InputParameters parameters);
+  PolyConstantAux(const InputParameters & parameters);
 
   virtual ~PolyConstantAux() {}
 

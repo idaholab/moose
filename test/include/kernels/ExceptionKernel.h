@@ -28,7 +28,7 @@ InputParameters validParams<ExceptionKernel>();
 class ExceptionKernel : public Kernel
 {
 public:
-  ExceptionKernel(const std::string & name, InputParameters parameters);
+  ExceptionKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

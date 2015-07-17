@@ -28,7 +28,7 @@ InputParameters validParams<TestCopyInitialSolution>();
 class TestCopyInitialSolution : public GeneralPostprocessor
 {
 public:
-  TestCopyInitialSolution(const std::string & name, InputParameters parameters);
+  TestCopyInitialSolution(const InputParameters & parameters);
   virtual ~TestCopyInitialSolution();
   virtual void initialize();
   virtual void execute();

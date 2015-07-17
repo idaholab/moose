@@ -26,8 +26,8 @@ InputParameters validParams<TestSerializedSolution>()
   return params;
 }
 
-TestSerializedSolution::TestSerializedSolution(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+TestSerializedSolution::TestSerializedSolution(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
     _test_sys(getParam<MooseEnum>("system") == 0 ? (SystemBase &)_fe_problem.getNonlinearSystem() : (SystemBase &)_fe_problem.getAuxiliarySystem()),
     _serialized_solution(_test_sys.serializedSolution()),
     _sum(0)

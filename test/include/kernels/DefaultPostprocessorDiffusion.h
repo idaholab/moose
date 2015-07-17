@@ -26,7 +26,7 @@ InputParameters validParams<DefaultPostprocessorDiffusion>();
 class DefaultPostprocessorDiffusion : public Kernel
 {
 public:
-  DefaultPostprocessorDiffusion(const std::string & name, InputParameters  parameters);
+  DefaultPostprocessorDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

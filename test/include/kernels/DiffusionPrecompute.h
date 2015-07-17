@@ -25,7 +25,7 @@ InputParameters validParams<DiffusionPrecompute>();
 class DiffusionPrecompute : public KernelGrad
 {
 public:
-  DiffusionPrecompute(const std::string & name, InputParameters parameters);
+  DiffusionPrecompute(const InputParameters & parameters);
   virtual ~DiffusionPrecompute();
 
 protected:

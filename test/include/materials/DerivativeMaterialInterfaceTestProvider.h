@@ -28,7 +28,7 @@ InputParameters validParams<DerivativeMaterialInterfaceTestProvider>();
 class DerivativeMaterialInterfaceTestProvider : public DerivativeMaterialInterface<Material>
 {
 public:
-  DerivativeMaterialInterfaceTestProvider(const std::string & name, InputParameters parameters);
+  DerivativeMaterialInterfaceTestProvider(const InputParameters & parameters);
 
 protected:
   void computeProperties();

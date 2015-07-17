@@ -79,8 +79,7 @@
   [./PolycrystalElasticDrivingForce]
   [../]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -195,8 +194,7 @@
   [./strain]
     type = ComputeSmallStrain
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y'
   [../]
   [./stress]
     type = ComputeLinearElasticStress
@@ -232,8 +230,8 @@
     condense_map_info = true
     connecting_threshold = 0.05
     compute_op_maps = true
-    execute_on = TIMESTEP_BEGIN
-    flood_entity_type = ELEMENTAL
+    execute_on = 'initial timestep_begin'
+    flood_entity_type = elemental
   [../]
 []
 

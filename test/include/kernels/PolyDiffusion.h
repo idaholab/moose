@@ -25,7 +25,7 @@ InputParameters validParams<PolyDiffusion>();
 class PolyDiffusion : public Kernel
 {
 public:
-  PolyDiffusion(const std::string & name, InputParameters parameters);
+  PolyDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
