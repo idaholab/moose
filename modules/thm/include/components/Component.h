@@ -198,7 +198,7 @@ Component::hasRParam(const std::string & param_name)
 
   std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
 
-  THREAD_ID = 0;
+  THREAD_ID tid = 0;
   const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
   for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
