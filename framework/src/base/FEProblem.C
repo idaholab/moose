@@ -2731,7 +2731,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
       _console << "Waiting For Transfers To Finish" << std::endl;
       MooseUtils::parallelBarrierNotify(_communicator);
 
-      _console << "Transfers To Finished" << std::endl;
+      _console << "Transfers Are Finished" << std::endl;
     }
   }
 }
