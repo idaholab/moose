@@ -38,9 +38,6 @@ public:
   virtual void initialize() {};
   virtual void execute();
   virtual void finalize() {};
-
-protected:
-  bool _first;
 };
 
 
