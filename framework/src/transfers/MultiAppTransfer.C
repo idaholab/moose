@@ -123,7 +123,7 @@ MultiAppTransfer::getAppInfo()
         if (!_multi_app->hasLocalApp(i_app)) continue;
         _local2global_map.push_back(i_app);
         _from_problems.push_back(_multi_app->appProblem(i_app));
-        _from_positions.push_back(- _multi_app->position(i_app));
+        _from_positions.push_back(_multi_app->position(i_app));
       }
       break;
   }
@@ -156,7 +156,7 @@ MultiAppTransfer::getFromBoundingBoxes()
   {
     // Get a bounding box around the mesh elements that are local to the current
     // processor.
-    MeshTools::BoundingBox bbox = MeshTools::processor_bounding_box(* _from_meshes[i], processor_id());
+    MeshTools::BoundingBox bbox = MeshTools::processor_bounding_box(* _from_meshes[i], _from_meshes[i]->comm().rank());
 
     // Translate the bounding box to the from domain's position.
     bbox.first += _from_positions[i];
