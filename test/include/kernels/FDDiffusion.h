@@ -26,7 +26,7 @@ InputParameters validParams<FDDiffusion>();
 class FDDiffusion : public FDKernel
 {
 public:
-  FDDiffusion(const std::string & name, InputParameters parameters);
+  FDDiffusion(const InputParameters & parameters);
   virtual ~FDDiffusion();
 
 protected:

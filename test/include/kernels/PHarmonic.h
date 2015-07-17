@@ -31,7 +31,7 @@ class PHarmonic : public Kernel
 {
 public:
 
-  PHarmonic(const std::string & name, InputParameters parameters);
+  PHarmonic(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

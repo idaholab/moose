@@ -22,8 +22,8 @@ InputParameters validParams<UserObjectKernel>()
   return params;
 }
 
-UserObjectKernel::UserObjectKernel(const std::string & name, InputParameters params) :
-    Kernel(name, params),
+UserObjectKernel::UserObjectKernel(const InputParameters & params) :
+    Kernel(params),
     _mutley(getUserObject<MTUserObject>("user_object"))   // get user-data object and cast it down so we can use it
 {
 }

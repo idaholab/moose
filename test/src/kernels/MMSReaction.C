@@ -21,8 +21,8 @@ InputParameters validParams<MMSReaction>()
   return params;
 }
 
-MMSReaction::MMSReaction(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+MMSReaction::MMSReaction(const InputParameters & parameters) :
+    Kernel(parameters),
     _mesh_dimension(_mesh.dimension())
 {
 }

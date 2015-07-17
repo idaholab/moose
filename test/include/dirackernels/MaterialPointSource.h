@@ -32,7 +32,7 @@ InputParameters validParams<MaterialPointSource>();
 class MaterialPointSource : public DiracKernel
 {
 public:
-  MaterialPointSource(const std::string & name, InputParameters parameters);
+  MaterialPointSource(const InputParameters & parameters);
 
   virtual void addPoints();
   virtual Real computeQpResidual();

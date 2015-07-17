@@ -26,7 +26,7 @@ class RestartDiffusion : public Kernel
 {
 public:
 
-  RestartDiffusion(const std::string & name, InputParameters parameters);
+  RestartDiffusion(const InputParameters & parameters);
 
   virtual void timestepSetup();
 

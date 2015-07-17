@@ -30,7 +30,7 @@ InputParameters validParams<ImplicitODEx>();
 class ImplicitODEx : public ODEKernel
 {
 public:
-  ImplicitODEx(const std::string & name, InputParameters parameters);
+  ImplicitODEx(const InputParameters & parameters);
   virtual ~ImplicitODEx();
 
 protected:

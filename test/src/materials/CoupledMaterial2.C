@@ -24,8 +24,8 @@ InputParameters validParams<CoupledMaterial2>()
 }
 
 
-CoupledMaterial2::CoupledMaterial2(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+CoupledMaterial2::CoupledMaterial2(const InputParameters & parameters) :
+    Material(parameters),
     _mat_prop_name(getParam<MaterialPropertyName>("mat_prop")),
     _mat_prop(declareProperty<Real>(_mat_prop_name)),
     _coupled_mat_prop(getMaterialProperty<Real>("coupled_mat_prop1")),

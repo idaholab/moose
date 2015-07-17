@@ -28,7 +28,7 @@ InputParameters validParams<InsideUserObject>();
 class InsideUserObject : public InternalSideUserObject
 {
 public:
-  InsideUserObject(const std::string & name, InputParameters parameters);
+  InsideUserObject(const InputParameters & parameters);
   virtual ~InsideUserObject();
 
   virtual void initialize();

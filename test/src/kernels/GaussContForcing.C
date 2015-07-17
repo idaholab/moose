@@ -27,8 +27,8 @@ InputParameters validParams<GaussContForcing>()
   return params;
 }
 
-GaussContForcing::GaussContForcing(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+GaussContForcing::GaussContForcing(const InputParameters & parameters) :
+    Kernel(parameters),
     _amplitude(getParam<Real>("amplitude")),
     _x_center(getParam<Real>("x_center")),
     _y_center(getParam<Real>("y_center")),

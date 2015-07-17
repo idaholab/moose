@@ -26,7 +26,7 @@ class GenericDiffusion : public Kernel
 {
 public:
 
-  GenericDiffusion(const std::string & name, InputParameters parameters);
+  GenericDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

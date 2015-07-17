@@ -40,8 +40,7 @@ public:
 protected:
   SubProblem & _zi_subproblem;
   THREAD_ID _zi_tid;
-
-  Real & _real_zero;
+  const Real & _real_zero;
   VariableValue & _zero;
   VariableGradient & _grad_zero;
   VariableSecond & _second_zero;

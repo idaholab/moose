@@ -27,7 +27,7 @@ InputParameters validParams<MTICSum>();
 class MTICSum : public InitialCondition
 {
 public:
-  MTICSum(const std::string & name, InputParameters parameters);
+  MTICSum(const InputParameters & parameters);
   virtual ~MTICSum();
 
   virtual Real value(const Point & /*p*/);

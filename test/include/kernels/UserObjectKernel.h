@@ -29,7 +29,7 @@ InputParameters validParams<UserObjectKernel>();
 class UserObjectKernel : public Kernel
 {
 public:
-  UserObjectKernel(const std::string & name, InputParameters params);
+  UserObjectKernel(const InputParameters & params);
   virtual ~UserObjectKernel();
 
 protected:

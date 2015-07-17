@@ -23,8 +23,8 @@ InputParameters validParams<PolyCoupledDirichletBC>()
   return params;
 }
 
-PolyCoupledDirichletBC::PolyCoupledDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+PolyCoupledDirichletBC::PolyCoupledDirichletBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     //Grab the parameter for the multiplier.
     _value(getParam<Real>("value"))
 {}

@@ -31,7 +31,7 @@ InputParameters validParams<ElementIntegralPostprocessor>();
 class NumElemQPs : public ElementIntegralPostprocessor
 {
 public:
-  NumElemQPs(const std::string & name, InputParameters parameters);
+  NumElemQPs(const InputParameters & parameters);
   virtual ~NumElemQPs();
   virtual Real computeIntegral();
   virtual Real computeQpIntegral();

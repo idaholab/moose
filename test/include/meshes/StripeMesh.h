@@ -30,7 +30,7 @@ InputParameters validParams<StripeMesh>();
 class StripeMesh : public GeneratedMesh
 {
 public:
-  StripeMesh(const std::string & name, InputParameters parameters);
+  StripeMesh(const InputParameters & parameters);
   StripeMesh(const StripeMesh & other_mesh);
   virtual ~StripeMesh();
 

@@ -45,9 +45,9 @@ public:
    *
    * see getPostprocessorValueByName getPostprocessorValueOldByName getPostprocessorValueOlderByName
    */
-  PostprocessorValue & getPostprocessorValue(const std::string & name);
-  PostprocessorValue & getPostprocessorValueOld(const std::string & name);
-  PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
+  const PostprocessorValue & getPostprocessorValue(const std::string & name);
+  const PostprocessorValue & getPostprocessorValueOld(const std::string & name);
+  const PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
   ///@}
 
   ///@{

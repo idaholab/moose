@@ -24,8 +24,8 @@ InputParameters validParams<MTUserObject>()
 }
 
 
-MTUserObject::MTUserObject(const std::string & name, InputParameters params) :
-    GeneralUserObject(name, params),
+MTUserObject::MTUserObject(const InputParameters & params) :
+    GeneralUserObject(params),
     _scalar(getParam<Real>("scalar")),
     _vector(getParam<std::vector<Real> >("vector")),
     _dyn_memory(NULL)

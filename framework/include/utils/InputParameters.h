@@ -419,7 +419,7 @@ public:
    * @param suppress_error If true, the error check is suppressed
    * @return The default value for the postprocessor
    */
-  PostprocessorValue & getDefaultPostprocessorValue(const std::string & name, bool suppress_error=false);
+  const PostprocessorValue & getDefaultPostprocessorValue(const std::string & name, bool suppress_error=false) const;
 
   /**
    * Set the default value for a postprocessor added with addPostprocessor

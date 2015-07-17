@@ -20,8 +20,8 @@ InputParameters validParams<StatefulSpatialTest>()
   return params;
 }
 
-StatefulSpatialTest::StatefulSpatialTest(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+StatefulSpatialTest::StatefulSpatialTest(const InputParameters & parameters) :
+    Material(parameters),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
     _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity"))
 {}

@@ -26,7 +26,7 @@ InputParameters validParams<RandomHitMarker>();
 class RandomHitMarker : public Marker
 {
 public:
-  RandomHitMarker(const std::string & name, InputParameters parameters);
+  RandomHitMarker(const InputParameters & parameters);
   virtual ~RandomHitMarker(){};
 
 protected:

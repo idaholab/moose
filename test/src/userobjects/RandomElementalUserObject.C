@@ -25,8 +25,8 @@ InputParameters validParams<RandomElementalUserObject>()
   return params;
 }
 
-RandomElementalUserObject::RandomElementalUserObject(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters)
+RandomElementalUserObject::RandomElementalUserObject(const InputParameters & parameters) :
+    ElementUserObject(parameters)
 {
   /**
    * This call turns on Random Number generation for this object, it can be called either in

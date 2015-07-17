@@ -40,7 +40,7 @@ dataStore(std::ostream & stream, Stupid * & v, void * context)
 class PointerLoadError : public GeneralUserObject
 {
 public:
-  PointerLoadError(const std::string & name, InputParameters params);
+  PointerLoadError(const InputParameters & params);
   virtual ~PointerLoadError();
 
   virtual void initialSetup();

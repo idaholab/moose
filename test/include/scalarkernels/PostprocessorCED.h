@@ -27,7 +27,7 @@ InputParameters validParams<PostprocessorCED>();
 class PostprocessorCED : public ScalarKernel
 {
 public:
-  PostprocessorCED(const std::string & name, InputParameters parameters);
+  PostprocessorCED(const InputParameters & parameters);
   virtual ~PostprocessorCED();
 
   virtual void reinit();

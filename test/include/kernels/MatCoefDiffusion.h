@@ -28,7 +28,7 @@ InputParameters validParams<MatCoefDiffusion>();
 class MatCoefDiffusion : public Kernel
 {
 public:
-  MatCoefDiffusion(const std::string & name, InputParameters parameters);
+  MatCoefDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

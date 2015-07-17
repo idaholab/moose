@@ -22,8 +22,8 @@ InputParameters validParams<RestartableTypes>()
 }
 
 
-RestartableTypes::RestartableTypes(const std::string & name, InputParameters params) :
-    GeneralUserObject(name, params),
+RestartableTypes::RestartableTypes(const InputParameters & params) :
+    GeneralUserObject(params),
     _context_int(3),
     _real_data(declareRestartableData<Real>("real_data", 1)),
     _vector_data(declareRestartableData<std::vector<Real> >("vector_data")),

@@ -22,8 +22,8 @@ InputParameters validParams<OnOffNeumannBC>()
   return params;
 }
 
-OnOffNeumannBC::OnOffNeumannBC(const std::string & name, InputParameters parameters) :
-    NeumannBC(name, parameters)
+OnOffNeumannBC::OnOffNeumannBC(const InputParameters & parameters) :
+    NeumannBC(parameters)
 {
 }
 

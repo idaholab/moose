@@ -22,8 +22,8 @@ InputParameters validParams<ScalarVarBC>()
   return params;
 }
 
-ScalarVarBC::ScalarVarBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+ScalarVarBC::ScalarVarBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _alpha_var(coupledScalar("alpha")),
     _alpha(coupledScalarValue("alpha"))
 {

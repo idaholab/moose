@@ -27,7 +27,7 @@ InputParameters validParams<CoupledMaterial>();
 class CoupledMaterial : public Material
 {
 public:
-  CoupledMaterial(const std::string & name, InputParameters parameters);
+  CoupledMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeProperties();

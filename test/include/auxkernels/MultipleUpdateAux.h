@@ -29,7 +29,7 @@ InputParameters validParams<MultipleUpdateAux>();
 class MultipleUpdateAux : public AuxKernel
 {
 public:
-  MultipleUpdateAux(const std::string & name, InputParameters parameters);
+  MultipleUpdateAux(const InputParameters & parameters);
   virtual ~MultipleUpdateAux();
 
 protected:

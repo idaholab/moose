@@ -445,11 +445,11 @@ InputParameters::getGroupName(const std::string &param_name) const
     return std::string();
 }
 
-PostprocessorValue &
-InputParameters::getDefaultPostprocessorValue(const std::string & name, bool suppress_error)
+const PostprocessorValue &
+InputParameters::getDefaultPostprocessorValue(const std::string & name, bool suppress_error) const
 {
   // Check that a default exists, error if it does not
-  std::map<std::string, PostprocessorValue>::iterator it = _default_postprocessor_value.find(name);
+  std::map<std::string, PostprocessorValue>::const_iterator it = _default_postprocessor_value.find(name);
   if (!(suppress_error || it != _default_postprocessor_value.end()))
     mooseError("A default PostprcessorValue does not exist for the given name: " << name);
 

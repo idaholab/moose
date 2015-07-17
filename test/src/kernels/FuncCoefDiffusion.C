@@ -21,8 +21,8 @@ InputParameters validParams<FuncCoefDiffusion>()
   return params;
 }
 
-FuncCoefDiffusion::FuncCoefDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+FuncCoefDiffusion::FuncCoefDiffusion(const InputParameters & parameters) :
+    Kernel(parameters),
     _function(getFunction("coef"))
 {
 }

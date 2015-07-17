@@ -28,7 +28,7 @@ InputParameters validParams<OnOffDirichletBC>();
 class OnOffDirichletBC : public DirichletBC
 {
 public:
-  OnOffDirichletBC(const std::string & name, InputParameters parameters);
+  OnOffDirichletBC(const InputParameters & parameters);
   virtual ~OnOffDirichletBC();
 
   virtual bool shouldApply();

@@ -24,8 +24,8 @@ InputParameters validParams<MatCoefDiffusion>()
   return params;
 }
 
-MatCoefDiffusion::MatCoefDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+MatCoefDiffusion::MatCoefDiffusion(const InputParameters & parameters) :
+    Kernel(parameters),
     _prop_name(getParam<MaterialPropertyName>("conductivity"))
 {
 

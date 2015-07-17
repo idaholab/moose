@@ -25,9 +25,8 @@ InputParameters validParams<ConvectionPrecompute>()
   return params;
 }
 
-ConvectionPrecompute::ConvectionPrecompute(const std::string & name,
-                       InputParameters parameters) :
-    KernelValue(name, parameters),
+ConvectionPrecompute::ConvectionPrecompute(const InputParameters & parameters) :
+    KernelValue(parameters),
     _velocity(getParam<RealVectorValue>("velocity"))
 {}
 

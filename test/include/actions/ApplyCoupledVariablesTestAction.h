@@ -34,7 +34,7 @@ public:
   /**
    * Class constructor
    */
-  ApplyCoupledVariablesTestAction(const std::string & name, InputParameters params);
+  ApplyCoupledVariablesTestAction(const InputParameters & params);
 
   /**
    * Class destructor

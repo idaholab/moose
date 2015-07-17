@@ -25,8 +25,8 @@ InputParameters validParams<MatConvection>()
   return params;
 }
 
-MatConvection::MatConvection(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+MatConvection::MatConvection(const InputParameters & parameters) :
+    Kernel(parameters),
     _conv_prop(getMaterialProperty<Real>("mat_prop")),
     _x(getParam<Real>("x")),
     _y(getParam<Real>("y")),

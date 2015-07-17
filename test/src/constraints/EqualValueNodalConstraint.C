@@ -23,8 +23,8 @@ InputParameters validParams<EqualValueNodalConstraint>()
   return params;
 }
 
-EqualValueNodalConstraint::EqualValueNodalConstraint(const std::string & name, InputParameters parameters) :
-    NodalConstraint(name, parameters),
+EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & parameters) :
+    NodalConstraint(parameters),
     _penalty(getParam<Real>("penalty"))
 {
   _connected_nodes.push_back(getParam<unsigned int>("slave"));

@@ -25,8 +25,8 @@ InputParameters validParams<RandomHitMarker>()
 }
 
 
-RandomHitMarker::RandomHitMarker(const std::string & name, InputParameters parameters) :
-    Marker(name, parameters),
+RandomHitMarker::RandomHitMarker(const InputParameters & parameters) :
+    Marker(parameters),
     _random_hits(getUserObject<RandomHitUserObject>("random_hits"))
 {
 }

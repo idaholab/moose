@@ -21,8 +21,8 @@ InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-TestCopyInitialSolution::TestCopyInitialSolution(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters)
+TestCopyInitialSolution::TestCopyInitialSolution(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters)
 {}
 
 TestCopyInitialSolution::~TestCopyInitialSolution()

@@ -26,8 +26,8 @@ InputParameters validParams<RandomHitSolutionModifier>()
   return params;
 }
 
-RandomHitSolutionModifier::RandomHitSolutionModifier(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+RandomHitSolutionModifier::RandomHitSolutionModifier(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     _random_hits(getUserObject<RandomHitUserObject>("random_hits")),
     _mesh(_subproblem.mesh()),
     _variable(_subproblem.getVariable(0, parameters.get<VariableName>("modify"))),

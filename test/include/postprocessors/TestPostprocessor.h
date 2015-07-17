@@ -34,7 +34,7 @@ InputParameters validParams<TestPostprocessor>();
 class TestPostprocessor : public GeneralPostprocessor
 {
 public:
-  TestPostprocessor(const std::string & name, InputParameters parameters);
+  TestPostprocessor(const InputParameters & parameters);
 
   ///@{
   /**

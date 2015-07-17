@@ -31,7 +31,7 @@ InputParameters validParams<CachingPointSource>();
 class CachingPointSource : public DiracKernel
 {
 public:
-  CachingPointSource(const std::string & name, InputParameters parameters);
+  CachingPointSource(const InputParameters & parameters);
 
   virtual void addPoints();
   virtual Real computeQpResidual();

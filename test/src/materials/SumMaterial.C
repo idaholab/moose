@@ -27,8 +27,8 @@ InputParameters validParams<SumMaterial>()
   return params;
 }
 
-SumMaterial::SumMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+SumMaterial::SumMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _sum(declareProperty<Real>(getParam<MaterialPropertyName>("sum_prop_name"))),
     _mp1(getMaterialProperty<Real>("mp1")),
     _mp2(getMaterialProperty<Real>("mp2")),

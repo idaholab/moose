@@ -21,8 +21,8 @@ InputParameters validParams<UniqueIDAux>()
   return params;
 }
 
-UniqueIDAux::UniqueIDAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters)
+UniqueIDAux::UniqueIDAux(const InputParameters & parameters) :
+    AuxKernel(parameters)
 {
 }
 

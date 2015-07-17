@@ -27,7 +27,7 @@ InputParameters validParams<MatPropUserObjectAux>();
 class MatPropUserObjectAux : public AuxKernel
 {
 public:
-  MatPropUserObjectAux(const std::string & name, InputParameters parameters);
+  MatPropUserObjectAux(const InputParameters & parameters);
 
   virtual ~MatPropUserObjectAux() {}
 

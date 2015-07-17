@@ -28,7 +28,7 @@ InputParameters validParams<MatTestNeumannBC>();
 class MatTestNeumannBC : public NeumannBC
 {
 public:
-  MatTestNeumannBC(const std::string & name, InputParameters parameters);
+  MatTestNeumannBC(const InputParameters & parameters);
 
 protected:
 

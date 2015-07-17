@@ -23,8 +23,8 @@ InputParameters validParams<TEIC>()
   return params;
 }
 
-TEIC::TEIC(const std::string & name, InputParameters parameters) :
-    InitialCondition(name, parameters),
+TEIC::TEIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _t_jump(getParam<Real>("t_jump")),
     _slope(getParam<Real>("slope"))
 {

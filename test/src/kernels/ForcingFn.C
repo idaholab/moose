@@ -20,8 +20,8 @@ InputParameters validParams<ForcingFn>()
 }
 
 
-ForcingFn::ForcingFn(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+ForcingFn::ForcingFn(const InputParameters & parameters) :
+    Kernel(parameters)
 {
 }
 

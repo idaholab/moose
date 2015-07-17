@@ -31,7 +31,7 @@ InputParameters validParams<SideIntegralPostprocessor>();
 class NumSideQPs : public SideIntegralPostprocessor
 {
 public:
-  NumSideQPs(const std::string & name, InputParameters parameters);
+  NumSideQPs(const InputParameters & parameters);
   virtual ~NumSideQPs();
   virtual Real computeIntegral();
   virtual Real computeQpIntegral();

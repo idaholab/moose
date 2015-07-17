@@ -24,7 +24,7 @@ InputParameters validParams<MMSConvection>();
 class MMSConvection : public Kernel
 {
 public:
-  MMSConvection(const std::string & name, InputParameters parameters);
+  MMSConvection(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

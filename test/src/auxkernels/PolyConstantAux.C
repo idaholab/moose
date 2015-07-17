@@ -21,8 +21,8 @@ InputParameters validParams<PolyConstantAux>()
   return params;
 }
 
-PolyConstantAux::PolyConstantAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters)
+PolyConstantAux::PolyConstantAux(const InputParameters & parameters) :
+    AuxKernel(parameters)
 {}
 
 

@@ -19,7 +19,7 @@
 class ForcingFn : public Kernel
 {
 public:
-  ForcingFn(const std::string & name, InputParameters parameters);
+  ForcingFn(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -25,8 +25,8 @@ InputParameters validParams<Diffusion0>()
   return params;
 }
 
-Diffusion0::Diffusion0(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters)
+Diffusion0::Diffusion0(const InputParameters & parameters)
+  :Kernel(parameters)
 {
   _Ak = getParam<Real>("Ak");
   _Bk = getParam<Real>("Bk");

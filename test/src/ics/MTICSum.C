@@ -23,8 +23,8 @@ InputParameters validParams<MTICSum>()
   return params;
 }
 
-MTICSum::MTICSum(const std::string & name, InputParameters parameters) :
-    InitialCondition(name, parameters),
+MTICSum::MTICSum(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _var1(coupledValue("var1")),
     _var2(coupledValue("var2"))
 {

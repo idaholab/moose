@@ -28,8 +28,8 @@ InputParameters validParams<CoupledAux>()
   return params;
 }
 
-CoupledAux::CoupledAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+CoupledAux::CoupledAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _value(getParam<Real>("value")),
     _operator(getParam<MooseEnum>("operator")),
     _coupled(coupled("coupled")),

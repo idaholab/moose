@@ -23,8 +23,8 @@ InputParameters validParams<TEJumpBC>()
   return params;
 }
 
-TEJumpBC::TEJumpBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+TEJumpBC::TEJumpBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     _t_jump(getParam<Real>("t_jump")),
     _slope(getParam<Real>("slope"))
 {

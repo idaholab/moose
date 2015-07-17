@@ -27,7 +27,7 @@ InputParameters validParams<DiffMKernel>();
 class DiffMKernel : public Kernel
 {
 public:
-  DiffMKernel(const std::string & name, InputParameters parameters);
+  DiffMKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

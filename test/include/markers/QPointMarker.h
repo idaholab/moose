@@ -31,7 +31,7 @@ InputParameters validParams<QPointMarker>();
 class QPointMarker : public QuadraturePointMarker
 {
 public:
-  QPointMarker(const std::string & name, InputParameters parameters);
+  QPointMarker(const InputParameters & parameters);
   virtual ~QPointMarker(){};
 
 protected:

@@ -25,8 +25,8 @@ InputParameters validParams<BndTestDirichletBC>()
 }
 
 
-BndTestDirichletBC::BndTestDirichletBC(const std::string & name, InputParameters parameters) :
-  NodalBC(name, parameters),
+BndTestDirichletBC::BndTestDirichletBC(const InputParameters & parameters) :
+  NodalBC(parameters),
   _value(getParam<Real>("value"))
 {
 

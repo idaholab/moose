@@ -27,7 +27,7 @@ InputParameters & modifyParams(InputParameters & params);
 class BlkResTestDiffusion : public Kernel
 {
 public:
-  BlkResTestDiffusion(const std::string & name, InputParameters parameters);
+  BlkResTestDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

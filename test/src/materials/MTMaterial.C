@@ -21,8 +21,8 @@ InputParameters validParams<MTMaterial>()
   return params;
 }
 
-MTMaterial::MTMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+MTMaterial::MTMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _mat_prop(declareProperty<Real>("matp")),
     _value(getParam<Real>("value"))
 {

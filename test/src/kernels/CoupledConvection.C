@@ -22,8 +22,8 @@ InputParameters validParams<CoupledConvection>()
   return params;
 }
 
-CoupledConvection::CoupledConvection(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+CoupledConvection::CoupledConvection(const InputParameters & parameters) :
+  Kernel(parameters),
   _velocity_vector(getParam<bool>("lag_coupling") ? coupledGradientOld("velocity_vector") : coupledGradient("velocity_vector"))
 {}
 

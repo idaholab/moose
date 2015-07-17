@@ -39,8 +39,8 @@ InputParameters validParams<ForcingFunctionXYZ0>()
   return params;
 }
 
-ForcingFunctionXYZ0::ForcingFunctionXYZ0(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters)
+ForcingFunctionXYZ0::ForcingFunctionXYZ0(const InputParameters & parameters)
+  :Kernel(parameters)
   {
      _A0 = getParam<Real>("A0");
      _B0 = getParam<Real>("B0");

@@ -31,7 +31,7 @@ class FuncCoefDiffusion :
   public Kernel
 {
 public:
-  FuncCoefDiffusion(const std::string & name, InputParameters parameters);
+  FuncCoefDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -30,7 +30,7 @@ InputParameters validParams<GetMaterialPropertyBoundaryBlockNamesTest>();
 class GetMaterialPropertyBoundaryBlockNamesTest : public GeneralUserObject
 {
 public:
-  GetMaterialPropertyBoundaryBlockNamesTest(const std::string & name, InputParameters parameters);
+  GetMaterialPropertyBoundaryBlockNamesTest(const InputParameters & parameters);
   virtual ~GetMaterialPropertyBoundaryBlockNamesTest(){};
   virtual void execute(){};
   virtual void initialize(){};

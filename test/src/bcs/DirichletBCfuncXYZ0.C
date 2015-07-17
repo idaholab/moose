@@ -27,8 +27,8 @@ InputParameters validParams<DirichletBCfuncXYZ0>()
   return params;
 }
 
-DirichletBCfuncXYZ0::DirichletBCfuncXYZ0(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+DirichletBCfuncXYZ0::DirichletBCfuncXYZ0(const InputParameters & parameters) :
+    NodalBC(parameters),
     _A0(getParam<Real>("A0")),
     _B0(getParam<Real>("B0")),
     _C0(getParam<Real>("C0")),

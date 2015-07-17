@@ -22,8 +22,8 @@ InputParameters validParams<TestBoundaryRestrictableAssert>()
   return params;
 }
 
-TestBoundaryRestrictableAssert::TestBoundaryRestrictableAssert(const std::string & name, InputParameters parameters) :
-  SideUserObject(name, parameters)
+TestBoundaryRestrictableAssert::TestBoundaryRestrictableAssert(const InputParameters & parameters) :
+  SideUserObject(parameters)
 {
   if (getParam<bool>("test_invalid"))
   {

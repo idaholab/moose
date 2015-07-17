@@ -28,7 +28,7 @@ class AdvDiffReaction1 : public Kernel
 {
 public:
 
-  AdvDiffReaction1(const std::string & name, InputParameters parameters);
+  AdvDiffReaction1(const InputParameters & parameters);
 
 protected:
 

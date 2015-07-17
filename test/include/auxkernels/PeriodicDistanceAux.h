@@ -29,7 +29,7 @@ InputParameters validParams<PeriodicDistanceAux>();
 class PeriodicDistanceAux : public AuxKernel
 {
 public:
-  PeriodicDistanceAux(const std::string & name, InputParameters parameters);
+  PeriodicDistanceAux(const InputParameters & parameters);
   virtual ~PeriodicDistanceAux();
 
 protected:

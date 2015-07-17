@@ -27,8 +27,8 @@ InputParameters validParams<GetMaterialPropertyBoundaryBlockNamesTest>()
   return params;
 }
 
-GetMaterialPropertyBoundaryBlockNamesTest::GetMaterialPropertyBoundaryBlockNamesTest(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+GetMaterialPropertyBoundaryBlockNamesTest::GetMaterialPropertyBoundaryBlockNamesTest(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     _test_type(getParam<MooseEnum>("test_type"))
 {
 }

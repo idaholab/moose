@@ -30,7 +30,7 @@ class MaterialPropertyUserObject :
   public ElementIntegralUserObject
 {
 public:
-  MaterialPropertyUserObject(const std::string & name, InputParameters parameters);
+  MaterialPropertyUserObject(const InputParameters & parameters);
 
   virtual ~MaterialPropertyUserObject() {}
 

@@ -25,7 +25,7 @@ InputParameters validParams<TEJumpFFN>();
 class TEJumpFFN : public Kernel
 {
 public:
-  TEJumpFFN(const std::string & name, InputParameters parameters);
+  TEJumpFFN(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -21,8 +21,8 @@ InputParameters validParams<DivergenceBC>()
   return params;
 }
 
-DivergenceBC::DivergenceBC(const std::string & name, InputParameters parameters) :
-  IntegratedBC(name, parameters)
+DivergenceBC::DivergenceBC(const InputParameters & parameters) :
+  IntegratedBC(parameters)
 {
 }
 

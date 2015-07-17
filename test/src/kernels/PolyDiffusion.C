@@ -20,8 +20,8 @@ InputParameters validParams<PolyDiffusion>()
   return params;
 }
 
-PolyDiffusion::PolyDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+PolyDiffusion::PolyDiffusion(const InputParameters & parameters) :
+    Kernel(parameters)
 {}
 
 Real
