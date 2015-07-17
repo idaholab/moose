@@ -112,6 +112,11 @@ private:
    */
   MooseEnum(const MooseEnumBase & other_enum);
 
+  /**
+   * Check if the current enum is deprecated or not
+   */
+  virtual void checkDeprecatedCurrent();
+
   /// The current id
   int _current_id;
 

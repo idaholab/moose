@@ -85,10 +85,7 @@ MultiMooseEnum::operator!=(const MultiMooseEnum & value) const
 bool
 MultiMooseEnum::contains(const std::string & value) const
 {
-  std::string upper(value);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-  return std::find(_current_names.begin(), _current_names.end(), upper) != _current_names.end();
+  return std::find(_current_names.begin(), _current_names.end(), formalize(value)) != _current_names.end();
 }
 
 bool
@@ -201,8 +198,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
   std::copy(first, last, std::back_inserter(_current_names_preserved));
   for (InputIterator it = first; it != last; ++it)
   {
-    std::string upper(*it);
-    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+    std::string upper = formalize(*it);
 
     _current_names.insert(upper);
 
@@ -235,9 +231,7 @@ MultiMooseEnum::remove(InputIterator first, InputIterator last)
   std::set<std::string> current = _current_names;
   for (InputIterator it = first; it != last; ++it)
   {
-    // Values stored as upper case
-    std::string upper(*it);
-    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+    std::string upper = formalize(*it);
 
     std::set<std::string>::iterator found = current.find(upper);
     if (found != current.end())
@@ -274,4 +268,38 @@ operator<<(std::ostream & out, const MultiMooseEnum & obj)
 {
   std::copy(obj._current_names.begin(), obj._current_names.end(), infix_ostream_iterator<std::string>(out, " "));
   return out;
+}
+
+void
+MultiMooseEnum::checkDeprecatedCurrent()
+{
+  std::set<std::string> _copy_current_names(_current_names);
+  _current_names.clear();
+
+  for (std::set<std::string>::const_iterator it = _copy_current_names.begin(); it != _copy_current_names.end(); it++)
+  {
+    std::map<std::string, std::string>::const_iterator iter = _deprecated_names.find(*it);
+    if (iter != _deprecated_names.end())
+    {
+      if (iter->second != "")
+      {
+        _current_names.insert(iter->second);
+        for (unsigned int i=0; i<_current_ids.size(); i++)
+          if (_current_ids[i] == _name_to_id[*it])
+          {
+            _current_ids[i] = _name_to_id[iter->second];
+            // invalidate the preserved of the current name because it is never provided.
+            _current_names_preserved[i] = "";
+          }
+        mooseWarning(*it+" as the default enum is deprecated, consider using "+iter->second);
+      }
+      else
+      {
+        _current_names.insert(*it);
+        mooseWarning(*it+" as the default enum is deprecated");
+      }
+    }
+    else
+      _current_names.insert(*it);
+  }
 }
