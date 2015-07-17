@@ -32,7 +32,7 @@ InputParameters validParams<CoupledDirichletBC>();
 class CoupledDirichletBC : public DirichletBC
 {
 public:
-  CoupledDirichletBC(const std::string & name, InputParameters parameters);
+  CoupledDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

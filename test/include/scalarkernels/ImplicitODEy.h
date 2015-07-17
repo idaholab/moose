@@ -30,7 +30,7 @@ InputParameters validParams<ImplicitODEy>();
 class ImplicitODEy : public ODEKernel
 {
 public:
-  ImplicitODEy(const std::string & name, InputParameters parameters);
+  ImplicitODEy(const InputParameters & parameters);
   virtual ~ImplicitODEy();
 
 protected:

@@ -25,7 +25,7 @@ InputParameters validParams<TimestepSetupFunction>();
 class TimestepSetupFunction : public Function
 {
 public:
-  TimestepSetupFunction(const std::string & name, InputParameters parameters);
+  TimestepSetupFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p);
 

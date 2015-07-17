@@ -28,7 +28,7 @@ InputParameters validParams<MultipleUpdateElemAux>();
 class MultipleUpdateElemAux : public AuxKernel
 {
 public:
-  MultipleUpdateElemAux(const std::string & name, InputParameters parameters);
+  MultipleUpdateElemAux(const InputParameters & parameters);
   virtual ~MultipleUpdateElemAux();
 
 protected:

@@ -129,7 +129,7 @@ AuxKernel::getUserObjectBase(const std::string & name)
   return UserObjectInterface::getUserObjectBase(name);
 }
 
-PostprocessorValue &
+const PostprocessorValue &
 AuxKernel::getPostprocessorValue(const std::string & name)
 {
   _depend_uo.insert(_pars.get<PostprocessorName>(name));

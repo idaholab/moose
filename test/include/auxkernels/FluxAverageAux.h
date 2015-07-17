@@ -32,7 +32,7 @@ InputParameters validParams<FluxAverageAux>();
 class FluxAverageAux : public AuxKernel
 {
 public:
-  FluxAverageAux(const std::string & name, InputParameters parameters);
+  FluxAverageAux(const InputParameters & parameters);
 
   virtual ~FluxAverageAux() {}
 

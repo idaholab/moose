@@ -29,8 +29,7 @@ InputParameters validParams<StatefulTest>();
 class StatefulTest : public Material
 {
 public:
-  StatefulTest(const std::string & name,
-                InputParameters parameters);
+  StatefulTest(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

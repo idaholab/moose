@@ -29,7 +29,7 @@ InputParameters validParams<FailingProblem>();
 class FailingProblem : public FEProblem
 {
 public:
-  FailingProblem(const std::string & name, InputParameters params);
+  FailingProblem(const InputParameters & params);
   virtual bool converged();
 
 protected:

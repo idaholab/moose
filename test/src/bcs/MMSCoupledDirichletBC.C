@@ -22,8 +22,8 @@ InputParameters validParams<MMSCoupledDirichletBC>()
   return params;
 }
 
-MMSCoupledDirichletBC::MMSCoupledDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+MMSCoupledDirichletBC::MMSCoupledDirichletBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     //Grab the parameter for the multiplier.
     _value(getParam<Real>("value")),
     _mesh_dimension(_mesh.dimension())

@@ -28,7 +28,6 @@ class ElementL2Diff :
 {
 public:
   ElementL2Diff(const InputParameters & parameters);
-  ElementL2Diff(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

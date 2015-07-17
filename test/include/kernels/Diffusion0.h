@@ -24,7 +24,7 @@ class Diffusion0 : public Kernel
 {
 public:
 
-  Diffusion0(const std::string & name, InputParameters parameters);
+  Diffusion0(const InputParameters & parameters);
 
 protected:
 

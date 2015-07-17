@@ -23,8 +23,8 @@ InputParameters validParams<TEJumpFFN>()
   return params;
 }
 
-TEJumpFFN::TEJumpFFN(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+TEJumpFFN::TEJumpFFN(const InputParameters & parameters) :
+    Kernel(parameters),
     _t_jump(getParam<Real>("t_jump")),
     _slope(getParam<Real>("slope"))
 {

@@ -29,7 +29,7 @@ InputParameters validParams<BoundaryValuePPS>();
 class BoundaryValuePPS : public GeneralPostprocessor
 {
 public:
-  BoundaryValuePPS(const std::string & name, InputParameters parameters);
+  BoundaryValuePPS(const InputParameters & parameters);
   virtual ~BoundaryValuePPS();
 
   virtual void initialize();

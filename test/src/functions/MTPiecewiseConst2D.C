@@ -22,8 +22,8 @@ InputParameters validParams<MTPiecewiseConst2D>()
         return params;
 }
 
-MTPiecewiseConst2D::MTPiecewiseConst2D(const std::string & name, InputParameters parameters) :
-      Function(name, parameters)
+MTPiecewiseConst2D::MTPiecewiseConst2D(const InputParameters & parameters) :
+      Function(parameters)
 {}
 
 Real

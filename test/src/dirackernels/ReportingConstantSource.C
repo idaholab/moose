@@ -24,8 +24,8 @@ InputParameters validParams<ReportingConstantSource>()
   return params;
 }
 
-ReportingConstantSource::ReportingConstantSource(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
+ReportingConstantSource::ReportingConstantSource(const InputParameters & parameters) :
+    DiracKernel(parameters),
     _shared_var(coupledScalarValue("shared")),
     _point_param(getParam<std::vector<Real> >("point")),
     _factor(getParam<Real>("factor"))

@@ -74,10 +74,3 @@ OutputObjectTest::initialSetup()
   else
     mooseError("You must specify a 'test_type'");
 }
-
-// DEPRECATED CONSTRUCTOR
-OutputObjectTest::OutputObjectTest(const std::string & name, InputParameters parameters) :
-    Console(name, parameters),
-    _type(getParam<MooseEnum>("test_type"))
-{
-}

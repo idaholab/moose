@@ -22,8 +22,8 @@ InputParameters validParams<MaterialEigenKernel>()
   return params;
 }
 
-MaterialEigenKernel::MaterialEigenKernel(const std::string & name, InputParameters parameters) :
-    EigenKernel(name,parameters),
+MaterialEigenKernel::MaterialEigenKernel(const InputParameters & parameters) :
+    EigenKernel(parameters),
     _propname(getParam<MaterialPropertyName>("mat")),
     _mat(_is_implicit ? getMaterialPropertyByName<Real>(_propname) : getMaterialPropertyByName<Real>(_propname+"_old"))
 {

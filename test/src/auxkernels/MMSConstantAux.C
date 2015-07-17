@@ -21,8 +21,8 @@ InputParameters validParams<MMSConstantAux>()
   return params;
 }
 
-MMSConstantAux::MMSConstantAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+MMSConstantAux::MMSConstantAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _mesh_dimension(_mesh.dimension())
 {}
 

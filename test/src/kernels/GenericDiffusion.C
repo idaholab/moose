@@ -21,8 +21,8 @@ InputParameters validParams<GenericDiffusion>()
   return params;
 }
 
-GenericDiffusion::GenericDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+GenericDiffusion::GenericDiffusion(const InputParameters & parameters) :
+    Kernel(parameters),
     _diffusivity(getMaterialProperty<Real>(parameters.get<std::string>("property")))
 {
 }

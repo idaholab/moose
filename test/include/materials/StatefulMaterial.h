@@ -29,8 +29,7 @@ InputParameters validParams<StatefulMaterial>();
 class StatefulMaterial : public Material
 {
 public:
-  StatefulMaterial(const std::string & name,
-                  InputParameters parameters);
+  StatefulMaterial(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

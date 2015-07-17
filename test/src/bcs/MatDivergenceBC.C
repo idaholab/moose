@@ -22,8 +22,8 @@ InputParameters validParams<MatDivergenceBC>()
   return params;
 }
 
-MatDivergenceBC::MatDivergenceBC(const std::string & name, InputParameters parameters) :
-    DivergenceBC(name, parameters),
+MatDivergenceBC::MatDivergenceBC(const InputParameters & parameters) :
+    DivergenceBC(parameters),
     _mat(getMaterialProperty<Real>("prop_name"))
 {
 }

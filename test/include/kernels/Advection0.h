@@ -24,7 +24,7 @@ class Advection0 : public Kernel
 {
 public:
 
-  Advection0(const std::string & name, InputParameters parameters);
+  Advection0(const InputParameters & parameters);
 
 protected:
 

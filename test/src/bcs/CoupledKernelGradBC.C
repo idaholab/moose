@@ -23,8 +23,8 @@ InputParameters validParams<CoupledKernelGradBC>()
   return params;
 }
 
-CoupledKernelGradBC::CoupledKernelGradBC(const std::string & name, InputParameters parameters) :
-  IntegratedBC(name, parameters),
+CoupledKernelGradBC::CoupledKernelGradBC(const InputParameters & parameters) :
+  IntegratedBC(parameters),
   _var2(coupledValue("var2"))
 {
   std::vector<Real> a(getParam<std::vector<Real> >("vel"));

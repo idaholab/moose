@@ -25,8 +25,8 @@ InputParameters validParams<InsideUserObject>()
   return params;
 }
 
-InsideUserObject::InsideUserObject(const std::string & name, InputParameters parameters) :
-    InternalSideUserObject(name, parameters),
+InsideUserObject::InsideUserObject(const InputParameters & parameters) :
+    InternalSideUserObject(parameters),
     _u(coupledValue("variable")),
     _u_neighbor(coupledNeighborValue("variable")),
     _value(0.),

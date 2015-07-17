@@ -23,8 +23,8 @@ InputParameters validParams<CoupledKernelValueTest>()
 }
 
 
-CoupledKernelValueTest::CoupledKernelValueTest(const std::string & name, InputParameters parameters) :
-    KernelValue(name, parameters),
+CoupledKernelValueTest::CoupledKernelValueTest(const InputParameters & parameters) :
+    KernelValue(parameters),
     _var2(coupledValue("var2")),
     _var2_num(coupled("var2"))
 {

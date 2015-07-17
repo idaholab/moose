@@ -23,9 +23,8 @@ InputParameters validParams<FDAdvection>()
   return params;
 }
 
-FDAdvection::FDAdvection(const std::string & name,
-                       InputParameters parameters) :
-    FDKernel(name, parameters),
+FDAdvection::FDAdvection(const InputParameters & parameters) :
+    FDKernel(parameters),
     _grad_advector(coupledGradient("advector"))
 {}
 

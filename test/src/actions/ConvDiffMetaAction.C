@@ -30,8 +30,8 @@ InputParameters validParams<ConvDiffMetaAction>()
   return params;
 }
 
-ConvDiffMetaAction::ConvDiffMetaAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+ConvDiffMetaAction::ConvDiffMetaAction(const InputParameters & params) :
+    Action(params)
 {
 }
 

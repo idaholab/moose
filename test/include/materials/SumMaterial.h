@@ -27,7 +27,7 @@ InputParameters validParams<SumMaterial>();
 class SumMaterial : public Material
 {
 public:
-  SumMaterial(const std::string & name, InputParameters parameters);
+  SumMaterial(const InputParameters & parameters);
   virtual ~SumMaterial();
 
 protected:

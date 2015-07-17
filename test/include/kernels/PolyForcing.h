@@ -24,7 +24,7 @@ InputParameters validParams<PolyForcing>();
 class PolyForcing : public Kernel
 {
 public:
-  PolyForcing(const std::string & name, InputParameters parameters);
+  PolyForcing(const InputParameters & parameters);
 
 protected:
   Real f();

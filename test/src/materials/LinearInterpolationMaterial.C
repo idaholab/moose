@@ -31,8 +31,8 @@ LinearInterpolationMaterial::~LinearInterpolationMaterial()
 }
 
 
-LinearInterpolationMaterial::LinearInterpolationMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+LinearInterpolationMaterial::LinearInterpolationMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _use_poly_fit(getParam<bool>("use_poly_fit")),
     _linear_interp(NULL),
     _poly_fit(NULL),

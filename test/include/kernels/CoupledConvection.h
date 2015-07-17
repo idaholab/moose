@@ -30,7 +30,7 @@ InputParameters validParams<CoupledConvection>();
 class CoupledConvection : public Kernel
 {
 public:
-  CoupledConvection(const std::string & name, InputParameters parameters);
+  CoupledConvection(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

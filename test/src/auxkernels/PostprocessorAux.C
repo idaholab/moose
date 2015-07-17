@@ -22,8 +22,8 @@ InputParameters validParams<PostprocessorAux>()
   return params;
 }
 
-PostprocessorAux::PostprocessorAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+PostprocessorAux::PostprocessorAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _pp_val(getPostprocessorValue("pp"))
 {
 }

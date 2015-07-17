@@ -27,8 +27,8 @@ InputParameters validParams<DGMatDiffusion>()
   return params;
 }
 
-DGMatDiffusion::DGMatDiffusion(const std::string & name, InputParameters parameters)
-  :DGKernel(name, parameters),
+DGMatDiffusion::DGMatDiffusion(const InputParameters & parameters)
+  :DGKernel(parameters),
    _epsilon(getParam<Real>("epsilon")),
    _sigma(getParam<Real>("sigma")),
    _prop_name(getParam<MaterialPropertyName>("prop_name")),

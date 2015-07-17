@@ -23,8 +23,8 @@ InputParameters validParams<FDDiffusion>()
 }
 
 
-FDDiffusion::FDDiffusion(const std::string & name, InputParameters parameters) :
-    FDKernel(name, parameters)
+FDDiffusion::FDDiffusion(const InputParameters & parameters) :
+    FDKernel(parameters)
 {
 
 }

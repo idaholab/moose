@@ -24,8 +24,8 @@ InputParameters validParams<NonlinearSource>()
   return params;
 }
 
-NonlinearSource::NonlinearSource(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
+NonlinearSource::NonlinearSource(const InputParameters & parameters) :
+    DiracKernel(parameters),
     _coupled_var(coupledValue("coupled_var")),
     _coupled_var_num(coupled("coupled_var")),
     _scale_factor(parameters.get<Real>("scale_factor")),

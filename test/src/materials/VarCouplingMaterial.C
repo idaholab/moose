@@ -24,8 +24,8 @@ InputParameters validParams<VarCouplingMaterial>()
 }
 
 
-VarCouplingMaterial::VarCouplingMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+VarCouplingMaterial::VarCouplingMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _var(coupledValue("var")),
     _base(getParam<Real>("base")),
     _coef(getParam<Real>("coef")),

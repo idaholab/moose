@@ -22,8 +22,8 @@ InputParameters validParams<MaterialPointSource>()
   return params;
 }
 
-MaterialPointSource::MaterialPointSource(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
+MaterialPointSource::MaterialPointSource(const InputParameters & parameters) :
+    DiracKernel(parameters),
     _p(getParam<Point>("point")),
     _value(getMaterialProperty<Real>("matp"))
 {

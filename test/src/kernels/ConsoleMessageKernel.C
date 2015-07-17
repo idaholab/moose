@@ -21,8 +21,8 @@ InputParameters validParams<ConsoleMessageKernel>()
   return params;
 }
 
-ConsoleMessageKernel::ConsoleMessageKernel(const std::string & name, InputParameters parameters) :
-  CoefDiffusion(name, parameters)
+ConsoleMessageKernel::ConsoleMessageKernel(const InputParameters & parameters) :
+  CoefDiffusion(parameters)
 {
   _console << "ConsoleMessageKernel - Constructing object.\n";
 }

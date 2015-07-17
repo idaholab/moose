@@ -24,8 +24,8 @@ InputParameters validParams<ExceptionKernel>()
 }
 
 
-ExceptionKernel::ExceptionKernel(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+ExceptionKernel::ExceptionKernel(const InputParameters & parameters) :
+    Kernel(parameters),
     _when(static_cast<WhenType>((int) getParam<MooseEnum>("when"))),
     _res_has_thrown(false),
     _jac_has_thrown(false)

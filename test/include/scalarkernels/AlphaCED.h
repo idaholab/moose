@@ -28,7 +28,7 @@ InputParameters validParams<AlphaCED>();
 class AlphaCED : public ScalarKernel
 {
 public:
-  AlphaCED(const std::string & name, InputParameters parameters);
+  AlphaCED(const InputParameters & parameters);
   virtual ~AlphaCED();
 
   virtual void reinit();

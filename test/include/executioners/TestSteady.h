@@ -27,7 +27,7 @@ InputParameters validParams<TestSteady>();
 class TestSteady : public Steady
 {
 public:
-  TestSteady(const std::string & name, InputParameters parameters);
+  TestSteady(const InputParameters & parameters);
   virtual ~TestSteady();
 
   /**

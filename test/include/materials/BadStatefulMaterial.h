@@ -27,8 +27,7 @@ InputParameters validParams<BadStatefulMaterial>();
 class BadStatefulMaterial : public Material
 {
 public:
-  BadStatefulMaterial(const std::string & name,
-                      InputParameters parameters);
+  BadStatefulMaterial(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

@@ -26,7 +26,7 @@ class PolyReaction : public Kernel
 {
 public:
 
-  PolyReaction(const std::string & name, InputParameters parameters);
+  PolyReaction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -30,7 +30,7 @@ class RandomHitUserObject :
   public GeneralUserObject
 {
 public:
-  RandomHitUserObject(const std::string & name, InputParameters parameters);
+  RandomHitUserObject(const InputParameters & parameters);
 
   virtual ~RandomHitUserObject() {}
 

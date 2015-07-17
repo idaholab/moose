@@ -23,8 +23,8 @@ InputParameters validParams<MMSConvection>()
   return params;
 }
 
-MMSConvection::MMSConvection(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+MMSConvection::MMSConvection(const InputParameters & parameters) :
+    Kernel(parameters),
     _x(getParam<Real>("x")),
     _y(getParam<Real>("y")),
     _z(getParam<Real>("z"))

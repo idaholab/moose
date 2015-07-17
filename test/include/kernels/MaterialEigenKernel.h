@@ -26,7 +26,7 @@ InputParameters validParams<MaterialEigenKernel>();
 class MaterialEigenKernel : public EigenKernel
 {
 public:
-  MaterialEigenKernel(const std::string & name, InputParameters parameters);
+  MaterialEigenKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

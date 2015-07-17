@@ -36,7 +36,7 @@ public:
    * @param name Name of the object
    * @param parameters Input parameters
    */
-  ConsoleMessageKernel(const std::string & name, InputParameters parameters);
+  ConsoleMessageKernel(const InputParameters & parameters);
 
   /**
    * Class destructor

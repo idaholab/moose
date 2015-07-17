@@ -27,7 +27,7 @@ InputParameters validParams<MatDivergenceBC>();
 class MatDivergenceBC : public DivergenceBC
 {
 public:
-  MatDivergenceBC(const std::string & name, InputParameters parameters);
+  MatDivergenceBC(const InputParameters & parameters);
   virtual ~MatDivergenceBC();
 
 protected:

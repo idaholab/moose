@@ -23,8 +23,8 @@ InputParameters validParams<WrongJacobianDiffusion>()
   return params;
 }
 
-WrongJacobianDiffusion::WrongJacobianDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+WrongJacobianDiffusion::WrongJacobianDiffusion(const InputParameters & parameters) :
+    Kernel(parameters),
     _rfactor(getParam<Real>("rfactor")),
     _jfactor(getParam<Real>("jfactor"))
 {

@@ -29,8 +29,8 @@ InputParameters validParams<MaterialCopyUserObject>()
   return params;
 }
 
-MaterialCopyUserObject::MaterialCopyUserObject(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+MaterialCopyUserObject::MaterialCopyUserObject(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     _mesh(_subproblem.mesh()),
     _copy_times(parameters.get<std::vector<Real> >("copy_times")),
     _copy_from_element(parameters.get<unsigned int>("copy_from_element")),

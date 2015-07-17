@@ -22,8 +22,8 @@ InputParameters validParams<ImplicitODEy>()
   return params;
 }
 
-ImplicitODEy::ImplicitODEy(const std::string & name, InputParameters parameters) :
-    ODEKernel(name, parameters),
+ImplicitODEy::ImplicitODEy(const InputParameters & parameters) :
+    ODEKernel(parameters),
     _x_var(coupledScalar("x")),
     _x(coupledScalarValue("x"))
 {

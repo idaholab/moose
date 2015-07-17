@@ -22,9 +22,8 @@ InputParameters validParams<StatefulMaterial>()
   return params;
 }
 
-StatefulMaterial::StatefulMaterial(const std::string & name,
-                                 InputParameters parameters)
-  :Material(name, parameters),
+StatefulMaterial::StatefulMaterial(const InputParameters & parameters)
+  :Material(parameters),
 
    // Get a parameter value for the diffusivity
    _initial_diffusivity(getParam<Real>("initial_diffusivity")),

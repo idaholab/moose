@@ -31,7 +31,7 @@ InputParameters validParams<NumInternalSides>();
 class NumInternalSides : public InternalSidePostprocessor
 {
 public:
-  NumInternalSides(const std::string & name, InputParameters parameters);
+  NumInternalSides(const InputParameters & parameters);
   virtual ~NumInternalSides();
   virtual void execute();
   virtual void threadJoin(const UserObject & uo);

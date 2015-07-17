@@ -23,8 +23,8 @@ InputParameters validParams<PolyConvection>()
   return params;
 }
 
-PolyConvection::PolyConvection(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+PolyConvection::PolyConvection(const InputParameters & parameters) :
+    Kernel(parameters),
     // This is the "Intialization List" it sets the values of class variables
     _x(getParam<Real>("x")),
     _y(getParam<Real>("y")),

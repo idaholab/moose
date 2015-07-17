@@ -30,7 +30,7 @@ InputParameters validParams<PMassEigenKernel>();
 class PMassEigenKernel : public EigenKernel
 {
 public:
-  PMassEigenKernel(const std::string & name, InputParameters parameters);
+  PMassEigenKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

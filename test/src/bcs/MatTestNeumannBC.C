@@ -23,8 +23,8 @@ InputParameters validParams<MatTestNeumannBC>()
 }
 
 
-MatTestNeumannBC::MatTestNeumannBC(const std::string & name, InputParameters parameters) :
-    NeumannBC(name, parameters),
+MatTestNeumannBC::MatTestNeumannBC(const InputParameters & parameters) :
+    NeumannBC(parameters),
     _prop_name(getParam<std::string>("mat_prop"))
 {
   if (hasBoundaryMaterialProperty<Real>(_prop_name))

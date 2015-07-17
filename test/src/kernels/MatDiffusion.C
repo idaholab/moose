@@ -25,8 +25,8 @@ InputParameters validParams<MatDiffusion>()
 }
 
 
-MatDiffusion::MatDiffusion(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+MatDiffusion::MatDiffusion(const InputParameters & parameters) :
+    Kernel(parameters)
 {
   MooseEnum prop_state = getParam<MooseEnum>("prop_state");
 

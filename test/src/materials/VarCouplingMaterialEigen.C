@@ -22,8 +22,8 @@ InputParameters validParams<VarCouplingMaterialEigen>()
   return params;
 }
 
-VarCouplingMaterialEigen::VarCouplingMaterialEigen(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+VarCouplingMaterialEigen::VarCouplingMaterialEigen(const InputParameters & parameters) :
+    Material(parameters),
     _var(coupledValue("var")),
     _var_old(coupledValueOld("var")),
     _propname(getParam<std::string>("material_prop_name")),

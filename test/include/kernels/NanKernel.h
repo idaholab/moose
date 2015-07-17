@@ -28,7 +28,7 @@ InputParameters validParams<NanKernel>();
 class NanKernel : public Kernel
 {
 public:
-  NanKernel(const std::string & name, InputParameters parameters);
+  NanKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

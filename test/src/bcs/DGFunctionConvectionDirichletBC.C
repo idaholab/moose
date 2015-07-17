@@ -26,8 +26,8 @@ InputParameters validParams<DGFunctionConvectionDirichletBC>()
   return params;
 }
 
-DGFunctionConvectionDirichletBC::DGFunctionConvectionDirichletBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+DGFunctionConvectionDirichletBC::DGFunctionConvectionDirichletBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _func(getFunction("function")),
     _x(getParam<Real>("x")),
     _y(getParam<Real>("y")),

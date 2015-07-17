@@ -29,7 +29,7 @@ InputParameters validParams<MTUserObject>();
 class MTUserObject : public GeneralUserObject
 {
 public:
-  MTUserObject(const std::string & name, InputParameters params);
+  MTUserObject(const InputParameters & params);
   virtual ~MTUserObject();
 
   /**

@@ -22,8 +22,8 @@ InputParameters validParams<StatefulPointSource>()
   return params;
 }
 
-StatefulPointSource::StatefulPointSource(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
+StatefulPointSource::StatefulPointSource(const InputParameters & parameters) :
+    DiracKernel(parameters),
     _p(getParam<Point>("point")),
     _value(getMaterialPropertyOld<Real>("thermal_conductivity"))
 {

@@ -21,8 +21,8 @@ InputParameters validParams<CachingPointSource>()
   return params;
 }
 
-CachingPointSource::CachingPointSource(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters)
+CachingPointSource::CachingPointSource(const InputParameters & parameters) :
+    DiracKernel(parameters)
 {
 }
 

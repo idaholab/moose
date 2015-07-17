@@ -22,8 +22,8 @@ InputParameters validParams<DiffTensorKernel>()
 }
 
 
-DiffTensorKernel::DiffTensorKernel(const std::string & name, InputParameters parameters)
-    : Kernel(name, parameters),
+DiffTensorKernel::DiffTensorKernel(const InputParameters & parameters)
+    : Kernel(parameters),
     _k_comp(getFunction("conductivity"))
 {
 }

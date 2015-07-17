@@ -21,8 +21,8 @@ InputParameters validParams<PMassEigenKernel>()
   return params;
 }
 
-PMassEigenKernel::PMassEigenKernel(const std::string & name, InputParameters parameters) :
-    EigenKernel(name,parameters),
+PMassEigenKernel::PMassEigenKernel(const InputParameters & parameters) :
+    EigenKernel(parameters),
     _p(getParam<Real>("p")-2.0)
 {
 }

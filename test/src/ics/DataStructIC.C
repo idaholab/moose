@@ -20,8 +20,8 @@ InputParameters validParams<DataStructIC>()
   return params;
 }
 
-DataStructIC::DataStructIC(const std::string & name, InputParameters parameters) :
-    InitialCondition(name, parameters),
+DataStructIC::DataStructIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _mesh(_fe_problem.mesh())
 {
 }

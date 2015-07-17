@@ -8,8 +8,8 @@ InputParameters validParams<DefaultMatPropConsumerMaterial>()
   return params;
 }
 
-DefaultMatPropConsumerMaterial::DefaultMatPropConsumerMaterial(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(name, parameters),
+DefaultMatPropConsumerMaterial::DefaultMatPropConsumerMaterial(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
     _prop_name(getParam<std::string>("mat_prop")),
     _prop(getDefaultMaterialProperty<Real>(_prop_name))
 {

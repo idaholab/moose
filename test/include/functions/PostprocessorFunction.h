@@ -25,7 +25,7 @@ InputParameters validParams<PostprocessorFunction>();
 class PostprocessorFunction : public Function
 {
 public:
-  PostprocessorFunction(const std::string & name, InputParameters parameters);
+  PostprocessorFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p);
 

@@ -24,7 +24,7 @@ InputParameters validParams<MMSCoupledDirichletBC>();
 class MMSCoupledDirichletBC : public NodalBC
 {
 public:
-  MMSCoupledDirichletBC(const std::string & name, InputParameters parameters);
+  MMSCoupledDirichletBC(const InputParameters & parameters);
   virtual ~MMSCoupledDirichletBC(){}
 
 protected:

@@ -21,8 +21,8 @@ InputParameters validParams<PHarmonic>()
   return params;
 }
 
-PHarmonic::PHarmonic(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+PHarmonic::PHarmonic(const InputParameters & parameters) :
+    Kernel(parameters),
     _p(getParam<Real>("p")-2.0)
 {
 }

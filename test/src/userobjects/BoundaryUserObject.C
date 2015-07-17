@@ -23,8 +23,8 @@ InputParameters validParams<BoundaryUserObject>()
   return params;
 }
 
-BoundaryUserObject::BoundaryUserObject(const std::string & name, InputParameters parameters) :
-    SideUserObject(name, parameters),
+BoundaryUserObject::BoundaryUserObject(const InputParameters & parameters) :
+    SideUserObject(parameters),
     _u(coupledValue("variable")),
     _value(0.)
 {
