@@ -105,4 +105,10 @@ AdaptivityAction::act()
   adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
 }
 
+// DEPRECATED CONSTRUCTOR
+AdaptivityAction::AdaptivityAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
+}
+
 #endif //LIBMESH_ENABLE_AMR
