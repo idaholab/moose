@@ -1,0 +1,12 @@
+[Tests]
+  [./one_elem]
+    type = 'Exodiff'
+    input = 'one_elem.i'
+    exodiff = 'one_elem.e'
+  [../]
+  [./one_elem_multi]
+    type = 'Exodiff'
+    input = 'one_elem_multi.i'
+    exodiff = 'one_elem_multi.e'
+  [../]
+[]
