@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "GBAnisotropy.h"
-#include "AddV.h"
 
 template<>
 InputParameters validParams<GBAnisotropy>()
@@ -20,15 +19,13 @@ InputParameters validParams<GBAnisotropy>()
   params.addParam<Real>("delta_mob", 0.1, "factor determining inclination dependence of GB mobility");
   params.addRequiredParam<std::string>("Anisotropic_GB_file_name", "Name of the file containing: 1)GB mobility prefactor; 2) GB migration activation energy; 3)GB energy");
   params.addRequiredParam<bool>("inclination_anisotropy", "The GB anisotropy ininclination would be considered if true");
-  params.addRequiredParam<unsigned int>("op_num", "number of grains");
-  params.addRequiredParam<std::string>("var_name_base", "base for variable names");
-  params.addCoupledVar("v", "Array of coupled variables");
+  params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables");
   return params;
 }
 
 GBAnisotropy::GBAnisotropy(const std::string & name,
                            InputParameters parameters) :
-    Material(name, AddV(parameters)),
+    Material(name, parameters),
     _mesh_dimension(_mesh.dimension()),
     _length_scale(getParam<Real>("length_scale")),
     _time_scale(getParam<Real>("time_scale")),

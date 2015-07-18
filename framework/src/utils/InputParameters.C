@@ -60,6 +60,7 @@ InputParameters::clear()
   _custom_type.clear();
   _group.clear();
   _range_functions.clear();
+  _auto_build_vectors.clear();
   _required_params.clear();
   _valid_params.clear();
   _private_params.clear();
@@ -123,6 +124,7 @@ InputParameters::operator=(const InputParameters &rhs)
   _custom_type = rhs._custom_type;
   _group = rhs._group;
   _range_functions = rhs._range_functions;
+  _auto_build_vectors = rhs._auto_build_vectors;
   _buildable_types = rhs._buildable_types;
   _collapse_nesting = rhs._collapse_nesting;
   _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
@@ -147,6 +149,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _custom_type.insert(rhs._custom_type.begin(), rhs._custom_type.end());
   _group.insert(rhs._group.begin(), rhs._group.end());
   _range_functions.insert(rhs._range_functions.begin(), rhs._range_functions.end());
+  _auto_build_vectors.insert(rhs._auto_build_vectors.begin(), rhs._auto_build_vectors.end());
   _buildable_types.insert(_buildable_types.end(), rhs._buildable_types.begin(), rhs._buildable_types.end());
   // Collapse nesting and moose object syntax hiding are not modified with +=
   _required_params.insert(rhs._required_params.begin(), rhs._required_params.end());
@@ -175,6 +178,26 @@ InputParameters::addCoupledVar(const std::string &name, const std::string &doc_s
 {
   addParam<std::vector<VariableName> >(name, doc_string);
   _coupled_vars.insert(name);
+}
+
+void
+InputParameters::addCoupledVarWithAutoBuild(const std::string &name, const std::string &base_name, const std::string &num_name, const std::string &doc_string)
+{
+  addParam<std::vector<VariableName> >(name, doc_string);
+  _coupled_vars.insert(name);
+  _auto_build_vectors[name] = std::make_pair(base_name, num_name);
+
+  // Additionally there are two more parameters that need to be added:
+  addParam<std::string>(base_name, doc_string + " (base_name)");
+  addParam<unsigned int>(num_name, doc_string + " (num_name)");
+}
+
+void
+InputParameters::addRequiredCoupledVarWithAutoBuild(const std::string &name, const std::string &base_name, const std::string &num_name, const std::string &doc_string)
+{
+  addRequiredParam<std::vector<VariableName> >(name, doc_string);
+
+  addCoupledVarWithAutoBuild(name, base_name, num_name, doc_string);
 }
 
 void
@@ -351,6 +374,12 @@ InputParameters::defaultCoupledValue(const std::string & coupling_name) const
     mooseError("Attempted to retrieve default value for coupled variable '" << coupling_name << "' when none was provided. \n\nThere are three reasons why this may have occurred:\n 1. The other version of params.addCoupledVar() should be used in order to provde a default value. \n 2. This should have been a required coupled variable added with params.addRequiredCoupledVar() \n 3. The call to get the coupled value should have been properly guarded with isCoupled()\n");
 
   return value_it->second;
+}
+
+const std::map<std::string, std::pair<std::string, std::string> > &
+InputParameters::getAutoBuildVectors() const
+{
+  return _auto_build_vectors;
 }
 
 std::string

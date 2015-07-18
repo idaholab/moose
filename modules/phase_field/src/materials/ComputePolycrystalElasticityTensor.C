@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ComputePolycrystalElasticityTensor.h"
-#include "AddV.h"
 #include "RotationTensor.h"
 #include "GrainTracker.h"
 #include "Conversion.h"
@@ -18,9 +17,7 @@ InputParameters validParams<ComputePolycrystalElasticityTensor>()
   params.addRequiredParam<FileName>("Euler_angles_file_name", "Name of the file containing the Euler angles");
   params.addParam<Real>("length_scale", 1.0e-9, "Lengthscale of the problem, in meters");
   params.addParam<Real>("pressure_scale", 1.0e6, "Pressure scale of the problem, in pa");
-  params.addRequiredParam<unsigned int>("op_num", "number of order parameters");
-  params.addRequiredParam<std::string>("var_name_base", "base for variable names");
-  params.addCoupledVar("v", "Array of coupled variables");
+  params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables");
   params.addRequiredParam<UserObjectName>("GrainTracker_object", "The GrainTracker UserObject to get values from.");
   params.addRequiredParam<unsigned int>("grain_num", "Number of initial grains that will be modeled");
   params.addParam<unsigned int>("stiffness_buffer",10,"Number of extra elastic stiffnesses that are created to handle new grains");
@@ -31,7 +28,7 @@ InputParameters validParams<ComputePolycrystalElasticityTensor>()
 
 ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const std::string & name,
                                                  InputParameters parameters) :
-    ComputeElasticityTensorBase(name, AddV(parameters) ),
+    ComputeElasticityTensorBase(name, parameters),
     _C_unrotated(getParam<std::vector<Real> >("Elastic_constants"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
     _length_scale(getParam<Real>("length_scale")),
     _pressure_scale(getParam<Real>("pressure_scale")),
