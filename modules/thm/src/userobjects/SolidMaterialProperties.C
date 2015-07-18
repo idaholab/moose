@@ -89,7 +89,10 @@ SolidMaterialProperties::setConstRefParam(std::string get_string, std::string se
   std::string s = getParam<std::string>(get_string);
   if (isNumber(s))
     {
-      this->parameters().set<Real>(set_string) = toNumber(s);
+      InputParameters & params =
+        _app.getInputParameterWarehouse().getInputParameters(getParam<std::string>("name"), _tid);
+
+      params.set<Real>(set_string) = toNumber(s);
       return getParam<Real>(set_string);
     }
   else
