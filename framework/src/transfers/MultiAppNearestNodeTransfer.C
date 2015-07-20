@@ -137,7 +137,7 @@ MultiAppNearestNodeTransfer::execute()
               if (distance < nearest_max_distance || bboxes[i_from].contains_point(*node))
               {
                 std::pair<unsigned int, unsigned int> key(i_to, node->id());
-                node_index_map[i_proc][key] = outgoing_qps[i_from].size();
+                node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
                 outgoing_qps[i_proc].push_back(*node + _to_positions[i_to]);
                 qp_found = true;
               }
@@ -181,7 +181,7 @@ MultiAppNearestNodeTransfer::execute()
               if (distance < nearest_max_distance || bboxes[i_from].contains_point(centroid))
               {
                 std::pair<unsigned int, unsigned int> key(i_to, elem->id());
-                node_index_map[i_proc][key] = outgoing_qps[i_from].size();
+                node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
                 outgoing_qps[i_proc].push_back(centroid + _to_positions[i_to]);
                 qp_found = true;
               }
@@ -255,7 +255,7 @@ MultiAppNearestNodeTransfer::execute()
 
           for (unsigned int i_node = 0; i_node < local_nodes[i_local_from].size(); i_node++)
           {
-            Real current_distance = (qpt - *(local_nodes[i_local_from][i_node]) + _from_positions[i_local_from]).size();
+            Real current_distance = (qpt - *(local_nodes[i_local_from][i_node]) - _from_positions[i_local_from]).size();
             if (current_distance < outgoing_evals[2*qp])
             {
               // Assuming LAGRANGE!

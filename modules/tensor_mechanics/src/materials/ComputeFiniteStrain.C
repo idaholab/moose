@@ -22,6 +22,7 @@ ComputeFiniteStrain::ComputeFiniteStrain(const std::string & name,
     _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
     _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation gradient")),
+    _deformation_gradient_old(declarePropertyOld<RankTwoTensor>(_base_name + "deformation gradient")),
     _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
     _T_old(coupledValueOld("temperature"))
 {
@@ -34,6 +35,8 @@ ComputeFiniteStrain::initQpStatefulProperties()
   _strain_increment[_qp].zero();
   _rotation_increment[_qp].zero();
   _deformation_gradient[_qp].zero();
+  _deformation_gradient[_qp].addIa(1.0);
+  _deformation_gradient_old[_qp] = _deformation_gradient[_qp];
   _total_strain_old[_qp] = _total_strain[_qp];
 }
 
