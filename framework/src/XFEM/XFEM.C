@@ -705,7 +705,8 @@ XFEM::cut_mesh_with_efa()
 
     //TODO: The 0 here is the thread ID.  Need to sort out how to do this correctly
     //TODO: Also need to copy surface and neighbor material data
-    _material_data[0]->copy(*libmesh_elem, *parent_elem, 0);
+    if (parent_elem->is_semilocal(_mesh->processor_id()))
+      _material_data[0]->copy(*libmesh_elem, *parent_elem, 0);
 
     std::cout<<"XFEM added elem "<<libmesh_elem->id()+1<<std::endl;
 
