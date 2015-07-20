@@ -96,6 +96,7 @@ protected:
   const Real _penalty;
   const Real _friction_coefficient;
   const Real _tension_release;
+  const Real _capture_tolerance;
   bool _update_contact_set;
 
   NumericVector<Number> & _residual_copy;
