@@ -30,9 +30,10 @@ InputParameters validParams<ContactAction>()
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
-  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
+  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  No tension release if negative.");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
+  params.addParam<Real>("capture_tolerance", 0, "Normal distance from surface within which nodes are captured");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
@@ -91,7 +92,7 @@ ContactAction::act()
       // Extract global params
       _app.parser().extractParams(_name, params);
 
-      // Create master objects
+      // Create Constraint objects
       params.set<std::string>("model") = _model;
       params.set<std::string>("formulation") = _formulation;
       params.set<MooseEnum>("order") = _order;
@@ -105,6 +106,9 @@ ContactAction::act()
 
       if (isParamValid("tangential_tolerance"))
         params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+
+      if (isParamValid("capture_tolerance"))
+        params.set<Real>("capture_tolerance") = getParam<Real>("capture_tolerance");
 
       if (isParamValid("normal_smoothing_distance"))
         params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
@@ -160,6 +164,9 @@ ContactAction::act()
         if (isParamValid("tangential_tolerance"))
           params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
 
+        if (isParamValid("capture_tolerance"))
+          params.set<Real>("capture_tolerance") = getParam<Real>("capture_tolerance");
+
         if (isParamValid("normal_smoothing_distance"))
           params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
 
@@ -208,6 +215,9 @@ ContactAction::act()
         params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+action_name);
         if (isParamValid("tangential_tolerance"))
           params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+
+        if (isParamValid("capture_tolerance"))
+          params.set<Real>("capture_tolerance") = getParam<Real>("capture_tolerance");
 
         if (isParamValid("normal_smoothing_distance"))
           params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");

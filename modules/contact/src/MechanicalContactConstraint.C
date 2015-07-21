@@ -32,6 +32,7 @@ InputParameters validParams<MechanicalContactConstraint>()
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
+  params.addParam<Real>("capture_tolerance", 0, "Normal distance from surface within which nodes are captured");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
@@ -55,6 +56,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _penalty(getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _tension_release(getParam<Real>("tension_release")),
+    _capture_tolerance(getParam<Real>("capture_tolerance")),
     _update_contact_set(true),
     _residual_copy(_sys.residualGhosted()),
     _x_var(isCoupled("disp_x") ? coupled("disp_x") : libMesh::invalid_uint),
@@ -138,8 +140,8 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
     const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(*pinfo);
     const Real distance = pinfo->_normal * (pinfo->_closest_point - _mesh.node(slave_node_num));
 
-    // ************** Capture ******************
-    if ( ! pinfo->isCaptured() && distance > 0 )
+    // Capture
+    if ( ! pinfo->isCaptured() && MooseUtils::absoluteFuzzyGreaterEqual(distance, 0, _capture_tolerance))
     {
       pinfo->capture();
 
@@ -147,12 +149,12 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
       if (_formulation == CF_KINEMATIC)
         ++pinfo->_locked_this_step;
     }
-    // ************** Release ******************
+    // Release
     else if (_model != CM_GLUED &&
-        pinfo->isCaptured() &&
-        _tension_release >= 0 &&
-        -contact_pressure >= _tension_release &&
-        pinfo->_locked_this_step < 2)
+             pinfo->isCaptured() &&
+             _tension_release >= 0 &&
+             -contact_pressure >= _tension_release &&
+             pinfo->_locked_this_step < 2)
     {
       pinfo->release();
       pinfo->_contact_force.zero();
