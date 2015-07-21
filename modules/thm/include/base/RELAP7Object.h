@@ -14,7 +14,7 @@ InputParameters validParams<RELAP7Object>();
 class RELAP7Object : public MooseObject
 {
 public:
-  RELAP7Object(const std::string & name, InputParameters parameters);
+  RELAP7Object(const InputParameters & parameters);
   virtual ~RELAP7Object();
 };
 

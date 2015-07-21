@@ -7,8 +7,8 @@ InputParameters validParams<RELAP7Object>()
   return params;
 }
 
-RELAP7Object::RELAP7Object(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters)
+RELAP7Object::RELAP7Object(const InputParameters & parameters) :
+    MooseObject(parameters)
 {
 }
 
