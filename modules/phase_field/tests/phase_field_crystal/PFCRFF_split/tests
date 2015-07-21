@@ -3,5 +3,8 @@
     type = 'Exodiff'
     input = 'PFCRFF_split_test_master.i'
     exodiff = 'PFCRFF_split_test_master_out.e'
+
+    # This test loads the PhaseFieldApp Multiapp - it needs to be restricted in order to run reliably
+    executable_pattern = 'phase_field-\w+$'
   [../]
 []
