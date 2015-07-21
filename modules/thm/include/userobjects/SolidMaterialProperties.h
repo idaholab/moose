@@ -18,7 +18,7 @@ class SolidMaterialProperties :
   public ZeroInterface
 {
 public:
-  SolidMaterialProperties(const std::string & name, InputParameters parameters);
+  SolidMaterialProperties(const InputParameters & parameters);
   virtual ~SolidMaterialProperties();
 
   virtual void initialize();

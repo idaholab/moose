@@ -22,8 +22,8 @@ InputParameters validParams<SolidMaterialProperties>()
   return params;
 }
 
-SolidMaterialProperties::SolidMaterialProperties(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+SolidMaterialProperties::SolidMaterialProperties(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     ZeroInterface(parameters),
     _k_const(setConstRefParam("k", "thermal_conductivity")),
     _Cp_const(setConstRefParam("Cp", "specific_heat")),

@@ -16,7 +16,7 @@ InputParameters validParams<SolidMaterial>();
 class SolidMaterial : public Material
 {
 public:
-  SolidMaterial(const std::string & name, InputParameters parameters);
+  SolidMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

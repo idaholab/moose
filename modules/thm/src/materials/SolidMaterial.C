@@ -10,8 +10,8 @@ InputParameters validParams<SolidMaterial>()
   return params;
 }
 
-SolidMaterial::SolidMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+SolidMaterial::SolidMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
     _specific_heat(declareProperty<Real>("specific_heat")),
     _density(declareProperty<Real>("density")),
