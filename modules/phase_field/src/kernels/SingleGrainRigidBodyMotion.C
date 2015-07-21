@@ -48,6 +48,15 @@ SingleGrainRigidBodyMotion::computeQpJacobian()
 }
 
 Real
+SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (_c_var == jvar) //Requires c jacobian
+    return computeQpCJacobian();
+
+  return 0.0;
+}
+
+Real
 SingleGrainRigidBodyMotion::computeQpCJacobian()
 {
   return _velocity_advection[_qp][_op_index] * _grad_phi[_j][_qp] * _test[_i][_qp] + _velocity_advection_derivative[_qp][_op_index] * _grad_c[_qp] * _phi[_j][_qp] *  _test[_i][_qp] + _div_velocity_advection[_qp][_op_index] * _phi[_j][_qp] * _test[_i][_qp] + _div_velocity_advection_derivative[_qp][_op_index] * _c[_qp] * _phi[_j][_qp] * _test[_i][_qp];

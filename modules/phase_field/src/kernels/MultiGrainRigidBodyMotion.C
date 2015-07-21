@@ -54,6 +54,15 @@ MultiGrainRigidBodyMotion::computeQpJacobian()
 }
 
 Real
+MultiGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (_c_var == jvar) //Requires c jacobian
+    return computeQpCJacobian();
+
+  return 0.0;
+}
+
+Real
 MultiGrainRigidBodyMotion::computeQpCJacobian()
 {
   RealGradient vadv_total = 0.0;
