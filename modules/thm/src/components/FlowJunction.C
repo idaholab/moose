@@ -25,9 +25,9 @@ InputParameters validParams<FlowJunction>()
 }
 
 
-FlowJunction::FlowJunction(const std::string & name, InputParameters params) :
-    Junction(name, params),
-    _lm_name(genName(name, "lm")),
+FlowJunction::FlowJunction(const InputParameters & params) :
+    Junction(params),
+    _lm_name(genName(name(), "lm")),
     _K(getParam<std::vector<Real> >("K")),
     _scaling_factor(getParam<Real>("scaling_factor")),
     _scaling_factor_bcs(getParam<std::vector<Real> >("scaling_factor_bcs"))

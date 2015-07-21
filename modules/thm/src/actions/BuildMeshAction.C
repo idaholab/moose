@@ -8,8 +8,8 @@ InputParameters validParams<BuildMeshAction>()
   return params;
 }
 
-BuildMeshAction::BuildMeshAction(const std::string & name, InputParameters params) :
-    R7Action(name, params)
+BuildMeshAction::BuildMeshAction(InputParameters params) :
+    R7Action(params)
 {
 }
 

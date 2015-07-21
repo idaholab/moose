@@ -11,7 +11,7 @@ InputParameters validParams<BuildMeshAction>();
 class BuildMeshAction : public R7Action
 {
 public:
-  BuildMeshAction(const std::string & name, InputParameters params);
+  BuildMeshAction(InputParameters params);
   virtual ~BuildMeshAction();
 
   virtual void act();

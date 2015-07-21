@@ -7,8 +7,8 @@ InputParameters validParams<AddComponentPhysicsAction>()
   return params;
 }
 
-AddComponentPhysicsAction::AddComponentPhysicsAction(const std::string & name, InputParameters params) :
-    R7Action(name, params)
+AddComponentPhysicsAction::AddComponentPhysicsAction(InputParameters params) :
+    R7Action(params)
 {
 }
 

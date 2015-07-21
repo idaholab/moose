@@ -9,8 +9,8 @@ InputParameters validParams<IntegrityCheckAction>()
   return params;
 }
 
-IntegrityCheckAction::IntegrityCheckAction(const std::string & name, InputParameters parameters) :
-    R7Action(name, parameters)
+IntegrityCheckAction::IntegrityCheckAction(InputParameters parameters) :
+    R7Action(parameters)
 {
 }
 

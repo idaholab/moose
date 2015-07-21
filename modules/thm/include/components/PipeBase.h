@@ -24,7 +24,7 @@ class PipeBase : public GeometricalComponent,
     public FlowModel
 {
 public:
-  PipeBase(const std::string & name, InputParameters params);
+  PipeBase(const InputParameters & params);
   virtual ~PipeBase();
 
   virtual void init();

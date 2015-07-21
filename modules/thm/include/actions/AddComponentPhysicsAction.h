@@ -11,7 +11,7 @@ InputParameters validParams<AddComponentPhysicsAction>();
 class AddComponentPhysicsAction : public R7Action
 {
 public:
-  AddComponentPhysicsAction(const std::string & name, InputParameters params);
+  AddComponentPhysicsAction(InputParameters params);
   virtual ~AddComponentPhysicsAction();
 
   virtual void act();

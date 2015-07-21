@@ -8,8 +8,8 @@ InputParameters validParams<AddComponentAction>()
   return params;
 }
 
-AddComponentAction::AddComponentAction(const std::string & name, InputParameters params) :
-    R7ObjectAction(name, params)
+AddComponentAction::AddComponentAction(InputParameters params) :
+    R7ObjectAction(params)
 {
 }
 

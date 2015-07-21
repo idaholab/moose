@@ -54,7 +54,7 @@ public:
     unsigned int _position;
   };
 
-  Component(const std::string & name, InputParameters parameters);
+  Component(const InputParameters & parameters);
   virtual ~Component();
 
   unsigned int id() { return _id; }

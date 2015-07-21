@@ -83,8 +83,8 @@ Component::split(const std::string & rname)
   return result;
 }
 
-Component::Component(const std::string & name, InputParameters parameters) :
-    RELAP7Object(name, parameters),
+Component::Component(const InputParameters & parameters) :
+    RELAP7Object(parameters),
     _id(comp_id++),
     _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent") : NULL),
     _sim(*getParam<Simulation *>("_sim")),

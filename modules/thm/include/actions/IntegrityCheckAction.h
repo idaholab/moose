@@ -14,7 +14,7 @@ InputParameters validParams<IntegrityCheckAction>();
 class IntegrityCheckAction : public R7Action
 {
 public:
-  IntegrityCheckAction(const std::string & name, InputParameters parameters);
+  IntegrityCheckAction(InputParameters parameters);
   virtual ~IntegrityCheckAction();
 
   virtual void act();

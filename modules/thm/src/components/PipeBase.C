@@ -14,9 +14,9 @@ InputParameters validParams<PipeBase>()
 }
 
 
-PipeBase::PipeBase(const std::string & name, InputParameters params) :
-    GeometricalComponent(name, params),
-    FlowModel(name, params)
+PipeBase::PipeBase(const InputParameters & params) :
+    GeometricalComponent(params),
+    FlowModel(name(), params)
 {
 }
 

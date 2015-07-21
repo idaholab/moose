@@ -16,7 +16,7 @@ InputParameters validParams<GeometricalComponent>();
 class GeometricalComponent : public Component
 {
 public:
-  GeometricalComponent(const std::string & name, InputParameters parameters);
+  GeometricalComponent(const InputParameters & parameters);
   virtual ~GeometricalComponent();
 
   virtual void doBuildMesh();

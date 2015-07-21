@@ -11,7 +11,7 @@ InputParameters validParams<AddComponentAction>();
 class AddComponentAction : public R7ObjectAction
 {
 public:
-  AddComponentAction(const std::string & name, InputParameters params);
+  AddComponentAction(InputParameters params);
 
   virtual void act();
 };

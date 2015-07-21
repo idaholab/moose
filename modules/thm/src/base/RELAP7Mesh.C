@@ -8,8 +8,8 @@ InputParameters validParams<RELAP7Mesh>()
   return params;
 }
 
-RELAP7Mesh::RELAP7Mesh(const std::string & name, InputParameters parameters) :
-    MooseMesh(name, parameters),
+RELAP7Mesh::RELAP7Mesh(const InputParameters & parameters) :
+    MooseMesh(parameters),
     _dim(getParam<MooseEnum>("dim"))
 {
   _mesh->set_mesh_dimension(_dim);

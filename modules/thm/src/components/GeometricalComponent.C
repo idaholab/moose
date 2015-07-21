@@ -13,8 +13,8 @@ InputParameters validParams<GeometricalComponent>()
   return params;
 }
 
-GeometricalComponent::GeometricalComponent(const std::string & name, InputParameters parameters) :
-    Component(name, parameters),
+GeometricalComponent::GeometricalComponent(const InputParameters & parameters) :
+    Component(parameters),
     _position(toPoint(getParam<std::vector<Real> >("position"))),
     _rotation(getParam<Real>("rotation"))
 {

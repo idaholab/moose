@@ -15,7 +15,7 @@ InputParameters validParams<FlowJunction>();
 class FlowJunction : public Junction
 {
 public:
-  FlowJunction(const std::string & name, InputParameters params);
+  FlowJunction(const InputParameters & params);
   virtual ~FlowJunction();
 
   virtual void init();
