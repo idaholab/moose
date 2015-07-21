@@ -14,7 +14,7 @@ InputParameters validParams<HeatExchangeCoefficientPartitioning>();
 class HeatExchangeCoefficientPartitioning : public GeneralUserObject
 {
 public:
-  HeatExchangeCoefficientPartitioning(const std::string & name, InputParameters parameters);
+  HeatExchangeCoefficientPartitioning(const InputParameters & parameters);
   virtual ~HeatExchangeCoefficientPartitioning();
 
   virtual void execute() {};

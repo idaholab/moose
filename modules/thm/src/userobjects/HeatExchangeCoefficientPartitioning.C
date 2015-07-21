@@ -11,8 +11,8 @@ InputParameters validParams<HeatExchangeCoefficientPartitioning>()
   return params;
 }
 
-HeatExchangeCoefficientPartitioning::HeatExchangeCoefficientPartitioning(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+HeatExchangeCoefficientPartitioning::HeatExchangeCoefficientPartitioning(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     _k(getParam<Real>("k")),
     _lower(getParam<Real>("lower")),
     _upper(getParam<Real>("upper"))
