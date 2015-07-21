@@ -9,8 +9,8 @@ InputParameters validParams<Euler2RGBAux>()
   return params;
 }
 
-Euler2RGBAux::Euler2RGBAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+Euler2RGBAux::Euler2RGBAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _sd(getParam<unsigned int>("sd")),
     _phi1(getMaterialProperty<Real>("phi1")),
     _phi(getMaterialProperty<Real>("phi")),

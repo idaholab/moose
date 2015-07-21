@@ -11,7 +11,7 @@ InputParameters validParams<Euler2RGBAux>();
 class Euler2RGBAux : public AuxKernel
 {
 public:
-  Euler2RGBAux(const std::string & name, InputParameters parameters);
+  Euler2RGBAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
