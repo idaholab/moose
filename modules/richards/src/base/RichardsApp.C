@@ -97,8 +97,8 @@ InputParameters validParams<RichardsApp>()
   return params;
 }
 
-RichardsApp::RichardsApp(const std::string & name, InputParameters parameters) :
-    MooseApp(name, parameters)
+RichardsApp::RichardsApp(const InputParameters & parameters) :
+    MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -116,12 +116,21 @@ RichardsApp::~RichardsApp()
 void
 RichardsApp::registerApps()
 {
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().reg<name>(#name)
+
   registerApp(RichardsApp);
+
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 void
 RichardsApp::registerObjects(Factory & factory)
 {
+#undef registerObject
+#define registerObject(name) factory.reg<name>(stringifyName(name))
+
   // UserObjects
   registerUserObject(RichardsVarNames);
   registerUserObject(RichardsDensityConstBulk);
@@ -198,9 +207,27 @@ RichardsApp::registerObjects(Factory & factory)
 
   // Problems
   registerProblem(RichardsMultiphaseProblem);
+
+#undef registerObject
+#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
+
 }
 
 void
 RichardsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsApp::RichardsApp(const std::string & deprecated_name, InputParameters parameters) :
+    MooseApp(deprecated_name, parameters)
+{
+  srand(processor_id());
+
+  Moose::registerObjects(_factory);
+  RichardsApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  RichardsApp::associateSyntax(_syntax, _action_factory);
 }

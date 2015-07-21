@@ -31,8 +31,8 @@ InputParameters validParams<SolidModel>();
 class SolidModel : public DerivativeMaterialInterface<Material>
 {
 public:
-  SolidModel( const std::string & name,
-              InputParameters parameters );
+  SolidModel( const InputParameters & parameters);
+  SolidModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SolidModel();
 
   virtual void initStatefulProperties( unsigned n_points );
@@ -266,7 +266,7 @@ private:
   void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
 
   SolidMechanics::Element * createElement( const std::string & name,
-                                           InputParameters & parameters );
+                                           const InputParameters & parameters );
 
   SolidMechanics::Element * _element;
 

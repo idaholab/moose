@@ -25,9 +25,8 @@ InputParameters validParams<HexPolycrystalIC>()
   return params;
 }
 
-HexPolycrystalIC::HexPolycrystalIC(const std::string & name,
-                                   InputParameters parameters) :
-    PolycrystalReducedIC(name, parameters),
+HexPolycrystalIC::HexPolycrystalIC(const InputParameters & parameters) :
+    PolycrystalReducedIC(parameters),
     _x_offset(getParam<Real>("x_offset")),
     _perturbation_percent(getParam<Real>("perturbation_percent"))
 {
@@ -106,4 +105,15 @@ HexPolycrystalIC::initialSetup()
 
   //Assign grains to specific order parameters in a way that maximizes the distance
   _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+HexPolycrystalIC::HexPolycrystalIC(const std::string & deprecated_name, InputParameters parameters) :
+    PolycrystalReducedIC(deprecated_name, parameters),
+    _x_offset(getParam<Real>("x_offset")),
+    _perturbation_percent(getParam<Real>("perturbation_percent"))
+{
+  if (_perturbation_percent < 0.0 || _perturbation_percent > 1.0)
+    mooseError("perturbation_percent out of range");
 }

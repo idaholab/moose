@@ -28,8 +28,8 @@ InputParameters validParams<PoroFullSatMaterial>()
   return params;
 }
 
-PoroFullSatMaterial::PoroFullSatMaterial(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(name, parameters),
+PoroFullSatMaterial::PoroFullSatMaterial(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
 
     _phi0(getParam<Real>("porosity0")),
     _alpha(getParam<Real>("biot_coefficient")),
@@ -92,4 +92,37 @@ PoroFullSatMaterial::computeQpProperties()
     _done_over_biot_modulus_dP[_qp] = -(1 - _alpha)*_dporosity_dP[_qp]*_one_over_K + _dporosity_dP[_qp]*_one_over_Kf;
     _done_over_biot_modulus_dep[_qp] = -(1 - _alpha)*_dporosity_dep[_qp]*_one_over_K + _dporosity_dep[_qp]*_one_over_Kf;
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PoroFullSatMaterial::PoroFullSatMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<Material>(deprecated_name, parameters),
+
+    _phi0(getParam<Real>("porosity0")),
+    _alpha(getParam<Real>("biot_coefficient")),
+    _one_over_K(getParam<Real>("solid_bulk_compliance")),
+    _one_over_Kf(getParam<Real>("fluid_bulk_compliance")),
+    _constant_porosity(getParam<bool>("constant_porosity")),
+
+    _porepressure(coupledValue("porepressure")),
+    _porepressure_name(getVar("porepressure", 0)->name()),
+
+    _grad_disp_x(coupledGradient("disp_x")),
+    _grad_disp_y(coupledGradient("disp_y")),
+    _grad_disp_z(coupledGradient("disp_z")),
+
+    _vol_strain(declareProperty<Real>("volumetric_strain")),
+    _vol_strain_old(declarePropertyOld<Real>("volumetric_strain")),
+
+    _biot_coefficient(declareProperty<Real>("biot_coefficient")),
+
+    _porosity(declareProperty<Real>("porosity")),
+    _dporosity_dP(declarePropertyDerivative<Real>("porosity", _porepressure_name)),
+    _dporosity_dep(declarePropertyDerivative<Real>("porosity", "volumetric_strain")),
+
+    _one_over_biot_modulus(declareProperty<Real>("one_over_biot_modulus")),
+    _done_over_biot_modulus_dP(declarePropertyDerivative<Real>("one_over_biot_modulus", _porepressure_name)),
+    _done_over_biot_modulus_dep(declarePropertyDerivative<Real>("one_over_biot_modulus", "volumetric_strain"))
+{
 }

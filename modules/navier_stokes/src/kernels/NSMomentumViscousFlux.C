@@ -22,8 +22,8 @@ InputParameters validParams<NSMomentumViscousFlux>()
 
 
 
-NSMomentumViscousFlux::NSMomentumViscousFlux(const std::string & name, InputParameters parameters)
-    : NSKernel(name, parameters),
+NSMomentumViscousFlux::NSMomentumViscousFlux(const InputParameters & parameters)
+    : NSKernel(parameters),
       _component(getParam<unsigned>("component")),
       _vst_derivs(*this)
 {
@@ -80,4 +80,13 @@ Real NSMomentumViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     value += _vst_derivs.dtau(k, ell, m)*_grad_test[_i][_qp](ell);
 
   return value;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSMomentumViscousFlux::NSMomentumViscousFlux(const std::string & deprecated_name, InputParameters parameters)
+    : NSKernel(deprecated_name, parameters),
+      _component(getParam<unsigned>("component")),
+      _vst_derivs(*this)
+{
 }

@@ -25,8 +25,8 @@ InputParameters validParams<PolycrystalKernelAction>()
   return params;
 }
 
-PolycrystalKernelAction::PolycrystalKernelAction(const std::string & name, InputParameters params) :
-    Action(name, params),
+PolycrystalKernelAction::PolycrystalKernelAction(const InputParameters & params) :
+    Action(params),
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base")),
     _c(getParam<VariableName>("c")),
@@ -121,4 +121,16 @@ PolycrystalKernelAction::act()
       _problem->addKernel("ACGBPoly", kernel_name, poly_params);
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PolycrystalKernelAction::PolycrystalKernelAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params),
+    _op_num(getParam<unsigned int>("op_num")),
+    _var_name_base(getParam<std::string>("var_name_base")),
+    _c(getParam<VariableName>("c")),
+    _implicit(getParam<bool>("implicit")),
+    _T(getParam<VariableName>("T"))
+{
 }

@@ -27,7 +27,8 @@ class NSStagnationPressureBC : public NSStagnationBC
 {
 public:
   // Constructor
-  NSStagnationPressureBC(const std::string & name, InputParameters parameters);
+  NSStagnationPressureBC(const InputParameters & parameters);
+  NSStagnationPressureBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   // Destructor, better be virtual
   virtual ~NSStagnationPressureBC(){}

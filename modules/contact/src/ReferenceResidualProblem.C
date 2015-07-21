@@ -22,12 +22,9 @@ InputParameters validParams<ReferenceResidualProblem>()
   return params;
 }
 
-ReferenceResidualProblem::ReferenceResidualProblem(const std::string & name, InputParameters params) :
-    FEProblem(name, params)
+ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & params) :
+    FEProblem(params)
 {
-  _app.parser().extractParams("Problem", params);
-  params.checkParams("Problem");
-
   if (params.isParamValid("solution_variables"))
     _solnVarNames = params.get<std::vector<std::string> >("solution_variables");
   if (params.isParamValid("reference_residual_variables"))
@@ -252,4 +249,27 @@ ReferenceResidualProblem::checkConvergenceIndividVars(const Real fnorm,
     convergedRelative = false;
   }
   return (convergedRelative);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ReferenceResidualProblem::ReferenceResidualProblem(const std::string & deprecated_name, InputParameters params) :
+    FEProblem(deprecated_name, params)
+{
+  _app.parser().extractParams("Problem", params);
+  params.checkParams("Problem");
+
+  if (params.isParamValid("solution_variables"))
+    _solnVarNames = params.get<std::vector<std::string> >("solution_variables");
+  if (params.isParamValid("reference_residual_variables"))
+    _refResidVarNames = params.get<std::vector<std::string> >("reference_residual_variables");
+  if (_solnVarNames.size() != _refResidVarNames.size() )
+  {
+    std::ostringstream err;
+    err << "In ReferenceResidualProblem, size of solution_variables ("<<_solnVarNames.size()
+        <<") != size of reference_residual_variables ("<<_refResidVarNames.size()<<")";
+    mooseError(err.str());
+  }
+  _accept_mult = params.get<Real>("acceptable_multiplier");
+  _accept_iters = params.get<int>("acceptable_iterations");
 }

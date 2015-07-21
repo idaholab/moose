@@ -25,7 +25,8 @@ InputParameters validParams<RichardsDensity>();
 class RichardsDensity : public GeneralUserObject
 {
 public:
-  RichardsDensity(const std::string & name, InputParameters parameters);
+  RichardsDensity(const InputParameters & parameters);
+  RichardsDensity(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();
   void execute();

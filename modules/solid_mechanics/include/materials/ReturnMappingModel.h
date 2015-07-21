@@ -16,8 +16,8 @@
 class ReturnMappingModel : public ConstitutiveModel
 {
 public:
-  ReturnMappingModel( const std::string & name,
-                           InputParameters parameters );
+  ReturnMappingModel( const InputParameters & parameters);
+  ReturnMappingModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ReturnMappingModel() {}
 
 

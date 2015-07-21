@@ -20,7 +20,8 @@ InputParameters validParams<ImageMesh>();
 class ImageMesh : public GeneratedMesh
 {
 public:
-  ImageMesh(const std::string & name, InputParameters parameters);
+  ImageMesh(const InputParameters & parameters);
+  ImageMesh(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   ImageMesh(const ImageMesh & other_mesh);
   virtual ~ImageMesh();
 

@@ -17,7 +17,8 @@
 class ComputeStressFreeStrainBase : public DerivativeMaterialInterface<Material>
 {
 public:
-  ComputeStressFreeStrainBase(const std:: string & name, InputParameters parameters);
+  ComputeStressFreeStrainBase(const InputParameters & parameters);
+  ComputeStressFreeStrainBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void initQpStatefulProperties();

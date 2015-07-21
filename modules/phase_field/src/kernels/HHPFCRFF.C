@@ -10,8 +10,8 @@ InputParameters validParams<HHPFCRFF>()
   return params;
 }
 
-HHPFCRFF::HHPFCRFF(const std::string & name, InputParameters parameters) :
-    KernelValue(name, parameters),
+HHPFCRFF::HHPFCRFF(const InputParameters & parameters) :
+    KernelValue(parameters),
     _positive(getParam<bool>("positive")),
     _prop(getMaterialProperty<Real>("prop_name")),
     _has_coupled_var(isCoupled("coupled_var")),
@@ -54,4 +54,21 @@ HHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
     return _kernel_sign * _prop[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+HHPFCRFF::HHPFCRFF(const std::string & deprecated_name, InputParameters parameters) :
+    KernelValue(deprecated_name, parameters),
+    _positive(getParam<bool>("positive")),
+    _prop(getMaterialProperty<Real>("prop_name")),
+    _has_coupled_var(isCoupled("coupled_var")),
+    _coupled_var(_has_coupled_var ? &coupledValue("coupled_var") : NULL),
+    _coupled_var_var(_has_coupled_var ? coupled("coupled_var") : 0)
+{
+  // Set the sign of the kernel
+  if (_positive)
+    _kernel_sign = 1.0;
+  else
+    _kernel_sign = -1.0;
 }

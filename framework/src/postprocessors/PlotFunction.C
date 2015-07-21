@@ -21,7 +21,7 @@ InputParameters validParams<PlotFunction>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<FunctionName>("function", "Name of the function to plot (i.e. sample)");
-  params.addParam<Point>("point", "A point in space to be given to the function");
+  params.addParam<Point>("point", Point(), "A point in space to be given to the function");
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
   return params;
 }
@@ -29,7 +29,7 @@ InputParameters validParams<PlotFunction>()
 PlotFunction::PlotFunction(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
     _func(getFunction("function")),
-    _point(isParamValid("point") ? getParam<Point>("point") : Point()),
+    _point(getParam<Point>("point")),
     _scale_factor(getParam<Real>("scale_factor"))
 {
 }
@@ -59,7 +59,7 @@ PlotFunction::getValue()
 PlotFunction::PlotFunction(const std::string & deprecated_name, InputParameters parameters) :
     GeneralPostprocessor(deprecated_name, parameters),
     _func(getFunction("function")),
-    _point(isParamValid("point") ? getParam<Point>("point") : Point()),
+    _point(getParam<Point>("point")),
     _scale_factor(getParam<Real>("scale_factor"))
 {
 }

@@ -17,8 +17,7 @@ InputParameters validParams<MultiPlasticityRawComponentAssembler>()
   return params;
 }
 
-MultiPlasticityRawComponentAssembler::MultiPlasticityRawComponentAssembler(const std::string & /*name*/,
-                                         InputParameters parameters):
+MultiPlasticityRawComponentAssembler::MultiPlasticityRawComponentAssembler(const InputParameters & parameters):
   _num_models(parameters.get<std::vector<UserObjectName> >("plastic_models").size()),
   _num_surfaces(0),
   _specialIC(parameters.get<MooseEnum>("specialIC"))

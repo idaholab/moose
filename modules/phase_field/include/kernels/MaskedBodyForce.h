@@ -26,7 +26,8 @@ class MaskedBodyForce : public BodyForce
 {
 public:
 
-  MaskedBodyForce(const std::string & name, InputParameters parameters);
+  MaskedBodyForce(const InputParameters & parameters);
+  MaskedBodyForce(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -29,8 +29,8 @@ InputParameters validParams<RichardsPiecewiseLinearSink>()
   return params;
 }
 
-RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name,parameters),
+RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _use_mobility(getParam<bool>("use_mobility")),
     _use_relperm(getParam<bool>("use_relperm")),
     _fully_upwind(getParam<bool>("fully_upwind")),
@@ -260,4 +260,52 @@ RichardsPiecewiseLinearSink::jac(unsigned int wrt_num)
     deriv /= _area_pp;
 
   return _test[_i][_qp]*deriv*phi;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & deprecated_name, InputParameters parameters) :
+    IntegratedBC(deprecated_name, parameters),
+    _use_mobility(getParam<bool>("use_mobility")),
+    _use_relperm(getParam<bool>("use_relperm")),
+    _fully_upwind(getParam<bool>("fully_upwind")),
+
+    _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("bare_fluxes")),
+
+    _m_func(getFunction("multiplying_fcn")),
+
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _num_p(_richards_name_UO.num_v()),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+
+    // in the following, getUserObjectByName returns a reference (an alias) to a RichardsBLAH user object, and the & turns it into a pointer
+    _density_UO(_fully_upwind ? &getUserObjectByName<RichardsDensity>(getParam<std::vector<UserObjectName> >("density_UO")[_pvar]) : NULL),
+    _seff_UO(_fully_upwind ? &getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[_pvar]) : NULL),
+    _relperm_UO(_fully_upwind ? &getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[_pvar]) : NULL),
+
+    _area_pp(getPostprocessorValue("area_pp")),
+
+    _num_nodes(0),
+    _nodal_density(0),
+    _dnodal_density_dv(0),
+    _nodal_relperm(0),
+    _dnodal_relperm_dv(0),
+
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
+    _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv")),
+
+    _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
+    _permeability(getMaterialProperty<RealTensorValue>("permeability")),
+
+    _dseff_dv(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff_dv")),
+
+    _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
+    _drel_perm_dv(getMaterialProperty<std::vector<std::vector<Real> > >("drel_perm_dv")),
+
+    _density(getMaterialProperty<std::vector<Real> >("density")),
+    _ddensity_dv(getMaterialProperty<std::vector<std::vector<Real> > >("ddensity_dv"))
+{
+  _ps_at_nodes.resize(_num_p);
+  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
+    _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
 }

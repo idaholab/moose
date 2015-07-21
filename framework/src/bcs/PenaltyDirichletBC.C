@@ -44,7 +44,7 @@ PenaltyDirichletBC::computeQpJacobian()
 
 // DEPRECATED
 PenaltyDirichletBC::PenaltyDirichletBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(parameters),
+    IntegratedBC(name, parameters),
     _p(getParam<Real>("penalty")),
     _v(getParam<Real>("value"))
 {

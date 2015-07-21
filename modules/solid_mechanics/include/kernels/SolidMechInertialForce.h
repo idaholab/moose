@@ -20,7 +20,8 @@ class SolidMechInertialForce : public Kernel
 {
 public:
 
-  SolidMechInertialForce(const std::string & name, InputParameters parameters);
+  SolidMechInertialForce(const InputParameters & parameters);
+  SolidMechInertialForce(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -25,8 +25,8 @@ InputParameters validParams<KineticDisPreRateAux>()
   return params;
 }
 
-KineticDisPreRateAux::KineticDisPreRateAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
+KineticDisPreRateAux::KineticDisPreRateAux(const InputParameters & parameters)
+  :AuxKernel(parameters),
    _log_k(getParam<Real>("log_k")),
    _r_area(getParam<Real>("r_area")),
    _ref_kconst(getParam<Real>("ref_kconst")),
@@ -65,4 +65,23 @@ KineticDisPreRateAux::computeValue()
     kinetic_rate =0.0;
 
   return -kinetic_rate;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+KineticDisPreRateAux::KineticDisPreRateAux(const std::string & deprecated_name, InputParameters parameters)
+  :AuxKernel(deprecated_name, parameters),
+   _log_k(getParam<Real>("log_k")),
+   _r_area(getParam<Real>("r_area")),
+   _ref_kconst(getParam<Real>("ref_kconst")),
+   _e_act(getParam<Real>("e_act")),
+   _gas_const(getParam<Real>("gas_const")),
+   _ref_temp(getParam<Real>("ref_temp")),
+   _sys_temp(getParam<Real>("sys_temp")),
+   _sto_v(getParam<std::vector<Real> >("sto_v"))
+{
+  int n = coupledComponents("v");
+  _vals.resize(n);
+  for (unsigned int i=0; i<_vals.size(); ++i)
+    _vals[i] = &coupledValue("v", i);
 }

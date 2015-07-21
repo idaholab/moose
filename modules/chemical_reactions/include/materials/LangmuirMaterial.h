@@ -22,8 +22,8 @@ InputParameters validParams<LangmuirMaterial>();
 class LangmuirMaterial : public Material
 {
 public:
-  LangmuirMaterial(const std::string & name,
-                  InputParameters parameters);
+  LangmuirMaterial(const InputParameters & parameters);
+  LangmuirMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

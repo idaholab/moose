@@ -23,8 +23,8 @@ InputParameters validParams<RichardsSeff2gasRSC>()
   return params;
 }
 
-RichardsSeff2gasRSC::RichardsSeff2gasRSC(const std::string & name, InputParameters parameters) :
-    RichardsSeff(name, parameters),
+RichardsSeff2gasRSC::RichardsSeff2gasRSC(const InputParameters & parameters) :
+    RichardsSeff(parameters),
     _oil_viscosity(getParam<Real>("oil_viscosity")),
     _scale_ratio(getParam<Real>("scale_ratio")),
     _shift(getParam<Real>("shift")),
@@ -58,3 +58,13 @@ RichardsSeff2gasRSC::d2seff(std::vector<VariableValue *> p, unsigned int qp, std
   result[0][0] = result[1][1];
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSeff2gasRSC::RichardsSeff2gasRSC(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsSeff(deprecated_name, parameters),
+    _oil_viscosity(getParam<Real>("oil_viscosity")),
+    _scale_ratio(getParam<Real>("scale_ratio")),
+    _shift(getParam<Real>("shift")),
+    _scale(0.25*_scale_ratio*_oil_viscosity)
+{}

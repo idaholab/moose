@@ -19,8 +19,8 @@ InputParameters validParams<DomainIntegralQFunction>()
   return params;
 }
 
-DomainIntegralQFunction::DomainIntegralQFunction(const std::string & name, InputParameters parameters):
-    AuxKernel(name, parameters),
+DomainIntegralQFunction::DomainIntegralQFunction(const InputParameters & parameters):
+    AuxKernel(parameters),
     _j_integral_radius_inner(getParam<Real>("j_integral_radius_inner")),
     _j_integral_radius_outer(getParam<Real>("j_integral_radius_outer")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
@@ -117,3 +117,16 @@ DomainIntegralQFunction::projectToFrontAtPoint(Real & dist_to_front, Real & dist
   RealVectorValue axis_to_current_node = p - projection_point;
   dist_to_front = axis_to_current_node.size();
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DomainIntegralQFunction::DomainIntegralQFunction(const std::string & deprecated_name, InputParameters parameters):
+    AuxKernel(deprecated_name, parameters),
+    _j_integral_radius_inner(getParam<Real>("j_integral_radius_inner")),
+    _j_integral_radius_outer(getParam<Real>("j_integral_radius_outer")),
+    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
+    _has_crack_front_point_index(isParamValid("crack_front_point_index")),
+    _crack_front_point_index(_has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
+    _treat_as_2d(false),
+    _is_point_on_intersecting_boundary(false)
+{}

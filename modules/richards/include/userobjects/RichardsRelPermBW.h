@@ -24,7 +24,8 @@ InputParameters validParams<RichardsRelPermBW>();
 class RichardsRelPermBW : public RichardsRelPerm
 {
 public:
-  RichardsRelPermBW(const std::string & name, InputParameters parameters);
+  RichardsRelPermBW(const InputParameters & parameters);
+  RichardsRelPermBW(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * relative permeability as a function of effective saturation

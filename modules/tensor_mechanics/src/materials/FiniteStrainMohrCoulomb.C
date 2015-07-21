@@ -28,9 +28,8 @@ InputParameters validParams<FiniteStrainMohrCoulomb>()
   return params;
 }
 
-FiniteStrainMohrCoulomb::FiniteStrainMohrCoulomb(const std::string & name,
-                                                         InputParameters parameters) :
-    FiniteStrainPlasticBase(name, parameters),
+FiniteStrainMohrCoulomb::FiniteStrainMohrCoulomb(const InputParameters & parameters) :
+    FiniteStrainPlasticBase(parameters),
     _cohesion(getParam<Real>("mc_cohesion")),
     _phi(getParam<Real>("mc_friction_angle")*M_PI/180.0),
     _psi(getParam<Real>("mc_dilation_angle")*M_PI/180.0),
@@ -418,4 +417,51 @@ FiniteStrainMohrCoulomb::dabbo(const Real sin3lode, const Real /*sin_angle*/, Re
 
   daaa = (sin3lode >= 0 ? -_sintt/std::sqrt(3.0) - dbbb*_sin3tt : _sintt/std::sqrt(3.0) + dbbb*_sin3tt);
   daaa += -dccc*std::pow(_sin3tt, 2);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FiniteStrainMohrCoulomb::FiniteStrainMohrCoulomb(const std::string & deprecated_name, InputParameters parameters) :
+    FiniteStrainPlasticBase(deprecated_name, parameters),
+    _cohesion(getParam<Real>("mc_cohesion")),
+    _phi(getParam<Real>("mc_friction_angle")*M_PI/180.0),
+    _psi(getParam<Real>("mc_dilation_angle")*M_PI/180.0),
+    _cohesion_residual(parameters.isParamValid("mc_cohesion_residual") ? getParam<Real>("mc_cohesion_residual") : _cohesion),
+    _phi_residual(parameters.isParamValid("mc_friction_angle_residual") ? getParam<Real>("mc_friction_angle_residual")*M_PI/180.0 : _phi),
+    _psi_residual(parameters.isParamValid("mc_dilation_angle_residual") ? getParam<Real>("mc_dilation_angle_residual")*M_PI/180.0 : _psi),
+    _cohesion_rate(getParam<Real>("mc_cohesion_rate")),
+    _phi_rate(getParam<Real>("mc_friction_angle_rate")),
+    _psi_rate(getParam<Real>("mc_dilation_angle_rate")),
+
+    _small_smoother2(std::pow(getParam<Real>("mc_tip_smoother"), 2)),
+    _tt(getParam<Real>("mc_edge_smoother")*M_PI/180.0),
+    _costt(std::cos(_tt)),
+    _sintt(std::sin(_tt)),
+    _cos3tt(std::cos(3*_tt)),
+    _sin3tt(std::sin(3*_tt)),
+    _cos6tt(std::cos(6*_tt)),
+    _sin6tt(std::sin(6*_tt)),
+    _lode_cutoff(parameters.isParamValid("mc_lode_cutoff") ? getParam<Real>("mc_lode_cutoff") : 1.0E-5*std::pow(_f_tol[0], 2)),
+
+    _mc_internal(declareProperty<Real>("mc_internal")),
+    _mc_internal_old(declarePropertyOld<Real>("mc_internal")),
+    _mc_max_principal(declareProperty<Real>("mc_max_principal_stress")),
+    _mc_min_principal(declareProperty<Real>("mc_min_principal_stress")),
+    _yf(declareProperty<Real>("mc_yield_function"))
+{
+  if (_phi < _psi)
+    mooseError("Mohr-Coulomb friction angle must not be less than Mohr-Coulomb dilation angle");
+  if (_cohesion_residual < 0)
+    mooseError("Mohr-Coulomb residual cohesion must not be negative");
+  if (_phi_residual < 0 || _phi_residual > M_PI/3.0 || _psi_residual < 0 || _phi_residual < _psi_residual)
+    mooseError("Mohr-Coulomb residual friction and dilation angles must lie in [0, 60], and dilation_residual <= friction_residual");
+
+  if (_lode_cutoff < 0)
+    mooseError("mc_lode_cutoff must not be negative");
+
+  // check Abbo et al's convexity constraint (Eqn c.18 in their paper)
+  Real sin_angle = std::sin(std::max(std::max(_phi, _psi), std::max(_phi_residual, _psi_residual)));
+  Real rhs = std::sqrt(3)*(35*std::sin(_tt) + 14*std::sin(5*_tt) - 5*std::sin(7*_tt))/16/std::pow(std::cos(_tt), 5)/(11 - 10*std::cos(2*_tt));
+  if (rhs <= sin_angle)
+    mooseError("Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will result.  Please choose a larger value");
 }

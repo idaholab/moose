@@ -26,7 +26,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  KineticDisPreRateAux(const std::string & name, InputParameters parameters);
+  KineticDisPreRateAux(const InputParameters & parameters);
+  KineticDisPreRateAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~KineticDisPreRateAux() {}
 

@@ -21,8 +21,8 @@ InputParameters validParams<AbaqusUmatMaterial>();
 class AbaqusUmatMaterial : public SolidModel
 {
 public:
-  AbaqusUmatMaterial(const std::string & name,
-                  InputParameters parameters);
+  AbaqusUmatMaterial(const InputParameters & parameters);
+  AbaqusUmatMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AbaqusUmatMaterial();
 
 protected:

@@ -19,7 +19,8 @@ InputParameters validParams<ACBulk>();
 class ACBulk : public DerivativeMaterialInterface<JvarMapInterface<KernelValue> >
 {
 public:
-  ACBulk(const std::string & name, InputParameters parameters);
+  ACBulk(const InputParameters & parameters);
+  ACBulk(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

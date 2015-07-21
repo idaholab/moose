@@ -24,7 +24,8 @@ InputParameters validParams<RichardsRelPerm>();
 class RichardsRelPerm : public GeneralUserObject
 {
 public:
-  RichardsRelPerm(const std::string & name, InputParameters parameters);
+  RichardsRelPerm(const InputParameters & parameters);
+  RichardsRelPerm(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();
   void execute();

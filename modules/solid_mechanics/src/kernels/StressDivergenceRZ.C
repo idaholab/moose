@@ -24,8 +24,8 @@ InputParameters validParams<StressDivergenceRZ>()
 }
 
 
-StressDivergenceRZ::StressDivergenceRZ(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+StressDivergenceRZ::StressDivergenceRZ(const InputParameters & parameters)
+  :Kernel(parameters),
    _stress(getMaterialProperty<SymmTensor>("stress")),
    _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult")),
    _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT")),
@@ -137,3 +137,19 @@ StressDivergenceRZ::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+StressDivergenceRZ::StressDivergenceRZ(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+   _stress(getMaterialProperty<SymmTensor>("stress")),
+   _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult")),
+   _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT")),
+   _component(getParam<unsigned int>("component")),
+   _rdisp_coupled(isCoupled("disp_r")),
+   _zdisp_coupled(isCoupled("disp_z")),
+   _temp_coupled(isCoupled("temp")),
+   _rdisp_var(_rdisp_coupled ? coupled("disp_r") : 0),
+   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
+   _temp_var(_temp_coupled ? coupled("temp") : 0)
+{}

@@ -26,7 +26,7 @@
     input = 'gh04.i'
     csvdiff = 'gh04.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
   [./gh05]
     type = 'CSVDiff'

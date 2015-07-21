@@ -24,7 +24,8 @@
 class FiniteStrainMaterial : public TensorMechanicsMaterial
 {
 public:
-  FiniteStrainMaterial(const std::string & name, InputParameters parameters);
+  FiniteStrainMaterial(const InputParameters & parameters);
+  FiniteStrainMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void initQpStatefulProperties();

@@ -21,7 +21,8 @@ InputParameters validParams<CrossTermGradientFreeEnergy>();
 class CrossTermGradientFreeEnergy : public TotalFreeEnergyBase
 {
 public:
-  CrossTermGradientFreeEnergy(const std::string & name, InputParameters parameters);
+  CrossTermGradientFreeEnergy(const InputParameters & parameters);
+  CrossTermGradientFreeEnergy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

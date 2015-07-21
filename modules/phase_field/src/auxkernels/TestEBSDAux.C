@@ -16,8 +16,8 @@ InputParameters validParams<TestEBSDAux>()
   return params;
 }
 
-TestEBSDAux::TestEBSDAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+TestEBSDAux::TestEBSDAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
     _data_name(getParam<MooseEnum>("data_name")),
     _val(getPointDataAccessFunctor(_data_name))
@@ -32,4 +32,14 @@ TestEBSDAux::computeValue()
   Point p = _current_elem->centroid();
 
   return (*_val)(_ebsd_reader.getData(p));
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TestEBSDAux::TestEBSDAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
+    _data_name(getParam<MooseEnum>("data_name")),
+    _val(getPointDataAccessFunctor(_data_name))
+{
 }

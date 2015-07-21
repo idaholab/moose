@@ -20,8 +20,8 @@ InputParameters validParams<NSMomentumViscousBC>()
 
 
 
-NSMomentumViscousBC::NSMomentumViscousBC(const std::string & name, InputParameters parameters)
-    : NSIntegratedBC(name, parameters),
+NSMomentumViscousBC::NSMomentumViscousBC(const InputParameters & parameters)
+    : NSIntegratedBC(parameters),
 
       // Parameters to be specified in input file block...
       _component(getParam<unsigned>("component")),
@@ -95,4 +95,17 @@ Real NSMomentumViscousBC::computeQpOffDiagJacobian(unsigned jvar)
 
   // Note the sign...
   return -visc_term;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSMomentumViscousBC::NSMomentumViscousBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSIntegratedBC(deprecated_name, parameters),
+
+      // Parameters to be specified in input file block...
+      _component(getParam<unsigned>("component")),
+
+      // Derivative computing object
+      _vst_derivs(*this)
+{
 }

@@ -20,8 +20,8 @@ InputParameters validParams<RichardsMultiphaseProblem>()
 }
 
 
-RichardsMultiphaseProblem::RichardsMultiphaseProblem(const std::string & name, InputParameters params) :
-    FEProblem(name, params),
+RichardsMultiphaseProblem::RichardsMultiphaseProblem(const InputParameters & params) :
+    FEProblem(params),
     // in the following have to get the names of the variables, and then find their numbers in initialSetup,
     // as their numbers won't be defined at the moment of instantiation of this class
     _bounded_var_name(params.get<NonlinearVariableName>("bounded_var")),
@@ -121,3 +121,15 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number>& vec_solution, N
 
 
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsMultiphaseProblem::RichardsMultiphaseProblem(const std::string & deprecated_name, InputParameters params) :
+    FEProblem(deprecated_name, params),
+    // in the following have to get the names of the variables, and then find their numbers in initialSetup,
+    // as their numbers won't be defined at the moment of instantiation of this class
+    _bounded_var_name(params.get<NonlinearVariableName>("bounded_var")),
+    _lower_var_name(params.get<NonlinearVariableName>("lower_var")),
+    _bounded_var_num(0),
+    _lower_var_num(0)
+{}

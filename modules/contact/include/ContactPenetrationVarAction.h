@@ -13,7 +13,8 @@
 class ContactPenetrationVarAction: public Action
 {
 public:
-  ContactPenetrationVarAction(const std::string & name, InputParameters params);
+  ContactPenetrationVarAction(const InputParameters & params);
+  ContactPenetrationVarAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

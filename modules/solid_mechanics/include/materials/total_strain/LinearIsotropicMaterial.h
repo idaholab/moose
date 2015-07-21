@@ -22,8 +22,8 @@ InputParameters validParams<LinearIsotropicMaterial>();
 class LinearIsotropicMaterial : public SolidMechanicsMaterial
 {
 public:
-  LinearIsotropicMaterial(const std::string & name,
-                          InputParameters parameters);
+  LinearIsotropicMaterial(const InputParameters & parameters);
+  LinearIsotropicMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~LinearIsotropicMaterial();
 

@@ -15,7 +15,8 @@ InputParameters validParams<CHSplitVar>();
 class CHSplitVar : public KernelGrad
 {
 public:
-  CHSplitVar(const std::string & name, InputParameters parameters);
+  CHSplitVar(const InputParameters & parameters);
+  CHSplitVar(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient precomputeQpResidual();

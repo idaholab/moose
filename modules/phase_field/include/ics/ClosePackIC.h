@@ -27,11 +27,10 @@ public:
 
   /**
    * Class constructor
-   * @param name Name of the InitialCondition object
    * @param parameters Input parameters for this object
    */
-  ClosePackIC(const std::string & name, InputParameters parameters);
-
+  ClosePackIC(const InputParameters & parameters);
+  ClosePackIC(const std::string & name, InputParameters parameters); // DEPRECATED
   /**
    * Destructor
    */

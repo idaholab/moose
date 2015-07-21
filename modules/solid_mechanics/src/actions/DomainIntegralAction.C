@@ -44,8 +44,8 @@ InputParameters validParams<DomainIntegralAction>()
   return params;
 }
 
-DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParameters params):
-  Action(name, params),
+DomainIntegralAction::DomainIntegralAction(const InputParameters & params):
+  Action(params),
   _boundary_names(getParam<std::vector<BoundaryName> >("boundary")),
   _order(getParam<std::string>("order")),
   _family(getParam<std::string>("family")),
@@ -739,4 +739,135 @@ DomainIntegralAction::calcNumCrackFrontPoints()
   else
     mooseError("Must define either 'boundary' or 'crack_front_points'");
   return num_points;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+DomainIntegralAction::DomainIntegralAction(const std::string & deprecated_name, InputParameters params):
+  Action(deprecated_name, params),
+  _boundary_names(getParam<std::vector<BoundaryName> >("boundary")),
+  _order(getParam<std::string>("order")),
+  _family(getParam<std::string>("family")),
+  _direction_method_moose_enum(getParam<MooseEnum>("crack_direction_method")),
+  _end_direction_method_moose_enum(getParam<MooseEnum>("crack_end_direction_method")),
+  _have_crack_direction_vector(false),
+  _have_crack_direction_vector_end_1(false),
+  _have_crack_direction_vector_end_2(false),
+  _treat_as_2d(getParam<bool>("2d")),
+  _axis_2d(getParam<unsigned int>("axis_2d")),
+  _convert_J_to_K(false),
+  _has_symmetry_plane(isParamValid("symmetry_plane")),
+  _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane") : std::numeric_limits<unsigned int>::max()),
+  _position_type(getParam<MooseEnum>("position_type")),
+  _q_function_type(getParam<MooseEnum>("q_function_type")),
+  _get_equivalent_k(getParam<bool>("equivalent_k")),
+  _use_displaced_mesh(false)
+{
+  if (_q_function_type == GEOMETRY)
+  {
+    if (isParamValid("radius_inner") && isParamValid("radius_outer"))
+    {
+      _radius_inner = getParam<std::vector<Real> >("radius_inner");
+      _radius_outer = getParam<std::vector<Real> >("radius_outer");
+    }
+    else
+      mooseError("DomainIntegral error: must set radius_inner and radius_outer.");
+    for (unsigned int i=0; i<_radius_inner.size(); ++i)
+      _ring_vec.push_back(i+1);
+  }
+  else if (_q_function_type == TOPOLOGY)
+  {
+    if (isParamValid("ring_first") && isParamValid("ring_last"))
+    {
+      _ring_first = getParam<unsigned int>("ring_first");
+      _ring_last = getParam<unsigned int>("ring_last");
+    }
+    else
+      mooseError("DomainIntegral error: must set ring_first and ring_last if q_function_type = Topology.");
+    for (unsigned int i=_ring_first; i<=_ring_last; ++i)
+      _ring_vec.push_back(i);
+  }
+  else
+    mooseError("DomainIntegral error: invalid q_function_type.");
+
+  if (isParamValid("crack_front_points"))
+  {
+    _crack_front_points = getParam<std::vector<Point> >("crack_front_points");
+  }
+  if (isParamValid("crack_direction_vector"))
+  {
+    _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
+    _have_crack_direction_vector = true;
+  }
+  if (isParamValid("crack_direction_vector_end_1"))
+  {
+    _crack_direction_vector_end_1 = getParam<RealVectorValue>("crack_direction_vector_end_1");
+    _have_crack_direction_vector_end_1 = true;
+  }
+  if (isParamValid("crack_direction_vector_end_2"))
+  {
+    _crack_direction_vector_end_2 = getParam<RealVectorValue>("crack_direction_vector_end_2");
+    _have_crack_direction_vector_end_2 = true;
+  }
+  if (isParamValid("crack_mouth_boundary"))
+    _crack_mouth_boundary_names = getParam<std::vector<BoundaryName> >("crack_mouth_boundary");
+  if (isParamValid("intersecting_boundary"))
+    _intersecting_boundary_names = getParam<std::vector<BoundaryName> >("intersecting_boundary");
+  if (_radius_inner.size() != _radius_outer.size())
+    mooseError("Number of entries in 'radius_inner' and 'radius_outer' must match.");
+
+  bool youngs_modulus_set(false);
+  bool poissons_ratio_set(false);
+  MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
+  if (integral_moose_enums.size() == 0)
+    mooseError("Must specify at least one domain integral to perform.");
+  for (unsigned int i=0; i<integral_moose_enums.size(); ++i)
+  {
+    if (integral_moose_enums[i] != "JIntegral")
+    {
+      //Check that parameters required for interaction integrals are defined
+      if (!(isParamValid("disp_x")) || !(isParamValid("disp_y")))
+        mooseError("DomainIntegral error: must set displacements for integral: "<<integral_moose_enums[i]);
+
+      if (!(isParamValid("poissons_ratio")) || !(isParamValid("youngs_modulus")))
+        mooseError("DomainIntegral error: must set Poisson's ratio and Young's modulus for integral: "<<integral_moose_enums[i]);
+
+      if (!(isParamValid("block")))
+        mooseError("DomainIntegral error: must set block ID or name for integral: "<<integral_moose_enums[i]);
+
+      _poissons_ratio = getParam<Real>("poissons_ratio");
+      poissons_ratio_set = true;
+      _youngs_modulus = getParam<Real>("youngs_modulus");
+      youngs_modulus_set = true;
+      _blocks = getParam<std::vector<SubdomainName> >("block");
+      _disp_x = getParam<VariableName>("disp_x");
+      _disp_y = getParam<VariableName>("disp_y");
+      _disp_z = getParam<VariableName>("disp_z");
+
+    }
+
+    _integrals.insert(INTEGRAL(int(integral_moose_enums.get(i))));
+  }
+
+  if (_get_equivalent_k && (_integrals.count(INTERACTION_INTEGRAL_KI) == 0 || _integrals.count(INTERACTION_INTEGRAL_KII) == 0 || _integrals.count(INTERACTION_INTEGRAL_KIII) == 0))
+    mooseError("DomainIntegral error: must calculate KI, KII and KIII to get equivalent K.");
+
+  if (isParamValid("output_variable"))
+  {
+    _output_variables = getParam<std::vector<VariableName> >("output_variable");
+    if (_crack_front_points.size() > 0)
+      mooseError("'output_variables' not yet supported with 'crack_front_points'");
+  }
+
+  if (isParamValid("convert_J_to_K"))
+    _convert_J_to_K = getParam<bool>("convert_J_to_K");
+  if (_convert_J_to_K)
+  {
+    if (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio"))
+      mooseError("DomainIntegral error: must set Young's modulus and Poisson's ratio for J-integral if convert_J_to_K = true.");
+    if (!youngs_modulus_set)
+      _youngs_modulus = getParam<Real>("youngs_modulus");
+    if (!poissons_ratio_set)
+      _poissons_ratio = getParam<Real>("poissons_ratio");
+  }
 }

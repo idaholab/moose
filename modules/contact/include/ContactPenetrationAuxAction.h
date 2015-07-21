@@ -19,7 +19,8 @@ InputParameters validParams<ContactPenetrationAuxAction>();
 class ContactPenetrationAuxAction: public Action
 {
 public:
-  ContactPenetrationAuxAction(const std::string & name, InputParameters params);
+  ContactPenetrationAuxAction(const InputParameters & params);
+  ContactPenetrationAuxAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

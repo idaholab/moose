@@ -26,8 +26,8 @@ InputParameters validParams<AnisoHeatConductionMaterial>()
   return params;
 }
 
-AnisoHeatConductionMaterial::AnisoHeatConductionMaterial(const std::string & name, InputParameters parameters) :
-  Material(name, parameters),
+AnisoHeatConductionMaterial::AnisoHeatConductionMaterial(const InputParameters & parameters) :
+  Material(parameters),
 
   _has_temp(isCoupled("temp")),
   _temperature(_has_temp ? coupledValue("temp") : _zero),
@@ -109,5 +109,63 @@ AnisoHeatConductionMaterial::computeProperties()
     {
       _specific_heat[qp] = _my_specific_heat;
     }
+  }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AnisoHeatConductionMaterial::AnisoHeatConductionMaterial(const std::string & deprecated_name, InputParameters parameters) :
+  Material(deprecated_name, parameters),
+
+  _has_temp(isCoupled("temp")),
+  _temperature(_has_temp ? coupledValue("temp") : _zero),
+
+  _my_thermal_conductivity_x(isParamValid("thermal_conductivity_x") ? getParam<Real>("thermal_conductivity_x") : -1),
+  _my_thermal_conductivity_y(isParamValid("thermal_conductivity_y") ? getParam<Real>("thermal_conductivity_y") : -1),
+  _my_thermal_conductivity_z(isParamValid("thermal_conductivity_z") ? getParam<Real>("thermal_conductivity_z") : -1),
+
+  _thermal_conductivity_x_pp(isParamValid("thermal_conductivity_x_pp") ? &getPostprocessorValue("thermal_conductivity_x_pp") : NULL),
+  _thermal_conductivity_y_pp(isParamValid("thermal_conductivity_y_pp") ? &getPostprocessorValue("thermal_conductivity_y_pp") : NULL),
+  _thermal_conductivity_z_pp(isParamValid("thermal_conductivity_z_pp") ? &getPostprocessorValue("thermal_conductivity_z_pp") : NULL),
+
+  _my_specific_heat(isParamValid("specific_heat") ? getParam<Real>("specific_heat") : 0),
+
+  _thermal_conductivity_x(&declareProperty<Real>("thermal_conductivity_x")),
+  _thermal_conductivity_x_dT(&declareProperty<Real>("thermal_conductivity_x_dT")),
+  _thermal_conductivity_y(isParamValid("thermal_conductivity_y") || isParamValid("thermal_conductivity_y_pp") ?
+                          &declareProperty<Real>("thermal_conductivity_y") : NULL),
+  _thermal_conductivity_y_dT(_thermal_conductivity_y ? &declareProperty<Real>("thermal_conductivity_y_dT") : NULL),
+  _thermal_conductivity_z(isParamValid("thermal_conductivity_z") || isParamValid("thermal_conductivity_z_pp") ?
+                          &declareProperty<Real>("thermal_conductivity_z") : NULL),
+  _thermal_conductivity_z_dT(_thermal_conductivity_z ? &declareProperty<Real>("thermal_conductivity_z_dT") : NULL),
+
+  _specific_heat(declareProperty<Real>("specific_heat")),
+  _specific_heat_temperature_function( getParam<FunctionName>("specific_heat_temperature_function") != "" ? &getFunction("specific_heat_temperature_function") : NULL)
+{
+  bool k_x = isParamValid("thermal_conductivity_x") || (NULL != _thermal_conductivity_x_pp);
+  bool k_y = isParamValid("thermal_conductivity_y") || (NULL != _thermal_conductivity_y_pp);
+  bool k_z = isParamValid("thermal_conductivity_z") || (NULL != _thermal_conductivity_z_pp);
+
+  if (!k_x ||
+      (_subproblem.mesh().dimension() > 1 && !k_y) ||
+      (_subproblem.mesh().dimension() > 2 && !k_z))
+  {
+    mooseError("Incomplete set of orthotropic thermal conductivity parameters");
+  }
+  if (_specific_heat_temperature_function && !_has_temp)
+  {
+    mooseError("Must couple with temperature if using specific heat function");
+  }
+  if (isParamValid("specific_heat") && _specific_heat_temperature_function)
+  {
+    mooseError("Cannot define both specific heat and specific heat temperature function");
+  }
+
+  k_x = isParamValid("thermal_conductivity_x") && (NULL != _thermal_conductivity_x_pp);
+  k_y = isParamValid("thermal_conductivity_y") && (NULL != _thermal_conductivity_y_pp);
+  k_z = isParamValid("thermal_conductivity_z") && (NULL != _thermal_conductivity_z_pp);
+  if (k_x || k_y || k_z)
+  {
+    mooseError("Cannot define thermal conductivity value and Postprocessor");
   }
 }

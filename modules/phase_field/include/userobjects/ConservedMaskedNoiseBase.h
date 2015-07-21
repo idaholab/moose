@@ -28,7 +28,8 @@ InputParameters validParams<ConservedMaskedNoiseBase>();
 class ConservedMaskedNoiseBase : public ConservedNoiseInterface
 {
 public:
-  ConservedMaskedNoiseBase(const std::string & name, InputParameters parameters);
+  ConservedMaskedNoiseBase(const InputParameters & parameters);
+  ConservedMaskedNoiseBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ConservedMaskedNoiseBase() {}
 

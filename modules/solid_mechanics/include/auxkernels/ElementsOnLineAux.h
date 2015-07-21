@@ -14,7 +14,8 @@ class ElementsOnLineAux : public AuxKernel
 
 public:
 
-  ElementsOnLineAux(const std::string & name, InputParameters parameters);
+  ElementsOnLineAux(const InputParameters & parameters);
+  ElementsOnLineAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ElementsOnLineAux() {}
 

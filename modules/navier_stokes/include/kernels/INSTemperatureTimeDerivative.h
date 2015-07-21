@@ -23,7 +23,8 @@ InputParameters validParams<INSTemperatureTimeDerivative>();
 class INSTemperatureTimeDerivative : public TimeDerivative
 {
 public:
-  INSTemperatureTimeDerivative(const std::string & name, InputParameters parameters);
+  INSTemperatureTimeDerivative(const InputParameters & parameters);
+  INSTemperatureTimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSTemperatureTimeDerivative(){}
 

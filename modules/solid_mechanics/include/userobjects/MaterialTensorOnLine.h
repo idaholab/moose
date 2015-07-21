@@ -19,7 +19,8 @@ InputParameters validParams<MaterialTensorOnLine>();
 class MaterialTensorOnLine : public ElementUserObject
 {
 public:
-  MaterialTensorOnLine(const std::string & name, InputParameters parameters);
+  MaterialTensorOnLine(const InputParameters & parameters);
+  MaterialTensorOnLine(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   ~MaterialTensorOnLine(); // the destructor closes the output file
 

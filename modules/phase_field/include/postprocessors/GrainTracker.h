@@ -24,7 +24,8 @@ InputParameters validParams<GrainTracker>();
 class GrainTracker : public FeatureFloodCount
 {
 public:
-  GrainTracker(const std::string & name, InputParameters parameters);
+  GrainTracker(const InputParameters & parameters);
+  GrainTracker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~GrainTracker();
 
   virtual void initialize();

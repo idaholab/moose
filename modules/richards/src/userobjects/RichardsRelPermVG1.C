@@ -21,8 +21,8 @@ InputParameters validParams<RichardsRelPermVG1>()
   return params;
 }
 
-RichardsRelPermVG1::RichardsRelPermVG1(const std::string & name, InputParameters parameters) :
-    RichardsRelPermVG(name, parameters),
+RichardsRelPermVG1::RichardsRelPermVG1(const InputParameters & parameters) :
+    RichardsRelPermVG(parameters),
     _simm(getParam<Real>("simm")),
     _m(getParam<Real>("m")),
     _scut(getParam<Real>("scut")),
@@ -101,4 +101,22 @@ RichardsRelPermVG1::d2relperm(Real seff) const
 
   Real krelpp = 2*_vg1_quad + 6*_vg1_cub*(s_internal - _scut);
   return krelpp/std::pow(1.0 - _simm, 2);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsRelPermVG1::RichardsRelPermVG1(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsRelPermVG(deprecated_name, parameters),
+    _simm(getParam<Real>("simm")),
+    _m(getParam<Real>("m")),
+    _scut(getParam<Real>("scut")),
+    _vg1_const(0),
+    _vg1_linear(0),
+    _vg1_quad(0),
+    _vg1_cub(0)
+{
+  _vg1_const = RichardsRelPermVG::relperm(_scut);
+  _vg1_linear = RichardsRelPermVG::drelperm(_scut);
+  _vg1_quad = RichardsRelPermVG::d2relperm(_scut);
+  _vg1_cub = (1 - _vg1_const - _vg1_linear*(1 - _scut) - _vg1_quad*std::pow(1 - _scut, 2))/std::pow(1 - _scut, 3);
 }

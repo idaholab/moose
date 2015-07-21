@@ -16,7 +16,8 @@
 class PolycrystalRandomICAction: public Action
 {
 public:
-  PolycrystalRandomICAction(const std::string & name, InputParameters params);
+  PolycrystalRandomICAction(const InputParameters & params);
+  PolycrystalRandomICAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

@@ -20,7 +20,8 @@ class Pressure : public IntegratedBC
 {
 public:
 
-  Pressure(const std::string & name, InputParameters parameters);
+  Pressure(const InputParameters & parameters);
+  Pressure(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Pressure(){}
 

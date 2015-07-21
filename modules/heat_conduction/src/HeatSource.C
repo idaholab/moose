@@ -17,7 +17,14 @@ InputParameters validParams<HeatSource>()
   return params;
 }
 
-HeatSource::HeatSource(const std::string & name, InputParameters parameters)
-  :BodyForce(name, parameters)
+HeatSource::HeatSource(const InputParameters & parameters)
+  :BodyForce(parameters)
+{
+}
+
+
+// DEPRECATED CONSTRUCTOR
+HeatSource::HeatSource(const std::string & deprecated_name, InputParameters parameters)
+  :BodyForce(deprecated_name, parameters)
 {
 }

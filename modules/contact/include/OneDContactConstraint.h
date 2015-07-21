@@ -25,7 +25,8 @@ class OneDContactConstraint :
   public NodeFaceConstraint
 {
 public:
-  OneDContactConstraint(const std::string & name, InputParameters parameters);
+  OneDContactConstraint(const InputParameters & parameters);
+  OneDContactConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~OneDContactConstraint(){}
 
   virtual void timestepSetup();

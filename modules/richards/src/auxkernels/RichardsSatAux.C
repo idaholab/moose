@@ -20,8 +20,8 @@ InputParameters validParams<RichardsSatAux>()
   return params;
 }
 
-RichardsSatAux::RichardsSatAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+RichardsSatAux::RichardsSatAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _seff_var(coupledValue("seff_var")),
     _sat_UO(getUserObject<RichardsSat>("sat_UO"))
 {}
@@ -32,3 +32,11 @@ RichardsSatAux::computeValue()
 {
   return _sat_UO.sat(_seff_var[_qp]);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSatAux::RichardsSatAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _seff_var(coupledValue("seff_var")),
+    _sat_UO(getUserObject<RichardsSat>("sat_UO"))
+{}

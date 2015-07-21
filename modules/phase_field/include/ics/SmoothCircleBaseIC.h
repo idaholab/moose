@@ -32,8 +32,8 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
-  SmoothCircleBaseIC(const std::string & name,
-                 InputParameters parameters);
+  SmoothCircleBaseIC(const InputParameters & parameters);
+  SmoothCircleBaseIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * The value of the variable at a point.

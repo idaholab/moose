@@ -23,9 +23,11 @@ InputParameters validParams<DerivativeParsedMaterialHelper>();
 class DerivativeParsedMaterialHelper : public ParsedMaterialHelper
 {
 public:
+  DerivativeParsedMaterialHelper(const InputParameters & parameters,
+                                 VariableNameMappingMode map_mode = USE_PARAM_NAMES);
   DerivativeParsedMaterialHelper(const std::string & name,
                                  InputParameters parameters,
-                                 VariableNameMappingMode map_mode = USE_PARAM_NAMES);
+                                 VariableNameMappingMode map_mode = USE_PARAM_NAMES); // DEPRECATED
 
   virtual ~DerivativeParsedMaterialHelper();
 

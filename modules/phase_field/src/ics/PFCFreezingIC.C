@@ -28,9 +28,8 @@ InputParameters validParams<PFCFreezingIC>()
   return params;
 }
 
-PFCFreezingIC::PFCFreezingIC(const std::string & name,
-                             InputParameters parameters) :
-    InitialCondition(name, parameters),
+PFCFreezingIC::PFCFreezingIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _x1(getParam<Real>("x1")),
     _y1(getParam<Real>("y1")),
     _z1(getParam<Real>("z1")),
@@ -102,4 +101,40 @@ PFCFreezingIC::value(const Point & p)
   val =  amp *val + _outside;
 
   return val;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PFCFreezingIC::PFCFreezingIC(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _x1(getParam<Real>("x1")),
+    _y1(getParam<Real>("y1")),
+    _z1(getParam<Real>("z1")),
+    _x2(getParam<Real>("x2")),
+    _y2(getParam<Real>("y2")),
+    _z2(getParam<Real>("z2")),
+    _lc(getParam<Real>("lc")),
+    _crystal_structure(getParam<MooseEnum>("crystal_structure")),
+    _bottom_left(_x1,_y1,_z1),
+    _top_right(_x2,_y2,_z2),
+    _range(_top_right - _bottom_left),
+    _min(getParam<Real>("min")),
+    _max(getParam<Real>("max")),
+    _val_range(_max - _min),
+    _inside(getParam<Real>("inside")),
+    _outside(getParam<Real>("outside"))
+{
+  _console << "MooseEnum? " << _crystal_structure << std::endl;
+
+  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+    mooseAssert(_range(i) >= 0.0, "x1, y1 or z1 is not less than x2, y2 or z2");
+
+  MooseRandom::seed(getParam<unsigned int>("seed"));
+
+  if (_range(1) == 0.0)
+    _icdim = 1;
+  else if (_range(2) < 1.0e-10*_range(0))
+    _icdim = 2;
+  else
+    _icdim = 3;
 }

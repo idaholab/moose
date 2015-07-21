@@ -25,9 +25,8 @@ InputParameters validParams<CombinedCreepPlasticity>()
 }
 
 
-CombinedCreepPlasticity::CombinedCreepPlasticity( const std::string & name,
-                                                  InputParameters parameters )
-  :ConstitutiveModel( name, parameters ),
+CombinedCreepPlasticity::CombinedCreepPlasticity( const InputParameters & parameters)
+  :ConstitutiveModel(parameters),
    _submodels(),
    _max_its(parameters.get<unsigned int>("max_its")),
    _output_iteration_info(getParam<bool>("output_iteration_info")),
@@ -179,4 +178,16 @@ CombinedCreepPlasticity::modifyStrainIncrement(const Elem & current_elem, unsign
     modified |= rmm[i_rmm]->modifyStrainIncrement( current_elem, qp, strain_increment, d_strain_dT);
   }
   return modified;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CombinedCreepPlasticity::CombinedCreepPlasticity(const std::string & deprecated_name, InputParameters parameters)
+  :ConstitutiveModel(deprecated_name, parameters),
+   _submodels(),
+   _max_its(parameters.get<unsigned int>("max_its")),
+   _output_iteration_info(getParam<bool>("output_iteration_info")),
+   _relative_tolerance(parameters.get<Real>("relative_tolerance")),
+   _absolute_tolerance(parameters.get<Real>("absolute_tolerance"))
+{
 }

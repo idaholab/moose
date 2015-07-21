@@ -22,7 +22,8 @@ class OutOfPlaneStress : public Kernel
 {
 public:
 
-  OutOfPlaneStress(const std::string & name, InputParameters parameters);
+  OutOfPlaneStress(const InputParameters & parameters);
+  OutOfPlaneStress(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

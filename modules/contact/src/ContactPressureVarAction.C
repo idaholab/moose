@@ -22,8 +22,8 @@ InputParameters validParams<ContactPressureVarAction>()
   return params;
 }
 
-ContactPressureVarAction::ContactPressureVarAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+ContactPressureVarAction::ContactPressureVarAction(const InputParameters & params) :
+  Action(params)
 {
 }
 
@@ -39,4 +39,11 @@ ContactPressureVarAction::act()
                            FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                                   Utility::string_to_enum<FEFamily>("LAGRANGE")));
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ContactPressureVarAction::ContactPressureVarAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
 }

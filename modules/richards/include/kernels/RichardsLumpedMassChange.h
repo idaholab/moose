@@ -32,7 +32,8 @@ class RichardsLumpedMassChange : public TimeKernel
 {
 public:
 
-  RichardsLumpedMassChange(const std::string & name, InputParameters parameters);
+  RichardsLumpedMassChange(const InputParameters & parameters);
+  RichardsLumpedMassChange(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

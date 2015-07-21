@@ -20,8 +20,8 @@ InputParameters validParams<CHPFCRFF>()
   return params;
 }
 
-CHPFCRFF::CHPFCRFF(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+CHPFCRFF::CHPFCRFF(const InputParameters & parameters) :
+    Kernel(parameters),
     _M(getMaterialProperty<Real>("mob_name")),
     _has_MJac(getParam<bool>("has_MJac")),
     _DM(_has_MJac ? &getMaterialProperty<Real>("Dmob_name") : NULL),
@@ -231,4 +231,30 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
     }
 
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CHPFCRFF::CHPFCRFF(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _M(getMaterialProperty<Real>("mob_name")),
+    _has_MJac(getParam<bool>("has_MJac")),
+    _DM(_has_MJac ? &getMaterialProperty<Real>("Dmob_name") : NULL),
+    _log_approach(getParam<MooseEnum>("log_approach")),
+    _tol(getParam<Real>("tol")),
+    _n_exp_terms(getParam<Real>("n_exp_terms")),
+    _a(getParam<Real>("a")),
+    _b(getParam<Real>("b")),
+    _c(getParam<Real>("c")),
+    _num_L(coupledComponents("v")) // number of L variables
+{
+  _grad_vals.resize(_num_L); // Resize variable array
+  _vals_var.resize(_num_L);
+
+  // Loop through grains and load coupled gradients into the arrays
+  for (unsigned int i = 0; i < _num_L; ++i)
+  {
+    _vals_var[i] = coupled("v",i);
+    _grad_vals[i] = &coupledGradient("v", i);
+  }
 }

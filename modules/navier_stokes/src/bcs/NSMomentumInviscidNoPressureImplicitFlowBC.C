@@ -17,8 +17,8 @@ InputParameters validParams<NSMomentumInviscidNoPressureImplicitFlowBC>()
 
 
 
-NSMomentumInviscidNoPressureImplicitFlowBC::NSMomentumInviscidNoPressureImplicitFlowBC(const std::string & name, InputParameters parameters)
-    : NSMomentumInviscidBC(name, parameters)
+NSMomentumInviscidNoPressureImplicitFlowBC::NSMomentumInviscidNoPressureImplicitFlowBC(const InputParameters & parameters)
+    : NSMomentumInviscidBC(parameters)
 {
 }
 
@@ -55,4 +55,11 @@ Real NSMomentumInviscidNoPressureImplicitFlowBC::computeQpJacobian()
 Real NSMomentumInviscidNoPressureImplicitFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
   return this->convective_qp_jacobian( this->map_var_number(jvar) );
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSMomentumInviscidNoPressureImplicitFlowBC::NSMomentumInviscidNoPressureImplicitFlowBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSMomentumInviscidBC(deprecated_name, parameters)
+{
 }

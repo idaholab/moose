@@ -12,7 +12,8 @@
 class PressureActionTM: public Action
 {
 public:
-  PressureActionTM(const std::string & name, InputParameters params);
+  PressureActionTM(const InputParameters & params);
+  PressureActionTM(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

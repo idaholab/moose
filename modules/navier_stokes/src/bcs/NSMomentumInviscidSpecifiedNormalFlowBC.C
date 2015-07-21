@@ -23,8 +23,8 @@ InputParameters validParams<NSMomentumInviscidSpecifiedNormalFlowBC>()
 
 
 
-NSMomentumInviscidSpecifiedNormalFlowBC::NSMomentumInviscidSpecifiedNormalFlowBC(const std::string & name, InputParameters parameters)
-    : NSMomentumInviscidBC(name, parameters),
+NSMomentumInviscidSpecifiedNormalFlowBC::NSMomentumInviscidSpecifiedNormalFlowBC(const InputParameters & parameters)
+    : NSMomentumInviscidBC(parameters),
 
       // Aux Variables
       _pressure(coupledValue("pressure")),
@@ -59,4 +59,17 @@ Real NSMomentumInviscidSpecifiedNormalFlowBC::computeQpJacobian()
 Real NSMomentumInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
   return this->pressure_qp_jacobian( this->map_var_number(jvar) );
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSMomentumInviscidSpecifiedNormalFlowBC::NSMomentumInviscidSpecifiedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSMomentumInviscidBC(deprecated_name, parameters),
+
+      // Aux Variables
+      _pressure(coupledValue("pressure")),
+
+      // Required parameters
+      _rhou_udotn(getParam<Real>("rhou_udotn"))
+{
 }

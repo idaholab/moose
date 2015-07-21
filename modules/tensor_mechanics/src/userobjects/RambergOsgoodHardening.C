@@ -12,8 +12,8 @@ InputParameters validParams<RambergOsgoodHardening>()
   return params;
 }
 
-RambergOsgoodHardening::RambergOsgoodHardening(const std::string & name, InputParameters parameters) :
-    TensorMechanicsHardeningModel(name, parameters),
+RambergOsgoodHardening::RambergOsgoodHardening(const InputParameters & parameters) :
+    TensorMechanicsHardeningModel(parameters),
     _yield_stress(getParam<Real>("yield_stress")),
     _hardening_exponent(getParam<Real>("hardening_exponent")),
     _ref_plastic_strain(getParam<Real>("reference_plastic_strain"))
@@ -30,4 +30,13 @@ Real
 RambergOsgoodHardening::derivative(const Real & intnl) const
 {
   return _yield_stress * std::pow(intnl/ _ref_plastic_strain + 1, _hardening_exponent - 1) * _hardening_exponent/ _ref_plastic_strain;
+}
+
+// DEPRECATED
+RambergOsgoodHardening::RambergOsgoodHardening(const std::string & name, InputParameters parameters) :
+    TensorMechanicsHardeningModel(name, parameters),
+    _yield_stress(getParam<Real>("yield_stress")),
+    _hardening_exponent(getParam<Real>("hardening_exponent")),
+    _ref_plastic_strain(getParam<Real>("reference_plastic_strain"))
+{
 }

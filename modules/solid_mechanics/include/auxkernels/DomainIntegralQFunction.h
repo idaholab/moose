@@ -21,7 +21,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  DomainIntegralQFunction(const std::string & name, InputParameters parameters);
+  DomainIntegralQFunction(const InputParameters & parameters);
+  DomainIntegralQFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~DomainIntegralQFunction() {}
 

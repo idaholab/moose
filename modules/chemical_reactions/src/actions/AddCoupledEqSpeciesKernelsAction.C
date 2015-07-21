@@ -37,8 +37,8 @@ InputParameters validParams<AddCoupledEqSpeciesKernelsAction>()
 }
 
 
-AddCoupledEqSpeciesKernelsAction::AddCoupledEqSpeciesKernelsAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddCoupledEqSpeciesKernelsAction::AddCoupledEqSpeciesKernelsAction(const InputParameters & params) :
+    Action(params)
 {
 }
 
@@ -281,4 +281,11 @@ AddCoupledEqSpeciesKernelsAction::act()
   }
   oss << "\n";
   _console << oss.str();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddCoupledEqSpeciesKernelsAction::AddCoupledEqSpeciesKernelsAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

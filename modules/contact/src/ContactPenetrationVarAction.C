@@ -22,8 +22,8 @@ InputParameters validParams<ContactPenetrationVarAction>()
   return params;
 }
 
-ContactPenetrationVarAction::ContactPenetrationVarAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+ContactPenetrationVarAction::ContactPenetrationVarAction(const InputParameters & params) :
+  Action(params)
 {
 }
 
@@ -39,4 +39,11 @@ ContactPenetrationVarAction::act()
                            FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                                   Utility::string_to_enum<FEFamily>("LAGRANGE")));
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ContactPenetrationVarAction::ContactPenetrationVarAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
 }

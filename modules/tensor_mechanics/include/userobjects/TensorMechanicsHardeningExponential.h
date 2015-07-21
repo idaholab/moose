@@ -24,7 +24,8 @@ InputParameters validParams<TensorMechanicsHardeningExponential>();
 class TensorMechanicsHardeningExponential : public TensorMechanicsHardeningModel
 {
  public:
-  TensorMechanicsHardeningExponential(const std::string & name, InputParameters parameters);
+  TensorMechanicsHardeningExponential(const InputParameters & parameters);
+  TensorMechanicsHardeningExponential(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(const Real & intnl) const;
 

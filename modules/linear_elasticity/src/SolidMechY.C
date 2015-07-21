@@ -15,8 +15,8 @@ InputParameters validParams<SolidMechY>()
   return params;
 }
 
-SolidMechY::SolidMechY(const std::string & name, InputParameters parameters) :
-    SolidMech(name, parameters),
+SolidMechY::SolidMechY(const InputParameters & parameters) :
+    SolidMech(parameters),
     _mesh_dimension(_mesh.dimension()),
     _x_var(coupled("x")),
     _x(coupledValue("x")),
@@ -78,3 +78,16 @@ SolidMechY::computeQpOffDiagJacobian(unsigned int jvar)
 
     return _c1*(_grad_test[_i][_qp]*value);
   }
+
+
+// DEPRECATED CONSTRUCTOR
+SolidMechY::SolidMechY(const std::string & deprecated_name, InputParameters parameters) :
+    SolidMech(deprecated_name, parameters),
+    _mesh_dimension(_mesh.dimension()),
+    _x_var(coupled("x")),
+    _x(coupledValue("x")),
+    _grad_x(coupledGradient("x")),
+    _z_var(_mesh_dimension == 3 ? coupled("z") : 1000000),
+    _z(_mesh_dimension == 3 ? coupledValue("z") : _zero),
+    _grad_z(_mesh_dimension == 3 ? coupledGradient("z") : _grad_zero)
+  {}

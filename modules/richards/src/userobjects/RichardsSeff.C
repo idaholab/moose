@@ -18,8 +18,8 @@ InputParameters validParams<RichardsSeff>()
   return params;
 }
 
-RichardsSeff::RichardsSeff(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters)
+RichardsSeff::RichardsSeff(const InputParameters & parameters) :
+    GeneralUserObject(parameters)
 {}
 
 void
@@ -33,3 +33,9 @@ RichardsSeff::execute()
 void RichardsSeff::finalize()
 {}
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSeff::RichardsSeff(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralUserObject(deprecated_name, parameters)
+{}

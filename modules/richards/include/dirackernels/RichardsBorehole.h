@@ -40,7 +40,8 @@ public:
    * It also calculates segment-lengths and rotation matrices
    * needed for computing the borehole well constant
    */
-  RichardsBorehole(const std::string & name, InputParameters parameters);
+  RichardsBorehole(const InputParameters & parameters);
+  RichardsBorehole(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Add Dirac Points to the borehole

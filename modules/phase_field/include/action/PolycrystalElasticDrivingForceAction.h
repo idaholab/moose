@@ -16,7 +16,8 @@ class PolycrystalElasticDrivingForceAction: public Action,
                                   public DerivativeMaterialPropertyNameInterface
 {
 public:
-  PolycrystalElasticDrivingForceAction(const std::string & name, InputParameters params);
+  PolycrystalElasticDrivingForceAction(const InputParameters & params);
+  PolycrystalElasticDrivingForceAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

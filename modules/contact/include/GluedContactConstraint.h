@@ -27,7 +27,8 @@ class GluedContactConstraint :
   public SparsityBasedContactConstraint
 {
 public:
-  GluedContactConstraint(const std::string & name, InputParameters parameters);
+  GluedContactConstraint(const InputParameters & parameters);
+  GluedContactConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~GluedContactConstraint(){}
 
   virtual void timestepSetup();

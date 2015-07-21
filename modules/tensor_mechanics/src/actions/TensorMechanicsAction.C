@@ -30,8 +30,8 @@ InputParameters validParams<TensorMechanicsAction>()
   return params;
 }
 
-TensorMechanicsAction::TensorMechanicsAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params) :
+    Action(params)
 {
 }
 
@@ -106,4 +106,11 @@ TensorMechanicsAction::act()
     _problem->addKernel("StressDivergenceTensors", name.str(), params);
   }
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsAction::TensorMechanicsAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

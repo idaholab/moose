@@ -17,8 +17,8 @@ InputParameters validParams<NSMassBC>()
 
 
 
-NSMassBC::NSMassBC(const std::string & name, InputParameters parameters)
-    : NSIntegratedBC(name, parameters)
+NSMassBC::NSMassBC(const InputParameters & parameters)
+    : NSIntegratedBC(parameters)
 {
 }
 
@@ -110,3 +110,10 @@ Real NSMassBC::qp_jacobian(unsigned var_number)
 //   // won't get here
 //   return 0.;
 // }
+
+
+// DEPRECATED CONSTRUCTOR
+NSMassBC::NSMassBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSIntegratedBC(deprecated_name, parameters)
+{
+}

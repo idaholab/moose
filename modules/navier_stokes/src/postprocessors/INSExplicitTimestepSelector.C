@@ -26,8 +26,8 @@ InputParameters validParams<INSExplicitTimestepSelector>()
 
 
 
-INSExplicitTimestepSelector::INSExplicitTimestepSelector(const std::string & name, InputParameters parameters) :
-  ElementPostprocessor(name, parameters),
+INSExplicitTimestepSelector::INSExplicitTimestepSelector(const InputParameters & parameters) :
+  ElementPostprocessor(parameters),
   _vel_mag(coupledValue("vel_mag")),
 
   // Material properties
@@ -106,4 +106,19 @@ INSExplicitTimestepSelector::threadJoin(const UserObject & uo)
 {
   const INSExplicitTimestepSelector & pps = dynamic_cast<const INSExplicitTimestepSelector &>(uo);
   _value = std::min(_value, pps._value);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+INSExplicitTimestepSelector::INSExplicitTimestepSelector(const std::string & deprecated_name, InputParameters parameters) :
+  ElementPostprocessor(deprecated_name, parameters),
+  _vel_mag(coupledValue("vel_mag")),
+
+  // Material properties
+  _mu(getParam<Real>("mu")),
+  _rho(getParam<Real>("rho")),
+
+  // Other parameters
+  _beta(getParam<Real>("beta"))
+{
 }

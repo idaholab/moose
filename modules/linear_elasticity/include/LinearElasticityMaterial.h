@@ -16,8 +16,8 @@
 class LinearElasticityMaterial : public Material
 {
 public:
-  LinearElasticityMaterial(const std::string & name,
-                           InputParameters parameters);
+  LinearElasticityMaterial(const InputParameters & parameters);
+  LinearElasticityMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

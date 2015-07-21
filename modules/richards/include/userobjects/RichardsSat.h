@@ -25,7 +25,8 @@ InputParameters validParams<RichardsSat>();
 class RichardsSat : public GeneralUserObject
 {
 public:
-  RichardsSat(const std::string & name, InputParameters parameters);
+  RichardsSat(const InputParameters & parameters);
+  RichardsSat(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();
   void execute();

@@ -12,7 +12,8 @@
 class ThermalContactDiracKernelsAction : public Action
 {
 public:
-  ThermalContactDiracKernelsAction(const std::string & name, InputParameters params);
+  ThermalContactDiracKernelsAction(const InputParameters & params);
+  ThermalContactDiracKernelsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ThermalContactDiracKernelsAction(){}
   virtual void act();
 };

@@ -25,8 +25,8 @@ InputParameters validParams<ContactPenetrationAuxAction>()
   return params;
 }
 
-ContactPenetrationAuxAction::ContactPenetrationAuxAction(const std::string & name, InputParameters params) :
-  Action(name, params),
+ContactPenetrationAuxAction::ContactPenetrationAuxAction(const InputParameters & params) :
+  Action(params),
   _master(getParam<BoundaryName>("master")),
   _slave(getParam<BoundaryName>("slave")),
   _order(getParam<MooseEnum>("order"))
@@ -64,4 +64,14 @@ ContactPenetrationAuxAction::act()
     name << counter++;
     _problem->addAuxKernel("PenetrationAux", name.str(), params);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ContactPenetrationAuxAction::ContactPenetrationAuxAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params),
+  _master(getParam<BoundaryName>("master")),
+  _slave(getParam<BoundaryName>("slave")),
+  _order(getParam<MooseEnum>("order"))
+{
 }

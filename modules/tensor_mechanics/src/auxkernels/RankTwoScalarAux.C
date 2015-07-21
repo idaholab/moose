@@ -18,8 +18,8 @@ InputParameters validParams<RankTwoScalarAux>()
   return params;
 }
 
-RankTwoScalarAux::RankTwoScalarAux(const std::string & name, InputParameters parameters) :
-  AuxKernel(name, parameters),
+RankTwoScalarAux::RankTwoScalarAux(const InputParameters & parameters) :
+  AuxKernel(parameters),
   _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
   _scalar_type(getParam<MooseEnum>("scalar_type"))
 {
@@ -51,4 +51,13 @@ RankTwoScalarAux::computeValue()
      mooseError("RankTwoScalarAux Error: Pass valid scalar type - VonMisesStress, EquivalentPlasticStrain, Hydrostatic, L2norm");
   }
   return val;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RankTwoScalarAux::RankTwoScalarAux(const std::string & deprecated_name, InputParameters parameters) :
+  AuxKernel(deprecated_name, parameters),
+  _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
+  _scalar_type(getParam<MooseEnum>("scalar_type"))
+{
 }

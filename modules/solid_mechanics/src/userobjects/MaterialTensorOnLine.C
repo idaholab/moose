@@ -28,9 +28,9 @@ InputParameters validParams<MaterialTensorOnLine>()
   return params;
 }
 
-MaterialTensorOnLine :: MaterialTensorOnLine(const std::string & name, InputParameters parameters) :
-  ElementUserObject(name, parameters),
-  _material_tensor_calculator( name, parameters),
+MaterialTensorOnLine :: MaterialTensorOnLine(const InputParameters & parameters) :
+  ElementUserObject(parameters),
+  _material_tensor_calculator( parameters),
   _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) ),
   _lp1( getParam<RealVectorValue>("line_point1") ),
   _lp2( getParam<RealVectorValue>("line_point2") ),
@@ -153,5 +153,27 @@ MaterialTensorOnLine::finalize()
        _output_file << it->first << "  " << it->second << std::endl;
      }
    }
+
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MaterialTensorOnLine :: MaterialTensorOnLine(const std::string & deprecated_name, InputParameters parameters) :
+  ElementUserObject(deprecated_name, parameters),
+  _material_tensor_calculator( parameters),
+  _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) ),
+  _lp1( getParam<RealVectorValue>("line_point1") ),
+  _lp2( getParam<RealVectorValue>("line_point2") ),
+  _line_id( getParam<int>("line_id") ),
+  _file_name( getParam<std::string>("filename") ),
+  _stream_open(false),
+  _elem_line_id(coupledValue("element_line_id"))
+{
+
+  if (!_stream_open && processor_id() == 0)
+  {
+    _output_file.open(_file_name.c_str(), std::ios::trunc | std::ios::out);
+    _stream_open = true;
+  }
 
 }

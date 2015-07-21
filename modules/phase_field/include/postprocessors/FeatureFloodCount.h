@@ -43,7 +43,8 @@ class FeatureFloodCount :
   public ZeroInterface
 {
 public:
-  FeatureFloodCount(const std::string & name, InputParameters parameters);
+  FeatureFloodCount(const InputParameters & parameters);
+  FeatureFloodCount(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   ~FeatureFloodCount();
 
   virtual void initialize();

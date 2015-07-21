@@ -28,7 +28,8 @@ class GradParsedFunction :
 {
 public:
 
-  GradParsedFunction(const std::string & name, InputParameters parameters);
+  GradParsedFunction(const InputParameters & parameters);
+  GradParsedFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(Real t, const Point & pt);
 

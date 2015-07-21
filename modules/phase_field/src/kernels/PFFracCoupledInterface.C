@@ -16,9 +16,8 @@ InputParameters validParams<PFFracCoupledInterface>()
   return params;
 }
 
-PFFracCoupledInterface::PFFracCoupledInterface(const std::string & name,
-                                               InputParameters parameters):
-  KernelGrad(name, parameters),
+PFFracCoupledInterface::PFFracCoupledInterface(const InputParameters & parameters):
+  KernelGrad(parameters),
   _c(coupledValue("c")),
   _grad_c(coupledGradient("c")),
   _c_var(coupled("c"))
@@ -47,4 +46,14 @@ PFFracCoupledInterface::computeQpOffDiagJacobian(unsigned int jvar)
     return _grad_test[_i][_qp] * _grad_phi[_j][_qp];
   else
     return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PFFracCoupledInterface::PFFracCoupledInterface(const std::string & deprecated_name, InputParameters parameters):
+  KernelGrad(deprecated_name, parameters),
+  _c(coupledValue("c")),
+  _grad_c(coupledGradient("c")),
+  _c_var(coupled("c"))
+{
 }

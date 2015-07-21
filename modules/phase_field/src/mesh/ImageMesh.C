@@ -29,8 +29,8 @@ InputParameters validParams<ImageMesh>()
   return params;
 }
 
-ImageMesh::ImageMesh(const std::string & obj_name, InputParameters parameters) :
-    GeneratedMesh(obj_name, parameters),
+ImageMesh::ImageMesh(const InputParameters & parameters) :
+    GeneratedMesh(parameters),
     _scale_to_one(getParam<bool>("scale_to_one")),
     _cells_per_pixel(getParam<Real>("cells_per_pixel"))
 {

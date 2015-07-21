@@ -20,7 +20,8 @@ InputParameters validParams<MixedModeEquivalentK>();
 class MixedModeEquivalentK : public GeneralPostprocessor
 {
 public:
-  MixedModeEquivalentK(const std::string & name, InputParameters parameters);
+  MixedModeEquivalentK(const InputParameters & parameters);
+  MixedModeEquivalentK(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

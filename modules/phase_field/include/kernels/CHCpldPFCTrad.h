@@ -12,7 +12,8 @@ InputParameters validParams<CHCpldPFCTrad>();
 class CHCpldPFCTrad : public CHSplitVar
 {
 public:
-  CHCpldPFCTrad(const std::string & name, InputParameters parameters);
+  CHCpldPFCTrad(const InputParameters & parameters);
+  CHCpldPFCTrad(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient precomputeQpResidual();

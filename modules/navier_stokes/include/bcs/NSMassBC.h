@@ -33,7 +33,8 @@ class NSMassBC : public NSIntegratedBC
 {
 public:
 
-  NSMassBC(const std::string & name, InputParameters parameters);
+  NSMassBC(const InputParameters & parameters);
+  NSMassBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMassBC(){}
 

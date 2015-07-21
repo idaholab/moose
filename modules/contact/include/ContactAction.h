@@ -19,7 +19,8 @@ InputParameters validParams<ContactAction>();
 class ContactAction : public Action
 {
 public:
-  ContactAction(const std::string & name, InputParameters params);
+  ContactAction(const InputParameters & params);
+  ContactAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

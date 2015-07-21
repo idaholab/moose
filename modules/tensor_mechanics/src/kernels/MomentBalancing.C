@@ -27,8 +27,8 @@ InputParameters validParams<MomentBalancing>()
   return params;
 }
 
-MomentBalancing::MomentBalancing(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+MomentBalancing::MomentBalancing(const InputParameters & parameters) :
+    Kernel(parameters),
     _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
     _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
     _component(getParam<unsigned int>("component")),
@@ -85,4 +85,20 @@ MomentBalancing::computeQpOffDiagJacobian(unsigned int jvar)
     return _Jacobian_mult[_qp].momentJacobianwc(_component, coupled_component, _test[_i][_qp], _phi[_j][_qp]);
 
   return 0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MomentBalancing::MomentBalancing(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
+    _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
+    _component(getParam<unsigned int>("component")),
+    _wc_x_var(coupled("wc_x")),
+    _wc_y_var(coupled("wc_y")),
+    _wc_z_var(coupled("wc_z")),
+    _xdisp_var(coupled("disp_x")),
+    _ydisp_var(coupled("disp_y")),
+    _zdisp_var(coupled("disp_z"))
+{
 }

@@ -21,8 +21,8 @@ InputParameters validParams<RichardsPPenalty>()
   return params;
 }
 
-RichardsPPenalty::RichardsPPenalty(const std::string & name, InputParameters parameters) :
-    Kernel(name,parameters),
+RichardsPPenalty::RichardsPPenalty(const InputParameters & parameters) :
+    Kernel(parameters),
     _a(getParam<Real>("a")),
     _lower(coupledValue("lower_var")),
     _lower_var_num(coupled("lower_var"))
@@ -57,3 +57,12 @@ RichardsPPenalty::computeQpOffDiagJacobian(unsigned int jvar)
 }
 
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsPPenalty::RichardsPPenalty(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _a(getParam<Real>("a")),
+    _lower(coupledValue("lower_var")),
+    _lower_var_num(coupled("lower_var"))
+{}

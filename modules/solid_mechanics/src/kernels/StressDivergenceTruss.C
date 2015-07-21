@@ -27,8 +27,8 @@ InputParameters validParams<StressDivergenceTruss>()
 }
 
 
-StressDivergenceTruss::StressDivergenceTruss(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+StressDivergenceTruss::StressDivergenceTruss(const InputParameters & parameters)
+  :Kernel(parameters),
    _axial_stress(getMaterialProperty<Real>("axial_stress" + getParam<std::string>("appended_property_name"))),
    _E_over_L(getMaterialProperty<Real>("e_over_l" + getParam<std::string>("appended_property_name"))),
    _component(getParam<unsigned int>("component")),
@@ -181,3 +181,22 @@ StressDivergenceTruss::computeOffDiagJacobian(unsigned int jvar)
     }
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+StressDivergenceTruss::StressDivergenceTruss(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+   _axial_stress(getMaterialProperty<Real>("axial_stress" + getParam<std::string>("appended_property_name"))),
+   _E_over_L(getMaterialProperty<Real>("e_over_l" + getParam<std::string>("appended_property_name"))),
+   _component(getParam<unsigned int>("component")),
+   _xdisp_coupled(isCoupled("disp_x")),
+   _ydisp_coupled(isCoupled("disp_y")),
+   _zdisp_coupled(isCoupled("disp_z")),
+   _temp_coupled(isCoupled("temp")),
+   _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
+   _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
+   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
+   _temp_var(_temp_coupled ? coupled("temp") : 0),
+   _area(coupledValue("area")),
+   _orientation(NULL)
+{}

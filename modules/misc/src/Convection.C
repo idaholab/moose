@@ -20,11 +20,11 @@ InputParameters validParams<Convection>()
   return params;
 }
 
-Convection::Convection(const std::string & name, InputParameters parameters)
+Convection::Convection(const InputParameters & parameters)
   // You must call the constructor of the base class first
   // The "true" here specifies that this Kernel is to be integrated
   // over the domain.
-  :Kernel(name, parameters),
+  :Kernel(parameters),
 
    // This is the "Intialization List" it sets the values of class variables
    // Here we are grabbing the values of Parameters to use for a velocity vector
@@ -58,4 +58,27 @@ Real Convection::computeQpJacobian()
 {
   // the partial derivative of _grad_u is just _dphi[_j]
   return _test[_i][_qp]*(velocity*_grad_phi[_j][_qp]);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Convection::Convection(const std::string & name, InputParameters parameters)
+  // You must call the constructor of the base class first
+  // The "true" here specifies that this Kernel is to be integrated
+  // over the domain.
+  :Kernel(name, parameters),
+
+   // This is the "Intialization List" it sets the values of class variables
+   // Here we are grabbing the values of Parameters to use for a velocity vector
+   _x(getParam<Real>("x")),
+   _y(getParam<Real>("y")),
+   _z(getParam<Real>("z"))
+{
+  // Build a velocity vector to use in the residual / jacobian computations.
+  // We do this here so that it's only done once and then we just reuse it.
+  // Note that RealVectorValues ALWAYS have 3 components... even when running in
+  // 2D or 1D.  This makes the code simpler...
+  velocity(0)=_x;
+  velocity(1)=_y;
+  velocity(2)=_z;
 }

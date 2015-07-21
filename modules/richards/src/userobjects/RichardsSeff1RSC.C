@@ -25,8 +25,8 @@ InputParameters validParams<RichardsSeff1RSC>()
   return params;
 }
 
-RichardsSeff1RSC::RichardsSeff1RSC(const std::string & name, InputParameters parameters) :
-    RichardsSeff(name, parameters),
+RichardsSeff1RSC::RichardsSeff1RSC(const InputParameters & parameters) :
+    RichardsSeff(parameters),
     _oil_viscosity(getParam<Real>("oil_viscosity")),
     _scale_ratio(getParam<Real>("scale_ratio")),
     _shift(getParam<Real>("shift")),
@@ -53,3 +53,13 @@ RichardsSeff1RSC::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::v
   Real pc = -(*p[0])[qp];
   result[0][0] =  RichardsSeffRSC::d2seff(pc, _shift, _scale);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSeff1RSC::RichardsSeff1RSC(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsSeff(deprecated_name, parameters),
+    _oil_viscosity(getParam<Real>("oil_viscosity")),
+    _scale_ratio(getParam<Real>("scale_ratio")),
+    _shift(getParam<Real>("shift")),
+    _scale(0.25*_scale_ratio*_oil_viscosity)
+{}

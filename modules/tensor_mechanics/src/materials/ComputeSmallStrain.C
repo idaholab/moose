@@ -14,9 +14,8 @@ InputParameters validParams<ComputeSmallStrain>()
   return params;
 }
 
-ComputeSmallStrain::ComputeSmallStrain(const std::string & name,
-                                                 InputParameters parameters) :
-    ComputeStrainBase(name, parameters),
+ComputeSmallStrain::ComputeSmallStrain(const InputParameters & parameters) :
+    ComputeStrainBase(parameters),
     _stress_free_strain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain"))
 {
 }
@@ -40,4 +39,12 @@ ComputeSmallStrain::computeProperties()
     //Remove the Eigen strain
     _total_strain[_qp] -= _stress_free_strain[_qp];
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeSmallStrain::ComputeSmallStrain(const std::string & deprecated_name, InputParameters parameters) :
+    ComputeStrainBase(deprecated_name, parameters),
+    _stress_free_strain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain"))
+{
 }

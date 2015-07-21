@@ -19,8 +19,8 @@ InputParameters validParams<NSMomentumConvectiveWeakStagnationBC>()
 
 
 
-NSMomentumConvectiveWeakStagnationBC::NSMomentumConvectiveWeakStagnationBC(const std::string & name, InputParameters parameters)
-    : NSWeakStagnationBC(name, parameters),
+NSMomentumConvectiveWeakStagnationBC::NSMomentumConvectiveWeakStagnationBC(const InputParameters & parameters)
+    : NSWeakStagnationBC(parameters),
 
       // Required parameters
       _component(getParam<unsigned>("component"))
@@ -64,3 +64,13 @@ Real NSMomentumConvectiveWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*j
 
 
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSMomentumConvectiveWeakStagnationBC::NSMomentumConvectiveWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSWeakStagnationBC(deprecated_name, parameters),
+
+      // Required parameters
+      _component(getParam<unsigned>("component"))
+{
+}

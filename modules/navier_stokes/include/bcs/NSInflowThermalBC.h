@@ -24,7 +24,8 @@ class NSInflowThermalBC : public NodalBC
 {
 public:
 
-  NSInflowThermalBC(const std::string & name, InputParameters parameters);
+  NSInflowThermalBC(const InputParameters & parameters);
+  NSInflowThermalBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSInflowThermalBC(){}
 

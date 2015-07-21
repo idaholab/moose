@@ -16,8 +16,8 @@ InputParameters validParams<SecondDerivativeImplicitEuler>()
   return params;
 }
 
-SecondDerivativeImplicitEuler::SecondDerivativeImplicitEuler(const std::string & name, InputParameters parameters) :
-    TimeKernel(name, parameters),
+SecondDerivativeImplicitEuler::SecondDerivativeImplicitEuler(const InputParameters & parameters) :
+    TimeKernel(parameters),
     _u_old(valueOld()),
     _u_older(valueOlder())
 {}
@@ -33,3 +33,11 @@ SecondDerivativeImplicitEuler::computeQpJacobian()
 {
   return _test[_i][_qp]*(_phi[_j][_qp]/(_dt*_dt));
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SecondDerivativeImplicitEuler::SecondDerivativeImplicitEuler(const std::string & deprecated_name, InputParameters parameters) :
+    TimeKernel(deprecated_name, parameters),
+    _u_old(valueOld()),
+    _u_older(valueOlder())
+{}

@@ -24,7 +24,8 @@ InputParameters validParams<RankFourAux>();
 class RankFourAux : public AuxKernel
 {
 public:
-  RankFourAux(const std::string & name, InputParameters parameters);
+  RankFourAux(const InputParameters & parameters);
+  RankFourAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ RankFourAux() {}
 

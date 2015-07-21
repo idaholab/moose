@@ -14,8 +14,8 @@ InputParameters validParams<SplitCHBase>()
   return params;
 }
 
-SplitCHBase::SplitCHBase(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters)
+SplitCHBase::SplitCHBase(const InputParameters & parameters) :
+    Kernel(parameters)
 {
 }
 
@@ -73,4 +73,11 @@ Real
 SplitCHBase::computeDEDC(PFFunctionType /*type*/)
 {
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SplitCHBase::SplitCHBase(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters)
+{
 }

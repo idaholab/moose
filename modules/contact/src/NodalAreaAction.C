@@ -27,8 +27,8 @@ InputParameters validParams<NodalAreaAction>()
   return params;
 }
 
-NodalAreaAction::NodalAreaAction(const std::string & name, InputParameters params) :
-  MooseObjectAction(name, params)
+NodalAreaAction::NodalAreaAction(const InputParameters & params) :
+  MooseObjectAction(params)
 {
 }
 
@@ -53,4 +53,11 @@ NodalAreaAction::act()
   _problem->addUserObject("NodalArea",
                           "nodal_area_object_" + Moose::stringify(counter++),
                           _moose_object_pars);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NodalAreaAction::NodalAreaAction(const std::string & deprecated_name, InputParameters params) :
+  MooseObjectAction(deprecated_name, params)
+{
 }

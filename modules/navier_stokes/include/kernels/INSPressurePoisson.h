@@ -25,7 +25,8 @@ InputParameters validParams<INSPressurePoisson>();
 class INSPressurePoisson : public Kernel
 {
 public:
-  INSPressurePoisson(const std::string & name, InputParameters parameters);
+  INSPressurePoisson(const InputParameters & parameters);
+  INSPressurePoisson(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSPressurePoisson(){}
 

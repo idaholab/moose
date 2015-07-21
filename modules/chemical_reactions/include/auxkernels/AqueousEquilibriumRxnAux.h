@@ -32,7 +32,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  AqueousEquilibriumRxnAux(const std::string & name, InputParameters parameters);
+  AqueousEquilibriumRxnAux(const InputParameters & parameters);
+  AqueousEquilibriumRxnAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~AqueousEquilibriumRxnAux() {}
 

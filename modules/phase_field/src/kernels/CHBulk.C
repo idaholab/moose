@@ -16,8 +16,8 @@ InputParameters validParams<CHBulk>()
   return params;
 }
 
-CHBulk::CHBulk(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(name, parameters),
+CHBulk::CHBulk(const InputParameters & parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(parameters),
     _M(getMaterialProperty<Real>("mob_name")),
     _dMdc(getMaterialPropertyDerivative<Real>("mob_name", _var.name()))
 {
@@ -56,4 +56,22 @@ CHBulk::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 
   return (*_dMdarg[cvar])[_qp] * _phi[_j][_qp] * computeGradDFDCons(Residual) * _grad_test[_i][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CHBulk::CHBulk(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(deprecated_name, parameters),
+    _M(getMaterialProperty<Real>("mob_name")),
+    _dMdc(getMaterialPropertyDerivative<Real>("mob_name", _var.name()))
+{
+  // Get number of coupled variables
+  unsigned int nvar = _coupled_moose_vars.size();
+
+  // reserve space for derivatives
+  _dMdarg.resize(nvar);
+
+  // Iterate over all coupled variables
+  for (unsigned int i = 0; i < nvar; ++i)
+    _dMdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
 }

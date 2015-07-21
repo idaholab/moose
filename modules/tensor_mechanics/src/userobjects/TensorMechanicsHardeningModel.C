@@ -16,8 +16,8 @@ InputParameters validParams<TensorMechanicsHardeningModel>()
   return params;
 }
 
-TensorMechanicsHardeningModel::TensorMechanicsHardeningModel(const std::string & name, InputParameters parameters) :
-  GeneralUserObject(name, parameters)
+TensorMechanicsHardeningModel::TensorMechanicsHardeningModel(const InputParameters & parameters) :
+  GeneralUserObject(parameters)
 {
 }
 
@@ -42,4 +42,11 @@ Real
 TensorMechanicsHardeningModel::derivative(const Real & /*intnl*/) const
 {
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsHardeningModel::TensorMechanicsHardeningModel(const std::string & deprecated_name, InputParameters parameters) :
+  GeneralUserObject(deprecated_name, parameters)
+{
 }

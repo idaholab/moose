@@ -34,8 +34,8 @@ InputParameters validParams<AddSecondarySpeciesAction>()
 }
 
 
-AddSecondarySpeciesAction::AddSecondarySpeciesAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddSecondarySpeciesAction::AddSecondarySpeciesAction(const InputParameters & params) :
+    Action(params)
 {
 }
 
@@ -92,4 +92,11 @@ AddSecondarySpeciesAction::act()
     }
   }
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddSecondarySpeciesAction::AddSecondarySpeciesAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

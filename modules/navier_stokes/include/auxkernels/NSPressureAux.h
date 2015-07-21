@@ -26,7 +26,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  NSPressureAux(const std::string & name, InputParameters parameters);
+  NSPressureAux(const InputParameters & parameters);
+  NSPressureAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSPressureAux() {}
 

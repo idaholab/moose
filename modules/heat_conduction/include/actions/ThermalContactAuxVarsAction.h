@@ -12,7 +12,8 @@
 class ThermalContactAuxVarsAction : public Action
 {
 public:
-  ThermalContactAuxVarsAction(const std::string & name, InputParameters params);
+  ThermalContactAuxVarsAction(const InputParameters & params);
+  ThermalContactAuxVarsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ThermalContactAuxVarsAction(){}
   virtual void act();
 

@@ -20,8 +20,8 @@ InputParameters validParams<RichardsDensityPrimePrimeAux>()
   return params;
 }
 
-RichardsDensityPrimePrimeAux::RichardsDensityPrimePrimeAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+RichardsDensityPrimePrimeAux::RichardsDensityPrimePrimeAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _pressure_var(coupledValue("pressure_var")),
     _density_UO(getUserObject<RichardsDensity>("density_UO"))
 {}
@@ -31,3 +31,11 @@ RichardsDensityPrimePrimeAux::computeValue()
 {
   return _density_UO.d2density(_pressure_var[_qp]);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsDensityPrimePrimeAux::RichardsDensityPrimePrimeAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _pressure_var(coupledValue("pressure_var")),
+    _density_UO(getUserObject<RichardsDensity>("density_UO"))
+{}

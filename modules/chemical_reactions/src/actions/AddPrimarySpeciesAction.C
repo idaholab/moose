@@ -32,8 +32,8 @@ InputParameters validParams<AddPrimarySpeciesAction>()
 }
 
 
-AddPrimarySpeciesAction::AddPrimarySpeciesAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddPrimarySpeciesAction::AddPrimarySpeciesAction(const InputParameters & params) :
+    Action(params)
 {
 }
 
@@ -50,4 +50,11 @@ AddPrimarySpeciesAction::act()
     _problem->addVariable(vars[i], fe_type, scale_factor);
   }
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddPrimarySpeciesAction::AddPrimarySpeciesAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

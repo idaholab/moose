@@ -28,7 +28,8 @@ InputParameters validParams<RichardsSeff2gasRSC>();
 class RichardsSeff2gasRSC : public RichardsSeff
 {
 public:
-  RichardsSeff2gasRSC(const std::string & name, InputParameters parameters);
+  RichardsSeff2gasRSC(const InputParameters & parameters);
+  RichardsSeff2gasRSC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * oil effective saturation

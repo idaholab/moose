@@ -44,8 +44,8 @@ InputParameters validParams<ChemicalReactionsApp>()
   return params;
 }
 
-ChemicalReactionsApp::ChemicalReactionsApp(const std::string & name, InputParameters parameters) :
-    MooseApp(name, parameters)
+ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters) :
+    MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -65,7 +65,11 @@ extern "C" void ChemicalReactionsApp__registerApps() { ChemicalReactionsApp::reg
 void
 ChemicalReactionsApp::registerApps()
 {
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().reg<name>(#name)
   registerApp(ChemicalReactionsApp);
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -73,6 +77,9 @@ extern "C" void ChemicalReactionsApp__registerObjects(Factory & factory) { Chemi
 void
 ChemicalReactionsApp::registerObjects(Factory & factory)
 {
+#undef registerObject
+#define registerObject(name) factory.reg<name>(stringifyName(name))
+
   registerKernel(PrimaryTimeDerivative);
   registerKernel(PrimaryConvection);
   registerKernel(PrimaryDiffusion);
@@ -91,6 +98,10 @@ ChemicalReactionsApp::registerObjects(Factory & factory)
 
   registerMaterial(LangmuirMaterial);
   registerMaterial(MollifiedLangmuirMaterial);
+
+#undef registerObject
+#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
+
 }
 
 // External entry point for dynamic syntax association
@@ -98,6 +109,11 @@ extern "C" void ChemicalReactionsApp__associateSyntax(Syntax & syntax, ActionFac
 void
 ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+
+#undef registerAction
+#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+
+
   syntax.registerActionSyntax("AddPrimarySpeciesAction", "ReactionNetwork");
   syntax.registerActionSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   syntax.registerActionSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
@@ -111,4 +127,21 @@ ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fa
   registerAction(AddCoupledEqSpeciesAuxKernelsAction, "add_aux_kernel");
   registerAction(AddCoupledSolidKinSpeciesKernelsAction, "add_kernel");
   registerAction(AddCoupledSolidKinSpeciesAuxKernelsAction, "add_aux_kernel");
+
+#undef registerAction
+#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ChemicalReactionsApp::ChemicalReactionsApp(const std::string & deprecated_name, InputParameters parameters) :
+    MooseApp(deprecated_name, parameters)
+{
+  srand(processor_id());
+
+  Moose::registerObjects(_factory);
+  ChemicalReactionsApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
 }

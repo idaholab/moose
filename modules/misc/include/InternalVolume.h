@@ -29,8 +29,8 @@ class InternalVolume : public SideIntegralPostprocessor
 {
 public:
 
-  InternalVolume( const std::string & name,
-                  InputParameters parameters );
+  InternalVolume( const InputParameters & parameters);
+  InternalVolume(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~InternalVolume() {}
 

@@ -26,7 +26,8 @@ InputParameters validParams<NSKernel>();
 class NSKernel : public Kernel
 {
 public:
-  NSKernel(const std::string & name, InputParameters parameters);
+  NSKernel(const InputParameters & parameters);
+  NSKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSKernel(){}
 

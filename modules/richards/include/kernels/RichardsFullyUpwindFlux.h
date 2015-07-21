@@ -48,7 +48,8 @@ class RichardsFullyUpwindFlux : public Kernel
 {
 public:
 
-  RichardsFullyUpwindFlux(const std::string & name, InputParameters parameters);
+  RichardsFullyUpwindFlux(const InputParameters & parameters);
+  RichardsFullyUpwindFlux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 
 protected:

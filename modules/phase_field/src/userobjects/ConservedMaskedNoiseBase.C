@@ -18,8 +18,8 @@ InputParameters validParams<ConservedMaskedNoiseBase>()
   return params;
 }
 
-ConservedMaskedNoiseBase::ConservedMaskedNoiseBase(const std::string & name, InputParameters parameters) :
-    ConservedNoiseInterface(name, parameters),
+ConservedMaskedNoiseBase::ConservedMaskedNoiseBase(const InputParameters & parameters) :
+    ConservedNoiseInterface(parameters),
     _mask(getMaterialProperty<Real>("mask"))
 {
 }
@@ -78,4 +78,12 @@ ConservedMaskedNoiseBase::getQpValue(dof_id_type element_id, unsigned int qp) co
     libmesh_assert_less(qp, me->second.size());
     return (me->second[qp].first - _offset) * me->second[qp].second;
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ConservedMaskedNoiseBase::ConservedMaskedNoiseBase(const std::string & deprecated_name, InputParameters parameters) :
+    ConservedNoiseInterface(deprecated_name, parameters),
+    _mask(getMaterialProperty<Real>("mask"))
+{
 }

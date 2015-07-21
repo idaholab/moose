@@ -24,7 +24,8 @@ InputParameters validParams<SwitchingFunctionConstraintEta>();
 class SwitchingFunctionConstraintEta : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  SwitchingFunctionConstraintEta(const std::string & name, InputParameters parameters);
+  SwitchingFunctionConstraintEta(const InputParameters & parameters);
+  SwitchingFunctionConstraintEta(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

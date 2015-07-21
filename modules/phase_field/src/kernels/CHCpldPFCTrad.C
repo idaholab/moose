@@ -8,9 +8,8 @@ InputParameters validParams<CHCpldPFCTrad>()
   return params;
 }
 
-CHCpldPFCTrad::CHCpldPFCTrad(const std::string & name,
-                             InputParameters parameters) :
-    CHSplitVar(name, parameters),
+CHCpldPFCTrad::CHCpldPFCTrad(const InputParameters & parameters) :
+    CHSplitVar(parameters),
     _coeff(getMaterialProperty<Real>("coeff_name"))
 {
 }
@@ -27,4 +26,12 @@ CHCpldPFCTrad::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real grphi_grtst = CHSplitVar::computeQpOffDiagJacobian(jvar);
   return _coeff[_qp]*grphi_grtst;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CHCpldPFCTrad::CHCpldPFCTrad(const std::string & deprecated_name, InputParameters parameters) :
+    CHSplitVar(deprecated_name, parameters),
+    _coeff(getMaterialProperty<Real>("coeff_name"))
+{
 }

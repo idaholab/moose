@@ -18,7 +18,8 @@ InputParameters validParams<CrystalPlasticityRotationOutAux>();
 class CrystalPlasticityRotationOutAux : public AuxKernel
 {
 public:
-  CrystalPlasticityRotationOutAux(const std::string & name, InputParameters parameters);
+  CrystalPlasticityRotationOutAux(const InputParameters & parameters);
+  CrystalPlasticityRotationOutAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CrystalPlasticityRotationOutAux() {}
 
 protected:

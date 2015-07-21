@@ -16,8 +16,8 @@ InputParameters validParams<EBSDReader>()
   return params;
 }
 
-EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
-    GeneralUserObject(name, params),
+EBSDReader::EBSDReader(const InputParameters & params) :
+    GeneralUserObject(params),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
     _op_num(getParam<unsigned int>("op_num")),
@@ -282,4 +282,22 @@ EBSDReader::buildNodeToGrainWeightMap()
       _node_to_grn_weight_map[node_id][grain_id] += 1.0 / n_elems;
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+EBSDReader::EBSDReader(const std::string & deprecated_name, InputParameters params) :
+    GeneralUserObject(deprecated_name, params),
+    _mesh(_fe_problem.mesh()),
+    _nl(_fe_problem.getNonlinearSystem()),
+    _op_num(getParam<unsigned int>("op_num")),
+    _feature_num(0),
+    _mesh_dimension(_mesh.dimension()),
+    _nx(0),
+    _ny(0),
+    _nz(0),
+    _dx(0.),
+    _dy(0.),
+    _dz(0.)
+{
 }

@@ -23,7 +23,8 @@ InputParameters validParams<RichardsDensityIdeal>();
 class RichardsDensityIdeal : public RichardsDensity
 {
 public:
-  RichardsDensityIdeal(const std::string & name, InputParameters parameters);
+  RichardsDensityIdeal(const InputParameters & parameters);
+  RichardsDensityIdeal(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * fluid density as a function of porepressure
