@@ -51,7 +51,7 @@ public:
   };
 
   bool isCaptured() const { return _mech_status != MS_NO_CONTACT; }
-  void capture() { _mech_status = MS_CONTACT; }
+  void capture() { if (_mech_status == MS_NO_CONTACT) _mech_status = MS_CONTACT; }
   void release() { _mech_status = MS_NO_CONTACT; }
 
   const Node * _node;
