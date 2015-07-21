@@ -10,8 +10,8 @@ InputParameters validParams<OneDEnergyWallHeatFlux>()
   return params;
 }
 
-OneDEnergyWallHeatFlux::OneDEnergyWallHeatFlux(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+OneDEnergyWallHeatFlux::OneDEnergyWallHeatFlux(const InputParameters & parameters) :
+    Kernel(parameters),
     _q_wall(getFunction("q_wall")),
     _Phf(coupledValue("heat_flux_perimeter"))
 {

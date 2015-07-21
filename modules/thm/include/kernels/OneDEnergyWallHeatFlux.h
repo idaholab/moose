@@ -13,7 +13,7 @@ InputParameters validParams<OneDEnergyWallHeatFlux>();
 class OneDEnergyWallHeatFlux : public Kernel
 {
 public:
-  OneDEnergyWallHeatFlux(const std::string & name, InputParameters parameters);
+  OneDEnergyWallHeatFlux(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

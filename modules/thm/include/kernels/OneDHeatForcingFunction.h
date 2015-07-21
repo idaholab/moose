@@ -15,7 +15,7 @@ InputParameters validParams<OneDHeatForcingFunction>();
 class OneDHeatForcingFunction : public Kernel
 {
 public:
-  OneDHeatForcingFunction(const std::string & name, InputParameters parameters);
+  OneDHeatForcingFunction(const InputParameters & parameters);
   virtual ~OneDHeatForcingFunction();
 
 protected:

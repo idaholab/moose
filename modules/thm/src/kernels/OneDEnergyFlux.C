@@ -22,8 +22,8 @@ InputParameters validParams<OneDEnergyFlux>()
   return params;
 }
 
-OneDEnergyFlux::OneDEnergyFlux(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters) :
+    Kernel(parameters),
     _is_liquid(getParam<bool>("is_liquid")),
     _sign(_is_liquid ? 1. : -1.),
     _rhouA(coupledValue("rhouA")),

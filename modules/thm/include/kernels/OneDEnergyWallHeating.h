@@ -13,7 +13,7 @@ InputParameters validParams<OneDEnergyWallHeating>();
 class OneDEnergyWallHeating : public Kernel
 {
 public:
-  OneDEnergyWallHeating(const std::string & name, InputParameters parameters);
+  OneDEnergyWallHeating(const InputParameters & parameters);
   virtual ~OneDEnergyWallHeating();
 
 protected:

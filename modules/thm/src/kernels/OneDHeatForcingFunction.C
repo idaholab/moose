@@ -12,8 +12,8 @@ InputParameters validParams<OneDHeatForcingFunction>()
   return params;
 }
 
-OneDHeatForcingFunction::OneDHeatForcingFunction(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+OneDHeatForcingFunction::OneDHeatForcingFunction(const InputParameters & parameters) :
+    Kernel(parameters),
     _power_fraction(getParam<Real>("power_fraction")),
     _total_power(coupledScalarValue("total_power")),
     _volume(getParam<Real>("volume")),

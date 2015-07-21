@@ -12,8 +12,8 @@ InputParameters validParams<OneDEnergyWallHeating>()
   return params;
 }
 
-OneDEnergyWallHeating::OneDEnergyWallHeating(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+OneDEnergyWallHeating::OneDEnergyWallHeating(const InputParameters & parameters) :
+    Kernel(parameters),
     _temperature(getMaterialPropertyByName<Real>("temperature")),
     _dT_drhoA (getMaterialPropertyByName<Real>("dT_drhoA")),
     _dT_drhouA(getMaterialPropertyByName<Real>("dT_drhouA")),

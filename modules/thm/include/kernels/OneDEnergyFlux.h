@@ -14,7 +14,7 @@ InputParameters validParams<OneDEnergyFlux>();
 class OneDEnergyFlux : public Kernel
 {
 public:
-  OneDEnergyFlux(const std::string & name, InputParameters parameters);
+  OneDEnergyFlux(const InputParameters & parameters);
   virtual ~OneDEnergyFlux();
 
 protected:
