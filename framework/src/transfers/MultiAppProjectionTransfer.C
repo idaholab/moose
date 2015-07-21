@@ -95,31 +95,106 @@ MultiAppProjectionTransfer::initialSetup()
 void
 MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string & system_name)
 {
+  // Get the system and mesh from the input arguments.
+  LinearImplicitSystem & system = es.get_system<LinearImplicitSystem>(system_name);
+  MeshBase & to_mesh = es.get_mesh();
+
+  // Get the meshfunction evaluations and the map that was stashed in the es.
+  std::vector<Real> & final_evals = * es.parameters.get<std::vector<Real>*>("final_evals");
+  std::map<unsigned int, unsigned int> & element_map = * es.parameters.get<std::map<unsigned int, unsigned int>*>("element_map");
+
+  // Setup system vectors and matrices.
+  FEType fe_type = system.variable_type(0);
+  UniquePtr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
+  QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
+  fe->attach_quadrature_rule(&qrule);
+  const DofMap& dof_map = system.get_dof_map();
+  DenseMatrix<Number> Ke;
+  DenseVector<Number> Fe;
+  std::vector<dof_id_type> dof_indices;
+  const std::vector<Real> & JxW = fe->get_JxW();
+  const std::vector<std::vector<Real> > & phi = fe->get_phi();
+
+  const MeshBase::const_element_iterator end_el = to_mesh.active_local_elements_end();
+  for (MeshBase::const_element_iterator el = to_mesh.active_local_elements_begin(); el != end_el; ++el)
+  {
+    const Elem* elem = *el;
+    fe->reinit (elem);
+
+    dof_map.dof_indices (elem, dof_indices);
+    Ke.resize (dof_indices.size(), dof_indices.size());
+    Fe.resize (dof_indices.size());
+
+    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+    {
+      Real meshfun_eval = 0.;
+      if (element_map.find(elem->id()) != element_map.end())
+      {
+        // We have evaluations for this element.
+        meshfun_eval = final_evals[element_map[elem->id()] + qp];
+      }
+
+      // Now compute the element matrix and RHS contributions.
+      for (unsigned int i=0; i<phi.size(); i++)
+      {
+        // RHS
+        Fe(i) += JxW[qp] * (meshfun_eval * phi[i][qp]);
+
+        if (_compute_matrix)
+          for (unsigned int j = 0; j < phi.size(); j++)
+          {
+            // The matrix contribution
+            Ke(i,j) += JxW[qp] * (phi[i][qp] * phi[j][qp]);
+          }
+      }
+      dof_map.constrain_element_matrix_and_vector(Ke, Fe, dof_indices);
+
+      if (_compute_matrix)
+        system.matrix->add_matrix(Ke, dof_indices);
+      system.rhs->add_vector(Fe, dof_indices);
+    }
+  }
+}
+
+
+void
+MultiAppProjectionTransfer::execute()
+{
+  _console << "Beginning projection transfer " << name() << std::endl;
+
+  getAppInfo();
+
   ////////////////////
-  // In order to assemble the system we need to evaluate the sub app solutions
-  // at quadrature points in the master domain.  This is complicated by the fact
-  // that each app is on its own MPI communicator.
+  // We are going to project the solutions by solving some linear systems.  In
+  // order to assemble the systems, we need to evaluate the "from" domain
+  // solutions at quadrature points in the "to" domain.  Some parallel
+  // communication is necessary because each processor doesn't necessarily have
+  // all the "from" information it needs to set its "to" values.  We don't want
+  // to use a bunch of big all-to-all broadcasts, so we'll use bounding boxes to
+  // figure out which processors have the information we need and only
+  // communicate with those processors.
   //
   // Each processor will
-  // 1. Check its local quadrature points in the "to" domain to see which "from"
-  //    domains they might be in.
-  // 2. Send quadrature points to the processors that might have a "from" domain
-  //    that contains those points.
+  // 1. Check its local quadrature points in the "to" domains to see which
+  //    "from" domains they might be in.
+  // 2. Send quadrature points to the processors with "from" domains that might
+  //    contain those points.
   // 3. Recieve quadrature points from other processors, evaluate its mesh
   //    functions at those points, and send the values back to the proper
   //    processor
   // 4. Recieve mesh function evaluations from all relevant processors and
   //    decide which one to use at every quadrature point (the lowest global app
   //    index always wins)
-  // 5. And assemble the L2 system at its local quadrature points
+  // 5. And use the mesh function evaluations to assemble and solve an L2
+  //    projection system on its local elements.
   ////////////////////
 
   ////////////////////
-  // Get the bounding boxes for all of the processors.  Then, check all the
-  // elements local to this processor and see if they overlap with any of the
-  // bounding boxes from other processors.  Keep track of which elements overlap
-  // with which processors.  Build vectors of quadrature points to send to other
-  // processors for mesh function evaluations.
+  // For every combination of global "from" problem and local "to" problem, find
+  // which "from" bounding boxes overlap with which "to" elements.  Keep track
+  // of which processors own bounding boxes that overlap with which elements.
+  // Build vectors of quadrature points to send to other processors for mesh
+  // function evaluations.
   ////////////////////
 
   // Get the bounding boxes for the "from" domains.
@@ -128,60 +203,61 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
   // Figure out how many "from" domains each processor owns.
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();
 
-  // Figure out which "to" domain we are projecting to.
-  unsigned int i_to = es.parameters.get<unsigned int>("to_index");
-
-  const MeshBase& mesh = es.get_mesh();
-  const unsigned int dim = mesh.mesh_dimension();
-
-  LinearImplicitSystem & system = es.get_system<LinearImplicitSystem>(system_name);
-
-  FEType fe_type = system.variable_type(0);
-  UniquePtr<FEBase> fe(FEBase::build(dim, fe_type));
-  QGauss qrule(dim, fe_type.default_quadrature_order());
-  fe->attach_quadrature_rule(&qrule);
-  const std::vector<Point> & xyz = fe->get_xyz();
   std::vector<std::vector<Point> > outgoing_qps(n_processors());
-  std::vector<std::map<unsigned int, unsigned int> > element_index_map(n_processors());
-  // element_index_map[element_id] = index
+  std::vector<std::map<std::pair<unsigned int, unsigned int>, unsigned int> > element_index_map(n_processors());
+  // element_index_map[i_to, element_id] = index
   // outgoing_qps[index] is the first quadrature point in element
 
-  MeshBase::const_element_iterator       el     = mesh.local_elements_begin();
-  const MeshBase::const_element_iterator end_el = mesh.local_elements_end();
-
-  unsigned int from0 = 0;
-  for (processor_id_type i_proc = 0;
-       i_proc < n_processors();
-       from0 += froms_per_proc[i_proc], i_proc++)
+  for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
   {
-    for (el = mesh.local_elements_begin(); el != end_el; ++el)
+    MeshBase & to_mesh = _to_meshes[i_to]->getMesh();
+
+    LinearImplicitSystem & system = * _proj_sys[i_to];
+
+    FEType fe_type = system.variable_type(0);
+    UniquePtr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
+    QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
+    fe->attach_quadrature_rule(&qrule);
+    const std::vector<Point> & xyz = fe->get_xyz();
+
+    MeshBase::const_element_iterator       el     = to_mesh.local_elements_begin();
+    const MeshBase::const_element_iterator end_el = to_mesh.local_elements_end();
+
+    unsigned int from0 = 0;
+    for (processor_id_type i_proc = 0;
+         i_proc < n_processors();
+         from0 += froms_per_proc[i_proc], i_proc++)
     {
-      const Elem* elem = *el;
-      fe->reinit (elem);
-
-      bool qp_hit = false;
-      for (unsigned int i_from = 0;
-           i_from < froms_per_proc[i_proc] && ! qp_hit; i_from++)
+      for (el = to_mesh.local_elements_begin(); el != end_el; el++)
       {
-        for (unsigned int qp = 0;
-             qp < qrule.n_points() && ! qp_hit; qp ++)
+        const Elem* elem = *el;
+        fe->reinit (elem);
+
+        bool qp_hit = false;
+        for (unsigned int i_from = 0;
+             i_from < froms_per_proc[i_proc] && ! qp_hit; i_from++)
         {
-          Point qpt = xyz[qp];
-          if (bboxes[from0 + i_from].contains_point(qpt + _to_positions[i_to]))
-            qp_hit = true;
+          for (unsigned int qp = 0;
+               qp < qrule.n_points() && ! qp_hit; qp ++)
+          {
+            Point qpt = xyz[qp];
+            if (bboxes[from0 + i_from].contains_point(qpt + _to_positions[i_to]))
+              qp_hit = true;
+          }
         }
-      }
 
-      if (qp_hit)
-      {
-        // The selected processor's bounding box contains at least one
-        // quadrature point from this element.  Send all qps from this element
-        // and remember where they are in the array using the map.
-        element_index_map[i_proc][elem->id()] = outgoing_qps[i_proc].size();
-        for (unsigned int qp = 0; qp < qrule.n_points(); qp ++)
+        if (qp_hit)
         {
-          Point qpt = xyz[qp];
-          outgoing_qps[i_proc].push_back(qpt + _to_positions[i_to]);
+          // The selected processor's bounding box contains at least one
+          // quadrature point from this element.  Send all qps from this element
+          // and remember where they are in the array using the map.
+          std::pair<unsigned int, unsigned int> key(i_to, elem->id());
+          element_index_map[i_proc][key] = outgoing_qps[i_proc].size();
+          for (unsigned int qp = 0; qp < qrule.n_points(); qp ++)
+          {
+            Point qpt = xyz[qp];
+            outgoing_qps[i_proc].push_back(qpt + _to_positions[i_to]);
+          }
         }
       }
     }
@@ -268,10 +344,10 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
           switch (_direction)
           {
             case TO_MULTIAPP:
-              outgoing_ids[qp] = _local2global_map[i_from];
+              outgoing_ids[qp] = 0;
               break;
             case FROM_MULTIAPP:
-              outgoing_ids[qp] = 0;
+              outgoing_ids[qp] = _local2global_map[i_from];
               break;
           }
         }
@@ -291,8 +367,7 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
   }
 
   ////////////////////
-  // Gather all of the qp evaluations, find the best one for each qp, and
-  // assemble the system.
+  // Gather all of the qp evaluations and pick out the best ones for each qp.
   ////////////////////
   for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {
@@ -303,89 +378,94 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
     _communicator.receive(i_proc, incoming_app_ids[i_proc]);
   }
 
-  const DofMap& dof_map = system.get_dof_map();
-  DenseMatrix<Number> Ke;
-  DenseVector<Number> Fe;
-  std::vector<dof_id_type> dof_indices;
-  const std::vector<Real> & JxW = fe->get_JxW();
-  const std::vector<std::vector<Real> > & phi = fe->get_phi();
+  std::vector<std::vector<Real> > final_evals(_to_problems.size());
+  std::vector<std::map<unsigned int, unsigned int> > trimmed_element_maps(_to_problems.size());
 
-  for (el = mesh.active_local_elements_begin(); el != end_el; ++el)
+  for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
   {
-    const Elem* elem = *el;
-    fe->reinit (elem);
+    MeshBase & to_mesh = _to_meshes[i_to]->getMesh();
+    LinearImplicitSystem & system = * _proj_sys[i_to];
 
-    dof_map.dof_indices (elem, dof_indices);
-    Ke.resize (dof_indices.size(), dof_indices.size());
-    Fe.resize (dof_indices.size());
+    FEType fe_type = system.variable_type(0);
+    UniquePtr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
+    QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
+    fe->attach_quadrature_rule(&qrule);
+    const std::vector<Point> & xyz = fe->get_xyz();
 
-    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+    MeshBase::const_element_iterator       el     = to_mesh.local_elements_begin();
+    const MeshBase::const_element_iterator end_el = to_mesh.local_elements_end();
+
+    for (el = to_mesh.active_local_elements_begin(); el != end_el; el++)
     {
-      Point qpt = xyz[qp];
+      const Elem* elem = *el;
+      fe->reinit (elem);
 
-      unsigned int lowest_app_rank = -1; // -1 = largest unsigned int
-      Real meshfun_eval = 0.;
-      for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
+      bool element_is_evaled = false;
+      std::vector<Real> evals(qrule.n_points(), 0.);
+
+      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
       {
-        // Ignore the selected processor if the element wasn't found in it's
-        // bounding box.
-        std::map<unsigned int, unsigned int> & map = element_index_map[i_proc];
-        if (map.find(elem->id()) == map.end())
-          continue;
-        unsigned int qp0 = map[elem->id()];
+        Point qpt = xyz[qp];
 
-        // Ignore the selected processor if it's app has a higher rank than the
-        // previously found lowest app rank.
-        if (incoming_app_ids[i_proc][qp0 + qp] >= lowest_app_rank)
-          continue;
+        unsigned int lowest_app_rank = -1; // -1 = largest unsigned int
+        for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
+        {
+          // Ignore the selected processor if the element wasn't found in it's
+          // bounding box.
+          std::map<std::pair<unsigned int, unsigned int>, unsigned int> & map = element_index_map[i_proc];
+          std::pair<unsigned int, unsigned int> key(i_to, elem->id());
+          if (map.find(key) == map.end())
+            continue;
+          unsigned int qp0 = map[key];
 
-        // Ignore the selected processor if the qp was actually outside the
-        // processor's subapp's mesh.
-        if (incoming_evals[i_proc][qp0 + qp] == OutOfMeshValue)
-          continue;
+          // Ignore the selected processor if it's app has a higher rank than the
+          // previously found lowest app rank.
+          if (incoming_app_ids[i_proc][qp0 + qp] >= lowest_app_rank)
+            continue;
 
-        meshfun_eval = incoming_evals[i_proc][qp0 + qp];
+          // Ignore the selected processor if the qp was actually outside the
+          // processor's subapp's mesh.
+          if (incoming_evals[i_proc][qp0 + qp] == OutOfMeshValue)
+            continue;
+
+          // This is the best meshfunction evaluation so far, save it.
+          element_is_evaled = true;
+          evals[qp] = incoming_evals[i_proc][qp0 + qp];
+        }
       }
 
-      // Now compute the element matrix and RHS contributions.
-      for (unsigned int i=0; i<phi.size(); i++)
+      // If we found good evaluations for any of the qps in this element, save
+      // those evaluations for later.
+      if (element_is_evaled)
       {
-        // RHS
-        Fe(i) += JxW[qp] * (meshfun_eval * phi[i][qp]);
-
-        if (_compute_matrix)
-          for (unsigned int j = 0; j < phi.size(); j++)
-          {
-            // The matrix contribution
-            Ke(i,j) += JxW[qp] * (phi[i][qp] * phi[j][qp]);
-          }
+        trimmed_element_maps[i_to][elem->id()] = final_evals[i_to].size();
+        for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+        {
+          final_evals[i_to].push_back(evals[qp]);
+        }
       }
-      dof_map.constrain_element_matrix_and_vector(Ke, Fe, dof_indices);
-
-      if (_compute_matrix)
-        system.matrix->add_matrix(Ke, dof_indices);
-      system.rhs->add_vector(Fe, dof_indices);
     }
+  }
+
+  ////////////////////
+  // We now have just one or zero mesh function values at all of our local
+  // quadrature points.  Stash those values (and a map linking them to element
+  // ids) in the equation systems parameters and project the solution.
+  ////////////////////
+
+  for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
+  {
+    _to_es[i_to]->parameters.set<std::vector<Real>*>("final_evals") = & final_evals[i_to];
+    _to_es[i_to]->parameters.set<std::map<unsigned int, unsigned int>*>("element_map") = & trimmed_element_maps[i_to];
+    projectSolution(i_to);
+    _to_es[i_to]->parameters.set<std::vector<Real>*>("final_evals") = NULL;
+    _to_es[i_to]->parameters.set<std::map<unsigned int, unsigned int>*>("element_map") = NULL;
   }
 
   for (unsigned int i = 0; i < _from_problems.size(); i++)
   {
     delete local_meshfuns[i];
     delete serialized_from_solutions[i];
-  }
-}
-
-
-void
-MultiAppProjectionTransfer::execute()
-{
-  _console << "Beginning projection transfer " << name() << std::endl;
-
-  getAppInfo();
-
-  for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
-  {
-    projectSolution(i_to);
   }
 
   _console << "Finished projection transfer " << name() << std::endl;
@@ -399,7 +479,6 @@ MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
   LinearImplicitSystem & ls = *_proj_sys[i_to];
   // activate the current transfer
   proj_es.parameters.set<MultiAppProjectionTransfer *>("transfer") = this;
-  proj_es.parameters.set<unsigned int>("to_index") = i_to;
 
   // TODO: specify solver params in an input file
   // solver tolerance
