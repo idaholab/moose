@@ -42,6 +42,12 @@ protected:
 
   /// Material property for divergence of advection velocities
   const MaterialProperty<std::vector<Real> > & _div_velocity_advection;
+
+  /// Material property for  dervative of advection velocities
+  const MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative;
+
+  /// Material property for dirivative of divergence of advection velocities
+  const MaterialProperty<std::vector<Real> > & _div_velocity_advection_derivative;
 };
 
 #endif //SINGLEGRAINRIGIDBODYMOTION_H

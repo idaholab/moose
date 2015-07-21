@@ -39,12 +39,16 @@ public:
 
   const std::vector<RealGradient> & getForceValues() const;
   const std::vector<RealGradient> & getTorqueValues() const;
+  const std::vector<RealGradient> & getForceDerivatives() const;
+  const std::vector<RealGradient> & getTorqueDerivatives() const;
 
 protected:
   unsigned int _qp;
   std::string _dF_name;
   /// material property that provides force density
   const MaterialProperty<std::vector<RealGradient> > & _dF;
+  /// material property that provides derivative of force density with respect to c
+  const MaterialProperty<std::vector<RealGradient> > & _dFdc;
   /// provide UserObject for calculating grain volumes and centers
   const ComputeGrainCenterUserObject & _grain_data;
   const std::vector<Real> & _grain_volumes;
@@ -53,8 +57,11 @@ protected:
   unsigned int _ncomp;
   std::vector<RealGradient> _force_values;
   std::vector<RealGradient> _torque_values;
+  std::vector<RealGradient> _force_derivatives;
+  std::vector<RealGradient> _torque_derivatives;
   /// vector storing grain force and torque values
   std::vector<Real> _force_torque_store;
+  std::vector<Real> _force_torque_derivative_store;
 };
 
 #endif //COMPUTEGRAINFORCEANDTORQUE_H

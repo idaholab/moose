@@ -31,6 +31,8 @@ protected:
   const ComputeGrainForceAndTorque & _grain_force_torque;
   const std::vector<RealGradient> & _grain_forces;
   const std::vector<RealGradient> & _grain_torques;
+  const std::vector<RealGradient> & _grain_force_derivatives;
+  const std::vector<RealGradient> & _grain_torque_derivatives;
 
 private:
   /// equilibrium density at the grain boundaries
@@ -48,6 +50,12 @@ private:
 
   /// Material storing divergence of advection velocities of grains
   MaterialProperty<std::vector<Real> > & _div_velocity_advection;
+
+  /// Material storing advection velocities of grains
+  MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative;
+
+  /// Material storing divergence of advection velocities of grains
+  MaterialProperty<std::vector<Real> > & _div_velocity_advection_derivative;
 };
 
 #endif //GRAINADVECTIONVELOCITY_H

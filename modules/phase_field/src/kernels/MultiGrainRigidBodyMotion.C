@@ -24,7 +24,9 @@ MultiGrainRigidBodyMotion::MultiGrainRigidBodyMotion(const std::string & name,
     _c(coupledValue("c")),
     _grad_c(coupledGradient("c")),
     _velocity_advection(getMaterialProperty<std::vector<RealGradient> >("advection_velocity")),
-    _div_velocity_advection(getMaterialProperty<std::vector<Real> >("advection_velocity_divergence"))
+    _div_velocity_advection(getMaterialProperty<std::vector<Real> >("advection_velocity_divergence")),
+    _velocity_advection_derivative(getMaterialProperty<std::vector<RealGradient> >("advection_velocity_derivative")),
+    _div_velocity_advection_derivative(getMaterialProperty<std::vector<Real> >("advection_velocity_divergence_derivative"))
 {
 }
 
@@ -56,11 +58,15 @@ MultiGrainRigidBodyMotion::computeQpCJacobian()
 {
   RealGradient vadv_total = 0.0;
   Real div_vadv_total = 0.0;
+  RealGradient dvadvdc_total = 0.0;
+  Real ddivvadvdc_total = 0.0;
   for (unsigned int i = 0; i < _velocity_advection[_qp].size(); ++i)
   {
     vadv_total += _velocity_advection[_qp][i];
     div_vadv_total += _div_velocity_advection[_qp][i];
+    dvadvdc_total += _velocity_advection_derivative[_qp][i];
+    ddivvadvdc_total += _div_velocity_advection_derivative[_qp][i];
   }
 
-  return  vadv_total * _grad_phi[_j][_qp] * _test[_i][_qp] + div_vadv_total * _phi[_j][_qp] * _test[_i][_qp];
+  return  vadv_total * _grad_phi[_j][_qp] * _test[_i][_qp] + dvadvdc_total * _grad_c[_qp] * _phi[_j][_qp] * _test[_i][_qp] + div_vadv_total * _phi[_j][_qp] * _test[_i][_qp] + ddivvadvdc_total * _c[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }

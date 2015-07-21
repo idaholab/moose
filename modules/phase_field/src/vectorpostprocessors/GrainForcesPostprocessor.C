@@ -30,9 +30,11 @@ GrainForcesPostprocessor::GrainForcesPostprocessor(const std::string & name, Inp
     _grain_force_torque(getUserObject<ComputeGrainForceAndTorque>("grain_force")),
     _grain_forces(_grain_force_torque.getForceValues()),
     _grain_torques(_grain_force_torque.getTorqueValues()),
+    _grain_force_derivatives(_grain_force_torque.getForceDerivatives()),
+    _grain_torque_derivatives(_grain_force_torque.getTorqueDerivatives()),
     _total_grains(_grain_forces.size())
 {
-  _grain_force_torque_vector.resize(_total_grains*6);
+  _grain_force_torque_vector.resize(_total_grains*12);
 }
 
 void
@@ -40,11 +42,17 @@ GrainForcesPostprocessor::execute()
 {
   for (unsigned int i=0; i< _total_grains; ++i)
   {
-    _grain_force_torque_vector[6*i+0] = _grain_forces[i](0);
-    _grain_force_torque_vector[6*i+1] = _grain_forces[i](1);
-    _grain_force_torque_vector[6*i+2] = _grain_forces[i](2);
-    _grain_force_torque_vector[6*i+3] = _grain_torques[i](0);
-    _grain_force_torque_vector[6*i+4] = _grain_torques[i](1);
-    _grain_force_torque_vector[6*i+5] = _grain_torques[i](2);
+    _grain_force_torque_vector[12*i+0] = _grain_forces[i](0);
+    _grain_force_torque_vector[12*i+1] = _grain_forces[i](1);
+    _grain_force_torque_vector[12*i+2] = _grain_forces[i](2);
+    _grain_force_torque_vector[12*i+3] = _grain_torques[i](0);
+    _grain_force_torque_vector[12*i+4] = _grain_torques[i](1);
+    _grain_force_torque_vector[12*i+5] = _grain_torques[i](2);
+    _grain_force_torque_vector[12*i+6] = _grain_force_derivatives[i](0);
+    _grain_force_torque_vector[12*i+7] = _grain_force_derivatives[i](1);
+    _grain_force_torque_vector[12*i+8] = _grain_force_derivatives[i](2);
+    _grain_force_torque_vector[12*i+9] = _grain_torque_derivatives[i](0);
+    _grain_force_torque_vector[12*i+10] = _grain_torque_derivatives[i](1);
+    _grain_force_torque_vector[12*i+11] = _grain_torque_derivatives[i](2);
   }
 }

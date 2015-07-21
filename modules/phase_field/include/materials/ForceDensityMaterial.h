@@ -36,6 +36,8 @@ private:
 
   /// force density material
   MaterialProperty<std::vector<RealGradient> > & _dF;
+  /// force density material w.r.t c
+  MaterialProperty<std::vector<RealGradient> > & _dFdc;
 };
 
 #endif //FORCEDENSITYMATERIAL_H

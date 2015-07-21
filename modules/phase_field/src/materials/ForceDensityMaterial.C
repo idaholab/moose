@@ -22,7 +22,8 @@ ForceDensityMaterial::ForceDensityMaterial(const std::string & name, InputParame
    _ncrys(coupledComponents("etas")), //determine number of grains from the number of names passed in.  Note this is the actual number -1
    _vals(_ncrys), //Size variable arrays
    _grad_vals(_ncrys),
-   _dF(declareProperty<std::vector<RealGradient> >("force_density"))
+   _dF(declareProperty<std::vector<RealGradient> >("force_density")),
+   _dFdc(declareProperty<std::vector<RealGradient> >("dFdc"))
 {
   //Loop through grains and load coupled variables into the arrays
   for (unsigned int i = 0; i < _ncrys; ++i)
@@ -39,6 +40,7 @@ ForceDensityMaterial::computeQpProperties()
   std::vector<RealGradient> sum_grad_etas(_ncrys);
 
   _dF[_qp].resize(_ncrys);
+  _dFdc[_qp].resize(_ncrys);
 
   for (unsigned int i = 0; i < _ncrys; ++i)
   {
@@ -54,5 +56,6 @@ ForceDensityMaterial::computeQpProperties()
     }
 
    _dF[_qp][i] = _k * (_c[_qp] - _ceq) * sum_grad_etas[i];
+   _dFdc[_qp][i] = _k * sum_grad_etas[i];
   }
 }

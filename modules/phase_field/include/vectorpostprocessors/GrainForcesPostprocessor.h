@@ -71,6 +71,8 @@ protected:
   const ComputeGrainForceAndTorque & _grain_force_torque;
   const std::vector<RealGradient> & _grain_forces;
   const std::vector<RealGradient> & _grain_torques;
+  const std::vector<RealGradient> & _grain_force_derivatives;
+  const std::vector<RealGradient> & _grain_torque_derivatives;
 
   unsigned int _total_grains;
 };
