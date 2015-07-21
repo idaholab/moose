@@ -15,7 +15,7 @@ InputParameters validParams<SolidWall>();
 class SolidWall : public BoundaryBase
 {
 public:
-  SolidWall(const std::string & name, InputParameters params);
+  SolidWall(const InputParameters & params);
   virtual ~SolidWall();
 
   virtual void addVariables();
