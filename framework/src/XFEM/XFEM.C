@@ -149,14 +149,20 @@ XFEM::update(Real time)
     MeshCommunication().make_nodes_parallel_consistent(*_mesh);
 //    _mesh->find_neighbors();
 //    _mesh->contract();
-    _mesh->prepare_for_use(true); //doing this preserves the numbering, but generates warning
+    _mesh->allow_renumbering(false);
+    _mesh->skip_partitioning(true);
+    _mesh->prepare_for_use();
+//    _mesh->prepare_for_use(true,true); //doing this preserves the numbering, but generates warning
 
     if (_mesh2)
     {
       _mesh2->update_parallel_id_counts();
       MeshCommunication().make_elems_parallel_consistent(*_mesh2);
       MeshCommunication().make_nodes_parallel_consistent(*_mesh2);
-      _mesh2->prepare_for_use(true);
+      _mesh2->allow_renumbering(false);
+      _mesh2->skip_partitioning(true);
+      _mesh2->prepare_for_use();
+//      _mesh2->prepare_for_use(true,true);
     }
   }
   clearStateMarkedElems();
@@ -705,7 +711,7 @@ XFEM::cut_mesh_with_efa()
 
     //TODO: The 0 here is the thread ID.  Need to sort out how to do this correctly
     //TODO: Also need to copy surface and neighbor material data
-    if (parent_elem->is_semilocal(_mesh->processor_id()))
+    if (parent_elem->processor_id() == _mesh->processor_id())
       _material_data[0]->copy(*libmesh_elem, *parent_elem, 0);
 
     std::cout<<"XFEM added elem "<<libmesh_elem->id()+1<<std::endl;
