@@ -14,7 +14,7 @@ InputParameters validParams<OneDMassFlux>();
 class OneDMassFlux : public Kernel
 {
 public:
-  OneDMassFlux(const std::string & name, InputParameters parameters);
+  OneDMassFlux(const InputParameters & parameters);
   virtual ~OneDMassFlux();
 
 protected:

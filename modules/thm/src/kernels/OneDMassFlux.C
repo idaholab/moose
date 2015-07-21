@@ -9,8 +9,8 @@ InputParameters validParams<OneDMassFlux>()
   return params;
 }
 
-OneDMassFlux::OneDMassFlux(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+OneDMassFlux::OneDMassFlux(const InputParameters & parameters) :
+    Kernel(parameters),
     _rhouA(coupledValue("rhouA")),
     _rhouA_var_number(coupled("rhouA"))
 {
