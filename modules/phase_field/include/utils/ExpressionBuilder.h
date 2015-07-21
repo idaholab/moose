@@ -95,6 +95,19 @@ public:
     virtual int precedence() const { return 0; }
   };
 
+  // Template class for leaf nodes holding anonymous IDs in the expression tree
+  class EBTempIDNode : public EBTermNode
+  {
+    unsigned long id;
+
+  public:
+    EBTempIDNode(unsigned int _id) : id(_id) {};
+    virtual EBTempIDNode * clone() const { return new EBTempIDNode(id); }
+
+    virtual std::string stringify() const; // returns "[idnumber]"
+    virtual int precedence() const { return 0; }
+  };
+
   // Base class for nodes with a single sub node (i.e. functions or operators taking one argument)
   class EBUnaryTermNode : public EBTermNode
   {
@@ -259,7 +272,11 @@ public:
   class EBTerm
   {
   public:
-    EBTerm() : root(NULL) {};
+    // the default constructor assigns a temporary id node to root we use the address of the
+    // current EBTerm object as the ID. This could be problematic if we create and destroy terms,
+    // but then we should not expect the substitution to do sane things anyways.
+    EBTerm() : root(new EBTempIDNode(reinterpret_cast<unsigned long>(this))) {};
+
     EBTerm(const EBTerm & term) : root(term.root==NULL ? NULL : term.root->clone()) {};
     ~EBTerm() { delete root; };
 

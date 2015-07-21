@@ -52,6 +52,14 @@ ExpressionBuilder::EBSymbolNode::stringify() const
 }
 
 std::string
+ExpressionBuilder::EBTempIDNode::stringify() const
+{
+  std::ostringstream s;
+  s << '[' << id << ']';
+  return s.str();
+}
+
+std::string
 ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
 {
   const char * name[] = { "sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh" };
