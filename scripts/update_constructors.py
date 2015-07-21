@@ -15,14 +15,14 @@ def write(filename, content):
 # Substitution function for source file
 def subSource(match):
   find = match.group(0)
-  repl = match.group(1) + '::' + match.group(1) + '(const InputParameters & ' + match.group(2) + ') :'
+  repl = match.group(1) + '::' + match.group(1) + '(const InputParameters & ' + match.group(2) + ')'
   repl += match.group(3) + match.group(4) + '(' + match.group(2) + ')'
   return match.group(0).replace(find, repl)
 
 # Substitution function for source file for Actions and App
 def subSourceNonConst(match):
   find = match.group(0)
-  repl = match.group(1) + '::' + match.group(1) + '(InputParameters ' + match.group(2) + ') :'
+  repl = match.group(1) + '::' + match.group(1) + '(InputParameters ' + match.group(2) + ')'
   repl += match.group(3) + match.group(4) + '(' + match.group(2) + ')'
   return match.group(0).replace(find, repl)
 
@@ -50,7 +50,7 @@ def updateSource(obj, filename):
   regex = r'(' + obj + ')\s*::\s*' + obj + '\s*\('
   regex += '\s*const\s*std::string\s*&\s*\w+'
   regex += '[\s\n]*,[\s\n]*InputParameters\s*(\w+)\s*'
-  regex += '\s*\)[\n\s]*:([\s\n]*)'
+  regex += '\s*\)([\n\s]*:[\s\n]*)'
   regex += '([\w\<\>\s]+)\(\s*\w+\s*,\s*\w+\s*\)'
 
   if obj.endswith('App') or ('actions' in filename):
