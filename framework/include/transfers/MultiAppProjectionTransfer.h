@@ -29,7 +29,6 @@ class MultiAppProjectionTransfer : public MultiAppTransfer
 {
 public:
   MultiAppProjectionTransfer(const InputParameters & parameters);
-  virtual ~MultiAppProjectionTransfer();
 
   virtual void initialSetup();
 
@@ -39,8 +38,7 @@ protected:
   void toMultiApp();
   void fromMultiApp();
 
-  void assembleL2From(EquationSystems & es, const std::string & system_name);
-  void assembleL2To(EquationSystems & es, const std::string & system_name);
+  void assembleL2(EquationSystems & es, const std::string & system_name);
 
   void projectSolution(unsigned int to_problem);
 
@@ -56,8 +54,7 @@ protected:
   /// thus is always going to be 0 unless something changes in libMesh or we change the way we project variables
   unsigned int _proj_var_num;
 
-  friend void assemble_l2_from(EquationSystems & es, const std::string & system_name);
-  friend void assemble_l2_to(EquationSystems & es, const std::string & system_name);
+  friend void assemble_l2(EquationSystems & es, const std::string & system_name);
 
   NumericVector<Number> * _serialized_master_solution;
 

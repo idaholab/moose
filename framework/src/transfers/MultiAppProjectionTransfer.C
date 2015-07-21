@@ -22,19 +22,11 @@
 #include "libmesh/parallel_algebra.h"
 
 
-void assemble_l2_from(EquationSystems & es, const std::string & system_name)
+void assemble_l2(EquationSystems & es, const std::string & system_name)
 {
   MultiAppProjectionTransfer * transfer = es.parameters.get<MultiAppProjectionTransfer *>("transfer");
-  transfer->assembleL2From(es, system_name);
+  transfer->assembleL2(es, system_name);
 }
-
-void assemble_l2_to(EquationSystems & es, const std::string & system_name)
-{
-  MultiAppProjectionTransfer * transfer = es.parameters.get<MultiAppProjectionTransfer *>("transfer");
-  //transfer->assembleL2To(es, system_name);
-  transfer->assembleL2From(es, system_name);
-}
-
 
 template<>
 InputParameters validParams<MultiAppProjectionTransfer>()
@@ -63,165 +55,45 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & p
 {
 }
 
-MultiAppProjectionTransfer::~MultiAppProjectionTransfer()
-{
-}
-
 void
 MultiAppProjectionTransfer::initialSetup()
 {
   getAppInfo();
 
-  switch (_direction)
+  _proj_sys.resize(_to_problems.size(), NULL);
+
+  for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
   {
-    case TO_MULTIAPP:
-      {
-        unsigned int n_to_domains = _to_problems.size();
-        _proj_sys.resize(n_to_domains, NULL);
+    FEProblem & to_problem = *_to_problems[i_to];
+    EquationSystems & to_es = to_problem.es();
 
-        // Keep track of which EquationSystems just had new Systems
-        // added to them
-        std::set<EquationSystems *> augmented_es;
+    // Add the projection system.
+    FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+                   Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
+    LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>(
+         "proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
+         + "-" + Utility::enum_to_string<Order>(fe_type.order) + "-" + name());
+    _proj_var_num = proj_sys.add_variable("var", fe_type);
+    proj_sys.attach_assemble_function(assemble_l2);
+    _proj_sys[i_to] = &proj_sys;
 
-        for (unsigned int i_to = 0; i_to < n_to_domains; i_to++)
-        {
-          FEProblem & to_problem = *_to_problems[i_to];
-          FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                         Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
+    // Prevent the projection system from being written to checkpoint
+    // files.  In the event of a recover or restart, we'll read the checkpoint
+    // before this initialSetup method is called.  As a result, we'll find
+    // systems in the checkpoint (the projection systems) that we don't know
+    // what to do with, and there will be a crash.  We could fix this by making
+    // the systems in the constructor, except we don't know how many sub apps
+    // there are at the time of construction.  So instead, we'll just nuke the
+    // projection system and rebuild it from scratch every recover/restart.
+    proj_sys.hide_output() = true;
 
-          EquationSystems & to_es = to_problem.es();
-          LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>(
-               "proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
-               + "-" + Utility::enum_to_string<Order>(fe_type.order) + "-" + name());
-          _proj_var_num = proj_sys.add_variable("var", fe_type);
-          proj_sys.attach_assemble_function(assemble_l2_to);
-
-          // Prevent the projection system from being written to checkpoint
-          // files.  (This makes recover/restart easier)
-          proj_sys.hide_output() = true;
-
-          _proj_sys[i_to] = &proj_sys;
-
-          // We'll defer to_es.reinit() so we don't do it multiple
-          // times even if we add multiple new systems
-          augmented_es.insert(&to_es);
-        }
-
-        // Make sure all new systems are initialized.
-        for (std::set<EquationSystems *>::iterator es_iter =
-             augmented_es.begin();
-             es_iter != augmented_es.end(); ++es_iter)
-          {
-            EquationSystems *es = *es_iter;
-            es->reinit();
-          }
-      }
-      break;
-
-    case FROM_MULTIAPP:
-      {
-        _proj_sys.resize(1);
-
-        FEProblem & to_problem = *_multi_app->problem();
-        FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                       Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
-
-        EquationSystems & to_es = to_problem.es();
-        LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>(
-             "proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
-             + "-" + Utility::enum_to_string<Order>(fe_type.order) + "-" + name());
-        _proj_var_num = proj_sys.add_variable("var", fe_type);
-        proj_sys.attach_assemble_function(assemble_l2_from);
-
-        // Prevent the projection system from being written to checkpoint
-        // files.  (This makes recover/restart easier)
-        proj_sys.hide_output() = true;
-
-        _proj_sys[0] = &proj_sys;
-
-        to_es.reinit();
-      }
-      break;
+    // Reinitialize EquationSystems since we added a system.
+    to_es.reinit();
   }
 }
 
 void
-MultiAppProjectionTransfer::assembleL2To(EquationSystems & es, const std::string & system_name)
-{
-  unsigned int app = es.parameters.get<unsigned int>("app");
-
-  FEProblem & from_problem = *_multi_app->problem();
-  EquationSystems & from_es = from_problem.es();
-
-  MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-  System & from_sys = from_var.sys().system();
-  unsigned int from_var_num = from_sys.variable_number(from_var.name());
-
-  MeshFunction from_func(from_es, *_serialized_master_solution, from_sys.get_dof_map(), from_var_num);
-  from_func.init(Trees::ELEMENTS);
-  from_func.enable_out_of_mesh_mode(0.);
-
-
-  const MeshBase& mesh = es.get_mesh();
-  const unsigned int dim = mesh.mesh_dimension();
-
-  LinearImplicitSystem & system = es.get_system<LinearImplicitSystem>(system_name);
-
-  FEType fe_type = system.variable_type(0);
-  UniquePtr<FEBase> fe(FEBase::build(dim, fe_type));
-  QGauss qrule(dim, fe_type.default_quadrature_order());
-  fe->attach_quadrature_rule(&qrule);
-  const std::vector<Real> & JxW = fe->get_JxW();
-  const std::vector<std::vector<Real> > & phi = fe->get_phi();
-  const std::vector<Point> & xyz = fe->get_xyz();
-
-  const DofMap& dof_map = system.get_dof_map();
-  DenseMatrix<Number> Ke;
-  DenseVector<Number> Fe;
-  std::vector<dof_id_type> dof_indices;
-
-  MeshBase::const_element_iterator       el     = mesh.active_local_elements_begin();
-  const MeshBase::const_element_iterator end_el = mesh.active_local_elements_end();
-  for ( ; el != end_el; ++el)
-  {
-    const Elem* elem = *el;
-
-    fe->reinit (elem);
-
-    dof_map.dof_indices (elem, dof_indices);
-    Ke.resize (dof_indices.size(), dof_indices.size());
-    Fe.resize (dof_indices.size());
-
-    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-    {
-      Point qpt = xyz[qp];
-      Point pt = qpt + _to_positions[app];
-      Real f = from_func(pt);
-
-      // Now compute the element matrix and RHS contributions.
-      for (unsigned int i=0; i<phi.size(); i++)
-      {
-        // RHS
-        Fe(i) += JxW[qp] * (f * phi[i][qp]);
-
-        if (_compute_matrix)
-          for (unsigned int j = 0; j < phi.size(); j++)
-          {
-            // The matrix contribution
-            Ke(i,j) += JxW[qp] * (phi[i][qp] * phi[j][qp]);
-          }
-      }
-      dof_map.constrain_element_matrix_and_vector(Ke, Fe, dof_indices);
-
-      if (_compute_matrix)
-        system.matrix->add_matrix(Ke, dof_indices);
-      system.rhs->add_vector(Fe, dof_indices);
-    }
-  }
-}
-
-void
-MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::string & system_name)
+MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string & system_name)
 {
   ////////////////////
   // In order to assemble the system we need to evaluate the sub app solutions
@@ -257,7 +129,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();
 
   // Figure out which "to" domain we are projecting to.
-  unsigned int i_to = es.parameters.get<unsigned int>("app");
+  unsigned int i_to = es.parameters.get<unsigned int>("to_index");
 
   const MeshBase& mesh = es.get_mesh();
   const unsigned int dim = mesh.mesh_dimension();
@@ -388,21 +260,6 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
 
       // Loop until we've found the lowest-ranked app that actually contains
       // the quadrature point.
-      /*
-      for (unsigned int i_global = 0, i_local = 0;
-           i_global < _multi_app->numGlobalApps() && outgoing_evals[qp] == OutOfMeshValue;
-           i_global++)
-      {
-        if (!_multi_app->hasLocalApp(i_global))
-          continue;
-        if (local_bboxes[i_local].contains_point(qpt))
-        {
-          outgoing_evals[qp] = (* local_meshfuns[i_local])(qpt - _multi_app->position(i_global));
-          outgoing_ids[qp] = i_global;
-        }
-        i_local ++;
-      }
-      */
       for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
       {
         if (local_bboxes[i_from].contains_point(qpt))
@@ -526,36 +383,10 @@ MultiAppProjectionTransfer::execute()
 
   getAppInfo();
 
-  if (_direction == TO_MULTIAPP)
-  {
-    // Serialize the master solution
-    FEProblem & from_problem = *_multi_app->problem();
-    MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-    System & from_sys = from_var.sys().system();
-    _serialized_master_solution = NumericVector<Number>::build(from_sys.comm()).release();
-    _serialized_master_solution->init(from_sys.n_dofs(), false, SERIAL);
-    from_sys.solution->localize(*_serialized_master_solution);
-  }
-
   for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
   {
     projectSolution(i_to);
   }
-
-  /*
-  switch (_direction)
-  {
-    case TO_MULTIAPP:
-      toMultiApp();
-      break;
-
-    case FROM_MULTIAPP:
-      fromMultiApp();
-      break;
-  }
-  */
-
-  if (_direction == TO_MULTIAPP) delete _serialized_master_solution;
 
   _console << "Finished projection transfer " << name() << std::endl;
 }
@@ -568,7 +399,7 @@ MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
   LinearImplicitSystem & ls = *_proj_sys[i_to];
   // activate the current transfer
   proj_es.parameters.set<MultiAppProjectionTransfer *>("transfer") = this;
-  proj_es.parameters.set<unsigned int>("app") = i_to;
+  proj_es.parameters.set<unsigned int>("to_index") = i_to;
 
   // TODO: specify solver params in an input file
   // solver tolerance
@@ -617,104 +448,3 @@ MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
   to_solution->close();
   to_sys.update();
 }
-
-/*
-void
-MultiAppProjectionTransfer::toMultiApp()
-{
-  _console << "Projecting solution" << std::endl;
-
-  // Serialize the master solution
-  FEProblem & from_problem = *_multi_app->problem();
-  MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-  System & from_sys = from_var.sys().system();
-  _serialized_master_solution = NumericVector<Number>::build(from_sys.comm()).release();
-  _serialized_master_solution->init(from_sys.n_dofs(), false, SERIAL);
-  from_sys.solution->localize(*_serialized_master_solution);
-
-  for (unsigned int app = 0; app < _multi_app->numGlobalApps(); app++)
-  {
-    if (_multi_app->hasLocalApp(app))
-    {
-      projectSolution(*_multi_app->appProblem(app), app);
-    }
-  }
-
-  delete _serialized_master_solution;
-}
-
-void
-MultiAppProjectionTransfer::fromMultiApp()
-{
-  _console << "Projecting solution" << std::endl;
-  projectSolution(*_multi_app->problem(), 0);
-}
-<<<<<<< HEAD
-
-
-// DEPRECATED CONSTRUCTOR
-MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & deprecated_name, InputParameters parameters) :
-    MultiAppTransfer(deprecated_name, parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable")),
-    _proj_type(getParam<MooseEnum>("proj_type")),
-    _compute_matrix(true)
-{
-  switch (_direction)
-  {
-    case TO_MULTIAPP:
-      {
-        unsigned int n_apps = _multi_app->numGlobalApps();
-        _proj_sys.resize(n_apps, NULL);
-        for (unsigned int app = 0; app < n_apps; app++)
-        {
-          if (_multi_app->hasLocalApp(app))
-          {
-            MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-
-            FEProblem & to_problem = *_multi_app->appProblem(app);
-            FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                           Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
-            to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
-
-            EquationSystems & to_es = to_problem.es();
-            LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
-                                                                                           + "-" + Utility::enum_to_string<Order>(fe_type.order));
-            _proj_var_num = proj_sys.add_variable("var", fe_type);
-            proj_sys.attach_assemble_function(assemble_l2_to);
-
-            _proj_sys[app] = &proj_sys;
-
-            //to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
-
-            Moose::swapLibMeshComm(swapped);
-          }
-        }
-      }
-      break;
-
-    case FROM_MULTIAPP:
-      {
-        _proj_sys.resize(1);
-
-        FEProblem & to_problem = *_multi_app->problem();
-        FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                       Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
-        to_problem.addAuxVariable(_to_var_name, fe_type, NULL);
-
-        EquationSystems & to_es = to_problem.es();
-        LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
-                                                                                       + "-" + Utility::enum_to_string<Order>(fe_type.order));
-        _proj_var_num = proj_sys.add_variable("var", fe_type);
-        proj_sys.attach_assemble_function(assemble_l2_from);
-
-        _proj_sys[0] = &proj_sys;
-
-        // to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
-      }
-      break;
-  }
-}
-=======
->>>>>>> TEMP
-*/
