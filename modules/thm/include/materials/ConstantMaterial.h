@@ -14,7 +14,7 @@ InputParameters validParams<ConstantMaterial>();
 class ConstantMaterial : public Material
 {
 public:
-  ConstantMaterial(const std::string & name, InputParameters parameters);
+  ConstantMaterial(const InputParameters & parameters);
   virtual ~ConstantMaterial();
 
 protected:

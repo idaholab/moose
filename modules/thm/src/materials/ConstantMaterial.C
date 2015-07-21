@@ -9,8 +9,8 @@ InputParameters validParams<ConstantMaterial>()
   return params;
 }
 
-ConstantMaterial::ConstantMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+ConstantMaterial::ConstantMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _value(getParam<Real>("value")),
     _property(declareProperty<Real>(getParam<std::string>("property_name")))
 {
