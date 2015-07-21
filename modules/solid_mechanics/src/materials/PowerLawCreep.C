@@ -30,9 +30,18 @@ InputParameters validParams<PowerLawCreep>()
 }
 
 
-PowerLawCreep::PowerLawCreep( const std::string & name,
-                              InputParameters parameters )
-  :SolidModel( name, parameters )
+PowerLawCreep::PowerLawCreep( const InputParameters & parameters)
+  :SolidModel(parameters)
+{
+
+  createConstitutiveModel( "PowerLawCreepModel", parameters );
+
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PowerLawCreep::PowerLawCreep(const std::string & deprecated_name, InputParameters parameters)
+  :SolidModel(deprecated_name, parameters)
 {
 
   createConstitutiveModel( "PowerLawCreepModel", parameters );

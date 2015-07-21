@@ -30,7 +30,6 @@ ActionFactory::~ActionFactory()
 MooseSharedPointer<Action>
 ActionFactory::create(const std::string & action, const std::string & name, InputParameters parameters)
 {
-  // DEPRECATED OBJECT CREATION
   if (_name_to_legacy_build_info.find(action) != _name_to_legacy_build_info.end())
     return createLegacy(action, name, parameters);
 

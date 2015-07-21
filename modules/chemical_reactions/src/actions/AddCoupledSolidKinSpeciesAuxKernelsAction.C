@@ -39,8 +39,8 @@ InputParameters validParams<AddCoupledSolidKinSpeciesAuxKernelsAction>()
 }
 
 
-AddCoupledSolidKinSpeciesAuxKernelsAction::AddCoupledSolidKinSpeciesAuxKernelsAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddCoupledSolidKinSpeciesAuxKernelsAction::AddCoupledSolidKinSpeciesAuxKernelsAction(const InputParameters & params) :
+    Action(params)
 {
 }
 
@@ -107,4 +107,11 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
     params_kin.print();
   }
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddCoupledSolidKinSpeciesAuxKernelsAction::AddCoupledSolidKinSpeciesAuxKernelsAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

@@ -22,8 +22,8 @@ InputParameters validParams<ThermalContactDiracKernelsAction>()
   return params;
 }
 
-ThermalContactDiracKernelsAction::ThermalContactDiracKernelsAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+ThermalContactDiracKernelsAction::ThermalContactDiracKernelsAction(const InputParameters & params) :
+  Action(params)
 {
 }
 
@@ -53,4 +53,11 @@ ThermalContactDiracKernelsAction::act()
                              "GapHeatPointSourceMaster_"+_name,
                              params);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ThermalContactDiracKernelsAction::ThermalContactDiracKernelsAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
 }

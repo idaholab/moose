@@ -22,9 +22,8 @@ InputParameters validParams<TensorMechanicsPlasticMohrCoulombMulti>()
   return params;
 }
 
-TensorMechanicsPlasticMohrCoulombMulti::TensorMechanicsPlasticMohrCoulombMulti(const std::string & name,
-                                                         InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters),
+TensorMechanicsPlasticMohrCoulombMulti::TensorMechanicsPlasticMohrCoulombMulti(const InputParameters & parameters) :
+    TensorMechanicsPlasticModel(parameters),
     _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
     _phi(getUserObject<TensorMechanicsHardeningModel>("friction_angle")),
     _psi(getUserObject<TensorMechanicsHardeningModel>("dilation_angle")),
@@ -421,4 +420,20 @@ std::string
 TensorMechanicsPlasticMohrCoulombMulti::modelName() const
 {
   return "MohrCoulombMulti";
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsPlasticMohrCoulombMulti::TensorMechanicsPlasticMohrCoulombMulti(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsPlasticModel(deprecated_name, parameters),
+    _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
+    _phi(getUserObject<TensorMechanicsHardeningModel>("friction_angle")),
+    _psi(getUserObject<TensorMechanicsHardeningModel>("dilation_angle")),
+    _shift(parameters.isParamValid("shift") ? getParam<Real>("shift") : _f_tol)
+{
+  if (_shift < 0)
+    mooseError("Value of 'shift' in TensorMechanicsPlasticMohrCoulombMulti must not be negative\n");
+  if (_shift > _f_tol)
+    _console << "WARNING: value of 'shift' in TensorMechanicsPlasticMohrCoulombMulti is probably set too high\n";
+  MooseRandom::seed(0);
 }

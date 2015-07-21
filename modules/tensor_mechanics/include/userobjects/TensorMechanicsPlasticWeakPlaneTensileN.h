@@ -23,7 +23,8 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensileN>();
 class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticWeakPlaneTensile
 {
  public:
-  TensorMechanicsPlasticWeakPlaneTensileN(const std::string & name, InputParameters parameters);
+  TensorMechanicsPlasticWeakPlaneTensileN(const InputParameters & parameters);
+  TensorMechanicsPlasticWeakPlaneTensileN(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// Returns the model name (WeakPlaneTensileN)
   virtual std::string modelName() const;

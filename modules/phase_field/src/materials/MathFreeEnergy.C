@@ -15,9 +15,8 @@ InputParameters validParams<MathFreeEnergy>()
   return params;
 }
 
-MathFreeEnergy::MathFreeEnergy(const std::string & name,
-                       InputParameters parameters) :
-    DerivativeFunctionMaterialBase(name, parameters),
+MathFreeEnergy::MathFreeEnergy(const InputParameters & parameters) :
+    DerivativeFunctionMaterialBase(parameters),
     _c(coupledValue("c")),
     _c_var(coupled("c"))
 {
@@ -54,4 +53,13 @@ MathFreeEnergy::computeD3F(unsigned int j_var, unsigned int k_var, unsigned int 
     return 6*_c[_qp];
   else
     return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MathFreeEnergy::MathFreeEnergy(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeFunctionMaterialBase(deprecated_name, parameters),
+    _c(coupledValue("c")),
+    _c_var(coupled("c"))
+{
 }

@@ -16,8 +16,8 @@ InputParameters validParams<NSMassUnspecifiedNormalFlowBC>()
 
 
 
-NSMassUnspecifiedNormalFlowBC::NSMassUnspecifiedNormalFlowBC(const std::string & name, InputParameters parameters)
-    : NSMassBC(name, parameters)
+NSMassUnspecifiedNormalFlowBC::NSMassUnspecifiedNormalFlowBC(const InputParameters & parameters)
+    : NSMassBC(parameters)
 {
 }
 
@@ -46,4 +46,11 @@ Real NSMassUnspecifiedNormalFlowBC::computeQpJacobian()
 Real NSMassUnspecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
   return this->qp_jacobian( this->map_var_number(jvar) );
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSMassUnspecifiedNormalFlowBC::NSMassUnspecifiedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSMassBC(deprecated_name, parameters)
+{
 }

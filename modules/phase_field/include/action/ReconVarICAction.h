@@ -20,7 +20,8 @@ InputParameters validParams<ReconVarICAction>();
 class ReconVarICAction: public Action
 {
 public:
-  ReconVarICAction(const std::string & name, InputParameters params);
+  ReconVarICAction(const InputParameters & params);
+  ReconVarICAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

@@ -12,7 +12,8 @@ InputParameters validParams<PFCEnergyDensity>();
 class PFCEnergyDensity : public AuxKernel
 {
 public:
-   PFCEnergyDensity( const std::string& name, InputParameters parameters );
+   PFCEnergyDensity( const InputParameters & parameters);
+  PFCEnergyDensity(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

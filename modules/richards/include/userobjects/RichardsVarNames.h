@@ -30,7 +30,8 @@ class RichardsVarNames :
   public ZeroInterface
 {
  public:
-  RichardsVarNames(const std::string & name, InputParameters parameters);
+  RichardsVarNames(const InputParameters & parameters);
+  RichardsVarNames(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();
   void execute();

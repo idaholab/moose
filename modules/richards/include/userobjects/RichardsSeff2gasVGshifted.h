@@ -29,7 +29,8 @@ InputParameters validParams<RichardsSeff2gasVGshifted>();
 class RichardsSeff2gasVGshifted : public RichardsSeff
 {
 public:
-  RichardsSeff2gasVGshifted(const std::string & name, InputParameters parameters);
+  RichardsSeff2gasVGshifted(const InputParameters & parameters);
+  RichardsSeff2gasVGshifted(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * gas effective saturation

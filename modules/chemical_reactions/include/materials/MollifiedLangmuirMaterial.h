@@ -22,8 +22,8 @@ InputParameters validParams<MollifiedLangmuirMaterial>();
 class MollifiedLangmuirMaterial : public Material
 {
 public:
-  MollifiedLangmuirMaterial(const std::string & name,
-                  InputParameters parameters);
+  MollifiedLangmuirMaterial(const InputParameters & parameters);
+  MollifiedLangmuirMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

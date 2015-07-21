@@ -27,7 +27,8 @@ InputParameters validParams<RichardsMaterial>();
 class RichardsMaterial : public Material
 {
 public:
-  RichardsMaterial(const std::string & name, InputParameters parameters);
+  RichardsMaterial(const InputParameters & parameters);
+  RichardsMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

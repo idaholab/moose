@@ -42,8 +42,8 @@ InputParameters validParams<ContactAction>()
   return params;
 }
 
-ContactAction::ContactAction(const std::string & name, InputParameters params) :
-  Action(name, params),
+ContactAction::ContactAction(const InputParameters & params) :
+  Action(params),
   _master(getParam<BoundaryName>("master")),
   _slave(getParam<BoundaryName>("slave")),
   _disp_x(getParam<NonlinearVariableName>("disp_x")),
@@ -240,4 +240,23 @@ ContactAction::act()
       }
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ContactAction::ContactAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params),
+  _master(getParam<BoundaryName>("master")),
+  _slave(getParam<BoundaryName>("slave")),
+  _disp_x(getParam<NonlinearVariableName>("disp_x")),
+  _disp_y(getParam<NonlinearVariableName>("disp_y")),
+  _disp_z(getParam<NonlinearVariableName>("disp_z")),
+  _penalty(getParam<Real>("penalty")),
+  _friction_coefficient(getParam<Real>("friction_coefficient")),
+  _tension_release(getParam<Real>("tension_release")),
+  _model(getParam<std::string>("model")),
+  _formulation(getParam<MooseEnum>("formulation")),
+  _order(getParam<MooseEnum>("order")),
+  _system(getParam<MooseEnum>("system"))
+{
 }

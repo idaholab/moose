@@ -16,7 +16,8 @@
 class BicrystalCircleGrainICAction: public Action
 {
 public:
-  BicrystalCircleGrainICAction(const std::string & name, InputParameters params);
+  BicrystalCircleGrainICAction(const InputParameters & params);
+  BicrystalCircleGrainICAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

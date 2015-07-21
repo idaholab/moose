@@ -19,8 +19,8 @@ InputParameters validParams<RigidBodyModesRZ>()
   return params;
 }
 
-RigidBodyModesRZ::RigidBodyModesRZ(const std::string & name, InputParameters parameters) :
-  NodalUserObject(name, parameters),
+RigidBodyModesRZ::RigidBodyModesRZ(const InputParameters & parameters) :
+  NodalUserObject(parameters),
   _subspace_name(parameters.get<std::string>("subspace_name")),
   _subspace_indices(parameters.get<std::vector<unsigned int> >("subspace_indices")),
   _disp_r_i(coupled("disp_r")),
@@ -70,5 +70,30 @@ RigidBodyModesRZ::finalize()
     postfix << "_" << _subspace_indices[i];
     NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());
     mode.close();
+  }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RigidBodyModesRZ::RigidBodyModesRZ(const std::string & deprecated_name, InputParameters parameters) :
+  NodalUserObject(deprecated_name, parameters),
+  _subspace_name(parameters.get<std::string>("subspace_name")),
+  _subspace_indices(parameters.get<std::vector<unsigned int> >("subspace_indices")),
+  _disp_r_i(coupled("disp_r")),
+  _disp_z_i(coupled("disp_z"))
+{
+  if (_subspace_indices.size() != 1) {
+    std::stringstream err;
+    err << "Expected 1 RZ rigid body mode, got " << _subspace_indices.size()  << " instead\n";
+    mooseError(err.str());
+  }
+  for (unsigned int i = 0; i < _subspace_indices.size(); ++i)
+  {
+    if (_subspace_indices[i] >= _fe_problem.subspaceDim(_subspace_name))
+    {
+      std::stringstream err;
+      err << "Invalid " << i << "-th " << _subspace_name << " index " << _subspace_indices[i] << "; must be < " << _fe_problem.subspaceDim(_subspace_name) << "\n";
+      mooseError(err.str());
+    }
   }
 }

@@ -18,8 +18,8 @@ InputParameters validParams<KKSXeVacSolidMaterial>();
 class KKSXeVacSolidMaterial : public DerivativeFunctionMaterialBase
 {
 public:
-  KKSXeVacSolidMaterial(const std::string & name,
-                        InputParameters parameters);
+  KKSXeVacSolidMaterial(const InputParameters & parameters);
+  KKSXeVacSolidMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual unsigned int expectedNumArgs();

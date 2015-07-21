@@ -26,9 +26,8 @@ InputParameters validParams<RateDepSmearCrackModel>()
 
 }
 
-RateDepSmearCrackModel::RateDepSmearCrackModel(const std::string & name,
-                                               InputParameters parameters) :
-  ConstitutiveModel( name, parameters),
+RateDepSmearCrackModel::RateDepSmearCrackModel(const InputParameters & parameters) :
+  ConstitutiveModel(parameters),
   _ref_damage_rate(getParam<Real>("ref_damage_rate")),
   _nstate(getParam<unsigned int>("nstate")),
   _exponent(getParam<Real>("exponent")),
@@ -258,4 +257,35 @@ RateDepSmearCrackModel::matrixInversion(std::vector<Real> & A, int n) const
 
 RateDepSmearCrackModel::~RateDepSmearCrackModel()
 {
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RateDepSmearCrackModel::RateDepSmearCrackModel(const std::string & deprecated_name, InputParameters parameters) :
+  ConstitutiveModel(deprecated_name, parameters),
+  _ref_damage_rate(getParam<Real>("ref_damage_rate")),
+  _nstate(getParam<unsigned int>("nstate")),
+  _exponent(getParam<Real>("exponent")),
+  _maxiter(getParam<unsigned int>("maxiter")),
+  _tol(getParam<Real>("tol")),
+  _zero_tol(getParam<Real>("zero_tol")),
+  _intvar_incr_tol(getParam<Real>("intvar_incr_tol")),
+  _input_rndm_scale_var(getParam<bool>("input_random_scaling_var")),
+  _rndm_scale_var(getParam<Real>("random_scaling_var")),
+  _intvar(declareProperty<std::vector<Real> >("intvar")),
+  _intvar_old(declarePropertyOld<std::vector<Real> >("intvar")),
+  _stress_undamaged(declareProperty<SymmTensor>("stress_undamaged")),
+  _stress_undamaged_old(declarePropertyOld<SymmTensor>("stress_undamaged"))
+{
+
+
+  _intvar_incr.resize( _nstate, 0.0 );
+  _intvar_tmp.resize( _nstate, 0.0 );
+  _intvar_old_tmp.resize( _nstate, 0.0 );
+  _resid.resize( _nstate, 0.0 );
+  _jac.resize ( _nstate * _nstate, 0.0 );
+  _dvar.resize( _nstate, 0.0 );
+
+  SymmTensor::initRandom();
+
 }

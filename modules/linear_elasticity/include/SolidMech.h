@@ -24,7 +24,8 @@ class SolidMech : public Kernel
 {
 public:
 
-  SolidMech(const std::string & name, InputParameters parameters);
+  SolidMech(const InputParameters & parameters);
+  SolidMech(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void subdomainSetup();
 

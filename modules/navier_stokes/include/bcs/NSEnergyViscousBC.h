@@ -33,7 +33,8 @@ class NSEnergyViscousBC : public NSIntegratedBC
 {
 
 public:
-  NSEnergyViscousBC(const std::string & name, InputParameters parameters);
+  NSEnergyViscousBC(const InputParameters & parameters);
+  NSEnergyViscousBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSEnergyViscousBC(){}
 

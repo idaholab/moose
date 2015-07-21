@@ -16,9 +16,8 @@ InputParameters validParams<TotalFreeEnergy>()
   return params;
 }
 
-TotalFreeEnergy::TotalFreeEnergy(const std::string & name,
-                                 InputParameters parameters) :
-    TotalFreeEnergyBase(name, parameters),
+TotalFreeEnergy::TotalFreeEnergy(const InputParameters & parameters) :
+    TotalFreeEnergyBase(parameters),
     _F(getMaterialProperty<Real>("f_name")),
     _kappas(_nkappas)
 {
@@ -46,4 +45,20 @@ TotalFreeEnergy::computeValue()
   }
 
   return total_energy;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TotalFreeEnergy::TotalFreeEnergy(const std::string & deprecated_name, InputParameters parameters) :
+    TotalFreeEnergyBase(deprecated_name, parameters),
+    _F(getMaterialProperty<Real>("f_name")),
+    _kappas(_nkappas)
+{
+  //Error check to ensure size of interfacial_vars is the same as kappa_names
+  if (_nvars != _nkappas)
+    mooseError("Size of interfacial_vars is not equal to the size of kappa_names in TotalFreeEnergy");
+
+  // Assign kappa values
+  for (unsigned int i = 0; i < _nkappas; ++i)
+    _kappas[i] = &getMaterialPropertyByName<Real>(_kappa_names[i]);
 }

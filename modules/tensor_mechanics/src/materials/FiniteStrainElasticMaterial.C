@@ -21,9 +21,8 @@ InputParameters validParams<FiniteStrainElasticMaterial>()
   return params;
 }
 
-FiniteStrainElasticMaterial::FiniteStrainElasticMaterial(const std::string & name,
-                                             InputParameters parameters) :
-    FiniteStrainMaterial(name, parameters)
+FiniteStrainElasticMaterial::FiniteStrainElasticMaterial(const InputParameters & parameters) :
+    FiniteStrainMaterial(parameters)
 {
 }
 
@@ -44,4 +43,11 @@ void FiniteStrainElasticMaterial::computeQpStress()
   //Rotate the stress to the current configuration
   _stress[_qp] = _rotation_increment[_qp] * _stress[_qp] * _rotation_increment[_qp].transpose();
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FiniteStrainElasticMaterial::FiniteStrainElasticMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    FiniteStrainMaterial(deprecated_name, parameters)
+{
 }

@@ -28,8 +28,8 @@ InputParameters validParams<INSMomentumNoBCBC>()
 
 
 
-INSMomentumNoBCBC::INSMomentumNoBCBC(const std::string & name, InputParameters parameters) :
-  IntegratedBC(name, parameters),
+INSMomentumNoBCBC::INSMomentumNoBCBC(const InputParameters & parameters) :
+  IntegratedBC(parameters),
 
   // Coupled variables
   _u_vel(coupledValue("u")),
@@ -114,4 +114,34 @@ Real INSMomentumNoBCBC::computeQpOffDiagJacobian(unsigned jvar)
 
   else
     return 0.;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+INSMomentumNoBCBC::INSMomentumNoBCBC(const std::string & deprecated_name, InputParameters parameters) :
+  IntegratedBC(deprecated_name, parameters),
+
+  // Coupled variables
+  _u_vel(coupledValue("u")),
+  _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+  _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+  _p(coupledValue("p")),
+
+  // Gradients
+  _grad_u_vel(coupledGradient("u")),
+  _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
+  _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero),
+
+  // Variable numberings
+  _u_vel_var_number(coupled("u")),
+  _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
+  _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
+  _p_var_number(coupled("p")),
+
+  // Required parameters
+  _mu(getParam<Real>("mu")),
+  _rho(getParam<Real>("rho")),
+  _gravity(getParam<RealVectorValue>("gravity")),
+  _component(getParam<unsigned>("component"))
+{
 }

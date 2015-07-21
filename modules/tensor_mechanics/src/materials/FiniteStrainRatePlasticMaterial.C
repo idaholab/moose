@@ -26,9 +26,8 @@ InputParameters validParams<FiniteStrainRatePlasticMaterial>()
   return params;
 }
 
-FiniteStrainRatePlasticMaterial::FiniteStrainRatePlasticMaterial(const std::string & name,
-                                                                 InputParameters parameters) :
-    FiniteStrainPlasticMaterial(name, parameters),
+FiniteStrainRatePlasticMaterial::FiniteStrainRatePlasticMaterial(const InputParameters & parameters) :
+    FiniteStrainPlasticMaterial(parameters),
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent"))
 {
@@ -240,4 +239,13 @@ FiniteStrainRatePlasticMaterial::macaulayBracket(Real val)
     return val;
   else
     return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FiniteStrainRatePlasticMaterial::FiniteStrainRatePlasticMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    FiniteStrainPlasticMaterial(deprecated_name, parameters),
+    _ref_pe_rate(getParam<Real>("ref_pe_rate")),
+    _exponent(getParam<Real>("exponent"))
+{
 }

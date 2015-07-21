@@ -20,8 +20,8 @@ InputParameters validParams<HomogenizationKernel>()
 }
 
 
-HomogenizationKernel::HomogenizationKernel(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+HomogenizationKernel::HomogenizationKernel(const InputParameters & parameters)
+  :Kernel(parameters),
 
    _elasticity_tensor(getMaterialProperty<SymmElasticityTensor>("elasticity_tensor" + getParam<std::string>("appended_property_name"))),
    _component(getParam<unsigned int>("component")),
@@ -90,3 +90,13 @@ HomogenizationKernel::computeQpResidual()
 
   return value;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+HomogenizationKernel::HomogenizationKernel(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+
+   _elasticity_tensor(getMaterialProperty<SymmElasticityTensor>("elasticity_tensor" + getParam<std::string>("appended_property_name"))),
+   _component(getParam<unsigned int>("component")),
+   _column(getParam<unsigned int>("column"))
+{}

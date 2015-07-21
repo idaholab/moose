@@ -37,7 +37,8 @@ class KKSPhaseChemicalPotential : public DerivativeMaterialInterface<
                                          > >
 {
 public:
-  KKSPhaseChemicalPotential(const std::string & name, InputParameters parameters);
+  KKSPhaseChemicalPotential(const InputParameters & parameters);
+  KKSPhaseChemicalPotential(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

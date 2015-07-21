@@ -14,7 +14,8 @@
 class NodalAreaAction: public MooseObjectAction
 {
 public:
-  NodalAreaAction(const std::string & name, InputParameters params);
+  NodalAreaAction(const InputParameters & params);
+  NodalAreaAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

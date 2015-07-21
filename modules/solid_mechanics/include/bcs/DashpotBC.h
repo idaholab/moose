@@ -29,7 +29,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  DashpotBC(const std::string & name, InputParameters parameters);
+  DashpotBC(const InputParameters & parameters);
+  DashpotBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

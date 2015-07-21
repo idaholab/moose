@@ -21,7 +21,8 @@ InputParameters validParams<MaterialTensorAux>();
 class MaterialTensorAux : public AuxKernel
 {
 public:
-  MaterialTensorAux( const std::string & name, InputParameters parameters );
+  MaterialTensorAux( const InputParameters & parameters);
+  MaterialTensorAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaterialTensorAux() {}
 

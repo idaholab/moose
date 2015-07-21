@@ -20,8 +20,8 @@ InputParameters validParams<KKSCHBulk>()
   return params;
 }
 
-KKSCHBulk::KKSCHBulk(const std::string & name, InputParameters parameters) :
-    CHBulk(name, parameters),
+KKSCHBulk::KKSCHBulk(const InputParameters & parameters) :
+    CHBulk(parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _ca_var(coupled("ca")),
@@ -114,4 +114,45 @@ KKSCHBulk::computeQpOffDiagJacobian(unsigned int jvar)
 
   // keeping this term seems to improve the solution.
   return res * _grad_test[_j][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+KKSCHBulk::KKSCHBulk(const std::string & deprecated_name, InputParameters parameters) :
+    CHBulk(deprecated_name, parameters),
+    // number of coupled variables (ca, args_a[])
+    _nvar(_coupled_moose_vars.size()),
+    _ca_var(coupled("ca")),
+    _ca_name(getVar("ca", 0)->name()),
+    _cb_var(coupled("cb")),
+    _cb_name(getVar("cb", 0)->name()),
+    _prop_h(getMaterialProperty<Real>("h_name")),
+    _second_derivative_Fa(getMaterialPropertyDerivative<Real>("fa_name", _ca_name, _ca_name)),
+    _second_derivative_Fb(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _cb_name))
+{
+  // reserve space for derivatives
+  _second_derivatives.resize(_nvar);
+  _third_derivatives.resize(_nvar);
+  _third_derivatives_ca.resize(_nvar);
+  _grad_args.resize(_nvar);
+
+  // Iterate over all coupled variables
+  for (unsigned int i = 0; i < _nvar; ++i)
+  {
+    MooseVariable *cvar = this->_coupled_moose_vars[i];
+
+    // get the second derivative material property (TODO:warn)
+    _second_derivatives[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name());
+
+    // get the third derivative material properties
+    _third_derivatives[i].resize(_nvar);
+    for (unsigned int j = 0; j < _nvar; ++j)
+      _third_derivatives[i][j] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name(), _coupled_moose_vars[j]->name());
+
+    // third derivative for the on-diagonal jacobian
+    _third_derivatives_ca[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name(), _ca_name);
+
+    // get the gradient
+    _grad_args[i] = &(cvar->gradSln());
+  }
 }

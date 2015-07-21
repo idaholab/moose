@@ -19,8 +19,8 @@ InputParameters validParams<NSEnergyViscousFlux>()
 
 
 
-NSEnergyViscousFlux::NSEnergyViscousFlux(const std::string & name, InputParameters parameters)
-    : NSKernel(name, parameters),
+NSEnergyViscousFlux::NSEnergyViscousFlux(const InputParameters & parameters)
+    : NSKernel(parameters),
       _vst_derivs(*this)
 {
 }
@@ -122,4 +122,12 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
   mooseError("Shouldn't get here...");
   return 0.;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSEnergyViscousFlux::NSEnergyViscousFlux(const std::string & deprecated_name, InputParameters parameters)
+    : NSKernel(deprecated_name, parameters),
+      _vst_derivs(*this)
+{
 }

@@ -26,8 +26,8 @@ InputParameters validParams<INSTemperature>()
 
 
 
-INSTemperature::INSTemperature(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+INSTemperature::INSTemperature(const InputParameters & parameters) :
+  Kernel(parameters),
 
   // Coupled variables
   _u_vel(coupledValue("u")),
@@ -100,4 +100,26 @@ Real INSTemperature::computeQpOffDiagJacobian(unsigned jvar)
   }
   else
     return 0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+INSTemperature::INSTemperature(const std::string & deprecated_name, InputParameters parameters) :
+  Kernel(deprecated_name, parameters),
+
+  // Coupled variables
+  _u_vel(coupledValue("u")),
+  _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+  _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+
+  // Variable numberings
+  _u_vel_var_number(coupled("u")),
+  _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
+  _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
+
+  // Required parameters
+  _rho(getParam<Real>("rho")),
+  _k(getParam<Real>("k")),
+  _cp(getParam<Real>("cp"))
+{
 }

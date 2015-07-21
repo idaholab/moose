@@ -14,9 +14,8 @@ InputParameters validParams<Compute2DSmallStrain>()
   return params;
 }
 
-Compute2DSmallStrain::Compute2DSmallStrain(const std::string & name,
-                                                 InputParameters parameters) :
-    ComputeSmallStrain(name, parameters)
+Compute2DSmallStrain::Compute2DSmallStrain(const InputParameters & parameters) :
+    ComputeSmallStrain(parameters)
 {
 }
 
@@ -37,4 +36,11 @@ Compute2DSmallStrain::computeProperties()
     //Remove the Eigen strain
     _total_strain[_qp] -= _stress_free_strain[_qp];
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Compute2DSmallStrain::Compute2DSmallStrain(const std::string & deprecated_name, InputParameters parameters) :
+    ComputeSmallStrain(deprecated_name, parameters)
+{
 }

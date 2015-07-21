@@ -31,8 +31,8 @@ InputParameters validParams<ThermalContactAuxVarsAction>()
   return params;
 }
 
-ThermalContactAuxVarsAction::ThermalContactAuxVarsAction(const std::string & name, InputParameters params) :
-   Action(name, params)
+ThermalContactAuxVarsAction::ThermalContactAuxVarsAction(const InputParameters & params) :
+   Action(params)
 {
 }
 
@@ -74,4 +74,11 @@ ThermalContactAuxVarsAction::act()
     FEType(Utility::string_to_enum<Order>(order),
            Utility::string_to_enum<FEFamily>(family)));
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ThermalContactAuxVarsAction::ThermalContactAuxVarsAction(const std::string & deprecated_name, InputParameters params) :
+   Action(deprecated_name, params)
+{
 }

@@ -24,9 +24,8 @@ InputParameters validParams<TensorMechanicsPlasticTensile>()
   return params;
 }
 
-TensorMechanicsPlasticTensile::TensorMechanicsPlasticTensile(const std::string & name,
-                                                         InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters),
+TensorMechanicsPlasticTensile::TensorMechanicsPlasticTensile(const InputParameters & parameters) :
+    TensorMechanicsPlasticModel(parameters),
     _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
     _tip_scheme(getParam<MooseEnum>("tip_scheme")),
     _small_smoother2(std::pow(getParam<Real>("tensile_tip_smoother"), 2)),
@@ -257,4 +256,25 @@ std::string
 TensorMechanicsPlasticTensile::modelName() const
 {
   return "Tensile";
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsPlasticTensile::TensorMechanicsPlasticTensile(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsPlasticModel(deprecated_name, parameters),
+    _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
+    _tip_scheme(getParam<MooseEnum>("tip_scheme")),
+    _small_smoother2(std::pow(getParam<Real>("tensile_tip_smoother"), 2)),
+    _cap_start(getParam<Real>("cap_start")),
+    _cap_rate(getParam<Real>("cap_rate")),
+    _tt(getParam<Real>("tensile_edge_smoother")*M_PI/180.0),
+    _sin3tt(std::sin(3*_tt)),
+    _lode_cutoff(parameters.isParamValid("tensile_lode_cutoff") ? getParam<Real>("tensile_lode_cutoff") : 1.0E-5*std::pow(_f_tol, 2))
+
+{
+  if (_lode_cutoff < 0)
+    mooseError("tensile_lode_cutoff must not be negative");
+  _ccc = (-std::cos(3*_tt)*(std::cos(_tt) - std::sin(_tt)/std::sqrt(3.0)) - 3*std::sin(3*_tt)*(std::sin(_tt) + std::cos(_tt)/std::sqrt(3.0)))/(18*std::pow(std::cos(3*_tt), 3));
+  _bbb = (std::sin(6*_tt)*(std::cos(_tt) - std::sin(_tt)/std::sqrt(3.0)) - 6*std::cos(6*_tt)*(std::sin(_tt) + std::cos(_tt)/std::sqrt(3.0)))/(18*std::pow(std::cos(3*_tt), 3));
+  _aaa = -std::sin(_tt)/std::sqrt(3.0) - _bbb*std::sin(3*_tt) - _ccc*std::pow(std::sin(3*_tt), 2) + std::cos(_tt);
 }

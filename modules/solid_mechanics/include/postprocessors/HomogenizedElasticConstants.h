@@ -24,7 +24,8 @@ InputParameters validParams<HomogenizedElasticConstants>();
 class HomogenizedElasticConstants : public ElementAverageValue
 {
 public:
-  HomogenizedElasticConstants(const std::string & name, InputParameters parameters);
+  HomogenizedElasticConstants(const InputParameters & parameters);
+  HomogenizedElasticConstants(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

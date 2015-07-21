@@ -20,7 +20,8 @@ InputParameters validParams<MomentBalancing>();
 class MomentBalancing : public Kernel
 {
 public:
-  MomentBalancing(const std::string & name, InputParameters parameters);
+  MomentBalancing(const InputParameters & parameters);
+  MomentBalancing(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -13,7 +13,8 @@
 class CavityPressurePPAction: public Action
 {
 public:
-  CavityPressurePPAction(const std::string & name, InputParameters params);
+  CavityPressurePPAction(const InputParameters & params);
+  CavityPressurePPAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

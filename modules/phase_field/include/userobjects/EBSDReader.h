@@ -22,7 +22,8 @@ InputParameters validParams<EBSDReader>();
 class EBSDReader : public GeneralUserObject, public EBSDAccessFunctors
 {
 public:
-  EBSDReader(const std::string & name, InputParameters params);
+  EBSDReader(const InputParameters & params);
+  EBSDReader(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~EBSDReader();
 
   virtual void initialSetup();

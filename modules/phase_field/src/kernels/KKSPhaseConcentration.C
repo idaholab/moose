@@ -19,8 +19,8 @@ InputParameters validParams<KKSPhaseConcentration>()
 }
 
 // Phase interpolation func
-KKSPhaseConcentration::KKSPhaseConcentration(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<Kernel>(name, parameters),
+KKSPhaseConcentration::KKSPhaseConcentration(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Kernel>(parameters),
     _ca(coupledValue("ca")),
     _ca_var(coupled("ca")),
     _c(coupledValue("c")),
@@ -62,4 +62,19 @@ KKSPhaseConcentration::computeQpOffDiagJacobian(unsigned int jvar)
     return _test[_i][_qp] * (_u[_qp] - _ca[_qp]) * _prop_dh[_qp] * _phi[_j][_qp];
 
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+KKSPhaseConcentration::KKSPhaseConcentration(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<Kernel>(deprecated_name, parameters),
+    _ca(coupledValue("ca")),
+    _ca_var(coupled("ca")),
+    _c(coupledValue("c")),
+    _c_var(coupled("c")),
+    _eta(coupledValue("eta")),
+    _eta_var(coupled("eta")),
+    _prop_h(getMaterialProperty<Real>("h_name")),
+    _prop_dh(getMaterialPropertyDerivative<Real>("h_name", getVar("eta", 0)->name()))
+{
 }

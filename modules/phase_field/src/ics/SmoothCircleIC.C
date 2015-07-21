@@ -18,9 +18,8 @@ InputParameters validParams<SmoothCircleIC>()
   return params;
 }
 
-SmoothCircleIC::SmoothCircleIC(const std::string & name,
-                               InputParameters parameters) :
-    SmoothCircleBaseIC(name, parameters),
+SmoothCircleIC::SmoothCircleIC(const InputParameters & parameters) :
+    SmoothCircleBaseIC(parameters),
     _x1(parameters.get<Real>("x1")),
     _y1(parameters.get<Real>("y1")),
     _z1(parameters.get<Real>("z1")),
@@ -42,4 +41,16 @@ SmoothCircleIC::computeCircleCenters()
 {
   _centers.resize(1);
   _centers[0] = _center;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SmoothCircleIC::SmoothCircleIC(const std::string & deprecated_name, InputParameters parameters) :
+    SmoothCircleBaseIC(deprecated_name, parameters),
+    _x1(parameters.get<Real>("x1")),
+    _y1(parameters.get<Real>("y1")),
+    _z1(parameters.get<Real>("z1")),
+    _radius(parameters.get<Real>("radius")),
+    _center(_x1, _y1, _z1)
+{
 }

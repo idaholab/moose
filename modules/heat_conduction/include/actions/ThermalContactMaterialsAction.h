@@ -12,7 +12,8 @@
 class ThermalContactMaterialsAction : public Action
 {
 public:
-  ThermalContactMaterialsAction( const std::string & name, InputParameters params );
+  ThermalContactMaterialsAction( const InputParameters & params);
+  ThermalContactMaterialsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ThermalContactMaterialsAction(){}
   virtual void act();
 };

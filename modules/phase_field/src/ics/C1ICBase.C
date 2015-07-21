@@ -39,9 +39,8 @@ InputParameters validParams<C1ICBase>()
   return params;
 }
 
-C1ICBase::C1ICBase(const std::string & name,
-                   InputParameters parameters) :
-    InitialCondition(name, parameters),
+C1ICBase::C1ICBase(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _average(parameters.get<Real>("average")),
     _amplitude(parameters.get<Real>("amplitude")),
     _length(parameters.get<Real>("length")),
@@ -72,3 +71,15 @@ C1ICBase::interfaceDerivative(Real r)
 
   return ((12.0*x*x - 12.0*x) * _amplitude);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+C1ICBase::C1ICBase(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _average(parameters.get<Real>("average")),
+    _amplitude(parameters.get<Real>("amplitude")),
+    _length(parameters.get<Real>("length")),
+    _width(parameters.get<Real>("width")),
+    _buffer(parameters.get<Real>("buffer")),
+    _interface(parameters.get<Real>("interface"))
+{}

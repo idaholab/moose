@@ -22,8 +22,8 @@ InputParameters validParams<RankFourAux>()
   return params;
 }
 
-RankFourAux::RankFourAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+RankFourAux::RankFourAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _tensor(getMaterialProperty<ElasticityTensorR4>("rank_four_tensor")),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j")),
@@ -36,4 +36,16 @@ Real
 RankFourAux::computeValue()
 {
   return _tensor[_qp](_i, _j, _k, _l);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RankFourAux::RankFourAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _tensor(getMaterialProperty<ElasticityTensorR4>("rank_four_tensor")),
+    _i(getParam<unsigned int>("index_i")),
+    _j(getParam<unsigned int>("index_j")),
+    _k(getParam<unsigned int>("index_k")),
+    _l(getParam<unsigned int>("index_l"))
+{
 }

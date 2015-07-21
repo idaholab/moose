@@ -37,8 +37,8 @@ InputParameters validParams<HomogenizedElasticConstants>()
   return params;
 }
 
-HomogenizedElasticConstants::HomogenizedElasticConstants(const std::string & name, InputParameters parameters)
-  :ElementAverageValue(name, parameters),
+HomogenizedElasticConstants::HomogenizedElasticConstants(const InputParameters & parameters)
+  :ElementAverageValue(parameters),
    _grad_disp_x_xx(coupledGradient("dx_xx")),
    _grad_disp_y_xx(coupledGradient("dy_xx")),
    _grad_disp_z_xx(_subproblem.mesh().dimension() == 3 ? coupledGradient("dz_xx") : _grad_zero),
@@ -234,5 +234,126 @@ HomogenizedElasticConstants::computeQpIntegral()
     }
 
     return (E(_I,_J) + value);
+
+}
+
+
+// DEPRECATED CONSTRUCTOR
+HomogenizedElasticConstants::HomogenizedElasticConstants(const std::string & deprecated_name, InputParameters parameters)
+  :ElementAverageValue(deprecated_name, parameters),
+   _grad_disp_x_xx(coupledGradient("dx_xx")),
+   _grad_disp_y_xx(coupledGradient("dy_xx")),
+   _grad_disp_z_xx(_subproblem.mesh().dimension() == 3 ? coupledGradient("dz_xx") : _grad_zero),
+   _grad_disp_x_yy(coupledGradient("dx_yy")),
+   _grad_disp_y_yy(coupledGradient("dy_yy")),
+   _grad_disp_z_yy(_subproblem.mesh().dimension() == 3 ? coupledGradient("dz_yy") : _grad_zero),
+   _grad_disp_x_zz(_subproblem.mesh().dimension() == 3 ? coupledGradient("dx_zz") : _grad_zero),
+   _grad_disp_y_zz(_subproblem.mesh().dimension() == 3 ? coupledGradient("dy_zz") : _grad_zero),
+   _grad_disp_z_zz(_subproblem.mesh().dimension() == 3 ? coupledGradient("dz_zz") : _grad_zero),
+   _grad_disp_x_xy(coupledGradient("dx_xy")),
+   _grad_disp_y_xy(coupledGradient("dy_xy")),
+   _grad_disp_z_xy(_subproblem.mesh().dimension() == 3 ? coupledGradient("dz_xy") : _grad_zero),
+   _grad_disp_x_yz(_subproblem.mesh().dimension() == 3 ? coupledGradient("dx_yz") : _grad_zero),
+   _grad_disp_y_yz(_subproblem.mesh().dimension() == 3 ? coupledGradient("dy_yz") : _grad_zero),
+   _grad_disp_z_yz(_subproblem.mesh().dimension() == 3 ? coupledGradient("dz_yz") : _grad_zero),
+   _grad_disp_x_zx(_subproblem.mesh().dimension() == 3 ? coupledGradient("dx_zx") : _grad_zero),
+   _grad_disp_y_zx(_subproblem.mesh().dimension() == 3 ? coupledGradient("dy_zx") : _grad_zero),
+   _grad_disp_z_zx(_subproblem.mesh().dimension() == 3 ? coupledGradient("dz_zx") : _grad_zero),
+   _elasticity_tensor(getMaterialProperty<SymmElasticityTensor>("elasticity_tensor" + getParam<std::string>("appended_property_name"))),
+   _column(getParam<unsigned int>("column")),
+   _row(getParam<unsigned int>("row")),
+   _volume(0),
+   _integral_value(0)
+{
+
+
+  if (_column == 0)
+  {
+    _k = 0;
+    _l = 0;
+  }
+
+
+  if (_column == 1)
+  {
+    _k = 1;
+    _l = 1;
+  }
+
+
+  if (_column == 2)
+  {
+    _k = 2;
+    _l = 2;
+  }
+
+
+  if (_column == 3)
+  {
+    _k = 0;
+    _l = 1;
+  }
+
+
+  if (_column == 4)
+  {
+    _k = 1;
+    _l = 2;
+  }
+
+  if (_column == 5)
+  {
+    _k = 2;
+    _l = 0;
+  }
+
+
+
+
+
+  if (_row == 0)
+  {
+    _i = 0;
+    _j = 0;
+  }
+
+
+  if (_row == 1)
+  {
+    _i = 1;
+    _j = 1;
+  }
+
+
+  if (_row == 2)
+  {
+    _i = 2;
+    _j = 2;
+  }
+
+
+  if (_row == 3)
+  {
+    _i = 0;
+    _j = 1;
+  }
+
+
+  if (_row == 4)
+  {
+    _i = 1;
+    _j = 2;
+  }
+
+  if (_row == 5)
+  {
+    _i = 2;
+    _j = 0;
+  }
+
+
+
+  _J = (3 * _l + _k);
+  _I = (3 * _j + _i);
 
 }

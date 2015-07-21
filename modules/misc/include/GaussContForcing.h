@@ -22,7 +22,8 @@ class GaussContForcing : public Kernel
 {
 public:
 
-  GaussContForcing(const std::string & name, InputParameters parameters);
+  GaussContForcing(const InputParameters & parameters);
+  GaussContForcing(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -16,8 +16,8 @@
 class Density : public Material
 {
 public:
-  Density( const std::string & name,
-           InputParameters params );
+  Density( const InputParameters & params);
+  Density(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initStatefulProperties(unsigned n_points);
 

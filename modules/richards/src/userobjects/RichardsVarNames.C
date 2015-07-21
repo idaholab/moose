@@ -22,8 +22,8 @@ InputParameters validParams<RichardsVarNames>()
   return params;
 }
 
-RichardsVarNames::RichardsVarNames(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters),
+RichardsVarNames::RichardsVarNames(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     Coupleable(parameters, false),
     ZeroInterface(parameters),
     _num_v(coupledComponents("richards_vars")),
@@ -151,3 +151,43 @@ RichardsVarNames::nodal_var_old(unsigned int richards_var_num) const
   return _moose_nodal_var_value_old[richards_var_num];
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsVarNames::RichardsVarNames(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralUserObject(deprecated_name, parameters),
+    Coupleable(parameters, false),
+    ZeroInterface(parameters),
+    _num_v(coupledComponents("richards_vars")),
+    _the_names(std::string()),
+    _var_types(getParam<MooseEnum>("var_types"))
+{
+  unsigned int max_moose_var_num_seen = 0;
+
+  _moose_var_num.resize(_num_v);
+  _moose_var_value.resize(_num_v);
+  _moose_var_value_old.resize(_num_v);
+  _moose_nodal_var_value.resize(_num_v);
+  _moose_nodal_var_value_old.resize(_num_v);
+  _moose_grad_var.resize(_num_v);
+  _moose_raw_var.resize(_num_v);
+  for (unsigned int i = 0; i < _num_v; ++i)
+  {
+    _moose_var_num[i] = coupled("richards_vars", i);
+    max_moose_var_num_seen = (max_moose_var_num_seen > _moose_var_num[i] ? max_moose_var_num_seen : _moose_var_num[i]);
+    _moose_var_value[i] = &coupledValue("richards_vars", i); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
+    _moose_var_value_old[i] = (_is_transient ? &coupledValueOld("richards_vars", i) : &_zero);
+    _moose_nodal_var_value[i] = &coupledNodalValue("richards_vars", i); // coupledNodalValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
+    _moose_nodal_var_value_old[i] = (_is_transient ? &coupledNodalValueOld("richards_vars", i) : &_zero);
+    _moose_grad_var[i] = &coupledGradient("richards_vars", i);
+    _moose_raw_var[i] = getVar("richards_vars", i);
+    _the_names += getVar("richards_vars", i)->name() + " ";
+  }
+  _the_names.erase(_the_names.end() - 1, _the_names.end()); // remove trailing space
+
+  _ps_var_num.resize(max_moose_var_num_seen + 1);
+  for (unsigned int i = 0 ; i < max_moose_var_num_seen + 1 ; ++i)
+    _ps_var_num[i] = _num_v; // NOTE: indicates that i is not a richards variable
+  for (unsigned int i=0 ; i<_num_v; ++i)
+    _ps_var_num[_moose_var_num[i]] = i;
+}

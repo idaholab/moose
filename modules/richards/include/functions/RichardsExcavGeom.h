@@ -44,8 +44,8 @@ class RichardsExcavGeom : public Function
 {
 public:
 
-  RichardsExcavGeom(const std::string & name,
-                        InputParameters parameters);
+  RichardsExcavGeom(const InputParameters & parameters);
+  RichardsExcavGeom(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(Real t, const Point & p);
 

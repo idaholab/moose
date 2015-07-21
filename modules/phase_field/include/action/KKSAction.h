@@ -21,7 +21,8 @@ InputParameters validParams<KKSAction>();
 class KKSAction: public Action
 {
 public:
-  KKSAction(const std::string & name, InputParameters params);
+  KKSAction(const InputParameters & params);
+  KKSAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void act();
 
 private:

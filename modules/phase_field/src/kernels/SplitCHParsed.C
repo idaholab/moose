@@ -16,8 +16,8 @@ InputParameters validParams<SplitCHParsed>()
   return params;
 }
 
-SplitCHParsed::SplitCHParsed(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<SplitCHCRes> >(name, parameters),
+SplitCHParsed::SplitCHParsed(const InputParameters & parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<SplitCHCRes> >(parameters),
     _nvar(_coupled_moose_vars.size()),
     _dFdc(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
     _d2Fdc2(getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name()))
@@ -57,4 +57,20 @@ SplitCHParsed::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 
   return (*_d2Fdcdarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SplitCHParsed::SplitCHParsed(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<SplitCHCRes> >(deprecated_name, parameters),
+    _nvar(_coupled_moose_vars.size()),
+    _dFdc(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
+    _d2Fdc2(getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name()))
+{
+  // reserve space for derivatives
+  _d2Fdcdarg.resize(_nvar);
+
+  // Iterate over all coupled variables
+  for (unsigned int i = 0; i < _nvar; ++i)
+    _d2Fdcdarg[i] = &getMaterialPropertyDerivative<Real>("f_name", _var.name(), _coupled_moose_vars[i]->name());
 }

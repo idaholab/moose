@@ -23,7 +23,8 @@ InputParameters validParams<NSMomentumInviscidSpecifiedPressureBC>();
 class NSMomentumInviscidSpecifiedPressureBC : public NSMomentumInviscidBC
 {
 public:
-  NSMomentumInviscidSpecifiedPressureBC(const std::string & name, InputParameters parameters);
+  NSMomentumInviscidSpecifiedPressureBC(const InputParameters & parameters);
+  NSMomentumInviscidSpecifiedPressureBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMomentumInviscidSpecifiedPressureBC(){}
 

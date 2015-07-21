@@ -20,8 +20,8 @@ InputParameters validParams<CosseratStressDivergenceTensors>()
   return params;
 }
 
-CosseratStressDivergenceTensors::CosseratStressDivergenceTensors(const std::string & name, InputParameters parameters) :
-    StressDivergenceTensors(name, parameters),
+CosseratStressDivergenceTensors::CosseratStressDivergenceTensors(const InputParameters & parameters) :
+    StressDivergenceTensors(parameters),
     _wc_x_var(coupled("wc_x")),
     _wc_y_var(coupled("wc_y")),
     _wc_z_var(coupled("wc_z"))
@@ -45,4 +45,14 @@ CosseratStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
     return _Jacobian_mult[_qp].elasticJacobianwc(_component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]);
 
   return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CosseratStressDivergenceTensors::CosseratStressDivergenceTensors(const std::string & deprecated_name, InputParameters parameters) :
+    StressDivergenceTensors(deprecated_name, parameters),
+    _wc_x_var(coupled("wc_x")),
+    _wc_y_var(coupled("wc_y")),
+    _wc_z_var(coupled("wc_z"))
+{
 }

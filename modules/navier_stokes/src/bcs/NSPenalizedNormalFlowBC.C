@@ -22,8 +22,8 @@ InputParameters validParams<NSPenalizedNormalFlowBC>()
 
 
 
-NSPenalizedNormalFlowBC::NSPenalizedNormalFlowBC(const std::string & name, InputParameters parameters)
-    : NSIntegratedBC(name, parameters),
+NSPenalizedNormalFlowBC::NSPenalizedNormalFlowBC(const InputParameters & parameters)
+    : NSIntegratedBC(parameters),
 
       // Required parameters
       _penalty(getParam<Real>("penalty")),
@@ -60,4 +60,15 @@ Real NSPenalizedNormalFlowBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // TODO
   return 0.;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSPenalizedNormalFlowBC::NSPenalizedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSIntegratedBC(deprecated_name, parameters),
+
+      // Required parameters
+      _penalty(getParam<Real>("penalty")),
+      _specified_udotn(getParam<Real>("specified_udotn"))
+{
 }

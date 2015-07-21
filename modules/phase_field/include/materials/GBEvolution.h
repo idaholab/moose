@@ -18,8 +18,8 @@ InputParameters validParams<GBEvolution>();
 class GBEvolution : public Material
 {
 public:
-  GBEvolution(const std::string & name,
-              InputParameters parameters);
+  GBEvolution(const InputParameters & parameters);
+  GBEvolution(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

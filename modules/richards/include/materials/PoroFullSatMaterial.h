@@ -28,7 +28,8 @@ InputParameters validParams<PoroFullSatMaterial>();
 class PoroFullSatMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
-  PoroFullSatMaterial(const std::string & name, InputParameters parameters);
+  PoroFullSatMaterial(const InputParameters & parameters);
+  PoroFullSatMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

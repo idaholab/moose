@@ -20,8 +20,8 @@ InputParameters validParams<KKSAction>()
   return params;
 }
 
-KKSAction::KKSAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+KKSAction::KKSAction(const InputParameters & params) :
+    Action(params)
     // _z2(getParam<Real>("z2"))
 {
 }
@@ -42,4 +42,12 @@ KKSAction::act()
     // Add initial condition
     _problem->addInitialCondition("BoundingBoxIC", "InitialCondition", poly_params);
   */
+}
+
+
+// DEPRECATED CONSTRUCTOR
+KKSAction::KKSAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+    // _z2(getParam<Real>("z2"))
+{
 }

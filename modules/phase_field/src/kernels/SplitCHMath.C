@@ -14,8 +14,8 @@ InputParameters validParams<SplitCHMath>()
   return params;
 }
 
-SplitCHMath::SplitCHMath(const std::string & name, InputParameters parameters) :
-    SplitCHCRes(name, parameters)
+SplitCHMath::SplitCHMath(const InputParameters & parameters) :
+    SplitCHCRes(parameters)
 {
 }
 
@@ -32,4 +32,11 @@ SplitCHMath::computeDFDC(PFFunctionType type)
   }
 
   mooseError("Invalid type passed in");
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SplitCHMath::SplitCHMath(const std::string & deprecated_name, InputParameters parameters) :
+    SplitCHCRes(deprecated_name, parameters)
+{
 }

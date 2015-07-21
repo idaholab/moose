@@ -20,8 +20,8 @@ InputParameters validParams<NSGravityPower>()
   return params;
 }
 
-NSGravityPower::NSGravityPower(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+NSGravityPower::NSGravityPower(const InputParameters & parameters)
+  :Kernel(parameters),
     _momentum_var(coupled("momentum")),
     _momentum(coupledValue("momentum")),
     _acceleration(getParam<Real>("acceleration"))
@@ -55,3 +55,12 @@ NSGravityPower::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NSGravityPower::NSGravityPower(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+    _momentum_var(coupled("momentum")),
+    _momentum(coupledValue("momentum")),
+    _acceleration(getParam<Real>("acceleration"))
+  {}

@@ -16,8 +16,8 @@ InputParameters validParams<SolidMech>()
   return params;
 }
 
-SolidMech::SolidMech(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+SolidMech::SolidMech(const InputParameters & parameters)
+  :Kernel(parameters),
    _E_prop(getMaterialProperty<Real>("youngs_modulus")),
    _nu_prop(getMaterialProperty<Real>("poissons_ratio")),
    _constant_properties(getParam<bool>("constant_properties"))
@@ -83,3 +83,12 @@ SolidMech::recomputeConstants()
                            0., _c3, 0.,
                            0., 0., 1.);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SolidMech::SolidMech(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+   _E_prop(getMaterialProperty<Real>("youngs_modulus")),
+   _nu_prop(getMaterialProperty<Real>("poissons_ratio")),
+   _constant_properties(getParam<bool>("constant_properties"))
+{}

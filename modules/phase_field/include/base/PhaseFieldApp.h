@@ -17,7 +17,8 @@ InputParameters validParams<PhaseFieldApp>();
 class PhaseFieldApp : public MooseApp
 {
 public:
-  PhaseFieldApp(const std::string & name, InputParameters parameters);
+  PhaseFieldApp(const InputParameters & parameters);
+  PhaseFieldApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~PhaseFieldApp();
 
   static void registerApps();

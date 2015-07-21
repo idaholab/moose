@@ -23,7 +23,8 @@ InputParameters validParams<CHParsed>();
 class CHParsed : public CHBulk
 {
 public:
-  CHParsed(const std::string & name, InputParameters parameters);
+  CHParsed(const InputParameters & parameters);
+  CHParsed(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);

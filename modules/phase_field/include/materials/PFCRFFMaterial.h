@@ -12,8 +12,8 @@ InputParameters validParams<PFCRFFMaterial>();
 class PFCRFFMaterial : public Material
 {
 public:
-  PFCRFFMaterial(const std::string & name,
-          InputParameters parameters);
+  PFCRFFMaterial(const InputParameters & parameters);
+  PFCRFFMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

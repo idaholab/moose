@@ -23,10 +23,10 @@ InputParameters validParams<CoupledConvectionReactionSub>()
   return params;
 }
 
-CoupledConvectionReactionSub::CoupledConvectionReactionSub(const std::string & name, InputParameters parameters)
+CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters & parameters)
 
     // You must call the constructor of the base class first
-  :Kernel(name,parameters),
+  :Kernel(parameters),
 
     // coupledGradient will give us a reference to the gradient of another
     // variable in the computation.  We are going to use the gradient of p
@@ -207,4 +207,35 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else
     return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CoupledConvectionReactionSub::CoupledConvectionReactionSub(const std::string & name, InputParameters parameters)
+
+    // You must call the constructor of the base class first
+  :Kernel(name,parameters),
+
+    // coupledGradient will give us a reference to the gradient of another
+    // variable in the computation.  We are going to use the gradient of p
+    // to calculate our velocity vector.
+   _weight(getParam<Real>("weight")),
+   _log_k (getParam<Real>("log_k")),
+   _sto_u(getParam<Real>("sto_u")),
+   _sto_v(getParam<std::vector<Real> >("sto_v")),
+   _cond(getMaterialProperty<Real>("conductivity")),
+   _grad_p(coupledGradient("p"))
+{
+  int n = coupledComponents("v");
+  _vars.resize(n);
+  _vals.resize(n);
+  _grad_vals.resize(n);
+
+  for (unsigned int i=0; i<_vals.size(); ++i)
+  {
+    _vars[i] = coupled("v", i);
+    _vals[i] = &coupledValue("v", i);
+    _grad_vals[i] = &coupledGradient("v", i);
+  }
+
 }

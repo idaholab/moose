@@ -26,7 +26,8 @@ InputParameters validParams<NSIntegratedBC>();
 class NSIntegratedBC : public IntegratedBC
 {
 public:
-  NSIntegratedBC(const std::string & name, InputParameters parameters);
+  NSIntegratedBC(const InputParameters & parameters);
+  NSIntegratedBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSIntegratedBC(){}
 

@@ -23,6 +23,11 @@ InputParameters validParams<ConservedNormalNoise>()
 class ConservedNormalNoise : public ConservedNormalNoiseVeneer<ConservedNoiseBase>
 {
 public:
+
+  ConservedNormalNoise(const InputParameters & parameters) :
+      ConservedNormalNoiseVeneer<ConservedNoiseBase>(parameters) {}
+
+  // DEPRECATED CONSTRUCTOR
   ConservedNormalNoise(const std::string & name, InputParameters parameters) :
     ConservedNormalNoiseVeneer<ConservedNoiseBase>(name, parameters) {}
 };

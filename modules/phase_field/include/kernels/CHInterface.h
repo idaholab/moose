@@ -25,7 +25,8 @@ InputParameters validParams<CHInterface>();
 class CHInterface : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
 {
 public:
-  CHInterface(const std::string & name, InputParameters parameters);
+  CHInterface(const InputParameters & parameters);
+  CHInterface(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

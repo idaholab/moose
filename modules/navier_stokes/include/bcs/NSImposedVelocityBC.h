@@ -22,7 +22,8 @@ class NSImposedVelocityBC : public NodalBC
 {
 public:
   // Constructor
-  NSImposedVelocityBC(const std::string & name, InputParameters parameters);
+  NSImposedVelocityBC(const InputParameters & parameters);
+  NSImposedVelocityBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   // Destructor, better be virtual
   virtual ~NSImposedVelocityBC(){}

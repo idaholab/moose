@@ -35,7 +35,8 @@ class PFCElementEnergyIntegral :
   public MooseVariableInterface
 {
 public:
-  PFCElementEnergyIntegral(const std::string & name, InputParameters parameters);
+  PFCElementEnergyIntegral(const InputParameters & parameters);
+  PFCElementEnergyIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

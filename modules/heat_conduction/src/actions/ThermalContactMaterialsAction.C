@@ -38,8 +38,8 @@ InputParameters validParams<ThermalContactMaterialsAction>()
   return params;
 }
 
-ThermalContactMaterialsAction::ThermalContactMaterialsAction( const std::string & name, InputParameters params ) :
-  Action(name, params)
+ThermalContactMaterialsAction::ThermalContactMaterialsAction( const InputParameters & params) :
+  Action(params)
 {
 }
 
@@ -111,4 +111,11 @@ ThermalContactMaterialsAction::act()
   }
 
   ++n;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ThermalContactMaterialsAction::ThermalContactMaterialsAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
 }

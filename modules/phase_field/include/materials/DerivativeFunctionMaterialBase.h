@@ -42,7 +42,8 @@ InputParameters validParams<DerivativeFunctionMaterialBase>();
 class DerivativeFunctionMaterialBase : public FunctionMaterialBase
 {
 public:
-  DerivativeFunctionMaterialBase(const std::string & name, InputParameters parameters);
+  DerivativeFunctionMaterialBase(const InputParameters & parameters);
+  DerivativeFunctionMaterialBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

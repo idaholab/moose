@@ -15,8 +15,8 @@ InputParameters validParams<PFParamsPolyFreeEnergy>();
 class PFParamsPolyFreeEnergy : public Material
 {
 public:
-  PFParamsPolyFreeEnergy(const std::string & name,
-                         InputParameters parameters);
+  PFParamsPolyFreeEnergy(const InputParameters & parameters);
+  PFParamsPolyFreeEnergy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

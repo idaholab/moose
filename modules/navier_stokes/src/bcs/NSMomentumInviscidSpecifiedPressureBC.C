@@ -20,8 +20,8 @@ InputParameters validParams<NSMomentumInviscidSpecifiedPressureBC>()
 
 
 
-NSMomentumInviscidSpecifiedPressureBC::NSMomentumInviscidSpecifiedPressureBC(const std::string & name, InputParameters parameters)
-    : NSMomentumInviscidBC(name, parameters),
+NSMomentumInviscidSpecifiedPressureBC::NSMomentumInviscidSpecifiedPressureBC(const InputParameters & parameters)
+    : NSMomentumInviscidBC(parameters),
 
       // Parameters to be specified in input file block...
       _specified_pressure(getParam<Real>("specified_pressure"))
@@ -62,4 +62,14 @@ Real NSMomentumInviscidSpecifiedPressureBC::computeQpJacobian()
 Real NSMomentumInviscidSpecifiedPressureBC::computeQpOffDiagJacobian(unsigned jvar)
 {
   return this->convective_qp_jacobian( this->map_var_number(jvar) );
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSMomentumInviscidSpecifiedPressureBC::NSMomentumInviscidSpecifiedPressureBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSMomentumInviscidBC(deprecated_name, parameters),
+
+      // Parameters to be specified in input file block...
+      _specified_pressure(getParam<Real>("specified_pressure"))
+{
 }

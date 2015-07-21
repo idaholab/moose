@@ -18,9 +18,8 @@ InputParameters validParams<SmoothCircleBaseIC>()
   return params;
 }
 
-SmoothCircleBaseIC::SmoothCircleBaseIC(const std::string & name,
-                               InputParameters parameters) :
-    InitialCondition(name, parameters),
+SmoothCircleBaseIC::SmoothCircleBaseIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
     _invalue(parameters.get<Real>("invalue")),
     _outvalue(parameters.get<Real>("outvalue")),
@@ -139,4 +138,18 @@ SmoothCircleBaseIC::computeCircleGradient(const Point & p, const Point & center,
     return _mesh.minPeriodicVector(_var.number(), center, p) * (DvalueDr / dist);
   else
     return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SmoothCircleBaseIC::SmoothCircleBaseIC(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _mesh(_fe_problem.mesh()),
+    _invalue(parameters.get<Real>("invalue")),
+    _outvalue(parameters.get<Real>("outvalue")),
+    _int_width(parameters.get<Real>("int_width")),
+    _3D_spheres(parameters.get<bool>("3D_spheres")),
+    _zero_gradient(parameters.get<bool>("zero_gradient")),
+    _num_dim(_3D_spheres ? 3 : 2)
+{
 }

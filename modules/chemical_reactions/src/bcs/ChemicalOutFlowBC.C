@@ -14,8 +14,8 @@ InputParameters validParams<ChemicalOutFlowBC>()
   return params;
 }
 
-ChemicalOutFlowBC::ChemicalOutFlowBC(const std::string & name, InputParameters parameters)
-  :IntegratedBC(name, parameters),
+ChemicalOutFlowBC::ChemicalOutFlowBC(const InputParameters & parameters)
+  :IntegratedBC(parameters),
    _diff(getMaterialProperty<Real>("diffusivity")),
    _porosity(getMaterialProperty<Real>("porosity"))
 {
@@ -47,4 +47,13 @@ ChemicalOutFlowBC::computeQpJacobian()
 
   return var;
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ChemicalOutFlowBC::ChemicalOutFlowBC(const std::string & deprecated_name, InputParameters parameters)
+  :IntegratedBC(deprecated_name, parameters),
+   _diff(getMaterialProperty<Real>("diffusivity")),
+   _porosity(getMaterialProperty<Real>("porosity"))
+{
 }

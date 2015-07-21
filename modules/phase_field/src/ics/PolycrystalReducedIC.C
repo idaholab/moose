@@ -22,9 +22,8 @@ InputParameters validParams<PolycrystalReducedIC>()
   return params;
 }
 
-PolycrystalReducedIC::PolycrystalReducedIC(const std::string & name,
-                                           InputParameters parameters) :
-    InitialCondition(name, parameters),
+PolycrystalReducedIC::PolycrystalReducedIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
     _op_num(getParam<unsigned int>("op_num")),
@@ -132,4 +131,19 @@ PolycrystalReducedIC::value(const Point & p)
     val = 0.0;
 
   return val;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PolycrystalReducedIC::PolycrystalReducedIC(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _mesh(_fe_problem.mesh()),
+    _nl(_fe_problem.getNonlinearSystem()),
+    _op_num(getParam<unsigned int>("op_num")),
+    _grain_num(getParam<unsigned int>("grain_num")),
+    _op_index(getParam<unsigned int>("op_index")),
+    _rand_seed(getParam<unsigned int>("rand_seed")),
+    _cody_test(getParam<bool>("cody_test")),
+    _columnar_3D(getParam<bool>("columnar_3D"))
+{
 }

@@ -37,7 +37,8 @@ InputParameters validParams<RichardsDensityVDW>();
 class RichardsDensityVDW : public RichardsDensity
 {
 public:
-  RichardsDensityVDW(const std::string & name, InputParameters parameters);
+  RichardsDensityVDW(const InputParameters & parameters);
+  RichardsDensityVDW(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * fluid density as a function of porepressure

@@ -18,8 +18,8 @@ class ReturnMappingModel;
 class CombinedCreepPlasticity : public ConstitutiveModel
 {
 public:
-  CombinedCreepPlasticity( const std::string & name,
-                           InputParameters parameters );
+  CombinedCreepPlasticity( const InputParameters & parameters);
+  CombinedCreepPlasticity(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CombinedCreepPlasticity() {}
 
 

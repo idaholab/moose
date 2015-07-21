@@ -16,7 +16,8 @@ InputParameters validParams<CHPFCRFFSplitVariablesAction>();
 class CHPFCRFFSplitVariablesAction: public Action
 {
 public:
-  CHPFCRFFSplitVariablesAction(const std::string & name, InputParameters params);
+  CHPFCRFFSplitVariablesAction(const InputParameters & params);
+  CHPFCRFFSplitVariablesAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

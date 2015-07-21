@@ -16,8 +16,8 @@ InputParameters validParams<SwitchingFunctionConstraintEta>()
   return params;
 }
 
-SwitchingFunctionConstraintEta::SwitchingFunctionConstraintEta(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<Kernel>(name, parameters),
+SwitchingFunctionConstraintEta::SwitchingFunctionConstraintEta(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Kernel>(parameters),
     _eta_name(_var.name()),
     _dh(getMaterialPropertyDerivative<Real>("h_name", _eta_name)),
     _d2h(getMaterialPropertyDerivative<Real>("h_name", _eta_name, _eta_name)),
@@ -45,4 +45,16 @@ SwitchingFunctionConstraintEta::computeQpOffDiagJacobian(unsigned int j_var)
     return _phi[_j][_qp] * _dh[_qp] * _test[_i][_qp];
   else
     return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SwitchingFunctionConstraintEta::SwitchingFunctionConstraintEta(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<Kernel>(deprecated_name, parameters),
+    _eta_name(_var.name()),
+    _dh(getMaterialPropertyDerivative<Real>("h_name", _eta_name)),
+    _d2h(getMaterialPropertyDerivative<Real>("h_name", _eta_name, _eta_name)),
+    _lambda(coupledValue("lambda")),
+    _lambda_var(coupled("lambda"))
+{
 }

@@ -162,8 +162,8 @@ InputParameters validParams<PhaseFieldApp>()
   return params;
 }
 
-PhaseFieldApp::PhaseFieldApp(const std::string & name, InputParameters parameters) :
-    MooseApp(name, parameters)
+PhaseFieldApp::PhaseFieldApp(const InputParameters & parameters) :
+    MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -183,7 +183,14 @@ extern "C" void PhaseFieldApp__registerApps() { PhaseFieldApp::registerApps(); }
 void
 PhaseFieldApp::registerApps()
 {
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().reg<name>(#name)
+
   registerApp(PhaseFieldApp);
+
+
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -191,6 +198,12 @@ extern "C" void PhaseFieldApp__registerObjects(Factory & factory) { PhaseFieldAp
 void
 PhaseFieldApp::registerObjects(Factory & factory)
 {
+#undef registerObject
+#define registerObject(name) factory.reg<name>(stringifyName(name))
+#undef registerDeprecatedObjectName
+#define registerDeprecatedObjectName(obj, name, time) factory.regReplaced<obj>(stringifyName(obj), name, time)
+
+
   registerKernel(ACGBPoly);
   registerKernel(ACGrGrElasticDrivingForce);
   registerKernel(ACGrGrPoly);
@@ -290,6 +303,12 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerMesh(EBSDMesh);
   registerMesh(ImageMesh);
+
+#undef registerDeprecatedObjectName
+#define registerDeprecatedObjectName(obj, name, time) factory.regLegacyReplaced<obj>(stringifyName(obj), name, time)
+#undef registerObject
+#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
+
 }
 
 // External entry point for dynamic syntax association
@@ -297,6 +316,9 @@ extern "C" void PhaseFieldApp__associateSyntax(Syntax & syntax, ActionFactory & 
 void
 PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+#undef registerAction
+#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+
   syntax.registerActionSyntax("BicrystalBoundingBoxICAction", "ICs/PolycrystalICs/BicrystalBoundingBoxIC");
   syntax.registerActionSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
   syntax.registerActionSyntax("CHPFCRFFSplitKernelAction", "Kernels/CHPFCRFFSplitKernel");
@@ -331,4 +353,21 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PolycrystalVoronoiICAction, "add_ic");
   registerAction(ReconVarICAction, "add_ic");
   registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
+
+#undef registerAction
+#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PhaseFieldApp::PhaseFieldApp(const std::string & deprecated_name, InputParameters parameters) :
+    MooseApp(deprecated_name, parameters)
+{
+  srand(processor_id());
+
+  Moose::registerObjects(_factory);
+  PhaseFieldApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  PhaseFieldApp::associateSyntax(_syntax, _action_factory);
 }

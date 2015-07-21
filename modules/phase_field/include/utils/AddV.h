@@ -9,6 +9,6 @@
 
 #include "InputParameters.h"
 
-InputParameters & AddV(InputParameters & parameters, const std::string & var_name = "v");
+InputParameters & AddV(const InputParameters & params, const std::string & var_name = "v");
 
 #endif //ADDV_H

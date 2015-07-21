@@ -21,8 +21,8 @@ InputParameters validParams<RichardsPolyLineSink>()
   return params;
 }
 
-RichardsPolyLineSink::RichardsPolyLineSink(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
+RichardsPolyLineSink::RichardsPolyLineSink(const InputParameters & parameters) :
+    DiracKernel(parameters),
     _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
     _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("fluxes")),
     _point_file(getParam<std::string>("point_file")),
@@ -122,4 +122,42 @@ RichardsPolyLineSink::computeQpOffDiagJacobian(unsigned int jvar)
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
   Real test_fcn = _test[_i][_qp];
   return test_fcn*_sink_func.sampleDerivative(_pp[_qp][_pvar])*_dpp_dv[_qp][_pvar][dvar]*_phi[_j][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsPolyLineSink::RichardsPolyLineSink(const std::string & deprecated_name, InputParameters parameters) :
+    DiracKernel(deprecated_name, parameters),
+    _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
+    _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("fluxes")),
+    _point_file(getParam<std::string>("point_file")),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
+    _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv"))
+{
+  // open file
+  std::ifstream file(_point_file.c_str());
+  if (!file.good())
+    mooseError("Error opening file '" + _point_file + "' from RichardsPolyLineSink.");
+
+  std::vector<Real> scratch;
+  while (parseNextLineReals(file, scratch))
+  {
+    if (scratch.size() >= 1)
+    {
+      _xs.push_back(scratch[0]);
+      if (scratch.size() >= 2)
+        _ys.push_back(scratch[1]);
+      else
+        _ys.push_back(0.0);
+
+      if (scratch.size() >= 3)
+        _zs.push_back(scratch[2]);
+      else
+        _zs.push_back(0.0);
+    }
+  }
+
+  file.close();
 }

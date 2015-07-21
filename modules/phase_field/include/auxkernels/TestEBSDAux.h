@@ -23,7 +23,8 @@ InputParameters validParams<TestEBSDAux>();
 class TestEBSDAux : public AuxKernel, EBSDAccessFunctors
 {
 public:
-  TestEBSDAux(const std::string & name, InputParameters parameters);
+  TestEBSDAux(const InputParameters & parameters);
+  TestEBSDAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

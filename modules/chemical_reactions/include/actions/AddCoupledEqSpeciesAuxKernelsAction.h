@@ -18,7 +18,8 @@ InputParameters validParams<AddCoupledEqSpeciesAuxKernelsAction>();
 class AddCoupledEqSpeciesAuxKernelsAction : public Action
 {
 public:
-  AddCoupledEqSpeciesAuxKernelsAction(const std::string & name, InputParameters params);
+  AddCoupledEqSpeciesAuxKernelsAction(const InputParameters & params);
+  AddCoupledEqSpeciesAuxKernelsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

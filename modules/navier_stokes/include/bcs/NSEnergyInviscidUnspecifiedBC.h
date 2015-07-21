@@ -23,7 +23,8 @@ class NSEnergyInviscidUnspecifiedBC : public NSEnergyInviscidBC
 {
 
 public:
-  NSEnergyInviscidUnspecifiedBC(const std::string & name, InputParameters parameters);
+  NSEnergyInviscidUnspecifiedBC(const InputParameters & parameters);
+  NSEnergyInviscidUnspecifiedBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSEnergyInviscidUnspecifiedBC(){}
 

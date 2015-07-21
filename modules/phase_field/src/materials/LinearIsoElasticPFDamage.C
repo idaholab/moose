@@ -17,9 +17,8 @@ InputParameters validParams<LinearIsoElasticPFDamage>()
   return params;
 }
 
-LinearIsoElasticPFDamage::LinearIsoElasticPFDamage(const std::string & name,
-                                             InputParameters parameters) :
-  LinearElasticMaterial(name, parameters),
+LinearIsoElasticPFDamage::LinearIsoElasticPFDamage(const InputParameters & parameters) :
+  LinearElasticMaterial(parameters),
   _c(coupledValue("c")),
   _kdamage(getParam<Real>("kdamage")),
   _dstress_dc(declareProperty<RankTwoTensor>("dstress_dc")),
@@ -120,4 +119,19 @@ LinearIsoElasticPFDamage::updateVar()
   _dG0_pos_dstrain[_qp] = stress0pos;
   //Used in StressDivergencePFFracTensors Jacobian
   _dstress_dc[_qp] = -stress0pos * (2 * (1.0-c));
+}
+
+
+// DEPRECATED CONSTRUCTOR
+LinearIsoElasticPFDamage::LinearIsoElasticPFDamage(const std::string & deprecated_name, InputParameters parameters) :
+  LinearElasticMaterial(deprecated_name, parameters),
+  _c(coupledValue("c")),
+  _kdamage(getParam<Real>("kdamage")),
+  _dstress_dc(declareProperty<RankTwoTensor>("dstress_dc")),
+  _G0_pos(declareProperty<Real>("G0_pos")),
+  _dG0_pos_dstrain(declareProperty<RankTwoTensor>("dG0_pos_dstrain"))
+{
+  _etens.resize(LIBMESH_DIM);
+  _epos.resize(LIBMESH_DIM);
+  _scaling = 1.0;
 }

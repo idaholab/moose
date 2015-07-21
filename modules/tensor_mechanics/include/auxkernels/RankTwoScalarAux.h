@@ -23,7 +23,8 @@ InputParameters validParams<RankTwoScalarAux>();
 class RankTwoScalarAux : public AuxKernel
 {
 public:
-  RankTwoScalarAux(const std::string & name, InputParameters parameters);
+  RankTwoScalarAux(const InputParameters & parameters);
+  RankTwoScalarAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~RankTwoScalarAux() {}
 
 protected:

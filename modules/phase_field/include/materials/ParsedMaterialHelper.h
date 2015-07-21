@@ -32,9 +32,11 @@ public:
     USE_MOOSE_NAMES, USE_PARAM_NAMES
   };
 
+  ParsedMaterialHelper(const InputParameters & parameters,
+                       VariableNameMappingMode map_mode);
   ParsedMaterialHelper(const std::string & name,
                        InputParameters parameters,
-                       VariableNameMappingMode map_mode);
+                       VariableNameMappingMode map_mode); // DEPRECATED
 
   virtual ~ParsedMaterialHelper();
 

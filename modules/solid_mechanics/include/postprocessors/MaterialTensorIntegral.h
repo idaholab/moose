@@ -25,7 +25,8 @@ InputParameters validParams<MaterialTensorIntegral>();
 class MaterialTensorIntegral: public ElementIntegralPostprocessor
 {
 public:
-  MaterialTensorIntegral(const std::string & name, InputParameters parameters);
+  MaterialTensorIntegral(const InputParameters & parameters);
+  MaterialTensorIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

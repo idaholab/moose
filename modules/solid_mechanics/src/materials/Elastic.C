@@ -13,9 +13,8 @@ InputParameters validParams<Elastic>()
   return params;
 }
 
-Elastic::Elastic( const std::string & name,
-                  InputParameters parameters )
-  :SolidModel( name, parameters )
+Elastic::Elastic( const InputParameters & parameters)
+  :SolidModel(parameters)
 {
 
   createConstitutiveModel("ElasticModel", parameters);
@@ -29,3 +28,13 @@ Elastic::~Elastic()
 }
 
 ////////////////////////////////////////////////////////////////////////
+
+
+// DEPRECATED CONSTRUCTOR
+Elastic::Elastic(const std::string & deprecated_name, InputParameters parameters)
+  :SolidModel(deprecated_name, parameters)
+{
+
+  createConstitutiveModel("ElasticModel", parameters);
+
+}

@@ -17,7 +17,8 @@ InputParameters validParams<TensorMechanicsAxisymmetricRZAction>();
 class TensorMechanicsAxisymmetricRZAction : public Action
 {
 public:
-  TensorMechanicsAxisymmetricRZAction(const std::string & name, InputParameters params);
+  TensorMechanicsAxisymmetricRZAction(const InputParameters & params);
+  TensorMechanicsAxisymmetricRZAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

@@ -34,8 +34,8 @@ InputParameters validParams<MiscApp>()
   return params;
 }
 
-MiscApp::MiscApp(const std::string & name, InputParameters parameters) :
-    MooseApp(name, parameters)
+MiscApp::MiscApp(const InputParameters & parameters) :
+    MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -55,7 +55,14 @@ extern "C" void MiscApp__registerApps() { MiscApp::registerApps(); }
 void
 MiscApp::registerApps()
 {
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().reg<name>(#name)
+
   registerApp(MiscApp);
+
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
+
 }
 
 // External entry point for dynamic object registration
@@ -63,6 +70,9 @@ extern "C" void MiscApp__registerObjects(Factory & factory) { MiscApp::registerO
 void
 MiscApp::registerObjects(Factory & factory)
 {
+#undef registerObject
+#define registerObject(name) factory.reg<name>(stringifyName(name))
+
   registerAux(CoupledDirectionalMeshHeightInterpolation);
 
   registerBoundaryCondition(RobinBC);
@@ -84,6 +94,9 @@ MiscApp::registerObjects(Factory & factory)
   registerPostprocessor(SharpInterfaceForcing);
 
   registerPostprocessor(CInterfacePosition);
+
+#undef registerObject
+#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
 
 // External entry point for dynamic syntax association
@@ -91,4 +104,18 @@ extern "C" void MiscApp__associateSyntax(Syntax & syntax, ActionFactory & action
 void
 MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MiscApp::MiscApp(const std::string & deprecated_name, InputParameters parameters) :
+    MooseApp(deprecated_name, parameters)
+{
+  srand(processor_id());
+
+  Moose::registerObjects(_factory);
+  MiscApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  MiscApp::associateSyntax(_syntax, _action_factory);
 }

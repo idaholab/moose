@@ -16,8 +16,8 @@ InputParameters validParams<KKSACBulkF>()
   return params;
 }
 
-KKSACBulkF::KKSACBulkF(const std::string & name, InputParameters parameters) :
-    KKSACBulkBase(name, parameters),
+KKSACBulkF::KKSACBulkF(const InputParameters & parameters) :
+    KKSACBulkBase(parameters),
     _w(getParam<Real>("w")),
     _prop_dg(getMaterialPropertyDerivative<Real>("g_name", _eta_name)),
     _prop_d2g(getMaterialPropertyDerivative<Real>("g_name", _eta_name, _eta_name))
@@ -61,4 +61,14 @@ KKSACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
                               - (*_derivatives_Fb[cvar])[_qp])
                            * _phi[_j][_qp];
   return res * _test[_j][_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+KKSACBulkF::KKSACBulkF(const std::string & deprecated_name, InputParameters parameters) :
+    KKSACBulkBase(deprecated_name, parameters),
+    _w(getParam<Real>("w")),
+    _prop_dg(getMaterialPropertyDerivative<Real>("g_name", _eta_name)),
+    _prop_d2g(getMaterialPropertyDerivative<Real>("g_name", _eta_name, _eta_name))
+{
 }

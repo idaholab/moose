@@ -17,9 +17,8 @@ InputParameters validParams<SwitchingFunctionMaterial>()
   return params;
 }
 
-SwitchingFunctionMaterial::SwitchingFunctionMaterial(const std::string & name,
-                                                     InputParameters parameters) :
-    OrderParameterFunctionMaterial(name, parameters),
+SwitchingFunctionMaterial::SwitchingFunctionMaterial(const InputParameters & parameters) :
+    OrderParameterFunctionMaterial(parameters),
     _h_order(getParam<MooseEnum>("h_order"))
 {
 }
@@ -47,4 +46,12 @@ SwitchingFunctionMaterial::computeQpProperties()
     default:
       mooseError("Internal error");
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SwitchingFunctionMaterial::SwitchingFunctionMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    OrderParameterFunctionMaterial(deprecated_name, parameters),
+    _h_order(getParam<MooseEnum>("h_order"))
+{
 }

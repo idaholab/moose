@@ -15,8 +15,8 @@ InputParameters validParams<GravityTM>()
   return params;
 }
 
-GravityTM::GravityTM(const std::string & name, InputParameters parameters) :
-  BodyForce(name, parameters),
+GravityTM::GravityTM(const InputParameters & parameters) :
+  BodyForce(parameters),
   _density(getMaterialProperty<Real>("density"))
 {
 }
@@ -25,4 +25,12 @@ Real
 GravityTM::computeQpResidual()
 {
   return _density[_qp]*BodyForce::computeQpResidual();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+GravityTM::GravityTM(const std::string & deprecated_name, InputParameters parameters) :
+  BodyForce(deprecated_name, parameters),
+  _density(getMaterialProperty<Real>("density"))
+{
 }

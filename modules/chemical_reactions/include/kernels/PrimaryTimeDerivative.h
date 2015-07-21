@@ -30,7 +30,8 @@ class PrimaryTimeDerivative : public TimeDerivative
 {
 public:
 
-  PrimaryTimeDerivative(const std::string & name, InputParameters parameters);
+  PrimaryTimeDerivative(const InputParameters & parameters);
+  PrimaryTimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

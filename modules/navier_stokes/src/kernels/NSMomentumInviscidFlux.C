@@ -25,8 +25,8 @@ InputParameters validParams<NSMomentumInviscidFlux>()
 
 
 
-NSMomentumInviscidFlux::NSMomentumInviscidFlux(const std::string & name, InputParameters parameters)
-    : NSKernel(name, parameters),
+NSMomentumInviscidFlux::NSMomentumInviscidFlux(const InputParameters & parameters)
+    : NSKernel(parameters),
 
       // Coupled variables
       _pressure(coupledValue("pressure")),
@@ -121,3 +121,15 @@ Real NSMomentumInviscidFlux::compute_jacobian(unsigned m)
   return 0;
 
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NSMomentumInviscidFlux::NSMomentumInviscidFlux(const std::string & deprecated_name, InputParameters parameters)
+    : NSKernel(deprecated_name, parameters),
+
+      // Coupled variables
+      _pressure(coupledValue("pressure")),
+
+      // Required parameters
+      _component(getParam<unsigned>("component"))
+{}

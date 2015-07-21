@@ -16,7 +16,8 @@
 class PolycrystalVoronoiICAction: public Action
 {
 public:
-  PolycrystalVoronoiICAction(const std::string & name, InputParameters params);
+  PolycrystalVoronoiICAction(const InputParameters & params);
+  PolycrystalVoronoiICAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

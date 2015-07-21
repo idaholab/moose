@@ -26,8 +26,8 @@ InputParameters validParams<NSStagnationPressureBC>()
 
 
 // Constructor, be sure to call the base class constructor first!
-NSStagnationPressureBC::NSStagnationPressureBC(const std::string & name, InputParameters parameters)
-    : NSStagnationBC(name, parameters),
+NSStagnationPressureBC::NSStagnationPressureBC(const InputParameters & parameters)
+    : NSStagnationBC(parameters),
 
       // Coupled variables
       _pressure(coupledValue("pressure")),
@@ -55,3 +55,15 @@ Real NSStagnationPressureBC::computeQpResidual()
   return computed_stagnation_pressure - _desired_stagnation_pressure;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSStagnationPressureBC::NSStagnationPressureBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSStagnationBC(deprecated_name, parameters),
+
+      // Coupled variables
+      _pressure(coupledValue("pressure")),
+
+      // Required parameters
+      _desired_stagnation_pressure(getParam<Real>("desired_stagnation_pressure"))
+{}

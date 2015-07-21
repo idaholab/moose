@@ -18,7 +18,8 @@ InputParameters validParams<SolidMechanicsAction>();
 class SolidMechanicsAction : public Action
 {
 public:
-  SolidMechanicsAction(const std::string & name, InputParameters params);
+  SolidMechanicsAction(const InputParameters & params);
+  SolidMechanicsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

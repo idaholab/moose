@@ -18,8 +18,8 @@ InputParameters validParams<WaterSteamEOSApp>()
   return params;
 }
 
-WaterSteamEOSApp::WaterSteamEOSApp(const std::string & name, InputParameters parameters) :
-    MooseApp(name, parameters)
+WaterSteamEOSApp::WaterSteamEOSApp(const InputParameters & parameters) :
+    MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -39,7 +39,12 @@ extern "C" void WaterSteamEOSApp__registerApps() { WaterSteamEOSApp::registerApp
 void
 WaterSteamEOSApp::registerApps()
 {
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().reg<name>(#name)
   registerApp(WaterSteamEOSApp);
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
+
 }
 
 // External entry point for dynamic object registration
@@ -54,4 +59,18 @@ extern "C" void WaterSteamEOSApp__associateSyntax(Syntax & syntax, ActionFactory
 void
 WaterSteamEOSApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+}
+
+
+// DEPRECATED CONSTRUCTOR
+WaterSteamEOSApp::WaterSteamEOSApp(const std::string & deprecated_name, InputParameters parameters) :
+    MooseApp(deprecated_name, parameters)
+{
+  srand(processor_id());
+
+  Moose::registerObjects(_factory);
+  WaterSteamEOSApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  WaterSteamEOSApp::associateSyntax(_syntax, _action_factory);
 }

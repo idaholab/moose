@@ -28,7 +28,8 @@ InputParameters validParams<INSSplitMomentum>();
 class INSSplitMomentum : public Kernel
 {
 public:
-  INSSplitMomentum(const std::string & name, InputParameters parameters);
+  INSSplitMomentum(const InputParameters & parameters);
+  INSSplitMomentum(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSSplitMomentum(){}
 

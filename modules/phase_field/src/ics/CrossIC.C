@@ -38,9 +38,8 @@ InputParameters validParams<CrossIC>()
   return params;
 }
 
-CrossIC::CrossIC(const std::string & name,
-                 InputParameters parameters) :
-    C1ICBase(name, parameters),
+CrossIC::CrossIC(const InputParameters & parameters) :
+    C1ICBase(parameters),
     _x1(parameters.get<Real>("x1")),
     _y1(parameters.get<Real>("y1")),
     _x2(parameters.get<Real>("x2")),
@@ -310,3 +309,13 @@ RealGradient CrossIC::gradient(const Point & p)
   return Gradient((uxplus - uxminus) / 2.0 / TOLERANCE,
                   (uyplus - uyminus) / 2.0 / TOLERANCE);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+CrossIC::CrossIC(const std::string & deprecated_name, InputParameters parameters) :
+    C1ICBase(deprecated_name, parameters),
+    _x1(parameters.get<Real>("x1")),
+    _y1(parameters.get<Real>("y1")),
+    _x2(parameters.get<Real>("x2")),
+    _y2(parameters.get<Real>("y2"))
+{}

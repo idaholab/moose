@@ -36,8 +36,8 @@ InputParameters validParams<ThermalContactBCsAction>()
   return params;
 }
 
-ThermalContactBCsAction::ThermalContactBCsAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+ThermalContactBCsAction::ThermalContactBCsAction(const InputParameters & params) :
+  Action(params)
 {
 }
 
@@ -118,4 +118,11 @@ ThermalContactBCsAction::act()
 
 
   ++n;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ThermalContactBCsAction::ThermalContactBCsAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
 }

@@ -25,7 +25,8 @@ InputParameters validParams<FiniteStrainMohrCoulomb>();
 class FiniteStrainMohrCoulomb : public FiniteStrainPlasticBase
 {
 public:
-  FiniteStrainMohrCoulomb(const std::string & name, InputParameters parameters);
+  FiniteStrainMohrCoulomb(const InputParameters & parameters);
+  FiniteStrainMohrCoulomb(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void initQpStatefulProperties();

@@ -16,8 +16,8 @@ InputParameters validParams<MaskedBodyForce>()
   return params;
 }
 
-MaskedBodyForce::MaskedBodyForce(const std::string & name, InputParameters parameters) :
-    BodyForce(name, parameters),
+MaskedBodyForce::MaskedBodyForce(const InputParameters & parameters) :
+    BodyForce(parameters),
     _mask(getMaterialProperty<Real>("mask"))
 {
 }
@@ -26,4 +26,12 @@ Real
 MaskedBodyForce::computeQpResidual()
 {
   return BodyForce::computeQpResidual()*_mask[_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+MaskedBodyForce::MaskedBodyForce(const std::string & deprecated_name, InputParameters parameters) :
+    BodyForce(deprecated_name, parameters),
+    _mask(getMaterialProperty<Real>("mask"))
+{
 }

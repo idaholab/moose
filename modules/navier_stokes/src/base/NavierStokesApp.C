@@ -88,8 +88,8 @@ InputParameters validParams<NavierStokesApp>()
   return params;
 }
 
-NavierStokesApp::NavierStokesApp(const std::string & name, InputParameters parameters) :
-    MooseApp(name, parameters)
+NavierStokesApp::NavierStokesApp(const InputParameters & parameters) :
+    MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -109,7 +109,11 @@ extern "C" void NavierStokesApp__registerApps() { NavierStokesApp::registerApps(
 void
 NavierStokesApp::registerApps()
 {
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().reg<name>(#name)
   registerApp(NavierStokesApp);
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -117,6 +121,9 @@ extern "C" void NavierStokesApp__registerObjects(Factory & factory) { NavierStok
 void
 NavierStokesApp::registerObjects(Factory & factory)
 {
+#undef registerObject
+#define registerObject(name) factory.reg<name>(stringifyName(name))
+
   registerKernel(NSMassInviscidFlux);
   registerKernel(NSMomentumInviscidFlux);
   registerKernel(NSEnergyInviscidFlux);
@@ -186,6 +193,9 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Postprocessors
   registerPostprocessor(INSExplicitTimestepSelector);
+
+#undef registerObject
+#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
 
 // External entry point for dynamic syntax association
@@ -193,4 +203,18 @@ extern "C" void NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory 
 void
 NavierStokesApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NavierStokesApp::NavierStokesApp(const std::string & deprecated_name, InputParameters parameters) :
+    MooseApp(deprecated_name, parameters)
+{
+  srand(processor_id());
+
+  Moose::registerObjects(_factory);
+  NavierStokesApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  NavierStokesApp::associateSyntax(_syntax, _action_factory);
 }

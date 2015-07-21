@@ -15,8 +15,8 @@ InputParameters validParams<ImplicitNeumannBC>()
 
 
 
-ImplicitNeumannBC::ImplicitNeumannBC(const std::string & name, InputParameters parameters) :
-  IntegratedBC(name, parameters)
+ImplicitNeumannBC::ImplicitNeumannBC(const InputParameters & parameters) :
+  IntegratedBC(parameters)
 {
 }
 
@@ -42,4 +42,11 @@ Real ImplicitNeumannBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // off-diagonal derivatives are all zero.
   return 0.;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ImplicitNeumannBC::ImplicitNeumannBC(const std::string & deprecated_name, InputParameters parameters) :
+  IntegratedBC(deprecated_name, parameters)
+{
 }

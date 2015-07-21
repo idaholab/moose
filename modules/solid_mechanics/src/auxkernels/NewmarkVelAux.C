@@ -18,8 +18,8 @@ InputParameters validParams<NewmarkVelAux>()
   return params;
 }
 
-NewmarkVelAux::NewmarkVelAux(const std::string & name, InputParameters parameters) :
-  AuxKernel(name, parameters),
+NewmarkVelAux::NewmarkVelAux(const InputParameters & parameters) :
+  AuxKernel(parameters),
    _accel_old(coupledValueOld("acceleration")),
    _accel(coupledValue("acceleration")),
    _gamma(getParam<Real>("gamma"))
@@ -33,4 +33,14 @@ NewmarkVelAux::computeValue()
   if (!isNodal())
     mooseError("must run on a nodal variable");
   return vel_old + (_dt*(1-_gamma))*_accel_old[_qp] + _gamma*_dt*_accel[_qp];
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NewmarkVelAux::NewmarkVelAux(const std::string & deprecated_name, InputParameters parameters) :
+  AuxKernel(deprecated_name, parameters),
+   _accel_old(coupledValueOld("acceleration")),
+   _accel(coupledValue("acceleration")),
+   _gamma(getParam<Real>("gamma"))
+{
 }

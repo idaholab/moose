@@ -20,8 +20,8 @@ InputParameters validParams<Pressure>()
   return params;
 }
 
-Pressure::Pressure(const std::string & name, InputParameters parameters)
-  :IntegratedBC(name, parameters),
+Pressure::Pressure(const InputParameters & parameters)
+  :IntegratedBC(parameters),
    _component(getParam<int>("component")),
    _factor(getParam<Real>("factor")),
    _function( isParamValid("function") ? &getFunction("function") : NULL ),
@@ -29,16 +29,7 @@ Pressure::Pressure(const std::string & name, InputParameters parameters)
 {
 
   if (_component < 0 || _component > 2)
-  {
-    std::stringstream errMsg;
-    errMsg << "Invalid component given for "
-           << name
-           << ": "
-           << _component
-           << "." << std::endl;
-
-    mooseError( errMsg.str() );
-  }
+    mooseError("Invalid component given for " << name() << ": " << _component << "." );
 }
 
 Real
@@ -57,4 +48,27 @@ Pressure::computeQpResidual()
   }
 
   return factor * (_normals[_qp](_component) * _test[_i][_qp]);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+Pressure::Pressure(const std::string & deprecated_name, InputParameters parameters)
+  :IntegratedBC(deprecated_name, parameters),
+   _component(getParam<int>("component")),
+   _factor(getParam<Real>("factor")),
+   _function( isParamValid("function") ? &getFunction("function") : NULL ),
+   _postprocessor( isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : NULL )
+{
+
+  if (_component < 0 || _component > 2)
+  {
+    std::stringstream errMsg;
+    errMsg << "Invalid component given for "
+           << deprecated_name
+           << ": "
+           << _component
+           << "." << std::endl;
+
+    mooseError( errMsg.str() );
+  }
 }

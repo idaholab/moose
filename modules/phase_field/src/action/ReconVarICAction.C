@@ -33,8 +33,8 @@ InputParameters validParams<ReconVarICAction>()
   return params;
 }
 
-ReconVarICAction::ReconVarICAction(const std::string & name, InputParameters params) :
-    Action(name, params),
+ReconVarICAction::ReconVarICAction(const InputParameters & params) :
+    Action(params),
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base"))
 {}
@@ -71,3 +71,11 @@ ReconVarICAction::act()
     }
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ReconVarICAction::ReconVarICAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params),
+    _op_num(getParam<unsigned int>("op_num")),
+    _var_name_base(getParam<std::string>("var_name_base"))
+{}

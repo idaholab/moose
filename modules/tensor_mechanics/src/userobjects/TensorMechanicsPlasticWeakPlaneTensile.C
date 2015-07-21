@@ -16,9 +16,8 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensile>()
   return params;
 }
 
-TensorMechanicsPlasticWeakPlaneTensile::TensorMechanicsPlasticWeakPlaneTensile(const std::string & name,
-                                                         InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters),
+TensorMechanicsPlasticWeakPlaneTensile::TensorMechanicsPlasticWeakPlaneTensile(const InputParameters & parameters) :
+    TensorMechanicsPlasticModel(parameters),
     _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength"))
 {
   // cannot check the following for all values of strength, but this is a start
@@ -113,4 +112,15 @@ std::string
 TensorMechanicsPlasticWeakPlaneTensile::modelName() const
 {
   return "WeakPlaneTensile";
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsPlasticWeakPlaneTensile::TensorMechanicsPlasticWeakPlaneTensile(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsPlasticModel(deprecated_name, parameters),
+    _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength"))
+{
+  // cannot check the following for all values of strength, but this is a start
+  if (_strength.value(0) < 0)
+    mooseError("Weak plane tensile strength must not be negative");
 }

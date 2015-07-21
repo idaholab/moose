@@ -34,7 +34,8 @@ public:
    * @param name The name of the class
    * @param parameters The input parameters
    */
-  LineMaterialSymmTensorSampler(const std::string & name, InputParameters parameters);
+  LineMaterialSymmTensorSampler(const InputParameters & parameters);
+  LineMaterialSymmTensorSampler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~LineMaterialSymmTensorSampler() {}
 

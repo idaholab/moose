@@ -6,8 +6,23 @@
 /****************************************************************/
 #include "ConservedNoiseInterface.h"
 
-ConservedNoiseInterface::ConservedNoiseInterface(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters),
+ConservedNoiseInterface::ConservedNoiseInterface(const InputParameters & parameters) :
+    ElementUserObject(parameters),
+    _integral(0),
+    _volume(0),
+    _qp(0)
+{
+  /**
+   * This call turns on Random Number generation for this object, it can be called either in
+   * the constructor or in initialSetup().
+   */
+  setRandomResetFrequency(EXEC_TIMESTEP);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ConservedNoiseInterface::ConservedNoiseInterface(const std::string & deprecated_name, InputParameters parameters) :
+    ElementUserObject(deprecated_name, parameters),
     _integral(0),
     _volume(0),
     _qp(0)

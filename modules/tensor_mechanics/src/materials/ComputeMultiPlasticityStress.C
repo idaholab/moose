@@ -30,10 +30,9 @@ InputParameters validParams<ComputeMultiPlasticityStress>()
   return params;
 }
 
-ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const std::string & name,
-                                                           InputParameters parameters) :
-    ComputeStressBase(name, parameters),
-    MultiPlasticityDebugger(name, parameters),
+ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters & parameters) :
+    ComputeStressBase(parameters),
+    MultiPlasticityDebugger(parameters),
     _max_iter(getParam<unsigned int>("max_NR_iterations")),
     _min_stepsize(getParam<Real>("min_stepsize")),
     _max_stepsize_for_dumb(getParam<Real>("max_stepsize_for_dumb")),
@@ -1392,4 +1391,59 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   }
 
   return s_inv*strain_coeff;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const std::string & deprecated_name, InputParameters parameters) :
+    ComputeStressBase(deprecated_name, parameters),
+    MultiPlasticityDebugger(parameters),
+    _max_iter(getParam<unsigned int>("max_NR_iterations")),
+    _min_stepsize(getParam<Real>("min_stepsize")),
+    _max_stepsize_for_dumb(getParam<Real>("max_stepsize_for_dumb")),
+    _ignore_failures(getParam<bool>("ignore_failures")),
+
+    _tangent_operator_type((TangentOperatorEnum)(int)getParam<MooseEnum>("tangent_operator")),
+
+    _epp_tol(getParam<Real>("ep_plastic_tolerance")),
+
+    _deactivation_scheme((DeactivationSchemeEnum)(int)getParam<MooseEnum>("deactivation_scheme")),
+
+    _n_supplied(parameters.isParamValid("transverse_direction")),
+    _n_input(_n_supplied ? getParam<RealVectorValue>("transverse_direction") : RealVectorValue()),
+    _rot(RealTensorValue()),
+
+    _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
+    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
+    _intnl(declareProperty<std::vector<Real> >("plastic_internal_parameter")),
+    _intnl_old(declarePropertyOld<std::vector<Real> >("plastic_internal_parameter")),
+    _yf(declareProperty<std::vector<Real> >("plastic_yield_function")),
+    _iter(declareProperty<Real>("plastic_NR_iterations")), // this is really an unsigned int, but for visualisation i convert it to Real
+    _linesearch_needed(declareProperty<Real>("plastic_linesearch_needed")), // this is really a boolean, but for visualisation i convert it to Real
+    _ld_encountered(declareProperty<Real>("plastic_linear_dependence_encountered")), // this is really a boolean, but for visualisation i convert it to Real
+    _constraints_added(declareProperty<Real>("plastic_constraints_added")), // this is really a boolean, but for visualisation i convert it to Real
+    _n(declareProperty<RealVectorValue>("plastic_transverse_direction")),
+    _n_old(declarePropertyOld<RealVectorValue>("plastic_transverse_direction")),
+
+    _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
+    _total_strain_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "total_strain")),
+    _rotation_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
+
+    _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _elastic_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
+
+    _my_elasticity_tensor(RankFourTensor()),
+    _my_strain_increment(RankTwoTensor())
+{
+  if (_n_supplied)
+  {
+    // normalise the inputted transverse_direction
+    if (_n_input.size() == 0)
+      mooseError("ComputeMultiPlasticityStress: transverse_direction vector must not have zero length");
+    else
+      _n_input /= _n_input.size();
+  }
+
+  if (_num_surfaces == 1)
+    _deactivation_scheme = safe;
 }

@@ -19,7 +19,8 @@ InputParameters validParams<LangevinNoise>();
 class ConservedLangevinNoise : public LangevinNoise
 {
 public:
-  ConservedLangevinNoise(const std::string & name, InputParameters parameters);
+  ConservedLangevinNoise(const InputParameters & parameters);
+  ConservedLangevinNoise(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void residualSetup() {};

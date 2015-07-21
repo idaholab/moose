@@ -28,8 +28,8 @@ void addDisplacementAboutAxisParams(InputParameters& params)
   params.addRequiredParam<RealVectorValue>("axis_direction","Direction of the axis of rotation");
 }
 
-DisplacementAboutAxis::DisplacementAboutAxis(const std::string & name, InputParameters parameters) :
-    PresetNodalBC(name, parameters),
+DisplacementAboutAxis::DisplacementAboutAxis(const InputParameters & parameters) :
+    PresetNodalBC(parameters),
     _component(getParam<int>("component")),
     _func(getFunction("function")),
     _angle_units(getParam<MooseEnum>("angle_units")),
@@ -37,16 +37,7 @@ DisplacementAboutAxis::DisplacementAboutAxis(const std::string & name, InputPara
     _axis_direction(getParam<RealVectorValue>("axis_direction"))
 {
   if (_component < 0 || _component > 2)
-  {
-    std::stringstream errMsg;
-    errMsg << "Invalid component given for "
-           << name
-           << ": "
-           << _component
-           << "." << std::endl;
-
-    mooseError( errMsg.str() );
-  }
+    mooseError("Invalid component given for " << name() << ": " << _component << "."  );
 }
 
 void
@@ -174,4 +165,27 @@ ColumnMajorMatrix rotx(4,4);
   _transformation_matrix = roty * rotx * transl;
   _transformation_matrix_inv = transl_inv * rotx_inv * roty_inv;
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+DisplacementAboutAxis::DisplacementAboutAxis(const std::string & deprecated_name, InputParameters parameters) :
+    PresetNodalBC(deprecated_name, parameters),
+    _component(getParam<int>("component")),
+    _func(getFunction("function")),
+    _angle_units(getParam<MooseEnum>("angle_units")),
+    _axis_origin(getParam<RealVectorValue>("axis_origin")),
+    _axis_direction(getParam<RealVectorValue>("axis_direction"))
+{
+  if (_component < 0 || _component > 2)
+  {
+    std::stringstream errMsg;
+    errMsg << "Invalid component given for "
+           << deprecated_name
+           << ": "
+           << _component
+           << "." << std::endl;
+
+    mooseError( errMsg.str() );
+  }
 }

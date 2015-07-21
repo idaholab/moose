@@ -23,7 +23,8 @@ InputParameters validParams<MultiBarrierFunctionMaterial>();
 class MultiBarrierFunctionMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
-  MultiBarrierFunctionMaterial(const std::string & name, InputParameters parameters);
+  MultiBarrierFunctionMaterial(const InputParameters & parameters);
+  MultiBarrierFunctionMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

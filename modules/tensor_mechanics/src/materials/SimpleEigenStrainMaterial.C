@@ -19,9 +19,8 @@ InputParameters validParams<SimpleEigenStrainMaterial>()
   return params;
 }
 
-SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const std::string & name,
-                                                     InputParameters parameters) :
-    EigenStrainBaseMaterial(name, parameters),
+SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const InputParameters & parameters) :
+    EigenStrainBaseMaterial(parameters),
     _epsilon0(getParam<Real>("epsilon0")),
     _c0(getParam<Real>("c0"))
 {
@@ -47,4 +46,13 @@ void SimpleEigenStrainMaterial::computeQpElasticityTensor()
   // the elasticity tensor is independent of c
   _delasticity_tensor_dc[_qp].zero();
   _d2elasticity_tensor_dc2[_qp].zero();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    EigenStrainBaseMaterial(deprecated_name, parameters),
+    _epsilon0(getParam<Real>("epsilon0")),
+    _c0(getParam<Real>("c0"))
+{
 }

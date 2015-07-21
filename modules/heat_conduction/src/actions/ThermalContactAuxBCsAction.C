@@ -38,8 +38,8 @@ InputParameters validParams<ThermalContactAuxBCsAction>()
   return params;
 }
 
-ThermalContactAuxBCsAction::ThermalContactAuxBCsAction( const std::string & name, InputParameters params ) :
-  Action(name, params)
+ThermalContactAuxBCsAction::ThermalContactAuxBCsAction( const InputParameters & params) :
+  Action(params)
 {
 }
 
@@ -101,4 +101,11 @@ ThermalContactAuxBCsAction::act()
   _problem->addAuxKernel("PenetrationAux", "AuxKernels/penetration_" + Moose::stringify(n), params);
 
   ++n;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ThermalContactAuxBCsAction::ThermalContactAuxBCsAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
 }

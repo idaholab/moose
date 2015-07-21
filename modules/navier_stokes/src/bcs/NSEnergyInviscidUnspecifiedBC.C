@@ -19,8 +19,8 @@ InputParameters validParams<NSEnergyInviscidUnspecifiedBC>()
 
 
 
-NSEnergyInviscidUnspecifiedBC::NSEnergyInviscidUnspecifiedBC(const std::string & name, InputParameters parameters)
-    : NSEnergyInviscidBC(name, parameters),
+NSEnergyInviscidUnspecifiedBC::NSEnergyInviscidUnspecifiedBC(const InputParameters & parameters)
+    : NSEnergyInviscidBC(parameters),
 
       // Aux Variables
       _pressure(coupledValue("pressure"))
@@ -74,4 +74,14 @@ Real NSEnergyInviscidUnspecifiedBC::compute_jacobian(unsigned var_number)
     this->qp_jacobian_termA(var_number, _pressure[_qp]) +
     this->qp_jacobian_termB(var_number, un) +
     this->qp_jacobian_termC(var_number, un);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSEnergyInviscidUnspecifiedBC::NSEnergyInviscidUnspecifiedBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSEnergyInviscidBC(deprecated_name, parameters),
+
+      // Aux Variables
+      _pressure(coupledValue("pressure"))
+{
 }

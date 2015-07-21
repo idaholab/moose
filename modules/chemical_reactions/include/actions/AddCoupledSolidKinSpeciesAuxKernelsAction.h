@@ -18,7 +18,8 @@ InputParameters validParams<AddCoupledSolidKinSpeciesAuxKernelsAction>();
 class AddCoupledSolidKinSpeciesAuxKernelsAction : public Action
 {
 public:
-  AddCoupledSolidKinSpeciesAuxKernelsAction(const std::string & name, InputParameters params);
+  AddCoupledSolidKinSpeciesAuxKernelsAction(const InputParameters & params);
+  AddCoupledSolidKinSpeciesAuxKernelsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

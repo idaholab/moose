@@ -21,8 +21,8 @@ InputParameters validParams<TorqueReaction>()
   return params;
 }
 
-TorqueReaction::TorqueReaction(const std::string & name, InputParameters parameters) :
-    NodalPostprocessor(name, parameters),
+TorqueReaction::TorqueReaction(const InputParameters & parameters) :
+    NodalPostprocessor(parameters),
     _aux(_fe_problem.getAuxiliarySystem()),
     _react_x_var(_aux.getVariable(_tid, parameters.get<AuxVariableName>("react_x"))),
     _react_y_var(_aux.getVariable(_tid, parameters.get<AuxVariableName>("react_y"))),
@@ -72,4 +72,21 @@ TorqueReaction::threadJoin(const UserObject & y)
 {
   const TorqueReaction & pps = static_cast<const TorqueReaction &>(y);
   _sum += pps._sum;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TorqueReaction::TorqueReaction(const std::string & deprecated_name, InputParameters parameters) :
+    NodalPostprocessor(deprecated_name, parameters),
+    _aux(_fe_problem.getAuxiliarySystem()),
+    _react_x_var(_aux.getVariable(_tid, parameters.get<AuxVariableName>("react_x"))),
+    _react_y_var(_aux.getVariable(_tid, parameters.get<AuxVariableName>("react_y"))),
+    _react_z_var(_aux.getVariable(_tid, parameters.get<AuxVariableName>("react_z"))),
+    _react_x(_react_x_var.nodalSln()),
+    _react_y(_react_y_var.nodalSln()),
+    _react_z(_react_z_var.nodalSln()),
+    _axis_origin(getParam<RealVectorValue>("axis_origin")),
+    _axis_direction(getParam<RealVectorValue>("axis_direction")),
+    _sum(0)
+{
 }

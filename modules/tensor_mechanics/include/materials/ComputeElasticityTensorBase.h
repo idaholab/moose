@@ -16,7 +16,8 @@
 class ComputeElasticityTensorBase : public DerivativeMaterialInterface<Material>
 {
 public:
-  ComputeElasticityTensorBase(const std:: string & name, InputParameters parameters);
+  ComputeElasticityTensorBase(const InputParameters & parameters);
+  ComputeElasticityTensorBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

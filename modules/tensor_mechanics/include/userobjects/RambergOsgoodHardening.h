@@ -21,7 +21,8 @@ InputParameters validParams<RambergOsgoodHardening>();
 class RambergOsgoodHardening : public TensorMechanicsHardeningModel
 {
 public:
-  RambergOsgoodHardening(const std::string & name, InputParameters parameters);
+  RambergOsgoodHardening(const InputParameters & parameters);
+  RambergOsgoodHardening(const std::string & name, InputParameters parameters); // DEPRECATED
 
   virtual Real value(const Real & intnl) const;
   virtual Real derivative(const Real & intnl) const;

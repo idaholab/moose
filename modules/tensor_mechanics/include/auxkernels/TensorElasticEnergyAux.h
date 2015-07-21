@@ -20,7 +20,8 @@ InputParameters validParams<TensorElasticEnergyAux>();
 class TensorElasticEnergyAux : public AuxKernel
 {
 public:
-  TensorElasticEnergyAux(const std::string & name, InputParameters parameters);
+  TensorElasticEnergyAux(const InputParameters & parameters);
+  TensorElasticEnergyAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~TensorElasticEnergyAux() {}
 
 protected:

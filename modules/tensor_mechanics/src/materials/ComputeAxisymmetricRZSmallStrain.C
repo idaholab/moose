@@ -14,9 +14,8 @@ InputParameters validParams<ComputeAxisymmetricRZSmallStrain>()
   return params;
 }
 
-ComputeAxisymmetricRZSmallStrain::ComputeAxisymmetricRZSmallStrain(const std::string & name,
-    InputParameters parameters) :
-    Compute2DSmallStrain(name, parameters)
+ComputeAxisymmetricRZSmallStrain::ComputeAxisymmetricRZSmallStrain(const InputParameters & parameters) :
+    Compute2DSmallStrain(parameters)
 {
 }
 
@@ -31,4 +30,11 @@ ComputeAxisymmetricRZSmallStrain::computeStrainZZ()
 
   else
     return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeAxisymmetricRZSmallStrain::ComputeAxisymmetricRZSmallStrain(const std::string & deprecated_name, InputParameters parameters) :
+    Compute2DSmallStrain(deprecated_name, parameters)
+{
 }

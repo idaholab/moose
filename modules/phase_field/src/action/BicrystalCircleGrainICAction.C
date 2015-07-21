@@ -41,8 +41,8 @@ InputParameters validParams<BicrystalCircleGrainICAction>()
   return params;
 }
 
-BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const std::string & name, InputParameters params) :
-    Action(name, params),
+BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const InputParameters & params) :
+    Action(params),
     _var_name_base(getParam<std::string>("var_name_base")),
     _op_num(getParam<unsigned int>("op_num")),
     _radius(getParam<Real>("radius")),
@@ -97,4 +97,21 @@ BicrystalCircleGrainICAction::act()
     //Add initial condition
     _problem->addInitialCondition("SmoothCircleIC", "ICs/PolycrystalICs/BicrystalCircleGrainIC_" + Moose::stringify(op), poly_params);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params),
+    _var_name_base(getParam<std::string>("var_name_base")),
+    _op_num(getParam<unsigned int>("op_num")),
+    _radius(getParam<Real>("radius")),
+    _x(getParam<Real>("x")),
+    _y(getParam<Real>("y")),
+    _z(getParam<Real>("z")),
+    _int_width(getParam<Real>("int_width")),
+    _3D_sphere(getParam<bool>("3D_sphere"))
+{
+  if (_op_num != 2)
+    mooseError("op_num must equal 2 for bicrystal ICs");
 }

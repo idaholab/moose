@@ -14,9 +14,8 @@ InputParameters validParams<ComputeFiniteStrain>()
   return params;
 }
 
-ComputeFiniteStrain::ComputeFiniteStrain(const std::string & name,
-                                                 InputParameters parameters) :
-    ComputeStrainBase(name, parameters),
+ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
+    ComputeStrainBase(parameters),
     _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
@@ -152,4 +151,19 @@ ComputeFiniteStrain::computeQpStrain(const RankTwoTensor & Fhat)
 
   //Rotate strain to current configuration
   _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeFiniteStrain::ComputeFiniteStrain(const std::string & deprecated_name, InputParameters parameters) :
+    ComputeStrainBase(deprecated_name, parameters),
+    _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
+    _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
+    _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation gradient")),
+    _deformation_gradient_old(declarePropertyOld<RankTwoTensor>(_base_name + "deformation gradient")),
+    _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
+    _T_old(coupledValueOld("temperature"))
+{
 }

@@ -15,7 +15,8 @@
 class ComputeIncrementalSmallStrain : public ComputeSmallStrain
 {
 public:
-  ComputeIncrementalSmallStrain(const std::string & name, InputParameters parameters);
+  ComputeIncrementalSmallStrain(const InputParameters & parameters);
+  ComputeIncrementalSmallStrain(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void initQpStatefulProperties();
