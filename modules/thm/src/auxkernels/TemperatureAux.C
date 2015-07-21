@@ -14,8 +14,8 @@ InputParameters validParams<TemperatureAux>()
 }
 
 
-TemperatureAux::TemperatureAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+TemperatureAux::TemperatureAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _rho(coupledValue("rho")),
     _rhou(coupledValue("rhou")),
     _rhoE(coupledValue("rhoE")),

@@ -17,7 +17,7 @@ InputParameters validParams<TemperatureAux>();
 class TemperatureAux : public AuxKernel
 {
 public:
-  TemperatureAux(const std::string & name, InputParameters parameters);
+  TemperatureAux(const InputParameters & parameters);
   virtual ~TemperatureAux();
 
 protected:

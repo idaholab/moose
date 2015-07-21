@@ -13,8 +13,8 @@ InputParameters validParams<SoundSpeedAux>()
   return params;
 }
 
-SoundSpeedAux::SoundSpeedAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+SoundSpeedAux::SoundSpeedAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _rho(coupledValue("rho")),
     _rhou(coupledValue("rhou")),
     _rhoE(coupledValue("rhoE")),

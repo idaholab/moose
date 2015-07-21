@@ -13,8 +13,8 @@ InputParameters validParams<PressureAux>()
   return params;
 }
 
-PressureAux::PressureAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+PressureAux::PressureAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _rho(coupledValue("rho")),
     _rhou(isCoupled("rhou") ? coupledValue("rhou") : _zero),
     _rhoE(isCoupled("rhoE") ? coupledValue("rhoE") : _zero),

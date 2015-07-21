@@ -17,7 +17,7 @@ InputParameters validParams<PressureAux>();
 class PressureAux : public AuxKernel
 {
 public:
-  PressureAux(const std::string & name, InputParameters parameters);
+  PressureAux(const InputParameters & parameters);
   virtual ~PressureAux();
 
 protected:

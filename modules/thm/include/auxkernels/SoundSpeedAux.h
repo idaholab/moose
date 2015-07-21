@@ -15,7 +15,7 @@ InputParameters validParams<SoundSpeedAux>();
 class SoundSpeedAux : public AuxKernel
 {
 public:
-  SoundSpeedAux(const std::string & name, InputParameters parameters);
+  SoundSpeedAux(const InputParameters & parameters);
   virtual ~SoundSpeedAux();
 
 protected:
