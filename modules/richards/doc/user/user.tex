@@ -166,6 +166,7 @@ MOOSE is struggling with.
 \begin{enumerate}
 \item {\tt -ksp\_type=gmres -pc\_type=bjacobi}
 \item {\tt -ksp\_type=gmres -pc\_type=asm -sub\_pc\_type=lu -sub\_pc\_factor\_shift\_type=NONZERO}
+\item {\tt -ksp\_type=gmres -pc\_type=asm -sub\_pc\_type=lu -sub\_pc\_factor\_shift\_type=NONZERO -pc\_asm\_overlap=2 -ksp\_diagonal\_scale -ksp\_diagonal\_scale\_fix -ksp\_gmres\_modifiedgramschmidt}
 \end{enumerate}
 \end{itemize}
 
