@@ -18,7 +18,7 @@ InputParameters validParams<HeatConductionTimeDerivativeRZ>();
 class HeatConductionTimeDerivativeRZ : public HeatConductionTimeDerivative
 {
 public:
-  HeatConductionTimeDerivativeRZ(const std::string & name, InputParameters parameters);
+  HeatConductionTimeDerivativeRZ(const InputParameters & parameters);
   virtual ~HeatConductionTimeDerivativeRZ();
 
 protected:

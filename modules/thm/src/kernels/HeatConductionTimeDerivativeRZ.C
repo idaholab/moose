@@ -9,8 +9,8 @@ InputParameters validParams<HeatConductionTimeDerivativeRZ>()
   return params;
 }
 
-HeatConductionTimeDerivativeRZ::HeatConductionTimeDerivativeRZ(const std::string & name, InputParameters parameters) :
-    HeatConductionTimeDerivative(name, parameters),
+HeatConductionTimeDerivativeRZ::HeatConductionTimeDerivativeRZ(const InputParameters & parameters) :
+    HeatConductionTimeDerivative(parameters),
     _axial_offset(getParam<Real>("axial_offset"))
 {
 }

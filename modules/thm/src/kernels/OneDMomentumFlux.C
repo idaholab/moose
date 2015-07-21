@@ -20,8 +20,8 @@ InputParameters validParams<OneDMomentumFlux>()
   return params;
 }
 
-OneDMomentumFlux::OneDMomentumFlux(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters) :
+    Kernel(parameters),
     _is_liquid(getParam<bool>("is_liquid")),
     _sign(_is_liquid ? 1. : -1.),
     _alpha(coupledValue("alpha")),

@@ -9,8 +9,8 @@ InputParameters validParams<HeatConductionRZ>()
   return params;
 }
 
-HeatConductionRZ::HeatConductionRZ(const std::string & name, InputParameters parameters) :
-    HeatConductionKernel(name, parameters),
+HeatConductionRZ::HeatConductionRZ(const InputParameters & parameters) :
+    HeatConductionKernel(parameters),
     _axial_offset(getParam<Real>("axial_offset"))
 {
 }

@@ -18,7 +18,7 @@ InputParameters validParams<HeatConductionRZ>();
 class HeatConductionRZ : public HeatConductionKernel
 {
 public:
-  HeatConductionRZ(const std::string & name, InputParameters parameters);
+  HeatConductionRZ(const InputParameters & parameters);
   virtual ~HeatConductionRZ();
 
 protected:

@@ -14,7 +14,7 @@ InputParameters validParams<OneDMomentumFlux>();
 class OneDMomentumFlux : public Kernel
 {
 public:
-  OneDMomentumFlux(const std::string & name, InputParameters parameters);
+  OneDMomentumFlux(const InputParameters & parameters);
   virtual ~OneDMomentumFlux();
 
 protected:

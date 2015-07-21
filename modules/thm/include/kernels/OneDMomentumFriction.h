@@ -15,7 +15,7 @@ InputParameters validParams<OneDMomentumFriction>();
 class OneDMomentumFriction : public Kernel
 {
 public:
-  OneDMomentumFriction(const std::string & name, InputParameters parameters);
+  OneDMomentumFriction(const InputParameters & parameters);
   virtual ~OneDMomentumFriction();
 
 protected:

@@ -11,8 +11,8 @@ InputParameters validParams<OneDMomentumFriction>()
   return params;
 }
 
-OneDMomentumFriction::OneDMomentumFriction(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+OneDMomentumFriction::OneDMomentumFriction(const InputParameters & parameters) :
+    Kernel(parameters),
     _u_vel(coupledValue("u")),
     _rhouA(coupledValue("rhouA")),
     _hydraulic_diameter(coupledValue("hydraulic_diameter")),
