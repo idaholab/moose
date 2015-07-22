@@ -185,7 +185,7 @@
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
-    C_ijkl = '0.4 0.4' # young's = 1, poisson = 0.25
+    C_ijkl = '0.4 0.4' # young = 1, poisson = 0.25
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain

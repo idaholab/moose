@@ -2,10 +2,10 @@
 #
 # If you want to add another test for another UserObject
 # then add the UserObject, add a Function defining the expected result,
-# add an AuxVariable and AuxKernel that will record the UserObject's value
+# add an AuxVariable and AuxKernel that will record the UserObjects value
 # and finally add a NodalL2Error that compares this with the Function
 #
-# pressure = x (-5E6<=x<=5E6)
+# Here pressure is x where x runs between -5E6 and 5E6
 
 [UserObjects]
   [./Seff1VG]
@@ -275,7 +275,7 @@
 
 #############################################################################
 #
-# Following is largely unimportant as we're not running an actual similation
+# Following is largely unimportant as we are not running an actual similation
 #
 #############################################################################
 [Mesh]

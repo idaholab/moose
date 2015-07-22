@@ -185,8 +185,6 @@
 []
 
 [Preconditioning]
-#active = ''
-
   [./SMP]
    type = SMP
    full=true
@@ -201,7 +199,6 @@
   dtmin=0.0001
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
 

@@ -83,7 +83,7 @@
 []
 
 [ICs]
-  # get non-convergence if initial condition is too crazy
+  # get nonconvergence if initial condition is too crazy
   [./water_ic]
     type = FunctionIC
     function = '1-x/2'
@@ -214,7 +214,6 @@
   [./andy]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000'
   [../]

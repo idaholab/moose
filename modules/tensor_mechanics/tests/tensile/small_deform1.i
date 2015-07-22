@@ -209,12 +209,6 @@
     plastic_models = mc
     debug_fspb = 1
     debug_jac_at_stress = '1 2 3 2 -4 -5 3 -5 10'
-    #debug_jac_at_stress = '1 0 0 0 1 0 0 0 0'
-    #debug_jac_at_stress = '0 0 0 0 1 0 0 0 1'
-    #debug_jac_at_stress = '1 0 0 0 0 0 0 0 1'
-    #debug_jac_at_stress = '1 1 0 1 1 0 0 0 2'
-    #debug_jac_at_stress = '1 0 0 0 0 0 0 0 0'
-    #debug_jac_at_stress = '1.1 0 0 0 1 0 0 0 0'
     debug_jac_at_pm = 0.8
     debug_jac_at_intnl = 1
     debug_stress_change = 1E-8

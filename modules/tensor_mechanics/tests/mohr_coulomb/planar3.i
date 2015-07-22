@@ -229,7 +229,6 @@
     block = 0
     ep_plastic_tolerance = 1E-9
     plastic_models = mc
-    #deactivation_scheme = optimized_to_safe_to_dumb
     deactivation_scheme = safe
     max_NR_iterations = 3
     min_stepsize = 1

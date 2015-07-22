@@ -112,14 +112,12 @@
     type = RichardsMass
     variable = pressure
     execute_on = timestep_begin
-    #output = file
   [../]
 
   [./fluid_mass1]
     type = RichardsMass
     variable = pressure
     execute_on = timestep_end
-    #output = file
   [../]
 
   [./zmass_error]

@@ -8,7 +8,7 @@
 # You may specify:
 #  - the "type" of relative permeability in the UserObjects block
 #  - the parameters of this relative permeability curve in the UserObjects block
-#  - the "x" point (= effective saturation) that you want to extract
+#  - the "x" point (which is effective saturation) that you want to extract
 #       the relative permeability at, if you want a value at a particular point
 
 
@@ -31,7 +31,7 @@
 
 
 ############################
-# You shouldn't need to change any of the stuff below
+# You should not need to change any of the stuff below
 ############################
 
 [Mesh]
