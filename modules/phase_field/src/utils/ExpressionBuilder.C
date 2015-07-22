@@ -6,8 +6,6 @@
 /****************************************************************/
 #include "ExpressionBuilder.h"
 
-#include "MooseError.h"
-
 ExpressionBuilder::EBTermList
 operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTerm & rarg)
 {
@@ -244,6 +242,7 @@ ExpressionBuilder::EBFunction::substitute(const EBSubstitutionRuleList & rules)
 
 #define UNARY_FUNC_IMPLEMENT(op,OP) \
 ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & term) { \
+  mooseAssert(term.root != NULL, "Empty term provided as argument of function " #op "()"); \
   return ExpressionBuilder::EBTerm( \
     new ExpressionBuilder::EBUnaryFuncTermNode(term.root->clone(), ExpressionBuilder::EBUnaryFuncTermNode::OP) \
   ); \
@@ -261,6 +260,8 @@ UNARY_FUNC_IMPLEMENT(cosh,COSH)
 
 #define BINARY_FUNC_IMPLEMENT(op,OP) \
 ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & right) { \
+  mooseAssert(left.root != NULL, "Empty term provided as first argument of function " #op "()"); \
+  mooseAssert(right.root != NULL, "Empty term provided as second argument of function " #op "()"); \
   return ExpressionBuilder::EBTerm( \
     new ExpressionBuilder::EBBinaryFuncTermNode(left.root->clone(), right.root->clone(), ExpressionBuilder::EBBinaryFuncTermNode::OP) \
   ); \
@@ -273,6 +274,8 @@ BINARY_FUNC_IMPLEMENT(plog,PLOG)
 
 // this is a function in ExpressionBuilder (pow) but an operator in FParser (^)
 ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & right) {
+  mooseAssert(left.root != NULL, "Empty term for base of pow()"); \
+  mooseAssert(right.root != NULL, "Empty term for exponent of pow()"); \
   return ExpressionBuilder::EBTerm(
     new ExpressionBuilder::EBBinaryOpTermNode(
       left.root->clone(), right.root->clone(), ExpressionBuilder::EBBinaryOpTermNode::POW
@@ -282,6 +285,9 @@ ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, const Expr
 
 #define TERNARY_FUNC_IMPLEMENT(op,OP) \
 ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & middle, const ExpressionBuilder::EBTerm & right) { \
+  mooseAssert(left.root != NULL, "Empty term provided as first argument of the ternary function " #op "()"); \
+  mooseAssert(middle.root != NULL, "Empty term provided as second argument of the ternary function " #op "()"); \
+  mooseAssert(right.root != NULL, "Empty term provided as third argument of the ternary function " #op "()"); \
   return ExpressionBuilder::EBTerm( \
     new ExpressionBuilder::EBTernaryFuncTermNode(left.root->clone(), middle.root->clone(), right.root->clone(), ExpressionBuilder::EBTernaryFuncTermNode::OP) \
   ); \
@@ -444,6 +450,11 @@ ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & _find, 
   if (find_root == NULL)
     mooseError("Function arguments must be pure symbols.");
   find = find_root->stringify();
+
+  if (_replace.getRoot() != NULL)
+    replace = _replace.getRoot()->clone();
+  else
+    mooseError("Trying to substitute in an empty term for " << find);
 }
 
 ExpressionBuilder::EBTermNode *

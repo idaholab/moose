@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iomanip>
 
+#include "MooseError.h"
 #include "libmesh/libmesh_common.h"
 
 using namespace libMesh;
@@ -316,6 +317,7 @@ public:
      */
     #define UNARY_OP_IMPLEMENT(op,OP) \
     EBTerm operator op () { \
+      mooseAssert(root != NULL, "Empty term provided for unary operator " #op); \
       return EBTerm(new EBUnaryOpTermNode(root->clone(), EBUnaryOpTermNode::OP)); \
     }
     UNARY_OP_IMPLEMENT(-,NEG)
@@ -340,15 +342,21 @@ public:
      */
     #define BINARY_OP_IMPLEMENT(op,OP) \
     EBTerm operator op (const EBTerm & term) { \
+      mooseAssert(root != NULL, "Empty term provided on left side of operator " #op); \
+      mooseAssert(term.root != NULL, "Empty term provided on right side of operator " #op); \
       return EBTerm(new EBBinaryOpTermNode(root->clone(), term.root->clone(), EBBinaryOpTermNode::OP)); \
     } \
     friend EBTerm operator op (int left, const EBTerm & right) { \
+      mooseAssert(right.root != NULL, "Empty term provided on right side of operator " #op); \
       return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<int>(left), right.root->clone(), EBBinaryOpTermNode::OP)); \
     } \
     friend EBTerm operator op (Real left, const EBTerm & right) { \
+      mooseAssert(right.root != NULL, "Empty term provided on right side of operator " #op); \
       return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<Real>(left), right.root->clone(), EBBinaryOpTermNode::OP)); \
     } \
     friend EBTerm operator op (const EBFunction & left, const EBTerm & right) { \
+      mooseAssert(EBTerm(left).root != NULL, "Empty term provided on left side of operator " #op); \
+      mooseAssert(right.root != NULL, "Empty term provided on right side of operator " #op); \
       return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), right.root->clone(), EBBinaryOpTermNode::OP)); \
     } \
     friend EBTerm operator op (const EBFunction & left, const EBFunction & right); \
@@ -434,12 +442,16 @@ public:
 
   #define BINARYFUNC_OP_IMPLEMENT(op,OP) \
   friend EBTerm operator op (const EBFunction & left, const EBFunction & right) { \
+    mooseAssert(EBTerm(left).root != NULL, "Empty term provided on left side of operator " #op); \
+    mooseAssert(EBTerm(right).root != NULL, "Empty term provided on right side of operator " #op); \
     return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
   } \
   friend EBTerm operator op (int left, const EBFunction & right) { \
+    mooseAssert(EBTerm(right).root != NULL, "Empty term provided on right side of operator " #op); \
     return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<int>(left), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
   } \
   friend EBTerm operator op (Real left, const EBFunction & right) { \
+    mooseAssert(EBTerm(right).root != NULL, "Empty term provided on right side of operator " #op); \
     return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<Real>(left), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
   }
   BINARYFUNC_OP_IMPLEMENT(+,ADD)
