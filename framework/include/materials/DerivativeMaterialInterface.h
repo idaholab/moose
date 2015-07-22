@@ -146,10 +146,6 @@ DerivativeMaterialInterface<Material>::getZeroMaterialProperty(const std::string
   for (unsigned int qp = 0; qp < nqp; ++qp)
     mooseSetToZero<U>(preload_with_zero[qp]);
 
-#ifdef DEBUG
-  this->_console << "DerivativeMaterialInterface<Material>(" << this->_name << ") returning ZERO for " << prop_name << '\n';
-#endif
-
   return preload_with_zero;
 }
 
@@ -171,10 +167,6 @@ DerivativeMaterialInterface<T>::getZeroMaterialProperty(const std::string & prop
     for (unsigned int qp = 0; qp < nqp; ++qp)
       mooseSetToZero<U>(_zero[qp]);
   }
-
-#ifdef DEBUG
-  this->_console << "DerivativeMaterialInterface<T>(" << this->_name << ") returning ZERO for " << prop_name << '\n';
-#endif
 
   // return a reference to a static zero property
   return _zero;
@@ -278,10 +270,6 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 {
   // get the base property name
   std::string prop_name = this->deducePropertyName(base);
-
-#ifdef DEBUG
-  this->_console << "DerivativeMaterialInterface<T> getMaterialPropertyDerivative " << base << '=' << prop_name<< ',' << c1 << ',' << c2 << ',' << c3 << '\n';
-#endif
 
   /**
    * Check if base is a default property and shortcut to returning zero, as
