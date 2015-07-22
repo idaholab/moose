@@ -48,12 +48,12 @@ def updateSource(obj, filename):
   obj = os.path.splitext(obj)[0]
 
   regex = r'(' + obj + ')\s*::\s*' + obj + '\s*\('
-  regex += '\s*const\s*std::string\s*&\s*\w+'
+  regex += '\s*const\s*std\s*::\s*string\s*&\s*\w+'
   regex += '[\s\n]*,[\s\n]*InputParameters\s*(\w+)\s*'
   regex += '\s*\)([\n\s]*:[\s\n]*)'
   regex += '([\w\<\>\s]+)\(\s*\w+\s*,\s*\w+\s*\)'
 
-  if obj.endswith('App') or ('actions' in filename):
+  if (obj.endswith('App') and not obj.endswith('MultiApp')) or ('actions' in filename):
     content = re.sub(regex, subSourceNonConst, content, flags=re.MULTILINE|re.DOTALL)
   else:
     content = re.sub(regex, subSource, content, flags=re.MULTILINE|re.DOTALL)
@@ -69,10 +69,10 @@ def updateHeader(obj, filename):
   obj = os.path.splitext(obj)[0]
 
   regex = r'(' + obj + ')\s*\(\s*'
-  regex += 'const\s*std::string\s*&\s*\w+'
+  regex += 'const\s*std\s*::\s*string\s*&\s*\w+'
   regex += '[\n\s]*,[\s\n]*InputParameters\s*(\w+)\s*\)'
 
-  if obj.endswith('App') or ('actions' in filename):
+  if (obj.endswith('App') and not obj.endswith('MultiApp')) or ('actions' in filename):
     content = re.sub(regex, subHeaderNonConst, content, flags=re.MULTILINE|re.DOTALL)
   else:
     content = re.sub(regex, subHeader, content, flags=re.MULTILINE|re.DOTALL)
