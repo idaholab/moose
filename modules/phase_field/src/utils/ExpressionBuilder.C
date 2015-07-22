@@ -36,8 +36,8 @@ operator, (const ExpressionBuilder::EBTermList & largs, const ExpressionBuilder:
 std::ostream &
 operator<< (std::ostream & os, const ExpressionBuilder::EBTerm & term)
 {
-  if (term.root != NULL)
-    return os << *term.root;
+  if (term._root != NULL)
+    return os << *term._root;
   else
     return os << "[NULL]";
 }
@@ -46,14 +46,14 @@ operator<< (std::ostream & os, const ExpressionBuilder::EBTerm & term)
 std::string
 ExpressionBuilder::EBSymbolNode::stringify() const
 {
-  return symbol;
+  return _symbol;
 }
 
 std::string
 ExpressionBuilder::EBTempIDNode::stringify() const
 {
   std::ostringstream s;
-  s << '[' << id << ']';
+  s << '[' << _id << ']';
   return s.str();
 }
 
@@ -62,7 +62,7 @@ ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
 {
   const char * name[] = { "sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh" };
   std::ostringstream s;
-  s << name[type] << '(' << *subnode << ')';
+  s << name[_type] << '(' << *_subnode << ')';
   return s.str();
 }
 
@@ -72,12 +72,12 @@ ExpressionBuilder::EBUnaryOpTermNode::stringify() const
   const char * name[] = { "-", "!" };
   std::ostringstream s;
 
-  s <<  name[type];
+  s <<  name[_type];
 
-  if (subnode->precedence() > precedence())
-    s << '(' << *subnode << ')';
+  if (_subnode->precedence() > precedence())
+    s << '(' << *_subnode << ')';
   else
-    s << *subnode;
+    s << *_subnode;
 
   return s.str();
 }
@@ -87,7 +87,7 @@ ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
 {
   const char * name[] = { "min", "max", "atan2", "hypot", "plog" };
   std::ostringstream s;
-  s << name[type] << '(' << *left << ',' << *right << ')';
+  s << name[_type] << '(' << *_left << ',' << *_right << ')';
   return s.str();
 }
 
@@ -97,22 +97,22 @@ ExpressionBuilder::EBBinaryOpTermNode::stringify() const
   const char * name[] = { "+", "-", "*", "/", "%", "^", "<", ">", "<=", ">=", "=", "!=" };
   std::ostringstream s;
 
-  if (left->precedence() > precedence())
-    s << '(' << *left << ')';
+  if (_left->precedence() > precedence())
+    s << '(' << *_left << ')';
   else
-    s << *left;
+    s << *_left;
 
-  s << name[type];
+  s << name[_type];
 
   // these operators are left associative at equal precedence
   // (this matters for -,/,&,^ but not for + and *)
-  if (right->precedence() > precedence() || (
-        right->precedence() == precedence() && (
-          type == SUB || type == DIV || type == MOD || type == POW
+  if (_right->precedence() > precedence() || (
+        _right->precedence() == precedence() && (
+          _type == SUB || _type == DIV || _type == MOD || _type == POW
         )))
-    s << '(' << *right << ')';
+    s << '(' << *_right << ')';
   else
-    s << *right;
+    s << *_right;
 
   return s.str();
 }
@@ -120,7 +120,7 @@ ExpressionBuilder::EBBinaryOpTermNode::stringify() const
 int
 ExpressionBuilder::EBBinaryOpTermNode::precedence() const
 {
-  switch (type)
+  switch (_type)
   {
     case ADD: case SUB:
       return 6;
@@ -142,54 +142,54 @@ ExpressionBuilder::EBTernaryFuncTermNode::stringify() const
 {
   const char * name[] = { "if" };
   std::ostringstream s;
-  s << name[type] << '(' << *left << ',' << *middle << ',' << *right << ')';
+  s << name[_type] << '(' << *_left << ',' << *_middle << ',' << *_right << ')';
   return s.str();
 }
 
 ExpressionBuilder::EBFunction &
 ExpressionBuilder::EBFunction::operator() (const ExpressionBuilder::EBTerm & arg)
 {
-  this->eval_arguments.resize(1);
-  this->eval_arguments[0] = arg;
+  this->_eval_arguments.resize(1);
+  this->_eval_arguments[0] = arg;
   return *this;
 }
 
 ExpressionBuilder::EBFunction &
 ExpressionBuilder::EBFunction::operator() (const ExpressionBuilder::EBTermList & args)
 {
-  this->eval_arguments = EBTermList(args);
+  this->_eval_arguments = EBTermList(args);
   return *this;
 }
 
 ExpressionBuilder::EBFunction &
 ExpressionBuilder::EBFunction::operator= (const ExpressionBuilder::EBTerm & term)
 {
-  this->arguments = this->eval_arguments;
-  this->term = term;
+  this->_arguments = this->_eval_arguments;
+  this->_term = term;
   return *this;
 }
 
 ExpressionBuilder::EBFunction &
 ExpressionBuilder::EBFunction::operator= (const ExpressionBuilder::EBFunction & func)
 {
-  this->arguments = this->eval_arguments;
-  this->term = EBTerm(func);
+  this->_arguments = this->_eval_arguments;
+  this->_term = EBTerm(func);
   return *this;
 }
 
 ExpressionBuilder::EBFunction::operator ExpressionBuilder::EBTerm() const
 {
-  unsigned int narg = arguments.size();
-  if (narg != eval_arguments.size())
+  unsigned int narg = _arguments.size();
+  if (narg != _eval_arguments.size())
     mooseError("EBFunction is used wth a different number of arguments than it was defined with.");
 
   // prepare a copy of the function term to perform the substitution on
-  EBTerm result(term);
+  EBTerm result(_term);
 
   // prepare a rule list for the substitutions
   EBSubstitutionRuleList rules;
   for (unsigned i = 0; i < narg; ++i)
-    rules.push_back(new EBTermSubstitution(arguments[i], eval_arguments[i]));
+    rules.push_back(new EBTermSubstitution(_arguments[i], _eval_arguments[i]));
 
   // perform substitution
   result.substitute(rules);
@@ -213,16 +213,14 @@ ExpressionBuilder::EBFunction::operator std::string() const
 std::string
 ExpressionBuilder::EBFunction::args()
 {
-  unsigned int narg = arguments.size();
+  unsigned int narg = _arguments.size();
   if (narg < 1)
     return "";
 
-  //for (unsigned int i = 1; i < nargs; ++i) // check for symbol nodes here
-
   std::ostringstream s;
-  s << arguments[0];
+  s << _arguments[0];
   for (unsigned int i = 1; i < narg; ++i)
-    s << ',' << arguments[i];
+    s << ',' << _arguments[i];
 
   return s.str();
 }
@@ -230,21 +228,21 @@ ExpressionBuilder::EBFunction::args()
 unsigned int
 ExpressionBuilder::EBFunction::substitute(const EBSubstitutionRule & rule)
 {
-  return term.substitute(rule);
+  return _term.substitute(rule);
 }
 
 unsigned int
 ExpressionBuilder::EBFunction::substitute(const EBSubstitutionRuleList & rules)
 {
-  return term.substitute(rules);
+  return _term.substitute(rules);
 }
 
 
 #define UNARY_FUNC_IMPLEMENT(op,OP) \
 ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & term) { \
-  mooseAssert(term.root != NULL, "Empty term provided as argument of function " #op "()"); \
+  mooseAssert(term._root != NULL, "Empty term provided as argument of function " #op "()"); \
   return ExpressionBuilder::EBTerm( \
-    new ExpressionBuilder::EBUnaryFuncTermNode(term.root->clone(), ExpressionBuilder::EBUnaryFuncTermNode::OP) \
+    new ExpressionBuilder::EBUnaryFuncTermNode(term.cloneRoot(), ExpressionBuilder::EBUnaryFuncTermNode::OP) \
   ); \
 }
 UNARY_FUNC_IMPLEMENT(sin,SIN)
@@ -260,10 +258,10 @@ UNARY_FUNC_IMPLEMENT(cosh,COSH)
 
 #define BINARY_FUNC_IMPLEMENT(op,OP) \
 ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & right) { \
-  mooseAssert(left.root != NULL, "Empty term provided as first argument of function " #op "()"); \
-  mooseAssert(right.root != NULL, "Empty term provided as second argument of function " #op "()"); \
+  mooseAssert(left._root != NULL, "Empty term provided as first argument of function " #op "()"); \
+  mooseAssert(right._root != NULL, "Empty term provided as second argument of function " #op "()"); \
   return ExpressionBuilder::EBTerm( \
-    new ExpressionBuilder::EBBinaryFuncTermNode(left.root->clone(), right.root->clone(), ExpressionBuilder::EBBinaryFuncTermNode::OP) \
+    new ExpressionBuilder::EBBinaryFuncTermNode(left.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBBinaryFuncTermNode::OP) \
   ); \
 }
 BINARY_FUNC_IMPLEMENT(min,MIN)
@@ -274,22 +272,22 @@ BINARY_FUNC_IMPLEMENT(plog,PLOG)
 
 // this is a function in ExpressionBuilder (pow) but an operator in FParser (^)
 ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & right) {
-  mooseAssert(left.root != NULL, "Empty term for base of pow()"); \
-  mooseAssert(right.root != NULL, "Empty term for exponent of pow()"); \
+  mooseAssert(left._root != NULL, "Empty term for base of pow()"); \
+  mooseAssert(right._root != NULL, "Empty term for exponent of pow()"); \
   return ExpressionBuilder::EBTerm(
     new ExpressionBuilder::EBBinaryOpTermNode(
-      left.root->clone(), right.root->clone(), ExpressionBuilder::EBBinaryOpTermNode::POW
+      left.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBBinaryOpTermNode::POW
     )
   );
 }
 
 #define TERNARY_FUNC_IMPLEMENT(op,OP) \
 ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & middle, const ExpressionBuilder::EBTerm & right) { \
-  mooseAssert(left.root != NULL, "Empty term provided as first argument of the ternary function " #op "()"); \
-  mooseAssert(middle.root != NULL, "Empty term provided as second argument of the ternary function " #op "()"); \
-  mooseAssert(right.root != NULL, "Empty term provided as third argument of the ternary function " #op "()"); \
+  mooseAssert(left._root != NULL, "Empty term provided as first argument of the ternary function " #op "()"); \
+  mooseAssert(middle._root != NULL, "Empty term provided as second argument of the ternary function " #op "()"); \
+  mooseAssert(right._root != NULL, "Empty term provided as third argument of the ternary function " #op "()"); \
   return ExpressionBuilder::EBTerm( \
-    new ExpressionBuilder::EBTernaryFuncTermNode(left.root->clone(), middle.root->clone(), right.root->clone(), ExpressionBuilder::EBTernaryFuncTermNode::OP) \
+    new ExpressionBuilder::EBTernaryFuncTermNode(left.cloneRoot(), middle.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBTernaryFuncTermNode::OP) \
   ); \
 }
 TERNARY_FUNC_IMPLEMENT(conditional,CONDITIONAL)
@@ -301,16 +299,16 @@ ExpressionBuilder::EBUnaryTermNode::substitute(const EBSubstitutionRuleList & ru
 
   for (unsigned int i = 0; i < nrule; ++i)
   {
-    EBTermNode * replace = rules[i]->apply(subnode);
+    EBTermNode * replace = rules[i]->apply(_subnode);
     if (replace != NULL)
     {
-      delete subnode;
-      subnode = replace;
+      delete _subnode;
+      _subnode = replace;
       return 1;
     }
   }
 
-  return subnode->substitute(rules);
+  return _subnode->substitute(rules);
 }
 
 unsigned int
@@ -321,31 +319,31 @@ ExpressionBuilder::EBBinaryTermNode::substitute(const EBSubstitutionRuleList & r
 
   for (unsigned int i = 0; i < nrule; ++i)
   {
-    EBTermNode * replace = rules[i]->apply(left);
+    EBTermNode * replace = rules[i]->apply(_left);
     if (replace != NULL)
     {
-      delete left;
-      left = replace;
+      delete _left;
+      _left = replace;
       success = 1;
       break;
     }
   }
 
   if (success == 0)
-    success += left->substitute(rules);
+    success += _left->substitute(rules);
 
   for (unsigned int i = 0; i < nrule; ++i)
   {
-    EBTermNode * replace = rules[i]->apply(right);
+    EBTermNode * replace = rules[i]->apply(_right);
     if (replace != NULL)
     {
-      delete right;
-      right = replace;
+      delete _right;
+      _right = replace;
       return success + 1;
     }
   }
 
-  return success + right->substitute(rules);
+  return success + _right->substitute(rules);
 }
 
 unsigned int
@@ -359,11 +357,11 @@ ExpressionBuilder::EBTernaryTermNode::substitute(const EBSubstitutionRuleList & 
 
   for (unsigned int i = 0; i < nrule; ++i)
   {
-    replace = rules[i]->apply(left);
+    replace = rules[i]->apply(_left);
     if (replace)
     {
-      delete left;
-      left = replace;
+      delete _left;
+      _left = replace;
       left_success = true;
       break;
     }
@@ -371,11 +369,11 @@ ExpressionBuilder::EBTernaryTermNode::substitute(const EBSubstitutionRuleList & 
 
   for (unsigned int i = 0; i < nrule; ++i)
   {
-    replace = rules[i]->apply(middle);
+    replace = rules[i]->apply(_middle);
     if (replace)
     {
-      delete middle;
-      middle = replace;
+      delete _middle;
+      _middle = replace;
       middle_success = true;
       break;
     }
@@ -383,22 +381,22 @@ ExpressionBuilder::EBTernaryTermNode::substitute(const EBSubstitutionRuleList & 
 
   for (unsigned int i = 0; i < nrule; ++i)
   {
-    replace = rules[i]->apply(right);
+    replace = rules[i]->apply(_right);
     if (replace)
     {
-      delete right;
-      right = replace;
+      delete _right;
+      _right = replace;
       right_success = true;
       break;
     }
   }
 
   if (!left_success)
-    left_success = left->substitute(rules);
+    left_success = _left->substitute(rules);
   if (!middle_success)
-    middle_success = middle->substitute(rules);
+    middle_success = _middle->substitute(rules);
   if (!right_success)
-    right_success = right->substitute(rules);
+    right_success = _right->substitute(rules);
 
   return left_success + middle_success + right_success;
 }
@@ -416,21 +414,21 @@ ExpressionBuilder::EBTerm::substitute(const EBSubstitutionRuleList & rules)
 {
   unsigned int nrule = rules.size();
 
-  if (root == NULL)
+  if (_root == NULL)
     return 0;
 
   for (unsigned int i = 0; i < nrule; ++i)
   {
-    EBTermNode * replace = rules[i]->apply(root);
+    EBTermNode * replace = rules[i]->apply(_root);
     if (replace != NULL)
     {
-      delete root;
-      root = replace;
+      delete _root;
+      _root = replace;
       return 1;
     }
   }
 
-  return root->substitute(rules);
+  return _root->substitute(rules);
 }
 
 template<class Node_T>
@@ -443,25 +441,26 @@ ExpressionBuilder::EBTermNode * ExpressionBuilder::EBSubstitutionRuleTyped<Node_
     return substitute(*match_node);
 }
 
-ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & _find, const EBTerm & _replace) :
-    replace(_replace.getRoot()->clone())
+ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & find, const EBTerm & replace)
 {
-  const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(_find.getRoot());
+  // the expression we want to substitute (has to be a symbol node)
+  const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(find.getRoot());
   if (find_root == NULL)
     mooseError("Function arguments must be pure symbols.");
-  find = find_root->stringify();
+  _find = find_root->stringify();
 
-  if (_replace.getRoot() != NULL)
-    replace = _replace.getRoot()->clone();
+  // the term we want to substitute with
+  if (replace.getRoot() != NULL)
+    _replace = replace.cloneRoot();
   else
-    mooseError("Trying to substitute in an empty term for " << find);
+    mooseError("Trying to substitute in an empty term for " << _find);
 }
 
 ExpressionBuilder::EBTermNode *
 ExpressionBuilder::EBTermSubstitution::substitute(const EBSymbolNode & node) const
 {
-  if (node.stringify() == find)
-    return replace->clone();
+  if (node.stringify() == _find)
+    return _replace->clone();
   else
     return NULL;
 }
@@ -469,8 +468,8 @@ ExpressionBuilder::EBTermSubstitution::substitute(const EBSymbolNode & node) con
 ExpressionBuilder::EBTermNode *
 ExpressionBuilder::EBLogPlogSubstitution::substitute(const EBUnaryFuncTermNode & node) const
 {
-  if (node.type == EBUnaryFuncTermNode::LOG)
-    return new EBBinaryFuncTermNode(node.getSubnode()->clone(), epsilon->clone(), EBBinaryFuncTermNode::PLOG);
+  if (node._type == EBUnaryFuncTermNode::LOG)
+    return new EBBinaryFuncTermNode(node.getSubnode()->clone(), _epsilon->clone(), EBBinaryFuncTermNode::PLOG);
   else
     return NULL;
 }
