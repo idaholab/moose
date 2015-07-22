@@ -1,0 +1,30 @@
+reset
+#{plate_width=25}
+#{plate_height=plate_width/2}
+#{mesh_size = 1}
+create surface rectangle width {plate_width} height {plate_height}
+volume 1 move {plate_width/2} {plate_height/2}
+create surface rectangle width {plate_width} height {plate_height}
+volume 2 move {plate_width/2} {-plate_height/2}
+webcut volume 1 with plane yplane offset {mesh_size/2}
+webcut volume 2 with plane yplane offset {-mesh_size/2}
+merge volume 2 4
+merge volume 1 3
+
+surface all size {mesh_size}
+surface all scheme map
+mesh surface all
+
+block 1 surface all
+block 1 element type QUAD4
+
+sideset 1 curve 7
+sideset 2 curve 17 19
+sideset 3 curve 5
+sideset 4 curve 20 16
+sideset 5 curve 3
+sideset 6 curve 11 13
+sideset 7 curve 1
+sideset 8 curve 10 14
+
+export mesh "plastic_plate.e" dimension 2 overwrite

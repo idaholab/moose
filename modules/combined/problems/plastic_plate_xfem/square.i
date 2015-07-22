@@ -7,8 +7,8 @@
 #  type = ReferenceResidualProblem
 #  solution_variables = 'disp_x disp_y'
 #  reference_residual_variables = 'saved_x saved_y'
-  XFEM_cuts ='-1.0000e-017  1.2500e+001  5.0000e+000  1.2500e+001  0.0000e+000  0.0000e+000
-               5.0000e+000  1.2500e+001  2.5000e+001  1.2500e+001  0.0000e+000  1.0000e+000'
+  XFEM_cuts ='0.0000e+000  0.0000e+000  5.5000e+000  0.0000e+000  0.0000e+000  0.0000e+000
+              5.5000e+000  0.0000e+000  2.5500e+001  0.0000e+000  0.0500e+000  1.0500e+000'
 []
 
 [Mesh]
@@ -18,8 +18,8 @@
   ny = 25
   xmin = 0.0
   xmax = 25.0
-  ymin = 0.0
-  ymax = 25.0
+  ymin = -12.5
+  ymax = 12.5
   elem_type = QUAD4
   displacements = 'disp_x disp_y'
 []
@@ -225,11 +225,11 @@
   solve_type = 'PJFNK'
 #  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
 #  petsc_options_value = '201                hypre    boomeramg      8'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -ksp_gmres_restart'
+  petsc_options_value = 'lu       superlu_dist                  101'
 
 
-  line_search = 'cp' #'none'
+  line_search = 'cp'
 
 #  [./Predictor]
 #    type = SimplePredictor
@@ -247,8 +247,8 @@
 
 # time control
   start_time = 0.0
-  dt = 0.02
-  end_time = 1.0
+  dt = 0.05
+  end_time = 1.00
   num_steps = 5000
 []
 
