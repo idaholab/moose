@@ -54,7 +54,7 @@ public:
   /**
    * Advance all of the apps one timestep.
    */
-  void solveStep(Real dt, Real target_time, bool auto_advance=true);
+  bool solveStep(Real dt, Real target_time, bool auto_advance=true);
 
   /**
    * Actually advances time and causes output.
@@ -121,7 +121,6 @@ private:
 
   /// Flag for toggling console output on sub cycles
   bool _print_sub_cycles;
-
 };
 
 #endif // TRANSIENTMULTIAPP_H

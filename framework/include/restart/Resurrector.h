@@ -16,7 +16,6 @@
 #define RESURRECTOR_H
 
 #include "Moose.h"
-#include "MaterialPropertyIO.h"
 #include "RestartableDataIO.h"
 
 #include <string>
@@ -46,8 +45,6 @@ public:
    */
   void restartFromFile();
 
-  void restartStatefulMaterialProps();
-
   void restartRestartableData();
 
 protected:
@@ -57,9 +54,6 @@ protected:
 
   /// name of the file that we restart from
   std::string _restart_file_base;
-
-  /// Stateful material property output
-  MaterialPropertyIO _mat;
 
   /// Restartable Data
   RestartableDataIO _restartable;

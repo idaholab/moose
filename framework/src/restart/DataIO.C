@@ -34,6 +34,20 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
   stream.write(v.c_str(), sizeof(char)*(size+1));
 }
 
+template<>
+void
+dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/)
+{
+  v.close();
+
+  numeric_index_type size = v.local_size();
+
+  for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
+  {
+    Real r = v(i);
+    stream.write((char *) &r, sizeof(r));
+  }
+}
 
 template<>
 void
@@ -181,6 +195,25 @@ dataStore(std::ostream & stream, Node * & n, void * context)
   storeHelper(stream, id, context);
 }
 
+template<>
+void
+dataStore(std::ostream & stream, std::stringstream & s, void * /* context */)
+{
+  const std::string & s_str = s.str();
+
+  size_t s_size = s_str.size();
+  stream.write((char *) &s_size, sizeof(s_size));
+
+  stream.write(s_str.c_str(), sizeof(char)*(s_str.size()));
+}
+
+template<>
+void
+dataStore(std::ostream & stream, std::stringstream * & s, void * context)
+{
+  dataStore(stream, *s, context);
+}
+
 // global load functions
 
 template<>
@@ -211,6 +244,24 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
   // Store the string and clean up
   v = s;
   delete[] s;
+}
+
+
+template<>
+void
+dataLoad(std::istream & stream, NumericVector<Real> & v, void * /*context*/)
+{
+  numeric_index_type size = v.local_size();
+
+  for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
+  {
+    Real r = 0;
+    stream.read((char *) &r, sizeof(r));
+
+    v.set(i, r);
+  }
+
+  v.close();
 }
 
 template<>
@@ -391,4 +442,26 @@ dataLoad(std::istream & stream, Node * & n, void * context)
     n = NULL;
     // Moose::out<<"NULL Node"<<std::endl;
   }
+}
+
+template<>
+void
+dataLoad(std::istream & stream, std::stringstream & s, void * /* context */)
+{
+  size_t s_size = 0;
+
+  stream.read((char *) & s_size, sizeof(s_size));
+
+  char * s_s = new char[s_size];
+
+  stream.read(s_s, s_size);
+
+  s.write(s_s, s_size);
+}
+
+template<>
+void
+dataLoad(std::istream & stream, std::stringstream * & s, void * context)
+{
+  dataLoad(stream, *s, context);
 }
