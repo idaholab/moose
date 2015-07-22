@@ -4,20 +4,30 @@ template<>
 InputParameters validParams<OneDMomentumFriction>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredCoupledVar("rhoA", "density term");
-  params.addRequiredCoupledVar("rhouA", "momentum term");
+  params.addRequiredCoupledVar("area", "Cross-sectional area");
+  params.addRequiredCoupledVar("rhoA", "Conserved density");
+  params.addRequiredCoupledVar("rhouA", "Conserved momentum");
+  params.addCoupledVar("rhoEA", "Conserved total energy");
   params.addRequiredCoupledVar("u", "velocity");
-  params.addRequiredCoupledVar("hydraulic_diameter", "The hydraulic diameter. Depends on A(x).");
+  params.addRequiredParam<MaterialPropertyName>("Cw", "The name of the material property that stores the wall drag coefficient");
+  params.addRequiredParam<MaterialPropertyName>("dCw_drhoA", "");
+  params.addRequiredParam<MaterialPropertyName>("dCw_drhouA", "");
+  params.addRequiredParam<MaterialPropertyName>("dCw_drhoEA", "");
   return params;
 }
 
 OneDMomentumFriction::OneDMomentumFriction(const InputParameters & parameters) :
     Kernel(parameters),
+    _area(coupledValue("area")),
     _u_vel(coupledValue("u")),
-    _rhouA(coupledValue("rhouA")),
-    _hydraulic_diameter(coupledValue("hydraulic_diameter")),
+    _rhoA(coupledValue("rhoA")),
+    _Cw(getMaterialProperty<Real>("Cw")),
+    _dCw_drhoA(getMaterialProperty<Real>("dCw_drhoA")),
+    _dCw_drhouA(getMaterialProperty<Real>("dCw_drhouA")),
+    _dCw_drhoEA(getMaterialProperty<Real>("dCw_drhoEA")),
     _rhoA_var_number(coupled("rhoA")),
-    _friction(getMaterialPropertyByName<Real>("friction"))
+    _rhouA_var_number(coupled("rhouA")),
+    _rhoEA_var_number(isCoupled("rhoEA") ? coupled("rhoEA") : libMesh::invalid_uint)
 {
 }
 
@@ -25,26 +35,35 @@ OneDMomentumFriction::~OneDMomentumFriction()
 {
 }
 
-
 Real
 OneDMomentumFriction::computeQpResidual()
 {
-  return (0.5 * _friction[_qp] / _hydraulic_diameter[_qp]) * _rhouA[_qp] * std::abs(_u_vel[_qp]) * _test[_i][_qp];
+  return _Cw[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) * _area[_qp] * _test[_i][_qp];
 }
-
 
 Real
 OneDMomentumFriction::computeQpJacobian()
 {
-  return (0.5 * _friction[_qp] / _hydraulic_diameter[_qp]) * 2. * std::abs(_u_vel[_qp]) * _phi[_j][_qp] * _test[_i][_qp];
+  return computeQpOffDiagJacobian(_var.number());
 }
-
 
 Real
 OneDMomentumFriction::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _rhoA_var_number)
-    return (0.5 * _friction[_qp] / _hydraulic_diameter[_qp]) * (-_u_vel[_qp]) * std::abs(_u_vel[_qp]) * _phi[_j][_qp] * _test[_i][_qp];
+  {
+    Real ddU0 = (_dCw_drhoA[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) - 2. * _Cw[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) / _rhoA[_qp]);
+    return ddU0 * _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  }
+  else if (jvar == _rhouA_var_number)
+  {
+    Real ddU1 = (_dCw_drhouA[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) + 2. * _Cw[_qp] * std::abs(_u_vel[_qp]) / _rhoA[_qp]);
+    return ddU1 * _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  }
+  else if (jvar == _rhoEA_var_number)
+  {
+    return _dCw_drhoEA[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) * _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  }
   else
-    return 0.;
+    return 0;
 }

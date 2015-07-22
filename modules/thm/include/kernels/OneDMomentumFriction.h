@@ -23,13 +23,17 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  VariableValue & _area;
   VariableValue & _u_vel;
-  VariableValue & _rhouA;
-  VariableValue & _hydraulic_diameter;
+  VariableValue & _rhoA;
+  const MaterialProperty<Real> & _Cw;
+  const MaterialProperty<Real> & _dCw_drhoA;
+  const MaterialProperty<Real> & _dCw_drhouA;
+  const MaterialProperty<Real> & _dCw_drhoEA;
 
   unsigned int _rhoA_var_number;
-
-  const MaterialProperty<Real> & _friction;
+  unsigned int _rhouA_var_number;
+  unsigned int _rhoEA_var_number;
 };
 
 #endif
