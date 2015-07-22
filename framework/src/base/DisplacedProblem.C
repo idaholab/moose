@@ -561,22 +561,6 @@ DisplacedProblem::onTimestepEnd()
 }
 
 void
-DisplacedProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
-{
-  name += "/displaced";
-
-  _mproblem.registerRestartableData(name, data, tid);
-}
-
-void
-DisplacedProblem::registerRecoverableData(std::string name)
-{
-  name += "/displaced";
-
-  _mproblem.registerRecoverableData(name);
-}
-
-void
 DisplacedProblem::undisplaceMesh()
 {
   // If undisplaceMesh() is called during initial adaptivity, it is

@@ -3,68 +3,62 @@
   dim = 2
   nx = 10
   ny = 10
-  distribution = serial
 []
 
 [Variables]
-  [./u]
-  [../]
-[]
-
-[AuxVariables]
   [./v]
   [../]
 []
 
+[AuxVariables]
+  [./v2]
+  [../]
+[]
+
 [Kernels]
-  [./diff]
-    type = CoefDiffusion
-    variable = u
-    coef = 0.1
+  [./diff_v]
+    type = Diffusion
+    variable = v
   [../]
-  [./time]
-    type = TimeDerivative
-    variable = u
-  [../]
-  [./force_u]
+  [./coupled_force]
     type = CoupledForce
-    variable = u
-    v = v
+    variable = v
+    v = v2
+  [../]
+  [./td_v]
+    type = TimeDerivative
+    variable = v
   [../]
 []
 
 [BCs]
-  [./left]
+  [./left_v]
     type = DirichletBC
-    variable = u
+    variable = v
     boundary = left
-    value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = u
-    boundary = right
     value = 1
   [../]
-[]
-
-[Postprocessors]
-  [./picard_its]
-    type = NumPicardIterations
-    execute_on = 'initial timestep_end'
+  [./right_v]
+    type = DirichletBC
+    variable = v
+    boundary = right
+    value = 0
   [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 20
-  dt = 0.1
+  num_steps = 5
+  dt = 1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   picard_max_its = 30
-  nl_abs_tol = 1e-14
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-9
+  picard_rel_tol = 1e-8
+  picard_abs_tol = 1e-9
 []
 
 [Outputs]
@@ -75,27 +69,22 @@
 []
 
 [MultiApps]
-  [./sub]
+  [./sub2]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
-    input_files = picard_sub.i
+    input_files = picard_sub2.i
+    sub_cycling = true
+    execute_on = timestep_end
   [../]
 []
 
 [Transfers]
-  [./v_from_sub]
+  [./v2]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
-    multi_app = sub
+    multi_app = sub2
     source_variable = v
-    variable = v
-  [../]
-  [./u_to_sub]
-    type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
-    source_variable = u
-    variable = u
+    variable = v2
   [../]
 []

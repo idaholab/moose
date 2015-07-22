@@ -203,6 +203,7 @@ TimeStepper::acceptStep()
 void
 TimeStepper::rejectStep()
 {
+  _converged = false;
   _fe_problem.restoreSolutions();
 }
 

@@ -125,17 +125,11 @@ TransientMultiApp::initialSetup()
   Moose::swapLibMeshComm(swapped);
 }
 
-void
+bool
 TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
-  if (_sub_cycling && !auto_advance)
-    mooseError("TransientMultiApp with sub_cycling=true is not compatible with auto_advance=false");
-
-  if (_catch_up && !auto_advance)
-    mooseError("TransientMultiApp with catch_up=true is not compatible with auto_advance=false");
-
   if (!_has_an_app)
-    return;
+    return true;
 
   _auto_advance = auto_advance;
 
@@ -260,7 +254,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           _failures++;
 
           if (_failures > _max_failures)
-            mooseError("While sub_cycling " << name() << _first_local_app+i << " REALLY failed!" << std::endl);
+          {
+            mooseWarning("While sub_cycling " << name() << _first_local_app+i << " REALLY failed!" << std::endl);
+            return false;
+          }
         }
 
         Real solution_change_norm = ex->getSolutionChangeNorm();
@@ -349,8 +346,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
 
             if (!caught_up)
-              mooseError(name() << " Failed to catch up!\n");
-
+            {
+              mooseWarning(name() << " Failed to catch up!\n");
+              return false;
+            }
           }
         }
       }
@@ -369,12 +368,14 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   _transferred_vars.clear();
 
   _console << "Finished Solving MultiApp " << name() << std::endl;
+
+  return true;
 }
 
 void
 TransientMultiApp::advanceStep()
 {
-  if (!_auto_advance)
+  if (!_auto_advance && !_sub_cycling)
   {
     for (unsigned int i=0; i<_my_num_apps; i++)
     {

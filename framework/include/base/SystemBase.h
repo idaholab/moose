@@ -37,6 +37,7 @@ class Factory;
 class MooseApp;
 class MooseVariable;
 class MooseMesh;
+class SystemBase;
 
 /**
  * ///< Type of coordinate system
@@ -50,6 +51,20 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
                    std::vector<dof_id_type> & n_nz,
                    std::vector<dof_id_type> & n_oz,
                    void * context);
+
+/**
+ * IO Methods for restart, backup and restore.
+ */
+template<>
+void
+dataStore(std::ostream & stream, SystemBase & system_base, void * context);
+
+/**
+ * IO Methods for restart, backup and restore.
+ */
+template<>
+void
+dataLoad(std::istream & stream, SystemBase & system_base, void * context);
 
 /**
  * Base class for a system (of equations)

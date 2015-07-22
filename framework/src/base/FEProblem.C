@@ -121,6 +121,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _aux(*this, name_sys("aux", _n)),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
+    _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
+    _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif
@@ -459,25 +461,6 @@ void FEProblem::initialSetup()
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
 
-  if (_app.isRestarting() || _app.isRecovering())
-  {
-    // now if restarting and we have stateful material properties, go overwrite the values with the ones
-    // from the restart file.  We need to do it this way, since we have no idea about sizes of user-defined material
-    // properties (i.e. things like std:vector<std::vector<SymmTensor> >)
-    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
-    {
-      // load the stateful material props from a file
-      _resurrector->restartStatefulMaterialProps();
-    }
-
-    // TODO: Reenable restarting for UserObjects!
-//    if (_user_objects[0].size() > 0)
-//      _resurrector->restartUserData();
-  }
-
-//  // RUN initial postprocessors
-//  computePostprocessors(EXEC_INITIAL);
-
   _nl.setSolution(*(_nl.sys().current_local_solution.get()));
 
   Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
@@ -582,15 +565,10 @@ void FEProblem::initialSetup()
   // during initialSetup by calls to computeProperties.
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
   {
-    if (_app.isRestarting() || _app.isRecovering())
-      _resurrector->restartStatefulMaterialProps();
-    else
-    {
-      ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-      ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                       _material_props, _bnd_material_props, _materials, _assembly);
-      Threads::parallel_reduce(elem_range, cmt);
-    }
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
+                                     _material_props, _bnd_material_props, _materials, _assembly);
+    Threads::parallel_reduce(elem_range, cmt);
   }
 
   if (_app.isRestarting() || _app.isRecovering())
@@ -2689,10 +2667,10 @@ FEProblem::getMultiApp(const std::string & multi_app_name)
   mooseError("MultiApp "<<multi_app_name<<" not found!");
 }
 
-void
+bool
 FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 {
- std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
 
   // Do anything that needs to be done to Apps before transfers
   for (unsigned int i=0; i<multi_apps.size(); i++)
@@ -2710,11 +2688,18 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     _console << "Executing MultiApps" << std::endl;
 
-    for (unsigned int i=0; i<multi_apps.size(); i++)
-      multi_apps[i]->solveStep(_dt, _time, auto_advance);
+    bool success = true;
+
+    for (unsigned int i=0; success && i<multi_apps.size(); i++)
+      success = multi_apps[i]->solveStep(_dt, _time, auto_advance);
 
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
+
+    _communicator.max(success);
+
+    if (!success)
+      return false;
 
     _console << "Finished Executing MultiApps" << std::endl;
   }
@@ -2734,6 +2719,9 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
       _console << "Transfers Are Finished" << std::endl;
     }
   }
+
+  // If we made it here then everything passed
+  return true;
 }
 
 void
@@ -2752,6 +2740,44 @@ FEProblem::advanceMultiApps(ExecFlagType type)
     MooseUtils::parallelBarrierNotify(_communicator);
 
     _console << "Finished Advancing MultiApps" << std::endl;
+  }
+}
+
+void
+FEProblem::backupMultiApps(ExecFlagType type)
+{
+  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+
+  if (multi_apps.size())
+  {
+    _console << "Backing Up MultiApps" << std::endl;
+
+    for (unsigned int i=0; i<multi_apps.size(); i++)
+      multi_apps[i]->backup();
+
+    _console << "Waiting For Other Processors To Finish" << std::endl;
+    MooseUtils::parallelBarrierNotify(_communicator);
+
+    _console << "Finished Backing Up MultiApps" << std::endl;
+  }
+}
+
+void
+FEProblem::restoreMultiApps(ExecFlagType type)
+{
+  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+
+  if (multi_apps.size())
+  {
+    _console << "Restoring MultiApps" << std::endl;
+
+    for (unsigned int i=0; i<multi_apps.size(); i++)
+      multi_apps[i]->restore();
+
+    _console << "Waiting For Other Processors To Finish" << std::endl;
+    MooseUtils::parallelBarrierNotify(_communicator);
+
+    _console << "Finished Restoring MultiApps" << std::endl;
   }
 }
 
@@ -3790,23 +3816,6 @@ FEProblem::setRestartFile(const std::string & file_name)
   _resurrector->setRestartFile(file_name);
 }
 
-void
-FEProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
-{
-  std::map<std::string, RestartableDataValue *> & restartable_data = _restartable_data[tid];
-
-  if (restartable_data.find(name) != restartable_data.end())
-    mooseError("Attempted to declare restartable twice with the same name: " << name);
-
-  restartable_data[name] = data;
-}
-
-void
-FEProblem::registerRecoverableData(std::string name)
-{
-  _recoverable_data.insert(name);
-}
-
 std::vector<VariableName>
 FEProblem::getVariableNames()
 {
@@ -4031,6 +4040,8 @@ FEProblem::FEProblem(const std::string & deprecated_name, InputParameters parame
     _aux(*this, name_sys("aux", _n)),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
+    _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
+    _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif

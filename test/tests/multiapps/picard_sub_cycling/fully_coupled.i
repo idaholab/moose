@@ -3,15 +3,11 @@
   dim = 2
   nx = 10
   ny = 10
-  distribution = serial
 []
 
 [Variables]
   [./u]
   [../]
-[]
-
-[AuxVariables]
   [./v]
   [../]
 []
@@ -26,10 +22,23 @@
     type = TimeDerivative
     variable = u
   [../]
+  [./diff_v]
+    type = Diffusion
+    variable = v
+  [../]
   [./force_u]
     type = CoupledForce
     variable = u
     v = v
+  [../]
+  [./force_v]
+    type = CoupledForce
+    variable = v
+    v = u
+  [../]
+  [./td_v]
+    type = TimeDerivative
+    variable = v
   [../]
 []
 
@@ -46,24 +55,29 @@
     boundary = right
     value = 1
   [../]
-[]
-
-[Postprocessors]
-  [./picard_its]
-    type = NumPicardIterations
-    execute_on = 'initial timestep_end'
+  [./left_v]
+    type = DirichletBC
+    variable = v
+    boundary = left
+    value = 1
+  [../]
+  [./right_v]
+    type = DirichletBC
+    variable = v
+    boundary = right
+    value = 0
   [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 20
-  dt = 0.1
+  num_steps = 5
+  dt = 1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  picard_max_its = 30
+  nl_rel_tol = 1e-10
   nl_abs_tol = 1e-14
 []
 
@@ -72,30 +86,4 @@
   exodus = true
   print_linear_residuals = true
   print_perf_log = true
-[]
-
-[MultiApps]
-  [./sub]
-    type = TransientMultiApp
-    app_type = MooseTestApp
-    positions = '0 0 0'
-    input_files = picard_sub.i
-  [../]
-[]
-
-[Transfers]
-  [./v_from_sub]
-    type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub
-    source_variable = v
-    variable = v
-  [../]
-  [./u_to_sub]
-    type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
-    source_variable = u
-    variable = u
-  [../]
 []

@@ -43,7 +43,7 @@ public:
   /**
    * Completely solve all of the Apps
    */
-  virtual void solveStep(Real dt, Real target_time, bool auto_advance=true);
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true);
 
   /**
    * Actually advances time and causes output.

@@ -106,7 +106,8 @@ MultiApp::MultiApp(const InputParameters & parameters):
     _move_apps(getParam<std::vector<unsigned int> >("move_apps")),
     _move_positions(getParam<std::vector<Point> >("move_positions")),
     _move_happened(false),
-    _has_an_app(true)
+    _has_an_app(true),
+    _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
 {
 }
 
@@ -144,6 +145,11 @@ MultiApp::initialSetup()
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   _apps.resize(_my_num_apps);
+  _backups.resize(_my_num_apps);
+
+  // Initialize the backups
+  for (unsigned int i=0; i<_my_num_apps; i++)
+    _backups[i] = MooseSharedPointer<Backup>(new Backup);
 
   // If the user provided an unregistered app type, see if we can load it dynamically
   if (!AppFactory::instance().isRegistered(_app_type))
@@ -221,6 +227,20 @@ MultiApp::getExecutioner(unsigned int app)
     mooseError("No app for " << name() << " on processor " << _orig_rank);
 
   return _apps[globalAppToLocal(app)]->getExecutioner();
+}
+
+void
+MultiApp::backup()
+{
+  for (unsigned int i=0; i<_my_num_apps; i++)
+    _backups[i] = _apps[i]->backup();
+}
+
+void
+MultiApp::restore()
+{
+  for (unsigned int i=0; i<_my_num_apps; i++)
+    _apps[i]->restore(_backups[i]);
 }
 
 MeshTools::BoundingBox
@@ -317,6 +337,12 @@ MultiApp::hasLocalApp(unsigned int global_app)
     return true;
 
   return false;
+}
+
+MooseApp *
+MultiApp::localApp(unsigned int local_app)
+{
+  return _apps[local_app];
 }
 
 void
@@ -540,6 +566,7 @@ MultiApp::MultiApp(const std::string & deprecated_name, InputParameters paramete
     _move_apps(getParam<std::vector<unsigned int> >("move_apps")),
     _move_positions(getParam<std::vector<Point> >("move_positions")),
     _move_happened(false),
-    _has_an_app(true)
+    _has_an_app(true),
+    _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
 {
 }

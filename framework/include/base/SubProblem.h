@@ -20,7 +20,6 @@
 #include "DiracKernelInfo.h"
 #include "Assembly.h"
 #include "GeometricSearchData.h"
-#include "RestartableData.h"
 
 // libMesh include
 #include "libmesh/equation_systems.h"
@@ -288,7 +287,7 @@ public:
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    */
-  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid) = 0;
+  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
 public:
   /**
@@ -338,9 +337,6 @@ protected:
   /// Elements that should have Dofs ghosted to the local processor
   std::set<dof_id_type> _ghosted_elems;
 
-  /// Where the restartable data is held (indexed on tid)
-  RestartableDatas _restartable_data;
-
   /// Storage for RZ axis selection
   unsigned int _rz_coord_axis;
 
@@ -368,7 +364,7 @@ private:
    *
    * @param name The full (unique) name.
    */
-  virtual void registerRecoverableData(std::string name) = 0;
+  virtual void registerRecoverableData(std::string name);
 
   friend class Restartable;
 };
