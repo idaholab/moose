@@ -48,4 +48,5 @@ FunctionPenaltyDirichletBC::FunctionPenaltyDirichletBC(const std::string & depre
     IntegratedBC(deprecated_name, parameters),
     _func(getFunction("function")),
     _p(getParam<Real>("penalty"))
-{}
+{
+}

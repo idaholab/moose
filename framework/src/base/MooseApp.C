@@ -141,7 +141,7 @@ MooseApp::MooseApp(InputParameters parameters) :
     mooseError("Valid CommandLine object required");
 }
 
-MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
+MooseApp::MooseApp(const std::string & /*deprecated_name*/, InputParameters parameters) :
     ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("name")),
     _pars(parameters),
