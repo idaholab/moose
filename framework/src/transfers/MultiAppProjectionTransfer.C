@@ -341,15 +341,8 @@ MultiAppProjectionTransfer::execute()
         if (local_bboxes[i_from].contains_point(qpt))
         {
           outgoing_evals[qp] = (* local_meshfuns[i_from])(qpt - _from_positions[i_from]);
-          switch (_direction)
-          {
-            case TO_MULTIAPP:
-              outgoing_ids[qp] = 0;
-              break;
-            case FROM_MULTIAPP:
-              outgoing_ids[qp] = _local2global_map[i_from];
-              break;
-          }
+          if (_direction == FROM_MULTIAPP)
+            outgoing_ids[qp] = _local2global_map[i_from];
         }
       }
     }
@@ -357,12 +350,14 @@ MultiAppProjectionTransfer::execute()
     if (i_proc == processor_id())
     {
       incoming_evals[i_proc] = outgoing_evals;
-      incoming_app_ids[i_proc] = outgoing_ids;
+      if (_direction == FROM_MULTIAPP)
+        incoming_app_ids[i_proc] = outgoing_ids;
     }
     else
     {
       _communicator.send(i_proc, outgoing_evals);
-      _communicator.send(i_proc, outgoing_ids);
+      if (_direction == FROM_MULTIAPP)
+        _communicator.send(i_proc, outgoing_ids);
     }
   }
 
@@ -375,7 +370,8 @@ MultiAppProjectionTransfer::execute()
       continue;
 
     _communicator.receive(i_proc, incoming_evals[i_proc]);
-    _communicator.receive(i_proc, incoming_app_ids[i_proc]);
+    if (_direction == FROM_MULTIAPP)
+      _communicator.receive(i_proc, incoming_app_ids[i_proc]);
   }
 
   std::vector<std::vector<Real> > final_evals(_to_problems.size());
@@ -420,8 +416,11 @@ MultiAppProjectionTransfer::execute()
 
           // Ignore the selected processor if it's app has a higher rank than the
           // previously found lowest app rank.
-          if (incoming_app_ids[i_proc][qp0 + qp] >= lowest_app_rank)
-            continue;
+          if (_direction == FROM_MULTIAPP)
+          {
+            if (incoming_app_ids[i_proc][qp0 + qp] >= lowest_app_rank)
+              continue;
+          }
 
           // Ignore the selected processor if the qp was actually outside the
           // processor's subapp's mesh.
