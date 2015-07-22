@@ -26,9 +26,9 @@ InputParameters validParams<XFEMMaterialTensorMarkerUserObject>()
   return params;
 }
 
-XFEMMaterialTensorMarkerUserObject::XFEMMaterialTensorMarkerUserObject(const std::string & name, InputParameters parameters):
-  XFEMMarkerUserObject(name, parameters),
-  _material_tensor_calculator(name, parameters),
+XFEMMaterialTensorMarkerUserObject::XFEMMaterialTensorMarkerUserObject(const InputParameters & parameters):
+  XFEMMarkerUserObject(parameters),
+  _material_tensor_calculator(parameters),
   _tensor(getMaterialProperty<SymmTensor>(getParam<std::string>("tensor"))),
   _threshold(getParam<Real>("threshold")),
   _average(getParam<bool>("average")),
@@ -88,4 +88,16 @@ XFEMMaterialTensorMarkerUserObject::doesElementCrack(RealVectorValue &direction)
   }
 
   return does_it_crack;
+}
+
+// DEPRECATED CONSTRUCTOR
+XFEMMaterialTensorMarkerUserObject::XFEMMaterialTensorMarkerUserObject(const std::string & deprecated_name, InputParameters parameters):
+  XFEMMarkerUserObject(deprecated_name, parameters),
+  _material_tensor_calculator(parameters),
+  _tensor(getMaterialProperty<SymmTensor>(getParam<std::string>("tensor"))),
+  _threshold(getParam<Real>("threshold")),
+  _average(getParam<bool>("average")),
+  _random_range(getParam<Real>("random_range"))
+{
+  setRandomResetFrequency(EXEC_INITIAL);
 }

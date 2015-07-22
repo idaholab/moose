@@ -26,8 +26,8 @@ InputParameters validParams<XFEMCutPlaneAux>()
   return params;
 }
 
-XFEMCutPlaneAux::XFEMCutPlaneAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
+XFEMCutPlaneAux::XFEMCutPlaneAux(const InputParameters & parameters)
+  :AuxKernel(parameters),
   _quantity(XFEM_CUTPLANE_QUANTITY(int(getParam<MooseEnum>("quantity")))),
   _plane_id(getParam<unsigned int>("plane_id"))
 {
@@ -45,4 +45,18 @@ XFEMCutPlaneAux::computeValue()
   Real value = _xfem->get_cut_plane(_current_elem, _quantity, _plane_id);
 
   return value;
+}
+
+// DEPRECATED CONSTRUCTOR
+XFEMCutPlaneAux::XFEMCutPlaneAux(const std::string & deprecated_name, InputParameters parameters)
+  :AuxKernel(deprecated_name, parameters),
+  _quantity(XFEM_CUTPLANE_QUANTITY(int(getParam<MooseEnum>("quantity")))),
+  _plane_id(getParam<unsigned int>("plane_id"))
+{
+  FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
+  if (fe_problem == NULL)
+    mooseError("Problem casting _subproblem to FEProblem in XFEMCutPlaneAux");
+  _xfem = fe_problem->get_xfem();
+  if (isNodal())
+    mooseError("XFEMCutPlaneAux can only be run on an element variable");
 }

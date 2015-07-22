@@ -74,7 +74,6 @@
 #include "RateDepSmearCrackModel.h"
 #include "RateDepSmearIsoCrackModel.h"
 #include "CutPlaneAction.h"
-#include "StatefulTest.h"
 
 template<>
 InputParameters validParams<SolidMechanicsApp>()
@@ -148,7 +147,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(TrussMaterial);
   registerMaterial(RateDepSmearCrackModel);
   registerMaterial(RateDepSmearIsoCrackModel);
-  registerMaterial(StatefulTest);
 
   registerKernel(HomogenizationKernel);
   registerKernel(SolidMechImplicitEuler);

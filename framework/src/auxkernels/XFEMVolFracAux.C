@@ -23,8 +23,8 @@ InputParameters validParams<XFEMVolFracAux>()
   return params;
 }
 
-XFEMVolFracAux::XFEMVolFracAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters)
+XFEMVolFracAux::XFEMVolFracAux(const InputParameters & parameters)
+  :AuxKernel(parameters)
 {
   if (isNodal())
     mooseError("XFEMVolFracAux must be run on an element variable");
@@ -38,4 +38,16 @@ Real
 XFEMVolFracAux::computeValue()
 {
   return _xfem->get_elem_phys_volfrac(_current_elem);
+}
+
+// DEPRECATED CONSTRUCTOR
+XFEMVolFracAux::XFEMVolFracAux(const std::string & deprecated_name, InputParameters parameters)
+  :AuxKernel(deprecated_name, parameters)
+{
+  if (isNodal())
+    mooseError("XFEMVolFracAux must be run on an element variable");
+  FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
+  if (fe_problem == NULL)
+    mooseError("Problem casting _subproblem to FEProblem in XFEMVolFracAux");
+  _xfem = fe_problem->get_xfem();
 }

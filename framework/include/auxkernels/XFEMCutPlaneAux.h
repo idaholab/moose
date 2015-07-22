@@ -30,7 +30,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  XFEMCutPlaneAux(const std::string & name, InputParameters parameters);
+  XFEMCutPlaneAux(const InputParameters & parameters);
+  XFEMCutPlaneAux(const std::string & deprecated_name, InputParameters parameters);  // DEPRECATED CONSTRUCTOR
 
   virtual ~XFEMCutPlaneAux() {}
 

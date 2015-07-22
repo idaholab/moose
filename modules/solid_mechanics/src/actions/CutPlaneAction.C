@@ -14,8 +14,8 @@ InputParameters validParams<CutPlaneAction>()
   return params;
 }
 
-CutPlaneAction::CutPlaneAction(const std::string & name, InputParameters params):
-  Action(name, params),
+CutPlaneAction::CutPlaneAction(const InputParameters & params):
+  Action(params),
   _order(getParam<std::string>("order")),
   _family(getParam<std::string>("family"))
 {
@@ -103,4 +103,12 @@ CutPlaneAction::act()
     params.set<MooseEnum>("quantity") = "normal_z";
     _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut2_normal_z", params);
   }
+}
+
+// DEPRECATED CONSTRUCTOR
+CutPlaneAction::CutPlaneAction(const std::string & deprecated_name, InputParameters params):
+  Action(deprecated_name, params),
+  _order(getParam<std::string>("order")),
+  _family(getParam<std::string>("family"))
+{
 }

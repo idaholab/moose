@@ -23,8 +23,8 @@ InputParameters validParams<XFEMMarkerAux>()
   return params;
 }
 
-XFEMMarkerAux::XFEMMarkerAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters)
+XFEMMarkerAux::XFEMMarkerAux(const InputParameters & parameters)
+  :AuxKernel(parameters)
 {
   FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
   if (fe_problem == NULL)
@@ -45,4 +45,16 @@ XFEMMarkerAux::computeValue()
   }
 
   return value;
+}
+
+// DEPRECATED CONSTRUCTOR
+XFEMMarkerAux::XFEMMarkerAux(const std::string & deprecated_name, InputParameters parameters)
+  :AuxKernel(deprecated_name, parameters)
+{
+  FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
+  if (fe_problem == NULL)
+    mooseError("Problem casting _subproblem to FEProblem in XFEMMarkerAux");
+  _xfem = fe_problem->get_xfem();
+  if (isNodal())
+    mooseError("XFEMMarkerAux can only be run on an element variable");
 }

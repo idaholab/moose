@@ -12,7 +12,8 @@ InputParameters validParams<XFEMMaterialTensorMarkerUserObject>();
 class XFEMMaterialTensorMarkerUserObject : public XFEMMarkerUserObject
 {
 public:
-  XFEMMaterialTensorMarkerUserObject(const std::string &name, InputParameters parameters);
+  XFEMMaterialTensorMarkerUserObject(const InputParameters & parameters);
+  XFEMMaterialTensorMarkerUserObject(const std::string &deprecated_name, InputParameters parameters); // DEPRECATED_CONSTRUCTOR
   virtual ~XFEMMaterialTensorMarkerUserObject(){}
 
 protected:

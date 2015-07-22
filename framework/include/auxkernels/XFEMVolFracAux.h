@@ -30,7 +30,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  XFEMVolFracAux(const std::string & name, InputParameters parameters);
+  XFEMVolFracAux(const InputParameters & parameters);
+  XFEMVolFracAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~XFEMVolFracAux() {}
 

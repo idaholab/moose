@@ -13,7 +13,8 @@ InputParameters validParams<CutPlaneAction>();
 class CutPlaneAction : public Action
 {
 public:
-  CutPlaneAction(const std::string & name, InputParameters params);
+  CutPlaneAction(const InputParameters & params);
+  CutPlaneAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED_CONSTRUCTOR
   ~CutPlaneAction();
 
   virtual void act();

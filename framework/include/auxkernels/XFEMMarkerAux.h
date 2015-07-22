@@ -30,7 +30,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  XFEMMarkerAux(const std::string & name, InputParameters parameters);
+  XFEMMarkerAux(const InputParameters & parameters);
+  XFEMMarkerAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~XFEMMarkerAux() {}
 
