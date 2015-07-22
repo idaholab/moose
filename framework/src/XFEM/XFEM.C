@@ -196,9 +196,12 @@ void XFEM::initSolution(NonlinearSystem & nl, AuxiliarySystem & aux)
       unsigned int new_node_dof = new_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
       unsigned int parent_node_dof = parent_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
 //      std::cout<<"BWS setting soln : "<<new_node_dof<<" "<<parent_node_dof<<" "<<current_solution(parent_node_dof)<<std::endl;
-      current_solution.set(new_node_dof, current_solution(parent_node_dof));
+      if (parent_node->processor_id() == _mesh->processor_id())
+      {
+        current_solution.set(new_node_dof, current_solution(parent_node_dof));
 //      std::cout<<"BWS setting old soln : "<<new_node_dof<<" "<<parent_node_dof<<" "<<old_solution(parent_node_dof)<<std::endl;
-      old_solution.set(new_node_dof, old_solution(parent_node_dof));
+        old_solution.set(new_node_dof, old_solution(parent_node_dof));
+      }
     }
   }
 
