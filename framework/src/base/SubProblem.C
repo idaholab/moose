@@ -372,11 +372,11 @@ SubProblem::SubProblem(const std::string & deprecated_name, InputParameters para
 void
 SubProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
 {
-  _app.registerRestartableData(_name + "/" + name, data, tid);
+  _app.registerRestartableData(this->name() + "/" + name, data, tid);
 }
 
 void
 SubProblem::registerRecoverableData(std::string name)
 {
-  _app.registerRecoverableData(_name + "/" + name);
+  _app.registerRecoverableData(this->name() + "/" + name);
 }
