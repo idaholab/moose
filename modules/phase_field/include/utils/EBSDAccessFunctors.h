@@ -3,6 +3,7 @@
 
 #include "MooseObject.h"
 #include "MooseEnum.h"
+#include "EulerAngles.h"
 
 /**
  * Mix-in class that adds so called access functors to select a field from
@@ -21,7 +22,7 @@ public:
 
   /// Averaged EBSD data
   struct EBSDAvgData {
-    Real phi1, phi, phi2;
+    EulerAngles * angles;
     unsigned int phase, symmetry, grain, n;
     Point p;
   };
@@ -70,13 +71,13 @@ public:
 
   // List of specialized access functors (one for each field in EBSDAvgData)
   struct EBSDAvgDataPhi1 : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a.phi1; };
+    virtual Real operator () (const EBSDAvgData & a) { return a.angles->phi1; };
   };
   struct EBSDAvgDataPhi : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a.phi; };
+    virtual Real operator () (const EBSDAvgData & a) { return a.angles->Phi; };
   };
   struct EBSDAvgDataPhi2 : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a.phi2; };
+    virtual Real operator () (const EBSDAvgData & a) { return a.angles->phi2; };
   };
   struct EBSDAvgDataPhase : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a.phase; };
