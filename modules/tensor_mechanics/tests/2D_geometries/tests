@@ -1,0 +1,23 @@
+[Tests]
+  [./plane_strain]
+    type = Exodiff
+    input = 'planestrain_test.i'
+    exodiff = 'planestrain_test_out.e'
+  [../]
+  [./axisym_smallstrain]
+    type = Exodiff
+    input = '2D-RZ_test.i'
+    exodiff = '2D-RZ_test_out.e'
+  [../]
+  [./axisym_finitestrain]
+    type = Exodiff
+    input = '2D-RZ_finiteStrain_test.i'
+    exodiff = '2D-RZ_finiteStrain_test_out.e'
+  [../]
+  [./3D_RZ_finitestrain]
+    type = Exodiff
+    input = '3D-RZ_finiteStrain_test.i'
+    exodiff = '3D-RZ_finiteStrain_test_out.e'
+    valgrind = 'HEAVY'
+  [../]
+[]
