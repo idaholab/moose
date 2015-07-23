@@ -9,9 +9,6 @@
 <QUEUE>
 <COMBINE_STREAMS>
 
-source /etc/profile.d/modules.sh
-<MODULE>
-
 cd $PBS_O_WORKDIR
 
 JOB_NUM=${PBS_JOBID%\.*}
