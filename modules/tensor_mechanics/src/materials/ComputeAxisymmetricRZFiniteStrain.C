@@ -14,9 +14,8 @@ InputParameters validParams<ComputeAxisymmetricRZFiniteStrain>()
   return params;
 }
 
-ComputeAxisymmetricRZFiniteStrain::ComputeAxisymmetricRZFiniteStrain(const std::string & name,
-                                                 InputParameters parameters) :
-    Compute2DFiniteStrain(name, parameters)
+ComputeAxisymmetricRZFiniteStrain::ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters) :
+    Compute2DFiniteStrain(parameters)
 {
 }
 

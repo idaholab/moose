@@ -14,9 +14,8 @@ InputParameters validParams<Compute2DFiniteStrain>()
   return params;
 }
 
-Compute2DFiniteStrain::Compute2DFiniteStrain(const std::string & name,
-                                                 InputParameters parameters) :
-    ComputeFiniteStrain(name, parameters)
+Compute2DFiniteStrain::Compute2DFiniteStrain(const InputParameters & parameters) :
+    ComputeFiniteStrain(parameters)
 {
 }
 

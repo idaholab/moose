@@ -17,7 +17,7 @@
 class ComputeAxisymmetricRZFiniteStrain : public Compute2DFiniteStrain
 {
 public:
-  ComputeAxisymmetricRZFiniteStrain(const std:: string & name, InputParameters parameters);
+  ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
 
 protected:
   virtual Real computeDeformGradZZ();

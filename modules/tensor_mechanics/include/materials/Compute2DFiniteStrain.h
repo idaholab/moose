@@ -19,7 +19,7 @@
 class Compute2DFiniteStrain : public ComputeFiniteStrain
 {
 public:
-  Compute2DFiniteStrain(const std:: string & name, InputParameters parameters);
+  Compute2DFiniteStrain(const InputParameters & parameters);
 
 protected:
   virtual void computeProperties();
