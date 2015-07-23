@@ -27,7 +27,7 @@
   [./SeffVG]
     type = RichardsSeff1VG
     m = 0.336
-    al = 1.43E-4 # same deal with PETSc's "constant state"
+    al = 1.43E-4
   [../]
   [./RelPermPower]
     type = RichardsRelPermVG1
@@ -117,24 +117,6 @@
   [../]
 []
 
-#[Adaptivity]
-#  marker = errorfrac
-#  max_h_level = 3
-#  [./Indicators]
-#    [./error]
-#      type = RichardsFluxJumpIndicator
-#      variable = pressure
-#    [../]
-#  [../]
-#  [./Markers]
-#    [./errorfrac]
-#      type = ErrorFractionMarker
-#      refine = 0.5
-#      coarsen = 0.3
-#      indicator = error
-#   [../]
-#  [../]
-#[]
 
 [Preconditioning]
   active = 'andy'
@@ -154,7 +136,6 @@
   type = Transient
   solve_type = Newton
   petsc_options = '-snes_converged_reason'
-  #end_time = 8.64E6
   end_time = 345600
 
   [./TimeStepper]
@@ -162,21 +143,6 @@
     time_dt = '1E-2 1 10 500 5000 50000'
     time_t = '0 10 100 1000 10000 500000'
   [../]
-
-
-#  [./TimeStepper]
-#    type = FunctionControlledDT
-#    functions = ''
-#    maximums = ''
-#    minimums = ''
-#    dt = 1e-2
-#    increment = 1.1
-#    decrement = 0.5
-#    maxDt = 1E12
-#    minDt = 1
-#    adapt_log = false
-#    percent_change = 0.1
-#  [../]
 []
 
 

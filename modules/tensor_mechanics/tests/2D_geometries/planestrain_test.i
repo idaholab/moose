@@ -46,14 +46,6 @@
   [../]
 []
 
-#[Postprocessors]
-#  [./react_z]
-#    type = MaterialTensorIntegral
-#    tensor = stress
-#    index = 2
-#    use_displaced_mesh = true
-#  [../]
-#[]
 
 [Kernels]
   [./TensorMechanics]
@@ -124,7 +116,6 @@
 [Functions]
   [./pull]
     type = ParsedFunction
-#    x='0     1  10'
     value ='0.01 * t'
   [../]
 []

@@ -156,7 +156,7 @@
     variable = pwater
     unit_weight = '0 0 0'
     re_constant = 0.1594
-    character = 2 # this is to make the length=1 borehole fill the entire z=2 height
+    character = 2 # this is to make the length 1m borehole fill the entire 2m height
     MyNameIsAndyWilkins = false
   [../]
   [./bh_gas_dummy]
@@ -168,7 +168,7 @@
     variable = pgas
     unit_weight = '0 0 0'
     re_constant = 0.1594
-    character = 2 # this is to make the length=1 borehole fill the entire z=2 height
+    character = 2 # this is to make the length 1m borehole fill the entire 2m height
     MyNameIsAndyWilkins = false
   [../]
 []
@@ -221,7 +221,6 @@
   solve_type = NEWTON
 
   [./TimeStepper]
-    # get only marginally better results for smaller time steps
     type = FunctionDT
     time_dt = '1000 10000'
     time_t = '100 1000'

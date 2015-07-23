@@ -20,7 +20,7 @@
   [./SeffVG]
     type = RichardsSeff1VG
     m = 0.336
-    al = 1.43E-4 # same deal with PETSc's "constant state"
+    al = 1.43E-4
   [../]
   [./RelPermPower]
     type = RichardsRelPermVG1
@@ -111,24 +111,6 @@
   [../]
 []
 
-#[Adaptivity]
-#  marker = errorfrac
-#  max_h_level = 3
-#  [./Indicators]
-#    [./error]
-#      type = RichardsFluxJumpIndicator
-#      variable = pressure
-#    [../]
-#  [../]
-#  [./Markers]
-#    [./errorfrac]
-#      type = ErrorFractionMarker
-#      refine = 0.5
-#      coarsen = 0.3
-#      indicator = error
-#   [../]
-#  [../]
-#[]
 
 [Preconditioning]
   active = 'andy'
@@ -155,23 +137,7 @@
     time_dt = '2E4 1E6'
     time_t = '0 1E6'
   [../]
-
-
-#  [./TimeStepper]
-#    type = FunctionControlledDT
-#    functions = ''
-#    maximums = ''
-#    minimums = ''
-#    dt = 1e-2
-#    increment = 1.1
-#    decrement = 0.5
-#    maxDt = 1E12
-#    minDt = 1
-#    adapt_log = false
-#    percent_change = 0.1
-#  [../]
 []
-
 
 [Outputs]
   file_base = rd03

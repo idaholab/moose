@@ -177,7 +177,6 @@
   [./initial_water]
     type = ParsedFunction
     value = 1000000*(1-min(x/5,1))-300000*(max(x-5,0)/max(abs(x-5),1E-10))
-    #value = max(1000000*(1-x/5),-300000)
   [../]
   [./initial_gas]
     type = ParsedFunction

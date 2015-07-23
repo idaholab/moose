@@ -183,8 +183,6 @@
 []
 
 [Preconditioning]
-#active = ''
-
   [./SMP]
    type = SMP
    full=true
@@ -199,9 +197,7 @@
   dtmin=0.1
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 
   petsc_options_iname = -pc_hypre_type
   petsc_options_value = boomerang
