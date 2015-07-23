@@ -204,6 +204,8 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
     std::string upper(*it);
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
+    checkDeprecatedBase(upper);
+
     _current_names.insert(upper);
 
     if (std::find(_names.begin(), _names.end(), upper) == _names.end())
@@ -267,6 +269,13 @@ MultiMooseEnum::unique_items_size() const
 {
   std::set<int> unique_ids(_current_ids.begin(), _current_ids.end());
   return unique_ids.size();
+}
+
+void
+MultiMooseEnum::checkDeprecated() const
+{
+  for (std::set<std::string>::const_iterator it = _current_names.begin(); it != _current_names.end(); ++it)
+    checkDeprecatedBase(*it);
 }
 
 std::ostream &

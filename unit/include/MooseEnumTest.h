@@ -26,6 +26,7 @@ class MooseEnumTest : public CppUnit::TestFixture
 
   CPPUNIT_TEST( multiTestOne );
   CPPUNIT_TEST( withNamesFromTest );
+  CPPUNIT_TEST( testDeprecate );
   CPPUNIT_TEST( testErrors );
 
   CPPUNIT_TEST_SUITE_END();
@@ -33,6 +34,7 @@ class MooseEnumTest : public CppUnit::TestFixture
 public:
   void multiTestOne();
   void withNamesFromTest();
+  void testDeprecate();
   void testErrors();
 };
 
