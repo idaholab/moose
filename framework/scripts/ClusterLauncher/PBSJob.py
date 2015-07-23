@@ -20,7 +20,6 @@ class PBSJob(Job):
     params.addStringSubParam('combine_streams', '#PBS -j oe', "Combine stdout and stderror into one file (needed for NO EXPECTED ERR)")
     params.addStringSubParam('threads', '--n-threads=THREADS', "The number of threads to run per MPI process.")
     params.addStringSubParam('queue', '#PBS -q QUEUE', "Which queue to submit this job to.")
-    params.addStringSubParam('module', 'module load MODULE', 'moose-dev-gcc', "The module to load.")
     params.addStringSubParam('cli_args', 'CLI_ARGS', "Any extra command line arguments to tack on.")
     params.addStringSubParam('notifications', '#PBS -m NOTIFICATIONS', "The PBS notifications to enable: 'b' for begin, 'e' for end, 'a' for abort.")
     params.addStringSubParam('notify_address', '#PBS -M NOTIFY_ADDRESS', "The email address to use for PBS notifications")
