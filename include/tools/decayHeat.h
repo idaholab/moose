@@ -11,7 +11,7 @@ InputParameters validParams<decayHeat>();
 class decayHeat : public CrowTools
 {
 public:
-  decayHeat(const std::string & name, InputParameters parameters);
+  decayHeat(const InputParameters & parameters);
   virtual ~decayHeat();
   double compute(double time);
 

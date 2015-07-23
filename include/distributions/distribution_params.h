@@ -13,7 +13,7 @@ class distribution : public MooseObject, public virtual BasicDistribution
 {
 public:
   //> constructor for built-in distributions
-  distribution(const std::string & name, InputParameters parameters);
+  distribution(const InputParameters & parameters);
 
   virtual ~distribution();
 
@@ -25,7 +25,7 @@ InputParameters validParams<UniformDistribution>();
 class UniformDistribution : public distribution, public BasicUniformDistribution
 {
 public:
-  UniformDistribution(const std::string & name, InputParameters parameters);
+  UniformDistribution(const InputParameters & parameters);
   virtual ~UniformDistribution();
 };
 
@@ -35,7 +35,7 @@ InputParameters validParams<NormalDistribution>();
 class NormalDistribution : public distribution, public BasicNormalDistribution
 {
 public:
-  NormalDistribution(const std::string & name, InputParameters parameters);
+  NormalDistribution(const InputParameters & parameters);
   virtual ~NormalDistribution();
 };
 
@@ -45,7 +45,7 @@ InputParameters validParams<LogNormalDistribution>();
 class LogNormalDistribution : public distribution, public BasicLogNormalDistribution
 {
 public:
-  LogNormalDistribution(const std::string & name, InputParameters parameters);
+  LogNormalDistribution(const InputParameters & parameters);
   virtual ~LogNormalDistribution();
 };
 
@@ -55,7 +55,7 @@ InputParameters validParams<LogisticDistribution>();
 class LogisticDistribution : public distribution, public BasicLogisticDistribution
 {
 public:
-  LogisticDistribution(const std::string & name, InputParameters parameters);
+  LogisticDistribution(const InputParameters & parameters);
   virtual ~LogisticDistribution();
 };
 
@@ -65,7 +65,7 @@ InputParameters validParams<TriangularDistribution>();
 class TriangularDistribution : public distribution, public BasicTriangularDistribution
 {
 public:
-  TriangularDistribution(const std::string & name, InputParameters parameters);
+  TriangularDistribution(const InputParameters & parameters);
   virtual ~TriangularDistribution();
 };
 
@@ -75,7 +75,7 @@ InputParameters validParams<ExponentialDistribution>();
 class ExponentialDistribution : public distribution, public BasicExponentialDistribution
 {
 public:
-  ExponentialDistribution(const std::string & name, InputParameters parameters);
+  ExponentialDistribution(const InputParameters & parameters);
   virtual ~ExponentialDistribution();
 };
 
@@ -85,7 +85,7 @@ InputParameters validParams<WeibullDistribution>();
 class WeibullDistribution : public distribution, public BasicWeibullDistribution
 {
 public:
-  WeibullDistribution(const std::string & name, InputParameters parameters);
+  WeibullDistribution(const InputParameters & parameters);
   virtual ~WeibullDistribution();
 };
 
@@ -97,7 +97,7 @@ InputParameters validParams<GammaDistribution>();
 class GammaDistribution : public distribution, public BasicGammaDistribution
 {
 public:
-  GammaDistribution(const std::string & name, InputParameters parameters);
+  GammaDistribution(const InputParameters & parameters);
   virtual ~GammaDistribution();
 };
 
@@ -109,7 +109,7 @@ InputParameters validParams<BetaDistribution>();
 class BetaDistribution : public distribution, public BasicBetaDistribution
 {
 public:
-  BetaDistribution(const std::string & name, InputParameters parameters);
+  BetaDistribution(const InputParameters & parameters);
   virtual ~BetaDistribution();
 };
 
@@ -121,7 +121,7 @@ InputParameters validParams<PoissonDistribution>();
 class PoissonDistribution : public distribution, public BasicPoissonDistribution
 {
 public:
-  PoissonDistribution(const std::string & name, InputParameters parameters);
+  PoissonDistribution(const InputParameters & parameters);
   virtual ~PoissonDistribution();
 };
 
@@ -133,7 +133,7 @@ InputParameters validParams<BinomialDistribution>();
 class BinomialDistribution : public distribution, public BasicBinomialDistribution
 {
 public:
-  BinomialDistribution(const std::string & name, InputParameters parameters);
+  BinomialDistribution(const InputParameters & parameters);
   virtual ~BinomialDistribution();
 };
 
@@ -145,7 +145,7 @@ InputParameters validParams<BernoulliDistribution>();
 class BernoulliDistribution : public distribution, public BasicBernoulliDistribution
 {
 public:
-  BernoulliDistribution(const std::string & name, InputParameters parameters);
+  BernoulliDistribution(const InputParameters & parameters);
   virtual ~BernoulliDistribution();
 };
 
@@ -157,7 +157,7 @@ InputParameters validParams<ConstantDistribution>();
 class ConstantDistribution : public distribution, public BasicConstantDistribution
 {
 public:
-  ConstantDistribution(const std::string & name, InputParameters parameters);
+  ConstantDistribution(const InputParameters & parameters);
   virtual ~ConstantDistribution();
 };
 

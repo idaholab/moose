@@ -11,7 +11,7 @@ InputParameters validParams<batteries>();
 class batteries : public CrowTools
 {
 public:
-  batteries(const std::string & name, InputParameters parameters);
+  batteries(const InputParameters & parameters);
   virtual ~batteries();
   double compute(double time);
 };

@@ -13,7 +13,7 @@ InputParameters validParams<pumpCoastdownExponential>();
 class pumpCoastdownExponential : public CrowTools
 {
 public:
-  pumpCoastdownExponential(const std::string & name, InputParameters parameters);
+  pumpCoastdownExponential(const InputParameters & parameters);
   ~pumpCoastdownExponential();
   double compute (double time);
 

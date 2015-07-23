@@ -25,8 +25,8 @@ InputParameters validParams<pumpCoastdownExponential>(){
 
 
 
-pumpCoastdownExponential::pumpCoastdownExponential(const std::string & name, InputParameters parameters):
-  CrowTools(name,parameters)
+pumpCoastdownExponential::pumpCoastdownExponential(const InputParameters & parameters):
+  CrowTools(parameters)
 {
   _tool_parameters["coefficient"      ] = getParam<double>("coefficient");
   _tool_parameters["initial_flow_rate"] = getParam<double>("initial_flow_rate");

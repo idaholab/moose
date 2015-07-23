@@ -18,8 +18,8 @@ InputParameters validParams<CrowTools>(){
   return params;
 }
 
-CrowTools::CrowTools(const std::string & name, InputParameters parameters):
-    MooseObject(name,parameters)
+CrowTools::CrowTools(const InputParameters & parameters):
+    MooseObject(parameters)
 {
   _type=getParam<std::string>("type");
 }

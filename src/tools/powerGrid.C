@@ -17,8 +17,8 @@ InputParameters validParams<powerGrid>(){
    return params;
 }
 
-powerGrid::powerGrid(const std::string & name, InputParameters parameters):
-  CrowTools(name,parameters)
+powerGrid::powerGrid(const InputParameters & parameters):
+  CrowTools(parameters)
 {
   _tool_parameters["status"      ] = getParam<double>("status");
 }

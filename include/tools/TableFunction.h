@@ -13,7 +13,7 @@ InputParameters validParams<TableFunction>();
 class TableFunction : public CrowTools
 {
 public:
-  TableFunction(const std::string & name, InputParameters parameters);
+  TableFunction(const InputParameters & parameters);
   virtual ~TableFunction();
   double compute(double time);
 
