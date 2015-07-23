@@ -789,6 +789,9 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_predictor",              Predictor,              false);
   registerMooseObjectTask("setup_time_stepper",           TimeStepper,            false);
 
+
+  registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,            false);
+
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
   registerMooseObjectTask("add_split",                    Split,                  false);
 
