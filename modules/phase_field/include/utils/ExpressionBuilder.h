@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iomanip>
 
+#include "MooseError.h"
 #include "libmesh/libmesh_common.h"
 
 using namespace libMesh;
@@ -55,7 +56,7 @@ public:
   typedef std::vector<EBTermNode *> EBTermNodeList;
   typedef std::vector<const EBSubstitutionRule *> EBSubstitutionRuleList;
 
-  // Base class for nodes in the expression tree
+  /// Base class for nodes in the expression tree
   class EBTermNode
   {
   public:
@@ -68,150 +69,167 @@ public:
     friend std::ostream& operator<< (std::ostream & os, const EBTermNode & node) { return os << node.stringify(); }
   };
 
-  // Template class for leaf nodes holding numbers in the expression tree
+  /// Template class for leaf nodes holding numbers in the expression tree
   template<typename T>
   class EBNumberNode : public EBTermNode
   {
-    T value;
+    T _value;
 
   public:
-    EBNumberNode(T _value) : value(_value) {};
-    virtual EBNumberNode<T> * clone() const { return new EBNumberNode(value); }
+    EBNumberNode(T value) : _value(value) {};
+    virtual EBNumberNode<T> * clone() const { return new EBNumberNode(_value); }
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 0; }
   };
 
-  // Template class for leaf nodes holding symbols (i.e. variables) in the expression tree
+  /// Template class for leaf nodes holding symbols (i.e. variables) in the expression tree
   class EBSymbolNode : public EBTermNode
   {
-    std::string symbol;
+    std::string _symbol;
 
   public:
-    EBSymbolNode(std::string _symbol) : symbol(_symbol) {};
-    virtual EBSymbolNode * clone() const { return new EBSymbolNode(symbol); }
+    EBSymbolNode(std::string symbol) : _symbol(symbol) {};
+    virtual EBSymbolNode * clone() const { return new EBSymbolNode(_symbol); }
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 0; }
   };
 
-  // Base class for nodes with a single sub node (i.e. functions or operators taking one argument)
+  /**
+   * Template class for leaf nodes holding anonymous IDs in the expression tree.
+   * No such node must be left in the final expression that is serialized and passed to FParser
+   */
+  class EBTempIDNode : public EBTermNode
+  {
+    unsigned long _id;
+
+  public:
+    EBTempIDNode(unsigned int id) : _id(id) {};
+    virtual EBTempIDNode * clone() const { return new EBTempIDNode(_id); }
+
+    virtual std::string stringify() const; // returns "[idnumber]"
+    virtual int precedence() const { return 0; }
+  };
+
+  /// Base class for nodes with a single sub node (i.e. functions or operators taking one argument)
   class EBUnaryTermNode : public EBTermNode
   {
   public:
-    EBUnaryTermNode(EBTermNode * _subnode) : subnode(_subnode) {};
-    virtual ~EBUnaryTermNode() { delete subnode; };
+    EBUnaryTermNode(EBTermNode * subnode) : _subnode(subnode) {};
+    virtual ~EBUnaryTermNode() { delete _subnode; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
-    const EBTermNode * getSubnode() const { return subnode; }
+    const EBTermNode * getSubnode() const { return _subnode; }
 
   protected:
-    EBTermNode *subnode;
+    EBTermNode * _subnode;
   };
 
-  // Node representing a function with two arguments
+  /// Node representing a function with two arguments
   class EBUnaryFuncTermNode : public EBUnaryTermNode
   {
   public:
-    enum NodeType { SIN, COS, TAN, ABS, LOG, LOG2, LOG10, EXP, SINH, COSH } type;
+    enum NodeType { SIN, COS, TAN, ABS, LOG, LOG2, LOG10, EXP, SINH, COSH } _type;
 
-    EBUnaryFuncTermNode(EBTermNode * _subnode, NodeType _type) :
-      EBUnaryTermNode(_subnode), type(_type) {};
+    EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type) :
+      EBUnaryTermNode(subnode), _type(type) {};
     virtual EBUnaryFuncTermNode * clone() const {
-      return new EBUnaryFuncTermNode(subnode->clone(), type);
+      return new EBUnaryFuncTermNode(_subnode->clone(), _type);
     };
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 2; }
   };
 
-  // Node representing a unary operator
+  /// Node representing a unary operator
   class EBUnaryOpTermNode : public EBUnaryTermNode
   {
   public:
-    enum NodeType { NEG, LOGICNOT } type;
+    enum NodeType { NEG, LOGICNOT } _type;
 
-    EBUnaryOpTermNode(EBTermNode * _subnode, NodeType _type) :
-      EBUnaryTermNode(_subnode), type(_type) {};
+    EBUnaryOpTermNode(EBTermNode * subnode, NodeType type) :
+      EBUnaryTermNode(subnode), _type(type) {};
     virtual EBUnaryOpTermNode * clone() const {
-      return new EBUnaryOpTermNode(subnode->clone(), type);
+      return new EBUnaryOpTermNode(_subnode->clone(), _type);
     };
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 3; }
   };
 
-  // Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
+  /// Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
   class EBBinaryTermNode : public EBTermNode
   {
   public:
-    EBBinaryTermNode(EBTermNode * _left, EBTermNode * _right) : left(_left), right(_right) {};
-    virtual ~EBBinaryTermNode() { delete left; delete right; };
+    EBBinaryTermNode(EBTermNode * left, EBTermNode * right) : _left(left), _right(right) {};
+    virtual ~EBBinaryTermNode() { delete _left; delete _right; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
 
   protected:
-    EBTermNode *left, *right;
+    EBTermNode * _left;
+    EBTermNode * _right;
   };
 
-  // Node representing a binary operator
+  /// Node representing a binary operator
   class EBBinaryOpTermNode : public EBBinaryTermNode
   {
   public:
     enum NodeType { ADD, SUB, MUL, DIV, MOD, POW, LESS, GREATER, LESSEQ, GREATEREQ, EQ, NOTEQ };
 
-    EBBinaryOpTermNode(EBTermNode * _left, EBTermNode * _right, NodeType _type) :
-      EBBinaryTermNode(_left, _right), type(_type) {};
+    EBBinaryOpTermNode(EBTermNode * left, EBTermNode * right, NodeType type) :
+      EBBinaryTermNode(left, right), _type(type) {};
     virtual EBBinaryOpTermNode * clone() const {
-      return new EBBinaryOpTermNode(left->clone(), right->clone(), type);
+      return new EBBinaryOpTermNode(_left->clone(), _right->clone(), _type);
     };
 
     virtual std::string stringify() const;
     virtual int precedence() const;
 
   protected:
-    NodeType type;
+    NodeType _type;
   };
 
-  // Node representing a function with two arguments
+  /// Node representing a function with two arguments
   class EBBinaryFuncTermNode : public EBBinaryTermNode
   {
   public:
-    enum NodeType { MIN, MAX, ATAN2, HYPOT, PLOG } type;
+    enum NodeType { MIN, MAX, ATAN2, HYPOT, PLOG } _type;
 
-    EBBinaryFuncTermNode(EBTermNode * _left, EBTermNode * _right, NodeType _type) :
-      EBBinaryTermNode(_left, _right), type(_type) {};
+    EBBinaryFuncTermNode(EBTermNode * left, EBTermNode * right, NodeType type) :
+      EBBinaryTermNode(left, right), _type(type) {};
     virtual EBBinaryFuncTermNode * clone() const {
-      return new EBBinaryFuncTermNode(left->clone(), right->clone(), type);
+      return new EBBinaryFuncTermNode(_left->clone(), _right->clone(), _type);
     };
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 2; }
   };
 
-  // Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
+  /// Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
   class EBTernaryTermNode : public EBBinaryTermNode
   {
   public:
-    EBTernaryTermNode(EBTermNode * _left, EBTermNode * _middle, EBTermNode * _right) : EBBinaryTermNode(_left, _right), middle(_middle) {};
-    virtual ~EBTernaryTermNode() { delete middle; };
+    EBTernaryTermNode(EBTermNode * left, EBTermNode * middle, EBTermNode * right) : EBBinaryTermNode(left, right), _middle(middle) {};
+    virtual ~EBTernaryTermNode() { delete _middle; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
 
   protected:
-    EBTermNode *middle;
+    EBTermNode * _middle;
   };
 
-  // Node representing a function with three arguments
+  /// Node representing a function with three arguments
   class EBTernaryFuncTermNode : public EBTernaryTermNode
   {
   public:
-    enum NodeType { CONDITIONAL } type;
+    enum NodeType { CONDITIONAL } _type;
 
-    EBTernaryFuncTermNode(EBTermNode * _left, EBTermNode * _middle, EBTermNode * _right, NodeType _type) :
-      EBTernaryTermNode(_left, _middle, _right), type(_type) {};
+    EBTernaryFuncTermNode(EBTermNode * left, EBTermNode * middle, EBTermNode * right, NodeType type) :
+      EBTernaryTermNode(left, middle, right), _type(type) {};
     virtual EBTernaryFuncTermNode * clone() const {
-      return new EBTernaryFuncTermNode(left->clone(), middle->clone(), right->clone(), type);
+      return new EBTernaryFuncTermNode(_left->clone(), _middle->clone(), _right->clone(), _type);
     };
 
     virtual std::string stringify() const;
@@ -219,57 +237,81 @@ public:
   };
 
 
-  // substitution rule functor base class to perform flexible term substitutions
+  /**
+   * Substitution rule functor base class to perform flexible term substitutions
+   */
   class EBSubstitutionRule {
   public:
     virtual EBTermNode * apply(const EBTermNode *) const = 0;
     virtual ~EBSubstitutionRule() {}
   };
 
+  /**
+   * Substitution rule base class that applies to nodes of type Node_T
+   */
   template<class Node_T>
   class EBSubstitutionRuleTyped : public EBSubstitutionRule {
   public:
     virtual EBTermNode * apply(const EBTermNode *) const;
   protected:
-    // on successful substitution this returns a new node to replace toe old one, otherwise it returns NULL
+    // on successful substitution this returns a new node to replace the old one, otherwise it returns NULL
     virtual EBTermNode * substitute(const Node_T &) const = 0;
   };
 
+  /**
+   * Generic Substitution rule to replace all occurences of a given symbol node
+   * term with a user defined term. This is used by EBFunction.
+   */
   class EBTermSubstitution : public EBSubstitutionRuleTyped<EBSymbolNode> {
   public:
-    EBTermSubstitution(const EBTerm & _find, const EBTerm & _replace);
-    virtual ~EBTermSubstitution() { delete replace; }
+    EBTermSubstitution(const EBTerm & find, const EBTerm & replace);
+    virtual ~EBTermSubstitution() { delete _replace; }
   protected:
     virtual EBTermNode * substitute(const EBSymbolNode &) const;
-    std::string find;
-    EBTermNode * replace;
+    std::string _find;
+    EBTermNode * _replace;
   };
 
+  /**
+   * Substitution rule to replace all occurences of log(x) with plog(x, epsilon)
+   * with a user defined term for epsilon.
+   */
   class EBLogPlogSubstitution : public EBSubstitutionRuleTyped<EBUnaryFuncTermNode> {
   public:
-    EBLogPlogSubstitution(const EBTerm & _epsilon) : epsilon(_epsilon.getRoot()->clone()) {}
-    virtual ~EBLogPlogSubstitution() { delete epsilon; }
+    EBLogPlogSubstitution(const EBTerm & epsilon) : _epsilon(epsilon.cloneRoot()) {
+      mooseAssert(_epsilon != NULL, "Epsilon must not be an empty term in EBLogPlogSubstitution");
+    }
+    virtual ~EBLogPlogSubstitution() { delete _epsilon; }
   protected:
     virtual EBTermNode * substitute(const EBUnaryFuncTermNode &) const;
-    EBTermNode * epsilon;
+    EBTermNode * _epsilon;
   };
 
 
-  // User facing host object for an expression tree
+  /**
+   * User facing host object for an expression tree. Each EBTerm contains a _root
+   * node pointer to an EBTermNode object. The _root pointer should never be NULL,
+   * but it should be safe if it ever is. The default constructor assigns a
+   * EBTempIDNode to _root with a unique ID.
+   */
   class EBTerm
   {
   public:
-    EBTerm() : root(NULL) {};
-    EBTerm(const EBTerm & term) : root(term.root==NULL ? NULL : term.root->clone()) {};
-    ~EBTerm() { delete root; };
+    // the default constructor assigns a temporary id node to root we use the address of the
+    // current EBTerm object as the ID. This could be problematic if we create and destroy terms,
+    // but then we should not expect the substitution to do sane things anyways.
+    EBTerm() : _root(new EBTempIDNode(reinterpret_cast<unsigned long>(this))) {};
+
+    EBTerm(const EBTerm & term) : _root(term.cloneRoot()) {};
+    ~EBTerm() { delete _root; };
 
     // construct a term from a node
-    EBTerm(EBTermNode * _root) : root(_root) {};
+    EBTerm(EBTermNode * root) : _root(root) {};
 
     // construct from number or string
-    EBTerm(int number) : root(new EBNumberNode<int>(number)) {}
-    EBTerm(Real number) : root(new EBNumberNode<Real>(number)) {}
-    EBTerm(const char *symbol) : root(new EBSymbolNode(symbol)) {}
+    EBTerm(int number) : _root(new EBNumberNode<int>(number)) {}
+    EBTerm(Real number) : _root(new EBNumberNode<Real>(number)) {}
+    EBTerm(const char *symbol) : _root(new EBSymbolNode(symbol)) {}
 
     // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
     friend EBTermList operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTerm & rarg);
@@ -279,19 +321,20 @@ public:
     // dump term as FParser expression
     friend std::ostream & operator<< (std::ostream & os, const EBTerm & term);
     // cast into a string
-    operator std::string() const { return root->stringify(); }
+    operator std::string() const { return _root->stringify(); }
 
     // assign a term
-    EBTerm & operator= (const EBTerm & term) { delete root; root = term.root==NULL ? NULL : term.root->clone(); return *this; }
+    EBTerm & operator= (const EBTerm & term) { delete _root; _root = term.cloneRoot(); return *this; }
 
     // perform a substitution (returns substituton count)
     unsigned int substitute(const EBSubstitutionRule & rule);
     unsigned int substitute(const EBSubstitutionRuleList & rules);
 
-    const EBTermNode * getRoot() const { return root; }
+    const EBTermNode * getRoot() const { return _root; }
+    EBTermNode * cloneRoot() const { return _root == NULL ? NULL : _root->clone(); }
 
   protected:
-    EBTermNode *root;
+    EBTermNode * _root;
 
   public:
     /**
@@ -299,7 +342,8 @@ public:
      */
     #define UNARY_OP_IMPLEMENT(op,OP) \
     EBTerm operator op () { \
-      return EBTerm(new EBUnaryOpTermNode(root->clone(), EBUnaryOpTermNode::OP)); \
+      mooseAssert(_root != NULL, "Empty term provided for unary operator " #op); \
+      return EBTerm(new EBUnaryOpTermNode(cloneRoot(), EBUnaryOpTermNode::OP)); \
     }
     UNARY_OP_IMPLEMENT(-,NEG)
     UNARY_OP_IMPLEMENT(!,LOGICNOT)
@@ -323,16 +367,22 @@ public:
      */
     #define BINARY_OP_IMPLEMENT(op,OP) \
     EBTerm operator op (const EBTerm & term) { \
-      return EBTerm(new EBBinaryOpTermNode(root->clone(), term.root->clone(), EBBinaryOpTermNode::OP)); \
+      mooseAssert(_root != NULL, "Empty term provided on left side of operator " #op); \
+      mooseAssert(term._root != NULL, "Empty term provided on right side of operator " #op); \
+      return EBTerm(new EBBinaryOpTermNode(cloneRoot(), term.cloneRoot(), EBBinaryOpTermNode::OP)); \
     } \
     friend EBTerm operator op (int left, const EBTerm & right) { \
-      return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<int>(left), right.root->clone(), EBBinaryOpTermNode::OP)); \
+      mooseAssert(right._root != NULL, "Empty term provided on right side of operator " #op); \
+      return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<int>(left), right.cloneRoot(), EBBinaryOpTermNode::OP)); \
     } \
     friend EBTerm operator op (Real left, const EBTerm & right) { \
-      return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<Real>(left), right.root->clone(), EBBinaryOpTermNode::OP)); \
+      mooseAssert(right._root != NULL, "Empty term provided on right side of operator " #op); \
+      return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<Real>(left), right.cloneRoot(), EBBinaryOpTermNode::OP)); \
     } \
     friend EBTerm operator op (const EBFunction & left, const EBTerm & right) { \
-      return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), right.root->clone(), EBBinaryOpTermNode::OP)); \
+      mooseAssert(EBTerm(left)._root != NULL, "Empty term provided on left side of operator " #op); \
+      mooseAssert(right._root != NULL, "Empty term provided on right side of operator " #op); \
+      return EBTerm(new EBBinaryOpTermNode(EBTerm(left).cloneRoot(), right.cloneRoot(), EBBinaryOpTermNode::OP)); \
     } \
     friend EBTerm operator op (const EBFunction & left, const EBFunction & right); \
     friend EBTerm operator op (int left, const EBFunction & right); \
@@ -366,18 +416,21 @@ public:
     friend EBTerm conditional(const EBTerm &, const EBTerm &, const EBTerm &);
   };
 
-  // User facing host object for a function. This combines a term with an argument list.
+  /// User facing host object for a function. This combines a term with an argument list.
   class EBFunction
   {
   public:
     EBFunction() {};
 
-    // set the temporary argument list which is either used for evaluation
-    // or committed to the argument list upon function definition (assignment)
+    /// @{
+    /// set the temporary argument list which is either used for evaluation
+    /// or committed to the argument list upon function definition (assignment)
     EBFunction & operator() (const EBTerm & arg);
     EBFunction & operator() (const EBTermList & args);
+    /// @}
 
-    // convenience operators to allow single bracket syntax
+    /// @{
+    /// convenience operators to allow single bracket syntax
     EBFunction & operator() (const EBTerm & a1, const EBTerm & a2) { return (*this)((a1,a2)); }
     EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3) { return (*this)((a1,a2,a3)); }
     EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4) { return (*this)((a1,a2,a3,a4)); }
@@ -386,44 +439,59 @@ public:
     EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7) { return (*this)((a1,a2,a3,a4,a5,a6,a7)); }
     EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7, const EBTerm & a8) { return (*this)((a1,a2,a3,a4,a5,a6,a7,a8)); }
     EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7, const EBTerm & a8, const EBTerm & a9) { return (*this)((a1,a2,a3,a4,a5,a6,a7,a8,a9)); }
+    /// @}
 
-    // cast an EBFunction into an EBTerm
+    /// cast an EBFunction into an EBTerm
     operator EBTerm() const;
 
-    // cast into a string (via the cast into a term above)
+    /// cast into a string (via the cast into a term above)
     operator std::string() const;
 
-    // function definition (assignment)
+    /// @{
+    /// function definition (assignment)
     EBFunction & operator= (const EBTerm &);
     EBFunction & operator= (const EBFunction &);
+    /// @}
 
-    // get the list of arguments and check if they are all symbols
+    /// get the list of arguments and check if they are all symbols
     std::string args();
 
-    /**
-     * Unary operators on functions
-     */
+    /// @{
+    /// Unary operators on functions
     EBTerm operator- () { return -EBTerm(*this); }
     EBTerm operator! () { return !EBTerm(*this); }
+    /// @}
 
     // perform a substitution (returns substituton count)
     unsigned int substitute(const EBSubstitutionRule & rule);
     unsigned int substitute(const EBSubstitutionRuleList & rules);
 
   protected:
-    EBTermList arguments, eval_arguments;
-    EBTerm term;
+    /// argument list the function is declared with
+    EBTermList _arguments;
+    /// argument list passed in when evaluating the function
+    EBTermList _eval_arguments;
+
+    // underlying term that the _eval_arguments are substituted in
+    EBTerm _term;
   };
 
+  /**
+   * Binary operators
+   */
   #define BINARYFUNC_OP_IMPLEMENT(op,OP) \
   friend EBTerm operator op (const EBFunction & left, const EBFunction & right) { \
-    return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
+    mooseAssert(EBTerm(left)._root != NULL, "Empty term provided on left side of operator " #op); \
+    mooseAssert(EBTerm(right)._root != NULL, "Empty term provided on right side of operator " #op); \
+    return EBTerm(new EBBinaryOpTermNode(EBTerm(left).cloneRoot(), EBTerm(right).cloneRoot(), EBBinaryOpTermNode::OP)); \
   } \
   friend EBTerm operator op (int left, const EBFunction & right) { \
-    return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<int>(left), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
+    mooseAssert(EBTerm(right)._root != NULL, "Empty term provided on right side of operator " #op); \
+    return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<int>(left), EBTerm(right).cloneRoot(), EBBinaryOpTermNode::OP)); \
   } \
   friend EBTerm operator op (Real left, const EBFunction & right) { \
-    return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<Real>(left), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
+    mooseAssert(EBTerm(right)._root != NULL, "Empty term provided on right side of operator " #op); \
+    return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<Real>(left), EBTerm(right).cloneRoot(), EBBinaryOpTermNode::OP)); \
   }
   BINARYFUNC_OP_IMPLEMENT(+,ADD)
   BINARYFUNC_OP_IMPLEMENT(-,SUB)
@@ -443,7 +511,7 @@ template<typename T>
 ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, T exponent) {
   return ExpressionBuilder::EBTerm(
     new ExpressionBuilder::EBBinaryOpTermNode(
-      left.root->clone(),
+      left.cloneRoot(),
       new ExpressionBuilder::EBNumberNode<T>(exponent),
       ExpressionBuilder::EBBinaryOpTermNode::POW
     )
@@ -456,7 +524,7 @@ std::string
 ExpressionBuilder::EBNumberNode<T>::stringify() const
 {
   std::ostringstream s;
-  s << std::setprecision(12) << value;
+  s << std::setprecision(12) << _value;
   return s.str();
 }
 
