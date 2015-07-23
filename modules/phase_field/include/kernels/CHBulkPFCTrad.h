@@ -12,7 +12,8 @@ InputParameters validParams<CHBulkPFCTrad>();
 class CHBulkPFCTrad : public CHBulk
 {
 public:
-  CHBulkPFCTrad(const std::string & name, InputParameters parameters);
+  CHBulkPFCTrad(const InputParameters & parameters);
+  CHBulkPFCTrad(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);

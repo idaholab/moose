@@ -28,8 +28,8 @@ InputParameters validParams<NSWeakStagnationBC>()
 
 
 // Constructor, be sure to call the base class constructor first!
-NSWeakStagnationBC::NSWeakStagnationBC(const std::string & name, InputParameters parameters)
-    : NSIntegratedBC(name, parameters),
+NSWeakStagnationBC::NSWeakStagnationBC(const InputParameters & parameters)
+    : NSIntegratedBC(parameters),
 
       // Required parameters
       _stagnation_pressure(getParam<Real>("stagnation_pressure")),
@@ -88,3 +88,16 @@ Real NSWeakStagnationBC::sdotn()
     _sy*_normals[_qp](1) +
     _sz*_normals[_qp](2);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NSWeakStagnationBC::NSWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSIntegratedBC(deprecated_name, parameters),
+
+      // Required parameters
+      _stagnation_pressure(getParam<Real>("stagnation_pressure")),
+      _stagnation_temperature(getParam<Real>("stagnation_temperature")),
+      _sx(getParam<Real>("sx")),
+      _sy(getParam<Real>("sy")),
+      _sz(getParam<Real>("sz"))
+{}

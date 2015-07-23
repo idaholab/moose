@@ -28,7 +28,8 @@ InputParameters validParams<RichardsSeff1RSC>();
 class RichardsSeff1RSC : public RichardsSeff
 {
 public:
-  RichardsSeff1RSC(const std::string & name, InputParameters parameters);
+  RichardsSeff1RSC(const InputParameters & parameters);
+  RichardsSeff1RSC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * water effective saturation

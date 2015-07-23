@@ -24,7 +24,8 @@ class NSPenalizedNormalFlowBC : public NSIntegratedBC
 {
 
 public:
-  NSPenalizedNormalFlowBC(const std::string & name, InputParameters parameters);
+  NSPenalizedNormalFlowBC(const InputParameters & parameters);
+  NSPenalizedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSPenalizedNormalFlowBC(){}
 

@@ -22,7 +22,8 @@ InputParameters validParams<INSChorinCorrector>();
 class INSChorinCorrector : public Kernel
 {
 public:
-  INSChorinCorrector(const std::string & name, InputParameters parameters);
+  INSChorinCorrector(const InputParameters & parameters);
+  INSChorinCorrector(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSChorinCorrector(){}
 

@@ -25,8 +25,8 @@ InputParameters validParams<RichardsPiecewiseLinearSinkFlux>()
   return params;
 }
 
-RichardsPiecewiseLinearSinkFlux::RichardsPiecewiseLinearSinkFlux(const std::string & name, InputParameters parameters) :
-    SideIntegralVariablePostprocessor(name, parameters),
+RichardsPiecewiseLinearSinkFlux::RichardsPiecewiseLinearSinkFlux(const InputParameters & parameters) :
+    SideIntegralVariablePostprocessor(parameters),
     _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("bare_fluxes")),
 
     _use_mobility(getParam<bool>("use_mobility")),
@@ -62,3 +62,25 @@ RichardsPiecewiseLinearSinkFlux::computeQpIntegral()
 
   return flux*_dt;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsPiecewiseLinearSinkFlux::RichardsPiecewiseLinearSinkFlux(const std::string & deprecated_name, InputParameters parameters) :
+    SideIntegralVariablePostprocessor(deprecated_name, parameters),
+    _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("bare_fluxes")),
+
+    _use_mobility(getParam<bool>("use_mobility")),
+    _use_relperm(getParam<bool>("use_relperm")),
+
+    _m_func(getFunction("multiplying_fcn")),
+
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(coupled("variable"))),
+
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
+
+    _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
+    _permeability(getMaterialProperty<RealTensorValue>("permeability")),
+    _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
+    _density(getMaterialProperty<std::vector<Real> >("density"))
+{}

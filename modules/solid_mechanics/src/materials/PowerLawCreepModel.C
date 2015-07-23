@@ -26,9 +26,8 @@ InputParameters validParams<PowerLawCreepModel>()
 }
 
 
-PowerLawCreepModel::PowerLawCreepModel( const std::string & name,
-                                InputParameters parameters )
-  :ReturnMappingModel( name, parameters ),
+PowerLawCreepModel::PowerLawCreepModel( const InputParameters & parameters)
+  :ReturnMappingModel(parameters),
    _coefficient(parameters.get<Real>("coefficient")),
    _n_exponent(parameters.get<Real>("n_exponent")),
    _m_exponent(parameters.get<Real>("m_exponent")),
@@ -79,3 +78,17 @@ PowerLawCreepModel::computeDerivative(unsigned /*qp*/, Real effectiveTrialStress
   return -3*_coefficient*_shear_modulus*_n_exponent*
       std::pow(effectiveTrialStress-3*_shear_modulus*scalar, _n_exponent-1)*_exponential*_expTime - 1/_dt;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+PowerLawCreepModel::PowerLawCreepModel(const std::string & deprecated_name, InputParameters parameters)
+  :ReturnMappingModel(deprecated_name, parameters),
+   _coefficient(parameters.get<Real>("coefficient")),
+   _n_exponent(parameters.get<Real>("n_exponent")),
+   _m_exponent(parameters.get<Real>("m_exponent")),
+   _activation_energy(parameters.get<Real>("activation_energy")),
+   _gas_constant(parameters.get<Real>("gas_constant")),
+   _start_time(getParam<Real>("start_time")),
+   _creep_strain(declareProperty<SymmTensor>("creep_strain")),
+   _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain"))
+{}

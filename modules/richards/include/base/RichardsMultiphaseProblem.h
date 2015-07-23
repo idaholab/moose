@@ -24,7 +24,8 @@ InputParameters validParams<RichardsMultiphaseProblem>();
 class RichardsMultiphaseProblem : public FEProblem
 {
 public:
-  RichardsMultiphaseProblem(const std::string & name, InputParameters params);
+  RichardsMultiphaseProblem(const InputParameters & params);
+  RichardsMultiphaseProblem(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~RichardsMultiphaseProblem();
 
   /**

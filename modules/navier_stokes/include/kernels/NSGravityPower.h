@@ -19,7 +19,8 @@ class NSGravityPower : public Kernel
 {
 public:
 
-  NSGravityPower(const std::string & name, InputParameters parameters);
+  NSGravityPower(const InputParameters & parameters);
+  NSGravityPower(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

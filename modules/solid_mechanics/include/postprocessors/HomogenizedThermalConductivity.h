@@ -18,7 +18,8 @@
 class HomogenizedThermalConductivity : public ElementAverageValue
 {
 public:
-  HomogenizedThermalConductivity(const std::string & name, InputParameters parameters);
+  HomogenizedThermalConductivity(const InputParameters & parameters);
+  HomogenizedThermalConductivity(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

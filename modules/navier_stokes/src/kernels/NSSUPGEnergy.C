@@ -17,8 +17,8 @@ InputParameters validParams<NSSUPGEnergy>()
 
 
 
-NSSUPGEnergy::NSSUPGEnergy(const std::string & name, InputParameters parameters)
-    : NSSUPGBase(name, parameters)
+NSSUPGEnergy::NSSUPGEnergy(const InputParameters & parameters)
+    : NSSUPGBase(parameters)
 {
 }
 
@@ -153,4 +153,11 @@ Real NSSUPGEnergy::compute_jacobian(unsigned var)
 
   // Sum up values and return
   return mass_term + mom_term + ene_term;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSSUPGEnergy::NSSUPGEnergy(const std::string & deprecated_name, InputParameters parameters)
+    : NSSUPGBase(deprecated_name, parameters)
+{
 }

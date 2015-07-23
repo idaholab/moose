@@ -27,7 +27,8 @@ class MechanicalContactConstraint :
   public NodeFaceConstraint
 {
 public:
-  MechanicalContactConstraint(const std::string & name, InputParameters parameters);
+  MechanicalContactConstraint(const InputParameters & parameters);
+  MechanicalContactConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MechanicalContactConstraint(){}
 
   virtual void timestepSetup();
@@ -96,6 +97,7 @@ protected:
   const Real _penalty;
   const Real _friction_coefficient;
   const Real _tension_release;
+  const Real _capture_tolerance;
   bool _update_contact_set;
 
   NumericVector<Number> & _residual_copy;

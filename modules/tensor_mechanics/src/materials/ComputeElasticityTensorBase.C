@@ -15,9 +15,8 @@ InputParameters validParams<ComputeElasticityTensorBase>()
   return params;
 }
 
-ComputeElasticityTensorBase::ComputeElasticityTensorBase(const std::string & name,
-                                                 InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(name, parameters),
+ComputeElasticityTensorBase::ComputeElasticityTensorBase(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
     _elasticity_tensor(declareProperty<ElasticityTensorR4>(_elasticity_tensor_name)),
@@ -33,4 +32,15 @@ ComputeElasticityTensorBase::computeQpProperties()
   //Multiply by prefactor
   if (_prefactor_function)
     _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputeElasticityTensorBase::ComputeElasticityTensorBase(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<Material>(deprecated_name, parameters),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _elasticity_tensor_name(_base_name + "elasticity_tensor"),
+    _elasticity_tensor(declareProperty<ElasticityTensorR4>(_elasticity_tensor_name)),
+    _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
+{
 }

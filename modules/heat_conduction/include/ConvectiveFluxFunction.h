@@ -13,7 +13,8 @@ class ConvectiveFluxFunction : public IntegratedBC
 {
 public:
 
-  ConvectiveFluxFunction(const std::string & name, InputParameters parameters);
+  ConvectiveFluxFunction(const InputParameters & parameters);
+  ConvectiveFluxFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ConvectiveFluxFunction() {}
 
 protected:

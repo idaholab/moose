@@ -12,9 +12,15 @@ InputParameters validParams<VolumetricModel>()
   return validParams<Material>();
 }
 
+VolumetricModel::VolumetricModel(const InputParameters & parameters ):
+  Material( parameters )
+{}
+
+VolumetricModel::~VolumetricModel() {}
+
+
+// DEPRECATED CONSTRUCTOR
 VolumetricModel::VolumetricModel( const std::string & name,
                                   InputParameters & parameters ):
   Material( name, parameters )
 {}
-
-VolumetricModel::~VolumetricModel() {}

@@ -22,8 +22,8 @@ InputParameters validParams<OneDContactConstraint>()
   return params;
 }
 
-OneDContactConstraint::OneDContactConstraint(const std::string & name, InputParameters parameters) :
-    NodeFaceConstraint(name, parameters),
+OneDContactConstraint::OneDContactConstraint(const InputParameters & parameters) :
+    NodeFaceConstraint(parameters),
     _residual_copy(_sys.residualGhosted()),
     _jacobian_update(getParam<bool>("jacobian_update"))
 {}
@@ -121,3 +121,11 @@ OneDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   }
   return 0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+OneDContactConstraint::OneDContactConstraint(const std::string & deprecated_name, InputParameters parameters) :
+    NodeFaceConstraint(deprecated_name, parameters),
+    _residual_copy(_sys.residualGhosted()),
+    _jacobian_update(getParam<bool>("jacobian_update"))
+{}

@@ -31,8 +31,8 @@ InputParameters validParams<EBSDMesh>()
   return params;
 }
 
-EBSDMesh::EBSDMesh(const std::string & name, InputParameters parameters) :
-    GeneratedMesh(name, parameters),
+EBSDMesh::EBSDMesh(const InputParameters & parameters) :
+    GeneratedMesh(parameters),
     _filename(getParam<FileName>("filename"))
 {
   if (_nx != 1 || _ny != 1 || _nz !=1)
@@ -166,4 +166,14 @@ EBSDMesh::buildMesh()
   _nz = nr[2];
 
   GeneratedMesh::buildMesh();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+EBSDMesh::EBSDMesh(const std::string & deprecated_name, InputParameters parameters) :
+    GeneratedMesh(deprecated_name, parameters),
+    _filename(getParam<FileName>("filename"))
+{
+  if (_nx != 1 || _ny != 1 || _nz !=1)
+    mooseWarning("Do not specify mesh geometry information, it is read from the EBSD file.");
 }

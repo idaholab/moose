@@ -15,8 +15,8 @@ InputParameters validParams<PrimaryConvection>()
   return params;
 }
 
-PrimaryConvection::PrimaryConvection(const std::string & name, InputParameters parameters) :
-    Kernel(name,parameters),
+PrimaryConvection::PrimaryConvection(const InputParameters & parameters) :
+    Kernel(parameters),
     _cond(getMaterialProperty<Real>("conductivity")),
     _grad_p(coupledGradient("p"))
 {
@@ -42,4 +42,13 @@ Real PrimaryConvection::computeQpJacobian()
 Real PrimaryConvection::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PrimaryConvection::PrimaryConvection(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _cond(getMaterialProperty<Real>("conductivity")),
+    _grad_p(coupledGradient("p"))
+{
 }

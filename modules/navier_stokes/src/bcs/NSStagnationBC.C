@@ -30,8 +30,8 @@ InputParameters validParams<NSStagnationBC>()
 
 
 // Constructor, be sure to call the base class constructor first!
-NSStagnationBC::NSStagnationBC(const std::string & name, InputParameters parameters)
-    : NodalBC(name, parameters),
+NSStagnationBC::NSStagnationBC(const InputParameters & parameters)
+    : NodalBC(parameters),
 
       // Coupled variables
       _u_vel(coupledValue("u")),
@@ -47,3 +47,20 @@ NSStagnationBC::NSStagnationBC(const std::string & name, InputParameters paramet
 
 
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSStagnationBC::NSStagnationBC(const std::string & deprecated_name, InputParameters parameters)
+    : NodalBC(deprecated_name, parameters),
+
+      // Coupled variables
+      _u_vel(coupledValue("u")),
+      _v_vel(coupledValue("v")),
+      _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+
+      _temperature(coupledValue("temperature")),
+
+      // Required parameters
+      _gamma(getParam<Real>("gamma")),
+      _R(getParam<Real>("R"))
+{}

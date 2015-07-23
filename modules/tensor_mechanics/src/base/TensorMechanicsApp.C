@@ -87,8 +87,8 @@ InputParameters validParams<TensorMechanicsApp>()
   return params;
 }
 
-TensorMechanicsApp::TensorMechanicsApp(const std::string & name, InputParameters parameters) :
-    MooseApp(name, parameters)
+TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) :
+    MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -108,7 +108,13 @@ extern "C" void TensorMechanicsApp_registerApps() { TensorMechanicsApp::register
 void
 TensorMechanicsApp::registerApps()
 {
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().reg<name>(#name)
+
   registerApp(TensorMechanicsApp);
+
+#undef  registerApp
+#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -116,6 +122,9 @@ extern "C" void TensorMechanicsApp__registerObjects(Factory & factory) { TensorM
 void
 TensorMechanicsApp::registerObjects(Factory & factory)
 {
+#undef registerObject
+#define registerObject(name) factory.reg<name>(stringifyName(name))
+
   registerKernel(StressDivergenceTensors);
   registerKernel(CosseratStressDivergenceTensors);
   registerKernel(StressDivergenceRZTensors);
@@ -178,6 +187,10 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(RankTwoScalarAux);
 
   registerBoundaryCondition(PressureTM);
+
+#undef registerObject
+#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
+
 }
 
 // External entry point for dynamic syntax association
@@ -185,6 +198,9 @@ extern "C" void TensorMechanicsApp__associateSyntax(Syntax & syntax, ActionFacto
 void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+#undef registerAction
+#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+
   syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
 
   syntax.registerActionSyntax("EmptyAction", "BCs/PressureTM");
@@ -197,4 +213,21 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(PressureActionTM, "add_bc");
   registerAction(PoroMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
+
+#undef registerAction
+#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsApp::TensorMechanicsApp(const std::string & deprecated_name, InputParameters parameters) :
+    MooseApp(deprecated_name, parameters)
+{
+  srand(processor_id());
+
+  Moose::registerObjects(_factory);
+  TensorMechanicsApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
 }

@@ -18,9 +18,8 @@ InputParameters validParams<DesorptionFromMatrix>()
   return params;
 }
 
-DesorptionFromMatrix::DesorptionFromMatrix(const std::string & name,
-                                             InputParameters parameters) :
-    Kernel(name,parameters),
+DesorptionFromMatrix::DesorptionFromMatrix(const InputParameters & parameters) :
+    Kernel(parameters),
     _pressure_var(coupled("pressure_var")),
     _mass_rate_from_matrix(getMaterialProperty<Real>("mass_rate_from_matrix")),
     _dmass_rate_from_matrix_dC(getMaterialProperty<Real>("dmass_rate_from_matrix_dC")),
@@ -47,3 +46,13 @@ DesorptionFromMatrix::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
   return _test[_i][_qp]*_dmass_rate_from_matrix_dp[_qp]*_phi[_j][_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+DesorptionFromMatrix::DesorptionFromMatrix(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _pressure_var(coupled("pressure_var")),
+    _mass_rate_from_matrix(getMaterialProperty<Real>("mass_rate_from_matrix")),
+    _dmass_rate_from_matrix_dC(getMaterialProperty<Real>("dmass_rate_from_matrix_dC")),
+    _dmass_rate_from_matrix_dp(getMaterialProperty<Real>("dmass_rate_from_matrix_dp"))
+{}

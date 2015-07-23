@@ -17,8 +17,8 @@ InputParameters validParams<NSSUPGMass>()
 
 
 
-NSSUPGMass::NSSUPGMass(const std::string & name, InputParameters parameters)
-    : NSSUPGBase(name, parameters)
+NSSUPGMass::NSSUPGMass(const InputParameters & parameters)
+    : NSSUPGBase(parameters)
 {
 }
 
@@ -95,4 +95,11 @@ Real NSSUPGMass::compute_jacobian(unsigned var)
   //   Moose::out << "SUPG mass jacobian[qp=" << _qp << "] = " << result << std::endl;
 
   return result;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSSUPGMass::NSSUPGMass(const std::string & deprecated_name, InputParameters parameters)
+    : NSSUPGBase(deprecated_name, parameters)
+{
 }

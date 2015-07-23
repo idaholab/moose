@@ -18,7 +18,8 @@ InputParameters validParams<CosseratStressDivergenceTensors>();
 class CosseratStressDivergenceTensors : public StressDivergenceTensors
 {
 public:
-  CosseratStressDivergenceTensors(const std::string & name, InputParameters parameters);
+  CosseratStressDivergenceTensors(const InputParameters & parameters);
+  CosseratStressDivergenceTensors(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);

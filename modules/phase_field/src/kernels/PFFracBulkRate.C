@@ -21,9 +21,8 @@ InputParameters validParams<PFFracBulkRate>()
   return params;
 }
 
-PFFracBulkRate::PFFracBulkRate(const std::string & name,
-                               InputParameters parameters):
-  KernelValue(name,parameters),
+PFFracBulkRate::PFFracBulkRate(const InputParameters & parameters):
+  KernelValue(parameters),
   _gc_prop(getMaterialProperty<Real>("gc_prop")),
   _G0_pos(getMaterialProperty<Real>("G0_pos")),
   _dG0_pos_dstrain(getMaterialProperty<RankTwoTensor>("dG0_pos_dstrain")),
@@ -129,4 +128,24 @@ PFFracBulkRate::computeQpOffDiagJacobian(unsigned int jvar)
   }
 
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PFFracBulkRate::PFFracBulkRate(const std::string & deprecated_name, InputParameters parameters):
+  KernelValue(deprecated_name, parameters),
+  _gc_prop(getMaterialProperty<Real>("gc_prop")),
+  _G0_pos(getMaterialProperty<Real>("G0_pos")),
+  _dG0_pos_dstrain(getMaterialProperty<RankTwoTensor>("dG0_pos_dstrain")),
+  _betaval(coupledValue("beta")),
+  _beta_var(coupled("beta")),
+  _xdisp_coupled(isCoupled("disp_x")),
+  _ydisp_coupled(isCoupled("disp_y")),
+  _zdisp_coupled(isCoupled("disp_z")),
+  _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
+  _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
+  _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
+  _l(getParam<Real>("l")),
+  _visco(getParam<Real>("visco"))
+{
 }

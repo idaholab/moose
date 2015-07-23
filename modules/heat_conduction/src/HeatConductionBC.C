@@ -14,8 +14,8 @@ InputParameters validParams<HeatConductionBC>()
   return params;
 }
 
-HeatConductionBC::HeatConductionBC(const std::string & name, InputParameters parameters) :
-    FluxBC(name, parameters),
+HeatConductionBC::HeatConductionBC(const InputParameters & parameters) :
+    FluxBC(parameters),
     _k(getMaterialProperty<Real>("thermal_conductivity"))
 {
 }
@@ -36,3 +36,11 @@ HeatConductionBC::computeQpFluxJacobian()
   return -_k[_qp] * _grad_phi[_j][_qp];
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+HeatConductionBC::HeatConductionBC(const std::string & deprecated_name, InputParameters parameters) :
+    FluxBC(deprecated_name, parameters),
+    _k(getMaterialProperty<Real>("thermal_conductivity"))
+{
+}

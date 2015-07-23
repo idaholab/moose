@@ -17,9 +17,8 @@ InputParameters validParams<PolycrystalRandomIC>()
   return params;
 }
 
-PolycrystalRandomIC::PolycrystalRandomIC(const std::string & name,
-                             InputParameters parameters) :
-    InitialCondition(name, parameters),
+PolycrystalRandomIC::PolycrystalRandomIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _op_num(getParam<unsigned int>("op_num")),
     _op_index(getParam<unsigned int>("op_index")),
     _typ(getParam<unsigned int>("typ"))
@@ -48,3 +47,12 @@ Real PolycrystalRandomIC::value(const Point & p)
 
   mooseError("Bad case passed in PolycrystalRandomIC");
 }
+
+
+// DEPRECATED CONSTRUCTOR
+PolycrystalRandomIC::PolycrystalRandomIC(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _op_num(getParam<unsigned int>("op_num")),
+    _op_index(getParam<unsigned int>("op_index")),
+    _typ(getParam<unsigned int>("typ"))
+{}

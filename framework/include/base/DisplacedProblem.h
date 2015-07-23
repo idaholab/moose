@@ -165,16 +165,6 @@ public:
   virtual void ghostGhostedBoundaries();
 
   /**
-   * Register a piece of restartable data.  This is data that will get
-   * written / read to / from a restart file.
-   *
-   * @param name The full (unique) name.
-   * @param data The actual data object.
-   * @param tid The thread id of the object.  Use 0 if the object is not threaded.
-   */
-  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
-
-  /**
    * Resets the displaced mesh to the reference mesh.  Required when
    * refining the DisplacedMesh.
    */
@@ -199,18 +189,6 @@ protected:
   GeometricSearchData _geometric_search_data;
 
 private:
-  /**
-   * NOTE: This is an internal function meant for MOOSE use only!
-   *
-   * Register a piece of recoverable data.  This is data that will get
-   * written / read to / from a restart file.
-   *
-   * However, this data will ONLY get read from the restart file during a RECOVERY operation!
-   *
-   * @param name The full (unique) name.
-   */
-  virtual void registerRecoverableData(std::string name);
-
   friend class UpdateDisplacedMeshThread;
   friend class Restartable;
 };

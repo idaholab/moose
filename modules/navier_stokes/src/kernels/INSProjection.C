@@ -26,8 +26,8 @@ InputParameters validParams<INSProjection>()
 
 
 
-INSProjection::INSProjection(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+INSProjection::INSProjection(const InputParameters & parameters) :
+  Kernel(parameters),
 
   // Coupled variables
   _a1(coupledValue("a1")),
@@ -100,4 +100,29 @@ Real INSProjection::computeQpOffDiagJacobian(unsigned jvar)
 
   else
     return 0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+INSProjection::INSProjection(const std::string & deprecated_name, InputParameters parameters) :
+  Kernel(deprecated_name, parameters),
+
+  // Coupled variables
+  _a1(coupledValue("a1")),
+  _a2(_mesh.dimension() >= 2 ? coupledValue("a2") : _zero),
+  _a3(_mesh.dimension() == 3 ? coupledValue("a3") : _zero),
+
+  // Gradients
+  _grad_p(coupledGradient("p")),
+
+  // Variable numberings
+  _a1_var_number(coupled("a1")),
+  _a2_var_number(_mesh.dimension() >= 2 ? coupled("a2") : libMesh::invalid_uint),
+  _a3_var_number(_mesh.dimension() == 3 ? coupled("a3") : libMesh::invalid_uint),
+  _p_var_number(coupled("p")),
+
+  // Required parameters
+  _rho(getParam<Real>("rho")),
+  _component(getParam<unsigned>("component"))
+{
 }

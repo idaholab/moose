@@ -22,8 +22,8 @@ InputParameters validParams<RichardsFullyUpwindFlux>()
   return params;
 }
 
-RichardsFullyUpwindFlux::RichardsFullyUpwindFlux(const std::string & name, InputParameters parameters) :
-    Kernel(name,parameters),
+RichardsFullyUpwindFlux::RichardsFullyUpwindFlux(const InputParameters & parameters) :
+    Kernel(parameters),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _num_p(_richards_name_UO.num_v()),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
@@ -312,4 +312,27 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
     }
   }
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsFullyUpwindFlux::RichardsFullyUpwindFlux(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _num_p(_richards_name_UO.num_v()),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+    _density_UO(getUserObjectByName<RichardsDensity>(getParam<std::vector<UserObjectName> >("density_UO")[_pvar])),
+    _seff_UO(getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[_pvar])),
+    _relperm_UO(getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[_pvar])),
+    _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
+    _flux_no_mob(getMaterialProperty<std::vector<RealVectorValue> >("flux_no_mob")),
+    _dflux_no_mob_dv(getMaterialProperty<std::vector<std::vector<RealVectorValue> > >("dflux_no_mob_dv")),
+    _dflux_no_mob_dgradv(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dflux_no_mob_dgradv")),
+    _num_nodes(0),
+    _mobility(0),
+    _dmobility_dv(0)
+{
+  _ps_at_nodes.resize(_num_p);
+  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
+    _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
 }

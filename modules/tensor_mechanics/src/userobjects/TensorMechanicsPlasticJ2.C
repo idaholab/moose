@@ -16,9 +16,8 @@ InputParameters validParams<TensorMechanicsPlasticJ2>()
   return params;
 }
 
-TensorMechanicsPlasticJ2::TensorMechanicsPlasticJ2(const std::string & name,
-                                                         InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters),
+TensorMechanicsPlasticJ2::TensorMechanicsPlasticJ2(const InputParameters & parameters) :
+    TensorMechanicsPlasticModel(parameters),
     _strength(getUserObject<TensorMechanicsHardeningModel>("yield_strength"))
 {
 }
@@ -93,4 +92,12 @@ std::string
 TensorMechanicsPlasticJ2::modelName() const
 {
   return "J2";
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsPlasticJ2::TensorMechanicsPlasticJ2(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsPlasticModel(deprecated_name, parameters),
+    _strength(getUserObject<TensorMechanicsHardeningModel>("yield_strength"))
+{
 }

@@ -22,7 +22,8 @@ InputParameters validParams<INSChorinPredictor>();
 class INSChorinPredictor : public Kernel
 {
 public:
-  INSChorinPredictor(const std::string & name, InputParameters parameters);
+  INSChorinPredictor(const InputParameters & parameters);
+  INSChorinPredictor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSChorinPredictor(){}
 

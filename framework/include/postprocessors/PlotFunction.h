@@ -40,7 +40,7 @@ public:
 
 protected:
   Function & _func;
-  const Point _point;
+  const Point & _point;
   const Real _scale_factor;
 };
 

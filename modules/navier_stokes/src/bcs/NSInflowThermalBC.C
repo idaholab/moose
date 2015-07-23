@@ -26,8 +26,8 @@ InputParameters validParams<NSInflowThermalBC>()
 
 
 
-NSInflowThermalBC::NSInflowThermalBC(const std::string & name, InputParameters parameters)
-  :NodalBC(name, parameters),
+NSInflowThermalBC::NSInflowThermalBC(const InputParameters & parameters)
+  :NodalBC(parameters),
    _R(getParam<Real>("R")),
    _gamma(getParam<Real>("gamma")),
    _specified_rho(getParam<Real>("specified_rho")),
@@ -53,3 +53,14 @@ NSInflowThermalBC::computeQpResidual()
   Real cv = _R / (_gamma-1.);
   return _u[_qp] - _specified_rho * (cv * _specified_temperature + 0.5*_specified_velocity_magnitude*_specified_velocity_magnitude);
 }
+
+
+// DEPRECATED CONSTRUCTOR
+NSInflowThermalBC::NSInflowThermalBC(const std::string & deprecated_name, InputParameters parameters)
+  :NodalBC(deprecated_name, parameters),
+   _R(getParam<Real>("R")),
+   _gamma(getParam<Real>("gamma")),
+   _specified_rho(getParam<Real>("specified_rho")),
+   _specified_temperature(getParam<Real>("specified_temperature")),
+   _specified_velocity_magnitude(getParam<Real>("specified_velocity_magnitude"))
+  {}

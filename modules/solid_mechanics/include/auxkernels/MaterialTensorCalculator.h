@@ -42,7 +42,8 @@ public:
     VOLUMETRICSTRAIN
   };
 
-  MaterialTensorCalculator(const std::string &name, InputParameters parameters);
+  MaterialTensorCalculator(const InputParameters & parameters);
+
   ~MaterialTensorCalculator() {}
 
 protected:

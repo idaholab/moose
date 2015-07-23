@@ -31,8 +31,8 @@ InputParameters validParams<RateDepSmearCrackModel>();
 class RateDepSmearCrackModel : public ConstitutiveModel
 {
 public:
-  RateDepSmearCrackModel( const std::string & name,
-                     InputParameters parameters );
+  RateDepSmearCrackModel( const InputParameters & parameters);
+  RateDepSmearCrackModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~RateDepSmearCrackModel();
 

@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "ColumnMajorMatrix.h"
-#include "MaterialPropertyIO.h"
+#include "DataIO.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/tensor_value.h"
@@ -175,27 +175,16 @@ class RestartableDatas : public std::vector<std::map<std::string, RestartableDat
 public:
   RestartableDatas(size_type n) :
       std::vector<std::map<std::string, RestartableDataValue *> >(n)
-    {
-    }
+  {}
 
 
   virtual ~RestartableDatas()
-    {
-      for (std::vector<std::map<std::string, RestartableDataValue *> >::iterator i = begin(); i != end(); ++i)
-        for (std::map<std::string, RestartableDataValue *>::iterator j=(*i).begin();
-             j != (*i).end();
-             ++j)
-          delete j->second;
-    }
-
-//   /**
-//    * Parameter map iterator.
-//    */
-//   typedef std::vector<RestartableDataValue *>::iterator iterator;
-
-//   /**
-//    * Constant parameter map iterator.
-//    */
-//   typedef std::vector<RestartableDataValue *>::const_iterator const_iterator;
+  {
+    for (std::vector<std::map<std::string, RestartableDataValue *> >::iterator i = begin(); i != end(); ++i)
+      for (std::map<std::string, RestartableDataValue *>::iterator j=(*i).begin();
+           j != (*i).end();
+           ++j)
+        delete j->second;
+  }
 };
 #endif

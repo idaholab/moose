@@ -17,7 +17,8 @@ InputParameters validParams<TensorMechanicsApp>();
 class TensorMechanicsApp : public MooseApp
 {
 public:
-  TensorMechanicsApp(const std::string & name, InputParameters parameters);
+  TensorMechanicsApp(const InputParameters & parameters);
+  TensorMechanicsApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~TensorMechanicsApp();
 
   static void registerApps();

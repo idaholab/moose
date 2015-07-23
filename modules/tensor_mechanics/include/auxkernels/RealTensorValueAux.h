@@ -22,7 +22,8 @@ InputParameters validParams<RealTensorValueAux>();
 class RealTensorValueAux : public AuxKernel
 {
 public:
-  RealTensorValueAux(const std::string & name, InputParameters parameters);
+  RealTensorValueAux(const InputParameters & parameters);
+  RealTensorValueAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~RealTensorValueAux() {}
 
 protected:

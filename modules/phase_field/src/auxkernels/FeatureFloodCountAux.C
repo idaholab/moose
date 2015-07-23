@@ -20,8 +20,8 @@ InputParameters validParams<FeatureFloodCountAux>()
   return params;
 }
 
-FeatureFloodCountAux::FeatureFloodCountAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _flood_counter(getUserObject<FeatureFloodCount>("bubble_object")),
     _var_idx(getParam<unsigned int>("map_index")),
     _field_display(getParam<MooseEnum>("field_display")),
@@ -60,4 +60,31 @@ FeatureFloodCountAux::computeValue()
   }
 
   return 0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FeatureFloodCountAux::FeatureFloodCountAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _flood_counter(getUserObject<FeatureFloodCount>("bubble_object")),
+    _var_idx(getParam<unsigned int>("map_index")),
+    _field_display(getParam<MooseEnum>("field_display")),
+    _var_coloring(_field_display == "VARIABLE_COLORING")
+{
+  if (isNodal())
+  {
+    if (_field_display == "CENTROID")
+      mooseError("CENTROID coloring is only available for elemental aux variables");
+
+    if (_field_display == "ACTIVE_BOUNDS")
+      mooseError("ACTIVE_BOUNDS is only available for elemental aux variables");
+
+    if (_flood_counter.isElemental() && (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING"))
+      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the FeatureFloodCounter");
+  }
+  else
+  {
+    if (! _flood_counter.isElemental() && (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING"))
+      mooseError("UNIQUE_REGION and VARIABLE_COLORING must be on variable types that match the entity mode of the FeatureFloodCounter");
+  }
 }

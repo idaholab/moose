@@ -14,8 +14,8 @@ InputParameters validParams<ReconVarIC>()
   return params;
 }
 
-ReconVarIC::ReconVarIC(const std::string & name,InputParameters parameters) :
-    InitialCondition(name, parameters),
+ReconVarIC::ReconVarIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
@@ -91,4 +91,21 @@ ReconVarIC::value(const Point & /*p*/)
   }
 
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ReconVarIC::ReconVarIC(const std::string & deprecated_name, InputParameters parameters) :
+    InitialCondition(deprecated_name, parameters),
+    _mesh(_fe_problem.mesh()),
+    _nl(_fe_problem.getNonlinearSystem()),
+    _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
+    _consider_phase(getParam<bool>("consider_phase")),
+    _phase(getParam<unsigned int>("phase")),
+    _all_to_one(getParam<bool>("all_to_one")),
+    _op_num(getParam<unsigned int>("op_num")),
+    _op_index(getParam<unsigned int>("op_index"))
+{
+  if (!_consider_phase && _all_to_one)
+    mooseError("In ReconVarIC, if you are not considering phase, you can't assign all grains to one variable");
 }

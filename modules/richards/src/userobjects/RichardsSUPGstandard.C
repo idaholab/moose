@@ -19,8 +19,8 @@ InputParameters validParams<RichardsSUPGstandard>()
   return params;
 }
 
-RichardsSUPGstandard::RichardsSUPGstandard(const std::string & name, InputParameters parameters) :
-    RichardsSUPG(name, parameters),
+RichardsSUPGstandard::RichardsSUPGstandard(const InputParameters & parameters) :
+    RichardsSUPG(parameters),
     _p_SUPG(getParam<Real>("p_SUPG"))
 {
 }
@@ -181,3 +181,11 @@ RichardsSUPGstandard::SUPG_trivial() const
   return false;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSUPGstandard::RichardsSUPGstandard(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsSUPG(deprecated_name, parameters),
+    _p_SUPG(getParam<Real>("p_SUPG"))
+{
+}

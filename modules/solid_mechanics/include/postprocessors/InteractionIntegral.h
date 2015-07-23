@@ -24,7 +24,8 @@ InputParameters validParams<InteractionIntegral>();
 class InteractionIntegral: public ElementIntegralPostprocessor
 {
 public:
-  InteractionIntegral(const std::string & name, InputParameters parameters);
+  InteractionIntegral(const InputParameters & parameters);
+  InteractionIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real getValue();
 

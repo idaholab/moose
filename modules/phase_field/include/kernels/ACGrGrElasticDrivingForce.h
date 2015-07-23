@@ -18,7 +18,8 @@ InputParameters validParams<ACGrGrElasticDrivingForce>();
 class ACGrGrElasticDrivingForce : public ACBulk
 {
 public:
-  ACGrGrElasticDrivingForce(const std::string & name, InputParameters parameters);
+  ACGrGrElasticDrivingForce(const InputParameters & parameters);
+  ACGrGrElasticDrivingForce(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);

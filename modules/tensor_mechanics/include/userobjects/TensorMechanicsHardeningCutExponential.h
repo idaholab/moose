@@ -24,7 +24,8 @@ InputParameters validParams<TensorMechanicsHardeningCutExponential>();
 class TensorMechanicsHardeningCutExponential : public TensorMechanicsHardeningModel
 {
  public:
-  TensorMechanicsHardeningCutExponential(const std::string & name, InputParameters parameters);
+  TensorMechanicsHardeningCutExponential(const InputParameters & parameters);
+  TensorMechanicsHardeningCutExponential(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(const Real & intnl) const;
 

@@ -22,8 +22,8 @@ InputParameters validParams<TensorMechanicsAxisymmetricRZAction>()
   return params;
 }
 
-TensorMechanicsAxisymmetricRZAction::TensorMechanicsAxisymmetricRZAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+TensorMechanicsAxisymmetricRZAction::TensorMechanicsAxisymmetricRZAction(const InputParameters & params) :
+    Action(params)
 {
 }
 
@@ -64,4 +64,11 @@ TensorMechanicsAxisymmetricRZAction::act()
 
     _problem->addKernel("StressDivergenceRZTensors", name.str(), params);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsAxisymmetricRZAction::TensorMechanicsAxisymmetricRZAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

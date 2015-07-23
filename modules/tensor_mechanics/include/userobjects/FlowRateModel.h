@@ -29,7 +29,8 @@ InputParameters validParams<FlowRateModel>();
 class FlowRateModel : public GeneralUserObject
 {
 public:
-  FlowRateModel(const std::string & name, InputParameters parameters);
+  FlowRateModel(const InputParameters & parameters);
+  FlowRateModel(const std::string & name, InputParameters parameters); // DEPRECATED
   virtual ~FlowRateModel() {}
 
   void initialize() {}

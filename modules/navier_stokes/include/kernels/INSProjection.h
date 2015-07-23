@@ -25,7 +25,8 @@ InputParameters validParams<INSProjection>();
 class INSProjection : public Kernel
 {
 public:
-  INSProjection(const std::string & name, InputParameters parameters);
+  INSProjection(const InputParameters & parameters);
+  INSProjection(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSProjection(){}
 

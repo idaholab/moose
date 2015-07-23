@@ -25,9 +25,8 @@ InputParameters validParams<GBEvolution>()
 }
 
 
-GBEvolution::GBEvolution(const std::string & name,
-                         InputParameters parameters) :
-    Material(name, parameters),
+GBEvolution::GBEvolution(const InputParameters & parameters) :
+    Material(parameters),
     _f0s(getParam<Real>("f0s")),
     _wGB(getParam<Real>("wGB")),
     _length_scale(getParam<Real>("length_scale")),
@@ -80,4 +79,35 @@ GBEvolution::computeQpProperties()
   _act_wGB[_qp] = 0.5e-9/_length_scale;
   _tgrad_corr_mult[_qp] = _mu[_qp]*9.0/8.0;
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+GBEvolution::GBEvolution(const std::string & deprecated_name, InputParameters parameters) :
+    Material(deprecated_name, parameters),
+    _f0s(getParam<Real>("f0s")),
+    _wGB(getParam<Real>("wGB")),
+    _length_scale(getParam<Real>("length_scale")),
+    _time_scale(getParam<Real>("time_scale")),
+    _GBmob0(getParam<Real>("GBmob0")),
+    _Q(getParam<Real>("Q")),
+    _GBenergy(getParam<Real>("GBenergy")),
+    _GBMobility(getParam<Real>("GBMobility")),
+    _molar_vol(getParam<Real>("molar_volume")),
+    _T(coupledValue("T")),
+    _sigma(declareProperty<Real>("sigma")),
+    _M_GB(declareProperty<Real>("M_GB")),
+    _kappa(declareProperty<Real>("kappa_op")),
+    _gamma(declareProperty<Real>("gamma_asymm")),
+    _L(declareProperty<Real>("L")),
+    _l_GB(declareProperty<Real>("l_GB")),
+    _mu(declareProperty<Real>("mu")),
+    _entropy_diff(declareProperty<Real>("entropy_diff")),
+    _molar_volume(declareProperty<Real>("molar_volume")),
+    _act_wGB(declareProperty<Real>("act_wGB")),
+    _tgrad_corr_mult(declareProperty<Real>("tgrad_corr_mult")),
+    _kb(8.617343e-5) //Boltzmann constant in eV/K
+{
+  if (_GBMobility == -1 && _GBmob0 == 0)
+    mooseError("Either a value for GBMobility or for GBmob0 and Q must be provided");
 }

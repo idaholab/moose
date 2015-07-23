@@ -31,7 +31,6 @@ InputParameters validParams<SubProblem>()
 SubProblem::SubProblem(const InputParameters & parameters) :
     Problem(parameters),
     _factory(_app.getFactory()),
-    _restartable_data(libMesh::n_threads()),
     _rz_coord_axis(1) // default to RZ rotation around y-axis
 {
   unsigned int n_threads = libMesh::n_threads();
@@ -358,7 +357,6 @@ SubProblem::getAxisymmetricRadialCoord()
 SubProblem::SubProblem(const std::string & deprecated_name, InputParameters parameters) :
     Problem(deprecated_name, parameters),
     _factory(_app.getFactory()),
-    _restartable_data(libMesh::n_threads()),
     _rz_coord_axis(1) // default to RZ rotation around y-axis
 {
   unsigned int n_threads = libMesh::n_threads();
@@ -369,4 +367,16 @@ SubProblem::SubProblem(const std::string & deprecated_name, InputParameters para
   _second_phi_zero.resize(n_threads);
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
+}
+
+void
+SubProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
+{
+  _app.registerRestartableData(this->name() + "/" + name, data, tid);
+}
+
+void
+SubProblem::registerRecoverableData(std::string name)
+{
+  _app.registerRecoverableData(this->name() + "/" + name);
 }

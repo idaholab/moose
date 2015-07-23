@@ -23,8 +23,8 @@ InputParameters validParams<HeatConductionMaterial>();
 class HeatConductionMaterial : public Material
 {
 public:
-  HeatConductionMaterial(const std::string & name,
-                         InputParameters parameters);
+  HeatConductionMaterial(const InputParameters & parameters);
+  HeatConductionMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

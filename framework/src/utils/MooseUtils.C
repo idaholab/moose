@@ -274,7 +274,7 @@ absoluteFuzzyEqual(const Real & var1, const Real & var2, const Real & tol)
 bool
 absoluteFuzzyGreaterEqual(const Real & var1, const Real & var2, const Real & tol)
 {
-  return (var1 > (var2 - tol));
+  return (var1 >= (var2 - tol));
 }
 
 bool
@@ -286,7 +286,7 @@ absoluteFuzzyGreaterThan(const Real & var1, const Real & var2, const Real & tol)
 bool
 absoluteFuzzyLessEqual(const Real & var1, const Real & var2, const Real & tol)
 {
-  return (var1 < (var2 + tol));
+  return (var1 <= (var2 + tol));
 }
 
 bool

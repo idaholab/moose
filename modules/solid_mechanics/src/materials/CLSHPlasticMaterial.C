@@ -22,6 +22,16 @@ InputParameters validParams<CLSHPlasticMaterial>()
    return params;
 }
 
+CLSHPlasticMaterial::CLSHPlasticMaterial(const InputParameters & parameters)
+  :SolidModel(parameters)
+{
+
+  createConstitutiveModel("CLSHPlasticModel", parameters);
+
+}
+
+
+// DEPRECATED CONSTRUCTOR
 CLSHPlasticMaterial::CLSHPlasticMaterial(std::string name,
                                          InputParameters parameters)
   :SolidModel(name, parameters)

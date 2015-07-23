@@ -21,8 +21,8 @@ InputParameters validParams<ElementPropertyReadFile>()
   return params;
 }
 
-ElementPropertyReadFile::ElementPropertyReadFile(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name,parameters),
+ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & parameters) :
+    GeneralUserObject(parameters),
     _prop_file_name(getParam<std::string>("prop_file_name")),
     _nprop(getParam<unsigned int>("nprop")),
     _ngrain(getParam<unsigned int>("ngrain")),
@@ -190,4 +190,44 @@ ElementPropertyReadFile::minPeriodicDistance(Point c, Point p) const
       }
 
   return min_dist;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ElementPropertyReadFile::ElementPropertyReadFile(const std::string & deprecated_name, InputParameters parameters) :
+    GeneralUserObject(deprecated_name, parameters),
+    _prop_file_name(getParam<std::string>("prop_file_name")),
+    _nprop(getParam<unsigned int>("nprop")),
+    _ngrain(getParam<unsigned int>("ngrain")),
+    _read_type(getParam<MooseEnum>("read_type")),
+    _rand_seed(getParam<unsigned int>("rand_seed")),
+    _rve_type(getParam<MooseEnum>("rve_type")),
+    _mesh(_fe_problem.mesh())
+{
+  _nelem = _mesh.nElem();
+
+  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  {
+    _bottom_left(i) = _mesh.getMinInDimension(i);
+    _top_right(i) = _mesh.getMaxInDimension(i);
+    _range(i) = _top_right(i) - _bottom_left(i);
+  }
+
+  for (unsigned int i = 1; i < LIBMESH_DIM; i++)
+    if (_range(i) > _max_range)
+      _max_range = _range(i);
+
+  switch (_read_type)
+  {
+    case 0:
+      readElementData();
+      break;
+
+    case 1:
+      readGrainData();
+      break;
+
+    default:
+      mooseError("Error ElementPropertyReadFile: Provide valid read type");
+  }
 }

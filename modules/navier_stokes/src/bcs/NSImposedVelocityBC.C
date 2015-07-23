@@ -27,8 +27,8 @@ InputParameters validParams<NSImposedVelocityBC>()
 
 
 // Constructor, be sure to call the base class constructor first!
-NSImposedVelocityBC::NSImposedVelocityBC(const std::string & name, InputParameters parameters)
-  :NodalBC(name, parameters),
+NSImposedVelocityBC::NSImposedVelocityBC(const InputParameters & parameters)
+  :NodalBC(parameters),
    _rho(coupledValue("rho")),
    _desired_velocity(getParam<Real>("desired_velocity"))
   {}
@@ -43,3 +43,11 @@ Real NSImposedVelocityBC::computeQpResidual()
   return _u[_qp] - (_rho[_qp] * _desired_velocity);
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSImposedVelocityBC::NSImposedVelocityBC(const std::string & deprecated_name, InputParameters parameters)
+  :NodalBC(deprecated_name, parameters),
+   _rho(coupledValue("rho")),
+   _desired_velocity(getParam<Real>("desired_velocity"))
+  {}

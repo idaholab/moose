@@ -22,7 +22,8 @@ InputParameters validParams<Mass>();
 class Mass: public ElementIntegralVariablePostprocessor
 {
 public:
-  Mass(const std::string & name, InputParameters parameters);
+  Mass(const InputParameters & parameters);
+  Mass(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

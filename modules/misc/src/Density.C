@@ -21,8 +21,8 @@ InputParameters validParams<Density>()
   return params;
 }
 
-Density::Density( const std::string & name, InputParameters parameters ) :
-  Material( name, parameters ),
+Density::Density( const InputParameters & parameters) :
+  Material(parameters),
 
   _is_coupled( isCoupled("disp_x") || isCoupled("disp_r") ),
   _is_RZ( isCoupled("disp_r") && isCoupled("disp_z") ),
@@ -90,3 +90,24 @@ Density::computeProperties()
     _density[qp] = d;
   }
 }
+
+
+// DEPRECATED CONSTRUCTOR
+Density::Density(const std::string & deprecated_name, InputParameters parameters) :
+  Material(deprecated_name, parameters),
+
+  _is_coupled( isCoupled("disp_x") || isCoupled("disp_r") ),
+  _is_RZ( isCoupled("disp_r") && isCoupled("disp_z") ),
+  _is_SphericalR( isCoupled("disp_r") && !isCoupled("disp_z") ),
+  _grad_disp_x( isCoupled("disp_x") ? coupledGradient("disp_x") :
+                ( isCoupled("disp_r") ? coupledGradient("disp_r") : _grad_zero ) ),
+  _grad_disp_y( isCoupled("disp_y") ? coupledGradient("disp_y") :
+                ( isCoupled("disp_z") ? coupledGradient("disp_z") : _grad_zero ) ),
+  _grad_disp_z( !_is_RZ && isCoupled("disp_z") ? coupledGradient("disp_z") : _grad_zero ),
+  _disp_r( _is_RZ ? coupledValue("disp_r") : _zero ),
+
+  _orig_density(getParam<Real>("density")),
+  _density(declareProperty<Real>("density")),
+  _density_old(declarePropertyOld<Real>("density"))
+
+{}

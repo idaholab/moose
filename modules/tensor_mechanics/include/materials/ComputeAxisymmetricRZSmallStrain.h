@@ -16,7 +16,8 @@
 class ComputeAxisymmetricRZSmallStrain : public Compute2DSmallStrain
 {
 public:
-  ComputeAxisymmetricRZSmallStrain(const std::string & name, InputParameters parameters);
+  ComputeAxisymmetricRZSmallStrain(const InputParameters & parameters);
+  ComputeAxisymmetricRZSmallStrain(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeStrainZZ();

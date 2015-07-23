@@ -19,8 +19,8 @@ InputParameters validParams<ConvectiveFluxFunction>()
   return params;
 }
 
-ConvectiveFluxFunction::ConvectiveFluxFunction(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+ConvectiveFluxFunction::ConvectiveFluxFunction(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _T_infinity(getFunction("T_infinity")),
     _coefficient(getParam<Real>("coefficient")),
     _coef_func(isParamValid("coefficient_function") ? &getFunction("coefficient_function") : NULL)
@@ -40,3 +40,12 @@ ConvectiveFluxFunction::computeQpJacobian()
   const Real coef(_coefficient * (_coef_func ? _coef_func->value(_t, _q_point[_qp]) : 1));
   return _test[_i][_qp] * coef * _phi[_j][_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+ConvectiveFluxFunction::ConvectiveFluxFunction(const std::string & deprecated_name, InputParameters parameters) :
+    IntegratedBC(deprecated_name, parameters),
+    _T_infinity(getFunction("T_infinity")),
+    _coefficient(getParam<Real>("coefficient")),
+    _coef_func(isParamValid("coefficient_function") ? &getFunction("coefficient_function") : NULL)
+{}

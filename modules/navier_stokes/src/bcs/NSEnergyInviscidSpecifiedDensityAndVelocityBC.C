@@ -26,8 +26,8 @@ InputParameters validParams<NSEnergyInviscidSpecifiedDensityAndVelocityBC>()
 
 
 
-NSEnergyInviscidSpecifiedDensityAndVelocityBC::NSEnergyInviscidSpecifiedDensityAndVelocityBC(const std::string & name, InputParameters parameters)
-    : NSEnergyInviscidBC(name, parameters),
+NSEnergyInviscidSpecifiedDensityAndVelocityBC::NSEnergyInviscidSpecifiedDensityAndVelocityBC(const InputParameters & parameters)
+    : NSEnergyInviscidBC(parameters),
 
       // Aux Variables
       _pressure(coupledValue("pressure")),
@@ -78,3 +78,19 @@ Real NSEnergyInviscidSpecifiedDensityAndVelocityBC::computeQpOffDiagJacobian(uns
 //   // When both pressure and u.n are specified, only term B of the Jacobian is non-zero.
 //   return this->qp_jacobian_termB(var_number, _un);
 // }
+
+
+// DEPRECATED CONSTRUCTOR
+NSEnergyInviscidSpecifiedDensityAndVelocityBC::NSEnergyInviscidSpecifiedDensityAndVelocityBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSEnergyInviscidBC(deprecated_name, parameters),
+
+      // Aux Variables
+      _pressure(coupledValue("pressure")),
+
+      // Required parameters
+      _specified_density(getParam<Real>("specified_density")),
+      _specified_u(getParam<Real>("specified_u")),
+      _specified_v(getParam<Real>("specified_v")),
+      _specified_w(getParam<Real>("specified_w"))
+{
+}

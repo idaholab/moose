@@ -34,9 +34,8 @@ InputParameters validParams<CosseratLinearElasticMaterial>()
   return params;
 }
 
-CosseratLinearElasticMaterial::CosseratLinearElasticMaterial(const std::string & name,
-                                                             InputParameters parameters) :
-    TensorMechanicsMaterial(name, parameters),
+CosseratLinearElasticMaterial::CosseratLinearElasticMaterial(const InputParameters & parameters) :
+    TensorMechanicsMaterial(parameters),
     _eigenstrain(declareProperty<RankTwoTensor>("eigenstrain")),
     _symmetric_strain(declareProperty<RankTwoTensor>("symmetric_strain")),
     _antisymmetric_strain(declareProperty<RankTwoTensor>("antisymmetric_strain")),
@@ -126,4 +125,40 @@ void CosseratLinearElasticMaterial::computeQpElasticityTensor()
 
   _elastic_flexural_rigidity_tensor[_qp] = _Bijkl;
   _Jacobian_mult_couple[_qp] = _Bijkl;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CosseratLinearElasticMaterial::CosseratLinearElasticMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsMaterial(deprecated_name, parameters),
+    _eigenstrain(declareProperty<RankTwoTensor>("eigenstrain")),
+    _symmetric_strain(declareProperty<RankTwoTensor>("symmetric_strain")),
+    _antisymmetric_strain(declareProperty<RankTwoTensor>("antisymmetric_strain")),
+    _curvature(declareProperty<RankTwoTensor>("curvature")),
+    _symmetric_stress(declareProperty<RankTwoTensor>("symmetric_stress")),
+    _antisymmetric_stress(declareProperty<RankTwoTensor>("antisymmetric_stress")),
+    _stress_couple(declareProperty<RankTwoTensor>("coupled_stress")),
+    _elastic_flexural_rigidity_tensor(declareProperty<ElasticityTensorR4>("elastic_flexural_rigidity_tensor")),
+    _Jacobian_mult_couple(declareProperty<ElasticityTensorR4>("coupled_Jacobian_mult")),
+    _Bijkl_vector(getParam<std::vector<Real> >("B_ijkl")),
+    _Bijkl(),
+    _T(coupledValue("T")),
+    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
+    _T0(getParam<Real>("T0")),
+    _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector")),
+    _wc_x(coupledValue("wc_x")),
+    _wc_y(coupledValue("wc_y")),
+    _wc_z(coupledValue("wc_z")),
+    _grad_wc_x(coupledGradient("wc_x")),
+    _grad_wc_y(coupledGradient("wc_y")),
+    _grad_wc_z(coupledGradient("wc_z")),
+    _fill_method_bending(getParam<MooseEnum>("fill_method_bending"))
+{
+  //Initialize applied strain tensor from input vector
+  if (_applied_strain_vector.size() == 6)
+    _applied_strain_tensor.fillFromInputVector(_applied_strain_vector);
+  else
+    _applied_strain_tensor.zero();
+
+  _Bijkl.fillFromInputVector(_Bijkl_vector, (RankFourTensor::FillMethod)(int)_fill_method_bending);
 }

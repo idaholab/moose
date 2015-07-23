@@ -18,8 +18,8 @@ InputParameters validParams<PoroMechanicsAction>()
   return params;
 }
 
-PoroMechanicsAction::PoroMechanicsAction(const std::string & name, InputParameters params) :
-    TensorMechanicsAction(name, params)
+PoroMechanicsAction::PoroMechanicsAction(const InputParameters & params) :
+    TensorMechanicsAction(params)
 {
 }
 
@@ -66,4 +66,11 @@ PoroMechanicsAction::act()
 
     _problem->addKernel(type, name.str(), params);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PoroMechanicsAction::PoroMechanicsAction(const std::string & deprecated_name, InputParameters params) :
+    TensorMechanicsAction(deprecated_name, params)
+{
 }

@@ -24,9 +24,8 @@ InputParameters validParams<LatticeSmoothCircleIC>()
   return params;
 }
 
-LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
-                                             InputParameters parameters) :
-    SmoothCircleBaseIC(name, parameters),
+LatticeSmoothCircleIC::LatticeSmoothCircleIC(const InputParameters & parameters) :
+    SmoothCircleBaseIC(parameters),
     _lattice_variation(getParam<Real>("Rnd_variation")),
     _circles_per_side(getParam<std::vector<unsigned int> >("circles_per_side")),
     _radius(getParam<Real>("radius")),
@@ -164,4 +163,19 @@ LatticeSmoothCircleIC::computeCircleCenters()
 
         cnt++;
       }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & deprecated_name, InputParameters parameters) :
+    SmoothCircleBaseIC(deprecated_name, parameters),
+    _lattice_variation(getParam<Real>("Rnd_variation")),
+    _circles_per_side(getParam<std::vector<unsigned int> >("circles_per_side")),
+    _radius(getParam<Real>("radius")),
+    _radius_variation(getParam<Real>("radius_variation")),
+    _radius_variation_type(getParam<MooseEnum>("radius_variation_type")),
+    _avoid_bounds(getParam<bool>("avoid_bounds"))
+{
+  //Set random seed
+  MooseRandom::seed(getParam<unsigned int>("rand_seed"));
 }

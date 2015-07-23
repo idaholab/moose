@@ -26,8 +26,8 @@ class RichardsFlux : public Kernel
 {
 public:
 
-  RichardsFlux(const std::string & name,
-                        InputParameters parameters);
+  RichardsFlux(const InputParameters & parameters);
+  RichardsFlux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 
 protected:

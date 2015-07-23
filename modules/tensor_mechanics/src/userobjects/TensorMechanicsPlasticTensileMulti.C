@@ -19,9 +19,8 @@ InputParameters validParams<TensorMechanicsPlasticTensileMulti>()
   return params;
 }
 
-TensorMechanicsPlasticTensileMulti::TensorMechanicsPlasticTensileMulti(const std::string & name,
-                                                         InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters),
+TensorMechanicsPlasticTensileMulti::TensorMechanicsPlasticTensileMulti(const InputParameters & parameters) :
+    TensorMechanicsPlasticModel(parameters),
     _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
     _shift(parameters.isParamValid("shift") ? getParam<Real>("shift") : _f_tol)
 {
@@ -236,4 +235,18 @@ std::string
 TensorMechanicsPlasticTensileMulti::modelName() const
 {
   return "TensileMulti";
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsPlasticTensileMulti::TensorMechanicsPlasticTensileMulti(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsPlasticModel(deprecated_name, parameters),
+    _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
+    _shift(parameters.isParamValid("shift") ? getParam<Real>("shift") : _f_tol)
+{
+  if (_shift < 0)
+    mooseError("Value of 'shift' in TensorMechanicsPlasticTensileMulti must not be negative\n");
+  if (_shift > _f_tol)
+    _console << "WARNING: value of 'shift' in TensorMechanicsPlasticTensileMulti is probably set too high\n";
+  MooseRandom::seed(0);
 }

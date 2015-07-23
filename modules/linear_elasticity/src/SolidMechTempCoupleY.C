@@ -14,8 +14,8 @@ InputParameters validParams<SolidMechTempCoupleY>()
 }
 
 
-SolidMechTempCoupleY::SolidMechTempCoupleY(const std::string & name, InputParameters parameters)
-  :SolidMechTempCouple(name, parameters)
+SolidMechTempCoupleY::SolidMechTempCoupleY(const InputParameters & parameters)
+  :SolidMechTempCouple(parameters)
 {}
 
 Real
@@ -38,3 +38,9 @@ SolidMechTempCoupleY::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0.0;
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SolidMechTempCoupleY::SolidMechTempCoupleY(const std::string & deprecated_name, InputParameters parameters)
+  :SolidMechTempCouple(deprecated_name, parameters)
+{}

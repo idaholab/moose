@@ -22,8 +22,8 @@ InputParameters validParams<NodalAreaVarAction>()
   return params;
 }
 
-NodalAreaVarAction::NodalAreaVarAction(const std::string & name, InputParameters params) :
-  Action(name, params)
+NodalAreaVarAction::NodalAreaVarAction(const InputParameters & params) :
+  Action(params)
 {
 }
 
@@ -38,4 +38,11 @@ NodalAreaVarAction::act()
                            FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                                   Utility::string_to_enum<FEFamily>("LAGRANGE")));
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NodalAreaVarAction::NodalAreaVarAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params)
+{
 }

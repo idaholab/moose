@@ -19,8 +19,8 @@ InputParameters validParams<SolidMechInertialForce>()
   return params;
 }
 
-SolidMechInertialForce::SolidMechInertialForce(const std::string & name, InputParameters parameters)
-  :Kernel(name,parameters),
+SolidMechInertialForce::SolidMechInertialForce(const InputParameters & parameters)
+  :Kernel(parameters),
    _density(getMaterialProperty<Real>("density")),
    _u_old(valueOld()),
    _vel_old(coupledValueOld("velocity")),
@@ -45,3 +45,15 @@ SolidMechInertialForce::computeQpJacobian()
     return 0;
   return _test[_i][_qp]*_density[_qp]/(_beta*_dt*_dt)*_phi[_j][_qp];
 }
+
+
+// DEPRECATED CONSTRUCTOR
+SolidMechInertialForce::SolidMechInertialForce(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+   _density(getMaterialProperty<Real>("density")),
+   _u_old(valueOld()),
+   _vel_old(coupledValueOld("velocity")),
+   _accel_old(coupledValueOld("acceleration")),
+   _beta(getParam<Real>("beta")),
+   _gamma(getParam<Real>("gamma"))
+{}

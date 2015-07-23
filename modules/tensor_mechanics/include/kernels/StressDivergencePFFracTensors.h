@@ -32,7 +32,8 @@ InputParameters validParams<StressDivergencePFFracTensors>();
 class StressDivergencePFFracTensors : public StressDivergenceTensors
 {
 public:
-  StressDivergencePFFracTensors(const std::string & name, InputParameters parameters);
+  StressDivergencePFFracTensors(const InputParameters & parameters);
+  StressDivergencePFFracTensors(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);

@@ -7,8 +7,11 @@
 #include "AddV.h"
 
 InputParameters &
-AddV(InputParameters & parameters, const std::string & var_name)
+AddV(const InputParameters & params, const std::string & var_name)
 {
+  // TEMP FIX
+  InputParameters & parameters = const_cast<InputParameters &>(params);
+
   unsigned int op_num = parameters.get<unsigned int>("op_num");
 
   //Create variable names

@@ -24,7 +24,8 @@ InputParameters validParams<RichardsSeff>();
 class RichardsSeff : public GeneralUserObject
 {
 public:
-  RichardsSeff(const std::string & name, InputParameters parameters);
+  RichardsSeff(const InputParameters & parameters);
+  RichardsSeff(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();
   void execute();

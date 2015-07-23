@@ -29,7 +29,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  NSTemperatureAux(const std::string & name, InputParameters parameters);
+  NSTemperatureAux(const InputParameters & parameters);
+  NSTemperatureAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSTemperatureAux() {}
 

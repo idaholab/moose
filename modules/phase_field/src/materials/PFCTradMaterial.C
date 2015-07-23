@@ -10,9 +10,8 @@ InputParameters validParams<PFCTradMaterial>()
   return params;
 }
 
-PFCTradMaterial::PFCTradMaterial(const std::string & name,
-                 InputParameters parameters)
-  :Material(name, parameters),
+PFCTradMaterial::PFCTradMaterial(const InputParameters & parameters)
+  :Material(parameters),
    _order(getParam<unsigned int>("order")),
    _M(declareProperty<Real>("M")),
    _a(declareProperty<Real>("a")),
@@ -54,4 +53,20 @@ PFCTradMaterial::computeQpProperties()
   else
   {
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PFCTradMaterial::PFCTradMaterial(const std::string & deprecated_name, InputParameters parameters)
+  :Material(deprecated_name, parameters),
+   _order(getParam<unsigned int>("order")),
+   _M(declareProperty<Real>("M")),
+   _a(declareProperty<Real>("a")),
+   _b(declareProperty<Real>("b")),
+   _C0(declareProperty<Real>("C0")),
+   _C2(declareProperty<Real>("C2")),
+   _C4(declareProperty<Real>("C4")),
+   _C6(declareProperty<Real>("C6")),
+   _C8(declareProperty<Real>("C8"))
+{
 }

@@ -38,9 +38,8 @@ InputParameters validParams<PLC_LSH>()
 }
 
 
-PLC_LSH::PLC_LSH( const std::string & name,
-                  InputParameters parameters )
-  :SolidModel( name, parameters ),
+PLC_LSH::PLC_LSH( const InputParameters & parameters)
+  :SolidModel(parameters),
    _coefficient(parameters.get<Real>("coefficient")),
    _n_exponent(parameters.get<Real>("n_exponent")),
    _m_exponent(parameters.get<Real>("m_exponent")),
@@ -354,4 +353,42 @@ PLC_LSH::computeLSH( const SymmTensor & strain_increment,
 
   } // end of if statement
 
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PLC_LSH::PLC_LSH(const std::string & deprecated_name, InputParameters parameters)
+  :SolidModel(deprecated_name, parameters),
+   _coefficient(parameters.get<Real>("coefficient")),
+   _n_exponent(parameters.get<Real>("n_exponent")),
+   _m_exponent(parameters.get<Real>("m_exponent")),
+   _activation_energy(parameters.get<Real>("activation_energy")),
+   _gas_constant(parameters.get<Real>("gas_constant")),
+
+   _yield_stress(parameters.get<Real>("yield_stress")),
+   _hardening_constant(parameters.get<Real>("hardening_constant")),
+
+   _max_its(parameters.get<unsigned int>("max_its")),
+   _output_iteration_info(getParam<bool>("output_iteration_info")),
+   _relative_tolerance(parameters.get<Real>("relative_tolerance")),
+   _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
+
+   _absolute_stress_tolerance(parameters.get<Real>("absolute_stress_tolerance")),
+
+   _creep_strain(declareProperty<SymmTensor>("creep_strain")),
+   _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain")),
+
+   _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain")),
+
+   _hardening_variable(declareProperty<Real>("hardening_variable")),
+   _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
+
+   _output( getParam<PostprocessorName>("output") != "" ? &getPostprocessorValue("output") : NULL )
+
+{
+  if (_yield_stress <= 0)
+  {
+    mooseError("Yield stress must be greater than zero");
+  }
 }

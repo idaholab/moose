@@ -12,8 +12,8 @@ InputParameters validParams<PFCTradMaterial>();
 class PFCTradMaterial : public Material
 {
 public:
-  PFCTradMaterial(const std::string & name,
-                  InputParameters parameters);
+  PFCTradMaterial(const InputParameters & parameters);
+  PFCTradMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

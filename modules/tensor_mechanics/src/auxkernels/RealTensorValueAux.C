@@ -17,8 +17,8 @@ InputParameters validParams<RealTensorValueAux>()
   return params;
 }
 
-RealTensorValueAux::RealTensorValueAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+RealTensorValueAux::RealTensorValueAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _tensor(getMaterialProperty<RealTensorValue>("tensor")),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j"))
@@ -29,4 +29,14 @@ Real
 RealTensorValueAux::computeValue()
 {
   return _tensor[_qp](_i, _j);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RealTensorValueAux::RealTensorValueAux(const std::string & deprecated_name, InputParameters parameters) :
+    AuxKernel(deprecated_name, parameters),
+    _tensor(getMaterialProperty<RealTensorValue>("tensor")),
+    _i(getParam<unsigned int>("index_i")),
+    _j(getParam<unsigned int>("index_j"))
+{
 }

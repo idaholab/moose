@@ -31,8 +31,8 @@ InputParameters validParams<INSSplitMomentum>()
 
 
 
-INSSplitMomentum::INSSplitMomentum(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+INSSplitMomentum::INSSplitMomentum(const InputParameters & parameters) :
+  Kernel(parameters),
 
   // Coupled variables
   _u_vel(coupledValue("u")),
@@ -192,4 +192,40 @@ Real INSSplitMomentum::computeQpOffDiagJacobian(unsigned jvar)
 
   else
     return 0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+INSSplitMomentum::INSSplitMomentum(const std::string & deprecated_name, InputParameters parameters) :
+  Kernel(deprecated_name, parameters),
+
+  // Coupled variables
+  _u_vel(coupledValue("u")),
+  _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+  _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+
+  _a1(coupledValue("a1")),
+  _a2(_mesh.dimension() >= 2 ? coupledValue("a2") : _zero),
+  _a3(_mesh.dimension() == 3 ? coupledValue("a3") : _zero),
+
+  // Gradients
+  _grad_u_vel(coupledGradient("u")),
+  _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
+  _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero),
+
+  // Variable numberings
+  _u_vel_var_number(coupled("u")),
+  _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
+  _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
+
+  _a1_var_number(coupled("a1")),
+  _a2_var_number(_mesh.dimension() >= 2 ? coupled("a2") : libMesh::invalid_uint),
+  _a3_var_number(_mesh.dimension() == 3 ? coupled("a3") : libMesh::invalid_uint),
+
+  // Required parameters
+  _mu(getParam<Real>("mu")),
+  _rho(getParam<Real>("rho")),
+  _gravity(getParam<RealVectorValue>("gravity")),
+  _component(getParam<unsigned>("component"))
+{
 }

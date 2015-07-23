@@ -22,8 +22,8 @@ InputParameters validParams<RichardsExcav>()
   return params;
 }
 
-RichardsExcav::RichardsExcav(const std::string & name, InputParameters parameters) :
-    NodalBC(name,parameters),
+RichardsExcav::RichardsExcav(const InputParameters & parameters) :
+    NodalBC(parameters),
     _p_excav(getParam<Real>("p_excav")),
     _func(getFunction("excav_geom_function"))
 {}
@@ -43,3 +43,11 @@ RichardsExcav::computeQpResidual()
   return _u[_qp] - _p_excav;
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsExcav::RichardsExcav(const std::string & deprecated_name, InputParameters parameters) :
+    NodalBC(deprecated_name, parameters),
+    _p_excav(getParam<Real>("p_excav")),
+    _func(getFunction("excav_geom_function"))
+{}

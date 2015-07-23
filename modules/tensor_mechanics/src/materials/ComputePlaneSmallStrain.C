@@ -14,9 +14,8 @@ InputParameters validParams<ComputePlaneSmallStrain>()
   return params;
 }
 
-ComputePlaneSmallStrain::ComputePlaneSmallStrain(const std::string & name,
-                                                 InputParameters parameters) :
-    Compute2DSmallStrain(name, parameters)
+ComputePlaneSmallStrain::ComputePlaneSmallStrain(const InputParameters & parameters) :
+    Compute2DSmallStrain(parameters)
 {
 }
 
@@ -24,4 +23,11 @@ Real
 ComputePlaneSmallStrain::computeStrainZZ()
 {
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ComputePlaneSmallStrain::ComputePlaneSmallStrain(const std::string & deprecated_name, InputParameters parameters) :
+    Compute2DSmallStrain(deprecated_name, parameters)
+{
 }

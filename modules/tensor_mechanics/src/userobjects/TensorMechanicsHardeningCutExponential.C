@@ -18,8 +18,8 @@ InputParameters validParams<TensorMechanicsHardeningCutExponential>()
   return params;
 }
 
-TensorMechanicsHardeningCutExponential::TensorMechanicsHardeningCutExponential(const std::string & name, InputParameters parameters) :
-  TensorMechanicsHardeningModel(name, parameters),
+TensorMechanicsHardeningCutExponential::TensorMechanicsHardeningCutExponential(const InputParameters & parameters) :
+  TensorMechanicsHardeningModel(parameters),
   _val_0(getParam<Real>("value_0")),
   _val_res(parameters.isParamValid("value_residual") ? getParam<Real>("value_residual") : _val_0),
   _intnl_0(getParam<Real>("internal_0")),
@@ -45,4 +45,15 @@ TensorMechanicsHardeningCutExponential::derivative(const Real & intnl) const
     return 0;
   else
     return -_rate*(_val_0 - _val_res)*std::exp(-_rate*x);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+TensorMechanicsHardeningCutExponential::TensorMechanicsHardeningCutExponential(const std::string & deprecated_name, InputParameters parameters) :
+  TensorMechanicsHardeningModel(deprecated_name, parameters),
+  _val_0(getParam<Real>("value_0")),
+  _val_res(parameters.isParamValid("value_residual") ? getParam<Real>("value_residual") : _val_0),
+  _intnl_0(getParam<Real>("internal_0")),
+  _rate(getParam<Real>("rate"))
+{
 }

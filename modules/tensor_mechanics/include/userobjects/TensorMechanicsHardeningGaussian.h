@@ -24,7 +24,8 @@ InputParameters validParams<TensorMechanicsHardeningGaussian>();
 class TensorMechanicsHardeningGaussian : public TensorMechanicsHardeningModel
 {
  public:
-  TensorMechanicsHardeningGaussian(const std::string & name, InputParameters parameters);
+  TensorMechanicsHardeningGaussian(const InputParameters & parameters);
+  TensorMechanicsHardeningGaussian(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(const Real & intnl) const;
 

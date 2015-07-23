@@ -125,7 +125,8 @@ MooseApp::MooseApp(InputParameters parameters) :
     _legacy_uo_aux_computation_default(getParam<bool>("use_legacy_uo_aux_computation")),
     _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
     _legacy_constructors(false),
-    _check_input(getParam<bool>("check_input"))
+    _check_input(getParam<bool>("check_input")),
+    _restartable_data(libMesh::n_threads())
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -140,7 +141,7 @@ MooseApp::MooseApp(InputParameters parameters) :
     mooseError("Valid CommandLine object required");
 }
 
-MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
+MooseApp::MooseApp(const std::string & /*deprecated_name*/, InputParameters parameters) :
     ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("name")),
     _pars(parameters),
@@ -166,7 +167,8 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _legacy_uo_aux_computation_default(getParam<bool>("use_legacy_uo_aux_computation")),
     _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
     _legacy_constructors(true),
-    _check_input(getParam<bool>("check_input"))
+    _check_input(getParam<bool>("check_input")),
+    _restartable_data(libMesh::n_threads())
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -450,6 +452,32 @@ MooseApp::meshOnly(std::string mesh_file_name)
 }
 
 void
+MooseApp::registerRecoverableData(std::string name)
+{
+  _recoverable_data.insert(name);
+}
+
+MooseSharedPointer<Backup>
+MooseApp::backup()
+{
+  FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
+
+  RestartableDataIO rdio(fe_problem);
+
+  return rdio.createBackup();
+}
+
+void
+MooseApp::restore(MooseSharedPointer<Backup> backup)
+{
+  FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
+
+  RestartableDataIO rdio(fe_problem);
+
+  rdio.restoreBackup(backup);
+}
+
+void
 MooseApp::setCheckUnusedFlag(bool warn_is_error)
 {
   _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
@@ -535,6 +563,18 @@ MooseApp::libNameToAppName(const std::string & library_name) const
     mooseError("Invalid library name: " << app_name);
 
   return MooseUtils::underscoreToCamelCase(app_name, true);
+}
+
+
+void
+MooseApp::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
+{
+  std::map<std::string, RestartableDataValue *> & restartable_data = _restartable_data[tid];
+
+  if (restartable_data.find(name) != restartable_data.end())
+    mooseError("Attempted to declare restartable twice with the same name: " << name);
+
+  restartable_data[name] = data;
 }
 
 void

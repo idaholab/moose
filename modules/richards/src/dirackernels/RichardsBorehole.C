@@ -32,8 +32,8 @@ InputParameters validParams<RichardsBorehole>()
   return params;
 }
 
-RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
+RichardsBorehole::RichardsBorehole(const InputParameters & parameters) :
+    DiracKernel(parameters),
 
     _debug_things(getParam<bool>("MyNameIsAndyWilkins")),
 
@@ -498,4 +498,157 @@ RichardsBorehole::jac(unsigned int wrt_num)
   }
 
   return outflowp;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsBorehole::RichardsBorehole(const std::string & deprecated_name, InputParameters parameters) :
+    DiracKernel(deprecated_name, parameters),
+
+    _debug_things(getParam<bool>("MyNameIsAndyWilkins")),
+
+    _fully_upwind(getParam<bool>("fully_upwind")),
+
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _num_p(_richards_name_UO.num_v()),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+
+    // in the following, getUserObjectByName returns a reference (an alias) to a RichardsBLAH user object, and the & turns it into a pointer
+    _density_UO(_fully_upwind ? &getUserObjectByName<RichardsDensity>(getParam<std::vector<UserObjectName> >("density_UO")[_pvar]) : NULL),
+    _seff_UO(_fully_upwind ? &getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[_pvar]) : NULL),
+    _relperm_UO(_fully_upwind ? &getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[_pvar]) : NULL),
+
+    _num_nodes(0),
+    _mobility(0),
+    _dmobility_dv(0),
+
+    _character(getFunction("character")),
+    _p_bot(getParam<Real>("bottom_pressure")),
+    _unit_weight(getParam<RealVectorValue>("unit_weight")),
+
+    _re_constant(getParam<Real>("re_constant")),
+    _well_constant(getParam<Real>("well_constant")),
+
+    _borehole_length(getParam<Real>("borehole_length")),
+    _borehole_direction(getParam<RealVectorValue>("borehole_direction")),
+
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
+    _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv")),
+
+    _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
+
+    _permeability(getMaterialProperty<RealTensorValue>("permeability")),
+
+    _dseff_dv(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff_dv")),
+
+    _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
+    _drel_perm_dv(getMaterialProperty<std::vector<std::vector<Real> > >("drel_perm_dv")),
+
+    _density(getMaterialProperty<std::vector<Real> >("density")),
+    _ddensity_dv(getMaterialProperty<std::vector<std::vector<Real> > >("ddensity_dv")),
+
+    _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
+    _point_file(getParam<std::string>("point_file"))
+
+{
+  // zero the outflow mass
+  _total_outflow_mass.zero();
+
+  // open file
+  std::ifstream file(_point_file.c_str());
+  if (!file.good())
+    mooseError("Error opening file '" + _point_file + "' from RichardsBorehole.");
+
+  // construct the arrays of radius, x, y and z
+  std::vector<Real> scratch;
+  while (parseNextLineReals(file, scratch))
+  {
+    if (scratch.size() >= 2)
+    {
+      _rs.push_back(scratch[0]);
+      _xs.push_back(scratch[1]);
+      if (scratch.size() >= 3)
+        _ys.push_back(scratch[2]);
+      else
+        _ys.push_back(0.0);
+      if (scratch.size() >= 4)
+        _zs.push_back(scratch[3]);
+      else
+        _zs.push_back(0.0);
+    }
+  }
+
+  file.close();
+
+  int num_pts = _zs.size();
+  _bottom_point(0) = _xs[num_pts - 1];
+  _bottom_point(1) = _ys[num_pts - 1];
+  _bottom_point(2) = _zs[num_pts - 1];
+
+  // construct the line-segment lengths between each point
+  _half_seg_len.resize(std::max(num_pts-1, 1));
+  for (unsigned int i = 0 ; i < _xs.size() - 1; ++i)
+  {
+    _half_seg_len[i] = 0.5*std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
+    if (_half_seg_len[i] == 0)
+      mooseError("Borehole has a zero-segment length at (x,y,z) = " << _xs[i] << " " << _ys[i] << " " << _zs[i] << "\n");
+  }
+  if (num_pts == 1)
+    _half_seg_len[0] = _borehole_length;
+
+  // construct the rotation matrix needed to rotate the permeability
+  _rot_matrix.resize(std::max(num_pts-1, 1));
+  for (unsigned int i = 0 ; i < _xs.size()-1; ++i)
+  {
+    RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
+    _rot_matrix[i] = RotationMatrix::rotVecToZ(v2);
+  }
+  if (num_pts == 1)
+    _rot_matrix[0] = RotationMatrix::rotVecToZ(_borehole_direction);
+
+  // do debugging if AndyWilkins
+  if (_debug_things)
+  {
+    _console << "Checking rotation matrices" << std::endl;
+    RealVectorValue zzz(0,0,1);
+    RealTensorValue iii;
+    iii(0,0) = 1;
+    iii(1,1) = 1;
+    iii(2,2) = 1;
+    RealVectorValue vec0;
+    RealTensorValue ten0;
+    Real the_sum;
+    for (unsigned int i = 0 ; i < _xs.size()-1; ++i)
+    {
+      // check rotation matrix does the correct rotation
+      _console << i << std::endl;
+      RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
+      v2 /= std::sqrt(v2*v2);
+      vec0 = _rot_matrix[i]*v2 - zzz;
+      if ((vec0*vec0) > 1E-20)
+        mooseError("Rotation matrix for v2 = " << v2 << " is wrong.  It is " << _rot_matrix[i] << "\n");
+
+      // check rotation matrix is orthogonal
+      ten0 = _rot_matrix[i]*_rot_matrix[i].transpose() - iii;
+      the_sum = 0;
+      for (unsigned int j = 0 ; j < 3; ++j)
+        for (unsigned int k = 0 ; k < 3; ++k)
+          the_sum = ten0(j,k)*ten0(j,k);
+      if (the_sum > 1E-20)
+        mooseError("Rotation matrix for v2 = " << v2 << " does not obey R.R^T=I.  It is " << _rot_matrix[i] << "\n");
+
+      ten0 = _rot_matrix[i].transpose()*_rot_matrix[i] - iii;
+      the_sum = 0;
+      for (unsigned int j = 0 ; j < 3; ++j)
+        for (unsigned int k = 0 ; k < 3; ++k)
+          the_sum = ten0(j,k)*ten0(j,k);
+      if (the_sum > 1E-20)
+        mooseError("Rotation matrix for v2 = " << v2 << " does not obey R^T.R=I.  It is " << _rot_matrix[i] << "\n");
+    }
+  }
+
+  _ps_at_nodes.resize(_num_p);
+  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
+    _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
+
 }

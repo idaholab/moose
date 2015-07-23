@@ -26,7 +26,8 @@ InputParameters validParams<SplitCHParsed>();
 class SplitCHParsed : public DerivativeMaterialInterface<JvarMapInterface<SplitCHCRes> >
 {
 public:
-  SplitCHParsed(const std::string & name, InputParameters parameters);
+  SplitCHParsed(const InputParameters & parameters);
+  SplitCHParsed(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeDFDC(PFFunctionType type);

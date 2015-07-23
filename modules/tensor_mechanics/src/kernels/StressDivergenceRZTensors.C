@@ -16,8 +16,8 @@ InputParameters validParams<StressDivergenceRZTensors>()
   return params;
 }
 
-StressDivergenceRZTensors::StressDivergenceRZTensors(const std::string & name, InputParameters parameters) :
-    StressDivergenceTensors(name, parameters)
+StressDivergenceRZTensors::StressDivergenceRZTensors(const InputParameters & parameters) :
+    StressDivergenceTensors(parameters)
 {
 }
 
@@ -124,4 +124,11 @@ StressDivergenceRZTensors::calculateJacobian(unsigned int ivar, unsigned int jva
 
   else
     mooseError("Invalid component in Jacobian Calculation");
+}
+
+
+// DEPRECATED CONSTRUCTOR
+StressDivergenceRZTensors::StressDivergenceRZTensors(const std::string & deprecated_name, InputParameters parameters) :
+    StressDivergenceTensors(deprecated_name, parameters)
+{
 }

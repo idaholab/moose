@@ -22,8 +22,8 @@ InputParameters validParams<MathFreeEnergy>();
 class MathFreeEnergy : public DerivativeFunctionMaterialBase
 {
 public:
-  MathFreeEnergy(const std::string & name,
-             InputParameters parameters);
+  MathFreeEnergy(const InputParameters & parameters);
+  MathFreeEnergy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeF();

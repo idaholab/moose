@@ -39,7 +39,8 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  AdaptiveTransient(const std::string & name, InputParameters parameters);
+  AdaptiveTransient(const InputParameters & parameters);
+  AdaptiveTransient(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~AdaptiveTransient();
 

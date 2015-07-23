@@ -36,7 +36,8 @@ InputParameters validParams<FrictionalContactProblem>();
 class FrictionalContactProblem : public ReferenceResidualProblem
 {
 public:
-  FrictionalContactProblem(const std::string & name, InputParameters params);
+  FrictionalContactProblem(const InputParameters & params);
+  FrictionalContactProblem(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~FrictionalContactProblem();
 
   class SlipData

@@ -16,9 +16,8 @@ InputParameters validParams<FiniteStrainMaterial>()
   return params;
 }
 
-FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
-                                           InputParameters parameters) :
-    TensorMechanicsMaterial(name, parameters),
+FiniteStrainMaterial::FiniteStrainMaterial(const InputParameters & parameters) :
+    TensorMechanicsMaterial(parameters),
     _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
     _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
@@ -159,4 +158,18 @@ FiniteStrainMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   R_incr(2,0) += C3*a[1];
   R_incr(2,1) -= C3*a[0];
   _rotation_increment[_qp] = R_incr.transpose();
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FiniteStrainMaterial::FiniteStrainMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    TensorMechanicsMaterial(deprecated_name, parameters),
+    _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
+    _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
+    _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
+    _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
+    _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
+    _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
+    _deformation_gradient(declareProperty<RankTwoTensor>("deformation gradient"))
+{
 }

@@ -19,7 +19,8 @@
 class LinearIsoElasticPFDamage : public LinearElasticMaterial
 {
 public:
-  LinearIsoElasticPFDamage(const std:: string & name, InputParameters parameters);
+  LinearIsoElasticPFDamage(const InputParameters & parameters);
+  LinearIsoElasticPFDamage(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpElasticityTensor();

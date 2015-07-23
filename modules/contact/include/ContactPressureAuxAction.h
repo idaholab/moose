@@ -14,7 +14,8 @@
 class ContactPressureAuxAction: public Action
 {
 public:
-  ContactPressureAuxAction(const std::string & name, InputParameters params);
+  ContactPressureAuxAction(const InputParameters & params);
+  ContactPressureAuxAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

@@ -23,7 +23,8 @@ InputParameters validParams<CHMath>();
 class CHMath : public CHBulk
 {
 public:
-  CHMath(const std::string & name, InputParameters parameters);
+  CHMath(const InputParameters & parameters);
+  CHMath(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);

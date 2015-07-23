@@ -20,8 +20,8 @@ InputParameters validParams<RichardsDensityMethane20degC>()
   return params;
 }
 
-RichardsDensityMethane20degC::RichardsDensityMethane20degC(const std::string & name, InputParameters parameters) :
-    RichardsDensity(name, parameters)
+RichardsDensityMethane20degC::RichardsDensityMethane20degC(const InputParameters & parameters) :
+    RichardsDensity(parameters)
 {}
 
 
@@ -52,3 +52,9 @@ RichardsDensityMethane20degC::d2density(Real p) const
     return 0.1*std::pow(6.54576947608E-5, 2)*std::exp(6.54576947608E-5*p);
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsDensityMethane20degC::RichardsDensityMethane20degC(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsDensity(deprecated_name, parameters)
+{}

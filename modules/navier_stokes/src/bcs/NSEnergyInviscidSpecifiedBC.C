@@ -20,8 +20,8 @@ InputParameters validParams<NSEnergyInviscidSpecifiedBC>()
 
 
 
-NSEnergyInviscidSpecifiedBC::NSEnergyInviscidSpecifiedBC(const std::string & name, InputParameters parameters)
-    : NSEnergyInviscidBC(name, parameters),
+NSEnergyInviscidSpecifiedBC::NSEnergyInviscidSpecifiedBC(const InputParameters & parameters)
+    : NSEnergyInviscidBC(parameters),
 
       // Required parameters
       _specified_pressure(getParam<Real>("specified_pressure")),
@@ -60,4 +60,15 @@ Real NSEnergyInviscidSpecifiedBC::compute_jacobian(unsigned var_number)
 {
   // When both pressure and u.n are specified, only term B of the Jacobian is non-zero.
   return this->qp_jacobian_termB(var_number, _un);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+NSEnergyInviscidSpecifiedBC::NSEnergyInviscidSpecifiedBC(const std::string & deprecated_name, InputParameters parameters)
+    : NSEnergyInviscidBC(deprecated_name, parameters),
+
+      // Required parameters
+      _specified_pressure(getParam<Real>("specified_pressure")),
+      _un(getParam<Real>("un"))
+{
 }

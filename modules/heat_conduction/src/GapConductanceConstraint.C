@@ -15,8 +15,8 @@ InputParameters validParams<GapConductanceConstraint>()
   return params;
 }
 
-GapConductanceConstraint::GapConductanceConstraint(const std::string & name, InputParameters parameters) :
-    FaceFaceConstraint(name, parameters),
+GapConductanceConstraint::GapConductanceConstraint(const InputParameters & parameters) :
+    FaceFaceConstraint(parameters),
     _k(getParam<Real>("k"))
 {
 }
@@ -69,4 +69,12 @@ GapConductanceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType ja
   case Moose::SlaveSlave:   return -_phi[_j][_qp] * _test_slave[_i][_qp];
   default: return 0;
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+GapConductanceConstraint::GapConductanceConstraint(const std::string & deprecated_name, InputParameters parameters) :
+    FaceFaceConstraint(deprecated_name, parameters),
+    _k(getParam<Real>("k"))
+{
 }

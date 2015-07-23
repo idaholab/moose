@@ -7,9 +7,8 @@ InputParameters validParams<CHBulkPFCTrad>()
   return params;
 }
 
-CHBulkPFCTrad::CHBulkPFCTrad(const std::string & name,
-                             InputParameters parameters) :
-    CHBulk(name, parameters),
+CHBulkPFCTrad::CHBulkPFCTrad(const InputParameters & parameters) :
+    CHBulk(parameters),
     _C0(getMaterialProperty<Real>("C0")),
     _a(getMaterialProperty<Real>("a")),
     _b(getMaterialProperty<Real>("b"))
@@ -34,4 +33,14 @@ CHBulkPFCTrad::computeGradDFDCons(PFFunctionType type)
   }
 
   mooseError("Invalid type passed in");
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CHBulkPFCTrad::CHBulkPFCTrad(const std::string & deprecated_name, InputParameters parameters) :
+    CHBulk(deprecated_name, parameters),
+    _C0(getMaterialProperty<Real>("C0")),
+    _a(getMaterialProperty<Real>("a")),
+    _b(getMaterialProperty<Real>("b"))
+{
 }

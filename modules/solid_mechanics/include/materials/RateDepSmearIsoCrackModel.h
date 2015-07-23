@@ -22,8 +22,8 @@ InputParameters validParams<RateDepSmearIsoCrackModel>();
 class RateDepSmearIsoCrackModel : public RateDepSmearCrackModel
 {
 public:
-  RateDepSmearIsoCrackModel( const std::string & name,
-                     InputParameters parameters );
+  RateDepSmearIsoCrackModel( const InputParameters & parameters);
+  RateDepSmearIsoCrackModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~RateDepSmearIsoCrackModel();
 

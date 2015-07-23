@@ -29,7 +29,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  NewmarkVelAux(const std::string & name, InputParameters parameters);
+  NewmarkVelAux(const InputParameters & parameters);
+  NewmarkVelAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NewmarkVelAux() {}
 

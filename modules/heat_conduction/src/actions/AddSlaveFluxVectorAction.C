@@ -14,8 +14,8 @@ InputParameters validParams<AddSlaveFluxVectorAction>()
   return validParams<Action>();
 }
 
-AddSlaveFluxVectorAction::AddSlaveFluxVectorAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+AddSlaveFluxVectorAction::AddSlaveFluxVectorAction(const InputParameters & params) :
+    Action(params)
 {
 }
 
@@ -23,4 +23,11 @@ void
 AddSlaveFluxVectorAction::act()
 {
   _problem->getNonlinearSystem().addVector("slave_flux", false, GHOSTED, true);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+AddSlaveFluxVectorAction::AddSlaveFluxVectorAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
 }

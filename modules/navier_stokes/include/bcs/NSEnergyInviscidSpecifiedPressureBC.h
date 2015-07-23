@@ -23,7 +23,8 @@ class NSEnergyInviscidSpecifiedPressureBC : public NSEnergyInviscidBC
 {
 
 public:
-  NSEnergyInviscidSpecifiedPressureBC(const std::string & name, InputParameters parameters);
+  NSEnergyInviscidSpecifiedPressureBC(const InputParameters & parameters);
+  NSEnergyInviscidSpecifiedPressureBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSEnergyInviscidSpecifiedPressureBC(){}
 

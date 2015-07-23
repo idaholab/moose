@@ -23,8 +23,7 @@ class MultiPlasticityDebugger:
   public MultiPlasticityLinearSystem
 {
 public:
-  MultiPlasticityDebugger(const std::string & name, InputParameters parameters);
-
+  MultiPlasticityDebugger(const InputParameters & parameters);
 
   /**
    * Outputs the debug parameters: _fspb_debug_stress, _fspd_debug_pm, etc

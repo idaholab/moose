@@ -18,8 +18,8 @@ InputParameters validParams<PFCFreezingIC>();
 class PFCFreezingIC : public InitialCondition
 {
 public:
-  PFCFreezingIC(const std::string & name,
-                InputParameters parameters);
+  PFCFreezingIC(const InputParameters & parameters);
+  PFCFreezingIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(const Point & p);
 

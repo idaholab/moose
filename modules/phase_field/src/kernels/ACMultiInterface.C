@@ -17,8 +17,8 @@ InputParameters validParams<ACMultiInterface>()
   return params;
 }
 
-ACMultiInterface::ACMultiInterface(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+ACMultiInterface::ACMultiInterface(const InputParameters & parameters) :
+    Kernel(parameters),
     _num_etas(coupledComponents("etas")),
     _eta(_num_etas),
     _grad_eta(_num_etas),
@@ -53,7 +53,7 @@ ACMultiInterface::ACMultiInterface(const std::string & name, InputParameters par
   }
 
   if (a < 0)
-    mooseError("Kernel variable must be listed in etas for ACMultiInterface kernel " << name);
+    mooseError("Kernel variable must be listed in etas for ACMultiInterface kernel " << name());
   else
     _a = a;
 }
@@ -140,4 +140,47 @@ ACMultiInterface::computeQpOffDiagJacobian(unsigned int jvar)
                    + 2.0 * _test[_i][_qp] * (_phi[_j][_qp] * (*_grad_eta[b])[_qp] + (*_eta[b])[_qp] * _grad_phi[_j][_qp])
                  ) * _grad_eta_a[_qp])
          );
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ACMultiInterface::ACMultiInterface(const std::string & deprecated_name, InputParameters parameters) :
+    Kernel(deprecated_name, parameters),
+    _num_etas(coupledComponents("etas")),
+    _eta(_num_etas),
+    _grad_eta(_num_etas),
+    _eta_vars(_fe_problem.getNonlinearSystem().nVariables(), -1),
+    _kappa_names(getParam<std::vector<MaterialPropertyName> >("kappa_names")),
+    _kappa(_num_etas),
+    _L(getMaterialProperty<Real>("mob_name"))
+{
+  if (_num_etas != _kappa_names.size())
+    mooseError("Supply the same nummber of etas and kappa_names.");
+
+  unsigned int nvariables = _fe_problem.getNonlinearSystem().nVariables();
+
+  int a = -1;
+  for (unsigned int i = 0; i < _num_etas; ++i)
+  {
+    // get all order parameters and their gradients
+    _eta[i] = &coupledValue("etas", i);
+    _grad_eta[i] = &coupledGradient("etas", i);
+
+    // populate lookup table form jvar to _eta index
+    unsigned int var = coupled("etas", i);
+    if (var < nvariables)
+      _eta_vars[var] = i;
+
+    // get the index of the variable the kernel is operating on
+    if (coupled("etas", i) == _var.number())
+      a = i;
+
+    // get gradient prefactors
+    _kappa[i] = &getMaterialPropertyByName<Real>(_kappa_names[i]);
+  }
+
+  if (a < 0)
+    mooseError("Kernel variable must be listed in etas for ACMultiInterface kernel " << deprecated_name);
+  else
+    _a = a;
 }

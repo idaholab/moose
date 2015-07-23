@@ -24,9 +24,8 @@ InputParameters validParams<IsotropicPlasticity>()
 }
 
 
-IsotropicPlasticity::IsotropicPlasticity( const std::string & name,
-                                      InputParameters parameters )
-  :ReturnMappingModel( name, parameters ),
+IsotropicPlasticity::IsotropicPlasticity( const InputParameters & parameters)
+  :ReturnMappingModel(parameters),
    _yield_stress(getParam<Real>("yield_stress")),
    _hardening_constant(isParamValid("hardening_constant") ? getParam<Real>("hardening_constant") : 0),
    _hardening_function(isParamValid("hardening_function") ? dynamic_cast<PiecewiseLinear*>(&getFunction("hardening_function")) : NULL),
@@ -134,4 +133,35 @@ IsotropicPlasticity::computeHardening( unsigned qp, Real /*scalar*/ )
     slope = _hardening_function->timeDerivative( strain_old, p );
   }
   return slope;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+IsotropicPlasticity::IsotropicPlasticity(const std::string & deprecated_name, InputParameters parameters)
+  :ReturnMappingModel(deprecated_name, parameters),
+   _yield_stress(getParam<Real>("yield_stress")),
+   _hardening_constant(isParamValid("hardening_constant") ? getParam<Real>("hardening_constant") : 0),
+   _hardening_function(isParamValid("hardening_function") ? dynamic_cast<PiecewiseLinear*>(&getFunction("hardening_function")) : NULL),
+
+   _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain")),
+   _scalar_plastic_strain(_hardening_function ? &declareProperty<Real>("scalar_plastic_strain") : NULL),
+   _scalar_plastic_strain_old(_hardening_function ? &declarePropertyOld<Real>("scalar_plastic_strain") : NULL),
+
+   _hardening_variable(declareProperty<Real>("hardening_variable")),
+   _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
+{
+  if (_yield_stress <= 0)
+  {
+    mooseError("Yield stress must be greater than zero");
+  }
+  if ((isParamValid("hardening_constant") && isParamValid("hardening_function")) ||
+      (!isParamValid("hardening_constant") && !isParamValid("hardening_function")))
+  {
+    mooseError("Either hardening_constant or hardening_function must be defined");
+  }
+  if (isParamValid("hardening_function") && !_hardening_function)
+  {
+    mooseError("The hardening_function must be PiecewiseLinear");
+  }
 }

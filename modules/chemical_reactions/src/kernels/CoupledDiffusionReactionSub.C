@@ -22,8 +22,8 @@ InputParameters validParams<CoupledDiffusionReactionSub>()
   return params;
 }
 
-CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const std::string & name, InputParameters parameters)
-  :Kernel(name,parameters),
+CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const InputParameters & parameters)
+  :Kernel(parameters),
    _diffusivity(getMaterialProperty<Real>("diffusivity")),
    _weight(getParam<Real>("weight")),
    _log_k(getParam<Real>("log_k")),
@@ -203,4 +203,28 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else
     return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+   _diffusivity(getMaterialProperty<Real>("diffusivity")),
+   _weight(getParam<Real>("weight")),
+   _log_k(getParam<Real>("log_k")),
+   _sto_u(getParam<Real>("sto_u")),
+   _sto_v(getParam<std::vector<Real> >("sto_v"))
+{
+  int n = coupledComponents("v");
+  _vars.resize(n);
+  _vals.resize(n);
+  _grad_vals.resize(n);
+
+  for (unsigned int i=0; i<_vals.size(); ++i)
+  {
+    _vars[i] = coupled("v", i);
+    _vals[i] = &coupledValue("v", i);
+    _grad_vals[i] = &coupledGradient("v", i);
+  }
+
 }

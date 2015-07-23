@@ -21,8 +21,8 @@ InputParameters validParams<RichardsSeff2gasVGshifted>()
   return params;
 }
 
-RichardsSeff2gasVGshifted::RichardsSeff2gasVGshifted(const std::string & name, InputParameters parameters) :
-    RichardsSeff(name, parameters),
+RichardsSeff2gasVGshifted::RichardsSeff2gasVGshifted(const InputParameters & parameters) :
+    RichardsSeff(parameters),
     _al(getParam<Real>("al")),
     _m(getParam<Real>("m")),
     _shift(getParam<Real>("shift"))
@@ -61,3 +61,14 @@ RichardsSeff2gasVGshifted::d2seff(std::vector<VariableValue *> p, unsigned int q
   result[1][1] = result[0][0];
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSeff2gasVGshifted::RichardsSeff2gasVGshifted(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsSeff(deprecated_name, parameters),
+    _al(getParam<Real>("al")),
+    _m(getParam<Real>("m")),
+    _shift(getParam<Real>("shift"))
+{
+  _scale = RichardsSeffVG::seff(-_shift, _al, _m);
+}

@@ -19,7 +19,8 @@ InputParameters validParams<SplitCHCRes>();
 class SplitCHCRes : public SplitCHBase
 {
 public:
-  SplitCHCRes(const std::string & name, InputParameters parameters);
+  SplitCHCRes(const InputParameters & parameters);
+  SplitCHCRes(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

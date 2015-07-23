@@ -25,7 +25,8 @@ InputParameters validParams<TensorMechanicsHardeningCubic>();
 class TensorMechanicsHardeningCubic : public TensorMechanicsHardeningModel
 {
  public:
-  TensorMechanicsHardeningCubic(const std::string & name, InputParameters parameters);
+  TensorMechanicsHardeningCubic(const InputParameters & parameters);
+  TensorMechanicsHardeningCubic(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(const Real & intnl) const;
 

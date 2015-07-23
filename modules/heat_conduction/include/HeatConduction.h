@@ -26,7 +26,8 @@ class HeatConductionKernel : public Diffusion
 {
 public:
 
-  HeatConductionKernel(const std::string & name, InputParameters parameters);
+  HeatConductionKernel(const InputParameters & parameters);
+  HeatConductionKernel(const std::string & name, InputParameters parameters); // DEPRECATED
 
 protected:
   virtual Real computeQpResidual();

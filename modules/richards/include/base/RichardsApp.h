@@ -22,7 +22,8 @@ InputParameters validParams<RichardsApp>();
 class RichardsApp : public MooseApp
 {
 public:
-  RichardsApp(const std::string & name, InputParameters parameters);
+  RichardsApp(const InputParameters & parameters);
+  RichardsApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~RichardsApp();
 
   static void registerApps();

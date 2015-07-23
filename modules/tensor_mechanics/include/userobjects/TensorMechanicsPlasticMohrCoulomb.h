@@ -30,7 +30,8 @@ InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>();
 class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
 {
  public:
-  TensorMechanicsPlasticMohrCoulomb(const std::string & name, InputParameters parameters);
+  TensorMechanicsPlasticMohrCoulomb(const InputParameters & parameters);
+  TensorMechanicsPlasticMohrCoulomb(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// Returns the model name (MohrCoulomb)
   virtual std::string modelName() const;

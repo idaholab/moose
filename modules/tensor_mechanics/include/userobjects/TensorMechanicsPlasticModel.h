@@ -41,7 +41,8 @@ InputParameters validParams<TensorMechanicsPlasticModel>();
 class TensorMechanicsPlasticModel : public GeneralUserObject
 {
  public:
-  TensorMechanicsPlasticModel(const std::string & name, InputParameters parameters);
+  TensorMechanicsPlasticModel(const InputParameters & parameters);
+  TensorMechanicsPlasticModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();
   void execute();

@@ -29,8 +29,8 @@ InputParameters validParams<NSImposedVelocityDirectionBC>()
 
 
 // Constructor, be sure to call the base class constructor first!
-NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const std::string & name, InputParameters parameters)
-    : NodalBC(name, parameters),
+NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const InputParameters & parameters)
+    : NodalBC(parameters),
 
       // Coupled variables
       _rho(coupledValue("rho")),
@@ -53,3 +53,17 @@ Real NSImposedVelocityDirectionBC::computeQpResidual()
   return _u[_qp] - _rho[_qp] * _desired_unit_velocity_component * vel.size();
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const std::string & deprecated_name, InputParameters parameters)
+    : NodalBC(deprecated_name, parameters),
+
+      // Coupled variables
+      _rho(coupledValue("rho")),
+      _u_vel(coupledValue("u")),
+      _v_vel(coupledValue("v")),
+      _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+
+      _desired_unit_velocity_component(getParam<Real>("desired_unit_velocity_component"))
+{}

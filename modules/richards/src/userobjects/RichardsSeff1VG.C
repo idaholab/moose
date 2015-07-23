@@ -20,8 +20,8 @@ InputParameters validParams<RichardsSeff1VG>()
   return params;
 }
 
-RichardsSeff1VG::RichardsSeff1VG(const std::string & name, InputParameters parameters) :
-    RichardsSeff(name, parameters),
+RichardsSeff1VG::RichardsSeff1VG(const InputParameters & parameters) :
+    RichardsSeff(parameters),
     _al(getParam<Real>("al")),
     _m(getParam<Real>("m"))
 {
@@ -44,4 +44,13 @@ void
 RichardsSeff1VG::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const
 {
   result[0][0] = RichardsSeffVG::d2seff((*p[0])[qp], _al, _m);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSeff1VG::RichardsSeff1VG(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsSeff(deprecated_name, parameters),
+    _al(getParam<Real>("al")),
+    _m(getParam<Real>("m"))
+{
 }

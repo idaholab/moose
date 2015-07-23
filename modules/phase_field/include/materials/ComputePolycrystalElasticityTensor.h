@@ -19,7 +19,8 @@ class GrainTracker;
 class ComputePolycrystalElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
-  ComputePolycrystalElasticityTensor(const std:: string & name, InputParameters parameters);
+  ComputePolycrystalElasticityTensor(const InputParameters & parameters);
+  ComputePolycrystalElasticityTensor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpElasticityTensor();

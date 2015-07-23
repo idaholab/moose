@@ -26,8 +26,8 @@ InputParameters validParams<ContactPressureAuxAction>()
   return params;
 }
 
-ContactPressureAuxAction::ContactPressureAuxAction(const std::string & name, InputParameters params) :
-  Action(name, params),
+ContactPressureAuxAction::ContactPressureAuxAction(const InputParameters & params) :
+  Action(params),
   _master(getParam<BoundaryName>("master")),
   _slave(getParam<BoundaryName>("slave")),
   _order(getParam<MooseEnum>("order"))
@@ -71,4 +71,14 @@ ContactPressureAuxAction::act()
     params.set<MultiMooseEnum>("execute_on") = execute_options;
     _problem->addAuxKernel("ContactPressureAux", name.str(), params);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ContactPressureAuxAction::ContactPressureAuxAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params),
+  _master(getParam<BoundaryName>("master")),
+  _slave(getParam<BoundaryName>("slave")),
+  _order(getParam<MooseEnum>("order"))
+{
 }

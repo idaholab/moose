@@ -20,7 +20,8 @@ class CoefDiffusion : public Kernel
 {
 public:
 
-  CoefDiffusion(const std::string & name, InputParameters parameters);
+  CoefDiffusion(const InputParameters & parameters);
+  CoefDiffusion(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

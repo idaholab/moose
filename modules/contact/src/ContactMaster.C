@@ -34,6 +34,7 @@ InputParameters validParams<ContactMaster>()
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
+  params.addParam<Real>("capture_tolerance", 0, "Normal distance from surface within which nodes are captured");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
@@ -47,8 +48,8 @@ InputParameters validParams<ContactMaster>()
 
 
 
-ContactMaster::ContactMaster(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
+ContactMaster::ContactMaster(const InputParameters & parameters) :
+    DiracKernel(parameters),
     _component(getParam<unsigned int>("component")),
     _model(contactModel(getParam<std::string>("model"))),
     _formulation(contactFormulation(getParam<std::string>("formulation"))),
@@ -57,6 +58,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
     _penalty(getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _tension_release(getParam<Real>("tension_release")),
+    _capture_tolerance(getParam<Real>("capture_tolerance")),
     _updateContactSet(true),
     _residual_copy(_sys.residualGhosted()),
     _x_var(isCoupled("disp_x") ? coupled("disp_x") : libMesh::invalid_uint),
@@ -143,8 +145,8 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(*pinfo);
     const Real distance = pinfo->_normal * (pinfo->_closest_point - _mesh.node(slave_node_num));
 
-    // ************** Capture ******************
-    if ( ! pinfo->isCaptured() && distance > 0 )
+    // Capture
+    if ( ! pinfo->isCaptured() && MooseUtils::absoluteFuzzyGreaterEqual(distance, 0, _capture_tolerance))
     {
       pinfo->capture();
 
@@ -152,12 +154,12 @@ ContactMaster::updateContactSet(bool beginning_of_step)
       if (_formulation == CF_KINEMATIC)
         ++pinfo->_locked_this_step;
     }
-    // ************** Release ******************
+    // Release
     else if (_model != CM_GLUED &&
-        pinfo->isCaptured() &&
-        _tension_release >= 0 &&
-        -contact_pressure >= _tension_release &&
-        pinfo->_locked_this_step < 2)
+             pinfo->isCaptured() &&
+             _tension_release >= 0 &&
+             -contact_pressure >= _tension_release &&
+             pinfo->_locked_this_step < 2)
     {
       pinfo->release();
       pinfo->_contact_force.zero();
@@ -454,4 +456,51 @@ ContactMaster::getPenalty(PenetrationInfo & pinfo)
     penalty *= nodalArea(pinfo);
   }
   return penalty;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ContactMaster::ContactMaster(const std::string & deprecated_name, InputParameters parameters) :
+    DiracKernel(deprecated_name, parameters),
+    _component(getParam<unsigned int>("component")),
+    _model(contactModel(getParam<std::string>("model"))),
+    _formulation(contactFormulation(getParam<std::string>("formulation"))),
+    _normalize_penalty(getParam<bool>("normalize_penalty")),
+    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
+    _penalty(getParam<Real>("penalty")),
+    _friction_coefficient(getParam<Real>("friction_coefficient")),
+    _tension_release(getParam<Real>("tension_release")),
+    _capture_tolerance(getParam<Real>("capture_tolerance")),
+    _updateContactSet(true),
+    _residual_copy(_sys.residualGhosted()),
+    _x_var(isCoupled("disp_x") ? coupled("disp_x") : libMesh::invalid_uint),
+    _y_var(isCoupled("disp_y") ? coupled("disp_y") : libMesh::invalid_uint),
+    _z_var(isCoupled("disp_z") ? coupled("disp_z") : libMesh::invalid_uint),
+    _mesh_dimension(_mesh.dimension()),
+    _vars(_x_var, _y_var, _z_var),
+    _nodal_area_var(getVar("nodal_area", 0)),
+    _aux_system(_nodal_area_var->sys()),
+    _aux_solution(_aux_system.currentSolution())
+{
+  if (parameters.isParamValid("tangential_tolerance"))
+  {
+    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_distance"))
+  {
+    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
+  }
+  if (parameters.isParamValid("normal_smoothing_method"))
+  {
+    _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
+  }
+  if (_model == CM_GLUED ||
+      (_model == CM_COULOMB && _formulation == CF_DEFAULT))
+  {
+    _penetration_locator.setUpdate(false);
+  }
+  if (_friction_coefficient < 0)
+  {
+    mooseError("The friction coefficient must be nonnegative");
+  }
 }

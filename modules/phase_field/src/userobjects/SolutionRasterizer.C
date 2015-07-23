@@ -20,8 +20,8 @@ InputParameters validParams<SolutionRasterizer>()
   return params;
 }
 
-SolutionRasterizer::SolutionRasterizer(const std::string & name, InputParameters parameters) :
-    SolutionUserObject(name, parameters),
+SolutionRasterizer::SolutionRasterizer(const InputParameters & parameters) :
+    SolutionUserObject(parameters),
     _xyz_input(getParam<FileName>("xyz_input")),
     _xyz_output(getParam<FileName>("xyz_output")),
     _variable(getParam<std::string>("variable")),
@@ -115,5 +115,23 @@ SolutionRasterizer::initialSetup()
     std::ofstream stream_fix(_xyz_output.c_str(), std::ios::binary | std::ios::in | std::ios::out);
     stream_fix << newline0;
     stream_fix.close();
+  }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SolutionRasterizer::SolutionRasterizer(const std::string & deprecated_name, InputParameters parameters) :
+    SolutionUserObject(deprecated_name, parameters),
+    _xyz_input(getParam<FileName>("xyz_input")),
+    _xyz_output(getParam<FileName>("xyz_output")),
+    _variable(getParam<std::string>("variable")),
+    _raster_mode(getParam<MooseEnum>("raster_mode")),
+    _threshold(0.0)
+{
+  if (_raster_mode == "FILTER")
+  {
+    if (!isParamValid("threshold"))
+      mooseError("Please specify 'threshold' parameter for raster_mode = FILTER");
+    _threshold = getParam<Real>("threshold");
   }
 }

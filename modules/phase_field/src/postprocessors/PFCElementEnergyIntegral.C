@@ -23,8 +23,8 @@ InputParameters validParams<PFCElementEnergyIntegral>()
   return params;
 }
 
-PFCElementEnergyIntegral::PFCElementEnergyIntegral(const std::string & name, InputParameters parameters) :
-    ElementIntegralPostprocessor(name, parameters),
+PFCElementEnergyIntegral::PFCElementEnergyIntegral(const InputParameters & parameters) :
+    ElementIntegralPostprocessor(parameters),
     MooseVariableInterface(parameters, false),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
@@ -42,4 +42,18 @@ PFCElementEnergyIntegral::computeQpIntegral()
   // const Real p0 = 0.0801; // A^-3
 
   return _u[_qp]; // * (kb * _temp);
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PFCElementEnergyIntegral::PFCElementEnergyIntegral(const std::string & deprecated_name, InputParameters parameters) :
+    ElementIntegralPostprocessor(deprecated_name, parameters),
+    MooseVariableInterface(parameters, false),
+    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
+    _u_dot(_var.uDot()),
+    _temp(getParam<Real>("temp")) // K
+{
+  addMooseVariableDependency(mooseVariable());
 }

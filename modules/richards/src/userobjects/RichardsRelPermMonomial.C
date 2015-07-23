@@ -21,8 +21,8 @@ InputParameters validParams<RichardsRelPermMonomial>()
   return params;
 }
 
-RichardsRelPermMonomial::RichardsRelPermMonomial(const std::string & name, InputParameters parameters) :
-    RichardsRelPerm(name, parameters),
+RichardsRelPermMonomial::RichardsRelPermMonomial(const InputParameters & parameters) :
+    RichardsRelPerm(parameters),
     _simm(getParam<Real>("simm")),
     _n(getParam<Real>("n")),
     _zero_to_the_zero(getParam<Real>("zero_to_the_zero"))
@@ -87,3 +87,13 @@ RichardsRelPermMonomial::d2relperm(Real seff) const
   return krelpp/std::pow(1.0 - _simm, 2);
 }
 
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsRelPermMonomial::RichardsRelPermMonomial(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsRelPerm(deprecated_name, parameters),
+    _simm(getParam<Real>("simm")),
+    _n(getParam<Real>("n")),
+    _zero_to_the_zero(getParam<Real>("zero_to_the_zero"))
+{
+}

@@ -25,6 +25,7 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/elem.h"
+#include "libmesh/numeric_vector.h"
 
 #include <string>
 #include <vector>
@@ -45,6 +46,12 @@ inline void storeHelper(std::ostream & stream, P & data, void * context);
  */
 template<typename P>
 inline void storeHelper(std::ostream & stream, std::vector<P> & data, void * context);
+
+/**
+ * Shared pointer helper routine
+ */
+template<typename P>
+inline void storeHelper(std::ostream & stream, MooseSharedPointer<P> & data, void * context);
 
 /**
  * Set helper routine
@@ -75,6 +82,12 @@ inline void loadHelper(std::istream & stream, P & data, void * context);
  */
 template<typename P>
 inline void loadHelper(std::istream & stream, std::vector<P> & data, void * context);
+
+/**
+ * SharedPointer helper routine
+ */
+template<typename P>
+inline void loadHelper(std::istream & stream, MooseSharedPointer<P> & data, void * context);
 
 /**
  * Set helper routine
@@ -129,6 +142,17 @@ dataStore(std::ostream & stream, std::vector<T> & v, void * context)
 
   for (unsigned int i = 0; i < size; i++)
     storeHelper(stream, v[i], context);
+}
+
+template<typename T>
+inline void
+dataStore(std::ostream & stream, MooseSharedPointer<T> & v, void * context)
+{
+  // Moose::out<<"SharedPointer dataStore"<<std::endl;
+
+  T * tmp = v.get();
+
+  storeHelper(stream, tmp, context);
 }
 
 template<typename T>
@@ -215,6 +239,7 @@ dataStore(std::ostream & stream, HashMap<T,U> & m, void * context)
 // Specializations (defined in .C)
 template<> void dataStore(std::ostream & stream, Real & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, std::string & v, void * /*context*/);
+template<> void dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, RealTensorValue & v, void * /*context*/);
@@ -223,6 +248,8 @@ template<> void dataStore(std::ostream & stream, const Elem * & e, void * contex
 template<> void dataStore(std::ostream & stream, const Node * & n, void * context);
 template<> void dataStore(std::ostream & stream, Elem * & e, void * context);
 template<> void dataStore(std::ostream & stream, Node * & n, void * context);
+template<> void dataStore(std::ostream & stream, std::stringstream & s, void * context);
+template<> void dataStore(std::ostream & stream, std::stringstream * & s, void * context);
 
 // global load functions
 
@@ -257,6 +284,15 @@ dataLoad(std::istream & stream, std::vector<T> & v, void * context)
 
   for (unsigned int i = 0; i < size; i++)
     loadHelper(stream, v[i], context);
+}
+
+template<typename T>
+inline void
+dataLoad(std::istream & stream, MooseSharedPointer<T> & v, void * context)
+{
+  T * tmp = v.get();
+
+  loadHelper(stream, tmp, context);
 }
 
 template<typename T>
@@ -331,6 +367,7 @@ dataLoad(std::istream & stream, HashMap<T,U> & m, void * context)
 // Specializations (defined in .C)
 template<> void dataLoad(std::istream & stream, Real & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, std::string & v, void * /*context*/);
+template<> void dataLoad(std::istream & stream, NumericVector<Real> & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, ColumnMajorMatrix & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, RealTensorValue & v, void * /*context*/);
@@ -339,6 +376,8 @@ template<> void dataLoad(std::istream & stream, const Elem * & e, void * context
 template<> void dataLoad(std::istream & stream, const Node * & e, void * context);
 template<> void dataLoad(std::istream & stream, Elem * & e, void * context);
 template<> void dataLoad(std::istream & stream, Node * & e, void * context);
+template<> void dataLoad(std::istream & stream, std::stringstream & s, void * context);
+template<> void dataLoad(std::istream & stream, std::stringstream * & s, void * context);
 
 // Scalar Helper Function
 template<typename P>
@@ -355,6 +394,15 @@ inline void
 storeHelper(std::ostream & stream, std::vector<P> & data, void * context)
 {
   // Moose::out<<"Vector storeHelper"<<std::endl;
+  dataStore(stream, data, context);
+}
+
+// MooseSharedPointer Helper Function
+template<typename P>
+inline void
+storeHelper(std::ostream & stream, MooseSharedPointer<P> & data, void * context)
+{
+  // Moose::out<<"MooseSharedPointer storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -399,6 +447,15 @@ loadHelper(std::istream & stream, P & data, void * context)
 template<typename P>
 inline void
 loadHelper(std::istream & stream, std::vector<P> & data, void * context)
+{
+  // Moose::out<<"Vector loadHelper"<<std::endl;
+  dataLoad(stream, data, context);
+}
+
+// MooseSharedPointer Helper Function
+template<typename P>
+inline void
+loadHelper(std::istream & stream, MooseSharedPointer<P> & data, void * context)
 {
   // Moose::out<<"Vector loadHelper"<<std::endl;
   dataLoad(stream, data, context);

@@ -19,8 +19,8 @@ InputParameters validParams<RichardsSeff1VGcut>()
   return params;
 }
 
-RichardsSeff1VGcut::RichardsSeff1VGcut(const std::string & name, InputParameters parameters) :
-    RichardsSeff1VG(name, parameters),
+RichardsSeff1VGcut::RichardsSeff1VGcut(const InputParameters & parameters) :
+    RichardsSeff1VG(parameters),
     _al(getParam<Real>("al")),
     _m(getParam<Real>("m")),
     _p_cut(getParam<Real>("p_cut")),
@@ -70,4 +70,18 @@ RichardsSeff1VGcut::d2seff(std::vector<VariableValue *> p, unsigned int qp, std:
     return RichardsSeff1VG::d2seff(p, qp, result);
   else
     result[0][0] = 0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+RichardsSeff1VGcut::RichardsSeff1VGcut(const std::string & deprecated_name, InputParameters parameters) :
+    RichardsSeff1VG(deprecated_name, parameters),
+    _al(getParam<Real>("al")),
+    _m(getParam<Real>("m")),
+    _p_cut(getParam<Real>("p_cut")),
+    _s_cut(0),
+    _ds_cut(0)
+{
+  _s_cut = RichardsSeffVG::seff(_p_cut, _al, _m);
+  _ds_cut = RichardsSeffVG::dseff(_p_cut, _al, _m);
 }

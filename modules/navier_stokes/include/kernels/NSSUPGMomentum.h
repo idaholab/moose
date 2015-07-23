@@ -22,7 +22,8 @@ InputParameters validParams<NSSUPGMomentum>();
 class NSSUPGMomentum : public NSSUPGBase
 {
 public:
-  NSSUPGMomentum(const std::string & name, InputParameters parameters);
+  NSSUPGMomentum(const InputParameters & parameters);
+  NSSUPGMomentum(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

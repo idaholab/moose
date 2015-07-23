@@ -36,8 +36,8 @@ InputParameters validParams<SolidMechanicsAction>()
   return params;
 }
 
-SolidMechanicsAction::SolidMechanicsAction(const std::string & name, InputParameters params) :
-  Action(name, params),
+SolidMechanicsAction::SolidMechanicsAction(const InputParameters & params) :
+  Action(params),
   _disp_x(getParam<NonlinearVariableName>("disp_x")),
   _disp_y(getParam<NonlinearVariableName>("disp_y")),
   _disp_z(getParam<NonlinearVariableName>("disp_z")),
@@ -220,4 +220,16 @@ SolidMechanicsAction::act()
       _problem->addKernel(type, name.str(), params);
     }
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SolidMechanicsAction::SolidMechanicsAction(const std::string & deprecated_name, InputParameters params) :
+  Action(deprecated_name, params),
+  _disp_x(getParam<NonlinearVariableName>("disp_x")),
+  _disp_y(getParam<NonlinearVariableName>("disp_y")),
+  _disp_z(getParam<NonlinearVariableName>("disp_z")),
+  _disp_r(getParam<NonlinearVariableName>("disp_r")),
+  _temp(getParam<NonlinearVariableName>("temp"))
+{
 }

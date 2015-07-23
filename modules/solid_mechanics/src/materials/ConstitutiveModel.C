@@ -29,9 +29,8 @@ InputParameters validParams<ConstitutiveModel>()
 }
 
 
-ConstitutiveModel::ConstitutiveModel( const std::string & name,
-                                      InputParameters parameters )
-  :Material( name, parameters ),
+ConstitutiveModel::ConstitutiveModel( const InputParameters & parameters)
+  :Material(parameters),
    _has_temp(isCoupled("temp")),
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
@@ -145,4 +144,46 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
 
   bool modified = true;
   return modified;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ConstitutiveModel::ConstitutiveModel(const std::string & deprecated_name, InputParameters parameters)
+  :Material(deprecated_name, parameters),
+   _has_temp(isCoupled("temp")),
+   _temperature(_has_temp ? coupledValue("temp") : _zero),
+   _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
+   _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
+   _alpha_function( parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
+   _has_stress_free_temp(isParamValid("stress_free_temperature")),
+   _stress_free_temp(_has_stress_free_temp ? getParam<Real>("stress_free_temperature") : 0.0),
+   _ref_temp(0.0)
+{
+  if (parameters.isParamValid("thermal_expansion_function_type"))
+  {
+    if (!_alpha_function)
+      mooseError("thermal_expansion_function_type can only be set when thermal_expansion_function is used");
+    MooseEnum tec = getParam<MooseEnum>("thermal_expansion_function_type");
+    if (tec == "mean")
+      _mean_alpha_function = true;
+    else if (tec == "instantaneous")
+      _mean_alpha_function = false;
+    else
+      mooseError("Invalid option for thermal_expansion_function_type");
+  }
+  else
+    _mean_alpha_function = false;
+
+  if (parameters.isParamValid("thermal_expansion_reference_temperature"))
+  {
+    if (!_alpha_function)
+      mooseError("thermal_expansion_reference_temperature can only be set when thermal_expansion_function is used");
+    if (!_mean_alpha_function)
+      mooseError("thermal_expansion_reference_temperature can only be set when thermal_expansion_function_type = mean");
+    _ref_temp = getParam<Real>("thermal_expansion_reference_temperature");
+    if (!_has_temp)
+      mooseError("Cannot specify thermal_expansion_reference_temperature without coupling to temperature");
+  }
+  else if (_mean_alpha_function)
+    mooseError("Must specify thermal_expansion_reference_temperature if thermal_expansion_function_type = mean");
 }

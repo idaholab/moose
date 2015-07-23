@@ -15,11 +15,10 @@ InputParameters validParams<ParsedMaterialHelper>()
   return params;
 }
 
-ParsedMaterialHelper::ParsedMaterialHelper(const std::string & name,
-                                           InputParameters parameters,
+ParsedMaterialHelper::ParsedMaterialHelper(const InputParameters & parameters,
                                            VariableNameMappingMode map_mode) :
-    FunctionMaterialBase(name, parameters),
-    FunctionParserUtils(name, parameters),
+    FunctionMaterialBase(parameters),
+    FunctionParserUtils(parameters),
     _func_F(NULL),
     _variable_names(_nargs),
     _mat_prop_descriptors(0),
@@ -184,4 +183,19 @@ ParsedMaterialHelper::computeProperties()
     if (_prop_F)
       (*_prop_F)[_qp] = evaluate(_func_F);
   }
+}
+
+
+// DEPRECATED CONSTRUCTOR
+ParsedMaterialHelper::ParsedMaterialHelper(const std::string & name,
+                                           InputParameters parameters,
+                                           VariableNameMappingMode map_mode) :
+    FunctionMaterialBase(name, parameters),
+    FunctionParserUtils(name, parameters),
+    _func_F(NULL),
+    _variable_names(_nargs),
+    _mat_prop_descriptors(0),
+    _tol(0),
+    _map_mode(map_mode)
+{
 }

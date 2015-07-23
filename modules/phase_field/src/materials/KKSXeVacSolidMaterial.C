@@ -17,9 +17,8 @@ InputParameters validParams<KKSXeVacSolidMaterial>()
   return params;
 }
 
-KKSXeVacSolidMaterial::KKSXeVacSolidMaterial(const std::string & name,
-                                             InputParameters parameters) :
-    DerivativeFunctionMaterialBase(name, parameters),
+KKSXeVacSolidMaterial::KKSXeVacSolidMaterial(const InputParameters & parameters) :
+    DerivativeFunctionMaterialBase(parameters),
     _T(getParam<Real>("T")),
     _Omega(2.53),
     _kB(8.6173324e-5),
@@ -88,3 +87,19 @@ KKSXeVacSolidMaterial::computeD2F(unsigned int i_var, unsigned int j_var) {
 // note that the second cross derivatives are actually 0.0!
 
 // Third derivative: 1.0/Omega * kB*T*((-c^m_v + 1.0)**(-2) - 1/c^m_v**2)
+
+
+// DEPRECATED CONSTRUCTOR
+KKSXeVacSolidMaterial::KKSXeVacSolidMaterial(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeFunctionMaterialBase(deprecated_name, parameters),
+    _T(getParam<Real>("T")),
+    _Omega(2.53),
+    _kB(8.6173324e-5),
+    _Efv(3.0),
+    _Efg(3.0),
+    _cmg(coupledValue("cmg")),
+    _cmg_var(coupled("cmg")),
+    _cmv(coupledValue("cmv")),
+    _cmv_var(coupled("cmv"))
+{
+}

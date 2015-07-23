@@ -45,9 +45,8 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   return params;
 }
 
-FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string & name,
-                                                             InputParameters parameters) :
-    FiniteStrainMaterial(name, parameters),
+FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParameters & parameters) :
+    FiniteStrainMaterial(parameters),
     _nss(getParam<int>("nss")),
     _gprops(getParam<std::vector<Real> >("gprops")),
     _hprops(getParam<std::vector<Real> >("hprops")),
@@ -1119,4 +1118,95 @@ FiniteStrainCrystalPlasticity::line_search_update(const Real rnorm_prev, const R
     return false;
 
   return true;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string & deprecated_name, InputParameters parameters) :
+    FiniteStrainMaterial(deprecated_name, parameters),
+    _nss(getParam<int>("nss")),
+    _gprops(getParam<std::vector<Real> >("gprops")),
+    _hprops(getParam<std::vector<Real> >("hprops")),
+    _flowprops(getParam<std::vector<Real> >("flowprops")),
+    _slip_sys_file_name(getParam<std::string>("slip_sys_file_name")),
+    _slip_sys_res_prop_file_name(getParam<std::string>("slip_sys_res_prop_file_name")),
+    _slip_sys_flow_prop_file_name(getParam<std::string>("slip_sys_flow_prop_file_name")),
+    _slip_sys_hard_prop_file_name(getParam<std::string>("slip_sys_hard_prop_file_name")),
+    _rtol(getParam<Real>("rtol")),
+    _abs_tol(getParam<Real>("abs_tol")),
+    _gtol(getParam<Real>("gtol")),
+    _slip_incr_tol(getParam<Real>("slip_incr_tol")),
+    _maxiter(getParam<unsigned int>("maxiter")),
+    _maxiterg(getParam<unsigned int>("maxitergss")),
+    _num_slip_sys_flowrate_props(getParam<unsigned int>("num_slip_sys_flowrate_props")),
+    _read_prop_user_object(isParamValid("read_prop_user_object") ? & getUserObject<ElementPropertyReadFile>("read_prop_user_object") : NULL),
+    _tan_mod_type(getParam<MooseEnum>("tan_mod_type")),
+    _intvar_read_type(getParam<MooseEnum>("intvar_read_type")),
+    _num_slip_sys_props(getParam<unsigned int>("num_slip_sys_props")),
+    _save_euler_angle(getParam<bool>("save_euler_angle")),
+    _gen_rndm_stress_flag(getParam<bool>("gen_random_stress_flag")),
+    _input_rndm_scale_var(getParam<bool>("input_random_scaling_var")),
+    _rndm_scale_var(getParam<Real>("random_scaling_var")),
+    _rndm_seed(getParam<unsigned int>("random_seed")),
+    _max_substep_iter(getParam<unsigned int>("maximum_substep_iteration")),
+    _use_line_search(getParam<bool>("use_line_search")),
+    _min_lsrch_step(getParam<Real>("min_line_search_step_size")),
+    _fp(declareProperty<RankTwoTensor>("fp")), // Plastic deformation gradient
+    _fp_old(declarePropertyOld<RankTwoTensor>("fp")), // Plastic deformation gradient of previous increment
+    _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress
+    _pk2_old(declarePropertyOld<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress of previous increment
+    _lag_e(declareProperty<RankTwoTensor>("lage")), // Lagrangian strain
+    _lag_e_old(declarePropertyOld<RankTwoTensor>("lage")), // Lagrangian strain of previous increment
+    _gss(declareProperty<std::vector<Real> >("gss")), // Slip system resistances
+    _gss_old(declarePropertyOld<std::vector<Real> >("gss")), // Slip system resistances of previous increment
+    _acc_slip(declareProperty<Real>("acc_slip")), // Accumulated slip
+    _acc_slip_old(declarePropertyOld<Real>("acc_slip")), // Accumulated alip of previous increment
+    _update_rot(declareProperty<RankTwoTensor>("update_rot")), // Rotation tensor considering material rotation and crystal orientation
+    _update_rot_old(declarePropertyOld<RankTwoTensor>("update_rot")),
+    _deformation_gradient_old(declarePropertyOld<RankTwoTensor>("deformation gradient"))
+{
+  if (_save_euler_angle)
+  {
+    _euler_ang = &declareProperty< std::vector<Real> >("euler_ang");
+    _euler_ang_old = &declarePropertyOld< std::vector<Real> >("euler_ang");
+  }
+
+  if (!_input_rndm_scale_var)
+    _rndm_scale_var = _Cijkl(0,0,0,0);
+
+  _err_tol = false;
+
+  _tau.resize(_nss);
+  _slip_incr.resize(_nss);
+  _dslipdtau.resize(_nss);
+
+  _mo.resize(_nss*LIBMESH_DIM);
+  _no.resize(_nss*LIBMESH_DIM);
+
+  _s0.resize(_nss);
+
+  if (_num_slip_sys_props > 0)
+    _slip_sys_props.resize(_nss * _num_slip_sys_props);
+
+  _pk2_tmp.zero();
+  _pk2_tmp_old.zero();
+  _gss_tmp.resize(_nss);
+  _gss_tmp_old.resize(_nss);
+  _delta_dfgrd.zero();
+
+  _first_step_iter = false;
+  _last_step_iter = false;
+  //Initialize variables in the first iteration of substepping
+  _first_substep = true;
+
+  _read_from_slip_sys_file = false;
+  if (_intvar_read_type == "slip_sys_file")
+    _read_from_slip_sys_file = true;
+
+  if (_read_from_slip_sys_file && ! ( _num_slip_sys_props > 0 ))
+    mooseError("Crystal Plasticity Error: Specify number of internal variable's initial values to be read from slip system file");
+
+  getSlipSystems();
+
+  RankTwoTensor::initRandom( _rndm_seed );
 }

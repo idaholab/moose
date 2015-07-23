@@ -31,7 +31,8 @@ public:
    * It is ok to have the definition in the .h if the function body
    * is really small.  Otherwise it should be in the .C
    */
-  PrimaryConvection(const std::string & name, InputParameters parameters);
+  PrimaryConvection(const InputParameters & parameters);
+  PrimaryConvection(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

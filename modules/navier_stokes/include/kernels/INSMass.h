@@ -23,7 +23,8 @@ InputParameters validParams<INSMass>();
 class INSMass : public Kernel
 {
 public:
-  INSMass(const std::string & name, InputParameters parameters);
+  INSMass(const InputParameters & parameters);
+  INSMass(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSMass(){}
 

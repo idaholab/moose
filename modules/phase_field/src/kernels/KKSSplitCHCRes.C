@@ -22,8 +22,8 @@ InputParameters validParams<KKSSplitCHCRes>()
   return params;
 }
 
-KKSSplitCHCRes::KKSSplitCHCRes(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<SplitCHBase>(name, parameters),
+KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters) :
+    DerivativeMaterialInterface<SplitCHBase>(parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _ca_var(coupled("ca")),
@@ -108,4 +108,34 @@ KKSSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 
   return 0.0; // OK
+}
+
+
+// DEPRECATED CONSTRUCTOR
+KKSSplitCHCRes::KKSSplitCHCRes(const std::string & deprecated_name, InputParameters parameters) :
+    DerivativeMaterialInterface<SplitCHBase>(deprecated_name, parameters),
+    // number of coupled variables (ca, args_a[])
+    _nvar(_coupled_moose_vars.size()),
+    _ca_var(coupled("ca")),
+    _ca_name(getVar("ca", 0)->name()),
+    _cb_var(coupled("cb")),
+    _cb_name(getVar("cb", 0)->name()),
+    _prop_h(getMaterialProperty<Real>("h_name")),
+    _first_derivative_Fa(getMaterialPropertyDerivative<Real>("fa_name", _ca_name)),
+    _second_derivative_Fa(getMaterialPropertyDerivative<Real>("fa_name", _ca_name, _ca_name)),
+    _second_derivative_Fb(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _cb_name)),
+    _w_var(coupled("w")),
+    _w(coupledValue("w"))
+{
+  // reserve space for derivatives
+  _second_derivatives.resize(_nvar);
+
+  // Iterate over all coupled variables
+  for (unsigned int i = 0; i < _nvar; ++i)
+  {
+    MooseVariable *cvar = this->_coupled_moose_vars[i];
+
+    // get the second derivative material property (TODO:warn)
+    _second_derivatives[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name());
+  }
 }

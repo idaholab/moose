@@ -352,7 +352,7 @@ MultiAppMeshFunctionTransfer::execute()
 
 // DEPRECATED CONSTRUCTOR
 MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(parameters),
+    MultiAppTransfer(name, parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
     _error_on_miss(getParam<bool>("error_on_miss"))

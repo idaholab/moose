@@ -17,8 +17,8 @@ InputParameters validParams<PrimaryDiffusion>()
   return params;
 }
 
-PrimaryDiffusion::PrimaryDiffusion(const std::string & name, InputParameters parameters)
-  :Diffusion(name,parameters),
+PrimaryDiffusion::PrimaryDiffusion(const InputParameters & parameters)
+  :Diffusion(parameters),
    // We are grabbing the "diffusivity" material property
    _diffusivity(getMaterialProperty<Real>("diffusivity"))
 {
@@ -53,4 +53,13 @@ PrimaryDiffusion::computeQpJacobian()
 Real PrimaryDiffusion::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.0;
+}
+
+
+// DEPRECATED CONSTRUCTOR
+PrimaryDiffusion::PrimaryDiffusion(const std::string & deprecated_name, InputParameters parameters)
+  :Diffusion(deprecated_name, parameters),
+   // We are grabbing the "diffusivity" material property
+   _diffusivity(getMaterialProperty<Real>("diffusivity"))
+{
 }

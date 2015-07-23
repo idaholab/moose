@@ -15,8 +15,10 @@
 class CLSHPlasticModel : public ReturnMappingModel
 {
 public:
+  CLSHPlasticModel(const InputParameters & parameters);
+
   CLSHPlasticModel(std::string name,
-                   InputParameters parameters);
+                   InputParameters parameters); // DEPRECATED
 
 protected:
 
