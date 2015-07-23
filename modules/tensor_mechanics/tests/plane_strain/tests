@@ -4,6 +4,7 @@
     type = Exodiff
     input = 'planestrain_test.i'
     exodiff = 'planestrain_test_out.e'
+    compiler = 'GCC CLANG'
   [../]
   [./axisym_smallstrain]
     type = Exodiff
