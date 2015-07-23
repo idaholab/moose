@@ -21,7 +21,9 @@ template<>
 InputParameters validParams<Dirk>()
 {
   InputParameters params = validParams<TimeIntegrator>();
-
+  // This serves as a test for passing parameter to TimeIntegrators. Later, the implementation of DIRK can be extended to actually provide
+  // DIRK methods of different order
+  params.addParam<unsigned int>("dirk_order", 2, "Order of the DIRK integrator. Default: 2");
   return params;
 }
 
@@ -29,10 +31,12 @@ InputParameters validParams<Dirk>()
 Dirk::Dirk(const InputParameters & parameters) :
     TimeIntegrator(parameters),
     _stage(1),
+    _order(getParam<unsigned int>("dirk_order")),
     _residual_stage1(_nl.addVector("residual_stage1", false, GHOSTED)),
     _residual_stage2(_nl.addVector("residual_stage2", false, GHOSTED)),
     _solution_start(_sys.solutionOld())
 {
+  if (_order != 2) mooseError("Only a second order DIRK method is implemented at the moment");
 }
 
 
