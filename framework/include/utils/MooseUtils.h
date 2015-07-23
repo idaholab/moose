@@ -34,27 +34,20 @@ class MaterialProperties;
 namespace MooseUtils
 {
   /**
-   * This function will split the passed in string on a set of delimiters appending the substrings
-   * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In addition
-   * if min_len is supplied, the minimum token length will be greater than the supplied value.
-   */
-  void tokenize(const std::string &str, std::vector<std::string> & elements, unsigned int min_len = 1, const std::string &delims = "/");
-
-  /**
    * This function will escape all of the standard C++ escape characters so that they can be printed.  The
    * passed in parameter is modified in place
    */
-  void escape(std::string &str);
+  void escape(std::string & str);
 
   /**
    * Standard scripting language trim function
    */
-  std::string trim(std::string str, const std::string &white_space = " \t\n\v\f\r");
+  std::string trim(std::string str, const std::string & white_space = " \t\n\v\f\r");
 
   /**
    * This function tokenizes a path and checks to see if it contains the string to look for
    */
-  bool pathContains(const std::string &expression, const std::string &string_to_find, const std::string &delims = "/");
+  bool pathContains(const std::string & expression, const std::string & string_to_find, const std::string & delims = "/");
 
   /**
    * Checks to see if a file is readable (exists and permissions)
@@ -228,6 +221,31 @@ namespace MooseUtils
    * that may be overloaded to dump the type using template specialization.
    */
   void MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties> > & props);
+
+  /**
+   * This function will split the passed in string on a set of delimiters appending the substrings
+   * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In addition
+   * if min_len is supplied, the minimum token length will be greater than the supplied value.
+   * T should be std::string or a MOOSE derivied string class.
+   */
+  template<typename T>
+  void
+  tokenize(const std::string & str, std::vector<T> & elements, unsigned int min_len = 1, const std::string & delims = "/")
+  {
+    elements.clear();
+
+    std::string::size_type last_pos = str.find_first_not_of(delims, 0);
+    std::string::size_type pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
+
+    while (last_pos != std::string::npos)
+    {
+      elements.push_back(str.substr(last_pos, pos - last_pos));
+      // skip delims between tokens
+      last_pos = str.find_first_not_of(delims, pos);
+      if (last_pos == std::string::npos) break;
+      pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
+    }
+  }
 }
 
 #endif //MOOSEUTILS_H
