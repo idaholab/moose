@@ -32,7 +32,8 @@ RestartableTypes::RestartableTypes(const InputParameters & params) :
     _custom_data(declareRestartableData<Dummy>("custom_data")),
     _custom_with_context(declareRestartableDataWithContext<DummyNeedingContext>("custom_with_context", &_context_int)),
     _set_data(declareRestartableData<std::set<Real> >("set_data")),
-    _map_data(declareRestartableData<std::map<unsigned int, Real> >("map_data"))
+    _map_data(declareRestartableData<std::map<unsigned int, Real> >("map_data")),
+    _dense_matrix_data(declareRestartableData<DenseMatrix<Real> >("dense_matrix_data"))
 {
   _vector_data.resize(4,1);
   _vector_vector_data.resize(4);
@@ -77,6 +78,11 @@ void RestartableTypes::initialSetup()
 
   _map_data[1] = 2.2;
   _map_data[2] = 3.4;
+
+  _dense_matrix_data.resize(2,3);
+  for (unsigned int i = 0; i < _dense_matrix_data.m(); i++)
+    for (unsigned int j = 0; j < _dense_matrix_data.n(); j++)
+      _dense_matrix_data(i, j) = (Real) (i + j);
 }
 
 void RestartableTypes::timestepSetup()
