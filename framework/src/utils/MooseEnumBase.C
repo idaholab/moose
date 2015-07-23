@@ -41,6 +41,7 @@ MooseEnumBase::MooseEnumBase(const MooseEnumBase & other_enum) :
     _names(other_enum._names),
     _raw_names(other_enum._raw_names),
     _name_to_id(other_enum._name_to_id),
+    _deprecated_names(other_enum._deprecated_names),
     _out_of_range_index(other_enum._out_of_range_index)
 {
 }
@@ -54,6 +55,20 @@ MooseEnumBase::MooseEnumBase()
 
 MooseEnumBase::~MooseEnumBase()
 {
+}
+
+void
+MooseEnumBase::deprecate(const std::string & name, const std::string & new_name)
+{
+  std::string upper(name);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+  std::string upper_new(new_name);
+  std::transform(upper_new.begin(), upper_new.end(), upper_new.begin(), ::toupper);
+
+  _deprecated_names[upper] = upper_new;
+
+  checkDeprecated();
 }
 
 void
@@ -98,5 +113,19 @@ MooseEnumBase::fillNames(std::string names, std::string option_delim)
     // populate internal datastructures
     _names[i] = upper;
     _name_to_id[upper] = value++;
+  }
+}
+
+void
+MooseEnumBase::checkDeprecatedBase(const std::string & name_upper) const
+{
+  std::map<std::string, std::string>::const_iterator it = _deprecated_names.find(name_upper);
+
+  if (it != _deprecated_names.end())
+  {
+    if (it->second != "")
+      mooseWarning(name_upper + " is deprecated, consider using " + it->second);
+    else
+      mooseWarning(name_upper + " is deprecated");
   }
 }

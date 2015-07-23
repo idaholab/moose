@@ -169,6 +169,10 @@ public:
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MultiMooseEnum & obj);
 
+protected:
+  /// Check whether any of the current values are deprecated when called
+  virtual void checkDeprecated() const;
+
 private:
 
   /**

@@ -46,6 +46,13 @@ public:
   virtual ~MooseEnumBase();
 
   /**
+   * Deprecates various options in the MOOSE enum. For each deprecated option,
+   * you may supply an option new option that will be used in a message telling
+   * the user which new option replaces the old one.
+   */
+  void deprecate(const std::string & name, const std::string & new_name="");
+
+  /**
    * Method for returning a vector of all valid enumeration names for this instance
    * @return a vector of names
    */
@@ -73,6 +80,14 @@ protected:
    */
   void fillNames(std::string names, std::string option_delim=" ");
 
+  // The method that must be implemented to check derived class values against the _deprecated_names list
+  virtual void checkDeprecated() const = 0;
+
+  /**
+   * Check and warn deprecated values
+   */
+  void checkDeprecatedBase(const std::string & name_upper) const;
+
   /// The vector of enumeration names
   std::vector<std::string> _names;
 
@@ -81,6 +96,9 @@ protected:
 
   /// The map of names to enumeration constants
   std::map<std::string, int> _name_to_id;
+
+  /// The map of deprecated names and optional replacements
+  std::map<std::string, std::string> _deprecated_names;
 
   /**
    * The index of values assigned that are NOT values in this enum.  If this index is 0 (false) then
