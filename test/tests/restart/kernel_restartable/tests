@@ -37,6 +37,7 @@
     exodiff = 'kernel_restartable_out.e'
     min_threads = 4
     max_threads = 4
+    max_parallel = 1
     prereq = parallel_error1
     cli_args = 'Outputs/restart/file_base=kernel_restartable_out_threads'
   [../]
@@ -46,7 +47,6 @@
     input = 'kernel_restartable_second.i'
     min_threads = 2
     max_threads = 2
-    max_parallel = 2
     prereq = with_threads
     cli_args = 'Executioner/restart_file_base=kernel_restartable_out_threads_cp/0005'
     expect_err = 'Cannot restart using a different number of threads'
