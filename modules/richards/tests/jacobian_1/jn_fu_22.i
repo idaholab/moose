@@ -36,12 +36,12 @@
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1
-    bulk_mod = 1.0 # notice small quantity, so PETSc's "constant state" works
+    bulk_mod = 1.0 # notice small quantity, so the PETSc constant state works
   [../]
   [./SeffVG]
     type = RichardsSeff1VG
     m = 0.8
-    al = 1 # same deal with PETSc's "constant state"
+    al = 1 # notice small quantity, so the PETSc constant state works
   [../]
   [./RelPermPower]
     type = RichardsRelPermPower
@@ -77,7 +77,7 @@
     type = RichardsPiecewiseLinearSink
     boundary = 'left right'
     pressures = '-0.9 0.9'
-    bare_fluxes = '1E8 2E8'  # can't make too high as finite-difference constant state bums out due to precision loss
+    bare_fluxes = '1E8 2E8'  # can not make too high as finite difference constant state bums out due to precision loss
     use_mobility = true
     use_relperm = true
     variable = pressure
@@ -114,7 +114,6 @@
   [./andy]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
   [../]

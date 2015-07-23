@@ -30,12 +30,12 @@
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1
-    bulk_mod = 1.0 # notice small quantity, so PETSc's "constant state" works
+    bulk_mod = 1.0 # notice small quantity, so the PETSc constant state works
   [../]
   [./SeffVG]
     type = RichardsSeff1VG
     m = 0.8
-    al = 1 # same deal with PETSc's "constant state"
+    al = 1 # notice small quantity, so the PETSc constant state works
   [../]
   [./RelPermPower]
     type = RichardsRelPermPower
@@ -74,7 +74,7 @@
   [./stream]
     type = RichardsPolyLineSink
     pressures = '-0.5 0.25 0.26 0.5'
-    fluxes = '1E5 2E10 -1E10 1E5' # outer ones can't be too big otherwise PETSc's constant state finite-differencing loses precision
+    fluxes = '1E5 2E10 -1E10 1E5' # outer ones can not be too big otherwise the PETSc constant state finitedifferencing loses precision
     point_file = jn40.stream
     SumQuantityUO = stream_total_outflow_mass
     variable = pressure

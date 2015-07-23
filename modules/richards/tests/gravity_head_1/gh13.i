@@ -38,7 +38,7 @@
   [./SeffVG]
     type = RichardsSeff1VG
     m = 0.8
-    al = 1 # same deal with PETSc's "constant state"
+    al = 1
   [../]
   [./RelPermPower]
     type = RichardsRelPermPower
@@ -104,7 +104,6 @@
   [./andy]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
   [../]

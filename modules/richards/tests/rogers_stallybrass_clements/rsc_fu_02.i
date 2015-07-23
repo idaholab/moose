@@ -5,7 +5,7 @@
   nx = 200
   ny = 1
   xmin = 0
-  xmax = 10 # x is the depth variable, called "zeta" in RSC
+  xmax = 10 # x is the depth variable, called zeta in RSC
   ymin = 0
   ymax = 0.05
 []
@@ -128,7 +128,8 @@
 
 
 [BCs]
-  active = 'recharge fixedoil fixedwater' # we're pumping water into a system that has virtually incompressible fluids, hence the pressures rise enormously.  this adversely affects convergence because of almost-overflows and precision-loss problems.  The "fixed" things help keep pressures low and so prevent these awful behaviours.   the movement of the saturation front is the same regardless of the "fixed" things.
+# we are pumping water into a system that has virtually incompressible fluids, hence the pressures rise enormously.  this adversely affects convergence because of almost-overflows and precision-loss problems.  The fixed things help keep pressures low and so prevent these awful behaviours.   the movement of the saturation front is the same regardless of the fixed things.
+  active = 'recharge fixedoil fixedwater'
   [./recharge]
     type = RichardsPiecewiseLinearSink
     variable = pwater

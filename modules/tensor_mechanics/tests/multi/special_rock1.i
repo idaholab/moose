@@ -295,13 +295,6 @@
     block = 0
     ep_plastic_tolerance = 1E-5  # Note larger value, to match the larger yield_function_tolerances
 
-    #plastic_models = 'tensile_smooth mc_smooth'
-    #max_NR_iterations = 30
-    #specialIC = 'none'
-    #deactivation_scheme = 'optimized_to_dumb'
-    #min_stepsize = 1E-5
-    #max_stepsize_for_dumb = 1E-5
-
     plastic_models = 'tensile mc'
     max_NR_iterations = 5
     specialIC = 'rock'
