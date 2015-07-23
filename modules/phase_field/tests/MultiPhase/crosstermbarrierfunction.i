@@ -38,6 +38,19 @@
       int_width = 2.0
     [../]
   [../]
+  [./eta3]
+    order = FIRST
+    family = LAGRANGE
+    [./InitialCondition]
+      type = SmoothCircleIC
+      x1 = 16.0
+      y1 = 13.0
+      radius = 5.0
+      invalue = 0.9
+      outvalue = 0.1
+      int_width = 2.0
+    [../]
+  [../]
 []
 
 [BCs]
@@ -52,8 +65,8 @@
   [./crosstermbarrier]
     type = CrossTermBarrierFunctionMaterial
     block = 0
-    etas = 'eta1 eta2'
-    W_ij = '0 1 1 0'
+    etas = 'eta1 eta2 eta3'
+    W_ij = '0 1 2.2 1 0 3.1 2.2 3.1 0'
     function_name = g
     outputs = exodus
   [../]
