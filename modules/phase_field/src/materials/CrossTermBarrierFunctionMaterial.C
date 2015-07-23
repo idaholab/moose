@@ -37,9 +37,9 @@ CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const std::st
     for (unsigned int j = 0; j < _num_eta; ++j)
     {
       if (_W_ij[_num_eta*i + j] != _W_ij[_num_eta*j + i])
-      mooseError("Supply symmetric values for W_ij")
-      if (_W_ij[_num_eta*i + i] != 0])
-      mooseError("Set on-diagonal values of W_ij to zero")
+        mooseError("Supply symmetric values for W_ij");
+      if (_W_ij[_num_eta*i + i] != 0)
+        mooseError("Set on-diagonal values of W_ij to zero");
     }
 
   // declare derivative properties, fetch eta values
