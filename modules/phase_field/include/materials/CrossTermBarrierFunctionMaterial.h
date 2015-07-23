@@ -23,7 +23,7 @@ InputParameters validParams<CrossTermBarrierFunctionMaterial>();
 class CrossTermBarrierFunctionMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
-  CrossTermBarrierFunctionMaterial(const std::string & name, InputParameters parameters);
+  CrossTermBarrierFunctionMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

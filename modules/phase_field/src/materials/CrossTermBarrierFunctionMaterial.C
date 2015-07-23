@@ -18,8 +18,8 @@ InputParameters validParams<CrossTermBarrierFunctionMaterial>()
   return params;
 }
 
-CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const std::string & name, InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(name, parameters),
+CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
     _function_name(getParam<std::string>("function_name")),
     _g_order(getParam<MooseEnum>("g_order")),
     _W_ij(getParam<std::vector<Real> >("W_ij")),
