@@ -19,8 +19,8 @@ InputParameters validParams<DieselGeneratorBase>(){
    return params;
 }
 
-DieselGeneratorBase::DieselGeneratorBase(const std::string & name, InputParameters parameters):
-  CrowTools(name,parameters)
+DieselGeneratorBase::DieselGeneratorBase(const InputParameters & parameters):
+  CrowTools(parameters)
 {
   if((getParam<double>("supply_time") > 0)  & (getParam<double>("status") != 1)) throw("Bad input - diesel generators' values do not agree");
   if((getParam<double>("supply_time") <= 0) & (getParam<double>("status") != 0)) throw("Bad input - diesel generators' values do not agree");

@@ -13,7 +13,7 @@ class CrowTools : public MooseObject
 {
 public:
   //> constructor for built-in crow tools
-  CrowTools(const std::string & name, InputParameters parameters);
+  CrowTools(const InputParameters & parameters);
 
   virtual ~CrowTools();
   /*

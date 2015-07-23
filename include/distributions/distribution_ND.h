@@ -16,7 +16,7 @@ class distributionND : public MooseObject , public virtual BasicDistributionND
 {
 public:
   //> constructor for built-in distributions
-  distributionND(const std::string & name, InputParameters parameters);
+  distributionND(const InputParameters & parameters);
   virtual ~distributionND();
 
 };
@@ -32,7 +32,7 @@ InputParameters validParams<MultiDimensionalInverseWeight>();
 class MultiDimensionalInverseWeight : public distributionND, public BasicMultiDimensionalInverseWeight
 {
 public:
-  MultiDimensionalInverseWeight(const std::string & name, InputParameters parameters);
+  MultiDimensionalInverseWeight(const InputParameters & parameters);
   virtual ~MultiDimensionalInverseWeight();
 };
 
@@ -47,7 +47,7 @@ InputParameters validParams<MultivariateNormal>();
 class MultivariateNormal : public distributionND, public BasicMultivariateNormal
 {
 public:
-  MultivariateNormal(const std::string & name, InputParameters parameters);
+  MultivariateNormal(const InputParameters & parameters);
   virtual ~MultivariateNormal();
 };
 
@@ -63,7 +63,7 @@ InputParameters validParams<MultiDimensionalScatteredMS>();
 class MultiDimensionalScatteredMS : public distributionND, public BasicMultiDimensionalScatteredMS
 {
 public:
-  MultiDimensionalScatteredMS(const std::string & name, InputParameters parameters);
+  MultiDimensionalScatteredMS(const InputParameters & parameters);
   virtual ~MultiDimensionalScatteredMS();
 };
 
@@ -79,7 +79,7 @@ InputParameters validParams<MultiDimensionalCartesianSpline>();
 class MultiDimensionalCartesianSpline : public distributionND, public BasicMultiDimensionalCartesianSpline
 {
 public:
-  MultiDimensionalCartesianSpline(const std::string & name, InputParameters parameters);
+  MultiDimensionalCartesianSpline(const InputParameters & parameters);
   virtual ~MultiDimensionalCartesianSpline();
 };
 
@@ -95,7 +95,7 @@ public:
 //class MultiDimensionalLinear : public distributionND, public BasicMultiDimensionalLinear
 //{
 //public:
-//  MultiDimensionalLinear(const std::string & name, InputParameters parameters);
+//  MultiDimensionalLinear(const InputParameters & parameters);
 //  virtual ~MultiDimensionalLinear();
 //};
 

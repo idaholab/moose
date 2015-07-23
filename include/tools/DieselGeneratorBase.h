@@ -11,7 +11,7 @@ InputParameters validParams<DieselGeneratorBase>();
 class DieselGeneratorBase : public CrowTools
 {
 public:
-  DieselGeneratorBase(const std::string & name, InputParameters parameters);
+  DieselGeneratorBase(const InputParameters & parameters);
   virtual ~DieselGeneratorBase();
   double compute(double time);
 };

@@ -11,7 +11,7 @@ InputParameters validParams<powerGrid>();
 class powerGrid : public CrowTools
 {
 public:
-  powerGrid(const std::string & name, InputParameters parameters);
+  powerGrid(const InputParameters & parameters);
   ~powerGrid();
 
 };

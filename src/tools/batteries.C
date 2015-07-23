@@ -21,8 +21,8 @@ InputParameters validParams<batteries>(){
 
 
 
-batteries::batteries(const std::string & name, InputParameters parameters) :
-  CrowTools(name,parameters)
+batteries::batteries(const InputParameters & parameters) :
+  CrowTools(parameters)
 {
   if((getParam<double>("initial_life") > 0)  & (getParam<double>("status") != 1)) throw("Bad input - batteries values do not agree");
   if((getParam<double>("initial_life") <= 0) & (getParam<double>("status") != 0)) throw("Bad input - batteries values do not agree");

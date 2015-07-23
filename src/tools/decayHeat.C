@@ -24,8 +24,8 @@ InputParameters validParams<decayHeat>(){
    return params;
 }
 
-decayHeat::decayHeat(const std::string & name, InputParameters parameters):
-  CrowTools(name,parameters)
+decayHeat::decayHeat(const InputParameters & parameters):
+  CrowTools(parameters)
 {
   _tool_parameters["initial_pow"      ] = getParam<double>("initial_pow");
   _tool_parameters["operating_time"   ] = getParam<double>("operating_time");

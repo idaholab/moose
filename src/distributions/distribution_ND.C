@@ -28,8 +28,8 @@ InputParameters validParams<distributionND>()
 
 class distributionND;
 
-distributionND::distributionND(const std::string & name, InputParameters parameters):
-      MooseObject(name,parameters)
+distributionND::distributionND(const InputParameters & parameters):
+      MooseObject(parameters)
 {
    _type          = getParam<std::string>("type");
    _data_filename = getParam<std::string>("data_filename");
@@ -58,14 +58,14 @@ InputParameters validParams<MultiDimensionalInverseWeight>(){
 
 }
 
-MultiDimensionalInverseWeight::MultiDimensionalInverseWeight(const std::string & name, InputParameters parameters):
-    distributionND(name,parameters),
+MultiDimensionalInverseWeight::MultiDimensionalInverseWeight(const InputParameters & parameters):
+    distributionND(parameters),
     BasicMultiDimensionalInverseWeight(getParam<std::string>("data_filename"),getParam<double>("p"), getParam<bool>("CDF"))
 {
 }
 
 //MultiDimensionalInverseWeight::MultiDimensionalInverseWeight(const char * name, InputParameters parameters):
-//    distributionND(name,parameters),
+//    distributionND(parameters),
 //    BasicMultiDimensionalInverseWeight(getParam<std::string>("data_filename"),getParam<double>("p"))
 //{
 //}
@@ -87,8 +87,8 @@ InputParameters validParams<MultivariateNormal>(){
 
 }
 
-MultivariateNormal::MultivariateNormal(const std::string & name, InputParameters parameters):
-    distributionND(name,parameters),
+MultivariateNormal::MultivariateNormal(const InputParameters & parameters):
+    distributionND(parameters),
     BasicMultivariateNormal(getParam<std::string>("data_filename"),getParam<std::vector<double> >("mu"))
 {
 }
@@ -112,8 +112,8 @@ InputParameters validParams<MultiDimensionalScatteredMS>(){
 
 }
 
-MultiDimensionalScatteredMS::MultiDimensionalScatteredMS(const std::string & name, InputParameters parameters):
-    distributionND(name,parameters),
+MultiDimensionalScatteredMS::MultiDimensionalScatteredMS(const InputParameters & parameters):
+    distributionND(parameters),
     BasicMultiDimensionalScatteredMS(getParam<std::string>("data_filename"),getParam<double>("p"),getParam<int>("precision"))
 {
 }
@@ -137,8 +137,8 @@ InputParameters validParams<MultiDimensionalCartesianSpline>(){
 
 }
 
-MultiDimensionalCartesianSpline::MultiDimensionalCartesianSpline(const std::string & name, InputParameters parameters):
-    distributionND(name,parameters),
+MultiDimensionalCartesianSpline::MultiDimensionalCartesianSpline(const InputParameters & parameters):
+    distributionND(parameters),
 	//BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"), getParam<bool>("CDF"))
     BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"), getParam<bool>("CDF"))
 {
@@ -161,8 +161,8 @@ MultiDimensionalCartesianSpline::~MultiDimensionalCartesianSpline()
 //
 //}
 //
-//MultiDimensionalLinear::MultiDimensionalLinear(const std::string & name, InputParameters parameters):
-//    distributionND(name,parameters),
+//MultiDimensionalLinear::MultiDimensionalLinear(const InputParameters & parameters):
+//    distributionND(parameters),
 //    BasicMultiDimensionalLinear(getParam<std::string>("data_filename"))
 //{
 //}

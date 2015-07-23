@@ -24,8 +24,8 @@ InputParameters validParams<TableFunction>(){
 
 #define ECustomDistFitType custom_dist_fit_type
 
-TableFunction::TableFunction(const std::string & name, InputParameters parameters):
-  CrowTools(name,parameters)
+TableFunction::TableFunction(const InputParameters & parameters):
+  CrowTools(parameters)
 {
   _tool_parameters["scaling_factor"] = getParam<double>("scaling_factor");
   _interpolation=Interpolation_Functions(getParam<std::vector<double> >("x_coordinates"),
