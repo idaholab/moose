@@ -457,6 +457,7 @@ dataLoad(std::istream & stream, std::stringstream & s, void * /* context */)
   stream.read(s_s, s_size);
 
   s.write(s_s, s_size);
+  delete[] s_s;
 }
 
 template<>
