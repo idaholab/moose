@@ -11,7 +11,7 @@
 template<>
 InputParameters validParams<EBSDReader>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<EulerAngleProvider>();
   params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order parameters to create");
   return params;
 }
