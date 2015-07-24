@@ -12,7 +12,6 @@
 [GlobalParams]
   op_num = 2
   var_name_base = gr
-  Euler_angles_file_name = test.tex
 []
 
 [Variables]
@@ -193,6 +192,7 @@
     Elastic_constants = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
     GrainTracker_object = grain_tracker
     grain_num = 2
+    euler_angle_provider = euler_angle_file
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -217,6 +217,10 @@
     compute_op_maps = true
     execute_on = TIMESTEP_BEGIN
     flood_entity_type = ELEMENTAL
+  [../]
+  [./euler_angle_file]
+    type = EulerAngleFileReader
+    file_name = test.tex
   [../]
 []
 
