@@ -23,6 +23,7 @@
 #include <iterator>
 
 // MOOSE includes
+#include "MooseUtils.h"
 #include "MooseError.h"
 #include "MaterialProperty.h"
 
@@ -33,25 +34,7 @@ namespace MooseUtils
 {
 
 void
-tokenize(const std::string &str, std::vector<std::string> &elements, unsigned int min_len, const std::string &delims)
-{
-  elements.clear();
-
-  std::string::size_type last_pos = str.find_first_not_of(delims, 0);
-  std::string::size_type pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
-
-  while (last_pos != std::string::npos)
-  {
-    elements.push_back(str.substr(last_pos, pos - last_pos));
-    // skip delims between tokens
-    last_pos = str.find_first_not_of(delims, pos);
-    if (last_pos == std::string::npos) break;
-    pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
-  }
-}
-
-void
-escape(std::string &str)
+escape(std::string & str)
 {
   std::map<char, std::string> escapes;
   escapes['\a'] = "\\a";
@@ -69,18 +52,17 @@ escape(std::string &str)
 
 
 std::string
-trim(std::string str, const std::string &white_space)
+trim(std::string str, const std::string & white_space)
 {
   std::string r = str.erase(str.find_last_not_of(white_space)+1);
   return r.erase(0,r.find_first_not_of(white_space));
 }
 
-bool pathContains(const std::string &expression,
-                          const std::string &string_to_find,
-                          const std::string &delims)
+bool pathContains(const std::string & expression,
+                  const std::string & string_to_find,
+                  const std::string & delims)
 {
   std::vector<std::string> elements;
-
   tokenize(expression, elements, 0, delims);
 
   std::vector<std::string>::iterator found_it = std::find(elements.begin(), elements.end(), string_to_find);
@@ -130,8 +112,6 @@ checkFileWriteable(const std::string & filename, bool throw_on_unwritable)
     else
       return false;
   }
-
-
 
   out.close();
 
