@@ -11,13 +11,13 @@
 template<>
 InputParameters validParams<EBSDReader>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<EulerAngleProvider>();
   params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order parameters to create");
   return params;
 }
 
 EBSDReader::EBSDReader(const InputParameters & params) :
-    GeneralUserObject(params),
+    EulerAngleProvider(params),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
     _op_num(getParam<unsigned int>("op_num")),
@@ -105,24 +105,29 @@ EBSDReader::initialSetup()
 
   // Resize the variables
   _avg_data.resize(_feature_num);
+  _avg_angles.resize(_feature_num);
 
   // clear the averages
   for (unsigned int i = 0; i < _feature_num; ++i)
   {
     EBSDAvgData & a = _avg_data[i];
-    a.p = a.phi1 = a.phi = a.phi2 = 0.0;
     a.symmetry = a.phase = a.n = 0;
+    a.p = 0.0;
+
+    EulerAngles & b = _avg_angles[i];
+    b.phi1 = b.Phi = b.phi2 = 0.0;
   }
 
   // Iterate through data points to get average variable values for each grain
   for (std::vector<EBSDPointData>::iterator j = _data.begin(); j != _data.end(); ++j)
   {
     EBSDAvgData & a = _avg_data[j->grain];
+    EulerAngles & b = _avg_angles[j->grain];
 
     //use Eigen::Quaternion<Real> here?
-    a.phi1 += j->phi1;
-    a.phi  += j->phi;
-    a.phi2 += j->phi2;
+    b.phi1 += j->phi1;
+    b.Phi  += j->phi;
+    b.phi2 += j->phi2;
 
     if (a.n == 0)
       a.phase = j->phase;
@@ -143,12 +148,16 @@ EBSDReader::initialSetup()
   for (unsigned int i = 0; i < _feature_num; ++i)
   {
     EBSDAvgData & a = _avg_data[i];
+    EulerAngles & b = _avg_angles[i];
 
     if (a.n == 0) continue;
 
-    a.phi1 /= Real(a.n);
-    a.phi  /= Real(a.n);
-    a.phi2 /= Real(a.n);
+    b.phi1 /= Real(a.n);
+    b.Phi  /= Real(a.n);
+    b.phi2 /= Real(a.n);
+
+    // link the EulerAngles into the EBSDAvgData for access via the functors
+    a.angles = &b;
 
     if (a.phase >= _feature_id.size())
       _feature_id.resize(a.phase + 1);
@@ -177,6 +186,12 @@ const EBSDReader::EBSDAvgData &
 EBSDReader::getAvgData(unsigned int var) const
 {
   return _avg_data[indexFromIndex(var)];
+}
+
+const EulerAngles &
+EBSDReader::getEulerAngles(unsigned int var) const
+{
+  return _avg_angles[indexFromIndex(var)];
 }
 
 const EBSDReader::EBSDAvgData &
@@ -287,7 +302,7 @@ EBSDReader::buildNodeToGrainWeightMap()
 
 // DEPRECATED CONSTRUCTOR
 EBSDReader::EBSDReader(const std::string & deprecated_name, InputParameters params) :
-    GeneralUserObject(deprecated_name, params),
+    EulerAngleProvider(deprecated_name, params),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
     _op_num(getParam<unsigned int>("op_num")),

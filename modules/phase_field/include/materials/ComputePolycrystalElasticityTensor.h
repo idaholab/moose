@@ -12,6 +12,7 @@
 //Forward Declarations
 class ComputePolycrystalElasticityTensor;
 class GrainTracker;
+class EulerAngleProvider;
 
 /**
  * Compute an evolving elasticity tensor coupled to a grain growth phase field model.
@@ -31,7 +32,8 @@ protected:
   Real _length_scale;
   Real _pressure_scale;
 
-  FileName _Euler_angles_file_name;
+  /// Object providing the Euler angles
+  const EulerAngleProvider & _euler;
 
   /// Grain tracker object
   const GrainTracker & _grain_tracker;

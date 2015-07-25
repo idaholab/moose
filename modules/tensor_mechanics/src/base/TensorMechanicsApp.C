@@ -65,6 +65,7 @@
 #include "HyperElasticStress.h"
 #include "FlowRateModel.h"
 #include "RambergOsgoodHardening.h"
+#include "EulerAngleFileReader.h"
 
 #include "RankTwoAux.h"
 #include "RealTensorValueAux.h"
@@ -178,6 +179,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(HyperElasticStress);
   registerUserObject(FlowRateModel);
   registerUserObject(RambergOsgoodHardening);
+  registerUserObject(EulerAngleFileReader);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);

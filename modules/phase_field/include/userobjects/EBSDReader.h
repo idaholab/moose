@@ -7,7 +7,7 @@
 #ifndef EBSDREADER_H
 #define EBSDREADER_H
 
-#include "GeneralUserObject.h"
+#include "EulerAngleProvider.h"
 #include "EBSDAccessFunctors.h"
 
 class EBSDReader;
@@ -19,7 +19,7 @@ InputParameters validParams<EBSDReader>();
  * A GeneralUserObject that reads an EBSD file and stores the centroid
  * data in a data structure which indexes on element centroids.
  */
-class EBSDReader : public GeneralUserObject, public EBSDAccessFunctors
+class EBSDReader : public EulerAngleProvider, public EBSDAccessFunctors
 {
 public:
   EBSDReader(const InputParameters & params);
@@ -59,9 +59,14 @@ public:
   const EBSDAvgData &  getAvgData(unsigned int phase, unsigned int grain) const;
 
   /**
+   * EulerAngleProvider interface implementation to fetch a triplet of Euler angles
+   */
+  virtual const EulerAngles & getEulerAngles(unsigned int) const;
+
+  /**
    * Return the total number of grains
    */
-  unsigned int getGrainNum() const;
+  virtual unsigned int getGrainNum() const;
 
   /**
    * Return the number of grains in a given phase
@@ -91,6 +96,9 @@ protected:
 
   /// Averages by feature ID
   std::vector<EBSDAvgData> _avg_data;
+
+  /// Euler Angles by feature ID
+  std::vector<EulerAngles> _avg_angles;
 
   /// feature ID for given phases and grains
   std::vector<std::vector<unsigned int> > _feature_id;

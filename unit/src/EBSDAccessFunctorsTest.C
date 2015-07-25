@@ -16,6 +16,7 @@
 
 //Moose includes
 #include "EBSDAccessFunctors.h"
+#include "EulerAngles.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( EBSDAccessFunctorsTest );
 
@@ -122,15 +123,17 @@ EBSDAccessFunctorsTest::avgData()
   for (unsigned int i = 0; i < 10; ++i)
   {
     // initialize data
-    d.phi1  = i * offset + 0.4;
-    d.phi   = i * offset + 1.5;
-    d.phi2  = i * offset + 2.6;
+    EulerAngles a;
+    a.phi1  = i * offset + 0.4;
+    a.Phi   = i * offset + 1.5;
+    a.phi2  = i * offset + 2.6;
+    d.angles = &a;
     d.phase = i * offset + 3.7;
     d.symmetry = i * offset + 4.9;
 
     // check functors
     v1 = new EBSDAccessFunctors::EBSDAvgDataPhi1;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phi1, 1e-9 );
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), a.phi1, 1e-9 );
     field = "phi1";
     v2 = EBSDAccessFunctors::getAvgDataAccessFunctor(field);
     CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
@@ -138,7 +141,7 @@ EBSDAccessFunctorsTest::avgData()
     delete v1;
 
     v1 = new EBSDAccessFunctors::EBSDAvgDataPhi;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phi, 1e-9 );
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), a.Phi, 1e-9 );
     field = "phi";
     v2 = EBSDAccessFunctors::getAvgDataAccessFunctor(field);
     CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
@@ -146,7 +149,7 @@ EBSDAccessFunctorsTest::avgData()
     delete v1;
 
     v1 = new EBSDAccessFunctors::EBSDAvgDataPhi2;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phi2, 1e-9 );
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), a.phi2, 1e-9 );
     field = "phi2";
     v2 = EBSDAccessFunctors::getAvgDataAccessFunctor(field);
     CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
