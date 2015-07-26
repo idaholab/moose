@@ -72,6 +72,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./euler_angle]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -143,6 +147,13 @@
     variable = vonmises_stress
     rank_two_tensor = stress
     scalar_type = VonMisesStress
+  [../]
+  [./euler_angle]
+    type = OutputEulerAngles
+    variable = euler_angle
+    euler_angle_provider = euler_angle_file
+    GrainTracker_object = grain_tracker
+    output_euler_angle = 'phi1'
   [../]
 []
 
@@ -252,8 +263,8 @@
   type = Transient
   scheme = bdf2
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 31'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold'
+  petsc_options_value = 'hypre boomeramg 31 0.7'
   l_tol = 1.0e-4
   l_max_its = 30
   nl_max_its = 40

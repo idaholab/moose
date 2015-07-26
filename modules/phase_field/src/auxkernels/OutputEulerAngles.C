@@ -32,10 +32,10 @@ Real
 OutputEulerAngles::computeValue()
 {
   // ID of unique grain at current point
-  const unsigned int grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), 0, "VARIABLE_COLORING");
+  const unsigned int grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), 0, false);
 
   // Recover euler angles for current grain
-  const RealVectorValue angles = _euler.getEulerAngles(grain_id);
+  const RealVectorValue angles = _euler.getEulerAngles(grain_id - 1);
 
   // Return specific euler angle
   return angles(_output_euler_angle);

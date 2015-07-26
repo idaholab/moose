@@ -8,7 +8,8 @@
 #define OUTPUTEULERANGLES_H
 
 #include "AuxKernel.h"
-#include "EBSDReader.h"
+#include "EulerAngleProvider.h"
+#include "GrainTracker.h"
 
 //Forward Declarations
 class OutputEulerAngles;
@@ -21,7 +22,7 @@ InputParameters validParams<OutputEulerAngles>();
 /**
  * Output euler angles from user object to an AuxVariable.
  */
-class OutputEulerAngles : public AuxKernel, EBSDAccessFunctors
+class OutputEulerAngles : public AuxKernel
 {
 public:
   OutputEulerAngles(const InputParameters & parameters);
@@ -38,7 +39,6 @@ protected:
 
   /// Number of grains
   MooseEnum _output_euler_angle;
-
 };
 
 #endif //OUTPUTEULERANGLES_H
