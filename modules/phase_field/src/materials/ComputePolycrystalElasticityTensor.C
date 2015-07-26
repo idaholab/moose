@@ -21,7 +21,7 @@ InputParameters validParams<ComputePolycrystalElasticityTensor>()
   params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables");
   params.addRequiredParam<UserObjectName>("GrainTracker_object", "The GrainTracker UserObject to get values from.");
   params.addRequiredParam<unsigned int>("grain_num", "Number of initial grains that will be modeled");
-  params.addParam<unsigned int>("stiffness_buffer",10,"Number of extra elastic stiffnesses that are created to handle new grains");
+  params.addParam<unsigned int>("stiffness_buffer", 10, "Number of extra elastic stiffnesses that are created to handle new grains");
   params.addRequiredParam<std::vector<Real> >("Elastic_constants", "Vector containing elastic constants for fill method");
   params.addParam<MooseEnum>("fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
   return params;

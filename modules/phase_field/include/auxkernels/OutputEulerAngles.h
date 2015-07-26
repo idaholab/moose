@@ -1,0 +1,44 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+#ifndef OUTPUTEULERANGLES_H
+#define OUTPUTEULERANGLES_H
+
+#include "AuxKernel.h"
+#include "EBSDReader.h"
+
+//Forward Declarations
+class OutputEulerAngles;
+class GrainTracker;
+class EulerAngleProvider;
+
+template<>
+InputParameters validParams<OutputEulerAngles>();
+
+/**
+ * Output euler angles from user object to an AuxVariable.
+ */
+class OutputEulerAngles : public AuxKernel, EBSDAccessFunctors
+{
+public:
+  OutputEulerAngles(const InputParameters & parameters);
+  OutputEulerAngles(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
+
+protected:
+  virtual Real computeValue();
+
+  /// Object providing the Euler angles
+  const EulerAngleProvider & _euler;
+
+  /// Grain tracker object
+  const GrainTracker & _grain_tracker;
+
+  /// Number of grains
+  MooseEnum _output_euler_angle;
+
+};
+
+#endif //OUTPUTEULERANGLES_H
