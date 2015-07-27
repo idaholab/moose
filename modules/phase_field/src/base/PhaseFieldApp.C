@@ -110,6 +110,7 @@
 #include "PFCEnergyDensity.h"
 #include "PFCRFFEnergyDensity.h"
 #include "TotalFreeEnergy.h"
+#include "OutputEulerAngles.h"
 
 /*
  * Functions
@@ -291,6 +292,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(PFCEnergyDensity);
   registerAux(PFCRFFEnergyDensity);
   registerAux(TotalFreeEnergy);
+  registerAux(OutputEulerAngles);
 
   registerUserObject(ConservedMaskedNormalNoise);
   registerUserObject(ConservedMaskedUniformNoise);

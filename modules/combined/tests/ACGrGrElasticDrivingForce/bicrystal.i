@@ -71,6 +71,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./euler_angle]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -150,6 +154,13 @@
     field_display = ACTIVE_BOUNDS
     bubble_object = grain_tracker
   [../]
+  [./euler_angle]
+    type = OutputEulerAngles
+    variable = euler_angle
+    euler_angle_provider = euler_angle_file
+    GrainTracker_object = grain_tracker
+    output_euler_angle = 'phi1'
+  [../]
 []
 
 [BCs]
@@ -215,8 +226,8 @@
     condense_map_info = true
     connecting_threshold = 0.05
     compute_op_maps = true
-    execute_on = TIMESTEP_BEGIN
-    flood_entity_type = ELEMENTAL
+    execute_on = 'initial timestep_begin'
+    flood_entity_type = elemental
   [../]
   [./euler_angle_file]
     type = EulerAngleFileReader
@@ -246,8 +257,8 @@
   type = Transient
 
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 31'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold'
+  petsc_options_value = 'hypre boomeramg 31 0.7'
 
   l_max_its = 30
   l_tol = 1e-4
@@ -255,7 +266,7 @@
   nl_rel_tol = 1e-9
 
   start_time = 0.0
-  num_steps = 6
+  num_steps = 3
   dt = 0.2
 
   [./Adaptivity]
