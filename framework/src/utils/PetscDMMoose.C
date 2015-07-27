@@ -721,19 +721,23 @@ static PetscErrorCode DMMooseFunction(DM dm, Vec x, Vec r)
   NonlinearSystem* nl = NULL;
   ierr = DMMooseGetNonlinearSystem(dm, nl); CHKERRQ(ierr);
   PetscVector<Number>& X_sys = *cast_ptr<PetscVector<Number>* >(nl->sys().solution.get());
-  PetscVector<Number>& R_sys = *cast_ptr<PetscVector<Number>* >(nl->sys().rhs);
   PetscVector<Number> X_global(x, nl->comm()), R(r, nl->comm());
 
-  // Use the systems update() to get a good local version of the parallel solution
+  // Use the system's update() to get a good local version of the
+  // parallel solution.  sys.update() does change the residual vector,
+  // so there's no reason to swap PETSc's residual into the system for
+  // this step.
   X_global.swap(X_sys);
-  R.swap(R_sys);
-
-  nl->sys().get_dof_map().enforce_constraints_exactly(nl->sys());
   nl->sys().update();
-
-  // Swap back
   X_global.swap(X_sys);
-  R.swap(R_sys);
+
+  // Enforce constraints (if any) exactly on the
+  // current_local_solution.  This is the solution vector that is
+  // actually used in the computation of the residual below, and is
+  // not locked by debug-enabled PETSc the way that "x" is.
+  nl->sys().get_dof_map().enforce_constraints_exactly(nl->sys(), nl->sys().current_local_solution.get());
+
+  // Zero the residual vector before assembling
   R.zero();
 
   // if the user has provided both function pointers and objects only the pointer
@@ -766,7 +770,6 @@ static PetscErrorCode DMMooseFunction(DM dm, Vec x, Vec r)
     mooseError(err.str());
   }
   R.close();
-  X_global.close();
   PetscFunctionReturn(0);
 }
 
@@ -803,23 +806,27 @@ static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   PetscMatrix<Number>  the_pc(pc, nl->comm());
   PetscMatrix<Number>  Jac(jac, nl->comm());
   PetscVector<Number>& X_sys = *cast_ptr<PetscVector<Number>*>(nl->sys().solution.get());
-  PetscMatrix<Number>& Jac_sys = *cast_ptr<PetscMatrix<Number>*>(nl->sys().matrix);
   PetscVector<Number>  X_global(x, nl->comm());
 
   // Set the dof maps
   the_pc.attach_dof_map(nl->sys().get_dof_map());
   Jac.attach_dof_map(nl->sys().get_dof_map());
 
-  // Use the systems update() to get a good local version of the parallel solution
+  // Use the system's update() to get a good local version of the
+  // parallel solution.  sys.update() does change the Jacobian, so
+  // there's no reason to swap PETSc's Jacobian into the system for
+  // this step.
   X_global.swap(X_sys);
-  Jac.swap(Jac_sys);
-
-  nl->sys().get_dof_map().enforce_constraints_exactly(nl->sys());
   nl->sys().update();
-
   X_global.swap(X_sys);
-  Jac.swap(Jac_sys);
 
+  // Enforce constraints (if any) exactly on the
+  // current_local_solution.  This is the solution vector that is
+  // actually used in the computation of the Jacobian below, and is
+  // not locked by debug-enabled PETSc the way that "x" is.
+  nl->sys().get_dof_map().enforce_constraints_exactly(nl->sys(), nl->sys().current_local_solution.get());
+
+  // Zero out the preconditioner before computing the Jacobian.
   the_pc.zero();
 
   // if the user has provided both function pointers and objects only the pointer
@@ -853,7 +860,6 @@ static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   }
   the_pc.close();
   Jac.close();
-  X_global.close();
 #if PETSC_VERSION_LT(3,5,0)
   *msflag = SAME_NONZERO_PATTERN;
 #endif
