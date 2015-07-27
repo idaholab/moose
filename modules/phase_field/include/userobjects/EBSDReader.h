@@ -26,7 +26,7 @@ public:
   EBSDReader(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~EBSDReader();
 
-  virtual void initialSetup();
+  virtual void readFile();
 
   /**
    * Called before execute() is ever called so that data can be cleared.
