@@ -288,7 +288,6 @@ MultiAppProjectionTransfer::execute()
   }
 
   // Setup the local mesh functions.
-  std::vector<NumericVector<Number> *> serialized_from_solutions(froms_per_proc[processor_id()], NULL);
   std::vector<MeshFunction *> local_meshfuns(froms_per_proc[processor_id()], NULL);
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
@@ -297,12 +296,8 @@ MultiAppProjectionTransfer::execute()
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-    serialized_from_solutions[i_from] = NumericVector<Number>::build(from_sys.comm()).release();
-    serialized_from_solutions[i_from]->init(from_sys.n_dofs(), false, SERIAL);
-    from_sys.solution->localize(*serialized_from_solutions[i_from]);
-
     MeshFunction * from_func = new MeshFunction(from_problem.es(),
-         *serialized_from_solutions[i_from], from_sys.get_dof_map(), from_var_num);
+         *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num);
     from_func->init(Trees::ELEMENTS);
     from_func->enable_out_of_mesh_mode(OutOfMeshValue);
     local_meshfuns[i_from] = from_func;
@@ -462,10 +457,7 @@ MultiAppProjectionTransfer::execute()
   }
 
   for (unsigned int i = 0; i < _from_problems.size(); i++)
-  {
     delete local_meshfuns[i];
-    delete serialized_from_solutions[i];
-  }
 
   _console << "Finished projection transfer " << name() << std::endl;
 }
