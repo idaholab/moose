@@ -35,15 +35,13 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const Inp
     _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
     _grain_tracker(getUserObject<GrainTracker>("GrainTracker_object")), // TODO: Rename to lower case "grain_tracker"
     _grain_num(getParam<unsigned int>("grain_num")),
+    _nop(coupledComponents("v")),
     _stiffness_buffer(getParam<unsigned int>("stiffness_buffer")),
-    _JtoeV(6.24150974e18), // Joule to eV conversion
-    _nop(coupledComponents("v"))
+    _vals(_nop),
+    _D_elastic_tensor(_nop),
+    _C_rotated(_grain_num + _stiffness_buffer),
+    _JtoeV(6.24150974e18) // Joule to eV conversion
 {
-  // Initialize values for crystals
-  _vals.resize(_nop);
-  _D_elastic_tensor.resize(_nop);
-  _C_rotated.resize(_grain_num + _stiffness_buffer);
-
   // Read in Euler angles from the Euler angle provider
   if (_euler.getGrainNum() < _grain_num)
     mooseError("Euler angle provider has too few angles.");
@@ -51,11 +49,8 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const Inp
   // Loop over grains
   for (unsigned int grn = 0; grn < _grain_num; ++grn)
   {
-    // Read in Euler angles
-    RealVectorValue Euler_Angles = _euler.getEulerAngles(grn);
-
     // Rotate one elasticity tensor for each grain
-    RotationTensor R(Euler_Angles);
+    RotationTensor R(_euler.getEulerAngles(grn));
     _C_rotated[grn] = _C_unrotated;
     _C_rotated[grn].rotate(R);
 
@@ -157,9 +152,9 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const std
     _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
     _grain_tracker(getUserObject<GrainTracker>("GrainTracker_object")),
     _grain_num(getParam<unsigned int>("grain_num")),
+    _nop(coupledComponents("v")),
     _stiffness_buffer(getParam<unsigned int>("stiffness_buffer")),
-    _JtoeV(6.24150974e18), // Joule to eV conversion
-    _nop(coupledComponents("v"))
+    _JtoeV(6.24150974e18) // Joule to eV conversion
 {
   // Initialize values for crystals
   _vals.resize(_nop);
