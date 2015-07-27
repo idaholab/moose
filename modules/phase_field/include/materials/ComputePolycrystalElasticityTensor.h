@@ -41,6 +41,9 @@ protected:
   /// Number of grains
   unsigned int _grain_num;
 
+  /// Number of order parameters
+  unsigned int _nop;
+
   /// Number of extra euler angles that are stored for when grains are created
   unsigned int _stiffness_buffer;
 
@@ -55,9 +58,6 @@ protected:
 
   /// Conversion factor from J to eV
   const Real _JtoeV;
-
-  /// Number of order parameters
-  unsigned int _nop;
 };
 
 #endif //COMPUTEPOLYCRYSTALELASTICITYTENSOR_H
