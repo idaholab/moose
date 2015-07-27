@@ -789,8 +789,6 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_damper",                   Damper,                 false);
   registerMooseObjectTask("setup_predictor",              Predictor,              false);
   registerMooseObjectTask("setup_time_stepper",           TimeStepper,            false);
-
-
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,            false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
@@ -884,6 +882,7 @@ addActionTypes(Syntax & syntax)
 "(create_problem)"
 "(setup_executioner)"
 "(setup_time_stepper)"
+"(setup_time_integrator)"
 "(setup_predictor)"
 "(setup_postprocessor_data)"
 "(setup_time_periods)"

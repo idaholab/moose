@@ -95,7 +95,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("DetermineSystemType", "Executioner");
   syntax.registerActionSyntax("CreateExecutionerAction", "Executioner");
   syntax.registerActionSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
-  syntax.registerActionSyntax("SetupTimeIntegratorAction", "Executioner/TimeTimeIntegrator");
+  syntax.registerActionSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
 
   syntax.registerActionSyntax("SetupTimePeriodsAction", "Executioner/TimePeriods/*");
   syntax.registerActionSyntax("SetupQuadratureAction", "Executioner/Quadrature");
