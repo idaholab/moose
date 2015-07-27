@@ -41,7 +41,7 @@ protected:
 
   //! Indicates stage or, if _stage==3, the update step.
   unsigned int _stage;
-  
+
   //! Order of the DIRK integrator. @note At the moment, only a second order DIRK is implemented
   unsigned int _order;
 
