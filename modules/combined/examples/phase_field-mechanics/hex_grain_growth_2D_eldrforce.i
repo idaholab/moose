@@ -190,8 +190,7 @@
     #reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
     Elastic_constants = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
     GrainTracker_object = grain_tracker
-    # Euler_angles_file_name = grn_36_test_2D.tex #One grain will shrink
-    Euler_angles_file_name = grn_36_test2_2D.tex #One grain will grow
+    euler_angle_provider = euler_angle_file
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -234,6 +233,10 @@
     compute_op_maps = true
     execute_on = 'initial timestep_begin'
     flood_entity_type = ELEMENTAL
+  [../]
+  [./euler_angle_file]
+    type = EulerAngleFileReader
+    file_name = grn_36_test2_2D.tex
   [../]
 []
 

@@ -12,6 +12,7 @@
 //Forward Declarations
 class ComputePolycrystalElasticityTensor;
 class GrainTracker;
+class EulerAngleProvider;
 
 /**
  * Compute an evolving elasticity tensor coupled to a grain growth phase field model.
@@ -31,13 +32,17 @@ protected:
   Real _length_scale;
   Real _pressure_scale;
 
-  FileName _Euler_angles_file_name;
+  /// Object providing the Euler angles
+  const EulerAngleProvider & _euler;
 
   /// Grain tracker object
   const GrainTracker & _grain_tracker;
 
   /// Number of grains
   unsigned int _grain_num;
+
+  /// Number of order parameters
+  unsigned int _nop;
 
   /// Number of extra euler angles that are stored for when grains are created
   unsigned int _stiffness_buffer;
@@ -53,9 +58,6 @@ protected:
 
   /// Conversion factor from J to eV
   const Real _JtoeV;
-
-  /// Number of order parameters
-  unsigned int _nop;
 };
 
 #endif //COMPUTEPOLYCRYSTALELASTICITYTENSOR_H

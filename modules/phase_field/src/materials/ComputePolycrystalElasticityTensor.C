@@ -7,6 +7,7 @@
 #include "ComputePolycrystalElasticityTensor.h"
 #include "RotationTensor.h"
 #include "GrainTracker.h"
+#include "EulerAngleProvider.h"
 #include "Conversion.h"
 
 template<>
@@ -14,7 +15,7 @@ InputParameters validParams<ComputePolycrystalElasticityTensor>()
 {
   InputParameters params = validParams<ComputeElasticityTensorBase>();
   params.addClassDescription("Compute an evolving elasticity tensor coupled to a grain growth phase field model.");
-  params.addRequiredParam<FileName>("Euler_angles_file_name", "Name of the file containing the Euler angles");
+  params.addRequiredParam<UserObjectName>("euler_angle_provider", "Name of Euler angle provider user object");
   params.addParam<Real>("length_scale", 1.0e-9, "Lengthscale of the problem, in meters");
   params.addParam<Real>("pressure_scale", 1.0e6, "Pressure scale of the problem, in pa");
   params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables");
@@ -28,45 +29,28 @@ InputParameters validParams<ComputePolycrystalElasticityTensor>()
 
 ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const InputParameters & parameters) :
     ComputeElasticityTensorBase(parameters),
-    _C_unrotated(getParam<std::vector<Real> >("Elastic_constants"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
+    _C_unrotated(getParam<std::vector<Real> >("Elastic_constants"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")), // TODO: rename to lower case "elastic_constants"
     _length_scale(getParam<Real>("length_scale")),
     _pressure_scale(getParam<Real>("pressure_scale")),
-    _Euler_angles_file_name(getParam<FileName>("Euler_angles_file_name")),
-    _grain_tracker(getUserObject<GrainTracker>("GrainTracker_object")),
+    _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
+    _grain_tracker(getUserObject<GrainTracker>("GrainTracker_object")), // TODO: Rename to lower case "grain_tracker"
     _grain_num(getParam<unsigned int>("grain_num")),
+    _nop(coupledComponents("v")),
     _stiffness_buffer(getParam<unsigned int>("stiffness_buffer")),
-    _JtoeV(6.24150974e18), // Joule to eV conversion
-    _nop(coupledComponents("v"))
+    _vals(_nop),
+    _D_elastic_tensor(_nop),
+    _C_rotated(_grain_num + _stiffness_buffer),
+    _JtoeV(6.24150974e18) // Joule to eV conversion
 {
-  // Initialize values for crystals
-  _vals.resize(_nop);
-  _D_elastic_tensor.resize(_nop);
-  _C_rotated.resize(_grain_num + _stiffness_buffer);
-
-  // Read in Euler angles from "angle_file_name"
-  std::ifstream inFile(_Euler_angles_file_name.c_str());
-
-  if (!inFile)
-    mooseError("Can't open " + _Euler_angles_file_name);
-
-  for (unsigned int i = 0; i < 4; ++i)
-    inFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // ignore line
-
-  Real weight;
+  // Read in Euler angles from the Euler angle provider
+  if (_euler.getGrainNum() < _grain_num)
+    mooseError("Euler angle provider has too few angles.");
 
   // Loop over grains
   for (unsigned int grn = 0; grn < _grain_num; ++grn)
   {
-    // Read in Euler angles
-    RealVectorValue Euler_Angles;
-    for (unsigned int j=0; j<3; ++j)
-      inFile >> Euler_Angles(j);
-
-    // Read in weight
-    inFile >> weight;
-
     // Rotate one elasticity tensor for each grain
-    RotationTensor R(Euler_Angles);
+    RotationTensor R(_euler.getEulerAngles(grn));
     _C_rotated[grn] = _C_unrotated;
     _C_rotated[grn].rotate(R);
 
@@ -76,9 +60,6 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const Inp
       _C_rotated[grn + _grain_num].rotate(R);
     }
   }
-
-  // Close Euler angle file
-  inFile.close();
 
   // Loop over variables (ops)
   for (unsigned int op = 0; op < _nop; ++op)
@@ -110,7 +91,7 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
 
   unsigned int n_active_ops= active_ops.size();
 
-  if (n_active_ops < 1 && _t_step > 0 )
+  if (n_active_ops < 1 && _t_step > 0)
     mooseError("No active order parameters");
 
   // Calculate elasticity tensor
@@ -168,39 +149,27 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const std
     _C_unrotated(getParam<std::vector<Real> >("Elastic_constants"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
     _length_scale(getParam<Real>("length_scale")),
     _pressure_scale(getParam<Real>("pressure_scale")),
-    _Euler_angles_file_name(getParam<FileName>("Euler_angles_file_name")),
+    _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
     _grain_tracker(getUserObject<GrainTracker>("GrainTracker_object")),
     _grain_num(getParam<unsigned int>("grain_num")),
+    _nop(coupledComponents("v")),
     _stiffness_buffer(getParam<unsigned int>("stiffness_buffer")),
-    _JtoeV(6.24150974e18), // Joule to eV conversion
-    _nop(coupledComponents("v"))
+    _JtoeV(6.24150974e18) // Joule to eV conversion
 {
   // Initialize values for crystals
   _vals.resize(_nop);
   _D_elastic_tensor.resize(_nop);
   _C_rotated.resize(_grain_num + _stiffness_buffer);
 
-  // Read in Euler angles from "angle_file_name"
-  std::ifstream inFile(_Euler_angles_file_name.c_str());
-
-  if (!inFile)
-    mooseError("Can't open " + _Euler_angles_file_name);
-
-  for (unsigned int i = 0; i < 4; ++i)
-    inFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // ignore line
-
-  Real weight;
+  // Read in Euler angles from the Euler angle provider
+  if (_euler.getGrainNum() < _grain_num)
+    mooseError("Euler angle provider has too few angles.");
 
   // Loop over grains
   for (unsigned int grn = 0; grn < _grain_num; ++grn)
   {
     // Read in Euler angles
-    RealVectorValue Euler_Angles;
-    for (unsigned int j=0; j<3; ++j)
-      inFile >> Euler_Angles(j);
-
-    // Read in weight
-    inFile >> weight;
+    RealVectorValue Euler_Angles = _euler.getEulerAngles(grn);
 
     // Rotate one elasticity tensor for each grain
     RotationTensor R(Euler_Angles);
@@ -213,9 +182,6 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const std
       _C_rotated[grn + _grain_num].rotate(R);
     }
   }
-
-  // Close Euler angle file
-  inFile.close();
 
   // Loop over variables (ops)
   for (unsigned int op = 0; op < _nop; ++op)
