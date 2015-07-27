@@ -1,0 +1,58 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "SetupTimeIntegratorAction.h"
+#include "Transient.h"
+#include "Factory.h"
+#include "TimeStepper.h"
+
+template<>
+InputParameters validParams<SetupTimeIntegratorAction>()
+{
+  InputParameters params = validParams<MooseObjectAction>();
+
+  return params;
+}
+
+SetupTimeIntegratorAction::SetupTimeIntegratorAction(InputParameters parameters) :
+    MooseObjectAction(parameters)
+{
+}
+
+SetupTimeIntegratorAction::~SetupTimeIntegratorAction()
+{
+}
+
+void
+SetupTimeIntegratorAction::act()
+{
+/*  if (_problem->isTransient())
+  {
+    Transient * transient = dynamic_cast<Transient *>(_executioner.get());
+    if (transient == NULL)
+      mooseError("You can setup time stepper only with executioners of transient type.");
+
+    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
+    _moose_object_pars.set<Transient *>("_executioner") = transient;
+    MooseSharedPointer<TimeStepper> ts = MooseSharedNamespace::static_pointer_cast<TimeStepper>(_factory.create(_type, "TimeStepper", _moose_object_pars));
+    transient->setTimeStepper(ts);
+  }*/
+}
+
+
+// DEPRECATED CONSTRUCTOR
+SetupTimeIntegratorAction::SetupTimeIntegratorAction(const std::string & deprecated_name, InputParameters parameters) :
+    MooseObjectAction(deprecated_name, parameters)
+{
+}

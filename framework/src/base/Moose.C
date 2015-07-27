@@ -363,6 +363,7 @@
 #include "AddTransferAction.h"
 #include "AddNodalNormalsAction.h"
 #include "SetupTimeStepperAction.h"
+#include "SetupTimeIntegratorAction.h"
 #include "SetupPredictorAction.h"
 #include "AddMortarInterfaceAction.h"
 #include "SetupPostprocessorDataAction.h"
@@ -965,6 +966,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddFunctionAction, "add_function");
   registerAction(CreateExecutionerAction, "setup_executioner");
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
+  registerAction(SetupTimeIntegratorAction, "setup_time_integrator");
   registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(DetermineSystemType, "determine_system_type");
