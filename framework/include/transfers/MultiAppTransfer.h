@@ -102,7 +102,6 @@ protected:
    */
   NumericVector<Real> & getTransferVector(unsigned int i_local, std::string var_name);
 
-private:
   // Given local app index, returns global app index.
   std::vector<unsigned int> _local2global_map;
 };

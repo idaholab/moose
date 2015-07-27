@@ -1,15 +1,8 @@
 [Mesh]
-  # The MultiAppMeshFunctionTransfer doesn't work with ParallelMesh.
-  # To start debugging this issue, you can add 'error_on_miss = true'
-  # to the 'to_sub' and 'elemental_to_sub' blocks below, and you should
-  # get an error message like:
-  # Point not found! (x,y,z)=(    0.62,      0.6,        0)
-  # 2145.
   type = GeneratedMesh
   dim = 2
   nx = 10
   ny = 10
-  distribution = serial
 []
 
 [Variables]
