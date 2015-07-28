@@ -22,7 +22,7 @@ double lamda2D(double poissons_ratio)
 	double lamda = 0.0;
 	e2 = -poissons_ratio*e1;
 	for(m = -3;m<4;m++)
-	{	
+	{
 		for(n = 1;n<4;n++)
 		{
 			dx = m;
@@ -40,6 +40,18 @@ double lamda2D(double poissons_ratio)
 	return lamda;
 }
 
+double AvgArea2D(double MeshSpacing,double ThicknessPerLayer)
+{
+	double Quarter = 0.0;
+	Quarter += exp(-3.0/3.0)*3.0*1.0;
+	Quarter += exp(-2.0/3.0)*2.0*1.0;
+	Quarter += exp(-1.0/3.0)*1.0*1.0;
+	Quarter += exp(-sqrt(5.0)/3.0)*sqrt(5.0)*2.0;
+	Quarter += exp(-sqrt(8.0)/3.0)*sqrt(8.0)*1.0;
+	Quarter += exp(-sqrt(2.0)/3.0)*sqrt(2.0)*1.0;
+	return MeshSpacing * ThicknessPerLayer / Quarter;
+}
+
 template<>
 InputParameters validParams<PeridynamicBond>()
 {
@@ -52,9 +64,10 @@ InputParameters validParams<PeridynamicBond>()
   params.addParam<Real>("MeshSpacing", "MeshSpacing");
   params.addParam<Real>("ThicknessPerLayer", 1.0, "ThicknessPerLayer");
   params.addParam<Real>("CriticalStretch", 1.0, "CriticalStretch");
-  params.addCoupledVar("youngs_modulus_var","Variable containing Young's modulus");
-  params.addParam<Real>("t_ref", 0.0, "The reference temperature at which this material has zero strain.");
+	params.addParam<Real>("reference_temp", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
+	params.addParam<Real>("thermal_conductivity", 0.0, "The thermal conductivity");
+  params.addCoupledVar("youngs_modulus_var","Variable containing Young's modulus");
   params.addCoupledVar("temp", "The temperature if you want thermal expansion.");
   return params;
 }
@@ -66,6 +79,8 @@ PeridynamicBond::PeridynamicBond(const std::string  & name,
    _stiff_elem(declareProperty<Real>("stiff_elem")),
    _bond_status(declareProperty<Real>("bond_status")),
    _bond_status_old(declarePropertyOld<Real>("bond_status")),
+	 _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
+	 _bond_volume(declareProperty<Real>("bond_volume")),
    _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0),
    _poissons_ratio(isParamValid("poissons_ratio") ? getParam<Real>("poissons_ratio") : 0),
    _MeshSpacing(isParamValid("MeshSpacing") ? getParam<Real>("MeshSpacing") : 0),
@@ -75,8 +90,9 @@ PeridynamicBond::PeridynamicBond(const std::string  & name,
    _youngs_modulus_var(_youngs_modulus_coupled ? coupledValue("youngs_modulus_var"): _zero),
    _has_temp(isCoupled("temp")),
    _temp(_has_temp ? coupledValue("temp") : _zero),
-   _t_ref(getParam<Real>("t_ref")),
-   _alpha(getParam<Real>("thermal_expansion")),
+   _t_ref(isParamValid("reference_temp") ? getParam<Real>("reference_temp") : 0),
+   _alpha(isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0),
+	 _my_thermal_conductivity(isParamValid("thermal_conductivity") ? getParam<Real>("thermal_conductivity") : 0),
    _dim(1)
 {
 // This doesn't work: if there are just line elements, this
@@ -120,11 +136,12 @@ PeridynamicBond::PeridynamicBond(const std::string  & name,
     }
   }
   /***********************************************************************************************/
-  /* Peridynamic Code */                                                                           
+  /* Peridynamic Code */
   /***********************************************************************************************/
   _MaterialRegion = 3.0 * _MeshSpacing;
   _VolumePerNode = _MeshSpacing * _MeshSpacing * _ThicknessPerLayer;
   _lamda = lamda2D(_poissons_ratio);
+	_AvgArea = AvgArea2D(_MeshSpacing,_ThicknessPerLayer);
   cout << "123456" << endl;
   _callnum = 0;
   /***********************************************************************************************/
@@ -145,7 +162,7 @@ PeridynamicBond::initQpStatefulProperties()
 void
 PeridynamicBond::computeProperties()
 {
-  
+
   const Node* const node0=_current_elem->get_node(0);
   const Node* const node1=_current_elem->get_node(1);
 
@@ -194,7 +211,7 @@ PeridynamicBond::computeProperties()
   }
   Real new_length = std::sqrt( ddx*ddx + ddy*ddy + ddz*ddz );
   Real strain = (new_length-orig_length)/orig_length;
-   
+
   if (std::abs(strain) > _CriticalStretch)
   {
   	for (_qp=0; _qp < _qrule->n_points(); ++_qp)
@@ -202,7 +219,7 @@ PeridynamicBond::computeProperties()
   		_bond_status[_qp] = 0.0;
   	}
   }
-  	
+
   Real thermal_strain = 0.0;
 
   for (_qp=0; _qp < _qrule->n_points(); ++_qp)
@@ -211,6 +228,9 @@ PeridynamicBond::computeProperties()
     if (_has_temp)
     {
       thermal_strain = _alpha * (_t_ref - _temp[_qp]);
+			//_thermal_conductivity[_qp] = _my_thermal_conductivity;
+			_thermal_conductivity[_qp] = _my_thermal_conductivity * exp(-orig_length / _MaterialRegion) * _AvgArea;
+			_bond_volume[_qp] = exp(-orig_length / _MaterialRegion) * _AvgArea * orig_length;
     }
     _axial_force[_qp] = youngs_modulus * (strain+thermal_strain) * exp(-orig_length / _MaterialRegion) * _VolumePerNode / _MeshSpacing / _lamda;
     _stiff_elem[_qp] = (youngs_modulus * exp(-orig_length / _MaterialRegion) / _MeshSpacing / _VolumePerNode / _lamda) * _VolumePerNode * _VolumePerNode / new_length;

@@ -40,25 +40,29 @@ protected:
   MaterialProperty<Real> & _stiff_elem;
   MaterialProperty<Real> & _bond_status;
   MaterialProperty<Real> & _bond_status_old;
-  
-  Real _youngs_modulus;
-  Real _poissons_ratio;
-  Real _MeshSpacing;
+  MaterialProperty<Real> & _thermal_conductivity;
+  MaterialProperty<Real> & _bond_volume;
+
+  const Real _youngs_modulus;
+  const Real _poissons_ratio;
+  const Real _MeshSpacing;
+  const Real _ThicknessPerLayer;
+  const Real _CriticalStretch;
   Real _MaterialRegion;
-  Real _ThicknessPerLayer;
   Real _VolumePerNode;
   Real _lamda;
-  Real _CriticalStretch;
-  
+
   int _callnum;
-  
+
   bool _youngs_modulus_coupled;
   VariableValue & _youngs_modulus_var;
 
   bool _has_temp;
   VariableValue & _temp;
-  Real _t_ref;
-  Real _alpha;
+  const Real _t_ref;
+  const Real _alpha;
+  const Real _my_thermal_conductivity;
+  Real _AvgArea;
 
   unsigned int _dim;
 };

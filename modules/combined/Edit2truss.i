@@ -26,21 +26,17 @@
 []
 
 [AuxVariables]
-  [./axial_force]
+  [./axial_stress]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stiff_elem]
+  [./e_over_l]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./bond_status]
+  [./area]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./failure_index]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./react_x]
     order = FIRST
@@ -126,29 +122,30 @@
 []
 
 [AuxKernels]
-  [./axial_force]
+  [./axial_stress]
     type = MaterialRealAux
     block = 0
-    property = axial_force
-    variable = axial_force
+    property = axial_stress
+    variable = axial_stress
   [../]
-  [./stiff_elem]
+  [./e_over_l]
     type = MaterialRealAux
     block = 0
-    property = stiff_elem
-    variable = stiff_elem
+    property = e_over_l
+    variable = e_over_l
   [../]
-  [./bond_status]
-    type = MaterialRealAux
+  [./area1]
+    type = ConstantAux
     block = 0
-    property = bond_status
-    variable = bond_status
+    variable = area
+    value = 1.0
+    execute_on = 'initial timestep_begin'
   [../]
 []
 
 [Executioner]
   type = Transient
-  dt = 0.001
+  dt = 0.1
   solve_type = PJFNK #NEWTON
   nl_max_its = 100
   nl_rel_tol = 1e-6
@@ -171,33 +168,36 @@
 
 [Kernels]
   [./solid_x]
-    type = StressDivergenceTrussPD
+    type = StressDivergenceTruss
     block = 0
     variable = disp_x
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
     component = 0
+    area = area
     save_in = react_x
   [../]
   [./solid_y]
-    type = StressDivergenceTrussPD
+    type = StressDivergenceTruss
     block = 0
     variable = disp_y
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
     component = 1
+    area = area
     save_in = react_y
   [../]
   [./solid_z]
-    type = StressDivergenceTrussPD
+    type = StressDivergenceTruss
     block = 0
     variable = disp_z
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
     component = 2
+    area = area
     save_in = react_z
   [../]
 []
@@ -213,18 +213,15 @@
     poissons_ratio = 0.33
   [../]
   [./linelast]
-    type = PeridynamicBond
+    type = TrussMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    youngs_modulus = 70000
-    poissons_ratio = 0.33
-    MeshSpacing = 1.0                # MeshSpacing = (xmax - xmin) / nx
-    ThicknessPerLayer = 1.0          # For 2D case, ThicknessPerLayer needs a value; For 3D case, ThicknessPerLayer = MeshSpacing
-    CriticalStretch = 0.001
-#    t_ref = 0.0
-#    thermal_expansion = 0.000001
+    youngs_modulus = 1e6
+#    thermal_expansion = 0.1
+#    t_ref = 0.5
+#    temp = temp
   [../]
 []
 

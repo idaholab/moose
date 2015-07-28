@@ -27,6 +27,7 @@
 #include "ThermalContactDiracKernelsAction.h"
 #include "ThermalContactMaterialsAction.h"
 #include "HeatSource.h"
+#include "HeatSourcePD.h"
 #include "ThermalCond.h"
 #include "CoupledConvectiveFlux.h"
 
@@ -70,6 +71,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerKernel(AnisoHeatConduction);
   registerKernel(HeatConductionTimeDerivative);
   registerKernel(HeatSource);
+  registerKernel(HeatSourcePD);
   registerBoundaryCondition(HeatConductionBC);
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);

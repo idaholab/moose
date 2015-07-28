@@ -23,6 +23,8 @@
     order = FIRST
     family = LAGRANGE
   [../]
+  [./temp]
+  [../]
 []
 
 [AuxVariables]
@@ -57,15 +59,34 @@
 []
 
 [Functions]
-  [./bc_func]
+  [./bc_func1]
     type = ParsedFunction
     value = t*d
     vars = 'd'
     vals = '1'
   [../]
+  [./bc_func2]
+    type = ParsedFunction
+    value = t*T
+    vars = 'T'
+    vals = '100'
+  [../]
 []
 
 [BCs]
+
+  [./inlet_temperature]
+    type = DirichletBC
+    variable = temp
+    boundary = 0
+    value = 0
+  [../]
+#  [./outlet_temperature]
+#    type = FunctionPresetBC
+#    variable = temp
+#    boundary = 1
+#    function = bc_func2
+#  [../]
   [./fixx0]
     type = DirichletBC
     variable = disp_x
@@ -84,24 +105,24 @@
     boundary = 0
     value = 0.0
   [../]
-  [./fixx1]
-    type = DirichletBC
-    variable = disp_x
-    boundary = 1
-    value = 0.0
-  [../]
-  [./fixy1]
-    type = FunctionPresetBC
-    variable = disp_y
-    boundary = 1
-    function = bc_func
-  [../]
-  [./fixz1]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 1
-    value = 0.0
-  [../]
+#  [./fixx1]
+#    type = DirichletBC
+#    variable = disp_x
+#    boundary = 1
+#    value = 0.0
+#  [../]
+#  [./fixy1]
+#    type = FunctionPresetBC
+#    variable = disp_y
+#    boundary = 1
+#    function = bc_func1
+#  [../]
+#  [./fixz1]
+#    type = DirichletBC
+#    variable = disp_z
+#    boundary = 1
+#    value = 0.0
+#  [../]
 
   [./fixDummyHex_x]
     type = DirichletBC
@@ -109,17 +130,21 @@
     boundary = 100
     value = 0.0
   [../]
-
   [./fixDummyHex_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
   [../]
-
   [./fixDummyHex_z]
     type = DirichletBC
     variable = disp_z
+    boundary = 100
+    value = 0.0
+  [../]
+  [./fixDummyHex_temp]
+    type = DirichletBC
+    variable = temp
     boundary = 100
     value = 0.0
   [../]
@@ -148,10 +173,10 @@
 
 [Executioner]
   type = Transient
-  dt = 0.001
-  solve_type = PJFNK #NEWTON
-  nl_max_its = 100
-  nl_rel_tol = 1e-6
+  dt = 1.0
+  solve_type = NEWTON #PJFNK
+  nl_max_its = 500
+  nl_rel_tol = 1e-4
   nl_abs_tol = 1e-6
   end_time = 1
   line_search = basic
@@ -177,6 +202,7 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
+    temp = temp
     component = 0
     save_in = react_x
   [../]
@@ -187,6 +213,7 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
+    temp = temp
     component = 1
     save_in = react_y
   [../]
@@ -197,8 +224,25 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
+    temp = temp
     component = 2
     save_in = react_z
+  [../]
+#  [./diff]
+#    type = Diffusion
+#    variable = temp
+#    coef = 0.1
+#  [../]
+  [./heatconduction]
+    type = HeatConduction
+    block = 0
+    variable = temp
+  [../]
+  [./heatsource]
+    type = HeatSourcePD
+    block = 0
+    variable = temp
+    PowerDensity = 100.0;
   [../]
 []
 
@@ -218,13 +262,15 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
+    temp = temp
     youngs_modulus = 70000
     poissons_ratio = 0.33
     MeshSpacing = 1.0                # MeshSpacing = (xmax - xmin) / nx
     ThicknessPerLayer = 1.0          # For 2D case, ThicknessPerLayer needs a value; For 3D case, ThicknessPerLayer = MeshSpacing
     CriticalStretch = 0.001
-#    t_ref = 0.0
-#    thermal_expansion = 0.000001
+    reference_temp = 0.0
+    thermal_expansion = 0.000001
+    thermal_conductivity = 100.0
   [../]
 []
 
