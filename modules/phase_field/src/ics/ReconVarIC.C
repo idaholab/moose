@@ -9,7 +9,7 @@ InputParameters validParams<ReconVarIC>()
   params.addParam<unsigned int>("phase", 0, "EBSD phase number to be assigned to this grain");
   params.addParam<bool>("all_to_one", false, "If true, assign all grain numbers in this phase to the same variable");
   params.addParam<unsigned int>("op_num", 0, "Specifies the number of order paraameters to create, all_to_one = false");
-  params.addParam<unsigned int>("op_index", 0,"The index for the current order parameter, if all_to_one = false");
+  params.addParam<unsigned int>("op_index", 0, "The index for the current order parameter, if all_to_one = false");
   return params;
 }
 
@@ -26,15 +26,19 @@ ReconVarIC::ReconVarIC(const InputParameters & parameters) :
 {
   if (!_consider_phase && _all_to_one)
     mooseError("In ReconVarIC, if you are not considering phase, you can't assign all grains to one variable");
+
+  if (_consider_phase)
+    mooseError("In ReconvarIC, setting ics from phase informtation is not currently supported");
 }
 
 void
 ReconVarIC::initialSetup()
 {
-  //Get the number of grains from the EBSD data, reduce by one if consider phase because grain numbering starts at one in phase 1
-  _grain_num = _ebsd_reader.getGrainNum();
+  //Get the number of grains from the EBSD data, for the specified phase
   if (_consider_phase)
-    _grain_num -= 1;
+    _grain_num = _ebsd_reader.getGrainNum(_phase);
+  else
+    _grain_num = _ebsd_reader.getGrainNum();
 
   if (!_all_to_one)
   {
@@ -59,7 +63,7 @@ ReconVarIC::initialSetup()
     // Assign grains to each order parameter in a way that maximizes distance
     _assigned_op.resize(_grain_num);
 
-    _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
+    _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints, _op_num, _mesh, _var);
   }
 }
 
@@ -77,16 +81,28 @@ ReconVarIC::value(const Point & /*p*/)
 
   // Make sure the _current_node is in the node_to_grn_weight_map (return error if not in map)
   std::map<dof_id_type, std::vector<Real> >::const_iterator it = node_to_grn_weight_map.find(_current_node->id());
+
   if (it == node_to_grn_weight_map.end())
     mooseError("The following node id is not in the node map: " << _current_node->id());
+
+  //Get local information from EBSDReader object
+  EBSDReader::EBSDPointData local_ebsd_data; // = _ebsd_reader.getData(p);
+
+  /*TODO: NEEDED FUNCTIONALITY THAT IS NOT CURRENTLY POSSIBLE
+  //Output all grains in a specific phase to the same variable
+  if (_all_to_one && _phase == local_ebsd_data.phase)
+    return 1.0;
+    */
 
   // Increment through all grains at node_index
   for (unsigned int grn = 0; grn < _grain_num; ++grn)
   {
     // If the current order parameter index (_op_index) is equal to the assinged index (_assigned_op),
     // set the value from node_to_grn_weight_map
-    if (_assigned_op[grn] == _op_index && (it->second)[grn] > 0.0)
-      return (it->second)[grn];
+    if (!_consider_phase)
+      if (_assigned_op[grn] == _op_index && (it->second)[grn] > 0.0)
+        return (it->second)[grn];
+    //TODO: Make this work when considering phase
   }
 
   return 0.0;
