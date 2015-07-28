@@ -54,7 +54,12 @@ FlowRateModel::computeFlowRate(Real & flow_rate, const RankTwoTensor & pk2, cons
 }
 
 bool
-FlowRateModel::computeDflowrateDstress(RankTwoTensor & dflowrate_dstress, const RankTwoTensor & pk2, const RankTwoTensor & ce, const std::vector<Real> & internal_var, const unsigned int start_index, const unsigned int size) const
+FlowRateModel::computeDflowrateDstress(RankTwoTensor & dflowrate_dstress,
+                                       const RankTwoTensor & pk2,
+                                       const RankTwoTensor & ce,
+                                       const std::vector<Real> & internal_var,
+                                       const unsigned int start_index,
+                                       const unsigned int /*size*/) const
 {
   RankTwoTensor pk2_dev = computePK2Deviatoric(pk2, ce);
   Real eqv_stress = computeEqvStress(pk2_dev, ce);
@@ -126,7 +131,12 @@ FlowRateModel::updateInternalVar(std::vector<Real> & q, std::vector<Real> & dq_d
 
 
 bool
-FlowRateModel::computeFlowDirection(RankTwoTensor & flow_dirn, const RankTwoTensor & pk2, const RankTwoTensor & ce, const std::vector<Real> & internal_var, const unsigned int start_index, const unsigned int size) const
+FlowRateModel::computeFlowDirection(RankTwoTensor & flow_dirn,
+                                    const RankTwoTensor & pk2,
+                                    const RankTwoTensor & ce,
+                                    const std::vector<Real> & /*internal_var*/,
+                                    const unsigned int /*start_index*/,
+                                    const unsigned int /*size*/) const
 {
   RankTwoTensor pk2_dev = computePK2Deviatoric(pk2, ce);
   Real eqv_stress = computeEqvStress(pk2_dev, ce);

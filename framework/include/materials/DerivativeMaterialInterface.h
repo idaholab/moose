@@ -152,7 +152,7 @@ DerivativeMaterialInterface<Material>::getZeroMaterialProperty(const std::string
 template<class T>
 template<typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getZeroMaterialProperty(const std::string & prop_name)
+DerivativeMaterialInterface<T>::getZeroMaterialProperty(const std::string & /*prop_name*/)
 {
   static MaterialProperty<U> _zero;
 
