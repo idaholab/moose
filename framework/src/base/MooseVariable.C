@@ -1333,7 +1333,6 @@ MooseVariable::computeNeighborValues()
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
-  const Real & du_dot_du                       = _sys.duDotDu();
 
   dof_id_type idx;
   Real soln_local;
