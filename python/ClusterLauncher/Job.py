@@ -1,4 +1,4 @@
-from InputParameters import InputParameters
+from FactorySystem import InputParameters
 import os, sys, shutil
 
 # Get the real path of cluster_launcher
