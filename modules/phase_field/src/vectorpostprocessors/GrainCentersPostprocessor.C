@@ -24,9 +24,9 @@ InputParameters validParams<GrainCentersPostprocessor>()
   return params;
 }
 
-GrainCentersPostprocessor::GrainCentersPostprocessor(const std::string & name, InputParameters parameters) :
-    GeneralVectorPostprocessor(name, parameters),
-    _grain_volume_center_vector(declareVector(name)),
+GrainCentersPostprocessor::GrainCentersPostprocessor(const InputParameters & parameters) :
+    GeneralVectorPostprocessor(parameters),
+    _grain_volume_center_vector(declareVector("grain_volume_center_vector")),
     _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
     _grain_volumes(_grain_data.getGrainVolumes()),
     _grain_centers(_grain_data.getGrainCenters()),

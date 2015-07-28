@@ -17,7 +17,7 @@ InputParameters validParams<GrainAdvectionVelocity>();
 class GrainAdvectionVelocity : public Material
 {
 public:
-  GrainAdvectionVelocity(const std::string & name, InputParameters parameters);
+  GrainAdvectionVelocity(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

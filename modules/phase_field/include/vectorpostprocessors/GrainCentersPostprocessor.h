@@ -38,7 +38,7 @@ public:
     * @param name The name of the object
     * @param parameters The input parameters
     */
-  GrainCentersPostprocessor(const std::string & name, InputParameters parameters);
+  GrainCentersPostprocessor(const InputParameters & parameters);
 
   /**
    * Destructor

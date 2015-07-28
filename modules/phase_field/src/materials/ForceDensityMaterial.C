@@ -13,8 +13,8 @@ InputParameters validParams<ForceDensityMaterial>()
   return params;
 }
 
-ForceDensityMaterial::ForceDensityMaterial(const std::string & name, InputParameters parameters) :
-   Material(name,parameters),
+ForceDensityMaterial::ForceDensityMaterial(const InputParameters & parameters) :
+   Material(parameters),
    _c(coupledValue("c")),
    _ceq(getParam<Real>("ceq")),
    _cgb(getParam<Real>("cgb")),

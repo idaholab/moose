@@ -13,8 +13,8 @@ InputParameters validParams<GrainAdvectionVelocity>()
   return params;
 }
 
-GrainAdvectionVelocity::GrainAdvectionVelocity(const std::string & name, InputParameters parameters) :
-   Material(name,parameters),
+GrainAdvectionVelocity::GrainAdvectionVelocity(const InputParameters & parameters) :
+   Material(parameters),
    _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
    _grain_volumes(_grain_data.getGrainVolumes()),
    _grain_centers(_grain_data.getGrainCenters()),

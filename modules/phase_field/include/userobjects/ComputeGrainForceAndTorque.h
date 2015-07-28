@@ -30,7 +30,7 @@ InputParameters validParams<ComputeGrainForceAndTorque>();
 class ComputeGrainForceAndTorque :  public ElementUserObject
 {
 public:
-  ComputeGrainForceAndTorque(const std::string & name, InputParameters parameters);
+  ComputeGrainForceAndTorque(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

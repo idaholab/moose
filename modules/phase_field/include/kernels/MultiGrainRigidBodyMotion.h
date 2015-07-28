@@ -18,7 +18,7 @@ InputParameters validParams<MultiGrainRigidBodyMotion>();
 class MultiGrainRigidBodyMotion : public Kernel
 {
 public:
-  MultiGrainRigidBodyMotion(const std::string & name, InputParameters parameters);
+  MultiGrainRigidBodyMotion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

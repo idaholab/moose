@@ -24,8 +24,8 @@ InputParameters validParams<ComputeGrainForceAndTorque>()
   return params;
 }
 
-ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters),
+ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & parameters) :
+    ElementUserObject(parameters),
     _dF(getMaterialProperty<std::vector<RealGradient> >("force_density")),
     _dFdc(getMaterialProperty<std::vector<RealGradient> >("dFdc")),
     _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
@@ -59,7 +59,7 @@ ComputeGrainForceAndTorque::execute()
   RealGradient _compute_torque_derivative = 0.0;
 
   for (unsigned int i = 0; i < _ncrys; ++i)
-    for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    for (_qp=0; _qp<_qrule->n_points(); ++_qp)
     {
       _compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dF[_qp][i]);
       _force_torque_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](0);

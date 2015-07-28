@@ -23,8 +23,8 @@ InputParameters validParams<ComputeGrainCenterUserObject>()
   return params;
 }
 
-ComputeGrainCenterUserObject::ComputeGrainCenterUserObject(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters),
+ComputeGrainCenterUserObject::ComputeGrainCenterUserObject(const InputParameters & parameters) :
+    ElementUserObject(parameters),
     _ncrys(coupledComponents("etas")), //determine number of grains from the number of names passed in.  Note this is the actual number -1
     _vals(_ncrys), //Size variable arrays
     _ncomp(4*_ncrys),

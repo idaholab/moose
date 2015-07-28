@@ -29,7 +29,7 @@ InputParameters validParams<ComputeGrainCenterUserObject>();
 class ComputeGrainCenterUserObject : public ElementUserObject
 {
 public:
-  ComputeGrainCenterUserObject(const std::string & name, InputParameters parameters);
+  ComputeGrainCenterUserObject(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

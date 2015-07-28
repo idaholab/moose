@@ -24,9 +24,9 @@ InputParameters validParams<GrainForcesPostprocessor>()
   return params;
 }
 
-GrainForcesPostprocessor::GrainForcesPostprocessor(const std::string & name, InputParameters parameters) :
-    GeneralVectorPostprocessor(name, parameters),
-    _grain_force_torque_vector(declareVector(name)),
+GrainForcesPostprocessor::GrainForcesPostprocessor(const InputParameters & parameters) :
+    GeneralVectorPostprocessor(parameters),
+    _grain_force_torque_vector(declareVector("grain_force_torque_vector")),
     _grain_force_torque(getUserObject<ComputeGrainForceAndTorque>("grain_force")),
     _grain_forces(_grain_force_torque.getForceValues()),
     _grain_torques(_grain_force_torque.getTorqueValues()),

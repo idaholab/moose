@@ -18,9 +18,8 @@ InputParameters validParams<SingleGrainRigidBodyMotion>()
   return params;
 }
 
-SingleGrainRigidBodyMotion::SingleGrainRigidBodyMotion(const std::string & name,
-                             InputParameters parameters) :
-    Kernel(name, parameters),
+SingleGrainRigidBodyMotion::SingleGrainRigidBodyMotion(const InputParameters & parameters) :
+    Kernel(parameters),
     _c_var(coupled("c")),
     _c(coupledValue("c")),
     _grad_c(coupledGradient("c")),

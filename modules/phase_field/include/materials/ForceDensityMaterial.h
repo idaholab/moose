@@ -15,7 +15,7 @@ InputParameters validParams<ForceDensityMaterial>();
 class ForceDensityMaterial : public Material
 {
 public:
-  ForceDensityMaterial(const std::string & name, InputParameters parameters);
+  ForceDensityMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

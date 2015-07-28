@@ -17,9 +17,8 @@ InputParameters validParams<MultiGrainRigidBodyMotion>()
   return params;
 }
 
-MultiGrainRigidBodyMotion::MultiGrainRigidBodyMotion(const std::string & name,
-                             InputParameters parameters) :
-    Kernel(name, parameters),
+MultiGrainRigidBodyMotion::MultiGrainRigidBodyMotion(const InputParameters & parameters) :
+    Kernel(parameters),
     _c_var(coupled("c")),
     _c(coupledValue("c")),
     _grad_c(coupledGradient("c")),

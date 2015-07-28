@@ -18,7 +18,7 @@ InputParameters validParams<SingleGrainRigidBodyMotion>();
 class SingleGrainRigidBodyMotion : public Kernel
 {
 public:
-  SingleGrainRigidBodyMotion(const std::string & name, InputParameters parameters);
+  SingleGrainRigidBodyMotion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
