@@ -81,9 +81,10 @@ public:
   Real shearModulus() const;
 
 
-  virtual Real stiffness( const unsigned i, const unsigned j,
-                          const RealGradient & test,
-                          const RealGradient & phi );
+  virtual Real stiffness(const unsigned i,
+                         const unsigned j,
+                         const RealGradient & test,
+                         const RealGradient & phi) const;
 
   virtual void multiply( const SymmTensor & x, SymmTensor & b ) const;
 

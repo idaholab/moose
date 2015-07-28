@@ -46,7 +46,7 @@ ClosePackIC::computeCircleCenters()
   Real y_min = min(1) - 2*std::sqrt(3.0)*_radius + _radius;
   Real y_max = max(1) + 2*_radius;
 
-  Real z_min = min(2) - 2*std::sqrt(3.0)*_radius + _radius;
+  // Real z_min = min(2) - 2*std::sqrt(3.0)*_radius + _radius;
   Real z_max = 0;
 
   // Initialize the coordinates that will be used in looping
