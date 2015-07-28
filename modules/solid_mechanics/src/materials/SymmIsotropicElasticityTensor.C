@@ -139,9 +139,10 @@ SymmIsotropicElasticityTensor::setEntries( Real C11, Real C12, Real C44 )
 }
 
 Real
-SymmIsotropicElasticityTensor::stiffness( const unsigned int i, const unsigned int j,
-                                          const RealGradient & test,
-                                          const RealGradient & phi )
+SymmIsotropicElasticityTensor::stiffness(const unsigned int i,
+                                         const unsigned int j,
+                                         const RealGradient & test,
+                                         const RealGradient & phi) const
 {
   RealGradient b;
   if (0 == i && 0 == j)
