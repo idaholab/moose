@@ -4,27 +4,26 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef MULTIBARRIERFUNCTION_H
-#define MULTIBARRIERFUNCTION_H
+#ifndef CROSSTERMBARRIERFUNCTION_H
+#define CROSSTERMBARRIERFUNCTION_H
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class MultiBarrierFunctionMaterial;
+class CrossTermBarrierFunctionMaterial;
 
 template<>
-InputParameters validParams<MultiBarrierFunctionMaterial>();
+InputParameters validParams<CrossTermBarrierFunctionMaterial>();
 
 /**
- * MultiBarrierFunctionMaterial is a constraint kernel that acts on one of the eta_i variables to
- * enforce \f$ \sum_n h_i(\eta_i) \equiv 1 \f$.
+ * CrossTermBarrierFunctionMaterial is a constraint kernel that acts on one of the eta_i variables to
+ * enforce \f$ \sum_n g_i(\eta_i) \equiv 1 \f$.
  */
-class MultiBarrierFunctionMaterial : public DerivativeMaterialInterface<Material>
+class CrossTermBarrierFunctionMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
-  MultiBarrierFunctionMaterial(const InputParameters & parameters);
-  MultiBarrierFunctionMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
+  CrossTermBarrierFunctionMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();
@@ -35,6 +34,9 @@ protected:
   /// Polynomial order of the barrier function \f$ g(\eta) \f$
   MooseEnum _g_order;
 
+  ///barrier function height vector
+  std::vector<Real> _W_ij;
+
   /// order parameters
   unsigned int _num_eta;
   std::vector<VariableValue *> _eta;
@@ -44,4 +46,4 @@ protected:
   std::vector<MaterialProperty<Real> *> _prop_dg, _prop_d2g;
 };
 
-#endif //MULTIBARRIERFUNCTION_H
+#endif //CROSSTERMBARRIERFUNCTION_H
