@@ -30,10 +30,11 @@ EBSDReader::EBSDReader(const InputParameters & params) :
     _dy(0.),
     _dz(0.)
 {
+  readFile();
 }
 
 void
-EBSDReader::initialSetup()
+EBSDReader::readFile()
 {
   // No need to re-read data upon recovery
   if (_app.isRecovering())
@@ -315,4 +316,5 @@ EBSDReader::EBSDReader(const std::string & deprecated_name, InputParameters para
     _dy(0.),
     _dz(0.)
 {
+  readFile();
 }
