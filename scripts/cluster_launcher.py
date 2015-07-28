@@ -2,36 +2,22 @@
 import os, sys, re, shutil
 from optparse import OptionParser, OptionGroup, Values
 
-# Get the real path of cluster_launcher
-if(os.path.islink(sys.argv[0])):
-  pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
+# Determine the MOOSE Directory
+MOOSE_PYTHON_DIR = None
+if os.environ.has_key('MOOSE_DIR'):
+  MOOSE_PYTHON_DIR = os.path.join(os.environ['MOOSE_DIR'], 'python')
 else:
-  pathname = os.path.dirname(sys.argv[0])
-  pathname = os.path.abspath(pathname)
+  MOOSE_PYTHON_DIR = os.path.join(os.environ['HOME'], 'projects', 'moose', 'python')
 
-# Add the utilities/python_getpot directory
-MOOSE_DIR = os.path.abspath(os.path.join(pathname, '../../'))
-FRAMEWORK_DIR = os.path.abspath(os.path.join(pathname, '../../', 'framework'))
-#### See if MOOSE_DIR is already in the environment instead
-if os.environ.has_key("MOOSE_DIR"):
-  MOOSE_DIR = os.environ['MOOSE_DIR']
-  FRAMEWORK_DIR = os.path.join(MOOSE_DIR, 'framework')
-if os.environ.has_key("FRAMEWORK_DIR"):
-  FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
+# Add moose/python to path
+if os.path.exists(MOOSE_PYTHON_DIR):
+  sys.path.append(MOOSE_PYTHON_DIR)
+else:
+  raise Exception('Unable to locate moose/python directory, please set MOOSE_DIR environment variable')
 
 # Import the TestHarness and Helper functions from the MOOSE toolkit
-sys.path.append(os.path.join(MOOSE_DIR, 'python'))
-import path_tool
-path_tool.activate_module('TestHarness')
-path_tool.activate_module('FactorySystem')
-sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'ClusterLauncher'))
-from PBSJob import PBSJob
-
-sys.path.append(os.path.join(MOOSE_DIR, 'python', 'FactorySystem'))
-
-import ParseGetPot
-from InputParameters import InputParameters
-from Factory import Factory
+from FactorySystem import ParseGetPot, InputParameters, Factory
+from ClusterLauncher import PBSJob
 
 # Default file to read if only a directory is supplied
 job_list = 'job_list'
