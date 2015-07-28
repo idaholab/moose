@@ -36,6 +36,7 @@
 #include "ComputeIsotropicElasticityTensor.h"
 #include "ComputeSmallStrain.h"
 #include "ComputePlaneSmallStrain.h"
+#include "ComputePlaneFiniteStrain.h"
 #include "ComputeAxisymmetricRZSmallStrain.h"
 #include "ComputeIncrementalSmallStrain.h"
 #include "ComputeFiniteStrain.h"
@@ -150,6 +151,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeIsotropicElasticityTensor);
   registerMaterial(ComputeSmallStrain);
   registerMaterial(ComputePlaneSmallStrain);
+  registerMaterial(ComputePlaneFiniteStrain);
   registerMaterial(ComputeAxisymmetricRZSmallStrain);
   registerMaterial(ComputeIncrementalSmallStrain);
   registerMaterial(ComputeFiniteStrain);
