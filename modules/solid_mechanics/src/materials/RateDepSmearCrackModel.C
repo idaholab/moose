@@ -87,7 +87,7 @@ RateDepSmearCrackModel::computeStress(const Elem & /*current_elem*/,
   solve( );
 
   if ( !_input_rndm_scale_var )
-    Real _rndm_scale_var = elasticityTensor.valueAtIndex(0);
+    _rndm_scale_var = elasticityTensor.valueAtIndex(0);
 
   if ( _nconv || _err_tol )
   {
