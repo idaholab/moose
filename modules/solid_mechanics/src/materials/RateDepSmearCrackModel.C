@@ -71,7 +71,7 @@ RateDepSmearCrackModel::initStatefulProperties( unsigned int n_points )
 }
 
 void
-RateDepSmearCrackModel::computeStress(const Elem & current_elem,
+RateDepSmearCrackModel::computeStress(const Elem & /*current_elem*/,
                                       unsigned qp, const SymmElasticityTensor & elasticityTensor,
                                       const SymmTensor & stress_old, SymmTensor & strain_increment,
                                       SymmTensor & stress_new)
@@ -114,7 +114,7 @@ RateDepSmearCrackModel::initVariables( )
   _dstress0 = _elasticity * _dstrain;
   _stress0 = _stress_undamaged_old[_qp] + _dstress0;
 
-  for ( int i = 0; i < _nstate; i++ )
+  for (unsigned int i = 0; i < _nstate; ++i)
   {
     _intvar_tmp[i] = _intvar_old[_qp][i];
     _intvar_old_tmp[i] = _intvar_old[_qp][i];
@@ -194,7 +194,7 @@ RateDepSmearCrackModel::getConvergeVar()
 void
 RateDepSmearCrackModel::postSolveVariables( )
 {
-  for ( int i = 0; i < _nstate; i++ )
+  for (unsigned int i = 0; i < _nstate; ++i)
     _intvar[_qp][i] = _intvar_tmp[i];
 }
 
@@ -213,7 +213,7 @@ RateDepSmearCrackModel::calcResidual()
   if ( _err_tol )
     return;
 
-  for ( int i = 0; i < _nstate; i++ )
+  for (unsigned int i = 0; i < _nstate; ++i)
     _resid[i] = _intvar_tmp[i] - _intvar_old_tmp[i] - _intvar_incr[i];
 }
 

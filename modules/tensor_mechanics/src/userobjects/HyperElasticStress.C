@@ -35,7 +35,7 @@ HyperElasticStress::getNumStateOutRankTwoTensor() const
 }
 
 RankFourTensor
-HyperElasticStress::computeDstrainDce(const RankTwoTensor & ce) const
+HyperElasticStress::computeDstrainDce(const RankTwoTensor & /*ce*/) const
 {
   RankFourTensor val;
 
@@ -47,7 +47,13 @@ HyperElasticStress::computeDstrainDce(const RankTwoTensor & ce) const
 }
 
 void
-HyperElasticStress::computePK2Stress(RankTwoTensor & pk2, RankFourTensor &dpk2_dce, std::vector<Real> & out_state_real, std::vector<RankTwoTensor> & out_state_ranktwotensor,const RankTwoTensor & ce, const RankFourTensor & elasticity_tensor, const std::vector<Real> & in_state) const
+HyperElasticStress::computePK2Stress(RankTwoTensor & pk2,
+                                     RankFourTensor &dpk2_dce,
+                                     std::vector<Real> & /*out_state_real*/,
+                                     std::vector<RankTwoTensor> & /*out_state_ranktwotensor*/,
+                                     const RankTwoTensor & ce,
+                                     const RankFourTensor & elasticity_tensor,
+                                     const std::vector<Real> & /*in_state*/) const
 {
   RankTwoTensor ee = computeStrain(ce);
   pk2 = elasticity_tensor * ee;

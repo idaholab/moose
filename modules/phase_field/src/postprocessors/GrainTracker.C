@@ -782,8 +782,6 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
   for (std::set<dof_id_type>::const_iterator entity_it = grain_it1->second->entities_ptr->begin();
        entity_it != grain_it1->second->entities_ptr->end(); ++entity_it)
   {
-    Node *curr_node = NULL;
-
     if (_is_elemental)
     {
       Elem *elem = mesh.query_elem(*entity_it);
