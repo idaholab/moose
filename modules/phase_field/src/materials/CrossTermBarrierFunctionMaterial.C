@@ -55,19 +55,25 @@ CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const InputPa
 void
 CrossTermBarrierFunctionMaterial::computeQpProperties()
 {
+  // Initialize properties to zero before accumulating
+  _prop_g[_qp] = 0.;
+  for (unsigned int i = 0; i < _num_eta; ++i)
+  {
+    (*_prop_dg[i])[_qp] = 0.;
+    (*_prop_d2g[i])[_qp] = 0.;
+  }
 
   // Sum the components of our W_ij matrix to get constant used in our g function
   for (unsigned int i = 0; i < _num_eta; ++i)
     for (unsigned int j = 0; j < _num_eta; ++j)
     {
-
       switch (_g_order)
       {
         case 0: // SIMPLE
           _prop_g[_qp]         +=  _W_ij[_num_eta*i + j] * (*_eta[i])[_qp] * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp];
           (*_prop_dg[i])[_qp]  +=  2 * _W_ij[_num_eta*i + j] * 2 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp];
           (*_prop_d2g[i])[_qp] +=  2 * _W_ij[_num_eta*i + j] * 2 * (*_eta[j])[_qp] * (*_eta[j])[_qp];
-        break;
+          break;
       }
     }
 }
