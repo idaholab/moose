@@ -52,7 +52,7 @@ MultiBarrierFunctionMaterial::computeQpProperties()
       _prop_g[_qp] = 0.0;
       (*_prop_dg[i])[_qp] = 0.0;
       (*_prop_d2g[i])[_qp] = 0.0;
-      return;
+      continue;
     }
 
     switch (_g_order)
