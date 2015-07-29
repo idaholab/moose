@@ -44,7 +44,7 @@
   solve_type = NEWTON
   start_time = 0.0
   dtmin = 1.0
-  end_time = 14.0
+  end_time = 25.0
   [./TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 1
