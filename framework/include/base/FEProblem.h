@@ -792,6 +792,8 @@ public:
 
   void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
 
+  void setMaterialCoverageCheck(bool flag) { _material_coverage_check = flag; }
+
   bool & legacyUoAuxComputation() { return _use_legacy_uo_aux_computation; }
 
   bool & legacyUoInitialization() { return _use_legacy_uo_initialization; }
@@ -1015,6 +1017,9 @@ protected:
 
   /// Determines whether a check to verify an active kernel on every subdomain
   bool _kernel_coverage_check;
+
+  /// Determines whether a check to verify an active material on every subdomain
+  bool _material_coverage_check;
 
   /// Maximum number of quadrature points used in the problem
   unsigned int _max_qps;
