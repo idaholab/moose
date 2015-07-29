@@ -11,19 +11,11 @@
     exodiff = 'adapt_tstep_grow_init_dt_out.e'
   [../]
 
-  [./test_grow_init_dt_restart1]
-    type = 'RunApp'
-    input = 'adapt_tstep_grow_init_dt_restart1.i'
-  [../]
-
-  [./test_grow_init_dt_restart2]
+  [./test_grow_init_dt_restart]
     type = 'Exodiff'
-    input = 'adapt_tstep_grow_init_dt_restart2.i'
-    exodiff = 'adapt_tstep_grow_init_dt_restart2_out.e'
-    #exodiff_opts = -TM
-    exodiff_opts = '-steps last'
-
-    prereq = 'test_grow_init_dt test_grow_init_dt_restart1'
+    input = 'adapt_tstep_grow_init_dt_restart.i'
+    exodiff = 'adapt_tstep_grow_init_dt_restart_out.e'
+    prereq = 'test_grow_init_dt'
   [../]
 
   [./test_grow_dtfunc]
@@ -32,17 +24,11 @@
     exodiff = 'adapt_tstep_grow_dtfunc_out.e'
   [../]
 
-  [./test_grow_dtfunc_restart1]
-    type = 'RunApp'
-    input = 'adapt_tstep_grow_dtfunc_restart1.i'
-  [../]
-
-  [./test_grow_dtfunc_restart2]
+  [./test_grow_dtfunc_restart]
     type = 'Exodiff'
-    input = 'adapt_tstep_grow_dtfunc_restart2.i'
-    exodiff = 'adapt_tstep_grow_dtfunc_restart2_out.e'
-    exodiff_opts = -TM
-    prereq = 'test_grow_dtfunc test_grow_dtfunc_restart1'
+    input = 'adapt_tstep_grow_dtfunc_restart.i'
+    exodiff = 'adapt_tstep_grow_dtfunc_restart_out.e'
+    prereq = 'test_grow_dtfunc'
   [../]
 
   [./test_shrink_init_dt]
@@ -51,16 +37,10 @@
     exodiff = 'adapt_tstep_shrink_init_dt_out.e'
   [../]
 
-  [./test_shrink_init_dt_restart1]
-    type = 'RunApp'
-    input = 'adapt_tstep_shrink_init_dt_restart1.i'
-  [../]
-
-  [./test_shrink_init_dt_restart2]
+  [./test_shrink_init_dt_restart]
     type = 'Exodiff'
-    input = 'adapt_tstep_shrink_init_dt_restart2.i'
-    exodiff = 'adapt_tstep_shrink_init_dt_restart2_out.e'
-    exodiff_opts = -TM
-    prereq = 'test_shrink_init_dt test_shrink_init_dt_restart1'
+    input = 'adapt_tstep_shrink_init_dt_restart.i'
+    exodiff = 'adapt_tstep_shrink_init_dt_restart_out.e'
+    prereq = 'test_shrink_init_dt'
   [../]
 []

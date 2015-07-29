@@ -43,14 +43,15 @@
   type = Transient
   solve_type = NEWTON
   start_time = 0.0
-  end_time = 5.0
+  dtmin = 1.0
+  end_time = 25.0
   [./TimeStepper]
     type = IterationAdaptiveDT
-    dt = 1.0
-    optimal_iterations = 10
-    time_t = '0.0, 5.0'
-    time_dt = '1.0, 5.0'
+    optimal_iterations = 1
+    linear_iteration_ratio = 1
+    dt = 2.0
   [../]
+  restart_file_base = adapt_tstep_shrink_init_dt_out_cp/0005
 []
 
 [Postprocessors]
@@ -61,6 +62,5 @@
 
 [Outputs]
   exodus = true
-  checkpoint = true
+  print_linear_residuals = true
 []
-
