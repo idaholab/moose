@@ -51,8 +51,7 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  scheme = dirk
-  dirk_order = 3
+
 
   num_steps = 75
   dt = 1

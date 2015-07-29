@@ -465,4 +465,10 @@
     input_switch = '--check-input'
     expect_err = 'You specified --check-input, but did not provide an input file. Add -i <inputfile> to your command line.'
   [../]
+
+  [./multiple_time_int_check]
+    type = 'RunException'
+    input = time_integrator_error.i
+    expect_err = 'You cannot specify time_scheme in the Executioner and independently add a TimeIntegrator.'
+  [../]
 []

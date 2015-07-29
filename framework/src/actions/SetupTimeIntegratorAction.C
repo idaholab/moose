@@ -21,11 +21,10 @@ template<>
 InputParameters validParams<SetupTimeIntegratorAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-
   return params;
 }
 
-SetupTimeIntegratorAction::SetupTimeIntegratorAction(InputParameters parameters) :
+SetupTimeIntegratorAction::SetupTimeIntegratorAction(const InputParameters & parameters) :
     MooseObjectAction(parameters)
 {
 }
@@ -37,8 +36,8 @@ SetupTimeIntegratorAction::~SetupTimeIntegratorAction()
 void
 SetupTimeIntegratorAction::act()
 {
+  _problem->addTimeIntegrator(_type, _name, _moose_object_pars);
 }
-
 
 // DEPRECATED CONSTRUCTOR
 SetupTimeIntegratorAction::SetupTimeIntegratorAction(const std::string & deprecated_name, InputParameters parameters) :
