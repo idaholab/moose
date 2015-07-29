@@ -228,7 +228,9 @@ endif
 # compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
 	libmesh_CXXFLAGS += -fprofile-arcs -ftest-coverage
-	libmesh_LDFLAGS += -lgcov
+	ifeq (,$(findstring clang++,$(cxx_compiler)))
+		libmesh_LDFLAGS += -lgcov
+	endif
 endif
 
 # link with gcov support, but do now generate data for this build
