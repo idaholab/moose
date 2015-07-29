@@ -18,13 +18,14 @@
 #include "MooseTypes.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
+#include "MooseTypes.h" // for MooseSharedPointer
 
 // libMesh
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_tools.h"
-#include "libmesh/parallel_algebra.h"
+#include "libmesh/parallel_algebra.h" // for communicator send and recieve stuff
 
 template<>
 InputParameters validParams<MultiAppMeshFunctionTransfer>()
@@ -64,13 +65,13 @@ MultiAppMeshFunctionTransfer::execute()
 
   getAppInfo();
 
-  ////////////////////
-  // For every combination of global "from" problem and local "to" problem, find
-  // which "from" bounding boxes overlap with which "to" elements.  Keep track
-  // of which processors own bounding boxes that overlap with which elements.
-  // Build vectors of node locations/element centroids to send to other
-  // processors for mesh function evaluations.
-  ////////////////////
+  /**
+   * For every combination of global "from" problem and local "to" problem, find
+   * which "from" bounding boxes overlap with which "to" elements.  Keep track
+   * of which processors own bounding boxes that overlap with which elements.
+   * Build vectors of node locations/element centroids to send to other
+   * processors for mesh function evaluations.
+   */
 
   // Get the bounding boxes for the "from" domains.
   std::vector<MeshTools::BoundingBox> bboxes = getFromBoundingBoxes();
@@ -165,10 +166,10 @@ MultiAppMeshFunctionTransfer::execute()
     }
   }
 
-  ////////////////////
-  // Request point evaluations from other processors and handle requests sent to
-  // this processor.
-  ////////////////////
+  /**
+   * Request point evaluations from other processors and handle requests sent to
+   * this processor.
+   */
 
   // Get the local bounding boxes.
   std::vector<MeshTools::BoundingBox> local_bboxes(froms_per_proc[processor_id()]);
@@ -190,7 +191,7 @@ MultiAppMeshFunctionTransfer::execute()
   }
 
   // Setup the local mesh functions.
-  std::vector<MeshFunction *> local_meshfuns(_from_problems.size(), NULL);
+  std::vector<MooseSharedPointer<MeshFunction> > local_meshfuns;
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
     FEProblem & from_problem = *_from_problems[i_from];
@@ -198,17 +199,17 @@ MultiAppMeshFunctionTransfer::execute()
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-    MeshFunction * from_func;
+    MooseSharedPointer<MeshFunction> from_func;
     //TODO: make MultiAppTransfer give me the right es
     if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-      from_func = new MeshFunction(from_problem.getDisplacedProblem()->es(),
-           *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num);
+      from_func.reset(new MeshFunction(from_problem.getDisplacedProblem()->es(),
+           *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num));
     else
-      from_func = new MeshFunction(from_problem.es(),
-           *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num);
+      from_func.reset(new MeshFunction(from_problem.es(),
+           *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num));
     from_func->init(Trees::ELEMENTS);
     from_func->enable_out_of_mesh_mode(OutOfMeshValue);
-    local_meshfuns[i_from] = from_func;
+    local_meshfuns.push_back(from_func);
   }
 
   // Send points to other processors.
@@ -264,12 +265,13 @@ MultiAppMeshFunctionTransfer::execute()
     }
   }
 
-  ////////////////////
-  // Gather all of the evaluations, pick out the best ones for each point, and
-  // apply them to the solution vector.  When we are transferring from
-  // multiapps, there may be multiple overlapping apps for a particular point.
-  // In that case, we'll try to use the value from the app with the lowest id.
-  ////////////////////
+  /**
+   * Gather all of the evaluations, pick out the best ones for each point, and
+   * apply them to the solution vector.  When we are transferring from
+   * multiapps, there may be multiple overlapping apps for a particular point.
+   * In that case, we'll try to use the value from the app with the lowest id.
+   */
+
   for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {
     if (i_proc == processor_id())
@@ -315,7 +317,7 @@ MultiAppMeshFunctionTransfer::execute()
         if (node->n_dofs(sys_num, var_num) < 1)
           continue;
 
-        unsigned int lowest_app_rank = -1; // -1 = largest unsigned int
+        unsigned int lowest_app_rank = libMesh::invalid_uint;
         Real best_val = 0.;
         bool point_found = false;
         for (unsigned int i_proc = 0; i_proc < incoming_evals.size(); i_proc++)
@@ -342,7 +344,7 @@ MultiAppMeshFunctionTransfer::execute()
           point_found = true;
         }
 
-        if (_error_on_miss && ~ point_found)
+        if (_error_on_miss && ! point_found)
           mooseError("Point not found! " << *node + _to_positions[i_to]);
 
         dof_id_type dof = node->dof_number(sys_num, var_num, 0);
@@ -362,7 +364,7 @@ MultiAppMeshFunctionTransfer::execute()
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;
 
-        unsigned int lowest_app_rank = -1; // -1 = largest unsigned int
+        unsigned int lowest_app_rank = libMesh::invalid_uint;
         Real best_val = 0;
         bool point_found = false;
         for (unsigned int i_proc = 0; i_proc < incoming_evals.size(); i_proc++)
@@ -389,7 +391,7 @@ MultiAppMeshFunctionTransfer::execute()
           point_found = true;
         }
 
-        if (_error_on_miss && ~ point_found)
+        if (_error_on_miss && ! point_found)
           mooseError("Point not found! " << elem->centroid() + _to_positions[i_to]);
 
         dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
@@ -399,9 +401,6 @@ MultiAppMeshFunctionTransfer::execute()
     solution->close();
     to_sys->update();
   }
-
-  for (unsigned int i = 0; i < _from_problems.size(); i++)
-    delete local_meshfuns[i];
 
   _console << "Finished MeshFunctionTransfer " << name() << std::endl;
 }
