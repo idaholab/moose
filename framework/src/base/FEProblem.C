@@ -140,6 +140,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _const_jacobian(false),
     _has_jacobian(false),
     _kernel_coverage_check(false),
+    _material_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),
@@ -3705,29 +3706,32 @@ FEProblem::checkProblemIntegrity()
 
     std::set<SubdomainID> local_mesh_subs(mesh_subdomains);
 
-    /**
-     * If a material is specified for any block in the simulation, then all blocks must
-     * have a material specified.
-     */
-    bool check_material_coverage = false;
-    for (std::set<SubdomainID>::const_iterator i = _materials[0].blocks().begin(); i != _materials[0].blocks().end(); ++i)
+    if (_material_coverage_check)
     {
-      local_mesh_subs.erase(*i);
-      check_material_coverage = true;
-    }
-    // also exclude mortar spaces from the material check
-    std::vector<MooseMesh::MortarInterface *> & mortar_ifaces = _mesh.getMortarInterfaces();
-    for (std::vector<MooseMesh::MortarInterface *>::iterator it = mortar_ifaces.begin(); it != mortar_ifaces.end(); ++it)
-      local_mesh_subs.erase((*it)->_id);
+      /**
+       * If a material is specified for any block in the simulation, then all blocks must
+       * have a material specified.
+       */
+      bool check_material_coverage = false;
+      for (std::set<SubdomainID>::const_iterator i = _materials[0].blocks().begin(); i != _materials[0].blocks().end(); ++i)
+      {
+        local_mesh_subs.erase(*i);
+        check_material_coverage = true;
+      }
+      // also exclude mortar spaces from the material check
+      std::vector<MooseMesh::MortarInterface *> & mortar_ifaces = _mesh.getMortarInterfaces();
+      for (std::vector<MooseMesh::MortarInterface *>::iterator it = mortar_ifaces.begin(); it != mortar_ifaces.end(); ++it)
+        local_mesh_subs.erase((*it)->_id);
 
-    // Check Material Coverage
-    if (check_material_coverage && !local_mesh_subs.empty())
-    {
-      std::stringstream extra_subdomain_ids;
-      /// unsigned int is necessary to print SubdomainIDs in the statement below
-      std::copy (local_mesh_subs.begin(), local_mesh_subs.end(), std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
+      // Check Material Coverage
+      if (check_material_coverage && !local_mesh_subs.empty())
+      {
+        std::stringstream extra_subdomain_ids;
+        /// unsigned int is necessary to print SubdomainIDs in the statement below
+        std::copy (local_mesh_subs.begin(), local_mesh_subs.end(), std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
-      mooseError("The following blocks from your input mesh do not contain an active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
+        mooseError("The following blocks from your input mesh do not contain an active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
+      }
     }
 
     // Check material properties on blocks and boundaries
@@ -4061,6 +4065,7 @@ FEProblem::FEProblem(const std::string & deprecated_name, InputParameters parame
     _const_jacobian(false),
     _has_jacobian(false),
     _kernel_coverage_check(false),
+    _material_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),
