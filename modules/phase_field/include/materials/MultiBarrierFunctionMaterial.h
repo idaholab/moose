@@ -35,6 +35,9 @@ protected:
   /// Polynomial order of the barrier function \f$ g(\eta) \f$
   MooseEnum _g_order;
 
+  /// zero out g contribution in the eta interval [0:1]
+  bool _well_only;
+
   /// order parameters
   unsigned int _num_eta;
   std::vector<VariableValue *> _eta;

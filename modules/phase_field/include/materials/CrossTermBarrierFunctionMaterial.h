@@ -43,7 +43,10 @@ protected:
 
   /// Barrier functions and their drivatives
   MaterialProperty<Real> & _prop_g;
-  std::vector<MaterialProperty<Real> *> _prop_dg, _prop_d2g;
+  std::vector<MaterialProperty<Real> *> _prop_dg;
+
+  /// Material properties to store the second derivatives.
+  std::vector<std::vector<MaterialProperty<Real> *> > _prop_d2g;
 };
 
 #endif //CROSSTERMBARRIERFUNCTION_H
