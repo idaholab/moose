@@ -871,6 +871,8 @@ public:
 
   void setErrorOnJacobianNonzeroReallocation(bool state) { _error_on_jacobian_nonzero_reallocation = state; }
 
+  /// Returns whether or not this Problem has a TimeIntegrator
+  bool hasTimeIntegrator() const { return _has_time_integrator; }
 
 protected:
   MooseMesh & _mesh;
@@ -964,7 +966,6 @@ protected:
 
   void computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group);
 
-protected:
   void checkUserObjects();
 
   /// Verify that there are no element type/coordinate type conflicts
@@ -1021,6 +1022,9 @@ protected:
 
   /// Maximum scalar variable order
   Order _max_scalar_order;
+
+  /// Indicates whether or not this executioner has a time integrator (during setup)
+  bool _has_time_integrator;
 
   /// Whether or not an exception has occurred
   bool _has_exception;

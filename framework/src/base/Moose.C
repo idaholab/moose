@@ -363,6 +363,7 @@
 #include "AddTransferAction.h"
 #include "AddNodalNormalsAction.h"
 #include "SetupTimeStepperAction.h"
+#include "SetupTimeIntegratorAction.h"
 #include "SetupPredictorAction.h"
 #include "AddMortarInterfaceAction.h"
 #include "SetupPostprocessorDataAction.h"
@@ -788,6 +789,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_damper",                   Damper,                 false);
   registerMooseObjectTask("setup_predictor",              Predictor,              false);
   registerMooseObjectTask("setup_time_stepper",           TimeStepper,            false);
+  registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,         false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
   registerMooseObjectTask("add_split",                    Split,                  false);
@@ -878,6 +880,7 @@ addActionTypes(Syntax & syntax)
 "(setup_mesh_complete)"
 "(determine_system_type)"
 "(create_problem)"
+"(setup_time_integrator)"
 "(setup_executioner)"
 "(setup_time_stepper)"
 "(setup_predictor)"
@@ -962,6 +965,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddFunctionAction, "add_function");
   registerAction(CreateExecutionerAction, "setup_executioner");
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
+  registerAction(SetupTimeIntegratorAction, "setup_time_integrator");
   registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(DetermineSystemType, "determine_system_type");

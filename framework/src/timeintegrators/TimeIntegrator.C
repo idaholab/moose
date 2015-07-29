@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<TimeIntegrator>()
 {
   InputParameters params = validParams<MooseObject>();
-
+  params.registerBase("TimeIntegrator");
   return params;
 }
 
