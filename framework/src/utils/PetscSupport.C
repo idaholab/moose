@@ -285,6 +285,10 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
     *reason = KSP_CONVERGED_ITS;
     break;
 
+  case MOOSE_DIVERGED_NANORINF:
+    *reason = KSP_DIVERGED_NANORINF;
+    break;
+
   default:
   {
     // If it's not either of the two specific cases we handle, just go

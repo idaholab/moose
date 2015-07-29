@@ -147,7 +147,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _has_exception(false),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
-    _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
+    _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
+    _fail_next_linear_convergence_check(false)
 {
 
   _n++;
@@ -3145,6 +3146,9 @@ FEProblem::checkExceptionAndStopSolve()
     // We've handled this exception, so we no longer have one.
     _has_exception = false;
 
+    // Force the next linear convergence check to fail.
+    _fail_next_linear_convergence_check = true;
+
     // Repropagate the exception, so it can be caught at a higher level, typically
     // this is NonlinearSystem::computeResidual().
     throw MooseException(_exception_message);
@@ -4013,6 +4017,13 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
                                   const Real /*dtol*/,
                                   const PetscInt maxits)
 {
+  if (_fail_next_linear_convergence_check)
+  {
+    // Unset the flag
+    _fail_next_linear_convergence_check = false;
+    return MOOSE_DIVERGED_NANORINF;
+  }
+
   // We initialize the reason to something that basically means MOOSE
   // has not made a decision on convergence yet.
   MooseLinearConvergenceReason reason = MOOSE_LINEAR_ITERATING;
