@@ -81,7 +81,7 @@ CrossTermBarrierFunctionMaterial::computeQpProperties()
 
   // Sum the components of our W_ij matrix to get constant used in our g function
   for (unsigned int i = 0; i < _num_eta; ++i)
-    for (unsigned int j = 0; j < _num_eta; ++j)
+    for (unsigned int j = i; j < _num_eta; ++j)
     {
       switch (_g_order)
       {
