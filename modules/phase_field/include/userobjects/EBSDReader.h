@@ -91,6 +91,9 @@ protected:
   Point _top_right;
   Point _range;
 
+  /// number of additional custom data columns
+  unsigned int _custom_columns;
+
   /// Logically three-dimensional data indexed by geometric points in a 1D vector
   std::vector<EBSDPointData> _data;
 
