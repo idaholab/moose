@@ -20,27 +20,24 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParame
     FunctionMaterialBase(parameters),
     _third_derivatives(isParamValid("third_derivatives") ? getParam<bool>("third_derivatives") : (getParam<unsigned int>("derivative_order")==3))
 {
-  // loop counters
-  unsigned int i, j, k;
-
   // reserve space for material properties and explicitly initialize to NULL
   _prop_dF.resize(_nargs, NULL);
   _prop_d2F.resize(_nargs);
   _prop_d3F.resize(_nargs);
-  for (i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nargs; ++i)
   {
     _prop_d2F[i].resize(_nargs, NULL);
 
     if (_third_derivatives) {
       _prop_d3F[i].resize(_nargs);
 
-      for (j = 0; j < _nargs; ++j)
+      for (unsigned int j = 0; j < _nargs; ++j)
         _prop_d3F[i][j].resize(_nargs, NULL);
     }
   }
 
   // initialize derivatives
-  for (i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nargs; ++i)
   {
     // skip all derivatives w.r.t. auxiliary variables
     if (_arg_numbers[i] >= _number_of_nl_variables) continue;
@@ -49,7 +46,7 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParame
     _prop_dF[i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
 
     // second derivatives
-    for (j = i; j < _nargs; ++j)
+    for (unsigned int j = i; j < _nargs; ++j)
     {
       // skip all derivatives w.r.t. auxiliary variables
       if (_arg_numbers[j] >= _number_of_nl_variables) continue;
@@ -60,7 +57,7 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParame
       // third derivatives
       if (_third_derivatives)
       {
-        for (k = j; k < _nargs; ++k)
+        for (unsigned int k = j; k < _nargs; ++k)
         {
           // skip all derivatives w.r.t. auxiliary variables
           if (_arg_numbers[k] >= _number_of_nl_variables) continue;
@@ -83,19 +80,18 @@ void
 DerivativeFunctionMaterialBase::initialSetup()
 {
   // set the _prop_* pointers of all material properties that are not beeing used back to NULL
-  unsigned int i, j, k;
   bool needs_third_derivatives = false;
 
   if (!_fe_problem.isMatPropRequested(_F_name))
     _prop_F = NULL;
 
-  for (i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nargs; ++i)
   {
     if (!_fe_problem.isMatPropRequested(propertyNameFirst(_F_name, _arg_names[i])))
       _prop_dF[i] = NULL;
 
     // second derivatives
-    for (j = i; j < _nargs; ++j)
+    for (unsigned int j = i; j < _nargs; ++j)
     {
       if (!_fe_problem.isMatPropRequested(propertyNameSecond(_F_name, _arg_names[i], _arg_names[j])))
         _prop_d2F[i][j] =
@@ -104,7 +100,7 @@ DerivativeFunctionMaterialBase::initialSetup()
       // third derivatives
       if (_third_derivatives)
       {
-        for (k = j; k < _nargs; ++k)
+        for (unsigned int k = j; k < _nargs; ++k)
         {
           if (!_fe_problem.isMatPropRequested(propertyNameThird(_F_name, _arg_names[i], _arg_names[j], _arg_names[k])))
             _prop_d3F[i][j][k] =
@@ -127,22 +123,20 @@ DerivativeFunctionMaterialBase::initialSetup()
 void
 DerivativeFunctionMaterialBase::computeProperties()
 {
-  unsigned int i, j, k;
-
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     // set function value
     if (_prop_F)
       (*_prop_F)[_qp] = computeF();
 
-    for (i = 0; i < _nargs; ++i)
+    for (unsigned int i = 0; i < _nargs; ++i)
     {
       // set first derivatives
       if (_prop_dF[i])
         (*_prop_dF[i])[_qp] = computeDF(_arg_numbers[i]);
 
       // second derivatives
-      for (j = i; j < _nargs; ++j)
+      for (unsigned int j = i; j < _nargs; ++j)
       {
         if (_prop_d2F[i][j])
           (*_prop_d2F[i][j])[_qp] = computeD2F(_arg_numbers[i], _arg_numbers[j]);
@@ -150,7 +144,7 @@ DerivativeFunctionMaterialBase::computeProperties()
         // third derivatives
         if (_third_derivatives)
         {
-          for (k = j; k < _nargs; ++k)
+          for (unsigned int k = j; k < _nargs; ++k)
             if (_prop_d3F[i][j][k])
               (*_prop_d3F[i][j][k])[_qp] = computeD3F(_arg_numbers[i], _arg_numbers[j], _arg_numbers[k]);
         }
@@ -165,27 +159,24 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const std::string
     FunctionMaterialBase(deprecated_name, parameters),
     _third_derivatives(isParamValid("third_derivatives") ? getParam<bool>("third_derivatives") : (getParam<unsigned int>("derivative_order")==3))
 {
-  // loop counters
-  unsigned int i, j, k;
-
   // reserve space for material properties and explicitly initialize to NULL
   _prop_dF.resize(_nargs, NULL);
   _prop_d2F.resize(_nargs);
   _prop_d3F.resize(_nargs);
-  for (i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nargs; ++i)
   {
     _prop_d2F[i].resize(_nargs, NULL);
 
     if (_third_derivatives) {
       _prop_d3F[i].resize(_nargs);
 
-      for (j = 0; j < _nargs; ++j)
+      for (unsigned int j = 0; j < _nargs; ++j)
         _prop_d3F[i][j].resize(_nargs, NULL);
     }
   }
 
   // initialize derivatives
-  for (i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nargs; ++i)
   {
     // skip all derivatives w.r.t. auxiliary variables
     if (_arg_numbers[i] >= _number_of_nl_variables) continue;
@@ -194,7 +185,7 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const std::string
     _prop_dF[i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
 
     // second derivatives
-    for (j = i; j < _nargs; ++j)
+    for (unsigned int j = i; j < _nargs; ++j)
     {
       // skip all derivatives w.r.t. auxiliary variables
       if (_arg_numbers[j] >= _number_of_nl_variables) continue;
@@ -205,7 +196,7 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const std::string
       // third derivatives
       if (_third_derivatives)
       {
-        for (k = j; k < _nargs; ++k)
+        for (unsigned int k = j; k < _nargs; ++k)
         {
           // skip all derivatives w.r.t. auxiliary variables
           if (_arg_numbers[k] >= _number_of_nl_variables) continue;
