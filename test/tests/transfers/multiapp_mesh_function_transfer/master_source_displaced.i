@@ -1,11 +1,8 @@
 [Mesh]
-  # The MultiAppMeshFunctionTransfer doesn't work with ParallelMesh.
-  # 2145 for more information.
   type = GeneratedMesh
   dim = 2
   nx = 10
   ny = 10
-  distribution = serial
 []
 
 [Variables]
