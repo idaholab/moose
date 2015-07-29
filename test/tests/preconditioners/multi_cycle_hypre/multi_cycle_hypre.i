@@ -43,8 +43,6 @@
   petsc_options = '-pc_hypre_boomeramg_print_statistics'
   petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_tol -pc_hypre_boomeramg_max_iter'
   petsc_options_value = 'hypre boomeramg 1e-4 20'
-
-  nl_rel_tol = 1e-6
 []
 
 [Outputs]

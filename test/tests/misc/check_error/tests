@@ -301,7 +301,6 @@
     type = 'RunException'
     input = 'multi_precond_test.i'
     expect_err = "More than one active Preconditioner detected"
-    max_parallel = 1
   [../]
 
   [./nan_test]
@@ -346,6 +345,7 @@
     type = 'RunApp'
     input = 'override_name_variable_test.i'
     expect_out = "The following variables were overridden or supplied multiple times:"
+    max_parallel = 1
   [../]
 
   [./rz_3d_error_check_test]
@@ -364,7 +364,6 @@
     type = 'RunException'
     input = 'subdomain_restricted_auxkernel_mismatch.i'
     expect_err = "In object AuxKernels/foo the defined blocks are outside of the domain of the variable"
-    max_parallel = 1  # Error output can interleave on multiple processes
   [../]
 
   [./subdomain_restricted_kernel_test]
@@ -450,6 +449,7 @@
     input = 'check_syntax_ok.i'
     cli_args = '--check-input'
     expect_out = 'Syntax OK'
+    max_parallel = 1
   [../]
 
   [./check_syntax_error]
