@@ -75,12 +75,16 @@
 
 [Executioner]
   type = Transient
-  scheme = 'dirk'
   start_time = 0.0
   end_time   = 1.0
   dt         = 1.0
   nl_abs_tol=1e-13
   nl_rel_tol=1e-13
+
+  [./TimeIntegrator]
+    type = Dirk
+    order = 2
+  [../]
 []
 
 [Outputs]

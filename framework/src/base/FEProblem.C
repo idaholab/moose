@@ -142,6 +142,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
+    _has_time_integrator(false),
     _has_exception(false),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
@@ -3253,6 +3254,7 @@ FEProblem::addTimeIntegrator(const std::string & type, const std::string & name,
   parameters.set<SubProblem *>("_subproblem") = this;
   _aux.addTimeIntegrator(type, name + ":aux", parameters);
   _nl.addTimeIntegrator(type, name, parameters);
+  _has_time_integrator = true;
 }
 
 void
@@ -4061,6 +4063,7 @@ FEProblem::FEProblem(const std::string & deprecated_name, InputParameters parame
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
+    _has_time_integrator(false),
     _has_exception(false),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),

@@ -91,7 +91,6 @@
 
 [Executioner]
   type = Transient
-  scheme = 'dirk'
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -99,6 +98,10 @@
   start_time = 0.0
   num_steps  = 5
   dt         = 0.25
+
+  [./TimeIntegrator]
+    type = Dirk
+  [../]
 
   [./Adaptivity]
     refine_fraction  = 0.2

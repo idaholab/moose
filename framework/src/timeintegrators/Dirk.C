@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<Dirk>()
 {
   InputParameters params = validParams<TimeIntegrator>();
-
+  params.addParam<unsigned int>("order", 2, "Order of the DIRK integrator. Default: 2");
   return params;
 }
 
@@ -29,10 +29,13 @@ InputParameters validParams<Dirk>()
 Dirk::Dirk(const InputParameters & parameters) :
     TimeIntegrator(parameters),
     _stage(1),
+    _order(getParam<unsigned int>("order")),
     _residual_stage1(_nl.addVector("residual_stage1", false, GHOSTED)),
     _residual_stage2(_nl.addVector("residual_stage2", false, GHOSTED)),
     _solution_start(_sys.solutionOld())
 {
+  if (_order != 2)
+    mooseError("Only a second order DIRK method is implemented at the moment");
 }
 
 
@@ -43,10 +46,10 @@ Dirk::~Dirk()
 void
 Dirk::computeTimeDerivatives()
 {
-
   _u_dot  = *_solution;
 
-  if (_stage==1) {
+  if (_stage == 1)
+  {
     // Compute stage U_1
     _u_dot -= _solution_start;
     _u_dot *= 3. / _dt;
@@ -54,7 +57,8 @@ Dirk::computeTimeDerivatives()
 
     _du_dot_du = 3. / _dt;
   }
-  else if (_stage==2) {
+  else if (_stage == 2)
+  {
     // Compute stage U_2
     _u_dot -= _solution_start;
     _u_dot *= 2. / _dt;
@@ -62,7 +66,8 @@ Dirk::computeTimeDerivatives()
 
     _du_dot_du = 2. / _dt;
   }
-  else if (_stage==3) {
+  else if (_stage == 3)
+  {
     // Compute update
     _u_dot -= _solution_start;
     _u_dot *= 4. / _dt;
@@ -70,9 +75,8 @@ Dirk::computeTimeDerivatives()
 
     _du_dot_du = 4. / _dt;
   }
-  else {
+  else
     mooseError("Dirk::computeTimeDerivatives(): Member variable _stage can only have values 1, 2 or 3.");
-  }
 
   _u_dot.close();
 
@@ -135,7 +139,7 @@ void
 Dirk::postStep(NumericVector<Number> & residual)
 {
 
-  if (_stage==1) {
+  if (_stage == 1) {
 
     residual += _Re_time;
     residual += _Re_non_time;
@@ -145,7 +149,7 @@ Dirk::postStep(NumericVector<Number> & residual)
     _residual_stage1.close();
 
   }
-  else if (_stage==2) {
+  else if (_stage == 2) {
 
     residual += _Re_time;
     residual += _Re_non_time;
@@ -155,7 +159,7 @@ Dirk::postStep(NumericVector<Number> & residual)
     _residual_stage2 = _Re_non_time;
     _residual_stage2.close();
   }
-  else if (_stage==3) {
+  else if (_stage == 3) {
     residual = 0.0;
     residual += _residual_stage1;
     residual *= 3.;
@@ -163,9 +167,8 @@ Dirk::postStep(NumericVector<Number> & residual)
     residual += _residual_stage2;
     residual.close();
   }
-  else {
+  else
     mooseError("Dirk::computeTimeDerivatives(): Member variable _stage can only have values 1, 2 or 3.");
-  }
 }
 
 // DEPRECATED CONSTRUCTOR

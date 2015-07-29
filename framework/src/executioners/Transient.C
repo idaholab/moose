@@ -40,7 +40,12 @@ InputParameters validParams<Transient>()
   InputParameters params = validParams<Executioner>();
   std::vector<Real> sync_times(1);
   sync_times[0] = -std::numeric_limits<Real>::max();
-  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 rk-2 dirk", "implicit-euler");
+
+  /**
+   * For backwards compatibility we'll allow users to set the TimeIntegration scheme inside of the executioner block
+   * as long as the TimeIntegrator does not have any additional parameters.
+   */
+  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 rk-2 dirk");
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
@@ -693,26 +698,32 @@ Transient::getSolutionChangeNorm()
 void
 Transient::setupTimeIntegrator()
 {
-  // backwards compatibility
-  std::string ti_str;
+  if (_time_scheme.isValid() && _problem.hasTimeIntegrator())
+    mooseError("You cannot specify time_scheme in the Executioner and independently add a TimeIntegrator to the system at the same time");
 
-  switch (_time_scheme)
+  if (!_problem.hasTimeIntegrator())
   {
-  case 0: ti_str = "ImplicitEuler"; break;
-  case 1: ti_str = "ExplicitEuler"; break;
-  case 2: ti_str = "CrankNicolson"; break;
-  case 3: ti_str = "BDF2"; break;
-  case 4: ti_str = "RungeKutta2"; break;
-  case 5: ti_str = "Dirk"; break;
-  default: mooseError("Unknown scheme"); break;
-  }
+    if (!_time_scheme.isValid())
+      _time_scheme = "implicit-euler";
 
-  {
+    // backwards compatibility
+    std::string ti_str;
+
+    switch (_time_scheme)
+    {
+    case 0: ti_str = "ImplicitEuler"; break;
+    case 1: ti_str = "ExplicitEuler"; break;
+    case 2: ti_str = "CrankNicolson"; break;
+    case 3: ti_str = "BDF2"; break;
+    case 4: ti_str = "RungeKutta2"; break;
+    case 5: ti_str = "Dirk"; mooseError("Dirk requires parameters, please use the TimeIntegrator block instead of the \"scheme\" parameter."); break;
+    default: mooseError("Unknown scheme"); break;
+    }
+
     InputParameters params = _app.getFactory().getValidParams(ti_str);
     _problem.addTimeIntegrator(ti_str, ti_str, params);
   }
 }
-
 
 std::string
 Transient::getTimeStepperName()
