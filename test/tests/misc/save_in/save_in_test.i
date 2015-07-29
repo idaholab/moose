@@ -23,14 +23,18 @@
   [../]
   [./bc_diag_saved]
   [../]
+  [./saved_dirichlet]
+  [../]
+  [./diag_saved_dirichlet]
+  [../]
 []
 
 [Kernels]
   [./diff]
     type = Diffusion
     variable = u
-    save_in = 'saved accumulated'
-    diag_save_in = diag_saved
+    save_in = 'saved accumulated saved_dirichlet'
+    diag_save_in = 'diag_saved diag_saved_dirichlet'
   [../]
 []
 
@@ -40,6 +44,8 @@
     variable = u
     boundary = left
     value = 0
+    save_in = saved_dirichlet
+    diag_save_in = diag_saved_dirichlet
   [../]
   [./nbc]
     type = NeumannBC
@@ -60,6 +66,12 @@
   [./saved_norm]
     type = NodalL2Norm
     variable = saved
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./saved_dirichlet_norm]
+    type = NodalL2Norm
+    variable = saved_dirichlet
     execute_on = timestep_end
     block = 0
   [../]

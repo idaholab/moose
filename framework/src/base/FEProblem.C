@@ -3342,10 +3342,6 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   _app.getOutputWarehouse().residualSetup();
 
   _nl.computeResidual(residual, type);
-
-  // Need to close and update the aux system in case residuals were saved to it.
-  _aux.solution().close();
-  _aux.update();
 }
 
 void
