@@ -28,56 +28,75 @@ CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const InputPa
     _prop_g(declareProperty<Real>(_function_name)),
     _prop_dg(_num_eta),
     _prop_d2g(_num_eta)
+
 {
+  //loop counters
+  unsigned int i,j;
+
   // if Vector W_ij is not the correct size to fill the matrix give error
   if (_num_eta * _num_eta != _W_ij.size())
     mooseError("Supply the number of etas squared for W_ij.");
 
   // if W_ij is not symmetric or if diagonal values are not zero, return error
-  for (unsigned int i = 0; i < _num_eta; ++i)
+  for (i = 0; i < _num_eta; ++i)
   {
     if (_W_ij[_num_eta * i + i] != 0)
       mooseError("Set on-diagonal values of W_ij to zero");
 
-    for (unsigned int j = i; j < _num_eta; ++j)
+    for (j = i; j < _num_eta; ++j)
     {
-      if (_W_ij[_num_eta * i + j] != _W_ij[_num_eta*j + i])
+      if (_W_ij[_num_eta * i + j] != _W_ij[_num_eta * j + i])
         mooseError("Supply symmetric values for W_ij");
     }
   }
 
+  for (i = 0; i < _num_eta; ++i)
+    _prop_d2g[i].resize(_num_eta);
+
   // declare derivative properties, fetch eta values
-  for (unsigned int i = 0; i < _num_eta; ++i)
+  std::vector<std::string> eta_name;
+  for (i = 0; i < _num_eta; ++i)
+    eta_name[i] = getVar("etas", i)->name();
+
+  for (i = 0; i < _num_eta; ++i)
   {
-    const std::string & eta_name = getVar("etas", i)->name();
-    _prop_dg[i]  = &declarePropertyDerivative<Real>(_function_name, eta_name);
-    _prop_d2g[i] = &declarePropertyDerivative<Real>(_function_name, eta_name, eta_name);
+    _prop_dg[i]  = &declarePropertyDerivative<Real>(_function_name, eta_name[i]);
     _eta[i] = &coupledValue("etas", i);
+    for (j = i; j < _num_eta; ++j)
+    {
+      _prop_d2g[i][j] =
+      _prop_d2g[j][i] = &declarePropertyDerivative<Real>(_function_name, eta_name[i], eta_name[j]);
+    }
   }
 }
 
 void
 CrossTermBarrierFunctionMaterial::computeQpProperties()
 {
+  unsigned int i,j;
   // Initialize properties to zero before accumulating
-  _prop_g[_qp] = 0.;
-  for (unsigned int i = 0; i < _num_eta; ++i)
+  _prop_g[_qp] = 0.0;
+  for (i = 0; i < _num_eta; ++i)
   {
-    (*_prop_dg[i])[_qp] = 0.;
-    (*_prop_d2g[i])[_qp] = 0.;
+    (*_prop_dg[i])[_qp] = 0.0;
+    for (j = i; j < _num_eta; ++j)
+      (*_prop_d2g[i][j])[_qp] = 0.0;
   }
 
   // Sum the components of our W_ij matrix to get constant used in our g function
-  for (unsigned int i = 0; i < _num_eta; ++i)
-    for (unsigned int j = 0; j < _num_eta; ++j)
+  for (i = 0; i < _num_eta; ++i)
+    for (j = 0; j < _num_eta; ++j)
     {
       switch (_g_order)
       {
         case 0: // SIMPLE
-          _prop_g[_qp]         +=  _W_ij[_num_eta*i + j] * (*_eta[i])[_qp] * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp];
-          (*_prop_dg[i])[_qp]  +=  2 * _W_ij[_num_eta*i + j] * 2 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp];
-          (*_prop_d2g[i])[_qp] +=  2 * _W_ij[_num_eta*i + j] * 2 * (*_eta[j])[_qp] * (*_eta[j])[_qp];
-          break;
+          _prop_g[_qp]         +=  _W_ij[_num_eta * i + j] * (*_eta[i])[_qp] * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp];
+          (*_prop_dg[i])[_qp]  +=  _W_ij[_num_eta * i + j] * 2 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp];
+          if (i == j)
+            (*_prop_d2g[i][j])[_qp] +=  _W_ij[_num_eta * i + j] * 2 * (*_eta[j])[_qp] * (*_eta[j])[_qp];
+          else
+            (*_prop_d2g[i][j])[_qp] +=  _W_ij[_num_eta * i + j] * 4 * (*_eta[i])[_qp] * (*_eta[j])[_qp];
+        break;
       }
     }
 }
