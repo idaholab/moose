@@ -243,6 +243,12 @@ InputParameters::isParamValid(const std::string &name) const
 }
 
 bool
+InputParameters::isParamSetByAddParam(const std::string &name) const
+{
+  return _set_by_add_param.find(name) != _set_by_add_param.end();
+}
+
+bool
 InputParameters::areAllRequiredParamsValid() const
 {
   for (Parameters::const_iterator it = this->begin(); it != this->end(); ++it)
