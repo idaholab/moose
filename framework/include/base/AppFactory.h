@@ -23,7 +23,7 @@
 /**
  * Macros
  */
-#define registerApp(name)                        AppFactory::instance().regLegacy<name>(#name)
+#define registerApp(name)                        AppFactory::instance().reg<name>(#name)
 
 /**
  * Typedef for function to build objects

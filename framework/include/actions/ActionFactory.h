@@ -28,7 +28,7 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
+#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
 
 
 #define registerTask(name, is_required)                            syntax.registerTaskName(name, is_required)

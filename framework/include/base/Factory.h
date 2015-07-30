@@ -29,10 +29,10 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerObject(name)                          factory.regLegacy<name>(stringifyName(name))
-#define registerNamedObject(obj, name)                factory.regLegacy<obj>(name)
-#define registerDeprecatedObject(name, time)          factory.regLegacyDeprecated<name>(stringifyName(name), time)
-#define registerDeprecatedObjectName(obj, name, time) factory.regLegacyReplaced<obj>(stringifyName(obj), name, time)
+#define registerObject(name)                          factory.reg<name>(stringifyName(name))
+#define registerNamedObject(obj, name)                factory.reg<obj>(name)
+#define registerDeprecatedObject(name, time)          factory.regDeprecated<name>(stringifyName(name), time)
+#define registerDeprecatedObjectName(obj, name, time) factory.regReplaced<obj>(stringifyName(obj), name, time)
 
 // for backward compatibility
 #define registerKernel(name)                        registerObject(name)
