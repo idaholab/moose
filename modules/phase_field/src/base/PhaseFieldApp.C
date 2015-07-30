@@ -73,6 +73,7 @@
  */
 #include "BarrierFunctionMaterial.h"
 #include "ComputePolycrystalElasticityTensor.h"
+#include "ConstGrainAdvectionVelocity.h"
 #include "DerivativeMultiPhaseMaterial.h"
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
@@ -130,6 +131,7 @@
  */
 #include "ComputeGrainCenterUserObject.h"
 #include "ComputeGrainForceAndTorque.h"
+#include "ConstantGrainForceAndTorque.h"
 #include "ConservedMaskedNormalNoise.h"
 #include "ConservedMaskedUniformNoise.h"
 #include "ConservedNormalNoise.h"
@@ -172,6 +174,8 @@
  */
  #include "GrainCentersPostprocessor.h"
  #include "GrainForcesPostprocessor.h"
+ #include "ConstantGrainForcesPostprocessor.h"
+
 
 template<>
 InputParameters validParams<PhaseFieldApp>()
@@ -279,6 +283,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerMaterial(BarrierFunctionMaterial);
   registerMaterial(ComputePolycrystalElasticityTensor);
+  registerMaterial(ConstGrainAdvectionVelocity);
   registerMaterial(DerivativeMultiPhaseMaterial);
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
@@ -322,6 +327,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerUserObject(ComputeGrainCenterUserObject);
   registerUserObject(ComputeGrainForceAndTorque);
+  registerUserObject(ConstantGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
   registerUserObject(ConservedMaskedUniformNoise);
   registerUserObject(ConservedNormalNoise);
@@ -337,6 +343,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerVectorPostprocessor(GrainCentersPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
+  registerVectorPostprocessor(ConstantGrainForcesPostprocessor);
 
   registerMesh(EBSDMesh);
   registerMesh(ImageMesh);

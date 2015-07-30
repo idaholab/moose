@@ -13,7 +13,7 @@ InputParameters validParams<SingleGrainRigidBodyMotion>()
   params.addClassDescription("Adds rigid mody motion to a single grain");
   params.addRequiredCoupledVar("c", "Concentration");
   params.addParam<unsigned int>("op_index",0, "Grain number for the kernel to be applied");
-  params.addParam<MaterialPropertyName>("advection_velocity", "Material property tgiving the advection velocity of grains");
+  params.addParam<MaterialPropertyName>("advection_velocity", "Material property giving the advection velocity of grains");
   params.addParam<MaterialPropertyName>("advection_velocity_divergence", "Material property for divergence of advection velocities");
   return params;
 }

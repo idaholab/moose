@@ -49,10 +49,10 @@ ComputeGrainCenterUserObject::execute()
   for (unsigned int i = 0; i < _ncrys; ++i)
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
-      _grain_data[4*i+0] += _JxW[_qp]*_coord[_qp]*(*_vals[i])[_qp];
-      _grain_data[4*i+1] += _JxW[_qp]*_coord[_qp]*_q_point[_qp](0)*(*_vals[i])[_qp];
-      _grain_data[4*i+2] += _JxW[_qp]*_coord[_qp]*_q_point[_qp](1)*(*_vals[i])[_qp];
-      _grain_data[4*i+3] += _JxW[_qp]*_coord[_qp]*_q_point[_qp](2)*(*_vals[i])[_qp];
+      _grain_data[4*i+0] += _JxW[_qp] * _coord[_qp] * (*_vals[i])[_qp];
+      _grain_data[4*i+1] += _JxW[_qp] * _coord[_qp] * _q_point[_qp](0) * (*_vals[i])[_qp];
+      _grain_data[4*i+2] += _JxW[_qp] * _coord[_qp] * _q_point[_qp](1) * (*_vals[i])[_qp];
+      _grain_data[4*i+3] += _JxW[_qp] * _coord[_qp] * _q_point[_qp](2) * (*_vals[i])[_qp];
     }
 }
 
