@@ -18,6 +18,7 @@ public:
     Real phi1, phi, phi2, symmetry;
     unsigned int grain, phase, op;
     Point p;
+    std::vector<Real> custom;
   };
 
   /// Averaged EBSD data
@@ -25,6 +26,7 @@ public:
     EulerAngles * angles;
     unsigned int phase, symmetry, grain, n;
     Point p;
+    std::vector<Real> custom;
   };
 
   static MooseEnum getPointDataFieldType();
@@ -40,11 +42,6 @@ public:
     virtual Real operator () (const EBSDAvgData &) = 0;
     virtual ~EBSDAvgDataFunctor() {};
   };
-
-  /// Factory function to return a point functor specified by name
-  static EBSDPointDataFunctor * getPointDataAccessFunctor(const MooseEnum & field_name);
-  /// Factory function to return a average functor specified by name
-  static EBSDAvgDataFunctor * getAvgDataAccessFunctor(const MooseEnum & field_name);
 
   // List of specialized access functors (one for each field in EBSDPointData)
   struct EBSDPointDataPhi1 : EBSDPointDataFunctor {
@@ -68,6 +65,11 @@ public:
   struct EBSDPointDataOp : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d.op; };
   };
+  struct EBSDPointDataCustom : EBSDPointDataFunctor {
+    EBSDPointDataCustom(unsigned int index) : _index(index) {}
+    virtual Real operator () (const EBSDPointData & d) { mooseAssert(_index < d.custom.size(), "Requesting out of bounds index in EBSDPointDataCustom."); return d.custom[_index]; };
+    const unsigned int _index;
+  };
 
   // List of specialized access functors (one for each field in EBSDAvgData)
   struct EBSDAvgDataPhi1 : EBSDAvgDataFunctor {
@@ -84,6 +86,11 @@ public:
   };
   struct EBSDAvgDataSymmetry : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a.symmetry; };
+  };
+  struct EBSDAvgDataCustom : EBSDAvgDataFunctor {
+    EBSDAvgDataCustom(unsigned int index) : _index(index) {}
+    virtual Real operator () (const EBSDAvgData & a) { mooseAssert(_index < a.custom.size(), "Requesting out of bounds index in EBSDPointDataCustom."); return a.custom[_index]; };
+    const unsigned int _index;
   };
 };
 
