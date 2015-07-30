@@ -244,11 +244,7 @@ extern "C" void MooseTestApp__registerApps() { MooseTestApp::registerApps(); }
 void
 MooseTestApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
   registerApp(MooseTestApp);
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -256,10 +252,6 @@ extern "C" void MooseTestApp__registerObjects(Factory & factory) { MooseTestApp:
 void
 MooseTestApp::registerObjects(Factory & factory)
 {
-
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-
   // Kernels
   registerKernel(CoupledConvection);
   registerKernel(ForcingFn);
@@ -450,10 +442,6 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Outputs
   registerOutput(OutputObjectTest);
-
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
-
 }
 
 // External entry point for dynamic syntax association
@@ -461,10 +449,6 @@ extern "C" void MooseTestApp__associateSyntax(Syntax & syntax, ActionFactory & a
 void
 MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-
-#undef registerAction
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
-
   // and add more
   registerAction(ConvDiffMetaAction, "meta_action");
   registerAction(AddLotsOfAuxVariablesAction, "meta_action");
@@ -482,7 +466,4 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
 
   syntax.registerActionSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
-
-#undef registerAction
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 }
