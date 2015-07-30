@@ -74,8 +74,8 @@ InputParameters validParams<Console>()
   params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
 
   // System information controls
-  MultiMooseEnum info("framework mesh aux nonlinear execution output", "framework mesh aux nonlinear execution");
-  params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output')");
+  MultiMooseEnum info("framework mesh aux nonlinear execution output header", "framework mesh aux nonlinear execution header");
+  params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output', 'header')");
 
   // Advanced group
   params.addParamNamesToGroup("max_rows fit_node verbose show_multiapp_name system_info", "Advanced");
@@ -517,6 +517,9 @@ Console::outputScalarVariables()
 void
 Console::outputSystemInformation()
 {
+  if (_system_info_flags.contains("header"))
+    _console << _app.header() << "\n\n";
+
   if (_system_info_flags.contains("framework"))
     _console << ConsoleUtils::outputFrameworkInformation(_app);
 

@@ -797,3 +797,9 @@ MooseApp::getInputParameterWarehouse()
 {
   return *_input_parameter_warehouse;
 }
+
+std::string
+MooseApp::header() const
+{
+  return std::string("");
+}
