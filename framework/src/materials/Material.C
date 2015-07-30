@@ -25,6 +25,7 @@ InputParameters validParams<Material>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
+  params += validParams<RandomInterface>();
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
 
@@ -62,6 +63,7 @@ Material::Material(const InputParameters & parameters) :
     // The false flag disables the automatic call  buildOutputVariableHideList;
     // for Material objects the hide lists are handled by MaterialOutputAction
     OutputInterface(parameters, false),
+    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -252,6 +254,7 @@ Material::Material(const std::string & deprecated_name, InputParameters deprecat
     // The false flag disables the automatic call  buildOutputVariableHideList;
     // for Material objects the hide lists are handled by MaterialOutputAction
     OutputInterface(parameters(), false),
+    RandomInterface(parameters(), *getParam<FEProblem *>("_fe_problem"), getParam<THREAD_ID>("_tid"), false),
     _subproblem(*getParam<SubProblem *>("_subproblem")),
     _fe_problem(*getParam<FEProblem *>("_fe_problem")),
     _tid(getParam<THREAD_ID>("_tid")),

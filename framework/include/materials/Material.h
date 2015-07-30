@@ -38,6 +38,7 @@
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 #include "OutputInterface.h"
+#include "RandomInterface.h"
 
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"
@@ -81,7 +82,8 @@ class Material :
   public Restartable,
   public ZeroInterface,
   public MeshChangedInterface,
-  public OutputInterface
+  public OutputInterface,
+  public RandomInterface
 {
 public:
   Material(const InputParameters & parameters);

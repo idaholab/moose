@@ -126,6 +126,7 @@
 #include "DerivativeMaterialInterfaceTestProvider.h"
 #include "DerivativeMaterialInterfaceTestClient.h"
 #include "DefaultMatPropConsumerMaterial.h"
+#include "RandomMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -379,7 +380,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(VecRangeCheckMaterial);
   registerMaterial(DerivativeMaterialInterfaceTestProvider);
   registerMaterial(DerivativeMaterialInterfaceTestClient);
-  registerKernel(DefaultMatPropConsumerMaterial);
+  registerMaterial(DefaultMatPropConsumerMaterial);
+  registerMaterial(RandomMaterial);
 
 
   registerScalarKernel(ExplicitODE);
