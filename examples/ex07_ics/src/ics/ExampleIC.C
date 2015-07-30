@@ -22,9 +22,8 @@ InputParameters validParams<ExampleIC>()
   return params;
 }
 
-ExampleIC::ExampleIC(const std::string & name,
-                     InputParameters parameters) :
-    InitialCondition(name, parameters),
+ExampleIC::ExampleIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _coefficient(getParam<Real>("coefficient"))
 {}
 
