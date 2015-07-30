@@ -73,11 +73,16 @@ public:
    */
   unsigned int getGrainNum(unsigned int phase) const;
 
+  /// Factory function to return a point functor specified by name
+  EBSDPointDataFunctor * getPointDataAccessFunctor(const MooseEnum & field_name) const;
+  /// Factory function to return a average functor specified by name
+  EBSDAvgDataFunctor * getAvgDataAccessFunctor(const MooseEnum & field_name) const;
+
   /**
    * Creates a map consisting of the node index followd by
    * a vector of all grain weights for that node
    */
-   const std::map<dof_id_type, std::vector<Real> > & getNodeToGrainWeightMap() const;
+  const std::map<dof_id_type, std::vector<Real> > & getNodeToGrainWeightMap() const;
 
 protected:
   // MooseMesh Variables

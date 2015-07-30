@@ -43,11 +43,6 @@ public:
     virtual ~EBSDAvgDataFunctor() {};
   };
 
-  /// Factory function to return a point functor specified by name
-  static EBSDPointDataFunctor * getPointDataAccessFunctor(const MooseEnum & field_name);
-  /// Factory function to return a average functor specified by name
-  static EBSDAvgDataFunctor * getAvgDataAccessFunctor(const MooseEnum & field_name);
-
   // List of specialized access functors (one for each field in EBSDPointData)
   struct EBSDPointDataPhi1 : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d.phi1; };

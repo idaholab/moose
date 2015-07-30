@@ -7,6 +7,7 @@
 #include "EBSDReader.h"
 #include "EBSDMesh.h"
 #include "MooseMesh.h"
+#include "Conversion.h"
 
 template<>
 InputParameters validParams<EBSDReader>()
@@ -312,6 +313,60 @@ EBSDReader::buildNodeToGrainWeightMap()
       _node_to_grn_weight_map[node_id][grain_id] += 1.0 / n_elems;
     }
   }
+}
+
+EBSDAccessFunctors::EBSDPointDataFunctor *
+EBSDReader::getPointDataAccessFunctor(const MooseEnum & field_name) const
+{
+  switch (field_name)
+  {
+    case 0: // phi1
+      return new EBSDPointDataPhi1();
+    case 1: // phi
+      return new EBSDPointDataPhi();
+    case 2: // phi2
+      return new EBSDPointDataPhi2();
+    case 3: // grain
+      return new EBSDPointDataGrain();
+    case 4: // phase
+      return new EBSDPointDataPhase();
+    case 5: // symmetry
+      return new EBSDPointDataSymmetry();
+    case 6: // op
+      return new EBSDPointDataOp();
+  }
+
+  // check for custom columns
+  for (unsigned int i = 0; i < _custom_columns; ++i)
+    if (field_name == "CUSTOM" + Moose::stringify(i))
+      return new EBSDPointDataCustom(i);
+
+  mooseError("Error:  Please input supported EBSD_param");
+}
+
+EBSDAccessFunctors::EBSDAvgDataFunctor *
+EBSDReader::getAvgDataAccessFunctor(const MooseEnum & field_name) const
+{
+  switch (field_name)
+  {
+    case 0: // phi1
+      return new EBSDAvgDataPhi1();
+    case 1: // phi
+      return new EBSDAvgDataPhi();
+    case 2: // phi2
+      return new EBSDAvgDataPhi2();
+    case 3: // phase
+      return new EBSDAvgDataPhase();
+    case 4: // symmetry
+      return new EBSDAvgDataSymmetry();
+  }
+
+  // check for custom columns
+  for (unsigned int i = 0; i < _custom_columns; ++i)
+    if (field_name == "CUSTOM" + Moose::stringify(i))
+      return new EBSDAvgDataCustom(i);
+
+  mooseError("Error:  Please input supported EBSD_param");
 }
 
 
