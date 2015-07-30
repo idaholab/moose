@@ -31,7 +31,7 @@ public:
   virtual ~SumMaterial();
 
 protected:
-  void computeQpProperties();
+  virtual void computeQpProperties();
 
   std::string _sum_prop_name;
   std::string _mp1_prop_name;

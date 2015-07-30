@@ -90,9 +90,8 @@ protected:
   /// d(1/M)/d(volumetric_strain)
   MaterialProperty<Real> & _done_over_biot_modulus_dep;
 
-  void initQpStatefulProperties();
-  void computeQpProperties();
-
+  virtual void initQpStatefulProperties();
+  virtual void computeQpProperties();
 };
 
 #endif //POROFULLSATMATERIAL_H
