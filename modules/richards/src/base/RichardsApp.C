@@ -117,21 +117,12 @@ RichardsApp::~RichardsApp()
 void
 RichardsApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
-
   registerApp(RichardsApp);
-
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 void
 RichardsApp::registerObjects(Factory & factory)
 {
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-
   // UserObjects
   registerUserObject(RichardsVarNames);
   registerUserObject(RichardsDensityConstBulk);
@@ -211,10 +202,6 @@ RichardsApp::registerObjects(Factory & factory)
 
   // Problems
   registerProblem(RichardsMultiphaseProblem);
-
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
-
 }
 
 void

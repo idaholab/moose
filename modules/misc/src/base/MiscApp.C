@@ -53,14 +53,7 @@ extern "C" void MiscApp__registerApps() { MiscApp::registerApps(); }
 void
 MiscApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
-
   registerApp(MiscApp);
-
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
-
 }
 
 // External entry point for dynamic object registration
@@ -68,9 +61,6 @@ extern "C" void MiscApp__registerObjects(Factory & factory) { MiscApp::registerO
 void
 MiscApp::registerObjects(Factory & factory)
 {
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-
   registerAux(CoupledDirectionalMeshHeightInterpolation);
 
   registerBoundaryCondition(RobinBC);
@@ -92,9 +82,6 @@ MiscApp::registerObjects(Factory & factory)
   registerPostprocessor(SharpInterfaceForcing);
 
   registerPostprocessor(CInterfacePosition);
-
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
 
 // External entry point for dynamic syntax association
