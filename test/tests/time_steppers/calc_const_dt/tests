@@ -1,0 +1,14 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'calc_const_dt.i'
+    exodiff = 'calc_const_dt_out.e'
+  [../]
+
+  [./test_with_start_time]
+    type = 'Exodiff'
+    input = 'calc_const_dt.i'
+    cli_args = 'Executioner/start_time=0.5 Outputs/file_base=calc_dt_with_start_out'
+    exodiff = 'calc_dt_with_start_out.e'
+  [../]
+[]

@@ -333,6 +333,12 @@ public:
   bool isParamValid(const std::string &name) const;
 
   /**
+   * Returns whether or not the parameter was set due to addParam. If not then it was either set programmatically
+   * or was read through the input file.
+   */
+  bool isParamSetByAddParam(const std::string &name) const;
+
+  /**
    * This method returns true if all of the parameters in this object are valid
    * (i.e. isParamValid(name) == true - for all parameters)
    */
