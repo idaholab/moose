@@ -72,4 +72,21 @@
     cli_args = 'Mesh/distribution=PARALLEL Outputs/file_base=parallel_mesh_uo_out'
     prereq = 'threads_verification_uo'
   [../]
+
+  # Material Tests
+  [./material_serial]
+    type = 'Exodiff'
+    input = 'random_material.i'
+    exodiff = 'random_material_out.e'
+    max_threads = 1
+  [../]
+
+  [./material_parallel]
+    type = 'Exodiff'
+    input = 'random_material.i'
+    exodiff = 'random_material_out.e'
+    prereq = 'material_serial'
+    min_parallel = 2
+    max_threads = 1
+  [../]
 []
