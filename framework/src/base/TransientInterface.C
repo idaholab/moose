@@ -20,7 +20,9 @@ template<>
 InputParameters validParams<TransientInterface>()
 {
   InputParameters params = emptyInputParameters();
-  params.addPrivateParam<bool>("implicit", true);
+  params.addParam<bool>("implicit", true, "Determines whether this object is calculated using an implicit or explicit form");
+
+  params.addParamNamesToGroup("implicit", "Advanced");
   return params;
 }
 
