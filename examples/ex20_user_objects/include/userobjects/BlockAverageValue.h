@@ -32,7 +32,7 @@ InputParameters validParams<BlockAverageValue>();
 class BlockAverageValue : public ElementIntegralVariablePostprocessor
 {
 public:
-  BlockAverageValue(const std::string & name, InputParameters parameters);
+  BlockAverageValue(const InputParameters & parameters);
 
   /**
    * Given a block ID return the average value for a variable on that block

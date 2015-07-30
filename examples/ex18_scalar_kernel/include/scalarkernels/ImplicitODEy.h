@@ -44,7 +44,7 @@ public:
   /**
    * Constructor
    */
-  ImplicitODEy(const std::string & name, InputParameters parameters);
+  ImplicitODEy(const InputParameters & parameters);
 
 protected:
   /**

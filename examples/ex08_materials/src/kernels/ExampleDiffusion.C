@@ -26,9 +26,8 @@ InputParameters validParams<ExampleDiffusion>()
 }
 
 
-ExampleDiffusion::ExampleDiffusion(const std::string & name,
-                                   InputParameters parameters) :
-    Diffusion(name,parameters),
+ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters) :
+    Diffusion(parameters),
     _diffusivity(getMaterialProperty<Real>("diffusivity"))
 {}
 

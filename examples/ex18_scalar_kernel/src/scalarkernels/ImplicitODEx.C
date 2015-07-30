@@ -26,9 +26,9 @@ InputParameters validParams<ImplicitODEx>()
   return params;
 }
 
-ImplicitODEx::ImplicitODEx(const std::string & name, InputParameters parameters) :
+ImplicitODEx::ImplicitODEx(const InputParameters & parameters) :
     // You must call the constructor of the base class first
-    ODEKernel(name, parameters),
+    ODEKernel(parameters),
     // get the coupled variable number and values
     _y_var(coupledScalar("y")),
     _y(coupledScalarValue("y"))

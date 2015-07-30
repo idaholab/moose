@@ -21,9 +21,8 @@ InputParameters validParams<ExampleConvection>()
   return params;
 }
 
-ExampleConvection::ExampleConvection(const std::string & name,
-                                     InputParameters parameters) :
-    Kernel(name, parameters),
+ExampleConvection::ExampleConvection(const InputParameters & parameters) :
+    Kernel(parameters),
 
     // Retrieve a gradient material property to use for the convection
     // velocity

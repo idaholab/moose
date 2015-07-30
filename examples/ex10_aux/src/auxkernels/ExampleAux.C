@@ -23,8 +23,8 @@ InputParameters validParams<ExampleAux>()
   return params;
 }
 
-ExampleAux::ExampleAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+ExampleAux::ExampleAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
 
     // We can couple in a value from one of our kernels with a call to coupledValueAux
     _coupled_val(coupledValue("coupled")),

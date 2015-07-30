@@ -27,8 +27,7 @@ InputParameters validParams<BlockAverageDiffusionMaterial>();
 class BlockAverageDiffusionMaterial : public Material
 {
 public:
-  BlockAverageDiffusionMaterial(const std::string & name,
-                  InputParameters parameters);
+  BlockAverageDiffusionMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

@@ -27,7 +27,7 @@ InputParameters validParams<ExampleDirac>();
 class ExampleDirac : public DiracKernel
 {
 public:
-  ExampleDirac(const std::string & name, InputParameters parameters);
+  ExampleDirac(const InputParameters & parameters);
 
   virtual void addPoints();
   virtual Real computeQpResidual();
