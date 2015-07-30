@@ -42,9 +42,8 @@ public:
    */
   virtual ~OutputTestMaterial();
 
-  void computeQpProperties();
-
 protected:
+  virtual void computeQpProperties();
 
   MaterialProperty<Real> & _real_property;
   MaterialProperty<RealVectorValue> & _vector_property;
