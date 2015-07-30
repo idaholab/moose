@@ -21,8 +21,8 @@ InputParameters validParams<MooseUnitApp>()
   return params;
 }
 
-MooseUnitApp::MooseUnitApp(const std::string & name, InputParameters parameters) :
-    MooseApp(name, parameters)
+MooseUnitApp::MooseUnitApp(const InputParameters & parameters) :
+    MooseApp(parameters)
 {
   srand(processor_id());
 
