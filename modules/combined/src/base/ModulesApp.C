@@ -55,13 +55,7 @@ extern "C" void ModulesApp__registerApps() { ModulesApp::registerApps(); }
 void
 ModulesApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
-
   registerApp(ModulesApp);
-
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -69,10 +63,6 @@ extern "C" void ModulesApp__registerObjects(Factory & factory) { ModulesApp::reg
 void
 ModulesApp::registerObjects(Factory & factory)
 {
-
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-
   /************************************************************
    * New Module Step 2.                                       *
    *                Register module objects here              *
@@ -89,10 +79,6 @@ ModulesApp::registerObjects(Factory & factory)
   SolidMechanicsApp::registerObjects(factory);
   TensorMechanicsApp::registerObjects(factory);
   WaterSteamEOSApp::registerObjects(factory);
-
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
-
 }
 
 // External entry point for dynamic syntax association
@@ -100,9 +86,6 @@ extern "C" void ModulesApp__associateSyntax(Syntax & syntax, ActionFactory & act
 void
 ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-#undef registerAction
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
-
   /************************************************************
    * New Module Step 3.                                       *
    *                Associate syntax here                     *
@@ -119,10 +102,6 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   SolidMechanicsApp::associateSyntax(syntax, action_factory);
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
   WaterSteamEOSApp::associateSyntax(syntax, action_factory);
-
-#undef registerAction
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
-
 }
 
 
