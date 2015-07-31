@@ -16,8 +16,7 @@
 #ifndef CONSTANTGRAINFORCEANDTORQUE_H
 #define CONSTANTGRAINFORCEANDTORQUE_H
 
-#include "ElementUserObject.h"
-#include "ComputeGrainCenterUserObject.h"
+#include "GeneralUserObject.h"
 
 //Forward Declarations
 class ConstantGrainForceAndTorque;
@@ -27,7 +26,7 @@ InputParameters validParams<ConstantGrainForceAndTorque>();
 
 /* This class is here to get the force and torque acting on a grain*/
 
-class ConstantGrainForceAndTorque :  public ElementUserObject
+class ConstantGrainForceAndTorque :  public GeneralUserObject
 {
 public:
   ConstantGrainForceAndTorque(const InputParameters & parameters);
@@ -45,14 +44,8 @@ public:
 protected:
 
   /// Applied force on particles
-  RealGradient _dF;
-
-  unsigned int _qp;
-
-  /// provide UserObject for calculating grain volumes and centers
-  const ComputeGrainCenterUserObject & _grain_data;
-  const std::vector<Real> & _grain_volumes;
-  const std::vector<Point> & _grain_centers;
+  std::vector<Real> _F;
+  std::vector<Real> _M;
 
   unsigned int _ncrys;
   unsigned int _ncomp;

@@ -17,21 +17,19 @@
 template<>
 InputParameters validParams<ConstantGrainForceAndTorque>()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = validParams<GeneralUserObject>();
   params.addClassDescription("Userobject for calculating force and torque acting on a grain");
-  params.addParam<RealGradient>("force", "force acting on grains");
-  params.addParam<UserObjectName>("grain_data","center of mass of grains");
+  params.addParam<std::vector<Real> >("force", "force acting on grains");
+  params.addParam<std::vector<Real> >("torque", "torque acting on grains");
 
   return params;
 }
 
 ConstantGrainForceAndTorque::ConstantGrainForceAndTorque(const InputParameters & parameters) :
-    ElementUserObject(parameters),
-    _dF(getParam<RealGradient>("force")),
-    _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
-    _grain_volumes(_grain_data.getGrainVolumes()),
-    _grain_centers(_grain_data.getGrainCenters()),
-    _ncrys(_grain_volumes.size()),
+    GeneralUserObject(parameters),
+    _F(getParam<std::vector<Real> >("force")),
+    _M(getParam<std::vector<Real> >("torque")),
+    _ncrys(_F.size()/3),
     _ncomp(6*_ncrys),
     _force_values(_ncrys),
     _torque_values(_ncrys),
@@ -55,40 +53,22 @@ ConstantGrainForceAndTorque::initialize()
 void
 ConstantGrainForceAndTorque::execute()
 {
-    RealGradient compute_torque0 = 0.0;
-    RealGradient compute_torque1 = 0.0;
-
-    for (_qp=0; _qp<_qrule->n_points(); ++_qp)
+    for (unsigned int i = 0; i < _ncrys; ++i)
     {
-      compute_torque0 += (_q_point[_qp] - _grain_centers[0]).cross(_dF);
-      compute_torque1 += (_q_point[_qp] - _grain_centers[1]).cross(- _dF);
+      _force_torque_store[6*i+0] = _F[3*i+0];
+      _force_torque_store[6*i+1] = _F[3*i+1];
+      _force_torque_store[6*i+2] = _F[3*i+2];
+      _force_torque_store[6*i+3] = _M[3*i+0];
+      _force_torque_store[6*i+4] = _M[3*i+1];
+      _force_torque_store[6*i+5] = _M[3*i+2];
 
-      _force_torque_store[0] = _dF(0);
-      _force_torque_store[1] = _dF(1);
-      _force_torque_store[2] = _dF(2);
-      _force_torque_store[3] = compute_torque0(0);
-      _force_torque_store[4] = compute_torque0(1);
-      _force_torque_store[5] = compute_torque0(2);
-      _force_torque_store[6] = - _dF(0);
-      _force_torque_store[7] = - _dF(1);
-      _force_torque_store[8] = - _dF(2);
-      _force_torque_store[9] = compute_torque1(0);
-      _force_torque_store[10] = compute_torque1(1);
-      _force_torque_store[11] = compute_torque1(2);
+      _force_torque_derivative_store[6*i+0] = 0.0;
+      _force_torque_derivative_store[6*i+1] = 0.0;
+      _force_torque_derivative_store[6*i+2] = 0.0;
+      _force_torque_derivative_store[6*i+3] = 0.0;
+      _force_torque_derivative_store[6*i+4] = 0.0;
+      _force_torque_derivative_store[6*i+5] = 0.0;
     }
-
-      _force_torque_derivative_store[0] = 0.0;
-      _force_torque_derivative_store[1] = 0.0;
-      _force_torque_derivative_store[2] = 0.0;
-      _force_torque_derivative_store[3] = 0.0;
-      _force_torque_derivative_store[4] = 0.0;
-      _force_torque_derivative_store[5] = 0.0;
-      _force_torque_derivative_store[6] = 0.0;
-      _force_torque_derivative_store[7] = 0.0;
-      _force_torque_derivative_store[8] = 0.0;
-      _force_torque_derivative_store[9] = 0.0;
-      _force_torque_derivative_store[10] = 0.0;
-      _force_torque_derivative_store[11] = 0.0;
 }
 
 void
