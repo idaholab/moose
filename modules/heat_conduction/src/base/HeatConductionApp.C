@@ -42,8 +42,6 @@ InputParameters validParams<HeatConductionApp>()
 HeatConductionApp::HeatConductionApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   HeatConductionApp::registerObjects(_factory);
 
@@ -139,8 +137,6 @@ HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
 HeatConductionApp::HeatConductionApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   HeatConductionApp::registerObjects(_factory);
 

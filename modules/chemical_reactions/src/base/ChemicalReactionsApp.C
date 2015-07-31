@@ -47,8 +47,6 @@ InputParameters validParams<ChemicalReactionsApp>()
 ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   ChemicalReactionsApp::registerObjects(_factory);
 
@@ -137,8 +135,6 @@ ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fa
 ChemicalReactionsApp::ChemicalReactionsApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   ChemicalReactionsApp::registerObjects(_factory);
 

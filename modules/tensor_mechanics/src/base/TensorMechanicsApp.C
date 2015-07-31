@@ -92,8 +92,6 @@ InputParameters validParams<TensorMechanicsApp>()
 TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   TensorMechanicsApp::registerObjects(_factory);
 
@@ -227,8 +225,6 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
 TensorMechanicsApp::TensorMechanicsApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   TensorMechanicsApp::registerObjects(_factory);
 

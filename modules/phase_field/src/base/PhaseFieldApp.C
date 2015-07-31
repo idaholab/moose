@@ -167,8 +167,6 @@ InputParameters validParams<PhaseFieldApp>()
 PhaseFieldApp::PhaseFieldApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   PhaseFieldApp::registerObjects(_factory);
 
@@ -367,8 +365,6 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 PhaseFieldApp::PhaseFieldApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   PhaseFieldApp::registerObjects(_factory);
 

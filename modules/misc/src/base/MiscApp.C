@@ -37,8 +37,6 @@ InputParameters validParams<MiscApp>()
 MiscApp::MiscApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   MiscApp::registerObjects(_factory);
 
@@ -111,8 +109,6 @@ MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/
 MiscApp::MiscApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   MiscApp::registerObjects(_factory);
 

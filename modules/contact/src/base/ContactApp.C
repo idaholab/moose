@@ -41,8 +41,6 @@ InputParameters validParams<ContactApp>()
 ContactApp::ContactApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   ContactApp::registerObjects(_factory);
 
@@ -140,8 +138,6 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 ContactApp::ContactApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   ContactApp::registerObjects(_factory);
 
