@@ -21,6 +21,8 @@ InputParameters validParams<NodalBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
   params += validParams<RandomInterface>();
+  params.addParam<std::vector<AuxVariableName> >("save_in", "The name of auxiliary variables to save this BC's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in", "The name of auxiliary variables to save this BC's diagonal jacobian contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
 
   return params;
 }
@@ -31,8 +33,40 @@ NodalBC::NodalBC(const InputParameters & parameters) :
     RandomInterface(parameters, _fe_problem, _tid, true),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
     _current_node(_var.node()),
-    _u(_var.nodalSln())
+    _u(_var.nodalSln()),
+    _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
 {
+  _save_in.resize(_save_in_strings.size());
+  _diag_save_in.resize(_diag_save_in_strings.size());
+
+  for (unsigned int i=0; i<_save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
+
+    if (var->feType() != _var.feType())
+      mooseError("Error in " + name() + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
+
+    _save_in[i] = var;
+    var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_save_in = _save_in.size() > 0;
+
+  for (unsigned int i=0; i<_diag_save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
+
+    if (var->feType() != _var.feType())
+      mooseError("Error in " + name() + ". When saving diagonal Jacobian values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
+
+    _diag_save_in[i] = var;
+    var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
 void
@@ -42,7 +76,15 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
   {
     dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
-    residual.set(dof_idx, computeQpResidual());
+    Real res = computeQpResidual();
+    residual.set(dof_idx, res);
+
+    if (_has_save_in)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      for (unsigned int i=0; i<_save_in.size(); i++)
+        _save_in[i]->sys().solution().set(_save_in[i]->nodalDofIndex(), res);
+    }
   }
 }
 
@@ -61,6 +103,13 @@ NodalBC::computeJacobian()
 
     // Cache the user's computeQpJacobian() value for later use.
     _fe_problem.assembly(0).cacheNodalBCJacobianEntry(cached_row, cached_row, cached_val);
+
+    if (_has_diag_save_in)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      for (unsigned int i=0; i<_diag_save_in.size(); i++)
+        _diag_save_in[i]->sys().solution().set(_diag_save_in[i]->nodalDofIndex(), cached_val);
+    }
   }
 }
 

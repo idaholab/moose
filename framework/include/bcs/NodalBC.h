@@ -53,6 +53,16 @@ protected:
   /// Value of the unknown variable this BC is acting on
   VariableValue & _u;
 
+  /// The aux variables to save the residual contributions to
+  bool _has_save_in;
+  std::vector<MooseVariable*> _save_in;
+  std::vector<AuxVariableName> _save_in_strings;
+
+  /// The aux variables to save the diagonal Jacobian contributions to
+  bool _has_diag_save_in;
+  std::vector<MooseVariable*> _diag_save_in;
+  std::vector<AuxVariableName> _diag_save_in_strings;
+
   virtual Real computeQpResidual() = 0;
 
   /**

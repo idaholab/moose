@@ -564,6 +564,9 @@ protected:
 
   bool _print_all_var_norms;
 
+  /// If there is a nodal BC having save_in or diag_save_in
+  bool _has_nodalbc_save_in;
+
   void getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs);
 };
 
