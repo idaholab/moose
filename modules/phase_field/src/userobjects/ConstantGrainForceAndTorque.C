@@ -21,11 +21,11 @@ InputParameters validParams<ConstantGrainForceAndTorque>()
   params.addClassDescription("Userobject for calculating force and torque acting on a grain");
   params.addParam<std::vector<Real> >("force", "force acting on grains");
   params.addParam<std::vector<Real> >("torque", "torque acting on grains");
-
   return params;
 }
 
 ConstantGrainForceAndTorque::ConstantGrainForceAndTorque(const InputParameters & parameters) :
+    GrainForceAndTorqueInterface(),
     GeneralUserObject(parameters),
     _F(getParam<std::vector<Real> >("force")),
     _M(getParam<std::vector<Real> >("torque")),
@@ -43,66 +43,17 @@ ConstantGrainForceAndTorque::ConstantGrainForceAndTorque(const InputParameters &
 void
 ConstantGrainForceAndTorque::initialize()
 {
-  for (unsigned int i = 0; i < _ncomp; ++i)
-  {
-    _force_torque_store[i] = 0;
-    _force_torque_derivative_store[i] = 0;
-  }
-}
-
-void
-ConstantGrainForceAndTorque::execute()
-{
-    for (unsigned int i = 0; i < _ncrys; ++i)
-    {
-      _force_torque_store[6*i+0] = _F[3*i+0];
-      _force_torque_store[6*i+1] = _F[3*i+1];
-      _force_torque_store[6*i+2] = _F[3*i+2];
-      _force_torque_store[6*i+3] = _M[3*i+0];
-      _force_torque_store[6*i+4] = _M[3*i+1];
-      _force_torque_store[6*i+5] = _M[3*i+2];
-
-      _force_torque_derivative_store[6*i+0] = 0.0;
-      _force_torque_derivative_store[6*i+1] = 0.0;
-      _force_torque_derivative_store[6*i+2] = 0.0;
-      _force_torque_derivative_store[6*i+3] = 0.0;
-      _force_torque_derivative_store[6*i+4] = 0.0;
-      _force_torque_derivative_store[6*i+5] = 0.0;
-    }
-}
-
-void
-ConstantGrainForceAndTorque::finalize()
-{
-  gatherSum(_force_torque_store);
-  gatherSum(_force_torque_derivative_store);
-
   for (unsigned int i = 0; i < _ncrys; ++i)
   {
-    _force_values[i](0) = _force_torque_store[6*i+0];
-    _force_values[i](1) = _force_torque_store[6*i+1];
-    _force_values[i](2) = _force_torque_store[6*i+2];
-    _torque_values[i](0) = _force_torque_store[6*i+3];
-    _torque_values[i](1) = _force_torque_store[6*i+4];
-    _torque_values[i](2) = _force_torque_store[6*i+5];
+    _force_values[i](0) = _F[3*i+0];
+    _force_values[i](1) = _F[3*i+1];
+    _force_values[i](2) = _F[3*i+2];
+    _torque_values[i](0) = _M[3*i+0];
+    _torque_values[i](1) = _M[3*i+1];
+    _torque_values[i](2) = _M[3*i+2];
 
-    _force_derivatives[i](0) = _force_torque_derivative_store[6*i+0];
-    _force_derivatives[i](1) = _force_torque_derivative_store[6*i+1];
-    _force_derivatives[i](2) = _force_torque_derivative_store[6*i+2];
-    _torque_derivatives[i](0) = _force_torque_derivative_store[6*i+3];
-    _torque_derivatives[i](1) = _force_torque_derivative_store[6*i+4];
-    _torque_derivatives[i](2) = _force_torque_derivative_store[6*i+5];
-  }
-}
-
-void
-ConstantGrainForceAndTorque::threadJoin(const UserObject & y)
-{
-  const ConstantGrainForceAndTorque & pps = static_cast<const ConstantGrainForceAndTorque &>(y);
-  for (unsigned int i = 0; i < _ncomp; ++i)
-  {
-    _force_torque_store[i] += pps._force_torque_store[i];
-    _force_torque_derivative_store[i] += pps._force_torque_derivative_store[i];
+    _force_derivatives[i] = 0.0;
+    _torque_derivatives[i] = 0.0;
   }
 }
 

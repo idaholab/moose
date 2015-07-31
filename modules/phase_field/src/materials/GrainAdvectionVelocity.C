@@ -18,7 +18,7 @@ GrainAdvectionVelocity::GrainAdvectionVelocity(const InputParameters & parameter
    _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
    _grain_volumes(_grain_data.getGrainVolumes()),
    _grain_centers(_grain_data.getGrainCenters()),
-   _grain_force_torque(getUserObject<ComputeGrainForceAndTorque>("grain_force")),
+   _grain_force_torque(getUserObject<GrainForceAndTorqueInterface>("grain_force")),
    _grain_forces(_grain_force_torque.getForceValues()),
    _grain_torques(_grain_force_torque.getTorqueValues()),
    _grain_force_derivatives(_grain_force_torque.getForceDerivatives()),

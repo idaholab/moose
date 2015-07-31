@@ -17,6 +17,7 @@
 #define CONSTANTGRAINFORCEANDTORQUE_H
 
 #include "GeneralUserObject.h"
+#include "GrainForceAndTorqueInterface.h"
 
 //Forward Declarations
 class ConstantGrainForceAndTorque;
@@ -24,25 +25,26 @@ class ConstantGrainForceAndTorque;
 template<>
 InputParameters validParams<ConstantGrainForceAndTorque>();
 
-/* This class is here to get the force and torque acting on a grain*/
-
-class ConstantGrainForceAndTorque :  public GeneralUserObject
+/**
+ * This class is here to get the force and torque acting on a grain
+ */
+class ConstantGrainForceAndTorque :
+    public GrainForceAndTorqueInterface,
+    public GeneralUserObject
 {
 public:
   ConstantGrainForceAndTorque(const InputParameters & parameters);
 
   virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
+  virtual void execute() {}
+  virtual void finalize() {}
 
-  const std::vector<RealGradient> & getForceValues() const;
-  const std::vector<RealGradient> & getTorqueValues() const;
-  const std::vector<RealGradient> & getForceDerivatives() const;
-  const std::vector<RealGradient> & getTorqueDerivatives() const;
+  virtual const std::vector<RealGradient> & getForceValues() const;
+  virtual const std::vector<RealGradient> & getTorqueValues() const;
+  virtual const std::vector<RealGradient> & getForceDerivatives() const;
+  virtual const std::vector<RealGradient> & getTorqueDerivatives() const;
 
 protected:
-
   /// Applied force on particles
   std::vector<Real> _F;
   std::vector<Real> _M;

@@ -3,7 +3,7 @@
 
 #include "Material.h"
 #include "ComputeGrainCenterUserObject.h"
-#include "ComputeGrainForceAndTorque.h"
+#include "GrainForceAndTorqueInterface.h"
 
 //Forward Declarations
 class GrainAdvectionVelocity;
@@ -28,7 +28,7 @@ protected:
   const std::vector<Point> & _grain_centers;
 
   /// getting userobject for calculating grain forces and torques
-  const ComputeGrainForceAndTorque & _grain_force_torque;
+  const GrainForceAndTorqueInterface & _grain_force_torque;
   const std::vector<RealGradient> & _grain_forces;
   const std::vector<RealGradient> & _grain_torques;
   const std::vector<RealGradient> & _grain_force_derivatives;

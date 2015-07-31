@@ -16,6 +16,7 @@
 #ifndef COMPUTEGRAINFORCEANDTORQUE_H
 #define COMPUTEGRAINFORCEANDTORQUE_H
 
+#include "GrainForceAndTorqueInterface.h"
 #include "ElementUserObject.h"
 #include "ComputeGrainCenterUserObject.h"
 
@@ -27,7 +28,9 @@ InputParameters validParams<ComputeGrainForceAndTorque>();
 
 /* This class is here to get the force and torque acting on a grain*/
 
-class ComputeGrainForceAndTorque :  public ElementUserObject
+class ComputeGrainForceAndTorque :
+    public GrainForceAndTorqueInterface,
+    public ElementUserObject
 {
 public:
   ComputeGrainForceAndTorque(const InputParameters & parameters);

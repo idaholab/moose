@@ -25,6 +25,7 @@ InputParameters validParams<ComputeGrainForceAndTorque>()
 }
 
 ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & parameters) :
+    GrainForceAndTorqueInterface(),
     ElementUserObject(parameters),
     _dF(getMaterialProperty<std::vector<RealGradient> >("force_density")),
     _dFdc(getMaterialProperty<std::vector<RealGradient> >("dFdc")),
