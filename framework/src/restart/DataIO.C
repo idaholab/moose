@@ -51,6 +51,19 @@ dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/)
 
 template<>
 void
+dataStore(std::ostream & stream, DenseVector<Real> & v, void * /*context*/)
+{
+  unsigned int m = v.size();
+  stream.write((char *) &m, sizeof(m));
+  for (unsigned int i = 0; i < v.size(); i++)
+  {
+    Real r = v(i);
+    stream.write((char *) &r, sizeof(r));
+  }
+}
+
+template<>
+void
 dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * /*context*/)
 {
   unsigned int m = v.m();
@@ -224,6 +237,21 @@ dataLoad(std::istream & stream, NumericVector<Real> & v, void * /*context*/)
   }
 
   v.close();
+}
+
+template<>
+void
+dataLoad(std::istream & stream, DenseVector<Real> & v, void * /*context*/)
+{
+  unsigned int n = 0;
+  stream.read((char *) &n, sizeof(n));
+  v.resize(n);
+  for (unsigned int i = 0; i < n; i++)
+  {
+    Real r = 0;
+    stream.read((char *) &r, sizeof(r));
+    v(i) = r;
+  }
 }
 
 template<>
