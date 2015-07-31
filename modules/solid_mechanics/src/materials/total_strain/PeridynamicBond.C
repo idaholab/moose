@@ -79,6 +79,7 @@ PeridynamicBond::PeridynamicBond(const std::string  & name,
    _stiff_elem(declareProperty<Real>("stiff_elem")),
    _bond_status(declareProperty<Real>("bond_status")),
    _bond_status_old(declarePropertyOld<Real>("bond_status")),
+	 _bond_stretch(declareProperty<Real>("bond_stretch")),
 	 _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
 	 _bond_volume(declareProperty<Real>("bond_volume")),
    _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0),
@@ -210,30 +211,45 @@ PeridynamicBond::computeProperties()
     }
   }
   Real new_length = std::sqrt( ddx*ddx + ddy*ddy + ddz*ddz );
-  Real strain = (new_length-orig_length)/orig_length;
-
-  if (std::abs(strain) > _CriticalStretch)
-  {
-  	for (_qp=0; _qp < _qrule->n_points(); ++_qp)
-  	{
-  		_bond_status[_qp] = 0.0;
-  	}
-  }
-
-  Real thermal_strain = 0.0;
+  //Real strain = (new_length-orig_length)/orig_length;
+	Real strain = new_length/orig_length - 1.0;
+  Real mechanics_strain = 0.0;
+	Real thermal_strain = 0.0;
 
   for (_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
     Real youngs_modulus(_youngs_modulus_coupled ? _youngs_modulus_var[_qp] : _youngs_modulus);
     if (_has_temp)
     {
-      thermal_strain = _alpha * (_t_ref - _temp[_qp]);
+      thermal_strain = _alpha * (_temp[_qp] - _t_ref);
+			mechanics_strain = strain - thermal_strain;
 			//_thermal_conductivity[_qp] = _my_thermal_conductivity;
 			_thermal_conductivity[_qp] = _my_thermal_conductivity * exp(-orig_length / _MaterialRegion) * _AvgArea;
 			_bond_volume[_qp] = exp(-orig_length / _MaterialRegion) * _AvgArea * orig_length;
     }
-    _axial_force[_qp] = youngs_modulus * (strain+thermal_strain) * exp(-orig_length / _MaterialRegion) * _VolumePerNode / _MeshSpacing / _lamda;
+		else
+		{
+			mechanics_strain = strain;
+		}
+    _axial_force[_qp] = youngs_modulus * mechanics_strain * exp(-orig_length / _MaterialRegion) * _VolumePerNode / _MeshSpacing / _lamda;
     _stiff_elem[_qp] = (youngs_modulus * exp(-orig_length / _MaterialRegion) / _MeshSpacing / _VolumePerNode / _lamda) * _VolumePerNode * _VolumePerNode / new_length;
+		_bond_stretch[_qp] = mechanics_strain;
+		if (_bond_status_old[_qp] == 1.0)
+		{
+			if (std::abs(mechanics_strain) > _CriticalStretch)
+		  {
+		  	_bond_status[_qp] = 0.0;
+				//cout << "Bond breaking! " << endl;
+		  }
+			else
+			{
+				_bond_status[_qp] = 1.0;
+			}
+		}
+		else
+		{
+			_bond_status[_qp] = _bond_status_old[_qp];
+		}
   }
   _callnum++;
 }

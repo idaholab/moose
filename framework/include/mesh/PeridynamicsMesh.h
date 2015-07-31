@@ -43,7 +43,7 @@ protected:
   /// The dimension of the mesh
   MooseEnum _dim;
   /// Number of elements in x, y, z direction
-  int _nx, _ny, _nz;
+  int _nx, _ny, _nz, _nr, _shape;
 };
 
 #endif /* PERIDYNAMICSMESH_H */

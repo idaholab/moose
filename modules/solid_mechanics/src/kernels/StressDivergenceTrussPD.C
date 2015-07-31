@@ -32,6 +32,8 @@ StressDivergenceTrussPD::StressDivergenceTrussPD(const std::string & name, Input
    _axial_force(getMaterialProperty<Real>("axial_force" + getParam<std::string>("appended_property_name"))),
    _stiff_elem(getMaterialProperty<Real>("stiff_elem" + getParam<std::string>("appended_property_name"))),
    _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
+   _bond_status_old(getMaterialPropertyOld<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
+   _bond_stretch(getMaterialProperty<Real>("bond_stretch" + getParam<std::string>("appended_property_name"))),
    _component(getParam<unsigned int>("component")),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),
@@ -62,7 +64,7 @@ StressDivergenceTrussPD::computeResidual()
 
   RealGradient orientation( (*_orientation)[0] );
   orientation /= orientation.size();
-  VectorValue<Real> force_local = _axial_force[0] * _bond_status[0] * orientation;
+  VectorValue<Real> force_local = _axial_force[0] * _bond_status_old[0] * orientation;
   int sign(-_test[0][0]/std::abs(_test[0][0]));
   _local_re(0) = sign * force_local(_component);
   _local_re(1) = -_local_re(0);
@@ -83,16 +85,16 @@ StressDivergenceTrussPD::computeStiffness(ColumnMajorMatrix & stiff_global)
   RealGradient orientation( (*_orientation)[0] );
   orientation /= orientation.size();
 
-  Real k = _stiff_elem[0];
-  stiff_global(0,0) = orientation(0)*orientation(0)*k;
+  Real k = _stiff_elem[0]*_bond_status_old[0];
+  stiff_global(0,0) = (orientation(0)*orientation(0) + _bond_stretch[0])*k;
   stiff_global(0,1) = orientation(0)*orientation(1)*k;
   stiff_global(0,2) = orientation(0)*orientation(2)*k;
   stiff_global(1,0) = orientation(1)*orientation(0)*k;
-  stiff_global(1,1) = orientation(1)*orientation(1)*k;
+  stiff_global(1,1) = (orientation(1)*orientation(1) + _bond_stretch[0])*k;
   stiff_global(1,2) = orientation(1)*orientation(2)*k;
   stiff_global(2,0) = orientation(2)*orientation(0)*k;
   stiff_global(2,1) = orientation(2)*orientation(1)*k;
-  stiff_global(2,2) = orientation(2)*orientation(2)*k;
+  stiff_global(2,2) = (orientation(2)*orientation(2) + _bond_stretch[0])*k;
 }
 
 void
