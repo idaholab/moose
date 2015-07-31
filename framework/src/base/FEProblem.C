@@ -2659,6 +2659,17 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
 //  multi_app->init();
 }
 
+bool
+FEProblem::hasMultiApp(const std::string & multi_app_name)
+{
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+    if (_multi_apps(Moose::exec_types[i])[0].hasMultiApp(multi_app_name))
+      return true;
+
+  return false;
+}
+
+
 MultiApp *
 FEProblem::getMultiApp(const std::string & multi_app_name)
 {

@@ -24,6 +24,7 @@
 #include "Conversion.h"
 #include "CommandLine.h"
 #include "InfixIterator.h"
+#include "MultiApp.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -357,14 +358,66 @@ MooseApp::runInputFile()
     std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
     _parser.checkUnidentifiedParams(all_vars, error_unused, true);
 
-    // Only check CLI parameters on the main application
-    // TODO: Add support for SubApp overrides and checks #4119
-    if (_name == "main")
+    // Check the CLI parameters
+    all_vars = _command_line->getPot()->get_variable_names();
+    // Remove flags, they aren't "input" parameters
+    all_vars.erase( std::remove_if(all_vars.begin(), all_vars.end(), isFlag), all_vars.end() );
+
+    MooseSharedPointer<FEProblem> fe_problem= _action_warehouse.problem();
+    if (fe_problem.get() && name() == "main")
     {
-      // Check the CLI parameters
-      all_vars = _command_line->getPot()->get_variable_names();
-      // Remove flags, they aren't "input" parameters
-      all_vars.erase( std::remove_if(all_vars.begin(), all_vars.end(), isFlag), all_vars.end() );
+      // Make sure that multiapp overrides were processed properly
+      int last = all_vars.size() - 1;                      // last is allowed to go negative
+      for (int i = 0; i <= last; /* no increment */)       // i is an int because last is an int
+      {
+        std::string multi_app, variable;
+        int app_num;
+
+        /**
+         * Command line parameters that contain a colon are assumed to apply to MultiApps
+         * (e.g.  MultiApp_name[num]:fully_qualified_parameter)
+         *
+         * Note: Two separate regexs are used since the digit part is optional. Attempting
+         * to have an optional capture into a non-string type will cause pcrecpp to report
+         * false. Capturing into a string an converting is more work than just using two
+         * regexs to begin with.
+         */
+        if (pcrecpp::RE("(.*?)"                                             // Match the MultiApp name
+                        "(\\d+)"                                            // MultiApp number (leave off to apply to all MultiApps with this name)
+                        ":"                                                 // the colon delimiter
+                        "(.*)"                                              // the variable override that applies to the MultiApp
+              ).FullMatch(all_vars[i], &multi_app, &app_num, &variable) &&
+            fe_problem->hasMultiApp(multi_app) &&                           // Make sure the MultiApp exists
+                                                                            // Finally make sure the number is in range (if provided)
+            static_cast<unsigned int>(app_num) < fe_problem->getMultiApp(multi_app)->numGlobalApps())
+
+
+          // delete the current item by copying the last item to this position and decrementing the vector end position
+          all_vars[i] = all_vars[last--];
+
+        else if (pcrecpp::RE("(.*?)"                                        // Same as above without the MultiApp number
+                             ":"
+                             "(.*)"
+                   ).FullMatch(all_vars[i], &multi_app, &variable) &&
+                 fe_problem->hasMultiApp(multi_app))                        // Make sure the MultiApp exists but no need to check numbers
+
+          // delete (see comment above)
+          all_vars[i] = all_vars[last--];
+
+
+        // TODO: check to see if globals are unused
+        else if (all_vars[i].find(":") == 0)
+          all_vars[i] = all_vars[last--];
+
+        else
+          // only increment if we didn't "delete", otherwise we'll need to revisit the current index due to copy
+          ++i;
+      }
+
+      mooseAssert(last + 1 >= 0, "index \"last\" is negative");
+
+      // Remove the deleted items
+      all_vars.resize(last+1);
 
       _parser.checkUnidentifiedParams(all_vars, error_unused, false);
     }

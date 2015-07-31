@@ -95,7 +95,12 @@ MultiApp::MultiApp(const InputParameters & parameters):
     _fe_problem(getParam<FEProblem *>("_fe_problem")),
     _app_type(getParam<MooseEnum>("app_type")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
+    _total_num_apps(0),
+    _my_num_apps(0),
+    _first_local_app(0),
     _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
+    _my_comm(MPI_COMM_SELF),
+    _my_rank(0),
     _inflation(getParam<Real>("bounding_box_inflation")),
     _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
@@ -109,6 +114,14 @@ MultiApp::MultiApp(const InputParameters & parameters):
     _has_an_app(true),
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
 {
+  if (_move_apps.size() != _move_positions.size())
+    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp "<<_name);
+
+  // Fill in the _positions vector
+  fillPositions();
+
+  _total_num_apps = _positions.size();
+  mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
 }
 
 MultiApp::~MultiApp()
@@ -132,9 +145,6 @@ MultiApp::initialSetup()
 
   if (_move_apps.size() != _move_positions.size())
     mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp " << name());
-
-  _total_num_apps = _positions.size();
-  mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
 
   /// Set up our Comm and set the number of apps we're going to be working on
   buildComm();
