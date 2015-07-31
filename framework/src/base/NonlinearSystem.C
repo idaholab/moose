@@ -141,7 +141,8 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _n_residual_evaluations(0),
     _final_residual(0.),
     _computing_initial_residual(false),
-    _print_all_var_norms(false)
+    _print_all_var_norms(false),
+    _has_nodalbc_save_in(false)
 {
   _sys.nonlinear_solver->residual      = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian      = Moose::compute_jacobian;
@@ -550,6 +551,9 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
     {
       _bcs[tid].addNodalBC(boundary_ids, nbc);
       _vars[tid].addBoundaryVars(boundary_ids, nbc->getCoupledVars());
+      if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0 ||
+          parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
+        _has_nodalbc_save_in = true;
     }
     else if (ibc.get())
     {
@@ -695,6 +699,10 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
       _residual_ghosted = residual;
       _residual_ghosted.close();
     }
+
+    // Need to close and update the aux system in case residuals were saved to it.
+    _fe_problem.getAuxiliarySystem().solution().close();
+    _fe_problem.getAuxiliarySystem().update();
   }
   catch (MooseException & e)
   {
@@ -1238,6 +1246,10 @@ void
 void
 NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
 {
+  // We need to close the diag_save_in variables on the aux system before NodalBCs clear the dofs on boundary nodes
+  if (_has_nodalbc_save_in)
+    _fe_problem.getAuxiliarySystem().solution().close();
+
   PARALLEL_TRY {
     // last thing to do are nodal BCs
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -1800,6 +1812,10 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   }
   PARALLEL_CATCH;
   jacobian.close();
+
+  // We need to close the save_in variables on the aux system before NodalBCs clear the dofs on boundary nodes
+  if (_has_nodalbc_save_in)
+    _fe_problem.getAuxiliarySystem().solution().close();
 
   PARALLEL_TRY {
     // Make sure there are no cached NodalBC entries hanging around from the last assembly
