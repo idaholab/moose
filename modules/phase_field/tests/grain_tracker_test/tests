@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [./test_nodal]
     type = 'Exodiff'
     input = 'grain_tracker_same.i'
     exodiff = 'grain_tracker_same_out.e'
@@ -42,5 +42,25 @@
     input = 'grain_tracker_ebsd.i'
     exodiff = 'grain_tracker_ebsd_out.e'
     skip = 'ReconVarIC not moved yet'
+  [../]
+
+  ###################################################
+  # Faux grain tracker
+  ###################################################
+  [./test_faux_nodal]
+    type = 'Exodiff'
+    input = 'grain_tracker_same.i'
+    cli_args = 'Outputs/file_base=gt_faux_nodal_out Postprocessors/grain_tracker/type=FauxGrainTracker'
+
+    exodiff = 'gt_faux_nodal_out.e'
+  [../]
+
+  [./test_faux_element]
+    type = 'Exodiff'
+    input = 'grain_tracker_test_elemental.i'
+    cli_args = 'Outputs/file_base=gt_faux_elemental_out Postprocessors/grain_tracker/type=FauxGrainTracker'
+
+    exodiff = 'gt_faux_elemental_out.e-s002'
+    method = 'OPT OPROF' # slow test
   [../]
 []
