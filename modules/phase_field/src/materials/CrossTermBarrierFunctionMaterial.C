@@ -30,6 +30,7 @@ CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const InputPa
     _prop_d2g(_num_eta)
 
 {
+
   // if Vector W_ij is not the correct size to fill the matrix give error
   if (_num_eta * _num_eta != _W_ij.size())
     mooseError("Supply the number of etas squared for W_ij.");
@@ -82,6 +83,7 @@ CrossTermBarrierFunctionMaterial::computeQpProperties()
   // Sum the components of our W_ij matrix to get constant used in our g function
   for (unsigned int i = 0; i < _num_eta; ++i)
     for (unsigned int j = i; j < _num_eta; ++j)
+
     {
       switch (_g_order)
       {
@@ -93,6 +95,7 @@ CrossTermBarrierFunctionMaterial::computeQpProperties()
           else
             (*_prop_d2g[i][j])[_qp] +=  _W_ij[_num_eta * i + j] * 4 * (*_eta[i])[_qp] * (*_eta[j])[_qp];
           break;
+
       }
     }
 }
