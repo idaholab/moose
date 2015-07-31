@@ -390,6 +390,11 @@ public:
    */
   void restore(MooseSharedPointer<Backup> backup);
 
+  /**
+   * Returns a string to be printed at the beginning of a simulation
+   */
+  virtual std::string header() const;
+
 protected:
 
   /**

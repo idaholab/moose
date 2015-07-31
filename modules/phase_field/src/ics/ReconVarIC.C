@@ -3,12 +3,11 @@
 template<>
 InputParameters validParams<ReconVarIC>()
 {
-
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
-  params.addRequiredParam<bool>("consider_phase","If true, IC will only only deal with grain values and ignore phase");
-  params.addParam<unsigned int>("phase", 0,"EBSD phase number to be assigned to this grain");
-  params.addParam<bool>("all_to_one",false,"If true, assign all grain numbers in this phase to the same variable");
+  params.addRequiredParam<bool>("consider_phase", "If true, IC will only only deal with grain values and ignore phase");
+  params.addParam<unsigned int>("phase", 0, "EBSD phase number to be assigned to this grain");
+  params.addParam<bool>("all_to_one", false, "If true, assign all grain numbers in this phase to the same variable");
   params.addParam<unsigned int>("op_num", 0, "Specifies the number of order paraameters to create, all_to_one = false");
   params.addParam<unsigned int>("op_index", 0,"The index for the current order parameter, if all_to_one = false");
   return params;

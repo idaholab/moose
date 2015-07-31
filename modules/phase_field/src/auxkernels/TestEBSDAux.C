@@ -20,7 +20,7 @@ TestEBSDAux::TestEBSDAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
     _data_name(getParam<MooseEnum>("data_name")),
-    _val(getPointDataAccessFunctor(_data_name))
+    _val(_ebsd_reader.getPointDataAccessFunctor(_data_name))
 {
 }
 
@@ -40,6 +40,6 @@ TestEBSDAux::TestEBSDAux(const std::string & deprecated_name, InputParameters pa
     AuxKernel(deprecated_name, parameters),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
     _data_name(getParam<MooseEnum>("data_name")),
-    _val(getPointDataAccessFunctor(_data_name))
+    _val(_ebsd_reader.getPointDataAccessFunctor(_data_name))
 {
 }

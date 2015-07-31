@@ -75,6 +75,7 @@
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
 #include "DerivativeTwoPhaseMaterial.h"
+#include "DiscreteNucleation.h"
 #include "ElasticEnergyMaterial.h"
 #include "GBAnisotropy.h"
 #include "GBEvolution.h"
@@ -264,6 +265,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
   registerMaterial(DerivativeTwoPhaseMaterial);
+  registerMaterial(DiscreteNucleation);
   registerMaterial(ElasticEnergyMaterial);
   registerMaterial(GBAnisotropy);
   registerMaterial(GBEvolution);

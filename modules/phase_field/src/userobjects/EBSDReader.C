@@ -7,12 +7,14 @@
 #include "EBSDReader.h"
 #include "EBSDMesh.h"
 #include "MooseMesh.h"
+#include "Conversion.h"
 
 template<>
 InputParameters validParams<EBSDReader>()
 {
   InputParameters params = validParams<EulerAngleProvider>();
   params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order parameters to create");
+  params.addParam<unsigned int>("custom_columns", 0, "Number of additional custom data columns to read from the EBSD file");
   return params;
 }
 
@@ -22,6 +24,7 @@ EBSDReader::EBSDReader(const InputParameters & params) :
     _nl(_fe_problem.getNonlinearSystem()),
     _op_num(getParam<unsigned int>("op_num")),
     _feature_num(0),
+    _custom_columns(getParam<unsigned int>("custom_columns")),
     _mesh_dimension(_mesh.dimension()),
     _nx(0),
     _ny(0),
@@ -83,6 +86,11 @@ EBSDReader::readFile()
       std::istringstream iss(line);
       iss >> d.phi1 >> d.phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
 
+      d.custom.resize(_custom_columns);
+      for (unsigned int i = 0; i < _custom_columns; ++i)
+        if (!(iss >> d.custom[i]))
+          mooseError("Unable to read in EBSD custom data column #" << i);
+
       if (x < _minx || y < _miny || x > _maxx || y > _maxy || (g.dim == 3 && (z < _minz || z > _maxz)))
         mooseError("EBSD Data ouside of the domain declared in the header ([" << _minx << ':' << _maxx << "], [" << _miny << ':' << _maxy << "], [" << _minz << ':' << _maxz << "]) dim=" << g.dim << "\n" << line);
 
@@ -114,6 +122,7 @@ EBSDReader::readFile()
     EBSDAvgData & a = _avg_data[i];
     a.symmetry = a.phase = a.n = 0;
     a.p = 0.0;
+    a.custom.assign(_custom_columns, 0.0);
 
     EulerAngles & b = _avg_angles[i];
     b.phi1 = b.Phi = b.phi2 = 0.0;
@@ -142,6 +151,9 @@ EBSDReader::readFile()
       if (a.symmetry != j->symmetry)
         mooseError("An EBSD feature needs to have a uniform symmetry parameter.");
 
+    for (unsigned int i = 0; i < _custom_columns; ++i)
+      a.custom[i] += j->custom[i];
+
     a.p += j->p;
     a.n++;
   }
@@ -167,6 +179,9 @@ EBSDReader::readFile()
     _feature_id[a.phase].push_back(i);
 
     a.p *= 1.0/Real(a.n);
+
+    for (unsigned int i = 0; i < _custom_columns; ++i)
+      a.custom[i] *= 1.0/Real(a.n);
   }
 
   // Build map
@@ -298,6 +313,60 @@ EBSDReader::buildNodeToGrainWeightMap()
       _node_to_grn_weight_map[node_id][grain_id] += 1.0 / n_elems;
     }
   }
+}
+
+EBSDAccessFunctors::EBSDPointDataFunctor *
+EBSDReader::getPointDataAccessFunctor(const MooseEnum & field_name) const
+{
+  switch (field_name)
+  {
+    case 0: // phi1
+      return new EBSDPointDataPhi1();
+    case 1: // phi
+      return new EBSDPointDataPhi();
+    case 2: // phi2
+      return new EBSDPointDataPhi2();
+    case 3: // grain
+      return new EBSDPointDataGrain();
+    case 4: // phase
+      return new EBSDPointDataPhase();
+    case 5: // symmetry
+      return new EBSDPointDataSymmetry();
+    case 6: // op
+      return new EBSDPointDataOp();
+  }
+
+  // check for custom columns
+  for (unsigned int i = 0; i < _custom_columns; ++i)
+    if (field_name == "CUSTOM" + Moose::stringify(i))
+      return new EBSDPointDataCustom(i);
+
+  mooseError("Error:  Please input supported EBSD_param");
+}
+
+EBSDAccessFunctors::EBSDAvgDataFunctor *
+EBSDReader::getAvgDataAccessFunctor(const MooseEnum & field_name) const
+{
+  switch (field_name)
+  {
+    case 0: // phi1
+      return new EBSDAvgDataPhi1();
+    case 1: // phi
+      return new EBSDAvgDataPhi();
+    case 2: // phi2
+      return new EBSDAvgDataPhi2();
+    case 3: // phase
+      return new EBSDAvgDataPhase();
+    case 4: // symmetry
+      return new EBSDAvgDataSymmetry();
+  }
+
+  // check for custom columns
+  for (unsigned int i = 0; i < _custom_columns; ++i)
+    if (field_name == "CUSTOM" + Moose::stringify(i))
+      return new EBSDAvgDataCustom(i);
+
+  mooseError("Error:  Please input supported EBSD_param");
 }
 
 
