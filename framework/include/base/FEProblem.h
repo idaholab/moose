@@ -526,6 +526,7 @@ public:
    * Returns whether or not the current simulation has any multiapps
    */
   bool hasMultiApps() const { return _has_multiapps; }
+  bool hasMultiApp(const std::string & name);
 
   /**
    * Check existence of the VectorPostprocessor.

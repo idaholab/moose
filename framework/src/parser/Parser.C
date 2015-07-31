@@ -44,6 +44,9 @@
 
 #include "MooseTypes.h"
 
+// Regular expression includes
+#include "pcrecpp.h"
+
 // libMesh
 #include "libmesh/getpot.h"
 
@@ -146,6 +149,22 @@ Parser::parse(const std::string &input_filename)
   _getpot_file.parse_input_file(input_filename);
   _getpot_initialized = true;
   _inactive_strings.clear();
+
+  /**
+   * If this is a Multiapp or wrapper make sure we set a prefix on the CommandLine object for CLI overrides.
+   */
+  if (_app.name() != "main")
+  {
+    std::string name;
+    std::string num;
+    if (pcrecpp::RE("(.*?)"                       // Match the multiapp name
+                    "(\\d+)"                      // math the multiapp number
+          ).FullMatch(_app.name(), &name, &num))
+      _app.commandLine()->setPrefix(name, num);
+    else
+      // Wrapper case
+      _app.commandLine()->setPrefix(_app.name(), "0");
+  }
 
   // Check for "unidentified nominuses".  These can indicate a vector
   // input which the user failed to wrap in quotes e.g.: v = 1 2
@@ -320,12 +339,12 @@ void
 Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
 {
   /**
-   * We only want to retrieve CLI overrides for the main application. We'll check the
+   * We only want to retrieve non-prefixed CLI overrides for the main application. We'll check the
    * name of the controlling application to determine whether to use the command line
    * here or not.
    */
   MooseSharedPointer<CommandLine> cmd_line;
-  if (_app.name() == "main") // See AppFactory::createApp
+//  if (_app.name() == "main") // See AppFactory::createApp
     cmd_line = _app.commandLine();
 
   if (cmd_line.get())
@@ -336,11 +355,15 @@ Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
     std::vector<std::string> cli_variables = get_pot->get_variable_names();
     for (unsigned int i=0; i<cli_variables.size(); ++i)
     {
-      std::string::size_type pos = cli_variables[i].find_last_of('/');
-      if (pos != std::string::npos)
+      std::string::size_type colon_pos = cli_variables[i].find(':');
+      std::string::size_type last_slash_pos = cli_variables[i].find_last_of('/');
+
+      // Make sure that the variable does not contain a colon. This indicates that the override is for
+      // a Multiapp parameter which we won't handle here.
+      if (colon_pos == std::string::npos && last_slash_pos != std::string::npos)
       {
         // If the user supplies a CLI argument whose section doesn't exist in the input file, we'll append it here
-        std::string section = cli_variables[i].substr(0, pos+1);
+        std::string section = cli_variables[i].substr(0, last_slash_pos+1);
         if (std::find(section_names.begin(), section_names.end(), section) == section_names.end())
           section_names.push_back(section);
       }
@@ -909,7 +932,7 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
@@ -918,6 +941,7 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
   std::string current_name = current_param;
 
   std::string value = gp->get_value_no_default(full_name.c_str(), current_name);
+
   param->set() = value;
   if (in_global)
   {
@@ -933,7 +957,7 @@ void Parser::setScalarParameter<MultiMooseEnum>(const std::string & full_name, c
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
@@ -965,7 +989,7 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
@@ -996,12 +1020,13 @@ void Parser::setScalarParameter<PostprocessorName>(const std::string & full_name
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
 
   PostprocessorName pps_name = gp->get_value_no_default(full_name.c_str(), param->get());
+
   // Set the value here
   param->set() = pps_name;
 
@@ -1037,7 +1062,7 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
@@ -1075,7 +1100,7 @@ void Parser::setVectorParameter<VariableName>(const std::string & full_name, con
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
