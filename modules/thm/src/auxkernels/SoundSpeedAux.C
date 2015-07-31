@@ -29,8 +29,5 @@ SoundSpeedAux::~SoundSpeedAux()
 Real
 SoundSpeedAux::computeValue()
 {
-  Real c2 = _spfp.c2(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
-  if (c2 < 0)
-    mooseError("Sound speed went negative. Aborting...");
-  return std::sqrt(c2);
+  return _spfp.c(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
 }
