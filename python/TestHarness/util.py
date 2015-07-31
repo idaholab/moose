@@ -55,6 +55,10 @@ LIBMESH_OPTIONS = {
   'dof_id_bytes' : { 're_option' : r'#define\s+LIBMESH_DOF_ID_BYTES\s+(\d+)',
                      'default'   : '4'
                    },
+  'petsc_debug'  : { 're_option' : r'#define\s+LIBMESH_PETSC_USE_DEBUG\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE'  : '1', 'FALSE' : '0'}
+                   },
 }
 
 
