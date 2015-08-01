@@ -40,10 +40,10 @@ public:
   virtual void finalize();
   virtual void threadJoin(const UserObject & y);
 
-  const std::vector<RealGradient> & getForceValues() const;
-  const std::vector<RealGradient> & getTorqueValues() const;
-  const std::vector<RealGradient> & getForceDerivatives() const;
-  const std::vector<RealGradient> & getTorqueDerivatives() const;
+  virtual const std::vector<RealGradient> & getForceValues() const;
+  virtual const std::vector<RealGradient> & getTorqueValues() const;
+  virtual const std::vector<RealGradient> & getForceDerivatives() const;
+  virtual const std::vector<RealGradient> & getTorqueDerivatives() const;
 
 protected:
   unsigned int _qp;
