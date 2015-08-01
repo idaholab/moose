@@ -25,8 +25,8 @@ template<>
 InputParameters validParams<GrainCentersPostprocessor>();
 
 /**
- *  GrainCentersPostprocessor is a type of VectorPostprocessor that outputs the
- *  values of an arbitrary user-specified set of postprocessors as a vector in the order specified by the user.
+ *  GrainCentersPostprocessor is a type of VectorPostprocessor that outputs center and volume of grains
+ *  calculated in GrainCenterUserObject.
  */
 
 class GrainCentersPostprocessor :
@@ -67,9 +67,11 @@ protected:
   /// The VectorPostprocessorValue object where the results are stored
   VectorPostprocessorValue & _grain_volume_center_vector;
 
-  /// The vector of PostprocessorValue objects that are used to get the values of the postprocessors
+  /// Userobject that calculates volumes and centers of grains
   const ComputeGrainCenterUserObject & _grain_data;
+  /// Extracting grain volumes from Userobject
   const std::vector<Real> & _grain_volumes;
+  /// Extracting grain centers from Userobject
   const std::vector<Point> & _grain_centers;
 
   unsigned int _total_grains;

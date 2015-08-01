@@ -64,6 +64,7 @@ protected:
   std::vector<RealGradient> _torque_derivatives;
   /// vector storing grain force and torque values
   std::vector<Real> _force_torque_store;
+  /// vector storing derivative of grain force and torque values
   std::vector<Real> _force_torque_derivative_store;
 };
 

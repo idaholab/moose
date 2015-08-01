@@ -35,10 +35,10 @@ protected:
   const std::vector<RealGradient> & _grain_torque_derivatives;
 
 private:
-  /// equilibrium density at the grain boundaries
+  /// constant value corresponding to grain translation
   Real _mt;
 
-  /// thresold value for identifying grain boundaries
+  /// constant value corresponding to grain rotation
   Real _mr;
 
   unsigned int _ncrys;
@@ -51,10 +51,8 @@ private:
   /// Material storing divergence of advection velocities of grains
   MaterialProperty<std::vector<Real> > & _div_velocity_advection;
 
-  /// Material storing advection velocities of grains
+  /// Material storing derivative of advection velocities of grains
   MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative;
-
-  /// Material storing divergence of advection velocities of grains
   MaterialProperty<std::vector<Real> > & _div_velocity_advection_derivative;
 };
 

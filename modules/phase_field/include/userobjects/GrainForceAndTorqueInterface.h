@@ -19,7 +19,7 @@
 #include "MooseObject.h"
 
 /**
- * This class is here to get the force and torque acting on a grain
+ * This class provides interface for extracting the forces and torques computed in other UserObjects
  */
 class GrainForceAndTorqueInterface
 {

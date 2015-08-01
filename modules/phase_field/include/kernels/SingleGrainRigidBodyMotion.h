@@ -47,7 +47,7 @@ protected:
   /// Material property for  dervative of advection velocities
   const MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative;
 
-  /// Material property for dirivative of divergence of advection velocities
+  /// Material property for derivative of divergence of advection velocities
   const MaterialProperty<std::vector<Real> > & _div_velocity_advection_derivative;
 };
 

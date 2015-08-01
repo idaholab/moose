@@ -26,7 +26,7 @@ InputParameters validParams<GrainForcesPostprocessor>();
 
 /**
  *  GrainForcesPostprocessor is a type of VectorPostprocessor that outputs the
- *  values of an arbitrary user-specified set of postprocessors as a vector in the order specified by the user.
+ *  force and torque values calculated in UserObjects.
  */
 
 class GrainForcesPostprocessor :
@@ -67,11 +67,15 @@ protected:
   /// The VectorPostprocessorValue object where the results are stored
   VectorPostprocessorValue & _grain_force_torque_vector;
 
-  /// The vector of PostprocessorValue objects that are used to get the values of the postprocessors
+  /// UserobjectInterface for getting force and torque values from UserObjects
   const GrainForceAndTorqueInterface & _grain_force_torque;
+  /// Extracting forces from Userobject
   const std::vector<RealGradient> & _grain_forces;
+  /// Extracting torques from Userobject
   const std::vector<RealGradient> & _grain_torques;
+  /// Extracting derivative of forces from Userobject
   const std::vector<RealGradient> & _grain_force_derivatives;
+  /// Extracting derivative of torques from Userobject
   const std::vector<RealGradient> & _grain_torque_derivatives;
 
   unsigned int _total_grains;
