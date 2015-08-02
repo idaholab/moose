@@ -227,6 +227,9 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
     // ignore any other lines - if we get here probably the data file is corrupt
   }
 
+  // check that some axes have been defined
+  if (dim == 0)
+    mooseError("No valid AXIS lines found by GriddedData");
 
   // step is useful in evaluateFcn
   step.resize(dim);
@@ -236,8 +239,6 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
 
 
   // perform some checks
-  if (dim == 0)
-    mooseError("No valid data found by GriddedData");
   unsigned int num_data_points = 1;
   for (unsigned int i = 0; i < dim; ++i)
   {

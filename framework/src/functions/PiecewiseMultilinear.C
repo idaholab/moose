@@ -42,7 +42,7 @@ PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters) :
   // GriddedData does not demand that each axis is independent, but we do
   std::set<int> s(_axes.begin(), _axes.end());
   if (s.size() != _dim)
-    mooseError("PiecewiseMultilinear needs the AXES to be independent.  Check the AXES lines in your data file.");
+    mooseError("PiecewiseMultilinear needs the AXES to be independent.  Check the AXIS lines in your data file.");
 
 }
 
@@ -179,6 +179,6 @@ PiecewiseMultilinear::PiecewiseMultilinear(const std::string & deprecated_name, 
   // GriddedData does not demand that each axis is independent, but we do
   std::set<int> s(_axes.begin(), _axes.end());
   if (s.size() != _dim)
-    mooseError("PiecewiseMultilinear needs the AXES to be independent.  Check the AXES lines in your data file.");
+    mooseError("PiecewiseMultilinear needs the AXES to be independent.  Check the AXIS lines in your data file.");
 
 }
