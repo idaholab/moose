@@ -61,15 +61,3 @@ Real NSMomentumInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned 
   return this->pressure_qp_jacobian( this->map_var_number(jvar) );
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSMomentumInviscidSpecifiedNormalFlowBC::NSMomentumInviscidSpecifiedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSMomentumInviscidBC(deprecated_name, parameters),
-
-      // Aux Variables
-      _pressure(coupledValue("pressure")),
-
-      // Required parameters
-      _rhou_udotn(getParam<Real>("rhou_udotn"))
-{
-}

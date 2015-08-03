@@ -55,15 +55,3 @@ NSTemperatureAux::computeValue()
   return e_i / cv;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSTemperatureAux::NSTemperatureAux(const std::string & deprecated_name, InputParameters parameters)
-    : AuxKernel(deprecated_name, parameters),
-      _rho(coupledValue("rho")),
-      _u_vel(coupledValue("u")),
-      _v_vel(coupledValue("v")),
-      _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
-      _rhoe(coupledValue("rhoe")),
-      _R(getParam<Real>("R")),
-      _gamma(getParam<Real>("gamma"))
-{}

@@ -26,7 +26,6 @@ class NSMomentumPressureWeakStagnationBC : public NSWeakStagnationBC
 
 public:
   NSMomentumPressureWeakStagnationBC(const InputParameters & parameters);
-  NSMomentumPressureWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMomentumPressureWeakStagnationBC(){}
 

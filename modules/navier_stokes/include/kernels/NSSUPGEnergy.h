@@ -23,7 +23,6 @@ class NSSUPGEnergy : public NSSUPGBase
 {
 public:
   NSSUPGEnergy(const InputParameters & parameters);
-  NSSUPGEnergy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

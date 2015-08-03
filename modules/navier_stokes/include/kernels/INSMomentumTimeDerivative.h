@@ -24,7 +24,6 @@ class INSMomentumTimeDerivative : public TimeDerivative
 {
 public:
   INSMomentumTimeDerivative(const InputParameters & parameters);
-  INSMomentumTimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSMomentumTimeDerivative(){}
 

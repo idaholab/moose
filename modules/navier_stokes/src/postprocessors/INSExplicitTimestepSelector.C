@@ -108,17 +108,3 @@ INSExplicitTimestepSelector::threadJoin(const UserObject & uo)
   _value = std::min(_value, pps._value);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-INSExplicitTimestepSelector::INSExplicitTimestepSelector(const std::string & deprecated_name, InputParameters parameters) :
-  ElementPostprocessor(deprecated_name, parameters),
-  _vel_mag(coupledValue("vel_mag")),
-
-  // Material properties
-  _mu(getParam<Real>("mu")),
-  _rho(getParam<Real>("rho")),
-
-  // Other parameters
-  _beta(getParam<Real>("beta"))
-{
-}

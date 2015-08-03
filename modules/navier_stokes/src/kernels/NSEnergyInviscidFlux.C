@@ -111,9 +111,3 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-NSEnergyInviscidFlux::NSEnergyInviscidFlux(const std::string & deprecated_name, InputParameters parameters)
-  : NSKernel(deprecated_name, parameters),
-    _enthalpy(coupledValue("enthalpy"))
-{}

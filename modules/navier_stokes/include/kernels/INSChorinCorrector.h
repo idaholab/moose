@@ -23,7 +23,6 @@ class INSChorinCorrector : public Kernel
 {
 public:
   INSChorinCorrector(const InputParameters & parameters);
-  INSChorinCorrector(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSChorinCorrector(){}
 

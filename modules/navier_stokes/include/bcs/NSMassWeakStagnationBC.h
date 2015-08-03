@@ -24,7 +24,6 @@ class NSMassWeakStagnationBC : public NSWeakStagnationBC
 
 public:
   NSMassWeakStagnationBC(const InputParameters & parameters);
-  NSMassWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMassWeakStagnationBC(){}
 

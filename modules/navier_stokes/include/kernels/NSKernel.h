@@ -27,7 +27,6 @@ class NSKernel : public Kernel
 {
 public:
   NSKernel(const InputParameters & parameters);
-  NSKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSKernel(){}
 

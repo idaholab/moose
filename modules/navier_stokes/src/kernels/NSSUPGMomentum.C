@@ -175,10 +175,3 @@ Real NSSUPGMomentum::compute_jacobian(unsigned var)
   return mass_term + mom_term + ene_term;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSSUPGMomentum::NSSUPGMomentum(const std::string & deprecated_name, InputParameters parameters)
-    : NSSUPGBase(deprecated_name, parameters),
-      _component(getParam<unsigned>("component"))
-{
-}

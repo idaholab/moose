@@ -22,7 +22,6 @@ class INSExplicitTimestepSelector : public ElementPostprocessor
 {
 public:
   INSExplicitTimestepSelector(const InputParameters & parameters);
-  INSExplicitTimestepSelector(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~INSExplicitTimestepSelector();
 
   virtual void initialize();

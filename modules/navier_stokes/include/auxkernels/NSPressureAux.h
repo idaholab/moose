@@ -27,7 +27,6 @@ public:
    * constructor.
    */
   NSPressureAux(const InputParameters & parameters);
-  NSPressureAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSPressureAux() {}
 

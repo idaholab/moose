@@ -28,7 +28,6 @@ class NSStagnationBC : public NodalBC
 public:
   // Constructor
   NSStagnationBC(const InputParameters & parameters);
-  NSStagnationBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   // Destructor, better be virtual
   virtual ~NSStagnationBC(){}

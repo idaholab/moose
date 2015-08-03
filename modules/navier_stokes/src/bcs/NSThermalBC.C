@@ -70,15 +70,3 @@ NSThermalBC::computeQpResidual()
   return _u[_qp] - (_rho[_qp] * cv * value);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSThermalBC::NSThermalBC(const std::string & deprecated_name, InputParameters parameters)
-  :NodalBC(deprecated_name, parameters),
-   _rho_var(coupled("rho")),
-   _rho(coupledValue("rho")),
-   _initial(getParam<Real>("initial")),
-   _final(getParam<Real>("final")),
-   _duration(getParam<Real>("duration")),
-   _R(getParam<Real>("R")),
-   _gamma(getParam<Real>("gamma"))
-  {}

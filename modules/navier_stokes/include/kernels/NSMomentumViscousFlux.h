@@ -27,7 +27,6 @@ class NSMomentumViscousFlux : public NSKernel
 public:
 
   NSMomentumViscousFlux(const InputParameters & parameters);
-  NSMomentumViscousFlux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

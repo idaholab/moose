@@ -76,12 +76,3 @@ Real NSEnergyInviscidUnspecifiedBC::compute_jacobian(unsigned var_number)
     this->qp_jacobian_termC(var_number, un);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSEnergyInviscidUnspecifiedBC::NSEnergyInviscidUnspecifiedBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSEnergyInviscidBC(deprecated_name, parameters),
-
-      // Aux Variables
-      _pressure(coupledValue("pressure"))
-{
-}

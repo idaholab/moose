@@ -24,7 +24,6 @@ class NSEnergyInviscidSpecifiedNormalFlowBC : public NSEnergyInviscidBC
 
 public:
   NSEnergyInviscidSpecifiedNormalFlowBC(const InputParameters & parameters);
-  NSEnergyInviscidSpecifiedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSEnergyInviscidSpecifiedNormalFlowBC(){}
 

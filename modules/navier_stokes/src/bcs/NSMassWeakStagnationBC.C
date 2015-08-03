@@ -52,9 +52,3 @@ Real NSMassWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 
 
 
-
-// DEPRECATED CONSTRUCTOR
-NSMassWeakStagnationBC::NSMassWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSWeakStagnationBC(deprecated_name, parameters)
-{
-}

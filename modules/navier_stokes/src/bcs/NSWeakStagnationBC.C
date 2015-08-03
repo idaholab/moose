@@ -89,15 +89,3 @@ Real NSWeakStagnationBC::sdotn()
     _sz*_normals[_qp](2);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSWeakStagnationBC::NSWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSIntegratedBC(deprecated_name, parameters),
-
-      // Required parameters
-      _stagnation_pressure(getParam<Real>("stagnation_pressure")),
-      _stagnation_temperature(getParam<Real>("stagnation_temperature")),
-      _sx(getParam<Real>("sx")),
-      _sy(getParam<Real>("sy")),
-      _sz(getParam<Real>("sz"))
-{}

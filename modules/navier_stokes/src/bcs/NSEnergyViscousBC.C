@@ -206,28 +206,3 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
   return (-thermal_term - visc_term) * _test[_i][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSEnergyViscousBC::NSEnergyViscousBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSIntegratedBC(deprecated_name, parameters),
-
-      // Coupled gradients
-      _grad_temperature(coupledGradient("temperature")),
-
-      // Material properties
-      _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
-
-      // Viscous stress tensor derivative computing object
-      _vst_derivs(*this),
-
-      // Temperature derivative computing object
-      _temp_derivs(*this)
-{
-  // Store pointers to all variable gradients in a single vector.
-  _gradU.resize(5);
-  _gradU[0] = &_grad_rho  ;
-  _gradU[1] = &_grad_rho_u;
-  _gradU[2] = &_grad_rho_v;
-  _gradU[3] = &_grad_rho_w;
-  _gradU[4] = &_grad_rho_e;
-}

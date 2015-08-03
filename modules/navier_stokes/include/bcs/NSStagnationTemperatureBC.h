@@ -28,7 +28,6 @@ class NSStagnationTemperatureBC : public NSStagnationBC
 public:
   // Constructor
   NSStagnationTemperatureBC(const InputParameters & parameters);
-  NSStagnationTemperatureBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   // Destructor, better be virtual
   virtual ~NSStagnationTemperatureBC(){}

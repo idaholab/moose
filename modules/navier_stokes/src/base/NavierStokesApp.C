@@ -88,7 +88,7 @@ InputParameters validParams<NavierStokesApp>()
   return params;
 }
 
-NavierStokesApp::NavierStokesApp(const InputParameters & parameters) :
+NavierStokesApp::NavierStokesApp(InputParameters parameters) :
     MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
@@ -191,16 +191,4 @@ extern "C" void NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory 
 void
 NavierStokesApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
-}
-
-
-// DEPRECATED CONSTRUCTOR
-NavierStokesApp::NavierStokesApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  NavierStokesApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  NavierStokesApp::associateSyntax(_syntax, _action_factory);
 }

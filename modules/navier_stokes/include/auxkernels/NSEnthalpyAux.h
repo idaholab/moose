@@ -34,7 +34,6 @@ public:
    * constructor.
    */
   NSEnthalpyAux(const InputParameters & parameters);
-  NSEnthalpyAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSEnthalpyAux() {}
 

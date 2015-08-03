@@ -74,20 +74,3 @@ Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
     return 0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-INSMass::INSMass(const std::string & deprecated_name, InputParameters parameters) :
-  Kernel(deprecated_name, parameters),
-
-  // Gradients
-  _grad_u_vel(coupledGradient("u")),
-  _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
-  _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero),
-
-  // Variable numberings
-  _u_vel_var_number(coupled("u")),
-  _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
-  _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
-  _p_var_number(coupled("p"))
-{
-}

@@ -33,11 +33,3 @@ INSDivergenceAux::computeValue()
   return _grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-INSDivergenceAux::INSDivergenceAux(const std::string & deprecated_name, InputParameters parameters)
-  :AuxKernel(deprecated_name, parameters),
-  _grad_u_vel(coupledGradient("u")),
-  _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
-  _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero)
-{}

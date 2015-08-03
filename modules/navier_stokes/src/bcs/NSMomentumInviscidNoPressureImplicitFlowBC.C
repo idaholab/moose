@@ -57,9 +57,3 @@ Real NSMomentumInviscidNoPressureImplicitFlowBC::computeQpOffDiagJacobian(unsign
   return this->convective_qp_jacobian( this->map_var_number(jvar) );
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSMomentumInviscidNoPressureImplicitFlowBC::NSMomentumInviscidNoPressureImplicitFlowBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSMomentumInviscidBC(deprecated_name, parameters)
-{
-}
