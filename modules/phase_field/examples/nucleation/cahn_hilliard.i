@@ -92,10 +92,9 @@
     block = 0
     f_name = Fn
     op_names  = c
-    op_values = 0.95
-    hold_time = 500
+    op_values = 0.98
     penalty = 5
-    probability = P
+    map = map
     outputs = exodus
   [../]
 
@@ -106,6 +105,26 @@
     block = 0
     args = c
     sum_materials = 'Fc Fn'
+  [../]
+[]
+
+[UserObjects]
+  [./inserter]
+    # The inserter runs at the end of each time step to add nucleation events
+    # that happend during the timestep (if it converged) to the list of nuclei
+    type = DiscreteNucleationInserter
+    hold_time = 500
+    probability = P
+  [../]
+  [./map]
+    # The map UO runs at the beginning of a timestep and generates a per-element/qp
+    # map of nucleus locations. The map is only regenerated if the mesh changed or
+    # the list of nuclei was modified.
+    # The map converts the nucleation points into finite area objects with a given radius.
+    type = DiscreteNucleationMap
+    radius = 10
+    periodic = c
+    inserter = inserter
   [../]
 []
 

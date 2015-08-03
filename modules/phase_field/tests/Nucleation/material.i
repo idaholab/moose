@@ -31,6 +31,11 @@
     variable = c
     value = 1
   [../]
+  [./Periodic]
+    [./all]
+      auto_direction = y
+    [../]
+  [../]
 []
 
 [Kernels]
@@ -51,9 +56,22 @@
     op_names  = c
     op_values = 1
     block = 0
-    hold_time = 1
-    probability = 0.05
+    map = map
     outputs = exodus
+  [../]
+[]
+
+[UserObjects]
+  [./inserter]
+    type = DiscreteNucleationInserter
+    hold_time = 1
+    probability = 0.01
+  [../]
+  [./map]
+    type = DiscreteNucleationMap
+    radius = 3
+    periodic = c
+    inserter = inserter
   [../]
 []
 
