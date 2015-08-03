@@ -44,7 +44,6 @@ public:
   virtual bool isActive();
 
 protected:
-  virtual void initialSetup();
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
 

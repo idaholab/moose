@@ -209,7 +209,7 @@ outputExecutionInformation(MooseApp & app, FEProblem & problem)
   std::stringstream oss;
   oss << std::left;
 
-  Executioner * exec = app.actionWarehouse().executioner().get();
+  Executioner * exec = app.getExecutioner();
 
   oss << "Execution Information:\n"
       << std::setw(console_field_width) << "  Executioner: " << demangle(typeid(*exec).name()) << '\n';

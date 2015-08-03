@@ -66,7 +66,6 @@ ActionWarehouse::clear()
   _displaced_mesh.reset();
 
   _problem.reset();
-  _executioner.reset();
 }
 
 void

@@ -139,7 +139,6 @@ public:
   MooseSharedPointer<MooseMesh> & displacedMesh() { return _displaced_mesh; }
 
   MooseSharedPointer<FEProblem> & problem() { return _problem; }
-  MooseSharedPointer<Executioner> & executioner() { return _executioner; }
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
@@ -195,9 +194,6 @@ protected:
 
   /// Problem class
   MooseSharedPointer<FEProblem> _problem;
-
-  /// Executioner for the simulation (top-level class, is stored in MooseApp, where it is freed)
-  MooseSharedPointer<Executioner> _executioner;
 };
 
 #endif // ACTIONWAREHOUSE_H
