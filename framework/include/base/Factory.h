@@ -126,12 +126,6 @@ MooseObjectPtr buildObject(const InputParameters & parameters)
   return MooseObjectPtr(new T(parameters));
 }
 
-template<class T>
-MooseObjectPtr buildLegacyObject(const std::string & name, InputParameters parameters)
-{
-  return MooseObjectPtr(new T(name, parameters));
-}
-
 /**
  * Generic factory class for build all sorts of objects
  */
@@ -206,36 +200,21 @@ public:
   template<typename T>
   void regLegacy(const std::string & obj_name)
   {
-    if (_registerable_objects.empty() || _registerable_objects.find(obj_name) != _registerable_objects.end())
-    {
-      if (_name_to_legacy_build_pointer.find(obj_name) == _name_to_legacy_build_pointer.end())
-      {
-        _name_to_legacy_build_pointer[obj_name] = &buildLegacyObject<T>;
-        _name_to_params_pointer[obj_name] = &validParams<T>;
-      }
-      else
-        mooseError("Object '" + obj_name + "' already registered.");
-    }
+    reg<T>(obj_name);
   }
 
   template<typename T>
   void regLegacyDeprecated(const std::string & obj_name, const std::string t_str)
   {
     // Register the name
-    regLegacy<T>(obj_name);
-
-    // Store the time
-    _deprecated_time[obj_name] = parseTime(t_str);
+    regDeprecated<T>(obj_name, t_str);
   }
 
   template<typename T>
   void regLegacyReplaced(const std::string & obj_name, const std::string & name, const std::string t_str)
   {
     // Register the name
-    regLegacyDeprecated<T>(name, t_str);
-
-    // Store the new name
-    _deprecated_name[name] = obj_name;
+    regReplaced<T>(obj_name, name, t_str);
   }
 
   /**
@@ -253,7 +232,6 @@ public:
    * @return The created object
    */
   MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
-  MooseSharedPointer<MooseObject> createLegacy(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
 
   /**
    * Calling this object with a non-empty vector will cause this factory to ignore registrations from any object
@@ -302,7 +280,6 @@ protected:
 
   /// Storage for pointers to the object
   std::map<std::string, buildPtr> _name_to_build_pointer;
-  std::map<std::string, buildLegacyPtr> _name_to_legacy_build_pointer;
 
   /// Storage for pointers to the parameters objects
   std::map<std::string, paramsPtr> _name_to_params_pointer;

@@ -52,10 +52,6 @@ Factory::getValidParams(const std::string & obj_name)
 MooseObjectPtr
 Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
 {
-  // DEPRECATED CREATION
-  if (_name_to_legacy_build_pointer.find(obj_name) != _name_to_legacy_build_pointer.end())
-    return createLegacy(obj_name, name, parameters, tid);
-
   // Pointer to the object constructor
   std::map<std::string, buildPtr>::iterator it = _name_to_build_pointer.find(obj_name);
 
@@ -85,30 +81,6 @@ void
 Factory::restrictRegisterableObjects(const std::vector<std::string> & names)
 {
   _registerable_objects.insert(names.begin(), names.end());
-}
-
-MooseObjectPtr
-Factory::createLegacy(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
-{
-  // Pointer to the object constructor
-  std::map<std::string, buildLegacyPtr>::iterator it = _name_to_legacy_build_pointer.find(obj_name);
-
-  // Check if the object is registered
-  if (it == _name_to_legacy_build_pointer.end())
-    mooseError("Object '" + obj_name + "' was not registered.");
-
-  // Print out deprecated message, if it exists
-  deprecatedMessage(obj_name);
-
-  // Check to make sure that all required parameters are supplied
-  parameters.set<std::string>("name") = name;
-  parameters.set<THREAD_ID>("_tid") = tid;
-  parameters.checkParams(name);
-
-  // Actually call the function pointer.  You can do this in one line,
-  // but it's a bit more obvious what's happening if you do it in two...
-  buildLegacyPtr & func = it->second;
-  return (*func)(MooseUtils::shortName(name), parameters);
 }
 
 time_t Factory::parseTime(const std::string t_str)
