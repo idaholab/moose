@@ -1,0 +1,23 @@
+[Tests]
+  [./jac]
+    type = 'PetscJacobianTester'
+    input = 'jac.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E-7
+  [../]
+  [./ss]
+    type = 'Exodiff'
+    input = 'ss.i'
+    exodiff = 'ss.e'
+    exodiff_opts = '-steps last'
+    abs_zero = 1e-5
+    use_old_floor = True
+  [../]
+  [./pp]
+    type = 'Exodiff'
+    input = 'pp.i'
+    exodiff = 'pp.e'
+    exodiff_opts = '-steps last'
+    use_old_floor = True
+  [../]
+[]

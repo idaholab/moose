@@ -25,7 +25,7 @@ InputParameters validParams<DarcyFluxComponent>();
  * P is the fluid pressure (the variable)
  * and w_j is the fluid weight
  * This is measured in m^3 . s^-1 . m^-2
- * 
+ *
  * Sometimes the fluid velocity is required,
  * rather than the flux.  In this case
  * velocity_scaling may be used, and the
