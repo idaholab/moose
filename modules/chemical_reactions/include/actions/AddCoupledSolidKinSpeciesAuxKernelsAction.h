@@ -19,7 +19,6 @@ class AddCoupledSolidKinSpeciesAuxKernelsAction : public Action
 {
 public:
   AddCoupledSolidKinSpeciesAuxKernelsAction(const InputParameters & params);
-  AddCoupledSolidKinSpeciesAuxKernelsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

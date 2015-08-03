@@ -109,9 +109,3 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddCoupledSolidKinSpeciesAuxKernelsAction::AddCoupledSolidKinSpeciesAuxKernelsAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

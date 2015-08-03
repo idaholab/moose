@@ -42,7 +42,6 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   CoupledConvectionReactionSub(const InputParameters & parameters);
-  CoupledConvectionReactionSub(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

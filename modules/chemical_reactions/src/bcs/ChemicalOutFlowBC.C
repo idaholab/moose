@@ -49,11 +49,3 @@ ChemicalOutFlowBC::computeQpJacobian()
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ChemicalOutFlowBC::ChemicalOutFlowBC(const std::string & deprecated_name, InputParameters parameters)
-  :IntegratedBC(deprecated_name, parameters),
-   _diff(getMaterialProperty<Real>("diffusivity")),
-   _porosity(getMaterialProperty<Real>("porosity"))
-{
-}

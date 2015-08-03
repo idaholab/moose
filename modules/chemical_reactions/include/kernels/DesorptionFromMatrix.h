@@ -25,7 +25,6 @@ class DesorptionFromMatrix : public Kernel
 public:
 
   DesorptionFromMatrix(const InputParameters & parameters);
-  DesorptionFromMatrix(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -26,7 +26,6 @@ class CoupledBEKinetic : public Kernel
 public:
 
   CoupledBEKinetic(const InputParameters & parameters);
-  CoupledBEKinetic(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

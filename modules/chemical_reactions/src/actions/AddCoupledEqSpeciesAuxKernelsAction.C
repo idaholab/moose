@@ -180,9 +180,3 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddCoupledEqSpeciesAuxKernelsAction::AddCoupledEqSpeciesAuxKernelsAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

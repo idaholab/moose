@@ -111,14 +111,3 @@ ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fa
   registerAction(AddCoupledSolidKinSpeciesAuxKernelsAction, "add_aux_kernel");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ChemicalReactionsApp::ChemicalReactionsApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  ChemicalReactionsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
-}

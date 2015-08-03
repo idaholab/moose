@@ -27,7 +27,6 @@ public:
    * constructor.
    */
   KineticDisPreRateAux(const InputParameters & parameters);
-  KineticDisPreRateAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~KineticDisPreRateAux() {}
 

@@ -33,7 +33,6 @@ public:
    * constructor.
    */
   AqueousEquilibriumRxnAux(const InputParameters & parameters);
-  AqueousEquilibriumRxnAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~AqueousEquilibriumRxnAux() {}
 
