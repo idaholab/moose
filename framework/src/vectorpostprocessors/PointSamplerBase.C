@@ -160,20 +160,3 @@ PointSamplerBase::getInflatedProcessorBoundingBox()
   return bbox;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PointSamplerBase::PointSamplerBase(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralVectorPostprocessor(deprecated_name, parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
-    SamplerBase(parameters, this, _communicator),
-    _mesh(_subproblem.mesh()),
-    _point_vec(1) // Only going to evaluate one point at a time for now
-{
-  std::vector<std::string> var_names(_coupled_moose_vars.size());
-
-  for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
-    var_names[i] = _coupled_moose_vars[i]->name();
-
-  // Initialize the datastructions in SamplerBase
-  SamplerBase::setupVariables(var_names);
-}

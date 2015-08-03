@@ -36,7 +36,6 @@ public:
    * @param parameters The input parameters for this AuxKernel
    */
   MaterialRealDenseMatrixAux(const InputParameters & parameters);
-  MaterialRealDenseMatrixAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaterialRealDenseMatrixAux();
 

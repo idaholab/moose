@@ -165,29 +165,3 @@ PenetrationAux::computeValue()
   return retVal;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PenetrationAux::PenetrationAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-
-    // Here we cast the value of the MOOSE enum to an integer to the class-based enum.
-    _quantity(PenetrationAux::PA_ENUM(int(getParam<MooseEnum>("quantity")))),
-    _penetration_locator(_nodal
-      ? getPenetrationLocator(
-          parameters.get<BoundaryName>("paired_boundary"),
-          boundaryNames()[0],
-          Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))
-      : getQuadraturePenetrationLocator(
-          parameters.get<BoundaryName>("paired_boundary"),
-          boundaryNames()[0],
-          Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))))
-{
-  if (parameters.isParamValid("tangential_tolerance"))
-    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-
-  if (parameters.isParamValid("normal_smoothing_distance"))
-    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-
-  if (parameters.isParamValid("normal_smoothing_method"))
-    _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
-}

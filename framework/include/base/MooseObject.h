@@ -37,7 +37,6 @@ class MooseObject :
 {
 public:
   MooseObject(const InputParameters & parameters);
-  MooseObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MooseObject() { }
 

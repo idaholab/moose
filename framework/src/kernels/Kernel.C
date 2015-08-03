@@ -139,13 +139,3 @@ Kernel::precalculateResidual()
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Kernel::Kernel(const std::string & deprecated_name, InputParameters parameters) :
-    KernelBase(deprecated_name, parameters),
-    _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
-    _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu())
-{
-}

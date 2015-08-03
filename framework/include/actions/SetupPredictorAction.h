@@ -29,7 +29,6 @@ class SetupPredictorAction : public MooseObjectAction
 {
 public:
   SetupPredictorAction(InputParameters parameters);
-  SetupPredictorAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SetupPredictorAction();
 
   virtual void act();

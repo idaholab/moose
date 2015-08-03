@@ -41,7 +41,6 @@ public:
    * @param params Input parameters for the action
    */
   SetupPostprocessorDataAction(InputParameters params);
-  SetupPostprocessorDataAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

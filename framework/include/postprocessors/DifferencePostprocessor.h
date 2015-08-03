@@ -30,7 +30,6 @@ class DifferencePostprocessor : public GeneralPostprocessor
 {
 public:
   DifferencePostprocessor(const InputParameters & parameters);
-  DifferencePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~DifferencePostprocessor();
 
   virtual void initialize();

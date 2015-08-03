@@ -38,7 +38,6 @@ public:
    * @param parameters The input parameters for the kernel
    */
   SolutionAux(const InputParameters & parameters);
-  SolutionAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /** Empty destructor
    */

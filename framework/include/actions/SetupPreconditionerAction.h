@@ -29,7 +29,6 @@ class SetupPreconditionerAction : public MooseObjectAction
 {
 public:
   SetupPreconditionerAction(InputParameters params);
-  SetupPreconditionerAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

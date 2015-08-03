@@ -27,7 +27,6 @@ class AddInitialConditionAction : public MooseObjectAction
 {
 public:
   AddInitialConditionAction(InputParameters params);
-  AddInitialConditionAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

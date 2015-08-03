@@ -36,7 +36,6 @@ class GenericConstantMaterial : public Material
 {
 public:
   GenericConstantMaterial(const InputParameters & parameters);
-  GenericConstantMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

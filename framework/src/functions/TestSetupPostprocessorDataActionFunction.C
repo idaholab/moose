@@ -36,14 +36,3 @@ TestSetupPostprocessorDataActionFunction::~TestSetupPostprocessorDataActionFunct
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFunction(const std::string & deprecated_name, InputParameters parameters) :
-  Function(deprecated_name, parameters)
-{
-  if (hasPostprocessor("postprocessor"))
-    mooseError("TestSetupPostprocessorDataActionFunction pass");
-  else
-    mooseError("TestSetupPostprocessorDataActionFunction fail");
-
-}

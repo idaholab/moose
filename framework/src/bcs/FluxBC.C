@@ -44,9 +44,3 @@ FluxBC::computeQpJacobian()
   return - computeQpFluxJacobian() * _normals[_qp] * _test[_i][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FluxBC::FluxBC(const std::string & deprecated_name, InputParameters params) :
-    IntegratedBC(deprecated_name, params)
-{
-}

@@ -36,7 +36,6 @@ class SideIntegralVariableUserObject :
 {
 public:
   SideIntegralVariableUserObject(const InputParameters & parameters);
-  SideIntegralVariableUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

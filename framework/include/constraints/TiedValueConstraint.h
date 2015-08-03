@@ -32,7 +32,6 @@ class TiedValueConstraint :
 {
 public:
   TiedValueConstraint(const InputParameters & parameters);
-  TiedValueConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~TiedValueConstraint(){}
 
   virtual Real computeQpSlaveValue();

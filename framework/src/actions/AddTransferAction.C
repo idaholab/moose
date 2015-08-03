@@ -32,9 +32,3 @@ AddTransferAction::act()
   _problem->addTransfer(_type, _name, _moose_object_pars);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddTransferAction::AddTransferAction(const std::string & deprecated_name, InputParameters params) :
-    MooseObjectAction(deprecated_name, params)
-{
-}

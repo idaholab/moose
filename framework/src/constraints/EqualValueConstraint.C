@@ -67,9 +67,3 @@ EqualValueConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType jac_ty
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-EqualValueConstraint::EqualValueConstraint(const std::string & deprecated_name, InputParameters parameters) :
-    FaceFaceConstraint(deprecated_name, parameters)
-{
-}

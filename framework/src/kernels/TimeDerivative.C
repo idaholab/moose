@@ -56,10 +56,3 @@ TimeDerivative::computeJacobian()
     TimeKernel::computeJacobian();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TimeDerivative::TimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
-    TimeKernel(deprecated_name, parameters),
-    _lumping(getParam<bool>("lumping"))
-{
-}

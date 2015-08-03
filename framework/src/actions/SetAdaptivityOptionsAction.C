@@ -58,9 +58,3 @@ SetAdaptivityOptionsAction::act()
   adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

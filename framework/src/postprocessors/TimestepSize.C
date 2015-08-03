@@ -33,9 +33,3 @@ TimestepSize::getValue()
   return _feproblem.dt();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TimestepSize::TimestepSize(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters),
-    _feproblem(dynamic_cast<FEProblem &>(_subproblem))
-{}

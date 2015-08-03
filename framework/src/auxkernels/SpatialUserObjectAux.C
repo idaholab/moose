@@ -38,10 +38,3 @@ SpatialUserObjectAux::computeValue()
     return _user_object.spatialValue(_current_elem->centroid());
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SpatialUserObjectAux::SpatialUserObjectAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _user_object(getUserObjectBase("user_object"))
-{
-}

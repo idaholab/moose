@@ -34,8 +34,3 @@ NumLinearIterations::getValue()
   return _subproblem.nLinearIterations();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NumLinearIterations::NumLinearIterations(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters)
-{}

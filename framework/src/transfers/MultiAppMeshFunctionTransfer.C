@@ -405,16 +405,3 @@ MultiAppMeshFunctionTransfer::execute()
   _console << "Finished MeshFunctionTransfer " << name() << std::endl;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & name, InputParameters parameters) :
-    MultiAppTransfer(name, parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable")),
-    _error_on_miss(getParam<bool>("error_on_miss"))
-{
-  // This transfer does not work with ParallelMesh
-  _fe_problem.mesh().errorIfParallelDistribution("MultiAppMeshFunctionTransfer");
-  _displaced_source_mesh = getParam<bool>("displaced_source_mesh");
-  _displaced_target_mesh = getParam<bool>("displaced_target_mesh");
-}

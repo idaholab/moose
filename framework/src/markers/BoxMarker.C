@@ -50,12 +50,3 @@ BoxMarker::computeElementMarker()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-BoxMarker::BoxMarker(const std::string & deprecated_name, InputParameters parameters) :
-    Marker(deprecated_name, parameters),
-    _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
-    _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside")),
-    _bounding_box(parameters.get<RealVectorValue>("bottom_left"), parameters.get<RealVectorValue>("top_right"))
-{
-}

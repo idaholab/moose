@@ -54,15 +54,3 @@ NearestNodeValueAux::computeValue()
   return (*_serialized_solution)(dof_number);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NearestNodeValueAux::NearestNodeValueAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"),
-                                        boundaryNames()[0])),
-    _serialized_solution(_nl_sys.currentSolution()),
-    _paired_variable(coupled("paired_variable"))
-{
-  if (boundaryNames().size() > 1)
-    mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
-}

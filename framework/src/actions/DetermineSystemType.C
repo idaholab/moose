@@ -40,9 +40,3 @@ DetermineSystemType::act()
     _app.useNonlinear() = false;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-DetermineSystemType::DetermineSystemType(const std::string & deprecated_name, InputParameters parameters) :
-    MooseObjectAction(deprecated_name, parameters)
-{
-}

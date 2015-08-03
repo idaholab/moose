@@ -40,12 +40,3 @@ LaplacianJumpIndicator::computeQpIntegral()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-LaplacianJumpIndicator::LaplacianJumpIndicator(const std::string & deprecated_name, InputParameters parameters) :
-    JumpIndicator(deprecated_name, parameters),
-    _second_u(second()),
-    _second_u_neighbor(neighborSecond())
-{
-  _mesh.errorIfParallelDistribution("LaplacianJumpIndicator");
-}

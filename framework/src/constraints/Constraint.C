@@ -54,23 +54,3 @@ Constraint::~Constraint()
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Constraint::Constraint(const std::string & deprecated_name, InputParameters parameters) :
-  MooseObject(deprecated_name, parameters),
-  SetupInterface(parameters),
-  FunctionInterface(parameters),
-  UserObjectInterface(parameters),
-  TransientInterface(parameters, "constraint"),
-  GeometricSearchInterface(parameters),
-  Restartable(parameters, "Constraints"),
-  ZeroInterface(parameters),
-  MeshChangedInterface(parameters),
-  _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-  _sys(*parameters.get<SystemBase *>("_sys")),
-  _tid(parameters.get<THREAD_ID>("_tid")),
-  _assembly(_subproblem.assembly(_tid)),
-  _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-  _mesh(_subproblem.mesh())
-{
-}

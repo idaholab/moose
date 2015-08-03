@@ -28,10 +28,3 @@ InternalSidePostprocessor::InternalSidePostprocessor(const InputParameters & par
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-InternalSidePostprocessor::InternalSidePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    InternalSideUserObject(deprecated_name, parameters),
-    Postprocessor(parameters)
-{
-}

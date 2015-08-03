@@ -35,10 +35,3 @@ FunctionNeumannBC::computeQpResidual()
   return -_test[_i][_qp] * _func.value(_t, _q_point[_qp]);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FunctionNeumannBC::FunctionNeumannBC(const std::string & deprecated_name, InputParameters parameters) :
-    IntegratedBC(deprecated_name, parameters),
-    _func(getFunction("function"))
-{
-}

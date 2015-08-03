@@ -29,7 +29,6 @@ class FiniteDifferencePreconditioner : public MoosePreconditioner
 {
 public:
   FiniteDifferencePreconditioner(const InputParameters & params);
-  FiniteDifferencePreconditioner(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual ~FiniteDifferencePreconditioner();
 };
 

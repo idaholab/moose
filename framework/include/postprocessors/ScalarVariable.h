@@ -30,7 +30,6 @@ class ScalarVariable : public GeneralPostprocessor
 {
 public:
   ScalarVariable(const InputParameters & parameters);
-  ScalarVariable(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ScalarVariable();
 
   virtual void initialize();

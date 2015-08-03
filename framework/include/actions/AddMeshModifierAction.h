@@ -29,7 +29,6 @@ class AddMeshModifierAction : public MooseObjectAction
 {
 public:
   AddMeshModifierAction(InputParameters params);
-  AddMeshModifierAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

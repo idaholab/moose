@@ -46,10 +46,3 @@ AnisotropicDiffusion::computeQpJacobian()
   return (_k * _grad_phi[_j][_qp]) * _grad_test[_i][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AnisotropicDiffusion::AnisotropicDiffusion(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _k(getParam<RealTensorValue>("tensor_coeff"))
-{
-}

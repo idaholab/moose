@@ -38,10 +38,3 @@ FunctionAux::computeValue()
     return _func.value(_t, _q_point[_qp]);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FunctionAux::FunctionAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _func(getFunction("function"))
-{
-}

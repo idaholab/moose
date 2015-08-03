@@ -100,11 +100,3 @@ DGDiffusion::computeQpJacobian(Moose::DGJacobianType type)
   return r;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-DGDiffusion::DGDiffusion(const std::string & deprecated_name, InputParameters parameters) :
-    DGKernel(deprecated_name, parameters),
-    _epsilon(getParam<Real>("epsilon")),
-    _sigma(getParam<Real>("sigma"))
-{
-}

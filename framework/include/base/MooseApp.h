@@ -416,7 +416,6 @@ protected:
 
   /// Constructor is protected so that this object is constructed through the AppFactory object
   MooseApp(InputParameters parameters);
-  MooseApp(const std::string & name, InputParameters parameters);
 
   /// Don't run the simulation, just complete all of the mesh preperation steps and exit
   virtual void meshOnly(std::string mesh_file_name);

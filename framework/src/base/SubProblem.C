@@ -353,22 +353,6 @@ SubProblem::getAxisymmetricRadialCoord()
 }
 
 
-// DEPRECATED CONSTRUCTOR
-SubProblem::SubProblem(const std::string & deprecated_name, InputParameters parameters) :
-    Problem(deprecated_name, parameters),
-    _factory(_app.getFactory()),
-    _rz_coord_axis(1) // default to RZ rotation around y-axis
-{
-  unsigned int n_threads = libMesh::n_threads();
-  _real_zero.resize(n_threads, 0.);
-  _zero.resize(n_threads);
-  _grad_zero.resize(n_threads);
-  _second_zero.resize(n_threads);
-  _second_phi_zero.resize(n_threads);
-  _active_elemental_moose_variables.resize(n_threads);
-  _has_active_elemental_moose_variables.resize(n_threads);
-}
-
 void
 SubProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
 {

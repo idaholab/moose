@@ -37,7 +37,6 @@ class ElementH1Error :
 {
 public:
   ElementH1Error(const InputParameters & parameters);
-  ElementH1Error(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 };
 
 #endif //ELEMENTH1ERROR_H

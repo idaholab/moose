@@ -53,12 +53,3 @@ ConvectiveFluxBC::computeQpJacobian()
   return -(_test[_i][_qp]*_rate*(-_phi[_j][_qp]));
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ConvectiveFluxBC::ConvectiveFluxBC(const std::string & deprecated_name, InputParameters parameters) :
-    IntegratedBC(deprecated_name, parameters),
-    _initial(getParam<Real>("initial")),
-    _final(getParam<Real>("final")),
-    _rate(getParam<Real>("rate")),
-    _duration(getParam<Real>("duration"))
-{}

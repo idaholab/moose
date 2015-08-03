@@ -31,7 +31,6 @@ class NormalizationAux : public AuxKernel
 {
 public:
   NormalizationAux(const InputParameters & parameters);
-  NormalizationAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NormalizationAux() {}
 

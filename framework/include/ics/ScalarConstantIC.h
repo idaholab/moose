@@ -43,7 +43,6 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    */
   ScalarConstantIC(const InputParameters & parameters);
-  ScalarConstantIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * The value of the variable at a point.

@@ -37,7 +37,6 @@ public:
    * @param parameters Outputter input file parameters
    */
   PetscOutput(const InputParameters & parameters);
-  PetscOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

@@ -37,13 +37,3 @@ SideIntegralVariableUserObject::computeQpIntegral()
   return _u[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SideIntegralVariableUserObject::SideIntegralVariableUserObject(const std::string & deprecated_name, InputParameters parameters) :
-    SideIntegralUserObject(deprecated_name, parameters),
-    MooseVariableInterface(parameters, false),
-    _u(coupledValue("variable")),
-    _grad_u(coupledGradient("variable"))
-{
-  addMooseVariableDependency(mooseVariable());
-}

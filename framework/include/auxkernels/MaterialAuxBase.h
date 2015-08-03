@@ -38,7 +38,6 @@ public:
    * @param parameters The input parameters for this object
    */
   MaterialAuxBase(const InputParameters & parameters);
-  MaterialAuxBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaterialAuxBase(){}
 
@@ -75,16 +74,6 @@ Real
 MaterialAuxBase<T>::computeValue()
 {
   return _factor * getRealValue() + _offset;
-}
-
-// DEPRECATED CONSTRUCTOR
-template<typename T>
-MaterialAuxBase<T>::MaterialAuxBase(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _prop(getMaterialProperty<T>("property")),
-    _factor(getParam<Real>("factor")),
-    _offset(getParam<Real>("offset"))
-{
 }
 
 #endif //MATERIALAUXBASE_H

@@ -40,14 +40,3 @@ MooseObject::MooseObject(const InputParameters & parameters) :
   _short_name(MooseUtils::shortName(_name))
 {
 }
-
-// DEPRECATED CONSTRUCTOR
-MooseObject::MooseObject(const std::string & /*deprecated_name*/, InputParameters parameters) :
-  ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-  _pars(injectParameters(_app, parameters)),
-  _name(getParam<std::string>("name")),
-  _short_name(MooseUtils::shortName(_name))
-{
-}

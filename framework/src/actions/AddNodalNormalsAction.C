@@ -104,12 +104,3 @@ AddNodalNormalsAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddNodalNormalsAction::AddNodalNormalsAction(const std::string & deprecated_name, InputParameters parameters) :
-    Action(deprecated_name, parameters),
-    _boundary(getParam<std::vector<BoundaryName> >("boundary")),
-    _has_corners(isParamValid("corner_boundary")),
-    _corner_boundary(_has_corners ? getParam<BoundaryName>("corner_boundary") : BoundaryName())
-{
-}

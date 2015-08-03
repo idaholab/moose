@@ -40,7 +40,6 @@ public:
    * @param parameters The input parameters
    */
   RenameBlock(const InputParameters & parameters);
-  RenameBlock(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

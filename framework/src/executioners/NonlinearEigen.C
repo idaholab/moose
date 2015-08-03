@@ -116,16 +116,3 @@ NonlinearEigen::takeStep()
   _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NonlinearEigen::NonlinearEigen(const std::string & deprecated_name, InputParameters parameters) :
-    EigenExecutionerBase(deprecated_name, parameters),
-     _free_iter(getParam<unsigned int>("free_power_iterations")),
-     _abs_tol(getParam<Real>("source_abs_tol")),
-     _rel_tol(getParam<Real>("source_rel_tol")),
-     _pfactor(getParam<Real>("pfactor")),
-     _output_after_pi(getParam<bool>("output_after_power_iterations"))
-{
-  _eigenvalue = getParam<Real>("k0");
-  addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
-}

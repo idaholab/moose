@@ -62,10 +62,3 @@ SideIntegralUserObject::computeIntegral()
   return sum;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SideIntegralUserObject::SideIntegralUserObject(const std::string & deprecated_name, InputParameters parameters) :
-    SideUserObject(deprecated_name, parameters),
-    _qp(0),
-    _integral_value(0)
-{}

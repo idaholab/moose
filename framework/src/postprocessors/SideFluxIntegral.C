@@ -34,10 +34,3 @@ SideFluxIntegral::computeQpIntegral()
   return -_diffusion_coef[_qp]*_grad_u[_qp]*_normals[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SideFluxIntegral::SideFluxIntegral(const std::string & deprecated_name, InputParameters parameters) :
-    SideIntegralVariablePostprocessor(deprecated_name, parameters),
-    _diffusivity(parameters.get<std::string>("diffusivity")),
-    _diffusion_coef(getMaterialProperty<Real>(_diffusivity))
-{}

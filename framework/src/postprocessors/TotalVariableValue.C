@@ -52,13 +52,3 @@ TotalVariableValue::getValue()
   return _value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TotalVariableValue::TotalVariableValue(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters),
-    _value(0),
-    _value_old(getPostprocessorValueOldByName(name())),
-    _pps_value(getPostprocessorValue("value")),
-    _pps_value_old(getPostprocessorValueOld("value"))
-{
-}

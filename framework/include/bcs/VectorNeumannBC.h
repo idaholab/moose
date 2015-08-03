@@ -40,7 +40,6 @@ public:
    * constructor.
    */
   VectorNeumannBC(const InputParameters & parameters);
-  VectorNeumannBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

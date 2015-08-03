@@ -87,11 +87,3 @@ BoundingBoxNodeSet::modify()
     boundary_info.nodeset_name(boundary_ids[i]) = boundary_names[i];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-BoundingBoxNodeSet::BoundingBoxNodeSet(const std::string & deprecated_name, InputParameters params) :
-    MeshModifier(deprecated_name, params),
-    _location(getParam<MooseEnum>("location")),
-    _bounding_box(getParam<RealVectorValue>("bottom_left"), params.get<RealVectorValue>("top_right"))
-{
-}

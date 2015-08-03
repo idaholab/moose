@@ -57,7 +57,6 @@ class InputParameters : public Parameters
 {
 public:
   InputParameters(const InputParameters &rhs);
-  InputParameters(const std::string & deprecated_name, InputParameters rhs); // DEPRECATED CONSTRUCTOR
   InputParameters(const Parameters &rhs);
 
   virtual ~InputParameters();

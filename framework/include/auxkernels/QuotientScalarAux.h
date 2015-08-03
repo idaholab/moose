@@ -31,7 +31,6 @@ class QuotientScalarAux : public AuxScalarKernel
 {
 public:
   QuotientScalarAux(const InputParameters & parameters);
-  QuotientScalarAux(const std::string & deprecated_name, InputParameters deprecated_parameters); // DEPRECATED CONSTRUCTOR
   virtual ~QuotientScalarAux();
 
 protected:

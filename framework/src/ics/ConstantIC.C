@@ -35,10 +35,3 @@ ConstantIC::value(const Point & /*p*/)
   return _value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ConstantIC::ConstantIC(const std::string & deprecated_name, InputParameters parameters) :
-    InitialCondition(deprecated_name, parameters),
-    _value(getParam<Real>("value"))
-{
-}

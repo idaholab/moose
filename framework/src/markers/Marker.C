@@ -110,29 +110,3 @@ Marker::getSuppliedItems()
   return _supplied;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Marker::Marker(const std::string & deprecated_name, InputParameters parameters) :
-    MooseObject(deprecated_name, parameters),
-    BlockRestrictable(parameters),
-    SetupInterface(parameters),
-    UserObjectInterface(parameters),
-    Restartable(parameters, "Markers"),
-    PostprocessorInterface(parameters),
-    MeshChangedInterface(parameters),
-    OutputInterface(parameters),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
-    _adaptivity(_fe_problem.adaptivity()),
-    _sys(*parameters.get<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
-    _field_var(_sys.getVariable(_tid, name())),
-    _current_elem(_field_var.currentElem()),
-
-    _mesh(_subproblem.mesh())
-{
-  _supplied.insert(name());
-
-  addMooseVariableDependency(&_field_var);
-}

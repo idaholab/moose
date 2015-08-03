@@ -43,7 +43,6 @@ public:
    * @see initAvailable init separate
    */
   BasicOutput(const InputParameters & parameters) : T(parameters) {}
-  BasicOutput(const std::string & name, InputParameters parameters): T(name, parameters) {}
 
 
 protected:

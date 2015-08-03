@@ -46,7 +46,6 @@ class InternalSideUserObject :
 {
 public:
   InternalSideUserObject(const InputParameters & parameters);
-  InternalSideUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~InternalSideUserObject();
 
   /**

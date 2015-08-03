@@ -54,12 +54,3 @@ PlotFunction::getValue()
   return _scale_factor * _func.value(_t, _point);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PlotFunction::PlotFunction(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters),
-    _func(getFunction("function")),
-    _point(getParam<Point>("point")),
-    _scale_factor(getParam<Real>("scale_factor"))
-{
-}

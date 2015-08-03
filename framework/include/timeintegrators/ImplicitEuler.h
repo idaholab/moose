@@ -29,7 +29,6 @@ class ImplicitEuler : public TimeIntegrator
 {
 public:
   ImplicitEuler(const InputParameters & parameters);
-  ImplicitEuler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ImplicitEuler();
 
   virtual int order() { return 1; }

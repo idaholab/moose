@@ -32,7 +32,6 @@ class DOFMapOutput : public BasicOutput<FileOutput>
 {
 public:
   DOFMapOutput(const InputParameters & parameters);
-  DOFMapOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~DOFMapOutput(){};
 
   /**

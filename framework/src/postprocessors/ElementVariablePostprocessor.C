@@ -43,15 +43,3 @@ ElementVariablePostprocessor::execute()
     computeQpValue();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElementVariablePostprocessor::ElementVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    ElementPostprocessor(deprecated_name, parameters),
-    MooseVariableInterface(parameters, false),
-    _u(coupledValue("variable")),
-    _grad_u(coupledGradient("variable")),
-    _u_dot(coupledDot("variable")),
-    _qp(0)
-{
-  addMooseVariableDependency(mooseVariable());
-}

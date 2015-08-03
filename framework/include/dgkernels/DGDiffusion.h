@@ -37,7 +37,6 @@ class DGDiffusion : public DGKernel
 {
 public:
   DGDiffusion(const InputParameters & parameters);
-  DGDiffusion(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);

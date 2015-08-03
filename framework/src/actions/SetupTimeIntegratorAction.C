@@ -38,9 +38,3 @@ SetupTimeIntegratorAction::act()
 {
   _problem->addTimeIntegrator(_type, _name, _moose_object_pars);
 }
-
-// DEPRECATED CONSTRUCTOR
-SetupTimeIntegratorAction::SetupTimeIntegratorAction(const std::string & deprecated_name, InputParameters parameters) :
-    MooseObjectAction(deprecated_name, parameters)
-{
-}

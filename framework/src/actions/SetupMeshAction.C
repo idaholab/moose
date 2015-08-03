@@ -157,9 +157,3 @@ SetupMeshAction::act()
     setupMesh(_displaced_mesh.get());
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SetupMeshAction::SetupMeshAction(const std::string & deprecated_name, InputParameters params) :
-    MooseObjectAction(deprecated_name, params)
-{
-}

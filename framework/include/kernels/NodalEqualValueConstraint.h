@@ -34,7 +34,6 @@ class NodalEqualValueConstraint : public NodalScalarKernel
 {
 public:
   NodalEqualValueConstraint(const InputParameters & parameters);
-  NodalEqualValueConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalEqualValueConstraint();
 
   virtual void computeResidual();

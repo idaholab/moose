@@ -45,7 +45,6 @@ class SideUserObject :
 {
 public:
   SideUserObject(const InputParameters & parameters);
-  SideUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * This function will get called on each geometric object this postprocessor acts on

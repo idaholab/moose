@@ -31,7 +31,6 @@ class ScalarL2Error :
 {
 public:
   ScalarL2Error(const InputParameters & parameters);
-  ScalarL2Error(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

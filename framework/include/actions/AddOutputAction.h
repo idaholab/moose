@@ -44,7 +44,6 @@ public:
    * Class constructor
    */
   AddOutputAction(InputParameters params);
-  AddOutputAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Creates the actual output object

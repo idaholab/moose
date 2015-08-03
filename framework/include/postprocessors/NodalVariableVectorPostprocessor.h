@@ -30,7 +30,6 @@ class NodalVariableVectorPostprocessor : public NodalVectorPostprocessor
 {
 public:
   NodalVariableVectorPostprocessor(const InputParameters & parameters);
-  NodalVariableVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 };
 
 #endif

@@ -43,12 +43,3 @@ ComboMarker::computeElementMarker()
   return marker_value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ComboMarker::ComboMarker(const std::string & deprecated_name, InputParameters parameters) :
-    Marker(deprecated_name, parameters),
-    _names(parameters.get<std::vector<MarkerName> >("markers"))
-{
-  for (unsigned int i=0; i<_names.size(); i++)
-    _markers.push_back(&getMarkerValue(_names[i]));
-}

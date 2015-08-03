@@ -44,11 +44,3 @@ ConstantDT::computeDT()
   return std::min(_constant_dt, _growth_factor * getCurrentDT());
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ConstantDT::ConstantDT(const std::string & deprecated_name, InputParameters parameters) :
-    TimeStepper(deprecated_name, parameters),
-    _constant_dt(getParam<Real>("dt")),
-    _growth_factor(getParam<Real>("growth_factor"))
-{
-}

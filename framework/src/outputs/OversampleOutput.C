@@ -235,22 +235,3 @@ OversampleOutput::cloneMesh()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-OversampleOutput::OversampleOutput(const std::string & deprecated_name, InputParameters parameters) :
-    FileOutput(deprecated_name, parameters),
-    _mesh_ptr(getParam<bool>("use_displaced") ?
-              &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
-    _refinements(getParam<unsigned int>("refinements")),
-    _oversample(_refinements > 0 || isParamValid("file")),
-    _change_position(isParamValid("position")),
-    _position(_change_position ? getParam<Point>("position") : Point()),
-    _oversample_mesh_changed(true)
-{
-  // ** DEPRECATED SUPPORT **
-  if (getParam<bool>("append_oversample"))
-    _file_base += "_oversample";
-
-  // Creates and initializes the oversampled mesh
-  initOversample();
-}

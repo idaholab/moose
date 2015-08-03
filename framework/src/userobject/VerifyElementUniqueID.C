@@ -68,8 +68,3 @@ VerifyElementUniqueID::finalize()
     mooseError("Duplicate unique_ids found!");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-VerifyElementUniqueID::VerifyElementUniqueID(const std::string & deprecated_name, InputParameters parameters) :
-    ElementUserObject(deprecated_name, parameters)
-{}

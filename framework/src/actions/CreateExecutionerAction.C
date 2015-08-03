@@ -111,9 +111,3 @@ CreateExecutionerAction::act()
 
   _app.executioner() = executioner;
 }
-
-// DEPRECATED CONSTRUCTOR
-CreateExecutionerAction::CreateExecutionerAction(const std::string & deprecated_name, InputParameters params) :
-    MooseObjectAction(deprecated_name, params)
-{
-}

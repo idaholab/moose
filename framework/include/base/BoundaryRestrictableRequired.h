@@ -34,7 +34,6 @@ class BoundaryRestrictableRequired : public BoundaryRestrictable
 {
 public:
   BoundaryRestrictableRequired(const InputParameters & parameters);
-  BoundaryRestrictableRequired(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 };
 
 #endif // BOUNDARYRESTRICTABLEREQURIED_H

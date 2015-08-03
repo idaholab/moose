@@ -37,7 +37,6 @@ public:
    * constructor.
    */
   WeakGradientBC(const InputParameters & parameters);
-  WeakGradientBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

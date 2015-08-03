@@ -63,8 +63,3 @@ AverageElementSize::threadJoin(const UserObject & y)
   _elems += pps._elems;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AverageElementSize::AverageElementSize(const std::string & deprecated_name, InputParameters parameters) :
-    ElementAverageValue(deprecated_name, parameters)
-{}

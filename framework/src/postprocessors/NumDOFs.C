@@ -32,8 +32,3 @@ NumDOFs::getValue()
   return _subproblem.es().n_dofs();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NumDOFs::NumDOFs(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters)
-{}

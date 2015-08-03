@@ -50,7 +50,6 @@ public:
    * @param parameters The input parameters
    */
   LineMaterialSamplerBase(const InputParameters & parameters);
-  LineMaterialSamplerBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor
@@ -196,28 +195,6 @@ void
 LineMaterialSamplerBase<T>::threadJoin(const SamplerBase & sb)
 {
   SamplerBase::threadJoin(sb);
-}
-
-template <typename T>
-LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const std::string & name, InputParameters parameters) :
-    GeneralVectorPostprocessor(name, parameters),
-    SamplerBase(name, parameters, this, _communicator),
-    BlockRestrictable(parameters),
-    _start(getParam<Point>("start")),
-    _end(getParam<Point>("end")),
-    _mesh(_subproblem.mesh()),
-    _qrule(_subproblem.assembly(_tid).qRule()),
-    _q_point(_subproblem.assembly(_tid).qPoints())
-{
-  std::vector<std::string> material_property_names = getParam<std::vector<std::string> >("property");
-  for (unsigned int i=0; i<material_property_names.size(); ++i)
-  {
-    if (!hasMaterialProperty<T>(material_property_names[i]))
-      mooseError("In LineMaterialSamplerBase material property: " + material_property_names[i] + " does not exist.");
-    _material_properties.push_back(&getMaterialProperty<T>(material_property_names[i]));
-  }
-
-  SamplerBase::setupVariables(material_property_names);
 }
 
 #endif

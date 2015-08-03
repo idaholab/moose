@@ -32,7 +32,6 @@ class GeneratedMesh : public MooseMesh
 {
 public:
   GeneratedMesh(const InputParameters & parameters);
-  GeneratedMesh(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   GeneratedMesh(const GeneratedMesh & other_mesh);
   virtual ~GeneratedMesh();
 

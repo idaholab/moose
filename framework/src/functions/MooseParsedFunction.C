@@ -74,12 +74,3 @@ MooseParsedFunction::initialSetup()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MooseParsedFunction::MooseParsedFunction(const std::string & deprecated_name, InputParameters parameters) :
-    Function(deprecated_name, parameters),
-    MooseParsedFunctionBase(parameters),
-    _value(verifyFunction(getParam<std::string>("value"))),
-    _function_ptr(NULL)
-{
-}

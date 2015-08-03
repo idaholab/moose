@@ -37,10 +37,3 @@ ConstantDamper::computeQpDamping()
 
 
 
-
-// DEPRECATED CONSTRUCTOR
-ConstantDamper::ConstantDamper(const std::string & deprecated_name, InputParameters parameters) :
-    Damper(deprecated_name, parameters),
-    _damping(getParam<Real>("damping"))
-{
-}

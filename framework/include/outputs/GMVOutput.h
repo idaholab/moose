@@ -37,7 +37,6 @@ public:
    * Class constructor
    */
   GMVOutput(const InputParameters & parameters);
-  GMVOutput(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

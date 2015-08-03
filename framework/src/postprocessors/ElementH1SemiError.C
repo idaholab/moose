@@ -42,10 +42,3 @@ ElementH1SemiError::computeQpIntegral()
   return diff*diff;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElementH1SemiError::ElementH1SemiError(const std::string & deprecated_name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(deprecated_name, parameters),
-    _func(getFunction("function"))
-{
-}

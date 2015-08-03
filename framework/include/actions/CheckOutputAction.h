@@ -37,7 +37,6 @@ public:
    * @param params Input parameters for this object
    */
   CheckOutputAction(InputParameters params);
-  CheckOutputAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

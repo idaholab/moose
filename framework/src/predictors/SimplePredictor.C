@@ -55,11 +55,3 @@ SimplePredictor::apply(NumericVector<Number> & sln)
     }
   }
 }
-
-
-// DEPRECATED CONSTRUCTOR
-SimplePredictor::SimplePredictor(const std::string & deprecated_name, InputParameters parameters) :
-    Predictor(deprecated_name, parameters),
-    _scale(getParam<Real>("scale"))
-{
-}

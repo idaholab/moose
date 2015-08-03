@@ -33,7 +33,6 @@ class ElementIntegralPostprocessor : public ElementPostprocessor
 {
 public:
   ElementIntegralPostprocessor(const InputParameters & parameters);
-  ElementIntegralPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

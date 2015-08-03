@@ -143,14 +143,3 @@ NodalBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-NodalBC::NodalBC(const std::string & deprecated_name, InputParameters parameters) :
-    BoundaryCondition(deprecated_name, parameters),
-    RandomInterface(parameters, _fe_problem, _tid, true),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
-    _current_node(_var.node()),
-    _u(_var.nodalSln())
-{
-}

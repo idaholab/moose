@@ -33,7 +33,6 @@ class LayeredSideFluxAverage : public LayeredSideAverage
 {
 public:
   LayeredSideFluxAverage(const InputParameters & parameters);
-  LayeredSideFluxAverage(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

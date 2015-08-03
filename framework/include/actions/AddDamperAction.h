@@ -27,7 +27,6 @@ class AddDamperAction: public MooseObjectAction
 {
 public:
   AddDamperAction(InputParameters params);
-  AddDamperAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

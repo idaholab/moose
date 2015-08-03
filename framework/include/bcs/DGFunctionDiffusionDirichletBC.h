@@ -42,7 +42,6 @@ public:
    * constructor.
    */
   DGFunctionDiffusionDirichletBC(const InputParameters & parameters);
-  DGFunctionDiffusionDirichletBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~DGFunctionDiffusionDirichletBC() {}
 

@@ -39,10 +39,3 @@ UniformMarker::computeElementMarker()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-UniformMarker::UniformMarker(const std::string & deprecated_name, InputParameters parameters) :
-    Marker(deprecated_name, parameters),
-    _mark((MarkerValue)(int)parameters.get<MooseEnum>("mark"))
-{
-}

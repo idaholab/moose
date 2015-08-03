@@ -86,13 +86,3 @@ CreateProblemAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CreateProblemAction::CreateProblemAction(const std::string & deprecated_name, InputParameters parameters) :
-    MooseObjectAction(deprecated_name, parameters),
-    _problem_name(getParam<std::string>("name")),
-    _blocks(getParam<std::vector<SubdomainName> >("block")),
-    _coord_sys(getParam<MultiMooseEnum>("coord_type")),
-    _fe_cache(getParam<bool>("fe_cache"))
-{
-}

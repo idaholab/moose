@@ -40,9 +40,3 @@ AddKernelAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddKernelAction::AddKernelAction(const std::string & deprecated_name, InputParameters params) :
-    MooseObjectAction(deprecated_name, params)
-{
-}

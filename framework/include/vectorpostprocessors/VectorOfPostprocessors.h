@@ -38,7 +38,6 @@ public:
     * @param parameters The input parameters
     */
   VectorOfPostprocessors(const InputParameters & parameters);
-  VectorOfPostprocessors(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Destructor
