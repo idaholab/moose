@@ -127,6 +127,8 @@
 #include "ConservedMaskedUniformNoise.h"
 #include "ConservedNormalNoise.h"
 #include "ConservedUniformNoise.h"
+#include "DiscreteNucleationInserter.h"
+#include "DiscreteNucleationMap.h"
 #include "EBSDReader.h"
 #include "SolutionRasterizer.h"
 
@@ -302,6 +304,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(ConservedMaskedUniformNoise);
   registerUserObject(ConservedNormalNoise);
   registerUserObject(ConservedUniformNoise);
+  registerUserObject(DiscreteNucleationInserter);
+  registerUserObject(DiscreteNucleationMap);
+
   registerUserObject(EBSDReader);
   registerUserObject(SolutionRasterizer);
 
