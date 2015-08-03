@@ -13,21 +13,6 @@
     exodiff = '2phase_reconstruction_test_out.e'
     max_time = 1000
     recover = false # issue #5188
-[../]
-
-  [./many_grains_test]
-    type = 'Exodiff'
-    input = 'reconstruction_many_grains_test.i'
-    exodiff = 'many_grains.e'
-    max_time = 1000
-    skip = 'Needs Updating'
-  [../]
-
-  [./many_grains_conc_test]
-    type = 'Exodiff'
-    input = 'reconstruction_many_grains_conc_test.i'
-    exodiff = 'many_grains_conc.e'
-    max_time = 1000
-    skip = 'Needs Updating'
+    skip = 'See issue #5502'
   [../]
 []
