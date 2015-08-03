@@ -26,7 +26,7 @@ template<>
 InputParameters validParams<FeatureFloodCount>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredCoupledVar("variable", "Ths variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
+  params.addRequiredCoupledVar("variable", "The variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
   params.addParam<Real>("threshold", 0.5, "The threshold value for which a new bubble may be started");
   params.addParam<Real>("connecting_threshold", "The threshold for which an existing bubble may be extended (defaults to \"threshold\")");
   params.addParam<PostprocessorName>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");

@@ -99,6 +99,7 @@
  */
 #include "FeatureFloodCount.h"
 #include "GrainTracker.h"
+#include "FauxGrainTracker.h"
 #include "NodalVolumeFraction.h"
 #include "PFCElementEnergyIntegral.h"
 
@@ -286,6 +287,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
+  registerPostprocessor(FauxGrainTracker);
   registerPostprocessor(NodalVolumeFraction);
   registerPostprocessor(PFCElementEnergyIntegral);
 

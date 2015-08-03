@@ -79,6 +79,7 @@ temp_print_trace.*
 
 # Allow certain files in gold directories
 !**/gold/*.e
+!**/gold/*.e-s*
 !**/gold/*.csv
 !**/gold/*.vtk
 !**/gold/*.vtu

@@ -1,0 +1,8 @@
+# Following has no valid AXIS lines - should produce an exception
+X AXIS
+-1 2
+AXES Y
+2 3
+DATA
+1 2 3 4
+
