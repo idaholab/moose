@@ -23,7 +23,6 @@ class SolidMechTempCouple : public SolidMech
 public:
 
   SolidMechTempCouple(const InputParameters & parameters);
-  SolidMechTempCouple(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void subdomainSetup();
 

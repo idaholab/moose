@@ -69,14 +69,3 @@ LinearElasticityApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*acti
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-LinearElasticityApp::LinearElasticityApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  LinearElasticityApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  LinearElasticityApp::associateSyntax(_syntax, _action_factory);
-}

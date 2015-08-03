@@ -43,12 +43,3 @@ SolidMechTempCouple::recomputeCouplingConstants()
     _c4 = _E/(1.-2.*_nu);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SolidMechTempCouple::SolidMechTempCouple(const std::string & deprecated_name, InputParameters parameters)
-  :SolidMech(deprecated_name, parameters),
-    _temp_var(coupled("temp")),
-    _thermal_strain(getMaterialProperty<Real>("thermal_strain")),
-   _alpha(getMaterialProperty<Real>("alpha")),
-   _mesh_dimension(_mesh.dimension())
-{}
