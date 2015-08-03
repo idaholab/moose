@@ -34,6 +34,7 @@ StressDivergenceTrussPD::StressDivergenceTrussPD(const std::string & name, Input
    _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
    _bond_status_old(getMaterialPropertyOld<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
    _bond_stretch(getMaterialProperty<Real>("bond_stretch" + getParam<std::string>("appended_property_name"))),
+   _critical_stretch(getMaterialProperty<Real>("critical_stretch" + getParam<std::string>("appended_property_name"))),
    _component(getParam<unsigned int>("component")),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),

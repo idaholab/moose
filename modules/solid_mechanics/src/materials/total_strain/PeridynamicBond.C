@@ -64,6 +64,7 @@ InputParameters validParams<PeridynamicBond>()
   params.addParam<Real>("MeshSpacing", "MeshSpacing");
   params.addParam<Real>("ThicknessPerLayer", 1.0, "ThicknessPerLayer");
   params.addParam<Real>("CriticalStretch", 1.0, "CriticalStretch");
+	params.addParam<Real>("StandardDeviation", 1.0, "StandardDeviation");
 	params.addParam<Real>("reference_temp", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
 	params.addParam<Real>("thermal_conductivity", 0.0, "The thermal conductivity");
@@ -80,6 +81,7 @@ PeridynamicBond::PeridynamicBond(const std::string  & name,
    _bond_status(declareProperty<Real>("bond_status")),
    _bond_status_old(declarePropertyOld<Real>("bond_status")),
 	 _bond_stretch(declareProperty<Real>("bond_stretch")),
+	 _critical_stretch(declareProperty<Real>("critical_stretch")),
 	 _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
 	 _bond_volume(declareProperty<Real>("bond_volume")),
    _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0),
@@ -87,6 +89,7 @@ PeridynamicBond::PeridynamicBond(const std::string  & name,
    _MeshSpacing(isParamValid("MeshSpacing") ? getParam<Real>("MeshSpacing") : 0),
    _ThicknessPerLayer(isParamValid("ThicknessPerLayer") ? getParam<Real>("ThicknessPerLayer") : 0),
    _CriticalStretch(isParamValid("CriticalStretch") ? getParam<Real>("CriticalStretch") : 0),
+	 _StandardDeviation(isParamValid("StandardDeviation") ? getParam<Real>("StandardDeviation") : 0),
    _youngs_modulus_coupled(isCoupled("youngs_modulus_var")),
    _youngs_modulus_var(_youngs_modulus_coupled ? coupledValue("youngs_modulus_var"): _zero),
    _has_temp(isCoupled("temp")),
@@ -143,6 +146,7 @@ PeridynamicBond::PeridynamicBond(const std::string  & name,
   _VolumePerNode = _MeshSpacing * _MeshSpacing * _ThicknessPerLayer;
   _lamda = lamda2D(_poissons_ratio);
 	_AvgArea = AvgArea2D(_MeshSpacing,_ThicknessPerLayer);
+	srand((unsigned)time( NULL ));
   cout << "123456" << endl;
   _callnum = 0;
   /***********************************************************************************************/
@@ -158,6 +162,11 @@ PeridynamicBond::initQpStatefulProperties()
 {
 	_bond_status[_qp] = 1.0;
 	_bond_status_old[_qp] = 1.0;
+	/* Generate randomized critical stretch by Box-Muller method */
+	double Pi = 3.14159265358;
+	_critical_stretch[_qp] = sqrt(-2.0*log((double)rand()/(double)RAND_MAX))*cos(2.0*Pi*(double)rand()/(double)RAND_MAX);
+	_critical_stretch[_qp] /= 1.0/_StandardDeviation;
+	_critical_stretch[_qp] += _CriticalStretch;
 }
 
 void

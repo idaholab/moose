@@ -37,6 +37,7 @@ protected:
   const MaterialProperty<Real> & _bond_status;
   const MaterialProperty<Real> & _bond_status_old;
   const MaterialProperty<Real> & _bond_stretch;
+  const MaterialProperty<Real> & _critical_stretch;
 
 private:
   const unsigned int _component;

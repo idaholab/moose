@@ -41,6 +41,7 @@ protected:
   MaterialProperty<Real> & _bond_status;
   MaterialProperty<Real> & _bond_status_old;
   MaterialProperty<Real> & _bond_stretch;
+  MaterialProperty<Real> & _critical_stretch;
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _bond_volume;
 
@@ -49,6 +50,7 @@ protected:
   const Real _MeshSpacing;
   const Real _ThicknessPerLayer;
   const Real _CriticalStretch;
+  const Real _StandardDeviation;
   Real _MaterialRegion;
   Real _VolumePerNode;
   Real _lamda;
