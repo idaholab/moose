@@ -9,28 +9,85 @@
   filename = 'Ti_2Phase_28x28_Sqr_Marmot.txt'
 []
 
-[GlobalParams]
-  op_num = 4
-  var_name_base = eta
-[]
-
 [UserObjects]
   [./ebsd]
     type = EBSDReader
   [../]
 []
 
-[ICs]
-  [./PolycrystalICs]
-    [./ReconVarIC]
-      ebsd_reader = ebsd
-      consider_phase = false
-    [../]
+[Variables]
+  [./c1]
+  [../]
+  [./c2]
   [../]
 []
 
-[Variables]
-  [./PolycrystalVariables]
+[ICs]
+  [./phase1_recon]
+    type = ReconVarIC
+    ebsd_reader = ebsd
+    consider_phase = true
+    phase = 1
+    variable = c1
+    all_to_one = true
+  [../]
+  [./phase2_recon]
+    type = ReconVarIC
+    ebsd_reader = ebsd
+    consider_phase = true
+    phase = 2
+    variable = c2
+    all_to_one = true
+  [../]
+[]
+
+[AuxVariables]
+  [./PHI1]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./PHI]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./PHI2]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./PHASE]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
+[AuxKernels]
+  [./phi1_aux]
+    type = TestEBSDAux
+    variable = PHI1
+    ebsd_reader = ebsd
+    data_name = 'phi1'
+    execute_on = 'initial'
+  [../]
+  [./phi_aux]
+    type = TestEBSDAux
+    variable = PHI
+    ebsd_reader = ebsd
+    data_name = 'phi'
+    execute_on = 'initial'
+  [../]
+  [./phi2_aux]
+    type = TestEBSDAux
+    variable = PHI2
+    ebsd_reader = ebsd
+    data_name = 'phi2'
+    execute_on = 'initial'
+  [../]
+  [./phase_aux]
+    type = TestEBSDAux
+    variable = PHASE
+    ebsd_reader = ebsd
+    data_name = 'phase'
+    execute_on = 'initial'
   [../]
 []
 
@@ -45,5 +102,3 @@
   exodus = true
   print_perf_log = true
 []
-
-

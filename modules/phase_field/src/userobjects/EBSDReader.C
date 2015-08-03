@@ -13,7 +13,6 @@ template<>
 InputParameters validParams<EBSDReader>()
 {
   InputParameters params = validParams<EulerAngleProvider>();
-  params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order parameters to create");
   params.addParam<unsigned int>("custom_columns", 0, "Number of additional custom data columns to read from the EBSD file");
   return params;
 }
@@ -22,7 +21,6 @@ EBSDReader::EBSDReader(const InputParameters & params) :
     EulerAngleProvider(params),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
-    _op_num(getParam<unsigned int>("op_num")),
     _feature_num(0),
     _custom_columns(getParam<unsigned int>("custom_columns")),
     _mesh_dimension(_mesh.dimension()),
@@ -86,6 +84,12 @@ EBSDReader::readFile()
       std::istringstream iss(line);
       iss >> d.phi1 >> d.phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
 
+      // Transform angles to degrees
+      d.phi1 *= 180.0/libMesh::pi;
+      d.phi *= 180.0/libMesh::pi;
+      d.phi2 *= 180.0/libMesh::pi;
+
+      // Custom columns
       d.custom.resize(_custom_columns);
       for (unsigned int i = 0; i < _custom_columns; ++i)
         if (!(iss >> d.custom[i]))
@@ -94,7 +98,7 @@ EBSDReader::readFile()
       if (x < _minx || y < _miny || x > _maxx || y > _maxy || (g.dim == 3 && (z < _minz || z > _maxz)))
         mooseError("EBSD Data ouside of the domain declared in the header ([" << _minx << ':' << _maxx << "], [" << _miny << ':' << _maxy << "], [" << _minz << ':' << _maxz << "]) dim=" << g.dim << "\n" << line);
 
-      d.p = Point(x,y,z);
+      d.p = Point(x, y, z);
 
       // determine number of grains in the dataset
       if (d.grain > _feature_num) _feature_num = d.grain;
@@ -375,7 +379,6 @@ EBSDReader::EBSDReader(const std::string & deprecated_name, InputParameters para
     EulerAngleProvider(deprecated_name, params),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
-    _op_num(getParam<unsigned int>("op_num")),
     _feature_num(0),
     _mesh_dimension(_mesh.dimension()),
     _nx(0),
