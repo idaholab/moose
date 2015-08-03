@@ -91,8 +91,6 @@ InputParameters validParams<NavierStokesApp>()
 NavierStokesApp::NavierStokesApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   NavierStokesApp::registerObjects(_factory);
 
@@ -210,8 +208,6 @@ NavierStokesApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_f
 NavierStokesApp::NavierStokesApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   NavierStokesApp::registerObjects(_factory);
 
