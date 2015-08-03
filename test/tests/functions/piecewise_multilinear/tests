@@ -20,7 +20,13 @@
   [./except4]
     type = 'RunException'
     input = 'except4.i'
-    expect_err = "PiecewiseMultilinear needs the AXES to be independent.  Check the AXES lines in your data file."
+    expect_err = "PiecewiseMultilinear needs the AXES to be independent.  Check the AXIS lines in your data file."
+    max_parallel = 1
+  [../]
+  [./except5]
+    type = 'RunException'
+    input = 'except5.i'
+    expect_err = "No valid AXIS lines found by GriddedData"
     max_parallel = 1
   [../]
 
