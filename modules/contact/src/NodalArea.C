@@ -108,11 +108,3 @@ NodalArea::nodalArea( const Node * node ) const
   return retVal;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NodalArea::NodalArea(const std::string & deprecated_name, InputParameters parameters) :
-    SideIntegralVariableUserObject(deprecated_name, parameters),
-    _phi(getCoupledVars().find("variable")->second[0]->phiFace()),
-    _system( _variable->sys() ),
-    _aux_solution( _system.solution() )
-{}

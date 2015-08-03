@@ -73,12 +73,3 @@ ContactPressureAuxAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ContactPressureAuxAction::ContactPressureAuxAction(const std::string & deprecated_name, InputParameters params) :
-  Action(deprecated_name, params),
-  _master(getParam<BoundaryName>("master")),
-  _slave(getParam<BoundaryName>("slave")),
-  _order(getParam<MooseEnum>("order"))
-{
-}

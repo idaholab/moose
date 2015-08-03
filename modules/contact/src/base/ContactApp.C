@@ -112,14 +112,3 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(NodalAreaVarAction, "add_aux_variable");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ContactApp::ContactApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  ContactApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ContactApp::associateSyntax(_syntax, _action_factory);
-}

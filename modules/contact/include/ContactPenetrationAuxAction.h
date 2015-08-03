@@ -20,7 +20,6 @@ class ContactPenetrationAuxAction: public Action
 {
 public:
   ContactPenetrationAuxAction(const InputParameters & params);
-  ContactPenetrationAuxAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

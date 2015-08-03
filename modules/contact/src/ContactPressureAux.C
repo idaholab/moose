@@ -52,11 +52,3 @@ ContactPressureAux::computeValue()
   return value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ContactPressureAux::ContactPressureAux(const std::string & deprecated_name, InputParameters params) :
-    AuxKernel(deprecated_name, params),
-    _nodal_area(coupledValue("nodal_area")),
-    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("paired_boundary"), getParam<std::vector<BoundaryName> >("boundary")[0], Utility::string_to_enum<Order>(getParam<MooseEnum>("order"))))
-{
-}
