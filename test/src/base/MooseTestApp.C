@@ -228,8 +228,6 @@ InputParameters validParams<MooseTestApp>()
 MooseTestApp::MooseTestApp(const InputParameters & parameters):
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   MooseTestApp::registerObjects(_factory);
 

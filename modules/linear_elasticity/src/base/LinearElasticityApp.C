@@ -29,8 +29,6 @@ InputParameters validParams<LinearElasticityApp>()
 LinearElasticityApp::LinearElasticityApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   LinearElasticityApp::registerObjects(_factory);
 
@@ -88,8 +86,6 @@ LinearElasticityApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*acti
 LinearElasticityApp::LinearElasticityApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   LinearElasticityApp::registerObjects(_factory);
 

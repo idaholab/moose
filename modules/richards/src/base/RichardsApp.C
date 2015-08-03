@@ -100,8 +100,6 @@ InputParameters validParams<RichardsApp>()
 RichardsApp::RichardsApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   RichardsApp::registerObjects(_factory);
 
@@ -223,8 +221,6 @@ RichardsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_facto
 RichardsApp::RichardsApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   RichardsApp::registerObjects(_factory);
 

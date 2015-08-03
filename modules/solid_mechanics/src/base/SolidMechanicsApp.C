@@ -92,8 +92,6 @@ InputParameters validParams<SolidMechanicsApp>()
 SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   SolidMechanicsApp::registerObjects(_factory);
 
@@ -251,8 +249,6 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
 SolidMechanicsApp::SolidMechanicsApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   SolidMechanicsApp::registerObjects(_factory);
 

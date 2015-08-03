@@ -21,8 +21,6 @@ InputParameters validParams<WaterSteamEOSApp>()
 WaterSteamEOSApp::WaterSteamEOSApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   WaterSteamEOSApp::registerObjects(_factory);
 
@@ -66,8 +64,6 @@ WaterSteamEOSApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_
 WaterSteamEOSApp::WaterSteamEOSApp(const std::string & deprecated_name, InputParameters parameters) :
     MooseApp(deprecated_name, parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   WaterSteamEOSApp::registerObjects(_factory);
 
