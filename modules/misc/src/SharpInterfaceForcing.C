@@ -36,12 +36,3 @@ SharpInterfaceForcing::computeQpResidual()
     return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SharpInterfaceForcing::SharpInterfaceForcing(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _x_center(getFunction("x_center")),
-    _y_center(getFunction("y_center")),
-    _amplitude(getParam<Real>("amplitude"))
-{
-}

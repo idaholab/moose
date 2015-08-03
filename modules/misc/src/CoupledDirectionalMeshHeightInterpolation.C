@@ -45,15 +45,3 @@ CoupledDirectionalMeshHeightInterpolation::computeValue()
   return percentage_along_direction * _coupled_val[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CoupledDirectionalMeshHeightInterpolation::CoupledDirectionalMeshHeightInterpolation(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _coupled_val(coupledValue("coupled_var")),
-    _direction(getParam<MooseEnum>("direction"))
-{
-  MeshTools::BoundingBox bounding_box = MeshTools::bounding_box(_subproblem.mesh());
-
-  _direction_min = bounding_box.min()(_direction);
-  _direction_max = bounding_box.max()(_direction);
-}

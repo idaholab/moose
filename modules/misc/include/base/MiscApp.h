@@ -18,7 +18,6 @@ class MiscApp : public MooseApp
 {
 public:
   MiscApp(const InputParameters & parameters);
-  MiscApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MiscApp();
 
   static void registerApps();

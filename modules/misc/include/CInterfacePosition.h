@@ -22,7 +22,6 @@ class CInterfacePosition : public NodalProxyMaxValue
 {
 public:
   CInterfacePosition(const InputParameters & parameters);
-  CInterfacePosition(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual Real getValue();
 
 protected:

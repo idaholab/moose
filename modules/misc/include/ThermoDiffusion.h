@@ -36,7 +36,6 @@ class ThermoDiffusion : public Kernel
 {
 public:
   ThermoDiffusion( const InputParameters & parameters);
-  ThermoDiffusion(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

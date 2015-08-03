@@ -29,10 +29,3 @@ RobinBC::computeQpResidual()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RobinBC::RobinBC(const std::string & deprecated_name, InputParameters parameters) :
-  IntegratedBC(deprecated_name, parameters),
-  _value(parameters.get<Real>("value"))
-{
-}

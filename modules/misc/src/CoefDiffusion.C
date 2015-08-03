@@ -40,10 +40,3 @@ CoefDiffusion::computeQpJacobian()
   return diffusivity*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CoefDiffusion::CoefDiffusion(const std::string & deprecated_name, InputParameters parameters)
-  :Kernel(deprecated_name, parameters),
-   _coef(getParam<Real>("coef")),
-   _func(parameters.isParamValid("function") ? &getFunction("function") : NULL)
-{}

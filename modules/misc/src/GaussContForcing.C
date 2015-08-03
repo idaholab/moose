@@ -59,22 +59,3 @@ GaussContForcing::computeQpResidual()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-GaussContForcing::GaussContForcing(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _amplitude(getParam<Real>("amplitude")),
-    _x_center(getParam<Real>("x_center")),
-    _y_center(getParam<Real>("y_center")),
-    _z_center(getParam<Real>("z_center")),
-    _x_spread(getParam<Real>("x_spread")),
-    _y_spread(getParam<Real>("y_spread")),
-    _z_spread(getParam<Real>("z_spread")),
-    _x_min(_x_center-(3.0*_x_spread)),
-    _x_max(_x_center+(3.0*_x_spread)),
-    _y_min(_y_center-(3.0*_y_spread)),
-    _y_max(_y_center+(3.0*_y_spread)),
-    _z_min(_z_center-(3.0*_z_spread)),
-    _z_max(_z_center+(3.0*_z_spread))
-{
-}

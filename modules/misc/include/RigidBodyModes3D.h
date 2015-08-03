@@ -22,7 +22,6 @@ class RigidBodyModes3D :
 {
 public:
   RigidBodyModes3D(const InputParameters & parameters);
-  RigidBodyModes3D(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * This function will get called on each node.
