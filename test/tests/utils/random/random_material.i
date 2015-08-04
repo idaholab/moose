@@ -28,7 +28,7 @@
     type = RandomMaterial
     block = 0
     outputs = exodus
-    output_properties = random_real
+    output_properties = rand_real
   [../]
 []
 
