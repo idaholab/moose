@@ -61,7 +61,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
 
       if (distance < closest_distance)
       {
-        Real patch_percentage = (Real)k / (Real)n_neighbor_nodes;
+        Real patch_percentage = static_cast<Real>(k) / static_cast<Real>(n_neighbor_nodes);
 
         // Save off the maximum we had to go through the patch to find the closes node
         if (patch_percentage > _max_patch_percentage)

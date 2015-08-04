@@ -807,7 +807,7 @@ CrackFrontDefinition::updateDataForCrackDirection()
     {
       _crack_mouth_coordinates += **nit;
     }
-    _crack_mouth_coordinates /= (Real)crack_mouth_nodes.size();
+    _crack_mouth_coordinates /= static_cast<Real>(crack_mouth_nodes.size());
 
     if (_has_symmetry_plane)
       _crack_mouth_coordinates(_symmetry_plane) = 0.0;

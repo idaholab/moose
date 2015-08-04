@@ -1347,7 +1347,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo* info,
       Real fw1 = edge_face_weights[1];
 
       //Corner weight is product of edge weights.  Spread out over multiple neighbors.
-      Real fw_corner = (fw0 * fw1) / ((Real)num_corner_neighbors);
+      Real fw_corner = (fw0 * fw1) / static_cast<Real>(num_corner_neighbors);
 
       //Adjust original edge weights
       edge_face_weights[0] *= (1.0 - fw1);

@@ -123,7 +123,7 @@ LeastSquaresFit::execute()
 
     for (unsigned int i=0; i<_num_samples; ++i)
     {
-      Real x = x_min + (Real)i / _num_samples * x_span;
+      Real x = x_min + static_cast<Real>(i) / _num_samples * x_span;
       _sample_x->push_back(x);
       _sample_y->push_back(pf.sample(x));
     }

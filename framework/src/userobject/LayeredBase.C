@@ -232,7 +232,7 @@ LayeredBase::getLayer(Point p) const
 
   if (_interval_based)
   {
-    unsigned int layer = std::floor(((direction_x - _direction_min) / (_direction_max - _direction_min)) * (Real)_num_layers);
+    unsigned int layer = std::floor(((direction_x - _direction_min) / (_direction_max - _direction_min)) * static_cast<Real>(_num_layers));
 
     if (layer >= _num_layers)
       layer = _num_layers-1;
