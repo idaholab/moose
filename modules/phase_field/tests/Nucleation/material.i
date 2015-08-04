@@ -69,7 +69,7 @@
   [../]
   [./map]
     type = DiscreteNucleationMap
-    radius = 3
+    radius = 3.27
     periodic = c
     inserter = inserter
   [../]

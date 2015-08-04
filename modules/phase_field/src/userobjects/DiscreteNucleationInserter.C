@@ -58,6 +58,9 @@ DiscreteNucleationInserter::initialize()
         ++i;
     }
   }
+
+  // we reassemble this list at every timestep
+  _global_nucleus_list.clear();
 }
 
 void
@@ -78,15 +81,18 @@ DiscreteNucleationInserter::threadJoin(const UserObject &y)
 {
   // combine _local_nucleus_list entries from all threads on the current process
   const DiscreteNucleationInserter & uo = static_cast<const DiscreteNucleationInserter &>(y);
-  _local_nucleus_list.insert(_local_nucleus_list.end(), uo._local_nucleus_list.begin(), uo._local_nucleus_list.end());
+  _global_nucleus_list.insert(_global_nucleus_list.end(), uo._local_nucleus_list.begin(), uo._local_nucleus_list.end());
   _changes_made += uo._changes_made;
 }
 
 void
 DiscreteNucleationInserter::finalize()
 {
-  // here we need to combine all _local_nucleus_list into a the _global_nucleus_list
-  _global_nucleus_list = _local_nucleus_list;
+  // add the _local_nucleus_list of thread zero
+  _global_nucleus_list.insert(_global_nucleus_list.end(), _local_nucleus_list.begin(), _local_nucleus_list.end());
+  // combine _global_nucleus_lists from all MPI ranks
   _communicator.allgather(_global_nucleus_list);
+
+  // get the global number of changes (i.e. changes to _global_nucleus_list)
   gatherSum(_changes_made);
 }
