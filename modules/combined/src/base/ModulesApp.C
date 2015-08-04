@@ -104,14 +104,3 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   WaterSteamEOSApp::associateSyntax(syntax, action_factory);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ModulesApp::ModulesApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  ModulesApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ModulesApp::associateSyntax(_syntax, _action_factory);
-}
