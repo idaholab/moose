@@ -209,14 +209,3 @@ RichardsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_facto
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsApp::RichardsApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  RichardsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  RichardsApp::associateSyntax(_syntax, _action_factory);
-}

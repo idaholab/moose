@@ -53,8 +53,3 @@ RichardsDensityMethane20degC::d2density(Real p) const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsDensityMethane20degC::RichardsDensityMethane20degC(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsDensity(deprecated_name, parameters)
-{}

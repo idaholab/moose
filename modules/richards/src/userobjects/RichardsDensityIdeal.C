@@ -46,10 +46,3 @@ RichardsDensityIdeal::d2density(Real /*p*/) const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsDensityIdeal::RichardsDensityIdeal(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsDensity(deprecated_name, parameters),
-    _slope(getParam<Real>("slope")),
-    _p0(getParam<Real>("p0"))
-{}

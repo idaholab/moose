@@ -24,7 +24,6 @@ class RichardsDensityIdeal : public RichardsDensity
 {
 public:
   RichardsDensityIdeal(const InputParameters & parameters);
-  RichardsDensityIdeal(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * fluid density as a function of porepressure

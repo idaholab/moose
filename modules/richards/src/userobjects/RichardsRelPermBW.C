@@ -85,19 +85,3 @@ RichardsRelPermBW::d2relperm(Real seff) const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsRelPermBW::RichardsRelPermBW(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsRelPerm(deprecated_name, parameters),
-    _sn(getParam<Real>("Sn")),
-    _ss(getParam<Real>("Ss")),
-    _kn(getParam<Real>("Kn")),
-    _ks(getParam<Real>("Ks")),
-    _c(getParam<Real>("C"))
-{
-  if (_ss <= _sn)
-    mooseError("In BW relative permeability Sn set to " << _sn << " and Ss set to " << _ss << " but these must obey Ss > Sn");
-  if (_ks <= _kn)
-    mooseError("In BW relative permeability Kn set to " << _kn << " and Ks set to " << _ks << " but these must obey Ks > Kn");
-  _coef = (_ks - _kn)*(_c - 1); // shorthand coefficient
-}

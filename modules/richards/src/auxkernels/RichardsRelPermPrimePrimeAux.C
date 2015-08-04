@@ -32,10 +32,3 @@ RichardsRelPermPrimePrimeAux::computeValue()
   return _relperm_UO.d2relperm(_seff_var[_qp]);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsRelPermPrimePrimeAux::RichardsRelPermPrimePrimeAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _seff_var(coupledValue("seff_var")),
-    _relperm_UO(getUserObject<RichardsRelPerm>("relperm_UO"))
-{}

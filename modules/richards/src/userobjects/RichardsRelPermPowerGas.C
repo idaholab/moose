@@ -77,11 +77,3 @@ RichardsRelPermPowerGas::d2relperm(Real seff) const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsRelPermPowerGas::RichardsRelPermPowerGas(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsRelPerm(deprecated_name, parameters),
-    _simm(getParam<Real>("simm")),
-    _n(getParam<Real>("n"))
-{
-}

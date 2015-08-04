@@ -28,7 +28,6 @@ class RichardsExcavFlow :
 {
 public:
   RichardsExcavFlow(const InputParameters & parameters);
-  RichardsExcavFlow(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

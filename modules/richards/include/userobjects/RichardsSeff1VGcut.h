@@ -32,7 +32,6 @@ class RichardsSeff1VGcut : public RichardsSeff1VG
 {
 public:
   RichardsSeff1VGcut(const InputParameters & parameters);
-  RichardsSeff1VGcut(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// just prints some (maybe) useful info to the console
   void initialSetup();

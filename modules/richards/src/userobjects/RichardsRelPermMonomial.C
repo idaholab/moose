@@ -88,12 +88,3 @@ RichardsRelPermMonomial::d2relperm(Real seff) const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsRelPermMonomial::RichardsRelPermMonomial(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsRelPerm(deprecated_name, parameters),
-    _simm(getParam<Real>("simm")),
-    _n(getParam<Real>("n")),
-    _zero_to_the_zero(getParam<Real>("zero_to_the_zero"))
-{
-}

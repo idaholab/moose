@@ -27,7 +27,6 @@ class RichardsRelPermVG1 : public RichardsRelPermVG
 {
 public:
   RichardsRelPermVG1(const InputParameters & parameters);
-  RichardsRelPermVG1(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// just prints some (maybe) useful info to the console
   void initialSetup();

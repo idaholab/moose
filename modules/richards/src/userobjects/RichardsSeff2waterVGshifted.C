@@ -60,13 +60,3 @@ RichardsSeff2waterVGshifted::d2seff(std::vector<VariableValue *> p, unsigned int
   result[1][1] = result[0][0];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSeff2waterVGshifted::RichardsSeff2waterVGshifted(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsSeff(deprecated_name, parameters),
-    _al(getParam<Real>("al")),
-    _m(getParam<Real>("m")),
-    _shift(getParam<Real>("shift"))
-{
-  _scale = RichardsSeffVG::seff(-_shift, _al, _m);
-}

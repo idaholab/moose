@@ -29,7 +29,6 @@ class RichardsMassChange : public TimeDerivative
 public:
 
   RichardsMassChange(const InputParameters & parameters);
-  RichardsMassChange(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -25,7 +25,6 @@ class RichardsSUPGnone : public RichardsSUPG
 {
 public:
   RichardsSUPGnone(const InputParameters & parameters);
-  RichardsSUPGnone(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// SUPG velocity = zero
   RealVectorValue velSUPG(RealTensorValue /*perm*/, RealVectorValue /*gradp*/, Real /*density*/, RealVectorValue /*gravity*/) const;

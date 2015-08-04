@@ -26,7 +26,6 @@ class RichardsRelPermPrimeAux: public AuxKernel
 {
 public:
   RichardsRelPermPrimeAux(const InputParameters & parameters);
-  RichardsRelPermPrimeAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

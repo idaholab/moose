@@ -34,8 +34,3 @@ void RichardsSeff::finalize()
 {}
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSeff::RichardsSeff(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralUserObject(deprecated_name, parameters)
-{}

@@ -32,10 +32,3 @@ RichardsDensityPrimeAux::computeValue()
   return _density_UO.ddensity(_pressure_var[_qp]);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsDensityPrimeAux::RichardsDensityPrimeAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _pressure_var(coupledValue("pressure_var")),
-    _density_UO(getUserObject<RichardsDensity>("density_UO"))
-{}

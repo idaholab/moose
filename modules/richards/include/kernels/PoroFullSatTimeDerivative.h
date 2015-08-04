@@ -29,7 +29,6 @@ class PoroFullSatTimeDerivative : public DerivativeMaterialInterface<TimeDerivat
 public:
 
   PoroFullSatTimeDerivative(const InputParameters & parameters);
-  PoroFullSatTimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

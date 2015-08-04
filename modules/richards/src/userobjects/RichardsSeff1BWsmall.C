@@ -152,15 +152,3 @@ RichardsSeff1BWsmall::d2seff(std::vector<VariableValue *> p, unsigned int qp, st
   result[0][0] = -std::pow(_c, 3)/std::pow(_las, 2)*lamw*(1 - 2*lamw)/std::pow(1 + lamw, 5);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSeff1BWsmall::RichardsSeff1BWsmall(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsSeff(deprecated_name, parameters),
-    _sn(getParam<Real>("Sn")),
-    _ss(getParam<Real>("Ss")),
-    _c(getParam<Real>("C")),
-    _las(getParam<Real>("las"))
-{
-  if (_ss <= _sn)
-    mooseError("In BW effective saturation Sn set to " << _sn << " and Ss set to " << _ss << " but these must obey Ss > Sn");
-}

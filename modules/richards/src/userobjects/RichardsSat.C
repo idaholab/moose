@@ -60,13 +60,3 @@ RichardsSat::d2sat(Real /*seff*/) const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSat::RichardsSat(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralUserObject(deprecated_name, parameters),
-    _s_res(getParam<Real>("s_res")),
-    _sum_s_res(getParam<Real>("sum_s_res"))
-{
-  if (_sum_s_res < _s_res)
-    mooseError("sum_s_res set to " << _sum_s_res << " but it must obey s_res <= sum_s_res < 1");
-}

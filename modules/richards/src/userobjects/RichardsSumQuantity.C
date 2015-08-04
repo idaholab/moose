@@ -60,10 +60,3 @@ RichardsSumQuantity::getValue() const
   return _total;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSumQuantity::RichardsSumQuantity(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralUserObject(deprecated_name, parameters),
-    _total(0)
-{
-}

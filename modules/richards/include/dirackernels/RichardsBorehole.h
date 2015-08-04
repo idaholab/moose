@@ -41,7 +41,6 @@ public:
    * needed for computing the borehole well constant
    */
   RichardsBorehole(const InputParameters & parameters);
-  RichardsBorehole(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Add Dirac Points to the borehole

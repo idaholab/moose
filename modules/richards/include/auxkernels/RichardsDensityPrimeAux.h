@@ -26,7 +26,6 @@ class RichardsDensityPrimeAux: public AuxKernel
 {
 public:
   RichardsDensityPrimeAux(const InputParameters & parameters);
-  RichardsDensityPrimeAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();
