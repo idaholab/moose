@@ -38,6 +38,9 @@ protected:
   /// Nucleation free energy prefactor
   const Real _penalty;
 
+  /// Match concentration exactly or use the target as a minumum or maximum value
+  const unsigned int _penalty_mode;
+
   /// UserObject providing a map of currently active nuclei
   const DiscreteNucleationMap & _map;
 };

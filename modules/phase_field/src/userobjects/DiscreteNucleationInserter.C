@@ -24,6 +24,7 @@ DiscreteNucleationInserter::DiscreteNucleationInserter(const InputParameters & p
     ElementUserObject(parameters),
     _probability(getMaterialProperty<Real>("probability")),
     _hold_time(getParam<Real>("hold_time")),
+    _changes_made(0),
     _global_nucleus_list(0),
     _local_nucleus_list(0)
 {

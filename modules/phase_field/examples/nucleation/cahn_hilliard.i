@@ -92,8 +92,9 @@
     block = 0
     f_name = Fn
     op_names  = c
-    op_values = 0.98
+    op_values = 0.90
     penalty = 5
+    penalty_mode = MIN
     map = map
     outputs = exodus
   [../]
@@ -113,7 +114,7 @@
     # The inserter runs at the end of each time step to add nucleation events
     # that happend during the timestep (if it converged) to the list of nuclei
     type = DiscreteNucleationInserter
-    hold_time = 500
+    hold_time = 100
     probability = P
   [../]
   [./map]
@@ -148,15 +149,19 @@
   scheme = bdf2
   solve_type = 'NEWTON'
 
-  nl_max_its = 10
+  nl_max_its = 15
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   nl_abs_tol = 1.0e-10
   start_time = 0.0
   num_steps = 1200
 
-  dt = 10
-  dtmin = 1e-6
+  [./TimeStepper]
+    type = IterationAdaptiveDT
+    dt = 10
+    growth_factor = 1.5
+    cutback_factor = 0.5
+  [../]
 []
 
 [Outputs]
