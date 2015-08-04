@@ -1,26 +1,19 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #include "ComputeGrainForceAndTorque.h"
+#include "ComputeGrainCenterUserObject.h"
 
 template<>
 InputParameters validParams<ComputeGrainForceAndTorque>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addClassDescription("Userobject for calculating force and torque acting on a grain");
-  params.addRequiredParam<MaterialPropertyName>("force_density", "Force density material");
-  params.addParam<UserObjectName>("grain_data","center of mass of grains");
+  params.addParam<MaterialPropertyName>("force_density", "force_density", "Force density material");
+  params.addParam<UserObjectName>("grain_data", "center of mass of grains");
   return params;
 }
 
@@ -56,27 +49,24 @@ ComputeGrainForceAndTorque::initialize()
 void
 ComputeGrainForceAndTorque::execute()
 {
-  RealGradient _compute_torque = 0.0;
-  RealGradient _compute_torque_derivative = 0.0;
-
   for (unsigned int i = 0; i < _ncrys; ++i)
     for (_qp=0; _qp<_qrule->n_points(); ++_qp)
     {
-      _compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dF[_qp][i]);
+      const RealGradient compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dF[_qp][i]);
       _force_torque_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](0);
       _force_torque_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](1);
       _force_torque_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](2);
-      _force_torque_store[6*i+3] += _compute_torque(0);
-      _force_torque_store[6*i+4] += _compute_torque(1);
-      _force_torque_store[6*i+5] += _compute_torque(2);
+      _force_torque_store[6*i+3] += compute_torque(0);
+      _force_torque_store[6*i+4] += compute_torque(1);
+      _force_torque_store[6*i+5] += compute_torque(2);
 
-      _compute_torque_derivative =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dFdc[_qp][i]);
+      const RealGradient compute_torque_derivative_c =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dFdc[_qp][i]);
       _force_torque_derivative_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dFdc[_qp][i](0);
       _force_torque_derivative_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dFdc[_qp][i](1);
       _force_torque_derivative_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dFdc[_qp][i](2);
-      _force_torque_derivative_store[6*i+3] += _compute_torque_derivative(0);
-      _force_torque_derivative_store[6*i+4] += _compute_torque_derivative(1);
-      _force_torque_derivative_store[6*i+5] += _compute_torque_derivative(2);
+      _force_torque_derivative_store[6*i+3] += compute_torque_derivative_c(0);
+      _force_torque_derivative_store[6*i+4] += compute_torque_derivative_c(1);
+      _force_torque_derivative_store[6*i+5] += compute_torque_derivative_c(2);
     }
 }
 

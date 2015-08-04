@@ -13,14 +13,14 @@
 /****************************************************************/
 
 #include "GrainForcesPostprocessor.h"
-#include "PostprocessorInterface.h"
+#include "GrainForceAndTorqueInterface.h"
 
 template<>
 InputParameters validParams<GrainForcesPostprocessor>()
 {
   InputParameters params = validParams<VectorPostprocessor>();
   params.addClassDescription("Outputs the values from GrainForcesPostprocessor");
-  params.addParam<UserObjectName>("grain_force","Specify userobject that gives center of mass and volume of grains");
+  params.addParam<UserObjectName>("grain_force", "Specify userobject that gives center of mass and volume of grains");
   return params;
 }
 

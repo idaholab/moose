@@ -1,17 +1,9 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #include "ConstantGrainForceAndTorque.h"
 
 template<>
@@ -34,9 +26,7 @@ ConstantGrainForceAndTorque::ConstantGrainForceAndTorque(const InputParameters &
     _force_values(_ncrys),
     _torque_values(_ncrys),
     _force_derivatives(_ncrys),
-    _torque_derivatives(_ncrys),
-    _force_torque_store(_ncomp),
-    _force_torque_derivative_store(_ncomp)
+    _torque_derivatives(_ncrys)
 {
 }
 

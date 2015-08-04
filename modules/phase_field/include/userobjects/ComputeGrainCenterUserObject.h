@@ -1,17 +1,9 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #ifndef COMPUTEGRAINCENTERUSEROBJECT_H
 #define COMPUTEGRAINCENTERUSEROBJECT_H
 
@@ -44,10 +36,11 @@ protected:
   unsigned int _ncrys;
   std::vector<VariableValue *> _vals;
   unsigned int _ncomp;
-  /// storing volumes and centers of all the grains
+  ///@{ storing volumes and centers of all the grains
   std::vector<Real> _grain_data;
   std::vector<Real> _grain_volumes;
   std::vector<Point> _grain_centers;
+  ///@}
 };
 
 #endif //COMPUTEGRAINCENTERUSEROBJECT_H

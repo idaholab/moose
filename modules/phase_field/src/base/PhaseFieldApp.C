@@ -130,7 +130,6 @@
  */
 #include "ComputeGrainCenterUserObject.h"
 #include "ComputeGrainForceAndTorque.h"
-#include "ConstantGrainForceAndTorque.h"
 #include "ConservedMaskedNormalNoise.h"
 #include "ConservedMaskedUniformNoise.h"
 #include "ConservedNormalNoise.h"
@@ -324,7 +323,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerUserObject(ComputeGrainCenterUserObject);
   registerUserObject(ComputeGrainForceAndTorque);
-  registerUserObject(ConstantGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
   registerUserObject(ConservedMaskedUniformNoise);
   registerUserObject(ConservedNormalNoise);

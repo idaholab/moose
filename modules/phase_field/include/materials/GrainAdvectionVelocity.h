@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef GRAINADVECTIONVELOCITY_H
 #define GRAINADVECTIONVELOCITY_H
 
@@ -12,7 +18,8 @@ template<>
 InputParameters validParams<GrainAdvectionVelocity>();
 
 /**
- * This Material calculates the advection velocity and it's divergence acting on a particle/grain
+ * This Material calculates the advection velocity, it's divergence and
+ * derivatives acting on a particle/grain
  */
 class GrainAdvectionVelocity : public Material
 {
@@ -51,9 +58,12 @@ private:
   /// Material storing divergence of advection velocities of grains
   MaterialProperty<std::vector<Real> > & _div_velocity_advection;
 
-  /// Material storing derivative of advection velocities of grains
-  MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative;
-  MaterialProperty<std::vector<Real> > & _div_velocity_advection_derivative;
+  /// Material storing derivative of advection velocities of grains w r. t. c
+  MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative_c;
+  /// Material storing derivative of divergence of advection velocities of grains w r. t. c
+  MaterialProperty<std::vector<Real> > & _div_velocity_advection_derivative_c;
+  /// Material storing derivative of advection velocities of grains w r. t. eta
+  MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative_eta;
 };
 
 #endif //GRAINADVECTIONVELOCITY_H

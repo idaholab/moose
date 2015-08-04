@@ -1,33 +1,25 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
-
-
 #ifndef COMPUTEGRAINFORCEANDTORQUE_H
 #define COMPUTEGRAINFORCEANDTORQUE_H
 
 #include "GrainForceAndTorqueInterface.h"
 #include "ElementUserObject.h"
-#include "ComputeGrainCenterUserObject.h"
 
 //Forward Declarations
 class ComputeGrainForceAndTorque;
+class ComputeGrainCenterUserObject;
 
 template<>
 InputParameters validParams<ComputeGrainForceAndTorque>();
 
-/* This class is here to get the force and torque acting on a grain*/
-
+/**
+ * This class is here to get the force and torque acting on a grain
+ */
 class ComputeGrainForceAndTorque :
     public GrainForceAndTorqueInterface,
     public ElementUserObject
@@ -58,10 +50,12 @@ protected:
   const std::vector<Point> & _grain_centers;
   unsigned int _ncrys;
   unsigned int _ncomp;
+  ///@{ providing grain forces, torques and their derivatives w. r. t c
   std::vector<RealGradient> _force_values;
   std::vector<RealGradient> _torque_values;
   std::vector<RealGradient> _force_derivatives;
   std::vector<RealGradient> _torque_derivatives;
+  ///@}
   /// vector storing grain force and torque values
   std::vector<Real> _force_torque_store;
   /// vector storing derivative of grain force and torque values

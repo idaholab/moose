@@ -1,3 +1,4 @@
+# test file for applyting advection term and observing rigid body motion of grains
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -63,8 +64,7 @@
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
-    advection_velocity = advection_velocity
-    advection_velocity_divergence = advection_velocity_divergence
+    v = eta
   [../]
   [./eta_dot]
     type = TimeDerivative
@@ -74,8 +74,7 @@
     type = SingleGrainRigidBodyMotion
     variable = eta
     c = c
-    advection_velocity = advection_velocity
-    advection_velocity_divergence = advection_velocity_divergence
+    v = eta
   [../]
   [./acint_eta]
     type = ACInterface

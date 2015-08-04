@@ -59,23 +59,23 @@
     variable = w
     v = c
   [../]
+  # advection kernel corrsponding to CH equation
   [./motion]
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
-    advection_velocity = advection_velocity
-    advection_velocity_divergence = advection_velocity_divergence
+    v = eta
   [../]
   [./eta_dot]
     type = TimeDerivative
     variable = eta
   [../]
+  # advection kernel corrsponding to AC equation
   [./vadv_eta]
     type = SingleGrainRigidBodyMotion
     variable = eta
     c = c
-    advection_velocity = advection_velocity
-    advection_velocity_divergence = advection_velocity_divergence
+    v = eta
   [../]
   [./acint_eta]
     type = ACInterface
@@ -128,6 +128,7 @@
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+(c-eta)^2
     derivative_order = 2
   [../]
+  # advection velocity is being calculated
   [./advection_vel]
     type = GrainAdvectionVelocity
     block = 0
@@ -138,10 +139,12 @@
 []
 
 [VectorPostprocessors]
+  # VectorPostprocessor for outputing grain centers and volumes
   [./centers]
     type = GrainCentersPostprocessor
     grain_data = grain_center
   [../]
+  # VectorPostprocessor for outputing grain forces and torques
   [./forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
@@ -149,16 +152,18 @@
 []
 
 [UserObjects]
+  # user object for extracting grain centers and volumes
   [./grain_center]
     type = ComputeGrainCenterUserObject
     etas = eta
     execute_on = 'initial linear'
   [../]
+  # constant force and torque is applied
   [./grain_force]
     type = ConstantGrainForceAndTorque
     execute_on = 'initial linear'
-    force = '0.2 0.0 0.0 '
-    torque = '0.0 0.0 5.0 '
+    force = '0.2 0.0 0.0 ' # size should be 3 * no. of grains
+    torque = '0.0 0.0 5.0 ' # size should be 3 * no. of grains
   [../]
 []
 

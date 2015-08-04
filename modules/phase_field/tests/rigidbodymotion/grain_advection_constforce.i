@@ -1,10 +1,4 @@
-#
-# Test the split parsed function free enery Cahn-Hilliard Bulk kernel
-# The free energy used here has the same functional form as the SplitCHPoly kernel
-# If everything works, the output of this test should replicate the output
-# of marmot/tests/chpoly_test/CHPoly_Cu_Split_test.i (exodiff match)
-#
-
+# test file for showing advection velocities corresponding to applied constant forces and torques
 [Mesh]
   type = GeneratedMesh
   dim = 2
