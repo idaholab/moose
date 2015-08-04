@@ -23,6 +23,7 @@ InputParameters validParams<DiscreteNucleationMap>()
 
 DiscreteNucleationMap::DiscreteNucleationMap(const InputParameters & parameters) :
     ElementUserObject(parameters),
+    _mesh_changed(false),
     _inserter(getUserObject<DiscreteNucleationInserter>("inserter")),
     _periodic(isCoupled("periodic") ? coupled("periodic") : -1),
     _radius(getParam<Real>("radius")),
@@ -64,7 +65,7 @@ DiscreteNucleationMap::execute()
                    _mesh.minPeriodicDistance(_periodic, _q_point[qp], _nucleus_list[i].second);
         if (r <= _radius)
         {
-          _elem_map[i] = 1;
+          _elem_map[qp] = 1;
           active_nuclei++;
         }
       }
