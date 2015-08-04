@@ -54,6 +54,8 @@ ConservedMaskedNoiseBase::threadJoin(const UserObject &y)
   const ConservedMaskedNoiseBase & uo = static_cast<const ConservedMaskedNoiseBase &>(y);
 
   _random_data.insert(uo._random_data.begin(), uo._random_data.end());
+  _integral += uo._integral;
+  _volume += uo._volume;
 }
 
 void
