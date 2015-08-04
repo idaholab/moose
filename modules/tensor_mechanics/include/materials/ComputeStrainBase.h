@@ -20,7 +20,6 @@ class ComputeStrainBase : public DerivativeMaterialInterface<Material>
 {
 public:
   ComputeStrainBase(const InputParameters & parameters);
-  ComputeStrainBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ComputeStrainBase() {}
 
 protected:

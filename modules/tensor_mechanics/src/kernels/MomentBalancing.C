@@ -87,18 +87,3 @@ MomentBalancing::computeQpOffDiagJacobian(unsigned int jvar)
   return 0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MomentBalancing::MomentBalancing(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
-    _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
-    _component(getParam<unsigned int>("component")),
-    _wc_x_var(coupled("wc_x")),
-    _wc_y_var(coupled("wc_y")),
-    _wc_z_var(coupled("wc_z")),
-    _xdisp_var(coupled("disp_x")),
-    _ydisp_var(coupled("disp_y")),
-    _zdisp_var(coupled("disp_z"))
-{
-}

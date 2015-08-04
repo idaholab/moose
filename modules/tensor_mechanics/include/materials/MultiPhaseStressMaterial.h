@@ -25,7 +25,6 @@ class MultiPhaseStressMaterial : public Material
 {
 public:
   MultiPhaseStressMaterial(const InputParameters & parameters);
-  MultiPhaseStressMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

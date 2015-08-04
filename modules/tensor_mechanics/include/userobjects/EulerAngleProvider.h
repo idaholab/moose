@@ -23,7 +23,6 @@ class EulerAngleProvider : public GeneralUserObject
 {
 public:
   EulerAngleProvider(const InputParameters & parameters) : GeneralUserObject(parameters) {}
-  EulerAngleProvider(const std::string & deprecated_name, InputParameters parameters) : GeneralUserObject(deprecated_name, parameters) {}; // DEPRECATED CONSTRUCTOR
 
   virtual const EulerAngles & getEulerAngles(unsigned int) const = 0;
   virtual unsigned int getGrainNum() const = 0;

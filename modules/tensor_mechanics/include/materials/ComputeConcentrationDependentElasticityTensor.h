@@ -16,7 +16,6 @@ class ComputeConcentrationDependentElasticityTensor : public ComputeRotatedElast
 {
 public:
   ComputeConcentrationDependentElasticityTensor(const InputParameters & parameters);
-  ComputeConcentrationDependentElasticityTensor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpElasticityTensor();

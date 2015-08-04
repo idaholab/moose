@@ -31,7 +31,6 @@ class ComputeMultiPlasticityStress :
 {
 public:
   ComputeMultiPlasticityStress(const InputParameters & parameters);
-  ComputeMultiPlasticityStress(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpStress();

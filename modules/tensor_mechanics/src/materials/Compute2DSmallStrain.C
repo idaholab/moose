@@ -38,9 +38,3 @@ Compute2DSmallStrain::computeProperties()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Compute2DSmallStrain::Compute2DSmallStrain(const std::string & deprecated_name, InputParameters parameters) :
-    ComputeSmallStrain(deprecated_name, parameters)
-{
-}

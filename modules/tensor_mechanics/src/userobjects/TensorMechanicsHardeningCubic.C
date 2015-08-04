@@ -56,18 +56,3 @@ TensorMechanicsHardeningCubic::derivative(const Real & intnl) const
     return 3*_alpha*std::pow(x - _half_intnl_limit, 2) + _beta;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TensorMechanicsHardeningCubic::TensorMechanicsHardeningCubic(const std::string & deprecated_name, InputParameters parameters) :
-  TensorMechanicsHardeningModel(deprecated_name, parameters),
-  _val_0(getParam<Real>("value_0")),
-  _val_res(parameters.isParamValid("value_residual") ? getParam<Real>("value_residual") : _val_0),
-  _intnl_0(getParam<Real>("internal_0")),
-  _intnl_limit(getParam<Real>("internal_limit")),
-  _half_intnl_limit(0.5*(_intnl_limit - _intnl_0)),
-  _alpha((_val_0 - _val_res)/4.0/std::pow(_half_intnl_limit, 3)),
-  _beta(-3.0*_alpha*std::pow(_half_intnl_limit, 2))
-{
-  if (_intnl_limit <= _intnl_0)
-    mooseError("internal_limit must be greater than internal_0 in Cubic Hardening");
-}

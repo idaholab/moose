@@ -23,7 +23,6 @@ class TensorMechanicsHardeningConstant : public TensorMechanicsHardeningModel
 {
  public:
   TensorMechanicsHardeningConstant(const InputParameters & parameters);
-  TensorMechanicsHardeningConstant(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(const Real & intnl) const;
 

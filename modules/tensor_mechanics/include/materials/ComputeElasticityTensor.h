@@ -16,7 +16,6 @@ class ComputeElasticityTensor : public ComputeRotatedElasticityTensorBase
 {
 public:
   ComputeElasticityTensor(const InputParameters & parameters);
-  ComputeElasticityTensor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpElasticityTensor();

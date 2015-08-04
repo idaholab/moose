@@ -47,14 +47,3 @@ ComputeStressFreeStrainBase::computeQpProperties()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-ComputeStressFreeStrainBase::ComputeStressFreeStrainBase(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(deprecated_name, parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
-    _incremental_form(getParam<bool>("incremental_form")),
-    _stress_free_strain(declareProperty<RankTwoTensor>(_base_name + "stress_free_strain")),
-    _stress_free_strain_old(_incremental_form ? &declarePropertyOld<RankTwoTensor>(_base_name + "stress_free_strain") : NULL),
-    _stress_free_strain_increment(declareProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment"))
-{
-}

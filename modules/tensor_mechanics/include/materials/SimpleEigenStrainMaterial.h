@@ -21,7 +21,6 @@ class SimpleEigenStrainMaterial : public EigenStrainBaseMaterial
 {
 public:
   SimpleEigenStrainMaterial(const InputParameters & parameters);
-  SimpleEigenStrainMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeEigenStrain();

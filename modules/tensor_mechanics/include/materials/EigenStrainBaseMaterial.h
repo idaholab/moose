@@ -21,7 +21,6 @@ class EigenStrainBaseMaterial : public DerivativeMaterialInterface<LinearElastic
 {
 public:
   EigenStrainBaseMaterial(const InputParameters & parameters);
-  EigenStrainBaseMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeEigenStrain() = 0;

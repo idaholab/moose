@@ -93,12 +93,3 @@ ElementPropertyReadFileTest::getEulerRotations()
   _crysrot = RT.transpose();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElementPropertyReadFileTest::ElementPropertyReadFileTest(const std::string & deprecated_name, InputParameters parameters) :
-    FiniteStrainElasticMaterial(deprecated_name, parameters),
-    _read_prop_user_object(isParamValid("read_prop_user_object") ? & getUserObject<ElementPropertyReadFile>("read_prop_user_object") : NULL),
-    _some_state_var(declareProperty<Real>("some_state_var")),
-    _some_state_var_old(declarePropertyOld<Real>("some_state_var"))
-{
-}

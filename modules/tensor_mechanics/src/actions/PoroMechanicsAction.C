@@ -68,9 +68,3 @@ PoroMechanicsAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PoroMechanicsAction::PoroMechanicsAction(const std::string & deprecated_name, InputParameters params) :
-    TensorMechanicsAction(deprecated_name, params)
-{
-}

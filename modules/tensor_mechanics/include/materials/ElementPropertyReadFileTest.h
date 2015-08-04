@@ -23,7 +23,6 @@ class ElementPropertyReadFileTest : public FiniteStrainElasticMaterial
 {
 public:
   ElementPropertyReadFileTest(const InputParameters & parameters);
-  ElementPropertyReadFileTest(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

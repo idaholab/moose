@@ -16,7 +16,6 @@ class ComputeVariableEigenstrain : public ComputeEigenstrain
 {
 public:
   ComputeVariableEigenstrain(const InputParameters & parameters);
-  ComputeVariableEigenstrain(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpStressFreeStrain();

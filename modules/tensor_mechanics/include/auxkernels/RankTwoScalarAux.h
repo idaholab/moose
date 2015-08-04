@@ -24,7 +24,6 @@ class RankTwoScalarAux : public AuxKernel
 {
 public:
   RankTwoScalarAux(const InputParameters & parameters);
-  RankTwoScalarAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~RankTwoScalarAux() {}
 
 protected:

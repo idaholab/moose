@@ -25,7 +25,6 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
 {
  public:
   TensorMechanicsPlasticTensileMulti(const InputParameters & parameters);
-  TensorMechanicsPlasticTensileMulti(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// The number of yield surfaces for this plasticity model
   virtual unsigned int numberSurfaces() const;

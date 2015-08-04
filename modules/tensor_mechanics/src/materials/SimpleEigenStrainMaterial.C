@@ -48,11 +48,3 @@ void SimpleEigenStrainMaterial::computeQpElasticityTensor()
   _d2elasticity_tensor_dc2[_qp].zero();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    EigenStrainBaseMaterial(deprecated_name, parameters),
-    _epsilon0(getParam<Real>("epsilon0")),
-    _c0(getParam<Real>("c0"))
-{
-}

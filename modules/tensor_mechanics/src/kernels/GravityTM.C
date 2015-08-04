@@ -27,10 +27,3 @@ GravityTM::computeQpResidual()
   return _density[_qp]*BodyForce::computeQpResidual();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-GravityTM::GravityTM(const std::string & deprecated_name, InputParameters parameters) :
-  BodyForce(deprecated_name, parameters),
-  _density(getMaterialProperty<Real>("density"))
-{
-}

@@ -27,7 +27,6 @@ class HyperElasticStress : public GeneralUserObject
 {
  public:
   HyperElasticStress(const InputParameters & parameters);
-  HyperElasticStress(const std::string & name, InputParameters parameters); // DEPRECATED
   virtual ~HyperElasticStress() {}
 
   void initialize() {}

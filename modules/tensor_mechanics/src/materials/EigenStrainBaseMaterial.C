@@ -43,22 +43,3 @@ RankTwoTensor EigenStrainBaseMaterial::computeStressFreeStrain()
   return stress_free_strain;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-EigenStrainBaseMaterial::EigenStrainBaseMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMaterialInterface<LinearElasticMaterial>(deprecated_name, parameters),
-
-    _c(coupledValue("c")),
-    _c_name(getVar("c", 0)->name()),
-
-    _eigenstrain_name(_base_name + "eigenstrain"),
-    _eigenstrain(declareProperty<RankTwoTensor>(_eigenstrain_name)),
-
-    // the derivatives of elastic strain w.r.t c are provided here
-    _delastic_strain_dc(declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", _c_name)),
-    _d2elastic_strain_dc2(declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", _c_name, _c_name)),
-
-    _delasticity_tensor_dc(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name)),
-    _d2elasticity_tensor_dc2(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name, _c_name))
-{
-}

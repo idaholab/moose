@@ -25,7 +25,6 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
 {
  public:
   TensorMechanicsPlasticJ2(const InputParameters & parameters);
-  TensorMechanicsPlasticJ2(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// returns the model name (J2)
   virtual std::string modelName() const;

@@ -29,7 +29,6 @@ class FiniteStrainHyperElasticViscoPlastic : public ComputeStressBase
 {
  public:
   FiniteStrainHyperElasticViscoPlastic (const InputParameters & parameters);
-  FiniteStrainHyperElasticViscoPlastic (const std::string & name, InputParameters parameters); // DEPRECATED
 
  protected:
 
