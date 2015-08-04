@@ -79,6 +79,7 @@ DiscreteNucleationInserter::threadJoin(const UserObject &y)
   // combine _local_nucleus_list entries from all threads on the current process
   const DiscreteNucleationInserter & uo = static_cast<const DiscreteNucleationInserter &>(y);
   _local_nucleus_list.insert(_local_nucleus_list.end(), uo._local_nucleus_list.begin(), uo._local_nucleus_list.end());
+  _changes_made += uo._changes_made;
 }
 
 void
@@ -87,4 +88,5 @@ DiscreteNucleationInserter::finalize()
   // here we need to combine all _local_nucleus_list into a the _global_nucleus_list
   _global_nucleus_list = _local_nucleus_list;
   _communicator.allgather(_global_nucleus_list);
+  gatherSum(_changes_made);
 }
