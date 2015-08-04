@@ -9,23 +9,13 @@
 template<>
 InputParameters validParams<MultiGrainRigidBodyMotion>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<GrainRigidBodyMotionBase>();
   params.addClassDescription("Adds rigid mody motion to grains");
-  params.addRequiredCoupledVar("c", "Concentration");
-  params.addParam<MaterialPropertyName>("advection_velocity", "Material property for advection velocities");
-  params.addParam<MaterialPropertyName>("advection_velocity_divergence", "Material property for divergence of advection velocities");
   return params;
 }
 
 MultiGrainRigidBodyMotion::MultiGrainRigidBodyMotion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _c_var(coupled("c")),
-    _c(coupledValue("c")),
-    _grad_c(coupledGradient("c")),
-    _velocity_advection(getMaterialProperty<std::vector<RealGradient> >("advection_velocity")),
-    _div_velocity_advection(getMaterialProperty<std::vector<Real> >("advection_velocity_divergence")),
-    _velocity_advection_derivative(getMaterialProperty<std::vector<RealGradient> >("advection_velocity_derivative")),
-    _div_velocity_advection_derivative(getMaterialProperty<std::vector<Real> >("advection_velocity_divergence_derivative"))
+    GrainRigidBodyMotionBase(parameters)
 {
 }
 
@@ -46,10 +36,10 @@ MultiGrainRigidBodyMotion::computeQpResidual()
 Real
 MultiGrainRigidBodyMotion::computeQpJacobian()
 {
-    if (_c_var == _var.number()) //Requires c jacobian
-      return computeQpCJacobian();
+  if (_c_var == _var.number()) //Requires c jacobian
+    return computeQpCJacobian();
 
-    return 0.0;
+  return 0.0;
 }
 
 Real
@@ -72,9 +62,10 @@ MultiGrainRigidBodyMotion::computeQpCJacobian()
   {
     vadv_total += _velocity_advection[_qp][i];
     div_vadv_total += _div_velocity_advection[_qp][i];
-    dvadvdc_total += _velocity_advection_derivative[_qp][i];
-    ddivvadvdc_total += _div_velocity_advection_derivative[_qp][i];
+    dvadvdc_total += _velocity_advection_derivative_c[_qp][i];
+    ddivvadvdc_total += _div_velocity_advection_derivative_c[_qp][i];
   }
 
-  return  vadv_total * _grad_phi[_j][_qp] * _test[_i][_qp] + dvadvdc_total * _grad_c[_qp] * _phi[_j][_qp] * _test[_i][_qp] + div_vadv_total * _phi[_j][_qp] * _test[_i][_qp] + ddivvadvdc_total * _c[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  return  vadv_total * _grad_phi[_j][_qp] * _test[_i][_qp] + dvadvdc_total * _grad_c[_qp] * _phi[_j][_qp] * _test[_i][_qp]
+          + div_vadv_total * _phi[_j][_qp] * _test[_i][_qp] + ddivvadvdc_total * _c[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }

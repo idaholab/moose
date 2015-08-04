@@ -9,54 +9,48 @@
 template<>
 InputParameters validParams<SingleGrainRigidBodyMotion>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<GrainRigidBodyMotionBase>();
   params.addClassDescription("Adds rigid mody motion to a single grain");
-  params.addRequiredCoupledVar("c", "Concentration");
   params.addParam<unsigned int>("op_index",0, "Grain number for the kernel to be applied");
-  params.addParam<MaterialPropertyName>("advection_velocity", "Material property giving the advection velocity of grains");
-  params.addParam<MaterialPropertyName>("advection_velocity_divergence", "Material property for divergence of advection velocities");
   return params;
 }
 
 SingleGrainRigidBodyMotion::SingleGrainRigidBodyMotion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _c_var(coupled("c")),
-    _c(coupledValue("c")),
-    _grad_c(coupledGradient("c")),
-    _op_index(getParam<unsigned int>("op_index")),
-    _velocity_advection(getMaterialProperty<std::vector<RealGradient> >("advection_velocity")),
-    _div_velocity_advection(getMaterialProperty<std::vector<Real> >("advection_velocity_divergence")),
-    _velocity_advection_derivative(getMaterialProperty<std::vector<RealGradient> >("advection_velocity_derivative")),
-    _div_velocity_advection_derivative(getMaterialProperty<std::vector<Real> >("advection_velocity_divergence_derivative"))
+    GrainRigidBodyMotionBase(parameters),
+    _op_index(getParam<unsigned int>("op_index"))
 {
 }
 
 Real
 SingleGrainRigidBodyMotion::computeQpResidual()
 {
-  return _velocity_advection[_qp][_op_index] * _grad_c[_qp] * _test[_i][_qp] + _div_velocity_advection[_qp][_op_index] * _c[_qp] * _test[_i][_qp];
+  return _velocity_advection[_qp][_op_index] * _grad_u[_qp] * _test[_i][_qp]
+         + _div_velocity_advection[_qp][_op_index] * _u[_qp] * _test[_i][_qp];
 }
 
 Real
 SingleGrainRigidBodyMotion::computeQpJacobian()
 {
-    if (_c_var == _var.number()) //Requires c jacobian
-      return computeQpCJacobian();
-
-    return 0.0;
+  return _velocity_advection[_qp][_op_index] * _grad_phi[_j][_qp] * _test[_i][_qp]
+         + _velocity_advection_derivative_eta[_qp][_op_index] * _grad_u[_qp] * _phi[_j][_qp] *  _test[_i][_qp]
+         + _div_velocity_advection[_qp][_op_index] * _phi[_j][_qp] * _test[_i][_qp];
 }
 
 Real
 SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_c_var == jvar) //Requires c jacobian
-    return computeQpCJacobian();
+  if (jvar == _c_var)
+    return _velocity_advection_derivative_c[_qp][_op_index] * _grad_u[_qp] * _phi[_j][_qp] * _test[_i][_qp]
+           + _div_velocity_advection_derivative_c[_qp][_op_index] * _u[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+
+  for (unsigned int i=0; i<_ncrys; ++i)
+  {
+    if (i != _op_index)
+    {
+      if (jvar == _vals_var[i])
+        return _velocity_advection_derivative_eta[_qp][_op_index] * _grad_u[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    }
+  }
 
   return 0.0;
-}
-
-Real
-SingleGrainRigidBodyMotion::computeQpCJacobian()
-{
-  return _velocity_advection[_qp][_op_index] * _grad_phi[_j][_qp] * _test[_i][_qp] + _velocity_advection_derivative[_qp][_op_index] * _grad_c[_qp] * _phi[_j][_qp] *  _test[_i][_qp] + _div_velocity_advection[_qp][_op_index] * _phi[_j][_qp] * _test[_i][_qp] + _div_velocity_advection_derivative[_qp][_op_index] * _c[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }
