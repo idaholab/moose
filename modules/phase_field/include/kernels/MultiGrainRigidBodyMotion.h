@@ -24,7 +24,13 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  virtual Real computeQpCJacobian();
+
+  /**
+   * Calculates jacobian entry for variable c seperately
+   * can be used for both on/off diagonal jacobian corrsponding to c
+   * can be used with both split/non-split version of CH kernels
+   */
+  virtual Real computeCVarJacobianEntry();
 };
 
 #endif //MULTIGRAINRIGIDBODYMOTION_H

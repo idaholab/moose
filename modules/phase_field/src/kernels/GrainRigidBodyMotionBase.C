@@ -17,7 +17,7 @@ InputParameters validParams<GrainRigidBodyMotionBase>()
   params.addParam<MaterialPropertyName>("advection_velocity_divergence","advection_velocity_divergence", "Material property for divergence of advection velocities");
   params.addParam<MaterialPropertyName>("advection_velocity_derivative_c", "advection_velocity_derivative_c", "Material property giving derivative of advection velocity of grains");
   params.addParam<MaterialPropertyName>("advection_velocity_divergence_derivative_c", "advection_velocity_divergence_derivative_c", "Material property for derivative of divergence of advection velocities");
-    params.addParam<MaterialPropertyName>("advection_velocity_derivative_eta", "advection_velocity_derivative_eta", "Material property giving derivative of advection velocity of grains");
+  params.addParam<MaterialPropertyName>("advection_velocity_derivative_eta", "advection_velocity_derivative_eta", "Material property giving derivative of advection velocity of grains");
   return params;
 }
 

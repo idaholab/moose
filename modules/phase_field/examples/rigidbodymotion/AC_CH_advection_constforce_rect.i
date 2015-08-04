@@ -1,3 +1,11 @@
+#
+# Tests the Rigid Body Motion of grains due to applied forces.
+# Concenterated forces and torques have been applied and corresponding
+# advection velocities are calculated.
+# Grain motion kernels make the grains translate and rotate as a rigidbody,
+# applicable to grain movement in porous media
+#
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -59,8 +67,8 @@
     variable = w
     v = c
   [../]
-  # advection kernel corrsponding to CH equation
   [./motion]
+    # advection kernel corrsponding to CH equation
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
@@ -70,8 +78,8 @@
     type = TimeDerivative
     variable = eta
   [../]
-  # advection kernel corrsponding to AC equation
   [./vadv_eta]
+    # advection kernel corrsponding to AC equation
     type = SingleGrainRigidBodyMotion
     variable = eta
     c = c
@@ -95,17 +103,20 @@
 
 [AuxKernels]
   [./vadv00]
+    # outputting components of advection velocity
     type = MaterialStdVectorRealGradientAux
     variable = vadv00
     property = advection_velocity
   [../]
   [./vadv01]
+    # outputting components of advection velocity
     type = MaterialStdVectorRealGradientAux
     variable = vadv01
     property = advection_velocity
     component = 1
   [../]
   [./vadv0_div]
+    # outputting components of advection velocity
     type = MaterialStdVectorAux
     variable = vadv0_div
     property = advection_velocity_divergence
@@ -128,8 +139,8 @@
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+(c-eta)^2
     derivative_order = 2
   [../]
-  # advection velocity is being calculated
   [./advection_vel]
+    # advection velocity is being calculated
     type = GrainAdvectionVelocity
     block = 0
     grain_force = grain_force
@@ -139,27 +150,27 @@
 []
 
 [VectorPostprocessors]
-  # VectorPostprocessor for outputing grain centers and volumes
   [./centers]
+    # VectorPostprocessor for outputing grain centers and volumes
     type = GrainCentersPostprocessor
     grain_data = grain_center
   [../]
-  # VectorPostprocessor for outputing grain forces and torques
   [./forces]
+    # VectorPostprocessor for outputing grain forces and torques
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]
 []
 
 [UserObjects]
-  # user object for extracting grain centers and volumes
   [./grain_center]
+    # user object for extracting grain centers and volumes
     type = ComputeGrainCenterUserObject
     etas = eta
     execute_on = 'initial linear'
   [../]
-  # constant force and torque is applied
   [./grain_force]
+    # constant force and torque is applied on grains
     type = ConstantGrainForceAndTorque
     execute_on = 'initial linear'
     force = '0.2 0.0 0.0 ' # size should be 3 * no. of grains
