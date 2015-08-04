@@ -36,6 +36,10 @@ DiscreteNucleation::DiscreteNucleation(const InputParameters & params) :
   if (_nvar != _args.size())
     mooseError("Internal error.");
 
+  // this does not work with legacy UO initialization
+  if (_fe_problem.legacyUoInitialization())
+    mooseError("DiscreteNucleation needs to be run with legacy UO initialization disabled. Set Problem/use_legacy_uo_initialization=false");
+
   // get libMesh variable numbers
   for (unsigned int i = 0; i < _nvar; ++i)
     _op_index[i] = argIndex(coupled("op_names", i));
