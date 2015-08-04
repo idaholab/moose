@@ -34,7 +34,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  ScalarDirichletBC(const std::string & name, InputParameters parameters);
+  ScalarDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

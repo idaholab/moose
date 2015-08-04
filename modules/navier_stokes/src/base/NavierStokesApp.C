@@ -107,11 +107,7 @@ extern "C" void NavierStokesApp__registerApps() { NavierStokesApp::registerApps(
 void
 NavierStokesApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
   registerApp(NavierStokesApp);
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -119,9 +115,6 @@ extern "C" void NavierStokesApp__registerObjects(Factory & factory) { NavierStok
 void
 NavierStokesApp::registerObjects(Factory & factory)
 {
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-
   registerKernel(NSMassInviscidFlux);
   registerKernel(NSMomentumInviscidFlux);
   registerKernel(NSEnergyInviscidFlux);
@@ -191,9 +184,6 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Postprocessors
   registerPostprocessor(INSExplicitTimestepSelector);
-
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
 
 // External entry point for dynamic syntax association

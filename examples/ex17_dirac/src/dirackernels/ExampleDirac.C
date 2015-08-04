@@ -23,8 +23,8 @@ InputParameters validParams<ExampleDirac>()
   return params;
 }
 
-ExampleDirac::ExampleDirac(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
+ExampleDirac::ExampleDirac(const InputParameters & parameters) :
+    DiracKernel(parameters),
     _value(getParam<Real>("value")),
     _point(getParam<Point>("point"))
 {

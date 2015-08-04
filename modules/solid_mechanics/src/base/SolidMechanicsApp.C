@@ -108,13 +108,7 @@ extern "C" void SolidMechanicsApp__registerApps() { SolidMechanicsApp::registerA
 void
 SolidMechanicsApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
-
   registerApp(SolidMechanicsApp);
-
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -122,9 +116,6 @@ extern "C" void SolidMechanicsApp__registerObjects(Factory & factory) { SolidMec
 void
 SolidMechanicsApp::registerObjects(Factory & factory)
 {
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-
   registerAux(ElasticEnergyAux);
   registerAux(MaterialSymmElasticityTensorAux);
   registerAux(MaterialTensorAux);
@@ -194,9 +185,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(MaterialTensorOnLine);
   registerUserObject(CavityPressureUserObject);
   registerUserObject(CrackFrontDefinition);
-
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
 
 // External entry point for dynamic syntax association
@@ -204,9 +192,6 @@ extern "C" void SolidMechanicsApp__associateSyntax(Syntax & syntax, ActionFactor
 void
 SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-#undef registerAction
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
-
   syntax.registerActionSyntax("EmptyAction", "BCs/CavityPressure");
   syntax.registerActionSyntax("CavityPressureAction", "BCs/CavityPressure/*");
   syntax.registerActionSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
@@ -238,10 +223,6 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerAction(DomainIntegralAction, "add_aux_kernel");
   registerAction(DomainIntegralAction, "add_postprocessor");
   registerAction(DomainIntegralAction, "add_material");
-
-#undef registerAction
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
-
 }
 
 

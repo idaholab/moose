@@ -25,8 +25,8 @@ InputParameters validParams<CoupledNeumannBC>()
   return params;
 }
 
-CoupledNeumannBC::CoupledNeumannBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
+CoupledNeumannBC::CoupledNeumannBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _alpha(getParam<Real>("alpha")),
     _some_var_val(coupledValue("some_var"))
 {}

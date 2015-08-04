@@ -43,7 +43,7 @@ public:
   /**
    * Constructor
    */
-  ImplicitODEx(const std::string & name, InputParameters parameters);
+  ImplicitODEx(const InputParameters & parameters);
 
 protected:
   /**

@@ -28,9 +28,8 @@ InputParameters validParams<ExampleMaterial>()
   return params;
 }
 
-ExampleMaterial::ExampleMaterial(const std::string & name,
-                                 InputParameters parameters) :
-    Material(name, parameters),
+ExampleMaterial::ExampleMaterial(const InputParameters & parameters) :
+    Material(parameters),
     // Declare that this material is going to provide a Real
     // valued property named "diffusivity" that Kernels can use.
     _diffusivity(declareProperty<Real>("diffusivity")),
