@@ -40,8 +40,8 @@
 #include "PFFracBulkRate.h"
 #include "PFFracCoupledInterface.h"
 #include "PFFracIntVar.h"
-#include "SoretDiffusion.h"
 #include "SingleGrainRigidBodyMotion.h"
+#include "SoretDiffusion.h"
 #include "SplitCHMath.h"
 #include "SplitCHParsed.h"
 #include "SplitCHWRes.h"
@@ -98,7 +98,6 @@
 #include "SwitchingFunctionMaterial.h"
 #include "CrossTermBarrierFunctionMaterial.h"
 
-
 /*
  * Postprocessors
  */
@@ -135,8 +134,10 @@
 #include "ConservedMaskedUniformNoise.h"
 #include "ConservedNormalNoise.h"
 #include "ConservedUniformNoise.h"
+#include "ConstantGrainForceAndTorque.h"
 #include "DiscreteNucleationInserter.h"
 #include "DiscreteNucleationMap.h"
+
 #include "EBSDReader.h"
 #include "SolutionRasterizer.h"
 
@@ -250,8 +251,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(PFFracBulkRate);
   registerKernel(PFFracCoupledInterface);
   registerKernel(PFFracIntVar);
-  registerKernel(SoretDiffusion);
   registerKernel(SingleGrainRigidBodyMotion);
+  registerKernel(SoretDiffusion);
   registerKernel(SplitCHMath);
   registerKernel(SplitCHParsed);
   registerKernel(SplitCHWRes);
@@ -325,16 +326,17 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(ConservedMaskedUniformNoise);
   registerUserObject(ConservedNormalNoise);
   registerUserObject(ConservedUniformNoise);
+  registerUserObject(ConstantGrainForceAndTorque);
   registerUserObject(DiscreteNucleationInserter);
   registerUserObject(DiscreteNucleationMap);
 
   registerUserObject(EBSDReader);
   registerUserObject(SolutionRasterizer);
 
+  registerFunction(ImageFunction);
+
   registerVectorPostprocessor(GrainCentersPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
-
-  registerFunction(ImageFunction);
 
   registerMesh(EBSDMesh);
   registerMesh(ImageMesh);
