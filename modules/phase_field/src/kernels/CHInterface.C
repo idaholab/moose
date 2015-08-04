@@ -116,34 +116,3 @@ CHInterface::computeQpOffDiagJacobian(unsigned int jvar)
   return value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CHInterface::CHInterface(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(deprecated_name, parameters),
-    _kappa(getMaterialProperty<Real>("kappa_name")),
-    _M(getMaterialProperty<Real>("mob_name")),
-    _dMdc(getMaterialPropertyDerivative<Real>("mob_name", _var.name())),
-    _d2Mdc2(getMaterialPropertyDerivative<Real>("mob_name", _var.name(), _var.name())),
-    _second_u(second()),
-    _second_test(secondTest()),
-    _second_phi(secondPhi()),
-    _nvar(_coupled_moose_vars.size()),
-    _dMdarg(_nvar),
-    _d2Mdcdarg(_nvar),
-    _d2Mdargdarg(_nvar),
-    _coupled_grad_vars(_nvar)
-{
-  // Iterate over all coupled variables
-  for (unsigned int i = 0; i < _nvar; ++i)
-  {
-    //Set material property values
-    _dMdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
-    _d2Mdcdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _var.name(), _coupled_moose_vars[i]->name());
-    _d2Mdargdarg[i].resize(_nvar);
-    for (unsigned int j = 0; j < _nvar; ++j)
-      _d2Mdargdarg[i][j] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name(), _coupled_moose_vars[j]->name());
-
-    //Set coupled variable gradients
-    _coupled_grad_vars[i] = &coupledGradient("args", i);
-  }
-}

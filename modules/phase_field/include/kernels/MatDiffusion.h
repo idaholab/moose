@@ -20,7 +20,6 @@ class MatDiffusion : public Diffusion
 {
 public:
   MatDiffusion(const InputParameters & parameters);
-  MatDiffusion(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

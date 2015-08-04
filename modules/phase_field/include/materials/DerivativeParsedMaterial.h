@@ -24,7 +24,6 @@ class DerivativeParsedMaterial : public DerivativeParsedMaterialHelper, public P
 {
 public:
   DerivativeParsedMaterial(const InputParameters & parameters);
-  DerivativeParsedMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 };
 
 #endif // DERIVATIVEPARSEDMATERIAL_H

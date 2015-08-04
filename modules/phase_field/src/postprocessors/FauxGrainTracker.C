@@ -132,10 +132,3 @@ FauxGrainTracker::getValue()
 {
   return _variables_used.size();
 }
-
-// DEPRECATED CONSTRUCTOR
-FauxGrainTracker::FauxGrainTracker(const std::string & deprecated_name, InputParameters parameters) :
-    FeatureFloodCount(deprecated_name, parameters),
-    _tracking_step(getParam<int>("tracking_step"))
-{
-}

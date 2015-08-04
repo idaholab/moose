@@ -118,20 +118,3 @@ SolutionRasterizer::initialSetup()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SolutionRasterizer::SolutionRasterizer(const std::string & deprecated_name, InputParameters parameters) :
-    SolutionUserObject(deprecated_name, parameters),
-    _xyz_input(getParam<FileName>("xyz_input")),
-    _xyz_output(getParam<FileName>("xyz_output")),
-    _variable(getParam<std::string>("variable")),
-    _raster_mode(getParam<MooseEnum>("raster_mode")),
-    _threshold(0.0)
-{
-  if (_raster_mode == "FILTER")
-  {
-    if (!isParamValid("threshold"))
-      mooseError("Please specify 'threshold' parameter for raster_mode = FILTER");
-    _threshold = getParam<Real>("threshold");
-  }
-}

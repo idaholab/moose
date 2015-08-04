@@ -25,7 +25,6 @@ class DerivativeMultiPhaseBase : public DerivativeFunctionMaterialBase
 {
 public:
   DerivativeMultiPhaseBase(const InputParameters & parameters);
-  DerivativeMultiPhaseBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeF();

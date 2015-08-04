@@ -128,16 +128,3 @@ MultiSmoothCircleIC::computeCircleCenters()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MultiSmoothCircleIC::MultiSmoothCircleIC(const std::string & deprecated_name, InputParameters parameters) :
-    SmoothCircleBaseIC(deprecated_name, parameters),
-    _numbub(getParam<unsigned int>("numbub")),
-    _bubspac(getParam<Real>("bubspac")),
-    _numtries(getParam<unsigned int>("numtries")),
-    _radius(getParam<Real>("radius")),
-    _radius_variation(getParam<Real>("radius_variation")),
-    _radius_variation_type(getParam<MooseEnum>("radius_variation_type"))
-{
-  MooseRandom::seed(getParam<unsigned int>("rand_seed"));
-}

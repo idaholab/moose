@@ -18,7 +18,6 @@ class DerivativeSumMaterial : public DerivativeFunctionMaterialBase
 {
 public:
   DerivativeSumMaterial(const InputParameters & parameters);
-  DerivativeSumMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

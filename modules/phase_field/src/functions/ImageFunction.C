@@ -361,17 +361,3 @@ ImageFunction::imageFlip(const int & axis)
 }
 #endif
 
-
-// DEPRECATED CONSTRUCTOR
-ImageFunction::ImageFunction(const std::string & deprecated_name, InputParameters parameters) :
-    Function(deprecated_name, parameters)
-#ifdef LIBMESH_HAVE_VTK
-    ,_data(NULL)
-    ,_algorithm(NULL)
-#endif
-{
-#ifndef LIBMESH_HAVE_VTK
-  // This should be impossible to reach, the registration of ImageFunction is also guarded with LIBMESH_HAVE_VTK
-  mooseError("libMesh must be configured with VTK enabled to utilize ImageFunction");
-#endif
-}

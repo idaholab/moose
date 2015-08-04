@@ -63,12 +63,3 @@ KKSACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
   return res * _test[_j][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-KKSACBulkF::KKSACBulkF(const std::string & deprecated_name, InputParameters parameters) :
-    KKSACBulkBase(deprecated_name, parameters),
-    _w(getParam<Real>("w")),
-    _prop_dg(getMaterialPropertyDerivative<Real>("g_name", _eta_name)),
-    _prop_d2g(getMaterialPropertyDerivative<Real>("g_name", _eta_name, _eta_name))
-{
-}

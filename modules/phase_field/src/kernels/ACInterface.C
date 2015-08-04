@@ -60,21 +60,3 @@ ACInterface::computeQpOffDiagJacobian(unsigned int jvar)
   return _kappa[_qp] * (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ACInterface::ACInterface(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(deprecated_name, parameters),
-    _kappa(getMaterialProperty<Real>("kappa_name")),
-    _L(getMaterialProperty<Real>("mob_name")),
-    _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name()))
-{
-  // Get number of coupled variables
-  unsigned int nvar = _coupled_moose_vars.size();
-
-  // reserve space for derivatives
-  _dLdarg.resize(nvar);
-
-  // Iterate over all coupled variables
-  for (unsigned int i = 0; i < nvar; ++i)
-    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
-}

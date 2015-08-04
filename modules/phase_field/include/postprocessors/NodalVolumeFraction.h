@@ -19,7 +19,6 @@ class NodalVolumeFraction : public FeatureFloodCount
 {
 public:
   NodalVolumeFraction(const InputParameters & parameters);
-  NodalVolumeFraction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   ~NodalVolumeFraction();
 
   virtual void finalize();

@@ -60,7 +60,6 @@ public:
    * @param parameters
    */
   ImageFunction(const InputParameters & parameters);
-  ImageFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

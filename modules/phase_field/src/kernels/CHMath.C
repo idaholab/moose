@@ -34,9 +34,3 @@ CHMath::computeGradDFDCons(PFFunctionType type)
   mooseError("Invalid type passed in");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CHMath::CHMath(const std::string & deprecated_name, InputParameters parameters) :
-    CHBulk(deprecated_name, parameters)
-{
-}

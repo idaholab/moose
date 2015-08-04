@@ -16,7 +16,6 @@ class CHPFCRFF : public Kernel
 {
 public:
   CHPFCRFF(const InputParameters & parameters);
-  CHPFCRFF(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

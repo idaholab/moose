@@ -34,9 +34,6 @@ public:
 
   ParsedMaterialHelper(const InputParameters & parameters,
                        VariableNameMappingMode map_mode);
-  ParsedMaterialHelper(const std::string & name,
-                       InputParameters parameters,
-                       VariableNameMappingMode map_mode); // DEPRECATED
 
   virtual ~ParsedMaterialHelper();
 

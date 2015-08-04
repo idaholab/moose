@@ -17,7 +17,6 @@ class PolycrystalHexGrainICAction: public Action
 {
 public:
   PolycrystalHexGrainICAction(const InputParameters & params);
-  PolycrystalHexGrainICAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

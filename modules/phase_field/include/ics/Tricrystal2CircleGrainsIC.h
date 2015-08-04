@@ -33,7 +33,6 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   Tricrystal2CircleGrainsIC(const InputParameters & parameters);
-  Tricrystal2CircleGrainsIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * The value of the variable at a point.

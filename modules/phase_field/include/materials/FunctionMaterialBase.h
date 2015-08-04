@@ -24,7 +24,6 @@ class FunctionMaterialBase : public DerivativeMaterialInterface<Material>
 {
 public:
   FunctionMaterialBase(const InputParameters & parameters);
-  FunctionMaterialBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

@@ -20,7 +20,6 @@ class BndsCalcAux : public AuxKernel
 public:
 
   BndsCalcAux(const InputParameters & parameters);
-  BndsCalcAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

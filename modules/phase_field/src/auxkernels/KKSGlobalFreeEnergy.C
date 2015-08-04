@@ -35,14 +35,3 @@ KKSGlobalFreeEnergy::computeValue()
   return _prop_fa[_qp] * h + _prop_fb[_qp] * (1.0 - h) + _w * _prop_g[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-KKSGlobalFreeEnergy::KKSGlobalFreeEnergy(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _prop_fa(getMaterialProperty<Real>("fa_name")),
-    _prop_fb(getMaterialProperty<Real>("fb_name")),
-    _prop_h(getMaterialProperty<Real>("h_name")),
-    _prop_g(getMaterialProperty<Real>("g_name")),
-    _w(getParam<Real>("w"))
-{
-}

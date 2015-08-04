@@ -82,10 +82,3 @@ ConservedMaskedNoiseBase::getQpValue(dof_id_type element_id, unsigned int qp) co
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ConservedMaskedNoiseBase::ConservedMaskedNoiseBase(const std::string & deprecated_name, InputParameters parameters) :
-    ConservedNoiseInterface(deprecated_name, parameters),
-    _mask(getMaterialProperty<Real>("mask"))
-{
-}

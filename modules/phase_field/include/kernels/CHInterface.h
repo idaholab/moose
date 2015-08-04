@@ -26,7 +26,6 @@ class CHInterface : public DerivativeMaterialInterface<JvarMapInterface<Kernel> 
 {
 public:
   CHInterface(const InputParameters & parameters);
-  CHInterface(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

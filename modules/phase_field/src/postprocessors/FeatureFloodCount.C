@@ -890,39 +890,3 @@ FeatureFloodCount::formatBytesUsed() const
 
 const std::vector<std::pair<unsigned int, unsigned int> > FeatureFloodCount::_empty;
 
-
-// DEPRECATED CONSTRUCTOR
-FeatureFloodCount::FeatureFloodCount(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters),
-    Coupleable(parameters, false),
-    MooseVariableDependencyInterface(),
-    ZeroInterface(parameters),
-    _vars(getCoupledMooseVars()),
-    _threshold(getParam<Real>("threshold")),
-    _connecting_threshold(isParamValid("connecting_threshold") ? getParam<Real>("connecting_threshold") : getParam<Real>("threshold")),
-    _mesh(_subproblem.mesh()),
-    _var_number(_vars[0]->number()),
-    _single_map_mode(getParam<bool>("use_single_map")),
-    _condense_map_info(getParam<bool>("condense_map_info")),
-    _global_numbering(getParam<bool>("use_global_numbering")),
-    _var_index_mode(getParam<bool>("enable_var_coloring")),
-    _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
-    _maps_size(_single_map_mode ? 1 : _vars.size()),
-    _pbs(NULL),
-    _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
-    _track_memory(getParam<bool>("track_memory_usage")),
-    _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
-    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
-{
-  // Size the data structures to hold the correct number of maps
-  _bubble_maps.resize(_maps_size);
-  _bubble_sets.resize(_maps_size);
-  _region_counts.resize(_maps_size);
-  _region_offsets.resize(_maps_size);
-
-  if (_var_index_mode)
-    _var_index_maps.resize(_maps_size);
-
-  // This map is always size to the number of variables
-  _entities_visited.resize(_vars.size());
-}

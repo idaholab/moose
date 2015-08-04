@@ -24,7 +24,6 @@ class GBAnisotropy : public Material
 {
 public:
   GBAnisotropy(const InputParameters & parameters);
-  GBAnisotropy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

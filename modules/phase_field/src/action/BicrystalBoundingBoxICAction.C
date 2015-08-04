@@ -99,19 +99,3 @@ BicrystalBoundingBoxICAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-BicrystalBoundingBoxICAction::BicrystalBoundingBoxICAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _var_name_base(getParam<std::string>("var_name_base")),
-    _op_num(getParam<unsigned int>("op_num")),
-    _x1(getParam<Real>("x1")),
-    _y1(getParam<Real>("y1")),
-    _z1(getParam<Real>("z1")),
-    _x2(getParam<Real>("x2")),
-    _y2(getParam<Real>("y2")),
-    _z2(getParam<Real>("z2"))
-{
-  if (_op_num != 2)
-    mooseError("op_num must equal 2 for bicrystal ICs");
-}

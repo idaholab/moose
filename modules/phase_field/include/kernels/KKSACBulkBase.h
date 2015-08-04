@@ -25,7 +25,6 @@ class KKSACBulkBase : public ACBulk
 {
 public:
   KKSACBulkBase(const InputParameters & parameters);
-  KKSACBulkBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /// Number of coupled variables

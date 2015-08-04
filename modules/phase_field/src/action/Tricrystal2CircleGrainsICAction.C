@@ -67,10 +67,3 @@ Tricrystal2CircleGrainsICAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Tricrystal2CircleGrainsICAction::Tricrystal2CircleGrainsICAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _var_name_base(getParam<std::string>("var_name_base")),
-    _op_num(getParam<unsigned int>("op_num"))
-{}

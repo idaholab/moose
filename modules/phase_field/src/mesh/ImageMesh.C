@@ -42,11 +42,6 @@ ImageMesh::ImageMesh(const InputParameters & parameters) :
     mooseError(getFileRangeErrorMessage(status));
 }
 
-ImageMesh::ImageMesh(const ImageMesh & other_mesh) :
-    GeneratedMesh(other_mesh)
-{
-}
-
 ImageMesh::~ImageMesh()
 {
 }

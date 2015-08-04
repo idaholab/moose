@@ -36,7 +36,6 @@ class PFCElementEnergyIntegral :
 {
 public:
   PFCElementEnergyIntegral(const InputParameters & parameters);
-  PFCElementEnergyIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

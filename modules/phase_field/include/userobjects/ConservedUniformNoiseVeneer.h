@@ -14,7 +14,6 @@ class ConservedUniformNoiseVeneer : public T
 {
 public:
   ConservedUniformNoiseVeneer(const InputParameters & parameters);
-  ConservedUniformNoiseVeneer(const std::string & name, InputParameters parameters); // DEPRECATED
 
 protected:
   Real getQpRandom();
@@ -32,13 +31,6 @@ Real
 ConservedUniformNoiseVeneer<T>::getQpRandom()
 {
   return 2.0 * this->getRandomReal() - 1.0;
-}
-
-// DEPRECATED
-template<class T>
-ConservedUniformNoiseVeneer<T>::ConservedUniformNoiseVeneer(const std::string & name, InputParameters parameters) :
-    T(name, parameters)
-{
 }
 
 #endif //CONSERVEDUNIFORMNOISEVENEER_H

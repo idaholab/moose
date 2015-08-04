@@ -22,7 +22,6 @@ class TotalFreeEnergyBase : public AuxKernel
 {
 public:
   TotalFreeEnergyBase(const InputParameters & parameters);
-  TotalFreeEnergyBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue() = 0;

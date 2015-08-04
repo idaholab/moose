@@ -17,7 +17,6 @@ class PFCRFFVariablesAction: public Action
 {
 public:
   PFCRFFVariablesAction(const InputParameters & params);
-  PFCRFFVariablesAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

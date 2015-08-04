@@ -26,16 +26,3 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const InputParameters & param
                 _tol_names, _tol_values);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
-                                                   InputParameters parameters) :
-    DerivativeParsedMaterialHelper(name, parameters, USE_MOOSE_NAMES),
-    ParsedMaterialBase(name, parameters)
-{
-  // Build function, take derivatives, optimize
-  functionParse(_function,
-                _constant_names, _constant_expressions,
-                getParam<std::vector<std::string> >("material_property_names"),
-                _tol_names, _tol_values);
-}

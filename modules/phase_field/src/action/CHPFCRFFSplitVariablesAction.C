@@ -147,13 +147,3 @@ CHPFCRFFSplitVariablesAction::act()
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CHPFCRFFSplitVariablesAction::CHPFCRFFSplitVariablesAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _num_L(getParam<unsigned int>("num_L")),
-    _L_name_base(getParam<std::string>("L_name_base")),
-    _sub_filenames(getParam<std::vector<std::string> >("sub_filenames")),
-    _n_name(getParam<AuxVariableName>("n_name"))
-{
-}

@@ -372,21 +372,3 @@ EBSDReader::getAvgDataAccessFunctor(const MooseEnum & field_name) const
 
   mooseError("Error:  Please input supported EBSD_param");
 }
-
-
-// DEPRECATED CONSTRUCTOR
-EBSDReader::EBSDReader(const std::string & deprecated_name, InputParameters params) :
-    EulerAngleProvider(deprecated_name, params),
-    _mesh(_fe_problem.mesh()),
-    _nl(_fe_problem.getNonlinearSystem()),
-    _feature_num(0),
-    _mesh_dimension(_mesh.dimension()),
-    _nx(0),
-    _ny(0),
-    _nz(0),
-    _dx(0.),
-    _dy(0.),
-    _dz(0.)
-{
-  readFile();
-}

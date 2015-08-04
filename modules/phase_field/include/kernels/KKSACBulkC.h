@@ -26,7 +26,6 @@ class KKSACBulkC : public KKSACBulkBase
 {
 public:
   KKSACBulkC(const InputParameters & parameters);
-  KKSACBulkC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);

@@ -80,20 +80,3 @@ PFCRFFEnergyDensity::computeValue()
   return val;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PFCRFFEnergyDensity::PFCRFFEnergyDensity(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _order(coupledComponents("v")),
-    _a(getParam<Real>("a")),
-    _b(getParam<Real>("b")),
-    _c(getParam<Real>("c")),
-    _num_exp_terms(getParam<unsigned int>("num_exp_terms")),
-    _log_approach(getParam<MooseEnum>("log_approach")),
-    _tol(getParam<Real>("tol"))
-
-{
-  _vals.resize(_order);
-  for (unsigned int i = 0; i < _order; ++i)
-    _vals[i] = &coupledValue("v", i);
-}

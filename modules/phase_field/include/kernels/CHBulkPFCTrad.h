@@ -13,7 +13,6 @@ class CHBulkPFCTrad : public CHBulk
 {
 public:
   CHBulkPFCTrad(const InputParameters & parameters);
-  CHBulkPFCTrad(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);

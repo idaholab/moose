@@ -138,24 +138,3 @@ DerivativeMultiPhaseMaterial::computeD3F(unsigned int i_var, unsigned int j_var,
   return d3F;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-DerivativeMultiPhaseMaterial::DerivativeMultiPhaseMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMultiPhaseBase(deprecated_name, parameters),
-    _dhi(_num_etas),
-    _d2hi(_num_etas),
-    _d3hi(_num_etas)
-{
-  // verify that the user supplied one less eta than the number of phases
-  if (_num_hi != _num_etas)
-    mooseError("The number of coupled etas must be equal to the number of hi_names in DerivativeMultiPhaseMaterial " << deprecated_name);
-
-  for (unsigned int i = 0; i < _num_etas; ++i)
-  {
-    _dhi[i] = &getMaterialPropertyDerivative<Real>(_hi_names[i], _eta_names[i]);
-    _d2hi[i] = &getMaterialPropertyDerivative<Real>(_hi_names[i], _eta_names[i], _eta_names[i]);
-
-    if (_third_derivatives)
-      _d3hi[i] = &getMaterialPropertyDerivative<Real>(_hi_names[i], _eta_names[i], _eta_names[i], _eta_names[i]);
-  }
-}

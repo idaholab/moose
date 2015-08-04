@@ -36,14 +36,3 @@ BndsCalcAux::computeValue()
   return value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-BndsCalcAux::BndsCalcAux(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters)
-{
-  _ncrys = coupledComponents("v");
-  _vals.resize(_ncrys);
-
-  for (unsigned int i=0; i < _ncrys; ++i)
-    _vals[i] = &coupledValue("v", i);
-}

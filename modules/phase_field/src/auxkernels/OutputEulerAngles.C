@@ -41,12 +41,3 @@ OutputEulerAngles::computeValue()
   return angles(_output_euler_angle);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-OutputEulerAngles::OutputEulerAngles(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
-    _grain_tracker(getUserObject<GrainTracker>("GrainTracker_object")),
-    _output_euler_angle(getParam<MooseEnum>("output_euler_angle"))
-{
-}

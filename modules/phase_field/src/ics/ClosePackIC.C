@@ -96,10 +96,3 @@ ClosePackIC::computeCircleCenters()
     j++;
   }
 }
-
-// DEPRECATED
-ClosePackIC::ClosePackIC(const std::string & name, InputParameters parameters) :
-    SmoothCircleBaseIC(name, parameters),
-    _radius(parameters.get<Real>("radius"))
-{
-}

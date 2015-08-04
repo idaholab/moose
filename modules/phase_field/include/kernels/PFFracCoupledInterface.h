@@ -27,7 +27,6 @@ class PFFracCoupledInterface : public KernelGrad
 public:
 
   PFFracCoupledInterface(const InputParameters & parameters);
-  PFFracCoupledInterface(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient precomputeQpResidual();

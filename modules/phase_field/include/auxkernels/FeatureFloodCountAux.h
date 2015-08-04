@@ -27,7 +27,6 @@ public:
    * constructor.
    */
   FeatureFloodCountAux(const InputParameters & parameters);
-  FeatureFloodCountAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~FeatureFloodCountAux() {}
 
