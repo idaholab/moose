@@ -18,7 +18,6 @@ class HeatConductionApp : public MooseApp
 {
 public:
   HeatConductionApp(const InputParameters & parameters);
-  HeatConductionApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~HeatConductionApp();
 
   static void registerApps();

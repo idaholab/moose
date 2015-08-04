@@ -64,12 +64,3 @@ HeatConductionTimeDerivative::computeQpJacobian()
   return (*_specific_heat)[_qp] * (*_density)[_qp] * TimeDerivative::computeQpJacobian();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-HeatConductionTimeDerivative::HeatConductionTimeDerivative(const std::string & deprecated_name, InputParameters parameters)
-  : TimeDerivative(deprecated_name, parameters),
-   _use_heat_capacity(getParam<bool>("use_heat_capacity")),
-   _specific_heat(NULL),
-   _density(NULL)
-{
-}

@@ -13,7 +13,6 @@ class ThermalContactBCsAction : public Action
 {
 public:
   ThermalContactBCsAction( const InputParameters & params);
-  ThermalContactBCsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ThermalContactBCsAction(){}
   virtual void act();
 };

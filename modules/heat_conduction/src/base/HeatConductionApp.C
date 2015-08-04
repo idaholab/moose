@@ -108,14 +108,3 @@ HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerAction(ThermalContactMaterialsAction,    "add_material");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-HeatConductionApp::HeatConductionApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  HeatConductionApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  HeatConductionApp::associateSyntax(_syntax, _action_factory);
-}
