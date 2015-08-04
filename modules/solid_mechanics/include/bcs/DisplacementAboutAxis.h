@@ -27,7 +27,6 @@ class DisplacementAboutAxis : public PresetNodalBC
 {
 public:
   DisplacementAboutAxis(const InputParameters & parameters);
-  DisplacementAboutAxis(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

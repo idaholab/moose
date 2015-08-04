@@ -26,11 +26,3 @@ ElasticEnergyAux::computeValue()
 {
   return 0.5*_stress[_qp].doubleContraction(_elastic_strain[_qp]);
 }
-
-
-// DEPRECATED CONSTRUCTOR
-ElasticEnergyAux::ElasticEnergyAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _stress( getMaterialProperty<SymmTensor>("stress") ),
-    _elastic_strain(getMaterialProperty<SymmTensor>("elastic_strain"))
-{}

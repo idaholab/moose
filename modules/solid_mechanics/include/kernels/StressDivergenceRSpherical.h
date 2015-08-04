@@ -18,8 +18,7 @@ class StressDivergenceRSpherical : public Kernel
 public:
 
   StressDivergenceRSpherical(const InputParameters & parameters);
-  StressDivergenceRSpherical(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
-  virtual ~StressDivergenceRSpherical() {}
+    virtual ~StressDivergenceRSpherical() {}
 
 protected:
   virtual Real computeQpResidual();

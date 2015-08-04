@@ -16,7 +16,6 @@ class CavityPressurePostprocessor : public GeneralPostprocessor
 public:
 
   CavityPressurePostprocessor(const InputParameters & parameters);
-  CavityPressurePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~CavityPressurePostprocessor(){}
 

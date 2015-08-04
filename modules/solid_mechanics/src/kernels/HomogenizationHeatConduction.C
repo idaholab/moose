@@ -29,11 +29,3 @@ HomogenizationHeatConduction::computeQpResidual()
   // Compute positive value since we are computing a residual not a rhs
   return _diffusion_coefficient[_qp] * _grad_test[_i][_qp](_component);
 }
-
-
-// DEPRECATED CONSTRUCTOR
-HomogenizationHeatConduction::HomogenizationHeatConduction(const std::string & deprecated_name, InputParameters parameters)
-  :Kernel(deprecated_name, parameters),
-   _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
-   _component(getParam<unsigned int>("component"))
-{}

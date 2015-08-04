@@ -166,26 +166,3 @@ ColumnMajorMatrix rotx(4,4);
   _transformation_matrix_inv = transl_inv * rotx_inv * roty_inv;
 
 }
-
-
-// DEPRECATED CONSTRUCTOR
-DisplacementAboutAxis::DisplacementAboutAxis(const std::string & deprecated_name, InputParameters parameters) :
-    PresetNodalBC(deprecated_name, parameters),
-    _component(getParam<int>("component")),
-    _func(getFunction("function")),
-    _angle_units(getParam<MooseEnum>("angle_units")),
-    _axis_origin(getParam<RealVectorValue>("axis_origin")),
-    _axis_direction(getParam<RealVectorValue>("axis_direction"))
-{
-  if (_component < 0 || _component > 2)
-  {
-    std::stringstream errMsg;
-    errMsg << "Invalid component given for "
-           << deprecated_name
-           << ": "
-           << _component
-           << "." << std::endl;
-
-    mooseError( errMsg.str() );
-  }
-}

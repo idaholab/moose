@@ -13,7 +13,6 @@ class Elastic : public SolidModel
 {
 public:
   Elastic( const InputParameters & parameters);
-  Elastic(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Elastic();
 
 protected:

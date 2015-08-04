@@ -57,18 +57,3 @@ OutOfPlaneStress::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-OutOfPlaneStress::OutOfPlaneStress(const std::string & deprecated_name, InputParameters parameters)
-  :Kernel(deprecated_name, parameters),
-   _stress(getMaterialProperty<SymmTensor>("stress" + getParam<std::string>("appended_property_name"))),
-   _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
-   _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT"+ getParam<std::string>("appended_property_name"))),
-   _xdisp_coupled(isCoupled("disp_x")),
-   _ydisp_coupled(isCoupled("disp_y")),
-   _temp_coupled(isCoupled("temp")),
-   _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
-   _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
-   _temp_var(_temp_coupled ? coupled("temp") : 0)
-{}

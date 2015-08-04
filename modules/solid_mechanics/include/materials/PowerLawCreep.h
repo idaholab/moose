@@ -24,7 +24,6 @@ class PowerLawCreep : public SolidModel
 {
 public:
   PowerLawCreep( const InputParameters & parameters);
-  PowerLawCreep(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

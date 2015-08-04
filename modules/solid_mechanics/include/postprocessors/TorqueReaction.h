@@ -23,7 +23,6 @@ class TorqueReaction :
 {
 public:
   TorqueReaction(const InputParameters & parameters);
-  TorqueReaction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

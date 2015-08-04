@@ -32,7 +32,6 @@ class SolidModel : public DerivativeMaterialInterface<Material>
 {
 public:
   SolidModel( const InputParameters & parameters);
-  SolidModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SolidModel();
 
   virtual void initStatefulProperties( unsigned n_points );

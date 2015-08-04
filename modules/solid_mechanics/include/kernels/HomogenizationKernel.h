@@ -23,7 +23,6 @@ class HomogenizationKernel : public Kernel
 public:
 
   HomogenizationKernel(const InputParameters & parameters);
-  HomogenizationKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -29,12 +29,3 @@ Elastic::~Elastic()
 
 ////////////////////////////////////////////////////////////////////////
 
-
-// DEPRECATED CONSTRUCTOR
-Elastic::Elastic(const std::string & deprecated_name, InputParameters parameters)
-  :SolidModel(deprecated_name, parameters)
-{
-
-  createConstitutiveModel("ElasticModel", parameters);
-
-}

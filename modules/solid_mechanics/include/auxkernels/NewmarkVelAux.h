@@ -30,7 +30,6 @@ public:
    * constructor.
    */
   NewmarkVelAux(const InputParameters & parameters);
-  NewmarkVelAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NewmarkVelAux() {}
 

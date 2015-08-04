@@ -151,24 +151,3 @@ LinearIsotropicMaterial::computeAlpha()
   return _alpha;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-LinearIsotropicMaterial::LinearIsotropicMaterial(const std::string & deprecated_name, InputParameters parameters)
-  :SolidMechanicsMaterial(deprecated_name, parameters),
-   _youngs_modulus(getParam<Real>("youngs_modulus")),
-   _poissons_ratio(getParam<Real>("poissons_ratio")),
-   _t_ref(getParam<Real>("t_ref")),
-   _alpha(getParam<Real>("thermal_expansion")),
-   _local_elasticity_tensor(NULL)
-{
-  SymmIsotropicElasticityTensor * iso_elasticity_tensor = new SymmIsotropicElasticityTensor;
-  iso_elasticity_tensor->setYoungsModulus(_youngs_modulus);
-  iso_elasticity_tensor->setPoissonsRatio(_poissons_ratio);
-
-  _local_elasticity_tensor = iso_elasticity_tensor;
-
-  _pi = 3.14159;
-  _tol = 1.0e-5;
-
-
-}

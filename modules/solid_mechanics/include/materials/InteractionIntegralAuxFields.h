@@ -29,7 +29,6 @@ class InteractionIntegralAuxFields : public Material
 {
 public:
   InteractionIntegralAuxFields(const InputParameters & parameters);
-  InteractionIntegralAuxFields(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   static std::vector<MooseEnum> getSIFModesVec(unsigned int n);
   static MooseEnum getSIFModesEnum();

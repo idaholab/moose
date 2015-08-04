@@ -45,12 +45,3 @@ SolidMechImplicitEuler::scaling()
   }
   return factor;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-SolidMechImplicitEuler::SolidMechImplicitEuler(const std::string & deprecated_name, InputParameters parameters)
-  :SecondDerivativeImplicitEuler(deprecated_name, parameters),
-   _density(getMaterialProperty<Real>("density")),
-   _artificial_scaling_set(parameters.isParamValid("artificial_scaling")),
-   _artificial_scaling( _artificial_scaling_set ? getParam<Real>("artificial_scaling") : 1 )
-{}

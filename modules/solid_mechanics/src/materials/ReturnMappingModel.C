@@ -157,14 +157,3 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ReturnMappingModel::ReturnMappingModel(const std::string & deprecated_name, InputParameters parameters)
-  :ConstitutiveModel(deprecated_name, parameters),
-   _max_its(parameters.get<unsigned int>("max_its")),
-   _output_iteration_info(getParam<bool>("output_iteration_info")),
-   _output_iteration_info_on_error(getParam<bool>("output_iteration_info_on_error")),
-   _relative_tolerance(parameters.get<Real>("relative_tolerance")),
-   _absolute_tolerance(parameters.get<Real>("absolute_tolerance"))
-{
-}

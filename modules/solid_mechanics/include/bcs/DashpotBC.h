@@ -30,7 +30,6 @@ public:
    * constructor.
    */
   DashpotBC(const InputParameters & parameters);
-  DashpotBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

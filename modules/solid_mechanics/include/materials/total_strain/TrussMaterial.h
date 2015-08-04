@@ -22,7 +22,6 @@ class TrussMaterial : public Material
 {
 public:
   TrussMaterial(const InputParameters & parameters);
-  TrussMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~TrussMaterial();
 

@@ -353,39 +353,3 @@ InteractionIntegralAuxFields::computeTFields(ColumnMajorMatrix & stress, ColumnM
   grad_disp(0,2) = 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-InteractionIntegralAuxFields::InteractionIntegralAuxFields(const std::string & deprecated_name, InputParameters parameters) :
-    Material(deprecated_name, parameters),
-    _appended_index_name(getParam<std::string>("appended_index_name")),
-    _aux_stress_I(declareProperty<ColumnMajorMatrix>("aux_stress_I_"+_appended_index_name)),
-    _aux_disp_I(declareProperty<ColumnMajorMatrix>("aux_disp_I_"+_appended_index_name)),
-    _aux_grad_disp_I(declareProperty<ColumnMajorMatrix>("aux_grad_disp_I_"+_appended_index_name)),
-    _aux_strain_I(declareProperty<ColumnMajorMatrix>("aux_strain_I_"+_appended_index_name)),
-    _aux_stress_II(declareProperty<ColumnMajorMatrix>("aux_stress_II_"+_appended_index_name)),
-    _aux_disp_II(declareProperty<ColumnMajorMatrix>("aux_disp_II_"+_appended_index_name)),
-    _aux_grad_disp_II(declareProperty<ColumnMajorMatrix>("aux_grad_disp_II_"+_appended_index_name)),
-    _aux_strain_II(declareProperty<ColumnMajorMatrix>("aux_strain_II_"+_appended_index_name)),
-    _aux_stress_III(declareProperty<ColumnMajorMatrix>("aux_stress_III_"+_appended_index_name)),
-    _aux_disp_III(declareProperty<ColumnMajorMatrix>("aux_disp_III_"+_appended_index_name)),
-    _aux_grad_disp_III(declareProperty<ColumnMajorMatrix>("aux_grad_disp_III_"+_appended_index_name)),
-    _aux_strain_III(declareProperty<ColumnMajorMatrix>("aux_strain_III_"+_appended_index_name)),
-    _aux_stress_T(declareProperty<ColumnMajorMatrix>("aux_stress_T_"+_appended_index_name)),
-    _aux_disp_T(declareProperty<ColumnMajorMatrix>("aux_disp_T_"+_appended_index_name)),
-    _aux_grad_disp_T(declareProperty<ColumnMajorMatrix>("aux_grad_disp_T_"+_appended_index_name)),
-    _aux_strain_T(declareProperty<ColumnMajorMatrix>("aux_strain_T_"+_appended_index_name)),
-    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _crack_front_point_index(getParam<unsigned int>("crack_front_point_index")),
-    _poissons_ratio(getParam<Real>("poissons_ratio")),
-    _youngs_modulus(getParam<Real>("youngs_modulus"))
-{
-  std::vector<MooseEnum> sif_mode_enum = getParam<std::vector<MooseEnum> >("sif_modes");
-  for (std::vector<MooseEnum>::iterator it = sif_mode_enum.begin(); it != sif_mode_enum.end(); ++it)
-  {
-    _sif_mode.push_back(SIF_MODE(int(*it)));
-  }
-  //plane strain
-  _kappa = 3 - 4*_poissons_ratio;
-  _shear_modulus = _youngs_modulus / (2*(1 + _poissons_ratio));
-
-}

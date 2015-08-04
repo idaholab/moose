@@ -28,11 +28,3 @@ LineMaterialSymmTensorSampler::getScalarFromProperty(const SymmTensor &property,
   RealVectorValue direction;
   return getTensorQuantity(property, curr_point, direction);
 }
-
-
-// DEPRECATED CONSTRUCTOR
-LineMaterialSymmTensorSampler::LineMaterialSymmTensorSampler(const std::string & deprecated_name, InputParameters parameters) :
-    LineMaterialSamplerBase<SymmTensor>(deprecated_name, parameters),
-    MaterialTensorCalculator(parameters)
-{
-}

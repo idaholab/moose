@@ -58,14 +58,3 @@ DomainIntegralTopologicalQFunction::computeValue()
 
   return q;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-DomainIntegralTopologicalQFunction::DomainIntegralTopologicalQFunction(const std::string & deprecated_name, InputParameters parameters):
-    AuxKernel(deprecated_name, parameters),
-    _ring_number(getParam<unsigned int>("ring_index")),
-    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _has_crack_front_point_index(isParamValid("crack_front_point_index")),
-    _crack_front_point_index(_has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
-    _treat_as_2d(false)
-{}

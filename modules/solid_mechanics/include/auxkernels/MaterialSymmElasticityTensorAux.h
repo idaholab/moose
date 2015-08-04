@@ -32,7 +32,6 @@ class MaterialSymmElasticityTensorAux : public AuxKernel
 public:
 
   MaterialSymmElasticityTensorAux(const InputParameters & parameters);
-  MaterialSymmElasticityTensorAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

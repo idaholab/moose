@@ -68,16 +68,3 @@ CavityPressureUOAction::act()
 
   _problem->addUserObject(uo_type_name, name, params);
 }
-
-
-// DEPRECATED CONSTRUCTOR
-CavityPressureUOAction::CavityPressureUOAction(const std::string & deprecated_name, InputParameters params) :
-  Action(deprecated_name, params),
-  _initial_pressure(getParam<Real>("initial_pressure")),
-  _material_input(getParam<std::vector<PostprocessorName> >("material_input")),
-  _R(getParam<Real>("R")),
-  _temperature(getParam<PostprocessorName>("temperature")),
-  _volume(getParam<PostprocessorName>("volume")),
-  _startup_time(getParam<Real>("startup_time"))
-{
-}

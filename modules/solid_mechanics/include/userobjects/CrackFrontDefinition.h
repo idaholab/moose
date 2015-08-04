@@ -28,7 +28,6 @@ class CrackFrontDefinition :
 {
 public:
   CrackFrontDefinition(const InputParameters & parameters);
-  CrackFrontDefinition(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CrackFrontDefinition();
 
   virtual void initialSetup();

@@ -22,7 +22,6 @@ public:
    * constructor.
    */
   DomainIntegralQFunction(const InputParameters & parameters);
-  DomainIntegralQFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~DomainIntegralQFunction() {}
 

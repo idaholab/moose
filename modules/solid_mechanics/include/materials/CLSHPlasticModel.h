@@ -17,9 +17,6 @@ class CLSHPlasticModel : public ReturnMappingModel
 public:
   CLSHPlasticModel(const InputParameters & parameters);
 
-  CLSHPlasticModel(std::string name,
-                   InputParameters parameters); // DEPRECATED
-
 protected:
 
   virtual void initStatefulProperties(unsigned n_points);

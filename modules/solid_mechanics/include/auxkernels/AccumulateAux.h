@@ -30,7 +30,6 @@ public:
    * constructor.
    */
   AccumulateAux(const InputParameters & parameters);
-  AccumulateAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~AccumulateAux() {}
 
