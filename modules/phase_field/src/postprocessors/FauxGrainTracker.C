@@ -43,7 +43,7 @@ FauxGrainTracker::~FauxGrainTracker()
 }
 
 Real
-FauxGrainTracker::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool show_var_coloring) const
+FauxGrainTracker::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool /*show_var_coloring*/) const
 {
   mooseAssert(var_idx < _vars.size(), "Index out of range");
 

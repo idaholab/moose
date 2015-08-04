@@ -6,7 +6,6 @@
 /****************************************************************/
 #include <cstdlib> // std::system, mkstemp
 #include "ImageMesh.h"
-#include "FileRangeBuilder.h"
 #include "pcrecpp.h"
 #include "MooseApp.h"
 
@@ -17,10 +16,8 @@ template<>
 InputParameters validParams<ImageMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
+  params += validParams<FileRangeBuilder>();
   params.addClassDescription("Generated mesh with the aspect ratio of a given image stack");
-
-  // Add parameters associated with file ranges
-  addFileRangeParams(params);
 
   // Add ImageMesh-specific params
   params.addParam<bool>("scale_to_one", true, "Whether or not to scale the image so its max dimension is 1");
@@ -31,15 +28,20 @@ InputParameters validParams<ImageMesh>()
 
 ImageMesh::ImageMesh(const InputParameters & parameters) :
     GeneratedMesh(parameters),
+    FileRangeBuilder(parameters),
     _scale_to_one(getParam<bool>("scale_to_one")),
     _cells_per_pixel(getParam<Real>("cells_per_pixel"))
 {
-  // Set up the parameters associated with file ranges (this needs to be moved to validParams, if possible)
-  int status = parseFileRange(_app.getInputParameterWarehouse().getInputParameters(name()));
-
   // Failure is not an option
-  if (status != 0)
-    mooseError(getFileRangeErrorMessage(status));
+  errorCheck();
+}
+
+ImageMesh::ImageMesh(const ImageMesh & other_mesh) :
+    GeneratedMesh(other_mesh),
+    FileRangeBuilder(other_mesh.parameters()),
+    _scale_to_one(getParam<bool>("scale_to_one")),
+    _cells_per_pixel(getParam<Real>("cells_per_pixel"))
+{
 }
 
 ImageMesh::~ImageMesh()
@@ -52,29 +54,16 @@ ImageMesh::clone() const
   return *(new ImageMesh(*this));
 }
 
-
-
 void
 ImageMesh::buildMesh()
 {
-  // Make sure the filenames parameter is valid.  This is set up by
-  // the parseFileRange() function, see FileRangeBuilder.{C,h} for
-  // more information.
-  if (!isParamValid("filenames"))
-    mooseError("ImageMesh Error: filenames parameter is not valid!");
-
-  // Grab the list of filenames
-  std::vector<std::string> filenames = getParam<std::vector<std::string> >("filenames");
-
   // A list of filenames of length 1 means we are building a 2D mesh
-  if (filenames.size()==1)
-    buildMesh2D(filenames[0]);
+  if (_filenames.size()==1)
+    buildMesh2D(_filenames[0]);
 
   else
-    buildMesh3D(filenames);
+    buildMesh3D(_filenames);
 }
-
-
 
 void
 ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
@@ -113,46 +102,34 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
 
   // Set the maximum dimension to 1.0 while scaling the other
   // directions to maintain the aspect ratio.
-  Real
-    xmax = xpixels,
-    ymax = ypixels,
-    zmax = zpixels;
+  _xmax = xpixels;
+  _ymax = ypixels;
+  _zmax = zpixels;
 
   if (_scale_to_one)
   {
-    Real max = std::max(std::max(xmax, ymax), zmax);
-    xmax /= max;
-    ymax /= max;
-    zmax /= max;
+    Real max = std::max(std::max(_xmax, _ymax), _zmax);
+    _xmax /= max;
+    _ymax /= max;
+    _zmax /= max;
   }
 
   // Compute the number of cells in the x and y direction based on
   // the user's cells_per_pixel parameter.  Note: we use ints here
   // because the GeneratedMesh params object uses ints for these...
-  int
-    nx = static_cast<int>(_cells_per_pixel * xpixels),
-    ny = static_cast<int>(_cells_per_pixel * ypixels),
-    nz = static_cast<int>(_cells_per_pixel * zpixels);
+  _nx = static_cast<int>(_cells_per_pixel * xpixels);
+  _ny = static_cast<int>(_cells_per_pixel * ypixels);
+  _nz = static_cast<int>(_cells_per_pixel * zpixels);
 
   // Actually build the Mesh
   MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh&>(getMesh()),
-                                    nx, ny, nz,
-                                    /*xmin=*/0., /*xmax=*/xmax,
-                                    /*ymin=*/0., /*ymax=*/ymax,
-                                    /*zmin=*/0., /*zmax=*/zmax,
+                                    _nx, _ny, _nz,
+                                    /*xmin=*/0., /*xmax=*/_xmax,
+                                    /*ymin=*/0., /*ymax=*/_ymax,
+                                    /*zmin=*/0., /*zmax=*/_zmax,
                                     HEX8);
 
-  // We've determined the correct xmax, ymax, zmax values, so set them in
-  // our InputParameters object.
-  InputParameters & pars = _app.getInputParameterWarehouse().getInputParameters(name());
-  pars.set<Real>("xmax") = xmax;
-  pars.set<Real>("ymax") = ymax;
-  pars.set<Real>("zmax") = zmax;
 
-  // Set the number of cells in the x, y, and z directions that we determined.
-  pars.set<int>("nx") = nx;
-  pars.set<int>("ny") = ny;
-  pars.set<int>("nz") = nz;
 }
 
 
@@ -169,43 +146,29 @@ ImageMesh::buildMesh2D(const std::string & filename)
 
   // Set the maximum dimension to 1.0 while scaling the other
   // direction to maintain the aspect ratio.
-  Real
-    xmax = xpixels,
-    ymax = ypixels;
+  _xmax = xpixels;
+  _ymax = ypixels;
 
   if (_scale_to_one)
   {
-    Real max = std::max(xmax, ymax);
-    xmax /= max;
-    ymax /= max;
+    Real max = std::max(_xmax, _ymax);
+    _xmax /= max;
+    _ymax /= max;
   }
 
   // Compute the number of cells in the x and y direction based on
   // the user's cells_per_pixel parameter.  Note: we use ints here
   // because the GeneratedMesh params object uses ints for these...
-  int
-    nx = static_cast<int>(_cells_per_pixel * xpixels),
-    ny = static_cast<int>(_cells_per_pixel * ypixels);
+  _nx = static_cast<int>(_cells_per_pixel * xpixels);
+  _ny = static_cast<int>(_cells_per_pixel * ypixels);
 
   // Actually build the Mesh
   MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh&>(getMesh()),
-                                      nx, ny,
-                                      /*xmin=*/0., /*xmax=*/xmax,
-                                      /*ymin=*/0., /*ymax=*/ymax,
+                                      _nx, _ny,
+                                      /*xmin=*/0., /*xmax=*/_xmax,
+                                      /*ymin=*/0., /*ymax=*/_ymax,
                                       QUAD4);
-
-  // We've determined the correct xmax, ymax values so set them in
-  // our InputParameters object
-  InputParameters & pars = _app.getInputParameterWarehouse().getInputParameters(name());
-  pars.set<Real>("xmax") = xmax;
-  pars.set<Real>("ymax") = ymax;
-
-  // Set the number of cells in the x and y directions that we determined.
-  pars.set<int>("nx") = nx;
-  pars.set<int>("ny") = ny;
 }
-
-
 
 void
 ImageMesh::GetPixelInfo(std::string filename, int & xpixels, int & ypixels)
