@@ -47,14 +47,32 @@ public:
                                    const Real ref_resid);
 
 protected:
+  ///@{
+  /// List of solution variable names whose reference residuals will be stored,
+  /// and the residual variable names that will store them.
   std::vector<std::string> _solnVarNames;
   std::vector<std::string> _refResidVarNames;
+  ///@}
+
+  ///@{
+  /// Variable numbers assoicated with the names in _solnVarNames and _refResidVarNames.
   std::vector<unsigned int> _solnVars;
   std::vector<unsigned int> _refResidVars;
+  ///@}
+
+  ///@{
+  /// "Acceptable" absolute and relative tolerance multiplier and
+  /// acceptable number of iterations.  Used when checking the
+  /// convergence of individual variables.
   Real _accept_mult;
   int _accept_iters;
+  ///@}
+
+  ///@{
+  /// Local storage for *discrete L2 residual norms* of the variables listed in _refResidVarNames.
   std::vector<Real> _refResid;
   std::vector<Real> _resid;
+  ///@}
 };
 
 #endif /* REFERENCERESIDUALPROBLEM_H */
