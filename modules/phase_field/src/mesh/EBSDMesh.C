@@ -144,13 +144,12 @@ EBSDMesh::buildMesh()
   nr[2] = _geometry.n[2];
 
   // set min/max box length
-  InputParameters & params = _app.getInputParameterWarehouse().getInputParameters(_name);
-  params.set<Real>("xmin") = _geometry.min[0];
-  params.set<Real>("xmax") = nr[0] * _geometry.d[0] + _geometry.min[0];
-  params.set<Real>("ymin") = _geometry.min[1];
-  params.set<Real>("ymax") = nr[1] * _geometry.d[1] + _geometry.min[1];
-  params.set<Real>("zmin") = _geometry.min[2];
-  params.set<Real>("zmax") = nr[2] * _geometry.d[2] + _geometry.min[2];
+  _xmin = _geometry.min[0];
+  _xmax = nr[0] * _geometry.d[0] + _geometry.min[0];
+  _ymin = _geometry.min[1];
+  _ymax = nr[1] * _geometry.d[1] + _geometry.min[1];
+  _zmin = _geometry.min[2];
+  _zmax = nr[2] * _geometry.d[2] + _geometry.min[2];
 
   // check if the requested uniform refine level is possible and determine initial grid size
   for (unsigned int i = 0; i < uniform_refine; ++i)
@@ -167,4 +166,3 @@ EBSDMesh::buildMesh()
 
   GeneratedMesh::buildMesh();
 }
-

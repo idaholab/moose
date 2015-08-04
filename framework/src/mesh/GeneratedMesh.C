@@ -53,7 +53,13 @@ GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
     _dim(getParam<MooseEnum>("dim")),
     _nx(getParam<int>("nx")),
     _ny(getParam<int>("ny")),
-    _nz(getParam<int>("nz"))
+    _nz(getParam<int>("nz")),
+    _xmin(getParam<Real>("xmin")),
+    _xmax(getParam<Real>("xmax")),
+    _ymin(getParam<Real>("ymin")),
+    _ymax(getParam<Real>("ymax")),
+    _zmin(getParam<Real>("zmin")),
+    _zmax(getParam<Real>("zmax"))
 {
 }
 
@@ -62,7 +68,13 @@ GeneratedMesh::GeneratedMesh(const GeneratedMesh & other_mesh) :
     _dim(other_mesh._dim),
     _nx(other_mesh._nx),
     _ny(other_mesh._ny),
-    _nz(other_mesh._nz)
+    _nz(other_mesh._nz),
+    _xmin(getParam<Real>("xmin")),
+    _xmax(getParam<Real>("xmax")),
+    _ymin(getParam<Real>("ymin")),
+    _ymax(getParam<Real>("ymax")),
+    _zmin(getParam<Real>("zmin")),
+    _zmax(getParam<Real>("zmax"))
 {
 }
 
@@ -102,23 +114,22 @@ GeneratedMesh::buildMesh()
   case 1:
     MeshTools::Generation::build_line(dynamic_cast<UnstructuredMesh&>(getMesh()),
                                       _nx,
-                                      getParam<Real>("xmin"),
-                                      getParam<Real>("xmax"),
+                                      _xmin, _xmax,
                                       elem_type);
     break;
   case 2:
     MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh&>(getMesh()),
                                         _nx, _ny,
-                                        getParam<Real>("xmin"), getParam<Real>("xmax"),
-                                        getParam<Real>("ymin"), getParam<Real>("ymax"),
+                                        _xmin, _xmax,
+                                        _ymin, _ymax,
                                         elem_type);
     break;
   case 3:
     MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh&>(getMesh()),
                                       _nx, _ny, _nz,
-                                      getParam<Real>("xmin"), getParam<Real>("xmax"),
-                                      getParam<Real>("ymin"), getParam<Real>("ymax"),
-                                      getParam<Real>("zmin"), getParam<Real>("zmax"),
+                                      _xmin, _xmax,
+                                      _ymin, _ymax,
+                                      _zmin, _zmax,
                                       elem_type);
     break;
   }

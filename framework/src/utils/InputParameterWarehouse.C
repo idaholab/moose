@@ -48,6 +48,8 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
 InputParameters &
 InputParameterWarehouse::getInputParameters(const std::string & name, THREAD_ID tid /* =0 */)
 {
+  print_trace();
+
   std::map<std::string, MooseSharedPointer<InputParameters> >::iterator iter = _name_to_shared_pointer[tid].find(name);
   if (iter == _name_to_shared_pointer[tid].end())
     mooseError("Unknown InputParameters object " << name);

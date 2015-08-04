@@ -52,7 +52,7 @@ EBSDMeshErrorTest::fileDoesNotExist()
   params.set<FileName>("filename") = "FILEDOESNOTEXIST";
 
   // construct mesh object
-  EBSDMesh * mesh = new EBSDMesh("unit_test_mesh", params);
+  EBSDMesh * mesh = new EBSDMesh(params);
 
   try
   {
@@ -98,7 +98,7 @@ EBSDMeshErrorTest::headerErrorHelper(const char * filename, const char * error)
   params.set<unsigned int>("uniform_refine") = 2;
 
   // construct mesh object
-  EBSDMesh * mesh = new EBSDMesh(filename, params);
+  EBSDMesh * mesh = new EBSDMesh(params);
 
   try
   {
@@ -153,7 +153,7 @@ EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list, std:
     try
     {
       // construct mesh object
-      EBSDMesh * mesh = new EBSDMesh(oss.str(), params);
+      EBSDMesh * mesh = new EBSDMesh(params);
       delete mesh;
     }
     catch(const std::exception & e)
