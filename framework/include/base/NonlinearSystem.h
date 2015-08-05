@@ -422,6 +422,16 @@ public:
   const DamperWarehouse & getDamperWarehouse(THREAD_ID tid);
   //@}
 
+  /**
+   * Weather or not the nonlinear system has save-ins
+   */
+  bool hasSaveIn() const { return _has_save_in || _has_nodalbc_save_in; }
+
+  /**
+   * Weather or not the nonlinear system has diagonal Jacobian save-ins
+   */
+  bool hasDiagSaveIn() const { return _has_diag_save_in || _has_nodalbc_diag_save_in; }
+
 public:
   FEProblem & _fe_problem;
   // FIXME: make these protected and create getters/setters
@@ -564,8 +574,17 @@ protected:
 
   bool _print_all_var_norms;
 
-  /// If there is a nodal BC having save_in or diag_save_in
+  /// If there is any Kernel or IntegratedBC having save_in
+  bool _has_save_in;
+
+  /// If there is any Kernel or IntegratedBC having diag_save_in
+  bool _has_diag_save_in;
+
+  /// If there is a nodal BC having save_in
   bool _has_nodalbc_save_in;
+
+  /// If there is a nodal BC having diag_save_in
+  bool _has_nodalbc_diag_save_in;
 
   void getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs);
 };
