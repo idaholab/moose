@@ -183,7 +183,7 @@ CHPFCRFF::computeQpJacobian()
         else
           temp_coeff = 1.0;
 
-        Dln_expansion += temp_coeff * std::pow((Real) - 1.0, Real(i)) * (Real(i) - 2.0) * std::pow(_u[_qp], Real(i) - 3.0);
+        Dln_expansion += temp_coeff * std::pow(static_cast<Real>(-1.0), static_cast<Real>(i)) * (static_cast<Real>(i) - 2.0) * std::pow(_u[_qp], static_cast<Real>(i) - 3.0);
       }
 
       dGradDFDConsdC = ln_expansion * _grad_phi[_j][_qp] + _phi[_j][_qp] * Dln_expansion * grad_c;

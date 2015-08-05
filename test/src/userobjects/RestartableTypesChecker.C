@@ -91,6 +91,6 @@ RestartableTypesChecker::execute()
     mooseError("Error reading restartable DenseMatrix size");
   for (unsigned int i = 0; i < _dense_matrix_data.m(); i++)
     for (unsigned int j = 0; j < _dense_matrix_data.n(); j++)
-      if (_dense_matrix_data(i,j) != (Real) (i + j))
+      if (_dense_matrix_data(i,j) != static_cast<Real>(i + j))
         mooseError("Error reading restartable DenseMatrix data!");
 }

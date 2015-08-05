@@ -82,7 +82,7 @@ void RestartableTypes::initialSetup()
   _dense_matrix_data.resize(2,3);
   for (unsigned int i = 0; i < _dense_matrix_data.m(); i++)
     for (unsigned int j = 0; j < _dense_matrix_data.n(); j++)
-      _dense_matrix_data(i, j) = (Real) (i + j);
+      _dense_matrix_data(i, j) = static_cast<Real>(i + j);
 }
 
 void RestartableTypes::timestepSetup()

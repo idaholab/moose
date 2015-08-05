@@ -865,7 +865,7 @@ void Parser::setScalarComponentParameter(const std::string & full_name, const st
 
   T value;
   for (int i = 0; i < vec_size; ++i)
-    value(i) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i));
+    value(i) = Real(gp->get_value_no_default(full_name.c_str(), static_cast<Real>(0.0), i));
 
   param->set() = value;
   if (in_global)
@@ -898,7 +898,7 @@ void Parser::setVectorComponentParameter(const std::string & full_name, const st
   {
     T value;
     for (int j=0; j < LIBMESH_DIM; ++j)
-      value(j) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i*LIBMESH_DIM+j));
+      value(j) = Real(gp->get_value_no_default(full_name.c_str(), static_cast<Real>(0.0), i*LIBMESH_DIM+j));
     values.push_back(value);
   }
 
@@ -1002,7 +1002,7 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
   RealTensorValue value;
   for (int i = 0; i < LIBMESH_DIM; ++i)
     for (int j = 0; j < LIBMESH_DIM; ++j)
-      value(i, j) = Real(gp->get_value_no_default(full_name.c_str(), (Real) 0.0, i * LIBMESH_DIM + j));
+      value(i, j) = Real(gp->get_value_no_default(full_name.c_str(), static_cast<Real>(0.0), i * LIBMESH_DIM + j));
 
   param->set() = value;
   if (in_global)

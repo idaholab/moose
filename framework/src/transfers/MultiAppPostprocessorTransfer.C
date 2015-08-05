@@ -117,7 +117,7 @@ MultiAppPostprocessorTransfer::execute()
       {
         case AVERAGE:
           _communicator.sum(reduced_pp_value);
-          reduced_pp_value /= (Real) _multi_app->numGlobalApps();
+          reduced_pp_value /= static_cast<Real>(_multi_app->numGlobalApps());
           break;
         case SUM:
           _communicator.sum(reduced_pp_value);

@@ -112,9 +112,9 @@ PenetrationAux::computeValue()
       case PA_CLOSEST_POINT_Z:
         retVal = pinfo->_closest_point(2); break;
       case PA_ELEM_ID:
-        retVal = (Real) (pinfo->_elem->id()+1); break;
+        retVal = static_cast<Real>(pinfo->_elem->id()+1); break;
       case PA_SIDE:
-        retVal = (Real) (pinfo->_side_num); break;
+        retVal = static_cast<Real>(pinfo->_side_num); break;
       case PA_INCREMENTAL_SLIP_MAG:
         retVal = pinfo->isCaptured() ? pinfo->_incremental_slip.size() : 0; break;
       case PA_INCREMENTAL_SLIP_X:
