@@ -120,7 +120,7 @@ InternalSideIndicator::finalize()
 
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _solution.set(_field_var.nodalDofIndex(), std::sqrt(value)/(Real)n_flux_faces);
+    _solution.set(_field_var.nodalDofIndex(), std::sqrt(value)/static_cast<Real>(n_flux_faces));
   }
 }
 
