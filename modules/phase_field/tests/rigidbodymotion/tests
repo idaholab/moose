@@ -1,0 +1,31 @@
+[Tests]
+  [./grain_center]
+    type = 'Exodiff'
+    input = 'grain_center.i'
+    exodiff = 'grain_center_out.e'
+  [../]
+
+  [./grain_force]
+    type = 'Exodiff'
+    input = 'grain_constforce.i'
+    exodiff = 'grain_constforce_out.e'
+  [../]
+
+  [./grain_advection]
+    type = 'Exodiff'
+    input = 'grain_advection_constforce.i'
+    exodiff = 'grain_advection_constforce_out.e'
+  [../]
+
+  [./grain_motion]
+    type = 'Exodiff'
+    input = 'grain_motion.i'
+    exodiff = 'grain_motion_out.e'
+  [../]
+
+  [./grain_forcedensity]
+    type = 'Exodiff'
+    input = 'grain_forcedensity.i'
+    exodiff = 'grain_forcedensity_out.e'
+  [../]
+[]

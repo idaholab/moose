@@ -36,9 +36,11 @@
 #include "LangevinNoise.h"
 #include "MaskedBodyForce.h"
 #include "MatDiffusion.h"
+#include "MultiGrainRigidBodyMotion.h"
 #include "PFFracBulkRate.h"
 #include "PFFracCoupledInterface.h"
 #include "PFFracIntVar.h"
+#include "SingleGrainRigidBodyMotion.h"
 #include "SoretDiffusion.h"
 #include "SplitCHMath.h"
 #include "SplitCHParsed.h"
@@ -77,8 +79,10 @@
 #include "DerivativeTwoPhaseMaterial.h"
 #include "DiscreteNucleation.h"
 #include "ElasticEnergyMaterial.h"
+#include "ForceDensityMaterial.h"
 #include "GBAnisotropy.h"
 #include "GBEvolution.h"
+#include "GrainAdvectionVelocity.h"
 #include "KKSXeVacSolidMaterial.h"
 #include "LinearIsoElasticPFDamage.h"
 #include "MathEBFreeEnergy.h"
@@ -124,12 +128,16 @@
 /*
  * User Objects
  */
+#include "ComputeGrainCenterUserObject.h"
+#include "ComputeGrainForceAndTorque.h"
 #include "ConservedMaskedNormalNoise.h"
 #include "ConservedMaskedUniformNoise.h"
 #include "ConservedNormalNoise.h"
 #include "ConservedUniformNoise.h"
+#include "ConstantGrainForceAndTorque.h"
 #include "DiscreteNucleationInserter.h"
 #include "DiscreteNucleationMap.h"
+
 #include "EBSDReader.h"
 #include "SolutionRasterizer.h"
 
@@ -158,6 +166,13 @@
 #include "PolycrystalVoronoiICAction.h"
 #include "ReconVarICAction.h"
 #include "Tricrystal2CircleGrainsICAction.h"
+
+/*
+ * VectorPostprocessors
+ */
+ #include "GrainCentersPostprocessor.h"
+ #include "GrainForcesPostprocessor.h"
+
 
 template<>
 InputParameters validParams<PhaseFieldApp>()
@@ -233,9 +248,11 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(LangevinNoise);
   registerKernel(MaskedBodyForce);
   registerKernel(MatDiffusion);
+  registerKernel(MultiGrainRigidBodyMotion);
   registerKernel(PFFracBulkRate);
   registerKernel(PFFracCoupledInterface);
   registerKernel(PFFracIntVar);
+  registerKernel(SingleGrainRigidBodyMotion);
   registerKernel(SoretDiffusion);
   registerKernel(SplitCHMath);
   registerKernel(SplitCHParsed);
@@ -269,8 +286,10 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(DerivativeTwoPhaseMaterial);
   registerMaterial(DiscreteNucleation);
   registerMaterial(ElasticEnergyMaterial);
+  registerMaterial(ForceDensityMaterial);
   registerMaterial(GBAnisotropy);
   registerMaterial(GBEvolution);
+  registerMaterial(GrainAdvectionVelocity);
   registerMaterial(KKSXeVacSolidMaterial);
   registerMaterial(LinearIsoElasticPFDamage);
   registerMaterial(MathEBFreeEnergy);
@@ -302,10 +321,13 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(TotalFreeEnergy);
   registerAux(OutputEulerAngles);
 
+  registerUserObject(ComputeGrainCenterUserObject);
+  registerUserObject(ComputeGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
   registerUserObject(ConservedMaskedUniformNoise);
   registerUserObject(ConservedNormalNoise);
   registerUserObject(ConservedUniformNoise);
+  registerUserObject(ConstantGrainForceAndTorque);
   registerUserObject(DiscreteNucleationInserter);
   registerUserObject(DiscreteNucleationMap);
 
@@ -313,6 +335,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(SolutionRasterizer);
 
   registerFunction(ImageFunction);
+
+  registerVectorPostprocessor(GrainCentersPostprocessor);
+  registerVectorPostprocessor(GrainForcesPostprocessor);
 
   registerMesh(EBSDMesh);
   registerMesh(ImageMesh);
