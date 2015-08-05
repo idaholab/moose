@@ -28,6 +28,7 @@ InputParameters validParams<Axisymmetric2D3DSolutionFunction>()
 
   params.addParam<Real>("scale_factor", 1.0, "Scale factor (a) to be applied to the solution (x): ax+b, where b is the 'add_factor'");
   params.addParam<Real>("add_factor", 0.0, "Add this value (b) to the solution (x): ax+b, where a is the 'scale_factor'");
+  params.addParam<Real>("axial_dimension_ratio", 1.0, "Ratio of the axial dimension in the 3d model to that in the 2d model. Optinally permits the 3d model to be larger than the 2d model in that dimension, and scales vector solutions in that direction by this factor.");
 
   params.addParam<RealVectorValue>("2d_axis_point1", RealVectorValue(0,0,0), "Start point for axis of symmetry for the 2d model");
   params.addParam<RealVectorValue>("2d_axis_point2", RealVectorValue(0,1,0), "End point for axis of symmetry for the 2d model");
@@ -46,6 +47,7 @@ Axisymmetric2D3DSolutionFunction::Axisymmetric2D3DSolutionFunction(const InputPa
     _solution_object_ptr(NULL),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor")),
+    _axial_dim_ratio(getParam<Real>("axial_dimension_ratio")),
     _2d_axis_point1(getParam<RealVectorValue>("2d_axis_point1")),
     _2d_axis_point2(getParam<RealVectorValue>("2d_axis_point2")),
     _3d_axis_point1(getParam<RealVectorValue>("3d_axis_point1")),
@@ -132,7 +134,7 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
     }
     z_dir_3d(1) = 1;
     xypoint(0) = std::sqrt(p(0)*p(0) + p(2)*p(2));
-    xypoint(1) = p(1);
+    xypoint(1) = p(1)/_axial_dim_ratio;
   }
   else
   {
@@ -156,7 +158,7 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
     Point out_of_plane_vec(0,0,1);
     r_dir_2d = z_dir_2d.cross(out_of_plane_vec);
     r_dir_2d /= r_dir_2d.size();  //size should be 1, maybe this isn't necessary
-    xypoint = _2d_axis_point1 + z * z_dir_2d + r * r_dir_2d;
+    xypoint = _2d_axis_point1 + z/_axial_dim_ratio * z_dir_2d + r * r_dir_2d;
   }
 
   Real val;
@@ -188,6 +190,7 @@ Axisymmetric2D3DSolutionFunction::Axisymmetric2D3DSolutionFunction(const std::st
     _solution_object_ptr(NULL),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor")),
+    _axial_dim_ratio(getParam<Real>("axial_dimension_ratio")),
     _2d_axis_point1(getParam<RealVectorValue>("2d_axis_point1")),
     _2d_axis_point2(getParam<RealVectorValue>("2d_axis_point2")),
     _3d_axis_point1(getParam<RealVectorValue>("3d_axis_point1")),

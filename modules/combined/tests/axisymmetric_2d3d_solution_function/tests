@@ -9,9 +9,14 @@
     input = '3dy.i'
     exodiff = '3dy_out.e'
   [../]
-  [./axisymmetric_2d3d_solution_function_3dz]
+  [./axisymmetric_2d3d_solution_function_3dy_scale]
     type = 'Exodiff'
-    input = '3dz.i'
-    exodiff = '3dz_out.e'
+    input = '3dy_scale.i'
+    exodiff = '3dy_scale_out.e'
+  [../]
+  [./axisymmetric_2d3d_solution_function_3dz_scale]
+    type = 'Exodiff'
+    input = '3dz_scale.i'
+    exodiff = '3dz_scale_out.e'
   [../]
 []

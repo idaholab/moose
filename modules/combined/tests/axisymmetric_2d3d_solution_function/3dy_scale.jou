@@ -1,0 +1,27 @@
+## /Applications/Cubit-14.0/Cubit.app/Contents/MacOS/cubitclx
+## Cubit Version 14.0
+## Cubit Build 387010
+## Revised 2013-06-11 10:13:37 -0600 (Tue, 11 Jun 2013)
+## Running 05/19/2015 12:17:45 PM
+## Command Options:
+## -warning = On
+## -information = On
+## 3d.jou 
+create cylinder height 0.04 radius 2.35
+webcut volume all with cylinder radius 2.25 axis z
+delete volume 2
+rotate volume all about x angle 90
+webcut volume all with plane zplane
+delete volume 3
+webcut volume all with plane zplane rotate -1 about y
+webcut volume all with plane zplane rotate -45 about y
+webcut volume all with plane zplane rotate -46 about y
+delete volume 1 5
+volume all size 0.01
+mesh volume all
+block 1 volume 4
+block 2 volume 6
+sideset 1 surface 11 27 28 29 30 31
+sideset 2 surface 32 47 48 49 50 51
+block all element type HEX8
+export mesh '3dy_scale.e' overwrite
