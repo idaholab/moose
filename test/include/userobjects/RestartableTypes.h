@@ -112,6 +112,7 @@ protected:
   DummyNeedingContext & _custom_with_context;
   std::set<Real> & _set_data;
   std::map<unsigned int, Real> & _map_data;
+  DenseVector<Real> & _dense_vector_data;
   DenseMatrix<Real> & _dense_matrix_data;
 };
 
