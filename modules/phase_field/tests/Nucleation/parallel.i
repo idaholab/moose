@@ -1,14 +1,18 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 100
+  ny = 100
   nz = 0
   xmin = 0
   xmax = 20
   ymin = 0
   ymax = 20
   elem_type = QUAD4
+[]
+
+[GlobalParams]
+  derivative_order = 2
 []
 
 [Variables]
@@ -19,21 +23,9 @@
 []
 
 [BCs]
-  [./left]
-    type = DirichletBC
-    boundary = left
-    variable = c
-    value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-    boundary = right
-    variable = c
-    value = 1
-  [../]
   [./Periodic]
     [./all]
-      auto_direction = y
+      auto_direction = 'x y'
     [../]
   [../]
 []
@@ -57,7 +49,6 @@
     op_values = 1
     block = 0
     map = map
-    outputs = exodus
   [../]
 []
 
@@ -69,9 +60,16 @@
   [../]
   [./map]
     type = DiscreteNucleationMap
-    radius = 3.27
+    radius = 4
     periodic = c
     inserter = inserter
+  [../]
+[]
+
+[Postprocessors]
+  [./sum]
+    type = ElementIntegralMaterialProperty
+    mat_prop = F
   [../]
 []
 
@@ -83,6 +81,7 @@
 []
 
 [Outputs]
-  exodus = true
-  hide = c
+  [./out]
+    type = CSV
+  [../]
 []
