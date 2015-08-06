@@ -77,6 +77,11 @@ protected:
   /// Factor to add to the solution (default = 0)
   const Real _add_factor;
 
+  /// Ratio of axial dimension of 3d model to its counterpart in the 2d model.
+  /// This permits the axial dimension of the 3d model to be larger than that
+  /// of the 2d model
+  const Real _axial_dim_ratio;
+
   /// Two points that define the axis of rotation for the 2d model
   const RealVectorValue _2d_axis_point1;
   const RealVectorValue _2d_axis_point2;
