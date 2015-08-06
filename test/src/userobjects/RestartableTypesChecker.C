@@ -87,10 +87,16 @@ RestartableTypesChecker::execute()
   if (_map_data[2] != 3.4)
     mooseError("Error reading restartable map data!");
 
+  if (_dense_vector_data.size() != 3)
+    mooseError("Error reading restartable DenseVector size");
+  for (unsigned int i = 0; i < _dense_vector_data.size(); i++)
+    if (_dense_vector_data(i) != static_cast<Real>(i+1))
+      mooseError("Error reading restartable DenseMatrix data!");
+
   if (_dense_matrix_data.m() != 2 || _dense_matrix_data.n() != 3)
     mooseError("Error reading restartable DenseMatrix size");
   for (unsigned int i = 0; i < _dense_matrix_data.m(); i++)
     for (unsigned int j = 0; j < _dense_matrix_data.n(); j++)
-      if (_dense_matrix_data(i,j) != static_cast<Real>(i + j))
+      if (_dense_matrix_data(i,j) != static_cast<Real>(i + j + 1))
         mooseError("Error reading restartable DenseMatrix data!");
 }
