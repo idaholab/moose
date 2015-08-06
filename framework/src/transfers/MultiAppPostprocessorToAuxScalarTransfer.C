@@ -42,6 +42,8 @@ MultiAppPostprocessorToAuxScalarTransfer::MultiAppPostprocessorToAuxScalarTransf
 void
 MultiAppPostprocessorToAuxScalarTransfer::execute()
 {
+  _console << "Beginning PostprocessorToAuxScalarTransfer " << name() << std::endl;
+
   // Perform action based on the transfer direction
   switch (_direction)
   {
@@ -101,6 +103,8 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
       break;
     }
   }
+
+  _console << "Finished PostprocessorToAuxScalarTransfer " << name() << std::endl;
 }
 
 
