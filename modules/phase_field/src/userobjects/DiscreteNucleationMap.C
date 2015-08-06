@@ -52,7 +52,7 @@ DiscreteNucleationMap::execute()
   if (_rebuild_map)
   {
     // reserve space for each quadrature point in the element
-    _elem_map.resize(_qrule->n_points());
+    _elem_map.assign(_qrule->n_points(), 0);
 
     // store a random number for each quadrature point
     unsigned int active_nuclei = 0;

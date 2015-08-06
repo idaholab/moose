@@ -58,6 +58,9 @@ DiscreteNucleationInserter::initialize()
         ++i;
     }
   }
+
+  // we reassemble this list at every timestep
+  _global_nucleus_list.clear();
 }
 
 void
@@ -78,13 +81,45 @@ DiscreteNucleationInserter::threadJoin(const UserObject &y)
 {
   // combine _local_nucleus_list entries from all threads on the current process
   const DiscreteNucleationInserter & uo = static_cast<const DiscreteNucleationInserter &>(y);
-  _local_nucleus_list.insert(_local_nucleus_list.end(), uo._local_nucleus_list.begin(), uo._local_nucleus_list.end());
+  _global_nucleus_list.insert(_global_nucleus_list.end(), uo._local_nucleus_list.begin(), uo._local_nucleus_list.end());
+  _changes_made += uo._changes_made;
 }
 
 void
 DiscreteNucleationInserter::finalize()
 {
-  // here we need to combine all _local_nucleus_list into a the _global_nucleus_list
-  _global_nucleus_list = _local_nucleus_list;
-  _communicator.allgather(_global_nucleus_list);
+  // add the _local_nucleus_list of thread zero
+  _global_nucleus_list.insert(_global_nucleus_list.end(), _local_nucleus_list.begin(), _local_nucleus_list.end());
+
+  /**
+   * Pack the _global_nucleus_list into a simple vector of Real.
+   * libMesh's allgather does not portably work on the original
+   * _global_nucleus_list data structure!
+   */
+  std::vector<Real> comm_buffer(_global_nucleus_list.size() * 4);
+  for (unsigned i = 0; i<_global_nucleus_list.size(); ++i)
+  {
+    comm_buffer[i*4+0] = _global_nucleus_list[i].first;
+    comm_buffer[i*4+1] = _global_nucleus_list[i].second(0);
+    comm_buffer[i*4+2] = _global_nucleus_list[i].second(1);
+    comm_buffer[i*4+3] = _global_nucleus_list[i].second(2);
+  }
+
+  // combine _global_nucleus_lists from all MPI ranks
+  _communicator.allgather(comm_buffer);
+
+  // unpack the gathered _global_nucleus_list
+  unsigned int n = comm_buffer.size() / 4;
+  mooseAssert(comm_buffer.size() % 4 == 0, "Communication buffer has an unexpected size (not divisible by 4)");
+  _global_nucleus_list.resize(n);
+  for (unsigned i = 0; i < n; ++i)
+  {
+    _global_nucleus_list[i].first = comm_buffer[i*4+0];
+    _global_nucleus_list[i].second(0) = comm_buffer[i*4+1];
+    _global_nucleus_list[i].second(1) = comm_buffer[i*4+2];
+    _global_nucleus_list[i].second(2) = comm_buffer[i*4+3];
+  }
+
+  // get the global number of changes (i.e. changes to _global_nucleus_list)
+  gatherSum(_changes_made);
 }

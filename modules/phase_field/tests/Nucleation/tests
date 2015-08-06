@@ -4,4 +4,13 @@
     input = 'material.i'
     exodiff = 'material_out.e'
   [../]
+
+  [./parallel]
+    type = 'CSVDiff'
+    input = 'parallel.i'
+    csvdiff = 'parallel_out.csv'
+    min_parallel = 4
+    max_parallel = 4
+    rel_err = 1e-3
+  [../]
 []

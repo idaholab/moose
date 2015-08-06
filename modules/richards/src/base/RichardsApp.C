@@ -49,10 +49,12 @@
 #include "RichardsRelPermAux.h"
 #include "RichardsRelPermPrimeAux.h"
 #include "RichardsRelPermPrimePrimeAux.h"
+#include "DarcyFluxComponent.h"
 
 // Materials
 #include "RichardsMaterial.h"
 #include "PoroFullSatMaterial.h" // Used for mechanical coupling
+#include "DarcyMaterial.h"
 
 // DiracKernels
 #include "RichardsBorehole.h"
@@ -78,6 +80,7 @@
 #include "RichardsFullyUpwindFlux.h"
 #include "RichardsPPenalty.h"
 #include "PoroFullSatTimeDerivative.h" // Used for mechanical coupling
+#include "DarcyFlux.h"
 
   // BoundaryConditions
 #include "RichardsExcav.h"
@@ -168,10 +171,12 @@ RichardsApp::registerObjects(Factory & factory)
   registerAux(RichardsRelPermAux);
   registerAux(RichardsRelPermPrimeAux);
   registerAux(RichardsRelPermPrimePrimeAux);
+  registerAux(DarcyFluxComponent);
 
   // Materials
   registerMaterial(RichardsMaterial);
   registerMaterial(PoroFullSatMaterial); // Used for mechanical coupling
+  registerMaterial(DarcyMaterial);
 
   // DiracKernels
   registerDiracKernel(RichardsPolyLineSink);
@@ -197,6 +202,7 @@ RichardsApp::registerObjects(Factory & factory)
   registerKernel(RichardsFullyUpwindFlux);
   registerKernel(RichardsPPenalty);
   registerKernel(PoroFullSatTimeDerivative); // Used for mechanical coupling
+  registerKernel(DarcyFlux);
 
   // BoundaryConditions
   registerBoundaryCondition(RichardsExcav);
