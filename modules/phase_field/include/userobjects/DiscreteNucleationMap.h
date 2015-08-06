@@ -32,7 +32,7 @@ public:
 
   virtual void meshChanged();
 
-  const std::vector<char> & nuclei(const Elem *) const;
+  const std::vector<Real> & nuclei(const Elem *) const;
 
 protected:
   /// Did the mesh change since the last execution of this PP?
@@ -42,10 +42,10 @@ protected:
   bool _rebuild_map;
 
   /// Buffer for building the per QP map
-  std::vector<char> _elem_map;
+  std::vector<Real> _elem_map;
 
   /// Dummy map for elements without nuclei
-  std::vector<char> _zero_map;
+  std::vector<Real> _zero_map;
 
   /// UserObject that manages nucleus insertin and deletion
   const DiscreteNucleationInserter & _inserter;
@@ -61,7 +61,7 @@ protected:
 
   ///@{
   /// Per element list with 0/1 flags indicating the presence of a nucleus
-  typedef LIBMESH_BEST_UNORDERED_MAP<dof_id_type, std::vector<char> > NucleusMap;
+  typedef LIBMESH_BEST_UNORDERED_MAP<dof_id_type, std::vector<Real> > NucleusMap;
   NucleusMap _nucleus_map;
   ///@}
 };

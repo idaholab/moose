@@ -43,7 +43,7 @@ DiscreteNucleationMap::initialize()
     _rebuild_map = false;
 
   _mesh_changed = false;
-  _zero_map.assign(_fe_problem.getMaxQps(), 0);
+  _zero_map.assign(_fe_problem.getMaxQps(), 0.0);
 }
 
 void
@@ -72,7 +72,7 @@ DiscreteNucleationMap::execute()
 
     // if the map is not empty insert it
     if (active_nuclei > 0)
-      _nucleus_map.insert(std::pair<dof_id_type, std::vector<char> >(_current_elem->id(), _elem_map));
+      _nucleus_map.insert(std::pair<dof_id_type, std::vector<Real> >(_current_elem->id(), _elem_map));
   }
 }
 
@@ -93,7 +93,7 @@ DiscreteNucleationMap::meshChanged()
   _mesh_changed = true;
 }
 
-const std::vector<char> &
+const std::vector<Real> &
 DiscreteNucleationMap::nuclei(const Elem * elem) const
 {
   NucleusMap::const_iterator i = _nucleus_map.find(elem->id());
