@@ -39,8 +39,6 @@ struct node_structure2D
 	{
 		int NodesIndex;
 		int NodesOrder;
-		double Length;
-		double C;
 	}bond[28];
 };
 
@@ -54,8 +52,6 @@ struct node_structure3D
 	{
 		int NodesIndex;
 		int NodesOrder;
-		double Length;
-		double C;
 	}bond[122];
 };
 
@@ -91,8 +87,6 @@ void InitializeNode2D(struct node_structure2D *Node,int NodeNum)
 		{
 			Node[i].bond[j].NodesIndex = 0;
 			Node[i].bond[j].NodesOrder = 0;
-			Node[i].bond[j].Length = 0.0;
-			Node[i].bond[j].C = 0.0;
 		}
 	}
 }
@@ -110,8 +104,6 @@ void InitializeNode3D(struct node_structure3D *Node,int NodeNum)
 		{
 			Node[i].bond[j].NodesIndex = 0;
 			Node[i].bond[j].NodesOrder = 0;
-			Node[i].bond[j].Length = 0.0;
-			Node[i].bond[j].C = 0.0;
 		}
 	}
 }
@@ -348,6 +340,28 @@ void SearchBond3D(struct node_structure3D *Node,int NodeNum,int NodeNumX,int Nod
 	}
 }
 
+void SearchBondGeneral3D(struct node_structure3D *Node,int NodeNum,int Range,double Horizon,double MeshSpacing)
+{
+	int i,j,k,num,nodeid;
+	double d;
+	for(nodeid=0;nodeid<NodeNum;nodeid++)
+	{
+		num = 0;
+		i = (nodeid - Range >= 0)? nodeid - Range:0;
+		j = (nodeid + Range <= NodeNum)? nodeid + Range:NodeNum;
+		for(k = i;k < j;k++)
+		{
+			d = sqrt(pow(Node[nodeid].X-Node[k].X,2) + pow(Node[nodeid].Y-Node[k].Y,2) + pow(Node[nodeid].Z-Node[k].Z,2));
+			if(d <= Horizon + 0.001*MeshSpacing && k != nodeid)
+			{
+				Node[nodeid].bond[num].NodesIndex = k;
+				num++;
+			}
+		}
+		Node[nodeid].BondsNumPerNode = num;
+	}
+}
+
 /***********************************************************************************************/
 template<>
 InputParameters validParams<PeridynamicsMesh>()
@@ -377,8 +391,8 @@ InputParameters validParams<PeridynamicsMesh>()
   return params;
 }
 
-PeridynamicsMesh::PeridynamicsMesh(const std::string & name, InputParameters parameters) :
-    MooseMesh(name, parameters),
+PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters) :
+    MooseMesh(parameters),
     _dim(getParam<MooseEnum>("dim")),
     _nx(getParam<int>("nx")),
     _ny(getParam<int>("ny")),
@@ -437,9 +451,9 @@ PeridynamicsMesh::buildMesh()
   /* Peridynamic Mesh */
   /***********************************************************************************************/
   double _xmin,_ymin,_zmin,_xmax,_ymax,_zmax,_R;
-	double MeshSpacingX,MeshSpacingY,MeshSpacingZ,Horizon,dist,X,Y;
+	double MeshSpacingX,MeshSpacingY,MeshSpacingZ,Horizon,dist,X,Y,Z;
   unsigned int i,j,k,m,node_id;
-  unsigned int NodeNum,BondNum,nd,Range;
+  unsigned int NodeNum,NodeNumPerLayer,BondNum,nd,nz,Range;
   Point mypoint(0.0,0.0,0.0);
   //cout << "shape = " << _shape << endl;
   if (_dim == 2)
@@ -499,11 +513,11 @@ PeridynamicsMesh::buildMesh()
 	    // Define Boundary Nodes //
 	    for (i=0; i<_nx; i++)
 	  	{
-	  		for (j=0; j<3; j++)
+	  		for (j=0; j<1; j++)
 	  		{
 	  			k = i + j*_nx;
 	  			boundary_info.add_node(mesh.node_ptr(k),0);
-	  			k = NodeNum - 3*_nx + i + j*_nx;
+	  			k = NodeNum - 1*_nx + i + j*_nx;
 	  			boundary_info.add_node(mesh.node_ptr(k),1);
 	  		}
 	  	}
@@ -519,9 +533,9 @@ PeridynamicsMesh::buildMesh()
 			Horizon = MeshSpacingX*3.0;
 			// Create and Initialize Node Structure //
 			NodeNum = CountNodeNum(_R,MeshSpacingX,MeshSpacingY,nd);
-			mesh.reserve_nodes(NodeNum);
 			Node = (struct node_structure2D*)malloc(NodeNum*sizeof(struct node_structure2D));
 	  	InitializeNode2D(Node,NodeNum);
+			mesh.reserve_nodes(NodeNum);
 			// Define Nodal Coordinates //
 			for (j=0,node_id=0; j<nd; j++)
 	  	{
@@ -578,94 +592,192 @@ PeridynamicsMesh::buildMesh()
 				{
 					boundary_info.add_node(mesh.node_ptr(node_id),1);
 				}
-				if (abs(Y) < 0.00001*MeshSpacingY && dist >= _R - MeshSpacingX)
+				if (abs(Y) < 0.00001*MeshSpacingY && dist >= _R - MeshSpacingX && X > 0.0)
 				{
 					boundary_info.add_node(mesh.node_ptr(node_id),2);
+				}
+				boundary_info.add_node(mesh.node_ptr(node_id),3);
+	  	}
+	  	boundary_info.nodeset_name(0) = "Outside";
+	  	boundary_info.nodeset_name(1) = "CenterPoint";
+			boundary_info.nodeset_name(2) = "SidePoint";
+			boundary_info.nodeset_name(3) = "BottomPoint";
+		}
+ 	}
+ 	else if(_dim == 3)
+ 	{
+ 		struct node_structure3D *Node;
+		if (_shape == 1)
+		{
+			_xmin = getParam<Real>("xmin");
+	  	_ymin = getParam<Real>("ymin");
+	  	_zmin = getParam<Real>("zmin");
+	  	_xmax = getParam<Real>("xmax");
+	  	_ymax = getParam<Real>("ymax");
+	  	_zmax = getParam<Real>("zmax");
+			MeshSpacingX = (_xmax - _xmin) / _nx;
+	  	MeshSpacingY = (_ymax - _ymin) / _ny;
+	  	MeshSpacingZ = (_zmax - _zmin) / _nz;
+	  	Horizon = MeshSpacingX*3.0;
+			// Create and Initialize Node Structure //
+			NodeNum = _nx*_ny*_nz;
+	  	Node = (struct node_structure3D*)malloc(NodeNum*sizeof(struct node_structure3D));
+	  	InitializeNode3D(Node,NodeNum);
+			mesh.reserve_nodes(NodeNum);
+			// Define Nodal Coordinates //
+	  	for(k=0,node_id=0; k<_nz; k++)
+	  	{
+	  		for (j=0; j<_ny; j++)
+	  		{
+	  			for (i=0; i<_nx; i++)
+	  			{
+	  				mypoint = Point(MeshSpacingX / 2.0 + static_cast<Real>(i)*MeshSpacingX,
+	  			                  MeshSpacingY / 2.0 + static_cast<Real>(j)*MeshSpacingY,
+	  			                  MeshSpacingZ / 2.0 + static_cast<Real>(k)*MeshSpacingZ);
+	  			  mesh.add_point (mypoint, node_id);
+	  			  Node[node_id].X = MeshSpacingX / 2.0 + static_cast<Real>(i)*MeshSpacingX;
+	  			  Node[node_id].Y = MeshSpacingY / 2.0 + static_cast<Real>(j)*MeshSpacingY;
+	  			  Node[node_id].Z = MeshSpacingZ / 2.0 + static_cast<Real>(k)*MeshSpacingZ;
+	  			  node_id++;
+	        }
+	      }
+	 	  }
+	 	  // Search Family Member //
+	  	SearchBond3D(Node,NodeNum,_nx,_ny,Horizon);
+	  	// Generate Mesh //
+	  	for(i=0,j=0; i<NodeNum; i++)
+	  	{
+	  		j += Node[i].BondsNumPerNode;
+	  	}
+	  	BondNum = j / 2;
+	    mesh.reserve_elem (BondNum);
+	    for (i=0; i<NodeNum; i++)
+	    {
+	      for(j=0; j<Node[i].BondsNumPerNode; j++)
+	      {
+	      	k = Node[i].bond[j].NodesIndex;
+	      	if (k > i)
+	      	{
+	      		Elem* elem = mesh.add_elem (new Edge2);
+	      		elem->set_node(0) = mesh.node_ptr(i);
+	      		elem->set_node(1) = mesh.node_ptr(k);
+	      		elem->subdomain_id() = 0;
+	      	}
+	      }
+	    }
+	    // Define Boundary Nodes //
+	    for (i=0; i<_nx; i++)
+	  	{
+	  		for (j=0; j<_ny; j++)
+	  		{
+	  			for (k=0; k<1; k++)
+	  			{
+	  				m = i + j*_nx + k*_nx*_ny;
+	  				boundary_info.add_node(mesh.node_ptr(m),0);
+	  				m = NodeNum - 1*_nx*_ny + i + j*_nx + k*_nx*_ny;
+	  				boundary_info.add_node(mesh.node_ptr(m),1);
+	  			}
+	  		}
+	  	}
+	  	boundary_info.nodeset_name(0) = "Bottom";
+	  	boundary_info.nodeset_name(1) = "Top";
+		}
+		else if (_shape == 2)
+		{
+			_R = getParam<Real>("R");
+			_zmin = getParam<Real>("zmin");
+	  	_zmax = getParam<Real>("zmax");
+			nd = 2 * _nr + 1;
+			MeshSpacingX = 2*_R / nd;
+	  	MeshSpacingY = MeshSpacingX;
+			MeshSpacingZ = MeshSpacingX;
+			Horizon = MeshSpacingX*3.0;
+			nz = static_cast<int>((_zmax - _zmin) / MeshSpacingX);
+			// Create and Initialize Node Structure //
+			NodeNumPerLayer = CountNodeNum(_R,MeshSpacingX,MeshSpacingY,nd);
+      NodeNum = NodeNumPerLayer * nz;
+			Node = (struct node_structure3D*)malloc(NodeNum*sizeof(struct node_structure3D));
+	  	InitializeNode3D(Node,NodeNum);
+			mesh.reserve_nodes(NodeNum);
+			// Define Nodal Coordinates //
+			for (k=0,node_id=0; k<nz; k++)
+			{
+				for (j=0; j<nd; j++)
+		  	{
+		  		for (i=0; i<nd; i++)
+		  		{
+						X = -_R + MeshSpacingX / 2.0 + static_cast<Real>(i)*MeshSpacingX;
+						Y = -_R + MeshSpacingY / 2.0 + static_cast<Real>(j)*MeshSpacingY;
+						Z = _zmin+MeshSpacingZ / 2.0 + static_cast<Real>(k)*MeshSpacingZ;
+						dist = sqrt(X*X + Y*Y);
+						if (dist <= _R + 0.001*MeshSpacingX)
+						{
+							mypoint = Point(X,Y,Z);
+							mesh.add_point (mypoint, node_id);
+							Node[node_id].X = X;
+							Node[node_id].Y = Y;
+							Node[node_id].Z = Z;
+							node_id++;
+						}
+					}
+				}
+			}
+			// Search Family Member //
+			Range = 3 * NodeNumPerLayer + 1;
+	  	SearchBondGeneral3D(Node,NodeNum,Range,Horizon,MeshSpacingX);
+			// Generate Mesh //
+			for(i=0,j=0; i<NodeNum; i++)
+			{
+				j += Node[i].BondsNumPerNode;
+			}
+			BondNum = j / 2;
+			mesh.reserve_elem (BondNum);
+			for (i=0; i<NodeNum; i++)
+			{
+				for(j=0; j<Node[i].BondsNumPerNode; j++)
+				{
+					k = Node[i].bond[j].NodesIndex;
+					if (k > i)
+					{
+						Elem* elem = mesh.add_elem (new Edge2);
+						elem->set_node(0) = mesh.node_ptr(i);
+						elem->set_node(1) = mesh.node_ptr(k);
+						elem->subdomain_id() = 0;
+					}
+				}
+			}
+			// Define Boundary Nodes //
+	    for (node_id=0; node_id<NodeNum; node_id++)
+	  	{
+				X = Node[node_id].X;
+				Y = Node[node_id].Y;
+				Z = Node[node_id].Z;
+				dist = sqrt(X*X + Y*Y);
+				if (dist >= _R - MeshSpacingX)
+				{
+					boundary_info.add_node(mesh.node_ptr(node_id),0);
+				}
+				if (abs(dist) < 0.00001*MeshSpacingX)
+				{
+					boundary_info.add_node(mesh.node_ptr(node_id),1);
+				}
+				if (abs(Y) < 0.00001*MeshSpacingY && dist >= _R - MeshSpacingX && X > 0.0)
+				{
+					boundary_info.add_node(mesh.node_ptr(node_id),2);
+				}
+				if (Z < _zmin+MeshSpacingZ)
+				{
+					boundary_info.add_node(mesh.node_ptr(node_id),3);
 				}
 	  	}
 	  	boundary_info.nodeset_name(0) = "Outside";
 	  	boundary_info.nodeset_name(1) = "CenterPoint";
 			boundary_info.nodeset_name(2) = "SidePoint";
+			boundary_info.nodeset_name(3) = "BottomPoint";
 		}
-		cout << "NodeNum = " << NodeNum << endl;
-  	cout << "BondNum = " << BondNum << endl;
  	}
- 	else if(_dim == 3)
- 	{
- 		_xmin = getParam<Real>("xmin");
-  	_ymin = getParam<Real>("ymin");
-  	_zmin = getParam<Real>("zmin");
-  	_xmax = getParam<Real>("xmax");
-  	_ymax = getParam<Real>("ymax");
-  	_zmax = getParam<Real>("zmax");
-  	// Create and Initialize Node Structure //
-  	struct node_structure3D *Node;
-  	NodeNum = _nx*_ny*_nz;
-  	Node = (struct node_structure3D*)malloc(NodeNum*sizeof(struct node_structure3D));
-  	InitializeNode3D(Node,NodeNum);
-  	// Define Nodal Coordinates //
-  	double MeshSpacingX = (_xmax - _xmin) / _nx;
-  	double MeshSpacingY = (_ymax - _ymin) / _ny;
-  	double MeshSpacingZ = (_zmax - _zmin) / _nz;
-  	double Horizon = MeshSpacingX*3.0;
-  	mesh.reserve_nodes(NodeNum);
-  	for(k=0; k<_nz; k++)
-  	{
-  		for (j=0; j<_ny; j++)
-  		{
-  			for (i=0; i<_nx; i++)
-  			{
-  				mypoint = Point(MeshSpacingX / 2.0 + static_cast<Real>(i)*MeshSpacingX,
-  			                  MeshSpacingY / 2.0 + static_cast<Real>(j)*MeshSpacingY,
-  			                  MeshSpacingZ / 2.0 + static_cast<Real>(k)*MeshSpacingZ);
-  			  mesh.add_point (mypoint, node_id);
-  			  Node[node_id].X = MeshSpacingX / 2.0 + static_cast<Real>(i)*MeshSpacingX;
-  			  Node[node_id].Y = MeshSpacingY / 2.0 + static_cast<Real>(j)*MeshSpacingY;
-  			  Node[node_id].Z = MeshSpacingZ / 2.0 + static_cast<Real>(k)*MeshSpacingZ;
-  			  node_id++;
-        }
-      }
- 	  }
- 	  // Search Family Member //
-  	SearchBond3D(Node,NodeNum,_nx,_ny,Horizon);
-  	// Generate Mesh //
-  	for(i=0,j=0; i<NodeNum; i++)
-  	{
-  		j += Node[i].BondsNumPerNode;
-  	}
-  	BondNum = j / 2;
-    mesh.reserve_elem (BondNum);
-    for (i=0; i<NodeNum; i++)
-    {
-      for(j=0; j<Node[i].BondsNumPerNode; j++)
-      {
-      	k = Node[i].bond[j].NodesIndex;
-      	if (k > i)
-      	{
-      		Elem* elem = mesh.add_elem (new Edge2);
-      		elem->set_node(0) = mesh.node_ptr(i);
-      		elem->set_node(1) = mesh.node_ptr(k);
-      		elem->subdomain_id() = 0;
-      	}
-      }
-    }
-    // Define Boundary Nodes //
-    for (i=0; i<_nx; i++)
-  	{
-  		for (j=0; j<_ny; j++)
-  		{
-  			for (k=0; k<3; k++)
-  			{
-  				m = i + j*_nx + k*_nx*_ny;
-  				boundary_info.add_node(mesh.node_ptr(m),0);
-  				m = NodeNum - 3*_nx*_ny + i + j*_nx + k*_nx*_ny;
-  				boundary_info.add_node(mesh.node_ptr(m),1);
-  			}
-  		}
-  	}
-  	boundary_info.nodeset_name(0) = "Bottom";
-  	boundary_info.nodeset_name(1) = "Top";
- 	}
+	cout << "NodeNum = " << NodeNum << endl;
+	cout << "BondNum = " << BondNum << endl;
  	// Define a Dummy Hex//
  	mesh.add_point (Point(-2.,-2.,-2.), node_id+0);
  	mesh.add_point (Point(-1.,-2.,-2.), node_id+1);
@@ -687,4 +799,16 @@ PeridynamicsMesh::buildMesh()
   mesh.prepare_for_use (/*skip_renumber =*/ false);
 
   /***********************************************************************************************/
+}
+
+//DEPRECATED CONSTRUCTOR
+PeridynamicsMesh::PeridynamicsMesh(const std::string & deprecated_name, InputParameters parameters) :
+    MooseMesh(deprecated_name, parameters),
+    _dim(getParam<MooseEnum>("dim")),
+    _nx(getParam<int>("nx")),
+    _ny(getParam<int>("ny")),
+    _nz(getParam<int>("nz")),
+		_nr(getParam<int>("nr")),
+		_shape(getParam<int>("shape"))
+{
 }

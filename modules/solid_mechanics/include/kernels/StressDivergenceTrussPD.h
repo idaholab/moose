@@ -18,7 +18,8 @@ class StressDivergenceTrussPD : public Kernel
 {
 public:
 
-  StressDivergenceTrussPD(const std::string & name, InputParameters parameters);
+  StressDivergenceTrussPD(const InputParameters & parameters);
+  StressDivergenceTrussPD(const std::string & deprecated_name, InputParameters parameters); //DEPRECATED CONSTRUCTOR
   virtual ~StressDivergenceTrussPD() {}
 
 protected:
@@ -37,7 +38,6 @@ protected:
   const MaterialProperty<Real> & _bond_status;
   const MaterialProperty<Real> & _bond_status_old;
   const MaterialProperty<Real> & _bond_stretch;
-  const MaterialProperty<Real> & _critical_stretch;
 
 private:
   const unsigned int _component;

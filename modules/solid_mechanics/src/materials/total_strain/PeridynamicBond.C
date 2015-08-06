@@ -40,16 +40,64 @@ double lamda2D(double poissons_ratio)
 	return lamda;
 }
 
+double lamda3D(double poissons_ratio)
+{
+	int m,n,p;
+	double e1 = 0.0001,e2,e3,s;
+	double ftemp1,cn,dx,dy,dz;
+	double tol = 0.0001;
+	double lamda = 0.0;
+	e2 = -poissons_ratio*e1;
+	e3 = -poissons_ratio*e1;
+  for(p = -3;p<4;p++)
+	{
+		for(m = -3;m<4;m++)
+		{
+			for(n = 1;n<4;n++)
+			{
+				dx = m;
+				dy = n;
+				dz = p;
+				ftemp1 = sqrt(pow(dx,2) + pow(dy,2) + pow(dz,2));
+				if(ftemp1 <= 3.0 + tol)
+				{
+					cn = dy / ftemp1;
+					s = (sqrt(pow(dy*(1.0+e1),2.0)+pow(dx*(1.0+e2),2.0)+pow(dz*(1.0+e3),2.0))-sqrt(dx*dx+dy*dy+dz*dz))/sqrt(dx*dx+dy*dy+dz*dz);
+					lamda += n*(exp(-ftemp1/3.0)*cn*s);
+				}
+			}
+		}
+	}
+
+	lamda /= e1;
+	return lamda;
+}
+
 double AvgArea2D(double MeshSpacing,double ThicknessPerLayer)
 {
-	double Quarter = 0.0;
-	Quarter += exp(-3.0/3.0)*3.0*1.0;
-	Quarter += exp(-2.0/3.0)*2.0*1.0;
-	Quarter += exp(-1.0/3.0)*1.0*1.0;
-	Quarter += exp(-sqrt(5.0)/3.0)*sqrt(5.0)*2.0;
-	Quarter += exp(-sqrt(8.0)/3.0)*sqrt(8.0)*1.0;
-	Quarter += exp(-sqrt(2.0)/3.0)*sqrt(2.0)*1.0;
-	return MeshSpacing * ThicknessPerLayer / Quarter;
+	double denominator = 0.0;
+	denominator += exp(-3.0/3.0)*3.0*4.0;
+	denominator += exp(-2.0/3.0)*2.0*4.0;
+	denominator += exp(-1.0/3.0)*1.0*4.0;
+	denominator += exp(-sqrt(5.0)/3.0)*sqrt(5.0)*8.0;
+	denominator += exp(-sqrt(8.0)/3.0)*sqrt(8.0)*4.0;
+	denominator += exp(-sqrt(2.0)/3.0)*sqrt(2.0)*4.0;
+	return 2.0 * MeshSpacing * ThicknessPerLayer / denominator;
+}
+
+double AvgArea3D(double MeshSpacing)
+{
+	double denominator = 0.0;
+	denominator += exp(-3.0/3.0)*3.0*6.0;
+	denominator += exp(-2.0/3.0)*2.0*6.0;
+	denominator += exp(-1.0/3.0)*1.0*6.0;
+	denominator += exp(-sqrt(5.0)/3.0)*sqrt(5.0)*24.0;
+	denominator += exp(-sqrt(8.0)/3.0)*sqrt(8.0)*12.0;
+	denominator += exp(-sqrt(2.0)/3.0)*sqrt(2.0)*12.0;
+	denominator += exp(-sqrt(3.0)/3.0)*sqrt(3.0)*8.0;
+	denominator += exp(-sqrt(6.0)/3.0)*sqrt(6.0)*24.0;
+	denominator += exp(-sqrt(9.0)/3.0)*sqrt(9.0)*24.0;
+	return 2.0 * MeshSpacing * MeshSpacing / denominator;
 }
 
 template<>
@@ -59,6 +107,7 @@ InputParameters validParams<PeridynamicBond>()
   params.addRequiredParam<NonlinearVariableName>("disp_x","Variable containing the x displacement");
   params.addParam<NonlinearVariableName>        ("disp_y","Variable containing the y displacement");
   params.addParam<NonlinearVariableName>        ("disp_z","Variable containing the z displacement");
+	params.addParam<int>("PDdim", "PDdim");
   params.addParam<Real>("youngs_modulus", "Young's Modulus");
   params.addParam<Real>("poissons_ratio", "Poisson's Ratio");
   params.addParam<Real>("MeshSpacing", "MeshSpacing");
@@ -73,17 +122,18 @@ InputParameters validParams<PeridynamicBond>()
   return params;
 }
 
-PeridynamicBond::PeridynamicBond(const std::string  & name,
-                             InputParameters parameters)
-  :Material(name, parameters),
+PeridynamicBond::PeridynamicBond(const InputParameters & parameters)
+  :Material(parameters),
    _axial_force(declareProperty<Real>("axial_force")),
    _stiff_elem(declareProperty<Real>("stiff_elem")),
    _bond_status(declareProperty<Real>("bond_status")),
    _bond_status_old(declarePropertyOld<Real>("bond_status")),
 	 _bond_stretch(declareProperty<Real>("bond_stretch")),
 	 _critical_stretch(declareProperty<Real>("critical_stretch")),
+	 _critical_stretch_old(declarePropertyOld<Real>("critical_stretch")),
 	 _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
 	 _bond_volume(declareProperty<Real>("bond_volume")),
+	 _PDdim(isParamValid("PDdim") ? getParam<int>("PDdim") : 0),
    _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0),
    _poissons_ratio(isParamValid("poissons_ratio") ? getParam<Real>("poissons_ratio") : 0),
    _MeshSpacing(isParamValid("MeshSpacing") ? getParam<Real>("MeshSpacing") : 0),
@@ -143,11 +193,23 @@ PeridynamicBond::PeridynamicBond(const std::string  & name,
   /* Peridynamic Code */
   /***********************************************************************************************/
   _MaterialRegion = 3.0 * _MeshSpacing;
-  _VolumePerNode = _MeshSpacing * _MeshSpacing * _ThicknessPerLayer;
-  _lamda = lamda2D(_poissons_ratio);
-	_AvgArea = AvgArea2D(_MeshSpacing,_ThicknessPerLayer);
-	srand((unsigned)time( NULL ));
+	if (_PDdim == 2)
+	{
+		_VolumePerNode = _MeshSpacing * _MeshSpacing * _ThicknessPerLayer;
+	  _lamda = lamda2D(_poissons_ratio);
+		_AvgArea = AvgArea2D(_MeshSpacing,_ThicknessPerLayer);
+	}
+	else if (_PDdim == 3)
+	{
+		_VolumePerNode = _MeshSpacing * _MeshSpacing * _MeshSpacing;
+		_lamda = lamda3D(_poissons_ratio);
+		_AvgArea = AvgArea3D(_MeshSpacing);
+	}
+	//setRandomResetFrequency(EXEC_INITIAL);
   cout << "123456" << endl;
+	cout << _PDdim << endl;
+	cout << _AvgArea << endl;
+	cout << _lamda << endl;
   _callnum = 0;
   /***********************************************************************************************/
 }
@@ -162,17 +224,13 @@ PeridynamicBond::initQpStatefulProperties()
 {
 	_bond_status[_qp] = 1.0;
 	_bond_status_old[_qp] = 1.0;
-	/* Generate randomized critical stretch by Box-Muller method */
-	double Pi = 3.14159265358;
-	_critical_stretch[_qp] = sqrt(-2.0*log((double)rand()/(double)RAND_MAX))*cos(2.0*Pi*(double)rand()/(double)RAND_MAX);
-	_critical_stretch[_qp] /= 1.0/_StandardDeviation;
-	_critical_stretch[_qp] += _CriticalStretch;
+	_critical_stretch[_qp] = 10.0;
+	_critical_stretch_old[_qp] = 10.0;
 }
 
 void
 PeridynamicBond::computeProperties()
 {
-
   const Node* const node0=_current_elem->get_node(0);
   const Node* const node1=_current_elem->get_node(1);
 
@@ -220,21 +278,33 @@ PeridynamicBond::computeProperties()
     }
   }
   Real new_length = std::sqrt( ddx*ddx + ddy*ddy + ddz*ddz );
-  //Real strain = (new_length-orig_length)/orig_length;
 	Real strain = new_length/orig_length - 1.0;
   Real mechanics_strain = 0.0;
 	Real thermal_strain = 0.0;
+	double Pi = 3.14159265358;
+  double Varying_Thermal_Conductivity;
+	double t;
 
   for (_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
+		/* Generate randomized critical stretch by Box-Muller method */
+		if(_critical_stretch_old[_qp] > 1.0)
+		{
+			//_critical_stretch_old[_qp] = sqrt(-2.0*log(getRandomReal()))*cos(2.0*Pi*getRandomReal());
+			_critical_stretch_old[_qp] /= 1.0/_StandardDeviation;
+			_critical_stretch_old[_qp] += _CriticalStretch;
+		}
+		_critical_stretch[_qp] = _critical_stretch_old[_qp];
     Real youngs_modulus(_youngs_modulus_coupled ? _youngs_modulus_var[_qp] : _youngs_modulus);
     if (_has_temp)
     {
       thermal_strain = _alpha * (_temp[_qp] - _t_ref);
 			mechanics_strain = strain - thermal_strain;
-			//_thermal_conductivity[_qp] = _my_thermal_conductivity;
-			_thermal_conductivity[_qp] = _my_thermal_conductivity * exp(-orig_length / _MaterialRegion) * _AvgArea;
-			_bond_volume[_qp] = exp(-orig_length / _MaterialRegion) * _AvgArea * orig_length;
+			//_thermal_conductivity[_qp] = _bond_status_old[_qp] * _my_thermal_conductivity * exp(-orig_length / _MaterialRegion) * _AvgArea;
+			t = _temp[_qp] / 1000.0;
+			Varying_Thermal_Conductivity = 100.0 / (6.548 + 23.533*t) + 6400.0 * exp(-16.35/t) / pow(t,2.5);
+			_thermal_conductivity[_qp] = _bond_status_old[_qp] * Varying_Thermal_Conductivity * exp(-orig_length / _MaterialRegion) * _AvgArea;
+			_thermal_conductivity[_qp] *= (double) _PDdim;
     }
 		else
 		{
@@ -243,9 +313,10 @@ PeridynamicBond::computeProperties()
     _axial_force[_qp] = youngs_modulus * mechanics_strain * exp(-orig_length / _MaterialRegion) * _VolumePerNode / _MeshSpacing / _lamda;
     _stiff_elem[_qp] = (youngs_modulus * exp(-orig_length / _MaterialRegion) / _MeshSpacing / _VolumePerNode / _lamda) * _VolumePerNode * _VolumePerNode / new_length;
 		_bond_stretch[_qp] = mechanics_strain;
+		_bond_volume[_qp] = exp(-orig_length / _MaterialRegion) * _AvgArea * orig_length;
 		if (_bond_status_old[_qp] == 1.0)
 		{
-			if (std::abs(mechanics_strain) > _CriticalStretch)
+			if (std::abs(mechanics_strain) > _critical_stretch_old[_qp])
 		  {
 		  	_bond_status[_qp] = 0.0;
 				//cout << "Bond breaking! " << endl;
@@ -261,4 +332,95 @@ PeridynamicBond::computeProperties()
 		}
   }
   _callnum++;
+}
+
+//DEPRECATED CONSTRUCTOR
+PeridynamicBond::PeridynamicBond(const std::string  & deprecated_name,
+                             InputParameters parameters)
+  :Material(deprecated_name, parameters),
+   _axial_force(declareProperty<Real>("axial_force")),
+   _stiff_elem(declareProperty<Real>("stiff_elem")),
+   _bond_status(declareProperty<Real>("bond_status")),
+   _bond_status_old(declarePropertyOld<Real>("bond_status")),
+	 _bond_stretch(declareProperty<Real>("bond_stretch")),
+	 _critical_stretch(declareProperty<Real>("critical_stretch")),
+	 _critical_stretch_old(declarePropertyOld<Real>("critical_stretch")),
+	 _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
+	 _bond_volume(declareProperty<Real>("bond_volume")),
+	 _PDdim(isParamValid("PDdim") ? getParam<int>("PDdim") : 0),
+   _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0),
+   _poissons_ratio(isParamValid("poissons_ratio") ? getParam<Real>("poissons_ratio") : 0),
+   _MeshSpacing(isParamValid("MeshSpacing") ? getParam<Real>("MeshSpacing") : 0),
+   _ThicknessPerLayer(isParamValid("ThicknessPerLayer") ? getParam<Real>("ThicknessPerLayer") : 0),
+   _CriticalStretch(isParamValid("CriticalStretch") ? getParam<Real>("CriticalStretch") : 0),
+	 _StandardDeviation(isParamValid("StandardDeviation") ? getParam<Real>("StandardDeviation") : 0),
+   _youngs_modulus_coupled(isCoupled("youngs_modulus_var")),
+   _youngs_modulus_var(_youngs_modulus_coupled ? coupledValue("youngs_modulus_var"): _zero),
+   _has_temp(isCoupled("temp")),
+   _temp(_has_temp ? coupledValue("temp") : _zero),
+   _t_ref(isParamValid("reference_temp") ? getParam<Real>("reference_temp") : 0),
+   _alpha(isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0),
+	 _my_thermal_conductivity(isParamValid("thermal_conductivity") ? getParam<Real>("thermal_conductivity") : 0),
+   _dim(1)
+{
+// This doesn't work: if there are just line elements, this
+// returns 1 even if the mesh has higher dimensionality
+//  unsigned int dim = _subproblem.mesh().dimension();
+
+
+// This won't work for multiple threads because computeProperties will get called for
+// all of the threads.
+  NonlinearVariableName disp_x = parameters.get<NonlinearVariableName>("disp_x");
+  _disp_x_var = &_fe_problem.getVariable(_tid,disp_x);
+  _disp_y_var = NULL;
+  _disp_z_var = NULL;
+
+  if (parameters.isParamValid("disp_y"))
+  {
+    NonlinearVariableName disp_y = parameters.get<NonlinearVariableName>("disp_y");
+    _disp_y_var = &_fe_problem.getVariable(_tid,disp_y);
+    _dim = 2;
+
+    if (parameters.isParamValid("disp_z"))
+    {
+      NonlinearVariableName disp_z = parameters.get<NonlinearVariableName>("disp_z");
+      _disp_z_var = &_fe_problem.getVariable(_tid,disp_z);
+      _dim = 3;
+    }
+  }
+
+  if (parameters.isParamValid("youngs_modulus"))
+  {
+    if (_youngs_modulus_coupled)
+    {
+      mooseError("Cannot specify both youngs_modulus and youngs_modulus_var");
+    }
+  }
+  else
+  {
+    if (!_youngs_modulus_coupled)
+    {
+      mooseError("Must specify either youngs_modulus or youngs_modulus_var");
+    }
+  }
+  /***********************************************************************************************/
+  /* Peridynamic Code */
+  /***********************************************************************************************/
+  _MaterialRegion = 3.0 * _MeshSpacing;
+	if (_PDdim == 2)
+	{
+		_VolumePerNode = _MeshSpacing * _MeshSpacing * _ThicknessPerLayer;
+	  _lamda = lamda2D(_poissons_ratio);
+		_AvgArea = AvgArea2D(_MeshSpacing,_ThicknessPerLayer);
+	}
+	else if (_PDdim == 3)
+	{
+		_VolumePerNode = _MeshSpacing * _MeshSpacing * _MeshSpacing;
+		_lamda = lamda3D(_poissons_ratio);
+		_AvgArea = AvgArea3D(_MeshSpacing);
+	}
+	//setRandomResetFrequency(EXEC_INITIAL);
+  cout << "123456" << endl;
+  _callnum = 0;
+  /***********************************************************************************************/
 }

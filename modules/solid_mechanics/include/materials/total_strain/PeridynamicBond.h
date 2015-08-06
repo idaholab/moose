@@ -21,9 +21,9 @@ InputParameters validParams<PeridynamicBond>();
 class PeridynamicBond : public Material
 {
 public:
-  PeridynamicBond(const std::string & name,
-                InputParameters parameters);
-
+  PeridynamicBond(const InputParameters & parameters);
+  PeridynamicBond(const std::string & deprecated_name,
+                  InputParameters parameters); //DEPRECATED CONSTRUCTOR
   virtual ~PeridynamicBond();
 
 protected:
@@ -42,9 +42,11 @@ protected:
   MaterialProperty<Real> & _bond_status_old;
   MaterialProperty<Real> & _bond_stretch;
   MaterialProperty<Real> & _critical_stretch;
+  MaterialProperty<Real> & _critical_stretch_old;
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _bond_volume;
 
+  const int _PDdim;
   const Real _youngs_modulus;
   const Real _poissons_ratio;
   const Real _MeshSpacing;

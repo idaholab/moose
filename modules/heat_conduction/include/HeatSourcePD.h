@@ -18,7 +18,8 @@ class HeatSourcePD : public Kernel
 {
 public:
 
-  HeatSourcePD(const std::string & name, InputParameters parameters);
+  HeatSourcePD(const InputParameters & parameters);
+  HeatSourcePD(const std::string & deprecated_name, InputParameters parameters); //DEPRECATED CONSTRUCTOR
   virtual ~HeatSourcePD() {}
 
 protected:

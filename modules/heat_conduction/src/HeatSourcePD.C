@@ -22,8 +22,8 @@ InputParameters validParams<HeatSourcePD>()
 }
 
 
-HeatSourcePD::HeatSourcePD(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+HeatSourcePD::HeatSourcePD(const InputParameters & parameters)
+  :Kernel(parameters),
    _power_density(isParamValid("PowerDensity") ? getParam<Real>("PowerDensity") : 0),
    _bond_volume(getMaterialProperty<Real>("bond_volume" + getParam<std::string>("appended_property_name"))),
    _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
@@ -61,4 +61,16 @@ HeatSourcePD::computeResidual()
     for (unsigned int i=0; i<_save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
+}
+
+//DEPRECATED CONSTRUCTOR
+HeatSourcePD::HeatSourcePD(const std::string & deprecated_name, InputParameters parameters)
+  :Kernel(deprecated_name, parameters),
+   _power_density(isParamValid("PowerDensity") ? getParam<Real>("PowerDensity") : 0),
+   _bond_volume(getMaterialProperty<Real>("bond_volume" + getParam<std::string>("appended_property_name"))),
+   _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
+   _function(getFunction("function")),
+   _temp_coupled(isCoupled("temp")),
+   _temp_var(_temp_coupled ? coupled("temp") : 0)
+{
 }

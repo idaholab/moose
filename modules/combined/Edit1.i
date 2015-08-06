@@ -2,8 +2,17 @@
   type = PeridynamicsMesh
   dim = 2
   shape = 2               # 1. Rectangular, 2. Disk.
-  nr = 12
+  nr = 10
   R = 4.1
+  nx = 10
+  ny = 10
+  nz = 10
+  xmin = 0.0
+  xmax = 100.0
+  ymin = 0.0
+  ymax = 100.0
+  zmin = 0.0
+  zmax = 100.0
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -244,12 +253,6 @@
 []
 
 [BCs]
-#  [./temperature]
-#    type = DirichletBC
-#    variable = temp
-#    boundary = 0
-#    value = 0
-#  [../]
   [./pellet_outer_temp]
     type = FunctionPresetBC
     variable = temp
@@ -268,24 +271,68 @@
     boundary = 1
     value = 0.0
   [../]
-  [./fixz1]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 1
-    value = 0.0
-  [../]
   [./fixy2]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
   [../]
-  [./fixz2]
+  [./fixz3]
     type = DirichletBC
     variable = disp_z
-    boundary = 2
+    boundary = 3
     value = 0.0
   [../]
+
+
+#  [./temp0]
+#    type = DirichletBC
+#    variable = temp
+#    boundary = 0
+#    value = 0.0
+#  [../]
+#  [./temp1]
+#    type = DirichletBC
+#    variable = temp
+#    boundary = 1
+#    value = 1.0
+#  [../]
+#  [./fixx0]
+#    type = DirichletBC
+#    variable = disp_x
+#    boundary = 0
+#    value = 0.0
+#  [../]
+#  [./fixy0]
+#    type = DirichletBC
+#    variable = disp_y
+#    boundary = 0
+#    value = 0.0
+#  [../]
+#  [./fixz0]
+#    type = DirichletBC
+#    variable = disp_z
+#    boundary = 0
+#    value = 0.0
+#  [../]
+#  [./fixx1]
+#    type = DirichletBC
+#    variable = disp_x
+#    boundary = 1
+#    value = 0.0
+#  [../]
+#  [./fixy1]
+#    type = DirichletBC
+#    variable = disp_y
+#    boundary = 1
+#    value = 0.0
+#  [../]
+#  [./fixz1]
+#    type = DirichletBC
+#    variable = disp_z
+#    boundary = 1
+#    value = 0.0
+#  [../]
 
   [./fixDummyHex_x]
     type = DirichletBC
@@ -351,10 +398,10 @@
   dt = 100.0
   solve_type = NEWTON #PJFNK
   l_max_its = 10000
-  l_tol = 1e-04
+  l_tol = 1e-06
   nl_max_its = 2000
 #  nl_rel_tol = 1e-4
-  nl_abs_tol = 1e-3
+  nl_abs_tol = 1e-6
   end_time = 1.0e4
   line_search = basic
 #  petsc_options = '-snes_view -snes_check_jacobian -snes_check_jacobian_view'
@@ -409,6 +456,7 @@
     type = HeatConduction
     block = 0
     variable = temp
+#    save_in = nodal_power
   [../]
   [./heatsource]
     type = HeatSourcePD
@@ -437,11 +485,12 @@
     disp_y = disp_y
     disp_z = disp_z
     temp = temp
+    PDdim = 2                        # Dimension of Peridynamic model
     youngs_modulus = 200000
     poissons_ratio = 0.345
-    MeshSpacing = 0.328
-    #MeshSpacing = 0.08118812               # MeshSpacing = (xmax - xmin) / nx
-    ThicknessPerLayer = 1.0          # For 2D case, ThicknessPerLayer needs a value; For 3D case, ThicknessPerLayer = MeshSpacing
+    MeshSpacing = 0.390476
+#    MeshSpacing = 0.08118812               # MeshSpacing = (xmax - xmin) / nx
+    ThicknessPerLayer = 1.0          # For 2D case, ThicknessPerLayer needs a value; For 3D case, not neccessary.
     CriticalStretch = 0.0005         # Expectation of the Gaussian Distribution
     StandardDeviation = 0.0001       # Standard Deviation of the Gaussian Distribution
     reference_temp = 300.0
@@ -451,14 +500,24 @@
 []
 
 [Postprocessors]
-  [./sum_react_y_0]
+  [./sum_react_z_0]
     type = NodalSum
-    variable = react_y
+    variable = react_z
     boundary = 0
   [../]
-  [./sum_react_y_1]
+  [./sum_react_z_1]
     type = NodalSum
-    variable = react_y
+    variable = react_z
+    boundary = 1
+  [../]
+  [./sum_power_0]
+    type = NodalSum
+    variable = nodal_power
+    boundary = 0
+  [../]
+  [./sum_power_1]
+    type = NodalSum
+    variable = nodal_power
     boundary = 1
   [../]
 []
