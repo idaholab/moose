@@ -64,4 +64,17 @@ Real wallHeatTransferCoefficient(Real Nu, Real k, Real Dh);
 */
 Real surfaceTension(Real temperature);
 
+/**
+ * Determine the region (liquid, vapor, two phase)
+ *
+ * Taken from libSBTL 0.9.0 (more optimal for our needs)
+ * @param v Specific volume
+ * @param u Specific internal energy
+ * @param vt "Transformed" specific volume
+ * @param ps Stauration pressure
+ * @param ts Saturation temperature
+ * @return The region
+ */
+int    ireg_vu_SBTL95(double v, double u, double & vt, double & ps, double & ts, double & x, double & v1, double & v2, double & v2t, double & u1, double & u2);
+
 #endif  // NUMERICS_H
