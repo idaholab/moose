@@ -11,6 +11,7 @@ InputParameters validParams<DiscreteNucleationMap>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addParam<Real>("radius", 0.0, "Radius for the inserted nuclei");
+  params.addParam<Real>("int_width", 0.0, "Nucleus interface width for smooth nuclei");
   params.addRequiredParam<UserObjectName>("inserter", "DiscreteNucleationInserter user object");
   params.addCoupledVar("periodic", "Use the periodicity settings of this variable to populate the grain map");
   MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
@@ -27,6 +28,7 @@ DiscreteNucleationMap::DiscreteNucleationMap(const InputParameters & parameters)
     _inserter(getUserObject<DiscreteNucleationInserter>("inserter")),
     _periodic(isCoupled("periodic") ? coupled("periodic") : -1),
     _radius(getParam<Real>("radius")),
+    _int_width(getParam<Real>("int_width")),
     _nucleus_list(_inserter.getNucleusList())
 {
 }
@@ -57,18 +59,35 @@ DiscreteNucleationMap::execute()
     // store a random number for each quadrature point
     unsigned int active_nuclei = 0;
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+    {
+      Real r, rmin = std::numeric_limits<Real>::max();
+
+      // find the distance to the closest nucleus
       for (unsigned i = 0; i < _nucleus_list.size(); ++i)
       {
         // use a non-periodic or periodic distance
-        Real r = _periodic < 0 ?
-                   (_q_point[qp] - _nucleus_list[i].second).size() :
-                   _mesh.minPeriodicDistance(_periodic, _q_point[qp], _nucleus_list[i].second);
-        if (r <= _radius)
-        {
-          _elem_map[qp] = 1;
-          active_nuclei++;
-        }
+        r = _periodic < 0 ?
+              (_q_point[qp] - _nucleus_list[i].second).size() :
+              _mesh.minPeriodicDistance(_periodic, _q_point[qp], _nucleus_list[i].second);
+        if (r < rmin)
+          rmin = r;
       }
+
+      // compute intensity value with smooth interface
+      Real value = 0.0;
+      if (rmin <= _radius - _int_width/2.0) //Inside circle
+      {
+        active_nuclei++;
+        value = 1.0;
+      }
+      else if (rmin < _radius + _int_width/2.0) //Smooth interface
+      {
+        Real int_pos = (rmin - _radius + _int_width/2.0)/_int_width;
+        active_nuclei++;
+        value = (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+      }
+      _elem_map[qp] = value;
+    }
 
     // if the map is not empty insert it
     if (active_nuclei > 0)

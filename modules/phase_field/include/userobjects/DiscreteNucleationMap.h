@@ -56,6 +56,9 @@ protected:
   /// Nucleus radius
   const Real _radius;
 
+  /// Nucleus interface width
+  const Real _int_width;
+
   /// list of nuclei maintained bu the inserter object
   const DiscreteNucleationInserter::NucleusList & _nucleus_list;
 
