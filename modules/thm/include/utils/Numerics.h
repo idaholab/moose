@@ -3,13 +3,11 @@
 
 #include "libmesh/libmesh_common.h"
 
-namespace Numerics {
-  extern void* auxpt;
-
-Real Newton_Solver(Real x0, Real f0, Real (*fct)(Real x, Real f0), Real (*dfct)(Real x), Real tola, Real tolr, unsigned int n_max);
-}
-
-
+/**
+ * The sign function
+ * @param val The argument of the sign function
+ * @return -1 for negative values, 0 for zero and 1 for positive values
+ */
 template <typename T>
 int sgn(T val)
 {
