@@ -33,13 +33,23 @@ DiscreteNucleationInserter::DiscreteNucleationInserter(const InputParameters & p
   // debugging code (this will insert the entry into every processors list, but duplicate entries in global should be OK)
   // we also assume that time starts at 0! But hey, this is only for debugging anyways...
   if (isParamValid("test"))
-    _local_nucleus_list.push_back(NucleusLocation(_hold_time, getParam<Point>("test")));
+    _insert_test = true;
+  else
+    _insert_test = false;
 }
 
 void
 DiscreteNucleationInserter::initialize()
 {
   _changes_made = 0;
+
+  // insert test nucleus once
+  if (_insert_test)
+  {
+    _local_nucleus_list.push_back(NucleusLocation(_hold_time, getParam<Point>("test")));
+    _changes_made++;
+    _insert_test = false;
+  }
 
   // expire entries from the local nucleus list (if the current timestep converged)
   if (_fe_problem.converged())
