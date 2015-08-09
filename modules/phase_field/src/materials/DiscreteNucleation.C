@@ -49,7 +49,7 @@ void
 DiscreteNucleation::computeProperties()
 {
   // check if a nucleation event list is available for the current element
-  const std::vector<char> & nucleus = _map.nuclei(_current_elem);
+  const std::vector<Real> & nucleus = _map.nuclei(_current_elem);
 
   // calculate penalty
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
@@ -62,32 +62,29 @@ DiscreteNucleation::computeProperties()
     {
       const unsigned ii = _op_index[i];
 
-      // sum up penalty contributions
-      if (nucleus[_qp])
-      {
-        // deviation from the target concentration
-        Real dc = (*_args[ii])[_qp] - _op_values[i];
+      // modify the penalty magnitude with the nucleus mask
+      const Real penalty = _penalty * nucleus[_qp];
 
-        // ignore above/below target values for min/max modes respectively
-        if ((_penalty_mode == 1 && dc > 0.0) || (_penalty_mode == 2 && dc < 0.0))
-          dc = 0.0;
+      // deviation from the target concentration
+      Real dc = (*_args[ii])[_qp] - _op_values[i];
 
-        // build free energy correction
-        if (_prop_F)
-          (*_prop_F)[_qp] += dc * dc;
+      // ignore above/below target values for min/max modes respectively
+      if ((_penalty_mode == 1 && dc > 0.0) || (_penalty_mode == 2 && dc < 0.0))
+        dc = 0.0;
 
-        // first derivative
-        if (_prop_dF[ii])
-          (*_prop_dF[ii])[_qp] = 2.0 * dc * _penalty;
-      }
-      else if (_prop_dF[ii])
-        (*_prop_dF[ii])[_qp] = 0.0;
+      // build free energy correction
+      if (_prop_F)
+        (*_prop_F)[_qp] += dc * dc * penalty;
+
+      // first derivative
+      if (_prop_dF[ii])
+        (*_prop_dF[ii])[_qp] = 2.0 * dc * penalty;
 
       // second derivatives
       for (unsigned int jj = ii; jj < _nvar; ++jj)
       {
         if (_prop_d2F[ii][jj])
-          (*_prop_d2F[ii][jj])[_qp] = (!nucleus[_qp] || ii != jj) ? 0.0 : 2.0 * _penalty;
+          (*_prop_d2F[ii][jj])[_qp] = 2.0 * penalty;
 
         // third derivatives
         if (_third_derivatives)
@@ -96,9 +93,5 @@ DiscreteNucleation::computeProperties()
               (*_prop_d3F[ii][jj][kk])[_qp] = 0.0;
       }
     }
-
-    // apply penalty factor
-    if (nucleus[_qp] && _prop_F)
-      (*_prop_F)[_qp] *= _penalty;
   }
 }

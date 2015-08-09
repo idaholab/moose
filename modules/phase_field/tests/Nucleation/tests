@@ -5,6 +5,12 @@
     exodiff = 'material_out.e'
   [../]
 
+  [./soft]
+    type = 'Exodiff'
+    input = 'soft.i'
+    exodiff = 'soft_out.e'
+  [../]
+
   [./parallel]
     type = 'CSVDiff'
     input = 'parallel.i'

@@ -54,6 +54,9 @@ protected:
 
   /// the local nucleus list of nuclei centered in the domain of the current processor
   NucleusList _local_nucleus_list;
+
+  /// insert test location
+  bool _insert_test;
 };
 
 #endif //DISCRETENUCLEATIONINSERTER_H
