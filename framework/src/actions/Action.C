@@ -50,7 +50,7 @@ Action::Action(InputParameters parameters) :
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
     _problem(_awh.problem()),
-    _executioner(_awh.executioner())
+    _executioner(_app.executioner())
 {
 }
 
@@ -84,6 +84,6 @@ Action::Action(const std::string & deprecated_name, InputParameters deprecated_p
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
     _problem(_awh.problem()),
-    _executioner(_awh.executioner())
+    _executioner(_app.executioner())
 {
 }

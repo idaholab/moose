@@ -206,9 +206,14 @@ public:
   bool & legacyUoInitializationDefault();
 
   /**
-   * Retrieve the Executioner for this App.
+   * Retrieve the Executioner for this App
    */
   Executioner * getExecutioner() { return _executioner.get(); }
+
+  /**
+   * Retrieve the Executioner shared pointer for this App
+   */
+  MooseSharedPointer<Executioner> & executioner() { return _executioner; }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.

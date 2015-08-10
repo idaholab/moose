@@ -36,11 +36,6 @@ EigenKernel::EigenKernel(const InputParameters & parameters) :
     _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem())),
     _eigenvalue(NULL)
 {
-}
-
-void
-EigenKernel::initialSetup()
-{
   // The name to the postprocessor storing the eigenvalue
   std::string eigen_pp_name;
 
