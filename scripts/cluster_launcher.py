@@ -16,8 +16,9 @@ else:
   raise Exception('Unable to locate moose/python directory, please set MOOSE_DIR environment variable')
 
 # Import the TestHarness and Helper functions from the MOOSE toolkit
-from FactorySystem import ParseGetPot, InputParameters, Factory
+from FactorySystem import InputParameters, Factory
 from ClusterLauncher import PBSJob
+import ParseGetPot
 
 # Default file to read if only a directory is supplied
 job_list = 'job_list'
