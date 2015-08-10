@@ -11,4 +11,11 @@
     exodiff = 'master_from_multiapp_out_sub0.e master_from_multiapp_out_sub1.e master_from_multiapp_out.e'
     recover = false
   [../]
+  [./from_one_sub]
+    # We need this test to make sure everything is working when n_procs > n_apps
+    type = 'Exodiff'
+    input = 'from_one_sub_master.i'
+    exodiff = 'from_one_sub_master_out.e from_one_sub_master_out_sub0.e'
+    recover = false
+  [../]
 []
