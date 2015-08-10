@@ -190,7 +190,7 @@ class RunApp(Tester):
     # Write the cluster_launcher input file
     options.cluster_handle.write(content + '\n')
 
-    return os.path.join(self.specs['moose_dir'], 'framework', 'scripts', 'cluster_launcher.py') + ' ' + options.pbs + '.cluster'
+    return os.path.join(self.specs['moose_dir'], 'scripts', 'cluster_launcher.py') + ' ' + options.pbs + '.cluster'
 
 
   def processResults(self, moose_dir, retcode, options, output):
