@@ -55,6 +55,8 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
 void
 MultiAppPostprocessorInterpolationTransfer::execute()
 {
+  _console << "Beginning PostprocessorInterpolationTransfer " << name() << std::endl;
+
   switch (_direction)
   {
     case TO_MULTIAPP:
@@ -151,6 +153,8 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       break;
     }
   }
+
+  _console << "Finished PostprocessorInterpolationTransfer " << name() << std::endl;
 }
 
 
