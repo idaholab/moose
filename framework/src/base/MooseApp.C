@@ -193,6 +193,7 @@ MooseApp::MooseApp(const std::string & /*deprecated_name*/, InputParameters para
 MooseApp::~MooseApp()
 {
   _action_warehouse.clear();
+  _executioner.reset();
 
   delete _input_parameter_warehouse;
 
@@ -338,7 +339,6 @@ MooseApp::runInputFile()
     return;
 
   _action_warehouse.executeAllActions();
-  _executioner = _action_warehouse.executioner();
 
   if (getParam<bool>("list_constructed_objects"))
   {
