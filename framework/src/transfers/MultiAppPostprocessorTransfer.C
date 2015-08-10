@@ -65,22 +65,17 @@ MultiAppPostprocessorTransfer::execute()
       FEProblem & to_problem = *_multi_app->problem();
 
       Real reduced_pp_value;
-      Real default_init;
-
       switch (_reduction_type)
       {
         case AVERAGE:
         case SUM:
           reduced_pp_value = 0;
-          default_init = -std::numeric_limits<Real>::max();
           break;
         case MAXIMUM:
           reduced_pp_value = -std::numeric_limits<Real>::max();
-          default_init = -std::numeric_limits<Real>::max();
           break;
         case MINIMUM:
           reduced_pp_value = std::numeric_limits<Real>::max();
-          default_init = std::numeric_limits<Real>::max();
           break;
         default:
           mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
@@ -110,8 +105,6 @@ MultiAppPostprocessorTransfer::execute()
           }
         }
       }
-      if (!found_local)
-        reduced_pp_value = default_init;
 
       switch (_reduction_type)
       {
