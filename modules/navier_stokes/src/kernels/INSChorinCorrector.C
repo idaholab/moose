@@ -95,27 +95,3 @@ Real INSChorinCorrector::computeQpOffDiagJacobian(unsigned jvar)
     return 0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-INSChorinCorrector::INSChorinCorrector(const std::string & deprecated_name, InputParameters parameters) :
-  Kernel(deprecated_name, parameters),
-
-  // Current velocities
-  _u_vel_star(coupledValue("u_star")),
-  _v_vel_star(_mesh.dimension() >= 2 ? coupledValue("v_star") : _zero),
-  _w_vel_star(_mesh.dimension() == 3 ? coupledValue("w_star") : _zero),
-
-  // Pressure gradient
-  _grad_p(coupledGradient("p")),
-
-  // Variable numberings
-  _u_vel_star_var_number(coupled("u_star")),
-  _v_vel_star_var_number(_mesh.dimension() >= 2 ? coupled("v_star") : libMesh::invalid_uint),
-  _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
-  _p_var_number(coupled("p")),
-
-  // Required parameters
-  _rho(getParam<Real>("rho")),
-  _component(getParam<unsigned>("component"))
-{
-}

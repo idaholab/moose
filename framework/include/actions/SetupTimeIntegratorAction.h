@@ -29,7 +29,6 @@ class SetupTimeIntegratorAction : public MooseObjectAction
 {
 public:
   SetupTimeIntegratorAction(const InputParameters & parameters);
-  SetupTimeIntegratorAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SetupTimeIntegratorAction();
 
   virtual void act();

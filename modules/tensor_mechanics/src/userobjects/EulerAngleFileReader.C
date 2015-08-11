@@ -55,11 +55,3 @@ EulerAngleFileReader::readFile()
   while (inFile >> a.phi1 >> a.Phi >> a.phi2 >> weight)
     _angles.push_back(EulerAngles(a));
 }
-
-// DEPRECATED CONSTRUCTOR
-EulerAngleFileReader::EulerAngleFileReader(const std::string & deprecated_name, InputParameters params) :
-    EulerAngleProvider(deprecated_name, params),
-    _file_name(getParam<FileName>("file_name"))
-{
-  readFile();
-}

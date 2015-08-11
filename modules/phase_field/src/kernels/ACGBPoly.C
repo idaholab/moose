@@ -70,14 +70,3 @@ ACGBPoly::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ACGBPoly::ACGBPoly(const std::string & deprecated_name, InputParameters parameters) :
-    ACBulk(deprecated_name, parameters),
-    _c(coupledValue("c")),
-    _c_var(coupled("c")),
-    _mu(getMaterialProperty<Real>("mu")),
-    _gamma(getMaterialProperty<Real>("gamma_asymm")),
-    _en_ratio(getParam<Real>("en_ratio"))
-{
-}

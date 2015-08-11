@@ -19,8 +19,7 @@ class StressDivergenceTruss : public Kernel
 public:
 
   StressDivergenceTruss(const InputParameters & parameters);
-  StressDivergenceTruss(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
-  virtual ~StressDivergenceTruss() {}
+    virtual ~StressDivergenceTruss() {}
 
 protected:
   virtual void initialSetup();

@@ -148,51 +148,10 @@ MooseApp::MooseApp(InputParameters parameters) :
     mooseError("Valid CommandLine object required");
 }
 
-MooseApp::MooseApp(const std::string & /*deprecated_name*/, InputParameters parameters) :
-    ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
-    _name(parameters.get<std::string>("name")),
-    _pars(parameters),
-    _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
-    _output_position_set(false),
-    _start_time_set(false),
-    _start_time(0.0),
-    _global_time_offset(0.0),
-    _input_parameter_warehouse(new InputParameterWarehouse()),
-    _action_factory(*this),
-    _action_warehouse(*this, _syntax, _action_factory),
-    _parser(*this, _action_warehouse),
-    _use_nonlinear(true),
-    _enable_unused_check(WARN_UNUSED),
-    _factory(*this),
-    _error_overridden(false),
-    _ready_to_exit(false),
-    _initial_from_file(false),
-    _parallel_mesh_on_command_line(false),
-    _recover(false),
-    _restart(false),
-    _half_transient(false),
-    _legacy_uo_aux_computation_default(getParam<bool>("use_legacy_uo_aux_computation")),
-    _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
-    _legacy_constructors(true),
-    _check_input(getParam<bool>("check_input")),
-    _restartable_data(libMesh::n_threads())
-{
-  if (isParamValid("_argc") && isParamValid("_argv"))
-  {
-    int argc = getParam<int>("_argc");
-    char ** argv = getParam<char**>("_argv");
-
-    _sys_info = MooseSharedPointer<SystemInfo>(new SystemInfo(argc, argv));
-  }
-  if (isParamValid("_command_line"))
-    _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
-  else
-    mooseError("Valid CommandLine object required");
-}
-
 MooseApp::~MooseApp()
 {
   _action_warehouse.clear();
+  _executioner.reset();
 
   delete _input_parameter_warehouse;
 
@@ -338,7 +297,6 @@ MooseApp::runInputFile()
     return;
 
   _action_warehouse.executeAllActions();
-  _executioner = _action_warehouse.executioner();
 
   if (getParam<bool>("list_constructed_objects"))
   {

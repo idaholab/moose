@@ -28,7 +28,7 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
+#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
 
 
 #define registerTask(name, is_required)                            syntax.registerTaskName(name, is_required)
@@ -44,7 +44,6 @@ class MooseApp;
  * Typedef for function to build objects
  */
 typedef MooseSharedPointer<Action> (*buildActionPtr)(InputParameters parameters);
-typedef MooseSharedPointer<Action> (*buildLegacyActionPtr)(const std::string & name, InputParameters parameters);
 
 
 /**
@@ -62,12 +61,6 @@ MooseSharedPointer<Action> buildAction(InputParameters parameters)
   return MooseSharedPointer<Action>(new T(parameters));
 }
 
-template<class T>
-MooseSharedPointer<Action> buildLegacyAction(const std::string & name, InputParameters parameters)
-{
-  return MooseSharedPointer<Action>(new T(name, parameters));
-}
-
 /**
  * Specialized factory for generic Action System objects
  */
@@ -81,13 +74,7 @@ public:
   template<typename T>
   void regLegacy(const std::string & name, const std::string & task)
   {
-    LegacyBuildInfo build_info;
-    build_info._build_pointer = &buildLegacyAction<T>;
-    build_info._params_pointer = &validParams<T>;
-    build_info._task = task;
-    build_info._unique_id = _unique_id++;
-    _name_to_legacy_build_info.insert(std::make_pair(name, build_info));
-    _task_to_action_map.insert(std::make_pair(task, name));
+    reg<T>(name, task);
   }
 
   template<typename T>
@@ -105,7 +92,6 @@ public:
   std::string getTaskName(const std::string & action);
 
   MooseSharedPointer<Action> create(const std::string & action, const std::string & name, InputParameters parameters);
-  MooseSharedPointer<Action> createLegacy(const std::string & action, const std::string & name, InputParameters parameters);
 
   InputParameters getValidParams(const std::string & name);
 
@@ -118,20 +104,9 @@ public:
     unsigned int _unique_id;
   };
 
-  class LegacyBuildInfo
-  {
-  public:
-    buildLegacyActionPtr _build_pointer;
-    paramsActionPtr _params_pointer;
-    std::string _task;
-    unsigned int _unique_id;
-  };
-
   /// Typedef for registered Action iterator
   typedef std::multimap<std::string, BuildInfo>::iterator iterator;
   typedef std::multimap<std::string, BuildInfo>::const_iterator const_iterator;
-  typedef std::multimap<std::string, LegacyBuildInfo>::iterator legacy_iterator;
-  typedef std::multimap<std::string, LegacyBuildInfo>::const_iterator const_legacy_iterator;
 
   iterator begin();
   const_iterator begin() const;
@@ -149,8 +124,6 @@ protected:
   std::multimap<std::string, BuildInfo> _name_to_build_info;
 
   std::multimap<std::string, std::string> _task_to_action_map;
-
-  std::multimap<std::string, LegacyBuildInfo> _name_to_legacy_build_info;
 
   // TODO: I don't think we need this anymore
   static unsigned int _unique_id;        ///< Unique ID for identifying multiple registrations

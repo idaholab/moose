@@ -23,8 +23,8 @@ InputParameters validParams<MaterialStdVectorRealGradientAux>()
   return params;
 }
 
-MaterialStdVectorRealGradientAux::MaterialStdVectorRealGradientAux(const std::string & name, InputParameters parameters) :
-  MaterialStdVectorAuxBase<RealGradient>(name, parameters),
+MaterialStdVectorRealGradientAux::MaterialStdVectorRealGradientAux(const InputParameters & parameters) :
+    MaterialStdVectorAuxBase<RealGradient>(parameters),
     _component(getParam<unsigned int>("component"))
 {
   if (_component > LIBMESH_DIM)
@@ -39,12 +39,4 @@ Real
 MaterialStdVectorRealGradientAux::getRealValue()
 {
   return _prop[_qp][_index](_component);
-}
-
-MaterialStdVectorRealGradientAux::MaterialStdVectorRealGradientAux(const InputParameters & parameters) :
-  MaterialStdVectorAuxBase<RealGradient>(parameters),
-    _component(getParam<unsigned int>("component"))
-{
-  if (_component > LIBMESH_DIM)
-    mooseError("The component " << _component << " does not exist for " << LIBMESH_DIM << " dimensional problems");
 }

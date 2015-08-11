@@ -108,9 +108,3 @@ TensorMechanicsAction::act()
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TensorMechanicsAction::TensorMechanicsAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

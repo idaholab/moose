@@ -25,7 +25,6 @@ class SplitCHWRes : public DerivativeMaterialInterface<JvarMapInterface<Kernel> 
 {
 public:
   SplitCHWRes(const InputParameters & parameters);
-  SplitCHWRes(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

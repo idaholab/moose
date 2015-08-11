@@ -26,7 +26,6 @@ class NSSUPGBase : public NSKernel
 public:
 
   NSSUPGBase(const InputParameters & parameters);
-  NSSUPGBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

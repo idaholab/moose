@@ -77,23 +77,3 @@ PoroFullSatTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
   return _test[_i][_qp]*jac/_dt;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PoroFullSatTimeDerivative::PoroFullSatTimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMaterialInterface<TimeDerivative>(deprecated_name, parameters),
-    _u_old(valueOld()),
-    _volstrain(getMaterialProperty<Real>("volumetric_strain")),
-    _volstrain_old(getMaterialPropertyOld<Real>("volumetric_strain")),
-
-    _disp_x_var(coupled("disp_x")),
-    _disp_y_var(coupled("disp_y")),
-    _disp_z_var(coupled("disp_z")),
-
-    _alpha(getMaterialProperty<Real>("biot_coefficient")),
-
-    _one_over_biot_modulus(getMaterialProperty<Real>("one_over_biot_modulus")),
-    _done_over_biot_modulus_dP(getMaterialPropertyDerivative<Real>("one_over_biot_modulus", _var.name())),
-    _done_over_biot_modulus_dep(getMaterialPropertyDerivative<Real>("one_over_biot_modulus", "volumetric_strain"))
-
-{
-}

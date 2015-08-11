@@ -24,7 +24,6 @@ class INSChorinPressurePoisson : public Kernel
 {
 public:
   INSChorinPressurePoisson(const InputParameters & parameters);
-  INSChorinPressurePoisson(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSChorinPressurePoisson(){}
 

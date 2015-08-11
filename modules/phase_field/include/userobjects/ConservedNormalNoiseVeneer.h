@@ -14,7 +14,6 @@ class ConservedNormalNoiseVeneer : public T
 {
 public:
   ConservedNormalNoiseVeneer(const InputParameters & parameters);
-  ConservedNormalNoiseVeneer(const std::string & name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   Real getQpRandom();
@@ -56,15 +55,6 @@ ConservedNormalNoiseVeneer<T>::getQpRandom()
     _phase = 0;
     return _Z2;
   }
-}
-
-// DEPRECATED CONSTRUCTOR
-template<class T>
-ConservedNormalNoiseVeneer<T>::ConservedNormalNoiseVeneer(const std::string & name, InputParameters parameters) :
-    T(name, parameters),
-    _phase(0),
-    _Z2(0)
-{
 }
 
 #endif //CONSERVEDNORMALNOISEVENEER_H

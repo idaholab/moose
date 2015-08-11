@@ -35,7 +35,6 @@ class NodalNormalsPreprocessor :
 {
 public:
   NodalNormalsPreprocessor(const InputParameters & parameters);
-  NodalNormalsPreprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalNormalsPreprocessor();
 
   virtual void initialize();

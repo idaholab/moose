@@ -60,9 +60,3 @@ CopyNodalVarsAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CopyNodalVarsAction::CopyNodalVarsAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

@@ -21,7 +21,6 @@ class ReconVarICAction: public Action
 {
 public:
   ReconVarICAction(const InputParameters & params);
-  ReconVarICAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

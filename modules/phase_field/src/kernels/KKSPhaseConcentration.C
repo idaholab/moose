@@ -64,17 +64,3 @@ KKSPhaseConcentration::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-KKSPhaseConcentration::KKSPhaseConcentration(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMaterialInterface<Kernel>(deprecated_name, parameters),
-    _ca(coupledValue("ca")),
-    _ca_var(coupled("ca")),
-    _c(coupledValue("c")),
-    _c_var(coupled("c")),
-    _eta(coupledValue("eta")),
-    _eta_var(coupled("eta")),
-    _prop_h(getMaterialProperty<Real>("h_name")),
-    _prop_dh(getMaterialPropertyDerivative<Real>("h_name", getVar("eta", 0)->name()))
-{
-}

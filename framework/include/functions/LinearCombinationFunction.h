@@ -30,7 +30,6 @@ class LinearCombinationFunction : public Function, protected FunctionInterface
 {
 public:
   LinearCombinationFunction(const InputParameters & parameters);
-  LinearCombinationFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~LinearCombinationFunction();
 

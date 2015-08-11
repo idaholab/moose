@@ -32,7 +32,6 @@ class MultiAppVariableValueSampleTransfer :
 {
 public:
   MultiAppVariableValueSampleTransfer(const InputParameters & parameters);
-  MultiAppVariableValueSampleTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppVariableValueSampleTransfer() {}
 
   virtual void initialSetup();

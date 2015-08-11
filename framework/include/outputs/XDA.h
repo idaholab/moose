@@ -36,7 +36,6 @@ public:
    * Class consturctor
    */
   XDA(const InputParameters & parameters);
-  XDA(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

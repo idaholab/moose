@@ -34,12 +34,3 @@ CavityPressurePostprocessor::getValue()
 {
   return _cpuo.getValue( _quantity );
 }
-
-
-// DEPRECATED CONSTRUCTOR
-CavityPressurePostprocessor::CavityPressurePostprocessor(const std::string & deprecated_name, InputParameters params)
-  :GeneralPostprocessor(deprecated_name, params),
-   _cpuo(getUserObject<CavityPressureUserObject>("cavity_pressure_uo")),
-   _quantity(getParam<std::string>("quantity"))
-{
-}

@@ -18,8 +18,6 @@ class JvarMapInterface : public T
 {
 public:
   JvarMapInterface(const InputParameters & parameters);
-  JvarMapInterface(const std::string & name, InputParameters parameters); // DEPRECATED
-
 
   /// Set the cvar value to the mapped jvar value and return true if the mapping exists.
   /// Otherwise return false
@@ -48,23 +46,6 @@ JvarMapInterface<T>::JvarMapInterface(const InputParameters & parameters) :
   }
 }
 
-// DEPRECATED
-template<class T>
-JvarMapInterface<T>::JvarMapInterface(const std::string & name,  InputParameters parameters) :
-    T(name, parameters),
-    _jvar_map(this->_fe_problem.getNonlinearSystem().nVariables(), -1)
-{
-  unsigned int nvar = this->_coupled_moose_vars.size();
-
-  // populate map;
-  for (unsigned int i = 0; i < nvar; ++i) {
-    unsigned int number = this->_coupled_moose_vars[i]->number();
-
-    // skip AuxVars as off-diagonal jacobian entries are not calculated for them
-    if (number < _jvar_map.size())
-      _jvar_map[number] = i;
-  }
-}
 
 template<class T>
 bool

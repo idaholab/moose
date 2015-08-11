@@ -37,7 +37,6 @@ class MooseObject :
 {
 public:
   MooseObject(const InputParameters & parameters);
-  MooseObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MooseObject() { }
 
@@ -51,7 +50,7 @@ public:
    * Get the parameters of the object
    * @return The parameters of the object
    */
-  const InputParameters & parameters() { return _pars; }
+  const InputParameters & parameters() const { return _pars; }
 
   /**
    * Retrieve a parameter for the object

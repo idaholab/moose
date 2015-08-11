@@ -31,10 +31,3 @@ NodalVectorPostprocessor::NodalVectorPostprocessor(const InputParameters & param
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NodalVectorPostprocessor::NodalVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    NodalUserObject(deprecated_name, parameters),
-    VectorPostprocessor(parameters)
-{
-}

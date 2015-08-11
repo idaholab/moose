@@ -255,14 +255,3 @@ MultiAppUserObjectTransfer::execute()
   _console << "Finished MultiAppUserObjectTransfer " << name() << std::endl;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const std::string & deprecated_name, InputParameters parameters) :
-    MultiAppTransfer(deprecated_name, parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
-    _user_object_name(getParam<UserObjectName>("user_object")),
-    _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
-{
-  // This transfer does not work with ParallelMesh
-  _fe_problem.mesh().errorIfParallelDistribution("MultiAppUserObjectTransfer");
-}

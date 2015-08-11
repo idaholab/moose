@@ -25,7 +25,6 @@ class RichardsRelPermPower : public RichardsRelPerm
 {
 public:
   RichardsRelPermPower(const InputParameters & parameters);
-  RichardsRelPermPower(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * relative permeability as a function of effective saturation

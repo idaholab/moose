@@ -38,7 +38,6 @@ public:
    * Factory constructor.
    */
   BoundsAux(const InputParameters & parameters);
-  BoundsAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

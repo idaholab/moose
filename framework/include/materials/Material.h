@@ -87,7 +87,6 @@ class Material :
 {
 public:
   Material(const InputParameters & parameters);
-  Material(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Material();
 

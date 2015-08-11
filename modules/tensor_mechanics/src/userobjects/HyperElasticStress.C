@@ -67,14 +67,3 @@ HyperElasticStress::computeStrain(const RankTwoTensor & ce) const
   iden.addIa(1.0);
   return 0.5 * (ce-iden);
 }
-
-// DEPRECATED
-HyperElasticStress::HyperElasticStress(const std::string & name,
-                                       InputParameters parameters) :
-    GeneralUserObject(name, parameters)
-{
-  //Sets number of states used and computed in this user object
-  _num_in_state = 0;
-  _num_out_state_real = 0;
-  _num_out_state_ranktwotensor = 0;
-}

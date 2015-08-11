@@ -42,15 +42,3 @@ MaterialSymmElasticityTensorAux::computeValue()
 {
   return (_tensor_prop[_qp]).valueAtIndex(_index);
 }
-
-
-// DEPRECATED CONSTRUCTOR
-MaterialSymmElasticityTensorAux::MaterialSymmElasticityTensorAux(const std::string & deprecated_name, InputParameters parameters)
-    :AuxKernel(deprecated_name, parameters),
-     _tensor_matpro(getParam<std::string>("tensor_matpro")),
-     _index(getParam<int>("index")),
-     _tensor_prop(getMaterialProperty<SymmElasticityTensor>(_tensor_matpro))
-{
-  if (_index < 0 || _index > 20)
-    mooseError("Please check your index specified for MaterialSymmElasticityTensorAux (between 0 and 20).");
-}

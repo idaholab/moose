@@ -45,10 +45,3 @@ Real INSTemperatureTimeDerivative::computeQpOffDiagJacobian(unsigned)
   return 0.;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-INSTemperatureTimeDerivative::INSTemperatureTimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
-  TimeDerivative(deprecated_name, parameters),
-  _rho(getParam<Real>("rho")),
-  _cp(getParam<Real>("cp"))
-{}

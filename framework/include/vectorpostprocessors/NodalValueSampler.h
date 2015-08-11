@@ -30,7 +30,6 @@ class NodalValueSampler :
 {
 public:
   NodalValueSampler(const InputParameters & parameters);
-  NodalValueSampler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NodalValueSampler() {}
 

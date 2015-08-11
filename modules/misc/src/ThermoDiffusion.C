@@ -70,15 +70,3 @@ ThermoDiffusion::computeQpOffDiagJacobian( unsigned int jvar )
   return 0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ThermoDiffusion::ThermoDiffusion(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _temperature( coupledValue( "temp" ) ),
-    _grad_temperature( coupledGradient( "temp" ) ),
-    _mass_diffusivity( getMaterialProperty< Real >( getParam< std::string >( "mass_diffusivity" ) ) ),
-    _heat_of_transport( getMaterialProperty< Real >( getParam< std::string >( "heat_of_transport" ) ) ),
-    _gas_constant( getParam< Real >( "gas_constant" ) ),
-    _temperature_index( coupled( "temp" ) )
-{
-}

@@ -19,7 +19,6 @@ class PFMobility : public Material
 {
 public:
   PFMobility(const InputParameters & parameters);
-  PFMobility(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

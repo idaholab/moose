@@ -23,7 +23,6 @@ class RealTensorValueAux : public AuxKernel
 {
 public:
   RealTensorValueAux(const InputParameters & parameters);
-  RealTensorValueAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~RealTensorValueAux() {}
 
 protected:

@@ -24,7 +24,6 @@ class INSMass : public Kernel
 {
 public:
   INSMass(const InputParameters & parameters);
-  INSMass(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSMass(){}
 

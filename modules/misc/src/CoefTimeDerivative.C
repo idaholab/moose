@@ -36,9 +36,3 @@ CoefTimeDerivative::computeQpJacobian()
   return _coef * TimeDerivative::computeQpJacobian();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CoefTimeDerivative::CoefTimeDerivative(const std::string & deprecated_name, InputParameters parameters)
-    :TimeDerivative(deprecated_name, parameters),
-     _coef(getParam<Real>("Coefficient"))
-{}

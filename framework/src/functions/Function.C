@@ -79,16 +79,3 @@ Function::average()
   return 0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Function::Function(const std::string & deprecated_name, InputParameters parameters) :
-    MooseObject(deprecated_name, parameters),
-    SetupInterface(parameters),
-    TransientInterface(parameters, "functions"),
-    PostprocessorInterface(parameters),
-    UserObjectInterface(parameters),
-    Restartable(parameters, "Functions"),
-    MeshChangedInterface(parameters),
-    ScalarCoupleable(parameters)
-{
-}

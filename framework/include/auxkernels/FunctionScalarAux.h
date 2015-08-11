@@ -30,7 +30,6 @@ class FunctionScalarAux : public AuxScalarKernel
 {
 public:
   FunctionScalarAux(const InputParameters & parameters);
-  FunctionScalarAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~FunctionScalarAux();
 
 protected:

@@ -92,13 +92,3 @@ NodalVolumeFraction::calculateAvramiValue()
   return std::log(std::log(1.0/(1.0 - (_volume_fraction/_equil_fraction) ) ) );
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NodalVolumeFraction::NodalVolumeFraction(const std::string & deprecated_name, InputParameters parameters) :
-    FeatureFloodCount(deprecated_name, parameters),
-    _mesh_volume(getPostprocessorValue("mesh_volume")),
-    _equil_fraction(getParam<Real>("equil_fraction"))
-{
-  if (parameters.isParamValid("Avrami_file") && _equil_fraction < 0.0)
-    mooseError("please supply an equilibrium fraction of 2nd phase for Avrami analysis (NodalVolumeFraction).");
-}

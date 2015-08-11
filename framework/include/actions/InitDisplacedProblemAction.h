@@ -29,7 +29,6 @@ class InitDisplacedProblemAction : public Action
 {
 public:
   InitDisplacedProblemAction(InputParameters parameters);
-  InitDisplacedProblemAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~InitDisplacedProblemAction();
 
   virtual void act();

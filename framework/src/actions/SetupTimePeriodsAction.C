@@ -58,13 +58,3 @@ SetupTimePeriodsAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SetupTimePeriodsAction::SetupTimePeriodsAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-  if (params.isParamValid("active_kernels") && params.isParamValid("inactive_kernels"))
-    mooseError(std::string("Either active or inactive kernels may be supplied for time period \"") + name() + "\", not both");
-  if (params.isParamValid("active_bcs") && params.isParamValid("inactive_bcs"))
-    mooseError(std::string("Either active or inactive bcs may be supplied for time period \"") + name() + "\", not both");
-}

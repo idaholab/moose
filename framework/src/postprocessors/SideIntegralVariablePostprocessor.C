@@ -37,14 +37,3 @@ SideIntegralVariablePostprocessor::computeQpIntegral()
   return _u[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    SideIntegralPostprocessor(deprecated_name, parameters),
-    MooseVariableInterface(parameters, false),
-    _u(coupledValue("variable")),
-    _grad_u(coupledGradient("variable"))
-
-{
-  addMooseVariableDependency(mooseVariable());
-}

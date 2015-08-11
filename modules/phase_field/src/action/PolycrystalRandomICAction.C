@@ -70,11 +70,3 @@ PolycrystalRandomICAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PolycrystalRandomICAction::PolycrystalRandomICAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _op_num(getParam<unsigned int>("op_num")),
-    _var_name_base(getParam<std::string>("var_name_base")),
-    _random_type(getParam<MooseEnum>("random_type"))
-{}

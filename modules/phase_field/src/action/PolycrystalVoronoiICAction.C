@@ -76,12 +76,3 @@ PolycrystalVoronoiICAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PolycrystalVoronoiICAction::PolycrystalVoronoiICAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _op_num(getParam<unsigned int>("op_num")),
-    _grain_num(getParam<unsigned int>("grain_num")),
-    _var_name_base(getParam<std::string>("var_name_base"))
-{
-}

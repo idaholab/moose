@@ -24,7 +24,6 @@ class MultiBarrierFunctionMaterial : public DerivativeMaterialInterface<Material
 {
 public:
   MultiBarrierFunctionMaterial(const InputParameters & parameters);
-  MultiBarrierFunctionMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

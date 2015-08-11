@@ -57,11 +57,7 @@ extern "C" void ContactApp__registerApps() { ContactApp::registerApps(); }
 void
 ContactApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
   registerApp(ContactApp);
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -69,11 +65,6 @@ extern "C" void ContactApp__registerObjects(Factory & factory) { ContactApp::reg
 void
 ContactApp::registerObjects(Factory & factory)
 {
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-#undef registerNamedObject
-#define registerNamedObject(obj, name) factory.reg<obj>(name)
-
   registerDiracKernel(ContactMaster);
   registerDiracKernel(SlaveConstraint);
   registerConstraint(OneDContactConstraint);
@@ -85,11 +76,6 @@ ContactApp::registerObjects(Factory & factory)
   registerProblem(ReferenceResidualProblem);
   registerUserObject(NodalArea);
   registerAux(ContactPressureAux);
-
-#undef registerNamedObject
-#define registerNamedObject(obj, name) factory.regLegacy<obj>(name)
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
 
 // External entry point for dynamic syntax association
@@ -97,10 +83,6 @@ extern "C" void ContactApp__associateSyntax(Syntax & syntax, ActionFactory & act
 void
 ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-
-#undef registerAction
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
-
   syntax.registerActionSyntax("ContactAction", "Contact/*");
 
   syntax.registerActionSyntax("ContactPenetrationAuxAction", "Contact/*");
@@ -128,19 +110,5 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(NodalAreaAction, "add_user_object");
   registerAction(NodalAreaVarAction, "add_aux_variable");
-
-#undef registerAction
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ContactApp::ContactApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  ContactApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ContactApp::associateSyntax(_syntax, _action_factory);
-}

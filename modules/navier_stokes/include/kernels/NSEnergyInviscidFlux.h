@@ -20,7 +20,6 @@ class NSEnergyInviscidFlux : public NSKernel
 public:
 
   NSEnergyInviscidFlux(const InputParameters & parameters);
-  NSEnergyInviscidFlux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

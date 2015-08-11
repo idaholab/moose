@@ -44,19 +44,3 @@ ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters)
   _tol_names = parameters.get<std::vector<std::string> >("tol_names");
   _tol_values = parameters.get<std::vector<Real> >("tol_values");
 }
-
-// DEPRECATED CONSTRUCTOR
-ParsedMaterialBase::ParsedMaterialBase(const std::string & /* name */,
-                                       InputParameters parameters)
-{
-  // get function expression
-  _function = parameters.get<std::string>("function");
-
-  // get constant vectors
-  _constant_names = parameters.get<std::vector<std::string> >("constant_names");
-  _constant_expressions = parameters.get<std::vector<std::string> >("constant_expressions");
-
-  // get tolerance vectors
-  _tol_names = parameters.get<std::vector<std::string> >("tol_names");
-  _tol_values = parameters.get<std::vector<Real> >("tol_values");
-}

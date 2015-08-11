@@ -4,14 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+#ifndef FILERANGEBUILDER_H
+#define FILERANGEBUILDER_H
+
+// MOOSE includes
 #include "InputParameters.h"
+
+// Forward declarations
+class FileRangeBuilder;
 
 /**
  * To be called in the validParams functions of classes that need to
  * operate on ranges of files.  Adds several non-required parameters
  * that are parsed in the parseFileRange function.
  */
-void addFileRangeParams(InputParameters & params);
+template<>
+InputParameters validParams<FileRangeBuilder>();
 
 /**
  * Augments an InputParameters object with file range information.
@@ -21,9 +30,20 @@ void addFileRangeParams(InputParameters & params);
  * of filenames in the range.  Returns a non-zero error code if there
  * is an error while parsing.
  */
-int parseFileRange(InputParameters & params);
+class FileRangeBuilder
+{
+public:
+  FileRangeBuilder(const InputParameters & params);
+  std::string fileSuffix(){ return _file_suffix; }
+  const std::vector<std::string> & filenames(){ return _filenames; }
 
-/**
- * Returns a string containing a description of the error code.
- */
-std::string getFileRangeErrorMessage(int code);
+protected:
+//  int status(){ return _status; }
+  void errorCheck();
+
+  int _status;
+  std::string _file_suffix;
+  std::vector<std::string> _filenames;
+};
+
+#endif // FILERANGEBUILDER_H

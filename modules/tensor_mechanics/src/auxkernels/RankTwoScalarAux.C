@@ -53,11 +53,3 @@ RankTwoScalarAux::computeValue()
   return val;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RankTwoScalarAux::RankTwoScalarAux(const std::string & deprecated_name, InputParameters parameters) :
-  AuxKernel(deprecated_name, parameters),
-  _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-  _scalar_type(getParam<MooseEnum>("scalar_type"))
-{
-}

@@ -28,7 +28,6 @@ class FiniteStrainPlasticMaterial : public FiniteStrainMaterial
 {
 public:
   FiniteStrainPlasticMaterial(const InputParameters & parameters);
-  FiniteStrainPlasticMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpStress();

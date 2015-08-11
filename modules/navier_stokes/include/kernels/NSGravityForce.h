@@ -21,7 +21,6 @@ class NSGravityForce : public NSKernel
 public:
 
   NSGravityForce(const InputParameters & parameters);
-  NSGravityForce(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

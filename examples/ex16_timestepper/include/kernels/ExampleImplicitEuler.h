@@ -26,7 +26,7 @@ class ExampleImplicitEuler : public TimeDerivative
 {
 public:
 
-  ExampleImplicitEuler(const std::string & name, InputParameters parameters);
+  ExampleImplicitEuler(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

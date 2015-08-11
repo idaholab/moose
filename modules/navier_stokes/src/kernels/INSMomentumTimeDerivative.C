@@ -43,9 +43,3 @@ Real INSMomentumTimeDerivative::computeQpOffDiagJacobian(unsigned)
   return 0.;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-INSMomentumTimeDerivative::INSMomentumTimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
-  TimeDerivative(deprecated_name, parameters),
-  _rho(getParam<Real>("rho"))
-{}

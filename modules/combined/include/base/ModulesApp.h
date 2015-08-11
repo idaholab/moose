@@ -18,7 +18,6 @@ class ModulesApp : public MooseApp
 {
 public:
   ModulesApp(const InputParameters & parameters);
-  ModulesApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ModulesApp();
 
   static void registerApps();

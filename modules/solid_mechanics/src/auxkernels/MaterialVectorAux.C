@@ -64,32 +64,3 @@ MaterialVectorAux::computeValue()
   }
   return value;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-MaterialVectorAux::MaterialVectorAux(const std::string & deprecated_name, InputParameters parameters)
-  :AuxKernel(deprecated_name, parameters),
-   _vector( getMaterialProperty<RealVectorValue>( getParam<std::string>("vector") ) ),
-   _index( getParam<int>("index") ),
-   _quantity_moose_enum( getParam<MooseEnum>("quantity") )
-{
-  if (_quantity_moose_enum.isValid())
-  {
-    if ( _index > 0 )
-      mooseError("Cannot define an index and a quantity in " + name());
-    else
-      _quantity = MVA_ENUM(int(_quantity_moose_enum));
-  }
-  else
-  {
-    if ( _index < 0 )
-      mooseError("Neither an index nor a quantity listed for " + name());
-    else
-      _quantity = MVA_COMPONENT;  // default
-  }
-
-  if (_index > -1 && _index > 2)
-  {
-    mooseError("MaterialVectorAux requires the index to be >= 0 and <= 2 OR < 0 (off).");
-  }
-}

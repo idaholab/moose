@@ -44,11 +44,3 @@ Real PrimaryConvection::computeQpOffDiagJacobian(unsigned int /*jvar*/)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PrimaryConvection::PrimaryConvection(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _cond(getMaterialProperty<Real>("conductivity")),
-    _grad_p(coupledGradient("p"))
-{
-}

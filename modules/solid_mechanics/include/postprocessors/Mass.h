@@ -23,7 +23,6 @@ class Mass: public ElementIntegralVariablePostprocessor
 {
 public:
   Mass(const InputParameters & parameters);
-  Mass(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

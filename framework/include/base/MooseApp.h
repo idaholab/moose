@@ -206,9 +206,14 @@ public:
   bool & legacyUoInitializationDefault();
 
   /**
-   * Retrieve the Executioner for this App.
+   * Retrieve the Executioner for this App
    */
   Executioner * getExecutioner() { return _executioner.get(); }
+
+  /**
+   * Retrieve the Executioner shared pointer for this App
+   */
+  MooseSharedPointer<Executioner> & executioner() { return _executioner; }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
@@ -411,7 +416,6 @@ protected:
 
   /// Constructor is protected so that this object is constructed through the AppFactory object
   MooseApp(InputParameters parameters);
-  MooseApp(const std::string & name, InputParameters parameters);
 
   /// Don't run the simulation, just complete all of the mesh preperation steps and exit
   virtual void meshOnly(std::string mesh_file_name);

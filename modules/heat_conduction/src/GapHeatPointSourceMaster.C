@@ -86,23 +86,3 @@ GapHeatPointSourceMaster::computeQpJacobian()
   return 0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-GapHeatPointSourceMaster::GapHeatPointSourceMaster(const std::string & deprecated_name, InputParameters parameters)
-  :DiracKernel(deprecated_name, parameters),
-   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
-   _slave_flux(_sys.getVector("slave_flux"))
-{
-  if (parameters.isParamValid("tangential_tolerance"))
-  {
-    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-  }
-  if (parameters.isParamValid("normal_smoothing_distance"))
-  {
-    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-  }
-  if (parameters.isParamValid("normal_smoothing_method"))
-  {
-    _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
-  }
-}

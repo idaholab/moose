@@ -563,33 +563,3 @@ InitialCondition::compute()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-InitialCondition::InitialCondition(const std::string & deprecated_name, InputParameters parameters) :
-    MooseObject(deprecated_name, parameters),
-    Coupleable(parameters, getParam<SystemBase *>("_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<VariableName>("variable")).isNodal()),
-    FunctionInterface(parameters),
-    UserObjectInterface(parameters),
-    BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters),
-    DependencyResolverInterface(),
-    Restartable(parameters, "InitialConditions"),
-    ZeroInterface(parameters),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
-    _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(getParam<THREAD_ID>("_tid")),
-    _assembly(_fe_problem.assembly(_tid)),
-    _t(_fe_problem.time()),
-    _coord_sys(_assembly.coordSystem()),
-    _var(_sys.getVariable(_tid, getParam<VariableName>("variable"))),
-
-    _current_elem(_var.currentElem()),
-    _qp(0)
-{
-  _supplied_vars.insert(getParam<VariableName>("variable"));
-
-  std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();
-  for (std::map<std::string, std::vector<MooseVariable *> >::iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
-    for (std::vector<MooseVariable *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
-      _depend_vars.insert((*it2)->name());
-}

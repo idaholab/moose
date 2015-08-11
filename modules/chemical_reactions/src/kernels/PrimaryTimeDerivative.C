@@ -37,9 +37,3 @@ Real PrimaryTimeDerivative::computeQpOffDiagJacobian(unsigned int /*jvar*/)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PrimaryTimeDerivative::PrimaryTimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
-    TimeDerivative(deprecated_name, parameters),
-    _porosity(getMaterialProperty<Real>("porosity"))
-{}

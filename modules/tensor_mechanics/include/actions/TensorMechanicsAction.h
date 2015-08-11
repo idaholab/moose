@@ -18,7 +18,6 @@ class TensorMechanicsAction : public Action
 {
 public:
   TensorMechanicsAction(const InputParameters & params);
-  TensorMechanicsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

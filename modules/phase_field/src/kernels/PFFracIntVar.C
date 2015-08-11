@@ -34,9 +34,3 @@ PFFracIntVar::precomputeQpJacobian()
   return val * _phi[_j][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PFFracIntVar::PFFracIntVar(const std::string & deprecated_name, InputParameters parameters):
-  KernelValue(deprecated_name, parameters)
-{
-}

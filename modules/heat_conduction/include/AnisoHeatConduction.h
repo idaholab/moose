@@ -14,7 +14,6 @@ class AnisoHeatConduction : public Kernel
 public:
 
   AnisoHeatConduction(const InputParameters & parameters);
-  AnisoHeatConduction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

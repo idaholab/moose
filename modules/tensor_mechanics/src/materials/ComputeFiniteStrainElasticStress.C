@@ -46,12 +46,3 @@ ComputeFiniteStrainElasticStress::computeQpStress()
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp]; //This is NOT the exact jacobian
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(const std::string & deprecated_name, InputParameters parameters) :
-    ComputeStressBase(deprecated_name, parameters),
-    _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
-    _rotation_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
-    _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress"))
-{
-}

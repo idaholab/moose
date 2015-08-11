@@ -8,17 +8,19 @@
 #include "pcrecpp.h"
 #include "tinydir.h"
 
-void addFileRangeParams(InputParameters & params)
+template<>
+InputParameters validParams<FileRangeBuilder>()
 {
+  InputParameters params = emptyInputParameters();
   params.addParam<std::string>("file", "Name of single image file to extract mesh parameters from.  If provided, a 2D mesh is created.");
   params.addParam<std::string>("file_base", "Image file base to open, use this option when a stack of images must be read (ignored if 'file' is given)");
   params.addParam<std::vector<unsigned int> >("file_range", "Range of images to analyze, used with 'file_base' (ignored if 'file' is given)");
   params.addParam<std::string>("file_suffix", "Suffix of the file to open, e.g. 'png'");
+  return params;
 }
 
-
-
-int parseFileRange(InputParameters & params)
+FileRangeBuilder::FileRangeBuilder(const InputParameters & params) :
+    _status(0)
 {
   bool
     has_file = params.isParamValid("file"),
@@ -30,35 +32,43 @@ int parseFileRange(InputParameters & params)
   std::string file;
   std::string file_base;
   std::vector<unsigned int> file_range;
-  std::string file_suffix;
 
   if (has_file)
   {
     file = params.get<std::string>("file");
 
     // Set the file_suffix parameter in the passed-in params object based on the input filename
-    params.set<std::string>("file_suffix") = file.substr(file.find_last_of(".") + 1);
+    _file_suffix = file.substr(file.find_last_of(".") + 1);
   }
   if (has_file_base)
     file_base = params.get<std::string>("file_base");
   if (has_file_range)
     file_range = params.get<std::vector<unsigned int> >("file_range");
   if (has_file_suffix)
-    file_suffix = params.get<std::string>("file_suffix");
+    _file_suffix = params.get<std::string>("file_suffix");
 
   // Check that the combination of params provided is valid
 
   // 1.) Provided both a filename and a file base
   if (has_file && has_file_base)
-    return 1;
+  {
+    _status = 1;
+    return;
+  }
 
   // 2.) Provided neither a filename nor a file base
   if (!has_file && !has_file_base)
-    return 2;
+  {
+    _status = 2;
+    return;
+  }
 
   // 3.) Provided a file base but not a suffix
   if (has_file_base && !has_file_suffix)
-    return 3;
+  {
+    _status = 3;
+    return;
+  }
 
   // 4.) Provided a filename and a range, warn that the range will be ignored.
   if (has_file && has_file_range)
@@ -89,10 +99,8 @@ int parseFileRange(InputParameters & params)
   std::sort(file_range.begin(), file_range.end());
 
   // Build up the filenames parameter, and inject it into the InputParameters object
-  std::vector<std::string> filenames;
-
   if (has_file)
-    filenames.push_back(file);
+    _filenames.push_back(file);
 
   else if (has_file_base)
   {
@@ -116,14 +124,14 @@ int parseFileRange(InputParameters & params)
       tinydir_readfile_n(&dir, &file, i);
 
       // Store the file if it has proper extension as in numeric range
-      if (!file.is_dir && MooseUtils::hasExtension(file.name, file_suffix))
+      if (!file.is_dir && MooseUtils::hasExtension(file.name, _file_suffix))
       {
         std::string the_base;
         unsigned int file_num = 0;
         file_base_and_num_regex.FullMatch(file.name, &the_base, &file_num);
 
         if (!the_base.empty() && file_num >= file_range[0] && file_num <= file_range[1])
-          filenames.push_back(split_file.first + "/" + file.name);
+          _filenames.push_back(split_file.first + "/" + file.name);
       }
     }
     tinydir_close(&dir);
@@ -132,30 +140,28 @@ int parseFileRange(InputParameters & params)
   else
     mooseError("We'll never get here!");
 
-  // for (unsigned i=0; i<filenames.size(); ++i)
-  //   Moose::out << "In parseFileRange() filenames[" << i << "]=" << filenames[i] << std::endl;
-
-  params.set<std::vector<std::string> >("filenames") = filenames;
-
   // If we made it here, there were no errors
-  return 0;
 }
 
 
 
-std::string getFileRangeErrorMessage(int code)
+void
+FileRangeBuilder::errorCheck()
 {
-  switch (code)
+  switch (_status)
   {
   case 0:
-    return std::string("");
+    return;
   case 1:
-    return std::string("Cannot provide both file and file_base parameters");
+    mooseError("Cannot provide both file and file_base parameters");
+    break;
   case 2:
-    return std::string("You must provide a valid value for either the 'file' parameter or the 'file_base' parameter.");
+    mooseError("You must provide a valid value for either the 'file' parameter or the 'file_base' parameter.");
+    break;
   case 3:
-    return std::string("If you provide a 'file_base', you must also provide a valid 'file_suffix', e.g. 'png'.");
+    mooseError("If you provide a 'file_base', you must also provide a valid 'file_suffix', e.g. 'png'.");
+    break;
   default:
-    return std::string("Unkown error code!");
+    mooseError("Unknown error code!");
   }
 }

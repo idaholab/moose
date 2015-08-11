@@ -32,7 +32,6 @@ class FunctionDirichletBC : public NodalBC
 {
 public:
   FunctionDirichletBC(const InputParameters & parameters);
-  FunctionDirichletBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

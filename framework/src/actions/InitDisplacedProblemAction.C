@@ -46,9 +46,3 @@ InitDisplacedProblemAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-InitDisplacedProblemAction::InitDisplacedProblemAction(const std::string & deprecated_name, InputParameters parameters) :
-    Action(deprecated_name, parameters)
-{
-}

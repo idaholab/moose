@@ -18,9 +18,3 @@ VolumetricModel::VolumetricModel(const InputParameters & parameters ):
 
 VolumetricModel::~VolumetricModel() {}
 
-
-// DEPRECATED CONSTRUCTOR
-VolumetricModel::VolumetricModel( const std::string & name,
-                                  InputParameters & parameters ):
-  Material( name, parameters )
-{}

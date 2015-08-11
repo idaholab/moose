@@ -26,7 +26,6 @@ class NSMomentumInviscidNoPressureImplicitFlowBC : public NSMomentumInviscidBC
 {
 public:
   NSMomentumInviscidNoPressureImplicitFlowBC(const InputParameters & parameters);
-  NSMomentumInviscidNoPressureImplicitFlowBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMomentumInviscidNoPressureImplicitFlowBC(){}
 

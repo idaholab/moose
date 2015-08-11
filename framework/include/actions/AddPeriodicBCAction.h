@@ -35,7 +35,6 @@ class AddPeriodicBCAction : public Action
 {
 public:
   AddPeriodicBCAction(InputParameters params);
-  AddPeriodicBCAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

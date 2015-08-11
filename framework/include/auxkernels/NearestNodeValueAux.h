@@ -36,7 +36,6 @@ public:
    * constructor.
    */
   NearestNodeValueAux(const InputParameters & parameters);
-  NearestNodeValueAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NearestNodeValueAux();
 

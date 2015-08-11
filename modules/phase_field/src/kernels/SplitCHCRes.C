@@ -72,12 +72,3 @@ SplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SplitCHCRes::SplitCHCRes(const std::string & deprecated_name, InputParameters parameters) :
-    SplitCHBase(deprecated_name, parameters),
-    _kappa(getMaterialProperty<Real>("kappa_name")),
-    _w_var(coupled("w")),
-    _w(coupledValue("w"))
-{
-}

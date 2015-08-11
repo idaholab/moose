@@ -31,7 +31,6 @@ class MaterialStdVectorRealGradientAux : public MaterialStdVectorAuxBase<RealGra
 {
 public:
   MaterialStdVectorRealGradientAux(const InputParameters & parameters);
-  MaterialStdVectorRealGradientAux(const std::string & name, InputParameters parameters);
 
   virtual ~MaterialStdVectorRealGradientAux();
 

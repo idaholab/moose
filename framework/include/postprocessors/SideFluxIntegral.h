@@ -31,7 +31,6 @@ class SideFluxIntegral : public SideIntegralVariablePostprocessor
 {
 public:
   SideFluxIntegral(const InputParameters & parameters);
-  SideFluxIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

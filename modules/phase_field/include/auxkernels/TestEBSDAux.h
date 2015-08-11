@@ -24,7 +24,6 @@ class TestEBSDAux : public AuxKernel, EBSDAccessFunctors
 {
 public:
   TestEBSDAux(const InputParameters & parameters);
-  TestEBSDAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

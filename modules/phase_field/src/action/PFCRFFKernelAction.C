@@ -213,12 +213,3 @@ PFCRFFKernelAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PFCRFFKernelAction::PFCRFFKernelAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _num_L(getParam<unsigned int>("num_L")),
-    _L_name_base(getParam<std::string>("L_name_base")),
-    _n_name(getParam<std::string>("n_name"))
-{
-}

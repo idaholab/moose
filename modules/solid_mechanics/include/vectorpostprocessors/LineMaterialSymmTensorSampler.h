@@ -35,7 +35,6 @@ public:
    * @param parameters The input parameters
    */
   LineMaterialSymmTensorSampler(const InputParameters & parameters);
-  LineMaterialSymmTensorSampler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~LineMaterialSymmTensorSampler() {}
 

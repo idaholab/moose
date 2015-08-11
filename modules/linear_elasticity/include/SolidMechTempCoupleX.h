@@ -20,7 +20,6 @@ class SolidMechTempCoupleX : public SolidMechTempCouple
 public:
 
   SolidMechTempCoupleX(const InputParameters & parameters);
-  SolidMechTempCoupleX(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

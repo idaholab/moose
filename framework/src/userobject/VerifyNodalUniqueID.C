@@ -68,8 +68,3 @@ VerifyNodalUniqueID::finalize()
     mooseError("Duplicate unique_ids found!");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-VerifyNodalUniqueID::VerifyNodalUniqueID(const std::string & deprecated_name, InputParameters parameters) :
-    NodalUserObject(deprecated_name, parameters)
-{}

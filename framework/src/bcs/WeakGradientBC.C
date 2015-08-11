@@ -38,8 +38,3 @@ WeakGradientBC::computeQpJacobian()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-WeakGradientBC::WeakGradientBC(const std::string & deprecated_name, InputParameters parameters) :
-    IntegratedBC(deprecated_name, parameters)
-{}

@@ -41,7 +41,6 @@ public:
    * Class constructor
    */
   AddVariableAction(InputParameters params);
-  AddVariableAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   /**
    * Adds the nonlinear variable

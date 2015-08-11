@@ -38,7 +38,6 @@ public:
    * constructor.
    */
   CoupledDirectionalMeshHeightInterpolation(const InputParameters & parameters);
-  CoupledDirectionalMeshHeightInterpolation(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~CoupledDirectionalMeshHeightInterpolation() {}
 

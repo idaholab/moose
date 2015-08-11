@@ -28,7 +28,6 @@ class NSMassSpecifiedNormalFlowBC : public NSMassBC
 public:
 
   NSMassSpecifiedNormalFlowBC(const InputParameters & parameters);
-  NSMassSpecifiedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMassSpecifiedNormalFlowBC(){}
 

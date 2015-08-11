@@ -26,7 +26,6 @@ class NodalMaxVarChange : public NodalVariablePostprocessor
 {
 public:
   NodalMaxVarChange(const InputParameters & parameters);
-  NodalMaxVarChange(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

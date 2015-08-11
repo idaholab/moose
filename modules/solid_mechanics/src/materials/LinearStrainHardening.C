@@ -35,12 +35,3 @@ LinearStrainHardening::LinearStrainHardening( const InputParameters & parameters
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-LinearStrainHardening::LinearStrainHardening(const std::string & deprecated_name, InputParameters parameters)
-  :SolidModel(deprecated_name, parameters)
-{
-
-  createConstitutiveModel("IsotropicPlasticity", parameters);
-
-}

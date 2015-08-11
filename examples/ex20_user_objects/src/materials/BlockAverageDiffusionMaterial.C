@@ -25,9 +25,8 @@ InputParameters validParams<BlockAverageDiffusionMaterial>()
   return params;
 }
 
-BlockAverageDiffusionMaterial::BlockAverageDiffusionMaterial(const std::string & name,
-                                 InputParameters parameters) :
-    Material(name, parameters),
+BlockAverageDiffusionMaterial::BlockAverageDiffusionMaterial(const InputParameters & parameters) :
+    Material(parameters),
 
     // Declare that this material is going to provide a Real
     // valued property named "diffusivity" that Kernels can use.

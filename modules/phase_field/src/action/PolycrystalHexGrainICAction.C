@@ -80,14 +80,3 @@ PolycrystalHexGrainICAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PolycrystalHexGrainICAction::PolycrystalHexGrainICAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _var_name_base(getParam<std::string>("var_name_base")),
-    _op_num(getParam<unsigned int>("op_num")),
-    _grain_num(getParam<unsigned int>("grain_num")),
-    _x_offset(getParam<Real>("x_offset")),
-    _perturbation_percent(getParam<Real>("perturbation_percent"))
-{
-}

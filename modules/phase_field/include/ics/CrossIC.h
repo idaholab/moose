@@ -53,7 +53,6 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   CrossIC(const InputParameters & parameters);
-  CrossIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * The value of the variable at a point.

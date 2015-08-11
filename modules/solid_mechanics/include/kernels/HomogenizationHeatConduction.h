@@ -21,7 +21,6 @@ class HomogenizationHeatConduction : public Kernel
 public:
 
   HomogenizationHeatConduction(const InputParameters & parameters);
-  HomogenizationHeatConduction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

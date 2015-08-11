@@ -63,20 +63,3 @@ InteractionIntegralBenchmarkBC::computeQpValue()
 
   return disp;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-InteractionIntegralBenchmarkBC::InteractionIntegralBenchmarkBC(const std::string & deprecated_name, InputParameters parameters) :
-    PresetNodalBC(deprecated_name, parameters),
-    _component(getParam<MooseEnum>("component")),
-    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _crack_front_point_index(getParam<unsigned int>("crack_front_point_index")),
-    _poissons_ratio(getParam<Real>("poissons_ratio")),
-    _youngs_modulus(getParam<Real>("youngs_modulus")),
-    _ki(getParam<Real>("KI")),
-    _kii(getParam<Real>("KII")),
-    _kiii(getParam<Real>("KIII"))
-{
-  _kappa = 3 - 4*_poissons_ratio;
-  _mu = _youngs_modulus / (2*(1 + _poissons_ratio));
-}

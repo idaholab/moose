@@ -29,7 +29,6 @@ class SingleMatrixPreconditioner : public MoosePreconditioner
 {
 public:
   SingleMatrixPreconditioner(const InputParameters & params);
-  SingleMatrixPreconditioner(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual ~SingleMatrixPreconditioner();
 };
 

@@ -32,7 +32,6 @@ class BoundingBoxNodeSet :
 {
 public:
   BoundingBoxNodeSet(const InputParameters & parameters);
-  BoundingBoxNodeSet(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void modify();
 

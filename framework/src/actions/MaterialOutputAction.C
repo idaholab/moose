@@ -243,11 +243,3 @@ MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & 
       _awh.addActionBlock(action);
     }
 }
-
-
-// DEPRECATED CONSTRUCTOR
-MaterialOutputAction::MaterialOutputAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _output_warehouse(_app.getOutputWarehouse())
-{
-}

@@ -72,14 +72,3 @@ SolidMechZ::computeQpOffDiagJacobian(unsigned int jvar)
     return _c1*(_grad_test[_i][_qp]*value);
   }
 
-
-// DEPRECATED CONSTRUCTOR
-SolidMechZ::SolidMechZ(const std::string & deprecated_name, InputParameters parameters)
-  :SolidMech(deprecated_name, parameters),
-    _x_var(coupled("x")),
-    _x(coupledValue("x")),
-    _grad_x(coupledGradient("x")),
-    _y_var(coupled("y")),
-    _y(coupledValue("y")),
-    _grad_y(coupledGradient("y"))
-  {}

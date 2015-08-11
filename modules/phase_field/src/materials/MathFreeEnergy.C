@@ -55,11 +55,3 @@ MathFreeEnergy::computeD3F(unsigned int j_var, unsigned int k_var, unsigned int 
     return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MathFreeEnergy::MathFreeEnergy(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeFunctionMaterialBase(deprecated_name, parameters),
-    _c(coupledValue("c")),
-    _c_var(coupled("c"))
-{
-}

@@ -14,7 +14,6 @@ class PresetVelocity : public PresetNodalBC
 {
 public:
   PresetVelocity(const InputParameters & parameters);
-  PresetVelocity(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpValue();

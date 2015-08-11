@@ -50,11 +50,3 @@ Real NSStagnationTemperatureBC::computeQpResidual()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-NSStagnationTemperatureBC::NSStagnationTemperatureBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSStagnationBC(deprecated_name, parameters),
-
-      // Required parameters
-      _desired_stagnation_temperature(getParam<Real>("desired_stagnation_temperature"))
-{}

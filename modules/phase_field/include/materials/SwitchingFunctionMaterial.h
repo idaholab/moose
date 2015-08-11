@@ -26,7 +26,6 @@ class SwitchingFunctionMaterial : public OrderParameterFunctionMaterial
 {
 public:
   SwitchingFunctionMaterial(const InputParameters & parameters);
-  SwitchingFunctionMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

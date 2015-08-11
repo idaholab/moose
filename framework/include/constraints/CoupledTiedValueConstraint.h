@@ -32,7 +32,6 @@ class CoupledTiedValueConstraint :
 {
 public:
   CoupledTiedValueConstraint(const InputParameters & parameters);
-  CoupledTiedValueConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CoupledTiedValueConstraint(){}
 
   virtual Real computeQpSlaveValue();

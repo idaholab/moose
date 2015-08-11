@@ -63,10 +63,3 @@ GMVOutput::filename()
          << _file_num;
   return output.str() + ".gmv";
 }
-
-// DEPRECATED CONSTRUCTOR
-GMVOutput::GMVOutput(const std::string & name, InputParameters parameters) :
-    BasicOutput<OversampleOutput>(name, parameters),
-    _binary(getParam<bool>("binary"))
-{
-}

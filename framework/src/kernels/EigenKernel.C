@@ -36,11 +36,6 @@ EigenKernel::EigenKernel(const InputParameters & parameters) :
     _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem())),
     _eigenvalue(NULL)
 {
-}
-
-void
-EigenKernel::initialSetup()
-{
   // The name to the postprocessor storing the eigenvalue
   std::string eigen_pp_name;
 
@@ -147,14 +142,3 @@ EigenKernel::isActive()
     return flag;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-EigenKernel::EigenKernel(const std::string & deprecated_name, InputParameters parameters) :
-    KernelBase(deprecated_name, parameters),
-    _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
-    _eigen(getParam<bool>("eigen")),
-    _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem())),
-    _eigenvalue(NULL)
-{
-}

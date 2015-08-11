@@ -17,7 +17,6 @@ class PowerLawCreepModel : public ReturnMappingModel
 {
 public:
   PowerLawCreepModel( const InputParameters & parameters);
-  PowerLawCreepModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor);

@@ -33,8 +33,3 @@ RichardsRelPerm::execute()
 void RichardsRelPerm::finalize()
 {}
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsRelPerm::RichardsRelPerm(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralUserObject(deprecated_name, parameters)
-{}

@@ -53,13 +53,3 @@ SpecifiedSmoothCircleIC::computeCircleCenters()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SpecifiedSmoothCircleIC::SpecifiedSmoothCircleIC(const std::string & deprecated_name, InputParameters parameters) :
-    SmoothCircleBaseIC(deprecated_name, parameters),
-    _x_positions(getParam<std::vector<Real> >("x_positions")),
-    _y_positions(getParam<std::vector<Real> >("y_positions")),
-    _z_positions(getParam<std::vector<Real> >("z_positions")),
-    _input_radii(getParam<std::vector<Real> >("radii"))
-{
-}

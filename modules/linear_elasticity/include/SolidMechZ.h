@@ -20,7 +20,6 @@ class SolidMechZ : public SolidMech
 public:
 
   SolidMechZ(const InputParameters & parameters);
-  SolidMechZ(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -71,37 +71,3 @@ CompositeFunction::value(Real t, const Point & p)
   return val;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CompositeFunction::CompositeFunction(const std::string & deprecated_name, InputParameters parameters) :
-  Function(deprecated_name, parameters),
-  FunctionInterface( parameters ),
-  _scale_factor( getParam<Real>("scale_factor") )
-{
-
-  const std::vector<FunctionName> & names( getParam<std::vector<FunctionName> >("functions") );
-  const unsigned len( names.size() );
-  if (len == 0)
-  {
-    mooseError( "A composite function must reference at least one other function" );
-  }
-  _f.resize(len);
-  for (unsigned i(0); i < len; ++i)
-  {
-    if (name() == names[i])
-    {
-      mooseError( "A composite function must not reference itself" );
-    }
-    Function * const f = &getFunctionByName( names[i] );
-    if (!f)
-    {
-      std::string msg("Error in composite function ");
-      msg += name();
-      msg += ".  Function ";
-      msg += names[i];
-      msg += " referenced but not found.";
-      mooseError( msg );
-    }
-    _f[i] = f;
-  }
-}

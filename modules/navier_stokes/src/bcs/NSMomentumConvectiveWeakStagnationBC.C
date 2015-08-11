@@ -65,12 +65,3 @@ Real NSMomentumConvectiveWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*j
 
 
 
-
-// DEPRECATED CONSTRUCTOR
-NSMomentumConvectiveWeakStagnationBC::NSMomentumConvectiveWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSWeakStagnationBC(deprecated_name, parameters),
-
-      // Required parameters
-      _component(getParam<unsigned>("component"))
-{
-}

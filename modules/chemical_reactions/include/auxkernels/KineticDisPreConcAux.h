@@ -33,7 +33,6 @@ public:
    * constructor.
    */
   KineticDisPreConcAux(const InputParameters & parameters);
-  KineticDisPreConcAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~KineticDisPreConcAux() {}
 

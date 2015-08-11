@@ -30,7 +30,6 @@ InputParameters validParams<PercentChangePostprocessor>();
  {
  public:
    PercentChangePostprocessor(const InputParameters & parameters);
-  PercentChangePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
    virtual ~PercentChangePostprocessor();
    virtual void initialize();
    virtual void execute();

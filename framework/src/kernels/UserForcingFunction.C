@@ -41,10 +41,3 @@ UserForcingFunction::computeQpResidual()
   return -_test[_i][_qp] * f();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-UserForcingFunction::UserForcingFunction(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _func(getFunction("function"))
-{
-}

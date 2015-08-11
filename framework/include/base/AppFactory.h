@@ -23,14 +23,12 @@
 /**
  * Macros
  */
-#define registerApp(name)                        AppFactory::instance().regLegacy<name>(#name)
+#define registerApp(name)                        AppFactory::instance().reg<name>(#name)
 
 /**
  * Typedef for function to build objects
  */
 typedef MooseApp * (*appBuildPtr)(InputParameters parameters);
-typedef MooseApp * (*appLegacyBuildPtr)(const std::string & name, InputParameters parameters);
-
 
 /**
  * Typedef for validParams
@@ -49,11 +47,6 @@ template<class T>
 MooseApp * buildApp(InputParameters parameters)
 {
   return new T(parameters);
-}
-template<class T>
-MooseApp * buildLegacyApp(const std::string & name, InputParameters parameters)
-{
-  return new T(name, parameters);
 }
 
 /**
@@ -92,11 +85,7 @@ public:
   template<typename T>
   void regLegacy(const std::string & name)
   {
-    if (_name_to_legacy_build_pointer.find(name) == _name_to_legacy_build_pointer.end())
-    {
-      _name_to_legacy_build_pointer[name] = &buildLegacyApp<T>;
-      _name_to_params_pointer[name] = &validParams<T>;
-    }
+    reg<T>(name);
   }
 
   /**
@@ -114,7 +103,6 @@ public:
    * @return The created object
    */
   MooseApp *create(const std::string & app_type, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
-  MooseApp *createLegacy(const std::string & app_type, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
 
   ///@{
   /**
@@ -131,7 +119,6 @@ public:
 
 protected:
   std::map<std::string, appBuildPtr>  _name_to_build_pointer;
-  std::map<std::string, appLegacyBuildPtr>  _name_to_legacy_build_pointer;
 
   std::map<std::string, paramsPtr> _name_to_params_pointer;
 

@@ -27,7 +27,6 @@ class AddKernelAction : public MooseObjectAction
 {
 public:
   AddKernelAction(InputParameters params);
-  AddKernelAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

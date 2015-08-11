@@ -51,22 +51,3 @@ CrossTermGradientFreeEnergy::computeValue()
   return total_energy;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CrossTermGradientFreeEnergy::CrossTermGradientFreeEnergy(const std::string & deprecated_name, InputParameters parameters) :
-    TotalFreeEnergyBase(deprecated_name, parameters),
-    _kappas(_nvars)
-{
-  //Error check to ensure size of interfacial_vars is the same as kappa_names
-  if (_nvars * _nvars != _nkappas)
-    mooseError("Size of interfacial_vars squared is not equal to the size of kappa_names in CrossTermGradientFreeEnergy");
-
-  // Assign kappa values
-  for (unsigned int i = 0; i < _nvars; ++i)
-  {
-    _kappas[i].resize(_nvars);
-
-    for (unsigned int j = 0; j < _nvars; ++j)
-      _kappas[i][j] = &getMaterialPropertyByName<Real>(_kappa_names[i * _nvars + j]);
-  }
-}

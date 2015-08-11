@@ -16,7 +16,6 @@ class HHPFCRFF : public KernelValue
 {
 public:
   HHPFCRFF(const InputParameters & parameters);
-  HHPFCRFF(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real precomputeQpResidual();

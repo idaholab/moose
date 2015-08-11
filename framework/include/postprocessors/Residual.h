@@ -27,7 +27,6 @@ class Residual : public GeneralPostprocessor
 {
 public:
   Residual(const InputParameters & parameters);
-  Residual(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

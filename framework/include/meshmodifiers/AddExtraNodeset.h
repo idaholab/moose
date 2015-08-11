@@ -29,7 +29,6 @@ class AddExtraNodeset :
 {
 public:
   AddExtraNodeset(const InputParameters & params);
-  AddExtraNodeset(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void modify();
 };

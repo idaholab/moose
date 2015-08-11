@@ -28,7 +28,6 @@ class RichardsMaterial : public Material
 {
 public:
   RichardsMaterial(const InputParameters & parameters);
-  RichardsMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

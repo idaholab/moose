@@ -43,7 +43,7 @@ FauxGrainTracker::~FauxGrainTracker()
 }
 
 Real
-FauxGrainTracker::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool show_var_coloring) const
+FauxGrainTracker::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool /*show_var_coloring*/) const
 {
   mooseAssert(var_idx < _vars.size(), "Index out of range");
 
@@ -131,11 +131,4 @@ Real
 FauxGrainTracker::getValue()
 {
   return _variables_used.size();
-}
-
-// DEPRECATED CONSTRUCTOR
-FauxGrainTracker::FauxGrainTracker(const std::string & deprecated_name, InputParameters parameters) :
-    FeatureFloodCount(deprecated_name, parameters),
-    _tracking_step(getParam<int>("tracking_step"))
-{
 }

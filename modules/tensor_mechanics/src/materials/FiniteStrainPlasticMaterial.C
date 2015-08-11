@@ -427,19 +427,3 @@ FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(const Real eqpe)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    FiniteStrainMaterial(deprecated_name, parameters),
-    _yield_stress_vector(getParam< std::vector<Real> >("yield_stress")),//Read from input file
-    _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
-    _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
-    _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
-    _rtol(getParam<Real>("rtol")),
-    _ftol(getParam<Real>("ftol")),
-    _eptol(getParam<Real>("eptol")),
-    _deltaOuter(RankTwoTensor::Identity().outerProduct(RankTwoTensor::Identity())),
-    _deltaMixed(RankTwoTensor::Identity().mixedProductIkJl(RankTwoTensor::Identity()))
-{
-}

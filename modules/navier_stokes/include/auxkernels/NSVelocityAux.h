@@ -27,7 +27,6 @@ public:
    * constructor.
    */
   NSVelocityAux(const InputParameters & parameters);
-  NSVelocityAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSVelocityAux() {}
 

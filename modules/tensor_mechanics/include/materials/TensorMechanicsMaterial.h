@@ -30,7 +30,6 @@ class TensorMechanicsMaterial : public Material
 {
 public:
   TensorMechanicsMaterial(const InputParameters & parameters);
-  TensorMechanicsMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void initQpStatefulProperties();

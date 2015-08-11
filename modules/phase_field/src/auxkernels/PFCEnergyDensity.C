@@ -47,27 +47,3 @@ PFCEnergyDensity::computeValue()
   return val;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PFCEnergyDensity::PFCEnergyDensity(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _order(coupledComponents("v")),
-    _a(getMaterialProperty<Real>("a")),
-    _b(getMaterialProperty<Real>("b"))
-{
-  _vals.resize(_order);
-  _coeff.resize(_order);
-
-  std::string coeff_name_base = "C";
-
-  for (unsigned int i = 0; i < _order; ++i)
-  {
-    _vals[i] = &coupledValue("v", i);
-    std::string coeff_name = coeff_name_base;
-    std::stringstream out;
-    out << i*2;
-    coeff_name.append(out.str());
-    _console << coeff_name << std::endl;
-    _coeff[i] = &getMaterialProperty<Real>(coeff_name);
-  }
-}

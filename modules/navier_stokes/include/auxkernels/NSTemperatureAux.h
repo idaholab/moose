@@ -30,7 +30,6 @@ public:
    * constructor.
    */
   NSTemperatureAux(const InputParameters & parameters);
-  NSTemperatureAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSTemperatureAux() {}
 

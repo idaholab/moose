@@ -75,9 +75,3 @@ SplitCHBase::computeDEDC(PFFunctionType /*type*/)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SplitCHBase::SplitCHBase(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters)
-{
-}

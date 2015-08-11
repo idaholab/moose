@@ -29,7 +29,6 @@ class BoxMarker : public Marker
 {
 public:
   BoxMarker(const InputParameters & parameters);
-  BoxMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~BoxMarker(){};
 
 protected:

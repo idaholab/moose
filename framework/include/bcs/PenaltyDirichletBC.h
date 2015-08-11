@@ -34,7 +34,6 @@ class PenaltyDirichletBC : public IntegratedBC
 public:
 
   PenaltyDirichletBC(const InputParameters & parameters);
-  PenaltyDirichletBC(const std::string & name, InputParameters parameters); // DEPRECATED
 
   virtual ~PenaltyDirichletBC() {}
 

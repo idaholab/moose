@@ -54,13 +54,3 @@ SetupQuadratureAction::act()
     _problem->createQRules(_type, _order, _element_order, _side_order);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SetupQuadratureAction::SetupQuadratureAction(const std::string & deprecated_name, InputParameters parameters) :
-    Action(deprecated_name, parameters),
-    _type(Moose::stringToEnum<QuadratureType>(getParam<MooseEnum>("type"))),
-    _order(Moose::stringToEnum<Order>(getParam<MooseEnum>("order"))),
-    _element_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("element_order"))),
-    _side_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("side_order")))
-{
-}

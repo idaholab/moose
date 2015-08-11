@@ -22,8 +22,7 @@ InputParameters validParams<ExampleCoefDiffusion>()
   return params;
 }
 
-ExampleCoefDiffusion::ExampleCoefDiffusion(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
+ExampleCoefDiffusion::ExampleCoefDiffusion(const InputParameters & parameters) :Kernel(parameters),
    _coef(getParam<Real>("coef"))
 {}
 

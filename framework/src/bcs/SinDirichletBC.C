@@ -46,12 +46,3 @@ SinDirichletBC::computeQpResidual()
   return _u[_qp]- value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SinDirichletBC::SinDirichletBC(const std::string & deprecated_name, InputParameters parameters) :
-    NodalBC(deprecated_name, parameters),
-    _initial(getParam<Real>("initial")),
-    _final(getParam<Real>("final")),
-    _duration(getParam<Real>("duration"))
-{
-}

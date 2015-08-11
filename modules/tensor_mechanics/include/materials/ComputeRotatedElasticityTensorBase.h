@@ -16,7 +16,6 @@ class ComputeRotatedElasticityTensorBase : public ComputeElasticityTensorBase
 {
 public:
   ComputeRotatedElasticityTensorBase(const InputParameters & parameters);
-  ComputeRotatedElasticityTensorBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   RealVectorValue _Euler_angles;

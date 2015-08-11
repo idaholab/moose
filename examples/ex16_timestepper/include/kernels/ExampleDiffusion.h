@@ -27,8 +27,7 @@ class ExampleDiffusion : public Diffusion
 {
 public:
 
-  ExampleDiffusion(const std::string & name,
-                   InputParameters parameters);
+  ExampleDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -52,9 +52,3 @@ TimeKernel::computeResidual()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TimeKernel::TimeKernel(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters)
-{
-}

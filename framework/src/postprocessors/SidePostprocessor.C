@@ -27,9 +27,3 @@ SidePostprocessor::SidePostprocessor(const InputParameters & parameters) :
     Postprocessor(parameters)
 {}
 
-
-// DEPRECATED CONSTRUCTOR
-SidePostprocessor::SidePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    SideUserObject(deprecated_name, parameters),
-    Postprocessor(parameters)
-{}

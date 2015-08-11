@@ -18,7 +18,6 @@ class PoroMechanicsAction : public TensorMechanicsAction
 {
 public:
   PoroMechanicsAction(const InputParameters & params);
-  PoroMechanicsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

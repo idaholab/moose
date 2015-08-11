@@ -22,7 +22,6 @@ public:
    * constructor.
    */
   DomainIntegralTopologicalQFunction(const InputParameters & parameters);
-  DomainIntegralTopologicalQFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~DomainIntegralTopologicalQFunction() {}
 

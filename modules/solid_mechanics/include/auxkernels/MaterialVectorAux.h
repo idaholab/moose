@@ -19,7 +19,6 @@ class MaterialVectorAux : public AuxKernel
 {
 public:
   MaterialVectorAux( const InputParameters & parameters);
-  MaterialVectorAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~MaterialVectorAux() {}
 

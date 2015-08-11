@@ -36,11 +36,3 @@ PresetBC::computeQpValue()
   return _value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PresetBC::PresetBC(const std::string & deprecated_name, InputParameters parameters) :
-  PresetNodalBC(deprecated_name, parameters),
-  _value(getParam<Real>("value"))
-{
-
-}

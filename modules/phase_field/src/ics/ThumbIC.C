@@ -59,13 +59,3 @@ ThumbIC::value(const Point & p)
   return value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ThumbIC::ThumbIC(const std::string & deprecated_name, InputParameters parameters) :
-    InitialCondition(deprecated_name, parameters),
-    _xcoord(parameters.get<Real>("xcoord")),
-    _width(parameters.get<Real>("width")),
-    _height(parameters.get<Real>("height")),
-    _invalue(parameters.get<Real>("invalue")),
-    _outvalue(parameters.get<Real>("outvalue"))
-{}

@@ -38,9 +38,3 @@ MassEigenKernel::computeQpJacobian()
   return -_phi[_j][_qp] * _test[_i][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MassEigenKernel::MassEigenKernel(const std::string & deprecated_name, InputParameters parameters) :
-    EigenKernel(deprecated_name, parameters)
-{
-}

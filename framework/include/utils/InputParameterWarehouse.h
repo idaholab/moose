@@ -47,17 +47,6 @@ public:
   virtual ~InputParameterWarehouse();
 
   /**
-   * Return a reference to the InputParameters for the named object
-   * @name The full name of the object for which parameters are desired
-   * @return A const reference to the warehouse copy of the InputParameters
-   *
-   * If you are using this method to access a writable reference to input parameters, this
-   * will break the ability to control the parameters with the MOOSE control logic system.
-   * Only change parameters if you know what you are doing.
-   */
-  InputParameters & getInputParameters(const std::string & long_name, THREAD_ID tid = 0);
-
-  /**
    * This method is not valid, so it will produce an error
    *
    * The Warehouse::all() method returns raw pointers, which this warehouse does
@@ -87,12 +76,24 @@ private:
    */
   InputParameters & addInputParameters(const std::string & long_name, InputParameters parameters, THREAD_ID tid = 0);
 
+  /**
+   * Return a reference to the InputParameters for the named object
+   * @name The full name of the object for which parameters are desired
+   * @return A const reference to the warehouse copy of the InputParameters
+   *
+   * If you are using this method to access a writable reference to input parameters, this
+   * will break the ability to control the parameters with the MOOSE control logic system.
+   * Only change parameters if you know what you are doing.
+   */
+  InputParameters & getInputParameters(const std::string & long_name, THREAD_ID tid = 0);
 
   friend class Factory;
   friend class ActionFactory;
 
-  // for deprecated support, this will be removed (see MooseObject.C)
-  friend InputParameters & injectParameters(MooseApp & app, InputParameters & parameters);
+  // RELAP-7 Control Logic (This will go away when the MOOSE system is created)
+  friend class Component;
+  friend class R7SetupOutputAction;
+  friend class SolidMaterialProperties;
 };
 
 #endif // INPUTPARAMETERWAREHOUSE_H

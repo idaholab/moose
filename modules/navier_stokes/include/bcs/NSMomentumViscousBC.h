@@ -33,7 +33,6 @@ class NSMomentumViscousBC : public NSIntegratedBC
 public:
 
   NSMomentumViscousBC(const InputParameters & parameters);
-  NSMomentumViscousBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMomentumViscousBC(){}
 

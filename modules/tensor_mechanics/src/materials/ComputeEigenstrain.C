@@ -30,11 +30,3 @@ ComputeEigenstrain::computeQpStressFreeStrain()
   _stress_free_strain[_qp] = _eigen_base_tensor * _prefactor[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ComputeEigenstrain::ComputeEigenstrain(const std::string & deprecated_name, InputParameters parameters) :
-    ComputeStressFreeStrainBase(deprecated_name, parameters),
-    _prefactor(getMaterialProperty<Real>("prefactor"))
-{
-  _eigen_base_tensor.fillFromInputVector(getParam<std::vector<Real> >("eigen_base"));
-}

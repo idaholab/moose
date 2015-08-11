@@ -22,7 +22,6 @@ class INSDivergenceAux : public AuxKernel
 {
 public:
   INSDivergenceAux(const InputParameters & parameters);
-  INSDivergenceAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSDivergenceAux() {}
 

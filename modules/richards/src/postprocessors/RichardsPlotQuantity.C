@@ -44,10 +44,3 @@ RichardsPlotQuantity::getValue()
   return _total_mass.getValue();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsPlotQuantity::RichardsPlotQuantity(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters),
-    _total_mass(getUserObject<RichardsSumQuantity>("uo"))
-{
-}

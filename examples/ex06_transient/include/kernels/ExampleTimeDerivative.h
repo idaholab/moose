@@ -27,8 +27,7 @@ class ExampleTimeDerivative : public TimeDerivative
 {
 public:
 
-  ExampleTimeDerivative(const std::string & name,
-                        InputParameters parameters);
+  ExampleTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

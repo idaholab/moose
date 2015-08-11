@@ -52,11 +52,3 @@ Receiver::initialSetup()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Receiver::Receiver(const std::string & deprecated_name, InputParameters params) :
-    GeneralPostprocessor(deprecated_name, params),
-    _initialize_old(getParam<bool>("initialize_old")),
-    _my_value(getPostprocessorValueByName(deprecated_name))
-{
-}

@@ -37,9 +37,3 @@ InitProblemAction::act()
     mooseError("Problem doesn't exist in InitProblemAction!");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-InitProblemAction::InitProblemAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

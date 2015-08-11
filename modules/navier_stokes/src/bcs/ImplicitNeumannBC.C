@@ -44,9 +44,3 @@ Real ImplicitNeumannBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
   return 0.;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ImplicitNeumannBC::ImplicitNeumannBC(const std::string & deprecated_name, InputParameters parameters) :
-  IntegratedBC(deprecated_name, parameters)
-{
-}

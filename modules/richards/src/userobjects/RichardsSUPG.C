@@ -33,8 +33,3 @@ RichardsSUPG::execute()
 void RichardsSUPG::finalize()
 {}
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSUPG::RichardsSUPG(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralUserObject(deprecated_name, parameters)
-{}

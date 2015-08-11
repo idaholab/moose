@@ -13,7 +13,6 @@ class HHPFCRFFSplitKernelAction: public Action
 {
 public:
   HHPFCRFFSplitKernelAction(const InputParameters & params);
-  HHPFCRFFSplitKernelAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

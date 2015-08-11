@@ -26,7 +26,6 @@ class ErrorToleranceMarker : public IndicatorMarker
 {
 public:
   ErrorToleranceMarker(const InputParameters & parameters);
-  ErrorToleranceMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ErrorToleranceMarker(){};
 
 protected:

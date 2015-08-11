@@ -26,7 +26,6 @@ class OutputEulerAngles : public AuxKernel
 {
 public:
   OutputEulerAngles(const InputParameters & parameters);
-  OutputEulerAngles(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

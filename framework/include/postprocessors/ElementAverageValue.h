@@ -33,7 +33,6 @@ class ElementAverageValue : public ElementIntegralVariablePostprocessor
 {
 public:
   ElementAverageValue(const InputParameters & parameters);
-  ElementAverageValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

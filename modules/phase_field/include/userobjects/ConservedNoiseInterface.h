@@ -25,7 +25,6 @@ class ConservedNoiseInterface : public ElementUserObject
 {
 public:
   ConservedNoiseInterface(const InputParameters & parameters);
-  ConservedNoiseInterface(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ConservedNoiseInterface() {}
 
   virtual Real getQpValue(dof_id_type element_id, unsigned int qp) const = 0;

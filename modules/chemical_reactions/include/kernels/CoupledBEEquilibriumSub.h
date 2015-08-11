@@ -40,7 +40,6 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   CoupledBEEquilibriumSub(const InputParameters & parameters);
-  CoupledBEEquilibriumSub(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

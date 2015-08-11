@@ -33,7 +33,6 @@ class LayeredAverage : public LayeredIntegral
 {
 public:
   LayeredAverage(const InputParameters & parameters);
-  LayeredAverage(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

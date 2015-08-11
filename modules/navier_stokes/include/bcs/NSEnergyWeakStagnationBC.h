@@ -24,7 +24,6 @@ class NSEnergyWeakStagnationBC : public NSWeakStagnationBC
 
 public:
   NSEnergyWeakStagnationBC(const InputParameters & parameters);
-  NSEnergyWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSEnergyWeakStagnationBC(){}
 

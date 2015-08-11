@@ -33,7 +33,6 @@ class ContactMaster : public DiracKernel
 {
 public:
   ContactMaster(const InputParameters & parameters);
-  ContactMaster(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void jacobianSetup();
   virtual void timestepSetup();

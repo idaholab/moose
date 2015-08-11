@@ -283,9 +283,3 @@ AddCoupledEqSpeciesKernelsAction::act()
   _console << oss.str();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddCoupledEqSpeciesKernelsAction::AddCoupledEqSpeciesKernelsAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

@@ -42,15 +42,3 @@ AqueousEquilibriumRxnAux::computeValue()
   return std::pow(10.0,_log_k)*conc_product;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AqueousEquilibriumRxnAux::AqueousEquilibriumRxnAux(const std::string & deprecated_name, InputParameters parameters) :
-  AuxKernel(deprecated_name, parameters),
-  _log_k(getParam<Real>("log_k")),
-  _sto_v(getParam<std::vector<Real> >("sto_v"))
-{
-  int n = coupledComponents("v");
-  _vals.resize(n);
-  for (unsigned int i=0; i<_vals.size(); ++i)
-    _vals[i] = &coupledValue("v", i);
-}

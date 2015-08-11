@@ -32,7 +32,6 @@ class PiecewiseBilinear : public Function
 {
 public:
   PiecewiseBilinear(const InputParameters & parameters);
-  PiecewiseBilinear(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~PiecewiseBilinear();
 
   /**

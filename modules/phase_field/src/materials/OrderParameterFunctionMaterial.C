@@ -27,16 +27,3 @@ OrderParameterFunctionMaterial::OrderParameterFunctionMaterial(const InputParame
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-OrderParameterFunctionMaterial::OrderParameterFunctionMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(deprecated_name, parameters),
-    _eta(coupledValue("eta")),
-    _eta_var(coupled("eta")),
-    _eta_name(getVar("eta", 0)->name()),
-    _function_name(getParam<std::string>("function_name")),
-    _prop_f(declareProperty<Real>(_function_name)),
-    _prop_df(declarePropertyDerivative<Real>(_function_name, _eta_name)),
-    _prop_d2f(declarePropertyDerivative<Real>(_function_name, _eta_name, _eta_name))
-{
-}

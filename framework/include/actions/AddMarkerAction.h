@@ -27,7 +27,6 @@ class AddMarkerAction : public MooseObjectAction
 {
 public:
   AddMarkerAction(InputParameters params);
-  AddMarkerAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

@@ -44,10 +44,3 @@ Real NSImposedVelocityBC::computeQpResidual()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-NSImposedVelocityBC::NSImposedVelocityBC(const std::string & deprecated_name, InputParameters parameters)
-  :NodalBC(deprecated_name, parameters),
-   _rho(coupledValue("rho")),
-   _desired_velocity(getParam<Real>("desired_velocity"))
-  {}

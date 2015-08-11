@@ -21,7 +21,6 @@ class SplitCHBase : public Kernel
 {
 public:
   SplitCHBase(const InputParameters & parameters);
-  SplitCHBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   enum PFFunctionType

@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "Function.h"
+#include "FileRangeBuilder.h"
 
 // libmesh includes
 #include "libmesh/mesh_tools.h"
@@ -50,7 +51,9 @@ InputParameters validParams<ImageFunction>();
 /**
  * A function for extracting data from an image or stack of images
  */
-class ImageFunction : public Function
+class ImageFunction :
+  public Function,
+  public FileRangeBuilder
 {
 public:
 
@@ -60,7 +63,6 @@ public:
    * @param parameters
    */
   ImageFunction(const InputParameters & parameters);
-  ImageFunction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor
@@ -105,6 +107,8 @@ protected:
    */
   void vtkFlip();
 
+private:
+
 #ifdef LIBMESH_HAVE_VTK
 
   /// List of file names to extract data
@@ -132,7 +136,6 @@ protected:
   vtkSmartPointer<vtkImageFlip> _flip_filter;
 #endif
 
-private:
   /**
    * Helper method for flipping image
    * @param axis Flag for determing the flip axis: "x=0", "y=1", "z=2"

@@ -31,10 +31,3 @@ NodalPostprocessor::NodalPostprocessor(const InputParameters & parameters) :
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NodalPostprocessor::NodalPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    NodalUserObject(deprecated_name, parameters),
-    Postprocessor(parameters)
-{
-}

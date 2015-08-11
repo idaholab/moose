@@ -36,9 +36,3 @@ MaterialStdVectorAux::getRealValue()
 {
   return _prop[_qp][_index];
 }
-
-// DEPRECATED CONSTRUCTOR
-MaterialStdVectorAux::MaterialStdVectorAux(const std::string & deprecated_name, InputParameters parameters) :
-    MaterialStdVectorAuxBase<Real>(deprecated_name, parameters)
-{
-}

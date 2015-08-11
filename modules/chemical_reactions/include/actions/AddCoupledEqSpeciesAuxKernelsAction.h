@@ -19,7 +19,6 @@ class AddCoupledEqSpeciesAuxKernelsAction : public Action
 {
 public:
   AddCoupledEqSpeciesAuxKernelsAction(const InputParameters & params);
-  AddCoupledEqSpeciesAuxKernelsAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

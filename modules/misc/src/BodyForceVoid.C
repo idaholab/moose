@@ -41,13 +41,3 @@ BodyForceVoid::computeQpResidual()
   return _test[_i][_qp]*-factor*(1-_c[_qp]*_c[_qp]);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-BodyForceVoid::BodyForceVoid(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _value(getParam<Real>("value")),
-    _c(coupledValue("c")),
-    _has_function(getParam<FunctionName>("function") != ""),
-    _function( _has_function ? &getFunction("function") : NULL )
-{
-}

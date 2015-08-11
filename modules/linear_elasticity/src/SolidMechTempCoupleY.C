@@ -39,8 +39,3 @@ SolidMechTempCoupleY::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SolidMechTempCoupleY::SolidMechTempCoupleY(const std::string & deprecated_name, InputParameters parameters)
-  :SolidMechTempCouple(deprecated_name, parameters)
-{}

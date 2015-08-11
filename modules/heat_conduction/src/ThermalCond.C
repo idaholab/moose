@@ -46,13 +46,3 @@ ThermalCond::getValue()
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ThermalCond::ThermalCond(const std::string & deprecated_name, InputParameters parameters)
-  :SideAverageValue(deprecated_name, parameters),
-   _dx(getParam<Real>("dx")),
-   _flux(getParam<Real>("flux")),
-   _T_hot(getParam<Real>("T_hot")),
-   _length_scale(getParam<Real>("length_scale")),
-   _k0(getParam<Real>("k0"))
-{}

@@ -71,31 +71,3 @@ SwitchingFunctionConstraintLagrange::computeQpOffDiagJacobian(unsigned int j_var
     return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMaterialInterface<Kernel>(deprecated_name, parameters),
-    _h_names(getParam<std::vector<MaterialPropertyName> >("h_names")),
-    _num_h(_h_names.size()),
-    _h(_num_h),
-    _dh(_num_h),
-    _number_of_nl_variables(_fe_problem.getNonlinearSystem().nVariables()),
-    _j_eta(_number_of_nl_variables, -1),
-    _epsilon(getParam<Real>("epsilon"))
-{
-  // parameter check. We need exactly one eta per h
-  if (_num_h != coupledComponents("etas"))
-    mooseError("Need to pass in as many h_names as etas in SwitchingFunctionConstraintLagrange kernel " << deprecated_name);
-
-  // fetch switching functions (for the residual) and h derivatives (for the Jacobian)
-  for (unsigned int i = 0; i < _num_h; ++i)
-  {
-    _h[i] = &getMaterialPropertyByName<Real>(_h_names[i]);
-    _dh[i] = &getMaterialPropertyDerivative<Real>(_h_names[i], getVar("etas", i)->name());
-
-    // generate the lookup table from j_var -> eta index
-    unsigned int num = coupled("etas", i);
-    if (num < _number_of_nl_variables)
-      _j_eta[num] = i;
-  }
-}

@@ -30,7 +30,6 @@ class StressDivergenceRZTensors : public StressDivergenceTensors
 {
 public:
   StressDivergenceRZTensors(const InputParameters & parameters);
-  StressDivergenceRZTensors(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -25,7 +25,6 @@ class TensorMechanicsHardeningGaussian : public TensorMechanicsHardeningModel
 {
  public:
   TensorMechanicsHardeningGaussian(const InputParameters & parameters);
-  TensorMechanicsHardeningGaussian(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(const Real & intnl) const;
 

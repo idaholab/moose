@@ -25,7 +25,6 @@ class OrderParameterFunctionMaterial : public DerivativeMaterialInterface<Materi
 {
 public:
   OrderParameterFunctionMaterial(const InputParameters & parameters);
-  OrderParameterFunctionMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /// Coupled variable value for the order parameter \f$ \eta \f$.

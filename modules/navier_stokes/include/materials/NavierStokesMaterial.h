@@ -35,7 +35,6 @@ class NavierStokesMaterial : public Material
 {
 public:
   NavierStokesMaterial(const InputParameters & parameters);
-  NavierStokesMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

@@ -40,7 +40,6 @@ class Action : public ConsoleStreamInterface
 {
 public:
   Action(InputParameters parameters);
-  Action(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Action() {}                  // empty virtual destructor for proper memory release
 
   virtual void act() = 0;

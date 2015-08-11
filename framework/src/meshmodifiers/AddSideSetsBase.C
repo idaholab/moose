@@ -105,13 +105,3 @@ AddSideSetsBase::flood(const Elem *elem, Point normal, BoundaryID side_id)
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddSideSetsBase::AddSideSetsBase(const std::string & deprecated_name, InputParameters parameters):
-    MeshModifier(deprecated_name, parameters),
-    _variance(getParam<Real>("variance")),
-    _fixed_normal(getParam<bool>("fixed_normal")),
-    _fe_face(NULL),
-    _qface(NULL)
-{
-}

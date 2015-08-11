@@ -42,7 +42,6 @@ class RichardsPiecewiseLinearSink : public IntegratedBC
 public:
 
   RichardsPiecewiseLinearSink(const InputParameters & parameters);
-  RichardsPiecewiseLinearSink(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeResidual();

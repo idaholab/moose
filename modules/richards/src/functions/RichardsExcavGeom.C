@@ -73,21 +73,3 @@ RichardsExcavGeom::value(Real t, const Point & p)
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsExcavGeom::RichardsExcavGeom(const std::string & deprecated_name, InputParameters parameters) :
-    Function(deprecated_name, parameters),
-    _start_posn(getParam<RealVectorValue>("start_posn")),
-    _start_time(getParam<Real>("start_time")),
-    _end_posn(getParam<RealVectorValue>("end_posn")),
-    _end_time(getParam<Real>("end_time")),
-    _active_length(getParam<Real>("active_length")),
-    _true_value(getParam<Real>("true_value")),
-    _deactivation_time(getParam<Real>("deactivation_time")),
-    _retreat_vel(_end_posn - _start_posn)
-{
-  if (_start_time >= _end_time)
-    mooseError("Start time for excavation set to " << _start_time << " but this must be less than the end time, which is " << _end_time);
-  _retreat_vel /= (_end_time - _start_time); // this is now a velocity
-  _norm_retreat_vel = std::pow(_retreat_vel*_retreat_vel, 0.5);
-}

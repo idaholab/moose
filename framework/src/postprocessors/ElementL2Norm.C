@@ -39,9 +39,3 @@ ElementL2Norm::computeQpIntegral()
   return val*val;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElementL2Norm::ElementL2Norm(const std::string & deprecated_name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(deprecated_name, parameters)
-{
-}

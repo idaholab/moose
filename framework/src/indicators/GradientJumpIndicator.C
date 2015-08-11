@@ -37,9 +37,3 @@ GradientJumpIndicator::computeQpIntegral()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-GradientJumpIndicator::GradientJumpIndicator(const std::string & deprecated_name, InputParameters parameters) :
-    JumpIndicator(deprecated_name, parameters)
-{
-}

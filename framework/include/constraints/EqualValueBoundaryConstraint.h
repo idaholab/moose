@@ -26,7 +26,6 @@ class EqualValueBoundaryConstraint : public NodalConstraint
 {
 public:
   EqualValueBoundaryConstraint(const InputParameters & parameters);
-  EqualValueBoundaryConstraint(const std::string & deprecated_name, InputParameters deprecated_parameters); // DEPRECATED CONSTRUCTOR
   virtual ~EqualValueBoundaryConstraint();
 
 protected:

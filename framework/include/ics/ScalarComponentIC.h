@@ -29,7 +29,6 @@ class ScalarComponentIC : public ScalarInitialCondition
 {
 public:
   ScalarComponentIC(const InputParameters & parameters);
-  ScalarComponentIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ScalarComponentIC();
 
 protected:

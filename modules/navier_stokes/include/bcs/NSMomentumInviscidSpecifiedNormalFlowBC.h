@@ -24,7 +24,6 @@ class NSMomentumInviscidSpecifiedNormalFlowBC : public NSMomentumInviscidBC
 {
 public:
   NSMomentumInviscidSpecifiedNormalFlowBC(const InputParameters & parameters);
-  NSMomentumInviscidSpecifiedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMomentumInviscidSpecifiedNormalFlowBC(){}
 

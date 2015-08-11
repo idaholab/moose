@@ -38,7 +38,6 @@ public:
     * @param parameters The input parameters
     */
   LeastSquaresFit(const InputParameters & parameters);
-  LeastSquaresFit(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Destructor

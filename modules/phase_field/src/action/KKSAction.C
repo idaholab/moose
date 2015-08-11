@@ -44,10 +44,3 @@ KKSAction::act()
   */
 }
 
-
-// DEPRECATED CONSTRUCTOR
-KKSAction::KKSAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-    // _z2(getParam<Real>("z2"))
-{
-}

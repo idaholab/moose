@@ -27,7 +27,6 @@ class RunTime : public GeneralPostprocessor
 {
 public:
   RunTime(const InputParameters & parameters);
-  RunTime(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize() {}
   virtual void execute() {}

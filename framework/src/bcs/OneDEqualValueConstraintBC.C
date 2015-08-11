@@ -64,13 +64,3 @@ OneDEqualValueConstraintBC::computeQpOffDiagJacobian(unsigned jvar)
     return 0.;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-OneDEqualValueConstraintBC::OneDEqualValueConstraintBC(const std::string & deprecated_name, InputParameters parameters) :
-    IntegratedBC(deprecated_name, parameters),
-    _lambda(coupledScalarValue("lambda")),
-    _lambda_var_number(coupledScalar("lambda")),
-    _component(getParam<unsigned int>("component")),
-    _vg(getParam<Real>("vg"))
-{
-}

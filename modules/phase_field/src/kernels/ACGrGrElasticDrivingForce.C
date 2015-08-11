@@ -41,11 +41,3 @@ ACGrGrElasticDrivingForce::computeDFDOP(PFFunctionType type)
   mooseError("Invalid type passed in");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ACGrGrElasticDrivingForce::ACGrGrElasticDrivingForce(const std::string & deprecated_name, InputParameters parameters) :
-    ACBulk(deprecated_name, parameters),
-    _D_elastic_tensor(getMaterialProperty<ElasticityTensorR4>("D_tensor_name")),
-    _elastic_strain(getMaterialPropertyByName<RankTwoTensor>("elastic_strain"))
-{
-}

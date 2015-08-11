@@ -55,10 +55,3 @@ FunctionValuePostprocessor::threadJoin(const UserObject & /*uo*/)
   // nothing to do here, general PPS do not run threaded
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FunctionValuePostprocessor::FunctionValuePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters),
-    _function(getFunction("function"))
-{
-}

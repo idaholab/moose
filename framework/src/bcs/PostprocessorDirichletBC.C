@@ -34,9 +34,3 @@ PostprocessorDirichletBC::computeQpResidual()
   return _u[_qp] - _postprocessor_value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PostprocessorDirichletBC::PostprocessorDirichletBC(const std::string & deprecated_name, InputParameters parameters) :
-  NodalBC(deprecated_name, parameters),
-  _postprocessor_value(getPostprocessorValue("postprocessor"))
-{}

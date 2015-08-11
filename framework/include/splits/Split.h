@@ -25,7 +25,6 @@ class Split :
 {
  public:
   Split(const InputParameters & parameters);
-  Split(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void setup(const std::string& prefix = "-");
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)

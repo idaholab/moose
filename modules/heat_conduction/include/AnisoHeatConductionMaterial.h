@@ -20,7 +20,6 @@ class AnisoHeatConductionMaterial : public Material
 {
 public:
   AnisoHeatConductionMaterial(const InputParameters & parameters);
-  AnisoHeatConductionMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

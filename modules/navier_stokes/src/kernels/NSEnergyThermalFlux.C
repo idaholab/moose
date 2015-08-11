@@ -114,25 +114,3 @@ Real NSEnergyThermalFlux::compute_jacobian_value(unsigned var_number)
 
 
 
-
-// DEPRECATED CONSTRUCTOR
-NSEnergyThermalFlux::NSEnergyThermalFlux(const std::string & deprecated_name, InputParameters parameters)
-    : NSKernel(deprecated_name, parameters),
-
-      // Gradients
-      _grad_temp(coupledGradient("temperature")),
-
-      // material properties and parameters
-      _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
-
-      // Temperature derivative computing object
-      _temp_derivs(*this)
-{
-  // Store pointers to all variable gradients in a single vector.
-  _gradU.resize(5);
-  _gradU[0] = &_grad_rho  ;
-  _gradU[1] = &_grad_rho_u;
-  _gradU[2] = &_grad_rho_v;
-  _gradU[3] = &_grad_rho_w;
-  _gradU[4] = &_grad_rho_e;
-}

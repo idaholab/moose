@@ -122,10 +122,3 @@ OneDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   return 0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-OneDContactConstraint::OneDContactConstraint(const std::string & deprecated_name, InputParameters parameters) :
-    NodeFaceConstraint(deprecated_name, parameters),
-    _residual_copy(_sys.residualGhosted()),
-    _jacobian_update(getParam<bool>("jacobian_update"))
-{}

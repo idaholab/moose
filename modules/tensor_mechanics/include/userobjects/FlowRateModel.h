@@ -30,7 +30,6 @@ class FlowRateModel : public GeneralUserObject
 {
 public:
   FlowRateModel(const InputParameters & parameters);
-  FlowRateModel(const std::string & name, InputParameters parameters); // DEPRECATED
   virtual ~FlowRateModel() {}
 
   void initialize() {}

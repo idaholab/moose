@@ -82,27 +82,3 @@ ACGrGrPoly::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ACGrGrPoly::ACGrGrPoly(const std::string & deprecated_name, InputParameters parameters) :
-    ACBulk(deprecated_name, parameters),
-    _mu(getMaterialProperty<Real>("mu")),
-    _gamma(getMaterialProperty<Real>("gamma_asymm")),
-    _tgrad_corr_mult(getMaterialProperty<Real>("tgrad_corr_mult")),
-    _has_T(isCoupled("T")),
-    _grad_T(_has_T ? &coupledGradient("T") : NULL)
-{
-  // Array of coupled variables is created in the constructor
-  _ncrys = coupledComponents("v"); //determine number of grains from the number of names passed in.  Note this is the actual number -1
-  _vals.resize(_ncrys); //Size variable arrays
-  _vals_var.resize(_ncrys);
-
-  // _gamma = 1.5;
-
-  //Loop through grains and load coupled variables into the arrays
-  for (unsigned int i = 0; i < _ncrys; ++i)
-  {
-    _vals[i] = &coupledValue("v", i);
-    _vals_var[i] = coupled("v", i);
-  }
-}

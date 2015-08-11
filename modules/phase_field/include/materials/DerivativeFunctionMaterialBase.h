@@ -43,7 +43,6 @@ class DerivativeFunctionMaterialBase : public FunctionMaterialBase
 {
 public:
   DerivativeFunctionMaterialBase(const InputParameters & parameters);
-  DerivativeFunctionMaterialBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeProperties();

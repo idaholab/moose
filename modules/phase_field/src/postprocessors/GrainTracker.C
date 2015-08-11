@@ -1032,22 +1032,3 @@ GrainTracker::UniqueGrain::~UniqueGrain()
     delete sphere_ptrs[i];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-GrainTracker::GrainTracker(const std::string & name, InputParameters parameters) :
-    FeatureFloodCount(name, parameters),
-    _tracking_step(getParam<int>("tracking_step")),
-    _hull_buffer(getParam<Real>("convex_hull_buffer")),
-    _remap(getParam<bool>("remap_grains")),
-    _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
-    _unique_grains(declareRestartableData<std::map<unsigned int, UniqueGrain *> >("unique_grains")),
-    _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : NULL),
-    _compute_op_maps(getParam<bool>("compute_op_maps")),
-    _center_mass_tracking(getParam<bool>("center_of_mass_tracking"))
-{
-  // Size the data structures to hold the correct number of maps
-  _bounding_spheres.resize(_maps_size);
-
-  if (!_is_elemental && _compute_op_maps)
-    mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
-}

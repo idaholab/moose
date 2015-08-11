@@ -13,7 +13,6 @@ class PFCRFFKernelAction: public Action
 {
 public:
   PFCRFFKernelAction(const InputParameters & params);
-  PFCRFFKernelAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

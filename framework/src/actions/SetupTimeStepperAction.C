@@ -50,9 +50,3 @@ SetupTimeStepperAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SetupTimeStepperAction::SetupTimeStepperAction(const std::string & deprecated_name, InputParameters parameters) :
-    MooseObjectAction(deprecated_name, parameters)
-{
-}

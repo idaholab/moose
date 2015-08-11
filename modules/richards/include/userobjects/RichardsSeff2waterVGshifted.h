@@ -30,7 +30,6 @@ class RichardsSeff2waterVGshifted : public RichardsSeff
 {
 public:
   RichardsSeff2waterVGshifted(const InputParameters & parameters);
-  RichardsSeff2waterVGshifted(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * water effective saturation

@@ -81,10 +81,3 @@ NodalNormalsEvaluator::threadJoin(const UserObject & /*uo*/)
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NodalNormalsEvaluator::NodalNormalsEvaluator(const std::string & deprecated_name, InputParameters parameters) :
-    NodalUserObject(deprecated_name, parameters),
-    _aux(_fe_problem.getAuxiliarySystem())
-{
-}

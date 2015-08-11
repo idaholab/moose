@@ -82,22 +82,3 @@ Real INSChorinPressurePoisson::computeQpOffDiagJacobian(unsigned jvar)
     return 0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-INSChorinPressurePoisson::INSChorinPressurePoisson(const std::string & deprecated_name, InputParameters parameters) :
-  Kernel(deprecated_name, parameters),
-
-  // Gradients
-  _grad_u_star(coupledGradient("u_star")),
-  _grad_v_star(_mesh.dimension() >= 2 ? coupledGradient("v_star") : _grad_zero),
-  _grad_w_star(_mesh.dimension() == 3 ? coupledGradient("w_star") : _grad_zero),
-
-  // Variable numberings
-  _u_vel_star_var_number(coupled("u_star")),
-  _v_vel_star_var_number(_mesh.dimension() >= 2 ? coupled("v_star") : libMesh::invalid_uint),
-  _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
-
-  // Required parameters
-  _rho(getParam<Real>("rho"))
-{
-}

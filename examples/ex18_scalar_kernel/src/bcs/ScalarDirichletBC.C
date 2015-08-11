@@ -23,8 +23,8 @@ InputParameters validParams<ScalarDirichletBC>()
   return params;
 }
 
-ScalarDirichletBC::ScalarDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+ScalarDirichletBC::ScalarDirichletBC(const InputParameters & parameters) :
+    NodalBC(parameters),
 
     /**
      * Get a reference to the coupled variable's values.

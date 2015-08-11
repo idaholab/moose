@@ -241,11 +241,3 @@ FiniteStrainRatePlasticMaterial::macaulayBracket(Real val)
     return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FiniteStrainRatePlasticMaterial::FiniteStrainRatePlasticMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    FiniteStrainPlasticMaterial(deprecated_name, parameters),
-    _ref_pe_rate(getParam<Real>("ref_pe_rate")),
-    _exponent(getParam<Real>("exponent"))
-{
-}

@@ -27,7 +27,6 @@ class RichardsSUPG : public GeneralUserObject
 {
 public:
   RichardsSUPG(const InputParameters & parameters);
-  RichardsSUPG(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();
   void execute();

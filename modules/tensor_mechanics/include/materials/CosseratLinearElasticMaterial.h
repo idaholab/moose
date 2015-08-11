@@ -21,7 +21,6 @@ class CosseratLinearElasticMaterial : public TensorMechanicsMaterial
 {
 public:
   CosseratLinearElasticMaterial(const InputParameters & parameters);
-  CosseratLinearElasticMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpStrain();

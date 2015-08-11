@@ -30,7 +30,6 @@ class NodalNormalsCorner : public SideUserObject
 {
 public:
   NodalNormalsCorner(const InputParameters & parameters);
-  NodalNormalsCorner(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalNormalsCorner();
 
   virtual void initialize();

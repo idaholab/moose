@@ -25,7 +25,6 @@ class TensorMechanicsPlasticWeakPlaneTensile : public TensorMechanicsPlasticMode
 {
  public:
   TensorMechanicsPlasticWeakPlaneTensile(const InputParameters & parameters);
-  TensorMechanicsPlasticWeakPlaneTensile(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * The active yield surfaces, given a vector of yield functions.

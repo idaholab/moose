@@ -84,8 +84,3 @@ NSMassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSMassInviscidFlux::NSMassInviscidFlux(const std::string & deprecated_name, InputParameters parameters)
-    : NSKernel(deprecated_name, parameters)
-{}

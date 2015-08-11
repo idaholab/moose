@@ -25,7 +25,6 @@ class FiniteStrainCrystalPlasticity : public FiniteStrainMaterial
 {
 public:
   FiniteStrainCrystalPlasticity(const InputParameters & parameters);
-  FiniteStrainCrystalPlasticity(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

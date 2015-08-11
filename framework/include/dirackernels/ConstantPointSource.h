@@ -31,7 +31,6 @@ class ConstantPointSource : public DiracKernel
 {
 public:
   ConstantPointSource(const InputParameters & parameters);
-  ConstantPointSource(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void addPoints();
   virtual Real computeQpResidual();

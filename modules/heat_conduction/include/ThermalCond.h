@@ -22,7 +22,6 @@ class ThermalCond : public SideAverageValue
 {
 public:
   ThermalCond(const InputParameters & parameters);
-  ThermalCond(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real getValue();
 

@@ -25,7 +25,6 @@ class TwoPhaseStressMaterial : public Material
 {
 public:
   TwoPhaseStressMaterial(const InputParameters & parameters);
-  TwoPhaseStressMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

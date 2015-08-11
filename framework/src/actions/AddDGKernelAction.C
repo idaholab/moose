@@ -32,9 +32,3 @@ AddDGKernelAction::act()
   _problem->addDGKernel(_type, _name, _moose_object_pars);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddDGKernelAction::AddDGKernelAction(const std::string & deprecated_name, InputParameters params) :
-    MooseObjectAction(deprecated_name, params)
-{
-}

@@ -53,11 +53,3 @@ Transform::modify()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Transform::Transform(const std::string & deprecated_name, InputParameters parameters):
-    MeshModifier(deprecated_name, parameters),
-    _transform(getParam<MooseEnum>("transform")),
-    _vector_value(getParam<RealVectorValue>("vector_value"))
-{
-}

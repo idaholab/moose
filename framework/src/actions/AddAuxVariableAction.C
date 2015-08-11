@@ -80,9 +80,3 @@ AddAuxVariableAction::act()
     createInitialConditionAction();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddAuxVariableAction::AddAuxVariableAction(const std::string & deprecated_name, InputParameters params) :
-    AddVariableAction(deprecated_name, params)
-{
-}

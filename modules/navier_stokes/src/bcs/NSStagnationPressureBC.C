@@ -56,14 +56,3 @@ Real NSStagnationPressureBC::computeQpResidual()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-NSStagnationPressureBC::NSStagnationPressureBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSStagnationBC(deprecated_name, parameters),
-
-      // Coupled variables
-      _pressure(coupledValue("pressure")),
-
-      // Required parameters
-      _desired_stagnation_pressure(getParam<Real>("desired_stagnation_pressure"))
-{}

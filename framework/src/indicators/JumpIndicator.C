@@ -35,9 +35,3 @@ JumpIndicator::computeQpIndicator()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-JumpIndicator::JumpIndicator(const std::string & deprecated_name, InputParameters parameters) :
-    InternalSideIndicator(deprecated_name, parameters)
-{
-}

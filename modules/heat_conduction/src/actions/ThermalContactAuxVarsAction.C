@@ -76,9 +76,3 @@ ThermalContactAuxVarsAction::act()
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ThermalContactAuxVarsAction::ThermalContactAuxVarsAction(const std::string & deprecated_name, InputParameters params) :
-   Action(deprecated_name, params)
-{
-}

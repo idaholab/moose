@@ -45,11 +45,3 @@ SinNeumannBC::computeQpResidual()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-SinNeumannBC::SinNeumannBC(const std::string & deprecated_name, InputParameters parameters) :
-    IntegratedBC(deprecated_name, parameters),
-    _initial(getParam<Real>("initial")),
-    _final(getParam<Real>("final")),
-    _duration(getParam<Real>("duration"))
-{}

@@ -28,7 +28,6 @@ class ACMultiInterface : public Kernel
 {
 public:
   ACMultiInterface(const InputParameters & parameters);
-  ACMultiInterface(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

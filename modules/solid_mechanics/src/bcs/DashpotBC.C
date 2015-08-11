@@ -69,18 +69,3 @@ DashpotBC::computeQpOffDiagJacobian(unsigned int jvar)
 
   return -_test[_i][_qp]*_normals[_qp]*velocity;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-DashpotBC::DashpotBC(const std::string & deprecated_name, InputParameters parameters) :
-    IntegratedBC(deprecated_name, parameters),
-    _component(getParam<unsigned int>("component")),
-    _coefficient(getParam<Real>("coefficient")),
-    _disp_x_var(coupled("disp_x")),
-    _disp_y_var(isCoupled("disp_y") ? coupled("disp_y") : 0),
-    _disp_z_var(isCoupled("disp_z") ? coupled("disp_z") : 0),
-
-    _disp_x_dot(coupledDot("disp_x")),
-    _disp_y_dot(isCoupled("disp_y") ? coupledDot("disp_y") : _zero),
-    _disp_z_dot(isCoupled("disp_z") ? coupledDot("disp_z") : _zero)
-{}

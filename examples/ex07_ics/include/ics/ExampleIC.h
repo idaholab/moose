@@ -34,8 +34,7 @@ public:
   /**
    * Constructor: Same as the rest of the MOOSE Objects
    */
-  ExampleIC(const std::string & name,
-            InputParameters parameters);
+  ExampleIC(const InputParameters & parameters);
 
   /**
    * The value of the variable at a point.

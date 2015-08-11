@@ -42,12 +42,3 @@ VectorMagnitudeAux::computeValue()
   return std::sqrt((_x[_qp] * _x[_qp]) + (_y[_qp] * _y[_qp]) + (_z[_qp] * _z[_qp]));
 }
 
-
-// DEPRECATED CONSTRUCTOR
-VectorMagnitudeAux::VectorMagnitudeAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _x(coupledValue("x")),
-    _y(_mesh.dimension() >= 2 ? coupledValue("y") : _zero),
-    _z(_mesh.dimension() >= 3 ? coupledValue("z") : _zero)
-{
-}

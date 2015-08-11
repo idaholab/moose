@@ -75,9 +75,3 @@ SideSetsBetweenSubdomains::modify()
     boundary_info.sideset_name(boundary_ids[i]) = boundary_names[i];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const std::string & deprecated_name, InputParameters parameters):
-    MeshModifier(deprecated_name, parameters)
-{
-}

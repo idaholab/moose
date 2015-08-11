@@ -31,7 +31,6 @@ class FluxBC : public IntegratedBC
 {
 public:
   FluxBC(const InputParameters & params);
-  FluxBC(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual ~FluxBC();
 
 protected:

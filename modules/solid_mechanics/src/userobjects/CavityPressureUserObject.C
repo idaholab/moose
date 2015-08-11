@@ -107,33 +107,3 @@ CavityPressureUserObject::execute()
   const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
   _cavity_pressure = factor * pressure;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-CavityPressureUserObject::CavityPressureUserObject(const std::string & deprecated_name, InputParameters params) :
-    GeneralUserObject(deprecated_name, params),
-   _cavity_pressure(declareRestartableData<Real>("cavity_pressure", 0)),
-   _n0(declareRestartableData<Real>("initial_moles", 0)),
-   _initial_pressure(getParam<Real>("initial_pressure")),
-   _material_input(),
-   _R(getParam<Real>("R")),
-   _temperature( getPostprocessorValue("temperature")),
-   _init_temp_given( isParamValid("initial_temperature") ),
-   _init_temp( _init_temp_given ? getParam<Real>("initial_temperature") : 0 ),
-   _volume( getPostprocessorValue("volume")),
-   _start_time(0),
-   _startup_time( getParam<Real>("startup_time")),
-   _initialized(declareRestartableData<bool>("initialized", false))
-{
-
-  if (isParamValid("material_input"))
-  {
-    std::vector<PostprocessorName> ppn = params.get<std::vector<PostprocessorName> >("material_input");
-    const unsigned len = ppn.size();
-    for (unsigned i(0); i < len; ++i)
-    {
-      _material_input.push_back( &getPostprocessorValueByName(ppn[i]) );
-    }
-  }
-
-}

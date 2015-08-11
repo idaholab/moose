@@ -74,10 +74,3 @@ SetupResidualDebugAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SetupResidualDebugAction::SetupResidualDebugAction(const std::string & deprecated_name, InputParameters parameters) :
-    Action(deprecated_name, parameters),
-    _show_var_residual(getParam<std::vector<NonlinearVariableName> >("show_var_residual"))
-{
-}

@@ -21,7 +21,6 @@ class GapHeatPointSourceMaster : public DiracKernel
 {
 public:
   GapHeatPointSourceMaster(const InputParameters & parameters);
-  GapHeatPointSourceMaster(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void addPoints();
   virtual Real computeQpResidual();

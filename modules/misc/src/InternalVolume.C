@@ -68,11 +68,3 @@ InternalVolume::getValue()
   return _scale * SideIntegralPostprocessor::getValue() + _addition;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-InternalVolume::InternalVolume(const std::string & deprecated_name, InputParameters parameters)
-  : SideIntegralPostprocessor(deprecated_name, parameters),
-    _component( getParam<unsigned int>("component") ),
-    _scale( getParam<Real>("scale_factor") ),
-    _addition( getParam<Real>("addition") )
-{}

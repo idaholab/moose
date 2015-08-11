@@ -37,11 +37,3 @@ NormalizationAux::computeValue()
   return _src[_qp] * _normal_factor / _pp_on_source;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NormalizationAux::NormalizationAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _src(coupledValue("source_variable")),
-    _pp_on_source(getPostprocessorValue("normalization")),
-    _normal_factor(getParam<Real>("normal_factor"))
-{}

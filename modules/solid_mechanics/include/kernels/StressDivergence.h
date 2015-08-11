@@ -23,7 +23,6 @@ class StressDivergence : public Kernel
 public:
 
   StressDivergence(const InputParameters & parameters);
-  StressDivergence(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -20,7 +20,6 @@ class Gravity : public BodyForce
 public:
 
   Gravity(const InputParameters & parameters);
-  Gravity(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Gravity() {}
 

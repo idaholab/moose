@@ -27,7 +27,6 @@ class RichardsDensityMethane20degC : public RichardsDensity
 {
 public:
   RichardsDensityMethane20degC(const InputParameters & parameters);
-  RichardsDensityMethane20degC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * fluid density as a function of porepressure

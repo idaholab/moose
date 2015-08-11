@@ -25,7 +25,6 @@ class SwitchingFunctionConstraintLagrange : public DerivativeMaterialInterface<K
 {
 public:
   SwitchingFunctionConstraintLagrange(const InputParameters & parameters);
-  SwitchingFunctionConstraintLagrange(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

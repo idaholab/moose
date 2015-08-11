@@ -50,7 +50,7 @@ Action::Action(InputParameters parameters) :
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
     _problem(_awh.problem()),
-    _executioner(_awh.executioner())
+    _executioner(_app.executioner())
 {
 }
 
@@ -64,26 +64,4 @@ std::string
 Action::getBaseName() const
 {
   return _name.substr(0, _name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') : 0);
-}
-
-
-// DEPRECATED CONSTRUCTOR
-Action::Action(const std::string & deprecated_name, InputParameters deprecated_parameters) :
-    ConsoleStreamInterface(*deprecated_parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
-    _pars(deprecated_parameters),
-    _name(deprecated_name),
-    _short_name(MooseUtils::shortName(_name)),
-    _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
-    _action_type(getParam<std::string>("action_type")),
-    _app(*parameters().getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
-    _factory(_app.getFactory()),
-    _action_factory(_app.getActionFactory()),
-    _specific_task_name(parameters().isParamValid("task") ? getParam<std::string>("task") : ""),
-    _awh(*parameters().getCheckedPointerParam<ActionWarehouse *>("awh")),
-    _current_task(_awh.getCurrentTaskName()),
-    _mesh(_awh.mesh()),
-    _displaced_mesh(_awh.displacedMesh()),
-    _problem(_awh.problem()),
-    _executioner(_awh.executioner())
-{
 }

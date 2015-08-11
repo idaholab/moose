@@ -25,7 +25,6 @@ class PFFracBulkRate : public KernelValue
 public:
 
   PFFracBulkRate(const InputParameters & parameters);
-  PFFracBulkRate(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

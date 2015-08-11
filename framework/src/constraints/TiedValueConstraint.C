@@ -82,10 +82,3 @@ TiedValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   return retVal;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TiedValueConstraint::TiedValueConstraint(const std::string & deprecated_name, InputParameters parameters) :
-    NodeFaceConstraint(deprecated_name, parameters),
-    _scaling(getParam<Real>("scaling")),
-    _residual_copy(_sys.residualGhosted())
-{}

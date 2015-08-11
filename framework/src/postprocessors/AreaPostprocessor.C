@@ -38,8 +38,3 @@ AreaPostprocessor::computeQpIntegral()
   return 1.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AreaPostprocessor::AreaPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    SideIntegralPostprocessor(deprecated_name, parameters)
-{}

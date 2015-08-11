@@ -31,7 +31,6 @@ class RichardsVarNames :
 {
  public:
   RichardsVarNames(const InputParameters & parameters);
-  RichardsVarNames(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();
   void execute();

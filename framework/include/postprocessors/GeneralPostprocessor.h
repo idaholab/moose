@@ -41,7 +41,6 @@ class GeneralPostprocessor :
 {
 public:
   GeneralPostprocessor(const InputParameters & parameters);
-  GeneralPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~GeneralPostprocessor() {}
 

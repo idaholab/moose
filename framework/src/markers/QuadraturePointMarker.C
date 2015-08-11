@@ -59,17 +59,3 @@ QuadraturePointMarker::computeElementMarker()
   return current_mark;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-QuadraturePointMarker::QuadraturePointMarker(const std::string & deprecated_name, InputParameters parameters) :
-    Marker(deprecated_name, parameters),
-    Coupleable(parameters, false),
-    MaterialPropertyInterface(parameters),
-    _qrule(_assembly.qRule()),
-    _q_point(_assembly.qPoints()),
-    _qp(0)
-{
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
-}

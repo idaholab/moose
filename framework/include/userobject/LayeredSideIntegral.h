@@ -35,7 +35,6 @@ class LayeredSideIntegral : public SideIntegralVariableUserObject, public Layere
 {
 public:
   LayeredSideIntegral(const InputParameters & parameters);
-  LayeredSideIntegral(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Given a Point return the integral value associated with the layer that point falls in.

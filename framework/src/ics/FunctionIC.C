@@ -41,10 +41,3 @@ FunctionIC::gradient(const Point & p)
   return _func.gradient(_t, p);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FunctionIC::FunctionIC(const std::string & deprecated_name, InputParameters parameters) :
-    InitialCondition(deprecated_name, parameters),
-    _func(getFunction("function"))
-{
-}

@@ -16,7 +16,6 @@ class ComputeIsotropicElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
   ComputeIsotropicElasticityTensor(const InputParameters & parameters);
-  ComputeIsotropicElasticityTensor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpElasticityTensor();

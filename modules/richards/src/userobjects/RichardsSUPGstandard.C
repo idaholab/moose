@@ -182,10 +182,3 @@ RichardsSUPGstandard::SUPG_trivial() const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSUPGstandard::RichardsSUPGstandard(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsSUPG(deprecated_name, parameters),
-    _p_SUPG(getParam<Real>("p_SUPG"))
-{
-}

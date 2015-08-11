@@ -34,12 +34,3 @@ TestEBSDAux::computeValue()
   return (*_val)(_ebsd_reader.getData(p));
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TestEBSDAux::TestEBSDAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
-    _data_name(getParam<MooseEnum>("data_name")),
-    _val(_ebsd_reader.getPointDataAccessFunctor(_data_name))
-{
-}

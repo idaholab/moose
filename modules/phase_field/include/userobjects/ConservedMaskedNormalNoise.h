@@ -26,10 +26,6 @@ class ConservedMaskedNormalNoise : public ConservedNormalNoiseVeneer<ConservedMa
 public:
   ConservedMaskedNormalNoise(const InputParameters & parameters) :
     ConservedNormalNoiseVeneer<ConservedMaskedNoiseBase>(parameters) {}
-
-  // DEPRECATED CONSTRUCTOR
-  ConservedMaskedNormalNoise(const std::string & name, InputParameters parameters) :
-    ConservedNormalNoiseVeneer<ConservedMaskedNoiseBase>(name, parameters) {}
 };
 
 #endif //CONSERVEDMASKEDNORMALNOISE_H

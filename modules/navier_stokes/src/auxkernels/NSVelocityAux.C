@@ -28,11 +28,3 @@ NSVelocityAux::computeValue()
   return _momentum[_qp] / _rho[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSVelocityAux::NSVelocityAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _rho(coupledValue("rho")),
-    _momentum(coupledValue("momentum"))
-{
-}

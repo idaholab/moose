@@ -20,7 +20,7 @@
 class ConvectionDiffusionAction : public Action
 {
 public:
-  ConvectionDiffusionAction(const std::string & name, InputParameters params);
+  ConvectionDiffusionAction(InputParameters params);
 
   virtual void act();
 };

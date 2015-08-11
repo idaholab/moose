@@ -13,7 +13,6 @@ class LinearStrainHardening : public SolidModel
 {
 public:
   LinearStrainHardening( const InputParameters & parameters);
-  LinearStrainHardening(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~LinearStrainHardening() {}
 
 };

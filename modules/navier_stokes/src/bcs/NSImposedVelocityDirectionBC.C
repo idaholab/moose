@@ -54,16 +54,3 @@ Real NSImposedVelocityDirectionBC::computeQpResidual()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const std::string & deprecated_name, InputParameters parameters)
-    : NodalBC(deprecated_name, parameters),
-
-      // Coupled variables
-      _rho(coupledValue("rho")),
-      _u_vel(coupledValue("u")),
-      _v_vel(coupledValue("v")),
-      _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
-
-      _desired_unit_velocity_component(getParam<Real>("desired_unit_velocity_component"))
-{}

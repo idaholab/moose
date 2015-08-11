@@ -27,7 +27,6 @@ class TimeDerivative : public TimeKernel
 {
 public:
   TimeDerivative(const InputParameters & parameters);
-  TimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void computeJacobian();
 

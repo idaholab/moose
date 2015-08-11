@@ -30,7 +30,6 @@ class CoupledTimeDerivative : public Kernel
 {
 public:
   CoupledTimeDerivative(const InputParameters & parameters);
-  CoupledTimeDerivative(const std::string & name, InputParameters parameters); // DEPRECATED
 
 protected:
   virtual Real computeQpResidual();

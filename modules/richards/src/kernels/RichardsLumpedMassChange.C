@@ -126,30 +126,3 @@ RichardsLumpedMassChange::computeQpOffDiagJacobian(unsigned int jvar)
   return _test[_i][_qp]*mass_prime/_dt;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & deprecated_name, InputParameters parameters) :
-    TimeKernel(deprecated_name, parameters),
-    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
-    _num_p(_richards_name_UO.num_v()),
-    _pvar(_richards_name_UO.richards_var_num(_var.number())),
-
-    _porosity(getMaterialProperty<Real>("porosity")),
-    _porosity_old(getMaterialProperty<Real>("porosity_old")),
-
-    // in the following:  first get the userobject names that were inputted, then get the _pvar one of these, then get the actual userobject that this corresponds to, then finally & gives pointer to RichardsDensity (or whatever) object.
-    _seff_UO(&getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[_pvar])),
-    _sat_UO(&getUserObjectByName<RichardsSat>(getParam<std::vector<UserObjectName> >("sat_UO")[_pvar])),
-    _density_UO(&getUserObjectByName<RichardsDensity>(getParam<std::vector<UserObjectName> >("density_UO")[_pvar]))
-{
-  _ps_at_nodes.resize(_num_p);
-  _ps_old_at_nodes.resize(_num_p);
-
-  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
-  {
-    _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
-    _ps_old_at_nodes[pnum] = _richards_name_UO.nodal_var_old(pnum);
-  }
-
-  _dseff.resize(_num_p);
-}

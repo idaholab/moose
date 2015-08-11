@@ -18,7 +18,6 @@ class GapConductance :
 public:
 
   GapConductance(const InputParameters & parameters);
-  GapConductance(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~GapConductance(){}
 

@@ -96,19 +96,3 @@ CLSHPlasticModel::computeStressFinalize(unsigned qp, const SymmTensor & plasticS
 {
   _plastic_strain[qp] += plasticStrainIncrement;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-CLSHPlasticModel::CLSHPlasticModel(std::string name,
-                                         InputParameters parameters)
-  :ReturnMappingModel(name, parameters),
-   _yield_stress(parameters.get<Real>("yield_stress")),
-   _hardening_constant(parameters.get<Real>("hardening_constant")),
-   _c_alpha(parameters.get<Real>("c_alpha")),
-   _c_beta(parameters.get<Real>("c_beta")),
-   _hardening_variable(declareProperty<Real>("hardening_variable")),
-   _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
-   _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
-   _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain"))
-{
-}

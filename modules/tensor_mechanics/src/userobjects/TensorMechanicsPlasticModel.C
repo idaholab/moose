@@ -171,10 +171,3 @@ TensorMechanicsPlasticModel::modelName() const
   return "None";
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TensorMechanicsPlasticModel::TensorMechanicsPlasticModel(const std::string & deprecated_name, InputParameters parameters) :
-  GeneralUserObject(deprecated_name, parameters),
-  _f_tol(getParam<Real>("yield_function_tolerance")),
-  _ic_tol(getParam<Real>("internal_constraint_tolerance"))
-{}

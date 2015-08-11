@@ -23,7 +23,6 @@ class LinearAnisotropicMaterial : public LinearIsotropicMaterial
 {
 public:
   LinearAnisotropicMaterial(const InputParameters & parameters);
-  LinearAnisotropicMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

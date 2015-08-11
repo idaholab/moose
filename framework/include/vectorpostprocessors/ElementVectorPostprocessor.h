@@ -30,7 +30,6 @@ class ElementVectorPostprocessor :
 {
 public:
   ElementVectorPostprocessor(const InputParameters & parameters);
-  ElementVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!

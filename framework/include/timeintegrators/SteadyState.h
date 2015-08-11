@@ -29,7 +29,6 @@ class SteadyState : public TimeIntegrator
 {
 public:
   SteadyState(const InputParameters & parameters);
-  SteadyState(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SteadyState();
 
   virtual int order() { return 0; }

@@ -34,7 +34,6 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   SpecifiedSmoothCircleIC(const InputParameters & parameters);
-  SpecifiedSmoothCircleIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void computeCircleRadii();
 

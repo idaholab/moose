@@ -37,8 +37,3 @@ Reaction::computeQpJacobian()
   return _test[_i][_qp]*_phi[_j][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Reaction::Reaction(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters)
-{}

@@ -31,7 +31,6 @@ class MultiAppNearestNodeTransfer :
 {
 public:
   MultiAppNearestNodeTransfer(const InputParameters & parameters);
-  MultiAppNearestNodeTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppNearestNodeTransfer() {}
 
   virtual void initialSetup();

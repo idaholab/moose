@@ -45,9 +45,3 @@ RunTime::getValue()
   mooseError("Invalid Type");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RunTime::RunTime(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters),
-    _time_type(getParam<MooseEnum>("time_type"))
-{}

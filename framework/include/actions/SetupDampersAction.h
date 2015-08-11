@@ -27,7 +27,6 @@ class SetupDampersAction : public Action
 {
 public:
   SetupDampersAction(InputParameters params);
-  SetupDampersAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

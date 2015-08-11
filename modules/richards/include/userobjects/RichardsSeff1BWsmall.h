@@ -27,7 +27,6 @@ class RichardsSeff1BWsmall : public RichardsSeff
 {
 public:
   RichardsSeff1BWsmall(const InputParameters & parameters);
-  RichardsSeff1BWsmall(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * LambertW function, returned value satisfies W(z)*exp(W(z))=z

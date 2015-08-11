@@ -25,7 +25,6 @@ class PLC_LSH : public SolidModel
 {
 public:
   PLC_LSH( const InputParameters & parameters);
-  PLC_LSH(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

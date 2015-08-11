@@ -54,9 +54,3 @@ SetupPreconditionerAction::act()
     Moose::PetscSupport::storePetscOptions(*_problem, _pars);
   }
 }
-
-// DEPRECATED CONSTRUCTOR
-SetupPreconditionerAction::SetupPreconditionerAction(const std::string & deprecated_name, InputParameters params) :
-    MooseObjectAction(deprecated_name, params)
-{
-}

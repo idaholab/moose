@@ -20,7 +20,6 @@ class SplitCHMath : public SplitCHCRes
 {
 public:
   SplitCHMath(const InputParameters & parameters);
-  SplitCHMath(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeDFDC(PFFunctionType type);

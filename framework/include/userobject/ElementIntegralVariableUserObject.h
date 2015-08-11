@@ -36,7 +36,6 @@ class ElementIntegralVariableUserObject :
 {
 public:
   ElementIntegralVariableUserObject(const InputParameters & parameters);
-  ElementIntegralVariableUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

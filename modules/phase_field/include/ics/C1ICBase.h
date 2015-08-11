@@ -51,7 +51,6 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   C1ICBase(const InputParameters & parameters);
-  C1ICBase(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   Real _average;

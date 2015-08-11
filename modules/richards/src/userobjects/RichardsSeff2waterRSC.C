@@ -59,12 +59,3 @@ RichardsSeff2waterRSC::d2seff(std::vector<VariableValue *> p, unsigned int qp, s
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSeff2waterRSC::RichardsSeff2waterRSC(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsSeff(deprecated_name, parameters),
-    _oil_viscosity(getParam<Real>("oil_viscosity")),
-    _scale_ratio(getParam<Real>("scale_ratio")),
-    _shift(getParam<Real>("shift")),
-    _scale(0.25*_scale_ratio*_oil_viscosity)
-{}

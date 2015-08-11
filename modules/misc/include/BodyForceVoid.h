@@ -23,7 +23,6 @@ class BodyForceVoid : public Kernel
 public:
 
   BodyForceVoid(const InputParameters & parameters);
-  BodyForceVoid(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

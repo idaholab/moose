@@ -26,8 +26,7 @@ class ExampleConvection : public Kernel
 {
 public:
 
-  ExampleConvection(const std::string & name,
-                    InputParameters parameters);
+  ExampleConvection(InputParameters parameters);
 
 protected:
 

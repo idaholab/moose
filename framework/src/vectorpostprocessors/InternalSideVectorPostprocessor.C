@@ -28,10 +28,3 @@ InternalSideVectorPostprocessor::InternalSideVectorPostprocessor(const InputPara
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-InternalSideVectorPostprocessor::InternalSideVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    InternalSideUserObject(deprecated_name, parameters),
-    VectorPostprocessor(parameters)
-{
-}

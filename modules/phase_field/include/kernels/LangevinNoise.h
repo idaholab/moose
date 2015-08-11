@@ -19,7 +19,6 @@ class LangevinNoise : public Kernel
 {
 public:
   LangevinNoise(const InputParameters & parameters);
-  LangevinNoise(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void residualSetup();

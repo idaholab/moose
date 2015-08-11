@@ -21,7 +21,6 @@ class SecondDerivativeImplicitEuler : public TimeKernel
 {
 public:
   SecondDerivativeImplicitEuler(const InputParameters & parameters);
-  SecondDerivativeImplicitEuler(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

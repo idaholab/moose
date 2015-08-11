@@ -24,7 +24,6 @@ class INSTemperatureTimeDerivative : public TimeDerivative
 {
 public:
   INSTemperatureTimeDerivative(const InputParameters & parameters);
-  INSTemperatureTimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSTemperatureTimeDerivative(){}
 

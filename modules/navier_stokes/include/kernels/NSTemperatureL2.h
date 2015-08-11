@@ -26,7 +26,6 @@ class NSTemperatureL2 : public Kernel
 public:
 
   NSTemperatureL2(const InputParameters & parameters);
-  NSTemperatureL2(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

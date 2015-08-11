@@ -78,12 +78,3 @@ BDF2::postStep(NumericVector<Number> & residual)
   residual += _Re_non_time;
   residual.close();
 }
-
-
-// DEPRECATED CONSTRUCTOR
-BDF2::BDF2(const std::string & deprecated_name, InputParameters parameters) :
-    TimeIntegrator(deprecated_name, parameters),
-    _weight(declareRestartableData<std::vector<Real> >("weight"))
-{
-  _weight.resize(3);
-}

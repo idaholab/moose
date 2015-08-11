@@ -46,9 +46,3 @@ ElementIntegralIndicator::computeQpIntegral()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-ElementIntegralIndicator::ElementIntegralIndicator(const std::string & deprecated_name, InputParameters parameters) :
-    ElementIndicator(deprecated_name, parameters)
-{
-}

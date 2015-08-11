@@ -21,7 +21,7 @@ InputParameters validParams<CavityPressurePPAction>()
   return params;
 }
 
-CavityPressurePPAction::CavityPressurePPAction(const InputParameters & params) :
+CavityPressurePPAction::CavityPressurePPAction(InputParameters params) :
   Action(params)
 {
 }
@@ -57,11 +57,4 @@ CavityPressurePPAction::act()
     params.set<std::string>("quantity") = "initial_moles";
     _problem->addPostprocessor(pp_name, getParam<std::string>("output_initial_moles"), params);
   }
-}
-
-
-// DEPRECATED CONSTRUCTOR
-CavityPressurePPAction::CavityPressurePPAction(const std::string & deprecated_name, InputParameters params) :
-  Action(deprecated_name, params)
-{
 }
