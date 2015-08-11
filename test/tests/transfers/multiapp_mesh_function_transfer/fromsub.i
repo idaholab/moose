@@ -65,7 +65,7 @@
     positions = '.099 .099 0 .599 .599 0 0.599 0.099 0'
     type = TransientMultiApp
     app_type = MooseTestApp
-    input_files = sub.i
+    input_files = fromsub_sub.i
   [../]
 []
 

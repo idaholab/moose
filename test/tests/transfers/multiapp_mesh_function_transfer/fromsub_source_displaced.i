@@ -42,13 +42,11 @@
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   num_steps = 1
   dt = 1
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
@@ -56,6 +54,7 @@
 [Outputs]
   output_initial = true
   exodus = true
+  print_linear_residuals = true
   print_perf_log = true
 []
 
@@ -75,7 +74,7 @@
     variable = transferred_u
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
-    execute_on = 'initial timestep_end'
+    displaced_source_mesh = true
   [../]
   [./elemental_from_sub]
     source_variable = sub_u
@@ -83,5 +82,6 @@
     variable = elemental_transferred_u
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
+    displaced_source_mesh = true
   [../]
 []

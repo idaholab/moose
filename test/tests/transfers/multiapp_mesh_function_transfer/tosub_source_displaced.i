@@ -3,6 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
+  displacements = 'x_disp y_disp'
 []
 
 [Variables]
@@ -11,11 +12,11 @@
 []
 
 [AuxVariables]
-  [./transferred_u]
+  [./x_disp]
+    initial_condition = -0.1
   [../]
-  [./elemental_transferred_u]
-    order = CONSTANT
-    family = MONOMIAL
+  [./y_disp]
+    initial_condition = -0.1
   [../]
 []
 
@@ -42,11 +43,13 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   num_steps = 1
   dt = 1
-  solve_type = PJFNK
+
+  # Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
@@ -60,28 +63,30 @@
 
 [MultiApps]
   [./sub]
-    positions = '.099 .099 0 .599 .599 0 0.599 0.099 0'
+    positions = '.1 .1 0 0.6 0.6 0 0.6 0.1 0'
     type = TransientMultiApp
     app_type = MooseTestApp
-    input_files = sub.i
+    input_files = tosub_sub.i
+    execute_on = timestep_end
   [../]
 []
 
 [Transfers]
-  [./from_sub]
-    source_variable = sub_u
-    direction = from_multiapp
+  [./to_sub]
+    source_variable = u
+    direction = to_multiapp
     variable = transferred_u
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
-    displaced_source_mesh = true
+    #displaced_source_mesh = true
   [../]
-  [./elemental_from_sub]
-    source_variable = sub_u
-    direction = from_multiapp
+
+  [./elemental_to_sub]
+    source_variable = u
+    direction = to_multiapp
     variable = elemental_transferred_u
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
-    displaced_source_mesh = true
+    #displaced_source_mesh = true
   [../]
 []
