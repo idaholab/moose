@@ -24,7 +24,6 @@ class INSMomentum : public Kernel
 {
 public:
   INSMomentum(const InputParameters & parameters);
-  INSMomentum(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSMomentum(){}
 

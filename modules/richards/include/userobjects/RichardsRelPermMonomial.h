@@ -27,7 +27,6 @@ class RichardsRelPermMonomial : public RichardsRelPerm
 {
 public:
   RichardsRelPermMonomial(const InputParameters & parameters);
-  RichardsRelPermMonomial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Relative permeability

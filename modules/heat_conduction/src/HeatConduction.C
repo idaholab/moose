@@ -45,13 +45,3 @@ HeatConductionKernel::computeQpJacobian()
     jac += (*_diffusion_coefficient_dT)[_qp] * _phi[_j][_qp] * Diffusion::computeQpResidual();
   return jac;
 }
-
-// DEPRECAteD
-HeatConductionKernel::HeatConductionKernel(const std::string & name, InputParameters parameters) :
-    Diffusion(name, parameters),
-    _dim(_subproblem.mesh().dimension()),
-    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
-    _diffusion_coefficient_dT(hasMaterialProperty<Real>("diffusion_coefficient_dT_name") ?
-                            &getMaterialProperty<Real>("diffusion_coefficient_dT_name") : NULL)
-{
-}

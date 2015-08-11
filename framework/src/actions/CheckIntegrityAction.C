@@ -37,9 +37,3 @@ CheckIntegrityAction::act()
     _problem->checkProblemIntegrity();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CheckIntegrityAction::CheckIntegrityAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

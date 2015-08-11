@@ -27,7 +27,6 @@ class RichardsSUPGstandard : public RichardsSUPG
 {
 public:
   RichardsSUPGstandard(const InputParameters & parameters);
-  RichardsSUPGstandard(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * SUPG velocity = -perm*(gradp - density*gravity)

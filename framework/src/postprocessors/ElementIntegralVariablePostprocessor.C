@@ -38,14 +38,3 @@ ElementIntegralVariablePostprocessor::computeQpIntegral()
   return _u[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    ElementIntegralPostprocessor(deprecated_name, parameters),
-    MooseVariableInterface(parameters, false),
-    _u(coupledValue("variable")),
-    _grad_u(coupledGradient("variable")),
-    _u_dot(coupledDot("variable"))
-{
-  addMooseVariableDependency(mooseVariable());
-}

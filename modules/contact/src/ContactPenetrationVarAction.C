@@ -41,9 +41,3 @@ ContactPenetrationVarAction::act()
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ContactPenetrationVarAction::ContactPenetrationVarAction(const std::string & deprecated_name, InputParameters params) :
-  Action(deprecated_name, params)
-{
-}

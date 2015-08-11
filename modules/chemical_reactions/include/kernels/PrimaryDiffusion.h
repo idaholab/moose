@@ -31,7 +31,6 @@ class PrimaryDiffusion : public Diffusion
 public:
 
   PrimaryDiffusion(const InputParameters & parameters);
-  PrimaryDiffusion(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

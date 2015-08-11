@@ -55,9 +55,3 @@ NodalAreaAction::act()
                           _moose_object_pars);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NodalAreaAction::NodalAreaAction(const std::string & deprecated_name, InputParameters params) :
-  MooseObjectAction(deprecated_name, params)
-{
-}

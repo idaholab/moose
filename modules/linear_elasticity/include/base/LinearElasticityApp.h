@@ -18,7 +18,6 @@ class LinearElasticityApp : public MooseApp
 {
 public:
   LinearElasticityApp(const InputParameters & parameters);
-  LinearElasticityApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~LinearElasticityApp();
 
   static void registerApps();

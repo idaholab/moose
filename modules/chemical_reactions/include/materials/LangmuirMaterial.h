@@ -23,7 +23,6 @@ class LangmuirMaterial : public Material
 {
 public:
   LangmuirMaterial(const InputParameters & parameters);
-  LangmuirMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

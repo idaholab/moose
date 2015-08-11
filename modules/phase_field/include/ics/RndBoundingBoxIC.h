@@ -39,7 +39,6 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   RndBoundingBoxIC(const InputParameters & parameters);
-  RndBoundingBoxIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * The value of the variable at a point.

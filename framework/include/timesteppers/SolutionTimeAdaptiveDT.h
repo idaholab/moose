@@ -31,7 +31,6 @@ class SolutionTimeAdaptiveDT : public TimeStepper
 {
 public:
   SolutionTimeAdaptiveDT(const InputParameters & parameters);
-  SolutionTimeAdaptiveDT(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SolutionTimeAdaptiveDT();
 
   virtual void step();

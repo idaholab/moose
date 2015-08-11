@@ -18,7 +18,6 @@ class PolynomialFreeEnergy : public DerivativeParsedMaterialHelper,
 {
 public:
   PolynomialFreeEnergy(const InputParameters & parameters);
-  PolynomialFreeEnergy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   ///Concentration variable used in the free energy expression

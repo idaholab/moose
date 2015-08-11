@@ -33,7 +33,6 @@ class SideAverageValue : public SideIntegralVariablePostprocessor
 {
 public:
   SideAverageValue(const InputParameters & parameters);
-  SideAverageValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~SideAverageValue(){}
 
   virtual void initialize();

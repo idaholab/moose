@@ -124,10 +124,3 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSEnergyViscousFlux::NSEnergyViscousFlux(const std::string & deprecated_name, InputParameters parameters)
-    : NSKernel(deprecated_name, parameters),
-      _vst_derivs(*this)
-{
-}

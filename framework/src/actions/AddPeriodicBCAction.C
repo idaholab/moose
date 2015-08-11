@@ -181,9 +181,3 @@ AddPeriodicBCAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddPeriodicBCAction::AddPeriodicBCAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

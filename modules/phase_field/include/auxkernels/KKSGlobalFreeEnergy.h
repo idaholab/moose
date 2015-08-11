@@ -24,7 +24,6 @@ class KKSGlobalFreeEnergy : public AuxKernel
 {
 public:
   KKSGlobalFreeEnergy(const InputParameters & parameters);
-  KKSGlobalFreeEnergy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

@@ -49,8 +49,7 @@ public:
    * string and a InputParameters object, just like other
    * Kernel-derived classes.
    */
-  ExampleConvection(const std::string & name,
-                    InputParameters parameters);
+  ExampleConvection(const InputParameters & parameters);
 
 protected:
   /**

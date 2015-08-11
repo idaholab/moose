@@ -116,20 +116,3 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number>& vec_solution, N
   return updatedSolution;
 
 }
-
-
-
-
-
-
-
-// DEPRECATED CONSTRUCTOR
-RichardsMultiphaseProblem::RichardsMultiphaseProblem(const std::string & deprecated_name, InputParameters params) :
-    FEProblem(deprecated_name, params),
-    // in the following have to get the names of the variables, and then find their numbers in initialSetup,
-    // as their numbers won't be defined at the moment of instantiation of this class
-    _bounded_var_name(params.get<NonlinearVariableName>("bounded_var")),
-    _lower_var_name(params.get<NonlinearVariableName>("lower_var")),
-    _bounded_var_num(0),
-    _lower_var_num(0)
-{}

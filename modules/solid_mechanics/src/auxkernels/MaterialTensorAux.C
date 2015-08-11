@@ -54,14 +54,3 @@ MaterialTensorAux::computeValue()
                                                              direction);
   return value;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-MaterialTensorAux::MaterialTensorAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _material_tensor_calculator(parameters),
-    _tensor(getMaterialProperty<SymmTensor>("tensor")),
-    _has_qp_select(isParamValid("qp_select")),
-    _qp_select(_has_qp_select ? getParam<unsigned int>("qp_select") : 0)
-{
-}

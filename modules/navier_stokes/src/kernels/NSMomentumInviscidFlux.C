@@ -122,14 +122,3 @@ Real NSMomentumInviscidFlux::compute_jacobian(unsigned m)
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSMomentumInviscidFlux::NSMomentumInviscidFlux(const std::string & deprecated_name, InputParameters parameters)
-    : NSKernel(deprecated_name, parameters),
-
-      // Coupled variables
-      _pressure(coupledValue("pressure")),
-
-      // Required parameters
-      _component(getParam<unsigned>("component"))
-{}

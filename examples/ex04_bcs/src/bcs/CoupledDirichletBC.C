@@ -25,8 +25,8 @@ InputParameters validParams<CoupledDirichletBC>()
   return params;
 }
 
-CoupledDirichletBC::CoupledDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
+CoupledDirichletBC::CoupledDirichletBC(const InputParameters & parameters) :
+    NodalBC(parameters),
 
     /**
      * Grab the parameter for the multiplier.

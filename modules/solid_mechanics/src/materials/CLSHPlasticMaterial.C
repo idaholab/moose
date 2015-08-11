@@ -29,14 +29,3 @@ CLSHPlasticMaterial::CLSHPlasticMaterial(const InputParameters & parameters)
   createConstitutiveModel("CLSHPlasticModel", parameters);
 
 }
-
-
-// DEPRECATED CONSTRUCTOR
-CLSHPlasticMaterial::CLSHPlasticMaterial(std::string name,
-                                         InputParameters parameters)
-  :SolidModel(name, parameters)
-{
-
-  createConstitutiveModel("CLSHPlasticModel", parameters);
-
-}

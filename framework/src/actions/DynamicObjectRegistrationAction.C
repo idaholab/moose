@@ -56,25 +56,3 @@ void
 DynamicObjectRegistrationAction::act()
 {
 }
-
-DynamicObjectRegistrationAction::DynamicObjectRegistrationAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters)
-{
-  /**
-   * Dynamic object registration must occur before parsing. The parser needs to retrieve parameters for each
-   * registered object that it must build.
-   */
-  if (isParamValid("register_objects_from"))
-  {
-    // Only register the requested objects
-    if (isParamValid("object_names"))
-      _factory.restrictRegisterableObjects(getParam<std::vector<std::string> >("object_names"));
-
-    std::vector<std::string> application_names = getParam<std::vector<std::string> >("register_objects_from");
-    for (unsigned int i = 0; i < application_names.size(); ++i)
-    {
-      _app.dynamicObjectRegistration(application_names[i], &_factory, getParam<std::string>("library_path"));
-      _app.dynamicSyntaxAssociation(application_names[i], &_awh.syntax(), &_action_factory, getParam<std::string>("library_path"));
-    }
-  }
-}

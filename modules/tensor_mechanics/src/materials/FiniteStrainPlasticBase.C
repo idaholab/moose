@@ -986,29 +986,3 @@ FiniteStrainPlasticBase::outputAndCheckDebugParameters()
     _console << _fspb_debug_intnl_change[a] << "\n";
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FiniteStrainPlasticBase::FiniteStrainPlasticBase(const std::string & deprecated_name, InputParameters parameters) :
-    FiniteStrainMaterial(deprecated_name, parameters),
-    _max_iter(getParam<unsigned int>("max_NR_iterations")),
-    _max_subdivisions(getParam<unsigned int>("max_subdivisions")),
-    _f_tol(getParam<std::vector<Real> >("yield_function_tolerance")),
-    _ic_tol(parameters.isParamValid("internal_constraint_tolerance") ? getParam<std::vector<Real> >("internal_constraint_tolerance") : std::vector<Real>(0)),
-    _epp_tol(getParam<Real>("ep_plastic_tolerance")),
-
-    _fspb_debug(getParam<int>("debug_fspb")),
-    _fspb_debug_stress(getParam<RealTensorValue>("debug_jac_at_stress")),
-    _fspb_debug_pm(getParam<std::vector<Real> >("debug_jac_at_pm")),
-    _fspb_debug_intnl(getParam<std::vector<Real> >("debug_jac_at_intnl")),
-    _fspb_debug_stress_change(getParam<Real>("debug_stress_change")),
-    _fspb_debug_pm_change(getParam<std::vector<Real> >("debug_pm_change")),
-    _fspb_debug_intnl_change(getParam<std::vector<Real> >("debug_intnl_change")),
-
-    _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
-    _intnl(declareProperty<std::vector<Real> >("plastic_internal_parameter")),
-    _intnl_old(declarePropertyOld<std::vector<Real> >("plastic_internal_parameter")),
-    _f(declareProperty<std::vector<Real> >("plastic_yield_function")),
-    _iter(declareProperty<unsigned int>("plastic_NR_iterations"))
-{
-}

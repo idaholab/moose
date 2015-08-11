@@ -71,15 +71,3 @@ Transfer::find_sys(EquationSystems & es, const std::string & var_name) const
   return sys;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-Transfer::Transfer(const std::string & deprecated_name, InputParameters parameters) :
-    MooseObject(deprecated_name, parameters),
-    SetupInterface(parameters),
-    Restartable(parameters, "Transfers"),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
-    _sys(*parameters.get<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid"))
-{
-}

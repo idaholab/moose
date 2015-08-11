@@ -105,30 +105,3 @@ GapValueAux::computeValue()
   return gap_value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-GapValueAux::GapValueAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _penetration_locator(_nodal ?  getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))) : getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
-    _moose_var(_subproblem.getVariable(_tid, getParam<VariableName>("paired_variable"))),
-    _serialized_solution(_moose_var.sys().currentSolution()),
-    _dof_map(_moose_var.dofMap()),
-    _warnings(getParam<bool>("warnings"))
-{
-  if (parameters.isParamValid("tangential_tolerance"))
-    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-
-  if (parameters.isParamValid("normal_smoothing_distance"))
-    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-
-  if (parameters.isParamValid("normal_smoothing_method"))
-    _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
-
-  Order pairedVarOrder(_moose_var.getOrder());
-  Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
-  if (pairedVarOrder != gvaOrder && pairedVarOrder != CONSTANT)
-    mooseError("ERROR: specified order for GapValueAux ("<<Utility::enum_to_string<Order>(gvaOrder)
-               <<") does not match order for paired_variable \""<< _moose_var.name() << "\" ("
-               <<Utility::enum_to_string<Order>(pairedVarOrder)<<")");
-
-}

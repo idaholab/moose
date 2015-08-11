@@ -73,16 +73,3 @@ GeneralUserObject::getVectorPostprocessorValueByName(const VectorPostprocessorNa
   return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-GeneralUserObject::GeneralUserObject(const std::string & deprecated_name, InputParameters parameters) :
-    UserObject(deprecated_name, parameters),
-    MaterialPropertyInterface(parameters),
-    TransientInterface(parameters, "general_user_objects"),
-    DependencyResolverInterface(),
-    UserObjectInterface(parameters),
-    PostprocessorInterface(parameters),
-    VectorPostprocessorInterface(parameters)
-{
-  _supplied_vars.insert(name());
-}

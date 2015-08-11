@@ -27,7 +27,6 @@ class ConstantVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
   ConstantVectorPostprocessor(const InputParameters & parameters);
-  ConstantVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ConstantVectorPostprocessor() {}
 

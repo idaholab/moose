@@ -46,10 +46,3 @@ SteadyState::postStep(NumericVector<Number> & residual)
   residual += _Re_non_time;
   residual.close();
 }
-
-
-// DEPRECATED CONSTRUCTOR
-SteadyState::SteadyState(const std::string & deprecated_name, InputParameters parameters) :
-    TimeIntegrator(deprecated_name, parameters)
-{
-}

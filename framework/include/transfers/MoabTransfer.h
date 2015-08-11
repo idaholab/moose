@@ -29,7 +29,6 @@ class MoabTransfer :
 {
 public:
   MoabTransfer(const InputParameters & parameters);
-  MoabTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MoabTransfer() {}
 
   virtual void execute();

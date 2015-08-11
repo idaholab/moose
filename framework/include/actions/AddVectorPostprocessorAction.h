@@ -28,7 +28,6 @@ class AddVectorPostprocessorAction: public MooseObjectAction
 {
 public:
   AddVectorPostprocessorAction(InputParameters params);
-  AddVectorPostprocessorAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

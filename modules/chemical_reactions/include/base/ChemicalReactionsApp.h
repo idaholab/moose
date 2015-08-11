@@ -18,7 +18,6 @@ class ChemicalReactionsApp : public MooseApp
 {
 public:
   ChemicalReactionsApp(const InputParameters & parameters);
-  ChemicalReactionsApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ChemicalReactionsApp();
 
   static void registerApps();

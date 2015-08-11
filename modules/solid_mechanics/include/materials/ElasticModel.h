@@ -13,7 +13,6 @@ class ElasticModel : public ConstitutiveModel
 {
 public:
   ElasticModel( const InputParameters & parameters);
-  ElasticModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ElasticModel();
 
 protected:

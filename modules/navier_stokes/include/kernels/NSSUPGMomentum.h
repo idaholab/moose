@@ -23,7 +23,6 @@ class NSSUPGMomentum : public NSSUPGBase
 {
 public:
   NSSUPGMomentum(const InputParameters & parameters);
-  NSSUPGMomentum(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -34,7 +34,6 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   CoupledDiffusionReactionSub(const InputParameters & parameters);
-  CoupledDiffusionReactionSub(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

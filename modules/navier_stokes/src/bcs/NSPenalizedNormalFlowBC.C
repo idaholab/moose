@@ -62,13 +62,3 @@ Real NSPenalizedNormalFlowBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
   return 0.;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSPenalizedNormalFlowBC::NSPenalizedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSIntegratedBC(deprecated_name, parameters),
-
-      // Required parameters
-      _penalty(getParam<Real>("penalty")),
-      _specified_udotn(getParam<Real>("specified_udotn"))
-{
-}

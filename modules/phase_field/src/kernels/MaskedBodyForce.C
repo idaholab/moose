@@ -28,10 +28,3 @@ MaskedBodyForce::computeQpResidual()
   return BodyForce::computeQpResidual()*_mask[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MaskedBodyForce::MaskedBodyForce(const std::string & deprecated_name, InputParameters parameters) :
-    BodyForce(deprecated_name, parameters),
-    _mask(getMaterialProperty<Real>("mask"))
-{
-}

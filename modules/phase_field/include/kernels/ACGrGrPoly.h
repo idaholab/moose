@@ -24,7 +24,6 @@ class ACGrGrPoly : public ACBulk
 {
 public:
   ACGrGrPoly(const InputParameters & parameters);
-  ACGrGrPoly(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);

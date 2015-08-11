@@ -37,10 +37,3 @@ HeatConductionBC::computeQpFluxJacobian()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-HeatConductionBC::HeatConductionBC(const std::string & deprecated_name, InputParameters parameters) :
-    FluxBC(deprecated_name, parameters),
-    _k(getMaterialProperty<Real>("thermal_conductivity"))
-{
-}

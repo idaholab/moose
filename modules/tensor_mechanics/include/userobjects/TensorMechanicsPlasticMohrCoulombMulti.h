@@ -25,7 +25,6 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
 {
  public:
   TensorMechanicsPlasticMohrCoulombMulti(const InputParameters & parameters);
-  TensorMechanicsPlasticMohrCoulombMulti(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// The number of yield surfaces for this plasticity model
   virtual unsigned int numberSurfaces() const;

@@ -29,7 +29,6 @@ class TiledMesh : public MooseMesh
 {
 public:
   TiledMesh(const InputParameters & parameters);
-  TiledMesh(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   TiledMesh(const TiledMesh & other_mesh);
 
   virtual MooseMesh & clone() const;

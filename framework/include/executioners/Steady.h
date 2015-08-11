@@ -42,7 +42,6 @@ public:
    * @return Whether or not the solve was successful.
    */
   Steady(const InputParameters & parameters);
-  Steady(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Steady();
 

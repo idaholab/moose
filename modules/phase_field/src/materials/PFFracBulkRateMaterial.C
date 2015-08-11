@@ -41,11 +41,3 @@ PFFracBulkRateMaterial::computeQpProperties()
   getProp();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PFFracBulkRateMaterial::PFFracBulkRateMaterial(const std::string & deprecated_name, InputParameters parameters) :
-  Material(deprecated_name, parameters),
-  _gc(getParam<Real>("gc")),
-  _gc_prop(declareProperty<Real>("gc_prop"))
-{
-}

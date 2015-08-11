@@ -33,11 +33,3 @@ JouleHeating::computeQpResidual()
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-JouleHeating::JouleHeating(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _grad_potential(coupledGradient("potential")),
-    _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
-{
-}

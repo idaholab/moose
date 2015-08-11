@@ -32,8 +32,3 @@ NumElems::getValue()
   return _subproblem.mesh().nElem();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NumElems::NumElems(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters)
-{}

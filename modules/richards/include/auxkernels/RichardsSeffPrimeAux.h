@@ -26,7 +26,6 @@ class RichardsSeffPrimeAux: public AuxKernel
 {
 public:
   RichardsSeffPrimeAux(const InputParameters & parameters);
-  RichardsSeffPrimeAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

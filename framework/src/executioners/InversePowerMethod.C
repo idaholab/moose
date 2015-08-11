@@ -91,22 +91,3 @@ InversePowerMethod::takeStep()
   _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-InversePowerMethod::InversePowerMethod(const std::string & deprecated_name, InputParameters parameters) :
-    EigenExecutionerBase(deprecated_name, parameters),
-     _solution_diff_name(getParam<PostprocessorName>("xdiff")),
-    _min_iter(getParam<unsigned int>("min_power_iterations")),
-    _max_iter(getParam<unsigned int>("max_power_iterations")),
-    _eig_check_tol(getParam<Real>("eig_check_tol")),
-    _sol_check_tol(getParam<Real>("sol_check_tol")),
-    _pfactor(getParam<Real>("pfactor")),
-    _cheb_on(getParam<bool>("Chebyshev_acceleration_on"))
-{
-  _eigenvalue = getParam<Real>("k0");
-  addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
-
-  if (_max_iter<_min_iter) mooseError("max_power_iterations<min_power_iterations!");
-  if (_eig_check_tol<0.0) mooseError("eig_check_tol<0!");
-  if (_pfactor<0.0) mooseError("pfactor<0!");
-}

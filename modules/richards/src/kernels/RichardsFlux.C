@@ -105,26 +105,3 @@ RichardsFlux::computeQpOffDiagJacobian(unsigned int jvar)
   return computeQpJac(dvar);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsFlux::RichardsFlux(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
-    _pvar(_richards_name_UO.richards_var_num(_var.number())),
-
-    // This kernel gets lots of things from the material
-    _flux(getMaterialProperty<std::vector<RealVectorValue> >("flux")),
-    _dflux_dv(getMaterialProperty<std::vector<std::vector<RealVectorValue> > >("dflux_dv")),
-    _dflux_dgradv(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dflux_dgradv")),
-    _d2flux_dvdv(getMaterialProperty<std::vector<std::vector<std::vector<RealVectorValue> > > >("d2flux_dvdv")),
-    _d2flux_dgradvdv(getMaterialProperty<std::vector<std::vector<std::vector<RealTensorValue> > > >("d2flux_dgradvdv")),
-    _d2flux_dvdgradv(getMaterialProperty<std::vector<std::vector<std::vector<RealTensorValue> > > >("d2flux_dvdgradv")),
-
-    _second_u(getParam<bool>("linear_shape_fcns") ? _second_zero : (_is_implicit ? _var.secondSln() : _var.secondSlnOld())),
-    _second_phi(getParam<bool>("linear_shape_fcns") ? _second_phi_zero : secondPhi()),
-
-    _tauvel_SUPG(getMaterialProperty<std::vector<RealVectorValue> >("tauvel_SUPG")),
-    _dtauvel_SUPG_dgradv(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dtauvel_SUPG_dgradv")),
-    _dtauvel_SUPG_dv(getMaterialProperty<std::vector<std::vector<RealVectorValue> > >("dtauvel_SUPG_dv"))
-{
-}

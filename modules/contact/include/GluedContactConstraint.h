@@ -28,7 +28,6 @@ class GluedContactConstraint :
 {
 public:
   GluedContactConstraint(const InputParameters & parameters);
-  GluedContactConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~GluedContactConstraint(){}
 
   virtual void timestepSetup();

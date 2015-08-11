@@ -24,7 +24,6 @@ class ElasticEnergyMaterial : public DerivativeFunctionMaterialBase
 {
 public:
   ElasticEnergyMaterial(const InputParameters & parameters);
-  ElasticEnergyMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeF();

@@ -185,17 +185,3 @@ ParsedMaterialHelper::computeProperties()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ParsedMaterialHelper::ParsedMaterialHelper(const std::string & name,
-                                           InputParameters parameters,
-                                           VariableNameMappingMode map_mode) :
-    FunctionMaterialBase(name, parameters),
-    FunctionParserUtils(name, parameters),
-    _func_F(NULL),
-    _variable_names(_nargs),
-    _mat_prop_descriptors(0),
-    _tol(0),
-    _map_mode(map_mode)
-{
-}

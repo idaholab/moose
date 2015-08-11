@@ -31,7 +31,6 @@ class MultiAppInterpolationTransfer :
 {
 public:
   MultiAppInterpolationTransfer(const InputParameters & parameters);
-  MultiAppInterpolationTransfer(const std::string & name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppInterpolationTransfer() {}
 
   virtual void initialSetup();

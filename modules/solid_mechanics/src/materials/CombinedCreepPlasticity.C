@@ -180,14 +180,3 @@ CombinedCreepPlasticity::modifyStrainIncrement(const Elem & current_elem, unsign
   return modified;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CombinedCreepPlasticity::CombinedCreepPlasticity(const std::string & deprecated_name, InputParameters parameters)
-  :ConstitutiveModel(deprecated_name, parameters),
-   _submodels(),
-   _max_its(parameters.get<unsigned int>("max_its")),
-   _output_iteration_info(getParam<bool>("output_iteration_info")),
-   _relative_tolerance(parameters.get<Real>("relative_tolerance")),
-   _absolute_tolerance(parameters.get<Real>("absolute_tolerance"))
-{
-}

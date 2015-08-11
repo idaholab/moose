@@ -30,7 +30,6 @@ class AreaPostprocessor : public SideIntegralPostprocessor
 {
 public:
   AreaPostprocessor(const InputParameters & parameters);
-  AreaPostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void threadJoin(const UserObject & y);
 
 protected:

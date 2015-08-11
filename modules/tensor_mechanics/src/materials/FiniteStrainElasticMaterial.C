@@ -45,9 +45,3 @@ void FiniteStrainElasticMaterial::computeQpStress()
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FiniteStrainElasticMaterial::FiniteStrainElasticMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    FiniteStrainMaterial(deprecated_name, parameters)
-{
-}

@@ -35,10 +35,3 @@ FunctionPresetBC::computeQpValue()
   return _func.value(_t, *_current_node);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FunctionPresetBC::FunctionPresetBC(const std::string & deprecated_name, InputParameters parameters) :
-    PresetNodalBC(deprecated_name, parameters),
-    _func(getFunction("function"))
-{
-}

@@ -35,7 +35,6 @@ class Postprocessor : public OutputInterface
 {
 public:
   Postprocessor(const InputParameters & parameters);
-  Postprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Postprocessor(){ }
 

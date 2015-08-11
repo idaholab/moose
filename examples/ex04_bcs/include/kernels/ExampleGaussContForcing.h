@@ -26,7 +26,7 @@ class ExampleGaussContForcing : public Kernel
 {
 public:
 
-  ExampleGaussContForcing(const std::string & name, InputParameters parameters);
+  ExampleGaussContForcing(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -47,7 +47,6 @@ class UserObject :
 {
 public:
   UserObject(const InputParameters & params);
-  UserObject(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
   virtual ~UserObject();
 
   /**

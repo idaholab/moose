@@ -105,7 +105,6 @@ class FEProblem :
 {
 public:
   FEProblem(const InputParameters & parameters);
-  FEProblem(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~FEProblem();
 
   virtual EquationSystems & es() { return _eq; }

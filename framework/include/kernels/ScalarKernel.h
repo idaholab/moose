@@ -57,7 +57,6 @@ class ScalarKernel :
 {
 public:
   ScalarKernel(const InputParameters & parameters);
-  ScalarKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void reinit() = 0;
   virtual void computeResidual() = 0;

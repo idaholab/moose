@@ -37,7 +37,6 @@ class NSEnergyInviscidBC : public NSIntegratedBC
 
 public:
   NSEnergyInviscidBC(const InputParameters & parameters);
-  NSEnergyInviscidBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSEnergyInviscidBC(){}
 

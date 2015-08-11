@@ -16,7 +16,6 @@ class ComputeFiniteStrain : public ComputeStrainBase
 {
 public:
   ComputeFiniteStrain(const InputParameters & parameters);
-  ComputeFiniteStrain(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void initQpStatefulProperties();

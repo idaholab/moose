@@ -41,9 +41,3 @@ GlobalParamsAction::remove(const std::string & name)
   parameters().remove(name);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-GlobalParamsAction::GlobalParamsAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

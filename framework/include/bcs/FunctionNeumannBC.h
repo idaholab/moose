@@ -31,7 +31,6 @@ class FunctionNeumannBC : public IntegratedBC
 {
 public:
   FunctionNeumannBC(const InputParameters & parameters);
-  FunctionNeumannBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

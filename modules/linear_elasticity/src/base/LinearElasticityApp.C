@@ -45,13 +45,7 @@ extern "C" void LinearElasticityApp__registerApps() { LinearElasticityApp::regis
 void
 LinearElasticityApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
-
   registerApp(LinearElasticityApp);
-
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -59,9 +53,6 @@ extern "C" void LinearElasticityApp__registerObjects(Factory & factory) { Linear
 void
 LinearElasticityApp::registerObjects(Factory & factory)
 {
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-
   registerMaterial(LinearElasticityMaterial);
   registerKernel(SolidMechX);
   registerKernel(SolidMechY);
@@ -69,9 +60,6 @@ LinearElasticityApp::registerObjects(Factory & factory)
   registerKernel(SolidMechTempCoupleX);
   registerKernel(SolidMechTempCoupleY);
   registerKernel(SolidMechTempCoupleZ);
-
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
 
 // External entry point for dynamic syntax association
@@ -81,14 +69,3 @@ LinearElasticityApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*acti
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-LinearElasticityApp::LinearElasticityApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  LinearElasticityApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  LinearElasticityApp::associateSyntax(_syntax, _action_factory);
-}

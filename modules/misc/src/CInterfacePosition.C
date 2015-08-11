@@ -48,12 +48,3 @@ CInterfacePosition::getValue()
   return _mesh.node(node_id)(_direction_index);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CInterfacePosition::CInterfacePosition(const std::string & deprecated_name, InputParameters parameters) :
-  NodalProxyMaxValue(deprecated_name, parameters),
-  _RefVal(getParam<Real>("RefVal")),
-    _direction_index(parameters.get<unsigned int>("direction_index")),
-    _mesh(_subproblem.mesh())
-{
-}

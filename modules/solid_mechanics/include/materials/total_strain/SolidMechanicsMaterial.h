@@ -24,7 +24,6 @@ class SolidMechanicsMaterial : public Material
 {
 public:
   SolidMechanicsMaterial(const InputParameters & parameters);
-  SolidMechanicsMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   const std::string _appended_property_name;

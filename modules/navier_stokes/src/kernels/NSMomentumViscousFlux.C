@@ -82,11 +82,3 @@ Real NSMomentumViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   return value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSMomentumViscousFlux::NSMomentumViscousFlux(const std::string & deprecated_name, InputParameters parameters)
-    : NSKernel(deprecated_name, parameters),
-      _component(getParam<unsigned>("component")),
-      _vst_derivs(*this)
-{
-}

@@ -32,7 +32,6 @@ class ElementVariablePostprocessor :
 {
 public:
   ElementVariablePostprocessor(const InputParameters & parameters);
-  ElementVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /// Just does a loop over "qp" calling computeQpValue()
   virtual void execute();

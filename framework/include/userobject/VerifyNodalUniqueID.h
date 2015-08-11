@@ -28,7 +28,6 @@ class VerifyNodalUniqueID : public NodalUserObject
 {
 public:
   VerifyNodalUniqueID(const InputParameters & parameters);
-  VerifyNodalUniqueID(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

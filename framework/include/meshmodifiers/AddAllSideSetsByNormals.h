@@ -33,7 +33,6 @@ class AddAllSideSetsByNormals : public AddSideSetsBase
 {
 public:
   AddAllSideSetsByNormals(const InputParameters & parameters);
-  AddAllSideSetsByNormals(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~AddAllSideSetsByNormals();
 

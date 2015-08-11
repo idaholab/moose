@@ -35,7 +35,6 @@
 // public:
 //
 //   NSPressureNeumannBC(const InputParameters & parameters);
-  NSPressureNeumannBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 //
 //   virtual ~NSPressureNeumannBC(){}
 //

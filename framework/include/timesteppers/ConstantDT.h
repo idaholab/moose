@@ -26,7 +26,6 @@ class ConstantDT : public TimeStepper
 {
 public:
   ConstantDT(const InputParameters & parameters);
-  ConstantDT(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeInitialDT();

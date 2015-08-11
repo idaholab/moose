@@ -34,9 +34,3 @@ DirichletBC::computeQpResidual()
   return _u[_qp] - _value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-DirichletBC::DirichletBC(const std::string & deprecated_name, InputParameters parameters) :
-  NodalBC(deprecated_name, parameters),
-  _value(getParam<Real>("value"))
-{}

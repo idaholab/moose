@@ -25,7 +25,6 @@ class RichardsRelPermVG : public RichardsRelPerm
 {
 public:
   RichardsRelPermVG(const InputParameters & parameters);
-  RichardsRelPermVG(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * relative permeability as a function of effective saturation

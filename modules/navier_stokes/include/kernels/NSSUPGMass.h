@@ -23,7 +23,6 @@ class NSSUPGMass : public NSSUPGBase
 {
 public:
   NSSUPGMass(const InputParameters & parameters);
-  NSSUPGMass(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

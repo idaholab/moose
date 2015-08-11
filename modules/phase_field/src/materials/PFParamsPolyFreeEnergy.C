@@ -104,28 +104,3 @@ PFParamsPolyFreeEnergy::computeQpProperties()
   _Qstar[_qp] = -4.0; // eV
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PFParamsPolyFreeEnergy::PFParamsPolyFreeEnergy(const std::string & deprecated_name, InputParameters parameters) :
-    Material(deprecated_name, parameters),
-    _c(coupledValue("c")),
-    _T(coupledValue("T")),
-    _M(declareProperty<Real>("M")),
-    _grad_M(declareProperty<RealGradient>("grad_M")),
-    _kappa(declareProperty<Real>("kappa")),
-    _c_eq(declareProperty<Real>("c_eq")),
-    _W(declareProperty<Real>("barr_height")),
-    _Qstar(declareProperty<Real>("Qstar")),
-    _D(declareProperty<Real>("D")),
-    _int_width(getParam<Real>("int_width")),
-    _length_scale(getParam<Real>("length_scale")),
-    _time_scale(getParam<Real>("time_scale")),
-    _order(getParam<MooseEnum>("polynomial_order")),
-    _D0(getParam<Real>("D0")),
-    _Em(getParam<Real>("Em")),
-    _Ef(getParam<Real>("Ef")),
-    _surface_energy(getParam<Real>("surface_energy")),
-    _JtoeV(6.24150974e18), // joule to eV conversion
-    _kb(8.617343e-5) // Boltzmann constant in eV/K
-{
-}

@@ -17,7 +17,6 @@ class ComputePlaneSmallStrain : public Compute2DSmallStrain
 {
 public:
   ComputePlaneSmallStrain(const InputParameters & parameters);
-  ComputePlaneSmallStrain(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeStrainZZ();

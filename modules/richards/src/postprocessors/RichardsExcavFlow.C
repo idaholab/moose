@@ -37,15 +37,3 @@ RichardsExcavFlow::computeQpIntegral()
   return -_func.value(_t, _q_point[_qp])*_normals[_qp]*_flux[_qp][_pvar]*_dt;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsExcavFlow::RichardsExcavFlow(const std::string & deprecated_name, InputParameters parameters) :
-    SideIntegralVariablePostprocessor(deprecated_name, parameters),
-
-    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
-    _pvar(_richards_name_UO.richards_var_num(coupled("variable"))),
-
-    _flux(getMaterialProperty<std::vector<RealVectorValue> >("flux")),
-
-    _func(getFunction("excav_geom_function"))
-{}

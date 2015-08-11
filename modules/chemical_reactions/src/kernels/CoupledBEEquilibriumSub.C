@@ -118,28 +118,3 @@ Real CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
 
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const std::string & name, InputParameters parameters)
-  // You must call the constructor of the base class first
-  :Kernel(name,parameters),
-   _weight(getParam<Real>("weight")),
-   _log_k(getParam<Real>("log_k")),
-   _sto_u(getParam<Real>("sto_u")),
-   _sto_v(getParam<std::vector<Real> >("sto_v")),
-   _porosity(getMaterialProperty<Real>("porosity")),
-   _u_old(valueOld())
-{
-  int n = coupledComponents("v");
-  _vars.resize(n);
-  _v_vals.resize(n);
-  _v_vals_old.resize(n);
-
-  for (unsigned int i=0; i < _v_vals.size(); ++i)
-  {
-    _vars[i] = coupled("v", i);
-    _v_vals[i] = &coupledValue("v", i);
-    _v_vals_old[i] = & coupledValueOld("v", i);
-  }
-
-}

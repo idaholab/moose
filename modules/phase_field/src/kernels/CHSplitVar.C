@@ -37,11 +37,3 @@ CHSplitVar::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CHSplitVar::CHSplitVar(const std::string & deprecated_name, InputParameters parameters) :
-    KernelGrad(deprecated_name, parameters),
-    _var_c(coupled("c")),
-    _grad_c(coupledGradient("c"))
-{
-}

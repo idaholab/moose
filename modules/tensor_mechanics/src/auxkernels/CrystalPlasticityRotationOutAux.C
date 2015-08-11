@@ -41,12 +41,3 @@ CrystalPlasticityRotationOutAux::computeValue()
   return 0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CrystalPlasticityRotationOutAux::CrystalPlasticityRotationOutAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _rotout_file_name(getParam<FileName>("rotout_file_name")),
-    _out_freq(getParam<unsigned int>("output_frequency")),
-    _update_rot( getMaterialProperty<RankTwoTensor>("update_rot"))
-{
-}

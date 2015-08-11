@@ -34,7 +34,6 @@ class ParsedODEKernel :
 {
 public:
   ParsedODEKernel(const InputParameters & parameters);
-  ParsedODEKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ParsedODEKernel();
 
 protected:

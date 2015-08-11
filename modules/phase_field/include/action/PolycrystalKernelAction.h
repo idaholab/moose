@@ -13,7 +13,6 @@ class PolycrystalKernelAction: public Action
 {
 public:
   PolycrystalKernelAction(const InputParameters & params);
-  PolycrystalKernelAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

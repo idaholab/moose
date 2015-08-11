@@ -49,9 +49,3 @@ SetupPredictorAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SetupPredictorAction::SetupPredictorAction(const std::string & deprecated_name, InputParameters parameters) :
-    MooseObjectAction(deprecated_name, parameters)
-{
-}

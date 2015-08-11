@@ -38,9 +38,3 @@ SetupPostprocessorDataAction::act()
   _problem->initPostprocessorData(MooseUtils::shortName(_name));
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SetupPostprocessorDataAction::SetupPostprocessorDataAction(const std::string & deprecated_name, InputParameters params) :
-  Action(deprecated_name, params)
-{
-}

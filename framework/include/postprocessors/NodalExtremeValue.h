@@ -41,7 +41,6 @@ public:
    * @param parameters The input parameters
    */
   NodalExtremeValue(const InputParameters & parameters);
-  NodalExtremeValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void initialize();
   virtual void execute();
   virtual Real getValue();

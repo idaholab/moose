@@ -37,12 +37,7 @@ extern "C" void WaterSteamEOSApp__registerApps() { WaterSteamEOSApp::registerApp
 void
 WaterSteamEOSApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
   registerApp(WaterSteamEOSApp);
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
-
 }
 
 // External entry point for dynamic object registration
@@ -59,14 +54,3 @@ WaterSteamEOSApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-WaterSteamEOSApp::WaterSteamEOSApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  WaterSteamEOSApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  WaterSteamEOSApp::associateSyntax(_syntax, _action_factory);
-}

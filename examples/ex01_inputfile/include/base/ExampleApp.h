@@ -24,7 +24,7 @@ InputParameters validParams<ExampleApp>();
 class ExampleApp : public MooseApp
 {
 public:
-  ExampleApp(const std::string & name, InputParameters parameters);
+  ExampleApp(InputParameters parameters);
   virtual ~ExampleApp();
 
   static void registerApps();

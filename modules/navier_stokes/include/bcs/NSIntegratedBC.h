@@ -27,7 +27,6 @@ class NSIntegratedBC : public IntegratedBC
 {
 public:
   NSIntegratedBC(const InputParameters & parameters);
-  NSIntegratedBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSIntegratedBC(){}
 

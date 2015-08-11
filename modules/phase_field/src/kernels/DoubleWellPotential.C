@@ -36,9 +36,3 @@ DoubleWellPotential::computeDFDOP(PFFunctionType type)
   mooseError("Invalid type passed in");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-DoubleWellPotential::DoubleWellPotential(const std::string & deprecated_name, InputParameters parameters) :
-    ACBulk(deprecated_name, parameters)
-{
-}

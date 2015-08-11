@@ -44,7 +44,6 @@ class FeatureFloodCount :
 {
 public:
   FeatureFloodCount(const InputParameters & parameters);
-  FeatureFloodCount(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   ~FeatureFloodCount();
 
   virtual void initialize();

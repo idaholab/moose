@@ -25,12 +25,3 @@ ComputeRotatedElasticityTensorBase::ComputeRotatedElasticityTensorBase(const Inp
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ComputeRotatedElasticityTensorBase::ComputeRotatedElasticityTensorBase(const std::string & deprecated_name, InputParameters parameters) :
-    ComputeElasticityTensorBase(deprecated_name, parameters),
-    _Euler_angles(getParam<Real>("euler_angle_1"),
-                  getParam<Real>("euler_angle_2"),
-                  getParam<Real>("euler_angle_3"))
-{
-}

@@ -41,18 +41,3 @@ StressDivergencePFFracTensors::computeQpOffDiagJacobian(unsigned int jvar)
   return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-StressDivergencePFFracTensors::StressDivergencePFFracTensors(const std::string & deprecated_name, InputParameters parameters) :
-    StressDivergenceTensors(deprecated_name, parameters),
-    _c_coupled(isCoupled("c")),
-    _c_var(_c_coupled ? coupled("c") : 0)
-{
-  if (_c_coupled)
-  {
-    if (!isParamValid("pff_jac_prop_name"))
-      mooseError("StressDivergencePFFracTensors: Provide pff_jac_prop_name that contains d_stress_d_c: Coupled variable only used in Jacobian evaluation");
-    else
-      _d_stress_dc  = &getMaterialProperty<RankTwoTensor>("pff_jac_prop_name");
-  }
-}

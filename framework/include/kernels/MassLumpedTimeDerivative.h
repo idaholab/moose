@@ -27,7 +27,6 @@ class MassLumpedTimeDerivative : public TimeKernel
 {
 public:
   MassLumpedTimeDerivative(const InputParameters & parameters);
-  MassLumpedTimeDerivative(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void computeJacobian();
 

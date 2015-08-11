@@ -30,11 +30,3 @@ AccumulateAux::computeValue()
   else
     return _var.nodalSln()[0] + _accumulate_from[_qp];
 }
-
-
-// DEPRECATED CONSTRUCTOR
-AccumulateAux::AccumulateAux(const std::string & deprecated_name, InputParameters parameters) :
-  AuxKernel(deprecated_name, parameters),
-  _accumulate_from(coupledValue("accumulate_from_variable"))
-{
-}

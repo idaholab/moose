@@ -17,7 +17,6 @@ class HHPFCRFFSplitVariablesAction: public Action
 {
 public:
   HHPFCRFFSplitVariablesAction(const InputParameters & params);
-  HHPFCRFFSplitVariablesAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

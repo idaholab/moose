@@ -27,7 +27,6 @@ class NSEnergyThermalFlux : public NSKernel
 public:
 
   NSEnergyThermalFlux(const InputParameters & parameters);
-  NSEnergyThermalFlux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

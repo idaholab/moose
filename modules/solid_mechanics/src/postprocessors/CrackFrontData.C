@@ -61,18 +61,3 @@ CrackFrontData::getValue()
 
   return _scale_factor * value;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-CrackFrontData::CrackFrontData(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters),
-    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _crack_front_point_index(isParamValid("crack_front_point_index") ? getParam<unsigned int>("crack_front_point_index") : 0),
-    _crack_front_node(NULL),
-    _mesh(_subproblem.mesh()),
-    _var_name(parameters.get<VariableName>("variable")),
-    _scale_factor(getParam<Real>("scale_factor"))
-{
-  if (!_subproblem.getVariable(_tid, _var_name).isNodal())
-    mooseError("CrackFrontData can be output only for nodal variables, variable '" << _var_name << "' is not nodal");
-}

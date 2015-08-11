@@ -30,7 +30,6 @@ public:
    * @param parameters Input parameters for this object
    */
   ClosePackIC(const InputParameters & parameters);
-  ClosePackIC(const std::string & name, InputParameters parameters); // DEPRECATED
   /**
    * Destructor
    */

@@ -78,11 +78,3 @@ CrankNicolson::postSolve()
   _residual_old = _Re_non_time;
   _residual_old.close();
 }
-
-
-// DEPRECATED CONSTRUCTOR
-CrankNicolson::CrankNicolson(const std::string & deprecated_name, InputParameters parameters) :
-    TimeIntegrator(deprecated_name, parameters),
-    _residual_old(_nl.addVector("residual_old", false, GHOSTED))
-{
-}

@@ -26,8 +26,8 @@ InputParameters validParams<TransientHalf>()
   return params;
 }
 
-TransientHalf::TransientHalf(const std::string & name, InputParameters parameters) :
-    TimeStepper(name, parameters),
+TransientHalf::TransientHalf(const InputParameters & parameters) :
+    TimeStepper(parameters),
     _ratio(getParam<Real>("ratio")),
     _min_dt(getParam<Real>("min_dt"))
 {

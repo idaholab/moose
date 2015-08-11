@@ -31,7 +31,6 @@ class FunctionValuePostprocessor : public GeneralPostprocessor
 {
 public:
   FunctionValuePostprocessor(const InputParameters & parameters);
-  FunctionValuePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~FunctionValuePostprocessor();
 
   virtual void initialize();

@@ -170,13 +170,3 @@ Dirk::postStep(NumericVector<Number> & residual)
   else
     mooseError("Dirk::computeTimeDerivatives(): Member variable _stage can only have values 1, 2 or 3.");
 }
-
-// DEPRECATED CONSTRUCTOR
-Dirk::Dirk(const std::string & name, InputParameters parameters) :
-    TimeIntegrator(name, parameters),
-    _stage(1),
-    _residual_stage1(_nl.addVector("residual_stage1", false, GHOSTED)),
-    _residual_stage2(_nl.addVector("residual_stage2", false, GHOSTED)),
-    _solution_start(_sys.solutionOld())
-{
-}

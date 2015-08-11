@@ -24,7 +24,6 @@ class CHParsed : public CHBulk
 {
 public:
   CHParsed(const InputParameters & parameters);
-  CHParsed(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);

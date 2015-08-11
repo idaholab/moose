@@ -19,7 +19,6 @@ class ACGrGrElasticDrivingForce : public ACBulk
 {
 public:
   ACGrGrElasticDrivingForce(const InputParameters & parameters);
-  ACGrGrElasticDrivingForce(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);

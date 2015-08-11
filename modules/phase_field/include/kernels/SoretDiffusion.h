@@ -22,7 +22,6 @@ class SoretDiffusion : public Kernel
 {
 public:
   SoretDiffusion(const InputParameters & parameters);
-  SoretDiffusion(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -32,11 +32,3 @@ NodalVariablePostprocessor::NodalVariablePostprocessor(const InputParameters & p
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NodalVariablePostprocessor::NodalVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    NodalPostprocessor(deprecated_name, parameters),
-    MooseVariableInterface(parameters, true),
-    _u(coupledValue("variable"))
-{
-}

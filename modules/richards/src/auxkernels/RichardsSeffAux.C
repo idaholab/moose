@@ -38,15 +38,3 @@ RichardsSeffAux::computeValue()
   return _seff_UO.seff(_pressure_vals, _qp);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSeffAux::RichardsSeffAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _seff_UO(getUserObject<RichardsSeff>("seff_UO"))
-{
-  int n = coupledComponents("pressure_vars");
-  _pressure_vals.resize(n);
-
-  for (int i = 0 ; i < n; ++i)
-    _pressure_vals[i] = &coupledValue("pressure_vars", i);
-}

@@ -28,7 +28,6 @@ class RichardsSeff1VG : public RichardsSeff
 {
 public:
   RichardsSeff1VG(const InputParameters & parameters);
-  RichardsSeff1VG(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * effective saturation as a function of porepressure

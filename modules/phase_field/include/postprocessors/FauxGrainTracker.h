@@ -26,7 +26,6 @@ class FauxGrainTracker : public FeatureFloodCount
 {
 public:
   FauxGrainTracker(const InputParameters & parameters);
-  FauxGrainTracker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~FauxGrainTracker();
 
   virtual void initialize();

@@ -27,7 +27,6 @@ class CHBulk : public DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >
 public:
 
   CHBulk(const InputParameters & parameters);
-  CHBulk(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

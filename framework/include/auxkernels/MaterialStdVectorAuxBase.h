@@ -32,7 +32,6 @@ class MaterialStdVectorAuxBase : public MaterialAuxBase<std::vector<T> >
 {
 public:
   MaterialStdVectorAuxBase(const InputParameters & parameters);
-  MaterialStdVectorAuxBase(const std::string & name, InputParameters parameters);
 
   virtual ~MaterialStdVectorAuxBase(){}
 
@@ -42,13 +41,6 @@ protected:
   /// index of the vecor element
   unsigned int _index;
 };
-
-template<typename T>
-MaterialStdVectorAuxBase<T>::MaterialStdVectorAuxBase(const std::string & name, InputParameters parameters) :
-    MaterialAuxBase<std::vector<T> >(name, parameters),
-    _index(this->template getParam<unsigned int>("index"))
-{
-}
 
 template<typename T>
 MaterialStdVectorAuxBase<T>::MaterialStdVectorAuxBase(const InputParameters & parameters) :

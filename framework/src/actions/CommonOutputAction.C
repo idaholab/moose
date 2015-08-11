@@ -207,25 +207,3 @@ CommonOutputAction::hasConsole()
   return false;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CommonOutputAction::CommonOutputAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _action_params(_action_factory.getValidParams("AddOutputAction"))
-{
-  // Set the ActionWarehouse pointer in the parameters that will be passed to the actions created with this action
-  _action_params.set<ActionWarehouse *>("awh") = &_awh;
-
-  // Support quick output toggles
-  MultiMooseEnum & output_on = _pars.set<MultiMooseEnum>("output_on");
-  if (getParam<bool>("output_initial"))
-    output_on.push_back("initial");
-  if (getParam<bool>("output_timestep_end"))
-    output_on.push_back("timestep_end");
-  if (getParam<bool>("output_final"))
-    output_on.push_back("final");
-
-  // **** DEPRECATED PARAMETER SUPPORT ****
-  if (getParam<bool>("output_intermediate"))
-    output_on.push_back("timestep_end");
-}

@@ -62,10 +62,3 @@ AutoPositionsMultiApp::fillPositions()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AutoPositionsMultiApp::AutoPositionsMultiApp(const std::string & deprecated_name, InputParameters parameters):
-    TransientMultiApp(deprecated_name, parameters),
-    BoundaryRestrictable(parameters)
-{
-}

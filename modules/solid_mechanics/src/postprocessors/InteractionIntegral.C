@@ -167,27 +167,3 @@ InteractionIntegral::computeQpIntegral()
 
   return eq/q_avg_seg;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-InteractionIntegral::InteractionIntegral(const std::string & deprecated_name, InputParameters parameters) :
-    ElementIntegralPostprocessor(deprecated_name, parameters),
-    _grad_of_scalar_q(coupledGradient("q")),
-    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _has_crack_front_point_index(isParamValid("crack_front_point_index")),
-    _crack_front_point_index(_has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
-    _treat_as_2d(false),
-    _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor")),
-    _stress(getMaterialPropertyByName<SymmTensor>("stress")),
-    _strain(getMaterialPropertyByName<SymmTensor>("elastic_strain")),
-    _grad_disp_x(coupledGradient("disp_x")),
-    _grad_disp_y(coupledGradient("disp_y")),
-    _grad_disp_z(parameters.get<SubProblem *>("_subproblem")->mesh().dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
-    _aux_stress(getMaterialProperty<ColumnMajorMatrix>("aux_stress")),
-    _aux_grad_disp(getMaterialProperty<ColumnMajorMatrix>("aux_grad_disp")),
-    _K_factor(getParam<Real>("K_factor")),
-    _has_symmetry_plane(isParamValid("symmetry_plane")),
-    _t_stress(getParam<bool>("t_stress")),
-    _poissons_ratio(getParam<Real>("poissons_ratio"))
-{
-}

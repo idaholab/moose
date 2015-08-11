@@ -17,7 +17,6 @@ class Tricrystal2CircleGrainsICAction: public Action
 {
 public:
   Tricrystal2CircleGrainsICAction(const InputParameters & params);
-  Tricrystal2CircleGrainsICAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

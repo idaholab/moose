@@ -33,10 +33,3 @@ RichardsSatPrimeAux::computeValue()
   return _sat_UO.dsat(_seff_var[_qp]);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSatPrimeAux::RichardsSatPrimeAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _seff_var(coupledValue("seff_var")),
-    _sat_UO(getUserObject<RichardsSat>("sat_UO"))
-{}

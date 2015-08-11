@@ -18,7 +18,6 @@ class WaterSteamEOSApp : public MooseApp
 {
 public:
   WaterSteamEOSApp(const InputParameters & parameters);
-  WaterSteamEOSApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~WaterSteamEOSApp();
 
   static void registerApps();

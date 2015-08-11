@@ -40,7 +40,6 @@ public:
    * @return Whether or not the solve was successful.
    */
   EigenExecutionerBase(const InputParameters & parameters);
-  EigenExecutionerBase(const std::string & name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~EigenExecutionerBase();
 

@@ -32,9 +32,3 @@ ComputeAxisymmetricRZSmallStrain::computeStrainZZ()
     return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ComputeAxisymmetricRZSmallStrain::ComputeAxisymmetricRZSmallStrain(const std::string & deprecated_name, InputParameters parameters) :
-    Compute2DSmallStrain(deprecated_name, parameters)
-{
-}

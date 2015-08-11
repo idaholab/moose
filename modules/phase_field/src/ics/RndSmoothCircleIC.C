@@ -57,12 +57,3 @@ RndSmoothCircleIC::computeCircleValue(const Point & p, const Point & center, con
   return value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RndSmoothCircleIC::RndSmoothCircleIC(const std::string & deprecated_name, InputParameters parameters) :
-    SmoothCircleIC(deprecated_name, parameters),
-    _variation_invalue(parameters.get<Real>("variation_invalue")),
-    _variation_outvalue(parameters.get<Real>("variation_outvalue"))
-{
-  MooseRandom::seed(getParam<unsigned int>("rand_seed"));
-}

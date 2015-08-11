@@ -32,9 +32,3 @@ EmptyAction::act()
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-EmptyAction::EmptyAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

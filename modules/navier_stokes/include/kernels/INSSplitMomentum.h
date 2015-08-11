@@ -29,7 +29,6 @@ class INSSplitMomentum : public Kernel
 {
 public:
   INSSplitMomentum(const InputParameters & parameters);
-  INSSplitMomentum(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSSplitMomentum(){}
 

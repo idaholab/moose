@@ -46,10 +46,3 @@ RichardsDensityConstBulk::d2density(Real p) const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsDensityConstBulk::RichardsDensityConstBulk(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsDensity(deprecated_name, parameters),
-    _dens0(getParam<Real>("dens0")),
-    _bulk(getParam<Real>("bulk_mod"))
-{}

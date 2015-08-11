@@ -35,7 +35,6 @@ class ElementH1SemiError :
 {
 public:
   ElementH1SemiError(const InputParameters & parameters);
-  ElementH1SemiError(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real getValue();
 

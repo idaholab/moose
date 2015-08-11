@@ -26,7 +26,6 @@ class RichardsRelPermPowerGas : public RichardsRelPerm
 {
 public:
   RichardsRelPermPowerGas(const InputParameters & parameters);
-  RichardsRelPermPowerGas(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Relative permeability

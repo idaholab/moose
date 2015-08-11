@@ -30,7 +30,6 @@ class RichardsHalfGaussianSink : public IntegratedBC
 {
 public:
   RichardsHalfGaussianSink(const InputParameters & parameters);
-  RichardsHalfGaussianSink(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

@@ -41,7 +41,6 @@ public:
    * @param parameters The input parameters
    */
   ElementExtremeValue(const InputParameters & parameters);
-  ElementExtremeValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void initialize();
   virtual Real getValue();
   virtual void threadJoin(const UserObject & y);

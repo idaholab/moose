@@ -22,9 +22,3 @@ HeatSource::HeatSource(const InputParameters & parameters)
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-HeatSource::HeatSource(const std::string & deprecated_name, InputParameters parameters)
-  :BodyForce(deprecated_name, parameters)
-{
-}

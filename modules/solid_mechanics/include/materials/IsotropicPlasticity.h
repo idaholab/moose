@@ -18,7 +18,6 @@ class IsotropicPlasticity : public ReturnMappingModel
 {
 public:
   IsotropicPlasticity( const InputParameters & parameters);
-  IsotropicPlasticity(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initStatefulProperties(unsigned n_points);
 

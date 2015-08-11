@@ -34,9 +34,3 @@ AddPostprocessorAction::act()
   _problem->addPostprocessor(_type, _name, _moose_object_pars);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddPostprocessorAction::AddPostprocessorAction(const std::string & deprecated_name, InputParameters params) :
-    MooseObjectAction(deprecated_name, params)
-{
-}

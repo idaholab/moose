@@ -23,7 +23,6 @@ class INSChorinPredictor : public Kernel
 {
 public:
   INSChorinPredictor(const InputParameters & parameters);
-  INSChorinPredictor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSChorinPredictor(){}
 

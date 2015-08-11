@@ -20,7 +20,6 @@ class GapHeatTransfer : public IntegratedBC
 public:
 
   GapHeatTransfer(const InputParameters & parameters);
-  GapHeatTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~GapHeatTransfer(){}
 

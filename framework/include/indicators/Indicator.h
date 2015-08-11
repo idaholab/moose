@@ -55,7 +55,6 @@ class Indicator :
 {
 public:
   Indicator(const InputParameters & parameters);
-  Indicator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~Indicator(){};
 
   /**

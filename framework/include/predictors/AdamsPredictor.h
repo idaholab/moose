@@ -30,7 +30,6 @@ class AdamsPredictor : public Predictor
 {
 public:
   AdamsPredictor(const InputParameters & parameters);
-  AdamsPredictor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~AdamsPredictor();
 
   virtual int order() { return _order; }

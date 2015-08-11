@@ -26,7 +26,6 @@ class ElementIntegralMaterialProperty : public ElementIntegralPostprocessor
 {
 public:
   ElementIntegralMaterialProperty(const InputParameters & parameters);
-  ElementIntegralMaterialProperty(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

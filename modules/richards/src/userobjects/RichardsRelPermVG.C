@@ -90,11 +90,3 @@ RichardsRelPermVG::d2relperm(Real seff) const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsRelPermVG::RichardsRelPermVG(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsRelPerm(deprecated_name, parameters),
-    _simm(getParam<Real>("simm")),
-    _m(getParam<Real>("m"))
-{
-}

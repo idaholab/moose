@@ -57,13 +57,3 @@ PolycrystalElasticDrivingForceAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PolycrystalElasticDrivingForceAction::PolycrystalElasticDrivingForceAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _op_num(getParam<unsigned int>("op_num")),
-    _var_name_base(getParam<std::string>("var_name_base")),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
-    _elasticity_tensor_name(_base_name + "elasticity_tensor")
-{
-}

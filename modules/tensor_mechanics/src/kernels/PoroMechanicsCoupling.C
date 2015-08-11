@@ -51,15 +51,3 @@ PoroMechanicsCoupling::computeQpOffDiagJacobian(unsigned int jvar)
   return -_coefficient[_qp]*_phi[_j][_qp]*_grad_test[_i][_qp](_component);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PoroMechanicsCoupling::PoroMechanicsCoupling(const std::string & deprecated_name, InputParameters parameters) :
-  Kernel(deprecated_name, parameters),
-  _coefficient(getMaterialProperty<Real>("biot_coefficient")),
-  _porepressure(coupledValue("porepressure")),
-  _porepressure_var_num(coupled("porepressure")),
-  _component(getParam<unsigned int>("component"))
-{
-  if (_component >= _mesh.dimension())
-    mooseError("PoroMechanicsCoupling: component should not be greater than the mesh dimension\n");
-}

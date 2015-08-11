@@ -34,7 +34,6 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   LatticeSmoothCircleIC(const InputParameters & parameters);
-  LatticeSmoothCircleIC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialSetup();
 

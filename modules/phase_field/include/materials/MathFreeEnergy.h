@@ -23,7 +23,6 @@ class MathFreeEnergy : public DerivativeFunctionMaterialBase
 {
 public:
   MathFreeEnergy(const InputParameters & parameters);
-  MathFreeEnergy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeF();

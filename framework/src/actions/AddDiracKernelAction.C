@@ -33,9 +33,3 @@ AddDiracKernelAction::act()
   _problem->addDiracKernel(_type, _name, _moose_object_pars);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddDiracKernelAction::AddDiracKernelAction(const std::string & deprecated_name, InputParameters params) :
-    MooseObjectAction(deprecated_name, params)
-{
-}

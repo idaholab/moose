@@ -28,7 +28,6 @@ class MultiDContactConstraint :
 {
 public:
   MultiDContactConstraint(const InputParameters & parameters);
-  MultiDContactConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiDContactConstraint(){}
 
   virtual void timestepSetup();

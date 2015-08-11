@@ -42,10 +42,3 @@ ElementL2Error::computeQpIntegral()
   return diff*diff;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElementL2Error::ElementL2Error(const std::string & deprecated_name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(deprecated_name, parameters),
-    _func(getFunction("function"))
-{
-}

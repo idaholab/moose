@@ -21,7 +21,6 @@ class GapConductanceConstraint : public FaceFaceConstraint
 {
 public:
   GapConductanceConstraint(const InputParameters & parameters);
-  GapConductanceConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~GapConductanceConstraint();
 
 protected:

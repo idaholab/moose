@@ -41,9 +41,3 @@ ElasticModel::computeStress( const Elem & /*current_elem*/,
   stress_new += stress_old;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElasticModel::ElasticModel(const std::string & deprecated_name, InputParameters parameters)
-  :ConstitutiveModel(deprecated_name, parameters)
-{
-}

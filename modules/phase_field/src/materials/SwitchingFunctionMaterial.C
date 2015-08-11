@@ -48,10 +48,3 @@ SwitchingFunctionMaterial::computeQpProperties()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SwitchingFunctionMaterial::SwitchingFunctionMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    OrderParameterFunctionMaterial(deprecated_name, parameters),
-    _h_order(getParam<MooseEnum>("h_order"))
-{
-}

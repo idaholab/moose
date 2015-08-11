@@ -35,7 +35,6 @@ class SideSetsAroundSubdomain :
 {
 public:
   SideSetsAroundSubdomain(const InputParameters & parameters);
-  SideSetsAroundSubdomain(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SideSetsAroundSubdomain();
 

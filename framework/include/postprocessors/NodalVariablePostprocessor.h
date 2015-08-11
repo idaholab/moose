@@ -31,7 +31,6 @@ class NodalVariablePostprocessor :
 {
 public:
   NodalVariablePostprocessor(const InputParameters & parameters);
-  NodalVariablePostprocessor(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /// Holds the solution at current quadrature points

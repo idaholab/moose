@@ -55,11 +55,3 @@ RichardsSeff2gasVG::d2seff(std::vector<VariableValue *> p, unsigned int qp, std:
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSeff2gasVG::RichardsSeff2gasVG(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsSeff(deprecated_name, parameters),
-    _al(getParam<Real>("al")),
-    _m(getParam<Real>("m"))
-{
-}

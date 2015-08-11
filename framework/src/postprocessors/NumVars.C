@@ -45,9 +45,3 @@ NumVars::getValue()
   mooseError("Unknown system type!");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NumVars::NumVars(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralPostprocessor(deprecated_name, parameters),
-    _system(getParam<MooseEnum>("system"))
-{}

@@ -19,7 +19,6 @@ class ConstitutiveModel : public Material
 {
 public:
   ConstitutiveModel( const InputParameters & parameters);
-  ConstitutiveModel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ConstitutiveModel() {}
 

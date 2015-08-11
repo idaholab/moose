@@ -65,13 +65,3 @@ SplineFunction::secondDerivative(const Point & p)
   return _ipol.sample2ndDerivative(p(0));
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SplineFunction::SplineFunction(const std::string & deprecated_name, InputParameters parameters) :
-    Function(deprecated_name, parameters),
-    _ipol(getParam<std::vector<Real> >("x"),
-          getParam<std::vector<Real> >("y"),
-          getParam<Real>("yp1"),
-          getParam<Real>("ypn"))
-{
-}

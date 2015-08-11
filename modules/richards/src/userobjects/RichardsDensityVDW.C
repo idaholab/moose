@@ -107,18 +107,3 @@ RichardsDensityVDW::d2density(Real p) const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsDensityVDW::RichardsDensityVDW(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsDensity(deprecated_name, parameters),
-    _a(getParam<Real>("a")),
-    _b(getParam<Real>("b")),
-    _rt(getParam<Real>("temperature")*8.314472), // multiply by gas constant
-    _molar_mass(getParam<Real>("molar_mass")),
-    _infinity_ratio(getParam<Real>("infinity_ratio")),
-    _rhs(_rt*_b/_a),
-    _b2oa(_b*_b/_a)
-{
-  _vdw0 = densityVDW(0);
-  _slope0 = ddensity(0)/_molar_mass/_infinity_ratio;
-}

@@ -78,9 +78,3 @@ ConservedNoiseBase::getQpValue(dof_id_type element_id, unsigned int qp) const
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ConservedNoiseBase::ConservedNoiseBase(const std::string & deprecated_name, InputParameters parameters) :
-    ConservedNoiseInterface(deprecated_name, parameters)
-{
-}

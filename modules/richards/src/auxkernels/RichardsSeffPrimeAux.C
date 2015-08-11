@@ -45,20 +45,3 @@ RichardsSeffPrimeAux::computeValue()
   return _mat[_wrt1];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSeffPrimeAux::RichardsSeffPrimeAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _seff_UO(getUserObject<RichardsSeff>("seff_UO")),
-    _wrt1(getParam<int>("wrtnum"))
-{
-  int n = coupledComponents("pressure_vars");
-  if (_wrt1 < 0 || _wrt1 >= n)
-    mooseError("Your wrtnum is " << _wrt1 << " but it must obey 0 <= wrtnum < " << n << ".");
-  _pressure_vals.resize(n);
-
-  for (int i = 0 ; i < n; ++i)
-    _pressure_vals[i] = &coupledValue("pressure_vars", i);
-
-  _mat.resize(n);
-}

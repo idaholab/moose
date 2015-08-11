@@ -116,24 +116,3 @@ JIntegral::getValue()
 
   return _integral_value;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-JIntegral::JIntegral(const std::string & deprecated_name, InputParameters parameters):
-    ElementIntegralPostprocessor(deprecated_name, parameters),
-    _scalar_q(coupledValue("q")),
-    _grad_of_scalar_q(coupledGradient("q")),
-    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _has_crack_front_point_index(isParamValid("crack_front_point_index")),
-    _crack_front_point_index(_has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
-    _treat_as_2d(false),
-    _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor")),
-    _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")?
-                        &getMaterialProperty<RealVectorValue>("J_thermal_term_vec"):
-                        NULL),
-    _convert_J_to_K(getParam<bool>("convert_J_to_K")),
-    _has_symmetry_plane(isParamValid("symmetry_plane")),
-    _poissons_ratio(isParamValid("poissons_ratio") ? getParam<Real>("poissons_ratio") : 0),
-    _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0)
-{
-}

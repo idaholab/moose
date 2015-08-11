@@ -66,17 +66,3 @@ SoretDiffusion::computeQpCJacobian()
   return _D[_qp] * _Q[_qp] * _phi[_j][_qp] * _grad_T[_qp] / (_kb * _T[_qp] * _T[_qp]) * _grad_test[_i][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SoretDiffusion::SoretDiffusion(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _T_var(coupled("T")),
-    _T(coupledValue("T")),
-    _grad_T(coupledGradient("T")),
-    _c_var(coupled("c")),
-    _c(coupledValue("c")),
-    _D(getMaterialProperty<Real>("diff_name")),
-    _Q(getMaterialProperty<Real>("Q_name")),
-    _kb(8.617343e-5) // Boltzmann constant in eV/K
-{
-}

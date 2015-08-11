@@ -35,13 +35,3 @@ PFMobility::computeProperties()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PFMobility::PFMobility(const std::string & deprecated_name, InputParameters parameters) :
-    Material(deprecated_name, parameters),
-    _M(declareProperty<Real>("M")),
-    _grad_M(declareProperty<RealGradient>("grad_M")),
-    _kappa_c(declareProperty<Real>("kappa_c")),
-    _mob(getParam<Real>("mob")),
-    _kappa(getParam<Real>("kappa"))
-{}

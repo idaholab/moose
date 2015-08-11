@@ -23,7 +23,6 @@ class EBSDReader : public EulerAngleProvider, public EBSDAccessFunctors
 {
 public:
   EBSDReader(const InputParameters & params);
-  EBSDReader(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~EBSDReader();
 
   virtual void readFile();

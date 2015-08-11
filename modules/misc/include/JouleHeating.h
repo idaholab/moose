@@ -23,7 +23,6 @@ class JouleHeating : public Kernel
 public:
 
   JouleHeating(const InputParameters & parameters);
-  JouleHeating(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

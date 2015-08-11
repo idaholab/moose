@@ -96,9 +96,3 @@ AddOutputAction::act()
   output_warehouse.addOutput(output);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-AddOutputAction::AddOutputAction(const std::string & deprecated_name, InputParameters params) :
-    MooseObjectAction(deprecated_name, params)
-{
-}

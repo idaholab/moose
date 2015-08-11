@@ -6,7 +6,6 @@
 /****************************************************************/
 #include "ImageFunction.h"
 #include "MooseUtils.h"
-#include "FileRangeBuilder.h"
 #include "ImageMesh.h"
 
 template<>
@@ -14,10 +13,8 @@ InputParameters validParams<ImageFunction>()
 {
   // Define the general parameters
   InputParameters params = validParams<Function>();
+  params += validParams<FileRangeBuilder>();
   params.addClassDescription("Function with values sampled from a given image stack");
-
-  // Add parameters associated with file ranges
-  addFileRangeParams(params);
 
   params.addParam<Point>("origin", "Origin of the image (defaults to mesh origin)");
   params.addParam<Point>("dimensions", "x,y,z dimensions of the image (defaults to mesh dimensions)");
@@ -45,7 +42,8 @@ InputParameters validParams<ImageFunction>()
 }
 
 ImageFunction::ImageFunction(const InputParameters & parameters) :
-    Function(parameters)
+    Function(parameters),
+    FileRangeBuilder(parameters)
 #ifdef LIBMESH_HAVE_VTK
     ,_data(NULL)
     ,_algorithm(NULL)
@@ -68,6 +66,7 @@ ImageFunction::initialSetup()
   // Get access to the Mesh object
   FEProblem * fe_problem = getParam<FEProblem *>("_fe_problem");
   MooseMesh & mesh = fe_problem->mesh();
+  MeshTools::BoundingBox bbox = MeshTools::bounding_box(mesh.getMesh());
 
   // Set the dimensions from the Mesh if not set by the User
   if (isParamValid("dimensions"))
@@ -75,12 +74,12 @@ ImageFunction::initialSetup()
 
   else
   {
-    _physical_dims(0) = mesh.getParam<Real>("xmax") - mesh.getParam<Real>("xmin");
+    _physical_dims(0) = bbox.max()(0) - bbox.min()(0);
 #if LIBMESH_DIM > 1
-    _physical_dims(1) = mesh.getParam<Real>("ymax") - mesh.getParam<Real>("ymin");
+    _physical_dims(1) = bbox.max()(1) - bbox.min()(1);
 #endif
 #if LIBMESH_DIM > 2
-    _physical_dims(2) = mesh.getParam<Real>("zmax") - mesh.getParam<Real>("zmin");
+    _physical_dims(2) = bbox.max()(2) - bbox.min()(2);
 #endif
   }
 
@@ -89,12 +88,12 @@ ImageFunction::initialSetup()
     _origin = getParam<Point>("origin");
   else
   {
-    _origin(0) = mesh.getParam<Real>("xmin");
+    _origin(0) = bbox.min()(0);
 #if LIBMESH_DIM > 1
-    _origin(1) = mesh.getParam<Real>("ymin");
+    _origin(1) = bbox.min()(1);
 #endif
 #if LIBMESH_DIM > 2
-    _origin(2) = mesh.getParam<Real>("zmin");
+    _origin(2) = bbox.min()(2);
 #endif
   }
 
@@ -111,9 +110,7 @@ ImageFunction::initialSetup()
   // The parseFileRange method sets parameters, thus a writable reference to the InputParameters
   // object must be obtained from the warehouse. Generally, this should be avoided, but
   // this is a special case.
-  int status = parseFileRange(_app.getInputParameterWarehouse().getInputParameters(_name));
-
-  if (status != 0)
+  if (_status != 0)
   {
     // We don't have parameters, so see if we can get them from ImageMesh
     ImageMesh * image_mesh = dynamic_cast<ImageMesh*>(&mesh);
@@ -122,15 +119,14 @@ ImageFunction::initialSetup()
 
     // Get the ImageMesh's parameters.  This should work, otherwise
     // errors would already have been thrown...
-    const InputParameters & im_params = image_mesh->parameters();
-    filenames = im_params.get<std::vector<std::string> >("filenames");
-    file_suffix = im_params.get<std::string>("file_suffix");
+    filenames = image_mesh->filenames();
+    file_suffix = image_mesh->fileSuffix();
   }
   else
   {
-    // Use our own parameters
-    filenames = getParam<std::vector<std::string> >("filenames");
-    file_suffix = getParam<std::string>("file_suffix");
+    // Use our own parameters (using 'this' b/c of conflicts with filenames the local variable)
+    filenames = this->filenames();
+    file_suffix = this->fileSuffix();
   }
 
   // Storage for the file names
@@ -360,18 +356,3 @@ ImageFunction::imageFlip(const int & axis)
   return flip_image;
 }
 #endif
-
-
-// DEPRECATED CONSTRUCTOR
-ImageFunction::ImageFunction(const std::string & deprecated_name, InputParameters parameters) :
-    Function(deprecated_name, parameters)
-#ifdef LIBMESH_HAVE_VTK
-    ,_data(NULL)
-    ,_algorithm(NULL)
-#endif
-{
-#ifndef LIBMESH_HAVE_VTK
-  // This should be impossible to reach, the registration of ImageFunction is also guarded with LIBMESH_HAVE_VTK
-  mooseError("libMesh must be configured with VTK enabled to utilize ImageFunction");
-#endif
-}

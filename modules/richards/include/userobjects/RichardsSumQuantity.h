@@ -27,7 +27,6 @@ class RichardsSumQuantity : public GeneralUserObject
 {
 public:
   RichardsSumQuantity(const InputParameters & parameters);
-  RichardsSumQuantity(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~RichardsSumQuantity();
 
   /// sets _total = 0

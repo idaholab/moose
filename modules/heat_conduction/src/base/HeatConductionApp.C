@@ -58,13 +58,7 @@ extern "C" void HeatConductionApp__registerApps() { HeatConductionApp::registerA
 void
 HeatConductionApp::registerApps()
 {
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
-
   registerApp(HeatConductionApp);
-
-#undef  registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 // External entry point for dynamic object registration
@@ -72,12 +66,6 @@ extern "C" void HeatConductionApp__registerObjects(Factory & factory) { HeatCond
 void
 HeatConductionApp::registerObjects(Factory & factory)
 {
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-
-#undef registerNamedObject
-#define registerNamedObject(obj, name) factory.reg<obj>(name)
-
   registerNamedKernel(HeatConductionKernel, "HeatConduction");
   registerKernel(AnisoHeatConduction);
   registerKernel(HeatConductionTimeDerivative);
@@ -92,12 +80,6 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerDiracKernel(GapHeatPointSourceMaster);
   registerPostprocessor(ThermalCond);
   registerConstraint(GapConductanceConstraint);
-
-#undef registerNamedObject
-#define registerNamedObject(obj, name) factory.regLegacy<obj>(name)
-
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
 
 // External entry point for dynamic syntax association
@@ -105,9 +87,6 @@ extern "C" void HeatConductionApp__associateSyntax(Syntax & syntax, ActionFactor
 void
 HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-#undef registerAction
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
-
   // This registers an action to add the "slave_flux" vector to the system at the right time
   registerTask("add_slave_flux_vector", false);
   addTaskDependency("add_slave_flux_vector", "ready_to_init");
@@ -127,19 +106,5 @@ HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerAction(ThermalContactBCsAction,          "add_bc");
   registerAction(ThermalContactDiracKernelsAction, "add_dirac_kernel");
   registerAction(ThermalContactMaterialsAction,    "add_material");
-
-#undef registerAction
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 }
 
-
-// DEPRECATED CONSTRUCTOR
-HeatConductionApp::HeatConductionApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  Moose::registerObjects(_factory);
-  HeatConductionApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  HeatConductionApp::associateSyntax(_syntax, _action_factory);
-}

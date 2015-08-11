@@ -33,8 +33,3 @@ RichardsDensity::execute()
 void RichardsDensity::finalize()
 {}
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsDensity::RichardsDensity(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralUserObject(deprecated_name, parameters)
-{}

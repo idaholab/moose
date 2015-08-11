@@ -53,12 +53,3 @@ Real NSMassSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-NSMassSpecifiedNormalFlowBC::NSMassSpecifiedNormalFlowBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSMassBC(deprecated_name, parameters),
-
-      // Required parameters
-      _rhoun(getParam<Real>("rhoun"))
-{
-}

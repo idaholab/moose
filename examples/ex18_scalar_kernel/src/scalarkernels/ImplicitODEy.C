@@ -26,9 +26,9 @@ InputParameters validParams<ImplicitODEy>()
   return params;
 }
 
-ImplicitODEy::ImplicitODEy(const std::string & name, InputParameters parameters) :
+ImplicitODEy::ImplicitODEy(const InputParameters & parameters) :
     // You must call the constructor of the base class first
-    ODEKernel(name, parameters),
+    ODEKernel(parameters),
     // get the coupled variable number and values
     _x_var(coupledScalar("x")),
     _x(coupledScalarValue("x"))

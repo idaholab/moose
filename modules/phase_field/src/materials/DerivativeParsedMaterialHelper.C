@@ -145,13 +145,3 @@ DerivativeParsedMaterialHelper::computeProperties()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string & name,
-                                                               InputParameters parameters,
-                                                               VariableNameMappingMode map_mode) :
-    ParsedMaterialHelper(name, parameters, map_mode),
-    //_derivative_order(getParam<unsigned int>("derivative_order"))
-    _derivative_order(isParamValid("third_derivatives") ? (getParam<bool>("third_derivatives") ? 3 : 2) : getParam<unsigned int>("derivative_order"))
-{
-}

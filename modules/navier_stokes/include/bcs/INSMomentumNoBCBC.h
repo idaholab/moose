@@ -23,7 +23,6 @@ class INSMomentumNoBCBC : public IntegratedBC
 {
 public:
   INSMomentumNoBCBC(const InputParameters & parameters);
-  INSMomentumNoBCBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~INSMomentumNoBCBC(){}
 

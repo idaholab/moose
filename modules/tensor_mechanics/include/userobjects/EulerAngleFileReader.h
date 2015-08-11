@@ -23,7 +23,6 @@ class EulerAngleFileReader : public EulerAngleProvider
 {
 public:
   EulerAngleFileReader(const InputParameters & parameters);
-  EulerAngleFileReader(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual const EulerAngles & getEulerAngles(unsigned int) const;
   virtual unsigned int getGrainNum() const;

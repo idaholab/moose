@@ -87,15 +87,3 @@ StressDivergenceRSpherical::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0;
 }
-
-
-// DEPRECATED CONSTRUCTOR
-StressDivergenceRSpherical::StressDivergenceRSpherical(const std::string & deprecated_name, InputParameters parameters)
-  :Kernel(deprecated_name, parameters),
-   _stress(getMaterialProperty<SymmTensor>("stress")),
-   _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult")),
-   _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT")),
-   _component(getParam<unsigned int>("component")),
-   _temp_coupled(isCoupled("temp")),
-   _temp_var(_temp_coupled ? coupled("temp") : 0)
-{}

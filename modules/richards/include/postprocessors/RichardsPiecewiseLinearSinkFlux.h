@@ -35,7 +35,6 @@ class RichardsPiecewiseLinearSinkFlux:
 {
 public:
   RichardsPiecewiseLinearSinkFlux(const InputParameters & parameters);
-  RichardsPiecewiseLinearSinkFlux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpIntegral();

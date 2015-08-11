@@ -27,7 +27,6 @@ class SolutionRasterizer : public SolutionUserObject
 {
 public:
   SolutionRasterizer(const InputParameters & parameters);
-  SolutionRasterizer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~SolutionRasterizer() {}
 

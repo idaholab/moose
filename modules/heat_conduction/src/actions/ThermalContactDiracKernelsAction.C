@@ -55,9 +55,3 @@ ThermalContactDiracKernelsAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ThermalContactDiracKernelsAction::ThermalContactDiracKernelsAction(const std::string & deprecated_name, InputParameters params) :
-  Action(deprecated_name, params)
-{
-}

@@ -34,7 +34,6 @@ class QuadraturePointMarker :
 {
 public:
   QuadraturePointMarker(const InputParameters & parameters);
-  QuadraturePointMarker(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~QuadraturePointMarker(){};
 
 protected:

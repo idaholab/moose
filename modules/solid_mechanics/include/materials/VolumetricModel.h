@@ -20,9 +20,6 @@ class VolumetricModel : public Material
 {
 public:
   VolumetricModel( const InputParameters & parameters );
-
-  VolumetricModel( const std::string & name,
-                   InputParameters & parameters ); // DEPRECATED
   virtual ~VolumetricModel();
 
   virtual void modifyStrain(const unsigned int qp,

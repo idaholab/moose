@@ -29,7 +29,6 @@ class NSWeakStagnationBC : public NSIntegratedBC
 public:
   // Constructor
   NSWeakStagnationBC(const InputParameters & parameters);
-  NSWeakStagnationBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   // Destructor, better be virtual
   virtual ~NSWeakStagnationBC(){}

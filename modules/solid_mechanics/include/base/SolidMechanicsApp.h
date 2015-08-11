@@ -18,7 +18,7 @@ class SolidMechanicsApp : public MooseApp
 {
 public:
   SolidMechanicsApp(const InputParameters & parameters);
-  SolidMechanicsApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
+
   virtual ~SolidMechanicsApp();
 
   static void registerApps();

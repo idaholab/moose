@@ -47,12 +47,3 @@ CosseratStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
   return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CosseratStressDivergenceTensors::CosseratStressDivergenceTensors(const std::string & deprecated_name, InputParameters parameters) :
-    StressDivergenceTensors(deprecated_name, parameters),
-    _wc_x_var(coupled("wc_x")),
-    _wc_y_var(coupled("wc_y")),
-    _wc_z_var(coupled("wc_z"))
-{
-}

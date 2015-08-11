@@ -29,7 +29,6 @@ class InteractionIntegralBenchmarkBC : public PresetNodalBC
 {
 public:
   InteractionIntegralBenchmarkBC(const InputParameters & parameters);
-  InteractionIntegralBenchmarkBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

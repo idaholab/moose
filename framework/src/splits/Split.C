@@ -72,25 +72,6 @@ Split::Split (const InputParameters & parameters) :
 {
 }
 
-
-// DEPRECATED
-Split::Split (const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
-    Restartable(parameters, "Splits"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
-    _vars(getParam<std::vector<NonlinearVariableName> >("vars")),
-    _blocks(getParam<std::vector<SubdomainName> >("blocks")),
-    _sides(getParam<std::vector<BoundaryName> >("sides")),
-    _unsides(getParam<std::vector<BoundaryName> >("unsides")),
-    _splitting(getParam<std::vector<std::string> >("splitting")),
-    _splitting_type(getParam<MooseEnum>("splitting_type")),
-    _schur_type(getParam<MooseEnum>("schur_type")),
-    _schur_pre(getParam<MooseEnum>("schur_pre")),
-    _schur_ainv(getParam<MooseEnum>("schur_ainv")),
-    _petsc_options(_fe_problem.getPetscOptions())
-{
-}
-
 void
 Split::setup(const std::string& prefix)
 {

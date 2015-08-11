@@ -51,11 +51,3 @@ Real INSTemperatureNoBCBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
   return 0.;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-INSTemperatureNoBCBC::INSTemperatureNoBCBC(const std::string & deprecated_name, InputParameters parameters) :
-  IntegratedBC(deprecated_name, parameters),
-  // Required parameters
-  _k(getParam<Real>("k"))
-{
-}

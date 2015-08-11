@@ -48,12 +48,3 @@ PFFracCoupledInterface::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PFFracCoupledInterface::PFFracCoupledInterface(const std::string & deprecated_name, InputParameters parameters):
-  KernelGrad(deprecated_name, parameters),
-  _c(coupledValue("c")),
-  _grad_c(coupledGradient("c")),
-  _c_var(coupled("c"))
-{
-}

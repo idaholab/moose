@@ -37,12 +37,3 @@ TensorMechanicsHardeningExponential::derivative(const Real & intnl) const
   return -_rate*(_val_0 - _val_res)*std::exp(-_rate*intnl);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TensorMechanicsHardeningExponential::TensorMechanicsHardeningExponential(const std::string & deprecated_name, InputParameters parameters) :
-  TensorMechanicsHardeningModel(deprecated_name, parameters),
-  _val_0(getParam<Real>("value_0")),
-  _val_res(parameters.isParamValid("value_residual") ? getParam<Real>("value_residual") : _val_0),
-  _rate(getParam<Real>("rate"))
-{
-}

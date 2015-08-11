@@ -85,35 +85,3 @@ CHParsed::computeQpOffDiagJacobian(unsigned int jvar)
   return CHBulk::computeQpOffDiagJacobian(jvar) + _grad_test[_i][_qp]*_M[_qp]*J;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CHParsed::CHParsed(const std::string & deprecated_name, InputParameters parameters) :
-    CHBulk(deprecated_name, parameters),
-    _nvar(_coupled_moose_vars.size()),
-    _second_derivatives(_nvar+1),
-    _third_derivatives(_nvar+1),
-    _third_cross_derivatives(_nvar),
-    _grad_vars(_nvar+1)
-{
-  // derivatives w.r.t. and gradients of the kernel variable
-  _second_derivatives[0] = &getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name());
-  _third_derivatives[0]  = &getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name(), _var.name());
-  _grad_vars[0] = &(_grad_u);
-
-  // Iterate over all coupled variables
-  for (unsigned int i = 0; i < _nvar; ++i)
-  {
-    VariableName iname = _coupled_moose_vars[i]->name();
-    _second_derivatives[i+1] = &getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname);
-    _third_derivatives[i+1]  = &getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name(), iname);
-
-    _third_cross_derivatives[i].resize(_nvar);
-    for (unsigned int j = 0; j < _nvar; ++j)
-    {
-      VariableName jname = _coupled_moose_vars[j]->name();
-      _third_cross_derivatives[i][j] = &getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname, jname);
-    }
-
-    _grad_vars[i+1] = &(_coupled_moose_vars[i]->gradSln());
-  }
-}

@@ -25,7 +25,6 @@ class TensorMechanicsHardeningCutExponential : public TensorMechanicsHardeningMo
 {
  public:
   TensorMechanicsHardeningCutExponential(const InputParameters & parameters);
-  TensorMechanicsHardeningCutExponential(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual Real value(const Real & intnl) const;
 

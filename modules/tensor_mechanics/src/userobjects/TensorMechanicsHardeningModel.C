@@ -44,9 +44,3 @@ TensorMechanicsHardeningModel::derivative(const Real & /*intnl*/) const
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TensorMechanicsHardeningModel::TensorMechanicsHardeningModel(const std::string & deprecated_name, InputParameters parameters) :
-  GeneralUserObject(deprecated_name, parameters)
-{
-}

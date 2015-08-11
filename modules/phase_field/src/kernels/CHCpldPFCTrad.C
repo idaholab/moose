@@ -28,10 +28,3 @@ CHCpldPFCTrad::computeQpOffDiagJacobian(unsigned int jvar)
   return _coeff[_qp]*grphi_grtst;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CHCpldPFCTrad::CHCpldPFCTrad(const std::string & deprecated_name, InputParameters parameters) :
-    CHSplitVar(deprecated_name, parameters),
-    _coeff(getMaterialProperty<Real>("coeff_name"))
-{
-}

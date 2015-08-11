@@ -22,7 +22,6 @@ class TotalFreeEnergy : public TotalFreeEnergyBase
 {
 public:
   TotalFreeEnergy(const InputParameters & parameters);
-  TotalFreeEnergy(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

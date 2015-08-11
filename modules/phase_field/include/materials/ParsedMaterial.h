@@ -25,7 +25,6 @@ class ParsedMaterial : public ParsedMaterialHelper, public ParsedMaterialBase
 {
 public:
   ParsedMaterial(const InputParameters & parameters);
-  ParsedMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 };
 
 #endif //PARSEDMATERIAL_H

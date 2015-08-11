@@ -71,10 +71,3 @@ LayeredAverage::threadJoin(const UserObject & y)
     _layer_volumes[i] += la._layer_volumes[i];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-LayeredAverage::LayeredAverage(const std::string & deprecated_name, InputParameters parameters) :
-    LayeredIntegral(deprecated_name, parameters)
-{
-  _layer_volumes.resize(_num_layers);
-}

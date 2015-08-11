@@ -28,7 +28,6 @@ class NodalProxyMaxValue : public NodalVariablePostprocessor
 {
 public:
   NodalProxyMaxValue(const InputParameters & parameters);
-  NodalProxyMaxValue(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual Real computeValue();

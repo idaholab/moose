@@ -111,15 +111,3 @@ NodalNormalsPreprocessor::threadJoin(const UserObject & /*uo*/)
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NodalNormalsPreprocessor::NodalNormalsPreprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    ElementUserObject(deprecated_name, parameters),
-    BoundaryRestrictable(parameters),
-    _aux(_fe_problem.getAuxiliarySystem()),
-    _fe_type(getParam<Order>("fe_order"), getParam<FEFamily>("fe_family")),
-    _has_corners(isParamValid("corner_boundary")),
-    _corner_boundary_id(_has_corners ? _mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary")) : static_cast<BoundaryID>(-1)),
-    _grad_phi(_assembly.feGradPhi(_fe_type))
-{
-}

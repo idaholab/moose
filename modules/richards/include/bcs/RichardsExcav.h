@@ -29,7 +29,6 @@ class RichardsExcav : public NodalBC
 public:
 
   RichardsExcav(const InputParameters & parameters);
-  RichardsExcav(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();

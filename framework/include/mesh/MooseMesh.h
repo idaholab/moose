@@ -74,7 +74,6 @@ public:
    * Typical "Moose-style" constructor and copy constructor.
    */
   MooseMesh(const InputParameters & parameters);
-  MooseMesh(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   MooseMesh(const MooseMesh & other_mesh);
 
   /**

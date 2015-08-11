@@ -29,7 +29,6 @@ class RichardsPolyLineSink : public DiracKernel
 {
 public:
   RichardsPolyLineSink(const InputParameters & parameters);
-  RichardsPolyLineSink(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void addPoints();
   virtual Real computeQpResidual();

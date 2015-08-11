@@ -23,7 +23,6 @@ class AbaqusCreepMaterial : public SolidModel
 {
 public:
   AbaqusCreepMaterial(const InputParameters & parameters);
-  AbaqusCreepMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~AbaqusCreepMaterial();
 

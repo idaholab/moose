@@ -61,7 +61,6 @@ class MultiAppDTKUserObjectTransfer :
 {
 public:
   MultiAppDTKUserObjectTransfer(const InputParameters & parameters);
-  MultiAppDTKUserObjectTransfer(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MultiAppDTKUserObjectTransfer() {}
 
   typedef long unsigned int GlobalOrdinal;

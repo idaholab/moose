@@ -397,19 +397,6 @@ static bool registered = false;
 void
 registerObjects(Factory & factory)
 {
-
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-
-#undef registerNamedObject
-#define registerNamedObject(obj, name) factory.reg<obj>(name)
-
-#undef registerDeprecatedObject
-#define registerDeprecatedObject(name, time) factory.regDeprecated<name>(stringifyName(name), time)
-
-#undef registerDeprecatedObjectName
-#define registerDeprecatedObjectName(obj, name, time) factory.regReplaced<obj>(stringifyName(obj), name, time)
-
   // mesh
   registerMesh(FileMesh);
   registerMesh(GeneratedMesh);
@@ -726,19 +713,6 @@ registerObjects(Factory & factory)
   registerNamedOutput(DOFMapOutput, "DOFMap");
 
   registered = true;
-
-#undef registerDeprecatedObject
-#define registerDeprecatedObject(name, time) factory.regLegacyDeprecated<name>(stringifyName(name), time)
-
-#undef registerDeprecatedObjectName
-#define registerDeprecatedObjectName(obj, name, time) factory.regLegacyReplaced<obj>(stringifyName(obj), name, time)
-
-#undef registerNamedObject
-#define registerNamedObject(obj, name) factory.regLegacy<obj>(name)
-
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
-
 }
 
 void

@@ -35,12 +35,3 @@ MaterialTensorIntegral::computeQpIntegral()
                                                        &_q_point[_qp],
                                                        direction);
 }
-
-
-// DEPRECATED CONSTRUCTOR
-MaterialTensorIntegral::MaterialTensorIntegral(const std::string & deprecated_name, InputParameters parameters) :
-    ElementIntegralPostprocessor(deprecated_name, parameters),
-    _material_tensor_calculator(parameters),
-    _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) )
-{
-}

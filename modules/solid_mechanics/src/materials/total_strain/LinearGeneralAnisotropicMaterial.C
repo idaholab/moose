@@ -85,28 +85,3 @@ void LinearGeneralAnisotropicMaterial::computeQpStress()
   _stress[_qp] = _elasticity_tensor[_qp]*_elastic_strain[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-LinearGeneralAnisotropicMaterial::LinearGeneralAnisotropicMaterial(const std::string & deprecated_name, InputParameters parameters)
-    : SolidMechanicsMaterial(deprecated_name, parameters),
-      _euler_angle_1(getParam<Real>("euler_angle_1")),
-      _euler_angle_2(getParam<Real>("euler_angle_2")),
-      _euler_angle_3(getParam<Real>("euler_angle_3")),
-      _Cijkl_matrix_vector(getParam<std::vector<Real> >("C_matrix")),
-      _all_21(getParam<bool>("all_21")),
-      _Cijkl_matrix()
-{
-  // fill in the local tensors from the input vector information
-  _Cijkl_matrix.fillFromInputVector(_Cijkl_matrix_vector, _all_21);
-
-  //rotate the C_ijkl matrix
-  _Cijkl_matrix.rotate(_euler_angle_1,_euler_angle_2,_euler_angle_3);
-
-  //debugging
-  /*_Cijkl_matrix.show_r_matrix();
-    _Cijkl_matrix.show_dt_matrix();
-    if (libMesh::on_command_line("--debug") || libMesh::on_command_line("--debug-elasticity-Cijkl"))
-    {
-      libMesh::out << "Material " << this->name() << " on mesh block " << this->blockID() << " has _Cijkl_matrix:\n" << _Cijkl_matrix << "\n";
-    }*/
-}

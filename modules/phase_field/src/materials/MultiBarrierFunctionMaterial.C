@@ -69,24 +69,3 @@ MultiBarrierFunctionMaterial::computeQpProperties()
   _prop_g[_qp] = g;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MultiBarrierFunctionMaterial::MultiBarrierFunctionMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeMaterialInterface<Material>(deprecated_name, parameters),
-    _function_name(getParam<std::string>("function_name")),
-    _g_order(getParam<MooseEnum>("g_order")),
-    _num_eta(coupledComponents("etas")),
-    _eta(_num_eta),
-    _prop_g(declareProperty<Real>(_function_name)),
-    _prop_dg(_num_eta),
-    _prop_d2g(_num_eta)
-{
-  // declare derivative properties, fetch eta values
-  for (unsigned int i = 0; i < _num_eta; ++i)
-  {
-    const std::string & eta_name = getVar("etas", i)->name();
-    _prop_dg[i]  = &declarePropertyDerivative<Real>(_function_name, eta_name);
-    _prop_d2g[i] = &declarePropertyDerivative<Real>(_function_name, eta_name, eta_name);
-    _eta[i] = &coupledValue("etas", i);
-  }
-}

@@ -71,10 +71,3 @@ GapConductanceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType ja
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-GapConductanceConstraint::GapConductanceConstraint(const std::string & deprecated_name, InputParameters parameters) :
-    FaceFaceConstraint(deprecated_name, parameters),
-    _k(getParam<Real>("k"))
-{
-}

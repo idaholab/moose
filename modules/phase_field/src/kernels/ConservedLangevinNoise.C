@@ -26,10 +26,3 @@ ConservedLangevinNoise::computeQpResidual()
   return -_test[_i][_qp] * _noise.getQpValue(_current_elem->id(), _qp) * _amplitude * _multiplier_prop[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ConservedLangevinNoise::ConservedLangevinNoise(const std::string & deprecated_name, InputParameters parameters) :
-    LangevinNoise(deprecated_name, parameters),
-    _noise(getUserObject<ConservedNoiseInterface>("noise"))
-{
-}

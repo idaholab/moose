@@ -60,7 +60,6 @@ class NSMomentumInviscidBC : public NSIntegratedBC
 public:
 
   NSMomentumInviscidBC(const InputParameters & parameters);
-  NSMomentumInviscidBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~NSMomentumInviscidBC(){}
 

@@ -17,7 +17,6 @@ class BicrystalBoundingBoxICAction: public Action
 {
 public:
   BicrystalBoundingBoxICAction(const InputParameters & params);
-  BicrystalBoundingBoxICAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 

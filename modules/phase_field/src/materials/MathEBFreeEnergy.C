@@ -27,16 +27,3 @@ MathEBFreeEnergy::MathEBFreeEnergy(const InputParameters & parameters) :
   functionParse(free_energy);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MathEBFreeEnergy::MathEBFreeEnergy(const std::string & deprecated_name, InputParameters parameters) :
-    DerivativeParsedMaterialHelper(deprecated_name, parameters),
-    _c("c")
-{
-  EBFunction free_energy;
-  //Definition of the free energy for the expression builder
-  free_energy(_c) = 1.0/4.0*( 1.0 + _c )*( 1.0 + _c )*( 1.0 - _c )*( 1.0 - _c );
-
-  //Parse function for automatic differentiation
-  functionParse(free_energy);
-}

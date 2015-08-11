@@ -55,11 +55,3 @@ Real PrimaryDiffusion::computeQpOffDiagJacobian(unsigned int /*jvar*/)
   return 0.0;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PrimaryDiffusion::PrimaryDiffusion(const std::string & deprecated_name, InputParameters parameters)
-  :Diffusion(deprecated_name, parameters),
-   // We are grabbing the "diffusivity" material property
-   _diffusivity(getMaterialProperty<Real>("diffusivity"))
-{
-}

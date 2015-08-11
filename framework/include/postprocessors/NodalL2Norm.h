@@ -29,7 +29,6 @@ class NodalL2Norm : public NodalVariablePostprocessor
 {
 public:
   NodalL2Norm(const InputParameters & parameters);
-  NodalL2Norm(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void initialize();
   virtual void execute();

@@ -18,7 +18,6 @@ class ContactApp : public MooseApp
 {
 public:
   ContactApp(const InputParameters & parameters);
-  ContactApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ContactApp();
 
   static void registerApps();

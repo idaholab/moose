@@ -43,7 +43,6 @@ class TimeIntegrator :
 {
 public:
   TimeIntegrator(const InputParameters & parameters);
-  TimeIntegrator(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~TimeIntegrator();
 
   virtual void preSolve() { }

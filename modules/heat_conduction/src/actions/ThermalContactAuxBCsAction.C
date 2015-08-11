@@ -103,9 +103,3 @@ ThermalContactAuxBCsAction::act()
   ++n;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ThermalContactAuxBCsAction::ThermalContactAuxBCsAction(const std::string & deprecated_name, InputParameters params) :
-  Action(deprecated_name, params)
-{
-}

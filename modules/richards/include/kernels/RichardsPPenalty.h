@@ -26,7 +26,6 @@ class RichardsPPenalty : public Kernel
 public:
 
   RichardsPPenalty(const InputParameters & parameters);
-  RichardsPPenalty(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 
 protected:

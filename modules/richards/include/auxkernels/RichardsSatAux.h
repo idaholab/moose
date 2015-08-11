@@ -26,7 +26,6 @@ class RichardsSatAux: public AuxKernel
 {
 public:
   RichardsSatAux(const InputParameters & parameters);
-  RichardsSatAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeValue();

@@ -20,7 +20,7 @@ class DomainIntegralAction : public Action
 {
 public:
   DomainIntegralAction(const InputParameters & params);
-  DomainIntegralAction(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
+
   ~DomainIntegralAction();
 
   virtual void act();

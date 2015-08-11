@@ -19,7 +19,6 @@ class GBEvolution : public Material
 {
 public:
   GBEvolution(const InputParameters & parameters);
-  GBEvolution(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual void computeQpProperties();

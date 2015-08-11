@@ -13,7 +13,6 @@ class MacroElastic : public Elastic
 {
 public:
   MacroElastic( const InputParameters & parameters);
-  MacroElastic(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~MacroElastic();
 
 protected:

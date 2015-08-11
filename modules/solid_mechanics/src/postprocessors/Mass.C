@@ -30,12 +30,3 @@ Mass::computeQpIntegral()
 {
   return _density[_qp];
 }
-
-
-// DEPRECATED CONSTRUCTOR
-Mass::Mass(const std::string & deprecated_name, InputParameters parameters) :
-    ElementIntegralVariablePostprocessor(deprecated_name, parameters),
-    _density(getMaterialProperty<Real>("density"))
-
-{
-}

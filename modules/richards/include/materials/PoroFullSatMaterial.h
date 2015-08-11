@@ -29,7 +29,6 @@ class PoroFullSatMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
   PoroFullSatMaterial(const InputParameters & parameters);
-  PoroFullSatMaterial(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

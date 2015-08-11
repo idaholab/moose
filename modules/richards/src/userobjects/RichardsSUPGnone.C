@@ -88,8 +88,3 @@ RichardsSUPGnone::SUPG_trivial() const
 }
 
 
-
-// DEPRECATED CONSTRUCTOR
-RichardsSUPGnone::RichardsSUPGnone(const std::string & deprecated_name, InputParameters parameters) :
-    RichardsSUPG(deprecated_name, parameters)
-{}

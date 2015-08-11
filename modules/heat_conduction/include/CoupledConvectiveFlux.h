@@ -14,7 +14,6 @@ class CoupledConvectiveFlux : public IntegratedBC
 public:
 
   CoupledConvectiveFlux(const InputParameters & parameters);
-  CoupledConvectiveFlux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~CoupledConvectiveFlux() {}
 
 protected:

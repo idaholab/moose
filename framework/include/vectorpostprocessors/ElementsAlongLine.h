@@ -30,7 +30,6 @@ class ElementsAlongLine : public GeneralVectorPostprocessor
 {
 public:
   ElementsAlongLine(const InputParameters & parameters);
-  ElementsAlongLine(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ElementsAlongLine() {}
 

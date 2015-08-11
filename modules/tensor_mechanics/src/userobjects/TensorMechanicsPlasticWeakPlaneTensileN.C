@@ -84,23 +84,3 @@ TensorMechanicsPlasticWeakPlaneTensileN::modelName() const
   return "WeakPlaneTensileN";
 }
 
-
-// DEPRECATED CONSTRUCTOR
-TensorMechanicsPlasticWeakPlaneTensileN::TensorMechanicsPlasticWeakPlaneTensileN(const std::string & deprecated_name, InputParameters parameters) :
-    TensorMechanicsPlasticWeakPlaneTensile(deprecated_name, parameters),
-    _input_n(getParam<RealVectorValue>("normal_vector")),
-    _df_dsig(RankTwoTensor())
-{
-  // cannot check the following for all values of strength, but this is a start
-  if (_strength.value(0) < 0)
-    mooseError("Weak plane tensile strength must not be negative");
-  if (_input_n.size() == 0)
-     mooseError("Weak-plane normal vector must not have zero length");
-   else
-     _input_n /= _input_n.size();
-  _rot = RotationMatrix::rotVecToZ(_input_n);
-
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
-      _df_dsig(i, j) = _rot(2, i)*_rot(2, j);
-}

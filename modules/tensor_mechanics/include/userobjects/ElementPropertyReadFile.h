@@ -26,7 +26,6 @@ class ElementPropertyReadFile : public GeneralUserObject
 {
  public:
   ElementPropertyReadFile(const InputParameters & parameters);
-  ElementPropertyReadFile(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~ElementPropertyReadFile() {}
 
   virtual void initialize() {}

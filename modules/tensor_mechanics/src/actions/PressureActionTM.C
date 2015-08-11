@@ -100,24 +100,3 @@ PressureActionTM::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-PressureActionTM::PressureActionTM(const std::string & deprecated_name, InputParameters params) :
-  Action(deprecated_name, params),
-  _boundary(getParam<std::vector<BoundaryName> >("boundary")),
-  _disp_x(getParam<NonlinearVariableName>("disp_x")),
-  _disp_y(getParam<NonlinearVariableName>("disp_y")),
-  _disp_z(getParam<NonlinearVariableName>("disp_z")),
-  _factor(getParam<Real>("factor")),
-  _postprocessor(getParam<PostprocessorName>("postprocessor")),
-  _kernel_name("PressureTM"),
-  _use_displaced_mesh(true)
-{
-  _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_x"));
-  _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_y"));
-  _save_in_vars.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_z"));
-
-  _has_save_in_vars.push_back(params.isParamValid("save_in_disp_x"));
-  _has_save_in_vars.push_back(params.isParamValid("save_in_disp_y"));
-  _has_save_in_vars.push_back(params.isParamValid("save_in_disp_z"));
-}

@@ -42,7 +42,6 @@ public:
    * @param parameters
    */
   ExecutionerAttributeReporter(const InputParameters & parameters);
-  ExecutionerAttributeReporter(const std::string & name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
    * Class destructor

@@ -26,7 +26,6 @@ class OneDContactConstraint :
 {
 public:
   OneDContactConstraint(const InputParameters & parameters);
-  OneDContactConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~OneDContactConstraint(){}
 
   virtual void timestepSetup();

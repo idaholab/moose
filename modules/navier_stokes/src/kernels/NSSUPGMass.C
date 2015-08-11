@@ -97,9 +97,3 @@ Real NSSUPGMass::compute_jacobian(unsigned var)
   return result;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSSUPGMass::NSSUPGMass(const std::string & deprecated_name, InputParameters parameters)
-    : NSSUPGBase(deprecated_name, parameters)
-{
-}

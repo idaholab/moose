@@ -24,7 +24,6 @@ class ImplicitNeumannBC : public IntegratedBC
 {
 public:
   ImplicitNeumannBC(const InputParameters & parameters);
-  ImplicitNeumannBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ImplicitNeumannBC(){}
 

@@ -26,7 +26,6 @@ class DetermineSystemType : public MooseObjectAction
 {
 public:
   DetermineSystemType(InputParameters parameters);
-  DetermineSystemType(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

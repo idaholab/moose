@@ -155,9 +155,3 @@ Real NSSUPGEnergy::compute_jacobian(unsigned var)
   return mass_term + mom_term + ene_term;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSSUPGEnergy::NSSUPGEnergy(const std::string & deprecated_name, InputParameters parameters)
-    : NSSUPGBase(deprecated_name, parameters)
-{
-}

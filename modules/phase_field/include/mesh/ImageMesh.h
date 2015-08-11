@@ -8,6 +8,7 @@
 #define IMAGEMESH_H
 
 #include "GeneratedMesh.h"
+#include "FileRangeBuilder.h"
 
 class ImageMesh;
 
@@ -17,11 +18,12 @@ InputParameters validParams<ImageMesh>();
 /**
  * A 2D GeneratedMesh where xmin, xmax, etc. are determined from an input image file.
  */
-class ImageMesh : public GeneratedMesh
+class ImageMesh :
+  public GeneratedMesh,
+  public FileRangeBuilder
 {
 public:
   ImageMesh(const InputParameters & parameters);
-  ImageMesh(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   ImageMesh(const ImageMesh & other_mesh);
   virtual ~ImageMesh();
 
@@ -41,10 +43,16 @@ protected:
   void buildMesh3D(const std::vector<std::string> & filenames);
 
   /**
+   * Process a single image with the 'file' command to find out the
+   * number of pixels in the x and y directions.
+   */
+  void GetPixelInfo(std::string filename, int & xpixels, int & ypixels);
+
+  /**
    * If true, forces the maximum width (height) of the mesh to be 1.0
    * while retaining the original aspect ratio of the image.
    */
-  bool _scale_to_one;
+  const bool _scale_to_one;
 
   /**
    * A number <= 1.0 which determines the number of cells in the mesh
@@ -54,13 +62,7 @@ protected:
    *         _cells_per_pixel = 0.3
    * Result: Mesh has 552x477 elements
    */
-  Real _cells_per_pixel;
-
-  /**
-   * Process a single image with the 'file' command to find out the
-   * number of pixels in the x and y directions.
-   */
-  void GetPixelInfo(std::string filename, int & xpixels, int & ypixels);
+  const Real & _cells_per_pixel;
 };
 
 #endif /* IMAGEMESH_H */

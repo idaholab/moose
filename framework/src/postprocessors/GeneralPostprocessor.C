@@ -27,9 +27,3 @@ GeneralPostprocessor::GeneralPostprocessor(const InputParameters & parameters) :
     Postprocessor(parameters)
 {}
 
-
-// DEPRECATED CONSTRUCTOR
-GeneralPostprocessor::GeneralPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralUserObject(deprecated_name, parameters),
-    Postprocessor(parameters)
-{}

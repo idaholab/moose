@@ -29,7 +29,6 @@ class BDF2 : public TimeIntegrator
 {
 public:
   BDF2(const InputParameters & parameters);
-  BDF2(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~BDF2();
 
   virtual int order() { return 2; }

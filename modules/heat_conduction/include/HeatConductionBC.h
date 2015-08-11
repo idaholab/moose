@@ -21,7 +21,6 @@ class HeatConductionBC : public FluxBC
 {
 public:
   HeatConductionBC(const InputParameters & parameters);
-  HeatConductionBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~HeatConductionBC();
 
 protected:

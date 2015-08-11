@@ -26,7 +26,6 @@ class DynamicObjectRegistrationAction : public Action
 {
 public:
   DynamicObjectRegistrationAction(InputParameters parameters);
-  DynamicObjectRegistrationAction(const std::string & name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual void act();
 };
 

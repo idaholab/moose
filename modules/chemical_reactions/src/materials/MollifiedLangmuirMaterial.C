@@ -87,24 +87,3 @@ MollifiedLangmuirMaterial::computeQpProperties()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MollifiedLangmuirMaterial::MollifiedLangmuirMaterial(const std::string & deprecated_name, InputParameters parameters) :
-    Material(deprecated_name, parameters),
-    // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
-    _one_over_de_time_const(&coupledValue("one_over_desorption_time_const")),
-    _one_over_ad_time_const(&coupledValue("one_over_adsorption_time_const")),
-
-    _langmuir_dens(getParam<Real>("langmuir_density")),
-    _langmuir_p(getParam<Real>("langmuir_pressure")),
-
-    _conc(&coupledValue("conc_var")),
-    _pressure(&coupledValue("pressure_var")),
-
-    _mollifier(getParam<Real>("mollifier")),
-
-    _mass_rate_from_matrix(declareProperty<Real>("mass_rate_from_matrix")),
-    _dmass_rate_from_matrix_dC(declareProperty<Real>("dmass_rate_from_matrix_dC")),
-    _dmass_rate_from_matrix_dp(declareProperty<Real>("dmass_rate_from_matrix_dp"))
-{
-}

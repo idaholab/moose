@@ -31,7 +31,6 @@ class KKSCHBulk : public CHBulk
 {
 public:
   KKSCHBulk(const InputParameters & parameters);
-  KKSCHBulk(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);

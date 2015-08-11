@@ -44,7 +44,6 @@ class NSImposedVelocityDirectionBC : public NodalBC
 public:
   // Constructor
   NSImposedVelocityDirectionBC(const InputParameters & parameters);
-  NSImposedVelocityDirectionBC(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   // Destructor, better be virtual
   virtual ~NSImposedVelocityDirectionBC(){}

@@ -25,8 +25,6 @@ class ConservedMaskedUniformNoise : public ConservedUniformNoiseVeneer<Conserved
 public:
   ConservedMaskedUniformNoise(const InputParameters & parameters) :
       ConservedUniformNoiseVeneer<ConservedMaskedNoiseBase>(parameters) {}
-  ConservedMaskedUniformNoise(const std::string & name, InputParameters parameters) :
-      ConservedUniformNoiseVeneer<ConservedMaskedNoiseBase>(name, parameters) {} // DEPRECATED
 };
 
 #endif //CONSERVEDMASKEDUNIFORMNOISE_H

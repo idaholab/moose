@@ -148,34 +148,3 @@ FileOutput::getFileNumber()
   return _file_num;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-FileOutput::FileOutput(const std::string & deprecated_name, InputParameters parameters) :
-    PetscOutput(deprecated_name, parameters),
-    _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
-    _padding(getParam<unsigned int>("padding")),
-    _output_if_base_contains(parameters.get<std::vector<std::string> >("output_if_base_contains"))
-{
-  // If restarting reset the file number
-  if (_app.isRestarting())
-    _file_num = 0;
-
-  // Set the file base
-  if (isParamValid("file_base"))
-    _file_base = getParam<std::string>("file_base");
-  else if (getParam<bool>("_built_by_moose"))
-    _file_base = getOutputFileBase(_app);
-  else
-    _file_base = getOutputFileBase(_app, "_" + name());
-
-  // Check the file directory of file_base
-  std::string base = "./" + _file_base;
-  base = base.substr(0, base.find_last_of('/'));
-  if (access(base.c_str(), W_OK) == -1)
-    mooseError("Can not write to directory: " + base + " for file base: " + _file_base);
-
-  // ** DEPRECATED SUPPORT **
-  if (getParam<bool>("append_displaced"))
-    _file_base += "_displaced";
-
-}

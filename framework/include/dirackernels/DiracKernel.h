@@ -63,7 +63,6 @@ class DiracKernel :
 {
 public:
   DiracKernel(const InputParameters & parameters);
-  DiracKernel(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~DiracKernel(){}
 
   /**

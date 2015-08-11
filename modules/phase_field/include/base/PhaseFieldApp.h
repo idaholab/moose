@@ -18,7 +18,6 @@ class PhaseFieldApp : public MooseApp
 {
 public:
   PhaseFieldApp(const InputParameters & parameters);
-  PhaseFieldApp(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~PhaseFieldApp();
 
   static void registerApps();

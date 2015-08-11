@@ -22,7 +22,6 @@ class SparsityBasedContactConstraint : public NodeFaceConstraint
 {
 public:
   SparsityBasedContactConstraint(const InputParameters & parameters) : NodeFaceConstraint(parameters){};
-  SparsityBasedContactConstraint(const std::string & name, InputParameters parameters) : NodeFaceConstraint(name,parameters){};
   virtual ~SparsityBasedContactConstraint(){}
 
   virtual Real computeQpSlaveValue()

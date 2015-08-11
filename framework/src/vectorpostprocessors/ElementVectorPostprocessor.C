@@ -28,10 +28,3 @@ ElementVectorPostprocessor::ElementVectorPostprocessor(const InputParameters & p
 {
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElementVectorPostprocessor::ElementVectorPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    ElementUserObject(deprecated_name, parameters),
-    VectorPostprocessor(parameters)
-{
-}

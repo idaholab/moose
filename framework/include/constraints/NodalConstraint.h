@@ -31,7 +31,6 @@ class NodalConstraint :
 {
 public:
   NodalConstraint(const InputParameters & parameters);
-  NodalConstraint(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~NodalConstraint();
 
   /**

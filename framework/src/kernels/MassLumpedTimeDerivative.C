@@ -49,10 +49,3 @@ MassLumpedTimeDerivative::computeJacobian()
       ke(_i, _i) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 }
 
-
-// DEPRECATED CONSTRUCTOR
-MassLumpedTimeDerivative::MassLumpedTimeDerivative(const std::string & deprecated_name, InputParameters parameters) :
-    TimeKernel(deprecated_name, parameters),
-    _u_dot_nodal(_var.nodalValueDot())
-{
-}

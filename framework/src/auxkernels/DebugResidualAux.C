@@ -42,12 +42,3 @@ DebugResidualAux::computeValue()
   return _residual_copy(dof);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-DebugResidualAux::DebugResidualAux(const std::string & deprecated_name, InputParameters parameters) :
-    AuxKernel(deprecated_name, parameters),
-    _debug_var(_nl_sys.getVariable(_tid, getParam<NonlinearVariableName>("debug_variable"))),
-    _residual_copy(_nl_sys.residualGhosted())
-{
-  mooseAssert(_nodal == true, "Cannot use DebugResidualAux on elemental variables");
-}

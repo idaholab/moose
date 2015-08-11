@@ -14,7 +14,6 @@ class CavityPressureUserObject : public GeneralUserObject
 public:
 
   CavityPressureUserObject(const InputParameters & parameters);
-  CavityPressureUserObject(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~CavityPressureUserObject(){}
 

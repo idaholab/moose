@@ -20,7 +20,6 @@ class ElasticEnergyAux : public AuxKernel
 {
 public:
   ElasticEnergyAux( const InputParameters & parameters);
-  ElasticEnergyAux(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~ElasticEnergyAux() {}
 

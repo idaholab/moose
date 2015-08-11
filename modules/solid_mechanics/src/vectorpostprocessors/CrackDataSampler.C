@@ -86,23 +86,3 @@ CrackDataSampler::threadJoin(const SamplerBase & y)
   const CrackDataSampler & vpp = static_cast<const CrackDataSampler &>(y);
   SamplerBase::threadJoin(vpp);
 }
-
-
-// DEPRECATED CONSTRUCTOR
-CrackDataSampler::CrackDataSampler(const std::string & deprecated_name, InputParameters parameters) :
-    GeneralVectorPostprocessor(deprecated_name, parameters),
-    SamplerBase(deprecated_name, parameters, this, _communicator),
-    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _position_type(getParam<MooseEnum>("position_type"))
-{
-  std::vector<PostprocessorName> pps_names(getParam<std::vector<PostprocessorName> >("postprocessors"));
-  for (unsigned int i=0; i<pps_names.size(); ++i)
-  {
-    if (!hasPostprocessorByName(pps_names[i]))
-      mooseError("In CrackDataSampler, postprocessor with name: "<<pps_names[i]<<" does not exist");
-    _domain_integral_postprocessor_values.push_back(&getPostprocessorValueByName(pps_names[i]));
-  }
-  std::vector<std::string> var_names;
-  var_names.push_back(deprecated_name);
-  SamplerBase::setupVariables(var_names);
-}

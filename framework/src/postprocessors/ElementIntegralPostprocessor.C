@@ -63,10 +63,3 @@ ElementIntegralPostprocessor::computeIntegral()
   return sum;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElementIntegralPostprocessor::ElementIntegralPostprocessor(const std::string & deprecated_name, InputParameters parameters) :
-    ElementPostprocessor(deprecated_name, parameters),
-    _qp(0),
-    _integral_value(0)
-{}

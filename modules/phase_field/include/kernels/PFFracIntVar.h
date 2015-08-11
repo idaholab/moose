@@ -25,7 +25,6 @@ class PFFracIntVar : public KernelValue
 {
 public:
   PFFracIntVar(const InputParameters & parameters);
-  PFFracIntVar(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
 

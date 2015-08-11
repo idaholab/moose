@@ -36,11 +36,3 @@ LangevinNoise::computeQpResidual()
   return -_test[_i][_qp] * (2.0 * MooseRandom::rand() - 1.0) * _amplitude * _multiplier_prop[_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-LangevinNoise::LangevinNoise(const std::string & deprecated_name, InputParameters parameters) :
-    Kernel(deprecated_name, parameters),
-    _amplitude(getParam<Real>("amplitude")),
-    _multiplier_prop(getMaterialProperty<Real>("multiplier"))
-{
-}

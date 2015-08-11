@@ -35,10 +35,3 @@ ScalarConstantIC::value()
   return _value;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ScalarConstantIC::ScalarConstantIC(const std::string & deprecated_name, InputParameters parameters) :
-    ScalarInitialCondition(deprecated_name, parameters),
-    _value(getParam<Real>("value"))
-{
-}

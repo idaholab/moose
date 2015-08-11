@@ -72,18 +72,3 @@ SideValueSampler::threadJoin(const UserObject & y)
   SamplerBase::threadJoin(vpp);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SideValueSampler::SideValueSampler(const std::string & deprecated_name, InputParameters parameters) :
-    SideVectorPostprocessor(deprecated_name, parameters),
-    SamplerBase(parameters, this, _communicator)
-{
-  std::vector<std::string> var_names(_coupled_moose_vars.size());
-  _values.resize(_coupled_moose_vars.size());
-
-  for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
-    var_names[i] = _coupled_moose_vars[i]->name();
-
-  // Initialize the datastructions in SamplerBase
-  SamplerBase::setupVariables(var_names);
-}

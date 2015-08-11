@@ -37,10 +37,3 @@ CoupledConvectiveFlux::computeQpJacobian()
   return _test[_i][_qp] * _coefficient * _phi[_j][_qp];
 }
 
-
-// DEPRECATED CONSTRUCTOR
-CoupledConvectiveFlux::CoupledConvectiveFlux(const std::string & deprecated_name, InputParameters parameters) :
-    IntegratedBC(deprecated_name, parameters),
-    _T_infinity(coupledValue("T_infinity")),
-    _coefficient(getParam<Real>("coefficient"))
-{}

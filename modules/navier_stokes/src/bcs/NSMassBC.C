@@ -111,9 +111,3 @@ Real NSMassBC::qp_jacobian(unsigned var_number)
 //   return 0.;
 // }
 
-
-// DEPRECATED CONSTRUCTOR
-NSMassBC::NSMassBC(const std::string & deprecated_name, InputParameters parameters)
-    : NSIntegratedBC(deprecated_name, parameters)
-{
-}

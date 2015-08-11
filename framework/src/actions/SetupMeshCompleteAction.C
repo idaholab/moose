@@ -73,9 +73,3 @@ SetupMeshCompleteAction::act()
   }
 }
 
-
-// DEPRECATED CONSTRUCTOR
-SetupMeshCompleteAction::SetupMeshCompleteAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params)
-{
-}

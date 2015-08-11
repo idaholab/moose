@@ -23,7 +23,6 @@ class ParsedMaterialBase
 {
 public:
   ParsedMaterialBase(const InputParameters & parameters);
-  ParsedMaterialBase(const std::string & name, InputParameters parameters); // DEPRECATED
 
 protected:
   /// function expression

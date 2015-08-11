@@ -70,19 +70,6 @@ MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 }
 
 
-// DEPRECATED CONSTRUCTOR
-MultiAppTransfer::MultiAppTransfer(const std::string & deprecated_name, InputParameters parameters) :
-    /**
-     * Here we need to remove the special option that indicates to the user that this object will follow it's associated
-     * Multiapp execute_on. This non-standard option is not understood by SetupInterface. In the absence of any execute_on
-     * parameters, FEProblem will populate the execute_on MultiMooseEnum with the values from the associated MultiApp.
-     */
-    Transfer(deprecated_name, removeSpecialOption(parameters)),
-    _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
-    _direction(getParam<MooseEnum>("direction"))
-{
-}
-
 void
 MultiAppTransfer::getAppInfo()
 {

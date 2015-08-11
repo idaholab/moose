@@ -21,7 +21,6 @@ class EBSDMesh : public GeneratedMesh
 {
 public:
   EBSDMesh(const InputParameters & parameters);
-  EBSDMesh(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
   virtual ~EBSDMesh();
 
   virtual void buildMesh();

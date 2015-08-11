@@ -113,9 +113,3 @@ ThermalContactMaterialsAction::act()
   ++n;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ThermalContactMaterialsAction::ThermalContactMaterialsAction(const std::string & deprecated_name, InputParameters params) :
-  Action(deprecated_name, params)
-{
-}

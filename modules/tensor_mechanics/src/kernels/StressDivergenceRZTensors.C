@@ -126,9 +126,3 @@ StressDivergenceRZTensors::calculateJacobian(unsigned int ivar, unsigned int jva
     mooseError("Invalid component in Jacobian Calculation");
 }
 
-
-// DEPRECATED CONSTRUCTOR
-StressDivergenceRZTensors::StressDivergenceRZTensors(const std::string & deprecated_name, InputParameters parameters) :
-    StressDivergenceTensors(deprecated_name, parameters)
-{
-}

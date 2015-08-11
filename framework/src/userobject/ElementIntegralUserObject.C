@@ -63,10 +63,3 @@ ElementIntegralUserObject::computeIntegral()
   return sum;
 }
 
-
-// DEPRECATED CONSTRUCTOR
-ElementIntegralUserObject::ElementIntegralUserObject(const std::string & deprecated_name, InputParameters parameters) :
-    ElementUserObject(deprecated_name, parameters),
-    _qp(0),
-    _integral_value(0)
-{}

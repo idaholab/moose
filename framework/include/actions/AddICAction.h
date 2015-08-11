@@ -27,7 +27,6 @@ class AddICAction : public MooseObjectAction
 {
 public:
   AddICAction(InputParameters params);
-  AddICAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 };

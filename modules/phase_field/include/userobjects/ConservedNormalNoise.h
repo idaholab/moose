@@ -26,10 +26,6 @@ public:
 
   ConservedNormalNoise(const InputParameters & parameters) :
       ConservedNormalNoiseVeneer<ConservedNoiseBase>(parameters) {}
-
-  // DEPRECATED CONSTRUCTOR
-  ConservedNormalNoise(const std::string & name, InputParameters parameters) :
-    ConservedNormalNoiseVeneer<ConservedNoiseBase>(name, parameters) {}
 };
 
 #endif //CONSERVEDNORMALNOISE_H

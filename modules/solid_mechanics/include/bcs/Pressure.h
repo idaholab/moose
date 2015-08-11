@@ -21,7 +21,6 @@ class Pressure : public IntegratedBC
 public:
 
   Pressure(const InputParameters & parameters);
-  Pressure(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~Pressure(){}
 

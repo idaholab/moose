@@ -42,7 +42,6 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   Convection(const InputParameters & parameters);
-  Convection(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   /**

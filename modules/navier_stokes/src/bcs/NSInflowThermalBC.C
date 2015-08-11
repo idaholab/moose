@@ -54,13 +54,3 @@ NSInflowThermalBC::computeQpResidual()
   return _u[_qp] - _specified_rho * (cv * _specified_temperature + 0.5*_specified_velocity_magnitude*_specified_velocity_magnitude);
 }
 
-
-// DEPRECATED CONSTRUCTOR
-NSInflowThermalBC::NSInflowThermalBC(const std::string & deprecated_name, InputParameters parameters)
-  :NodalBC(deprecated_name, parameters),
-   _R(getParam<Real>("R")),
-   _gamma(getParam<Real>("gamma")),
-   _specified_rho(getParam<Real>("specified_rho")),
-   _specified_temperature(getParam<Real>("specified_temperature")),
-   _specified_velocity_magnitude(getParam<Real>("specified_velocity_magnitude"))
-  {}

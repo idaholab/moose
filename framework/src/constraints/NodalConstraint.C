@@ -75,16 +75,3 @@ void
 NodalConstraint::updateConnectivity()
 {
 }
-
-
-// DEPRECATED CONSTRUCTOR
-NodalConstraint::NodalConstraint(const std::string & deprecated_name, InputParameters parameters) :
-    Constraint(deprecated_name, parameters),
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, true, true),
-    _master_node_id(getParam<unsigned int>("master")),
-    _master_node(_assembly.node()),
-    _slave_node(_assembly.nodeNeighbor()),
-    _u_slave(_var.nodalSlnNeighbor()),
-    _u_master(_var.nodalSln())
-{
-}
