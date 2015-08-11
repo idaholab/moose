@@ -21,11 +21,11 @@ template<>
 InputParameters validParams<IterationAdaptiveDT>()
 {
   InputParameters params = validParams<TimeStepper>();
-  params.addClassDescription("Adjust the timestep based on the number of iterations.");
+  params.addClassDescription("Adjust the timestep based on the number of iterations");
   params.addParam<int>("optimal_iterations", "The target number of nonlinear iterations for adaptive timestepping");
-  params.addParam<int>("iteration_window", "The size of the nonlinear iteration window for adaptive timestepping (default = optimal_iterations/5)");
+  params.addParam<int>("iteration_window", "Attempt to grow/shrink timestep if the iteration count is below/above 'optimal_iterations plus/minus iteration_window' (default = optimal_iterations/5).");
   params.addParam<unsigned>("linear_iteration_ratio", "The ratio of linear to nonlinear iterations to determine target linear iterations and window for adaptive timestepping (default = 25)");
-  params.addParam<FunctionName>("timestep_limiting_function", "A function used to control the timestep by limiting the change in the function over a timestep");
+  params.addParam<FunctionName>("timestep_limiting_function", "A 'Piecewise' type function used to control the timestep by limiting the change in the function over a timestep");
   params.addParam<Real>("max_function_change", "The absolute value of the maximum change in timestep_limiting_function over a timestep");
   params.addParam<bool>("force_step_every_function_point", false, "Forces the timestepper to take a step that is consistent with points defined in the function");
   params.addRequiredParam<Real>("dt", "The default timestep size between solves");
@@ -266,12 +266,13 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
       do
       {
         limitedDT /= 2.0;
-        newValue = _timestep_limiting_function->value(_time_old+limitedDT, dummyPoint);
+        newValue = _timestep_limiting_function->value(_time_old + limitedDT, dummyPoint);
         change = std::abs(newValue - oldValue);
       }
       while (change > _max_function_change);
     }
   }
+
   _at_function_point = false;
   if (_piecewise_timestep_limiting_function && _force_step_every_function_point)
   {
