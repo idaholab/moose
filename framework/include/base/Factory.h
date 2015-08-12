@@ -195,29 +195,6 @@ public:
   }
 
   /**
-   * Registration for legacy constructors
-   */
-  template<typename T>
-  void regLegacy(const std::string & obj_name)
-  {
-    reg<T>(obj_name);
-  }
-
-  template<typename T>
-  void regLegacyDeprecated(const std::string & obj_name, const std::string t_str)
-  {
-    // Register the name
-    regDeprecated<T>(obj_name, t_str);
-  }
-
-  template<typename T>
-  void regLegacyReplaced(const std::string & obj_name, const std::string & name, const std::string t_str)
-  {
-    // Register the name
-    regReplaced<T>(obj_name, name, t_str);
-  }
-
-  /**
    * Get valid parameters for the object
    * @param name Name of the object whose parameter we are requesting
    * @return Parameters of the object

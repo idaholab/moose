@@ -72,12 +72,6 @@ public:
   virtual ~ActionFactory();
 
   template<typename T>
-  void regLegacy(const std::string & name, const std::string & task)
-  {
-    reg<T>(name, task);
-  }
-
-  template<typename T>
   void reg(const std::string & name, const std::string & task)
   {
     BuildInfo build_info;
