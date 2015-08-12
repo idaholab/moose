@@ -82,12 +82,6 @@ public:
     }
   }
 
-  template<typename T>
-  void regLegacy(const std::string & name)
-  {
-    reg<T>(name);
-  }
-
   /**
    * Get valid parameters for the object
    * @param name Name of the object whose parameter we are requesting
