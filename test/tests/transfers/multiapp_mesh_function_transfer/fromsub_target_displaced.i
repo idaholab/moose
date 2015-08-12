@@ -3,6 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
+  displacements = 'x_disp y_disp'
 []
 
 [Variables]
@@ -16,6 +17,12 @@
   [./elemental_transferred_u]
     order = CONSTANT
     family = MONOMIAL
+  [../]
+  [./x_disp]
+    initial_condition = -0.1
+  [../]
+  [./y_disp]
+    initial_condition = -0.1
   [../]
 []
 
@@ -56,6 +63,7 @@
 [Outputs]
   output_initial = true
   exodus = true
+  print_linear_residuals = true
   print_perf_log = true
 []
 
@@ -75,7 +83,7 @@
     variable = transferred_u
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
-    execute_on = 'initial timestep_end'
+    displaced_target_mesh = true
   [../]
   [./elemental_from_sub]
     source_variable = sub_u
@@ -83,5 +91,6 @@
     variable = elemental_transferred_u
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
+    displaced_target_mesh = true
   [../]
 []
