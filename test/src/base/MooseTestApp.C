@@ -85,6 +85,7 @@
 #include "RandomAux.h"
 #include "PostprocessorAux.h"
 #include "FluxAverageAux.h"
+#include "OldMaterialAux.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -320,6 +321,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(RandomAux);
   registerAux(PostprocessorAux);
   registerAux(FluxAverageAux);
+  registerAux(OldMaterialAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);

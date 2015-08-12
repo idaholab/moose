@@ -101,9 +101,9 @@ public:
   template<typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
   template<typename T>
   const T & getUserObject(const std::string & name);
@@ -203,7 +203,7 @@ AuxKernel::getMaterialProperty(const std::string & name)
 }
 
 template<typename T>
-MaterialProperty<T> &
+const MaterialProperty<T> &
 AuxKernel::getMaterialPropertyOld(const std::string & name)
 {
   if (isNodal())
@@ -213,7 +213,7 @@ AuxKernel::getMaterialPropertyOld(const std::string & name)
 }
 
 template<typename T>
-MaterialProperty<T> &
+const MaterialProperty<T> &
 AuxKernel::getMaterialPropertyOlder(const std::string & name)
 {
   if (isNodal())

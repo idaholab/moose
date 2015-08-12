@@ -38,6 +38,7 @@ public:
   GenericFunctionMaterial(const InputParameters & parameters);
 
 protected:
+  virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
   std::vector<std::string> _prop_names;
@@ -46,7 +47,19 @@ protected:
   unsigned int _num_props;
 
   std::vector<MaterialProperty<Real> *> _properties;
+  std::vector<MaterialProperty<Real> *> _properties_old;
+  std::vector<MaterialProperty<Real> *> _properties_older;
   std::vector<Function *> _functions;
+
+private:
+
+  /**
+   * A helper method for evaluating the functions
+   */
+  void computeQpFunctions();
+
+  /// Flag for calling declareProperyOld/Older
+  bool _enable_stateful;
 };
 
 #endif //GENERICFUNCTIONMATERIAL_H
