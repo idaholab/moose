@@ -28,4 +28,11 @@ int sgn(T val)
  */
 Real Reynolds(Real volume_fraction, Real rho, Real v, Real Dh, Real visc);
 
+/**
+ * Computes surface tension [N/m]
+ * @param temperature
+ * @return returns the surface tension [N/m]
+ */
+Real surfaceTension(Real temperature);
+
 #endif  // NUMERICS_H
