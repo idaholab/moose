@@ -48,7 +48,7 @@ protected:
   virtual bool constrainStep(Real &dt);
   virtual Real computeFailedDT();
   void computeAdaptiveDT(Real & dt, bool allowToGrow = true, bool allowToShrink = true);
-  void computeInterpolationDT(Real & dt);
+  Real computeInterpolationDT();
   void limitDTByFunction(Real & limitedDT);
 
   Real & _dt_old;
