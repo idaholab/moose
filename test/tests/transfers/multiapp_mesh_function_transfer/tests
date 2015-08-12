@@ -3,56 +3,48 @@
     type = 'Exodiff'
     input = 'tosub.i'
     exodiff = 'tosub_out_sub0.e tosub_out_sub1.e tosub_out_sub2.e'
-    recover = false
   [../]
 
   [./tosub_source_displaced]
     type = 'Exodiff'
     input = 'tosub_source_displaced.i'
     exodiff = 'tosub_source_displaced_out_sub0.e tosub_source_displaced_out_sub1.e tosub_source_displaced_out_sub2.e'
-    recover = false
   [../]
 
   [./tosub_target_displaced]
     type = 'Exodiff'
     input = 'tosub_target_displaced.i'
     exodiff = 'tosub_target_displaced_out_sub0.e tosub_target_displaced_out_sub1.e tosub_target_displaced_out_sub2.e'
-    recover = false
   [../]
 
   [./fromsub]
     type = 'Exodiff'
     input = 'fromsub.i'
     exodiff = 'fromsub_out.e'
-    recover = false
   [../]
 
   [./fromsub_source_displaced]
     type = 'Exodiff'
     input = 'fromsub_source_displaced.i'
     exodiff = 'fromsub_source_displaced_out.e'
-    recover = false
   [../]
 
   [./fromsub_target_displaced]
     type = 'Exodiff'
     input = 'fromsub_target_displaced.i'
     exodiff = 'fromsub_target_displaced_out.e'
-    recover = false
   [../]
 
   [./missed_point]
     type = 'RunException'
     input = 'missing_master.i'
     expect_err = 'Point not found'
-    recover = false
   [../]
 
   [./mismatch_exec_on]
     type = 'RunApp'
     input = 'exec_on_mismatch.i'
     expect_out = 'MultiAppTransfer execute_on flags do not match'
-    recover = false
     max_parallel = 1
   [../]
 []
