@@ -117,7 +117,7 @@ RichardsBorehole::RichardsBorehole(const InputParameters & parameters) :
 
   // construct the line-segment lengths between each point
   _half_seg_len.resize(std::max(num_pts-1, 1));
-  for (unsigned int i = 0 ; i < _xs.size() - 1; ++i)
+  for (unsigned int i = 0 ; i + 1 < _xs.size(); ++i)
   {
     _half_seg_len[i] = 0.5*std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
     if (_half_seg_len[i] == 0)
@@ -128,7 +128,7 @@ RichardsBorehole::RichardsBorehole(const InputParameters & parameters) :
 
   // construct the rotation matrix needed to rotate the permeability
   _rot_matrix.resize(std::max(num_pts-1, 1));
-  for (unsigned int i = 0 ; i < _xs.size()-1; ++i)
+  for (unsigned int i = 0 ; i + 1 < _xs.size(); ++i)
   {
     RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
     _rot_matrix[i] = RotationMatrix::rotVecToZ(v2);
@@ -148,7 +148,7 @@ RichardsBorehole::RichardsBorehole(const InputParameters & parameters) :
     RealVectorValue vec0;
     RealTensorValue ten0;
     Real the_sum;
-    for (unsigned int i = 0 ; i < _xs.size()-1; ++i)
+    for (unsigned int i = 0 ; i + 1 < _xs.size(); ++i)
     {
       // check rotation matrix does the correct rotation
       _console << i << std::endl;

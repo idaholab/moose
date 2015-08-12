@@ -28,25 +28,17 @@ LinearInterpolation::LinearInterpolation(const std::vector<double> & x, const st
 void
 LinearInterpolation::errorCheck()
 {
-
-  if ( _x.size() != _y.size() )
-  {
+  if (_x.size() != _y.size())
     mooseError("LinearInterpolation: Vectors are not the same length");
-  }
 
-
-  bool error(false);
-  for (unsigned i(0); !error && !_x.empty() && i < _x.size()-1; ++i)
+  bool error = false;
+  for (unsigned i = 0; !error && i + 1 < _x.size(); ++i)
   {
-    if ( _x[i] >= _x[i+1] )
-    {
+    if (_x[i] >= _x[i+1])
       error = true;
-    }
   }
   if (error)
-  {
     mooseError( "x-values are not strictly increasing" );
-  }
 }
 
 double
@@ -58,11 +50,9 @@ LinearInterpolation::sample(double x) const
   if (x >= _x[_x.size()-1])
     return _y[_y.size()-1];
 
-  for (unsigned int i=0; i < _x.size()-1; ++i)
+  for (unsigned int i = 0; i + 1 < _x.size(); ++i)
     if (x >= _x[i]  && x < _x[i+1])
-    {
       return _y[i] + (_y[i+1]-_y[i])*(x-_x[i])/(_x[i+1]-_x[i]);
-    }
 
   mooseError("Unreachable?");
   return 0;
@@ -77,11 +67,9 @@ LinearInterpolation::sampleDerivative(double x) const
   if (x >= _x[_x.size()-1])
     return 0.0;
 
-  for (unsigned int i=0; i < _x.size()-1; ++i)
+  for (unsigned int i = 0; i + 1 < _x.size(); ++i)
     if (x >= _x[i]  && x < _x[i+1])
-    {
       return (_y[i+1]-_y[i])/(_x[i+1]-_x[i]);
-    }
 
   mooseError("Unreachable?");
   return 0;
