@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = old_mat_in_aux.i
+    exodiff = old_mat_in_aux_out.e
+  [../]
+[]
