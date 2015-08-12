@@ -2694,7 +2694,11 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     std::vector<Transfer *> transfers = _to_multi_app_transfers(type)[0].all();
     if (transfers.size())
       for (unsigned int i=0; i<transfers.size(); i++)
+      {
+        Moose::perf_log.push(transfers[i]->name(), "Transfers");
         transfers[i]->execute();
+        Moose::perf_log.pop(transfers[i]->name(), "Transfers");
+      }
   }
 
   if (multi_apps.size())
@@ -2724,7 +2728,11 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     {
       _console << "Starting Transfers From MultiApps" << std::endl;
       for (unsigned int i=0; i<transfers.size(); i++)
+      {
+        Moose::perf_log.push(transfers[i]->name(), "Transfers");
         transfers[i]->execute();
+        Moose::perf_log.pop(transfers[i]->name(), "Transfers");
+      }
 
       _console << "Waiting For Transfers To Finish" << std::endl;
       MooseUtils::parallelBarrierNotify(_communicator);
