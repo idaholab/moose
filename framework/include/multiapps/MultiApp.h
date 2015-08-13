@@ -103,6 +103,12 @@ public:
   virtual void restore();
 
   /**
+   * Whether or not this MultiApp should be restored at the beginning of
+   * each Picard iteration.
+   */
+  virtual bool needsRestoration() { return true; }
+
+  /**
    * @param app The global app number to get the Executioner for
    * @return The Executioner associated with that App.
    */
