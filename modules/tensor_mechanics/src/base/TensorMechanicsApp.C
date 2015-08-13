@@ -19,6 +19,7 @@
 #include "MomentBalancing.h"
 #include "GravityTM.h"
 #include "PoroMechanicsCoupling.h"
+#include "SolidMechInertialForceTensors.h"
 
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
@@ -75,6 +76,8 @@
 #include "CrystalPlasticityRotationOutAux.h"
 #include "RankTwoScalarAux.h"
 #include "StressDivergencePFFracTensors.h"
+#include "NewmarkAccelAux.h"
+#include "NewmarkVelAux.h"
 
 #include "PressureTM.h"
 
@@ -123,6 +126,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergencePFFracTensors);
   registerKernel(GravityTM);
   registerKernel(PoroMechanicsCoupling);
+  registerKernel(SolidMechInertialForceTensors);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
@@ -178,6 +182,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(TensorElasticEnergyAux);
   registerAux(CrystalPlasticityRotationOutAux);
   registerAux(RankTwoScalarAux);
+  registerAux(NewmarkAccelAux);
+  registerAux(NewmarkVelAux);
 
   registerBoundaryCondition(PressureTM);
 }

@@ -16,6 +16,7 @@ InputParameters validParams<ComputeLinearElasticStress>()
 
 ComputeLinearElasticStress::ComputeLinearElasticStress(const InputParameters & parameters) :
     ComputeStressBase(parameters),
+    _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
     _total_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "total_strain")),
     _is_finite_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
 {

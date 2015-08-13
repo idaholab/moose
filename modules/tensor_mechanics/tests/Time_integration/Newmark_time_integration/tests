@@ -1,0 +1,8 @@
+[tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'Newmark_test.i'
+    exodiff = 'Newmark_test_out.e'
+    abs_zero = 1e-09
+  [../]
+[]

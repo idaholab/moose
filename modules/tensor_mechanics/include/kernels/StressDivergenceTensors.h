@@ -28,6 +28,7 @@ class StressDivergenceTensors : public Kernel
 {
 public:
   StressDivergenceTensors(const InputParameters & parameters);
+  StressDivergenceTensors(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();
@@ -36,6 +37,7 @@ protected:
 
   std::string _base_name;
 
+  const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
@@ -50,6 +52,8 @@ protected:
   const bool _temp_coupled;
 
   const unsigned int _temp_var;
+  const Real _zeta;
+  const Real _alpha;
 
 private:
 
