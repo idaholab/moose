@@ -15,6 +15,20 @@ Prandtl(Real cp, Real mu, Real k)
 }
 
 Real
+Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l)
+{
+  // Eq. 6-17
+  static const Real g = 9.81;            // gravitational acceleration
+  return g * beta * dT * std::pow(Dh, 3) * (rho_l * rho_l) / (visc_l * visc_l);
+}
+
+Real
+wallHeatTransferCoefficient(Real Nu, Real k, Real Dh)
+{
+  return Nu * k / Dh;
+}
+
+Real
 surfaceTension(Real temperature)
 {
   return SIGMA_TS(temperature) * 1e-3;               // [ N/m]

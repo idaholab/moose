@@ -38,10 +38,30 @@ Real Reynolds(Real volume_fraction, Real rho, Real v, Real Dh, Real visc);
 Real Prandtl(Real cp, Real mu, Real k);
 
 /**
- * Computes surface tension [N/m]
- * @param temperature
- * @return returns the surface tension [N/m]
+ * Compute Grashof number
+ * @param beta Thermal expansion coefficient
+ * @param dT |T_w - T|
+ * @param Dh Hydraulic diameter
+ * @param rho_l Density of liquid
+ * @param visc_l Viscosity of liquid
+ * @return Grashof number
  */
+Real Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l);
+
+/**
+ * Compute wall heat transfer coefficient
+ * @param Nu Nusselt number
+ * @param k Thermal conductivity
+ * @param Dh Hydraulic diameter
+ * @return Returns the wall heat transfer coefficient
+ */
+Real wallHeatTransferCoefficient(Real Nu, Real k, Real Dh);
+
+/**
+* Computes surface tension [N/m]
+* @param temperature
+* @return returns the surface tension [N/m]
+*/
 Real surfaceTension(Real temperature);
 
 #endif  // NUMERICS_H
