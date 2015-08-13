@@ -5,13 +5,13 @@
   ny = 10
   nz = 0
   xmin = 0
-  xmax = 1000
+  xmax = 400
   ymin = 0
-  ymax = 1000
+  ymax = 400
   zmin = 0
   zmax = 0
   elem_type = QUAD4
-  uniform_refine = 2
+  uniform_refine = 1
 []
 
 [GlobalParams]
@@ -28,9 +28,9 @@
 [ICs]
   [./PolycrystalICs]
     [./BicrystalCircleGrainIC]
-      radius = 333.333
-      x = 500
-      y = 500
+      radius = 300
+      x = 400
+      y = 0
     [../]
   [../]
 []

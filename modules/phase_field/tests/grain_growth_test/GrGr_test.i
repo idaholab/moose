@@ -5,13 +5,13 @@
   ny = 10
   nz = 0
   xmin = 0
-  xmax = 1000
+  xmax = 400
   ymin = 0
-  ymax = 1000
+  ymax = 400
   zmin = 0
   zmax = 0
   elem_type = QUAD4
-  uniform_refine = 2
+  uniform_refine = 1
 []
 
 [GlobalParams]
@@ -27,9 +27,9 @@
 [ICs]
   [./PolycrystalICs]
     [./BicrystalCircleGrainIC]
-      radius = 333.333
-      x = 500
-      y = 500
+      radius = 300
+      x = 400
+      y = 0
     [../]
   [../]
 []
@@ -50,14 +50,6 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
-  [../]
-[]
-
-[BCs]
-  [./Periodic]
-    [./All]
-      auto_direction = 'x y'
-    [../]
   [../]
 []
 
@@ -101,7 +93,7 @@
   nl_max_its = 20
   nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 10
+  num_steps = 5
   dt = 80.0
   [./Adaptivity]
     initial_adaptivity = 2
