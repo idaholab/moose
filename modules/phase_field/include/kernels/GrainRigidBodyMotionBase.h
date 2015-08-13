@@ -8,6 +8,7 @@
 #define GRAINRIGIDBODYMOTIONBASE_H
 
 #include "Kernel.h"
+#include "DerivativeMaterialPropertyNameInterface.h"
 
 //Forward Declarations
 class GrainRigidBodyMotionBase;
@@ -15,7 +16,9 @@ class GrainRigidBodyMotionBase;
 template<>
 InputParameters validParams<GrainRigidBodyMotionBase>();
 
-class GrainRigidBodyMotionBase : public Kernel
+class GrainRigidBodyMotionBase :
+    public Kernel,
+    public DerivativeMaterialPropertyNameInterface
 {
 public:
   GrainRigidBodyMotionBase(const InputParameters & parameters);
@@ -34,10 +37,14 @@ protected:
   /// Variable gradient for the concentration
   VariableGradient & _grad_c;
 
+  VariableName _c_name;
   unsigned int _ncrys;
   /// Variable value for the order parameters
   std::vector<VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;
+
+  /// type of force density material
+  std::string _base_name;
 
   /// Material property for advection velocities
   const MaterialProperty<std::vector<RealGradient> > & _velocity_advection;

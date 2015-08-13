@@ -79,6 +79,7 @@
 #include "DerivativeTwoPhaseMaterial.h"
 #include "DiscreteNucleation.h"
 #include "ElasticEnergyMaterial.h"
+#include "ExternalForceDensityMaterial.h"
 #include "ForceDensityMaterial.h"
 #include "GBAnisotropy.h"
 #include "GBEvolution.h"
@@ -286,6 +287,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(DerivativeTwoPhaseMaterial);
   registerMaterial(DiscreteNucleation);
   registerMaterial(ElasticEnergyMaterial);
+  registerMaterial(ExternalForceDensityMaterial);
   registerMaterial(ForceDensityMaterial);
   registerMaterial(GBAnisotropy);
   registerMaterial(GBEvolution);

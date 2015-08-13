@@ -14,14 +14,17 @@ InputParameters validParams<ComputeGrainForceAndTorque>()
   params.addClassDescription("Userobject for calculating force and torque acting on a grain");
   params.addParam<MaterialPropertyName>("force_density", "force_density", "Force density material");
   params.addParam<UserObjectName>("grain_data", "center of mass of grains");
+  params.addCoupledVar("c", "Concentration field");
   return params;
 }
 
 ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & parameters) :
-    GrainForceAndTorqueInterface(),
     ElementUserObject(parameters),
+    GrainForceAndTorqueInterface(),
+    _c_name(getVar("c", 0)->name()),
     _dF(getMaterialProperty<std::vector<RealGradient> >("force_density")),
-    _dFdc(getMaterialProperty<std::vector<RealGradient> >("dFdc")),
+    _dF_name(getParam<MaterialPropertyName>("force_density")),
+    _dFdc(getMaterialPropertyByName<std::vector<RealGradient> >(propertyNameFirst(_dF_name, _c_name))),
     _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
     _grain_volumes(_grain_data.getGrainVolumes()),
     _grain_centers(_grain_data.getGrainCenters()),

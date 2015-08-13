@@ -7,8 +7,9 @@
 #ifndef COMPUTEGRAINFORCEANDTORQUE_H
 #define COMPUTEGRAINFORCEANDTORQUE_H
 
-#include "GrainForceAndTorqueInterface.h"
 #include "ElementUserObject.h"
+#include "GrainForceAndTorqueInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
 class ComputeGrainForceAndTorque;
@@ -21,8 +22,9 @@ InputParameters validParams<ComputeGrainForceAndTorque>();
  * This class is here to get the force and torque acting on a grain
  */
 class ComputeGrainForceAndTorque :
-    public GrainForceAndTorqueInterface,
-    public ElementUserObject
+    public ElementUserObject,
+    public DerivativeMaterialPropertyNameInterface,
+    public GrainForceAndTorqueInterface
 {
 public:
   ComputeGrainForceAndTorque(const InputParameters & parameters);
@@ -39,9 +41,11 @@ public:
 
 protected:
   unsigned int _qp;
-  std::string _dF_name;
+
+  VariableName _c_name;
   /// material property that provides force density
   const MaterialProperty<std::vector<RealGradient> > & _dF;
+  MaterialPropertyName _dF_name;
   /// material property that provides derivative of force density with respect to c
   const MaterialProperty<std::vector<RealGradient> > & _dFdc;
   /// provide UserObject for calculating grain volumes and centers
