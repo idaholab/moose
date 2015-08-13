@@ -34,7 +34,6 @@ private:
   const VariableValue & _accel_old;
   const Real _beta;
   const Real _gamma;
-  const Real _eta;
 
 };
 #endif //SOLIDMECHINERTIALFORCE_H

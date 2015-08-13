@@ -1,8 +1,0 @@
-[tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'Rayleigh_Newmark.i'
-    exodiff = 'Rayleigh_Newmark_out.e'
-    abs_zero = 1e-09
-  [../]
-[]
