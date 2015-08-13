@@ -137,6 +137,8 @@
 #include "ConstantGrainForceAndTorque.h"
 #include "DiscreteNucleationInserter.h"
 #include "DiscreteNucleationMap.h"
+#include "GrainForceAndTorqueSum.h"
+#include "MaskedGrainForceAndTorque.h"
 
 #include "EBSDReader.h"
 #include "SolutionRasterizer.h"
@@ -317,6 +319,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(ConstantGrainForceAndTorque);
   registerUserObject(DiscreteNucleationInserter);
   registerUserObject(DiscreteNucleationMap);
+  registerUserObject(GrainForceAndTorqueSum);
+  registerUserObject(MaskedGrainForceAndTorque);
 
   registerUserObject(EBSDReader);
   registerUserObject(SolutionRasterizer);
@@ -370,4 +374,3 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(ReconVarICAction, "add_ic");
   registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
 }
-
