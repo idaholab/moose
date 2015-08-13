@@ -2793,7 +2793,8 @@ FEProblem::restoreMultiApps(ExecFlagType type)
     _console << "Restoring MultiApps" << std::endl;
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
-      multi_apps[i]->restore();
+      if (multi_apps[i]->needsRestoration())
+        multi_apps[i]->restore();
 
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
