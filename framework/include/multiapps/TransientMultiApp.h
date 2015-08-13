@@ -61,6 +61,12 @@ public:
   virtual void advanceStep();
 
   /**
+   * Whether or not this MultiApp should be restored at the beginning of
+   * each Picard iteration.
+   */
+  virtual bool needsRestoration();
+
+  /**
    * Finds the smallest dt from among any of the apps.
    */
   Real computeDT();

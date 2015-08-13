@@ -388,6 +388,12 @@ TransientMultiApp::advanceStep()
   }
 }
 
+bool
+TransientMultiApp::needsRestoration()
+{
+  return _sub_cycling || _catch_up || _auto_advance || _tolerate_failure || _detect_steady_state;
+}
+
 Real
 TransientMultiApp::computeDT()
 {
@@ -481,4 +487,3 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we 
   problem->advanceState();
   _transient_executioners[i] = ex;
 }
-
