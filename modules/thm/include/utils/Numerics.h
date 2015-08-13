@@ -29,6 +29,15 @@ int sgn(T val)
 Real Reynolds(Real volume_fraction, Real rho, Real v, Real Dh, Real visc);
 
 /**
+ * Compute Prandtl number
+ * @param cp Specific heat
+ * @param mu Dynamic viscosity
+ * @param k Thermal conductivity
+ * @return
+ */
+Real Prandtl(Real cp, Real mu, Real k);
+
+/**
  * Computes surface tension [N/m]
  * @param temperature
  * @return returns the surface tension [N/m]

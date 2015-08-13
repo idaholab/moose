@@ -9,6 +9,12 @@ Reynolds(Real volume_fraction, Real rho, Real v, Real Dh, Real visc)
 }
 
 Real
+Prandtl(Real cp, Real mu, Real k)
+{
+  return cp * mu / k;
+}
+
+Real
 surfaceTension(Real temperature)
 {
   return SIGMA_TS(temperature) * 1e-3;               // [ N/m]
