@@ -130,12 +130,6 @@ protected:
   void write(std::string message, bool indent = true);
 
   /**
-   * Apply indentation to newlines in the supplied stream
-   * @param message Reference to the message being changed
-   */
-  void indentMessage(std::string & message);
-
-  /**
    * Write the file stream to the file
    * @param append Toggle for appending the file
    *
@@ -220,9 +214,6 @@ private:
   /// State of the --timing command line argument from MooseApp
   bool _timing;
 
-  /// Level of indent to add to output
-  std::string _multiapp_indent;
-
   /// Reference to cached messages from calls to _console
   const std::ostringstream & _console_buffer;
 
@@ -237,7 +228,6 @@ private:
 
   /// Flags for controlling the what simulations information is shown
   MultiMooseEnum _system_info_flags;
-
 
   friend class OutputWarehouse;
 };

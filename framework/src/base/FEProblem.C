@@ -323,7 +323,7 @@ void FEProblem::initialSetup()
   // Perform output related setups
   _app.getOutputWarehouse().initialSetup();
 
-  // Flush all output to _console that occured during construction of objects
+  // Flush all output to _console that occur during construction and initialization of objects
   _app.getOutputWarehouse().mooseConsole();
 
   if (_app.isRecovering())

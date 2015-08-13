@@ -27,7 +27,6 @@
 
 OutputWarehouse::OutputWarehouse() :
     Warehouse<Output>(),
-    _multiapp_level(0),
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false)
 {

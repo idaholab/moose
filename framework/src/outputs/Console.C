@@ -20,7 +20,6 @@
 #include "PetscSupport.h"
 #include "Executioner.h"
 #include "MooseApp.h"
-#include "pcrecpp.h"
 #include "Moose.h"
 
 template<>
@@ -74,8 +73,8 @@ InputParameters validParams<Console>()
   params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
 
   // System information controls
-  MultiMooseEnum info("framework mesh aux nonlinear execution output header", "framework mesh aux nonlinear execution header");
-  params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output', 'header')");
+  MultiMooseEnum info("framework mesh aux nonlinear execution output", "framework mesh aux nonlinear execution");
+  params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output')");
 
   // Advanced group
   params.addParamNamesToGroup("max_rows fit_node verbose show_multiapp_name system_info", "Advanced");
@@ -231,10 +230,6 @@ Console::initialSetup()
   // Call the base class method
   TableOutput::initialSetup();
 
-  // Set the string for multiapp output indenting
-  if (_app.getOutputWarehouse().multiappLevel() > 0)
-    _multiapp_indent = COLOR_CYAN + _app.name() + ": " + COLOR_DEFAULT;
-
   // If file output is desired, wipe out the existing file if not recovering
   if (!_app.isRecovering())
     writeStreamToFile(false);
@@ -244,7 +239,7 @@ Console::initialSetup()
     _verbose = true;
 
   // Display a message to indicate the application is running (useful for MultiApps)
-  if (_problem_ptr->hasMultiApps() || _app.getOutputWarehouse().multiappLevel() > 0)
+  if (_problem_ptr->hasMultiApps() || _app.multiappLevel() > 0)
     write(std::string("\nRunning App: ") + _app.name() + "\n");
 
   // Output the performance log early
@@ -517,9 +512,6 @@ Console::outputScalarVariables()
 void
 Console::outputSystemInformation()
 {
-  if (_system_info_flags.contains("header"))
-    _console << _app.header() << "\n\n";
-
   if (_system_info_flags.contains("framework"))
     _console << ConsoleUtils::outputFrameworkInformation(_app);
 
@@ -560,18 +552,7 @@ Console::meshChanged()
 }
 
 void
-Console::indentMessage(std::string & message)
-{
-  // Indent all lines after the first
-  pcrecpp::RE re("\n(?!\\Z)");
-  re.GlobalReplace(std::string("\n") + _multiapp_indent, &message);
-
-  // Prepend indent string at the front of the message
-  message = _multiapp_indent + message;
-}
-
-void
-Console::write(std::string message, bool indent)
+Console::write(std::string message, bool indent /*=true*/)
 {
   // Do nothing if the message is empty, writing empty strings messes with multiapp indenting
   if (message.empty())
@@ -582,8 +563,8 @@ Console::write(std::string message, bool indent)
     _file_output_stream << message;
 
   // Apply MultiApp indenting
-  if (indent)
-    indentMessage(message);
+  if (indent && _app.multiappLevel() > 0)
+    MooseUtils::indentMessage(_app.name(), message);
 
   // Write message to the screen
   if (_write_screen)
@@ -606,4 +587,3 @@ Console::petscSetupOutput()
   char c[] =  {32,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,13,10,124,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,124,13,10,124,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,124,13,10,32,92,32,32,32,32,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,32,32,32,32,47,13,10,32,32,92,95,95,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,95,95,95,45,45,45,95,95,95,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,95,95,47,13,10,32,32,32,32,32,45,45,45,95,95,95,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,92,32,32,32,32,32,32,32,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,45,95,95,95,32,32,124,32,32,32,32,32,32,32,32,32,124,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,45,45,124,32,32,95,32,32,32,95,32,32,124,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,124,111,124,32,124,111,124,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,45,32,32,32,45,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,95,95,95,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,45,45,32,32,32,45,45,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,32,47,92,32,32,32,32,32,47,92,32,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,92,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,47,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,92,32,32,92,95,95,95,95,95,95,95,95,95,95,95,95,32,47,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,92,32,32,32,32,32,39,95,95,95,39,32,32,32,32,32,47,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,47,92,32,32,32,32,32,92,32,45,45,95,95,45,45,45,95,95,45,45,32,47,32,32,32,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,47,32,32,92,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,47,32,32,92,13,10,32,32,32,32,32,32,32,32,47,32,32,32,47,32,32,32,32,32,32,32,77,46,79,46,79,46,83,46,69,32,32,32,32,32,32,32,92,32,32,32,92,13,10,32,32,32,32,32,32,32,47,32,32,32,124,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,92,13,10,32,32,32,32,32,32,124,32,32,32,32,124,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,124,32,32,32,32,124,13,10,32,32,32,32,32,32,32,92,32,32,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,47,13,10,32,32,32,32,32,32,32,32,32,92,92,32,92,95,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,95,47,32,47,47,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,45,45,45,95,95,95,95,95,45,45,45,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,86,32,32,32,32,32,92,32,47,32,32,32,32,86,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,95,124,95,95,95,95,95,124,32,124,95,95,95,95,124,95,95,124};
   Moose::out << std::string(c) << std::endl << std::endl;
 }
-

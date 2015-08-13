@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Moose includes
+// MOOSE includes
 #include "ConsoleStreamInterface.h"
 #include "MooseApp.h"
 
