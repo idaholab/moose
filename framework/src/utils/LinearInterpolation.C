@@ -44,11 +44,15 @@ LinearInterpolation::errorCheck()
 double
 LinearInterpolation::sample(double x) const
 {
+  // sanity check (empty LinearInterpolations get constructed in many places
+  // so we cannot put this into the errorCheck)
+  mooseAssert(_x.size() > 0, "Sampling an empty LinearInterpolation.");
+
   // endpoint cases
   if (x <= _x[0])
     return _y[0];
-  if (x >= _x[_x.size()-1])
-    return _y[_y.size()-1];
+  if (x >= _x.back())
+    return _y.back();
 
   for (unsigned int i = 0; i + 1 < _x.size(); ++i)
     if (x >= _x[i]  && x < _x[i+1])

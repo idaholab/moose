@@ -268,11 +268,11 @@ SyntaxTree::wildCardMatch(std::string name, std::string search_string)
       return false;
   }
 
-  if (pos != std::string::npos)
+  if (pos != std::string::npos && tokens.size() > 0)
   {
     // Now see if we have a trailing wildcard
-    size_t last_token_length = tokens[tokens.size()-1].length();
-    if (search_string[search_string.length()-1] == '*' || pos == name.size() - last_token_length)
+    size_t last_token_length = tokens.back().length();
+    if (*search_string.rbegin() == '*' || pos == name.size() - last_token_length)
       return true;
     else
       return false;

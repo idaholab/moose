@@ -169,7 +169,7 @@ std::pair<std::string, std::string>
 splitFileName(std::string full_file)
 {
   // Error if path ends with /
-  if (full_file[full_file.size()-1] == '/')
+  if (full_file.empty() || *full_file.rbegin() == '/')
     mooseError("Invalid full file name: " << full_file);
 
   // Define the variables to output

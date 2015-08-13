@@ -396,7 +396,7 @@ RichardsBorehole::computeQpResidual()
       outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(pp - bh_pressure);
   }
 
-  if (current_dirac_ptid < _zs.size() - 1 || _zs.size() == 1)
+  if (current_dirac_ptid + 1 < _zs.size() || _zs.size() == 1)
   // contribution from half-segment "ahead of" this point, or we only have one point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);

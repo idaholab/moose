@@ -50,11 +50,9 @@ SplineInterpolation::errorCheck()
     mooseError("SplineInterpolation: vectors are not the same length");
 
   bool error = false;
-  for (unsigned i = 0; !error && !_x.empty() && i < _x.size() - 1; ++i)
-  {
+  for (unsigned i = 0; !error && i + 1 < _x.size(); ++i)
     if (_x[i] >= _x[i+1])
       error = true;
-  }
 
   if (error)
     mooseError( "x-values are not strictly increasing" );
@@ -64,6 +62,9 @@ void
 SplineInterpolation::solve()
 {
   unsigned int n = _x.size();
+  if (n == 0)
+    mooseError("Solving for an empty SplineInterpolation.");
+
   std::vector<double> u(n, 0.);
   _y2.resize(n, 0.);
 
@@ -75,7 +76,7 @@ SplineInterpolation::solve()
     u[0] = (3.0 / (_x[1] - _x[0])) * ((_y[1] - _y[0]) / (_x[1] - _x[0]) - _yp1);
   }
   // decomposition of tri-diagonal algorithm (_y2 and u are used for temporary storage)
-  for (unsigned int i = 1; i < n-1; i++)
+  for (unsigned int i = 1; i + 1 < n; i++)
   {
     double sig = (_x[i] - _x[i - 1]) / (_x[i + 1] - _x[i - 1]);
     double p = sig * _y2[i - 1] + 2.0;
