@@ -102,4 +102,3 @@ PFCFreezingIC::value(const Point & p)
 
   return val;
 }
-

@@ -14,14 +14,10 @@ InputParameters validParams<HexPolycrystalIC>()
 {
   InputParameters params = validParams<PolycrystalReducedIC>();
   params.addClassDescription("Perturbed hexagonal polycrystal");
-
   params.addParam<Real>("x_offset", 0.5, "Specifies offset of hexagon grid in x-direction");
   params.addParam<Real>("perturbation_percent", 0.0, "The percent to randomly perturbate centers of grains relative to the size of the grain");
-
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
-
   params.set<int>("typ") = 1;
-
   return params;
 }
 
@@ -32,14 +28,13 @@ HexPolycrystalIC::HexPolycrystalIC(const InputParameters & parameters) :
 {
   if (_perturbation_percent < 0.0 || _perturbation_percent > 1.0)
     mooseError("perturbation_percent out of range");
+  _random.seed(_tid, getParam<unsigned int>("rand_seed"));
 }
 
 void
 HexPolycrystalIC::initialSetup()
 {
-  MooseRandom::seed(_rand_seed);
-
-  unsigned int root = std::floor(std::pow(_grain_num, 1.0/_mesh.dimension()));
+  unsigned int root = std::floor(std::pow(_grain_num, 1.0 / _mesh.dimension()));
 
   if (_grain_num != std::pow((float)root, (float)_mesh.dimension()))
   {
@@ -75,10 +70,10 @@ HexPolycrystalIC::initialSetup()
       for (unsigned int i = 0; i < root; ++i)
       {
         // set x-coordinate
-        holder[count](0) = i*ndist + (0.5*ndist*(j%2)) + _x_offset*ndist;
+        holder[count](0) = i*ndist + (0.5 * ndist * (j % 2)) + _x_offset*ndist;
 
         // set y-coordinate
-        holder[count](1) = j*ndist + (0.5*ndist*(k%2));
+        holder[count](1) = j*ndist + (0.5 * ndist * (k % 2));
 
         // set z-coordinate
         holder[count](2) = k*ndist;
@@ -88,14 +83,14 @@ HexPolycrystalIC::initialSetup()
       }
 
   // Assign center point values
-  for (unsigned int grain=0; grain < _grain_num; grain++)
-    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (unsigned int grain=0; grain < _grain_num; ++grain)
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       if (_range(i) == 0)
         continue;
 
-      Real perturbation_dist = (_range(i)/root * (MooseRandom::rand()*2 - 1.0)) * _perturbation_percent;  // Perturb -100 to 100%
-      _centerpoints[grain](i) = _bottom_left(i) + _range(i)*holder[grain](i) + perturbation_dist;
+      Real perturbation_dist = (_range(i)/root * (_random.rand(_tid) * 2 - 1.0)) * _perturbation_percent;  // Perturb -100 to 100%
+      _centerpoints[grain](i) = _bottom_left(i) + _range(i) * holder[grain](i) + perturbation_dist;
 
       if (_centerpoints[grain](i) > _top_right(i))
         _centerpoints[grain](i) = _top_right(i);
@@ -104,6 +99,5 @@ HexPolycrystalIC::initialSetup()
     }
 
   //Assign grains to specific order parameters in a way that maximizes the distance
-  _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
+  _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints, _op_num, _mesh, _var);
 }
-
