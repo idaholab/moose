@@ -44,7 +44,6 @@ class Action;
 class Parser;
 class Problem;
 class MooseApp;
-
 class InputParameters;
 
 template<class T>
