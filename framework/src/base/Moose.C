@@ -352,7 +352,7 @@
 #include "SetupResidualDebugAction.h"
 #include "DeprecatedBlockAction.h"
 #include "AddConstraintAction.h"
-#include "InitDisplacedProblemAction.h"
+#include "CreateDisplacedProblemAction.h"
 #include "CreateProblemAction.h"
 #include "DynamicObjectRegistrationAction.h"
 #include "AddUserObjectAction.h"
@@ -946,7 +946,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
   registerAction(SetupTimeIntegratorAction, "setup_time_integrator");
   registerAction(SetupTimePeriodsAction, "setup_time_periods");
-  registerAction(InitDisplacedProblemAction, "init_displaced_problem");
+  registerAction(CreateDisplacedProblemAction, "init_displaced_problem");
   registerAction(DetermineSystemType, "determine_system_type");
   registerAction(CreateProblemAction, "create_problem");
   registerAction(DynamicObjectRegistrationAction, "dynamic_object_registration");

@@ -12,13 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "InitDisplacedProblemAction.h"
+#include "CreateDisplacedProblemAction.h"
 #include "MooseApp.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 
 template<>
-InputParameters validParams<InitDisplacedProblemAction>()
+InputParameters validParams<CreateDisplacedProblemAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
@@ -26,29 +26,28 @@ InputParameters validParams<InitDisplacedProblemAction>()
   return params;
 }
 
-InitDisplacedProblemAction::InitDisplacedProblemAction(InputParameters parameters) :
+CreateDisplacedProblemAction::CreateDisplacedProblemAction(InputParameters parameters) :
     Action(parameters)
 {
 }
 
-InitDisplacedProblemAction::~InitDisplacedProblemAction()
+CreateDisplacedProblemAction::~CreateDisplacedProblemAction()
 {
 }
 
 void
-InitDisplacedProblemAction::act()
+CreateDisplacedProblemAction::act()
 {
   if (isParamValid("displacements"))
   {
     if (!_displaced_mesh)
       mooseError("displacements were set but a displaced mesh wasn't created!");
 
-    Moose::setup_perf_log.push("Create DisplacedProblem","Setup");
+    Moose::setup_perf_log.push("Create DisplacedProblem", "Setup");
 
     // Define the parameters
     InputParameters object_params = _factory.getValidParams("DisplacedProblem");
     object_params.set<std::vector<std::string> >("displacements") = getParam<std::vector<std::string> >("displacements");
-    // object_params += _problem->parameters();
     object_params.set<MooseMesh *>("mesh") = _displaced_mesh.get();
     object_params.set<FEProblem *>("_fe_problem") = _problem.get();
 
