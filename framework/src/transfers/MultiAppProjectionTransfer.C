@@ -484,10 +484,10 @@ MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
     for ( ; it != end_it; ++it)
     {
       const Node * node = *it;
-      if (node->n_comp(to_sys.number(), to_var.number()) > 0)
+      for (unsigned int comp = 0; comp < node->n_comp(to_sys.number(), to_var.number()); comp++)
       {
-        const dof_id_type proj_index = node->dof_number(ls.number(), _proj_var_num, 0);
-        const dof_id_type to_index = node->dof_number(to_sys.number(), to_var.number(), 0);
+        const dof_id_type proj_index = node->dof_number(ls.number(), _proj_var_num, comp);
+        const dof_id_type to_index = node->dof_number(to_sys.number(), to_var.number(), comp);
         to_solution->set(to_index, (*ls.solution)(proj_index));
       }
     }
@@ -498,10 +498,10 @@ MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
     for ( ; it != end_it; ++it)
     {
       const Elem * elem = *it;
-      if (elem->n_comp(to_sys.number(), to_var.number()) > 0)
+      for (unsigned int comp = 0; comp < elem->n_comp(to_sys.number(), to_var.number()); comp++)
       {
-        const dof_id_type proj_index = elem->dof_number(ls.number(), _proj_var_num, 0);
-        const dof_id_type to_index = elem->dof_number(to_sys.number(), to_var.number(), 0);
+        const dof_id_type proj_index = elem->dof_number(ls.number(), _proj_var_num, comp);
+        const dof_id_type to_index = elem->dof_number(to_sys.number(), to_var.number(), comp);
         to_solution->set(to_index, (*ls.solution)(proj_index));
       }
     }
