@@ -40,9 +40,24 @@ InitDisplacedProblemAction::act()
 {
   if (isParamValid("displacements"))
   {
-    InputParameters params = validParams<DisplacedProblem>();
-    params.set<std::vector<std::string> >("displacements") = getParam<std::vector<std::string> >("displacements");
-    _problem->initDisplacedProblem(_displaced_mesh.get(), params);
+    if (!_displaced_mesh)
+      mooseError("displacements were set but a displaced mesh wasn't created!");
+
+    Moose::setup_perf_log.push("Create DisplacedProblem","Setup");
+
+    // Define the parameters
+    InputParameters object_params = _factory.getValidParams("DisplacedProblem");
+    object_params.set<std::vector<std::string> >("displacements") = getParam<std::vector<std::string> >("displacements");
+    // object_params += _problem->parameters();
+    object_params.set<MooseMesh *>("mesh") = _displaced_mesh.get();
+    object_params.set<FEProblem *>("_fe_problem") = _problem.get();
+
+    // Create the object
+    MooseSharedPointer<DisplacedProblem> disp_problem = MooseSharedNamespace::dynamic_pointer_cast<DisplacedProblem>(_factory.create("DisplacedProblem", "Problem/DisplacedProblem", object_params));
+
+    // Add the Displaced Problem to FEProblem
+    _problem->addDisplacedProblem(disp_problem);
+
+    Moose::setup_perf_log.pop("Create DisplacedProblem","Setup");
   }
 }
-
