@@ -10,6 +10,7 @@
 #include "Material.h"
 #include "ComputeGrainCenterUserObject.h"
 #include "GrainForceAndTorqueInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
 class GrainAdvectionVelocity;
@@ -21,7 +22,7 @@ InputParameters validParams<GrainAdvectionVelocity>();
  * This Material calculates the advection velocity, it's divergence and
  * derivatives acting on a particle/grain
  */
-class GrainAdvectionVelocity : public Material
+class GrainAdvectionVelocity : public DerivativeMaterialInterface<Material>
 {
 public:
   GrainAdvectionVelocity(const InputParameters & parameters);
@@ -51,6 +52,9 @@ private:
   unsigned int _ncrys;
   std::vector<VariableValue *> _vals;
   std::vector<VariableGradient *> _grad_vals;
+  VariableName _c_name;
+  /// type of force density material
+  std::string _base_name;
 
   /// Material storing advection velocities of grains
   MaterialProperty<std::vector<RealGradient> > & _velocity_advection;

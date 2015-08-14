@@ -1,9 +1,10 @@
-# test file for showing reaction forces between particles
+# example showing grain motion due to applied force density on grains
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 25
-  ny = 10
+  ny = 15
   nz = 0
   xmax = 50
   ymax = 25
@@ -18,7 +19,7 @@
     [./InitialCondition]
       type = SpecifiedSmoothCircleIC
       invalue = 1.0
-      outvalue = 0.1
+      outvalue = 0.0
       int_width = 6.0
       x_positions = '20.0 30.0 '
       z_positions = '0.0 0.0 '
@@ -32,6 +33,13 @@
   [./w]
     order = FIRST
     family = LAGRANGE
+  [../]
+[]
+
+[Functions]
+  [./load]
+    type = ConstantFunction
+    value = -0.01
   [../]
 []
 
@@ -53,6 +61,12 @@
     variable = w
     v = c
   [../]
+  [./motion]
+    type = MultiGrainRigidBodyMotion
+    variable = w
+    c = c
+    v = 'eta0 eta1'
+  [../]
 []
 
 [Materials]
@@ -73,22 +87,24 @@
     derivative_order = 2
   [../]
   [./force_density]
-    type = ForceDensityMaterial
+    type = ExternalForceDensityMaterial
     block = 0
     c = c
-    etas ='eta0 eta1'
+    etas = 'eta0 eta1'
+    k = 1.0
+    force_y = load
   [../]
   [./advection_vel]
     type = GrainAdvectionVelocity
     block = 0
     grain_force = grain_force
     etas = 'eta0 eta1'
-    c = c
     grain_data = grain_center
   [../]
 []
 
 [AuxVariables]
+  active = 'bnds eta0 eta1 df11 df10 df00 df01'
   [./eta0]
   [../]
   [./eta1]
@@ -138,6 +154,7 @@
 []
 
 [AuxKernels]
+  active = 'bnds df11 df10 df01 df00'
   [./bnds]
     type = BndsCalcAux
     variable = bnds
@@ -149,30 +166,26 @@
   [./df01]
     type = MaterialStdVectorRealGradientAux
     variable = df01
-    index = 0
     component = 1
-    property = force_density
+    property = force_density_ext
   [../]
   [./df11]
     type = MaterialStdVectorRealGradientAux
     variable = df11
     index = 1
     component = 1
-    property = force_density
+    property = force_density_ext
   [../]
   [./df00]
     type = MaterialStdVectorRealGradientAux
     variable = df00
-    index = 0
-    component = 0
-    property = force_density
+    property = force_density_ext
   [../]
   [./df10]
     type = MaterialStdVectorRealGradientAux
     variable = df10
     index = 1
-    component = 0
-    property = force_density
+    property = force_density_ext
   [../]
   [./vadv00]
     type = MaterialStdVectorRealGradientAux
@@ -255,8 +268,8 @@
     type = ComputeGrainForceAndTorque
     execute_on = 'initial linear'
     grain_data = grain_center
-    force_density = force_density
-    c = c
+    force_density = force_density_ext
+    force_density_derivative = dFdc_ext
   [../]
 []
 
@@ -278,8 +291,8 @@
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   start_time = 0.0
-  num_steps = 1
-  dt = 1
+  num_steps = 5
+  dt = 0.1
 []
 
 [Outputs]

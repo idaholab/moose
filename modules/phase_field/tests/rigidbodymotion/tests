@@ -28,4 +28,10 @@
     input = 'grain_forcedensity.i'
     exodiff = 'grain_forcedensity_out.e'
   [../]
+
+  [./grain_appliedforcedensity]
+    type = 'Exodiff'
+    input = 'grain_appliedforcedensity.i'
+    exodiff = 'grain_appliedforcedensity_out.e'
+  [../]
 []
