@@ -26,7 +26,7 @@ public:
 protected:
   virtual Real computeQpResidual() { return 0.0; }
   virtual Real computeQpJacobian() { return 0.0; }
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) { return 0.0; }
+  virtual Real computeQpOffDiagJacobian(unsigned int /* jvar */ ) { return 0.0; }
 
   /// int label for the Concentration
   unsigned int _c_var;
