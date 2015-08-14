@@ -34,4 +34,16 @@
     input = 'grain_appliedforcedensity.i'
     exodiff = 'grain_appliedforcedensity_out.e'
   [../]
+
+  [./grain_forcesum]
+    type = 'Exodiff'
+    input = 'grain_forcesum.i'
+    exodiff = 'grain_forcesum_out.e'
+  [../]
+
+  [./grain_forcemasked]
+    type = 'Exodiff'
+    input = 'grain_maskedforce.i'
+    exodiff = 'grain_maskedforce_out.e'
+  [../]
 []
