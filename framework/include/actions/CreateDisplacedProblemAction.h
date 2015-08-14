@@ -12,24 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef INITDISPLACEDPROBLEMACTION_H
-#define INITDISPLACEDPROBLEMACTION_H
+#ifndef CREATEDISPLACEDPROBLEMACTION_H
+#define CREATEDISPLACEDPROBLEMACTION_H
 
 #include "Action.h"
 
-class InitDisplacedProblemAction;
+class CreateDisplacedProblemAction;
 
 template<>
-InputParameters validParams<InitDisplacedProblemAction>();
+InputParameters validParams<CreateDisplacedProblemAction>();
 
 /**
  *
  */
-class InitDisplacedProblemAction : public Action
+class CreateDisplacedProblemAction : public Action
 {
 public:
-  InitDisplacedProblemAction(InputParameters parameters);
-  virtual ~InitDisplacedProblemAction();
+  CreateDisplacedProblemAction(InputParameters parameters);
+  virtual ~CreateDisplacedProblemAction();
 
   virtual void act();
 
@@ -37,4 +37,4 @@ protected:
 
 };
 
-#endif /* INITDISPLACEDPROBLEMACTION_H */
+#endif /* CREATEDISPLACEDPROBLEMACTION_H */

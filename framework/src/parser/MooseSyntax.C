@@ -47,7 +47,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh");
 //  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "prepare_mesh");
 //  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "setup_mesh_complete");
-  syntax.registerActionSyntax("InitDisplacedProblemAction", "Mesh");
+  syntax.registerActionSyntax("CreateDisplacedProblemAction", "Mesh");
   syntax.registerActionSyntax("AddMeshModifierAction", "MeshModifiers/*");
   syntax.registerActionSyntax("AddMortarInterfaceAction", "Mesh/MortarInterfaces/*");
 
