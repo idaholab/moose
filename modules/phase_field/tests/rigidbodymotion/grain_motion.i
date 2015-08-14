@@ -129,6 +129,7 @@
   [../]
   [./advection_vel]
     type = GrainAdvectionVelocity
+    c = c
     block = 0
     grain_force = grain_force
     etas = eta

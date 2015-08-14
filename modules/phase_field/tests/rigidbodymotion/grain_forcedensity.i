@@ -80,6 +80,7 @@
   [../]
   [./advection_vel]
     type = GrainAdvectionVelocity
+    c = c
     block = 0
     grain_force = grain_force
     etas = 'eta0 eta1'
@@ -252,6 +253,7 @@
   [../]
   [./grain_force]
     type = ComputeGrainForceAndTorque
+    c = c
     execute_on = 'initial linear'
     grain_data = grain_center
     force_density = force_density

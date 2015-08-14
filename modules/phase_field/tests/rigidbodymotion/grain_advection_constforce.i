@@ -72,6 +72,7 @@
     derivative_order = 2
   [../]
   [./advection_vel]
+    c = c
     type = GrainAdvectionVelocity
     block = 0
     grain_force = grain_force
