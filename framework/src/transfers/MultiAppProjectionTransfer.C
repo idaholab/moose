@@ -38,11 +38,6 @@ InputParameters validParams<MultiAppProjectionTransfer>()
   MooseEnum proj_type("l2", "l2");
   params.addParam<MooseEnum>("proj_type", proj_type, "The type of the projection.");
 
-  MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
-  params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
-  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  params.addParam<MooseEnum>("order", orders,  "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
-
   return params;
 }
 
@@ -68,11 +63,8 @@ MultiAppProjectionTransfer::initialSetup()
     EquationSystems & to_es = to_problem.es();
 
     // Add the projection system.
-    FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                   Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
-    LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>(
-         "proj-sys-" + Utility::enum_to_string<FEFamily>(fe_type.family)
-         + "-" + Utility::enum_to_string<Order>(fe_type.order) + "-" + name());
+    FEType fe_type = to_problem.getVariable(0, _to_var_name).feType();
+    LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + name());
     _proj_var_num = proj_sys.add_variable("var", fe_type);
     proj_sys.attach_assemble_function(assemble_l2);
     _proj_sys[i_to] = &proj_sys;

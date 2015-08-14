@@ -94,8 +94,6 @@
     multi_app = sub
     source_variable = u
     variable = u_nodal
-    family = LAGRANGE
-    order = FIRST
   [../]
   [./elemental_tosub]
     type = MultiAppProjectionTransfer
@@ -103,8 +101,6 @@
     multi_app = sub
     source_variable = u
     variable = u_elemental
-    order = CONSTANT
-    family = MONOMIAL
   [../]
   [./elemental_to_sub_elemental]
     type = MultiAppProjectionTransfer
@@ -112,8 +108,6 @@
     multi_app = sub
     source_variable = x
     variable = x_elemental
-    order = CONSTANT
-    family = MONOMIAL
   [../]
   [./elemental_to_sub_nodal]
     type = MultiAppProjectionTransfer
@@ -121,7 +115,5 @@
     multi_app = sub
     source_variable = x
     variable = x_nodal
-    family = LAGRANGE
-    order = FIRST
   [../]
 []
