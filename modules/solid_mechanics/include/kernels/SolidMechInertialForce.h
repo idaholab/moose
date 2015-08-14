@@ -21,6 +21,7 @@ class SolidMechInertialForce : public Kernel
 public:
 
   SolidMechInertialForce(const InputParameters & parameters);
+  SolidMechInertialForce(const std::string & deprecated_name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -34,6 +35,7 @@ private:
   const VariableValue & _accel_old;
   const Real _beta;
   const Real _gamma;
+  const Real _eta;
 
 };
 #endif //SOLIDMECHINERTIALFORCE_H

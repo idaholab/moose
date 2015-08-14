@@ -23,6 +23,7 @@ class StressDivergence : public Kernel
 public:
 
   StressDivergence(const InputParameters & parameters);
+  StressDivergence(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
 protected:
   virtual Real computeQpResidual();
@@ -31,6 +32,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  const MaterialProperty<SymmTensor> & _stress_old;
   const MaterialProperty<SymmTensor> & _stress;
   const MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
   const MaterialProperty<SymmTensor> & _d_stress_dT;
@@ -47,5 +49,7 @@ private:
   const unsigned int _ydisp_var;
   const unsigned int _zdisp_var;
   const unsigned int _temp_var;
+  const Real _zeta;
+  const Real _alpha;
 };
 #endif //STRESSDIVERGENCE_H
