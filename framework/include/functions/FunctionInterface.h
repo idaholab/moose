@@ -61,7 +61,7 @@ private:
   THREAD_ID _fni_tid;
 
   /// Parameters of the object with this interface
-  InputParameters _fni_params;
+  const InputParameters &_fni_params;
 };
 
 #endif //FUNCTIONINTERFACE_H
