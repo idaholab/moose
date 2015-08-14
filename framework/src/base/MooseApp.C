@@ -107,6 +107,7 @@ bool isFlag(const std::string s)
 }
 
 MooseApp::MooseApp(InputParameters parameters) :
+    ConsoleStreamInterface(*this),
     ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("name")),
     _pars(parameters),
@@ -133,8 +134,10 @@ MooseApp::MooseApp(InputParameters parameters) :
     _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
     _legacy_constructors(false),
     _check_input(getParam<bool>("check_input")),
-    _restartable_data(libMesh::n_threads())
+    _restartable_data(libMesh::n_threads()),
+    _multiapp_level(0)
 {
+
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
     int argc = getParam<int>("_argc");
@@ -165,6 +168,12 @@ MooseApp::~MooseApp()
 void
 MooseApp::setupOptions()
 {
+  // Print the header, this is as early as possible
+  std::string hdr = header();
+  if (multiappLevel() > 0)
+    MooseUtils::indentMessage(_name, hdr);
+  Moose::out << hdr << std::endl;
+
   if (getParam<bool>("error_unused"))
     setCheckUnusedFlag(true);
   else if (getParam<bool>("warn_unused"))
@@ -231,9 +240,7 @@ MooseApp::setupOptions()
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
     Moose::out << "**START SYNTAX DATA**\n";
     for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = syntax.begin(); it != syntax.end(); ++it)
-    {
       Moose::out << it->first << "\n";
-    }
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
@@ -304,9 +311,7 @@ MooseApp::runInputFile()
     std::vector<std::string> obj_list = _factory.getConstructedObjects();
     Moose::out << "**START OBJECT DATA**\n";
     for (unsigned int i = 0; i < obj_list.size(); ++i)
-    {
       Moose::out << obj_list[i] << "\n";
-    }
     Moose::out << "**END OBJECT DATA**\n" << std::endl;
     _ready_to_exit = true;
     return;

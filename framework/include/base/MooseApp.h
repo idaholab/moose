@@ -30,6 +30,7 @@
 #include "OutputWarehouse.h"
 #include "InputParameterWarehouse.h"
 #include "RestartableData.h"
+#include "ConsoleStreamInterface.h"
 
 // libMesh includes
 #include "libmesh/parallel_object.h"
@@ -53,7 +54,9 @@ InputParameters validParams<MooseApp>();
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp : public libMesh::ParallelObject
+class MooseApp :
+  public ConsoleStreamInterface,
+  public libMesh::ParallelObject
 {
 public:
   virtual ~MooseApp();
@@ -400,6 +403,12 @@ public:
    */
   virtual std::string header() const;
 
+  /**
+   * The multiapp level
+   * @return A writable reference to the current number of levels from the master app
+   */
+  unsigned int & multiappLevel() { return _multiapp_level; }
+
 protected:
 
   /**
@@ -411,7 +420,6 @@ protected:
    * Recursively loads libraries and dependencies in the proper order to fully register a
    * MOOSE application that may have several dependencies. REQUIRES: dynamic linking loader support.
    */
-  //void loadLibraryAndDependencies(const std::string & library_filename, const std::string & registration_method_name, Factory * factory);
   void loadLibraryAndDependencies(const std::string & library_filename, const Parameters & params);
 
   /// Constructor is protected so that this object is constructed through the AppFactory object
@@ -550,6 +558,9 @@ private:
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
   enum RegistrationType { APPLICATION, OBJECT, SYNTAX };
+
+  /// Level of multiapp, the master is level 0. This used by the Console to indent output
+  unsigned int _multiapp_level;
 
   ///@{
   /**

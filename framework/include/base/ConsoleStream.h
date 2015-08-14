@@ -42,9 +42,7 @@ public:
    *
    * ConsoleStreamInterface contains an instance of this object, which allows message streams to be
    * transferred to Console output objects. This class simply provides an operator<< method
-   * that passes the stream to the Console objects. Note, that this class inserts a
-   * newline at the beginning of each call, but returns a reference to ConsoleStreamHelper
-   * that write the stream to the Console objects with out entering a new
+   * that passes the stream to the Console objects.
    */
   ConsoleStream(OutputWarehouse & output_warehouse);
 
