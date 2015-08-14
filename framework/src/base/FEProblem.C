@@ -77,6 +77,7 @@
 #include "XFEM_geometric_cut_2d.h"
 #include "XFEM_square_cut.h"
 #include "XFEM_circle_cut.h"
+#include "XFEM_ellipse_cut.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -308,6 +309,12 @@ FEProblem::addXFEMGeometricCuts(InputParameters parameters)
      if  (cut_data.size() != 9 )
       mooseError("Length of XFEM_cuts must be 9 when circle_cut_3d");
     _xfem.addGeometricCut(new XFEM_circle_cut(cut_data));
+  }
+  else if (_XFEM_cut_type == "ellipse_cut_3d")
+  {
+    if (cut_data.size() !=9 )
+      mooseError("Length of XFEM_cuts must be 9 when ellipse_cut_3d");
+      _xfem.addGeometricCut(new XFEM_ellipse_cut(cut_data));
   }
   else
     mooseError("unrecognized XFEM cut type");
