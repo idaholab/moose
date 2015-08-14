@@ -213,7 +213,8 @@ OversampleOutput::cloneMesh()
   // Create the new mesh from a file
   if (isParamValid("file"))
   {
-    InputParameters mesh_params = _problem_ptr->mesh().parameters();
+    InputParameters mesh_params = emptyInputParameters();
+    mesh_params += _problem_ptr->mesh().parameters();
     mesh_params.set<MeshFileName>("file") = getParam<MeshFileName>("file");
     mesh_params.set<bool>("nemesis") = false;
     mesh_params.set<bool>("skip_partitioning") = false;
@@ -234,4 +235,3 @@ OversampleOutput::cloneMesh()
     _mesh_ptr= &(_problem_ptr->mesh().clone());
   }
 }
-

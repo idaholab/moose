@@ -82,7 +82,7 @@ protected:
   virtual void threadJoin(const SamplerBase & y);
 
   /// The child params
-  InputParameters _sampler_params;
+  const InputParameters & _sampler_params;
 
   /// The child VectorPostprocessor
   VectorPostprocessor * _vpp;

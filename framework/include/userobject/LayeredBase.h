@@ -78,7 +78,7 @@ protected:
   std::string _layered_base_name;
 
   /// Params for this object
-  InputParameters _layered_base_params;
+  const InputParameters & _layered_base_params;
 
   /// The MooseEnum direction the layers are going in
   MooseEnum _direction_enum;
