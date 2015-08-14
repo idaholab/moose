@@ -1,6 +1,8 @@
-#       Test for  HHT time integration
-#       The test is for an 1-D bar element with unit length fixed on one end and a ramped pressure boundary condition applied to the other #       end. The parameters alpha, beta and gamma are HHT time integration parameters.
-
+# Test for HHT time integration The test is for a 1-D bar
+# element with unit length fixed on one end and a ramped
+# pressure boundary condition applied to the other end. The
+# parameters alpha, beta and gamma are HHT time integration
+# parameters.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE

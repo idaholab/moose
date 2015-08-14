@@ -1,8 +1,13 @@
-#       Test for rayleigh damping implemented using Newmark integration
-#       The test is for an 1-D bar element with unit length fixed on one end and a ramped pressure boundary condition applied to the other #       end. The parameters zeta and eta correspond to the stiffness and mass proportional rayliegh damping; and beta and gamma are Newmark
-#       time integration parameters. Note that in the StressDivergencedamping kernel an approximate slope (stress-stress_old)/dt is used
-#       as opposed to newmark time integration. The system will come to steady state slowly after the pressure becomes constant.
-
+# Test for rayleigh damping implemented using Newmark
+# integration. The test is for a 1-D bar element with unit
+# length fixed on one end and a ramped pressure boundary
+# condition applied to the other end. The parameters zeta and
+# eta correspond to the stiffness and mass proportional rayliegh
+# damping; and beta and gamma are Newmark time integration
+# parameters. Note that in the StressDivergencedamping kernel an
+# approximate slope (stress-stress_old)/dt is used as opposed to
+# newmark time integration. The system will come to steady state
+# slowly after the pressure becomes constant.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE

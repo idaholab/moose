@@ -1,6 +1,8 @@
-#       Test for Newmark integration
-#       The test is for an 1-D bar element with unit length fixed on one end and a ramped pressure boundary condition applied to the other #       end. The parameters beta and gamma are Newmark time integration parameters.
-
+# Test for Newmark integration The test is for an 1-D bar
+# element with unit length fixed on one end and a ramped
+# pressure boundary condition applied to the other end. The
+# parameters beta and gamma are Newmark time integration
+# parameters.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE

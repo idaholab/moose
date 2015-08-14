@@ -1,8 +1,14 @@
-#       Test for rayleigh damping implemented using HHT time integration
-#       The test is for an 1-D bar element with unit length fixed on one end with a ramped pressure boundary condition applied to the other#       end. The parameters zeta and eta correspond to the stiffness and mass proportional rayleigh damping; and alpha, beta and gamma are
-#       HHT time integration parameters. Note that in the StressDivergencedamping kernel an approximate slope (stress-stress_old)/dt is
-#       used as opposed to newmark time integration. The system will come to steady state slowly after the pressure becomes constant. Alpha#       equal to zero will result in Newmark integration.
-
+# Test for rayleigh damping implemented using HHT time
+# integration The test is for an 1-D bar element with unit
+# length fixed on one end with a ramped pressure boundary
+# condition applied to the other end. The parameters zeta and
+# eta correspond to the stiffness and mass proportional rayleigh
+# damping; and alpha, beta and gamma are HHT time integration
+# parameters. Note that in the StressDivergencedamping kernel an
+# approximate slope (stress-stress_old)/dt is used as opposed to
+# newmark time integration. The system will come to steady state
+# slowly after the pressure becomes constant. Alpha equal to
+# zero will result in Newmark integration.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
