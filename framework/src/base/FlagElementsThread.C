@@ -24,11 +24,10 @@
 
 FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
                                        std::vector<Number> & serialized_solution,
-                                       DisplacedProblem * displaced_problem,
                                        unsigned int max_h_level) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, fe_problem.getAuxiliarySystem()),
     _fe_problem(fe_problem),
-    _displaced_problem(displaced_problem),
+    _displaced_problem(_fe_problem.getDisplacedProblem()),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _system_number(_aux_sys.number()),
     _adaptivity(_fe_problem.adaptivity()),

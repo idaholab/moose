@@ -732,8 +732,8 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);
 
   // Displaced problem /////
-  virtual void initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters & params);
-  virtual DisplacedProblem * & getDisplacedProblem() { return _displaced_problem; }
+  virtual void addDisplacedProblem(MooseSharedPointer<DisplacedProblem> displaced_problem);
+  virtual MooseSharedPointer<DisplacedProblem> getDisplacedProblem() { return _displaced_problem; }
 
   virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL);
 
@@ -984,7 +984,7 @@ protected:
 
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;
-  DisplacedProblem * _displaced_problem;
+  MooseSharedPointer<DisplacedProblem> _displaced_problem;
   GeometricSearchData _geometric_search_data;
 
   bool _reinit_displaced_elem;

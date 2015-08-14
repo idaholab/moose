@@ -507,7 +507,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
       PetscBool displaced = (*dmm->contact_displaced)[it->second];
       PenetrationLocator *locator;
       if (displaced) {
-        DisplacedProblem *displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
+        MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
         if (!displaced_problem) {
     std::ostringstream err;
     err << "Cannot use a displaced contact (" << it->second.first << "," << it->second.second << ") with an undisplaced problem";
@@ -534,7 +534,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
       PetscBool displaced = (*dmm->uncontact_displaced)[it->second];
       PenetrationLocator *locator;
       if (displaced) {
-        DisplacedProblem *displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
+        MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
         if (!displaced_problem) {
     std::ostringstream err;
     err << "Cannot use a displaced uncontact (" << it->second.first << "," << it->second.second << ") with an undisplaced problem";
@@ -1464,7 +1464,7 @@ PetscErrorCode  DMSetFromOptions_Moose(DM dm)
   }
   ierr = PetscFree(sides);CHKERRQ(ierr);
   PetscInt maxcontacts = dmm->nl->_fe_problem.geomSearchData()._penetration_locators.size();
-  DisplacedProblem *displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
+  MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
   if (displaced_problem) {
     maxcontacts = PetscMax(maxcontacts,(PetscInt)displaced_problem->geomSearchData()._penetration_locators.size());
   }
