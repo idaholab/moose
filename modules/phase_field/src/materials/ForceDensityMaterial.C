@@ -20,8 +20,9 @@ InputParameters validParams<ForceDensityMaterial>()
 }
 
 ForceDensityMaterial::ForceDensityMaterial(const InputParameters & parameters) :
-   Material(parameters),
+   DerivativeMaterialInterface<Material>(parameters),
    _c(coupledValue("c")),
+   _c_name(getVar("c", 0)->name()),
    _ceq(getParam<Real>("ceq")),
    _cgb(getParam<Real>("cgb")),
    _k(getParam<Real>("k")),
@@ -31,7 +32,7 @@ ForceDensityMaterial::ForceDensityMaterial(const InputParameters & parameters) :
    _product_etas(_ncrys),
    _sum_grad_etas(_ncrys),
    _dF(declareProperty<std::vector<RealGradient> >("force_density")),
-   _dFdc(declareProperty<std::vector<RealGradient> >("dFdc"))
+   _dFdc(declarePropertyDerivative<std::vector<RealGradient> >("force_density", _c_name))
 {
   //Loop through grains and load coupled variables into the arrays
   for (unsigned int i = 0; i < _ncrys; ++i)

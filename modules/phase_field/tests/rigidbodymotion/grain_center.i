@@ -117,8 +117,8 @@
   type = Transient
   scheme = bdf2
   solve_type = PJFNK
-  petsc_options_iname = -pc_type
-  petsc_options_value = lu
+  petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
+  petsc_options_value = 'asm         31   preonly   lu      1'
   l_max_its = 30
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10

@@ -2,8 +2,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 50
-  ny = 25
+  nx = 25
+  ny = 15
   nz = 0
   xmax = 50
   ymax = 25
@@ -116,7 +116,7 @@
     type = GenericConstantMaterial
     block = 0
     prop_names = 'M    kappa_c  kappa_eta'
-    prop_values = '1.0  2.0      0.1'
+    prop_values = '5.0  2.0      0.1'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
@@ -132,6 +132,7 @@
     block = 0
     grain_force = grain_force
     etas = eta
+    c = c
     grain_data = grain_center
   [../]
 []
@@ -151,11 +152,11 @@
   [./grain_center]
     type = ComputeGrainCenterUserObject
     etas = eta
-    execute_on = 'initial linear'
+    execute_on = 'initial timestep_end'
   [../]
   [./grain_force]
     type = ConstantGrainForceAndTorque
-    execute_on = 'initial linear'
+    execute_on = 'initial timestep_end'
     force = '0.5 0.0 0.0 '
     torque = '0.0 0.0 10.0 '
   [../]
@@ -173,21 +174,20 @@
   nl_max_its = 30
   scheme = bdf2
   solve_type = PJFNK
-  petsc_options_iname = -pc_type
-  petsc_options_value = lu
+  petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
+  petsc_options_value = 'asm         31   preonly   lu      1'
   l_max_its = 30
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   start_time = 0.0
-  dt = 1
-  num_steps = 2
+  dt = 0.5
+  num_steps = 1
 []
 
 [Outputs]
   output_initial = true
   exodus = true
   print_perf_log = true
-  csv = true
 []
 
 [ICs]
