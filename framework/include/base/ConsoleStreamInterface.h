@@ -18,7 +18,7 @@
 // MOOSE includes
 #include "ConsoleStream.h"
 
-// Forward declerations
+// Forward declarations
 class MooseApp;
 
 /**

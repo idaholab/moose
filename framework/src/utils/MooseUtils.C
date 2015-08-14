@@ -342,4 +342,17 @@ MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigne
   }
 }
 
+void indentMessage(const std::string & prefix, std::string & message, const char* color/*= COLOR_CYAN*/)
+{
+  // The colored prefix
+  std::string indent = color + prefix + ": " + COLOR_DEFAULT;
+
+  // Indent all lines after the first
+  pcrecpp::RE re("\n(?!\\Z)");
+  re.GlobalReplace(std::string("\n") + indent, &message);
+
+  // Prepend indent string at the front of the message
+  message = indent + message;
+}
+
 } // MooseUtils namespace

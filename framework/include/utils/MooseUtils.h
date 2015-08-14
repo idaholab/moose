@@ -23,6 +23,7 @@
 
 // MOOSE includes
 #include "HashMap.h"
+#include "Moose.h"
 
 // libMesh includes
 #include "libmesh/parallel.h"
@@ -221,6 +222,14 @@ namespace MooseUtils
    * that may be overloaded to dump the type using template specialization.
    */
   void MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties> > & props);
+
+  /**
+   * Indents the supplied message given the prefix and color
+   * @param prefix The prefix to use for indenting
+   * @param message The message that will be indented
+   * @param color The color to apply to the prefix (default CYAN)
+   */
+  void indentMessage(const std::string & prefix, std::string & message, const char* color = COLOR_CYAN);
 
   /**
    * This function will split the passed in string on a set of delimiters appending the substrings
