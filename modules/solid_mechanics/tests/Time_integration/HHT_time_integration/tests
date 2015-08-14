@@ -1,0 +1,8 @@
+[tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'HHT_test.i'
+    exodiff = 'HHT_test_out.e'
+    abs_zero = 1e-09
+  [../]
+[]
