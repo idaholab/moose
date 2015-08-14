@@ -118,6 +118,15 @@ InputParameters::getClassDescription() const
 InputParameters &
 InputParameters::operator=(const InputParameters &rhs)
 {
+  // An error to help minimize the segmentation faults that occure when MooseObjects do not have the correct constructor
+  if (rhs.have_parameter<bool>("_allow_parameter_copy") && !rhs.get<bool>("_allow_parameter_copy"))
+  {
+    const std::string & name = rhs.get<std::string>("name"); // If _allow_parameter_copy is set then so is name (see InputParameterWarehouse::addInputParameters)
+    mooseError("Copying of the InputParameters object for the " << name << " object is not allowed.\n\nThe likely cause for this error "
+               << "is having a constructor that does not use a const reference, all constructors\nfor MooseObject based classes should be as follows:\n\n"
+               << "    MyObject::MyObject(const InputParameters & parameters);");
+  }
+
   Parameters::operator=(rhs);
 
   _doc_string = rhs._doc_string;
