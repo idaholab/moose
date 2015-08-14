@@ -257,15 +257,14 @@ protected:
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeConstitutiveModelStress();
 
-  void createConstitutiveModel(const std::string & cm_name, const InputParameters & params);
+  void createConstitutiveModel(const std::string & cm_name);
 
 
 private:
 
   void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
 
-  SolidMechanics::Element * createElement( const std::string & name,
-                                           const InputParameters & parameters );
+  SolidMechanics::Element * createElement();
 
   SolidMechanics::Element * _element;
 

@@ -34,7 +34,6 @@ PowerLawCreep::PowerLawCreep( const InputParameters & parameters)
   :SolidModel(parameters)
 {
 
-  createConstitutiveModel( "PowerLawCreepModel", parameters );
+  createConstitutiveModel("PowerLawCreepModel");
 
 }
-

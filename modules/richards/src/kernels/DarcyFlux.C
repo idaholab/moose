@@ -20,7 +20,7 @@ InputParameters validParams<DarcyFlux>()
   return params;
 }
 
-DarcyFlux::DarcyFlux(InputParameters parameters) :
+DarcyFlux::DarcyFlux(const InputParameters & parameters) :
     Kernel(parameters),
     _fluid_weight(getParam<RealVectorValue>("fluid_weight")),
     _fluid_viscosity(getParam<Real>("fluid_viscosity")),

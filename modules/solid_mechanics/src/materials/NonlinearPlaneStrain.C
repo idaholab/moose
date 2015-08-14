@@ -16,7 +16,7 @@ namespace SolidMechanics
 
 NonlinearPlaneStrain::NonlinearPlaneStrain( SolidModel & solid_model,
                                             const std::string & name,
-                                            InputParameters parameters )
+                                            const InputParameters & parameters )
   :Nonlinear( solid_model, name, parameters ),
    ScalarCoupleable(parameters),
    _grad_disp_x(coupledGradient("disp_x")),

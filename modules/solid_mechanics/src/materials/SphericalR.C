@@ -14,7 +14,7 @@ namespace SolidMechanics
 
 SphericalR::SphericalR(SolidModel & solid_model,
                        const std::string & name,
-                       InputParameters parameters)
+                       const InputParameters & parameters)
   :Element(solid_model, name, parameters),
    _disp_r(coupledValue("disp_r")),
    _large_strain(solid_model.getParam<bool>("large_strain")),
