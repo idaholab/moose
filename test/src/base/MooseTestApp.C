@@ -70,7 +70,7 @@
 #include "ConsoleMessageKernel.h"
 #include "WrongJacobianDiffusion.h"
 #include "DefaultMatPropConsumerKernel.h"
-
+#include "DoNotCopyParametersKernel.h"
 #include "CoupledAux.h"
 #include "CoupledScalarAux.h"
 #include "CoupledGradAux.h"
@@ -305,6 +305,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(ConsoleMessageKernel);
   registerKernel(WrongJacobianDiffusion);
   registerKernel(DefaultMatPropConsumerKernel);
+  registerKernel(DoNotCopyParametersKernel);
 
   // Aux kernels
   registerAux(CoupledAux);
