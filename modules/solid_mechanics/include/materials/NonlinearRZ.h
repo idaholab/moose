@@ -20,7 +20,7 @@ class NonlinearRZ : public Nonlinear
 public:
   NonlinearRZ( SolidModel & solid_model,
                const std::string & name,
-               InputParameters parameters );
+               const InputParameters & parameters );
 
   virtual ~NonlinearRZ();
 

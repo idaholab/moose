@@ -24,7 +24,7 @@ class Nonlinear3D : public Nonlinear
 public:
   Nonlinear3D( SolidModel & solid_model,
                const std::string & name,
-               InputParameters parameters );
+               const InputParameters & parameters );
 
   virtual ~Nonlinear3D();
 
