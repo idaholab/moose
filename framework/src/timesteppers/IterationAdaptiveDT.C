@@ -257,7 +257,7 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
   _at_function_point = false;
   if (_piecewise_timestep_limiting_function && _force_step_every_function_point)
   {
-    for (unsigned int i = 0; i < _times.size()-1; ++i)
+    for (unsigned int i = 0; i + 1 < _times.size(); ++i)
     {
       if (_time >= _times[i] && _time < _times[i+1])
       {

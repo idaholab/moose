@@ -61,6 +61,8 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
 
       // Parsing each reaction
       MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
+      if (tokens.size() == 0)
+        mooseError("Empty reaction specified.");
 
       std::vector<Real> stos(tokens.size()-1);
       std::vector<std::string> rxn_vars(tokens.size()-1);
@@ -121,4 +123,3 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
     _console << "\n";
   }
 }
-

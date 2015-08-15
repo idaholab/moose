@@ -216,9 +216,9 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
         //Loop through all pairs of faces, and check for contact on ridge betweeen each face pair
         std::vector<RidgeData> ridgeDataVec;
-        for ( unsigned int i(0); i < p_info.size()-1; ++i )
+        for (unsigned int i = 0; i + 1 < p_info.size(); ++i)
         {
-          for ( unsigned int j(i+1); j < p_info.size(); ++j )
+          for (unsigned int j = i + 1; j < p_info.size(); ++j)
           {
             Point closest_coor;
             Real tangential_distance(0.0);

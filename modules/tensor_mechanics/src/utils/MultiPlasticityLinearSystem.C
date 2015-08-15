@@ -101,7 +101,9 @@ MultiPlasticityLinearSystem::eliminateLinearDependence(const RankTwoTensor & str
   // num_lin_dep are the number of linearly dependent
   // "r vectors", if num_active <= 6
   unsigned int num_lin_dep = 0;
-  for (unsigned i = s.size() - 1 ; i > 0 ; --i)
+
+  unsigned i = s.size();
+  while (i-- > 0)
     if (s[i] < _svd_tol*s[0])
       num_lin_dep++;
     else
