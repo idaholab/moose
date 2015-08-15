@@ -93,7 +93,3 @@ private:
 };
 
 #endif //LINEARINTERPOLATION_H
-
-
-
-

@@ -74,7 +74,7 @@ FileInfo::FileInfo(const std::string &dirpath, const std::string &my_filename)
 
   if (!dirpath.empty()) {
     filename_ = dirpath;
-    if (filename_.at(filename_.size()-1) != '/')
+    if (*filename_.rbegin() != '/')
       filename_ += SLASH;
   }
   filename_ += my_filename;

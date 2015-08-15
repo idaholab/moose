@@ -375,7 +375,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> &nodes)
           break;
       }
       second_last_node = last_node;
-      last_node = _ordered_crack_front_nodes[_ordered_crack_front_nodes.size()-1];
+      last_node = _ordered_crack_front_nodes.back();
     }
   }
 }
