@@ -5,6 +5,9 @@
 
 using namespace libMesh;
 
+// gravitational acceleration, or gravity constant
+static const Real gravity_const = 9.81;
+
 /**
  * The sign function
  * @param val The argument of the sign function

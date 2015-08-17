@@ -26,8 +26,7 @@ Real
 Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l)
 {
   // Eq. 6-17
-  static const Real g = 9.81;            // gravitational acceleration
-  return g * beta * dT * std::pow(Dh, 3) * (rho_l * rho_l) / (visc_l * visc_l);
+  return gravity_const * beta * dT * std::pow(Dh, 3) * (rho_l * rho_l) / (visc_l * visc_l);
 }
 
 Real
