@@ -38,6 +38,9 @@ InputParameters validParams<MultiAppProjectionTransfer>()
   MooseEnum proj_type("l2", "l2");
   params.addParam<MooseEnum>("proj_type", proj_type, "The type of the projection.");
 
+  params.addParam<bool>("fixed_meshes", false, "Set to true when the meshes are not changing (ie, no movement or adaptivity).  This will cache some information to speed up the transfer.");
+
+
   return params;
 }
 
@@ -46,7 +49,9 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & p
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
     _proj_type(getParam<MooseEnum>("proj_type")),
-    _compute_matrix(true)
+    _compute_matrix(true),
+    _fixed_meshes(getParam<bool>("fixed_meshes")),
+    _qps_cached(false)
 {
 }
 
@@ -81,6 +86,12 @@ MultiAppProjectionTransfer::initialSetup()
 
     // Reinitialize EquationSystems since we added a system.
     to_es.reinit();
+  }
+
+  if (_fixed_meshes)
+  {
+    _cached_qps.resize(n_processors());
+    _cached_index_map.resize(n_processors());
   }
 }
 
@@ -200,65 +211,82 @@ MultiAppProjectionTransfer::execute()
   // element_index_map[i_to, element_id] = index
   // outgoing_qps[index] is the first quadrature point in element
 
-  for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
+  if (! _qps_cached)
   {
-    MeshBase & to_mesh = _to_meshes[i_to]->getMesh();
-
-    LinearImplicitSystem & system = * _proj_sys[i_to];
-
-    FEType fe_type = system.variable_type(0);
-    UniquePtr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
-    QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
-    fe->attach_quadrature_rule(&qrule);
-    const std::vector<Point> & xyz = fe->get_xyz();
-
-    MeshBase::const_element_iterator       el     = to_mesh.local_elements_begin();
-    const MeshBase::const_element_iterator end_el = to_mesh.local_elements_end();
-
-    unsigned int from0 = 0;
-    for (processor_id_type i_proc = 0;
-         i_proc < n_processors();
-         from0 += froms_per_proc[i_proc], i_proc++)
+    for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
     {
-      for (el = to_mesh.local_elements_begin(); el != end_el; el++)
+      MeshBase & to_mesh = _to_meshes[i_to]->getMesh();
+
+      LinearImplicitSystem & system = * _proj_sys[i_to];
+
+      FEType fe_type = system.variable_type(0);
+      UniquePtr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
+      QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
+      fe->attach_quadrature_rule(&qrule);
+      const std::vector<Point> & xyz = fe->get_xyz();
+
+      MeshBase::const_element_iterator       el     = to_mesh.local_elements_begin();
+      const MeshBase::const_element_iterator end_el = to_mesh.local_elements_end();
+
+      unsigned int from0 = 0;
+      for (processor_id_type i_proc = 0;
+           i_proc < n_processors();
+           from0 += froms_per_proc[i_proc], i_proc++)
       {
-        const Elem* elem = *el;
-        fe->reinit (elem);
-
-        bool qp_hit = false;
-        for (unsigned int i_from = 0;
-             i_from < froms_per_proc[i_proc] && ! qp_hit; i_from++)
+        for (el = to_mesh.local_elements_begin(); el != end_el; el++)
         {
-          for (unsigned int qp = 0;
-               qp < qrule.n_points() && ! qp_hit; qp ++)
+          const Elem* elem = *el;
+          fe->reinit (elem);
+
+          bool qp_hit = false;
+          for (unsigned int i_from = 0;
+               i_from < froms_per_proc[i_proc] && ! qp_hit; i_from++)
           {
-            Point qpt = xyz[qp];
-            if (bboxes[from0 + i_from].contains_point(qpt + _to_positions[i_to]))
-              qp_hit = true;
+            for (unsigned int qp = 0;
+                 qp < qrule.n_points() && ! qp_hit; qp ++)
+            {
+              Point qpt = xyz[qp];
+              if (bboxes[from0 + i_from].contains_point(qpt + _to_positions[i_to]))
+                qp_hit = true;
+            }
           }
-        }
 
-        if (qp_hit)
-        {
-          // The selected processor's bounding box contains at least one
-          // quadrature point from this element.  Send all qps from this element
-          // and remember where they are in the array using the map.
-          std::pair<unsigned int, unsigned int> key(i_to, elem->id());
-          element_index_map[i_proc][key] = outgoing_qps[i_proc].size();
-          for (unsigned int qp = 0; qp < qrule.n_points(); qp ++)
+          if (qp_hit)
           {
-            Point qpt = xyz[qp];
-            outgoing_qps[i_proc].push_back(qpt + _to_positions[i_to]);
+            // The selected processor's bounding box contains at least one
+            // quadrature point from this element.  Send all qps from this element
+            // and remember where they are in the array using the map.
+            std::pair<unsigned int, unsigned int> key(i_to, elem->id());
+            element_index_map[i_proc][key] = outgoing_qps[i_proc].size();
+            for (unsigned int qp = 0; qp < qrule.n_points(); qp ++)
+            {
+              Point qpt = xyz[qp];
+              outgoing_qps[i_proc].push_back(qpt + _to_positions[i_to]);
+            }
           }
         }
       }
     }
+
+    if (_fixed_meshes)
+      _cached_index_map = element_index_map;
+  }
+  else
+  {
+    element_index_map = _cached_index_map;
   }
 
   ////////////////////
   // Request quadrature point evaluations from other processors and handle
   // requests sent to this processor.
   ////////////////////
+
+  // Non-blocking send quadrature points to other processors.
+  std::vector<Parallel::Request> send_qps(n_processors());
+  if (! _qps_cached)
+    for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
+      if (i_proc != processor_id())
+        _communicator.send(i_proc, outgoing_qps[i_proc], send_qps[i_proc]);
 
   // Get the local bounding boxes.
   std::vector<MeshTools::BoundingBox> local_bboxes(froms_per_proc[processor_id()]);
@@ -268,15 +296,11 @@ MultiAppProjectionTransfer::execute()
     for (processor_id_type i_proc = 0;
          i_proc < n_processors() && i_proc != processor_id();
          i_proc++)
-    {
       local_start += froms_per_proc[i_proc];
-    }
 
     // Extract the local bounding boxes.
     for (unsigned int i_from = 0; i_from < froms_per_proc[processor_id()]; i_from++)
-    {
       local_bboxes[i_from] = bboxes[local_start + i_from];
-    }
   }
 
   // Setup the local mesh functions.
@@ -295,28 +319,36 @@ MultiAppProjectionTransfer::execute()
     local_meshfuns[i_from] = from_func;
   }
 
-  // Send quadrature points to other processors.
+  // Recieve quadrature points from other processors, evaluate mesh frunctions
+  // at those points, and send the values back.
+  std::vector<Parallel::Request> send_evals(n_processors());
+  std::vector<Parallel::Request> send_ids(n_processors());
+  std::vector<std::vector<Real> > outgoing_evals(n_processors());
+  std::vector<std::vector<unsigned int> > outgoing_ids(n_processors());
   std::vector<std::vector<Real> > incoming_evals(n_processors());
   std::vector<std::vector<unsigned int> > incoming_app_ids(n_processors());
   for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {
-    if (i_proc == processor_id())
-      continue;
-    _communicator.send(i_proc, outgoing_qps[i_proc]);
-  }
-
-  // Recieve quadrature points from other processors, evaluate mesh frunctions
-  // at those points, and send the values back.
-  for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
-  {
+    // Use the cached qps if they're available.
     std::vector<Point> incoming_qps;
-    if (i_proc == processor_id())
-      incoming_qps = outgoing_qps[i_proc];
+    if (! _qps_cached)
+    {
+      if (i_proc == processor_id())
+        incoming_qps = outgoing_qps[i_proc];
+      else
+        _communicator.receive(i_proc, incoming_qps);
+      // Cache these qps for later if _fixed_meshes
+      if (_fixed_meshes)
+        _cached_qps[i_proc] = incoming_qps;
+    }
     else
-      _communicator.receive(i_proc, incoming_qps);
+    {
+      incoming_qps = _cached_qps[i_proc];
+    }
 
-    std::vector<Real> outgoing_evals(incoming_qps.size(), OutOfMeshValue);
-    std::vector<unsigned int> outgoing_ids(incoming_qps.size(), -1); // -1 = largest unsigned int
+    outgoing_evals[i_proc].resize(incoming_qps.size(), OutOfMeshValue);
+    if (_direction == FROM_MULTIAPP)
+      outgoing_ids[i_proc].resize(incoming_qps.size(), libMesh::invalid_uint);
     for (unsigned int qp = 0; qp < incoming_qps.size(); qp++)
     {
       Point qpt = incoming_qps[qp];
@@ -327,24 +359,24 @@ MultiAppProjectionTransfer::execute()
       {
         if (local_bboxes[i_from].contains_point(qpt))
         {
-          outgoing_evals[qp] = (* local_meshfuns[i_from])(qpt - _from_positions[i_from]);
+          outgoing_evals[i_proc][qp] = (* local_meshfuns[i_from])(qpt - _from_positions[i_from]);
           if (_direction == FROM_MULTIAPP)
-            outgoing_ids[qp] = _local2global_map[i_from];
+            outgoing_ids[i_proc][qp] = _local2global_map[i_from];
         }
       }
     }
 
     if (i_proc == processor_id())
     {
-      incoming_evals[i_proc] = outgoing_evals;
+      incoming_evals[i_proc] = outgoing_evals[i_proc];
       if (_direction == FROM_MULTIAPP)
-        incoming_app_ids[i_proc] = outgoing_ids;
+        incoming_app_ids[i_proc] = outgoing_ids[i_proc];
     }
     else
     {
-      _communicator.send(i_proc, outgoing_evals);
+      _communicator.send(i_proc, outgoing_evals[i_proc], send_evals[i_proc]);
       if (_direction == FROM_MULTIAPP)
-        _communicator.send(i_proc, outgoing_ids);
+        _communicator.send(i_proc, outgoing_ids[i_proc], send_ids[i_proc]);
     }
   }
 
@@ -355,7 +387,6 @@ MultiAppProjectionTransfer::execute()
   {
     if (i_proc == processor_id())
       continue;
-
     _communicator.receive(i_proc, incoming_evals[i_proc]);
     if (_direction == FROM_MULTIAPP)
       _communicator.receive(i_proc, incoming_app_ids[i_proc]);
@@ -390,7 +421,7 @@ MultiAppProjectionTransfer::execute()
       {
         Point qpt = xyz[qp];
 
-        unsigned int lowest_app_rank = -1; // -1 = largest unsigned int
+        unsigned int lowest_app_rank = libMesh::invalid_uint;
         for (unsigned int i_proc = 0; i_proc < n_processors(); i_proc++)
         {
           // Ignore the selected processor if the element wasn't found in it's
@@ -404,10 +435,8 @@ MultiAppProjectionTransfer::execute()
           // Ignore the selected processor if it's app has a higher rank than the
           // previously found lowest app rank.
           if (_direction == FROM_MULTIAPP)
-          {
             if (incoming_app_ids[i_proc][qp0 + qp] >= lowest_app_rank)
               continue;
-          }
 
           // Ignore the selected processor if the qp was actually outside the
           // processor's subapp's mesh.
@@ -426,9 +455,7 @@ MultiAppProjectionTransfer::execute()
       {
         trimmed_element_maps[i_to][elem->id()] = final_evals[i_to].size();
         for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-        {
           final_evals[i_to].push_back(evals[qp]);
-        }
       }
     }
   }
@@ -450,6 +477,22 @@ MultiAppProjectionTransfer::execute()
 
   for (unsigned int i = 0; i < _from_problems.size(); i++)
     delete local_meshfuns[i];
+
+
+  // Make sure all our sends succeeded.
+  for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
+  {
+    if (i_proc == processor_id())
+      continue;
+    if (! _qps_cached)
+      send_qps[i_proc].wait();
+    send_evals[i_proc].wait();
+    if (_direction == FROM_MULTIAPP)
+      send_ids[i_proc].wait();
+  }
+
+  if (_fixed_meshes)
+    _qps_cached = true;
 
   _console << "Finished projection transfer " << name() << std::endl;
 }

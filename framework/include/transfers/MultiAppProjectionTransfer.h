@@ -56,6 +56,12 @@ protected:
 
   friend void assemble_l2(EquationSystems & es, const std::string & system_name);
 
+  // These variables allow us to cache qps for fixed meshes.
+  bool _fixed_meshes;
+  bool _qps_cached;
+  std::vector<std::vector<Point> > _cached_qps;
+  std::vector<std::map<std::pair<unsigned int, unsigned int>, unsigned int> > _cached_index_map;
+
 };
 
 
