@@ -3508,7 +3508,7 @@ FEProblem::computeNullSpace(NonlinearImplicitSystem & /*sys*/, std::vector<Numer
 
 void
 FEProblem::computePostCheck(NonlinearImplicitSystem & sys,
-                            const NumericVector<Number> & /*old_soln*/,
+                            const NumericVector<Number> & old_soln,
                             NumericVector<Number> & search_direction,
                             NumericVector<Number> & new_soln,
                             bool & changed_search_direction,
@@ -3553,13 +3553,8 @@ FEProblem::computePostCheck(NonlinearImplicitSystem & sys,
       // vector accordingly.
       if (damping < 1.0)
       {
-        // Compute the new solution.  Note that:
-        // u_new <-- u_old + damping*delta_u
-        //       <-- u_old + damping*delta_u + delta_u - delta_u    (add/subtract delta_u)
-        //       <-- u_old + delta_u + (damping-1)*delta_u
-        //       <-- u_old + (u_new - u_old) + (damping-1)*delta_u
-        //       <-- u_new + (damping-1)*delta_u
-        new_soln.add(damping-1., search_direction);
+        new_soln = old_soln;
+        new_soln.add(-damping, search_direction);
         changed_new_soln = true;
       }
     }
