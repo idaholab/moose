@@ -83,12 +83,10 @@ MultiAppPostprocessorTransfer::execute()
           mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
-      bool found_local = false;
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
         if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
         {
-          found_local = true;
           Real curr_pp_value = _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name);
           switch (_reduction_type)
           {
