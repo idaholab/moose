@@ -15,7 +15,7 @@ InputParameters validParams<HeatSourcePD>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("temp", "The temperature");
-  params.addParam<Real>("PowerDensity", 1.0, "ThicknessPerLayer");
+  params.addParam<Real>("PowerDensity", 1.0, "PowerDensity");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.addParam<FunctionName>("function", "1", "Function describing the volumetric heat source");
   return params;
@@ -50,6 +50,7 @@ HeatSourcePD::computeResidual()
 
   //_local_re(0) = _power_density * _bond_volume[0] * _bond_status[0] / 2.0;
   //_local_re(0) = -_power_density * _bond_volume[0] / 2.0;
+  _qp = 0;
   _local_re(0) = -computeQpResidual() * _bond_volume[0] / 2.0;
   _local_re(1) = _local_re(0);
 

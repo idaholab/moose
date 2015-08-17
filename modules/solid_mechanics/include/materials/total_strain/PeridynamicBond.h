@@ -57,11 +57,6 @@ protected:
   Real _VolumePerNode;
   Real _lamda;
 
-  int _callnum;
-
-  bool _youngs_modulus_coupled;
-  VariableValue & _youngs_modulus_var;
-
   bool _has_temp;
   VariableValue & _temp;
   const Real _t_ref;

@@ -107,17 +107,16 @@ InputParameters validParams<PeridynamicBond>()
   params.addRequiredParam<NonlinearVariableName>("disp_x","Variable containing the x displacement");
   params.addParam<NonlinearVariableName>        ("disp_y","Variable containing the y displacement");
   params.addParam<NonlinearVariableName>        ("disp_z","Variable containing the z displacement");
-	params.addParam<int>("PDdim", "PDdim");
-  params.addParam<Real>("youngs_modulus", "Young's Modulus");
-  params.addParam<Real>("poissons_ratio", "Poisson's Ratio");
-  params.addParam<Real>("MeshSpacing", "MeshSpacing");
+	params.addParam<int>("PDdim", 2,"PDdim");
+  params.addParam<Real>("youngs_modulus", 1,"Young's Modulus");
+  params.addParam<Real>("poissons_ratio", 0.25,"Poisson's Ratio");
+  params.addParam<Real>("MeshSpacing", 1.0,"MeshSpacing");
   params.addParam<Real>("ThicknessPerLayer", 1.0, "ThicknessPerLayer");
   params.addParam<Real>("CriticalStretch", 1.0, "CriticalStretch");
 	params.addParam<Real>("StandardDeviation", 1.0, "StandardDeviation");
 	params.addParam<Real>("reference_temp", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
 	params.addParam<Real>("thermal_conductivity", 0.0, "The thermal conductivity");
-  params.addCoupledVar("youngs_modulus_var","Variable containing Young's modulus");
   params.addCoupledVar("temp", "The temperature if you want thermal expansion.");
   return params;
 }
@@ -140,8 +139,6 @@ PeridynamicBond::PeridynamicBond(const InputParameters & parameters)
    _ThicknessPerLayer(isParamValid("ThicknessPerLayer") ? getParam<Real>("ThicknessPerLayer") : 0),
    _CriticalStretch(isParamValid("CriticalStretch") ? getParam<Real>("CriticalStretch") : 0),
 	 _StandardDeviation(isParamValid("StandardDeviation") ? getParam<Real>("StandardDeviation") : 0),
-   _youngs_modulus_coupled(isCoupled("youngs_modulus_var")),
-   _youngs_modulus_var(_youngs_modulus_coupled ? coupledValue("youngs_modulus_var"): _zero),
    _has_temp(isCoupled("temp")),
    _temp(_has_temp ? coupledValue("temp") : _zero),
    _t_ref(isParamValid("reference_temp") ? getParam<Real>("reference_temp") : 0),
@@ -175,20 +172,6 @@ PeridynamicBond::PeridynamicBond(const InputParameters & parameters)
     }
   }
 
-  if (parameters.isParamValid("youngs_modulus"))
-  {
-    if (_youngs_modulus_coupled)
-    {
-      mooseError("Cannot specify both youngs_modulus and youngs_modulus_var");
-    }
-  }
-  else
-  {
-    if (!_youngs_modulus_coupled)
-    {
-      mooseError("Must specify either youngs_modulus or youngs_modulus_var");
-    }
-  }
   /***********************************************************************************************/
   /* Peridynamic Code */
   /***********************************************************************************************/
@@ -205,18 +188,16 @@ PeridynamicBond::PeridynamicBond(const InputParameters & parameters)
 		_lamda = lamda3D(_poissons_ratio);
 		_AvgArea = AvgArea3D(_MeshSpacing);
 	}
-	//setRandomResetFrequency(EXEC_INITIAL);
+	setRandomResetFrequency(EXEC_INITIAL);
   cout << "123456" << endl;
 	cout << _PDdim << endl;
 	cout << _AvgArea << endl;
 	cout << _lamda << endl;
-  _callnum = 0;
   /***********************************************************************************************/
 }
 
 PeridynamicBond::~PeridynamicBond()
 {
-	cout << "callnum = " << _callnum << endl;
 }
 
 void
@@ -290,12 +271,11 @@ PeridynamicBond::computeProperties()
 		/* Generate randomized critical stretch by Box-Muller method */
 		if(_critical_stretch_old[_qp] > 1.0)
 		{
-			//_critical_stretch_old[_qp] = sqrt(-2.0*log(getRandomReal()))*cos(2.0*Pi*getRandomReal());
+			_critical_stretch_old[_qp] = sqrt(-2.0*log(getRandomReal()))*cos(2.0*Pi*getRandomReal());
 			_critical_stretch_old[_qp] /= 1.0/_StandardDeviation;
 			_critical_stretch_old[_qp] += _CriticalStretch;
 		}
 		_critical_stretch[_qp] = _critical_stretch_old[_qp];
-    Real youngs_modulus(_youngs_modulus_coupled ? _youngs_modulus_var[_qp] : _youngs_modulus);
     if (_has_temp)
     {
       thermal_strain = _alpha * (_temp[_qp] - _t_ref);
@@ -310,8 +290,8 @@ PeridynamicBond::computeProperties()
 		{
 			mechanics_strain = strain;
 		}
-    _axial_force[_qp] = youngs_modulus * mechanics_strain * exp(-orig_length / _MaterialRegion) * _VolumePerNode / _MeshSpacing / _lamda;
-    _stiff_elem[_qp] = (youngs_modulus * exp(-orig_length / _MaterialRegion) / _MeshSpacing / _VolumePerNode / _lamda) * _VolumePerNode * _VolumePerNode / new_length;
+    _axial_force[_qp] = _youngs_modulus * mechanics_strain * exp(-orig_length / _MaterialRegion) * _VolumePerNode / _MeshSpacing / _lamda;
+    _stiff_elem[_qp] = (_youngs_modulus * exp(-orig_length / _MaterialRegion) / _MeshSpacing / _VolumePerNode / _lamda) * _VolumePerNode * _VolumePerNode / new_length;
 		_bond_stretch[_qp] = mechanics_strain;
 		_bond_volume[_qp] = exp(-orig_length / _MaterialRegion) * _AvgArea * orig_length;
 		if (_bond_status_old[_qp] == 1.0)
@@ -331,7 +311,6 @@ PeridynamicBond::computeProperties()
 			_bond_status[_qp] = _bond_status_old[_qp];
 		}
   }
-  _callnum++;
 }
 
 //DEPRECATED CONSTRUCTOR
@@ -354,8 +333,6 @@ PeridynamicBond::PeridynamicBond(const std::string  & deprecated_name,
    _ThicknessPerLayer(isParamValid("ThicknessPerLayer") ? getParam<Real>("ThicknessPerLayer") : 0),
    _CriticalStretch(isParamValid("CriticalStretch") ? getParam<Real>("CriticalStretch") : 0),
 	 _StandardDeviation(isParamValid("StandardDeviation") ? getParam<Real>("StandardDeviation") : 0),
-   _youngs_modulus_coupled(isCoupled("youngs_modulus_var")),
-   _youngs_modulus_var(_youngs_modulus_coupled ? coupledValue("youngs_modulus_var"): _zero),
    _has_temp(isCoupled("temp")),
    _temp(_has_temp ? coupledValue("temp") : _zero),
    _t_ref(isParamValid("reference_temp") ? getParam<Real>("reference_temp") : 0),
@@ -389,20 +366,6 @@ PeridynamicBond::PeridynamicBond(const std::string  & deprecated_name,
     }
   }
 
-  if (parameters.isParamValid("youngs_modulus"))
-  {
-    if (_youngs_modulus_coupled)
-    {
-      mooseError("Cannot specify both youngs_modulus and youngs_modulus_var");
-    }
-  }
-  else
-  {
-    if (!_youngs_modulus_coupled)
-    {
-      mooseError("Must specify either youngs_modulus or youngs_modulus_var");
-    }
-  }
   /***********************************************************************************************/
   /* Peridynamic Code */
   /***********************************************************************************************/
@@ -419,8 +382,7 @@ PeridynamicBond::PeridynamicBond(const std::string  & deprecated_name,
 		_lamda = lamda3D(_poissons_ratio);
 		_AvgArea = AvgArea3D(_MeshSpacing);
 	}
-	//setRandomResetFrequency(EXEC_INITIAL);
+	setRandomResetFrequency(EXEC_INITIAL);
   cout << "123456" << endl;
-  _callnum = 0;
   /***********************************************************************************************/
 }

@@ -38,7 +38,6 @@ struct node_structure2D
 	struct bond_structure
 	{
 		int NodesIndex;
-		int NodesOrder;
 	}bond[28];
 };
 
@@ -51,7 +50,6 @@ struct node_structure3D
 	struct bond_structure
 	{
 		int NodesIndex;
-		int NodesOrder;
 	}bond[122];
 };
 
@@ -86,7 +84,6 @@ void InitializeNode2D(struct node_structure2D *Node,int NodeNum)
 		for(j = 0;j < 28;j++)
 		{
 			Node[i].bond[j].NodesIndex = 0;
-			Node[i].bond[j].NodesOrder = 0;
 		}
 	}
 }
@@ -103,7 +100,6 @@ void InitializeNode3D(struct node_structure3D *Node,int NodeNum)
 		for(j = 0;j < 122;j++)
 		{
 			Node[i].bond[j].NodesIndex = 0;
-			Node[i].bond[j].NodesOrder = 0;
 		}
 	}
 }
@@ -120,29 +116,12 @@ void SearchBond2D(struct node_structure2D *Node,int NodeNum,int NodeNumX,double 
 			for(j = -2;j < 3;j++)
 			{
 				k = nodeid + i + j * NodeNumX;
-				if(j < 0)
-				{
-					m = 3 + i + (2+j)*5;
-				}
-				else if(j == 0 && i < 0)
-				{
-					m = 14 + i;
-				}
-				else if(j == 0 && i > 0)
-				{
-					m = 13 + i;
-				}
-				else
-				{
-					m = 19 + i + (j-1)*5;
-				}
 				if(k>=0 && k<NodeNum && k != nodeid)
 				{
 					d = sqrt(pow(Node[nodeid].X-Node[k].X,2) + pow(Node[nodeid].Y-Node[k].Y,2));
 					if(d <= Horizon + 0.001*MeshSpacing)
 					{
 						Node[nodeid].bond[num].NodesIndex = k;
-						Node[nodeid].bond[num].NodesOrder = m;
 						num++;
 					}
 				}
@@ -153,22 +132,18 @@ void SearchBond2D(struct node_structure2D *Node,int NodeNum,int NodeNumX,double 
 			if(i == 0)
 			{
 				k = nodeid - 3;
-				m = 11;
 			}
 			else if(i == 1)
 			{
 				k = nodeid + 3;
-				m = 16;
 			}
 			else if(i == 2)
 			{
 				k = nodeid - 3 * NodeNumX;
-				m = 0;
 			}
 			else
 			{
 				k = nodeid + 3 * NodeNumX;
-				m = 27;
 			}
 			if(k>=0 && k<NodeNum)
 			{
@@ -176,7 +151,6 @@ void SearchBond2D(struct node_structure2D *Node,int NodeNum,int NodeNumX,double 
 				if(d <= Horizon + 0.001*MeshSpacing)
 				{
 					Node[nodeid].bond[num].NodesIndex = k;
-					Node[nodeid].bond[num].NodesOrder = m;
 					num++;
 				}
 			}
@@ -227,66 +201,6 @@ void SearchBond3D(struct node_structure3D *Node,int NodeNum,int NodeNumX,int Nod
 						if(d <= Horizon + 0.001)
 						{
 							Node[nodeid].bond[num].NodesIndex = n;
-							if(k == -2 && j == -2)
-							{
-								m = i + 2;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == -2 && j == 2)
-							{
-								m = i + 20;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == 2 && j == -2)
-							{
-								m = i + 101;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == 2 && j == 2)
-							{
-								m = i + 119;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == -2 && j > -2 && j < 2)
-							{
-								m = i + (j+1)*5 + 6;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == 2 && j > -2 && j < 2)
-							{
-								m = i + (j+1)*5 + 105;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == -1)
-							{
-								m = i + (j+2)*5 + 24;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == 1)
-							{
-								m = i + (j+2)*5 + 77;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == 0 && j < 0)
-							{
-								m = i + (j+2)*5 + 50;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == 0 && j > 0)
-							{
-								m = i + (j-1)*5 + 66;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == 0 && j == 0 && i < 0)
-							{
-								m = i + 61;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
-							else if(k == 0 && j == 0 && i > 0)
-							{
-								m = i + 60;
-								Node[nodeid].bond[num].NodesOrder = m;
-							}
 							num++;
 						}
 					}
@@ -298,32 +212,26 @@ void SearchBond3D(struct node_structure3D *Node,int NodeNum,int NodeNumX,int Nod
 			if(i == 0)
 			{
 				n = nodeid - 3;
-				m = 58;
 			}
 			else if(i == 1)
 			{
 				n = nodeid + 3;
-				m = 63;
 			}
 			else if(i == 2)
 			{
 				n = nodeid - 3 * NodeNumX;
-				m = 47;
 			}
 			else if(i == 3)
 			{
 				n = nodeid + 3 * NodeNumX;
-				m = 74;
 			}
 			else if(i == 4)
 			{
 				n = nodeid - 3 * NodeNumX * NodeNumY;
-				m = 0;
 			}
 			else if(i == 5)
 			{
 				n = nodeid + 3 * NodeNumX * NodeNumY;
-				m = 121;
 			}
 			if(n>=0 && n<NodeNum)
 			{
@@ -331,7 +239,6 @@ void SearchBond3D(struct node_structure3D *Node,int NodeNum,int NodeNumX,int Nod
 				if(d <= Horizon + 0.001)
 				{
 					Node[nodeid].bond[num].NodesIndex = n;
-					Node[nodeid].bond[num].NodesOrder = m;
 					num++;
 				}
 			}
@@ -765,7 +672,7 @@ PeridynamicsMesh::buildMesh()
 				{
 					boundary_info.add_node(mesh.node_ptr(node_id),2);
 				}
-				if (Z < _zmin+MeshSpacingZ)
+				if (abs(dist) < 0.00001*MeshSpacingX && Z < _zmin+MeshSpacingZ)
 				{
 					boundary_info.add_node(mesh.node_ptr(node_id),3);
 				}
