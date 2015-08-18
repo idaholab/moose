@@ -154,7 +154,7 @@
     outputs = none
   [../]
   [./error_water]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = fcn_error_water
   [../]
 
@@ -171,7 +171,7 @@
     outputs = none
   [../]
   [./error_gas]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = fcn_error_gas
   [../]
 []

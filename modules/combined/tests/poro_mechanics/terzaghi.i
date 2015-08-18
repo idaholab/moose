@@ -253,7 +253,7 @@
     variable = disp_z
   [../]
   [./dt]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     outputs = console
     function = if(0.5*t<0.1,0.5*t,0.1)
   [../]

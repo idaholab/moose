@@ -180,7 +180,7 @@
   [../]
 
   [./mass_error_water]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = fcn_mass_error_w
   [../]
 
@@ -197,7 +197,7 @@
     outputs = none
   [../]
   [./error_water]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = fcn_error_water
   [../]
 []

@@ -65,7 +65,7 @@
     execute_on = 'initial timestep_end'
   [../]
   [./mass_tot]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = mass_fcn
     execute_on = 'initial timestep_end'
   [../]

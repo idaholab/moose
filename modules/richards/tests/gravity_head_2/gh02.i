@@ -165,12 +165,12 @@
   [../]
 
   [./mass_error_water]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = fcn_mass_error_w
     outputs = none # no reason why mass should be conserved
   [../]
   [./mass_error_gas]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = fcn_mass_error_g
     outputs = none # no reason why mass should be conserved
   [../]
@@ -188,7 +188,7 @@
     outputs = none
   [../]
   [./error_water]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = fcn_error_water
   [../]
 
@@ -205,7 +205,7 @@
     outputs = none
   [../]
   [./error_gas]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = fcn_error_gas
   [../]
 []
