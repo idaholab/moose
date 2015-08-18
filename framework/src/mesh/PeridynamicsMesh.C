@@ -707,15 +707,3 @@ PeridynamicsMesh::buildMesh()
 
   /***********************************************************************************************/
 }
-
-//DEPRECATED CONSTRUCTOR
-PeridynamicsMesh::PeridynamicsMesh(const std::string & deprecated_name, InputParameters parameters) :
-    MooseMesh(deprecated_name, parameters),
-    _dim(getParam<MooseEnum>("dim")),
-    _nx(getParam<int>("nx")),
-    _ny(getParam<int>("ny")),
-    _nz(getParam<int>("nz")),
-		_nr(getParam<int>("nr")),
-		_shape(getParam<int>("shape"))
-{
-}

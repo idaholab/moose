@@ -32,7 +32,6 @@ class PeridynamicsMesh : public MooseMesh
 {
 public:
   PeridynamicsMesh(const InputParameters & parameters);
-  PeridynamicsMesh(const std::string & deprecated_name, InputParameters parameters); //DEPRECATED CONSTRUCTOR
   PeridynamicsMesh(const PeridynamicsMesh & other_mesh);
   virtual ~PeridynamicsMesh();
 

@@ -22,8 +22,6 @@ class PeridynamicBond : public Material
 {
 public:
   PeridynamicBond(const InputParameters & parameters);
-  PeridynamicBond(const std::string & deprecated_name,
-                  InputParameters parameters); //DEPRECATED CONSTRUCTOR
   virtual ~PeridynamicBond();
 
 protected:

@@ -182,24 +182,3 @@ StressDivergenceTrussPD::computeOffDiagJacobian(unsigned int jvar)
     }
   }
 }
-
-//DEPRECATED CONSTRUCTOR
-StressDivergenceTrussPD::StressDivergenceTrussPD(const std::string & deprecated_name, InputParameters parameters)
-  :Kernel(deprecated_name, parameters),
-   _axial_force(getMaterialProperty<Real>("axial_force" + getParam<std::string>("appended_property_name"))),
-   _stiff_elem(getMaterialProperty<Real>("stiff_elem" + getParam<std::string>("appended_property_name"))),
-   _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
-   _bond_status_old(getMaterialPropertyOld<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
-   _bond_stretch(getMaterialProperty<Real>("bond_stretch" + getParam<std::string>("appended_property_name"))),
-   _component(getParam<unsigned int>("component")),
-   _xdisp_coupled(isCoupled("disp_x")),
-   _ydisp_coupled(isCoupled("disp_y")),
-   _zdisp_coupled(isCoupled("disp_z")),
-   _temp_coupled(isCoupled("temp")),
-   _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
-   _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
-   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
-   _temp_var(_temp_coupled ? coupled("temp") : 0),
-   _orientation(NULL)
-{
-}
