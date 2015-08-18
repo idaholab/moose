@@ -9,7 +9,7 @@ else:
   pathname = os.path.abspath(pathname)
 
 # Add the utilities/python_getpot directory
-MOOSE_DIR = os.path.abspath(os.path.join(pathname, '../../'))
+MOOSE_DIR = os.path.abspath(os.path.join(pathname, '../'))
 FRAMEWORK_DIR = os.path.abspath(os.path.join(pathname, '../../', 'framework'))
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
