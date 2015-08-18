@@ -681,7 +681,7 @@
   [../]
 
   [./dt]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     outputs = console
     function = 2*t
   [../]

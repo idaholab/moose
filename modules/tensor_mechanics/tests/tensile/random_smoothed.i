@@ -197,7 +197,7 @@
     outputs = console
   [../]
   [./f0]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = should_be_zero0_fcn
   [../]
 []

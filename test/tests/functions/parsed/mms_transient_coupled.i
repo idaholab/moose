@@ -134,7 +134,7 @@
     execute_on = 'initial timestep_end'
   [../]
   [./u_midpoint_exact]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = u_exact
     point = '0.5 0.5 0.0'
     execute_on = 'initial timestep_end'

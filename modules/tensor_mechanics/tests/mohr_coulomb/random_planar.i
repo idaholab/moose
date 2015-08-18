@@ -108,7 +108,7 @@
     outputs = 'console'
   [../]
   [./should_be_zero]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = should_be_zero_fcn
   [../]
   [./av_iter]

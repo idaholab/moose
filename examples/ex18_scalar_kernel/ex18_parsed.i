@@ -128,7 +128,7 @@
   [../]
 
   [./exact_x]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = exact_x_fn
     execute_on = timestep_end
   [../]

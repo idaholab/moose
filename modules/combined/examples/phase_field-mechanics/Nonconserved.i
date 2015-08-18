@@ -67,7 +67,7 @@
 []
 
 #
-# Try visualizing the strees tensor components as done in Conserved.i
+# Try visualizing the stress tensor components as done in Conserved.i
 #
 
 [Materials]

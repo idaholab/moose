@@ -103,7 +103,7 @@
     variable = pressure
   [../]
   [./mass_bal]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = mass_bal_fcn
   [../]
 []
