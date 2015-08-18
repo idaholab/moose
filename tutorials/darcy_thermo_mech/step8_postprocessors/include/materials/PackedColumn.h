@@ -33,7 +33,7 @@ InputParameters validParams<PackedColumn>();
 class PackedColumn : public Material
 {
 public:
-  PackedColumn(const std::string & name, InputParameters parameters);
+  PackedColumn(const InputParameters & parameters);
 
 protected:
   /**

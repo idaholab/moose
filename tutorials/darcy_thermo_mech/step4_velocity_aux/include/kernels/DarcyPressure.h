@@ -34,7 +34,7 @@ InputParameters validParams<DarcyPressure>();
 class DarcyPressure : public Diffusion
 {
 public:
-  DarcyPressure(const std::string & name, InputParameters parameters);
+  DarcyPressure(const InputParameters & parameters);
   virtual ~DarcyPressure();
 
 protected:

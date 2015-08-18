@@ -25,8 +25,8 @@ InputParameters validParams<PackedColumn>()
 }
 
 
-PackedColumn::PackedColumn(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+PackedColumn::PackedColumn(const InputParameters & parameters) :
+    Material(parameters),
 
     // Get the one parameter from the input file
     _ball_radius(getParam<Real>("ball_radius")),

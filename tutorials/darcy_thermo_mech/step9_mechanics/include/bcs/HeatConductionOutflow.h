@@ -33,7 +33,7 @@ InputParameters validParams<HeatConductionOutflow>();
 class HeatConductionOutflow : public IntegratedBC
 {
 public:
-  HeatConductionOutflow(const std::string & name, InputParameters parameters);
+  HeatConductionOutflow(const InputParameters & parameters);
 
 
 protected:

@@ -24,8 +24,8 @@ InputParameters validParams<DarcyConvection>()
   return params;
 }
 
-DarcyConvection::DarcyConvection(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+DarcyConvection::DarcyConvection(const InputParameters & parameters) :
+    Kernel(parameters),
 
     // Couple to the gradient of the pressure
     _pressure_gradient(coupledGradient("darcy_pressure")),
