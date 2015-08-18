@@ -7,4 +7,12 @@
     min_parallel = 4
     recover = false
   [../]
+  [./nemesis_repartitioning_test]
+    type = 'Exodiff'
+    input = 'nemesis_repartitioning_test.i'
+    exodiff = 'repartitioned.e.4.0 repartitioned.e.4.1 repartitioned.e.4.2 repartitioned.e.4.3'
+    max_parallel = 4
+    min_parallel = 4
+    recover = false
+  [../]
 []

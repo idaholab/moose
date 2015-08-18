@@ -1,9 +1,9 @@
 [Mesh]
   file = cylinder/cylinder.e
   nemesis = true
-  # This option lets us exodiff against a gold standard generated
-  # without repartitioning
-  skip_partitioning = true
+  # leaving skip_partitioning off lets us exodiff against a gold
+  # standard generated with default libMesh settings
+  # skip_partitioning = true
 []
 
 [Variables]
@@ -57,7 +57,7 @@
 []
 
 [Outputs]
-  file_base = out
+  file_base = repartitioned
   output_initial = true
   nemesis = true
   print_linear_residuals = true
