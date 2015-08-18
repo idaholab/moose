@@ -14,6 +14,7 @@ class RunApp(Tester):
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
     params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
+    params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
     params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
     params.addParam('executable_pattern', "A test that only runs if the exectuable name matches the given pattern")
 
@@ -48,7 +49,7 @@ class RunApp(Tester):
 
   def checkRunnable(self, options):
     if options.enable_recover:
-      if self.specs.isValid('expect_out') or self.specs['should_crash'] == True:
+      if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
         reason = 'skipped (expect_out RECOVER)'
         return (False, reason)
 
@@ -201,10 +202,20 @@ class RunApp(Tester):
         out_ok = self.checkOutputForLiteral(output, specs['expect_out'])
       else:
         out_ok = self.checkOutputForPattern(output, specs['expect_out'])
+      # Process out_ok
       if (out_ok and retcode != 0):
         reason = 'OUT FOUND BUT CRASH'
       elif (not out_ok):
         reason = 'NO EXPECTED OUT'
+
+    elif specs.isValid('absent_out'):
+      out_ok = self.checkOutputForPattern(output, specs['absent_out'])
+      # Process out_ok
+      if (not out_ok and retcode != 0):
+        reason = 'OUTPUT ABSENT BUT CRASH'
+      elif (out_ok):
+        reason = 'OUTPUT NOT ABSENT'
+
     if reason == '':
       # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
       # since a message to standard error might actually be a real error.  This case should be handled

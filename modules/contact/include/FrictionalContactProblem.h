@@ -124,6 +124,9 @@ protected:
   int _num_slipped_too_far;
   Real _inc_slip_norm;
   Real _it_slip_norm;
+
+  /// Convenient typedef for frequently used iterator
+  typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_iterator;
 };
 
 #endif /* FRICTIONALCONTACTPROBLEM_H */

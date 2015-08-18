@@ -68,8 +68,6 @@ void petscSetOptions(FEProblem & problem);
  */
 void petscSetDefaults(FEProblem & problem);
 
-void petscSetupDampers(NonlinearImplicitSystem& sys);
-
 void petscSetupDM(NonlinearSystem & nl);
 
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
