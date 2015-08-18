@@ -34,8 +34,8 @@ InputParameters validParams<DarcyVelocity>()
   return params;
 }
 
-DarcyVelocity::DarcyVelocity(const std::string & name, InputParameters parameters) :
-    AuxKernel(name, parameters),
+DarcyVelocity::DarcyVelocity(const InputParameters & parameters) :
+    AuxKernel(parameters),
 
     // This will automatically convert the MooseEnum to an integer
     _component(getParam<MooseEnum>("component")),

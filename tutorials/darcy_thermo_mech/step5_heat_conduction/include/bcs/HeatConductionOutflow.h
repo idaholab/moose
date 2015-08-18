@@ -39,7 +39,7 @@ InputParameters validParams<HeatConductionOutflow>();
 class HeatConductionOutflow : public IntegratedBC
 {
 public:
-  HeatConductionOutflow(const std::string & name, InputParameters parameters);
+  HeatConductionOutflow(const InputParameters & parameters);
 
 protected:
   /// This is called to integrate the residual across the boundary

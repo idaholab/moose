@@ -31,7 +31,7 @@ InputParameters validParams<DarcyConvection>();
 class DarcyConvection : public Kernel
 {
 public:
-  DarcyConvection(const std::string & name, InputParameters parameters);
+  DarcyConvection(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
