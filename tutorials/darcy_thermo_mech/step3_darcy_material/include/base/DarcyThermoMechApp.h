@@ -24,7 +24,7 @@ InputParameters validParams<DarcyThermoMechApp>();
 class DarcyThermoMechApp : public MooseApp
 {
 public:
-  DarcyThermoMechApp(const std::string & name, InputParameters parameters);
+  DarcyThermoMechApp(InputParameters parameters);
   virtual ~DarcyThermoMechApp();
 
   static void registerApps();

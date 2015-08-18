@@ -26,11 +26,9 @@ InputParameters validParams<DarcyThermoMechApp>()
   return params;
 }
 
-DarcyThermoMechApp::DarcyThermoMechApp(const std::string & name, InputParameters parameters) :
-    MooseApp(name, parameters)
+DarcyThermoMechApp::DarcyThermoMechApp(InputParameters parameters) :
+    MooseApp(parameters)
 {
-  srand(processor_id());
-
   Moose::registerObjects(_factory);
   ModulesApp::registerObjects(_factory);
   DarcyThermoMechApp::registerObjects(_factory);

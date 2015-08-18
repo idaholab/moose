@@ -21,9 +21,8 @@ InputParameters validParams<HeatConductionOutflow>()
   return params;
 }
 
-HeatConductionOutflow::HeatConductionOutflow(const std::string & name,
-                                             InputParameters parameters) :
-  IntegratedBC(name, parameters),
+HeatConductionOutflow::HeatConductionOutflow(const InputParameters & parameters) :
+  IntegratedBC(parameters),
   // IntegratedBCs can retrieve material properties!
   _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
 {}

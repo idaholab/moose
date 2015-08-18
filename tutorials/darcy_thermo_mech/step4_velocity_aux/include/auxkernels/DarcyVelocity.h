@@ -29,7 +29,7 @@ InputParameters validParams<DarcyVelocity>();
 class DarcyVelocity : public AuxKernel
 {
 public:
-  DarcyVelocity(const std::string & name, InputParameters parameters);
+  DarcyVelocity(const InputParameters & parameters);
 
   virtual ~DarcyVelocity() {}
 
