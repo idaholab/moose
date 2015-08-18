@@ -7,7 +7,7 @@ MOOSE_PYTHON_DIR = None
 if os.environ.has_key('MOOSE_DIR'):
   MOOSE_PYTHON_DIR = os.path.join(os.environ['MOOSE_DIR'], 'python')
 else:
-  MOOSE_PYTHON_DIR = os.path.join(os.environ['HOME'], 'projects', 'moose', 'python')
+  MOOSE_PYTHON_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], 'python')
 
 # Add moose/python to path
 if os.path.exists(MOOSE_PYTHON_DIR):
