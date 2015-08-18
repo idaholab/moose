@@ -235,7 +235,7 @@
   [../]
 
   # We use this to output the level of constraint enforcement
-  # ideally it should be 0 everywhere, if teh constraint is fully enforced
+  # ideally it should be 0 everywhere, if the constraint is fully enforced
   [./etasummat]
     type = ParsedMaterial
     block = 0
@@ -297,7 +297,7 @@
     fill_method = symmetric_isotropic
   [../]
 
-  # switchiung functions
+  # switching functions
   [./switching1]
     type = SwitchingFunctionMaterial
     block = 0
@@ -461,7 +461,7 @@
       auto_direction = 'x'
     [../]
 
-    # all other phase field vaiables are fully periodic
+    # all other phase field variables are fully periodic
     [./c]
       auto_direction = 'x y'
     [../]
@@ -487,7 +487,7 @@
   [../]
 []
 
-# We monitor the total free energy and teh total solute concentration (should be constant)
+# We monitor the total free energy and the total solute concentration (should be constant)
 [Postprocessors]
   [./total_free_energy]
     type = ElementIntegralVariablePostprocessor
