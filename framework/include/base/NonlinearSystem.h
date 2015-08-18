@@ -245,6 +245,11 @@ public:
   Real computeDamping(const NumericVector<Number>& update);
 
   /**
+   * Computes the time derivative vector
+   */
+  void computeTimeDerivatives();
+
+  /**
    * Called at the beginning of the time step
    */
   void onTimestepBegin();
@@ -445,11 +450,6 @@ public:
   bool _compute_initial_residual_before_preset_bcs;
 
 protected:
-  /**
-   * Computes the time derivative vector
-   */
-  void computeTimeDerivatives();
-
   /**
    * Compute the residual
    * @param type The type of kernels for which the residual is to be computed.
