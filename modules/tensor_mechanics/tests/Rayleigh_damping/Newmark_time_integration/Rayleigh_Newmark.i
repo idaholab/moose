@@ -1,7 +1,25 @@
-#       Test for rayleigh damping implemented using Newmark integration
-#       The test is for an 1-D bar element with unit length fixed on one end and a ramped pressure boundary condition applied to the other #       end. The parameters zeta and eta correspond to the stiffness and mass proportional rayliegh damping; and beta and gamma are Newmark
-#       time integration parameters. Note that in the StressDivergencedamping kernel an approximate slope (stress-stress_old)/dt is used
-#       as opposed to newmark time integration. The system will come to steady state slowly after the pressure becomes constant.
+# Test for rayleigh damping implemented using Newmark time integration
+# The test is for an 1-D bar element of  unit length fixed on one end
+# with a ramped pressure boundary condition applied to the other end.
+# zeta and eta correspond to the stiffness and mass proportional rayleigh damping
+# beta and gamma are Newmark time integration parameters
+# The equation of motion in terms of matrices is:
+#
+# M*accel + eta*M*vel + zeta*K*vel + K*disp = P*Area
+#
+# Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
+#
+# This equation is equivalent to:
+#
+# density*accel + eta*density*vel + zeta*d/dt(Div stress) + Div stress = P
+#
+# The first two terms on the left are evaluated using the Inertial force kernel
+# The next term on the left involving zeta ise evaluated using the DynamicStressDivergenceTensors Kernel
+# The last term on the left is evaluated using StressDivergenceTensors
+# The residual due to Pressure is evaluated using Pressure boundary condition
+#
+# The system will come to steady state slowly after the pressure becomes constant.
+# The store_stress_old flag in the ComputeStressBase material model needs to be turned on to store stress old. In this example, this flag is turned on using the child class ComputeLinearElasticStress.
 
 [GlobalParams]
   order = FIRST
@@ -57,8 +75,15 @@
 []
 
 [Kernels]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y disp_z'
+  [../]
+  [./DynamicTensorMechanics]
+    displacements = 'disp_x disp_y disp_z'
+    zeta = 0.1
+  [../]
   [./inertia_x]
-    type = SolidMechInertialForceTensors
+    type = InertialForce
     variable = disp_x
     velocity = vel_x
     acceleration = accel_x
@@ -66,15 +91,8 @@
     gamma = 0.5
     eta=0.1
   [../]
-  [./stiffness_x]
-    type = StressDivergenceTensors
-    displacements = 'disp_x disp_y disp_z'
-    variable = disp_x
-    component = 0
-    zeta = 0.1
-  [../]
   [./inertia_y]
-    type = SolidMechInertialForceTensors
+    type = InertialForce
     variable = disp_y
     velocity = vel_y
     acceleration = accel_y
@@ -82,28 +100,14 @@
     gamma = 0.5
     eta=0.1
   [../]
-  [./stiffness_y]
-    type = StressDivergenceTensors
-    displacements = 'disp_x disp_y disp_z'
-    variable = disp_y
-    component = 1
-    zeta = 0.1
-  [../]
   [./inertia_z]
-    type = SolidMechInertialForceTensors
+    type = InertialForce
     variable = disp_z
     velocity = vel_z
     acceleration = accel_z
     beta = 0.25
     gamma = 0.5
     eta = 0.1
-  [../]
-  [./stiffness_z]
-    type = StressDivergenceTensors
-    displacements = 'disp_x disp_y disp_z'
-    variable = disp_z
-    component = 2
-    zeta = 0.1
   [../]
 
 []
@@ -203,7 +207,7 @@
     boundary = bottom
     value=0.0
   [../]
-  [./PressureTM]
+  [./Pressure]
     [./Side1]
     boundary = bottom
     function = pressure
@@ -232,6 +236,7 @@
 
   [./stress]
       type = ComputeLinearElasticStress
+      store_stress_old = True
       block = 0
   [../]
 

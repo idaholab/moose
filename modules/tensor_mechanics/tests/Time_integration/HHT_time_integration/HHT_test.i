@@ -1,5 +1,25 @@
-#       Test for  HHT time integration
-#       The test is for an 1-D bar element with unit length fixed on one end and a ramped pressure boundary condition applied to the other #       end. The parameters alpha, beta and gamma are HHT time integration parameters.
+# Test for  HHT time integration
+# The test is for an 1-D bar element of  unit length fixed on one end
+# with a ramped pressure boundary condition applied to the other end.
+# alpha, beta and gamma are HHT time integration parameters
+# The equation of motion in terms of matrices is:
+#
+# M*accel + alpha*(K*disp - K*disp_old) + K*disp = P*Area
+#
+# Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
+#
+# This equation is equivalent to:
+#
+# density*accel + alpha*(Div stress - Div stress_old) +Div Stress= P
+#
+# The first term on the left is evaluated using the Inertial force kernel
+# The next term on the left involving alpha is evaluated using the DynamicStressDivergenceTensors Kernel
+# The last term on the left is evaluated using StressDivergenceTensors
+# The residual due to Pressure is evaluated using Pressure boundary condition
+#
+# The system will come to steady state slowly after the pressure becomes constant.
+# Alpha equal to zero will result in Newmark integration.
+# The store_stress_old flag in the ComputeStressBase material model needs to be turned on to store stress old. In this example, this flag is turned on using the child class ComputeLinearElasticStress.
 
 [GlobalParams]
   order = FIRST
@@ -55,50 +75,36 @@
 []
 
 [Kernels]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y disp_z'
+  [../]
+  [./DynamicTensorMechanics]
+    displacements = 'disp_x disp_y disp_z'
+    alpha = 0.11
+  [../]
   [./inertia_x]
-    type = SolidMechInertialForceTensors
+    type = InertialForce
     variable = disp_x
     velocity = vel_x
     acceleration = accel_x
     beta = 0.25
     gamma = 0.5
   [../]
-  [./stiffness_x]
-    type = StressDivergenceTensors
-    displacements = 'disp_x disp_y disp_z'
-    variable = disp_x
-    component = 0
-    alpha = 0.11
-  [../]
   [./inertia_y]
-    type = SolidMechInertialForceTensors
+    type = InertialForce
     variable = disp_y
     velocity = vel_y
     acceleration = accel_y
     beta = 0.25
     gamma = 0.5
   [../]
-  [./stiffness_y]
-    type = StressDivergenceTensors
-    displacements = 'disp_x disp_y disp_z'
-    variable = disp_y
-    component = 1
-    alpha = 0.11
-  [../]
   [./inertia_z]
-    type = SolidMechInertialForceTensors
+    type = InertialForce
     variable = disp_z
     velocity = vel_z
     acceleration = accel_z
     beta = 0.25
     gamma = 0.5
-  [../]
-  [./stiffness_z]
-    type = StressDivergenceTensors
-    displacements = 'disp_x disp_y disp_z'
-    variable = disp_z
-    component = 2
-    alpha = 0.11
   [../]
 
 []
@@ -198,7 +204,7 @@
     boundary = bottom
     value=0.0
   [../]
-  [./PressureTM]
+  [./Pressure]
     [./Side1]
     boundary = bottom
     function = pressure
@@ -226,6 +232,7 @@
 
   [./stress]
       type = ComputeLinearElasticStress
+      store_stress_old = True
       block = 0
   [../]
   [./density]

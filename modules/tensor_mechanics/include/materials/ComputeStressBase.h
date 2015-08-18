@@ -41,6 +41,9 @@ protected:
 
   /// derivative of stress w.r.t. strain (_dstress_dstrain)
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+
+  /// Parameter which decided whether to old stress. This is required for dyanmics and Rayleigh damping
+  const bool _store_stress_old;
 };
 
 #endif //COMPUTESTRESSBASE_H

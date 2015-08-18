@@ -4,8 +4,6 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
-
 #include "NewmarkAccelAux.h"
 
 template<>
@@ -15,7 +13,6 @@ InputParameters validParams<NewmarkAccelAux>()
     params.addRequiredCoupledVar("displacement","displacement variable");
     params.addRequiredCoupledVar("velocity","velocity variable");
     params.addRequiredParam<Real>("beta","beta parameter");
-    //params.addRequiredParam<Real>("gamma","gamma parameter");
   return params;
 }
 
@@ -37,5 +34,6 @@ NewmarkAccelAux::computeValue()
   Real accel_old = _u_old[_qp];
   if (_dt == 0)
     return accel_old;
+  //Calculates acceeleration using Newmark time integration method
   return 1/_beta*(((_disp[_qp]-_disp_old[_qp])/(_dt*_dt)) - _vel_old[_qp]/_dt - accel_old*(0.5-_beta));
 }

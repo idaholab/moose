@@ -10,16 +10,18 @@
 
 #include "TensorMechanicsAction.h"
 #include "TensorMechanicsAxisymmetricRZAction.h"
-#include "PressureActionTM.h"
 #include "PoroMechanicsAction.h"
+#include "DynamicTensorMechanicsAction.h"
+#include "PressureAction.h"
 
 #include "StressDivergenceTensors.h"
 #include "CosseratStressDivergenceTensors.h"
 #include "StressDivergenceRZTensors.h"
 #include "MomentBalancing.h"
-#include "GravityTM.h"
 #include "PoroMechanicsCoupling.h"
-#include "SolidMechInertialForceTensors.h"
+#include "DynamicStressDivergenceTensors.h"
+#include "InertialForce.h"
+#include "Gravity.h"
 
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
@@ -79,8 +81,7 @@
 #include "NewmarkAccelAux.h"
 #include "NewmarkVelAux.h"
 
-#include "PressureTM.h"
-
+#include "Pressure.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -124,9 +125,10 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceRZTensors);
   registerKernel(MomentBalancing);
   registerKernel(StressDivergencePFFracTensors);
-  registerKernel(GravityTM);
   registerKernel(PoroMechanicsCoupling);
-  registerKernel(SolidMechInertialForceTensors);
+  registerKernel(DynamicStressDivergenceTensors);
+  registerKernel(InertialForce);
+  registerKernel(Gravity);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
@@ -185,7 +187,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(NewmarkAccelAux);
   registerAux(NewmarkVelAux);
 
-  registerBoundaryCondition(PressureTM);
+  registerBoundaryCondition(Pressure);
 }
 
 // External entry point for dynamic syntax association
@@ -194,15 +196,17 @@ void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
-
-  syntax.registerActionSyntax("EmptyAction", "BCs/PressureTM");
-  syntax.registerActionSyntax("PressureActionTM", "BCs/PressureTM/*");
-
+  syntax.registerActionSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
   syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
   syntax.registerActionSyntax("TensorMechanicsAxisymmetricRZAction", "Kernels/AxisymmetricRZ");
 
+  syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
+  syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
+
   registerAction(TensorMechanicsAction, "add_kernel");
-  registerAction(PressureActionTM, "add_bc");
+  registerAction(DynamicTensorMechanicsAction, "add_kernel");
   registerAction(PoroMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
+  registerAction(PressureAction, "add_bc");
 }
+

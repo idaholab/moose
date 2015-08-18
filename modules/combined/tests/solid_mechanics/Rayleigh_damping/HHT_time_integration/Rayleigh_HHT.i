@@ -1,27 +1,14 @@
-# Test for rayleigh damping implemented using HHT time integration
-# The test is for an 1-D bar element of  unit length fixed on one end
-# with a ramped pressure boundary condition applied to the other end.
-# zeta and eta correspond to the stiffness and mass proportional rayleigh damping
-# alpha, beta and gamma are HHT time integration parameters
-# The equation of motion in terms of matrices is:
-#
-# M*accel + eta*M*vel + zeta*K*vel + alpha*(K*disp - K*disp_old) + K*disp = P*Area
-#
-# Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
-#
-# This equation is equivalent to:
-#
-# density*accel + eta*density*vel + zeta*d/dt(Div stress) + alpha *(Div stress - Div stress_old) +Div Stress= P
-#
-# The first two terms on the left are evaluated using the Inertial force kernel
-# The next two terms on the left involving zeta and alpha are evaluated using the DynamicStressDivergenceTensors Kernel
-# The last term on the left is evaluated using StressDivergenceTensors
-# The residual due to Pressure is evaluated using Pressure boundary condition
-#
-# The system will come to steady state slowly after the pressure becomes constant.
-# Alpha equal to zero will result in Newmark integration.
-# The store_stress_old flag in the ComputeStressBase material model needs to be turned on to store stress old. In this example, this flag is turned on using the child class ComputeLinearElasticStress.
-
+# Test for rayleigh damping implemented using HHT time
+# integration The test is for an 1-D bar element with unit
+# length fixed on one end with a ramped pressure boundary
+# condition applied to the other end. The parameters zeta and
+# eta correspond to the stiffness and mass proportional rayleigh
+# damping; and alpha, beta and gamma are HHT time integration
+# parameters. Note that in the StressDivergencedamping kernel an
+# approximate slope (stress-stress_old)/dt is used as opposed to
+# newmark time integration. The system will come to steady state
+# slowly after the pressure becomes constant. Alpha equal to
+# zero will result in Newmark integration.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -76,15 +63,7 @@
 []
 
 [Kernels]
- [./TensorMechanics]
-   displacements = 'disp_x disp_y disp_z'
- [../]
- [./DynamicTensorMechanics]
-   displacements = 'disp_x disp_y disp_z'
-   zeta = 0.1
-   alpha = 0.11
- [../]
- [./inertia_x]
+  [./inertia_x]
     type = InertialForce
     variable = disp_x
     velocity = vel_x
@@ -92,6 +71,13 @@
     beta = 0.25
     gamma = 0.5
     eta=0.1
+  [../]
+  [./stiffness_x]
+    type = StressDivergence
+    variable = disp_x
+    component = 0
+    zeta = 0.1
+    alpha = 0.11
   [../]
   [./inertia_y]
     type = InertialForce
@@ -102,6 +88,13 @@
     gamma = 0.5
     eta=0.1
   [../]
+  [./stiffness_y]
+    type = StressDivergence
+    variable = disp_y
+    component = 1
+    zeta = 0.1
+    alpha = 0.11
+  [../]
   [./inertia_z]
     type = InertialForce
     variable = disp_z
@@ -110,6 +103,13 @@
     beta = 0.25
     gamma = 0.5
     eta = 0.1
+  [../]
+  [./stiffness_z]
+    type = StressDivergence
+    variable = disp_z
+    component = 2
+    zeta = 0.1
+    alpha = 0.11
   [../]
 
 []
@@ -161,18 +161,16 @@
     execute_on = timestep_end
   [../]
   [./stress_yy]
-     type = RankTwoAux
-     rank_two_tensor = stress
+     type = MaterialTensorAux
      variable = stress_yy
-     index_i = 0
-     index_j = 1
+     tensor = stress
+     index = 1
   [../]
   [./strain_yy]
-     type = RankTwoAux
-     rank_two_tensor = total_strain
+     type = MaterialTensorAux
      variable = strain_yy
-     index_i = 0
-     index_j = 1
+     tensor = total_strain
+     index = 1
   [../]
 
 []
@@ -223,27 +221,19 @@
 
 [Materials]
 
-  [./Elasticity_tensor]
-     type = ComputeElasticityTensor
-     block = 0
-     fill_method = symmetric_isotropic
-     C_ijkl = '210e9 0'
-  [../]
-
-  [./strain]
-        type = ComputeSmallStrain
-        block = 0
-        displacements = 'disp_x disp_y disp_z'
-  [../]
-
-  [./stress]
-      type = ComputeLinearElasticStress
-      store_stress_old = True
-      block = 0
+  [./constant]
+    type = Elastic
+    block = 0
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    youngs_modulus = 210e+09
+    poissons_ratio = 0
+    thermal_expansion = 0
   [../]
 
   [./density]
-  type = GenericConstantMaterial
+    type = GenericConstantMaterial
     block = 0
     prop_names = 'density'
     prop_values = '7750'

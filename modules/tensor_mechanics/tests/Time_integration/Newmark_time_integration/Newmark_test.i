@@ -1,5 +1,20 @@
-#       Test for  Newmark time integration
-#       The test is for an 1-D bar element with unit length fixed on one end and a ramped pressure boundary condition applied to the other #       end. The parameters beta and gamma are HHT time integration parameters.
+# Test for  Newmark time integration
+# The test is for an 1-D bar element of  unit length fixed on one end
+# with a ramped pressure boundary condition applied to the other end.
+# beta and gamma are Newmark time integration parameters
+# The equation of motion in terms of matrices is:
+#
+# M*accel + K*disp = P*Area
+#
+# Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
+#
+# This equation is equivalent to:
+#
+# density*accel + Div Stress = P
+#
+# The first term on the left is evaluated using the Inertial force kernel
+# The last term on the left is evaluated using StressDivergenceTensors
+# The residual due to Pressure is evaluated using Pressure boundary condition
 
 [GlobalParams]
   order = FIRST
@@ -55,47 +70,32 @@
 []
 
 [Kernels]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y disp_z'
+  [../]
   [./inertia_x]
-    type = SolidMechInertialForceTensors
+    type = InertialForce
     variable = disp_x
     velocity = vel_x
     acceleration = accel_x
     beta = 0.25
     gamma = 0.5
   [../]
-  [./stiffness_x]
-    type = StressDivergenceTensors
-    displacements = 'disp_x disp_y disp_z'
-    variable = disp_x
-    component = 0
-  [../]
   [./inertia_y]
-    type = SolidMechInertialForceTensors
+    type = InertialForce
     variable = disp_y
     velocity = vel_y
     acceleration = accel_y
     beta = 0.25
     gamma = 0.5
   [../]
-  [./stiffness_y]
-    type = StressDivergenceTensors
-    displacements = 'disp_x disp_y disp_z'
-    variable = disp_y
-    component = 1
-  [../]
   [./inertia_z]
-    type = SolidMechInertialForceTensors
+    type = InertialForce
     variable = disp_z
     velocity = vel_z
     acceleration = accel_z
     beta = 0.25
     gamma = 0.5
-  [../]
-  [./stiffness_z]
-    type = StressDivergenceTensors
-    displacements = 'disp_x disp_y disp_z'
-    variable = disp_z
-    component = 2
   [../]
 
 []
@@ -195,7 +195,7 @@
     boundary = bottom
     value=0.0
   [../]
-  [./PressureTM]
+  [./Pressure]
     [./Side1]
     boundary = bottom
     function = pressure

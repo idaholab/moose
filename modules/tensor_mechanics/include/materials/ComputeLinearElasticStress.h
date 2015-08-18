@@ -20,7 +20,6 @@ public:
 protected:
   virtual void computeQpStress();
 
-  MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _total_strain;
   const bool _is_finite_strain;
 };
