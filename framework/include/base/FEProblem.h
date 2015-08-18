@@ -84,14 +84,14 @@ enum MooseLinearConvergenceReason
   // MOOSE_CONVERGED_CG_CONSTRAINED     =  6,
   // MOOSE_CONVERGED_STEP_LENGTH        =  7,
   // MOOSE_CONVERGED_HAPPY_BREAKDOWN    =  8,
-  MOOSE_DIVERGED_NULL                   = -2
+  MOOSE_DIVERGED_NULL                   = -2,
   // MOOSE_DIVERGED_ITS                 = -3,
   // MOOSE_DIVERGED_DTOL                = -4,
   // MOOSE_DIVERGED_BREAKDOWN           = -5,
   // MOOSE_DIVERGED_BREAKDOWN_BICG      = -6,
   // MOOSE_DIVERGED_NONSYMMETRIC        = -7,
   // MOOSE_DIVERGED_INDEFINITE_PC       = -8,
-  // MOOSE_DIVERGED_NANORINF            = -9,
+  MOOSE_DIVERGED_NANORINF               = -9
   // MOOSE_DIVERGED_INDEFINITE_MAT      = -10
 };
 
@@ -692,6 +692,12 @@ public:
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper);
   virtual void computeNearNullSpace(NonlinearImplicitSystem & sys, std::vector<NumericVector<Number>*> &sp);
   virtual void computeNullSpace(NonlinearImplicitSystem & sys, std::vector<NumericVector<Number>*> &sp);
+  virtual void computePostCheck(NonlinearImplicitSystem & sys,
+                                const NumericVector<Number> & old_soln,
+                                NumericVector<Number> & search_direction,
+                                NumericVector<Number> & new_soln,
+                                bool & changed_search_direction,
+                                bool & changed_new_soln);
 
   virtual void computeIndicatorsAndMarkers();
 
@@ -1051,6 +1057,7 @@ private:
   bool _use_legacy_uo_initialization;
 
   bool _error_on_jacobian_nonzero_reallocation;
+  bool _fail_next_linear_convergence_check;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;

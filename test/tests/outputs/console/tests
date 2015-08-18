@@ -137,7 +137,9 @@
     # Tests that perf log is disabled flag when console level flag is set to false
     type = RunApp
     input = 'console_print_toggles.i'
-    expect_out = '\s*2\sNonlinear.*?\n\s*\n\Z'
+    # We are testing that the perflog is disabled, so the string 'Alive time' should
+    # be absent from the output.
+    absent_out = 'Alive time'
     valgrind = NONE
     # Note the "--disable-perflog" cli option is for libMesh currently NOT MOOSE
     cli_args = '--disable-perflog Outputs/print_perf_log=true Outputs/console/perf_log=false'

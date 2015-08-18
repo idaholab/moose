@@ -72,7 +72,7 @@ class TestHarness:
     self.checks = {}
     self.checks['platform'] = getPlatforms()
 
-    # The TestHarness doesn't strictly require the existance of libMesh in order to run. Here we allow the user
+    # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
     # to select whether they want to probe for libMesh configuration options.
     if self.options.skip_config_checks:
       self.checks['compiler'] = set(['ALL'])
@@ -84,6 +84,7 @@ class TestHarness:
       self.checks['vtk'] = set(['ALL'])
       self.checks['tecplot'] = set(['ALL'])
       self.checks['dof_id_bytes'] = set(['ALL'])
+      self.checks['petsc_debug'] = set(['ALL'])
     else:
       self.checks['compiler'] = getCompilers(self.libmesh_dir)
       self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
@@ -94,6 +95,7 @@ class TestHarness:
       self.checks['vtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'vtk')
       self.checks['tecplot'] =  getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
       self.checks['dof_id_bytes'] = getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
+      self.checks['petsc_debug'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
 
     # Override the MESH_MODE option if using '--parallel-mesh' option
     if self.options.parallel_mesh == True or \

@@ -147,7 +147,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _has_exception(false),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
-    _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
+    _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
+    _fail_next_linear_convergence_check(false)
 {
 
   _n++;
@@ -3145,6 +3146,9 @@ FEProblem::checkExceptionAndStopSolve()
     // We've handled this exception, so we no longer have one.
     _has_exception = false;
 
+    // Force the next linear convergence check to fail.
+    _fail_next_linear_convergence_check = true;
+
     // Repropagate the exception, so it can be caught at a higher level, typically
     // this is NonlinearSystem::computeResidual().
     throw MooseException(_exception_message);
@@ -3500,6 +3504,78 @@ FEProblem::computeNullSpace(NonlinearImplicitSystem & /*sys*/, std::vector<Numer
     postfix << "_" << i;
     sp.push_back(&_nl.getVector("NullSpace"+postfix.str()));
   }
+}
+
+void
+FEProblem::computePostCheck(NonlinearImplicitSystem & sys,
+                            const NumericVector<Number> & old_soln,
+                            NumericVector<Number> & search_direction,
+                            NumericVector<Number> & new_soln,
+                            bool & changed_search_direction,
+                            bool & changed_new_soln)
+{
+  // This function replaces the old PetscSupport::dampedCheck() function.
+  //
+  // 1.) Recreate code in PetscSupport::dampedCheck() for constructing
+  //     ghosted "soln" and "update" vectors.
+  // 2.) Call FEProblem::computeDamping() with these ghost vectors.
+  // 3.) Recreate the code in PetscSupport::dampedCheck() to actually update
+  //     the solution vector based on the damping, and set the "changed" flags
+  //     appropriately.
+  Moose::perf_log.push("computePostCheck()","Solve");
+
+  // MOOSE's FEProblem doesn't update the solution during the
+  // postcheck, but FEProblem-derived classes (see e.g.
+  // FrictionalContactProblem) might.
+  if (_has_dampers || shouldUpdateSolution())
+  {
+    // We need ghosted versions of new_soln and search_direction (the
+    // ones we get from libmesh/PETSc are PARALLEL vectors.  To make
+    // our lives simpler, we use the same ghosting pattern as the
+    // system's current_local_solution to create new ghosted vectors.
+
+    // Construct zeroed-out clones with the same ghosted dofs as the
+    // System's current_local_solution.
+    UniquePtr<NumericVector<Number> >
+      ghosted_solution = sys.current_local_solution->zero_clone(),
+      ghosted_search_direction = sys.current_local_solution->zero_clone();
+
+    // Copy values from input vectors into clones with ghosted values.
+    *ghosted_solution = new_soln;
+    *ghosted_search_direction = search_direction;
+
+    if (_has_dampers)
+    {
+      // Compute the damping coefficient using the ghosted vectors
+      Real damping = computeDamping(*ghosted_solution, *ghosted_search_direction);
+
+      // If some non-trivial damping was computed, update the new_soln
+      // vector accordingly.
+      if (damping < 1.0)
+      {
+        new_soln = old_soln;
+        new_soln.add(-damping, search_direction);
+        changed_new_soln = true;
+      }
+    }
+
+    if (shouldUpdateSolution())
+    {
+      // Update the ghosted copy of the new solution, if necessary.
+      if (changed_new_soln)
+        *ghosted_solution = new_soln;
+
+      bool updated_solution = updateSolution(new_soln, *ghosted_solution);
+      if (updated_solution)
+        changed_new_soln = true;
+    }
+
+  }
+
+  // MOOSE doesn't change the search_direction
+  changed_search_direction = false;
+
+  Moose::perf_log.pop("computePostCheck()","Solve");
 }
 
 Real
@@ -3936,6 +4012,13 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
                                   const Real /*dtol*/,
                                   const PetscInt maxits)
 {
+  if (_fail_next_linear_convergence_check)
+  {
+    // Unset the flag
+    _fail_next_linear_convergence_check = false;
+    return MOOSE_DIVERGED_NANORINF;
+  }
+
   // We initialize the reason to something that basically means MOOSE
   // has not made a decision on convergence yet.
   MooseLinearConvergenceReason reason = MOOSE_LINEAR_ITERATING;
