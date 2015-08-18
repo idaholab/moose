@@ -227,15 +227,15 @@
     outputs = console
   [../]
   [./f0]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = should_be_zero0_fcn
   [../]
   [./f1]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = should_be_zero1_fcn
   [../]
   [./f2]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = should_be_zero2_fcn
   [../]
 []

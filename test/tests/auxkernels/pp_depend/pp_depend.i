@@ -56,7 +56,7 @@
 
 [Postprocessors]
   [./t_pp]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = t_func
   [../]
 []
@@ -82,4 +82,3 @@
   print_linear_residuals = true
   print_perf_log = true
 []
-

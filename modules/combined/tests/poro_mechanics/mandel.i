@@ -300,7 +300,7 @@
      variable = tot_force
   [../]
   [./dt]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     outputs = console
     function = if(0.15*t<0.01,0.15*t,0.01)
   [../]

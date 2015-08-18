@@ -104,7 +104,7 @@
 
 # mass_bal just outputs the result to screen
   [./mass_bal]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = mass_bal_fcn
   [../]
 []

@@ -128,7 +128,7 @@
   [../]
 
   [./zmass_error]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = mass_bal_fcn
     execute_on = timestep_end
   [../]

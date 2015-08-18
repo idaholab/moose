@@ -19,13 +19,17 @@ InputParameters validParams<FunctionValuePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<FunctionName>("function", "The function which supplies the postprocessor value.");
+  params.addParam<Point>("point", Point(), "A point in space to be given to the function Default: (0, 0, 0)");
+  params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
 
   return params;
 }
 
 FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _function(getFunction("function"))
+    _function(getFunction("function")),
+    _point(getParam<Point>("point")),
+    _scale_factor(getParam<Real>("scale_factor"))
 {
 }
 
@@ -46,12 +50,5 @@ FunctionValuePostprocessor::execute()
 PostprocessorValue
 FunctionValuePostprocessor::getValue()
 {
-  return _function.value(_t, 0);         //Pass 0 instead of Point(0,0,0) because postprocessors return a single scalar value.
+  return _scale_factor * _function.value(_t, _point);
 }
-
-void
-FunctionValuePostprocessor::threadJoin(const UserObject & /*uo*/)
-{
-  // nothing to do here, general PPS do not run threaded
-}
-
