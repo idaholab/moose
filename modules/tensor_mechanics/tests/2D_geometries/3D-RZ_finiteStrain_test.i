@@ -13,9 +13,9 @@
 #          ro = outer radius
 #
 # The tests assume an inner and outer radii of 5 and 10, with internal and external
-# pressures of 100000 and 200000, respectively. The resulting compressive tangential
-# stress is largest at the inner wall and, from the above equation, has a value
-# of -271429.
+# pressures of 100000 and 200000 at t = 1.0, respectively. The resulting compressive
+# tangential stress is largest at the inner wall and, from the above equation, has a
+# value of -271429.
 #
 # RESULTS are below. Since stresses are average element values, values for the
 # edge element and one-element-in are used to extrapolate the stress to the
@@ -67,6 +67,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./strain_theta]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
@@ -76,6 +80,14 @@
     index_i = 2
     index_j = 2
     variable = stress_theta
+    execute_on = timestep_end
+  [../]
+  [./strain_theta]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    index_i = 2
+    index_j = 2
+    variable = strain_theta
     execute_on = timestep_end
   [../]
 []
@@ -103,21 +115,21 @@
 [BCs]
 # pin particle along symmetry planes
   [./no_disp_x]
-    type = DirichletBC
+    type = PresetBC
     variable = disp_x
     boundary = xzero
     value = 0.0
   [../]
 
   [./no_disp_y]
-    type = DirichletBC
+    type = PresetBC
     variable = disp_y
     boundary = yzero
     value = 0.0
   [../]
 
   [./no_disp_z]
-    type = DirichletBC
+    type = PresetBC
     variable = disp_z
     boundary = zzero
     value = 0.0
@@ -129,7 +141,7 @@
     variable = disp_x
     boundary = outer
     component = 0
-    factor = 200000
+    function = '200000*t'
   [../]
 
  [./exterior_pressure_y]
@@ -137,7 +149,7 @@
     variable = disp_y
     boundary = outer
     component = 1
-    factor = 200000
+    function = '200000*t'
   [../]
 
 [./exterior_pressure_z]
@@ -145,7 +157,7 @@
     variable = disp_z
     boundary = outer
     component = 2
-    factor = 200000
+    function = '200000*t'
   [../]
 
   [./interior_pressure_x]
@@ -153,7 +165,7 @@
     variable = disp_x
     boundary = inner
     component = 0
-    factor = 100000
+    function = '100000*t'
   [../]
 
   [./interior_pressure_y]
@@ -161,7 +173,7 @@
     variable = disp_y
     boundary = inner
     component = 1
-    factor = 100000
+    function = '100000*t'
   [../]
 
 [./interior_pressure_z]
@@ -169,7 +181,7 @@
     variable = disp_z
     boundary = inner
     component = 2
-    factor = 100000
+    function = '100000*t'
   [../]
 
 []
@@ -197,38 +209,33 @@
   l_max_its = 50
 
   start_time = 0.0
-  end_time = 1
-  num_steps = 1000
-
-  dtmax = 5e6
-  dtmin = 1
-
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 1
-    optimal_iterations = 6
-    iteration_window = 0.4
-    linear_iteration_ratio = 100
-  [../]
-
-  [./Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  [../]
+  end_time = 0.2
+  dt = 0.1
 
 []
 
 [Postprocessors]
-  [./dt]
-    type = TimestepSize
+  [./strainTheta]
+    type = ElementAverageValue
+    variable = strain_theta
+  [../]
+  [./stressTheta]
+    type = ElementAverageValue
+    variable = stress_theta
+  [../]
+  [./stressTheta_pt]
+    type = PointValue
+    point = '5.0 0.0 0.0'
+    #bottom inside edge for comparison to theory; use csv = true
+    variable = stress_theta
   [../]
 []
 
 [Outputs]
-  file_base = 3D-RZ_finiteStrain_test_out
   output_on = 'timestep_end'
   output_initial = true
   exodus = true
+  #csv = true
   print_linear_residuals = true
   print_perf_log = true
   [./console]
