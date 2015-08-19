@@ -1,3 +1,7 @@
+[GlobalParams]
+  displacements = 'disp_r disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -13,9 +17,9 @@
   [./temp]
     initial_condition = 300 # Start at room temperature
   [../]
-  [./disp_x]
+  [./disp_r]
   [../]
-  [./disp_y]
+  [./disp_z]
   [../]
 []
 
@@ -53,12 +57,9 @@
     variable = temp
     darcy_pressure = pressure
   [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
+  [./AxisymmetricRZ]
+    # This block adds all of the proper Kernels for TensorMechanics in RZ
+    use_displaced_mesh = true
   [../]
 []
 
@@ -112,19 +113,19 @@
   [../]
   [./hold_inlet]
     type = DirichletBC
-    variable = disp_y
+    variable = disp_z
     boundary = bottom
     value = 0
   [../]
   [./hold_center]
     type = DirichletBC
-    variable = disp_x
+    variable = disp_r
     boundary = left
     value = 0
   [../]
   [./hold_outside]
     type = DirichletBC
-    variable = disp_x
+    variable = disp_r
     boundary = right
     value = 0
   [../]
@@ -136,15 +137,24 @@
     block = 0
     ball_radius = 1
   [../]
-  [./steel]
-    type = Elastic
-    block = 0
-    disp_r = disp_x
-    disp_z = disp_y
+
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 200e9 # (Pa) from wikipedia
     poissons_ratio = .3 # from wikipedia
-    thermal_expansion = 12e-6 # (K^-1) @20C from wikipedia
-    temp = temp
+    block = 0
+  [../]
+
+  [./small_strain_arz]
+    type = ComputeAxisymmetricRZFiniteStrain
+    temperature = temp
+    thermal_expansion_coeff = 12e-6 # (K^-1) @20C from wikipedia
+    block = 0
+  [../]
+
+  [./_elastic_strain]
+    type = ComputeFiniteStrainElasticStress
+    block = 0
   [../]
 []
 
@@ -162,7 +172,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 200
+  num_steps = 50
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
