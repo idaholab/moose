@@ -455,8 +455,8 @@ Console::outputNorm(const Real & old_norm, const Real & norm)
 {
   std::string color = COLOR_GREEN;
 
-  // Red if the residual went up...
-  if (norm > old_norm)
+  // Red if the residual went up... or if the norm is nan
+  if (norm != norm || norm > old_norm)
     color = COLOR_RED;
   // Yellow if change is less than 5%
   else if ((old_norm - norm) / old_norm <= 0.05)
