@@ -115,6 +115,10 @@ public:
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
 protected:
+  virtual VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
+
+  virtual VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
+
   virtual Real computeValue() = 0;
 
   /// Subproblem this kernel is part of

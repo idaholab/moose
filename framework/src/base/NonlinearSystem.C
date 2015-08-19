@@ -720,8 +720,6 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
     residual.zero();
     residualVector(Moose::KT_TIME).zero();
     residualVector(Moose::KT_NONTIME).zero();
-    _time_integrator->preStep();
-    computeTimeDerivatives();
     computeResidualInternal(type);
     residualVector(Moose::KT_TIME).close();
     residualVector(Moose::KT_NONTIME).close();
@@ -837,6 +835,7 @@ NonlinearSystem::residualVector(Moose::KernelType type)
 void
 NonlinearSystem::computeTimeDerivatives()
 {
+  _time_integrator->preStep();
   _time_integrator->computeTimeDerivatives();
 }
 
