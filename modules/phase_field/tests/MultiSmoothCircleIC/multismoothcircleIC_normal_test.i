@@ -30,6 +30,7 @@
     numbub = 10
     radius = 10.0
     int_width = 12.0
+    rand_seed = 2000
     radius_variation = 2 #This is the standard deviation
     radius_variation_type = normal
   [../]

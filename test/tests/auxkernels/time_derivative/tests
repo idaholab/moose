@@ -4,4 +4,16 @@
     input = 'time_derivative.i'
     exodiff = 'time_derivative_out.e'
   [../]
+
+  [./time_derivative_nl]
+    type = 'Exodiff'
+    input = 'time_derivative_nl.i'
+    exodiff = 'time_derivative_nl_out.e'
+  [../]
+
+  [./coupled_aux_time_derivative]
+    type = 'RunException'
+    input = 'coupled_aux_time_derivative.i'
+    expect_err = 'g_k: Unable to couple time derivative of an auxiliary variable into the auxiliary system.'
+  [../]
 []

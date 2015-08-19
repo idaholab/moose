@@ -15,6 +15,7 @@ InputParameters validParams<SmoothCircleBaseIC>()
   params.addParam<Real>("int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
   params.addParam<bool>("3D_spheres", true, "in 3D, whether the objects are spheres or columns");
   params.addParam<bool>("zero_gradient", false, "Set the gradient DOFs to zero. This can avoid numerical problems with higher order shape functions and overlapping circles.");
+  params.addParam<unsigned int>("rand_seed", 12345, "Seed value for the random number generator");
   return params;
 }
 
@@ -28,6 +29,7 @@ SmoothCircleBaseIC::SmoothCircleBaseIC(const InputParameters & parameters) :
     _zero_gradient(parameters.get<bool>("zero_gradient")),
     _num_dim(_3D_spheres ? 3 : 2)
 {
+  _random.seed(_tid, getParam<unsigned int>("rand_seed"));
 }
 
 void
@@ -42,7 +44,6 @@ SmoothCircleBaseIC::initialSetup()
 
   if (_centers.size() < 1)
     mooseError("_center and _radii were not initialized in the Circle IC");
-
 }
 
 Real
@@ -139,4 +140,3 @@ SmoothCircleBaseIC::computeCircleGradient(const Point & p, const Point & center,
   else
     return 0.0;
 }
-

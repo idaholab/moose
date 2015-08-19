@@ -3359,6 +3359,8 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   }
   _aux.residualSetup();
 
+  _nl.computeTimeDerivatives();
+
   _aux.compute(EXEC_LINEAR);
 
   computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "MultiSmoothCircleIC.h"
-#include "MooseRandom.h"
 
 template<>
 InputParameters validParams<MultiSmoothCircleIC>()
@@ -14,7 +13,6 @@ InputParameters validParams<MultiSmoothCircleIC>()
   params.addClassDescription("Random distribution of smooth circles with given minimum spacing");
   params.addRequiredParam<unsigned int>("numbub", "The number of bubbles to place");
   params.addRequiredParam<Real>("bubspac", "minimum spacing of bubbles, measured from center to center");
-  params.addParam<unsigned int>("rand_seed", 2000, "random seed");
   params.addParam<unsigned int>("numtries", 1000, "The number of tries");
   params.addRequiredParam<Real>("radius", "Mean radius value for the circels");
   params.addParam<Real>("radius_variation", 0.0, "Plus or minus fraction of random variation in the bubble radius for uniform, standard deviation for normal");
@@ -32,7 +30,6 @@ MultiSmoothCircleIC::MultiSmoothCircleIC(const InputParameters & parameters) :
     _radius_variation(getParam<Real>("radius_variation")),
     _radius_variation_type(getParam<MooseEnum>("radius_variation_type"))
 {
-  MooseRandom::seed(getParam<unsigned int>("rand_seed"));
 }
 
 void
@@ -69,10 +66,10 @@ MultiSmoothCircleIC::computeCircleRadii()
     switch (_radius_variation_type)
     {
     case 0: //Uniform distrubtion
-      _radii[i] = _radius*(1.0 + (1.0 - 2.0*MooseRandom::rand())*_radius_variation);
+      _radii[i] = _radius*(1.0 + (1.0 - 2.0 * _random.rand(_tid)) * _radius_variation);
       break;
     case 1: //Normal distribution
-      _radii[i] = MooseRandom::randNormal(_radius,_radius_variation);
+      _radii[i] = _random.randNormal(_tid, _radius,_radius_variation);
       break;
     case 2: //No variation
       _radii[i] = _radius;
@@ -101,9 +98,9 @@ MultiSmoothCircleIC::computeCircleCenters()
       num_tries++;
       //Moose::out<<"num_tries: "<<num_tries<<std::endl;
 
-      Real ran1 = MooseRandom::rand();
-      Real ran2 = MooseRandom::rand();
-      Real ran3 = MooseRandom::rand();
+      Real ran1 = _random.rand(_tid);
+      Real ran2 = _random.rand(_tid);
+      Real ran3 = _random.rand(_tid);
 
       newcenter(0) = _bottom_left(0) + ran1*_range(0);
       newcenter(1) = _bottom_left(1) + ran2*_range(1);
@@ -127,4 +124,3 @@ MultiSmoothCircleIC::computeCircleCenters()
     _centers[i] = newcenter;
   }
 }
-
