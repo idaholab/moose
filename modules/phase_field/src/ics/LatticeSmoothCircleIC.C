@@ -5,14 +5,14 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "LatticeSmoothCircleIC.h"
-#include "MooseRandom.h"
 
 template<>
 InputParameters validParams<LatticeSmoothCircleIC>()
 {
   InputParameters params = validParams<SmoothCircleBaseIC>();
   params.addClassDescription("Perturbed square lattice of smooth circles");
-  params.addParam<Real>("Rnd_variation", 0.0, "Variation from central lattice position");
+  params.addDeprecatedParam<Real>("Rnd_variation", "Variation from central lattice position", "use the new parameter name pos_variation");
+  params.addParam<Real>("pos_variation", 0.0, "Variation from central lattice position");
   params.addRequiredParam<std::vector<unsigned int> >("circles_per_side", "Vector containing the number of bubbles along each side");
   params.addParam<unsigned int>("rand_seed", 2000, "random seed");
   params.addRequiredParam<Real>("radius", "Mean radius value for the circels");
@@ -20,21 +20,18 @@ InputParameters validParams<LatticeSmoothCircleIC>()
   MooseEnum rand_options("uniform normal none","none");
   params.addParam<MooseEnum>("radius_variation_type", rand_options, "Type of distribution that random circle radii will follow");
   params.addParam<bool>("avoid_bounds", true, "Don't place any bubbles on the simulation cell boundaries");
-
   return params;
 }
 
 LatticeSmoothCircleIC::LatticeSmoothCircleIC(const InputParameters & parameters) :
     SmoothCircleBaseIC(parameters),
-    _lattice_variation(getParam<Real>("Rnd_variation")),
+    _lattice_variation(isParamValid("Rnd_variation") ? getParam<Real>("Rnd_variation") : getParam<Real>("pos_variation")),
     _circles_per_side(getParam<std::vector<unsigned int> >("circles_per_side")),
     _radius(getParam<Real>("radius")),
     _radius_variation(getParam<Real>("radius_variation")),
     _radius_variation_type(getParam<MooseEnum>("radius_variation_type")),
     _avoid_bounds(getParam<bool>("avoid_bounds"))
 {
-  //Set random seed
-  MooseRandom::seed(getParam<unsigned int>("rand_seed"));
 }
 
 void
@@ -44,7 +41,7 @@ LatticeSmoothCircleIC::initialSetup()
   _circles_per_side.resize(3);
 
   //Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
     _top_right(i) = _mesh.getMaxInDimension(i);
@@ -94,10 +91,10 @@ LatticeSmoothCircleIC::computeCircleRadii()
     switch (_radius_variation_type)
     {
     case 0: //Uniform distrubtion
-      _radii[i] = _radius*(1.0 + (1.0 - 2.0*MooseRandom::rand())*_radius_variation);
+      _radii[i] = _radius*(1.0 + (1.0 - 2.0 * _random.rand(_tid))*_radius_variation);
       break;
     case 1: //Normal distribution
-      _radii[i] = MooseRandom::randNormal(_radius,_radius_variation);
+      _radii[i] = _random.randNormal(_tid, _radius, _radius_variation);
       break;
     case 2: //No variation
       _radii[i] = _radius;
@@ -112,33 +109,33 @@ LatticeSmoothCircleIC::computeCircleCenters()
 {
   _centers.resize(_numbub);
 
-  Real x_sep = _range(0)/_circles_per_side[0];
-  Real y_sep = _range(1)/_circles_per_side[1];
+  Real x_sep = _range(0) / _circles_per_side[0];
+  Real y_sep = _range(1) / _circles_per_side[1];
 
   Real z_sep = 0.0;
   unsigned int z_num = 1.0;
 
   if (_range(2) > 0.0)
   {
-    z_sep = _range(2)/_circles_per_side[2];
+    z_sep = _range(2) / _circles_per_side[2];
     z_num = _circles_per_side[2];
   }
 
   unsigned int cnt = 0;
-  for (unsigned int i = 0; i < _circles_per_side[0]; i++)
-    for (unsigned int j = 0; j < _circles_per_side[1]; j++)
-      for (unsigned int k = 0; k < z_num; k++)
+  for (unsigned int i = 0; i < _circles_per_side[0]; ++i)
+    for (unsigned int j = 0; j < _circles_per_side[1]; ++j)
+      for (unsigned int k = 0; k < z_num; ++k)
       {
-        Real xx = x_sep/2.0 + i*x_sep;
-        Real yy = y_sep/2.0 + j*y_sep;
-        Real zz = z_sep/2.0 + k*z_sep;
+        Real xx = x_sep/2.0 + i * x_sep;
+        Real yy = y_sep/2.0 + j * y_sep;
+        Real zz = z_sep/2.0 + k * z_sep;
 
         //Vary circle position
-        xx = xx + (1.0 - 2.0*MooseRandom::rand())*_lattice_variation;
-        yy = yy + (1.0 - 2.0*MooseRandom::rand())*_lattice_variation;
+        xx = xx + (1.0 - 2.0 * _random.rand(_tid)) * _lattice_variation;
+        yy = yy + (1.0 - 2.0 * _random.rand(_tid)) * _lattice_variation;
 
         if (_range(2) != 0.0)
-          zz = zz + (1.0 - 2.0*MooseRandom::rand())*_lattice_variation;
+          zz = zz + (1.0 - 2.0 * _random.rand(_tid)) * _lattice_variation;
 
         //Verify not out of bounds
         if (_avoid_bounds && xx < _radii[cnt] + _int_width)
@@ -164,4 +161,3 @@ LatticeSmoothCircleIC::computeCircleCenters()
         cnt++;
       }
 }
-

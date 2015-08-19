@@ -9,6 +9,7 @@
 
 #include "Kernel.h"
 #include "InitialCondition.h"
+#include "MooseRandom.h"
 
 // System includes
 #include <string>
@@ -25,22 +26,20 @@ InputParameters validParams<SmoothCircleBaseIC>();
 class SmoothCircleBaseIC : public InitialCondition
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param name The name given to the initial condition in the input file.
-   * @param parameters The parameters object holding data for the class to use.
-   * @param var_name The variable this InitialCondtion is supposed to provide values for.
-   */
   SmoothCircleBaseIC(const InputParameters & parameters);
 
-  /**
-   * The value of the variable at a point.
-   *
-   * This must be overriden by derived classes.
-   */
+  virtual Real value(const Point & p);
+  virtual RealGradient gradient(const Point & p);
+
+  virtual void initialSetup();
 
 protected:
+  virtual Real computeCircleValue(const Point & p, const Point & center, const Real & radius);
+  virtual RealGradient computeCircleGradient(const Point & p, const Point & center, const Real & radius);
+
+  virtual void computeCircleRadii() = 0;
+  virtual void computeCircleCenters() = 0;
+
   MooseMesh & _mesh;
 
   Real _invalue;
@@ -54,19 +53,7 @@ protected:
   std::vector<Point> _centers;
   std::vector<Real> _radii;
 
-  virtual void initialSetup();
-
-  virtual Real value(const Point & p);
-
-  virtual RealGradient gradient(const Point & p);
-
-  virtual Real computeCircleValue(const Point & p, const Point & center, const Real & radius);
-
-  virtual RealGradient computeCircleGradient(const Point & p, const Point & center, const Real & radius);
-
-  virtual void computeCircleRadii() = 0;
-
-  virtual void computeCircleCenters() = 0;
+  MooseRandom _random;
 };
 
 #endif //SMOOTHCIRCLEBASEIC_H

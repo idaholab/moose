@@ -5,17 +5,14 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "RndSmoothCircleIC.h"
-#include "MooseRandom.h"
 
 template<>
 InputParameters validParams<RndSmoothCircleIC>()
 {
   InputParameters params = validParams<SmoothCircleIC>();
   params.addClassDescription("Random noise with different min/max inside/outside of a smooth circle");
-
   params.addRequiredParam<Real>("variation_invalue", "Plus or minus this amount on the invalue");
   params.addRequiredParam<Real>("variation_outvalue", "Plus or minus this amount on the outvalue");
-  params.addParam<unsigned int>("rand_seed", 12345, "Seed value for the random number generator");
   return params;
 }
 
@@ -24,7 +21,6 @@ RndSmoothCircleIC::RndSmoothCircleIC(const InputParameters & parameters) :
     _variation_invalue(parameters.get<Real>("variation_invalue")),
     _variation_outvalue(parameters.get<Real>("variation_outvalue"))
 {
-  MooseRandom::seed(getParam<unsigned int>("rand_seed"));
 }
 
 
@@ -44,16 +40,15 @@ RndSmoothCircleIC::computeCircleValue(const Point & p, const Point & center, con
   //Return value
   Real value = 0.0;
 
-  if (dist <= radius - _int_width/2.0) //Random value inside circle
-    value = _invalue - _variation_invalue + 2.0*MooseRandom::rand()*_variation_invalue;
-  else if (dist < radius + _int_width/2.0) //Smooth interface
+  if (dist <= radius - _int_width / 2.0) //Random value inside circle
+    value = _invalue - _variation_invalue + 2.0 * _random.rand(_tid) * _variation_invalue;
+  else if (dist < radius + _int_width / 2.0) //Smooth interface
   {
-    Real int_pos = (dist - radius + _int_width/2.0)/_int_width;
+    Real int_pos = (dist - radius + _int_width/2.0) / _int_width;
     value = _outvalue + (_invalue - _outvalue) * (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
   }
   else //Random value outside circle
-    value = _outvalue - _variation_outvalue + 2.0*MooseRandom::rand()*_variation_outvalue;
+    value = _outvalue - _variation_outvalue + 2.0 * _random.rand(_tid) * _variation_outvalue;
 
   return value;
 }
-

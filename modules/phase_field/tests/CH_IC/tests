@@ -29,6 +29,7 @@
     scale_refine = 1
     valgrind = 'HEAVY'
     max_parallel = 1
+    max_threads = 1
     recover = false # See #5207
   [../]
 
@@ -47,5 +48,6 @@
     scale_refine = 1
     valgrind = 'HEAVY'
     max_parallel = 1
+    max_threads = 1
   [../]
 []

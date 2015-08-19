@@ -62,4 +62,3 @@ RndBoundingBoxIC::value(const Point & p)
 
   return rand_num * _range_invalue + _mn_invalue;
 }
-

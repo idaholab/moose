@@ -9,6 +9,7 @@
 
 #include "Kernel.h"
 #include "PolycrystalReducedIC.h"
+#include "MooseRandom.h"
 
 // System includes
 #include <string>
@@ -40,6 +41,7 @@ public:
 private:
   Real _x_offset;
   Real _perturbation_percent;
+  MooseRandom _random;
 };
 
 #endif //HEXPOLYCRYSTALIC_H
