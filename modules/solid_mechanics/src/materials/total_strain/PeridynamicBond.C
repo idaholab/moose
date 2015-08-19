@@ -189,10 +189,9 @@ PeridynamicBond::PeridynamicBond(const InputParameters & parameters)
 		_AvgArea = AvgArea3D(_MeshSpacing);
 	}
 	setRandomResetFrequency(EXEC_INITIAL);
-  cout << "123456" << endl;
-	cout << _PDdim << endl;
-	cout << _AvgArea << endl;
-	cout << _lamda << endl;
+	//cout << _PDdim << endl;
+	//cout << _AvgArea << endl;
+	//cout << _lamda << endl;
   /***********************************************************************************************/
 }
 
