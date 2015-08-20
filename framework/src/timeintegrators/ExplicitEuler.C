@@ -27,11 +27,19 @@ InputParameters validParams<ExplicitEuler>()
 ExplicitEuler::ExplicitEuler(const InputParameters & parameters) :
     TimeIntegrator(parameters)
 {
-  _fe_problem.setConstJacobian(true);
 }
 
 ExplicitEuler::~ExplicitEuler()
 {
+}
+
+void
+ExplicitEuler::preSolve()
+{
+  if (_dt == _dt_old)
+    _fe_problem.setConstJacobian(true);
+  else
+    _fe_problem.setConstJacobian(false);
 }
 
 void

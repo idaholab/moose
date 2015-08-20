@@ -29,7 +29,6 @@ RungeKutta2::RungeKutta2(const InputParameters & parameters) :
     TimeIntegrator(parameters),
     _stage(0)
 {
-  _fe_problem.setConstJacobian(true);
 }
 
 RungeKutta2::~RungeKutta2()
@@ -39,6 +38,10 @@ RungeKutta2::~RungeKutta2()
 void
 RungeKutta2::preSolve()
 {
+  if (_dt == _dt_old)
+    _fe_problem.setConstJacobian(true);
+  else
+    _fe_problem.setConstJacobian(false);
 }
 
 void
