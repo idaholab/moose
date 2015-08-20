@@ -215,15 +215,18 @@ MultiAppMeshFunctionTransfer::execute()
   // Send points to other processors.
   std::vector<std::vector<Real> > incoming_evals(n_processors());
   std::vector<std::vector<unsigned int> > incoming_app_ids(n_processors());
+  std::vector<Parallel::Request> send_points(n_processors());
   for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {
     if (i_proc == processor_id())
       continue;
-    _communicator.send(i_proc, outgoing_points[i_proc]);
+    _communicator.send(i_proc, outgoing_points[i_proc], send_points[i_proc]);
   }
 
   // Recieve points from other processors, evaluate mesh frunctions at those
   // points, and send the values back.
+  std::vector<Parallel::Request> send_evals(n_processors());
+  std::vector<Parallel::Request> send_ids(n_processors());
   for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {
     std::vector<Point> incoming_points;
@@ -259,9 +262,9 @@ MultiAppMeshFunctionTransfer::execute()
     }
     else
     {
-      _communicator.send(i_proc, outgoing_evals);
+      _communicator.send(i_proc, outgoing_evals, send_evals[i_proc]);
       if (_direction == FROM_MULTIAPP)
-        _communicator.send(i_proc, outgoing_ids);
+        _communicator.send(i_proc, outgoing_ids, send_ids[i_proc]);
     }
   }
 
@@ -400,6 +403,17 @@ MultiAppMeshFunctionTransfer::execute()
     }
     solution->close();
     to_sys->update();
+  }
+
+  // Make sure all our sends succeeded.
+  for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
+  {
+    if (i_proc == processor_id())
+      continue;
+    send_points[i_proc].wait();
+    send_evals[i_proc].wait();
+    if (_direction == FROM_MULTIAPP)
+      send_ids[i_proc].wait();
   }
 
   _console << "Finished MeshFunctionTransfer " << name() << std::endl;

@@ -1,12 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  xmin = 0
-  xmax = 9
-  ymin = 0
-  ymax = 9
-  nx = 9
-  ny = 9
+  nx = 10
+  ny = 5
 []
 
 [Variables]
@@ -15,16 +11,11 @@
 []
 
 [AuxVariables]
-  [./x]
+  [./from_sub]
+  [../]
+  [./elemental_from_sub]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-[]
-
-[Functions]
-  [./x_func]
-    type = ParsedFunction
-    value = x
   [../]
 []
 
@@ -33,14 +24,9 @@
     type = Diffusion
     variable = u
   [../]
-[]
-
-[AuxKernels]
-  [./x_func_aux]
-    type = FunctionAux
-    variable = x
-    function = x_func
-    execute_on = initial
+  [./td]
+    type = TimeDerivative
+    variable = u
   [../]
 []
 
@@ -49,71 +35,71 @@
     type = DirichletBC
     variable = u
     boundary = left
-    value = 0
+    value = 1
   [../]
   [./right]
     type = DirichletBC
     variable = u
     boundary = right
-    value = 1
+    value = 0
   [../]
 []
 
 [Executioner]
   type = Transient
-  num_steps = 1
-  dt = 1
-
-  solve_type = 'NEWTON'
+  num_steps = 2
+  dt = 0.01
+  solve_type = NEWTON
 []
 
 [Outputs]
   output_initial = true
   exodus = true
+  #print_linear_residuals = true
   print_perf_log = true
-[]
-
-[Debug]
-#  show_actions = true
 []
 
 [MultiApps]
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep_end
-    positions = '1 1 0 5 5 0'
-    input_files = tosub_sub.i
+    positions = '0.0 0.0 0'
+    input_files = fixed_meshes_sub.i
   [../]
 []
 
 [Transfers]
-  [./tosub]
+  [./from_sub]
+    type = MultiAppProjectionTransfer
+    direction = from_multiapp
+    multi_app = sub
+    source_variable = u
+    variable = from_sub
+    fixed_meshes = true
+  [../]
+  [./elemental_from_sub]
+    type = MultiAppProjectionTransfer
+    direction = from_multiapp
+    multi_app = sub
+    source_variable = u
+    variable = elemental_from_sub
+    fixed_meshes = true
+  [../]
+  [./to_sub]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
-    variable = u_nodal
+    variable = from_master
+    fixed_meshes = true
   [../]
-  [./elemental_tosub]
+  [./elemental_to_sub]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
-    variable = u_elemental
-  [../]
-  [./elemental_to_sub_elemental]
-    type = MultiAppProjectionTransfer
-    direction = to_multiapp
-    multi_app = sub
-    source_variable = x
-    variable = x_elemental
-  [../]
-  [./elemental_to_sub_nodal]
-    type = MultiAppProjectionTransfer
-    direction = to_multiapp
-    multi_app = sub
-    source_variable = x
-    variable = x_nodal
+    variable = elemental_from_master
+    fixed_meshes = true
   [../]
 []
+

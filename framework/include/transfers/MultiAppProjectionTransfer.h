@@ -29,7 +29,8 @@ class MultiAppProjectionTransfer : public MultiAppTransfer
 {
 public:
   MultiAppProjectionTransfer(const InputParameters & parameters);
-  virtual ~MultiAppProjectionTransfer();
+
+  virtual void initialSetup();
 
   virtual void execute();
 
@@ -37,10 +38,9 @@ protected:
   void toMultiApp();
   void fromMultiApp();
 
-  void assembleL2From(EquationSystems & es, const std::string & system_name);
-  void assembleL2To(EquationSystems & es, const std::string & system_name);
+  void assembleL2(EquationSystems & es, const std::string & system_name);
 
-  void projectSolution(FEProblem & fep, unsigned int app);
+  void projectSolution(unsigned int to_problem);
 
   AuxVariableName _to_var_name;
   VariableName _from_var_name;
@@ -54,8 +54,13 @@ protected:
   /// thus is always going to be 0 unless something changes in libMesh or we change the way we project variables
   unsigned int _proj_var_num;
 
-  friend void assemble_l2_from(EquationSystems & es, const std::string & system_name);
-  friend void assemble_l2_to(EquationSystems & es, const std::string & system_name);
+  friend void assemble_l2(EquationSystems & es, const std::string & system_name);
+
+  // These variables allow us to cache qps for fixed meshes.
+  bool _fixed_meshes;
+  bool _qps_cached;
+  std::vector<std::vector<Point> > _cached_qps;
+  std::vector<std::map<std::pair<unsigned int, unsigned int>, unsigned int> > _cached_index_map;
 
 };
 
