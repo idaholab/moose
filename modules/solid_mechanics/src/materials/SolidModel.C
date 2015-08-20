@@ -882,6 +882,11 @@ SolidModel::initialSetup()
       }
     }
 
+    for (std::map<SubdomainID, ConstitutiveModel*>::iterator iter=_constitutive_model.begin(); iter != _constitutive_model.end(); ++iter)
+    {
+      iter->second->initialSetup();
+    }
+
     if (isParamValid("constitutive_model") && !_constitutive_active)
     {
       // User-defined name of the constitutive model (a Material object)
