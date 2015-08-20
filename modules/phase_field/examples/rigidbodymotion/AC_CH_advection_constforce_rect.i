@@ -145,6 +145,7 @@
     block = 0
     grain_force = grain_force
     etas = eta
+    c = c
     grain_data = grain_center
   [../]
 []
