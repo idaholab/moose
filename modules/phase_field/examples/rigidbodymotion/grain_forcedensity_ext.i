@@ -99,6 +99,7 @@
     block = 0
     grain_force = grain_force
     etas = 'eta0 eta1'
+    c = c
     grain_data = grain_center
   [../]
 []
@@ -268,8 +269,8 @@
     type = ComputeGrainForceAndTorque
     execute_on = 'initial linear'
     grain_data = grain_center
+    c = c
     force_density = force_density_ext
-    force_density_derivative = dFdc_ext
   [../]
 []
 
