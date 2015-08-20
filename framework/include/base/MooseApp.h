@@ -40,6 +40,7 @@ class MooseApp;
 class RecoverBaseAction;
 class Backup;
 class FEProblem;
+class MeshModifier;
 
 template<>
 InputParameters validParams<MooseApp>();
@@ -409,6 +410,16 @@ public:
    */
   unsigned int & multiappLevel() { return _multiapp_level; }
 
+  /**
+   * Add a Mesh modifier that will act on the meshes in the system
+   */
+  void addMeshModifier(const std::string & modifier_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Execute and clear the Mesh Modifiers data structure
+   */
+  void executeMeshModifiers();
+
 protected:
 
   /**
@@ -561,6 +572,9 @@ private:
 
   /// Level of multiapp, the master is level 0. This used by the Console to indent output
   unsigned int _multiapp_level;
+
+  /// Holds the mesh modifiers until they have completed, then this structure is cleared
+  std::map<std::string, MooseSharedPointer<MeshModifier> > _mesh_modifiers;
 
   ///@{
   /**
