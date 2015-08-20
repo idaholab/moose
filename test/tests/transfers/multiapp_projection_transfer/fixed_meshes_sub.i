@@ -1,51 +1,45 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  xmin = 0
-  xmax = 3
-  ymin = 0
-  ymax = 3
-  nx = 3
-  ny = 3
+  nx = 10
+  ny = 5
 []
 
 [Variables]
-  [./v]
+  [./u]
   [../]
 []
 
 [AuxVariables]
-  [./u_nodal]
+  [./from_master]
   [../]
-  [./u_elemental]
+  [./elemental_from_master]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./x_elemental]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./x_nodal]
   [../]
 []
 
 [Kernels]
   [./diff]
     type = Diffusion
-    variable = v
+    variable = u
+  [../]
+  [./td]
+    type = TimeDerivative
+    variable = u
   [../]
 []
 
 [BCs]
   [./left]
     type = DirichletBC
-    variable = v
+    variable = u
     boundary = left
     value = 0
   [../]
   [./right]
     type = DirichletBC
-    variable = v
+    variable = u
     boundary = right
     value = 1
   [../]
@@ -53,17 +47,15 @@
 
 [Executioner]
   type = Transient
-  num_steps = 1
-  dt = 1
-
-  solve_type = 'NEWTON'
+  num_steps = 2
+  dt = 0.01
+  solve_type = NEWTON
 []
 
 [Outputs]
   output_initial = true
+  exodus = true
+  #print_linear_residuals = true
   print_perf_log = true
-  [./out]
-    type = Exodus
-    elemental_as_nodal = true
-  [../]
 []
+
