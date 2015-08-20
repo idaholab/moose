@@ -310,11 +310,16 @@ void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDd
 double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
   // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
   //double up   = discretizations[0];
-  double down = discretizations[discretizations.size()-1];
+  
+  //double down = discretizations[discretizations.size()-1];
+  int down=0;
 
-  for(unsigned int n=0; n<discretizations.size(); n++)
-   if (x>discretizations[n])
-    down = n;
+  for(unsigned int n=0; n<discretizations.size(); n++){
+    if (x>discretizations.at(n)){
+      down = n;
+      break;
+    }
+  }
 
   //up is never used
   //for(int n=discretizations.size(); n<0; n--)
@@ -323,7 +328,10 @@ double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
 
   // Node re-scaling - linear type
   //double scaled_x = down + (x-discretizations[down])/(discretizations[up]-discretizations[down]);
-  double scaled_x = down + (x-discretizations[(int)down])/(discretizations[(int)down+1]-discretizations[(int)down]);
+  
+  //double scaled_x = down + (x-discretizations[(int)down])/(discretizations[(int)down+1]-discretizations[(int)down]);
+  
+  double scaled_x = (double)down + (x-discretizations[down])/(discretizations[down+1]-discretizations[down]);
 
   double a = 0.0;
   double h = 1.0;
@@ -495,7 +503,7 @@ double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
 	//double value = PHI((scaled_x-a)/h - (k-2.0));
 
 	double value = PHI((scaled_x-a)/h - (k-2.0)) * (discretizations[1]-discretizations[0]);
-
+  
 	return value;
 }
 
