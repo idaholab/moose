@@ -202,13 +202,15 @@ MultiAppNearestNodeTransfer::execute()
   ////////////////////
 
   std::vector<std::vector<Real> > incoming_evals(n_processors());
+  std::vector<Parallel::Request> send_qps(n_processors());
+  std::vector<Parallel::Request> send_evals(n_processors());
   if (! _neighbors_cached)
   {
     for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
     {
       if (i_proc == processor_id())
         continue;
-      _communicator.send(i_proc, outgoing_qps[i_proc]);
+      _communicator.send(i_proc, outgoing_qps[i_proc], send_qps[i_proc]);
     }
 
     // Build an array of pointers to all of this processor's local nodes.  We
@@ -276,13 +278,9 @@ MultiAppNearestNodeTransfer::execute()
       }
 
       if (i_proc == processor_id())
-      {
         incoming_evals[i_proc] = outgoing_evals;
-      }
       else
-      {
-        _communicator.send(i_proc, outgoing_evals);
-      }
+        _communicator.send(i_proc, outgoing_evals, send_evals[i_proc]);
     }
   }
 
@@ -301,13 +299,9 @@ MultiAppNearestNodeTransfer::execute()
       }
 
       if (i_proc == processor_id())
-      {
         incoming_evals[i_proc] = outgoing_evals;
-      }
       else
-      {
-        _communicator.send(i_proc, outgoing_evals);
-      }
+        _communicator.send(i_proc, outgoing_evals, send_evals[i_proc]);
     }
   }
 
@@ -445,6 +439,15 @@ MultiAppNearestNodeTransfer::execute()
 
   if (_fixed_meshes)
     _neighbors_cached = true;
+
+  // Make sure all our sends succeeded.
+  for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
+  {
+    if (i_proc == processor_id())
+      continue;
+    send_qps[i_proc].wait();
+    send_evals[i_proc].wait();
+  }
 
   _console << "Finished NearestNodeTransfer " << name() << std::endl;
 }
