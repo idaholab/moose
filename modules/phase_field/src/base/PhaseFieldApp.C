@@ -45,6 +45,7 @@
 #include "SplitCHMath.h"
 #include "SplitCHParsed.h"
 #include "SplitCHWRes.h"
+#include "SplitCHWResAniso.h"
 #include "SwitchingFunctionConstraintEta.h"
 #include "SwitchingFunctionConstraintLagrange.h"
 #include "SwitchingFunctionPenalty.h"
@@ -247,6 +248,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SplitCHMath);
   registerKernel(SplitCHParsed);
   registerKernel(SplitCHWRes);
+  registerKernel(SplitCHWResAniso);
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);

@@ -4,17 +4,17 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "SplitCHWRes.h"
+#include "SplitCHWResAniso.h"
 
 template<>
-InputParameters validParams<SplitCHWRes>()
+InputParameters validParams<SplitCHWResAniso>()
 {
-  InputParameters params = SplitCHWResBase<Real>::validParams();
-  params.addClassDescription("Split formulation Cahn-Hilliard Kernel for the chemical potential variable with a scalar (isotropic) mobility");
+  InputParameters params = SplitCHWResBase<RealTensorValue>::validParams();
+  params.addClassDescription("Split formulation Cahn-Hilliard Kernel for the chemical potential variable with a tensor (anisotropic) mobility");
   return params;
 }
 
-SplitCHWRes::SplitCHWRes(const InputParameters & parameters) :
-    SplitCHWResBase<Real>(parameters)
+SplitCHWResAniso::SplitCHWResAniso(const InputParameters & parameters) :
+    SplitCHWResBase<RealTensorValue>(parameters)
 {
 }
