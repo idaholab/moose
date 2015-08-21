@@ -790,6 +790,7 @@ addActionTypes(Syntax & syntax)
   registerTask("add_aux_variable", false);
   registerTask("add_variable", false);
 
+  registerTask("execute_mesh_modifiers", false);
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
   registerTask("setup_mesh_complete", false);  // calls prepare
@@ -850,6 +851,7 @@ addActionTypes(Syntax & syntax)
 "(prepare_mesh)"
 "(add_mesh_modifier)"
 "(add_mortar_interface)"
+"(execute_mesh_modifiers)"
 "(uniform_refine_mesh)"
 "(setup_mesh_complete)"
 "(determine_system_type)"
@@ -933,6 +935,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupMeshCompleteAction, "prepare_mesh");
   registerAction(AddMeshModifierAction, "add_mesh_modifier");
   registerAction(AddMortarInterfaceAction, "add_mortar_interface");
+  registerAction(SetupMeshCompleteAction, "execute_mesh_modifiers");
   registerAction(SetupMeshCompleteAction, "uniform_refine_mesh");
   registerAction(SetupMeshCompleteAction, "setup_mesh_complete");
 

@@ -41,25 +41,5 @@ AddMeshModifierAction::act()
   // as is the case for SideSetAroundSubdomain
   _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh.get();
 
-  // Create the modifier object and run it
-  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create(_type, _name, _moose_object_pars));
-  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
-
-  // Run the modifier on the normal mesh
-  mesh_modifier->setMeshPointer(_mesh.get());
-  mesh_modifier->modify();
-
-  // We'll need to prepare again!
-  _mesh->prepared(false);
-
-  // Run the modifier on the displaced mesh
-  if (_displaced_mesh)
-  {
-    mesh_modifier->setMeshPointer(_displaced_mesh.get());
-    mesh_modifier->modify();
-    _displaced_mesh->prepared(false);
-  }
-
-  // mesh_modifier is deleted here
+  _app.addMeshModifier(_type, _name, _moose_object_pars);
 }
-

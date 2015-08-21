@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<MeshModifier>()
 {
   InputParameters params = validParams<MooseObject>();
+  params.addParam<std::vector<std::string> >("depends_on", "The MeshModifiers that this modifier relies upon (i.e. must execute before this one)");
 
   params.registerBase("MeshModifier");
 
@@ -27,11 +28,11 @@ InputParameters validParams<MeshModifier>()
 MeshModifier::MeshModifier(const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "MeshModifiers"),
-    _mesh_ptr(NULL)
+    _mesh_ptr(NULL),
+    _depends_on(getParam<std::vector<std::string> >("depends_on"))
 {
 }
 
 MeshModifier::~MeshModifier()
 {
 }
-

@@ -25,6 +25,9 @@
 #include "CommandLine.h"
 #include "InfixIterator.h"
 #include "MultiApp.h"
+#include "MeshModifier.h"
+#include "DependencyResolver.h"
+#include "MooseUtils.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -435,6 +438,7 @@ MooseApp::meshOnly(std::string mesh_file_name)
   _action_warehouse.executeActionsWithAction("setup_mesh");
   _action_warehouse.executeActionsWithAction("prepare_mesh");
   _action_warehouse.executeActionsWithAction("add_mesh_modifier");
+  _action_warehouse.executeActionsWithAction("execute_mesh_modifiers");
   _action_warehouse.executeActionsWithAction("uniform_refine_mesh");
   _action_warehouse.executeActionsWithAction("setup_mesh_complete");
 
@@ -824,4 +828,66 @@ std::string
 MooseApp::header() const
 {
   return std::string("");
+}
+
+void
+MooseApp::addMeshModifier(const std::string & modifier_name, const std::string & name, InputParameters parameters)
+{
+  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create(modifier_name, name, parameters));
+
+  _mesh_modifiers.insert(std::make_pair(MooseUtils::shortName(name), mesh_modifier));
+}
+
+void
+MooseApp::executeMeshModifiers()
+{
+  DependencyResolver<MooseSharedPointer<MeshModifier> > resolver;
+
+  // Add all of the dependencies into the resolver and sort them
+  for (std::map<std::string, MooseSharedPointer<MeshModifier> >::const_iterator it = _mesh_modifiers.begin(); it != _mesh_modifiers.end(); ++it)
+  {
+    // Make sure an item with no dependencies comes out too!
+    resolver.addItem(it->second);
+
+    std::vector<std::string> & modifiers = it->second->getDependencies();
+    for (std::vector<std::string>::const_iterator depend_name_it = modifiers.begin(); depend_name_it != modifiers.end(); ++depend_name_it)
+    {
+      std::map<std::string, MooseSharedPointer<MeshModifier> >::const_iterator depend_it = _mesh_modifiers.find(*depend_name_it);
+
+      if (depend_it == _mesh_modifiers.end())
+        mooseError("The MeshModifier \"" << *depend_name_it << "\" was not created, did you make a spelling mistake or forget to include it in your input file?");
+
+      resolver.insertDependency(it->second, depend_it->second);
+    }
+  }
+
+  const std::vector<MooseSharedPointer<MeshModifier> > & ordered_modifiers = resolver.getSortedValues();
+
+  if (ordered_modifiers.size())
+  {
+    MooseMesh * mesh = _action_warehouse.mesh().get();
+    MooseMesh * displaced_mesh = _action_warehouse.displacedMesh().get();
+
+    // Run the MeshModifiers in the proper order
+    for (std::vector<MooseSharedPointer<MeshModifier> >::const_iterator it = ordered_modifiers.begin(); it != ordered_modifiers.end(); ++it)
+    {
+      MeshModifier * modifier_ptr = it->get();
+
+      modifier_ptr->setMeshPointer(mesh);
+      modifier_ptr->modify();
+
+      if (displaced_mesh)
+      {
+        modifier_ptr->setMeshPointer(displaced_mesh);
+        modifier_ptr->modify();
+      }
+    }
+
+    mesh->prepared(false);
+    if (displaced_mesh)
+      displaced_mesh->prepared(false);
+  }
+
+  // Clear the modifiers, they are not used again during the simulation
+  _mesh_modifiers.clear();
 }
