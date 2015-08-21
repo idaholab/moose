@@ -59,8 +59,13 @@ public:
    */
   virtual void modify() = 0;
 
+  std::vector<std::string> & getDependencies() { return _depends_on; }
+
 protected:
   MooseMesh *_mesh_ptr;
+
+private:
+  std::vector<std::string> _depends_on;
 };
 
 #endif //MESHMODIFIER_H

@@ -661,14 +661,6 @@ public:
    */
   void allowRecovery(bool allow) { _allow_recovery = allow; }
 
-  /**
-   * Add surface
-   * @param name The name of the surface
-   * @param bnd_id Boundary ID in the existing mesh this surface mesh will be created from
-   * @param domain_id New domain ID assigned to the surface mesh
-   */
-  void addSurface(const std::string & name, BoundaryID bnd_id, SubdomainID domain_id);
-
   class MortarInterface
   {
   public:
