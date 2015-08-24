@@ -39,3 +39,11 @@ XFEMCutElem::get_mf_weights(unsigned int i_qp) const
 {
   return _new_weights[i_qp];
 }
+
+//WJ
+void XFEMCutElem::set_gauss_points_and_weights(std::vector<Point> &gauss_points, std::vector<Real> &gauss_weights)
+{
+  _g_points = gauss_points;
+  _g_weights = gauss_weights;
+}
+

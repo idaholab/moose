@@ -48,6 +48,7 @@ private:
   void partial_gauss(unsigned int nen, std::vector<std::vector<Real> > &tsg);
   void solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &elem_nodes,
                 std::vector<std::vector<Real> > &tsg, std::vector<std::vector<Real> > &wsg);
+
 };
 
 #endif

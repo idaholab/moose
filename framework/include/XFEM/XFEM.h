@@ -94,7 +94,7 @@ public:
    * Get the volume fraction of an element that is physical
    */
   Real get_elem_phys_volfrac(const Elem* elem) const;
-  Real get_elem_new_weights(const Elem* elem, unsigned int i_qp) const; // ZZY
+  Real get_elem_new_weights(const Elem* elem, unsigned int i_qp, std::vector<Point> &g_points, std::vector<Real> &g_weights) const; // ZZY WJ
   Real flag_qp_inside(const Elem* elem, const Point & p) const; // ZZY code
 
   /**

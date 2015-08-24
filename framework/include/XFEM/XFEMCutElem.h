@@ -45,6 +45,8 @@ protected:
   unsigned int _n_nodes;
   unsigned int _n_qpoints;
   std::vector<Node*> _nodes;
+  std::vector<Point> _g_points; 
+  std::vector<Real> _g_weights;
   Real _elem_volume;
   Real _physical_volfrac;
   std::vector<Real> _new_weights; // quadrature weights from moment fitting
@@ -52,6 +54,7 @@ protected:
 
 public:
 
+  void set_gauss_points_and_weights(std::vector<Point> &gauss_points, std::vector<Real> &gauss_weights); //WJ
   virtual void calc_physical_volfrac() = 0;
   Real get_physical_volfrac() const;
   virtual void calc_mf_weights() = 0; // ZZY
@@ -62,5 +65,4 @@ public:
   virtual const EFAelement * get_efa_elem() const = 0;
   virtual unsigned int num_cut_planes() const = 0;
 };
-
 #endif

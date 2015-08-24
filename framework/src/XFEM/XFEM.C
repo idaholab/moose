@@ -883,24 +883,30 @@ XFEM::get_elem_phys_volfrac(const Elem* elem) const
   it = _cut_elem_map.find(elem);
   if (it != _cut_elem_map.end())
   {
-    const XFEMCutElem *xfce = it->second;
+    //const XFEMCutElem *xfce = it->second;
+    XFEMCutElem *xfce = it->second; //WJ
     const EFAelement* EFAelem = xfce->get_efa_elem();
-    if (EFAelem->is_partial()) // exclude the full crack tip elements
+    if (EFAelem->is_partial()){ // exclude the full crack tip elements
+      xfce->calc_physical_volfrac(); //WJ
       phys_volfrac = xfce->get_physical_volfrac();
+    }
   }
 
   return phys_volfrac;
 }
 
 Real
-XFEM::get_elem_new_weights(const Elem* elem, unsigned int i_qp) const // ZZY
+XFEM::get_elem_new_weights(const Elem* elem, unsigned int i_qp, std::vector<Point> &g_points, std::vector<Real> &g_weights) const // ZZY
 {
   Real qp_weight = 1.0;
   std::map<const Elem*, XFEMCutElem*>::const_iterator it;
   it = _cut_elem_map.find(elem);
   if (it != _cut_elem_map.end())
   {
-    const XFEMCutElem *xfce = it->second;
+    //const XFEMCutElem *xfce = it->second;
+    XFEMCutElem *xfce = it->second; //WJ
+    xfce->set_gauss_points_and_weights(g_points,g_weights);
+    xfce->calc_mf_weights(); //WJ
     qp_weight = xfce->get_mf_weights(i_qp);
   }
   return qp_weight;
@@ -915,7 +921,8 @@ XFEM::flag_qp_inside(const Elem* elem, const Point & p) const
   it = _cut_elem_map.find(elem);
   if (it != _cut_elem_map.end())
   {
-    const XFEMCutElem *xfce = it->second;
+    //const XFEMCutElem *xfce = it->second;
+    XFEMCutElem *xfce = it->second;
     unsigned int n_cut_planes = xfce->num_cut_planes();
     for (unsigned int plane_id = 0; plane_id < n_cut_planes; ++plane_id)
     {

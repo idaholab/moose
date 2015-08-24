@@ -15,15 +15,15 @@
 #include <cstdlib> // *must* precede <cmath> for proper std:abs() on PGI, Sun Studio CC
 #include <cmath> // for isnan(), when it's defined
 #include "XFEMCutElem2D.h"
-#include "XFEMLightSolver.h"
 #include "XFEMIntegrationFuncs.h"
+#include "petscblaslapack.h"
 
 XFEMCutElem2D::XFEMCutElem2D(Elem* elem, const EFAelement2D * const CEMelem, unsigned int n_qpoints):
   XFEMCutElem(elem, n_qpoints),
   _efa_elem2d(CEMelem, true)
 {
   calc_physical_volfrac();
-  calc_mf_weights();
+//  calc_mf_weights();
 }
 
 XFEMCutElem2D::~XFEMCutElem2D()
@@ -32,8 +32,7 @@ XFEMCutElem2D::~XFEMCutElem2D()
 
 Point
 XFEMCutElem2D::get_node_coords(EFAnode* CEMnode, MeshBase* displaced_mesh) const
-{
-  Point node_coor(0.0,0.0,0.0);
+{ Point node_coor(0.0,0.0,0.0);
   std::vector<EFAnode*> master_nodes;
   std::vector<Point> master_points;
   std::vector<double> master_weights;
@@ -218,7 +217,7 @@ XFEMCutElem2D::partial_gauss(unsigned int nen, std::vector<std::vector<Real> > &
   {
     std::vector<std::vector<Real> > sg2;
     std::vector<std::vector<Real> > shape(nnd_pe,std::vector<Real>(3,0.0));
-    stdQuadr2D(nnd_pe, 2, sg2); // get sg2
+    stdQuadr2D(nnd_pe, 2, sg2); // 
     for (unsigned int l = 0; l < sg2.size(); ++l)
     {
       shapeFunc2D(nnd_pe, sg2[l], frag_points, shape, jac, true); // Get shape
@@ -268,48 +267,46 @@ XFEMCutElem2D::partial_gauss(unsigned int nen, std::vector<std::vector<Real> > &
 }
 
 void
-XFEMCutElem2D::solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &elem_nodes,
-                        std::vector<std::vector<Real> > &tsg, std::vector<std::vector<Real> > &wsg) // ZZY
+XFEMCutElem2D::solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &elem_nodes, std::vector<std::vector<Real> > &tsg, std::vector<std::vector<Real> > &wsg) // WJ
 {
   // Get physical coords for the new six-point rule
   std::vector<std::vector<Real> > shape(nen,std::vector<Real>(3,0.0));
   std::vector<std::vector<Real> > wss;
 
-  if (nen == 4) // 2D quad element
-  {
-    if (nqp == 1)
-      stdQuadr2D(nen, 1, wss); // 1-pt
-    else if (nqp == 4)
-      stdQuadr2D(nen, 2, wss); // 4-pts
-    else if (nqp == 6)
-      wissmannPoints(nqp, wss); // 6-pts
-    else
-      mooseError("Invalid number of Q-points for 2D quad element!");
-  }
-  else if (nen == 3) // 2D triangle element
-  {
-    if (nqp == 1)
-      stdQuadr2D(nen, 1, wss); // 1-pt
-    else if (nqp == 3)
-      stdQuadr2D(nen, 2, wss); // 3-pts
-    else if (nqp == 4)
-      stdQuadr2D(nen, 3, wss); // 4-pts
-    else if (nqp == 6)
-      stdQuadr2D(nen, 4, wss); // 6-pts
-    else
-      mooseError("Invalid number of Q-points for 2D triangle element!");
-  }
-  else
-    mooseError("Invalid element!");
+  if(nen == 4){
+    wss.resize(_g_points.size());
+    for(unsigned int i = 0; i < _g_points.size(); i ++){
+      wss[i].resize(3);
+      wss[i][0] = _g_points[i](0);
+      wss[i][1] = _g_points[i](1);
+      wss[i][2] = _g_weights[i];
+    }
+  }else if(nen == 3){
+    wss.resize(_g_points.size());
+    for(unsigned int i = 0; i < _g_points.size(); i ++){
+      wss[i].resize(4);
+      wss[i][0] = _g_points[i](0);
+      wss[i][1] = _g_points[i](1);
+      wss[i][2] = _g_points[i](2);
+      wss[i][3] = _g_weights[i];
+    }
+  }else
+    mooseError("Invalid element");
 
   wsg.resize(wss.size());
   for (unsigned int i = 0; i < wsg.size(); ++i) wsg[i].resize(3,0.0);
   Real jac = 0.0;
+  std::vector<Real> old_weights(wss.size(),0.0);
 
   for (unsigned int l = 0; l < wsg.size(); ++l)
   {
     shapeFunc2D(nen, wss[l], elem_nodes, shape, jac, true); // Get shape
-    wss[l][2] *= jac; // weights for total element
+    if (nen == 4) // 2D quad elem
+      old_weights[l] = wss[l][2]*jac; // weights for total element
+    else if (nen == 3) // 2D triangle elem
+      old_weights[l] = wss[l][3]*jac;
+    else
+      mooseError("Invalid element!");    
     for (unsigned int k = 0; k < nen; ++k) // physical coords of Q-pts
     {
       wsg[l][0] += shape[k][2]*elem_nodes[k](0);
@@ -318,17 +315,18 @@ XFEMCutElem2D::solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &
   }
 
   // Compute weights via moment fitting
-  Real **A;
-  A = openMatrix(wsg.size(), wsg.size());
-  for (unsigned int i = 0; i < wsg.size(); ++i)
-  {
-    A[0][i] = 1.0; // const
-    if (nqp > 1) A[1][i] = wsg[i][0]; // x
-    if (nqp > 2) A[2][i] = wsg[i][1]; // y
-    if (nqp > 3) A[3][i] = wsg[i][0]*wsg[i][1]; // x*y
-    if (nqp > 4) A[4][i] = wsg[i][0]*wsg[i][0]; // x^2
-    if (nqp > 5) A[5][i] = wsg[i][1]*wsg[i][1]; // y^2
+  Real *A;
+  A = new Real[wsg.size()*wsg.size()];
+  unsigned ind = 0;
+  for (unsigned int i = 0; i < wsg.size(); ++i){
+     A[ind] = 1.0; // const
+    if (nqp > 1) A[1+ind] = wsg[i][0]; // x
+    if (nqp > 2) A[2+ind] = wsg[i][1]; // y
+    if (nqp > 3) A[3+ind] = wsg[i][0]*wsg[i][1]; // x*y
+    if (nqp > 4) A[4+ind] = wsg[i][0]*wsg[i][0]; // x^2
+    if (nqp > 5) A[5+ind] = wsg[i][1]*wsg[i][1]; // y^2
     if (nqp > 6) mooseError("Q-points of more than 6 are not allowed now!");
+    ind = ind+nqp;
   }
 
   Real *b;
@@ -346,11 +344,17 @@ XFEMCutElem2D::solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &
     if (nqp > 6) mooseError("Q-points of more than 6 are not allowed now!");
   }
 
-  solveLinearSystLU(A, b, wsg.size());
+  int nrhs = 1;
+  int info;
+  int n = wsg.size();
+  std::vector<int> ipiv(n);
+ 
+  LAPACKgesv_(&n, &nrhs, A, &n, &ipiv[0], b, &n, &info );
+
   for (unsigned int i = 0; i < wsg.size(); ++i)
-    wsg[i][2] = b[i]/wss[i][2]; // get the multiplier
+    wsg[i][2] = b[i]/old_weights[i]; // get the multiplier
 
   // delete arrays
-  deleteMatrix(A,wsg.size());
+  delete[] A;
   delete[] b;
 }

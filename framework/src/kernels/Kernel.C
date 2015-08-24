@@ -166,8 +166,15 @@ Kernel::get_xfem_weights(std::vector<Real> & _xfem_weights)
   {
     if (_xfem_qrule == "volfrac")
       _xfem_weights[_qp] = xfem->get_elem_phys_volfrac(undisplaced_elem);
-    else if (_xfem_qrule == "moment_fitting")
-      _xfem_weights[_qp] = xfem->get_elem_new_weights(undisplaced_elem, _qp);
+    else if (_xfem_qrule == "moment_fitting"){
+      std::vector<Point> gauss_points = _qrule->get_points();
+      std::vector<Real>  gauss_weights = _qrule->get_weights();
+      _xfem_weights[_qp] = xfem->get_elem_new_weights(undisplaced_elem, _qp, gauss_points, gauss_weights);
+      //std::vector<Point> test_points = _qrule->get_points();
+      //for(int i = 0; i < test_points.size(); i++){
+      //  std::cout << "[" << i << "] point = " << test_points[i] << std::endl;
+      //}
+    }
     else if (_xfem_qrule == "direct") // remove q-points outside the elem real domain by force
       _xfem_weights[_qp] = xfem->flag_qp_inside(undisplaced_elem, _q_point[_qp]);
     else
