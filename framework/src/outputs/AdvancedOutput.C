@@ -503,12 +503,7 @@ AdvancedOutput<T>::initExecutionTypes(const std::string & name, MultiMooseEnum &
 
   // The parameters exists and has been set by the user
   if (T::_pars.template have_parameter<MultiMooseEnum>(param_name) && T::isParamValid(param_name))
-  {
     input = T::template getParam<MultiMooseEnum>(param_name);
-
-    if (name != "system_information" && name != "input")
-      T::applyOutputOnShortCutFlags(input);
-  }
 
   // If the parameter does not exists; set it to a state where no valid entries exists so nothing gets executed
   else if (!T::_pars. template have_parameter<MultiMooseEnum>(param_name))
