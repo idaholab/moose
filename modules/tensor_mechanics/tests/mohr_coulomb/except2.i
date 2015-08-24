@@ -221,7 +221,6 @@
 
 [Outputs]
   file_base = except2
-  output_initial = true
   exodus = false
   print_linear_residuals = true
   print_perf_log = true

@@ -167,7 +167,6 @@
 
 [Outputs]
   file_base = rot_eg1
-  output_initial = true
   solution_history = true
   print_linear_residuals = true
   print_perf_log = true

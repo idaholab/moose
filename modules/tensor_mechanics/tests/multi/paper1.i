@@ -288,6 +288,7 @@
 
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = paper1
   exodus = false
   output_on = 'initial timestep_end'

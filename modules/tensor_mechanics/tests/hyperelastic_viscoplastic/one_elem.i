@@ -183,7 +183,6 @@
 
 [Outputs]
   file_base = one_elem
-  output_initial = true
   exodus = true
   csv = false
   print_linear_residuals = true
