@@ -40,6 +40,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   [./exodus]
     type = Exodus
     refinements = 1

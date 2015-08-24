@@ -96,7 +96,7 @@
   file_base = out
   exodus = true
   output_on = 'initial timestep_end'
-  # debugging output_on options: output_initial = true
+  # debugging output_on options:
   [./console]
     type = Console
     perf_log = true

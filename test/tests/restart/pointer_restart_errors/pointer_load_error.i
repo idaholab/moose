@@ -52,7 +52,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   checkpoint = true
   print_linear_residuals = true

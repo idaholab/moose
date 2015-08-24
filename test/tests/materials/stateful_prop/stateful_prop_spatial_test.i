@@ -74,7 +74,6 @@
 
 [Outputs]
   file_base = out_spatial
-  output_initial = true
   print_perf_log = true
   [./out]
     type = Exodus

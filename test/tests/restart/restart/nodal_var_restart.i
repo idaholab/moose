@@ -94,6 +94,5 @@
 
 [Outputs]
   file_base = out_nodal_var_restart
-  output_initial = true
   exodus = true
 []

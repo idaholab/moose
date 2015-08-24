@@ -40,7 +40,6 @@
 []
 
 [Outputs]
-  output_initial = true
   [./out]
     type = Tecplot
     ascii_append = true

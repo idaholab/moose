@@ -130,7 +130,6 @@
 
 [Outputs]
   file_base = pps_out_interval
-  output_initial = true
   interval = 2
   exodus = true
   print_linear_residuals = true

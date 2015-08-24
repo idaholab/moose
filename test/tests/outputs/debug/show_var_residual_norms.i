@@ -206,6 +206,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   print_perf_log = true
   [./debug]
     type = VariableResidualNormsDebugOutput

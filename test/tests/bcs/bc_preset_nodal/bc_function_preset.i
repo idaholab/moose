@@ -66,7 +66,6 @@
 
 [Outputs]
   file_base = bc_func_out
-  output_initial = true
   exodus = true
   print_linear_residuals = true
   print_perf_log = true

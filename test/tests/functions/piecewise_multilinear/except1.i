@@ -50,6 +50,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = except1
   hide = dummy
   csv = true

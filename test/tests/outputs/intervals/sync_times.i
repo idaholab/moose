@@ -49,6 +49,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   [./out]
     type = Exodus
     sync_times = '0.15 0.375 0.892'

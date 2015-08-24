@@ -71,6 +71,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out_vars
   exodus = true
   [./console]

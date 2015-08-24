@@ -127,6 +127,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = pps_out
   print_perf_log = true
   [./exodus]

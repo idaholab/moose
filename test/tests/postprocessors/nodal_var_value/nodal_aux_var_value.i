@@ -115,6 +115,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out_nodal_aux_var_value
   exodus = true
   [./console]

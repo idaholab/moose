@@ -48,7 +48,6 @@
 []
 
 [Outputs]
-  output_initial = true
   file_base = recover_out
   exodus = true
   print_perf_log = true

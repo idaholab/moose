@@ -69,6 +69,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = time
   hide = dummy
   csv = true

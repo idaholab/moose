@@ -94,6 +94,7 @@
 
 ##! [MultipleOutputBlocks]
 [Outputs]
+  output_on = 'timestep_end'
   [./out]
     type = Exodus
     hide = 'u v aux0 aux1'

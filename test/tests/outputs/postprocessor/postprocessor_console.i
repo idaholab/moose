@@ -70,6 +70,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   csv = true
   print_perf_log = true
   print_linear_residuals = true

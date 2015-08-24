@@ -58,6 +58,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out_tio
   interval = 3
   csv = true

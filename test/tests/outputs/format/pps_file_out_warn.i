@@ -61,6 +61,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   gmv = true
   print_perf_log = true
 []

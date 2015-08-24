@@ -51,6 +51,7 @@
 
 
 [Outputs]
+  output_on = 'timestep_end'
   [./screen]
     type = Console
     verbose = true

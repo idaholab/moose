@@ -48,6 +48,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   [./exodus]
     type = Exodus
     output_on = none

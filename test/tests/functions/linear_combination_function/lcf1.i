@@ -84,9 +84,9 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = lcf1
   hide = dummy
-  output_initial = false
   exodus = false
   csv = true
   print_perf_log = true

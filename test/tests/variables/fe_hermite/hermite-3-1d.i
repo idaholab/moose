@@ -103,6 +103,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   exodus = true
   csv = true
   [./console]

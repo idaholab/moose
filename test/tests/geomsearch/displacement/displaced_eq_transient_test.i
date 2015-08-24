@@ -92,7 +92,6 @@
 []
 
 [Outputs]
-  output_initial = true
   [./out_displaced]
     type = Exodus
     use_displaced = true

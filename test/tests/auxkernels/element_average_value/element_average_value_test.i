@@ -65,7 +65,6 @@
   exodus = true
   csv = true
   file_base = out
-  output_initial = true
   interval = 1
   print_perf_log = true
 []

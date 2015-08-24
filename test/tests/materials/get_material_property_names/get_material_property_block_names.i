@@ -75,6 +75,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   exodus = true
   output_on = 'initial timestep_end'
   [./console]

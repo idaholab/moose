@@ -69,7 +69,6 @@
 
 [Outputs]
   file_base = computing_initial_residual_test_out
-  output_initial = true
   print_perf_log = true
   [./out]
     type = Exodus

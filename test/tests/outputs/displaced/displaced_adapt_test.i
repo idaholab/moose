@@ -124,6 +124,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   [./out]
     type = Exodus
     use_displaced = true
