@@ -522,6 +522,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   interval = 1
   exodus = true
   output_on = 'timestep_end'

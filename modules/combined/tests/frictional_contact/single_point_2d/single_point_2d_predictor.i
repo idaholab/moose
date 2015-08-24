@@ -209,7 +209,6 @@
 
 [Outputs]
   file_base = single_point_2d_predictor_out
-  output_initial = true
   exodus = true
   print_linear_residuals = true
   print_perf_log = true

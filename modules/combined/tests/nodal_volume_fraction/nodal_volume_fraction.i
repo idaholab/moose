@@ -65,6 +65,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = nodal_volume_fraction
   exodus = true
   [./console]

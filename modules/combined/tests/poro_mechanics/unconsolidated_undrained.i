@@ -291,6 +291,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = unconsolidated_undrained
   print_perf_log = true
   [./csv]

@@ -109,7 +109,6 @@
 [] # Executioner
 
 [Outputs]
-  output_initial = true
   exodus = true
   hide = 'tcx tcy tcz'
   print_linear_residuals = true

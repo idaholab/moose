@@ -242,7 +242,6 @@
 
 [Outputs]
   file_base = out_jac_rz_smp
-  output_initial = true
   print_linear_residuals = true
   print_perf_log = true
   [./exodus]

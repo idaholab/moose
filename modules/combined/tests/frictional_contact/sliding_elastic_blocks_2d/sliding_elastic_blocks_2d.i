@@ -201,7 +201,6 @@
 
 [Outputs]
   file_base = sliding_elastic_blocks_2d_out
-  output_initial = true
   print_linear_residuals = true
   print_perf_log = true
   [./exodus]
