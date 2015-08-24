@@ -89,7 +89,6 @@
   [./screen]
     type = Console
     fit_mode = 100
-    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []
 

@@ -298,9 +298,6 @@
 [Outputs]
   file_base = one_element_b_0_3025_g_0_6_cubic_out
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_linear = true
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

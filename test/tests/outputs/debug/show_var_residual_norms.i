@@ -208,7 +208,7 @@
 [Outputs]
   output_on = 'timestep_end'
   print_perf_log = true
-  [./debug]
+  [./debug] # This is a test, use the [Debug] block to enable this
     type = VariableResidualNormsDebugOutput
   [../]
 []

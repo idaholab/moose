@@ -72,11 +72,8 @@
 []
 
 [Outputs]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'initial linear nonlinear timestep_end failed'
-  [../]
+  print_perf_log = true
+  print_linear_residuals = true
   [./markers]
     type = Exodus
   [../]

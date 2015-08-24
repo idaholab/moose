@@ -94,11 +94,6 @@
 [Outputs]
   output_on = 'timestep_end'
   file_base = ne_deficient_b
-  interval = 1
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'failed nonlinear linear timestep_end'
-  [../]
+  print_perf_log = true
 []

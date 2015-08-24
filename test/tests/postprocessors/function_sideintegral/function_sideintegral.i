@@ -85,6 +85,5 @@
   print_perf_log = true
   [./csv]
     type = CSV
-    interval = 1
   [../]
 []

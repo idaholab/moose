@@ -29,12 +29,9 @@
 
 [Outputs]
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'initial failed linear nonlinear timestep_end'
-  [../]
-  [./debug]
+  print_perf_log = true
+  print_linear_residuals = true
+  [./debug] # This is only test, use [Debug] block to enable this
     type = TopResidualDebugOutput
     num_residuals = 1
   [../]

@@ -49,9 +49,6 @@
     type = Exodus
     refinements = 1
   [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'initial failed timestep_end linear nonlinear'
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

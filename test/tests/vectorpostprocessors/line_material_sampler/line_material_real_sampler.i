@@ -84,15 +84,10 @@
 [Outputs]
   output_on = 'timestep_end'
   file_base = out
-  output_on = 'initial timestep_end'
   csv = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
   [../]
 []

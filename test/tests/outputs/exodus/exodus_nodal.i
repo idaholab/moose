@@ -92,7 +92,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-##! [MultipleOutputBlocks]
 [Outputs]
   output_on = 'timestep_end'
   [./out]
@@ -104,13 +103,9 @@
     output_scalars_on = none
     output_postprocessors_on = none
   [../]
-  [./screen]
-    type = Console
-    perf_log = true
-    output_on = 'failed nonlinear timestep_end'
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []
-##! [MultipleOutputBlocks]
 
 [ICs]
   [./aux0_IC]

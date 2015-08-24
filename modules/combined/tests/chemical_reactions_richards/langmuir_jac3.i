@@ -169,10 +169,6 @@
 [Outputs]
   output_on = 'timestep_end'
   file_base = langmuir_jac3
-  exodus = false
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'failed nonlinear linear timestep_end'
-  [../]
+  print_linear_residuals = true
+  print_perf_log = true
 []

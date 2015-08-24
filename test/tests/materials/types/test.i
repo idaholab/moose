@@ -243,14 +243,6 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
-  output_on = 'initial timestep_end'
-  [./out]
-    type = Exodus
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear'
-  [../]
+  print_perf_log = true
+  exodus = true
 []

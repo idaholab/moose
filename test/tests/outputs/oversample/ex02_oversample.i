@@ -52,11 +52,8 @@
 [Outputs]
   output_on = 'timestep_end'
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'failed nonlinear linear timestep_end'
-  [../]
+  print_perf_log = true
+  print_linear_residuals = true
   [./os2]
     type = Exodus
     refinements = 2

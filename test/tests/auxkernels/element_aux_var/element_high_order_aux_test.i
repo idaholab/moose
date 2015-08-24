@@ -96,12 +96,10 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
   print_perf_log = true
   [./ex_out]
     type = Exodus
     file_base = ho
     elemental_as_nodal = true
-    output_on = 'initial timestep_end'
   [../]
 []
