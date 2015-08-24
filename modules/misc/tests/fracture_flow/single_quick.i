@@ -80,7 +80,6 @@
 
 [Outputs]
   file_base = single_quick_out
-  output_initial = true
   output_final = true
   interval = 1000000
   exodus = true
