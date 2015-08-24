@@ -239,6 +239,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = bl22_lumped_fu
   print_perf_log = true
   [./exodus]

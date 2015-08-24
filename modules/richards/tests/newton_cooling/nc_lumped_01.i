@@ -127,8 +127,7 @@
 [Outputs]
   file_base = nc_lumped_01
   interval = 100000
-  output_initial = true
-  output_final = true
+  output_on = 'timestep_end final'
   exodus = true
   print_linear_residuals = true
   print_perf_log = true

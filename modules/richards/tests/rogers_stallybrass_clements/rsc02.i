@@ -196,8 +196,7 @@
 [Outputs]
   file_base = rsc02
   interval = 100000
-  output_initial = true
-  output_final = true
+  output_on = 'initial timestep_end final'
   exodus = true
   print_perf_log = true
 []

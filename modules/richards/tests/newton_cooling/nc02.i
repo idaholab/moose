@@ -134,6 +134,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = nc02
   exodus = true
   [./console]

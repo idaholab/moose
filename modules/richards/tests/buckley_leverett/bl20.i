@@ -239,8 +239,7 @@
 
 [Outputs]
   file_base = bl20
-  output_initial = true
-  output_final = true
+  output_on = 'initial timestep_end final'
   interval = 10000
   exodus = true
   hide = pgas

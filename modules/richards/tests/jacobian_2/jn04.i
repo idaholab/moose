@@ -156,6 +156,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = jn04
   exodus = false
   print_perf_log = true
