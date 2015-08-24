@@ -245,8 +245,8 @@
 
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = t_stress_ellip_crack_out
-  output_initial = false
   exodus = true
   print_linear_residuals = true
   print_perf_log = true

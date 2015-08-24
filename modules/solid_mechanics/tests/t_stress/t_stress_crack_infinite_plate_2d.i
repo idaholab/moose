@@ -201,7 +201,6 @@
 
 [Outputs]
   file_base = t_stress_crack_infinite_plate_out
-  output_initial = true
   exodus = true
   [./console]
     type = Console

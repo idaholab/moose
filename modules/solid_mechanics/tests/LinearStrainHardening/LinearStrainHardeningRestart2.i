@@ -189,7 +189,6 @@
 
 [Outputs]
   file_base = LinearStrainHardening_test_out
-  output_initial = true
   exodus = true
   csv = true
   print_linear_residuals = true
