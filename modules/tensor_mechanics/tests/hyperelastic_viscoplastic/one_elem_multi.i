@@ -214,7 +214,6 @@
 
 [Outputs]
   file_base = one_elem_multi
-  output_initial = true
   exodus = true
   csv = false
   print_linear_residuals = true

@@ -176,7 +176,6 @@
 
 [Outputs]
   file_base = large_deform3
-  output_initial = true
   exodus = false
   print_linear_residuals = true
   print_perf_log = true

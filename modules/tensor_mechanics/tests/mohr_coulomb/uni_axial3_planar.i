@@ -258,7 +258,6 @@
 
 [Outputs]
   file_base = uni_axial3_planar
-  output_initial = true
   print_linear_residuals = true
   print_perf_log = true
   [./exodus]

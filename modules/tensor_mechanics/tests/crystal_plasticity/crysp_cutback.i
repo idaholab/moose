@@ -213,7 +213,6 @@
 
 [Outputs]
   file_base = crysp_cutback_out
-  output_initial = true
   exodus = true
   csv = true
   gnuplot = true

@@ -331,7 +331,6 @@
 
 [Outputs]
   file_base = three_surface05
-  output_initial = true
   exodus = false
   print_linear_residuals = true
   print_perf_log = true

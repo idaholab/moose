@@ -147,14 +147,7 @@
 
 [Outputs]
   file_base = 2D-axisymmetric_rz_test_out
-  output_on = 'timestep_end'
-  output_initial = true
   exodus = true
   print_linear_residuals = true
   print_perf_log = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'initial timestep_end failed nonlinear'
-  [../]
 []

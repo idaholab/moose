@@ -290,7 +290,6 @@
 
 [Outputs]
   file_base = two_surface03
-  output_initial = true
   exodus = false
   print_linear_residuals = true
   print_perf_log = true
