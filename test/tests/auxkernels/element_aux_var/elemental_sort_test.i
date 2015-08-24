@@ -80,10 +80,8 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
   [./out]
     type = Exodus
     elemental_as_nodal = true
-    output_on = 'initial timestep_end'
   [../]
 []

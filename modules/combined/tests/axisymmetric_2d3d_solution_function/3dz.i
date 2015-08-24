@@ -215,7 +215,6 @@
 
 [Outputs]
   file_base = 3dz_out
-  interval = 1
   exodus = true
   print_linear_residuals = true
   [./console]

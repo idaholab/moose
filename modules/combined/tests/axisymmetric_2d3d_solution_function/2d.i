@@ -225,7 +225,6 @@
 
 [Outputs]
   file_base = 2d_out
-  interval = 1
   exodus = true
   print_linear_residuals = true
   [./console]

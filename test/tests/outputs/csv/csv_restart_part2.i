@@ -58,13 +58,10 @@
 
 [Outputs]
   output_on = 'timestep_end'
+  print_perf_log = true
+  print_linear_residuals = true
   [./csv]
     type = CSV
     file_base = csv_restart_part2_out
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []

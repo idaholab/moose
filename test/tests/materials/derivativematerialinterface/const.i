@@ -34,9 +34,5 @@
 
 [Outputs]
   exodus = true
-  [./console]
-    type = Console
-    perf_log = false
-    output_on = 'initial timestep_end failed nonlinear'
-  [../]
+  print_linear_residuals = true
 []

@@ -43,7 +43,6 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
   [./out]
     type = Exodus
     output_on = 'initial timestep_end failed nonlinear linear'

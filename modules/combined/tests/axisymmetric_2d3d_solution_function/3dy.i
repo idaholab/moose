@@ -207,7 +207,6 @@
 
 [Outputs]
   file_base = 3dy_out
-  interval = 1
   exodus = true
   print_linear_residuals = true
   [./console]

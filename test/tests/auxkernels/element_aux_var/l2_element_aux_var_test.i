@@ -119,13 +119,10 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
   print_perf_log = true
   [./ex_out]
     type = Exodus
     file_base = l2elemaux
     elemental_as_nodal = true
-    interval = 1
-    output_on = 'initial timestep_end'
   [../]
 []

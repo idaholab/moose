@@ -39,9 +39,7 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-##! [CommonExodusOutput]
 [Outputs]
   output_on = 'timestep_end'
   exodus = true
 []
-##! [CommonExodusOutput]

@@ -40,11 +40,9 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
   [./out]
     type = Exodus
     refinements = 2
     position = '1 1 0'
-    output_on = 'initial timestep_end'
   [../]
 []

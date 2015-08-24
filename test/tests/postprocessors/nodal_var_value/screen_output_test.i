@@ -131,10 +131,10 @@
 [Outputs]
   output_on = 'timestep_end'
   exodus = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./console]
     type = Console
-    perf_log = true
     max_rows = 2
-    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []
