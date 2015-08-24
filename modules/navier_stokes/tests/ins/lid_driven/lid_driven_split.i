@@ -260,7 +260,6 @@
 
 [Outputs]
   file_base = lid_driven_split_out
-  output_initial = true
   exodus = true
   print_linear_residuals = true
   print_perf_log = true
