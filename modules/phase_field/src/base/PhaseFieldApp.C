@@ -17,11 +17,12 @@
 #include "ACInterface.h"
 #include "ACMultiInterface.h"
 #include "ACParsed.h"
+#include "CahnHilliard.h"
+#include "CahnHilliardAniso.h"
 #include "CHBulkPFCTrad.h"
 #include "CHCpldPFCTrad.h"
 #include "CHInterface.h"
 #include "CHMath.h"
-#include "CHParsed.h"
 #include "CHPFCRFF.h"
 #include "CHSplitVar.h"
 #include "ConservedLangevinNoise.h"
@@ -221,11 +222,12 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACInterface);
   registerKernel(ACMultiInterface);
   registerKernel(ACParsed);
+  registerKernel(CahnHilliard);
+  registerKernel(CahnHilliardAniso);
   registerKernel(CHBulkPFCTrad);
   registerKernel(CHCpldPFCTrad);
   registerKernel(CHInterface);
   registerKernel(CHMath);
-  registerKernel(CHParsed);
   registerKernel(CHPFCRFF);
   registerKernel(CHSplitVar);
   registerKernel(ConservedLangevinNoise);
@@ -252,6 +254,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
+  registerDeprecatedObjectName(CahnHilliard, "CHParsed", "11/01/2015 00:00");
   registerDeprecatedObjectName(CoupledTimeDerivative, "CoupledImplicitEuler", "09/01/2015 00:00");
 
   registerInitialCondition(ClosePackIC);
