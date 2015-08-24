@@ -167,6 +167,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = langmuir_jac3
   exodus = false
   [./console]

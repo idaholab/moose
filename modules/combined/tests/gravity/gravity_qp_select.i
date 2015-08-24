@@ -299,7 +299,6 @@
 
 [Outputs]
   file_base = out_qp_select
-  output_initial = true
   print_linear_residuals = true
   print_perf_log = true
   [./exodus]

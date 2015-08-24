@@ -261,7 +261,6 @@
 
 [Outputs]
   file_base = merged_out
-  output_initial = true
   print_linear_residuals = true
   print_perf_log = true
   [./exodus]

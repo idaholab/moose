@@ -712,6 +712,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = borehole_highres
   print_perf_log = true
   exodus = true

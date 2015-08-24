@@ -120,7 +120,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   show = 'temp disp_x disp_y'
   print_linear_residuals = true

@@ -129,7 +129,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   output_on = timestep_end
   [./console]

@@ -213,7 +213,6 @@
 [Outputs]
   file_base = 3dy_scale_out
   interval = 1
-  output_initial = true
   exodus = true
   print_linear_residuals = true
   [./console]

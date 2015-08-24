@@ -186,7 +186,6 @@
 [Outputs]
   # csv = true
   file_base = frictional_02_penalty_out
-  output_initial = true
   interval = 10
   print_linear_residuals = true
   print_perf_log = true
