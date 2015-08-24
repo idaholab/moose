@@ -39,7 +39,7 @@
     variable = cv
   [../]
   [./CHSolid]
-    type = CHParsed
+    type = CahnHilliard
     variable = cv
     f_name = F
     mob_name = M
