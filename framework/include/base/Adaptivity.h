@@ -19,6 +19,7 @@
 #include "MooseError.h"
 #include "MooseEnum.h"
 #include "ConsoleStreamInterface.h"
+#include "MooseTypes.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 
@@ -210,7 +211,8 @@ protected:
   /// Error vector for use with the error estimator.
   ErrorVector * _error;
 
-  DisplacedProblem * & _displaced_problem;
+  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+
   /// A mesh refinement object for displaced mesh
   MeshRefinement * _displaced_mesh_refinement;
 

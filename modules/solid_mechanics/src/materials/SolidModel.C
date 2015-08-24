@@ -166,7 +166,7 @@ SolidModel::SolidModel( const InputParameters & parameters) :
     mooseError("Material '" << name() << "' was specified on multiple blocks that do not have the same coordinate system");
   // Use the first block to figure out the coordinate system (the above check ensures that they are the same)
   _coord_type = _subproblem.getCoordSystem(_block_id[0]);
-  _element = createElement(name(), parameters);
+  _element = createElement();
 
   const std::vector<std::string> & dmp = getParam<std::vector<std::string> >("dep_matl_props");
   _dep_matl_props.insert(dmp.begin(), dmp.end());
@@ -1346,9 +1346,12 @@ SolidModel::getNumKnownCrackDirs() const
 }
 
 SolidMechanics::Element *
-SolidModel::createElement( const std::string & mat_name,
-                           const InputParameters & parameters )
+SolidModel::createElement()
 {
+  std::string mat_name = name();
+  InputParameters parameters = emptyInputParameters();
+  parameters += this->parameters();
+
   SolidMechanics::Element * element(NULL);
 
   std::string formulation = getParam<MooseEnum>("formulation");
@@ -1471,10 +1474,12 @@ SolidModel::createElement( const std::string & mat_name,
 }
 
 void
-SolidModel::createConstitutiveModel(const std::string & cm_name, const InputParameters & params)
+SolidModel::createConstitutiveModel(const std::string & cm_name)
 {
 
   Factory & factory = _app.getFactory();
+  InputParameters params = factory.getValidParams(cm_name);
+  params += parameters();
   MooseSharedPointer<ConstitutiveModel> cm = MooseSharedNamespace::dynamic_pointer_cast<ConstitutiveModel>(factory.create(cm_name, name()+"Model", params, _tid));
 
   if (!cm.get())
@@ -1555,4 +1560,3 @@ SolidModel::computeThermalJvec()
     }
   }
 }
-

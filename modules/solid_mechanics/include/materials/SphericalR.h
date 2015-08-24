@@ -18,7 +18,7 @@ namespace SolidMechanics
 class SphericalR : public Element
 {
 public:
-  SphericalR(SolidModel & solid_model, const std::string & name, InputParameters parameters);
+  SphericalR(SolidModel & solid_model, const std::string & name, const InputParameters & parameters);
   virtual ~SphericalR();
 
 protected:

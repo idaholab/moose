@@ -18,7 +18,7 @@ namespace SolidMechanics
 class Linear : public Element
 {
 public:
-  Linear(SolidModel & solid_model, const std::string & name, InputParameters parameters);
+  Linear(SolidModel & solid_model, const std::string & name, const InputParameters & parameters);
   virtual ~Linear();
 
 protected:

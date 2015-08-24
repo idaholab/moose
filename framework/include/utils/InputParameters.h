@@ -44,7 +44,6 @@ class Action;
 class Parser;
 class Problem;
 class MooseApp;
-
 class InputParameters;
 
 template<class T>
@@ -507,16 +506,18 @@ public:
   const std::vector<T> & getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T>* the_type);
   ///@}
 
-  // These are the only objects allowed to _create_ InputParameters
-  friend InputParameters validParams<MooseObject>();
-  friend InputParameters validParams<Action>();
-  friend InputParameters validParams<Problem>();
-  friend InputParameters emptyInputParameters();
-  friend InputParameters validParams<MooseApp>();
-
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
+
+  /**
+   * Toggle the availability of the copy constructor
+   *
+   * When MooseObject is created via the Factory this flag is set to false, so when a MooseObject is created if
+   * the constructor is not a const reference an error is produced. This method allows the InputParameterWarehouse
+   * to disable copying.
+   */
+  void allowCopy(bool status){ _allow_copy = status; }
 
   /// This method is called when adding a Parameter with a default value, can be specialized for non-matching types
   template <typename T, typename S>
@@ -581,6 +582,17 @@ private:
 
   /// Flag for disabling deprecated parameters message, this is used by applyParameters to avoid dumping messages
   bool _show_deprecated_message;
+
+  /// A flag for toggling the error message in the copy constructor
+  bool _allow_copy;
+
+  // These are the only objects allowed to _create_ InputParameters
+  friend InputParameters validParams<MooseObject>();
+  friend InputParameters validParams<Action>();
+  friend InputParameters validParams<Problem>();
+  friend InputParameters emptyInputParameters();
+  friend InputParameters validParams<MooseApp>();
+  friend class InputParameterWarehouse;
 };
 
 // Template and inline function implementations

@@ -38,6 +38,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
   // Set the name and tid parameters
   ptr->addParam<std::string>("name", name, "The complete name of the object");
   ptr->addPrivateParam<THREAD_ID>("_tid", tid);
+  ptr->allowCopy(false);  // no more copies allowed
 
   // Store the object in the warehouse
   _name_to_shared_pointer[tid].insert(std::pair<std::string, MooseSharedPointer<InputParameters> >(name, ptr));

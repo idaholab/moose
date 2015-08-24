@@ -39,7 +39,7 @@ InputParameters validParams<DisplacedProblem>();
 class DisplacedProblem : public SubProblem
 {
 public:
-  DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, InputParameters params);
+  DisplacedProblem(const InputParameters & parameters);
   virtual ~DisplacedProblem();
 
   virtual EquationSystems & es() { return _eq; }

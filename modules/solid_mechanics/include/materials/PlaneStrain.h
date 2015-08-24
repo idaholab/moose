@@ -18,7 +18,7 @@ class PlaneStrain :
   public ScalarCoupleable
 {
 public:
-  PlaneStrain(SolidModel & solid_model, const std::string & name, InputParameters parameters);
+  PlaneStrain(SolidModel & solid_model, const std::string & name, const InputParameters & parameters);
   virtual ~PlaneStrain();
 
 protected:

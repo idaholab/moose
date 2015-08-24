@@ -26,6 +26,6 @@ CLSHPlasticMaterial::CLSHPlasticMaterial(const InputParameters & parameters)
   :SolidModel(parameters)
 {
 
-  createConstitutiveModel("CLSHPlasticModel", parameters);
+  createConstitutiveModel("CLSHPlasticModel");
 
 }

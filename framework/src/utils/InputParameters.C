@@ -28,20 +28,23 @@ InputParameters::InputParameters() :
     Parameters(),
     _collapse_nesting(false),
     _moose_object_syntax_visibility(true),
-    _show_deprecated_message(true)
+    _show_deprecated_message(true),
+    _allow_copy(true)
 {
 }
 
 InputParameters::InputParameters(const InputParameters &rhs) :
     Parameters(),
-    _show_deprecated_message(true)
+    _show_deprecated_message(true),
+    _allow_copy(true)
 
 {
   *this = rhs;
 }
 
 InputParameters::InputParameters(const Parameters &rhs) :
-    _show_deprecated_message(true)
+    _show_deprecated_message(true),
+    _allow_copy(true)
 {
   Parameters::operator=(rhs);
   _collapse_nesting = false;
@@ -71,6 +74,7 @@ InputParameters::clear()
   _collapse_nesting = false;
   _moose_object_syntax_visibility = true;
   _show_deprecated_message = true;
+  _allow_copy = true;
 }
 
 void
@@ -118,6 +122,15 @@ InputParameters::getClassDescription() const
 InputParameters &
 InputParameters::operator=(const InputParameters &rhs)
 {
+  // An error to help minimize the segmentation faults that occure when MooseObjects do not have the correct constructor
+  if (!rhs._allow_copy)
+  {
+    const std::string & name = rhs.get<std::string>("name"); // If _allow_parameter_copy is set then so is name (see InputParameterWarehouse::addInputParameters)
+    mooseError("Copying of the InputParameters object for the " << name << " object is not allowed.\n\nThe likely cause for this error "
+               << "is having a constructor that does not use a const reference, all constructors\nfor MooseObject based classes should be as follows:\n\n"
+               << "    MyObject::MyObject(const InputParameters & parameters);");
+  }
+
   Parameters::operator=(rhs);
 
   _doc_string = rhs._doc_string;
@@ -136,6 +149,7 @@ InputParameters::operator=(const InputParameters &rhs)
   _default_coupled_value = rhs._default_coupled_value;
   _default_postprocessor_value = rhs._default_postprocessor_value;
   _set_by_add_param = rhs._set_by_add_param;
+  _allow_copy = rhs._allow_copy;
 
   return *this;
 }
@@ -160,7 +174,6 @@ InputParameters::operator+=(const InputParameters &rhs)
   _default_coupled_value.insert(rhs._default_coupled_value.begin(), rhs._default_coupled_value.end());
   _default_postprocessor_value.insert(rhs._default_postprocessor_value.begin(), rhs._default_postprocessor_value.end());
   _set_by_add_param.insert(rhs._set_by_add_param.begin(), rhs._set_by_add_param.end());
-
   return *this;
 }
 
