@@ -84,6 +84,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = langmuir_jac2
   exodus = false
   [./console]

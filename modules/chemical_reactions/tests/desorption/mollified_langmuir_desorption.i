@@ -125,7 +125,6 @@
 []
 [Outputs]
   file_base = mollified_langmuir_desorption
-  output_initial = true
   interval = 10
   exodus = true
   csv = 10
