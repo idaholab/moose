@@ -614,8 +614,6 @@ void FEProblem::timestepSetup()
     _indicators[i].timestepSetup();
     _markers[i].timestepSetup();
 
-    _materials[i].timestepSetup();
-
     // Timestep setup of all UserObjects
     for (unsigned int j = 0; j < Moose::exec_types.size(); j++)
       _user_objects(Moose::exec_types[j])[i].timestepSetup();
