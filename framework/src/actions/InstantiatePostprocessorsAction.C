@@ -13,28 +13,27 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "SetupPostprocessorDataAction.h"
+#include "InstantiatePostprocessorsAction.h"
 #include "FEProblem.h"
 
 template<>
-InputParameters validParams<SetupPostprocessorDataAction>()
+InputParameters validParams<InstantiatePostprocessorsAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-SetupPostprocessorDataAction::SetupPostprocessorDataAction(InputParameters params) :
+InstantiatePostprocessorsAction::InstantiatePostprocessorsAction(InputParameters params) :
   Action(params)
 {
 }
 
-SetupPostprocessorDataAction::~SetupPostprocessorDataAction()
+InstantiatePostprocessorsAction::~InstantiatePostprocessorsAction()
 {
 }
 
 void
-SetupPostprocessorDataAction::act()
+InstantiatePostprocessorsAction::act()
 {
-  _problem->initPostprocessorData(MooseUtils::shortName(_name));
+  _problem->instantiatePostprocessors();
 }
-
