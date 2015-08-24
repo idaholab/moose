@@ -25,7 +25,7 @@ class DarcyFlux : public Kernel
 {
 public:
 
-  DarcyFlux(InputParameters parameters);
+  DarcyFlux(const InputParameters & parameters);
 
 
 protected:

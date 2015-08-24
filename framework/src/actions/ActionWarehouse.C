@@ -130,7 +130,7 @@ ActionWarehouse::addActionBlock(MooseSharedPointer<Action> action)
     MooseSharedPointer<MooseObjectAction> moa = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
     if (moa.get())
     {
-      InputParameters mparams = moa->getObjectParams();
+      const InputParameters & mparams = moa->getObjectParams();
 
       if (mparams.have_parameter<std::string>("_moose_base"))
       {

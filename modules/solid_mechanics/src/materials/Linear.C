@@ -15,7 +15,7 @@ namespace SolidMechanics
 
 Linear::Linear(SolidModel & solid_model,
                const std::string & name,
-               InputParameters parameters)
+               const InputParameters & parameters)
   :Element(solid_model, name, parameters),
    _large_strain(solid_model.getParam<bool>("large_strain")),
    _grad_disp_x(coupledGradient("disp_x")),

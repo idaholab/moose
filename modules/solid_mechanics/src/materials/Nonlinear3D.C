@@ -16,7 +16,7 @@ namespace SolidMechanics
 
 Nonlinear3D::Nonlinear3D( SolidModel & solid_model,
                           const std::string & name,
-                          InputParameters parameters )
+                          const InputParameters & parameters )
   :Nonlinear( solid_model, name, parameters ),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(coupledGradient("disp_y")),

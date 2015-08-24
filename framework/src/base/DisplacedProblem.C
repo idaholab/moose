@@ -26,13 +26,13 @@ InputParameters validParams<DisplacedProblem>()
   return params;
 }
 
-DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, InputParameters params) :
-    SubProblem(params),
-    _mproblem(mproblem),
-    _mesh(displaced_mesh),
-    _eq(displaced_mesh),
+DisplacedProblem::DisplacedProblem(const InputParameters & parameters) :
+    SubProblem(parameters),
+    _mproblem(*getParam<FEProblem *>("_fe_problem")),
+    _mesh(*getParam<MooseMesh *>("mesh")),
+    _eq(_mesh),
     _ref_mesh(_mproblem.mesh()),
-    _displacements(params.get<std::vector<std::string> >("displacements")),
+    _displacements(getParam<std::vector<std::string> >("displacements")),
     _displaced_nl(*this, _mproblem.getNonlinearSystem(), _mproblem.getNonlinearSystem().name() + "_displaced", Moose::VAR_NONLINEAR),
     _displaced_aux(*this, _mproblem.getAuxiliarySystem(), _mproblem.getAuxiliarySystem().name() + "_displaced", Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh)

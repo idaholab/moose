@@ -114,7 +114,7 @@ private:
   THREAD_ID _vpi_tid;
 
   /// VectorPostprocessorInterface Parameters
-  const InputParameters _vpi_params;
+  const InputParameters & _vpi_params;
 };
 
 #endif //VECTORPOSTPROCESSORINTERFACE_H

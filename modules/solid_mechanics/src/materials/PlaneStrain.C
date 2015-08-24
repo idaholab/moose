@@ -12,7 +12,7 @@ namespace SolidMechanics
 
 PlaneStrain::PlaneStrain(SolidModel & solid_model,
                          const std::string & name,
-                         InputParameters parameters)
+                         const InputParameters & parameters)
   :Element(solid_model, name, parameters),
    ScalarCoupleable(parameters),
    _large_strain(solid_model.getParam<bool>("large_strain")),

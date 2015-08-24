@@ -11,30 +11,30 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#ifndef INITDISPLACEDPROBLEMACTION_H
-#define INITDISPLACEDPROBLEMACTION_H
-
-#include "Action.h"
-
-class InitDisplacedProblemAction;
+#include "DoNotCopyParametersKernel.h"
 
 template<>
-InputParameters validParams<InitDisplacedProblemAction>();
-
-/**
- *
- */
-class InitDisplacedProblemAction : public Action
+InputParameters validParams<DoNotCopyParametersKernel>()
 {
-public:
-  InitDisplacedProblemAction(InputParameters parameters);
-  virtual ~InitDisplacedProblemAction();
+  InputParameters params = validParams<Kernel>();
+  return params;
+}
 
-  virtual void act();
+// This is the wrong constructor, don't to this!
+DoNotCopyParametersKernel::DoNotCopyParametersKernel(InputParameters parameters) :
+    Kernel(parameters)
+{
+}
 
-protected:
+Real
+DoNotCopyParametersKernel::computeQpResidual()
+{
+  getParam<std::string>("name"); // This will cause a segmentation fault
+  return 0.0;
+}
 
-};
-
-#endif /* INITDISPLACEDPROBLEMACTION_H */
+Real
+DoNotCopyParametersKernel::computeQpJacobian()
+{
+  return 0.0;
+}

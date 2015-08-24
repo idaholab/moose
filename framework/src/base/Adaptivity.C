@@ -38,7 +38,6 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _mesh_refinement(NULL),
     _error_estimator(NULL),
     _error(NULL),
-    _displaced_problem(_subproblem.getDisplacedProblem()),
     _displaced_mesh_refinement(NULL),
     _initial_steps(0),
     _steps(0),
@@ -70,6 +69,10 @@ Adaptivity::~Adaptivity()
 void
 Adaptivity::init(unsigned int steps, unsigned int initial_steps)
 {
+  // Get the pointer to the DisplacedProblem, this cannot be done at construction because DisplacedProblem
+  // does not exist at that point.
+  _displaced_problem = _subproblem.getDisplacedProblem();
+
   if (!_mesh_refinement)
     _mesh_refinement = new MeshRefinement(_mesh);
 
@@ -140,7 +143,7 @@ Adaptivity::adaptMesh()
         _subproblem.getAuxiliarySystem().solution().close();
         _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
 
-        FlagElementsThread fet(_subproblem, serialized_solution, _displaced_problem, _max_h_level);
+        FlagElementsThread fet(_subproblem, serialized_solution, _max_h_level);
         ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
                                  _subproblem.mesh().getMesh().active_elements_end(), 1);
         Threads::parallel_reduce(all_elems, fet);

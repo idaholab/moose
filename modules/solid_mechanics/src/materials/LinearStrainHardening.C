@@ -31,7 +31,6 @@ LinearStrainHardening::LinearStrainHardening( const InputParameters & parameters
   :SolidModel(parameters)
 {
 
-  createConstitutiveModel("IsotropicPlasticity", parameters);
+  createConstitutiveModel("IsotropicPlasticity");
 
 }
-

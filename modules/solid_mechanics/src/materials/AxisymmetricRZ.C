@@ -14,7 +14,7 @@ namespace SolidMechanics
 
 AxisymmetricRZ::AxisymmetricRZ(SolidModel & solid_model,
                                const std::string & name,
-                               InputParameters parameters)
+                               const InputParameters & parameters)
   :Element(solid_model, name, parameters),
    _disp_r(coupledValue("disp_r")),
    _disp_z(coupledValue("disp_z")),

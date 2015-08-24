@@ -23,7 +23,7 @@ class NonlinearPlaneStrain :
 public:
   NonlinearPlaneStrain( SolidModel & solid_model,
                         const std::string & name,
-                        InputParameters parameters );
+                        const InputParameters & parameters );
 
   virtual ~NonlinearPlaneStrain();
 
