@@ -79,7 +79,6 @@
 
 [Outputs]
   file_base = single_out
-  output_initial = true
   output_final = true
   interval = 1000000
   exodus = true
