@@ -101,6 +101,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out_wedge_sys
   exodus = true
   print_perf_log = true

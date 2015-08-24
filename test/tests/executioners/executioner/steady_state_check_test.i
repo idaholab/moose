@@ -97,6 +97,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out_ss_check
   exodus = true
   print_perf_log = true

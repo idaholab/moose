@@ -94,6 +94,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out_restrict
   interval = 1
   exodus = true

@@ -129,7 +129,6 @@
 []
 
 [Outputs]
-  output_initial = true
   interval = 4
   exodus = true
   print_linear_residuals = true

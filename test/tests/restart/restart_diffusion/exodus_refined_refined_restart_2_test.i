@@ -63,7 +63,6 @@
 
 [Outputs]
   file_base = exodus_refined_refined_restart_2
-  output_initial = true
   exodus = true
   print_perf_log = true
 []

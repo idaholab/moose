@@ -64,7 +64,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   hide = from_master_app
   print_linear_residuals = true

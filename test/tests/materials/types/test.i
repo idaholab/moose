@@ -243,6 +243,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   output_on = 'initial timestep_end'
   [./out]
     type = Exodus

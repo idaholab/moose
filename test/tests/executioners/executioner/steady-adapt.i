@@ -81,6 +81,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out_steady_adapt
   exodus = true
   print_perf_log = true

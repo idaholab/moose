@@ -96,6 +96,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   exodus = true
   print_perf_log = true
 []

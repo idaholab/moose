@@ -44,7 +44,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   [./oversample]
     type = Exodus

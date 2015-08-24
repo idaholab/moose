@@ -50,6 +50,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   exodus = true
   [./console]
     type = Console

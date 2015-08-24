@@ -57,6 +57,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   [./csv]
     type = CSV
     file_base = csv_restart_part2_out

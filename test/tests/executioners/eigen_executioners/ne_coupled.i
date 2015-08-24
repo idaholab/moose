@@ -129,6 +129,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = ne_coupled
   interval = 1
   exodus = true

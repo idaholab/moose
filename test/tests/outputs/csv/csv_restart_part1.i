@@ -56,7 +56,6 @@
 []
 
 [Outputs]
-  output_initial = true
   csv = true
   checkpoint = true
   print_linear_residuals = true

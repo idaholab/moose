@@ -121,7 +121,6 @@
 
 [Outputs]
   file_base = out_xda_restart_part2
-  output_initial = true
   [./out]
     type = Exodus
     elemental_as_nodal = true

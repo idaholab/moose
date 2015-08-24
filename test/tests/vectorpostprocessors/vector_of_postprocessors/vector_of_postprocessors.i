@@ -60,6 +60,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   exodus = false
   csv = true
   [./console]

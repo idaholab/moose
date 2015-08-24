@@ -58,7 +58,6 @@
 
 [Outputs]
   file_base = out_part2
-  output_initial = true
   exodus = true
   print_perf_log = true
 []

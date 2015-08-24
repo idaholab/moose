@@ -84,6 +84,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   color = false
   [./screen]
     type = Console

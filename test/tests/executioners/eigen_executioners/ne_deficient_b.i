@@ -92,6 +92,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = ne_deficient_b
   interval = 1
   exodus = true

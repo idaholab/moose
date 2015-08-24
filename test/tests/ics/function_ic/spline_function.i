@@ -45,7 +45,6 @@
 []
 
 [Outputs]
-  output_initial = true
   file_base = spline
   print_perf_log = true
   [./OverSampling]

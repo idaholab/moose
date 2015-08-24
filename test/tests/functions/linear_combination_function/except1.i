@@ -79,6 +79,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   hide = dummy
   exodus = false
   csv = true

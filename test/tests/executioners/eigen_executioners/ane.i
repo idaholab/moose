@@ -96,6 +96,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = ane
   interval = 1
   exodus = true

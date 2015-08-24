@@ -73,7 +73,6 @@
 
 [Outputs]
   file_base = out
-  output_initial = true
   print_perf_log = true
   [./exodus]
     type = Exodus

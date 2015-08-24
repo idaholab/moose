@@ -76,7 +76,6 @@
 
 [Outputs]
   file_base = out_part1
-  output_initial = true
   exodus = true
   checkpoint = true
   print_perf_log = true

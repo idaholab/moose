@@ -100,6 +100,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out_elm_time_deriv
   csv = true
   print_perf_log = true

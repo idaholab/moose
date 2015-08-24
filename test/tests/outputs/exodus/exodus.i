@@ -40,6 +40,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   [./console]
     type = Console
     output_on = 'initial timestep_end failed nonlinear'

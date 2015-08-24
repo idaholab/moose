@@ -57,6 +57,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = twoDb
   hide = dummy
   exodus = true

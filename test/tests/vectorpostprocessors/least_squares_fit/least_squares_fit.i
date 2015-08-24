@@ -87,6 +87,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   csv = true
   [./console]
     type = Console

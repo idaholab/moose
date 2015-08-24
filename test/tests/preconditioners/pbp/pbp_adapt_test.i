@@ -117,6 +117,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out_pbp_adapt
   exodus = true
   [./console]
