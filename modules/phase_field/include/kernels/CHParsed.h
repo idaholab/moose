@@ -20,7 +20,7 @@ InputParameters validParams<CHParsed>();
  * provided by a DerivativeParsedMaterial.
  * \see SplitCHParsed
  */
-class CHParsed : public CHBulk
+class CHParsed : public CHBulk<Real>
 {
 public:
   CHParsed(const InputParameters & parameters);

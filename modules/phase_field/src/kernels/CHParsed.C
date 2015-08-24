@@ -9,14 +9,14 @@
 template<>
 InputParameters validParams<CHParsed>()
 {
-  InputParameters params = validParams<CHBulk>();
+  InputParameters params = CHBulk<Real>::validParams();
   params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy");
   params.addRequiredParam<MaterialPropertyName>("f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
   return params;
 }
 
 CHParsed::CHParsed(const InputParameters & parameters) :
-    CHBulk(parameters),
+    CHBulk<Real>(parameters),
     _nvar(_coupled_moose_vars.size()),
     _second_derivatives(_nvar+1),
     _third_derivatives(_nvar+1),
@@ -84,4 +84,3 @@ CHParsed::computeQpOffDiagJacobian(unsigned int jvar)
 
   return CHBulk::computeQpOffDiagJacobian(jvar) + _grad_test[_i][_qp]*_M[_qp]*J;
 }
-

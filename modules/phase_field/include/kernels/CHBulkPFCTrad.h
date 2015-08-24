@@ -9,7 +9,7 @@ class CHBulkPFCTrad;
 template<>
 InputParameters validParams<CHBulkPFCTrad>();
 
-class CHBulkPFCTrad : public CHBulk
+class CHBulkPFCTrad : public CHBulk<Real>
 {
 public:
   CHBulkPFCTrad(const InputParameters & parameters);
