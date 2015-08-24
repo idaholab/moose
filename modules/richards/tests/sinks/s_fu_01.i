@@ -177,7 +177,6 @@
 
 [Outputs]
   file_base = s_fu_01
-  output_initial = true
   csv = true
   print_perf_log = true
 []

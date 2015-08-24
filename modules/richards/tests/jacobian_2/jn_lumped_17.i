@@ -161,6 +161,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = jn17
   exodus = false
   print_perf_log = true

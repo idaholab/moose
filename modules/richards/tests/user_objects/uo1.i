@@ -613,6 +613,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   active = 'csv'
   file_base = uo1
   print_perf_log = true

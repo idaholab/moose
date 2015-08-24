@@ -205,7 +205,6 @@
 
 [Outputs]
   file_base = bh04
-  output_initial = true
   exodus = false
   csv = true
   print_linear_residuals = true

@@ -120,8 +120,7 @@
 
 [Outputs]
   file_base = gh20
-  output_initial = true
-  output_final = true
+  output_on = 'timestep_end final'
   interval = 10000
   exodus = true
   print_perf_log = true

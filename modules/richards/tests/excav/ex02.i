@@ -233,6 +233,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = ex02
   output_initial = false
   exodus = true

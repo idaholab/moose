@@ -198,7 +198,6 @@
 
 [Outputs]
   file_base = st01
-  output_initial = true
   exodus = false
   csv = true
   print_linear_residuals = true

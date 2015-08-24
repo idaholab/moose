@@ -117,6 +117,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = gh16
   exodus = true
   print_perf_log = true
