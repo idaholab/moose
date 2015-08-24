@@ -104,6 +104,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = out
   csv = true
   exodus = true

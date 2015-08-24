@@ -247,7 +247,6 @@
 
 [Outputs]
   file_base = kks_example_split
-  output_initial = true
   exodus = true
   print_perf_log = true
 []

@@ -116,7 +116,6 @@
 
 [Outputs]
   file_base = kks_xevac
-  output_initial = true
   exodus = true
   print_perf_log = true
 []

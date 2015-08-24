@@ -52,6 +52,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   [./console]
     type = Console
     perf_log = true

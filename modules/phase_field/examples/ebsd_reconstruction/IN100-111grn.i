@@ -152,7 +152,6 @@
 []
 
 [Outputs]
-  output_initial = true
   csv = true
   [./console]
     type = Console

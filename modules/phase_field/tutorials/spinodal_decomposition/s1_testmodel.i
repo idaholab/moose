@@ -138,5 +138,4 @@
   exodus = true
   console = true
   print_perf_log = true
-  output_initial = true
 []

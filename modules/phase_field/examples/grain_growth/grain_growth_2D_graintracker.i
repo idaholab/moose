@@ -155,7 +155,6 @@
 
 [Outputs]
   file_base = tracker_2D # Output base file name.  Note the output will be saved in the "output" directory, that MUST be created before you run the simulation
-  output_initial = true # Output initial condition
   exodus = true # Exodus file will be outputted
   csv = true
   print_perf_log = true

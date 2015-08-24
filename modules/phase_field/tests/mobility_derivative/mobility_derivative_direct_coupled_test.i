@@ -123,6 +123,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   print_linear_residuals = true
   print_perf_log = true
   [./oversample]

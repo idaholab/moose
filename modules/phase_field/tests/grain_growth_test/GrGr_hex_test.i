@@ -113,7 +113,6 @@
 [Outputs]
   file_base = hex
   exodus = true
-  output_initial = true
   print_linear_residuals = true
   print_perf_log = true
 []
