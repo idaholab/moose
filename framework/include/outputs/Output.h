@@ -163,12 +163,6 @@ protected:
    */
   virtual void initialSetup();
 
-  /**
-   * A method for modifying "output_on" MultiMooseEnums with the short-cut flag options
-   * @param input A reference to the enum to modifiy
-   */
-  void applyOutputOnShortCutFlags(MultiMooseEnum & input);
-
   /// Pointer the the FEProblem object for output object (use this)
   FEProblem * _problem_ptr;
 
