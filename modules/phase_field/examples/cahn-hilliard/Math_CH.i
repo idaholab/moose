@@ -80,7 +80,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   active = console
   print_linear_residuals = true

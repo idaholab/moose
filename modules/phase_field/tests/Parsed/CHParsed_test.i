@@ -87,7 +87,6 @@
 []
 
 [Outputs]
-  output_initial = true
   print_perf_log = true
   [./OverSampling]
     type = Exodus

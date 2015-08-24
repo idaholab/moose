@@ -127,7 +127,6 @@
   file_base = pfct_newton_split1_asm5_out
   output_linear = true
   file_base = out
-  output_initial = true
   exodus = true
   perf_log = true
 []

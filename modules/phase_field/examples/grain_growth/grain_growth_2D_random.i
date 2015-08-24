@@ -137,7 +137,6 @@
 
 [Outputs]
   file_base = random_2D
-  output_initial = true
   exodus = true
   csv = true
   print_perf_log = true

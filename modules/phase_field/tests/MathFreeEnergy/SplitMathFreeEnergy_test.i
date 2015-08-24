@@ -118,10 +118,6 @@ active = 'SMP'
 
 [Outputs]
   exodus = true
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
-  [../]
+  print_perf_log = true
+  print_linear_residuals = true
 []

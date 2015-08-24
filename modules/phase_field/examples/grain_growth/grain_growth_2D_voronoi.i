@@ -141,7 +141,6 @@ active = 'dt '
 
 [Outputs]
   file_base = voronoi_2D
-  output_initial = true
   exodus = true
   csv = true
   print_perf_log = true
