@@ -11,25 +11,20 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
-class CHBulk;
-
-template<>
-InputParameters validParams<CHBulk>();
 /** This is the Cahn-Hilliard equation base class that implements the bulk or local energy term of the equation.
  *  See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29 for more information.
  *  Note that the function computeGradDFDCons MUST be overridden in any kernel that inherits from
  *  CHBulk.  Use CHMath as an example of how this works.
  **/
-
+template<typename T>
 class CHBulk : public DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >
 {
 public:
-
   CHBulk(const InputParameters & parameters);
 
-protected:
+  static InputParameters validParams();
 
+protected:
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
@@ -42,10 +37,67 @@ protected:
 
   virtual RealGradient computeGradDFDCons(PFFunctionType type) = 0;
 
-  const MaterialProperty<Real> & _M;
-  const MaterialProperty<Real> & _dMdc;
+  const MaterialProperty<T> & _M;
+  const MaterialProperty<T> & _dMdc;
 
-  std::vector<const MaterialProperty<Real> *> _dMdarg;
+  std::vector<const MaterialProperty<T> *> _dMdarg;
 };
+
+template<typename T>
+CHBulk<T>::CHBulk(const InputParameters & parameters) :
+    DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(parameters),
+    _M(getMaterialProperty<T>("mob_name")),
+    _dMdc(getMaterialPropertyDerivative<T>("mob_name", _var.name()))
+{
+  // Get number of coupled variables
+  unsigned int nvar = _coupled_moose_vars.size();
+
+  // reserve space for derivatives
+  _dMdarg.resize(nvar);
+
+  // Iterate over all coupled variables
+  for (unsigned int i = 0; i < nvar; ++i)
+    _dMdarg[i] = &getMaterialPropertyDerivative<T>("mob_name", _coupled_moose_vars[i]->name());
+}
+
+template<typename T>
+InputParameters
+CHBulk<T>::validParams()
+{
+  InputParameters params = ::validParams<KernelGrad>();
+  params.addClassDescription("Cahn-Hilliard base Kernel");
+  params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel");
+  params.addCoupledVar("args", "Vector of arguments to mobility");
+  return params;
+}
+
+template<typename T>
+RealGradient
+CHBulk<T>::precomputeQpResidual()
+{
+  return _M[_qp] * computeGradDFDCons(Residual);
+}
+
+template<typename T>
+RealGradient
+CHBulk<T>::precomputeQpJacobian()
+{
+  RealGradient grad_value =   _M[_qp] * computeGradDFDCons(Jacobian)
+                            + _dMdc[_qp] * _phi[_j][_qp] * computeGradDFDCons(Residual);
+
+  return grad_value;
+}
+
+template<typename T>
+Real
+CHBulk<T>::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  // get the coupled variable jvar is referring to
+  unsigned int cvar;
+  if (!mapJvarToCvar(jvar, cvar))
+    return 0.0;
+
+  return (*_dMdarg[cvar])[_qp] * _phi[_j][_qp] * computeGradDFDCons(Residual) * _grad_test[_i][_qp];
+}
 
 #endif //CHBULK_H
