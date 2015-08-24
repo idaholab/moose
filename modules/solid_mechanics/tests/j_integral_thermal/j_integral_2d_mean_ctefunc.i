@@ -207,6 +207,7 @@
 []
 
 [Outputs]
+  output_on = 'timestep_end'
   file_base = mean_out
   csv = true
   print_linear_residuals = true
