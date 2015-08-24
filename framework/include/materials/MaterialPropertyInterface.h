@@ -218,7 +218,7 @@ private:
   const std::set<BoundaryID> _mi_boundary_ids;
 
   /// Parameters of the object with this interface
-  InputParameters _mi_params;
+  const InputParameters & _mi_params;
 };
 
 template<typename T>

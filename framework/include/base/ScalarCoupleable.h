@@ -115,7 +115,7 @@ protected:
   bool _sc_is_implicit;
 
   /// Local InputParameters
-  InputParameters _coupleable_params;
+  const InputParameters & _coupleable_params;
 
   /**
    * Helper method to return (and insert if necessary) the default value

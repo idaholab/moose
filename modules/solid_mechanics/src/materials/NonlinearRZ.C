@@ -16,7 +16,7 @@ namespace SolidMechanics
 
 NonlinearRZ::NonlinearRZ( SolidModel & solid_model,
                           const std::string & name,
-                          InputParameters parameters )
+                          const InputParameters & parameters )
   :Nonlinear( solid_model, name, parameters ),
    _grad_disp_r(coupledGradient("disp_r")),
    _grad_disp_z(coupledGradient("disp_z")),

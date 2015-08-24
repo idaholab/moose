@@ -104,7 +104,7 @@ private:
   THREAD_ID _pi_tid;
 
   /// PostprocessorInterface Parameters
-  InputParameters _ppi_params;
+  const InputParameters & _ppi_params;
 };
 
 #endif //POSTPROCESSORINTERFACE_H

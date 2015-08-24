@@ -27,7 +27,7 @@ class DisplacedProblem;
 class FlagElementsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  FlagElementsThread(FEProblem & fe_problem, std::vector<Number> & serialized_solution, DisplacedProblem * displaced_problem, unsigned int max_h_level);
+  FlagElementsThread(FEProblem & fe_problem, std::vector<Number> & serialized_solution, unsigned int max_h_level);
 
   // Splitting Constructor
   FlagElementsThread(FlagElementsThread & x, Threads::split split);
@@ -38,7 +38,7 @@ public:
 
 protected:
   FEProblem & _fe_problem;
-  DisplacedProblem * _displaced_problem;
+  MooseSharedPointer<DisplacedProblem> _displaced_problem;
   AuxiliarySystem & _aux_sys;
   unsigned int _system_number;
   Adaptivity & _adaptivity;
