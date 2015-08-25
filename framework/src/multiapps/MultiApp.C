@@ -43,6 +43,7 @@ template<>
 InputParameters validParams<MultiApp>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -63,11 +64,8 @@ InputParameters validParams<MultiApp>()
 
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
 
-
-  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep_begin";  // set the default
-
-  params.addParam<MultiMooseEnum>("execute_on", execute_options, "Set to (linear|nonlinear|timestep_end|timestep_begin|custom) to execute only at that moment");
+  // Set the default execution time
+  params.set<MultiMooseEnum>("execute_on") = "timestep_begin";
 
   params.addParam<unsigned int>("max_procs_per_app", std::numeric_limits<unsigned int>::max(), "Maximum number of processors to give to each App in this MultiApp.  Useful for restricting small solves to just a few procs so they don't get spread out");
 

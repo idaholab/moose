@@ -76,6 +76,6 @@
   output_on = 'timestep_end'
   [./out]
     type = Exodus
-    output_scalars_on = none
+    execute_scalars_on = none
   [../]
 []

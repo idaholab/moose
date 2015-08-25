@@ -26,6 +26,10 @@ InputParameters validParams<SetupInterface>()
   // Add the 'execute_on' input parameter for users to set
   params.addParam<MultiMooseEnum>("execute_on", execute_options, "Set to (nonlinear|linear|timestep_end|timestep_begin|custom) to execute only at that moment");
 
+  // The Output system uses different options for the 'execute_on' than other systems, therefore the check of the options
+  // cannot occur based on the 'execute_on' parameter, so this flag triggers the check
+  params.addPrivateParam<bool>("check_execute_on", true);
+
   return params;
 }
 
@@ -36,7 +40,7 @@ SetupInterface::SetupInterface(const InputParameters & params)
    * Our way of dealing with this is by not having those particular classes add the this classes valid params to their own.  In
    * those cases it won't exist so we just set it to a default and ignore it.
    */
-  if (params.have_parameter<MultiMooseEnum>("execute_on"))
+  if (params.have_parameter<bool>("check_execute_on") && params.get<bool>("check_execute_on"))
   {
 
     // Handle deprecated syntax

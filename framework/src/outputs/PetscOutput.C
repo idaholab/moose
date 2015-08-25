@@ -69,21 +69,21 @@ PetscOutput::PetscOutput(const InputParameters & parameters) :
 {
   // Output toggle support
   if (getParam<bool>("output_linear"))
-    _output_on.push_back("linear");
+    _execute_on.push_back("linear");
   if (getParam<bool>("output_nonlinear"))
-    _output_on.push_back("nonlinear");
+    _execute_on.push_back("nonlinear");
 
   // **** DEPRECATED PARAMETER SUPPORT ****
   if (getParam<bool>("linear_residuals"))
-    _output_on.push_back("linear");
+    _execute_on.push_back("linear");
   if (getParam<bool>("nonlinear_residuals"))
-    _output_on.push_back("nonlinear");
+    _execute_on.push_back("nonlinear");
 
   // Nonlinear residual start-time supplied by user
   if (isParamValid("nonlinear_residual_start_time"))
   {
     _nonlinear_start_time = getParam<Real>("nonlinear_residual_start_time");
-    _output_on.push_back("nonlinear");
+    _execute_on.push_back("nonlinear");
   }
 
   // Nonlinear residual end-time supplied by user
@@ -94,7 +94,7 @@ PetscOutput::PetscOutput(const InputParameters & parameters) :
   if (isParamValid("linear_residual_start_time"))
   {
     _linear_start_time = getParam<Real>("linear_residual_start_time");
-    _output_on.push_back("linear");
+    _execute_on.push_back("linear");
   }
 
   // Linear residual end-time supplied by user
@@ -129,13 +129,13 @@ PetscOutput::solveSetup()
   _linear_dt = _nonlinear_dt/_linear_dt_divisor; // set the pseudo linear timestep
 
   // Set the PETSc monitor functions
-  if (_output_on.contains(EXEC_NONLINEAR) && (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol) )
+  if (_execute_on.contains(EXEC_NONLINEAR) && (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol) )
   {
     PetscErrorCode ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, PETSC_NULL);
     CHKERRABORT(_communicator.get(),ierr);
   }
 
-  if (_output_on.contains(EXEC_LINEAR) && (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol) )
+  if (_execute_on.contains(EXEC_LINEAR) && (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol) )
   {
     PetscErrorCode ierr = KSPMonitorSet(ksp, petscLinearOutput, this, PETSC_NULL);
     CHKERRABORT(_communicator.get(),ierr);
@@ -233,4 +233,3 @@ PetscOutput::time()
   else
     return Output::time();
 }
-

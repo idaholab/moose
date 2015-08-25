@@ -73,6 +73,6 @@
   [./out]
     type = Exodus
     elemental_as_nodal = true
-    output_elemental_on = none
+    execute_elemental_on = none
   [../]
 []

@@ -37,7 +37,7 @@ InputParameters validParams<Exodus>()
   params.addClassDescription("Object for output data in the Exodus II format");
 
   // Set outputting of the input to be on by default
-  params.set<MultiMooseEnum>("output_input_on") = "initial";
+  params.set<MultiMooseEnum>("execute_input_on") = "initial";
 
   // Return the InputParameters
   return params;
