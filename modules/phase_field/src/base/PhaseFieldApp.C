@@ -22,6 +22,7 @@
 #include "CHBulkPFCTrad.h"
 #include "CHCpldPFCTrad.h"
 #include "CHInterface.h"
+#include "CHInterfaceAniso.h"
 #include "CHMath.h"
 #include "CHPFCRFF.h"
 #include "CHSplitVar.h"
@@ -227,6 +228,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHBulkPFCTrad);
   registerKernel(CHCpldPFCTrad);
   registerKernel(CHInterface);
+  registerKernel(CHInterfaceAniso);
   registerKernel(CHMath);
   registerKernel(CHPFCRFF);
   registerKernel(CHSplitVar);

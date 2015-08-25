@@ -4,17 +4,17 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "CHInterface.h"
+#include "CHInterfaceAniso.h"
 
 template<>
-InputParameters validParams<CHInterface>()
+InputParameters validParams<CHInterfaceAniso>()
 {
-  InputParameters params = CHInterfaceBase<Real>::validParams();
-  params.addClassDescription("Gradient energy Cahn-Hilliard Kernel with a scalar (isotropic) mobility");
+  InputParameters params = CHInterfaceBase<RealTensorValue>::validParams();
+  params.addClassDescription("Gradient energy Cahn-Hilliard Kernel with a tensor (anisotropic) mobility");
   return params;
 }
 
-CHInterface::CHInterface(const InputParameters & parameters) :
-    CHInterfaceBase<Real>(parameters)
+CHInterfaceAniso::CHInterfaceAniso(const InputParameters & parameters) :
+    CHInterfaceBase<RealTensorValue>(parameters)
 {
 }
