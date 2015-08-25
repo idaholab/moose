@@ -125,7 +125,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   [./out]
     type = Exodus
     hide = 'eta1 eta2 eta3 local_energy'

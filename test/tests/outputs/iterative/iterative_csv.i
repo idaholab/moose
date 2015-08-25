@@ -55,7 +55,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   print_perf_log = true
   [./out]
     type = CSV
@@ -63,6 +63,6 @@
     linear_residual_dt_divisor = 100
     start_time = 1.8
     end_time = 1.85
-    output_on = 'nonlinear linear timestep_end'
+    execute_on = 'nonlinear linear timestep_end'
   [../]
 []

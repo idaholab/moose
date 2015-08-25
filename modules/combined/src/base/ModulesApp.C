@@ -32,7 +32,7 @@ InputParameters validParams<ModulesApp>()
   InputParameters params = validParams<MooseApp>();
   params.set<bool>("use_legacy_uo_initialization") = false;
   params.set<bool>("use_legacy_uo_aux_computation") = false;
-
+  params.set<bool>("use_legacy_output_syntax") = false;
   return params;
 }
 
@@ -103,4 +103,3 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
   WaterSteamEOSApp::associateSyntax(syntax, action_factory);
 }
-

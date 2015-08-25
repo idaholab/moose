@@ -65,7 +65,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   file_base = out
   exodus = true
   print_linear_residuals = true

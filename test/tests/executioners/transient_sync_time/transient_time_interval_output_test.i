@@ -58,13 +58,13 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   file_base = out_tio
   interval = 3
   csv = true
   print_perf_log = true
   [./exodus]
     type = Exodus
-    output_on = 'final timestep_end'
+    execute_on = 'final timestep_end'
   [../]
 []

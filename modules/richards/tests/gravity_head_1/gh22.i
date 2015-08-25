@@ -120,7 +120,7 @@
 
 [Outputs]
   file_base = gh22
-  output_on = 'timestep_end final'
+  execute_on = 'timestep_end final'
   interval = 10000
   exodus = true
   print_perf_log = true

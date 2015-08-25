@@ -196,7 +196,7 @@
 [Outputs]
   file_base = rsc_fu_01
   interval = 100000
-  output_on = 'initial timestep_end final'
+  execute_on = 'initial timestep_end final'
   exodus = true
   print_perf_log = true
 []

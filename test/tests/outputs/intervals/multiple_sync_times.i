@@ -48,7 +48,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   [./exodus_3]
     type = Exodus
     interval = 3

@@ -84,7 +84,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   file_base = lcf1
   hide = dummy
   exodus = false

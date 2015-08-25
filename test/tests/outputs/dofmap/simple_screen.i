@@ -55,7 +55,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   [./dofmap]
     type = DOFMap
     output_screen = true

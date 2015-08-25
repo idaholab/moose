@@ -241,7 +241,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   file_base = oneDa
   hide = dummy
   exodus = false
