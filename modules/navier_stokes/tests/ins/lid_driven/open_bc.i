@@ -254,5 +254,4 @@
 [Outputs]
   file_base = open_bc_out
   exodus = true
-  print_linear_residuals = true
 []

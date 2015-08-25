@@ -167,5 +167,4 @@
 [Outputs]
   file_base = out
   exodus = true
-  print_linear_residuals = true
 []

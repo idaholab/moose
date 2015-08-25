@@ -148,6 +148,5 @@
   # Output Start
   file_base = out_rz
   exodus = true
-  print_linear_residuals = true
 []      # Output END
 #      # Input file END

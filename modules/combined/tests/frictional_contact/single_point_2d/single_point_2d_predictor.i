@@ -210,7 +210,6 @@
 [Outputs]
   file_base = single_point_2d_predictor_out
   exodus = true
-  print_linear_residuals = true
   [./console]
     type = Console
     max_rows = 5

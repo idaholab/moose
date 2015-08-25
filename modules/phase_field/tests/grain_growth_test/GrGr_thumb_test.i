@@ -152,5 +152,4 @@
   file_base = Thumb
   csv = true
   exodus = true
-  print_linear_residuals = true
 []

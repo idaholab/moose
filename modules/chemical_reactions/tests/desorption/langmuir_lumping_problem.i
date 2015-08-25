@@ -96,5 +96,4 @@
 [Outputs]
   file_base = langmuir_lumping_problem
   exodus = true
-  print_linear_residuals = true
 []

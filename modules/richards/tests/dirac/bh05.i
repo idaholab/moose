@@ -207,7 +207,6 @@
   file_base = bh05
   exodus = false
   csv = true
-  print_linear_residuals = true
 []
 
 [Problem]

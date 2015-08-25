@@ -134,7 +134,6 @@
 []
 
 [Outputs]
-  print_linear_residuals = true
   [./out]
     type = Exodus
     elemental_as_nodal = true

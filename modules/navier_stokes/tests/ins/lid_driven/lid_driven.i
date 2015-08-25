@@ -245,7 +245,5 @@
 
 [Outputs]
   file_base = lid_driven_out
-  interval = 1
   exodus = true
-  print_linear_residuals = true
 []

@@ -202,5 +202,4 @@
 [Outputs]
   file_base = t_stress_crack_infinite_plate_out
   exodus = true
-  print_linear_residuals = true
 []

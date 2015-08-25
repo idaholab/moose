@@ -370,5 +370,4 @@
 [Outputs]
   file_base = Linear_General_Anisotropic_Material_out
   exodus = true
-  print_linear_residuals = true
 []

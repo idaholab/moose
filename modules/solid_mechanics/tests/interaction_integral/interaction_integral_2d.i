@@ -208,5 +208,4 @@
 [Outputs]
   file_base = interaction_integral_2d_out
   exodus = true
-  print_linear_residuals = true
 []

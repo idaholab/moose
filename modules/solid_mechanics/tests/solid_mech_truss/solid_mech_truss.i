@@ -258,5 +258,4 @@
 [Outputs]
   file_base = solid_mech_truss_out
   exodus = true
-  print_linear_residuals = true
 []

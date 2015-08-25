@@ -91,6 +91,5 @@
 
 [Outputs]
   file_base = ipm
-  interval = 1
   exodus = true
 []

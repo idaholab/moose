@@ -201,7 +201,6 @@
 [Outputs]
   file_base = crysp_user_object_out
   exodus = true
-  print_linear_residuals = true
 []
 
 [Kernels]

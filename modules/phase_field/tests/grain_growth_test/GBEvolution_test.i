@@ -107,7 +107,6 @@
 [Outputs]
   file_base = GBEvolution
   exodus = true
-  print_linear_residuals = true
 []
 
 [Problem]

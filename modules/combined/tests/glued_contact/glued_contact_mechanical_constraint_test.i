@@ -162,5 +162,4 @@
 [Outputs]
   file_base = mechanical_constraint_out
   exodus = true
-  print_linear_residuals = true
 [] # Outputs

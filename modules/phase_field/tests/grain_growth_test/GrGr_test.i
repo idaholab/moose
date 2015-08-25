@@ -108,5 +108,4 @@
   file_base = out
   csv = true
   exodus = true
-  print_linear_residuals = true
 []

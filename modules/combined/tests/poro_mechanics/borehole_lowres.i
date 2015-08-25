@@ -719,17 +719,14 @@
   sync_times = '0.003 0.3'
   [./csv_p]
     file_base = borehole_lowres_p
-    interval = 1
     type = CSV
   [../]
   [./csv_s]
     file_base = borehole_lowres_s
-    interval = 1
     type = CSV
   [../]
   [./csv_t]
     file_base = borehole_lowres_t
-    interval = 1
     type = CSV
   [../]
 []

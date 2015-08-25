@@ -149,7 +149,6 @@
 
 [Outputs]
   file_base = glued_penalty_out
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

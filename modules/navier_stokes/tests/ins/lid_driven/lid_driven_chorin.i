@@ -269,5 +269,4 @@ solve_type = 'NEWTON'
 [Outputs]
   file_base = lid_driven_chorin_out
   exodus = true
-  print_linear_residuals = true
 []

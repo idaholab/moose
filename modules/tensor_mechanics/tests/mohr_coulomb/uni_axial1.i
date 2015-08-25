@@ -274,9 +274,7 @@
 [Outputs]
   file_base = uni_axial1
   exodus = true
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

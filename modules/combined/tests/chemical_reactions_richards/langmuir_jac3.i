@@ -169,5 +169,4 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = langmuir_jac3
-  print_linear_residuals = true
 []

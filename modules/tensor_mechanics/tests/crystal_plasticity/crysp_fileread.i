@@ -212,5 +212,4 @@
 [Outputs]
   file_base = crysp_fileread_out
   exodus = true
-  print_linear_residuals = true
 []

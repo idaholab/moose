@@ -206,7 +206,6 @@
 [Outputs]
   file_base = crysp_lsearch_out
   exodus = true
-  print_linear_residuals = true
 []
 
 [Problem]

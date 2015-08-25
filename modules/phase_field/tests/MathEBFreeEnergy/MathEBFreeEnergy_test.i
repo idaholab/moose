@@ -89,7 +89,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   [./circle_oversample]
     type = Exodus
     file_base = MathEBFreeEnergy_test_oversample

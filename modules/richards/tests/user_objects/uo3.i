@@ -352,8 +352,7 @@
   file_base = uo3
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
   [./exodus]
     type = Exodus
     hide = pressure

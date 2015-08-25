@@ -190,5 +190,4 @@
 [Outputs]
   file_base = j_integral_2d_topo_q_func_out
   exodus = true
-  print_linear_residuals = true
 []

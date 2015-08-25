@@ -172,5 +172,4 @@
   file_base = bh01
   exodus = false
   csv = true
-  print_linear_residuals = true
 []

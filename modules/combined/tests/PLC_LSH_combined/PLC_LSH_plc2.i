@@ -301,5 +301,4 @@
   file_base = PLC_LSH_plc_out
   exodus = true
   csv = true
-  print_linear_residuals = true
 []

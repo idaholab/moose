@@ -94,7 +94,6 @@
 
 [Outputs]
   file_base = normal_masked
-  print_linear_residuals = true
   [./csv]
     type = CSV
   [../]

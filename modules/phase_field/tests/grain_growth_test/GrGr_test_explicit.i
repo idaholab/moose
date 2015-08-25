@@ -101,7 +101,6 @@
   csv = true
   interval = 20
   exodus = true
-  print_linear_residuals = true
 []
 
 [Problem]

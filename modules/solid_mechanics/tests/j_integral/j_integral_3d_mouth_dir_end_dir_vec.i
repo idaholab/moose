@@ -255,5 +255,4 @@
 [Outputs]
   file_base = j_integral_3d_mouth_dir_end_dir_vec_out
   exodus = true
-  print_linear_residuals = true
 []

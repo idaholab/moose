@@ -189,9 +189,7 @@
 [Outputs]
   file_base = random_planar
   exodus = false
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

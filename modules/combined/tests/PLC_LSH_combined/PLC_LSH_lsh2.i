@@ -192,5 +192,4 @@
 [Outputs]
   file_base = PLC_LSH_lsh_out
   exodus = true
-  print_linear_residuals = true
 []

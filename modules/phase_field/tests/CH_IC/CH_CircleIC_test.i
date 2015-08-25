@@ -83,7 +83,6 @@
 
 [Outputs]
   exodus = false
-  print_linear_residuals = true
   [./out]
     type = Exodus
     refinements = 2

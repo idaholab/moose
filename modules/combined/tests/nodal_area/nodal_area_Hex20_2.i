@@ -170,5 +170,4 @@
 [Outputs]
   file_base = nodal_area_Hex20_out
   exodus = true
-  print_linear_residuals = true
 []

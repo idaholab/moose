@@ -169,5 +169,4 @@
   file_base = 1D-SPH_out
   exodus = true
   csv = false
-  print_linear_residuals = true
 []

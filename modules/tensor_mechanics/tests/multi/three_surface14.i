@@ -342,9 +342,7 @@
 [Outputs]
   file_base = three_surface14
   exodus = false
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

@@ -209,7 +209,6 @@
   execute_on = 'timestep_end'
   file_base = inst_out
   csv = true
-  print_linear_residuals = true
 []
 
 [Preconditioning]

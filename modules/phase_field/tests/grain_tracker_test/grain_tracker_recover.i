@@ -135,6 +135,5 @@
 []
 
 [Outputs]
-  interval = 1
   exodus = true
 []

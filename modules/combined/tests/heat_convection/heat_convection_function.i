@@ -88,6 +88,5 @@
 [Outputs]    # Output Start
   # Output Start
   exodus = true
-  print_linear_residuals = true
 []      # Output END
 #      # Input file END

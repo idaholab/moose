@@ -92,5 +92,4 @@
   execute_on = 'timestep_end'
   file_base = derivative_parsed_material
   exodus = true
-  print_linear_residuals = true
 []

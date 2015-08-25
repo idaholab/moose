@@ -73,6 +73,5 @@
 
 [Outputs]
   file_base = out
-  interval = 1
   exodus = true
 []

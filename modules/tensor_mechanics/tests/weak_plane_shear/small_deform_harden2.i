@@ -235,9 +235,7 @@
 [Outputs]
   file_base = small_deform_harden2
   exodus = true
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

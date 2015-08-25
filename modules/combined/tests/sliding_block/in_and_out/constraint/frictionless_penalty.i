@@ -188,7 +188,6 @@
   # csv = true
   file_base = frictionless_penalty_out
   interval = 10
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

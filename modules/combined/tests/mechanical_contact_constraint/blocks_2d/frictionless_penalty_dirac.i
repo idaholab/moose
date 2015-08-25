@@ -150,7 +150,6 @@
 
 [Outputs]
   file_base = frictionless_penalty_dirac_out
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

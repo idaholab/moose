@@ -175,9 +175,7 @@
 [Outputs]
   file_base = many_deforms_cap
   exodus = false
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

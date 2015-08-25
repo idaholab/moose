@@ -287,6 +287,5 @@
 
 [Outputs]
   file_base = poly36_grtracker
-  interval = 1
   exodus = true
 []

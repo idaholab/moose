@@ -199,9 +199,7 @@
 [Outputs]
   file_base = large_deform_harden3
   exodus = false
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

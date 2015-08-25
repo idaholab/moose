@@ -213,13 +213,10 @@
 
 [Outputs]
   file_base = large_deform1
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
   [./exodus]
     type = Exodus
-    interval = 1
-  [../]
+    [../]
 []

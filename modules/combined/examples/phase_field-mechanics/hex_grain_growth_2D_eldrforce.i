@@ -288,6 +288,5 @@
 
 [Outputs]
   file_base = hex36_grtracker
-  interval = 1
   exodus = true
 []

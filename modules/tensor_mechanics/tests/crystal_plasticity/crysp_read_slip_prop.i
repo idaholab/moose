@@ -214,7 +214,6 @@
 [Outputs]
   file_base = crysp_read_slip_prop_out
   exodus = true
-  print_linear_residuals = true
 []
 
 [Problem]

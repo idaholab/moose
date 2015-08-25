@@ -185,7 +185,6 @@
   file_base = one_elem
   exodus = true
   csv = false
-  print_linear_residuals = true
 []
 
 [Problem]
