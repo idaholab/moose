@@ -86,5 +86,4 @@
   execute_on = 'timestep_end'
   file_base = pps_old_value_out
   exodus = true
-  print_perf_log = true
 []

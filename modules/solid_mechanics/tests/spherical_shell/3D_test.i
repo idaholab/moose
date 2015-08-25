@@ -232,5 +232,4 @@
   file_base = 3D_out
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

@@ -120,5 +120,4 @@
   execute_on = 'timestep_end'
   file_base = gh14
   exodus = true
-  print_perf_log = true
 []

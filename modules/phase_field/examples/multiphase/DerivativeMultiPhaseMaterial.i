@@ -391,5 +391,4 @@
     type = CSV
     delimiter = ' '
   [../]
-  print_perf_log = true
 []

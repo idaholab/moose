@@ -233,7 +233,6 @@
 [Outputs]
   file_base = pl_test3qnns_out
   exodus = true
-  print_perf_log = true
 []
 
 [NodalNormals]

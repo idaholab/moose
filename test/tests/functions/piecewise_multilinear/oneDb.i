@@ -91,5 +91,4 @@
   file_base = oneDb
   hide = dummy
   csv = true
-  print_perf_log = true
 []

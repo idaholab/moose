@@ -54,5 +54,4 @@
 
 [Outputs]
   solution_history = true
-  print_perf_log = true
 []

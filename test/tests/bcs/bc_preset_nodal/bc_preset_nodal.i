@@ -56,5 +56,4 @@
 [Outputs]
   file_base = bc_preset_out
   exodus = true
-  print_perf_log = true
 []

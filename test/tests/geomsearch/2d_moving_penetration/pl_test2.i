@@ -229,5 +229,4 @@
 [Outputs]
   file_base = pl_test2_out
   exodus = true
-  print_perf_log = true
 []

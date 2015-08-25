@@ -107,7 +107,6 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
   [./console]
     type = Console
     max_rows = 10

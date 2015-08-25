@@ -191,5 +191,4 @@
   file_base = j_integral_2d_points_out
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

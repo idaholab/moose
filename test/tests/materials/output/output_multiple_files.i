@@ -72,7 +72,6 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
   [./exodus1]
     type = Exodus
     hide = u

@@ -243,5 +243,4 @@
   interval = 10000
   exodus = true
   hide = pgas
-  print_perf_log = true
 []

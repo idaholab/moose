@@ -49,5 +49,4 @@
 [Outputs]
   file_base = bad_dir/out
   exodus = true
-  print_perf_log = true
 []

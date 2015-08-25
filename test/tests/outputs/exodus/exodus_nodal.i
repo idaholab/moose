@@ -103,7 +103,6 @@
     execute_scalars_on = none
     execute_postprocessors_on = none
   [../]
-  print_perf_log = true
 []
 
 [ICs]

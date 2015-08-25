@@ -186,5 +186,4 @@
   file_base = 2D-RZ_test_out
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

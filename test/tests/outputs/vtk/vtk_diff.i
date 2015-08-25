@@ -56,5 +56,4 @@
 
 [Outputs]
   vtk = true
-  print_perf_log = true
 []

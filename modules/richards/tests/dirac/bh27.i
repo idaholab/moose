@@ -233,7 +233,6 @@
   execute_on = 'initial timestep_end final'
   interval = 100000
   exodus = true
-  print_perf_log = true
 []
 
 

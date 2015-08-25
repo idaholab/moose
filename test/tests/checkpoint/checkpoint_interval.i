@@ -50,7 +50,6 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
   [./out]
     type = Checkpoint
     interval = 3

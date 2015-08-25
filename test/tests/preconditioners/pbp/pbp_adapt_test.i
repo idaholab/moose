@@ -120,5 +120,4 @@
   execute_on = 'timestep_end'
   file_base = out_pbp_adapt
   exodus = true
-  print_perf_log = true
 []

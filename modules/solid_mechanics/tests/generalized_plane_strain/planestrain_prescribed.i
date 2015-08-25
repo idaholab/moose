@@ -223,5 +223,4 @@
 [Outputs]
   print_linear_residuals = true
   exodus = true
-  print_perf_log = true
 []

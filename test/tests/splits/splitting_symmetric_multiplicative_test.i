@@ -100,5 +100,4 @@
 [Outputs]
   file_base = splitting_symmetric_multiplicative_out
   exodus = true
-  print_perf_log = true
 []

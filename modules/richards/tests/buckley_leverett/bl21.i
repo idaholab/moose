@@ -242,5 +242,4 @@
   file_base = bl21
   interval = 10000
   exodus = true
-  print_perf_log = true
 []

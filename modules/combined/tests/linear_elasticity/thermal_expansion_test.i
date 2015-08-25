@@ -124,5 +124,4 @@
   file_base = thermal_expansion
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

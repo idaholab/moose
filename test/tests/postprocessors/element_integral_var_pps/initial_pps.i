@@ -136,5 +136,4 @@
 [Outputs]
   file_base = out_initial_pps
   exodus = true
-  print_perf_log = true
 []

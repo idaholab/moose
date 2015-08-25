@@ -83,7 +83,6 @@
   interval = 1000000
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
   [./console]
     type = Console
     interval = 1

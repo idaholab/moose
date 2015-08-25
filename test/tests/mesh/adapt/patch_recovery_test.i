@@ -107,5 +107,4 @@
 [Outputs]
   file_base = patch_out
   exodus = true
-  print_perf_log = true
 []

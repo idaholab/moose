@@ -49,7 +49,6 @@
 
 [Outputs]
   file_base = out_displaced
-  print_perf_log = true
   [./exodus]
     type = Exodus
     use_displaced = true

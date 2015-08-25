@@ -82,7 +82,6 @@
 [Outputs]
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []
 
 # Here we'll load the wrong library and check for the correct error condition

@@ -152,6 +152,5 @@
   file_base = out_3d
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []      # Output END
 #      # Input file END

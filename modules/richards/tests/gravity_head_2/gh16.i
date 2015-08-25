@@ -282,5 +282,4 @@
   exodus = true
   csv = true
   perf_log = false
-  print_perf_log = true
 []

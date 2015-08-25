@@ -234,5 +234,4 @@
 [Outputs]
   file_base = pl_test3qtt_out
   exodus = true
-  print_perf_log = true
 []

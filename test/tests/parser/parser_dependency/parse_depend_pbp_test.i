@@ -95,5 +95,4 @@
 [Outputs]
   file_base = pbp_out
   exodus = true
-  print_perf_log = true
 []

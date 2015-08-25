@@ -61,5 +61,4 @@
   file_base = fourDa
   exodus = true
   hide = dummy
-  print_perf_log = true
 []

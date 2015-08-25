@@ -173,5 +173,4 @@
   execute_on = 'timestep_end'
   file_base = jn08
   exodus = false
-  print_perf_log = true
 []

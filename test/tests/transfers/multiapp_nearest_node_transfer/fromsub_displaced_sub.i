@@ -54,7 +54,6 @@
 []
 
 [Outputs]
-  print_perf_log = true
   [./out]
     type = Exodus
     use_displaced = true

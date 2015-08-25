@@ -299,5 +299,4 @@
   file_base = one_element_b_0_3025_g_0_6_cubic_out
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

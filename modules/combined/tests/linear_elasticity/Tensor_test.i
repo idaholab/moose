@@ -517,5 +517,4 @@
   file_base = Tensor_test
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

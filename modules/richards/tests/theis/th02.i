@@ -168,5 +168,4 @@
 [Outputs]
   file_base = th02
   csv = true
-  print_perf_log = true
 []

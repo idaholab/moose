@@ -199,7 +199,6 @@
   file_base = j_integral_2d_ctefunc_out
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []
 
 [Preconditioning]

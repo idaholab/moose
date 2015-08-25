@@ -60,7 +60,6 @@
 []
 
 [Outputs]
-  print_perf_log = true
   [./out]
     type = Exodus
     elemental_as_nodal = true

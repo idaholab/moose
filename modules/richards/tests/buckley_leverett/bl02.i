@@ -149,5 +149,4 @@
   file_base = bl02
   interval = 1000000
   exodus = true
-  print_perf_log = true
 []

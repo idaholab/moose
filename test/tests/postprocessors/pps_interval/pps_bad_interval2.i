@@ -131,7 +131,6 @@
 [Outputs]
   file_base = ignore_bad
   exodus = true
-  print_perf_log = true
   [./console]
     type = Console
     interval = 2

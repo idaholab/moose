@@ -76,5 +76,4 @@
 [Outputs]
   exodus = true
   xda = true
-  print_perf_log = true
 []

@@ -87,7 +87,6 @@
 [Outputs]
   exodus = true
   show = u
-  print_perf_log = true
 []
 
 [LotsOfAuxVariables]

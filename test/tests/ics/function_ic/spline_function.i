@@ -46,7 +46,6 @@
 
 [Outputs]
   file_base = spline
-  print_perf_log = true
   [./OverSampling]
     type = Exodus
     refinements = 3

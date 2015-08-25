@@ -59,7 +59,6 @@
 []
 
 [Outputs]
-  print_perf_log = true
   [./out]
     type = Gnuplot
     extension = ps

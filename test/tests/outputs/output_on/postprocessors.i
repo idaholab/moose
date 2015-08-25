@@ -57,7 +57,6 @@
 
 [Outputs]
   exodus = false
-  print_perf_log = true
   [./console]
     type = Console
     execute_postprocessors_on = 'initial nonlinear timestep_end'

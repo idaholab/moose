@@ -62,5 +62,4 @@
 [Outputs]
   file_base = 1d_3d_out
   exodus = true
-  print_perf_log = true
 []

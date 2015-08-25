@@ -53,5 +53,4 @@
 [Outputs]
   file_base = out_quad_angle
   exodus = true
-  print_perf_log = true
 []

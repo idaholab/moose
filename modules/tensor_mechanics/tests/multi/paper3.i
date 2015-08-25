@@ -352,6 +352,5 @@
 [Outputs]
   file_base = paper3
   exodus = false
-  print_perf_log = true
   csv = true
 []

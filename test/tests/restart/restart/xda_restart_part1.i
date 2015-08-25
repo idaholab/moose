@@ -93,7 +93,6 @@
 [Outputs]
   file_base = out_xda_restart_part1
   checkpoint = true
-  print_perf_log = true
   [./out]
     type = Exodus
     elemental_as_nodal = true

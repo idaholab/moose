@@ -131,5 +131,4 @@
   interval = 1
   exodus = true
   csv = true
-  print_perf_log = true
 []

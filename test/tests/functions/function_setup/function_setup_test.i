@@ -69,5 +69,4 @@
 [Outputs]
   file_base = out
   exodus = true
-  print_perf_log = true
 []

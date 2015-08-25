@@ -186,5 +186,4 @@
   exodus = true
   hide = 'u elemental nodal x'
   show = u
-  print_perf_log = true
 []

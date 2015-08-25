@@ -128,7 +128,6 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
   [./console]
     type = Console
     use_displaced = true

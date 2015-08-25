@@ -292,7 +292,6 @@
   file_base = two_surface04
   exodus = false
   print_linear_residuals = true
-  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

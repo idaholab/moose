@@ -47,5 +47,4 @@
 [Outputs]
   exodus = true
   output_if_base_contains = 'sub1_sub1 sub0_sub1'
-  print_perf_log = true
 []

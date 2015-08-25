@@ -128,6 +128,5 @@
   interval = 10
   exodus = true
   csv = 10
-  print_perf_log = true
 [] # Outputs
 []

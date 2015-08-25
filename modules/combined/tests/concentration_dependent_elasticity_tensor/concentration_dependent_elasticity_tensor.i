@@ -129,8 +129,8 @@
 []
 
 [Outputs]
-  exodus = true
   output_on = 'timestep_end'
+  exodus = true
 []
 
 [ICs]

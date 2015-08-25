@@ -58,7 +58,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  print_perf_log = true
   [./csv]
     type = CSV
     file_base = csv_restart_part2_out

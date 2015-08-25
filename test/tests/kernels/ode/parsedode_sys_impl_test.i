@@ -139,5 +139,4 @@
 [Outputs]
   file_base = ode_sys_impl_test_out
   exodus = true
-  print_perf_log = true
 []

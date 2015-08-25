@@ -405,6 +405,5 @@
 [Outputs]
   file_base = cto14
   exodus = false
-  print_perf_log = true
   csv = true
 []

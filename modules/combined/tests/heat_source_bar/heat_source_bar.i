@@ -121,5 +121,4 @@
   file_base = heat_source_bar_out
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

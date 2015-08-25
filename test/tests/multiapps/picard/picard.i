@@ -67,7 +67,6 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
   [./console]
     type = Console
     start_time = 1

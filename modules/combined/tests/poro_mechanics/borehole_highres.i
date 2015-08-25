@@ -714,7 +714,6 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = borehole_highres
-  print_perf_log = true
   exodus = true
   sync_times = '0.003 0.3'
   [./csv_p]

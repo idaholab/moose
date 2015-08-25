@@ -258,7 +258,6 @@
   file_base = out_except_creep
   csv = true
   print_linear_residuals = true
-  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

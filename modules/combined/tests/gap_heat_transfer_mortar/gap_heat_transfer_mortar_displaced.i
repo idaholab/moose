@@ -123,5 +123,4 @@
   exodus = true
   show = 'temp disp_x disp_y'
   print_linear_residuals = true
-  print_perf_log = true
 []

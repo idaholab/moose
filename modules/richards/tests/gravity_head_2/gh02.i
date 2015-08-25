@@ -283,5 +283,4 @@
   execute_on = 'timestep_end'
   file_base = gh02
   csv = true
-  print_perf_log = true
 []

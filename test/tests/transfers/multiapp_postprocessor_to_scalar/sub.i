@@ -66,5 +66,4 @@
 [Outputs]
   exodus = true
   hide = from_master_app
-  print_perf_log = true
 []

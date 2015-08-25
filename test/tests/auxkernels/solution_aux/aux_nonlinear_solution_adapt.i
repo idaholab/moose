@@ -74,5 +74,4 @@
 
 [Outputs]
   xda = true
-  print_perf_log = true
 []
