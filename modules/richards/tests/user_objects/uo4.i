@@ -434,8 +434,7 @@
   file_base = uo4
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
   [./exodus]
     type = Exodus
   [../]

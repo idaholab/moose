@@ -295,6 +295,5 @@
 [Outputs]
   file_base = special_joint1
   exodus = false
-  print_linear_residuals = true
   csv = true
 []

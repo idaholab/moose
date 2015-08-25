@@ -289,9 +289,7 @@
 [Outputs]
   file_base = two_surface05
   exodus = false
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

@@ -223,9 +223,7 @@
 [Outputs]
   file_base = except4
   exodus = false
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

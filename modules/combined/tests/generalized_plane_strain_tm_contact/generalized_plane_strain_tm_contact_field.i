@@ -282,6 +282,5 @@
 []
 
 [Outputs]
-  print_linear_residuals = true
   exodus = true
 []

@@ -213,7 +213,5 @@
 
 [Outputs]
   file_base = Small_IN100_1_partitioned_Marmot
-  interval = 1
   exodus = true
-  print_linear_residuals = true
 []

@@ -179,7 +179,6 @@
 [Outputs]
   output_linear = true
   file_base = merged_rz_out
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

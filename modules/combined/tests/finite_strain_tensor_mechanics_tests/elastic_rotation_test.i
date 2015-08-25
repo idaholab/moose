@@ -255,5 +255,4 @@ active = ''
 [Outputs]
   file_base = elastic_rotation
   exodus = true
-  print_linear_residuals = true
 [] # Outputs

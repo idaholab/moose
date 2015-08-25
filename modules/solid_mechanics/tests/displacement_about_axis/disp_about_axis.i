@@ -185,5 +185,4 @@
 [Outputs]
   file_base = disp_about_axis_out
   exodus = true
-  print_linear_residuals = true
 []

@@ -153,7 +153,6 @@
 
 [Outputs]
   csv = true
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     file_base = IN100-111grn

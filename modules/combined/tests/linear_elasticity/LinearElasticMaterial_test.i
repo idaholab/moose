@@ -201,5 +201,4 @@
 [Outputs]
   file_base = LinearElasticMaterial
   exodus = true
-  print_linear_residuals = true
 []

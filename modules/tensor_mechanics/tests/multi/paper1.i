@@ -290,6 +290,5 @@
 [Outputs]
   file_base = paper1
   exodus = false
-  print_linear_residuals = true
   csv = true
 []

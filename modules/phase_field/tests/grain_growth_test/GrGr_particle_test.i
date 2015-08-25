@@ -128,5 +128,4 @@
   file_base = particle
   csv = true
   exodus = true
-  print_linear_residuals = true
 []

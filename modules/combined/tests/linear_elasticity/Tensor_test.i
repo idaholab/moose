@@ -518,5 +518,4 @@
 [Outputs]
   file_base = Tensor_test
   exodus = true
-  print_linear_residuals = true
 []

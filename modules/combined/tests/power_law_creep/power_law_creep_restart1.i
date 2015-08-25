@@ -255,7 +255,6 @@
 [Outputs]
   exodus = true
   csv = true
-  print_linear_residuals = true
   [./out]
     type = Checkpoint
     num_files = 1

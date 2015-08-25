@@ -160,5 +160,4 @@
   execute_on = 'timestep_end'
   csv = true
   exodus = true
-  print_linear_residuals = true
 []

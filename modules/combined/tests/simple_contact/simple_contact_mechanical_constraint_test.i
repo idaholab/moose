@@ -157,7 +157,6 @@
 
 [Outputs]
   file_base = mechanical_constraint_out
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

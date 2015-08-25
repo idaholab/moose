@@ -139,6 +139,5 @@
   # Output Start
   file_base = out_rz_tf
   exodus = true
-  print_linear_residuals = true
 []      # Output END
 #      # Input file END

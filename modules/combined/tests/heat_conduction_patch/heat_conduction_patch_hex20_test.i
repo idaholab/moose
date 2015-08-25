@@ -148,5 +148,4 @@
 [Outputs]
   file_base = out_hex20
   exodus = true
-  print_linear_residuals = true
 [] # Output

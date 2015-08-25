@@ -156,7 +156,6 @@
 
 [Outputs]
   file_base = out_it_plot
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     output_nonlinear = true

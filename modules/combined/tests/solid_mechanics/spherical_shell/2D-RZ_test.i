@@ -208,5 +208,4 @@
 [Outputs]
   file_base = 2D-RZ_out
   exodus = true
-  print_linear_residuals = true
 []

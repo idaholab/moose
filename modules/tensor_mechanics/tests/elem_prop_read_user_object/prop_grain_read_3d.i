@@ -167,7 +167,6 @@
 [Outputs]
   file_base = prop_grain_read_3d_out
   exodus = true
-  print_linear_residuals = true
 []
 
 [Kernels]

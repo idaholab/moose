@@ -242,7 +242,6 @@
 [Outputs]
   file_base = out
   csv = true
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

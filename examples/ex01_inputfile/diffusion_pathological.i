@@ -7,7 +7,6 @@
 [Outputs]
   file_base = out
   exodus = true
-  print_linear_residuals = true
 []
 
 # Note: The executioner is out of its normal place (should be just about the output block)

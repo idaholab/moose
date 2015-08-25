@@ -449,9 +449,7 @@
 [Outputs]
   file_base = six_surface14
   exodus = false
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

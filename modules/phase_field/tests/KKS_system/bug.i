@@ -76,7 +76,5 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = bug
-  interval = 1
   exodus = true
-  print_linear_residuals = true
 []

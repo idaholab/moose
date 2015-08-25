@@ -165,5 +165,4 @@
   file_base = out
   interval = 4
   exodus = true
-  print_linear_residuals = true
 [] # Outputs

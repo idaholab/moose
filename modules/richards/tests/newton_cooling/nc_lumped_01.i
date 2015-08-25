@@ -129,5 +129,4 @@
   interval = 100000
   execute_on = 'timestep_end final'
   exodus = true
-  print_linear_residuals = true
 []

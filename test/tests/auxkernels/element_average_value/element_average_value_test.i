@@ -65,5 +65,4 @@
   exodus = true
   csv = true
   file_base = out
-  interval = 1
-[]
+  []

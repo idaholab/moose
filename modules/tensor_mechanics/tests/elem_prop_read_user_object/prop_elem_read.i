@@ -157,7 +157,6 @@
 [Outputs]
   file_base = prop_elem_read_out
   exodus = true
-  print_linear_residuals = true
 []
 
 [Kernels]

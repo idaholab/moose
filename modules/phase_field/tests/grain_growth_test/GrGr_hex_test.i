@@ -113,5 +113,4 @@
 [Outputs]
   file_base = hex
   exodus = true
-  print_linear_residuals = true
 []

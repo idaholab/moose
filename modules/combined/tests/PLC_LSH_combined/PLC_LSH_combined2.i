@@ -322,5 +322,4 @@
 [Outputs]
   file_base = PLC_LSH_combined_out
   exodus = true
-  print_linear_residuals = true
 []

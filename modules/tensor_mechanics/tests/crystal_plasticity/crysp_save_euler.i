@@ -241,7 +241,6 @@
 [Outputs]
   file_base = crysp_save_euler_out
   exodus = true
-  print_linear_residuals = true
 []
 
 [Kernels]

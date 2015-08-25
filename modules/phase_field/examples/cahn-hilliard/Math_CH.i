@@ -82,5 +82,4 @@
 [Outputs]
   exodus = true
   active = console
-  print_linear_residuals = true
 []

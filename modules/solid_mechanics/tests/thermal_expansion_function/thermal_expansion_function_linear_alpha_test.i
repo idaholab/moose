@@ -168,5 +168,4 @@
   file_base = linear_alpha_out
   exodus = true
   csv = true
-  print_linear_residuals = true
 []

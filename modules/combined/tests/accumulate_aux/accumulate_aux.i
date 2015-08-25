@@ -79,5 +79,4 @@
 [Outputs]
   file_base = accumulate_aux_out
   exodus = true
-  print_linear_residuals = true
 []

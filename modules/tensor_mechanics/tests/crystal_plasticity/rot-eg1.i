@@ -168,7 +168,6 @@
 [Outputs]
   file_base = rot_eg1
   solution_history = true
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     use_displaced = true

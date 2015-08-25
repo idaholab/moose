@@ -187,7 +187,6 @@
   # csv = true
   file_base = frictional_02_penalty_out
   interval = 10
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

@@ -68,5 +68,4 @@
 [Outputs]
   file_base = Avrami
   exodus = true
-  print_linear_residuals = true
 []

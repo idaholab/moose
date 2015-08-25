@@ -216,7 +216,6 @@
   file_base = one_elem_multi
   exodus = true
   csv = false
-  print_linear_residuals = true
 []
 
 [Problem]

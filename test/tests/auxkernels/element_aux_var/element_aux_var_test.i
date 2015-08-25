@@ -139,7 +139,6 @@
 
 [Outputs]
   file_base = out
-  interval = 1
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

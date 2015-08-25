@@ -132,7 +132,6 @@
 
 [Outputs]
   file_base = out_smp
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     output_nonlinear = true

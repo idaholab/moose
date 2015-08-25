@@ -191,5 +191,4 @@
 [Outputs]
   file_base = j_integral_2d_mouth_dir_out
   exodus = true
-  print_linear_residuals = true
 []

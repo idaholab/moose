@@ -63,5 +63,4 @@
 []
 
 [Outputs]
-  print_linear_residuals = true
 []

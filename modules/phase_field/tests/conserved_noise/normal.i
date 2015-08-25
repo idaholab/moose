@@ -115,7 +115,6 @@
 [Outputs]
   file_base = normal
   exodus = true
-  print_linear_residuals = true
   [./csv]
     type = CSV
     delimiter = ' '

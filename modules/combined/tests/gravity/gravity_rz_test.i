@@ -197,7 +197,6 @@
 
 [Outputs]
   file_base = out_rz
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

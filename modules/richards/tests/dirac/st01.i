@@ -200,7 +200,6 @@
   file_base = st01
   exodus = false
   csv = true
-  print_linear_residuals = true
 []
 
 [Problem]

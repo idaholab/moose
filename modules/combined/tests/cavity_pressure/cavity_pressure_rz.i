@@ -205,7 +205,6 @@
 
 [Outputs]
   exodus = true
-  print_linear_residuals = true
   [./checkpoint]
     type = Checkpoint
     num_files = 1

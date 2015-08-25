@@ -127,5 +127,4 @@
   file_base = out_rz
   exodus = true
   csv = true
-  print_linear_residuals = true
 []

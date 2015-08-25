@@ -177,5 +177,4 @@
   execute_on = 'timestep_end'
   file_base = out_2var
   exodus = true
-  print_linear_residuals = true
 []

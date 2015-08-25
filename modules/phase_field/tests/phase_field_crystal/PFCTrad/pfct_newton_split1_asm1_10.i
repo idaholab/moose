@@ -126,7 +126,6 @@
 [Outputs]
   file_base = pfct_newton_split1_asm1_10_out
   exodus = true
-  print_linear_residuals = true
 []
 
 

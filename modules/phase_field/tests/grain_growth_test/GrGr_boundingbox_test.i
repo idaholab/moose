@@ -111,5 +111,4 @@
   file_base = bounding_box
   csv = true
   exodus = true
-  print_linear_residuals = true
 []

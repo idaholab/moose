@@ -49,7 +49,5 @@
 []
 
 [Outputs]
-  output_initial = true # Output initial condiiton
-  exodus = true # Output Exodus format # Show performance log information on screen
-  print_linear_residuals = true # Display linear residuals on screen
+  exodus = true # Output Exodus format
 []

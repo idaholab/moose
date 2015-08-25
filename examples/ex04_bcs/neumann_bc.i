@@ -96,5 +96,4 @@
 [Outputs]
   file_base = out_coupled_neumann
   exodus = true
-  print_linear_residuals = true
 []

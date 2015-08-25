@@ -221,7 +221,6 @@
 [Outputs]
   file_base = 3dz_scale_out
   exodus = true
-  print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true

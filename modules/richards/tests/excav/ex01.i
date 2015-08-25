@@ -236,7 +236,6 @@
   file_base = ex01
   exodus = true
   csv = true
-  print_linear_residuals = true
 []
 
 [Problem]

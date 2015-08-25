@@ -110,5 +110,4 @@
 [Outputs]
   file_base = voronoi
   exodus = true
-  print_linear_residuals = true
 []

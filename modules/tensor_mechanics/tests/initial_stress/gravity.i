@@ -234,9 +234,7 @@
 [Outputs]
   file_base = gravity
   exodus = true
-  print_linear_residuals = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

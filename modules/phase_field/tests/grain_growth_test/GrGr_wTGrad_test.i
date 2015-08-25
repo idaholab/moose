@@ -133,5 +133,4 @@
   execute_on = 'timestep_end'
   file_base = wT
   exodus = true
-  print_linear_residuals = true
 []

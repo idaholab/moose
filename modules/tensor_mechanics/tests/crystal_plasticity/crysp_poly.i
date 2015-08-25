@@ -204,7 +204,6 @@
 [Outputs]
   file_base = outpoly
   exodus = true
-  print_linear_residuals = true
 []
 
 [TensorMechanics]
