@@ -41,7 +41,7 @@
 
 [Kernels]
   [./c_bulk]
-    type = CHParsed
+    type = CahnHilliard
     variable = c
     mob_name = M
     f_name = F

@@ -9,7 +9,7 @@
 template<>
 InputParameters validParams<KKSCHBulk>()
 {
-  InputParameters params = validParams<CHBulk>();
+  InputParameters params = CHBulk<Real>::validParams();
   params.addClassDescription("KKS model kernel for the Bulk Cahn-Hilliard term. This operates on the concentration 'c' as the non-linear variable");
   params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
   params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function F (f_name in the corresponding derivative function material)");
@@ -21,7 +21,7 @@ InputParameters validParams<KKSCHBulk>()
 }
 
 KKSCHBulk::KKSCHBulk(const InputParameters & parameters) :
-    CHBulk(parameters),
+    CHBulk<Real>(parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _ca_var(coupled("ca")),
@@ -115,4 +115,3 @@ KKSCHBulk::computeQpOffDiagJacobian(unsigned int jvar)
   // keeping this term seems to improve the solution.
   return res * _grad_test[_j][_qp];
 }
-

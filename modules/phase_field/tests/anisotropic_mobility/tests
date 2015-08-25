@@ -1,0 +1,12 @@
+[Tests]
+  [./split]
+    type = 'Exodiff'
+    input = 'split.i'
+    exodiff = 'split_out.e'
+  [../]
+  [./nonsplit]
+    type = 'Exodiff'
+    input = 'nonsplit.i'
+    exodiff = 'nonsplit_out.e'
+  [../]
+[]

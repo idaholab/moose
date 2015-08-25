@@ -9,13 +9,13 @@
 template<>
 InputParameters validParams<CHMath>()
 {
-  InputParameters params = validParams<CHBulk>();
+  InputParameters params = CHBulk<Real>::validParams();
   params.addClassDescription("Simple demonstration Cahn-Hilliard Kernel using an algebraic double-well potential");
   return params;
 }
 
 CHMath::CHMath(const InputParameters & parameters) :
-    CHBulk(parameters)
+    CHBulk<Real>(parameters)
 {
 }
 
@@ -33,4 +33,3 @@ CHMath::computeGradDFDCons(PFFunctionType type)
 
   mooseError("Invalid type passed in");
 }
-

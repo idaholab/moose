@@ -4,8 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef CHINTERFACE_H
-#define CHINTERFACE_H
+#ifndef CHINTERFACEANISO_H
+#define CHINTERFACEANISO_H
 
 #include "CHInterfaceBase.h"
 
@@ -13,13 +13,13 @@
  * This is the Cahn-Hilliard equation base class that implements the interfacial
  * or gradient energy term of the equation. With a scalar (isotropic) mobility.
  */
-class CHInterface : public CHInterfaceBase<Real>
+class CHInterfaceAniso : public CHInterfaceBase<RealTensorValue>
 {
 public:
-  CHInterface(const InputParameters & parameters);
+  CHInterfaceAniso(const InputParameters & parameters);
 };
 
 template<>
-InputParameters validParams<CHInterface>();
+InputParameters validParams<CHInterfaceAniso>();
 
-#endif //CHINTERFACE_H
+#endif //CHINTERFACEANISO_H

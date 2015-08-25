@@ -20,7 +20,7 @@ InputParameters validParams<CHMath>();
  * and implements a simple polynomial double well to model spinodal decomposition.
  * See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29, Eqs 11 and 12.
  **/
-class CHMath : public CHBulk
+class CHMath : public CHBulk<Real>
 {
 public:
   CHMath(const InputParameters & parameters);
