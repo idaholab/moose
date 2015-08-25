@@ -50,7 +50,6 @@
 [Outputs]
   output_on = 'timestep_end'
   print_perf_log = true
-  print_linear_residuals = true
   [./out]
     type = VTK
     nonlinear_residual_dt_divisor = 100

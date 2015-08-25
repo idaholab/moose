@@ -73,7 +73,6 @@
 
 [Outputs]
   print_perf_log = true
-  print_linear_residuals = true
   [./markers]
     type = Exodus
   [../]

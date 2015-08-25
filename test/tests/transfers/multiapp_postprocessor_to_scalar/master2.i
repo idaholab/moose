@@ -78,7 +78,6 @@
 [Outputs]
   exodus = true
   hide = from_sub_app
-  print_linear_residuals = true
   print_perf_log = true
 []
 

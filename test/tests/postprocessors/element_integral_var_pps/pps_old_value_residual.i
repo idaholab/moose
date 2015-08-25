@@ -87,5 +87,4 @@
   file_base = pps_old_value_out
   exodus = true
   print_perf_log = true
-  print_linear_residuals = true
 []

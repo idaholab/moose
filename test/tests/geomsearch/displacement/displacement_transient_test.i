@@ -91,7 +91,6 @@
 
 [Outputs]
   print_perf_log = true
-  print_linear_residuals = true
   [./out_displaced]
     type = Exodus
     use_displaced = true

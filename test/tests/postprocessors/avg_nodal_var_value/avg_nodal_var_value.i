@@ -128,5 +128,4 @@
   file_base = out_avg_nodal_var_value
   exodus = true
   print_perf_log = true
-  print_linear_residuals = true
 []

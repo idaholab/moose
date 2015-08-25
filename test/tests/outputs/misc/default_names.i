@@ -49,6 +49,5 @@
     type = Exodus
     refinements = 1
   [../]
-  print_linear_residuals = true
   print_perf_log = true
 []

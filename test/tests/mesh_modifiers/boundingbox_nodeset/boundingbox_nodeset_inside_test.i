@@ -61,7 +61,6 @@
 [Outputs]
   file_base = boundingbox_nodeset_inside_out
   exodus = true
-  print_linear_residuals = true
   print_perf_log = true
 []
 

@@ -57,7 +57,6 @@
 
 [Outputs]
   print_perf_log = true
-  print_linear_residuals = true
   [./indicators]
     type = Exodus
   [../]
