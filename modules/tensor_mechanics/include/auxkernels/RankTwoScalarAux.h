@@ -14,7 +14,8 @@ class RankTwoScalarAux;
 
 /**
  * RankTwoScalarAux provides scalar values of RankTwoTensor
- * Currently supported are VonMisesStress, EquivalentPlasticStrain, Hydrostatic, L2norm
+ * Currently supported are VonMisesStress, EquivalentPlasticStrain, Hydrostatic, L2norm,
+ * MaxPrincipal, MidPrincipal, MinPrincipal
  */
 
 template<>
@@ -28,6 +29,8 @@ public:
 
 protected:
   virtual Real computeValue();
+  Real calcEigenValues();
+
   const MaterialProperty<RankTwoTensor> & _tensor;
   MooseEnum _scalar_type;
 

@@ -1,0 +1,192 @@
+[Mesh]
+  type = GeneratedMesh
+  elem_type = HEX8
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
+  xmin=0.0
+  xmax=1.0
+  ymin=0.0
+  ymax=1.0
+  zmin=0.0
+  zmax=1.0
+  displacements = 'disp_x disp_y disp_z'
+[]
+
+[Variables]
+  [./disp_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y disp_z'
+  [../]
+[]
+
+[Materials]
+  active='felastic'
+  [./felastic]
+    type = FiniteStrainPlasticMaterial
+    block=0
+    fill_method = symmetric9
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    C_ijkl = '2.827e5 1.21e5 1.21e5 2.827e5 1.21e5 2.827e5 0.808e5 0.808e5 0.808e5'
+    yield_stress='0. 445. 0.05 610. 0.1 680. 0.38 810. 0.95 920. 2. 950.'
+  [../]
+[]
+
+[BCs]
+  [./left]
+    type = PresetBC
+    variable = disp_x
+    boundary = left
+    value = 0.0
+  [../]
+  [./bottom]
+    type = PresetBC
+    variable = disp_y
+    boundary = bottom
+    value = 0.0
+  [../]
+  [./back]
+    type = PresetBC
+    variable = disp_z
+    boundary = back
+    value = 0.0
+  [../]
+  [./front]
+    type = FunctionPresetBC
+    variable = disp_z
+    boundary = front
+    function = 't'
+  [../]
+  [./right]
+    type = FunctionPresetBC
+    variable = disp_y
+    boundary = right
+    function = '-0.5*t'
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./peeq]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_max]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_mid]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_min]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_zz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_zz
+    index_i = 2
+    index_j = 2
+  [../]
+  [./peeq]
+    type = RankTwoScalarAux
+    rank_two_tensor = plastic_strain
+    variable = peeq
+    scalar_type = EquivalentPlasticStrain
+  [../]
+  [./stress_max]
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    variable = stress_max
+    scalar_type = MaxPrincipal
+  [../]
+  [./stress_mid]
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    variable = stress_mid
+    scalar_type = MidPrincipal
+  [../]
+  [./stress_min]
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    variable = stress_min
+    scalar_type = MinPrincipal
+  [../]
+[]
+
+[Postprocessors]
+  [./stress_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+    block = 'ANY_BLOCK_ID 0'
+  [../]
+  [./peeq]
+    type = ElementAverageValue
+    variable = peeq
+    block = 'ANY_BLOCK_ID 0'
+  [../]
+  [./stress_max]
+    type = ElementAverageValue
+    variable = stress_max
+    block = 'ANY_BLOCK_ID 0'
+  [../]
+  [./stress_mid]
+    type = ElementAverageValue
+    variable = stress_mid
+    block = 'ANY_BLOCK_ID 0'
+  [../]
+  [./stress_min]
+    type = ElementAverageValue
+    variable = stress_min
+    block = 'ANY_BLOCK_ID 0'
+  [../]
+[]
+
+[Executioner]
+  start_time = 0.0
+  end_time=1.0
+  dt=0.1
+  dtmax=1
+  dtmin=0.1
+  type = Transient
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  nl_abs_tol = 1e-10
+[]
+
+
+[Outputs]
+  file_base = principal_aux
+  exodus = true
+  csv = true
+[]

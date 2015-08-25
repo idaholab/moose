@@ -4,4 +4,9 @@
     input = 'test.i'
     exodiff = 'out.e'
   [../]
+  [./test_principal]
+    type = 'Exodiff'
+    input = 'test_principal.i'
+    exodiff = 'principal_aux.e'
+  [../]
 []
