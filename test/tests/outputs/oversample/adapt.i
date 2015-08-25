@@ -73,12 +73,12 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   exodus = true
   [./oversample]
     type = Exodus
     refinements = 2
     file_base = adapt_out_oversample
-    output_on = 'initial timestep_end'
+    execute_on = 'initial timestep_end'
   [../]
 []

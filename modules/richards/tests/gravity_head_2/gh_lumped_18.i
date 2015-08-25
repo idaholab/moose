@@ -279,7 +279,7 @@
 
 [Outputs]
   file_base = gh_lumped_18
-  output_on = 'timestep_end final'
+  execute_on = 'timestep_end final'
   interval = 100000
   exodus = true
   print_perf_log = true

@@ -45,7 +45,7 @@
 [Outputs]
   [./out]
     type = Exodus
-    output_on = 'initial timestep_end failed nonlinear linear'
+    execute_on = 'initial timestep_end failed nonlinear linear'
     sequence = true
   [../]
 []

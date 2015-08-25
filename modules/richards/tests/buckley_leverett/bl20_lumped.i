@@ -222,7 +222,7 @@
 
 [Outputs]
   file_base = bl20_lumped
-  output_on = 'initial timestep_end final'
+  execute_on = 'initial timestep_end final'
   interval = 100000
   exodus = true
   hide = pgas

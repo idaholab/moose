@@ -48,13 +48,13 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   print_perf_log = true
   [./out]
     type = VTK
     nonlinear_residual_dt_divisor = 100
     start_time = 1.8
     end_time = 1.85
-    output_on = 'nonlinear timestep_end'
+    execute_on = 'nonlinear timestep_end'
   [../]
 []

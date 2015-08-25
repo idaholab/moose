@@ -169,7 +169,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   file_base = kks_phase_concentration
   exodus = true
   print_linear_residuals = true

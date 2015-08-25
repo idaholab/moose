@@ -48,10 +48,10 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   print_perf_log = true
   [./console]
     type = Console
-    additional_output_on = initial
+    additional_execute_on = initial
   [../]
 []

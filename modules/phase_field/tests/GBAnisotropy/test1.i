@@ -117,7 +117,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   exodus = true
   csv = true
   print_linear_residuals = true

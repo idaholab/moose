@@ -141,7 +141,7 @@
   [./additional_output_on]
     # Test use of 'additional_output_on' parameter
     type = RunApp
-    input = 'additional_output_on.i'
+    input = 'additional_execute_on.i'
     expect_out = 'Time\sStep\s*0'
   [../]
 []

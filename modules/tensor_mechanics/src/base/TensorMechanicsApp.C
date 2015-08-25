@@ -85,7 +85,7 @@ InputParameters validParams<TensorMechanicsApp>()
   InputParameters params = validParams<MooseApp>();
   params.set<bool>("use_legacy_uo_initialization") = false;
   params.set<bool>("use_legacy_uo_aux_computation") = false;
-
+  params.set<bool>("use_legacy_output_syntax") = false;
   return params;
 }
 
@@ -200,4 +200,3 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(PoroMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
 }
-

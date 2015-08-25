@@ -83,7 +83,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   file_base = ne
   exodus = true
   print_perf_log = true

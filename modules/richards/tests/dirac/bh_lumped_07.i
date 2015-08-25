@@ -176,7 +176,7 @@
 
 [Outputs]
   file_base = bh_lumped_07
-  output_on = 'initial timestep_end final'
+  execute_on = 'initial timestep_end final'
   interval = 10000
   exodus = true
   print_perf_log = true

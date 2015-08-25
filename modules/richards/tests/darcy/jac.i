@@ -56,7 +56,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   file_base = jac
   exodus = false
   print_perf_log = false

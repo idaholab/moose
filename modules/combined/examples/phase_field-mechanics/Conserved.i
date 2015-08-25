@@ -222,10 +222,6 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
-  interval = 1
+  execute_on = 'timestep_end'
   exodus = true
-  output_on = timestep_end
-  print_linear_residuals = true
-  print_perf_log = true
 []

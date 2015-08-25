@@ -239,13 +239,13 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   file_base = bl22_lumped_fu
   print_perf_log = true
   [./exodus]
     type = Exodus
     interval = 100000
     hide = 'pgas bounds_dummy'
-    output_on = 'initial final timestep_end'
+    execute_on = 'initial final timestep_end'
   [../]
 []

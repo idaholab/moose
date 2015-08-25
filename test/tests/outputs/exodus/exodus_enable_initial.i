@@ -40,11 +40,11 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   print_perf_log = true
   [./out]
     type = Exodus
-    output_on = 'initial timestep_end'
+    execute_on = 'initial timestep_end'
   [../]
 []
 

@@ -97,7 +97,7 @@
 
 [Outputs]
   file_base = explicit
-  output_on = 'initial timestep_end final'
+  execute_on = 'initial timestep_end final'
   csv = true
   interval = 20
   exodus = true

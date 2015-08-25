@@ -40,7 +40,7 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
+  execute_on = 'timestep_end'
   # This block is needed so cli_args in the tests files is available
   [./console]
     type = Console
