@@ -7,7 +7,7 @@
 #ifndef LINEARISOELASTICPFDAMAGE_H
 #define LINEARISOELASTICPFDAMAGE_H
 
-#include "LinearElasticMaterial.h"
+#include "ComputeStressBase.h"
 #include "Function.h"
 
 /**
@@ -16,33 +16,28 @@
  * Small strain Isotropic Elastic formulation
  * Stiffness matrix scaled for heterogeneous elasticity property
  */
-class LinearIsoElasticPFDamage : public LinearElasticMaterial
+class LinearIsoElasticPFDamage : public ComputeStressBase
 {
 public:
   LinearIsoElasticPFDamage(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpElasticityTensor();
   virtual void computeQpStress();
   virtual void updateVar();
+  virtual void updateJacobian();
 
-  /**
-   * This function obtains the value of _scaling
-   * Must be overidden by the user for heterogeneous elasticity
-   */
-  virtual void getScalingFactor();
-
-  VariableValue & _c;
+  const VariableValue & _c;
+  /// Small number to avoid non-positive definiteness at or near complete damage
   Real _kdamage;
 
-  MaterialProperty<RankTwoTensor> & _dstress_dc;
   MaterialProperty<Real> & _G0_pos;
+  MaterialProperty<RankTwoTensor> & _dstress_dc;
   MaterialProperty<RankTwoTensor> & _dG0_pos_dstrain;
 
-  /// Small number to avoid non-positive definiteness at or near complete damage
-  Real _scaling;
   std::vector<RankTwoTensor> _etens;
   std::vector<Real> _epos;
+  std::vector<Real> _eigval;
+  RankTwoTensor _eigvec;
 };
 
 #endif //LINEARISOELASTICPFDAMAGE_H

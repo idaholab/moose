@@ -40,13 +40,13 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   ///Critical energy release rate for fracture
   const MaterialProperty<Real> & _gc_prop;
-  ///Contribution from positive component of strain to energy
+  ///Contribution of umdamaged strain energy to damage evolution
   const MaterialProperty<Real> & _G0_pos;
-  ///Variation of positive component of energy with strain
-  const MaterialProperty<RankTwoTensor> & _dG0_pos_dstrain;
+  ///Variation of undamaged strain energy driving damage evolution with strain
+  const MaterialProperty<RankTwoTensor> * _dG0_pos_dstrain;
   ///Auxiliary variable: beta = Laplacian of c
-  VariableValue & _betaval;
-  unsigned int _beta_var;
+  const VariableValue & _betaval;
+  const unsigned int _beta_var;
 
   const bool _xdisp_coupled;
   const bool _ydisp_coupled;

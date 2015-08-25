@@ -47,6 +47,7 @@
 #include "ComputeVariableEigenstrain.h"
 #include "ComputeConcentrationDependentElasticityTensor.h"
 #include "FiniteStrainHyperElasticViscoPlastic.h"
+#include "LinearIsoElasticPFDamage.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -151,6 +152,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeVariableEigenstrain);
   registerMaterial(ComputeConcentrationDependentElasticityTensor);
   registerMaterial(FiniteStrainHyperElasticViscoPlastic);
+  registerMaterial(LinearIsoElasticPFDamage);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

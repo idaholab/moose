@@ -13,6 +13,9 @@ InputParameters validParams<PFFracBulkRate>()
   params.addClassDescription("Kernel to compute bulk energy contribution to damage order parameter residual equation");
   params.addRequiredParam<Real>("l","Interface width");
   params.addRequiredParam<Real>("visco","Viscosity parameter");
+  params.addRequiredParam<MaterialPropertyName>("gc_prop_var", "Material property name with gc value");
+  params.addRequiredParam<MaterialPropertyName>("G0_var", "Material property name with undamaged strain energy driving damage (G0_pos)");
+  params.addParam<MaterialPropertyName>("dG0_dstrain_var", "Material property name with derivative of G0_pos with strain");
   params.addRequiredCoupledVar("beta", "Auxiliary variable");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
@@ -23,9 +26,9 @@ InputParameters validParams<PFFracBulkRate>()
 
 PFFracBulkRate::PFFracBulkRate(const InputParameters & parameters):
   KernelValue(parameters),
-  _gc_prop(getMaterialProperty<Real>("gc_prop")),
-  _G0_pos(getMaterialProperty<Real>("G0_pos")),
-  _dG0_pos_dstrain(getMaterialProperty<RankTwoTensor>("dG0_pos_dstrain")),
+  _gc_prop(getMaterialProperty<Real>("gc_prop_var")),
+  _G0_pos(getMaterialProperty<Real>("G0_var")),
+  _dG0_pos_dstrain(isParamValid("dG0_dstrain_var") ? &getMaterialProperty<RankTwoTensor>("dG0_dstrain_var"): NULL),
   _betaval(coupledValue("beta")),
   _beta_var(coupled("beta")),
   _xdisp_coupled(isCoupled("disp_x")),
@@ -117,12 +120,12 @@ PFFracBulkRate::computeQpOffDiagJacobian(unsigned int jvar)
   else
     return 0.0;
   //Contribution of displacements to off diag Jacobian of c
-  if ( disp_flag )
+  if (disp_flag && _dG0_pos_dstrain != NULL)
   {
     Real val = 0.0;
 
-    for (unsigned int i = 0; i < 3; ++i)
-      val +=  (_dG0_pos_dstrain[_qp](c_comp,i) + _dG0_pos_dstrain[_qp](i,c_comp))/2.0 * _grad_phi[_j][_qp](i);
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      val +=  ((*_dG0_pos_dstrain)[_qp](c_comp,i) + (*_dG0_pos_dstrain)[_qp](i,c_comp))/2.0 * _grad_phi[_j][_qp](i);
 
     return xfac * val * _test[_i][_qp];
   }

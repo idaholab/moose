@@ -16,6 +16,8 @@
 #define STRESSDIVERGENCEPFFRACTENSORS_H
 
 #include "StressDivergenceTensors.h"
+#include "Material.h"
+#include "DerivativeMaterialInterface.h"
 
 /**
  * This class computes the off-diagonal Jacobian component of stress divergence residual system
@@ -29,7 +31,7 @@ class StressDivergencePFFracTensors;
 template<>
 InputParameters validParams<StressDivergencePFFracTensors>();
 
-class StressDivergencePFFracTensors : public StressDivergenceTensors
+class StressDivergencePFFracTensors : public DerivativeMaterialInterface<StressDivergenceTensors>
 {
 public:
   StressDivergencePFFracTensors(const InputParameters & parameters);
@@ -37,10 +39,9 @@ public:
 protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const MaterialProperty<RankTwoTensor> * _d_stress_dc;
-
   const bool _c_coupled;
   const unsigned int _c_var;
+  const MaterialProperty<RankTwoTensor> & _d_stress_dc;
 };
 
 #endif //STRESSDIVERGENCEPFFRACTENSORS_H
