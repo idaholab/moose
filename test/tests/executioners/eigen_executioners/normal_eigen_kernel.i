@@ -76,6 +76,5 @@
 [Outputs]
   file_base = normal_eigen_kernel
   exodus = true
-  print_linear_residuals = true
   print_perf_log = true
 []

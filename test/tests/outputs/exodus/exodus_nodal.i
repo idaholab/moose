@@ -103,7 +103,6 @@
     output_scalars_on = none
     output_postprocessors_on = none
   [../]
-  print_linear_residuals = true
   print_perf_log = true
 []
 

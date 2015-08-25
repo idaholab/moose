@@ -59,6 +59,5 @@
 [Outputs]
   file_base = out_gen
   exodus = true
-  print_linear_residuals = true
   print_perf_log = true
 []

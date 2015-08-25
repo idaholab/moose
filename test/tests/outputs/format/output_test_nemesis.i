@@ -62,6 +62,5 @@
 [Outputs]
   file_base = out
   nemesis = 1
-  print_linear_residuals = true
   print_perf_log = true
 []

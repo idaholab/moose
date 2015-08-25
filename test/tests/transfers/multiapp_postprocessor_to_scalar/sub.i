@@ -66,6 +66,5 @@
 [Outputs]
   exodus = true
   hide = from_master_app
-  print_linear_residuals = true
   print_perf_log = true
 []

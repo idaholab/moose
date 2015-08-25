@@ -131,7 +131,6 @@
 [Outputs]
   file_base = ignore_bad
   exodus = true
-  print_linear_residuals = true
   print_perf_log = true
   [./console]
     type = Console

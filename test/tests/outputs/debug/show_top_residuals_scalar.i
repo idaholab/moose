@@ -30,7 +30,6 @@
 [Outputs]
   exodus = true
   print_perf_log = true
-  print_linear_residuals = true
   [./debug] # This is only test, use [Debug] block to enable this
     type = TopResidualDebugOutput
     num_residuals = 1

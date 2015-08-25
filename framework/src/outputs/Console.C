@@ -97,7 +97,7 @@ InputParameters validParams<Console>()
   params.set<MultiMooseEnum>("output_system_information_on", /*quiet_mode=*/true) = "initial";
 
   // Change the default behavior of 'output_on' to included nonlinear iterations and failed timesteps
-  params.set<MultiMooseEnum>("output_on", /*quiet_mode=*/true).push_back("timestep_begin nonlinear failed");
+  params.set<MultiMooseEnum>("output_on", /*quiet_mode=*/true).push_back("timestep_begin linear nonlinear failed");
 
   // By default postprocessors and scalar are only output at the end of a timestep
   params.set<MultiMooseEnum>("output_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
@@ -138,8 +138,7 @@ Console::Console(const InputParameters & parameters) :
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
   Action * common_action = awh.getActionsByName("common_output")[0];
-  if (!_pars.paramSetByUser("output_on") && common_action->getParam<bool>("print_linear_residuals"))
-    _output_on.push_back("linear");
+
   if (!_pars.paramSetByUser("perf_log") && common_action->getParam<bool>("print_perf_log"))
   {
     _perf_log = true;

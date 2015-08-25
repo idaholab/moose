@@ -65,7 +65,6 @@ InputParameters validParams<CommonOutputAction>()
   params.addParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("initial timestep_end"), "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment (default: 'initial timestep_end')");
 
   // Add special Console flags
-  params.addParam<bool>("print_linear_residuals", false, "Enable printing of linear residuals to the screen (Console)");
   params.addParam<bool>("print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
   params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
 

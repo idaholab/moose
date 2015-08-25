@@ -48,6 +48,5 @@
 [Outputs]
   file_base = neumannbc_out
   exodus = true
-  print_linear_residuals = true
   print_perf_log = true
 []

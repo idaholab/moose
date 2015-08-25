@@ -19,7 +19,6 @@
 [Outputs]
   file_base = 2d_diffusion_out
   exodus = true
-  print_linear_residuals = true
   print_perf_log = true
 []
 
