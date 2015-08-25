@@ -83,13 +83,39 @@ Syntax::addDependencySets(const std::string & action_sets)
 const std::vector<std::string> &
 Syntax::getSortedTask()
 {
-  return _tasks.getSortedValues();
+  try
+  {
+    return _tasks.getSortedValues();
+  }
+  catch(CyclicDependencyException<std::string> & e)
+  {
+    std::ostringstream oss;
+
+    oss << "Cyclic dependency detected in task ordering:\n";
+    const std::multimap<std::string, std::string> & depends = e.getCyclicDependencies();
+    for (std::multimap<std::string, std::string>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+      oss << (it->first) << " -> " << (it->second) << "\n";
+    mooseError(oss.str());
+  }
 }
 
 const std::vector<std::set<std::string> > &
 Syntax::getSortedTaskSet()
 {
-  return _tasks.getSortedValuesSets();
+  try
+  {
+    return _tasks.getSortedValuesSets();
+  }
+  catch(CyclicDependencyException<std::string> & e)
+  {
+    std::ostringstream oss;
+
+    oss << "Cyclic dependency detected in task ordering:\n";
+    const std::multimap<std::string, std::string> & depends = e.getCyclicDependencies();
+    for (std::multimap<std::string, std::string>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+      oss << (it->first) << " -> " << (it->second) << "\n";
+    mooseError(oss.str());
+  }
 }
 
 bool
