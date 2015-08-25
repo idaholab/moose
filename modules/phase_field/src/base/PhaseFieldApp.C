@@ -76,6 +76,7 @@
  */
 #include "BarrierFunctionMaterial.h"
 #include "ComputePolycrystalElasticityTensor.h"
+#include "ConstantAnisotropicMobility.h"
 #include "DerivativeMultiPhaseMaterial.h"
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
@@ -277,6 +278,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerMaterial(BarrierFunctionMaterial);
   registerMaterial(ComputePolycrystalElasticityTensor);
+  registerMaterial(ConstantAnisotropicMobility);
   registerMaterial(DerivativeMultiPhaseMaterial);
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
