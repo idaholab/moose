@@ -127,6 +127,11 @@ public:
    */
   void allowOutput(bool state) { _allow_output = state; }
 
+  /**
+   * A static helper for injecting deprecated parameters
+   */
+  static void addDeprecatedInputParameters(InputParameters & params);
+
 
 protected:
 
@@ -162,6 +167,9 @@ protected:
    * This populates the various data structures needed to control the output
    */
   virtual void initialSetup();
+
+  // **** DEPRECATED PARAMETER SUPPORT ****
+  void applyOutputOnShortCutFlags(MultiMooseEnum & input);
 
   /// Pointer the the FEProblem object for output object (use this)
   FEProblem * _problem_ptr;

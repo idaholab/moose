@@ -68,6 +68,12 @@ InputParameters validParams<CommonOutputAction>()
   params.addParam<bool>("print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
   params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
 
+  // **** DEPRECATED SUPPORT ****
+  Output::addDeprecatedInputParameters(params);
+  params.addDeprecatedParam("print_linear_residuals", true, "Enable printing of linear residuals to the screen (Console)",
+                            "Printing linear residuals is now enabled by default, to disable use the 'output_on' parameter inside a Console block");
+
+
   // Return object
   return params;
 }
@@ -78,6 +84,17 @@ CommonOutputAction::CommonOutputAction(InputParameters params) :
 {
   // Set the ActionWarehouse pointer in the parameters that will be passed to the actions created with this action
   _action_params.set<ActionWarehouse *>("awh") = &_awh;
+
+  // **** DEPRECATED PARAMETER SUPPORT ****
+  MultiMooseEnum & output_on = _pars.set<MultiMooseEnum>("output_on");
+  if (getParam<bool>("output_initial"))
+    output_on.push_back("initial");
+  if (getParam<bool>("output_timestep_end"))
+    output_on.push_back("timestep_end");
+  if (getParam<bool>("output_final"))
+    output_on.push_back("final");
+  if (getParam<bool>("output_intermediate"))
+    output_on.push_back("timestep_end");
 }
 
 void
