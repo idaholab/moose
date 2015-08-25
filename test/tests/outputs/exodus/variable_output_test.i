@@ -93,7 +93,7 @@
     file_base = new_out
     hide_variables = 'u box aux_pp'
     scalar_as_nodal = true
-    output_scalars_on = none
+    execute_scalars_on = none
   [../]
   [./console]
     Type = Console

@@ -361,11 +361,6 @@ public:
    */
   InputParameterWarehouse & getInputParameterWarehouse();
 
-  /**
-   * Returns true if legacy constructors are being used
-   */
-  bool usingLegacyConstructors() { return _legacy_constructors; }
-
   /*
    * Register a piece of restartable data.  This is data that will get
    * written / read to / from a restart file.
@@ -419,6 +414,11 @@ public:
    * Execute and clear the Mesh Modifiers data structure
    */
   void executeMeshModifiers();
+
+  /**
+   * True if using the legacy input syntax for outputs
+   */
+  bool useLegacyOutputSyntax(){ return _use_legacy_output_syntax; }
 
 protected:
 
@@ -551,9 +551,6 @@ protected:
   /// Legacy Uo Initialization flag
   bool _legacy_uo_initialization_default;
 
-  /// True when using legacy constructors
-  bool _legacy_constructors;
-
   /// true if we want to just check the input file
   bool _check_input;
 
@@ -575,6 +572,9 @@ private:
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, MooseSharedPointer<MeshModifier> > _mesh_modifiers;
+
+  /// Enables the use of legacy 'output_on' syntax
+  bool _use_legacy_output_syntax;
 
   ///@{
   /**

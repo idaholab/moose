@@ -99,9 +99,9 @@ public:
   const unsigned int & interval() const;
 
   /**
-   * Get the current 'output_on' selections for display
+   * Get the current 'execute_on' selections for display
    */
-  const MultiMooseEnum & outputOn() const;
+  const MultiMooseEnum & executeOn() const;
 
   /**
    * Returns true if this object is an AdvancedOutput object
@@ -109,11 +109,11 @@ public:
   bool isAdvanced();
 
   /**
-   * Returns the advanced output_on settings.
+   * Returns the advanced 'execute_on' settings.
    *
    * Check if this is valid first with isAdvanced()
    */
-  virtual const OutputOnWarehouse & advancedOutputOn() const;
+  virtual const OutputOnWarehouse & advancedExecuteOn() const;
 
   /**
    * Return the support output execution times
@@ -168,9 +168,6 @@ protected:
    */
   virtual void initialSetup();
 
-  // **** DEPRECATED PARAMETER SUPPORT ****
-  void applyOutputOnShortCutFlags(MultiMooseEnum & input);
-
   /// Pointer the the FEProblem object for output object (use this)
   FEProblem * _problem_ptr;
 
@@ -187,7 +184,7 @@ protected:
   bool _sequence;
 
   /// The common Execution types; this is used as the default execution type for everything except system information and input
-  MultiMooseEnum _output_on;
+  MultiMooseEnum _execute_on;
 
   /// The current time for output purposes
   Real & _time;
@@ -238,7 +235,7 @@ protected:
   // This is here rather than in AdvancedOutput to allow generic
   // access to this data from the Console object for displaying
   // the output settings.
-  OutputOnWarehouse _advanced_output_on;
+  OutputOnWarehouse _advanced_execute_on;
 
   friend class OutputWarehouse;
 };

@@ -99,9 +99,9 @@
     hide = 'u v aux0 aux1'
     scalar_as_nodal = true
     elemental_as_nodal = true
-    output_elemental_on = none
-    output_scalars_on = none
-    output_postprocessors_on = none
+    execute_elemental_on = none
+    execute_scalars_on = none
+    execute_postprocessors_on = none
   [../]
   print_perf_log = true
 []

@@ -110,6 +110,6 @@
   print_perf_log = true
   [./out]
     type = Exodus
-    output_scalars_on = none
+    execute_scalars_on = none
   [../]
 []
