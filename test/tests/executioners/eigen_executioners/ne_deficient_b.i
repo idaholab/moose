@@ -95,5 +95,4 @@
   execute_on = 'timestep_end'
   file_base = ne_deficient_b
   exodus = true
-  print_perf_log = true
 []

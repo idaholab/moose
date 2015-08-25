@@ -117,5 +117,4 @@
   execute_on = 'timestep_end'
   file_base = m01
   csv = true
-  print_perf_log = true
 []

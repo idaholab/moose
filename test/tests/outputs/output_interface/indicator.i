@@ -56,7 +56,6 @@
 []
 
 [Outputs]
-  print_perf_log = true
   [./indicators]
     type = Exodus
   [../]

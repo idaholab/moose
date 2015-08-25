@@ -80,5 +80,4 @@
 [Outputs]
   file_base = out_nodal_max
   exodus = true
-  print_perf_log = true
 []

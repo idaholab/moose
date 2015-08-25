@@ -222,7 +222,6 @@
 
 [Outputs]
   file_base = kks_example
-  print_perf_log = true
   [./oversampling]
     type = Exodus
     refinements = 3

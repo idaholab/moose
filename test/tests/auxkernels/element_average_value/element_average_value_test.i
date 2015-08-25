@@ -66,5 +66,4 @@
   csv = true
   file_base = out
   interval = 1
-  print_perf_log = true
 []

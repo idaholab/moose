@@ -112,7 +112,6 @@
   exodus = true
   hide = 'tcx tcy tcz'
   print_linear_residuals = true
-  print_perf_log = true
 [] # Outputs
 
 [Postprocessors]

@@ -65,7 +65,6 @@
 
 [Outputs]
   file_base = out_wedge
-  print_perf_log = true
   [./oversample]
     type = Exodus
     file_base = out_wedge_oversample

@@ -73,5 +73,4 @@
   file_base = time
   hide = dummy
   csv = true
-  print_perf_log = true
 []

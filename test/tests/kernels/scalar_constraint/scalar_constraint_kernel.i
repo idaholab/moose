@@ -143,5 +143,4 @@
 [Outputs]
   exodus = true
   hide = lambda
-  print_perf_log = true
 []

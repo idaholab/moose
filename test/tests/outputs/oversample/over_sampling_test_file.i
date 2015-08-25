@@ -73,7 +73,6 @@
 [Outputs]
   file_base = out_file
   exodus = true
-  print_perf_log = true
   [./oversampling]
     file_base = out_file_oversample
     type = Exodus

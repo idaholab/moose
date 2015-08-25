@@ -85,7 +85,6 @@
 [Outputs]
   file_base = out_adv_coupled
   exodus = true
-  print_perf_log = true
 []
 
 [Debug]

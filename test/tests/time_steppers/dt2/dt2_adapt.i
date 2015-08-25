@@ -99,5 +99,4 @@
   execute_on = 'timestep_end'
   csv = false
   exodus = true
-  print_perf_log = true
 []

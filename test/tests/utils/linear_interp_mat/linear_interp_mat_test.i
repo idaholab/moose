@@ -69,5 +69,4 @@
 [Outputs]
   file_base = out
   gmv = true
-  print_perf_log = true
 []

@@ -82,6 +82,7 @@ class RunApp(Tester):
     timing_string = ' '
     if options.timing:
       specs['cli_args'].append('--timing')
+      specs['cli_args'].append('Outputs/print_perf_log=true')
 
     if options.colored == False:
       specs['cli_args'].append('--no-color')

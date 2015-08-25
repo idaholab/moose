@@ -54,5 +54,4 @@
   file_base = except1
   hide = dummy
   csv = true
-  print_perf_log = true
 []

@@ -169,5 +169,4 @@
 [Outputs]
   file_base = th_lumped_02
   csv = true
-  print_perf_log = true
 []

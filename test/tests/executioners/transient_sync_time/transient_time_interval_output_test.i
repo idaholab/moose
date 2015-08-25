@@ -62,7 +62,6 @@
   file_base = out_tio
   interval = 3
   csv = true
-  print_perf_log = true
   [./exodus]
     type = Exodus
     execute_on = 'final timestep_end'

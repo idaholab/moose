@@ -43,7 +43,6 @@
 []
 
 [Outputs]
-  print_perf_log = true
   [./out]
     type = Exodus
     position = '1 1 0'

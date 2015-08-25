@@ -108,5 +108,4 @@
 [Outputs]
   interval = 1
   exodus = true
-  print_perf_log = true
 []

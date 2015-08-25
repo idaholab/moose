@@ -69,7 +69,6 @@
 
 [Outputs]
   file_base = computing_initial_residual_test_out
-  print_perf_log = true
   [./out]
     type = Exodus
     elemental_as_nodal = true

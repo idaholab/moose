@@ -171,5 +171,4 @@
   file_base = nodal_area_Hex20_out
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

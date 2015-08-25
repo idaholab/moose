@@ -67,5 +67,4 @@
   execute_on = 'timestep_end'
   file_base = solution_function_scale_mult
   exodus = true
-  print_perf_log = true
 []

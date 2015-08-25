@@ -71,5 +71,4 @@
 []
 
 [Outputs]
-  print_perf_log = true
 []

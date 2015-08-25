@@ -77,5 +77,4 @@
   file_base = out_nodal_part1
   exodus = true
   xda = true
-  print_perf_log = true
 []

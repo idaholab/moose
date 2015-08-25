@@ -132,7 +132,6 @@
   file_base = pps_out_interval
   interval = 2
   exodus = true
-  print_perf_log = true
   [./console]
     type = Console
     interval = 1

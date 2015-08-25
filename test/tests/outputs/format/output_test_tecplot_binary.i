@@ -53,7 +53,6 @@
 []
 
 [Outputs]
-  print_perf_log = true
   [./out]
     type = Tecplot
     binary = true

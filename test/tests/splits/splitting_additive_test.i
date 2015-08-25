@@ -99,5 +99,4 @@
 [Outputs]
   file_base = splitting_additive_out
   exodus = true
-  print_perf_log = true
 []

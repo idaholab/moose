@@ -125,5 +125,4 @@
 [Outputs]
   file_base = 3_d_postprocessor_out
   csv = true
-  print_perf_log = true
 []

@@ -57,7 +57,6 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
   [./out]
     type = Console
     output_file = true

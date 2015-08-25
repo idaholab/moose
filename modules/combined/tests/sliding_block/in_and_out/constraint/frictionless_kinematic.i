@@ -189,7 +189,6 @@
   file_base = frictionless_kinematic_out
   interval = 10
   print_linear_residuals = true
-  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

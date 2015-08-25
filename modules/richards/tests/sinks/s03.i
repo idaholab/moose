@@ -196,7 +196,6 @@
 [Outputs]
   file_base = s03
   csv = true
-  print_perf_log = true
 []
 
 [Problem]

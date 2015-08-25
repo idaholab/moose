@@ -83,6 +83,5 @@
 
 [Outputs]
   file_base = out_stateful_copy
-  print_perf_log = true
   exodus = true
 []

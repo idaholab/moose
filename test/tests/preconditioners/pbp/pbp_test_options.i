@@ -96,5 +96,4 @@
 [Outputs]
   file_base = out_dummy
   exodus = true
-  print_perf_log = true
 []

@@ -97,5 +97,4 @@
   file_base = out_coupled_dirichlet
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

@@ -87,5 +87,4 @@
   execute_on = 'timestep_end'
   file_base = langmuir_jac2
   print_linear_residuals = true
-  print_perf_log = true
 []

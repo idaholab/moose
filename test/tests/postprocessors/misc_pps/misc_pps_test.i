@@ -129,7 +129,6 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = pps_out
-  print_perf_log = true
   [./exodus]
     type = Exodus
     execute_scalars_on = none

@@ -173,5 +173,4 @@
   file_base = kks_phase_concentration
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

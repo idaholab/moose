@@ -290,5 +290,4 @@
 [Outputs]
   file_base = pl_test3qns_out
   exodus = true
-  print_perf_log = true
 []

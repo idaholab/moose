@@ -74,7 +74,6 @@
 
 [Outputs]
   file_base = out_spatial
-  print_perf_log = true
   [./out]
     type = Exodus
     elemental_as_nodal = true

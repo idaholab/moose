@@ -214,5 +214,4 @@
   output_initial = false
   exodus = true
   csv = true
-  print_perf_log = true
 []

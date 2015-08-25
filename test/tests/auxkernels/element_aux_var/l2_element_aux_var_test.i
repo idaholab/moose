@@ -119,7 +119,6 @@
 []
 
 [Outputs]
-  print_perf_log = true
   [./ex_out]
     type = Exodus
     file_base = l2elemaux

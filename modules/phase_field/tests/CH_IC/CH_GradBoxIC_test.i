@@ -117,5 +117,4 @@ active = 'Periodic'
   file_base = gradbox
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

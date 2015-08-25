@@ -287,5 +287,4 @@
 [Outputs]
   file_base = pl_test2tt_out
   exodus = true
-  print_perf_log = true
 []

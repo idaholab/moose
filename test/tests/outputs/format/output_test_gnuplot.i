@@ -60,5 +60,4 @@
 
 [Outputs]
   gnuplot = true
-  print_perf_log = true
 []

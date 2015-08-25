@@ -236,7 +236,6 @@
   file_base = small_deform_harden2
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
   [./csv]
     type = CSV
     interval = 1

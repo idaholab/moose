@@ -62,6 +62,5 @@
 [Outputs]
   file_base = boundingbox_nodeset_outside_out
   exodus = true
-  print_perf_log = true
 []
 

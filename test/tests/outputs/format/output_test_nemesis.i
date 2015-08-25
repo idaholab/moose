@@ -62,5 +62,4 @@
 [Outputs]
   file_base = out
   nemesis = 1
-  print_perf_log = true
 []

@@ -93,5 +93,4 @@
   file_base = derivative_parsed_material
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

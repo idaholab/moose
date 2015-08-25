@@ -77,5 +77,4 @@
 [Outputs]
   file_base = missing_mat_prop_test
   exodus = true
-  print_perf_log = true
 []

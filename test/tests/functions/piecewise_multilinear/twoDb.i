@@ -62,5 +62,4 @@
   hide = dummy
   exodus = true
   csv = true
-  print_perf_log = true
 []

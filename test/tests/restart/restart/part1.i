@@ -78,5 +78,4 @@
   file_base = out_part1
   exodus = true
   checkpoint = true
-  print_perf_log = true
 []

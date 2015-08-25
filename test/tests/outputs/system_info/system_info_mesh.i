@@ -71,6 +71,5 @@
 []
 
 [Outputs]
-  print_perf_log = true
   print_mesh_changed_info = true
 []

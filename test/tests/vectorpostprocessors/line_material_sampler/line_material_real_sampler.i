@@ -85,7 +85,6 @@
   execute_on = 'timestep_end'
   file_base = out
   csv = true
-  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

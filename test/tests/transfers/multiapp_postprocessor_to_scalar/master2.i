@@ -78,7 +78,6 @@
 [Outputs]
   exodus = true
   hide = from_sub_app
-  print_perf_log = true
 []
 
 [MultiApps]

@@ -90,7 +90,6 @@
 []
 
 [Outputs]
-  print_perf_log = true
   [./out_displaced]
     type = Exodus
     use_displaced = true

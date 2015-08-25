@@ -130,5 +130,4 @@
   interval = 1
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []

@@ -49,7 +49,6 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
   [./restart]
     type = Checkpoint
     num_files = 100

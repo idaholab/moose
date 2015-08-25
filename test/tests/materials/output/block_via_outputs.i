@@ -61,7 +61,6 @@
 []
 
 [Outputs]
-  print_perf_log = true
   [./out]
     type = Exodus
     output_material_properties = true

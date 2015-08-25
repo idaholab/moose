@@ -206,7 +206,6 @@
   file_base = single_point_2d_out
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
   [./console]
     type = Console
     max_rows = 5

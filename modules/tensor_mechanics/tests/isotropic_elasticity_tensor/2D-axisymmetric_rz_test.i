@@ -149,5 +149,4 @@
   file_base = 2D-axisymmetric_rz_test_out
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
 []
