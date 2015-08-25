@@ -25,6 +25,7 @@
 #include "FileMesh.h"
 #include "MooseUtils.h"
 
+
 template<>
 InputParameters validParams<Output>()
 {
@@ -56,8 +57,32 @@ InputParameters validParams<Output>()
 
   // Register this class as base class
   params.registerBase("Output");
+
+  //**** DEPRECATED SUPPORT ****
+  Output::addDeprecatedInputParameters(params);
+
   return params;
 }
+
+void
+Output::addDeprecatedInputParameters(InputParameters & params)
+{
+  params.addDeprecatedParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file",
+                                  "Replace by adding 'initial' to the 'output_on' or 'additional_output_on' options");
+
+  params.addDeprecatedParam<bool>("output_timestep_end", true, "Request that data be output at the end of the timestep",
+                                  "Replace by adding 'timestep_end' to the 'output_on' or 'additional_output_on' options");
+
+  params.addDeprecatedParam<bool>("output_final", false, "Force the final time step to be output, regardless of output interval",
+                                  "Replace by adding 'final' to the 'output_on' or 'additional_output_on' options");
+
+  params.addDeprecatedParam<bool>("output_failed", false, "When true all time attempted time steps are output",
+                                  "Replace by adding 'faild' to the 'output_on' or 'additional_output_on' options");
+
+  params.addDeprecatedParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output",
+                                  "Replace by adding 'timestep_end' to the 'output_on' or 'additional_output_on' options");
+}
+
 
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
@@ -96,6 +121,10 @@ Output::Output(const InputParameters & parameters) :
     _is_advanced(false),
     _advanced_output_on(_output_on, parameters)
 {
+
+  // **** DEPRECATED PARAMETER SUPPORT ****
+  applyOutputOnShortCutFlags(_output_on);
+
   // Apply the additional output flags
   MultiMooseEnum add = getParam<MultiMooseEnum>("additional_output_on");
   for (MooseEnumIterator it = add.begin(); it != add.end(); ++it)
@@ -202,4 +231,34 @@ Output::advancedOutputOn() const
 {
   mooseError("The output object " << name() << " is not an AdvancedOutput, use isAdvanced() to check.");
   return _advanced_output_on;
+}
+
+// **** DEPRECATED PARAMETER SUPPORT ****
+void
+Output::applyOutputOnShortCutFlags(MultiMooseEnum & input)
+{
+  /*
+   * output_initial/final/failed are false by default
+   * If they are enabled, then update the output_on
+   * to include this execution time.
+   */
+  if (getParam<bool>("output_initial"))
+    input.push_back("initial");
+
+  if (getParam<bool>("output_final"))
+    input.push_back("final");
+
+  if (getParam<bool>("output_failed"))
+    input.push_back("failed");
+
+  /*
+   * output_timestep_end is true by default
+   * If it is disabled, then update the output_on
+   * by removing it from the execution time.
+   */
+  if (!getParam<bool>("output_timestep_end"))
+    input.erase("timestep_end");
+
+  if (!getParam<bool>("output_intermediate"))
+    _output_on.erase("timestep_end");
 }
