@@ -24,7 +24,7 @@
     input = 'dynamic_objects.i'
     exodiff = 'dynamic_objects_out.e'
     # Register only some of the objects necessary for running this test
-    cli_args = "Problem/object_names='CHMath CHInterface PFMobility'"
+    cli_args = "Problem/object_names='CHMath CHInterface'"
     library_mode = 'DYNAMIC'
     prereq = 'dynamic_object_loading'
 
@@ -37,7 +37,7 @@
     input = 'dynamic_objects.i'
     expect_err = "A '\w+' is not a registered object"
     # Register only some of the objects necessary, not enough for running this test
-    cli_args = "Problem/object_names='CHMath CHInterface'"
+    cli_args = "Problem/object_names='CHMath'"
     library_mode = 'DYNAMIC'
     prereq = 'dynamic_object_restrict'
 
