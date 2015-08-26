@@ -44,7 +44,6 @@
     variable = c
     kappa_name = kappa_c
     mob_name = M
-    grad_mob_name = grad_M
   [../]
 []
 

@@ -57,7 +57,6 @@
     variable = c
     mob_name = M
     kappa_name = kappa_c
-    grad_mob_name = grad_M
   [../]
 []
 
@@ -131,4 +130,3 @@
   print_linear_residuals = true
   print_perf_log = true
 []
-
