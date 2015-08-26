@@ -117,11 +117,11 @@
   # Cahn-Hilliard kernel for the concentration variable.
   # Note that we are not using an interfcae kernel on this variable, but rather
   # rely on the interface width enforced on the order parameters. This allows us
-  # to use a direct solve using the CHParsed kernel _despite_ only using first
+  # to use a direct solve using the CahnHilliard kernel _despite_ only using first
   # order elements.
   #
   [./c_res]
-    type = CHParsed
+    type = CahnHilliard
     variable = c
     f_name = F
     args = 'eta1 eta2 eta3'

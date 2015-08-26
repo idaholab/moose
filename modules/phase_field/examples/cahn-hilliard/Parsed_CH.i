@@ -1,5 +1,5 @@
 #
-# Example problem showing how to use the DerivativeParsedMaterial with CHParsed.
+# Example problem showing how to use the DerivativeParsedMaterial with CahnHilliard.
 # The free energy is identical to that from CHMath, f_bulk = 1/4*(1-c)^2*(1+c)^2.
 #
 
@@ -43,7 +43,7 @@
     variable = c
   [../]
   [./CH_Parsed]
-    type = CHParsed
+    type = CahnHilliard
     variable = c
     f_name = fbulk
     mob_name = M

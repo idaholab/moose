@@ -4,17 +4,17 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "CHInterface.h"
+#include "CahnHilliard.h"
 
 template<>
-InputParameters validParams<CHInterface>()
+InputParameters validParams<CahnHilliard>()
 {
-  InputParameters params = CHInterfaceBase<Real>::validParams();
-  params.addClassDescription("Gradient energy Cahn-Hilliard Kernel with a scalar (isotropic) mobility");
+  InputParameters params = CahnHilliardBase<Real>::validParams();
+  params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy and a scalar (isotropic) mobility");
   return params;
 }
 
-CHInterface::CHInterface(const InputParameters & parameters) :
-    CHInterfaceBase<Real>(parameters)
+CahnHilliard::CahnHilliard(const InputParameters & parameters) :
+    CahnHilliardBase<Real>(parameters)
 {
 }

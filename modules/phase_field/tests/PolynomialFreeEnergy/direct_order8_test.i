@@ -31,7 +31,7 @@
 
 [Kernels]
   [./local_energy]
-    type = CHParsed
+    type = CahnHilliard
     variable = c
     f_name = F
     args = c

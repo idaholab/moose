@@ -34,7 +34,7 @@
 []
 
 [GlobalParams]
-  # CHParsed needs the third derivatives
+  # CahnHilliard needs the third derivatives
   derivative_order = 3
   enable_jit = true
 []
@@ -127,7 +127,7 @@
 
   # Cahn-Hilliard kernels
   [./c_res]
-    type = CHParsed
+    type = CahnHilliard
     variable = c
     f_name = F
     args = 'eta1 eta2 eta3'

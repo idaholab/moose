@@ -3,12 +3,12 @@
 template<>
 InputParameters validParams<CHBulkPFCTrad>()
 {
-  InputParameters params = validParams<CHBulk>();
+  InputParameters params = CHBulk<Real>::validParams();
   return params;
 }
 
 CHBulkPFCTrad::CHBulkPFCTrad(const InputParameters & parameters) :
-    CHBulk(parameters),
+    CHBulk<Real>(parameters),
     _C0(getMaterialProperty<Real>("C0")),
     _a(getMaterialProperty<Real>("a")),
     _b(getMaterialProperty<Real>("b"))
@@ -34,4 +34,3 @@ CHBulkPFCTrad::computeGradDFDCons(PFFunctionType type)
 
   mooseError("Invalid type passed in");
 }
-

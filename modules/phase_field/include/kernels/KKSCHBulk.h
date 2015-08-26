@@ -27,7 +27,7 @@ InputParameters validParams<KKSCHBulk>();
  * The user picks one phase free energy \f$ F_a \f$ (f_base) and its corresponding
  * phase concentration \f$ c_a \f$
  */
-class KKSCHBulk : public CHBulk
+class KKSCHBulk : public CHBulk<Real>
 {
 public:
   KKSCHBulk(const InputParameters & parameters);

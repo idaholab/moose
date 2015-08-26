@@ -4,23 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef SPLITCHWRES_H
-#define SPLITCHWRES_H
+#ifndef SPLITCHWRESANISO_H
+#define SPLITCHWRESANISO_H
 
 #include "SplitCHWResBase.h"
 
 /**
- * SplitCHWRes creates the residual for the chemical
+ * SplitCHWResAniso creates the residual for the chemical
  * potential in the split form of the Cahn-Hilliard
- * equation with a scalar (isotropic) mobility.
+ * equation with a tensor (anisotropic) mobility.
  */
-class SplitCHWRes : public SplitCHWResBase<Real>
+class SplitCHWResAniso : public SplitCHWResBase<RealTensorValue>
 {
 public:
-  SplitCHWRes(const InputParameters & parameters);
+  SplitCHWResAniso(const InputParameters & parameters);
 };
 
 template<>
-InputParameters validParams<SplitCHWRes>();
+InputParameters validParams<SplitCHWResAniso>();
 
 #endif //SPLITCHWRES_H
