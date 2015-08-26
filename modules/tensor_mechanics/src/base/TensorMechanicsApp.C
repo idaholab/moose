@@ -69,7 +69,6 @@
 #include "EulerAngleFileReader.h"
 
 #include "RankTwoAux.h"
-#include "RealTensorValueAux.h"
 #include "RankFourAux.h"
 #include "TensorElasticEnergyAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
@@ -173,7 +172,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(EulerAngleFileReader);
 
   registerAux(RankTwoAux);
-  registerAux(RealTensorValueAux);
   registerAux(RankFourAux);
   registerAux(TensorElasticEnergyAux);
   registerAux(CrystalPlasticityRotationOutAux);
@@ -200,4 +198,3 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(PoroMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
 }
-
