@@ -88,12 +88,12 @@ CrossTermBarrierFunctionMaterial::computeQpProperties()
       switch (_g_order)
       {
         case 0: // SIMPLE
-          _prop_g[_qp]         +=  _W_ij[_num_eta * i + j] * (*_eta[i])[_qp] * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp];
-          (*_prop_dg[i])[_qp]  +=  _W_ij[_num_eta * i + j] * 2 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp];
+          _prop_g[_qp]         +=  _W_ij[_num_eta * i + j] * ((*_eta[i])[_qp] * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp] + ((*_eta[i])[_qp]-1) * ((*_eta[i])[_qp]-1) * ((*_eta[j])[_qp]-1) * ((*_eta[j])[_qp]-1));
+          (*_prop_dg[i])[_qp]  +=  _W_ij[_num_eta * i + j] * (2 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp] + 2 * ((*_eta[i])[_qp]-1) * ((*_eta[j])[_qp]-1) * ((*_eta[j])[_qp]-1));
           if (i == j)
-            (*_prop_d2g[i][j])[_qp] +=  _W_ij[_num_eta * i + j] * 2 * (*_eta[j])[_qp] * (*_eta[j])[_qp];
+            (*_prop_d2g[i][j])[_qp] +=  _W_ij[_num_eta * i + j] * (2 * (*_eta[j])[_qp] * (*_eta[j])[_qp] + 2 * ((*_eta[j])[_qp]-1) * ((*_eta[j])[_qp]-1));
           else
-            (*_prop_d2g[i][j])[_qp] +=  _W_ij[_num_eta * i + j] * 4 * (*_eta[i])[_qp] * (*_eta[j])[_qp];
+            (*_prop_d2g[i][j])[_qp] +=  _W_ij[_num_eta * i + j] * (4 * (*_eta[i])[_qp] * (*_eta[j])[_qp] + 4 * ((*_eta[i])[_qp]-1) * ((*_eta[j])[_qp]-1));
           break;
 
       }
