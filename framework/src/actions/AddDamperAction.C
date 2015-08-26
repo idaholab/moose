@@ -31,4 +31,3 @@ AddDamperAction::act()
 {
   _problem->addDamper(_type, _name, _moose_object_pars);
 }
-

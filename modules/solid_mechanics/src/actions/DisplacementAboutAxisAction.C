@@ -96,7 +96,6 @@ DisplacementAboutAxisAction::act()
   for (std::vector<unsigned int>::iterator it = dim_vec.begin(); it != dim_vec.end(); ++it)
   {
     std::stringstream name;
-    name << "BCs/";
     name << short_name;
     name << "_";
     name << *it;

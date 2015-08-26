@@ -16,6 +16,7 @@
 #include "ActionWarehouse.h"
 #include "MooseMesh.h"
 #include "MooseApp.h"
+#include "MooseUtils.h" // remove when getBaseName is removed
 
 template<>
 InputParameters validParams<Action>()
@@ -37,9 +38,15 @@ InputParameters validParams<Action>()
 Action::Action(InputParameters parameters) :
     ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _pars(parameters),
-    _name(getParam<std::string>("_parsing_syntax")),
-    _short_name(MooseUtils::shortName(_name)),
     _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
+    _full_syntax(getParam<std::string>("name")),
+    _base_syntax(MooseUtils::baseName(_full_syntax)),
+    // If the action was created via the Parser is will have a "registered_identifier" set that gives the input file syntax
+    // that generated the action. In this case, the name will contain this syntax (e.g., Kernels/object_name). The true object
+    // name is simply "object_name" in this case, thus the name is shortened. If this identifier is empty or set to "(AutoBuilt)"
+    // then just leave the name as in the "meta action" case.
+    _name( (_registered_identifier.empty() || _registered_identifier == "(AutoBuilt)")  ?
+           _full_syntax : MooseUtils::shortName(_full_syntax)),
     _action_type(getParam<std::string>("action_type")),
     _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _factory(_app.getFactory()),
@@ -54,14 +61,18 @@ Action::Action(InputParameters parameters) :
 {
 }
 
-std::string
+
+/// DEPRECATED METHODS
+const std::string &
 Action::getShortName() const
 {
-  return _short_name;
+  mooseDeprecated("getShortName() is deprecated, please use name() method.");
+  return _name;
 }
 
 std::string
 Action::getBaseName() const
 {
-  return _name.substr(0, _name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') : 0);
+  mooseDeprecated("getBaseName() is deprecated, please Use getInputSyntaxBase() method.");
+  return MooseUtils::baseName(_full_syntax);
 }

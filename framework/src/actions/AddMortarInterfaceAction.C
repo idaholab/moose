@@ -38,10 +38,9 @@ AddMortarInterfaceAction::~AddMortarInterfaceAction()
 void
 AddMortarInterfaceAction::act()
 {
-  std::string iface_name = getShortName();
+  std::string iface_name = name();
 
   _mesh->addMortarInterface(iface_name, getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"), getParam<SubdomainName>("subdomain"));
   if (_displaced_mesh)
     _displaced_mesh->addMortarInterface(iface_name, getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"), getParam<SubdomainName>("subdomain"));
 }
-

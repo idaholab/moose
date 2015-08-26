@@ -39,7 +39,7 @@ AddUserObjectAction::act()
 
     if (std::find(bnd_ids.begin(), bnd_ids.end(), "ANY_BOUNDARY_ID") != bnd_ids.end()
         && std::find(blk_ids.begin(), blk_ids.end(), "ANY_BLOCK_ID") != blk_ids.end())
-      mooseError (std::string("The parameter 'boundary' and 'block' were both supplied for ") + getShortName());
+      mooseError (std::string("The parameter 'boundary' and 'block' were both supplied for ") + name());
     else if (std::find(blk_ids.begin(), blk_ids.end(), "ANY_BLOCK_ID") != blk_ids.end())
       _moose_object_pars.addPrivateParam<bool>("block_restricted_nodal", true);
   }

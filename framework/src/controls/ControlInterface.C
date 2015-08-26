@@ -36,43 +36,51 @@ ControlInterface::ControlInterface(const InputParameters & parameters) :
 }
 
 ControlParameterName
-ControlInterface::tokenizeName(const std::string & name)
+ControlInterface::tokenizeName(std::string name)
 {
-  ControlParameterName output;
 
-  // Strip the parameter name into components
-  std::vector<std::string> components;
-  MooseUtils::tokenize(name, components);
+  // Create the storage container that will be output
+  ControlParameterName container;
 
-  // Separate the components into variables for testing against
-  // [System]
-  //   [./object]
-  //     param = ...
-  std::size_t n = components.size();
-  if (n == 1)
-    output.param = components[0];
-
-  else if (n == 2)
+  // Locate the group name (this can be the "_moose_base" or "control_tag" parameters from the object
+  std::size_t idx = name.find("::");
+  if (idx != std::string::npos)
   {
-    output.object = components[0];
-    output.param = components[1];
+    container.group = name.substr(0, idx);
+    name.erase(0, idx+2);
   }
 
-  else if (n == 3)
+  // Locate the param name
+  idx = name.rfind("/");
+  if (idx != std::string::npos)
   {
-    output.system = components[0];
-    output.object = components[1];
-    output.param = components[2];
+    container.param = name.substr(idx+1);
+    name.erase(idx);
+  }
+  else // if a slash isn't located then the entire name must be the parameter
+  {
+    container.param = name;
+    name.erase();
   }
 
-  else if (n > 3)
-    mooseError("The desired controllable parameter '" << name << "' does not match the expected naming convection.");
+  // Locate the syntax
+  idx = name.rfind("/");
+  if (idx != std::string::npos)
+  {
+    container.syntax = name.substr(0, idx);
+    name.erase(0, idx+1);
+  }
 
-  // Set '*' to empty
-  if (output.system == "*")
-    output.system = "";
-  if (output.object == "*")
-    output.object = "";
+  // Whatever is remaining is the object name
+  container.object = name;
 
-  return output;
+  // Handle asterisks
+  if (container.group == "*")
+    container.group = "";
+  if (container.syntax == "*")
+    container.syntax = "";
+  if (container.object == "*")
+    container.object = "";
+
+  return container;
 }

@@ -45,11 +45,10 @@ AddElementalFieldAction::act()
 
   FEType fe_type(CONSTANT, MONOMIAL);
 
-  std::string variable = getShortName();
+  std::string variable = name();
 
   if (blocks.empty())
     _problem->addAuxVariable(variable, fe_type);
   else
     _problem->addAuxVariable(variable, fe_type, &blocks);
 }
-

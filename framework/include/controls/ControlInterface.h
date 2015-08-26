@@ -26,22 +26,23 @@ class ControlInterface;
 template<>
 InputParameters validParams<ControlInterface>();
 
-
 /**
  * A storage container for the name of parameters to be controlled
  */
 struct ControlParameterName
 {
-  /// The "system" name (e.g., Kerenels)
-  std::string system;
+  /// The "system" name (e.g., Kernels) or user-defined "control_tag" name
+  std::string group;
 
   /// The "object" name (generally a sub block in an input file)
   std::string object;
 
   /// The name of the parameter to be controlled
   std::string param;
-};
 
+  /// Input file syntax provided by creating Action
+  std::string syntax;
+};
 
 /**
  * An interface class for accessing writable references to InputParameters
@@ -104,14 +105,9 @@ private:
   std::vector<InputParameterIterator> getValidInputParameterIteratorsByName(const std::string & name, const ControlParameterName & desired);
 
   /**
-   * Helper method separating parameter name into system/group/param format
-   *
-   * [System]
-   *   [./object]
-   *     param = ...
-   *
+   * Helper method supplied parameter name into a container
    */
-  ControlParameterName tokenizeName(const std::string & name);
+  ControlParameterName tokenizeName(std::string name);
 
   /// Reference to the Control objects parameters
   const InputParameters & _ci_parameters;
@@ -154,13 +150,12 @@ ControlInterface::getControlParamByName(const std::string & name)
     std::ostringstream oss;
     oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found in multiple objects:\n";
     for (std::vector<InputParameterIterator>::const_iterator it = iters.begin(); it != iters.end(); ++it)
-      oss << "  " << (*it)->first << '\n';
-    oss << "\nUse the method 'getControlParamVector' to access multiple parameters";
+      oss << "  " << (*it)->system << "::" << (*it)->object << '\n';
     mooseError(oss.str());
   }
 
   // Return a writeable reference to the parameter
-  return iters[0]->second->set<T>(desired.param);
+  return iters[0]->parameters->set<T>(desired.param);
 }
 
 template<typename T>
@@ -183,7 +178,7 @@ ControlInterface::getControlParamVectorByName(const std::string & name)
 
   // Loop over all InputParameter objects
   for (std::vector<InputParameterIterator>::iterator it = iters.begin(); it != iters.end(); ++it)
-    output.push_back(&((*it)->second->set<T>(desired.param)));
+    output.push_back(&((*it)->parameters->set<T>(desired.param)));
 
   return output;
 }
@@ -195,29 +190,26 @@ ControlInterface::getValidInputParameterIteratorsByName(const std::string & name
   // The vector to return
   std::vector<InputParameterIterator> output;
 
-  // Storage for tokenizing the current InputParameters name
-  std::vector<std::string> current;
-
   // Loop over all InputParameter objects
   for (InputParameterIterator it = _input_parameter_warehouse.begin(_tid); it != _input_parameter_warehouse.end(_tid); ++it)
   {
-    InputParameters & parameters = *(it->second);
-
-    // Get the current system and group:
-    //   current[0] = system; current[1] = group;
-    current.clear();
-    MooseUtils::tokenize(it->first, current);
-
-    // Continue if the system and group do not agree
-    if ( (!desired.system.empty() && current.size() > 0 && desired.system != current[0]) ||
-         (!desired.object.empty() && current.size() > 1 && desired.object != current[1]) )
+    // If the desired group is not empty, it must match either the system or tag of the current iterator
+    if (!desired.group.empty() && (desired.group != it->system || it->system.empty()) && (desired.group != it->tag || it->tag.empty()) )
       continue;
 
-    // If the parameter is valid update the output vector with a pointer to the parameter
-    if (parameters.isParamValid(desired.param))
+    // If the desired syntax is not empty, it must match the syntax for the current iterator
+    if ( !desired.syntax.empty() && (desired.syntax != it->syntax || it->syntax.empty()) )
+      continue;
+
+    // If the desired object is not empty, it must match the syntax for the current iterator
+    if (!desired.object.empty() && (desired.object != it->object || it->object.empty()) )
+      continue;
+
+    // If the parameter is valid and controllable update the output vector with a pointer to the parameter
+    if (it->parameters->have_parameter<T>(desired.param))
     {
       // Do not allow non-controllable types to be controlled
-      if (!parameters.isControllable(desired.param))
+      if (!it->parameters->isControllable(desired.param))
         mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " is not a controllable parameter.");
 
       output.push_back(it);

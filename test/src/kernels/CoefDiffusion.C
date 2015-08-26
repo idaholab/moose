@@ -19,6 +19,7 @@ InputParameters validParams<CoefDiffusion>()
   InputParameters params = validParams<Kernel>();
   params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
   params.addPrivateParam<Real>("_test_private_param", 12345);
+  params.addParam<Real>("non_controllable", "A parameter we cannot control.");
 
   params.declareControllable("coef");
 

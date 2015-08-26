@@ -1,9 +1,9 @@
 [Tests]
-  [./tokenize_error]
-    # Test that an invalid name errors
+  [./non_controllable_error]
+    # Test non-controllable parameter error
     type = 'RunException'
-    input = 'tokenize_error.i'
-    expect_err = "The desired controllable parameter 'Kernels/group/group/name' does not match the expected naming convection."
+    input = 'non_controllable_error.i'
+    expect_err = "The controlled parameter, 'Kernels/diff/non_controllable', in test_control is not a controllable parameter."
     match_literal = true
     max_threads = 1
   [../]
@@ -12,7 +12,7 @@
     # Test error message when single parameter is requested, but multiple exist
     type = RunException
     input = 'multiple_parameters_found.i'
-    expect_err = "The controlled parameter, 'coef', in Controls/func_control was found in multiple objects"
+    expect_err = "The controlled parameter, 'coef', in func_control was found in multiple objects"
     match_literal = true
     max_threads = 1
   [../]
@@ -21,18 +21,17 @@
     # Test that an invalid parameter name errors properly
     type = 'RunException'
     input = 'no_parameter_found.i'
-    expect_err = "The controlled parameter, 'unknown_param_name', in Controls/func_control was not found."
+    expect_err = "The controlled parameter, 'unknown_param_name', in func_control was not found."
     match_literal = true
     max_threads = 1
   [../]
 
   [./thread_error]
-    # Test that an invalid parameter name errors properly
+    # Tests threading error
     type = 'RunException'
     input = 'no_parameter_found.i'
     expect_err = "The control logic system is experimental and under heavy development, it currently does not work with threading."
     match_literal = true
     min_threads = 2
   [../]
-
 []

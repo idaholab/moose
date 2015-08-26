@@ -66,7 +66,7 @@ CheckOutputAction::checkVariableOutput(const std::string & task)
 
       // Create the hide list for the action
       std::set<std::string> names_set;
-      names_set.insert(ptr->getShortName());
+      names_set.insert(ptr->name());
       ptr->buildOutputHideVariableList(names_set);
     }
   }
@@ -143,4 +143,3 @@ CheckOutputAction::checkPerfLogOutput()
 #endif
   }
 }
-

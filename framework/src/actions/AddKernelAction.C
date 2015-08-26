@@ -39,4 +39,3 @@ AddKernelAction::act()
     _problem->addAuxKernel(_type, _name, _moose_object_pars);
   }
 }
-

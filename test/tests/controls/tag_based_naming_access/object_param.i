@@ -27,6 +27,7 @@
     type = MaterialPointSource
     point = '0.5 0.5 0'
     variable = diffused
+    control_tag = 'tag'
   [../]
 []
 
@@ -60,6 +61,7 @@
     type = FunctionValuePostprocessor
     function = '2*(x+y)'
     point = '0.5 0.5 0'
+    control_tag = 'tag'
   [../]
   [./other_point_test_object]
     type = FunctionValuePostprocessor
@@ -82,7 +84,7 @@
   [./point_control]
     type = TestControl
     test_type = 'point'
-    parameter = 'DiracKernels/test_object/point'
+    parameter = 'tag::point'
     execute_on = 'initial'
   [../]
 []

@@ -56,7 +56,7 @@ CopyNodalVarsAction::act()
       else
         system = &_problem->getAuxiliarySystem();
 
-      system->addVariableToCopy(getShortName(), getParam<std::string>("initial_from_file_var"), getParam<std::string>("initial_from_file_timestep"));
+      system->addVariableToCopy(name(), getParam<std::string>("initial_from_file_var"), getParam<std::string>("initial_from_file_timestep"));
     }
   }
 }
