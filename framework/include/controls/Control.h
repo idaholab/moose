@@ -11,28 +11,44 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef COEFDIFFUSION_H
-#define COEFDIFFUSION_H
 
-#include "Kernel.h"
+#ifndef CONTROL_H
+#define CONTROL_H
 
-//Forward Declarations
-class CoefDiffusion;
+// MOOSE includes
+#include "GeneralUserObject.h"
+#include "ControlInterface.h"
+
+// Forward declarations
+class Control;
 
 template<>
-InputParameters validParams<CoefDiffusion>();
+InputParameters validParams<Control>();
 
-class CoefDiffusion : public Kernel
+/**
+ * Base class for Control objects
+ *
+ * Control objects are simply GeneralUserObjects with an additional interface
+ * for accessing InputParameters via the InputParameterWarehouse. These objects
+ * are create by the [Controls] block in the input file after all other MooseObjects
+ * are created, so they have access to parameters in all other MooseObjects.
+ */
+class Control :
+  public GeneralUserObject,
+  public ControlInterface
 {
 public:
 
-  CoefDiffusion(const InputParameters & parameters);
+  /**
+   * Class constructor
+   * @param parameters The input parameters for this control object
+   */
+  Control(const InputParameters & parameters);
 
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-
-  const Real & _coef;
+  /**
+   * Class destructor
+   */
+  virtual ~Control(){}
 };
 
-#endif //COEFDIFFUSION_H
+#endif //FUNCTIONCONTROL_H

@@ -82,4 +82,3 @@ PointValue::getValue()
 {
   return _value;
 }
-

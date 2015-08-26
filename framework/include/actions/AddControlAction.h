@@ -11,28 +11,40 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef COEFDIFFUSION_H
-#define COEFDIFFUSION_H
 
-#include "Kernel.h"
+#ifndef ADDCONTROLACTION_H
+#define ADDCONTROLACTION_H
 
-//Forward Declarations
-class CoefDiffusion;
+// MOOSE includes
+#include "AddUserObjectAction.h"
+
+// Forward declerations
+class AddControlAction;
 
 template<>
-InputParameters validParams<CoefDiffusion>();
+InputParameters validParams<AddControlAction>();
 
-class CoefDiffusion : public Kernel
+/**
+ * Action for creating Control objects
+ *
+ * Control objects are GeneralUserObjects, thus just
+ * use the AddUserObjectAction
+ */
+class AddControlAction : public AddUserObjectAction
 {
 public:
 
-  CoefDiffusion(const InputParameters & parameters);
+  /**
+   * Class constructor
+   * @param params Parameters for this Action
+   */
+  AddControlAction(InputParameters params);
 
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  /**
+   * Class destructor
+   */
+  virtual ~AddControlAction(){};
 
-  const Real & _coef;
 };
 
-#endif //COEFDIFFUSION_H
+#endif // ADDCONTROLACTION_H

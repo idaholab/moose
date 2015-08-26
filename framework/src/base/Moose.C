@@ -196,6 +196,7 @@
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
 #include "PercentChangePostprocessor.h"
+#include "RealParameterReporter.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -357,6 +358,7 @@
 #include "CreateProblemAction.h"
 #include "DynamicObjectRegistrationAction.h"
 #include "AddUserObjectAction.h"
+#include "AddControlAction.h"
 #include "AddElementalFieldAction.h"
 #include "AddIndicatorAction.h"
 #include "AddMarkerAction.h"
@@ -391,6 +393,9 @@
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
 #include "DOFMapOutput.h"
+
+// Controls
+#include "RealFunctionControl.h"
 
 namespace Moose {
 
@@ -575,6 +580,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(FunctionSideIntegral);
   registerPostprocessor(ExecutionerAttributeReporter);
   registerPostprocessor(PercentChangePostprocessor);
+  registerPostprocessor(RealParameterReporter);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
@@ -716,6 +722,9 @@ registerObjects(Factory & factory)
   registerOutput(TopResidualDebugOutput);
   registerNamedOutput(DOFMapOutput, "DOFMap");
 
+  // Controls
+  registerControl(RealFunctionControl);
+
   registered = true;
 }
 
@@ -774,6 +783,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_user_object",              UserObject,             false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
+
   registerMooseObjectTask("add_postprocessor",            Postprocessor,          false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,    false);
 
@@ -784,6 +794,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_transfer",                 Transfer,               false);
 
   registerMooseObjectTask("add_output",                   Output,                 false);
+
+  registerMooseObjectTask("add_control",                  Control,                false);
 
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
@@ -893,6 +905,7 @@ addActionTypes(Syntax & syntax)
 "(add_postprocessor)"
 "(add_vector_postprocessor)"
 "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+"(add_control)"
 "(check_output)"
 "(check_integrity)"
 );
@@ -990,6 +1003,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(DeprecatedBlockAction, "deprecated_block");
   registerAction(AddConstraintAction, "add_constraint");
   registerAction(AddUserObjectAction, "add_user_object");
+  registerAction(AddControlAction, "add_control");
   registerAction(AddElementalFieldAction, "add_elemental_field_variable");
   registerAction(AddIndicatorAction, "add_indicator");
   registerAction(AddMarkerAction, "add_marker");
