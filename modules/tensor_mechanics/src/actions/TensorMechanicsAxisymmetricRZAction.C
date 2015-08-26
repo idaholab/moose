@@ -19,6 +19,9 @@ InputParameters validParams<TensorMechanicsAxisymmetricRZAction>()
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
 
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_r", "Auxiliary variables to save the r displacement residuals.");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "Auxiliary variables to save the z displacement residuals.");
+
   return params;
 }
 
@@ -42,6 +45,16 @@ TensorMechanicsAxisymmetricRZAction::act()
     coupled_displacements.push_back(displacements[i]);
   }
 
+  // Retain this code 'as is' because StressDivergenceTensors inherits from Kernel.C
+  std::vector<std::vector<AuxVariableName> > save_in;
+  save_in.resize(dim);
+
+  if (isParamValid("save_in_disp_r"))
+    save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_r");
+
+  if (isParamValid("save_in_disp_z"))
+    save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
+
   InputParameters params = _factory.getValidParams("StressDivergenceRZTensors");
   params.set<std::vector<VariableName> >("displacements") = coupled_displacements;
 
@@ -61,6 +74,7 @@ TensorMechanicsAxisymmetricRZAction::act()
 
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
+    params.set<std::vector<AuxVariableName> >("save_in") = save_in[i];
 
     _problem->addKernel("StressDivergenceRZTensors", name.str(), params);
   }
