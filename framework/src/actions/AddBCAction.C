@@ -34,4 +34,3 @@ AddBCAction::act()
 {
   _problem->addBoundaryCondition(_type, _name, _moose_object_pars);
 }
-

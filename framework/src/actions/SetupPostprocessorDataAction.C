@@ -35,6 +35,5 @@ SetupPostprocessorDataAction::~SetupPostprocessorDataAction()
 void
 SetupPostprocessorDataAction::act()
 {
-  _problem->initPostprocessorData(MooseUtils::shortName(_name));
+  _problem->initPostprocessorData(_name);
 }
-

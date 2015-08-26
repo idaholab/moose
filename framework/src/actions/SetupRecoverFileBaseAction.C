@@ -152,7 +152,7 @@ SetupRecoverFileBaseAction::getCheckpointFiles(std::set<std::string> & files)
       else
       {
         std::ostringstream oss;
-        oss << "_" << (*it)->getShortName() << "_cp";
+        oss << "_" << (*it)->name() << "_cp";
         checkpoint_dirs.insert(FileOutput::getOutputFileBase(_app, oss.str()));
       }
     }

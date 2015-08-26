@@ -128,8 +128,8 @@
 
 [Outputs]
   exodus = true
-  [./console]
-    type = Console
+  [./displaced]
+    type = Exodus
     use_displaced = true
   [../]
 []

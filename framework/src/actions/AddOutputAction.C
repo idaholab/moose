@@ -49,18 +49,14 @@ AddOutputAction::act()
   // Get a reference to the OutputWarehouse
   OutputWarehouse & output_warehouse = _app.getOutputWarehouse();
 
-  // Get the output object name
-  std::string object_name = _name;
-
   // Reject the reserved names for objects not built by MOOSE
-  std::string short_name = MooseUtils::shortName(object_name);
-  if (!_moose_object_pars.get<bool>("_built_by_moose") && output_warehouse.isReservedName(short_name))
-    mooseError("The name '" << short_name << "' is a reserved name for output objects");
+  if (!_moose_object_pars.get<bool>("_built_by_moose") && output_warehouse.isReservedName(_name))
+    mooseError("The name '" << _name << "' is a reserved name for output objects");
 
   // Check that an object by the same name does not already exist; this must be done before the object
   // is created to avoid getting misleading errors from the Parser
-  if (output_warehouse.hasOutput(object_name))
-    mooseError("The output object named '" << object_name << "' already exists");
+  if (output_warehouse.hasOutput(_name))
+    mooseError("An output object named '" << _name << "' already exists");
 
   // Add a pointer to the FEProblem class
   _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem",  _problem.get());
@@ -88,10 +84,10 @@ AddOutputAction::act()
     _moose_object_pars.set<bool>("_binary") = false;
 
   // Adjust the checkpoint suffix if auto recovery was enabled
-  if (object_name == "auto_recovery_checkpoint")
+  if (_name == "auto_recovery_checkpoint")
     _moose_object_pars.set<std::string>("suffix") = "auto_recovery";
 
   // Create the object and add it to the warehouse
-  MooseSharedPointer<Output> output = MooseSharedNamespace::static_pointer_cast<Output>(_factory.create(_type, object_name, _moose_object_pars));
+  MooseSharedPointer<Output> output = MooseSharedNamespace::static_pointer_cast<Output>(_factory.create(_type, _name, _moose_object_pars));
   output_warehouse.addOutput(output);
 }

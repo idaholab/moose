@@ -60,7 +60,7 @@ AddLotsOfDiffusion::act()
   {
     for (unsigned int cur_num = 0; cur_num < number; cur_num++)
     {
-      std::string var_name = getShortName() + Moose::stringify(cur_num);
+      std::string var_name = name() + Moose::stringify(cur_num);
       addVariable(var_name);
     }
   }
@@ -68,7 +68,7 @@ AddLotsOfDiffusion::act()
   {
     for (unsigned int cur_num = 0; cur_num < number; cur_num++)
     {
-      std::string var_name = getShortName() + Moose::stringify(cur_num);
+      std::string var_name = name() + Moose::stringify(cur_num);
 
       InputParameters params = _factory.getValidParams("Diffusion");
       params.set<NonlinearVariableName>("variable") = var_name;
@@ -79,7 +79,7 @@ AddLotsOfDiffusion::act()
   {
     for (unsigned int cur_num = 0; cur_num < number; cur_num++)
     {
-      std::string var_name = getShortName() + Moose::stringify(cur_num);
+      std::string var_name = name() + Moose::stringify(cur_num);
 
       InputParameters params = _factory.getValidParams("DirichletBC");
       params.set<NonlinearVariableName>("variable") = var_name;

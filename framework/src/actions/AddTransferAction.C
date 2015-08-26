@@ -31,4 +31,3 @@ AddTransferAction::act()
 {
   _problem->addTransfer(_type, _name, _moose_object_pars);
 }
-

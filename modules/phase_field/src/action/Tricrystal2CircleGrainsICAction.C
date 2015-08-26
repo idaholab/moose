@@ -63,7 +63,6 @@ Tricrystal2CircleGrainsICAction::act()
 
 
     //Add initial condition
-    _problem->addInitialCondition("Tricrystal2CircleGrainsIC", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC_" + Moose::stringify(op), poly_params);
+    _problem->addInitialCondition("Tricrystal2CircleGrainsIC", "Tricrystal2CircleGrainsIC_" + Moose::stringify(op), poly_params);
   }
 }
-
