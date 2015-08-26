@@ -111,7 +111,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddConstraintAction", "Constraints/*");
 
   syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*");
-
+  syntax.registerActionSyntax("AddControlAction", "Controls/*");
   syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds");
 
   syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals");
