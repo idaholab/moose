@@ -38,7 +38,7 @@ if [ $? == 0 ]; then
   if [ $? == 0 ]; then
     echo "warning: setting --enable-timestamps explicitly will negatively impact the ccache performance"
   else
-    echo "configuring limbesh with --disable-timestamps to improve cache hit rate"
+    echo "configuring libmesh with --disable-timestamps to improve cache hit rate"
     DISABLE_TIMESTAMPS="--disable-timestamps"
   fi
 fi
