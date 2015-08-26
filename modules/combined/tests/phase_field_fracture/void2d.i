@@ -1,35 +1,27 @@
 [Mesh]
   type = FileMesh
-  file = crack_mesh.e
-  uniform_refine = 0
+  file = void2d_mesh.xda
 []
 
 [Variables]
   [./u]
-    block = 1
   [../]
   [./v]
-    block = 1
   [../]
   [./c]
-    block = 1
   [../]
   [./b]
-    block = 1
   [../]
 []
 
 [AuxVariables]
   [./resid_x]
-    block = 1
   [../]
   [./resid_y]
-    block = 1
   [../]
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
-    block = 1
   [../]
 []
 
@@ -44,10 +36,9 @@
   [./pfbulk]
     type = PFFracBulkRate
     variable = c
-    block = 1
-    l = 0.08
+    l = 0.01
     beta = b
-    visco =1e-4
+    visco =1e-1
     gc_prop_var = 'gc_prop'
     G0_var = 'G0_pos'
     dG0_dstrain_var = 'dG0_pos_dstrain'
@@ -59,7 +50,6 @@
     variable = u
     displacements = 'u v'
     component = 0
-    block = 1
     save_in = resid_x
     c = c
   [../]
@@ -68,25 +58,21 @@
     variable = v
     displacements = 'u v'
     component = 1
-    block = 1
     save_in = resid_y
     c = c
   [../]
   [./dcdt]
     type = TimeDerivative
     variable = c
-    block = 1
   [../]
   [./pfintvar]
     type = PFFracIntVar
     variable = b
-    block = 1
   [../]
   [./pfintcoupled]
     type = PFFracCoupledInterface
     variable = b
     c = c
-    block = 1
   [../]
 []
 
@@ -98,7 +84,6 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-    block = 1
   [../]
 []
 
@@ -106,44 +91,56 @@
   [./ydisp]
     type = FunctionPresetBC
     variable = v
-    boundary = 2
+    boundary = top
     function = tfunc
   [../]
   [./yfix]
     type = PresetBC
     variable = v
-    boundary = 1
+    boundary = bottom
     value = 0
   [../]
   [./xfix]
     type = PresetBC
     variable = u
-    boundary = '1 2'
+    boundary = left
     value = 0
   [../]
 []
 
+[Functions]
+  [./void_prop_func]
+    type = ParsedFunction
+    value = 'rad:=0.2;m:=50;r:=sqrt(x^2+y^2);1-exp(-(r/rad)^m)+1e-8'
+  [../]
+  [./gb_prop_func]
+    type = ParsedFunction
+    value = 'rad:=0.2;thk:=0.05;m:=50;sgnx:=1-exp(-(x/rad)^m);v:=sgnx*exp(-(y/thk)^m);0.005*(1-v)+0.001*v'
+  [../]
+[../]
+
 [Materials]
   [./pfbulkmat]
     type = PFFracBulkRateMaterial
-    block = 1
-    gc = 1e-3
+    block = 0
+    function = gb_prop_func
   [../]
   [./elastic]
     type = LinearIsoElasticPFDamage
-    block = 1
+    block = 0
     c = c
     kdamage = 1e-8
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 1
+    block = 0
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
+    elasticity_tensor_prefactor = void_prop_func
   [../]
   [./strain]
     type = ComputeSmallStrain
-    block = 1
+    block = 0
     displacements = 'u v'
   [../]
 []
@@ -152,12 +149,12 @@
   [./resid_x]
     type = NodalSum
     variable = resid_x
-    boundary = 2
+    boundary = left
   [../]
   [./resid_y]
     type = NodalSum
     variable = resid_y
-    boundary = 2
+    boundary = top
   [../]
 []
 

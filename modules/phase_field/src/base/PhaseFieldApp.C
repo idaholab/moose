@@ -89,7 +89,6 @@
 #include "GBEvolution.h"
 #include "GrainAdvectionVelocity.h"
 #include "KKSXeVacSolidMaterial.h"
-#include "LinearIsoElasticPFDamage.h"
 #include "MathEBFreeEnergy.h"
 #include "MathFreeEnergy.h"
 #include "MultiBarrierFunctionMaterial.h"
@@ -291,7 +290,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(GBEvolution);
   registerMaterial(GrainAdvectionVelocity);
   registerMaterial(KKSXeVacSolidMaterial);
-  registerMaterial(LinearIsoElasticPFDamage);
   registerMaterial(MathEBFreeEnergy);
   registerMaterial(MathFreeEnergy);
   registerMaterial(MultiBarrierFunctionMaterial);
