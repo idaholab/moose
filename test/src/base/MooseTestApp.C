@@ -216,6 +216,9 @@
 // Outputs
 #include "OutputObjectTest.h"
 
+// Controls
+#include "TestControl.h"
+
 template<>
 InputParameters validParams<MooseTestApp>()
 {
@@ -447,6 +450,9 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Outputs
   registerOutput(OutputObjectTest);
+
+  // Controls
+  registerControl(TestControl);
 }
 
 // External entry point for dynamic syntax association

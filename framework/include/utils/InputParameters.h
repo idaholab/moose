@@ -353,6 +353,11 @@ public:
   bool isPrivate(const std::string &name) const;
 
   /**
+   * Returns a Boolean indicating whether the specified parameter is controlable
+   */
+  bool isControlable(const std::string & name);
+
+  /**
    * This method must be called from every base "Moose System" to create linkage with the Action System.
    * See "Moose.C" for the registerMooseObjectTask() calls.
    */

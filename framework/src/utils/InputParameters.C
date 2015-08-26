@@ -276,6 +276,22 @@ InputParameters::isPrivate(const std::string &name) const
   return _private_params.find(name) != _private_params.end();
 }
 
+#define checkMooseType(type, name) if (have_parameter<type>(name) || have_parameter<std::vector<type> >(name)) return false
+bool
+InputParameters::isControlable(const std::string &name)
+{
+  checkMooseType(NonlinearVariableName, name);
+  checkMooseType(AuxVariableName, name);
+  checkMooseType(VariableName, name);
+  checkMooseType(BoundaryName, name);
+  checkMooseType(SubdomainName, name);
+  checkMooseType(PostprocessorName, name);
+  checkMooseType(VectorPostprocessorName, name);
+  checkMooseType(UserObjectName, name);
+  checkMooseType(MaterialPropertyName, name);
+  return true;
+}
+
 void
 InputParameters::registerBase(const std::string &value)
 {
@@ -390,7 +406,7 @@ InputParameters::defaultCoupledValue(const std::string & coupling_name) const
   std::map<std::string, Real>::const_iterator value_it = _default_coupled_value.find(coupling_name);
 
   if (value_it == _default_coupled_value.end())
-    mooseError("Attempted to retrieve default value for coupled variable '" << coupling_name << "' when none was provided. \n\nThere are three reasons why this may have occurred:\n 1. The other version of params.addCoupledVar() should be used in order to provde a default value. \n 2. This should have been a required coupled variable added with params.addRequiredCoupledVar() \n 3. The call to get the coupled value should have been properly guarded with isCoupled()\n");
+    mooseError("Attempted to retrieve default value for coupled variable '" << coupling_name << "' when none was provided. \n\nThere are three reasons why this may have occurred:\n 1. The other version of params.addCoupledVar() should be used in order to provide a default value. \n 2. This should have been a required coupled variable added with params.addRequiredCoupledVar() \n 3. The call to get the coupled value should have been properly guarded with isCoupled()\n");
 
   return value_it->second;
 }
@@ -423,6 +439,14 @@ InputParameters::getMooseType(const std::string &name) const
     var = get<NonlinearVariableName>(name);
   else if (have_parameter<AuxVariableName>(name))
     var = get<AuxVariableName>(name);
+  else if (have_parameter<PostprocessorName>(name))
+    var = get<PostprocessorName>(name);
+  else if (have_parameter<VectorPostprocessorName>(name))
+    var = get<VectorPostprocessorName>(name);
+  else if (have_parameter<FunctionName>(name))
+    var = get<FunctionName>(name);
+  else if (have_parameter<UserObjectName>(name))
+    var = get<UserObjectName>(name);
   else if (have_parameter<MaterialPropertyName>(name))
     var = get<MaterialPropertyName>(name);
   else if (have_parameter<std::string>(name))
