@@ -11,28 +11,43 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef COEFDIFFUSION_H
-#define COEFDIFFUSION_H
 
-#include "Kernel.h"
+#ifndef TESTCONTROL_H
+#define TESTCONTROL_H
 
-//Forward Declarations
-class CoefDiffusion;
+// MOOSE includes
+#include "Control.h"
+
+// Forward declerations
+class TestControl;
 
 template<>
-InputParameters validParams<CoefDiffusion>();
+InputParameters validParams<TestControl>();
 
-class CoefDiffusion : public Kernel
+/**
+ * A Control object for testing purposes
+ */
+class TestControl : public Control
 {
 public:
+  TestControl(const InputParameters & parameters);
+  virtual ~TestControl(){};
+  virtual void execute();
 
-  CoefDiffusion(const InputParameters & parameters);
+  ///@{
+  /**
+   * These methods are left intentionally empty
+   */
+  virtual void initialize(){}
+  virtual void finalize(){}
+  virtual void threadJoin(const UserObject & /*uo*/){}
+  ///@}
 
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+private:
 
-  const Real & _coef;
+  /// The type of test to perform
+  MooseEnum _test_type;
+
 };
 
-#endif //COEFDIFFUSION_H
+#endif //TESTCONTROL_H
