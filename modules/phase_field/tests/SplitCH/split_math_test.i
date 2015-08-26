@@ -92,10 +92,10 @@ active = 'SMP'
 [Materials]
 
   [./constant]
-    type = PFMobility
+    type = GenericConstantMaterial
+    prop_names  = 'M kappa_c'
+    prop_values = '1.0 2.0'
     block = 0
-    mob = 1.0
-    kappa = 2.0
   [../]
 []
 
