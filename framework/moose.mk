@@ -71,7 +71,7 @@ ifneq (,$(findstring +,$(libmesh_status)))
   endif
 endif
 libmesh_submodule_status:
-	@if [ x$(libmesh_message) != "x" ]; then echo $(libmesh_message); fi
+	@if [ x$(libmesh_message) != "x" ]; then echo -e $(libmesh_message); fi
 
 moose: $(moose_LIB)
 
