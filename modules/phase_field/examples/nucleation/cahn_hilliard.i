@@ -56,10 +56,10 @@
 
 [Materials]
   [./pfmobility]
-    type = PFMobility
+    type = GenericConstantMaterial
+    prop_names  = 'M kappa_c'
+    prop_values = '1 25'
     block = 0
-    kappa = 25
-    mob = 1
   [../]
 
   [./chemical_free_energy]

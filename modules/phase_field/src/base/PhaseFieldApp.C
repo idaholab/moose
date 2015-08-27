@@ -89,7 +89,6 @@
 #include "GBEvolution.h"
 #include "GrainAdvectionVelocity.h"
 #include "KKSXeVacSolidMaterial.h"
-#include "LinearIsoElasticPFDamage.h"
 #include "MathEBFreeEnergy.h"
 #include "MathFreeEnergy.h"
 #include "MultiBarrierFunctionMaterial.h"
@@ -291,7 +290,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(GBEvolution);
   registerMaterial(GrainAdvectionVelocity);
   registerMaterial(KKSXeVacSolidMaterial);
-  registerMaterial(LinearIsoElasticPFDamage);
   registerMaterial(MathEBFreeEnergy);
   registerMaterial(MathFreeEnergy);
   registerMaterial(MultiBarrierFunctionMaterial);
@@ -299,11 +297,11 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFCRFFMaterial);
   registerMaterial(PFCTradMaterial);
   registerMaterial(PFFracBulkRateMaterial);
-  registerMaterial(PFMobility);
   registerMaterial(PFParamsPolyFreeEnergy);
   registerMaterial(PolynomialFreeEnergy);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(CrossTermBarrierFunctionMaterial);
+  registerDeprecatedObjectName(PFMobility, "PFMobility", "09/26/2015 00:00");
 
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);

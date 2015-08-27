@@ -33,13 +33,15 @@ protected:
    * This function obtains the value of gc
    * Must be overidden by the user for heterogeneous gc
    */
-  virtual void getProp() {}
+  virtual void getProp();
 
   ///Input parameter for homogeneous gc
   Real _gc;
 
-  ///Material property where the values are stored
+  ///Material property where the gc values are stored
   MaterialProperty<Real> &_gc_prop;
+  ///Function to specify varying gc
+  Function * _function_prop;
 
 private:
 

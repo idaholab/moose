@@ -6,4 +6,11 @@
     abs_zero = 1e-09
     use_old_floor = True
   [../]
+  [./void2d]
+    type = 'Exodiff'
+    input = 'void2d.i'
+    exodiff = 'void2d_out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+  [../]
 [../]
