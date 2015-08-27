@@ -92,6 +92,10 @@ class RunApp(Tester):
     if options.scaling and specs['scale_refine'] > 0:
       specs['cli_args'].insert(0, ' -r ' + str(specs['scale_refine']))
 
+    # The test harness should never use GDB backtraces: they don't
+    # work well when dozens of expect_err jobs run at the same time.
+    specs['cli_args'].append('--no-gdb-backtrace')
+
     # Raise the floor
     ncpus = max(default_ncpus, int(specs['min_parallel']))
     # Lower the ceiling
