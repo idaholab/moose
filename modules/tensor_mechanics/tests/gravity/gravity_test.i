@@ -35,7 +35,7 @@
     displacements = 'disp_x disp_y disp_z'
   [../]
   [./gravity_y]
-    type = GravityTM
+    type = Gravity
     variable = disp_y
     value = -9.81
   [../]
