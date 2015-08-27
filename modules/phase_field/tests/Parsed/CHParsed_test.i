@@ -54,10 +54,10 @@
 
 [Materials]
   [./consts]
-    type = PFMobility
+    type = GenericConstantMaterial
+    prop_names  = 'M kappa_c'
+    prop_values = '1 0.1'
     block = 0
-    kappa = 0.1
-    mob = 1
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial

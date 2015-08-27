@@ -135,10 +135,10 @@
     prop_values = '1 1        '
   [../]
   [./consts2]
-    type = PFMobility
+    type = GenericConstantMaterial
+    prop_names  = 'M kappa_c'
+    prop_values = '1 1'
     block = 0
-    kappa = 1
-    mob = 1
   [../]
 
   [./hsum]

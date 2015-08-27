@@ -297,11 +297,11 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFCRFFMaterial);
   registerMaterial(PFCTradMaterial);
   registerMaterial(PFFracBulkRateMaterial);
-  registerMaterial(PFMobility);
   registerMaterial(PFParamsPolyFreeEnergy);
   registerMaterial(PolynomialFreeEnergy);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(CrossTermBarrierFunctionMaterial);
+  registerDeprecatedObjectName(PFMobility, "PFMobility", "09/26/2015 00:00");
 
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
