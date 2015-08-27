@@ -26,5 +26,11 @@
     input = '3D-RZ_finiteStrain_test.i'
     exodiff = '3D-RZ_finiteStrain_test_out.e'
     valgrind = 'HEAVY'
+    heavy = true
+  [../]
+  [./axisym_resid]
+    type = Exodiff
+    input = '2D-RZ_finiteStrain_resid.i'
+    exodiff = '2D-RZ_finiteStrain_resid_out.e'
   [../]
 []
