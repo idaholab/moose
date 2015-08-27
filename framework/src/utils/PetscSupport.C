@@ -286,7 +286,13 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
     break;
 
   case MOOSE_DIVERGED_NANORINF:
+#if PETSC_VERSION_LESS_THAN(3,4,0)
+    // Report divergence due to exceeding the divergence tolerance.
+    *reason = KSP_DIVERGED_DTOL;
+#else
+    // KSP_DIVERGED_NANORINF was added in PETSc 3.4.0.
     *reason = KSP_DIVERGED_NANORINF;
+#endif
     break;
 
   default:
