@@ -485,11 +485,14 @@ bool NDSpline::checkBoundaries(std::vector<double> point){
 
 double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
   //double up   = discretizations[0];
-  double down = discretizations.at(discretizations.size()-1);
+  //double down = discretizations.at(discretizations.size()-1);
+  int down = 0;
 
   for(unsigned int n=0; n<discretizations.size(); n++)
-    if (x>discretizations.at(n))
+    if (x>discretizations.at(n)) {
       down = n;
+      break;
+    }
 
   //up is never used
   //for(int n=discretizations.size(); n<0; n--)
