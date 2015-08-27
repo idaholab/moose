@@ -239,16 +239,16 @@ outputOutputInformation(MooseApp & app)
   oss << "Outputs:\n";
   for (std::vector<Output *>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
   {
-    // Display the "output_on" settings
-    const MultiMooseEnum & output_on = (*it)->outputOn();
-    oss << "  " << std::setw(console_field_width-2) << (*it)->name() <<  "\"" << output_on << "\"\n";
+    // Display the "execute_on" settings
+    const MultiMooseEnum & execute_on = (*it)->executeOn();
+    oss << "  " << std::setw(console_field_width-2) << (*it)->name() <<  "\"" << execute_on << "\"\n";
 
-    // Display the advanced "output_on" settings, only if they are different from "output_on"
+    // Display the advanced "execute_on" settings, only if they are different from "execute_on"
     if ((*it)->isAdvanced())
     {
-      const OutputOnWarehouse & adv_on = (*it)->advancedOutputOn();
+      const OutputOnWarehouse & adv_on = (*it)->advancedExecuteOn();
       for (std::map<std::string, MultiMooseEnum>::const_iterator adv_it = adv_on.begin(); adv_it != adv_on.end(); ++adv_it)
-        if (output_on != adv_it->second)
+        if (execute_on != adv_it->second)
           oss << "    " << std::setw(console_field_width-4) << adv_it->first + ":" <<  "\"" << adv_it->second << "\"\n";
     }
   }
@@ -262,15 +262,15 @@ std::string outputLegacyInformation(MooseApp & app, FEProblem & problem)
   std::stringstream oss;
   oss << std::left;
 
-  if (problem.legacyUoAuxComputation() || problem.legacyUoInitialization())
+  if (problem.legacyUoAuxComputation() || problem.legacyUoInitialization() || app.useLegacyOutputSyntax())
   {
     oss << COLOR_RED << "LEGACY MODES ENABLED:" << COLOR_DEFAULT << '\n';
     if (problem.legacyUoAuxComputation())
       oss << COLOR_RED << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed." << COLOR_DEFAULT << '\n';
     if (problem.legacyUoInitialization())
       oss << COLOR_RED << "  Computing all UserObjects during initial setup." << COLOR_DEFAULT << '\n';
-    if (app.usingLegacyConstructors())
-      oss << COLOR_RED << "  Using legacy constructors." << COLOR_DEFAULT << '\n';
+    if (app.useLegacyOutputSyntax())
+      oss << COLOR_RED << "  Using legacy output syntax." << COLOR_DEFAULT << '\n';
   }
 
   return oss.str();

@@ -87,12 +87,9 @@
 []
 
 [Outputs]
-  output_initial = true
-  print_perf_log = true
   [./OverSampling]
     type = Exodus
     refinements = 1
-    output_initial = true
     oversample = true
   [../]
 []

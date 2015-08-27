@@ -90,7 +90,5 @@
 
 [Outputs]
   file_base = out_multi_var
-  output_initial = true
   exodus = true
-  print_perf_log = true
 []

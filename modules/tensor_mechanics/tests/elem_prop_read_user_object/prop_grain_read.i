@@ -158,10 +158,7 @@
 
 [Outputs]
   file_base = prop_grain_read_out
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
 []
 
 [Kernels]

@@ -76,5 +76,4 @@
 
 [Outputs]
   exodus = true
-  output_initial = true
 []

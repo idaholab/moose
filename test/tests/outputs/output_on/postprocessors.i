@@ -56,12 +56,9 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = false
-  print_linear_residuals = true
-  print_perf_log = true
   [./console]
     type = Console
-    output_postprocessors_on = 'initial nonlinear timestep_end'
+    execute_postprocessors_on = 'initial nonlinear timestep_end'
   [../]
 []

@@ -56,7 +56,7 @@
 []
 
 [Outputs]
-  print_perf_log = true
+  execute_on = 'timestep_end'
   [./out]
     type = Exodus
     elemental_as_nodal = true

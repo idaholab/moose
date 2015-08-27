@@ -98,8 +98,5 @@
 
 [Outputs]
   file_base = splitting_additive_out
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

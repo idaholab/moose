@@ -111,7 +111,6 @@
 
 [Outputs]
   file_base = integral
-  output_initial = true
   csv = true
   console = true
 []

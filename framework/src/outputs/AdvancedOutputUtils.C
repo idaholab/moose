@@ -17,28 +17,28 @@
 #include "Output.h"
 
 // Constructor of OutputOnWarehouse; initializes the MultiMooseEnums for all available output types
-OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & output_on, const InputParameters & params) : OutputMapWrapper<MultiMooseEnum>()
+OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & execute_on, const InputParameters & params) : OutputMapWrapper<MultiMooseEnum>()
 {
-  // Initialize each of the output_on settings for the various types of outputs
-  if (params.have_parameter<MultiMooseEnum>("output_nodal_on"))
-    _map.insert(std::make_pair("nodal", output_on));
+  // Initialize each of the 'execute_on' settings for the various types of outputs
+  if (params.have_parameter<MultiMooseEnum>("execute_nodal_on"))
+    _map.insert(std::make_pair("nodal", execute_on));
 
-  if (params.have_parameter<MultiMooseEnum>("output_elemental_on"))
-    _map.insert(std::make_pair("elemental", output_on));
+  if (params.have_parameter<MultiMooseEnum>("execute_elemental_on"))
+    _map.insert(std::make_pair("elemental", execute_on));
 
-  if (params.have_parameter<MultiMooseEnum>("output_scalars_on"))
-    _map.insert(std::make_pair("scalars", output_on));
+  if (params.have_parameter<MultiMooseEnum>("execute_scalars_on"))
+    _map.insert(std::make_pair("scalars", execute_on));
 
-  if (params.have_parameter<MultiMooseEnum>("output_postprocessors_on"))
-    _map.insert(std::make_pair("postprocessors", output_on));
+  if (params.have_parameter<MultiMooseEnum>("execute_postprocessors_on"))
+    _map.insert(std::make_pair("postprocessors", execute_on));
 
-  if (params.have_parameter<MultiMooseEnum>("output_vector_postprocessors_on"))
-    _map.insert(std::make_pair("vector_postprocessors", output_on));
+  if (params.have_parameter<MultiMooseEnum>("execute_vector_postprocessors_on"))
+    _map.insert(std::make_pair("vector_postprocessors", execute_on));
 
-  if (params.have_parameter<MultiMooseEnum>("output_input_on"))
+  if (params.have_parameter<MultiMooseEnum>("execute_input_on"))
     _map.insert(std::make_pair("input", Output::getExecuteOptions()));
 
-  if (params.have_parameter<MultiMooseEnum>("output_system_information_on"))
+  if (params.have_parameter<MultiMooseEnum>("execute_system_information_on"))
     _map.insert(std::make_pair("system_information", Output::getExecuteOptions("initial")));
 }
 

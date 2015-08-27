@@ -57,9 +57,9 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = out
   csv = true
   exodus = true
   sync_times = '10.5 20 30.5'
-  print_perf_log = true
 []

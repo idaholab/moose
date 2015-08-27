@@ -79,12 +79,9 @@
 
 [Outputs]
   file_base = single_out
-  output_initial = true
   output_final = true
   interval = 1000000
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
   [./console]
     type = Console
     interval = 1

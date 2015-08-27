@@ -278,7 +278,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = gh07
   csv = true
-  print_perf_log = true
 []

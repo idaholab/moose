@@ -225,10 +225,7 @@
 
 [Outputs]
   file_base = 2d_out
-  interval = 1
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true

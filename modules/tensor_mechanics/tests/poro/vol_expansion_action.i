@@ -213,6 +213,5 @@
 
 [Outputs]
   file_base = vol_expansion_action
-  output_initial = true
   exodus = true
 []

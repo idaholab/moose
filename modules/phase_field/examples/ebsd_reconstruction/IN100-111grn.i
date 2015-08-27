@@ -152,18 +152,11 @@
 []
 
 [Outputs]
-  output_initial = true
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'linear nonlinear'
-  [../]
   [./exodus]
     type = Exodus
-    interval = 1
     file_base = IN100-111grn
-    output_on = 'initial timestep_end'
+    execute_on = 'initial timestep_end'
     output_postprocessors_on = 'initial timestep_end'
   [../]
 []

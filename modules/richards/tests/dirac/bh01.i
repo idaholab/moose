@@ -170,9 +170,6 @@
 
 [Outputs]
   file_base = bh01
-  output_initial = true
   exodus = false
   csv = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

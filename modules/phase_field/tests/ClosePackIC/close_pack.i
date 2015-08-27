@@ -52,14 +52,8 @@
 []
 
 [Outputs]
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
-  [./out]
-    type = Exodus
-  [../]
+  execute_on = 'timestep_end'
+  exodus = true
 []
 
 [ICs]
@@ -71,4 +65,3 @@
     type = ClosePackIC
   [../]
 []
-

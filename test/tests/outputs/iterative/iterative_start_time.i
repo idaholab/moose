@@ -48,11 +48,7 @@
 []
 
 [Outputs]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'failed nonlinear linear timestep_end'
-  [../]
+  execute_on = 'timestep_end'
   [./out]
     type = Exodus
     nonlinear_residual_dt_divisor = 100

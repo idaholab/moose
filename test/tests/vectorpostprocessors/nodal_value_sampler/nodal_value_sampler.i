@@ -68,6 +68,6 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   csv = true
-  print_perf_log = true
 []

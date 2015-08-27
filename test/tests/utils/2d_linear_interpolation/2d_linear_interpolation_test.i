@@ -341,6 +341,4 @@
 [Outputs]
   file_base = out
   exodus = true
-  output_initial = true
-  print_perf_log = true
 []

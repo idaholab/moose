@@ -48,8 +48,5 @@
 # Test for bad output directory
 [Outputs]
   file_base = bad_dir/out
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

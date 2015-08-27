@@ -116,7 +116,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = gh_fu_11
   exodus = true
-  print_perf_log = true
 []

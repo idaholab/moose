@@ -49,13 +49,7 @@
 
 [Outputs]
   exodus = true
-  output_on = 'initial timestep_end'
   csv = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'timestep_end failed nonlinear linear'
-  [../]
 []
 
 [MultiApps]
@@ -77,4 +71,3 @@
     to_aux_scalar = average_scalar
   [../]
 []
-

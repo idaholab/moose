@@ -69,11 +69,11 @@ AddOutputAction::act()
   std::vector<std::string> exclude;
   if (_type == "Console")
   {
-    exclude.push_back("output_on");
+    exclude.push_back("execute_on");
 
     // --show-input should enable the display of the input file on the screen
     if (_app.getParam<bool>("show_input") && _moose_object_pars.get<bool>("output_screen"))
-      _moose_object_pars.set<MultiMooseEnum>("output_input_on") = "initial";
+      _moose_object_pars.set<MultiMooseEnum>("execute_input_on") = "initial";
   }
 
   // Apply the common parameters
@@ -95,4 +95,3 @@ AddOutputAction::act()
   MooseSharedPointer<Output> output = MooseSharedNamespace::static_pointer_cast<Output>(_factory.create(_type, object_name, _moose_object_pars));
   output_warehouse.addOutput(output);
 }
-

@@ -124,10 +124,8 @@
 []
 [Outputs]
   file_base = langmuir_desorption
-  output_initial = true
   interval = 10
   exodus = true
   csv = 10
-  print_perf_log = true
 [] # Outputs
 []

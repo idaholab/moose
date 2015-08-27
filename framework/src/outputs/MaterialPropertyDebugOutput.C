@@ -28,7 +28,7 @@ InputParameters validParams<MaterialPropertyDebugOutput>()
   InputParameters params = validParams<BasicOutput<Output> >();
 
   // This object only outputs data once, in the constructor, so disable fine control
-  params.suppressParameter<MultiMooseEnum>("output_on");
+  params.suppressParameter<MultiMooseEnum>("execute_on");
 
   return params;
 }

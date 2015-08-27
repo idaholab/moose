@@ -66,8 +66,6 @@
 
 [Outputs]
   file_base = out_block
-  output_initial = true
   exodus = false
   csv = true
-  print_perf_log = true
 []

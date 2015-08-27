@@ -48,7 +48,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   interval = 2
 []

@@ -89,8 +89,7 @@
 []
 
 [Outputs]
-  print_linear_residuals = true
-  print_perf_log = true
+  execute_on = 'timestep_end'
   [./circle_oversample]
     type = Exodus
     file_base = MathFreeEnergy_test_oversample

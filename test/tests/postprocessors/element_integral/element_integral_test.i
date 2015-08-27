@@ -54,8 +54,6 @@
 
 [Outputs]
   file_base = out
-  output_initial = true
   exodus = false
   csv = true
-  print_perf_log = true
 []

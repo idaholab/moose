@@ -274,8 +274,8 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = undrained_oedometer
-  print_perf_log = true
   [./csv]
     type = CSV
   [../]

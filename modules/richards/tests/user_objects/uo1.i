@@ -613,13 +613,12 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   active = 'csv'
   file_base = uo1
-  print_perf_log = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
   [./exodus]
     type = Exodus
     hide = pressure

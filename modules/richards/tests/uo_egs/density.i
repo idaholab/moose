@@ -91,7 +91,6 @@
 
 [Outputs]
   file_base = density
-  output_initial = true
   [./csv]
     type = CSV
   [../]

@@ -110,7 +110,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = jn03
   exodus = false
-  print_perf_log = true
 []

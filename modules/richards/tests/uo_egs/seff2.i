@@ -101,7 +101,6 @@
 
 [Outputs]
   file_base = seff2
-  output_initial = true
   [./csv]
     type = CSV
   [../]

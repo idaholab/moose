@@ -84,7 +84,7 @@
     tensor = stress
     variable = stress_xx
     index = 0
-    execute_on = timestep     # for efficiency, only compute at the end of a timestep
+    execute_on = timestep_end     # for efficiency, only compute at the end of a timestep
   [../]
   [./stress_yy]
     type = MaterialTensorAux
@@ -217,10 +217,8 @@
 
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = j_int_surfbreak_ellip_crack_sym_mm_out
-  output_initial = false
   exodus = true
   csv = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

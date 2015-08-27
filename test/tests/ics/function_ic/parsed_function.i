@@ -58,9 +58,7 @@
 []
 
 [Outputs]
-  output_initial = true
   file_base = parsed
-  print_perf_log = true
   [./OverSampling]
     type = Exodus
     refinements = 3
