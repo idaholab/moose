@@ -32,6 +32,12 @@ ACBulk::ACBulk(const InputParameters & parameters) :
     _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
 }
 
+void
+ACBulk::initialSetup()
+{
+  validateNonlinearCoupling<Real>("mob_name");
+}
+
 Real
 ACBulk::precomputeQpResidual()
 {
@@ -65,4 +71,3 @@ ACBulk::computeQpOffDiagJacobian(unsigned int jvar)
   // Set off-diagonal Jacobian term from mobility derivatives
   return (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * computeDFDOP(Residual) * _test[_i][_qp];
 }
-

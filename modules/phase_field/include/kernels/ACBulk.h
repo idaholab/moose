@@ -21,6 +21,8 @@ class ACBulk : public DerivativeMaterialInterface<JvarMapInterface<KernelValue> 
 public:
   ACBulk(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
 protected:
 
   /// Enum used with computeDFDOP function

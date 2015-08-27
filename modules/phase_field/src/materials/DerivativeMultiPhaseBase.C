@@ -115,6 +115,13 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & param
   }
 }
 
+void
+DerivativeMultiPhaseBase::initialSetup()
+{
+  for (unsigned int n = 0; n < _num_fi; ++n)
+    validateCoupling<Real>(_fi_names[n]);
+}
+
 Real
 DerivativeMultiPhaseBase::computeF()
 {
@@ -123,4 +130,3 @@ DerivativeMultiPhaseBase::computeF()
     F += (*_hi[n])[_qp] * (*_prop_Fi[n])[_qp];
   return F + _W * _g[_qp];
 }
-

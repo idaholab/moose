@@ -29,6 +29,13 @@ ACParsed::ACParsed(const InputParameters & parameters) :
     _d2FdEtadarg[i] = &getMaterialPropertyDerivative<Real>("f_name", _var.name(), _coupled_moose_vars[i]->name());
 }
 
+void
+ACParsed::initialSetup()
+{
+  ACBulk::initialSetup();
+  validateNonlinearCoupling<Real>("f_name");
+}
+
 Real
 ACParsed::computeDFDOP(PFFunctionType type)
 {
@@ -55,4 +62,3 @@ ACParsed::computeQpOffDiagJacobian(unsigned int jvar)
   return ACBulk::computeQpOffDiagJacobian(jvar) +
          _L[_qp] * (*_d2FdEtadarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }
-

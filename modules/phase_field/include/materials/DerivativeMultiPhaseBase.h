@@ -26,6 +26,8 @@ class DerivativeMultiPhaseBase : public DerivativeFunctionMaterialBase
 public:
   DerivativeMultiPhaseBase(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
 protected:
   virtual Real computeF();
 
