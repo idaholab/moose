@@ -395,6 +395,8 @@
 
 // Controls
 #include "RealFunctionControl.h"
+#include "RealFunctionControlMaterial.h"
+
 
 namespace Moose {
 
@@ -722,6 +724,7 @@ registerObjects(Factory & factory)
 
   // Controls
   registerControl(RealFunctionControl);
+  registerControl(RealFunctionControlMaterial);
 
   registered = true;
 }
@@ -794,6 +797,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_output",                   Output,                 false);
 
   registerMooseObjectTask("add_control",                  Control,                false);
+  appendMooseObjectTask("add_control", ControlMaterial);
+
 
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
@@ -1002,6 +1007,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddConstraintAction, "add_constraint");
   registerAction(AddUserObjectAction, "add_user_object");
   registerAction(AddControlAction, "add_control");
+  registerAction(AddControlAction, "add_material_control");
   registerAction(AddElementalFieldAction, "add_elemental_field_variable");
   registerAction(AddIndicatorAction, "add_indicator");
   registerAction(AddMarkerAction, "add_marker");

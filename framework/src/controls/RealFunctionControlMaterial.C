@@ -12,29 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddControlAction.h"
-#include "FEProblem.h"
+#include "RealFunctionControlMaterial.h"
 
 template<>
-InputParameters validParams<AddControlAction>()
+InputParameters validParams<RealFunctionControlMaterial>()
 {
-  InputParameters params = validParams<AddUserObjectAction>();
+  InputParameters params = validParams<ControlMaterial>();
+  params.addParam<FunctionName>("function", "The name of the function to evaluate for the material property");
+  params.addParam<MaterialPropertyName>("property", "The name of property to control");
   return params;
 }
 
-AddControlAction::AddControlAction(InputParameters params) :
-  AddUserObjectAction(params)
+RealFunctionControlMaterial::RealFunctionControlMaterial(const InputParameters & parameters) :
+    ControlMaterial(parameters),
+    _function(getFunction("function")),
+    _control_prop(getControlMaterialProperty<Real>("property"))
 {
 }
 
-
 void
-AddControlAction::act()
+RealFunctionControlMaterial::computeQpProperties()
 {
-  std::string base = _moose_object_pars.get<std::string>("_moose_base");
-
-  if (base == "Control")
-    AddUserObjectAction::act();
-  else if (base == "ControlMaterial")
-    _problem->addMaterial(_type, _name, _moose_object_pars);
+  _control_prop[_qp] = _function.value(_t, _q_point[_qp]);
 }

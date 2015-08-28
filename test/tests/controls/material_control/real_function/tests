@@ -1,0 +1,8 @@
+[Tests]
+  [./basic]
+    # Basic test for controlling material properties
+    type = Exodiff
+    input = real_function.i
+    exodiff = real_function_out.e
+  [../]
+[]

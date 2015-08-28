@@ -12,29 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddControlAction.h"
-#include "FEProblem.h"
+#include "ControlMaterial.h"
 
 template<>
-InputParameters validParams<AddControlAction>()
+InputParameters validParams<ControlMaterial>()
 {
-  InputParameters params = validParams<AddUserObjectAction>();
+  InputParameters params = validParams<Material>();
+
+  params.registerBase("ControlMaterial");
+
   return params;
 }
 
-AddControlAction::AddControlAction(InputParameters params) :
-  AddUserObjectAction(params)
+ControlMaterial::ControlMaterial(const InputParameters & parameters) :
+  Material(parameters)
 {
 }
 
-
-void
-AddControlAction::act()
+ControlMaterial::~ControlMaterial()
 {
-  std::string base = _moose_object_pars.get<std::string>("_moose_base");
-
-  if (base == "Control")
-    AddUserObjectAction::act();
-  else if (base == "ControlMaterial")
-    _problem->addMaterial(_type, _name, _moose_object_pars);
 }

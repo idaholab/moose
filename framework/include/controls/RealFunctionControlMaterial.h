@@ -12,29 +12,48 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddControlAction.h"
-#include "FEProblem.h"
+#ifndef REALFUNCTIONCONTROLMATERIAL_H
+#define REALFUNCTIONCONTROLMATERIAL_H
+
+// MOOSE includes
+#include "ControlMaterial.h"
+#include "Function.h"
+
+// Forward declarations
+class RealFunctionControlMaterial;
 
 template<>
-InputParameters validParams<AddControlAction>()
+InputParameters validParams<RealFunctionControlMaterial>();
+
+/**
+ *
+ */
+class RealFunctionControlMaterial : public ControlMaterial
 {
-  InputParameters params = validParams<AddUserObjectAction>();
-  return params;
-}
+public:
 
-AddControlAction::AddControlAction(InputParameters params) :
-  AddUserObjectAction(params)
-{
-}
+  /**
+   * Class constructor
+   * @param parameters
+   */
+  RealFunctionControlMaterial(const InputParameters & parameters);
+
+  /**
+   * Class destructor
+   */
+  virtual ~RealFunctionControlMaterial(){}
+
+  virtual void computeQpProperties();
 
 
-void
-AddControlAction::act()
-{
-  std::string base = _moose_object_pars.get<std::string>("_moose_base");
+private:
 
-  if (base == "Control")
-    AddUserObjectAction::act();
-  else if (base == "ControlMaterial")
-    _problem->addMaterial(_type, _name, _moose_object_pars);
-}
+  Function & _function;
+
+  MaterialProperty<Real> & _control_prop;
+
+};
+
+
+
+#endif // REALFUNCTIONCONTROLMATERIAL_H

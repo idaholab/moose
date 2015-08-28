@@ -12,41 +12,60 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDCONTROLACTION_H
-#define ADDCONTROLACTION_H
+#ifndef CONTROLMATERIAL_H
+#define CONTROLMATERIAL_H
 
 // MOOSE includes
-#include "AddUserObjectAction.h"
+#include "Material.h"
 
-// Forward declerations
-class AddControlAction;
+// Forward declarations
+class ControlMaterial;
 
 template<>
-InputParameters validParams<AddControlAction>();
+InputParameters validParams<ControlMaterial>();
 
 /**
- * Action for creating Control objects
  *
- * Control objects are GeneralUserObjects, thus just
- * use the AddUserObjectAction
  */
-class AddControlAction : public AddUserObjectAction
+class ControlMaterial : public Material
 {
 public:
 
   /**
    * Class constructor
-   * @param params Parameters for this Action
+   * @param parameters
    */
-  AddControlAction(InputParameters params);
+  ControlMaterial(const InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~AddControlAction(){};
+  virtual ~ControlMaterial();
 
-  virtual void act();
+protected:
+
+
+  template<typename T>
+  MaterialProperty<T> & getControlMaterialProperty(const std::string & name);
+
 
 };
 
-#endif // ADDCONTROLACTION_H
+template<typename T>
+MaterialProperty<T> &
+ControlMaterial::getControlMaterialProperty(const std::string & name)
+{
+  // This needs the logic for parsing object names...
+
+  // This needs logic for handling defaults (use deducePropertyName)
+  std::string prop_name = getParam<MaterialPropertyName>(name);
+
+
+  // ERROR if property doesn't exist
+
+
+  return _material_data.getProperty<T>(prop_name);
+}
+
+
+#endif // CONTROLMATERIAL_H
