@@ -1,0 +1,61 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+#ifndef DYNAMICSTRESSDIVERGENCETENSORS_H
+#define DYNAMICSTRESSDIVERGENCETENSORS_H
+
+#include "Kernel.h"
+#include "ElasticityTensorR4.h"
+#include "RankTwoTensor.h"
+
+//Forward Declarations
+class DynamicStressDivergenceTensors;
+class ElasticityTensorR4;
+class RankTwoTensor;
+
+template<>
+InputParameters validParams<DynamicStressDivergenceTensors>();
+
+/**
+ * StressDivergenceTensors mostly copies from StressDivergence.  There are small changes to use
+ * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This is done
+ * to allow for more mathematical transparancy.
+ */
+class DynamicStressDivergenceTensors : public Kernel
+{
+public:
+  DynamicStressDivergenceTensors(const InputParameters & parameters);
+
+protected:
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+
+  std::string _base_name;
+
+  const MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<RankTwoTensor> & _stress;
+  const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  // MaterialProperty<RankTwoTensor> & _d_stress_dT;
+
+  const unsigned int _component;
+
+  /// Coupled displacement variables
+  unsigned int _ndisp;
+  std::vector<VariableValue *> _disp;
+  std::vector<unsigned int> _disp_var;
+
+  const bool _temp_coupled;
+
+  const unsigned int _temp_var;
+  const Real _zeta;
+  const Real _alpha;
+
+private:
+
+};
+
+#endif //DYNAMICSTRESSDIVERGENCETENSORS_H

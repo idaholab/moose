@@ -137,7 +137,7 @@
 
 # exterior and internal pressures
   [./exterior_pressure_x]
-    type = PressureTM
+    type = Pressure
     variable = disp_x
     boundary = outer
     component = 0
@@ -145,7 +145,7 @@
   [../]
 
  [./exterior_pressure_y]
-    type = PressureTM
+    type = Pressure
     variable = disp_y
     boundary = outer
     component = 1
@@ -153,7 +153,7 @@
   [../]
 
 [./exterior_pressure_z]
-    type = PressureTM
+    type = Pressure
     variable = disp_z
     boundary = outer
     component = 2
@@ -161,7 +161,7 @@
   [../]
 
   [./interior_pressure_x]
-    type = PressureTM
+    type = Pressure
     variable = disp_x
     boundary = inner
     component = 0
@@ -169,7 +169,7 @@
   [../]
 
   [./interior_pressure_y]
-    type = PressureTM
+    type = Pressure
     variable = disp_y
     boundary = inner
     component = 1
@@ -177,7 +177,7 @@
   [../]
 
 [./interior_pressure_z]
-    type = PressureTM
+    type = Pressure
     variable = disp_z
     boundary = inner
     component = 2
