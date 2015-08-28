@@ -10,6 +10,10 @@
   elem_type = QUAD4
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Variables]
   [./disp_x]
     order = FIRST
@@ -46,8 +50,6 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
   [../]
 []
 
@@ -56,6 +58,7 @@
   active = 'Anisotropic_A Anisotropic_B switching combined'
 
   [./Anisotropic_A]
+    # this material is deprecated
     type = LinearElasticMaterial
     base_name = A
     block = 0
@@ -66,6 +69,7 @@
     applied_strain_vector = '0.1 0.05 0 0 0 0.01'
   [../]
   [./Anisotropic_B]
+    # this material is deprecated
     type = LinearElasticMaterial
     base_name = B
     block = 0
@@ -86,7 +90,7 @@
     block = 0
     base_A = A
     base_B = B
-    outputs = exodus
+    #outputs = exodus
   [../]
 []
 
