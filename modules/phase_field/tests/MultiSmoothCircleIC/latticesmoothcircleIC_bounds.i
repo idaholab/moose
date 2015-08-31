@@ -24,7 +24,7 @@
      invalue = 1.0
      outvalue = 0.0001
      circles_per_side = '2 2'
-     Rnd_variation = 10.0
+     pos_variation = 10.0
      radius = 8.0
      int_width = 5.0
      radius_variation_type = uniform

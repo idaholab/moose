@@ -299,7 +299,7 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = false
+    output_linear = false
   [../]
   [./csv]
     type = CSV

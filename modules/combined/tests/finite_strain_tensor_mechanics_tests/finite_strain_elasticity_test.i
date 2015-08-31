@@ -22,6 +22,9 @@
   # Comment
   # Mesh
   file = patch_mesh.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -105,9 +108,6 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     use_displaced_mesh = true
   [../]
 []
