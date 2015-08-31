@@ -29,6 +29,10 @@ ifeq ($(PHASE_FIELD),yes)
         TENSOR_MECHANICS          := yes
 endif
 
+ifeq ($(SOLID_MECHANICS),yes)
+        TENSOR_MECHANICS          := yes
+endif
+
 # The master list of all moose modules
 MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos"
 
@@ -108,6 +112,9 @@ endif
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
+  
+  #Dependency on tensor mechanics
+  DEPEND_MODULES     := tensor_mechanics
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
