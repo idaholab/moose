@@ -10,11 +10,12 @@ template<>
 InputParameters validParams<ComputeStrainBase>()
 {
   InputParameters params = validParams<Material>();
-  params.addCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
+  params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<Real>("temperature_ref", 273, "Reference temperature for thermal expansion in K");
   params.addCoupledVar("temperature", 273, "temperature in Kelvin");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
   params.addParam<Real>("thermal_expansion_coeff", 0, "Thermal expansion coefficient in 1/K");
+  params.addPrivateParam<bool>("stateful_displacements", false);
   return params;
 }
 
@@ -29,19 +30,20 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
     _T0(getParam<Real>("temperature_ref")),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
-    _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain"))
+    _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _stateful_displacements(getParam<bool>("stateful_displacements") && _fe_problem.isTransient())
 {
-  if (isParamValid("displacements") == false)
-    mooseError("The displacement variables for the Compute*Strain Materials must be provided in a string: displacements = 'disp_x disp_y'");
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
     mooseError("The number of variables supplied in 'displacements' must match the mesh dimension.");
 
+  // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _disp[i] = &coupledValue("displacements", i);
     _grad_disp[i] = &coupledGradient("displacements", i);
-    if (_fe_problem.isTransient())
+
+    if (_stateful_displacements)
     {
       _disp_old[i] = &coupledValueOld("displacements", i);
       _grad_disp_old[i] = &coupledGradientOld("displacements" ,i);
@@ -52,12 +54,14 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
       _grad_disp_old[i] = &_grad_zero;
     }
   }
-  if (_ndisp < 3)
+
+  // set unused dimensions to zero
+  for (unsigned i = _ndisp; i < 3; ++i)
   {
-    _disp[2] = &_zero;
-    _disp_old[2] = &_zero;
-    _grad_disp[2] = &_grad_zero;
-    _grad_disp_old[2] = &_grad_zero;
+    _disp[i] = &_zero;
+    _disp_old[i] = &_zero;
+    _grad_disp[i] = &_grad_zero;
+    _grad_disp_old[i] = &_grad_zero;
   }
 }
 
@@ -66,4 +70,3 @@ ComputeStrainBase::initQpStatefulProperties()
 {
   _total_strain[_qp].zero();
 }
-

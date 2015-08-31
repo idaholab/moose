@@ -11,6 +11,7 @@ InputParameters validParams<ComputeFiniteStrain>()
 {
   InputParameters params = validParams<ComputeStrainBase>();
   params.addClassDescription("Compute a strain increment and rotation increment for finite strains.");
+  params.set<bool>("stateful_displacements") = true;
   return params;
 }
 
@@ -152,4 +153,3 @@ ComputeFiniteStrain::computeQpStrain(const RankTwoTensor & Fhat)
   //Rotate strain to current configuration
   _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
 }
-

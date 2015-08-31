@@ -11,6 +11,7 @@ InputParameters validParams<ComputeIncrementalSmallStrain>()
 {
   InputParameters params = validParams<ComputeSmallStrain>();
   params.addClassDescription("Compute a strain increment and rotation increment for small strains.");
+  params.set<bool>("stateful_displacements") = true;
   return params;
 }
 
@@ -69,4 +70,3 @@ ComputeIncrementalSmallStrain::computeProperties()
     _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
   }
 }
-

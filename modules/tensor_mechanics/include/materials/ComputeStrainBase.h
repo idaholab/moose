@@ -40,6 +40,8 @@ protected:
   std::string _base_name;
 
   MaterialProperty<RankTwoTensor> & _total_strain;
+
+  const bool _stateful_displacements;
 };
 
 #endif //COMPUTESTRAINBASE_H
