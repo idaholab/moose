@@ -26,31 +26,37 @@
     type = RenameBlock
     old_block_id = '0'
     new_block_id = '2 3'
+    depends_on = sbb0
   [../]
   [./old_id_and_name]
     type = RenameBlock
     old_block_id = '0 1'
     old_block_name = 'zero one'
     new_block_id = '2 3'
+    depends_on = sbb0
   [../]
   [./no_old_id]
     type = RenameBlock
     new_block_id = '2 3'
+    depends_on = sbb0
   [../]
   [./too_many_old]
     type = RenameBlock
     old_block_id = '1 2 3'
     new_block_name = 'two three'
+    depends_on = sbb0
   [../]
   [./new_id_and_name]
     type = RenameBlock
     old_block_id = '1 2 3'
     new_block_id = '5 6 7'
     new_block_name = 'five six seven'
+    depends_on = sbb0
   [../]
   [./no_new]
     type = RenameBlock
     old_block_id = '1 2 3'
+    depends_on = sbb0
   [../]
 
 []
