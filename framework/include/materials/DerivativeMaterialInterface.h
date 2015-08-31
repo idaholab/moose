@@ -16,6 +16,7 @@
 
 #include "Material.h"
 #include "MaterialProperty.h"
+#include "KernelBase.h"
 #include "FEProblem.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
@@ -37,7 +38,7 @@ void mooseSetToZero(T & v)
   v = 0;
 }
 template<typename T>
-void mooseSetToZero(T* & )
+void mooseSetToZero(T* &)
 {
   mooseError("Cannot use pointer types for MaterialProperty derivatives.");
 }
@@ -104,6 +105,19 @@ public:
   const MaterialProperty<U> & getMaterialPropertyDerivativeByName(const MaterialPropertyName & base, const VariableName & c1, const VariableName & c2 = "", const VariableName & c3 = "");
   ///@}
 
+  ///@{
+  /**
+   * check if derivatives of the passed in material property exist w.r.t a variable
+   * that is _not_ coupled in to the current object
+   */
+  template<typename U>
+  void validateCoupling(const MaterialPropertyName & base, const std::vector<VariableName> & c, bool validate_aux = true);
+  template<typename U>
+  void validateCoupling(const MaterialPropertyName & base, const VariableName & c1 = "", const VariableName & c2 = "", const VariableName & c3 = "");
+  template<typename U>
+  void validateNonlinearCoupling(const MaterialPropertyName & base, const VariableName & c1 = "", const VariableName & c2 = "", const VariableName & c3 = "");
+  ///@}
+
 private:
   /// Return a constant zero property
   template<typename U>
@@ -112,6 +126,16 @@ private:
   /// Check if a material property is present with the applicable restrictions
   template<typename U>
   bool haveMaterialProperty(const std::string & prop_name);
+
+  /// helper method to combine multiple VariableNames into a vector (if they are != "")
+  std::vector<VariableName> buildVariableVector(const VariableName & c1, const VariableName & c2, const VariableName & c3);
+
+  /// helper method to compile list of missing coupled variables for a given system
+  template<typename U>
+  void validateCouplingHelper(const MaterialPropertyName & base, const std::vector<VariableName> & c, const System & system, std::vector<VariableName> & missing);
+
+  // check if the speciified variable name is not the variable this kernel is acting on (always true for any other type of object)
+  bool isNotKernelVariable(const VariableName & name);
 
   /// Reference to FEProblem
   FEProblem & _dmi_fe_problem;
@@ -303,6 +327,118 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(const Materi
   if (c2 != "")
     return getDefaultMaterialPropertyByName<U>(propertyNameSecond(base, c1, c2));
   return getDefaultMaterialPropertyByName<U>(propertyNameFirst(base, c1));
+}
+
+template<class T>
+template<typename U>
+void
+DerivativeMaterialInterface<T>::validateCouplingHelper(const MaterialPropertyName & base, const std::vector<VariableName> & c, const System & system, std::vector<VariableName> & missing)
+{
+  unsigned int ncoupled = this->_coupled_moose_vars.size();
+
+  // iterate over all variables in the current system (in groups)
+  for (unsigned int i = 0; i < system.n_variable_groups(); ++i)
+  {
+    const VariableGroup & vg = system.variable_group(i);
+    for (unsigned int j = 0; j < vg.n_variables(); ++j)
+    {
+      std::vector<VariableName> cj(c);
+      VariableName jname = vg.name(j);
+      cj.push_back(jname);
+
+      // if the derivative exists make sure the variable is coupled
+      if (haveMaterialProperty<U>(propertyName(base, cj)))
+      {
+        // kernels to not have the variable they are acting on in coupled_moose_vars
+        bool is_missing = isNotKernelVariable(jname);
+
+        for (unsigned int k = 0; k < ncoupled; ++k)
+          if (this->_coupled_moose_vars[k]->name() == jname)
+          {
+            is_missing = false;
+            break;
+          }
+
+        if (is_missing)
+          missing.push_back(jname);
+      }
+    }
+  }
+}
+
+template<class T>
+template<typename U>
+void
+DerivativeMaterialInterface<T>::validateCoupling(const MaterialPropertyName & base, const std::vector<VariableName> & c, bool validate_aux)
+{
+  // get the base property name
+  std::string prop_name = this->deducePropertyName(base);
+  // list of potentially missing coupled variables
+  std::vector<VariableName> missing;
+
+  // iterate over all variables in the both the non-linear and auxiliary system (optional)
+  validateCouplingHelper<U>(prop_name, c, _dmi_fe_problem.getNonlinearSystem().system(), missing);
+  if (validate_aux)
+    validateCouplingHelper<U>(prop_name, c, _dmi_fe_problem.getAuxiliarySystem().system(), missing);
+
+  if (missing.size() > 0)
+  {
+    // join list of missing variable names
+    std::string list = missing[0];
+    for (unsigned int i = 1; i < missing.size(); ++i)
+      list += ", " + missing[i];
+
+    mooseWarning("Missing coupled variables {" << list << "} (add them to args parameter of " << this->name() << ")");
+  }
+}
+
+template<class T>
+std::vector<VariableName>
+DerivativeMaterialInterface<T>::buildVariableVector(const VariableName & c1, const VariableName & c2, const VariableName & c3)
+{
+  std::vector<VariableName> c;
+  if (c1 != "")
+  {
+    c.push_back(c1);
+    if (c2 != "")
+    {
+      c.push_back(c2);
+      if (c3 != "")
+        c.push_back(c3);
+    }
+  }
+  return c;
+}
+
+template<class T>
+template<typename U>
+void
+DerivativeMaterialInterface<T>::validateCoupling(const MaterialPropertyName & base, const VariableName & c1, const VariableName & c2, const VariableName & c3)
+{
+  validateCoupling<U>(base, buildVariableVector(c1, c2, c3), true);
+}
+
+template<class T>
+template<typename U>
+void
+DerivativeMaterialInterface<T>::validateNonlinearCoupling(const MaterialPropertyName & base, const VariableName & c1, const VariableName & c2, const VariableName & c3)
+{
+  validateCoupling<U>(base, buildVariableVector(c1, c2, c3), false);
+}
+
+template<class T>
+inline bool
+DerivativeMaterialInterface<T>::isNotKernelVariable(const VariableName & name)
+{
+  // try to cast this to a Kernel pointer
+  KernelBase * k = dynamic_cast<KernelBase *>(this);
+
+  // This interface is not templated on a class derived from Kernel
+  if (k == NULL)
+    return true;
+
+  // We are templated on a kernel class, so we check if the kernel variable
+  return k->variable().name() != name;
 }
 
 #endif //DERIVATIVEMATERIALINTERFACE_H

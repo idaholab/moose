@@ -21,6 +21,7 @@ public:
   CahnHilliardBase(const InputParameters & parameters);
 
   static InputParameters validParams();
+  virtual void initialSetup();
 
 protected:
   typedef typename CHBulk<T>::PFFunctionType PFFunctionType;
@@ -75,6 +76,18 @@ CahnHilliardBase<T>::CahnHilliardBase(const InputParameters & parameters) :
 
     _grad_vars[i+1] = &(this->_coupled_moose_vars[i]->gradSln());
   }
+}
+
+template<typename T>
+void
+CahnHilliardBase<T>:: initialSetup()
+{
+  /**
+   * Check if both the non-linear as well as the auxiliary variables variables
+   * are coupled. Derivatives with respect to both types of variables contribute
+   * the residual.
+   */
+  this->template validateCoupling<Real>("f_name", this->_var.name());
 }
 
 template<typename T>

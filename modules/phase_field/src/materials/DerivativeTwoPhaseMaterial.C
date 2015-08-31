@@ -87,6 +87,13 @@ DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const InputParameters & p
   }
 }
 
+void
+DerivativeTwoPhaseMaterial::initialSetup()
+{
+  validateCoupling<Real>("fa_name");
+  validateCoupling<Real>("fb_name");
+}
+
 Real
 DerivativeTwoPhaseMaterial::computeF()
 {
@@ -148,4 +155,3 @@ DerivativeTwoPhaseMaterial::computeD3F(unsigned int i_var, unsigned int j_var, u
 
   return _h[_qp] * (*_prop_d3Fb[i][j][k])[_qp] + (1.0 - _h[_qp]) * (*_prop_d3Fa[i][j][k])[_qp];
 }
-

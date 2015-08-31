@@ -28,6 +28,8 @@ class SplitCHParsed : public DerivativeMaterialInterface<JvarMapInterface<SplitC
 public:
   SplitCHParsed(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
 protected:
   virtual Real computeDFDC(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);

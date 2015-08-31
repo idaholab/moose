@@ -26,6 +26,8 @@ class DerivativeTwoPhaseMaterial : public DerivativeFunctionMaterialBase
 public:
   DerivativeTwoPhaseMaterial(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
 protected:
   virtual Real computeF();
   virtual Real computeDF(unsigned int);
