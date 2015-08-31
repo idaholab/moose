@@ -25,6 +25,8 @@ class ACParsed : public ACBulk
 public:
   ACParsed(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
 protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);

@@ -21,6 +21,8 @@ class ACInterface : public DerivativeMaterialInterface<JvarMapInterface<KernelGr
 public:
   ACInterface(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
 protected:
 
   /// Enum of computeDFDOP inputs

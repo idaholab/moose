@@ -30,6 +30,17 @@ SplitCHParsed::SplitCHParsed(const InputParameters & parameters) :
     _d2Fdcdarg[i] = &getMaterialPropertyDerivative<Real>("f_name", _var.name(), _coupled_moose_vars[i]->name());
 }
 
+void
+SplitCHParsed::initialSetup()
+{
+  /**
+   * We are only interested if the necessary non-linear variables are coupled,
+   * as those are thge ones used in constructing the Jacobian. The AuxVariables
+   * do not have Jacobian entries.
+   */
+  validateNonlinearCoupling<Real>("f_name", _var.name());
+}
+
 Real
 SplitCHParsed::computeDFDC(PFFunctionType type)
 {
@@ -58,4 +69,3 @@ SplitCHParsed::computeQpOffDiagJacobian(unsigned int jvar)
 
   return (*_d2Fdcdarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }
-

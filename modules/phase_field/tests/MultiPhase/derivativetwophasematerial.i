@@ -52,6 +52,7 @@
   [./ACBulk]
     type = ACParsed
     variable = eta
+    args = c
     f_name = F
   [../]
   [./ACInterface]

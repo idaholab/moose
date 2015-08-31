@@ -82,6 +82,13 @@ DerivativeSumMaterial::DerivativeSumMaterial(const InputParameters & parameters)
 }
 
 void
+DerivativeSumMaterial::initialSetup()
+{
+  for (unsigned int n = 0; n < _num_materials; ++n)
+    validateCoupling<Real>(_sum_materials[n]);
+}
+
+void
 DerivativeSumMaterial::computeProperties()
 {
   unsigned int i, j, k;
@@ -127,4 +134,3 @@ DerivativeSumMaterial::computeProperties()
     }
   }
 }
-

@@ -19,6 +19,8 @@ class DerivativeSumMaterial : public DerivativeFunctionMaterialBase
 public:
   DerivativeSumMaterial(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
 protected:
   virtual void computeProperties();
 

@@ -34,6 +34,12 @@ ACInterface::ACInterface(const InputParameters & parameters) :
     _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
 }
 
+void
+ACInterface::initialSetup()
+{
+  validateNonlinearCoupling<Real>("mob_name");
+}
+
 RealGradient
 ACInterface::precomputeQpResidual()
 {
@@ -59,4 +65,3 @@ ACInterface::computeQpOffDiagJacobian(unsigned int jvar)
   // Set off-diagonal jaocbian terms from mobility dependence
   return _kappa[_qp] * (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
-
