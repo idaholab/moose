@@ -17,7 +17,7 @@ InputParameters validParams<SolidMaterialProperties>()
 
   params.addPrivateParam<MultiMooseEnum>("execute_on");
   params.addPrivateParam<bool>("use_displaced_mesh");
-  params.registerBase("MaterialProperties");
+  params.registerBase("SolidMaterialProperties");
 
   return params;
 }
