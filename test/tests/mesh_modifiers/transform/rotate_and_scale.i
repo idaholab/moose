@@ -13,6 +13,7 @@
     type = Transform
     transform = SCALE
     vector_value = '1e2 1e2 1e2'
+    depends_on = rotate
   [../]
 []
 
