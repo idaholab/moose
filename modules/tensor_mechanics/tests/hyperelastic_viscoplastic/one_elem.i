@@ -19,9 +19,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = ux
-    disp_z = uz
-    disp_y = uy
+    displacements = 'ux uy uz'
     use_displaced_mesh = true
   [../]
 []

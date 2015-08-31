@@ -10,6 +10,10 @@
   elem_type = QUAD4
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Variables]
   [./disp_x]
     order = FIRST
@@ -51,8 +55,6 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
   [../]
   [./dummy]
     type = MatDiffusion
@@ -63,12 +65,13 @@
 
 [Materials]
   [./eigenstrain]
+    # this material is deprecated
     type = SimpleEigenStrainMaterial
     block = 0
     epsilon0 = 0.05
     c = c
-    disp_y = disp_y
     disp_x = disp_x
+    disp_y = disp_y
     C_ijkl = '3 1 1 3 1 3 1 1 1 '
     fill_method = symmetric9
   [../]
