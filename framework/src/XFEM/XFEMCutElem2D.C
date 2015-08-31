@@ -15,7 +15,7 @@
 #include <cstdlib> // *must* precede <cmath> for proper std:abs() on PGI, Sun Studio CC
 #include <cmath> // for isnan(), when it's defined
 #include "XFEMCutElem2D.h"
-#include "XFEMIntegrationFuncs.h"
+#include "XFEMMiscFuncs.h"
 #include "petscblaslapack.h"
 
 XFEMCutElem2D::XFEMCutElem2D(Elem* elem, const EFAelement2D * const CEMelem, unsigned int n_qpoints):
