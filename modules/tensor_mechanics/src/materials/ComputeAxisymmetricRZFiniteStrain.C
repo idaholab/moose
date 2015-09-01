@@ -15,7 +15,8 @@ InputParameters validParams<ComputeAxisymmetricRZFiniteStrain>()
 }
 
 ComputeAxisymmetricRZFiniteStrain::ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters) :
-    Compute2DFiniteStrain(parameters)
+    Compute2DFiniteStrain(parameters),
+    _disp_old_0(coupledValueOld("displacements", 0))
 {
 }
 
@@ -36,7 +37,7 @@ Real
 ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZold()
 {
   if (_q_point[_qp](0) != 0.0)
-    return (*_disp_old[0])[_qp] / _q_point[_qp](0);
+    return _disp_old_0[_qp] / _q_point[_qp](0);
 
   else
     return 0.0;
