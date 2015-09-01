@@ -86,7 +86,7 @@
 
 # exterior and internal pressures
   [./exterior_pressure_r]
-    type = PressureTM
+    type = Pressure
     variable = disp_r
     boundary = right
     component = 0
