@@ -6,6 +6,14 @@
     recover = false
   [../]
 
+  [./test_error]
+    type = 'RunException'
+    input = 'master.i'
+    expect_err = 'Unable to find variable \w+ in any system'
+    cli_args = 'Transfers/pp_transfer/variable=invalid'
+    prereq = test
+  [../]
+
   [./radial_basis]
     type = 'Exodiff'
     input = 'radial_master.i'
