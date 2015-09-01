@@ -23,7 +23,6 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
-    _disp_old(3),
     _grad_disp(3),
     _grad_disp_old(3),
     _T(coupledValue("temperature")),
@@ -44,22 +43,15 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
     _grad_disp[i] = &coupledGradient("displacements", i);
 
     if (_stateful_displacements)
-    {
-      _disp_old[i] = &coupledValueOld("displacements", i);
       _grad_disp_old[i] = &coupledGradientOld("displacements" ,i);
-    }
     else
-    {
-      _disp_old[i] = &_zero;
       _grad_disp_old[i] = &_grad_zero;
-    }
   }
 
   // set unused dimensions to zero
   for (unsigned i = _ndisp; i < 3; ++i)
   {
     _disp[i] = &_zero;
-    _disp_old[i] = &_zero;
     _grad_disp[i] = &_grad_zero;
     _grad_disp_old[i] = &_grad_zero;
   }

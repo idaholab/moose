@@ -20,6 +20,9 @@ public:
   ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
 
 protected:
+  /// the old value of the first component of the displacements vector
+  VariableValue & _disp_old_0;
+
   virtual Real computeDeformGradZZ();
   virtual Real computeDeformGradZZold();
 };
