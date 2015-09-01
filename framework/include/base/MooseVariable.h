@@ -117,7 +117,7 @@ public:
   const VariablePhiGradient & gradPhiFaceNeighbor();
   const VariablePhiSecond & secondPhiFaceNeighbor();
 
-  const MooseArray<Point> & normals() { return _normals; }
+  const MooseArray<Point> & normals();
 
   // damping
   VariableValue & increment() { return _increment; }
