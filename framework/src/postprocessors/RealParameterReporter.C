@@ -11,31 +11,36 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "CoefDiffusion.h"
+
+#include "RealParameterReporter.h"
+#include "SubProblem.h"
 
 template<>
-InputParameters validParams<CoefDiffusion>()
+InputParameters validParams<RealParameterReporter>()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
-  params.addPrivateParam<Real>("_test_private_param", 12345);
+  InputParameters params = validParams<GeneralPostprocessor>();
+  params += validParams<ControlInterface>();
+
+  params.addRequiredParam<std::string>("parameter", "The input parameter to control.");
+
   return params;
 }
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _coef(getParam<Real>("coef"))
+RealParameterReporter::RealParameterReporter(const InputParameters & parameters) :
+    GeneralPostprocessor(parameters),
+    ControlInterface(parameters)
 {
 }
 
-Real
-CoefDiffusion::computeQpResidual()
+void
+RealParameterReporter::initialSetup()
 {
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
+  _parameter = &getControlParam<Real>("parameter");
 }
 
+
 Real
-CoefDiffusion::computeQpJacobian()
+RealParameterReporter::getValue()
 {
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
+  return *_parameter;
 }

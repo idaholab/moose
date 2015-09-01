@@ -11,31 +11,17 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "CoefDiffusion.h"
+
+#include "AddControlAction.h"
 
 template<>
-InputParameters validParams<CoefDiffusion>()
+InputParameters validParams<AddControlAction>()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
-  params.addPrivateParam<Real>("_test_private_param", 12345);
+  InputParameters params = validParams<AddUserObjectAction>();
   return params;
 }
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _coef(getParam<Real>("coef"))
+AddControlAction::AddControlAction(InputParameters params) :
+  AddUserObjectAction(params)
 {
-}
-
-Real
-CoefDiffusion::computeQpResidual()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
-}
-
-Real
-CoefDiffusion::computeQpJacobian()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
 }
