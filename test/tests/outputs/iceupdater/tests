@@ -1,0 +1,6 @@
+[Tests]
+	[./testupdater]
+		type = 'ICEUpdaterTester'
+		input = 'ice_updater_test.i'
+	[../]
+[]

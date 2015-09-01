@@ -48,11 +48,8 @@
 
 // kernels
 #include "TimeDerivative.h"
-<<<<<<< HEAD
 #include "CoupledTimeDerivative.h"
 #include "MassLumpedTimeDerivative.h"
-=======
->>>>>>> branch 'devel' of https://github.com/amccaskey/moose
 #include "Diffusion.h"
 #include "AnisotropicDiffusion.h"
 #include "CoupledForce.h"
@@ -198,6 +195,7 @@
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
 #include "PercentChangePostprocessor.h"
+#include "FunctionValuePostprocessor.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -426,11 +424,8 @@ registerObjects(Factory & factory)
 
   // kernels
   registerKernel(TimeDerivative);
-<<<<<<< HEAD
   registerKernel(CoupledTimeDerivative);
   registerKernel(MassLumpedTimeDerivative);
-=======
->>>>>>> branch 'devel' of https://github.com/amccaskey/moose
   registerKernel(Diffusion);
   registerKernel(AnisotropicDiffusion);
   registerKernel(CoupledForce);
