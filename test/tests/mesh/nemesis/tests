@@ -10,9 +10,16 @@
   [./nemesis_repartitioning_test]
     type = 'Exodiff'
     input = 'nemesis_repartitioning_test.i'
-    exodiff = 'repartitioned.e.4.0 repartitioned.e.4.1 repartitioned.e.4.2 repartitioned.e.4.3'
+    exodiff = 'repartitioned.e.4.0 repartitioned.e.4.1 repartitioned.e.4.2 repartitioned.e.4.3 repartitioned.e-s0002.4.0 repartitioned.e-s0002.4.1 repartitioned.e-s0002.4.2 repartitioned.e-s0002.4.3'
+    rel_err = 5.e-5
     max_parallel = 4
     min_parallel = 4
     recover = false
+
+    # There appears to be a platform specific issue with the
+    # nemesis repartitioning. While we do receive consistent
+    # results on each platform they do not produce the
+    # same results.
+    platform = 'LINUX'
   [../]
 []
