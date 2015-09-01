@@ -579,7 +579,7 @@ GrainTracker::trackGrains()
     else
     {
       Real min_centroid_diff = std::numeric_limits<Real>::max();
-      unsigned int min_idx;
+      unsigned int min_idx = 0;
       for (unsigned int i = 0; i < it->second.size(); ++i)
       {
         Real curr_centroid_diff = boundingRegionDistance(new_grains[it->first]->sphere_ptrs, _unique_grains[(it->second)[i]]->sphere_ptrs, true);
@@ -1031,4 +1031,3 @@ GrainTracker::UniqueGrain::~UniqueGrain()
   for (unsigned int i=0; i<sphere_ptrs.size(); ++i)
     delete sphere_ptrs[i];
 }
-
