@@ -1,0 +1,15 @@
+[Tests]
+  [./j2_hard1_mod]
+    type = 'Exodiff'
+    input = 'j2_hard1_mod.i'
+    exodiff = 'j2_hard1_mod_out.e'
+    heavy = true
+  [../]
+  [./LSH_mod]
+    type = 'Exodiff'
+    input = 'LSH_mod.i'
+    exodiff = 'LSH_mod_out.e'
+    heavy = true
+  [../]
+[]
+
