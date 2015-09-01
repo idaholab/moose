@@ -1123,10 +1123,8 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       // before adding the cached residuals below.
       _communicator.max( residual_has_inserted_values );
       if ( residual_has_inserted_values )
-      {
         residual.close();
-        residual_has_inserted_values = false;
-      }
+
       _fe_problem.addCachedResidualDirectly(residual, 0);
       residual.close();
 
