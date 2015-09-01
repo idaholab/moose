@@ -25,7 +25,7 @@ InputParameters validParams<ICEUpdater>();
 class ICEUpdater: public AdvancedOutput<Output> {
 public:
 
-	ICEUpdater(const std::string & name, InputParameters params);
+	ICEUpdater(const InputParameters & params);
 
 	virtual ~ICEUpdater();
 

@@ -18,8 +18,8 @@ InputParameters validParams<ICEUpdater>() {
 	return params;
 }
 
-ICEUpdater::ICEUpdater(const std::string & name, InputParameters parameters) :
-		AdvancedOutput<Output>(name, parameters) {
+ICEUpdater::ICEUpdater(const InputParameters & parameters) :
+		AdvancedOutput<Output>(parameters) {
 
 	// Create the iStream containing the initialization data for the Updater
 	std::stringstream ss;
