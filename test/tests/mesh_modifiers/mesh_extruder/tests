@@ -22,4 +22,16 @@
     input = 'gen_extrude.i'
     exodiff = 'out_gen.e'
   [../]
+
+  [./extrude_remap_layer1]
+    type = 'Exodiff'
+    input = 'extrude_remap_layer1.i'
+    exodiff = 'extrude_remap_layer1_out.e'
+  [../]
+
+  [./extrude_remap_layer2]
+    type = 'Exodiff'
+    input = 'extrude_remap_layer2.i'
+    exodiff = 'extrude_remap_layer2_out.e'
+  [../]
 []
