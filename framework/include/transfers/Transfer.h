@@ -69,7 +69,7 @@ protected:
    * @param es The EquationSystems object to be searched.
    * @param var_name The name of the variable you are looking for.
    */
-  System * find_sys(EquationSystems & es, const std::string & var_name) const;
+  static System * find_sys(EquationSystems & es, const std::string & var_name);
 
   SubProblem & _subproblem;
   FEProblem & _fe_problem;

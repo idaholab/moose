@@ -65,13 +65,6 @@ public:
 
 protected:
   /**
-   * Small helper function for finding the system containing the variable.
-   *
-   * Note that this implies that variable names are unique across all systems!
-   */
-  System * find_sys(std::string var_name);
-
-  /**
    * Helper that returns the DTK ElementTopology for a given Elem
    */
   DataTransferKit::DTK_ElementTopology get_element_topology(const Elem * elem);
