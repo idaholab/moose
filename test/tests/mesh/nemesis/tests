@@ -15,5 +15,11 @@
     max_parallel = 4
     min_parallel = 4
     recover = false
+
+    # There appears to be a platform specific issue with the
+    # nemesis repartitioning. While we do receive consistent
+    # results on each platform they do not produce the
+    # same results.
+    platform = 'LINUX'
   [../]
 []
