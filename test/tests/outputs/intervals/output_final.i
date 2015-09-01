@@ -48,9 +48,10 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   [./out]
     type = Exodus
     interval = 5
-    output_on = 'final timestep_end'
+    execute_on = 'final timestep_end'
   [../]
 []

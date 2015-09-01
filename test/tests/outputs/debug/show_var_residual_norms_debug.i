@@ -206,7 +206,7 @@
 []
 
 [Outputs]
-  print_perf_log = true
+  execute_on = 'timestep_end'
 []
 
 [Debug]

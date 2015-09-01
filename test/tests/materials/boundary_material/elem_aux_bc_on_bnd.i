@@ -68,7 +68,5 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
 []

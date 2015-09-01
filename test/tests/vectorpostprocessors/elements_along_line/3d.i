@@ -50,9 +50,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   csv = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

@@ -85,7 +85,6 @@
 
 [Outputs]
   file_base = relperm
-  output_initial = true
   [./csv]
     type = CSV
   [../]

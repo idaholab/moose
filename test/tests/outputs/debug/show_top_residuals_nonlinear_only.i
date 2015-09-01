@@ -45,12 +45,9 @@
 
 [Outputs]
   exodus = true
-  output_initial = true
-  print_perf_log = true
-  print_linear_residuals = true
-  [./debug]
+  [./debug] # This is only a test, this should be turned on via the [Debug] block
     type = TopResidualDebugOutput
     num_residuals = 1
-    output_on = nonlinear
+    execute_on = nonlinear
   [../]
 []

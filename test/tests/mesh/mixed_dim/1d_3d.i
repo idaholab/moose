@@ -61,8 +61,5 @@
 
 [Outputs]
   file_base = 1d_3d_out
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

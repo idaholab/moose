@@ -258,12 +258,8 @@
 
 [Outputs]
   file_base = uni_axial2_planar
-  output_initial = true
-  print_linear_residuals = true
-  print_perf_log = true
   [./exodus]
     type = Exodus
-    interval = 1
     hide = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz yield_fcn s_xx s_xy s_xz s_yy s_yz s_zz f'
   [../]
   [./csv]

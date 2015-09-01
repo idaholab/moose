@@ -89,10 +89,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = derivative_parsed_material
-  output_initial = false
-  interval = 1
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

@@ -55,17 +55,13 @@
 []
 
 [Outputs]
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'failed nonlinear linear timestep_end'
-  [../]
+  execute_on = 'timestep_end'
   [./out]
     type = CSV
     nonlinear_residual_dt_divisor = 100
     linear_residual_dt_divisor = 100
     start_time = 1.8
     end_time = 1.85
-    output_on = 'nonlinear linear timestep_end'
+    execute_on = 'nonlinear linear timestep_end'
   [../]
 []

@@ -108,6 +108,5 @@
 [Outputs]
   [./out]
     type = Exodus
-    output_initial = true
   [../]
 []

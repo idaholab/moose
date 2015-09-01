@@ -71,8 +71,5 @@
 []
 
 [Outputs]
-  output_initial = true
-  print_linear_residuals = true
-  print_perf_log = true
   print_mesh_changed_info = true
 []

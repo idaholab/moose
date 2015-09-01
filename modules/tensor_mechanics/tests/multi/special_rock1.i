@@ -323,13 +323,5 @@
 [Outputs]
   file_base = special_rock1
   exodus = false
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-    perf_log = true
-  [../]
-  [./csv]
-    type = CSV
-    interval = 1
-  [../]
+  csv = true
 []

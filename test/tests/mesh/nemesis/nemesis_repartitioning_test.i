@@ -66,8 +66,5 @@
 
 [Outputs]
   file_base = repartitioned
-  output_initial = true
   nemesis = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

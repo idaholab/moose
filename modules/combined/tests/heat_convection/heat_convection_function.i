@@ -87,9 +87,6 @@
 
 [Outputs]    # Output Start
   # Output Start
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
 []      # Output END
 #      # Input file END

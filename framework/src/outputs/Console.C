@@ -94,15 +94,15 @@ InputParameters validParams<Console>()
    * of user-modified parameters
    */
   // By default set System Information to output on initial
-  params.set<MultiMooseEnum>("output_system_information_on", /*quiet_mode=*/true) = "initial";
+  params.set<MultiMooseEnum>("execute_system_information_on", /*quiet_mode=*/true) = "initial";
 
-  // Change the default behavior of 'output_on' to included nonlinear iterations and failed timesteps
-  params.set<MultiMooseEnum>("output_on", /*quiet_mode=*/true).push_back("timestep_begin nonlinear failed");
+  // Change the default behavior of 'execute_on' to included nonlinear iterations and failed timesteps
+  params.set<MultiMooseEnum>("execute_on", /*quiet_mode=*/true).push_back("timestep_begin linear nonlinear failed");
 
   // By default postprocessors and scalar are only output at the end of a timestep
-  params.set<MultiMooseEnum>("output_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
-  params.set<MultiMooseEnum>("output_vector_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
-  params.set<MultiMooseEnum>("output_scalars_on", /*quiet_mode=*/true) = "timestep_end";
+  params.set<MultiMooseEnum>("execute_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
+  params.set<MultiMooseEnum>("execute_vector_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
+  params.set<MultiMooseEnum>("execute_scalars_on", /*quiet_mode=*/true) = "timestep_end";
 
   return params;
 }
@@ -138,8 +138,7 @@ Console::Console(const InputParameters & parameters) :
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
   Action * common_action = awh.getActionsByName("common_output")[0];
-  if (!_pars.paramSetByUser("output_on") && common_action->getParam<bool>("print_linear_residuals"))
-    _output_on.push_back("linear");
+
   if (!_pars.paramSetByUser("perf_log") && common_action->getParam<bool>("print_perf_log"))
   {
     _perf_log = true;
@@ -223,7 +222,7 @@ Console::~Console()
 void
 Console::initialSetup()
 {
-  // If output_on = 'initial' perform the output
+  // If execute_on = 'initial' perform the output
   if (shouldOutput("system_information", EXEC_INITIAL))
     outputSystemInformation();
 
@@ -271,11 +270,11 @@ Console::output(const ExecFlagType & type)
     outputInput();
 
   // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
-  if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _output_on.contains(EXEC_INITIAL)))
+  if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL)))
     writeTimestepInformation();
 
   // Print Non-linear Residual (control with "execute_on")
-  if (type == EXEC_NONLINEAR && _output_on.contains(EXEC_NONLINEAR))
+  if (type == EXEC_NONLINEAR && _execute_on.contains(EXEC_NONLINEAR))
   {
     if (_nonlinear_iter == 0)
       _old_nonlinear_norm = std::numeric_limits<Real>::max();
@@ -286,7 +285,7 @@ Console::output(const ExecFlagType & type)
   }
 
   // Print Linear Residual (control with "execute_on")
-  else if (type == EXEC_LINEAR && _output_on.contains(EXEC_LINEAR))
+  else if (type == EXEC_LINEAR && _execute_on.contains(EXEC_LINEAR))
   {
     if (_linear_iter == 0)
       _old_linear_norm = std::numeric_limits<Real>::max();

@@ -230,9 +230,6 @@
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-  print_linear_residuals = true
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg      101'
@@ -264,10 +261,7 @@
 []
 
 [Outputs]
-  output_initial = true
   elemental_as_nodal = true
-  print_linear_residuals = true
-  print_perf_log = true
   [./out]
     type = Exodus
     elemental_as_nodal = true

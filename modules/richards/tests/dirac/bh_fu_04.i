@@ -207,11 +207,8 @@
 
 [Outputs]
   file_base = bh_fu_04
-  output_initial = true
   exodus = false
   csv = true
-  print_linear_residuals = true
-  print_perf_log = true
 []
 
 [Problem]

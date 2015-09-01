@@ -193,8 +193,6 @@
   exodus = true
   console = true
   csv = true
-  print_perf_log = true
-  output_initial = true
   [./console]
     type = Console
     max_rows = 10

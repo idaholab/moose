@@ -61,8 +61,9 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   [./console]
     type = Console
-    output_postprocessors_on = none
+    execute_postprocessors_on = none
   [../]
 []

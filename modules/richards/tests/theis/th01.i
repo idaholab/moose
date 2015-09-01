@@ -166,8 +166,8 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = th01
   output_initial = false
   csv = true
-  print_perf_log = true
 []

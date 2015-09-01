@@ -127,6 +127,5 @@
   [./out]
     type = Exodus
     use_displaced = true
-    output_on = 'initial timestep_end'
   [../]
 []

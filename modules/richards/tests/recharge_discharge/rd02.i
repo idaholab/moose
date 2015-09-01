@@ -149,8 +149,6 @@
 [Outputs]
   file_base = rd02
   interval = 100000
-  output_initial = true
-  output_final = true
+  execute_on = 'timestep_end final'
   exodus = true
-  print_perf_log = true
 []

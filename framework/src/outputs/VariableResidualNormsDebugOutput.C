@@ -27,7 +27,7 @@ InputParameters validParams<VariableResidualNormsDebugOutput>()
   InputParameters params = validParams<BasicOutput<PetscOutput> >();
 
   // By default this outputs on every nonlinear iteration
-  params.set<MultiMooseEnum>("output_on") = "nonlinear";
+  params.set<MultiMooseEnum>("execute_on") = "nonlinear";
   return params;
 }
 

@@ -290,14 +290,5 @@
 [Outputs]
   file_base = paper1
   exodus = false
-  output_on = 'initial timestep_end'
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = false
-  [../]
-  [./csv]
-    type = CSV
-    interval = 1
-  [../]
+  csv = true
 []

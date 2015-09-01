@@ -66,8 +66,8 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = out
   exodus = true
-  print_perf_log = true
 []
 
