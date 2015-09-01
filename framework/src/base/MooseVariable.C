@@ -389,6 +389,14 @@ MooseVariable::secondPhiFaceNeighbor()
   return *_second_phi_face_neighbor;
 }
 
+const MooseArray<Point> &
+MooseVariable::normals()
+{
+  if (_is_nodal)
+    mooseError("Normals are not computed for nodal variables.");
+  return _normals;
+}
+
 VariableValue &
 MooseVariable::nodalValue()
 {
