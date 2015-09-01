@@ -11,31 +11,44 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "CoefDiffusion.h"
+
+#ifndef CONTROL_H
+#define CONTROL_H
+
+// MOOSE includes
+#include "GeneralUserObject.h"
+#include "ControlInterface.h"
+
+// Forward declarations
+class Control;
 
 template<>
-InputParameters validParams<CoefDiffusion>()
-{
-  InputParameters params = validParams<Kernel>();
-  params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
-  params.addPrivateParam<Real>("_test_private_param", 12345);
-  return params;
-}
+InputParameters validParams<Control>();
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _coef(getParam<Real>("coef"))
+/**
+ * Base class for Control objects
+ *
+ * Control objects are simply GeneralUserObjects with an additional interface
+ * for accessing InputParameters via the InputParameterWarehouse. These objects
+ * are create by the [Controls] block in the input file after all other MooseObjects
+ * are created, so they have access to parameters in all other MooseObjects.
+ */
+class Control :
+  public GeneralUserObject,
+  public ControlInterface
 {
-}
+public:
 
-Real
-CoefDiffusion::computeQpResidual()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
-}
+  /**
+   * Class constructor
+   * @param parameters The input parameters for this control object
+   */
+  Control(const InputParameters & parameters);
 
-Real
-CoefDiffusion::computeQpJacobian()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
-}
+  /**
+   * Class destructor
+   */
+  virtual ~Control(){}
+};
+
+#endif //FUNCTIONCONTROL_H

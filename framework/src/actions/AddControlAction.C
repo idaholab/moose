@@ -11,31 +11,30 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "CoefDiffusion.h"
+
+#include "AddControlAction.h"
+#include "FEProblem.h"
 
 template<>
-InputParameters validParams<CoefDiffusion>()
+InputParameters validParams<AddControlAction>()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
-  params.addPrivateParam<Real>("_test_private_param", 12345);
+  InputParameters params = validParams<AddUserObjectAction>();
   return params;
 }
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _coef(getParam<Real>("coef"))
+AddControlAction::AddControlAction(InputParameters params) :
+  AddUserObjectAction(params)
 {
 }
 
-Real
-CoefDiffusion::computeQpResidual()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
-}
 
-Real
-CoefDiffusion::computeQpJacobian()
+void
+AddControlAction::act()
 {
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
+  std::string base = _moose_object_pars.get<std::string>("_moose_base");
+
+  if (base == "Control")
+    AddUserObjectAction::act();
+  else if (base == "ControlMaterial")
+    _problem->addMaterial(_type, _name, _moose_object_pars);
 }

@@ -11,31 +11,42 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "CoefDiffusion.h"
+
+#ifndef ADDCONTROLACTION_H
+#define ADDCONTROLACTION_H
+
+// MOOSE includes
+#include "AddUserObjectAction.h"
+
+// Forward declerations
+class AddControlAction;
 
 template<>
-InputParameters validParams<CoefDiffusion>()
-{
-  InputParameters params = validParams<Kernel>();
-  params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
-  params.addPrivateParam<Real>("_test_private_param", 12345);
-  return params;
-}
+InputParameters validParams<AddControlAction>();
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _coef(getParam<Real>("coef"))
+/**
+ * Action for creating Control objects
+ *
+ * Control objects are GeneralUserObjects, thus just
+ * use the AddUserObjectAction
+ */
+class AddControlAction : public AddUserObjectAction
 {
-}
+public:
 
-Real
-CoefDiffusion::computeQpResidual()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
-}
+  /**
+   * Class constructor
+   * @param params Parameters for this Action
+   */
+  AddControlAction(InputParameters params);
 
-Real
-CoefDiffusion::computeQpJacobian()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
-}
+  /**
+   * Class destructor
+   */
+  virtual ~AddControlAction(){};
+
+  virtual void act();
+
+};
+
+#endif // ADDCONTROLACTION_H

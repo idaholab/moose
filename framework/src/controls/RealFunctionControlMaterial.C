@@ -11,31 +11,27 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "CoefDiffusion.h"
+
+#include "RealFunctionControlMaterial.h"
 
 template<>
-InputParameters validParams<CoefDiffusion>()
+InputParameters validParams<RealFunctionControlMaterial>()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
-  params.addPrivateParam<Real>("_test_private_param", 12345);
+  InputParameters params = validParams<ControlMaterial>();
+  params.addParam<FunctionName>("function", "The name of the function to evaluate for the material property");
+  params.addParam<MaterialPropertyName>("property", "The name of property to control");
   return params;
 }
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _coef(getParam<Real>("coef"))
+RealFunctionControlMaterial::RealFunctionControlMaterial(const InputParameters & parameters) :
+    ControlMaterial(parameters),
+    _function(getFunction("function")),
+    _control_prop(getControlMaterialProperty<Real>("property"))
 {
 }
 
-Real
-CoefDiffusion::computeQpResidual()
+void
+RealFunctionControlMaterial::computeQpProperties()
 {
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
-}
-
-Real
-CoefDiffusion::computeQpJacobian()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
+  _control_prop[_qp] = _function.value(_t, _q_point[_qp]);
 }

@@ -11,31 +11,49 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "CoefDiffusion.h"
+
+#ifndef REALFUNCTIONCONTROLMATERIAL_H
+#define REALFUNCTIONCONTROLMATERIAL_H
+
+// MOOSE includes
+#include "ControlMaterial.h"
+#include "Function.h"
+
+// Forward declarations
+class RealFunctionControlMaterial;
 
 template<>
-InputParameters validParams<CoefDiffusion>()
-{
-  InputParameters params = validParams<Kernel>();
-  params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
-  params.addPrivateParam<Real>("_test_private_param", 12345);
-  return params;
-}
+InputParameters validParams<RealFunctionControlMaterial>();
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _coef(getParam<Real>("coef"))
+/**
+ *
+ */
+class RealFunctionControlMaterial : public ControlMaterial
 {
-}
+public:
 
-Real
-CoefDiffusion::computeQpResidual()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
-}
+  /**
+   * Class constructor
+   * @param parameters
+   */
+  RealFunctionControlMaterial(const InputParameters & parameters);
 
-Real
-CoefDiffusion::computeQpJacobian()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
-}
+  /**
+   * Class destructor
+   */
+  virtual ~RealFunctionControlMaterial(){}
+
+  virtual void computeQpProperties();
+
+
+private:
+
+  Function & _function;
+
+  MaterialProperty<Real> & _control_prop;
+
+};
+
+
+
+#endif // REALFUNCTIONCONTROLMATERIAL_H

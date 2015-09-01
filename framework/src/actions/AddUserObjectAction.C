@@ -46,4 +46,3 @@ AddUserObjectAction::act()
 
   _problem->addUserObject(_type, _name, _moose_object_pars);
 }
-

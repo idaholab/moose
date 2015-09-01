@@ -90,7 +90,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   // Note: Preconditioner Actions will be built by this setup action
   syntax.registerActionSyntax("SetupPreconditionerAction", "Preconditioning/*");
-  syntax.registerActionSyntax("AddSplitAction","Splits/*");
+  syntax.registerActionSyntax("AddSplitAction", "Splits/*");
 
   syntax.registerActionSyntax("DetermineSystemType", "Executioner");
   syntax.registerActionSyntax("CreateExecutionerAction", "Executioner");
@@ -111,7 +111,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddConstraintAction", "Constraints/*");
 
   syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*");
-
+  syntax.registerActionSyntax("AddControlAction", "Controls/*", "add_control");
   syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds");
 
   syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals");

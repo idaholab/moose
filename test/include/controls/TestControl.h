@@ -11,31 +11,43 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "CoefDiffusion.h"
+
+#ifndef TESTCONTROL_H
+#define TESTCONTROL_H
+
+// MOOSE includes
+#include "Control.h"
+
+// Forward declerations
+class TestControl;
 
 template<>
-InputParameters validParams<CoefDiffusion>()
-{
-  InputParameters params = validParams<Kernel>();
-  params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
-  params.addPrivateParam<Real>("_test_private_param", 12345);
-  return params;
-}
+InputParameters validParams<TestControl>();
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _coef(getParam<Real>("coef"))
+/**
+ * A Control object for testing purposes
+ */
+class TestControl : public Control
 {
-}
+public:
+  TestControl(const InputParameters & parameters);
+  virtual ~TestControl(){};
+  virtual void execute();
 
-Real
-CoefDiffusion::computeQpResidual()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
-}
+  ///@{
+  /**
+   * These methods are left intentionally empty
+   */
+  virtual void initialize(){}
+  virtual void finalize(){}
+  virtual void threadJoin(const UserObject & /*uo*/){}
+  ///@}
 
-Real
-CoefDiffusion::computeQpJacobian()
-{
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
-}
+private:
+
+  /// The type of test to perform
+  MooseEnum _test_type;
+
+};
+
+#endif //TESTCONTROL_H

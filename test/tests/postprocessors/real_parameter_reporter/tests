@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'real_parameter_reporter.i'
+    csvdiff = 'real_parameter_reporter_out.csv'
+  [../]
+[]
