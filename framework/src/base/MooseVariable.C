@@ -45,6 +45,7 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _need_second_old(false),
     _need_second_older(false),
 
+    _need_ad_u(false),
 
     _need_u_old_neighbor(false),
     _need_u_older_neighbor(false),
@@ -924,6 +925,33 @@ MooseVariable::computeElemValues()
           second_u_older_qp->add_scaled(*d2phi_local, soln_older_local);
       }
     }
+  }
+
+  // Automatic differentiation
+  if (_need_ad_u)
+  {
+    _ad_dofs.resize(num_dofs);
+    _ad_u.resize(nqp);
+
+    for (unsigned int qp=0; qp < nqp; qp++)
+      _ad_u[qp] = 0;
+
+    for (unsigned int i=0; i < num_dofs; i++)
+    {
+      // Set all derivative values to zero
+      for (unsigned int j=0; j < num_dofs; j++)
+        _ad_dofs[i].derivatives()[j] = 0;
+
+      _ad_dofs[i] = current_solution(_dof_indices[i]);
+
+      // NOTE!  You have to do this AFTER setting the value!
+      _ad_dofs[i].derivatives()[i] = 1.0;
+    }
+
+    // Now build up the solution at each quadrature point:
+    for (unsigned int i=0; i < num_dofs; i++)
+      for (unsigned int qp=0; qp < nqp; qp++)
+        _ad_u[qp] += _ad_dofs[i] * _phi[i][qp];
   }
 }
 

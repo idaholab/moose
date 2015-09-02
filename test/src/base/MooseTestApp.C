@@ -87,6 +87,8 @@
 #include "FluxAverageAux.h"
 #include "OldMaterialAux.h"
 #include "DotCouplingAux.h"
+#include "ADValueTest.h"
+#include "ValueTest.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -308,6 +310,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(WrongJacobianDiffusion);
   registerKernel(DefaultMatPropConsumerKernel);
   registerKernel(DoNotCopyParametersKernel);
+  registerKernel(ADValueTest);
+  registerKernel(ValueTest);
 
   // Aux kernels
   registerAux(CoupledAux);

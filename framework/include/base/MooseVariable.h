@@ -27,6 +27,13 @@
 #include "libmesh/elem.h"
 #include "libmesh/node.h"
 
+// MetaPhysicL
+#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/numberarray.h"
+
+// The 100 here is for how many DoFs there are per element.
+typedef MetaPhysicL::DualNumber<double, MetaPhysicL::NumberArray<100, double> > ADReal;
+
 class Assembly;
 class SubProblem;
 class SystemBase;
@@ -131,6 +138,8 @@ public:
   VariableSecond & secondSln() { _need_second = true; secondPhi(); secondPhiFace(); return _second_u; }
   VariableSecond & secondSlnOld() { _need_second_old = true; secondPhi(); secondPhiFace(); return _second_u_old; }
   VariableSecond & secondSlnOlder() { _need_second_older = true; secondPhi(); secondPhiFace(); return _second_u_older; }
+
+  std::vector<ADReal> & adSln() { _need_ad_u = true; return _ad_u; }
 
   VariableValue & uDot() { return _u_dot; }
   VariableValue & duDotDu() { return _du_dot_du; }
@@ -339,6 +348,7 @@ protected:
   bool _need_second_old;
   bool _need_second_older;
 
+  bool _need_ad_u;
 
   bool _need_u_old_neighbor;
   bool _need_u_older_neighbor;
@@ -387,6 +397,10 @@ protected:
   VariableSecond _second_u, _second_u_bak;
   VariableSecond _second_u_old, _second_u_old_bak;
   VariableSecond _second_u_older, _second_u_older_bak;
+
+  std::vector<ADReal> _ad_u;
+
+  std::vector<ADReal> _ad_dofs;
 
   VariableValue _u_neighbor;
   VariableValue _u_old_neighbor;
