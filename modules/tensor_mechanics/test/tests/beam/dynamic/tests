@@ -23,11 +23,11 @@
     type = 'Exodiff'
     input = 'dyn_euler_small_rayleigh_hht.i'
     exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
-
     requirement = "The mechanics system shall correctly predict the natural frequencies"
                   " of an Euler-Bernoulli beam modeled using beam elements in the"
                   " presence of Rayleigh damping and numerical damping introduced"
                   " by Hilber-Hughes-Taylor (HHT) time integration."
+    rel_err = 6.5e-6
   [../]
   [./dyn_euler_added_mass]
     type = 'Exodiff'
