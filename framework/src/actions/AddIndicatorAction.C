@@ -29,6 +29,5 @@ AddIndicatorAction::AddIndicatorAction(InputParameters params) :
 void
 AddIndicatorAction::act()
 {
-  _problem->addIndicator(_type, _name, _moose_object_pars);
+  _problem->addIndicator(_type, _short_name, _moose_object_pars);
 }
-

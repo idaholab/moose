@@ -54,7 +54,7 @@
   [./test_control]
     type = TestControl
     test_type = 'real'
-    parameter = 'Kernels/group/group/name'
+    parameter = 'Kernel/group/group/name'
     execute_on = 'initial'
   [../]
 []

@@ -82,7 +82,7 @@
   [./point_control]
     type = TestControl
     test_type = 'point'
-    parameter = 'Postprocessors/*/point'
+    parameter = 'Postprocessor/*/point'
     execute_on = 'initial'
   [../]
 []

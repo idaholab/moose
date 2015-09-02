@@ -29,6 +29,5 @@ AddTransferAction::AddTransferAction(InputParameters params) :
 void
 AddTransferAction::act()
 {
-  _problem->addTransfer(_type, _name, _moose_object_pars);
+  _problem->addTransfer(_type, _short_name, _moose_object_pars);
 }
-

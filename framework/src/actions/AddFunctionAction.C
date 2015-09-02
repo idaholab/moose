@@ -29,6 +29,5 @@ AddFunctionAction::AddFunctionAction(InputParameters params) :
 void
 AddFunctionAction::act()
 {
-  _problem->addFunction(_type, _name, _moose_object_pars);
+  _problem->addFunction(_type, _short_name, _moose_object_pars);
 }
-

@@ -75,7 +75,7 @@ private:
    * This method is private, because only the factories that are creating objects should be
    * able to call this method.
    */
-  InputParameters & addInputParameters(const std::string & long_name, InputParameters parameters, THREAD_ID tid = 0);
+  InputParameters & addInputParameters(std::string name, InputParameters parameters, THREAD_ID tid = 0);
 
   /**
    * Return a reference to the InputParameters for the named object

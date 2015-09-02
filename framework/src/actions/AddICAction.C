@@ -41,4 +41,3 @@ AddICAction::act()
   _moose_object_pars.set<VariableName>("variable") = var_name;
   _problem->addInitialCondition(_type, _name, _moose_object_pars);
 }
-

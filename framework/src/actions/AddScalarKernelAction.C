@@ -30,8 +30,7 @@ void
 AddScalarKernelAction::act()
 {
   if (_current_task == "add_scalar_kernel")
-    _problem->addScalarKernel(_type, _name, _moose_object_pars);
+    _problem->addScalarKernel(_type, _short_name, _moose_object_pars);
   else
-    _problem->addAuxScalarKernel(_type, _name, _moose_object_pars);
+    _problem->addAuxScalarKernel(_type, _short_name, _moose_object_pars);
 }
-

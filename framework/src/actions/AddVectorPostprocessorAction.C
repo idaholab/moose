@@ -34,6 +34,5 @@ AddVectorPostprocessorAction::act()
   if (!_problem)
     mooseError("The Problem has not been initialized yet!");
 
-  _problem->addVectorPostprocessor(_type, _name, _moose_object_pars);
+  _problem->addVectorPostprocessor(_type, _short_name, _moose_object_pars);
 }
-

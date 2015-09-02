@@ -31,6 +31,5 @@ AddPostprocessorAction::AddPostprocessorAction(InputParameters params) :
 void
 AddPostprocessorAction::act()
 {
-  _problem->addPostprocessor(_type, _name, _moose_object_pars);
+  _problem->addPostprocessor(_type, _short_name, _moose_object_pars);
 }
-

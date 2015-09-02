@@ -29,6 +29,5 @@ AddMarkerAction::AddMarkerAction(InputParameters params) :
 void
 AddMarkerAction::act()
 {
-  _problem->addMarker(_type, _name, _moose_object_pars);
+  _problem->addMarker(_type, _short_name, _moose_object_pars);
 }
-

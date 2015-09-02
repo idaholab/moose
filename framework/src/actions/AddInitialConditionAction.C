@@ -31,6 +31,5 @@ AddInitialConditionAction::AddInitialConditionAction(InputParameters params) :
 void
 AddInitialConditionAction::act()
 {
-  _problem->addInitialCondition(_type, _name, _moose_object_pars);
+  _problem->addInitialCondition(_type, _short_name, _moose_object_pars);
 }
-
