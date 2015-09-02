@@ -26,6 +26,15 @@ class ControlInterface;
 template<>
 InputParameters validParams<ControlInterface>();
 
+// A storage structure for the name
+struct ControlParameterNameContainer
+{
+  std::string system;
+  std::string object;
+  std::string param;
+  std::string syntax;
+};
+
 /**
  * An interface class for accessing writable references to InputParameters
  *
@@ -84,17 +93,12 @@ private:
    * @see tokenizeName
    */
   template<typename T>
-  std::vector<InputParameterIterator> getValidInputParameterIteratorsByName(const std::string & name, const std::deque<std::string> & desired);
+  std::vector<InputParameterIterator> getValidInputParameterIteratorsByName(const std::string & name, const ControlParameterNameContainer & desired);
 
   /**
-   * Helper method separating parameter name into system/group/param format
-   *
-   * [System]
-   *   [./group]
-   *     param = ...
-   *
+   * Helper method separating parameter name into desired format
    */
-  std::deque<std::string> tokenizeName(const std::string & name);
+  static ControlParameterNameContainer tokenizeName(std::string name);
 
   /// Reference to the Control objects parameters
   const InputParameters & _ci_parameters;
@@ -128,7 +132,7 @@ T &
 ControlInterface::getControlParamByName(const std::string & name)
 {
   // Get the InputParameter objects that contain objects
-  std::deque<std::string> desired = tokenizeName(name);
+  ControlParameterNameContainer desired = tokenizeName(name);
   std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired);
 
   // If more than one parameter is located, report an eror message listing the object and parameter names
@@ -137,13 +141,13 @@ ControlInterface::getControlParamByName(const std::string & name)
     std::ostringstream oss;
     oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found in multiple objects:\n";
     for (std::vector<InputParameterIterator>::const_iterator it = iters.begin(); it != iters.end(); ++it)
-      oss << "  " << (*it)->first << '\n';
+      oss << "  " << (*it)->system << "::" << (*it)->object << '\n';
     oss << "\nUse the method 'getControlParamVector' to access multiple parameters";
     mooseError(oss.str());
   }
 
   // Return a writeable reference to the parameter
-  return iters[0]->second->set<T>(desired[2]);
+  return iters[0]->parameters->set<T>(desired.param);
 }
 
 template<typename T>
@@ -158,7 +162,7 @@ std::vector<T*>
 ControlInterface::getControlParamVectorByName(const std::string & name)
 {
   // Get the InputParameter objects that contain objects
-  std::deque<std::string> desired = tokenizeName(name);
+  ControlParameterNameContainer desired = tokenizeName(name);
   std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired);
 
   // The vector the return
@@ -166,43 +170,32 @@ ControlInterface::getControlParamVectorByName(const std::string & name)
 
   // Loop over all InputParameter objects
   for (std::vector<InputParameterIterator>::iterator it = iters.begin(); it != iters.end(); ++it)
-    output.push_back(&((*it)->second->set<T>(desired[2])));
+    output.push_back(&((*it)->parameters->set<T>(desired.param)));
 
   return output;
 }
 
 template<typename T>
 std::vector<InputParameterIterator>
-ControlInterface::getValidInputParameterIteratorsByName(const std::string & name, const std::deque<std::string> & desired)
+ControlInterface::getValidInputParameterIteratorsByName(const std::string & name, const ControlParameterNameContainer & desired)
 {
-  // The input deque consists of:
-  //   desired[0] = system; desired[1] = group; desired[2] = param
-
   // The vector to return
   std::vector<InputParameterIterator> output;
-
-  // Storage for tokenizing the current InputParameters name
-  std::vector<std::string> current;
 
   // Loop over all InputParameter objects
   for (InputParameterIterator it = _input_parameter_warehouse.begin(_tid); it != _input_parameter_warehouse.end(_tid); ++it)
   {
-    InputParameters & parameters = *(it->second);
-
-    // Get the current system and group:
-    //   current[0] = system; current[1] = group;
-    current.clear();
-    MooseUtils::tokenize(it->first, current);
-
-    // Continue if the system and group do not agree
-    if ( (!desired[0].empty() && current.size() > 0 && desired[0] != current[0]) || (!desired[1].empty() && current.size() > 1 && desired[1] != current[1]) )
+    // Continue if the system, syntax, and object names do not agree
+    if ( (!desired.system.empty() && !it->system.empty() && desired.system != it->system)
+      || (!desired.syntax.empty() && !it->syntax.empty() && desired.syntax != it->syntax)
+      || (!desired.object.empty() && !it->object.empty() && desired.object != it->object))
       continue;
 
-    // If the parameter is valid update the output vector with a pointer to the parameter
-    if (parameters.isParamValid(desired[2]))
+    // If the parameter is valid and controllable update the output vector with a pointer to the parameter
+    if (it->parameters->isParamValid(desired.param))
     {
       // Do not allow non-controllable types to be controlled
-      if (!parameters.isControllable(desired[2]))
+      if (!it->parameters->isControllable(desired.param))
         mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " is not a controllable parameter.");
 
       output.push_back(it);

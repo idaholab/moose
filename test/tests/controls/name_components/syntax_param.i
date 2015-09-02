@@ -74,6 +74,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
 []
 
@@ -81,7 +82,7 @@
   [./point_control]
     type = TestControl
     test_type = 'point'
-    parameter = '*/*/point'
+    parameter = 'Postprocessors/*/point'
     execute_on = 'initial'
   [../]
 []

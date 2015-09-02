@@ -33,37 +33,51 @@ ControlInterface::ControlInterface(const InputParameters & parameters) :
 {
 }
 
-std::deque<std::string>
-ControlInterface::tokenizeName(const std::string & name)
+ControlParameterNameContainer
+ControlInterface::tokenizeName(std::string name)
 {
-  // Strip the parameter name into components
-  std::vector<std::string> components;
-  MooseUtils::tokenize(name, components);
+  // Create the storage container that will be output
+  ControlParameterNameContainer container;
 
-  // Convert to deque so we can push_front
-  std::deque<std::string> output(components.begin(), components.end());
-
-  // Separate the components into variables for testing against
-  // [System]
-  //   [./group]
-  //     item = ...
-  std::size_t n = components.size();
-  if (n == 1)
+  // Locate the system name
+  std::size_t idx = name.find("::");
+  if (idx != std::string::npos)
   {
-    output.push_front("");
-    output.push_front("");
+    container.system = name.substr(0, idx);
+    name.erase(0, idx+2);
   }
-  else if (n == 2)
-    output.push_front("");
 
-  else if (n > 3)
-    mooseError("The desired controllable parameter '" << name << "' does not match the expected naming convection.");
+  // Locate the param name
+  idx = name.rfind("/");
+  if (idx != std::string::npos)
+  {
+    container.param = name.substr(idx+1);
+    name.erase(idx);
+  }
+  else // if a slash isn't located then the entire name must be the parameter
+  {
+    container.param = name;
+    name.erase();
+  }
 
-  // Set '*' to empty
-  if (output[0] == "*")
-    output[0] = "";
-  if (output[1] == "*")
-    output[1] = "";
+  // Locate the syntax
+  idx = name.rfind("/");
+  if (idx != std::string::npos)
+  {
+    container.syntax = name.substr(0, idx);
+    name.erase(0, idx+1);
+  }
 
-  return output;
+  // Whatever is remaining is the object name
+  container.object = name;
+
+  // Handle asterisks
+  if (container.system == "*")
+    container.system = "";
+  if (container.syntax == "*")
+    container.syntax = "";
+  if (container.object == "*")
+    container.object = "";
+
+  return container;
 }

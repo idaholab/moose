@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "MooseObjectAction.h"
+#include "MooseUtils.h"
 #include "Factory.h"
 
 template<>
@@ -27,12 +28,13 @@ InputParameters validParams<MooseObjectAction>()
 MooseObjectAction::MooseObjectAction(InputParameters params) :
     Action(params),
     _type(getParam<std::string>("type")),
-
     // We will create a second parameters object from the main factory unless instructed otherwise
     _moose_object_pars(!params.have_parameter<bool>("skip_param_construction") ||
                        (params.have_parameter<bool>("skip_param_construction") &&
                         !params.get<bool>("skip_param_construction"))
                        ? _factory.getValidParams(_type) : validParams<MooseObject>())
 {
+  // If the action was created by the parser, grab the syntax form the name of the Action
+  if (_registered_identifier != "(AutoBuilt)" || _registered_identifier.empty())
+    _moose_object_pars.addPrivateParam<std::string>("_syntax", MooseUtils::baseName(getParam<std::string>("name")));
 }
-

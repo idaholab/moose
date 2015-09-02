@@ -31,4 +31,3 @@ AddDGKernelAction::act()
 {
   _problem->addDGKernel(_type, _name, _moose_object_pars);
 }
-

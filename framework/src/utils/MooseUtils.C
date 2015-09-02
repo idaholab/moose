@@ -245,6 +245,12 @@ shortName(const std::string & name)
   return name.substr(name.find_last_of('/') != std::string::npos ? name.find_last_of('/') + 1 : 0);
 }
 
+std::string
+baseName(const std::string & name)
+{
+ return name.substr(0, name.find_last_of('/') != std::string::npos ? name.find_last_of('/') : 0);
+}
+
 bool
 absoluteFuzzyEqual(const Real & var1, const Real & var2, const Real & tol)
 {

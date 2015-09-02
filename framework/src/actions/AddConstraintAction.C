@@ -31,4 +31,3 @@ AddConstraintAction::act()
 {
   _problem->addConstraint(_type, _name, _moose_object_pars);
 }
-
