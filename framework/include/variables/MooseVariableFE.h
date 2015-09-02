@@ -323,6 +323,24 @@ public:
     return _curl_u_older;
   }
 
+  const ADVariableValue & adSln()
+  {
+    _need_ad_u = true;
+    return _ad_u;
+  }
+  const ADVariableGradient & adGradSln()
+  {
+    _need_ad_grad_u = true;
+    return _ad_grad_u;
+  }
+  const ADVariableSecond & adSecondSln()
+  {
+    _need_ad_second_u = true;
+    secondPhi();
+    secondPhiFace();
+    return _ad_second_u;
+  }
+
   const FieldVariableValue & uDot() { return _u_dot; }
   const VariableValue & duDotDu() { return _du_dot_du; }
 
@@ -568,6 +586,10 @@ protected:
   bool _need_curl_old;
   bool _need_curl_older;
 
+  bool _need_ad_u;
+  bool _need_ad_grad_u;
+  bool _need_ad_second_u;
+
   bool _need_u_old_neighbor;
   bool _need_u_older_neighbor;
   bool _need_u_previous_nl_neighbor;
@@ -701,6 +723,12 @@ protected:
   FieldVariableCurl _curl_u, _curl_u_bak;
   FieldVariableCurl _curl_u_old, _curl_u_old_bak;
   FieldVariableCurl _curl_u_older;
+
+  ADVariableValue _ad_u;
+  ADVariableGradient _ad_grad_u;
+  ADVariableSecond _ad_second_u;
+
+  std::vector<ADReal> _ad_dofs;
 
   FieldVariableValue _u_neighbor;
   FieldVariableValue _u_old_neighbor;

@@ -63,6 +63,7 @@
 #include "ODETimeKernel.h"
 #include "AllLocalDofIndicesThread.h"
 #include "FloatingPointExceptionGuard.h"
+#include "MaxVarNDofsPerElem.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -174,6 +175,13 @@ NonlinearSystemBase::init()
 
   if (_need_residual_copy)
     _residual_copy.init(_sys.n_dofs(), false, SERIAL);
+
+  Moose::setup_perf_log.push("maxVarNDofsPerElem()", "Setup");
+  MaxVarNDofsPerElem mvndpe(_fe_problem, *this);
+  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
+  _max_var_n_dofs_per_elem = mvndpe.max();
+  _communicator.max(_max_var_n_dofs_per_elem);
+  Moose::setup_perf_log.pop("maxVarNDofsPerElem()", "Setup");
 }
 
 void

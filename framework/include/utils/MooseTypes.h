@@ -23,6 +23,10 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/type_n_tensor.h"
 
+// MetaPhysicL
+#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/numberarray.h"
+
 // BOOST include
 #include "bitmask_operators.h"
 
@@ -90,6 +94,36 @@ typedef unsigned int TagID;
 
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
+
+// The 100 here is for how many DoFs there are per element.
+#define AD_MAX_DOFS_PER_ELEM 100
+typedef MetaPhysicL::DualNumber<double, MetaPhysicL::NumberArray<AD_MAX_DOFS_PER_ELEM, double>>
+    ADReal;
+
+namespace libMesh
+{
+template <>
+struct CompareTypes<double, ADReal>
+{
+  typedef ADReal supertype;
+};
+
+template <>
+struct CompareTypes<ADReal, double>
+{
+  typedef ADReal supertype;
+};
+}
+
+typedef VectorValue<ADReal> ADRealVectorValue;
+typedef ADRealVectorValue ADRealGradient;
+
+typedef TensorValue<ADReal> ADRealTensorValue;
+typedef ADRealTensorValue ADRealTensor;
+
+typedef MooseArray<ADReal> ADVariableValue;
+typedef MooseArray<ADRealGradient> ADVariableGradient;
+typedef MooseArray<ADRealTensor> ADVariableSecond;
 
 template <typename OutputType>
 struct OutputTools
