@@ -113,7 +113,6 @@ Checkpoint::output(const ExecFlagType & /*type*/)
     current_file_struct.system = current_file + ".xda";
   }
   current_file_struct.restart = current_file + ".rd";
-  current_file_struct.material = current_file + ".msmp";
 
   // Write the checkpoint file
   io.write(current_file_struct.checkpoint);
@@ -178,16 +177,6 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     }
 
     unsigned int n_threads = libMesh::n_threads();
-
-    // Remove material property files
-    if (_material_property_storage.hasStatefulProperties() || _bnd_material_property_storage.hasStatefulProperties())
-    {
-      std::ostringstream oss;
-      oss << delete_files.material << '-' << proc_id;
-      ret = remove(oss.str().c_str());
-      if (ret != 0)
-        mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
-    }
 
     // Remove the restart files (rd)
     {
