@@ -278,8 +278,8 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = pp_generation_unconfined
-  print_perf_log = true
   [./csv]
     type = CSV
   [../]

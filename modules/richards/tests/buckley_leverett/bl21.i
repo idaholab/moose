@@ -240,8 +240,6 @@
 
 [Outputs]
   file_base = bl21
-  output_initial = true
   interval = 10000
   exodus = true
-  print_perf_log = true
 []

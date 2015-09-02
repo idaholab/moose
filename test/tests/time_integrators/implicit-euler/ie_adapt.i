@@ -109,5 +109,6 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
 []

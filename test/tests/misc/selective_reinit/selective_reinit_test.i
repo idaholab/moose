@@ -85,11 +85,8 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   show = u
-  print_linear_residuals = true
-  print_perf_log = true
 []
 
 [LotsOfAuxVariables]

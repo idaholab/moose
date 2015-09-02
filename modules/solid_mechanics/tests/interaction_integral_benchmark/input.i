@@ -211,12 +211,7 @@
 
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = 360degree_model_out
-  output_initial = false
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_linear = true
-  [../]
 []

@@ -222,11 +222,10 @@
 
 [Outputs]
   file_base = kks_example
-  output_initial = true
-  print_perf_log = true
   [./oversampling]
     type = Exodus
     refinements = 3
     output_initial = true
+    oversample = true
   [../]
 []

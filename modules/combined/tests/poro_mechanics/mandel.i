@@ -329,8 +329,8 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = mandel
-  print_perf_log = true
   [./csv]
     interval = 3
     type = CSV

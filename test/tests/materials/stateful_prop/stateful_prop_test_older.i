@@ -92,8 +92,6 @@
 
 [Outputs]
   file_base = out_older
-  output_initial = true
   exodus = true
   csv = true
-  print_perf_log = true
 []

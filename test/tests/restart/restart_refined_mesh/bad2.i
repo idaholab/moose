@@ -808,6 +808,5 @@ active = ' '
 
 [Outputs]
   file_base = 2d_stoch_aperture_caco3_pe1.5_64_transient_out
-  output_initial =  true
   exodus =  true
 []

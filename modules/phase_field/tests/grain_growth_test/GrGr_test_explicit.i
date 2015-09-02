@@ -97,13 +97,10 @@
 
 [Outputs]
   file_base = explicit
-  output_initial = true
-  output_final = true
+  execute_on = 'initial timestep_end final'
   csv = true
   interval = 20
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
 []
 
 [Problem]

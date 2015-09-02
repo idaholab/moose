@@ -262,8 +262,6 @@
 []
 
 [Outputs]
-  output_initial = true
   csv = true
-  print_perf_log = true
   exodus = true
 []

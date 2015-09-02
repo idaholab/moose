@@ -429,13 +429,12 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   active = 'csv exodus'
   file_base = uo4
-  print_perf_log = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
   [./exodus]
     type = Exodus
   [../]

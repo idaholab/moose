@@ -48,10 +48,8 @@
 []
 
 [Outputs]
-  output_initial = true
   file_base = recover_out
   exodus = true
-  print_perf_log = true
   [./recover]
     type = Checkpoint
     file_base = test_recover_dir

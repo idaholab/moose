@@ -278,7 +278,6 @@
 []
 
 [Outputs]
-  interval = 1
-  print_perf_log = true
+  execute_on = 'timestep_end'
   exodus = true
 []

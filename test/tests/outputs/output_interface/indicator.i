@@ -56,12 +56,6 @@
 []
 
 [Outputs]
-  output_initial = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'initial failed linear nonlinear timestep_end'
-  [../]
   [./indicators]
     type = Exodus
   [../]

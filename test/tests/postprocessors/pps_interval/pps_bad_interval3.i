@@ -129,13 +129,8 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = ignore_bad
   interval = 2
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    interval = 1
-    output_on = 'failed nonlinear linear timestep_end'
-  [../]
 []

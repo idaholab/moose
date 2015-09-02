@@ -142,8 +142,6 @@
 [Outputs]
   file_base = wli02
   interval = 10000
-  output_initial = true
-  output_final = true
+  execute_on = 'timestep_end final'
   exodus = true
-  print_perf_log = true
 []

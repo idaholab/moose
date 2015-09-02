@@ -110,12 +110,12 @@ protected:
 
 
 /**
- * A helper warehouse class for storing the "output_on" settings for
+ * A helper warehouse class for storing the "execute_on" settings for
  * the various output types.
  *
  * In order to allow for new output types to be defined and to minimize
- * the number of member variables the "output_on" parameter for each of
- * the output types (e.g., output_postprocessors_on) are stored in a map.
+ * the number of member variables the "execute_on" parameter for each of
+ * the output types (e.g., execute_postprocessors_on) are stored in a map.
  *
  * This allows for iterative access to these parameters, which makes creating
  * generic code (e.g., AdvancedOutput::shouldOutput) possible. However, MultiMooseEnum
@@ -134,9 +134,9 @@ public:
 
   /**
    * Constructor
-   * @param output_on The general "output_on" settings for the object.
+   * @param execute_on The general "execute_on" settings for the object.
    */
-  OutputOnWarehouse(const MultiMooseEnum & output_on, const InputParameters & params);
+  OutputOnWarehouse(const MultiMooseEnum & execute_on, const InputParameters & params);
 };
 
 /**

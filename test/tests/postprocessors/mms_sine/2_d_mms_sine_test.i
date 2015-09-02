@@ -92,6 +92,4 @@
 [Outputs]
   file_base = 2_d_out
   exodus = true
-  output_initial = true
-  print_perf_log = true
 []

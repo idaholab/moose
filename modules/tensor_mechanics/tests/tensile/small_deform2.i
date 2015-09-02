@@ -220,12 +220,8 @@
 
 [Outputs]
   file_base = small_deform2
-  output_initial = true
   exodus = false
-  print_linear_residuals = true
-  print_perf_log = true
   [./csv]
     type = CSV
-    interval = 1
-  [../]
+    [../]
 []

@@ -91,8 +91,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   hide = alpha
-  print_perf_log = true
 []

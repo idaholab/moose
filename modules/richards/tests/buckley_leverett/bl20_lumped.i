@@ -222,12 +222,10 @@
 
 [Outputs]
   file_base = bl20_lumped
-  output_initial = true
-  output_final = true
+  execute_on = 'initial timestep_end final'
   interval = 100000
   exodus = true
   hide = pgas
-  print_perf_log = true
   [./console_out]
     type = Console
     interval = 1

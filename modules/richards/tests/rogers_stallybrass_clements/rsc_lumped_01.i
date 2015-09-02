@@ -196,8 +196,6 @@
 [Outputs]
   file_base = rsc_lumped_01
   interval = 100000
-  output_initial = true
-  output_final = true
+  execute_on = 'timestep_end final'
   exodus = true
-  print_perf_log = true
 []

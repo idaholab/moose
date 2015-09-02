@@ -65,11 +65,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = nodal_volume_fraction
   exodus = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'failed nonlinear linear timestep_end'
-  [../]
 []

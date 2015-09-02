@@ -92,24 +92,18 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-##! [MultipleOutputBlocks]
 [Outputs]
+  execute_on = 'timestep_end'
   [./out]
     type = Exodus
     hide = 'u v aux0 aux1'
     scalar_as_nodal = true
     elemental_as_nodal = true
-    output_elemental_on = none
-    output_scalars_on = none
-    output_postprocessors_on = none
-  [../]
-  [./screen]
-    type = Console
-    perf_log = true
-    output_on = 'failed nonlinear timestep_end'
+    execute_elemental_on = none
+    execute_scalars_on = none
+    execute_postprocessors_on = none
   [../]
 []
-##! [MultipleOutputBlocks]
 
 [ICs]
   [./aux0_IC]

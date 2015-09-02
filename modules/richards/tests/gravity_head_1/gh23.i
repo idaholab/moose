@@ -121,11 +121,9 @@
 
 [Outputs]
   file_base = gh23
-  output_initial = true
-  output_final = true
+  execute_on = 'timestep_end final'
   interval = 10000
   exodus = true
-  print_perf_log = true
   [./console]
     interval = 1
     type = Console

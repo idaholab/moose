@@ -105,7 +105,5 @@
 
 [Outputs]
   file_base = out_dg
-  output_initial = true
   exodus = true
-  print_perf_log = true
 []

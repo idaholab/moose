@@ -147,8 +147,6 @@
 
 [Outputs]
   file_base = bl02
-  output_initial = true
   interval = 1000000
   exodus = true
-  print_perf_log = true
 []

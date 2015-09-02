@@ -1,8 +1,6 @@
 [Outputs]
   file_base = 2d_diffusion_reverse_out
-  output_initial = true
   exodus = true
-  print_perf_log = true
 []
 
 [Executioner]

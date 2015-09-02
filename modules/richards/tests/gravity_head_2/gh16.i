@@ -277,11 +277,9 @@
 
 [Outputs]
   file_base = gh16
-  output_initial = true
-  output_final = true
+  execute_on = 'timestep_end final'
   interval = 100000
   exodus = true
   csv = true
   perf_log = false
-  print_perf_log = true
 []

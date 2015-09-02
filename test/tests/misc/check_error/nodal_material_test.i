@@ -83,8 +83,6 @@ active = 'mat'
 
 [Outputs]
   file_base = out
-  output_initial = true
   elemental_as_nodal = true
   exodus = true
-  print_perf_log = true
 []

@@ -233,8 +233,8 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = ex02
   output_initial = false
   exodus = true
-  print_perf_log = true
 []

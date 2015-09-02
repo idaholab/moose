@@ -183,8 +183,6 @@
 
 [Outputs]
   file_base = out_nonexistent
-  output_initial = true
   exodus = true
   show = 'u elemental nodal x foo1 foo2'
-  print_perf_log = true
 []
