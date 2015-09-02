@@ -24,6 +24,13 @@
     cli_args = '--yaml'
   [../]
 
+  [./no_double_executioner_output]
+    type = 'RunApp'
+    input = 'IGNORED'
+    absent_out = '/Executioner/\<type\>/Transient.*/Executioner/\<type\>/Transient'
+    cli_args = '--yaml /Executioner'
+  [../]
+
   [./tecplot_out_test]
     type = 'CheckFiles'
     input = 'output_test_tecplot.i'

@@ -82,8 +82,7 @@ ActionFactory::getValidParams(const std::string & name)
   if (iter == _name_to_build_info.end())
     mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
 
-  InputParameters params = emptyInputParameters();
-  params += (iter->second._params_pointer)();
+  InputParameters params = (iter->second._params_pointer)();
   params.addPrivateParam<unsigned int>("unique_id", iter->second._unique_id);
   params.addPrivateParam("_moose_app", &_app);
 
