@@ -37,7 +37,7 @@ InputParameterWarehouse::addInputParameters(std::string name, InputParameters pa
 
   // Build the long name
   if (ptr->isParamValid("_moose_base"))
-    name.insert(0, ptr->get<std::string>("_moose_base") + "/");
+    name.insert(0, ptr->get<std::string>("_moose_base") + ":");
 
   // Set the name and tid parameters
   ptr->addParam<std::string>("name", name, "The complete name of the object");

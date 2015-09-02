@@ -160,4 +160,3 @@ AddVariableAction::getSubdomainIDs()
   }
   return blocks;
 }
-
