@@ -29,6 +29,5 @@ AddMultiAppAction::AddMultiAppAction(InputParameters params) :
 void
 AddMultiAppAction::act()
 {
-  _problem->addMultiApp(_type, _name, _moose_object_pars);
+  _problem->addMultiApp(_type, _short_name, _moose_object_pars);
 }
-

@@ -29,6 +29,5 @@ AddDamperAction::AddDamperAction(InputParameters params) :
 void
 AddDamperAction::act()
 {
-  _problem->addDamper(_type, _name, _moose_object_pars);
+  _problem->addDamper(_type, _short_name, _moose_object_pars);
 }
-

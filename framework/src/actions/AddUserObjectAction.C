@@ -44,6 +44,5 @@ AddUserObjectAction::act()
       _moose_object_pars.addPrivateParam<bool>("block_restricted_nodal", true);
   }
 
-  _problem->addUserObject(_type, _name, _moose_object_pars);
+  _problem->addUserObject(_type, _short_name, _moose_object_pars);
 }
-

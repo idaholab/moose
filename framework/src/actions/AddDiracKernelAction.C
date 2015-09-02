@@ -30,6 +30,5 @@ AddDiracKernelAction::AddDiracKernelAction(InputParameters params) :
 void
 AddDiracKernelAction::act()
 {
-  _problem->addDiracKernel(_type, _name, _moose_object_pars);
+  _problem->addDiracKernel(_type, _short_name, _moose_object_pars);
 }
-

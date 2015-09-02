@@ -26,7 +26,7 @@ InputParameterWarehouse::~InputParameterWarehouse()
 }
 
 InputParameters &
-InputParameterWarehouse::addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
+InputParameterWarehouse::addInputParameters(std::string name, InputParameters parameters, THREAD_ID tid /* =0 */)
 {
   // Check that the Parameters do not already exist
   if (_name_to_shared_pointer[tid].find(name) != _name_to_shared_pointer[tid].end())
@@ -34,6 +34,10 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
 
   // Create the actual InputParameters object to store and reference from the objects
   MooseSharedPointer<InputParameters> ptr(new InputParameters(parameters));
+
+  // Build the long name
+  if (ptr->isParamValid("_moose_base"))
+    name.insert(0, ptr->get<std::string>("_moose_base") + ":");
 
   // Set the name and tid parameters
   ptr->addParam<std::string>("name", name, "The complete name of the object");

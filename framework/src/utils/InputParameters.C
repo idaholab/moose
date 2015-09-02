@@ -150,6 +150,7 @@ InputParameters::operator=(const InputParameters &rhs)
   _default_postprocessor_value = rhs._default_postprocessor_value;
   _set_by_add_param = rhs._set_by_add_param;
   _allow_copy = rhs._allow_copy;
+  _controllable_params = rhs._controllable_params;
 
   return *this;
 }
@@ -174,6 +175,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _default_coupled_value.insert(rhs._default_coupled_value.begin(), rhs._default_coupled_value.end());
   _default_postprocessor_value.insert(rhs._default_postprocessor_value.begin(), rhs._default_postprocessor_value.end());
   _set_by_add_param.insert(rhs._set_by_add_param.begin(), rhs._set_by_add_param.end());
+  _controllable_params.insert(rhs._controllable_params.begin(), rhs._controllable_params.end());
   return *this;
 }
 
@@ -277,6 +279,20 @@ InputParameters::isPrivate(const std::string &name) const
 }
 
 void
+InputParameters::declareControllable(const std::string & input_names)
+{
+  std::vector<std::string> names;
+  MooseUtils::tokenize<std::string>(input_names, names, 1, " ");
+  _controllable_params.insert(names.begin(), names.end());
+}
+
+bool
+InputParameters::isControllable(const std::string & name)
+{
+  return _controllable_params.find(name) != _controllable_params.end();
+}
+
+void
 InputParameters::registerBase(const std::string &value)
 {
   InputParameters::set<std::string>("_moose_base") = value;
@@ -331,11 +347,13 @@ InputParameters::mooseObjectSyntaxVisibility() const
       rangeCheck<type, up_type>(long_name, short_name, vector_p, oss); \
   } while (0)
 
+#define checkMooseType(param_type, name) if (have_parameter<param_type>(name) || have_parameter<std::vector<param_type> >(name)) \
+    mooseError("Parameter '" << name << "' cannot be marked as controllable because its type (" << this->type(name) << ") is not controllable.")
 
 void
-InputParameters::checkParams(const std::string &prefix)
+InputParameters::checkParams(const std::string & prefix)
 {
-  std::string l_prefix = this->have_parameter<std::string>("long_name") ? this->get<std::string>("long_name") : prefix;
+  std::string l_prefix = this->have_parameter<std::string>("name") ? this->get<std::string>("name") : prefix;
 
   std::ostringstream oss;
   // Required parameters
@@ -364,6 +382,27 @@ InputParameters::checkParams(const std::string &prefix)
 
   if (!oss.str().empty())
     mooseError(oss.str());
+
+  // Controllable parameters
+  for (std::set<std::string>::const_iterator it = _controllable_params.begin(); it != _controllable_params.end(); ++it)
+  {
+    // Check that parameter is valid
+    if (!isParamValid(*it))
+      mooseError("The parameter '" << *it << "' is not a valid parameter for the object " << l_prefix << " thus cannot be marked as controllable.");
+
+    if (isPrivate(*it))
+      mooseError("The parameter, '" << *it << "', in " << l_prefix << " is a private parameter and cannot be marked as controllable");
+
+    checkMooseType(NonlinearVariableName, *it);
+    checkMooseType(AuxVariableName, *it);
+    checkMooseType(VariableName, *it);
+    checkMooseType(BoundaryName, *it);
+    checkMooseType(SubdomainName, *it);
+    checkMooseType(PostprocessorName, *it);
+    checkMooseType(VectorPostprocessorName, *it);
+    checkMooseType(UserObjectName, *it);
+    checkMooseType(MaterialPropertyName, *it);
+  }
 }
 
 bool
@@ -390,7 +429,7 @@ InputParameters::defaultCoupledValue(const std::string & coupling_name) const
   std::map<std::string, Real>::const_iterator value_it = _default_coupled_value.find(coupling_name);
 
   if (value_it == _default_coupled_value.end())
-    mooseError("Attempted to retrieve default value for coupled variable '" << coupling_name << "' when none was provided. \n\nThere are three reasons why this may have occurred:\n 1. The other version of params.addCoupledVar() should be used in order to provde a default value. \n 2. This should have been a required coupled variable added with params.addRequiredCoupledVar() \n 3. The call to get the coupled value should have been properly guarded with isCoupled()\n");
+    mooseError("Attempted to retrieve default value for coupled variable '" << coupling_name << "' when none was provided. \n\nThere are three reasons why this may have occurred:\n 1. The other version of params.addCoupledVar() should be used in order to provide a default value. \n 2. This should have been a required coupled variable added with params.addRequiredCoupledVar() \n 3. The call to get the coupled value should have been properly guarded with isCoupled()\n");
 
   return value_it->second;
 }
@@ -423,6 +462,14 @@ InputParameters::getMooseType(const std::string &name) const
     var = get<NonlinearVariableName>(name);
   else if (have_parameter<AuxVariableName>(name))
     var = get<AuxVariableName>(name);
+  else if (have_parameter<PostprocessorName>(name))
+    var = get<PostprocessorName>(name);
+  else if (have_parameter<VectorPostprocessorName>(name))
+    var = get<VectorPostprocessorName>(name);
+  else if (have_parameter<FunctionName>(name))
+    var = get<FunctionName>(name);
+  else if (have_parameter<UserObjectName>(name))
+    var = get<UserObjectName>(name);
   else if (have_parameter<MaterialPropertyName>(name))
     var = get<MaterialPropertyName>(name);
   else if (have_parameter<std::string>(name))

@@ -29,6 +29,5 @@ AddDGKernelAction::AddDGKernelAction(InputParameters params) :
 void
 AddDGKernelAction::act()
 {
-  _problem->addDGKernel(_type, _name, _moose_object_pars);
+  _problem->addDGKernel(_type, _short_name, _moose_object_pars);
 }
-

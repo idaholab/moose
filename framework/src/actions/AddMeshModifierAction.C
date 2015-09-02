@@ -41,5 +41,5 @@ AddMeshModifierAction::act()
   // as is the case for SideSetAroundSubdomain
   _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh.get();
 
-  _app.addMeshModifier(_type, _name, _moose_object_pars);
+  _app.addMeshModifier(_type, _short_name, _moose_object_pars);
 }

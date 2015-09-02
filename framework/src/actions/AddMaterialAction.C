@@ -29,6 +29,5 @@ AddMaterialAction::AddMaterialAction(InputParameters params) :
 void
 AddMaterialAction::act()
 {
-  _problem->addMaterial(_type, _name, _moose_object_pars);
+  _problem->addMaterial(_type, _short_name, _moose_object_pars);
 }
-

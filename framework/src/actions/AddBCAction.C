@@ -32,6 +32,5 @@ AddBCAction::AddBCAction(InputParameters params) :
 void
 AddBCAction::act()
 {
-  _problem->addBoundaryCondition(_type, _name, _moose_object_pars);
+  _problem->addBoundaryCondition(_type, _short_name, _moose_object_pars);
 }
-

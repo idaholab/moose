@@ -29,6 +29,5 @@ AddConstraintAction::AddConstraintAction(InputParameters params) :
 void
 AddConstraintAction::act()
 {
-  _problem->addConstraint(_type, _name, _moose_object_pars);
+  _problem->addConstraint(_type, _short_name, _moose_object_pars);
 }
-
