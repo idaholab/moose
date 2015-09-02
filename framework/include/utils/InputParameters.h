@@ -924,27 +924,33 @@ template <typename T>
 void
 InputParameters::addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
+  _show_deprecated_message = false;
   addRequiredParam<T>(name, doc_string);
 
   _deprecated_params.insert(std::make_pair(name, deprecation_message));
+  _show_deprecated_message = true;
 }
 
 template <typename T>
 void
 InputParameters::addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message)
 {
+  _show_deprecated_message = false;
   addParam<T>(name, value, doc_string);
 
   _deprecated_params.insert(std::make_pair(name, deprecation_message));
+  _show_deprecated_message = true;
 }
 
 template <typename T>
 void
 InputParameters::addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
+  _show_deprecated_message = false;
   addParam<T>(name, doc_string);
 
   _deprecated_params.insert(std::make_pair(name, deprecation_message));
+  _show_deprecated_message = true;
 }
 
 
