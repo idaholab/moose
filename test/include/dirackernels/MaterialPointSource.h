@@ -38,7 +38,7 @@ public:
   virtual Real computeQpResidual();
 
 protected:
-  Point _p;
+  const Point & _p;
 
   const MaterialProperty<Real> & _value;
 };

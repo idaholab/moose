@@ -11,28 +11,32 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef COEFDIFFUSION_H
-#define COEFDIFFUSION_H
 
-#include "Kernel.h"
+#ifndef INPUTPARAMETERSTEST_H
+#define INPUTPARAMETERSTEST_H
 
-//Forward Declarations
-class CoefDiffusion;
+// CPPUnit includes
+#include "cppunit/extensions/HelperMacros.h"
 
-template<>
-InputParameters validParams<CoefDiffusion>();
-
-class CoefDiffusion : public Kernel
+class InputParametersTest : public CppUnit::TestFixture
 {
+  CPPUNIT_TEST_SUITE( InputParametersTest );
+
+  CPPUNIT_TEST( checkControlParamPrivateError );
+  CPPUNIT_TEST( checkControlParamTypeError );
+  CPPUNIT_TEST( checkControlParamValidError );
+
+  CPPUNIT_TEST_SUITE_END();
+
 public:
+  void setUp(){}
+  void tearDown(){}
 
-  CoefDiffusion(const InputParameters & parameters);
+  void checkControlParamPrivateError();
+  void checkControlParamTypeError();
+  void checkControlParamValidError();
 
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-
-  const Real & _coef;
+private:
 };
 
-#endif //COEFDIFFUSION_H
+#endif  // INPUTPARAMETERSTEST_H

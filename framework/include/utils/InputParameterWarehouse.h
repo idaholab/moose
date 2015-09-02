@@ -23,7 +23,7 @@
 class InputParameters;
 class MooseApp;
 
-typedef std::map<std::string, MooseSharedPointer<InputParameters> >::const_iterator InputParameterIterator;
+typedef std::map<std::string, MooseSharedPointer<InputParameters> >::iterator InputParameterIterator;
 
 /**
  * Storage container for all InputParamter objects.
@@ -56,6 +56,7 @@ public:
    */
   const std::vector<InputParameters *> & all() const;
 
+
 private:
 
   /// Name to pointer map for easy access to the pointers
@@ -78,17 +79,29 @@ private:
 
   /**
    * Return a reference to the InputParameters for the named object
-   * @name The full name of the object for which parameters are desired
+   * @name long_name The full name of the object for which parameters are desired
+   * @name tid The thread id
    * @return A const reference to the warehouse copy of the InputParameters
    *
    * If you are using this method to access a writable reference to input parameters, this
    * will break the ability to control the parameters with the MOOSE control logic system.
-   * Only change parameters if you know what you are doing.
+   * Only change parameters if you know what you are doing. Hence, this is private for a reason.
    */
   InputParameters & getInputParameters(const std::string & long_name, THREAD_ID tid = 0);
 
+  ///@{
+  /**
+   * Return iterators to the stored InputParameters object
+   * @name tid The thread id
+   * @return An iterator to the InputParameters object
+   */
+  InputParameterIterator begin(THREAD_ID tid = 0){ return _name_to_shared_pointer[tid].begin(); }
+  InputParameterIterator end(THREAD_ID tid = 0){ return _name_to_shared_pointer[tid].end(); }
+  ///@}
+
   friend class Factory;
   friend class ActionFactory;
+  friend class ControlInterface;
 
   // RELAP-7 Control Logic (This will go away when the MOOSE system is created)
   friend class Component;
