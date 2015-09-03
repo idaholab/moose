@@ -44,7 +44,7 @@ protected:
   ADVariableValue & _u;
 
   /// Holds the solution gradient at the current quadrature points
-  VariableGradient & _grad_u;
+  ADVariableGradient & _grad_u;
 
   /// Time derivative of u
   VariableValue & _u_dot;

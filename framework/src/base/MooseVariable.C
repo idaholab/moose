@@ -46,6 +46,8 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _need_second_older(false),
 
     _need_ad_u(false),
+    _need_ad_grad_u(false),
+    _need_ad_second_u(false),
 
     _need_u_old_neighbor(false),
     _need_u_older_neighbor(false),
@@ -108,6 +110,8 @@ MooseVariable::~MooseVariable()
   _second_u_older.release(); _second_u_older_bak.release();
 
   _ad_u.release();
+  _ad_grad_u.release();
+  _ad_second_u.release();
 
   _u_dot.release(); _u_dot_bak.release();
   _u_dot_neighbor.release(); _u_dot_bak_neighbor.release();
@@ -935,6 +939,12 @@ MooseVariable::computeElemValues()
     _ad_dofs.resize(num_dofs);
     _ad_u.resize(nqp);
 
+    if (_need_ad_grad_u)
+      _ad_grad_u.resize(nqp);
+
+    if (_need_ad_second_u)
+      _ad_second_u.resize(nqp);
+
     // Derivatives are offset by the variable number
     size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
 
@@ -943,7 +953,15 @@ MooseVariable::computeElemValues()
       mooseError("Current number of dofs per element is greater than AD_MAX_DOFS_PER_ELEM of " << AD_MAX_DOFS_PER_ELEM);
 
     for (unsigned int qp=0; qp < nqp; qp++)
+    {
       _ad_u[qp] = 0;
+
+      if (_need_ad_grad_u)
+        _ad_grad_u[qp] = 0;
+
+      if (_need_ad_second_u)
+        _ad_second_u[qp] = 0;
+    }
 
     for (unsigned int i=0; i < num_dofs; i++)
     {
@@ -955,8 +973,18 @@ MooseVariable::computeElemValues()
 
     // Now build up the solution at each quadrature point:
     for (unsigned int i=0; i < num_dofs; i++)
+    {
       for (unsigned int qp=0; qp < nqp; qp++)
+      {
         _ad_u[qp] += _ad_dofs[i] * _phi[i][qp];
+
+        if (_need_ad_grad_u)
+          _ad_grad_u[qp].add_scaled(_grad_phi[i][qp], _ad_dofs[i]); // Note: += does NOT work here!
+
+        if (_need_ad_second_u)
+          _ad_second_u[qp].add_scaled((*_second_phi)[i][qp], _ad_dofs[i]); // Note: += does NOT work here!
+      }
+    }
   }
 }
 

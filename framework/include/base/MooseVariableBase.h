@@ -31,11 +31,31 @@
 #define AD_MAX_DOFS_PER_ELEM 100
 typedef MetaPhysicL::DualNumber<double, MetaPhysicL::NumberArray<AD_MAX_DOFS_PER_ELEM, double> > ADReal;
 
+template<>
+struct CompareTypes<double, ADReal>
+{
+  typedef ADReal supertype;
+};
+
+template<>
+struct CompareTypes<ADReal, double>
+{
+  typedef ADReal supertype;
+};
+
+typedef VectorValue<ADReal> ADRealVectorValue;
+typedef ADRealVectorValue ADRealGradient;
+
+typedef TensorValue<ADReal> ADRealTensorValue;
+typedef ADRealTensorValue ADRealTensor;
+
 typedef MooseArray<Real>               VariableValue;
 typedef MooseArray<RealGradient>       VariableGradient;
 typedef MooseArray<RealTensor>         VariableSecond;
 
 typedef MooseArray<ADReal>             ADVariableValue;
+typedef MooseArray<ADRealGradient>     ADVariableGradient;
+typedef MooseArray<ADRealTensor>       ADVariableSecond;
 
 typedef MooseArray<std::vector<Real> >         VariableTestValue;
 typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;

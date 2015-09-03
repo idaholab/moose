@@ -33,7 +33,7 @@ InputParameters validParams<ADKernel>()
 ADKernel::ADKernel(const InputParameters & parameters) :
     KernelBase(parameters),
     _u(_var.adSln()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
+    _grad_u(_var.adGradSln()),
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
