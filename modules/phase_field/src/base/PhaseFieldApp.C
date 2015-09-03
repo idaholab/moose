@@ -28,6 +28,7 @@
 #include "CHSplitVar.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledTimeDerivative.h"
+#include "GradientComponent.h"
 #include "HHPFCRFF.h"
 #include "KKSACBulkC.h"
 #include "KKSACBulkF.h"
@@ -233,6 +234,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHPFCRFF);
   registerKernel(CHSplitVar);
   registerKernel(ConservedLangevinNoise);
+  registerKernel(GradientComponent);
   registerKernel(HHPFCRFF);
   registerKernel(KKSACBulkC);
   registerKernel(KKSACBulkF);
