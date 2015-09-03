@@ -1,3 +1,17 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "ICEUpdater.h"
 #include <sstream>
 #include "FEProblem.h"
@@ -37,6 +51,7 @@ ICEUpdater::ICEUpdater(const InputParameters & parameters) :
 }
 
 ICEUpdater::~ICEUpdater() {
+	// Stop the ICEUpdater thread
 	iceUpdater->stop();
 }
 
@@ -58,13 +73,21 @@ void ICEUpdater::initialSetup() {
 }
 
 void ICEUpdater::outputPostprocessors() {
-	// List of desired postprocessor outputs
+
+	// Get the list of Postprocessors
 	const std::set<std::string> & pps = getPostprocessorOutput();
 	for (std::set<std::string>::const_iterator it = pps.begin();
 			it != pps.end(); ++it) {
+		// Grab the value at the current time
 		PostprocessorValue value = _problem_ptr->getPostprocessorValue(*it);
+
+		// Create a string stream to use in posting the message
 		std::stringstream ss;
+
+		// Create the message as PPName:time:value
 		ss << *it << ":" << _time << ":" << value;
+
+		// Post the message
 		iceUpdater->postMessage(ss.str());
 	}
 }

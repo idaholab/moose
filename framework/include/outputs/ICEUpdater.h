@@ -1,9 +1,16 @@
-/*
- * ICEUpdater.h
- *
- *  Created on: Jun 12, 2015
- *      Author: aqw
- */
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 
 #ifndef ICE_UPDATER_H
 #define ICE_UPDATER_H
@@ -21,10 +28,17 @@ template<>
 InputParameters validParams<ICEUpdater>();
 
 /**
+ * The ICEUpdater is a subclass of AdvancedOutput<Output> that
+ * provides the functionality to post Postprocessor data at each
+ * time step over a web socket back to the Eclipse Integrated
+ * Computational Environment (ICE) for real-time plot updates.
  */
 class ICEUpdater: public AdvancedOutput<Output> {
 public:
 
+	/**
+	 * The Constructor
+	 */
 	ICEUpdater(const InputParameters & params);
 
 	virtual ~ICEUpdater();
@@ -43,6 +57,10 @@ protected:
 
 private:
 
+	/**
+	 * Reference to the ICE Updater object in charge of
+	 * connecting to ICE and posting update messages.
+	 */
 	MooseSharedPointer<Updater> iceUpdater;
 
 };
