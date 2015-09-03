@@ -55,6 +55,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D/RZ formulation.");
   params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ, SphericalR, and PlaneStrain formulations.");
   params.addParam<bool>("compute_JIntegral", false, "Whether to compute the J Integral.");
+  params.addParam<bool>("store_stress_older", false, "Parameter which indicates whether the older stress state, required for HHT time integration, needs to be stored");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
@@ -62,7 +63,6 @@ InputParameters validParams<SolidModel>()
   params.addCoupledVar("strain_zz", "The zz strain");
   params.addCoupledVar("scalar_strain_zz", "The zz strain (scalar variable)");
   params.addParam<std::vector<std::string> >("dep_matl_props", "Names of material properties this material depends on.");
-
   params.addParam<std::string>("constitutive_model", "ConstitutiveModel to use (optional)");
   return params;
 }
@@ -149,6 +149,7 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _total_strain_increment(0),
   _strain_increment(0),
   _compute_JIntegral(getParam<bool>("compute_JIntegral")),
+  _store_stress_older(getParam<bool>("store_stress_older")),
   _SED(NULL),
   _SED_old(NULL),
   _Eshelby_tensor(NULL),
@@ -158,6 +159,9 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _element(NULL),
   _local_elasticity_tensor(NULL)
 {
+  if (_store_stress_older)
+    declarePropertyOlder<SymmTensor>("stress");
+
   bool same_coord_type = true;
 
   for (unsigned int i=1; i<_block_id.size(); ++i)
