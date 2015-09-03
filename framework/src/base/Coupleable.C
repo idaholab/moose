@@ -60,6 +60,8 @@ Coupleable::Coupleable(const InputParameters & parameters, bool nodal) :
   _default_value_zero.resize(_coupleable_max_qps);
   _default_gradient.resize(_coupleable_max_qps);
   _default_second.resize(_coupleable_max_qps);
+  _ad_default_gradient.resize(_coupleable_max_qps);
+  _ad_default_second.resize(_coupleable_max_qps);
 }
 
 Coupleable::~Coupleable()
@@ -370,6 +372,33 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
     return (_c_is_implicit) ? var->gradSln() : var->gradSlnOld();
   else
     return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
+}
+
+ADVariableGradient &
+Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Return default 0
+    return _ad_default_gradient;
+
+  coupledCallback(var_name, false);
+  if (_nodal)
+    mooseError("Nodal variables do not have gradients");
+
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_is_implicit)
+      return var->adGradSln();
+    else
+      mooseError("Not Implemented!");
+    //return (_c_is_implicit) ? var->gradSln() : var->gradSlnOld();
+  }
+  else
+  {
+    mooseError("Not Implemented!");
+    // return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
+  }
 }
 
 VariableGradient &

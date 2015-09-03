@@ -122,6 +122,15 @@ protected:
   virtual VariableGradient & coupledGradient(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns gradient of a coupled variable for use in Automatic Differentation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the gradient of the coupled variable
+   * @see Kernel::gradient
+   */
+  virtual ADVariableGradient & adCoupledGradient(const std::string & var_name, unsigned int comp = 0);
+
+  /**
    * Returns an old gradient from previous time step of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -248,7 +257,13 @@ protected:
   VariableGradient _default_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
+  ADVariableGradient _ad_default_gradient;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
   VariableSecond _default_second;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  ADVariableSecond _ad_default_second;
 
   /**
    * Extract pointer to a coupled variable

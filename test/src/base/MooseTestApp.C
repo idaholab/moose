@@ -90,6 +90,7 @@
 #include "ADValueTest.h"
 #include "ValueTest.h"
 #include "ADCoupledValueTest.h"
+#include "ADCoupledConvection.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -315,6 +316,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(ADValueTest);
   registerKernel(ValueTest);
   registerKernel(ADCoupledValueTest);
+  registerKernel(ADCoupledConvection);
 
   // Aux kernels
   registerAux(CoupledAux);
