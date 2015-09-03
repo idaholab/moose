@@ -58,15 +58,9 @@ ElasticEnergyMaterial::computeDF(unsigned int i_var)
 {
   unsigned int i = argIndex(i_var);
 
-  // product rule d/di computeF
-  return 0.5 * (
-    ( // dstress/di
-        (*_delasticity_tensor[i])[_qp] * _strain[_qp]
-      + _elasticity_tensor[_qp] * (*_dstrain[i])[_qp]
-    ).doubleContraction(_strain[_qp])
-
-    + _stress[_qp].doubleContraction((*_dstrain[i])[_qp])
-  );
+  // product rule d/di computeF (doubleContraction commutes)
+  return 0.5 * ((*_delasticity_tensor[i])[_qp] * _strain[_qp]).doubleContraction(_strain[_qp]) +
+         (_elasticity_tensor[_qp] * (*_dstrain[i])[_qp]).doubleContraction(_strain[_qp]);
 }
 
 Real
@@ -76,6 +70,7 @@ ElasticEnergyMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
   unsigned int j = argIndex(j_var);
 
   // product rule d/dj computeDF
+  // TODO: simplify because doubleContraction commutes
   return 0.5 * (
     (
         (*_d2elasticity_tensor[i][j])[_qp] * _strain[_qp]
@@ -95,4 +90,3 @@ ElasticEnergyMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
     + _stress[_qp].doubleContraction((*_d2strain[i][j])[_qp])
   );
 }
-
