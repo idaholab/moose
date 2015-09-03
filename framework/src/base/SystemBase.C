@@ -86,7 +86,8 @@ SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
     _name(name),
     _currently_computing_jacobian(false),
     _vars(libMesh::n_threads()),
-    _var_map()
+    _var_map(),
+    _max_var_n_dofs_per_elem(0)
 {
 }
 

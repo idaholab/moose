@@ -174,6 +174,7 @@
 #include "NumSideQPs.h"
 #include "ElementL2Diff.h"
 #include "TestPostprocessor.h"
+#include "MaxVarNDofsPerElemPP.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -440,6 +441,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(NumSideQPs);
   registerPostprocessor(ElementL2Diff);
   registerPostprocessor(TestPostprocessor);
+  registerPostprocessor(MaxVarNDofsPerElemPP);
 
   registerMarker(RandomHitMarker);
   registerMarker(QPointMarker);

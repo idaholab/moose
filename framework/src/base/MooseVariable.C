@@ -933,19 +933,18 @@ MooseVariable::computeElemValues()
     _ad_dofs.resize(num_dofs);
     _ad_u.resize(nqp);
 
+    // Derivatives are offset by the variable number
+    size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
+
     for (unsigned int qp=0; qp < nqp; qp++)
       _ad_u[qp] = 0;
 
     for (unsigned int i=0; i < num_dofs; i++)
     {
-      // Set all derivative values to zero
-      for (unsigned int j=0; j < num_dofs; j++)
-        _ad_dofs[i].derivatives()[j] = 0;
-
       _ad_dofs[i] = current_solution(_dof_indices[i]);
 
       // NOTE!  You have to do this AFTER setting the value!
-      _ad_dofs[i].derivatives()[i] = 1.0;
+      _ad_dofs[i].derivatives()[ad_offset + i] = 1.0;
     }
 
     // Now build up the solution at each quadrature point:

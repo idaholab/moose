@@ -234,6 +234,13 @@ public:
   virtual unsigned int nVariables() = 0;
 
   /**
+   * Gets the maximum number of dofs used by any one variable on any one element
+   *
+   * @return The max
+   */
+  size_t getMaxVarNDofsPerElem() { return _max_var_n_dofs_per_elem; }
+
+  /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
    * @param var_name The name of the variable to be zeroed.
    */
@@ -386,6 +393,9 @@ protected:
 
   std::vector<std::string> _vars_to_be_zeroed_on_residual;
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
+
+  /// Maximum number of dofs for any one variable on any one element
+  size_t _max_var_n_dofs_per_elem;
 };
 
 /**
