@@ -7,8 +7,9 @@
 #ifndef GRAVITY_H
 #define GRAVITY_H
 
-#include "BodyForce.h"
+#include "Kernel.h"
 
+class Function;
 class Gravity;
 
 template<>
@@ -17,7 +18,7 @@ InputParameters validParams<Gravity>();
 /**
  * Gravity computes the body force (force/volume) given the acceleration of gravity (value) and the density
  */
-class Gravity : public BodyForce
+class Gravity : public Kernel
 {
 public:
 
@@ -29,6 +30,11 @@ protected:
   virtual Real computeQpResidual();
 
   const MaterialProperty<Real> & _density;
+
+  Real _value;
+  Function & _function;
+  // _alpha parameter for HHT time integration scheme
+  const Real _alpha;
 };
 
 #endif //GRAVITY_H
