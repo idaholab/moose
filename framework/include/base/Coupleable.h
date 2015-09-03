@@ -86,6 +86,15 @@ protected:
   virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns value of a coupled variable for use in Automatic Differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   * @see Kernel::value
+   */
+  virtual ADVariableValue & adCoupledValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
    * Returns an old value from previous time step  of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -229,6 +238,9 @@ protected:
   /// Will hold the default value for optional coupled variables.
   std::map<std::string, VariableValue *> _default_value;
 
+  /// Will hold the default value for optional coupled variables for automatic differentiation.
+  std::map<std::string, ADVariableValue *> _ad_default_value;
+
   /// This will always be zero because the default values for optionally coupled variables is always constant and this is used for time derivative info
   VariableValue _default_value_zero;
 
@@ -264,6 +276,14 @@ private:
    * @return VariableValue * a pointer to the associated VarirableValue.
    */
   VariableValue * getDefaultValue(const std::string & var_name);
+
+  /**
+   * Helper method to return (and insert if necessary) the default value for Automatic Differentiation
+   * for an uncoupled variable.
+   * @param var_name the name of the variable for which to retrieve a default value
+   * @return VariableValue * a pointer to the associated VarirableValue.
+   */
+  ADVariableValue * getADDefaultValue(const std::string & var_name);
 
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;

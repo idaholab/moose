@@ -89,6 +89,7 @@
 #include "DotCouplingAux.h"
 #include "ADValueTest.h"
 #include "ValueTest.h"
+#include "ADCoupledValueTest.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -313,6 +314,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(DoNotCopyParametersKernel);
   registerKernel(ADValueTest);
   registerKernel(ValueTest);
+  registerKernel(ADCoupledValueTest);
 
   // Aux kernels
   registerAux(CoupledAux);
