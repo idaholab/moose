@@ -91,6 +91,7 @@
 #include "ValueTest.h"
 #include "ADCoupledValueTest.h"
 #include "ADCoupledConvection.h"
+#include "ADMatDiffusion.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -133,6 +134,7 @@
 #include "DerivativeMaterialInterfaceTestClient.h"
 #include "DefaultMatPropConsumerMaterial.h"
 #include "RandomMaterial.h"
+#include "ADCoupledMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -317,6 +319,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(ValueTest);
   registerKernel(ADCoupledValueTest);
   registerKernel(ADCoupledConvection);
+  registerKernel(ADMatDiffusion);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -387,6 +390,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(DerivativeMaterialInterfaceTestClient);
   registerMaterial(DefaultMatPropConsumerMaterial);
   registerMaterial(RandomMaterial);
+  registerMaterial(ADCoupledMaterial);
 
 
   registerScalarKernel(ExplicitODE);

@@ -216,14 +216,19 @@ Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
       if (_c_is_implicit)
         return var->adSln();
       else
+      {
         mooseError("Not implemented");
 
-      //return (_c_is_implicit) ? var->adSln() : mooseErrorvar->slnOld();
+        //return (_c_is_implicit) ? var->adSln() : mooseErrorvar->slnOld();
+      }
+
     }
   }
   else
   {
-    mooseError("Not implemented");
+    return var->adSln(); // This is NOT right - FIXME
+
+    //mooseError("Not implemented");
     /*
     if (_nodal)
       return (_c_is_implicit) ? var->nodalSlnNeighbor() : var->nodalSlnOldNeighbor();
