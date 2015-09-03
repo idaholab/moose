@@ -1,13 +1,26 @@
-# Test for rayleigh damping implemented using Newmark
-# integration. The test is for a 1-D bar element with unit
-# length fixed on one end and a ramped pressure boundary
-# condition applied to the other end. The parameters zeta and
-# eta correspond to the stiffness and mass proportional rayliegh
-# damping; and beta and gamma are Newmark time integration
-# parameters. Note that in the StressDivergencedamping kernel an
-# approximate slope (stress-stress_old)/dt is used as opposed to
-# newmark time integration. The system will come to steady state
-# slowly after the pressure becomes constant.
+# Test for rayleigh damping implemented using Newmark time integration
+
+# The test is for an 1-D bar element of  unit length fixed on one end
+# with a ramped pressure boundary condition applied to the other end.
+# zeta and eta correspond to the stiffness and mass proportional rayleigh damping
+# beta and gamma are Newmark time integration parameters
+# The equation of motion in terms of matrices is:
+#
+# M*accel + eta*M*vel + zeta*K*vel + K*disp = P*Area
+#
+# Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
+#
+# This equation is equivalent to:
+#
+# density*accel + eta*density*vel + zeta*d/dt(Div stress) + Div stress = P
+#
+# The first two terms on the left are evaluated using the Inertial force kernel
+# The next two terms on the left involving zeta ise evaluated using the StressDivergence Kernel
+# The residual due to Pressure is evaluated using Pressure boundary condition
+#
+# The system will come to steady state slowly after the pressure becomes constant.
+# The store_stress_older flag in the SolidModel material model needs to be turned on to store stress older. In this example, this flag is turned on using the child class Elastic.
+
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -226,6 +239,7 @@
     youngs_modulus = 210e+09
     poissons_ratio = 0
     thermal_expansion = 0
+    store_stress_older = true
   [../]
 
   [./density]

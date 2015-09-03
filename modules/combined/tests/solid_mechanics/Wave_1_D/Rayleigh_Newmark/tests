@@ -1,0 +1,8 @@
+[tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'wave_bc_1d.i'
+    exodiff = 'wave_bc_1d_out.e'
+    abs_zero = 1e-09
+  [../]
+[]
