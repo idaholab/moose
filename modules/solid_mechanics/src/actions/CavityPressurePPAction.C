@@ -29,10 +29,7 @@ CavityPressurePPAction::CavityPressurePPAction(InputParameters params) :
 void
 CavityPressurePPAction::act()
 {
-  std::string short_name(_name);
-  // Chop off "BCs/CavityPressure/"
-  short_name.erase(0, 19);
-  std::string uo_name = short_name + "UserObject";
+  std::string uo_name = _name + "UserObject";
 
   const std::string pp_name = "CavityPressurePostprocessor";
 
@@ -49,7 +46,7 @@ CavityPressurePPAction::act()
   }
   else
   {
-    _problem->addPostprocessor(pp_name, short_name, params);
+    _problem->addPostprocessor(pp_name, _name, params);
   }
 
   if (isParamValid("output_initial_moles"))

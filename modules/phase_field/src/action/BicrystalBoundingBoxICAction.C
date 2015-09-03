@@ -95,7 +95,6 @@ BicrystalBoundingBoxICAction::act()
     }
 
     //Add initial condition
-    _problem->addInitialCondition("BoundingBoxIC", "ICs/PolycrystalICs/BicrystalBoundingBoxIC_" + Moose::stringify(op), poly_params);
+    _problem->addInitialCondition("BoundingBoxIC", "BicrystalBoundingBoxIC_" + Moose::stringify(op), poly_params);
   }
 }
-

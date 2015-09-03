@@ -69,14 +69,14 @@ ThermalContactAuxBCsAction::act()
     params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
 
   params.set<bool>("warnings") = getParam<bool>("warnings");
-  _problem->addAuxKernel(getParam<std::string>("gap_aux_type"), "AuxKernels/gap_value_" + Moose::stringify(n), params);
+  _problem->addAuxKernel(getParam<std::string>("gap_aux_type"), "gap_value_" + Moose::stringify(n), params);
 
   if (quadrature)
   {
     std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
-    _problem->addAuxKernel(getParam<std::string>("gap_aux_type"), "AuxKernels/gap_value_master_" + Moose::stringify(n), params);
+    _problem->addAuxKernel(getParam<std::string>("gap_aux_type"), "gap_value_master_" + Moose::stringify(n), params);
 
   }
 
@@ -98,8 +98,7 @@ ThermalContactAuxBCsAction::act()
   if (isParamValid("normal_smoothing_method"))
     params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
 
-  _problem->addAuxKernel("PenetrationAux", "AuxKernels/penetration_" + Moose::stringify(n), params);
+  _problem->addAuxKernel("PenetrationAux", "penetration_" + Moose::stringify(n), params);
 
   ++n;
 }
-
