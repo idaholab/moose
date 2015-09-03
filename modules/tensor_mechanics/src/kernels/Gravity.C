@@ -32,7 +32,7 @@ Gravity::Gravity(const InputParameters & parameters) :
 Real
 Gravity::computeQpResidual()
 {
-  Real factor = _value * _function.value(_t+_alpha*_dt, _q_point[_qp]);
-  return _density[_qp]*_test[_i][_qp]*-factor;
+  Real factor = _value * _function.value(_t + _alpha*_dt, _q_point[_qp]);
+  return _density[_qp] * _test[_i][_qp] * -factor;
 }
 

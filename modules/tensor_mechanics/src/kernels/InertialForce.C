@@ -43,7 +43,7 @@ InertialForce::computeQpResidual()
   {
     Real accel = 1./_beta*(((_u[_qp]-_u_old[_qp])/(_dt*_dt)) - _vel_old[_qp]/_dt - _accel_old[_qp]*(0.5-_beta));
     Real vel = _vel_old[_qp] + (_dt*(1-_gamma))*_accel_old[_qp] + _gamma*_dt*accel;
-    return _test[_i][_qp] * _density[_qp] * (accel +  vel * _eta*(1+_alpha) - _alpha*_eta*_vel_old[_qp]);
+    return _test[_i][_qp] * _density[_qp] * (accel + vel * _eta*(1+_alpha) - _alpha*_eta*_vel_old[_qp]);
   }
 }
 
@@ -53,5 +53,6 @@ InertialForce::computeQpJacobian()
   if (_dt == 0)
     return 0;
   else
-    return _test[_i][_qp] * _density[_qp] / (_beta * _dt * _dt) * _phi[_j][_qp] + _eta *(1+_alpha)* _test[_i][_qp] * _density[_qp] * _gamma / _beta / _dt * _phi[_j][_qp];
+    return _test[_i][_qp] * _density[_qp] / (_beta * _dt * _dt) * _phi[_j][_qp]
+      + _eta * (1+_alpha) * _test[_i][_qp] * _density[_qp] * _gamma / _beta / _dt * _phi[_j][_qp];
 }
