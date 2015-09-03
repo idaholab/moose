@@ -1,10 +1,12 @@
-# Wave propogation in 1-D using Newmark time integration in the presence of Rayleigh damping
+# Wave propogation in 1-D using Newmark time integration in the
+# presence of Rayleigh damping
 #
-# The test is for an 1-D bar element of length 4m  fixed on one end
-# with a sinusoidal pulse dirichlet boundary condition applied to the other end.
-# beta and gamma are Newmark  time integration parameters
-# eta and zeta are mass dependent and stiffness dependent Rayleigh damping coefficients, respectively.
-# The equation of motion in terms of matrices is:
+# The test is for an 1-D bar element of length 4m fixed on one end
+# with a sinusoidal pulse dirichlet boundary condition applied to the
+# other end.  beta and gamma are Newmark time integration parameters
+# eta and zeta are mass dependent and stiffness dependent Rayleigh
+# damping coefficients, respectively.  The equation of motion in terms
+# of matrices is:
 #
 # M*accel + (eta*M+zeta*K)*vel +K*disp = 0
 #
@@ -14,7 +16,6 @@
 #
 # The displacement at the second, third and fourth node at t = 0.1 are
 # -7.776268399030435152e-02, 1.949967184623528985e-02 and -4.615737877580032046e-03, respectively
-
 [GlobalParams]
   order = FIRST
   family = LAGRANGE

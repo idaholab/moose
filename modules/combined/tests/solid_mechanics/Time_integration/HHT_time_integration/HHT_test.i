@@ -1,9 +1,9 @@
 # Test for  HHT time integration
 
-# The test is for an 1-D bar element of  unit length fixed on one end
+# The test is for an 1-D bar element of unit length fixed on one end
 # with a ramped pressure boundary condition applied to the other end.
-# alpha, beta and gamma are HHT time integration parameters
-# The equation of motion in terms of matrices is:
+# alpha, beta and gamma are HHT time integration parameters The
+# equation of motion in terms of matrices is:
 #
 # M*accel + alpha*(K*disp - K*disp_old) + K*disp = P(t+alpha dt)*Area
 #
@@ -13,14 +13,16 @@
 #
 # density*accel + alpha*(Div stress - Div stress_old) +Div Stress= P(t+alpha dt)
 #
-# The first term on the left is evaluated using the Inertial force kernel
-# The next two terms on the left involving alpha is evaluated using the StressDivergence Kernel
-# The residual due to Pressure is evaluated using Pressure boundary condition
+# The first term on the left is evaluated using the Inertial force
+# kernel The next two terms on the left involving alpha is evaluated
+# using the StressDivergence Kernel The residual due to Pressure is
+# evaluated using Pressure boundary condition
 #
-# The system will come to steady state slowly after the pressure becomes constant.
-# Alpha equal to zero will result in Newmark integration.
-# The store_stress_older flag in the SolidModel material model needs to be turned on to store stress older. In this example, this flag is turned on using the child class Elastic.
-
+# The system will come to steady state slowly after the pressure
+# becomes constant.  Alpha equal to zero will result in Newmark
+# integration.  The store_stress_older flag in the SolidModel material
+# model needs to be turned on to store stress older. In this example,
+# this flag is turned on using the child class Elastic.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE

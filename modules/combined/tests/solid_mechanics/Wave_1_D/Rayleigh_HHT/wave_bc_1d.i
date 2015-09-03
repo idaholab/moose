@@ -1,10 +1,12 @@
-# Wave propogation in 1-D using HHT time integration in the presence of Rayleigh damping
+# Wave propogation in 1-D using HHT time integration in the presence
+# of Rayleigh damping
 #
-# The test is for an 1-D bar element of length 4m  fixed on one end
-# with a sinusoidal pulse dirichlet boundary condition applied to the other end.
-# alpha, beta and gamma are HHT  time integration parameters
-# eta and zeta are mass dependent and stiffness dependent Rayleigh damping coefficients, respectively.
-# The equation of motion in terms of matrices is:
+# The test is for an 1-D bar element of length 4m fixed on one end
+# with a sinusoidal pulse dirichlet boundary condition applied to the
+# other end.  alpha, beta and gamma are HHT time integration
+# parameters eta and zeta are mass dependent and stiffness dependent
+# Rayleigh damping coefficients, respectively.  The equation of motion
+# in terms of matrices is:
 #
 # M*accel + (eta*M+zeta*K)*((1+alpha)*vel-alpha*vel_old)+(1+alpha)*K*disp-alpha*K*disp_old = 0
 #
@@ -14,8 +16,6 @@
 #
 # The displacement at the first, second, third and fourth node at t = 0.1 are
 # -7.787499960311491942e-02, 1.955566679096475483e-02 and -4.634888180231294501e-03, respectively.
-
-
 [GlobalParams]
   order = FIRST
   family = LAGRANGE

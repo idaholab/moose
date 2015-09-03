@@ -1,28 +1,34 @@
 # Test for rayleigh damping implemented using HHT time integration
 #
-# The test is for an 1-D bar element of  unit length fixed on one end
+# The test is for an 1-D bar element of unit length fixed on one end
 # with a ramped pressure boundary condition applied to the other end.
-# zeta and eta correspond to the stiffness and mass proportional rayleigh damping
-# alpha, beta and gamma are HHT time integration parameters
-# The equation of motion in terms of matrices is:
+# zeta and eta correspond to the stiffness and mass proportional
+# rayleigh damping alpha, beta and gamma are HHT time integration
+# parameters The equation of motion in terms of matrices is:
 #
-# M*accel + (eta*M+zeta*K)*[(1+alpha)vel-alpha vel_old] + alpha*(K*disp - K*disp_old) + K*disp = P(t+alpha dt)*Area
+# M*accel + (eta*M+zeta*K)*[(1+alpha)vel-alpha vel_old]
+#   + alpha*(K*disp - K*disp_old) + K*disp = P(t+alpha dt)*Area
 #
 # Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
 #
 # This equation is equivalent to:
 #
-# density*accel + eta*density*[(1+alpha)vel-alpha vel_old] + zeta*[(1+alpha)*d/dt(Div stress)- alpha*d/dt(Div stress_old)] + alpha *(Div stress - Div stress_old) +Div Stress= P(t+alpha dt)
+# density*accel + eta*density*[(1+alpha)vel-alpha vel_old] +
+#   zeta*[(1+alpha)*d/dt(Div stress)- alpha*d/dt(Div stress_old)] +
+#   alpha *(Div stress - Div stress_old) +Div Stress= P(t+alpha dt)
 #
-# The first two terms on the left are evaluated using the Inertial force kernel
-# The next three terms on the left involving zeta and alpha are evaluated using the StressDivergence Kernel
-# The residual due to Pressure is evaluated using Pressure boundary condition
+# The first two terms on the left are evaluated using the Inertial
+# force kernel The next three terms on the left involving zeta and
+# alpha are evaluated using the StressDivergence Kernel The residual
+# due to Pressure is evaluated using Pressure boundary condition
 #
-# The system will come to steady state slowly after the pressure becomes constant.
-# Alpha equal to zero will result in Newmark integration.
+# The system will come to steady state slowly after the pressure
+# becomes constant.  Alpha equal to zero will result in Newmark
+# integration.
 #
-# The store_stress_older flag in the SolidModel material model needs to be turned on to store stress older. In this example, this flag is turned on using the child class Elastic.
-
+# The store_stress_older flag in the SolidModel material model needs
+# to be turned on to store stress older. In this example, this flag is
+# turned on using the child class Elastic.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
