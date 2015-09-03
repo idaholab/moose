@@ -18,8 +18,8 @@ InputParameters validParams<StressDivergence>()
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
-  params.addParam<Real>("zeta", 0, "zeta parameter");
-  params.addParam<Real>("alpha", 0, "alpha parameter");
+  params.addParam<Real>("zeta", 0.0, "Stiffness dependent Rayleigh damping coefficient");
+  params.addParam<Real>("alpha", 0.0, "alpha parameter required for HHT time integration");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   params.set<bool>("use_displaced_mesh") = true;
@@ -30,6 +30,7 @@ InputParameters validParams<StressDivergence>()
 
 StressDivergence::StressDivergence(const InputParameters & parameters) :
     Kernel(parameters),
+    _stress_older(getMaterialPropertyOlder<SymmTensor>("stress" + getParam<std::string>("appended_property_name"))),
     _stress_old(getMaterialPropertyOld<SymmTensor>("stress" + getParam<std::string>("appended_property_name"))),
     _stress(getMaterialProperty<SymmTensor>("stress" + getParam<std::string>("appended_property_name"))),
     _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
@@ -51,7 +52,7 @@ Real
 StressDivergence::computeQpResidual()
 {
   if ((_dt > 0) && ((_zeta != 0) || (_alpha != 0)))
-    return _stress[_qp].rowDot(_component, _grad_test[_i][_qp]) * (1 + _alpha + _zeta / _dt) - (_zeta / _dt + _alpha) * _stress_old[_qp].rowDot(_component, _grad_test[_i][_qp]);
+    return _stress[_qp].rowDot(_component, _grad_test[_i][_qp])*(1+_alpha+(1+_alpha)*_zeta/_dt)-(_alpha+(1+2*_alpha)*_zeta/_dt)*_stress_old[_qp].rowDot(_component, _grad_test[_i][_qp]) + (_alpha*_zeta/_dt)*_stress_older[_qp].rowDot(_component,_grad_test[_i][_qp]);
   else
     return _stress[_qp].rowDot(_component, _grad_test[_i][_qp]);
 }

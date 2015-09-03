@@ -21,6 +21,8 @@ InputParameters validParams<SolidMechanicsAction>()
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<NonlinearVariableName>("disp_r", "", "The r displacement");
   params.addParam<NonlinearVariableName>("temp", "", "The temperature");
+  params.addParam<Real>("zeta", 0.0, "Stiffness dependent damping parameter for Rayleigh damping");
+  params.addParam<Real>("alpha", 0.0, "alpha parameter for HHT time integration");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that these kernels will be applied to");
@@ -42,7 +44,9 @@ SolidMechanicsAction::SolidMechanicsAction(const InputParameters & params) :
   _disp_y(getParam<NonlinearVariableName>("disp_y")),
   _disp_z(getParam<NonlinearVariableName>("disp_z")),
   _disp_r(getParam<NonlinearVariableName>("disp_r")),
-  _temp(getParam<NonlinearVariableName>("temp"))
+  _temp(getParam<NonlinearVariableName>("temp")),
+  _zeta(getParam<Real>("zeta")),
+  _alpha(getParam<Real>("alpha"))
 {
 }
 
@@ -216,6 +220,8 @@ SolidMechanicsAction::act()
       params.set<std::vector<SubdomainName> >("block") = blocks;
       params.set<std::vector<AuxVariableName> >("save_in") = save_in[i];
       params.set<std::vector<AuxVariableName> >("diag_save_in") = diag_save_in[i];
+      params.set<Real>("zeta") = _zeta;
+      params.set<Real>("alpha") = _alpha;
 
       _problem->addKernel(type, name.str(), params);
     }

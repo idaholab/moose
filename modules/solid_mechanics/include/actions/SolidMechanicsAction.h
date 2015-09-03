@@ -28,6 +28,8 @@ private:
   const NonlinearVariableName _disp_z;
   const NonlinearVariableName _disp_r;
   const NonlinearVariableName _temp;
+  const Real _zeta;
+  const Real _alpha;
 };
 
 
