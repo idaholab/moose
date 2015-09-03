@@ -41,7 +41,7 @@ protected:
   virtual ADReal computeQpResidual() = 0;
 
   /// Holds the solution at current quadrature points
-  std::vector<ADReal> & _u;
+  ADVariableValue & _u;
 
   /// Holds the solution gradient at the current quadrature points
   VariableGradient & _grad_u;

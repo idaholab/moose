@@ -23,9 +23,19 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/vector_value.h"
 
+// MetaPhysicL
+#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/numberarray.h"
+
+// The 100 here is for how many DoFs there are per element.
+#define AD_MAX_DOFS_PER_ELEM 100
+typedef MetaPhysicL::DualNumber<double, MetaPhysicL::NumberArray<AD_MAX_DOFS_PER_ELEM, double> > ADReal;
+
 typedef MooseArray<Real>               VariableValue;
 typedef MooseArray<RealGradient>       VariableGradient;
 typedef MooseArray<RealTensor>         VariableSecond;
+
+typedef MooseArray<ADReal>             ADVariableValue;
 
 typedef MooseArray<std::vector<Real> >         VariableTestValue;
 typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;

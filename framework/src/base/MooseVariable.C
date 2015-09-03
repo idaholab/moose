@@ -107,6 +107,8 @@ MooseVariable::~MooseVariable()
   _second_u_old.release(); _second_u_old_bak.release();
   _second_u_older.release(); _second_u_older_bak.release();
 
+  _ad_u.release();
+
   _u_dot.release(); _u_dot_bak.release();
   _u_dot_neighbor.release(); _u_dot_bak_neighbor.release();
 
@@ -935,6 +937,10 @@ MooseVariable::computeElemValues()
 
     // Derivatives are offset by the variable number
     size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
+
+    // Hopefully this problem can go away at some point
+    if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)
+      mooseError("Current number of dofs per element is greater than AD_MAX_DOFS_PER_ELEM of " << AD_MAX_DOFS_PER_ELEM);
 
     for (unsigned int qp=0; qp < nqp; qp++)
       _ad_u[qp] = 0;
