@@ -9,38 +9,26 @@
 template<>
 InputParameters validParams<CoefCoupledTimeDerivative>()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Time derivative Kernel that acts on a coupled variable");
-  params.addRequiredCoupledVar("v", "Coupled variable");
-  params.addParam<Real>("coef", 0.0, "Coefficient"); 
+  InputParameters params = validParams<CoupledTimeDerivative>();
+  params.addClassDescription("Scaled time derivative Kernel that acts on a coupled variable");
+  params.addRequiredParam<Real>("coef", "Coefficient");
   return params;
 }
 
-CoefCoupledTimeDerivative::CoefCoupledTimeDerivative(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
-    _coef(getParam<Real>("coef")),
-    _v_dot(coupledDot("v")),
-    _dv_dot(coupledDotDu("v")),
-    _v_var(coupled("v"))
-{}
+CoefCoupledTimeDerivative::CoefCoupledTimeDerivative(const InputParameters & parameters) :
+    CoupledTimeDerivative(parameters),
+    _coef(getParam<Real>("coef"))
+{
+}
 
 Real
 CoefCoupledTimeDerivative::computeQpResidual()
 {
-  return _test[_i][_qp] *_coef* _v_dot[_qp];
-}
-
-Real
-CoefCoupledTimeDerivative::computeQpJacobian()
-{
-  return 0.0;
+  return CoupledTimeDerivative::computeQpResidual() * _coef;
 }
 
 Real
 CoefCoupledTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _v_var)
-    return _test[_i][_qp] *_coef* _phi[_j][_qp] * _dv_dot[_qp];
-
-  return 0.0;
+  return CoupledTimeDerivative::computeQpOffDiagJacobian(jvar) * _coef;
 }

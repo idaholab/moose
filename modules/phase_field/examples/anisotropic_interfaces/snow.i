@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 100
-  ny = 100
+  nx = 200
+  ny = 200
   xmax = 9
   ymax = 9
   elem_type = QUAD4
@@ -12,11 +12,11 @@
   [./w]
   [../]
   [./T]
+    initial_condition = 0.0
   [../]
 []
 
 [ICs]
-  active = 'wIC TIC'
   [./wIC]
     type = SmoothCircleIC
     variable = w
@@ -28,12 +28,6 @@
     outvalue = 0
     invalue = 1
     3D_spheres = false
-  [../]
-  [./TIC]
-    type = ConstantIC
-    variable = T
-    block = 0
-    value = 0
   [../]
 []
 
@@ -54,12 +48,12 @@
     variable = w
   [../]
   [./anisoACinterface1]
-    type = anisoACInterface1
+    type = ACInterfaceKobayashi1
     variable = w
     mob_name = M
   [../]
   [./anisoACinterface2]
-    type = anisoACInterface2    
+    type = ACInterfaceKobayashi2
     variable = w
     mob_name = M
   [../]
@@ -75,9 +69,8 @@
     variable = T
   [../]
   [./CoefDiffusion]
-    type = CoefDiffusion
+    type = Diffusion
     variable = T
-    coef = 1
   [../]
   [./w_dot_T]
     type = CoefCoupledTimeDerivative
@@ -88,59 +81,70 @@
 []
 
 [AuxKernels]
-  [./local_energy]
-    type = TotalFreeEnergy
-    variable = local_energy
-    f_name = fbulk
-    interfacial_vars = w
-    kappa_names = kappa_c
-    execute_on = timestep_end
-  [../]
   [./m]
     type = ParsedAux
     variable = m
     args = T
-    function = 0.9*atan(10*(1-T))/3.14
+    constant_names = pi
+    constant_expressions = 3.14159265359
+    function = '0.9*atan(10*(1-T))/pi'
     execute_on = timestep_end
   [../]
 []
 
-[BCs]
-  [./Periodic]
-  [../]
-[]
-
+#[BCs]
+#  [./Periodic]
+#  [../]
+#[]
+#
 [Materials]
   [./free_energy]
     type = DerivativeParsedMaterial
     block = 0
     f_name = fbulk
     args = 'w m'
-    function = 1/4*w*w*w*w-(1/2-m/3)*w*w*w+(1/4-m/2)*w*w
+    function = '1/4*w^4 - (1/2 - m/3)*w^3 + (1/4-m/2)*w^2'
     outputs = exodus
   [../]
   [./material]
-    type = ExampleMaterial
-    mob = 3333.333
+    type = InterfaceOrientationMaterial
     block = 0
     c = w
-    kappa = 0.5
+  [../]
+  [./consts]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names  = 'M       '
+    prop_values = '3333.333'
   [../]
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
-  type = Transient # Here we use the Transient Executioner
-  dt = 0.002
+  type = Transient
   solve_type = NEWTON
-  num_steps = 500
-  line_search = none
+
+  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-08
+  l_max_its = 30
+
+  [./TimeStepper]
+    type = IterationAdaptiveDT
+    optimal_iterations = 8
+    iteration_window = 2
+    dt = 0.002
+  [../]
+
+  end_time = 1
 []
 
 [Outputs]
    output_initial = true
+   interval = 10
    exodus = true
-   print_linear_residuals = true
-   print_perf_log = true 
+   [./console]
+     type = Console
+     interval = 1
+     execute_on = 'FAILED INITIAL NONLINEAR TIMESTEP_BEGIN TIMESTEP_END'
+   [../]
+   print_perf_log = true
 []
-

@@ -12,40 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EXAMPLEMATERIAL_H
-#define EXAMPLEMATERIAL_H
+#ifndef INTERFACEORIENTATIONMATERIAL_H
+#define INTERFACEORIENTATIONMATERIAL_H
 
 #include "Material.h"
 
 //Forward Declarations
-class ExampleMaterial;
+class InterfaceOrientationMaterial;
 
 template<>
-InputParameters validParams<ExampleMaterial>();
+InputParameters validParams<InterfaceOrientationMaterial>();
 
 /**
- * Example material class that defines a few properties.
+ * Material to compute the angular orientation of order parameter interfaces.
  */
-class ExampleMaterial : public Material
+class InterfaceOrientationMaterial : public Material
 {
 public:
-  ExampleMaterial(const std::string & name,
-                  InputParameters parameters);
+  InterfaceOrientationMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties();
 
 private:
   MaterialProperty<Real> & _eps;
-  MaterialProperty<Real> & _eps1;
+  MaterialProperty<Real> & _deps;
+
   VariableValue & _u;
   VariableGradient & _grad_u;
-  MaterialProperty<Real> & _M;
-  MaterialProperty<RealGradient> & _grad_M;
-  MaterialProperty<Real> & _kappa_c;
-  Real _mob;
-  Real _kappa;
-
 };
 
-#endif //EXAMPLEMATERIAL_H
+#endif //INTERFACEORIENTATIONMATERIAL_H

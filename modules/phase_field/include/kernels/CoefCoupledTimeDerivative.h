@@ -15,7 +15,7 @@
 #ifndef COEFCOUPLEDTIMEDERIVATIVE_H
 #define COEFCOUPLEDTIMEDERIVATIVE_H
 
-#include "Kernel.h"
+#include "CoupledTimeDerivative.h"
 
 // Forward Declaration
 class CoefCoupledTimeDerivative;
@@ -24,23 +24,18 @@ template<>
 InputParameters validParams<CoefCoupledTimeDerivative>();
 
 /**
- * This calculates the time derivative for a coupled variable
+ * This calculates the time derivative for a coupled variable multiplied by a scalar coedfficient
  **/
-class CoefCoupledTimeDerivative : public Kernel
+class CoefCoupledTimeDerivative : public CoupledTimeDerivative
 {
 public:
-  CoefCoupledTimeDerivative(const std::string & name, InputParameters parameters);
+  CoefCoupledTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-private:
   Real _coef;
-  VariableValue & _v_dot;
-  VariableValue & _dv_dot;
-  unsigned int _v_var;
 };
 
 #endif //COEFCOUPLEDTIMEDERIVATIVE_H

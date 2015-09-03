@@ -11,57 +11,41 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#include "ExampleMaterial.h"
-#include <cmath>
+#include "InterfaceOrientationMaterial.h"
 
 template<>
-InputParameters validParams<ExampleMaterial>()
+InputParameters validParams<InterfaceOrientationMaterial>()
 {
   InputParameters params = validParams<Material>();
-
-  // Vectors for Linear Interpolation
-  params.addRequiredCoupledVar("c","variable");
-  params.addRequiredParam<Real>("mob", "The mobility value");
-  params.addParam<Real>("kappa", 1.0, "The kappa parameter for the vacancy concentration");
+  params.addRequiredCoupledVar("c", "variable");
   return params;
 }
 
-ExampleMaterial::ExampleMaterial(const std::string & name,
-                                 InputParameters parameters) :
-    Material(name, parameters),
+InterfaceOrientationMaterial::InterfaceOrientationMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _eps(declareProperty<Real>("eps")),
-    _eps1(declareProperty<Real>("eps1")),
+    _deps(declareProperty<Real>("eps1")),
     _u(coupledValue("c")),
-    _grad_u(coupledGradient("c")),
-    _M(declareProperty<Real>("M")),
-    _grad_M(declareProperty<RealGradient>("grad_M")),
-    _kappa_c(declareProperty<Real>("kappa_c")),
-    _mob(getParam<Real>("mob")),
-    _kappa(getParam<Real>("kappa"))
-{}
-
-   Real _angle_Mat;
-   Real _cos_Mat;
-void
-ExampleMaterial::computeProperties()
+    _grad_u(coupledGradient("c"))
 {
-  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-  {
-    _M[qp] = _mob;
-    _grad_M[qp] = 0.0;
-    _kappa_c[qp] = _kappa;
-    
-    // Set value in special situation
-    if(_grad_u[qp]*_grad_u[qp] == 0)
-    _cos_Mat = 0;
-    // Set anisotropic properties value
-    else
-    _cos_Mat = _grad_u[qp](0)/sqrt(_grad_u[qp]*_grad_u[qp]);
-    _angle_Mat =  acos(_cos_Mat);
-    _eps[qp]= 0.01*(1+0.04*cos(6*(_angle_Mat-1.57)));
-    _eps1[qp]= -0.01*0.04*6*sin(6*(_angle_Mat-1.57));
-   }
+  // this currently only works in 2D simulations
+  if (_mesh.dimension() != 2)
+    mooseError("InterfaceOrientationMaterial requires a two-dimensional mesh.");
 }
 
+void
+InterfaceOrientationMaterial::computeQpProperties()
+{
+  // cosine of the gradient orientation angle
+  Real cos_grad;
+  const Real grad2 = _grad_u[_qp] * _grad_u[_qp];
+  if (grad2 == 0)
+    cos_grad = 0;
+  else
+    cos_grad = _grad_u[_qp](0) / std::sqrt(grad2);
 
+  const Real angle = std::acos(cos_grad);
+
+  _eps[_qp]= 0.01 * (1.0 + 0.04 * std::cos(6 * (angle - libMesh::pi/2.0)));
+  _deps[_qp]= -0.01 * 0.04 * 6.0 * std::sin(6 * (angle - libMesh::pi/2.0));
+}

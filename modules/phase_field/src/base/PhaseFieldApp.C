@@ -17,6 +17,8 @@
 #include "ACInterface.h"
 #include "ACMultiInterface.h"
 #include "ACParsed.h"
+#include "ACInterfaceKobayashi1.h"
+#include "ACInterfaceKobayashi2.h"
 #include "CahnHilliard.h"
 #include "CahnHilliardAniso.h"
 #include "CHBulkPFCTrad.h"
@@ -26,6 +28,7 @@
 #include "CHMath.h"
 #include "CHPFCRFF.h"
 #include "CHSplitVar.h"
+#include "CoefCoupledTimeDerivative.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledTimeDerivative.h"
 #include "GradientComponent.h"
@@ -89,6 +92,7 @@
 #include "GBAnisotropy.h"
 #include "GBEvolution.h"
 #include "GrainAdvectionVelocity.h"
+#include "InterfaceOrientationMaterial.h"
 #include "KKSXeVacSolidMaterial.h"
 #include "MathEBFreeEnergy.h"
 #include "MathFreeEnergy.h"
@@ -226,6 +230,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACInterface);
   registerKernel(ACMultiInterface);
   registerKernel(ACParsed);
+  registerKernel(ACInterfaceKobayashi1);
+  registerKernel(ACInterfaceKobayashi2);
   registerKernel(CahnHilliard);
   registerKernel(CahnHilliardAniso);
   registerKernel(CHBulkPFCTrad);
@@ -235,6 +241,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHMath);
   registerKernel(CHPFCRFF);
   registerKernel(CHSplitVar);
+  registerKernel(CoefCoupledTimeDerivative);
   registerKernel(ConservedLangevinNoise);
   registerKernel(GradientComponent);
   registerKernel(HHPFCRFF);
@@ -293,6 +300,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(GBAnisotropy);
   registerMaterial(GBEvolution);
   registerMaterial(GrainAdvectionVelocity);
+  registerMaterial(InterfaceOrientationMaterial);
   registerMaterial(KKSXeVacSolidMaterial);
   registerMaterial(MathEBFreeEnergy);
   registerMaterial(MathFreeEnergy);
