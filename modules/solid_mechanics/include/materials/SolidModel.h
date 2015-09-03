@@ -148,6 +148,7 @@ protected:
   SymmTensor _strain_increment;
 
   const bool _compute_JIntegral;
+  bool _store_stress_older;
 
   //These are used in calculation of the J integral
   MaterialProperty<Real> * _SED;

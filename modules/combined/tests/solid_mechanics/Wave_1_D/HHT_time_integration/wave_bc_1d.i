@@ -1,28 +1,19 @@
-# Test for  HHT time integration
+# Wave propogation in 1-D using HHT time integration
+#
+# The test is for an 1-D bar element of length 4m  fixed on one end
+# with a sinusoidal pulse dirichlet boundary condition applied to the other end.
+# alpha, beta and gamma are Newmark  time integration parameters
+# The equation of motion in terms of matrices is:
+#
+# M*accel + K*((1+alpha)*disp-alpha*disp_old) = 0
+#
+# Here M is the mass matrix, K is the stiffness matrix
+#
+# store_stress_older should be set to true in material model
+#
+# The displacement at the second, third and fourth node at t = 0.1 are
+# -8.097405701570538350e-02, 2.113131879547342634e-02 and -5.182787688751439893e-03, respectively.
 
-# The test is for an 1-D bar element of unit length fixed on one end
-# with a ramped pressure boundary condition applied to the other end.
-# alpha, beta and gamma are HHT time integration parameters The
-# equation of motion in terms of matrices is:
-#
-# M*accel + alpha*(K*disp - K*disp_old) + K*disp = P(t+alpha dt)*Area
-#
-# Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
-#
-# This equation is equivalent to:
-#
-# density*accel + alpha*(Div stress - Div stress_old) +Div Stress= P(t+alpha dt)
-#
-# The first term on the left is evaluated using the Inertial force
-# kernel The next two terms on the left involving alpha is evaluated
-# using the StressDivergence Kernel The residual due to Pressure is
-# evaluated using Pressure boundary condition
-#
-# The system will come to steady state slowly after the pressure
-# becomes constant.  Alpha equal to zero will result in Newmark
-# integration.  The store_stress_older flag in the SolidModel material
-# model needs to be turned on to store stress older. In this example,
-# this flag is turned on using the child class Elastic.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -32,12 +23,12 @@
   type = GeneratedMesh
   dim = 3
   nx = 1
-  ny = 1
+  ny = 4
   nz = 1
   xmin = 0.0
   xmax = 0.1
   ymin = 0.0
-  ymax = 1.0
+  ymax = 4.0
   zmin = 0.0
   zmax = 0.1
 []
@@ -76,48 +67,41 @@
 
 []
 
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    alpha = -0.3
+  [../]
+[]
 [Kernels]
-  [./inertia_x]
+ [./inertia_x]
     type = InertialForce
     variable = disp_x
     velocity = vel_x
     acceleration = accel_x
-    beta = 0.25
-    gamma = 0.5
-  [../]
-  [./stiffness_x]
-    type = StressDivergence
-    variable = disp_x
-    component = 0
-    alpha = 0.11
+    beta = 0.3025
+    gamma = 0.6
+    alpha = -0.3
   [../]
   [./inertia_y]
     type = InertialForce
     variable = disp_y
     velocity = vel_y
     acceleration = accel_y
-    beta = 0.25
-    gamma = 0.5
-  [../]
-  [./stiffness_y]
-    type = StressDivergence
-    variable = disp_y
-    component = 1
-    alpha = 0.11
+    beta = 0.3025
+    gamma = 0.6
+    alpha = -0.3
   [../]
   [./inertia_z]
     type = InertialForce
     variable = disp_z
     velocity = vel_z
     acceleration = accel_z
-    beta = 0.25
-    gamma = 0.5
-  [../]
-  [./stiffness_z]
-    type = StressDivergence
-    variable = disp_z
-    component = 2
-    alpha = 0.11
+    beta = 0.3025
+    gamma = 0.6
+    alpha = -0.3
   [../]
 
 []
@@ -128,14 +112,14 @@
     variable = accel_x
     displacement = disp_x
     velocity = vel_x
-    beta = 0.25
+    beta = 0.3025
     execute_on = timestep_end
   [../]
   [./vel_x]
     type = NewmarkVelAux
     variable = vel_x
     acceleration = accel_x
-    gamma = 0.5
+    gamma = 0.6
     execute_on = timestep_end
   [../]
   [./accel_y]
@@ -143,14 +127,14 @@
     variable = accel_y
     displacement = disp_y
     velocity = vel_y
-    beta = 0.25
+    beta = 0.3025
     execute_on = timestep_end
   [../]
   [./vel_y]
     type = NewmarkVelAux
     variable = vel_y
     acceleration = accel_y
-    gamma = 0.5
+    gamma = 0.6
     execute_on = timestep_end
   [../]
   [./accel_z]
@@ -158,27 +142,15 @@
     variable = accel_z
     displacement = disp_z
     velocity = vel_z
-    beta = 0.25
+    beta = 0.3025
     execute_on = timestep_end
   [../]
   [./vel_z]
     type = NewmarkVelAux
     variable = vel_z
     acceleration = accel_z
-    gamma = 0.5
+    gamma = 0.6
     execute_on = timestep_end
-  [../]
-  [./stress_yy]
-     type = MaterialTensorAux
-     variable = stress_yy
-     tensor = stress
-     index = 1
-  [../]
-  [./strain_yy]
-     type = MaterialTensorAux
-     variable = strain_yy
-     tensor = total_strain
-     index = 1
   [../]
 
 []
@@ -240,7 +212,7 @@
     value=0.0
   [../]
   [./back_x]
-    type = DirichletBC
+   type = DirichletBC
     variable = disp_x
     boundary = back
     value=0.0
@@ -251,50 +223,45 @@
     boundary = back
     value=0.0
   [../]
-  [./bottom_x]
-   type = DirichletBC
-    variable = disp_x
-    boundary = bottom
-    value=0.0
-  [../]
-  [./bottom_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = bottom
-    value=0.0
-  [../]
-  [./Pressure]
-    [./Side1]
-    boundary = bottom
-    function = pressure
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    factor = 1
-    alpha = 0.11
+    [./bottom_x]
+      type = DirichletBC
+      variable = disp_x
+      boundary = bottom
+      value=0.0
     [../]
-  [../]
+    [./bottom_z]
+      type = DirichletBC
+      variable = disp_z
+      boundary = bottom
+      value=0.0
+    [../]
+    [./bottom_y]
+      type = FunctionPresetBC
+      variable = disp_y
+      boundary = bottom
+      function = displacement_bc
+    [../]
 []
 
 [Materials]
 
   [./constant]
-    type = Elastic
-    block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    youngs_modulus = 210e+09
-    poissons_ratio = 0
-    thermal_expansion = 0
-    store_stress_older = true
+     type = Elastic
+     block = 0
+     disp_x = disp_x
+     disp_y = disp_y
+     disp_z = disp_z
+     youngs_modulus = 1
+     poissons_ratio = 0
+     thermal_expansion = 0
+     store_stress_older = true
   [../]
 
   [./density]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'density'
-    prop_values = '7750'
+    prop_values = '1'
   [../]
 
 []
@@ -303,9 +270,11 @@
 
   type = Transient
   start_time = 0
-  end_time = 2
+  end_time = 6.0
   dtmax = 0.1
   dtmin = 0.1
+  l_tol = 1e-8
+  nl_rel_tol = 1e-8
   [./TimeStepper]
     type = ConstantDT
     dt = 0.1
@@ -318,47 +287,59 @@
   [./pressure]
     type = PiecewiseLinear
     x = '0.0 0.1 0.2 1.0 2.0 5.0'
-    y = '0.0 0.1 0.2 1.0 1.0 1.0'
-    scale_factor = 1e9
+    y = '0.0 0.001 1 0.001 0.0 0.0'
+    scale_factor = 7750
   [../]
-  [./vel_ic]
+  [./displacement_ic]
     type = PiecewiseLinear
-    x = '0.0 0.5 1.0'
-    y = '0.1 0.1 0.1'
-    scale_factor = 1
+    axis = 1
+    x = '0.0 0.3 0.4 0.5 0.6 0.7 1.0'
+    y = '0.0 0.0 0.0001 1.0 0.0001 0.0 0.0'
+    scale_factor = 0.1
   [../]
+  [./displacement_bc]
+    type = PiecewiseLinear
+    data_file = 'sine_wave.csv'
+    format = columns
+  [../]
+
 []
 
 [Postprocessors]
    [./_dt]
      type = TimestepSize
    [../]
-   [./disp]
-     type = NodalMaxValue
-     variable = disp_y
-     boundary = bottom
-   [../]
-   [./vel]
-     type = NodalMaxValue
-     variable = vel_y
-     boundary = bottom
-   [../]
-   [./accel]
-     type = NodalMaxValue
-     variable = accel_y
-     boundary = bottom
-   [../]
-   [./stress_yy]
-      type = ElementAverageValue
-      variable = stress_yy
-   [../]
-   [./strain_yy]
-      type = ElementAverageValue
-      variable = strain_yy
-   [../]
-
+    [./disp_1]
+       type = NodalVariableValue
+       nodeid = 1
+       variable = disp_y
+     [../]
+    [./disp_2]
+       type = NodalVariableValue
+       nodeid = 3
+       variable = disp_y
+     [../]
+    [./disp_3]
+       type = NodalVariableValue
+       nodeid = 10
+       variable = disp_y
+     [../]
+    [./disp_4]
+       type = NodalVariableValue
+       nodeid = 14
+       variable = disp_y
+     [../]
 []
 
 [Outputs]
+  output_initial = true
   exodus = true
+  csv = true
+  print_linear_residuals = true
+  print_perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    output_linear = true
+  [../]
 []

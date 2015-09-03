@@ -31,6 +31,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  const MaterialProperty<SymmTensor> & _stress_older;
   const MaterialProperty<SymmTensor> & _stress_old;
   const MaterialProperty<SymmTensor> & _stress;
   const MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;

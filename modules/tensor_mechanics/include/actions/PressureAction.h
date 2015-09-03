@@ -25,6 +25,7 @@ private:
   std::vector<bool> _has_save_in_vars;
 
   const Real _factor;
+  const Real _alpha;
   const std::string _postprocessor;
 
 protected:
