@@ -19,4 +19,9 @@
     input = 'multiphasestress.i'
     exodiff = 'multiphasestress_out.e'
   [../]
+  [./nonsplit_gradderiv]
+    type = 'Exodiff'
+    input = 'nonsplit_gradderiv.i'
+    exodiff = 'nonsplit_gradderiv_out.e'
+  [../]
 []
