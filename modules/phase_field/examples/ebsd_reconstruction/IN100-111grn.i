@@ -157,7 +157,6 @@
     type = Exodus
     file_base = IN100-111grn
     execute_on = 'initial timestep_end'
-    output_postprocessors_on = 'initial timestep_end'
   [../]
 []
 
