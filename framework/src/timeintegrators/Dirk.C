@@ -99,7 +99,7 @@ Dirk::solve() {
   _solution_start = _solution_old;
 
   // Compute first stage
-  _console << "Dirk: 1. stage" << std::endl;
+  _console << "Dirk: 1st stage\n";
   _stage = 1;
   _fe_problem.time() = time_stage1;
   _fe_problem.getNonlinearSystem().sys().solve();
@@ -107,7 +107,7 @@ Dirk::solve() {
   _fe_problem.initPetscOutput();
 
   // Compute second stage
-  _console << "Dirk: 2. stage" << std::endl;
+  _console << "Dirk: 2nd stage\n";
   _stage = 2;
   _fe_problem.timeOld() = time_stage1;
   _fe_problem.time()    = time;
@@ -121,7 +121,7 @@ Dirk::solve() {
   _fe_problem.initPetscOutput();
 
   // Compute update
-  _console << "Dirk: 3. stage" << std::endl;
+  _console << "Dirk: 3rd stage\n";
   _stage = 3;
 
 #ifdef LIBMESH_HAVE_PETSC
