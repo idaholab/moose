@@ -90,6 +90,29 @@ namespace RELAP7
     WBM_ORIGINAL = 1
   };
 
+  enum EFlowRegimeNames
+  {
+    FR_DISPERSEDBUBBLE,   ///< Weight of DispersedBubble Correlations  PreCHF
+    FR_CAPSLUG,           ///< Weight of TaylorCap / Slug Flow
+    FR_ANNULARMIST,       ///< Weight of Annular Mist Correlations PreCHF
+    FR_STRATIFIED,        ///< Weight of Horiz Stratified Flow Exp PreCHF
+    FR_INVERTEDANNULAR,   ///< Weight of Inverted Annular Flow Correlations PostCHF
+    FR_INVERTEDSLUG,      ///< Weight of InvertedSlug Flow Correlations PostCHF
+    FR_DISPERSED,         ///< Weight of Dispersed Flow Correlations PostCHF
+    FR_LEFTOVER           ///< Weight of original Pre Map correlations to be applied
+  };
+
+  enum EWallDragFlowRegimeNames
+  {
+    WDFR_BUBBLYSLUG,      ///< Weight of Bubbly/Slug Correlations PreCHF
+    WDFR_ANNULARMIST,     ///< Weight of Annular/Mist Correlations PreCHF
+    WDFR_STRATIFIED,      ///< Weight of Horiz Stratified Flow Exp PreCHF
+    WDFR_INVERTEDANNULAR, ///< Weight of Inverted Annular Flow Correlations PostCHF
+    WDFR_INVERTEDSLUG,    ///< Weight of InvertedSlug Flow Correlations PostCHF
+    WDFR_DISPERSED,       ///< Weight of Dispersed Flow Correlations PostCHF
+    WDFR_LEFTOVER         ///< Weight of original Pre Map correlations to be applied
+  };
+
   /**
    * Check valve type
    */
