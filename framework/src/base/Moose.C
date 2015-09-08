@@ -668,7 +668,7 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(CrankNicolson);
   registerTimeIntegrator(ExplicitEuler);
   registerTimeIntegrator(RungeKutta2);
-  registerTimeIntegrator(Dirk);
+  registerDeprecatedObjectName(Dirk, "Dirk", "09/22/2015 12:00");
   registerTimeIntegrator(LStableDirk2);
   // predictors
   registerPredictor(SimplePredictor);
