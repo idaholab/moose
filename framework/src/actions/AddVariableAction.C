@@ -83,7 +83,7 @@ void
 AddVariableAction::act()
 {
   // Get necessary data for creating a variable
-  std::string var_name = getShortName();
+  std::string var_name = name();
   addVariable(var_name);
 
   // Set the initial condition
@@ -95,7 +95,7 @@ void
 AddVariableAction::createInitialConditionAction()
 {
   // Variable name
-  std::string var_name = getShortName();
+  std::string var_name = name();
 
   // Create the object name
   std::string long_name("ICs/");
@@ -160,4 +160,3 @@ AddVariableAction::getSubdomainIDs()
   }
   return blocks;
 }
-

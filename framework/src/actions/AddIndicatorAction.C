@@ -31,4 +31,3 @@ AddIndicatorAction::act()
 {
   _problem->addIndicator(_type, _name, _moose_object_pars);
 }
-

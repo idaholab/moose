@@ -59,11 +59,11 @@ ConvDiffMetaAction::act()
   variable_params.set<ActionWarehouse *>("awh") = &_awh;
 
   // Create and Add First Variable Action
-  action = _action_factory.create("AddVariableAction", "Variables/" + variables[0], variable_params);
+  action = _action_factory.create("AddVariableAction", variables[0], variable_params);
   _awh.addActionBlock(action);
 
   // Create and Add Second Variable Action
-  action = _action_factory.create("AddVariableAction", "Variables/" + variables[1], variable_params);
+  action = _action_factory.create("AddVariableAction", variables[1], variable_params);
   _awh.addActionBlock(action);
 
   //*******************************************//
@@ -74,7 +74,7 @@ ConvDiffMetaAction::act()
 
   // Setup our Diffusion Kernel on the "u" variable
   action_params.set<std::string>("type") = "Diffusion";
-  action = _action_factory.create("AddKernelAction", "Kernels/diff_u", action_params);
+  action = _action_factory.create("AddKernelAction", "diff_u", action_params);
   moose_object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
   mooseAssert (moose_object_action.get(), "Dynamic Cast failed");
   {
@@ -85,7 +85,7 @@ ConvDiffMetaAction::act()
   }
 
   // Setup our Diffusion Kernel on the "v" variable
-  action = _action_factory.create("AddKernelAction", "Kernels/diff_v", action_params);
+  action = _action_factory.create("AddKernelAction", "diff_v", action_params);
 
   moose_object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
   mooseAssert (moose_object_action.get(), "Dynamic Cast failed");
@@ -99,7 +99,7 @@ ConvDiffMetaAction::act()
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   action_params.set<std::string>("type") = "Convection";
-  action = _action_factory.create("AddKernelAction", "Kernels/conv_u", action_params);
+  action = _action_factory.create("AddKernelAction", "conv_u", action_params);
   moose_object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
   mooseAssert (moose_object_action.get(), "Dynamic Cast failed");
   {

@@ -37,9 +37,14 @@ InputParameters validParams<Action>()
 Action::Action(InputParameters parameters) :
     ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _pars(parameters),
-    _name(getParam<std::string>("name")),
-    _short_name(MooseUtils::shortName(_name)),
     _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
+    _full_name(getParam<std::string>("name")),
+    // If the action was created via the Parser is will have a "registered_identifier" set that gives the input file syntax
+    // that generated the action. In this case, the name will contain this syntax (e.g., Kernels/object_name). The true object
+    // name is simply "object_name" in this case, thus the name is shortened. If this identifier is empty or set to "(AutoBuilt)"
+    // then just leave the name as in the "meta action" case.
+    _name( (_registered_identifier.empty() || _registered_identifier == "(AutoBuilt)")  ?
+           _full_name : MooseUtils::shortName(_full_name)),
     _action_type(getParam<std::string>("action_type")),
     _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _factory(_app.getFactory()),
@@ -52,16 +57,4 @@ Action::Action(InputParameters parameters) :
     _problem(_awh.problem()),
     _executioner(_app.executioner())
 {
-}
-
-std::string
-Action::getShortName() const
-{
-  return _short_name;
-}
-
-std::string
-Action::getBaseName() const
-{
-  return _name.substr(0, _name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') : 0);
 }

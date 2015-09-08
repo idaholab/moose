@@ -74,7 +74,7 @@ ContactAction::act()
   if (_disp_z != "")
     ++numdims;
 
-  std::string action_name = getShortName();
+  std::string action_name = MooseUtils::shortName(name());
 
   std::vector<NonlinearVariableName> vars;
   vars.push_back(_disp_x);
@@ -90,7 +90,7 @@ ContactAction::act()
       InputParameters params = _factory.getValidParams("MechanicalContactConstraint");
 
       // Extract global params
-      _app.parser().extractParams(_name, params);
+      _app.parser().extractParams(_full_name, params);
 
       // Create Constraint objects
       params.set<std::string>("model") = _model;
@@ -102,7 +102,7 @@ ContactAction::act()
       params.set<Real>("friction_coefficient") = _friction_coefficient;
       params.set<Real>("tension_release") = _tension_release;
       params.addRequiredCoupledVar("nodal_area", "The nodal area");
-      params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+action_name);
+      params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_" + name());
 
       if (isParamValid("tangential_tolerance"))
         params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
@@ -147,7 +147,7 @@ ContactAction::act()
         InputParameters params = _factory.getValidParams("ContactMaster");
 
         // Extract global params
-        _app.parser().extractParams(_name, params);
+        _app.parser().extractParams(_full_name, params);
 
         // Create master objects
         params.set<std::string>("model") = _model;
@@ -159,7 +159,7 @@ ContactAction::act()
         params.set<Real>("friction_coefficient") = _friction_coefficient;
         params.set<Real>("tension_release") = _tension_release;
         params.addRequiredCoupledVar("nodal_area", "The nodal area");
-        params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+action_name);
+        params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_" + name());
 
         if (isParamValid("tangential_tolerance"))
           params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
@@ -201,7 +201,7 @@ ContactAction::act()
         InputParameters params = _factory.getValidParams("SlaveConstraint");
 
         // Extract global params
-        _app.parser().extractParams(_name, params);
+        _app.parser().extractParams(_full_name, params);
 
         // Create slave objects
         params.set<std::string>("model") = _model;
@@ -212,7 +212,7 @@ ContactAction::act()
         params.set<Real>("penalty") = _penalty;
         params.set<Real>("friction_coefficient") = _friction_coefficient;
         params.addRequiredCoupledVar("nodal_area", "The nodal area");
-        params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+action_name);
+        params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_" +name());
         if (isParamValid("tangential_tolerance"))
           params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
 
@@ -251,4 +251,3 @@ ContactAction::act()
     }
   }
 }
-

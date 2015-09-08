@@ -325,7 +325,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
       _console << "[DBG][ACT] "
                << "TASK (" << COLOR_YELLOW << std::setw (24) << task << COLOR_DEFAULT << ") "
                << "TYPE (" << COLOR_YELLOW << std::setw (32) << (*act_iter)->type() << COLOR_DEFAULT << ") "
-               << "NAME (" << COLOR_YELLOW << std::setw (16) << (*act_iter)->getShortName() << COLOR_DEFAULT << ") ";
+               << "NAME (" << COLOR_YELLOW << std::setw (16) << (*act_iter)->name() << COLOR_DEFAULT << ") ";
 
       MemData mcount;
       mcount.start();
@@ -356,7 +356,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
        i != ordered_actions.end();
        ++i)
    {
-    std::string name ((*i)->name());
+    std::string name = (*i)->getParam<std::string>("name");
     const std::set<std::string> & tasks = ((*i)->getAllTasks());
     mooseAssert(!tasks.empty(), "Task list is empty");
 

@@ -30,7 +30,6 @@ public:
   virtual void act();
 
 protected:
-  std::string _problem_name;
   std::vector<SubdomainName> _blocks;
   MultiMooseEnum _coord_sys;
   bool _fe_cache;

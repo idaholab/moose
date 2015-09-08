@@ -1,0 +1,26 @@
+[Tests]
+  [./tokenize_error]
+    # Test that an invalid name errors
+    type = 'RunException'
+    input = 'tokenize_error.i'
+    expect_err = "The controlled parameter, 'Kernel/group/group/name', in test_control is not a controllable parameter."
+    match_literal = true
+  [../]
+
+  [./multiple_params_found]
+    # Test error message when single parameter is requested, but multiple exist
+    type = RunException
+    input = 'multiple_parameters_found.i'
+    expect_err = "The controlled parameter, 'coef', in func_control was found in multiple objects"
+    match_literal = true
+  [../]
+
+  [./no_param_found]
+    # Test that an invalid parameter name errors properly
+    type = 'RunException'
+    input = 'no_parameter_found.i'
+    expect_err = "The controlled parameter, 'unknown_param_name', in func_control was not found."
+    match_literal = true
+  [../]
+
+[]

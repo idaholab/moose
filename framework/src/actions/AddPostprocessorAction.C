@@ -33,4 +33,3 @@ AddPostprocessorAction::act()
 {
   _problem->addPostprocessor(_type, _name, _moose_object_pars);
 }
-

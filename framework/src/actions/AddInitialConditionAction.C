@@ -33,4 +33,3 @@ AddInitialConditionAction::act()
 {
   _problem->addInitialCondition(_type, _name, _moose_object_pars);
 }
-

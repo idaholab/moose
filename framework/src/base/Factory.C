@@ -62,11 +62,11 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   // Print out deprecated message, if it exists
   deprecatedMessage(obj_name);
 
-  // Check to make sure that all required parameters are supplied
-  parameters.checkParams(name);
-
   // Create the actual parameters object that the object will reference
   InputParameters & params = _app.getInputParameterWarehouse().addInputParameters(name, parameters, tid);
+
+  // Check to make sure that all required parameters are supplied
+  params.checkParams(name);
 
   // register type name as constructed
   _constructed_types.insert(obj_name);

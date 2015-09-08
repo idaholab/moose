@@ -95,7 +95,6 @@ BicrystalCircleGrainICAction::act()
     }
 
     //Add initial condition
-    _problem->addInitialCondition("SmoothCircleIC", "ICs/PolycrystalICs/BicrystalCircleGrainIC_" + Moose::stringify(op), poly_params);
+    _problem->addInitialCondition("SmoothCircleIC", "BicrystalCircleGrainIC_" + Moose::stringify(op), poly_params);
   }
 }
-
