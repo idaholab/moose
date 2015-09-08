@@ -67,11 +67,10 @@ InputParameters validParams<CommonOutputAction>()
   // Add special Console flags
   params.addParam<bool>("print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
   params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
+  params.addParam<bool>("print_linear_residuals", true, "Enable printing of linear residuals to the screen (Console)");
 
   // **** DEPRECATED SUPPORT ****
   Output::addDeprecatedInputParameters(params);
-  params.addDeprecatedParam("print_linear_residuals", true, "Enable printing of linear residuals to the screen (Console)",
-                            "Printing linear residuals is now enabled by default, to disable use the 'execute_on' parameter inside a Console block");
 
   params.addDeprecatedParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"),
                                             "Set to (none|initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment",

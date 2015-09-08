@@ -12,44 +12,45 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DIRK_H
-#define DIRK_H
+#ifndef LSTABLEDIRK2_H
+#define LSTABLEDIRK2_H
 
 #include "TimeIntegrator.h"
 
-class Dirk;
+class LStableDirk2;
 
 template<>
-InputParameters validParams<Dirk>();
+InputParameters validParams<LStableDirk2>();
 
 /**
  * Second order diagonally implicit Runge Kutta method (Dirk) with two stages.
  *
  * The Butcher tableau for this method is:
- * 1/3 | 1/3
- * 1   | 1/2 1/2
- * --------------
- *     | 3/4 1/4
+ * alpha | alpha
+ * 1     | 1-alpha alpha
+ * ---------------------
+ *       | 1-alpha alpha
  *
- * The stability function for this method is (the same as Crank-Nicolson):
- * R(z) = -(z + 2)/(z - 2)
+ * where alpha = 1 - sqrt(2)/2 ~ .29289
  *
- * The method is A-stable, but not L-stable:
- * lim R(z), z->oo = -1
+ * The stability function for this method is:
+ * R(z) = 4*(-z*(-sqrt(2) + 2) + z + 1) / (z**2*(-sqrt(2) + 2)**2 - 4*z*(-sqrt(2) + 2) + 4)
  *
- * Notes: This method has the same order of accuracy and stability
- * characteristics as the Crank-Nicolson method, but requires two
- * nonlinear solves (and is actually implemented with 3 nonlinear
- * solves for some reason) where Crank-Nicolson requires only one.
- * Therefore, it should generally be considered inferior to
- * Crank-Nicolson, and will likely be deprecated in MOOSE once better
- * methods become available.
+ * The method is L-stable:
+ * lim R(z), z->oo = 0
+ *
+ * Notes: This method is derived in detail in: R. Alexander,
+ * "Diagonally implicit Runge-Kutta Methods for Stiff ODEs", SIAM
+ * J. Numer. Anal., 14(6), Dec. 1977, pg. 1006-1021.  This method is
+ * more expensive than Crank-Nicolson, but has the advantage of being
+ * L-stable (the same type of stability as the implicit Euler method)
+ * so may be more suitable for "stiff" problems.
  */
-class Dirk : public TimeIntegrator
+class LStableDirk2 : public TimeIntegrator
 {
 public:
-  Dirk(const InputParameters & parameters);
-  virtual ~Dirk();
+  LStableDirk2(const InputParameters & parameters);
+  virtual ~LStableDirk2();
 
   virtual int order() { return 2; }
   virtual void computeTimeDerivatives();
@@ -58,11 +59,8 @@ public:
 
 protected:
 
-  //! Indicates stage or, if _stage==3, the update step.
+  //! Indicates the current stage (1 or 2).
   unsigned int _stage;
-
-  //! Order of the DIRK integrator. @note At the moment, only a second order DIRK is implemented
-  unsigned int _order;
 
   //! Buffer to store non-time residual from first stage solve.
   NumericVector<Number> & _residual_stage1;
@@ -72,7 +70,10 @@ protected:
 
   //! Buffer to store solution at beginning of time step
   NumericVector<Number> & _solution_start;
+
+  // The parameter of the method, set at construction time and cannot be changed.
+  const Real _alpha;
 };
 
 
-#endif /* DIRK_H */
+#endif /* LSTABLEDIRK2_H */

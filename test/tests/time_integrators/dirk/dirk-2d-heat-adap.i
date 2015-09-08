@@ -94,18 +94,20 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 
   start_time = 0.0
   num_steps  = 5
   dt         = 0.25
 
   [./TimeIntegrator]
-    type = Dirk
+    type = LStableDirk2
   [../]
 
   [./Adaptivity]
-    refine_fraction  = 0.2
-    coarsen_fraction = 0.3
+    refine_fraction  = 0.07
+    coarsen_fraction = 0.
     max_h_level      = 4
   [../]
 []
