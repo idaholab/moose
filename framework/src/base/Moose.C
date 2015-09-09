@@ -289,6 +289,7 @@
 #include "RungeKutta2.h"
 #include "Dirk.h"
 #include "LStableDirk2.h"
+#include "ImplicitMidpoint.h"
 //
 #include "SimplePredictor.h"
 #include "AdamsPredictor.h"
@@ -676,6 +677,7 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(RungeKutta2);
   registerDeprecatedObjectName(Dirk, "Dirk", "09/22/2015 12:00");
   registerTimeIntegrator(LStableDirk2);
+  registerTimeIntegrator(ImplicitMidpoint);
   // predictors
   registerPredictor(SimplePredictor);
   registerPredictor(AdamsPredictor);
