@@ -1,0 +1,1 @@
+This file is for testing that a readable file has the correct extension.

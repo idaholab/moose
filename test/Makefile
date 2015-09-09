@@ -11,9 +11,18 @@ MOOSE_DIR          ?= $(shell dirname `pwd`)
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 ###############################################################################
 
+
+
 # framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
+
+#ADDITIONAL_LIBS += "-L/opt/moose/miniconda/lib -lpython2.7"
+#ADDITIONAL_CPPFLAGS += -I/opt/moose/miniconda/include/python2.7
+
+ADDITIONAL_LIBS += "-lpython2.7"
+ADDITIONAL_CPPFLAGS += -I/usr/include/python2.7
+
 
 # dep apps
 APPLICATION_DIR    := $(MOOSE_DIR)/test

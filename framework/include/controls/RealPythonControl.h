@@ -12,32 +12,43 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef REALPYTHONCONTROL_H
+#define REALPYTHONCONTROL_H
+
 // MOOSE includes
-#include "RealFunctionControl.h"
-#include "Function.h"
+#include "PythonControlBase.h"
+
+// Forward declarations
+class RealPythonControl;
 
 template<>
-InputParameters validParams<RealFunctionControl>()
+InputParameters validParams<RealPythonControl>();
+
+/**
+ * Python control object for Real parameters
+ */
+class RealPythonControl : public PythonControlBase<Real>
 {
-  InputParameters params = validParams<Control>();
+public:
 
-  params.addRequiredParam<FunctionName>("function", "The function to use for controlling the specified parameter.");
-  params.addRequiredParam<std::string>("parameter", "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated");
+  /**
+   * Class constructor
+   * @param parameters Input parameters for this Control object
+   */
+  RealPythonControl(const InputParameters & parameters);
 
-  return params;
-}
+protected:
 
-RealFunctionControl::RealFunctionControl(const InputParameters & parameters) :
-    Control(parameters),
-    _function(getFunction("function")),
-    _parameters(getControllableParamVector<Real>("parameter"))
-{
-}
+  /**
+   * Build the Python argument tuple
+   */
+  PyObject* buildPythonArguments();
 
-void
-RealFunctionControl::execute()
-{
-  Real value = _function.value(_t, Point());
-  for (std::vector<Real *>::iterator it = _parameters.begin(); it != _parameters.end(); ++it)
-    (*(*it)) = value;
-}
+  /**
+   * Extract the result from Python
+   */
+  Real getPythonResult(PyObject * result);
+
+};
+
+#endif // PYTHONCONTROLBASE_H

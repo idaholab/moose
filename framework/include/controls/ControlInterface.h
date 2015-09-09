@@ -58,25 +58,25 @@ protected:
    * Obtain a writeable reference to a single parameter given a InputParameter name
    */
   template<typename T>
-  T & getControlParam(const std::string & name);
+  T & getControllableParam(const std::string & name);
 
   /**
    * Obtain a writeable reference to a single parameter given a specific name
    */
   template<typename T>
-  T & getControlParamByName(const std::string & name);
+  T & getControllableParamByName(const std::string & name);
 
   /**
    * Obtain pointers to all parameters given a InputParameter name
    */
   template<typename T>
-  std::vector<T*> getControlParamVector(const std::string & name);
+  std::vector<T*> getControllableParamVector(const std::string & name);
 
   /**
    * Obtain pointers to all parameters given a specific name
    */
   template<typename T>
-  std::vector<T*> getControlParamVectorByName(const std::string & name);
+  std::vector<T*> getControllableParamVectorByName(const std::string & name);
 
   /**
    * Destructor
@@ -135,14 +135,14 @@ private:
 
 template<typename T>
 T &
-ControlInterface::getControlParam(const std::string & name)
+ControlInterface::getControllableParam(const std::string & name)
 {
-  return getControlParamByName<T>(_ci_parameters.get<std::string>(name));
+  return getControllableParamByName<T>(_ci_parameters.get<std::string>(name));
 }
 
 template<typename T>
 T &
-ControlInterface::getControlParamByName(const std::string & name)
+ControlInterface::getControllableParamByName(const std::string & name)
 {
   // Get the InputParameter objects that contain objects
   ControlParameterName desired = tokenizeName(name);
@@ -165,14 +165,14 @@ ControlInterface::getControlParamByName(const std::string & name)
 
 template<typename T>
 std::vector<T*>
-ControlInterface::getControlParamVector(const std::string & name)
+ControlInterface::getControllableParamVector(const std::string & name)
 {
-  return getControlParamVectorByName<T>(_ci_parameters.get<std::string>(name));
+  return getControllableParamVectorByName<T>(_ci_parameters.get<std::string>(name));
 }
 
 template<typename T>
 std::vector<T*>
-ControlInterface::getControlParamVectorByName(const std::string & name)
+ControlInterface::getControllableParamVectorByName(const std::string & name)
 {
   // Get the InputParameter objects that contain objects
   ControlParameterName desired = tokenizeName(name);

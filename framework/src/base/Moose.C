@@ -396,6 +396,7 @@
 
 // Controls
 #include "RealFunctionControl.h"
+#include "RealPythonControl.h"
 
 namespace Moose {
 
@@ -724,6 +725,7 @@ registerObjects(Factory & factory)
 
   // Controls
   registerControl(RealFunctionControl);
+  registerControl(RealPythonControl);
 
   registered = true;
 }
