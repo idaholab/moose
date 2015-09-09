@@ -12,7 +12,7 @@ InputParameters validParams<StrainGradDispDerivatives>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Provide the constant derivatives of strain w.r.t. the displacement gradient components.");
-  params.addRequiredCoupledVar("displacement_gradients", "List of displacement gradient component variables");
+  params.addCoupledVar("displacement_gradients", "List of displacement gradient component variables");
   return params;
 }
 

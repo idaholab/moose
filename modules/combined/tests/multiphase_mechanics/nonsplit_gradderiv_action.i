@@ -12,6 +12,13 @@
   displacement_gradients = 'gxx gxy gyx gyy'
 []
 
+[Modules]
+  [./PhaseField]
+    [./DisplacementGradients]
+    [../]
+  [../]
+[]
+
 [AuxVariables]
   [./disp_x]
     [./InitialCondition]
@@ -33,15 +40,6 @@
     family = HERMITE
     initial_condition = 0
   [../]
-
-  [./gxx]
-  [../]
-  [./gxy]
-  [../]
-  [./gyx]
-  [../]
-  [./gyy]
-  [../]
 []
 
 [Kernels]
@@ -61,31 +59,6 @@
     mob_name = M
     kappa_name = kappa_c
   [../]
-
-  [./gxx]
-    type = GradientComponent
-    variable = gxx
-    v = disp_x
-    component = 0
-  [../]
-  [./gxy]
-    type = GradientComponent
-    variable = gxy
-    v = disp_x
-    component = 1
-  [../]
-  [./gyx]
-    type = GradientComponent
-    variable = gyx
-    v = disp_y
-    component = 0
-  [../]
-  [./gyy]
-    type = GradientComponent
-    variable = gyy
-    v = disp_y
-    component = 1
-  [../]
 []
 
 [BCs]
@@ -102,10 +75,6 @@
     block = 0
     prop_names  = 'M  kappa_c'
     prop_values = '1  0.1'
-  [../]
-  [./straingradderiv]
-    type = StrainGradDispDerivatives
-    block = 0
   [../]
 
   [./elasticity_tensor]
@@ -153,5 +122,6 @@
 
 [Outputs]
   print_perf_log = true
+  file_base = nonsplit_gradderiv_out
   exodus = true
 []
