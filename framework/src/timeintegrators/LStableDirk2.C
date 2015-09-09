@@ -30,7 +30,6 @@ LStableDirk2::LStableDirk2(const InputParameters & parameters) :
     _stage(1),
     _residual_stage1(_nl.addVector("residual_stage1", false, GHOSTED)),
     _residual_stage2(_nl.addVector("residual_stage2", false, GHOSTED)),
-    _solution_start(_sys.solutionOld()),
     _alpha(1. - 0.5*std::sqrt(2))
 {
 }
@@ -69,9 +68,6 @@ LStableDirk2::solve()
 
   // Time at stage 1
   Real time_stage1 = time_old + _alpha*_dt;
-
-  // Solution at beginning of time step; store it because it is needed in update step
-  _solution_start = _solution_old;
 
   // Compute first stage
   _console << "LStableDirk2: 1st stage\n";
@@ -147,5 +143,5 @@ LStableDirk2::postStep(NumericVector<Number> & residual)
     residual.close();
   }
   else
-    mooseError("LStableDirk2::computeTimeDerivatives(): Member variable _stage can only have values 1 or 2.");
+    mooseError("LStableDirk2::postStep(): Member variable _stage can only have values 1 or 2.");
 }
