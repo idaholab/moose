@@ -400,4 +400,3 @@ DiracKernel::updateCaches(const Elem* old_elem,
     points.push_back(std::make_pair(p, id));
   }
 }
-
