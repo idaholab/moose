@@ -113,6 +113,11 @@ namespace MooseUtils
   std::string shortName(const std::string & name);
 
   /**
+   * Return the current working directory
+   */
+  std::string getCurrentWorkingDir();
+
+  /**
    * This routine is a simple helper function for searching a map by values instead of keys
    */
   template<typename T1, typename T2>

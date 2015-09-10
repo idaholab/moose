@@ -32,10 +32,10 @@ TestControl::TestControl(const InputParameters & parameters) :
     _test_type(getParam<MooseEnum>("test_type"))
 {
   if (_test_type == "real")
-    getControlParam<Real>("parameter");
+    getControllableParam<Real>("parameter");
 
   else if (_test_type == "variable")
-    getControlParam<NonlinearVariableName>("parameter");
+    getControllableParam<NonlinearVariableName>("parameter");
 
   else if (_test_type != "point")
     mooseError("Unknown test type.");
@@ -45,7 +45,7 @@ void
 TestControl::execute()
 {
   Point new_pt(0.25, 0.25);
-  std::vector<Point *> pts = getControlParamVector<Point>("parameter");
+  std::vector<Point *> pts = getControllableParamVector<Point>("parameter");
   for (unsigned int i = 0; i < pts.size(); ++i)
     *pts[i] = new_pt;
 }

@@ -12,32 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
-#include "RealFunctionControl.h"
-#include "Function.h"
+#include "RealPythonControl.h"
 
 template<>
-InputParameters validParams<RealFunctionControl>()
+InputParameters validParams<RealPythonControl>()
 {
-  InputParameters params = validParams<Control>();
-
-  params.addRequiredParam<FunctionName>("function", "The function to use for controlling the specified parameter.");
-  params.addRequiredParam<std::string>("parameter", "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated");
-
+  InputParameters params = validParams<PythonControlBase<> >();
   return params;
 }
 
-RealFunctionControl::RealFunctionControl(const InputParameters & parameters) :
-    Control(parameters),
-    _function(getFunction("function")),
-    _parameters(getControllableParamVector<Real>("parameter"))
+RealPythonControl::RealPythonControl(const InputParameters & parameters) :
+    PythonControlBase(parameters)
 {
 }
 
-void
-RealFunctionControl::execute()
+PyObject*
+RealPythonControl::buildPythonArguments()
 {
-  Real value = _function.value(_t, Point());
-  for (std::vector<Real *>::iterator it = _parameters.begin(); it != _parameters.end(); ++it)
-    (*(*it)) = value;
+  /// Creates a tuple of three doubles (control paramter, time, postprocessor)
+  return Py_BuildValue("(ddd)", _parameter, _t, _monitor);
+}
+
+Real
+RealPythonControl::getPythonResult(PyObject * result)
+{
+  /// Converts the return value from python into a double
+  return PyFloat_AsDouble(result);
 }

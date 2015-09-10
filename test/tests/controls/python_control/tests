@@ -1,0 +1,44 @@
+[Tests]
+  [./file_error]
+    # Test for proper error when an invalid Python file is supplied
+    type = RunException
+    input = python_control_file_error.i
+    expect_err = "Unable to open file \"not_a_valid_name.py\". Check to make sure that it exists and that you have read permission."
+    match_literal = true
+  [../]
+
+  [./ext_error]
+    # Test for proper error when a readable file is given, but it does not have *.py file
+    type = RunException
+    input = python_control_ext_error.i
+    expect_err = "The file, \"bad_extension_test.txt\", must have a \*\.py extension."
+  [../]
+
+  [./default]
+    # Test that the default function is called
+    type = RunApp
+    input = python_control_default.i
+    expect_out = "Hello from Python"
+  [../]
+
+  [./time_function]
+    # Tests that control parameter and time are able to modify a parameter
+    type = CSVDiff
+    input = python_control_time_function.i
+    csvdiff = python_control_time_function_out.csv
+  [../]
+
+  [./pp_function]
+    # Test that control parameter may be modified by a postprocessors value
+    type = CSVDiff
+    input = python_control_pp_function.i
+    csvdiff = python_control_pp_function_out.csv
+  [../]
+
+  [./non_default_module]
+    # Test that the python filename may be changed
+    type = CSVDiff
+    input = python_control_non_default_module.i
+    csvdiff = python_control_non_default_module_out.csv
+  [../]
+[]

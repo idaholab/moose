@@ -13,31 +13,18 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "RealFunctionControl.h"
+#include "PythonControlBase.h"
 #include "Function.h"
 
 template<>
-InputParameters validParams<RealFunctionControl>()
+InputParameters validParams<PythonControlBase<> >()
 {
   InputParameters params = validParams<Control>();
+  params.addParam<std::string>("python_function", "function", "The name of the function, within the given file, to be executed.");
+  params.addParam<FileName>("python_module", "control.py", "The python file (.py) that contains the python function to execute.");
+  params.addParam<PostprocessorName>("monitor", 0.0, "A postprocessor to pass to the function for monitoring the simulation.");
 
-  params.addRequiredParam<FunctionName>("function", "The function to use for controlling the specified parameter.");
   params.addRequiredParam<std::string>("parameter", "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated");
 
   return params;
-}
-
-RealFunctionControl::RealFunctionControl(const InputParameters & parameters) :
-    Control(parameters),
-    _function(getFunction("function")),
-    _parameters(getControllableParamVector<Real>("parameter"))
-{
-}
-
-void
-RealFunctionControl::execute()
-{
-  Real value = _function.value(_t, Point());
-  for (std::vector<Real *>::iterator it = _parameters.begin(); it != _parameters.end(); ++it)
-    (*(*it)) = value;
 }

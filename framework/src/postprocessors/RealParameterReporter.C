@@ -35,7 +35,7 @@ RealParameterReporter::RealParameterReporter(const InputParameters & parameters)
 void
 RealParameterReporter::initialSetup()
 {
-  _parameter = &getControlParam<Real>("parameter");
+  _parameter = &getControllableParam<Real>("parameter");
 }
 
 Real
