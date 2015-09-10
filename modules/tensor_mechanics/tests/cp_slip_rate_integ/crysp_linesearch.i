@@ -43,7 +43,7 @@
 [Functions]
   [./tdisp]
     type = ParsedFunction
-    value = 0.01*t
+    value = 0.0001*t
   [../]
 []
 
@@ -122,29 +122,26 @@
 [Materials]
   active = 'crysp'
   [./crysp]
-    type = FiniteStrainCrystalPlasticity
+    type = FiniteStrainCPSlipRateRes
     block = 0
     disp_y = uy
     disp_x = ux
-    rtol = 1e-6
-    abs_tol = 1e-8
-    gtol = 1e-2
     slip_sys_file_name = input_slip_sys.txt
     disp_z = uz
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     nss = 12
     num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
-    flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
+    flowprops = '1 4 0.001 0.01 5 8 0.001 0.01 9 12 0.001 0.01'
     hprops = '1.0 541.5 60.8 109.8 2.5'
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
     fill_method = symmetric9
     tan_mod_type = exact
+    slip_incr_tol = 1
+    maximum_substep_iteration = 12
     use_line_search = true
-    min_line_search_step_size = 0.01
-#    use_line_search = true
-#    line_search_tol = 1.0e-2
-#    line_search_maxiter = 100
-
+    rtol = 1e-8
+    abs_tol = 1e-12
+    line_search_method = 'BISECTION'
   [../]
   [./elastic]
     type = FiniteStrainElasticMaterial
@@ -189,7 +186,7 @@
 
 [Executioner]
   type = Transient
-  dt = 0.025
+  dt = 10
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -198,17 +195,17 @@
   petsc_options_value = boomerang
   nl_abs_tol = 1e-10
   nl_rel_step_tol = 1e-10
-  dtmax = 10.0
+  dtmax = 1e4
   nl_rel_tol = 1e-10
   ss_check_tol = 1e-10
-  end_time = 1
-  dtmin = 0.02
+  end_time = 1e4
+  dtmin = 0.05
   num_steps = 10
   nl_abs_step_tol = 1e-10
 []
 
 [Outputs]
-  file_base = crysp_lsearch_out
+  file_base = crysp_linesearch_out
   output_initial = true
   exodus = true
   print_linear_residuals = true

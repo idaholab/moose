@@ -41,6 +41,10 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   params.addParam<unsigned int>("maximum_substep_iteration", 1, "Maximum number of substep iteration");
   params.addParam<bool>("use_line_search", false, "Use line search in constitutive update");
   params.addParam<Real>("min_line_search_step_size", 0.01, "Minimum line search step size");
+  params.addParam<Real>("line_search_tol",0.5,"Line search bisection method tolerance");
+  params.addParam<unsigned int>("line_search_maxiter",20,"Line search bisection method maximum number of iteration");
+  MooseEnum line_search_method("CUT_HALF BISECTION","CUT_HALF");
+  params.addParam<MooseEnum>("line_search_method",line_search_method,"The method used in line search");
 
   return params;
 }
@@ -74,6 +78,9 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _max_substep_iter(getParam<unsigned int>("maximum_substep_iteration")),
     _use_line_search(getParam<bool>("use_line_search")),
     _min_lsrch_step(getParam<Real>("min_line_search_step_size")),
+    _lsrch_tol(getParam<Real>("line_search_tol")),
+    _lsrch_max_iter(getParam<unsigned int>("line_search_maxiter")),
+    _lsrch_method(getParam<MooseEnum>("line_search_method")),
     _fp(declareProperty<RankTwoTensor>("fp")), // Plastic deformation gradient
     _fp_old(declarePropertyOld<RankTwoTensor>("fp")), // Plastic deformation gradient of previous increment
     _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress
@@ -107,6 +114,10 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
   _no.resize(_nss*LIBMESH_DIM);
 
   _s0.resize(_nss);
+
+  _dgss_dsliprate.resize(_nss);
+  for (unsigned int i = 0;i < _nss; ++i)
+    _dgss_dsliprate[i].resize(_nss,0.0);
 
   if (_num_slip_sys_props > 0)
     _slip_sys_props.resize(_nss * _num_slip_sys_props);
@@ -699,6 +710,7 @@ FiniteStrainCrystalPlasticity::preSolveStress()
     _pk2_tmp = _pk2_old[_qp];
     _fp_old_inv = _fp_old[_qp].inverse();
     _fp_inv = _fp_old_inv;
+    _fp_prev_inv = _fp_inv; 
   }
   else
   {
@@ -711,6 +723,7 @@ FiniteStrainCrystalPlasticity::preSolveStress()
       _pk2_tmp = _pk2_tmp_old;
 
     _fp_inv = _fp_old_inv;
+    _fp_prev_inv = _fp_inv;
   }
 }
 
@@ -738,8 +751,9 @@ FiniteStrainCrystalPlasticity::solveStress()
   {
     dpk2 = - jac.invSymm() * resid; // Calculate stress increment
     _pk2_tmp = _pk2_tmp + dpk2; // Update stress
+    calcResidual(resid); 
+    internal_variable_update_NRiteration(); //update _fe_prev_inv
 
-    calc_resid_jacob(resid, jac); // Calculate stress residual
     if (_err_tol)
     {
 #ifdef DEBUG
@@ -751,7 +765,7 @@ FiniteStrainCrystalPlasticity::solveStress()
     rnorm_prev = rnorm;
     rnorm = resid.L2norm();
 
-    if (_use_line_search && rnorm > rnorm_prev && !line_search_update(rnorm_prev, dpk2))
+    if (_use_line_search && rnorm > rnorm_prev && !line_search_update(rnorm_prev,dpk2))
     {
 #ifdef DEBUG
       mooseWarning("FiniteStrainCrystalPLasticity: Failed with line search");
@@ -760,9 +774,14 @@ FiniteStrainCrystalPlasticity::solveStress()
       return;
     }
 
+    calc_resid_jacob(resid, jac); // Calculate stress residual
+    
+    if(_use_line_search)
+      rnorm = resid.L2norm();
+
     iter++;
   }
-
+  
   if (iter >= _maxiter)
   {
 #ifdef DEBUG
@@ -815,7 +834,7 @@ FiniteStrainCrystalPlasticity::updateGss()
   Real a = _hprops[4]; // Kalidindi
 
   _accslip_tmp = _accslip_tmp_old;
-  for (unsigned int i=0; i < _nss; ++i)
+  for (unsigned int i=0; i < _nss; ++i) 
     _accslip_tmp += std::abs(_slip_incr[i]);
 
   // Real val = std::cosh(_h0 * _accslip_tmp / (_tau_sat - _tau_init)); // Karthik
@@ -843,7 +862,8 @@ FiniteStrainCrystalPlasticity::updateGss()
       else
         qab = _r;
 
-      _gss_tmp[i] += qab * hb[j] * std::abs(_slip_incr[j]);
+      _gss_tmp[i] += qab * hb[j] * std::abs(_slip_incr[j]);//WJ
+      _dgss_dsliprate[i][j] = qab * hb[j] * copysign(1.0,_slip_incr[j]) * _dt;
     }
   }
 }
@@ -866,7 +886,7 @@ FiniteStrainCrystalPlasticity::calcResidual( RankTwoTensor &resid )
   iden.zero();
   iden.addIa(1.0);
 
-  _fe = _dfgrd_tmp * _fp_inv;
+  _fe = _dfgrd_tmp * _fp_prev_inv; // _fp_inv  ==> _fp_prev_inv
 
   ce = _fe.transpose() * _fe;
   ce_pk2 = ce * _pk2_tmp;
@@ -1099,24 +1119,83 @@ FiniteStrainCrystalPlasticity::elasticTangentModuli()
 bool
 FiniteStrainCrystalPlasticity::line_search_update(const Real rnorm_prev, const RankTwoTensor dpk2)
 {
-  Real rnorm;
-  RankTwoTensor resid;
-  Real step = 1.0;
+  if(_lsrch_method == "CUT_HALF"){
+    Real rnorm;
+    RankTwoTensor resid;
+    Real step = 1.0;
 
-  do
-  {
-    _pk2_tmp = _pk2_tmp - step * dpk2;
-    step /= 2.0;
-    _pk2_tmp = _pk2_tmp + step * dpk2;
+    do
+    {
+      _pk2_tmp = _pk2_tmp - step * dpk2;
+      step /= 2.0;
+      _pk2_tmp = _pk2_tmp + step * dpk2;
+ 
+      calcResidual(resid);
+      rnorm = resid.L2norm();
+    }
+    while (rnorm > rnorm_prev && step > _min_lsrch_step);
 
-    calcResidual(resid);
-    rnorm = resid.L2norm();
+    std::cout << "rnorm = " << rnorm << std::endl;
+
+    if (rnorm > rnorm_prev && step <= _min_lsrch_step)
+      return false;
+
+    return true;
   }
-  while (rnorm > rnorm_prev && step > _min_lsrch_step);
+  else if(_lsrch_method == "BISECTION"){
+    RankTwoTensor resid;
+    calcResidual(resid);
+    Real s_b = resid.doubleContraction(dpk2);
+    Real rnorm1 = resid.L2norm();
+    _pk2_tmp = _pk2_tmp - dpk2; 
+    calcResidual(resid);
+    Real s_a = resid.doubleContraction(dpk2);
+    Real rnorm0 = resid.L2norm();
+    unsigned int count = 0;
+    Real step_a = 0.0;
+    Real step_b = 1.0;
+    Real step = 1.0;
+    Real s_m = 1000.0;
+    Real rnorm = 1000.0;
+    _pk2_tmp = _pk2_tmp + dpk2;
 
-  if (rnorm > rnorm_prev && step <= _min_lsrch_step)
+    if( (rnorm1/rnorm0)<_lsrch_tol || s_a*s_b > 0){
+      calcResidual(resid);
+      return true;
+    }
+    
+    while((rnorm/rnorm0)>_lsrch_tol && count < _lsrch_max_iter)
+    {
+      _pk2_tmp = _pk2_tmp - step*dpk2;
+      step = 0.5 * (step_b + step_a);
+      _pk2_tmp = _pk2_tmp + step*dpk2;
+      calcResidual(resid);
+      s_m = resid.doubleContraction(dpk2);
+      rnorm = resid.L2norm();
+
+     if(s_m*s_a < 0.0){
+       step_b = step;
+       s_b = s_m;
+     }
+     if(s_m*s_b < 0.0){
+       step_a = step;
+       s_a = s_m;
+     }
+     count++;
+    }
+
+    if((rnorm/rnorm0)<_lsrch_tol && count<_lsrch_max_iter)
+      return true;
+
     return false;
-
-  return true;
+  }
+  else{
+    mooseError("Line search meothod is not provided.");
+    return false;
+  }
 }
-
+void
+FiniteStrainCrystalPlasticity::internal_variable_update_NRiteration()
+{
+  _fp_prev_inv = _fp_inv; // update _fp_prev_inv
+}
