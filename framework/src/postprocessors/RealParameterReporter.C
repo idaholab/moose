@@ -11,46 +11,35 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "FunctionValuePostprocessor.h"
-#include "Function.h"
+
+#include "RealParameterReporter.h"
+#include "SubProblem.h"
 
 template<>
-InputParameters validParams<FunctionValuePostprocessor>()
+InputParameters validParams<RealParameterReporter>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<FunctionName>("function", "The function which supplies the postprocessor value.");
-  params.addParam<Point>("point", Point(), "A point in space to be given to the function Default: (0, 0, 0)");
-  params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
+  params += validParams<ControlInterface>();
 
-  params.declareControllable("point scale_factor");
+  params.addRequiredParam<std::string>("parameter", "The input parameter to control.");
 
   return params;
 }
 
-FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & parameters) :
+RealParameterReporter::RealParameterReporter(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _function(getFunction("function")),
-    _point(getParam<Point>("point")),
-    _scale_factor(getParam<Real>("scale_factor"))
-{
-}
-
-FunctionValuePostprocessor::~FunctionValuePostprocessor()
+    ControlInterface(parameters)
 {
 }
 
 void
-FunctionValuePostprocessor::initialize()
+RealParameterReporter::initialSetup()
 {
+  _parameter = &getControlParam<Real>("parameter");
 }
 
-void
-FunctionValuePostprocessor::execute()
+Real
+RealParameterReporter::getValue()
 {
-}
-
-PostprocessorValue
-FunctionValuePostprocessor::getValue()
-{
-  return _scale_factor * _function.value(_t, _point);
+  return *_parameter;
 }

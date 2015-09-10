@@ -12,38 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MaterialPointSource.h"
+// MOOSE includes
+#include "RealFunctionControl.h"
+#include "Function.h"
 
 template<>
-InputParameters validParams<MaterialPointSource>()
+InputParameters validParams<RealFunctionControl>()
 {
-  InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<Point>("point", "The x,y,z coordinates of the point");
-  params.declareControllable("point");
+  InputParameters params = validParams<Control>();
+
+  params.addRequiredParam<FunctionName>("function", "The function to use for controlling the specified parameter.");
+  params.addRequiredParam<std::string>("parameter", "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated");
+
   return params;
 }
 
-MaterialPointSource::MaterialPointSource(const InputParameters & parameters) :
-    DiracKernel(parameters),
-    _p(getParam<Point>("point")),
-    _value(getMaterialProperty<Real>("matp"))
+RealFunctionControl::RealFunctionControl(const InputParameters & parameters) :
+    Control(parameters),
+    _function(getFunction("function")),
+    _parameters(getControlParamVector<Real>("parameter"))
 {
 }
 
 void
-MaterialPointSource::addPoints()
+RealFunctionControl::execute()
 {
-  addPoint(_p);
-}
-
-Real
-MaterialPointSource::computeQpResidual()
-{
-  // These values should match... this shows the problem
-  // Moose::out << "_value[_qp]=" << _value[_qp] << std::endl;
-  // Moose::out << "_q_point[_qp](0)=" << _q_point[_qp](0) << std::endl;
-
-  // This is negative because it's a forcing function that has been
-  // brought over to the left side.
-  return -_test[_i][_qp]*_value[_qp];
+  Real value = _function.value(_t, Point());
+  for (std::vector<Real *>::iterator it = _parameters.begin(); it != _parameters.end(); ++it)
+    (*(*it)) = value;
 }

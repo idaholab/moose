@@ -12,38 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MaterialPointSource.h"
+#include "AddControlAction.h"
 
 template<>
-InputParameters validParams<MaterialPointSource>()
+InputParameters validParams<AddControlAction>()
 {
-  InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<Point>("point", "The x,y,z coordinates of the point");
-  params.declareControllable("point");
+  InputParameters params = validParams<AddUserObjectAction>();
   return params;
 }
 
-MaterialPointSource::MaterialPointSource(const InputParameters & parameters) :
-    DiracKernel(parameters),
-    _p(getParam<Point>("point")),
-    _value(getMaterialProperty<Real>("matp"))
+AddControlAction::AddControlAction(InputParameters params) :
+  AddUserObjectAction(params)
 {
-}
-
-void
-MaterialPointSource::addPoints()
-{
-  addPoint(_p);
-}
-
-Real
-MaterialPointSource::computeQpResidual()
-{
-  // These values should match... this shows the problem
-  // Moose::out << "_value[_qp]=" << _value[_qp] << std::endl;
-  // Moose::out << "_q_point[_qp](0)=" << _q_point[_qp](0) << std::endl;
-
-  // This is negative because it's a forcing function that has been
-  // brought over to the left side.
-  return -_test[_i][_qp]*_value[_qp];
 }
