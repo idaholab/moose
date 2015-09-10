@@ -108,6 +108,16 @@ public:
   void get_frag_faces(const Elem* elem, std::vector<std::vector<Point> > &frag_faces,
                       bool displaced_mesh = false) const;
 
+  /**
+   * Set and get xfem cut data and type
+   */
+  std::vector<Real>& get_xfem_cut_data();
+  void set_xfem_cut_data(std::vector<Real> &cut_data);
+  std::string & get_xfem_cut_type();
+  void set_xfem_cut_type(std::string & cut_type);
+  std::string & get_xfem_qrule();
+  void set_xfem_qrule(std::string & xfem_qrule);
+
 private:
 
   void get_frag_edges(const Elem* elem, EFAelement2D* CEMElem,
@@ -117,6 +127,14 @@ private:
 
 private:
   std::vector<MaterialData *> & _material_data;
+
+  /**
+   * XFEM cut type and data
+   */
+  std::vector<Real> _XFEM_cut_data;
+  std::string _XFEM_cut_type;
+ 
+  std::string _XFEM_qrule;
 
   /**
    * Reference to the mesh.

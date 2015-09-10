@@ -28,6 +28,8 @@ CutPlaneAction::~CutPlaneAction()
 void
 CutPlaneAction::act()
 {
+  return; //WJ
+
   if (_current_task == "add_aux_variable")
   {
     _problem->addAuxVariable("xfem_cut_origin_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));

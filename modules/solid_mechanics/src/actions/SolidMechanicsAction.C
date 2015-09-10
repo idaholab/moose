@@ -36,7 +36,7 @@ InputParameters validParams<SolidMechanicsAction>()
   params.addParam<std::vector<AuxVariableName> >("diag_save_in_disp_y", "Auxiliary variables to save the y displacement diagonal preconditioner terms.");
   params.addParam<std::vector<AuxVariableName> >("diag_save_in_disp_z", "Auxiliary variables to save the z displacement diagonal preconditioner terms.");
   params.addParam<std::vector<AuxVariableName> >("diag_save_in_disp_r", "Auxiliary variables to save the r displacement diagonal preconditioner terms.");
-  params.addParam<std::string>("xfem_qrule", "volfrac", "XFEM quadrature rule to use");
+  //params.addParam<std::string>("xfem_qrule", "volfrac", "XFEM quadrature rule to use");
   return params;
 }
 
@@ -219,7 +219,7 @@ SolidMechanicsAction::act()
       params.set<std::vector<AuxVariableName> >("diag_save_in") = diag_save_in[i];
       params.set<Real>("zeta") = _zeta;
       params.set<Real>("alpha") = _alpha;
-      params.set<std::string>("xfem_qrule") = getParam<std::string>("xfem_qrule");
+      //params.set<std::string>("xfem_qrule") = getParam<std::string>("xfem_qrule");
 
       _problem->addKernel(type, name.str(), params);
     }

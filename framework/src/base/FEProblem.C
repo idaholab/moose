@@ -137,7 +137,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _adaptivity(*this),
 #endif
     _xfem(_material_data, &_mesh.getMesh()),
-    _XFEM_cut_type(getParam<std::string>("XFEM_cut_type")),
     _displaced_mesh(NULL),
     _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),
@@ -220,7 +219,14 @@ FEProblem::FEProblem(const InputParameters & parameters) :
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
 
+  /*
+  std::vector<Real> cut_data = parameters.get<std::vector<Real> >("XFEM_cuts");
+  std::string cut_type = parameters.get<std::string>("XFEM_cut_type");
+  _xfem.set_xfem_cut_type(cut_type);
+  _xfem.set_xfem_cut_data(cut_data);
+
   addXFEMGeometricCuts(parameters);
+  */
 }
 
 FEProblem::~FEProblem()
@@ -258,6 +264,10 @@ void
 FEProblem::addXFEMGeometricCuts(InputParameters parameters)
 {
   std::vector<Real> cut_data = parameters.get<std::vector<Real> >("XFEM_cuts");
+
+  _XFEM_cut_type = _xfem.get_xfem_cut_type();
+  std::cout << "XFEM_cut type is " << _XFEM_cut_type << std::endl;
+
   if (_XFEM_cut_type == "line_segment_2d")
   {
     if (cut_data.size() % 6 != 0)
@@ -746,8 +756,41 @@ FEProblem::getMaxScalarOrder() const
 
 void
 FEProblem::prepare(const Elem * elem, THREAD_ID tid)
-{
-  _assembly[tid]->reinit(elem);
+{ 
+  
+   _assembly[tid]->reinit(elem);
+
+   const Elem * undisplaced_elem  = NULL;
+  //if (getParam<bool>("use_displaced_mesh") && this->getDisplacedProblem() != NULL)
+  if(this->getDisplacedProblem()!=NULL)
+  {
+    //DisplacedProblem & displaced_problem = dynamic_cast< DisplacedProblem & >(_subproblem);
+    DisplacedProblem * & displaced_problem = this->getDisplacedProblem();
+    undisplaced_elem = displaced_problem->refMesh().elem(elem->id());
+  } 
+  else
+    undisplaced_elem = elem;
+
+  std::string xfem_qrule = _xfem.get_xfem_qrule();
+  std::vector<Real> xfem_weights;
+  xfem_weights.resize((_assembly[tid]->qRule())->n_points(), 1.0);
+
+  for (unsigned qp = 0; qp < (_assembly[tid]->qRule())->n_points(); qp++)
+  {
+    if (xfem_qrule == "volfrac")
+      xfem_weights[qp] = _xfem.get_elem_phys_volfrac(undisplaced_elem);
+    else if (xfem_qrule == "moment_fitting"){
+      std::vector<Point> gauss_points = (_assembly[tid]->qRule())->get_points();
+      std::vector<Real>  gauss_weights = (_assembly[tid]->qRule())->get_weights();
+      xfem_weights[qp] = _xfem.get_elem_new_weights(undisplaced_elem, qp, gauss_points, gauss_weights);
+    }
+    else if (xfem_qrule == "direct") // remove q-points outside the elem real domain by force
+      xfem_weights[qp] = _xfem.flag_qp_inside(undisplaced_elem, (_assembly[tid]->qPoints())[qp]);
+    else
+      mooseError("unrecognized XFEM qrule option!");
+  }
+
+  _assembly[tid]->updateXFEMWeights(xfem_weights,elem);
 
   _nl.prepare(tid);
   _aux.prepare(tid);
@@ -1351,6 +1394,10 @@ FEProblem::addKernel(const std::string & kernel_name, const std::string & name, 
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
+
+  std::string xfem_qrule = _xfem.get_xfem_qrule();
+  parameters.set<std::string>("xfem_qrule") = xfem_qrule;
+
   _nl.addKernel(kernel_name, name, parameters);
 }
 

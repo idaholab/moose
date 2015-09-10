@@ -1051,3 +1051,39 @@ XFEM::get_frag_faces(const Elem* elem, EFAelement3D* CEMElem, std::vector<std::v
     } // i
   }
 }
+
+std::vector<Real>& 
+XFEM::get_xfem_cut_data()
+{
+  return _XFEM_cut_data;
+}
+  
+void 
+XFEM::set_xfem_cut_data(std::vector<Real> &cut_data)
+{
+  _XFEM_cut_data = cut_data;
+}
+
+std::string & 
+XFEM::get_xfem_cut_type()
+{
+  return _XFEM_cut_type;
+}
+
+void 
+XFEM::set_xfem_cut_type(std::string & cut_type)
+{
+  _XFEM_cut_type = cut_type;
+}
+
+std::string & 
+XFEM::get_xfem_qrule()
+{
+  return _XFEM_qrule;
+}
+
+void
+XFEM::set_xfem_qrule(std::string & xfem_qrule)
+{
+  _XFEM_qrule = xfem_qrule;
+}

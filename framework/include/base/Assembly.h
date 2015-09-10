@@ -25,6 +25,8 @@
 #include "libmesh/fe_base.h"
 #include "libmesh/enum_quadrature_type.h"
 
+//#include "XFEM.h"
+
 // MOOSE Forward Declares
 class MooseMesh;
 class ArbitraryQuadrature;
@@ -115,7 +117,7 @@ public:
    * Returns the reference to the transformed jacobian weights
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxW() { return _current_JxW; }
+  const MooseArray<Real> & JxW(){ return _current_JxW; }
 
   /**
    * Returns the reference to the coordinate transformation coefficients
@@ -461,6 +463,11 @@ public:
    */
   void addCachedJacobianContributions(SparseMatrix<Number> & jacobian);
 
+  /**
+  * Set  XFEM integration weights
+  */
+  void updateXFEMWeights(std::vector<Real> & xfem_weights, const Elem* elem);
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -539,6 +546,10 @@ protected:
   MooseArray<Point> _current_q_points;
   /// The current list of transformed jacobian weights
   MooseArray<Real> _current_JxW;
+  /// The XFEM integration weights
+  MooseArray<Real> _current_xfem_weights;
+  /// XFEM weights update flag
+  std::map<dof_id_type,bool> _xfem_weights_have_been_updated;
   /// The coordinate system
   Moose::CoordinateSystemType _coord_type;
   /// The current coordinate transformation coefficients

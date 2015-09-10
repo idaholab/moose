@@ -21,20 +21,21 @@ template<>
 InputParameters validParams<ElementIntegralPostprocessor>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
-  params.addParam<std::string>("xfem_qrule", "volfrac", "The type of XFEM quadrature rule"); // WJ
+  //params.addParam<std::string>("xfem_qrule", "volfrac", "The type of XFEM quadrature rule"); // WJ
   return params;
 }
 
 ElementIntegralPostprocessor::ElementIntegralPostprocessor(const InputParameters & parameters) :
     ElementPostprocessor(parameters),
     _qp(0),
-    _integral_value(0),
-    _xfem_qrule(getParam<std::string>("xfem_qrule")) //WJ
+    _integral_value(0)
+    //_xfem_qrule(getParam<std::string>("xfem_qrule")) //WJ
 {
   FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);// ZZY
   if (fe_problem == NULL)
     mooseError("Problem casting _subproblem to FEProblem in ElementVectorL2Error");
   _xfem = fe_problem->get_xfem();
+  _xfem_qrule = _xfem->get_xfem_qrule();
 }
 
 void

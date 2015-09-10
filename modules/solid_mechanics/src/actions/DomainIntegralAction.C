@@ -45,7 +45,7 @@ InputParameters validParams<DomainIntegralAction>()
   MooseEnum q_function_type("Geometry Topology","Geometry");
   params.addParam<MooseEnum>("q_function_type",q_function_type,"The method used to define the integration domain. Options are: "+q_function_type.getRawNames());
   params.addParam<bool>("equivalent_k",false,"Calculate an equivalent K from KI, KII and KIII, assuming self-similar crack growth.");
-  params.addParam<std::string>("xfem_qrule", "volfrac", "XFEM quadrature rule to use");
+  //params.addParam<std::string>("xfem_qrule", "volfrac", "XFEM quadrature rule to use");
   return params;
 }
 
@@ -330,7 +330,7 @@ DomainIntegralAction::act()
       params.set<MultiMooseEnum>("execute_on") = "timestep_end";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("convert_J_to_K") = _convert_J_to_K;
-      params.set<std::string>("xfem_qrule") = getParam<std::string>("xfem_qrule"); // WJ
+      //params.set<std::string>("xfem_qrule") = getParam<std::string>("xfem_qrule"); // WJ
       if (_convert_J_to_K)
       {
         params.set<Real>("youngs_modulus") = _youngs_modulus;
