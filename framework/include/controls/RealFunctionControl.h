@@ -54,7 +54,6 @@ public:
    */
   virtual void initialize(){}
   virtual void finalize(){}
-  virtual void threadJoin(const UserObject & /*uo*/){}
   ///@}
 
 private:

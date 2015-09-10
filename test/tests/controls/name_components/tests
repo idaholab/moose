@@ -4,6 +4,7 @@
     type = Exodiff
     input = system_group_param.i
     exodiff = system_group_param_out.e
+    max_threads = 1
   [../]
 
   [./system_group_param_asterisk]
@@ -13,6 +14,7 @@
     exodiff = system_group_param_out.e
     cli_args = 'Controls/point_control/parameter=*/*/point'
     prereq = 'system_group_param'
+    max_threads = 1
   [../]
 
   [./group_param]
@@ -20,6 +22,7 @@
     type = Exodiff
     input = group_param.i
     exodiff = group_param_out.e
+    max_threads = 1
   [../]
 
   [./param]
@@ -27,6 +30,7 @@
     type = Exodiff
     input = param.i
     exodiff = param_out.e
+    max_threads = 1
   [../]
 
   [./system_param]
@@ -34,5 +38,6 @@
     type = Exodiff
     input = system_param.i
     exodiff = system_param_out.e
+    max_threads = 1
   [../]
 []

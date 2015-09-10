@@ -31,39 +31,48 @@ ControlInterface::ControlInterface(const InputParameters & parameters) :
     _tid(parameters.get<THREAD_ID>("_tid")),
     _ci_name(parameters.get<std::string>("name"))
 {
+  if (libMesh::n_threads() > 1)
+    mooseError("The control logic system is experimental and under heavy development, it currently does not work with threading.");
 }
 
-std::deque<std::string>
+ControlParameterName
 ControlInterface::tokenizeName(const std::string & name)
 {
+  ControlParameterName output;
+
   // Strip the parameter name into components
   std::vector<std::string> components;
   MooseUtils::tokenize(name, components);
 
-  // Convert to deque so we can push_front
-  std::deque<std::string> output(components.begin(), components.end());
-
   // Separate the components into variables for testing against
   // [System]
-  //   [./group]
-  //     item = ...
+  //   [./object]
+  //     param = ...
   std::size_t n = components.size();
   if (n == 1)
-  {
-    output.push_front("");
-    output.push_front("");
-  }
+    output.param = components[0];
+
   else if (n == 2)
-    output.push_front("");
+  {
+    output.object = components[0];
+    output.param = components[1];
+  }
+
+  else if (n == 3)
+  {
+    output.system = components[0];
+    output.object = components[1];
+    output.param = components[2];
+  }
 
   else if (n > 3)
     mooseError("The desired controllable parameter '" << name << "' does not match the expected naming convection.");
 
   // Set '*' to empty
-  if (output[0] == "*")
-    output[0] = "";
-  if (output[1] == "*")
-    output[1] = "";
+  if (output.system == "*")
+    output.system = "";
+  if (output.object == "*")
+    output.object = "";
 
   return output;
 }
