@@ -29,19 +29,8 @@ PoroMechanicsAction::act()
   TensorMechanicsAction::act();
 
   //Prepare displacements and set value for dim
-  unsigned int dim = 1;
-  std::vector<VariableName> vars;
-  vars.push_back(getParam<NonlinearVariableName>("disp_x"));
-  if (isParamValid("disp_y"))
-  {
-    ++dim;
-    vars.push_back(getParam<NonlinearVariableName>("disp_y"));
-    if (isParamValid("disp_z"))
-    {
-      ++dim;
-      vars.push_back(getParam<NonlinearVariableName>("disp_z"));
-    }
-  }
+  std::vector<NonlinearVariableName> displacements = getParam<std::vector<NonlinearVariableName> >("displacements");
+  unsigned int dim = displacements.size();
 
 
   // all the kernels added below have porepressure as a coupled variable
@@ -62,7 +51,7 @@ PoroMechanicsAction::act()
     name << i;
 
     params.set<unsigned int>("component") = i;
-    params.set<NonlinearVariableName>("variable") = vars[i];
+    params.set<NonlinearVariableName>("variable") = displacements[i];
 
     _problem->addKernel(type, name.str(), params);
   }

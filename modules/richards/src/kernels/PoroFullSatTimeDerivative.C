@@ -13,9 +13,7 @@ template<>
 InputParameters validParams<PoroFullSatTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
-  params.addRequiredCoupledVar("disp_x", "The x displacement");
-  params.addRequiredCoupledVar("disp_y", "The y displacement");
-  params.addRequiredCoupledVar("disp_z", "The z displacement");
+  params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
   params.addClassDescription("Kernel = biot_coefficient*d(volumetric_strain)/dt + (1/biot_modulus)*d(porepressure)/dt.  This is the time-derivative for poromechanics for a single-phase, fully-saturated fluid with constant bulk modulus");
   return params;
 }
@@ -26,17 +24,17 @@ PoroFullSatTimeDerivative::PoroFullSatTimeDerivative(const InputParameters & par
     _volstrain(getMaterialProperty<Real>("volumetric_strain")),
     _volstrain_old(getMaterialPropertyOld<Real>("volumetric_strain")),
 
-    _disp_x_var(coupled("disp_x")),
-    _disp_y_var(coupled("disp_y")),
-    _disp_z_var(coupled("disp_z")),
+    _ndisp(coupledComponents("displacements")),
+    _disp_var_num(_ndisp),
 
     _alpha(getMaterialProperty<Real>("biot_coefficient")),
 
     _one_over_biot_modulus(getMaterialProperty<Real>("one_over_biot_modulus")),
     _done_over_biot_modulus_dP(getMaterialPropertyDerivative<Real>("one_over_biot_modulus", _var.name())),
     _done_over_biot_modulus_dep(getMaterialPropertyDerivative<Real>("one_over_biot_modulus", "volumetric_strain"))
-
 {
+  for (unsigned i = 0 ; i < _ndisp ; ++i)
+    _disp_var_num[i] = coupled("displacements", i);
 }
 
 
@@ -61,18 +59,12 @@ PoroFullSatTimeDerivative::computeQpJacobian()
 Real
 PoroFullSatTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (!(jvar == _disp_x_var || jvar == _disp_y_var || jvar == _disp_z_var))
-    return 0.0;
+  Real jac = 0;
+  for (unsigned i = 0 ; i < _ndisp ; ++i)
+    if (jvar == _disp_var_num[i])
+      jac = _grad_phi[_j][_qp](i);
 
-  Real jac = _done_over_biot_modulus_dep[_qp]*(_u[_qp] - _u_old[_qp]);
-  jac += _alpha[_qp];
-
-  if (jvar == _disp_x_var)
-    jac *= _grad_phi[_j][_qp](0);
-  else if (jvar == _disp_y_var)
-    jac *= _grad_phi[_j][_qp](1);
-  else
-    jac *= _grad_phi[_j][_qp](2);
+  jac *= _done_over_biot_modulus_dep[_qp]*(_u[_qp] - _u_old[_qp]) + _alpha[_qp];
 
   return _test[_i][_qp]*jac/_dt;
 }
