@@ -16,6 +16,7 @@ InputParameters validParams<DerivativeSumMaterial>()
 
   // All arguments to the free energies being summed
   params.addRequiredCoupledVar("args", "Arguments of the free energy functions being summed - use vector coupling");
+  params.addCoupledVar("displacement_gradients", "Vector of displacement gradient variables (see Modules/PhaseField/DisplacementGradients action)");
 
   // Advanced arguments to construct a sum of the form \f$ c+\gamma\sum_iF_i \f$
   params.addParam<std::vector<Real> >("prefactor", "Prefactor to multiply the sum term with.");

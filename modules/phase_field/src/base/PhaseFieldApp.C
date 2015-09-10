@@ -28,6 +28,7 @@
 #include "CHSplitVar.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledTimeDerivative.h"
+#include "GradientComponent.h"
 #include "HHPFCRFF.h"
 #include "KKSACBulkC.h"
 #include "KKSACBulkF.h"
@@ -99,6 +100,7 @@
 #include "PFMobility.h"
 #include "PFParamsPolyFreeEnergy.h"
 #include "PolynomialFreeEnergy.h"
+#include "StrainGradDispDerivatives.h"
 #include "SwitchingFunctionMaterial.h"
 #include "CrossTermBarrierFunctionMaterial.h"
 
@@ -159,6 +161,7 @@
 #include "BicrystalBoundingBoxICAction.h"
 #include "BicrystalCircleGrainICAction.h"
 #include "CHPFCRFFSplitKernelAction.h"
+#include "DisplacementGradientsAction.h"
 #include "CHPFCRFFSplitVariablesAction.h"
 #include "HHPFCRFFSplitKernelAction.h"
 #include "HHPFCRFFSplitVariablesAction.h"
@@ -233,6 +236,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHPFCRFF);
   registerKernel(CHSplitVar);
   registerKernel(ConservedLangevinNoise);
+  registerKernel(GradientComponent);
   registerKernel(HHPFCRFF);
   registerKernel(KKSACBulkC);
   registerKernel(KKSACBulkF);
@@ -299,6 +303,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFFracBulkRateMaterial);
   registerMaterial(PFParamsPolyFreeEnergy);
   registerMaterial(PolynomialFreeEnergy);
+  registerMaterial(StrainGradDispDerivatives);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(CrossTermBarrierFunctionMaterial);
   registerDeprecatedObjectName(PFMobility, "PFMobility", "09/26/2015 00:00");
@@ -352,6 +357,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
   syntax.registerActionSyntax("CHPFCRFFSplitKernelAction", "Kernels/CHPFCRFFSplitKernel");
   syntax.registerActionSyntax("CHPFCRFFSplitVariablesAction", "Variables/CHPFCRFFSplitVariables");
+  syntax.registerActionSyntax("DisplacementGradientsAction", "Modules/PhaseField/DisplacementGradients");
   syntax.registerActionSyntax("EmptyAction", "ICs/PolycrystalICs");  // placeholder
   syntax.registerActionSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
   syntax.registerActionSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
@@ -370,6 +376,9 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(BicrystalCircleGrainICAction, "add_ic");
   registerAction(CHPFCRFFSplitKernelAction, "add_kernel");
   registerAction(CHPFCRFFSplitVariablesAction, "add_variable");
+  registerAction(DisplacementGradientsAction, "add_variable");
+  registerAction(DisplacementGradientsAction, "add_material");
+  registerAction(DisplacementGradientsAction, "add_kernel");
   registerAction(HHPFCRFFSplitKernelAction, "add_kernel");
   registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
   registerAction(PFCRFFKernelAction, "add_kernel");
