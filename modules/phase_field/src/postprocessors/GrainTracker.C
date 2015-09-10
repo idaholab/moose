@@ -145,7 +145,15 @@ GrainTracker::getElementalValue(dof_id_type element_id) const
     for (std::vector<BoundingSphereInfo *>::const_iterator it = grain_it->second->sphere_ptrs.begin();
          it != grain_it->second->sphere_ptrs.end(); ++it)
       if (curr_elem->contains_point((*it)->b_sphere.center()))
-        return grain_it->first;
+      {
+        if (!_ebsd_reader)
+          return grain_it->first;
+
+        std::map<unsigned int, unsigned int>::const_iterator ebsd_it = _unique_grain_to_ebsd_num.find(grain_it->first);
+
+        mooseAssert(ebsd_it != _unique_grain_to_ebsd_num.end(), "Bad mapping in unique_grain_to_ebsd_num");
+        return ebsd_it->second;
+      }
   }
 
   return 0;
@@ -213,7 +221,10 @@ GrainTracker::finalize()
       {
         std::set<dof_id_type>::const_iterator elem_it_end = grain_it->second->entities_ptr->end();
         for (std::set<dof_id_type>::const_iterator elem_it = grain_it->second->entities_ptr->begin(); elem_it != elem_it_end; ++elem_it)
-          _elemental_data[*elem_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
+        {
+          mooseAssert(!_ebsd_reader || _unique_grain_to_ebsd_num.find(grain_it->first) != _unique_grain_to_ebsd_num.end(), "Bad mapping in unique_grain_to_ebsd_num");
+          _elemental_data[*elem_it].push_back(std::make_pair(_ebsd_reader ? _unique_grain_to_ebsd_num[grain_it->first] : grain_it->first, grain_it->second->variable_idx));
+        }
       }
     }
   }
