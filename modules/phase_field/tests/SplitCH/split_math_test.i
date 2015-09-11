@@ -45,8 +45,7 @@ active = 'SMP'
 
   [./SMP]
    type = SMP
-   off_diag_row = 'w c'
-   off_diag_column = 'c w'
+   coupled_groups = 'c,w'
   [../]
 []
 
