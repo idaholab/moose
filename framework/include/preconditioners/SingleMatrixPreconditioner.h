@@ -29,7 +29,6 @@ class SingleMatrixPreconditioner : public MoosePreconditioner
 {
 public:
   SingleMatrixPreconditioner(const InputParameters & params);
-  virtual ~SingleMatrixPreconditioner();
 };
 
 #endif /* SINGLEMATRIXPRECONDITIONER_H_ */
