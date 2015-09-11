@@ -333,7 +333,7 @@ Assembly::invalidateCache()
   for (; it!=end; ++it)
     it->second->_invalidated = true;
 
-  std::cout << "validate Cashe" << std::endl;
+  reinitXFEMWeights();
 }
 
 void
@@ -422,7 +422,9 @@ Assembly::reinitFE(const Elem * elem)
   }
 
   if (do_caching)
-    efesd->_invalidated = false;
+    efesd->_invalidated = false; 
+
+  updateXFEMWeights(elem);
 }
 
 void
@@ -1551,18 +1553,33 @@ Assembly::clearCachedJacobianContributions()
 }
 
 void
-Assembly::updateXFEMWeights(std::vector<Real> & xfem_weights, const Elem * elem)
+Assembly::updateXFEMWeights(const Elem *elem)
 {
-  _current_xfem_weights.resize(xfem_weights.size());
+ if((_xfem_weights_map.find(elem->id()) != _xfem_weights_map.end())){
+    mooseAssert(_xfem_weights_map[elem->id()].size()==_current_JxW.size(),"wrong number of entries in xfem_weights"); 
+      for(unsigned i = 0; i < _xfem_weights_map[elem->id()].size(); i++){ 
+        _current_JxW[i] = _current_JxW[i] * _xfem_weights_map[elem->id()][i]; 
+      }
+      _xfem_weights_have_been_updated[elem->id()] = true;
+   } 
+}
+
+void
+Assembly::setXFEMWeights(std::vector<Real> & xfem_weights, const Elem * elem)
+{
+  _xfem_weights_map[elem->id()].resize(xfem_weights.size());
+
   for(unsigned i = 0; i < xfem_weights.size(); i++)
-    _current_xfem_weights[i] = xfem_weights[i];
-  
-  if(!_xfem_weights_have_been_updated[elem->id()] && _current_JxW.size()!=0){ 
-      mooseAssert(_current_xfem_weights.size()==_current_JxW.size(),"wrong number of entries in xfem_weights"); 
-      for(unsigned i = 0; i < _current_xfem_weights.size(); i++){ 
-        _current_JxW[i] = _current_JxW[i] * _current_xfem_weights[i]; 
-      } 
-      //std::cout << "xfem weights is updated" << std::endl; 
-     // _xfem_weights_have_been_updated = true; 
-   }
-} 
+    _xfem_weights_map[elem->id()][i] = xfem_weights[i]; 
+}
+
+void
+Assembly::reinitXFEMWeights()
+{ 
+  std::map<dof_id_type, bool >::iterator
+  it  = _xfem_weights_have_been_updated.begin(),
+  end = _xfem_weights_have_been_updated.end();
+
+  for (; it!=end; ++it)
+    it->second = false;
+}

@@ -107,8 +107,9 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("PartitionerAction", "Mesh/Partitioner");
   syntax.registerActionSyntax("XFEMAction", "XFEM");
-  syntax.registerActionSyntax("XFEMAction", "XFEM", "add_aux_variable");
-  syntax.registerActionSyntax("XFEMAction", "XFEM", "add_aux_kernel");
+  syntax.registerActionSyntax("AddUserObjectAction","XFEM/*");
+  //syntax.registerActionSyntax("XFEMAction", "XFEM", "add_aux_variable");
+  //syntax.registerActionSyntax("XFEMAction", "XFEM", "add_aux_kernel");
 
   syntax.registerActionSyntax("AddDiracKernelAction", "DiracKernels/*");
 

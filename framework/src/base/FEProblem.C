@@ -96,11 +96,6 @@ InputParameters validParams<FEProblem>()
   params.addParam<bool>("use_nonlinear", true, "Determines whether to use a Nonlinear vs a Eigenvalue system (Automatically determined based on executioner)");
   params.addParam<bool>("error_on_jacobian_nonzero_reallocation", false, "This causes PETSc to error if it had to reallocate memory in the Jacobian matrix due to not having enough nonzeros");
 
-  params.addParam<std::string>("XFEM_cut_type", "line_segment_2d", "The type of XFEM cuts");
-  params.addParam<std::vector<Real> >("XFEM_cuts","Data for XFEM geometric cuts");
-  params.addParam<std::vector<Real> >("XFEM_cut_scale","X,Y scale factors for XFEM geometric cuts");
-  params.addParam<std::vector<Real> >("XFEM_cut_translate","X,Y translations for XFEM geometric cuts");
-
   return params;
 }
 
@@ -218,15 +213,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
-
-  /*
-  std::vector<Real> cut_data = parameters.get<std::vector<Real> >("XFEM_cuts");
-  std::string cut_type = parameters.get<std::string>("XFEM_cut_type");
-  _xfem.set_xfem_cut_type(cut_type);
-  _xfem.set_xfem_cut_data(cut_data);
-
-  addXFEMGeometricCuts(parameters);
-  */
 }
 
 FEProblem::~FEProblem()
@@ -258,76 +244,6 @@ FEProblem::~FEProblem()
        it != _random_data_objects.end(); ++it)
     delete it->second;
 
-}
-
-void
-FEProblem::addXFEMGeometricCuts(InputParameters parameters)
-{
-  std::vector<Real> cut_data = parameters.get<std::vector<Real> >("XFEM_cuts");
-
-  _XFEM_cut_type = _xfem.get_xfem_cut_type();
-  std::cout << "XFEM_cut type is " << _XFEM_cut_type << std::endl;
-
-  if (_XFEM_cut_type == "line_segment_2d")
-  {
-    if (cut_data.size() % 6 != 0)
-    mooseError("Length of XFEM_cuts must be a multiple of 6.");
-
-    unsigned int num_cuts = cut_data.size()/6;
-
-    std::vector<Real> trans;
-    if (parameters.isParamValid("XFEM_cut_translate"))
-    {
-      trans = parameters.get<std::vector<Real> >("XFEM_cut_translate");
-    }
-    else
-    {
-      trans.push_back(0.0);
-      trans.push_back(0.0);
-    }
-
-    std::vector<Real> scale;
-    if (parameters.isParamValid("XFEM_cut_scale"))
-    {
-      scale = parameters.get<std::vector<Real> >("XFEM_cut_scale");
-    }
-    else
-    {
-      scale.push_back(1.0);
-      scale.push_back(1.0);
-    }
-
-    for (unsigned int i = 0; i < num_cuts; ++i)
-    {
-      Real x0 = (cut_data[i*6+0]+trans[0])*scale[0];
-      Real y0 = (cut_data[i*6+1]+trans[1])*scale[1];
-      Real x1 = (cut_data[i*6+2]+trans[0])*scale[0];
-      Real y1 = (cut_data[i*6+3]+trans[1])*scale[1];
-      Real t0 = cut_data[i*6+4];
-      Real t1 = cut_data[i*6+5];
-      _xfem.addGeometricCut(new XFEM_geometric_cut_2d( x0, y0, x1, y1, t0, t1));
-    } // i
-  }
-  else if (_XFEM_cut_type == "square_cut_3d")
-  {
-    if (cut_data.size() != 12)
-      mooseError("Length of XFEM_cuts must be 12 when square_cut_3d");
-    _xfem.addGeometricCut(new XFEM_square_cut(cut_data));
-  }
-  else if (_XFEM_cut_type == "circle_cut_3d")
-  {
-     if  (cut_data.size() != 9 )
-      mooseError("Length of XFEM_cuts must be 9 when circle_cut_3d");
-    _xfem.addGeometricCut(new XFEM_circle_cut(cut_data));
-  }
-  else if (_XFEM_cut_type == "ellipse_cut_3d")
-  {
-    if (cut_data.size() !=9 )
-      mooseError("Length of XFEM_cuts must be 9 when ellipse_cut_3d");
-      _xfem.addGeometricCut(new XFEM_ellipse_cut(cut_data));
-  }
-  else
-    mooseError("unrecognized XFEM cut type");
 }
 
 Moose::CoordinateSystemType
@@ -755,16 +671,22 @@ FEProblem::getMaxScalarOrder() const
 }
 
 void
-FEProblem::prepare(const Elem * elem, THREAD_ID tid)
-{ 
-  
-   _assembly[tid]->reinit(elem);
+FEProblem::reinitXFEMWeights()
+{
+  std::map<dof_id_type, std::vector<Real> > ::iterator it  = _xfem_JxW.begin();
+  std::map<dof_id_type, std::vector<Real> > ::iterator end  = _xfem_JxW.end();
 
-   const Elem * undisplaced_elem  = NULL;
-  //if (getParam<bool>("use_displaced_mesh") && this->getDisplacedProblem() != NULL)
+  for (;it != end; ++it)
+    (it->second).clear();
+}
+
+void
+FEProblem::get_xfem_weights(const Elem * elem, THREAD_ID tid)
+{
+  _xfem_JxW[elem->id()].clear();
+  const Elem * undisplaced_elem  = NULL;
   if(this->getDisplacedProblem()!=NULL)
   {
-    //DisplacedProblem & displaced_problem = dynamic_cast< DisplacedProblem & >(_subproblem);
     DisplacedProblem * & displaced_problem = this->getDisplacedProblem();
     undisplaced_elem = displaced_problem->refMesh().elem(elem->id());
   } 
@@ -772,25 +694,34 @@ FEProblem::prepare(const Elem * elem, THREAD_ID tid)
     undisplaced_elem = elem;
 
   std::string xfem_qrule = _xfem.get_xfem_qrule();
-  std::vector<Real> xfem_weights;
-  xfem_weights.resize((_assembly[tid]->qRule())->n_points(), 1.0);
+  
+  _xfem_JxW[elem->id()].resize((_assembly[tid]->qRule())->n_points(), 1.0);
 
   for (unsigned qp = 0; qp < (_assembly[tid]->qRule())->n_points(); qp++)
   {
     if (xfem_qrule == "volfrac")
-      xfem_weights[qp] = _xfem.get_elem_phys_volfrac(undisplaced_elem);
+      _xfem_JxW[elem->id()][qp] = _xfem.get_elem_phys_volfrac(undisplaced_elem);
     else if (xfem_qrule == "moment_fitting"){
       std::vector<Point> gauss_points = (_assembly[tid]->qRule())->get_points();
       std::vector<Real>  gauss_weights = (_assembly[tid]->qRule())->get_weights();
-      xfem_weights[qp] = _xfem.get_elem_new_weights(undisplaced_elem, qp, gauss_points, gauss_weights);
+      _xfem_JxW[elem->id()][qp] = _xfem.get_elem_new_weights(undisplaced_elem, qp, gauss_points, gauss_weights);
     }
     else if (xfem_qrule == "direct") // remove q-points outside the elem real domain by force
-      xfem_weights[qp] = _xfem.flag_qp_inside(undisplaced_elem, (_assembly[tid]->qPoints())[qp]);
+      _xfem_JxW[elem->id()][qp] = _xfem.flag_qp_inside(undisplaced_elem, (_assembly[tid]->qPoints())[qp]);
     else
-      mooseError("unrecognized XFEM qrule option!");
+      _xfem_JxW[elem->id()][qp] = 1.0;
   }
+}
 
-  _assembly[tid]->updateXFEMWeights(xfem_weights,elem);
+void
+FEProblem::prepare(const Elem * elem, THREAD_ID tid)
+{ 
+  _assembly[tid]->reinit(elem);
+
+  if (elem->is_semilocal(_mesh.processor_id()) && _xfem_JxW[elem->id()].size() == 0){
+    get_xfem_weights(elem,tid);
+  }
+  _assembly[tid]->setXFEMWeights(_xfem_JxW[elem->id()],elem);
 
   _nl.prepare(tid);
   _aux.prepare(tid);
@@ -1394,9 +1325,6 @@ FEProblem::addKernel(const std::string & kernel_name, const std::string & name, 
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
-
-  std::string xfem_qrule = _xfem.get_xfem_qrule();
-  parameters.set<std::string>("xfem_qrule") = xfem_qrule;
 
   _nl.addKernel(kernel_name, name, parameters);
 }
@@ -3821,8 +3749,11 @@ FEProblem::meshChanged()
 
   unsigned int n_threads = libMesh::n_threads();
 
-  for (unsigned int i = 0; i < n_threads; ++i)
+  for (unsigned int i = 0; i < n_threads; ++i){
     _assembly[i]->invalidateCache();
+  }
+
+  reinitXFEMWeights(); // reinitialize xfem weights
 
   // Need to redo ghosting
   _geometric_search_data.reinit();

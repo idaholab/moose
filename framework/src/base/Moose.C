@@ -1093,8 +1093,8 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(PartitionerAction, "add_partitioner");
   registerAction(XFEMAction,"setup_xfem");
-  //registerAction(XFEMAction,"add_aux_variable");
-  //registerAction(XFEMAction,"add_aux_kernel");
+  registerAction(XFEMAction,"add_aux_variable");
+  registerAction(XFEMAction,"add_aux_kernel");
 
   registerAction(AddDiracKernelAction, "add_dirac_kernel");
   registerAction(SetupDebugAction, "setup_debug");

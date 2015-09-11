@@ -121,8 +121,10 @@ public:
   FEProblem(const InputParameters & parameters);
   virtual ~FEProblem();
 
-  void addXFEMGeometricCuts(InputParameters parameters);
   XFEM * get_xfem(){return &_xfem;}
+  void get_xfem_weights(const Elem * elem, THREAD_ID tid);
+  std::vector<Real> & xfem_weights(dof_id_type id){return _xfem_JxW[id];}
+  void reinitXFEMWeights();
 
   virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
@@ -1107,7 +1109,7 @@ protected:
 #endif
 
   XFEM _xfem;
-  std::string _XFEM_cut_type;
+  std::map<dof_id_type, std::vector<Real> > _xfem_JxW;
 
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;
