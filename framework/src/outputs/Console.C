@@ -97,12 +97,12 @@ InputParameters validParams<Console>()
   params.set<MultiMooseEnum>("execute_system_information_on", /*quiet_mode=*/true) = "initial";
 
   // Change the default behavior of 'execute_on' to included nonlinear iterations and failed timesteps
-  params.set<MultiMooseEnum>("execute_on", /*quiet_mode=*/true).push_back("timestep_begin linear nonlinear failed");
+  params.set<MultiMooseEnum>("execute_on", /*quiet_mode=*/true).push_back("initial timestep_begin linear nonlinear failed");
 
   // By default postprocessors and scalar are only output at the end of a timestep
-  params.set<MultiMooseEnum>("execute_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
-  params.set<MultiMooseEnum>("execute_vector_postprocessors_on", /*quiet_mode=*/true) = "timestep_end";
-  params.set<MultiMooseEnum>("execute_scalars_on", /*quiet_mode=*/true) = "timestep_end";
+  params.set<MultiMooseEnum>("execute_postprocessors_on", /*quiet_mode=*/true) = "initial timestep_end";
+  params.set<MultiMooseEnum>("execute_vector_postprocessors_on", /*quiet_mode=*/true) = "initial timestep_end";
+  params.set<MultiMooseEnum>("execute_scalars_on", /*quiet_mode=*/true) = "initial timestep_end";
 
   return params;
 }
