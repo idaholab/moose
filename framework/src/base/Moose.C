@@ -287,9 +287,12 @@
 #include "CrankNicolson.h"
 #include "ExplicitEuler.h"
 #include "RungeKutta2.h"
+#include "ExplicitMidpoint.h"
 #include "Dirk.h"
 #include "LStableDirk2.h"
 #include "ImplicitMidpoint.h"
+#include "Heun.h"
+#include "Ralston.h"
 //
 #include "SimplePredictor.h"
 #include "AdamsPredictor.h"
@@ -675,9 +678,12 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(CrankNicolson);
   registerTimeIntegrator(ExplicitEuler);
   registerTimeIntegrator(RungeKutta2);
+  registerTimeIntegrator(ExplicitMidpoint);
   registerDeprecatedObjectName(Dirk, "Dirk", "09/22/2015 12:00");
   registerTimeIntegrator(LStableDirk2);
   registerTimeIntegrator(ImplicitMidpoint);
+  registerTimeIntegrator(Heun);
+  registerTimeIntegrator(Ralston);
   // predictors
   registerPredictor(SimplePredictor);
   registerPredictor(AdamsPredictor);
