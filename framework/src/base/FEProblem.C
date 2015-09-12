@@ -1828,58 +1828,72 @@ getPostprocessorPointer(UO_TYPE * uo)
 void
 FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblem *>("_fe_problem") = this;
-  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-  else
-    parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.addPrivateParam<std::string>("_pp_name", pp_name);
+  parameters.addPrivateParam<std::string>("_name", name);
 
+  // Save the postprocessor parameters to be created later during the instantiate_postprocessor task
+  _declared_pps_params.push_back(parameters);
+
+  // Make sure that we declare the data now for binding to postprocessors during subsequent tasks
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
-    // to be otherwise
-    MaterialData * mat_data = _material_data[tid];
-    if (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
-       mat_data = _bnd_material_data[tid];
-
-    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-      _reinit_displaced_face = true;
-
-    parameters.set<MaterialData *>("_material_data") = mat_data;
-
-    MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
-    if (!mo)
-      mooseError("Unable to determine type for Postprocessor: " + mo->name());
-
-    MooseSharedPointer<Postprocessor> pp = getPostprocessorPointer(mo);
-
-    // Postprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
-    const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
-    for (unsigned int i=0; i<exec_flags.size(); ++i)
-    {
-      // Check for name collision
-      if (_user_objects(exec_flags[i])[tid].getUserObjectByName(mo->name()))
-        mooseError(std::string("A UserObject with the name \"") + mo->name() + "\" already exists.  You may not add a Postprocessor by the same name.");
-      _pps(exec_flags[i])[tid].addPostprocessor(pp);
-
-      // Add it to the user object warehouse as well...
-      MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::dynamic_pointer_cast<UserObject>(mo);
-      if (!user_object.get())
-        mooseError("Unknown user object type: " + pp_name);
-
-      _user_objects(exec_flags[i])[tid].addUserObject(user_object);
-    }
-
-    _pps_data[tid]->init(mo->name());
-  }
+    _pps_data[tid]->init(MooseUtils::shortName(name));
 }
 
 void
-FEProblem::initPostprocessorData(const std::string & name)
+FEProblem::instantiatePostprocessors()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _pps_data[tid]->init(name);
+  for (std::list<InputParameters>::iterator it = _declared_pps_params.begin(); it != _declared_pps_params.end(); ++it)
+  {
+    InputParameters & parameters = *it;
+    const std::string & pp_name = parameters.get<std::string>("_pp_name");
+    const std::string & name = parameters.get<std::string>("_name");
 
+    parameters.set<FEProblem *>("_fe_problem") = this;
+    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+      parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    else
+      parameters.set<SubProblem *>("_subproblem") = this;
+
+    for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    {
+      // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
+      // to be otherwise
+      MaterialData * mat_data = _material_data[tid];
+      if (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
+         mat_data = _bnd_material_data[tid];
+
+      if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+        _reinit_displaced_face = true;
+
+      parameters.set<MaterialData *>("_material_data") = mat_data;
+
+      MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
+      if (!mo)
+        mooseError("Unable to determine type for Postprocessor: " + mo->name());
+
+      MooseSharedPointer<Postprocessor> pp = getPostprocessorPointer(mo);
+
+      // Postprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
+      const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
+      for (unsigned int i=0; i<exec_flags.size(); ++i)
+      {
+        // Check for name collision
+        if (_user_objects(exec_flags[i])[tid].getUserObjectByName(mo->name()))
+          mooseError(std::string("A UserObject with the name \"") + mo->name() + "\" already exists.  You may not add a Postprocessor by the same name.");
+        _pps(exec_flags[i])[tid].addPostprocessor(pp);
+
+        // Add it to the user object warehouse as well...
+        MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::dynamic_pointer_cast<UserObject>(mo);
+        if (!user_object.get())
+          mooseError("Unknown user object type: " + pp_name);
+
+        _user_objects(exec_flags[i])[tid].addUserObject(user_object);
+      }
+    }
+  }
+
+  // clear the parameters, we don't need them anymore
+  _declared_pps_params.clear();
 }
 
 ExecStore<PostprocessorWarehouse> &

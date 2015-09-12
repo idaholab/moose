@@ -438,15 +438,10 @@ public:
 
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
+  void instantiatePostprocessors();
 
   // VectorPostprocessors /////
   virtual void addVectorPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
-
-  /**
-   * Initializes the postprocessor data
-   * @see SetupPostprocessorDataAction
-   */
-  void initPostprocessorData(const std::string & name);
 
   // UserObjects /////
   virtual void addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters);
@@ -939,6 +934,7 @@ protected:
   std::vector<MarkerWarehouse> _markers;
 
   // postprocessors
+  std::list<InputParameters> _declared_pps_params;
   std::vector<PostprocessorData*> _pps_data;
   ExecStore<PostprocessorWarehouse> _pps;
 

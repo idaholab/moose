@@ -370,7 +370,7 @@
 #include "SetupTimeIntegratorAction.h"
 #include "SetupPredictorAction.h"
 #include "AddMortarInterfaceAction.h"
-#include "SetupPostprocessorDataAction.h"
+#include "InstantiatePostprocessorsAction.h"
 #include "MaterialOutputAction.h"
 #include "CheckOutputAction.h"
 #include "SetupRecoverFileBaseAction.h"
@@ -817,7 +817,7 @@ addActionTypes(Syntax & syntax)
   registerTask("check_copy_nodal_vars", true);
   registerTask("copy_nodal_vars", true);
   registerTask("copy_nodal_aux_vars", true);
-  registerTask("setup_postprocessor_data", false);
+  registerTask("instantiate_postprocessors", true);
 
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);
@@ -876,7 +876,7 @@ addActionTypes(Syntax & syntax)
 "(setup_executioner)"
 "(setup_time_stepper)"
 "(setup_predictor)"
-"(setup_postprocessor_data)"
+"(add_postprocessor)"
 "(setup_time_periods)"
 "(init_displaced_problem)"
 "(add_aux_variable, add_variable, add_elemental_field_variable)"
@@ -902,7 +902,7 @@ addActionTypes(Syntax & syntax)
 "(init_problem)"
 "(setup_debug)"
 "(add_output)"
-"(add_postprocessor)"
+"(instantiate_postprocessors)"
 "(add_vector_postprocessor)"
 "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
 "(add_control)"
@@ -941,12 +941,7 @@ addActionTypes(Syntax & syntax)
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
-
-#undef registerAction
 #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
-
-
-  registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshCompleteAction, "prepare_mesh");
@@ -1028,6 +1023,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(EmptyAction, "ready_to_init");
   registerAction(InitProblemAction, "init_problem");
   registerAction(CheckIntegrityAction, "check_integrity");
+  registerAction(InstantiatePostprocessorsAction, "instantiate_postprocessors");
 
   registerAction(AddMultiAppAction, "add_multi_app");
   registerAction(AddTransferAction, "add_transfer");
@@ -1035,9 +1031,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   // TODO: Why is this here?
   registerTask("finish_input_file_output", false);
   registerAction(EmptyAction, "finish_input_file_output");
-
-#undef registerAction
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 }
 
 void
