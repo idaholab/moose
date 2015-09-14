@@ -1,0 +1,26 @@
+[tests]
+  [./hht]
+    type = 'Exodiff'
+    input = 'wave_hht.i'
+    exodiff = 'wave_hht_out.e'
+    abs_zero = 1e-09
+  [../]
+  [./newmark]
+    type = 'Exodiff'
+    input = 'wave_newmark.i'
+    exodiff = 'wave_newmark_out.e'
+    abs_zero = 1e-09
+  [../]
+  [./rayleigh_hht]
+    type = 'Exodiff'
+    input = 'wave_rayleigh_hht.i'
+    exodiff = 'wave_rayleigh_hht_out.e'
+    abs_zero = 1e-09
+  [../]
+  [./rayleigh_newmark]
+    type = 'Exodiff'
+    input = 'wave_rayleigh_newmark.i'
+    exodiff = 'wave_rayleigh_newmark_out.e'
+    abs_zero = 1e-09
+  [../]
+[]
