@@ -103,8 +103,12 @@ TensorMechanicsAction::act()
     params.set<NonlinearVariableName>("variable") = displacements[i];
     params.set<std::vector<AuxVariableName> >("save_in") = save_in[i];
 
-    _problem->addKernel("StressDivergenceTensors", name.str(), params);
+    addkernel(name.str(), params);
   }
-
 }
 
+void
+TensorMechanicsAction::addkernel(const std::string & name,  InputParameters & params)
+{
+  _problem->addKernel("StressDivergenceTensors", name, params);
+}

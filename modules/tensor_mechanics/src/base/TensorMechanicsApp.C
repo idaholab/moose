@@ -9,6 +9,7 @@
 #include "AppFactory.h"
 
 #include "TensorMechanicsAction.h"
+#include "DynamicTensorMechanicsAction.h"
 #include "TensorMechanicsAxisymmetricRZAction.h"
 #include "PoroMechanicsAction.h"
 #include "PressureAction.h"
@@ -20,6 +21,7 @@
 #include "PoroMechanicsCoupling.h"
 #include "InertialForce.h"
 #include "Gravity.h"
+#include "DynamicStressDivergenceTensors.h"
 
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
@@ -126,6 +128,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(PoroMechanicsCoupling);
   registerKernel(InertialForce);
   registerKernel(Gravity);
+  registerKernel(DynamicStressDivergenceTensors);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
@@ -193,6 +196,7 @@ void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
+  syntax.registerActionSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
   syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
   syntax.registerActionSyntax("TensorMechanicsAxisymmetricRZAction", "Kernels/AxisymmetricRZ");
 
@@ -200,6 +204,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
   registerAction(TensorMechanicsAction, "add_kernel");
+  registerAction(DynamicTensorMechanicsAction, "add_kernel");
   registerAction(PoroMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
   registerAction(PressureAction, "add_bc");
