@@ -32,12 +32,12 @@ protected:
   const MaterialProperty<Real> & _L;
   const MaterialProperty<Real> & _dLdop;
   const MaterialProperty<Real> & _eps;
-  const MaterialProperty<Real> & _eps1;
+  const MaterialProperty<Real> & _deps;
 
   /// Mobility derivative w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dLdarg;
   std::vector<const MaterialProperty<Real> *> _depsdarg;
-  std::vector<const MaterialProperty<Real> *> _deps1darg;
+  std::vector<const MaterialProperty<Real> *> _ddepsdarg;
 };
 
 #endif //ACINTERFACEKOBAYASHI1_H

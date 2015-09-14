@@ -48,24 +48,22 @@ ACInterfaceKobayashi2::precomputeQpResidual()
 RealGradient
 ACInterfaceKobayashi2::precomputeQpJacobian()
 {
-  Real cos_AC2;
-  Real angle_AC2;
-  Real depsdop_AC2;
+  Real depsdop;
 
   // Set the value in special situation
   if (_grad_u[_qp] * _grad_u[_qp] == 0.0)
-    depsdop_AC2 = 0.0;
+    depsdop = 0.0;
   else
   {
     // Define the angle between grad_u and x axis
-    cos_AC2 = _grad_u[_qp](0) / std::sqrt(_grad_u[_qp] * _grad_u[_qp]);
-    angle_AC2 = std::acos(cos_AC2);
+    const Real cosine = _grad_u[_qp](0) / std::sqrt(_grad_u[_qp] * _grad_u[_qp]);
+    const Real angle = std::acos(cosine);
 
-    if (cos_AC2 * cos_AC2 == 1.0)
-      depsdop_AC2 = 0;
+    if (cosine * cosine == 1.0)
+      depsdop = 0;
     else
-      depsdop_AC2 = 6.0 * 0.01 * 0.04 * -1.0 * std::sin(6.0 * (angle_AC2 - libMesh::pi/2.0)) *
-                    -1.0 / std::sqrt(1.0 - cos_AC2 * cos_AC2) * (
+      depsdop = 6.0 * 0.01 * 0.04 * -1.0 * std::sin(6.0 * (angle - libMesh::pi/2.0)) *
+                    -1.0 / std::sqrt(1.0 - cosine * cosine) * (
                       _grad_phi[_j][_qp](0) * std::sqrt(_grad_u[_qp]*_grad_u[_qp]) -
                       _grad_u[_qp](0) * _grad_phi[_j][_qp] * _grad_u[_qp] / std::sqrt(_grad_u[_qp] * _grad_u[_qp])
                     ) / (_grad_u[_qp] * _grad_u[_qp]);
@@ -73,7 +71,7 @@ ACInterfaceKobayashi2::precomputeQpJacobian()
 
   // Set Jacobian using product rule
   return _L[_qp] * (_eps[_qp] * _eps[_qp] * _grad_phi[_j][_qp] +
-                    2.0 * _eps[_qp] * depsdop_AC2 * _phi[_j][_qp] * _grad_u[_qp]);
+                    2.0 * _eps[_qp] * depsdop * _phi[_j][_qp] * _grad_u[_qp]);
 }
 
 Real

@@ -23,7 +23,7 @@ ACInterfaceKobayashi1::ACInterfaceKobayashi1(const InputParameters & parameters)
     _L(getMaterialProperty<Real>("mob_name")),
     _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name())),
     _eps(getMaterialProperty<Real>("eps_name")),
-    _eps1(getMaterialProperty<Real>("eps1_name"))
+    _deps(getMaterialProperty<Real>("eps1_name"))
 
 {
   // Get number of coupled variables
@@ -32,14 +32,14 @@ ACInterfaceKobayashi1::ACInterfaceKobayashi1(const InputParameters & parameters)
   // reserve space for derivatives
   _dLdarg.resize(nvar);
   _depsdarg.resize(nvar);
-  _deps1darg.resize(nvar);
+  _ddepsdarg.resize(nvar);
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < nvar; ++i)
   {
     _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
     _depsdarg[i] = &getMaterialPropertyDerivative<Real>("eps_name", _coupled_moose_vars[i]->name());
-    _deps1darg[i] = &getMaterialPropertyDerivative<Real>("eps1_name", _coupled_moose_vars[i]->name());
+    _ddepsdarg[i] = &getMaterialPropertyDerivative<Real>("eps1_name", _coupled_moose_vars[i]->name());
   }
 }
 
@@ -47,7 +47,7 @@ RealGradient
 ACInterfaceKobayashi1::precomputeQpResidual()
 {
   // Set interfacial part of residual
-  RealVectorValue v = _eps[_qp]* _eps1[_qp] * _L[_qp] * _grad_u[_qp];
+  RealVectorValue v = _eps[_qp]* _deps[_qp] * _L[_qp] * _grad_u[_qp];
   std::swap(v(0), v(1));
   v(0) *= -1.0;
   return v;
@@ -56,41 +56,39 @@ ACInterfaceKobayashi1::precomputeQpResidual()
 RealGradient
 ACInterfaceKobayashi1::precomputeQpJacobian()
 {
-  Real cos_AC1;
-  Real depsdop_AC1;
-  Real deps1dop_AC1;
-  Real angle_AC1;
+  Real depsdop;
+  Real ddepsdop;
 
   // Set the value in special situation
-  if (_grad_u[_qp]*_grad_u[_qp] == 0)
+  if (_grad_u[_qp] * _grad_u[_qp] == 0)
   {
-    depsdop_AC1 = 0;
-    deps1dop_AC1 = 0;
+    depsdop = 0;
+    ddepsdop = 0;
   }
   // Define the angle between grad_u and x aixs
   else
   {
-    cos_AC1 = _grad_u[_qp](0) / std::sqrt(_grad_u[_qp] * _grad_u[_qp]);
-    angle_AC1 = std::acos(cos_AC1);
+    const Real cosine = _grad_u[_qp](0) / std::sqrt(_grad_u[_qp] * _grad_u[_qp]);
+    const Real angle = std::acos(cosine);
 
     // Set the value in special situation
-    if (cos_AC1 * cos_AC1 == 1)
+    if (cosine * cosine == 1)
     {
-      depsdop_AC1 = 0.0;
-      deps1dop_AC1 = 0.0;
+      depsdop = 0.0;
+      ddepsdop = 0.0;
     }
     else
     {
       // Derivative of eps with respect to u
-      depsdop_AC1 = 6*0.01*0.04*(-1) * std::sin(6*(angle_AC1 - libMesh::pi/2.0)) *
-                    -1.0 / std::sqrt(1.0 - cos_AC1 * cos_AC1) *
+      depsdop = 6*0.01*0.04*(-1) * std::sin(6*(angle - libMesh::pi/2.0)) *
+                    -1.0 / std::sqrt(1.0 - cosine * cosine) *
                     ( _grad_phi[_j][_qp](0) * std::sqrt(_grad_u[_qp] * _grad_u[_qp]) -
                       _grad_u[_qp](0) * _grad_phi[_j][_qp] * _grad_u[_qp] / std::sqrt(_grad_u[_qp] * _grad_u[_qp])
                     ) / (_grad_u[_qp] * _grad_u[_qp]);
 
       // Derivative of eps1 with respect to u
-      deps1dop_AC1 = 36*0.01*0.04*(-1) * std::cos(6.0 * (angle_AC1 - libMesh::pi/2.0)) *
-                     -1/std::sqrt(1.0 - cos_AC1 * cos_AC1) *
+      ddepsdop = 36*0.01*0.04*(-1) * std::cos(6.0 * (angle - libMesh::pi/2.0)) *
+                     -1/std::sqrt(1.0 - cosine * cosine) *
                      ( _grad_phi[_j][_qp](0) * std::sqrt(_grad_u[_qp] * _grad_u[_qp]) -
                        _grad_u[_qp](0) * _grad_phi[_j][_qp] * _grad_u[_qp] / std::sqrt(_grad_u[_qp] * _grad_u[_qp])
                      ) / (_grad_u[_qp] * _grad_u[_qp]);
@@ -98,9 +96,9 @@ ACInterfaceKobayashi1::precomputeQpJacobian()
   }
 
   // Set the Jacobian
-  RealVectorValue v = _L[_qp] * (_eps[_qp]*_eps1[_qp]* _grad_phi[_j][_qp] +
-                                 depsdop_AC1 * _eps1[_qp] * _phi[_j][_qp] * _grad_u[_qp] +
-                                 deps1dop_AC1 * _eps[_qp] * _phi[_j][_qp] * _grad_u[_qp]);
+  RealVectorValue v = _L[_qp] * (_eps[_qp]*_deps[_qp]* _grad_phi[_j][_qp] +
+                                 depsdop * _deps[_qp] * _phi[_j][_qp] * _grad_u[_qp] +
+                                 ddepsdop * _eps[_qp] * _phi[_j][_qp] * _grad_u[_qp]);
   std::swap(v(0), v(1));
   v(0) *= -1.0;
   return v;
@@ -115,6 +113,6 @@ ACInterfaceKobayashi1::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 
   // Set off-diagonal jaocbian terms from mobility dependence
-  return _L[_qp] * (_eps1[_qp] * (*_depsdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp] +
-                    _eps[_qp] * (*_deps1darg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp]);
+  return _L[_qp] * (_deps[_qp] * (*_depsdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp] +
+                    _eps[_qp] * (*_ddepsdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp]);
 }

@@ -5,7 +5,6 @@
   ny = 10
   xmax = 1
   ymax = 1
-  elem_type = QUAD4
 []
 
 [Variables]
@@ -102,7 +101,7 @@
   [./consts]
     type = GenericConstantMaterial
     block = 0
-    prop_names  = 'M       '
+    prop_names  = 'M'
     prop_values = '3333.333'
   [../]
 []
@@ -116,16 +115,10 @@
   l_max_its = 30
 
   dt = 0.0006
-
   num_steps = 8
 []
 
 [Outputs]
   interval = 4
   exodus = true
-  [./cnsl]
-    type = Console
-    #interval = 1
-    execute_on = 'failed timestep_begin timestep_end'
-  [../]
 []
