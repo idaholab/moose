@@ -1,0 +1,44 @@
+# Example of a snowflake
+
+Developed by Yang Xia, Department of Material Science and Engineering,
+Shanghai Jiao Tong University, Shanghai
+
+Model from Ryo Kobayashi, Modeling and numerical simulations of dendritic
+crystal growth, Physica D: Nonlinear Phenomena,Volume 63, Issues 3–4,
+15 March 1993, Pages 410–423
+
+This example shows a process of dendritic crystal growth, which is an anisotropic
+nucleation process. This is a simple phase field model, in which one component
+melt growth is presented in 2D condition.
+The PDE in this process is:
+
+  dw/dt = L*eps*deps*grad[F(w)] + L*grad*eps*eps*grad(w) + L*w(1-w)(w-0.5+m)
+  dT/dt = grad^2(T) + K*dw/dt
+  F(w) = (-dw/dy, dw/dx)
+  L = 3333.33
+  K = -1.8
+
+w is the phase field parameter, which equals to 0 when it is liquid and 1 when
+it is solid. T is the dimensionless temperature, for the melting temperature, it
+equals to 1.
+The parameter in PDE can be expressed as:
+
+  eps = 0.01*[1+0.02*cos(4*angle)]
+
+angle is the angle between grad(w) and x axis
+
+  deps = d(eps)/d(angle)
+  m = 0.9/3.14 * tan[10(1-T)]
+
+The residual can be expressed as:
+
+  R1 =   <dw/dt, _test> + <L*eps*deps*F(w), grad_test>
+       + <L*eps*eps*grad(w), grad_test> -<L*w(1-w)(w-0.5+m), _test>
+
+These four terms of residual correspond to TimeDerivative, ACInterfaceKobayashi1,
+ACInterfaceKobayashi2, and ACParsed in Kernels respectively.
+
+  R2 = <dT/dt, _test> + <grad(T), grad_test> - <K*dw/dt, _test>
+
+These three terms of residual correspond to TimeDerivative, Diffusion, and
+CoefCoupledTimeDerivative in Kernels respectively.
