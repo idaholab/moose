@@ -3,20 +3,17 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out_sub0.e master_out_sub1.e'
-    recover = false
   [../]
 
   [./pp_test]
     type = 'Exodiff'
     input = 'pp_master.i'
     exodiff = 'pp_master_out_pp_sub0.e pp_master_out_pp_sub1.e'
-    recover = false
   [../]
 
   [./monomial_to_sub_pp]
     type = 'Exodiff'
     input = 'master_quad.i'
     exodiff = 'master_quad_out.e master_quad_out_quad0.e master_quad_out_quad1.e master_quad_out_quad2.e master_quad_out_quad3.e'
-    recover = false
   [../]
 []
