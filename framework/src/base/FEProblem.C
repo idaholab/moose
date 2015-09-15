@@ -889,6 +889,7 @@ FEProblem::sizeZeroes(unsigned int size, THREAD_ID tid)
   _zero[tid].resize(size, 0);
   _grad_zero[tid].resize(size, 0);
   _second_zero[tid].resize(size, RealTensor(0.));
+  _second_phi_zero[tid].resize(size, std::vector<RealTensor>(LIBMESH_DIM, RealTensor(0.)));
 }
 
 bool
