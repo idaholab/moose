@@ -208,6 +208,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           if (!(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time))
             break;
 
+          ex->preStep();
           ex->computeDT();
 
           if (_interpolate_transfers)
@@ -281,9 +282,13 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
             // Clean up the end
             ex->endStep(target_time-app_time_offset);
+            ex->postStep();
           }
           else
+          {
             ex->endStep();
+            ex->postStep();
+          }
         }
 
         // If we were looking for a steady state, but didn't reach one, we still need to output one more time, regardless of interval
@@ -295,6 +300,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       {
         ex->takeStep(dt);
         ex->endStep(target_time-app_time_offset);
+        ex->postStep();
       }
       else
       {
@@ -311,6 +317,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         if (auto_advance)
         {
           ex->endStep();
+          ex->postStep();
 
           if (!ex->lastSolveConverged())
           {
@@ -346,6 +353,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
                   catch_up_dt /= 2.0;
 
                 ex->endStep();
+                ex->postStep();
 
                 catch_up_step++;
               }
@@ -392,6 +400,7 @@ TransientMultiApp::advanceStep()
       Transient * ex = _transient_executioners[i];
 
       ex->endStep();
+      ex->postStep();
       ex->incrementStepOrReject();
     }
   }

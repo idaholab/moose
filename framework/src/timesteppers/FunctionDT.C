@@ -103,7 +103,7 @@ FunctionDT::computeDT()
 }
 
 void
-FunctionDT::acceptStep()
+FunctionDT::postStep()
 {
   removeOldKnots();
 }
@@ -114,4 +114,3 @@ FunctionDT::rejectStep()
   _cutback_occurred = true;
   TimeStepper::rejectStep();
 }
-
