@@ -139,11 +139,14 @@ Console::Console(const InputParameters & parameters) :
   ActionWarehouse & awh = _app.actionWarehouse();
   Action * common_action = awh.getActionsByName("common_output")[0];
 
-  // Honor the 'print_linear_residuals' option
-  if (common_action->getParam<bool>("print_perf_log"))
-    _execute_on.push_back("linear");
-  else if (common_action->getParam<bool>("print_perf_log"))
-    _execute_on.erase("linear");
+  // Honor the 'print_linear_residuals' option, only if 'execute_on' has not been set by the user
+  if (!parameters.paramSetByUser("execute_on"))
+  {
+    if (common_action->getParam<bool>("print_linear_residuals"))
+      _execute_on.push_back("linear");
+    else
+      _execute_on.erase("linear");
+  }
 
   if (!_pars.paramSetByUser("perf_log") && common_action->getParam<bool>("print_perf_log"))
   {
