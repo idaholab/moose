@@ -286,7 +286,6 @@
 #include "BDF2.h"
 #include "CrankNicolson.h"
 #include "ExplicitEuler.h"
-#include "RungeKutta2.h"
 #include "ExplicitMidpoint.h"
 #include "Dirk.h"
 #include "LStableDirk2.h"
@@ -677,7 +676,7 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(BDF2);
   registerTimeIntegrator(CrankNicolson);
   registerTimeIntegrator(ExplicitEuler);
-  registerTimeIntegrator(RungeKutta2);
+  registerDeprecatedObjectName(ExplicitMidpoint, "RungeKutta2", "09/25/2015 12:00");
   registerTimeIntegrator(ExplicitMidpoint);
   registerDeprecatedObjectName(Dirk, "Dirk", "09/22/2015 12:00");
   registerTimeIntegrator(LStableDirk2);
