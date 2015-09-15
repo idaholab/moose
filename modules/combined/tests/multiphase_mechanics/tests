@@ -30,4 +30,9 @@
     exodiff = 'nonsplit_gradderiv_out.e'
     prereq = nonsplit_gradderiv
   [../]
+  [./gradientcomponent]
+    type = 'Exodiff'
+    input = 'gradientcomponent.i'
+    exodiff = 'gradientcomponent_out.e'
+  [../]
 []
