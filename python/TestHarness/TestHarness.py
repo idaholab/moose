@@ -11,6 +11,7 @@ from util import *
 from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
 from XMLDiffer import XMLDiffer
+from ImageDiffer import ImageDiffer
 from Tester import Tester
 from PetscJacobianTester import PetscJacobianTester
 from InputParameters import InputParameters

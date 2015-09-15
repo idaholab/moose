@@ -1,2 +1,3 @@
 from TestHarness import TestHarness
-__all__=['TestHarness']
+from RunParallel import RunParallel
+__all__ = ['TestHarness', 'RunParallel']

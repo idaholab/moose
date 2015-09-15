@@ -51,15 +51,14 @@ class VTKDiff(RunApp):
       # Perform diff
       else:
         output = 'Running XMLDiffer.py'
-        for file in self.specs['vtkdiff']:
-          gold = os.path.join(specs['test_dir'], specs['gold_dir'], file)
-          test = os.path.join(specs['test_dir'], file)
-          differ = XMLDiffer(gold, test, abs_zero=specs['abs_zero'], rel_tol=specs['rel_err'])
+        gold = os.path.join(specs['test_dir'], specs['gold_dir'], file)
+        test = os.path.join(specs['test_dir'], file)
+        differ = XMLDiffer(gold, test, abs_zero=specs['abs_zero'], rel_tol=specs['rel_err'])
 
-          if differ.fail():
-            reason = 'VTKDIFF'
-            output += differ.message()
-            break
+        if differ.fail():
+          reason = 'VTKDIFF'
+          output += differ.message()
+          break
 
     # Return to the test harness
     return (reason, output)

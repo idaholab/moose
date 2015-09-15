@@ -42,12 +42,12 @@ class XMLDiffer(object):
     self._root1 = self._extractXML(file1)
     self._root2 = self._extractXML(file2)
 
-    # Perform the comparision
+    # Perform the comparison
     self._compare()
 
   ##
-  # Check the comparision status (public)
-  # Returns True if the comparision fails
+  # Check the comparison status (public)
+  # Returns True if the comparison fails
   def fail(self):
     return len(self._errors) > 0
 
