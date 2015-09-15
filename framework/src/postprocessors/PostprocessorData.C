@@ -15,8 +15,8 @@
 #include "PostprocessorData.h"
 #include "FEProblem.h"
 
-PostprocessorData::PostprocessorData(FEProblem & fe_problem, THREAD_ID tid) :
-    Restartable("values", "PostprocessorData", fe_problem, tid)
+PostprocessorData::PostprocessorData(FEProblem & fe_problem) :
+    Restartable("values", "PostprocessorData", fe_problem, 0)
 {
 }
 

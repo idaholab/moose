@@ -123,6 +123,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _cm(NULL),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
+    _pps_data(*this),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif
@@ -197,11 +198,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _neighbor_material_data[i] = new MaterialData(_bnd_material_props);
   }
 
-  _pps_data.resize(n_threads);
-
-  for (unsigned int i=0; i<n_threads; i++)
-    _pps_data[i] = new PostprocessorData(*this, i);
-
   _vpps_data.resize(n_threads);
 
   for (unsigned int i=0; i<n_threads; i++)
@@ -241,9 +237,6 @@ FEProblem::~FEProblem()
   }
 
   delete &_nl;
-
-  for (unsigned int i=0; i<n_threads; i++)
-    delete _pps_data[i];
 
   for (unsigned int i=0; i<n_threads; i++)
     delete _vpps_data[i];
@@ -1877,16 +1870,15 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
     }
 
-    _pps_data[tid]->init(mo->name());
+    if (tid == 0)
+      _pps_data.init(mo->name());
   }
 }
 
 void
 FEProblem::initPostprocessorData(const std::string & name)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _pps_data[tid]->init(name);
-
+  _pps_data.init(name);
 }
 
 ExecStore<PostprocessorWarehouse> &
@@ -2047,27 +2039,27 @@ FEProblem::hasUserObject(const std::string & name)
 }
 
 bool
-FEProblem::hasPostprocessor(const std::string & name, THREAD_ID tid)
+FEProblem::hasPostprocessor(const std::string & name)
 {
-  return _pps_data[tid]->hasPostprocessor(name);
+  return _pps_data.hasPostprocessor(name);
 }
 
 PostprocessorValue &
-FEProblem::getPostprocessorValue(const PostprocessorName & name, THREAD_ID tid)
+FEProblem::getPostprocessorValue(const PostprocessorName & name)
 {
-  return _pps_data[tid]->getPostprocessorValue(name);
+  return _pps_data.getPostprocessorValue(name);
 }
 
 PostprocessorValue &
-FEProblem::getPostprocessorValueOld(const std::string & name, THREAD_ID tid)
+FEProblem::getPostprocessorValueOld(const std::string & name)
 {
-  return _pps_data[tid]->getPostprocessorValueOld(name);
+  return _pps_data.getPostprocessorValueOld(name);
 }
 
 PostprocessorValue &
-FEProblem::getPostprocessorValueOlder(const std::string & name, THREAD_ID tid)
+FEProblem::getPostprocessorValueOlder(const std::string & name)
 {
-  return _pps_data[tid]->getPostprocessorValueOlder(name);
+  return _pps_data.getPostprocessorValueOlder(name);
 }
 
 bool
@@ -2299,13 +2291,7 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
             Postprocessor * pp = getPostprocessorPointer<ElementUserObject, ElementPostprocessor>(ps);
 
             if (pp)
-            {
-              Real value = pp->getValue();
-              // store the value in each thread
-
-              for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-                _pps_data[tid]->storeValue(name, value);
-            }
+              _pps_data.storeValue(name, pp->getValue());
 
             already_gathered.insert(ps);
           }
@@ -2337,13 +2323,7 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
             Postprocessor * pp = getPostprocessorPointer<SideUserObject, SidePostprocessor>(ps);
 
             if (pp)
-            {
-              Real value = pp->getValue();
-
-              // store the value in each thread
-              for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-                _pps_data[tid]->storeValue(name, value);
-            }
+              _pps_data.storeValue(name, pp->getValue());
 
             already_gathered.insert(ps);
           }
@@ -2375,13 +2355,7 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
             Postprocessor * pp = getPostprocessorPointer<InternalSideUserObject, InternalSidePostprocessor>(it);
 
             if (pp)
-            {
-              Real value = pp->getValue();
-
-              // store the value in each thread
-              for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-                _pps_data[tid]->storeValue(pp->PPName(), value);
-            }
+              _pps_data.storeValue(pp->PPName(), pp->getValue());
 
             already_gathered.insert(it);
           }
@@ -2436,13 +2410,7 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
             Postprocessor * pp = getPostprocessorPointer<NodalUserObject, NodalPostprocessor>(ps);
 
             if (pp)
-            {
-              Real value = pp->getValue();
-
-              // store the value in each thread
-              for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-                _pps_data[tid]->storeValue(name, value);
-            }
+              _pps_data.storeValue(name, pp->getValue());
 
             already_gathered.insert(ps);
           }
@@ -2474,11 +2442,7 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
 
             if (pp)
             {
-              Real value = pp->getValue();
-
-              // store the value in each thread
-              for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-                _pps_data[tid]->storeValue(name, value);
+              _pps_data.storeValue(name, pp->getValue());
 
               already_gathered.insert(ps);
             }
@@ -2502,13 +2466,7 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
     Postprocessor * pp = getPostprocessorPointer<GeneralUserObject, GeneralPostprocessor>(*generic_user_object_it);
 
     if (pp)
-    {
-      Real value = pp->getValue();
-
-      // store the value in each thread
-      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-        _pps_data[tid]->storeValue(name, value);
-    }
+      _pps_data.storeValue(name, pp->getValue());
   }
 }
 
@@ -3187,8 +3145,7 @@ FEProblem::advanceState()
     _displaced_problem->auxSys().copyOldSolutions();
   }
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _pps_data[tid]->copyValuesBack();
+  _pps_data.copyValuesBack();
 
   if (_material_props.hasStatefulProperties())
     _material_props.shift();
@@ -3876,7 +3833,7 @@ FEProblem::checkUserObjects()
   }
 
   // check that all requested UserObjects were defined in the input file
-  for (std::map<std::string, PostprocessorValue*>::const_iterator it = _pps_data[0]->values().begin(); it != _pps_data[0]->values().end(); ++it)
+  for (std::map<std::string, PostprocessorValue*>::const_iterator it = _pps_data.values().begin(); it != _pps_data.values().end(); ++it)
   {
     if (names.find(it->first) == names.end())
       mooseError("Postprocessor '" + it->first + "' requested but not specified in the input file.");
