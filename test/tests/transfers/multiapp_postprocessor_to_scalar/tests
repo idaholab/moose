@@ -3,7 +3,6 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out_pp_sub0.e master_out_pp_sub1.e'
-    recover = false
     max_threads = 1  # Diffs with threads
   [../]
 
@@ -11,7 +10,6 @@
     type = 'Exodiff'
     input = 'master2.i'
     exodiff = 'master2_out.e'
-    recover = false
     max_threads = 1  # Diffs with threads
   [../]
 

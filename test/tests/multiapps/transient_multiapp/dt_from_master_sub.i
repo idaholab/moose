@@ -50,5 +50,4 @@
 
 [Outputs]
   exodus = true
-  checkpoint = true
 []
