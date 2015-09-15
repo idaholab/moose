@@ -325,10 +325,10 @@ void FEProblem::initialSetup()
   // Flush all output to _console that occur during construction and initialization of objects
   _app.getOutputWarehouse().mooseConsole();
 
-  if (_app.isRecovering())
+  if (_app.isRecovering() && _app.isUltimateMaster())
     _resurrector->setRestartFile(_app.getRecoverFileBase());
 
-  if (_app.isRestarting() || _app.isRecovering())
+  if ((_app.isRestarting() || _app.isRecovering()) && _app.isUltimateMaster())
     _resurrector->restartFromFile();
   else
   {
@@ -358,6 +358,9 @@ void FEProblem::initialSetup()
      */
     if (_mesh.uniformRefineLevel() > 0 && _app.setFileRestart())
     {
+      if (!_app.isUltimateMaster())
+        mooseError("Doing extra refinements when restarting is NOT supported for sub-apps of a MultiApp");
+
       Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
       adaptivity().uniformRefineWithProjection();
       Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
@@ -419,6 +422,10 @@ void FEProblem::initialSetup()
   {
     Moose::setup_perf_log.push("initial adaptivity", "Setup");
     unsigned int n = adaptivity().getInitialSteps();
+
+    if (n && !_app.isUltimateMaster())
+      mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
+
     for (unsigned int i = 0; i < n; i++)
     {
       _console << "Initial adaptivity step " << i+1 << " of " << n << std::endl;
@@ -572,7 +579,7 @@ void FEProblem::initialSetup()
     Threads::parallel_reduce(elem_range, cmt);
   }
 
-  if (_app.isRestarting() || _app.isRecovering())
+  if (_app.isUltimateMaster() && (_app.isRestarting() || _app.isRecovering()))
     _resurrector->restartRestartableData();
 
   // Scalar variables need to reinited for the initial conditions to be available for output

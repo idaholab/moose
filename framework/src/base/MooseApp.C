@@ -173,7 +173,7 @@ MooseApp::setupOptions()
 {
   // Print the header, this is as early as possible
   std::string hdr = header();
-  if (multiappLevel() > 0)
+  if (multiAppLevel() > 0)
     MooseUtils::indentMessage(_name, hdr);
   Moose::out << hdr << std::endl;
 
@@ -425,6 +425,26 @@ MooseApp::executeExecutioner()
   }
   else
     mooseError("No executioner was specified (go fix your input file)");
+}
+
+bool
+MooseApp::isRecovering() const
+{
+  // We never "recover" a sub-app... they just get their state "pushed" to them from  above
+  return _recover;
+}
+
+bool
+MooseApp::isRestarting() const
+{
+  // We never "restart" a sub-app... they just get their state "pushed" to them from  above
+  return _restart;
+}
+
+bool
+MooseApp::hasRecoverFileBase()
+{
+  return !_recover_base.empty();
 }
 
 void

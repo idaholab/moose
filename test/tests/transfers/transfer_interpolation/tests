@@ -5,6 +5,5 @@
     exodiff = 'master_out_sub0.e'
     use_old_floor = True
     rel_err = 3.8e-05
-    recover = false
   [../]
 []

@@ -266,17 +266,17 @@ public:
   /**
    * Whether or not this is a "recover" calculation.
    */
-  bool isRecovering() const { return _recover; }
+  bool isRecovering() const;
 
   /**
    * Whether or not this is a "recover" calculation.
    */
-  bool isRestarting() const { return _restart; }
+  bool isRestarting() const;
 
   /**
    * Return true if the recovery file base is set
    */
-  bool hasRecoverFileBase() { return !_recover_base.empty(); }
+  bool hasRecoverFileBase();
 
   /**
    * The file_base for the recovery file.
@@ -400,10 +400,21 @@ public:
   virtual std::string header() const;
 
   /**
-   * The multiapp level
-   * @return A writable reference to the current number of levels from the master app
+   * The MultiApp Level
+   * @return The current number of levels from the master app
    */
-  unsigned int & multiappLevel() { return _multiapp_level; }
+  unsigned int multiAppLevel() const { return _multiapp_level; }
+
+  /**
+   * Set the MultiApp Level
+   * @param level The level to assign to this app.
+   */
+  void setMultiAppLevel(const unsigned int level) { _multiapp_level = level; }
+
+  /**
+   * Whether or not this app is the ultimate master app. (ie level == 0)
+   */
+  bool isUltimateMaster() { return !_multiapp_level; }
 
   /**
    * Add a Mesh modifier that will act on the meshes in the system

@@ -411,7 +411,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
            << std::setprecision(0) << std::setfill('0') << std::right << _first_local_app + i;
 
   // Only add parent name if it the parent is not the main app
-  if (_app.multiappLevel() > 0)
+  if (_app.multiAppLevel() > 0)
     full_name = _app.name() + "_" + multiapp_name.str();
   else
     full_name = multiapp_name.str();
@@ -452,7 +452,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
 
   // Update the MultiApp level for the app that was just created
-  app->multiappLevel() = _app.multiappLevel() + 1;
+  app->setMultiAppLevel(_app.multiAppLevel() + 1);
   app->setupOptions();
   app->runInputFile();
 }

@@ -282,6 +282,13 @@ Transient::incrementStepOrReject()
     _t_step++;
 
     _problem.advanceState();
+
+    // Advance (and Output) MultiApps if we were doing Picard iterations
+    if (_picard_max_its > 1)
+    {
+      _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
+      _problem.advanceMultiApps(EXEC_TIMESTEP_END);
+    }
   }
   else
   {
@@ -459,13 +466,6 @@ Transient::endStep(Real input_time)
 
     // Perform the output of the current time step
     _problem.outputStep(EXEC_TIMESTEP_END);
-
-    // Output MultiApps if we were doing Picard iterations
-    if (_picard_max_its > 1)
-    {
-      _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
-      _problem.advanceMultiApps(EXEC_TIMESTEP_END);
-    }
 
     //output
     if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
@@ -747,4 +747,3 @@ Transient::getTimeStepperName()
   else
     return std::string();
 }
-
