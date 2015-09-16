@@ -205,7 +205,7 @@ DTKInterpolationAdapter::get_variable_evaluator(std::string var_name)
 {
   if (evaluators.find(var_name) == evaluators.end()) // We haven't created an evaluator for the variable yet
   {
-    System * sys = Transfer::find_sys(var_name);
+    System * sys = Transfer::find_sys(es, var_name);
 
     // Create the FieldEvaluator
     evaluators[var_name] = Teuchos::rcp(new DTKInterpolationEvaluator(*sys, var_name, _offset));
@@ -219,7 +219,7 @@ DTKInterpolationAdapter::get_values_to_fill(std::string var_name)
 {
   if (values_to_fill.find(var_name) == values_to_fill.end())
   {
-    System * sys = Transfer::find_sys(var_name);
+    System * sys = Transfer::find_sys(es, var_name);
     unsigned int var_num = sys->variable_number(var_name);
     bool is_nodal = sys->variable_type(var_num).family == LAGRANGE;
 
@@ -242,7 +242,7 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
 {
   MPI_Comm old_comm = Moose::swapLibMeshComm(*comm->getRawMpiComm());
 
-  System * sys = Transfer::find_sys(var_name);
+  System * sys = Transfer::find_sys(es, var_name);
   unsigned int var_num = sys->variable_number(var_name);
 
   bool is_nodal = sys->variable_type(var_num).family == LAGRANGE;
