@@ -104,4 +104,3 @@ RichardsFlux::computeQpOffDiagJacobian(unsigned int jvar)
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
   return computeQpJac(dvar);
 }
-

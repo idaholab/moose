@@ -27,7 +27,8 @@ MaxQpsThread::MaxQpsThread(FEProblem & fe_problem, QuadratureType qtype, Order o
     _qtype(qtype),
     _order(order),
     _face_order(face_order),
-    _max(0)
+    _max(0),
+    _max_shape_funcs(0)
 {
 }
 
@@ -37,7 +38,8 @@ MaxQpsThread::MaxQpsThread(MaxQpsThread & x, Threads::split /*split*/) :
     _qtype(x._qtype),
     _order(x._order),
     _face_order(x._face_order),
-    _max(x._max)
+    _max(x._max),
+    _max_shape_funcs(x._max_shape_funcs)
 {
 }
 
@@ -63,26 +65,26 @@ MaxQpsThread::operator() (const ConstElemRange & range)
       // We cannot mess with the FE objects in Assembly, because we might need to request second derivatives
       // later on. If we used them, we'd call reinit on them, thus making the call to request second
       // derivatives harmful (i.e. leading to segfaults/asserts). Thus, we have to use a locally allocated object here.
-      FEBase * fe = FEBase::build(dim, fe_type).release();
+      UniquePtr<FEBase> fe (FEBase::build(dim, fe_type));
 
       // figure out the number of qps for volume
-      QBase * qrule = QBase::build(_qtype, dim, _order).release();
-      fe->attach_quadrature_rule(qrule);
+      UniquePtr<QBase> qrule (QBase::build(_qtype, dim, _order));
+      fe->attach_quadrature_rule(qrule.get());
       fe->reinit(elem);
       if (qrule->n_points() > _max)
         _max = qrule->n_points();
-      delete qrule;
+
+      unsigned int n_shape_funcs = fe->n_shape_functions();
+      if (n_shape_funcs > _max_shape_funcs)
+        _max_shape_funcs = n_shape_funcs;
 
       // figure out the number of qps for the face
       // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps than in the volume
-      QBase * qrule_face = QBase::build(_qtype, dim - 1, _face_order).release();
-      fe->attach_quadrature_rule(qrule_face);
+      UniquePtr<QBase> qrule_face (QBase::build(_qtype, dim - 1, _face_order));
+      fe->attach_quadrature_rule(qrule_face.get());
       fe->reinit(elem, side);
       if (qrule_face->n_points() > _max)
         _max = qrule_face->n_points();
-      delete qrule_face;
-
-      delete fe;
     }
   }
 }
@@ -92,4 +94,7 @@ MaxQpsThread::join(const MaxQpsThread & y)
 {
   if (y._max > _max)
     _max = y._max;
+
+  if (y._max_shape_funcs > _max_shape_funcs)
+    _max_shape_funcs = y._max_shape_funcs;
 }
