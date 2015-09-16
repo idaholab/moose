@@ -78,8 +78,10 @@
 [Executioner]
   type = Transient
 
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  # We are solving only mass matrices in this problem.  The Jacobi
+  # preconditioner is a bit faster than ILU or AMG for this.
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'jacobi'
 
   start_time = 0.0
   end_time = 0.03125
