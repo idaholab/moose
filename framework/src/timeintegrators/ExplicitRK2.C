@@ -68,7 +68,7 @@ ExplicitRK2::solve()
   // first solve therefore happens in the second stage.  Note that the
   // non-time Kernels (which should be marked implicit=false) are
   // evaluated at the old solution during this stage.
-  _console << "ExplicitRK2: 1st solve\n";
+  _console << "1st solve\n";
   _stage = 2;
   _fe_problem.timeOld() = time_old;
   _fe_problem.time() = time_stage2;
@@ -88,7 +88,7 @@ ExplicitRK2::solve()
 
   // The "update" stage (which we call stage 3) requires an additional
   // solve with the mass matrix.
-  _console << "ExplicitRK2: 2nd solve\n";
+  _console << "2nd solve\n";
   _stage = 3;
   _fe_problem.timeOld() = time_stage2;
   _fe_problem.time() = time_new;
