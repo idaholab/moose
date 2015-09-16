@@ -22,6 +22,10 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+
+  /// Identity of the coupled variable
+  unsigned int _v_var;
 
   /// Gradient of the coupled variable
   VariableGradient & _grad_v;

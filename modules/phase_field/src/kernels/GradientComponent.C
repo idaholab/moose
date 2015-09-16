@@ -18,6 +18,7 @@ InputParameters validParams<GradientComponent>()
 
 GradientComponent::GradientComponent(const InputParameters & parameters) :
     Kernel(parameters),
+    _v_var(coupled("v")),
     _grad_v(coupledGradient("v")),
     _component(getParam<unsigned int>("component"))
 {
@@ -34,5 +35,13 @@ GradientComponent::computeQpResidual()
 Real
 GradientComponent::computeQpJacobian()
 {
-  return (_phi[_j][_qp] - _grad_v[_qp](_component)) * _test[_i][_qp];
+  return _phi[_j][_qp] * _test[_i][_qp];
+}
+
+Real
+GradientComponent::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (jvar == _v_var)
+    return -_grad_phi[_j][_qp](_component) * _test[_i][_qp];
+  return 0.0;
 }
