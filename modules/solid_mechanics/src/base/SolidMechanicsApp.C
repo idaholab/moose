@@ -10,7 +10,6 @@
 
 #include "AbaqusCreepMaterial.h"
 #include "AbaqusUmatMaterial.h"
-#include "AdaptiveTransient.h"
 #include "CLSHPlasticMaterial.h"
 #include "CLSHPlasticModel.h"
 #include "CombinedCreepPlasticity.h"
@@ -123,8 +122,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(DisplacementAboutAxis);
   registerBoundaryCondition(InteractionIntegralBenchmarkBC);
-
-  registerExecutioner(AdaptiveTransient);
 
   registerMaterial(AbaqusCreepMaterial);
   registerMaterial(AbaqusUmatMaterial);
