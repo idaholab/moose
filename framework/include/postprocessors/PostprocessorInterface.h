@@ -100,9 +100,6 @@ private:
   /// Reference the the FEProblem class
   FEProblem & _pi_feproblem;
 
-  /// Thread ID
-  THREAD_ID _pi_tid;
-
   /// PostprocessorInterface Parameters
   const InputParameters & _ppi_params;
 };

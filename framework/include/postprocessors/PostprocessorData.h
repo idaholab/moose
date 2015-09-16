@@ -29,7 +29,7 @@ public:
   /**
    * Class constructor
    */
-  PostprocessorData(FEProblem & fe_problem, THREAD_ID tid);
+  PostprocessorData(FEProblem & fe_problem);
 
   /**
    * Initialization method, sets the current and old value to 0.0 for this
