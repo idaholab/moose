@@ -26,6 +26,7 @@
     type = ParsedGradFunction
     value = x*x
     grad_x = 2*x
+  [../]
 []
 
 [Variables]
