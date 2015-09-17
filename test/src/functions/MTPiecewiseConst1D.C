@@ -18,22 +18,27 @@
 template<>
 InputParameters validParams<MTPiecewiseConst1D>()
 {
-    InputParameters params = validParams<Function>();
-        return params;
+  InputParameters params = validParams<Function>();
+  return params;
 }
 
 MTPiecewiseConst1D::MTPiecewiseConst1D(const InputParameters & parameters) :
-      Function(parameters)
+    Function(parameters)
 {}
 
 Real
 MTPiecewiseConst1D::value(Real /*t*/, const Point & p)
 {
-    Real val = 0;
-    Real x = p(0);
-    if      (x>=-0.75 && x<-0.50)val=1.0;
-    else if (x>=-0.25 && x< 0.25)val=1.0;
-    else if (x>= 0.50 && x< 0.75)val=1.0;
-    else val=0.1;
-    return val; // p(0) == x
+  Real val = 0;
+  Real x = p(0);
+
+  if ((x >= -0.75 && x < -0.50) ||
+      (x >= -0.25 && x < 0.25) ||
+      (x >= 0.50 && x < 0.75))
+    val = 1.0;
+
+  else
+    val = 0.1;
+
+  return val;
 }
