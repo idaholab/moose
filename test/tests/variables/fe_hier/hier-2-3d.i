@@ -54,6 +54,7 @@
     grad_x = 2*x
     grad_y = 2*y
     grad_z = 2*z
+  [../]
 []
 
 [Variables]

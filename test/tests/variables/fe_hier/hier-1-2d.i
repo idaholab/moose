@@ -38,6 +38,7 @@
     value = x+y
     grad_x = 1
     grad_y = 1
+  [../]
 []
 
 [Variables]

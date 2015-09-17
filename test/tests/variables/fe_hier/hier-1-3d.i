@@ -50,6 +50,7 @@
     grad_x = 1
     grad_y = 1
     grad_z = 1
+  [../]
 []
 
 [Variables]
