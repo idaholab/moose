@@ -27,24 +27,6 @@ template<>
 InputParameters validParams<ControlInterface>();
 
 /**
- * A storage container for the name of parameters to be controlled
- */
-struct ControlParameterName
-{
-  /// The "system" name (e.g., Kernels) or user-defined "control_tag" name
-  std::string group;
-
-  /// The "object" name (generally a sub block in an input file)
-  std::string object;
-
-  /// The name of the parameter to be controlled
-  std::string param;
-
-  /// Input file syntax provided by creating Action
-  std::string syntax;
-};
-
-/**
  * An interface class for accessing writable references to InputParameters
  *
  * This class exists to provided parameter access to the Control base class
@@ -94,20 +76,21 @@ private:
   /**
    * Helper method for extracting iterators to InputParameter objects containing a property with the given name
    * @param name The complete name of the desired parameter (only used for error messages)
-   * @param desired The desired parameter separated into components via tokenizeName method of this class
+   * @param desired The object stored as a MooseObjectName
+   * @param param The desired parameter name
    *
    * Using the iterator allows for the public get methods to provide better error messages because the
    * full object name can be reported.
    *
-   * @see tokenizeName
+   * @see parseParameterName
    */
   template<typename T>
-  std::vector<InputParameterIterator> getValidInputParameterIteratorsByName(const std::string & name, const ControlParameterName & desired);
+  std::set<T*> getValidInputParameterIteratorsByName(const std::string & name, const MooseObjectName & desired, const std::string & param);
 
   /**
    * Helper method supplied parameter name into a container
    */
-  ControlParameterName tokenizeName(std::string name);
+  std::pair<MooseObjectName, std::string> parseParameterName(std::string name);
 
   /// Reference to the Control objects parameters
   const InputParameters & _ci_parameters;
@@ -141,21 +124,19 @@ T &
 ControlInterface::getControlParamByName(const std::string & name)
 {
   // Get the InputParameter objects that contain objects
-  ControlParameterName desired = tokenizeName(name);
-  std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired);
+  std::pair<MooseObjectName, std::string> desired = parseParameterName(name);
+  std::set<T*> iters = getValidInputParameterIteratorsByName<T>(name, desired.first, desired.second);
 
   // If more than one parameter is located, report an error message listing the object and parameter names
   if (iters.size() > 1)
   {
     std::ostringstream oss;
     oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found in multiple objects:\n";
-    for (std::vector<InputParameterIterator>::const_iterator it = iters.begin(); it != iters.end(); ++it)
-      oss << "  " << (*it)->system << "::" << (*it)->object << '\n';
     mooseError(oss.str());
   }
 
   // Return a writeable reference to the parameter
-  return iters[0]->parameters->set<T>(desired.param);
+  return **(iters.begin());
 }
 
 template<typename T>
@@ -170,49 +151,38 @@ std::vector<T*>
 ControlInterface::getControlParamVectorByName(const std::string & name)
 {
   // Get the InputParameter objects that contain objects
-  ControlParameterName desired = tokenizeName(name);
-  std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired);
+  std::pair<MooseObjectName, std::string> desired = parseParameterName(name);
+  std::set<T*> iters = getValidInputParameterIteratorsByName<T>(name, desired.first, desired.second);
 
   // The vector the return
-  std::vector<T*> output;
-
-  // Loop over all InputParameter objects
-  for (std::vector<InputParameterIterator>::iterator it = iters.begin(); it != iters.end(); ++it)
-    output.push_back(&((*it)->parameters->set<T>(desired.param)));
+  std::vector<T*> output(iters.begin(), iters.end());
 
   return output;
 }
 
 template<typename T>
-std::vector<InputParameterIterator>
-ControlInterface::getValidInputParameterIteratorsByName(const std::string & name, const ControlParameterName & desired)
+std::set<T*>
+ControlInterface::getValidInputParameterIteratorsByName(const std::string & name, const MooseObjectName & desired, const std::string & param)
 {
-  // The vector to return
-  std::vector<InputParameterIterator> output;
+  // The set of pointer to controllable parameters
+  std::set<T*> output;
 
   // Loop over all InputParameter objects
-  for (InputParameterIterator it = _input_parameter_warehouse.begin(_tid); it != _input_parameter_warehouse.end(_tid); ++it)
+  for (InputParameterWarehouse::InputParameterIterator it = _input_parameter_warehouse.begin(_tid); it != _input_parameter_warehouse.end(_tid); ++it)
   {
-    // If the desired group is not empty, it must match either the system or tag of the current iterator
-    if (!desired.group.empty() && (desired.group != it->system || it->system.empty()) && (desired.group != it->tag || it->tag.empty()) )
-      continue;
-
-    // If the desired syntax is not empty, it must match the syntax for the current iterator
-    if ( !desired.syntax.empty() && (desired.syntax != it->syntax || it->syntax.empty()) )
-      continue;
-
-    // If the desired object is not empty, it must match the syntax for the current iterator
-    if (!desired.object.empty() && (desired.object != it->object || it->object.empty()) )
+    // If the desired object name does not match the current object name, move on
+    if (desired != it->first)
       continue;
 
     // If the parameter is valid and controllable update the output vector with a pointer to the parameter
-    if (it->parameters->have_parameter<T>(desired.param))
+    if (it->second->have_parameter<T>(param))
     {
       // Do not allow non-controllable types to be controlled
-      if (!it->parameters->isControllable(desired.param))
+      if (!it->second->isControllable(param))
         mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " is not a controllable parameter.");
 
-      output.push_back(it);
+      // Store pointer to the writable parameter
+      output.insert(&(it->second->set<T>(param)));
     }
   }
 

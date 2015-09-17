@@ -35,6 +35,6 @@ MooseObjectAction::MooseObjectAction(InputParameters params) :
                        ? _factory.getValidParams(_type) : validParams<MooseObject>())
 {
   // If the action was created by the parser, grab the syntax form the name of the Action
-  if (_registered_identifier != "(AutoBuilt)" || _registered_identifier.empty())
-    _moose_object_pars.addPrivateParam<std::string>("_syntax", MooseUtils::baseName(getParam<std::string>("name")));
+//  if (_registered_identifier != "(AutoBuilt)" || _registered_identifier.empty())
+//    _moose_object_pars.addPrivateParam<std::string>("action_tag", MooseUtils::baseName(getParam<std::string>("name")));
 }

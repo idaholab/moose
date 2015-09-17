@@ -17,10 +17,7 @@
 
 InputParameterWarehouse::InputParameterWarehouse() :
     Warehouse<InputParameters>(),
-    _input_parameters(libMesh::n_threads()),
-    _system_to_index(libMesh::n_threads()),
-    _syntax_to_index(libMesh::n_threads()),
-    _tag_to_index(libMesh::n_threads())
+    _input_parameters(libMesh::n_threads())
 {
 }
 
@@ -29,111 +26,64 @@ InputParameterWarehouse::~InputParameterWarehouse()
 }
 
 InputParameters &
-InputParameterWarehouse::addInputParameters(std::string name, InputParameters parameters, THREAD_ID tid /* =0 */)
+InputParameterWarehouse::addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
 {
-
-  // Create the storage object
-  InputParametersContainer container;
-  container.object = name;
-
-  // Create the actual InputParameters object to store and reference from the objects
+  // Create the actual InputParameters object that will be reference by the objects
   MooseSharedPointer<InputParameters> ptr(new InputParameters(parameters));
-  container.parameters = ptr;
 
-  // The object name, w/o the object base prefix (this is returned by MooseObject::name())
+  // Set the name parameter to the object being created
   ptr->addParam<std::string>("name", name, "The name of the object");
 
-  // Set the system name
-  container.system = ptr->get<std::string>("_moose_base");
-  std::string system_name = container.system + "::" + container.object;
+  // The object name defined by the base class name, this method of storing is used for
+  // determining the uniqueness of the name
+  MooseObjectName unique_name(ptr->get<std::string>("_moose_base"), name);
 
-  // Input file syntax, if it exists
-  if (ptr->isParamValid("_syntax"))
-    container.syntax = ptr->get<std::string>("_syntax");
+  // Check that the Parameters do not already exist
+  if (_input_parameters[tid].find(unique_name) != _input_parameters[tid].end())
+    mooseError("A '" << unique_name.tag() << "' object already exists with the name '" << unique_name.name() << "'.\n");
+
+  // Store the parameters according to the base name
+  _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(unique_name, ptr));
+
+  // Parser-defined tag, if it exists
+  if (ptr->isParamValid("parser_tag"))
+  {
+    _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(MooseObjectName(ptr->get<std::string>("parser_tag"), name, "/"),  ptr));
+  }
 
   // User-defined tag, if it exists (optional)
   if (ptr->isParamValid("control_tag"))
-    container.tag = ptr->get<std::string>("control_tag");
-
-  // Check that the Parameters do not already exist
-  if (_system_to_index[tid].find(system_name) != _system_to_index[tid].end())
-    mooseError("A " << container.system << " object already exists with the name " << name << ".\n");
+  {
+    _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(MooseObjectName(ptr->get<std::string>("control_tag"), name),  ptr));
+  }
 
   // Set the name and tid parameters
   ptr->addPrivateParam<THREAD_ID>("_tid", tid);
   ptr->allowCopy(false);  // no more copies allowed
 
-  // Store the object in the warehouse
-  _input_parameters[tid].push_back(container);
-  unsigned int index = _input_parameters.size() - 1;
-
-  // Store the name for checking that names are unique and name-based lookup
-  _system_to_index[tid].insert(std::pair<std::string, unsigned int>(system_name, index));
-
-  if (ptr->isParamValid("_syntax"))
-  {
-    std::string syntax_name = container.syntax + "/" + container.object;
-    _syntax_to_index[tid].insert(std::pair<std::string, unsigned int>(syntax_name, index));
-  }
-
-  if (ptr->isParamValid("control_tag"))
-  {
-    std::string tag_name = container.tag + "::" + container.object;
-    _tag_to_index[tid].insert(std::pair<std::string, unsigned int>(tag_name, index));
-  }
-
+  // Return a reference to the InputParameters object
   return *ptr;
 }
 
-
 InputParameters &
-InputParameterWarehouse::getInputParameters(const std::string & long_name, THREAD_ID tid /* =0 */)
+InputParameterWarehouse::getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid )
 {
-  // True when something is found
-  bool found = false;
+  // Create object name
+  MooseObjectName object_name(tag, name);
 
-  // The location of the Inputparameters object
-  unsigned int index;
-  std::map<std::string, unsigned int>::iterator system_iter, syntax_iter, tag_iter;
+  // Storage for the equal range
+  std::pair<InputParameterIterator, InputParameterIterator> ret;
 
-  // Search for parameters using "system" naming convention
-  system_iter = _system_to_index[tid].find(long_name);
-  if (system_iter != _system_to_index[tid].end())
-  {
-    index = system_iter->second;
-    found = true;
-  }
-
-  // Search for parameters using "syntax" naming convention
-  if (!found)
-  {
-    syntax_iter = _syntax_to_index[tid].find(long_name);
-    if (syntax_iter != _syntax_to_index[tid].end())
-    {
-      index = syntax_iter->second;
-      found = true;
-    }
-  }
-
-  // Search for parameters using "tag" naming convention
-  if (!found)
-  {
-    tag_iter = _tag_to_index[tid].find(long_name);
-    if (tag_iter != _tag_to_index[tid].end())
-    {
-      index = tag_iter->second;
-      found = true;
-    }
-  }
+  // Located the object(s)
+  ret = _input_parameters[tid].equal_range(object_name);
 
   // Error if not found
-  if (!found)
-    mooseError("Unknown InputParameters object " << long_name);
+  if (ret.first == ret.second)
+    mooseError("Unknown InputParameters object with tag '" << tag << "' and name '" << name << "'.");
 
-  // Return a writable reference to the InputParameters object
-  return *(_input_parameters[tid][index].parameters.get());
+  // Return a reference to the parameter
+  return *(ret.first->second.get());
 }
-
 
 const std::vector<InputParameters *> &
 InputParameterWarehouse::all() const

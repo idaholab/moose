@@ -220,14 +220,18 @@ Parser::parse(const std::string &input_filename)
           // Add the parsed syntax to the parameters object for consumption by the Action
           params.set<std::string>("task") = it->second._task;
           params.set<std::string>("registered_identifier") = registered_identifier;
+          params.addPrivateParam<std::string>("parser_syntax", curr_identifier);
 
           // Create the Action
-          MooseSharedPointer<Action> action_obj = _action_factory.create(it->second._action, curr_identifier, params);
+          MooseSharedPointer<Action> action_obj = _action_factory.create(it->second._action, MooseUtils::shortName(curr_identifier), params);
 
           // extract the MooseObject params if necessary
           MooseSharedPointer<MooseObjectAction> object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action_obj);
           if (object_action.get())
+          {
             extractParams(curr_identifier, object_action->getObjectParams());
+            object_action->getObjectParams().addPrivateParam<std::string>("parser_tag", MooseUtils::baseName(curr_identifier));
+          }
 
           // add it to the warehouse
           _action_wh.addActionBlock(action_obj);

@@ -21,7 +21,6 @@ InputParameters validParams<TestControl>()
 
   MooseEnum test_type("real variable point");
   params.addRequiredParam<MooseEnum>("test_type", test_type, "Indicates the type of test to perform");
-
   params.addRequiredParam<std::string>("parameter", "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated");
 
   return params;

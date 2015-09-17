@@ -48,44 +48,15 @@ public:
 
   /**
    * The name of the action
-   *
-   * When using MOOSE input files, this is the last portion
-   * of the full input syntax:
-   *    [System]
-   *      [./name]
-   *
-   *    [System]
-   *      [./Subsystem]
-   *        [./name]
    */
   const std::string & name() const { return _name; }
-
-  ///@{
-  /**
-   * The full input file and base syntax for the action
-   *
-   * _full_syntax = System/name
-   * _base_syntax = System
-   * [System]
-   *   [./name]
-   *
-   * _full_syntax = System/Subsystem/name
-   * _base_syntax = System/Subsystem
-   * [System]
-   *   [./Subsystem]
-   *     [./name]
-   */
-  const std::string & getInputSyntax() const { return _full_syntax; }
-  const std::string & getInputSyntaxBase() const { return _base_syntax; }
-  ///@}
-
 
   ///@{
   /**
    * Deprecated name methods, use name() and getInputSyntax()
    */
   std::string getBaseName() const;
-  const std::string & getShortName() const;
+  std::string getShortName() const;
   ///@}
 
   const std::string & type() const { return _action_type; }
@@ -120,10 +91,10 @@ protected:
   std::string _registered_identifier;
 
   /// The complete syntax of the action
-  const std::string & _full_syntax;
+  // const std::string & _full_syntax;
 
   /// The base syntax of the action
-  std::string _base_syntax;
+  //std::string _base_syntax;
 
   /// The name of the action
   std::string _name;

@@ -98,7 +98,7 @@ AddVariableAction::createInitialConditionAction()
   std::string var_name = name();
 
   // Create the object name
-  std::string long_name("ICs/");
+  std::string long_name("");
   long_name += var_name;
   long_name += "_moose";
 

@@ -32,11 +32,7 @@ AddICAction::AddICAction(InputParameters params) :
 void
 AddICAction::act()
 {
-  std::vector<std::string> elements;
-  MooseUtils::tokenize(getParam<std::string>("name"), elements);
-
-  // The variable name will be the second to last element in the path name
-  std::string & var_name = elements[elements.size()-2];
+  std::string var_name = MooseUtils::shortName(_moose_object_pars.get<std::string>("parser_tag"));
   _moose_object_pars.set<VariableName>("variable") = var_name;
   _problem->addInitialCondition(_type, var_name, _moose_object_pars);
 }

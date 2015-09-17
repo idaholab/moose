@@ -349,8 +349,12 @@ ActionWarehouse::printInputFile(std::ostream & out)
   for (std::vector<Action* >::iterator i = ordered_actions.begin();
        i != ordered_actions.end();
        ++i)
-   {
-    std::string name = (*i)->getParam<std::string>("name");
+  {
+    std::string name;
+    if ((*i)->isParamValid("parser_syntax"))
+      name = (*i)->getParam<std::string>("parser_syntax");
+    else
+      name = (*i)->getParam<std::string>("name");
     const std::set<std::string> & tasks = ((*i)->getAllTasks());
     mooseAssert(!tasks.empty(), "Task list is empty");
 

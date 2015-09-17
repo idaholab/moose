@@ -35,18 +35,17 @@ ControlInterface::ControlInterface(const InputParameters & parameters) :
     mooseError("The control logic system is experimental and under heavy development, it currently does not work with threading.");
 }
 
-ControlParameterName
-ControlInterface::tokenizeName(std::string name)
+std::pair<MooseObjectName, std::string>
+ControlInterface::parseParameterName(std::string name)
 {
+  // The MooseObject and parameter name to return
+  std::string object_tag, object_name, param_name;
 
-  // Create the storage container that will be output
-  ControlParameterName container;
-
-  // Locate the group name (this can be the "_moose_base" or "control_tag" parameters from the object
+  // The tag precedes the :: (this is used in _moose_base::name and control_tag::name conventions)
   std::size_t idx = name.find("::");
   if (idx != std::string::npos)
   {
-    container.group = name.substr(0, idx);
+    object_tag = name.substr(0, idx);
     name.erase(0, idx+2);
   }
 
@@ -54,33 +53,33 @@ ControlInterface::tokenizeName(std::string name)
   idx = name.rfind("/");
   if (idx != std::string::npos)
   {
-    container.param = name.substr(idx+1);
+    param_name = name.substr(idx+1);
     name.erase(idx);
   }
   else // if a slash isn't located then the entire name must be the parameter
   {
-    container.param = name;
+    param_name = name;
     name.erase();
   }
 
-  // Locate the syntax
+  // If there is a second slash, there is a syntax based tag: tag/object_name/param
   idx = name.rfind("/");
   if (idx != std::string::npos)
   {
-    container.syntax = name.substr(0, idx);
-    name.erase(0, idx+1);
+    object_name = name.substr(idx+1);
+    name.erase(idx);
+    object_tag = name;
   }
 
-  // Whatever is remaining is the object name
-  container.object = name;
+  // If content still exists in "name", then this must be the object name
+  if (object_name.empty() && !name.empty())
+    object_name = name;
 
   // Handle asterisks
-  if (container.group == "*")
-    container.group = "";
-  if (container.syntax == "*")
-    container.syntax = "";
-  if (container.object == "*")
-    container.object = "";
+  if (object_tag == "*")
+    object_tag = "";
+  if (object_name== "*")
+    object_name = "";
 
-  return container;
+  return std::pair<MooseObjectName, std::string>(MooseObjectName(object_tag, object_name), param_name);
 }
