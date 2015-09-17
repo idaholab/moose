@@ -1,0 +1,13 @@
+[Tests]
+  [./test_part1]
+    type = 'RunApp'
+    input = 'new_dt.i'
+  [../]
+
+  [./test_restart]
+    type = 'Exodiff'
+    input = 'new_dt_restart.i'
+    exodiff = 'new_dt_restart_exodus.e'
+    prereq = test_part1
+  [../]
+[]
