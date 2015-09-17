@@ -23,32 +23,59 @@
 class InputParameters;
 class MooseApp;
 
-/**
- * A storage container for the name of parameters to be controlled
- */
-struct InputParametersContainer
+
+struct MooseObjectName
 {
-  /// The "system" name (e.g., Kernels)
-  std::string system;
-
-  /// The user-defined tag assigned to the object
   std::string tag;
+  std::string name;
 
-  /// The "object" name (generally a sub block in an input file)
-  std::string object;
+  MooseObjectName(const std::string & tag = std::string(), const std::string & name = std::string())
+    {
+      this->tag = tag;
+      this->name = name;
+    }
 
-  /// The name of the parameter to be controlled
-  std::string param;
 
-  /// Input file syntax provided by creating Action
-  std::string syntax;
+  bool operator==(const MooseObjectName & rhs) const
+    {
+      if ( (this->name == rhs.name) && (this->tag == rhs.tag || this->tag.empty() || rhs.tag.empty() ) )
+           return true;
+      return false;
 
-  /// Pointer to the parameters object
-  MooseSharedPointer<InputParameters> parameters;
+    }
+
+  bool operator!=(const MooseObjectName & rhs) const
+    {
+      return !( *this == rhs );
+
+    }
+
+
+  bool operator<(const MooseObjectName & rhs) const
+    {
+      return !std::lexicographical_compare(this->tag.begin(), this->tag.end(), rhs.tag.begin(), rhs.tag.end())
+        && !std::lexicographical_compare(rhs.tag.begin(), rhs.tag.end(), this->tag.begin(), this->tag.end())
+        && !std::lexicographical_compare(this->name.begin(), this->name.end(), rhs.name.begin(), rhs.name.end())
+        && !std::lexicographical_compare(rhs.name.begin(), rhs.name.end(), this->name.begin(), this->name.end());
+
+      //return !std::less<std::string>(lhs.tag, rhs.tag) && !std::less<std::string>(rhs.tag, lhs.tag) &&
+      //       !std::less<std::string>(lhs.name, rhs.name) && !std::less<std::string>(rhs.name, lhs.name));
+
+    }
+
+  /*
+  bool operator()(const MooseObjectName & lhs, const MooseObjectName & rhs)
+    {
+      return lhs == rhs;
+    }
+*/
+
 };
 
 
-typedef std::vector<InputParametersContainer>::iterator InputParameterIterator;
+
+typedef std::map<MooseObjectName, MooseSharedPointer<InputParameters> >::iterator InputParameterIterator;
+
 
 /**
  * Storage container for all InputParamter objects.
@@ -60,6 +87,8 @@ typedef std::vector<InputParametersContainer>::iterator InputParameterIterator;
 class InputParameterWarehouse : public Warehouse<InputParameters>
 {
 public:
+
+
 
   /**
    * Class constructor
@@ -85,14 +114,7 @@ public:
 private:
 
   /// Storage for the InputParameters objects
-  std::vector<std::vector<InputParametersContainer> > _input_parameters;
-
-  ///@{
-  /// Maps from the name of the object to the pointer index in _input_parameters
-  std::vector<std::map<std::string, unsigned int> > _system_to_index;
-  std::vector<std::map<std::string, unsigned int> > _syntax_to_index;
-  std::vector<std::map<std::string, unsigned int> > _tag_to_index;
-  ///@}
+  std::vector<std::map<MooseObjectName, MooseSharedPointer<InputParameters> > > _input_parameters;
 
   /**
    * Method for adding a new InputParameters object
@@ -107,7 +129,7 @@ private:
    * This method is private, because only the factories that are creating objects should be
    * able to call this method.
    */
-  InputParameters & addInputParameters(std::string name, InputParameters parameters, THREAD_ID tid = 0);
+  InputParameters & addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
 
   /**
    * Return a reference to the InputParameters for the named object
@@ -123,7 +145,7 @@ private:
    * will break the ability to control the parameters with the MOOSE control logic system.
    * Only change parameters if you know what you are doing. Hence, this is private for a reason.
    */
-  InputParameters & getInputParameters(const std::string & long_name, THREAD_ID tid = 0);
+  InputParameters & getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid = 0);
 
   ///@{
   /**

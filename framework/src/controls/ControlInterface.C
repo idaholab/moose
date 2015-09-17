@@ -35,18 +35,18 @@ ControlInterface::ControlInterface(const InputParameters & parameters) :
     mooseError("The control logic system is experimental and under heavy development, it currently does not work with threading.");
 }
 
-ControlParameterName
+std::pair<MooseObjectName, std::string>
 ControlInterface::tokenizeName(std::string name)
 {
+  // The MooseObject and parameter name to return
+  MooseObjectName object_name;
+  std::string param_name;
 
-  // Create the storage container that will be output
-  ControlParameterName container;
-
-  // Locate the group name (this can be the "_moose_base" or "control_tag" parameters from the object
+  // The tag precedes the :: (this is used in _moose_base::name and control_tag::name conventions)
   std::size_t idx = name.find("::");
   if (idx != std::string::npos)
   {
-    container.group = name.substr(0, idx);
+    object_name.tag = name.substr(0, idx);
     name.erase(0, idx+2);
   }
 
@@ -54,33 +54,23 @@ ControlInterface::tokenizeName(std::string name)
   idx = name.rfind("/");
   if (idx != std::string::npos)
   {
-    container.param = name.substr(idx+1);
+    param_name = name.substr(idx+1);
     name.erase(idx);
   }
   else // if a slash isn't located then the entire name must be the parameter
   {
-    container.param = name;
+    param_name = name;
     name.erase();
   }
 
-  // Locate the syntax
-  idx = name.rfind("/");
-  if (idx != std::string::npos)
-  {
-    container.syntax = name.substr(0, idx);
-    name.erase(0, idx+1);
-  }
-
   // Whatever is remaining is the object name
-  container.object = name;
+  object_name.name = name;
 
   // Handle asterisks
-  if (container.group == "*")
-    container.group = "";
-  if (container.syntax == "*")
-    container.syntax = "";
-  if (container.object == "*")
-    container.object = "";
+  if (object_name.tag == "*")
+    object_name.tag = "";
+  if (object_name.name == "*")
+    object_name.name = "";
 
-  return container;
+  return std::pair<MooseObjectName, std::string>(object_name, param_name);
 }
