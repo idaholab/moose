@@ -1,49 +1,47 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
+  dim  = 2
   xmin = -1
   xmax = 1
   ymin = -1
   ymax = 1
-  nx = 20
-  ny = 20
+  nx   = 4
+  ny   = 4
   elem_type = QUAD9
 []
 
-[Functions]
-  [./ic]
-    type = ParsedFunction
-    value = 0
-  [../]
-
-  [./forcing_fn]
-    type = ParsedFunction
-    value = 2*t*((x*x)+(y*y))-(4*t*t)
-  [../]
-
-  [./exact_fn]
-    type = ParsedFunction
-    value = t*t*((x*x)+(y*y))
-  [../]
-[]
-
 [Variables]
+  active = 'u'
+
   [./u]
     order = SECOND
     family = LAGRANGE
 
     [./InitialCondition]
-      type = FunctionIC
-      function = ic
+      type = ConstantIC
+      value = 0
     [../]
   [../]
 []
 
+[Functions]
+  [./exact_fn]
+    type = ParsedFunction
+    value = t*t*t*((x*x)+(y*y))
+  [../]
+
+  [./forcing_fn]
+    type = ParsedFunction
+    value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
+  [../]
+[]
+
 [Kernels]
+  active = 'diff ie ffn'
+
   [./ie]
     type = TimeDerivative
     variable = u
-    implicit = true
   [../]
 
   [./diff]
@@ -61,8 +59,6 @@
 []
 
 [BCs]
-  active = 'all'
-
   [./all]
     type = FunctionDirichletBC
     variable = u
@@ -82,17 +78,25 @@
 [Executioner]
   type = Transient
 
-  [./TimeIntegrator]
-    type = ExplicitMidpoint
-  [../]
-  solve_type = 'LINEAR'
+  # We are solving only mass matrices in this problem.  The Jacobi
+  # preconditioner is a bit faster than ILU or AMG for this.
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'jacobi'
 
   start_time = 0.0
-  num_steps = 10
-  dt = 0.0001
-  l_tol = 1e-8
+  end_time = 0.03125
+  dt = 0.00390625
+
+  [./TimeIntegrator]
+    type = Heun
+  [../]
+
+   # For explicit methods, we use the LINEAR solve type.
+   solve_type = 'LINEAR'
+   l_tol = 1e-13
 []
 
 [Outputs]
+  execute_on = 'initial timestep_end'
   exodus = true
 []

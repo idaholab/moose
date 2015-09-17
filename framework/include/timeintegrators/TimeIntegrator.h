@@ -48,7 +48,24 @@ public:
   virtual void preSolve() { }
   virtual void preStep() { }
   virtual void solve();
+
+  /**
+   * Callback to the TimeIntegrator called immediately after the
+   * residuals are computed in NonlinearSystem::computeResidual() (it
+   * is not really named well...).  The residual vector which is
+   * passed in to this function should be filled in by the user with
+   * the _Re_time and _Re_non_time vectors in a way that makes sense
+   * for the particular TimeIntegration method.
+   */
   virtual void postStep(NumericVector<Number> & /*residual*/) { }
+
+  /**
+   * Callback to the TimeIntegrator called immediately after
+   * TimeIntegrator::solve() (so the name does make sense!).  See
+   * e.g. CrankNicolson for an example of what can be done in the
+   * postSolve() callback -- there it is used to move the residual
+   * from the "old" timestep forward in time to avoid recomputing it.
+   */
   virtual void postSolve() { }
 
   virtual int order() = 0;

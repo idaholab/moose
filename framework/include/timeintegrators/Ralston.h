@@ -12,35 +12,39 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef RUNGEKUTTA2_H
-#define RUNGEKUTTA2_H
+#ifndef RALSTON_H
+#define RALSTON_H
 
-#include "TimeIntegrator.h"
+#include "ExplicitRK2.h"
 
-class RungeKutta2;
+class Ralston;
 
 template<>
-InputParameters validParams<RungeKutta2>();
+InputParameters validParams<Ralston>();
 
 /**
- * RK-2
+ * Ralston's time integration method.
+ *
+ * The Butcher tableau for this method is:
+ * 0   | 0
+ * 2/3 | 2/3    0
+ * ---------------------
+ *     | 1/4  3/4
+ *
+ * See: ExplicitRK2.h for more information.
  */
-class RungeKutta2 : public TimeIntegrator
+class Ralston : public ExplicitRK2
 {
 public:
-  RungeKutta2(const InputParameters & parameters);
-  virtual ~RungeKutta2();
-
-  virtual int order() { return 2; }
-
-  virtual void preSolve();
-  virtual void computeTimeDerivatives();
-  virtual void solve();
-  virtual void postStep(NumericVector<Number> & residual);
+  Ralston(const InputParameters & parameters);
+  virtual ~Ralston() {}
 
 protected:
-  unsigned int _stage;
+  /// Method coefficient overrides
+  virtual Real a() const  { return 2./3.; }
+  virtual Real b1() const { return .25; }
+  virtual Real b2() const { return .75; }
 };
 
 
-#endif /* RUNGEKUTTA2_H */
+#endif /* RALSTON_H */

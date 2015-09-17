@@ -68,9 +68,6 @@ protected:
   //! Buffer to store non-time residual from second stage solve
   NumericVector<Number> & _residual_stage2;
 
-  //! Buffer to store solution at beginning of time step
-  NumericVector<Number> & _solution_start;
-
   // The parameter of the method, set at construction time and cannot be changed.
   const Real _alpha;
 };
