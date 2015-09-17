@@ -5,4 +5,10 @@
   input = 'test_import.py'
   requires_swig2 = True
  [../]
+
+ [./test_utils]
+  type = 'CrowPython'
+  input = 'test_utils.py'
+  requires_swig2 = True
+ [../]
 []

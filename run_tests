@@ -6,7 +6,8 @@ script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(script_dir)
 
 #Setup python path to install directory
-os.environ["PYTHONPATH"] = os.path.join(script_dir,"install") + os.pathsep + os.environ.get("PYTHONPATH","")
+os.environ["PYTHONPATH"] = os.path.join(script_dir,"install") + os.pathsep + \
+                           os.environ.get("PYTHONPATH","")
 
 #### Set the name of the application here and moose directory relative to the application
 app_name = 'crow'
