@@ -35,44 +35,42 @@ ControlInterface::ControlInterface(const InputParameters & parameters) :
     mooseError("The control logic system is experimental and under heavy development, it currently does not work with threading.");
 }
 
-ControlParameterName
-ControlInterface::tokenizeName(const std::string & name)
+std::pair<MooseObjectName, std::string>
+ControlInterface::tokenizeName(std::string name)
 {
-  ControlParameterName output;
+  // The MooseObject and parameter name to return
+  MooseObjectName object_name;
+  std::string param_name;
 
-  // Strip the parameter name into components
-  std::vector<std::string> components;
-  MooseUtils::tokenize(name, components);
-
-  // Separate the components into variables for testing against
-  // [System]
-  //   [./object]
-  //     param = ...
-  std::size_t n = components.size();
-  if (n == 1)
-    output.param = components[0];
-
-  else if (n == 2)
+  // The tag precedes the :: (this is used in _moose_base::name and control_tag::name conventions)
+  std::size_t idx = name.find("::");
+  if (idx != std::string::npos)
   {
-    output.object = components[0];
-    output.param = components[1];
+    object_name.tag = name.substr(0, idx);
+    name.erase(0, idx+2);
   }
 
-  else if (n == 3)
+  // Locate the param name
+  idx = name.rfind("/");
+  if (idx != std::string::npos)
   {
-    output.system = components[0];
-    output.object = components[1];
-    output.param = components[2];
+    param_name = name.substr(idx+1);
+    name.erase(idx);
+  }
+  else // if a slash isn't located then the entire name must be the parameter
+  {
+    param_name = name;
+    name.erase();
   }
 
-  else if (n > 3)
-    mooseError("The desired controllable parameter '" << name << "' does not match the expected naming convection.");
+  // Whatever is remaining is the object name
+  object_name.name = name;
 
-  // Set '*' to empty
-  if (output.system == "*")
-    output.system = "";
-  if (output.object == "*")
-    output.object = "";
+  // Handle asterisks
+  if (object_name.tag == "*")
+    object_name.tag = "";
+  if (object_name.name == "*")
+    object_name.name = "";
 
-  return output;
+  return std::pair<MooseObjectName, std::string>(object_name, param_name);
 }

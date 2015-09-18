@@ -181,7 +181,7 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
   InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
   action_params.set<std::string>("type") = type;
   action_params.set<ActionWarehouse *>("awh") = &_awh;
-  action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
+  //action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
   action_params.set<std::string>("task") = "add_aux_kernel";
 
   // Create the action

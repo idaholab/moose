@@ -23,7 +23,59 @@
 class InputParameters;
 class MooseApp;
 
-typedef std::map<std::string, MooseSharedPointer<InputParameters> >::iterator InputParameterIterator;
+
+struct MooseObjectName
+{
+  std::string tag;
+  std::string name;
+
+  MooseObjectName(const std::string & tag = std::string(), const std::string & name = std::string())
+    {
+      this->tag = tag;
+      this->name = name;
+    }
+
+
+  bool operator==(const MooseObjectName & rhs) const
+    {
+      if ( (this->name == rhs.name) && (this->tag == rhs.tag || this->tag.empty() || rhs.tag.empty() ) )
+           return true;
+      return false;
+
+    }
+
+  bool operator!=(const MooseObjectName & rhs) const
+    {
+      return !( *this == rhs );
+
+    }
+
+
+  bool operator<(const MooseObjectName & rhs) const
+    {
+      return !std::lexicographical_compare(this->tag.begin(), this->tag.end(), rhs.tag.begin(), rhs.tag.end())
+        && !std::lexicographical_compare(rhs.tag.begin(), rhs.tag.end(), this->tag.begin(), this->tag.end())
+        && !std::lexicographical_compare(this->name.begin(), this->name.end(), rhs.name.begin(), rhs.name.end())
+        && !std::lexicographical_compare(rhs.name.begin(), rhs.name.end(), this->name.begin(), this->name.end());
+
+      //return !std::less<std::string>(lhs.tag, rhs.tag) && !std::less<std::string>(rhs.tag, lhs.tag) &&
+      //       !std::less<std::string>(lhs.name, rhs.name) && !std::less<std::string>(rhs.name, lhs.name));
+
+    }
+
+  /*
+  bool operator()(const MooseObjectName & lhs, const MooseObjectName & rhs)
+    {
+      return lhs == rhs;
+    }
+*/
+
+};
+
+
+
+typedef std::map<MooseObjectName, MooseSharedPointer<InputParameters> >::iterator InputParameterIterator;
+
 
 /**
  * Storage container for all InputParamter objects.
@@ -35,6 +87,8 @@ typedef std::map<std::string, MooseSharedPointer<InputParameters> >::iterator In
 class InputParameterWarehouse : public Warehouse<InputParameters>
 {
 public:
+
+
 
   /**
    * Class constructor
@@ -59,8 +113,8 @@ public:
 
 private:
 
-  /// Name to pointer map for easy access to the pointers
-  std::vector<std::map<std::string, MooseSharedPointer<InputParameters> > > _name_to_shared_pointer;
+  /// Storage for the InputParameters objects
+  std::vector<std::map<MooseObjectName, MooseSharedPointer<InputParameters> > > _input_parameters;
 
   /**
    * Method for adding a new InputParameters object
@@ -75,7 +129,7 @@ private:
    * This method is private, because only the factories that are creating objects should be
    * able to call this method.
    */
-  InputParameters & addInputParameters(const std::string & long_name, InputParameters parameters, THREAD_ID tid = 0);
+  InputParameters & addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
 
   /**
    * Return a reference to the InputParameters for the named object
@@ -83,11 +137,15 @@ private:
    * @name tid The thread id
    * @return A const reference to the warehouse copy of the InputParameters
    *
+   * Note, the long_name can be supplied in two forms:
+   *   SystemBase::object_name
+   *   InputSyntax/object_name
+   *
    * If you are using this method to access a writable reference to input parameters, this
    * will break the ability to control the parameters with the MOOSE control logic system.
    * Only change parameters if you know what you are doing. Hence, this is private for a reason.
    */
-  InputParameters & getInputParameters(const std::string & long_name, THREAD_ID tid = 0);
+  InputParameters & getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid = 0);
 
   ///@{
   /**
@@ -95,8 +153,8 @@ private:
    * @name tid The thread id
    * @return An iterator to the InputParameters object
    */
-  InputParameterIterator begin(THREAD_ID tid = 0){ return _name_to_shared_pointer[tid].begin(); }
-  InputParameterIterator end(THREAD_ID tid = 0){ return _name_to_shared_pointer[tid].end(); }
+  InputParameterIterator begin(THREAD_ID tid = 0){ return _input_parameters[tid].begin(); }
+  InputParameterIterator end(THREAD_ID tid = 0){ return _input_parameters[tid].end(); }
   ///@}
 
   friend class Factory;

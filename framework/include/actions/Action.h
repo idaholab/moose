@@ -18,6 +18,8 @@
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 
+#include "MooseUtils.h"
+
 #include <string>
 #include <ostream>
 
@@ -44,7 +46,47 @@ public:
 
   virtual void act() = 0;
 
+  /**
+   * The name of the action
+   *
+   * When using MOOSE input files, this is the last portion
+   * of the full input syntax:
+   *    [System]
+   *      [./name]
+   *
+   *    [System]
+   *      [./Subsystem]
+   *        [./name]
+   */
   const std::string & name() const { return _name; }
+
+  ///@{
+  /**
+   * The full input file and base syntax for the action
+   *
+   * _full_syntax = System/name
+   * _base_syntax = System
+   * [System]
+   *   [./name]
+   *
+   * _full_syntax = System/Subsystem/name
+   * _base_syntax = System/Subsystem
+   * [System]
+   *   [./Subsystem]
+   *     [./name]
+   */
+  const std::string & getInputSyntax() const { return _full_syntax; }
+  const std::string & getInputSyntaxBase() const { return _base_syntax; }
+  ///@}
+
+
+  ///@{
+  /**
+   * Deprecated name methods, use name() and getInputSyntax()
+   */
+  std::string getBaseName() const;
+  const std::string & getShortName() const;
+  ///@}
 
   const std::string & type() const { return _action_type; }
 
@@ -66,23 +108,6 @@ public:
 
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
 
-  /**
-   * Returns the short name which is the final string after the last delimiter for the
-   * current ParserBlock
-   */
-  std::string getShortName() const;
-
-  /**
-   * Returns the base name which is the string before the last delimiter for the
-   * current ParserBlock
-   * Note:
-   *  1) If there are multiple slashes, like ./foo/bar/baz, this will return
-   *     ./foo/bar while getShortName() will return baz.
-   *  2) If there are no slashes, this will return an empty string and
-   *     getShortName() will return the action name.
-   */
-  std::string getBaseName() const;
-
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
 
 
@@ -91,14 +116,17 @@ protected:
   /// Input parameters for the action
   InputParameters _pars;
 
-  /// The name of the action
-  std::string _name;
-
-  /// The short name of the action
-  std::string _short_name;
-
   // The registered syntax for this block if any
   std::string _registered_identifier;
+
+  /// The complete syntax of the action
+  const std::string & _full_syntax;
+
+  /// The base syntax of the action
+  std::string _base_syntax;
+
+  /// The name of the action
+  std::string _name;
 
   // The type name of this Action instance
   std::string _action_type;
@@ -141,6 +169,7 @@ protected:
 
   /// Convenience reference to an executioner
   MooseSharedPointer<Executioner> & _executioner;
+
 };
 
 template <typename T>

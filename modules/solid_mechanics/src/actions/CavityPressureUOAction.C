@@ -44,10 +44,7 @@ CavityPressureUOAction::CavityPressureUOAction(const InputParameters & params) :
 void
 CavityPressureUOAction::act()
 {
-  std::string short_name(_name);
-  // Chop off "BCs/CavityPressure/"
-  short_name.erase(0, 19);
-  std::string name = short_name + "UserObject";
+  std::string name = _name + "UserObject";
 
   const std::string uo_type_name("CavityPressureUserObject");
 

@@ -31,4 +31,3 @@ AddMaterialAction::act()
 {
   _problem->addMaterial(_type, _name, _moose_object_pars);
 }
-

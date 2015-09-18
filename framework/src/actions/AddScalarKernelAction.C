@@ -34,4 +34,3 @@ AddScalarKernelAction::act()
   else
     _problem->addAuxScalarKernel(_type, _name, _moose_object_pars);
 }
-

@@ -67,8 +67,7 @@ ReconVarICAction::act()
       poly_params.set<bool>("all_to_one") = false;
 
       // Add initial condition
-      _problem->addInitialCondition("ReconVarIC", "ICs/Initialize_op_" + Moose::stringify(op), poly_params);
+      _problem->addInitialCondition("ReconVarIC", "Initialize_op_" + Moose::stringify(op), poly_params);
     }
   }
 }
-

@@ -26,23 +26,6 @@ class ControlInterface;
 template<>
 InputParameters validParams<ControlInterface>();
 
-
-/**
- * A storage container for the name of parameters to be controlled
- */
-struct ControlParameterName
-{
-  /// The "system" name (e.g., Kerenels)
-  std::string system;
-
-  /// The "object" name (generally a sub block in an input file)
-  std::string object;
-
-  /// The name of the parameter to be controlled
-  std::string param;
-};
-
-
 /**
  * An interface class for accessing writable references to InputParameters
  *
@@ -101,17 +84,12 @@ private:
    * @see tokenizeName
    */
   template<typename T>
-  std::vector<InputParameterIterator> getValidInputParameterIteratorsByName(const std::string & name, const ControlParameterName & desired);
+  std::vector<InputParameterIterator> getValidInputParameterIteratorsByName(const std::string & name, const MooseObjectName & desired, const std::string & param);
 
   /**
-   * Helper method separating parameter name into system/group/param format
-   *
-   * [System]
-   *   [./object]
-   *     param = ...
-   *
+   * Helper method supplied parameter name into a container
    */
-  ControlParameterName tokenizeName(const std::string & name);
+  std::pair<MooseObjectName, std::string> tokenizeName(std::string name);
 
   /// Reference to the Control objects parameters
   const InputParameters & _ci_parameters;
@@ -145,8 +123,8 @@ T &
 ControlInterface::getControlParamByName(const std::string & name)
 {
   // Get the InputParameter objects that contain objects
-  ControlParameterName desired = tokenizeName(name);
-  std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired);
+  std::pair<MooseObjectName, std::string> desired = tokenizeName(name);
+  std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired.first, desired.second);
 
   // If more than one parameter is located, report an error message listing the object and parameter names
   if (iters.size() > 1)
@@ -154,13 +132,12 @@ ControlInterface::getControlParamByName(const std::string & name)
     std::ostringstream oss;
     oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found in multiple objects:\n";
     for (std::vector<InputParameterIterator>::const_iterator it = iters.begin(); it != iters.end(); ++it)
-      oss << "  " << (*it)->first << '\n';
-    oss << "\nUse the method 'getControlParamVector' to access multiple parameters";
+      oss << "  " << (*it)->first.tag << "::" << (*it)->first.name << '\n';
     mooseError(oss.str());
   }
 
   // Return a writeable reference to the parameter
-  return iters[0]->second->set<T>(desired.param);
+  return iters[0]->second->set<T>(desired.second);
 }
 
 template<typename T>
@@ -175,49 +152,38 @@ std::vector<T*>
 ControlInterface::getControlParamVectorByName(const std::string & name)
 {
   // Get the InputParameter objects that contain objects
-  ControlParameterName desired = tokenizeName(name);
-  std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired);
+  std::pair<MooseObjectName, std::string> desired = tokenizeName(name);
+  std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired.first, desired.second);
 
   // The vector the return
   std::vector<T*> output;
 
   // Loop over all InputParameter objects
   for (std::vector<InputParameterIterator>::iterator it = iters.begin(); it != iters.end(); ++it)
-    output.push_back(&((*it)->second->set<T>(desired.param)));
+    output.push_back(&((*it)->second->set<T>(desired.second)));
 
   return output;
 }
 
 template<typename T>
 std::vector<InputParameterIterator>
-ControlInterface::getValidInputParameterIteratorsByName(const std::string & name, const ControlParameterName & desired)
+ControlInterface::getValidInputParameterIteratorsByName(const std::string & name, const MooseObjectName & desired, const std::string & param)
 {
   // The vector to return
   std::vector<InputParameterIterator> output;
 
-  // Storage for tokenizing the current InputParameters name
-  std::vector<std::string> current;
-
   // Loop over all InputParameter objects
   for (InputParameterIterator it = _input_parameter_warehouse.begin(_tid); it != _input_parameter_warehouse.end(_tid); ++it)
   {
-    InputParameters & parameters = *(it->second);
-
-    // Get the current system and group:
-    //   current[0] = system; current[1] = group;
-    current.clear();
-    MooseUtils::tokenize(it->first, current);
-
-    // Continue if the system and group do not agree
-    if ( (!desired.system.empty() && current.size() > 0 && desired.system != current[0]) ||
-         (!desired.object.empty() && current.size() > 1 && desired.object != current[1]) )
+    // If the desired name does not match the current parameter, move on
+    if (desired != it->first)
       continue;
 
-    // If the parameter is valid update the output vector with a pointer to the parameter
-    if (parameters.isParamValid(desired.param))
+    // If the parameter is valid and controllable update the output vector with a pointer to the parameter
+    if (it->second->have_parameter<T>(param))
     {
       // Do not allow non-controllable types to be controlled
-      if (!parameters.isControllable(desired.param))
+      if (!it->second->isControllable(param))
         mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " is not a controllable parameter.");
 
       output.push_back(it);

@@ -17,7 +17,7 @@
 
 InputParameterWarehouse::InputParameterWarehouse() :
     Warehouse<InputParameters>(),
-    _name_to_shared_pointer(libMesh::n_threads())
+    _input_parameters(libMesh::n_threads())
 {
 }
 
@@ -28,33 +28,64 @@ InputParameterWarehouse::~InputParameterWarehouse()
 InputParameters &
 InputParameterWarehouse::addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
 {
-  // Check that the Parameters do not already exist
-  if (_name_to_shared_pointer[tid].find(name) != _name_to_shared_pointer[tid].end())
-    mooseError("An object already exists with the name " << name);
 
-  // Create the actual InputParameters object to store and reference from the objects
+  // Create the storage object
+  std::vector<MooseObjectName> object_names;
+
+  // Create the actual InputParameters object
   MooseSharedPointer<InputParameters> ptr(new InputParameters(parameters));
 
+  // The object name, w/o the object base prefix (this is returned by MooseObject::name())
+  ptr->addParam<std::string>("name", name, "The name of the object");
+
+  // Build the vector of names this object shall be stored as
+  object_names.push_back(MooseObjectName(ptr->get<std::string>("_moose_base"), name));
+
+  // Input file syntax, if it exists (populated by MooseObjectAction)
+  if (ptr->isParamValid("action_tag"))
+    object_names.push_back(MooseObjectName(ptr->get<std::string>("action_tag"), name));
+
+  // User-defined tag, if it exists (optional)
+  if (ptr->isParamValid("control_tag"))
+    object_names.push_back(MooseObjectName(ptr->get<std::string>("control_tag"), name));
+
   // Set the name and tid parameters
-  ptr->addParam<std::string>("name", name, "The complete name of the object");
   ptr->addPrivateParam<THREAD_ID>("_tid", tid);
   ptr->allowCopy(false);  // no more copies allowed
 
   // Store the object in the warehouse
-  _name_to_shared_pointer[tid].insert(std::pair<std::string, MooseSharedPointer<InputParameters> >(name, ptr));
+  for (std::vector<MooseObjectName>::const_iterator it = object_names.begin(); it != object_names.end(); ++it)
+  {
+    // Check that the Parameters do not already exist
+    if (_input_parameters[tid].find(*it) != _input_parameters[tid].end())
+      mooseError("A " << it->tag << " object already exists with the name " << name << ".\n");
 
-  return *_name_to_shared_pointer[tid][name];
+    // Place the SharedPointer in the storage map
+    _input_parameters[tid][*it] = ptr;
+  }
+
+  // Return a reference to the InputParameters object
+  return *ptr;
 }
+
 
 InputParameters &
-InputParameterWarehouse::getInputParameters(const std::string & name, THREAD_ID tid /* =0 */)
+InputParameterWarehouse::getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid /* =0 */)
 {
-  std::map<std::string, MooseSharedPointer<InputParameters> >::iterator iter = _name_to_shared_pointer[tid].find(name);
-  if (iter == _name_to_shared_pointer[tid].end())
-    mooseError("Unknown InputParameters object " << name);
+  // Create object name
+  MooseObjectName object_name(tag, name);
 
-  return *(iter->second.get());
+  // Located the object
+  std::map<MooseObjectName, MooseSharedPointer<InputParameters> >::iterator iter = _input_parameters[tid].find(object_name);
+
+  // Error if not found
+  if (iter == _input_parameters[tid].end())
+    mooseError("Unknown InputParameters object " << long_name);
+
+  // Return a writable reference to the InputParameters object
+  return iter->second.get();
 }
+
 
 const std::vector<InputParameters *> &
 InputParameterWarehouse::all() const

@@ -53,7 +53,7 @@ void
 AddAuxVariableAction::act()
 {
   // Name of variable being added
-  std::string var_name = getShortName();
+  std::string var_name = name();
 
   // Blocks from the input
   std::set<SubdomainID> blocks = getSubdomainIDs();
@@ -79,4 +79,3 @@ AddAuxVariableAction::act()
   if (isParamValid("initial_condition"))
     createInitialConditionAction();
 }
-
