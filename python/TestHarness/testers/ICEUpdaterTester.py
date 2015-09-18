@@ -38,8 +38,7 @@ class ICEUpdaterTester(RunApp, BaseHTTPRequestHandler):
   # This method will be called to process the results of running the test.  Any post-test
   # processing should happen in this method
   def processResults(self, moose_dir, retcode, options, output):
-    self.httpServer.stop()
-    print self.httpServer.getNumberOfPosts()
+    #self.httpServer.stop()
     if self.httpServer.getNumberOfPosts() != int(self.nPosts):
        return ("DID NOT GET CORRECT NUMBER OF POSTS", False)
     else:
@@ -48,11 +47,7 @@ class ICEUpdaterTester(RunApp, BaseHTTPRequestHandler):
 class HTTPRequestHandler(BaseHTTPRequestHandler):
     nPosts = 0
     def do_POST(self):
-        print "POSTING", self.path
         HTTPRequestHandler.nPosts += 1
-        length = int(self.headers.getheader('content-length'))
-        data = cgi.parse_qs(self.rfile.read(length), keep_blank_values=1)
-        print data
         return
     
     def getNumberOfPosts(self):
