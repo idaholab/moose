@@ -216,6 +216,9 @@
 // Outputs
 #include "OutputObjectTest.h"
 
+// Controls
+#include "TestControl.h"
+
 template<>
 InputParameters validParams<MooseTestApp>()
 {
@@ -223,6 +226,7 @@ InputParameters validParams<MooseTestApp>()
 
   params.set<bool>("use_legacy_uo_initialization") = false;
   params.set<bool>("use_legacy_uo_aux_computation") = false;
+  params.set<bool>("use_legacy_output_syntax") = false;
   return params;
 }
 
@@ -447,6 +451,9 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Outputs
   registerOutput(OutputObjectTest);
+
+  // Controls
+  registerControl(TestControl);
 }
 
 // External entry point for dynamic syntax association

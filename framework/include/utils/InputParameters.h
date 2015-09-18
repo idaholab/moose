@@ -353,6 +353,16 @@ public:
   bool isPrivate(const std::string &name) const;
 
   /**
+   * Declare the given parameters as controllable
+   */
+  void declareControllable(const std::string & name);
+
+  /**
+   * Returns a Boolean indicating whether the specified parameter is controllable
+   */
+  bool isControllable(const std::string & name);
+
+  /**
    * This method must be called from every base "Moose System" to create linkage with the Action System.
    * See "Moose.C" for the registerMooseObjectTask() calls.
    */
@@ -579,6 +589,9 @@ private:
 
   /// If a parameters value was set by addParam, and not set again, it will appear in this list (see applyParameters)
   std::set<std::string> _set_by_add_param;
+
+  /// A list of parameters declared as controllable
+  std::set<std::string> _controllable_params;
 
   /// Flag for disabling deprecated parameters message, this is used by applyParameters to avoid dumping messages
   bool _show_deprecated_message;
@@ -924,27 +937,33 @@ template <typename T>
 void
 InputParameters::addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
+  _show_deprecated_message = false;
   addRequiredParam<T>(name, doc_string);
 
   _deprecated_params.insert(std::make_pair(name, deprecation_message));
+  _show_deprecated_message = true;
 }
 
 template <typename T>
 void
 InputParameters::addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message)
 {
+  _show_deprecated_message = false;
   addParam<T>(name, value, doc_string);
 
   _deprecated_params.insert(std::make_pair(name, deprecation_message));
+  _show_deprecated_message = true;
 }
 
 template <typename T>
 void
 InputParameters::addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
+  _show_deprecated_message = false;
   addParam<T>(name, doc_string);
 
   _deprecated_params.insert(std::make_pair(name, deprecation_message));
+  _show_deprecated_message = true;
 }
 
 

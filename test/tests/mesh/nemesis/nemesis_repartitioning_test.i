@@ -52,14 +52,19 @@
 [Executioner]
   type = Steady
 
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
+
+  [./Adaptivity]
+    steps = 1
+    refine_fraction = 0.1
+    coarsen_fraction = 0.1
+    max_h_level = 2
+  [../]
+
+  nl_rel_tol = 1e-6
 []
 
 [Outputs]
   file_base = repartitioned
-  output_initial = true
   nemesis = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

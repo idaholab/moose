@@ -12,4 +12,10 @@
     group = 'adaptive'
     max_parallel = 1
   [../]
+
+  [./smp_group_test]
+    type = 'Exodiff'
+    input = 'smp_group_test.i'
+    exodiff = 'smp_group_test_out.e'
+  [../]
 []

@@ -38,9 +38,6 @@
 []
 
 [GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
   displacements = 'disp_x disp_y disp_z'
   porepressure = porepressure
   block = 0
@@ -272,8 +269,8 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = pp_generation
-  print_perf_log = true
   [./csv]
     type = CSV
   [../]

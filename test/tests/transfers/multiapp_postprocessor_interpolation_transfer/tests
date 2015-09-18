@@ -3,32 +3,35 @@
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e'
-    recover = false
+  [../]
+
+  [./test_error]
+    type = 'RunException'
+    input = 'master.i'
+    expect_err = 'Unable to find variable \w+ in any system'
+    cli_args = 'Transfers/pp_transfer/variable=invalid'
+    prereq = test
   [../]
 
   [./radial_basis]
     type = 'Exodiff'
     input = 'radial_master.i'
     exodiff = 'radial_master_out.e'
-    recover = false
   [../]
 
   [./multilevel]
     type = 'Exodiff'
     input = 'multilevel_master.i'
     exodiff = 'multilevel_master_out.e multilevel_master_out_sub0.e multilevel_master_out_sub0_sub0.e multilevel_master_out_sub0_sub1.e multilevel_master_out_sub1.e multilevel_master_out_sub1_sub0.e multilevel_master_out_sub1_sub1.e'
-    recover = false
   [../]
   [./pp_to_master]
     type = 'Exodiff'
     input = 'master_quad.i'
     exodiff = 'master_quad_out.e'
-    recover = false
   [../]
   [./pp_to_master_single_sub_file]
     type = 'Exodiff'
     input = 'master2_quad.i'
     exodiff = 'master2_quad_out.e'
-    recover = false
   [../]
 []

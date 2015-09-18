@@ -50,6 +50,7 @@
     grad_x = 1
     grad_y = 1
     grad_z = 1
+  [../]
 []
 
 [Variables]
@@ -152,7 +153,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
   csv = true
-  print_perf_log = true
 []

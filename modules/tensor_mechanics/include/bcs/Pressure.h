@@ -37,6 +37,9 @@ protected:
   Function * const _function;
 
   const PostprocessorValue * const _postprocessor;
+
+  /// _alpha Parameter for HHT time integration scheme
+  const Real _alpha;
 };
 
 #endif //PRESSURE_H

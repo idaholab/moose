@@ -1743,10 +1743,11 @@ MooseMesh::getNormalByBoundaryID(BoundaryID id) const
 void
 MooseMesh::init()
 {
-  if (!_app.isRecovering() || !_allow_recovery)
-    buildMesh();
-  else // When recovering just read the CPR file
+  if (_app.isRecovering() && _allow_recovery && _app.isUltimateMaster())
+    // For now, only read the recovery mesh on the Ultimate Master.. sub-apps need to just build their mesh like normal
     getMesh().read(_app.getRecoverFileBase() + "_mesh.cpr");
+  else // Normally just build the mesh
+    buildMesh();
 }
 
 unsigned int

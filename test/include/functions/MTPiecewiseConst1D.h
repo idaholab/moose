@@ -24,10 +24,10 @@ InputParameters validParams<MTPiecewiseConst1D>();
 
 class MTPiecewiseConst1D : public Function
 {
-  public:
-      MTPiecewiseConst1D(const InputParameters & parameters);
+public:
+  MTPiecewiseConst1D(const InputParameters & parameters);
 
-        virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p);
 };
 
 #endif //MTPIECEWISECONST1D_H

@@ -20,6 +20,7 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>()
 
   // All arguments to the phase free energies
   params.addCoupledVar("args", "Arguments of fa and fb - use vector coupling");
+  params.addCoupledVar("displacement_gradients", "Vector of displacement gradient variables (see Modules/PhaseField/DisplacementGradients action)");
 
   // Order parameter which determines the phase
   params.addRequiredCoupledVar("eta", "Order parameter");

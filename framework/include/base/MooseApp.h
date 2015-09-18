@@ -266,17 +266,17 @@ public:
   /**
    * Whether or not this is a "recover" calculation.
    */
-  bool isRecovering() const { return _recover; }
+  bool isRecovering() const;
 
   /**
    * Whether or not this is a "recover" calculation.
    */
-  bool isRestarting() const { return _restart; }
+  bool isRestarting() const;
 
   /**
    * Return true if the recovery file base is set
    */
-  bool hasRecoverFileBase() { return !_recover_base.empty(); }
+  bool hasRecoverFileBase();
 
   /**
    * The file_base for the recovery file.
@@ -361,11 +361,6 @@ public:
    */
   InputParameterWarehouse & getInputParameterWarehouse();
 
-  /**
-   * Returns true if legacy constructors are being used
-   */
-  bool usingLegacyConstructors() { return _legacy_constructors; }
-
   /*
    * Register a piece of restartable data.  This is data that will get
    * written / read to / from a restart file.
@@ -405,10 +400,21 @@ public:
   virtual std::string header() const;
 
   /**
-   * The multiapp level
-   * @return A writable reference to the current number of levels from the master app
+   * The MultiApp Level
+   * @return The current number of levels from the master app
    */
-  unsigned int & multiappLevel() { return _multiapp_level; }
+  unsigned int multiAppLevel() const { return _multiapp_level; }
+
+  /**
+   * Set the MultiApp Level
+   * @param level The level to assign to this app.
+   */
+  void setMultiAppLevel(const unsigned int level) { _multiapp_level = level; }
+
+  /**
+   * Whether or not this app is the ultimate master app. (ie level == 0)
+   */
+  bool isUltimateMaster() { return !_multiapp_level; }
 
   /**
    * Add a Mesh modifier that will act on the meshes in the system
@@ -419,6 +425,11 @@ public:
    * Execute and clear the Mesh Modifiers data structure
    */
   void executeMeshModifiers();
+
+  /**
+   * True if using the legacy input syntax for outputs
+   */
+  bool useLegacyOutputSyntax(){ return _use_legacy_output_syntax; }
 
 protected:
 
@@ -551,9 +562,6 @@ protected:
   /// Legacy Uo Initialization flag
   bool _legacy_uo_initialization_default;
 
-  /// True when using legacy constructors
-  bool _legacy_constructors;
-
   /// true if we want to just check the input file
   bool _check_input;
 
@@ -575,6 +583,9 @@ private:
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, MooseSharedPointer<MeshModifier> > _mesh_modifiers;
+
+  /// Enables the use of legacy 'output_on' syntax
+  bool _use_legacy_output_syntax;
 
   ///@{
   /**

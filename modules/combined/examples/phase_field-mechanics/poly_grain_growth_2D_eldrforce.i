@@ -287,8 +287,5 @@
 
 [Outputs]
   file_base = poly36_grtracker
-  interval = 1
   exodus = true
-  print_perf_log = true
-  output_initial = true
 []

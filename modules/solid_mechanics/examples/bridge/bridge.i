@@ -139,9 +139,6 @@
 []
 
 [Outputs]
-  print_linear_residuals = true
-  print_perf_log = true
-  output_initial = true
   [./exodus]
     #Outputs the result to an exodus file and converts the element stress output to a nodal output
     type = Exodus

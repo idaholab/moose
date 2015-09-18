@@ -35,6 +35,7 @@ private:
   const Real _beta;
   const Real _gamma;
   const Real _eta;
+  const Real _alpha;
 
 };
 

@@ -209,7 +209,5 @@
 
 [Outputs]
   file_base = th21
-  output_initial = true
   csv = true
-  print_perf_log = true
 []

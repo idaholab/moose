@@ -208,9 +208,9 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   file_base = th22
   output_initial = false
   exodus = true
   csv = true
-  print_perf_log = true
 []

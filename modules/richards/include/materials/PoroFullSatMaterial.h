@@ -53,14 +53,11 @@ protected:
   /// name given by user to the porepressure variable
   std::string _porepressure_name;
 
-  /// grad(x displacement)
-  VariableGradient & _grad_disp_x;
+  /// number of displacement variables supplied
+  unsigned int _ndisp;
 
-  /// grad(y displacement)
-  VariableGradient & _grad_disp_y;
-
-  /// grad(z displacement)
-  VariableGradient & _grad_disp_z;
+  /// grad(displacement)
+  std::vector<VariableGradient *> _grad_disp;
 
   /// volumetric strain = strain_ii
   MaterialProperty<Real> & _vol_strain;

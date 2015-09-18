@@ -40,6 +40,5 @@
 []
 
 [Outputs]
-  output_initial = true
   tecplot = true
 []

@@ -108,7 +108,5 @@
 
 [Outputs]
   file_base = out_time
-  output_initial = true
   exodus = true
-  print_perf_log = true
 []

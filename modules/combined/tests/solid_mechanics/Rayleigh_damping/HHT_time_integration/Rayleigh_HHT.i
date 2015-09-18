@@ -1,14 +1,34 @@
-# Test for rayleigh damping implemented using HHT time
-# integration The test is for an 1-D bar element with unit
-# length fixed on one end with a ramped pressure boundary
-# condition applied to the other end. The parameters zeta and
-# eta correspond to the stiffness and mass proportional rayleigh
-# damping; and alpha, beta and gamma are HHT time integration
-# parameters. Note that in the StressDivergencedamping kernel an
-# approximate slope (stress-stress_old)/dt is used as opposed to
-# newmark time integration. The system will come to steady state
-# slowly after the pressure becomes constant. Alpha equal to
-# zero will result in Newmark integration.
+# Test for rayleigh damping implemented using HHT time integration
+#
+# The test is for an 1-D bar element of unit length fixed on one end
+# with a ramped pressure boundary condition applied to the other end.
+# zeta and eta correspond to the stiffness and mass proportional
+# rayleigh damping alpha, beta and gamma are HHT time integration
+# parameters The equation of motion in terms of matrices is:
+#
+# M*accel + (eta*M+zeta*K)*[(1+alpha)vel-alpha vel_old]
+#   + alpha*(K*disp - K*disp_old) + K*disp = P(t+alpha dt)*Area
+#
+# Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
+#
+# This equation is equivalent to:
+#
+# density*accel + eta*density*[(1+alpha)vel-alpha vel_old] +
+#   zeta*[(1+alpha)*d/dt(Div stress)- alpha*d/dt(Div stress_old)] +
+#   alpha *(Div stress - Div stress_old) +Div Stress= P(t+alpha dt)
+#
+# The first two terms on the left are evaluated using the Inertial
+# force kernel The next three terms on the left involving zeta and
+# alpha are evaluated using the StressDivergence Kernel The residual
+# due to Pressure is evaluated using Pressure boundary condition
+#
+# The system will come to steady state slowly after the pressure
+# becomes constant.  Alpha equal to zero will result in Newmark
+# integration.
+#
+# The store_stress_older flag in the SolidModel material model needs
+# to be turned on to store stress older. In this example, this flag is
+# turned on using the child class Elastic.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -195,6 +215,54 @@
     boundary = top
     value=0.0
   [../]
+  [./right_x]
+   type = DirichletBC
+    variable = disp_x
+    boundary = right
+    value=0.0
+  [../]
+  [./right_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = right
+    value=0.0
+  [../]
+  [./left_x]
+   type = DirichletBC
+    variable = disp_x
+    boundary = left
+    value=0.0
+  [../]
+  [./left_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = left
+    value=0.0
+  [../]
+  [./front_x]
+   type = DirichletBC
+    variable = disp_x
+    boundary = front
+    value=0.0
+  [../]
+  [./front_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = front
+    value=0.0
+  [../]
+  [./back_x]
+   type = DirichletBC
+    variable = disp_x
+    boundary = back
+    value=0.0
+  [../]
+  [./back_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = back
+    value=0.0
+  [../]
   [./bottom_x]
     type = DirichletBC
     variable = disp_x
@@ -215,6 +283,7 @@
     disp_y = disp_y
     disp_z = disp_z
     factor = 1
+    alpha = 0.11
     [../]
   [../]
 []
@@ -230,6 +299,7 @@
     youngs_modulus = 210e+09
     poissons_ratio = 0
     thermal_expansion = 0
+    store_stress_older = true
   [../]
 
   [./density]
@@ -302,13 +372,5 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_linear = true
-  [../]
 []

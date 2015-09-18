@@ -68,7 +68,7 @@
 []
 
 [Outputs]
-  print_perf_log = true
+  execute_on = 'timestep_end'
   [./vpp_csv]
     type = CSV
   [../]

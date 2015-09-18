@@ -51,12 +51,13 @@
 
 
 [Outputs]
+  execute_on = 'timestep_end'
   [./screen]
     type = Console
     verbose = true
     perf_log = true
     setup_log_early = true
     time_precision = 6
-    output_on = 'failed nonlinear linear timestep_end'
+    execute_on = 'failed nonlinear linear timestep_end'
   [../]
 []

@@ -61,20 +61,23 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
    params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
 
-  // Add the 'output_on' input parameter
-  params.addParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"), "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment (default: timestep_end)");
-
-  // Add common output toggles
-  params.addParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file");
-  params.addParam<bool>("output_timestep_end", true, "Request that data be output at the end of the timestep");
-  params.addDeprecatedParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output",
-                                  "replace by adding 'timestep_end' to the 'output_on' option");
-  params.addParam<bool>("output_final", false, "Force the final time step to be output, regardless of output interval");
+  // Add the 'execute_on' input parameter
+  params.addParam<MultiMooseEnum>("execute_on", Output::getExecuteOptions("initial timestep_end"), "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment (default: 'initial timestep_end')");
 
   // Add special Console flags
-  params.addParam<bool>("print_linear_residuals", false, "Enable printing of linear residuals to the screen (Console)");
   params.addParam<bool>("print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
   params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
+  params.addParam<bool>("print_linear_residuals", true, "Enable printing of linear residuals to the screen (Console)");
+
+  // **** DEPRECATED SUPPORT ****
+  Output::addDeprecatedInputParameters(params);
+
+  params.addDeprecatedParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"),
+                                            "Set to (none|initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment",
+                                            "Replaced with 'execute_on' to be consistent with other systems in MOOSE");
+  params.addDeprecatedParam<MultiMooseEnum>("additional_output_on", Output::getExecuteOptions(),
+                                            "This list of output flags is added to the existing flags (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment",
+                                            "Replaced with 'additional_execute_on' to be consistent with other systems in MOOSE");
 
   // Return object
   return params;
@@ -87,18 +90,22 @@ CommonOutputAction::CommonOutputAction(InputParameters params) :
   // Set the ActionWarehouse pointer in the parameters that will be passed to the actions created with this action
   _action_params.set<ActionWarehouse *>("awh") = &_awh;
 
-  // Support quick output toggles
-  MultiMooseEnum & output_on = _pars.set<MultiMooseEnum>("output_on");
-  if (getParam<bool>("output_initial"))
-    output_on.push_back("initial");
-  if (getParam<bool>("output_timestep_end"))
-    output_on.push_back("timestep_end");
-  if (getParam<bool>("output_final"))
-    output_on.push_back("final");
-
   // **** DEPRECATED PARAMETER SUPPORT ****
-  if (getParam<bool>("output_intermediate"))
-    output_on.push_back("timestep_end");
+  MultiMooseEnum & execute_on = params.set<MultiMooseEnum>("execute_on");
+  if (_app.useLegacyOutputSyntax() && isParamValid("output_on"))
+  {
+    execute_on.clear();
+    execute_on = getParam<MultiMooseEnum>("output_on");
+
+    if (getParam<bool>("output_initial"))
+      execute_on.push_back("initial");
+    if (getParam<bool>("output_timestep_end"))
+      execute_on.push_back("timestep_end");
+    if (getParam<bool>("output_final"))
+      execute_on.push_back("final");
+    if (getParam<bool>("output_intermediate"))
+      execute_on.push_back("timestep_end");
+  }
 }
 
 void
@@ -206,4 +213,3 @@ CommonOutputAction::hasConsole()
 
   return false;
 }
-

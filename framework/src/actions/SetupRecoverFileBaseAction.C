@@ -43,7 +43,8 @@ void
 SetupRecoverFileBaseAction::act()
 {
   // Do nothing if the App is not recovering
-  if (!_app.isRecovering())
+  // Don't look for a checkpoint file unless we're the ultimate master app
+  if (!_app.isRecovering() || !_app.isUltimateMaster())
     return;
 
   // Build the list of all possible checkpoint files for recover
@@ -179,4 +180,3 @@ SetupRecoverFileBaseAction::getCheckpointFiles(std::set<std::string> & files)
     tinydir_close(&dir);
   }
 }
-

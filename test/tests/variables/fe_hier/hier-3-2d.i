@@ -38,6 +38,7 @@
     value = (x*x*x)+(y*y*y)
     grad_x = 3*x*x
     grad_y = 3*y*y
+  [../]
 []
 
 [Variables]
@@ -128,7 +129,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
   csv = true
-  print_perf_log = true
 []

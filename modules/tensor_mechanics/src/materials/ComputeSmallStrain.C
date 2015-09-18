@@ -40,4 +40,3 @@ ComputeSmallStrain::computeProperties()
     _total_strain[_qp] -= _stress_free_strain[_qp];
   }
 }
-

@@ -77,8 +77,6 @@
 []
 
 [Outputs]
-  output_initial = true
   file_base = out_multi_elem_var
   exodus = true
-  print_perf_log = true
 []

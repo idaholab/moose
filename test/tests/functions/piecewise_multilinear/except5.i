@@ -50,6 +50,6 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   hide = dummy
-  print_perf_log = true
 []

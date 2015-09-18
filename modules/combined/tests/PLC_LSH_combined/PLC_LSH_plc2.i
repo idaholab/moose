@@ -299,9 +299,6 @@
 
 [Outputs]
   file_base = PLC_LSH_plc_out
-  output_initial = true
   exodus = true
   csv = true
-  print_linear_residuals = true
-  print_perf_log = true
 []

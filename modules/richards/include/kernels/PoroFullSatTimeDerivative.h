@@ -48,14 +48,11 @@ private:
   /// old value of volumetric strain
   const MaterialProperty<Real> & _volstrain_old;
 
-  /// variable number of the disp_x variable
-  unsigned int _disp_x_var;
+  /// number of displacement variables
+  unsigned int _ndisp;
 
-  /// variable number of the disp_y variable
-  unsigned int _disp_y_var;
-
-  /// variable number of the disp_z variable
-  unsigned int _disp_z_var;
+  /// variable number of the displacements variables
+  std::vector<unsigned int> _disp_var_num;
 
   /// Biot coefficient
   const MaterialProperty<Real> & _alpha;

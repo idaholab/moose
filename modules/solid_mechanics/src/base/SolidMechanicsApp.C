@@ -10,7 +10,6 @@
 
 #include "AbaqusCreepMaterial.h"
 #include "AbaqusUmatMaterial.h"
-#include "AdaptiveTransient.h"
 #include "CLSHPlasticMaterial.h"
 #include "CLSHPlasticModel.h"
 #include "CombinedCreepPlasticity.h"
@@ -79,7 +78,7 @@ InputParameters validParams<SolidMechanicsApp>()
   InputParameters params = validParams<MooseApp>();
   params.set<bool>("use_legacy_uo_initialization") = false;
   params.set<bool>("use_legacy_uo_aux_computation") = false;
-
+  params.set<bool>("use_legacy_output_syntax") = false;
   return params;
 }
 
@@ -123,8 +122,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(DisplacementAboutAxis);
   registerBoundaryCondition(InteractionIntegralBenchmarkBC);
-
-  registerExecutioner(AdaptiveTransient);
 
   registerMaterial(AbaqusCreepMaterial);
   registerMaterial(AbaqusUmatMaterial);

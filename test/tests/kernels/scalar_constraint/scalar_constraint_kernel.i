@@ -141,8 +141,6 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
   hide = lambda
-  print_perf_log = true
 []

@@ -8,7 +8,7 @@
   [./test_csv]
     type = 'CSVDiff'
     input = 'stateful_prop_test.i'
-	  cli_args = 'Outputs/csv=true'
+    cli_args = 'Outputs/csv=true'
     csvdiff = 'out.csv'
     prereq = 'test'
   [../]
@@ -38,12 +38,14 @@
     type = 'Exodiff'
     input = 'stateful_prop_spatial_test.i'
     exodiff = 'out_spatial.e'
+    cli_args = '--error'
   [../]
 
   [./spatial_bnd_only]
     type = 'Exodiff'
     input = 'stateful_prop_on_bnd_only.i'
     exodiff = 'out_bnd_only.e'
+    cli_args = '--error'
   [../]
 
   [./stateful_copy]
@@ -51,13 +53,14 @@
     input = 'stateful_prop_copy_test.i'
     exodiff = 'out_stateful_copy.e'
     max_parallel = 1
+    cli_args = '--error'
   [../]
 
   [./test_older_csv]
     type = 'CSVDiff'
     input = 'stateful_prop_test_older.i'
     csvdiff = 'out_older.csv'
-    cli_args = 'Outputs/csv=true'
+    cli_args = 'Outputs/csv=true --error'
     max_parallel = 1
     prereq = 'test_older'
   [../]
@@ -66,11 +69,13 @@
     type = 'Exodiff'
     input = 'stateful_prop_adaptivity_test.i'
     exodiff = 'stateful_prop_adaptivity_test_out.e-s003'
+    cli_args = '--error'
   [../]
 
   [./spatial_adaptivity]
     type = 'Exodiff'
     input = 'spatial_adaptivity_test.i'
     exodiff = 'spatial_adaptivity_test_out.e-s003'
+    cli_args = '--error'
   [../]
 []

@@ -22,6 +22,8 @@ InputParameters validParams<FunctionValuePostprocessor>()
   params.addParam<Point>("point", Point(), "A point in space to be given to the function Default: (0, 0, 0)");
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
 
+  params.declareControllable("point scale_factor");
+
   return params;
 }
 

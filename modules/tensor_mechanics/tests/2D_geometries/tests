@@ -32,5 +32,6 @@
     type = Exodiff
     input = '2D-RZ_finiteStrain_resid.i'
     exodiff = '2D-RZ_finiteStrain_resid_out.e'
+    compiler = 'GCC CLANG'
   [../]
 []

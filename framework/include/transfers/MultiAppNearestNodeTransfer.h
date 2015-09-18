@@ -77,17 +77,17 @@ protected:
   bool _fixed_meshes;
 
   /// Used to cache nodes
-  std::map<dof_id_type, Node *> _node_map;
+  std::map<dof_id_type, Node *> & _node_map;
 
   /// Used to cache distances
-  std::map<dof_id_type, Real> _distance_map;
+  std::map<dof_id_type, Real> & _distance_map;
 
   // These variables allow us to cache nearest node info
-  bool _neighbors_cached;
-  std::vector< std::vector<unsigned int> > _cached_froms;
-  std::vector< std::vector<dof_id_type> > _cached_dof_ids;
-  std::map<unsigned int, unsigned int> _cached_from_inds;
-  std::map<unsigned int, unsigned int> _cached_qp_inds;
+  bool & _neighbors_cached;
+  std::vector< std::vector<unsigned int> > & _cached_froms;
+  std::vector< std::vector<dof_id_type> > & _cached_dof_ids;
+  std::map<unsigned int, unsigned int> & _cached_from_inds;
+  std::map<unsigned int, unsigned int> & _cached_qp_inds;
 };
 
 #endif /* MULTIAPPNEARESTNODETRANSFER_H */

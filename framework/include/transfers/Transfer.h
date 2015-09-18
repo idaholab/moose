@@ -60,7 +60,6 @@ public:
    */
   virtual void initialSetup() {}
 
-protected:
   /**
    * Small helper function for finding the system containing the variable.
    *
@@ -69,7 +68,9 @@ protected:
    * @param es The EquationSystems object to be searched.
    * @param var_name The name of the variable you are looking for.
    */
-  System * find_sys(EquationSystems & es, const std::string & var_name) const;
+  static System * find_sys(EquationSystems & es, const std::string & var_name);
+
+protected:
 
   SubProblem & _subproblem;
   FEProblem & _fe_problem;

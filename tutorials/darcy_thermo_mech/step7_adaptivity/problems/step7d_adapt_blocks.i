@@ -169,9 +169,6 @@
 []
 
 [Outputs]
-  output_initial = true
-  print_perf_log = true
-  print_linear_residuals = true
   [./exodus]
     type = Exodus
     output_material_properties = true

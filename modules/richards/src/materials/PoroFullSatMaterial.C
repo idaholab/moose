@@ -20,9 +20,7 @@ InputParameters validParams<PoroFullSatMaterial>()
   params.addRequiredRangeCheckedParam<Real>("solid_bulk_compliance", "solid_bulk_compliance>=0", "The solid bulk compliance (the reciprocal of the solid bulk modulus)");
   params.addRequiredRangeCheckedParam<Real>("fluid_bulk_compliance", "fluid_bulk_compliance>=0", "The fluid bulk compliance (the reciprocal of the fluid bulk modulus)");
   params.addRequiredCoupledVar("porepressure", "The porepressure");
-  params.addRequiredCoupledVar("disp_x", "The x-displacement");
-  params.addRequiredCoupledVar("disp_y", "The y-displacement");
-  params.addRequiredCoupledVar("disp_z", "The z-displacement");
+  params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<bool>("constant_porosity", false, "Set the porosity equal to porosity0 always");
   params.addClassDescription("This Material is designed to calculate and store all the quantities needed for the fluid-flow part of poromechanics, assuming a fully-saturated, single-phase fluid with constant bulk modulus");
   return params;
@@ -40,9 +38,8 @@ PoroFullSatMaterial::PoroFullSatMaterial(const InputParameters & parameters) :
     _porepressure(coupledValue("porepressure")),
     _porepressure_name(getVar("porepressure", 0)->name()),
 
-    _grad_disp_x(coupledGradient("disp_x")),
-    _grad_disp_y(coupledGradient("disp_y")),
-    _grad_disp_z(coupledGradient("disp_z")),
+    _ndisp(coupledComponents("displacements")),
+    _grad_disp(_ndisp),
 
     _vol_strain(declareProperty<Real>("volumetric_strain")),
     _vol_strain_old(declarePropertyOld<Real>("volumetric_strain")),
@@ -57,6 +54,8 @@ PoroFullSatMaterial::PoroFullSatMaterial(const InputParameters & parameters) :
     _done_over_biot_modulus_dP(declarePropertyDerivative<Real>("one_over_biot_modulus", _porepressure_name)),
     _done_over_biot_modulus_dep(declarePropertyDerivative<Real>("one_over_biot_modulus", "volumetric_strain"))
 {
+  for (unsigned int i = 0 ; i < _ndisp ; ++i)
+    _grad_disp[i] = &coupledGradient("displacements", i);
 }
 
 void
@@ -70,7 +69,9 @@ PoroFullSatMaterial::computeQpProperties()
 {
   _biot_coefficient[_qp] = _alpha;
 
-  _vol_strain[_qp] = _grad_disp_x[_qp](0) + _grad_disp_y[_qp](1) + _grad_disp_z[_qp](2);
+  _vol_strain[_qp] = 0;
+  for (unsigned i = 0 ; i < _ndisp ; ++i)
+    _vol_strain[_qp] += (*_grad_disp[i])[_qp](i); // cartesian coordinates?
 
   if (_constant_porosity)
   {

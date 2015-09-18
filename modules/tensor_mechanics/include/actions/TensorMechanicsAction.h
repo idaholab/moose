@@ -20,9 +20,7 @@ public:
   TensorMechanicsAction(const InputParameters & params);
 
   virtual void act();
-
-private:
-
+  virtual void addkernel(const std::string & name, InputParameters & params);
 };
 
 #endif //TENSORMECHANICSACTION_H

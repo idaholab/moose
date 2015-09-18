@@ -203,10 +203,7 @@
 
 [Outputs]
   file_base = outpoly
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
 []
 
 [TensorMechanics]

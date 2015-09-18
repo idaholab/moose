@@ -1,8 +1,22 @@
-# Test for Newmark integration The test is for an 1-D bar
-# element with unit length fixed on one end and a ramped
-# pressure boundary condition applied to the other end. The
-# parameters beta and gamma are Newmark time integration
-# parameters.
+# Test for  Newmark time integration
+#
+# The test is for an 1-D bar element of unit length fixed on one end
+# with a ramped pressure boundary condition applied to the other end.
+# beta and gamma are Newmark time integration parameters The equation
+# of motion in terms of matrices is:
+#
+# M*accel + K*disp = P*Area
+#
+# Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
+#
+# This equation is equivalent to:
+#
+# density*accel + Div Stress = P
+#
+# The first term on the left is evaluated using the Inertial force
+# kernel The last term on the left is evaluated using StressDivergence
+# Kernel The residual due to Pressure is evaluated using Pressure
+# boundary condition
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -287,13 +301,5 @@
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
-  print_linear_residuals = true
-  print_perf_log = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_linear = true
-  [../]
 []

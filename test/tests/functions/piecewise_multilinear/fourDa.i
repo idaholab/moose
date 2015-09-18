@@ -59,8 +59,6 @@
 
 [Outputs]
   file_base = fourDa
-  output_initial = true
   exodus = true
   hide = dummy
-  print_perf_log = true
 []

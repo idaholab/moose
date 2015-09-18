@@ -239,10 +239,8 @@
 
 [Outputs]
   file_base = bl20
-  output_initial = true
-  output_final = true
+  execute_on = 'initial timestep_end final'
   interval = 10000
   exodus = true
   hide = pgas
-  print_perf_log = true
 []

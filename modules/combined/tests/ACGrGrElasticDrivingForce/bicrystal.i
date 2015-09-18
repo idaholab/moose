@@ -248,8 +248,7 @@
 [Preconditioning]
   [./SMP]
    type = SMP
-   off_diag_row = 'gr0 gr1 disp_x disp_y'
-   off_diag_column = 'gr1 gr0 disp_y disp_x'
+   coupled_groups = 'gr0,gr1 disp_x,disp_y'
   [../]
 []
 
@@ -278,7 +277,6 @@
 []
 
 [Outputs]
-  interval = 1
-  print_perf_log = true
+  execute_on = 'timestep_end'
   exodus = true
 []

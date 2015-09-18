@@ -45,7 +45,7 @@ InputParameters validParams<Transient>()
    * For backwards compatibility we'll allow users to set the TimeIntegration scheme inside of the executioner block
    * as long as the TimeIntegrator does not have any additional parameters.
    */
-  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 rk-2 dirk");
+  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 rk-2 dirk lstable-dirk-2");
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
@@ -282,6 +282,13 @@ Transient::incrementStepOrReject()
     _t_step++;
 
     _problem.advanceState();
+
+    // Advance (and Output) MultiApps if we were doing Picard iterations
+    if (_picard_max_its > 1)
+    {
+      _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
+      _problem.advanceMultiApps(EXEC_TIMESTEP_END);
+    }
   }
   else
   {
@@ -459,13 +466,6 @@ Transient::endStep(Real input_time)
 
     // Perform the output of the current time step
     _problem.outputStep(EXEC_TIMESTEP_END);
-
-    // Output MultiApps if we were doing Picard iterations
-    if (_picard_max_its > 1)
-    {
-      _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
-      _problem.advanceMultiApps(EXEC_TIMESTEP_END);
-    }
 
     //output
     if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
@@ -726,7 +726,11 @@ Transient::setupTimeIntegrator()
     case 2: ti_str = "CrankNicolson"; break;
     case 3: ti_str = "BDF2"; break;
     case 4: ti_str = "RungeKutta2"; break;
-    case 5: ti_str = "Dirk"; mooseError("Dirk requires parameters, please use the TimeIntegrator block instead of the \"scheme\" parameter."); break;
+    case 5:
+      ti_str = "Dirk";
+      mooseError("Dirk requires parameters, please use the TimeIntegrator block instead of the \"scheme\" parameter.");
+      break;
+    case 6: ti_str = "LStableDirk2"; break;
     default: mooseError("Unknown scheme"); break;
     }
 
@@ -743,4 +747,3 @@ Transient::getTimeStepperName()
   else
     return std::string();
 }
-

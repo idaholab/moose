@@ -189,9 +189,7 @@
 
 [Outputs]
   file_base = pp_fu_22
-  output_initial = true
-  output_final = true
+  execute_on = 'initial timestep_end final'
   interval = 10000
   exodus = true
-  print_perf_log = true
 []

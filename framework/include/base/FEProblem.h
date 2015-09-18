@@ -485,31 +485,28 @@ public:
   /**
    * Check existence of the postprocessor.
    * @param name The name of the post-processor
-   * @param tid Thread ID
    * @return true if it exists, otherwise false
    */
-  bool hasPostprocessor(const std::string & name, THREAD_ID tid = 0);
+  bool hasPostprocessor(const std::string & name);
 
   /**
    * Get a reference to the value associated with the postprocessor.
    */
-  PostprocessorValue & getPostprocessorValue(const PostprocessorName & name, THREAD_ID tid = 0);
+  PostprocessorValue & getPostprocessorValue(const PostprocessorName & name);
 
   /**
    * Get the reference to the old value of a post-processor
    * @param name The name of the post-processor
-   * @param tid Thread ID
    * @return The reference to the old value
    */
-  PostprocessorValue & getPostprocessorValueOld(const std::string & name, THREAD_ID tid = 0);
+  PostprocessorValue & getPostprocessorValueOld(const std::string & name);
 
   /**
    * Get the reference to the older value of a post-processor
    * @param name The name of the post-processor
-   * @param tid Thread ID
    * @return The reference to the old value
    */
-  PostprocessorValue & getPostprocessorValueOlder(const std::string & name, THREAD_ID tid = 0);
+  PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
 
   /**
    * Get a reference to the PostprocessorWarehouse ExecStore object
@@ -939,7 +936,7 @@ protected:
   std::vector<MarkerWarehouse> _markers;
 
   // postprocessors
-  std::vector<PostprocessorData*> _pps_data;
+  PostprocessorData _pps_data;
   ExecStore<PostprocessorWarehouse> _pps;
 
   // VectorPostprocessors

@@ -92,12 +92,10 @@
 
 [Outputs]
   file_base = out_xda_restart_part1
-  output_initial = true
   checkpoint = true
-  print_perf_log = true
   [./out]
     type = Exodus
     elemental_as_nodal = true
-    output_elemental_on = none
+    execute_elemental_on = none
   [../]
 []

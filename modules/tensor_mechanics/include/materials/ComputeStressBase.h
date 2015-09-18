@@ -41,6 +41,9 @@ protected:
 
   /// derivative of stress w.r.t. strain (_dstress_dstrain)
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+
+  /// Parameter which decides whether to store old stress. This is required for HHT time integration and Rayleigh damping
+  const bool _store_stress_old;
 };
 
 #endif //COMPUTESTRESSBASE_H

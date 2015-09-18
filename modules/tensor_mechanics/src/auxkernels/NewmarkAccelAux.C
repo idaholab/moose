@@ -34,6 +34,8 @@ NewmarkAccelAux::computeValue()
   Real accel_old = _u_old[_qp];
   if (_dt == 0)
     return accel_old;
+
   //Calculates acceeleration using Newmark time integration method
-  return 1/_beta*(((_disp[_qp]-_disp_old[_qp])/(_dt*_dt)) - _vel_old[_qp]/_dt - accel_old*(0.5-_beta));
+  return 1.0 / _beta * (  (_disp[_qp] - _disp_old[_qp]) / (_dt * _dt)
+                        - _vel_old[_qp] / _dt - accel_old * (0.5 - _beta));
 }

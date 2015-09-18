@@ -32,7 +32,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  Real _coef;
+  const Real & _coef;
 };
 
 #endif //COEFDIFFUSION_H

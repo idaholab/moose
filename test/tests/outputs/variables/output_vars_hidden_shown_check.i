@@ -183,9 +183,7 @@
 
 [Outputs]
   file_base = out_hidden
-  output_initial = true
   exodus = true
   hide = 'u elemental nodal x'
   show = u
-  print_perf_log = true
 []
