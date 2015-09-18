@@ -1,14 +1,12 @@
 from RunApp import RunApp
 from util import runCommand
 import os
-import web, threading
+from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+from SocketServer import ThreadingMixIn
+import threading, cgi
 
-urls = ('/ice/update', 'ICEUpdaterTester')
+class ICEUpdaterTester(RunApp, BaseHTTPRequestHandler): 
 
-class ICEUpdaterTester(RunApp, web.application):
-
-  postCounter = 0
-  
   @staticmethod
   def validParams():
     params = RunApp.validParams()
@@ -17,9 +15,7 @@ class ICEUpdaterTester(RunApp, web.application):
         
   def __init__(self, name=None, params=None):
     RunApp.__init__(self, name, params)
-    web.application.__init__(self, urls, globals())
-    self.httpThread = threading.Thread(target=self.run)
-    ICEUpdaterTester.postCounter += 1
+    self.httpServer = SimpleHttpServer("localhost", 8080)
     if params is not None:
        self.nPosts = self.getParam('nPosts')
 
@@ -36,22 +32,53 @@ class ICEUpdaterTester(RunApp, web.application):
   # This method should return the executable command that will be executed by the tester
   def getCommand(self, options):
     command = RunApp.getCommand(self, options)
-    self.httpThread.start()
+    self.httpServer.start()
     return command
 
   # This method will be called to process the results of running the test.  Any post-test
   # processing should happen in this method
   def processResults(self, moose_dir, retcode, options, output):
-    self.stop()
-    if ICEUpdaterTester.postCounter != int(self.nPosts):
+    self.httpServer.stop()
+    print self.httpServer.getNumberOfPosts()
+    if self.httpServer.getNumberOfPosts() != int(self.nPosts):
        return ("DID NOT GET CORRECT NUMBER OF POSTS", False)
     else:
        return RunApp.processResults(self, moose_dir, retcode, options, output)
   
-  def run(self, port=8080, *middleware):
-    func = self.wsgifunc(*middleware)
-    return web.httpserver.runsimple(func, ('127.0.0.1', port))
-
-  def POST(self):
-    data = web.data()
-    print data
+class HTTPRequestHandler(BaseHTTPRequestHandler):
+    nPosts = 0
+    def do_POST(self):
+        print "POSTING", self.path
+        HTTPRequestHandler.nPosts += 1
+        length = int(self.headers.getheader('content-length'))
+        data = cgi.parse_qs(self.rfile.read(length), keep_blank_values=1)
+        print data
+        return
+    
+    def getNumberOfPosts(self):
+        return self.nPosts
+ 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    allow_reuse_address = True
+        
+    def shutdown(self):
+        self.socket.close()
+        HTTPServer.shutdown(self)
+    
+    def getNumberOfPosts(self):
+        return HTTPRequestHandler.nPosts
+ 
+class SimpleHttpServer():
+    def __init__(self, ip, port):
+        self.server = ThreadedHTTPServer((ip,port), HTTPRequestHandler)
+    
+    def getNumberOfPosts(self):
+        return self.server.getNumberOfPosts()
+    
+    def start(self):
+        self.server_thread = threading.Thread(target=self.server.serve_forever)
+        self.server_thread.daemon = True
+        self.server_thread.start()
+    
+    def stop(self):
+        self.server.shutdown()
