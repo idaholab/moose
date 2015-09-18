@@ -34,6 +34,8 @@
 #include <stdlib.h>
 #include <sstream>
 #include "LibcurlUtils.h"
+#include <tbb/tick_count.h>
+#include <tbb/tbb_thread.h>
 
 std::vector<std::string> &split(const std::string &s, char delim,
 		std::vector<std::string> &elems) {
@@ -277,6 +279,7 @@ bool Updater::stop() {
 
 		//Pause this thread for sleepTime seconds
 		tbb::this_tbb_thread::sleep(tbb::tick_count::interval_t(1.0));
+		//tbb::this_tbb_thread::sleep(tbb::tick_count::interval_t(1.0));
 
 		// Stop the thread
 		updaterThread->stopThread();
