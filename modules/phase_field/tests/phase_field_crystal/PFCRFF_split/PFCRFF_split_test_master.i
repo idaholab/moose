@@ -14,17 +14,21 @@
 
 [Variables]
   [./n]
-    [./InitialCondition]
-      type = RandomIC
-      max = 0.8
-      min = 0.2
-      seed = 12345
-    [../]
   [../]
   [./CHPFCRFFSplitVariables]
     sub_filenames = PFCRFF_split_test_sub.i
     n_name = n
     #sub_file_name = test_sub.i
+  [../]
+[]
+
+[ICs]
+  [./n_ic]
+    type = RandomIC
+    max = 0.8
+    min = 0.2
+    seed = 12345
+    variable = n
   [../]
 []
 
@@ -106,4 +110,3 @@
     type = PFCFreezingIC
   [../]
 []
-
