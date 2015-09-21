@@ -267,16 +267,19 @@ MultiAppNearestNodeTransfer::execute()
             if (current_distance < outgoing_evals[2*qp])
             {
               // Assuming LAGRANGE!
-              dof_id_type from_dof = local_nodes[i_local_from][i_node]->dof_number(from_sys_num, from_var_num, 0);
-
-              outgoing_evals[2*qp] = current_distance;
-              outgoing_evals[2*qp + 1] = (*from_sys.solution)(from_dof);
-
-              if (_fixed_meshes)
+              if (local_nodes[i_local_from][i_node]->n_dofs(from_sys_num, from_var_num) > 0)
               {
-                // Cache the nearest nodes.
-                _cached_froms[i_proc][qp] = i_local_from;
-                _cached_dof_ids[i_proc][qp] = from_dof;
+                dof_id_type from_dof = local_nodes[i_local_from][i_node]->dof_number(from_sys_num, from_var_num, 0);
+
+                outgoing_evals[2*qp] = current_distance;
+                outgoing_evals[2*qp + 1] = (*from_sys.solution)(from_dof);
+
+                if (_fixed_meshes)
+                {
+                  // Cache the nearest nodes.
+                  _cached_froms[i_proc][qp] = i_local_from;
+                  _cached_dof_ids[i_proc][qp] = from_dof;
+                }
               }
             }
           }
