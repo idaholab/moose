@@ -33,35 +33,36 @@ InputParameters validParams<ICEUpdater>();
  * time step over a web socket back to the Eclipse Integrated
  * Computational Environment (ICE) for real-time plot updates.
  */
-class ICEUpdater: public AdvancedOutput<Output> {
+class ICEUpdater: public AdvancedOutput<Output>
+{
 public:
 
-	/**
-	 * The Constructor
-	 */
-	ICEUpdater(const InputParameters & params);
+  /**
+   * The Constructor
+   */
+  ICEUpdater(const InputParameters & params);
 
-	virtual ~ICEUpdater();
+  virtual ~ICEUpdater();
 
-	/**
-	 * Performs basic error checking and initial setup of ExodusII_IO output object
-	 */
-	virtual void initialSetup();
+  /**
+   * Performs basic error checking and initial setup of ExodusII_IO output object
+   */
+  virtual void initialSetup();
 
 protected:
 
-	/**
-	 * Writes postprocessor values to global output parameters
-	 */
-	virtual void outputPostprocessors();
+  /**
+   * Writes postprocessor values to global output parameters
+   */
+  virtual void outputPostprocessors();
 
 private:
 
-	/**
-	 * Reference to the ICE Updater object in charge of
-	 * connecting to ICE and posting update messages.
-	 */
-	MooseSharedPointer<Updater> iceUpdater;
+  /**
+   * Reference to the ICE Updater object in charge of
+   * connecting to ICE and posting update messages.
+   */
+  MooseSharedPointer<Updater> iceUpdater;
 
 };
 

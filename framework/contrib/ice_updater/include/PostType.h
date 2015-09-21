@@ -6,15 +6,15 @@
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *  notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the distribution.
+ *  notice, this list of conditions and the following disclaimer in
+ *  the documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
+ *  contributors may be used to endorse or promote products derived
+ *  from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -35,47 +35,48 @@
 /**
  * The PostType enumeration consists of literals representing each type of message.
  */
-enum PostType {
+enum PostType
+{
 
-    /**
-     * This literal means that the message is associated with a file creation.
-     */
-    FILE_CREATED = 0,
+  /**
+   * This literal means that the message is associated with a file creation.
+   */
+  FILE_CREATED = 0,
 
-    /**
-     * This literal means that the message is associated with a file modification.
-     */
-    FILE_MODIFIED,
+  /**
+   * This literal means that the message is associated with a file modification.
+   */
+  FILE_MODIFIED,
 
-    /**
-     * This literal means that the message is associated with a file deletion.
-     */
-    FILE_DELETED,
+  /**
+   * This literal means that the message is associated with a file deletion.
+   */
+  FILE_DELETED,
 
-    /**
-     * This literal means that the message is associated with a plain text message post.
-     */
-    MESSAGE_POSTED,
+  /**
+   * This literal means that the message is associated with a plain text message post.
+   */
+  MESSAGE_POSTED,
 
-    /**
-     * This literal means that the message is associated with a progress update.
-     */
-    PROGRESS_UPDATED,
+  /**
+   * This literal means that the message is associated with a progress update.
+   */
+  PROGRESS_UPDATED,
 
-    /**
-     * This literal means that the message is associated with a convergence update.
-     */
-    CONVERGENCE_UPDATED,
+  /**
+   * This literal means that the message is associated with a convergence update.
+   */
+  CONVERGENCE_UPDATED,
 
-    /**
-     * This literal means that the message is associated with an updater start event.
-     */
-    UPDATER_STARTED,
+  /**
+   * This literal means that the message is associated with an updater start event.
+   */
+  UPDATER_STARTED,
 
-    /**
-     * This literal means that the message is associated with an updater stop event.
-     */
-    UPDATER_STOPPED
+  /**
+   * This literal means that the message is associated with an updater stop event.
+   */
+  UPDATER_STOPPED
 
 };
 

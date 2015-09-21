@@ -6,15 +6,15 @@
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *  notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the distribution.
+ *  notice, this list of conditions and the following disclaimer in
+ *  the documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
+ *  contributors may be used to endorse or promote products derived
+ *  from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -41,49 +41,50 @@ using namespace std;
  * The Post class is a data structure used by the Updater to hold a
  * string message and its associated PostType.
  */
-class Post {
+class Post
+{
 
 private:
 
-    /**
-     * The plain text message stored in the Post.
-     */
-    string message;
+  /**
+   * The plain text message stored in the Post.
+   */
+  string message;
 
-    /**
-     * The PostType associated with this Post object.
-     */
-    PostType type;
+  /**
+   * The PostType associated with this Post object.
+   */
+  PostType type;
 
 public:
 
-    /**
-     * Constructor that sets the PostType and message for this post.
-     *
-     * @param type The PostType associated with this Post object.
-     * @param message The plain text message stored in the Post.
-     */
-    Post(PostType type, string message);
+  /**
+   * Constructor that sets the PostType and message for this post.
+   *
+   * @param type The PostType associated with this Post object.
+   * @param message The plain text message stored in the Post.
+   */
+  Post(PostType type, string message);
 
-    /**
-     * The Destructor.
-     */
-    ~Post();
+  /**
+   * The Destructor.
+   */
+  ~Post();
 
-    /**
-     * Returns a JSON formatted string containing the post message and type.
-     *
-     * @return A JSON formatted string containing the post message and type.
-     */
-    string getJSON();
+  /**
+   * Returns a JSON formatted string containing the post message and type.
+   *
+   * @return A JSON formatted string containing the post message and type.
+   */
+  string getJSON();
 
-    /**
-     * Returns a string representation of the provided PostType.
-     *
-     * @param postType A PostType literal.
-     * @return A string representation of the provided PostType.
-     */
-    static string getPostTypeString(PostType postType);
+  /**
+   * Returns a string representation of the provided PostType.
+   *
+   * @param postType A PostType literal.
+   * @return A string representation of the provided PostType.
+   */
+  static string getPostTypeString(PostType postType);
 
 };
 
