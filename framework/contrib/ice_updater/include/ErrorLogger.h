@@ -6,15 +6,15 @@
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *  notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the distribution.
+ *  notice, this list of conditions and the following disclaimer in
+ *  the documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
+ *  contributors may be used to endorse or promote products derived
+ *  from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -42,41 +42,42 @@ using namespace std;
  * The ErrorLogger class has functions to store errors in a Vector&lt;string&gt;
  * attribute and then dump those errors to a file.
  */
-class ErrorLogger {
+class ErrorLogger
+{
 
 private:
 
-    /**
-     * A ErrorVector object to contain string errors.
-     */
-	vector<string> errorVector;
+  /**
+   * A ErrorVector object to contain string errors.
+   */
+  vector<string> errorVector;
 
 public:
 
-    /**
-     * The Constructor.
-     */
-    ErrorLogger();
+  /**
+   * The Constructor.
+   */
+  ErrorLogger();
 
-    /**
-     * The Destructor.
-     */
-    ~ErrorLogger();
+  /**
+   * The Destructor.
+   */
+  ~ErrorLogger();
 
-    /**
-     * Appends an error string to the errorVector attribute.
-     *
-     * @param error An error string.
-     */
-    void logError(string error);
+  /**
+   * Appends an error string to the errorVector attribute.
+   *
+   * @param error An error string.
+   */
+  void logError(string error);
 
-    /**
-     * Dumps the errors in errorVector into a file with a filename format
-     * "updatererrors_&lt;timestamp&gt;.log".
-     *
-     * @return The name of the error log file.
-     */
-    string dumpErrors();
+  /**
+   * Dumps the errors in errorVector into a file with a filename format
+   * "updatererrors_&lt;timestamp&gt;.log".
+   *
+   * @return The name of the error log file.
+   */
+  string dumpErrors();
 
 };
 

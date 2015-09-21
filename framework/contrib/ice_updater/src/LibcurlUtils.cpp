@@ -6,15 +6,15 @@
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *  notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the distribution.
+ *  notice, this list of conditions and the following disclaimer in
+ *  the documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
+ *  contributors may be used to endorse or promote products derived
+ *  from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -39,25 +39,27 @@ using namespace std;
 /**
  * The Constructor.
  */
-LibcurlUtils::LibcurlUtils() {
+LibcurlUtils::LibcurlUtils()
+{
 
-    //Create the curl handle
-    curl = curl_easy_init();
+  //Create the curl handle
+  curl = curl_easy_init();
 
-    //Set the ignoreSslPeerVerification flag to false.
-    ignoreSslPeerVerification = false;
+  //Set the ignoreSslPeerVerification flag to false.
+  ignoreSslPeerVerification = false;
 
 }
 
 /**
  * The Destructor.
  */
-LibcurlUtils::~LibcurlUtils() {
+LibcurlUtils::~LibcurlUtils()
+{
 
-    //Cleanup handle
-    curl_easy_cleanup(curl);
+  //Cleanup handle
+  curl_easy_cleanup(curl);
 
-    return;
+  return;
 }
 
 /**
@@ -66,83 +68,84 @@ LibcurlUtils::~LibcurlUtils() {
  * @param url The URL of the GET request.
  * @return The contents at the URL or an error message if one took place.
  */
-string LibcurlUtils::get(string url, string username, string password) {
+string LibcurlUtils::get(string url, string username, string password)
+{
 
-    //If handle was successfully created
-    if(curl) {
+  //If handle was successfully created
+  if(curl) {
 
-        //String to hold contents retrieved with GET.
-        string buffer;
+    //String to hold contents retrieved with GET.
+    string buffer;
 
-        //Reinitialize curl handle
-        curl_easy_reset(curl);
+    //Reinitialize curl handle
+    curl_easy_reset(curl);
 
-        //Set the error buffer
-        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
+    //Set the error buffer
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
 
-        //Set the URL
-        curl_easy_setopt(curl, CURLOPT_URL, url.data());
+    //Set the URL
+    curl_easy_setopt(curl, CURLOPT_URL, url.data());
 
-        //Set the write callback function
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeGetData);
+    //Set the write callback function
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeGetData);
 
-        //Set the data pointer to write to the provided buffer
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+    //Set the data pointer to write to the provided buffer
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
 
-        //If the ignoreSslPeerVerification flag is set to true
-        if(ignoreSslPeerVerification) {
+    //If the ignoreSslPeerVerification flag is set to true
+    if(ignoreSslPeerVerification) {
 
-            //Do not verify server certificate
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+      //Do not verify server certificate
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 
-        }
+    }
 
-        //Set the username and password
-        curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
-        curl_easy_setopt(curl, CURLOPT_PASSWORD, password.data());
+    //Set the username and password
+    curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, password.data());
 
-        //Attempt to retrieve from the remote page
-        result = curl_easy_perform(curl);
+    //Attempt to retrieve from the remote page
+    result = curl_easy_perform(curl);
 
-        //Check the result
-        if (result == CURLE_OK) {
+    //Check the result
+    if (result == CURLE_OK) {
 
-            //Create a variable to hold HTTP response code
-            long http_code;
+      //Create a variable to hold HTTP response code
+      long http_code;
 
-            //Call easy info function to get the code of the last call.
-            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+      //Call easy info function to get the code of the last call.
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-            //If the response code is other than 200 OK
-            if(http_code != 200) {
+      //If the response code is other than 200 OK
+      if(http_code != 200) {
 
-                //Create a string to describe the error
-                string error = "A GET request to ";
-                stringstream ss;
-                ss << http_code;
-                error += url;
-                error += " returned HTTP code ";
-                error += ss.str();
-                error += ".";
+        //Create a string to describe the error
+        string error = "A GET request to ";
+        stringstream ss;
+        ss << http_code;
+        error += url;
+        error += " returned HTTP code ";
+        error += ss.str();
+        error += ".";
 
-                //Return the error.
-                return error ;
+        //Return the error.
+        return error ;
 
-            }
+      }
 
-            //Return the contents of the GET response
-            return buffer;
-
-        } else {
-            //Return the curl error
-            return string(error);
-        }
+      //Return the contents of the GET response
+      return buffer;
 
     } else {
-
-        //Return a CURL initialization error
-        return "CURL could not be initialized.";
+      //Return the curl error
+      return string(error);
     }
+
+  } else {
+
+    //Return a CURL initialization error
+    return "CURL could not be initialized.";
+  }
 }
 
 /**
@@ -152,81 +155,82 @@ string LibcurlUtils::get(string url, string username, string password) {
  * @param value The value that is posted to the url.
  * @return A string containing the error if one took place. Else returns an empty string.
  */
-string LibcurlUtils::post(string url, string value, string username, string password) {
+string LibcurlUtils::post(string url, string value, string username, string password)
+{
 
-    //If handle was successfully created and the value is not empty
-    if(curl && !value.empty()) {
+  //If handle was successfully created and the value is not empty
+  if(curl && !value.empty()) {
 
-        //Create string to post
-        string data = "post=" + value;
+    //Create string to post
+    string data = "post=" + value;
 
-        //Reinitialize curl handle
-        curl_easy_reset(curl);
+    //Reinitialize curl handle
+    curl_easy_reset(curl);
 
-        //Set the POST field with data
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.data());
+    //Set the POST field with data
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.data());
 
-        //Set the error buffer
-        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
+    //Set the error buffer
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
 
-        //Set the URL for the post
-        curl_easy_setopt(curl, CURLOPT_URL, url.data());
+    //Set the URL for the post
+    curl_easy_setopt(curl, CURLOPT_URL, url.data());
 
-        //If the ignoreSslPeerVerification flag is set to true
-        if(ignoreSslPeerVerification) {
+    //If the ignoreSslPeerVerification flag is set to true
+    if(ignoreSslPeerVerification) {
 
-            //Do not verify server certificate
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+      //Do not verify server certificate
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 
-        }
+    }
 
-        //Set the username and password
-        curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
-        curl_easy_setopt(curl, CURLOPT_PASSWORD, password.data());
+    //Set the username and password
+    curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, password.data());
 
-        //Attempt to post to the remote page
-        result = curl_easy_perform(curl);
+    //Attempt to post to the remote page
+    result = curl_easy_perform(curl);
 
-        //Check the result
-        if (result == CURLE_OK) {
+    //Check the result
+    if (result == CURLE_OK) {
 
-            //Create a variable to hold HTTP response code
-            long http_code;
+      //Create a variable to hold HTTP response code
+      long http_code;
 
-            //Call easy info function to get the code of the last call.
-            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+      //Call easy info function to get the code of the last call.
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-            //If the response code is other than 200 OK
-            if(http_code != 200) {
+      //If the response code is other than 200 OK
+      if(http_code != 200) {
 
-                //Create a string to describe the error
-                string error = "A POST request to ";
-                stringstream ss;
-                ss << http_code;
-                error += url;
-                error += " returned HTTP code ";
-                error += ss.str();
-                error += ".";
+        //Create a string to describe the error
+        string error = "A POST request to ";
+        stringstream ss;
+        ss << http_code;
+        error += url;
+        error += " returned HTTP code ";
+        error += ss.str();
+        error += ".";
 
-                //Return the error.
-                return error ;
+        //Return the error.
+        return error ;
 
-            }
+      }
 
-            //Return an empty string indicating no error
-            return "";
-
-        } else {
-
-            //Return the curl error
-            return string(error);
-        }
+      //Return an empty string indicating no error
+      return "";
 
     } else {
 
-        //Return a CURL initialization error
-        return "CURL could not be initialized.";
+      //Return the curl error
+      return string(error);
     }
+
+  } else {
+
+    //Return a CURL initialization error
+    return "CURL could not be initialized.";
+  }
 }
 
 /**
@@ -236,10 +240,11 @@ string LibcurlUtils::post(string url, string value, string username, string pass
  *
  * @param ignoreSslPeerVerification The value for the ignoreSslPeerVerification flag.
  */
-void LibcurlUtils::setIgnoreSslPeerVerification(bool ignoreSslPeerVerification) {
+void LibcurlUtils::setIgnoreSslPeerVerification(bool ignoreSslPeerVerification)
+{
 
-    //Set the instance value to the value in ignoreSslPeerVerification.
-    this->ignoreSslPeerVerification = ignoreSslPeerVerification;
+  //Set the instance value to the value in ignoreSslPeerVerification.
+  this->ignoreSslPeerVerification = ignoreSslPeerVerification;
 
 }
 
@@ -252,14 +257,15 @@ void LibcurlUtils::setIgnoreSslPeerVerification(bool ignoreSslPeerVerification) 
  * @param buffer The buffer to store the get() contents.
  * @return The amount written which should be size * nmemb.
  */
-int LibcurlUtils::writeGetData(char * data,  size_t size, size_t nmemb, string buffer) {
+int LibcurlUtils::writeGetData(char * data,  size_t size, size_t nmemb, string buffer)
+{
 
-    //Append the data to the buffer
-    buffer.append(data, size * nmemb);
+  //Append the data to the buffer
+  buffer.append(data, size * nmemb);
 
-    //Compute the size written to buffer
-    int result = size * nmemb;
+  //Compute the size written to buffer
+  int result = size * nmemb;
 
-    //Return the resulting size
-    return result;
+  //Return the resulting size
+  return result;
 }

@@ -6,15 +6,15 @@
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *  notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the distribution.
+ *  notice, this list of conditions and the following disclaimer in
+ *  the documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
+ *  contributors may be used to endorse or promote products derived
+ *  from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -37,15 +37,17 @@
 /**
  * The Constructor.
  */
-ErrorLogger::ErrorLogger() {
+ErrorLogger::ErrorLogger()
+{
 
 }
 
 /**
  * The Destructor.
  */
-ErrorLogger::~ErrorLogger() {
-    return;
+ErrorLogger::~ErrorLogger()
+{
+  return;
 }
 
 /**
@@ -53,31 +55,32 @@ ErrorLogger::~ErrorLogger() {
  *
  * @param error An error string.
  */
-void ErrorLogger::logError(string error) {
+void ErrorLogger::logError(string error)
+{
 
-    //The following block is modified from the C++ reference for the strftime function
-    //and is used to generate a formatted timestamp (e.g., Thu Aug 23 14:55:02 2001)
-    //to prepend to the error.
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer [80];
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-    strftime(buffer, 80, "%c",timeinfo);
+  //The following block is modified from the C++ reference for the strftime function
+  //and is used to generate a formatted timestamp (e.g., Thu Aug 23 14:55:02 2001)
+  //to prepend to the error.
+  time_t rawtime;
+  struct tm * timeinfo;
+  char buffer [80];
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(buffer, 80, "%c",timeinfo);
 
-    //Get the timestamp from the buffer.
-    string timestamp = string(buffer);
+  //Get the timestamp from the buffer.
+  string timestamp = string(buffer);
 
-    //Create an error string that is padded on the left by [timestamp].
-    string formattedError = "[";
-    formattedError += timestamp;
-    formattedError += "] ";
-    formattedError += error;
+  //Create an error string that is padded on the left by [timestamp].
+  string formattedError = "[";
+  formattedError += timestamp;
+  formattedError += "] ";
+  formattedError += error;
 
-    //Add the timestamp formatted error to the errorVector.
-    errorVector.push_back(formattedError);
+  //Add the timestamp formatted error to the errorVector.
+  errorVector.push_back(formattedError);
 
-    return;
+  return;
 }
 
 /**
@@ -86,59 +89,60 @@ void ErrorLogger::logError(string error) {
  *
  * @return The name of the error log file or a blank string if no errors have been recorded.
  */
-string ErrorLogger::dumpErrors() {
+string ErrorLogger::dumpErrors()
+{
 
-    //If there are no errors in the errorVector.
-    if(errorVector.empty()) {
+  //If there are no errors in the errorVector.
+  if(errorVector.empty()) {
 
-        //Just return a blank string.
-        return "";
-    }
+    //Just return a blank string.
+    return "";
+  }
 
-    //Declare a variable to store the contents of the error log file.
-    string errorFileContents = "";
+  //Declare a variable to store the contents of the error log file.
+  string errorFileContents = "";
 
-    //Loop over the errors in errorVector.
-    for(int i=0; i<errorVector.size(); i++) {
+  //Loop over the errors in errorVector.
+  for(int i=0; i<errorVector.size(); i++) {
 
-        //Append the error and a new line char to the error file contents.
-        errorFileContents += errorVector[i];
-        errorFileContents += "\n";
-    }
+    //Append the error and a new line char to the error file contents.
+    errorFileContents += errorVector[i];
+    errorFileContents += "\n";
+  }
 
-    //Clear out all of the errors.
-    errorVector.clear();
+  //Clear out all of the errors.
+  errorVector.clear();
 
-    //The following block is modified from the C++ reference for the strftime function
-    //and is used to generate a formatted timestamp (20120428_130456)
-    //to use in the error log filename.
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer [80];
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-    strftime(buffer, 80, "%Y%m%d_%H%M%S",timeinfo);
+  //The following block is modified from the C++ reference for the strftime function
+  //and is used to generate a formatted timestamp (20120428_130456)
+  //to use in the error log filename.
+  time_t rawtime;
+  struct tm * timeinfo;
+  char buffer [80];
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(buffer, 80, "%Y%m%d_%H%M%S",timeinfo);
 
-    //Get the timestamp from the buffer.
-    string timestamp = string(buffer);
+  //Get the timestamp from the buffer.
+  string timestamp = string(buffer);
 
-    //Create a filename from the timestamp for writing the errors.
-    string errorFileName = "updatererrors_";
-    errorFileName += timestamp;
-    errorFileName += ".log";
+  //Create a filename from the timestamp for writing the errors.
+  string errorFileName = "updatererrors_";
+  errorFileName += timestamp;
+  errorFileName += ".log";
 
-    //Write errors to file.
-    ofstream errorFile;
+  //Write errors to file.
+  ofstream errorFile;
 
-    //Open the file.
-    errorFile.open(errorFileName.data());
+  //Open the file.
+  errorFile.open(errorFileName.data());
 
-    //Write the contents to the error file.
-    errorFile << errorFileContents;
+  //Write the contents to the error file.
+  errorFile << errorFileContents;
 
-    //Close the file.
-    errorFile.close();
+  //Close the file.
+  errorFile.close();
 
-    //Return the name of the error log file.
-    return errorFileName;
+  //Return the name of the error log file.
+  return errorFileName;
 }
