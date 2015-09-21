@@ -264,6 +264,14 @@
     abs_zero = 1.0E-4
     cli_args = '--no-trap-fpe Mesh/nx=1 Mesh/ny=12 Mesh/xmax=1 Mesh/ymax=12'
   [../]
+  [./paper5]
+    type = CSVDiff
+    input = 'paper5.i'
+    csvdiff = 'paper5.csv'
+    rel_err = 1.0E-4
+    abs_zero = 1.0E-4
+    cli_args = '--no-trap-fpe Mesh/nx=1 Mesh/ny=12 Mesh/xmax=1 Mesh/ymax=12'
+  [../]
 
   [./special_rock1]
     type = CSVDiff
