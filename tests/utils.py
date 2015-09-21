@@ -1,3 +1,8 @@
+#For future compatibility with Python 3
+from __future__ import division, print_function, unicode_literals, absolute_import
+import warnings
+warnings.simplefilter('default',DeprecationWarning)
+
 import sys
 
 def find_distribution1D():
@@ -17,3 +22,10 @@ def find_interpolationND():
   else:
     import crow_modules.interpolationNDpy2
     return crow_modules.interpolationNDpy2
+
+def checkAnswer(comment,value,expected,results,tol=1e-10):
+  if abs(value - expected) > tol:
+    print("checking answer",comment,value,"!=",expected)
+    results["fail"] += 1
+  else:
+    results["pass"] += 1

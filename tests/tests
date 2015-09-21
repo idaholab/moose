@@ -11,4 +11,10 @@
   input = 'test_utils.py'
   requires_swig2 = True
  [../]
+
+[./test_normal]
+  type = 'CrowPython'
+  input = 'test_normal.py'
+  requires_swig2 = True
+ [../]
 []
