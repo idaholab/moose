@@ -117,21 +117,45 @@ XFEMAction::act()
     }
     else if (_xfem_cut_type == "square_cut_3d")
     {
-      if(_xfem_cut_data.size() != 12)
+      if(_xfem_cut_data.size() % 12 != 0)
         mooseError("Length of XFEM_cuts must be 12 when square_cut_3d");
-      xfem->addGeometricCut(new XFEM_square_cut(_xfem_cut_data));
+      
+      unsigned int num_cuts = _xfem_cut_data.size()/12;
+      std::vector<Real> square_cut_data(12);
+      for(unsigned i = 0; i < num_cuts; ++i){
+        for(unsigned j = 0; j < 12; j++){
+          square_cut_data[j] = _xfem_cut_data[i*12+j]; 
+        }
+        xfem->addGeometricCut(new XFEM_square_cut(square_cut_data));
+      }
     }  
     else if (_xfem_cut_type == "circle_cut_3d")
     {
-       if(_xfem_cut_data.size() != 9 )
+       if(_xfem_cut_data.size() % 9 != 0)
          mooseError("Length of XFEM_cuts must be 9 when circle_cut_3d");
-       xfem->addGeometricCut(new XFEM_circle_cut(_xfem_cut_data));
+       
+       unsigned int num_cuts = _xfem_cut_data.size()/9;
+       std::vector<Real> circle_cut_data(9);
+       for(unsigned i = 0; i < num_cuts; ++i){
+         for(unsigned j = 0; j < 9; j++){
+           circle_cut_data[j] = _xfem_cut_data[i*9+j]; 
+         }
+         xfem->addGeometricCut(new XFEM_circle_cut(circle_cut_data));
+       }
     }
     else if (_xfem_cut_type == "ellipse_cut_3d")
     {
-      if(_xfem_cut_data.size() !=9 )
+      if(_xfem_cut_data.size() % 9 != 0)
         mooseError("Length of XFEM_cuts must be 9 when ellipse_cut_3d");
-      xfem->addGeometricCut(new XFEM_ellipse_cut(_xfem_cut_data));
+           
+      unsigned int num_cuts = _xfem_cut_data.size()/9;
+      std::vector<Real> ellipse_cut_data(9);
+      for(unsigned i = 0; i < num_cuts; ++i){
+        for(unsigned j = 0; j < 9; j++){
+          ellipse_cut_data[j] = _xfem_cut_data[i*9+j]; 
+        }
+        xfem->addGeometricCut(new XFEM_ellipse_cut(ellipse_cut_data));
+      }
     }
     else
       mooseError("unrecognized XFEM cut type");
