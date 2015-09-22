@@ -38,7 +38,6 @@
  */
 enum PropertyType
 {
-
   /**
    * This literal indicates a url.
    */
@@ -65,7 +64,6 @@ enum PropertyType
    * authenticating with the server.
    */
   PASSWORD
-
 };
 
 #endif

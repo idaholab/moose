@@ -35,21 +35,17 @@
 #include <string>
 #include "PostType.h"
 
-using namespace std;
-
 /**
  * The Post class is a data structure used by the Updater to hold a
  * string message and its associated PostType.
  */
 class Post
 {
-
 private:
-
   /**
    * The plain text message stored in the Post.
    */
-  string message;
+  std::string message;
 
   /**
    * The PostType associated with this Post object.
@@ -57,26 +53,25 @@ private:
   PostType type;
 
 public:
-
   /**
    * Constructor that sets the PostType and message for this post.
    *
    * @param type The PostType associated with this Post object.
    * @param message The plain text message stored in the Post.
    */
-  Post(PostType type, string message);
+  Post(PostType type, std::string message);
 
   /**
-   * The Destructor.
+   * Empty Destructor.
    */
-  ~Post();
+  ~Post() {}
 
   /**
    * Returns a JSON formatted string containing the post message and type.
    *
    * @return A JSON formatted string containing the post message and type.
    */
-  string getJSON();
+  std::string getJSON();
 
   /**
    * Returns a string representation of the provided PostType.
@@ -84,8 +79,7 @@ public:
    * @param postType A PostType literal.
    * @return A string representation of the provided PostType.
    */
-  static string getPostTypeString(PostType postType);
-
+  static std::string getPostTypeString(PostType postType);
 };
 
 #endif

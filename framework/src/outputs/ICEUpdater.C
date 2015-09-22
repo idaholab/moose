@@ -21,14 +21,11 @@
 template<>
 InputParameters validParams<ICEUpdater>()
 {
-
   InputParameters params = validParams<AdvancedOutput<Output> >();
   params += AdvancedOutput<Output>::enableOutputTypes("postprocessor");
 
-  params.addRequiredParam<std::string>("item_id",
-      "The currently running MOOSE Item Id.");
-  params.addRequiredParam<std::string>("url",
-      "The URL of the currently running ICE Core instance.");
+  params.addRequiredParam<std::string>("item_id", "The currently running MOOSE Item Id.");
+  params.addRequiredParam<std::string>("url", "The URL of the currently running ICE Core instance.");
 
   return params;
 }
@@ -36,7 +33,6 @@ InputParameters validParams<ICEUpdater>()
 ICEUpdater::ICEUpdater(const InputParameters & parameters) :
     AdvancedOutput<Output>(parameters)
 {
-
   // Create the iStream containing the initialization data for the Updater
   std::stringstream ss;
   ss << "item_id=" + getParam<std::string>("item_id") + "\n";
@@ -66,23 +62,22 @@ void ICEUpdater::initialSetup()
   // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
   if (!hasOutput())
-    mooseError(
-        "The current settings result in nothing being output to the file.");
+    mooseError("The current settings result in nothing being output to the file.");
 
   // Test that some sort of variable output exists (case when all variables are disabled but input output is still enabled
-  if (!hasNodalVariableOutput() && !hasElementalVariableOutput()
-      && !hasPostprocessorOutput() && !hasScalarOutput())
-    mooseError(
-        "The current settings results in only the input file and no variables being output to the file, this is not supported.");
+  if (!hasNodalVariableOutput()     &&
+      !hasElementalVariableOutput() &&
+      !hasPostprocessorOutput()     &&
+      !hasScalarOutput())
+    mooseError("The current settings results in only the input file and no variables being output to the file, this is not supported.");
 }
 
 void ICEUpdater::outputPostprocessors()
 {
-
   // Get the list of Postprocessors
   const std::set<std::string> & pps = getPostprocessorOutput();
-  for (std::set<std::string>::const_iterator it = pps.begin();
-      it != pps.end(); ++it) {
+  for (std::set<std::string>::const_iterator it = pps.begin(); it != pps.end(); ++it)
+  {
     // Grab the value at the current time
     PostprocessorValue value = _problem_ptr->getPostprocessorValue(*it);
 

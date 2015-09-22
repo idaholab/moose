@@ -35,19 +35,11 @@
 #include <iostream>
 #include <string>
 
-// TODO: Actually test for curl.h with configure.  For now just
-// undefine the preprocessor token to see if we can get it working on
-// Linux.
 #include "libmesh/libmesh_config.h"
-#ifdef LIBMESH_HAVE_CURL_H
-#  undef LIBMESH_HAVE_CURL_H
-#endif
 
-#ifdef LIBMESH_HAVE_CURL_H
+#ifdef LIBMESH_HAVE_CURL
 #  include <curl/curl.h>
 #endif
-
-using namespace std;
 
 /**
  * LibcurlUtils is a utility class used to transmit and receive information
@@ -58,7 +50,7 @@ class LibcurlUtils
 
 private:
 
-#ifdef LIBMESH_HAVE_CURL_H
+#ifdef LIBMESH_HAVE_CURL
   /**
    * A handle to the cURL object.
    */
@@ -102,7 +94,7 @@ public:
    * @param password The password. It is ignored if it is empty. It may not be null.
    * @return The contents at the URL or an error message if one took place.
    */
-  string get(string url, string username, string password);
+  std::string get(std::string url, std::string username, std::string password);
 
   /**
    * Uses libcurl and POST to transmit value at url.
@@ -111,9 +103,9 @@ public:
    * @param username The username. It is ignored if it is empty. It may not be null.
    * @param password The password. It is ignored if it is empty. It may not be null.
    * @param value The value that is posted to the url.
-   * @return A string containing the error if one took place. Else returns an empty string.
+   * @return A std::string containing the error if one took place. Else returns an empty std::string.
    */
-  string post(string url, string value, string username, string password);
+  std::string post(std::string url, std::string value, std::string username, std::string password);
 
   /**
    * Sets the ignoreSslPeerVerification flag. If ignoreSslPeerVerification flag is
@@ -133,8 +125,7 @@ public:
    * @param buffer The buffer to store the get() contents.
    * @return The amount written which should be size * nmemb.
    */
-  static int writeGetData(char * data, size_t size, size_t nmemb, string buffer);
-
+  static int writeGetData(char * data, size_t size, size_t nmemb, std::string buffer);
 };
 
 #endif

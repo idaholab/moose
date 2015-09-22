@@ -35,22 +35,20 @@
 #include "Moose.h"
 #include "MooseError.h"
 
-using namespace std;
-
 /**
  * The Constructor.
  */
 LibcurlUtils::LibcurlUtils()
 {
 
-#ifdef LIBMESH_HAVE_CURL_H
-  //Create the curl handle
+#ifdef LIBMESH_HAVE_CURL
+  // Create the curl handle
   curl = curl_easy_init();
 #else
   mooseError("You tried to use the LibcurlUtils class, but CURL is not available.");
 #endif
 
-  //Set the ignoreSslPeerVerification flag to false.
+  // Set the ignoreSslPeerVerification flag to false.
   ignoreSslPeerVerification = false;
 }
 
@@ -59,8 +57,8 @@ LibcurlUtils::LibcurlUtils()
  */
 LibcurlUtils::~LibcurlUtils()
 {
-#ifdef LIBMESH_HAVE_CURL_H
-  //Cleanup handle
+#ifdef LIBMESH_HAVE_CURL
+  // Cleanup handle
   curl_easy_cleanup(curl);
 #endif
 }
@@ -71,84 +69,79 @@ LibcurlUtils::~LibcurlUtils()
  * @param url The URL of the GET request.
  * @return The contents at the URL or an error message if one took place.
  */
-string LibcurlUtils::get(string url, string username, string password)
+std::string LibcurlUtils::get(std::string url, std::string username, std::string password)
 {
-#ifdef LIBMESH_HAVE_CURL_H
-  //If handle was successfully created
-  if(curl) {
+#ifdef LIBMESH_HAVE_CURL
+  // If handle was successfully created
+  if (curl)
+  {
+    // String to hold contents retrieved with GET.
+    std::string buffer;
 
-    //String to hold contents retrieved with GET.
-    string buffer;
-
-    //Reinitialize curl handle
+    // Reinitialize curl handle
     curl_easy_reset(curl);
 
-    //Set the error buffer
+    // Set the error buffer
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
 
-    //Set the URL
+    // Set the URL
     curl_easy_setopt(curl, CURLOPT_URL, url.data());
 
-    //Set the write callback function
+    // Set the write callback function
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeGetData);
 
-    //Set the data pointer to write to the provided buffer
+    // Set the data pointer to write to the provided buffer
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
 
-    //If the ignoreSslPeerVerification flag is set to true
-    if(ignoreSslPeerVerification) {
-
-      //Do not verify server certificate
+    // If the ignoreSslPeerVerification flag is set to true,
+    // do not verify server certificate
+    if (ignoreSslPeerVerification)
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 
-    }
+    // Set the noproxy command line option
+    curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 
-    //Set the username and password
+    // Set the username and password
     curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
     curl_easy_setopt(curl, CURLOPT_PASSWORD, password.data());
 
-    //Attempt to retrieve from the remote page
+    // Attempt to retrieve from the remote page
     result = curl_easy_perform(curl);
 
-    //Check the result
-    if (result == CURLE_OK) {
-
-      //Create a variable to hold HTTP response code
+    // Check the result
+    if (result == CURLE_OK)
+    {
+      // Create a variable to hold HTTP response code
       long http_code;
 
-      //Call easy info function to get the code of the last call.
+      // Call easy info function to get the code of the last call.
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-      //If the response code is other than 200 OK
-      if(http_code != 200) {
-
-        //Create a string to describe the error
-        string error = "A GET request to ";
-        stringstream ss;
+      // If the response code is other than 200 OK
+      if (http_code != 200)
+      {
+        // Create a string to describe the error
+        std::string error = "A GET request to ";
+        std::stringstream ss;
         ss << http_code;
         error += url;
         error += " returned HTTP code ";
         error += ss.str();
         error += ".";
 
-        //Return the error.
-        return error ;
-
+        // Return the error.
+        return error;
       }
 
-      //Return the contents of the GET response
+      // Return the contents of the GET response
       return buffer;
-
-    } else {
-      //Return the curl error
-      return string(error);
     }
+    else
+      return std::string(error);
 
-  } else {
-
-    //Return a CURL initialization error
-    return std::string("CURL could not be initialized.");
   }
+  else
+    return std::string("CURL could not be initialized.");
 
 #else
   mooseError("You tried to use the LibcurlUtils class, but CURL is not available.");
@@ -163,85 +156,76 @@ string LibcurlUtils::get(string url, string username, string password)
  * @param value The value that is posted to the url.
  * @return A string containing the error if one took place. Else returns an empty string.
  */
-string LibcurlUtils::post(string url, string value, string username, string password)
+std::string LibcurlUtils::post(std::string url, std::string value, std::string username, std::string password)
 {
-#ifdef LIBMESH_HAVE_CURL_H
-  //If handle was successfully created and the value is not empty
-  if(curl && !value.empty()) {
+#ifdef LIBMESH_HAVE_CURL
+  // If handle was successfully created and the value is not empty
+  if (curl && !value.empty())
+  {
+    // Create string to post
+    std::string data = "post=" + value;
 
-    //Create string to post
-    string data = "post=" + value;
-
-    //Reinitialize curl handle
+    // Reinitialize curl handle
     curl_easy_reset(curl);
 
-    //Set the POST field with data
+    // Set the POST field with data
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.data());
 
-    //Set the error buffer
+    // Set the error buffer
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
 
-    //Set the URL for the post
+    // Set the URL for the post
     curl_easy_setopt(curl, CURLOPT_URL, url.data());
 
-    //If the ignoreSslPeerVerification flag is set to true
-    if(ignoreSslPeerVerification) {
-
-      //Do not verify server certificate
+    // If the ignoreSslPeerVerification flag is set to true,
+    // do not verify server certificate
+    if (ignoreSslPeerVerification)
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 
-    }
-
-    //Set the username and password
+    // Set the username and password
     curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
     curl_easy_setopt(curl, CURLOPT_PASSWORD, password.data());
 
     // Set the noproxy command line option
-    curl_easy_setopt(curl, CURLOPT_NOPROXY, "");
+    curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 
-    //Attempt to post to the remote page
+    // Attempt to post to the remote page
     result = curl_easy_perform(curl);
 
-    //Check the result
-    if (result == CURLE_OK) {
-
-      //Create a variable to hold HTTP response code
+    // Check the result
+    if (result == CURLE_OK)
+    {
+      // Create a variable to hold HTTP response code
       long http_code;
 
-      //Call easy info function to get the code of the last call.
+      // Call easy info function to get the code of the last call.
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-      //If the response code is other than 200 OK
-      if(http_code != 200) {
-
-        //Create a string to describe the error
-        string error = "A POST request to ";
-        stringstream ss;
+      // If the response code is other than 200 OK
+      if (http_code != 200)
+      {
+        // Create a string to describe the error
+        std::string error = "A POST request to ";
+        std::stringstream ss;
         ss << http_code;
         error += url;
         error += " returned HTTP code ";
         error += ss.str();
         error += ".";
 
-        //Return the error.
-        return error ;
-
+        // Return the error.
+        return error;
       }
 
-      //Return an empty string indicating no error
+      // Return an empty string indicating no error
       return "";
 
-    } else {
-
-      //Return the curl error
-      return string(error);
     }
-
-  } else {
-
-    //Return a CURL initialization error
-    return std::string("CURL could not be initialized.");
+    else
+      return std::string(error);
   }
+  else
+    return std::string("CURL could not be initialized.");
 
 #else
   mooseError("You tried to use the LibcurlUtils class, but CURL is not available.");
@@ -258,10 +242,8 @@ string LibcurlUtils::post(string url, string value, string username, string pass
  */
 void LibcurlUtils::setIgnoreSslPeerVerification(bool ignoreSslPeerVerification)
 {
-
-  //Set the instance value to the value in ignoreSslPeerVerification.
+  // Set the instance value to the value in ignoreSslPeerVerification.
   this->ignoreSslPeerVerification = ignoreSslPeerVerification;
-
 }
 
 /**
@@ -273,15 +255,14 @@ void LibcurlUtils::setIgnoreSslPeerVerification(bool ignoreSslPeerVerification)
  * @param buffer The buffer to store the get() contents.
  * @return The amount written which should be size * nmemb.
  */
-int LibcurlUtils::writeGetData(char * data,  size_t size, size_t nmemb, string buffer)
+int LibcurlUtils::writeGetData(char * data,  size_t size, size_t nmemb, std::string buffer)
 {
-
-  //Append the data to the buffer
+  // Append the data to the buffer
   buffer.append(data, size * nmemb);
 
-  //Compute the size written to buffer
+  // Compute the size written to buffer
   int result = size * nmemb;
 
-  //Return the resulting size
+  // Return the resulting size
   return result;
 }

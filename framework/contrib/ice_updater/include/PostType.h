@@ -37,7 +37,6 @@
  */
 enum PostType
 {
-
   /**
    * This literal means that the message is associated with a file creation.
    */
@@ -77,7 +76,6 @@ enum PostType
    * This literal means that the message is associated with an updater stop event.
    */
   UPDATER_STOPPED
-
 };
 
 #endif

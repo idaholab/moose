@@ -36,7 +36,6 @@ InputParameters validParams<ICEUpdater>();
 class ICEUpdater: public AdvancedOutput<Output>
 {
 public:
-
   /**
    * The Constructor
    */
@@ -50,20 +49,17 @@ public:
   virtual void initialSetup();
 
 protected:
-
   /**
    * Writes postprocessor values to global output parameters
    */
   virtual void outputPostprocessors();
 
 private:
-
   /**
    * Reference to the ICE Updater object in charge of
    * connecting to ICE and posting update messages.
    */
   MooseSharedPointer<Updater> iceUpdater;
-
 };
 
 #endif

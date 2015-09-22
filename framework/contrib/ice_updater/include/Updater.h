@@ -42,8 +42,6 @@
 #include "ErrorLogger.h"
 #include "MooseTypes.h"
 
-using namespace std;
-
 class UpdaterThread;
 
 /**
@@ -59,7 +57,7 @@ typedef MooseSharedPointer<ErrorLogger> ErrorLoggerPtr;
 /**
  * A PropertyMap is a map template associating with PropertyType keys and string values.
  */
-typedef map<PropertyType, string> PropertyMap;
+typedef std::map<PropertyType, std::string> PropertyMap;
 
 /**
  * A PostPtrQueue is a queue template typed for PostPtr objects.
@@ -78,9 +76,7 @@ typedef tbb::concurrent_queue<PostPtr> PostPtrQueue;
  */
 class Updater
 {
-
 private:
-
   /**
    * A smart pointer to an ErrorLogger instance.
    */
@@ -126,14 +122,14 @@ private:
    * @param type A PostType literal.
    * @param message The string message assigned to the Post.
    */
-  void addPostToQueue(PostType type, string message);
+  void addPostToQueue(PostType type, std::string message);
 
   /**
    * Returns the contents of the updater.properties file as a string.
    *
    * @return The string contents of the updater.properties file if it exists in the current directory.
    */
-  string getPropertyFileContents();
+  std::string getPropertyFileContents();
 
   /**
    * Creates and returns a PropertyMap type from a string formatted as a Java properties file.
@@ -141,7 +137,7 @@ private:
    * @param propertyString A updater.properties formatted string.
    * @return A PropertyMap comprised of the name/value pairs in the propertyString.
    */
-  PropertyMap getPropertyMap(string propertyString);
+  PropertyMap getPropertyMap(std::string propertyString);
 
   /**
    * Validates the propertyMap object and writes any errors to the error logger.
@@ -156,26 +152,26 @@ private:
    *
    * @param propertyString A string formatted as a Java properties file containing name/value pairs.
    */
-  void initialize(string propertyString);
+  void initialize(std::string propertyString);
 
 public:
 
   /**
-   * The Constructor. Here, the Constructor will search for properties file in the current directory.
+   * This Constructor will search for properties file in the current directory.
    * This file must contain the url, item id and client key used for transmission.
    */
   Updater();
 
   /**
-   * The Constructor. Here, the Constructor requires an input stream in the form of the
+   * This Constructor requires an input stream in the form of the
    * updater.properties file format.
    *
    * @param stream An input stream in the form of the updater.properties file format.
    */
-  Updater(istream &stream);
+  Updater(std::istream &stream);
 
   /**
-   * The Destructor.
+   * The Destructor.  Empty.
    */
   ~Updater();
 
@@ -184,28 +180,28 @@ public:
    *
    * @param path The path of the file.
    */
-  void postFileCreated(string path);
+  void postFileCreated(std::string path);
 
   /**
    * Adds a Post object to the posts queue indicating the deletion of the file located at path.
    *
    * @param path The path of the file.
    */
-  void postFileDeleted(string path);
+  void postFileDeleted(std::string path);
 
   /**
    * Adds a Post to the posts queue indicating the modification of the file located at path.
    *
    * @param path The path of the file.
    */
-  void postFileModified(string path);
+  void postFileModified(std::string path);
 
   /**
    * Adds a plain text message Post to the posts queue.
    *
    * @param message A plain text message.
    */
-  void postMessage(string message);
+  void postMessage(std::string message);
 
   /**
    * Sets the ignoreSslPeerVerification flag. If ignoreSslPeerVerification flag is
@@ -234,7 +230,7 @@ public:
 
   /**
    * Adds a Post object to posts queue containing the convergence status of the user simulation.
-   * Status must be &gt;=1 and &lt;=100. If the value of status is less than 0 then the value will be set to 0.
+   * Status must be >=1 and <=100. If the value of status is less than 0 then the value will be set to 0.
    * If the value of status is greater than 100 then the value will be set to 100.
    *
    * @param status The convergence value to post.
@@ -243,20 +239,23 @@ public:
 
   /**
    * Adds a Post object to posts queue containing the progress of the user simulation.
-   * Status must be &gt;=1 and &lt;=100. If the value of status is less than 0 then the value will be set to 0.
+   * Status must be >=1 and <=100. If the value of status is less than 0 then the value will be set to 0.
    * If the value of status is greater than 100 then the value will be set to 100.
    *
    * @param status The progress value to post.
    */
   void updateProgress(int status);
-
 };
+
+
 
 /**
  * UpdaterThread is a subclass of TBB Task and TBB concurrent queue
  * that executes the event loop for posting updates to the ICE Core.
  */
-class UpdaterThread: public tbb::task, public PostPtrQueue {
+class UpdaterThread: public tbb::task,
+                     public PostPtrQueue
+{
 private:
 
   /**
@@ -290,12 +289,14 @@ private:
 public:
 
   /**
-   * THe constructor
+   * The constructor
    */
-  UpdaterThread(PropertyMap map, ErrorLoggerPtr error,
-  bool ssl) :
-      propertyMap(map), errorLoggerPtr(error), ignoreSslPeerVerification(
-          ssl)
+  UpdaterThread(PropertyMap map,
+                ErrorLoggerPtr error,
+                bool ssl) :
+      propertyMap(map),
+      errorLoggerPtr(error),
+      ignoreSslPeerVerification(ssl)
   {
     stop.store(false);
   }
@@ -310,11 +311,7 @@ public:
   /**
    * Stop the thread
    */
-  void stopThread()
-  {
-    stop.store(true);
-  }
-
+  void stopThread() { stop.store(true); }
 };
 
 #endif

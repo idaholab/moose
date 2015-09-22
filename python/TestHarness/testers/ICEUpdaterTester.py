@@ -12,6 +12,10 @@ class ICEUpdaterTester(RunApp):
     params = RunApp.validParams()
     params.addRequiredParam('nPosts', "The Number of Expected Posts")
     params.addRequiredParam('port', "The port to listen to")
+    # Recover testing requires the Tester object to be copied, but
+    # this type of object *can't* be copied because it contains a
+    # thread.lock object.
+    params['recover'] = False
 
     return params
 
@@ -54,13 +58,16 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         length = int(self.headers.getheader('content-length'))
         data = cgi.parse_qs(self.rfile.read(length), keep_blank_values=1)
-        print data
         HTTPRequestHandler.nPosts += 1
         self.send_response(200)
         return
 
     def getNumberOfPosts(self):
         return self.nPosts
+
+    # Silence the output from BaseHTTPRequestHandler.
+    def log_message(self, format, *args):
+        return
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     allow_reuse_address = True

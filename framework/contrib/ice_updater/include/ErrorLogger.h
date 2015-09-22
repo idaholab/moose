@@ -36,49 +36,43 @@
 #include <vector>
 #include <string>
 
-using namespace std;
-
 /**
- * The ErrorLogger class has functions to store errors in a Vector&lt;string&gt;
+ * The ErrorLogger class has functions to store errors in a vector<string>
  * attribute and then dump those errors to a file.
  */
 class ErrorLogger
 {
-
 private:
-
   /**
    * A ErrorVector object to contain string errors.
    */
-  vector<string> errorVector;
+  std::vector<std::string> errorVector;
 
 public:
+  /**
+   * Empty Constructor.
+   */
+  ErrorLogger() {}
 
   /**
-   * The Constructor.
+   * Empty Destructor.
    */
-  ErrorLogger();
-
-  /**
-   * The Destructor.
-   */
-  ~ErrorLogger();
+  ~ErrorLogger() {}
 
   /**
    * Appends an error string to the errorVector attribute.
    *
    * @param error An error string.
    */
-  void logError(string error);
+  void logError(std::string error);
 
   /**
    * Dumps the errors in errorVector into a file with a filename format
-   * "updatererrors_&lt;timestamp&gt;.log".
+   * "updatererrors_<timestamp>.log".
    *
    * @return The name of the error log file.
    */
-  string dumpErrors();
-
+  std::string dumpErrors();
 };
 
 #endif
