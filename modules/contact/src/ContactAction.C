@@ -90,7 +90,8 @@ ContactAction::act()
       InputParameters params = _factory.getValidParams("MechanicalContactConstraint");
 
       // Extract global params
-      _app.parser().extractParams(getInputSyntax(), params);
+      if (isParamValid("parser_syntax"))
+        _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
       // Create Constraint objects
       params.set<std::string>("model") = _model;
@@ -147,7 +148,8 @@ ContactAction::act()
         InputParameters params = _factory.getValidParams("ContactMaster");
 
         // Extract global params
-        _app.parser().extractParams(getInputSyntax(), params);
+        if (isParamValid("parser_syntax"))
+          _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
         // Create master objects
         params.set<std::string>("model") = _model;
@@ -201,7 +203,8 @@ ContactAction::act()
         InputParameters params = _factory.getValidParams("SlaveConstraint");
 
         // Extract global params
-        _app.parser().extractParams(getInputSyntax(), params);
+        if (isParamValid("parser_syntax"))
+          _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
         // Create slave objects
         params.set<std::string>("model") = _model;

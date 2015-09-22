@@ -12,77 +12,67 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEOBJECTNAME_H
-#define MOOSEOBJECTNAME_H
+#ifndef MOOSEOBJECTPARAMETERNAME_H
+#define MOOSEOBJECTPARAMETERNAME_H
+
+// MOOSE includes
+#include "MooseObjectName.h"
 
 // STL includes
 #include <string>
 
 /**
- * A class for storing the names of MooseObject by tag and object name
+ * A class for storing an input parameter name.
  *
  * This class is used by the Control logic system, allowing for multiple tags
- * to be applied to many different MooseObjects.
+ * to be applied to many different MooseObject parameters.
  */
-class MooseObjectName
+class MooseObjectParameterName : public MooseObjectName
 {
 public:
 
   /**
-   * Construct the name object.
-   * @param tag The tag to apply the object
-   * @param name The name of the object
+   * Build an object given a raw parameter name (e.g., from an input file parameter)
    */
-  MooseObjectName(const std::string & tag, const std::string & name, const std::string & sep = "::");
+  MooseObjectParameterName(std::string name);
 
   /**
-   * Copy constructor.
+   * Build an object given a MooseObjectName and parameter name
    */
-  MooseObjectName(const MooseObjectName & rhs);
+  MooseObjectParameterName(const MooseObjectName & obj_name, std::string param);
 
   /**
-   * Return the name.
+   * Return the parameter name.
    */
-  const std::string & name() const { return _name; }
-
-  /**
-   * Return the tag.
-   */
-  const std::string & tag() const { return _tag; }
+  const std::string & parameter() const { return _parameter; }
 
   ///@{
   /**
    * Comparison operators.
    *
+   * Not that this class may be compared with MooseObjectName, this
+   * feature is used by ControlInterface.
+   *
    * The less than operator is required so this container can work in std::map.
    *
    * @see InputParameterWarehouse
    */
+  bool operator==(const MooseObjectParameterName & rhs) const;
   bool operator==(const MooseObjectName & rhs) const;
+
+  bool operator!=(const MooseObjectParameterName & rhs) const;
   bool operator!=(const MooseObjectName & rhs) const;
-  bool operator<(const MooseObjectName & rhs) const;
+
+  bool operator<(const MooseObjectParameterName & rhs) const;
   ///@}
 
-  /// Allows this to be used with std:: cout
-  friend std::ostream & operator<<(std::ostream & stream, const MooseObjectName & obj);
-
-  /// Allows for access for comparison operators
-  friend class MooseObjectParameterName;
+  /// Allow printing with std:: cout
+  friend std::ostream & operator<<(std::ostream & stream, const MooseObjectParameterName & obj);
 
 protected:
 
-  /**
-   * A constructor for use by MooseObjectParameterName
-   */
-  MooseObjectName(const std::string & sep = "::");
-
-  ///@{
-  /// Storage for the various name components
-  std::string _tag;
-  std::string _name;
-  std::string _combined;
-  std::string _separator; // used for better error messages only
-  ///@}
+  /// The name of the input parameter
+  std::string _parameter;
 };
 
-#endif // MOOSEOBJECTNAME_H
+#endif // MOOSEOBJECTPARAMETERNAME_H

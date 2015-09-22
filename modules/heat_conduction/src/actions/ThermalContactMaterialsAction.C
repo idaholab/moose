@@ -57,7 +57,8 @@ ThermalContactMaterialsAction::act()
 
   InputParameters params = _factory.getValidParams(type);
   // Extract global params
-  _app.parser().extractParams(getInputSyntax(), params);
+  if (isParamValid("parser_syntax"))
+    _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
   params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, getParam<NonlinearVariableName>("variable"));
 

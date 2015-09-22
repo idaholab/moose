@@ -45,7 +45,8 @@ ContactPenetrationAuxAction::act()
     InputParameters params = _factory.getValidParams("PenetrationAux");
 
     // Extract global params
-    _app.parser().extractParams(getInputSyntax(), params);
+    if (isParamValid("parser_syntax"))
+      _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
     params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,_slave);
     params.set<BoundaryName>("paired_boundary") = _master;

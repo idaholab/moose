@@ -12,11 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RealParameterReporter.h"
+#include "RealControlParameterReporter.h"
 #include "SubProblem.h"
 
 template<>
-InputParameters validParams<RealParameterReporter>()
+InputParameters validParams<RealControlParameterReporter>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params += validParams<ControlInterface>();
@@ -26,20 +26,20 @@ InputParameters validParams<RealParameterReporter>()
   return params;
 }
 
-RealParameterReporter::RealParameterReporter(const InputParameters & parameters) :
+RealControlParameterReporter::RealControlParameterReporter(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
     ControlInterface(parameters)
 {
 }
 
 void
-RealParameterReporter::initialSetup()
+RealControlParameterReporter::initialSetup()
 {
-  _parameter = &getControlParam<Real>("parameter");
+  _parameter = getControlParam<Real>("parameter", 1);
 }
 
 Real
-RealParameterReporter::getValue()
+RealControlParameterReporter::getValue()
 {
-  return *_parameter;
+  return _parameter.get()[0];
 }

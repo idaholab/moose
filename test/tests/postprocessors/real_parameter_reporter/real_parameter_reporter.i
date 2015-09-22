@@ -53,7 +53,7 @@
 
 [Postprocessors]
   [./coef_value]
-    type = RealParameterReporter
+    type = RealControlParameterReporter
     parameter = 'coef'
     execute_on = 'initial timestep_begin'
   [../]

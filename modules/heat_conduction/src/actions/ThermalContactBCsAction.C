@@ -49,7 +49,8 @@ ThermalContactBCsAction::act()
   InputParameters params = _factory.getValidParams(getParam<std::string>("type"));
 
   // Extract global params
-  _app.parser().extractParams(getInputSyntax(), params);
+  if (isParamValid("parser_syntax"))
+    _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
   if (isParamValid("save_in"))
   {

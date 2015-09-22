@@ -53,7 +53,7 @@ public:
 
   ///@{
   /**
-   * Deprecated name methods, use name() and getInputSyntax()
+   * Deprecated name methods, use name()
    */
   std::string getBaseName() const;
   std::string getShortName() const;

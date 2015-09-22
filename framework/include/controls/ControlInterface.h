@@ -19,6 +19,7 @@
 #include "InputParameters.h"
 #include "InputParameterWarehouse.h"
 #include "MooseUtils.h"
+#include "ControllableParameter.h"
 
 // Forward declarations
 class ControlInterface;
@@ -37,29 +38,25 @@ class ControlInterface
 {
 protected:
 
+  ///@{
   /**
-   * Obtain a writeable reference to a single parameter given a InputParameter name
+   * Obtain a ControllableParameter class for accessing parameter values given input file syntax.
    */
   template<typename T>
-  T & getControlParam(const std::string & name);
+  ControllableParameter<T> getControlParam(const std::string & name);
+  template<typename T>
+  ControllableParameter<T> getControlParam(const std::string & name, unsigned int count);
+  ///@}
 
+  ///@{
   /**
-   * Obtain a writeable reference to a single parameter given a specific name
+   * Obtain a ControllableParameter class for accessing parameter values given the actual name.
    */
   template<typename T>
-  T & getControlParamByName(const std::string & name);
-
-  /**
-   * Obtain pointers to all parameters given a InputParameter name
-   */
+  ControllableParameter<T> getControlParamByName(const std::string & name);
   template<typename T>
-  std::vector<T*> getControlParamVector(const std::string & name);
-
-  /**
-   * Obtain pointers to all parameters given a specific name
-   */
-  template<typename T>
-  std::vector<T*> getControlParamVectorByName(const std::string & name);
+  ControllableParameter<T> getControlParamByName(const std::string & name, unsigned int count);
+  ///@}
 
   /**
    * Destructor
@@ -72,25 +69,6 @@ private:
    * A private constructor to limit the use of this interface to Control related objects
    */
   ControlInterface(const InputParameters & parameters);
-
-  /**
-   * Helper method for extracting iterators to InputParameter objects containing a property with the given name
-   * @param name The complete name of the desired parameter (only used for error messages)
-   * @param desired The object stored as a MooseObjectName
-   * @param param The desired parameter name
-   *
-   * Using the iterator allows for the public get methods to provide better error messages because the
-   * full object name can be reported.
-   *
-   * @see parseParameterName
-   */
-  template<typename T>
-  std::set<T*> getValidInputParameterIteratorsByName(const std::string & name, const MooseObjectName & desired, const std::string & param);
-
-  /**
-   * Helper method supplied parameter name into a container
-   */
-  std::pair<MooseObjectName, std::string> parseParameterName(std::string name);
 
   /// Reference to the Control objects parameters
   const InputParameters & _ci_parameters;
@@ -108,64 +86,43 @@ private:
   const std::string & _ci_name;
 
   // Only these objects are allowed to construct this interface
-  friend class RealParameterReporter;
+  friend class RealControlParameterReporter;
   friend class Control;
 };
 
 template<typename T>
-T &
+ControllableParameter<T>
 ControlInterface::getControlParam(const std::string & name)
 {
-  return getControlParamByName<T>(_ci_parameters.get<std::string>(name));
+  return getControlParamByName<T>(_ci_parameters.get<std::string>(name),
+                                  std::numeric_limits<unsigned int>::max());
 }
 
 template<typename T>
-T &
+ControllableParameter<T>
+ControlInterface::getControlParam(const std::string & name, unsigned int count)
+{
+  return getControlParamByName<T>(_ci_parameters.get<std::string>(name), count);
+}
+
+template<typename T>
+ControllableParameter<T>
 ControlInterface::getControlParamByName(const std::string & name)
 {
-  // Get the InputParameter objects that contain objects
-  std::pair<MooseObjectName, std::string> desired = parseParameterName(name);
-  std::set<T*> iters = getValidInputParameterIteratorsByName<T>(name, desired.first, desired.second);
-
-  // If more than one parameter is located, report an error message listing the object and parameter names
-  if (iters.size() > 1)
-  {
-    std::ostringstream oss;
-    oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found in multiple objects:\n";
-    mooseError(oss.str());
-  }
-
-  // Return a writeable reference to the parameter
-  return **(iters.begin());
+  return getControlParamByName<T>(_ci_parameters.get<std::string>(name),
+                                  std::numeric_limits<unsigned int>::max());
 }
 
 template<typename T>
-std::vector<T*>
-ControlInterface::getControlParamVector(const std::string & name)
+ControllableParameter<T>
+ControlInterface::getControlParamByName(const std::string & name, unsigned int count)
 {
-  return getControlParamVectorByName<T>(_ci_parameters.get<std::string>(name));
-}
 
-template<typename T>
-std::vector<T*>
-ControlInterface::getControlParamVectorByName(const std::string & name)
-{
-  // Get the InputParameter objects that contain objects
-  std::pair<MooseObjectName, std::string> desired = parseParameterName(name);
-  std::set<T*> iters = getValidInputParameterIteratorsByName<T>(name, desired.first, desired.second);
+  // The desired parameter name
+  MooseObjectParameterName desired(name);
 
-  // The vector the return
-  std::vector<T*> output(iters.begin(), iters.end());
-
-  return output;
-}
-
-template<typename T>
-std::set<T*>
-ControlInterface::getValidInputParameterIteratorsByName(const std::string & name, const MooseObjectName & desired, const std::string & param)
-{
-  // The set of pointer to controllable parameters
-  std::set<T*> output;
+  // The ControlllableParametr object to return
+  ControllableParameter<T> output;
 
   // Loop over all InputParameter objects
   for (InputParameterWarehouse::InputParameterIterator it = _input_parameter_warehouse.begin(_tid); it != _input_parameter_warehouse.end(_tid); ++it)
@@ -175,20 +132,31 @@ ControlInterface::getValidInputParameterIteratorsByName(const std::string & name
       continue;
 
     // If the parameter is valid and controllable update the output vector with a pointer to the parameter
-    if (it->second->have_parameter<T>(param))
+    if (it->second->have_parameter<T>(desired.parameter()))
     {
       // Do not allow non-controllable types to be controlled
-      if (!it->second->isControllable(param))
+      if (!it->second->isControllable(desired.parameter()))
         mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " is not a controllable parameter.");
-
       // Store pointer to the writable parameter
-      output.insert(&(it->second->set<T>(param)));
+      output.insert(MooseObjectParameterName(it->first, desired.parameter()), &(it->second->set<T>(desired.parameter())));
     }
   }
 
   // Error if nothing was found
   if (output.size() == 0)
     mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " was not found.");
+
+  // Error if the size limit was reached
+  if (count != std::numeric_limits<unsigned int>::max() && output.size() != count)
+  {
+    std::ostringstream oss;
+    oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found,\n";
+    oss << "but the number of parameters matching (" << output.size() << ") the name differs\n";
+    oss << "from the amount requested (" << count << ").\n\n";
+    oss << "The following parameters were found:\n";
+    oss << output.dump();
+    mooseError(oss.str());
+  }
 
   return output;
 }

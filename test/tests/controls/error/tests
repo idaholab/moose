@@ -12,7 +12,7 @@
     # Test error message when single parameter is requested, but multiple exist
     type = RunException
     input = 'multiple_parameters_found.i'
-    expect_err = "The controlled parameter, 'coef', in func_control was found in multiple objects"
+    expect_err = "The controlled parameter, 'coef', in func_control was found,\nbut"
     match_literal = true
     max_threads = 1
   [../]

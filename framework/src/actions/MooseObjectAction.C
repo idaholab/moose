@@ -34,7 +34,4 @@ MooseObjectAction::MooseObjectAction(InputParameters params) :
                         !params.get<bool>("skip_param_construction"))
                        ? _factory.getValidParams(_type) : validParams<MooseObject>())
 {
-  // If the action was created by the parser, grab the syntax form the name of the Action
-//  if (_registered_identifier != "(AutoBuilt)" || _registered_identifier.empty())
-//    _moose_object_pars.addPrivateParam<std::string>("action_tag", MooseUtils::baseName(getParam<std::string>("name")));
 }
