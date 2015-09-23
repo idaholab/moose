@@ -51,7 +51,6 @@ public:
   virtual void threadJoin(const SamplerBase & y);
 
 protected:
-
   /**
    * Find the local element that contains the point.  This will attempt to use a cached element to speed things up.
    *

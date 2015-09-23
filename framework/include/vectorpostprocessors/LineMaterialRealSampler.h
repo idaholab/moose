@@ -34,7 +34,6 @@ public:
   /**
    * Class constructor
    * Sets up variables for output based on the properties to be output
-   * @param name The name of the class
    * @param parameters The input parameters
    */
   LineMaterialRealSampler(const InputParameters & parameters);

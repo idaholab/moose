@@ -33,7 +33,6 @@ public:
 
   /**
    * Class constructor
-   * @param name Name of the action
    * @param params Input parameters for this action
    */
   SetupRecoverFileBaseAction(InputParameters params);

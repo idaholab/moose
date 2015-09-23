@@ -37,7 +37,6 @@ public:
 
   /**
    * Class constructor
-   * @param name Name of this action
    * @param params Input parameters for this action object
    */
   MaterialOutputAction(InputParameters params);

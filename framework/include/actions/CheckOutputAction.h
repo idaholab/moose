@@ -33,7 +33,6 @@ public:
 
   /**
    * Class constructor
-   * @param name Name of this action
    * @param params Input parameters for this object
    */
   CheckOutputAction(InputParameters params);

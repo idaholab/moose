@@ -356,7 +356,8 @@ public:
   /**
    * Add info about variable that will be copied
    *
-   * @param name Name of the nodal variable being used for copying (name is from the exodusII file)
+   * @param dest_name Name of the nodal variable being used for copying into (name is from the exodusII file)
+   * @param source_name Name of the nodal variable being used for copying from (name is from the exodusII file)
    * @param timestep Timestep in the file being used
    */
   virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, unsigned int timestep) = 0;

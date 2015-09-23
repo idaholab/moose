@@ -51,7 +51,6 @@ public:
    *
    * The constructor performs all of the necessary initialization of the various
    * output lists required for the various output types.
-   * @param name The name of the output object
    * @param parameters The InputParameters for the object
    */
   AdvancedOutput(const InputParameters & parameters);

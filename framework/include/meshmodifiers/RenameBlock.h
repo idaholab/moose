@@ -36,7 +36,6 @@ public:
 
   /**
    * Class constructor
-   * @param name The name of the RenameBlock
    * @param parameters The input parameters
    */
   RenameBlock(const InputParameters & parameters);

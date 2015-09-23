@@ -70,7 +70,6 @@ public:
 
   /**
    * Class constructor.
-   * @param name The name of the boundary condition object
    * @param parameters The InputParameters for the object
    */
   BoundaryCondition(const InputParameters & parameters);

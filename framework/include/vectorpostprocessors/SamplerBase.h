@@ -30,7 +30,6 @@ class SamplerBase
 {
 public:
   /**
-   * @param name The name of the object
    * @param parameters The parameters for the object
    * @param vpp A pointer to the child object
    * @param comm The communicator of the child

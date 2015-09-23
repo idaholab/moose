@@ -37,7 +37,6 @@ class MooseParsedVectorFunction :
 public:
   /**
    * Class constructor
-   * @param name The name of the function
    * @param parameters The input parameters
    */
   MooseParsedVectorFunction(const InputParameters & parameters);
