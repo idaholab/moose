@@ -24,6 +24,7 @@ def find_interpolationND():
     return crow_modules.interpolationNDpy2
 
 def checkAnswer(comment,value,expected,results,tol=1e-10):
+  """ Will check if a test passes or fails and update the results dictionary. """
   if abs(value - expected) > tol:
     print("checking answer",comment,value,"!=",expected)
     results["fail"] += 1
