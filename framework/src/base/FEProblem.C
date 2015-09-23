@@ -142,6 +142,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _kernel_coverage_check(false),
     _material_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
+    _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),
     _has_exception(false),
@@ -631,6 +632,14 @@ FEProblem::getMaxQps() const
   return _max_qps;
 }
 
+unsigned int
+FEProblem::getMaxShapeFunctions() const
+{
+  if (_max_shape_funcs == std::numeric_limits<unsigned int>::max())
+    mooseError("Max shape functions uninitialized");
+  return _max_shape_funcs;
+}
+
 Order
 FEProblem::getMaxScalarOrder() const
 {
@@ -877,11 +886,9 @@ FEProblem::ghostGhostedBoundaries()
 }
 
 void
-FEProblem::sizeZeroes(unsigned int size, THREAD_ID tid)
+FEProblem::sizeZeroes(unsigned int /*size*/, THREAD_ID /*tid*/)
 {
-  _zero[tid].resize(size, 0);
-  _grad_zero[tid].resize(size, 0);
-  _second_zero[tid].resize(size, RealTensor(0.));
+  mooseDoOnce(mooseWarning("This function is deprecated and no longer performs any function. Please do not call it."));
 }
 
 bool
@@ -889,10 +896,27 @@ FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 {
   std::vector<Point> & points = _dirac_kernel_info.getPoints()[elem];
 
-  bool have_points = points.size();
+  unsigned int n_points = points.size();
 
-  if (have_points)
+  if (n_points)
   {
+    if (n_points > _max_qps)
+    {
+      _max_qps = n_points;
+
+      /**
+       * The maximum number of qps can rise if several Dirac points are added to a single element.
+       * In that case we need to resize the zeros to compensate.
+       */
+      for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+      {
+        _zero[tid].resize(getMaxQps(), 0);
+        _grad_zero[tid].resize(getMaxQps(), 0);
+        _second_zero[tid].resize(getMaxQps(), RealTensor(0.));
+        _second_phi_zero[tid].resize(getMaxQps(), std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
+      }
+    }
+
     _assembly[tid]->reinitAtPhysical(elem, points);
 
     _nl.prepare(tid);
@@ -900,10 +924,12 @@ FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
     reinitElem(elem, tid);
   }
+
   _assembly[tid]->prepare();
 
+  bool have_points = n_points > 0;
   if (_displaced_problem != NULL && (_reinit_displaced_elem))
-    have_points = have_points || _displaced_problem->reinitDirac(_displaced_mesh->elem(elem->id()), tid);
+    have_points |= _displaced_problem->reinitDirac(_displaced_mesh->elem(elem->id()), tid);
 
   return have_points;
 }
@@ -911,8 +937,6 @@ FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 void
 FEProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  sizeZeroes(_assembly[tid]->qRule()->n_points(), tid);
-
   _nl.reinitElem(elem, tid);
   _aux.reinitElem(elem, tid);
 
@@ -943,8 +967,6 @@ FEProblem::reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_i
 {
   _assembly[tid]->reinit(elem, side);
 
-  sizeZeroes(_assembly[tid]->qRule()->n_points(), tid);
-
   _nl.reinitElemFace(elem, side, bnd_id, tid);
   _aux.reinitElemFace(elem, side, bnd_id, tid);
 
@@ -956,8 +978,6 @@ void
 FEProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
   _assembly[tid]->reinit(node);
-
-  sizeZeroes(1, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitNode(&_displaced_mesh->node(node->id()), tid);
@@ -971,8 +991,6 @@ FEProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
 {
   _assembly[tid]->reinit(node);
 
-  sizeZeroes(1, tid);
-
   if (_displaced_problem != NULL && _reinit_displaced_face)
     _displaced_problem->reinitNodeFace(&_displaced_mesh->node(node->id()), bnd_id, tid);
 
@@ -984,8 +1002,6 @@ FEProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
 void
 FEProblem::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
-  sizeZeroes(nodes.size(), tid);
-
   if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitNodes(nodes, tid);
 
@@ -997,8 +1013,6 @@ void
 FEProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
 {
   _assembly[tid]->reinitNodeNeighbor(node);
-
-  sizeZeroes(1, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitNodeNeighbor(&_displaced_mesh->node(node->id()), tid);
@@ -2942,7 +2956,16 @@ FEProblem::createQRules(QuadratureType type, Order order, Order volume_order, Or
     MaxQpsThread mqt(*this, type, std::max(order, volume_order), face_order);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mqt);
     _max_qps = mqt.max();
+    _max_shape_funcs = mqt.max_shape_funcs();
     Moose::setup_perf_log.pop("maxQps()","Setup");
+  }
+
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    _zero[tid].resize(getMaxQps(), 0);
+    _grad_zero[tid].resize(getMaxQps(), 0);
+    _second_zero[tid].resize(getMaxQps(), RealTensor(0.));
+    _second_phi_zero[tid].resize(getMaxQps(), std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
   }
 }
 

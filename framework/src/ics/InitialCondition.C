@@ -161,8 +161,6 @@ InitialCondition::compute()
   // hold those fixed and project faces, then
   // hold those fixed and project interiors
 
-  _fe_problem.sizeZeroes(n_nodes, _tid);
-
   // Interpolate node values first
   unsigned int current_dof = 0;
   for (unsigned int n = 0; n != n_nodes; ++n)
@@ -319,7 +317,6 @@ InitialCondition::compute()
       fe->attach_quadrature_rule (qedgerule.get());
       fe->edge_reinit (_current_elem, e);
       const unsigned int n_qp = qedgerule->n_points();
-      _fe_problem.sizeZeroes(n_qp, _tid);
 
       // Loop over the quadrature points
       for (unsigned int qp = 0; qp < n_qp; qp++)
@@ -400,7 +397,6 @@ InitialCondition::compute()
       fe->attach_quadrature_rule (qsiderule.get());
       fe->reinit (_current_elem, s);
       const unsigned int n_qp = qsiderule->n_points();
-      _fe_problem.sizeZeroes(n_qp, _tid);
 
       // Loop over the quadrature points
       for (unsigned int qp = 0; qp < n_qp; qp++)
@@ -476,7 +472,6 @@ InitialCondition::compute()
     fe->attach_quadrature_rule (qrule.get());
     fe->reinit (_current_elem);
     const unsigned int n_qp = qrule->n_points();
-    _fe_problem.sizeZeroes(n_qp, _tid);
 
     // Loop over the quadrature points
     for (unsigned int qp=0; qp<n_qp; qp++)
@@ -562,4 +557,3 @@ InitialCondition::compute()
       }
   }
 }
-

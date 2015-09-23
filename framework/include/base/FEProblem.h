@@ -224,6 +224,11 @@ public:
   unsigned int getMaxQps() const;
 
   /**
+   * @return The maximum number of quadrature points in use on any element in this problem.
+   */
+  unsigned int getMaxShapeFunctions() const;
+
+  /**
    * @return The maximum order for all scalar variables in this problem's systems.
    */
   Order getMaxScalarOrder() const;
@@ -1027,6 +1032,9 @@ protected:
 
   /// Maximum number of quadrature points used in the problem
   unsigned int _max_qps;
+
+  /// Maximum number of shape functions on any element in the problem
+  unsigned int _max_shape_funcs;
 
   /// Maximum scalar variable order
   Order _max_scalar_order;
