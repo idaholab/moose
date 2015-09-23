@@ -33,7 +33,13 @@ public:
    * @param tag The tag to apply the object
    * @param name The name of the object
    */
-  MooseObjectName(const std::string & tag, const std::string & name, const std::string & sep = "::");
+  MooseObjectName(const std::string & tag, const std::string & name);
+
+  /**
+   * Build an object given a raw parameter name (e.g., from an input file parameter)
+   */
+  MooseObjectName(std::string name);
+
 
   /**
    * Copy constructor.
@@ -74,7 +80,7 @@ protected:
   /**
    * A constructor for use by MooseObjectParameterName
    */
-  MooseObjectName(const std::string & sep = "::");
+  MooseObjectName();
 
   ///@{
   /// Storage for the various name components

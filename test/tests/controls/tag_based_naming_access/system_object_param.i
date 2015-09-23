@@ -26,7 +26,7 @@
     type = MaterialPointSource
     point = '0.5 0.5 0'
     variable = diffused
-    control_tag = 'tag'
+    control_tags = 'tag'
   [../]
 []
 

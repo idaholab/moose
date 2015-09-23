@@ -33,6 +33,7 @@ MooseObjectParameterName::MooseObjectParameterName(std::string name) :
   {
     _tag = name.substr(0, idx);
     name.erase(0, idx+2);
+    _separator = "::";
   }
 
   // Locate the param name
@@ -116,5 +117,10 @@ MooseObjectParameterName::operator<(const MooseObjectParameterName & rhs) const
 std::ostream &
 operator<<(std::ostream & stream, const MooseObjectParameterName & obj)
 {
-  return stream << obj._tag << obj._separator << obj._name << "/" << obj._parameter;
+  if (obj._tag.empty() && obj._name.empty())
+    return stream << obj._parameter;
+  else if (obj._tag.empty())
+    return stream << obj._name << "/" << obj._parameter;
+  else
+    return stream << obj._tag << obj._separator << obj._name << "/" << obj._parameter;
 }

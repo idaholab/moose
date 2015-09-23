@@ -27,7 +27,7 @@
     type = MaterialPointSource
     point = '0.5 0.5 0'
     variable = diffused
-    control_tag = 'tag'
+    control_tags = 'tag'
   [../]
 []
 
@@ -61,13 +61,13 @@
     type = FunctionValuePostprocessor
     function = '2*(x+y)'
     point = '0.5 0.5 0'
-    control_tag = 'tag'
+    control_tags = 'tag'
   [../]
   [./other_point_test_object]
     type = FunctionValuePostprocessor
     function = '3*(x+y)'
     point = '0.5 0.5 0'
-    control_tag = 'tag'
+    control_tags = 'tag'
   [../]
 []
 

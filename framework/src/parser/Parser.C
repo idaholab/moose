@@ -230,7 +230,7 @@ Parser::parse(const std::string &input_filename)
           if (object_action.get())
           {
             extractParams(curr_identifier, object_action->getObjectParams());
-            object_action->getObjectParams().addPrivateParam<std::string>("parser_tag", MooseUtils::baseName(curr_identifier));
+            object_action->getObjectParams().set<std::vector<std::string> >("control_tags").push_back(MooseUtils::baseName(curr_identifier));
           }
 
           // add it to the warehouse

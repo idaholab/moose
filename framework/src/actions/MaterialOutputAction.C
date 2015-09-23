@@ -174,18 +174,17 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
   _material_variable_names.insert(variable_name);
 
   // Generate the name
-  std::ostringstream long_name;
-  long_name << "AuxKernels/" << material->name() << "_" << variable_name;
+  std::ostringstream name;
+  name <<  material->name() << "_" << variable_name;
 
   // Set the action parameters
   InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
   action_params.set<std::string>("type") = type;
   action_params.set<ActionWarehouse *>("awh") = &_awh;
-  //action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
   action_params.set<std::string>("task") = "add_aux_kernel";
 
   // Create the action
-  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddKernelAction", long_name.str(), action_params));
+  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddKernelAction", name.str(), action_params));
 
   // Set the object parameters
   InputParameters & object_params = action->getObjectParams();

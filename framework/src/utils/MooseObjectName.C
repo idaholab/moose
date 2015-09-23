@@ -18,16 +18,45 @@
 // STL includes
 #include <iostream>
 
-MooseObjectName::MooseObjectName(const std::string & tag, const std::string & name, const std::string & sep /* = "::" */) :
+MooseObjectName::MooseObjectName(const std::string & tag, const std::string & name) :
     _tag(tag),
     _name(name),
     _combined(tag + name),
-    _separator(sep)
+    _separator("::")
 {
 }
 
-MooseObjectName::MooseObjectName(const std::string & sep /* = "::" */) :
-    _separator(sep)
+MooseObjectName::MooseObjectName(std::string name)
+{
+  // Tags may be separated by a :: or the last /
+  std::size_t idx0 = name.find("::");
+  std::size_t idx1 = name.rfind("/");
+
+  // Case when :: is found
+  if (idx0 != std::string::npos)
+  {
+    _tag = name.substr(0, idx0);
+    _name = name.erase(0, idx0+2);
+    _separator = "::";
+  }
+
+  // Case when a / is found
+  else if (idx1 != std::string::npos)
+  {
+    _tag = name.substr(0, idx1);
+    _name = name.erase(0, idx1+2);
+    _separator = "/";
+  }
+
+  // If you get here, just use the supplied name without a tag
+  else
+    _name = name;
+
+  _combined = _tag + _name;
+
+}
+
+MooseObjectName::MooseObjectName()
 {
 }
 
@@ -65,5 +94,8 @@ MooseObjectName::operator<(const MooseObjectName & rhs) const
 std::ostream &
 operator<<(std::ostream & stream, const MooseObjectName & obj)
 {
-  return stream << obj._tag << obj._separator << obj._name;
+  if (obj._tag.empty())
+    return stream << obj._name;
+  else
+    return stream << obj._tag << obj._separator << obj._name;
 }

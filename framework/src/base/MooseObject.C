@@ -20,7 +20,7 @@ template<>
 InputParameters validParams<MooseObject>()
 {
   InputParameters params;
-  params.addParam<std::string>("control_tag", "Adds a user-defined label for accessing object parameters via control logic.");
+  params.addParam<std::vector<std::string> >("control_tags", "Adds user-defined labels for accessing object parameters via control logic.");
   return params;
 }
 

@@ -28,6 +28,10 @@ InputParameterWarehouse::~InputParameterWarehouse()
 InputParameters &
 InputParameterWarehouse::addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
 {
+  // Error if the name contains "::"
+  if (name.find("::") != std::string::npos)
+    mooseError("The object name may not contain '::' in the name: " << name);
+
   // Create the actual InputParameters object that will be reference by the objects
   MooseSharedPointer<InputParameters> ptr(new InputParameters(parameters));
 
@@ -45,16 +49,12 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
   // Store the parameters according to the base name
   _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(unique_name, ptr));
 
-  // Parser-defined tag, if it exists
-  if (ptr->isParamValid("parser_tag"))
+  // Store the object according to the control tags
+  if (ptr->isParamValid("control_tags"))
   {
-    _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(MooseObjectName(ptr->get<std::string>("parser_tag"), name, "/"),  ptr));
-  }
-
-  // User-defined tag, if it exists (optional)
-  if (ptr->isParamValid("control_tag"))
-  {
-    _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(MooseObjectName(ptr->get<std::string>("control_tag"), name),  ptr));
+    std::vector<std::string> tags = ptr->get<std::vector<std::string> >("control_tags");
+    for (std::vector<std::string>::const_iterator it = tags.begin(); it != tags.end(); ++it)
+      _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(MooseObjectName(*it, name),  ptr));
   }
 
   // Set the name and tid parameters
@@ -65,11 +65,23 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
   return *ptr;
 }
 
+
 InputParameters &
-InputParameterWarehouse::getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid )
+InputParameterWarehouse::getInputParameters(const std::string & name, THREAD_ID tid)
 {
-  // Create object name
-  MooseObjectName object_name(tag, name);
+  return getInputParameters(MooseObjectName(name), tid);
+}
+
+InputParameters &
+InputParameterWarehouse::getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid)
+{
+  return getInputParameters(MooseObjectName(tag, name), tid);
+}
+
+InputParameters &
+InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name, THREAD_ID tid)
+{
+
 
   // Storage for the equal range
   std::pair<InputParameterIterator, InputParameterIterator> ret;
@@ -79,7 +91,7 @@ InputParameterWarehouse::getInputParameters(const std::string & tag, const std::
 
   // Error if not found
   if (ret.first == ret.second)
-    mooseError("Unknown InputParameters object with tag '" << tag << "' and name '" << name << "'.");
+    mooseError("Unknown InputParameters object " << object_name);
 
   // Return a reference to the parameter
   return *(ret.first->second.get());
