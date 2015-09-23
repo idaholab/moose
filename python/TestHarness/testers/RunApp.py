@@ -157,12 +157,17 @@ class RunApp(Tester):
     if options.parallel or ncpus > 1 or nthreads > 1:
       extra_args = ' --n-threads=' + str(nthreads) + ' ' + ' '.join(self.specs['cli_args'])
 
+    timing_string = ' '
+    if options.timing:
+      self.specs['cli_args'].append('--timing')
+      self.specs['cli_args'].append('Outputs/print_perf_log=true')
+
     # Append any extra args to the cluster_launcher
     if extra_args != '':
       self.specs['cli_args'] = extra_args
     else:
       self.specs['cli_args'] = ' '.join(self.specs['cli_args'])
-    self.specs['cli_args'] = self.specs['cli_args'].strip()
+    self.specs['cli_args'] = "'" + self.specs['cli_args'].strip() + "'"
 
     # Open our template. This should probably be done at the same time as cluster_handle.
     template_script = open(os.path.join(self.specs['moose_dir'], 'python', 'TestHarness', 'pbs_template.i'), 'r')
