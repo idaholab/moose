@@ -136,10 +136,10 @@ protected:
    * @param intnl internal parameters
    * @param pm Current value(s) of the plasticity multiplier(s) (consistency parameters)
    * @param delta_dp Change in plastic strain incurred so far during the return
-   * @param f (output) Active yield function(s)
-   * @param r (output) Active flow directions
-   * @param epp (output) Plastic-strain increment constraint
-   * @param ic (output) Active internal-parameter constraint
+   * @param[out] f Active yield function(s)
+   * @param[out] r Active flow directions
+   * @param[out] epp Plastic-strain increment constraint
+   * @param[out] ic Active internal-parameter constraint
    * @param active The active constraints.
    */
   virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, std::vector<RankTwoTensor> & r, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active);
@@ -158,10 +158,10 @@ protected:
    * @param intnl internal parameters
    * @param pm Current value(s) of the plasticity multiplier(s) (consistency parameters)
    * @param delta_dp Change in plastic strain incurred so far during the return
-   * @param rhs (output) the rhs
+   * @param[out] rhs the rhs
    * @param active The active constraints.
    * @param eliminate_ld Check for linear dependence of constraints and put the results into deactivated_due_to_ld.  Usually this should be true, but for certain debug operations it should be false
-   * @param deactivated_due_to_ld (output) constraints deactivated due to linear-dependence of flow directions
+   * @param[out] deactivated_due_to_ld constraints deactivated due to linear-dependence of flow directions
    */
   virtual void calculateRHS(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & rhs, const std::vector<bool> & active, bool eliminate_ld, std::vector<bool> & deactivated_due_to_ld);
 
@@ -179,13 +179,17 @@ protected:
    * @param pm  Current value of the plasticity multipliers (consistency parameters)
    * @param E_inv inverse of the elasticity tensor
    * @param delta_dp  Current value of the plastic-strain increment (ie plastic_strain - plastic_strain_old)
-   * @param dstress (output) The change in stress for a full Newton step
-   * @param dpm (output) The change in all plasticity multipliers for a full Newton step
-   * @param dintnl (output) The change in all internal variables for a full Newton step
+   * @param[out] dstress The change in stress for a full Newton step
+   * @param[out] dpm The change in all plasticity multipliers for a full Newton step
+   * @param[out] dintnl The change in all internal variables for a full Newton step
    * @param active The active constraints
-   * @param deactivated_due_to_ld (output) The constraints deactivated due to linear-dependence of the flow directions
+   * @param[out] deactivated_due_to_ld The constraints deactivated due to linear-dependence of the flow directions
    */
-  virtual void nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, const RankTwoTensor & delta_dp, RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl, const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
+  virtual void nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old,
+                      const std::vector<Real> & intnl, const std::vector<Real> & pm,
+                      const RankFourTensor & E_inv, const RankTwoTensor & delta_dp,
+                      RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl,
+                      const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
 
 
  private:
@@ -201,7 +205,7 @@ protected:
    *     (  r[4](0,0) r[4](0,1) r[4](0,2) r[4](1,1) r[4](1,2) r[4](2,2)  )
    *
    * @param r The flow directions
-   * @param s (output) The singular values
+   * @param[out] s The singular values
    * @return The return value from the PETSc LAPACK gesvd reoutine
    */
   virtual int singularValuesOfR(const std::vector<RankTwoTensor> & r, std::vector<Real> & s);
@@ -215,11 +219,11 @@ protected:
    * @param f Active yield function values
    * @param r the flow directions that for those yield functions that are active upon entry to this function
    * @param active true if active
-   * @param (output) deactivated_due_to_ld Yield functions deactivated due to linearly-dependent flow directions
+   * @param[out] deactivated_due_to_ld Yield functions deactivated due to linearly-dependent flow directions
    */
-  virtual void eliminateLinearDependence(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & f, const std::vector<RankTwoTensor> & r, const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
-
-
+  virtual void eliminateLinearDependence(const RankTwoTensor & stress, const std::vector<Real> & intnl,
+                                         const std::vector<Real> & f, const std::vector<RankTwoTensor> & r,
+                                         const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
 };
 
 #endif //MULTIPLASTICITYLINEARSYSTEM_H

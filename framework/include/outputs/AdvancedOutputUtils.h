@@ -135,8 +135,9 @@ public:
   /**
    * Constructor
    * @param execute_on The general "execute_on" settings for the object.
+   * @param parameters The parameters object holding data for the class to use.
    */
-  OutputOnWarehouse(const MultiMooseEnum & execute_on, const InputParameters & params);
+  OutputOnWarehouse(const MultiMooseEnum & execute_on, const InputParameters & parameters);
 };
 
 /**

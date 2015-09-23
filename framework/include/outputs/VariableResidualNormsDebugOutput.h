@@ -37,7 +37,6 @@ public:
 
   /**
    * Class constructor
-   * @param name Output object name
    * @param parameters Object input parameters
    */
   VariableResidualNormsDebugOutput(const InputParameters & parameters);

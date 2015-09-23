@@ -280,7 +280,7 @@ private:
 
   /**
    * Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
-   * @param execute_data Reference to OutputData struct to initialize
+   * @param execute_data_name Name of the OutputData struct to initialize
    * @param warehouse Reference to the postprocessor or vector postprocessor warehouse
    */
   template <typename warehouse_type, typename postprocessor_type>

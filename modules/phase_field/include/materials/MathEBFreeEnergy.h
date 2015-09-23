@@ -28,7 +28,7 @@ public:
 
 protected:
 
-  /// Coupled variable value for the concentration \f$ \c \f$.
+  /// Coupled variable value for the concentration \f$ c \f$.
   EBTerm _c;
 };
 

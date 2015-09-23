@@ -45,7 +45,7 @@ TensorMechanicsPlasticMeanCap::dyieldFunction_dintnl(const RankTwoTensor & /*str
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMeanCap::flowPotential(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticMeanCap::flowPotential(const RankTwoTensor & stress, const Real & /*intnl*/) const
 {
   return _a_over_3*stress.dtrace();
 }
@@ -67,4 +67,3 @@ TensorMechanicsPlasticMeanCap::modelName() const
 {
   return "MeanCap";
 }
-

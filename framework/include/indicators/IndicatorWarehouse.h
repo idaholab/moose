@@ -51,7 +51,7 @@ public:
 
   /**
    * Add a Indicators
-   * @param Indicator indicator being added
+   * @param indicator Indicator being added
    * @param block_ids Set of active domain where the Indicator is defined
    */
   void addIndicator(MooseSharedPointer<Indicator> indicator, std::vector<SubdomainID> & block_ids);

@@ -25,9 +25,9 @@ public:
   DerivativeMultiPhaseMaterial(const InputParameters & parameters);
 
 protected:
-  virtual Real computeDF(unsigned int);
-  virtual Real computeD2F(unsigned int, unsigned int);
-  virtual Real computeD3F(unsigned int, unsigned int, unsigned int);
+  virtual Real computeDF(unsigned int i_var);
+  virtual Real computeD2F(unsigned int i_var, unsigned int j_var);
+  virtual Real computeD3F(unsigned int i_var, unsigned int j_var, unsigned int k_var);
 
   /// Function value of the i phase.
   std::vector<const MaterialProperty<Real> *> _dhi, _d2hi, _d3hi;

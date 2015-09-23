@@ -27,8 +27,8 @@ public:
 
 protected:
   virtual Real computeF();
-  virtual Real computeDF(unsigned int);
-  virtual Real computeD2F(unsigned int, unsigned int);
+  virtual Real computeDF(unsigned int i_var);
+  virtual Real computeD2F(unsigned int i_var, unsigned int j_var);
 
   std::string _base_name;
 

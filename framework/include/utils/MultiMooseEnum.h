@@ -36,7 +36,7 @@ public:
   /**
    * Constructor that takes a list of enumeration values, and a separate string to set a default for this instance
    * @param names - a list of names for this enumeration
-   * @param default_name - the default value for this enumeration instance
+   * @param default_names - the default value for this enumeration instance
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of it's range of
    *                       defined values.
    */

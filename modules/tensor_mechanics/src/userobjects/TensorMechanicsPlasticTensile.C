@@ -257,4 +257,3 @@ TensorMechanicsPlasticTensile::modelName() const
 {
   return "Tensile";
 }
-

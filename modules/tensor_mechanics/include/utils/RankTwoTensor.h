@@ -331,8 +331,7 @@ public:
 
   /**
    * Computes second derivatives of Eigenvalues of a rank two tensor
-   * @param tens is a rank two tensor
-   * @param deriv is a second derivative of the input tensor
+   * @param deriv store second derivative of the current tensor in here
    */
   void d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv) const;
 
