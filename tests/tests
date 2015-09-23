@@ -1,0 +1,20 @@
+[Tests]
+ [./test_import]
+  type = 'CrowPython'
+  #python_command = python3
+  input = 'test_import.py'
+  requires_swig2 = True
+ [../]
+
+ [./test_utils]
+  type = 'CrowPython'
+  input = 'test_utils.py'
+  requires_swig2 = True
+ [../]
+
+[./test_normal]
+  type = 'CrowPython'
+  input = 'test_normal.py'
+  requires_swig2 = True
+ [../]
+[]
