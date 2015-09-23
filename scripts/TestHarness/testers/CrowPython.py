@@ -13,8 +13,9 @@ class CrowPython(Tester):
 
   @staticmethod
   def validParams():
-  """ Return a list of valid parameters and their descriptions for this type of
-      test. """
+    """ Return a list of valid parameters and their descriptions for this type
+        of test.
+    """
     params = Tester.validParams()
     params.addRequiredParam('input',"The python file to use for this test.")
     if os.environ.get("CHECK_PYTHON3","0") == "1":
@@ -53,7 +54,7 @@ class CrowPython(Tester):
     return (True, '')
 
   def processResults(self, moose_dir,retcode, options, output):
-    """ Handle the results of test
+    """ Handle the results of test case.
         @ In, moose_dir: the root directory where MOOSE resides on the current
                          system.
         @ In, retcode: Return code of the test case.
