@@ -83,7 +83,7 @@ RichardsFlux::computeQpJac(unsigned int wrt_num)
     supg_kernel_prime = -(_d2flux_dvdv[_qp][_pvar][_pvar][wrt_num]*_phi[_j][_qp]*_grad_u[_qp] + _phi[_j][_qp]*(_d2flux_dgradvdv[_qp][_pvar][_pvar][wrt_num]*_second_u[_qp]).tr() + (_d2flux_dvdgradv[_qp][_pvar][_pvar][wrt_num]*_grad_u[_qp])*_grad_phi[_j][_qp]);
     if (wrt_num == _pvar)
       supg_kernel_prime -= _dflux_dv[_qp][_pvar][_pvar]*_grad_phi[_j][_qp];
-    //supg_kernel_prime -= (_dflux_dgradv[_qp][_pvar][_pvar]*_second_phi[_j][_qp]).tr(); // crashes because _second_phi_zero is not done correctly
+    supg_kernel_prime -= (_dflux_dgradv[_qp][_pvar][_pvar]*_second_phi[_j][_qp]).tr();
   }
 
   return flux_prime + supg_test_prime*supg_kernel + supg_test*supg_kernel_prime;
@@ -104,4 +104,3 @@ RichardsFlux::computeQpOffDiagJacobian(unsigned int jvar)
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
   return computeQpJac(dvar);
 }
-

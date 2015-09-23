@@ -26,7 +26,9 @@
 class FEProblem;
 
 /**
- * Grab all the local dof indices for the variables passed in, in the system passed in.
+ * This class determines the maximum number of Quadrature Points and Shape Functions
+ * used for a given simulation based on the variable discretizations, and quadrature
+ * rules used for all variables in the system.
  */
 class MaxQpsThread
 {
@@ -40,7 +42,9 @@ public:
 
   void join(const MaxQpsThread & y);
 
-  unsigned int max() { return _max; }
+  unsigned int max() const { return _max; }
+
+  unsigned int max_shape_funcs() const { return _max_shape_funcs; }
 
 protected:
   FEProblem & _fe_problem;
@@ -53,6 +57,9 @@ protected:
 
   /// Maximum number of qps encountered
   unsigned int _max;
+
+  /// Maximum number of shape functions encountered
+  unsigned int _max_shape_funcs;
 };
 
 #endif //MAXQPSTHREAD_H
