@@ -17,15 +17,15 @@
 template<>
 InputParameters validParams<DirichletBC>()
 {
-  InputParameters p = validParams<NodalBC>();
-  p.addRequiredParam<Real>("value", "Value of the BC");
-  return p;
+  InputParameters params = validParams<NodalBC>();
+  params.addRequiredParam<PostprocessorName>("value", "Value of the BC");
+  return params;
 }
 
 
 DirichletBC::DirichletBC(const InputParameters & parameters) :
   NodalBC(parameters),
-  _value(getParam<Real>("value"))
+  _value(getPostprocessorValue("value"))
 {}
 
 Real
@@ -33,4 +33,3 @@ DirichletBC::computeQpResidual()
 {
   return _u[_qp] - _value;
 }
-

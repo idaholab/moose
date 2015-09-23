@@ -36,7 +36,7 @@ protected:
   virtual Real computeQpResidual();
 
   /// The value for this BC
-  const Real & _value;
+  const PostprocessorValue & _value;
 };
 
 #endif /* DIRICHLETBC_H */

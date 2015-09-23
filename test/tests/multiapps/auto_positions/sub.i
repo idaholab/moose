@@ -31,7 +31,7 @@
     value = 0
   [../]
   [./right]
-    type = PostprocessorDirichletBC
+    type = DirichletBC
     variable = u
     boundary = right
     postprocessor = master_value
@@ -58,4 +58,3 @@
 [Outputs]
   exodus = true
 []
-
