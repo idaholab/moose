@@ -65,7 +65,7 @@
 #define registerSplit(name)                         registerObject(name)
 #define registerOutput(name)                        registerObject(name)
 #define registerControl(name)                       registerObject(name)
-
+#define registerPartitioner(name)                   registerObject(name)
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
@@ -96,6 +96,7 @@
 #define registerNamedSplit(obj, name)               registerNamedObject(obj, name)
 #define registerNamedOutput(obj, name)              registerNamedObject(obj, name)
 #define registerNamedControl(obj, name)             registerNamedObject(obj, name)
+#define registerNamedPartitioner(obj, name)         registerNamedObject(obj, name)
 
 /**
  * Typedef to wrap shared pointer type
