@@ -24,7 +24,15 @@ def find_interpolationND():
     return crow_modules.interpolationNDpy2
 
 def checkAnswer(comment,value,expected,results,tol=1e-10):
-  """ Will check if a test passes or fails and update the results dictionary. """
+  """ Will check if a test passes or fails and update the results dictionary. 
+    @ In, comment: A user-specified comment that will be printed with the test
+                   case.
+    @ In, value: the generated test value.
+    @ In, expected: the gold standard to which value will be compared.
+    @ InOut, results: a dictionary to which pass or fail will be incremented.
+    @ In, tol: an optional tolerance value specifying how close expected and
+               value should be.
+  """
   if abs(value - expected) > tol:
     print("checking answer",comment,value,"!=",expected)
     results["fail"] += 1
