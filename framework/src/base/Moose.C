@@ -75,7 +75,6 @@
 #include "VectorNeumannBC.h"
 #include "WeakGradientBC.h"
 #include "DiffusionFluxBC.h"
-#include "PostprocessorDirichletBC.h"
 #include "OneDEqualValueConstraintBC.h"
 
 // auxkernels
@@ -460,7 +459,7 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(VectorNeumannBC);
   registerBoundaryCondition(WeakGradientBC);
   registerBoundaryCondition(DiffusionFluxBC);
-  registerBoundaryCondition(PostprocessorDirichletBC);
+  registerDeprecatedObjectName(DirichletBC, "PostprocessorDirichletBC", "11/01/2015 11:42");
   registerBoundaryCondition(OneDEqualValueConstraintBC);
 
   // dirac kernels
