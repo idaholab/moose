@@ -38,7 +38,9 @@
 /**
  * The Constructor.
  */
-LibcurlUtils::LibcurlUtils()
+LibcurlUtils::LibcurlUtils() :
+    ignoreSslPeerVerification(false),
+    noProxyFlag(true)
 {
 
 #ifdef LIBMESH_HAVE_CURL
@@ -49,7 +51,6 @@ LibcurlUtils::LibcurlUtils()
 #endif
 
   // Set the ignoreSslPeerVerification flag to false.
-  ignoreSslPeerVerification = false;
 }
 
 /**
@@ -98,8 +99,9 @@ std::string LibcurlUtils::get(std::string url, std::string username, std::string
     if (ignoreSslPeerVerification)
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 
-    // Set the noproxy command line option
-    curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+    // Set the noproxy command line option if the user requested it.
+    if (noProxyFlag)
+      curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 
     // Set the username and password
     curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
@@ -186,8 +188,9 @@ std::string LibcurlUtils::post(std::string url, std::string value, std::string u
     curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
     curl_easy_setopt(curl, CURLOPT_PASSWORD, password.data());
 
-    // Set the noproxy command line option
-    curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+    // Set the noproxy command line option if the user requested it.
+    if (noProxyFlag)
+      curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 
     // Attempt to post to the remote page
     result = curl_easy_perform(curl);

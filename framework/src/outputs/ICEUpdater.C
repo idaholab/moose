@@ -26,12 +26,14 @@ InputParameters validParams<ICEUpdater>()
 
   params.addRequiredParam<std::string>("item_id", "The currently running MOOSE Item Id.");
   params.addRequiredParam<std::string>("url", "The URL of the currently running ICE Core instance.");
+  params.addParam<bool>("noproxy", true, "If true, set 'CURLOPT_NOPROXY, \"*\"' when calling libcurl APIs.");
 
   return params;
 }
 
 ICEUpdater::ICEUpdater(const InputParameters & parameters) :
-    AdvancedOutput<Output>(parameters)
+    AdvancedOutput<Output>(parameters),
+    _noproxy(getParam<bool>("noproxy"))
 {
   // Create the iStream containing the initialization data for the Updater
   std::stringstream ss;
@@ -43,6 +45,9 @@ ICEUpdater::ICEUpdater(const InputParameters & parameters) :
 
   // Create the ICE Updater
   iceUpdater = MooseSharedPointer<Updater>(new Updater(ss));
+
+  // Pass down the _noproxy flag to the iceUpdater.
+  iceUpdater->setNoProxyFlag(_noproxy);
 
   // Start the Updater.
   iceUpdater->start();

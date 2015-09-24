@@ -74,6 +74,13 @@ private:
    */
   bool ignoreSslPeerVerification;
 
+  /**
+   * True by default.  When true, set (CURLOPT_NOPROXY, "*") when
+   * calling libcurl APIs.  Call the setNoProxyFlag() setter to change
+   * the value.
+   */
+  bool noProxyFlag;
+
 public:
 
   /**
@@ -115,6 +122,13 @@ public:
    * @param ignoreSslPeerVerification The value for the ignoreSslPeerVerification flag.
    */
   void setIgnoreSslPeerVerification(bool ignoreSslPeerVerification);
+
+  /**
+   * Sets the noProxyFlag's value to 'val'.
+   *
+   * @param val The new value for the noProxyFlag.
+   */
+  void setNoProxyFlag(bool val) { noProxyFlag = val; }
 
   /**
    * A callback required by the C libcurl library to write the contents returned by get() to a buffer.

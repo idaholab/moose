@@ -54,12 +54,16 @@ protected:
    */
   virtual void outputPostprocessors();
 
-private:
   /**
    * Reference to the ICE Updater object in charge of
    * connecting to ICE and posting update messages.
    */
   MooseSharedPointer<Updater> iceUpdater;
+
+  /**
+   * If true, set (CURLOPT_NOPROXY, "*") when calling libcurl APIs.
+   */
+  bool _noproxy;
 };
 
 #endif

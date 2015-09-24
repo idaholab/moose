@@ -61,7 +61,8 @@ std::vector<std::string> split(const std::string &s, char delim)
  * The Constructor. Here, the Constructor will search for properties file in the current directory.
  * This file must contain the url, item id and client key used for transmission.
  */
-Updater::Updater()
+Updater::Updater() :
+    noProxyFlag(true)
 {
   // Get the contents of the "updater.properties" file
   std::string contents = getPropertyFileContents();
@@ -76,7 +77,8 @@ Updater::Updater()
  *
  * @param stream An input stream in the form of the updater.properties file format.
  */
-Updater::Updater(std::istream &stream)
+Updater::Updater(std::istream &stream) :
+    noProxyFlag(true)
 {
   // Create a string buffer
   std::stringstream buffer;
@@ -237,7 +239,7 @@ bool Updater::start()
     // using the current innermost cancellation group.  Believe it or
     // not, this is "idiomatic TBB code".
     // https://www.threadingbuildingblocks.org/docs/help/reference/task_scheduler/task_allocation.htm
-    updaterThread = new (tbb::task::allocate_root()) UpdaterThread(propertyMap, errorLoggerPtr, ignoreSslPeerVerification);
+    updaterThread = new (tbb::task::allocate_root()) UpdaterThread(propertyMap, errorLoggerPtr, ignoreSslPeerVerification, noProxyFlag);
     tbb::task::enqueue(*updaterThread);
 
     // Set flag to true
@@ -304,6 +306,7 @@ tbb::task * UpdaterThread::execute()
 
   // Set the ignoreSslPeerVerification flag in libcurlUtilsPtr
   libcurlUtilsPtr->setIgnoreSslPeerVerification(ignoreSslPeerVerification);
+  libcurlUtilsPtr->setNoProxyFlag(noProxyFlag);
 
   // Start an infinite loop
   while (!stop)

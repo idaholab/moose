@@ -117,6 +117,13 @@ private:
   bool threadCreated;
 
   /**
+   * True by default.  When true, set (CURLOPT_NOPROXY, "*") when
+   * calling libcurl APIs.  Call the setNoProxyFlag() setter to change
+   * the value.
+   */
+  bool noProxyFlag;
+
+  /**
    * Reference to the UpdaterThread that serves as the TBB Task to launch
    */
   UpdaterThread * updaterThread;
@@ -250,6 +257,13 @@ public:
    * @param status The progress value to post.
    */
   void updateProgress(int status);
+
+  /**
+   * Sets the noProxyFlag's value to 'val'.
+   *
+   * @param val The new value for the noProxyFlag.
+   */
+  void setNoProxyFlag(bool val) { noProxyFlag = val; }
 };
 
 
@@ -282,6 +296,12 @@ private:
   bool ignoreSslPeerVerification;
 
   /**
+   * Flag to be passed down to the libcurlUtils object to control
+   * whether proxies are ignored while making libcurl API calls.
+   */
+  bool noProxyFlag;
+
+  /**
    * A mutex to synchronize the posts queue.</p>
    */
   tbb::mutex mutex;
@@ -298,10 +318,12 @@ public:
    */
   UpdaterThread(PropertyMap map,
                 ErrorLoggerPtr error,
-                bool ssl) :
+                bool ssl,
+                bool noproxy) :
       propertyMap(map),
       errorLoggerPtr(error),
-      ignoreSslPeerVerification(ssl)
+      ignoreSslPeerVerification(ssl),
+      noProxyFlag(noproxy)
   {
     stop.store(false);
   }
