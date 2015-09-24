@@ -9,7 +9,8 @@
     port = 8181
 
     # This test should only run if libmesh has been configured with
-    # curl.
+    # both TBB and curl enabled.
     curl = true
+    tbb = true
   [../]
 []

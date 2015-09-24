@@ -35,12 +35,17 @@
 #include <string>
 #include <queue>
 #include <map>
-#include <tbb/mutex.h>
-#include <tbb/concurrent_queue.h>
+
 #include "Post.h"
 #include "PropertyType.h"
 #include "ErrorLogger.h"
 #include "MooseTypes.h"
+#include "MooseError.h"
+
+#ifdef LIBMESH_HAVE_TBB_API
+#include <tbb/mutex.h>
+#include <tbb/concurrent_queue.h>
+
 
 class UpdaterThread;
 
@@ -313,5 +318,41 @@ public:
    */
   void stopThread() { stop.store(true); }
 };
+
+
+
+#else // !LIBMESH_HAVE_TBB_API
+
+
+
+/**
+ * If we don't haev TBB, build a stub Updater class that does nothing
+ * but throw errors if used.  This is a temporary workaround until the
+ * Updater can be made TBB-agnostic.
+ */
+class Updater
+{
+public:
+  /**
+   * The constructors all throw errors.
+   */
+  Updater() { mooseError("Updater requires TBB."); }
+  Updater(std::istream &stream) { mooseError("Updater requires TBB."); }
+
+  /**
+   * The following functions do nothing, and will never be called.
+   */
+  void postFileCreated(std::string) {}
+  void postFileDeleted(std::string) {}
+  void postFileModified(std::string) {}
+  void postMessage(std::string) {}
+  void setIgnoreSslPeerVerification(bool) {}
+  bool start() { return false; }
+  bool stop() { return false; }
+  void updateConvergence(int) {}
+  void updateProgress(int) {}
+};
+
+#endif // LIBMESH_HAVE_TBB_API
 
 #endif

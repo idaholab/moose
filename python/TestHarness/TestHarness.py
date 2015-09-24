@@ -86,6 +86,7 @@ class TestHarness:
       self.checks['dof_id_bytes'] = set(['ALL'])
       self.checks['petsc_debug'] = set(['ALL'])
       self.checks['curl'] = set(['ALL'])
+      self.checks['tbb'] = set(['ALL'])
     else:
       self.checks['compiler'] = getCompilers(self.libmesh_dir)
       self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
@@ -98,6 +99,7 @@ class TestHarness:
       self.checks['dof_id_bytes'] = getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
       self.checks['petsc_debug'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
       self.checks['curl'] =  getLibMeshConfigOption(self.libmesh_dir, 'curl')
+      self.checks['tbb'] =  getLibMeshConfigOption(self.libmesh_dir, 'tbb')
 
     # Override the MESH_MODE option if using '--parallel-mesh' option
     if self.options.parallel_mesh == True or \

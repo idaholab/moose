@@ -29,11 +29,14 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
 *******************************************************************************/
-#include "Updater.h"
 #include <fstream>
 #include <stdlib.h>
 #include <sstream>
+
+#include "Updater.h"
 #include "LibcurlUtils.h"
+
+#ifdef LIBMESH_HAVE_TBB_API
 #include <tbb/tick_count.h>
 #include <tbb/tbb_thread.h>
 
@@ -595,3 +598,5 @@ void Updater::initialize(std::string propertyString)
   if (!goodPropertyMap)
     errorLoggerPtr->dumpErrors();
 }
+
+#endif // LIBMESH_HAVE_TBB_API
