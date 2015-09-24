@@ -121,6 +121,21 @@ MultiApp::MultiApp(const InputParameters & parameters):
   _total_num_apps = _positions.size();
 
   mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
+
+  // Fill in the _positions vector
+  fillPositions();
+
+  if (_move_apps.size() != _move_positions.size())
+    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp " << name());
+
+  /// Set up our Comm and set the number of apps we're going to be working on
+  buildComm();
+
+  _backups.resize(_my_num_apps);
+
+  // Initialize the backups
+  for (unsigned int i=0; i<_my_num_apps; i++)
+    _backups[i] = MooseSharedPointer<Backup>(new Backup);
 }
 
 MultiApp::~MultiApp()
@@ -139,23 +154,12 @@ MultiApp::~MultiApp()
 void
 MultiApp::initialSetup()
 {
-  if (_move_apps.size() != _move_positions.size())
-    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp " << name());
-
-  /// Set up our Comm and set the number of apps we're going to be working on
-  buildComm();
-
   if (!_has_an_app)
     return;
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   _apps.resize(_my_num_apps);
-  _backups.resize(_my_num_apps);
-
-  // Initialize the backups
-  for (unsigned int i=0; i<_my_num_apps; i++)
-    _backups[i] = MooseSharedPointer<Backup>(new Backup);
 
   // If the user provided an unregistered app type, see if we can load it dynamically
   if (!AppFactory::instance().isRegistered(_app_type))
