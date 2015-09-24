@@ -64,8 +64,7 @@ def getCoverage():
                  '*/moab/*',
                  '*/tbb/*',
                  '*/petsc*/*',
-                 '*/dtk_opt/*',
-                 '*/dtk_moab/*'
+                 '*/dtk_opt/*'
                  ]
 
   # Use the same commands from the coverage_html script to generate the raw.info file
