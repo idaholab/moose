@@ -28,20 +28,24 @@ InputParameters validParams<LStableDirk3>()
 LStableDirk3::LStableDirk3(const InputParameters & parameters) :
     TimeIntegrator(parameters),
     _stage(1),
-    _residual_stage1(_nl.addVector("residual_stage1", false, GHOSTED)),
-    _residual_stage2(_nl.addVector("residual_stage2", false, GHOSTED)),
-    _residual_stage3(_nl.addVector("residual_stage3", false, GHOSTED)),
-    _gamma(-std::sqrt(2.)*std::cos(atan(std::sqrt(2.)/4.)/3.)/2. + std::sqrt(6.)*std::sin(atan(std::sqrt(2.)/4.)/3.)/2. + 1.),
-    _c1(_gamma),
-    _c2(.5*(1+_gamma)),
-    _c3(1.0),
-    _a11(_gamma),
-    _a21(.5*(1-_gamma)),
-    _a22(_gamma),
-    _a31(.25*(-6*_gamma*_gamma + 16*_gamma - 1)),
-    _a32(.25*( 6*_gamma*_gamma - 20*_gamma + 5)),
-    _a33(_gamma)
+    _gamma(-std::sqrt(2.)*std::cos(atan(std::sqrt(2.)/4.)/3.)/2. + std::sqrt(6.)*std::sin(atan(std::sqrt(2.)/4.)/3.)/2. + 1.)
 {
+  // Name the stage residuals "residual_stage1", "residual_stage2", etc.
+  for (unsigned int stage=0; stage<3; ++stage)
+  {
+    std::ostringstream oss;
+    oss << "residual_stage" << stage+1;
+    _stage_residuals[stage] = &(_nl.addVector(oss.str(), false, GHOSTED));
+  }
+
+  // Initialize parameters
+  _c[0] = _gamma;
+  _c[1] = .5*(1+_gamma);
+  _c[2] = 1.0;
+
+  _a[0][0] = _gamma;
+  _a[1][0] = .5*(1-_gamma);                          /**/ _a[1][1] = _gamma;
+  _a[2][0] = .25*(-6*_gamma*_gamma + 16*_gamma - 1); /**/ _a[2][1] = .25*( 6*_gamma*_gamma - 20*_gamma + 5); /**/ _a[2][2] = _gamma;
 }
 
 
@@ -73,39 +77,26 @@ LStableDirk3::solve()
   // Time at end of step
   Real time_old = _fe_problem.timeOld();
 
-  // Compute first stage
-  _console << "1st stage\n";
-  _stage = 1;
-  _fe_problem.time() = time_old + _c1*_dt;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  // A for-loop would increment _stage too far, so we use an extra
+  // loop counter.
+  for (unsigned int current_stage=1; current_stage<4; ++current_stage)
+  {
+    // Set the current stage value
+    _stage = current_stage;
 
+    // This ensures that all the Output objects in the OutputWarehouse
+    // have had solveSetup() called, and sets the default solver
+    // parameters for PETSc.
+    _fe_problem.initPetscOutput();
 
+    _console << "Stage " << _stage << "\n";
 
-  // Compute second stage
-  _fe_problem.initPetscOutput();
-  _console << "2nd stage\n";
-  _stage = 2;
-  _fe_problem.time() = time_old + _c2*_dt;
+    // Set the time for this stage
+    _fe_problem.time() = time_old + _c[_stage-1]*_dt;
 
-#ifdef LIBMESH_HAVE_PETSC
-  Moose::PetscSupport::petscSetOptions(_fe_problem);
-#endif
-  Moose::setSolverDefaults(_fe_problem);
-  _fe_problem.getNonlinearSystem().sys().solve();
-
-
-
-  // Compute third stage
-  _fe_problem.initPetscOutput();
-  _console << "3rd stage\n";
-  _stage = 3;
-  _fe_problem.time() = time_old + _c3*_dt;
-
-#ifdef LIBMESH_HAVE_PETSC
-  Moose::PetscSupport::petscSetOptions(_fe_problem);
-#endif
-  Moose::setSolverDefaults(_fe_problem);
-  _fe_problem.getNonlinearSystem().sys().solve();
+    // Do the solve
+    _fe_problem.getNonlinearSystem().sys().solve();
+  }
 }
 
 
@@ -113,6 +104,10 @@ LStableDirk3::solve()
 void
 LStableDirk3::postStep(NumericVector<Number> & residual)
 {
+  // Error if _stage got messed up somehow.
+  if (_stage > 3)
+    mooseError("LStableDirk3::postStep(): Member variable _stage can only have values 1, 2, or 3.");
+
   // In the standard RK notation, the residual of stage 1 of s is given by:
   //
   // R := M*(Y_i - y_n)/dt - \sum_{j=1}^s a_{ij} * f(t_n + c_j*dt, Y_j) = 0
@@ -122,37 +117,14 @@ LStableDirk3::postStep(NumericVector<Number> & residual)
   // .) Y_i is the stage solution
   // .) dt is the timestep, and is accounted for in the _Re_time residual.
   // .) f are the "non-time" residuals evaluated for a given stage solution.
-  if (_stage == 1)
-  {
-    _residual_stage1 = _Re_non_time;
-    _residual_stage1.close();
 
-    residual.add(1., _Re_time);
-    residual.add(_a11, _residual_stage1);
-    residual.close();
-  }
-  else if (_stage == 2)
-  {
-    _residual_stage2 = _Re_non_time;
-    _residual_stage2.close();
+  // Store this stage's non-time residual.  We are calling operator=
+  // here, and that calls close().
+  *_stage_residuals[_stage-1] = _Re_non_time;
 
-    residual.add(1., _Re_time);
-    residual.add(_a21, _residual_stage1);
-    residual.add(_a22, _residual_stage2);
-    residual.close();
-  }
-  else if (_stage == 3)
-  {
-    _residual_stage3 = _Re_non_time;
-    _residual_stage3.close();
-
-    residual.add(1., _Re_time);
-    residual.add(_a31, _residual_stage1);
-    residual.add(_a32, _residual_stage2);
-    residual.add(_a33, _residual_stage3);
-    residual.close();
-  }
-
-  else
-    mooseError("LStableDirk3::postStep(): Member variable _stage can only have values 1, 2, or 3.");
+  // Build up the residual for this stage.
+  residual.add(1., _Re_time);
+  for (unsigned int j=0; j<_stage; ++j)
+    residual.add(_a[_stage-1][j], *_stage_residuals[j]);
+  residual.close();
 }

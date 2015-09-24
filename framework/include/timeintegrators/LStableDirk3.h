@@ -63,27 +63,22 @@ protected:
   // Indicates the current stage.
   unsigned int _stage;
 
-  // Buffer to store non-time residual from first stage solve.
-  NumericVector<Number> & _residual_stage1;
-
-  // Buffer to store non-time residual from second stage solve
-  NumericVector<Number> & _residual_stage2;
-
-  // Buffer to store non-time residual from third stage solve
-  NumericVector<Number> & _residual_stage3;
+  // Store pointers to the various stage residuals
+  NumericVector<Number> * _stage_residuals[3];
 
   // The parameter of the method, set at construction time and cannot be changed.
   const Real _gamma; // 0.4358665215084589
 
   // Butcher tableau "C" parameters derived from _gamma
-  const Real _c1; // 0.4358665215084589
-  const Real _c2; // 0.7179332607542295
-  const Real _c3; // 1.0000000000000000
+  // 0.4358665215084589, 0.7179332607542295, 1.0000000000000000
+  Real _c[3];
 
-  // Butcher tableau "A" parameters derived from _gamma
-  const Real _a11;             // 0.4358665215084589
-  const Real _a21, _a22;       // 0.2820667392457705,  0.4358665215084589
-  const Real _a31, _a32, _a33; // 1.2084966491760099, -0.6443631706844688, 0.4358665215084589
+  // Butcher tableau "A" values derived from _gamma.  We only use the
+  // lower triangle of this.
+  // 0.4358665215084589
+  // 0.2820667392457705,  0.4358665215084589
+  // 1.2084966491760099, -0.6443631706844688, 0.4358665215084589
+  Real _a[3][3];
 };
 
 
