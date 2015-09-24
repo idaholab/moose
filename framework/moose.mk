@@ -3,7 +3,6 @@
 #
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
-moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/dtk_moab
 
 #
 # pcre
@@ -97,7 +96,6 @@ sa:: $(moose_analyzer)
 -include $(moose_deps)
 
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/mtwist/src/*.d)
--include $(wildcard $(FRAMEWORK_DIR)/contrib/dtk_moab/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
 
 ifdef PRECOMPILED

@@ -305,7 +305,6 @@
 #ifdef LIBMESH_HAVE_DTK
   #include "MultiAppDTKUserObjectTransfer.h"
   #include "MultiAppDTKInterpolationTransfer.h"
-  #include "MoabTransfer.h"
 #endif
 #include "MultiAppPostprocessorInterpolationTransfer.h"
 #include "MultiAppVariableValueSampleTransfer.h"
@@ -691,7 +690,6 @@ registerObjects(Factory & factory)
 #ifdef LIBMESH_HAVE_DTK
   registerTransfer(MultiAppDTKUserObjectTransfer);
   registerTransfer(MultiAppDTKInterpolationTransfer);
-  registerTransfer(MoabTransfer);
 #endif
   registerTransfer(MultiAppPostprocessorInterpolationTransfer);
   registerTransfer(MultiAppVariableValueSampleTransfer);
