@@ -33,7 +33,6 @@ public:
 
   /**
    * Class constructor
-   * @param name Name of the action
    * @param params Input parameters for this action
    */
   SetupRecoverFileBaseAction(InputParameters params);
@@ -58,7 +57,7 @@ private:
 
   /**
    * Extract the file base to utilize for recovery, uses the newest of the files in the supplied set
-   * @param The most current checkpoing file base
+   * @param checkpoint_files The most current checkpoing file base
    */
   std::string getRecoveryFileBase(const std::set<std::string> checkpoint_files);
 };

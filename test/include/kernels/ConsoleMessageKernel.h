@@ -33,7 +33,6 @@ public:
 
   /**
    * Class constructor
-   * @param name Name of the object
    * @param parameters Input parameters
    */
   ConsoleMessageKernel(const InputParameters & parameters);

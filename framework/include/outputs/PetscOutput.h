@@ -33,7 +33,6 @@ public:
 
   /**
    * Class constructor
-   * @param name Outputter name
    * @param parameters Outputter input file parameters
    */
   PetscOutput(const InputParameters & parameters);

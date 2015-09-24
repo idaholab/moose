@@ -38,8 +38,8 @@ class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
    * @param stress stress tensor
    * @param intnl internal parameter
    * @param Eijkl elasticity tensor (stress = Eijkl*strain)
-   * @param act (output) act[i] = true if the i_th yield function is active
-   * @param returned_stress (output) Approximate value of the returned stress
+   * @param[out] act act[i] = true if the i_th yield function is active
+   * @param[out] returned_stress Approximate value of the returned stress
    */
   virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
 

@@ -60,7 +60,7 @@ public:
    * Linear combination of the solution vectors
    *
    * @param tag System tag.
-   * @param fcoef Coefficients for current, old and older solutions.
+   * @param coefficients Coefficients for current, old and older solutions.
    */
   void combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coefficients);
 

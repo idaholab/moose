@@ -55,7 +55,6 @@ public:
 
   /**
    * Class constructor
-   * @param name
    * @param parameters
    */
   Checkpoint(const InputParameters & parameters);

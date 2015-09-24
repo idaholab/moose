@@ -37,7 +37,6 @@ public:
   /**
    * Constructor
    *
-   * @param name The name given to the Executioner in the input file.
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */

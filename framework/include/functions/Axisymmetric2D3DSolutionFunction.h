@@ -37,7 +37,6 @@ public:
 
   /**
    * Constructor
-   * @param name The name of the function
    * @param parameters The input parameters for the function
    */
   Axisymmetric2D3DSolutionFunction(const InputParameters & parameters);

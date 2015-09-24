@@ -85,7 +85,7 @@ public:
 
   /**
    * Add a VectorPostprocessor
-   * @param VectorPostprocessor VectorPostprocessor being added
+   * @param vector_postprocessor VectorPostprocessor being added
    */
   void addVectorPostprocessor(MooseSharedPointer<VectorPostprocessor> vector_postprocessor);
 

@@ -36,8 +36,7 @@ public:
 
   /**
    * Class constructor
-   * @param name The name of the oject
-   * @param parameters Th input parameters
+   * @param parameters The parameters object holding data for the class to use.
    */
   OrientedSubdomainBoundingBox(const InputParameters & parameters);
 

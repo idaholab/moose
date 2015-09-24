@@ -41,7 +41,6 @@ public:
   virtual ~MultiPlasticityRawComponentAssembler() {}
 
 protected:
-
   /// Number of plastic models for this material
   unsigned int _num_models;
 
@@ -65,8 +64,7 @@ protected:
    * @param stress the stress at which to calculate the yield function
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active yield functions are put into "f"
-   * @param num_active number of active constraints
-   * @param f (output) the yield function (or functions in the case of multisurface plasticity)
+   * @param[out] f the yield function (or functions in the case of multisurface plasticity)
    */
   virtual void yieldFunction(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<Real> & f);
 
@@ -76,8 +74,7 @@ protected:
    * @param stress the stress at which to calculate the yield function
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active derivatives are put into "df_dstress"
-   * @param num_active number of active constraints
-   * @param df_dstress (output) the derivative (or derivatives in the case of multisurface plasticity).  df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
+   * @param[out] df_dstress the derivative (or derivatives in the case of multisurface plasticity).  df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
    */
   virtual void dyieldFunction_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<RankTwoTensor> & df_dstress);
 
@@ -86,8 +83,7 @@ protected:
    * @param stress the stress at which to calculate the yield function
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active derivatives are put into "df_dintnl"
-   * @param num_active number of active constraints
-   * @param df_dintnl (output) the derivatives.  df_dstress[alpha] = dyieldFunction[alpha]/dintnl[alpha]
+   * @param[out] df_dintnl the derivatives.  df_dstress[alpha] = dyieldFunction[alpha]/dintnl[alpha]
    */
   virtual void dyieldFunction_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<Real> & df_dintnl);
 
@@ -96,8 +92,7 @@ protected:
    * @param stress the stress at which to calculate the flow potential
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active flow potentials are put into "r"
-   * @param num_active number of active constraints
-   * @param r (output) the flow potential (flow potentials in the multi-surface case)
+   * @param[out] r the flow potential (flow potentials in the multi-surface case)
    */
   virtual void flowPotential(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<RankTwoTensor> & r);
 
@@ -106,8 +101,7 @@ protected:
    * @param stress the stress at which to calculate the flow potential
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active derivatives are put into "dr_dstress"
-   * @param num_active number of active constraints
-   * @param dr_dstress (output) the derivative.  dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
+   * @param[out] dr_dstress the derivative.  dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
    */
   virtual void dflowPotential_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<RankFourTensor> & dr_dstress);
 
@@ -117,8 +111,7 @@ protected:
    * @param stress the stress at which to calculate the flow potential
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active derivatives are put into "dr_dintnl"
-   * @param num_active number of active constraints
-   * @param dr_dintnl (output) the derivatives.  dr_dintnl[alpha](i, j) = dr[alpha](i, j)/dintnl[alpha]
+   * @param[out] dr_dintnl the derivatives.  dr_dintnl[alpha](i, j) = dr[alpha](i, j)/dintnl[alpha]
    */
   virtual void dflowPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<RankTwoTensor> & dr_dintnl);
 
@@ -128,8 +121,7 @@ protected:
    * @param stress the stress at which to calculate the hardening potential
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active hardening potentials are put into "h"
-   * @param num_active number of active constraints
-   * @param h (output) the hardening potentials.  h[alpha] = hardening potential for yield fcn alpha (and, by the above assumption we know which hardening parameter, a, this belongs to)
+   * @param[out] h the hardening potentials.  h[alpha] = hardening potential for yield fcn alpha (and, by the above assumption we know which hardening parameter, a, this belongs to)
    */
   virtual void hardPotential(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<Real> & h);
 
@@ -139,8 +131,7 @@ protected:
    * @param stress the stress at which to calculate the hardening potentials
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active derivatives are put into "dh_dstress"
-   * @param num_active number of active constraints
-   * @param dh_dstress (output) the derivative.  dh_dstress[a](i, j) = dh[a]/dstress(k, l)
+   * @param[out] dh_dstress the derivative.  dh_dstress[a](i, j) = dh[a]/dstress(k, l)
    */
   virtual void dhardPotential_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<RankTwoTensor> & dh_dstress);
 
@@ -149,8 +140,7 @@ protected:
    * @param stress the stress at which to calculate the hardening potentials
    * @param intnl vector of internal parameters
    * @param active set of active constraints - only the active derivatives are put into "dh_dintnl"
-   * @param num_active number of active constraints
-   * @param dh_dintnl (output) the derivatives.  dh_dintnl[a][alpha][b] = dh[a][alpha]/dintnl[b].  Note that the userobjects assume that there is exactly one internal parameter per yield function, so the derivative is only nonzero for a=alpha=b, so that is all we calculate
+   * @param[out] dh_dintnl the derivatives.  dh_dintnl[a][alpha][b] = dh[a][alpha]/dintnl[b].  Note that the userobjects assume that there is exactly one internal parameter per yield function, so the derivative is only nonzero for a=alpha=b, so that is all we calculate
    */
   virtual void dhardPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, std::vector<Real> & dh_dintnl);
 
@@ -162,7 +152,7 @@ protected:
    * @param stress stress tensor
    * @param intnl internal parameters
    * @param Eijkl elasticity tensor (stress = Eijkl*strain)
-   * @param act (output) the set of active constraints (will be resized to _num_surfaces)
+   * @param[out] act the set of active constraints (will be resized to _num_surfaces)
    */
   virtual void buildActiveConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const std::vector<Real> & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act);
 
@@ -177,7 +167,7 @@ protected:
    * This may be of size=0 if there are no active surfaces of the given model
    * @param model the model number
    * @param active array with entries being 'true' if the surface is active
-   * @param active_surfaces_of_model (output) the output
+   * @param[out] active_surfaces_of_model the output
    */
   void activeModelSurfaces(int model, const std::vector<bool> & active, std::vector<unsigned int> & active_surfaces_of_model);
 
@@ -186,7 +176,7 @@ protected:
    * This may be of size=0 if there are no active surfaces of the given model
    * @param model the model number
    * @param active array with entries being 'true' if the surface is active
-   * @param active_surfaces (output) the output
+   * @param[out] active_surfaces the output
    */
   void activeSurfaces(int model, const std::vector<bool> & active, std::vector<unsigned int> & active_surfaces);
 
@@ -210,7 +200,7 @@ protected:
    * @param stress stress tensor
    * @param intnl internal parameters
    * @param Eijkl elasticity tensor (stress = Eijkl*strain)
-   * @param act (output) the set of active constraints (will be resized to _num_surfaces)
+   * @param[out] act the set of active constraints (will be resized to _num_surfaces)
    */
   void buildActiveConstraintsRock(const std::vector<Real> & f, const RankTwoTensor & stress, const std::vector<Real> & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act);
 
@@ -223,10 +213,9 @@ protected:
    * @param stress stress tensor
    * @param intnl internal parameters
    * @param Eijkl elasticity tensor (stress = Eijkl*strain)
-   * @param act (output) the set of active constraints (will be resized to _num_surfaces)
+   * @param[out] act the set of active constraints (will be resized to _num_surfaces)
    */
   void buildActiveConstraintsJoint(const std::vector<Real> & f, const RankTwoTensor & stress, const std::vector<Real> & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act);
-
 };
 
 #endif //MULTIPLASTICITYRAWCOMPONENTASSEMBLER_H

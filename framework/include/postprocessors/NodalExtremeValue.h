@@ -37,7 +37,6 @@ public:
 
   /**
    * Class constructor
-   * @param name The name of the postprocessor
    * @param parameters The input parameters
    */
   NodalExtremeValue(const InputParameters & parameters);

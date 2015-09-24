@@ -90,8 +90,8 @@ public:
   InputParameters getValidParams(const std::string & name);
 
   /**
-   * Build an object (must be registered)
-   * @param obj_name Type of the object being constructed
+   * Build an application object (must be registered)
+   * @param app_type Type of the application being constructed
    * @param name Name for the object
    * @param parameters Parameters this object should have
    * @return The created object

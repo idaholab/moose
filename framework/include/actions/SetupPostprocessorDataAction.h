@@ -37,7 +37,6 @@ public:
 
   /**
    * Class constructor
-   * @param name The name of the Postprocessor that this action is acting upon
    * @param params Input parameters for the action
    */
   SetupPostprocessorDataAction(InputParameters params);

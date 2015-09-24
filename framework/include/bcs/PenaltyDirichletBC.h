@@ -25,7 +25,7 @@ InputParameters validParams<PenaltyDirichletBC>();
 /**
  * A different approach to applying Dirichlet BCs
  *
- * uses \int(p u \cdot \phi)=\int(p f \cdot \phi) on d\omega
+ * uses \f$\int(p u \cdot \phi)=\int(p f \cdot \phi)\f$ on \f$d\omega\f$
  *
  */
 

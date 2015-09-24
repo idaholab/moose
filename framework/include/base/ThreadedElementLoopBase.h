@@ -87,8 +87,7 @@ public:
 
   /**
    * Called if a MooseException is caught anywhere during the computation.
-   *
-   * @param e The MooseException
+   * The single input parameter taken is a MooseException object.
    */
   virtual void caughtMooseException(MooseException &) {};
 

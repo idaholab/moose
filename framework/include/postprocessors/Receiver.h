@@ -32,7 +32,6 @@ class Receiver : public GeneralPostprocessor
 public:
   /**
    * Class constructor
-   * @param name The name of the Receiver postprocessor
    * @param parameters The input parameters
    */
   Receiver(const InputParameters & parameters);

@@ -34,7 +34,6 @@ class SolutionFunction : public Function
 public:
 
   /** Constructor
-   * @param name The name of the function
    * @param parameters The input parameters for the function
    */
   SolutionFunction(const InputParameters & parameters);

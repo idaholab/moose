@@ -50,7 +50,7 @@ public:
 
   /**
    * Add a Markers
-   * @param Marker Marker being added
+   * @param marker Marker being added
    * @param block_ids Set of active domain where the Marker is defined
    */
   void addMarker(MooseSharedPointer<Marker> marker, std::vector<SubdomainID> & block_ids);
