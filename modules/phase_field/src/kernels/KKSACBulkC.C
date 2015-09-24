@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<KKSACBulkC>()
 {
   InputParameters params = validParams<KKSACBulkBase>();
-  // params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
+  params.addClassDescription("KKS model kernel (part 2 of 2) for the Bulk Allen-Cahn. This includes all terms dependent on chemical potential.");
   params.addRequiredCoupledVar("ca", "a-phase concentration");
   params.addRequiredCoupledVar("cb", "b-phase concentration");
   return params;
@@ -43,18 +43,9 @@ KKSACBulkC::computeDFDOP(PFFunctionType type)
       return _prop_dh[_qp] * A1;
 
     case Jacobian:
-    {
-      // Eq. (25) in the KKS paper
-      Real dcadeta =   _prop_dh[_qp] * (_ca[_qp] - _cb[_qp]) * _prop_d2Fbdcb2[_qp]
-                     / ((1.0 - _prop_h[_qp]) * _prop_d2Fbdcb2[_qp] + _prop_h[_qp] * _prop_d2Fadca2[_qp]);
-
-      Real A2 = (_ca[_qp] - _cb[_qp]) * _prop_d2Fadca2[_qp] * dcadeta;
-
-      res =   _prop_d2h[_qp] * A1
-            + _prop_dh[_qp]  * A2;
+      res =   _prop_d2h[_qp] * A1;
 
       return _phi[_j][_qp] * res;
-    }
   }
 
   mooseError("Invalid type passed in");
@@ -63,36 +54,36 @@ KKSACBulkC::computeDFDOP(PFFunctionType type)
 Real
 KKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // The root of these issues may be that the equations need dF/dc, which happens to be dFa/dca
-  // We should really calculate d^2F/dc*dca which is NOT d^2Fa/dca*dca!!!!
-
-  // for now ignore these terms
-  return 0.0;
-
-  // treat ca and cb specially, as they appear in the residual
+  // first get dependence of mobility _L on other variables using parent class
+  // member function
+  Real res = ACBulk::computeQpOffDiagJacobian(jvar);
+  // Then add dependence of KKSACBulkF on other variables
+  // Treat ca and cb specially, as they appear in the residual
   if (jvar == _ca_var)
   {
-    return _test[_i][_qp] * _phi[_j][_qp] * _prop_dh[_qp] * (
-        _ca[_qp] * _prop_d2Fadca2[_qp] + _prop_dFadca[_qp]
-      - _prop_dFadca[_qp]
-    ); // Not correct yet
+    res += _L[_qp] * _prop_dh[_qp] * (
+        (_ca[_qp] - _cb[_qp]) * _prop_d2Fadca2[_qp] + _prop_dFadca[_qp]
+        ) * _phi[_j][_qp] * _test[_i][_qp];
+
+    return res;
   }
 
   if (jvar == _cb_var)
   {
-    return 0.0;
+    res -= _L[_qp] * _prop_dh[_qp] * _prop_dFadca[_qp]
+              * _phi[_j][_qp] * _test[_i][_qp];
+
+    return res;
   }
 
   //  for all other vars get the coupled variable jvar is referring to
   unsigned int cvar;
   if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+    return res;
 
-  // The following stuff returns 0.0,  which is wrong!
-  Real res = _prop_dh[_qp] * (  (*_derivatives_Fa[cvar])[_qp]
+  res += _prop_dh[_qp] * (  (*_derivatives_Fa[cvar])[_qp]
                               - (*_derivatives_Fb[cvar])[_qp])
-                           * _phi[_j][_qp];
+                           * _phi[_j][_qp]  * _test[_i][_qp];
 
-  return res * _test[_i][_qp];
+  return res;
 }
-
