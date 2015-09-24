@@ -281,6 +281,12 @@ MultiApp::backup()
 void
 MultiApp::restore()
 {
+  // Must be restarting / recovering so hold off on restoring
+  // Instead - the restore will happen in createApp()
+  // Note that _backups was already populated by dataLoad()
+  if (_apps.empty())
+    return;
+
   for (unsigned int i=0; i<_my_num_apps; i++)
     _apps[i]->restore(_backups[i]);
 }
@@ -481,6 +487,15 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->setInputFileName(input_file);
   app->setOutputFileBase(output_base.str());
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
+  app->setRestart(_app.isRestarting());
+  app->setRecover(_app.isRecovering());
+
+  // This means we have a backup of this app that we need to give to it
+  // Note: This won't do the restoration immediately.  The Backup
+  // will be cached by the MooseApp object so that it can be used
+  // during FEProblem::initialSetup() during runInputFile()
+  if (_app.isRestarting() || _app.isRecovering())
+    app->restore(_backups[i]);
 
   if (getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);

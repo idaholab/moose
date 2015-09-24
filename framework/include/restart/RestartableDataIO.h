@@ -112,7 +112,7 @@ public:
   /**
    * Restore a Backup for the current system.
    */
-  void restoreBackup(MooseSharedPointer<Backup> backup);
+  void restoreBackup(MooseSharedPointer<Backup> backup, bool for_restart = false);
 
 private:
   /**
