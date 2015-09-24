@@ -590,7 +590,7 @@ private:
   ///@{
   /**
    * Sets the restart/recover flags
-   * @param state The state to set the flag to
+   * @param value The state to set the flag to
    */
   void setRestart(const bool & value){ _restart = value; }
   void setRecover(const bool & value){ _recover = value; }

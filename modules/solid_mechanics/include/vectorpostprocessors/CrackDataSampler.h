@@ -31,7 +31,6 @@ class CrackDataSampler :
 public:
   /**
     * Class constructor
-    * @param name The name of the object
     * @param parameters The input parameters
     */
   CrackDataSampler(const InputParameters & parameters);

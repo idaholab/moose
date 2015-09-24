@@ -24,7 +24,8 @@ InputParameters validParams<OneDEqualValueConstraintBC>();
 
 
 /**
- * This is the \int \lambda \d g term from the mortar method. This can connect two 1D domains only.
+ * This is the \f$ \int \lambda dg\f$ term from the mortar method.
+ * This can connect two 1D domains only.
  *
  * For higher dimensions, you should use face-face constraints.
  */

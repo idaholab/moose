@@ -34,7 +34,6 @@ class SolutionAux : public AuxKernel
 public:
 
   /** Constructor
-   * @param name The name of the SolutionAux kernel
    * @param parameters The input parameters for the kernel
    */
   SolutionAux(const InputParameters & parameters);

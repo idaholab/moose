@@ -84,8 +84,8 @@ namespace MooseUtils
 
   /**
    * Function for splitting path and filename
-   * @param full_name A complete filename and path
-   * @param A std::pair<std::string, std::string> containing the path and filename
+   * @param full_file A complete filename and path
+   * @return A std::pair<std::string, std::string> containing the path and filename
    *
    * If the supplied filename does not contain a path, it returns "." as the path
    */

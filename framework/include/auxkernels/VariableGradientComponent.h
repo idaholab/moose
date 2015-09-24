@@ -33,7 +33,6 @@ public:
 
   /**
    * Class constructor
-   * @param name AuxKernel object name
    * @param parameters Input parameters for the object
    */
   VariableGradientComponent(const InputParameters & parameters);

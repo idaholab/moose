@@ -17,7 +17,7 @@ InputParameters validParams<MathFreeEnergy>();
 
 /**
  * Material class that creates the math free energy and its derivatives
- * for use with CHParsed and SplitCHParsed. F = 1/4*(1 + c)^2*(1 - c)^2.
+ * for use with CHParsed and SplitCHParsed. \f$ F = \frac14(1 + c)^2(1 - c)^2 \f$.
  */
 class MathFreeEnergy : public DerivativeFunctionMaterialBase
 {
@@ -31,7 +31,7 @@ protected:
   virtual Real computeD3F(unsigned int j_var, unsigned int k_var, unsigned int l_var);
 
 private:
-  /// Coupled variable value for the concentration \f$ \c \f$.
+  /// Coupled variable value for the concentration \f$ c \f$.
   VariableValue & _c;
   unsigned int _c_var;
 };

@@ -159,4 +159,3 @@ PointSamplerBase::getInflatedProcessorBoundingBox()
 
   return bbox;
 }
-

@@ -10,9 +10,7 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-
 class TensorMechanicsPlasticTensileMulti;
-
 
 template<>
 InputParameters validParams<TensorMechanicsPlasticTensileMulti>();
@@ -34,7 +32,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * you don't want to override this - override the private yieldFunction below
    * @param stress the stress at which to calculate the yield function
    * @param intnl internal parameter
-   * @param f (output) the yield functions
+   * @param[out] f the yield functions
    */
   virtual void yieldFunctionV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & f) const;
 
@@ -42,7 +40,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * The derivative of yield functions with respect to stress
    * @param stress the stress at which to calculate the yield function
    * @param intnl internal parameter
-   * @param df_dstress (output) df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
+   * @param[out] df_dstress df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
    */
   virtual void dyieldFunction_dstressV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & df_dstress) const;
 
@@ -50,7 +48,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * The derivative of yield functions with respect to the internal parameter
    * @param stress the stress at which to calculate the yield function
    * @param intnl internal parameter
-   * @param df_dintnl (output) df_dintnl[alpha] = df[alpha]/dintnl
+   * @param[out] df_dintnl df_dintnl[alpha] = df[alpha]/dintnl
    */
   virtual void dyieldFunction_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & df_dintnl) const;
 
@@ -58,7 +56,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * The flow potentials
    * @param stress the stress at which to calculate the flow potential
    * @param intnl internal parameter
-   * @param r (output) r[alpha] is the flow potential for the "alpha" yield function
+   * @param[out] r r[alpha] is the flow potential for the "alpha" yield function
    */
   virtual void flowPotentialV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & r) const;
 
@@ -66,7 +64,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * The derivative of the flow potential with respect to stress
    * @param stress the stress at which to calculate the flow potential
    * @param intnl internal parameter
-   * @param dr_dstress (output) dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
+   * @param[out] dr_dstress dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
    */
   virtual void dflowPotential_dstressV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankFourTensor> & dr_dstress) const;
 
@@ -74,7 +72,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * The derivative of the flow potential with respect to the internal parameter
    * @param stress the stress at which to calculate the flow potential
    * @param intnl internal parameter
-   * @param dr_dintnl (output)  dr_dintnl[alpha](i, j) = dr[alpha](i, j)/dintnl
+   * @param[out] dr_dintnl  dr_dintnl[alpha](i, j) = dr[alpha](i, j)/dintnl
    */
   virtual void dflowPotential_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & dr_dintnl) const;
 
@@ -90,8 +88,8 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param stress stress tensor
    * @param intnl internal parameter
    * @param Eijkl elasticity tensor (stress = Eijkl*strain)
-   * @param act (output) act[i] = true if the i_th yield function is active
-   * @param returned_stress (output) Approximate value of the returned stress
+   * @param[out] act act[i] = true if the i_th yield function is active
+   * @param[out] returned_stress Approximate value of the returned stress
    */
   virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
 
@@ -99,7 +97,6 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
   virtual std::string modelName() const;
 
  protected:
-
   const TensorMechanicsHardeningModel & _strength;
 
   /// yield function is shifted by this amount to avoid problems with stress-derivatives at equal eigenvalues
@@ -116,7 +113,6 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
 
   /// triple product of three 3-dimensional vectors
   Real triple(const std::vector<Real> & a, const std::vector<Real> & b, const std::vector<Real> & c) const;
-
 };
 
 #endif // TENSORMECHANICSPLASTICTENSILEMULTI_H

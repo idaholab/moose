@@ -38,7 +38,6 @@ public:
 
   /**
    * Class constructor
-   * @param name Object name
    * @param parameters Object parameters
    */
   VTKOutput(const InputParameters & parameters);

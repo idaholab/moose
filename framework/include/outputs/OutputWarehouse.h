@@ -123,7 +123,7 @@ public:
 
   /**
    * Test that the output names exist
-   * @param A vector of names to check
+   * @param names A vector of names to check
    * This method will produce an error if any of the supplied
    * names do not exist in the warehouse. Reserved names are not considered.
    */
@@ -131,8 +131,8 @@ public:
 
   /**
    * Return an Output object by name
-   * @tparam T The Output object type to return
-   * @param The name of the output object
+   * @tparam T The Out put object type to return
+   * @param name The name of the output object
    * @return A pointer to the output object
    */
   template<typename T>
@@ -177,8 +177,7 @@ public:
   bool isReservedName(const std::string & name);
 
   /**
-   * Sends the supplied message to Console output objects
-   * @param message A string containing the message to write
+   * Send current output buffer to Console output objects
    */
   void mooseConsole();
 
@@ -227,7 +226,6 @@ private:
    * Adds the file name to the list of filenames being output
    * The main function of this object is to test that the same output file
    * does not already exist to protect against output files overwriting each other
-   * @param ptr Pointer to the Output object
    * @param filename Name of an output file (extracted from filename() method of the objects)
    */
   void addOutputFilename(const OutFileBase & filename);
@@ -269,9 +267,9 @@ private:
   void subdomainSetup();
 
   /**
-   * Insert a variable name for hiding via the OutoutInterface
+   * Insert variable names for hiding via the OutoutInterface
    * @param output_name The name of the output object on which the variable is to be hidden
-   * @param variable_name The name of the variable to be hidden
+   * @param variable_names The names of the variables to be hidden
    *
    * This is a private method used by the OutputInterface system, it is not intended for any
    * other purpose.

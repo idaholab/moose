@@ -32,7 +32,6 @@ public:
 
   /**
    * Class constructor
-   * @param name AuxKernel name
    * @param parameters The input parameters for this object
    */
   MaterialStdVectorAux(const InputParameters & parameters);

@@ -50,7 +50,6 @@ class Function :
 public:
   /**
    * Class constructor
-   * \param name The name of the function
    * \param parameters The input parameters for the function
    */
   Function(const InputParameters & parameters);

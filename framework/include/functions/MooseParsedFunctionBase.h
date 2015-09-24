@@ -35,7 +35,7 @@ template<>
 InputParameters validParams<MooseParsedFunctionBase>();
 
 /**
- * @class Adds user facing parameters for parsed function
+ * Adds user facing parameters for parsed function
  * @see ParsedFunction ParsedVectorFunction ParsedGradFunction
  */
 class MooseParsedFunctionBase

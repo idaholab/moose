@@ -44,5 +44,4 @@ namespace Moose
 void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & mesh, std::vector<Elem *> & intersected_elems);
 }
 
-
 #endif // RAYTRACING_H

@@ -138,7 +138,6 @@ protected:
   /**
    * A single call to this function should output all the necessary data for a single timestep.
    * @param type The type execution flag (see Moose.h)
-   * @param force Ignore the flag and preform the output
    *
    * @see outputNodalVariables outputElementalVariables outputScalarVariables outputPostprocessors
    */

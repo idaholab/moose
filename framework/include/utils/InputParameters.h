@@ -82,7 +82,7 @@ public:
    * Returns a writable reference to the named parameters.  Note: This is not a virtual
    * function! Use caution when comparing to the parent class implementation
    * @param name The name of the parameter to set
-   * @param quite_mode When true the parameter is not removed from the _set_by_add_param list,
+   * @param quiet_mode When true the parameter is not removed from the _set_by_add_param list,
    * this is generally not needed.
    *
    * "quite_mode" returns a writable reference to the named parameter, without removing it from the
@@ -447,6 +447,7 @@ public:
    * Set the default value for an optionally coupled variable (called by the Parser).
    *
    * @param coupling_name The name of the coupling parameter to get the default value for.
+   * @param value Default value to set.
    */
   void defaultCoupledValue(const std::string & coupling_name, Real value);
 

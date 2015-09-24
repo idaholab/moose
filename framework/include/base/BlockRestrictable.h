@@ -63,7 +63,7 @@ public:
   /**
    * Class constructor
    * Populates the 'block' input parameters, see the general class documentation for details.
-   * @param params The input parameters (see the detailed help for additional information)
+   * @param parameters The input parameters (see the detailed help for additional information)
    */
   BlockRestrictable(const InputParameters & parameters);
 

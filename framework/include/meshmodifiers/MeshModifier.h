@@ -40,7 +40,6 @@ public:
   /**
    * Constructor
    *
-   * @param name The name given to the MeshModifier in the input file.
    * @param parameters The parameters object holding data for the class to use.
    */
   MeshModifier(const InputParameters & parameters);

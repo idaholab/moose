@@ -30,9 +30,9 @@ public:
 
 protected:
   virtual Real computeF();
-  virtual Real computeDF(unsigned int);
-  virtual Real computeD2F(unsigned int, unsigned int);
-  virtual Real computeD3F(unsigned int, unsigned int, unsigned int);
+  virtual Real computeDF(unsigned int i_var);
+  virtual Real computeD2F(unsigned int i_var, unsigned int j_var);
+  virtual Real computeD3F(unsigned int i_var, unsigned int j_var, unsigned int k_var);
 
   /// Phase parameter (0=A-phase, 1=B-phase)
   VariableValue & _eta;

@@ -39,7 +39,6 @@ public:
   /**
    * Constructor
    *
-   * @param name The name given to the initial condition in the input file.
    * @param parameters The parameters object holding data for the class to use.
    */
   ScalarConstantIC(const InputParameters & parameters);

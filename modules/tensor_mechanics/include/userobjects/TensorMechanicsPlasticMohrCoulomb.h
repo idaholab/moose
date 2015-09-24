@@ -36,7 +36,6 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
   virtual std::string modelName() const;
 
  protected:
-
   /**
    * The yield function
    * @param stress the stress at which to calculate the yield function
@@ -164,16 +163,14 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
   /// d(psi)/d(internal_param);
   virtual Real dpsi(const Real internal_param) const;
 
-
  private:
-
   /**
    * Computes Abbo et al's A, B and C parameters
    * @param sin3lode sin(3*(lode angle))
    * @param sin_angle sin(friction_angle) (for yield function), or sin(dilation_angle) (for potential function)
-   * @param aaa (output) Abbo's A
-   * @param bbb (output) Abbo's B
-   * @param ccc (output) Abbo's C
+   * @param[out] aaa Abbo's A
+   * @param[out] bbb Abbo's B
+   * @param[out] ccc Abbo's C
    */
   void abbo(const Real sin3lode, const Real sin_angle, Real & aaa, Real & bbb, Real & ccc) const;
 
@@ -181,9 +178,9 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
    * Computes derivatives of Abbo et al's A, B and C parameters wrt sin_angle
    * @param sin3lode sin(3*(lode angle))
    * @param sin_angle sin(friction_angle) (for yield function), or sin(dilation_angle) (for potential function)
-   * @param daaa (output) d(Abbo's A)/d(sin_angle)
-   * @param dbbb (output) d(Abbo's B)/d(sin_angle)
-   * @param dccc (output) d(Abbo's C)/d(sin_angle)
+   * @param[out] daaa d(Abbo's A)/d(sin_angle)
+   * @param[out] dbbb d(Abbo's B)/d(sin_angle)
+   * @param[out] dccc d(Abbo's C)/d(sin_angle)
    */
   void dabbo(const Real sin3lode, const Real sin_angle, Real & daaa, Real & dbbb, Real & dccc) const;
 
@@ -193,8 +190,6 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
    * @param sin_angle either sin(friction angle) or sin(dilation angle)
    */
   RankTwoTensor df_dsig(const RankTwoTensor & stress, const Real sin_angle) const;
-
-
 };
 
 #endif // TENSORMECHANICSPLASTICMOHRCOULOMB_H

@@ -132,21 +132,15 @@ protected:
   /// Strain increment that can be rotated by this class, and split into multiple increments (ie, its not const)
   RankTwoTensor _my_strain_increment;
 
-
-
-
-
   /**
    * makes all deactivated_due_to_ld false, and if >0 of them were initially true, returns true
    */
   virtual bool reinstateLinearDependentConstraints(std::vector<bool> & deactivated_due_to_ld);
 
-
   /**
    * counts the number of active constraints
    */
   virtual unsigned int numberActive(const std::vector<bool> & active);
-
 
   /**
    * The residual-squared
@@ -162,7 +156,6 @@ protected:
                          const std::vector<bool> & active,
                          const std::vector<bool> & deactivated_due_to_ld);
 
-
   /**
    * Implements the return map
    *
@@ -171,25 +164,32 @@ protected:
    * This is usually done in computeQpStress
    *
    * @param stress_old The value of stress at the previous "time" step
-   * @param stress (output) The stress after returning to the yield surface
+   * @param[out] stress  The stress after returning to the yield surface
    * @param intnl_old The internal variables at the previous "time" step
-   * @param intnl    (output) All the internal variables after returning to the yield surface
+   * @param[out] intnl     All the internal variables after returning to the yield surface
    * @param plastic_strain_old The value of plastic strain at the previous "time" step
-   * @param plastic_strain   (output) The value of plastic strain after returning to the yield surface
+   * @param[out] plastic_strain    The value of plastic strain after returning to the yield surface
    * @param E_ijkl   The elasticity tensor.  If no plasiticity then stress = stress_old + E_ijkl*strain_increment
    * @param strain_increment   The applied strain increment
-   * @param f  (output) All the yield functions after returning to the yield surface
-   * @param iter (output) The number of Newton-Raphson iterations used
+   * @param[out] f   All the yield functions after returning to the yield surface
+   * @param[out] iter  The number of Newton-Raphson iterations used
    * @param can_revert_to_dumb  If the _deactivation_scheme is set to revert to dumb, it will only be allowed to do so if this parameter is true
-   * @param linesearch_needed (output) True if a linesearch was needed at any stage during the Newton-Raphson proceedure
-   * @param ld_encountered (output) True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
-   * @param constraints_added (output) True if constraints were added into the active set at any stage during the Newton-Raphson proceedure
+   * @param[out] linesearch_needed  True if a linesearch was needed at any stage during the Newton-Raphson proceedure
+   * @param[out] ld_encountered  True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
+   * @param[out] constraints_added  True if constraints were added into the active set at any stage during the Newton-Raphson proceedure
    * @param final_step Each strain increment may be decomposed into a sum of smaller increments if the return-map algorithm fails.  This flag indicates whether this is the last application of incremental strain
-   * @param consistent_tangent_operator (output) The consistent tangent operator d(stress_rate)/d(strain_rate).  This is only output if final_step=true, and the return value of returnMap is also true.
-   * @param cumulative_pm (input/output) Upon input: the plastic multipliers before the return map.  Upon output: the plastic multipliers after this return map, if the return map was successful
+   * @param[out] consistent_tangent_operator  The consistent tangent operator d(stress_rate)/d(strain_rate).  This is only output if final_step=true, and the return value of returnMap is also true.
+   * @param[in,out] cumulative_pm Upon input: the plastic multipliers before the return map.  Upon output: the plastic multipliers after this return map, if the return map was successful
    * @return true if the stress was successfully returned to the yield surface
    */
-  virtual bool returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added, const bool & final_step, RankFourTensor & consistent_tangent_operator, std::vector<Real> & cumulative_pm);
+  virtual bool returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress,
+                         const std::vector<Real> & intnl_old, std::vector<Real> & intnl,
+                         const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain,
+                         const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment,
+                         std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb,
+                         bool & linesearch_needed, bool & ld_encountered, bool & constraints_added,
+                         const bool & final_step, RankFourTensor & consistent_tangent_operator,
+                         std::vector<Real> & cumulative_pm);
 
 
   /**
@@ -202,21 +202,21 @@ protected:
    * with their values at the start of the Newton step, and they exit
    * the function with values attained after applying the under-relaxation
    *
-   * @param nr_res2 (input/output) The residual-squared
+   * @param[in,out] nr_res2 The residual-squared
    * @param intnl_old  The internal variables at the previous "time" step
-   * @param intnl (input/output) The internal variables
-   * @param pm (input/output) The plasticity multiplier(s) (consistency parameter(s))
+   * @param[in,out] intnl The internal variables
+   * @param[in,out] pm The plasticity multiplier(s) (consistency parameter(s))
    * @param E_inv inverse of the elasticity tensor
-   * @param delta_dp (input/output) Change in plastic strain from start of "time" step to current configuration (plastic_strain - plastic_strain_old)
+   * @param[in,out] delta_dp Change in plastic strain from start of "time" step to current configuration (plastic_strain - plastic_strain_old)
    * @param dstress Change in stress for a full Newton step
    * @param dpm Change in plasticity multiplier for a full Newton step
    * @param dintnl change in internal parameter(s) for a full Newton step
-   * @param f (input/output) Yield function(s).  In this routine, only the active constraints that are not deactivated_due_to_ld are contained in f.
-   * @param epp (input/output) Plastic strain increment constraint
-   * @param ic (input/output) Internal constraint.  In this routine, only the active constraints that are not deactivated_due_to_ld are contained in ic.
+   * @param[in,out] f Yield function(s).  In this routine, only the active constraints that are not deactivated_due_to_ld are contained in f.
+   * @param[in,out] epp Plastic strain increment constraint
+   * @param[in,out] ic Internal constraint.  In this routine, only the active constraints that are not deactivated_due_to_ld are contained in ic.
    * @param active The active constraints.
    * @param deactivated_due_to_ld True if a constraint has temporarily been made deactive due to linear dependence.
-   * @param linesearch_needed (output) True if the full Newton-Raphson step was cut by the linesearch
+   * @param[out] linesearch_needed  True if the full Newton-Raphson step was cut by the linesearch
    * @return true if successfully found a step that reduces the residual-squared
    */
   virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old,
@@ -232,20 +232,20 @@ protected:
    * Performs a single Newton-Raphson + linesearch step
    * Constraints are deactivated and the step is re-done if
    * deactivation_scheme is set appropriately
-   * @param nr_res2 (input/output) Residual-squared that the line-search will reduce
-   * @param stress (input/output) stress
-   * @param intnl_old (input) old values of the internal parameters
-   * @param intnl (input/output) internal parameters
-   * @param pm (input/output) plastic multipliers
-   * @param delta_dp (input/output) Change in plastic strain from start of "time" step to current configuration (plastic_strain - plastic_strain_old)
-   * @param E_inv (input) Inverse of the elasticity tensor
-   * @param f (input/output) Yield function(s).  Upon successful exit only the active constraints are contained in f
-   * @param epp (input/output) Plastic strain increment constraint
-   * @param ic (input/output) Internal constraint.  Upon successful exit only the active constraints are contained in ic
+   * @param[in,out] nr_res2 Residual-squared that the line-search will reduce
+   * @param[in,out] stress stress
+   * @param[in] intnl_old old values of the internal parameters
+   * @param[in,out] intnl internal parameters
+   * @param[in,out] pm plastic multipliers
+   * @param[in,out] delta_dp Change in plastic strain from start of "time" step to current configuration (plastic_strain - plastic_strain_old)
+   * @param[in] E_inv Inverse of the elasticity tensor
+   * @param[in,out] f Yield function(s).  Upon successful exit only the active constraints are contained in f
+   * @param[in,out] epp Plastic strain increment constraint
+   * @param[in,out] ic Internal constraint.  Upon successful exit only the active constraints are contained in ic
    * @param active The active constraints.  This is may be modified, depending upon deactivation_scheme
    * @param deactivation_scheme The scheme used for deactivating constraints
-   * @param linesearch_needed (output) True if a linesearch was employed during this Newton-Raphson step
-   * @param ld_encountered (output) True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
+   * @param[out] linesearch_needed True if a linesearch was employed during this Newton-Raphson step
+   * @param[out] ld_encountered True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
    * @return true if the step was successful, ie, if the linesearch was successful and the number of constraints wasn't reduced to zero via deactivation
    */
   virtual bool singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old,
@@ -259,7 +259,7 @@ protected:
    * Checks whether the yield functions are in the admissible region
    * @param stress stress
    * @param intnl internal parameters
-   * @param all_f (output) the values of all the yield functions
+   * @param[out] all_f the values of all the yield functions
    * @return return false if any yield functions exceed their tolerance
    */
   virtual bool checkAdmissible(const RankTwoTensor & stress, const std::vector<Real> & intnl,
@@ -270,7 +270,7 @@ protected:
    * Builds the order which "dumb" activation will take.
    * @param stress stress to evaluate yield functions and derivatives at
    * @param intnl internal parameters to evaluate yield functions and derivatives at
-   * @param dumb_order (output) dumb_order[0] will be the yield surface furthest away from (stress, intnl), dumb_order[1] will be the next yield surface, etc.  The distance measure used is f/|df_dstress|.  This array can then be fed into incrementDumb in order to first try the yield surfaces which are farthest away from the (stress, intnl).
+   * @param[out] dumb_order dumb_order[0] will be the yield surface furthest away from (stress, intnl), dumb_order[1] will be the next yield surface, etc.  The distance measure used is f/|df_dstress|.  This array can then be fed into incrementDumb in order to first try the yield surfaces which are farthest away from the (stress, intnl).
    */
   void buildDumbOrder(const RankTwoTensor & stress, const std::vector<Real> & intnl,
                       std::vector<unsigned int> & dumb_order);
@@ -278,8 +278,8 @@ protected:
   /**
    * Increments "dumb_iteration" by 1, and sets "act" appropriately
    * (act[alpha] = true iff alpha_th bit of dumb_iteration == 1)
-   * @param (input/output) dumb_iteration Used to set act bitwise - the "dumb" scheme tries all possible combinations of act until a successful return
-   * @param (output) act active constraints
+   * @param[in,out] dumb_iteration Used to set act bitwise - the "dumb" scheme tries all possible combinations of act until a successful return
+   * @param[out] act active constraints
    */
   virtual void incrementDumb(int & dumb_iteration, const std::vector<unsigned int> & dumb_order,
                              std::vector<bool> & act);
@@ -324,16 +324,16 @@ protected:
    * performs an elastic step
    *
    * @param stress_old The value of stress at the previous "time" step
-   * @param stress (output) stress = E_ijkl*plastic_strain
+   * @param[out] stress  stress = E_ijkl*plastic_strain
    * @param intnl_old The internal variables at the previous "time" step
-   * @param intnl  (output) intnl = intnl_old
+   * @param[out] intnl   intnl = intnl_old
    * @param plastic_strain_old The value of plastic strain at the previous "time" step
-   * @param plastic_strain   (output) plastic_strain = plastic_strain_old
+   * @param[out] plastic_strain    plastic_strain = plastic_strain_old
    * @param E_ijkl   The elasticity tensor.
    * @param strain_increment   The applied strain increment
-   * @param yf  (output) All the yield functions at (stress, intnl)
-   * @param iterations (output) zero
-   * @param consistent_tangent_operator (output) The consistent tangent operator d(stress_rate)/d(strain_rate)
+   * @param[out] yf   All the yield functions at (stress, intnl)
+   * @param[out] iterations  zero
+   * @param[out] consistent_tangent_operator  The consistent tangent operator d(stress_rate)/d(strain_rate)
    * @return true if the (stress, intnl) are admissible
    */
   virtual bool elasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations, RankFourTensor & consistent_tangent_operator);
@@ -342,19 +342,19 @@ protected:
    * performs a plastic step
    *
    * @param stress_old The value of stress at the previous "time" step
-   * @param stress (output) stress after returning to the yield surface
+   * @param[out] stress  stress after returning to the yield surface
    * @param intnl_old The internal variables at the previous "time" step
-   * @param intnl  (output) internal variables after returning to the yield surface
+   * @param[out] intnl   internal variables after returning to the yield surface
    * @param plastic_strain_old The value of plastic strain at the previous "time" step
-   * @param plastic_strain   (output) plastic_strain after returning to the yield surface
+   * @param[out] plastic_strain    plastic_strain after returning to the yield surface
    * @param E_ijkl   The elasticity tensor.
    * @param strain_increment   The applied strain increment
-   * @param yf  (output) All the yield functions at (stress, intnl)
-   * @param iterations (output) The total number of Newton-Raphson iterations used
-   * @param linesearch_needed (output) True if a linesearch was needed at any stage during the Newton-Raphson proceedure
-   * @param ld_encountered (output) True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
-   * @param constraints_added (output) True if constraints were added into the active set at any stage during the Newton-Raphson proceedure
-   * @param consistent_tangent_operator (output) The consistent tangent operator d(stress_rate)/d(strain_rate)
+   * @param[out] yf   All the yield functions at (stress, intnl)
+   * @param[out] iterations  The total number of Newton-Raphson iterations used
+   * @param[out] linesearch_needed  True if a linesearch was needed at any stage during the Newton-Raphson proceedure
+   * @param[out] ld_encountered  True if a linear-dependence of the flow directions was encountered at any stage during the Newton-Raphson proceedure
+   * @param[out] constraints_added  True if constraints were added into the active set at any stage during the Newton-Raphson proceedure
+   * @param[out] consistent_tangent_operator  The consistent tangent operator d(stress_rate)/d(strain_rate)
    * @return true if the (stress, intnl) are admissible.  Otherwise, if _ignore_failures==true, the output variables will be the best admissible ones found during the return-map.  Otherwise, if _ignore_failures==false, this routine will perform some finite-diference checks and call mooseError
    */
   virtual bool plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added, RankFourTensor & consistent_tangent_operator);

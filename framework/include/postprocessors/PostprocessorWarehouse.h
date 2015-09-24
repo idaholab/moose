@@ -65,7 +65,7 @@ public:
 
   /**
    * Get the list of nodal postprocessors restricted on the specified subdomain
-   * @param subdomain_id Subdomain ID
+   * @param block_id Subdomain ID
    * @return The list of all block nodal postprocessors
    */
   const std::vector<NodalPostprocessor *> & blockNodalPostprocessors(SubdomainID block_id) const;

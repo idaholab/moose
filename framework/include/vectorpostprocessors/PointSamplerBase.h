@@ -51,7 +51,6 @@ public:
   virtual void threadJoin(const SamplerBase & y);
 
 protected:
-
   /**
    * Find the local element that contains the point.  This will attempt to use a cached element to speed things up.
    *
@@ -59,7 +58,7 @@ protected:
    * @param id A unique ID for this point.
    * @return The Elem containing the point or NULL if this processor doesn't contain an element that contains this point.
    */
-  const Elem * getLocalElemContainingPoint(const Point & p, unsigned int /*id*/);
+  const Elem * getLocalElemContainingPoint(const Point & p, unsigned int id);
 
   /**
    * Gets a processor_bounding_box... and inflates it a bit to handle edge cases
