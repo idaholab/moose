@@ -26,8 +26,8 @@ public:
   virtual Real getValue();
 
   Real _dx;
-  Real _flux;
-  Real _T_hot;
+  const PostprocessorValue & _flux;
+  const PostprocessorValue & _T_hot;
   Real _length_scale;
   Real _k0;
 
