@@ -4,11 +4,13 @@
     input = 'rayleigh_hht.i'
     exodiff = 'rayleigh_hht_out.e'
     abs_zero = 1e-09
+    compiler = 'GCC CLANG'
   [../]
   [./newmark]
     type = 'Exodiff'
     input = 'rayleigh_newmark.i'
     exodiff = 'rayleigh_newmark_out.e'
     abs_zero = 1e-09
+    compiler = 'GCC CLANG'
   [../]
 []
