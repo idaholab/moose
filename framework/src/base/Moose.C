@@ -287,8 +287,8 @@
 #include "CrankNicolson.h"
 #include "ExplicitEuler.h"
 #include "ExplicitMidpoint.h"
-#include "Dirk.h"
 #include "LStableDirk2.h"
+#include "LStableDirk3.h"
 #include "ImplicitMidpoint.h"
 #include "Heun.h"
 #include "Ralston.h"
@@ -677,8 +677,8 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(ExplicitEuler);
   registerDeprecatedObjectName(ExplicitMidpoint, "RungeKutta2", "09/25/2015 12:00");
   registerTimeIntegrator(ExplicitMidpoint);
-  registerDeprecatedObjectName(Dirk, "Dirk", "09/22/2015 12:00");
   registerTimeIntegrator(LStableDirk2);
+  registerTimeIntegrator(LStableDirk3);
   registerTimeIntegrator(ImplicitMidpoint);
   registerTimeIntegrator(Heun);
   registerTimeIntegrator(Ralston);

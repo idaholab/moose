@@ -126,4 +126,30 @@
     exodiff = 'implicitmidpoint3.e'
     cli_args = 'Outputs/file_base=implicitmidpoint3 Executioner/TimeIntegrator/type=ImplicitMidpoint Executioner/dt=0.015625'
   [../]
+
+
+
+  # Test the LStableDirk3 time integration method.  On this test, the end_time=1.
+  [./test_lstabledirk3_1]
+    type = 'Exodiff'
+    input = 'implicit_convergence.i'
+    exodiff = 'lstabledirk3_1.e'
+    cli_args = 'Outputs/file_base=lstabledirk3_1 Executioner/TimeIntegrator/type=LStableDirk3 Executioner/dt=0.0625'
+  [../]
+
+  # Test the LStableDirk3 time integration with half the test_implicitmidpoint1 timestep.
+  [./test_lstabledirk3_2]
+    type = 'Exodiff'
+    input = 'implicit_convergence.i'
+    exodiff = 'lstabledirk3_2.e'
+    cli_args = 'Outputs/file_base=lstabledirk3_2 Executioner/TimeIntegrator/type=LStableDirk3 Executioner/dt=0.03125'
+  [../]
+
+  # Test the LStableDirk3 time integration with half the test_implicitmidpoint2 timestep.
+  [./test_lstabledirk3_3]
+    type = 'Exodiff'
+    input = 'implicit_convergence.i'
+    exodiff = 'lstabledirk3_3.e'
+    cli_args = 'Outputs/file_base=lstabledirk3_3 Executioner/TimeIntegrator/type=LStableDirk3 Executioner/dt=0.015625'
+  [../]
 []
