@@ -58,10 +58,10 @@ int main(int argc, char **argv)
     runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), Moose::err ) );
   }
 
-  bool wasSucessful = runner.run(/*testPath=*/"",
+  bool wasSuccessful = runner.run(/*testPath=*/"",
                                  /*doWait=*/false,
                                  /*doPrintResult=*/true,
                                  /*doPrintProgress=*/false);
 
-  return wasSucessful ? 0 : 1;
+  return wasSuccessful ? 0 : 1;
 }
