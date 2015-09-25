@@ -28,7 +28,7 @@ InputParameters validParams<LStableDirk3>()
 LStableDirk3::LStableDirk3(const InputParameters & parameters) :
     TimeIntegrator(parameters),
     _stage(1),
-    _gamma(-std::sqrt(2.)*std::cos(atan(std::sqrt(2.)/4.)/3.)/2. + std::sqrt(6.)*std::sin(atan(std::sqrt(2.)/4.)/3.)/2. + 1.)
+    _gamma(-std::sqrt(2.)*std::cos(std::atan(std::sqrt(2.)/4.)/3.)/2. + std::sqrt(6.)*std::sin(std::atan(std::sqrt(2.)/4.)/3.)/2. + 1.)
 {
   // Name the stage residuals "residual_stage1", "residual_stage2", etc.
   for (unsigned int stage=0; stage<3; ++stage)
@@ -79,7 +79,7 @@ LStableDirk3::solve()
 
   // A for-loop would increment _stage too far, so we use an extra
   // loop counter.
-  for (unsigned int current_stage=1; current_stage<4; ++current_stage)
+  for (unsigned int current_stage = 1; current_stage < 4; ++current_stage)
   {
     // Set the current stage value
     _stage = current_stage;
@@ -117,6 +117,7 @@ LStableDirk3::postStep(NumericVector<Number> & residual)
   // .) Y_i is the stage solution
   // .) dt is the timestep, and is accounted for in the _Re_time residual.
   // .) f are the "non-time" residuals evaluated for a given stage solution.
+  // .) The minus signs are already "baked in" to the residuals and so do not appear below.
 
   // Store this stage's non-time residual.  We are calling operator=
   // here, and that calls close().
@@ -124,7 +125,7 @@ LStableDirk3::postStep(NumericVector<Number> & residual)
 
   // Build up the residual for this stage.
   residual.add(1., _Re_time);
-  for (unsigned int j=0; j<_stage; ++j)
+  for (unsigned int j = 0; j < _stage; ++j)
     residual.add(_a[_stage-1][j], *_stage_residuals[j]);
   residual.close();
 }

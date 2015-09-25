@@ -59,7 +59,6 @@ public:
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-
   // Indicates the current stage.
   unsigned int _stage;
 
