@@ -16,9 +16,9 @@ whitelisted_kernels = ['Diffusion', 'TimeDerivative']
 
 
 # regular expressions to parse the PETSc debug output
-MfdRE = re.compile("^Finite difference Jacobian \(user-defined state\)")
+MfdRE = re.compile("^Finite[ -]difference Jacobian \(user-defined state\)")
 MhcRE = re.compile("^Hand-coded Jacobian \(user-defined state\)")
-MdiffRE = re.compile("^Hand-coded minus finite difference Jacobian \(user-defined state\)")
+MdiffRE = re.compile("^Hand-coded minus finite[ -]difference Jacobian \(user-defined state\)")
 rowRE = re.compile("row ([\d]+): ")
 valRE = re.compile(" \(([\d]+), ([+-.e\d]+)\)")
 
