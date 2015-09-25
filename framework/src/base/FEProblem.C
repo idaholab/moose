@@ -417,7 +417,7 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.push("initial adaptivity", "Setup");
     unsigned int n = adaptivity().getInitialSteps();
 
-    if (n && !_app.isUltimateMaster())
+    if (n && !_app.isUltimateMaster() && _app.isRestarting())
       mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
 
     for (unsigned int i = 0; i < n; i++)

@@ -269,7 +269,7 @@ public:
   bool isRecovering() const;
 
   /**
-   * Whether or not this is a "recover" calculation.
+   * Whether or not this is a "restart" calculation.
    */
   bool isRestarting() const;
 
