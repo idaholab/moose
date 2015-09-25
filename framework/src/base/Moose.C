@@ -676,7 +676,6 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(BDF2);
   registerTimeIntegrator(CrankNicolson);
   registerTimeIntegrator(ExplicitEuler);
-  registerDeprecatedObjectName(ExplicitMidpoint, "RungeKutta2", "09/25/2015 12:00");
   registerTimeIntegrator(ExplicitMidpoint);
   registerTimeIntegrator(LStableDirk2);
   registerTimeIntegrator(LStableDirk3);
