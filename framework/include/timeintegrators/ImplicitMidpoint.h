@@ -39,7 +39,15 @@ InputParameters validParams<ImplicitMidpoint>();
  *
  * Although strictly speaking this is a "one stage" method, we treat
  * the "update" step as a second stage, since in finite element
- * analysis the update step requires a mass matrix solve.
+ * analysis the update step requires a mass matrix solve.  The
+ * implicit midpoint method can also be written in a single stage as:
+ *
+ * M*y_{n+1} = M*y_n + h*f(t_n + h/2, (y_{n+1} + y_n)/2)
+ *
+ * However this is less convenient to implement in MOOSE, since it
+ * requires evaluating the time and non-time residuals on different
+ * solution vectors, and the Jacobian contributions have an extra
+ * factor of 1/2.
  */
 class ImplicitMidpoint : public TimeIntegrator
 {
