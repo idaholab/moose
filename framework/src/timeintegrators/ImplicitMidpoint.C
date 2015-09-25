@@ -58,23 +58,19 @@ ImplicitMidpoint::solve()
   Real time_old = _fe_problem.timeOld();
   Real time_half = (time_new + time_old) / 2.;
 
+  // Compute first stage
+  _fe_problem.initPetscOutput();
   _console << "1st stage\n";
   _stage = 1;
   _fe_problem.time() = time_half;
   _fe_problem.getNonlinearSystem().sys().solve();
-  _fe_problem.initPetscOutput();
 
+  // Compute second stage
+  _fe_problem.initPetscOutput();
   _console << "2nd stage\n";
   _stage = 2;
   _fe_problem.time() = time_new;
-
-#ifdef LIBMESH_HAVE_PETSC
-  Moose::PetscSupport::petscSetOptions(_fe_problem);
-#endif
-  Moose::setSolverDefaults(_fe_problem);
-
   _fe_problem.getNonlinearSystem().sys().solve();
-  _fe_problem.initPetscOutput();
 }
 
 
