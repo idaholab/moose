@@ -883,11 +883,10 @@ XFEM::get_elem_phys_volfrac(const Elem* elem) const
   it = _cut_elem_map.find(elem);
   if (it != _cut_elem_map.end())
   {
-    //const XFEMCutElem *xfce = it->second;
-    XFEMCutElem *xfce = it->second; //WJ
+    XFEMCutElem *xfce = it->second;
     const EFAelement* EFAelem = xfce->get_efa_elem();
     if (EFAelem->is_partial()){ // exclude the full crack tip elements
-      xfce->calc_physical_volfrac(); //WJ
+      xfce->calc_physical_volfrac();
       phys_volfrac = xfce->get_physical_volfrac();
     }
   }
@@ -903,10 +902,9 @@ XFEM::get_elem_new_weights(const Elem* elem, unsigned int i_qp, std::vector<Poin
   it = _cut_elem_map.find(elem);
   if (it != _cut_elem_map.end())
   {
-    //const XFEMCutElem *xfce = it->second;
-    XFEMCutElem *xfce = it->second; //WJ
+    XFEMCutElem *xfce = it->second;
     xfce->set_gauss_points_and_weights(g_points,g_weights);
-    xfce->calc_mf_weights(); //WJ
+    xfce->calc_mf_weights();
     qp_weight = xfce->get_mf_weights(i_qp);
   }
   return qp_weight;
@@ -915,13 +913,12 @@ XFEM::get_elem_new_weights(const Elem* elem, unsigned int i_qp, std::vector<Poin
 Real
 XFEM::flag_qp_inside(const Elem* elem, const Point & p) const
 {
-  // ZZY code to get the flag indicating if a QP is inside the physical domain of a partial element
+  // get the flag indicating if a QP is inside the physical domain of a partial element
   Real flag = 1.0; // default value - qp inside physical domain
   std::map<const Elem*, XFEMCutElem*>::const_iterator it;
   it = _cut_elem_map.find(elem);
   if (it != _cut_elem_map.end())
   {
-    //const XFEMCutElem *xfce = it->second;
     XFEMCutElem *xfce = it->second;
     unsigned int n_cut_planes = xfce->num_cut_planes();
     for (unsigned int plane_id = 0; plane_id < n_cut_planes; ++plane_id)

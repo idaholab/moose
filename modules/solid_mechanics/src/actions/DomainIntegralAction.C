@@ -330,7 +330,6 @@ DomainIntegralAction::act()
       params.set<MultiMooseEnum>("execute_on") = "timestep_end";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("convert_J_to_K") = _convert_J_to_K;
-      //params.set<std::string>("xfem_qrule") = getParam<std::string>("xfem_qrule"); // WJ
       if (_convert_J_to_K)
       {
         params.set<Real>("youngs_modulus") = _youngs_modulus;

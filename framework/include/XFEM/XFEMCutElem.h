@@ -54,11 +54,11 @@ protected:
 
 public:
 
-  void set_gauss_points_and_weights(std::vector<Point> &gauss_points, std::vector<Real> &gauss_weights); //WJ
+  void set_gauss_points_and_weights(std::vector<Point> &gauss_points, std::vector<Real> &gauss_weights);
   virtual void calc_physical_volfrac() = 0;
   Real get_physical_volfrac() const;
-  virtual void calc_mf_weights() = 0; // ZZY
-  Real get_mf_weights(unsigned int i_qp) const; // ZZY
+  virtual void calc_mf_weights() = 0;
+  Real get_mf_weights(unsigned int i_qp) const;
   virtual Point get_origin(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const = 0;
   virtual Point get_normal(unsigned int plane_id, MeshBase* displaced_mesh=NULL) const = 0;
   virtual void get_frag_faces(std::vector<std::vector<Point> > &frag_faces, MeshBase* displaced_mesh=NULL) const = 0;

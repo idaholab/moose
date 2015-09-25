@@ -41,8 +41,6 @@ InputParameters validParams<XFEMAction>()
   params.addParam<std::vector<Real> >("cut_scale","X,Y scale factors for XFEM geometric cuts");
   params.addParam<std::vector<Real> >("cut_translate","X,Y translations for XFEM geometric cuts");
   params.addParam<std::string>("qrule", "volfrac", "XFEM quadrature rule to use");
-  //params.addParam<std::string>("order","CONSTANT" "Specifies the order of the FE shape function to use for AuxVariables");
-  //params.addParam<std::string>("family","MONOMIAL","Specifies the family of FE shape functions to use for AuxVariables");
   params.addParam<bool>("cut_plane",false,"Output the XFEM cut plane and volume fraction");
   return params;
 }
@@ -51,12 +49,10 @@ XFEMAction::XFEMAction(InputParameters params) :
     Action(params),
     _xfem_cut_type(getParam<std::string>("cut_type")),
     _xfem_qrule(getParam<std::string>("qrule")),
-    //_order(getParam<std::string>("order")),
-    //_family(getParam<std::string>("family")),
     _xfem_cut_plane(false)
 {
-   _order = "CONSTANT"; // WJ
-   _family = "MONOMIAL"; //
+   _order = "CONSTANT"; 
+   _family = "MONOMIAL";
    if (isParamValid("cut_plane"))
      _xfem_cut_plane = getParam<bool>("cut_plane");
 } 
@@ -71,8 +67,6 @@ XFEMAction::act()
 
     _xfem_cut_data = getParam<std::vector<Real> >("cut_data");
  
-    //xfem->set_xfem_cut_type(_xfem_cut_type);
-    //xfem->set_xfem_cut_data(_xfem_cut_data);
     xfem->set_xfem_qrule(_xfem_qrule);
 
     if (_xfem_cut_type == "line_segment_2d")
@@ -249,8 +243,6 @@ XFEMAction::XFEMAction(const std::string & deprecated_name, InputParameters para
     Action(deprecated_name, params),
     _xfem_cut_type(getParam<std::string>("cut_type")),
     _xfem_qrule(getParam<std::string>("qrule")),
-    //_order(getParam<std::string>("order")),
-    //_family(getParam<std::string>("family"))
     _xfem_cut_plane(getParam<bool>("cut_plane"))
 {
 }

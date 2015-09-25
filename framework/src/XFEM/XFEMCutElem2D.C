@@ -267,7 +267,7 @@ XFEMCutElem2D::partial_gauss(unsigned int nen, std::vector<std::vector<Real> > &
 }
 
 void
-XFEMCutElem2D::solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &elem_nodes, std::vector<std::vector<Real> > &tsg, std::vector<std::vector<Real> > &wsg) // WJ
+XFEMCutElem2D::solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &elem_nodes, std::vector<std::vector<Real> > &tsg, std::vector<std::vector<Real> > &wsg)
 {
   // Get physical coords for the new six-point rule
   std::vector<std::vector<Real> > shape(nen,std::vector<Real>(3,0.0));
