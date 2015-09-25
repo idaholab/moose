@@ -25,23 +25,12 @@ class ICEUpdaterTester(RunApp):
        self.nPosts = self.getParam('nPosts')
        self.port = int(self.getParam('port'))
 
-    self.httpServer = SimpleHttpServer("localhost", self.port)
-    self.httpServer.start()
-
   # This method is called prior to running the test.  It can be used to cleanup files
   # or do other preparations before the tester is run
   def prepare(self):
+    self.httpServer = SimpleHttpServer("localhost", self.port)
+    self.httpServer.start()
     return
-
-  # This method is called to return the commands (list) used for processing results
-  def processResultsCommand(self, moose_dir, options):
-    commands = []
-    return commands
-
-  # This method should return the executable command that will be executed by the tester
-  def getCommand(self, options):
-    command = RunApp.getCommand(self, options)
-    return command
 
   # This method will be called to process the results of running the test.  Any post-test
   # processing should happen in this method
