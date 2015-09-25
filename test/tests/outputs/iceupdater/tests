@@ -12,5 +12,7 @@
     # both TBB and curl enabled.
     curl = true
     tbb = true
+
+    deleted = '#5741'
   [../]
 []
