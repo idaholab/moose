@@ -34,8 +34,10 @@ InputParameters validParams<FauxGrainTracker>()
 
 FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters) :
     FeatureFloodCount(parameters),
+    GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step"))
 {
+  _faux_data.resize(1);
 }
 
 FauxGrainTracker::~FauxGrainTracker()
@@ -68,6 +70,12 @@ Real
 FauxGrainTracker::getElementalValue(dof_id_type /*element_id*/) const
 {
   return 0;
+}
+
+const std::vector<std::pair<unsigned int, unsigned int> > &
+FauxGrainTracker::getElementalValues(dof_id_type elem_id) const
+{
+  return _faux_data;
 }
 
 void

@@ -64,6 +64,7 @@
 #include "PenaltyDirichletBC.h"
 #include "PresetBC.h"
 #include "NeumannBC.h"
+#include "PostprocessorNeumannBC.h"
 #include "FunctionDirichletBC.h"
 #include "FunctionPenaltyDirichletBC.h"
 #include "FunctionPresetBC.h"
@@ -448,6 +449,7 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(PenaltyDirichletBC);
   registerBoundaryCondition(PresetBC);
   registerBoundaryCondition(NeumannBC);
+  registerBoundaryCondition(PostprocessorNeumannBC);
   registerBoundaryCondition(FunctionDirichletBC);
   registerBoundaryCondition(FunctionPenaltyDirichletBC);
   registerBoundaryCondition(FunctionPresetBC);
