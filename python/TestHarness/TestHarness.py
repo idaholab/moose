@@ -468,7 +468,7 @@ class TestHarness:
       return ('QSUB NOT FOUND', '')
     else:
       # Get the PBS Job ID using qstat
-      results = re.findall(r'JOB_NAME: (\w+\d+) JOB_ID: (\d+) TEST_NAME: (\S+)', output, re.DOTALL)
+      results = re.findall(r'JOB_NAME: (\w+) JOB_ID:.* (\d+).*TEST_NAME: (\S+)', output, re.S)
       if len(results) != 0:
         file_name = self.options.pbs
         job_list = open(os.path.abspath(os.path.join(tester.specs['executable'], os.pardir)) + '/' + file_name, 'a')
@@ -479,7 +479,7 @@ class TestHarness:
           # Get the Output_Path from qstat stdout
           if qstat_stdout != None:
             output_value = re.search(r'Output_Path(.*?)(^ +)', qstat_stdout, re.S | re.M).group(1)
-            output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '')
+            output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '').strip()
           else:
             job_list.close()
             return ('QSTAT NOT FOUND', '')
