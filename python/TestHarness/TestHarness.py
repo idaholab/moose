@@ -468,7 +468,6 @@ class TestHarness:
       return ('QSUB NOT FOUND', '')
     else:
       # Get the PBS Job ID using qstat
-      print output
       results = re.findall(r'JOB_NAME: (\w+) JOB_ID:.* (\d+).*TEST_NAME: (\S+)', output, re.M)
       if len(results) != 0:
         file_name = self.options.pbs
