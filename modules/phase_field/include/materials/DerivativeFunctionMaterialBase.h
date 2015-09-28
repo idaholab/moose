@@ -80,7 +80,7 @@ protected:
   /**
    * Override this method to calculate the third derivatives.
    *
-   * @Note The implementation of this method is optional. It is only evaluated when
+   * @note The implementation of this method is optional. It is only evaluated when
    *       the 'third_derivatives' parameter is set to true.
    */
   virtual Real computeD3F(unsigned int, unsigned int, unsigned int) { return 0.0; }

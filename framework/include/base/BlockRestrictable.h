@@ -177,7 +177,7 @@ protected:
 
   /**
    * A helper method to allow the Material object to specialize the behavior
-   * of hasBlockMaterialProperty. It also avoid circular #include problems.
+   * of hasBlockMaterialProperty. It also avoid circular \#include problems.
    * @see hasBlockMaterialProperty
    */
   virtual bool hasBlockMaterialPropertyHelper(const std::string & prop_name);

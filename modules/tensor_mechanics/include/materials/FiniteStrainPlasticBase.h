@@ -267,6 +267,7 @@ protected:
    * the function with values attained after applying the under-relaxation
    *
    * @param[in,out] nr_res2 The residual-squared
+   * @param[in,out] stress Current value of stress
    * @param intnl_old  The internal variables at the previous "time" step
    * @param[in,out] intnl The internal variables
    * @param[in,out] pm The plasticity multiplier(s) (consistency parameter(s))
