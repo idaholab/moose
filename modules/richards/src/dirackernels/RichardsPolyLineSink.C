@@ -14,7 +14,7 @@ InputParameters validParams<RichardsPolyLineSink>()
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<std::vector<Real> >("pressures", "Tuple of pressure values.  Must be monotonically increasing.");
   params.addRequiredParam<std::vector<Real> >("fluxes", "Tuple of flux values (measured in kg.m^-3.s^-1).  A piecewise-linear fit is performed to the (pressure,flux) pairs to obtain the flux at any arbitrary pressure.  If a quad-point pressure is less than the first pressure value, the first flux value is used.  If quad-point pressure exceeds the final pressure value, the final flux value is used.  This flux is OUT of the medium: hence positive values of flux means this will be a SINK, while negative values indicate this flux will be a SOURCE.");
-  params.addRequiredParam<std::string>("point_file", "The file containing the coordinates of the point sinks that will approximate the polyline.  Each line in the file must contain a space-separated coordinate.  Note that you will get segementation faults if your points do not lie within your mesh!");
+  params.addRequiredParam<FileName>("point_file", "The file containing the coordinates of the point sinks that will approximate the polyline.  Each line in the file must contain a space-separated coordinate.  Note that you will get segementation faults if your points do not lie within your mesh!");
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the polylinesink for each time step.");
   params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addClassDescription("Approximates a polyline sink in the mesh by using a number of point sinks whose positions are read from a file");
@@ -25,7 +25,7 @@ RichardsPolyLineSink::RichardsPolyLineSink(const InputParameters & parameters) :
     DiracKernel(parameters),
     _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
     _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("fluxes")),
-    _point_file(getParam<std::string>("point_file")),
+    _point_file(getParam<FileName>("point_file")),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
     _pp(getMaterialProperty<std::vector<Real> >("porepressure")),

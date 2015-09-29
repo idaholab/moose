@@ -19,17 +19,17 @@ template<>
 InputParameters validParams<PiecewiseMultilinear>()
 {
   InputParameters params = validParams<Function>();
-  params.addParam<std::string>("data_file", "File holding data for use with PiecewiseMultilinear.  Format: any empty line and any line beginning with # are ignored, all other lines are assumed to contain relevant information.  The file must begin with specification of the grid.  This is done through lines containing the keywords: AXIS X; AXIS Y; AXIS Z; or AXIS T.  Immediately following the keyword line must be a space-separated line of real numbers which define the grid along the specified axis.  These data must be monotonically increasing.  After all the axes and their grids have been specified, there must be a line that is DATA.  Following that line, function values are given in the correct order (they may be on indivicual lines, or be space-separated on a number of lines).  When the function is evaluated, f[i,j,k,l] corresponds to the i + j*Ni + k*Ni*Nj + l*Ni*Nj*Nk data value.  Here i>=0 corresponding to the index along the first AXIS, j>=0 corresponding to the index along the second AXIS, etc, and Ni = number of grid points along the first AXIS, etc.");
+  params.addParam<FileName>("data_file", "File holding data for use with PiecewiseMultilinear.  Format: any empty line and any line beginning with # are ignored, all other lines are assumed to contain relevant information.  The file must begin with specification of the grid.  This is done through lines containing the keywords: AXIS X; AXIS Y; AXIS Z; or AXIS T.  Immediately following the keyword line must be a space-separated line of real numbers which define the grid along the specified axis.  These data must be monotonically increasing.  After all the axes and their grids have been specified, there must be a line that is DATA.  Following that line, function values are given in the correct order (they may be on indivicual lines, or be space-separated on a number of lines).  When the function is evaluated, f[i,j,k,l] corresponds to the i + j*Ni + k*Ni*Nj + l*Ni*Nj*Nk data value.  Here i>=0 corresponding to the index along the first AXIS, j>=0 corresponding to the index along the second AXIS, etc, and Ni = number of grid points along the first AXIS, etc.");
   params.addClassDescription("PiecewiseMultilinear performs interpolation on 1D, 2D, 3D or 4D data.  The data_file specifies the axes directions and the function values.  If a point lies outside the data range, the appropriate end value is used.");
   return params;
 }
 
 
 PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters) :
-    Function(parameters)
+    Function(parameters),
+    _gridded_data(new GriddedData(getParam<FileName>("data_file"))),
+    _dim(_gridded_data->getDim())
 {
-  _gridded_data = new GriddedData(getParam<std::string>("data_file"));
-  _dim = _gridded_data->getDim();
   _gridded_data->getAxes(_axes);
   _gridded_data->getGrid(_grid);
 
@@ -49,7 +49,6 @@ PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters) :
 
 PiecewiseMultilinear::~PiecewiseMultilinear()
 {
-  delete _gridded_data;
 }
 
 
@@ -159,4 +158,3 @@ PiecewiseMultilinear::getNeighborIndices(std::vector<Real> in_arr, Real x, unsig
       lower_x = upper_x - 1;
   }
 }
-
