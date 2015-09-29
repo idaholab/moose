@@ -2036,12 +2036,19 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
         (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal")))
        mat_data = _bnd_material_data[tid];
 
-    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-      _reinit_displaced_face = true;
-
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
     MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create(user_object_name, name, parameters, tid));
+    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      MooseSharedPointer<ElementUserObject> euo = MooseSharedNamespace::dynamic_pointer_cast<ElementUserObject>(user_object);
+      MooseSharedPointer<SideUserObject> suo = MooseSharedNamespace::dynamic_pointer_cast<SideUserObject>(user_object);
+      MooseSharedPointer<NodalUserObject> nuo = MooseSharedNamespace::dynamic_pointer_cast<NodalUserObject>(user_object);
+      if (euo.get() != NULL || nuo.get() != NULL)
+        _reinit_displaced_elem = true;
+      else if (suo.get() != NULL)
+        _reinit_displaced_face = true;
+    }
 
     const std::vector<ExecFlagType> & exec_flags = user_object->execFlags();
     for (unsigned int i=0; i<exec_flags.size(); ++i)
