@@ -1973,9 +1973,6 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
     if (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
        mat_data = _bnd_material_data[tid];
 
-    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-      _reinit_displaced_face = true;
-
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
     MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
@@ -1984,6 +1981,17 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
       mooseError("Unable to determine type for VectorPostprocessor: " + mo->name());
 
     MooseSharedPointer<VectorPostprocessor> pp = getVectorPostprocessorPointer(mo);
+
+    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      MooseSharedPointer<ElementVectorPostprocessor> evp = MooseSharedNamespace::dynamic_pointer_cast<ElementVectorPostprocessor>(mo);
+      MooseSharedPointer<SideVectorPostprocessor> svp = MooseSharedNamespace::dynamic_pointer_cast<SideVectorPostprocessor>(mo);
+      MooseSharedPointer<NodalVectorPostprocessor> nvp = MooseSharedNamespace::dynamic_pointer_cast<NodalVectorPostprocessor>(mo);
+      if (evp.get() != NULL || nvp.get() != NULL)
+        _reinit_displaced_elem = true;
+      else if (svp.get() != NULL)
+        _reinit_displaced_face = true;
+    }
 
     // VectorPostprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
     const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
