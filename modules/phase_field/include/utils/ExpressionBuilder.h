@@ -362,7 +362,7 @@ public:
     friend EBTerm sinh(const EBTerm &);
     friend EBTerm cosh(const EBTerm &);
 
-    /**
+    /*
      * Binary operators (including number,term operations)
      */
     #define BINARY_OP_IMPLEMENT(op,OP) \
@@ -400,6 +400,7 @@ public:
     BINARY_OP_IMPLEMENT(!=,NOTEQ)
 
     /**
+    * @{
      * Binary functions
      */
     friend EBTerm min(const EBTerm &, const EBTerm &);
@@ -409,6 +410,7 @@ public:
     friend EBTerm atan2(const EBTerm &, const EBTerm &);
     friend EBTerm hypot(const EBTerm &, const EBTerm &);
     friend EBTerm plog(const EBTerm &, const EBTerm &);
+    ///@}
 
     /**
      * Ternary functions
@@ -476,7 +478,7 @@ public:
     EBTerm _term;
   };
 
-  /**
+  /*
    * Binary operators
    */
   #define BINARYFUNC_OP_IMPLEMENT(op,OP) \
