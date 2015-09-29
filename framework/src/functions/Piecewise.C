@@ -29,11 +29,11 @@ InputParameters validParams<Piecewise>()
 }
 
 Piecewise::Piecewise(const InputParameters & parameters) :
-  Function(parameters),
-  _scale_factor(getParam<Real>("scale_factor")),
-  _linear_interp( NULL ),
-  _has_axis(false),
-  _data_file_name(getParam<FileName>("data_file"))
+    Function(parameters),
+    _scale_factor(getParam<Real>("scale_factor")),
+    _linear_interp( NULL ),
+    _has_axis(false),
+    _data_file_name(getParam<FileName>("data_file"))
 {
   std::vector<Real> x;
   std::vector<Real> y;
@@ -64,7 +64,7 @@ Piecewise::Piecewise(const InputParameters & parameters) :
            (parameters.isParamValid("y")))
   {
     if (! ((parameters.isParamValid("x")) &&
-          (parameters.isParamValid("y"))))
+           (parameters.isParamValid("y"))))
     {
       mooseError("In Piecewise: Both 'x' and 'y' must be specified if either one is specified.");
     }
