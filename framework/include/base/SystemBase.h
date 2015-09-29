@@ -360,7 +360,7 @@ public:
    * @param source_name Name of the nodal variable being used for copying from (name is from the exodusII file)
    * @param timestep Timestep in the file being used
    */
-  virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, unsigned int timestep) = 0;
+  virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, const std::string & timestep) = 0;
 
   const std::vector<MooseVariable *> & getVariables(THREAD_ID tid) { return _vars[tid].variables(); }
   const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid) { return _vars[tid].scalars(); }
@@ -393,7 +393,7 @@ protected:
  * Information about variables that will be copied
  */
 struct VarCopyInfo {
-  VarCopyInfo(const std::string & dest_name, const std::string & source_name, unsigned int timestep) :
+  VarCopyInfo(const std::string & dest_name, const std::string & source_name, const std::string & timestep) :
     _dest_name(dest_name),
     _source_name(source_name),
     _timestep(timestep)
@@ -401,7 +401,7 @@ struct VarCopyInfo {
 
   std::string _dest_name;
   std::string _source_name;
-  unsigned int _timestep;
+  std::string _timestep;
 };
 
 /**
@@ -568,24 +568,39 @@ public:
   virtual DofMap & dofMap() { return _sys.get_dof_map(); }
   virtual System & system() { return _sys; }
 
-  virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, unsigned int timestep)
+  virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, const std::string & timestep)
   {
     _var_to_copy.push_back(VarCopyInfo(dest_name, source_name, timestep));
   }
 
   void copyVars(ExodusII_IO & io)
   {
+    int n_steps = io.get_num_time_steps();
+
     bool did_copy = false;
     for (std::vector<VarCopyInfo>::iterator it = _var_to_copy.begin();
         it != _var_to_copy.end();
         ++it)
     {
-      did_copy = true;
       VarCopyInfo & vci = *it;
-      if (getVariable(0, vci._dest_name).isNodal())
-        io.copy_nodal_solution(_sys, vci._dest_name, vci._source_name, vci._timestep);
+      int timestep = -1;
+
+      if (vci._timestep == "END")
+        // Use the last time step in the file from which to retrieve the solution
+        timestep = n_steps;
       else
-        io.copy_elemental_solution(_sys, vci._dest_name, vci._source_name, vci._timestep);
+      {
+        std::istringstream ss(vci._timestep);
+        if (!(ss >> timestep) || timestep > n_steps)
+          mooseError("Invalid value passed as \"initial_from_file_timestep\". Expected \"END\" or a valid integer less than "
+                     << n_steps << ", received " << vci._timestep);
+      }
+
+      did_copy = true;
+      if (getVariable(0, vci._dest_name).isNodal())
+        io.copy_nodal_solution(_sys, vci._dest_name, vci._source_name, timestep);
+      else
+        io.copy_elemental_solution(_sys, vci._dest_name, vci._source_name, timestep);
     }
 
     if (did_copy)

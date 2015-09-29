@@ -39,4 +39,26 @@
     exodiff = 'restart_diffusion_test_transient_new_name_out.e'
     prereq = 'test_1'
   [../]
+
+  # Restart using "LAST"
+  [./restart_use_end_part1]
+    type = 'RunApp'
+    input = 'restart_diffusion_from_end_part1.i'
+  [../]
+
+  [./restart_use_end_part2]
+    type = 'Exodiff'
+    input = 'restart_diffusion_from_end_part2.i'
+    exodiff = 'restart_diffusion_from_end_part2_out.e'
+    prereq = 'restart_use_end_part1'
+  [../]
+
+  [./restart_use_end_error_check]
+    type = 'RunException'
+    input = 'restart_diffusion_from_end_part2.i'
+    expect_err = 'Invalid value passed as "initial_from_file_timestep". Expected "END" or a valid integer less than \d+, received \d+'
+
+    cli_args = 'Variables/u/initial_from_file_timestep=8'
+    prereq = 'restart_use_end_part2'
+  [../]
 []

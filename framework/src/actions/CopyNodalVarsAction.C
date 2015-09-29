@@ -23,7 +23,8 @@ template<>
 InputParameters validParams<CopyNodalVarsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<int>("initial_from_file_timestep", 2, "Gives the timestep for which to read a solution from a file for a given variable");
+  params.addParam<std::string>("initial_from_file_timestep", "END", "Gives the timestep (or \"END\") for which to read a solution from a file "
+                               "for a given variable. (Default: END)");
   params.addParam<std::string>("initial_from_file_var", "Gives the name of a variable for which to read an initial condition from a mesh file");
 
   params.addParamNamesToGroup("initial_from_file_timestep initial_from_file_var", "Initial From File");
@@ -55,8 +56,7 @@ CopyNodalVarsAction::act()
       else
         system = &_problem->getAuxiliarySystem();
 
-      system->addVariableToCopy(getShortName(), getParam<std::string>("initial_from_file_var"), getParam<int>("initial_from_file_timestep"));
+      system->addVariableToCopy(getShortName(), getParam<std::string>("initial_from_file_var"), getParam<std::string>("initial_from_file_timestep"));
     }
   }
 }
-
