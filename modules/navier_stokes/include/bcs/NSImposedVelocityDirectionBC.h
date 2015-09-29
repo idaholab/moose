@@ -37,7 +37,7 @@ InputParameters validParams<NSImposedVelocityDirectionBC>();
  * where:
  * u1  = the x-momentum component
  * |u| = velocity magnitude
- * u1_hat_desired = The desired velocity direction, \in (0,1)
+ * u1_hat_desired = The desired velocity direction, \f$ \in (0,1) \f$
  */
 class NSImposedVelocityDirectionBC : public NodalBC
 {
