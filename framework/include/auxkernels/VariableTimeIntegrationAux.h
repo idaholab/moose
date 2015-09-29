@@ -31,9 +31,10 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _coupled_var;
-  VariableValue & _coupled_var_old;
+  std::vector<VariableValue *>  _coupled_vars;
   Real _coef;
+  unsigned int _order;
+  std::vector<Real> _integration_coef;
 };
 
 #endif // VARIABLETIMEINTEGRATIONAUX_H

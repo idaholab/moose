@@ -35,8 +35,39 @@
   [../]
 []
 
+[AuxVariables]
+  active = 'v_midpoint v_trapazoid v_simpson'
+  [./v_midpoint]
+  [../]
+  [./v_trapazoid]
+  [../]
+  [./v_simpson]
+  [../]
+[]
+
+[AuxKernels]
+  [./MidpointTimeIntegrator]
+    type = VariableTimeIntegrationAux
+    variable_to_integrate = u
+    variable = v_midpoint
+    order = 1
+  [../]
+  [./TrapazoidalTimeIntegrator]
+    type = VariableTimeIntegrationAux
+    variable_to_integrate = u
+    variable = v_trapazoid
+    order = 2
+  [../]
+  [./SimpsonsTimeIntegrator]
+    type = VariableTimeIntegrationAux
+    variable_to_integrate = u
+    variable = v_simpson
+    order = 3
+  [../]
+[]
+
 [BCs]
-   active = 'RightBC LeftBC TopBC BottomBC'
+  active = 'RightBC LeftBC TopBC BottomBC'
  [./RightBC]
     type = FunctionDirichletBC
     variable = u
