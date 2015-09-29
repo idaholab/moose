@@ -1,0 +1,113 @@
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  elem_type = QUAD9
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  nx = 10 
+  ny = 10 
+[]
+
+[Variables]
+  [./u]
+    initial_condition = 0.0
+    family = LAGRANGE
+    order = SECOND
+  [../]
+[]
+
+[Kernels]
+  active = 'diff timederivative sourceterm'
+  [./diff]
+     type = Diffusion
+     variable = u
+  [../]
+  [./timederivative] 
+     type = TimeDerivative
+     variable = u
+  [../]
+  [./sourceterm]
+     type =  UserForcingFunction
+     variable = u
+     function = Source
+  [../]
+[]
+
+[BCs]
+   active = 'RightBC LeftBC TopBC BottomBC'
+ [./RightBC]
+    type = FunctionDirichletBC
+    variable = u
+    function = RightBC 
+    boundary = 'right'
+ [../] 
+ [./LeftBC]
+    type = FunctionDirichletBC
+    variable = u
+    function = LeftBC 
+    boundary = 'left'
+ [../] 
+ [./TopBC]
+    type = FunctionDirichletBC
+    variable = u
+    function = TopBC 
+    boundary = 'top'
+ [../] 
+ [./BottomBC]
+    type = FunctionDirichletBC
+    variable = u
+    function = BottomBC 
+    boundary = 'bottom'
+ [../] 
+[]
+
+[Functions]
+  active = 'Soln Source TopBC BottomBC RightBC LeftBC'
+ [./Soln]
+    type = ParsedFunction
+    value = 't*(x*x+y*y)'
+ [../]
+ [./Source]
+    type = ParsedFunction
+    value = '(x*x + y*y) - 4*t'
+ [../]
+ [./TopBC]
+    type = ParsedFunction
+    value = 't*(x*x+1)'
+ [../]
+ [./BottomBC]
+    type = ParsedFunction
+    value = 't*x*x'
+ [../]
+ [./RightBC]
+   type = ParsedFunction
+   value = 't*(y*y+1)'
+ [../]
+ [./LeftBC]
+    type = ParsedFunction
+    value = 't*y*y'
+  [../]
+[]
+[Postprocessors]
+  [./l2_error]
+    type = NodalL2Error
+    variable = u
+    function = Soln 
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  dt = 0.1
+  num_steps = 10 
+
+  nl_abs_tol = 1.e-15
+[]
+
+[Outputs]
+  execute_on = 'timestep_end'
+  exodus = true
+[]
