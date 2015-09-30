@@ -9,6 +9,7 @@
 #define GRAINTRACKER_H
 
 #include "FeatureFloodCount.h"
+#include "GrainTrackerInterface.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
@@ -21,7 +22,7 @@ class EBSDReader;
 template<>
 InputParameters validParams<GrainTracker>();
 
-class GrainTracker : public FeatureFloodCount
+class GrainTracker : public FeatureFloodCount, public GrainTrackerInterface
 {
 public:
   GrainTracker(const InputParameters & parameters);
@@ -50,12 +51,6 @@ public:
   virtual Real getElementalValue(dof_id_type element_id) const;
 
   /**
-   * Returns a list of active unique grains for a particular node in a vector of pairs
-   * (unique_grain_id, variable_idx)
-   */
-//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type node_id) const;
-
-  /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
    * holds the ith node with the inner vector holds the list of active unique grains.
    * (unique_grain_id, variable_idx)
@@ -65,7 +60,6 @@ public:
   // Debugging routine used for printing grain data structure information
   void print();
 
-public:
   /// This struct holds the nodesets and bounding spheres for each flooded region.
   struct BoundingSphereInfo;
 

@@ -1,0 +1,18 @@
+[Tests]
+  [./testupdater]
+    type = 'ICEUpdaterTester'
+    input = 'ice_updater_test.i'
+    nPosts = 4 # start, stop, 2 postprocessor posts
+
+    # If you change this, make sure you change
+    # it in ice_updater_test.i:Outputs/ICEUpdater/url
+    port = 8181
+
+    # This test should only run if libmesh has been configured with
+    # both TBB and curl enabled.
+    curl = true
+    tbb = true
+
+    deleted = '#5741'
+  [../]
+[]

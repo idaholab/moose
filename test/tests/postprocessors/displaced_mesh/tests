@@ -1,0 +1,15 @@
+[Tests]
+  [./elemental]
+    type = 'Exodiff'
+    input = 'elemental.i'
+    exodiff = 'elemental_out.e'
+    recover = false
+  [../]
+
+  [./side]
+    type = 'Exodiff'
+    input = 'side.i'
+    exodiff = 'side_out.e'
+    recover = false
+  [../]
+[]

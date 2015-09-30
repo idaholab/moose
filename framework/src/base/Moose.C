@@ -64,6 +64,7 @@
 #include "PenaltyDirichletBC.h"
 #include "PresetBC.h"
 #include "NeumannBC.h"
+#include "PostprocessorNeumannBC.h"
 #include "FunctionDirichletBC.h"
 #include "FunctionPenaltyDirichletBC.h"
 #include "FunctionPresetBC.h"
@@ -287,8 +288,8 @@
 #include "CrankNicolson.h"
 #include "ExplicitEuler.h"
 #include "ExplicitMidpoint.h"
-#include "Dirk.h"
 #include "LStableDirk2.h"
+#include "LStableDirk3.h"
 #include "ImplicitMidpoint.h"
 #include "Heun.h"
 #include "Ralston.h"
@@ -395,6 +396,7 @@
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
 #include "DOFMapOutput.h"
+#include "ICEUpdater.h"
 
 // Controls
 #include "RealFunctionControl.h"
@@ -447,6 +449,7 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(PenaltyDirichletBC);
   registerBoundaryCondition(PresetBC);
   registerBoundaryCondition(NeumannBC);
+  registerBoundaryCondition(PostprocessorNeumannBC);
   registerBoundaryCondition(FunctionDirichletBC);
   registerBoundaryCondition(FunctionPenaltyDirichletBC);
   registerBoundaryCondition(FunctionPresetBC);
@@ -675,10 +678,9 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(BDF2);
   registerTimeIntegrator(CrankNicolson);
   registerTimeIntegrator(ExplicitEuler);
-  registerDeprecatedObjectName(ExplicitMidpoint, "RungeKutta2", "09/25/2015 12:00");
   registerTimeIntegrator(ExplicitMidpoint);
-  registerDeprecatedObjectName(Dirk, "Dirk", "09/22/2015 12:00");
   registerTimeIntegrator(LStableDirk2);
+  registerTimeIntegrator(LStableDirk3);
   registerTimeIntegrator(ImplicitMidpoint);
   registerTimeIntegrator(Heun);
   registerTimeIntegrator(Ralston);
@@ -726,6 +728,7 @@ registerObjects(Factory & factory)
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
   registerNamedOutput(DOFMapOutput, "DOFMap");
+  registerOutput(ICEUpdater);
 
   // Controls
   registerControl(RealFunctionControl);

@@ -13,7 +13,7 @@ pcre/
   |* PCRE - Perl Compatible Regular Expressions                              *|
   |*-------------------------------------------------------------------------*|
   |* Copyright: Google Inc.                                                  *|
-  |* License: bsd http://www.linfo.org/bsdlicense.html                       *|
+  |* License: http://opensource.org/licenses/BSD-3-Clause                    *|
   /***************************************************************************\
 
 nsiqcppstyle/
@@ -29,5 +29,13 @@ exodiff/
   |* Exodus Differencing tool from the Seacas ACCESS package                 *|
   |*-------------------------------------------------------------------------*|
   |* Copyright: Sandia Corportation                                          *|
-  |* License: bsd http://www.linfo.org/bsdlicense.html                       *|
+  |* License: http://opensource.org/licenses/BSD-3-Clause                    *|
+  /***************************************************************************\
+
+ice_updater/
+  /***************************************************************************\
+  |* The ICE Updater                                                         *|
+  |*-------------------------------------------------------------------------*|
+  |* Copyright (c) 2015, UT-Battelle, LLC.                                   *|
+  |* License: http://opensource.org/licenses/BSD-3-Clause                    *|
   /***************************************************************************\

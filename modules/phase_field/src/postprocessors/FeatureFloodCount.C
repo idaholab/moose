@@ -305,7 +305,9 @@ FeatureFloodCount::pack(std::vector<unsigned int> & packed_data) const
        *
        * We will pack the data into a series of groups representing each unique bubble
        * the nodes for each group will be proceeded by the number of nodes in that group
+       * @verbatim
        * [ <i_nodes> <var_idx> <n_0> <n_1> ... <n_i> <j_nodes> <var_idx> <n_0> <n_1> ... <n_j> ]
+       * @endverbatim
        */
 
       // Note the _region_counts[mar_num]*2 takes into account the number of nodes and the variable index for each region
@@ -889,4 +891,3 @@ FeatureFloodCount::formatBytesUsed() const
 
 
 const std::vector<std::pair<unsigned int, unsigned int> > FeatureFloodCount::_empty;
-

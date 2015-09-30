@@ -90,6 +90,7 @@ InputParameters validParams<GrainTracker>()
 
 GrainTracker::GrainTracker(const InputParameters & parameters) :
     FeatureFloodCount(parameters),
+    GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _remap(getParam<bool>("remap_grains")),

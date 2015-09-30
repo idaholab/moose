@@ -203,6 +203,7 @@ protected:
    * the function with values attained after applying the under-relaxation
    *
    * @param[in,out] nr_res2 The residual-squared
+   * @param[out] stress  The stress after returning to the yield surface
    * @param intnl_old  The internal variables at the previous "time" step
    * @param[in,out] intnl The internal variables
    * @param[in,out] pm The plasticity multiplier(s) (consistency parameter(s))
@@ -279,6 +280,7 @@ protected:
    * Increments "dumb_iteration" by 1, and sets "act" appropriately
    * (act[alpha] = true iff alpha_th bit of dumb_iteration == 1)
    * @param[in,out] dumb_iteration Used to set act bitwise - the "dumb" scheme tries all possible combinations of act until a successful return
+   * @param[in] dumb_order dumb_order dumb_order[0] will be the yield surface furthest away from (stress, intnl), dumb_order[1] will be the next yield surface, etc.  The distance measure used is f/|df_dstress|.  This array can then be fed into incrementDumb in order to first try the yield surfaces which are farthest away from the (stress, intnl).
    * @param[out] act active constraints
    */
   virtual void incrementDumb(int & dumb_iteration, const std::vector<unsigned int> & dumb_order,

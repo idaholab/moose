@@ -16,10 +16,10 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   params.addParam<std::vector<Real> >("gprops", "Initial values of slip system resistances");
   params.addParam<std::vector<Real> >("hprops", "Hardening properties");
   params.addParam<std::vector<Real> >("flowprops", "Parameters used in slip rate equations");
-  params.addRequiredParam<std::string>("slip_sys_file_name", "Name of the file containing the slip system");
-  params.addParam<std::string>("slip_sys_res_prop_file_name", "", "Name of the file containing the initial values of slip system resistances");
-  params.addParam<std::string>("slip_sys_flow_prop_file_name", "", "Name of the file containing the values of slip rate equation parameters");
-  params.addParam<std::string>("slip_sys_hard_prop_file_name", "", "Name of the file containing the values of hardness evolution parameters");
+  params.addRequiredParam<FileName>("slip_sys_file_name", "Name of the file containing the slip system");
+  params.addParam<FileName>("slip_sys_res_prop_file_name", "", "Name of the file containing the initial values of slip system resistances");
+  params.addParam<FileName>("slip_sys_flow_prop_file_name", "", "Name of the file containing the values of slip rate equation parameters");
+  params.addParam<FileName>("slip_sys_hard_prop_file_name", "", "Name of the file containing the values of hardness evolution parameters");
   params.addParam<Real>("rtol", 1e-6, "Constitutive stress residue relative tolerance");
   params.addParam<Real>("abs_tol", 1e-6, "Constitutive stress residue absolute tolerance");
   params.addParam<Real>("gtol", 1e2, "Constitutive slip system resistance residual tolerance");
@@ -51,10 +51,10 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _gprops(getParam<std::vector<Real> >("gprops")),
     _hprops(getParam<std::vector<Real> >("hprops")),
     _flowprops(getParam<std::vector<Real> >("flowprops")),
-    _slip_sys_file_name(getParam<std::string>("slip_sys_file_name")),
-    _slip_sys_res_prop_file_name(getParam<std::string>("slip_sys_res_prop_file_name")),
-    _slip_sys_flow_prop_file_name(getParam<std::string>("slip_sys_flow_prop_file_name")),
-    _slip_sys_hard_prop_file_name(getParam<std::string>("slip_sys_hard_prop_file_name")),
+    _slip_sys_file_name(getParam<FileName>("slip_sys_file_name")),
+    _slip_sys_res_prop_file_name(getParam<FileName>("slip_sys_res_prop_file_name")),
+    _slip_sys_flow_prop_file_name(getParam<FileName>("slip_sys_flow_prop_file_name")),
+    _slip_sys_hard_prop_file_name(getParam<FileName>("slip_sys_hard_prop_file_name")),
     _rtol(getParam<Real>("rtol")),
     _abs_tol(getParam<Real>("abs_tol")),
     _gtol(getParam<Real>("gtol")),
@@ -1119,4 +1119,3 @@ FiniteStrainCrystalPlasticity::line_search_update(const Real rnorm_prev, const R
 
   return true;
 }
-

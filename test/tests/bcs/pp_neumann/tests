@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'pp_neumann.i'
+    exodiff = 'pp_neumann_out.e'
+  [../]
+[]

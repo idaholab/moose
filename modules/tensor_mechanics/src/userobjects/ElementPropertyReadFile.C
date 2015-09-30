@@ -12,7 +12,7 @@ InputParameters validParams<ElementPropertyReadFile>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addClassDescription("User Object to read property data from an external file and assign to elements: Works only for Rectangular geometry (2D-3D)");
-  params.addParam<std::string>("prop_file_name", "", "Name of the property file name");
+  params.addParam<FileName>("prop_file_name", "", "Name of the property file name");
   params.addRequiredParam<unsigned int>("nprop", "Number of tabulated property values");
   params.addParam<unsigned int>("ngrain", 0, "Number of grains");
   params.addParam<MooseEnum>("read_type", MooseEnum("element grain none", "none"), "Type of property distribution: element:element by element property variation; grain:voronoi grain structure");
@@ -23,7 +23,7 @@ InputParameters validParams<ElementPropertyReadFile>()
 
 ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & parameters) :
     GeneralUserObject(parameters),
-    _prop_file_name(getParam<std::string>("prop_file_name")),
+    _prop_file_name(getParam<FileName>("prop_file_name")),
     _nprop(getParam<unsigned int>("nprop")),
     _ngrain(getParam<unsigned int>("ngrain")),
     _read_type(getParam<MooseEnum>("read_type")),
@@ -191,4 +191,3 @@ ElementPropertyReadFile::minPeriodicDistance(Point c, Point p) const
 
   return min_dist;
 }
-
