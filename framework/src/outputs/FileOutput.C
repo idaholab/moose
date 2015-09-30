@@ -147,4 +147,3 @@ FileOutput::getFileNumber()
 {
   return _file_num;
 }
-
