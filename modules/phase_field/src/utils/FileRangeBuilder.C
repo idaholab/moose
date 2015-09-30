@@ -12,8 +12,8 @@ template<>
 InputParameters validParams<FileRangeBuilder>()
 {
   InputParameters params = emptyInputParameters();
-  params.addParam<std::string>("file", "Name of single image file to extract mesh parameters from.  If provided, a 2D mesh is created.");
-  params.addParam<std::string>("file_base", "Image file base to open, use this option when a stack of images must be read (ignored if 'file' is given)");
+  params.addParam<FileName>("file", "Name of single image file to extract mesh parameters from.  If provided, a 2D mesh is created.");
+  params.addParam<FileNameNoExtension>("file_base", "Image file base to open, use this option when a stack of images must be read (ignored if 'file' is given)");
   params.addParam<std::vector<unsigned int> >("file_range", "Range of images to analyze, used with 'file_base' (ignored if 'file' is given)");
   params.addParam<std::string>("file_suffix", "Suffix of the file to open, e.g. 'png'");
   return params;
@@ -35,13 +35,13 @@ FileRangeBuilder::FileRangeBuilder(const InputParameters & params) :
 
   if (has_file)
   {
-    file = params.get<std::string>("file");
+    file = params.get<FileName>("file");
 
     // Set the file_suffix parameter in the passed-in params object based on the input filename
     _file_suffix = file.substr(file.find_last_of(".") + 1);
   }
   if (has_file_base)
-    file_base = params.get<std::string>("file_base");
+    file_base = params.get<FileNameNoExtension>("file_base");
   if (has_file_range)
     file_range = params.get<std::vector<unsigned int> >("file_range");
   if (has_file_suffix)

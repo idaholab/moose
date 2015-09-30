@@ -17,7 +17,7 @@ InputParameters validParams<GBAnisotropy>()
   params.addParam<Real>("molar_volume_value", 7.11e-6, "molar volume of material in m^3/mol, by defaults it's the value of copper");
   params.addParam<Real>("delta_sigma", 0.1, "factor determining inclination dependence of GB energy");
   params.addParam<Real>("delta_mob", 0.1, "factor determining inclination dependence of GB mobility");
-  params.addRequiredParam<std::string>("Anisotropic_GB_file_name", "Name of the file containing: 1)GB mobility prefactor; 2) GB migration activation energy; 3)GB energy");
+  params.addRequiredParam<FileName>("Anisotropic_GB_file_name", "Name of the file containing: 1)GB mobility prefactor; 2) GB migration activation energy; 3)GB energy");
   params.addRequiredParam<bool>("inclination_anisotropy", "The GB anisotropy ininclination would be considered if true");
   params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables");
   return params;
@@ -32,7 +32,7 @@ GBAnisotropy::GBAnisotropy(const InputParameters & parameters) :
     _M_V(getParam<Real>("molar_volume_value")),
     _delta_sigma(getParam<Real>("delta_sigma")),
     _delta_mob(getParam<Real>("delta_mob")),
-    _Anisotropic_GB_file_name(getParam<std::string>("Anisotropic_GB_file_name")),
+    _Anisotropic_GB_file_name(getParam<FileName>("Anisotropic_GB_file_name")),
     _inclination_anisotropy(getParam<bool>("inclination_anisotropy")),
     _T(coupledValue("T")),
     _kappa(declareProperty<Real>("kappa_op")),
@@ -235,4 +235,3 @@ GBAnisotropy::computeProperties()
     _tgrad_corr_mult[_qp] = _mu[_qp] * 9.0/8.0;
   }
 }
-
