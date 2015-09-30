@@ -132,8 +132,14 @@
 [Executioner]
   type = Transient
 
-  dt = 0.1
-  num_steps = 10 
+  end_time = 1.0
+#  dt = 0.1
+#  num_steps = 10 
+  [./TimeStepper]
+     type = FunctionDT
+     time_t = '0.01 0.1 0.5 0.8 1.0'
+     time_dt = '0.005 0.05 0.1 0.05 0.1'
+  [../]
 
   nl_abs_tol = 1.e-15
 []

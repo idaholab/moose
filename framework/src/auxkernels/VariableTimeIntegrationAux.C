@@ -52,10 +52,25 @@ VariableTimeIntegrationAux::computeValue()
   Real integral = 0.0;
   if(_order == 3) 
   {
-    for(unsigned int i=0; i< _order; ++i)
-      integral+=_integration_coef[i]*(*_coupled_vars[i])[_qp];
+    if(_dt != _dt_old)
+    {
+      /*! 
+       * time step is uneven, so the standard formula will not work. Use a different set of coefficients here.
+       */
+       Real term1 = -(_dt*_dt - _dt_old*_dt - 2.0*_dt_old*_dt_old)*(*_coupled_vars[2])[_qp]/(6.0*_dt_old);
+       Real term2 = (_dt*_dt*_dt + 3.0*_dt*_dt*_dt_old + 3.0*_dt_old*_dt_old*_dt +_dt_old*_dt_old*_dt_old)*(*_coupled_vars[1])[_qp]/(6.0*_dt*_dt_old);
+       Real term3 = (2.0*_dt*_dt + _dt*_dt_old - _dt_old*_dt_old)*(*_coupled_vars[0])[_qp]/(6.0*_dt);
+       integral = term1 + term2 + term3;
+
+       return _u_older[_qp] + _coef*integral;
+
+     } else {
+ 
+     for(unsigned int i=0; i< _order; ++i)
+       integral+=_integration_coef[i]*(*_coupled_vars[i])[_qp];
 
      return _u_older[_qp] + _coef*integral*_dt;
+    }
   } 
 
   for(unsigned int i=0; i< _order; ++i)
