@@ -6,8 +6,8 @@
   xmax = 1
   ymin = 0
   ymax = 1
-  nx = 10 
-  ny = 10 
+  nx = 10
+  ny = 10
 []
 
 [Variables]
@@ -24,7 +24,7 @@
      type = Diffusion
      variable = u
   [../]
-  [./timederivative] 
+  [./timederivative]
      type = TimeDerivative
      variable = u
   [../]
@@ -71,27 +71,27 @@
  [./RightBC]
     type = FunctionDirichletBC
     variable = u
-    function = RightBC 
+    function = RightBC
     boundary = 'right'
- [../] 
+ [../]
  [./LeftBC]
     type = FunctionDirichletBC
     variable = u
-    function = LeftBC 
+    function = LeftBC
     boundary = 'left'
- [../] 
+ [../]
  [./TopBC]
     type = FunctionDirichletBC
     variable = u
-    function = TopBC 
+    function = TopBC
     boundary = 'top'
- [../] 
+ [../]
  [./BottomBC]
     type = FunctionDirichletBC
     variable = u
-    function = BottomBC 
+    function = BottomBC
     boundary = 'bottom'
- [../] 
+ [../]
 []
 
 [Functions]
@@ -125,20 +125,20 @@
   [./l2_error]
     type = NodalL2Error
     variable = u
-    function = Soln 
+    function = Soln
   [../]
 []
 
 [Executioner]
   type = Transient
 
-  end_time = 1.0
+  end_time = 0.1
 #  dt = 0.1
-#  num_steps = 10 
+#  num_steps = 10
   [./TimeStepper]
      type = FunctionDT
-     time_t = '0.01 0.1 0.5 0.8 1.0'
-     time_dt = '0.005 0.05 0.1 0.05 0.1'
+     time_t = '0.01 0.1'
+     time_dt = '0.005 0.05'
   [../]
 
   nl_abs_tol = 1.e-15

@@ -19,7 +19,7 @@ VariableTimeIntegrationAux::VariableTimeIntegrationAux(const InputParameters & p
   Real constant = 1.0/3.0;
 
   switch(_order) {
-  
+
     case 1:
       _integration_coef.push_back(1.0);
       _coupled_vars.push_back(&coupledValue("variable_to_integrate"));
@@ -50,11 +50,11 @@ Real
 VariableTimeIntegrationAux::computeValue()
 {
   Real integral = 0.0;
-  if(_order == 3) 
+  if(_order == 3)
   {
     if(_dt != _dt_old)
     {
-      /*! 
+      /*!
        * time step is uneven, so the standard formula will not work. Use a different set of coefficients here.
        */
        Real term1 = -(_dt*_dt - _dt_old*_dt - 2.0*_dt_old*_dt_old)*(*_coupled_vars[2])[_qp]/(6.0*_dt_old);
@@ -65,19 +65,19 @@ VariableTimeIntegrationAux::computeValue()
        return _u_older[_qp] + _coef*integral;
 
      } else {
- 
+
      for(unsigned int i=0; i< _order; ++i)
        integral+=_integration_coef[i]*(*_coupled_vars[i])[_qp];
 
      return _u_older[_qp] + _coef*integral*_dt;
     }
-  } 
+  }
 
   for(unsigned int i=0; i< _order; ++i)
     integral+=_integration_coef[i]*(*_coupled_vars[i])[_qp];
 
  return _u_old[_qp] + _coef*integral*_dt;
- 
+
 //  return _u_old[_qp] +0.5*_coef* (_coupled_var[_qp] + _coupled_var_old[_qp]) * _dt;
 }
 
