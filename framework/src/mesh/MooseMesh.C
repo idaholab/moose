@@ -99,6 +99,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _mesh(NULL),
     _partitioner_name(getParam<MooseEnum>("partitioner")),
     _partitioner_overridden(false),
+    _custom_partitioner_requested(false),
     _uniform_refine_level(0),
     _is_changed(false),
     _is_nemesis(getParam<bool>("nemesis")),
@@ -155,51 +156,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
   }
   else
     _mesh = new SerialMesh(_communicator, dim);
-
-  // Set the partitioner
-  switch (_partitioner_name)
-  {
-  case -3: // default
-    // We'll use the default partitioner, but notify the user of which one is being used...
-    if (_use_parallel_mesh)
-      _partitioner_name = "parmetis";
-    else
-      _partitioner_name = "metis";
-    break;
-
-  // No need to explicitily create the metis or parmetis partitioners,
-  // They are the default for serial and parallel mesh respectively
-  case -2: // metis
-  case -1: // parmetis
-    break;
-
-  case 0: // linear
-    getMesh().partitioner().reset(new LinearPartitioner);
-    break;
-  case 1: // centroid
-  {
-    if (!isParamValid("centroid_partitioner_direction"))
-      mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
-
-    MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
-
-    if (direction == "x")
-      getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
-    else if (direction == "y")
-      getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
-    else if (direction == "z")
-      getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
-    else if (direction == "radial")
-      getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
-    break;
-  }
-  case 2: // hilbert_sfc
-    getMesh().partitioner().reset(new HilbertSFCPartitioner);
-    break;
-  case 3: // morton_sfc
-    getMesh().partitioner().reset(new MortonSFCPartitioner);
-    break;
-  }
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
@@ -211,6 +167,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _mesh(other_mesh.getMesh().clone().release()),
     _partitioner_name(other_mesh._partitioner_name),
     _partitioner_overridden(other_mesh._partitioner_overridden),
+    _custom_partitioner(other_mesh.getCustomPartitioner()),
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _is_changed(false),
     _is_nemesis(false),
@@ -1743,6 +1700,65 @@ MooseMesh::getNormalByBoundaryID(BoundaryID id) const
 void
 MooseMesh::init()
 {
+  if (_custom_partitioner_requested)
+  {
+    // Check of partitioner is supplied (not allowed if custom partitioner is used)
+    if (!parameters().isParamSetByAddParam("partitioner"))
+      mooseError("If partitioner block is provded, partitioner keyword cannot be used!");
+    // Set custom partitioner
+    if (!_custom_partitioner)
+      mooseError("If using partitioner type custom you must explicitly provide a partitioner in your input file!");
+    getMesh().partitioner().reset(_custom_partitioner);
+  }
+  else
+  {
+    // Set standard partitioner
+    // Set the partitioner based on partitioner name
+    switch (_partitioner_name)
+    {
+    case -3: // default
+      // We'll use the default partitioner, but notify the user of which one is being used...
+      if (_use_parallel_mesh)
+        _partitioner_name = "parmetis";
+      else
+        _partitioner_name = "metis";
+      break;
+
+    // No need to explicitily create the metis or parmetis partitioners,
+    // They are the default for serial and parallel mesh respectively
+    case -2: // metis
+    case -1: // parmetis
+      break;
+
+    case 0: // linear
+      getMesh().partitioner().reset(new LinearPartitioner);
+      break;
+    case 1: // centroid
+    {
+      if (!isParamValid("centroid_partitioner_direction"))
+        mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+
+      MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
+
+      if (direction == "x")
+        getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
+      else if (direction == "y")
+        getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
+      else if (direction == "z")
+        getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
+      else if (direction == "radial")
+        getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+      break;
+    }
+    case 2: // hilbert_sfc
+      getMesh().partitioner().reset(new HilbertSFCPartitioner);
+      break;
+    case 3: // morton_sfc
+      getMesh().partitioner().reset(new MortonSFCPartitioner);
+      break;
+    }
+  }
+
   if (_app.isRecovering() && _allow_recovery && _app.isUltimateMaster())
     // For now, only read the recovery mesh on the Ultimate Master.. sub-apps need to just build their mesh like normal
     getMesh().read(_app.getRecoverFileBase() + "_mesh.cpr");
@@ -2164,6 +2180,31 @@ MooseMesh::getMortarInterface(BoundaryID master, BoundaryID slave)
     return (*it).second;
   else
     mooseError("Requesting non-existing mortar interface (master = " << master << ", slave = " << slave << ").");
+}
+
+Partitioner *
+MooseMesh::getCustomPartitioner() const
+{
+  return _custom_partitioner;
+}
+
+
+void
+MooseMesh::setCustomPartitioner(Partitioner * custom_partitioner)
+{
+  _custom_partitioner = custom_partitioner;
+}
+
+bool
+MooseMesh::isCustomPartitionerRequested() const
+{
+  return _custom_partitioner_requested;
+}
+
+void
+MooseMesh::setIsCustomPartitionerRequested(bool cpr)
+{
+  _custom_partitioner_requested = cpr;
 }
 
 void
