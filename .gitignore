@@ -76,6 +76,7 @@ temp_print_trace.*
 *Revision.h
 *.json
 *.bak
+.clang_complete
 
 # Allow certain files in gold directories
 !**/gold/*.e
