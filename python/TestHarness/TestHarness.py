@@ -485,6 +485,7 @@ class TestHarness:
             return ('QSTAT NOT FOUND', '')
           # Write job_id, test['test_name'], and Ouput_Path to the batch file
           job_list.write(str(job_id) + ':' + test_name + ':' + output_value + ':' + self.options.input_file_name  + '\n')
+          print printResult(test_name, 'QUEUED', 0, 0, 0, self.options)
         # Return to TestHarness and inform we have launched the job
         job_list.close()
         return ('', 'LAUNCHED')
