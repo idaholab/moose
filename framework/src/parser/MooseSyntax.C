@@ -104,6 +104,8 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AdaptivityAction", "Executioner/Adaptivity");
 #endif
 
+  syntax.registerActionSyntax("PartitionerAction", "Mesh/Partitioner");
+
   syntax.registerActionSyntax("AddDiracKernelAction", "DiracKernels/*");
 
   syntax.registerActionSyntax("AddDGKernelAction", "DGKernels/*");
