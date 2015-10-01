@@ -15,7 +15,6 @@ VariableTimeIntegrationAux::VariableTimeIntegrationAux(const InputParameters & p
     _coef(getParam<Real>("coefficient")),
     _order(getParam<unsigned int>("order"))
 {
-  // Note: initial value should be set by an initial condition.
   Real constant = 1.0/3.0;
 
   switch (_order)
@@ -51,9 +50,9 @@ Real
 VariableTimeIntegrationAux::computeValue()
 {
   Real integral = 0.0;
-  if(_order == 3)
+  if (_order == 3)
   {
-    if(_dt != _dt_old)
+    if (_dt != _dt_old)
     {
        /*!
         * time step is uneven, so the standard formula will not work. Use a different set of coefficients here.
@@ -67,13 +66,13 @@ VariableTimeIntegrationAux::computeValue()
 
      }
 
-     for(unsigned int i=0; i< _order; ++i)
+     for (unsigned int i=0; i< _order; ++i)
        integral+=_integration_coef[i]*(*_coupled_vars[i])[_qp];
 
      return _u_older[_qp] + _coef*integral*_dt;
   }
 
-  for(unsigned int i=0; i< _order; ++i)
+  for (unsigned int i=0; i< _order; ++i)
     integral+=_integration_coef[i]*(*_coupled_vars[i])[_qp];
 
   return _u_old[_qp] + _coef*integral*_dt;
