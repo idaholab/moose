@@ -732,7 +732,11 @@ registerObjects(Factory & factory)
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
   registerNamedOutput(DOFMapOutput, "DOFMap");
+
+  // Currently the ICE Updater requires TBB
+  #ifdef LIBMESH_HAVE_TBB_API
   registerOutput(ICEUpdater);
+  #endif
 
   // Controls
   registerControl(RealFunctionControl);
