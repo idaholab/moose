@@ -38,3 +38,5 @@ ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
 
 test: all
 	$(call TEST_exodiff,ex14.i,out.e-s006)
+	$(call TEST_exodiff,ex14_compare_solutions_1.i,compare_solutions_1.e)
+	$(call TEST_exodiff,ex14_compare_solutions_2.i,compare_solutions_2.e)
