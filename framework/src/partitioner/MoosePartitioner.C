@@ -11,50 +11,25 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "ExampleApp.h"
-#include "Moose.h"
-#include "Factory.h"
-#include "AppFactory.h"
+
+#include "MoosePartitioner.h"
+#include "FEProblem.h"
 
 template<>
-InputParameters validParams<ExampleApp>()
+InputParameters validParams<MoosePartitioner>()
 {
-  InputParameters params = validParams<MooseApp>();
-
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
-  params.set<bool>("use_legacy_output_syntax") = false;
+  InputParameters params = validParams<MooseObject>();
+  params.registerBase("MoosePartitioner");
   return params;
 }
 
-ExampleApp::ExampleApp(InputParameters parameters) :
-    MooseApp(parameters)
-{
-  srand(processor_id());
 
-  Moose::registerObjects(_factory);
-  ExampleApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ExampleApp::associateSyntax(_syntax, _action_factory);
-}
-
-ExampleApp::~ExampleApp()
+MoosePartitioner::MoosePartitioner(const InputParameters & params) :
+    MooseObject(params),
+    Restartable(params, "Partitioners")
 {
 }
 
-void
-ExampleApp::registerObjects(Factory & /*factory*/)
-{
-}
-
-void
-ExampleApp::registerApps()
-{
-  registerApp(ExampleApp);
-}
-
-void
-ExampleApp::associateSyntax(Syntax& /*syntax*/, ActionFactory & /*action_factory*/)
+MoosePartitioner::~MoosePartitioner()
 {
 }

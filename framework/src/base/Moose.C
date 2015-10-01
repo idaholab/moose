@@ -349,6 +349,7 @@
 #include "AddMaterialAction.h"
 #include "GlobalParamsAction.h"
 #include "AdaptivityAction.h"
+#include "PartitionerAction.h"
 #include "SetupDampersAction.h"
 #include "CheckIntegrityAction.h"
 #include "SetupQuadratureAction.h"
@@ -400,6 +401,9 @@
 
 // Controls
 #include "RealFunctionControl.h"
+
+// Partitioner
+#include "LibmeshPartitioner.h"
 
 namespace Moose {
 
@@ -728,10 +732,17 @@ registerObjects(Factory & factory)
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
   registerNamedOutput(DOFMapOutput, "DOFMap");
+
+  // Currently the ICE Updater requires TBB
+  #ifdef LIBMESH_HAVE_TBB_API
   registerOutput(ICEUpdater);
+  #endif
 
   // Controls
   registerControl(RealFunctionControl);
+
+  // Partitioner
+  registerPartitioner(LibmeshPartitioner);
 
   registered = true;
 }
@@ -760,6 +771,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("determine_system_type",        Executioner,             true);
 
   registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
+  registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
   registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
 
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
@@ -804,6 +816,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_output",                   Output,                 false);
 
   registerMooseObjectTask("add_control",                  Control,                false);
+  registerMooseObjectTask("add_partitioner",              MoosePartitioner,       false);
 
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
@@ -872,6 +885,8 @@ addActionTypes(Syntax & syntax)
 "(setup_recover_file_base)"
 "(check_copy_nodal_vars)"
 "(setup_mesh)"
+"(add_partitioner)"
+"(init_mesh)"
 "(prepare_mesh)"
 "(add_mesh_modifier)"
 "(add_mortar_interface)"
@@ -957,6 +972,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
   registerAction(SetupMeshAction, "setup_mesh");
+  registerAction(SetupMeshAction, "init_mesh");
   registerAction(SetupMeshCompleteAction, "prepare_mesh");
   registerAction(AddMeshModifierAction, "add_mesh_modifier");
   registerAction(AddMortarInterfaceAction, "add_mortar_interface");
@@ -1025,6 +1041,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AdaptivityAction, "setup_adaptivity");
 #endif
 
+  registerAction(PartitionerAction, "add_partitioner");
   registerAction(AddDiracKernelAction, "add_dirac_kernel");
   registerAction(SetupDebugAction, "setup_debug");
   registerAction(SetupResidualDebugAction, "setup_residual_debug");
