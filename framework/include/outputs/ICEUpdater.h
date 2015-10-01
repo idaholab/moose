@@ -21,6 +21,9 @@
 #include "InputParameters.h"
 #include "Updater.h"
 
+// Currently the ICE Updater requires TBB
+#ifdef LIBMESH_HAVE_TBB_API
+
 // Forward declarations
 class ICEUpdater;
 
@@ -58,7 +61,7 @@ protected:
    * Reference to the ICE Updater object in charge of
    * connecting to ICE and posting update messages.
    */
-  MooseSharedPointer<Updater> iceUpdater;
+  MooseSharedPointer<Updater> _updater;
 
   /**
    * If true, set (CURLOPT_NOPROXY, "*") when calling libcurl APIs.
@@ -67,3 +70,5 @@ protected:
 };
 
 #endif
+
+#endif // LIBMESH_HAVE_TBB_API

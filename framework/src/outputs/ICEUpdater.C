@@ -18,6 +18,9 @@
 #include "PostprocessorWarehouse.h"
 #include "Postprocessor.h"
 
+// Currently the ICE Updater requires TBB
+#ifdef LIBMESH_HAVE_TBB_API
+
 template<>
 InputParameters validParams<ICEUpdater>()
 {
@@ -44,19 +47,19 @@ ICEUpdater::ICEUpdater(const InputParameters & parameters) :
   ss << "password=veryice\n";
 
   // Create the ICE Updater
-  iceUpdater = MooseSharedPointer<Updater>(new Updater(ss));
+  _updater = MooseSharedPointer<Updater>(new Updater(ss));
 
   // Pass down the _noproxy flag to the iceUpdater.
-  iceUpdater->setNoProxyFlag(_noproxy);
+  _updater->setNoProxyFlag(_noproxy);
 
   // Start the Updater.
-  iceUpdater->start();
+  _updater->start();
 }
 
 ICEUpdater::~ICEUpdater()
 {
   // Stop the ICEUpdater thread
-  iceUpdater->stop();
+  _updater->stop();
 }
 
 void ICEUpdater::initialSetup()
@@ -93,6 +96,8 @@ void ICEUpdater::outputPostprocessors()
     ss << *it << ":" << _time << ":" << value;
 
     // Post the message
-    iceUpdater->postMessage(ss.str());
+    _updater->postMessage(ss.str());
   }
 }
+
+#endif // LIBMESH_HAVE_TBB_API
