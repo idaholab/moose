@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'RadSrc.i'
+    exodiff = 'RadSrc_out.e'
+  [../]
+[]

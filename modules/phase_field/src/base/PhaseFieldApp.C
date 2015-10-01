@@ -46,6 +46,7 @@
 #include "PFFracBulkRate.h"
 #include "PFFracCoupledInterface.h"
 #include "PFFracIntVar.h"
+#include "RadiationSource.h"
 #include "SingleGrainRigidBodyMotion.h"
 #include "SoretDiffusion.h"
 #include "SplitCHMath.h"
@@ -104,6 +105,7 @@
 #include "PFMobility.h"
 #include "PFParamsPolyFreeEnergy.h"
 #include "PolynomialFreeEnergy.h"
+#include "RadiationDefectCreation.h"
 #include "StrainGradDispDerivatives.h"
 #include "SwitchingFunctionMaterial.h"
 #include "CrossTermBarrierFunctionMaterial.h"
@@ -258,6 +260,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(PFFracBulkRate);
   registerKernel(PFFracCoupledInterface);
   registerKernel(PFFracIntVar);
+  registerKernel(RadiationSource);
   registerKernel(SingleGrainRigidBodyMotion);
   registerKernel(SoretDiffusion);
   registerKernel(SplitCHMath);
@@ -311,6 +314,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFFracBulkRateMaterial);
   registerMaterial(PFParamsPolyFreeEnergy);
   registerMaterial(PolynomialFreeEnergy);
+  registerMaterial(RadiationDefectCreation);
   registerMaterial(StrainGradDispDerivatives);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(CrossTermBarrierFunctionMaterial);
