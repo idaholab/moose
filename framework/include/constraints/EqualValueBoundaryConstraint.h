@@ -33,15 +33,22 @@ protected:
   /**
    * Computes the residual for the current slave node
    */
-  virtual Real computeQpResidual(Moose::ConstraintType type);
+  virtual Real computeQpResidual(Moose::ConstraintType type, NumericVector<Number> & residual);
 
   /**
    * Computes the jacobian for the constraint
    */
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type, SparseMatrix<Number> & jacobian);
 
+  /**
+   * Obtains the master node id and stores std::vector<dof_id_type>
+   */
+
+  unsigned int _master_node_id;
   short _slave_boundary_id;
   Real _penalty;
+  // obtain the formulation used to calculated residuals and jacobian
+  std::string _formulation;
 };
 
 #endif /* EQUALVALUEBOUNDARYCONSTRAINT_H */

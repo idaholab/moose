@@ -1136,6 +1136,19 @@ Assembly::cacheResidualNeighbor()
   }
 }
 
+void
+Assembly::cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type> & dof_index)
+{
+  // Add the residual value and dof_index  to cache_residual_values and cached_residual_rows respectively.
+  // This is used by NodalConstraint.C to cache the residual calculated for master and slave node.
+  Moose::KernelType type = Moose::KT_NONTIME;
+  std::vector<Real> & cached_residual_values = _cached_residual_values[type];
+  std::vector<dof_id_type> & cached_residual_rows = _cached_residual_rows[type];
+  _temp_dof_indices = dof_index;
+  _tmp_Re = res;
+  cached_residual_values.push_back(_tmp_Re(0));
+  cached_residual_rows.push_back(_temp_dof_indices[0]);
+}
 
 void
 Assembly::addCachedResidual(NumericVector<Number> & residual, Moose::KernelType type)

@@ -349,6 +349,7 @@ public:
    * @param type Whether the contribution should go to the Time or Non-Time residual
    */
   void cacheResidualContribution(dof_id_type dof, Real value, Moose::KernelType type);
+  void cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type> & dof_index);
 
   /**
    * Takes the values that are currently in _sub_Ke and appends them to the cached values.

@@ -19,14 +19,12 @@ template<>
 InputParameters validParams<NodalConstraint>()
 {
   InputParameters params = validParams<Constraint>();
-  params.addRequiredParam<unsigned int>("master", "The ID of the master node");
   return params;
 }
 
 NodalConstraint::NodalConstraint(const InputParameters & parameters) :
     Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, true, true),
-    _master_node_id(getParam<unsigned int>("master")),
     _master_node(_assembly.node()),
     _slave_node(_assembly.nodeNeighbor()),
     _u_slave(_var.nodalSlnNeighbor()),
@@ -38,37 +36,47 @@ NodalConstraint::~NodalConstraint()
 {
 }
 
-unsigned int
-NodalConstraint::getMasterNodeId() const
-{
-  return _master_node_id;
-}
-
 void
 NodalConstraint::computeResidual(NumericVector<Number> & residual)
 {
-  Real scaling_factor = _var.scalingFactor();
   _qp = 0;
-  // master node
-  dof_id_type & dof_idx = _var.nodalDofIndex();
-  residual.add(dof_idx, scaling_factor * computeQpResidual(Moose::Master));
-  // slave node
-  dof_id_type & dof_idx_neighbor = _var.nodalDofIndexNeighbor();
-  residual.add(dof_idx_neighbor, scaling_factor * computeQpResidual(Moose::Slave));
+
+  // obtain the slave and master residual
+  DenseVector<Number> re(1);
+  re(0) = computeQpResidual(Moose::Master, residual)*_var.scalingFactor();
+  DenseVector<Number> neighbor_re(1);
+  neighbor_re(0) = computeQpResidual(Moose::Slave, residual)*_var.scalingFactor();
+
+  // obtain slave and master dof_index
+  std::vector<dof_id_type> slavedof(1,_var.nodalDofIndexNeighbor());
+  std::vector<dof_id_type> masterdof(1,_var.nodalDofIndex());
+
+  // Add the slave and master residual to the cache along with the corresponding dof indices
+  _assembly.cacheResidualNodes(re, masterdof);
+  _assembly.cacheResidualNodes(neighbor_re, slavedof);
 }
 
 void
 NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
 {
+  // Calculate Jacobian enteries and cache those entries along with the row and column index
   _qp = 0;
-  dof_id_type & dof_idx = _var.nodalDofIndex();
-  dof_id_type & dof_idx_neighbor = _var.nodalDofIndexNeighbor();
-
-  Real scaling_factor = _var.scalingFactor();
-  jacobian.add(dof_idx, dof_idx, scaling_factor * computeQpJacobian(Moose::MasterMaster));
-  jacobian.add(dof_idx, dof_idx_neighbor, scaling_factor * computeQpJacobian(Moose::MasterSlave));
-  jacobian.add(dof_idx_neighbor, dof_idx_neighbor, scaling_factor * computeQpJacobian(Moose::SlaveSlave));
-  jacobian.add(dof_idx_neighbor, dof_idx, scaling_factor * computeQpJacobian(Moose::SlaveMaster));
+  DenseMatrix<Number> _Kee(1,1);
+ // _Kee.resize(1,1);
+  std::vector<dof_id_type> slavedof(1,_var.nodalDofIndexNeighbor());
+  std::vector<dof_id_type> masterdof(1,_var.nodalDofIndex());
+   //Master-Master
+  _Kee(0,0)= computeQpJacobian(Moose::MasterMaster, jacobian);
+  _assembly.cacheJacobianBlock(_Kee, masterdof, masterdof, _var.scalingFactor());
+   //Master-Slave
+  _Kee(0,0) = computeQpJacobian(Moose::MasterSlave, jacobian);
+  _assembly.cacheJacobianBlock(_Kee, masterdof, slavedof, _var.scalingFactor());
+   //Slave-Master
+  _Kee(0,0) = computeQpJacobian(Moose::SlaveMaster, jacobian);
+  _assembly.cacheJacobianBlock(_Kee, slavedof, masterdof, _var.scalingFactor());
+   //Slave-Slave
+  _Kee(0,0) = computeQpJacobian(Moose::SlaveSlave, jacobian);
+  _assembly.cacheJacobianBlock(_Kee, slavedof, slavedof, _var.scalingFactor());
 }
 
 void

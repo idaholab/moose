@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<EqualValueNodalConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
+  params.addRequiredParam<unsigned int>("master", "The ID of the master node");
   params.addRequiredParam<unsigned int>("slave", "The ID of the slave node");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
@@ -28,6 +29,7 @@ EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & par
     _penalty(getParam<Real>("penalty"))
 {
   _connected_nodes.push_back(getParam<unsigned int>("slave"));
+  _master_node_vector.push_back(getParam<unsigned int>("master"));
 }
 
 EqualValueNodalConstraint::~EqualValueNodalConstraint()
@@ -35,7 +37,7 @@ EqualValueNodalConstraint::~EqualValueNodalConstraint()
 }
 
 Real
-EqualValueNodalConstraint::computeQpResidual(Moose::ConstraintType type)
+EqualValueNodalConstraint::computeQpResidual(Moose::ConstraintType type, NumericVector<Number> & residual)
 {
   switch (type)
   {
@@ -50,7 +52,7 @@ EqualValueNodalConstraint::computeQpResidual(Moose::ConstraintType type)
 }
 
 Real
-EqualValueNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
+EqualValueNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type, SparseMatrix<Number> & jacobian)
 {
   switch (type)
   {

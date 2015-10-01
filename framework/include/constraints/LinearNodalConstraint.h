@@ -12,27 +12,46 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EQUALVALUENODALCONSTRAINT_H
-#define EQUALVALUENODALCONSTRAINT_H
+#ifndef LINEARNODALCONSTRAINT_H
+#define LINEARNODALCONSTRAINT_H
 
 #include "NodalConstraint.h"
 
-class EqualValueNodalConstraint;
+class LinearNodalConstraint;
 
 template<>
-InputParameters validParams<EqualValueNodalConstraint>();
+InputParameters validParams<LinearNodalConstraint>();
 
-class EqualValueNodalConstraint : public NodalConstraint
+class LinearNodalConstraint : public NodalConstraint
 {
 public:
-  EqualValueNodalConstraint(const InputParameters & parameters);
-  virtual ~EqualValueNodalConstraint();
+  LinearNodalConstraint(const InputParameters & parameters);
+  virtual ~LinearNodalConstraint();
 
 protected:
+
+  /**
+   * Computes the residual for the current slave node
+   */
   virtual Real computeQpResidual(Moose::ConstraintType type, NumericVector<Number> & residual);
+
+  /**
+   * Computes the jacobian for the constraint
+   */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type, SparseMatrix<Number> & jacobian);
 
+  // Holds the master node ids
+  std::vector<unsigned int> _master_node_ids;
+  // Holds the list of slave node ids
+  std::vector<unsigned int> _slave_node_ids;
+  // Holds the slave node set or side set
+  std::string _slave_node_set_id;
+  // Penalty if constrained is not satisfied
   Real _penalty;
+  // vector of weights corresponding to master nodes for the linear combination
+  std::vector<Real> _weights;
+  // Specifies the formulation used to calculate residuals and jacobian
+  std::string _formulation;
 };
 
-#endif /* EQUALVALUENODALCONSTRAINT_H */
+#endif /* LINEARNODALCONSTRAINT_H */

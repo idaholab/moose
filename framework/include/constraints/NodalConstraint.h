@@ -34,12 +34,12 @@ public:
   virtual ~NodalConstraint();
 
   /**
-   * Get the node ID of the master
-   * @return node ID
+   * Get the list of master nodes
+   * @return list of master nodes IDs
    */
-  unsigned int getMasterNodeId() const;
+  std::vector<dof_id_type> &  getMasterNodeId() { return _master_node_vector; }
 
-  /**
+   /**
    * Get the list of connected slave nodes
    * @return list of slave node IDs
    */
@@ -60,19 +60,17 @@ public:
    */
   virtual void computeJacobian(SparseMatrix<Number> & jacobian);
 
+//  SparseMatrix<Number> * _jacobian;
 protected:
   /**
    * This is the virtual that derived classes should override for computing the residual on neighboring element.
    */
-  virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
+  virtual Real computeQpResidual(Moose::ConstraintType type, NumericVector<Number> & residual) = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
    */
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
-
-  /// master node id
-  unsigned int _master_node_id;
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type, SparseMatrix<Number> & jacobian) = 0;
 
   /// Holds the reference to the master node
   const Node * & _master_node;
@@ -82,7 +80,8 @@ protected:
   VariableValue & _u_slave;
   /// node IDs connected to the master node (slave nodes)
   std::vector<dof_id_type> _connected_nodes;
-
+  /// node IDs of the master node
+  std::vector<dof_id_type> _master_node_vector;
   /// Holds the current solution at the current quadrature point
   VariableValue & _u_master;
 };
