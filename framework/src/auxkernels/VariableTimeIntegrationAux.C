@@ -18,12 +18,13 @@ VariableTimeIntegrationAux::VariableTimeIntegrationAux(const InputParameters & p
   // Note: initial value should be set by an initial condition.
   Real constant = 1.0/3.0;
 
-  switch(_order) {
+  switch (_order)
+  {
 
     case 1:
       _integration_coef.push_back(1.0);
       _coupled_vars.push_back(&coupledValue("variable_to_integrate"));
-     break;
+      break;
     case 2:
       _integration_coef.push_back(0.5);
       _integration_coef.push_back(0.5);
@@ -54,30 +55,28 @@ VariableTimeIntegrationAux::computeValue()
   {
     if(_dt != _dt_old)
     {
-      /*!
-       * time step is uneven, so the standard formula will not work. Use a different set of coefficients here.
-       */
-       Real term1 = -(_dt*_dt - _dt_old*_dt - 2.0*_dt_old*_dt_old)*(*_coupled_vars[2])[_qp]/(6.0*_dt_old);
-       Real term2 = (_dt*_dt*_dt + 3.0*_dt*_dt*_dt_old + 3.0*_dt_old*_dt_old*_dt +_dt_old*_dt_old*_dt_old)*(*_coupled_vars[1])[_qp]/(6.0*_dt*_dt_old);
-       Real term3 = (2.0*_dt*_dt + _dt*_dt_old - _dt_old*_dt_old)*(*_coupled_vars[0])[_qp]/(6.0*_dt);
-       integral = term1 + term2 + term3;
+       /*!
+        * time step is uneven, so the standard formula will not work. Use a different set of coefficients here.
+        */
+      Real term1 = -(_dt*_dt - _dt_old*_dt - 2.0*_dt_old*_dt_old)*(*_coupled_vars[2])[_qp]/(6.0*_dt_old);
+      Real term2 = (_dt*_dt*_dt + 3.0*_dt*_dt*_dt_old + 3.0*_dt_old*_dt_old*_dt +_dt_old*_dt_old*_dt_old)*(*_coupled_vars[1])[_qp]/(6.0*_dt*_dt_old);
+      Real term3 = (2.0*_dt*_dt + _dt*_dt_old - _dt_old*_dt_old)*(*_coupled_vars[0])[_qp]/(6.0*_dt);
+      integral = term1 + term2 + term3;
 
-       return _u_older[_qp] + _coef*integral;
+      return _u_older[_qp] + _coef*integral;
 
-     } else {
+     }
 
      for(unsigned int i=0; i< _order; ++i)
        integral+=_integration_coef[i]*(*_coupled_vars[i])[_qp];
 
      return _u_older[_qp] + _coef*integral*_dt;
-    }
   }
 
   for(unsigned int i=0; i< _order; ++i)
     integral+=_integration_coef[i]*(*_coupled_vars[i])[_qp];
 
- return _u_old[_qp] + _coef*integral*_dt;
+  return _u_old[_qp] + _coef*integral*_dt;
 
-//  return _u_old[_qp] +0.5*_coef* (_coupled_var[_qp] + _coupled_var_old[_qp]) * _dt;
 }
 
