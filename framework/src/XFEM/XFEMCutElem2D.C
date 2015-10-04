@@ -287,7 +287,7 @@ XFEMCutElem2D::solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &
       wss[i].resize(4);
       wss[i][0] = _g_points[i](0);
       wss[i][1] = _g_points[i](1);
-      wss[i][2] = _g_points[i](2);
+      wss[i][2] = 1.0 - _g_points[i](0) - _g_points[i](1);
       wss[i][3] = _g_weights[i];
     }
   }else

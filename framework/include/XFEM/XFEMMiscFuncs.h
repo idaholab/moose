@@ -135,15 +135,15 @@ void static stdQuadr2D(unsigned int nen, unsigned int iord, std::vector<std::vec
       sg2[0][0] = 1.0/3.0;
       sg2[0][1] = 1.0/3.0;
       sg2[0][2] = 1.0/3.0;
-      sg2[0][3] = 1.0;
+      sg2[0][3] = 0.5;
     }
     else if (iord == 2) // three-point Gauss
     {
       sg2.resize(3);
       for (unsigned int i = 0; i < 3; ++i) sg2[i].resize(4);
-      sg2[0][0] = 2.0/3.0; sg2[0][1] = 1.0/6.0; sg2[0][2] = 1.0/6.0; sg2[0][3] = 1.0/3.0;
-      sg2[1][0] = 1.0/6.0; sg2[1][1] = 2.0/3.0; sg2[1][2] = 1.0/6.0; sg2[1][3] = 1.0/3.0;
-      sg2[2][0] = 1.0/6.0; sg2[2][1] = 1.0/6.0; sg2[2][2] = 2.0/3.0; sg2[2][3] = 1.0/3.0;
+      sg2[0][0] = 2.0/3.0; sg2[0][1] = 1.0/6.0; sg2[0][2] = 1.0/6.0; sg2[0][3] = 1.0/6.0;
+      sg2[1][0] = 1.0/6.0; sg2[1][1] = 2.0/3.0; sg2[1][2] = 1.0/6.0; sg2[1][3] = 1.0/6.0;
+      sg2[2][0] = 1.0/6.0; sg2[2][1] = 1.0/6.0; sg2[2][2] = 2.0/3.0; sg2[2][3] = 1.0/6.0;
     }
     else if (iord == 3) // four-point Gauss
     {
@@ -292,7 +292,7 @@ void static shapeFunc2D(unsigned int nen, std::vector<Real> &ss, std::vector<Poi
     Real xsjr = 1.0;
     if (xsj != 0.0)
         xsjr = 1.0/xsj;
-    xsj  *= 0.5;
+    // xsj  *= 0.5; // we do not have this 0.5 here because in stdQuad2D the sum of all weights in trig is 0.5
     shp[0][2] = ss[0];
     shp[1][2] = ss[1];
     shp[2][2] = ss[2];
