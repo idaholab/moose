@@ -27,7 +27,6 @@ class XFEMAction: public Action
 {
 public:
   XFEMAction(InputParameters params);
-  XFEMAction(const std::string & deprecated_name, InputParameters params); // DEPRECATED CONSTRUCTOR
 
   virtual void act();
 protected:

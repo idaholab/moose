@@ -31,7 +31,6 @@ public:
    * constructor.
    */
   XFEMCutPlaneAux(const InputParameters & parameters);
-  XFEMCutPlaneAux(const std::string & deprecated_name, InputParameters parameters);  // DEPRECATED CONSTRUCTOR
 
   virtual ~XFEMCutPlaneAux() {}
 

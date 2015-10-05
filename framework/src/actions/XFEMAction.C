@@ -237,13 +237,3 @@ XFEMAction::act()
     _problem->addAuxKernel("XFEMCutPlaneAux", "xfem_cut2_normal_z", params);
   }
 }
-
-// DEPRECATED CONSTRUCTOR
-XFEMAction::XFEMAction(const std::string & deprecated_name, InputParameters params) :
-    Action(deprecated_name, params),
-    _xfem_cut_type(getParam<std::string>("cut_type")),
-    _xfem_qrule(getParam<std::string>("qrule")),
-    _xfem_cut_plane(getParam<bool>("cut_plane"))
-{
-}
-

@@ -73,7 +73,6 @@
 #include "TrussMaterial.h"
 #include "RateDepSmearCrackModel.h"
 #include "RateDepSmearIsoCrackModel.h"
-#include "CutPlaneAction.h"
 
 template<>
 InputParameters validParams<SolidMechanicsApp>()
@@ -200,9 +199,6 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_vector_postprocessor");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_material");
 
-  syntax.registerActionSyntax("CutPlaneAction", "CutPlanes","add_aux_variable");
-  syntax.registerActionSyntax("CutPlaneAction", "CutPlanes","add_aux_kernel");
-
   registerAction(DisplacementAboutAxisAction, "add_bc");
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
@@ -213,21 +209,4 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerAction(DomainIntegralAction, "add_aux_kernel");
   registerAction(DomainIntegralAction, "add_postprocessor");
   registerAction(DomainIntegralAction, "add_material");
-
-  registerAction(CutPlaneAction, "add_aux_variable");
-  registerAction(CutPlaneAction, "add_aux_kernel");
-}
-
-
-// DEPRECATED CONSTRUCTOR
-SolidMechanicsApp::SolidMechanicsApp(const std::string & deprecated_name, InputParameters parameters) :
-    MooseApp(deprecated_name, parameters)
-{
-  srand(processor_id());
-
-  Moose::registerObjects(_factory);
-  SolidMechanicsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
 }

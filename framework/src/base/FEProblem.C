@@ -685,10 +685,9 @@ FEProblem::get_xfem_weights(const Elem * elem, THREAD_ID tid)
 {
   _xfem_JxW[elem->id()].clear();
   const Elem * undisplaced_elem  = NULL;
-  if(this->getDisplacedProblem()!=NULL)
+  if(_displaced_problem != NULL)
   {
-    DisplacedProblem * & displaced_problem = this->getDisplacedProblem();
-    undisplaced_elem = displaced_problem->refMesh().elem(elem->id());
+    undisplaced_elem = _displaced_problem->refMesh().elem(elem->id());
   } 
   else
     undisplaced_elem = elem;
@@ -3651,7 +3650,7 @@ FEProblem::addDisplacedProblem(MooseSharedPointer<DisplacedProblem> displaced_pr
 {
   _displaced_mesh = &displaced_problem->mesh();
   _displaced_problem = displaced_problem;
-  _xfem.setSecondMesh(&_displaced_mesh->getMesh()),
+  _xfem.setSecondMesh(&_displaced_mesh->getMesh());
 }
 
 void

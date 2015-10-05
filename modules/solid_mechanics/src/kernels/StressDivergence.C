@@ -58,7 +58,6 @@ StressDivergence::computeQpResidual()
       + (_alpha * _zeta/_dt)*_stress_older[_qp].rowDot(_component,_grad_test[_i][_qp]);
   else
     return  _stress[_qp].rowDot(_component, _grad_test[_i][_qp]);
-  return r;
 }
 
 Real
@@ -68,7 +67,6 @@ StressDivergence::computeQpJacobian()
     return _Jacobian_mult[_qp].stiffness(_component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]) * (1 + _alpha + _zeta/_dt);
   else
     return _Jacobian_mult[_qp].stiffness(_component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
-  return jac;
 }
 
 Real

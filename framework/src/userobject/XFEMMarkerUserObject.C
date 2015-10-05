@@ -167,23 +167,3 @@ XFEMMarkerUserObject::doesElementCrack(RealVectorValue &direction)
   direction(1) = 1.0;
   return true;
 }
-
-// DEPRECATED CONSTRUCTOR
-XFEMMarkerUserObject::XFEMMarkerUserObject(const std::string & deprecated_name, InputParameters parameters)
-  :ElementUserObject(deprecated_name, parameters),
-  _mesh(_subproblem.mesh()),
-  _secondary_cracks(getParam<bool>("secondary_cracks"))
-{
-  FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
-  if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblem in XFEMMarkerUserObject");
-  _xfem = fe_problem->get_xfem();
-  if (isNodal())
-    mooseError("XFEMMarkerUserObject can only be run on an element variable");
-
-  if (isParamValid("initiate_on_boundary"))
-  {
-    std::vector<BoundaryName> initiation_boundary_names = getParam<std::vector<BoundaryName> >("initiate_on_boundary");
-    _initiation_boundary_ids = _mesh.getBoundaryIDs(initiation_boundary_names,true);
-  }
-}

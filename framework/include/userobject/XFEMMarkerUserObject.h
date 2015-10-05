@@ -31,7 +31,6 @@ public:
    * constructor.
    */
   XFEMMarkerUserObject(const InputParameters & parameters);
-  XFEMMarkerUserObject(const std::string & name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   virtual ~XFEMMarkerUserObject() {}
 
