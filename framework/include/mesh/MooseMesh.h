@@ -22,6 +22,7 @@
 #include "MooseTypes.h"
 #include "Restartable.h"
 #include "MooseEnum.h"
+#include "MoosePartitioner.h"
 
 // libMesh
 #include "libmesh/mesh.h"
@@ -685,7 +686,7 @@ public:
    * Setter and getter for custom partitioner
    */
   Partitioner * getCustomPartitioner() const;
-  void setCustomPartitioner(Partitioner * custom_partitioner);
+  void setCustomPartitioner(Partitioner * partitioner);
 
   /**
    * Setter and getter for _custom_partitioner_requested

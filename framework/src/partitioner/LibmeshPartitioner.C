@@ -75,10 +75,67 @@ LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params) :
 
 LibmeshPartitioner::~LibmeshPartitioner()
 {
+  delete _partitioner;
 }
 
-Partitioner *
-LibmeshPartitioner::getPartitioner()
+UniquePtr<Partitioner>
+LibmeshPartitioner::clone() const
 {
-  return _partitioner;
+  switch (_partitioner_name)
+  {
+  case -2: // metis
+    return UniquePtr<Partitioner>(new MetisPartitioner);
+    break;
+  case -1: // parmetis
+    return UniquePtr<Partitioner>(new ParmetisPartitioner);
+    break;
+
+  case 0: // linear
+    return UniquePtr<Partitioner>(new LinearPartitioner);
+    break;
+  case 1: // centroid
+  {
+    if (!isParamValid("centroid_partitioner_direction"))
+      mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+
+    MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
+
+    if (direction == "x")
+      return UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
+    else if (direction == "y")
+      return UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
+    else if (direction == "z")
+      return UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
+    else if (direction == "radial")
+      return UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+    break;
+  }
+  case 2: // hilbert_sfc
+    return UniquePtr<Partitioner>(new HilbertSFCPartitioner);
+    break;
+  case 3: // morton_sfc
+    return UniquePtr<Partitioner>(new MortonSFCPartitioner);
+    break;
+  }
+  // this cannot happen but I need to trick the compiler into
+  // believing me
+  mooseError("Error in LibmeshPartitioner: Supplied partitioner option causes error in clone()");
+  return UniquePtr<Partitioner>(new MetisPartitioner);
+}
+
+void
+LibmeshPartitioner::partition(MeshBase &mesh, const unsigned int n)
+{
+  _partitioner->partition(mesh, n);
+}
+
+void
+LibmeshPartitioner::partition(MeshBase &mesh)
+{
+  _partitioner->partition(mesh);
+}
+
+void
+LibmeshPartitioner::_do_partition(MeshBase & /*mesh*/, const unsigned int /*n*/)
+{
 }

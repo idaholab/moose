@@ -99,6 +99,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _mesh(NULL),
     _partitioner_name(getParam<MooseEnum>("partitioner")),
     _partitioner_overridden(false),
+    _custom_partitioner(NULL),
     _custom_partitioner_requested(false),
     _uniform_refine_level(0),
     _is_changed(false),
@@ -167,7 +168,6 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _mesh(other_mesh.getMesh().clone().release()),
     _partitioner_name(other_mesh._partitioner_name),
     _partitioner_overridden(other_mesh._partitioner_overridden),
-    _custom_partitioner(other_mesh.getCustomPartitioner()),
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _is_changed(false),
     _is_nemesis(false),
@@ -211,6 +211,11 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
 
   for (std::vector<BoundaryID>::const_iterator it = node_boundaries.begin(); it != node_boundaries.end(); ++it)
     boundary_info.nodeset_name(*it) = other_boundary_info.get_nodeset_name(*it);
+
+  if (other_mesh.getCustomPartitioner())
+    setCustomPartitioner(other_mesh.getCustomPartitioner());
+  else
+    _custom_partitioner = NULL;
 }
 
 MooseMesh::~MooseMesh()
@@ -1704,10 +1709,10 @@ MooseMesh::init()
   {
     // Check of partitioner is supplied (not allowed if custom partitioner is used)
     if (!parameters().isParamSetByAddParam("partitioner"))
-      mooseError("If partitioner block is provded, partitioner keyword cannot be used!");
+      mooseError("If partitioner block is provided, partitioner keyword cannot be used!");
     // Set custom partitioner
     if (!_custom_partitioner)
-      mooseError("If using partitioner type custom you must explicitly provide a partitioner in your input file!");
+      mooseError("Custom partitioner requested but not set!");
     getMesh().partitioner().reset(_custom_partitioner);
   }
   else
@@ -2188,11 +2193,10 @@ MooseMesh::getCustomPartitioner() const
   return _custom_partitioner;
 }
 
-
 void
-MooseMesh::setCustomPartitioner(Partitioner * custom_partitioner)
+MooseMesh::setCustomPartitioner(Partitioner * partitioner)
 {
-  _custom_partitioner = custom_partitioner;
+  _custom_partitioner = partitioner->clone().release();
 }
 
 bool
