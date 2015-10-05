@@ -1,0 +1,7 @@
+[Tests]
+  [./time_integration_aux]
+    type = 'Exodiff'
+    input = 'time_integration.i'
+    exodiff = 'time_integration_out.e'
+  [../]
+[]
