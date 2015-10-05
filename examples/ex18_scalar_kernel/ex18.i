@@ -130,6 +130,5 @@
 
 [Outputs]
   file_base = out
-  output_initial = true
   exodus = true
 []

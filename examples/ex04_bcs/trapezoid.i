@@ -76,6 +76,5 @@
 []
 
 [Outputs]
-  file_base = out_trapezoid
   exodus = true
 []

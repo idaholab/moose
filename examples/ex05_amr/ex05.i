@@ -60,8 +60,6 @@
 
 [Executioner]
   type = Steady
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   l_tol = 1e-3
@@ -89,6 +87,5 @@
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

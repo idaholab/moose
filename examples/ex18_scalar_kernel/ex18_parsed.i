@@ -146,15 +146,10 @@
   start_time = 0
   dt = 0.01
   num_steps = 10
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 []
 
 [Outputs]
   file_base = out
-  output_initial = true
   exodus = true
 []
