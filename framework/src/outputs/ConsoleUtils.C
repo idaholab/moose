@@ -262,15 +262,13 @@ std::string outputLegacyInformation(MooseApp & app, FEProblem & problem)
   std::stringstream oss;
   oss << std::left;
 
-  if (problem.legacyUoAuxComputation() || problem.legacyUoInitialization() || app.useLegacyOutputSyntax())
+  if (problem.legacyUoAuxComputation() || problem.legacyUoInitialization())
   {
     oss << COLOR_RED << "LEGACY MODES ENABLED:" << COLOR_DEFAULT << '\n';
     if (problem.legacyUoAuxComputation())
       oss << COLOR_RED << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed." << COLOR_DEFAULT << '\n';
     if (problem.legacyUoInitialization())
       oss << COLOR_RED << "  Computing all UserObjects during initial setup." << COLOR_DEFAULT << '\n';
-    if (app.useLegacyOutputSyntax())
-      oss << COLOR_RED << "  Using legacy output syntax." << COLOR_DEFAULT << '\n';
   }
 
   return oss.str();

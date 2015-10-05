@@ -117,7 +117,7 @@
     input = 'console_print_toggles.i'
     expect_out = '\s*0\sNonlinear.*?\n\s*1\sNonlinear'
     valgrind = NONE
-    cli_args = "Outputs/output_on='timestep_begin linear' Outputs/console/output_on='nonlinear final failed timestep_end'"
+    cli_args = "Outputs/execute_on='timestep_begin linear' Outputs/console/execute_on='nonlinear final failed timestep_end'"
   [../]
   [./print_perf_log]
     # Tests that flag is working to show performace log from the top level

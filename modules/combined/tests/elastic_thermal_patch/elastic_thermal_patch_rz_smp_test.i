@@ -284,7 +284,7 @@
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
-    output_nonlinear = true
+    execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100
   [../]
 [] # Outputs

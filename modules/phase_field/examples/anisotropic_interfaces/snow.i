@@ -138,7 +138,6 @@
 []
 
 [Outputs]
-   output_initial = true
    interval = 10
    exodus = true
    [./console]
