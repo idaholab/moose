@@ -23,4 +23,11 @@
     input = 'hide_output_via_variables_block.i'
     exodiff = 'hide_output_via_variables_block_out.e'
   [../]
+
+  [./show_single_vars]
+    # Tests that show/hide works when only a single variable for each type exists
+    type = 'Exodiff'
+    input = show_single_vars.i
+    exodiff = show_single_vars_out.e
+  [../]
 []

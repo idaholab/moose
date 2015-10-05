@@ -260,7 +260,7 @@ Console::initialSetup()
   if (getParam<bool>("setup_log_early"))
     write(Moose::setup_perf_log.get_perf_info());
 
-  // If the user adds "final or failed" to the execute on, append this to the postprocessors, scalars, etc., but only
+  // If the user adds "final" to the execute on, append this to the postprocessors, scalars, etc., but only
   // if the parameter (e.g., postprocessor_execute_on) has not been modified by the user.
   if (_execute_on.contains("final"))
   {

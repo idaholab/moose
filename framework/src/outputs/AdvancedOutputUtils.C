@@ -43,7 +43,9 @@ OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & execute_on, const In
 }
 
 // Constructor of OutputDataWarehouse; initializes the OutputData structures for 'variable' based output types
-OutputDataWarehouse::OutputDataWarehouse() : OutputMapWrapper<OutputData>()
+OutputDataWarehouse::OutputDataWarehouse() :
+    OutputMapWrapper<OutputData>(),
+    _has_show_list(false)
 {
   _map["nodal"] = OutputData();
   _map["elemental"] = OutputData();
