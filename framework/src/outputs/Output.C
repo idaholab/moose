@@ -137,6 +137,12 @@ Output::Output(const InputParameters & parameters) :
     _execute_on.clear();
     _execute_on = getParam<MultiMooseEnum>("output_on");
 
+    if (isParamValid("additional_output_on"))
+    {
+    MultiMooseEnum add = getParam<MultiMooseEnum>("additional_output_on");
+    for (MooseEnumIterator it = add.begin(); it != add.end(); ++it)
+      _execute_on.push_back(*it);
+    }
     if (getParam<bool>("output_initial"))
       _execute_on.push_back("initial");
     if (getParam<bool>("output_timestep_end"))
@@ -149,13 +155,6 @@ Output::Output(const InputParameters & parameters) :
       _execute_on.erase("timestep_end");
     if (!getParam<bool>("output_intermediate"))
       _execute_on.erase("timestep_end");
-
-    if (isParamValid("additional_output_on"))
-    {
-    MultiMooseEnum add = getParam<MultiMooseEnum>("additional_output_on");
-    for (MooseEnumIterator it = add.begin(); it != add.end(); ++it)
-      _execute_on.push_back(*it);
-    }
   }
 
   // Apply the additional output flags
@@ -165,7 +164,6 @@ Output::Output(const InputParameters & parameters) :
     for (MooseEnumIterator it = add.begin(); it != add.end(); ++it)
       _execute_on.push_back(*it);
   }
-
 }
 
 void
