@@ -1,3 +1,16 @@
+#
+# This test covers the usage of the VariableTimeIntegrationAux kernel. Here we test
+# three different time integration schemes for variable time accumulation.
+# midpoint, trapezoidal, and simpsons rule.
+# For this test we use a manufactured solution and we compare the trapezoid and simpsons rule
+# which must be exact for this time integration.
+#
+# The set up problem is
+#
+#  d^2 u/dx^2 + d^2 u/dy^2 + du/dt = Q
+#
+# solution: u = t*(x*x+y*y)
+#
 [Mesh]
   type = GeneratedMesh
   dim = 2
