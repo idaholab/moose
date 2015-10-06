@@ -78,6 +78,10 @@ InputParameters validParams<CommonOutputAction>()
   params.addDeprecatedParam<MultiMooseEnum>("additional_output_on", Output::getExecuteOptions(),
                                             "This list of output flags is added to the existing flags (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment",
                                             "Replaced with 'additional_execute_on' to be consistent with other systems in MOOSE");
+  params.addDeprecatedParam<bool>("output_initial", "Enable initial condition output.", "Replace by adding 'initial' to the 'execute_on' parameter.");
+  params.addDeprecatedParam<bool>("output_timestep_end", "Enable timestep_end output.", "Replace by adding 'timestep_end' to the 'execute_on' parameter.");
+  params.addDeprecatedParam<bool>("output_final", "Enable final condition output.", "Replace by adding 'final' to the 'execute_on' parameter.");
+  params.addDeprecatedParam<bool>("output_intermediate", "Enable timestep_end output.", "Replace by adding 'timestep_end' to the 'execute_on' parameter.");
 
   // Return object
   return params;

@@ -155,6 +155,12 @@ Console::Console(const InputParameters & parameters) :
     _setup_log = true;
   }
 
+  // Append the common 'execute_on' to the setting for this object
+  // This is unique to the Console object, all other objects inherit from the common options
+  const MultiMooseEnum & common_execute_on = common_action->getParam<MultiMooseEnum>("execute_on");
+  for (MooseEnumIterator it = common_execute_on.begin(); it != common_execute_on.end(); ++it)
+    _execute_on.push_back(*it);
+
   // If --timing was used from the command-line, do nothing, all logs are enabled
   if (!_timing)
   {
@@ -254,6 +260,17 @@ Console::initialSetup()
   if (getParam<bool>("setup_log_early"))
     write(Moose::setup_perf_log.get_perf_info());
 
+  // If the user adds "final" to the execute on, append this to the postprocessors, scalars, etc., but only
+  // if the parameter (e.g., postprocessor_execute_on) has not been modified by the user.
+  if (_execute_on.contains("final"))
+  {
+    if (!_pars.paramSetByUser("postprocessor_execute_on"))
+      _advanced_execute_on["postprocessors"].push_back("final");
+    if (!_pars.paramSetByUser("scalars_execute_on"))
+      _advanced_execute_on["scalars"].push_back("final");
+    if (!_pars.paramSetByUser("vector_postprocessor_execute_on"))
+      _advanced_execute_on["vector_postprocessors"].push_back("final");
+  }
 }
 
 std::string
@@ -279,7 +296,7 @@ Console::output(const ExecFlagType & type)
     outputInput();
 
   // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
-  if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL)))
+  if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL)) || (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL)))
     writeTimestepInformation();
 
   // Print Non-linear Residual (control with "execute_on")

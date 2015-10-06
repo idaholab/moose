@@ -178,13 +178,12 @@
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   dt = 0.01
-  num_steps = 10
+  num_steps = 1
 []
 
 [Outputs]
-  file_base = out
   show = 'x u nodal elemental'
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
     scalar_as_nodal = true

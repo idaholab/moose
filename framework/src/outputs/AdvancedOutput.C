@@ -519,6 +519,11 @@ AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, con
   // Storage for user-supplied input that is unknown as a variable or postprocessor
   std::set<std::string> unknown;
 
+  // If a show hide/list exists, let the data warehouse know about it. This allows for the proper
+  // handling of output lists (see initOutputList)
+  if (show.size() > 0)
+    _execute_data.setHasShowList(true);
+
   // Populate the show lists
   for (std::vector<VariableName>::const_iterator it = show.begin(); it != show.end(); ++it)
   {
@@ -588,8 +593,8 @@ AdvancedOutput<T>::initOutputList(OutputData & data)
   T::_app.getOutputWarehouse().buildInterfaceHideVariables(T::name(), interface_hide);
   hide.insert(interface_hide.begin(), interface_hide.end());
 
-  // Both show and hide are empty (show all available)
-  if (show.empty() && hide.empty())
+  // Both show and hide are empty and no show/hide settings were provided (show all available)
+  if (show.empty() && hide.empty() && !_execute_data.hasShowList())
     output = avail;
 
   // Only hide is empty (show all the variables listed)

@@ -156,6 +156,30 @@ public:
    * Populate the OutputData structures for all output types that are 'variable' based
    */
   OutputDataWarehouse();
+
+  /**
+   * False when the show lists for all variables is empty.
+   *
+   * When false everything should output.
+   * @see AdvancedOutput::initOutputList
+   */
+  bool hasShowList(){ return _has_show_list; }
+
+
+  /**
+   * Set the show list bool.
+   *
+   * This is set to true when the user supplies a show list.
+   * @see AdvancedOutput::initShowHideLists
+   */
+  void setHasShowList(bool value) { _has_show_list = value; }
+
+
+private:
+
+  // True when the input file contains a show/hide list
+  bool _has_show_list;
+
 };
 
 
