@@ -23,6 +23,11 @@ class VariableTimeIntegrationAux;
 template<>
 InputParameters validParams<VariableTimeIntegrationAux>();
 
+/**
+ * An AuxKernel that can be used to integrate a field variable in time
+ * using a variety of different integration methods.  The result is
+ * stored in another field variable.
+ */
 class VariableTimeIntegrationAux :  public AuxKernel
 {
 public:
@@ -36,7 +41,6 @@ protected:
   Real _coef;
   unsigned int _order;
   std::vector<Real> _integration_coef;
-
 };
 
 #endif // VARIABLETIMEINTEGRATIONAUX_H

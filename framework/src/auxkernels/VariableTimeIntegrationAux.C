@@ -20,7 +20,7 @@ InputParameters validParams<VariableTimeIntegrationAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("variable_to_integrate", "The variable to be integrated");
   params.addParam<Real>("coefficient", 1.0, "A simple coefficient");
-  params.addParam<unsigned int>("order",2," the order of global truncation error, midpoint(1), trapazoidal(2),  simpson 1/3 rule (3)");
+  params.addParam<unsigned int>("order", 2, "The order of global truncation error: midpoint=1, trapazoidal=2, Simpson=3");
   return params;
 }
 
@@ -29,10 +29,8 @@ VariableTimeIntegrationAux::VariableTimeIntegrationAux(const InputParameters & p
     _coef(getParam<Real>("coefficient")),
     _order(getParam<unsigned int>("order"))
 {
-
   switch (_order)
   {
-
     case 1:
       _integration_coef.push_back(1.0);
       _coupled_vars.push_back(&coupledValue("variable_to_integrate"));
@@ -65,7 +63,6 @@ VariableTimeIntegrationAux::computeValue()
     return _u_older[_qp] + _coef*integral;
 
   return _u_old[_qp] + _coef*integral;
-
 }
 
 Real
@@ -73,13 +70,15 @@ VariableTimeIntegrationAux::getIntegralValue()
 {
   Real integral_value = 0.0;
 
-  for (unsigned int i=0; i< _order; ++i)
-    integral_value += _integration_coef[i]*(*_coupled_vars[i])[_qp]*_dt;
+  for (unsigned int i = 0; i < _order; ++i)
+    integral_value += _integration_coef[i] * (*_coupled_vars[i])[_qp] * _dt;
 
-  /*!
-   * time step is uneven, so the standard formula will not work. Use a different set of coefficients here.
-   * J. McNAMEE, "A PROGRAM TO INTEGRATE A FUNCTION TABULATED AT UNEQUAL INTERVALS," Internation Journal for Numerical
-   * Methods in Engineering, Vol. 17, 217-279. (1981).
+  /**
+   * Subsequent timesteps may be unequal, so the standard Simpson rule
+   * cannot be used. Use a different set of coefficients here.
+   * J. McNAMEE, "A PROGRAM TO INTEGRATE A FUNCTION TABULATED AT
+   * UNEQUAL INTERVALS," Internation Journal for Numerical Methods in
+   * Engineering, Vol. 17, 217-279. (1981).
    */
   if (_order == 3 && _dt != _dt_old)
   {
@@ -95,5 +94,5 @@ VariableTimeIntegrationAux::getIntegralValue()
     integral_value = term1 + term2*term3;
   }
 
-  return (integral_value);
+  return integral_value;
 }
