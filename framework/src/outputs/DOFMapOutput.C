@@ -165,7 +165,13 @@ DOFMapOutput::output(const ExecFlagType & /*type*/)
         {
           const std::vector<KernelBase *> & active_kernels = kernels.activeVar(var);
           for (unsigned i = 0; i<active_kernels.size(); ++i)
-            oss << (i>0 ? ", " : "") << "{\"name\": \""<< active_kernels[i]->name() << "\", \"type\": \"" << demangle(typeid(*active_kernels[i]).name()) << "\"}";
+          {
+            KernelBase & kb = *active_kernels[i];
+            oss << (i>0 ? ", " : "")
+                << "{\"name\": \"" << kb.name()
+                << "\", \"type\": \"" << demangle(typeid(kb).name())
+                << "\"}";
+          }
         }
         oss << "], \"dofs\": [";
 
