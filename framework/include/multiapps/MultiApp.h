@@ -275,14 +275,11 @@ protected:
   /// The type of application to build
   std::string _app_type;
 
-  /// The positions as they came in from the input file
-  std::vector<Real> _positions_vec;
-
   /// The positions of all of the apps
   std::vector<Point> _positions;
 
   /// The input file for each app's simulation
-  std::vector<std::string> _input_files;
+  std::vector<FileName> _input_files;
 
   /// The output file basename for each multiapp
   std::string _output_base;

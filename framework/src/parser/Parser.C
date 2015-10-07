@@ -734,6 +734,9 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 
       // Moose String-derived vectors
       dynamicCastAndExtractVector(/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(FileName              , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(FileNameNoExtension   , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(MeshFileName          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(VariableName          , it->second, full_name, it->first, in_global, global_params_block);
