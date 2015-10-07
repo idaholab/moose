@@ -20,3 +20,9 @@ TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const InputParameters
     _neighbor_material_data(*parameters.get<MaterialData *>("_neighbor_material_data"))
 {
 }
+
+TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids) :
+    MaterialPropertyInterface(parameters, block_ids),
+    _neighbor_material_data(*parameters.get<MaterialData *>("_neighbor_material_data"))
+{
+}
