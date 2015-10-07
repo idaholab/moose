@@ -175,7 +175,12 @@ MultiApp::fillPositions()
     mooseError("Both 'positions' and 'positions_file' cannot be specified simultaneously in MultiApp " << name());
 
   if (isParamValid("positions"))
+  {
     _positions = getParam<std::vector<Point> >("positions");
+
+    if (_positions.size() < _input_files.size())
+      mooseError("Not enough positions for the number of input files provided in MultiApp " << name());
+  }
   else if (isParamValid("positions_file"))
   {
     std::vector<FileName> positions_files = getParam<std::vector<FileName> >("positions_file");
