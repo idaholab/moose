@@ -16,8 +16,8 @@
     x1 = 0.0
     y1 = 0.0
     radius = 6.0
-    invalue = 0.9
-    outvalue = 0.1
+    invalue = 1
+    outvalue = 0
     int_width = 3.0
     variable = op
   [../]
@@ -47,7 +47,7 @@
     type = DerivativeParsedMaterial
     block = 0
     f_name  = L
-    function = 'if(op<-1, 1, if(op>1, 1, 1 - 0.5*op^2))'
+    function = 'if(op<0, 0.01, if(op>1, 0.01, 1*op^2*(1-op)^2+0.01))'
     args = 'op'
     outputs = exodus
     derivative_order = 1
@@ -83,4 +83,5 @@
 
 [Outputs]
   exodus = true
+  print_linear_residuals = false
 []
