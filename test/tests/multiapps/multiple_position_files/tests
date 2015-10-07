@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'multiple_position_files.i'
+    exodiff = 'multiple_position_files_out.e multiple_position_files_out_multi0.e multiple_position_files_out_multi1.e multiple_position_files_out_multi2.e multiple_position_files_out_multi3.e'
+  [../]
+[]
