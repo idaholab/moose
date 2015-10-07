@@ -738,8 +738,11 @@ Transient::setupTimeIntegrator()
 std::string
 Transient::getTimeStepperName()
 {
-  if (_time_stepper.get())
-    return demangle(typeid(*_time_stepper).name());
+  if (_time_stepper)
+  {
+    TimeStepper & ts = *_time_stepper;
+    return demangle(typeid(ts).name());
+  }
   else
     return std::string();
 }
