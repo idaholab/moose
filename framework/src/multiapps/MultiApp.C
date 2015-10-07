@@ -57,9 +57,9 @@ InputParameters validParams<MultiApp>()
   params.addRequiredParam<MooseEnum>("app_type", app_types_options, "The type of application to build (applications not registered can be loaded with dynamic libraries.");
   params.addParam<std::string>("library_path", "", "Path to search for dynamic libraries (please avoid committing absolute paths in addition to MOOSE_LIBRARY_PATH)");
   params.addParam<std::vector<Point> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.  Either this must be supplied or 'positions_file'");
-  params.addParam<FileName>("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  Either this must be supplied or 'positions'");
+  params.addParam<std::vector<FileName> >("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  Either this must be supplied or 'positions'");
 
-  params.addRequiredParam<std::vector<std::string> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.");
+  params.addRequiredParam<std::vector<FileName> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.  When using 'positions_from_file' it is also admissable to provide one input_file per file.");
   params.addParam<Real>("bounding_box_inflation", 0.01, "Relative amount to 'inflate' the bounding box of this MultiApp.");
 
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
@@ -92,7 +92,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
     Restartable(parameters, "MultiApps"),
     _fe_problem(getParam<FEProblem *>("_fe_problem")),
     _app_type(getParam<MooseEnum>("app_type")),
-    _input_files(getParam<std::vector<std::string> >("input_files")),
+    _input_files(getParam<std::vector<FileName> >("input_files")),
     _total_num_apps(0),
     _my_num_apps(0),
     _first_local_app(0),
@@ -119,6 +119,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
   fillPositions();
 
   _total_num_apps = _positions.size();
+
   mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
 }
 
@@ -138,9 +139,6 @@ MultiApp::~MultiApp()
 void
 MultiApp::initialSetup()
 {
-  // Fill in the _positions vector
-  fillPositions();
-
   if (_move_apps.size() != _move_positions.size())
     mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp " << name());
 
@@ -173,35 +171,67 @@ MultiApp::initialSetup()
 void
 MultiApp::fillPositions()
 {
+  if (isParamValid("positions") && isParamValid("positions_file"))
+    mooseError("Both 'positions' and 'positions_file' cannot be specified simultaneously in MultiApp " << name());
+
   if (isParamValid("positions"))
+  {
     _positions = getParam<std::vector<Point> >("positions");
+
+    if (_positions.size() < _input_files.size())
+      mooseError("Not enough positions for the number of input files provided in MultiApp " << name());
+  }
   else if (isParamValid("positions_file"))
   {
-    // Read the file on the root processor then broadcast it
-    if (processor_id() == 0)
+    std::vector<FileName> positions_files = getParam<std::vector<FileName> >("positions_file");
+    std::vector<FileName> input_files = getParam<std::vector<FileName> >("input_files");
+
+    if (input_files.size() != 1 && positions_files.size() != input_files.size())
+      mooseError("Number of input_files for MultiApp " << name() << " must either be only one or match the number of positions_file files");
+
+    // Clear out the _input_files because we're going to rebuild it
+    if (input_files.size() != 1)
+      _input_files.clear();
+
+    for (unsigned int p_file_it = 0; p_file_it < positions_files.size(); p_file_it++)
     {
-      std::string positions_file = getParam<FileName>("positions_file");
-      MooseUtils::checkFileReadable(positions_file);
+      std::string positions_file = positions_files[p_file_it];
 
-      std::ifstream is(positions_file.c_str());
-      std::istream_iterator<Real> begin(is), end;
-      _positions_vec.insert(_positions_vec.begin(), begin, end);
+      std::vector<Real> positions_vec;
+
+      // Read the file on the root processor then broadcast it
+      if (processor_id() == 0)
+      {
+        MooseUtils::checkFileReadable(positions_file);
+
+        std::ifstream is(positions_file.c_str());
+        std::istream_iterator<Real> begin(is), end;
+        positions_vec.insert(positions_vec.begin(), begin, end);
+
+        if (positions_vec.size() % LIBMESH_DIM != 0)
+          mooseError("Number of entries in 'positions_file' " << positions_file << " must be divisible by " << LIBMESH_DIM << " in MultiApp " << name());
+      }
+
+      // Bradcast the vector to all processors
+      std::size_t num_positions = positions_vec.size();
+      _communicator.broadcast(num_positions);
+      positions_vec.resize(num_positions);
+      _communicator.broadcast(positions_vec);
+
+      for (unsigned int i = 0; i < positions_vec.size(); i += LIBMESH_DIM)
+      {
+        if (input_files.size() != 1)
+          _input_files.push_back(input_files[p_file_it]);
+
+        Point position;
+
+        // This is here so it will theoretically work with LIBMESH_DIM=1 or 2. That is completely untested!
+        for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+          position(j) = positions_vec[i + j];
+
+        _positions.push_back(position);
+      }
     }
-    unsigned int num_values = _positions_vec.size();
-
-    _communicator.broadcast(num_values);
-
-    _positions_vec.resize(num_values);
-
-    _communicator.broadcast(_positions_vec);
-
-    mooseAssert(num_values % LIBMESH_DIM == 0, "Wrong number of entries in 'positions'");
-
-    _positions.reserve(num_values / LIBMESH_DIM);
-
-    for (unsigned int i = 0; i < num_values; i += 3)
-      _positions.push_back(Point(_positions_vec[i], _positions_vec[i+1], _positions_vec[i+2]));
-
   }
   else
     mooseError("Must supply either 'positions' or 'positions_file' for MultiApp " << name());

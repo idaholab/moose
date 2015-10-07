@@ -23,7 +23,7 @@ InputParameters validParams<CHPFCRFFSplitVariablesAction>()
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to the L variables");
   params.addRequiredParam<unsigned int>("num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
-  params.addRequiredParam<std::vector<std::string> >("sub_filenames", "This is the filename of the sub.i file");
+  params.addRequiredParam<std::vector<FileName> >("sub_filenames", "This is the filename of the sub.i file");
   params.addRequiredParam<AuxVariableName>("n_name", "Name of atomic density variable");
 
   return params;
@@ -33,7 +33,7 @@ CHPFCRFFSplitVariablesAction::CHPFCRFFSplitVariablesAction(const InputParameters
     Action(params),
     _num_L(getParam<unsigned int>("num_L")),
     _L_name_base(getParam<std::string>("L_name_base")),
-    _sub_filenames(getParam<std::vector<std::string> >("sub_filenames")),
+    _sub_filenames(getParam<std::vector<FileName> >("sub_filenames")),
     _n_name(getParam<AuxVariableName>("n_name"))
 {
 }
@@ -48,7 +48,7 @@ CHPFCRFFSplitVariablesAction::act()
   InputParameters poly_params = _factory.getValidParams("TransientMultiApp");
   poly_params.set<MooseEnum>("app_type") = "PhaseFieldApp";
   poly_params.set<MultiMooseEnum>("execute_on") = execute_options;
-  poly_params.set<std::vector<std::string> >("input_files") = _sub_filenames;
+  poly_params.set<std::vector<FileName> >("input_files") = _sub_filenames;
   poly_params.set<unsigned int>("max_procs_per_app") = 1;
 
   Point one(0.0, 0.0, 0.0);
@@ -146,4 +146,3 @@ CHPFCRFFSplitVariablesAction::act()
   }
 
 }
-

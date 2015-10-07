@@ -1,0 +1,42 @@
+[Tests]
+  [./input_file]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'The following required'
+  [../]
+
+  [./positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Must supply either \'positions\' or \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i"'
+  [../]
+
+  [./not_enough_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions="0 1 0"'
+  [../]
+
+  [./not_enough_position_files]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of input_files for MultiApp'
+    cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions_file="position1"'
+  [../]
+
+  [./both_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions="0 1 0" MultiApps/multi/positions_file="position1"'
+  [../]
+
+  [./bad_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of entries in \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions"'
+  [../]
+[]
