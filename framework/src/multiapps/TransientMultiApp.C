@@ -139,237 +139,246 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   target_time += _app.getGlobalTimeOffset();
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+  bool return_value = true;
 
-  int rank;
-  int ierr;
-  ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
-
-  for (unsigned int i=0; i<_my_num_apps; i++)
+  // Make sure we swap back the communicator regardless of how this routine is exited
+  try
   {
+    int rank;
+    int ierr;
+    ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
 
-    FEProblem * problem = appProblem(_first_local_app + i);
-
-    Transient * ex = _transient_executioners[i];
-
-    // The App might have a different local time from the rest of the problem
-    Real app_time_offset = _apps[i]->getGlobalTimeOffset();
-
-    if ((ex->getTime() + app_time_offset) + 2e-14 >= target_time) // Maybe this MultiApp was already solved
-      continue;
-
-    if (_sub_cycling)
+    for (unsigned int i=0; i<_my_num_apps; i++)
     {
-      Real time_old = ex->getTime() + app_time_offset;
 
-      if (_interpolate_transfers)
+      FEProblem * problem = appProblem(_first_local_app + i);
+
+      Transient * ex = _transient_executioners[i];
+
+      // The App might have a different local time from the rest of the problem
+      Real app_time_offset = _apps[i]->getGlobalTimeOffset();
+
+      if ((ex->getTime() + app_time_offset) + 2e-14 >= target_time) // Maybe this MultiApp was already solved
+        continue;
+
+      if (_sub_cycling)
       {
-        AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
-        System & libmesh_aux_system = aux_system.system();
-
-        NumericVector<Number> & solution = *libmesh_aux_system.solution;
-        NumericVector<Number> & transfer_old = libmesh_aux_system.get_vector("transfer_old");
-
-        solution.close();
-
-        // Save off the current auxiliary solution
-        transfer_old = solution;
-
-        transfer_old.close();
-
-        // Snag all of the local dof indices for all of these variables
-        AllLocalDofIndicesThread aldit(libmesh_aux_system, _transferred_vars);
-        ConstElemRange & elem_range = *problem->mesh().getActiveLocalElementRange();
-        Threads::parallel_reduce(elem_range, aldit);
-
-        _transferred_dofs = aldit._all_dof_indices;
-      }
-
-      // Disable/enable output for sub cycling
-      problem->allowOutput(_output_sub_cycles); // disables all outputs, including console
-      problem->allowOutput<Console>(_print_sub_cycles); // re-enables Console to print, if desired
-
-      ex->setTargetTime(target_time-app_time_offset);
-
-//      unsigned int failures = 0;
-
-      bool at_steady = false;
-
-      // Now do all of the solves we need
-      while (true)
-      {
-        if (_first != true)
-          ex->incrementStepOrReject();
-        _first = false;
-
-        if (!(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time))
-          break;
-
-        ex->computeDT();
+        Real time_old = ex->getTime() + app_time_offset;
 
         if (_interpolate_transfers)
         {
-          // See what time this executioner is going to go to.
-          Real future_time = ex->getTime() + app_time_offset + ex->getDT();
-
-          // How far along we are towards the target time:
-          Real step_percent = (future_time - time_old) / (target_time - time_old);
-
-          Real one_minus_step_percent = 1.0 - step_percent;
-
-          // Do the interpolation for each variable that was transferred to
-          FEProblem * problem = appProblem(_first_local_app + i);
           AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
           System & libmesh_aux_system = aux_system.system();
 
           NumericVector<Number> & solution = *libmesh_aux_system.solution;
-          NumericVector<Number> & transfer = libmesh_aux_system.get_vector("transfer");
           NumericVector<Number> & transfer_old = libmesh_aux_system.get_vector("transfer_old");
 
-          solution.close(); // Just to be sure
-          transfer.close();
+          solution.close();
+
+          // Save off the current auxiliary solution
+          transfer_old = solution;
+
           transfer_old.close();
 
-          std::set<dof_id_type>::iterator it  = _transferred_dofs.begin();
-          std::set<dof_id_type>::iterator end = _transferred_dofs.end();
+          // Snag all of the local dof indices for all of these variables
+          AllLocalDofIndicesThread aldit(libmesh_aux_system, _transferred_vars);
+          ConstElemRange & elem_range = *problem->mesh().getActiveLocalElementRange();
+          Threads::parallel_reduce(elem_range, aldit);
 
-          for (; it != end; ++it)
+          _transferred_dofs = aldit._all_dof_indices;
+        }
+
+        // Disable/enable output for sub cycling
+        problem->allowOutput(_output_sub_cycles); // disables all outputs, including console
+        problem->allowOutput<Console>(_print_sub_cycles); // re-enables Console to print, if desired
+
+        ex->setTargetTime(target_time-app_time_offset);
+
+//      unsigned int failures = 0;
+
+        bool at_steady = false;
+
+        // Now do all of the solves we need
+        while (true)
+        {
+          if (_first != true)
+            ex->incrementStepOrReject();
+          _first = false;
+
+          if (!(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time))
+            break;
+
+          ex->computeDT();
+
+          if (_interpolate_transfers)
           {
-            dof_id_type dof = *it;
-            solution.set(dof, (transfer_old(dof) * one_minus_step_percent) + (transfer(dof) * step_percent));
+            // See what time this executioner is going to go to.
+            Real future_time = ex->getTime() + app_time_offset + ex->getDT();
+
+            // How far along we are towards the target time:
+            Real step_percent = (future_time - time_old) / (target_time - time_old);
+
+            Real one_minus_step_percent = 1.0 - step_percent;
+
+            // Do the interpolation for each variable that was transferred to
+            FEProblem * problem = appProblem(_first_local_app + i);
+            AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
+            System & libmesh_aux_system = aux_system.system();
+
+            NumericVector<Number> & solution = *libmesh_aux_system.solution;
+            NumericVector<Number> & transfer = libmesh_aux_system.get_vector("transfer");
+            NumericVector<Number> & transfer_old = libmesh_aux_system.get_vector("transfer_old");
+
+            solution.close(); // Just to be sure
+            transfer.close();
+            transfer_old.close();
+
+            std::set<dof_id_type>::iterator it  = _transferred_dofs.begin();
+            std::set<dof_id_type>::iterator end = _transferred_dofs.end();
+
+            for (; it != end; ++it)
+            {
+              dof_id_type dof = *it;
+              solution.set(dof, (transfer_old(dof) * one_minus_step_percent) + (transfer(dof) * step_percent));
 //            solution.set(dof, transfer_old(dof));
 //            solution.set(dof, transfer(dof));
 //            solution.set(dof, 1);
+            }
+
+            solution.close();
           }
 
-          solution.close();
-        }
+          ex->takeStep();
 
-        ex->takeStep();
+          bool converged = ex->lastSolveConverged();
 
-        bool converged = ex->lastSolveConverged();
-
-        if (!converged)
-        {
-          mooseWarning("While sub_cycling " << name() << _first_local_app+i << " failed to converge!" << std::endl);
-          _failures++;
-
-          if (_failures > _max_failures)
+          if (!converged)
           {
-            mooseWarning("While sub_cycling " << name() << _first_local_app+i << " REALLY failed!" << std::endl);
-            return false;
+            mooseWarning("While sub_cycling " << name() << _first_local_app+i << " failed to converge!" << std::endl);
+            _failures++;
+
+            if (_failures > _max_failures)
+            {
+              std::stringstream oss;
+              oss << "While sub_cycling " << name() << _first_local_app << i << " REALLY failed!";
+              throw MultiAppSolveFailure(oss.str());
+            }
           }
+
+          Real solution_change_norm = ex->getSolutionChangeNorm();
+
+          if (_detect_steady_state)
+            _console << "Solution change norm: " << solution_change_norm << std::endl;
+
+          if (converged && _detect_steady_state && solution_change_norm < _steady_state_tol)
+          {
+            _console << "Detected Steady State!  Fast-forwarding to " << target_time << std::endl;
+
+            at_steady = true;
+
+            // Indicate that the next output call (occurs in ex->endStep()) should output, regardless of intervals etc...
+            problem->forceOutput();
+
+            // Clean up the end
+            ex->endStep(target_time-app_time_offset);
+          }
+          else
+            ex->endStep();
         }
 
-        Real solution_change_norm = ex->getSolutionChangeNorm();
+        // If we were looking for a steady state, but didn't reach one, we still need to output one more time, regardless of interval
+        if (!at_steady)
+          problem->outputStep(EXEC_FORCED);
 
-        if (_detect_steady_state)
-          _console << "Solution change norm: " << solution_change_norm << std::endl;
-
-        if (converged && _detect_steady_state && solution_change_norm < _steady_state_tol)
-        {
-          _console << "Detected Steady State!  Fast-forwarding to " << target_time << std::endl;
-
-          at_steady = true;
-
-          // Indicate that the next output call (occurs in ex->endStep()) should output, regardless of intervals etc...
-          problem->forceOutput();
-
-          // Clean up the end
-          ex->endStep(target_time-app_time_offset);
-        }
-        else
-          ex->endStep();
-      }
-
-      // If we were looking for a steady state, but didn't reach one, we still need to output one more time, regardless of interval
-      if (!at_steady)
-        problem->outputStep(EXEC_FORCED);
-
-    } // sub_cycling
-    else if (_tolerate_failure)
-    {
-      ex->takeStep(dt);
-      ex->endStep(target_time-app_time_offset);
-    }
-    else
-    {
-      _console << "Solving Normal Step!" << std::endl;
-      if (auto_advance)
-        if (_first != true)
-          ex->incrementStepOrReject();
-
-      if (auto_advance)
-        problem->allowOutput(true);
-
-      ex->takeStep(dt);
-
-      if (auto_advance)
+      } // sub_cycling
+      else if (_tolerate_failure)
       {
-        ex->endStep();
+        ex->takeStep(dt);
+        ex->endStep(target_time-app_time_offset);
+      }
+      else
+      {
+        _console << "Solving Normal Step!" << std::endl;
+        if (auto_advance)
+          if (_first != true)
+            ex->incrementStepOrReject();
 
-        if (!ex->lastSolveConverged())
+        if (auto_advance)
+          problem->allowOutput(true);
+
+        ex->takeStep(dt);
+
+        if (auto_advance)
         {
-          mooseWarning(name() << _first_local_app+i << " failed to converge!" << std::endl);
+          ex->endStep();
 
-          if (_catch_up)
+          if (!ex->lastSolveConverged())
           {
-            _console << "Starting Catch Up!" << std::endl;
+            mooseWarning(name() << _first_local_app+i << " failed to converge!" << std::endl);
 
-            bool caught_up = false;
-
-            unsigned int catch_up_step = 0;
-
-            Real catch_up_dt = dt/2;
-
-            while (!caught_up && catch_up_step < _max_catch_up_steps)
+            if (_catch_up)
             {
-              Moose::err << "Solving " << name() << "catch up step " << catch_up_step << std::endl;
-              ex->incrementStepOrReject();
+              _console << "Starting Catch Up!" << std::endl;
 
-              ex->computeDT();
-              ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
+              bool caught_up = false;
 
-              if (ex->lastSolveConverged())
+              unsigned int catch_up_step = 0;
+
+              Real catch_up_dt = dt/2;
+
+              while (!caught_up && catch_up_step < _max_catch_up_steps)
               {
-                if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
+                Moose::err << "Solving " << name() << "catch up step " << catch_up_step << std::endl;
+                ex->incrementStepOrReject();
+
+                ex->computeDT();
+                ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
+
+                if (ex->lastSolveConverged())
                 {
-                  problem->outputStep(EXEC_FORCED);
-                  caught_up = true;
+                  if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
+                  {
+                    problem->outputStep(EXEC_FORCED);
+                    caught_up = true;
+                  }
                 }
+                else
+                  catch_up_dt /= 2.0;
+
+                ex->endStep();
+
+                catch_up_step++;
               }
-              else
-                catch_up_dt /= 2.0;
 
-              ex->endStep();
-
-              catch_up_step++;
-            }
-
-            if (!caught_up)
-            {
-              mooseWarning(name() << " Failed to catch up!\n");
-              return false;
+              if (!caught_up)
+                throw MultiAppSolveFailure(name() + " Failed to catch up!\n");
             }
           }
         }
       }
+
+      // Re-enable all output (it may of been disabled by sub-cycling)
+      problem->allowOutput(true);
+
     }
 
-    // Re-enable all output (it may of been disabled by sub-cycling)
-    problem->allowOutput(true);
+    _first = false;
+
+    _console << "Successfully Solved MultiApp " << name() << "." << std::endl;
 
   }
-
-  _first = false;
+  catch (MultiAppSolveFailure & e)
+  {
+    mooseWarning(e.what());
+    _console << "Failed to Solve MultiApp " << name() << ", attempting to recover." << std::endl;
+    return_value = false;
+  }
 
   // Swap back
   Moose::swapLibMeshComm(swapped);
-
   _transferred_vars.clear();
 
-  _console << "Finished Solving MultiApp " << name() << std::endl;
-
-  return true;
+  return return_value;
 }
 
 void
