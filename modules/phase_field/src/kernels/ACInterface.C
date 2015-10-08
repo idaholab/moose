@@ -68,7 +68,8 @@ ACInterface::ACInterface(const InputParameters & parameters) :
 void
 ACInterface::initialSetup()
 {
-  validateNonlinearCoupling<Real>("mob_name");
+  validateCoupling<Real>("mob_name");
+  validateCoupling<Real>("kappa_name");
 }
 
 RealGradient
@@ -92,7 +93,7 @@ ACInterface::gradKappa()
 RealGradient
 ACInterface::nablaLKappaPsi()
 {
-  // sum is the product rule gradient \f$ \nable (L\kappa\psi) \f$
+  // sum is the product rule gradient \f$ \nabla (L\kappa\psi) \f$
   RealGradient sum = _kappa[_qp] * _L[_qp] * _grad_test[_i][_qp];
 
   if (_variable_L)
