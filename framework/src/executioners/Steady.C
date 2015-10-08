@@ -64,6 +64,7 @@ Steady::init()
 
   checkIntegrity();
   _problem.initialSetup();
+  _problem.initialExecute();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
   _problem.outputStep(EXEC_INITIAL);
@@ -135,4 +136,3 @@ Steady::checkIntegrity()
   if (_problem.getNonlinearSystem().containsTimeKernel())
     mooseError("You have specified time kernels in your steady state simulation");
 }
-

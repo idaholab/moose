@@ -242,6 +242,7 @@ public:
 
 
   virtual void initialSetup();
+  virtual void initialExecute();
   virtual void timestepSetup();
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);

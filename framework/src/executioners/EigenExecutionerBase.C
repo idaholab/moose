@@ -89,6 +89,7 @@ EigenExecutionerBase::init()
     _eigen_sys.initSystemSolution(EigenSystem::EIGEN, 1.0);
   }
   _problem.initialSetup();
+  _problem.initialExecute();
   _eigen_sys.initSystemSolutionOld(EigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated
@@ -564,4 +565,3 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   _problem.es().parameters.set<Real> ("linear solver tolerance") = tol2;
   _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = tol3;
 }
-

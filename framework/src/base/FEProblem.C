@@ -529,7 +529,11 @@ void FEProblem::initialSetup()
   _from_multi_app_transfers(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
   _from_multi_app_transfers(EXEC_INITIAL)[0].initialSetup();
   _from_multi_app_transfers(EXEC_CUSTOM)[0].initialSetup();
+}
 
+void
+FEProblem::initialExecute()
+{
   if (!_app.isRecovering())
   {
     Moose::setup_perf_log.push("Initial execTransfers()","Setup");
@@ -577,6 +581,7 @@ void FEProblem::initialSetup()
     _resurrector->restartRestartableData();
 
   // Scalar variables need to reinited for the initial conditions to be available for output
+  unsigned int n_threads = libMesh::n_threads();
   for (unsigned int tid = 0; tid < n_threads; tid++)
     reinitScalars(tid);
 
