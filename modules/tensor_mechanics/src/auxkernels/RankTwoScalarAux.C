@@ -12,16 +12,16 @@ InputParameters validParams<RankTwoScalarAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addClassDescription("Compute a scalar property of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor", "The rank two material tensor name");
-  MooseEnum scalar_options("VonMisesStress EquivalentPlasticStrain Hydrostatic L2norm");
+  MooseEnum scalar_options("VonMisesStress EquivalentPlasticStrain Hydrostatic L2norm MaxPrincipal MidPrincipal MinPrincipal");
   params.addParam<MooseEnum>("scalar_type", scalar_options, "Type of scalar output");
 
   return params;
 }
 
 RankTwoScalarAux::RankTwoScalarAux(const InputParameters & parameters) :
-  AuxKernel(parameters),
-  _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-  _scalar_type(getParam<MooseEnum>("scalar_type"))
+    AuxKernel(parameters),
+    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
+    _scalar_type(getParam<MooseEnum>("scalar_type"))
 {
 }
 
@@ -47,9 +47,46 @@ RankTwoScalarAux::computeValue()
    case 3:
      val = _tensor[_qp].L2norm();
      break;
+   case 4:
+   case 5:
+   case 6:
+     val = calcEigenValues();
+     break;
    default:
-     mooseError("RankTwoScalarAux Error: Pass valid scalar type - VonMisesStress, EquivalentPlasticStrain, Hydrostatic, L2norm");
+     mooseError("RankTwoScalarAux Error: Pass valid scalar type - VonMisesStress, EquivalentPlasticStrain, Hydrostatic, L2norm MaxPrincipal MidPrincipal MinPrincipal");
   }
   return val;
 }
 
+Real
+RankTwoScalarAux::calcEigenValues()
+{
+  std::vector<Real> eigval(LIBMESH_DIM);
+  Real val = 0.0;
+  unsigned int max_index = 2;
+  unsigned int mid_index = 1;
+  unsigned int min_index = 0;
+
+  if (LIBMESH_DIM == 2)
+    max_index = 1;
+
+  _tensor[_qp].symmetricEigenvalues(eigval);
+
+  switch (_scalar_type)
+  {
+   case 4:
+     val = eigval[max_index];
+     break;
+   case 5:
+     if (LIBMESH_DIM == 2)
+       mooseError("RankTwoScalarAux Error: No Mid Principal value when LIBMESH_DIM is 2");
+     val = eigval[mid_index];
+     break;
+   case 6:
+     val = eigval[min_index];
+     break;
+   default:
+     mooseError("RankTwoScalarAux Error: Pass valid scalar type - VonMisesStress, EquivalentPlasticStrain, Hydrostatic, L2norm MaxPrincipal MidPrincipal MinPrincipal");
+  }
+  return val;
+}
