@@ -1,7 +1,18 @@
 [Tests]
-  [./test]
+  [./test_failure]
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e master_out_sub0.e'
+  [../]
+
+  [./test_failure_max_procs]
+    type = 'RunApp'
+    input = 'failure_with_max_procs_set.i'
+
+    # This test is designed to make sure MOOSE doesn't hang when
+    # sub apps fail due to communicators in a bad state
+    max_time = 60
+    min_parallel = 2
+    prereq = test_failure
   [../]
 []
