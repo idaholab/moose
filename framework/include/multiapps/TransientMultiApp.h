@@ -19,6 +19,8 @@
 #include "Transient.h"
 #include "TransientInterface.h"
 
+#include <exception>
+
 class TransientMultiApp;
 
 template<>
@@ -127,5 +129,28 @@ private:
   /// Flag for toggling console output on sub cycles
   bool _print_sub_cycles;
 };
+
+/**
+ * Utility class for catching solve failure errors so that MOOSE
+ * can recover state before continuing.
+ */
+class MultiAppSolveFailure : public std::runtime_error
+{
+public:
+  MultiAppSolveFailure(const std::string &error) throw() :
+      runtime_error(error)
+  {
+  }
+
+  MultiAppSolveFailure(const MultiAppSolveFailure & e) throw() :
+      runtime_error(e)
+  {
+  }
+
+  ~MultiAppSolveFailure() throw()
+  {
+  }
+};
+
 
 #endif // TRANSIENTMULTIAPP_H
