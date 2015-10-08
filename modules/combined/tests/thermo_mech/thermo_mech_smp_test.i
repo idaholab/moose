@@ -134,7 +134,7 @@
   file_base = out_smp
   [./exodus]
     type = Exodus
-    output_nonlinear = true
+    execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100
   [../]
 []

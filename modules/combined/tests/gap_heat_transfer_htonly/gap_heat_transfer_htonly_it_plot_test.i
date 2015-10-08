@@ -158,7 +158,7 @@
   file_base = out_it_plot
   [./exodus]
     type = Exodus
-    output_nonlinear = true
+    execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100
   [../]
 []

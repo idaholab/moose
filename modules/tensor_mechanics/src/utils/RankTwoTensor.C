@@ -399,6 +399,17 @@ RankTwoTensor::operator*(const TypeTensor<Real> & b) const
   return result;
 }
 
+bool
+RankTwoTensor::operator==(const RankTwoTensor &a) const
+{
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      if (!MooseUtils::absoluteFuzzyEqual((*this)(i,j), a(i,j)))
+        return false;
+
+  return true;
+}
+
 Real
 RankTwoTensor::doubleContraction(const RankTwoTensor & b) const
 {

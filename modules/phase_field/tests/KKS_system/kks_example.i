@@ -225,7 +225,5 @@
   [./oversampling]
     type = Exodus
     refinements = 3
-    output_initial = true
-    oversample = true
   [../]
 []

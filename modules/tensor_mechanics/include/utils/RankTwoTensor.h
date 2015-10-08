@@ -190,6 +190,9 @@ public:
   /// Defines multiplication with a TypeTensor<Real>
   RankTwoTensor operator* (const TypeTensor<Real> & a) const;
 
+  /// Defines logical equality with another RankTwoTensor
+  bool operator== (const RankTwoTensor & a) const;
+
   /// returns _vals_ij * a_ij (sum on i, j)
   Real doubleContraction(const RankTwoTensor & a) const;
 

@@ -183,14 +183,7 @@
 []
 
 [Outputs]
-  output_initial = true
-  interval = 1
   exodus = true
   csv = true
   gnuplot = true
-  [./console]
-    type = Console
-    output_linear = true
-  [../]
 []
-
