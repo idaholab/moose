@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef LIBMESH_HAVE_DTK
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 #ifndef MULTIAPPDTKUSEROBJECTTRANSFER_H
 #define MULTIAPPDTKUSEROBJECTTRANSFER_H
@@ -89,4 +89,4 @@ protected:
 
 #endif /* MULTIAPPDTKUSEROBJECTTRANSFER_H */
 
-#endif //LIBMESH_HAVE_DTK
+#endif //LIBMESH_TRILINOS_HAVE_DTK

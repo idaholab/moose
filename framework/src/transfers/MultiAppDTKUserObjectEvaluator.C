@@ -14,7 +14,7 @@
 
 #include "libmesh/libmesh_config.h"
 
-#ifdef LIBMESH_HAVE_DTK
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 #include "MultiAppDTKUserObjectEvaluator.h"
 
@@ -93,4 +93,4 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const T
 
 }
 
-#endif //LIBMESH_HAVE_DTK
+#endif //LIBMESH_TRILINOS_HAVE_DTK

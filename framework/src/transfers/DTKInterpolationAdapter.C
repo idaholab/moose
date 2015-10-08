@@ -13,7 +13,7 @@
 /****************************************************************/
 #include "libmesh/libmesh_config.h"
 
-#ifdef LIBMESH_HAVE_DTK
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 #include "Moose.h"
 
@@ -329,4 +329,4 @@ DTKInterpolationAdapter::get_semi_local_nodes(std::set<GlobalOrdinal> & semi_loc
   }
 }
 
-#endif // #ifdef LIBMESH_HAVE_DTK
+#endif // #ifdef LIBMESH_TRILINOS_HAVE_DTK

@@ -14,7 +14,7 @@
 
 #include "libmesh/libmesh_config.h"
 
-#ifdef LIBMESH_HAVE_DTK
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 #include "MultiAppDTKUserObjectTransfer.h"
 
@@ -78,4 +78,4 @@ MultiAppDTKUserObjectTransfer::execute()
   _multi_app->problem()->es().update();
 }
 
-#endif //LIBMESH_HAVE_DTK
+#endif //LIBMESH_TRILINOS_HAVE_DTK
