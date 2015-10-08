@@ -69,20 +69,6 @@ InputParameters validParams<CommonOutputAction>()
   params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
   params.addParam<bool>("print_linear_residuals", true, "Enable printing of linear residuals to the screen (Console)");
 
-  // **** DEPRECATED SUPPORT ****
-  Output::addDeprecatedInputParameters(params);
-
-  params.addDeprecatedParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"),
-                                            "Set to (none|initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment",
-                                            "Replaced with 'execute_on' to be consistent with other systems in MOOSE");
-  params.addDeprecatedParam<MultiMooseEnum>("additional_output_on", Output::getExecuteOptions(),
-                                            "This list of output flags is added to the existing flags (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment",
-                                            "Replaced with 'additional_execute_on' to be consistent with other systems in MOOSE");
-  params.addDeprecatedParam<bool>("output_initial", "Enable initial condition output.", "Replace by adding 'initial' to the 'execute_on' parameter.");
-  params.addDeprecatedParam<bool>("output_timestep_end", "Enable timestep_end output.", "Replace by adding 'timestep_end' to the 'execute_on' parameter.");
-  params.addDeprecatedParam<bool>("output_final", "Enable final condition output.", "Replace by adding 'final' to the 'execute_on' parameter.");
-  params.addDeprecatedParam<bool>("output_intermediate", "Enable timestep_end output.", "Replace by adding 'timestep_end' to the 'execute_on' parameter.");
-
   // Return object
   return params;
 }
@@ -93,23 +79,6 @@ CommonOutputAction::CommonOutputAction(InputParameters params) :
 {
   // Set the ActionWarehouse pointer in the parameters that will be passed to the actions created with this action
   _action_params.set<ActionWarehouse *>("awh") = &_awh;
-
-  // **** DEPRECATED PARAMETER SUPPORT ****
-  MultiMooseEnum & execute_on = params.set<MultiMooseEnum>("execute_on");
-  if (_app.useLegacyOutputSyntax() && isParamValid("output_on"))
-  {
-    execute_on.clear();
-    execute_on = getParam<MultiMooseEnum>("output_on");
-
-    if (getParam<bool>("output_initial"))
-      execute_on.push_back("initial");
-    if (getParam<bool>("output_timestep_end"))
-      execute_on.push_back("timestep_end");
-    if (getParam<bool>("output_final"))
-      execute_on.push_back("final");
-    if (getParam<bool>("output_intermediate"))
-      execute_on.push_back("timestep_end");
-  }
 }
 
 void

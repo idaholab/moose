@@ -211,7 +211,6 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = th_lumped_22
-  output_initial = false
   exodus = true
   csv = true
 []

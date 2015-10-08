@@ -87,7 +87,6 @@ InputParameters validParams<MooseApp>()
   // Legacy Flags
   params.addParam<bool>("use_legacy_uo_aux_computation", true, "Set to true to have MOOSE recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavoir is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
   params.addParam<bool>("use_legacy_uo_initialization", true, "Set to true to have MOOSE compute all UserObjects and Postprocessors during the initial setup phase of the problem recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavoir is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
-  params.addParam<bool>("use_legacy_output_syntax", true, "Set to true when using 'output_on' instead of 'execute_on' output syntax");
 
   // Options ignored by MOOSE but picked up by libMesh, these are here so that they are displayed in the application help
   params.addCommandLineParam<bool>("keep_cout", "--keep-cout", false, "Keep standard output from all processors when running in parallel");
@@ -137,8 +136,7 @@ MooseApp::MooseApp(InputParameters parameters) :
     _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
     _check_input(getParam<bool>("check_input")),
     _restartable_data(libMesh::n_threads()),
-    _multiapp_level(0),
-    _use_legacy_output_syntax(getParam<bool>("use_legacy_output_syntax"))
+    _multiapp_level(0)
 {
 
   if (isParamValid("_argc") && isParamValid("_argv"))

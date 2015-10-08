@@ -90,6 +90,5 @@
   [./OverSampling]
     type = Exodus
     refinements = 1
-    output_initial = true
   [../]
 []

@@ -79,7 +79,7 @@
 
 [Outputs]
   file_base = single_out
-  output_final = true
+  execute_on = 'initial timestep_end final'
   interval = 1000000
   exodus = true
   [./console]
@@ -87,4 +87,3 @@
     interval = 1
   [../]
 []
-

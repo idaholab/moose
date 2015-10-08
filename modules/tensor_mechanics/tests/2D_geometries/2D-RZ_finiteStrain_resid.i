@@ -215,15 +215,8 @@
 []
 
 [Outputs]
-  output_on = 'timestep_end'
-  output_initial = true
   exodus = true
   #csv = true
   print_linear_residuals = false
   print_perf_log = true
-  [./console]
-    type = Console
-    perf_log = true
-    output_on = 'initial timestep_end failed nonlinear'
-  [../]
 []

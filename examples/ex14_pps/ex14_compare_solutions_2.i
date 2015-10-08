@@ -43,8 +43,8 @@
     # Read in the fine grid solution
     type = SolutionUserObject
     system_variables = forced
-    mesh = compare_solutions_1_0000_mesh.xda
-    es = compare_solutions_1_0000.xda
+    mesh = ex14_compare_solutions_1_out_0000_mesh.xda
+    es = ex14_compare_solutions_1_out_0000.xda
   [../]
 []
 
@@ -82,6 +82,5 @@
 []
 
 [Outputs]
-  file_base = compare_solutions_2
   exodus = true
 []

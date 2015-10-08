@@ -58,40 +58,8 @@ InputParameters validParams<Output>()
   // Register this class as base class
   params.registerBase("Output");
 
-  //**** DEPRECATED SUPPORT ****
-  Output::addDeprecatedInputParameters(params);
-
   return params;
 }
-
-void
-Output::addDeprecatedInputParameters(InputParameters & params)
-{
-  params.addDeprecatedParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file",
-                                  "Replace by adding 'initial' to the 'execute_on' or 'additional_execute_on' options");
-
-  params.addDeprecatedParam<bool>("output_timestep_end", true, "Request that data be output at the end of the timestep",
-                                  "Replace by adding 'timestep_end' to the 'execute_on' or 'additional_execute_on' options");
-
-  params.addDeprecatedParam<bool>("output_final", false, "Force the final time step to be output, regardless of output interval",
-                                  "Replace by adding 'final' to the 'execute_on' or 'additional_execute_on' options");
-
-  params.addDeprecatedParam<bool>("output_failed", false, "When true all time attempted time steps are output",
-                                  "Replace by adding 'faild' to the 'execute_on' or 'additional_execute_on' options");
-
-  params.addDeprecatedParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output",
-                                  "Replace by adding 'timestep_end' to the 'execute_on' or 'additional_execute_on' options");
-
-  params.addDeprecatedParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"),
-                                            "Set to (none|initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment",
-                                            "Replaced with 'execute_on' to be consistent with other systems in MOOSE");
-
-  params.addDeprecatedParam<MultiMooseEnum>("additional_output_on", Output::getExecuteOptions(),
-                                            "This list of output flags is added to the existing flags (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment",
-                                            "Replaced with 'additional_execute_on' to be consistent with other systems in MOOSE");
-
-}
-
 
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
@@ -130,33 +98,6 @@ Output::Output(const InputParameters & parameters) :
     _is_advanced(false),
     _advanced_execute_on(_execute_on, parameters)
 {
-
-  // **** DEPRECATED PARAMETER SUPPORT ****
-  if (_app.useLegacyOutputSyntax() && isParamValid("output_on"))
-  {
-    _execute_on.clear();
-    _execute_on = getParam<MultiMooseEnum>("output_on");
-
-    if (isParamValid("additional_output_on"))
-    {
-    MultiMooseEnum add = getParam<MultiMooseEnum>("additional_output_on");
-    for (MooseEnumIterator it = add.begin(); it != add.end(); ++it)
-      _execute_on.push_back(*it);
-    }
-    if (getParam<bool>("output_initial"))
-      _execute_on.push_back("initial");
-    if (getParam<bool>("output_timestep_end"))
-      _execute_on.push_back("timestep_end");
-    if (getParam<bool>("output_final"))
-      _execute_on.push_back("final");
-    if (getParam<bool>("output_intermediate"))
-      _execute_on.push_back("timestep_end");
-    if (!getParam<bool>("output_timestep_end"))
-      _execute_on.erase("timestep_end");
-    if (!getParam<bool>("output_intermediate"))
-      _execute_on.erase("timestep_end");
-  }
-
   // Apply the additional output flags
   if (isParamValid("additional_execute_on"))
   {

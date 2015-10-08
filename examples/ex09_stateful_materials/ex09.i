@@ -95,17 +95,11 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
   num_steps = 10
   dt = 1.0
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

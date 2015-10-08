@@ -426,11 +426,6 @@ public:
    */
   void executeMeshModifiers();
 
-  /**
-   * True if using the legacy input syntax for outputs
-   */
-  bool useLegacyOutputSyntax(){ return _use_legacy_output_syntax; }
-
 protected:
 
   /**
@@ -583,9 +578,6 @@ private:
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, MooseSharedPointer<MeshModifier> > _mesh_modifiers;
-
-  /// Enables the use of legacy 'output_on' syntax
-  bool _use_legacy_output_syntax;
 
   ///@{
   /**

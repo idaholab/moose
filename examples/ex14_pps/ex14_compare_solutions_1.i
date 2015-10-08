@@ -48,7 +48,6 @@
 []
 
 [Outputs]
-  file_base = compare_solutions_1
   exodus = true
   xda = true #XDA writes out the perfect internal state of all variables, allowing SolutionUserObject to read back in higher order solutions and adapted meshes
 []

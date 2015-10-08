@@ -72,6 +72,5 @@
 []
 
 [Outputs]
-  file_base = out_pbc
   exodus = true
 []

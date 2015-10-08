@@ -189,22 +189,6 @@ AdvancedOutput<T>::initialSetup()
 
   // Set the initialization flag
   T::_initialized = true;
-
-  // **** DEPRECATED PARAMETER SUPPORT ****
-  if (T::isParamValid("execute_postprocessors") && !T::template getParam<bool>("execute_postprocessors"))
-    T::_advanced_execute_on["postprocessors"].clear();
-  if (T::isParamValid("execute_vector_postprocessors") && !T::template getParam<bool>("execute_vector_postprocessors"))
-    T::_advanced_execute_on["vector_postprocessors"].clear();
-  if (T::isParamValid("execute_scalar_variables") && !T::template getParam<bool>("execute_scalar_variables"))
-    T::_advanced_execute_on["scalars"].clear();
-  if (T::isParamValid("execute_elemental_variables") && !T::template getParam<bool>("execute_elemental_variables"))
-    T::_advanced_execute_on["elemental"].clear();
-  if (T::isParamValid("execute_nodal_variables") && !T::template getParam<bool>("execute_nodal_variables"))
-    T::_advanced_execute_on["nodal"].clear();
-  if (T::isParamValid("execute_system_information") && !T::template getParam<bool>("execute_system_information"))
-    T::_advanced_execute_on["system_information"].clear();
-  if (T::isParamValid("execute_input") && !T::template getParam<bool>("execute_input"))
-    T::_advanced_execute_on["input"].clear();
 }
 
 template<class T>
