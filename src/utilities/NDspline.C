@@ -116,7 +116,7 @@ double NDSpline::interpolateAt(std::vector<double> point_coordinate){
    double distance = 0;
 
    for (int nDim=0; nDim<_dimensions; nDim++)
-    distance = distance + pow((coordinates.at(nDim)-point_coordinate.at(nDim)),2);
+    distance = distance + pow((_discretizations.at(nDim).at(coordinates.at(nDim))-point_coordinate.at(nDim)),2);
 
    distances.at(i) = sqrt(distance);
 
