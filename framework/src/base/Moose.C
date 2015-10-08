@@ -41,6 +41,7 @@
 #include "SubdomainBoundingBox.h"
 #include "OrientedSubdomainBoundingBox.h"
 #include "RenameBlock.h"
+#include "AssignElementSubdomainID.h"
 
 // problems
 #include "FEProblem.h"
@@ -431,6 +432,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(SubdomainBoundingBox);
   registerMeshModifier(OrientedSubdomainBoundingBox);
   registerMeshModifier(RenameBlock);
+  registerMeshModifier(AssignElementSubdomainID);
 
   // problems
   registerProblem(FEProblem);
