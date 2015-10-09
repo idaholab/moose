@@ -222,7 +222,12 @@ protected:
   /**
    * This function performs the line search update
    */
-  bool line_search_update(const Real, const RankTwoTensor);
+  bool line_search_update(const Real rnorm_prev, const RankTwoTensor);
+
+  /**
+   * This function updates internal variables after each NewTon Raphson iteration (_fp_inv)
+   */
+  void internal_variable_update_NRiteration();
 
   /// Number of slip system resistance
   const unsigned int _nss;
@@ -299,6 +304,15 @@ protected:
   ///Minimum line search step size
   Real _min_lsrch_step;
 
+  ///Line search bisection method tolerance
+  Real _lsrch_tol;
+
+  ///Line search bisection method maximum iteration number
+  unsigned int _lsrch_max_iter;
+
+  //Line search method
+  MooseEnum _lsrch_method;
+
   MaterialProperty<RankTwoTensor> & _fp;
   MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _pk2;
@@ -331,7 +345,7 @@ protected:
   Real _r;
 
   RankTwoTensor _dfgrd_tmp;
-  RankTwoTensor _fe, _fp_old_inv, _fp_inv;
+  RankTwoTensor _fe, _fp_old_inv, _fp_inv, _fp_prev_inv;
   std::vector< Real > _slip_incr, _tau, _dslipdtau;
   std::vector<RankTwoTensor> _s0;
 
@@ -342,6 +356,8 @@ protected:
 
   std::vector<Real> _slip_sys_props;
 
+  std::vector< std::vector<Real> > _dgss_dsliprate;
+  
   bool _read_from_slip_sys_file;
 
   bool _err_tol;///Flag to check whether convergence is achieved
