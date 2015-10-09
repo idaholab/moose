@@ -132,6 +132,10 @@ public:
   VariableSecond & secondSlnOld() { _need_second_old = true; secondPhi(); secondPhiFace(); return _second_u_old; }
   VariableSecond & secondSlnOlder() { _need_second_older = true; secondPhi(); secondPhiFace(); return _second_u_older; }
 
+  ADVariableValue    & adSln() { _need_ad_u = true; return _ad_u; }
+  ADVariableGradient & adGradSln() { _need_ad_grad_u = true; return _ad_grad_u; }
+  ADVariableSecond   & adSecondSln() { _need_ad_second_u = true; secondPhi(); secondPhiFace(); return _ad_second_u; }
+
   VariableValue & uDot() { return _u_dot; }
   VariableValue & duDotDu() { return _du_dot_du; }
 
@@ -339,6 +343,9 @@ protected:
   bool _need_second_old;
   bool _need_second_older;
 
+  bool _need_ad_u;
+  bool _need_ad_grad_u;
+  bool _need_ad_second_u;
 
   bool _need_u_old_neighbor;
   bool _need_u_older_neighbor;
@@ -387,6 +394,12 @@ protected:
   VariableSecond _second_u, _second_u_bak;
   VariableSecond _second_u_old, _second_u_old_bak;
   VariableSecond _second_u_older, _second_u_older_bak;
+
+  ADVariableValue _ad_u;
+  ADVariableGradient _ad_grad_u;
+  ADVariableSecond _ad_second_u;
+
+  std::vector<ADReal> _ad_dofs;
 
   VariableValue _u_neighbor;
   VariableValue _u_old_neighbor;

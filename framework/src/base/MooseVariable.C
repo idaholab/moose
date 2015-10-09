@@ -45,6 +45,9 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _need_second_old(false),
     _need_second_older(false),
 
+    _need_ad_u(false),
+    _need_ad_grad_u(false),
+    _need_ad_second_u(false),
 
     _need_u_old_neighbor(false),
     _need_u_older_neighbor(false),
@@ -105,6 +108,10 @@ MooseVariable::~MooseVariable()
   _second_u.release(); _second_u_bak.release();
   _second_u_old.release(); _second_u_old_bak.release();
   _second_u_older.release(); _second_u_older_bak.release();
+
+  _ad_u.release();
+  _ad_grad_u.release();
+  _ad_second_u.release();
 
   _u_dot.release(); _u_dot_bak.release();
   _u_dot_neighbor.release(); _u_dot_bak_neighbor.release();
@@ -922,6 +929,60 @@ MooseVariable::computeElemValues()
 
         if (_need_second_older)
           second_u_older_qp->add_scaled(*d2phi_local, soln_older_local);
+      }
+    }
+  }
+
+  // Automatic differentiation
+  if (_need_ad_u)
+  {
+    _ad_dofs.resize(num_dofs);
+    _ad_u.resize(nqp);
+
+    if (_need_ad_grad_u)
+      _ad_grad_u.resize(nqp);
+
+    if (_need_ad_second_u)
+      _ad_second_u.resize(nqp);
+
+    // Derivatives are offset by the variable number
+    size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
+
+    // Hopefully this problem can go away at some point
+    if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)
+      mooseError("Current number of dofs per element is greater than AD_MAX_DOFS_PER_ELEM of " << AD_MAX_DOFS_PER_ELEM);
+
+    for (unsigned int qp=0; qp < nqp; qp++)
+    {
+      _ad_u[qp] = 0;
+
+      if (_need_ad_grad_u)
+        _ad_grad_u[qp] = 0;
+
+      if (_need_ad_second_u)
+        _ad_second_u[qp] = 0;
+    }
+
+    for (unsigned int i=0; i < num_dofs; i++)
+    {
+      _ad_dofs[i] = current_solution(_dof_indices[i]);
+
+      // NOTE!  You have to do this AFTER setting the value!
+      _ad_dofs[i].derivatives()[ad_offset + i] = 1.0;
+    }
+
+    // Now build up the solution at each quadrature point:
+    for (unsigned int i=0; i < num_dofs; i++)
+    {
+      for (unsigned int qp=0; qp < nqp; qp++)
+      {
+        _ad_u[qp] += _ad_dofs[i] * _phi[i][qp];
+
+        if (_need_ad_grad_u)
+          _ad_grad_u[qp].add_scaled(_grad_phi[i][qp], _ad_dofs[i]); // Note: += does NOT work here!
+
+        if (_need_ad_second_u)
+          _ad_second_u[qp].add_scaled((*_second_phi)[i][qp], _ad_dofs[i]); // Note: += does NOT work here!
       }
     }
   }

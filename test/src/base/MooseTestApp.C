@@ -87,6 +87,11 @@
 #include "FluxAverageAux.h"
 #include "OldMaterialAux.h"
 #include "DotCouplingAux.h"
+#include "ADValueTest.h"
+#include "ValueTest.h"
+#include "ADCoupledValueTest.h"
+#include "ADCoupledConvection.h"
+#include "ADMatDiffusion.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -129,6 +134,7 @@
 #include "DerivativeMaterialInterfaceTestClient.h"
 #include "DefaultMatPropConsumerMaterial.h"
 #include "RandomMaterial.h"
+#include "ADCoupledMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -172,6 +178,7 @@
 #include "NumSideQPs.h"
 #include "ElementL2Diff.h"
 #include "TestPostprocessor.h"
+#include "MaxVarNDofsPerElemPP.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -310,6 +317,11 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(WrongJacobianDiffusion);
   registerKernel(DefaultMatPropConsumerKernel);
   registerKernel(DoNotCopyParametersKernel);
+  registerKernel(ADValueTest);
+  registerKernel(ValueTest);
+  registerKernel(ADCoupledValueTest);
+  registerKernel(ADCoupledConvection);
+  registerKernel(ADMatDiffusion);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -380,6 +392,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(DerivativeMaterialInterfaceTestClient);
   registerMaterial(DefaultMatPropConsumerMaterial);
   registerMaterial(RandomMaterial);
+  registerMaterial(ADCoupledMaterial);
 
 
   registerScalarKernel(ExplicitODE);
@@ -438,6 +451,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(NumSideQPs);
   registerPostprocessor(ElementL2Diff);
   registerPostprocessor(TestPostprocessor);
+  registerPostprocessor(MaxVarNDofsPerElemPP);
 
   registerMarker(RandomHitMarker);
   registerMarker(QPointMarker);

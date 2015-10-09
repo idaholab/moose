@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'ad_coupled_convection.i'
+    exodiff = 'ad_coupled_convection_out.e'
+  [../]
+[]
