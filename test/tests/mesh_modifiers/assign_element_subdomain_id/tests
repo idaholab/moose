@@ -1,0 +1,18 @@
+[Tests]
+  [./quad_test]
+    type = 'Exodiff'
+    input = 'quad_with_subdomainid_test.i'
+    exodiff = 'out_quad_subdomain_id.e'
+  [../]
+  [./quad_elementid_test]
+    type = 'Exodiff'
+    input = 'quad_with_elementid_subdomainid_test.i'
+    exodiff = 'out_quad_subdomain_id.e'
+    prereq = quad_test
+  [../]
+  [./tri_test]
+    type = 'Exodiff'
+    input = 'tri_with_subdomainid_test.i'
+    exodiff = 'out_tri_subdomain_id.e'
+  [../]
+[]
