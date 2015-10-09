@@ -39,6 +39,15 @@
 
 #ifdef LIBMESH_HAVE_CURL
 #  include <curl/curl.h>
+#  include <curl/curlver.h>
+
+// A macro to help determine if the version of curl is new enough
+#define CURL_VERSION_LESS_THAN(major,minor,patch)                       \
+  ((LIBCURL_VERSION_MAJOR < (major) ||                                  \
+    (LIBCURL_VERSION_MAJOR == (major) && (LIBCURL_VERSION_MINOR < (minor) || \
+                                          (LIBCURL_VERSION_MINOR == (minor) && \
+                                           LIBCURL_VERSION_PATCH < (patch))))) ? 1 : 0)
+
 #endif
 
 /**
