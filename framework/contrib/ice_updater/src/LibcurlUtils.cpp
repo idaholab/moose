@@ -91,21 +91,27 @@ std::string LibcurlUtils::get(std::string url, std::string username, std::string
     // Set the write callback function
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeGetData);
 
+#if !CURL_VERSION_LESS_THAN(7,9,7)
     // Set the data pointer to write to the provided buffer
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+#endif
 
     // If the ignoreSslPeerVerification flag is set to true,
     // do not verify server certificate
     if (ignoreSslPeerVerification)
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 
+#if !CURL_VERSION_LESS_THAN(7,19,4)
     // Set the noproxy command line option if the user requested it.
     if (noProxyFlag)
       curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+#endif
 
+#if !CURL_VERSION_LESS_THAN(7,19,1)
     // Set the username and password
     curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
     curl_easy_setopt(curl, CURLOPT_PASSWORD, password.data());
+#endif
 
     // Attempt to retrieve from the remote page
     result = curl_easy_perform(curl);
@@ -185,12 +191,16 @@ std::string LibcurlUtils::post(std::string url, std::string value, std::string u
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 
     // Set the username and password
+#if !CURL_VERSION_LESS_THAN(7,19,1)
     curl_easy_setopt(curl, CURLOPT_USERNAME, username.data());
     curl_easy_setopt(curl, CURLOPT_PASSWORD, password.data());
+#endif
 
+#if !CURL_VERSION_LESS_THAN(7,19,4)
     // Set the noproxy command line option if the user requested it.
     if (noProxyFlag)
       curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+#endif
 
     // Attempt to post to the remote page
     result = curl_easy_perform(curl);
