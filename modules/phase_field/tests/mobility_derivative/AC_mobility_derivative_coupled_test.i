@@ -1,9 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 80
-  ny = 80
+  nx = 20
+  ny = 10
   xmax = 50
+  ymin = 25
   ymax = 50
 []
 
@@ -19,7 +20,7 @@
     type = SmoothCircleIC
     x1 = 25.0
     y1 = 25.0
-    radius = 6.0
+    radius = 15.0
     invalue = 0.9
     outvalue = 0.1
     int_width = 3.0
@@ -63,7 +64,7 @@
   [./v_diff]
     type = MatDiffusion
     variable = v
-    D_name = 10.0
+    D_name = 50.0
   [../]
 []
 
@@ -72,7 +73,7 @@
     type = DerivativeParsedMaterial
     block = 0
     f_name  = L
-    function = 'if(op<-1, 1, if(op>1, 1, (1-0.5*v)^2*(1 - 0.5*op^2)))'
+    function = 'l:=0.1+1*(v+op)^2; if(l<0.01, 0.01, l)'
     args = 'op v'
     outputs = exodus
     derivative_order = 1
@@ -109,10 +110,12 @@
   nl_rel_tol = 1.0e-9
 
   start_time = 0.0
-  num_steps = 2
+  num_steps = 10
   dt = 0.2
 []
 
 [Outputs]
+  interval = 5
+  print_linear_residuals = false
   exodus = true
 []
