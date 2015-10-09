@@ -14,6 +14,10 @@
 #include <cmath>   // to use erfc error function
 #include <ctime>   // for rand() and srand()
 
+#include <Eigen/Dense>
+
+using namespace Eigen;
+
 /*
  *  distributionFunctions
  *      source: Numerical Recipes in C++ 3rd edition
@@ -28,6 +32,12 @@ void computeInverse(const std::vector<std::vector<double> > & matrix, std::vecto
 // convert a matrix stored in a vector to a matrix stored in a vector of vector
 void vectorToMatrix(int &rows, int & columns, std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix);
 double getDeterminant(std::vector<std::vector<double> > matrix);
+
+// functions fro singular value decomposition
+void svd_decomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues);
+void matrixConversionToEigenType(std::vector<std::vector<double> > original, MatrixXd &converted);
+void matrixConversionToVectorType(MatrixXd original, std::vector<std::vector<double> > &converted);
+void matrixConversionToVectorType(VectorXd original, std::vector<double>  &converted);
 
 void nrerror(const char error_text[]);
 

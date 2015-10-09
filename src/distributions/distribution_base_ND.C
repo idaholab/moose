@@ -200,9 +200,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(int &rows, int &colum
 
    _mu = mu;
    _cov_matrix = covMatrix;
-
-   //int rows,columns;
-   //readMatrix(data_filename, rows, columns, _cov_matrix);
+   
    std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
 
    computeInverse(_cov_matrix, inverseCovMatrix);
@@ -329,6 +327,104 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
 
 	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
+}
+BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* genMethod){
+  /**
+   * This is the function that initializes the Multivariate normal distribution given:
+   * Input Parameters
+   * - vecCovMatrix: covariance matrix stored in a vector<double>
+   * - mu: the mean value vector
+   * - genMethod: 'spline' or 'pca', this indicate which method is used to calculate the inverseCdf
+   */
+  int rows, columns;
+  std::vector<std::vector<double> > covMatrix;
+  // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
+  vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
+  if (std::string(genMethod) == "spline") {
+	  BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
+  } else if (std::string(genMethod) == "pca") {
+    _mu = mu;
+    _cov_matrix = covMatrix;
+    std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
+    computeInverse(_cov_matrix, inverseCovMatrix);
+    for (int i=0;i<rows;i++){
+      std::vector<double> temp;
+	    for (int j=0;j<columns;j++) {
+	      temp.push_back(inverseCovMatrix.at(i).at(j));
+      }
+	    _inverse_cov_matrix.push_back(temp);
+    }
+    _determinant_cov_matrix = getDeterminant(_cov_matrix);
+    //compute the svd
+    computeSVD(_cov_matrix);
+  }
+}
+
+void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix) {
+  /**
+   * This function will compute the svd for given matrix (vecCovMatrix)
+   * Input
+   * vecCovMatrix: the provided matrix
+   */
+  int rows, columns;
+  std::vector<std::vector<double> > covMatrix;
+  // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
+  vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
+  svd_decomposition(covMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues);
+}
+
+void BasicMultivariateNormal::computeSVD(std::vector<std::vector<double> > vecCovMatrix) {
+  /**
+   * This function will compute the svd for given matrix (vecCovMatrix)
+   * Input
+   * vecCovMatrix: the provided matrix
+   */
+  svd_decomposition(vecCovMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues);
+}
+
+std::vector<double> BasicMultivariateNormal::getLeftSingularVectors() {
+  /**
+   * this function returns the left singular vectors
+   * input/output
+   * row: the row dimension of the left singular vectors
+   * col: the column dimension of the left singular vectors
+   * output
+   * tempVectors: the vector stores the left singular vectors
+   */
+  std::vector<double> tempVectors;
+  for(int i = 0; i < _leftSingularVectors.size(); ++i) {
+    for(int j = 0; j < _leftSingularVectors.at(0).size(); ++j) {
+      tempVectors.push_back(_leftSingularVectors.at(i).at(j));
+    }
+  }
+  return tempVectors;
+}
+std::vector<double> BasicMultivariateNormal::getRightSingularVectors() {
+  /**
+   * this function returns the right singular vectors
+   * input/output
+   * row: the row dimension of the right singular vectors
+   * col: the column dimension of the left singular vectors
+   * output
+   * tempVectors: the vector stores the right singular vectors
+   */
+  std::vector<double> tempVectors;
+  for(int i = 0; i < _rightSingularVectors.size(); ++i) {
+    for(int j = 0; j < _rightSingularVectors.at(0).size(); ++j) {
+      tempVectors.push_back(_rightSingularVectors.at(i).at(j));
+    }
+  }
+  return tempVectors;
+}
+std::vector<double> BasicMultivariateNormal::getSingularValues() {
+  /**
+   * this function returns the singular values
+   * input/output
+   * dim: the dimension of the singular values
+   * output
+   * _singularValues: the vector stores the singular values
+   */
+  return _singularValues;
 }
 
 double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix){

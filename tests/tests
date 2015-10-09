@@ -17,4 +17,10 @@
   input = 'test_normal.py'
   requires_swig2 = True
  [../]
+ 
+ [./test_svd]
+  type = 'CrowPython'
+  input = 'test_eigen_svd.py'
+  requires_swig2 = True
+ [../]
 []

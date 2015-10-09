@@ -434,6 +434,7 @@ public:
   BasicMultivariateNormal(std::string data_filename, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu);
+  BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char * genMethod);
 
   //void BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu);
   void BasicMultivariateNormal_init(int & rows, int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
@@ -455,12 +456,24 @@ public:
   double * cholesky(double *A, int n);
   std::vector<std::vector<double> > choleskyDecomposition(std::vector<std::vector<double> > matrix);
   void show_matrix(double *A, int n);
+  // used to obtain the information from the svd decomposition
+  std::vector<double> getSingularValues();
+  std::vector<double> getLeftSingularVectors();
+  std::vector<double> getRightSingularVectors();
+  void computeSVD(std::vector<std::vector<double> > vecCovMatrix);
+  void computeSVD(std::vector<double> vecCovMatrix);
+
 
 private:
   std::vector<double> _mu;
   std::vector<std::vector<double> > _cov_matrix;
   std::vector<std::vector<double> > _inverse_cov_matrix;
   std::vector<std::vector<double> > _cholesky_C;
+  // parameters for singular value decomposition
+  std::vector<std::vector<double> > _leftSingularVectors;
+  std::vector<double> _singularValues;
+  std::vector<std::vector<double> > _rightSingularVectors;
+
   double _determinant_cov_matrix;
 
   BasicMultiDimensionalCartesianSpline _cartesianDistribution;
