@@ -37,6 +37,10 @@
   [../]
 []
 
+[Problem]
+  # This is here to make sure we can restart with a Problem block
+[]
+
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient

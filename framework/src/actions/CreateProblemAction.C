@@ -67,7 +67,7 @@ CreateProblemAction::act()
       _moose_object_pars.set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
       _moose_object_pars.set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
 #endif
-      _problem = MooseSharedNamespace::dynamic_pointer_cast<FEProblem>(_factory.create(_type, _problem_name, _moose_object_pars));
+      _problem = MooseSharedNamespace::dynamic_pointer_cast<FEProblem>(_factory.create(_type, "Problem", _moose_object_pars));
       if (!_problem.get())
         mooseError("Problem has to be of a FEProblem type");
     }
@@ -85,4 +85,3 @@ CreateProblemAction::act()
       getParam<bool>("use_legacy_uo_initialization") : _app.legacyUoInitializationDefault();
   }
 }
-
