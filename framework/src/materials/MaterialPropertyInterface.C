@@ -115,7 +115,8 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
-  {    MooseSharedPointer<MaterialProperty<Real> > default_property(new MaterialProperty<Real>);
+  {
+    MooseSharedPointer<MaterialProperty<Real> > default_property(new MaterialProperty<Real>);
 
     // resize to accomodate maximum number of qpoints
     unsigned int nqp = _mi_feproblem.getMaxQps();

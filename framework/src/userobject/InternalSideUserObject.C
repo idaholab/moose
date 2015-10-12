@@ -20,13 +20,14 @@ InputParameters validParams<InternalSideUserObject>()
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
   params.addPrivateParam<bool>("use_bnd_material", true);
+  params.addPrivateParam<bool>("use_neighbor_material", true);
   return params;
 }
 
 InternalSideUserObject::InternalSideUserObject(const InputParameters & parameters) :
     UserObject(parameters),
     BlockRestrictable(parameters),
-    MaterialPropertyInterface(parameters, blockIDs()),
+    TwoMaterialPropertyInterface(parameters, blockIDs()),
     NeighborCoupleable(parameters, false, false),
     MooseVariableDependencyInterface(),
     UserObjectInterface(parameters),

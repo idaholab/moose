@@ -140,7 +140,7 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side
       // Face Materials
       _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), face_n_points, *elem, side);
       // Neighbor Materials
-      _bnd_material_props.initStatefulProps(*_neighbor_material_data[_tid], _materials[_tid].getNeighborMaterials(_subdomain), face_n_points, *neighbor, neighbor_side);
+      _bnd_material_props.initStatefulProps(*_neighbor_material_data[_tid], _materials[_tid].getNeighborMaterials(neighbor->subdomain_id()), face_n_points, *neighbor, neighbor_side);
     }
   }
 }
