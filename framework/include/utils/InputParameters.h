@@ -407,7 +407,7 @@ public:
    *   Required parameters are verified as valid meaning that they were either initialized when
    *   they were created, or were read from an input file or some other valid source
    */
-  void checkParams(const std::string & prefix);
+  void checkParams(const std::string & parsing_syntax);
 
   /**
    * Methods returning iterators to the coupled variables names stored in this

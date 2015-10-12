@@ -51,3 +51,7 @@
 [Outputs]
   exodus = true
 []
+
+[Problem]
+  # This is here to make sure we can restart with a Problem block
+[]
