@@ -85,7 +85,7 @@ public:
 
   std::string getTaskName(const std::string & action);
 
-  MooseSharedPointer<Action> create(const std::string & action, const std::string & name, InputParameters parameters);
+  MooseSharedPointer<Action> create(const std::string & action, const std::string & parsing_syntax, InputParameters parameters);
 
   InputParameters getValidParams(const std::string & name);
 

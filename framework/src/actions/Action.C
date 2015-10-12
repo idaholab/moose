@@ -37,7 +37,7 @@ InputParameters validParams<Action>()
 Action::Action(InputParameters parameters) :
     ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _pars(parameters),
-    _name(getParam<std::string>("name")),
+    _name(getParam<std::string>("_parsing_syntax")),
     _short_name(MooseUtils::shortName(_name)),
     _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
     _action_type(getParam<std::string>("action_type")),

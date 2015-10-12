@@ -351,9 +351,9 @@ InputParameters::mooseObjectSyntaxVisibility() const
     mooseError("Parameter '" << name << "' cannot be marked as controllable because its type (" << this->type(name) << ") is not controllable.")
 
 void
-InputParameters::checkParams(const std::string & prefix)
+InputParameters::checkParams(const std::string & parsing_syntax)
 {
-  std::string l_prefix = this->have_parameter<std::string>("name") ? this->get<std::string>("name") : prefix;
+  std::string l_prefix = this->have_parameter<std::string>("name") ? this->get<std::string>("name") : parsing_syntax;
 
   std::ostringstream oss;
   // Required parameters
