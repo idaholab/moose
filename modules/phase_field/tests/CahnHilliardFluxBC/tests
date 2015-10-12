@@ -1,0 +1,7 @@
+[Tests]
+  [./isotropic]
+    type = 'Exodiff'
+    input = 'isotropic.i'
+    exodiff = 'isotropic_out.e'
+  [../]
+[]
