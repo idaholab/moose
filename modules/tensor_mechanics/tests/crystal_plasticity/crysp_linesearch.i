@@ -141,6 +141,10 @@
     tan_mod_type = exact
     use_line_search = true
     min_line_search_step_size = 0.01
+#    use_line_search = true
+#    line_search_tol = 1.0e-2
+#    line_search_maxiter = 100
+
   [../]
   [./elastic]
     type = FiniteStrainElasticMaterial
