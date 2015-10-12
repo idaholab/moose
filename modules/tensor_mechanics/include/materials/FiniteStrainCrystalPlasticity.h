@@ -227,7 +227,7 @@ protected:
   /**
    * This function updates internal variables after each NewTon Raphson iteration (_fp_inv)
    */
-  void internal_variable_update_NRiteration();
+  void internalVariableUpdateNRiteration();
 
   /// Number of slip system resistance
   const unsigned int _nss;
@@ -331,11 +331,11 @@ protected:
   MaterialProperty< std::vector<Real> > * _euler_ang;
   MaterialProperty< std::vector<Real> > * _euler_ang_old;
 
-  std::vector<Real> _mo;
-  std::vector<Real> _no;
+  DenseVector<Real> _mo;
+  DenseVector<Real> _no;
 
-  std::vector<Real> _a0;
-  std::vector<Real> _xm;
+  DenseVector<Real> _a0;
+  DenseVector<Real> _xm;
 
   RankTwoTensor _crysrot;
 
@@ -346,7 +346,7 @@ protected:
 
   RankTwoTensor _dfgrd_tmp;
   RankTwoTensor _fe, _fp_old_inv, _fp_inv, _fp_prev_inv;
-  std::vector< Real > _slip_incr, _tau, _dslipdtau;
+  DenseVector<Real> _slip_incr, _tau, _dslipdtau;
   std::vector<RankTwoTensor> _s0;
 
   RankTwoTensor _pk2_tmp, _pk2_tmp_old;
@@ -354,9 +354,9 @@ protected:
   std::vector<Real> _gss_tmp;
   std::vector<Real> _gss_tmp_old;
 
-  std::vector<Real> _slip_sys_props;
+  DenseVector<Real> _slip_sys_props;
 
-  std::vector< std::vector<Real> > _dgss_dsliprate;
+  DenseMatrix<Real> _dgss_dsliprate;
 
   bool _read_from_slip_sys_file;
 
