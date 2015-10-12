@@ -61,7 +61,7 @@ app_LIB     := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)-$(METHOD).la
 # application
 app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
 # revision header
-CAMEL_CASE_NAME := $(shell echo $(APPLICATION_NAME) | perl -pe 's/(?:^|_)([a-z])/\u$$1/g')
+CAMEL_CASE_NAME ?= $(shell echo $(APPLICATION_NAME) | perl -pe 's/(?:^|_)([a-z])/\u$$1/g')
 app_BASE_DIR    ?= base/
 app_HEADER      := $(APPLICATION_DIR)/include/$(app_BASE_DIR)$(CAMEL_CASE_NAME)Revision.h
 # depend modules
@@ -110,7 +110,7 @@ $(app_objects): $(app_HEADER)
 
 # Target-specific Variable Values (See GNU-make manual)
 $(app_HEADER): curr_dir    := $(APPLICATION_DIR)
-$(app_HEADER): curr_app    := $(APPLICATION_NAME)
+$(app_HEADER): curr_app    := $(CAMEL_CASE_NAME)
 $(app_HEADER):
 	@echo "MOOSE Generating Header "$@"..."
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
