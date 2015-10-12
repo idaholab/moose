@@ -4,4 +4,9 @@
     input = 'internal_side_user_object.i'
     exodiff = 'internal_side_user_object_out.e'
   [../]
+  [./get_neighbor_test]
+    type = 'Exodiff'
+    input = 'internal_side_user_object_two_materials.i'
+    exodiff = 'internal_side_user_object_two_materials_out.e'
+  [../]
 []

@@ -46,7 +46,7 @@ public:
 
   ///@{
   /**
-   * Contructor.
+   * Constructor.
    *
    * @param parameters The objects input parameters
    * @param block_ids A reference to the block ids (optional)
@@ -225,7 +225,7 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant
@@ -255,7 +255,7 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant

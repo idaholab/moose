@@ -1857,6 +1857,8 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
        mat_data = _bnd_material_data[tid];
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
+    if (parameters.isParamValid("use_neighbor_material") && parameters.get<bool>("use_neighbor_material"))
+      parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
 
     MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
     if (!mo)
@@ -2037,6 +2039,8 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
        mat_data = _bnd_material_data[tid];
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
+    if (parameters.isParamValid("use_neighbor_material") && parameters.get<bool>("use_neighbor_material"))
+      parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
 
     MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create(user_object_name, name, parameters, tid));
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))

@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<InsideUserObject>()
 {
   InputParameters params = validParams<InternalSideUserObject>();
-  params.addParam<std::string>("diffusivity", "The name of the diffusivity material property that will be used in the flux computation.");
+  params.addParam<MaterialPropertyName>("diffusivity", 0.0, "The name of the diffusivity material property that will be used in the flux computation.");
   params.addParam<bool>("use_old_prop", false, "A Boolean to indicate whether the current or old value of a material prop should be used.");
   params.addRequiredCoupledVar("variable", "the variable name");
 
@@ -30,8 +30,8 @@ InsideUserObject::InsideUserObject(const InputParameters & parameters) :
     _u(coupledValue("variable")),
     _u_neighbor(coupledNeighborValue("variable")),
     _value(0.),
-    _diffusivity(parameters.get<std::string>("diffusivity")),
-    _diffusivity_prop(isParamValid("diffusivity") ? (getParam<bool>("use_old_prop") ? &getMaterialPropertyOld<Real>(_diffusivity) : &getMaterialProperty<Real>(_diffusivity)) : NULL)
+    _diffusivity_prop(getParam<bool>("use_old_prop") ? getMaterialPropertyOld<Real>("diffusivity") : getMaterialProperty<Real>("diffusivity")),
+    _neighbor_diffusivity_prop(getParam<bool>("use_old_prop") ? getNeighborMaterialPropertyOld<Real>("diffusivity") : getNeighborMaterialProperty<Real>("diffusivity"))
 {
 }
 
@@ -49,7 +49,7 @@ void
 InsideUserObject::execute()
 {
   for (unsigned int qp = 0; qp < _q_point.size(); ++qp)
-    _value += std::pow(_u[qp] - _u_neighbor[qp], 2) + (_diffusivity_prop ? (*_diffusivity_prop)[qp] : 0);
+    _value += std::pow(_u[qp] - _u_neighbor[qp], 2) + (_diffusivity_prop[qp] + _neighbor_diffusivity_prop[qp] ) / 2;
 }
 
 void
