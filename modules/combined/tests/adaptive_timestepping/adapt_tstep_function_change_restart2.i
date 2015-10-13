@@ -168,13 +168,13 @@
   [./Temperatrue_of_Block]
     type = ElementAverageValue
     variable = temp
-    execute_on = 'initial timestep_end'
+    execute_on = 'timestep_end'
   [../]
 
   [./vonMises]
     type = ElementAverageValue
     variable = vonmises
-    execute_on = 'initial timestep_end'
+    execute_on = 'timestep_end'
   [../]
 []
 

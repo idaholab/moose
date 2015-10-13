@@ -64,7 +64,7 @@ TransientMultiApp::TransientMultiApp(const InputParameters & parameters):
     _failures(0),
     _catch_up(getParam<bool>("catch_up")),
     _max_catch_up_steps(getParam<Real>("max_catch_up_steps")),
-    _first(declareRestartableData<bool>("first", true)),
+    _first(declareRecoverableData<bool>("first", true)),
     _auto_advance(false),
     _print_sub_cycles(getParam<bool>("print_sub_cycles"))
 {
@@ -198,6 +198,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
         bool at_steady = false;
 
+        if (_first && !_app.isRecovering())
+          problem->advanceState();
+
         // Now do all of the solves we need
         while (true)
         {
@@ -299,6 +302,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       else
       {
         _console << "Solving Normal Step!" << std::endl;
+
+        if (_first)
+          problem->advanceState();
+
         if (auto_advance)
           if (_first != true)
             ex->incrementStepOrReject();
