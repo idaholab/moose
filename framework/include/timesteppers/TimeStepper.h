@@ -45,6 +45,8 @@ public:
   virtual void preSolve() { }
   virtual void postSolve() { }
   virtual void postExecute() { }
+  virtual void preStep() { }
+  virtual void postStep() { }
 
   /**
    * Called before a new step is started.

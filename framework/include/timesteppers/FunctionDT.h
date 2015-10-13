@@ -32,7 +32,7 @@ public:
 
   virtual void preExecute();
 
-  virtual void acceptStep();
+  virtual void postStep();
   virtual void rejectStep();
 
 protected:

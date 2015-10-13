@@ -93,6 +93,10 @@ public:
 
   virtual void computeDT();
 
+  virtual void preStep();
+
+  virtual void postStep();
+
   /**
    * This is where the solve step is actually incremented.
    */

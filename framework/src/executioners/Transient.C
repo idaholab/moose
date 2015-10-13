@@ -225,6 +225,18 @@ Transient::init()
 }
 
 void
+Transient::preStep()
+{
+  _time_stepper->preStep();
+}
+
+void
+Transient::postStep()
+{
+  _time_stepper->postStep();
+}
+
+void
 Transient::execute()
 {
 
@@ -248,11 +260,11 @@ Transient::execute()
     if (!keepGoing())
       break;
 
+    preStep();
     computeDT();
-
     takeStep();
-
     endStep();
+    postStep();
 
     _steps_taken++;
   }
