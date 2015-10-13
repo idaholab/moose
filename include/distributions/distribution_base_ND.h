@@ -435,6 +435,7 @@ public:
   BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char * genMethod);
+  BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char * genMethod,int rank);
 
   //void BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu);
   void BasicMultivariateNormal_init(int & rows, int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
@@ -460,8 +461,17 @@ public:
   std::vector<double> getSingularValues();
   std::vector<double> getLeftSingularVectors();
   std::vector<double> getRightSingularVectors();
+  std::vector<int> getLeftSingularVectorsDimensions();
+  std::vector<int> getRightSingularVectorsDimensions();
+  int  getSingularValuesDimension();
+
+  std::vector<double> coordinateInTransformedSpace(int rank);
+  std::vector<double> coordinateInverseTransformed(std::vector<double> &coordinate);
+
+  void computeSVD(std::vector<std::vector<double> > vecCovMatrix, int rank);
   void computeSVD(std::vector<std::vector<double> > vecCovMatrix);
   void computeSVD(std::vector<double> vecCovMatrix);
+  void computeSVD(std::vector<double> vecCovMatrix,int rank);
 
 
 private:
@@ -473,6 +483,9 @@ private:
   std::vector<std::vector<double> > _leftSingularVectors;
   std::vector<double> _singularValues;
   std::vector<std::vector<double> > _rightSingularVectors;
+  int _rank; // used for dimensionality reduction
+  // store U*sqrt(S), where U, S, V = svd(A)
+  std::vector<std::vector<double> > _svdTransformedMatrix;
 
   double _determinant_cov_matrix;
 

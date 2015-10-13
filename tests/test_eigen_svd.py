@@ -21,7 +21,7 @@ cov = [1.36,   -0.816,  0.521,  1.43,    -0.144,
        0.521,  0.794,   -0.541, 0.461,   0.179,
        1.43,   -0.173,  0.461,  -1.43,   0.822,
        -0.144, -0.406,  0.179,  0.822,   -1.37]
-dim = 5
+#dim = 5
 
 # Transform 'mu' and 'cov' to the c++ vector
 muCpp = distribution1D.vectord_cxx(len(mu))
@@ -34,17 +34,23 @@ for i in range(len(cov)):
 # call the functions from the crow to compute the svd
 genMethod = "pca"
 mvnDistribution = distribution1D.BasicMultivariateNormal(covCpp,muCpp,str(genMethod))
+
+dim = mvnDistribution.getSingularValuesDimension()
 sCpp_vector = mvnDistribution.getSingularValues()
 sCpp = [sCpp_vector[i] for i in range(dim)]
 sCpp = np.asarray(sCpp)
+
+dimVectorLeft = mvnDistribution.getLeftSingularVectorsDimensions()
 uCpp_vector = mvnDistribution.getLeftSingularVectors()
-uCpp = [uCpp_vector[i] for i in range(dim**2)]
+uCpp = [uCpp_vector[i] for i in range(dimVectorLeft[0]*dimVectorLeft[1])]
 uCpp = np.asarray(uCpp)
-uCpp = np.reshape(uCpp,(dim,dim))
+uCpp = np.reshape(uCpp,(dimVectorLeft[0],dimVectorLeft[1]))
+
+dimVectorRight = mvnDistribution.getRightSingularVectorsDimensions()
 vCpp_vector = mvnDistribution.getRightSingularVectors()
-vCpp = [vCpp_vector[i] for i in range(dim**2)]
+vCpp = [vCpp_vector[i] for i in range(dimVectorRight[0]*dimVectorRight[1])]
 vCpp = np.asarray(vCpp)
-vCpp = np.reshape(vCpp,(dim,dim))
+vCpp = np.reshape(vCpp,(dimVectorRight[0],dimVectorRight[1]))
 
 # using numpy to compute the svd
 covNp = np.asarray(cov).reshape(-1,sqrt(len(cov)))
@@ -59,6 +65,12 @@ utils.checkArrayAllClose("MVN singular values",sCpp,sNp,results)
 utils.checkArrayAllClose("MVN left singular vectors",np.absolute(uCpp),np.absolute(uNp),results)
 utils.checkArrayAllClose("MVN right singular vectors", np.absolute(vCpp),np.absolute(vNp.T),results)
 utils.checkArrayAllClose("MVN singular value decomposition",covNp,covReCompute,results)
+
+utils.checkAnswer("MVN dimensions of singular values",dim,5,results)
+utils.checkAnswer("MVN row dimensions of left singular vectors",dimVectorLeft[0],5,results)
+utils.checkAnswer("MVN col dimensions of left singular vectors",dimVectorLeft[1],5,results)
+utils.checkAnswer("MVN row dimensions of right singular vectors",dimVectorRight[0],5,results)
+utils.checkAnswer("MVN col dimensions of right singular vectors",dimVectorRight[1],5,results)
 
 print(results)
 

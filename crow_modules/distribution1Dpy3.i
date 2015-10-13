@@ -15,5 +15,6 @@
 
 namespace std {
    %template(vectord_cxx) vector<double>;
+   %template(vectori_cxx) vector<int>;
 };
 

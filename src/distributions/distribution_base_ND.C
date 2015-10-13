@@ -7,7 +7,7 @@
  */
 
 #include "distribution_base_ND.h"
-//#include "DistributionContainer.h"
+#include "DistributionContainer.h"
 #include <stdexcept>
 #include <iostream>
 #include <stdio.h>
@@ -359,6 +359,44 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
     computeSVD(_cov_matrix);
   }
 }
+BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* genMethod, int rank){
+  /**
+   * This is the function that initializes the Multivariate normal distribution given:
+   * Input Parameters
+   * - vecCovMatrix: covariance matrix stored in a vector<double>
+   * - mu: the mean value vector
+   * - genMethod: 'spline' or 'pca', this indicate which method is used to calculate the inverseCdf
+   * - rank: the reduced dimension 
+   */
+  int rows, columns;
+  std::vector<std::vector<double> > covMatrix;
+  // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
+  vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
+  if (std::string(genMethod) == "spline") {
+	  BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
+  } else if (std::string(genMethod) == "pca") {
+    _mu = mu;
+    _cov_matrix = covMatrix;
+    _rank = rank;
+    if(_rank > _mu.size()) {
+      std::cout << " WARNING: The  provided rank = " << rank << " is larger than the given problem's dimension = " << _mu.size() << std::endl;
+      _rank = _mu.size();
+      std::cout << "The rank will be resetted to the given problem's dimension, i.e. " << _mu.size() << std::endl;
+    }
+    std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
+    computeInverse(_cov_matrix, inverseCovMatrix);
+    for (int i=0;i<rows;i++){
+      std::vector<double> temp;
+	    for (int j=0;j<columns;j++) {
+	      temp.push_back(inverseCovMatrix.at(i).at(j));
+      }
+	    _inverse_cov_matrix.push_back(temp);
+    }
+    _determinant_cov_matrix = getDeterminant(_cov_matrix);
+    //compute the svd
+    computeSVD(_cov_matrix, _rank);
+  }
+}
 
 void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix) {
   /**
@@ -370,7 +408,20 @@ void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix) {
   std::vector<std::vector<double> > covMatrix;
   // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
-  svd_decomposition(covMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues);
+  svdDecomposition(covMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix);
+}
+void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix, int rank) {
+  /**
+   * This function will compute the truncated svd for given matrix (vecCovMatrix)
+   * Input
+   * vecCovMatrix: the provided matrix
+   * rank: the number of singular values that will be kept for the truncated svd
+   */
+  int rows, columns;
+  std::vector<std::vector<double> > covMatrix;
+  // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
+  vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
+  svdDecomposition(covMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues, _svdTransformedMatrix,rank);
 }
 
 void BasicMultivariateNormal::computeSVD(std::vector<std::vector<double> > vecCovMatrix) {
@@ -379,7 +430,16 @@ void BasicMultivariateNormal::computeSVD(std::vector<std::vector<double> > vecCo
    * Input
    * vecCovMatrix: the provided matrix
    */
-  svd_decomposition(vecCovMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues);
+  svdDecomposition(vecCovMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix);
+}
+void BasicMultivariateNormal::computeSVD(std::vector<std::vector<double> > vecCovMatrix, int rank) {
+  /**
+   * This function will compute the svd for given matrix (vecCovMatrix)
+   * Input
+   * vecCovMatrix: the provided matrix
+   * rank: the number of singular values that will be kept for the truncated svd
+   */
+  svdDecomposition(vecCovMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix, rank);
 }
 
 std::vector<double> BasicMultivariateNormal::getLeftSingularVectors() {
@@ -425,6 +485,67 @@ std::vector<double> BasicMultivariateNormal::getSingularValues() {
    * _singularValues: the vector stores the singular values
    */
   return _singularValues;
+}
+
+std::vector<int> BasicMultivariateNormal::getLeftSingularVectorsDimensions() {
+  /**
+   * return the row and column of left singular vectors stored in tempVector.at(0) and tempVector.at(1) respectively
+   */
+  std::vector<int> tempVector;
+  tempVector.push_back(_leftSingularVectors.size());
+  tempVector.push_back(_leftSingularVectors.at(0).size());
+  return tempVector;
+}
+std::vector<int> BasicMultivariateNormal::getRightSingularVectorsDimensions() {
+  /**
+   * return the row and column of right singular vectors stored in tempVector.at(0) and tempVector.at(1) respectively
+   */
+  std::vector<int> tempVector;
+  tempVector.push_back(_rightSingularVectors.size());
+  tempVector.push_back(_rightSingularVectors.at(0).size());
+  return tempVector;
+}
+int  BasicMultivariateNormal::getSingularValuesDimension() {
+  /**
+   * return the dimension of  singular value vector stored
+   */
+  return _singularValues.size();
+}
+
+std::vector<double> BasicMultivariateNormal::coordinateInTransformedSpace(int rank) {
+  /**
+   * This function will return the coordinate in the transformed space
+   * rank: the effective dimension of the transformed space
+   */
+  std::cout << "BasicMultivariateNormal::coordinateInProjectedSpace" << std::endl;
+  std::vector<double> coordinate;
+  BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
+  double randValue = 0.0;
+  for(int i = 0; i < rank; ++i) {
+    DistributionContainer *distributionInstance = & DistributionContainer::Instance();
+    randValue = distributionInstance->random();
+    std::cout << "random value: " << randValue << std::cout;
+    double coordinateValue = normalDistribution->InverseCdf(randValue);
+    coordinate.push_back(coordinateValue);
+  }
+  delete normalDistribution;
+  return coordinate;
+}
+
+std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::vector<double> & coordinate) {
+  /**
+   * This function will transform the coordinate back to the original space
+   * coordinate: the coordinate in the transformed space
+   */
+  std::vector<double> originalCoordinate;
+  for(int irow = 0; irow < _svdTransformedMatrix.size(); ++irow) {
+    double tempSum = 0.0;
+    for(int icol = 0; icol < _svdTransformedMatrix.at(0).size(); ++icol) {
+      tempSum = tempSum + _svdTransformedMatrix.at(irow).at(icol) * coordinate.at(icol);
+    }
+    originalCoordinate.push_back(tempSum);
+  }
+  return originalCoordinate;
 }
 
 double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix){

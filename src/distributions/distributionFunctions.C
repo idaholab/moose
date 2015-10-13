@@ -233,7 +233,7 @@ double getDeterminant(std::vector<std::vector<double> > matrix){
 }
 */
 
-void svd_decomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues) {
+void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix) {
   /**
    * This function compute the singular value decomposition for given matrix
    * Input Parameters
@@ -254,16 +254,61 @@ void svd_decomposition(const std::vector<std::vector<double> > &matrix, std::vec
   MatrixXd A(row,col);
   MatrixXd U(row,row);
   MatrixXd V(col,col);
+  MatrixXd X(row,dim);
   VectorXd S(dim);
   matrixConversionToEigenType(matrix,A);
   JacobiSVD<MatrixXd> svd(A,ComputeFullU | ComputeFullV);
   U = svd.matrixU();
   V = svd.matrixV();
   S = svd.singularValues();
+  for(int i = 0; i < dim; ++i) {
+    X.col(i) = U.col(i)*sqrt(S(i));
+  }
   matrixConversionToVectorType(U,leftSingularVectors);
   matrixConversionToVectorType(V,rightSingularVectors);
   matrixConversionToVectorType(S,singularValues);
+  matrixConversionToVectorType(X,transformedMatrix);
 }
+
+void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix, int rank) {
+  /**
+   * This function compute the singular value decomposition for given matrix
+   * Input Parameters
+   * matrix: provided data
+   * Output Parameters
+   * leftSingularVectors: stores the left singular vectors for given matrix
+   * rightSingularVectors: stores the right singular vectors for given matrix
+   * singularValues: stores the singular values for given matrix
+   * rank: used for truncated svd, the number of singular values that will be kept for truncated svd
+   */
+  int row = matrix.size();
+  int col = matrix.at(0).size();
+  int dim = 0;
+  if(row > col) {
+    dim = col;
+  }else {
+    dim = row;
+  }
+  MatrixXd A(row,col);
+  MatrixXd U(row,row);
+  MatrixXd V(col,col);
+  MatrixXd X(row,rank);
+  VectorXd S(dim);
+  matrixConversionToEigenType(matrix,A);
+  JacobiSVD<MatrixXd> svd(A,ComputeFullU | ComputeFullV);
+  U = svd.matrixU();
+  V = svd.matrixV();
+  S = svd.singularValues();
+  for(int i = 0; i < rank; ++i) {
+    X.col(i) = U.col(i)*sqrt(S(i));
+  }
+  // transform and store the matrix for the truncated svd
+  matrixConversionToVectorType(U.block(0,0,row,rank),leftSingularVectors);
+  matrixConversionToVectorType(V.block(0,0,col,rank),rightSingularVectors);
+  matrixConversionToVectorType(S.head(rank),singularValues);
+  matrixConversionToVectorType(X,transformedMatrix);
+}
+
 void matrixConversionToEigenType(std::vector<std::vector<double> > original, MatrixXd &converted) {
   /**
    * This function convert the data from type std::vector<std::vector<double> > to Eigen::MatrixXd
@@ -279,6 +324,7 @@ void matrixConversionToEigenType(std::vector<std::vector<double> > original, Mat
     }
   }
 }
+
 void matrixConversionToVectorType(MatrixXd original, std::vector<std::vector<double> > &converted) {
   /**
    * This function convert the data from type Eigen::VectorXd to type std::vector<double>

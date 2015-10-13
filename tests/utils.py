@@ -38,7 +38,7 @@ def checkAnswer(comment,value,expected,results,tol=1e-10):
     results["fail"] += 1
   else:
     results["pass"] += 1
-def checkArrayAllClose(comment,value,expected,results,tol=1e-10):
+def checkArrayAllClose(comment,value,expected,results,tol=1e-11):
   """ Will check if a test passes or fails and update the results dictionary.
     @ In, comment: A user-specified comment that will be printed with the test
                    case.
@@ -48,7 +48,7 @@ def checkArrayAllClose(comment,value,expected,results,tol=1e-10):
     @ In, tol: an optional tolerance value specifying how close expected and
                value should be.
   """
-  if np.allclose(value,expected,atol=tol):
+  if np.allclose(value,expected,rtol=tol,atol=tol):
     results["pass"] += 1
   else:
     print("checking answer",comment,value,"!=",expected)

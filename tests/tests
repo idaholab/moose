@@ -23,4 +23,10 @@
   input = 'test_eigen_svd.py'
   requires_swig2 = True
  [../]
+
+ [./test_mvn_pca]
+  type = 'CrowPython'
+  input = 'test_mvn_pca.py'
+  requires_swig2 = True
+ [../]
 []
