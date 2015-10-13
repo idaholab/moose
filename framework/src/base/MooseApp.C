@@ -428,14 +428,12 @@ MooseApp::executeExecutioner()
 bool
 MooseApp::isRecovering() const
 {
-  // We never "recover" a sub-app... they just get their state "pushed" to them from  above
   return _recover;
 }
 
 bool
 MooseApp::isRestarting() const
 {
-  // We never "restart" a sub-app... they just get their state "pushed" to them from  above
   return _restart;
 }
 
@@ -514,13 +512,21 @@ MooseApp::backup()
 }
 
 void
-MooseApp::restore(MooseSharedPointer<Backup> backup)
+MooseApp::restore(MooseSharedPointer<Backup> backup, bool for_restart)
 {
+  // This means that a Backup is coming through to use for restart / recovery
+  // We should just cache it for now
+  if (!_executioner)
+  {
+    _cached_backup = backup;
+    return;
+  }
+
   FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
 
   RestartableDataIO rdio(fe_problem);
 
-  rdio.restoreBackup(backup);
+  rdio.restoreBackup(backup, for_restart);
 }
 
 void
@@ -570,6 +576,13 @@ MooseApp::setOutputPosition(Point p)
 
   if (_executioner.get() != NULL)
     _executioner->parentOutputPositionChanged();
+}
+
+void
+MooseApp::setStartTime(const Real time)
+{
+  _start_time_set = true;
+  _start_time = time;
 }
 
 std::string
@@ -910,4 +923,31 @@ MooseApp::executeMeshModifiers()
 
   // Clear the modifiers, they are not used again during the simulation
   _mesh_modifiers.clear();
+}
+
+void
+MooseApp::setRestart(const bool & value)
+{
+  _restart = value;
+
+  MooseSharedPointer<FEProblem> fe_problem = _action_warehouse.problem();
+}
+
+void
+MooseApp::setRecover(const bool & value)
+{
+  _recover = value;
+}
+
+
+void
+MooseApp::restoreCachedBackup()
+{
+  if (!_cached_backup.get())
+    mooseError("No cached Backup to restore!");
+
+  restore(_cached_backup, isRestarting());
+
+  // Release our hold on this Backup
+  _cached_backup.reset();
 }

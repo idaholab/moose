@@ -93,11 +93,11 @@ Transient::Transient(const InputParameters & parameters) :
     _time_old(_problem.timeOld()),
     _dt(_problem.dt()),
     _dt_old(_problem.dtOld()),
-    _unconstrained_dt(declareRestartableData<Real>("unconstrained_dt", -1)),
-    _at_sync_point(declareRestartableData<bool>("at_sync_point", false)),
+    _unconstrained_dt(declareRecoverableData<Real>("unconstrained_dt", -1)),
+    _at_sync_point(declareRecoverableData<bool>("at_sync_point", false)),
     _first(declareRecoverableData<bool>("first", true)),
-    _multiapps_converged(declareRestartableData<bool>("multiapps_converged", true)),
-    _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
+    _multiapps_converged(declareRecoverableData<bool>("multiapps_converged", true)),
+    _last_solve_converged(declareRecoverableData<bool>("last_solve_converged", true)),
     _end_time(getParam<Real>("end_time")),
     _dtmin(getParam<Real>("dtmin")),
     _dtmax(getParam<Real>("dtmax")),
@@ -107,20 +107,20 @@ Transient::Transient(const InputParameters & parameters) :
     _trans_ss_check(getParam<bool>("trans_ss_check")),
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
-    _old_time_solution_norm(declareRestartableData<Real>("old_time_solution_norm", 0.0)),
+    _old_time_solution_norm(declareRecoverableData<Real>("old_time_solution_norm", 0.0)),
     _sync_times(_app.getOutputWarehouse().getSyncTimes()),
     _abort(getParam<bool>("abort_on_solve_fail")),
-    _time_interval(declareRestartableData<bool>("time_interval", false)),
+    _time_interval(declareRecoverableData<bool>("time_interval", false)),
     _start_time(getParam<Real>("start_time")),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
-    _target_time(declareRestartableData<Real>("target_time", -1)),
+    _target_time(declareRecoverableData<Real>("target_time", -1)),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
-    _picard_it(declareRestartableData<int>("picard_it", 0)),
+    _picard_it(declareRecoverableData<int>("picard_it", 0)),
     _picard_max_its(getParam<unsigned int>("picard_max_its")),
-    _picard_converged(declareRestartableData<bool>("picard_converged", false)),
-    _picard_initial_norm(declareRestartableData<Real>("picard_initial_norm", 0.0)),
-    _picard_timestep_begin_norm(declareRestartableData<Real>("picard_timestep_begin_norm", 0.0)),
-    _picard_timestep_end_norm(declareRestartableData<Real>("picard_timestep_end_norm", 0.0)),
+    _picard_converged(declareRecoverableData<bool>("picard_converged", false)),
+    _picard_initial_norm(declareRecoverableData<Real>("picard_initial_norm", 0.0)),
+    _picard_timestep_begin_norm(declareRecoverableData<Real>("picard_timestep_begin_norm", 0.0)),
+    _picard_timestep_end_norm(declareRecoverableData<Real>("picard_timestep_end_norm", 0.0)),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose"))
@@ -133,7 +133,7 @@ Transient::Transient(const InputParameters & parameters) :
   // Either a start_time has been forced on us, or we want to tell the App about what our start time is (in case anyone else is interested.
   if (_app.hasStartTime())
     _start_time = _app.getStartTime();
-  else
+  else if (parameters.paramSetByUser("start_time"))
     _app.setStartTime(_start_time);
 
   _time = _time_old = _start_time;

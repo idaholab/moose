@@ -308,7 +308,7 @@ RestartableDataIO::createBackup()
 }
 
 void
-RestartableDataIO::restoreBackup(MooseSharedPointer<Backup> backup)
+RestartableDataIO::restoreBackup(MooseSharedPointer<Backup> backup, bool for_restart)
 {
   unsigned int n_threads = libMesh::n_threads();
 
@@ -336,6 +336,11 @@ RestartableDataIO::restoreBackup(MooseSharedPointer<Backup> backup)
     backup->_restartable_data[tid]->read((char *)&this_n_procs, sizeof(this_n_procs));
     backup->_restartable_data[tid]->read((char *)&this_n_threads, sizeof(this_n_threads));
 
-    deserializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid], std::set<std::string>());
+    std::set<std::string> & recoverable_data = _fe_problem.getMooseApp().getRecoverableData();
+
+    if (for_restart) // When doing restart - make sure we don't read data that is only for recovery...
+      deserializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid], recoverable_data);
+    else
+      deserializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid], std::set<std::string>());
   }
 }

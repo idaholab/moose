@@ -154,7 +154,7 @@ public:
    *
    * @param time The start time for the simulation.
    */
-  void setStartTime(const Real time) { _start_time_set = true; _start_time = time; }
+  void setStartTime(const Real time);
 
   /**
    * @return Whether or not a start time has been programmatically set using setStartTime()
@@ -391,8 +391,11 @@ public:
 
   /**
    * Restore a Backup.  This sets the App's state.
+   *
+   * @param backup The Backup holding the data for the app
+   * @param for_restart Whether this restoration is explicitly for the first restoration of restart data
    */
-  void restore(MooseSharedPointer<Backup> backup);
+  void restore(MooseSharedPointer<Backup> backup, bool for_restart = false);
 
   /**
    * Returns a string to be printed at the beginning of a simulation
@@ -426,7 +429,24 @@ public:
    */
   void executeMeshModifiers();
 
-protected:
+  ///@{
+  /**
+   * Sets the restart/recover flags
+   * @param state The state to set the flag to
+   */
+  void setRestart(const bool & value);
+  void setRecover(const bool & value);
+  ///@}
+
+  /**
+   * Whether or not this MooseApp has cached a Backup to use for restart / recovery
+   */
+  bool hasCachedBackup() { return _cached_backup.get(); }
+
+  /**
+   * Restore from a cached backup
+   */
+  void restoreCachedBackup();
 
   /**
    * Helper method for dynamic loading of objects
@@ -579,14 +599,8 @@ private:
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, MooseSharedPointer<MeshModifier> > _mesh_modifiers;
 
-  ///@{
-  /**
-   * Sets the restart/recover flags
-   * @param value The state to set the flag to
-   */
-  void setRestart(const bool & value){ _restart = value; }
-  void setRecover(const bool & value){ _recover = value; }
-  ///@}
+  /// Cache for a Backup to use for restart / recovery
+  MooseSharedPointer<Backup> _cached_backup;
 
   // Allow FEProblem to set the recover/restart state, so make it a friend
   friend class FEProblem;

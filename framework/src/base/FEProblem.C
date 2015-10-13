@@ -500,6 +500,16 @@ void FEProblem::initialSetup()
        ++it)
     it->second->updateSeeds(EXEC_INITIAL);
 
+  if (_app.isRestarting() || _app.isRecovering())
+  {
+    if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a Backup
+      _app.restoreCachedBackup();
+    else
+      _resurrector->restartRestartableData();
+  }
+
+  // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ restartable data has been restored
+
   // Call initialSetup on the MultiApps
   _multi_apps(EXEC_LINEAR)[0].initialSetup();
   _multi_apps(EXEC_NONLINEAR)[0].initialSetup();
@@ -539,7 +549,11 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.push("Initial execMultiApps()","Setup");
     execMultiApps(EXEC_INITIAL);
     Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
+  }
 
+  // Yak is currently relying on doing this after initial Transfers
+  if (!_app.isRecovering())
+  {
     Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
 
     computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
@@ -565,16 +579,19 @@ void FEProblem::initialSetup()
 
   // Here we will initialize the stateful properties once more since they may have been updated
   // during initialSetup by calls to computeProperties.
-  if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
+  //
+  // It's really bad that we don't allow this during restart.  It means that we can't add new stateful materials
+  // during restart.  This is only happening because this _has_ to be below initial userobject execution.
+  // Otherwise this could be done up above... _before_ restoring restartable data... which would allow you to have
+  // this happen during restart.  I honestly have no idea why this has to happen after initial user object computation.
+  // THAT is something we should fix... so I've opened this ticket: #5804
+  if (!_app.isRecovering() && !_app.isRestarting() && (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
                                      _material_props, _bnd_material_props, _materials, _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
-
-  if (_app.isUltimateMaster() && (_app.isRestarting() || _app.isRecovering()))
-    _resurrector->restartRestartableData();
 
   // Scalar variables need to reinited for the initial conditions to be available for output
   for (unsigned int tid = 0; tid < n_threads; tid++)
