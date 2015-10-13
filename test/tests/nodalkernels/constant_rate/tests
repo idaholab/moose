@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'constant_rate.i'
+    exodiff = 'constant_rate_out.e'
+    scale_refine = 3
+  [../]
+[]

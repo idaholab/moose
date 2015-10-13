@@ -23,8 +23,10 @@
 #include "DamperWarehouse.h"
 #include "ConstraintWarehouse.h"
 #include "SplitWarehouse.h"
+#include "NodalKernelWarehouse.h"
 #include "TimeIntegrator.h"
 #include "Predictor.h"
+#include "NodalKernelWarehouse.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -102,6 +104,14 @@ public:
    * @param parameters Kernel parameters
    */
   virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Adds a NodalKernel
+   * @param kernel_name The type of the nodal kernel
+   * @param name The name of the kernel
+   * @param parameters Kernel parameters
+   */
+  virtual void addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a scalar kernel
@@ -425,6 +435,7 @@ public:
   const BCWarehouse & getBCWarehouse(THREAD_ID tid);
   const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
   const DamperWarehouse & getDamperWarehouse(THREAD_ID tid);
+  const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
   //@}
 
   /**
@@ -454,7 +465,7 @@ protected:
    * Compute the residual
    * @param type The type of kernels for which the residual is to be computed.
    */
-  void computeResidualInternal(Moose::KernelType type = Moose::KT_ALL);
+  void computeResidualInternal(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
 
   /**
    * Enforces nodal boundary conditions
@@ -508,6 +519,8 @@ protected:
   std::vector<DGKernelWarehouse> _dg_kernels;
   /// Dampers for each thread
   std::vector<DamperWarehouse> _dampers;
+  /// NodalKernels for each thread
+  std::vector<NodalKernelWarehouse> _nodal_kernels;
 
   /// Decomposition splits
   SplitWarehouse _splits;

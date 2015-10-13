@@ -27,6 +27,7 @@
 #include "ComputeJacobianBlocksThread.h"
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
+#include "ComputeNodalKernelsThread.h"
 #include "TimeKernel.h"
 #include "BoundaryCondition.h"
 #include "PresetNodalBC.h"
@@ -47,6 +48,7 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
+#include "NodalKernel.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -181,6 +183,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
 
   unsigned int n_threads = libMesh::n_threads();
   _kernels.resize(n_threads);
+  _nodal_kernels.resize(n_threads);
   _bcs.resize(n_threads);
   _dirac_kernels.resize(n_threads);
   _dg_kernels.resize(n_threads);
@@ -546,6 +549,30 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
 }
 
 void
+NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    // Set the parameters for thread ID and material data
+    parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
+
+    // Create the kernel object via the factory
+    MooseSharedPointer<NodalKernel> kernel = MooseSharedNamespace::static_pointer_cast<NodalKernel>(_factory.create(kernel_name, name, parameters, tid));
+
+    // Extract the SubdomainIDs from the object (via BlockRestrictable class)
+    std::set<SubdomainID> blk_ids = kernel->blockIDs();
+
+    // Add the kernel to the warehouse
+    _nodal_kernels[tid].addNodalKernel(kernel);
+  }
+
+  if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
+    _has_save_in = true;
+  if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
+    _has_diag_save_in = true;
+}
+
+void
 NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -720,7 +747,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
     residual.zero();
     residualVector(Moose::KT_TIME).zero();
     residualVector(Moose::KT_NONTIME).zero();
-    computeResidualInternal(type);
+    computeResidualInternal(residual, type);
     residualVector(Moose::KT_TIME).close();
     residualVector(Moose::KT_NONTIME).close();
     _time_integrator->postStep(residual);
@@ -1181,9 +1208,8 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
 
 void
- NonlinearSystem::computeResidualInternal(Moose::KernelType type)
+NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose::KernelType type)
 {
-
    // residualSetup() /////
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
@@ -1193,7 +1219,6 @@ void
     if (_doing_dg) _dg_kernels[i].residualSetup();
     _constraints[i].residualSetup();
   }
-
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
@@ -1229,6 +1254,17 @@ void
       }
       _fe_problem.addResidualScalar();
     }
+  }
+  PARALLEL_CATCH;
+
+  // residual contributions from NodalKernels
+  PARALLEL_TRY
+  {
+    ComputeNodalKernelsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, residual);
+
+    ConstNodeRange & range = *_mesh.getLocalNodeRange();
+
+    cnk(range);
   }
   PARALLEL_CATCH;
 
@@ -2309,6 +2345,9 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
   std::set<std::string> kernel_variables;
 
   bool global_kernels_exist = _kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
+
+  global_kernels_exist |= _nodal_kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
+
   _constraints[0].subdomainsCovered(input_subdomains, kernel_variables);
   if (!global_kernels_exist && check_kernel_coverage)
   {
