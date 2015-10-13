@@ -14,7 +14,7 @@ app_name = 'crow'
 
 MOOSE_DIR = os.path.abspath(os.path.join('..', 'moose'))
 if os.listdir(MOOSE_DIR) == []:
-  MOOSE_DIR = os.path.abspath(os.path.join('../..','moose'))
+  MOOSE_DIR = os.path.abspath(os.path.join('..','..','moose'))
   if os.listdir(MOOSE_DIR) == []:
     print("MOOSE_DIR: " + MOOSE_DIR)
     print("Error: The above MOOSE_DIR is empty! Please check!")
