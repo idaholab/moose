@@ -114,6 +114,15 @@ namespace RELAP7
   };
 
   /**
+   * Interfacial heat transfer model used in 7eqn model
+   */
+  enum EInterfacialHeatTransferModelType
+  {
+    IHTM_SIMPLE = 0,
+    IHTM_TRACE = 1
+  };
+
+  /**
    * Check valve type
    */
   enum ECheckValveType
