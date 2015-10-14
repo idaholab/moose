@@ -35,6 +35,7 @@
 #include "MooseApp.h"
 #include "MooseEnum.h"
 #include "MultiMooseEnum.h"
+#include "MultiApp.h"
 
 #include "GlobalParamsAction.h"
 
@@ -49,6 +50,13 @@
 
 // libMesh
 #include "libmesh/getpot.h"
+
+// Free function for removing cli flags
+bool isFlag(const std::string s)
+{
+  return s.length() && s[0] == '-';
+}
+
 
 Parser::Parser(MooseApp & app, ActionWarehouse & action_wh) :
     ConsoleStreamInterface(app),
@@ -145,8 +153,18 @@ Parser::parse(const std::string &input_filename)
 
   MooseUtils::checkFileReadable(input_filename, true);
 
+  _getpot_file.absorb(*_app.commandLine()->getPot());
+
   // GetPot object
+  _getpot_file.enable_request_recording();
   _getpot_file.parse_input_file(input_filename);
+
+  /**
+   * We re-parse the exact same file for error checking purposes. We don't want all of the CLI variables
+   * involved in error checks.
+   */
+  _getpot_file_error_checking.parse_input_file(input_filename);
+
   _getpot_initialized = true;
   _inactive_strings.clear();
 
@@ -170,7 +188,7 @@ Parser::parse(const std::string &input_filename)
   // input which the user failed to wrap in quotes e.g.: v = 1 2
   {
     std::set<std::string> knowns;
-    std::vector<std::string> ufos = _getpot_file.unidentified_nominuses(knowns);
+    std::vector<std::string> ufos = _getpot_file_error_checking.unidentified_nominuses();
     if (!ufos.empty())
     {
       Moose::err << "Error: the following unidentified entries were found in your input file:" << std::endl;
@@ -179,7 +197,6 @@ Parser::parse(const std::string &input_filename)
       mooseError("Your input file may have a syntax error, or you may have forgotten to put quotes around a vector, ie. v='1 2'.");
     }
   }
-
 
   section_names = _getpot_file.get_section_names();
   appendAndReorderSectionNames(section_names);
@@ -281,11 +298,67 @@ Parser::checkActiveUsed(std::vector<std::string > & sections,
 }
 
 void
-Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file) const
+Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file, MooseSharedPointer<FEProblem> fe_problem) const
 {
+  // Make sure that multiapp overrides were processed properly
+  int last = all_vars.size() - 1;                      // last is allowed to go negative
+  for (int i = 0; i <= last; /* no increment */)       // i is an int because last is an int
+  {
+    std::string multi_app, variable;
+    int app_num;
+
+    /**
+     * Command line parameters that contain a colon are assumed to apply to MultiApps
+     * (e.g.  MultiApp_name[num]:fully_qualified_parameter)
+     *
+     * Note: Two separate regexs are used since the digit part is optional. Attempting
+     * to have an optional capture into a non-string type will cause pcrecpp to report
+     * false. Capturing into a string an converting is more work than just using two
+     * regexs to begin with.
+     */
+    if (pcrecpp::RE("(.*?)"                                             // Match the MultiApp name
+                    "(\\d+)"                                            // MultiApp number (leave off to apply to all MultiApps with this name)
+                    ":"                                                 // the colon delimiter
+                    "(.*)"                                              // the variable override that applies to the MultiApp
+          ).FullMatch(all_vars[i], &multi_app, &app_num, &variable) &&
+        fe_problem->hasMultiApp(multi_app) &&                           // Make sure the MultiApp exists
+        // Finally make sure the number is in range (if provided)
+        static_cast<unsigned int>(app_num) < fe_problem->getMultiApp(multi_app)->numGlobalApps())
+
+
+      // delete the current item by copying the last item to this position and decrementing the vector end position
+      all_vars[i] = all_vars[last--];
+
+    else if (pcrecpp::RE("(.*?)"                                        // Same as above without the MultiApp number
+                         ":"
+                         "(.*)"
+               ).FullMatch(all_vars[i], &multi_app, &variable) &&
+             fe_problem->hasMultiApp(multi_app))                        // Make sure the MultiApp exists but no need to check numbers
+
+      // delete (see comment above)
+      all_vars[i] = all_vars[last--];
+
+
+    // TODO: check to see if globals are unused
+    else if (all_vars[i].find(":") == 0)
+      all_vars[i] = all_vars[last--];
+
+    else
+      // only increment if we didn't "delete", otherwise we'll need to revisit the current index due to copy
+      ++i;
+  }
+
+  mooseAssert(last + 1 >= 0, "index \"last\" is negative");
+
+  // Remove the deleted items
+  all_vars.resize(last+1);
+
   std::set<std::string> difference;
 
   std::sort(all_vars.begin(), all_vars.end());
+
+  // Remove flags, they aren't "input" parameters
+  all_vars.erase( std::remove_if(all_vars.begin(), all_vars.end(), isFlag), all_vars.end() );
 
   std::set_difference(all_vars.begin(), all_vars.end(), _extracted_vars.begin(), _extracted_vars.end(),
                       std::inserter(difference, difference.end()));
@@ -299,12 +372,18 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
         difference.erase(curr);
     }
 
-  if (!difference.empty())
+  std::set<std::string> requested_vars = _getpot_file.get_requested_variables();
+
+  std::set<std::string> no_overrides;
+  std::set_difference(difference.begin(), difference.end(), requested_vars.begin(), requested_vars.end(),
+                      std::inserter(no_overrides, no_overrides.end()));
+
+  if (!no_overrides.empty())
   {
     std::ostringstream oss;
 
     oss << "The following parameters were unused " << (in_input_file ? "in your input file:\n" : "on the command line:\n");
-    for (std::set<std::string>::iterator i=difference.begin(); i != difference.end(); ++i)
+    for (std::set<std::string>::iterator i=no_overrides.begin(); i != no_overrides.end(); ++i)
       oss << *i << "\n";
 
     if (error_on_warn)
@@ -321,7 +400,7 @@ Parser::checkOverriddenParams(bool error_on_warn) const
     // The user has requested errors but we haven't done any parsing yet so throw an error
     mooseError("No parsing has been done, so checking for overridden parameters is not possible");
 
-  std::set<std::string> overridden_vars = _getpot_file.get_overridden_variables();
+  std::set<std::string> overridden_vars = _getpot_file_error_checking.get_overridden_variables();
 
   if (!overridden_vars.empty())
   {
