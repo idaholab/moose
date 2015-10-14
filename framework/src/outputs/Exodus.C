@@ -30,6 +30,9 @@ InputParameters validParams<Exodus>()
   // Enable sequential file output (do not set default, the use_displace criteria relies on isParamValid, see Constructor)
   params.addParam<bool>("sequence", "Enable/disable sequential file output (enabled by default when 'use_displace = true', otherwise defaults to false");
 
+  // Select problem dimension for mesh output
+  params.addParam<bool>("use_problem_dimension", "Use the problem dimension to the mesh output. Set to false when outputting lower dimensional meshes embedded in a higher dimensional space.");
+
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;
 
@@ -136,9 +139,14 @@ Exodus::outputSetup()
     _exodus_num = 1;
   }
 
-  // Utilize the spatial dimensions
-  if (_es_ptr->get_mesh().mesh_dimension() != 1)
-    _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
+  if (isParamValid("use_problem_dimension"))
+    _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(getParam<bool>("use_problem_dimension"));
+  else
+  {
+    // Utilize the spatial dimensions
+    if (_es_ptr->get_mesh().mesh_dimension() != 1)
+      _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
+  }
 }
 
 
