@@ -38,10 +38,15 @@ for i in range(len(cov)):
   covCpp[i] = cov[i]
 
 # call the functions from the crow to compute the svd
-genMethod = "pca"
+covType = "abs"
 rank = 4
-mvnDistribution = distribution1D.BasicMultivariateNormal(covCpp,muCpp,str(genMethod),rank)
+mvnDistribution = distribution1D.BasicMultivariateNormal(covCpp,muCpp,str(covType),rank)
 
+#compute the gold solution:
+mu = np.asarray(mu)
+coordinateInOriginalSpace += mu
+
+#call crow to compute the coordinate
 coordinate = mvnDistribution.coordinateInTransformedSpace(rank)
 Xcoordinate = mvnDistribution.coordinateInverseTransformed(coordinate)
 

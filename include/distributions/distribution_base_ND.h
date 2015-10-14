@@ -434,8 +434,7 @@ public:
   BasicMultivariateNormal(std::string data_filename, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu);
-  BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char * genMethod);
-  BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char * genMethod,int rank);
+  BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char * type,int rank);
 
   //void BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu);
   void BasicMultivariateNormal_init(int & rows, int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
@@ -472,6 +471,7 @@ public:
   void computeSVD(std::vector<std::vector<double> > vecCovMatrix);
   void computeSVD(std::vector<double> vecCovMatrix);
   void computeSVD(std::vector<double> vecCovMatrix,int rank);
+  double pdfInTransformedSpace(std::vector<double> x);
 
 
 private:
@@ -486,7 +486,7 @@ private:
   int _rank; // used for dimensionality reduction
   // store U*sqrt(S), where U, S, V = svd(A)
   std::vector<std::vector<double> > _svdTransformedMatrix;
-
+  std::string _covarianceType;
   double _determinant_cov_matrix;
 
   BasicMultiDimensionalCartesianSpline _cartesianDistribution;

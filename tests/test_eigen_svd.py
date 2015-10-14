@@ -32,8 +32,9 @@ for i in range(len(cov)):
   covCpp[i] = cov[i]
 
 # call the functions from the crow to compute the svd
-genMethod = "pca"
-mvnDistribution = distribution1D.BasicMultivariateNormal(covCpp,muCpp,str(genMethod))
+covType = "abs"
+rank = 5
+mvnDistribution = distribution1D.BasicMultivariateNormal(covCpp,muCpp,str(covType),5)
 
 dim = mvnDistribution.getSingularValuesDimension()
 sCpp_vector = mvnDistribution.getSingularValues()

@@ -328,74 +328,40 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
 
 	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
 }
-BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* genMethod){
+BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* type, int rank){
   /**
    * This is the function that initializes the Multivariate normal distribution given:
+   * This function will compute the svd of given vecCovMatrix
    * Input Parameters
    * - vecCovMatrix: covariance matrix stored in a vector<double>
    * - mu: the mean value vector
-   * - genMethod: 'spline' or 'pca', this indicate which method is used to calculate the inverseCdf
-   */
-  int rows, columns;
-  std::vector<std::vector<double> > covMatrix;
-  // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
-  vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
-  if (std::string(genMethod) == "spline") {
-	  BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
-  } else if (std::string(genMethod) == "pca") {
-    _mu = mu;
-    _cov_matrix = covMatrix;
-    std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
-    computeInverse(_cov_matrix, inverseCovMatrix);
-    for (int i=0;i<rows;i++){
-      std::vector<double> temp;
-	    for (int j=0;j<columns;j++) {
-	      temp.push_back(inverseCovMatrix.at(i).at(j));
-      }
-	    _inverse_cov_matrix.push_back(temp);
-    }
-    _determinant_cov_matrix = getDeterminant(_cov_matrix);
-    //compute the svd
-    computeSVD(_cov_matrix);
-  }
-}
-BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* genMethod, int rank){
-  /**
-   * This is the function that initializes the Multivariate normal distribution given:
-   * Input Parameters
-   * - vecCovMatrix: covariance matrix stored in a vector<double>
-   * - mu: the mean value vector
-   * - genMethod: 'spline' or 'pca', this indicate which method is used to calculate the inverseCdf
    * - rank: the reduced dimension 
    */
   int rows, columns;
   std::vector<std::vector<double> > covMatrix;
   // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
-  if (std::string(genMethod) == "spline") {
-	  BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
-  } else if (std::string(genMethod) == "pca") {
-    _mu = mu;
-    _cov_matrix = covMatrix;
-    _rank = rank;
-    if(_rank > _mu.size()) {
-      std::cout << " WARNING: The  provided rank = " << rank << " is larger than the given problem's dimension = " << _mu.size() << std::endl;
-      _rank = _mu.size();
-      std::cout << "The rank will be resetted to the given problem's dimension, i.e. " << _mu.size() << std::endl;
-    }
-    std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
-    computeInverse(_cov_matrix, inverseCovMatrix);
-    for (int i=0;i<rows;i++){
-      std::vector<double> temp;
-	    for (int j=0;j<columns;j++) {
-	      temp.push_back(inverseCovMatrix.at(i).at(j));
-      }
-	    _inverse_cov_matrix.push_back(temp);
-    }
-    _determinant_cov_matrix = getDeterminant(_cov_matrix);
-    //compute the svd
-    computeSVD(_cov_matrix, _rank);
+  _mu = mu;
+  _cov_matrix = covMatrix;
+  _rank = rank;
+  _covarianceType = std::string(type);
+  if(_rank > _mu.size()) {
+    std::cout << " WARNING: The  provided rank = " << rank << " is larger than the given problem's dimension = " << _mu.size() << std::endl;
+    _rank = _mu.size();
+    std::cout << "The rank will be resetted to the given problem's dimension, i.e. " << _mu.size() << std::endl;
   }
+  
+  std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
+  computeInverse(_cov_matrix, inverseCovMatrix);
+  for (int i=0;i<rows;i++){
+	std::vector<double> temp;
+	  for (int j=0;j<columns;j++)
+	   temp.push_back(inverseCovMatrix.at(i).at(j));
+	  _inverse_cov_matrix.push_back(temp);
+  }
+  _determinant_cov_matrix = getDeterminant(_cov_matrix);
+  //compute the svd
+  computeSVD(_cov_matrix, _rank);
 }
 
 void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix) {
@@ -517,14 +483,13 @@ std::vector<double> BasicMultivariateNormal::coordinateInTransformedSpace(int ra
    * This function will return the coordinate in the transformed space
    * rank: the effective dimension of the transformed space
    */
-  std::cout << "BasicMultivariateNormal::coordinateInProjectedSpace" << std::endl;
+  //std::cout << "BasicMultivariateNormal::coordinateInTransformedSpace" << std::endl;
   std::vector<double> coordinate;
   BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
+  DistributionContainer *distributionInstance = & DistributionContainer::Instance();
   double randValue = 0.0;
   for(int i = 0; i < rank; ++i) {
-    DistributionContainer *distributionInstance = & DistributionContainer::Instance();
     randValue = distributionInstance->random();
-    std::cout << "random value: " << randValue << std::cout;
     double coordinateValue = normalDistribution->InverseCdf(randValue);
     coordinate.push_back(coordinateValue);
   }
@@ -537,6 +502,7 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
    * This function will transform the coordinate back to the original space
    * coordinate: the coordinate in the transformed space
    */
+  //std::cout << "BasicMultivariateNormal::coordinateInverseTransformed" << std::endl;
   std::vector<double> originalCoordinate;
   for(int irow = 0; irow < _svdTransformedMatrix.size(); ++irow) {
     double tempSum = 0.0;
@@ -544,6 +510,17 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
       tempSum = tempSum + _svdTransformedMatrix.at(irow).at(icol) * coordinate.at(icol);
     }
     originalCoordinate.push_back(tempSum);
+  }
+  if(_covarianceType == "abs") {
+    for(int idim = 0; idim < originalCoordinate.size(); ++idim) {
+      originalCoordinate.at(idim) += _mu.at(idim); 
+    } 
+  } else if (_covarianceType == "rel") {
+    for(int idim = 0; idim < originalCoordinate.size(); ++idim) {
+      originalCoordinate.at(idim) = _mu.at(idim)*(1.0 + originalCoordinate.at(idim));
+    } 
+  } else {
+    throwError("MultivariateNormal Error: covariance type is not available");
   }
   return originalCoordinate;
 }
@@ -571,6 +548,23 @@ double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double
    return value;
 }
 
+double BasicMultivariateNormal::pdfInTransformedSpace(std::vector<double> x){
+	/**
+	 * This function calculates the pdf values at x in the PCA transformed space
+   * x: the coordinate in the transformed space
+	 */
+  double value = 1.0;
+  BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
+  if (x.size() == _rank) {
+    for (int i = 0; i < x.size(); ++i) {
+      value *=  normalDistribution->Pdf(x.at(i));
+    }
+  } else {
+    throwError("MultivariateNormal PDF in the PCA transformed space error: evaluate point dimensionality is not correct! ")
+  }
+  delete normalDistribution;
+	return value;
+}
 
 double BasicMultivariateNormal::Pdf(std::vector<double> x){
 	  /**
