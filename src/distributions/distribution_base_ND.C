@@ -350,16 +350,17 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
     _rank = _mu.size();
     std::cout << "The rank will be resetted to the given problem's dimension, i.e. " << _mu.size() << std::endl;
   }
-  
-  std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
-  computeInverse(_cov_matrix, inverseCovMatrix);
-  for (int i=0;i<rows;i++){
-	std::vector<double> temp;
-	  for (int j=0;j<columns;j++)
-	   temp.push_back(inverseCovMatrix.at(i).at(j));
-	  _inverse_cov_matrix.push_back(temp);
+  if (_rank == _mu.size()) { 
+    std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
+    computeInverse(_cov_matrix, inverseCovMatrix);
+    for (int i=0;i<rows;i++){
+	    std::vector<double> temp;
+	    for (int j=0;j<columns;j++)
+	    temp.push_back(inverseCovMatrix.at(i).at(j));
+	    _inverse_cov_matrix.push_back(temp);
+    }
+    _determinant_cov_matrix = getDeterminant(_cov_matrix);
   }
-  _determinant_cov_matrix = getDeterminant(_cov_matrix);
   //compute the svd
   computeSVD(_cov_matrix, _rank);
 }
