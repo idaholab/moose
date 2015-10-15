@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<KKSACBulkF>()
 {
   InputParameters params = validParams<KKSACBulkBase>();
-  // params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
+  params.addClassDescription("KKS model kernel (part 1 of 2) for the Bulk Allen-Cahn. This includes all terms NOT dependent on chemical potential.");
   params.addRequiredParam<Real>("w", "Double well height parameter");
   params.addParam<MaterialPropertyName>("g_name", "g", "Base name for the double well function g(eta)");
   return params;
@@ -40,8 +40,6 @@ KKSACBulkF::computeDFDOP(PFFunctionType type)
       res =  -_prop_d2h[_qp] * A1
             + _w * _prop_d2g[_qp];
 
-      // the -\frac{dh}{d\eta}\left(\frac{dF_a}{d\eta}-\frac{dF_b}{d\eta}\right)
-      // term is handled in KKSACBulkC!
       return _phi[_j][_qp] * res;
     }
   }
@@ -57,9 +55,14 @@ KKSACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  Real res = _prop_dh[_qp] * (  (*_derivatives_Fa[cvar])[_qp]
-                              - (*_derivatives_Fb[cvar])[_qp])
-                           * _phi[_j][_qp];
-  return res * _test[_j][_qp];
-}
+  // first get dependence of mobility _L on other variables using parent class
+  // member function
+  Real res = ACBulk::computeQpOffDiagJacobian(jvar);
 
+  // Then add dependence of KKSACBulkF on other variables
+  res -= _L[_qp] * _prop_dh[_qp] * (
+           (*_derivatives_Fa[cvar])[_qp] - (*_derivatives_Fb[cvar])[_qp]
+         ) * _phi[_j][_qp] * _test[_i][_qp];
+
+  return res;
+}

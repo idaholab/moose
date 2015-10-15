@@ -26,6 +26,8 @@ class KKSACBulkBase : public ACBulk
 public:
   KKSACBulkBase(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
 protected:
   /// Number of coupled variables
   unsigned int _nvar;
