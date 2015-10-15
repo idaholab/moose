@@ -7,6 +7,8 @@ using namespace libMesh;
 
 // gravitational acceleration, or gravity constant
 static const Real gravity_const = 9.81;
+// Critical pressure
+static const Real P_critical = 22.09E+6;
 
 /**
  * The sign function
