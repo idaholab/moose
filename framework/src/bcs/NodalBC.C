@@ -102,7 +102,7 @@ NodalBC::computeJacobian()
     dof_id_type cached_row = _var.nodalDofIndex();
 
     // Cache the user's computeQpJacobian() value for later use.
-    _fe_problem.assembly(0).cacheNodalBCJacobianEntry(cached_row, cached_row, cached_val);
+    _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_row, cached_val);
 
     if (_has_diag_save_in)
     {
@@ -127,7 +127,7 @@ NodalBC::computeOffDiagJacobian(unsigned int jvar)
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
 
     // Cache the user's computeQpJacobian() value for later use.
-    _fe_problem.assembly(0).cacheNodalBCJacobianEntry(cached_row, cached_col, cached_val);
+    _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_col, cached_val);
   }
 }
 

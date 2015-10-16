@@ -431,31 +431,24 @@ public:
   std::map<FEType, bool> _need_second_derivative;
 
   /**
-   * Caches the NodalBC Jacobian entry 'value', to eventually be
-   * stored in the (i,j) location of the matrix.
-   *
-   * We can't add NodalBC values to the Jacobian (or preconditioning)
-   * matrix at the time they are computed -- we instead need to
-   * overwrite an entire row of values with the Jacobian associated to
-   * the NodalBC, which may be coupled to other variables, *after*
-   * matrix assembly is finished.
+   * Caches the Jacobian entry 'value', to eventually be
+   * added/set in the (i,j) location of the matrix.
    *
    * We use numeric_index_type for the index arrays (rather than
    * dof_id_type) since that is what the SparseMatrix interface uses,
    * but at the time of this writing, those two types are equivalent.
    */
-  void cacheNodalBCJacobianEntry(numeric_index_type i, numeric_index_type j, Real value);
+  void cacheJacobianContribution(numeric_index_type i, numeric_index_type j, Real value);
 
   /**
-   * Clears any cached NodalBC Jacobian entries that have been
-   * accumulated during previous Assembly calls.
+   * Sets previously-cached Jacobian values via SparseMatrix::set() calls.
    */
-  void clearCachedNodalBCJacobianEntries();
+  void setCachedJacobianContributions(SparseMatrix<Number> & jacobian);
 
   /**
-   * Sets previously-cached NodalBC Jacobian values via SparseMatrix::set() calls.
+   * Adds previously-cached Jacobian values via SparseMatrix::add() calls.
    */
-  void setCachedNodalBCJacobianEntries(SparseMatrix<Number> & jacobian);
+  void addCachedJacobianContributions(SparseMatrix<Number> & jacobian);
 
 protected:
   /**
@@ -483,6 +476,14 @@ protected:
   void setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor);
 
   void addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
+
+
+  /**
+   * Clear any currently cached jacobian contributions
+   *
+   * This is automatically called by setCachedJacobianContributions and addCachedJacobianContributions
+   */
+  void clearCachedJacobianContributions();
 
   SystemBase & _sys;
   /// Reference to coupling matrix
@@ -710,11 +711,11 @@ protected:
   std::vector<dof_id_type> _temp_dof_indices;
 
   /**
-   * Storage for cached NodalBC data.
+   * Storage for cached Jacobian entries
    */
-  std::vector<Real> _cached_nodal_bc_vals;
-  std::vector<numeric_index_type> _cached_nodal_bc_rows;
-  std::vector<numeric_index_type> _cached_nodal_bc_cols;
+  std::vector<Real> _cached_jacobian_contribution_vals;
+  std::vector<numeric_index_type> _cached_jacobian_contribution_rows;
+  std::vector<numeric_index_type> _cached_jacobian_contribution_cols;
 };
 
 #endif /* ASSEMBLY_H */

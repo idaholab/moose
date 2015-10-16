@@ -1260,7 +1260,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
   // residual contributions from NodalKernels
   PARALLEL_TRY
   {
-    ComputeNodalKernelsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, residual);
+    ComputeNodalKernelsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels);
 
     ConstNodeRange & range = *_mesh.getLocalNodeRange();
 
@@ -1894,9 +1894,6 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     _fe_problem.getAuxiliarySystem().solution().close();
 
   PARALLEL_TRY {
-    // Make sure there are no cached NodalBC entries hanging around from the last assembly
-    _fe_problem.assembly(0).clearCachedNodalBCJacobianEntries();
-
     // Cache the information about which BCs are coupled to which
     // variables, so we don't have to figure it out for each node.
     std::map<std::string, std::set<unsigned int> > bc_involved_vars;
@@ -1974,7 +1971,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     } // end loop over boundary nodes
 
     // Set the cached NodalBC values in the Jacobian matrix
-    _fe_problem.assembly(0).setCachedNodalBCJacobianEntries(jacobian);
+    _fe_problem.assembly(0).setCachedJacobianContributions(jacobian);
   }
   PARALLEL_CATCH;
   jacobian.close();
