@@ -114,14 +114,14 @@ NodalKernel::subProblem()
 }
 
 void
-NodalKernel::computeResidual(NumericVector<Number> & residual)
+NodalKernel::computeResidual()
 {
   if (_var.isNodalDefined())
   {
     dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     Real res = computeQpResidual();
-    residual.add(dof_idx, res);
+    _assembly.cacheResidualContribution(dof_idx, res, Moose::KT_NONTIME);
 
     if (_has_save_in)
     {

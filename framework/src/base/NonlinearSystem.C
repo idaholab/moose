@@ -1264,7 +1264,11 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
 
     ConstNodeRange & range = *_mesh.getLocalNodeRange();
 
-    cnk(range);
+    Threads::parallel_reduce(range, cnk);
+
+    unsigned int n_threads = libMesh::n_threads();
+    for (unsigned int i=0; i<n_threads; i++) // Add any cached residuals that might be hanging around
+      _fe_problem.addCachedResidual(i);
   }
   PARALLEL_CATCH;
 

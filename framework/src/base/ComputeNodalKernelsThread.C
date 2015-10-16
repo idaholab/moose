@@ -23,12 +23,10 @@
 
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(FEProblem & fe_problem,
                                                      AuxiliarySystem & sys,
-                                                     std::vector<NodalKernelWarehouse> & nodal_kernels,
-                                                     NumericVector<Number> & residual) :
+                                                     std::vector<NodalKernelWarehouse> & nodal_kernels) :
     _fe_problem(fe_problem),
     _sys(sys),
-    _nodal_kernels(nodal_kernels),
-    _residual(residual)
+    _nodal_kernels(nodal_kernels)
 {
 }
 
@@ -36,8 +34,7 @@ ComputeNodalKernelsThread::ComputeNodalKernelsThread(FEProblem & fe_problem,
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split /*split*/) :
     _fe_problem(x._fe_problem),
     _sys(x._sys),
-    _nodal_kernels(x._nodal_kernels),
-    _residual(x._residual)
+    _nodal_kernels(x._nodal_kernels)
 {
 }
 
@@ -46,6 +43,8 @@ ComputeNodalKernelsThread::operator() (const ConstNodeRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
+
+  unsigned int num_cached = 0;
 
   for (ConstNodeRange::const_iterator node_it = range.begin() ; node_it != range.end(); ++node_it)
   {
@@ -66,7 +65,16 @@ ComputeNodalKernelsThread::operator() (const ConstNodeRange & range)
       for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = _nodal_kernels[_tid].activeBlockNodalKernels(*block_it).begin();
           nodal_kernel_it != _nodal_kernels[_tid].activeBlockNodalKernels(*block_it).end();
           ++nodal_kernel_it)
-        (*nodal_kernel_it)->computeResidual(_residual);
+        (*nodal_kernel_it)->computeResidual();
+    }
+
+    num_cached++;
+
+    if (num_cached % 20 == 0) // Cache 20 nodes worth before adding into the residual
+    {
+      num_cached = 0;
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _fe_problem.addCachedResidual(_tid);
     }
   }
 }

@@ -3,6 +3,13 @@
     type = 'Exodiff'
     input = 'constant_rate.i'
     exodiff = 'constant_rate_out.e'
-    scale_refine = 3
+  [../]
+
+  [./threaded]
+    type = 'Exodiff'
+    input = 'constant_rate.i'
+    exodiff = 'constant_rate_out.e'
+    min_threads = '3'
+    prereq = 'test' # Force ordering since they output the same files
   [../]
 []

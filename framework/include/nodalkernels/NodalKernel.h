@@ -96,7 +96,7 @@ public:
    * Note: This is NOT what a user would normally want to override.
    * Usually a user would override computeQpResidual()
    */
-  virtual void computeResidual(NumericVector<Number> & residual);
+  virtual void computeResidual();
 
   /**
    * Compute the Jacobian at one node.

@@ -1116,6 +1116,14 @@ Assembly::cacheResidual()
 }
 
 void
+Assembly::cacheResidualContribution(dof_id_type dof, Real value, Moose::KernelType type)
+{
+  _cached_residual_values[type].push_back(value);
+  _cached_residual_rows[type].push_back(dof);
+}
+
+
+void
 Assembly::cacheResidualNeighbor()
 {
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);

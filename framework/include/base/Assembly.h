@@ -342,6 +342,15 @@ public:
   void cacheResidual();
 
   /**
+   * Cache individual residual contributions.  These will ultimately get added to the residual when addCachedResidual() is called.
+   *
+   * @param dof The degree of freedom to add the residual contribution to
+   * @param value The value of the residual contribution.
+   * @param type Whether the contribution should go to the Time or Non-Time residual
+   */
+  void cacheResidualContribution(dof_id_type dof, Real value, Moose::KernelType type);
+
+  /**
    * Takes the values that are currently in _sub_Ke and appends them to the cached values.
    */
   void cacheResidualNeighbor();

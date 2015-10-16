@@ -30,7 +30,7 @@ class AuxiliarySystem;
 class ComputeNodalKernelsThread
 {
 public:
-  ComputeNodalKernelsThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<NodalKernelWarehouse> & nodal_kernels, NumericVector<Number> & residual);
+  ComputeNodalKernelsThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<NodalKernelWarehouse> & nodal_kernels);
 
   // Splitting Constructor
   ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split);
@@ -45,8 +45,6 @@ protected:
   THREAD_ID _tid;
 
   std::vector<NodalKernelWarehouse> & _nodal_kernels;
-
-  NumericVector<Number> & _residual;
 };
 
 #endif //COMPUTENODALKERNELSTHREAD_H
