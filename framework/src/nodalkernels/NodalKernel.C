@@ -65,6 +65,7 @@ NodalKernel::NodalKernel(const InputParameters & parameters) :
     _current_node(_var.node()),
     _u(_var.nodalSln()),
     _u_dot(_var.nodalSlnDot()),
+    _du_dot_du(_var.nodalSlnDuDotDu()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
 
@@ -134,34 +135,27 @@ NodalKernel::computeResidual()
 
 void
 NodalKernel::computeJacobian()
-{/*
-  // We call the user's computeQpJacobian() function and store the
-  // results in the _assembly object. We can't store them directly in
-  // the element stiffness matrix, as they will only be inserted after
-  // all the assembly is done.
+{
   if (_var.isNodalDefined())
   {
     _qp = 0;
     Real cached_val = computeQpJacobian();
     dof_id_type cached_row = _var.nodalDofIndex();
 
-    // Cache the user's computeQpJacobian() value for later use.
-    _fe_problem.assembly(0).cacheNodalBCJacobianEntry(cached_row, cached_row, cached_val);
+    _assembly.cacheJacobianContribution(cached_row, cached_row, cached_val);
 
     if (_has_diag_save_in)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i=0; i<_diag_save_in.size(); i++)
-        _diag_save_in[i]->sys().solution().set(_diag_save_in[i]->nodalDofIndex(), cached_val);
+        _diag_save_in[i]->sys().solution().add(_diag_save_in[i]->nodalDofIndex(), cached_val);
     }
   }
- */
 }
 
 void
 NodalKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  /*
   if (jvar == _var.number())
     computeJacobian();
   else
@@ -172,10 +166,8 @@ NodalKernel::computeOffDiagJacobian(unsigned int jvar)
     // Note: this only works for Lagrange variables...
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
 
-    // Cache the user's computeQpJacobian() value for later use.
-    _fe_problem.assembly(0).cacheNodalBCJacobianEntry(cached_row, cached_col, cached_val);
+    _assembly.cacheJacobianContribution(cached_row, cached_col, cached_val);
   }
-  */
 }
 
 

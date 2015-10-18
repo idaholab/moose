@@ -166,6 +166,9 @@ protected:
   /// Time derivative of the variable this is acting on
   VariableValue & _u_dot;
 
+  /// Derivative of u_dot with respect to u
+  VariableValue & _du_dot_du;
+
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
   std::vector<MooseVariable*> _save_in;

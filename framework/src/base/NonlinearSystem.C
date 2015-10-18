@@ -28,6 +28,7 @@
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
 #include "ComputeNodalKernelsThread.h"
+#include "ComputeNodalKernelJacobiansThread.h"
 #include "TimeKernel.h"
 #include "BoundaryCondition.h"
 #include "PresetNodalBC.h"
@@ -1837,6 +1838,17 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         unsigned int n_threads = libMesh::n_threads();
         for (unsigned int i=0; i<n_threads; i++) // Add any Jacobian contributions still hanging around
           _fe_problem.addCachedJacobian(jacobian, i);
+
+        if (!_nodal_kernels.empty())
+        {
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
+          ConstNodeRange & range = *_mesh.getLocalNodeRange();
+          Threads::parallel_reduce(range, cnkjt);
+
+          unsigned int n_threads = libMesh::n_threads();
+          for (unsigned int i=0; i<n_threads; i++) // Add any cached jacobians that might be hanging around
+            _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
+        }
       }
       break;
 
@@ -1849,6 +1861,17 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 
         for (unsigned int i=0; i<n_threads; i++)
           _fe_problem.addCachedJacobian(jacobian, i);
+
+        if (!_nodal_kernels.empty())
+        {
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
+          ConstNodeRange & range = *_mesh.getLocalNodeRange();
+          Threads::parallel_reduce(range, cnkjt);
+
+          unsigned int n_threads = libMesh::n_threads();
+          for (unsigned int i=0; i<n_threads; i++) // Add any cached jacobians that might be hanging around
+            _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
+        }
       }
       break;
     }

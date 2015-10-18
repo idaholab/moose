@@ -41,6 +41,11 @@ protected:
    */
   virtual Real computeQpResidual();
 
+  /**
+   * Jacobian with respect to the variable this NodalKernel is operating on.
+   */
+  virtual Real computeQpJacobian();
+
   /// The rate
   Real _rate;
 };

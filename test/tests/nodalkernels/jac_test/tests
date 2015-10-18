@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'jac_test.i'
+    exodiff = 'jac_test_out.e'
+  [../]
+[]

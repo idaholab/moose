@@ -33,3 +33,9 @@ ConstantRate::computeQpResidual()
 {
   return _u_dot[_qp] - _rate;
 }
+
+Real
+ConstantRate::computeQpJacobian()
+{
+  return _du_dot_du[_qp];
+}

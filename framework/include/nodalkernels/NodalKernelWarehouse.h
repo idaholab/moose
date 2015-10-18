@@ -42,7 +42,7 @@ public:
 
   const std::vector<MooseSharedPointer<NodalKernel> > & allNodalKernels() const { return _all_nodal_kernels; }
 
-  const std::vector<MooseSharedPointer<NodalKernel> > & activeBlockNodalKernels(SubdomainID block) { return _active_block_nodal_kernels[block]; }
+  std::vector<MooseSharedPointer<NodalKernel> > & activeBlockNodalKernels(SubdomainID block) { return _active_block_nodal_kernels[block]; }
 
   /**
    * Adds a nodal kernel

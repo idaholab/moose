@@ -51,6 +51,10 @@
   type = Transient
   num_steps = 20
   dt = 0.1
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+  nl_max_its = 1
 []
 
 [Outputs]
