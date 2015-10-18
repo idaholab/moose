@@ -48,3 +48,10 @@ KKSACBulkBase::KKSACBulkBase(const InputParameters & parameters) :
   }
 }
 
+void
+KKSACBulkBase::initialSetup()
+{
+  ACBulk::initialSetup();
+  validateNonlinearCoupling<Real>("fa_name");
+  validateNonlinearCoupling<Real>("fb_name");
+}
