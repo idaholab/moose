@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'jac_test.i'
     exodiff = 'jac_test_out.e'
+    max_parallel = 1 # Because we're using LU
   [../]
 []
