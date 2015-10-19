@@ -78,6 +78,7 @@
 /*
  * Boundary Conditions
  */
+#include "CahnHilliardAnisoFluxBC.h"
 #include "CahnHilliardFluxBC.h"
 
 /*
@@ -290,6 +291,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
 
+  registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);
 
   registerMaterial(BarrierFunctionMaterial);
