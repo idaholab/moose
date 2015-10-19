@@ -412,6 +412,7 @@
 // NodalKernels
 #include "ConstantRate.h"
 #include "TimeDerivativeNodalKernel.h"
+#include "UserForcingFunctionNodalKernel.h"
 
 namespace Moose {
 
@@ -758,6 +759,7 @@ registerObjects(Factory & factory)
   // NodalKernels
   registerNodalKernel(TimeDerivativeNodalKernel);
   registerNodalKernel(ConstantRate);
+  registerNodalKernel(UserForcingFunctionNodalKernel);
 
   registered = true;
 }
