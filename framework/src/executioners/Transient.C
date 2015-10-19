@@ -345,6 +345,8 @@ Transient::takeStep(Real input_dt)
     }
 
     solveStep(input_dt);
+    if (!lastSolveConverged())
+      break;
 
     if (_picard_max_its > 1)
     {
@@ -390,7 +392,10 @@ Transient::solveStep(Real input_dt)
   _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
 
   if (!_multiapps_converged)
+  {
+    _problem.restoreMultiAppsSolutions(EXEC_TIMESTEP_BEGIN);
     return;
+  }
 
   preSolve();
   _time_stepper->preSolve();
@@ -443,7 +448,10 @@ Transient::solveStep(Real input_dt)
     _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
 
     if (!_multiapps_converged)
+    {
+      _problem.restoreMultiAppsSolutions(EXEC_TIMESTEP_BEGIN);
       return;
+    }
   }
   else
   {

@@ -2823,6 +2823,26 @@ FEProblem::restoreMultiApps(ExecFlagType type)
   }
 }
 
+void
+FEProblem::restoreMultiAppsSolutions(ExecFlagType type)
+{
+  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+
+  if (multi_apps.size())
+  {
+    _console << "Restoring MultiApps Solutions" << std::endl;
+
+    for (unsigned int i = 0; i < multi_apps.size(); i++)
+        multi_apps[i]->restoreSolutions();
+
+    _console << "Waiting For Other Processors To Finish" << std::endl;
+    MooseUtils::parallelBarrierNotify(_communicator);
+
+    _console << "Finished Restoring MultiApps Soluitons" << std::endl;
+  }
+}
+
+
 Real
 FEProblem::computeMultiAppsDT(ExecFlagType type)
 {
