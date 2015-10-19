@@ -22,7 +22,7 @@ LIBMESH_OPTIONS = {
       'FALSE' : '0'
       }
                      },
-  'dtk' :          { 're_option' : r'#define\s+LIBMESH_HAVE_DTK\s+(\d+)',
+  'dtk' :          { 're_option' : r'#define\s+LIBMESH_TRILINOS_HAVE_DTK\s+(\d+)',
                      'default'   : 'FALSE',
                      'options'   :
                        {
