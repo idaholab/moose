@@ -12,42 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTANTRATE_H
-#define CONSTANTRATE_H
+#ifndef TIMENODALKERNEL_H
+#define TIMENODALKERNEL_H
 
 #include "NodalKernel.h"
 
 //Forward Declarations
-class ConstantRate;
+class TimeNodalKernel;
 class Function;
 
 template<>
-InputParameters validParams<ConstantRate>();
+InputParameters validParams<TimeNodalKernel>();
 
 /**
- * Represents the rate in a simple ODE of du/dt = rate
+ * Represents a simple ODE of du/dt - rate = 0
  */
-class ConstantRate : public NodalKernel
+class TimeNodalKernel : public NodalKernel
 {
 public:
   /**
    * Constructor initializes the rate
    */
-  ConstantRate(const InputParameters & parameters);
+  TimeNodalKernel(const InputParameters & parameters);
 
 protected:
-  /**
-   * Implement -rate
-   */
-  virtual Real computeQpResidual();
 
   /**
-   * Jacobian with respect to the variable this NodalKernel is operating on.
+   * Adds to the "time residual" for any NodalKernel inheriting
+   * from this class
    */
-  virtual Real computeQpJacobian();
-
-  /// The rate
-  Real _rate;
+  virtual void computeResidual();
 };
 
 #endif

@@ -25,6 +25,10 @@
 []
 
 [NodalKernels]
+  [./td]
+    type = TimeDerivativeNodalKernel
+    variable = nodal_ode
+  [../]
   [./constant_rate]
     type = ConstantRate
     variable = nodal_ode

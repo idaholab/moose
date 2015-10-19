@@ -12,42 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTANTRATE_H
-#define CONSTANTRATE_H
-
-#include "NodalKernel.h"
-
-//Forward Declarations
-class ConstantRate;
-class Function;
+#include "TimeNodalKernel.h"
 
 template<>
-InputParameters validParams<ConstantRate>();
-
-/**
- * Represents the rate in a simple ODE of du/dt = rate
- */
-class ConstantRate : public NodalKernel
+InputParameters validParams<TimeNodalKernel>()
 {
-public:
-  /**
-   * Constructor initializes the rate
-   */
-  ConstantRate(const InputParameters & parameters);
+  InputParameters params = validParams<NodalKernel>();
+  return params;
+}
 
-protected:
-  /**
-   * Implement -rate
-   */
-  virtual Real computeQpResidual();
+TimeNodalKernel::TimeNodalKernel(const InputParameters & parameters) :
+    NodalKernel(parameters)
+{
+}
 
-  /**
-   * Jacobian with respect to the variable this NodalKernel is operating on.
-   */
-  virtual Real computeQpJacobian();
+void
+TimeNodalKernel::computeResidual()
+{
+  if (_var.isNodalDefined())
+  {
+    dof_id_type & dof_idx = _var.nodalDofIndex();
+    _qp = 0;
+    Real res = computeQpResidual();
+    _assembly.cacheResidualContribution(dof_idx, res, Moose::KT_TIME);
 
-  /// The rate
-  Real _rate;
-};
-
-#endif
+    if (_has_save_in)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      for (unsigned int i=0; i<_save_in.size(); i++)
+        _save_in[i]->sys().solution().add(_save_in[i]->nodalDofIndex(), res);
+    }
+  }
+}

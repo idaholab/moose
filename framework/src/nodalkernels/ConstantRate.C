@@ -31,11 +31,11 @@ ConstantRate::ConstantRate(const InputParameters & parameters) :
 Real
 ConstantRate::computeQpResidual()
 {
-  return _u_dot[_qp] - _rate;
+  return -_rate;
 }
 
 Real
 ConstantRate::computeQpJacobian()
 {
-  return _du_dot_du[_qp];
+  return 0;
 }

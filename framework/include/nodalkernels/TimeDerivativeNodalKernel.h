@@ -12,32 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTANTRATE_H
-#define CONSTANTRATE_H
+#ifndef TIMEDERIVATIVENODALKERNEL_H
+#define TIMEDERIVATIVENODALKERNEL_H
 
 #include "NodalKernel.h"
 
 //Forward Declarations
-class ConstantRate;
+class TimeDerivativeNodalKernel;
 class Function;
 
 template<>
-InputParameters validParams<ConstantRate>();
+InputParameters validParams<TimeDerivativeNodalKernel>();
 
 /**
- * Represents the rate in a simple ODE of du/dt = rate
+ * Represents du/dt
  */
-class ConstantRate : public NodalKernel
+class TimeDerivativeNodalKernel : public NodalKernel
 {
 public:
   /**
-   * Constructor initializes the rate
+   * Constructor (Comment here for @aeslaughter :-)
    */
-  ConstantRate(const InputParameters & parameters);
+  TimeDerivativeNodalKernel(const InputParameters & parameters);
 
 protected:
   /**
-   * Implement -rate
+   * Implement du/dt
    */
   virtual Real computeQpResidual();
 
@@ -45,9 +45,6 @@ protected:
    * Jacobian with respect to the variable this NodalKernel is operating on.
    */
   virtual Real computeQpJacobian();
-
-  /// The rate
-  Real _rate;
 };
 
 #endif

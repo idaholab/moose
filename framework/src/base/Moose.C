@@ -411,6 +411,7 @@
 
 // NodalKernels
 #include "ConstantRate.h"
+#include "TimeDerivativeNodalKernel.h"
 
 namespace Moose {
 
@@ -755,6 +756,7 @@ registerObjects(Factory & factory)
   registerPartitioner(LibmeshPartitioner);
 
   // NodalKernels
+  registerNodalKernel(TimeDerivativeNodalKernel);
   registerNodalKernel(ConstantRate);
 
   registered = true;
