@@ -63,7 +63,7 @@ app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
 # revision header
 CAMEL_CASE_NAME := $(shell echo $(APPLICATION_NAME) | perl -pe 's/(?:^|_)([a-z])/\u$$1/g')
 app_BASE_DIR    ?= base/
-app_HEADER      := $(APPLICATION_DIR)/include/$(app_base_dir)$(CAMEL_CASE_NAME)Revision.h
+app_HEADER      := $(APPLICATION_DIR)/include/$(app_BASE_DIR)$(CAMEL_CASE_NAME)Revision.h
 # depend modules
 depend_libs  := $(foreach i, $(DEPEND_MODULES), $(MOOSE_DIR)/modules/$(i)/lib/lib$(i)-$(METHOD).la)
 
