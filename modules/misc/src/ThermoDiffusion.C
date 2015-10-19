@@ -16,6 +16,7 @@ InputParameters validParams< ThermoDiffusion >()
   params.addParam< std::string >( "mass_diffusivity", "mass_diffusivity", "Property name for the diffusivity.");
 
   params.addClassDescription( "Kernel for thermo-diffusion (Soret effect, thermophoresis, etc.)" );
+  params.addParam<FunctionName>("f_shape", "1.0", "The shape function found in denominator");
   return params;
 }
 
@@ -26,7 +27,8 @@ ThermoDiffusion::ThermoDiffusion( const InputParameters & parameters) :
     _mass_diffusivity( getMaterialProperty< Real >( getParam< std::string >( "mass_diffusivity" ) ) ),
     _heat_of_transport( getMaterialProperty< Real >( getParam< std::string >( "heat_of_transport" ) ) ),
     _gas_constant( getParam< Real >( "gas_constant" ) ),
-    _temperature_index( coupled( "temp" ) )
+    _temperature_index( coupled( "temp" ) ),
+    _f_shape(&getFunction("f_shape"))
 {
 }
 
@@ -38,10 +40,11 @@ ThermoDiffusion::thermoDiffusionVelocity() const
   // then the one-way coupling of temperature means that thermo-diffusion of C
   // behaves like advection. Then v is the velocity:
   //
-  //   v = D Qstar grad(T) / ( R T^2 )
+  //   v = D Qstar grad(T) / ( R T^2 F)
   //
+  Real shape_value = _f_shape->value(_t, _q_point[_qp]);
   Real coeff = _mass_diffusivity[_qp] * _heat_of_transport[_qp] /
-    ( _gas_constant * _temperature[_qp] * _temperature[_qp] );
+    ( _gas_constant * _temperature[_qp] * _temperature[_qp] * shape_value);
   return coeff * _grad_temperature[_qp];
 }
 
@@ -62,8 +65,9 @@ ThermoDiffusion::computeQpOffDiagJacobian( unsigned int jvar )
 {
   if ( jvar == _temperature_index )
   {
+    Real shape_value = _f_shape->value(_t, _q_point[_qp]);
     Real coeff = _mass_diffusivity[_qp] * _heat_of_transport[_qp] /
-      ( _gas_constant * _temperature[_qp] * _temperature[_qp] );
+      ( _gas_constant * _temperature[_qp] * _temperature[_qp] * shape_value);
     return coeff * _grad_test[_i][_qp] * _u[_qp] * ( _grad_phi[_j][_qp] -
       2 * _phi[_j][_qp] * _grad_temperature[_qp] / _temperature[_qp] );
   }

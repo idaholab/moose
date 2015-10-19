@@ -8,6 +8,7 @@
 #define SORETDIFFUSION_H
 
 #include "Kernel.h"
+#include "Function.h"
 
 //Forward Declaration
 class SoretDiffusion;
@@ -16,7 +17,7 @@ template<>
 InputParameters validParams<SoretDiffusion>();
 /**
  * SoretDiffusion adds the soret effect in the split form of the Cahn-Hilliard
- * equation.
+ * equation with added shape function (F) in the denominator.
  */
 class SoretDiffusion : public Kernel
 {
@@ -52,6 +53,9 @@ protected:
 
   /// Boltzmann constant
   const Real _kb;
+
+  /// Shape function
+  Function * const _f_shape;
 };
 
 #endif //SORETDIFFUSION_H
