@@ -291,6 +291,20 @@ MultiApp::restore()
     _apps[i]->restore(_backups[i]);
 }
 
+void
+MultiApp::restoreSolutions()
+{
+  if (_apps.empty())
+    return;
+
+  for (unsigned int i=0; i<_my_num_apps; i++)
+  {
+    MooseSharedPointer<Executioner> & ex = _apps[i]->executioner();
+    FEProblem & fe_problem = static_cast<FEProblem &>(ex->problem());
+    fe_problem.restoreSolutions();
+  }
+}
+
 MeshTools::BoundingBox
 MultiApp::getBoundingBox(unsigned int app)
 {

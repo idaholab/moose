@@ -612,6 +612,8 @@ public:
    */
   void restoreMultiApps(ExecFlagType type);
 
+  void restoreMultiAppsSolutions(ExecFlagType type);
+
   /**
    * Find the smallest timestep over all MultiApps
    */

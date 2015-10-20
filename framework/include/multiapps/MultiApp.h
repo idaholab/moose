@@ -103,6 +103,11 @@ public:
   virtual void restore();
 
   /**
+   * Restore the solutions of every Sub App
+   */
+  virtual void restoreSolutions();
+
+  /**
    * Whether or not this MultiApp should be restored at the beginning of
    * each Picard iteration.
    */
