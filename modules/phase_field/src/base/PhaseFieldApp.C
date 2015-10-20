@@ -85,6 +85,7 @@
  * Materials
  */
 #include "BarrierFunctionMaterial.h"
+#include "CompositeMobilityTensor.h"
 #include "ComputePolycrystalElasticityTensor.h"
 #include "ConstantAnisotropicMobility.h"
 #include "DerivativeMultiPhaseMaterial.h"
@@ -295,6 +296,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerBoundaryCondition(CahnHilliardFluxBC);
 
   registerMaterial(BarrierFunctionMaterial);
+  registerMaterial(CompositeMobilityTensor);
   registerMaterial(ComputePolycrystalElasticityTensor);
   registerMaterial(ConstantAnisotropicMobility);
   registerMaterial(DerivativeMultiPhaseMaterial);
