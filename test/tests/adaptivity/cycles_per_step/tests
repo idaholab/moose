@@ -2,6 +2,6 @@
   [./test]
     type = 'Exodiff'
     input = 'cycles_per_step.i'
-    exodiff = 'cycles_per_step_out.e-s005'
+    exodiff = 'cycles_per_step_out.e-s004'
   [../]
 []
