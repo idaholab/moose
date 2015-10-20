@@ -9,12 +9,13 @@
 
 #include "Kernel.h"
 #include "Material.h"
+#include "Function.h"
 
 /**
  * @brief Models thermo-diffusion (aka Soret effect, thermophoresis, etc.).
  * The mass flux J due to the thermal gradient is:
  *
- *   J_thermal = - ( D C Qstar / ( R T^2 ) ) * grad( T )
+ *   J_thermal = - ( D C Qstar / ( R T^2 F) ) * grad( T )
  *
  * where D is the mass diffusivity (same as for Fick's law), C is the concentration
  * Qstar is the heat of transport, R is the gas constant, and T is the temperature.
@@ -56,6 +57,7 @@ private:
   const MaterialProperty< Real > & _heat_of_transport;
   const Real _gas_constant;
   const unsigned int _temperature_index;
+  Function * const _f_shape;
 };
 
 template<>

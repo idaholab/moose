@@ -14,6 +14,7 @@ InputParameters validParams<SoretDiffusion>()
   params.addRequiredCoupledVar("c", "Concentration");
   params.addRequiredParam<MaterialPropertyName>("diff_name", "The diffusivity used with the kernel");
   params.addParam<MaterialPropertyName>("Q_name", "Qheat", "The material name for the heat of transport");
+  params.addParam<FunctionName>("f_shape", "1.0", "The shape function found in denominator");
   return params;
 }
 
@@ -26,14 +27,16 @@ SoretDiffusion::SoretDiffusion(const InputParameters & parameters) :
     _c(coupledValue("c")),
     _D(getMaterialProperty<Real>("diff_name")),
     _Q(getMaterialProperty<Real>("Q_name")),
-    _kb(8.617343e-5) // Boltzmann constant in eV/K
+    _kb(8.617343e-5), // Boltzmann constant in eV/K
+    _f_shape(&getFunction("f_shape"))
 {
 }
 
 Real
 SoretDiffusion::computeQpResidual()
 {
-  Real T_term = _D[_qp] * _Q[_qp] * _c[_qp] / (_kb * _T[_qp] * _T[_qp]);
+  Real shape_value = _f_shape->value(_t, _q_point[_qp]);
+  Real T_term = _D[_qp] * _Q[_qp] * _c[_qp] / (_kb * _T[_qp] * _T[_qp] * shape_value);
 
   return T_term * _grad_T[_qp] * _grad_test[_i][_qp];
 }
@@ -53,8 +56,12 @@ SoretDiffusion::computeQpOffDiagJacobian(unsigned int jvar)
   if (_c_var == jvar) //Requires c jacobian
     return computeQpCJacobian();
   else if (_T_var == jvar) //Requires T jacobian
+  {
+    Real shape_value = _f_shape->value(_t, _q_point[_qp]);
     return _D[_qp] * _Q[_qp] * _c[_qp] * _grad_test[_i][_qp] *
-           (_grad_phi[_j][_qp]/(_kb * _T[_qp] * _T[_qp]) - 2.0 * _grad_T[_qp] * _phi[_j][_qp] / (_kb * _T[_qp] * _T[_qp] * _T[_qp]));
+           (_grad_phi[_j][_qp]/(_kb * _T[_qp] * _T[_qp] * shape_value) - 2.0 * _grad_T[_qp] *
+           _phi[_j][_qp] / (_kb * _T[_qp] * _T[_qp] * _T[_qp] * shape_value));
+  }
 
   return 0.0;
 }
@@ -63,6 +70,7 @@ Real
 SoretDiffusion::computeQpCJacobian()
 {
   //Calculate the Jacobian for the c variable
-  return _D[_qp] * _Q[_qp] * _phi[_j][_qp] * _grad_T[_qp] / (_kb * _T[_qp] * _T[_qp]) * _grad_test[_i][_qp];
+  Real shape_value = _f_shape->value(_t, _q_point[_qp]);
+  return _D[_qp] * _Q[_qp] * _phi[_j][_qp] * _grad_T[_qp] / (_kb * _T[_qp] * _T[_qp] * shape_value) * _grad_test[_i][_qp];
 }
 
