@@ -222,7 +222,12 @@ protected:
   /**
    * This function performs the line search update
    */
-  bool line_search_update(const Real, const RankTwoTensor);
+  bool line_search_update(const Real rnorm_prev, const RankTwoTensor);
+
+  /**
+   * This function updates internal variables after each NewTon Raphson iteration (_fp_inv)
+   */
+  void internalVariableUpdateNRiteration();
 
   /// Number of slip system resistance
   const unsigned int _nss;
@@ -299,6 +304,15 @@ protected:
   ///Minimum line search step size
   Real _min_lsrch_step;
 
+  ///Line search bisection method tolerance
+  Real _lsrch_tol;
+
+  ///Line search bisection method maximum iteration number
+  unsigned int _lsrch_max_iter;
+
+  //Line search method
+  MooseEnum _lsrch_method;
+
   MaterialProperty<RankTwoTensor> & _fp;
   MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _pk2;
@@ -317,11 +331,11 @@ protected:
   MaterialProperty< std::vector<Real> > * _euler_ang;
   MaterialProperty< std::vector<Real> > * _euler_ang_old;
 
-  std::vector<Real> _mo;
-  std::vector<Real> _no;
+  DenseVector<Real> _mo;
+  DenseVector<Real> _no;
 
-  std::vector<Real> _a0;
-  std::vector<Real> _xm;
+  DenseVector<Real> _a0;
+  DenseVector<Real> _xm;
 
   RankTwoTensor _crysrot;
 
@@ -331,8 +345,8 @@ protected:
   Real _r;
 
   RankTwoTensor _dfgrd_tmp;
-  RankTwoTensor _fe, _fp_old_inv, _fp_inv;
-  std::vector< Real > _slip_incr, _tau, _dslipdtau;
+  RankTwoTensor _fe, _fp_old_inv, _fp_inv, _fp_prev_inv;
+  DenseVector<Real> _slip_incr, _tau, _dslipdtau;
   std::vector<RankTwoTensor> _s0;
 
   RankTwoTensor _pk2_tmp, _pk2_tmp_old;
@@ -340,7 +354,9 @@ protected:
   std::vector<Real> _gss_tmp;
   std::vector<Real> _gss_tmp_old;
 
-  std::vector<Real> _slip_sys_props;
+  DenseVector<Real> _slip_sys_props;
+
+  DenseMatrix<Real> _dgss_dsliprate;
 
   bool _read_from_slip_sys_file;
 

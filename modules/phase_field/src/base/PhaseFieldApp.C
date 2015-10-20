@@ -76,6 +76,11 @@
 #include "Tricrystal2CircleGrainsIC.h"
 
 /*
+ * Boundary Conditions
+ */
+#include "CahnHilliardFluxBC.h"
+
+/*
  * Materials
  */
 #include "BarrierFunctionMaterial.h"
@@ -284,6 +289,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(SpecifiedSmoothCircleIC);
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
+
+  registerBoundaryCondition(CahnHilliardFluxBC);
 
   registerMaterial(BarrierFunctionMaterial);
   registerMaterial(ComputePolycrystalElasticityTensor);
