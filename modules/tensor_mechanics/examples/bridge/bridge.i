@@ -6,11 +6,6 @@
 # Gravity is applied
 # A pressure of 0.5 MPa is also applied
 #
-[GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
-[]
 
 [Mesh]
   displacements = 'disp_x disp_y disp_z' #Define displacements for deformed mesh
@@ -39,12 +34,13 @@
 [Kernels]
   [./gravity_y]
     #Gravity is applied to bridge
-    type = GravityTM
+    type = Gravity
     variable = disp_y
     value = -9.81
   [../]
   [./TensorMechanics]
     #Stress divergence kernels
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
@@ -68,11 +64,14 @@
 []
 
 [BCs]
-  [./PressureTM]
+  [./Pressure]
     [./load]
       #Applies the pressure
       boundary = top
       factor = 5e5 # Pa
+      disp_x = disp_x
+      disp_y = disp_y
+      disp_z = disp_z
     [../]
   [../]
   [./anchor_x]
@@ -99,7 +98,7 @@
 []
 
 [Materials]
-  active = 'density_steel stress strain elasticity_tensor_steel'
+  active = 'density_concrete stress strain elasticity_tensor_concrete'
   [./elasticity_tensor_steel]
     #Creates the elasticity tensor using steel parameters
     youngs_modulus = 210e9 #Pa
@@ -118,6 +117,7 @@
     #Computes the strain, assuming small strains
     type = ComputeSmallStrain
     block = 1
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     #Computes the stress, using linear elasticity
@@ -161,10 +161,6 @@
 []
 
 [Outputs]
-  [./exodus]
-    #Outputs the result to an exodus file and converts the element stress output to a nodal output
-    type = Exodus
-    elemental_as_nodal = true
-  [../]
+  exodus = true
+  print_perf_log = true
 []
-
