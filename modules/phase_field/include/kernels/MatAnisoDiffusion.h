@@ -4,18 +4,18 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef MATDIFFUSION_H
-#define MATDIFFUSION_H
+#ifndef MATANISODIFFUSION_H
+#define MATANISODIFFUSION_H
 
 #include "MatDiffusionBase.h"
 
-class MatDiffusion : public MatDiffusionBase<Real>
+class MatAnisoDiffusion : public MatDiffusionBase<RealTensorValue>
 {
 public:
-  MatDiffusion(const InputParameters & parameters);
+  MatAnisoDiffusion(const InputParameters & parameters);
 };
 
 template<>
-InputParameters validParams<MatDiffusion>();
+InputParameters validParams<MatAnisoDiffusion>();
 
-#endif //MATDIFFUSION_H
+#endif //MATANISODIFFUSION_H
