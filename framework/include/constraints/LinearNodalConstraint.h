@@ -33,12 +33,12 @@ protected:
   /**
    * Computes the residual for the current slave node
    */
-  virtual Real computeQpResidual(Moose::ConstraintType type, NumericVector<Number> & residual);
+  virtual Real computeQpResidual(Moose::ConstraintType type);
 
   /**
    * Computes the jacobian for the constraint
    */
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type, SparseMatrix<Number> & jacobian);
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 
   // Holds the master node ids
   std::vector<unsigned int> _master_node_ids;
@@ -46,12 +46,8 @@ protected:
   std::vector<unsigned int> _slave_node_ids;
   // Holds the slave node set or side set
   std::string _slave_node_set_id;
-  // Penalty if constrained is not satisfied
+  // Penalty if constraint is not satisfied
   Real _penalty;
-  // vector of weights corresponding to master nodes for the linear combination
-  std::vector<Real> _weights;
-  // Specifies the formulation used to calculate residuals and jacobian
-  std::string _formulation;
 };
 
 #endif /* LINEARNODALCONSTRAINT_H */

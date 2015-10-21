@@ -870,38 +870,22 @@ NonlinearSystem::computeTimeDerivatives()
 void
 NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residual)
 {
-  THREAD_ID tid = 0;                            // constraints are going to be done single-threaded
+  THREAD_ID tid = 0; // constraints are going to be done single-threaded
   residual.close();
-  // loop over nodes with nodal constraints
   std::vector<NodalConstraint *> & ncs = _constraints[0].getNodalConstraints();
   for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
   {
     NodalConstraint * nc = (*it);
-    std::vector<dof_id_type>& slave_nodes = nc->getSlaveNodeId();
-    if (slave_nodes.size() > 0)
-    {
-      std::vector<dof_id_type>& master_nodes = nc->getMasterNodeId();
-      // loop over master nodes
-      for (std::vector<dof_id_type>::iterator it = master_nodes.begin(); it != master_nodes.end(); ++it)
-      {
-        Node & master_node = _mesh.node(*it);
-        // reinit variables at the master node
-        _fe_problem.reinitNode(&master_node, tid);
-        _fe_problem.prepareAssembly(tid);
+    std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+    std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
 
-        // go over slave nodes
-        for (std::vector<dof_id_type>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
-        {
-          Node & slave_node = _mesh.node(*it);
-          // reinit variables on the slave node
-          _fe_problem.reinitNodeNeighbor(&slave_node, tid);
-          // compute residual
-          nc->computeResidual(residual);
-        }
-      } //end master loop
+    if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
+    {
+       _fe_problem.reinitNodes(master_node_ids, tid);
+       _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
+       nc->computeResidual(residual);
     }
   }
-  //add cached residual to residual
   _fe_problem.addCachedResidualDirectly(residual,0);
   residual.close();
 }
@@ -909,61 +893,22 @@ NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residua
 void
 NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
 {
-  #if PETSC_VERSION_LESS_THAN(3,3,0)
-  #else
-    if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-      MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-  #endif
-
   THREAD_ID tid = 0;    // constraints are going to be done single-threaded
-  // loop over nodes with nodal constraints
+  jacobian.close();
   std::vector<NodalConstraint *> & ncs = _constraints[0].getNodalConstraints();
   for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
   {
     NodalConstraint * nc = (*it);
-    std::vector<dof_id_type>& slave_nodes = nc->getSlaveNodeId();
-    if (slave_nodes.size() > 0)
-    {
-      std::vector<dof_id_type>& master_nodes = nc->getMasterNodeId();
-      // loop over the master nodes
-      for (std::vector<dof_id_type>::iterator it = master_nodes.begin(); it != master_nodes.end(); ++it)
-      {
-        Node & master_node = _mesh.node(*it);
-        //reinit variables at the master node
-        _fe_problem.reinitNode(&master_node, tid);
-        _fe_problem.prepareAssembly(tid);
+    std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+    std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
 
-        // go over slave nodes
-        for (std::vector<dof_id_type>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
-        {
-          Node & slave_node = _mesh.node(*it);
-          // reinit variables on the slave node
-          _fe_problem.reinitNodeNeighbor(&slave_node, tid);
-          // compute Jacobian
-          nc->computeJacobian(jacobian);
-          //cache Jacobian entries
-          _fe_problem.cacheJacobian(0);
-        }
-      } //end master loop
+    if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
+    {
+      _fe_problem.reinitNodes(master_node_ids, tid);
+      _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
+      nc->computeJacobian(jacobian);
     }
   }
-  #ifdef LIBMESH_HAVE_PETSC
-  //Necessary for speed
-  #if PETSC_VERSION_LESS_THAN(3,0,0)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
-  #elif PETSC_VERSION_LESS_THAN(3,1,0)
-  // In Petsc 3.0.0, MatSetOption has three args...the third arg
-  // determines whether the option is set (true) or unset (false)
-     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                     MAT_KEEP_ZEROED_ROWS,
-                     PETSC_TRUE);
-  #else
-     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                     MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
-                     PETSC_TRUE);
-  #endif
-  #endif
-  //add cached jacobian entries to jacobian
   _fe_problem.addCachedJacobian(jacobian, 0);
   jacobian.close();
 }

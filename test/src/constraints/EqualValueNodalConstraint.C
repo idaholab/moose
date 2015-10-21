@@ -37,22 +37,22 @@ EqualValueNodalConstraint::~EqualValueNodalConstraint()
 }
 
 Real
-EqualValueNodalConstraint::computeQpResidual(Moose::ConstraintType type, NumericVector<Number> & residual)
+EqualValueNodalConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   switch (type)
   {
   case Moose::Master:
-    return (_u_master[_qp] - _u_slave[_qp]) * _penalty;
+    return (_u_master[_j] - _u_slave[_i]) * _penalty;
 
   case Moose::Slave:
-    return (_u_slave[_qp] - _u_master[_qp]) * _penalty;
+    return (_u_slave[_i] - _u_master[_j]) * _penalty;
   }
 
   return 0.;
 }
 
 Real
-EqualValueNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type, SparseMatrix<Number> & jacobian)
+EqualValueNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   switch (type)
   {

@@ -383,6 +383,18 @@ SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 }
 
 void
+SystemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
+{
+  const std::vector<MooseVariable *> & vars = _vars[tid].variables();
+  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  {
+    MooseVariable *var = *it;
+    var->reinitNodesNeighbor(nodes);
+    var->computeNodalNeighborValues();
+  }
+}
+
+void
 SystemBase::reinitScalars(THREAD_ID tid)
 {
   const std::vector<MooseVariableScalar *> & vars = _vars[tid].scalars();

@@ -29,8 +29,8 @@ public:
   virtual ~EqualValueNodalConstraint();
 
 protected:
-  virtual Real computeQpResidual(Moose::ConstraintType type, NumericVector<Number> & residual);
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type, SparseMatrix<Number> & jacobian);
+  virtual Real computeQpResidual(Moose::ConstraintType type);
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 
   Real _penalty;
 };

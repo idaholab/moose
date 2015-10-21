@@ -1027,6 +1027,16 @@ FEProblem::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 }
 
 void
+FEProblem::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
+{
+  if (_displaced_problem != NULL && _reinit_displaced_elem)
+    _displaced_problem->reinitNodesNeighbor(nodes, tid);
+
+  _nl.reinitNodesNeighbor(nodes, tid);
+  _aux.reinitNodesNeighbor(nodes, tid);
+}
+
+void
 FEProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
 {
   _assembly[tid]->reinitNodeNeighbor(node);

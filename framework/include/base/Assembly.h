@@ -349,6 +349,10 @@ public:
    * @param type Whether the contribution should go to the Time or Non-Time residual
    */
   void cacheResidualContribution(dof_id_type dof, Real value, Moose::KernelType type);
+
+  /**
+   * Lets an external class cache residual at a set of nodes
+   */
   void cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type> & dof_index);
 
   /**
