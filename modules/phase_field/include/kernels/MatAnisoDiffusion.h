@@ -9,6 +9,11 @@
 
 #include "MatDiffusionBase.h"
 
+/**
+ * Anisotropic diffusion kernel that takes a diffusion coefficient of type
+ * RealTensorValue. All logic is implemnted in the MatDiffusionBase class
+ * template.
+ */
 class MatAnisoDiffusion : public MatDiffusionBase<RealTensorValue>
 {
 public:

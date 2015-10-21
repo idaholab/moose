@@ -9,6 +9,11 @@
 
 #include "MatDiffusionBase.h"
 
+/**
+ * Isotropic diffusion kernel that takes a diffusion coefficient of type
+ * Real. All logic is implemnted in the MatDiffusionBase class
+ * template.
+ */
 class MatDiffusion : public MatDiffusionBase<Real>
 {
 public:

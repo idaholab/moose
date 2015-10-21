@@ -10,18 +10,29 @@
 #include "DerivativeMaterialInterface.h"
 #include "Kernel.h"
 
+/**
+ * This class template implements a diffusion kernel with a mobility that can vary
+ * spatially and can depend on variables in the simulation. Two classes are derived from
+ * this template, MatDiffusion for isotropic diffusion and MatAnisoDiffusion for
+ * anisotropic diffusion.
+ *
+ * \tparam T Type of the diffusion coefficient parameter. This can be Real for
+ *           isotriopc diffusion or RealTensorValue for the general anisotropic case.
+ */
 template<typename T>
 class MatDiffusionBase : public DerivativeMaterialInterface<Kernel>
 {
 public:
   MatDiffusionBase(const InputParameters & parameters);
 
+  /// in class templates this function has to be a static member
   static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
+  /// diffusion coefficient
   const MaterialProperty<T> & _D;
 };
 
@@ -30,7 +41,6 @@ InputParameters
 MatDiffusionBase<T>::validParams()
 {
   InputParameters params = ::validParams<Kernel>();
-  params.addClassDescription("Diffusion equation Kernel that takes the Diffusivity from a material property");
   params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
   return params;
 }
