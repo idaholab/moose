@@ -467,10 +467,8 @@ public:
   std::vector<double> coordinateInTransformedSpace(int rank);
   std::vector<double> coordinateInverseTransformed(std::vector<double> &coordinate);
 
-  void computeSVD(std::vector<std::vector<double> > vecCovMatrix, int rank);
-  void computeSVD(std::vector<std::vector<double> > vecCovMatrix);
-  void computeSVD(std::vector<double> vecCovMatrix);
-  void computeSVD(std::vector<double> vecCovMatrix,unsigned int rank);
+  void computeSVD();
+  void computeSVD(int rank);
   double pdfInTransformedSpace(std::vector<double> x);
 
 

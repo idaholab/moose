@@ -362,53 +362,28 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
     _determinant_cov_matrix = getDeterminant(_cov_matrix);
   }
   //compute the svd
-  computeSVD(_cov_matrix, _rank);
+  computeSVD(_rank);
 }
 
-void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix) {
+void BasicMultivariateNormal::computeSVD() {
   /**
-   * This function will compute the svd for given matrix (vecCovMatrix)
-   * Input
-   * vecCovMatrix: the provided matrix
+   * This function will compute the svd for the covariance matrix stored in _cov_matrix
+   * and store the left singular vectors in _leftSingularVectors, right singular vectors in _rightSingularVectors
+   * singular values in _singularValues, and the transform matrix in _svdTransformedMatrix
+   * The transform matrix is defined as: _leftSingularVectors*sqrt(diag(_singularValues))
    */
-  int rows, columns;
-  std::vector<std::vector<double> > covMatrix;
-  // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
-  vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
-  svdDecomposition(covMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix);
+  svdDecomposition(_cov_matrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix);
 }
 
-void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix, unsigned int rank) {
+void BasicMultivariateNormal::computeSVD(int rank) {
   /**
-   * This function will compute the truncated svd for given matrix (vecCovMatrix)
-   * Input
-   * vecCovMatrix: the provided matrix
+   * This function will compute the truncated svd for the covariance matrix stored in _cov_matrix
+   * and store the left singular vectors in _leftSingularVectors, right singular vectors in _rightSingularVectors
+   * singular values in _singularValues, and the transform matrix in _svdTransformedMatrix
+   * The transform matrix is defined as: _leftSingularVectors*sqrt(diag(_singularValues))
    * rank: the number of singular values that will be kept for the truncated svd
    */
-  int rows, columns;
-  std::vector<std::vector<double> > covMatrix;
-  // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
-  vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
-  svdDecomposition(covMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues, _svdTransformedMatrix,rank);
-}
-
-void BasicMultivariateNormal::computeSVD(std::vector<std::vector<double> > vecCovMatrix) {
-  /**
-   * This function will compute the svd for given matrix (vecCovMatrix)
-   * Input
-   * vecCovMatrix: the provided matrix
-   */
-  svdDecomposition(vecCovMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix);
-}
-
-void BasicMultivariateNormal::computeSVD(std::vector<std::vector<double> > vecCovMatrix, int rank) {
-  /**
-   * This function will compute the svd for given matrix (vecCovMatrix)
-   * Input
-   * vecCovMatrix: the provided matrix
-   * rank: the number of singular values that will be kept for the truncated svd
-   */
-  svdDecomposition(vecCovMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix, rank);
+  svdDecomposition(_cov_matrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix, rank);
 }
 
 std::vector<double> BasicMultivariateNormal::getLeftSingularVectors() {
@@ -514,6 +489,7 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
   /**
    * This function will transform the coordinate back to the original space
    * coordinate: the coordinate in the transformed space
+   * and the transformation are computed using computeSVD.
    */
   //std::cout << "BasicMultivariateNormal::coordinateInverseTransformed" << std::endl;
   std::vector<double> originalCoordinate;
