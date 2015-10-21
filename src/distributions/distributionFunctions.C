@@ -342,6 +342,7 @@ void matrixConversionToCxxVVectorType(Eigen::MatrixXd original, std::vector<std:
     converted.push_back(temp);
   }
 }
+
 void vectorConversionToCxxVectorType(Eigen::VectorXd original, std::vector<double> &converted) {
   /**
    * This function convert the data from type Eigen::VectorXd to type std::vector<double>

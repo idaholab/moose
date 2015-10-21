@@ -328,6 +328,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
 
 	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
 }
+
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* type, int rank){
   /**
    * This is the function that initializes the Multivariate normal distribution given:
@@ -378,6 +379,7 @@ void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix) {
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
   svdDecomposition(covMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix);
 }
+
 void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix, unsigned int rank) {
   /**
    * This function will compute the truncated svd for given matrix (vecCovMatrix)
@@ -400,6 +402,7 @@ void BasicMultivariateNormal::computeSVD(std::vector<std::vector<double> > vecCo
    */
   svdDecomposition(vecCovMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix);
 }
+
 void BasicMultivariateNormal::computeSVD(std::vector<std::vector<double> > vecCovMatrix, int rank) {
   /**
    * This function will compute the svd for given matrix (vecCovMatrix)
@@ -427,6 +430,7 @@ std::vector<double> BasicMultivariateNormal::getLeftSingularVectors() {
   }
   return returnVectors;
 }
+
 std::vector<double> BasicMultivariateNormal::getRightSingularVectors() {
   /**
    * this function returns the right singular vectors
@@ -444,6 +448,7 @@ std::vector<double> BasicMultivariateNormal::getRightSingularVectors() {
   }
   return returnVectors;
 }
+
 std::vector<double> BasicMultivariateNormal::getSingularValues() {
   /**
    * this function returns the singular values
@@ -464,6 +469,7 @@ std::vector<int> BasicMultivariateNormal::getLeftSingularVectorsDimensions() {
   returnVector.push_back(_leftSingularVectors.at(0).size());
   return returnVector;
 }
+
 std::vector<int> BasicMultivariateNormal::getRightSingularVectorsDimensions() {
   /**
    * return the row and column of right singular vectors stored in tempVector.at(0) and tempVector.at(1) respectively
@@ -473,6 +479,7 @@ std::vector<int> BasicMultivariateNormal::getRightSingularVectorsDimensions() {
   returnVector.push_back(_rightSingularVectors.at(0).size());
   return returnVector;
 }
+
 int  BasicMultivariateNormal::getSingularValuesDimension() {
   /**
    * return the dimension of  singular value vector stored
