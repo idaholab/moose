@@ -36,7 +36,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
   MooseSharedPointer<InputParameters> ptr(new InputParameters(parameters));
 
   // Set the name parameter to the object being created
-  ptr->addParam<std::string>("name", name, "The name of the object");
+  ptr->set<std::string>("_object_name") = name;
 
   // The object name defined by the base class name, this method of storing is used for
   // determining the uniqueness of the name

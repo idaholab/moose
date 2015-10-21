@@ -12,6 +12,19 @@
     prereq = test
   [../]
 
+  [./test_custom_name]
+    type = 'Exodiff'
+    input = 'kernel_restartable_custom_name.i'
+    exodiff = 'kernel_restartable_custom_name_out.e'
+  [../]
+
+  [./test_custom_name2]
+    type = 'Exodiff'
+    input = 'kernel_restartable_custom_name_second.i'
+    exodiff = 'kernel_restartable_custom_name_second_out.e'
+    prereq = test_custom_name
+  [../]
+
   [./parallel_error1]
     type = 'Exodiff'
     input = 'kernel_restartable.i'

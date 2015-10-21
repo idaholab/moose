@@ -19,7 +19,7 @@
 
 // Standard construction
 MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters):
-    _mi_name(MooseUtils::shortName(parameters.get<std::string>("name"))),
+    _mi_name(parameters.get<std::string>("_object_name")),
     _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _stateful_allowed(true),
     _get_material_property_called(false),
@@ -32,7 +32,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & par
 
 // Block restricted
 MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids):
-    _mi_name(MooseUtils::shortName(parameters.get<std::string>("name"))),
+    _mi_name(parameters.get<std::string>("_object_name")),
     _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _stateful_allowed(true),
     _get_material_property_called(false),
@@ -45,7 +45,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & par
 
 // Boundary restricted
 MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids):
-    _mi_name(MooseUtils::shortName(parameters.get<std::string>("name"))),
+    _mi_name(parameters.get<std::string>("_object_name")),
     _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _stateful_allowed(true),
     _get_material_property_called(false),
@@ -60,7 +60,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & par
 MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters,
                                                      const std::set<SubdomainID> & block_ids,
                                                      const std::set<BoundaryID> & boundary_ids):
-    _mi_name(MooseUtils::shortName(parameters.get<std::string>("name"))),
+    _mi_name(parameters.get<std::string>("_object_name")),
     _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _stateful_allowed(true),
     _get_material_property_called(false),

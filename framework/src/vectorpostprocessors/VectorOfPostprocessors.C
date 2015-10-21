@@ -28,7 +28,7 @@ InputParameters validParams<VectorOfPostprocessors>()
 
 VectorOfPostprocessors::VectorOfPostprocessors(const InputParameters & parameters) :
     GeneralVectorPostprocessor(parameters),
-    _pp_vec(declareVector(MooseUtils::shortName(parameters.get<std::string>("name"))))
+    _pp_vec(declareVector(MooseUtils::shortName(parameters.get<std::string>("_object_name"))))
 {
   std::vector<PostprocessorName> pps_names(getParam<std::vector<PostprocessorName> >("postprocessors"));
   _pp_vec.resize(pps_names.size());
@@ -52,4 +52,3 @@ VectorOfPostprocessors::execute()
   for (unsigned int i=0; i<_postprocessor_values.size(); ++i)
     _pp_vec.push_back(*_postprocessor_values[i]);
 }
-

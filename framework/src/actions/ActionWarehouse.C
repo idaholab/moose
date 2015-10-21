@@ -354,7 +354,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
     if ((*i)->isParamValid("parser_syntax"))
       name = (*i)->getParam<std::string>("parser_syntax");
     else
-      name = (*i)->getParam<std::string>("name");
+      name = (*i)->name();
     const std::set<std::string> & tasks = ((*i)->getAllTasks());
     mooseAssert(!tasks.empty(), "Task list is empty");
 

@@ -46,7 +46,7 @@ OutputInterface::OutputInterface(const InputParameters & parameters, bool build_
   if (build_list)
   {
     std::set<std::string> names_set;
-    names_set.insert(MooseUtils::shortName(parameters.get<std::string>("name")));
+    names_set.insert(parameters.get<std::string>("_object_name"));
     buildOutputHideVariableList(names_set);
   }
 }

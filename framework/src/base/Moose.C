@@ -199,12 +199,8 @@
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
 #include "PercentChangePostprocessor.h"
-<<<<<<< HEAD
-#include "RealParameterReporter.h"
 #include "ElementL2Difference.h"
-=======
 #include "RealControlParameterReporter.h"
->>>>>>> Added ControlParameter class with set method
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"

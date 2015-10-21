@@ -29,7 +29,7 @@ ControlInterface::ControlInterface(const InputParameters & parameters) :
     _ci_app(*parameters.get<MooseApp *>("_moose_app")),
     _input_parameter_warehouse(_ci_app.getInputParameterWarehouse()),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _ci_name(parameters.get<std::string>("name"))
+    _ci_name(parameters.get<std::string>("_object_name"))
 {
   if (libMesh::n_threads() > 1)
     mooseError("The control logic system is experimental and under heavy development, it currently does not work with threading.");

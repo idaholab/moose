@@ -18,8 +18,6 @@
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 
-#include "MooseUtils.h"
-
 #include <string>
 #include <ostream>
 
@@ -89,12 +87,6 @@ protected:
 
   // The registered syntax for this block if any
   std::string _registered_identifier;
-
-  /// The complete syntax of the action
-  // const std::string & _full_syntax;
-
-  /// The base syntax of the action
-  //std::string _base_syntax;
 
   /// The name of the action
   std::string _name;

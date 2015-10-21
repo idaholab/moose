@@ -15,6 +15,7 @@
     expect_err = "The controlled parameter, 'coef', in func_control was found,\nbut"
     match_literal = true
     max_threads = 1
+    allow_warnings = 1
   [../]
 
   [./no_param_found]

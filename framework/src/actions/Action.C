@@ -27,6 +27,7 @@ InputParameters validParams<Action>()
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
   params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
 
+  params.addPrivateParam<std::string>("_action_name"); // the name passed to ActionFactory::create
   params.addPrivateParam<std::string>("task");
   params.addPrivateParam<std::string>("registered_identifier");
   params.addPrivateParam<std::string>("action_type");
@@ -39,7 +40,7 @@ Action::Action(InputParameters parameters) :
     ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _pars(parameters),
     _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
-    _name(getParam<std::string>("name")),
+    _name(getParam<std::string>("_action_name")),
     _action_type(getParam<std::string>("action_type")),
     _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _factory(_app.getFactory()),

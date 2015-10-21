@@ -93,6 +93,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("redirect_stdout", "--redirect-stdout", false, "Keep standard output from all processors when running in parallel");
 
 
+  params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
   params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
@@ -111,7 +112,7 @@ bool isFlag(const std::string s)
 MooseApp::MooseApp(InputParameters parameters) :
     ConsoleStreamInterface(*this),
     ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
-    _name(parameters.get<std::string>("name")),
+    _name(parameters.get<std::string>("_app_name")),
     _pars(parameters),
     _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
     _output_position_set(false),
