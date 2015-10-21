@@ -38,6 +38,7 @@ def checkAnswer(comment,value,expected,results,tol=1e-10):
     results["fail"] += 1
   else:
     results["pass"] += 1
+
 def checkArrayAllClose(comment,value,expected,results,tol=1e-11):
   """ Will check if a test passes or fails and update the results dictionary.
     @ In, comment: A user-specified comment that will be printed with the test

@@ -212,7 +212,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(int &rows, int &colum
 	  _inverse_cov_matrix.push_back(temp);
    }
 
-   int dimensions = _mu.size();
+   unsigned int dimensions = _mu.size();
    //for(int i=0; i<dimensions; i++)
 	//for(int j=0; j<dimensions; j++)
 	 //std::cerr<<_inverse_cov_matrix[i][j]<<std::endl;
@@ -335,7 +335,8 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
    * Input Parameters
    * - vecCovMatrix: covariance matrix stored in a vector<double>
    * - mu: the mean value vector
-   * - rank: the reduced dimension 
+   * - rank: the reduced dimension
+   * - type: the type of given covariance matrix (vecCovMatrix), it can be 'abs' or 'rel', which means absolute covariance matrix or relative convariance matrix respectively. 
    */
   int rows, columns;
   std::vector<std::vector<double> > covMatrix;
@@ -343,7 +344,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
   _mu = mu;
   _cov_matrix = covMatrix;
-  _rank = rank;
+  _rank = (unsigned int) rank;
   _covarianceType = std::string(type);
   if(_rank > _mu.size()) {
     std::cout << " WARNING: The  provided rank = " << rank << " is larger than the given problem's dimension = " << _mu.size() << std::endl;
@@ -377,7 +378,7 @@ void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix) {
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
   svdDecomposition(covMatrix,_leftSingularVectors,_rightSingularVectors,_singularValues,_svdTransformedMatrix);
 }
-void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix, int rank) {
+void BasicMultivariateNormal::computeSVD(std::vector<double> vecCovMatrix, unsigned int rank) {
   /**
    * This function will compute the truncated svd for given matrix (vecCovMatrix)
    * Input
@@ -418,13 +419,13 @@ std::vector<double> BasicMultivariateNormal::getLeftSingularVectors() {
    * output
    * tempVectors: the vector stores the left singular vectors
    */
-  std::vector<double> tempVectors;
-  for(int i = 0; i < _leftSingularVectors.size(); ++i) {
-    for(int j = 0; j < _leftSingularVectors.at(0).size(); ++j) {
-      tempVectors.push_back(_leftSingularVectors.at(i).at(j));
+  std::vector<double> returnVectors;
+  for(unsigned int i = 0; i < _leftSingularVectors.size(); ++i) {
+    for(unsigned int j = 0; j < _leftSingularVectors.at(0).size(); ++j) {
+      returnVectors.push_back(_leftSingularVectors.at(i).at(j));
     }
   }
-  return tempVectors;
+  return returnVectors;
 }
 std::vector<double> BasicMultivariateNormal::getRightSingularVectors() {
   /**
@@ -435,13 +436,13 @@ std::vector<double> BasicMultivariateNormal::getRightSingularVectors() {
    * output
    * tempVectors: the vector stores the right singular vectors
    */
-  std::vector<double> tempVectors;
-  for(int i = 0; i < _rightSingularVectors.size(); ++i) {
-    for(int j = 0; j < _rightSingularVectors.at(0).size(); ++j) {
-      tempVectors.push_back(_rightSingularVectors.at(i).at(j));
+  std::vector<double> returnVectors;
+  for(unsigned int i = 0; i < _rightSingularVectors.size(); ++i) {
+    for(unsigned int j = 0; j < _rightSingularVectors.at(0).size(); ++j) {
+      returnVectors.push_back(_rightSingularVectors.at(i).at(j));
     }
   }
-  return tempVectors;
+  return returnVectors;
 }
 std::vector<double> BasicMultivariateNormal::getSingularValues() {
   /**
@@ -458,19 +459,19 @@ std::vector<int> BasicMultivariateNormal::getLeftSingularVectorsDimensions() {
   /**
    * return the row and column of left singular vectors stored in tempVector.at(0) and tempVector.at(1) respectively
    */
-  std::vector<int> tempVector;
-  tempVector.push_back(_leftSingularVectors.size());
-  tempVector.push_back(_leftSingularVectors.at(0).size());
-  return tempVector;
+  std::vector<int> returnVector;
+  returnVector.push_back(_leftSingularVectors.size());
+  returnVector.push_back(_leftSingularVectors.at(0).size());
+  return returnVector;
 }
 std::vector<int> BasicMultivariateNormal::getRightSingularVectorsDimensions() {
   /**
    * return the row and column of right singular vectors stored in tempVector.at(0) and tempVector.at(1) respectively
    */
-  std::vector<int> tempVector;
-  tempVector.push_back(_rightSingularVectors.size());
-  tempVector.push_back(_rightSingularVectors.at(0).size());
-  return tempVector;
+  std::vector<int> returnVector;
+  returnVector.push_back(_rightSingularVectors.size());
+  returnVector.push_back(_rightSingularVectors.at(0).size());
+  return returnVector;
 }
 int  BasicMultivariateNormal::getSingularValuesDimension() {
   /**
@@ -505,19 +506,19 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
    */
   //std::cout << "BasicMultivariateNormal::coordinateInverseTransformed" << std::endl;
   std::vector<double> originalCoordinate;
-  for(int irow = 0; irow < _svdTransformedMatrix.size(); ++irow) {
+  for(unsigned int irow = 0; irow < _svdTransformedMatrix.size(); ++irow) {
     double tempSum = 0.0;
-    for(int icol = 0; icol < _svdTransformedMatrix.at(0).size(); ++icol) {
+    for(unsigned int icol = 0; icol < _svdTransformedMatrix.at(0).size(); ++icol) {
       tempSum = tempSum + _svdTransformedMatrix.at(irow).at(icol) * coordinate.at(icol);
     }
     originalCoordinate.push_back(tempSum);
   }
   if(_covarianceType == "abs") {
-    for(int idim = 0; idim < originalCoordinate.size(); ++idim) {
+    for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
       originalCoordinate.at(idim) += _mu.at(idim); 
     } 
   } else if (_covarianceType == "rel") {
-    for(int idim = 0; idim < originalCoordinate.size(); ++idim) {
+    for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
       originalCoordinate.at(idim) = _mu.at(idim)*(1.0 + originalCoordinate.at(idim));
     } 
   } else {
@@ -557,7 +558,7 @@ double BasicMultivariateNormal::pdfInTransformedSpace(std::vector<double> x){
   double value = 1.0;
   BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
   if (x.size() == _rank) {
-    for (int i = 0; i < x.size(); ++i) {
+    for (unsigned int i = 0; i < x.size(); ++i) {
       value *=  normalDistribution->Pdf(x.at(i));
     }
   } else {

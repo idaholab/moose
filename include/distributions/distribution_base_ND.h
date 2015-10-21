@@ -470,7 +470,7 @@ public:
   void computeSVD(std::vector<std::vector<double> > vecCovMatrix, int rank);
   void computeSVD(std::vector<std::vector<double> > vecCovMatrix);
   void computeSVD(std::vector<double> vecCovMatrix);
-  void computeSVD(std::vector<double> vecCovMatrix,int rank);
+  void computeSVD(std::vector<double> vecCovMatrix,unsigned int rank);
   double pdfInTransformedSpace(std::vector<double> x);
 
 
@@ -483,7 +483,7 @@ private:
   std::vector<std::vector<double> > _leftSingularVectors;
   std::vector<double> _singularValues;
   std::vector<std::vector<double> > _rightSingularVectors;
-  int _rank; // used for dimensionality reduction
+  unsigned int _rank; // used for dimensionality reduction
   // store U*sqrt(S), where U, S, V = svd(A)
   std::vector<std::vector<double> > _svdTransformedMatrix;
   std::string _covarianceType;

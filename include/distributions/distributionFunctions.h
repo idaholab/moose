@@ -31,12 +31,12 @@ void computeInverse(const std::vector<std::vector<double> > & matrix, std::vecto
 void vectorToMatrix(int &rows, int & columns, std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix);
 double getDeterminant(std::vector<std::vector<double> > matrix);
 
-// functions fro singular value decomposition
+// functions for singular value decomposition
 void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix);
-void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix, int rank);
+void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix, unsigned int rank);
 void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted);
-void matrixConversionToVectorType(Eigen::MatrixXd original, std::vector<std::vector<double> > &converted);
-void matrixConversionToVectorType(Eigen::VectorXd original, std::vector<double>  &converted);
+void matrixConversionToCxxVVectorType(Eigen::MatrixXd original, std::vector<std::vector<double> > &converted);
+void vectorConversionToCxxVectorType(Eigen::VectorXd original, std::vector<double>  &converted);
 
 void nrerror(const char error_text[]);
 
