@@ -34,7 +34,7 @@ protected:
   const RealGradient _flux;
 
   const MaterialProperty<T> & _M;
-  const MaterialProperty<T> & _dMdc;
+  const MaterialProperty<T> & _dMdw;
   std::vector<const MaterialProperty<T> *> _dMdarg;
 };
 
@@ -43,7 +43,7 @@ CahnHilliardFluxBCBase<T>::CahnHilliardFluxBCBase(const InputParameters & parame
     DerivativeMaterialInterface<JvarMapInterface<IntegratedBC> >(parameters),
     _flux(getParam<RealGradient>("flux")),
     _M(getMaterialProperty<T>("mob_name")),
-    _dMdc(getMaterialPropertyDerivative<T>("mob_name", _var.name()))
+    _dMdw(getMaterialPropertyDerivative<T>("mob_name", _var.name()))
 {
   // Get number of coupled variables
   unsigned int nvar = _coupled_moose_vars.size();
@@ -86,7 +86,7 @@ template<typename T>
 Real
 CahnHilliardFluxBCBase<T>::computeQpJacobian()
 {
-  return (_flux - (_M[_qp] * _grad_phi[_j][_qp] + _phi[_j][_qp] * _dMdc[_qp] * _grad_u[_qp]))  * _normals[_qp] * _test[_i][_qp];
+  return  -(_M[_qp] * _grad_phi[_j][_qp] + _phi[_j][_qp] * _dMdw[_qp] * _grad_u[_qp])  * _normals[_qp] * _test[_i][_qp];
 }
 
 template<typename T>
@@ -98,7 +98,7 @@ CahnHilliardFluxBCBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  return (_flux - _phi[_j][_qp] * (*_dMdarg[cvar])[_qp] * _grad_u[_qp])  * _normals[_qp] * _test[_i][_qp];
+  return -_phi[_j][_qp] * (*_dMdarg[cvar])[_qp] * _grad_u[_qp]  * _normals[_qp] * _test[_i][_qp];
 }
 
 #endif //CAHNHILLIARDFLUXBCBASE_H

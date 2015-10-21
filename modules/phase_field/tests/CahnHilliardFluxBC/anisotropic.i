@@ -40,7 +40,7 @@
     w = w
   [../]
   [./wres]
-    type = SplitCHWRes
+    type = SplitCHWResAniso
     variable = w
     mob_name = M
   [../]
@@ -63,7 +63,7 @@
 
 [BCs]
   [./in_flux]
-    type = CahnHilliardFluxBC
+    type = CahnHilliardAnisoFluxBC
     variable = w
     boundary = top
     flux = '0 0.2 0'
@@ -71,7 +71,7 @@
     args = 'c d'
   [../]
   [./out_flux]
-    type = CahnHilliardFluxBC
+    type = CahnHilliardAnisoFluxBC
     variable = w
     boundary = bottom
     flux = '0 0.1 0'
@@ -100,13 +100,46 @@
     prop_values = '2.0'
     block = 0
   [../]
-  [./mob]
-    type = DerivativeParsedMaterial
+
+  # we assemble the variable dependent anosotropic mobility tensor form two
+  # base tensors and their associated weights
+  [./mob0]
+    type = ConstantAnisotropicMobility
+    tensor = '1 0 0  0 0.5 0  0 0 0'
+    M_name = M0
     block = 0
-    f_name = M
-    function = 'c^2+d+0.1'
+  [../]
+  [./mob1]
+    type = ConstantAnisotropicMobility
+    tensor = '0.5 0 0  0 1 0  0 0 0'
+    M_name = M1
+    block = 0
+  [../]
+  [./wgt0]
+    type = DerivativeParsedMaterial
+    f_name = w0
+    block = 0
+    function = 'c^2+d'
     args = 'c d'
   [../]
+  [./wgt1]
+    type = DerivativeParsedMaterial
+    f_name = w1
+    block = 0
+    function = 'c+d^2'
+    args = 'c d'
+  [../]
+
+  # assemble mobility tensor
+  [./mob]
+    type = CompositeMobilityTensor
+    M_name = M
+    tensors = 'M0 M1'
+    weights = 'w0 w1'
+    args = 'c d'
+    block = 0
+  [../]
+
   [./F]
     type = DerivativeParsedMaterial
     block = 0
@@ -133,11 +166,11 @@
 
   l_max_its = 30
   l_tol = 1.0e-3
-  nl_max_its = 10
+  nl_max_its = 15
   nl_rel_tol = 1.0e-10
   num_steps = 2
 
-  dt = 0.1
+  dt = 0.001
 []
 
 [Outputs]
