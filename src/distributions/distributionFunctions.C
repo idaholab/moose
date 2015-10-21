@@ -40,8 +40,6 @@
 
 #define _USE_MATH_DEFINES
 
-using namespace Eigen;
-
 /*
 extern "C" {
     // LU decomoposition of a general matrix
@@ -251,13 +249,13 @@ void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vect
   }else {
     dim = row;
   }
-  MatrixXd A(row,col);
-  MatrixXd U(row,row);
-  MatrixXd V(col,col);
-  MatrixXd X(row,dim);
-  VectorXd S(dim);
+  Eigen::MatrixXd A(row,col);
+  Eigen::MatrixXd U(row,row);
+  Eigen::MatrixXd V(col,col);
+  Eigen::MatrixXd X(row,dim);
+  Eigen::VectorXd S(dim);
   matrixConversionToEigenType(matrix,A);
-  JacobiSVD<MatrixXd> svd(A,ComputeFullU | ComputeFullV);
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A,Eigen::ComputeFullU | Eigen::ComputeFullV);
   U = svd.matrixU();
   V = svd.matrixV();
   S = svd.singularValues();
@@ -289,13 +287,13 @@ void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vect
   }else {
     dim = row;
   }
-  MatrixXd A(row,col);
-  MatrixXd U(row,row);
-  MatrixXd V(col,col);
-  MatrixXd X(row,rank);
-  VectorXd S(dim);
+  Eigen::MatrixXd A(row,col);
+  Eigen::MatrixXd U(row,row);
+  Eigen::MatrixXd V(col,col);
+  Eigen::MatrixXd X(row,rank);
+  Eigen::VectorXd S(dim);
   matrixConversionToEigenType(matrix,A);
-  JacobiSVD<MatrixXd> svd(A,ComputeFullU | ComputeFullV);
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A,Eigen::ComputeFullU | Eigen::ComputeFullV);
   U = svd.matrixU();
   V = svd.matrixV();
   S = svd.singularValues();
@@ -309,7 +307,7 @@ void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vect
   matrixConversionToVectorType(X,transformedMatrix);
 }
 
-void matrixConversionToEigenType(std::vector<std::vector<double> > original, MatrixXd &converted) {
+void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted) {
   /**
    * This function convert the data from type std::vector<std::vector<double> > to Eigen::MatrixXd
    * Input Parameters
@@ -325,7 +323,7 @@ void matrixConversionToEigenType(std::vector<std::vector<double> > original, Mat
   }
 }
 
-void matrixConversionToVectorType(MatrixXd original, std::vector<std::vector<double> > &converted) {
+void matrixConversionToVectorType(Eigen::MatrixXd original, std::vector<std::vector<double> > &converted) {
   /**
    * This function convert the data from type Eigen::VectorXd to type std::vector<double>
    * Input Parameters
@@ -341,7 +339,7 @@ void matrixConversionToVectorType(MatrixXd original, std::vector<std::vector<dou
     converted.push_back(temp);
   }
 }
-void matrixConversionToVectorType(VectorXd original, std::vector<double> &converted) {
+void matrixConversionToVectorType(Eigen::VectorXd original, std::vector<double> &converted) {
   /**
    * This function convert the data from type Eigen::VectorXd to type std::vector<double>
    * Input Parameters

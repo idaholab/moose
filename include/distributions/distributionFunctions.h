@@ -16,8 +16,6 @@
 
 #include <Eigen/Dense>
 
-using namespace Eigen;
-
 /*
  *  distributionFunctions
  *      source: Numerical Recipes in C++ 3rd edition
@@ -36,9 +34,9 @@ double getDeterminant(std::vector<std::vector<double> > matrix);
 // functions fro singular value decomposition
 void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix);
 void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix, int rank);
-void matrixConversionToEigenType(std::vector<std::vector<double> > original, MatrixXd &converted);
-void matrixConversionToVectorType(MatrixXd original, std::vector<std::vector<double> > &converted);
-void matrixConversionToVectorType(VectorXd original, std::vector<double>  &converted);
+void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted);
+void matrixConversionToVectorType(Eigen::MatrixXd original, std::vector<std::vector<double> > &converted);
+void matrixConversionToVectorType(Eigen::VectorXd original, std::vector<double>  &converted);
 
 void nrerror(const char error_text[]);
 
