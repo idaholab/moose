@@ -609,8 +609,9 @@ public:
 
   /**
    * Restore the MultiApps associated with the ExecFlagType
+   * @param force Force restoration because something went wrong with the solve
    */
-  void restoreMultiApps(ExecFlagType type);
+  void restoreMultiApps(ExecFlagType type, bool force=false);
 
   /**
    * Find the smallest timestep over all MultiApps

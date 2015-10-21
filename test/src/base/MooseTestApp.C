@@ -46,6 +46,7 @@
 #include "ForcingFunctionXYZ0.h"
 #include "TEJumpFFN.h"
 #include "NanKernel.h"
+#include "NanAtCountKernel.h"
 #include "ExceptionKernel.h"
 #include "MatConvection.h"
 #include "PPSDiffusion.h"
@@ -285,6 +286,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(ForcingFunctionXYZ0);
   registerKernel(TEJumpFFN);
   registerKernel(NanKernel);
+  registerKernel(NanAtCountKernel);
   registerKernel(ExceptionKernel);
   registerKernel(MatConvection);
   registerKernel(PPSDiffusion);
