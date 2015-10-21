@@ -200,7 +200,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(int &rows, int &colum
 
    _mu = mu;
    _cov_matrix = covMatrix;
-   
+
    std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
 
    computeInverse(_cov_matrix, inverseCovMatrix);
@@ -312,7 +312,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double>
   //_determinant_cov_matrix = getDeterminant(_cov_matrix);
 }
 
-// Input Parameters: vectors of covariance and mu 
+// Input Parameters: vectors of covariance and mu
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu){
   /**
    * This is the function that initializes the Multivariate normal distribution given:
@@ -337,7 +337,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
    * - vecCovMatrix: covariance matrix stored in a vector<double>
    * - mu: the mean value vector
    * - rank: the reduced dimension
-   * - type: the type of given covariance matrix (vecCovMatrix), it can be 'abs' or 'rel', which means absolute covariance matrix or relative convariance matrix respectively. 
+   * - type: the type of given covariance matrix (vecCovMatrix), it can be 'abs' or 'rel', which means absolute covariance matrix or relative convariance matrix respectively.
    */
   int rows, columns;
   std::vector<std::vector<double> > covMatrix;
@@ -350,7 +350,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
   if(_rank > _mu.size()) {
     throwError("The  provided rank  is larger than the given problem's dimension, it should be less or equal!" );
   }
-  if (_rank == _mu.size()) { 
+  if (_rank == _mu.size()) {
     std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
     computeInverse(_cov_matrix, inverseCovMatrix);
     for (int i=0;i<rows;i++){
@@ -526,12 +526,12 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
   }
   if(_covarianceType == "abs") {
     for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
-      originalCoordinate.at(idim) += _mu.at(idim); 
-    } 
+      originalCoordinate.at(idim) += _mu.at(idim);
+    }
   } else if (_covarianceType == "rel") {
     for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
       originalCoordinate.at(idim) = _mu.at(idim)*(1.0 + originalCoordinate.at(idim));
-    } 
+    }
   } else {
     throwError("MultivariateNormal Error: covariance type is not available");
   }
