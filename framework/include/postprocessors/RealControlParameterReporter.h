@@ -55,7 +55,7 @@ private:
   // Pointer to the parameter to report, a pointer is used because the access
   // of the parameter value must occur in initialSetup because all objects
   // must be created prior to attempting to access the parameter objects
-  ControllableParameter<Real> _parameter;
+  const Real * _parameter;
 
 };
 

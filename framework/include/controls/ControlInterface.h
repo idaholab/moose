@@ -40,22 +40,32 @@ protected:
 
   ///@{
   /**
-   * Obtain a ControllableParameter class for accessing parameter values given input file syntax.
+   * Obtain the value of a controllable parameter given input file syntax or actual name.
+   * @param name The name of the parameter to retrieve a value.
+   * @param warn_when_values_diff When true, produce a warning if multiple controllable values share the given
+   *                              name but have varying values.
+   * @return A constant reference to the first parameter that matches the given name.
    */
   template<typename T>
-  ControllableParameter<T> getControlParam(const std::string & name);
+  const T & getControllableValue(const std::string & name, bool warn_when_values_differ = true);
+
   template<typename T>
-  ControllableParameter<T> getControlParam(const std::string & name, unsigned int count);
+  const T & getControllableValueByName(const std::string & name, bool warn_when_values_differ = true);
   ///@}
 
   ///@{
   /**
-   * Obtain a ControllableParameter class for accessing parameter values given the actual name.
+   * Set the value(s) of a controllable parameter of class given input file syntax or actual name.
+   * @param name The name of the parameter to retrieve a value.
+   * @param value The value to set all matching parameters to.
+   * @param warn_when_values_diff When true, produce a warning if multiple controllable values share the given
+   *                              name but have varying values.
    */
   template<typename T>
-  ControllableParameter<T> getControlParamByName(const std::string & name);
+  void setControllableValue(const std::string & name, const T & value, bool warn_when_values_differ = false);
+
   template<typename T>
-  ControllableParameter<T> getControlParamByName(const std::string & name, unsigned int count);
+  void setControllableValueByName(const std::string & name, const T & value, bool warn_when_values_differ = false);
   ///@}
 
   /**
@@ -82,6 +92,10 @@ private:
   /// The object thread id, needed for access the warehouse
   THREAD_ID _tid;
 
+  /// Helper method for retrieving controllable parameters
+  template<typename T>
+  ControllableParameter<T> getControllableParameterHelper(const std::string & name, bool warn_when_values_differ);
+
   /// The name of the object, for better error message
   const std::string & _ci_name;
 
@@ -91,31 +105,38 @@ private:
 };
 
 template<typename T>
-ControllableParameter<T>
-ControlInterface::getControlParam(const std::string & name)
+const T &
+ControlInterface::getControllableValue(const std::string & name, bool warn_when_values_differ)
 {
-  return getControlParamByName<T>(_ci_parameters.get<std::string>(name),
-                                  std::numeric_limits<unsigned int>::max());
+  return getControllableValueByName<T>(_ci_parameters.get<std::string>(name), warn_when_values_differ);
+}
+
+template<typename T>
+const T &
+ControlInterface::getControllableValueByName(const std::string & name, bool warn_when_values_differ)
+{
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(name, warn_when_values_differ);
+  return  *(helper.get()[0]);
+}
+
+template<typename T>
+void
+ControlInterface::setControllableValue(const std::string & name, const T & value, bool warn_when_values_differ)
+{
+  setControllableValueByName<T>(_ci_parameters.get<std::string>(name), value, warn_when_values_differ);
+}
+
+template<typename T>
+void
+ControlInterface::setControllableValueByName(const std::string & name, const T & value, bool warn_when_values_differ)
+{
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(name, warn_when_values_differ);
+  helper.set(value);
 }
 
 template<typename T>
 ControllableParameter<T>
-ControlInterface::getControlParam(const std::string & name, unsigned int count)
-{
-  return getControlParamByName<T>(_ci_parameters.get<std::string>(name), count);
-}
-
-template<typename T>
-ControllableParameter<T>
-ControlInterface::getControlParamByName(const std::string & name)
-{
-  return getControlParamByName<T>(_ci_parameters.get<std::string>(name),
-                                  std::numeric_limits<unsigned int>::max());
-}
-
-template<typename T>
-ControllableParameter<T>
-ControlInterface::getControlParamByName(const std::string & name, unsigned int count)
+ControlInterface::getControllableParameterHelper(const std::string & name, bool warn_when_values_differ)
 {
 
   // The desired parameter name
@@ -137,6 +158,7 @@ ControlInterface::getControlParamByName(const std::string & name, unsigned int c
       // Do not allow non-controllable types to be controlled
       if (!it->second->isControllable(desired.parameter()))
         mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " is not a controllable parameter.");
+
       // Store pointer to the writable parameter
       output.insert(MooseObjectParameterName(it->first, desired.parameter()), &(it->second->set<T>(desired.parameter())));
     }
@@ -146,16 +168,27 @@ ControlInterface::getControlParamByName(const std::string & name, unsigned int c
   if (output.size() == 0)
     mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " was not found.");
 
-  // Error if the size limit was reached
-  if (count != std::numeric_limits<unsigned int>::max() && output.size() != count)
+  // Produce a warning, if the flag is true, when multiple parameters have differing values
+  if (warn_when_values_differ)
   {
-    std::ostringstream oss;
-    oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found,\n";
-    oss << "but the number of parameters matching (" << output.size() << ") the name differs\n";
-    oss << "from the amount requested (" << count << ").\n\n";
-    oss << "The following parameters were found:\n";
-    oss << output.dump();
-    mooseError(oss.str());
+    // Inspect the values for differing values
+    const std::vector<T*> & values = output.get();
+
+    // The first parameter to test against
+    const T & value0 = *values[0];
+
+    // Loop over all other parameter values
+    for (typename std::vector<T*>::const_iterator it = values.begin() + 1; it != values.end(); ++it)
+    {
+      if (value0 != **it)
+      {
+        std::ostringstream oss;
+        oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found,\n";
+        oss << "but the number of parameters have differing values.\n\n";
+        oss << output.dump();
+        mooseWarning(oss.str());
+      }
+    }
   }
 
   return output;

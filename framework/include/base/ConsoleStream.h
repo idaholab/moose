@@ -53,8 +53,8 @@ public:
    * This allows any object to uses _console to write to the Console:
    *   _console << "The combination to the air lock is " << 12345 << std::endl;
    */
-  template<typename T>
-  const ConsoleStream & operator<<(T s) const;
+  template<typename StreamType>
+  const ConsoleStream & operator<<(StreamType s) const;
 
   /**
    * This overload is here to handle the the std::endl manipulator
@@ -70,9 +70,9 @@ private:
   std::ostringstream & _oss;
 };
 
-template<typename T>
+template<typename StreamType>
 const ConsoleStream &
-ConsoleStream::operator<<(T s) const
+ConsoleStream::operator<<(StreamType s) const
 {
   _oss << s;
   return *this;

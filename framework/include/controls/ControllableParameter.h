@@ -55,7 +55,7 @@ public:
   /**
    * Retrieve a copy of the parameter values controlled by this class.
    */
-  std::vector<T> get();
+  const std::vector<T*> & get() const;
 
   /**
    * Return a string that lists the parameters stored by this object.
@@ -111,17 +111,10 @@ ControllableParameter<T>::set(const T & value)
 }
 
 template<typename T>
-std::vector<T>
-ControllableParameter<T>::get()
+const std::vector<T*> &
+ControllableParameter<T>::get() const
 {
-  // The vector to return
-  std::vector<T> output;
-
-  typename std::vector<T*>::iterator iter;
-  for (iter = _parameter_values.begin(); iter != _parameter_values.end(); iter++)
-    output.push_back(**iter);
-
-  return output;
+  return _parameter_values;
 }
 
 template<typename T>
