@@ -4,5 +4,6 @@
     input = 'picard_master.i'
     exodiff = 'picard_master_out.e'
     max_parallel = 1 # This is here because we're counting residual evaluations
+    recover = false
   [../]
 []

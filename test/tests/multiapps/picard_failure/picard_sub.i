@@ -29,7 +29,6 @@
     type = NanAtCountKernel
     variable = v
     count = 2918
-    print_count = true
   [../]
 []
 
