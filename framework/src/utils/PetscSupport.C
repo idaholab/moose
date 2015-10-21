@@ -602,11 +602,9 @@ getPetscValidParams()
 #endif
   params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
 
-#ifdef LIBMESH_HAVE_PETSC
   params.addParam<MultiMooseEnum>("petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
   params.addParam<MultiMooseEnum>("petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-#endif //LIBMESH_HAVE_PETSC
 
   return params;
 }

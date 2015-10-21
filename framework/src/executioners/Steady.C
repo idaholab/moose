@@ -27,7 +27,7 @@ InputParameters validParams<Steady>()
 
 Steady::Steady(const InputParameters & parameters) :
     Executioner(parameters),
-    _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
+    _problem(_fe_problem),
     _time_step(_problem.timeStep()),
     _time(_problem.time())
 {
@@ -45,12 +45,6 @@ Steady::Steady(const InputParameters & parameters) :
 
 Steady::~Steady()
 {
-}
-
-Problem &
-Steady::problem()
-{
-  return _problem;
 }
 
 void
@@ -135,4 +129,3 @@ Steady::checkIntegrity()
   if (_problem.getNonlinearSystem().containsTimeKernel())
     mooseError("You have specified time kernels in your steady state simulation");
 }
-
