@@ -78,12 +78,14 @@
 /*
  * Boundary Conditions
  */
+#include "CahnHilliardAnisoFluxBC.h"
 #include "CahnHilliardFluxBC.h"
 
 /*
  * Materials
  */
 #include "BarrierFunctionMaterial.h"
+#include "CompositeMobilityTensor.h"
 #include "ComputePolycrystalElasticityTensor.h"
 #include "ConstantAnisotropicMobility.h"
 #include "DerivativeMultiPhaseMaterial.h"
@@ -290,9 +292,11 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
 
+  registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);
 
   registerMaterial(BarrierFunctionMaterial);
+  registerMaterial(CompositeMobilityTensor);
   registerMaterial(ComputePolycrystalElasticityTensor);
   registerMaterial(ConstantAnisotropicMobility);
   registerMaterial(DerivativeMultiPhaseMaterial);
