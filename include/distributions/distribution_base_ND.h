@@ -434,7 +434,7 @@ public:
   BasicMultivariateNormal(std::string data_filename, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu);
-  BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char * type,unsigned int rank);
+  BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char * type, int rank);
 
   //void BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu);
   void BasicMultivariateNormal_init(int & rows, int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu);

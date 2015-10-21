@@ -329,7 +329,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
 	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
 }
 
-BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* type, unsigned int rank){
+BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* type, int rank){
   /**
    * This is the function that initializes the Multivariate normal distribution given:
    * This function will compute the svd of given vecCovMatrix
@@ -345,7 +345,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
   _mu = mu;
   _cov_matrix = covMatrix;
-  _rank = rank;
+  _rank = (unsigned int) rank;
   _covarianceType = std::string(type);
   if(_rank > _mu.size()) {
     throwError("The  provided rank  is larger than the given problem's dimension, it should be less or equal!" );
