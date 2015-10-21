@@ -370,6 +370,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
           }
         }
+        else
+          if (!ex->lastSolveConverged())
+            throw MultiAppSolveFailure(name() + " failed to converge");
       }
 
       // Re-enable all output (it may of been disabled by sub-cycling)

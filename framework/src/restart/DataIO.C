@@ -232,7 +232,6 @@ dataLoad(std::istream & stream, NumericVector<Real> & v, void * /*context*/)
   {
     Real r = 0;
     stream.read((char *) &r, sizeof(r));
-
     v.set(i, r);
   }
 

@@ -283,7 +283,7 @@ Transient::computeDT()
 void
 Transient::incrementStepOrReject()
 {
-  if (_last_solve_converged)
+  if (lastSolveConverged())
   {
 #ifdef LIBMESH_ENABLE_AMR
     if (_problem.adaptivity().isOn())
@@ -304,8 +304,10 @@ Transient::incrementStepOrReject()
   }
   else
   {
-    _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
-    _problem.restoreMultiApps(EXEC_TIMESTEP_END);
+    _console<<"\nRestoring Multiapps Because of solve failure!"<<std::endl;
+
+    _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN, true);
+    _problem.restoreMultiApps(EXEC_TIMESTEP_END, true);
     _time_stepper->rejectStep();
     _time = _time_old;
   }
@@ -345,6 +347,11 @@ Transient::takeStep(Real input_dt)
     }
 
     solveStep(input_dt);
+
+    // If the last solve didn't converge then we need to exit this step completely (even in the case of Picard)
+    // So we can retry...
+    if (!lastSolveConverged())
+      return;
 
     if (_picard_max_its > 1)
     {
