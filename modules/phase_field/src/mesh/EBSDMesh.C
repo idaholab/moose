@@ -21,12 +21,12 @@ InputParameters validParams<EBSDMesh>()
   params.suppressParameter<int>("nx");
   params.suppressParameter<int>("ny");
   params.suppressParameter<int>("nz");
-  params.suppressParameter<int>("xmin");
-  params.suppressParameter<int>("ymin");
-  params.suppressParameter<int>("zmin");
-  params.suppressParameter<int>("xmax");
-  params.suppressParameter<int>("ymax");
-  params.suppressParameter<int>("zmax");
+  params.suppressParameter<Real>("xmin");
+  params.suppressParameter<Real>("ymin");
+  params.suppressParameter<Real>("zmin");
+  params.suppressParameter<Real>("xmax");
+  params.suppressParameter<Real>("ymax");
+  params.suppressParameter<Real>("zmax");
 
   return params;
 }
