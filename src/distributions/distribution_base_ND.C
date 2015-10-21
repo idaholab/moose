@@ -491,6 +491,12 @@ std::vector<double> BasicMultivariateNormal::coordinateInTransformedSpace(int ra
   /**
    * This function will return the coordinate in the transformed space
    * rank: the effective dimension of the transformed space
+   * This function will generate the coordinate for r (r=rank) random variables, each of them
+   * are drew from single normal distribution. We need a random number between 0 and 1 to drew
+   * the random variable. In addition, thi function will be used in the input dimensionality reduction
+   * application. We will transform the correlated variables into uncorrelated variables, and using this
+   * function to draw the samples for the uncorrelated variables, and later transform the samples to correlated
+   * variables.
    */
   //std::cout << "BasicMultivariateNormal::coordinateInTransformedSpace" << std::endl;
   std::vector<double> coordinate;
