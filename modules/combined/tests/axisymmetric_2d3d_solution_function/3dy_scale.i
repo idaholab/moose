@@ -54,7 +54,6 @@
     type = SolutionUserObject
     mesh = gold/2d_out.e
     system_variables = 'disp_x disp_y temp'
-    timestep = -1
   [../]
 []
 

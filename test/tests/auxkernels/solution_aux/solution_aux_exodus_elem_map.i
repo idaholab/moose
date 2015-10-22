@@ -44,7 +44,7 @@
     type = SolutionUserObject
     mesh = elem_map.e
     system_variables = MatID
-    timestep = 1
+    timestep = END
   [../]
 []
 
