@@ -51,33 +51,6 @@ class Factory;
 class Syntax;
 class FEProblem;
 
-/// Execution flags - when is the object executed/evaluated
-// Note: If this enum is changed, make sure to modify:
-//   (1) the local function populateExecTypes in Moose.C.
-//   (2) the function in Conversion.C: initExecStoreType()
-//   (3) the method SetupInterface::getExecuteOptions
-//   (4) the function Output::getExecuteOptions
-enum ExecFlagType {
-  EXEC_NONE              = 0x00,
-  /// Object is evaluated only once at the beginning of the simulation
-  EXEC_INITIAL           = 0x01,
-  /// Object is evaluated in every residual computation
-  EXEC_LINEAR            = 0x02,
-  /// Object is evaluated in every jacobian computation
-  EXEC_NONLINEAR         = 0x04,
-  /// Object is evaluated at the end of every time step
-  EXEC_TIMESTEP_END      = 0x08,
-  /// Object is evaluated at the beginning of every time step
-  EXEC_TIMESTEP_BEGIN    = 0x10,
-  /// Object is evaluated at the end of the simulations (output only)
-  EXEC_FINAL             = 0x20,
-  /// Forces execution to occur (output only)
-  EXEC_FORCED            = 0x40,
-  /// Forces execution on failed solve (output only)
-  EXEC_FAILED            = 0x80,
-  /// For use with custom executioners that want to fire objects at a specific time
-  EXEC_CUSTOM            = 0x100,
-};
 
 namespace Moose
 {
@@ -92,10 +65,6 @@ extern PerfLog perf_log;
  * PerfLog to be used during setup.  This log will get printed just before the first solve. */
 extern PerfLog setup_perf_log;
 
-/**
- * A static list of all the exec types.
- */
-extern const std::vector<ExecFlagType> exec_types;
 
 /**
  * Variable indicating whether we will enable FPE trapping for this run.
