@@ -82,7 +82,7 @@ std::string ErrorLogger::dumpErrors()
   std::string errorFileContents = "";
 
   // Loop over the errors in errorVector.
-  for (int i=0; i<errorVector.size(); i++)
+  for (unsigned int i=0; i<errorVector.size(); i++)
   {
     // Append the error and a new line char to the error file contents.
     errorFileContents += errorVector[i];

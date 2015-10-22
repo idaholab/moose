@@ -152,6 +152,9 @@ std::string LibcurlUtils::get(std::string url, std::string username, std::string
     return std::string("CURL could not be initialized.");
 
 #else
+  libmesh_ignore(url);
+  libmesh_ignore(username);
+  libmesh_ignore(password);
   mooseError("You tried to use the LibcurlUtils class, but CURL is not available.");
   return std::string("");
 #endif
@@ -241,6 +244,10 @@ std::string LibcurlUtils::post(std::string url, std::string value, std::string u
     return std::string("CURL could not be initialized.");
 
 #else
+  libmesh_ignore(url);
+  libmesh_ignore(value);
+  libmesh_ignore(username);
+  libmesh_ignore(password);
   mooseError("You tried to use the LibcurlUtils class, but CURL is not available.");
   return std::string("");
 #endif
