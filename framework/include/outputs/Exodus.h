@@ -160,6 +160,9 @@ private:
 
   /// Sequence flag, if true each timestep is written to a new file
   bool _sequence;
+
+  /// Flag for overwriting timesteps
+  bool _overwrite;
 };
 
 #endif /* EXODUS_H */
