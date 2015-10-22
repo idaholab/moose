@@ -12,7 +12,7 @@ RandomMaterial::RandomMaterial(const InputParameters & parameters) :
     _rand_real(declareProperty<Real>("rand_real")),
     _rand_long(declareProperty<unsigned long>("rand_long"))
 {
-  setRandomResetFrequency(EXEC_TIMESTEP);
+  setRandomResetFrequency(EXEC_TIMESTEP_END);
 }
 
 void

@@ -42,9 +42,9 @@
 
 [AuxKernels]
   [./nodal_flood_aux]
-    # We definitely need to execute this AuxKernel on TIMESTEP,
+    # We definitely need to execute this AuxKernel on TIMESTEP_END,
     # otherwise the grain_auxvar won't be shown in paraview...
-    execute_on = 'TIMESTEP'
+    execute_on = 'TIMESTEP_END'
     # This auxkernel is initialized *before* the variable u is set
     # from FunctionIC, so it will always be zero initially...
     variable = grain_auxvar

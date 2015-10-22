@@ -54,8 +54,9 @@ class FEProblem;
 /// Execution flags - when is the object executed/evaluated
 // Note: If this enum is changed, make sure to modify:
 //   (1) the local function populateExecTypes in Moose.C.
-//   (2) the method SetupInterface::getExecuteOptions
-//   (3) the function Output::getExecuteOptions
+//   (2) the function in Conversion.C: initExecStoreType()
+//   (3) the method SetupInterface::getExecuteOptions
+//   (4) the function Output::getExecuteOptions
 enum ExecFlagType {
   EXEC_NONE              = 0x00,
   /// Object is evaluated only once at the beginning of the simulation
@@ -76,32 +77,7 @@ enum ExecFlagType {
   EXEC_FAILED            = 0x80,
   /// For use with custom executioners that want to fire objects at a specific time
   EXEC_CUSTOM            = 0x100,
-  ///@{
-  /// Deprecated
-  EXEC_RESIDUAL          = 0x200, // EXEC_LINEAR
-  EXEC_JACOBIAN          = 0x400, // EXEC_NONLINEAR
-  EXEC_TIMESTEP          = 0x800, // EXEC_TIMESTEP_END
-  OUTPUT_NONE            = 0x00,
-  OUTPUT_INITIAL         = 0x01,
-  OUTPUT_LINEAR          = 0x02,
-  OUTPUT_NONLINEAR       = 0x04,
-  OUTPUT_TIMESTEP_END    = 0x08,
-  OUTPUT_TIMESTEP_BEGIN  = 0x10,
-  OUTPUT_FINAL           = 0x20,
-  OUTPUT_FORCED          = 0x40,
-  OUTPUT_FAILED          = 0x80,
-  OUTPUT_CUSTOM          = 0x100
-  ///@}
 };
-
-// Support for deprecated output flags
-typedef ExecFlagType OutputExecFlagType;
-
-// Some define trickery to allow YAK to continue to operate, this will
-// allow the update to MOOSE to occur w/o an integration branch
-#define EXEC_RESIDUAL EXEC_LINEAR
-#define EXEC_JACOBIAN EXEC_NONLINEAR
-#define EXEC_TIMESTEP EXEC_TIMESTEP_END
 
 namespace Moose
 {

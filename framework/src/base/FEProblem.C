@@ -372,8 +372,8 @@ void FEProblem::initialSetup()
   // UserObject initialSetup
   for (unsigned int i=0; i<n_threads; i++)
   {
-    _user_objects(EXEC_LINEAR)[i].updateDependObjects(_aux.getDependObjects(EXEC_RESIDUAL));
-    _user_objects(EXEC_NONLINEAR)[i].updateDependObjects(_aux.getDependObjects(EXEC_JACOBIAN));
+    _user_objects(EXEC_LINEAR)[i].updateDependObjects(_aux.getDependObjects(EXEC_LINEAR));
+    _user_objects(EXEC_NONLINEAR)[i].updateDependObjects(_aux.getDependObjects(EXEC_NONLINEAR));
     _user_objects(EXEC_TIMESTEP_END)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP_END));
     _user_objects(EXEC_TIMESTEP_BEGIN)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP_BEGIN));
     _user_objects(EXEC_INITIAL)[i].updateDependObjects(_aux.getDependObjects(EXEC_INITIAL));
