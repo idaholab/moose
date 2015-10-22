@@ -74,15 +74,6 @@ enum KernelType
   KT_ALL
 };
 
-// Bit mask flags to be able to combine them through or-operator (|)
-enum PostprocessorType
-{
-  PPS_RESIDUAL = 0x01,
-  PPS_JACOBIAN = 0x02,
-  PPS_TIMESTEP = 0x04,
-  PPS_NEWTONIT = 0x08
-};
-
 enum CouplingType
 {
   COUPLING_DIAG,
@@ -129,15 +120,6 @@ enum CoordinateSystemType
   COORD_XYZ,
   COORD_RZ,
   COORD_RSPHERICAL
-};
-
-enum PPSOutputType
-{
-  PPS_OUTPUT_NONE,
-  PPS_OUTPUT_AUTO,
-  PPS_OUTPUT_SCREEN,
-  PPS_OUTPUT_FILE,
-  PPS_OUTPUT_BOTH
 };
 
 /**
