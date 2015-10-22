@@ -257,7 +257,7 @@ outputOutputInformation(MooseApp & app)
 }
 
 
-std::string outputLegacyInformation(MooseApp & app, FEProblem & problem)
+std::string outputLegacyInformation(MooseApp & /*app*/, FEProblem & problem)
 {
   std::stringstream oss;
   oss << std::left;

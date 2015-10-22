@@ -419,7 +419,7 @@ PropertyMap Updater::getPropertyMap(std::string propertyString)
   lines = split(propertyString, '\n');
 
   // Loop over all tokens
-  for (int i = 0; i < lines.size(); i++)
+  for (unsigned int i = 0; i < lines.size(); i++)
   {
     std::string line = lines[i];
 
