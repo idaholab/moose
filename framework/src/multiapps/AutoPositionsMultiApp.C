@@ -21,7 +21,7 @@ InputParameters validParams<AutoPositionsMultiApp>()
   params += validParams<BoundaryRestrictable>();
 
   params.suppressParameter<std::vector<Point> >("positions");
-  params.suppressParameter<FileName>("positions_file");
+  params.suppressParameter<std::vector<FileName> >("positions_file");
 
   return params;
 }
@@ -61,4 +61,3 @@ AutoPositionsMultiApp::fillPositions()
     }
   }
 }
-
