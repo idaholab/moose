@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    # Test that the overwrite flag results in only the final timestep being output
+    type = 'Exodiff'
+    input = 'overwrite.i'
+    exodiff = 'overwrite_out.e'
+  [../]
+[]
