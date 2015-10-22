@@ -6,6 +6,7 @@
     abs_zero = 1e-08
     scale_refine = 1
     compiler = 'GCC CLANG'
+    allow_warnings = true
   [../]
   [./sent_test]
     type = 'Exodiff'

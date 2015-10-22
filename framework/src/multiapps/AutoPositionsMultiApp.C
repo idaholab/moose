@@ -40,7 +40,7 @@ AutoPositionsMultiApp::~AutoPositionsMultiApp()
 void
 AutoPositionsMultiApp::fillPositions()
 {
-  MooseMesh & master_mesh = _fe_problem->mesh();
+  MooseMesh & master_mesh = _fe_problem.mesh();
 
   const std::set<BoundaryID> & bids = boundaryIDs();
 
