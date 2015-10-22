@@ -61,7 +61,7 @@
     min_threads = 2
     max_threads = 2
     prereq = with_threads
-    cli_args = 'Executioner/restart_file_base=kernel_restartable_out_threads_cp/0005'
+    cli_args = 'Problem/restart_file_base=kernel_restartable_out_threads_cp/0005'
     expect_err = 'Cannot restart using a different number of threads'
   [../]
 []

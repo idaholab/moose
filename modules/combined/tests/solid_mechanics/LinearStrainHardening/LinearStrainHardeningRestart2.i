@@ -181,14 +181,14 @@
   end_time = 0.0105
 #  num_steps = 100
   dt = 1.5e-3
-
-  restart_file_base = LinearStrainHardeningRestart1_out_cp/0004
 []
-
-
 
 [Outputs]
   file_base = LinearStrainHardening_test_out
   exodus = true
   csv = true
+[]
+
+[Problem]
+  restart_file_base = LinearStrainHardeningRestart1_out_cp/0004
 []
