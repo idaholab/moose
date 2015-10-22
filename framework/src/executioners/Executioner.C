@@ -27,7 +27,7 @@ template<>
 InputParameters validParams<Executioner>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<FileNameNoExtension>("restart_file_base", "", "File base name used for restart");
+  params.addDeprecatedParam<FileNameNoExtension>("restart_file_base", "", "File base name used for restart", "Please use \"Problem/restart_file_base\" instead");
 
   params.registerBase("Executioner");
 
