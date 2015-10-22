@@ -25,6 +25,7 @@ class InputParametersTest : public CppUnit::TestFixture
   CPPUNIT_TEST( checkControlParamPrivateError );
   CPPUNIT_TEST( checkControlParamTypeError );
   CPPUNIT_TEST( checkControlParamValidError );
+  CPPUNIT_TEST( checkSuppressedError );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -35,6 +36,7 @@ public:
   void checkControlParamPrivateError();
   void checkControlParamTypeError();
   void checkControlParamValidError();
+  void checkSuppressedError();
 
 private:
 };

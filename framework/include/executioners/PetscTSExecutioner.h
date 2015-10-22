@@ -61,10 +61,7 @@ public:
 
   virtual void execute();
 
-  virtual Problem & problem();
-
 protected:
-  FEProblem & _fe_problem;
   TimeStepper *_time_stepper;
   bool keepGoing(TimeStepperStatus status, Real time) const;
 };

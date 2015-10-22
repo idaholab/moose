@@ -930,6 +930,9 @@ template <typename T>
 void
 InputParameters::suppressParameter(const std::string &name)
 {
+  if (!this->have_parameter<T>(name))
+    mooseError("Unable to suppress nonexistent parameter: " << name);
+
   _required_params.erase(name);
   _private_params.insert(name);
 }

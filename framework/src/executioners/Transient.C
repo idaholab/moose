@@ -86,7 +86,7 @@ InputParameters validParams<Transient>()
 
 Transient::Transient(const InputParameters & parameters) :
     Executioner(parameters),
-    _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
+    _problem(_fe_problem),
     _time_scheme(getParam<MooseEnum>("scheme")),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
@@ -704,12 +704,6 @@ void
 Transient::postExecute()
 {
   _time_stepper->postExecute();
-}
-
-Problem &
-Transient::problem()
-{
-  return _problem;
 }
 
 void

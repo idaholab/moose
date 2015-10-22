@@ -71,3 +71,19 @@ InputParametersTest::checkControlParamValidError()
     CPPUNIT_ASSERT( msg.find("The parameter 'not_valid'") != std::string::npos );
   }
 }
+
+void
+InputParametersTest::checkSuppressedError()
+{
+  try
+  {
+    InputParameters params = emptyInputParameters();
+    params.suppressParameter<int>("nonexistent");
+    CPPUNIT_ASSERT( false ); // shouldn't get here
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT( msg.find("Unable to suppress nonexistent parameter") != std::string::npos );
+  }
+}
