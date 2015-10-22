@@ -51,8 +51,6 @@ public:
    */
   virtual void execute();
 
-  virtual Problem & problem();
-
   virtual void checkIntegrity();
 
 protected:

@@ -42,8 +42,6 @@ public:
 
   virtual ~EigenExecutionerBase();
 
-  virtual Problem & problem() { return _problem; }
-
   /**
    * Initialization
    */
