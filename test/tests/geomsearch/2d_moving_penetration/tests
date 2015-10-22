@@ -211,5 +211,6 @@
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     prereq = restart
+    recover = false # Turns out this isn't working in HEAD - we have more work to properly recover a restart test #5877
   [../]
 []

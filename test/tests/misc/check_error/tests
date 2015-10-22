@@ -313,10 +313,15 @@
     # error on newer versions of PETSc.
   [../]
 
+  # This is a Steady test so it would be skipped anyway but it turns out that we read the
+  # mesh and initialize the system before exiting safely. However this input file
+  # is used by several other error tests that may also be accessing the checkpoint
+  # file so it's just easier to not execute it in the first place.
   [./nan_no_trap_fpe_test]
     type = 'RunApp'
     input = 'nan_test.i'
     cli_args = '--no-trap-fpe'
+    recover = false
   [../]
 
   [./nan_test_transient]
