@@ -41,6 +41,7 @@
 #include "KKSSplitCHCRes.h"
 #include "LangevinNoise.h"
 #include "MaskedBodyForce.h"
+#include "MatAnisoDiffusion.h"
 #include "MatDiffusion.h"
 #include "MultiGrainRigidBodyMotion.h"
 #include "PFFracBulkRate.h"
@@ -259,6 +260,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(KKSSplitCHCRes);
   registerKernel(LangevinNoise);
   registerKernel(MaskedBodyForce);
+  registerKernel(MatAnisoDiffusion);
   registerKernel(MatDiffusion);
   registerKernel(MultiGrainRigidBodyMotion);
   registerKernel(PFFracBulkRate);

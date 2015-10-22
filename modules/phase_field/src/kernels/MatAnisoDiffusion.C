@@ -4,17 +4,17 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "MatDiffusion.h"
+#include "MatAnisoDiffusion.h"
 
 template<>
-InputParameters validParams<MatDiffusion>()
+InputParameters validParams<MatAnisoDiffusion>()
 {
-  InputParameters params = MatDiffusionBase<Real>::validParams();
-  params.addClassDescription("Diffusion equation Kernel that takes an isotropic Diffusivity from a material property");
+  InputParameters params = MatDiffusionBase<RealTensorValue>::validParams();
+  params.addClassDescription("Diffusion equation Kernel that takes an anisotropic Diffusivity from a material property");
   return params;
 }
 
-MatDiffusion::MatDiffusion(const InputParameters & parameters) :
-    MatDiffusionBase<Real>(parameters)
+MatAnisoDiffusion::MatAnisoDiffusion(const InputParameters & parameters) :
+    MatDiffusionBase<RealTensorValue>(parameters)
 {
 }

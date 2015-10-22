@@ -9,4 +9,9 @@
     input = 'nonsplit.i'
     exodiff = 'nonsplit_out.e'
   [../]
+  [./diffusion]
+    type = 'Exodiff'
+    input = 'diffusion.i'
+    exodiff = 'diffusion_out.e'
+  [../]
 []
