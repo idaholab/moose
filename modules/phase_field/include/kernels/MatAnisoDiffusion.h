@@ -4,23 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef MATDIFFUSION_H
-#define MATDIFFUSION_H
+#ifndef MATANISODIFFUSION_H
+#define MATANISODIFFUSION_H
 
 #include "MatDiffusionBase.h"
 
 /**
- * Isotropic diffusion kernel that takes a diffusion coefficient of type
- * Real. All logic is implemnted in the MatDiffusionBase class
+ * Anisotropic diffusion kernel that takes a diffusion coefficient of type
+ * RealTensorValue. All logic is implemnted in the MatDiffusionBase class
  * template.
  */
-class MatDiffusion : public MatDiffusionBase<Real>
+class MatAnisoDiffusion : public MatDiffusionBase<RealTensorValue>
 {
 public:
-  MatDiffusion(const InputParameters & parameters);
+  MatAnisoDiffusion(const InputParameters & parameters);
 };
 
 template<>
-InputParameters validParams<MatDiffusion>();
+InputParameters validParams<MatAnisoDiffusion>();
 
-#endif //MATDIFFUSION_H
+#endif //MATANISODIFFUSION_H
