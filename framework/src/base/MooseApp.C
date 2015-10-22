@@ -504,7 +504,7 @@ MooseApp::registerRecoverableData(std::string name)
 MooseSharedPointer<Backup>
 MooseApp::backup()
 {
-  FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
+  FEProblem & fe_problem = _executioner->feProblem();
 
   RestartableDataIO rdio(fe_problem);
 
@@ -522,7 +522,7 @@ MooseApp::restore(MooseSharedPointer<Backup> backup, bool for_restart)
     return;
   }
 
-  FEProblem & fe_problem = static_cast<FEProblem &>(_executioner->problem());
+  FEProblem & fe_problem = _executioner->feProblem();
 
   RestartableDataIO rdio(fe_problem);
 

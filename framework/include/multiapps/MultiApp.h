@@ -128,13 +128,13 @@ public:
   /**
    * Get the FEProblem this MultiApp is part of.
    */
-  FEProblem * problem() { return _fe_problem; }
+  FEProblem & problem() { return _fe_problem; }
 
   /**
    * Get the FEProblem for the global app is part of.
    * @param app The global app number
    */
-  FEProblem * appProblem(unsigned int app);
+  FEProblem & appProblem(unsigned int app);
 
   /**
    * Get a UserObject base for a specific global app
@@ -270,7 +270,7 @@ protected:
   unsigned int globalAppToLocal(unsigned int global_app);
 
   /// The FEProblem this MultiApp is part of
-  FEProblem * _fe_problem;
+  FEProblem & _fe_problem;
 
   /// The type of application to build
   std::string _app_type;
