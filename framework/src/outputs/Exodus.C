@@ -39,6 +39,9 @@ InputParameters validParams<Exodus>()
   // Add description for the Exodus class
   params.addClassDescription("Object for output data in the Exodus II format");
 
+  // Flag for overwriting at each timestep
+  params.addParam<bool>("overwrite", false, "When true the latest timestep will overwrite the existing file, so only a single timestep exists.");
+
   // Set outputting of the input to be on by default
   params.set<MultiMooseEnum>("execute_input_on") = "initial";
 
@@ -52,7 +55,8 @@ Exodus::Exodus(const InputParameters & parameters) :
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
     _recovering(_app.isRecovering()),
     _exodus_mesh_changed(declareRestartableData<bool>("exodus_mesh_changed", true)),
-    _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : _use_displaced ? true : false)
+    _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : _use_displaced ? true : false),
+    _overwrite(getParam<bool>("overwrite"))
 {
 }
 
@@ -159,7 +163,9 @@ Exodus::outputNodalVariables()
 
   // Write the data via libMesh::ExodusII_IO
   _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
-  _exodus_num++;
+
+  if (!_overwrite)
+    _exodus_num++;
 
   // This satisfies the initialization of the ExodusII_IO object
   _exodus_initialized = true;
@@ -311,6 +317,9 @@ Exodus::outputEmptyTimestep()
   // Write a timestep with no variables
   _exodus_io_ptr->set_output_variables(std::vector<std::string>());
   _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
-  _exodus_num++;
+
+  if (!_overwrite)
+    _exodus_num++;
+
   _exodus_initialized = true;
 }
