@@ -465,7 +465,7 @@ protected:
    * Compute the residual
    * @param type The type of kernels for which the residual is to be computed.
    */
-  void computeResidualInternal(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
+  void computeResidualInternal(Moose::KernelType type = Moose::KT_ALL);
 
   /**
    * Enforces nodal boundary conditions

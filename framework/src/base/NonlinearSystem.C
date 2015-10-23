@@ -748,7 +748,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
     residual.zero();
     residualVector(Moose::KT_TIME).zero();
     residualVector(Moose::KT_NONTIME).zero();
-    computeResidualInternal(residual, type);
+    computeResidualInternal(type);
     residualVector(Moose::KT_TIME).close();
     residualVector(Moose::KT_NONTIME).close();
     _time_integrator->postStep(residual);
@@ -1209,7 +1209,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
 
 void
-NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose::KernelType type)
+NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 {
    // residualSetup() /////
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
@@ -1261,15 +1261,20 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual, Moose
   // residual contributions from NodalKernels
   PARALLEL_TRY
   {
-    ComputeNodalKernelsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels);
+    if (!_nodal_kernels[0].all().empty())
+    {
+      ComputeNodalKernelsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels);
 
-    ConstNodeRange & range = *_mesh.getLocalNodeRange();
+      ConstNodeRange & range = *_mesh.getLocalNodeRange();
 
-    Threads::parallel_reduce(range, cnk);
+      _fe_problem.reinitNode(*range.begin(), 0);
 
-    unsigned int n_threads = libMesh::n_threads();
-    for (unsigned int i=0; i<n_threads; i++) // Add any cached residuals that might be hanging around
-      _fe_problem.addCachedResidual(i);
+      Threads::parallel_reduce(range, cnk);
+
+      unsigned int n_threads = libMesh::n_threads();
+      for (unsigned int i=0; i<n_threads; i++) // Add any cached residuals that might be hanging around
+        _fe_problem.addCachedResidual(i);
+    }
   }
   PARALLEL_CATCH;
 
@@ -1839,7 +1844,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         for (unsigned int i=0; i<n_threads; i++) // Add any Jacobian contributions still hanging around
           _fe_problem.addCachedJacobian(jacobian, i);
 
-        if (!_nodal_kernels.empty())
+        if (!_nodal_kernels[0].all().empty())
         {
           ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
@@ -1862,7 +1867,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         for (unsigned int i=0; i<n_threads; i++)
           _fe_problem.addCachedJacobian(jacobian, i);
 
-        if (!_nodal_kernels.empty())
+        if (!_nodal_kernels[0].all().empty())
         {
           ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();

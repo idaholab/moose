@@ -58,6 +58,8 @@ NodalKernelWarehouse::addNodalKernel(MooseSharedPointer<NodalKernel> & nodal_ker
   // Make certain that the NodalKernel is valid
   mooseAssert(nodal_kernel, "NodalKernel is NULL");
 
+  _all_objects.push_back(nodal_kernel.get());
+
   // Add to elemental/nodal storage
   _all_nodal_kernels.push_back(nodal_kernel);
 
