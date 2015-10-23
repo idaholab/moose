@@ -41,7 +41,7 @@ InputParameters validParams<SolutionUserObject>()
   params.addParam<std::string>("system", "nl0", "The name of the system to pull values out of (xda only).");
 
   // When using ExodusII a specific time is extracted
-  params.addParam<std::string>("timestep", "Index of the single timestep used or \"END\" for the last timestep (exodusII only).  If not supplied, time interpolation will occur.");
+  params.addParam<std::string>("timestep", "Index of the single timestep used or \"LATEST\" for the last timestep (exodusII only).  If not supplied, time interpolation will occur.");
 
   // Add ability to perform coordinate transformation: scale, factor
   params.addDeprecatedParam<std::vector<Real> >("coord_scale", "This name has been deprecated.",  "Please use scale instead");
@@ -194,13 +194,13 @@ SolutionUserObject::readExodusII()
   {
     std::string s_timestep = getParam<std::string>("timestep");
     int n_steps = _exodusII_io->get_num_time_steps();
-    if (s_timestep == "END")
+    if (s_timestep == "LATEST")
       _exodus_time_index = n_steps;
     else
     {
       std::istringstream ss(s_timestep);
       if (!(ss >> _exodus_time_index) || _exodus_time_index > n_steps)
-        mooseError("Invalid value passed as \"timestep\". Expected \"END\" or a valid integer less than "
+        mooseError("Invalid value passed as \"timestep\". Expected \"LATEST\" or a valid integer less than "
                    << n_steps << ", received " << s_timestep);
     }
   }
