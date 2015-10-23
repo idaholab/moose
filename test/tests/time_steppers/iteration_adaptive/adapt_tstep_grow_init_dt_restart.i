@@ -65,5 +65,5 @@
 []
 
 [Problem]
-  restart_file_base = adapt_tstep_grow_init_dt_out_cp/0006
+  restart_file_base = adapt_tstep_grow_init_dt_out_cp/LATEST
 []

@@ -65,5 +65,5 @@
 []
 
 [Problem]
-  restart_file_base = adapt_tstep_shrink_init_dt_out_cp/0005
+  restart_file_base = adapt_tstep_shrink_init_dt_out_cp/LATEST
 []

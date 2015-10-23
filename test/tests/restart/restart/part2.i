@@ -61,5 +61,5 @@
 []
 
 [Problem]
-  restart_file_base = out_part1_cp/0005
+  restart_file_base = out_part1_cp/LATEST
 []

@@ -56,5 +56,5 @@
 []
 
 [Problem]
-  restart_file_base = restartable_types_out_cp/0001
+  restart_file_base = restartable_types_out_cp/LATEST
 []
