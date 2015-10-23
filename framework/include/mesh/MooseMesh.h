@@ -683,9 +683,8 @@ public:
   MooseMesh::MortarInterface * getMortarInterface(BoundaryID master, BoundaryID slave);
 
   /**
-   * Setter and getter for custom partitioner
+   * Setter for custom partitioner
    */
-  Partitioner * getCustomPartitioner() const;
   void setCustomPartitioner(Partitioner * partitioner);
 
   /**
@@ -713,7 +712,7 @@ protected:
   bool _partitioner_overridden;
 
   /// The custom partitioner
-  Partitioner * _custom_partitioner;
+  UniquePtr<Partitioner> _custom_partitioner;
   bool _custom_partitioner_requested;
 
   /// Convenience enums

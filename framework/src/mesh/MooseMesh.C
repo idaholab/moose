@@ -211,11 +211,6 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
 
   for (std::vector<BoundaryID>::const_iterator it = node_boundaries.begin(); it != node_boundaries.end(); ++it)
     boundary_info.nodeset_name(*it) = other_boundary_info.get_nodeset_name(*it);
-
-  if (other_mesh.getCustomPartitioner())
-    setCustomPartitioner(other_mesh.getCustomPartitioner());
-  else
-    _custom_partitioner = NULL;
 }
 
 MooseMesh::~MooseMesh()
@@ -1713,7 +1708,7 @@ MooseMesh::init()
     // Set custom partitioner
     if (!_custom_partitioner)
       mooseError("Custom partitioner requested but not set!");
-    getMesh().partitioner().reset(_custom_partitioner);
+    getMesh().partitioner().reset(_custom_partitioner.release());
   }
   else
   {
@@ -2187,16 +2182,10 @@ MooseMesh::getMortarInterface(BoundaryID master, BoundaryID slave)
     mooseError("Requesting non-existing mortar interface (master = " << master << ", slave = " << slave << ").");
 }
 
-Partitioner *
-MooseMesh::getCustomPartitioner() const
-{
-  return _custom_partitioner;
-}
-
 void
 MooseMesh::setCustomPartitioner(Partitioner * partitioner)
 {
-  _custom_partitioner = partitioner->clone().release();
+  _custom_partitioner = partitioner->clone();
 }
 
 bool
