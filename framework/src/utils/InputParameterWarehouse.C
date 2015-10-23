@@ -81,20 +81,14 @@ InputParameterWarehouse::getInputParameters(const std::string & tag, const std::
 InputParameters &
 InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name, THREAD_ID tid)
 {
-
-
-  // Storage for the equal range
-  std::pair<InputParameterIterator, InputParameterIterator> ret;
-
-  // Located the object(s)
-  ret = _input_parameters[tid].equal_range(object_name);
-
-  // Error if not found
-  if (ret.first == ret.second)
+  // Locate the InputParameters object and error if it was not located
+  std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> >::const_iterator iter;
+  iter = _input_parameters[tid].find(object_name);
+  if (iter == _input_parameters[tid].end())
     mooseError("Unknown InputParameters object " << object_name);
 
   // Return a reference to the parameter
-  return *(ret.first->second.get());
+  return *(iter->second.get());
 }
 
 const std::vector<InputParameters *> &

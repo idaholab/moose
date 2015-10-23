@@ -92,6 +92,8 @@ ContactAction::act()
       // Extract global params
       if (isParamValid("parser_syntax"))
         _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
+      else
+        mooseError("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
 
       // Create Constraint objects
       params.set<std::string>("model") = _model;
@@ -150,6 +152,9 @@ ContactAction::act()
         // Extract global params
         if (isParamValid("parser_syntax"))
           _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
+        else
+          mooseError("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
+
 
         // Create master objects
         params.set<std::string>("model") = _model;
@@ -205,6 +210,8 @@ ContactAction::act()
         // Extract global params
         if (isParamValid("parser_syntax"))
           _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
+        else
+          mooseError("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
 
         // Create slave objects
         params.set<std::string>("model") = _model;
