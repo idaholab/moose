@@ -40,6 +40,11 @@ public:
 protected:
   /// index of the vecor element
   unsigned int _index;
+
+  // Explicitly declare the origin of the following inherited members
+  // https://isocpp.org/wiki/faq/templates#nondependent-name-lookup-members
+  using MaterialAuxBase<std::vector<T> >::_qp;
+  using MaterialAuxBase<std::vector<T> >::_prop;
 };
 
 template<typename T>
@@ -53,7 +58,7 @@ template<typename T>
 Real
 MaterialStdVectorAuxBase<T>::computeValue()
 {
-  mooseAssert(this->_prop[this->_qp].size() > _index, "MaterialStdVectorRealGradientAux: You chose to extract component " << _index << " but your Material property only has size " << this->_prop[this->_qp].size());
+  mooseAssert(_prop[_qp].size() > _index, "MaterialStdVectorRealGradientAux: You chose to extract component " << _index << " but your Material property only has size " << _prop[_qp].size());
   return MaterialAuxBase<std::vector<T> >::computeValue();
 }
 
