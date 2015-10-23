@@ -23,7 +23,7 @@ $(CROW_DIR)/src/distributions/distributionFunctions.$(obj-suffix): $(CROW_DIR)/s
 $(CROW_DIR)/src/distributions/distributionNDBase.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionNDBase.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
-$(CROW_DIR)/src/distributions/distributionNDNoraml.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionNDNormal.C
+$(CROW_DIR)/src/distributions/distributionNDNormal.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionNDNormal.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
 $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.$(obj-suffix): $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.C

@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "ND_Interpolation_Functions.h"
+#include "distributionNDCartesianSpline.h"
 #include "distributionFunctions.h"
 #include "distributionNDBase.h"
 #include <stdexcept>
