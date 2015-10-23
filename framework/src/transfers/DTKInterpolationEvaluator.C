@@ -13,7 +13,7 @@
 /****************************************************************/
 #include "libmesh/libmesh_config.h"
 
-#ifdef LIBMESH_HAVE_DTK
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 #include "DTKInterpolationEvaluator.h"
 #include "DTKInterpolationHelper.h"
@@ -77,4 +77,4 @@ DTKInterpolationEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>& elem
 
 } // namespace libMesh
 
-#endif
+#endif // LIBMESH_TRILINOS_HAVE_DTK

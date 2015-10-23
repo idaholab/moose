@@ -18,7 +18,7 @@
 
 #include "libmesh/libmesh_config.h"
 
-#ifdef LIBMESH_HAVE_DTK
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 #include "libmesh/dtk_evaluator.h"
 
@@ -97,6 +97,6 @@ protected:
   std::map<std::string, RCP_Evaluator> evaluators;
 };
 
-#endif // #ifdef LIBMESH_HAVE_DTK
+#endif // #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 #endif // #define DTKINTERPOLATIONADAPTER_H
