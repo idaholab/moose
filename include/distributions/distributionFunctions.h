@@ -35,8 +35,8 @@ double getDeterminant(std::vector<std::vector<double> > matrix);
 void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix);
 void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix, unsigned int rank);
 void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted);
-void matrixConversionToCxxVVectorType(Eigen::MatrixXd original, std::vector<std::vector<double> > &converted);
-void vectorConversionToCxxVectorType(Eigen::VectorXd original, std::vector<double>  &converted);
+void matrixConversionToCxxVVectorType(const Eigen::MatrixXd & original, std::vector<std::vector<double> > &converted);
+void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vector<double>  &converted);
 
 void nrerror(const char error_text[]);
 

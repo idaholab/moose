@@ -326,7 +326,7 @@ void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eig
   }
 }
 
-void matrixConversionToCxxVVectorType(Eigen::MatrixXd original, std::vector<std::vector<double> > &converted) {
+void matrixConversionToCxxVVectorType(const Eigen::MatrixXd & original, std::vector<std::vector<double> > &converted) {
   /**
    * This function convert the data from type Eigen::MatrixXd to type std::vector<double>
    * Input Parameters
@@ -343,7 +343,7 @@ void matrixConversionToCxxVVectorType(Eigen::MatrixXd original, std::vector<std:
   }
 }
 
-void vectorConversionToCxxVectorType(Eigen::VectorXd original, std::vector<double> &converted) {
+void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vector<double> &converted) {
   /**
    * This function convert the data from type Eigen::VectorXd to type std::vector<double>
    * Input Parameters
