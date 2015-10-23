@@ -28,6 +28,19 @@ protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  // Explicitly declare the use of the following members of the parent class
+  // https://isocpp.org/wiki/faq/templates#nondependent-name-lookup-members
+  using CHBulk<T>::_M;
+  using CHBulk<T>::_i;
+  using CHBulk<T>::_j;
+  using CHBulk<T>::_qp;
+  using CHBulk<T>::_var;
+  using CHBulk<T>::_phi;
+  using CHBulk<T>::_grad_u;
+  using CHBulk<T>::_grad_phi;
+  using CHBulk<T>::_grad_test;
+  using CHBulk<T>::_coupled_moose_vars;
+
 private:
   const unsigned int _nvar;
   std::vector<const MaterialProperty<Real>* > _second_derivatives;
@@ -50,32 +63,32 @@ CahnHilliardBase<T>::validParams()
 template<typename T>
 CahnHilliardBase<T>::CahnHilliardBase(const InputParameters & parameters) :
     CHBulk<T>(parameters),
-    _nvar(this->_coupled_moose_vars.size()),
+    _nvar(_coupled_moose_vars.size()),
     _second_derivatives(_nvar+1),
     _third_derivatives(_nvar+1),
     _third_cross_derivatives(_nvar),
     _grad_vars(_nvar+1)
 {
   // derivatives w.r.t. and gradients of the kernel variable
-  _second_derivatives[0] = &this->template getMaterialPropertyDerivative<Real>("f_name", this->_var.name(), this->_var.name());
-  _third_derivatives[0]  = &this->template getMaterialPropertyDerivative<Real>("f_name", this->_var.name(), this->_var.name(), this->_var.name());
-  _grad_vars[0] = &(this->_grad_u);
+  _second_derivatives[0] = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name());
+  _third_derivatives[0]  = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name(), _var.name());
+  _grad_vars[0] = &(_grad_u);
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    VariableName iname = this->_coupled_moose_vars[i]->name();
-    _second_derivatives[i+1] = &this->template getMaterialPropertyDerivative<Real>("f_name", this->_var.name(), iname);
-    _third_derivatives[i+1]  = &this->template getMaterialPropertyDerivative<Real>("f_name", this->_var.name(), this->_var.name(), iname);
+    VariableName iname = _coupled_moose_vars[i]->name();
+    _second_derivatives[i+1] = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname);
+    _third_derivatives[i+1]  = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name(), iname);
 
     _third_cross_derivatives[i].resize(_nvar);
     for (unsigned int j = 0; j < _nvar; ++j)
     {
-      VariableName jname = this->_coupled_moose_vars[j]->name();
-      _third_cross_derivatives[i][j] = &this->template getMaterialPropertyDerivative<Real>("f_name", this->_var.name(), iname, jname);
+      VariableName jname = _coupled_moose_vars[j]->name();
+      _third_cross_derivatives[i][j] = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname, jname);
     }
 
-    _grad_vars[i+1] = &(this->_coupled_moose_vars[i]->gradSln());
+    _grad_vars[i+1] = &(_coupled_moose_vars[i]->gradSln());
   }
 }
 
@@ -88,7 +101,7 @@ CahnHilliardBase<T>:: initialSetup()
    * are coupled. Derivatives with respect to both types of variables contribute
    * the residual.
    */
-  this->template validateCoupling<Real>("f_name", this->_var.name());
+  this->template validateCoupling<Real>("f_name", _var.name());
 }
 
 template<typename T>
@@ -96,19 +109,18 @@ RealGradient
 CahnHilliardBase<T>::computeGradDFDCons(PFFunctionType type)
 {
   RealGradient res = 0.0;
-  unsigned int & qp = this->_qp;
 
   switch (type)
   {
     case CHBulk<T>::Residual:
       for (unsigned int i = 0; i <= _nvar; ++i)
-        res += (*_grad_vars[i])[qp] * (*_second_derivatives[i])[qp];
+        res += (*_grad_vars[i])[_qp] * (*_second_derivatives[i])[_qp];
       return res;
 
     case CHBulk<T>::Jacobian:
-      res = this->_grad_phi[this->_j][qp] * (*_second_derivatives[0])[qp];
+      res = _grad_phi[_j][_qp] * (*_second_derivatives[0])[_qp];
       for (unsigned int i = 0; i <= _nvar; ++i)
-        res += this->_phi[this->_j][qp] * (*_grad_vars[i])[qp] * (*_third_derivatives[i])[qp];
+        res += _phi[_j][_qp] * (*_grad_vars[i])[_qp] * (*_third_derivatives[i])[_qp];
       return res;
   }
 
@@ -124,14 +136,13 @@ CahnHilliardBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   if (!this->mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  unsigned int & qp = this->_qp;
-  RealGradient J =   this->_grad_u[qp] * this->_phi[this->_j][qp] * (*_third_derivatives[cvar+1])[qp]
-                   + this->_grad_phi[this->_j][qp] * (*_second_derivatives[cvar+1])[qp];
+  RealGradient J =   _grad_u[_qp] * _phi[_j][_qp] * (*_third_derivatives[cvar+1])[_qp]
+                   + _grad_phi[_j][_qp] * (*_second_derivatives[cvar+1])[_qp];
 
   for (unsigned int i = 0; i < _nvar; ++i)
-    J += this->_phi[this->_j][qp] * (*_grad_vars[i+1])[qp] * (*_third_cross_derivatives[i][cvar])[qp];
+    J += _phi[_j][_qp] * (*_grad_vars[i+1])[_qp] * (*_third_cross_derivatives[i][cvar])[_qp];
 
-  return CHBulk<T>::computeQpOffDiagJacobian(jvar) + this->_M[qp] * this->_grad_test[this->_i][qp] * J;
+  return CHBulk<T>::computeQpOffDiagJacobian(jvar) + _M[_qp] * _grad_test[_i][_qp] * J;
 }
 
 #endif // CAHNHILLIARDBASE_H
