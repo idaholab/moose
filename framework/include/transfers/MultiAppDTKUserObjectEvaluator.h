@@ -11,7 +11,7 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifdef LIBMESH_HAVE_DTK
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 #ifndef MULTIAPPDTKUSEROBJECTEVALUATOR_H
 #define MULTIAPPDTKUSEROBJECTEVALUATOR_H
@@ -51,4 +51,4 @@ private:
 
 #endif //MULTIAPPDTKUSEROBJECTEVALUATOR_H
 
-#endif //LIBMESH_HAVE_DTK
+#endif //LIBMESH_TRILINOS_HAVE_DTK

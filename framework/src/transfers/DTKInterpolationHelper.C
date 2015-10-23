@@ -13,7 +13,7 @@
 /****************************************************************/
 #include "libmesh/libmesh_config.h"
 
-#ifdef LIBMESH_HAVE_DTK
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 // Moose Includes
 #include "MooseError.h"
@@ -167,4 +167,4 @@ DTKInterpolationHelper::transferWithOffset(unsigned int from, unsigned int to, c
 
 } // namespace libMesh
 
-#endif // #ifdef LIBMESH_HAVE_DTK
+#endif // #ifdef LIBMESH_TRILINOS_HAVE_DTK
