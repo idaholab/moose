@@ -27,8 +27,8 @@ FiniteStrainHyperElasticViscoPlastic::FiniteStrainHyperElasticViscoPlastic(const
     _fp_old(declarePropertyOld<RankTwoTensor>("fp")),
     _q(declareProperty< std::vector<Real> >("internal_var")),
     _q_old(declarePropertyOld< std::vector<Real> >("internal_var")),
-    _deformation_gradient(getMaterialProperty<RankTwoTensor>("deformation gradient")),
-    _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>("deformation gradient"))
+    _deformation_gradient(getMaterialProperty<RankTwoTensor>("deformation_gradient")),
+    _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>("deformation_gradient"))
 {
   if (_num_flow_rate_uos == 0)
     mooseError("Specify atleast one flow rate user object");
