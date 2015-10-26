@@ -42,23 +42,7 @@ SetupInterface::SetupInterface(const InputParameters & params)
    */
   if (params.have_parameter<bool>("check_execute_on") && params.get<bool>("check_execute_on"))
   {
-
-    // Handle deprecated syntax
     MultiMooseEnum flags = params.get<MultiMooseEnum>("execute_on");
-    std::map<std::string, std::string> syntax_conversion;
-    syntax_conversion["residual"] = "linear";
-    syntax_conversion["jacobian"] = "nonlinear";
-    syntax_conversion["timestep"] = "timestep_end";
-
-    for (std::map<std::string, std::string>::const_iterator it = syntax_conversion.begin(); it != syntax_conversion.end(); ++it)
-      if (flags.contains(it->first))
-      {
-        mooseWarning("The 'execute_on' option '" << it->first << "' is deprecated, please replace with '" << it->second << "'.");
-        flags.erase(it->first);
-        flags.push_back(it->second);
-      }
-
-    // Set the execution flags for this object
     _exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(flags);
   }
 

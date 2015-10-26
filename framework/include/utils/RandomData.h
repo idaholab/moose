@@ -16,7 +16,7 @@
 #define RANDOMDATA_H
 
 //MOOSE includes
-#include "Moose.h"          // For ExecFlaType
+#include "MooseTypes.h"
 #include "MooseRandom.h"
 
 #include "libmesh/libmesh_config.h"

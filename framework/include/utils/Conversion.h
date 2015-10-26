@@ -43,9 +43,6 @@ namespace Moose {
   CoordinateSystemType stringToEnum<CoordinateSystemType>(const std::string & s);
 
   template<>
-  PPSOutputType stringToEnum<PPSOutputType>(const std::string & s);
-
-  template<>
   SolveType stringToEnum<SolveType>(const std::string & s);
 
   template<>

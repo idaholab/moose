@@ -25,7 +25,6 @@ namespace Moose {
   std::map<std::string, ExecFlagType> execstore_type_to_enum;
   std::map<std::string, QuadratureType> quadrature_type_to_enum;
   std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;
-  std::map<std::string, PPSOutputType> pps_output_type_to_enum;
   std::map<std::string, SolveType> solve_type_to_enum;
   std::map<std::string, LineSearchType> line_search_type_to_enum;
 
@@ -39,11 +38,6 @@ namespace Moose {
       execstore_type_to_enum["TIMESTEP_END"] = EXEC_TIMESTEP_END;
       execstore_type_to_enum["TIMESTEP_BEGIN"] = EXEC_TIMESTEP_BEGIN;
       execstore_type_to_enum["CUSTOM"] = EXEC_CUSTOM;
-
-      // Deprecated syntax
-      execstore_type_to_enum["RESIDUAL"] = EXEC_LINEAR;
-      execstore_type_to_enum["JACOBIAN"] = EXEC_NONLINEAR;
-      execstore_type_to_enum["TIMESTEP"] = EXEC_TIMESTEP_END;
     }
   }
 
@@ -69,18 +63,6 @@ namespace Moose {
       coordinate_system_type_to_enum["XYZ"] = COORD_XYZ;
       coordinate_system_type_to_enum["RZ"]  = COORD_RZ;
       coordinate_system_type_to_enum["RSPHERICAL"]  = COORD_RSPHERICAL;
-    }
-  }
-
-  void initPPSOutputType()
-  {
-    if (pps_output_type_to_enum.empty())
-    {
-      pps_output_type_to_enum["NONE"]   = PPS_OUTPUT_NONE;
-      pps_output_type_to_enum["AUTO"]   = PPS_OUTPUT_AUTO;
-      pps_output_type_to_enum["SCREEN"] = PPS_OUTPUT_SCREEN;
-      pps_output_type_to_enum["FILE"]   = PPS_OUTPUT_FILE;
-      pps_output_type_to_enum["BOTH"]   = PPS_OUTPUT_BOTH;
     }
   }
 
@@ -171,20 +153,6 @@ namespace Moose {
       mooseError("Unknown coordinate system type: " << upper);
 
     return coordinate_system_type_to_enum[upper];
-  }
-
-  template<>
-  PPSOutputType stringToEnum<PPSOutputType>(const std::string & s)
-  {
-    initPPSOutputType();
-
-    std::string upper(s);
-    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-    if (!pps_output_type_to_enum.count(upper))
-      mooseError("Unknown PPS output type: " << upper);
-
-    return pps_output_type_to_enum[upper];
   }
 
   template<>
