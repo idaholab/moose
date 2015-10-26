@@ -43,8 +43,8 @@ InputParametersTest::checkControlParamTypeError()
   try
   {
     InputParameters params = emptyInputParameters();
-    params.addParam<PostprocessorName>("name", "make_it_valid", "Some doc");
-    params.declareControllable("name");
+    params.addParam<PostprocessorName>("pp_name", "make_it_valid", "Some doc");
+    params.declareControllable("pp_name");
     params.checkParams("");
     CPPUNIT_ASSERT( false ); // shouldn't get here
   }

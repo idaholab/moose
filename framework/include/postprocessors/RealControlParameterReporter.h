@@ -12,25 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REALPARAMETERREPORTER_H
-#define REALPARAMETERREPORTER_H
+#ifndef REALCONTROLPARAMETERREPORTER_H
+#define REALCONTROLPARAMETERREPORTER_H
 
 // MOOSE includes
 #include "GeneralPostprocessor.h"
 #include "ControlInterface.h"
 
 // Forward Declarations
-class RealParameterReporter;
+class RealControlParameterReporter;
 
 template<>
-InputParameters validParams<RealParameterReporter>();
+InputParameters validParams<RealControlParameterReporter>();
 
-class RealParameterReporter :
+class RealControlParameterReporter :
   public GeneralPostprocessor,
   public ControlInterface
 {
 public:
-  RealParameterReporter(const InputParameters & parameters);
+  RealControlParameterReporter(const InputParameters & parameters);
 
   /**
    * Extract the parameter via the ControlInterface::getControlParam
@@ -55,8 +55,8 @@ private:
   // Pointer to the parameter to report, a pointer is used because the access
   // of the parameter value must occur in initialSetup because all objects
   // must be created prior to attempting to access the parameter objects
-  Real * _parameter;
+  const Real * _parameter;
 
 };
 
-#endif // REALPARAMETERREPORTER_H
+#endif // REALCONTROLPARAMETERREPORTER_H

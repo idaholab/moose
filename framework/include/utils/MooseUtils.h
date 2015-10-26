@@ -113,6 +113,11 @@ namespace MooseUtils
   std::string shortName(const std::string & name);
 
   /**
+   * Function for string the information before the final / in a parser block
+   */
+  std::string baseName(const std::string & name);
+
+  /**
    * This routine is a simple helper function for searching a map by values instead of keys
    */
   template<typename T1, typename T2>

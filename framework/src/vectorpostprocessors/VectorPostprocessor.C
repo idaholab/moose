@@ -34,7 +34,7 @@ InputParameters validParams<VectorPostprocessor>()
 }
 
 VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters) :
-    _vpp_name(MooseUtils::shortName(parameters.get<std::string>("name"))),
+    _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
     _outputs(parameters.get<std::vector<OutputName> >("outputs")),
     _vpp_data(*parameters.getCheckedPointerParam<VectorPostprocessorData *>("_vector_postprocessor_data"))
 {

@@ -20,15 +20,16 @@ template<>
 InputParameters validParams<MooseObject>()
 {
   InputParameters params;
+  params.addParam<std::vector<std::string> >("control_tags", "Adds user-defined labels for accessing object parameters via control logic.");
+  params.addPrivateParam<std::string>("_object_name"); // the name passed to Factory::create
   return params;
 }
 
 MooseObject::MooseObject(const InputParameters & parameters) :
-  ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-  _pars(parameters),
-  _name(getParam<std::string>("name")),
-  _short_name(MooseUtils::shortName(_name))
+    ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
+    ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
+    _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+    _pars(parameters),
+    _name(getParam<std::string>("_object_name"))
 {
 }

@@ -44,7 +44,7 @@ public:
    * Get the name of the object
    * @return The name of the object
    */
-  const std::string & name() const { return _short_name; }
+  const std::string & name() const { return _name; }
 
   /**
    * Get the parameters of the object
@@ -79,11 +79,9 @@ protected:
   /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
   const InputParameters & _pars;
 
-  /// The full name of this object
+  /// The name of this object, reference to value stored in InputParameters
   const std::string & _name;
 
-  /// The short name of this object, this is what is returned by the name() method
-  const std::string _short_name;
 };
 
 template <typename T>

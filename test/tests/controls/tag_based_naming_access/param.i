@@ -1,6 +1,5 @@
 [Mesh]
   type = GeneratedMesh
-  type = GeneratedMesh
   dim = 2
   nx = 2
   ny = 2
@@ -27,6 +26,7 @@
     type = MaterialPointSource
     point = '0.5 0.5 0'
     variable = diffused
+    control_tags = 'tag'
   [../]
 []
 
@@ -60,11 +60,13 @@
     type = FunctionValuePostprocessor
     function = '2*(x+y)'
     point = '0.5 0.5 0'
+    control_tags = 'tag'
   [../]
   [./other_point_test_object]
     type = FunctionValuePostprocessor
     function = '3*(x+y)'
     point = '0.5 0.5 0'
+    control_tags = 'tag'
   [../]
 []
 
@@ -82,7 +84,7 @@
   [./point_control]
     type = TestControl
     test_type = 'point'
-    parameter = 'Postprocessors/*/point'
+    parameter = 'tag::point'
     execute_on = 'initial'
   [../]
 []

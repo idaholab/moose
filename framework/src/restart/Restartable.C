@@ -16,7 +16,7 @@
 #include "SubProblem.h"
 
 Restartable::Restartable(const InputParameters & parameters, std::string system_name, SubProblem * subproblem) :
-    _restartable_name(parameters.get<std::string>("name")),
+    _restartable_name(parameters.get<std::string>("_object_name")),
     _restartable_params(&parameters),
     _restartable_system_name(system_name),
     _restartable_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),

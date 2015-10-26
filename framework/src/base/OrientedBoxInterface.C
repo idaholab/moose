@@ -33,7 +33,7 @@ InputParameters validParams<OrientedBoxInterface>()
 OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters) :
     _center(parameters.get<Point>("center"))
 {
-  const std::string & name = parameters.get<std::string>("name");
+  const std::string & name = parameters.get<std::string>("_object_name");
 
   // Define the bounding box
   Real xmax = 0.5*parameters.get<Real>("width");

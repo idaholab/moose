@@ -16,6 +16,7 @@
 #include "ActionWarehouse.h"
 #include "MooseMesh.h"
 #include "MooseApp.h"
+#include "MooseUtils.h" // remove when getBaseName is removed
 
 template<>
 InputParameters validParams<Action>()
@@ -26,6 +27,7 @@ InputParameters validParams<Action>()
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
   params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
 
+  params.addPrivateParam<std::string>("_action_name"); // the name passed to ActionFactory::create
   params.addPrivateParam<std::string>("task");
   params.addPrivateParam<std::string>("registered_identifier");
   params.addPrivateParam<std::string>("action_type");
@@ -37,9 +39,8 @@ InputParameters validParams<Action>()
 Action::Action(InputParameters parameters) :
     ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _pars(parameters),
-    _name(getParam<std::string>("_parsing_syntax")),
-    _short_name(MooseUtils::shortName(_name)),
     _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
+    _name(getParam<std::string>("_action_name")),
     _action_type(getParam<std::string>("action_type")),
     _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _factory(_app.getFactory()),
@@ -54,14 +55,17 @@ Action::Action(InputParameters parameters) :
 {
 }
 
+/// DEPRECATED METHODS
 std::string
 Action::getShortName() const
 {
-  return _short_name;
+  mooseDeprecated("getShortName() is deprecated.");
+  return MooseUtils::shortName(_name);
 }
 
 std::string
 Action::getBaseName() const
 {
-  return _name.substr(0, _name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') : 0);
+  mooseDeprecated("getBaseName() is deprecated.");
+  return MooseUtils::baseName(_name);
 }

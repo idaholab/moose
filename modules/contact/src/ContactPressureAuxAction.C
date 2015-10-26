@@ -42,27 +42,24 @@ ContactPressureAuxAction::act()
     mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
   }
 
-  std::string short_name(_name);
-  // Chop off "Contact/"
-  short_name.erase(0, 8);
-
   {
     InputParameters params = _factory.getValidParams("ContactPressureAux");
 
     // Extract global params
-    _app.parser().extractParams(_name, params);
+    if (isParamValid("parser_syntax"))
+      _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
     params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,_slave);
     params.set<BoundaryName>("paired_boundary") = _master;
     params.set<AuxVariableName>("variable") = "contact_pressure";
     params.addRequiredCoupledVar("nodal_area", "The nodal area");
-    params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+short_name);
+    params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+_name);
     params.set<MooseEnum>("order") = _order;
 
     params.set<bool>("use_displaced_mesh") = true;
 
     std::stringstream name;
-    name << short_name;
+    name << _name;
     name << "_contact_pressure_";
     name << counter++;
 
@@ -72,4 +69,3 @@ ContactPressureAuxAction::act()
     _problem->addAuxKernel("ContactPressureAux", name.str(), params);
   }
 }
-

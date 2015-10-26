@@ -46,7 +46,7 @@ EBSDMeshErrorTest::fileDoesNotExist()
   // generate input parameter set
   InputParameters params = validParams<EBSDMesh>();
   params.addPrivateParam("_moose_app", _app);
-  params.set<std::string>("name", "EBSD");
+  params.set<std::string>("_object_name", "EBSD");
 
   // set filename
   params.set<FileName>("filename") = "FILEDOESNOTEXIST";
@@ -91,7 +91,7 @@ EBSDMeshErrorTest::headerErrorHelper(const char * filename, const char * error)
   // generate input parameter set
   InputParameters params = validParams<EBSDMesh>();
   params.addPrivateParam("_moose_app", _app);
-  params.set<std::string>("name") = filename; // use the filename to define a unique name
+  params.set<std::string>("_object_name") = filename; // use the filename to define a unique name
 
   // set filename
   params.set<FileName>("filename") = filename;
@@ -142,7 +142,7 @@ EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list, std:
     // generate input parameter set
     InputParameters params = validParams<EBSDMesh>();
     params.addPrivateParam("_moose_app", _app);
-    params.set<std::string>("name") = oss.str();
+    params.set<std::string>("_object_name") = oss.str();
 
     // set a single parameter
     params.set<T>(param_list[i]) = T(1.0);

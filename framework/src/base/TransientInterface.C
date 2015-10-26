@@ -37,7 +37,7 @@ TransientInterface::TransientInterface(const InputParameters & parameters, const
     _is_transient(_ti_feproblem.isTransient()),
     _object_type(object_type),
     _time_periods(_ti_feproblem.getTimePeriods()),
-    _ti_name(MooseUtils::shortName(parameters.get<std::string>("name")))
+    _ti_name(MooseUtils::shortName(parameters.get<std::string>("_object_name")))
 {
 }
 

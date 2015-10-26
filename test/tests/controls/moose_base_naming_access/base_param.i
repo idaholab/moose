@@ -1,6 +1,5 @@
 [Mesh]
   type = GeneratedMesh
-  type = GeneratedMesh
   dim = 2
   nx = 2
   ny = 2
@@ -74,6 +73,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
 []
 
@@ -81,7 +81,7 @@
   [./point_control]
     type = TestControl
     test_type = 'point'
-    parameter = '*/*/point'
+    parameter = 'Postprocessor::point'
     execute_on = 'initial'
   [../]
 []

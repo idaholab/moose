@@ -31,4 +31,3 @@ AddMultiAppAction::act()
 {
   _problem->addMultiApp(_type, _name, _moose_object_pars);
 }
-

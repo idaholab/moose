@@ -69,17 +69,12 @@ PressureAction::act()
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
-  std::string short_name(_name);
-
-  // Chop off "BCs/Pressure/"
-  short_name.erase(0, 5+_kernel_name.size());
 
   //Create pressure BCs
   for (unsigned int i = 0; i < dim; ++i)
   {
     std::stringstream name;
-    name << "BCs/";
-    name << short_name;
+    name << _name;
     name << "_";
     name << i;
 
@@ -102,4 +97,3 @@ PressureAction::act()
     _problem->addBoundaryCondition(_kernel_name, name.str(), params);
   }
 }
-

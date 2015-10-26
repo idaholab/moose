@@ -60,7 +60,7 @@
 
 [Postprocessors]
   [./coef]
-    type = RealParameterReporter
+    type = RealControlParameterReporter
     parameter = 'coef'
   [../]
 []

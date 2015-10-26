@@ -192,10 +192,6 @@ SolidMechanicsAction::act()
       vars.push_back(_temp);
     }
 
-    // Create divergence objects
-    std::string short_name(_name);
-    // Chop off "SolidMechanics/"
-    short_name.erase(0, 15);
 
     InputParameters params = _factory.getValidParams(type);
     for (unsigned j(0); j < num_coupled; ++j)
@@ -210,8 +206,7 @@ SolidMechanicsAction::act()
     for (unsigned int i(0); i < dim; ++i)
     {
       std::stringstream name;
-      name << "Kernels/";
-      name << short_name;
+      name << _name;
       name << i;
 
       params.set<unsigned int>("component") = i;

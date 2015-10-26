@@ -1,0 +1,17 @@
+[Tests]
+  [./base_object_param]
+    # Test that all aspects of the name may be specified using base class name
+    type = Exodiff
+    input = base_object_param.i
+    exodiff = base_object_param_out.e
+    max_threads = 1
+  [../]
+
+  [./base_param]
+    # Test that all objects with the same name change, in the same system may be changed
+    type = Exodiff
+    input = base_param.i
+    exodiff = base_param_out.e
+    max_threads = 1
+  [../]
+[]

@@ -28,7 +28,7 @@ ActionFactory::~ActionFactory()
 }
 
 MooseSharedPointer<Action>
-ActionFactory::create(const std::string & action, const std::string & parsing_syntax, InputParameters parameters)
+ActionFactory::create(const std::string & action, const std::string & action_name, InputParameters parameters)
 {
   parameters.addPrivateParam("_moose_app", &_app);
   parameters.addPrivateParam("action_type", action);
@@ -36,7 +36,7 @@ ActionFactory::create(const std::string & action, const std::string & parsing_sy
   BuildInfo *build_info = NULL;
 
   // Check to make sure that all required parameters are supplied
-  parameters.checkParams(parsing_syntax);
+  parameters.checkParams(action_name);
 
   iters = _name_to_build_info.equal_range(action);
 
@@ -57,10 +57,10 @@ ActionFactory::create(const std::string & action, const std::string & parsing_sy
     build_info = &(iters.first->second);
 
   if (!build_info)
-    mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + parsing_syntax);
+    mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + action_name);
 
   // Add the name to the parameters and create the object
-  parameters.addParam<std::string>("_parsing_syntax", parsing_syntax, "The Parsed Syntax where this object was created or blank if it was AutoBuilt");
+  parameters.set<std::string>("_action_name") = action_name;
   MooseSharedPointer<Action> action_obj = (*build_info->_build_pointer)(parameters);
 
   if (parameters.get<std::string>("task") == "")

@@ -49,7 +49,10 @@ ThermalContactBCsAction::act()
   InputParameters params = _factory.getValidParams(getParam<std::string>("type"));
 
   // Extract global params
-  _app.parser().extractParams(_name, params);
+  if (isParamValid("parser_syntax"))
+    _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
+  else
+    mooseError("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
 
   if (isParamValid("save_in"))
   {
@@ -119,4 +122,3 @@ ThermalContactBCsAction::act()
 
   ++n;
 }
-

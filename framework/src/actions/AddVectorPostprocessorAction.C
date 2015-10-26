@@ -36,4 +36,3 @@ AddVectorPostprocessorAction::act()
 
   _problem->addVectorPostprocessor(_type, _name, _moose_object_pars);
 }
-

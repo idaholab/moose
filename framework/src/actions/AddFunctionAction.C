@@ -31,4 +31,3 @@ AddFunctionAction::act()
 {
   _problem->addFunction(_type, _name, _moose_object_pars);
 }
-

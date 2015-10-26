@@ -66,7 +66,7 @@ AppFactory::create(const std::string & app_type, const std::string & name, Input
   MooseSharedPointer<Parallel::Communicator> comm(new Parallel::Communicator(COMM_WORLD_IN));
 
   parameters.set<MooseSharedPointer<Parallel::Communicator> >("_comm") = comm;
-  parameters.set<std::string>("name") = name;
+  parameters.set<std::string>("_app_name") = name;
 
   if (!parameters.isParamValid("_command_line"))
     mooseError("Valid CommandLine object required");

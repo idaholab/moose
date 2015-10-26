@@ -23,14 +23,12 @@ InputParameters validParams<RealFunctionControl>()
 
   params.addRequiredParam<FunctionName>("function", "The function to use for controlling the specified parameter.");
   params.addRequiredParam<std::string>("parameter", "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated");
-
   return params;
 }
 
 RealFunctionControl::RealFunctionControl(const InputParameters & parameters) :
     Control(parameters),
-    _function(getFunction("function")),
-    _parameters(getControlParamVector<Real>("parameter"))
+    _function(getFunction("function"))
 {
 }
 
@@ -38,6 +36,5 @@ void
 RealFunctionControl::execute()
 {
   Real value = _function.value(_t, Point());
-  for (std::vector<Real *>::iterator it = _parameters.begin(); it != _parameters.end(); ++it)
-    (*(*it)) = value;
+  setControllableValue<Real>("parameter", value);
 }
