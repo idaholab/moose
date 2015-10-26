@@ -2,6 +2,6 @@
   [./test]
     type = 'RunException'
     input = 'do_not_copy_parameters.i'
-    expect_err = 'Copying of the InputParameters object for the Kernels/diff object is not allowed.'
+    expect_err = 'Copying of the InputParameters object for the diff object is not allowed.'
   [../]
 []

@@ -457,4 +457,3 @@ ContactMaster::getPenalty(PenetrationInfo & pinfo)
   }
   return penalty;
 }
-

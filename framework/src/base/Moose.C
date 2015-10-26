@@ -199,8 +199,8 @@
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
 #include "PercentChangePostprocessor.h"
-#include "RealParameterReporter.h"
 #include "ElementL2Difference.h"
+#include "RealControlParameterReporter.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -594,8 +594,8 @@ registerObjects(Factory & factory)
   registerPostprocessor(FunctionSideIntegral);
   registerPostprocessor(ExecutionerAttributeReporter);
   registerPostprocessor(PercentChangePostprocessor);
-  registerPostprocessor(RealParameterReporter);
   registerPostprocessor(ElementL2Difference);
+  registerPostprocessor(RealControlParameterReporter);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);

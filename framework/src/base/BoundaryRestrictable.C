@@ -65,7 +65,7 @@ void
 BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & parameters)
 {
   // The name and id of the object
-  const std::string & name = parameters.get<std::string>("name");
+  const std::string & name = parameters.get<std::string>("_object_name");
 
   // If the mesh pointer is not defined, but FEProblem is, get it from there
   if (_bnd_feproblem != NULL && _bnd_mesh == NULL)

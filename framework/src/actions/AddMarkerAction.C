@@ -31,4 +31,3 @@ AddMarkerAction::act()
 {
   _problem->addMarker(_type, _name, _moose_object_pars);
 }
-

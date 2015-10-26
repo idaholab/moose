@@ -62,7 +62,7 @@ private:
   Function & _function;
 
   /// Vector of parameters to change
-  std::vector<Real *> _parameters;
+  ControllableParameter<Real> _parameters;
 };
 
 #endif // REALFUNCTIONCONTROL_H

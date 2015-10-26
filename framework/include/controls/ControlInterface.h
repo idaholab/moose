@@ -19,29 +19,13 @@
 #include "InputParameters.h"
 #include "InputParameterWarehouse.h"
 #include "MooseUtils.h"
+#include "ControllableParameter.h"
 
 // Forward declarations
 class ControlInterface;
 
 template<>
 InputParameters validParams<ControlInterface>();
-
-
-/**
- * A storage container for the name of parameters to be controlled
- */
-struct ControlParameterName
-{
-  /// The "system" name (e.g., Kerenels)
-  std::string system;
-
-  /// The "object" name (generally a sub block in an input file)
-  std::string object;
-
-  /// The name of the parameter to be controlled
-  std::string param;
-};
-
 
 /**
  * An interface class for accessing writable references to InputParameters
@@ -54,29 +38,35 @@ class ControlInterface
 {
 protected:
 
+  ///@{
   /**
-   * Obtain a writeable reference to a single parameter given a InputParameter name
+   * Obtain the value of a controllable parameter given input file syntax or actual name.
+   * @param name The name of the parameter to retrieve a value.
+   * @param warn_when_values_diff When true, produce a warning if multiple controllable values share the given
+   *                              name but have varying values.
+   * @return A constant reference to the first parameter that matches the given name.
    */
   template<typename T>
-  T & getControlParam(const std::string & name);
+  const T & getControllableValue(const std::string & name, bool warn_when_values_differ = true);
 
-  /**
-   * Obtain a writeable reference to a single parameter given a specific name
-   */
   template<typename T>
-  T & getControlParamByName(const std::string & name);
+  const T & getControllableValueByName(const std::string & name, bool warn_when_values_differ = true);
+  ///@}
 
+  ///@{
   /**
-   * Obtain pointers to all parameters given a InputParameter name
+   * Set the value(s) of a controllable parameter of class given input file syntax or actual name.
+   * @param name The name of the parameter to retrieve a value.
+   * @param value The value to set all matching parameters to.
+   * @param warn_when_values_diff When true, produce a warning if multiple controllable values share the given
+   *                              name but have varying values.
    */
   template<typename T>
-  std::vector<T*> getControlParamVector(const std::string & name);
+  void setControllableValue(const std::string & name, const T & value, bool warn_when_values_differ = false);
 
-  /**
-   * Obtain pointers to all parameters given a specific name
-   */
   template<typename T>
-  std::vector<T*> getControlParamVectorByName(const std::string & name);
+  void setControllableValueByName(const std::string & name, const T & value, bool warn_when_values_differ = false);
+  ///@}
 
   /**
    * Destructor
@@ -90,29 +80,6 @@ private:
    */
   ControlInterface(const InputParameters & parameters);
 
-  /**
-   * Helper method for extracting iterators to InputParameter objects containing a property with the given name
-   * @param name The complete name of the desired parameter (only used for error messages)
-   * @param desired The desired parameter separated into components via tokenizeName method of this class
-   *
-   * Using the iterator allows for the public get methods to provide better error messages because the
-   * full object name can be reported.
-   *
-   * @see tokenizeName
-   */
-  template<typename T>
-  std::vector<InputParameterIterator> getValidInputParameterIteratorsByName(const std::string & name, const ControlParameterName & desired);
-
-  /**
-   * Helper method separating parameter name into system/group/param format
-   *
-   * [System]
-   *   [./object]
-   *     param = ...
-   *
-   */
-  ControlParameterName tokenizeName(const std::string & name);
-
   /// Reference to the Control objects parameters
   const InputParameters & _ci_parameters;
 
@@ -125,108 +92,104 @@ private:
   /// The object thread id, needed for access the warehouse
   THREAD_ID _tid;
 
+  /// Helper method for retrieving controllable parameters
+  template<typename T>
+  ControllableParameter<T> getControllableParameterHelper(const std::string & name, bool warn_when_values_differ);
+
   /// The name of the object, for better error message
   const std::string & _ci_name;
 
   // Only these objects are allowed to construct this interface
-  friend class RealParameterReporter;
+  friend class RealControlParameterReporter;
   friend class Control;
 };
 
 template<typename T>
-T &
-ControlInterface::getControlParam(const std::string & name)
+const T &
+ControlInterface::getControllableValue(const std::string & name, bool warn_when_values_differ)
 {
-  return getControlParamByName<T>(_ci_parameters.get<std::string>(name));
+  return getControllableValueByName<T>(_ci_parameters.get<std::string>(name), warn_when_values_differ);
 }
 
 template<typename T>
-T &
-ControlInterface::getControlParamByName(const std::string & name)
+const T &
+ControlInterface::getControllableValueByName(const std::string & name, bool warn_when_values_differ)
 {
-  // Get the InputParameter objects that contain objects
-  ControlParameterName desired = tokenizeName(name);
-  std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired);
-
-  // If more than one parameter is located, report an error message listing the object and parameter names
-  if (iters.size() > 1)
-  {
-    std::ostringstream oss;
-    oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found in multiple objects:\n";
-    for (std::vector<InputParameterIterator>::const_iterator it = iters.begin(); it != iters.end(); ++it)
-      oss << "  " << (*it)->first << '\n';
-    oss << "\nUse the method 'getControlParamVector' to access multiple parameters";
-    mooseError(oss.str());
-  }
-
-  // Return a writeable reference to the parameter
-  return iters[0]->second->set<T>(desired.param);
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(name, warn_when_values_differ);
+  return  *(helper.get()[0]);
 }
 
 template<typename T>
-std::vector<T*>
-ControlInterface::getControlParamVector(const std::string & name)
+void
+ControlInterface::setControllableValue(const std::string & name, const T & value, bool warn_when_values_differ)
 {
-  return getControlParamVectorByName<T>(_ci_parameters.get<std::string>(name));
+  setControllableValueByName<T>(_ci_parameters.get<std::string>(name), value, warn_when_values_differ);
 }
 
 template<typename T>
-std::vector<T*>
-ControlInterface::getControlParamVectorByName(const std::string & name)
+void
+ControlInterface::setControllableValueByName(const std::string & name, const T & value, bool warn_when_values_differ)
 {
-  // Get the InputParameter objects that contain objects
-  ControlParameterName desired = tokenizeName(name);
-  std::vector<InputParameterIterator> iters = getValidInputParameterIteratorsByName<T>(name, desired);
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(name, warn_when_values_differ);
+  helper.set(value);
+}
 
-  // The vector the return
-  std::vector<T*> output;
+template<typename T>
+ControllableParameter<T>
+ControlInterface::getControllableParameterHelper(const std::string & name, bool warn_when_values_differ)
+{
+
+  // The desired parameter name
+  MooseObjectParameterName desired(name);
+
+  // The ControlllableParametr object to return
+  ControllableParameter<T> output;
 
   // Loop over all InputParameter objects
-  for (std::vector<InputParameterIterator>::iterator it = iters.begin(); it != iters.end(); ++it)
-    output.push_back(&((*it)->second->set<T>(desired.param)));
-
-  return output;
-}
-
-template<typename T>
-std::vector<InputParameterIterator>
-ControlInterface::getValidInputParameterIteratorsByName(const std::string & name, const ControlParameterName & desired)
-{
-  // The vector to return
-  std::vector<InputParameterIterator> output;
-
-  // Storage for tokenizing the current InputParameters name
-  std::vector<std::string> current;
-
-  // Loop over all InputParameter objects
-  for (InputParameterIterator it = _input_parameter_warehouse.begin(_tid); it != _input_parameter_warehouse.end(_tid); ++it)
+  for (InputParameterWarehouse::InputParameterIterator it = _input_parameter_warehouse.begin(_tid); it != _input_parameter_warehouse.end(_tid); ++it)
   {
-    InputParameters & parameters = *(it->second);
-
-    // Get the current system and group:
-    //   current[0] = system; current[1] = group;
-    current.clear();
-    MooseUtils::tokenize(it->first, current);
-
-    // Continue if the system and group do not agree
-    if ( (!desired.system.empty() && current.size() > 0 && desired.system != current[0]) ||
-         (!desired.object.empty() && current.size() > 1 && desired.object != current[1]) )
+    // If the desired object name does not match the current object name, move on
+    if (desired != it->first)
       continue;
 
-    // If the parameter is valid update the output vector with a pointer to the parameter
-    if (parameters.isParamValid(desired.param))
+    // If the parameter is valid and controllable update the output vector with a pointer to the parameter
+    if (it->second->have_parameter<T>(desired.parameter()))
     {
       // Do not allow non-controllable types to be controlled
-      if (!parameters.isControllable(desired.param))
+      if (!it->second->isControllable(desired.parameter()))
         mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " is not a controllable parameter.");
 
-      output.push_back(it);
+      // Store pointer to the writable parameter
+      output.insert(MooseObjectParameterName(it->first, desired.parameter()), &(it->second->set<T>(desired.parameter())));
     }
   }
 
   // Error if nothing was found
   if (output.size() == 0)
     mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " was not found.");
+
+  // Produce a warning, if the flag is true, when multiple parameters have differing values
+  if (warn_when_values_differ)
+  {
+    // Inspect the values for differing values
+    const std::vector<T*> & values = output.get();
+
+    // The first parameter to test against
+    const T & value0 = *values[0];
+
+    // Loop over all other parameter values
+    for (typename std::vector<T*>::const_iterator it = values.begin() + 1; it != values.end(); ++it)
+    {
+      if (value0 != **it)
+      {
+        std::ostringstream oss;
+        oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found,\n";
+        oss << "but the number of parameters have differing values.\n\n";
+        oss << output.dump();
+        mooseWarning(oss.str());
+      }
+    }
+  }
 
   return output;
 }

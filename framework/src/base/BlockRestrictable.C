@@ -62,7 +62,7 @@ void
 BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameters)
 {
   // The name and id of the object
-  const std::string name = parameters.get<std::string>("name");
+  const std::string name = parameters.get<std::string>("_object_name");
 
   // If the mesh pointer is not defined, but FEProblem is, get it from there
   if (_blk_feproblem != NULL && _blk_mesh == NULL)

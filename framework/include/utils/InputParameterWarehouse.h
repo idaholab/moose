@@ -18,12 +18,11 @@
 // MOOSE includes
 #include "Warehouse.h"
 #include "ParallelUniqueId.h"
+#include "MooseObjectName.h"
 
 // Forward declarations
 class InputParameters;
 class MooseApp;
-
-typedef std::map<std::string, MooseSharedPointer<InputParameters> >::iterator InputParameterIterator;
 
 /**
  * Storage container for all InputParamter objects.
@@ -35,6 +34,8 @@ typedef std::map<std::string, MooseSharedPointer<InputParameters> >::iterator In
 class InputParameterWarehouse : public Warehouse<InputParameters>
 {
 public:
+
+  typedef std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> >::iterator InputParameterIterator;
 
   /**
    * Class constructor
@@ -59,8 +60,8 @@ public:
 
 private:
 
-  /// Name to pointer map for easy access to the pointers
-  std::vector<std::map<std::string, MooseSharedPointer<InputParameters> > > _name_to_shared_pointer;
+  /// Storage for the InputParameters objects
+  std::vector<std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > > _input_parameters;
 
   /**
    * Method for adding a new InputParameters object
@@ -75,19 +76,24 @@ private:
    * This method is private, because only the factories that are creating objects should be
    * able to call this method.
    */
-  InputParameters & addInputParameters(const std::string & long_name, InputParameters parameters, THREAD_ID tid = 0);
+  InputParameters & addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
 
+  ///@{
   /**
    * Return a reference to the InputParameters for the named object
-   * @name long_name The full name of the object for which parameters are desired
-   * @name tid The thread id
+   * @param tag The tag of the object (e.g., 'Kernel')
+   * @param name The name of the parameters object, including the tag (name only input) or MooseObjectName object
+   * @param tid The thread id
    * @return A const reference to the warehouse copy of the InputParameters
    *
    * If you are using this method to access a writable reference to input parameters, this
    * will break the ability to control the parameters with the MOOSE control logic system.
    * Only change parameters if you know what you are doing. Hence, this is private for a reason.
    */
-  InputParameters & getInputParameters(const std::string & long_name, THREAD_ID tid = 0);
+  InputParameters & getInputParameters(const std::string & name, THREAD_ID tid = 0);
+  InputParameters & getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid = 0 );
+  InputParameters & getInputParameters(const MooseObjectName & object_name, THREAD_ID tid = 0 );
+  ///@{
 
   ///@{
   /**
@@ -95,8 +101,8 @@ private:
    * @name tid The thread id
    * @return An iterator to the InputParameters object
    */
-  InputParameterIterator begin(THREAD_ID tid = 0){ return _name_to_shared_pointer[tid].begin(); }
-  InputParameterIterator end(THREAD_ID tid = 0){ return _name_to_shared_pointer[tid].end(); }
+  InputParameterIterator begin(THREAD_ID tid = 0){ return _input_parameters[tid].begin(); }
+  InputParameterIterator end(THREAD_ID tid = 0){ return _input_parameters[tid].end(); }
   ///@}
 
   friend class Factory;

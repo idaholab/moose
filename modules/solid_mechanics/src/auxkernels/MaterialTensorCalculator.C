@@ -30,7 +30,7 @@ MaterialTensorCalculator::MaterialTensorCalculator(const InputParameters & param
   _p2(parameters.get<RealVectorValue>("point2")),
   _direction(parameters.get<RealVectorValue>("direction")/parameters.get<RealVectorValue>("direction").size())
 {
-  const std::string & name = parameters.get<std::string>("name");
+  const std::string & name = parameters.get<std::string>("_object_name");
 
   if (_quantity_moose_enum.isValid())
   {

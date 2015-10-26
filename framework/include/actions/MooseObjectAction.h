@@ -30,12 +30,22 @@ class MooseObjectAction : public Action
 public:
   MooseObjectAction(InputParameters params);
 
+  /**
+   * Retreive the parameters of the object to be created by this action
+   */
   InputParameters & getObjectParams() { return _moose_object_pars; }
 
+  /**
+   * Return the object type to be created
+   */
   const std::string & getMooseObjectType() const { return _type; }
 
 protected:
+
+  /// The Object type that is being created
   std::string _type;
+
+  /// The parameters for the object to be created
   InputParameters _moose_object_pars;
 };
 

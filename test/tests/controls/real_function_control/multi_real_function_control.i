@@ -71,11 +71,11 @@
 
 [Postprocessors]
   [./u_coef]
-    type = RealParameterReporter
+    type = RealControlParameterReporter
     parameter = 'Kernels/diff_u/coef'
   [../]
   [./v_coef]
-    type = RealParameterReporter
+    type = RealControlParameterReporter
     parameter = 'Kernels/diff_v/coef'
   [../]
 []

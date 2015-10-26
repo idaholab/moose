@@ -218,7 +218,7 @@ OversampleOutput::cloneMesh()
     mesh_params.set<MeshFileName>("file") = getParam<MeshFileName>("file");
     mesh_params.set<bool>("nemesis") = false;
     mesh_params.set<bool>("skip_partitioning") = false;
-    mesh_params.set<std::string>("name") = "output_problem_mesh";
+    mesh_params.set<std::string>("_object_name") = "output_problem_mesh";
     _mesh_ptr = new FileMesh(mesh_params);
     _mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
     _mesh_ptr->init();
