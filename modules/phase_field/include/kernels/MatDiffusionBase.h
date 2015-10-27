@@ -26,6 +26,8 @@ class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapInterface<Ker
 public:
   MatDiffusionBase(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
   /// in class templates this function has to be a static member
   static InputParameters validParams();
 
@@ -64,6 +66,13 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters) :
   // fetch derivatives
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
     _dDdarg[i] = &getMaterialPropertyDerivative<T>("D_name", _coupled_moose_vars[i]->name());
+}
+
+template<typename T>
+void
+MatDiffusionBase<T>::initialSetup()
+{
+  validateNonlinearCoupling<Real>("D_name");
 }
 
 template<typename T>
