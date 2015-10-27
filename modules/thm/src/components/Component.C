@@ -32,7 +32,9 @@ std::string
 Component::genName(const std::string & prefix, unsigned int id, const std::string & suffix)
 {
   std::stringstream ss;
-  ss << prefix << ":" << id << ":" << suffix;
+  ss << prefix << ":" << id;
+  if (!suffix.empty())
+    ss << ":" << suffix;
   return ss.str();
 }
 
@@ -40,15 +42,9 @@ std::string
 Component::genName(const std::string & prefix, unsigned int i, unsigned int j, const std::string & suffix)
 {
   std::stringstream ss;
-  ss << prefix << ":" << i << ":" << j << ":" << suffix;
-  return ss.str();
-}
-
-std::string
-Component::genName(const std::string & prefix, const std::string & suffix)
-{
-  std::stringstream ss;
-  ss << prefix << ":" << suffix;
+  ss << prefix << ":" << i << ":" << j;
+  if (!suffix.empty())
+    ss << ":" << suffix;
   return ss.str();
 }
 
@@ -56,7 +52,9 @@ std::string
 Component::genName(const std::string & prefix, const std::string & middle, const std::string & suffix)
 {
   std::stringstream ss;
-  ss << prefix << ":" << middle << ":" << suffix;
+  ss << prefix << ":" << middle;
+  if (!suffix.empty())
+    ss << ":" << suffix;
   return ss.str();
 }
 
@@ -137,9 +135,9 @@ Component::aliasVectorParam(const std::string & rname, const std::string & name,
 }
 
 void
-Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name)
+Component::connectObject(const InputParameters & params, const std::string & rname, const std::string & mooseName, const std::string & name)
 {
-  ControlLogicNameEntry rne(mooseName, name);
+  ControlLogicNameEntry rne(params.get<std::string>("_moose_base") + "::" + mooseName, name);
   if (_parent != NULL)
     _parent->_rname_map[rname][name].push_back(rne);
   else
@@ -147,9 +145,9 @@ Component::connectObject(const std::string & rname, const std::string & mooseNam
 }
 
 void
-Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name)
+Component::connectObject(const InputParameters & params, const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name)
 {
-  ControlLogicNameEntry rne(mooseName, par_name);
+  ControlLogicNameEntry rne(params.get<std::string>("_moose_base") + "::" + mooseName, par_name);
   if (_parent != NULL)
     _parent->_rname_map[rname][name].push_back(rne);
   else

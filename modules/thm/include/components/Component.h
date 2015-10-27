@@ -116,11 +116,11 @@ public:
   /**
    * Connect with control logic
    */
-  void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name);
+  void connectObject(const InputParameters & params, const std::string & rname, const std::string & mooseName, const std::string & name);
   /**
    * Connect with control logic
    */
-  void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name);
+  void connectObject(const InputParameters & params, const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name);
 
   /**
    * This function creates a mapping between a control logic friendly name and a vector variable within a MOOSE object
@@ -133,10 +133,9 @@ public:
   const std::map<std::string, std::map<std::string, std::vector<ControlLogicNameEntry> > > & getControllableParams() { return _rname_map; }
 
 public:
-  static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
-  static std::string genName(const std::string & prefix, unsigned int i, unsigned int j, const std::string & suffix);
-  static std::string genName(const std::string & prefix, const std::string & suffix);
-  static std::string genName(const std::string & prefix, const std::string & middle, const std::string & suffix);
+  static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix = "");
+  static std::string genName(const std::string & prefix, unsigned int i, unsigned int j, const std::string & suffix = "");
+  static std::string genName(const std::string & prefix, const std::string & middle, const std::string & suffix = "");
 
 protected:
   /**
@@ -307,7 +306,7 @@ Component::setRParam(const std::string & param_name, const T & value)
   // look for the parameter in this components' input parameters
   if (this->parameters().have_parameter<T>(param_name))
   {
-    InputParameters & params = ipw.getInputParameters(name(), tid);
+    InputParameters & params = ipw.getInputParameters("Component", name(), tid);
     params.set<T>(param_name) = value;
   }
   else
@@ -320,7 +319,7 @@ Component::setRParam(const std::string & param_name, const T & value)
       std::string par_name = it->second.second;
       if (comp->parameters().have_parameter<T>(par_name))
       {
-        InputParameters & params = ipw.getInputParameters(comp->name(), tid);
+        InputParameters & params = ipw.getInputParameters("Component", comp->name(), tid);
         params.set<T>(param_name) = value;
       }
     }
@@ -335,7 +334,7 @@ Component::setRParam(const std::string & param_name, const T & value)
       std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());
       tempp[name_cont.getControllableParPosition()] = value;
 
-      InputParameters & params = _app.getInputParameterWarehouse().getInputParameters(name(), tid);
+      InputParameters & params = ipw.getInputParameters("Component", name(), tid);
       params.set<std::vector<T> >(name_cont.getControllableParName()) = tempp;
     }
   }

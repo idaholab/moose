@@ -16,5 +16,5 @@ AddComponentAction::AddComponentAction(InputParameters params) :
 void
 AddComponentAction::act()
 {
-  _simulation.addComponent(_type, getShortName(), getObjectParams());
+  _simulation.addComponent(_type, _name, _moose_object_pars);
 }
