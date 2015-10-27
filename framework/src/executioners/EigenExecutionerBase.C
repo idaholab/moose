@@ -399,7 +399,7 @@ EigenExecutionerBase::normalizeSolution(bool force)
 {
   if (force)
   {
-    _problem.computeUserObjects(EXEC_INITIAL);
+    _problem.computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
     _problem.computeAuxiliaryKernels(EXEC_INITIAL);
     _problem.computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::POST_AUX);
   }
