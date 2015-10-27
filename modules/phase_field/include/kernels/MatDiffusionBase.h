@@ -34,6 +34,9 @@ protected:
 
   /// diffusion coefficient
   const MaterialProperty<T> & _D;
+
+  /// diffusion coefficient derivative w.r.t. the kernel variable
+  const MaterialProperty<T> & _dDdc;
 };
 
 template<typename T>
@@ -48,7 +51,8 @@ MatDiffusionBase<T>::validParams()
 template<typename T>
 MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters) :
     DerivativeMaterialInterface<Kernel>(parameters),
-    _D(getMaterialProperty<T>("D_name"))
+    _D(getMaterialProperty<T>("D_name")),
+    _dDdc(getMaterialPropertyDerivative<T>("D_name", _var.name()))
 {
 }
 
@@ -56,14 +60,14 @@ template<typename T>
 Real
 MatDiffusionBase<T>::computeQpResidual()
 {
-  return _D[_qp] * _grad_test[_i][_qp] * _grad_u[_qp];
+  return _D[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
 template<typename T>
 Real
 MatDiffusionBase<T>::computeQpJacobian()
 {
-  return _D[_qp] * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
+  return (_D[_qp] * _grad_phi[_j][_qp] + _phi[_j][_qp] * _dDdc[_qp] * _grad_u[_qp]) * _grad_test[_i][_qp];
 }
 
 #endif //MATDIFFUSIONBASE_H
