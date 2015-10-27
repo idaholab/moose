@@ -551,7 +551,7 @@ void FEProblem::initialSetup()
     if (_use_legacy_uo_initialization)
     {
       _aux.compute(EXEC_TIMESTEP_BEGIN);
-      computeUserObjects(EXEC_TIMESTEP_END);
+      computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::ALL);
     }
 
     // The only user objects that should be computed here are the initial UOs
@@ -559,8 +559,8 @@ void FEProblem::initialSetup()
 
     if (_use_legacy_uo_initialization)
     {
-      computeUserObjects(EXEC_TIMESTEP_BEGIN);
-      computeUserObjects(EXEC_LINEAR);
+      computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::ALL);
+      computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::ALL);
     }
     Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
   }
@@ -2243,9 +2243,28 @@ FEProblem::execute(const ExecFlagType & exec_type)
 
 }
 
+void
+FEProblem::computeAuxiliaryKernels(ExecFlagType type)
+{
+  mooseDeprecated("computeAuxiliaryKerels method will be removed in future versions of MOOSE, please update your code to use FEProblem::execute()");
+  executeAuxiliaryKernels(type);
+}
 
 void
 FEProblem::computeUserObjects(ExecFlagType type, UserObjectWarehouse::GROUP group)
+{
+  mooseDeprecated("computeUserObjects method will be removed in future versions of MOOSE, please update your code to use FEProblem::execute()");
+  executeUserObjects(type, group);
+}
+
+void
+FEProblem::executeAuxiliaryKernels(const ExecFlagType & type)
+{
+  _aux.compute(type);
+}
+
+void
+FEProblem::executeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group)
 {
   // Perform Residual/Jacobin setups
   switch (type)
@@ -3308,12 +3327,6 @@ FEProblem::onTimestepBegin()
 void
 FEProblem::onTimestepEnd()
 {
-}
-
-void
-FEProblem::computeAuxiliaryKernels(ExecFlagType type)
-{
-  _aux.compute(type);
 }
 
 void
