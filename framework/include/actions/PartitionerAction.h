@@ -16,6 +16,7 @@
 #define PARTITIONERACTION_H
 
 #include "MooseObjectAction.h"
+#include "MoosePartitioner.h"
 
 class PartitionerAction;
 

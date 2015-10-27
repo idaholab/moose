@@ -28,8 +28,13 @@ public:
   LibmeshPartitioner(const InputParameters & params);
   virtual ~LibmeshPartitioner();
 
-  virtual Partitioner * getPartitioner();
+  virtual UniquePtr<Partitioner> clone() const;
+  virtual void partition(MeshBase &mesh, const unsigned int n);
+  virtual void partition(MeshBase &mesh);
+
 protected:
+  virtual void _do_partition(MeshBase & mesh, const unsigned int n);
+
   Partitioner * _partitioner;
   MooseEnum _partitioner_name;
 };

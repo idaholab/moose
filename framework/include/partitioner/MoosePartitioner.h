@@ -35,14 +35,13 @@ InputParameters validParams<MoosePartitioner>();
  * Base class for MOOSE partitioner
  */
 class MoosePartitioner :
+  public Partitioner,
   public MooseObject,
   public Restartable
 {
 public:
   MoosePartitioner(const InputParameters & params);
   virtual ~MoosePartitioner();
-
-  virtual Partitioner * getPartitioner() = 0;
 };
 
 #endif /* MOOSEPARTITIONER_H */
