@@ -36,6 +36,7 @@
 #include "TwoPhaseStressMaterial.h"
 #include "MultiPhaseStressMaterial.h"
 #include "SimpleEigenStrainMaterial.h"
+#include "CompositeElasticityTensor.h"
 #include "ComputeElasticityTensor.h"
 #include "ComputeIsotropicElasticityTensor.h"
 #include "ComputeSmallStrain.h"
@@ -144,6 +145,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(TwoPhaseStressMaterial);
   registerMaterial(MultiPhaseStressMaterial);
   registerMaterial(SimpleEigenStrainMaterial);
+  registerMaterial(CompositeElasticityTensor);
   registerMaterial(ComputeElasticityTensor);
   registerMaterial(ComputeIsotropicElasticityTensor);
   registerMaterial(ComputeSmallStrain);
