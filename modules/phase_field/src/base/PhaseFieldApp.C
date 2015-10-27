@@ -75,6 +75,7 @@
 #include "SpecifiedSmoothCircleIC.h"
 #include "ThumbIC.h"
 #include "Tricrystal2CircleGrainsIC.h"
+#include "RampIC.h"
 
 /*
  * Boundary Conditions
@@ -293,6 +294,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(SpecifiedSmoothCircleIC);
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
+  registerInitialCondition(RampIC);
 
   registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);

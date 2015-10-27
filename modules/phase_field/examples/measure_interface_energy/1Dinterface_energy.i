@@ -32,9 +32,10 @@
     family = LAGRANGE
     scaling = 1e1
     [./InitialCondition]
-      type = FunctionIC
+      type = RampIC
       variable = c
-      function = x/100
+      value_left = 0
+      value_right = 1
     [../]
   [../]
   [./w]
@@ -67,9 +68,9 @@
 [Functions]
   [./Int_energy]
     type = ParsedFunction
-    vals = 'total_solute Cmin Cmax Fleft Fright'
-    value = ((total_solute-Cmin*100)/(Cmax-Cmin))*Fleft+(100-(total_solute-Cmin*100)/(Cmax-Cmin))*Fright
-    vars = 'total_solute Cmin Cmax Fleft Fright'
+    vals = 'total_solute Cmin Cmax Fleft Fright volume'
+    value = ((total_solute-Cmin*volume)/(Cmax-Cmin))*Fleft+(volume-(total_solute-Cmin*volume)/(Cmax-Cmin))*Fright
+    vars = 'total_solute Cmin Cmax Fleft Fright volume'
   [../]
 []
 
@@ -103,6 +104,12 @@
     type = ElementIntegralVariablePostprocessor
     variable = c
   [../]
+  # Get simulation cell size (1D volume) from postprocessor
+  [./volume]
+    type = ElementIntegralMaterialProperty
+    block = 0
+    mat_prop = 1
+  [../]
   # Find concentration in each phase using max and min
   [./Cmax]
     type = ElementExtremeValue
@@ -118,13 +125,13 @@
   [../]
   # Find local energy in each phase by checking boundaries
   [./Fleft]
-    type = PointValue
-    point = '0 0 0'
+    type = SideAverageValue
+    boundary = left
     variable = local_energy
   [../]
   [./Fright]
-    type = PointValue
-    point = '99 0 0'
+    type = SideAverageValue
+    boundary = right
     variable = local_energy
   [../]
   # Use concentrations and energies to find total free energy without any interface,
