@@ -7,8 +7,9 @@
 #ifndef MATDIFFUSIONBASE_H
 #define MATDIFFUSIONBASE_H
 
-#include "DerivativeMaterialInterface.h"
 #include "Kernel.h"
+#include "JvarMapInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 /**
  * This class template implements a diffusion kernel with a mobility that can vary
@@ -20,7 +21,7 @@
  *           isotriopc diffusion or RealTensorValue for the general anisotropic case.
  */
 template<typename T>
-class MatDiffusionBase : public DerivativeMaterialInterface<Kernel>
+class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
 {
 public:
   MatDiffusionBase(const InputParameters & parameters);
@@ -31,12 +32,16 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// diffusion coefficient
   const MaterialProperty<T> & _D;
 
   /// diffusion coefficient derivative w.r.t. the kernel variable
   const MaterialProperty<T> & _dDdc;
+
+  /// diffusion coefficient derivatives w.r.t. coupled variables
+  std::vector<const MaterialProperty<T> *> _dDdarg;
 };
 
 template<typename T>
@@ -45,15 +50,20 @@ MatDiffusionBase<T>::validParams()
 {
   InputParameters params = ::validParams<Kernel>();
   params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
+  params.addCoupledVar("args", "Vector of arguments to diffusivity");
   return params;
 }
 
 template<typename T>
 MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Kernel>(parameters),
+    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
     _D(getMaterialProperty<T>("D_name")),
-    _dDdc(getMaterialPropertyDerivative<T>("D_name", _var.name()))
+    _dDdc(getMaterialPropertyDerivative<T>("D_name", _var.name())),
+    _dDdarg(_coupled_moose_vars.size())
 {
+  // fetch derivatives
+  for (unsigned int i = 0; i < _dDdarg.size(); ++i)
+    _dDdarg[i] = &getMaterialPropertyDerivative<T>("D_name", _coupled_moose_vars[i]->name());
 }
 
 template<typename T>
@@ -68,6 +78,18 @@ Real
 MatDiffusionBase<T>::computeQpJacobian()
 {
   return (_D[_qp] * _grad_phi[_j][_qp] + _phi[_j][_qp] * _dDdc[_qp] * _grad_u[_qp]) * _grad_test[_i][_qp];
+}
+
+template<typename T>
+Real
+MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  // get the coupled variable jvar is referring to
+  unsigned int cvar;
+  if (!mapJvarToCvar(jvar, cvar))
+    return 0.0;
+
+  return (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
 #endif //MATDIFFUSIONBASE_H
