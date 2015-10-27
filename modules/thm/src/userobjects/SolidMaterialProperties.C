@@ -25,9 +25,9 @@ InputParameters validParams<SolidMaterialProperties>()
 SolidMaterialProperties::SolidMaterialProperties(const InputParameters & parameters) :
     GeneralUserObject(parameters),
     ZeroInterface(parameters),
-    _k_const(setConstRefParam("k", "thermal_conductivity")),
-    _Cp_const(setConstRefParam("Cp", "specific_heat")),
-    _rho_const(setConstRefParam("rho", "density")),
+    _k_const(setConstRefParam(parameters, "k", "thermal_conductivity")),
+    _Cp_const(setConstRefParam(parameters, "Cp", "specific_heat")),
+    _rho_const(setConstRefParam(parameters, "rho", "density")),
     _k(_k_const==0 ? &getFunctionByName(getParam<std::string>("k")) : NULL),
     _Cp(_Cp_const==0 ? &getFunctionByName(getParam<std::string>("Cp")) : NULL),
     _rho(_rho_const==0 ? &getFunctionByName(getParam<std::string>("rho")) : NULL)
@@ -84,21 +84,17 @@ SolidMaterialProperties::rho(Real temp) const
 }
 
 const Real &
-SolidMaterialProperties::setConstRefParam(std::string get_string, std::string set_string)
+SolidMaterialProperties::setConstRefParam(const InputParameters & params, std::string get_string, std::string set_string)
 {
   std::string s = getParam<std::string>(get_string);
   if (isNumber(s))
-    {
-      InputParameters & params =
-        _app.getInputParameterWarehouse().getInputParameters(getParam<std::string>("name"), _tid);
-
-      params.set<Real>(set_string) = toNumber(s);
-      return getParam<Real>(set_string);
-    }
+  {
+    return getParam<Real>(set_string);
+  }
   else
-    {
-      // We won't be using whatever the value of _XYZ_const is, so set
-      // the reference value to _real_zero
-      return _real_zero;
-    }
+  {
+    // We won't be using whatever the value of _XYZ_const is, so set
+    // the reference value to _real_zero
+    return _real_zero;
+  }
 }

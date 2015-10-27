@@ -42,7 +42,7 @@ protected:
    * Helper function so we can avoid calling getParam on parameters
    * before they are valid.
    */
-  const Real & setConstRefParam(std::string get_string, std::string set_string);
+  const Real & setConstRefParam(const InputParameters & parameters, std::string get_string, std::string set_string);
 };
 
 
