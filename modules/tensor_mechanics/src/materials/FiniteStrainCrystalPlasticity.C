@@ -93,7 +93,7 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _acc_slip_old(declarePropertyOld<Real>("acc_slip")), // Accumulated alip of previous increment
     _update_rot(declareProperty<RankTwoTensor>("update_rot")), // Rotation tensor considering material rotation and crystal orientation
     _update_rot_old(declarePropertyOld<RankTwoTensor>("update_rot")),
-    _deformation_gradient_old(declarePropertyOld<RankTwoTensor>("deformation gradient")),
+    _deformation_gradient_old(declarePropertyOld<RankTwoTensor>("deformation_gradient")),
     _mo(_nss*LIBMESH_DIM),
     _no(_nss*LIBMESH_DIM),
     _slip_incr(_nss),
