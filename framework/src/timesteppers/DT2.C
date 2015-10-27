@@ -121,7 +121,7 @@ DT2::step()
     // 1. step
     _fe_problem.onTimestepBegin();
     // Compute Post-Aux User Objects (Timestep begin)
-    _fe_problem.computeUserObjects();
+    _fe_problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
     _console << "  - 1. step" << std::endl;
     Moose::setSolverDefaults(_fe_problem);
@@ -137,7 +137,7 @@ DT2::step()
       _time += _dt;
       // 2. step
       _fe_problem.onTimestepBegin();
-      _fe_problem.computeUserObjects();
+      _fe_problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
       _console << "  - 2. step" << std::endl;
       Moose::setSolverDefaults(_fe_problem);
@@ -247,4 +247,3 @@ DT2::converged()
   else
     return false;
 }
-

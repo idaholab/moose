@@ -74,16 +74,6 @@
 //libmesh Includes
 #include "libmesh/exodusII_io.h"
 
-unsigned int FEProblem::_n = 0;
-
-static
-std::string name_sys(const std::string & name, unsigned int n)
-{
-  std::ostringstream os;
-  os << name << n;
-  return os.str();
-}
-
 Threads::spin_mutex get_function_mutex;
 
 template<>
@@ -117,8 +107,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
 
-    _nl(getParam<bool>("use_nonlinear") ? *(new NonlinearSystem(*this, name_sys("nl", _n))) : *(new EigenSystem(*this, name_sys("nl", _n)))),
-    _aux(*this, name_sys("aux", _n)),
+    _nl(getParam<bool>("use_nonlinear") ? *(new NonlinearSystem(*this, "nl0")) : *(new EigenSystem(*this, "nl0"))),
+    _aux(*this, "aux0"),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
@@ -151,8 +141,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _fail_next_linear_convergence_check(false)
 {
-
-  _n++;
 
   _time = 0.0;
   _time_old = 0.0;
@@ -576,6 +564,7 @@ void FEProblem::initialSetup()
     }
     Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
   }
+
 
   // Here we will initialize the stateful properties once more since they may have been updated
   // during initialSetup by calls to computeProperties.
@@ -2217,8 +2206,53 @@ FEProblem::computeIndicatorsAndMarkers()
 }
 
 void
-FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group)
+FEProblem::execute(const ExecFlagType & exec_type)
 {
+  // Set FEProblem execution flag
+  if (exec_type == EXEC_TIMESTEP_BEGIN)
+    onTimestepBegin();
+
+  else if (exec_type == EXEC_TIMESTEP_END)
+    onTimestepEnd();
+
+  // Pre-aux UserObjects
+  Moose::perf_log.push("computeUserObjects()", "Solve");
+  computeUserObjects(exec_type, UserObjectWarehouse::PRE_AUX);
+  Moose::perf_log.pop("computeUserObjects()", "Solve");
+
+  // AuxKernels
+  Moose::perf_log.push("computeAuxiliaryKernels()", "Solve");
+  computeAuxiliaryKernels(exec_type);
+  Moose::perf_log.pop("computeAuxiliaryKernels()", "Solve");
+
+  // Post-aux UserObjects
+  Moose::perf_log.push("computeUserObjects()", "Solve");
+  computeUserObjects(exec_type, UserObjectWarehouse::POST_AUX);
+  Moose::perf_log.pop("computeUserObjects()", "Solve");
+
+}
+
+
+void
+FEProblem::computeUserObjects(ExecFlagType type, UserObjectWarehouse::GROUP group)
+{
+  // Perform Residual/Jacobin setups
+  switch (type)
+  {
+  case EXEC_LINEAR:
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+      _user_objects(type)[tid].residualSetup();
+    break;
+
+  case EXEC_NONLINEAR:
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+      _user_objects(type)[tid].jacobianSetup();
+    break;
+
+  default:
+    break;
+  }
+
   std::vector<UserObjectWarehouse> & pps = _user_objects(type);
   if (pps[0].blockIds().size() || pps[0].boundaryIds().size() || pps[0].nodesetIds().size() || pps[0].blockNodalIds().size() || pps[0].internalSideUserObjects(group).size())
   {
@@ -2526,31 +2560,6 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
     if (pp)
       _pps_data.storeValue(name, pp->getValue());
   }
-}
-
-void
-FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP_END*/, UserObjectWarehouse::GROUP group)
-{
-  Moose::perf_log.push("compute_user_objects()","Solve");
-
-  switch (type)
-  {
-  case EXEC_LINEAR:
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _user_objects(type)[tid].residualSetup();
-    break;
-
-  case EXEC_NONLINEAR:
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _user_objects(type)[tid].jacobianSetup();
-    break;
-
-  default:
-    break;
-  }
-  computeUserObjectsInternal(type, group);
-
-  Moose::perf_log.pop("compute_user_objects()","Solve");
 }
 
 void
@@ -3124,12 +3133,9 @@ FEProblem::solve()
 
   possiblyRebuildGeomSearchPatches();
 
-//  _solve_only_perf_log.push("solve");
-
   if (_solve)
     _nl.solve();
 
-//  _solve_only_perf_log.pop("solve");
   Moose::perf_log.pop("solve()","Solve");
 
   if (_solve)
