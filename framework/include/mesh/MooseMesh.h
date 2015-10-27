@@ -22,6 +22,7 @@
 #include "MooseTypes.h"
 #include "Restartable.h"
 #include "MooseEnum.h"
+#include "MoosePartitioner.h"
 
 // libMesh
 #include "libmesh/mesh.h"
@@ -682,10 +683,9 @@ public:
   MooseMesh::MortarInterface * getMortarInterface(BoundaryID master, BoundaryID slave);
 
   /**
-   * Setter and getter for custom partitioner
+   * Setter for custom partitioner
    */
-  Partitioner * getCustomPartitioner() const;
-  void setCustomPartitioner(Partitioner * custom_partitioner);
+  void setCustomPartitioner(Partitioner * partitioner);
 
   /**
    * Setter and getter for _custom_partitioner_requested
@@ -712,7 +712,7 @@ protected:
   bool _partitioner_overridden;
 
   /// The custom partitioner
-  Partitioner * _custom_partitioner;
+  UniquePtr<Partitioner> _custom_partitioner;
   bool _custom_partitioner_requested;
 
   /// Convenience enums

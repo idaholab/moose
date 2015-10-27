@@ -25,6 +25,7 @@ InputParameters validParams<MoosePartitioner>()
 
 
 MoosePartitioner::MoosePartitioner(const InputParameters & params) :
+    Partitioner(),
     MooseObject(params),
     Restartable(params, "Partitioners")
 {
