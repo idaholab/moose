@@ -58,6 +58,7 @@ Steady::init()
 
   checkIntegrity();
   _problem.initialSetup();
+  _problem.initialExecute();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
   _problem.outputStep(EXEC_INITIAL);

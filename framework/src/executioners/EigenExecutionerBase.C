@@ -89,6 +89,7 @@ EigenExecutionerBase::init()
     _eigen_sys.initSystemSolution(EigenSystem::EIGEN, 1.0);
   }
   _problem.initialSetup();
+  _problem.initialExecute();
   _eigen_sys.initSystemSolutionOld(EigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated

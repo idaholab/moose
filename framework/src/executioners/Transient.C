@@ -198,6 +198,7 @@ Transient::init()
   }
 
   _problem.initialSetup();
+  _problem.initialExecute();
   _time_stepper->init();
 
   if (_app.isRestarting())
