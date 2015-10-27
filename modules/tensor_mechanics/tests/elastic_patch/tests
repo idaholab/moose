@@ -1,0 +1,7 @@
+[Tests]
+  [./elastic_patch]
+    type = 'Exodiff'
+    input = 'elastic_patch.i'
+    exodiff = 'elastic_patch_out.e'
+  [../]
+[]
