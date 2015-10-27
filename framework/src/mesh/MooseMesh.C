@@ -99,7 +99,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _mesh(NULL),
     _partitioner_name(getParam<MooseEnum>("partitioner")),
     _partitioner_overridden(false),
-    _custom_partitioner(NULL),
     _custom_partitioner_requested(false),
     _uniform_refine_level(0),
     _is_changed(false),
