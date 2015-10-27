@@ -12,7 +12,7 @@ InputParameters validParams<RankTwoScalarAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addClassDescription("Compute a scalar property of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor", "The rank two material tensor name");
-  MooseEnum scalar_options("VonMisesStress EquivalentPlasticStrain Hydrostatic L2norm MaxPrincipal MidPrincipal MinPrincipal");
+  MooseEnum scalar_options("VonMisesStress EquivalentPlasticStrain Hydrostatic L2norm MaxPrincipal MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant ThirdInvariant");
   params.addParam<MooseEnum>("scalar_type", scalar_options, "Type of scalar output");
 
   return params;
@@ -30,6 +30,7 @@ RankTwoScalarAux::computeValue()
 {
   Real val;
   RankTwoTensor s;
+  enum { x, y, z };
 
   switch (_scalar_type)
   {
@@ -52,8 +53,34 @@ RankTwoScalarAux::computeValue()
    case 6:
      val = calcEigenValues();
      break;
+   case 7: // VolumetricStrain (Lagrangian)
+     val = _tensor[_qp].trace() +
+           _tensor[_qp](x,x)*_tensor[_qp](y,y) +
+           _tensor[_qp](y,y)*_tensor[_qp](z,z) +
+           _tensor[_qp](z,z)*_tensor[_qp](x,x) +
+           _tensor[_qp](x,x)*_tensor[_qp](y,y)*_tensor[_qp](z,z);
+     break;
+   case 8: // FirstInvariant
+     val = _tensor[_qp].trace();
+     break;
+   case 9: // SecondInvariant
+     val = _tensor[_qp](x,x)*_tensor[_qp](y,y) +
+           _tensor[_qp](y,y)*_tensor[_qp](z,z) +
+           _tensor[_qp](z,z)*_tensor[_qp](x,x) -
+           _tensor[_qp](x,y)*_tensor[_qp](y,x) -
+           _tensor[_qp](y,z)*_tensor[_qp](z,y) -
+           _tensor[_qp](x,z)*_tensor[_qp](z,x);
+     break;
+   case 10: // ThirdInvariant
+     val = _tensor[_qp](x,x)*_tensor[_qp](y,y)*_tensor[_qp](z,z) -
+           _tensor[_qp](x,x)*_tensor[_qp](z,y)*_tensor[_qp](y,z) +
+           _tensor[_qp](x,y)*_tensor[_qp](z,x)*_tensor[_qp](y,z) -
+           _tensor[_qp](x,y)*_tensor[_qp](y,x)*_tensor[_qp](z,z) +
+           _tensor[_qp](x,z)*_tensor[_qp](y,x)*_tensor[_qp](z,y) -
+           _tensor[_qp](x,z)*_tensor[_qp](z,x)*_tensor[_qp](y,y);
+     break;
    default:
-     mooseError("RankTwoScalarAux Error: Pass valid scalar type - VonMisesStress, EquivalentPlasticStrain, Hydrostatic, L2norm MaxPrincipal MidPrincipal MinPrincipal");
+     mooseError("RankTwoScalarAux Error: Pass valid scalar type - VonMisesStress, EquivalentPlasticStrain, Hydrostatic, L2norm MaxPrincipal MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant ThirdInvariant");
   }
   return val;
 }
