@@ -887,15 +887,19 @@ public:
   /// Returns whether or not this Problem has a TimeIntegrator
   bool hasTimeIntegrator() const { return _has_time_integrator; }
 
-
   /**
    * Perform execution of MOOSE systems.
    */
   void execute(const ExecFlagType & exec_type);
 
-  virtual void computeUserObjects(ExecFlagType type, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
-
+  ///@{
+  /**
+   * Deprecated callbacks.
+   */
+  virtual void computeUserObjects(ExecFlagType type, UserObjectWarehouse::GROUP group);
   virtual void computeAuxiliaryKernels(ExecFlagType type);
+  ///@}
+
 
 protected:
   MooseMesh & _mesh;
@@ -989,6 +993,15 @@ protected:
 
   void checkUserObjects();
 
+  /**
+   * Call UserObject execute() methods.
+   */
+  virtual void executeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group);
+
+  /**
+   * Call AuxKernels compute() methods.
+   */
+  virtual void executeAuxiliaryKernels(const ExecFlagType & type);
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();

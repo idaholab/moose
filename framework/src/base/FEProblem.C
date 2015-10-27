@@ -542,27 +542,27 @@ void FEProblem::initialSetup()
   // Yak is currently relying on doing this after initial Transfers
   if (!_app.isRecovering())
   {
-    Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
+    Moose::setup_perf_log.push("Initial executeUserObjects()","Setup");
 
-    computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
+    executeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
 
     _aux.compute(EXEC_INITIAL);
 
     if (_use_legacy_uo_initialization)
     {
       _aux.compute(EXEC_TIMESTEP_BEGIN);
-      computeUserObjects(EXEC_TIMESTEP_END);
+      executeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::ALL);
     }
 
     // The only user objects that should be computed here are the initial UOs
-    computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::POST_AUX);
+    executeUserObjects(EXEC_INITIAL, UserObjectWarehouse::POST_AUX);
 
     if (_use_legacy_uo_initialization)
     {
-      computeUserObjects(EXEC_TIMESTEP_BEGIN);
-      computeUserObjects(EXEC_LINEAR);
+      executeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::ALL);
+      executeUserObjects(EXEC_LINEAR, UserObjectWarehouse::ALL);
     }
-    Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
+    Moose::setup_perf_log.pop("Initial executeUserObjects()","Setup");
   }
 
 
@@ -2236,44 +2236,62 @@ FEProblem::computeIndicatorsAndMarkers()
 void
 FEProblem::execute(const ExecFlagType & exec_type)
 {
-  // Run setup methods
-  /*
-  // Set FEProblem execution flag
-  if (exec_type == EXEC_TIMESTEP_BEGIN)
-    onTimestepBegin();
+  // Set the current flag
+  _current_execute_on_flag = exec_type;
 
-  else if (exec_type == EXEC_TIMESTEP_END)
-    onTimestepEnd();
-  */
+  // Call setup methods FEProblem::initialSetup, jacobianSetup, etc...
 
   // Pre-aux UserObjects
-  Moose::perf_log.push("computeUserObjects()", "Solve");
-  computeUserObjects(exec_type, UserObjectWarehouse::PRE_AUX);
-  Moose::perf_log.pop("computeUserObjects()", "Solve");
+  Moose::perf_log.push("executeUserObjects()", "Setup");
+  executeUserObjects(exec_type, UserObjectWarehouse::PRE_AUX);
+  Moose::perf_log.pop("executeUserObjects()", "Setup");
 
   // AuxKernels
-  Moose::perf_log.push("computeAuxiliaryKernels()", "Solve");
-  computeAuxiliaryKernels(exec_type);
-  Moose::perf_log.pop("computeAuxiliaryKernels()", "Solve");
+  Moose::perf_log.push("executeAuxiliaryKernels()", "Setup");
+  executeAuxiliaryKernels(exec_type);
+  Moose::perf_log.pop("executeAuxiliaryKernels()", "Setup");
 
   // Post-aux UserObjects
-  Moose::perf_log.push("computeUserObjects()", "Solve");
-  computeUserObjects(exec_type, UserObjectWarehouse::POST_AUX);
-  Moose::perf_log.pop("computeUserObjects()", "Solve");
+  Moose::perf_log.push("executeUserObjects()", "Setup");
+  executeUserObjects(exec_type, UserObjectWarehouse::POST_AUX);
+  Moose::perf_log.pop("executeUserObjects()", "Setup");
 
-  // Controls
+  // Indicators and Markers
 
   // MultiApps
 
   // Transfers
 
+  // Controls
+
   // Outputs
 
+  // Return the current flag to None
+  _current_execute_on_flag = EXEC_NONE;
 }
 
+void
+FEProblem::computeAuxiliaryKernels(ExecFlagType type)
+{
+  mooseDeprecated("computeAuxiliaryKerels method will be removed in future versions of MOOSE, please update your code to use FEProblem::execute()");
+  executeAuxiliaryKernels(type);
+}
 
 void
 FEProblem::computeUserObjects(ExecFlagType type, UserObjectWarehouse::GROUP group)
+{
+  mooseDeprecated("computeUserObjects method will be removed in future versions of MOOSE, please update your code to use FEProblem::execute()");
+  executeUserObjects(type, group);
+}
+
+void
+FEProblem::executeAuxiliaryKernels(const ExecFlagType & type)
+{
+  _aux.compute(type);
+}
+
+void
+FEProblem::executeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group)
 {
   // Perform Residual/Jacobin setups
   switch (type)
@@ -3339,12 +3357,6 @@ FEProblem::onTimestepEnd()
 }
 
 void
-FEProblem::computeAuxiliaryKernels(ExecFlagType type)
-{
-  _aux.compute(type);
-}
-
-void
 FEProblem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
@@ -3413,7 +3425,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   execMultiApps(EXEC_LINEAR);
 
-  computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
+  executeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -3435,7 +3447,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   _aux.compute(EXEC_LINEAR);
 
-  computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
+  executeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
 
   _app.getOutputWarehouse().residualSetup();
 
@@ -3463,7 +3475,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     execTransfers(EXEC_NONLINEAR);
     execMultiApps(EXEC_NONLINEAR);
 
-    computeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::PRE_AUX);
+    executeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::PRE_AUX);
 
     if (_displaced_problem != NULL)
       _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -3482,7 +3494,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
     _aux.compute(EXEC_NONLINEAR);
 
-    computeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::POST_AUX);
+    executeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::POST_AUX);
 
     _app.getOutputWarehouse().jacobianSetup();
 
