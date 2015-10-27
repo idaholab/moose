@@ -104,7 +104,7 @@ public:
    * This function checks to see if there are unidentified variables in the input file (i.e. unused)
    * If the warn_is_error is set, then the program will abort if unidentified parameters are found
    */
-  void checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file) const;
+  void checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file, MooseSharedPointer<FEProblem> fe_problem) const;
 
   /**
    * This function checks to see if there were any overridden parameters in the input file.
@@ -171,6 +171,9 @@ protected:
 
   /// The getpot object used for extracting parameters
   GetPot _getpot_file;
+
+  /// The getpot object used for testing
+  GetPot _getpot_file_error_checking;
 
   /// The input file name that is used for parameter extraction
   std::string _input_filename;
