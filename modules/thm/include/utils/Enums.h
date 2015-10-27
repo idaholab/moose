@@ -78,7 +78,8 @@ namespace RELAP7
   enum EHeatFluxPartitioningModelType
   {
     HFPM_LINEAR = 0,
-    HFPM_SIMPLE = 1
+    HFPM_SIMPLE = 1,
+    HFPM_TRACE  = 2
   };
 
   /**
