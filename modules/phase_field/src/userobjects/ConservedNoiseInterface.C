@@ -16,6 +16,5 @@ ConservedNoiseInterface::ConservedNoiseInterface(const InputParameters & paramet
    * This call turns on Random Number generation for this object, it can be called either in
    * the constructor or in initialSetup().
    */
-  setRandomResetFrequency(EXEC_TIMESTEP);
+  setRandomResetFrequency(EXEC_TIMESTEP_END);
 }
-
