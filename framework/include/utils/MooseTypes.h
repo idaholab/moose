@@ -75,7 +75,7 @@ enum ExecFlagType {
   /// Forces execution on failed solve (output only)
   EXEC_FAILED            = 0x80,
   /// For use with custom executioners that want to fire objects at a specific time
-  EXEC_CUSTOM            = 0x100,
+  EXEC_CUSTOM            = 0x100
 };
 
 
