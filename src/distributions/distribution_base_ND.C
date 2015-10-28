@@ -188,7 +188,7 @@ void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vec
 }
 
 //void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu){
-void BasicMultivariateNormal::BasicMultivariateNormal_init(int &rows, int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu){
+void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, unsigned int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu){
 	  /**
 	   * This is the base function that initializes the Multivariate normal distribution
      * Input Parameter
@@ -276,7 +276,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std:
 	   * - data_filename: it specifies the covariance matrix
 	   * - mu: the mean value vector
 	   */
-  int rows,columns;
+  unsigned int rows,columns;
   std::vector<std::vector<double> > covMatrix;
   readMatrix(data_filename, rows, columns, covMatrix);
   BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
@@ -288,7 +288,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(const char * data_filename, std
 	   * - data_filename: it specifies the covariance matrix
 	   * - mu: the mean value vector
 	   */
-  int rows,columns;
+  unsigned int rows,columns;
   std::vector<std::vector<double> > covMatrix;
   readMatrix(std::string(data_filename), rows, columns, covMatrix);
 	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
@@ -301,7 +301,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double>
    * - covMatrix: covariance matrix
    * - mu: the mean value vector
    */
-  int rows, columns;
+  unsigned int rows, columns;
   rows = covMatrix.size();
   columns = covMatrix.at(0).size();
 
@@ -323,7 +323,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
    * - mu: the mean value vector
    */
 
-  int rows, columns;
+  unsigned int rows, columns;
   std::vector<std::vector<double> > covMatrix;
   // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
