@@ -18,7 +18,7 @@
   [./solution_uo]
     type = SolutionUserObject
     mesh = cube_with_u_equals_x.e
-    timestep = END
+    timestep = LATEST
     system_variables = u
     rotation0_vector = '0 0 1'
     rotation0_angle = 45

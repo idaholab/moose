@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <vector>
+#include <list>
 #include <map>
 #include <set>
 
@@ -135,6 +136,12 @@ public:
    * Tell the app to output in a specific position.
    */
   void setOutputPosition(Point p);
+
+  /**
+   * Extract all possible checkpoint file names
+   * @param files A Set of checkpoint filenames to populate
+   */
+  std::list<std::string> getCheckpointFiles();
 
   /**
    * Whether or not an output position has been set.

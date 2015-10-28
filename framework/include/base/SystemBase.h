@@ -585,14 +585,14 @@ public:
       VarCopyInfo & vci = *it;
       int timestep = -1;
 
-      if (vci._timestep == "END")
+      if (vci._timestep == "LATEST")
         // Use the last time step in the file from which to retrieve the solution
         timestep = n_steps;
       else
       {
         std::istringstream ss(vci._timestep);
         if (!(ss >> timestep) || timestep > n_steps)
-          mooseError("Invalid value passed as \"initial_from_file_timestep\". Expected \"END\" or a valid integer less than "
+          mooseError("Invalid value passed as \"initial_from_file_timestep\". Expected \"LATEST\" or a valid integer less than "
                      << n_steps << ", received " << vci._timestep);
       }
 

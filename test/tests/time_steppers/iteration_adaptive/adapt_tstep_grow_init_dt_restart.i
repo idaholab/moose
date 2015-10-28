@@ -51,7 +51,6 @@
     optimal_iterations = 10
     dt = 1.0
   [../]
-  restart_file_base = adapt_tstep_grow_init_dt_out_cp/0006
 []
 
 [Postprocessors]
@@ -63,4 +62,8 @@
 [Outputs]
   execute_on = 'timestep_end'
   exodus = true
+[]
+
+[Problem]
+  restart_file_base = adapt_tstep_grow_init_dt_out_cp/LATEST
 []

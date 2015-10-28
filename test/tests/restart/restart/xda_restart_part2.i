@@ -112,7 +112,6 @@
 [Executioner]
   type = Transient
   solve_type = JFNK
-  restart_file_base = out_xda_restart_part1_cp/0005
   start_time = 1
   dt = 0.1
   reset_dt = true #NECESSARY to force a change in DT when using restart!
@@ -126,4 +125,8 @@
     elemental_as_nodal = true
     execute_elemental_on = none
   [../]
+[]
+
+[Problem]
+  restart_file_base = out_xda_restart_part1_cp/0005
 []
