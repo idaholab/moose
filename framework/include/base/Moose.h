@@ -65,7 +65,6 @@ extern PerfLog perf_log;
  * PerfLog to be used during setup.  This log will get printed just before the first solve. */
 extern PerfLog setup_perf_log;
 
-
 /**
  * Variable indicating whether we will enable FPE trapping for this run.
  */

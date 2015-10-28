@@ -55,7 +55,6 @@ InputParameters validParams<PiecewiseBilinear>()
 
 PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
     Function(parameters),
-    _bilinear_interp(NULL),
     _data_file_name(getParam<FileName>("data_file")),
     _axis(getParam<int>("axis")),
     _yaxis(getParam<int>("yaxis")),
@@ -67,36 +66,33 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
     _radial(getParam<bool>("radial"))
 {
   if (!parameters.isParamValid("data_file"))
-  {
-    mooseError("In PiecewiseBilinear, 'data_file' must be specified.");
-  }
+    mooseError("In PiecewiseBilinear " << _name << ": 'data_file' must be specified.");
 
   if (!_axisValid && !_yaxisValid && !_xaxisValid)
-    mooseError("Error in " << name() << ". None of axis, yaxis, or xaxis properly defined.  Allowable range is 0-2");
+    mooseError("In PiecewiseBilinear " << _name << ": None of axis, yaxis, or xaxis properly defined.  Allowable range is 0-2");
 
   if (_axisValid && (_yaxisValid || _xaxisValid))
-    mooseError("Error in " << name() << ". Cannot define axis with either yaxis or xaxis");
+    mooseError("In PiecewiseBilinear " << _name << ": Cannot define axis with either yaxis or xaxis");
 
   if (_radial && (!_yaxisValid || !_xaxisValid))
-    mooseError("Error in " << name() << ". yaxis and xaxis must be defined when radial = true");
+    mooseError("In PiecewiseBilinear " << _name << ": yaxis and xaxis must be defined when radial = true");
 
   std::vector<Real> x;
   std::vector<Real> y;
   ColumnMajorMatrix z;
 
   // Parse to get x, y, z
-  parse( x, y, z );
+  parse(x, y, z);
 
-  _bilinear_interp = new BilinearInterpolation( x, y, z );
+  _bilinear_interp.reset(new BilinearInterpolation(x, y, z));
 }
 
 PiecewiseBilinear::~PiecewiseBilinear()
 {
-  delete _bilinear_interp;
 }
 
 Real
-PiecewiseBilinear::value( Real t, const Point & p)
+PiecewiseBilinear::value(Real t, const Point & p)
 {
   Real retVal(0);
   if (_yaxisValid && _xaxisValid && _radial)
@@ -107,24 +103,17 @@ PiecewiseBilinear::value( Real t, const Point & p)
     retVal = _bilinear_interp->sample( r, t );
   }
   else if (_axisValid)
-  {
     retVal = _bilinear_interp->sample( p(_axis), t );
-  }
   else if (_yaxisValid && !_radial)
   {
     if (_xaxisValid)
-    {
       retVal = _bilinear_interp->sample( p(_xaxis), p(_yaxis) );
-    }
     else
-    {
       retVal = _bilinear_interp->sample( t, p(_yaxis) );
-    }
   }
   else
-  {
     retVal = _bilinear_interp->sample( p(_xaxis), t );
-  }
+
   return retVal * _scale_factor;
 }
 
@@ -135,7 +124,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
 {
   std::ifstream file(_data_file_name.c_str());
   if (!file.good())
-    mooseError("Error opening file '" + _data_file_name + "' from PiecewiseBilinear function.");
+    mooseError("In PiecewiseBilinear " << _name << ": Error opening file '" + _data_file_name + "'.");
   std::string line;
   unsigned int linenum= 0;
   unsigned int itemnum = 0;
@@ -148,6 +137,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
     std::istringstream linestream(line);
     std::string item;
     itemnum = 0;
+
     while (getline (linestream, item, ','))
     {
       itemnum++;
@@ -156,18 +146,12 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
       i >> d;
       data.push_back( d );
     }
+
     if (linenum == 1)
-    {
       num_cols = itemnum;
-    }
-    else
-    {
-      if (num_cols+1 != itemnum)
-      {
-        mooseError("ERROR! Read "<<itemnum<<" columns of data but expected "<<num_cols+1<<
-                   " columns while reading line "<<linenum<<" of '"+ _data_file_name + "' for PiecewiseBilinear function.");
-      }
-    }
+    else if (num_cols+1 != itemnum)
+      mooseError("In PiecewiseBilinear " << _name << ": Read " << itemnum << " columns of data but expected " << num_cols+1
+                 << " columns while reading line " << linenum << " of '" << _data_file_name << "'.");
   }
 
   x.resize(itemnum-1);
@@ -193,8 +177,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
       ++offset;
     }
   }
+
   if (data.size() != offset)
-  {
     mooseError("ERROR! Inconsistency in data read from '" + _data_file_name + "' for PiecewiseBilinear function.");
-  }
 }

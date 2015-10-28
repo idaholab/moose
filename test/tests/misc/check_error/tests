@@ -128,22 +128,28 @@
     expect_err = "The following dynamic boundary name is not unique: \w+"
   [../]
 
+  [./linear_interp_material_check]
+    type = 'RunException'
+    input = 'linear_interp_not_increasing.i'
+    expect_err = "In LinearInterpolationMaterial \S+: x-values are not strictly increasing"
+  [../]
+
   [./function_file_test1]
     type = 'RunException'
     input = 'function_file_test1.i'
-    expect_err = "Read more than two rows of data from file '\S+' for Piecewise function.  Did you mean to use \"format = columns\"?"
+    expect_err = "In Piecewise \S+: Read more than two rows of data from file '\S+'.  Did you mean to use \"format = columns\"?"
   [../]
 
   [./function_file_test2]
     type = 'RunException'
     input = 'function_file_test2.i'
-    expect_err = "Read more than 2 columns of data from file '\S+' for Piecewise function.  Did you mean to use \"format = rows\"?"
+    expect_err = "In Piecewise \S+: Read more than 2 columns of data from file '\S+'.  Did you mean to use \"format = rows\"?"
   [../]
 
   [./function_file_test3]
     type = 'RunException'
     input = 'function_file_test3.i'
-    expect_err = "Lengths of x and y data do not match in file '\S+' for Piecewise function."
+    expect_err = "In Piecewise \S+: Lengths of x and y data do not match in file '\S+'."
   [../]
 
   [./function_file_test4]
@@ -155,37 +161,37 @@
   [./function_file_test5]
     type = 'RunException'
     input = 'function_file_test5.i'
-    expect_err = "In Piecewise: Cannot specify 'data_file' and 'x', 'y', or 'xy_data' together."
+    expect_err = "In Piecewise \S+: Cannot specify 'data_file' and 'x', 'y', or 'xy_data' together."
   [../]
 
   [./function_file_test6]
     type = 'RunException'
     input = 'function_file_test6.i'
-    expect_err = "In Piecewise: Cannot specify 'x', 'y', and 'xy_data' together."
+    expect_err = "In Piecewise \S+: Cannot specify 'x', 'y', and 'xy_data' together."
   [../]
 
   [./function_file_test7]
     type = 'RunException'
     input = 'function_file_test7.i'
-    expect_err = "In Piecewise: Both 'x' and 'y' must be specified if either one is specified."
+    expect_err = "In Piecewise \S+: Both 'x' and 'y' must be specified if either one is specified."
   [../]
 
   [./function_file_test8]
     type = 'RunException'
     input = 'function_file_test8.i'
-    expect_err = "In Piecewise: Length of data provided in 'xy_data' must be a multiple of 2."
+    expect_err = "In Piecewise \S+: Length of data provided in 'xy_data' must be a multiple of 2."
   [../]
 
   [./function_file_test9]
     type = 'RunException'
     input = 'function_file_test9.i'
-    expect_err = "In Piecewise: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified."
+    expect_err = "In Piecewise \S+: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified."
   [../]
 
   [./function_file_test10]
     type = 'RunException'
     input = 'function_file_test10.i'
-    expect_err = "In Piecewise function axis=3 outside allowable range \(0-2\)."
+    expect_err = "In Piecewise \S+: axis=3 outside allowable range \(0-2\)."
   [../]
 
   [./incomplete_kernel_block_coverage_test]
@@ -233,7 +239,7 @@
   [./missing_function_file_test]
     type = 'RunException'
     input = 'missing_function_file_test.i'
-    expect_err = "Error opening file \S+ from Piecewise function"
+    expect_err = "In Piecewise \S+: Error opening file '\S+'"
   [../]
 
   [./missing_function_test]

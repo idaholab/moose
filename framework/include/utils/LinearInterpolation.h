@@ -20,6 +20,7 @@
 #include <sstream>
 #include <string>
 
+#include "Moose.h"
 
 /**
  * This class interpolates values given a set of data pairs and an abscissa.
@@ -32,11 +33,11 @@ public:
    * independent variable while the other should be of the dependent variable.  These values should
    * correspond to one and other in the same position.
    */
-  LinearInterpolation(const std::vector<double> & X,
-                      const std::vector<double> & Y);
+  LinearInterpolation(const std::vector<Real> & X,
+                      const std::vector<Real> & Y);
   LinearInterpolation() :
-    _x(std::vector<double>()),
-    _y(std::vector<double>()) {}
+    _x(std::vector<Real>()),
+    _y(std::vector<Real>()) {}
 
   virtual ~LinearInterpolation()
     {}
@@ -44,7 +45,7 @@ public:
   /**
    * Set the x and y values.
    */
-  void setData(const std::vector<double> & X, const std::vector<double> & Y)
+  void setData(const std::vector<Real> & X, const std::vector<Real> & Y)
   {
     _x = X;
     _y = Y;
@@ -57,19 +58,19 @@ public:
    * This function will take an independent variable input and will return the dependent variable
    * based on the generated fit
    */
-  double sample(double x) const;
+  Real sample(Real x) const;
 
   /**
    * This function will take an independent variable input and will return the derivative of the dependent variable
    * with respect to the independent variable based on the generated fit
    */
-  double sampleDerivative(double x) const;
+  Real sampleDerivative(Real x) const;
 
   /**
    * This function will dump GNUPLOT input files that can be run to show the data points and
    * function fits
    */
-  void dumpSampleFile(std::string base_name, std::string x_label="X", std::string y_label="Y", float xmin=0, float xmax=0, float ymin=0, float ymax=0);
+  void dumpSampleFile(std::string base_name, std::string x_label="X", std::string y_label="Y", Real xmin=0, Real xmax=0, Real ymin=0, Real ymax=0);
 
   /**
    * This function returns the size of the array holding the points, i.e. the number of sample points
@@ -79,15 +80,15 @@ public:
   /**
    * This function returns the integral of the function
    */
-  double integrate();
+  Real integrate();
 
-  double domain(int i) const;
-  double range(int i) const;
+  Real domain(int i) const;
+  Real range(int i) const;
 
 private:
 
-  std::vector<double> _x;
-  std::vector<double> _y;
+  std::vector<Real> _x;
+  std::vector<Real> _y;
 
   static int _file_number;
 };
