@@ -34,8 +34,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 
-#include <Eigen/Dense>
-
+//#include <Eigen/Dense>
+#include <Eigen/SVD>
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 #define _USE_MATH_DEFINES
