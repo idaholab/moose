@@ -6,14 +6,14 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-schemes = ['implicit-euler', 'bdf2', 'crank-nicolson', 'dirk', 'explicit-euler', 'rk-2']
+schemes = ['implicit-euler', 'bdf2', 'crank-nicolson', 'dirk']
 
 scheme_errors = {}
 
 # Generate list of dts
 dt = 1.0
 dts = []
-for i in range(0,10):
+for i in range(0,5):
   dts.append(dt)
   dt = dt / 2.0
 
