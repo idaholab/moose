@@ -18,7 +18,7 @@
  * anisotropic diffusion.
  *
  * \tparam T Type of the diffusion coefficient parameter. This can be Real for
- *           isotriopc diffusion or RealTensorValue for the general anisotropic case.
+ *           isotropic diffusion or RealTensorValue for the general anisotropic case.
  */
 template<typename T>
 class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
@@ -52,7 +52,7 @@ MatDiffusionBase<T>::validParams()
 {
   InputParameters params = ::validParams<Kernel>();
   params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
-  params.addCoupledVar("args", "Vector of arguments to diffusivity");
+  params.addCoupledVar("args", "Vector of arguments of the diffusivity");
   return params;
 }
 

@@ -18,7 +18,7 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>()
   params.addParam<MaterialPropertyName>("h", "h", "Switching Function Material that provides h(eta)");
   params.addParam<MaterialPropertyName>("g", "g", "Barrier Function Material that provides g(eta)");
 
-  // All arguments to the phase free energies
+  // All arguments of the phase free energies
   params.addCoupledVar("args", "Arguments of fa and fb - use vector coupling");
   params.addCoupledVar("displacement_gradients", "Vector of displacement gradient variables (see Modules/PhaseField/DisplacementGradients action)");
 
