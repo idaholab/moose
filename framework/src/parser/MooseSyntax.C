@@ -33,6 +33,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
 
   syntax.registerActionSyntax("AddKernelAction", "Kernels/*", "add_kernel");
+  syntax.registerActionSyntax("AddNodalKernelAction", "NodalKernels/*", "add_nodal_kernel");
   syntax.registerActionSyntax("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
   syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
 

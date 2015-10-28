@@ -1293,6 +1293,24 @@ FEProblem::addKernel(const std::string & kernel_name, const std::string & name, 
 }
 
 void
+FEProblem::addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_nl;
+  }
+  _nl.addNodalKernel(kernel_name, name, parameters);
+}
+
+void
 FEProblem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
