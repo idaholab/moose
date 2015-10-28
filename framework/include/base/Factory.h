@@ -36,6 +36,7 @@
 
 // for backward compatibility
 #define registerKernel(name)                        registerObject(name)
+#define registerNodalKernel(name)                   registerObject(name)
 #define registerBoundaryCondition(name)             registerObject(name)
 #define registerAux(name)                           registerObject(name)
 #define registerAuxKernel(name)                     registerObject(name)
@@ -68,6 +69,7 @@
 #define registerPartitioner(name)                   registerObject(name)
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
+#define registerNamedNodalKernel(obj, name)         registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
 #define registerNamedAux(obj, name)                 registerNamedObject(obj, name)
 #define registerNamedAuxKernel(name)                registerNamedObject(obj, name)

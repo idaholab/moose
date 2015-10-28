@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'high_order_time_integration.i'
+    exodiff = 'high_order_time_integration_out.e'
+    scale_refine = 3
+  [../]
+[]

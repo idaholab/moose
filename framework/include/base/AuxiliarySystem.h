@@ -158,6 +158,8 @@ protected:
   friend class ComputeIndicatorThread;
   friend class ComputeMarkerThread;
   friend class FlagElementsThread;
+  friend class ComputeNodalKernelsThread;
+  friend class ComputeNodalKernelJacobiansThread;
 };
 
 #endif /* EXPLICITSYSTEM_H */
