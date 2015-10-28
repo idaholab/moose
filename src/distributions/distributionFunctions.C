@@ -140,7 +140,7 @@ void computeInverse(const std::vector<std::vector<double> > & matrix, std::vecto
 
 
 // Convert the vector of covariance to vector of vector of covariance 
-void  vectorToMatrix(int &rows,int &columns,std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix) {
+void  vectorToMatrix(unsigned int &rows,unsigned int &columns,std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix) {
         /** Input Parameter
          * vecMatrix: covariance matrix stored in a vector
          * Output Parameter
@@ -148,7 +148,7 @@ void  vectorToMatrix(int &rows,int &columns,std::vector<double> &vecMatrix, std:
          * columns: the second dimension of the covariance matrix
          * _cov_matrix: covariance matrix stored in vector<vector<double> >
          */
-        int dimensions = vecMatrix.size();
+        unsigned int dimensions = vecMatrix.size();
         dimensions = sqrt(dimensions);
         rows = dimensions;
         columns = dimensions;

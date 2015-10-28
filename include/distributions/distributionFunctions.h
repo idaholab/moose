@@ -26,7 +26,7 @@ void matrixBackConversion(double original[], std::vector<std::vector<double> > c
 void inverseMatrix(double* A, int N);
 void computeInverse(const std::vector<std::vector<double> > & matrix, std::vector<std::vector<double> > & inverse);
 // convert a matrix stored in a vector to a matrix stored in a vector of vector
-void vectorToMatrix(int &rows, int & columns, std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix);
+void vectorToMatrix(unsigned int &rows, unsigned int & columns, std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix);
 double getDeterminant(std::vector<std::vector<double> > matrix);
 
 void nrerror(const char error_text[]);

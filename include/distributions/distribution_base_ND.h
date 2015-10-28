@@ -436,7 +436,7 @@ public:
   BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu);
 
   //void BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu);
-  void BasicMultivariateNormal_init(int & rows, int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
+  void BasicMultivariateNormal_init(unsigned int & rows, unsigned int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
 
   virtual ~BasicMultivariateNormal();
   double  Pdf(std::vector<double> x);
