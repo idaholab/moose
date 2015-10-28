@@ -13,14 +13,13 @@
 /****************************************************************/
 
 // STL includes
-#include <string>
-#include <vector>
-#include <map>
-#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <istream>
 #include <iterator>
+
+// Standard Library
+#include <sys/stat.h>
 
 // MOOSE includes
 #include "MooseUtils.h"
@@ -29,6 +28,8 @@
 
 // External includes
 #include "pcrecpp.h"
+#include "tinydir.h"
+
 
 namespace MooseUtils
 {
@@ -348,7 +349,8 @@ MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigne
   }
 }
 
-void indentMessage(const std::string & prefix, std::string & message, const char* color/*= COLOR_CYAN*/)
+void
+indentMessage(const std::string & prefix, std::string & message, const char* color/*= COLOR_CYAN*/)
 {
   // The colored prefix
   std::string indent = color + prefix + ": " + COLOR_DEFAULT;
@@ -360,5 +362,88 @@ void indentMessage(const std::string & prefix, std::string & message, const char
   // Prepend indent string at the front of the message
   message = indent + message;
 }
+
+std::list<std::string>
+getFilesInDirs(const std::list<std::string> & directory_list)
+{
+  std::list<std::string> files;
+
+  for (std::list<std::string>::const_iterator it = directory_list.begin(); it != directory_list.end(); ++it)
+  {
+    tinydir_dir dir;
+    dir.has_next = 0; // Avoid a garbage value in has_next (clang StaticAnalysis)
+    tinydir_open(&dir, it->c_str());
+
+    while (dir.has_next)
+    {
+      tinydir_file file;
+      file.is_dir = 0; // Avoid a garbage value in is_dir (clang StaticAnalysis)
+      tinydir_readfile(&dir, &file);
+
+      if (!file.is_dir)
+        files.push_back(*it + "/" + file.name);
+
+      tinydir_next(&dir);
+    }
+
+    tinydir_close(&dir);
+  }
+
+  return files;
+}
+
+std::string
+getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
+{
+  // Create storage for newest restart files
+  // Note that these might have the same modification time if the simulation was fast.
+  // In that case we're going to save all of the "newest" files and sort it out momentarily
+  time_t newest_time = 0;
+  std::list<std::string> newest_restart_files;
+
+  // Loop through all possible files and store the newest
+  for (std::list<std::string>::const_iterator it = checkpoint_files.begin(); it != checkpoint_files.end(); ++it)
+  {
+      struct stat stats;
+      stat(it->c_str(), &stats);
+
+      time_t mod_time = stats.st_mtime;
+      if (mod_time > newest_time)
+      {
+        newest_restart_files.clear(); // If the modification time is greater, clear the list
+        newest_time = mod_time;
+      }
+
+      if (mod_time == newest_time)
+        newest_restart_files.push_back(*it);
+  }
+
+  // Loop through all of the newest files according the number in the file name
+  int max_file_num = -1;
+  std::string max_base;
+  pcrecpp::RE re_base_and_file_num("(.*?(\\d+))\\..*"); // Will pull out the full base and the file number simultaneously
+
+  // Now, out of the newest files find the one with the largest number in it
+  for (std::list<std::string>::const_iterator it = newest_restart_files.begin(); it != newest_restart_files.end(); ++it)
+  {
+    std::string the_base;
+    int file_num = 0;
+
+    re_base_and_file_num.FullMatch(*it, &the_base, &file_num);
+
+    if (file_num > max_file_num)
+    {
+      max_file_num = file_num;
+      max_base = the_base;
+    }
+  }
+
+  // Error if nothing was located
+  if (max_file_num == -1)
+    max_base.clear();
+
+  return max_base;
+}
+
 
 } // MooseUtils namespace

@@ -160,8 +160,6 @@
     max_function_change = 3e7
     dt = 1e6
   [../]
-
-  restart_file_base = adapt_tstep_function_change_restart1_checkpoint_cp/0065
 []
 
 [Postprocessors]
@@ -187,4 +185,8 @@
     type = Console
     max_rows = 10
   [../]
+[]
+
+[Problem]
+  restart_file_base = adapt_tstep_function_change_restart1_checkpoint_cp/0065
 []

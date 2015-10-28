@@ -60,8 +60,6 @@
   num_steps = 5
   dt = 0.1
   solve_type = 'PJFNK'
-
-  restart_file_base = master_out_cp/0005
 []
 
 [Outputs]
@@ -86,4 +84,8 @@
     source_variable = u
     variable = v
   [../]
+[]
+
+[Problem]
+  restart_file_base = master_out_cp/0005
 []

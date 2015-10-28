@@ -40,7 +40,6 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  restart_file_base = kernel_restartable_restart_cp/0005
   num_steps = 5
   dt = 1e-2
   solve_type = PJFNK
@@ -53,5 +52,5 @@
 []
 
 [Problem]
-  # This is here to make sure we can restart with a Problem block#
+  restart_file_base = kernel_restartable_restart_cp/LATEST
 []

@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <list>
 #include <sstream>
 #include <algorithm>
 
@@ -235,6 +236,21 @@ namespace MooseUtils
    * @param color The color to apply to the prefix (default CYAN)
    */
   void indentMessage(const std::string & prefix, std::string & message, const char* color = COLOR_CYAN);
+
+  /**
+   * Retrieves the names of all of the files contained within the list of directories passed into the routine.
+   * The names returned will be the paths to the files relative to the current directory.
+   * @param directory_list The list of directories to retrieve files from.
+   */
+  std::list<std::string> getFilesInDirs(const std::list<std::string> & directory_list);
+
+  /**
+   * Returns the most recent checkpoint file given a list of files.
+   * If a suitable file isn't found the empty string is returned
+   * @param checkpoint_files the list of files to analyze
+   */
+  std::string getRecoveryFileBase(const std::list<std::string> & checkpoint_files);
+
 
   /**
    * This function will split the passed in string on a set of delimiters appending the substrings

@@ -53,7 +53,6 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  restart_file_base = csv_restart_part1_out_cp/0010
 []
 
 [Outputs]
@@ -62,4 +61,8 @@
     type = CSV
     file_base = csv_restart_part2_out
   [../]
+[]
+
+[Problem]
+  restart_file_base = csv_restart_part1_out_cp/0010
 []

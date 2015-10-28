@@ -28,6 +28,7 @@
 #include "MeshModifier.h"
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
+#include "MooseObjectAction.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -514,6 +515,50 @@ MooseApp::setOutputPosition(Point p)
 
   if (_executioner.get() != NULL)
     _executioner->parentOutputPositionChanged();
+}
+
+std::list<std::string>
+MooseApp::getCheckpointFiles()
+{
+  // Extract the CommonOutputAction
+  const Action* common = _action_warehouse.getActionsByName("common_output")[0];
+
+  // Storage for the directory names
+  std::list<std::string> checkpoint_dirs;
+
+  // If file_base is set in CommonOutputAction, add this file to the list of potential checkpoint files
+  if (common->isParamValid("file_base"))
+    checkpoint_dirs.push_back(common->getParam<std::string>("file_base") + "_cp");
+  // Case for normal application or master in a Multiapp setting
+  else if (getOutputFileBase().empty())
+    checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, "_out_cp"));
+  // Case for a sub app in a Multiapp setting
+  else
+    checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
+
+  // Add the directories from any existing checkpoint objects
+  const std::vector<Action *> actions = _action_warehouse.getActionsByName("add_output");
+  for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+  {
+    // Get the parameters from the MooseObjectAction
+    MooseObjectAction * moose_object_action = static_cast<MooseObjectAction *>(*it);
+    const InputParameters & params = moose_object_action->getObjectParams();
+
+    // Loop through the actions and add the necessary directories to the list to check
+    if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
+    {
+      if (params.isParamValid("file_base"))
+        checkpoint_dirs.push_back(common->getParam<std::string>("file_base") + "_cp");
+      else
+      {
+        std::ostringstream oss;
+        oss << "_" << (*it)->getShortName() << "_cp";
+        checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, oss.str()));
+      }
+    }
+  }
+
+  return MooseUtils::getFilesInDirs(checkpoint_dirs);
 }
 
 void
