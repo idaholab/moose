@@ -68,6 +68,7 @@
 #include "PFCFreezingIC.h"
 #include "PolycrystalRandomIC.h"
 #include "PolycrystalReducedIC.h"
+#include "RampIC.h"
 #include "ReconVarIC.h"
 #include "RndBoundingBoxIC.h"
 #include "RndSmoothCircleIC.h"
@@ -75,7 +76,6 @@
 #include "SpecifiedSmoothCircleIC.h"
 #include "ThumbIC.h"
 #include "Tricrystal2CircleGrainsIC.h"
-#include "RampIC.h"
 
 /*
  * Boundary Conditions
@@ -287,6 +287,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(PFCFreezingIC);
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalReducedIC);
+  registerInitialCondition(RampIC);
   registerInitialCondition(ReconVarIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerInitialCondition(RndSmoothCircleIC);
@@ -294,7 +295,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(SpecifiedSmoothCircleIC);
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
-  registerInitialCondition(RampIC);
 
   registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);

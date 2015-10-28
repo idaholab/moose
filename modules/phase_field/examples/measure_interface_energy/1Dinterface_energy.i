@@ -68,9 +68,9 @@
 [Functions]
   [./Int_energy]
     type = ParsedFunction
-    vals = 'total_solute Cmin Cmax Fleft Fright volume'
-    value = ((total_solute-Cmin*volume)/(Cmax-Cmin))*Fleft+(volume-(total_solute-Cmin*volume)/(Cmax-Cmin))*Fright
-    vars = 'total_solute Cmin Cmax Fleft Fright volume'
+    vals = 'total_solute Cleft Cright Fleft Fright volume'
+    value = ((total_solute-Cleft*volume)/(Cright-Cleft))*Fleft+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fright
+    vars = 'total_solute Cleft Cright Fleft Fright volume'
   [../]
 []
 
@@ -92,7 +92,7 @@
 []
 
 [Postprocessors]
-  # The total free enrgy of the simulation cell to observe the energy reduction.
+  # The total free energy of the simulation cell to observe the energy reduction.
   [./total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
@@ -110,18 +110,16 @@
     block = 0
     mat_prop = 1
   [../]
-  # Find concentration in each phase using max and min
-  [./Cmax]
-    type = ElementExtremeValue
-    value_type = max
+  # Find concentration in each phase using SideAverageValue
+  [./Cleft]
+    type = SideAverageValue
+    boundary = left
     variable = c
-    block = 0
   [../]
-  [./Cmin]
-    type = ElementExtremeValue
-    value_type = min
+  [./Cright]
+    type = SideAverageValue
+    boundary = right
     variable = c
-    block = 0
   [../]
   # Find local energy in each phase by checking boundaries
   [./Fleft]
