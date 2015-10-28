@@ -1,4 +1,9 @@
 [Tests]
+  [./matdiffusion]
+    type = 'Exodiff'
+    input = 'matdiffusion.i'
+    exodiff = 'matdiffusion_out.e'
+  [../]
   [./mobility_derivative_test]
     type = 'Exodiff'
     input = 'mobility_derivative_test.i'
