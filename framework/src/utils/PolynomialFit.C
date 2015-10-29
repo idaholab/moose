@@ -13,8 +13,6 @@
 /****************************************************************/
 
 #include "PolynomialFit.h"
-#include "MooseError.h"
-#include "libmesh/libmesh_common.h"
 
 extern "C" void FORTRAN_CALL(dgels) ( ... );
 
@@ -40,7 +38,7 @@ PolynomialFit::PolynomialFit(std::vector<Real> x, std::vector<Real> y, unsigned 
 
   }
   else if (_x.size() < order)
-    mooseError("Polynomial Fit requires an order less than the size of the input vector\n");
+    throw std::domain_error("Polynomial Fit requires an order less than the size of the input vector");
 }
 
 void
@@ -87,7 +85,7 @@ PolynomialFit::doLeastSquares()
 
   FORTRAN_CALL(dgels)(&mode, &num_rows, &num_coeff, &num_rhs, &_matrix[0], &num_rows, &rhs[0], &num_rows, &opt_buffer_size, &buffer_size, &return_value);
   if (return_value)
-    mooseError("");
+    throw std::runtime_error("Call to Fortran routine 'dgels' returned non-zero exit code");
 
   buffer_size = (int) opt_buffer_size;
 
@@ -96,7 +94,7 @@ PolynomialFit::doLeastSquares()
   delete [] buffer;
 
   if (return_value)
-    mooseError("");
+    throw std::runtime_error("Call to Fortran routine 'dgels' returned non-zero exit code");
 
   _coeffs.resize(num_coeff);
   for (int i=0; i<num_coeff; ++i)

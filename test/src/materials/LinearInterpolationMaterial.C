@@ -50,8 +50,16 @@ LinearInterpolationMaterial::LinearInterpolationMaterial(const InputParameters &
   }
   else
   {
-    _linear_interp = new LinearInterpolation(getParam<std::vector<Real> >("independent_vals"),
-                                             getParam<std::vector<Real> >("dependent_vals"));
+    try
+    {
+
+      _linear_interp = new LinearInterpolation(getParam<std::vector<Real> >("independent_vals"),
+                                               getParam<std::vector<Real> >("dependent_vals"));
+    }
+    catch (std::domain_error & e)
+    {
+      mooseError("In LinearInterpolationMaterial " << _name << ": " << e.what());
+    }
 
     _linear_interp->dumpSampleFile(getParam<std::string>("prop_name"),
                                    "X position",

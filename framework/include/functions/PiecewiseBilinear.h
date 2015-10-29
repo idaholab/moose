@@ -15,6 +15,7 @@
 #ifndef PIECEWISEBILINEAR_H
 #define PIECEWISEBILINEAR_H
 
+#include "MooseTypes.h"
 #include "Function.h"
 #include "BilinearInterpolation.h"
 #include "ColumnMajorMatrix.h"
@@ -42,7 +43,7 @@ public:
 
 
 private:
-  BilinearInterpolation * _bilinear_interp;
+  MooseSharedPointer<BilinearInterpolation> _bilinear_interp;
   const std::string _data_file_name;
   const int _axis;
   const int _yaxis;
