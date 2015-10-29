@@ -1,4 +1,10 @@
 [Tests]
+  [./matproptest]
+    type = CSVDiff
+    input = 'matproptest.i'
+    csvdiff = 'matproptest_out.csv'
+  [../]
+
   [./CHParsed]
     type = 'Exodiff'
     input = 'CHParsed_test.i'
