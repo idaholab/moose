@@ -66,10 +66,8 @@ NonlinearEigen::init()
                           "", std::numeric_limits<Real>::max(),
                           _eigenvalue, initial_res);
 
-    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
     _problem.onTimestepEnd();
-    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
-    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
+    _problem.execute(EXEC_TIMESTEP_END);
 
     if (_output_after_pi)
     {
@@ -99,20 +97,16 @@ NonlinearEigen::takeStep()
   _console << " Nonlinear iteration starts"  << std::endl;
 
   // nonlinear solve
-  _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);
   preSolve();
   _problem.timestepSetup();
   _problem.advanceState();
-  _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
+  _problem.execute(EXEC_TIMESTEP_BEGIN);
 
   nonlinearSolve(_rel_tol, _abs_tol, _pfactor, _eigenvalue);
 
   postSolve();
   printEigenvalue();
 
-  _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
   _problem.onTimestepEnd();
-  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
-  _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
+  _problem.execute(EXEC_TIMESTEP_END);
 }
-

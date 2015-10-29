@@ -566,9 +566,6 @@ public:
   ExecStore<VectorPostprocessorWarehouse> & getVectorPostprocessorWarehouse();
 
 
-  virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP_END, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
-  virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_LINEAR);
-
   // Dampers /////
   void addDamper(std::string damper_name, const std::string & name, InputParameters parameters);
   void setupDampers();
@@ -890,6 +887,30 @@ public:
   /// Returns whether or not this Problem has a TimeIntegrator
   bool hasTimeIntegrator() const { return _has_time_integrator; }
 
+
+  /**
+   * Return the current execution flag.
+   *
+   * Returns EXEC_NONE when not being executed.
+   * @see FEProblem::execute
+   */
+  const ExecFlagType & getCurrentExecuteOnFlag() const;
+
+
+  /**
+   * Perform execution of MOOSE systems.
+   */
+  void execute(const ExecFlagType & exec_type);
+
+  ///@{
+  /**
+   * Deprecated callbacks.
+   */
+  virtual void computeUserObjects(ExecFlagType type, UserObjectWarehouse::GROUP group);
+  virtual void computeAuxiliaryKernels(ExecFlagType type);
+  ///@}
+
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -980,9 +1001,17 @@ protected:
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
-  void computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group);
-
   void checkUserObjects();
+
+  /**
+   * Call UserObject execute() methods.
+   */
+  virtual void executeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group);
+
+  /**
+   * Call AuxKernels compute() methods.
+   */
+  virtual void executeAuxiliaryKernels(const ExecFlagType & type);
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();
@@ -1054,14 +1083,13 @@ protected:
   /// The error message to go with an exception
   std::string _exception_message;
 
+  /// Current execute_on flag
+  ExecFlagType _current_execute_on_flag;
+
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
 #endif //LIBMESH_HAVE_PETSC
-
-public:
-  /// number of instances of FEProblem (to distinguish Systems when coupling problems together)
-  static unsigned int _n;
 
 private:
   bool _use_legacy_uo_aux_computation;

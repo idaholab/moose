@@ -126,7 +126,6 @@
 #include "Transient.h"
 #include "InversePowerMethod.h"
 #include "NonlinearEigen.h"
-#include "PetscTSExecutioner.h"
 
 // functions
 #include "Axisymmetric2D3DSolutionFunction.h"
@@ -524,11 +523,6 @@ registerObjects(Factory & factory)
   registerExecutioner(Transient);
   registerExecutioner(InversePowerMethod);
   registerExecutioner(NonlinearEigen);
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
-#if 0 // This seems to be broken right now -- doesn't work wiith petsc >= 3.4 either
-  registerExecutioner(PetscTSExecutioner);
-#endif
-#endif
 
   // functions
   registerFunction(Axisymmetric2D3DSolutionFunction);

@@ -85,9 +85,6 @@ InversePowerMethod::takeStep()
   postSolve();
   printEigenvalue();
 
-  _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
   _problem.onTimestepEnd();
-  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
-  _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
+  _problem.execute(EXEC_TIMESTEP_END);
 }
-
