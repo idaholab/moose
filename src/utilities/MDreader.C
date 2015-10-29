@@ -137,7 +137,7 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, unsi
 
 }
 
-void readMatrix(const std::string filename, int & rows, int & columns, std::vector< std::vector<double> > & matrix){
+void readMatrix(const std::string filename, unsigned int & rows, unsigned int & columns, std::vector< std::vector<double> > & matrix){
  // Data format: row1
  //              row2
  //              row3
@@ -155,7 +155,7 @@ void readMatrix(const std::string filename, int & rows, int & columns, std::vect
 }
 
 
-int ReadNumbers(const std::string & s, std::vector <double> & v ) {
+unsigned int ReadNumbers(const std::string & s, std::vector <double> & v ) {
     std::istringstream is( s );
     double n;
     while( is >> n )
@@ -167,14 +167,14 @@ int ReadNumbers(const std::string & s, std::vector <double> & v ) {
 
 
 
-void import_matrix_from_txt_file(const std::string filename_X, std::vector <double>& v, int& rows, int& cols){
+void import_matrix_from_txt_file(const std::string filename_X, std::vector <double>& v, unsigned int& rows, unsigned int& cols){
     std::ifstream file_X;
     std::string line;
 
     file_X.open(filename_X.c_str());
     if (file_X.is_open())
     {
-        int i=0;
+        unsigned int i=0;
         getline(file_X, line);
 
         cols =ReadNumbers( line, v );
