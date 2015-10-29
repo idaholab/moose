@@ -63,7 +63,13 @@ EigenKernel::EigenKernel(const InputParameters & parameters) :
     if (_is_implicit)
       _eigenvalue = &getPostprocessorValueByName(eigen_pp_name);
     else
-      _eigenvalue = &getPostprocessorValueOldByName(eigen_pp_name);
+    {
+      EigenExecutionerBase * exec = dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner());
+      if (exec)
+        _eigenvalue = &exec->eigenvalueOld();
+      else
+        _eigenvalue = &getPostprocessorValueOldByName(eigen_pp_name);
+    }
   }
 }
 
