@@ -111,11 +111,7 @@ EigenExecutionerBase::init()
 
   // check if _source_integral has been evaluated during initialSetup()
   if ((bx_execflag & EXEC_INITIAL) == EXEC_NONE)
-  {
-    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
-    _problem.computeAuxiliaryKernels(EXEC_LINEAR);
-    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
-  }
+    _problem.execute(EXEC_LINEAR);
   if (_source_integral==0.0) mooseError("|Bx| = 0!");
 
   // normalize solution to make |Bx|=_eigenvalue, _eigenvalue at this point has the initialized value
@@ -149,9 +145,7 @@ EigenExecutionerBase::makeBXConsistent(Real k)
   {
     // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
     _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, k/_source_integral);
-    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
-    _problem.computeAuxiliaryKernels(EXEC_LINEAR);
-    _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
+    _problem.execute(EXEC_LINEAR);
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << _source_integral;
     _console << " |Bx_0| = " << ss.str() << std::endl;
@@ -398,11 +392,7 @@ Real
 EigenExecutionerBase::normalizeSolution(bool force)
 {
   if (force)
-  {
-    _problem.computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
-    _problem.computeAuxiliaryKernels(EXEC_INITIAL);
-    _problem.computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::POST_AUX);
-  }
+    _problem.execute(EXEC_INITIAL);
 
   Real factor;
   if (isParamValid("normal_factor"))
@@ -419,10 +409,9 @@ EigenExecutionerBase::normalizeSolution(bool force)
     for (unsigned int i=0; i<Moose::exec_types.size(); i++)
     {
       // EXEC_CUSTOM is special, should be treated only by specifically designed executioners.
-      if (Moose::exec_types[i]==EXEC_CUSTOM) continue;
-      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(Moose::exec_types[i]);
-      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::POST_AUX);
+      if (Moose::exec_types[i]==EXEC_CUSTOM)
+        continue;
+      _problem.execute(Moose::exec_types[i]);
     }
   }
   return scaling;
@@ -489,9 +478,7 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, uns
       coef[0] = alp;
       coef[1] = 1-alp;
       _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
-      _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(EXEC_LINEAR);
-      _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
+      _problem.execute(EXEC_LINEAR);
       _eigenvalue = _source_integral;
     }
   }
@@ -542,9 +529,7 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, uns
         coef[1] = 1-alp+beta;
         coef[2] = -beta;
         _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
-        _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
-        _problem.computeAuxiliaryKernels(EXEC_LINEAR);
-        _problem.computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
+        _problem.execute(EXEC_LINEAR);
         _eigenvalue = _source_integral;
       }
 //    }
