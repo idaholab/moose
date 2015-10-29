@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+class MooseObject;
+
 /**
  * Material properties get fully described using this structure, including their dependent
  * variables and derivation state.
@@ -33,7 +35,7 @@ public:
    *   'a:=D[x(t),t,t]'  The second time derivative of the t-dependent material property 'x'
    *                     which will be referred to as 'a' in the function expression.
    */
-  FunctionMaterialPropertyDescriptor(const std::string &, Material *);
+  FunctionMaterialPropertyDescriptor(const std::string &, MooseObject *);
 
   /// default constructor
   FunctionMaterialPropertyDescriptor();
@@ -74,6 +76,8 @@ public:
   void printDebug();
 
 private:
+  void updatePropertyReference();
+
   void parseDerivative(const std::string &);
   void parseDependentVariables(const std::string &);
 
@@ -90,7 +94,7 @@ private:
   const MaterialProperty<Real> * _value;
 
   /// material object that owns this descriptor
-  Material * _parent_material;
+  MooseObject * _parent;
 };
 
 #endif // FUNCTIONMATERIALPROPERTYDESCRIPTOR_H

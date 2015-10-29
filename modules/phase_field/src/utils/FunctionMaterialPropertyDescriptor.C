@@ -1,11 +1,12 @@
 #include "FunctionMaterialPropertyDescriptor.h"
 #include "Material.h"
+#include "Kernel.h"
 #include <algorithm>
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std::string & expression, Material * parent) :
+FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std::string & expression, MooseObject * parent) :
     _dependent_vars(),
     _derivative_vars(),
-    _parent_material(parent)
+    _parent(parent)
 {
   size_t define = expression.find_last_of(":=");
 
@@ -26,10 +27,7 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std
     _fparser_name = _base_name;
   }
 
-  printDebug();
-
-  // get the material property reference
-  _value = &(_parent_material->getMaterialProperty<Real>(getPropertyName()));
+  updatePropertyReference();
 }
 
 FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor() :
@@ -43,7 +41,7 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const Fun
     _dependent_vars(rhs._dependent_vars),
     _derivative_vars(rhs._derivative_vars),
     _value(rhs._value),
-    _parent_material(rhs._parent_material)
+    _parent(rhs._parent)
 {
 }
 
@@ -51,7 +49,7 @@ void
 FunctionMaterialPropertyDescriptor::addDerivative(const VariableName & var)
 {
   _derivative_vars.push_back(var);
-  _value = &(_parent_material->getMaterialProperty<Real>(getPropertyName()));
+  updatePropertyReference();
 }
 
 bool
@@ -145,4 +143,19 @@ FunctionMaterialPropertyDescriptor::printDebug()
   for (unsigned int i = 0; i < _dependent_vars.size(); ++i)
     Moose::out << _dependent_vars[i] << ' ';
   Moose::out << "] " << getPropertyName() << '\n';
+}
+
+void
+FunctionMaterialPropertyDescriptor::updatePropertyReference()
+{
+  Material * _material_parent = dynamic_cast<Material *>(_parent);
+  Kernel * _kernel_parent = dynamic_cast<Kernel *>(_parent);
+
+  // get the material property reference
+  if (_material_parent)
+    _value = &(_material_parent->getMaterialProperty<Real>(getPropertyName()));
+  else if (_kernel_parent)
+    _value = &(_kernel_parent->getMaterialProperty<Real>(getPropertyName()));
+  else
+    mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a Kernel object.");
 }
