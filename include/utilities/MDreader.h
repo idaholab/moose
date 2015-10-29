@@ -11,9 +11,9 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions,unsig
 //int findIndex(double pivot, std::vector<double> discretizations);
 std::vector<double> read1Darray(std::string filename);
 double getPointAtCoordinate(std::vector<double> coordinates);
-void readMatrix(const std::string filename, int & rows, int & columns, std::vector< std::vector<double> > & matrix);
-void import_matrix_from_txt_file(const std::string filename_X, std::vector <double>& v, int& rows, int& cols);
-int ReadNumbers(const std::string & s, std::vector <double> & v );
+void readMatrix(const std::string filename, unsigned int & rows, unsigned int & columns, std::vector< std::vector<double> > & matrix);
+void import_matrix_from_txt_file(const std::string filename_X, std::vector <double>& v, unsigned int& rows, unsigned int& cols);
+unsigned int ReadNumbers(const std::string & s, std::vector <double> & v );
 
 
 #endif
