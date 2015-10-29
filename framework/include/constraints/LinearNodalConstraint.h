@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EQUALVALUEBOUNDARYCONSTRAINT_H
-#define EQUALVALUEBOUNDARYCONSTRAINT_H
+#ifndef LINEARNODALCONSTRAINT_H
+#define LINEARNODALCONSTRAINT_H
 
 #include "NodalConstraint.h"
 
-class EqualValueBoundaryConstraint;
+class LinearNodalConstraint;
 
 template<>
-InputParameters validParams<EqualValueBoundaryConstraint>();
+InputParameters validParams<LinearNodalConstraint>();
 
-class EqualValueBoundaryConstraint : public NodalConstraint
+class LinearNodalConstraint : public NodalConstraint
 {
 public:
-  EqualValueBoundaryConstraint(const InputParameters & parameters);
-  virtual ~EqualValueBoundaryConstraint();
+  LinearNodalConstraint(const InputParameters & parameters);
+  virtual ~LinearNodalConstraint();
 
 protected:
 
@@ -40,14 +40,14 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 
-  // Holds the master node id
-  unsigned int _master_node_id;
+  // Holds the master node ids
+  std::vector<unsigned int> _master_node_ids;
   // Holds the list of slave node ids
   std::vector<unsigned int> _slave_node_ids;
   // Holds the slave node set or side set
-  BoundaryName _slave_node_set_id;
+  std::string _slave_node_set_id;
   // Penalty if constraint is not satisfied
   Real _penalty;
 };
 
-#endif /* EQUALVALUEBOUNDARYCONSTRAINT_H */
+#endif /* LINEARNODALCONSTRAINT_H */

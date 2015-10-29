@@ -282,15 +282,11 @@ MooseVariable::reinitAuxNeighbor()
 void
 MooseVariable::reinitNodes(const std::vector<dof_id_type> & nodes)
 {
-  // Store only DOFs that are on this processor and have the variable defined here
   _dof_indices.clear();
   for (unsigned int i = 0; i < nodes.size(); i++)
   {
-    // The MeshBase::query_node_ptr() routine will return NULL if the requested
-    // node is non-local.
     Node * nd = _subproblem.mesh().getMesh().query_node_ptr(nodes[i]);
-
-    if (nd && (_subproblem.mesh().getMesh().processor_id() == nd->processor_id()))
+    if (nd && (_subproblem.mesh().isSemiLocal(nd)))
     {
       if (nd->n_dofs(_sys.number(), _var_num) > 0)
       {
@@ -304,6 +300,29 @@ MooseVariable::reinitNodes(const std::vector<dof_id_type> & nodes)
     _is_defined = true;
   else
     _is_defined = false;
+}
+
+void
+MooseVariable::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes)
+{
+  _dof_indices_neighbor.clear();
+  for (unsigned int i = 0; i < nodes.size(); i++)
+  {
+    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(nodes[i]);
+    if (nd && (_subproblem.mesh().isSemiLocal(nd)))
+    {
+      if (nd->n_dofs(_sys.number(), _var_num) > 0)
+      {
+        dof_id_type dof = nd->dof_number(_sys.number(), _var_num, 0);
+        _dof_indices_neighbor.push_back(dof);
+      }
+    }
+  }
+
+  if (_dof_indices_neighbor.size() > 0)
+    _is_defined_neighbor = true;
+  else
+    _is_defined_neighbor = false;
 }
 
 void
@@ -1467,6 +1486,17 @@ MooseVariable::computeNodalNeighborValues()
         _nodal_u_dot_neighbor[i] = _sys.solutionUDot()(_dof_indices_neighbor[i]);
         _nodal_du_dot_du_neighbor[i] = _sys.duDotDu();
       }
+    }
+  }
+  else
+  {
+    _nodal_u_neighbor.resize(0);
+    if (_subproblem.isTransient())
+    {
+      _nodal_u_old_neighbor.resize(0);
+      _nodal_u_older_neighbor.resize(0);
+      _nodal_u_dot_neighbor.resize(0);
+      _nodal_du_dot_du_neighbor.resize(0);
     }
   }
 }

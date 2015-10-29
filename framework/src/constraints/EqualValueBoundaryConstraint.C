@@ -13,45 +13,66 @@
 /****************************************************************/
 
 #include "EqualValueBoundaryConstraint.h"
+#include <limits.h>
 
 template<>
 InputParameters validParams<EqualValueBoundaryConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
-  params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
+  params.addParam<unsigned int>("master", std::numeric_limits<unsigned int>::max(), "The ID of the master node. If no ID is provided, first node of slave set is chosen.");
+  params.addParam<std::vector<unsigned int> >("slave_node_ids", "The IDs of the slave node");
+  params.addParam<BoundaryName>("slave", "NaN", "The boundary ID associated with the slave side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }
 
 EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters) :
     NodalConstraint(parameters),
-    _slave_boundary_id(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
+    _master_node_id(getParam<unsigned int>("master")),
+    _slave_node_ids(getParam<std::vector<unsigned int> >("slave_node_ids")),
+    _slave_node_set_id(getParam<BoundaryName>("slave")),
     _penalty(getParam<Real>("penalty"))
 {
-
-  std::vector<dof_id_type> nodelist;
-  std::vector<boundary_id_type> boundary_id_list;
-  _mesh.getMesh().boundary_info->build_node_list(nodelist,boundary_id_list);
-
-  std::vector<dof_id_type>::iterator in;
-  std::vector<boundary_id_type>::iterator ib;
-
-  for (in = nodelist.begin(), ib = boundary_id_list.begin();
-       in != nodelist.end() && ib != boundary_id_list.end();
-       ++in, ++ib)
+  if ((_slave_node_ids.size() == 0) && (_slave_node_set_id == "NaN"))
+    mooseError("Please specify slave node ids or boundary id.");
+  else if ((_slave_node_ids.size() == 0) && (_slave_node_set_id != "NaN"))
   {
-    bool slave_local(_mesh.node(*in).processor_id() == _subproblem.processor_id());
-    if (*ib == _slave_boundary_id &&
-        *in != _master_node_id &&
-        slave_local)
-    {
-      _connected_nodes.push_back(*in);
+    std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));
+    std::vector<dof_id_type>::iterator in;
 
-      std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[_master_node_id];
-      for (unsigned int i = 0; i < elems.size(); ++i)
-        _subproblem.addGhostedElem(elems[i]);
+    //Setting master node to first node of the slave node set if no master node id is pprovided
+    if (_master_node_id == std::numeric_limits<unsigned int>::max())
+    {
+      in = nodelist.begin();
+      _master_node_id = *in;
+    }
+    _master_node_vector.push_back(_master_node_id); //_master_node_vector defines master nodes in the base class
+
+    for (in = nodelist.begin(); in != nodelist.end(); ++in)
+    {
+      if ((*in != _master_node_id) && (_mesh.node(*in).processor_id() == _subproblem.processor_id()))
+        _connected_nodes.push_back(*in); //_connected_nodes defines slave nodes in the base class
     }
   }
+  else if ((_slave_node_ids.size() != 0) && (_slave_node_set_id == "NaN"))
+  {
+    if (_master_node_id == std::numeric_limits<unsigned int>::max())
+      _master_node_id = _slave_node_ids[0];
+
+    _master_node_vector.push_back(_master_node_id); //_master_node_vector defines master nodes in the base class
+
+    std::vector<unsigned int>::iterator its;
+    for (its = _slave_node_ids.begin(); its != _slave_node_ids.end(); ++its)
+    {
+      if ((_mesh.node(*its).processor_id() == _subproblem.processor_id()) && (*its != _master_node_id))
+        _connected_nodes.push_back(*its);
+    }
+  }
+
+  // Add elements connected to master node to Ghosted Elements
+  std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[_master_node_id];
+  for (unsigned int i = 0; i < elems.size(); i++)
+    _subproblem.addGhostedElem(elems[i]);
 }
 
 EqualValueBoundaryConstraint::~EqualValueBoundaryConstraint()
@@ -63,13 +84,11 @@ EqualValueBoundaryConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   switch (type)
   {
-  case Moose::Master:
-    return (_u_master[_qp] - _u_slave[_qp]) * _penalty;
-
-  case Moose::Slave:
-    return (_u_slave[_qp] - _u_master[_qp]) * _penalty;
+    case Moose::Slave:
+      return (_u_slave[_i] - _u_master[_j]) * _penalty;
+    case Moose::Master:
+      return (_u_master[_j] - _u_slave[_i]) * _penalty;
   }
-
   return 0.;
 }
 
@@ -78,20 +97,14 @@ EqualValueBoundaryConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
 {
   switch (type)
   {
-  case Moose::MasterMaster:
-    return _penalty;
-
-  case Moose::MasterSlave:
-    return -_penalty;
-
-  case Moose::SlaveSlave:
-    return _penalty;
-
-  case Moose::SlaveMaster:
-    return -_penalty;
+    case Moose::SlaveSlave:
+      return _penalty;
+    case Moose::SlaveMaster:
+      return -_penalty;
+    case Moose::MasterMaster:
+      return _penalty;
+    case Moose::MasterSlave:
+      return -_penalty;
   }
-
   return 0.;
 }
-
-

@@ -178,6 +178,14 @@ enum SolveType
 };
 
 /**
+ * Type of constraint formulation
+ */
+enum ConstraintFormulationType
+{
+  Penalty,
+  Kinematic
+};
+/**
  * Type of the line search
  */
 enum LineSearchType
