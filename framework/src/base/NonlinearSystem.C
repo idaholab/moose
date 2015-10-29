@@ -2353,7 +2353,7 @@ NonlinearSystem::reinitDampers(THREAD_ID tid)
 }
 
 void
-NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains, bool check_kernel_coverage) const
+NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const
 {
   // Check kernel coverage of subdomains (blocks) in your mesh
   std::set<SubdomainID> input_subdomains;
@@ -2364,7 +2364,7 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
   global_kernels_exist |= _nodal_kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
 
   _constraints[0].subdomainsCovered(input_subdomains, kernel_variables);
-  if (!global_kernels_exist && check_kernel_coverage)
+  if (!global_kernels_exist)
   {
     std::set<SubdomainID> difference;
     std::set_difference (mesh_subdomains.begin(), mesh_subdomains.end(),
