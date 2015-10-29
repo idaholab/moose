@@ -5,6 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "DerivativeParsedMaterialHelper.h"
+#include "Conversion.h"
+#include <deque>
 
 template<>
 InputParameters validParams<DerivativeParsedMaterialHelper>()
@@ -21,6 +23,8 @@ DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const InputParame
                                                                VariableNameMappingMode map_mode) :
     ParsedMaterialHelper(parameters, map_mode),
     //_derivative_order(getParam<unsigned int>("derivative_order"))
+    _dmatvar_base("matpropautoderiv"),
+    _dmatvar_index(0),
     _derivative_order(isParamValid("third_derivatives") ? (getParam<bool>("third_derivatives") ? 3 : 2) : getParam<unsigned int>("derivative_order"))
 {
 }
@@ -31,7 +35,8 @@ DerivativeParsedMaterialHelper::~DerivativeParsedMaterialHelper()
     delete _derivatives[i].second;
 }
 
-void DerivativeParsedMaterialHelper::functionsPostParse()
+void
+DerivativeParsedMaterialHelper::functionsPostParse()
 {
   // optimize base function
   ParsedMaterialHelper::functionsOptimize();
@@ -40,8 +45,19 @@ void DerivativeParsedMaterialHelper::functionsPostParse()
   assembleDerivatives();
 }
 
+ParsedMaterialHelper::MatPropDescriptorList::iterator
+DerivativeParsedMaterialHelper::findMatPropDerivative(const FunctionMaterialPropertyDescriptor & m)
+{
+  std::string name = m.getPropertyName();
+  for (MatPropDescriptorList::iterator i = _mat_prop_descriptors.begin(); i != _mat_prop_descriptors.end(); ++i)
+    if (i->getPropertyName() == name)
+      return i;
+
+  return _mat_prop_descriptors.end();
+}
+
 /**
- * Peform a breadth first construction of all requeste derivatives.
+ * Perform a breadth first construction of all requested derivatives.
  */
 void
 DerivativeParsedMaterialHelper::assembleDerivatives()
@@ -49,7 +65,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   // need to check for zero derivatives here, otherwise at least one order is generated
   if (_derivative_order < 1) return;
 
-  // set up deque
+  // set up job queue. We need a deque here to be able to iterate over the currently queued items.
   std::deque<QueueItem> queue;
   queue.push_back(QueueItem(_func_F));
 
@@ -57,24 +73,44 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   while (!queue.empty())
   {
     QueueItem current = queue.front();
-    queue.pop_front();
 
     // all permutations of one set of derivatives are equal, so we make sure to generate only one each
     unsigned int first = current._dargs.empty() ? 0 : current._dargs.back();
 
-    // add necessary derivative stepos
+    // add necessary derivative steps
     for (unsigned int i = first; i < _nargs; ++i)
     {
-      // here we will eventually check if we need to create more variables to hold material property derivatives
-      // if material property derivative needed)
-      // {
-      //   // add variable to the current parent and..
-      //   current._F->AddVariable(newvarname);
-      //
-      //   // ..all siblings in the queue
-      //   for (std::deque<QueueItem>::iterator j = queue.begin(); j != queue.end(); ++j)
-      //     j->_F->AddVariable(newvarname);
-      // }
+      // go through list of material properties and check if derivatives are needed
+      unsigned int ndesc = _mat_prop_descriptors.size();
+      for (unsigned int jj = 0; jj < ndesc; ++jj)
+      {
+        FunctionMaterialPropertyDescriptor * j = &_mat_prop_descriptors[jj];
+
+        // take a property descriptor and check if it depends on the current derivative variable
+        if (j->dependsOn(_arg_names[i]))
+        {
+          FunctionMaterialPropertyDescriptor matderivative(*j);
+          matderivative.addDerivative(_arg_names[i]);
+
+          // search if this new derivative is not yet in the list of material properties
+          MatPropDescriptorList::iterator m = findMatPropDerivative(matderivative);
+          if (m == _mat_prop_descriptors.end())
+          {
+            // construct new variable name for the material property derivative as base name + number
+            std::string newvarname = _dmatvar_base + Moose::stringify(_dmatvar_index++);
+            matderivative.setSymbolName(newvarname);
+
+            // loop over all queue items to register the new dmatvar variable (includes 'current' which is popped below)
+            for (std::deque<QueueItem>::iterator k = queue.begin(); k != queue.end(); ++k)
+            {
+              k->_F->AddVariable(newvarname);
+              k->_F->RegisterDerivative(j->getSymbolName(), _arg_names[i], newvarname);
+            }
+
+            _mat_prop_descriptors.push_back(matderivative);
+          }
+        }
+      }
 
       // construct new derivative
       QueueItem newitem = current;
@@ -109,7 +145,13 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
       if (newitem._dargs.size() < _derivative_order)
         queue.push_back(newitem);
     }
+
+    // remove the 'current' element from the queue
+    queue.pop_front();
   }
+
+  // increase the parameter buffer to provide storage for the material property derivatives
+  _func_params.resize(_nargs + _mat_prop_descriptors.size());
 }
 
 // TODO: computeQpProperties()
@@ -144,4 +186,3 @@ DerivativeParsedMaterialHelper::computeProperties()
       (*_derivatives[i].first)[_qp] = evaluate(_derivatives[i].second);
   }
 }
-

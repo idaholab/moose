@@ -32,14 +32,20 @@ protected:
   virtual void computeProperties();
 
   virtual void functionsPostParse();
-
   void assembleDerivatives();
+  MatPropDescriptorList::iterator findMatPropDerivative(const FunctionMaterialPropertyDescriptor &);
 
   struct QueueItem;
   typedef std::pair<MaterialProperty<Real> *,ADFunction *> Derivative;
 
   /// The requested derivatives of the free energy
   std::vector<Derivative> _derivatives;
+
+  /// variable base name for the dynamically material property derivatives
+  const std::string _dmatvar_base;
+
+  /// next available variable number for automatically created material property derivative variables
+  unsigned int _dmatvar_index;
 
   /// maximum derivative order
   unsigned int _derivative_order;

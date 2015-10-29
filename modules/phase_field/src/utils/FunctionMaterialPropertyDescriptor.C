@@ -1,9 +1,12 @@
 #include "FunctionMaterialPropertyDescriptor.h"
 #include "Material.h"
+#include "Kernel.h"
+#include <algorithm>
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std::string & expression, Material * parent) :
+FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std::string & expression, MooseObject * parent) :
     _dependent_vars(),
-    _derivative_vars()
+    _derivative_vars(),
+    _parent(parent)
 {
   size_t define = expression.find_last_of(":=");
 
@@ -11,10 +14,10 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std
   if (define != std::string::npos)
   {
     // section before ':=' is the name used in the function expression
-    _fparser_name = expression.substr(0, define);
+    _fparser_name = expression.substr(0, define-1);
 
     // parse right hand side
-    parseDerivative(expression.substr(define+2));
+    parseDerivative(expression.substr(define+1));
   }
   else
   {
@@ -24,8 +27,7 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std
     _fparser_name = _base_name;
   }
 
-  // get the material property reference
-  _value = &(parent->getMaterialProperty<Real>(getPropertyName()));
+  updatePropertyReference();
 }
 
 FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor() :
@@ -38,8 +40,23 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const Fun
     _base_name(rhs._base_name),
     _dependent_vars(rhs._dependent_vars),
     _derivative_vars(rhs._derivative_vars),
-    _value(rhs._value)
+    _value(rhs._value),
+    _parent(rhs._parent)
 {
+}
+
+void
+FunctionMaterialPropertyDescriptor::addDerivative(const VariableName & var)
+{
+  _derivative_vars.push_back(var);
+  updatePropertyReference();
+}
+
+bool
+FunctionMaterialPropertyDescriptor::dependsOn(const std::string & var) const
+{
+  return    std::find(_dependent_vars.begin(), _dependent_vars.end(), var) != _dependent_vars.end()
+         || std::find(_derivative_vars.begin(), _derivative_vars.end(), var) != _derivative_vars.end();
 }
 
 void
@@ -52,24 +69,36 @@ FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expressi
   {
     // no derivative requested
     parseDependentVariables(expression);
+
     return;
   }
   else if (open != std::string::npos && close != std::string::npos && expression.substr(0, open) == "D")
   {
-    // parse argument list 0 is the function and 1,.. ar the variable to take the derivative w.r.t.
-    std::vector<std::string> buffer;
-    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), buffer, 0, ",");
-    _derivative_vars.resize(buffer.size());
-    std::copy(buffer.begin(), buffer.end(), _derivative_vars.begin());
+    // tokenize splits the arguments in d2h2:=D[h2(eta1,eta2),eta1] into 'h2(eta1' 'eta2)' 'eta1' DAMN!!
+    std::string arguments = expression.substr(open + 1, close - open - 1);
+    size_t close2 = arguments.find_last_of(")");
 
-    // check for empty [] brackets
-    if (_derivative_vars.size() > 0)
+    if (close2 == std::string::npos)
     {
-      // parse argument zero of D[] as the function material property
-      parseDependentVariables(_derivative_vars[0]);
+      // rest of argument list 0 is the function and 1,.. are the variable to take the derivative w.r.t.
+      MooseUtils::tokenize(arguments, _derivative_vars, 0, ",");
 
-      // remove function from the _derivative_vars vector
-      _derivative_vars.erase(_derivative_vars.begin());
+      // check for empty [] brackets
+      if (_derivative_vars.size() > 0)
+      {
+        // parse argument zero of D[] as the function material property
+        parseDependentVariables(_derivative_vars[0]);
+
+        // remove function from the _derivative_vars vector
+        _derivative_vars.erase(_derivative_vars.begin());
+
+        return;
+      }
+    }
+    else
+    {
+      parseDependentVariables(arguments.substr(0, close2+1));
+      MooseUtils::tokenize(arguments.substr(close2+2), _derivative_vars, 0, ",");
       return;
     }
   }
@@ -86,7 +115,7 @@ FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & 
   if (open == std::string::npos && close == std::string::npos)
   {
     // material property name without arguments
-    _fparser_name = _base_name = expression;
+    _base_name = expression;
   }
   else if (open != std::string::npos && close != std::string::npos)
   {
@@ -94,10 +123,7 @@ FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & 
     _base_name = expression.substr(0, open);
 
     // parse argument list
-    std::vector<std::string> buffer;
-    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), buffer, 0, ",");
-    _derivative_vars.resize(buffer.size());
-    std::copy(buffer.begin(), buffer.end(), _derivative_vars.begin());
+    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), _dependent_vars, 0, ",");
 
     // cremove duplicates from dependent variable list
     std::sort(_dependent_vars.begin(), _dependent_vars.end());
@@ -105,4 +131,31 @@ FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & 
   }
   else
     mooseError("Malformed material_properties expression '" << expression << "'");
+}
+
+void
+FunctionMaterialPropertyDescriptor::printDebug()
+{
+  Moose::out << "MPD: " << _fparser_name << ' ' << _base_name << " deriv = [";
+  for (unsigned int i = 0; i < _derivative_vars.size(); ++i)
+    Moose::out << _derivative_vars[i] << ' ';
+  Moose::out << "] dep = [";
+  for (unsigned int i = 0; i < _dependent_vars.size(); ++i)
+    Moose::out << _dependent_vars[i] << ' ';
+  Moose::out << "] " << getPropertyName() << '\n';
+}
+
+void
+FunctionMaterialPropertyDescriptor::updatePropertyReference()
+{
+  Material * _material_parent = dynamic_cast<Material *>(_parent);
+  Kernel * _kernel_parent = dynamic_cast<Kernel *>(_parent);
+
+  // get the material property reference
+  if (_material_parent)
+    _value = &(_material_parent->getMaterialProperty<Real>(getPropertyName()));
+  else if (_kernel_parent)
+    _value = &(_kernel_parent->getMaterialProperty<Real>(getPropertyName()));
+  else
+    mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a Kernel object.");
 }

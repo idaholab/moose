@@ -63,8 +63,11 @@ protected:
   /// variable names used in the expression (depends on the map_mode)
   std::vector<std::string> _variable_names;
 
+  /// convenicnce typedef for the material property descriptors
+  typedef std::vector<FunctionMaterialPropertyDescriptor> MatPropDescriptorList;
+
   /// Material property descriptors (obtained by parsing _mat_prop_expressions)
-  std::vector<FunctionMaterialPropertyDescriptor> _mat_prop_descriptors;
+  MatPropDescriptorList _mat_prop_descriptors;
 
   /// Tolerance values for all arguments (to protect from log(0)).
   std::vector<Real> _tol;
