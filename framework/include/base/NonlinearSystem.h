@@ -345,7 +345,7 @@ public:
 
   ///@{
   /// System Integrity Checks
-  void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains, bool check_kernel_coverage) const;
+  void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const;
   bool containsTimeKernel();
   ///@}
 

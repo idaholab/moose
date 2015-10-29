@@ -3823,8 +3823,8 @@ FEProblem::checkProblemIntegrity()
   const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
 
   // Check kernel coverage of subdomains (blocks) in the mesh
-  if (_solve)
-    _nl.checkKernelCoverage(mesh_subdomains, _kernel_coverage_check);
+  if (_solve && _kernel_coverage_check)
+    _nl.checkKernelCoverage(mesh_subdomains);
 
   // Check materials
   {
