@@ -14,6 +14,7 @@
 
 #include "SetupInterface.h"
 #include "Conversion.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<SetupInterface>()
@@ -33,7 +34,8 @@ InputParameters validParams<SetupInterface>()
   return params;
 }
 
-SetupInterface::SetupInterface(const InputParameters & params)
+SetupInterface::SetupInterface(const InputParameters & params) :
+    _current_execute_flag((params.getCheckedPointerParam<FEProblem *>("_fe_problem"))->getCurrentExecuteOnFlag())
 {
   /*
    * While many of the MOOSE systems inherit from this interface, it doesn't make sense for them all to adjust their execution flags.

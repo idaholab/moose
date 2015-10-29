@@ -76,6 +76,9 @@ protected:
   /// execution flag (when is the object executed/evaluated)
   std::vector<ExecFlagType> _exec_flags;
 
+  /// Reference to FEProblem
+  const ExecFlagType & _current_execute_flag;
+
   // FEProblem::addMultiApp needs to reset the execution flags
   friend class FEProblem;
 };
