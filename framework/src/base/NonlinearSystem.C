@@ -870,61 +870,46 @@ NonlinearSystem::computeTimeDerivatives()
 void
 NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residual)
 {
-  THREAD_ID tid = 0;                            // constraints are going to be done single-threaded
-  // loop over nodes with nodal constraints
+  THREAD_ID tid = 0; // constraints are going to be done single-threaded
+  residual.close();
   std::vector<NodalConstraint *> & ncs = _constraints[0].getNodalConstraints();
   for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
   {
     NodalConstraint * nc = (*it);
-    std::vector<dof_id_type>& slave_nodes = nc->getSlaveNodeId();
-    if (slave_nodes.size() > 0)
-    {
-      Node & master_node = _mesh.node(nc->getMasterNodeId());
-      // reinit variables at the master node
-      _fe_problem.reinitNode(&master_node, tid);
-      _fe_problem.prepareAssembly(tid);
+    std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+    std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
 
-      // go over slave nodes
-      for (std::vector<dof_id_type>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
-      {
-        Node & slave_node = _mesh.node(*it);
-        // reinit variables on the slave node
-        _fe_problem.reinitNodeNeighbor(&slave_node, tid);
-        // compute residual
-        nc->computeResidual(residual);
-      }
+    if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
+    {
+       _fe_problem.reinitNodes(master_node_ids, tid);
+       _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
+       nc->computeResidual(residual);
     }
   }
+  _fe_problem.addCachedResidualDirectly(residual,0);
+  residual.close();
 }
 
 void
 NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
 {
-  THREAD_ID tid = 0;                            // constraints are going to be done single-threaded
-  // loop over nodes with nodal constraints
+  THREAD_ID tid = 0;    // constraints are going to be done single-threaded
+  jacobian.close();
   std::vector<NodalConstraint *> & ncs = _constraints[0].getNodalConstraints();
   for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
   {
     NodalConstraint * nc = (*it);
-    std::vector<dof_id_type>& slave_nodes = nc->getSlaveNodeId();
-    if (slave_nodes.size() > 0)
-    {
-      Node & master_node = _mesh.node(nc->getMasterNodeId());
-      // reinit variables at the master node
-      _fe_problem.reinitNode(&master_node, tid);
-      _fe_problem.prepareAssembly(tid);
+    std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+    std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
 
-      // go over slave nodes
-      for (std::vector<dof_id_type>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
-      {
-        Node & slave_node = _mesh.node(*it);
-        // reinit variables on the slave node
-        _fe_problem.reinitNodeNeighbor(&slave_node, tid);
-        // compute Jacobian
-        nc->computeJacobian(jacobian);
-      }
+    if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
+    {
+      _fe_problem.reinitNodes(master_node_ids, tid);
+      _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
+      nc->computeJacobian(jacobian);
     }
   }
+  _fe_problem.addCachedJacobian(jacobian, 0);
   jacobian.close();
 }
 
@@ -1458,8 +1443,9 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
     NodalConstraint * nc = *it;
 
     std::vector<dof_id_type> master_dofs;
-    unsigned int master_node_id = nc->getMasterNodeId();
-    getNodeDofs(master_node_id, master_dofs);
+    std::vector<dof_id_type> &  master_node_ids = nc->getMasterNodeId();
+    for (std::vector<dof_id_type>::iterator mi = master_node_ids.begin(); mi != master_node_ids.end(); mi++)
+      getNodeDofs(*mi, master_dofs);
 
     std::vector<dof_id_type> slave_dofs;
     std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();

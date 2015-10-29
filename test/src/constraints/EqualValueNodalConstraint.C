@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<EqualValueNodalConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
+  params.addRequiredParam<unsigned int>("master", "The ID of the master node");
   params.addRequiredParam<unsigned int>("slave", "The ID of the slave node");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
@@ -28,6 +29,7 @@ EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & par
     _penalty(getParam<Real>("penalty"))
 {
   _connected_nodes.push_back(getParam<unsigned int>("slave"));
+  _master_node_vector.push_back(getParam<unsigned int>("master"));
 }
 
 EqualValueNodalConstraint::~EqualValueNodalConstraint()
@@ -40,10 +42,10 @@ EqualValueNodalConstraint::computeQpResidual(Moose::ConstraintType type)
   switch (type)
   {
   case Moose::Master:
-    return (_u_master[_qp] - _u_slave[_qp]) * _penalty;
+    return (_u_master[_j] - _u_slave[_i]) * _penalty;
 
   case Moose::Slave:
-    return (_u_slave[_qp] - _u_master[_qp]) * _penalty;
+    return (_u_slave[_i] - _u_master[_j]) * _penalty;
   }
 
   return 0.;

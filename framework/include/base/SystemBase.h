@@ -348,6 +348,13 @@ public:
   virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid);
 
   /**
+   * Reinit variables at a set of neighbor nodes
+   * @param nodes List of node ids to reinit
+   * @param tid Thread ID
+   */
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid);
+
+  /**
    * Reinit scalar varaibles
    * @param tid Thread ID
    */

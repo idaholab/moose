@@ -351,6 +351,11 @@ public:
   void cacheResidualContribution(dof_id_type dof, Real value, Moose::KernelType type);
 
   /**
+   * Lets an external class cache residual at a set of nodes
+   */
+  void cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type> & dof_index);
+
+  /**
    * Takes the values that are currently in _sub_Ke and appends them to the cached values.
    */
   void cacheResidualNeighbor();
