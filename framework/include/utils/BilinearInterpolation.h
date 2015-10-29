@@ -19,7 +19,9 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+
 #include "ColumnMajorMatrix.h"
+#include "Moose.h"
 
 
 /**

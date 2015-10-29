@@ -34,7 +34,7 @@ public:
 
 protected:
   const Real _scale_factor;
-  LinearInterpolation * _linear_interp;
+  MooseSharedPointer<LinearInterpolation> _linear_interp;
   int _axis;
   bool _has_axis;
 private:
