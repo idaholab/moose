@@ -331,7 +331,7 @@
 []
 
 [Postprocessors]
-  # The total free enrgy of the simulation cell to observe the energy reduction.
+  # The total free energy of the simulation cell to observe the energy reduction.
   [./total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy

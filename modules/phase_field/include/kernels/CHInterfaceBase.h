@@ -98,7 +98,7 @@ CHInterfaceBase<T>::validParams()
   params.addClassDescription("Gradient energy Cahn-Hilliard base Kernel");
   params.addRequiredParam<MaterialPropertyName>("kappa_name", "The kappa used with the kernel");
   params.addRequiredParam<MaterialPropertyName>("mob_name", "The mobility used with the kernel");
-  params.addCoupledVar("args", "Vector of arguments to mobility");
+  params.addCoupledVar("args", "Vector of arguments of the mobility");
   return params;
 }
 
