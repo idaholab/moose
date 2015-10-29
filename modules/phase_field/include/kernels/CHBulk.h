@@ -67,7 +67,7 @@ CHBulk<T>::validParams()
   InputParameters params = ::validParams<KernelGrad>();
   params.addClassDescription("Cahn-Hilliard base Kernel");
   params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel");
-  params.addCoupledVar("args", "Vector of arguments to mobility");
+  params.addCoupledVar("args", "Vector of arguments of the mobility");
   return params;
 }
 

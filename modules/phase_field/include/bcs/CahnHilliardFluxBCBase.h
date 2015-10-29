@@ -13,7 +13,7 @@
 
 /**
  * Flux boundary condition base class for variable dependent mobilities. This
- * Class must be templated on teh mobility type, which can be either a scalar (Real)
+ * class must be templated on the mobility type, which can be either a scalar (Real)
  * or a tensor (RealValueTensor).
  */
 template<typename T>
@@ -64,7 +64,7 @@ CahnHilliardFluxBCBase<T>::validParams()
   params.addClassDescription("Cahn-Hilliard base Kernel");
   params.addParam<RealGradient>("flux", "The flux set at the boundary");
   params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel");
-  params.addCoupledVar("args", "Vector of arguments to mobility");
+  params.addCoupledVar("args", "Vector of arguments of the mobility");
   return params;
 }
 

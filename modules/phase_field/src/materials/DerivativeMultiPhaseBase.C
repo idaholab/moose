@@ -15,7 +15,7 @@ InputParameters validParams<DerivativeMultiPhaseBase>()
   params.addRequiredParam<std::vector<MaterialPropertyName> >("fi_names", "List of free energies for the n phases");
   params.addParam<std::vector<MaterialPropertyName> >("hi_names", "Switching Function Materials that provide h(eta_i)");
 
-  // All arguments to the phase free energies
+  // All arguments of the phase free energies
   params.addCoupledVar("args", "Arguments of the fi free energies - use vector coupling");
   params.addCoupledVar("displacement_gradients", "Vector of displacement gradient variables (see Modules/PhaseField/DisplacementGradients action)");
 

@@ -14,7 +14,7 @@ InputParameters validParams<DerivativeSumMaterial>()
   params.addParam<std::vector<std::string> >("sum_materials", "Base name of the free energy function (used to name the material properties)");
   //params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free energy");
 
-  // All arguments to the free energies being summed
+  // All arguments of the free energies being summed
   params.addRequiredCoupledVar("args", "Arguments of the free energy functions being summed - use vector coupling");
   params.addCoupledVar("displacement_gradients", "Vector of displacement gradient variables (see Modules/PhaseField/DisplacementGradients action)");
 
