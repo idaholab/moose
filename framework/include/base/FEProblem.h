@@ -887,6 +887,16 @@ public:
   /// Returns whether or not this Problem has a TimeIntegrator
   bool hasTimeIntegrator() const { return _has_time_integrator; }
 
+
+  /**
+   * Return the current execution flag.
+   *
+   * Returns EXEC_NONE when not being executed.
+   * @see FEProblem::execute
+   */
+  const ExecFlagType & getCurrentExecuteOnFlag() const;
+
+
   /**
    * Perform execution of MOOSE systems.
    */
@@ -1072,6 +1082,9 @@ protected:
 
   /// The error message to go with an exception
   std::string _exception_message;
+
+  /// Current execute_on flag
+  ExecFlagType _current_execute_on_flag;
 
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage

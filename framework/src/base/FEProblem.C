@@ -136,6 +136,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),
     _has_exception(false),
+    _current_execute_on_flag(EXEC_NONE),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
@@ -2233,6 +2234,13 @@ FEProblem::computeIndicatorsAndMarkers()
   }
 }
 
+const ExecFlagType &
+FEProblem::getCurrentExecuteOnFlag() const
+{
+  return _current_execute_on_flag;
+}
+
+
 void
 FEProblem::execute(const ExecFlagType & exec_type)
 {
@@ -2273,14 +2281,14 @@ FEProblem::execute(const ExecFlagType & exec_type)
 void
 FEProblem::computeAuxiliaryKernels(ExecFlagType type)
 {
-  mooseDeprecated("computeAuxiliaryKerels method will be removed in future versions of MOOSE, please update your code to use FEProblem::execute()");
+  mooseDoOnce(mooseDeprecated("computeAuxiliaryKerels method will be removed in future versions of MOOSE, please update your code to use FEProblem::execute()"));
   executeAuxiliaryKernels(type);
 }
 
 void
 FEProblem::computeUserObjects(ExecFlagType type, UserObjectWarehouse::GROUP group)
 {
-  mooseDeprecated("computeUserObjects method will be removed in future versions of MOOSE, please update your code to use FEProblem::execute()");
+  mooseDoOnce(mooseDeprecated("computeUserObjects method will be removed in future versions of MOOSE, please update your code to use FEProblem::execute()"));
   executeUserObjects(type, group);
 }
 
