@@ -48,6 +48,11 @@ public:
   virtual void init();
 
   /**
+   * The old eigenvalue used by inverse power iterations
+   */
+  const Real & eigenvalueOld();
+
+  /**
    * Normalize solution so that |Bx| = k
    */
   virtual void makeBXConsistent(Real k);
@@ -130,6 +135,7 @@ protected:
 
   // postprocessor for eigenvalue
   const Real & _source_integral;
+  Real _source_integral_old;
 
   /// Postprocessor for normalization
   const Real & _normalization;

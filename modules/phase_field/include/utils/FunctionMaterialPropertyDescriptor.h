@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+class MooseObject;
+
 /**
  * Material properties get fully described using this structure, including their dependent
  * variables and derivation state.
@@ -33,7 +35,7 @@ public:
    *   'a:=D[x(t),t,t]'  The second time derivative of the t-dependent material property 'x'
    *                     which will be referred to as 'a' in the function expression.
    */
-  FunctionMaterialPropertyDescriptor(const std::string &, Material *);
+  FunctionMaterialPropertyDescriptor(const std::string &, MooseObject *);
 
   /// default constructor
   FunctionMaterialPropertyDescriptor();
@@ -43,6 +45,9 @@ public:
 
   /// get the fparser symbol name
   const std::string & getSymbolName() const { return _fparser_name; };
+
+  /// set the fparser symbol name
+  void setSymbolName(const std::string & n) { _fparser_name = n; };
 
   /// get the property name
   const std::string getPropertyName() const
@@ -58,9 +63,21 @@ public:
   }
 
   /// take another derivative
-  void addDerivative(const VariableName & var) { _derivative_vars.push_back(var); }
+  void addDerivative(const VariableName & var);
+
+  /**
+   * Check if a material property depends on a given variable.
+   * A dependency is indicated by either directly specifying it, or by requesting a
+   * derivative w.r.t. that variable using the D[x,a] syntax
+   */
+  bool dependsOn(const std::string & var) const;
+
+  // output the internal state of this descriptor for debugging purposes
+  void printDebug();
 
 private:
+  void updatePropertyReference();
+
   void parseDerivative(const std::string &);
   void parseDependentVariables(const std::string &);
 
@@ -75,6 +92,9 @@ private:
 
   /// material property value
   const MaterialProperty<Real> * _value;
+
+  /// material object that owns this descriptor
+  MooseObject * _parent;
 };
 
 #endif // FUNCTIONMATERIALPROPERTYDESCRIPTOR_H

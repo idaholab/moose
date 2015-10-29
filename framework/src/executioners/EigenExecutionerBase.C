@@ -16,6 +16,7 @@
 #include "EigenSystem.h"
 
 #include "MooseApp.h"
+#include "DisplacedProblem.h"
 
 template<>
 InputParameters validParams<EigenExecutionerBase>()
@@ -39,12 +40,19 @@ InputParameters validParams<EigenExecutionerBase>()
   return params;
 }
 
+const Real &
+EigenExecutionerBase::eigenvalueOld()
+{
+  return _source_integral_old;
+}
+
 EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters) :
     Executioner(parameters),
     _problem(_fe_problem),
      _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
      _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
      _source_integral(getPostprocessorValue("bx_norm")),
+     _source_integral_old(1),
      _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
                     : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
 {
@@ -213,9 +221,6 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   }
 
   // some iteration variables
-  Real k_old = 0.0;
-  Real source_integral_old = getPostprocessorValueOld("bx_norm");
-  Real saved_source_integral_old = source_integral_old;
   Chebyshev_Parameters chebyshev_parameters;
 
   std::vector<Real> keff_history;
@@ -231,10 +236,19 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     if (echo)
       _console << " Power iteration= "<< iter << std::endl;
 
-    // important: solutions of aux system is also copied
-    _problem.advanceState();
-    k_old = k;
-    source_integral_old = _source_integral;
+    // Important: we do not call _problem.advanceState() because we do not
+    // want to overwrite the old postprocessor values and old material
+    // properties in stateful materials.
+    _problem.getNonlinearSystem().copyOldSolutions();
+    _problem.getAuxiliarySystem().copyOldSolutions();
+    if ( _problem.getDisplacedProblem() != NULL )
+    {
+      _problem.getDisplacedProblem()->nlSys().copyOldSolutions();
+      _problem.getDisplacedProblem()->auxSys().copyOldSolutions();
+    }
+
+    Real k_old = k;
+    _source_integral_old = _source_integral;
 
     preIteration();
     _problem.solve();
@@ -244,7 +258,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     if (iter==0) initial_res = _eigen_sys._initial_residual_before_preset_bcs;
 
     // update eigenvalue
-    k = k_old * _source_integral / source_integral_old;
+    k = k_old * _source_integral / _source_integral_old;
     _eigenvalue = k;
 
     if (echo)
@@ -326,7 +340,6 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
         break;
     }
   }
-  source_integral_old = saved_source_integral_old;
 
   // restore parameters changed by the executioner
   _problem.es().parameters.set<Real> ("linear solver tolerance") = tol1;
@@ -434,6 +447,7 @@ EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters()
   finit(6),
   lgac(0),
   icheb(0),
+  flux_error_norm_old(1),
   icho(0)
 {}
 
@@ -442,8 +456,9 @@ EigenExecutionerBase::Chebyshev_Parameters::reinit()
 {
   finit   = 6;
   lgac    = 0;
-  icho    = 0;
   icheb   = 0;
+  flux_error_norm_old = 1;
+  icho    = 0;
 }
 
 void
