@@ -57,6 +57,21 @@ class LineSegment
 
   bool intersect (const LineSegment & l1, Point & intersect_p) const;
 
+  /**
+   * Beginning of the line segment.
+   */
+  const Point & start() const { return _p0; }
+
+  /**
+   * Ending of the line segment.
+   */
+  const Point & end() const { return _p1; }
+
+  /**
+   * Length of segment
+   */
+  Real length() const { return (_p0 - _p1).size(); }
+
  private:
   bool closest_point(const Point & p, bool clamp_to_segment, Point & closest_p) const;
 

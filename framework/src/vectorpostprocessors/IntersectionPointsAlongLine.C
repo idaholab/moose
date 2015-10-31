@@ -12,36 +12,51 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ElementsAlongLine.h"
+#include "IntersectionPointsAlongLine.h"
 
 #include "RayTracing.h"
 
 template<>
-InputParameters validParams<ElementsAlongLine>()
+InputParameters validParams<IntersectionPointsAlongLine>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
-
   params.addRequiredParam<Point>("start", "The beginning of the line");
   params.addRequiredParam<Point>("end", "The end of the line");
   return params;
 }
 
-ElementsAlongLine::ElementsAlongLine(const InputParameters & parameters) :
+IntersectionPointsAlongLine::IntersectionPointsAlongLine(const InputParameters & parameters) :
     GeneralVectorPostprocessor(parameters),
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
-    _elem_ids(declareVector("elem_ids"))
+    _x_intersections(declareVector("x"))
+#if LIBMESH_DIM > 1
+    ,
+    _y_intersections(declareVector("y"))
+#if LIBMESH_DIM > 2
+    ,
+    _z_intersections(declareVector("z"))
+#endif
+#endif
 {
+  _intersections.push_back(&_x_intersections);
+#if LIBMESH_DIM > 1
+  _intersections.push_back(&_y_intersections);
+#if LIBMESH_DIM > 2
+  _intersections.push_back(&_z_intersections);
+#endif
+#endif
 }
 
 void
-ElementsAlongLine::initialize()
+IntersectionPointsAlongLine::initialize()
 {
-  _elem_ids.clear();
+  for (unsigned int i=0; i<_intersections.size(); i++)
+    _intersections[i]->clear();
 }
 
 void
-ElementsAlongLine::execute()
+IntersectionPointsAlongLine::execute()
 {
   std::vector<Elem *> intersected_elems;
   std::vector<LineSegment> segments;
@@ -50,8 +65,25 @@ ElementsAlongLine::execute()
 
   unsigned int num_elems = intersected_elems.size();
 
-  _elem_ids.resize(num_elems);
+  // Quick return in case no elements were found
+  if (num_elems == 0)
+    return;
 
+  for (unsigned int i=0; i<LIBMESH_DIM; i++)
+    _intersections[i]->resize(num_elems+1);
+
+  // Add the beginning point
+  for (unsigned int i=0; i<LIBMESH_DIM; i++)
+    (*_intersections[i])[0] = _start(i);
+
+  // Add the ending point of every segment
   for (unsigned int i=0; i<num_elems; i++)
-    _elem_ids[i] = intersected_elems[i]->id();
+  {
+    LineSegment & segment = segments[i];
+
+    const Point & end_point = segment.end();
+
+    for (unsigned int j=0; j<LIBMESH_DIM; j++)
+      (*_intersections[j])[i+1] = end_point(j);
+  }
 }
