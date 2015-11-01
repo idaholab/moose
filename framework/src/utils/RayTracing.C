@@ -15,6 +15,7 @@
 // Moose includes
 #include "RayTracing.h"
 #include "LineSegment.h"
+#include "MooseError.h"
 
 // libMesh includes
 #include "libmesh/plane.h"
@@ -30,11 +31,11 @@ namespace Moose
  * Figure out which (if any) side of an Elem is intersected by a line.
  *
  * @param elem The elem to search
- * @param not_side A side to _not_ search (Use -1 if you want to search all sides)
+ * @param not_side Sides to _not_ search (Use -1 if you want to search all sides)
  * @param intersection_point If an intersection is found this will be filled with the x,y,z position of that intersection
  * @return The side that is intersected by the line.  Will return -1 if it doesn't intersect any side
  */
-int sideIntersectedByLine(const Elem * elem, int not_side, const LineSegment & line_segment, Point & intersection_point)
+int sideIntersectedByLine(const Elem * elem, std::vector<int> & not_side, const LineSegment & line_segment, Point & intersection_point)
 {
   unsigned int n_sides = elem->n_sides();
 
@@ -45,7 +46,9 @@ int sideIntersectedByLine(const Elem * elem, int not_side, const LineSegment & l
 
   for (unsigned int i=0; i<n_sides; i++)
   {
-    if (static_cast<int>(i) == not_side) // Don't search the "not_side"
+    // Don't search the "not_side"
+    // Note: A linear search is fine here because this vector is going to be < n_sides
+    if (std::find(not_side.begin(), not_side.end(), static_cast<int>(i)) != not_side.end())
       continue;
 
     // Get a simplified side element
@@ -78,8 +81,25 @@ int sideIntersectedByLine(const Elem * elem, int not_side, const LineSegment & l
     }
 
     if (intersect)
+    {
       if (side_elem->contains_point(intersection_point))
+      {
+        Elem * neighbor = elem->neighbor(i);
+
+        // If this side is on a boundary, let's do another search and see if we can find a better candidate
+        if (!neighbor)
+        {
+          not_side.push_back(i); // Make sure we don't find this side again
+
+          int better_side = sideIntersectedByLine(elem, not_side, line_segment, intersection_point);
+
+          if (better_side != -1)
+            return better_side;
+        }
+
         return i;
+      }
+    }
   }
 
   // Didn't find one
@@ -123,8 +143,10 @@ void recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment, 
 {
   Point intersection_point;
 
+  std::vector<int> not_side(1, incoming_side);
+
   // Find the side of this element that the LineSegment intersects... while ignoring the incoming side (we don't want to move backward!)
-  int intersected_side = sideIntersectedByLine(current_elem, incoming_side, line_segment, intersection_point);
+  int intersected_side = sideIntersectedByLine(current_elem, not_side, line_segment, intersection_point);
 
   if (intersected_side != -1) // -1 means that we didn't find any side
   {
@@ -144,9 +166,9 @@ void recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment, 
 
       // Recurse
       recursivelyFindElementsIntersectedByLine(line_segment, neighbor, incoming_side, intersection_point, intersected_elems, segments);
-
-      return;
     }
+    else // Add the final segment
+      segments.push_back(LineSegment(incoming_point, line_segment.end()));
   }
   else // Add the final segment
     segments.push_back(LineSegment(incoming_point, line_segment.end()));
