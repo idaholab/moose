@@ -119,21 +119,21 @@ public:
   void NDSpline_init(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
 
   //std::vector< std::vector<double> > getDiscretizations(){
-  //	  std::cout<<"but why!"<< std::endl;
-  //	  return _discretizations;};
+  //      std::cout<<"but why!"<< std::endl;
+  //      return _discretizations;};
 
   void getDiscretizations(std::vector< std::vector<double> > & vector){
-	  for(unsigned int i=0; i<_discretizations.size();i++){
-		  std::vector<double> temp;
-		  for(unsigned int j=0; j<_discretizations.at(i).size(); j++)
-			  temp.push_back(_discretizations.at(i).at(j));
-		  vector.push_back(temp);
-	  };
+          for(unsigned int i=0; i<_discretizations.size();i++){
+                  std::vector<double> temp;
+                  for(unsigned int j=0; j<_discretizations.at(i).size(); j++)
+                          temp.push_back(_discretizations.at(i).at(j));
+                  vector.push_back(temp);
+          };
   }
 
   void printFunction(){
-	  std::cout<<"data ND spline1 value " << _discretizations.at(0).at(0) << std::endl;
-	  std::cout<<"data ND spline2 dimensions " << _dimensions << std::endl;
+          std::cout<<"data ND spline1 value " << _discretizations.at(0).at(0) << std::endl;
+          std::cout<<"data ND spline2 dimensions " << _dimensions << std::endl;
   };
 
   NDSpline();

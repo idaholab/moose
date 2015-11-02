@@ -496,8 +496,8 @@ double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
 
   //up is never used
   //for(int n=discretizations.size(); n<0; n--)
-  //	if (x<discretizations[n])
-  //		up = n;
+  //  if (x<discretizations[n])
+  //    up = n;
 
   double scaled_x = down + (x-discretizations.at((int)down))/(discretizations.at((int)down+1)-discretizations.at((int)down));
 
@@ -685,9 +685,9 @@ double NDSpline::PHI(double t){
 // boost::random::uniform_distribution<> dist(1, numberOfCells);
 //
 // int pickedCell = dist(rng)-1;
-//	std::vector<double> coordinate(_dimensions);
-//	for (int i=0; i<_dimensions; i++){
-//		coordinate.at(i) = spline_cartesian_inverse_marginal(F, i, _tolerance);
-//	}
-//	return coordinate;
+//  std::vector<double> coordinate(_dimensions);
+//  for (int i=0; i<_dimensions; i++){
+//    coordinate.at(i) = spline_cartesian_inverse_marginal(F, i, _tolerance);
+//  }
+//  return coordinate;
 //}

@@ -38,34 +38,34 @@ using boost::math::normal;
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vector<int> & value_baseN){
-	  /**
-	   * This function convert a number in base 10 to a new number in any base N
-	   */
+          /**
+           * This function convert a number in base 10 to a new number in any base N
+           */
 
-	   int index = 0 ;
+           int index = 0 ;
 
-	   if (value_base10 == 0)
-		   value_baseN.push_back(0);
-	   else{
-		   while ( value_base10 != 0 ){
-			   int remainder = value_base10 % base ;  // assume K > 1
-			   value_base10  = value_base10 / base ;  // integer division
-			   value_baseN.push_back(remainder);
-			   index++ ;
-			}
-	   }
+           if (value_base10 == 0)
+                   value_baseN.push_back(0);
+           else{
+                   while ( value_base10 != 0 ){
+                           int remainder = value_base10 % base ;  // assume K > 1
+                           value_base10  = value_base10 / base ;  // integer division
+                           value_baseN.push_back(remainder);
+                           index++ ;
+                        }
+           }
 }
 
 //void BasicMultivariateNormal::BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu){
 void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, unsigned int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu){
-	  /**
-	   * This is the base function that initializes the Multivariate normal distribution
+          /**
+           * This is the base function that initializes the Multivariate normal distribution
      * Input Parameter
      * rows: first dimension of covariance matrix
      * columns: second dimension of covariance matrix
      * covMatrix: covariance matrix stored in vector<vector<double> >
      * mu: mean value stored in vector<double>
-	   */
+           */
 
    _mu = mu;
    _cov_matrix = covMatrix;
@@ -75,23 +75,23 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
    computeInverse(_cov_matrix, inverseCovMatrix);
 
    for (int i=0;i<rows;i++){
-	std::vector<double> temp;
-	  for (int j=0;j<columns;j++)
-	   temp.push_back(inverseCovMatrix.at(i).at(j));
-	  _inverse_cov_matrix.push_back(temp);
+        std::vector<double> temp;
+          for (int j=0;j<columns;j++)
+           temp.push_back(inverseCovMatrix.at(i).at(j));
+          _inverse_cov_matrix.push_back(temp);
    }
 
    unsigned int dimensions = _mu.size();
    //for(int i=0; i<dimensions; i++)
-	//for(int j=0; j<dimensions; j++)
-	 //std::cerr<<_inverse_cov_matrix[i][j]<<std::endl;
+        //for(int j=0; j<dimensions; j++)
+         //std::cerr<<_inverse_cov_matrix[i][j]<<std::endl;
 
    _determinant_cov_matrix = getDeterminant(_cov_matrix);
 
    _cholesky_C = choleskyDecomposition(_cov_matrix);
 
    if(rows != columns)
-	   throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
+           throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
 
    // Creation BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool CDFprovided)
    // number of discretizations in sigma/2 units; plus/minus six sigma
@@ -102,47 +102,47 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
    std::vector<double> beta (_mu.size());
 
    for(int i=0; i<dimensions; i++){
-	   alpha.at(i) = 0.0;
-	   beta.at(i)  = 0.0;
+           alpha.at(i) = 0.0;
+           beta.at(i)  = 0.0;
 
-	   numberValues = numberValues * 25;
+           numberValues = numberValues * 25;
 
-	   std::vector<double> discretization_temp;
-	   double sigma = sqrt(_cov_matrix[i][i]);
-	   for(int n=0; n<25; n++){
-		   double disc_value = mu.at(i) - 6.0 * sigma + sigma * (double)n /2.0;
-		   discretization_temp.push_back(disc_value);
-	   }
-	   discretizations.push_back(discretization_temp);
+           std::vector<double> discretization_temp;
+           double sigma = sqrt(_cov_matrix[i][i]);
+           for(int n=0; n<25; n++){
+                   double disc_value = mu.at(i) - 6.0 * sigma + sigma * (double)n /2.0;
+                   discretization_temp.push_back(disc_value);
+           }
+           discretizations.push_back(discretization_temp);
    }
 
    std::vector< double > values (numberValues);
    for(int i=0; i<numberValues; i++){
-	   std::vector<int> intCoordinates;
-	   base10tobaseN(i,25,intCoordinates);
+           std::vector<int> intCoordinates;
+           base10tobaseN(i,25,intCoordinates);
 
-	   std::vector<double> pointCoordinates(dimensions);
-	   std::vector<int> intCoordinatesFormatted(dimensions);
+           std::vector<double> pointCoordinates(dimensions);
+           std::vector<int> intCoordinatesFormatted(dimensions);
 
-	   for(unsigned int j=0; j<dimensions; j++)
-		   intCoordinatesFormatted.at(j) = 0;
-	   for(unsigned int j=0; j<intCoordinates.size(); j++)
-		   intCoordinatesFormatted.at(j) = intCoordinates.at(j);
+           for(unsigned int j=0; j<dimensions; j++)
+                   intCoordinatesFormatted.at(j) = 0;
+           for(unsigned int j=0; j<intCoordinates.size(); j++)
+                   intCoordinatesFormatted.at(j) = intCoordinates.at(j);
 
-	   for(unsigned int j=0; j<intCoordinates.size(); j++)
-		   pointCoordinates.at(j) = discretizations.at(j).at(intCoordinatesFormatted.at(j));
+           for(unsigned int j=0; j<intCoordinates.size(); j++)
+                   pointCoordinates.at(j) = discretizations.at(j).at(intCoordinatesFormatted.at(j));
 
-	   values.at(i) = getPdf(pointCoordinates, _mu, _inverse_cov_matrix);
+           values.at(i) = getPdf(pointCoordinates, _mu, _inverse_cov_matrix);
    }
    _cartesianDistribution = BasicMultiDimensionalCartesianSpline(discretizations,values,alpha,beta,false);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std::vector<double> mu){
-	  /**
-	   * This is the function that initializes the Multivariate normal distribution given:
-	   * - data_filename: it specifies the covariance matrix
-	   * - mu: the mean value vector
-	   */
+          /**
+           * This is the function that initializes the Multivariate normal distribution given:
+           * - data_filename: it specifies the covariance matrix
+           * - mu: the mean value vector
+           */
   unsigned int rows,columns;
   std::vector<std::vector<double> > covMatrix;
   readMatrix(data_filename, rows, columns, covMatrix);
@@ -150,16 +150,16 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std:
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(const char * data_filename, std::vector<double> mu){
-	  /**
-	   * This is the function that initializes the Multivariate normal distribution given:
-	   * - data_filename: it specifies the covariance matrix
-	   * - mu: the mean value vector
-	   */
+          /**
+           * This is the function that initializes the Multivariate normal distribution given:
+           * - data_filename: it specifies the covariance matrix
+           * - mu: the mean value vector
+           */
   unsigned int rows,columns;
   std::vector<std::vector<double> > covMatrix;
   readMatrix(std::string(data_filename), rows, columns, covMatrix);
-	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
-	//BasicMultivariateNormal_init(std::string(data_filename) , mu);
+        BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
+        //BasicMultivariateNormal_init(std::string(data_filename) , mu);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu){
@@ -172,7 +172,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double>
   rows = covMatrix.size();
   columns = covMatrix.at(0).size();
 
-	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
+        BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
   //_mu = mu;
   //_cov_matrix = covMatrix;
 
@@ -195,7 +195,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
   // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
 
-	BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
+        BasicMultivariateNormal_init(rows,columns,covMatrix, mu);
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* type, int rank){
@@ -388,21 +388,21 @@ double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double
    * This function calculates the pdf values at x of a MVN distribution
    */
 
-	double value = 0;
+        double value = 0;
 
    if(mu.size() == x.size()){
-	   int dimensions = mu.size();
-	   double expTerm=0;
-	   std::vector<double> tempVector (dimensions);
-	   for(int i=0; i<dimensions; i++){
-		   tempVector[i]=0;
-		   for(int j=0; j<dimensions; j++)
-			   tempVector[i] += inverse_cov_matrix[i][j]*(x[j]-mu[j]);
-		   expTerm += tempVector[i]*(x[i]-mu[i]);
-	   }
-	   value = 1/sqrt(_determinant_cov_matrix*pow(2*M_PI,dimensions))*exp(-0.5*expTerm);
+           int dimensions = mu.size();
+           double expTerm=0;
+           std::vector<double> tempVector (dimensions);
+           for(int i=0; i<dimensions; i++){
+                   tempVector[i]=0;
+                   for(int j=0; j<dimensions; j++)
+                           tempVector[i] += inverse_cov_matrix[i][j]*(x[j]-mu[j]);
+                   expTerm += tempVector[i]*(x[i]-mu[i]);
+           }
+           value = 1/sqrt(_determinant_cov_matrix*pow(2*M_PI,dimensions))*exp(-0.5*expTerm);
    }else
-	   throwError("MultivariateNormal PDF error: evaluation point dimensionality is not correct");
+           throwError("MultivariateNormal PDF error: evaluation point dimensionality is not correct");
    return value;
 }
 
@@ -425,54 +425,54 @@ double BasicMultivariateNormal::pdfInTransformedSpace(std::vector<double> x){
 }
 
 double BasicMultivariateNormal::Pdf(std::vector<double> x){
-	  /**
-	   * This function calculates the pdf values at x of a MVN distribution
-	   */
-	return getPdf(x, _mu, _inverse_cov_matrix);
+          /**
+           * This function calculates the pdf values at x of a MVN distribution
+           */
+        return getPdf(x, _mu, _inverse_cov_matrix);
 }
 
 double BasicMultivariateNormal::Cdf(std::vector<double> x){
-	  /**
-	   * This function calculates the Cdf values at x of a MVN distribution
-	   */
-	return _cartesianDistribution.Cdf(x);
+          /**
+           * This function calculates the Cdf values at x of a MVN distribution
+           */
+        return _cartesianDistribution.Cdf(x);
 }
 
 std::vector<double> BasicMultivariateNormal::InverseCdf(double F, double g){
-	  /**
-	   * This function calculates the inverse CDF values at F of a MVN distribution
-	   */
-	std::cout<<"BasicMultivariateNormal::InverseCdf"<< std::endl;
-	return _cartesianDistribution.InverseCdf(F,g);
+          /**
+           * This function calculates the inverse CDF values at F of a MVN distribution
+           */
+        std::cout<<"BasicMultivariateNormal::InverseCdf"<< std::endl;
+        return _cartesianDistribution.InverseCdf(F,g);
   std::cout << "test inverseCdf" << std::endl;
 }
 
 double BasicMultivariateNormal::inverseMarginal(double F, int dimension){
-	  /**
-	   * This function calculates the inverse marginal distribution at F for a specific dimension of a MVN distribution
-	   */
-	return _cartesianDistribution.inverseMarginal(F,dimension);
+          /**
+           * This function calculates the inverse marginal distribution at F for a specific dimension of a MVN distribution
+           */
+        return _cartesianDistribution.inverseMarginal(F,dimension);
 }
 
 int BasicMultivariateNormal::returnDimensionality(){
-	  /**
-	   * This function returns the dimensionality of a MVN distribution
-	   */
-	return _mu.size();
+          /**
+           * This function returns the dimensionality of a MVN distribution
+           */
+        return _mu.size();
 }
 
 void BasicMultivariateNormal::updateRNGparameter(double tolerance, double initial_divisions){
-	  /**
-	   * This function updates the random number generator parameters of a MVN distribution
-	   */
-	return _cartesianDistribution.updateRNGparameter(tolerance,initial_divisions);
+          /**
+           * This function updates the random number generator parameters of a MVN distribution
+           */
+        return _cartesianDistribution.updateRNGparameter(tolerance,initial_divisions);
 }
 
 double BasicMultivariateNormal::Marginal(double x, int dimension){
-	  /**
-	   * This function calculates the marginal distribution at x for a specific dimension of a MVN distribution
-	   */
-	return _cartesianDistribution.Marginal(x,dimension);
+          /**
+           * This function calculates the marginal distribution at x for a specific dimension of a MVN distribution
+           */
+        return _cartesianDistribution.Marginal(x,dimension);
 }
 
 //double BasicMultivariateNormal::Cdf_(std::vector<double> x){
