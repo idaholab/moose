@@ -277,7 +277,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
   registerDeprecatedObjectName(CahnHilliard, "CHParsed", "11/01/2015 00:00");
-  registerDeprecatedObjectName(CoupledTimeDerivative, "CoupledImplicitEuler", "09/01/2015 00:00");
 
   registerInitialCondition(ClosePackIC);
   registerInitialCondition(CrossIC);
@@ -328,7 +327,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(StrainGradDispDerivatives);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(CrossTermBarrierFunctionMaterial);
-  registerDeprecatedObjectName(PFMobility, "PFMobility", "09/26/2015 00:00");
 
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);

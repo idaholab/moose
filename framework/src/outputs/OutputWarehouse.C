@@ -119,14 +119,6 @@ OutputWarehouse::hasOutput(const std::string & name) const
   return _object_map.find(name) != _object_map.end();
 }
 
-const std::vector<Output *> &
-OutputWarehouse::getOutputs() const
-{
-  mooseDeprecated("OutputWarehouse::getOutputs() is deprecated - use OutputWarehouse::all() instead");
-  return _all_objects;
-}
-
-
 const std::set<OutputName> &
 OutputWarehouse::getOutputNames() const
 {

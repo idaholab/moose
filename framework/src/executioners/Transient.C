@@ -58,7 +58,6 @@ InputParameters validParams<Transient>()
   params.addParam<bool>("trans_ss_check",  false,  "Whether or not to check for steady state conditions");
   params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
   params.addParam<Real>("ss_tmin",         0.0,    "Minimum number of timesteps to take before checking for steady state conditions.");
-  params.addParam<Real>("predictor_scale", "The scale factor for the predictor (can range from 0 to 1)");
 
   params.addParam<std::vector<std::string> >("time_periods", "The names of periods");
   params.addParam<std::vector<Real> >("time_period_starts", "The start times of time periods");
@@ -138,22 +137,6 @@ Transient::Transient(const InputParameters & parameters) :
 
   _time = _time_old = _start_time;
   _problem.transient(true);
-
-  if (parameters.isParamValid("predictor_scale"))
-  {
-    mooseWarning("Parameter 'predictor_scale' is deprecated, migrate your input file to use Predictor sub-block.");
-
-    Real predscale = getParam<Real>("predictor_scale");
-    if (predscale >= 0.0 && predscale <= 1.0)
-    {
-      InputParameters params = _app.getFactory().getValidParams("SimplePredictor");
-      params.set<Real>("scale") = predscale;
-      _problem.addPredictor("SimplePredictor", "predictor", params);
-    }
-
-    else
-      mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
-  }
 
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
