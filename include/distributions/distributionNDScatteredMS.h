@@ -46,24 +46,25 @@ public:
 //  {
 //    return std::vector<double>(2,-1.0);
 //  };
+
   std::vector<double>
   InverseCdf(double F, double g)
   {
    return _interpolator.NDinverseFunctionGrid(F,g);
-      //return _interpolator.NDinverseFunction(min, max);
+   //return _interpolator.NDinverseFunction(min, max);
   };
 
   double
     inverseMarginal(double /* F */, int /* dimension */)
   {
-	  throwError("BasicMultiDimensionalScatteredMS: inverseMarginal not available");
-	  return 0.0;
+          throwError("BasicMultiDimensionalScatteredMS: inverseMarginal not available");
+          return 0.0;
   }
 
   int
   returnDimensionality()
   {
-	  return _interpolator.returnDimensionality();
+          return _interpolator.returnDimensionality();
   }
 
 protected:
