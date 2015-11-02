@@ -44,8 +44,6 @@ InputParameters validParams<SolutionUserObject>()
   params.addParam<std::string>("timestep", "Index of the single timestep used or \"LATEST\" for the last timestep (exodusII only).  If not supplied, time interpolation will occur.");
 
   // Add ability to perform coordinate transformation: scale, factor
-  params.addDeprecatedParam<std::vector<Real> >("coord_scale", "This name has been deprecated.",  "Please use scale instead");
-  params.addDeprecatedParam<std::vector<Real> >("coord_factor", "This name has been deprecated.",  "Please use translation instead");
   params.addParam<std::vector<Real> >("scale", std::vector<Real>(LIBMESH_DIM,1), "Scale factor for points in the simulation");
   params.addParam<std::vector<Real> >("scale_multiplier", std::vector<Real>(LIBMESH_DIM,1), "Scale multiplying factor for points in the simulation");
   params.addParam<std::vector<Real> >("translation", std::vector<Real>(LIBMESH_DIM,0), "Translation factors for x,y,z coordinates of the simulation");

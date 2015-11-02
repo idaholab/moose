@@ -54,12 +54,6 @@ public:
   void addOutput(MooseSharedPointer<Output> & output);
 
   /**
-   * Get a complete list of all output objects
-   * @return A vector of pointers to each of the output objects
-   */
-  const std::vector<Output *> & getOutputs() const;
-
-  /**
    * Get a complete set of all output object names
    * @return A set of output names for each output object
    */
