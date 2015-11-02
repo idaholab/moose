@@ -1778,8 +1778,6 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 void
 NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 {
-  _currently_computing_jacobian = true;
-
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
@@ -1996,8 +1994,6 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 
   if (hasDiagSaveIn())
     _fe_problem.getAuxiliarySystem().update();
-
-  _currently_computing_jacobian = false;
 }
 
 void
