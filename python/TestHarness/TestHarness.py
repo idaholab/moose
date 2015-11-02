@@ -200,10 +200,10 @@ class TestHarness:
                       # This method will block when the maximum allowed parallel processes are running
                       self.runner.run(tester, command)
                     else: # This job is skipped - notify the runner
-                      if (reason != ''):
-                        self.handleTestResult(tester.parameters(), '', reason)
+                      if reason != '':
+                        if (self.options.report_skipped and reason.find('skipped') != -1) or reason.find('skipped') == -1:
+                          self.handleTestResult(tester.parameters(), '', reason)
                       self.runner.jobSkipped(tester.parameters()['test_name'])
-
                 os.chdir(saved_cwd)
                 sys.path.pop()
     except KeyboardInterrupt:
@@ -702,6 +702,7 @@ class TestHarness:
     outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test')
     outputgroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='only show the result of every test, don\'t show test output even if it fails')
+    outputgroup.add_argument('--no-report', action='store_false', dest='report_skipped', help='do not report skipped tests')
     outputgroup.add_argument('--show-directory', action='store_true', dest='show_directory', help='Print test directory path in out messages')
     outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
     outputgroup.add_argument('-f', '--file', nargs=1, action='store', dest='file', help='Write verbose output of each test to FILE and quiet output to terminal')
@@ -772,6 +773,10 @@ class TestHarness:
         if m != None and int(m.group(1)) > largest_serial_num:
           largest_serial_num = int(m.group(1))
       opts.pbs = "pbs_" +  str(largest_serial_num+1).zfill(3)
+
+    # When running heavy tests, we'll make sure we use --no-report
+    if opts.heavy_tests:
+      self.options.report_skipped = False
 
   def postRun(self, specs, timing):
     return
