@@ -2,7 +2,7 @@
  * distributionNDNormal.C
  * Created on Oct. 23, 2015
  * Author: @wangc
- * Extracted from @alfoa (Feb 6, 2014) distribution_base_ND.C   
+ * Extracted from @alfoa (Feb 6, 2014) distribution_base_ND.C
  *
  */
 

@@ -1,7 +1,7 @@
 /*
  * distributionNDBase.h
  * Created by @wangc on Oct. 23, 2015
- * Extracted from  distribution_base_ND.h   
+ * Extracted from  distribution_base_ND.h
  *
  */
 #ifndef DISTRIBUTION_ND_BASE_H
