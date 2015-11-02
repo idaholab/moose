@@ -898,17 +898,19 @@ public:
 
 
   /**
-   * Perform execution of MOOSE systems.
+   * Convenience function for performing execution of MOOSE systems.
    */
   void execute(const ExecFlagType & exec_type);
 
-  ///@{
   /**
-   * Deprecated callbacks.
+   * Call compute methods on UserObjects.
    */
-  virtual void computeUserObjects(ExecFlagType type, UserObjectWarehouse::GROUP group);
-  virtual void computeAuxiliaryKernels(ExecFlagType type);
-  ///@}
+  virtual void computeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group);
+
+  /**
+   * Call compute methods on AuxKernels
+   */
+  virtual void computeAuxiliaryKernels(const ExecFlagType & type);
 
 
 protected:
@@ -1002,16 +1004,6 @@ protected:
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
   void checkUserObjects();
-
-  /**
-   * Call UserObject execute() methods.
-   */
-  virtual void executeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group);
-
-  /**
-   * Call AuxKernels compute() methods.
-   */
-  virtual void executeAuxiliaryKernels(const ExecFlagType & type);
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();
