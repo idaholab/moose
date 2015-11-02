@@ -127,7 +127,7 @@ public:
 		  value = _CDFspline.Cdf(x);
 
      if (value > 1.0)
-    	 throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF value calculated is above 1.0");
+	 throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF value calculated is above 1.0");
 
      return value;
   };

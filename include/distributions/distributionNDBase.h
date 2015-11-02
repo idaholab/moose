@@ -51,15 +51,15 @@ public:
 
        weights.at(0)=1;
        for (int nDim=1; nDim<n_dimensions; nDim++)
-           weights.at(nDim)=weights.at(nDim-1)*indexes.at(nDim-1);
+	   weights.at(nDim)=weights.at(nDim-1)*indexes.at(nDim-1);
 
        for (int nDim=(n_dimensions-1); nDim>=0; nDim--){
-     	  if (nDim>0){
-     		  NDcoordinates.at(nDim) = oneDcoordinate/weights.at(nDim);
-     		  oneDcoordinate -= NDcoordinates.at(nDim)*weights.at(nDim);
-     	  }
-     	  else
-     		  NDcoordinates.at(0) = oneDcoordinate;
+	  if (nDim>0){
+		  NDcoordinates.at(nDim) = oneDcoordinate/weights.at(nDim);
+		  oneDcoordinate -= NDcoordinates.at(nDim)*weights.at(nDim);
+	  }
+	  else
+		  NDcoordinates.at(0) = oneDcoordinate;
        }
        return NDcoordinates;
    };

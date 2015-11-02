@@ -128,7 +128,7 @@ public:
 		  value = _CDFinterpolator.interpolateAt(x);
 
       if (value > 1.0)
-    	  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value calculated is above 1.0");
+	  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value calculated is above 1.0");
 
      return value;
   };

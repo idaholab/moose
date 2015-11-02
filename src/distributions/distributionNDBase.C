@@ -52,7 +52,7 @@ BasicDistributionND::getVariable(const std::string & variable_name){
 
    if(_dis_parameters.find(variable_name) != _dis_parameters.end())
    {
-          res = _dis_parameters.find(variable_name) ->second;
+	  res = _dis_parameters.find(variable_name) ->second;
    }
    else
    {
@@ -166,4 +166,3 @@ double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
 std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & F, double & g){
 	return dist.InverseCdf(F,g);
 }
-
