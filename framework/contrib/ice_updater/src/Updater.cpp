@@ -334,29 +334,20 @@ tbb::task * UpdaterThread::execute()
           std::string json = postPtr->getJSON();
 
           // Add the json to the posts array in the transmission
-          transmission += json;
+          transmission += json + "]}";
 
-          // Remove the post from the queue
-          // pop();
+          // Transmit post to url and return an error if there is one
+          std::string error = libcurlUtilsPtr->post(url,
+                                                    transmission,
+                                                    propertyMap[USERNAME],
+                                                    propertyMap[PASSWORD]);
 
-          // If posts is still non empty, add a comma separator
-          if (!empty())
-            transmission += ",";
+          // Check to see if there was an error, and log it.
+          if (error != "")
+            errorLoggerPtr->logError(error);
+
         }
       }
-
-      // Add the final characters to the transmission
-      transmission += "]}";
-
-      // Transmit post to url and return an error if there is one
-      std::string error = libcurlUtilsPtr->post(url,
-                                                transmission,
-                                                propertyMap[USERNAME],
-                                                propertyMap[PASSWORD]);
-
-      // Check to see if there was an error, and log it.
-      if (error != "")
-        errorLoggerPtr->logError(error);
     }
 
     // Pause this thread for sleepTime seconds
