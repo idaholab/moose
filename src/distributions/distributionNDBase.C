@@ -79,7 +79,7 @@ BasicDistributionND::getType(){
 }
 
 double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
-	  /**
+    /**
      * This function calculates the integral of the pdf in a cell region
      * In the 1D case a cell region is an interval [a,b], thus the integral of the pdf in such interval is
      * calculated as CDF(b)-CDF(a). This functions perform a similar evolution but for a generic ND cell

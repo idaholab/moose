@@ -55,7 +55,7 @@ public:
       //BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool CDFprovided)
       std::cout<<"Creating ND spline for inverseWeight"<< std::endl;
       int n_dimensions = _interpolator.returnDimensionality();
-	    std::vector<double> alpha (n_dimensions);
+      std::vector<double> alpha (n_dimensions);
       std::vector<double> beta (n_dimensions);
 
       for(int i=0; i<n_dimensions; i++){

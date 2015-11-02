@@ -42,7 +42,7 @@ void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vec
      * This function convert a number in base 10 to a new number in any base N
      */
 
-	   int index = 0 ;
+     int index = 0 ;
 
      if (value_base10 == 0)
        value_baseN.push_back(0);
