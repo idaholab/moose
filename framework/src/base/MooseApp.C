@@ -552,7 +552,7 @@ MooseApp::getCheckpointFiles()
       else
       {
         std::ostringstream oss;
-        oss << "_" << (*it)->getShortName() << "_cp";
+        oss << "_" << (*it)->name() << "_cp";
         checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, oss.str()));
       }
     }

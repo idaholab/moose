@@ -111,13 +111,6 @@ MaterialWarehouse::hasBoundaryMaterials(BoundaryID boundary_id) const
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getMaterials()
-{
-  mooseDeprecated("MaterialWarehouse::getMaterials() is deprecated - use MaterialWarehouse::all() instead");
-  return _all_objects;
-}
-
-std::vector<Material *> &
 MaterialWarehouse::getMaterials(SubdomainID block_id)
 {
   std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_materials.find(block_id);

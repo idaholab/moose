@@ -64,7 +64,6 @@ public:
    * to compute properties during the system "solve".  The materials in these
    * vectors are asked to recompute their values.
    */
-  std::vector<Material *> & getMaterials();
   std::vector<Material *> & getMaterials(SubdomainID block_id);
   std::vector<Material *> & getFaceMaterials(SubdomainID block_id);
   std::vector<Material *> & getNeighborMaterials(SubdomainID block_id);
