@@ -317,7 +317,7 @@ double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
   double h = 1.0;
   return phi((scaled_x-a)/h - (k-2));
 
-  //return phi((x-discretizations[0])/(discretizations[1]-discretizations[0]) - (k-2));
+  //return phi((x-discretizations[0])/h - (k-2));
 }
 
 
@@ -484,8 +484,6 @@ bool NDSpline::checkBoundaries(std::vector<double> point){
 }
 
 double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
-        //double up   = discretizations[0];
-        //double down = discretizations[discretizations.size()-1];
         int down=0;
 
         for(unsigned int n=0; n<discretizations.size(); n++)
@@ -494,23 +492,17 @@ double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
                         break;
                 }
 
-        //up is never used
-        //for(int n=discretizations.size(); n<0; n--)
-        //	if (x<discretizations[n])
-        //		up = n;
-
         //double scaled_x = down + (x-discretizations[(int)down])/(discretizations[(int)down+1]-discretizations[(int)down]);
         double scaled_x = (double)down + (x-discretizations.at(down))/(discretizations.at(down+1)-discretizations.at(down));
 
         double a = 0.0;
         double h = 1.0;
-        //double value = PHI((scaled_x-a)/h - (k-2.0));
 
-        //double value = PHI((scaled_x-a)/h - (k-2.0)) * (discretizations[1]-discretizations[0]);
+        return PHI((scaled_x-a)/h - (k-2.0)) * (discretizations.at(down+1)-discretizations.at(down));
 
-        double value = PHI((scaled_x-a)/h - (k-2.0));
+        //return PHI((scaled_x-a)/h - (k-2.0));
 
-        return value;
+        //return PHI((x-discretizations.at(0))/(discretizations.at(down+1)-discretizations.at(down)) - (k-2.0)) * (discretizations.at(down+1)-discretizations.at(down));
 }
 
 
@@ -533,7 +525,7 @@ double NDSpline::spline_cartesian_integration(std::vector<double> point_coordina
             }
             interpolated_value += _spline_coefficients.at(i)*product;
          }
-         std::cout<<interpolated_value<<std::endl;
+
          return interpolated_value;
 }
 

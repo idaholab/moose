@@ -373,9 +373,7 @@ std::vector<double> BasicMultivariateNormal::InverseCdf(double F, double g){
 	  /**
 	   * This function calculates the inverse CDF values at F of a MVN distribution
 	   */
-	std::cout<<"BasicMultivariateNormal::InverseCdf"<< std::endl;
 	return _cartesianDistribution.InverseCdf(F,g);
-  std::cout << "test inverseCdf" << std::endl;
 }
 
 double BasicMultivariateNormal::inverseMarginal(double F, int dimension){
