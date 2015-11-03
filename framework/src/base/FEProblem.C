@@ -140,7 +140,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
-    _fail_next_linear_convergence_check(false)
+    _fail_next_linear_convergence_check(false),
+    _currently_computing_jacobian(false)
 {
 
   _time = 0.0;
@@ -3454,6 +3455,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
          ++it)
       it->second->updateSeeds(EXEC_NONLINEAR);
 
+    _currently_computing_jacobian = true;
+
     execTransfers(EXEC_NONLINEAR);
     execMultiApps(EXEC_NONLINEAR);
 
@@ -3482,6 +3485,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
     _nl.computeJacobian(jacobian);
 
+    _currently_computing_jacobian = false;
     _has_jacobian = true;
   }
 

@@ -116,7 +116,6 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
   Threads::parallel_for (*_mesh.getActiveSemiLocalNodeRange(), UpdateDisplacedMeshThread(*this));
 
   // Update the geometric searches that depend on the displaced mesh
-  // if (_displaced_nl.currentlyComputingJacobian())
   _geometric_search_data.update();
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
