@@ -64,6 +64,9 @@ InversePowerMethod::init()
 void
 InversePowerMethod::execute()
 {
+  if (_app.isRecovering())
+    return;
+
   preExecute();
 
   takeStep();
@@ -83,8 +86,11 @@ InversePowerMethod::takeStep()
                         _solution_diff_name, _sol_check_tol,
                         _eigenvalue, initial_res);
   postSolve();
-  printEigenvalue();
 
-  _problem.onTimestepEnd();
-  _problem.execute(EXEC_TIMESTEP_END);
+  if (lastSolveConverged())
+  {
+    printEigenvalue();
+    _problem.onTimestepEnd();
+    _problem.execute(EXEC_TIMESTEP_END);
+  }
 }

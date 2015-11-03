@@ -202,10 +202,13 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   // save solver control parameters to be modified by the power iteration
   Real tol1 = _problem.es().parameters.get<Real> ("linear solver tolerance");
   unsigned int num1 = _problem.es().parameters.get<unsigned int>("nonlinear solver maximum iterations");
+  Real tol2 = _problem.es().parameters.get<Real> ("nonlinear solver relative residual tolerance");
 
   // every power iteration is a linear solve, so set nonlinear iteration number to one
   _problem.es().parameters.set<Real> ("linear solver tolerance") = pfactor;
+  // disable nonlinear convergence check
   _problem.es().parameters.set<unsigned int>("nonlinear solver maximum iterations") = 1;
+  _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = 1-1e-8;
 
   if (echo)
   {
@@ -338,6 +341,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   // restore parameters changed by the executioner
   _problem.es().parameters.set<Real> ("linear solver tolerance") = tol1;
   _problem.es().parameters.set<unsigned int>("nonlinear solver maximum iterations") = num1;
+  _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = tol2;
 
   //FIXME: currently power iteration use old and older solutions, so restore them
   _eigen_sys.restoreOldSolutions();

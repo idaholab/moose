@@ -313,11 +313,9 @@ Transient::takeStep(Real input_dt)
     {
       _console << "\nBeginning Picard Iteration " << _picard_it << "\n" << std::endl;
 
-      Real current_norm = _problem.computeResidualL2Norm();
-
       if (_picard_it == 0) // First Picard iteration - need to save off the initial nonlinear residual
       {
-        _picard_initial_norm = current_norm;
+        _picard_initial_norm = _problem.computeResidualL2Norm();
         _console << "Initial Picard Norm: " << _picard_initial_norm << '\n';
       }
     }

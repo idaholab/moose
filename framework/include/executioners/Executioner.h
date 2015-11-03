@@ -110,6 +110,11 @@ public:
    */
   virtual void parentOutputPositionChanged() {}
 
+  /**
+   * Whether or not the last solve converged.
+   */
+  virtual bool lastSolveConverged();
+
 protected:
 
   /**

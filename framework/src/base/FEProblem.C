@@ -537,6 +537,7 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Initial execTransfers()","Setup");
 
     Moose::setup_perf_log.push("Initial execMultiApps()","Setup");
+    //TODO: we did not check the convergence of the multiapps on initial
     execMultiApps(EXEC_INITIAL);
     Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
   }
@@ -546,6 +547,7 @@ void FEProblem::initialSetup()
   {
     Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
 
+    //TODO: user object evaluation could fail.
     computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
 
     _aux.compute(EXEC_INITIAL);
