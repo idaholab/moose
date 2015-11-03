@@ -91,7 +91,7 @@ Steady::execute()
     _problem.solve();
     postSolve();
 
-    if (!_problem.converged())
+    if (!lastSolveConverged())
     {
       _console << "Aborting as solve did not converge\n";
       break;

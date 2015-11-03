@@ -84,6 +84,9 @@ NonlinearEigen::init()
 void
 NonlinearEigen::execute()
 {
+  if (_app.isRecovering())
+    return;
+
   preExecute();
 
   takeStep();
@@ -103,10 +106,13 @@ NonlinearEigen::takeStep()
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
   nonlinearSolve(_rel_tol, _abs_tol, _pfactor, _eigenvalue);
-
   postSolve();
-  printEigenvalue();
 
-  _problem.onTimestepEnd();
-  _problem.execute(EXEC_TIMESTEP_END);
+  if (lastSolveConverged())
+  {
+    printEigenvalue();
+
+    _problem.onTimestepEnd();
+    _problem.execute(EXEC_TIMESTEP_END);
+  }
 }
