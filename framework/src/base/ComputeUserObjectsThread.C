@@ -16,6 +16,7 @@
 #include "Problem.h"
 #include "SystemBase.h"
 #include "ElementUserObject.h"
+#include "ShapeElementUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
@@ -64,6 +65,24 @@ ComputeUserObjectsThread::subdomainChanged()
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
+
+  // ShapeElementUserObject requested Jacobian variables
+  {
+    std::set<MooseVariable *> jacobian_moose_vars;
+
+    const std::vector<MooseSharedPointer<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
+    for (std::vector<MooseSharedPointer<ElementUserObject> >::const_iterator it = e_objects.begin(); it != e_objects.end(); ++it)
+    {
+      MooseSharedPointer<ShapeElementUserObject> shape_element_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeElementUserObject>(*it);
+      if (shape_element_uo)
+      {
+        const std::set<MooseVariable *> & mv_deps = shape_element_uo->jacobianMooseVariables();
+        jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+      }
+    }
+
+    _jacobian_moose_vars.assign(jacobian_moose_vars.begin(), jacobian_moose_vars.end());
+  }
 }
 
 void
@@ -78,6 +97,29 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
     const std::vector<MooseSharedPointer<ElementUserObject> > & objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
     for (const auto & uo : objects)
       uo->execute();
+  }
+
+  // UserObject Jacobians
+  if (_fe_problem.currentlyComputingJacobian())
+  {
+    // Prepare shape functions for ShapeElementUserObjects
+    for (std::vector<MooseVariable *>::const_iterator jvar_it = _jacobian_moose_vars.begin();
+         jvar_it != _jacobian_moose_vars.end();
+         ++jvar_it)
+    {
+      unsigned int jvar = (*jvar_it)->number();
+      std::vector<dof_id_type> & dof_indices = (*jvar_it)->dofIndices();
+
+      _fe_problem.prepareShapes(jvar, _tid);
+
+      const std::vector<MooseSharedPointer<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
+      for (std::vector<MooseSharedPointer<ElementUserObject> >::const_iterator it = e_objects.begin(); it != e_objects.end(); ++it)
+      {
+        MooseSharedPointer<ShapeElementUserObject> shape_element_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeElementUserObject>(*it);
+        if (shape_element_uo)
+          shape_element_uo->executeJacobianWrapper(jvar, dof_indices);
+      }
+    }
   }
 
   _fe_problem.swapBackMaterials(_tid);

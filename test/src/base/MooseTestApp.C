@@ -93,6 +93,7 @@
 #include "OldMaterialAux.h"
 #include "DotCouplingAux.h"
 #include "VectorPostprocessorAux.h"
+#include "ExampleShapeElementKernel.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -179,6 +180,8 @@
 #include "GetMaterialPropertyBoundaryBlockNamesTest.h"
 #include "SetupInterfaceCount.h"
 #include "ReadDoubleIndex.h"
+#include "TestShapeElementUserObject.h"
+#include "ExampleShapeElementUserObject.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -343,6 +346,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(WrongJacobianDiffusion);
   registerKernel(DefaultMatPropConsumerKernel);
   registerKernel(DoNotCopyParametersKernel);
+  registerKernel(ExampleShapeElementKernel);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -480,6 +484,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(InternalSideSetupInterfaceCount);
   registerUserObject(NodalSetupInterfaceCount);
   registerUserObject(ReadDoubleIndex);
+  registerUserObject(TestShapeElementUserObject);
+  registerUserObject(ExampleShapeElementUserObject);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
