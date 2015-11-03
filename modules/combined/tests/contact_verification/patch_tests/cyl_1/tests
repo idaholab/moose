@@ -49,7 +49,7 @@
     input = 'cyl1_mu_0_2_kin.i'
     csvdiff = 'cyl1_mu_0_2_kin_check.csv cyl1_mu_0_2_kin_check_cont_press_0001.csv cyl1_mu_0_2_kin_check_x_disp_0001.csv'
     rel_err = 1e-5
-    abs_zero = 1e-8
+    abs_zero = 1e-6
     max_parallel = 1
   [../]
   [./mu_0_2_pen]
