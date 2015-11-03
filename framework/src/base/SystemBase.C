@@ -84,7 +84,6 @@ SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
     _factory(_app.getFactory()),
     _mesh(subproblem.mesh()),
     _name(name),
-    _currently_computing_jacobian(false),
     _vars(libMesh::n_threads()),
     _var_map()
 {

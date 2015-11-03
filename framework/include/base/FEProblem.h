@@ -317,6 +317,11 @@ public:
   virtual bool computingInitialResidual() { return _nl.computingInitialResidual(); }
 
   /**
+   * Returns true if we are currently computing Jacobian
+   */
+  virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
+
+  /**
    * The relative (both to solution size and dt) change in the L2 norm of the solution vector.
    * Call just after a converged solve.
    */
@@ -1089,6 +1094,9 @@ private:
 
   bool _error_on_jacobian_nonzero_reallocation;
   bool _fail_next_linear_convergence_check;
+
+  /// Whether or not the system is currently computing the Jacobian matrix
+  bool _currently_computing_jacobian;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;

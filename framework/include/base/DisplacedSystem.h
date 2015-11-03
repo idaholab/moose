@@ -61,11 +61,6 @@ public:
     {}
 
   /**
-   * Return whether or not the NonlinearSystem is currently computing a Jacobian matrix
-   */
-  virtual bool currentlyComputingJacobian() { return _undisplaced_system.currentlyComputingJacobian(); }
-
-  /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
    * @param var_name The name of the variable to be zeroed.
    */

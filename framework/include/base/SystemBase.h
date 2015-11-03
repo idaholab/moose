@@ -158,11 +158,6 @@ public:
                                std::vector<dof_id_type> & n_oz) = 0;
 
   /**
-   * Returns true if we are currently computing Jacobian
-   */
-  virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
-
-  /**
    * Adds a variable to the system
    *
    * @param var_name name of the variable
@@ -383,9 +378,6 @@ protected:
   MooseMesh & _mesh;
   /// The name of this system
   std::string _name;
-
-  /// Whether or not the system is currently computing the Jacobian matrix
-  bool _currently_computing_jacobian;
 
   /// Variable warehouses (one for each thread)
   std::vector<VariableWarehouse> _vars;
