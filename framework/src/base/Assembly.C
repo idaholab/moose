@@ -1532,14 +1532,14 @@ Assembly::addCachedJacobianContributions(SparseMatrix<Number> & jacobian)
 void
 Assembly::registerUserObjectShapeVariable(unsigned int var)
 {
-  std::vector<unsigned int> & vec = _user_object_shape_variables;
+  std::vector<unsigned int> & reg = _user_object_shape_variables;
 
-  // add variable to the vector
-  vec.push_back(var);
+  // add variable number to the list of registered variables
+  reg.push_back(var);
 
   // sort and keep elements unique
-  std::sort(vec.begin(), vec.end());
-  vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+  std::sort(reg.begin(), reg.end());
+  reg.erase(std::unique(reg.begin(), reg.end()), reg.end());
 }
 
 void

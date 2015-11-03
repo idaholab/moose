@@ -2252,6 +2252,9 @@ FEProblem::execute(const ExecFlagType & exec_type)
 {
   // Set the current flag
   _current_execute_on_flag = exec_type;
+  if (exec_type == EXEC_NONLINEAR)
+    _currently_computing_jacobian = true;
+
 
   // Pre-aux UserObjects
   Moose::perf_log.push("computeUserObjects()", "Setup");
@@ -2270,6 +2273,7 @@ FEProblem::execute(const ExecFlagType & exec_type)
 
   // Return the current flag to None
   _current_execute_on_flag = EXEC_NONE;
+  _currently_computing_jacobian = false;
 }
 
 void

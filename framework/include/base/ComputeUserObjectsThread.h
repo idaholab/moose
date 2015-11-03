@@ -55,8 +55,6 @@ protected:
   const NumericVector<Number>& _soln;
   std::vector<UserObjectWarehouse> & _user_objects;
   UserObjectWarehouse::GROUP _group;
-
-  const std::vector<unsigned int> & _user_object_shape_variables;
 };
 
 #endif //COMPUTEUSEROBJECTSTHREAD_H
