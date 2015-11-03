@@ -1,0 +1,8 @@
+splot
+node 4 7 3 13 10
+sel time 1.0
+contact_pressure
+p
+neu
+exit
+
