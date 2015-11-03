@@ -27,7 +27,8 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem, SystemBa
     ThreadedElementLoop<ConstElemRange>(problem, sys),
     _soln(in_soln),
     _user_objects(user_objects),
-    _group(group)
+    _group(group),
+    _user_object_shape_variables(_fe_problem.assembly(_tid).userObjectShapeVariables())
 {
 }
 
@@ -36,7 +37,8 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x,
     ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
     _soln(x._soln),
     _user_objects(x._user_objects),
-    _group(x._group)
+    _group(x._group),
+    _user_object_shape_variables(x._user_object_shape_variables)
 {
 }
 
@@ -166,6 +168,10 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
+
+  // Prepare shape functions for ShapeElementUserObjects
+  for (unsigned int i = 0; i < _user_object_shape_variables.size(); ++i)
+    _fe_problem.prepareShapes(_user_object_shape_variables[i], _tid);
 
   //Global UserObjects
   for (std::vector<ElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID, _group).begin();

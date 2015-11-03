@@ -461,6 +461,16 @@ public:
    */
   void addCachedJacobianContributions(SparseMatrix<Number> & jacobian);
 
+  /**
+   * Indicate that at least one UserObject needs the shape functions initialized
+   */
+  void registerUserObjectShapeVariable(unsigned int var);
+
+  /**
+   * Access the flag from ComputeUserObjectsThread
+   */
+  const std::vector<unsigned int> & userObjectShapeVariables() { return _user_object_shape_variables; }
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -727,6 +737,9 @@ protected:
   std::vector<Real> _cached_jacobian_contribution_vals;
   std::vector<numeric_index_type> _cached_jacobian_contribution_rows;
   std::vector<numeric_index_type> _cached_jacobian_contribution_cols;
+
+  /// Variables that need shape functions initialized for UserObjects
+  std::vector<unsigned int> _user_object_shape_variables;
 };
 
 #endif /* ASSEMBLY_H */
