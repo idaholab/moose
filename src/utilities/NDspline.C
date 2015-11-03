@@ -287,26 +287,6 @@ void NDSpline::from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDd
 }
 
 
-void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing){
- // this function restructures a 1D vector into a 2D vector
- // example: 1D [1,2,3,4,5,6] spacing=2 --> 2D restructuring [[1,2],[3,4],[5,6]]
-
- if (oneDdata.size()%spacing == 0)
-  for (unsigned int i=0; i<oneDdata.size()/spacing; i++){
-   for (int j=0; j<spacing; j++)
-    twoDdata[i][j] = oneDdata[spacing*i+j];
-  }
- else
-  throw ("Error in from1Dto2Drestructuring: spacing value not a multiplier for oneDdata");
-}
-
-
-//double NDSpline::u_k(double x, double a, double h, double k){
-// // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
-// return phi((x-a)/h - (k-2));
-//}
-
-
 double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
   // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
   //double up   = discretizations[0];
@@ -340,6 +320,26 @@ double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
   //return phi((x-discretizations[0])/(discretizations[1]-discretizations[0]) - (k-2));
 }
 
+
+
+void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing){
+ // this function restructures a 1D vector into a 2D vector
+ // example: 1D [1,2,3,4,5,6] spacing=2 --> 2D restructuring [[1,2],[3,4],[5,6]]
+
+ if (oneDdata.size()%spacing == 0)
+  for (unsigned int i=0; i<oneDdata.size()/spacing; i++){
+   for (int j=0; j<spacing; j++)
+    twoDdata[i][j] = oneDdata[spacing*i+j];
+  }
+ else
+  throw ("Error in from1Dto2Drestructuring: spacing value not a multiplier for oneDdata");
+}
+
+
+//double NDSpline::u_k(double x, double a, double h, double k){
+// // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
+// return phi((x-a)/h - (k-2));
+//}
 
 
 double NDSpline::phi(double t){
@@ -485,24 +485,30 @@ bool NDSpline::checkBoundaries(std::vector<double> point){
 
 double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
         //double up   = discretizations[0];
-        double down = discretizations[discretizations.size()-1];
+        //double down = discretizations[discretizations.size()-1];
+        int down=0;
 
         for(unsigned int n=0; n<discretizations.size(); n++)
-                if (x>discretizations[n])
+                if (x>discretizations.at(n)){
                         down = n;
+                        break;
+                }
 
         //up is never used
         //for(int n=discretizations.size(); n<0; n--)
         //	if (x<discretizations[n])
         //		up = n;
 
-        double scaled_x = down + (x-discretizations[(int)down])/(discretizations[(int)down+1]-discretizations[(int)down]);
+        //double scaled_x = down + (x-discretizations[(int)down])/(discretizations[(int)down+1]-discretizations[(int)down]);
+        double scaled_x = (double)down + (x-discretizations.at(down))/(discretizations.at(down+1)-discretizations.at(down));
 
         double a = 0.0;
         double h = 1.0;
         //double value = PHI((scaled_x-a)/h - (k-2.0));
 
-        double value = PHI((scaled_x-a)/h - (k-2.0)) * (discretizations[1]-discretizations[0]);
+        //double value = PHI((scaled_x-a)/h - (k-2.0)) * (discretizations[1]-discretizations[0]);
+
+        double value = PHI((scaled_x-a)/h - (k-2.0));
 
         return value;
 }
@@ -527,6 +533,7 @@ double NDSpline::spline_cartesian_integration(std::vector<double> point_coordina
             }
             interpolated_value += _spline_coefficients.at(i)*product;
          }
+         std::cout<<interpolated_value<<std::endl;
          return interpolated_value;
 }
 
