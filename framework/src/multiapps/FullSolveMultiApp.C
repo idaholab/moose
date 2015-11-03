@@ -85,10 +85,13 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
   int ierr;
   ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
 
+  bool last_solve_converged = true;
   for (unsigned int i=0; i<_my_num_apps; i++)
   {
     Executioner * ex = _executioners[i];
     ex->execute();
+    if (!ex->lastSolveConverged())
+      last_solve_converged = false;
   }
 
   // Swap back
@@ -98,7 +101,6 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
 
   _console << "Finished Solving MultiApp " << name() << std::endl;
 
-  // TODO: Do soemthing better than this
-  return true;
+  return last_solve_converged;
 }
 
