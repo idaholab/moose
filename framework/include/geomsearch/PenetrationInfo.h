@@ -15,18 +15,20 @@
 #ifndef PENETRATIONINFO_H
 #define PENETRATIONINFO_H
 
+// MOOSE includes
+#include "Moose.h"
+#include "DataIO.h"
+
 // libmesh includes
-#include "libmesh/libmesh_common.h"
-#include "MooseMesh.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/point.h"
-#include "libmesh/fe_type.h"
-#include "libmesh/fe.h"
 
-#include <vector>
-#include <map>
-
-class PenetrationInfo;
+// libMesh forward declarations
+namespace libMesh
+{
+class Node;
+class Elem;
+}
 
 /**
  * Data structure used to hold penetration information

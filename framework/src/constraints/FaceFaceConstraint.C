@@ -16,6 +16,10 @@
 #include "FEProblem.h"
 #include "NearestNodeLocator.h"
 #include "PenetrationLocator.h"
+#include "Assembly.h"
+
+// libMesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<FaceFaceConstraint>()

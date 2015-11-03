@@ -16,7 +16,6 @@
 #define FDKERNEL_H
 
 #include "Kernel.h"
-#include "MooseObject.h"
 
 class FDKernel;
 

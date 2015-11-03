@@ -23,6 +23,7 @@
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
+#include "libmesh/coupling_matrix.h"
 
 template<>
 InputParameters validParams<SplitBasedPreconditioner>()

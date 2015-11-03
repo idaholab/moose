@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "ImageSubdomain.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<ImageSubdomain>()

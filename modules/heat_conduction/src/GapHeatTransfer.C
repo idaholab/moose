@@ -4,11 +4,12 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "GapHeatTransfer.h"
 
+#include "GapHeatTransfer.h"
 #include "GapConductance.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
+#include "Assembly.h"
 
 // libmesh
 #include "libmesh/string_to_enum.h"

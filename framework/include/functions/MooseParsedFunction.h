@@ -23,10 +23,10 @@
 // MOOSE includes
 #include "Function.h"
 #include "MooseParsedFunctionBase.h"
-#include "MooseParsedFunctionWrapper.h"
 
 //Forward declarations
 class MooseParsedFunction;
+class MooseParsedFunctionWrapper;
 
 template<>
 InputParameters validParams<MooseParsedFunction>();

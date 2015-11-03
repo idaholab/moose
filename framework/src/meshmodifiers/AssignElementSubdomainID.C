@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "AssignElementSubdomainID.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<AssignElementSubdomainID>()

@@ -16,6 +16,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
+#include "Assembly.h"
 
 MooseVariableInterface::MooseVariableInterface(const InputParameters & parameters, bool nodal, std::string var_param_name) :
     _nodal(nodal)

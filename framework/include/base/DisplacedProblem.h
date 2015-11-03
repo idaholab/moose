@@ -16,21 +16,27 @@
 #define DISPLACEDPROBLEM_H
 
 #include "SubProblem.h"
-#include "MooseMesh.h"
 #include "DisplacedSystem.h"
-#include "Assembly.h"
 #include "GeometricSearchData.h"
-#include "FEProblem.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
-#include "libmesh/explicit_system.h"
-#include "libmesh/numeric_vector.h"
+#include "libmesh/enum_quadrature_type.h"
 
-class SubProblem;
+// Forward declarations
 class MooseVariable;
 class AssemblyData;
 class DisplacedProblem;
+class MooseMesh;
+class Assembly;
+class FEProblem;
+
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
+
 
 template<>
 InputParameters validParams<DisplacedProblem>();
@@ -65,8 +71,8 @@ public:
   virtual void syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
 
-  virtual bool isTransient() const { return _mproblem.isTransient(); }
-  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) { return _mproblem.getCoordSystem(sid); }
+  virtual bool isTransient() const;
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid);
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name);
@@ -147,7 +153,7 @@ public:
    * Return the list of elements that should have their DoFs ghosted to this processor.
    * @return The list
    */
-  virtual std::set<dof_id_type> & ghostedElems() { return _mproblem.ghostedElems(); }
+  virtual std::set<dof_id_type> & ghostedElems();
 
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor

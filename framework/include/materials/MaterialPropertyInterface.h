@@ -15,20 +15,14 @@
 #ifndef MATERIALPROPERTYINTERFACE_H
 #define MATERIALPROPERTYINTERFACE_H
 
-#include <map>
-#include <string>
-
 // MOOSE includes
-#include "MaterialProperty.h"
-#include "InputParameters.h"
-#include "MaterialData.h"
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "MaterialProperty.h"
+#include "MaterialData.h"
 
 // Forward declarations
-class BlockRestrictable;
-class BoundaryRestrictable;
-class InterfaceCommunicationHelper;
+class FEProblem;
+class InputParameters;
 
 /**
  * \class MaterialPropertyInterface

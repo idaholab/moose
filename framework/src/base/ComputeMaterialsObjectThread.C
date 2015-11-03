@@ -24,6 +24,7 @@
 
 // libmesh includes
 #include "libmesh/threads.h"
+#include "libmesh/quadrature.h"
 
 ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
                                                            std::vector<MaterialData *> & bnd_material_data, std::vector<MaterialData *> & neighbor_material_data,

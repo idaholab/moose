@@ -16,10 +16,10 @@
 #define SOLUTIONFUNCTION_H
 
 #include "Function.h"
-#include "SolutionUserObject.h"
 
 // Forward decleration
 class SolutionFunction;
+class SolutionUserObject;
 
 template<>
 InputParameters validParams<SolutionFunction>();

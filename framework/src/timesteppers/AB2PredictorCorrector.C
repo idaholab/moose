@@ -19,6 +19,8 @@
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
+#include "TimeIntegrator.h"
+
 //libMesh includes
 #include "libmesh/nonlinear_solver.h"
 

@@ -20,6 +20,9 @@
 #include "Problem.h"
 #include "NonlinearSystem.h"
 #include "MooseVariable.h"
+#include "DiracKernelWarehouse.h"
+#include "DiracKernel.h"
+#include "Assembly.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

@@ -23,13 +23,10 @@
 
 #include "Moose.h"
 #include "Parser.h"
-#include "MooseSyntax.h"
 #include "ActionWarehouse.h"
-#include "SystemInfo.h"
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "OutputWarehouse.h"
-#include "InputParameterWarehouse.h"
 #include "RestartableData.h"
 #include "ConsoleStreamInterface.h"
 
@@ -38,10 +35,11 @@
 
 class Executioner;
 class MooseApp;
-class RecoverBaseAction;
 class Backup;
 class FEProblem;
 class MeshModifier;
+class InputParameterWarehouse;
+class SystemInfo;
 
 template<>
 InputParameters validParams<MooseApp>();

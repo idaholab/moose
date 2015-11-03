@@ -20,6 +20,7 @@
 #include "DisplacedProblem.h"
 
 #include "libmesh/parallel_algebra.h"
+#include "libmesh/mesh_tools.h"
 
 template<>
 InputParameters validParams<MultiAppTransfer>()

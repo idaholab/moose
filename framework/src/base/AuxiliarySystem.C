@@ -25,9 +25,11 @@
 #include "ComputeElemAuxVarsThread.h"
 #include "ComputeElemAuxBcsThread.h"
 #include "Parser.h"
+#include "TimeIntegrator.h"
 
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/node_range.h"
+#include "libmesh/numeric_vector.h"
 
 // AuxiliarySystem ////////
 

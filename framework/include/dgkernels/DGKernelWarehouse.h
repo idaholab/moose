@@ -16,6 +16,7 @@
 #define DGKERNELWAREHOUSE_H
 
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 #include <vector>
 

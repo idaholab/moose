@@ -23,6 +23,9 @@
 // libMesh
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
+#include "libmesh/elem.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/dense_vector.h"
 
 MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     MooseVariableBase(var_num, sys, assembly, var_kind),

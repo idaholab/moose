@@ -46,6 +46,10 @@
 #include "libmesh/hilbert_sfc_partitioner.h"
 #include "libmesh/morton_sfc_partitioner.h"
 #include "libmesh/edge_edge2.h"
+#include "libmesh/mesh_refinement.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/boundary_info.h"
+#include "libmesh/periodic_boundaries.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 

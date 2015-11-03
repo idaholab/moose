@@ -18,7 +18,9 @@
 #include <map>
 #include <vector>
 #include <set>
+
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 class BoundaryCondition;
 class IntegratedBC;

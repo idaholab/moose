@@ -17,9 +17,10 @@
 #include "FEProblem.h"
 #include "NodalKernel.h"
 #include "NodalKernelWarehouse.h"
+#include "Assembly.h"
 
 // libmesh includes
-#include "libmesh/threads.h"
+#include "libmesh/sparse_matrix.h"
 
 ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(FEProblem & fe_problem,
                                                                      AuxiliarySystem & sys,

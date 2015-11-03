@@ -15,6 +15,7 @@
 // MOOSE includes
 #include "BoundaryRestrictable.h"
 #include "Material.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<BoundaryRestrictable>()

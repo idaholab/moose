@@ -4,9 +4,14 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "DerivativeParsedMaterialHelper.h"
 #include "Conversion.h"
+
 #include <deque>
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<DerivativeParsedMaterialHelper>()

@@ -17,6 +17,9 @@
 
 #include <set>
 
+// Forward declarations
+class MooseVariable;
+
 class MooseVariableDependencyInterface
 {
 public:

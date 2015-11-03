@@ -19,6 +19,7 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Output.h"
 #include "Console.h"
+#include "Transient.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"

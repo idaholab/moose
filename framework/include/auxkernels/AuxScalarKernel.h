@@ -16,7 +16,6 @@
 #define AUXSCALARKERNEL_H
 
 #include "MooseObject.h"
-#include "Coupleable.h"
 #include "ScalarCoupleable.h"
 #include "SetupInterface.h"
 #include "FunctionInterface.h"
@@ -24,21 +23,14 @@
 #include "PostprocessorInterface.h"
 #include "DependencyResolverInterface.h"
 #include "TransientInterface.h"
-#include "Assembly.h"
 #include "MooseVariableScalar.h"
-#include "SubProblem.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
-// libMesh
-#include "libmesh/fe.h"
-#include "libmesh/quadrature.h"
-
+// Forward declarations
 class MooseMesh;
-class Problem;
 class SubProblem;
-
-
+class Assembly;
 class AuxScalarKernel;
 
 template<>

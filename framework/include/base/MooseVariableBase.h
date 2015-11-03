@@ -18,10 +18,16 @@
 #include "MooseTypes.h"
 #include "MooseArray.h"
 
-#include "libmesh/variable.h"
-#include "libmesh/dof_map.h"
+// libMesh includes
 #include "libmesh/tensor_value.h"
 #include "libmesh/vector_value.h"
+
+// libMesh forward declarations
+namespace libMesh
+{
+class DofMap;
+class Variable;
+}
 
 typedef MooseArray<Real>               VariableValue;
 typedef MooseArray<RealGradient>       VariableGradient;

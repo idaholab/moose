@@ -18,11 +18,16 @@
 #include "Moose.h"
 #include "ParallelUniqueId.h"
 
-// libMesh includes
-#include "libmesh/node_range.h"
-#include "libmesh/system.h"
+// libmesh includes
+#include "libmesh/elem_range.h"
 
-class FEProblem;
+// Forward declare classes in libMesh
+namespace libMesh
+{
+class System;
+class DofMap;
+}
+
 
 /**
  * Grab all the local dof indices for the variables passed in, in the system passed in.

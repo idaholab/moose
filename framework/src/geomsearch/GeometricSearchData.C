@@ -18,6 +18,7 @@
 #include "PenetrationLocator.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
+#include "Assembly.h"
 
 static const unsigned int MORTAR_BASE_ID = 2e6;
 

@@ -16,22 +16,17 @@
 #define MARKER_H
 
 #include "MooseObject.h"
-#include "MooseVariableInterface.h"
-#include "InputParameters.h"
+#include "BlockRestrictable.h"
 #include "SetupInterface.h"
 #include "DependencyResolverInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "UserObjectInterface.h"
-#include "BlockRestrictable.h"
 #include "Restartable.h"
 #include "PostprocessorInterface.h"
 #include "MeshChangedInterface.h"
 #include "OutputInterface.h"
 
-// libmesh Includes
-#include "libmesh/threads.h"
-#include "libmesh/error_vector.h"
-
+// Forward declarations
 class MooseMesh;
 class SubProblem;
 class FEProblem;

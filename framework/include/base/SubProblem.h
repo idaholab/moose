@@ -18,19 +18,25 @@
 #include "ParallelUniqueId.h"
 #include "Problem.h"
 #include "DiracKernelInfo.h"
-#include "Assembly.h"
 #include "GeometricSearchData.h"
-
-// libMesh include
-#include "libmesh/equation_systems.h"
-#include "libmesh/transient_system.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/sparse_matrix.h"
+#include "MooseVariableBase.h" // VariableValue
 
 class MooseMesh;
 class SubProblem;
 class Factory;
+class Assembly;
+class MooseVariable;
+class MooseVariableScalar;
+class RestartableDataValue;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class EquationSystems;
+class DofMap;
+template <typename T> class SparseMatrix;
+template <typename T> class NumericVector;
+}
 
 template<>
 InputParameters validParams<SubProblem>();

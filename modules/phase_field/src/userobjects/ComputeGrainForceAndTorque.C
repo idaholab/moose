@@ -4,8 +4,12 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "ComputeGrainForceAndTorque.h"
 #include "ComputeGrainCenterUserObject.h"
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<ComputeGrainForceAndTorque>()

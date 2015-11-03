@@ -13,13 +13,8 @@
 /****************************************************************/
 
 #include "ComputeBoundaryInitialConditionThread.h"
-#include "SystemBase.h"
 #include "InitialCondition.h"
-
-// libmesh includes
-#include "libmesh/threads.h"
-#include "libmesh/fe_interface.h"
-#include "libmesh/numeric_vector.h"
+#include "Assembly.h"
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(FEProblem & fe_problem) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem)

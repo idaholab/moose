@@ -20,14 +20,26 @@
 
 // libMesh includes
 #include "libmesh/elem_range.h"
-#include "libmesh/numeric_vector.h"
 
-//
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
+
+/**
+ * Class for threaded computation of UserObjects.
+ */
 class ComputeUserObjectsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP);
-  ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);                 // Splitting Constructor
+  ComputeUserObjectsThread(FEProblem & problem,
+                           SystemBase & sys,
+                           const NumericVector<Number>& in_soln,
+                           std::vector<UserObjectWarehouse> & user_objects,
+                           UserObjectWarehouse::GROUP);
+  // Splitting Constructor
+  ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);
 
   virtual ~ComputeUserObjectsThread();
 

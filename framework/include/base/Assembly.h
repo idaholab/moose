@@ -15,25 +15,31 @@
 #ifndef ASSEMBLY_H
 #define ASSEMBLY_H
 
-#include <vector>
 #include "ParallelUniqueId.h"
-#include "MooseVariable.h"
-#include "MooseVariableScalar.h"
 #include "MooseTypes.h"
+#include "MooseVariableBase.h"
+
 // libMesh
-#include "libmesh/dof_map.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
-#include "libmesh/coupling_matrix.h"
-#include "libmesh/fe.h"
-#include "libmesh/quadrature.h"
-#include "libmesh/elem.h"
-#include "libmesh/node.h"
+#include "libmesh/fe_base.h"
+#include "libmesh/enum_quadrature_type.h"
 
 // MOOSE Forward Declares
 class MooseMesh;
 class ArbitraryQuadrature;
 class SystemBase;
+class MooseVariable;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class DofMap;
+class CouplingMatrix;
+class Elem;
+class Node;
+template <typename T> class SparseMatrix;
+}
 
 /**
  * Keeps track of stuff related to assembling

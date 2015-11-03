@@ -4,8 +4,12 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "DiscreteNucleation.h"
 #include "DiscreteNucleationMap.h"
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<DiscreteNucleation>()

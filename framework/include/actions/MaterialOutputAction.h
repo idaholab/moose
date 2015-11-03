@@ -17,12 +17,12 @@
 
 // MOOSE includes
 #include "Action.h"
-#include "MooseObjectAction.h"
-#include "ActionFactory.h"
-#include "Material.h"
+#include "MaterialData.h"
 
 // Forward declarations
 class MaterialOutputAction;
+class MooseObjectAction;
+class Material;
 
 template<>
 InputParameters validParams<MaterialOutputAction>();

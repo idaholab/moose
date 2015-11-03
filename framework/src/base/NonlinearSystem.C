@@ -11,6 +11,7 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "Problem.h"
@@ -50,6 +51,10 @@
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "NodalKernel.h"
+#include "DiracKernel.h"
+#include "TimeIntegrator.h"
+#include "Predictor.h"
+#include "Assembly.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -64,6 +69,9 @@
 #include "libmesh/dense_subvector.h"
 #include "libmesh/dense_submatrix.h"
 #include "libmesh/dof_map.h"
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/petsc_matrix.h"
+
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
 #include "petscsnes.h"

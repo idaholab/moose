@@ -16,9 +16,6 @@
 
 #include "MooseTypes.h"
 
-#include <string>
-#include <vector>
-
 class DerivativeMaterialPropertyNameInterface
 {
 public:

@@ -26,9 +26,15 @@
 
 // libMesh
 #include "libmesh/vector_value.h"
-#include "libmesh/point.h"
 
+// Forward declarations
 class Function;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class Point;
+}
 
 template<>
 InputParameters validParams<Function>();

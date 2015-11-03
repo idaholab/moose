@@ -14,6 +14,7 @@
 
 #include "MooseError.h"
 #include "Axisymmetric2D3DSolutionFunction.h"
+#include "SolutionUserObject.h"
 
 
 template<>

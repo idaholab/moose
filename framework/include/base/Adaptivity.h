@@ -15,26 +15,31 @@
 #ifndef ADAPTIVITY_H
 #define ADAPTIVITY_H
 
-#include "Moose.h"
-#include "MooseError.h"
-#include "MooseEnum.h"
-#include "ConsoleStreamInterface.h"
-#include "MooseTypes.h"
+#include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 
-#include <string>
+#include "Moose.h"
+#include "MooseError.h"
+#include "ConsoleStreamInterface.h"
+#include "MooseTypes.h"
 
 // libMesh
-#include "libmesh/system_norm.h"
 #include "libmesh/mesh_refinement.h"
-#include "libmesh/error_vector.h"
-#include "libmesh/error_estimator.h"
 
 class FEProblem;
 class MooseMesh;
 class DisplacedProblem;
 class MooseVariable;
+class MooseEnum;
+
+// Forward declare classes in libMesh
+namespace libMesh
+{
+class SystemNorm;
+class ErrorVector;
+class ErrorEstimator;
+}
 
 /**
  * Takes care of everything related to mesh adaptivity

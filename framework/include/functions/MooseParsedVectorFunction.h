@@ -18,10 +18,10 @@
 // MOOSE includes
 #include "Function.h"
 #include "MooseParsedFunctionBase.h"
-#include "MooseParsedFunctionWrapper.h"
 
 // Forward decleratrions
 class MooseParsedVectorFunction;
+class MooseParsedFunctionWrapper;
 
 template<>
 InputParameters validParams<MooseParsedVectorFunction>();
@@ -72,7 +72,6 @@ protected:
 
   // Pointer to the wrapper object for parsed functions
   MooseParsedFunctionWrapper * _function_ptr;
-
 };
 
 #endif //MOOSEPARSEDVECTORFUNCTION_H

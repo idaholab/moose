@@ -15,6 +15,7 @@
 // Moose
 #include "FindContactPoint.h"
 #include "LineSegment.h"
+#include "PenetrationInfo.h"
 
 // libMesh
 #include "libmesh/boundary_info.h"
@@ -24,6 +25,8 @@
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 #include "libmesh/fe_base.h"
+#include "libmesh/vector_value.h"
+
 
 namespace Moose
 {

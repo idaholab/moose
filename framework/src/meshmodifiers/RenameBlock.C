@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "RenameBlock.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<RenameBlock>()

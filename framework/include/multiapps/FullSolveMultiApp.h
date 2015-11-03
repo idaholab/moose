@@ -15,11 +15,10 @@
 #define FULLSOLVEMULTIAPP_H
 
 #include "MultiApp.h"
-#include "MooseApp.h"
-#include "Transient.h"
-#include "TransientInterface.h"
 
+// Forward declarations
 class FullSolveMultiApp;
+class Executioner;
 
 template<>
 InputParameters validParams<FullSolveMultiApp>();

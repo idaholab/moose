@@ -16,10 +16,10 @@
 #define FUNCTIONAUX_H
 
 #include "AuxKernel.h"
-#include "Function.h"
 
 //Forward Declarations
 class FunctionAux;
+class Function;
 
 template<>
 InputParameters validParams<FunctionAux>();

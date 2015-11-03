@@ -16,17 +16,16 @@
 #define MOOSEVARIABLESCALAR_H
 
 #include "MooseVariableBase.h"
-#include "MooseArray.h"
 #include "ParallelUniqueId.h"
-#include "MooseVariable.h"
 
-// libMesh
-#include "libmesh/dof_map.h"
-
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
 
 /**
- * Class for scalar variables (they are different)
- *
+ * Class for scalar variables (they are different).
  */
 class MooseVariableScalar : public MooseVariableBase
 {

@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "InternalSideUserObject.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<InternalSideUserObject>()

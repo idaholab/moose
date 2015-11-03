@@ -16,6 +16,8 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "FEProblem.h"
+#include "MooseVariable.h"
+#include "InputParameters.h"
 
 Coupleable::Coupleable(const InputParameters & parameters, bool nodal) :
     _c_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),

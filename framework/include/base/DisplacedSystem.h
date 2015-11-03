@@ -16,10 +16,12 @@
 #define DISPLACEDSYSTEM_H
 
 #include "SystemBase.h"
-// libMesh include
-#include "libmesh/explicit_system.h"
-#include "libmesh/transient_system.h"
 
+// libMesh include
+#include "libmesh/transient_system.h"
+#include "libmesh/explicit_system.h"
+
+// Forward declarations
 class DisplacedProblem;
 
 

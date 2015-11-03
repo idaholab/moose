@@ -17,10 +17,7 @@
 
 #include "ComputeFullJacobianThread.h"
 
-// libMesh includes
-#include "libmesh/elem_range.h"
-
-
+// Forward declarations
 class FEProblem;
 class NonlinearSystem;
 

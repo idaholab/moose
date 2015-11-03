@@ -15,13 +15,10 @@
 #ifndef TWOMATERIALPROPERTYINTERFACE_H
 #define TWOMATERIALPROPERTYINTERFACE_H
 
-#include <map>
-#include <string>
-
-#include "MaterialData.h"
 #include "MaterialPropertyInterface.h"
 
 // Forward Declarations
+class MaterialData;
 
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {

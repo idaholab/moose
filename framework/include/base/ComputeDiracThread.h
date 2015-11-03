@@ -15,16 +15,15 @@
 #ifndef COMPUTEDIRACTHREAD_H
 #define COMPUTEDIRACTHREAD_H
 
-//Moose Includes
+// Moose Includes
 #include "ParallelUniqueId.h"
-#include "DiracKernelWarehouse.h"
-#include "DiracKernel.h"
 #include "ThreadedElementLoop.h"
-#include "NonlinearSystem.h"
+
 // libMesh includes
 #include "libmesh/elem_range.h"
 
-#include <vector>
+// Forward declarations
+class NonlinearSystem;
 
 typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistElemRange;
 

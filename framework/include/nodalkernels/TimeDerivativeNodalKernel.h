@@ -19,7 +19,6 @@
 
 //Forward Declarations
 class TimeDerivativeNodalKernel;
-class Function;
 
 template<>
 InputParameters validParams<TimeDerivativeNodalKernel>();

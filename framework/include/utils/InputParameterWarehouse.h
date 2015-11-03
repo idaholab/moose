@@ -19,6 +19,7 @@
 #include "Warehouse.h"
 #include "ParallelUniqueId.h"
 #include "MooseObjectName.h"
+#include "MooseTypes.h"
 
 // Forward declarations
 class InputParameters;

@@ -19,9 +19,6 @@
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
 class QuadraturePointMarker;
 
 template<>

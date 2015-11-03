@@ -16,7 +16,12 @@
 #define PIECEWISELINEAR_H
 
 #include "Piecewise.h"
-#include "LinearInterpolation.h"
+
+// Forward declarations
+class PiecewiseLinear;
+
+template<>
+InputParameters validParams<PiecewiseLinear>();
 
 /**
  * Base class for function objects.  Functions override value to supply a
@@ -48,8 +53,5 @@ public:
 
   virtual Real average();
 };
-
-template<>
-InputParameters validParams<PiecewiseLinear>();
 
 #endif

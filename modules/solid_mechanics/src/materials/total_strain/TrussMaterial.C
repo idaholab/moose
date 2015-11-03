@@ -4,12 +4,15 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "TrussMaterial.h"
 
+#include "TrussMaterial.h"
 #include "Material.h"
 #include "ColumnMajorMatrix.h"
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<TrussMaterial>()

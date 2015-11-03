@@ -16,12 +16,11 @@
 #define NODALKERNELWAREHOUSE_H
 
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 #include <vector>
 #include <map>
 #include <string>
-#include <list>
-#include <set>
 
 class NodalKernel;
 

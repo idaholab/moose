@@ -19,12 +19,10 @@
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "Restartable.h"
-#include "OutputWarehouse.h"
 
 // System includes
 #include <string>
 
-class MooseMesh;
 class Problem;
 class Executioner;
 

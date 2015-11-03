@@ -15,6 +15,7 @@
 #include "ElementUserObject.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<ElementUserObject>()

@@ -6,12 +6,13 @@
 /****************************************************************/
 
 #include "MechanicalContactConstraint.h"
-
 #include "SystemBase.h"
 #include "PenetrationLocator.h"
+#include "Assembly.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
+#include "libmesh/sparse_matrix.h"
 
 template<>
 InputParameters validParams<MechanicalContactConstraint>()

@@ -18,6 +18,8 @@
 #include "SlaveNeighborhoodThread.h"
 #include "NearestNodeThread.h"
 #include "Moose.h"
+#include "MooseMesh.h"
+
 // libMesh
 #include "libmesh/boundary_info.h"
 #include "libmesh/elem.h"

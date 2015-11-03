@@ -16,14 +16,14 @@
 #define THREADEDELEMENTLOOP_H
 
 #include "ParallelUniqueId.h"
-#include "MooseMesh.h"
 #include "FEProblem.h"
-#include "SystemBase.h"
 #include "ThreadedElementLoopBase.h"
 
+// Forward declarations
+class SystemBase;
+
 /**
- * Base class for assembling-like calculations
- *
+ * Base class for assembly-like calculations.
  */
 template<typename RangeType>
 class ThreadedElementLoop : public ThreadedElementLoopBase<RangeType>

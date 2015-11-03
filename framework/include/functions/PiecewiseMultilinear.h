@@ -16,8 +16,9 @@
 #define PIECEWISEMULTILINEAR_H
 
 #include "Function.h"
-#include "GriddedData.h"
 
+// Forward declarations
+class GriddedData;
 
 /**
  * Uses GriddedData to define data on a grid,

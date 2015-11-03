@@ -18,7 +18,9 @@
 #include <vector>
 #include <map>
 #include <set>
+
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 class VectorPostprocessor;
 class ElementVectorPostprocessor;

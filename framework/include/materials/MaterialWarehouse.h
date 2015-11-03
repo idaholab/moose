@@ -15,16 +15,10 @@
 #ifndef MATERIALWAREHOUSE_H
 #define MATERIALWAREHOUSE_H
 
-#include <vector>
-#include <map>
-#include <set>
-
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 class Material;
-
-// Forward Declaration
-template <class T> class DependencyResolver;
 
 /**
  * Stores materials.

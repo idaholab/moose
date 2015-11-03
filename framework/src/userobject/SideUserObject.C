@@ -15,6 +15,7 @@
 #include "SideUserObject.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<SideUserObject>()

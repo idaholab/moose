@@ -18,26 +18,30 @@
 #include <vector>
 
 #include "VariableWarehouse.h"
-#include "InitialConditionWarehouse.h"
-#include "Assembly.h"
 #include "ParallelUniqueId.h"
 #include "SubProblem.h"
 #include "MooseVariableScalar.h"
+#include "MooseVariable.h"
+#include "DataIO.h"
 
 // libMesh
-#include "libmesh/equation_systems.h"
-#include "libmesh/dof_map.h"
 #include "libmesh/exodusII_io.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/quadrature.h"
-#include "libmesh/point.h"
 #include "libmesh/parallel_object.h"
+#include "libmesh/dof_map.h"
+#include "libmesh/equation_systems.h"
 
+// Forward declarations
 class Factory;
 class MooseApp;
 class MooseVariable;
 class MooseMesh;
 class SystemBase;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class System;
+}
 
 /**
  * ///< Type of coordinate system

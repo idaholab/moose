@@ -20,7 +20,6 @@
 #include "MooseEnum.h"
 
 class GeneratedMesh;
-class NonlinearSystem;
 
 template<>
 InputParameters validParams<GeneratedMesh>();

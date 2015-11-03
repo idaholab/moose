@@ -18,7 +18,6 @@
 #include "MeshModifier.h"
 
 //Forward Declaration
-class MooseMesh;
 class AddExtraNodeset;
 
 template<>

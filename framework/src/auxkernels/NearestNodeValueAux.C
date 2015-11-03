@@ -13,9 +13,7 @@
 /****************************************************************/
 
 #include "NearestNodeValueAux.h"
-
-#include "MooseMesh.h"
-#include "SystemBase.h"
+#include "NearestNodeLocator.h"
 
 template<>
 InputParameters validParams<NearestNodeValueAux>()

@@ -15,35 +15,29 @@
 #ifndef FEPROBLEM_H
 #define FEPROBLEM_H
 
-#include "Moose.h"
 #include "SubProblem.h"
 #include "AuxiliarySystem.h"
-#include "Assembly.h"
 #include "GeometricSearchData.h"
 #include "MaterialWarehouse.h"
-#include "MaterialPropertyStorage.h"
 #include "PostprocessorWarehouse.h"
 #include "PostprocessorData.h"
 #include "VectorPostprocessorWarehouse.h"
-#include "VectorPostprocessorData.h"
 #include "Adaptivity.h"
-#include "Resurrector.h"
 #include "IndicatorWarehouse.h"
 #include "MarkerWarehouse.h"
 #include "MultiAppWarehouse.h"
 #include "TransferWarehouse.h"
-#include "MooseEnum.h"
-#include "Resurrector.h"
 #include "UserObjectWarehouse.h"
-#include "NonlinearSystem.h"
+#include "InitialConditionWarehouse.h"
 #include "Restartable.h"
 #include "SolverParams.h"
-#include "OutputWarehouse.h"
-#include "MooseApp.h"
 #include "PetscSupport.h"
 
-class DisplacedProblem;
+// libMesh includes
+#include "libmesh/enum_quadrature_type.h"
 
+// Forward declarations
+class DisplacedProblem;
 class FEProblem;
 class MooseMesh;
 class NonlinearSystem;
@@ -51,6 +45,18 @@ class RandomInterface;
 class RandomData;
 class MeshChangedInterface;
 class MultiMooseEnum;
+class MaterialPropertyStorage;
+class MaterialData;
+class VectorPostprocessorData;
+class MooseEnum;
+class Resurrector;
+class Assembly;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class CouplingMatrix;
+}
 
 template<>
 InputParameters validParams<FEProblem>();
@@ -130,9 +136,9 @@ public:
   void setCouplingMatrix(CouplingMatrix * cm);
   CouplingMatrix * & couplingMatrix() { return _cm; }
 
-  bool areCoupled(unsigned int ivar, unsigned int jvar) { return (*_cm)(ivar, jvar); }
+  bool areCoupled(unsigned int ivar, unsigned int jvar);
 
-  std::vector<std::pair<MooseVariable *, MooseVariable *> > & couplingEntries(THREAD_ID tid) { return _assembly[tid]->couplingEntries(); }
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & couplingEntries(THREAD_ID tid);
 
   /**
    * Check for converence of the nonlinear solution

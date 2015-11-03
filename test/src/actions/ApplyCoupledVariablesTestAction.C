@@ -15,6 +15,7 @@
 #include "ApplyCoupledVariablesTestAction.h"
 #include "ActionFactory.h"
 #include "MooseObjectAction.h"
+#include "ActionWarehouse.h"
 
 template<>
 InputParameters validParams<ApplyCoupledVariablesTestAction>()

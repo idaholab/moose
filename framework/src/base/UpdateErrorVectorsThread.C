@@ -20,6 +20,7 @@
 
 // libmesh includes
 #include "libmesh/threads.h"
+#include "libmesh/error_vector.h"
 
 UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem, std::map<std::string, ErrorVector *> indicator_field_to_error_vector) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, fe_problem.getAuxiliarySystem()),

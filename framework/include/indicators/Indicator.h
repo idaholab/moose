@@ -16,29 +16,19 @@
 #define INDICATOR_H
 
 #include "MooseObject.h"
+#include "BlockRestrictable.h"
 #include "SetupInterface.h"
-
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
-#include "MaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
-#include "BlockRestrictable.h"
 #include "Restartable.h"
 #include "OutputInterface.h"
 
-#include "Assembly.h"
-#include "MooseVariable.h"
-#include "SubProblem.h"
-#include "MooseTypes.h"
-#include "Function.h"
-
-
-class MooseMesh;
-class Problem;
-class SubProblem;
-
-//Forward Declarations
+// Forward Declarations
 class Indicator;
+class MooseMesh;
+class SubProblem;
+class Assembly;
 
 template<>
 InputParameters validParams<Indicator>();
@@ -90,9 +80,6 @@ protected:
 
   Assembly & _assembly;
 
-//  const MooseVariable & _var;
-
   MooseMesh & _mesh;
-//  unsigned int _dim;
 };
 #endif /* INDICATOR_H */

@@ -15,12 +15,11 @@
 #ifndef SLAVENEIGHBORHOODTHREAD_H
 #define SLAVENEIGHBORHOODTHREAD_H
 
+// MOOSE includes
 #include "MooseTypes.h"
-#include "MooseMesh.h"
-// libMesh
-#include "libmesh/mesh_base.h"
-// System
-#include <set>
+
+// Forward declarations
+class MooseMesh;
 
 class SlaveNeighborhoodThread
 {

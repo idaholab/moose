@@ -23,17 +23,15 @@
 #include "UserObjectInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FunctionInterface.h"
-#include "MooseVariableInterface.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "Assembly.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 
+// Forward Declarations
 class MooseMesh;
-class Problem;
 class SubProblem;
+class Assembly;
 
-//Forward Declarations
 class DGKernel;
 
 template<>

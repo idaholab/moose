@@ -13,6 +13,10 @@
 /****************************************************************/
 
 #include "TimeDerivative.h"
+#include "Assembly.h"
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<TimeDerivative>()

@@ -15,7 +15,7 @@
 #ifndef SETUPTIMEPERIODSACTION_H
 #define SETUPTIMEPERIODSACTION_H
 
-#include "MooseObjectAction.h"
+#include "Action.h"
 
 class SetupTimePeriodsAction;
 

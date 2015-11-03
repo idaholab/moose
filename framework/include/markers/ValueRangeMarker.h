@@ -17,9 +17,6 @@
 
 #include "QuadraturePointMarker.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
 class ValueRangeMarker;
 
 template<>

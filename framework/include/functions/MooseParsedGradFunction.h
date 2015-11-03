@@ -18,10 +18,10 @@
 // MOOSE includes
 #include "Function.h"
 #include "MooseParsedFunctionBase.h"
-#include "MooseParsedFunctionWrapper.h"
 
 // Forward declerations
 class MooseParsedGradFunction;
+class MooseParsedFunctionWrapper;
 
 template<>
 InputParameters validParams<MooseParsedGradFunction>();

@@ -33,7 +33,3 @@ ConstantDamper::computeQpDamping()
 {
   return _damping;
 }
-
-
-
-
