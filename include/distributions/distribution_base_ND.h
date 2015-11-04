@@ -32,6 +32,9 @@ public:
    virtual int returnDimensionality() = 0;
    double cellIntegral(std::vector<double> center, std::vector<double> dx);
 
+   virtual double returnUpperBound(int dimension) = 0;
+   virtual double returnLowerBound(int dimension) = 0;
+
    std::string & getType();
 
    std::vector<int> oneDtoNDconverter(int oneDcoordinate, std::vector<int> indexes){
@@ -252,6 +255,14 @@ public:
 	  return value;
   }
 
+  double returnUpperBound(int dimension){
+    return _interpolator.returnUpperBound(dimension);
+  }
+
+  double returnLowerBound(int dimension){
+    return _interpolator.returnLowerBound(dimension);
+  }
+
 protected:
   bool _CDFprovided;
   NDSpline _interpolator;
@@ -417,6 +428,14 @@ public:
 	  return _interpolator.returnDimensionality();
   }
 
+  double returnUpperBound(int dimension){
+    return _interpolator.returnUpperBound(dimension);
+  }
+
+  double returnLowerBound(int dimension){
+    return _interpolator.returnLowerBound(dimension);
+  }
+
 
 protected:
   InverseDistanceWeighting  _interpolator;
@@ -456,12 +475,24 @@ public:
   std::vector<std::vector<double> > choleskyDecomposition(std::vector<std::vector<double> > matrix);
   void show_matrix(double *A, int n);
 
+
+  double returnLowerBound(int dimension){
+    return _lowerBounds.at(dimension);
+  }
+
+  double returnUpperBound(int dimension){
+    return _upperBounds.at(dimension);
+  }
+
 private:
   std::vector<double> _mu;
   std::vector<std::vector<double> > _cov_matrix;
   std::vector<std::vector<double> > _inverse_cov_matrix;
   std::vector<std::vector<double> > _cholesky_C;
   double _determinant_cov_matrix;
+
+  std::vector<double> _upperBounds;
+  std::vector<double> _lowerBounds;
 
   BasicMultiDimensionalCartesianSpline _cartesianDistribution;
 

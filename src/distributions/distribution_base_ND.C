@@ -114,29 +114,6 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
 	return value;
 }
 
-//double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
-//	double value=0.0;
-//
-//	int numberOfVerteces = (int)pow(2,center.size());
-//
-//	for(int i=0; i<numberOfVerteces; i++){
-//		std::vector<double> index = int2binary(i,center.size());
-//		std::vector<double> NDcoordinate(center.size());
-//
-//		for(unsigned int j=0; j<center.size(); j++){
-//			if (index[j]==0)
-//				NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
-//			else
-//				NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
-//		}
-//		value += Cdf(NDcoordinate);
-//	}
-//
-//	value = value/numberOfVerteces;
-//
-//	return value;
-//}
-
 
 double
 getDistributionVariable(BasicDistributionND & dist,const std::string & variable_name){
@@ -166,6 +143,14 @@ double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
 //std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){
 std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & F, double & g){
 	return dist.InverseCdf(F,g);
+}
+
+double returnUpperBound(BasicDistributionND & dist, int dimension){
+  return dist.returnUpperBound(dimension);
+}
+
+double returnLowerBound(BasicDistributionND & dist, int dimension){
+  return dist.returnLowerBound(dimension);
 }
 
 void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vector<int> & value_baseN){
@@ -247,6 +232,9 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(int &rows, int &colum
 		   discretization_temp.push_back(disc_value);
 	   }
 	   discretizations.push_back(discretization_temp);
+
+	   _lowerBounds.push_back(discretization_temp.at(0));
+	   _upperBounds.push_back(discretization_temp.back());
    }
 
    std::vector< double > values (numberValues);

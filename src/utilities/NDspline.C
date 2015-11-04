@@ -75,6 +75,10 @@ void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretization
              _cellDxs.push_back(_discretizations[i][_discretizations[i].size()-1]-_discretizations[i][0]);
             }
 
+         for (int i=0; i<_dimensions; i++){
+             _lowerBound.push_back(_cellPoint0.at(i));
+             _upperBound.push_back(_cellPoint0.at(i) + _cellDxs.at(i));
+         }
          std::cout << "ND spline completed initialization" << std::endl;
 }
 

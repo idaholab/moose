@@ -45,6 +45,11 @@ InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double 
  for (int d=0; d<_dimensions; d++)
   _cellDxs[d] = cellPointInf[d]-_cellPoint0[d];
 
+ for (int i=0; i<_dimensions; i++){
+     _lowerBound.push_back(_cellPoint0.at(i));
+     _upperBound.push_back(_cellPoint0.at(i) + _cellDxs.at(i));
+ }
+
  //std::cerr << "_dimensions " << _dimensions << std::endl;
  //std::cerr << "_number_of_points " << _number_of_points << std::endl;
  //std::cerr << "_p " << _p << std::endl;
