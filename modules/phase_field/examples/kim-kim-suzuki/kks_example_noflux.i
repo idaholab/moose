@@ -260,7 +260,6 @@
 []
 
 [Outputs]
-  file_base = kks_noflux
   exodus = true
   csv = true
 []

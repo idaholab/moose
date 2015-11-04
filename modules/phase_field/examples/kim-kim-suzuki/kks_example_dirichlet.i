@@ -261,7 +261,6 @@
 []
 
 [Outputs]
-  file_base = kks_dirichlet
   exodus = true
   console = true
   gnuplot = true
