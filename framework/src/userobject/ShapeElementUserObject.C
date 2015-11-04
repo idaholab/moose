@@ -28,5 +28,15 @@ ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameter
 {
   // all coupled variables of this user object will get iniitialized shape functions
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); ++i)
-    _assembly.registerUserObjectShapeVariable(_coupled_moose_vars[i]->number());
+  {
+    MooseVariable * moose_var = _coupled_moose_vars[i];
+    if (moose_var->kind() == Moose::VAR_NONLINEAR)
+    {
+      _assembly.registerUserObjectShapeVariable(moose_var->number());
+
+      if (_requested_jacobian_flag.size() <= moose_var->number())
+        _requested_jacobian_flag.resize(moose_var->number() + 1, false);
+      _requested_jacobian_flag[moose_var->number()] = true;
+    }
+  }
 }

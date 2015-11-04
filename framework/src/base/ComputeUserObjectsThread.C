@@ -167,14 +167,6 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   _fe_problem.reinitElem(elem, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-  // Prepare shape functions for ShapeElementUserObjects
-  if (_fe_problem.currentlyComputingJacobian())
-  {
-    const std::vector<unsigned int> & user_object_shape_variables = _fe_problem.assembly(_tid).userObjectShapeVariables();
-    for (unsigned int i = 0; i < user_object_shape_variables.size(); ++i)
-      _fe_problem.prepareShapes(user_object_shape_variables[i], _tid);
-  }
-
   //Global UserObjects
   for (std::vector<ElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID, _group).begin();
        UserObject_it != _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID, _group).end();
@@ -185,6 +177,30 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
        UserObject_it != _user_objects[_tid].elementUserObjects(_subdomain, _group).end();
        ++UserObject_it)
     (*UserObject_it)->execute();
+
+  // UserObject Jacobians
+  if (_fe_problem.currentlyComputingJacobian())
+  {
+    // Prepare shape functions for ShapeElementUserObjects
+    const std::vector<unsigned int> & user_object_shape_variables = _fe_problem.assembly(_tid).userObjectShapeVariables();
+    for (unsigned int i = 0; i < user_object_shape_variables.size(); ++i)
+    {
+      unsigned int jvar = user_object_shape_variables[i];
+      _fe_problem.prepareShapes(jvar, _tid);
+
+      for (std::vector<ElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID, _group).begin();
+           UserObject_it != _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID, _group).end();
+           ++UserObject_it)
+        if ((*UserObject_it)->requestedJacobian(jvar))
+          (*UserObject_it)->executeJacobian(jvar);
+
+      for (std::vector<ElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].elementUserObjects(_subdomain, _group).begin();
+           UserObject_it != _user_objects[_tid].elementUserObjects(_subdomain, _group).end();
+           ++UserObject_it)
+        if ((*UserObject_it)->requestedJacobian(jvar))
+          (*UserObject_it)->executeJacobian(jvar);
+    }
+  }
 
   _fe_problem.swapBackMaterials(_tid);
 }
@@ -213,7 +229,6 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
 void
 ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-
   // Get vectors of object pointers
   const std::vector<InternalSideUserObject *> & block_uo = _user_objects[_tid].internalSideUserObjects(_subdomain, _group);
   const std::vector<InternalSideUserObject *> & global_uo = _user_objects[_tid].internalSideUserObjects(Moose::ANY_BLOCK_ID, _group);
