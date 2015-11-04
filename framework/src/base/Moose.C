@@ -28,6 +28,8 @@
 #include "FileMesh.h"
 #include "GeneratedMesh.h"
 #include "TiledMesh.h"
+#include "ImageMesh.h"
+
 // MeshModifiers
 #include "MeshExtruder.h"
 #include "SideSetsFromPoints.h"
@@ -141,6 +143,7 @@
 #include "SplineFunction.h"
 #include "PiecewiseMultilinear.h"
 #include "LinearCombinationFunction.h"
+#include "ImageFunction.h"
 
 // materials
 #include "GenericConstantMaterial.h"
@@ -426,6 +429,7 @@ registerObjects(Factory & factory)
   registerMesh(FileMesh);
   registerMesh(GeneratedMesh);
   registerMesh(TiledMesh);
+  registerMesh(ImageMesh);
 
   // mesh modifiers
   registerMeshModifier(MeshExtruder);
@@ -539,6 +543,7 @@ registerObjects(Factory & factory)
   registerFunction(SplineFunction);
   registerFunction(PiecewiseMultilinear);
   registerFunction(LinearCombinationFunction);
+  registerFunction(ImageFunction);
 
   // materials
   registerMaterial(GenericConstantMaterial);
