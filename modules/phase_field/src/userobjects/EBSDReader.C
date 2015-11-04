@@ -188,8 +188,9 @@ EBSDReader::readFile()
       a.custom[i] *= 1.0/Real(a.n);
   }
 
-  // Build map
-  buildNodeToGrainWeightMap();
+  // Build maps to indicate the weights with which grain and phase data
+  // from the surrounding elements contributes to a node fo IC purposes
+  buildNodeWeightMaps();
 }
 
 EBSDReader::~EBSDReader()
@@ -277,11 +278,17 @@ EBSDReader::indexFromIndex(unsigned int var) const
 const std::map<dof_id_type, std::vector<Real> > &
 EBSDReader::getNodeToGrainWeightMap() const
 {
-  return _node_to_grn_weight_map;
+  return _node_to_grain_weight_map;
+}
+
+const std::map<dof_id_type, std::vector<Real> > &
+EBSDReader::getNodeToPhaseWeightMap() const
+{
+  return _node_to_phase_weight_map;
 }
 
 void
-EBSDReader::buildNodeToGrainWeightMap()
+EBSDReader::buildNodeWeightMaps()
 {
   // Import nodeToElemMap from MooseMesh for current node
   // This map consists of the node index followed by a vector of element indices that are associated with that node
@@ -296,8 +303,9 @@ EBSDReader::buildNodeToGrainWeightMap()
     // Get node_id
     const dof_id_type node_id = (*ni)->id();
 
-    // Initialize node_to_grn_weight_map
-    _node_to_grn_weight_map[node_id].resize(_feature_num, 0);
+    // Initialize map entries for current node
+    _node_to_grain_weight_map[node_id].resize(getGrainNum(), 0.0);
+    _node_to_phase_weight_map[node_id].resize(getPhaseNum(), 0.0);
 
     // Loop through element indices associated with the current node and record weighted eta value in new map
     unsigned int n_elems = node_to_elem_map[node_id].size();  // n_elems can range from 1 to 4 for 2D and 1 to 8 for 3D problems
@@ -308,13 +316,12 @@ EBSDReader::buildNodeToGrainWeightMap()
       unsigned int elem_id = node_to_elem_map[node_id][ne];
 
       // Retrieve EBSD grain number for the current element index
-      unsigned int grain_id;
       const Elem * elem = mesh.elem(elem_id);
       const EBSDReader::EBSDPointData & d = getData(elem->centroid());
-      grain_id = d.grain;
 
       // Calculate eta value and add to map
-      _node_to_grn_weight_map[node_id][grain_id] += 1.0 / n_elems;
+      _node_to_grain_weight_map[node_id][d.grain] += 1.0 / n_elems;
+      _node_to_phase_weight_map[node_id][d.phase] += 1.0 / n_elems;
     }
   }
 }

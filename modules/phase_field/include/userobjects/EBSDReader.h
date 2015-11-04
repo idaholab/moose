@@ -68,6 +68,11 @@ public:
   virtual unsigned int getGrainNum() const;
 
   /**
+   * Return the total number of phases
+   */
+  virtual unsigned int getPhaseNum() const { return _feature_id.size(); }
+
+  /**
    * Return the number of grains in a given phase
    */
   unsigned int getGrainNum(unsigned int phase) const;
@@ -78,10 +83,16 @@ public:
   EBSDAvgDataFunctor * getAvgDataAccessFunctor(const MooseEnum & field_name) const;
 
   /**
-   * Creates a map consisting of the node index followd by
-   * a vector of all grain weights for that node
+   * Returns a map consisting of the node index followd by
+   * a vector of all grain weights for that node. Needed by ReconVarIC
    */
   const std::map<dof_id_type, std::vector<Real> > & getNodeToGrainWeightMap() const;
+
+  /**
+   * Returns a map consisting of the node index followd by
+   * a vector of all phase weights for that node. Needed by ReconPhaseVarIC
+   */
+  const std::map<dof_id_type, std::vector<Real> > & getNodeToPhaseWeightMap() const;
 
 protected:
   // MooseMesh Variables
@@ -110,7 +121,10 @@ protected:
   std::vector<std::vector<unsigned int> > _feature_id;
 
   /// Map of grain weights per node
-  std::map<dof_id_type, std::vector<Real> > _node_to_grn_weight_map;
+  std::map<dof_id_type, std::vector<Real> > _node_to_grain_weight_map;
+
+  /// Map of phase weights per node
+  std::map<dof_id_type, std::vector<Real> > _node_to_phase_weight_map;
 
   /// Dimension of the problem domain
   unsigned int _mesh_dimension;
@@ -133,8 +147,8 @@ protected:
   /// Transfer the index into the _avg_data array from given index
   unsigned indexFromIndex(unsigned int var) const;
 
-  /// Build map
-  void buildNodeToGrainWeightMap();
+  /// Build grain and phase weight maps
+  void buildNodeWeightMaps();
 };
 
 #endif // EBSDREADER_H

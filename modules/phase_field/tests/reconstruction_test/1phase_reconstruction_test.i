@@ -24,7 +24,6 @@
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
-      consider_phase = false
     [../]
   [../]
 []
