@@ -2,6 +2,7 @@
 # With cohesion = 10, friction_angle = 60deg, tip_smoother = 4, the
 # algorithm should return to
 # sigma_m = (10*Cos(60) - 4)/Sin(60) = 1.1547
+#See http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/MC/ for documentation. Test is called small_deform_1.
 
 [Mesh]
   type = GeneratedMesh
