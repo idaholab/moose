@@ -129,8 +129,10 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
   MooseVariable * var = getVar(var_name, comp);
   switch (var->kind())
   {
-  case Moose::VAR_NONLINEAR: return getVar(var_name, comp)->number();
-  case Moose::VAR_AUXILIARY: return std::numeric_limits<unsigned int>::max() - getVar(var_name, comp)->number();
+    case Moose::VAR_NONLINEAR:
+      return var->number();
+    case Moose::VAR_AUXILIARY:
+      return std::numeric_limits<unsigned int>::max() - var->number();
   }
   mooseError("Unknown variable kind. Corrupted binary?");
 }
