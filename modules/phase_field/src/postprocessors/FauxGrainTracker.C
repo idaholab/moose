@@ -11,6 +11,7 @@ template<>
 InputParameters validParams<FauxGrainTracker>()
 {
   InputParameters params = validParams<FeatureFloodCount>();
+  params.addClassDescription("Fake grain tracker object for cases where the number of grains is equal to the number of order parameters.");
   params.addParam<int>("tracking_step", 0, "The timestep for when we should start tracking grains");
 
 
@@ -73,7 +74,7 @@ FauxGrainTracker::getElementalValue(dof_id_type /*element_id*/) const
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &
-FauxGrainTracker::getElementalValues(dof_id_type elem_id) const
+FauxGrainTracker::getElementalValues(dof_id_type /*elem_id*/) const
 {
   return _faux_data;
 }

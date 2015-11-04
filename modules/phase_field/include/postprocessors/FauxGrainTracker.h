@@ -60,7 +60,7 @@ public:
    * @param element_id the element identifier for which to retrieve field data
    * @return the elemental value
    */
-  virtual Real getElementalValue(dof_id_type element_id) const;
+  virtual Real getElementalValue(dof_id_type /*element_id*/) const;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
