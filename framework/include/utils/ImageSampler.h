@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "FileRangeBuilder.h"
+#include "ConsoleStream.h"
 
 // libmesh includes
 #include "libmesh/mesh_tools.h"
@@ -176,6 +177,9 @@ private:
 
   /// Parameters for interface
   const InputParameters & _is_pars;
+
+  /// Create a console stream object for this helper class
+  ConsoleStream _is_console;
 
 };
 

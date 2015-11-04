@@ -11,8 +11,10 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE includes
 #include "ImageSampler.h"
-#include "MooseUtils.h"
+#include "MooseApp.h"
 #include "ImageMesh.h"
 
 template<>
@@ -34,8 +36,8 @@ InputParameters validParams<ImageSampler>()
 
   // Threshold parameters
   params.addParam<double>("threshold", "The threshold value");
-  params.addParam<double>("upper_value", "The value to set for data greater than the threshold value");
-  params.addParam<double>("lower_value", "The value to set for data less than the threshold value");
+  params.addParam<double>("upper_value", 1, "The value to set for data greater than the threshold value");
+  params.addParam<double>("lower_value", 0, "The value to set for data less than the threshold value");
   params.addParamNamesToGroup("threshold upper_value lower_value", "Threshold");
 
   // Flip image
@@ -53,7 +55,8 @@ ImageSampler::ImageSampler(const InputParameters & parameters) :
     _data(NULL),
     _algorithm(NULL),
 #endif
-    _is_pars(parameters)
+    _is_pars(parameters),
+    _is_console((parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))->getOutputWarehouse())
 
 {
 #ifndef LIBMESH_HAVE_VTK
@@ -131,7 +134,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   {
     // Use our own parameters (using 'this' b/c of conflicts with filenames the local variable)
     filenames = this->filenames();
-    file_suffix = this->fileSuffix();
+    file_suffix = fileSuffix();
   }
 
   // Storage for the file names
@@ -157,7 +160,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
 
   // Now that _image is set up, actually read the images
   // Indicate that data read has started
-  //this->_console << "Reading image(s)..." << std::endl;
+  _is_console << "Reading image(s)..." << std::endl;
 
   // Extract the data
   _image->SetFileNames(_files);
@@ -180,7 +183,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   _bounding_box.max() = _origin + _physical_dims;
 
   // Indicate data read is completed
-  //this->_console << "          ...image read finished" << std::endl;
+  _is_console << "          ...image read finished" << std::endl;
 
   // Set the component parameter
   // If the parameter is not set then vtkMagnitude() will applied

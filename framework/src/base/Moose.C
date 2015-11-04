@@ -44,6 +44,7 @@
 #include "OrientedSubdomainBoundingBox.h"
 #include "RenameBlock.h"
 #include "AssignElementSubdomainID.h"
+#include "ImageSubdomain.h"
 
 // problems
 #include "FEProblem.h"
@@ -288,6 +289,7 @@
 #include "DT2.h"
 #include "PostprocessorDT.h"
 #include "AB2PredictorCorrector.h"
+
 // time integrators
 #include "SteadyState.h"
 #include "ImplicitEuler.h"
@@ -300,7 +302,6 @@
 #include "ImplicitMidpoint.h"
 #include "Heun.h"
 #include "Ralston.h"
-//
 #include "SimplePredictor.h"
 #include "AdamsPredictor.h"
 
@@ -445,6 +446,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(OrientedSubdomainBoundingBox);
   registerMeshModifier(RenameBlock);
   registerMeshModifier(AssignElementSubdomainID);
+  registerMeshModifier(ImageSubdomain);
 
   // problems
   registerProblem(FEProblem);
