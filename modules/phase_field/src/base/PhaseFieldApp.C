@@ -69,6 +69,7 @@
 #include "PolycrystalRandomIC.h"
 #include "PolycrystalReducedIC.h"
 #include "RampIC.h"
+#include "ReconPhaseVarIC.h"
 #include "ReconVarIC.h"
 #include "RndBoundingBoxIC.h"
 #include "RndSmoothCircleIC.h"
@@ -287,6 +288,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalReducedIC);
   registerInitialCondition(RampIC);
+  registerInitialCondition(ReconPhaseVarIC);
   registerInitialCondition(ReconVarIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerInitialCondition(RndSmoothCircleIC);

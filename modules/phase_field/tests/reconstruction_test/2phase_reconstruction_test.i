@@ -24,20 +24,16 @@
 
 [ICs]
   [./phase1_recon]
-    type = ReconVarIC
+    type = ReconPhaseVarIC
     ebsd_reader = ebsd
-    consider_phase = true
     phase = 1
     variable = c1
-    all_to_one = true
   [../]
   [./phase2_recon]
-    type = ReconVarIC
+    type = ReconPhaseVarIC
     ebsd_reader = ebsd
-    consider_phase = true
     phase = 2
     variable = c2
-    all_to_one = true
   [../]
 []
 
