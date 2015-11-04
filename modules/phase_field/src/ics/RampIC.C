@@ -13,6 +13,7 @@ template<>
 InputParameters validParams<RampIC>()
 {
   InputParameters params = validParams<InitialCondition>();
+  params.addClassDescription("Linear ramp along the x-axis with given values at the left and right extreme points.");
   params.addRequiredParam<Real>("value_left", "The value on left (xmin) boundary.");
   params.addRequiredParam<Real>("value_right", "The value on right (xmax) boundary.");
   return params;
@@ -34,7 +35,7 @@ RampIC::value(const Point & p)
 }
 
 RealGradient
-RampIC::gradient(const Point & p)
+RampIC::gradient(const Point & /*p*/)
 {
   return (_value_right - _value_left) / _xlength;
 }

@@ -30,12 +30,12 @@ protected:
   /**
    * The value of the variable at a point.
    */
-  virtual Real value(const Point &p);
+  virtual Real value(const Point & p);
 
   /**
    * The value of the gradient at a point.
    */
-  virtual RealGradient gradient(const Point &p);
+  virtual RealGradient gradient(const Point & /*p*/);
 
   const Real _xlength;
   const Real _xmin;
