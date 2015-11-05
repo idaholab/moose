@@ -28,7 +28,7 @@ protected:
 
   std::string _base_name;
 
-  const MaterialProperty<RankTwoTensor> & _total_strain;
+  const MaterialProperty<RankTwoTensor> & _mechanical_strain;
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _elastic_strain;
   const MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;

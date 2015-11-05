@@ -38,6 +38,8 @@ protected:
 
   std::string _base_name;
 
+  MaterialProperty<RankTwoTensor> & _mechanical_strain;
+
   MaterialProperty<RankTwoTensor> & _total_strain;
 
   const bool _stateful_displacements;
