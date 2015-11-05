@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
+  nx = 176
+  ny = 287
 []
 
 [Variables]
@@ -13,10 +13,8 @@
 [MeshModifiers]
   [./image]
     type = ImageSubdomain
-    file_base = ../../functions/image_function/stack/test
-    file_suffix = png
-    file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
-    threshold = 2.7e4
+    file = kitten.png #../../functions/image_function/stack/test
+    threshold = 100
   [../]
 []
 
