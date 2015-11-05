@@ -46,7 +46,7 @@ LinearIsoElasticPFDamage::updateVar()
   Real c = _c[_qp];
   Real xfac = std::pow(1.0-c,2.0) + _kdamage;
 
-  _total_strain[_qp].symmetricEigenvaluesEigenvectors(_eigval, _eigvec);
+  _mechanical_strain[_qp].symmetricEigenvaluesEigenvectors(_eigval, _eigvec);
 
   //Tensors of outerproduct of eigen vectors
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)

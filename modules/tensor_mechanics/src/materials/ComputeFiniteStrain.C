@@ -19,6 +19,7 @@ ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
     ComputeStrainBase(parameters),
     _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _mechanical_strain_old(declarePropertyOld<RankTwoTensor>("mechanical_strain")),
     _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
     _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
@@ -31,12 +32,15 @@ ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
 void
 ComputeFiniteStrain::initQpStatefulProperties()
 {
+  ComputeStrainBase::initQpStatefulProperties();
+
   _strain_rate[_qp].zero();
   _strain_increment[_qp].zero();
   _rotation_increment[_qp].zero();
   _deformation_gradient[_qp].zero();
   _deformation_gradient[_qp].addIa(1.0);
   _deformation_gradient_old[_qp] = _deformation_gradient[_qp];
+  _mechanical_strain_old[_qp] = _mechanical_strain[_qp];
   _total_strain_old[_qp] = _total_strain[_qp];
 }
 
@@ -101,7 +105,9 @@ ComputeFiniteStrain::computeQpStrain(const RankTwoTensor & Fhat)
   RankTwoTensor Cinv_I = A*A.transpose() - A - A.transpose();
 
   //strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
-  _strain_increment[_qp] = -Cinv_I*0.5 + Cinv_I*Cinv_I*0.25;
+  RankTwoTensor total_strain_increment = -Cinv_I*0.5 + Cinv_I*Cinv_I*0.25;
+
+  _strain_increment[_qp] = total_strain_increment;
 
   //Remove thermal expansion
   _strain_increment[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T_old[_qp]));
@@ -148,8 +154,10 @@ ComputeFiniteStrain::computeQpStrain(const RankTwoTensor & Fhat)
   _rotation_increment[_qp] = R_incr.transpose();
 
   //Update strain in intermediate configuration
-  _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+  _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
+  _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
 
   //Rotate strain to current configuration
+  _mechanical_strain[_qp] = _rotation_increment[_qp] * _mechanical_strain[_qp] * _rotation_increment[_qp].transpose();
   _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
 }

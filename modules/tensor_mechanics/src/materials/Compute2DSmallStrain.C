@@ -30,11 +30,12 @@ Compute2DSmallStrain::computeProperties()
     _total_strain[_qp](1,0) = _total_strain[_qp](0,1);  //force the symmetrical strain tensor
     _total_strain[_qp](2,2) = computeStrainZZ();
 
+    _mechanical_strain[_qp] = _total_strain[_qp];
+
     //Remove thermal expansion
-    _total_strain[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T0 ));
+    _mechanical_strain[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T0 ));
 
     //Remove the Eigen strain
-    _total_strain[_qp] -= _stress_free_strain[_qp];
+    _mechanical_strain[_qp] -= _stress_free_strain[_qp];
   }
 }
-

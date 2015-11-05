@@ -61,14 +61,14 @@
 [AuxKernels]
   [./strain11]
     type = RankTwoAux
-    rank_two_tensor = total_strain
+    rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 0
     variable = strain11
   [../]
   [./stress11]
     type = RankTwoAux
-    rank_two_tensor = total_strain
+    rank_two_tensor = mechanical_strain
     index_i = 1
     index_j = 1
     variable = stress11

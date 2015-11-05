@@ -19,7 +19,7 @@ InputParameters validParams<ComputeStressBase>()
 ComputeStressBase::ComputeStressBase(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
-    _total_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "total_strain")),
+    _mechanical_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "mechanical_strain")),
     _stress(declareProperty<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain(declareProperty<RankTwoTensor>(_base_name + "elastic_strain")),
     _elasticity_tensor(getMaterialPropertyByName<ElasticityTensorR4>(_base_name + "elasticity_tensor")),
@@ -65,4 +65,3 @@ ComputeStressBase::computeQpProperties()
   //Add in extra stress
   _stress[_qp] += _extra_stress[_qp];
 }
-
