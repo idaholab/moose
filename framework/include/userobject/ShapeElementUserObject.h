@@ -36,12 +36,27 @@ class ShapeElementUserObject : public ElementUserObject
 public:
   ShapeElementUserObject(const InputParameters & parameters);
 
+  /// returns the set of variables a Jacobian has bee requested for
+  const std::set<MooseVariable *> & jacobianMooseVariables() { return _jacobian_moose_variables; }
+
+  /**
+   * This function will be called with the shape functions for jvar initialized. It
+   * can be used to compute Jacobian contributions of the UserObject.
+   */
+  virtual void executeJacobian(unsigned int /*jvar*/) {}
+
 protected:
+  /// call this method to request the computation of a Jacobian w.r.t. to this variable
+  void requestJacobian(const std::string & var_name, unsigned int comp = 0);
+
   /// shape function values
   const VariablePhiValue & _phi;
 
   /// shape function gradients
   const VariablePhiGradient & _grad_phi;
+
+private:
+  std::set<MooseVariable *> _jacobian_moose_variables;
 };
 
 #endif //SHAPEELEMENTUSEROBJECT_H

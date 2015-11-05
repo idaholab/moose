@@ -63,9 +63,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
 
     _max_cached_residuals(0),
     _max_cached_jacobians(0),
-    _block_diagonal_matrix(false),
-
-    _user_object_shape_variables()
+    _block_diagonal_matrix(false)
 {
   // Build fe's for the helpers
   buildFE(FEType(FIRST, LAGRANGE));
@@ -1527,19 +1525,6 @@ Assembly::addCachedJacobianContributions(SparseMatrix<Number> & jacobian)
                  _cached_jacobian_contribution_vals[i]);
 
   clearCachedJacobianContributions();
-}
-
-void
-Assembly::registerUserObjectShapeVariable(unsigned int var)
-{
-  std::vector<unsigned int> & reg = _user_object_shape_variables;
-
-  // add variable number to the list of registered variables
-  reg.push_back(var);
-
-  // sort and keep elements unique
-  std::sort(reg.begin(), reg.end());
-  reg.erase(std::unique(reg.begin(), reg.end()), reg.end());
 }
 
 void

@@ -52,9 +52,3 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
   for (unsigned int i=0; i<coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
 }
-
-bool
-ElementUserObject::requestedJacobian(unsigned int var) const
-{
-  return var < _requested_jacobian_flag.size() && _requested_jacobian_flag[var];
-}

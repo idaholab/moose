@@ -26,17 +26,16 @@ ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameter
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi())
 {
-  // all coupled variables of this user object will get iniitialized shape functions
-  for (unsigned int i = 0; i < _coupled_moose_vars.size(); ++i)
-  {
-    MooseVariable * moose_var = _coupled_moose_vars[i];
-    if (moose_var->kind() == Moose::VAR_NONLINEAR)
-    {
-      _assembly.registerUserObjectShapeVariable(moose_var->number());
+}
 
-      if (_requested_jacobian_flag.size() <= moose_var->number())
-        _requested_jacobian_flag.resize(moose_var->number() + 1, false);
-      _requested_jacobian_flag[moose_var->number()] = true;
-    }
-  }
+void
+ShapeElementUserObject::requestJacobian(const std::string & var_name, unsigned int comp)
+{
+  MooseVariable * var = getVar(var_name, comp);
+
+  // Jacobians can only be requested for non-linear variables
+  if (var->kind() != Moose::VAR_NONLINEAR)
+    mooseError("ShapeElementUserObject Jacobians can only be requested for non-linear variables.");
+
+  _jacobian_moose_variables.insert(var);
 }

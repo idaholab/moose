@@ -14,6 +14,7 @@
 
 #include "UserObjectWarehouse.h"
 #include "ElementUserObject.h"
+#include "ShapeElementUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
@@ -45,6 +46,20 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
         _pre_element_user_objects[it1->first].push_back(*it2);
       else
         _post_element_user_objects[it1->first].push_back(*it2);
+    }
+  }
+
+  // Bin the user objects into either Pre or Post AuxKernel bins
+  for (std::map<SubdomainID, std::vector<ShapeElementUserObject *> >::iterator it1 = _block_shape_element_user_objects.begin(); it1 != _block_shape_element_user_objects.end(); ++it1)
+  {
+    _pre_shape_element_user_objects[it1->first].clear();
+    _post_shape_element_user_objects[it1->first].clear();
+    for (std::vector<ShapeElementUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
+    {
+      if (depend_uo.find((*it2)->name()) != depend_uo.end())
+        _pre_shape_element_user_objects[it1->first].push_back(*it2);
+      else
+        _post_shape_element_user_objects[it1->first].push_back(*it2);
     }
   }
 
@@ -260,6 +275,20 @@ UserObjectWarehouse::addUserObject(MooseSharedPointer<UserObject> & user_object)
       _block_element_user_objects[*it].push_back(element_uo);
       _block_ids_with_user_objects.insert(*it);
     }
+
+    // maintain subset consisting of the derived ShapeElementUserObjects
+    if (dynamic_cast<ShapeElementUserObject*>(raw_ptr))
+    {
+      // Extract the BlockIDs (see BlockRestrictable)
+      ShapeElementUserObject * shape_element_uo = dynamic_cast<ShapeElementUserObject *>(raw_ptr);
+
+      // Add to the list of all SideUserObjects
+      _all_shape_element_user_objects.push_back(shape_element_uo);
+
+      // Loop through each of the block ids and update the block storage list
+      for (std::set<SubdomainID>::const_iterator it = blks.begin(); it != blks.end(); ++it)
+        _block_shape_element_user_objects[*it].push_back(shape_element_uo);
+    }
   }
 
   // Add a SideUserObject
@@ -347,6 +376,22 @@ UserObjectWarehouse::elementUserObjects(SubdomainID block_id, GROUP group)
     return _pre_element_user_objects[block_id];
   case POST_AUX:
     return _post_element_user_objects[block_id];
+  default:
+    mooseError("Bad Enum");
+  }
+}
+
+const std::vector<ShapeElementUserObject *> &
+UserObjectWarehouse::shapeElementUserObjects(SubdomainID block_id, GROUP group)
+{
+  switch (group)
+  {
+  case ALL:
+    return _block_shape_element_user_objects[block_id];
+  case PRE_AUX:
+    return _pre_shape_element_user_objects[block_id];
+  case POST_AUX:
+    return _post_shape_element_user_objects[block_id];
   default:
     mooseError("Bad Enum");
   }

@@ -24,6 +24,7 @@
 #include <set>
 
 class ElementUserObject;
+class ShapeElementUserObject;
 class NodalUserObject;
 class SideUserObject;
 class InternalSideUserObject;
@@ -75,6 +76,14 @@ public:
    * @return The list of all elemental user_objects
    */
   const std::vector<ElementUserObject *> & elementUserObjects(SubdomainID block_id, GROUP group = ALL);
+
+  /**
+   * Get the list of all  elemental user_objects with shape function support
+   * @param block_id Block ID
+   * @param group - the type of user objects to return in the list, defaults to ALL
+   * @return The list of all elemental user_objects
+   */
+  const std::vector<ShapeElementUserObject *> & shapeElementUserObjects(SubdomainID block_id, GROUP group = ALL);
 
   /**
    * Get the list of side user_objects
@@ -155,6 +164,7 @@ protected:
 
   // All UserObjects
   std::vector<ElementUserObject *> _all_element_user_objects;
+  std::vector<ShapeElementUserObject *> _all_shape_element_user_objects;
   std::vector<NodalUserObject *> _all_nodal_user_objects;
   std::vector<SideUserObject *> _all_side_user_objects;
   std::vector<InternalSideUserObject *> _all_internal_side_user_objects;
@@ -162,6 +172,7 @@ protected:
 
   // Block restricted UserObjects
   std::map<SubdomainID, std::vector<ElementUserObject *> > _block_element_user_objects;
+  std::map<SubdomainID, std::vector<ShapeElementUserObject *> > _block_shape_element_user_objects;
   std::map<SubdomainID, std::vector<InternalSideUserObject *> > _block_internal_side_user_objects;
   std::map<SubdomainID, std::vector<NodalUserObject *> > _block_nodal_user_objects;
 
@@ -171,6 +182,7 @@ protected:
 
   // PreAux UO
   std::map<SubdomainID, std::vector<ElementUserObject *> > _pre_element_user_objects;
+  std::map<SubdomainID, std::vector<ShapeElementUserObject *> > _pre_shape_element_user_objects;
   std::map<SubdomainID, std::vector<NodalUserObject *> > _pre_block_nodal_user_objects;
   std::map<SubdomainID, std::vector<InternalSideUserObject *> > _pre_internal_side_user_objects;
   std::map<BoundaryID, std::vector<SideUserObject *> > _pre_side_user_objects;
@@ -179,6 +191,7 @@ protected:
 
   // PostAux UO
   std::map<SubdomainID, std::vector<ElementUserObject *> > _post_element_user_objects;
+  std::map<SubdomainID, std::vector<ShapeElementUserObject *> > _post_shape_element_user_objects;
   std::map<SubdomainID, std::vector<InternalSideUserObject *> > _post_internal_side_user_objects;
   std::map<SubdomainID, std::vector<NodalUserObject *> > _post_block_nodal_user_objects;
   std::map<BoundaryID, std::vector<SideUserObject *> > _post_side_user_objects;
