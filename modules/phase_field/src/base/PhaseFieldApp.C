@@ -143,7 +143,6 @@
 /*
  * Functions
  */
-#include "ImageFunction.h"
 
 /*
  * User Objects
@@ -167,7 +166,6 @@
  * Meshes
  */
 #include "EBSDMesh.h"
-#include "ImageMesh.h"
 
 /*
  * Actions
@@ -361,13 +359,10 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(EBSDReader);
   registerUserObject(SolutionRasterizer);
 
-  registerFunction(ImageFunction);
-
   registerVectorPostprocessor(GrainCentersPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
 
   registerMesh(EBSDMesh);
-  registerMesh(ImageMesh);
 }
 
 // External entry point for dynamic syntax association
