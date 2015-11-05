@@ -1,3 +1,8 @@
+#
+# In this test we set the initial condition of a set of order parameters
+# by pulling out the only grains from given EBSD data file that belong to a specified phase
+#
+
 [Problem]
   type = FEProblem
   solve = false
