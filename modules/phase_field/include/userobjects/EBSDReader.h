@@ -77,6 +77,11 @@ public:
    */
   unsigned int getGrainNum(unsigned int phase) const;
 
+  /**
+   * Return the feature id (global grain number) for a given phase and phase grain number
+   */
+  unsigned int getFeatureID(unsigned int phase, unsigned int grain) const { return _feature_id[phase][grain]; }
+
   /// Factory function to return a point functor specified by name
   EBSDPointDataFunctor * getPointDataAccessFunctor(const MooseEnum & field_name) const;
   /// Factory function to return a average functor specified by name

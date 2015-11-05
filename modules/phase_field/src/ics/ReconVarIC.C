@@ -28,16 +28,11 @@ ReconVarIC::ReconVarIC(const InputParameters & parameters) :
     _op_index(getParam<unsigned int>("op_index")),
     _node_to_grain_weight_map(_ebsd_reader.getNodeToGrainWeightMap())
 {
-  if (_consider_phase)
-    mooseError("In ReconvarIC, setting ics from grain(phase) information is not currently supported");
 }
 
 void
 ReconVarIC::initialSetup()
 {
-  // grain index number offset
-  _grain_index_offset = _consider_phase ? 1 : 0;
-
   // number of grains this ICs deals with
   _grain_num = _consider_phase ?_ebsd_reader.getGrainNum(_phase) : _ebsd_reader.getGrainNum();
 
@@ -75,12 +70,10 @@ ReconVarIC::value(const Point & /*p*/)
   for (unsigned int grain = 0; grain < _grain_num; ++grain)
   {
     // If the current order parameter index (_op_index) is equal to the assinged index (_assigned_op),
-    // set the value from node_to_grain_weight_map
-    if (!_consider_phase)
-      if (_assigned_op[grain] == _op_index && (it->second)[grain] > 0.0)
-        return (it->second)[grain];
-
-    //TODO: Make this work when considering phase
+    // set the value from node_to_grain_weight_map=
+    Real value = (it->second)[_consider_phase ? _ebsd_reader.getFeatureID(_phase, grain) : grain];
+    if (_assigned_op[grain] == _op_index && value > 0.0)
+      return value;
   }
 
   return 0.0;
@@ -90,7 +83,7 @@ Point
 ReconVarIC::getCenterPoint(unsigned int grain)
 {
   if (_consider_phase)
-    return _ebsd_reader.getAvgData(_phase, grain + _grain_index_offset).p;
+    return _ebsd_reader.getAvgData(_phase, grain).p;
   else
-    return _ebsd_reader.getAvgData(grain + _grain_index_offset).p;
+    return _ebsd_reader.getAvgData(grain).p;
 }

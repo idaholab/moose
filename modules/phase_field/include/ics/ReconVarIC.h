@@ -41,7 +41,6 @@ private:
   unsigned int _op_index;
 
   unsigned int _grain_num;
-  int _grain_index_offset;
 
   std::vector<Point> _centerpoints;
   std::vector<Real> _assigned_op;

@@ -13,6 +13,13 @@
     exodiff = '2phase_reconstruction_test_out.e'
     max_time = 1000
     recover = false # issue #5188
-    #skip = 'See issue #5502'
+  [../]
+
+  [./2phase_reconstruction_test2]
+    type = 'Exodiff'
+    input = '2phase_reconstruction_test2.i'
+    exodiff = '2phase_reconstruction_test2_out.e'
+    max_time = 1000
+    recover = false # issue #5188
   [../]
 []
