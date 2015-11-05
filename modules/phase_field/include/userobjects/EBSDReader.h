@@ -18,6 +18,14 @@ InputParameters validParams<EBSDReader>();
 /**
  * A GeneralUserObject that reads an EBSD file and stores the centroid
  * data in a data structure which indexes on element centroids.
+ *
+ * Grains are indexed through multiple schemes:
+ *  * feature_id   The grain number in the EBSD data file
+ *  * global_id    The index into the global average data (this is feature_id shifted back by feature_id_origin)
+ *  * local_id     The index into the per-phase grain list. This is only unique when combined with phase number
+ *
+ * Phases are referred to using the numbers in the EBSD data file. In case the phase number in the data file
+ * starts at 1 the phase 0 will simply contain no grains.
  */
 class EBSDReader : public EulerAngleProvider, public EBSDAccessFunctors
 {
@@ -55,7 +63,7 @@ public:
   /**
    * Get the requested type of average data for a given phase and grain.
    */
-  const EBSDAvgData &  getAvgData(unsigned int phase, unsigned int grain) const;
+  const EBSDAvgData &  getAvgData(unsigned int phase, unsigned int local_id) const;
 
   /**
    * EulerAngleProvider interface implementation to fetch a triplet of Euler angles
@@ -70,7 +78,7 @@ public:
   /**
    * Return the total number of phases
    */
-  virtual unsigned int getPhaseNum() const { return _feature_id.size(); }
+  virtual unsigned int getPhaseNum() const { return _global_id.size(); }
 
   /**
    * Return the number of grains in a given phase
@@ -80,7 +88,12 @@ public:
   /**
    * Return the feature id (global grain number) for a given phase and phase grain number
    */
-  unsigned int getFeatureID(unsigned int phase, unsigned int grain) const { return _feature_id[phase][grain]; }
+  unsigned int getFeatureID(unsigned int phase, unsigned int local_id) const { return _avg_data[_global_id[phase][local_id]].grain; }
+
+  /**
+   * Return the feature id (global grain number) for a given phase and phase grain number
+   */
+  unsigned int getGlobalID(unsigned int phase, unsigned int local_id) const { return _global_id[phase][local_id]; }
 
   /// Factory function to return a point functor specified by name
   EBSDPointDataFunctor * getPointDataAccessFunctor(const MooseEnum & field_name) const;
@@ -122,8 +135,11 @@ protected:
   /// Euler Angles by feature ID
   std::vector<EulerAngles> _avg_angles;
 
-  /// feature ID for given phases and grains
-  std::vector<std::vector<unsigned int> > _feature_id;
+  /// map from feature_id to global_id
+  std::map<unsigned int, unsigned int> _global_id_map;
+
+  /// global ID for given phases and grains
+  std::vector<std::vector<unsigned int> > _global_id;
 
   /// Map of grain weights per node
   std::map<dof_id_type, std::vector<Real> > _node_to_grain_weight_map;

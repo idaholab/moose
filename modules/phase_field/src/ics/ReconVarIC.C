@@ -38,8 +38,8 @@ ReconVarIC::initialSetup()
 
   // fetch all center points
   _centerpoints.resize(_grain_num);
-  for (unsigned int grain = 0; grain < _grain_num; ++grain)
-    _centerpoints[grain] = getCenterPoint(grain);
+  for (unsigned int index = 0; index < _grain_num; ++index)
+    _centerpoints[index] = getCenterPoint(index);
 
   // We do not want to have more order parameters than grains. That would leave some unused.
   if (_op_num > _grain_num)
@@ -66,13 +66,13 @@ ReconVarIC::value(const Point & /*p*/)
   //Get local information from EBSDReader object
   EBSDReader::EBSDPointData local_ebsd_data; // = _ebsd_reader.getData(p);
 
-  // Increment through all grains at node_index
-  for (unsigned int grain = 0; grain < _grain_num; ++grain)
+  // Increment through all grains at node_index (these are global IDs if consider_phase is false and local IDs otherwise)
+  for (unsigned int index = 0; index < _grain_num; ++index)
   {
     // If the current order parameter index (_op_index) is equal to the assinged index (_assigned_op),
     // set the value from node_to_grain_weight_map=
-    Real value = (it->second)[_consider_phase ? _ebsd_reader.getFeatureID(_phase, grain) : grain];
-    if (_assigned_op[grain] == _op_index && value > 0.0)
+    Real value = (it->second)[_consider_phase ? _ebsd_reader.getGlobalID(_phase, index) : index];
+    if (_assigned_op[index] == _op_index && value > 0.0)
       return value;
   }
 
@@ -80,10 +80,10 @@ ReconVarIC::value(const Point & /*p*/)
 }
 
 Point
-ReconVarIC::getCenterPoint(unsigned int grain)
+ReconVarIC::getCenterPoint(unsigned int index)
 {
   if (_consider_phase)
-    return _ebsd_reader.getAvgData(_phase, grain).p;
+    return _ebsd_reader.getAvgData(_phase, index).p;
   else
-    return _ebsd_reader.getAvgData(grain).p;
+    return _ebsd_reader.getAvgData(index).p;
 }
