@@ -2,7 +2,7 @@
  * distributionNDBase.C
  * Created on Oct. 23, 2015
  * Author: @wangc
- * Extracted from @alfoa (Feb 6, 2014) distribution_base_ND.C   
+ * Extracted from @alfoa (Feb 6, 2014) distribution_base_ND.C
  *
  */
 
@@ -38,8 +38,8 @@ using boost::math::normal;
 
 BasicDistributionND::BasicDistributionND()
 {
-	_tolerance = 0.1;
-	_initial_divisions = 10;
+  _tolerance = 0.1;
+  _initial_divisions = 10;
 }
 
 BasicDistributionND::~BasicDistributionND()
@@ -52,7 +52,7 @@ BasicDistributionND::getVariable(const std::string & variable_name){
 
    if(_dis_parameters.find(variable_name) != _dis_parameters.end())
    {
-          res = _dis_parameters.find(variable_name) ->second;
+    res = _dis_parameters.find(variable_name) ->second;
    }
    else
    {
@@ -79,61 +79,61 @@ BasicDistributionND::getType(){
 }
 
 double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
-	  /**
-	   * This function calculates the integral of the pdf in a cell region
-	   * In the 1D case a cell region is an interval [a,b], thus the integral of the pdf in such interval is
-	   * calculated as CDF(b)-CDF(a). This functions perform a similar evolution but for a generic ND cell
-	   */
+    /**
+     * This function calculates the integral of the pdf in a cell region
+     * In the 1D case a cell region is an interval [a,b], thus the integral of the pdf in such interval is
+     * calculated as CDF(b)-CDF(a). This functions perform a similar evolution but for a generic ND cell
+     */
 
-	double value = 0.0;
+  double value = 0.0;
 
-	int numberOfVerteces = (int)pow(2,center.size());
-	double sign = 1.0;
+  int numberOfVerteces = (int)pow(2,center.size());
+  double sign = 1.0;
 
-	int counter=1;
+  int counter=1;
 
-	for(int i=numberOfVerteces; i>0; i--){
-		std::vector<double> index = int2binary(i-1,center.size());
-		std::vector<double> NDcoordinate(center.size());
+  for(int i=numberOfVerteces; i>0; i--){
+    std::vector<double> index = int2binary(i-1,center.size());
+    std::vector<double> NDcoordinate(center.size());
 
-		for(unsigned int j=0; j<center.size(); j++){
-			if (index.at(j)==0)
-				NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
-			else
-				NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
-		}
-		value += Cdf(NDcoordinate) * sign;
+    for(unsigned int j=0; j<center.size(); j++){
+      if (index.at(j)==0)
+        NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
+      else
+        NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
+    }
+    value += Cdf(NDcoordinate) * sign;
 
-		sign = sign * (-1.0);
-		counter++;
-		if (counter%2)
-			sign = sign * (-1.0);
-	}
+    sign = sign * (-1.0);
+    counter++;
+    if (counter%2)
+      sign = sign * (-1.0);
+  }
 
-	return value;
+  return value;
 }
 
 //double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
-//	double value=0.0;
+//  double value=0.0;
 //
-//	int numberOfVerteces = (int)pow(2,center.size());
+//  int numberOfVerteces = (int)pow(2,center.size());
 //
-//	for(int i=0; i<numberOfVerteces; i++){
-//		std::vector<double> index = int2binary(i,center.size());
-//		std::vector<double> NDcoordinate(center.size());
+//  for(int i=0; i<numberOfVerteces; i++){
+//    std::vector<double> index = int2binary(i,center.size());
+//    std::vector<double> NDcoordinate(center.size());
 //
-//		for(unsigned int j=0; j<center.size(); j++){
-//			if (index[j]==0)
-//				NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
-//			else
-//				NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
-//		}
-//		value += Cdf(NDcoordinate);
-//	}
+//    for(unsigned int j=0; j<center.size(); j++){
+//      if (index[j]==0)
+//        NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
+//      else
+//        NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
+//    }
+//    value += Cdf(NDcoordinate);
+//  }
 //
-//	value = value/numberOfVerteces;
+//  value = value/numberOfVerteces;
 //
-//	return value;
+//  return value;
 //}
 
 
@@ -164,6 +164,5 @@ double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
 
 //std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){
 std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & F, double & g){
-	return dist.InverseCdf(F,g);
+  return dist.InverseCdf(F,g);
 }
-

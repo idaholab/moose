@@ -34,8 +34,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 
-#include <Eigen/Dense>
-
+//#include <Eigen/Dense>
+#include <Eigen/SVD>
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 #define _USE_MATH_DEFINES
@@ -116,7 +116,6 @@ void inverseMatrix(double* A, int N)
 }
 */
 
-
 //Roughly based on http://savingyoutime.wordpress.com/2009/09/21/c-matrix-inversion-boostublas/ and libs/numeric/ublas/test/test_lu.cpp
 void invertMatrixBoost(matrixDouble & a, matrixDouble & aInverted)
 {
@@ -130,8 +129,6 @@ void invertMatrixBoost(matrixDouble & a, matrixDouble & aInverted)
   boost::numeric::ublas::lu_substitute(a, pm, aInverted);
 }
 
-
-
 void computeInverse(const std::vector<std::vector<double> > & matrix, std::vector<std::vector<double> > & inverse){
         int dimensions = matrix.size();
         matrixDouble A(dimensions,dimensions),inverted(dimensions,dimensions);
@@ -140,8 +137,7 @@ void computeInverse(const std::vector<std::vector<double> > & matrix, std::vecto
         matrixBackConversionBoost(inverted, inverse);
 }
 
-
-// Convert the vector of covariance to vector of vector of covariance 
+// Convert the vector of covariance to vector of vector of covariance
 void  vectorToMatrix(unsigned int &rows,unsigned int &columns,std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix) {
         /** Input Parameter
          * vecMatrix: covariance matrix stored in a vector
@@ -155,7 +151,7 @@ void  vectorToMatrix(unsigned int &rows,unsigned int &columns,std::vector<double
         rows = dimensions;
         columns = dimensions;
         if(rows*columns != vecMatrix.size())
-	              throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
+                      throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
         for (int row = 0; row < rows; ++row) {
                 std::vector<double> temp;
                 for (int colm = 0; colm < columns; ++colm) {
@@ -203,7 +199,6 @@ double getDeterminant(std::vector<std::vector<double> > matrix){
         return getDeterminantBoost(A);
 
 }
-
 
 /*
 double getDeterminant(std::vector<std::vector<double> > matrix){
