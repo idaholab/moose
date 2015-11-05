@@ -24,6 +24,7 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
+  MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
   MaterialProperty<RankTwoTensor> & _total_strain_old;
   MaterialProperty<RankTwoTensor> & _rotation_increment;
 

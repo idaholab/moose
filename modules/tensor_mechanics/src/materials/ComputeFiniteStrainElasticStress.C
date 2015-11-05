@@ -39,10 +39,9 @@ ComputeFiniteStrainElasticStress::computeQpStress()
   //Rotate the stress to the current configuration
   _stress[_qp] = _rotation_increment[_qp]*intermediate_stress*_rotation_increment[_qp].transpose();
 
-  //Assign value for elastic strain, which is equal to the total strain
-  _elastic_strain[_qp] = _total_strain[_qp];
+  //Assign value for elastic strain, which is equal to the mechanical strain
+  _elastic_strain[_qp] = _mechanical_strain[_qp];
 
   //Compute dstress_dstrain
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp]; //This is NOT the exact jacobian
 }
-
