@@ -63,12 +63,13 @@ CROW_MODULES = $(CROW_DIR)/control_modules
 ifeq ($(UNAME),Darwin)
 DISTRIBUTION_KLUDGE=$(CROW_LIB)
 else
-DISTRIBUTION_KLUDGE=$(CROW_DIR)/src/distributions/distribution_1D.$(obj-suffix)  $(CROW_DIR)/src/distributions/distributionFunctions.$(obj-suffix) $(CROW_DIR)/src/distributions/distribution_base_ND.$(obj-suffix) $(CROW_DIR)/src/distributions/distribution.$(obj-suffix) $(CROW_DIR)/src/distributions/DistributionContainer.$(obj-suffix)
+DISTRIBUTION_KLUDGE=$(CROW_DIR)/src/distributions/distribution_1D.$(obj-suffix)  $(CROW_DIR)/src/distributions/distributionFunctions.$(obj-suffix) $(CROW_DIR)/src/distributions/distributionNDBase.$(obj-suffix) $(CROW_DIR)/src/distributions/distributionNDNormal.$(obj-suffix) $(CROW_DIR)/src/distributions/distribution.$(obj-suffix) $(CROW_DIR)/src/distributions/DistributionContainer.$(obj-suffix)
 endif
 
 $(CROW_DIR)/control_modules/_distribution1D.so : $(CROW_DIR)/control_modules/distribution1D.i \
 						 $(CROW_DIR)/src/distributions/distribution_1D.C \
-						 $(CROW_DIR)/src/distributions/distribution_base_ND.C \
+						 $(CROW_DIR)/src/distributions/distributionNDBase.C \
+						 $(CROW_DIR)/src/distributions/distributionNDNormal.C \
 						 $(CROW_DIR)/src/distributions/DistributionContainer.C \
 						 $(CROW_DIR)/src/distributions/distributionFunctions.C \
 						 $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.C \

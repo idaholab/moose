@@ -4,7 +4,11 @@
 #include <string>
 #include <vector>
 #include "MooseObject.h"
-#include "distribution_base_ND.h"
+#include "distributionNDBase.h"
+#include "distributionNDInverseWeight.h"
+#include "distributionNDNormal.h"
+#include "distributionNDCartesianSpline.h"
+#include "distributionNDScatteredMS.h"
 #include "ND_Interpolation_Functions.h"
 
 class distributionND;
