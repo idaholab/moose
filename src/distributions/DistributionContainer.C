@@ -5,7 +5,8 @@
  *      Author: alfoa
  */
 #include "DistributionContainer.h"
-#include "distribution_base_ND.h"
+//#include "distribution_base_ND.h"
+#include "distributionNDBase.h"
 #include <iostream>
 #include <cmath>
 #include <cstdlib>

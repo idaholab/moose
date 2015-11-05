@@ -4,7 +4,7 @@ import warnings
 warnings.simplefilter('default',DeprecationWarning)
 
 import sys
-
+import numpy as np
 def find_distribution1D():
   """ find the crow distribution1D module and return it. """
   if sys.version_info.major > 2:
@@ -38,3 +38,19 @@ def checkAnswer(comment,value,expected,results,tol=1e-10):
     results["fail"] += 1
   else:
     results["pass"] += 1
+
+def checkArrayAllClose(comment,value,expected,results,tol=1e-11):
+  """ Will check if a test passes or fails and update the results dictionary.
+    @ In, comment: A user-specified comment that will be printed with the test
+                   case.
+    @ In, value: the generated test array.
+    @ In, expected: the gold standard to which array will be compared.
+    @ InOut, results: a dictionary to which pass or fail will be incremented.
+    @ In, tol: an optional tolerance value specifying how close expected and
+               value should be.
+  """
+  if np.allclose(value,expected,rtol=tol,atol=tol):
+    results["pass"] += 1
+  else:
+    print("checking answer",comment,value,"!=",expected)
+    results["fail"] += 1

@@ -7,6 +7,7 @@
  */
 
 #include "distribution_ND.h"
+#include "distributionNDCartesianSpline.h"
 #include <string>
 #include <list>
 

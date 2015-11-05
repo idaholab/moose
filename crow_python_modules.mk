@@ -3,7 +3,7 @@ DISTRIBUTION_COMPILE_COMMAND=$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -I$(CROW_LIB_INCLUDE_DIR) -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/  -MMD -MF $@.d -MT $@ -c $< -o $@
 
 #from setup.py
-DISTRIBUTION_SOURCE=$(CROW_DIR)/src/distributions/distribution.C $(CROW_DIR)/src/utilities/MDreader.C $(CROW_DIR)/src/utilities/inverseDistanceWeigthing.C $(CROW_DIR)/src/utilities/microSphere.C $(CROW_DIR)/src/utilities/NDspline.C $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.C $(CROW_DIR)/src/distributions/distribution_base_ND.C $(CROW_DIR)/src/distributions/distributionFunctions.C $(CROW_DIR)/src/distributions/DistributionContainer.C $(CROW_DIR)/src/distributions/distribution_1D.C
+DISTRIBUTION_SOURCE=$(CROW_DIR)/src/distributions/distribution.C $(CROW_DIR)/src/utilities/MDreader.C $(CROW_DIR)/src/utilities/inverseDistanceWeigthing.C $(CROW_DIR)/src/utilities/microSphere.C $(CROW_DIR)/src/utilities/NDspline.C $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.C  $(CROW_DIR)/src/distributions/distributionNDBase.C $(CROW_DIR)/src/distributions/distributionNDNormal.C $(CROW_DIR)/src/distributions/distributionFunctions.C $(CROW_DIR)/src/distributions/DistributionContainer.C $(CROW_DIR)/src/distributions/distribution_1D.C
 
 #from setup.py
 INTERPOLATION_SOURCE=$(CROW_DIR)/src/utilities/ND_Interpolation_Functions.C $(CROW_DIR)/src/utilities/NDspline.C $(CROW_DIR)/src/utilities/microSphere.C $(CROW_DIR)/src/utilities/inverseDistanceWeigthing.C $(CROW_DIR)/src/utilities/MDreader.C
@@ -17,7 +17,13 @@ $(CROW_DIR)/src/distributions/distribution_1D.$(obj-suffix): $(CROW_DIR)/src/dis
 $(CROW_DIR)/src/distributions/distributionFunctions.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionFunctions.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
-$(CROW_DIR)/src/distributions/distribution_base_ND.$(obj-suffix): $(CROW_DIR)/src/distributions/distribution_base_ND.C
+#$(CROW_DIR)/src/distributions/distribution_base_ND.$(obj-suffix): $(CROW_DIR)/src/distributions/distribution_base_ND.C
+#	$(DISTRIBUTION_COMPILE_COMMAND)
+
+$(CROW_DIR)/src/distributions/distributionNDBase.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionNDBase.C
+	$(DISTRIBUTION_COMPILE_COMMAND)
+
+$(CROW_DIR)/src/distributions/distributionNDNormal.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionNDNormal.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
 $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.$(obj-suffix): $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.C

@@ -34,6 +34,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 
+//#include <Eigen/Dense>
+#include <Eigen/SVD>
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 #define _USE_MATH_DEFINES
@@ -228,6 +230,131 @@ double getDeterminant(std::vector<std::vector<double> > matrix){
         return determinant;
 }
 */
+
+void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix) {
+  /**
+   * This function compute the singular value decomposition for given matrix
+   * Input Parameters
+   * matrix: provided data
+   * Output Parameters
+   * leftSingularVectors: stores the left singular vectors for given matrix
+   * rightSingularVectors: stores the right singular vectors for given matrix
+   * singularValues: stores the singular values for given matrix
+   */
+  unsigned int row = matrix.size();
+  unsigned int col = matrix.at(0).size();
+  unsigned int dim = 0;
+  if(row > col) {
+    dim = col;
+  }else {
+    dim = row;
+  }
+  Eigen::MatrixXd A(row,col);
+  Eigen::MatrixXd U(row,row);
+  Eigen::MatrixXd V(col,col);
+  Eigen::MatrixXd X(row,dim);
+  Eigen::VectorXd S(dim);
+  matrixConversionToEigenType(matrix,A);
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A,Eigen::ComputeFullU | Eigen::ComputeFullV);
+  U = svd.matrixU();
+  V = svd.matrixV();
+  S = svd.singularValues();
+  for(unsigned int i = 0; i < dim; ++i) {
+    X.col(i) = U.col(i)*sqrt(S(i));
+  }
+  matrixConversionToCxxVVectorType(U,leftSingularVectors);
+  matrixConversionToCxxVVectorType(V,rightSingularVectors);
+  vectorConversionToCxxVectorType(S,singularValues);
+  matrixConversionToCxxVVectorType(X,transformedMatrix);
+}
+
+void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix, unsigned int rank) {
+  /**
+   * This function compute the singular value decomposition for given matrix
+   * Input Parameters
+   * matrix: provided data
+   * Output Parameters
+   * leftSingularVectors: stores the left singular vectors for given matrix
+   * rightSingularVectors: stores the right singular vectors for given matrix
+   * singularValues: stores the singular values for given matrix
+   * rank: used for truncated svd, the number of singular values that will be kept for truncated svd
+   */
+  unsigned int row = matrix.size();
+  unsigned int col = matrix.at(0).size();
+  unsigned int dim = 0;
+  if(row > col) {
+    dim = col;
+  }else {
+    dim = row;
+  }
+  Eigen::MatrixXd A(row,col);
+  Eigen::MatrixXd U(row,row);
+  Eigen::MatrixXd V(col,col);
+  Eigen::MatrixXd X(row,rank);
+  Eigen::VectorXd S(dim);
+  matrixConversionToEigenType(matrix,A);
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A,Eigen::ComputeFullU | Eigen::ComputeFullV);
+  U = svd.matrixU();
+  V = svd.matrixV();
+  S = svd.singularValues();
+  for(unsigned int i = 0; i < rank; ++i) {
+    X.col(i) = U.col(i)*sqrt(S(i));
+  }
+  // transform and store the matrix for the truncated svd
+  matrixConversionToCxxVVectorType(U.block(0,0,row,rank),leftSingularVectors);
+  matrixConversionToCxxVVectorType(V.block(0,0,col,rank),rightSingularVectors);
+  vectorConversionToCxxVectorType(S.head(rank),singularValues);
+  matrixConversionToCxxVVectorType(X,transformedMatrix);
+}
+
+void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted) {
+  /**
+   * This function convert the data from type std::vector<std::vector<double> > to Eigen::MatrixXd
+   * Input Parameters
+   * original: provided data with the type of std::vector<std::vector<double> >
+   * Output Parameters
+   * converted: output data with the type of Eigen::MatrixXd
+   */
+  converted.resize(original.size(),original.at(0).size());
+  for(unsigned int row = 0; row < original.size(); ++row) {
+    for(unsigned int col = 0; col < original.at(0).size(); ++col) {
+      if(original.at(0).size() != original.at(row).size()) {
+        throwError("The matrix stored in the C++ vector container with different lenght of columns");
+      }
+      converted(row,col) = original.at(row).at(col);
+    }
+  }
+}
+
+void matrixConversionToCxxVVectorType(const Eigen::MatrixXd & original, std::vector<std::vector<double> > &converted) {
+  /**
+   * This function convert the data from type Eigen::MatrixXd to type std::vector<double>
+   * Input Parameters
+   * original: provided data with the type of Eigen::MatrixXd
+   * Output Parameters
+   * converted: output data with the type of std::vector<std::vector<double> >
+   */
+  for(unsigned int row = 0; row < original.rows(); ++row) {
+    std::vector<double> temp;
+    for(unsigned int col = 0; col < original.cols(); ++col) {
+      temp.push_back(original(row,col));
+    }
+    converted.push_back(temp);
+  }
+}
+
+void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vector<double> &converted) {
+  /**
+   * This function convert the data from type Eigen::VectorXd to type std::vector<double>
+   * Input Parameters
+   * original: provided data with the type of Eigen::VectorXd
+   * Output Parameters
+   * converted: output data with the type of std::vector<double>
+   */
+  for(unsigned int dim = 0; dim < original.rows(); ++dim) {
+    converted.push_back(original(dim));
+  }
+}
 
 // void nrerror(const char error_text[]){     // added const to avoid "warning: deprecated conversion from string constant to *char
 // /* Numerical Recipes standard error handler */
