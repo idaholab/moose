@@ -46,8 +46,12 @@ public:
   virtual void executeJacobian(unsigned int /*jvar*/) {}
 
 protected:
-  /// call this method to request the computation of a Jacobian w.r.t. to this variable
-  void requestJacobian(const std::string & var_name, unsigned int comp = 0);
+  /**
+   * Returns the index for a coupled variable by name and requests the computation
+   * of a Jacobian w.r.t. to this variable i.e. the call to executeJacobian() with
+   * shapefunctions initialized for this variable.
+   */
+  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
 
   /// shape function values
   const VariablePhiValue & _phi;
