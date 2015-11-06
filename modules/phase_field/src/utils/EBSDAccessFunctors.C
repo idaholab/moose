@@ -9,5 +9,5 @@ EBSDAccessFunctors::getPointDataFieldType()
 MooseEnum
 EBSDAccessFunctors::getAvgDataFieldType()
 {
-  return MooseEnum("phi1 phi phi2 phase symmetry", "", true);
+  return MooseEnum("phi1 phi phi2 phase symmetry local grain", "", true);
 }

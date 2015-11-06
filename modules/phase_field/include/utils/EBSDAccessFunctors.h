@@ -16,7 +16,7 @@ public:
   /// Per element EBSD data point
   struct EBSDPointData {
     Real phi1, phi, phi2, symmetry;
-    unsigned int grain, phase, op;
+    unsigned int grain, phase, op, global;
     Point p;
     std::vector<Real> custom;
   };
@@ -24,7 +24,7 @@ public:
   /// Averaged EBSD data
   struct EBSDAvgData {
     EulerAngles * angles;
-    unsigned int phase, symmetry, grain, n;
+    unsigned int phase, local, symmetry, grain, n;
     Point p;
     std::vector<Real> custom;
   };
@@ -83,6 +83,12 @@ public:
   };
   struct EBSDAvgDataPhase : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a.phase; };
+  };
+  struct EBSDAvgDataLocalID : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a.local; };
+  };
+  struct EBSDAvgDataGrain : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a.grain; };
   };
   struct EBSDAvgDataSymmetry : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a.symmetry; };

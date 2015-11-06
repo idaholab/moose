@@ -101,20 +101,19 @@ EBSDReader::readFile()
       d.p = Point(x, y, z);
 
       // determine number of grains in the dataset
-      if (d.grain > _feature_num) _feature_num = d.grain;
+      if (_global_id_map.find(d.grain) == _global_id_map.end())
+        _global_id_map[d.grain] = _feature_num++;
+      d.global = _global_id_map[d.grain];
 
       // The Order parameter is not yet assigned.
       // We initialize it to zero in order not to have undefined values that break the testing.
       d.op = 0;
 
-      unsigned global_index = indexFromPoint(Point(x, y, z));
+      unsigned int global_index = indexFromPoint(Point(x, y, z));
       _data[global_index] = d;
     }
   }
   stream_in.close();
-
-  // total number of grains is one higher than the maximum grain id
-  _feature_num += 1;
 
   // Resize the variables
   _avg_data.resize(_feature_num);
@@ -135,8 +134,8 @@ EBSDReader::readFile()
   // Iterate through data points to get average variable values for each grain
   for (std::vector<EBSDPointData>::iterator j = _data.begin(); j != _data.end(); ++j)
   {
-    EBSDAvgData & a = _avg_data[j->grain];
-    EulerAngles & b = _avg_angles[j->grain];
+    EBSDAvgData & a = _avg_data[_global_id_map[j->grain]];
+    EulerAngles & b = _avg_angles[_global_id_map[j->grain]];
 
     //use Eigen::Quaternion<Real> here?
     b.phi1 += j->phi1;
@@ -158,6 +157,9 @@ EBSDReader::readFile()
     for (unsigned int i = 0; i < _custom_columns; ++i)
       a.custom[i] += j->custom[i];
 
+    // store the feature (or grain) ID
+    a.grain = j->grain;
+
     a.p += j->p;
     a.n++;
   }
@@ -169,6 +171,7 @@ EBSDReader::readFile()
 
     if (a.n == 0) continue;
 
+    // TODO: need betetr way to average angles
     b.phi1 /= Real(a.n);
     b.Phi  /= Real(a.n);
     b.phi2 /= Real(a.n);
@@ -176,11 +179,13 @@ EBSDReader::readFile()
     // link the EulerAngles into the EBSDAvgData for access via the functors
     a.angles = &b;
 
-    if (a.phase >= _feature_id.size())
-      _feature_id.resize(a.phase + 1);
+    if (a.phase >= _global_id.size())
+      _global_id.resize(a.phase + 1);
 
-    a.grain = _feature_id[a.phase].size();
-    _feature_id[a.phase].push_back(i);
+    // the averaged per grain data locally contains the phase id, local id, and
+    // original feature id it is stored contiguously indexed by global id
+    a.local = _global_id[a.phase].size();
+    _global_id[a.phase].push_back(i);
 
     a.p *= 1.0/Real(a.n);
 
@@ -216,9 +221,9 @@ EBSDReader::getEulerAngles(unsigned int var) const
 }
 
 const EBSDReader::EBSDAvgData &
-EBSDReader::getAvgData(unsigned int phase, unsigned int grain) const
+EBSDReader::getAvgData(unsigned int phase, unsigned int local_id) const
 {
-  return _avg_data[indexFromIndex(_feature_id[phase][grain])];
+  return _avg_data[indexFromIndex(_global_id[phase][local_id])];
 }
 
 unsigned int
@@ -230,7 +235,7 @@ EBSDReader::getGrainNum() const
 unsigned int
 EBSDReader::getGrainNum(unsigned int phase) const
 {
-  return _feature_id[phase].size();
+  return _global_id[phase].size();
 }
 
 unsigned int
@@ -320,7 +325,7 @@ EBSDReader::buildNodeWeightMaps()
       const EBSDReader::EBSDPointData & d = getData(elem->centroid());
 
       // Calculate eta value and add to map
-      _node_to_grain_weight_map[node_id][d.grain] += 1.0 / n_elems;
+      _node_to_grain_weight_map[node_id][d.global] += 1.0 / n_elems;
       _node_to_phase_weight_map[node_id][d.phase] += 1.0 / n_elems;
     }
   }
