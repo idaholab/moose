@@ -67,14 +67,12 @@ ShapeTestUserObject::executeJacobian(unsigned int jvar)
     //
     // example jacobian term
     //
-    for (unsigned int j = 0; j < _phi.size(); ++j)
-    {
-      Real sum = 0.0;
-      for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-        sum += _JxW[qp] * _coord[qp] * (2.0 * _u_value[qp] * _phi[j][qp]) * _v_value[qp];
+    Real sum = 0.0;
+    for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+      sum += _JxW[qp] * _coord[qp] * (2.0 * _u_value[qp] * _phi[_j][qp]) * _v_value[qp];
 
-      // the user has to store the value of sum in a storage object indexed by global DOF
-    }
+    // the user has to store the value of sum in a storage object indexed by global DOF _j_global
+    // _storage[_j_global] += sum;
   }
 
   // derivative of _jacobi_sum w.r.t. v_j
@@ -86,7 +84,7 @@ ShapeTestUserObject::executeJacobian(unsigned int jvar)
     _execute_mask |= 2;
 
     // see above for the general structure. The derivative for _v_var is
-    // sum += _JxW[qp] * _coord[qp] * (_u_value[_qp] * _u_value[_qp]) * _phi[j][_qp];
+    // sum += _JxW[qp] * _coord[qp] * (_u_value[_qp] * _u_value[_qp]) * _phi[_j][_qp];
   }
 }
 
