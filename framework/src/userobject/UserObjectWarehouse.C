@@ -56,10 +56,14 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
     _post_shape_element_user_objects[it1->first].clear();
     for (std::vector<ShapeElementUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
     {
-      if (depend_uo.find((*it2)->name()) != depend_uo.end())
-        _pre_shape_element_user_objects[it1->first].push_back(*it2);
-      else
-        _post_shape_element_user_objects[it1->first].push_back(*it2);
+      // only add user objects that registered variables for Jacobian computation
+      if (!(*it2)->jacobianMooseVariables().empty())
+      {
+        if (depend_uo.find((*it2)->name()) != depend_uo.end())
+          _pre_shape_element_user_objects[it1->first].push_back(*it2);
+        else
+          _post_shape_element_user_objects[it1->first].push_back(*it2);
+      }
     }
   }
 

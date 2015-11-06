@@ -214,17 +214,19 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
          ++jvar_it)
     {
       unsigned int jvar = (*jvar_it)->number();
+      std::vector<dof_id_type> & dof_indices = (*jvar_it)->dofIndices();
+
       _fe_problem.prepareShapes(jvar, _tid);
 
       for (std::vector<ShapeElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].shapeElementUserObjects(Moose::ANY_BLOCK_ID, _group).begin();
            UserObject_it != _user_objects[_tid].shapeElementUserObjects(Moose::ANY_BLOCK_ID, _group).end();
            ++UserObject_it)
-        (*UserObject_it)->executeJacobian(jvar);
+        (*UserObject_it)->executeJacobianWrapper(jvar, dof_indices);
 
       for (std::vector<ShapeElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].shapeElementUserObjects(_subdomain, _group).begin();
            UserObject_it != _user_objects[_tid].shapeElementUserObjects(_subdomain, _group).end();
            ++UserObject_it)
-        (*UserObject_it)->executeJacobian(jvar);
+        (*UserObject_it)->executeJacobianWrapper(jvar, dof_indices);
     }
   }
 

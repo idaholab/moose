@@ -325,7 +325,7 @@ public:
   /**
    * Returns true if we are currently computing Jacobian
    */
-  virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
+  virtual const bool & currentlyComputingJacobian() { return _currently_computing_jacobian; }
 
   /**
    * The relative (both to solution size and dt) change in the L2 norm of the solution vector.
