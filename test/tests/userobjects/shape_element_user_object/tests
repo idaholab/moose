@@ -1,0 +1,7 @@
+[Tests]
+  [./shape_element_user_object]
+    type = RunApp
+    input = 'shape_element_user_object.i'
+    recover = false
+  [../]
+[]
