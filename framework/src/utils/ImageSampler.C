@@ -1,20 +1,28 @@
 /****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "ImageFunction.h"
-#include "MooseUtils.h"
+
+// MOOSE includes
+#include "ImageSampler.h"
+#include "MooseApp.h"
 #include "ImageMesh.h"
 
 template<>
-InputParameters validParams<ImageFunction>()
+InputParameters validParams<ImageSampler>()
 {
   // Define the general parameters
-  InputParameters params = validParams<Function>();
+  InputParameters params = emptyInputParameters();
   params += validParams<FileRangeBuilder>();
-  params.addClassDescription("Function with values sampled from a given image stack");
 
   params.addParam<Point>("origin", "Origin of the image (defaults to mesh origin)");
   params.addParam<Point>("dimensions", "x,y,z dimensions of the image (defaults to mesh dimensions)");
@@ -28,8 +36,8 @@ InputParameters validParams<ImageFunction>()
 
   // Threshold parameters
   params.addParam<double>("threshold", "The threshold value");
-  params.addParam<double>("upper_value", "The value to set for data greater than the threshold value");
-  params.addParam<double>("lower_value", "The value to set for data less than the threshold value");
+  params.addParam<double>("upper_value", 1, "The value to set for data greater than the threshold value");
+  params.addParam<double>("lower_value", 0, "The value to set for data less than the threshold value");
   params.addParamNamesToGroup("threshold upper_value lower_value", "Threshold");
 
   // Flip image
@@ -41,36 +49,36 @@ InputParameters validParams<ImageFunction>()
   return params;
 }
 
-ImageFunction::ImageFunction(const InputParameters & parameters) :
-    Function(parameters),
-    FileRangeBuilder(parameters)
+ImageSampler::ImageSampler(const InputParameters & parameters) :
+    FileRangeBuilder(parameters),
 #ifdef LIBMESH_HAVE_VTK
-    ,_data(NULL)
-    ,_algorithm(NULL)
+    _data(NULL),
+    _algorithm(NULL),
 #endif
+    _is_pars(parameters),
+    _is_console((parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))->getOutputWarehouse())
+
 {
 #ifndef LIBMESH_HAVE_VTK
-  // This should be impossible to reach, the registration of ImageFunction is also guarded with LIBMESH_HAVE_VTK
-  mooseError("libMesh must be configured with VTK enabled to utilize ImageFunction");
+  // This should be impossible to reach, the registration of ImageSampler is also guarded with LIBMESH_HAVE_VTK
+  mooseError("libMesh must be configured with VTK enabled to utilize ImageSampler");
 #endif
 }
 
-ImageFunction::~ImageFunction()
+ImageSampler::~ImageSampler()
 {
 }
 
 void
-ImageFunction::initialSetup()
+ImageSampler::setupImageSampler(MooseMesh & mesh)
 {
 #ifdef LIBMESH_HAVE_VTK
   // Get access to the Mesh object
-  FEProblem * fe_problem = getParam<FEProblem *>("_fe_problem");
-  MooseMesh & mesh = fe_problem->mesh();
   MeshTools::BoundingBox bbox = MeshTools::bounding_box(mesh.getMesh());
 
   // Set the dimensions from the Mesh if not set by the User
-  if (isParamValid("dimensions"))
-    _physical_dims = getParam<Point>("dimensions");
+  if (_is_pars.isParamValid("dimensions"))
+    _physical_dims = _is_pars.get<Point>("dimensions");
 
   else
   {
@@ -84,8 +92,8 @@ ImageFunction::initialSetup()
   }
 
   // Set the origin from the Mesh if not set in the input file
-  if (isParamValid("origin"))
-    _origin = getParam<Point>("origin");
+  if (_is_pars.isParamValid("origin"))
+    _origin = _is_pars.get<Point>("origin");
   else
   {
     _origin(0) = bbox.min()(0);
@@ -126,7 +134,7 @@ ImageFunction::initialSetup()
   {
     // Use our own parameters (using 'this' b/c of conflicts with filenames the local variable)
     filenames = this->filenames();
-    file_suffix = this->fileSuffix();
+    file_suffix = fileSuffix();
   }
 
   // Storage for the file names
@@ -152,7 +160,7 @@ ImageFunction::initialSetup()
 
   // Now that _image is set up, actually read the images
   // Indicate that data read has started
-  _console << "Reading image(s)..." << std::endl;
+  _is_console << "Reading image(s)..." << std::endl;
 
   // Extract the data
   _image->SetFileNames(_files);
@@ -175,14 +183,14 @@ ImageFunction::initialSetup()
   _bounding_box.max() = _origin + _physical_dims;
 
   // Indicate data read is completed
-  _console << "          ...image read finished" << std::endl;
+  _is_console << "          ...image read finished" << std::endl;
 
   // Set the component parameter
   // If the parameter is not set then vtkMagnitude() will applied
-  if (isParamValid("component"))
+  if (_is_pars.isParamValid("component"))
   {
     unsigned int n = _data->GetNumberOfScalarComponents();
-    _component = getParam<unsigned int>("component");
+    _component = _is_pars.get<unsigned int>("component");
     if (_component >= n)
       mooseError("'component' parameter must be empty or have a value of 0 to " << n-1);
   }
@@ -198,7 +206,7 @@ ImageFunction::initialSetup()
 }
 
 Real
-ImageFunction::value(Real /*t*/, const Point & p)
+ImageSampler::sample(const Point & p)
 {
 #ifdef LIBMESH_HAVE_VTK
 
@@ -234,11 +242,11 @@ ImageFunction::value(Real /*t*/, const Point & p)
 }
 
 void
-ImageFunction::vtkMagnitude()
+ImageSampler::vtkMagnitude()
 {
 #ifdef LIBMESH_HAVE_VTK
   // Do nothing if 'component' is set
-  if (isParamValid("component"))
+  if (_is_pars.isParamValid("component"))
     return;
 
   // Apply the greyscale filtering
@@ -253,12 +261,12 @@ ImageFunction::vtkMagnitude()
 }
 
 void
-ImageFunction::vtkShiftAndScale()
+ImageSampler::vtkShiftAndScale()
 {
 #ifdef LIBMESH_HAVE_VTK
   // Capture the parameters
-  double shift = getParam<double>("shift");
-  double scale = getParam<double>("scale");
+  double shift = _is_pars.get<double>("shift");
+  double scale = _is_pars.get<double>("scale");
 
   // Do nothing if shift and scale are not set
   if (shift == 0 || scale == 1)
@@ -281,15 +289,15 @@ ImageFunction::vtkShiftAndScale()
 }
 
 void
-ImageFunction::vtkThreshold()
+ImageSampler::vtkThreshold()
 {
 #ifdef LIBMESH_HAVE_VTK
   // Do nothing if threshold not set
-  if (!isParamValid("threshold"))
+  if (!_is_pars.isParamValid("threshold"))
     return;
 
   // Error if both upper and lower are not set
-  if (!isParamValid("upper_value") || !isParamValid("lower_value"))
+  if (!_is_pars.isParamValid("upper_value") || !_is_pars.isParamValid("lower_value"))
     mooseError("When thresholding is applied, both the upper_value and lower_value parameters must be set");
 
   // Create the thresholding object
@@ -299,11 +307,11 @@ ImageFunction::vtkThreshold()
   _image_threshold->SetInputConnection(_algorithm);
 
   // Setup the thresholding options
-  _image_threshold->ThresholdByUpper(getParam<Real>("threshold"));
+  _image_threshold->ThresholdByUpper(_is_pars.get<Real>("threshold"));
   _image_threshold->ReplaceInOn();
-  _image_threshold->SetInValue(getParam<Real>("upper_value"));
+  _image_threshold->SetInValue(_is_pars.get<Real>("upper_value"));
   _image_threshold->ReplaceOutOn();
-  _image_threshold->SetOutValue(getParam<Real>("lower_value"));
+  _image_threshold->SetOutValue(_is_pars.get<Real>("lower_value"));
   _image_threshold->SetOutputScalarTypeToDouble();
 
   // Perform the thresholding
@@ -316,13 +324,13 @@ ImageFunction::vtkThreshold()
 }
 
 void
-ImageFunction::vtkFlip()
+ImageSampler::vtkFlip()
 {
 #ifdef LIBMESH_HAVE_VTK
   // Convert boolean values into an integer array, then loop over it
-  int mask[3] = {getParam<bool>("flip_x"),
-                 getParam<bool>("flip_y"),
-                 getParam<bool>("flip_z")};
+  int mask[3] = {_is_pars.get<bool>("flip_x"),
+                 _is_pars.get<bool>("flip_y"),
+                 _is_pars.get<bool>("flip_z")};
 
   for (int dim=0; dim<3; ++dim)
   {
@@ -340,7 +348,7 @@ ImageFunction::vtkFlip()
 
 #ifdef LIBMESH_HAVE_VTK
 vtkSmartPointer<vtkImageFlip>
-ImageFunction::imageFlip(const int & axis)
+ImageSampler::imageFlip(const int & axis)
 {
   vtkSmartPointer<vtkImageFlip> flip_image = vtkSmartPointer<vtkImageFlip>::New();
 

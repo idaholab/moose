@@ -28,6 +28,8 @@
 #include "FileMesh.h"
 #include "GeneratedMesh.h"
 #include "TiledMesh.h"
+#include "ImageMesh.h"
+
 // MeshModifiers
 #include "MeshExtruder.h"
 #include "SideSetsFromPoints.h"
@@ -42,6 +44,7 @@
 #include "OrientedSubdomainBoundingBox.h"
 #include "RenameBlock.h"
 #include "AssignElementSubdomainID.h"
+#include "ImageSubdomain.h"
 
 // problems
 #include "FEProblem.h"
@@ -141,6 +144,7 @@
 #include "SplineFunction.h"
 #include "PiecewiseMultilinear.h"
 #include "LinearCombinationFunction.h"
+#include "ImageFunction.h"
 
 // materials
 #include "GenericConstantMaterial.h"
@@ -285,6 +289,7 @@
 #include "DT2.h"
 #include "PostprocessorDT.h"
 #include "AB2PredictorCorrector.h"
+
 // time integrators
 #include "SteadyState.h"
 #include "ImplicitEuler.h"
@@ -297,7 +302,6 @@
 #include "ImplicitMidpoint.h"
 #include "Heun.h"
 #include "Ralston.h"
-//
 #include "SimplePredictor.h"
 #include "AdamsPredictor.h"
 
@@ -426,6 +430,7 @@ registerObjects(Factory & factory)
   registerMesh(FileMesh);
   registerMesh(GeneratedMesh);
   registerMesh(TiledMesh);
+  registerMesh(ImageMesh);
 
   // mesh modifiers
   registerMeshModifier(MeshExtruder);
@@ -441,6 +446,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(OrientedSubdomainBoundingBox);
   registerMeshModifier(RenameBlock);
   registerMeshModifier(AssignElementSubdomainID);
+  registerMeshModifier(ImageSubdomain);
 
   // problems
   registerProblem(FEProblem);
@@ -539,6 +545,7 @@ registerObjects(Factory & factory)
   registerFunction(SplineFunction);
   registerFunction(PiecewiseMultilinear);
   registerFunction(LinearCombinationFunction);
+  registerFunction(ImageFunction);
 
   // materials
   registerMaterial(GenericConstantMaterial);

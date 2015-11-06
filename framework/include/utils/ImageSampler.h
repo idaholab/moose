@@ -1,15 +1,23 @@
 /****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef IMAGEFUNCTION_H
-#define IMAGEFUNCTION_H
+
+#ifndef IMAGESAMPLER_H
+#define IMAGESAMPLER_H
 
 // MOOSE includes
-#include "Function.h"
 #include "FileRangeBuilder.h"
+#include "ConsoleStream.h"
 
 // libmesh includes
 #include "libmesh/mesh_tools.h"
@@ -42,43 +50,46 @@
 
 #endif
 
+
 // Forward declarations
-class ImageFunction;
+class ImageSampler;
+class MooseMesh;
 
 template<>
-InputParameters validParams<ImageFunction>();
+InputParameters validParams<ImageSampler>();
 
 /**
- * A function for extracting data from an image or stack of images
+ * A helper class for reading and sampling images using VTK.
  */
-class ImageFunction :
-  public Function,
-  public FileRangeBuilder
+class ImageSampler : public FileRangeBuilder
 {
 public:
 
   /**
-   * Class constructor
-   * @param parameters The parameters object holding data for the class to use.
+   * Constructor.
+   *
+   * Use this object as an interface, being sure to also add the parameters to the
+   * child class.
+   *
+   * @see ImageFunction
    */
-  ImageFunction(const InputParameters & parameters);
+  ImageSampler(const InputParameters & parameters);
 
   /**
-   * Class destructor
+   * Destructor.
    */
-  virtual ~ImageFunction();
+  virtual ~ImageSampler();
 
   /**
    * Return the pixel value for the given point
-   * @param t Time (unused)
    * @param p The point at which to extract pixel data
    */
-  virtual Real value(Real t, const Point & p);
+  virtual Real sample(const Point & p);
 
   /**
    * Perform initialization of image data
    */
-  virtual void initialSetup();
+  virtual void setupImageSampler(MooseMesh & mesh);
 
 protected:
 
@@ -163,6 +174,13 @@ private:
 
   /// Bounding box for testing points
   MeshTools::BoundingBox _bounding_box;
+
+  /// Parameters for interface
+  const InputParameters & _is_pars;
+
+  /// Create a console stream object for this helper class
+  ConsoleStream _is_console;
+
 };
 
-#endif // IMAGEFUNCTION_H
+#endif // IMAGESAMPLER_H
