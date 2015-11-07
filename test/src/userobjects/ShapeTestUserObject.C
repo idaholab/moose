@@ -39,7 +39,13 @@ ShapeTestUserObject::ShapeTestUserObject(const InputParameters & parameters) :
 void
 ShapeTestUserObject::initialize()
 {
-  _jacobi_sum = 0.0;
+  _integral = 0.0;
+
+  // Jacobian term storage is up to the user. One option is using an std::vector
+  // We resize it to the total number of DOFs in the system and zero it out.
+  // WARNING: this can be large number (smart sparse storage could be a future improvement)
+  _jacobian_storage.assign(_subproblem.es().n_dofs(), 0.0);
+
   _execute_mask = 0;
 }
 
@@ -50,13 +56,13 @@ ShapeTestUserObject::execute()
   // integrate u^2*v over the simulation domain
   //
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
-    _jacobi_sum += _JxW[qp] * _coord[qp] * (_u_value[qp] * _u_value[qp]) * _v_value[qp];
+    _integral += _JxW[qp] * _coord[qp] * (_u_value[qp] * _u_value[qp]) * _v_value[qp];
 }
 
 void
 ShapeTestUserObject::executeJacobian(unsigned int jvar)
 {
-  // derivative of _jacobi_sum w.r.t. u_j
+  // derivative of _integral w.r.t. u_j
   if (jvar == _u_var)
   {
     // internal testing to make sure the _phis are initialized, set flag on call
@@ -64,15 +70,13 @@ ShapeTestUserObject::executeJacobian(unsigned int jvar)
       mooseError("Shape functions for u are initialized incorrectly. Expected " << _u_dofs << " DOFs, found " << _phi.size());
     _execute_mask |= 1;
 
-    //
-    // example jacobian term
-    //
+    // sum jacobian contributions over quadrature points
     Real sum = 0.0;
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
       sum += _JxW[qp] * _coord[qp] * (2.0 * _u_value[qp] * _phi[_j][qp]) * _v_value[qp];
 
     // the user has to store the value of sum in a storage object indexed by global DOF _j_global
-    // _storage[_j_global] += sum;
+    _jacobian_storage[_j_global] += sum;
   }
 
   // derivative of _jacobi_sum w.r.t. v_j
@@ -83,15 +87,21 @@ ShapeTestUserObject::executeJacobian(unsigned int jvar)
       mooseError("Shape functions for v are initialized incorrectly");
     _execute_mask |= 2;
 
-    // see above for the general structure. The derivative for _v_var is
-    // sum += _JxW[qp] * _coord[qp] * (_u_value[_qp] * _u_value[_qp]) * _phi[_j][_qp];
+    // sum jacobian contributions over quadrature points
+    Real sum = 0.0;
+    for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+      sum += _JxW[qp] * _coord[qp] * (_u_value[qp] * _u_value[qp]) * _phi[_j][qp];
+
+    // the user has to store the value of sum in a storage object indexed by global DOF _j_global
+    _jacobian_storage[_j_global] += sum;
   }
 }
 
 void
 ShapeTestUserObject::finalize()
 {
-  gatherSum(_jacobi_sum);
+  gatherSum(_integral);
+  gatherSum(_jacobian_storage);
 
   // check in all MPI processes if executeJacobian was called for each variable
   if (_fe_problem.currentlyComputingJacobian())
@@ -107,7 +117,12 @@ void
 ShapeTestUserObject::threadJoin(const UserObject & y)
 {
   const ShapeTestUserObject & shp_uo = dynamic_cast<const ShapeTestUserObject &>(y);
-  _jacobi_sum += shp_uo._jacobi_sum;
+
+  _integral += shp_uo._integral;
+
+  mooseAssert(_jacobian_storage.size() == shp_uo._jacobian_storage.size(), "Jacobian storage size is inconsistent across threads");
+  for (unsigned int i = 0; i < _jacobian_storage.size(); ++i)
+    _jacobian_storage[i] += shp_uo._jacobian_storage[i];
 
   // we expect the jacobians to be computed in every thread, so we use AND
   _execute_mask &= shp_uo._execute_mask;

@@ -24,6 +24,14 @@ class ShapeTestUserObject;
 template<>
 InputParameters validParams<ShapeTestUserObject>();
 
+/**
+ * Test and proof of concept class for computing UserObject Jacobians using the
+ * ShapeElementUserObject base class. This object computes the integral
+ * \f$ \int_\Omega u^2v dr \f$
+ * and builds a vector of all derivatives of the integral w.r.t. the DOFs of u and v.
+ * These Jacobian terms can be utilized by a Kernel that uses the integral in the
+ * calculation of its residual.
+ */
 class ShapeTestUserObject :
   public ShapeElementUserObject
 {
@@ -38,10 +46,16 @@ public:
   virtual void finalize();
   virtual void threadJoin(const UserObject & y);
 
-  Real getJacobiSumValue() const { return _jacobi_sum; }
+  ///@{ custom UserObject interface functions
+  Real getIntegral() const { return _integral; }
+  const std::vector<Real> & getJacobian() const { return _jacobian_storage; }
+  ///@}
 
 protected:
-  Real _jacobi_sum;
+  Real _integral;
+  std::vector<Real> _jacobian_storage;
+
+  /// Bit mask for testing purposes (bits get set if executeJacobian is called for a variable)
   unsigned int _execute_mask;
 
   VariableValue & _u_value;

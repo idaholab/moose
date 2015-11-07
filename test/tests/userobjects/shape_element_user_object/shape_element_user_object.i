@@ -47,9 +47,13 @@
   [./test]
     type = ShapeTestUserObject
     u = u
+    # first order lagrange variables have 4 DOFs per element
     u_dofs = 4
     v = v
+    # third order hermite variables have 16 DOFs per element
     v_dofs = 16
+    # as this userobject computes quantities for both the residual AND the jacobian
+    # it needs to have these execute_on flags set.
     execute_on = 'linear nonlinear'
   [../]
 []

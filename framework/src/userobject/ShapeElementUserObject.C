@@ -30,6 +30,7 @@ ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameter
     _currently_computing_jacobian(_fe_problem.currentlyComputingJacobian()),
     _compute_jacobians(getParam<bool>("compute_jacobians"))
 {
+  mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");
 }
 
 unsigned int
