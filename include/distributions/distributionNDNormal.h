@@ -63,7 +63,7 @@ public:
 
   double cellProbabilityWeight(std::vector<double> center, std::vector<double> dx);
   double inverseMarginalForPCA(double F);
-  
+
   void computeSVD();
   void computeSVD(int rank);
   double pdfInTransformedSpace(std::vector<double> x);
