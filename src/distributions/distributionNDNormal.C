@@ -384,14 +384,14 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
 }
 
 double BasicMultivariateNormal::cellProbabilityWeight(std::vector<double> center, std::vector<double> dx){
-	  /**
-	   * This function calculates the integral of the pdf in a cell region
-	   * In the 1D case a cell region is an interval [a,b], thus the integral of the pdf in such interval is
-	   * calculated as CDF(b)-CDF(a). This functions perform a similar evolution but for a generic ND cell
+    /**
+     * This function calculates the integral of the pdf in a cell region
+     * In the 1D case a cell region is an interval [a,b], thus the integral of the pdf in such interval is
+     * calculated as CDF(b)-CDF(a). This functions perform a similar evolution but for a generic ND cell
      * This function assumes all the input variables are uncorrelated, and follows univariate normal distribution N(0,1)
-	   */
+     */
 
-	double value = 1.0;
+  double value = 1.0;
   double upperBound = 0.0;
   double lowerBound = 0.0;
   double cdfValue = 0.0;
@@ -402,15 +402,15 @@ double BasicMultivariateNormal::cellProbabilityWeight(std::vector<double> center
     cdfValue = normalDistribution->Cdf(upperBound) - normalDistribution->Cdf(lowerBound);
     value *= cdfValue;
   }
-	return value;
+  return value;
 }
 
 double BasicMultivariateNormal::inverseMarginalForPCA(double F){
-	  /**
-	   * This function calculates the inverse marginal distribution at F of a MVN distribution when using pca decomposition
-	   */
+    /**
+     * This function calculates the inverse marginal distribution at F of a MVN distribution when using pca decomposition
+     */
   BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
-	return normalDistribution->InverseCdf(F);
+  return normalDistribution->InverseCdf(F);
 }
 
 double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix){
