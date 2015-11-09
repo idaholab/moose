@@ -106,13 +106,14 @@
 [Postprocessors]
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.5
+    threshold = 0.1
     convex_hull_buffer = 5.0
-    execute_on = 'initial timestep_end'
+    execute_on = 'timestep_end'
     remap_grains = true
     use_single_map = false
     enable_var_coloring = true
     condense_map_info = true
+    tracking_step = 1
   [../]
   [./DOFs]
     type = NumDOFs
