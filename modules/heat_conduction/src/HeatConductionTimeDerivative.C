@@ -40,16 +40,6 @@ HeatConductionTimeDerivative::HeatConductionTimeDerivative(const InputParameters
    _specific_heat(NULL),
    _density(NULL)
 {
-}
-
-void
-HeatConductionTimeDerivative::initialSetup()
-{
-  // Initialize the unity material property
-  _one.resize(_fe_problem.getMaxQps());
-  for (unsigned int i = 0; i < _one.size(); ++i)
-    _one[i] = 1;
-
   // Use the Heat Capacity based formulation
   if (_use_heat_capacity)
   {
@@ -63,6 +53,15 @@ HeatConductionTimeDerivative::initialSetup()
     _specific_heat = &getMaterialProperty<Real>("specific_heat_name");
     _density = &getMaterialProperty<Real>("density_name");
   }
+}
+
+void
+HeatConductionTimeDerivative::initialSetup()
+{
+  // Initialize the unity material property
+  _one.resize(_fe_problem.getMaxQps());
+  for (unsigned int i = 0; i < _one.size(); ++i)
+    _one[i] = 1;
 }
 
 Real
