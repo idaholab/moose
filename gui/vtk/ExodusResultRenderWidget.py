@@ -531,8 +531,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.time_slider_textbox = QtGui.QLineEdit()
     self.time_slider_textbox.setToolTip('Enter a number and press Enter to go to that timestep')
-    self.time_slider_textbox.setMaximumWidth(30)
-    self.time_slider_textbox.setMinimumWidth(30)
+    self.time_slider_textbox.setMaximumWidth(40)
+    self.time_slider_textbox.setMinimumWidth(40)
     self.time_slider_textbox.returnPressed.connect(self._sliderTextboxReturn)
 
     self.time_layout = QtGui.QHBoxLayout()
