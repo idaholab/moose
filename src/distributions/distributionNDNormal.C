@@ -594,13 +594,11 @@ double BasicMultivariateNormal::phi(double x){
  return value;
 }
 
-
 double BasicMultivariateNormal::phi_inv(double x){
  normal s;
  double value = quantile(s,x);
  return value;
 }
-
 
 //double BasicMultivariateNormal::rn(){
 //    boost::random::mt19937 rng;
