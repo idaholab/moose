@@ -6,6 +6,7 @@
 #include "ActionWarehouse.h"
 #include "FlowModel.h"
 #include "Simulation.h"
+#include "InputParameterWarehouse.h"
 
 class Component;
 class FEProblem;
