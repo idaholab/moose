@@ -22,6 +22,10 @@
       function = (y-0.5)^2
     [../]
   [../]
+  [./w]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [Kernels]
@@ -33,6 +37,13 @@
     type = Diffusion
     variable = v
   [../]
+  [./shape_w]
+    type = ExampleShapeElementKernel
+    user_object = example_uo
+    u = u
+    v = v
+    variable = w
+  [../]
   [./time_u]
     type = TimeDerivative
     variable = u
@@ -41,25 +52,33 @@
     type = TimeDerivative
     variable = v
   [../]
+  [./time_w]
+    type = TimeDerivative
+    variable = w
+  [../]
 []
 
 [UserObjects]
-  [./test]
-    type = TestShapeElementUserObject
-    u = u
-    # first order lagrange variables have 4 DOFs per element
-    u_dofs = 4
-    v = v
-    # third order hermite variables have 16 DOFs per element
-    v_dofs = 16
+  [./example_uo]
+    type = ExampleShapeElementUserObject
+    u = v
+    v = u
     # as this userobject computes quantities for both the residual AND the jacobian
     # it needs to have these execute_on flags set.
     execute_on = 'linear nonlinear'
   [../]
 []
 
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
   type = Transient
+  solve_type = NEWTON
   dt = 0.1
   num_steps = 2
 []
