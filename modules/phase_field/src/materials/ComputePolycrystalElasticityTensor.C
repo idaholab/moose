@@ -97,8 +97,8 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
   // Calculate elasticity tensor
   for (unsigned int op = 0; op<n_active_ops; ++op)
   {
-    // First position of the active ops contains grain number (starting at 1)
-    unsigned int grn_index = active_ops[op].first - 1;
+    // First position of the active ops contains grain number
+    unsigned int grn_index = active_ops[op].first;
 
     // Second position contains the order parameter index
     unsigned int op_index = active_ops[op].second;
@@ -126,7 +126,7 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
 
   for (unsigned int op = 0; op < n_active_ops; ++op)
   {
-    unsigned int grn_index = active_ops[op].first - 1;
+    unsigned int grn_index = active_ops[op].first;
     unsigned int op_index = active_ops[op].second;
     Real dhdopi = libMesh::pi * std::cos(libMesh::pi * ((*_vals[op_index])[_qp] - 0.5))/2.0;
     ElasticityTensorR4 C_deriv(_C_rotated[grn_index]);
@@ -140,4 +140,3 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
     (*_D_elastic_tensor[op_index])[_qp] = C_deriv;
   }
 }
-
