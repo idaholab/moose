@@ -93,8 +93,7 @@ ComputeUserObjectsThread::subdomainChanged()
       jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
 
-    _jacobian_moose_vars.clear();
-    std::copy(jacobian_moose_vars.begin(), jacobian_moose_vars.end(), std::back_inserter(_jacobian_moose_vars));
+    _jacobian_moose_vars.assign(jacobian_moose_vars.begin(), jacobian_moose_vars.end());
   }
 
   // InternalSideUserObject dependencies
