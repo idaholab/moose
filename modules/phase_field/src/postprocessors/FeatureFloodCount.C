@@ -140,7 +140,7 @@ FeatureFloodCount::execute()
     if (_is_elemental)
     {
       for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
-        flood(current_elem, var_num, 0);
+        flood(current_elem, var_num, -1 /* Designates unmarked region */);
     }
     else
     {
@@ -150,7 +150,7 @@ FeatureFloodCount::execute()
         const Node * current_node = current_elem->get_node(i);
 
         for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
-          flood(current_node, var_num, 0);
+          flood(current_node, var_num, -1 /* Designates unmarked region */);
       }
     }
   }
@@ -245,7 +245,7 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, b
     if (entity_it != _var_index_maps[var_idx].end())
       return entity_it->second;
     else
-      return 0;
+      return -1;
   }
   else
   {
@@ -254,7 +254,7 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, b
     if (entity_it != _bubble_maps[var_idx].end())
       return entity_it->second + _region_offsets[var_idx];
     else
-      return 0;
+      return -1;
   }
 }
 
@@ -284,7 +284,7 @@ FeatureFloodCount::pack(std::vector<unsigned int> & packed_data) const
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
-    data[map_num].resize(_region_counts[map_num]+1);
+    data[map_num].resize(_region_counts[map_num]);
 
     {
       std::map<dof_id_type, int>::const_iterator end = _bubble_maps[map_num].end();
@@ -293,7 +293,7 @@ FeatureFloodCount::pack(std::vector<unsigned int> & packed_data) const
       for (std::map<dof_id_type, int>::const_iterator it = _bubble_maps[map_num].begin(); it != end; ++it)
         data[map_num][(it->second)].insert(it->first);
 
-      mooseAssert(_region_counts[map_num]+1 == data[map_num].size(), "Error in packing data");
+      mooseAssert(_region_counts[map_num] == data[map_num].size(), "Error in packing data");
     }
 
     {
@@ -316,17 +316,16 @@ FeatureFloodCount::pack(std::vector<unsigned int> & packed_data) const
       // Now pack it up
       unsigned int current_idx = 0;
 
-      mooseAssert(data[map_num][0].empty(), "We have nodes marked with zeros - something is not correct");
       // Note: The zeroth "region" is everything outside of a bubble - we don't want to put
       // that into our packed data structure so start at 1 here!
-      for (unsigned int i = 1 /* Yes - start at 1 */; i <= _region_counts[map_num]; ++i)
+      for (unsigned int i = 0; i < _region_counts[map_num]; ++i)
       {
         partial_packed_data[current_idx++] = data[map_num][i].size();     // The number of nodes in the current region
 
         if (_single_map_mode)
         {
-          mooseAssert(i-1 < _region_to_var_idx.size(), "Index out of bounds in FeatureFloodCounter");
-          partial_packed_data[current_idx++] = _region_to_var_idx[i-1];   // The variable owning this bubble
+          mooseAssert(i < _region_to_var_idx.size(), "Index out of bounds in FeatureFloodCounter");
+          partial_packed_data[current_idx++] = _region_to_var_idx[i];     // The variable owning this bubble
         }
         else
           partial_packed_data[current_idx++] = map_num;                   // The variable owning this bubble
@@ -556,7 +555,7 @@ FeatureFloodCount::updateFieldInfo()
   // Finally update the original bubble map with field data from the merged sets
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
-    unsigned int counter = 1;
+    unsigned int counter = 0;
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
     {
       for (std::set<dof_id_type>::iterator it2 = it1->_entity_ids.begin(); it2 != it1->_entity_ids.end(); ++it2)
@@ -568,16 +567,16 @@ FeatureFloodCount::updateFieldInfo()
       }
 
       if (_single_map_mode)
-        _region_to_var_idx[counter-1] = it1->_var_idx;
+        _region_to_var_idx[counter] = it1->_var_idx;
       ++counter;
     }
 
-    _region_counts[map_num] = counter-1;
+    _region_counts[map_num] = counter;
   }
 }
 
 void
-FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, unsigned int live_region)
+FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, int live_region)
 {
   if (dof_object == NULL)
     return;
@@ -593,7 +592,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, unsigned
   _entities_visited[current_idx][entity_id] = true;
 
   // Determine which threshold to use based on whether this is an established region
-  Real threshold = (live_region ? _step_connecting_threshold : _step_threshold);
+  Real threshold = (live_region > -1 ? _step_connecting_threshold : _step_threshold);
 
   // Get the value of the current variable for the current entity
   Number entity_value;
@@ -617,11 +616,11 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, unsigned
 
   // Yay! A bubble -> Mark it!
   unsigned int map_num = _single_map_mode ? 0 : current_idx;
-  if (live_region)
+  if (live_region > -1)
     _bubble_maps[map_num][entity_id] = live_region;
   else
   {
-    _bubble_maps[map_num][entity_id] = ++_region_counts[map_num];
+    _bubble_maps[map_num][entity_id] = _region_counts[map_num]++;
     _region_to_var_idx.push_back(current_idx);
   }
 
