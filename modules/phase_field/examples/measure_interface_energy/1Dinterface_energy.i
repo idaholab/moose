@@ -69,8 +69,14 @@
   [./Int_energy]
     type = ParsedFunction
     vals = 'total_solute Cleft Cright Fleft Fright volume'
-    value = ((total_solute-Cleft*volume)/(Cright-Cleft))*Fleft+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fright
+    value = ((total_solute-Cleft*volume)/(Cright-Cleft))*Fright+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fleft
     vars = 'total_solute Cleft Cright Fleft Fright volume'
+  [../]
+  [./Diff]
+    type = ParsedFunction
+    vals = 'total_free_energy total_no_int'
+    vars = 'total_free_energy total_no_int'
+    value = total_free_energy-total_no_int
   [../]
 []
 
@@ -139,6 +145,10 @@
   [./total_no_int]
     type = FunctionValuePostprocessor
     function = Int_energy
+  [../]
+  [./Energy_of_Interface]
+    type = FunctionValuePostprocessor
+    function = Diff
   [../]
 []
 
