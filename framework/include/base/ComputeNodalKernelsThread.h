@@ -15,7 +15,7 @@
 #ifndef COMPUTENODALKERNELSTHREAD_H
 #define COMPUTENODALKERNELSTHREAD_H
 
-#include "ParallelUniqueId.h"
+#include "ThreadedNodeLoop.h"
 #include "NodalKernelWarehouse.h"
 
 // libMesh includes
@@ -27,7 +27,7 @@ class FEProblem;
 class AuxiliarySystem;
 
 
-class ComputeNodalKernelsThread
+class ComputeNodalKernelsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   ComputeNodalKernelsThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<NodalKernelWarehouse> & nodal_kernels);
@@ -35,16 +35,19 @@ public:
   // Splitting Constructor
   ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split);
 
-  void operator() (const ConstNodeRange & range);
+  virtual void pre();
+
+  virtual void onNode(ConstNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalKernelsThread & /*y*/);
 
 protected:
-  FEProblem & _fe_problem;
-  AuxiliarySystem & _sys;
-  THREAD_ID _tid;
+  AuxiliarySystem & _aux_sys;
 
   std::vector<NodalKernelWarehouse> & _nodal_kernels;
+
+  /// Number of contributions cached up
+  unsigned int _num_cached;
 };
 
 #endif //COMPUTENODALKERNELSTHREAD_H

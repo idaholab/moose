@@ -24,58 +24,58 @@
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(FEProblem & fe_problem,
                                                      AuxiliarySystem & sys,
                                                      std::vector<NodalKernelWarehouse> & nodal_kernels) :
-    _fe_problem(fe_problem),
-    _sys(sys),
-    _nodal_kernels(nodal_kernels)
+    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem, sys),
+    _aux_sys(sys),
+    _nodal_kernels(nodal_kernels),
+    _num_cached(0)
 {
 }
 
 // Splitting Constructor
-ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split /*split*/) :
-    _fe_problem(x._fe_problem),
-    _sys(x._sys),
-    _nodal_kernels(x._nodal_kernels)
+ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split) :
+    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+    _aux_sys(x._aux_sys),
+    _nodal_kernels(x._nodal_kernels),
+    _num_cached(0)
 {
 }
 
 void
-ComputeNodalKernelsThread::operator() (const ConstNodeRange & range)
+ComputeNodalKernelsThread::pre()
 {
-  ParallelUniqueId puid;
-  _tid = puid.id;
+  _num_cached = 0;
+}
 
-  unsigned int num_cached = 0;
+void
+ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
+{
+  const Node * node = *node_it;
 
-  for (ConstNodeRange::const_iterator node_it = range.begin() ; node_it != range.end(); ++node_it)
+  // prepare variables
+  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._nodal_vars[_tid].begin(); it != _aux_sys._nodal_vars[_tid].end(); ++it)
   {
-    const Node * node = *node_it;
+    MooseVariable * var = it->second;
+    var->prepareAux();
+  }
 
-    // prepare variables
-    for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
-    {
-      MooseVariable * var = it->second;
-      var->prepareAux();
-    }
+  _fe_problem.reinitNode(node, _tid);
 
-    _fe_problem.reinitNode(node, _tid);
+  const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
+  for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
+  {
+    for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = _nodal_kernels[_tid].activeBlockNodalKernels(*block_it).begin();
+         nodal_kernel_it != _nodal_kernels[_tid].activeBlockNodalKernels(*block_it).end();
+         ++nodal_kernel_it)
+      (*nodal_kernel_it)->computeResidual();
+  }
 
-    const std::set<SubdomainID> & block_ids = _sys.mesh().getNodeBlockIds(*node);
-    for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
-    {
-      for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = _nodal_kernels[_tid].activeBlockNodalKernels(*block_it).begin();
-          nodal_kernel_it != _nodal_kernels[_tid].activeBlockNodalKernels(*block_it).end();
-          ++nodal_kernel_it)
-        (*nodal_kernel_it)->computeResidual();
-    }
+  _num_cached++;
 
-    num_cached++;
-
-    if (num_cached % 20 == 0) // Cache 20 nodes worth before adding into the residual
-    {
-      num_cached = 0;
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      _fe_problem.addCachedResidual(_tid);
-    }
+  if (_num_cached == 20) // Cache 20 nodes worth before adding into the residual
+  {
+    _num_cached = 0;
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    _fe_problem.addCachedResidual(_tid);
   }
 }
 
