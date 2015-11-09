@@ -78,6 +78,12 @@ public:
   BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids);
 
   /**
+   * Destructor: does nothing but needs to be marked as virtual since
+   * this class defines virtual functions.
+   */
+  virtual ~BlockRestrictable() {}
+
+  /**
    * Return the block names for this object
    *
    * Note, if the 'blocks' input parameter was not utilized this will return an
