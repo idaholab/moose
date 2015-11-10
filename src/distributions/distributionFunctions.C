@@ -116,7 +116,6 @@ void inverseMatrix(double* A, int N)
 }
 */
 
-
 //Roughly based on http://savingyoutime.wordpress.com/2009/09/21/c-matrix-inversion-boostublas/ and libs/numeric/ublas/test/test_lu.cpp
 void invertMatrixBoost(matrixDouble & a, matrixDouble & aInverted)
 {
@@ -130,8 +129,6 @@ void invertMatrixBoost(matrixDouble & a, matrixDouble & aInverted)
   boost::numeric::ublas::lu_substitute(a, pm, aInverted);
 }
 
-
-
 void computeInverse(const std::vector<std::vector<double> > & matrix, std::vector<std::vector<double> > & inverse){
         int dimensions = matrix.size();
         matrixDouble A(dimensions,dimensions),inverted(dimensions,dimensions);
@@ -139,7 +136,6 @@ void computeInverse(const std::vector<std::vector<double> > & matrix, std::vecto
         invertMatrixBoost(A,inverted);
         matrixBackConversionBoost(inverted, inverse);
 }
-
 
 // Convert the vector of covariance to vector of vector of covariance
 void  vectorToMatrix(unsigned int &rows,unsigned int &columns,std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix) {
@@ -203,7 +199,6 @@ double getDeterminant(std::vector<std::vector<double> > matrix){
         return getDeterminantBoost(A);
 
 }
-
 
 /*
 double getDeterminant(std::vector<std::vector<double> > matrix){
