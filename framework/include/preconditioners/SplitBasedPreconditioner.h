@@ -15,19 +15,10 @@
 #ifndef SPLITBASEDPRECONDITIONER_H
 #define SPLITBASEDPRECONDITIONER_H
 
-#include "libmesh/petsc_macro.h"
-
-//Global includes
-#include <vector>
 // MOOSE includes
 #include "MoosePreconditioner.h"
-//libMesh includes
-#include "libmesh/preconditioner.h"
-#include "libmesh/system.h"
-#include "libmesh/linear_implicit_system.h"
 
-
-class FEProblem;
+// Forward declarations
 class NonlinearSystem;
 class SplitBasedPreconditioner;
 
@@ -50,16 +41,14 @@ public:
    */
   virtual ~SplitBasedPreconditioner(){};
 
-
   /**
    * Sets up internals.
-   *
    */
   void setup();
 
 protected:
   /// The nonlinear system this FSP is associated with (convenience reference)
   NonlinearSystem & _nl;
-
 };
+
 #endif //SPLITBASEDPRECONDITIONER_H

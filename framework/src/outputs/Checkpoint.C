@@ -19,6 +19,8 @@
 #include "Checkpoint.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "MaterialPropertyStorage.h"
+#include "RestartableData.h"
 
 // libMesh includes
 #include "libmesh/checkpoint_io.h"

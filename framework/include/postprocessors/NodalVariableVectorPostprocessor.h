@@ -16,16 +16,16 @@
 #define NODALVARIABLEVECTORPOSTPROCESSOR_H
 
 #include "NodalVectorPostprocessor.h"
-#include "Coupleable.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class NodalVariableVectorPostprocessor;
 
 template<>
 InputParameters validParams<NodalVariableVectorPostprocessor>();
 
+/**
+ * Base class VectorPostprocessors operating on nodal variables.
+ */
 class NodalVariableVectorPostprocessor : public NodalVectorPostprocessor
 {
 public:

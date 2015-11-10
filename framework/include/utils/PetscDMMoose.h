@@ -11,20 +11,26 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #ifndef PETSCDMMOOSE_H
 #define PETSCDMMOOSE_H
 
-#include "libmesh/petsc_macro.h"
 // This only works with petsc-3.3 and above.
+#include "libmesh/petsc_macro.h"
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-#include "NonlinearSystem.h"
-#include <map>
+
+// PETSc includes
+#include <petscdm.h>
+#define DMMOOSE "moose"
+
+// C++ includes
+#include <vector>
 #include <set>
 #include <string>
 
-#include <petscdm.h>
-#define DMMOOSE "moose"
+// Forward declarations
+class NonlinearSystem;
 
 extern PetscErrorCode DMMooseRegisterAll();
 extern PetscErrorCode DMCreateMoose(MPI_Comm,NonlinearSystem&,DM*);

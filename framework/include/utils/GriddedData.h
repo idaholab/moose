@@ -15,30 +15,30 @@
 #ifndef GRIDDEDDATA_H
 #define GRIDDEDDATA_H
 
+// C++ includes
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include <string>
 
-#include "MooseError.h"
+// libMesh includes
+#include "libmesh/libmesh_common.h" // Real
 
 /**
- * Container for holding a function defined on a grid of arbitrary dimension
+ * Container for holding a function defined on a grid of arbitrary dimension.
  *
- * Information is read from a file.
- * The file contains the grid, which has dimension _dim, and consists
- *   of _dim vectors of Reals.
- * The file also contains the function values at each grid point.
- * The file also contains information on how to embed the grid
- *   into a MOOSE simulation.  This is achieved through specifying the
- *   MOOSE direction that each grid axis corresponds to.  For instance,
- *   the first grid axis might correspond to the MOOSE "y" direction,
- *   the second grid axis might correspond to the MOOSE "t" direction, etc.
+ * Information is read from a file.  The file contains the grid, which
+ * has dimension _dim, and consists of _dim vectors of Reals.  The
+ * file also contains the function values at each grid point.  The
+ * file also contains information on how to embed the grid into a
+ * MOOSE simulation.  This is achieved through specifying the MOOSE
+ * direction that each grid axis corresponds to.  For instance, the
+ * first grid axis might correspond to the MOOSE "y" direction, the
+ * second grid axis might correspond to the MOOSE "t" direction, etc.
  */
 class GriddedData
 {
 public:
-
   /**
    * Construct with a file name
    */
@@ -49,9 +49,10 @@ public:
 
   /**
    * Returns the dimensionality of the grid.
-   * This may have nothing to do with the dimensionality of
-   * the simulation.  Eg, a 2D grid with axes (Y,Z) (so dim=2)
-   * be used in a 3D simulation
+   *
+   * This may have nothing to do with the dimensionality of the
+   * simulation.  Eg, a 2D grid with axes (Y,Z) (so dim=2) be used in
+   * a 3D simulation.
    */
   unsigned int getDim();
 
@@ -66,24 +67,22 @@ public:
 
   /**
    * Yields the grid.
-   * grid[i] = a vector of Reals that define the i_th axis of the grid
+   * grid[i] = a vector of Reals that define the i_th axis of the grid.
    */
   void getGrid(std::vector<std::vector<Real> > & grid);
 
   /**
-   * Yields the values defined at the grid points
+   * Yields the values defined at the grid points.
    */
   void getFcn(std::vector<Real> & fcn);
 
   /**
-   * Evaluates the function at a given grid point
-   * for instance evaluateFcn({n,m}) = value at (grid[0][n], grid[1][m]), for a function defined on a 2D grid
+   * Evaluates the function at a given grid point.
+   * For instance, evaluateFcn({n,m}) = value at (grid[0][n], grid[1][m]), for a function defined on a 2D grid
    */
   Real evaluateFcn(const std::vector<unsigned int> & ijk);
 
-
 private:
-
   unsigned int _dim;
   std::vector<int> _axes;
   std::vector<std::vector<Real> > _grid;

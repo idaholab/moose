@@ -15,16 +15,11 @@
 #ifndef GENERALPOSTPROCESSOR_H
 #define GENERALPOSTPROCESSOR_H
 
+// MOOSE includes
 #include "Postprocessor.h"
 #include "GeneralUserObject.h"
-#include "TransientInterface.h"
-#include "FunctionInterface.h"
-#include "UserObjectInterface.h"
-#include "PostprocessorInterface.h"
-#include "Problem.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class GeneralPostprocessor;
 
 template<>

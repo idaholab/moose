@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "FunctionSideIntegral.h"
+#include "Function.h"
 
 template<>
 InputParameters validParams<FunctionSideIntegral>()

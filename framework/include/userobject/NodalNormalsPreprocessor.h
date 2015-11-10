@@ -15,11 +15,14 @@
 #ifndef NODALNORMALSPREPROCESSOR_H
 #define NODALNORMALSPREPROCESSOR_H
 
+// MOOSE includes
 #include "ElementUserObject.h"
-#include "SideUserObject.h"
 #include "BoundaryRestrictable.h"
-#include "libmesh/fe.h"
 
+// libMesh includes
+#include "libmesh/fe_type.h"
+
+// Forward declarations
 class NodalNormalsPreprocessor;
 class AuxiliarySystem;
 
@@ -27,7 +30,8 @@ template<>
 InputParameters validParams<NodalNormalsPreprocessor>();
 
 /**
- *
+ * An ElementUserObject that prepares MOOSE for computing nodal
+ * normals.
  */
 class NodalNormalsPreprocessor :
   public ElementUserObject,

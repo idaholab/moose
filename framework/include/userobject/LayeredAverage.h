@@ -17,17 +17,15 @@
 
 #include "LayeredIntegral.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
-//Forward Declarations
+// Forward Declarations
 class LayeredAverage;
 
 template<>
 InputParameters validParams<LayeredAverage>();
 
 /**
- * This UserObject computes  averages of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
+ * This UserObject computes averages of a variable storing partial
+ * sums for the specified number of intervals in a direction (x,y,z).
  */
 class LayeredAverage : public LayeredIntegral
 {

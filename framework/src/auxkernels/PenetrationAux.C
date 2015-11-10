@@ -12,11 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "PenetrationAux.h"
-
 #include "DisplacedProblem.h"
 #include "MooseEnum.h"
+#include "MooseMesh.h"
 
+// libMesh includes
 #include "libmesh/string_to_enum.h"
 
 const Real PenetrationAux::NotPenetrated = -999999;

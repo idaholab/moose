@@ -14,9 +14,6 @@
 
 #include "LayeredSideIntegral.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
 template<>
 InputParameters validParams<LayeredSideIntegral>()
 {

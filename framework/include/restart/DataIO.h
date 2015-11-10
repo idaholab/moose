@@ -15,25 +15,30 @@
 #ifndef DATAIO_H
 #define DATAIO_H
 
-#include "Moose.h"
-#include "ColumnMajorMatrix.h"
+// MOOSE includes
 #include "MooseTypes.h"
 #include "HashMap.h"
+#include "MooseError.h"
 
-//libMesh
-#include "libmesh/dense_matrix.h"
+// libMesh includes
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
-#include "libmesh/elem.h"
-#include "libmesh/numeric_vector.h"
 
+// C++ includes
 #include <string>
 #include <vector>
 #include <iostream>
-#include <fstream>
+#include <map>
 
-class MooseMesh;
-class FEProblem;
+// Forward declarations
+class ColumnMajorMatrix;
+namespace libMesh
+{
+template <typename T> class NumericVector;
+template <typename T> class DenseMatrix;
+template <typename T> class DenseVector;
+class Elem;
+}
 
 /**
  * Scalar helper routine

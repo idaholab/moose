@@ -12,24 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// STL includes
-#include <iostream>
-#include <fstream>
-#include <istream>
-#include <iterator>
-
-// Standard Library
-#include <sys/stat.h>
-
 // MOOSE includes
 #include "MooseUtils.h"
 #include "MooseError.h"
 #include "MaterialProperty.h"
 
+// libMesh includes
+#include "libmesh/elem.h"
+
 // External includes
 #include "pcrecpp.h"
 #include "tinydir.h"
 
+// C++ includes
+#include <iostream>
+#include <fstream>
+#include <istream>
+#include <iterator>
+
+// System includes
+#include <sys/stat.h>
 
 namespace MooseUtils
 {

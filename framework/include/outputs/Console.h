@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "TableOutput.h"
-#include "FormattedTable.h"
 
 // Forward declarations
 class Console;

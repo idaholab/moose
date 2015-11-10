@@ -16,15 +16,17 @@
 
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
+// MOOSE includes
 #include "MultiAppDTKUserObjectEvaluator.h"
-
-// Moose
 #include "UserObject.h"
 #include "Executioner.h"
 #include "FEProblem.h"
-#include "libmesh/mesh_tools.h"
-
+#include "MultiApp.h"
 #include "MooseTypes.h"
+#include "MooseMesh.h"
+
+// libMesh includes
+#include "libmesh/mesh_tools.h"
 
 MultiAppDTKUserObjectEvaluator::MultiAppDTKUserObjectEvaluator(MultiApp & multi_app, const std::string & user_object_name):
     _multi_app(multi_app),
@@ -58,7 +60,7 @@ MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>&
       for (unsigned int j=0; j<dim; j++)
         p(j) = coords[(j*num_values)+i];
 
-      evaluated_data[i] = _multi_app.appUserObjectBase(app, _user_object_name).spatialValue(p - _multi_app.position(app) );
+      evaluated_data[i] = _multi_app.appUserObjectBase(app, _user_object_name).spatialValue(p - _multi_app.position(app));
     }
     else
       evaluated_data[i] = 0.0;
@@ -90,8 +92,7 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const T
     _box_ids[app] = global_app;
   }
 
-  return Teuchos::rcp( new DataTransferKit::GeometryManager<DataTransferKit::Box,GlobalOrdinal>(_boxes, _box_ids, comm, 3));
-
+  return Teuchos::rcp(new DataTransferKit::GeometryManager<DataTransferKit::Box,GlobalOrdinal>(_boxes, _box_ids, comm, 3));
 }
 
 #endif //LIBMESH_TRILINOS_HAVE_DTK

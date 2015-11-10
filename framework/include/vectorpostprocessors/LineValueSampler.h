@@ -15,10 +15,10 @@
 #ifndef LINEVALUESAMPLER_H
 #define LINEVALUESAMPLER_H
 
-#include "GeneralVectorPostprocessor.h"
+// MOOSE includes
 #include "PointSamplerBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class LineValueSampler;
 
 template<>

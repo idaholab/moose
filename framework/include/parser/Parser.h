@@ -15,23 +15,22 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "GlobalParamsAction.h"
-#include "MooseSyntax.h"
-#include "CommandLine.h"
-#include "Syntax.h"
+// MOOSE includes
 #include "ConsoleStreamInterface.h"
+#include "MooseTypes.h"
+#include "InputParameters.h"
+#include "Syntax.h"
 
-// libMesh
+// libMesh include
 #include "libmesh/getpot.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/vector_value.h"
-#include "libmesh/tensor_value.h"
 
+// Forward declarations
 class ActionWarehouse;
 class SyntaxTree;
 class MooseApp;
 class Factory;
 class ActionFactory;
+class GlobalParamsAction;
 
 /**
  * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and parsing files. It is not
@@ -127,16 +126,16 @@ protected:
   /// Template method for setting any scalar type parameter read from the input file or command line
   template<typename T>
   void setScalarParameter(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
+                          InputParameters::Parameter<T> * param, bool in_global, GlobalParamsAction * global_block);
 
   template<typename T, typename UP_T>
   void setScalarValueTypeParameter(const std::string & full_name, const std::string & short_name,
-                                   InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
+                                   InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction * global_block);
 
   /// Template method for setting any vector type parameter read from the input file or command line
   template<typename T>
   void setVectorParameter(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
+                          InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction * global_block);
 
   /// Template method for setting any multivalue "scalar" type parameter read from the input file or command line.  Examples include "Point" and "RealVectorValue"
   template<typename T>

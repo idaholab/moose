@@ -12,30 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-/* BilinearInterpolation is designed to linearly interpolate a function of
- * two values e.g. z(x,y).  Supply Bilinearlinear with a vector of x and a
- * vector of y and a ColumnMajorMatrix of function values, z, that correspond
- * to the values in the vectors x and y...and also a sample point
- * (xcoord and ycoord), and BilinearInterpolation will return the value of the
- * function at the sample point.  A simple example:
- *
- * x = [1 2], y = [1 2],
- *
- * z = [1 2]
- *     [3 4]
- *
- * with xcoord = 1.5 and ycoord = 1.5 returns a value of 2.5
- */
-
 #include "BilinearInterpolation.h"
 
 int BilinearInterpolation::_file_number = 0;
 
-BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & x, const std::vector<Real> & y, const ColumnMajorMatrix & z): _xAxis(x), _yAxis(y), _zSurface(z)
+BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & x,
+                                             const std::vector<Real> & y,
+                                             const ColumnMajorMatrix & z) :
+    _xAxis(x),
+    _yAxis(y),
+    _zSurface(z)
 {
 }
 
-void BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr, Real x ,int& lowerX ,int& upperX )
+void BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
+                                               Real x,
+                                               int & lowerX,
+                                               int & upperX)
 {
   int N = inArr.size();
   if (x <= inArr[0])
@@ -50,7 +43,7 @@ void BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr, 
   }
   else
   {
-    for (int i(1); i < N; ++i)
+    for (int i = 1; i < N; ++i)
     {
       if (x < inArr[i] )
       {
@@ -70,13 +63,13 @@ void BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr, 
 
 Real BilinearInterpolation::sample(Real xcoord, Real ycoord)
 {
-  //first find 4 neighboring points
-  int lx=0; //index of x coordinate of adjacent grid point to left of P
-  int ux=0; //index of x coordinate of adjacent grid point to right of P
+  // first find 4 neighboring points
+  int lx = 0; // index of x coordinate of adjacent grid point to left of P
+  int ux = 0; // index of x coordinate of adjacent grid point to right of P
   getNeighborIndices(_xAxis, xcoord, lx, ux);
 
-  int ly=0; //index of y coordinate of adjacent grid point below P
-  int uy=0; //index of y coordinate of adjacent grid point above P
+  int ly = 0; // index of y coordinate of adjacent grid point below P
+  int uy = 0; // index of y coordinate of adjacent grid point above P
   getNeighborIndices(_yAxis, ycoord, ly, uy);
 
   Real fQ11 = _zSurface(ly, lx);

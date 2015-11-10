@@ -15,18 +15,20 @@
 #ifndef MOOSEENUMBASE_H
 #define MOOSEENUMBASE_H
 
-#include "libmesh/parameters.h"
-
+// C++ includes
 #include <string>
 #include <vector>
 #include <map>
-#include <ostream>
 
+/**
+ * The base class for both the MooseEnum and MultiMooseEnum classes.
+ */
 class MooseEnumBase
 {
 public:
   /**
-   * Constructor that takes a list of enumeration values, and a separate string to set a default for this instance
+   * Constructor that takes a list of enumeration values, and a
+   * separate string to set a default for this instance.
    * @param names - a list of names for this enumeration
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of it's range of
    *                       defined values.

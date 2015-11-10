@@ -15,9 +15,10 @@
 #ifndef MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H
 #define MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H
 
+// MOOSE includes
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppPostprocessorInterpolationTransfer;
 
 template<>

@@ -17,14 +17,17 @@
 
 #include "NodalVariablePostprocessor.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class NodalL2Norm;
 
 template<>
 InputParameters validParams<NodalL2Norm>();
 
+/**
+ * Computes the "nodal" L2-norm of the coupled variable, which is
+ * defined by summing the square of its value at every node and taking
+ * the square root.
+ */
 class NodalL2Norm : public NodalVariablePostprocessor
 {
 public:

@@ -15,17 +15,14 @@
 #ifndef MOOSEPARTITIONER_H
 #define MOOSEPARTITIONER_H
 
+// MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
 
+// libMesh includes
 #include "libmesh/partitioner.h"
 
-//Forward declarations
-namespace libMesh
-{
-  class MeshBase;
-}
-
+// Forward declarations
 class MoosePartitioner;
 
 template<>
@@ -35,7 +32,7 @@ InputParameters validParams<MoosePartitioner>();
  * Base class for MOOSE partitioner
  */
 class MoosePartitioner :
-  public Partitioner,
+  public libMesh::Partitioner,
   public MooseObject,
   public Restartable
 {

@@ -15,12 +15,10 @@
 #ifndef LAYEREDSIDEAVERAGE_H
 #define LAYEREDSIDEAVERAGE_H
 
+// MOOSE includes
 #include "LayeredSideIntegral.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
-//Forward Declarations
+// Forward Declarations
 class LayeredSideAverage;
 
 template<>

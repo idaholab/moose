@@ -15,6 +15,7 @@
 // MOOSE includes
 #include "AdvancedOutputUtils.h"
 #include "Output.h"
+#include "InputParameters.h"
 
 // Constructor of OutputOnWarehouse; initializes the MultiMooseEnums for all available output types
 OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & execute_on, const InputParameters & parameters) : OutputMapWrapper<MultiMooseEnum>()

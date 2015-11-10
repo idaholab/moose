@@ -18,18 +18,20 @@
 // Moose
 #include "ParallelUniqueId.h"
 #include "MooseObject.h"
-#include "InputParameters.h"
 #include "SetupInterface.h"
-#include "MooseEnum.h"
 #include "Restartable.h"
 
-// libMesh
-#include "libmesh/system.h"
-
+// Forward declarations
 class Transfer;
 class SubProblem;
 class FEProblem;
 class SystemBase;
+
+namespace libMesh
+{
+class System;
+class EquationSystems;
+}
 
 template<>
 InputParameters validParams<Transfer>();

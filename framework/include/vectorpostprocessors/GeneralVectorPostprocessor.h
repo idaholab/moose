@@ -15,23 +15,21 @@
 #ifndef GENERALVECTORPOSTPROCESSOR_H
 #define GENERALVECTORPOSTPROCESSOR_H
 
+// MOOSE includes
 #include "VectorPostprocessor.h"
 #include "GeneralUserObject.h"
-#include "TransientInterface.h"
-#include "FunctionInterface.h"
-#include "UserObjectInterface.h"
-#include "VectorPostprocessorInterface.h"
-#include "Problem.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class GeneralVectorPostprocessor;
 
 template<>
 InputParameters validParams<GeneralVectorPostprocessor>();
 
-/* This class is here to combine the VectorPostprocessor interface and the
- * base class VectorPostprocessor object along with adding MooseObject to the inheritance tree*/
+/**
+ * This class is here to combine the VectorPostprocessor interface and
+ * the base class VectorPostprocessor object along with adding
+ * MooseObject to the inheritance tree.
+ */
 class GeneralVectorPostprocessor :
   public GeneralUserObject,
   public VectorPostprocessor
@@ -42,7 +40,9 @@ public:
   virtual ~GeneralVectorPostprocessor() {}
 
   /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
+   * Finalize.  This is called _after_ execute() and _after_
+   * threadJoin()!  This is probably where you want to do MPI
+   * communication!
    */
   virtual void finalize(){}
 };

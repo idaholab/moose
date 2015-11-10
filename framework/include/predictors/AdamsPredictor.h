@@ -15,16 +15,23 @@
 #ifndef ADAMSPREDICTOR_H
 #define ADAMSPREDICTOR_H
 
+// MOOSE includes
 #include "Predictor.h"
-#include "libmesh/numeric_vector.h"
 
+// Forward declarations
 class AdamsPredictor;
+
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
 
 template<>
 InputParameters validParams<AdamsPredictor>();
 
 /**
- *
+ * Implements an explicit Adams predictor based on two old solution
+ * vectors.
  */
 class AdamsPredictor : public Predictor
 {

@@ -12,12 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "SetupPreconditionerAction.h"
 #include "Factory.h"
 #include "PetscSupport.h"
 #include "MoosePreconditioner.h"
 #include "FEProblem.h"
 #include "CreateExecutionerAction.h"
+#include "NonlinearSystem.h"
 
 unsigned int SetupPreconditionerAction::_count = 0;
 

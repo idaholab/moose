@@ -15,12 +15,16 @@
 #ifndef MOOSERANDOM_H
 #define MOOSERANDOM_H
 
-#include "randistrs.h"
-
+// MOOSE includes
 #include "MooseError.h"
 
+// libMesh includes
 #include "libmesh/libmesh_config.h"
 #include LIBMESH_INCLUDE_UNORDERED_MAP
+
+// External library includes
+#include "randistrs.h"
+
 
 /**
  * This class encapsulates a useful, consistent, cross-platform random number generator
@@ -74,7 +78,8 @@ public:
   /**
    * Return next random number drawn from a standard distribution.
    */
-  static inline double randNormal() {
+  static inline double randNormal()
+  {
     return randNormal(0.0, 1.0);
   }
 
@@ -125,7 +130,8 @@ public:
   /**
    * Return next random number drawn from a standard distribution.
    */
-  inline double randNormal(unsigned int i) {
+  inline double randNormal(unsigned int i)
+  {
     return randNormal(i, 0.0, 1.0);
   }
 

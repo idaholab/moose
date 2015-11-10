@@ -18,14 +18,17 @@
 // MOOSE includes
 #include "FileOutput.h"
 
-// libMesh
-#include "libmesh/equation_systems.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/mesh_function.h"
-
 // Forward declerations
 class OversampleOutput;
+class MooseMesh;
+
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class NumericVector;
+class MeshFunction;
+}
+
 
 template<>
 InputParameters validParams<OversampleOutput>();

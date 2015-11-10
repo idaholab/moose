@@ -15,13 +15,14 @@
 #ifndef ARBITRARYQUADRATURE_H
 #define ARBITRARYQUADRATURE_H
 
-#include "Moose.h"
+// MOOSE includes
+#include "Moose.h" // using namespace libMesh
 
-//libMesh
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 /**
- * Implements a fake quadrature rule where you can specify the points
+ * Implements a fake quadrature rule where you can specify the locations
  * (in the reference domain) of the quadrature points.
  */
 class ArbitraryQuadrature : public QBase

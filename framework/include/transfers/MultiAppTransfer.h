@@ -15,12 +15,17 @@
 #ifndef MULTIAPPTRANSFER_H
 #define MULTIAPPTRANSFER_H
 
+// MOOSE includes
 #include "Transfer.h"
-#include "MultiApp.h"
 #include "MooseEnum.h"
-#include "MooseTypes.h"
 
+// libMesh includes
+#include "libmesh/mesh_tools.h"
+
+// Forward declarations
 class MultiAppTransfer;
+class MooseMesh;
+class MultiApp;
 
 template<>
 InputParameters validParams<MultiAppTransfer>();
@@ -28,10 +33,11 @@ InputParameters validParams<MultiAppTransfer>();
 /**
  * Base class for all MultiAppTransfer objects.
  *
- * MultiAppTransfers are objects that push and pull values to and from MultiApp objects
- * from and to the main (master) system.
+ * MultiAppTransfers are objects that push and pull values to and from
+ * MultiApp objects from and to the main (master) system.
  *
- * Classes that inherit from this class still need to override the execute() method from Transfer.
+ * Classes that inherit from this class still need to override the
+ * execute() method from Transfer.
  */
 class MultiAppTransfer : public Transfer
 {

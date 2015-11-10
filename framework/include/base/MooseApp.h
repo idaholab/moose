@@ -15,12 +15,7 @@
 #ifndef MOOSEAPP_H
 #define MOOSEAPP_H
 
-#include <iostream>
-#include <vector>
-#include <list>
-#include <map>
-#include <set>
-
+// MOOSE includes
 #include "Moose.h"
 #include "Parser.h"
 #include "ActionWarehouse.h"
@@ -33,6 +28,12 @@
 // libMesh includes
 #include "libmesh/parallel_object.h"
 
+// C++ includes
+#include <list>
+#include <map>
+#include <set>
+
+// Forward declarations
 class Executioner;
 class MooseApp;
 class Backup;
@@ -40,6 +41,7 @@ class FEProblem;
 class MeshModifier;
 class InputParameterWarehouse;
 class SystemInfo;
+class CommandLine;
 
 template<>
 InputParameters validParams<MooseApp>();

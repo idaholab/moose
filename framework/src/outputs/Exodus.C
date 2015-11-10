@@ -20,6 +20,9 @@
 #include "ExodusFormatter.h"
 #include "FileMesh.h"
 
+// libMesh includes
+#include "libmesh/exodusII_io.h"
+
 template<>
 InputParameters validParams<Exodus>()
 {

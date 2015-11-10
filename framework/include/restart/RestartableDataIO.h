@@ -15,16 +15,17 @@
 #ifndef RESTARTABLEDATAIO_H
 #define RESTARTABLEDATAIO_H
 
-#include "Moose.h"
+// MOOSE includes
 #include "DataIO.h"
 
+// C++ includes
 #include <sstream>
 #include <string>
 #include <list>
 
+// Forward declarations
 class RestartableDatas;
 class RestartableDataValue;
-
 class FEProblem;
 
 /**

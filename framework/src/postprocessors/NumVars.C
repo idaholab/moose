@@ -12,8 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "NumVars.h"
 #include "SubProblem.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<NumVars>()

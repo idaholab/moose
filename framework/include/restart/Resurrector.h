@@ -15,12 +15,13 @@
 #ifndef RESURRECTOR_H
 #define RESURRECTOR_H
 
-#include "Moose.h"
+// MOOSE includes
 #include "RestartableDataIO.h"
 
+// C++ includes
 #include <string>
-#include <list>
 
+// Forward declarations
 class FEProblem;
 
 /**

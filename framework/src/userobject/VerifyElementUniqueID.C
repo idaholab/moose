@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "VerifyElementUniqueID.h"
 #include "SubProblem.h"
-
-#include <algorithm>
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<VerifyElementUniqueID>()

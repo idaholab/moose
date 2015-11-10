@@ -15,16 +15,25 @@
 #ifndef DT2_H_
 #define DT2_H_
 
+// MOOSE includes
 #include "TimeStepper.h"
-#include "libmesh/numeric_vector.h"
 
+// Forward declarations
 class DT2;
+
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
+
 
 template<>
 InputParameters validParams<DT2>();
 
 /**
- *
+ * An adaptive timestepper that compares the solution obtained from a
+ * single step of size dt with two steps of size dt/2 and adjusts the
+ * next timestep accordingly.
  */
 class DT2 : public TimeStepper
 {

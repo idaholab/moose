@@ -13,10 +13,12 @@
 /****************************************************************/
 
 #include "ICEUpdater.h"
-#include <sstream>
 #include "FEProblem.h"
 #include "PostprocessorWarehouse.h"
 #include "Postprocessor.h"
+#include "Updater.h"
+
+#include <sstream>
 
 // Currently the ICE Updater requires TBB
 #ifdef LIBMESH_HAVE_TBB_API

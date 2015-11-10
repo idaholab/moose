@@ -14,11 +14,18 @@
 
 #ifndef SPLIT_H
 #define SPLIT_H
-#include <vector>
-#include "libmesh/petsc_macro.h"
-#include "FEProblem.h"
-#include "Restartable.h"
 
+// MOOSE includes
+#include "Restartable.h"
+#include "MooseObject.h"
+#include "PetscSupport.h"
+
+// Forward declarations
+class FEProblem;
+
+/**
+ * Base class for split-based preconditioners.
+ */
 class Split :
   public MooseObject,
   public Restartable

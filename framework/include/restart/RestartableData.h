@@ -15,15 +15,13 @@
 #ifndef RESTARTABLEDATA_H
 #define RESTARTABLEDATA_H
 
-#include <vector>
-
-#include "ColumnMajorMatrix.h"
+// MOOSE includes
 #include "DataIO.h"
 
-#include "libmesh/libmesh_common.h"
-#include "libmesh/tensor_value.h"
-#include "libmesh/vector_value.h"
+// C++ includes
+#include <vector>
 
+// Forward declarations
 class RestartableDataValue;
 
 /**

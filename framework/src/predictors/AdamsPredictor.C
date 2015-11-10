@@ -15,6 +15,9 @@
 #include "AdamsPredictor.h"
 #include "NonlinearSystem.h"
 
+// libMesh includes
+#include "libmesh/numeric_vector.h"
+
 template<>
 InputParameters validParams<AdamsPredictor>()
 {

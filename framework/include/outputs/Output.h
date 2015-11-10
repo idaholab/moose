@@ -18,20 +18,18 @@
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
-#include "MooseTypes.h"
-#include "MooseMesh.h"
 #include "MeshChangedInterface.h"
 #include "SetupInterface.h"
 #include "AdvancedOutputUtils.h"
 
-// libMesh
-#include "libmesh/equation_systems.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/mesh_function.h"
-
 // Forward declarations
-class Problem;
 class Output;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class EquationSystems;
+}
 
 template<>
 InputParameters validParams<Output>();

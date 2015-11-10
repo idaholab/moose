@@ -15,26 +15,30 @@
 #ifndef NODALUSEROBJECT_H
 #define NODALUSEROBJECT_H
 
+// MOOSE includes
 #include "UserObject.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "UserObjectInterface.h"
-#include "MooseVariable.h"
-#include "TransientInterface.h"
-#include "PostprocessorInterface.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "MaterialPropertyInterface.h"
+#include "UserObjectInterface.h"
+#include "Coupleable.h"
+#include "ScalarCoupleable.h"
+#include "MooseVariableDependencyInterface.h"
+#include "TransientInterface.h"
+#include "PostprocessorInterface.h"
 #include "RandomInterface.h"
 #include "ZeroInterface.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class NodalUserObject;
 
 template<>
 InputParameters validParams<NodalUserObject>();
 
+/**
+ * A user object that runs over all the nodes and does an aggregation
+ * step to compute a single value.
+ */
 class NodalUserObject :
   public UserObject,
   public BlockRestrictable,

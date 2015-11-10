@@ -12,10 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "SetupResidualDebugAction.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<SetupResidualDebugAction>()

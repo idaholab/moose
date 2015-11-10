@@ -14,24 +14,24 @@
 #ifndef MOOSEUTILS_H
 #define MOOSEUTILS_H
 
-// STL includes
+// MOOSE includes
+#include "HashMap.h"
+#include "MaterialProperty.h" // MaterialProperties
+
+// libMesh includes
+#include "libmesh/parallel.h"
+
+// C++ includes
 #include <string>
 #include <vector>
 #include <map>
 #include <list>
-#include <sstream>
-#include <algorithm>
-
-// MOOSE includes
-#include "HashMap.h"
-#include "Moose.h"
-
-// libMesh includes
-#include "libmesh/parallel.h"
-#include "libmesh/elem.h"
 
 // Forward Declarations
-class MaterialProperties;
+namespace libMesh
+{
+class Elem;
+}
 
 namespace MooseUtils
 {

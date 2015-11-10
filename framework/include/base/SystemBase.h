@@ -29,6 +29,7 @@
 #include "libmesh/parallel_object.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/equation_systems.h"
+#include "libmesh/numeric_vector.h"
 
 // Forward declarations
 class Factory;

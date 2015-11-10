@@ -11,28 +11,33 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #ifndef SOLUTIONUSEROBJECT_H
 #define SOLUTIONUSEROBJECT_H
 
+// MOOSE includes
 #include "GeneralUserObject.h"
-#include "libmesh/exodusII_io.h"
-#include "MooseUtils.h"
 
-// Forward Declarations
+// Forward declarations
 namespace libMesh
 {
-  class Mesh;
-  class EquationSystems;
-  class System;
-  class MeshFunction;
-  template<class T> class NumericVector;
+class ExodusII_IO;
+class EquationSystems;
+class System;
+class MeshFunction;
+template<class T> class NumericVector;
 }
 
+// Forward declarations
 class SolutionUserObject;
 
 template<>
 InputParameters validParams<SolutionUserObject>();
 
+/**
+ * User object that reads an existing solution from an input file and
+ * uses it in the current simulation.
+ */
 class SolutionUserObject : public GeneralUserObject
 {
 public:

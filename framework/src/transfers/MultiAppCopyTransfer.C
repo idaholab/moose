@@ -12,14 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "MultiAppCopyTransfer.h"
-
-// Moose
 #include "MooseTypes.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
+#include "MultiApp.h"
+#include "MooseMesh.h"
 
-// libMesh
+// libMesh includes
 #include "libmesh/system.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/id_types.h"

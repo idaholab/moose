@@ -14,9 +14,6 @@
 
 #include "LayeredSideAverage.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
 template<>
 InputParameters validParams<LayeredSideAverage>()
 {

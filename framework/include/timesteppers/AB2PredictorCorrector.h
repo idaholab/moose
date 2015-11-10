@@ -15,22 +15,27 @@
 #ifndef AB2PREDICTORCORRECTOR_H
 #define AB2PREDICTORCORRECTOR_H
 
+// MOOSE includes
 #include "TimeStepper.h"
-#include <iostream>
-#include <fstream>
-#include "libmesh/numeric_vector.h"
 
-// System includes
-#include <string>
+// C++ includes
+#include <fstream>
 
 // Forward Declarations
 class AB2PredictorCorrector;
+
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
 
 template<>
 InputParameters validParams<AB2PredictorCorrector>();
 
 /**
- *
+ * A TimeStepper based on the AB2 method.  Increases the timestep if
+ * the difference between the actual and AB2-predicted solutions is
+ * small enough.
  */
 class AB2PredictorCorrector : public TimeStepper
 {

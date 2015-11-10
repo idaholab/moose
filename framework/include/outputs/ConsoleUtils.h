@@ -16,12 +16,17 @@
 #define CONSOLEUTILS_H
 
 // MOOSE includes
-#include "NonlinearSystem.h"
-#include "AuxiliarySystem.h"
+#include "Moose.h"
 
 // Forward declarations
 class MooseApp;
 class FEProblem;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class System;
+}
 
 namespace ConsoleUtils
 {

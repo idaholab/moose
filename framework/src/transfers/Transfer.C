@@ -12,11 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "Transfer.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
 #include "MooseVariable.h"
+#include "MooseEnum.h"
+#include "InputParameters.h"
+
+// libMesh
+#include "libmesh/system.h"
 
 const Number Transfer::OutOfMeshValue = -999999;
 

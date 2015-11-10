@@ -11,10 +11,13 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE includes
 #include "SetupPredictorAction.h"
 #include "Transient.h"
 #include "Predictor.h"
 #include "Factory.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<SetupPredictorAction>()

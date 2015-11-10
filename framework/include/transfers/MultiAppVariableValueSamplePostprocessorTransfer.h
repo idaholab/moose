@@ -17,15 +17,16 @@
 
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppVariableValueSamplePostprocessorTransfer;
 
 template<>
 InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>();
 
 /**
- * Samples a variable's value in the Master domain at the point where the MultiApp is.
- * Copies that value into a postprocessor in the MultiApp.
+ * Samples a variable's value in the Master domain at the point where
+ * the MultiApp is.  Copies that value into a postprocessor in the
+ * MultiApp.
  */
 class MultiAppVariableValueSamplePostprocessorTransfer :
   public MultiAppTransfer
@@ -41,4 +42,4 @@ protected:
   PostprocessorName _from_var_name;
 };
 
-#endif /* MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H */
+#endif // MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H

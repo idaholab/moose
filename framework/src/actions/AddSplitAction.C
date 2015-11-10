@@ -12,8 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "AddSplitAction.h"
 #include "FEProblem.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<AddSplitAction>()

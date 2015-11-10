@@ -15,14 +15,20 @@
 #ifndef TIMEINTEGRATOR_H
 #define TIMEINTEGRATOR_H
 
+// MOOSE includes
 #include "MooseObject.h"
-#include "libmesh/numeric_vector.h"
 #include "Restartable.h"
 
+// Forward declarations
 class TimeIntegrator;
 class FEProblem;
 class SystemBase;
 class NonlinearSystem;
+
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
 
 template<>
 InputParameters validParams<TimeIntegrator>();

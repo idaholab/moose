@@ -14,6 +14,7 @@
 
 #include "ContactSplit.h"
 #include "InputParameters.h"
+
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 template<>
 InputParameters validParams<ContactSplit>()

@@ -15,11 +15,11 @@
 #ifndef FUNCTIONSIDEINTEGRAL_H
 #define FUNCTIONSIDEINTEGRAL_H
 
-#include "Function.h"
 #include "SideIntegralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionSideIntegral;
+class Function;
 
 template<>
 InputParameters validParams<FunctionSideIntegral>();
@@ -38,8 +38,6 @@ protected:
 
   /// The function
   Function & _func;
-
-
 };
 
 #endif //FUNCTIONSIDEINTEGRAL_H

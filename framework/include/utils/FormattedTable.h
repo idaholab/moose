@@ -15,24 +15,27 @@
 #ifndef FORMATTEDTABLE_H
 #define FORMATTEDTABLE_H
 
+// MOOSE includes
 #include "Moose.h"
 #include "MooseEnum.h"
 #include "DataIO.h"
 
-#include "libmesh/libmesh_common.h"
-#include "libmesh/exodusII_io.h"
-
-#include <string>
-#include <map>
-#include <set>
-#include <ostream>
+// C++ includes
 #include <fstream>
 
+// Forward declarations
 class FormattedTable;
+namespace libMesh
+{
+class ExodusII_IO;
+}
 
 template<> void dataStore(std::ostream & stream, FormattedTable & table, void * context);
 template<> void dataLoad(std::istream & stream, FormattedTable & v, void * context);
 
+/**
+ * This class is used for building, formatting, and outputting tables of numbers.
+ */
 class FormattedTable
 {
 public:

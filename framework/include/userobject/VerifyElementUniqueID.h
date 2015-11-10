@@ -15,10 +15,10 @@
 #ifndef VERIFYELEMENTUNIQUEID_H
 #define VERIFYELEMENTUNIQUEID_H
 
+// MOOSE includes
 #include "ElementUserObject.h"
-#include "libmesh/id_types.h"
 
-//Forward Declarations
+// Forward Declarations
 class VerifyElementUniqueID;
 
 template<>

@@ -16,19 +16,16 @@
 #define ADVANCEDOUTPUT_H
 
 // MOOSE includes
-#include "OversampleOutput.h"
-#include "MooseObject.h"
-#include "Restartable.h"
+#include "AdvancedOutputUtils.h" // OutputDataWarehouse
 #include "MooseTypes.h"
-#include "MooseMesh.h"
-#include "MeshChangedInterface.h"
-#include "MooseApp.h"
-#include "AdvancedOutputUtils.h"
 
-// libMesh
-#include "libmesh/equation_systems.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/mesh_function.h"
+// Forward declarations
+class OutputWarehouse;
+class FileOutput;
+class OversampleOutput;
+class PetscOutput;
+class Console;
+class TransientMultiApp;
 
 /**
  * Based class for output objects

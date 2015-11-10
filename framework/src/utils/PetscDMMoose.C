@@ -11,11 +11,13 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "libmesh/petsc_macro.h"
+
 // This only works with petsc-3.3 and above.
+#include "libmesh/petsc_macro.h"
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-/* Inside these guards we can use PETSC_VERSION_LT, which need not be modified upon transition from dev to a release. */
+// Inside these guards we can use PETSC_VERSION_LT, which need not be
+// modified upon transition from dev to a release.
 
 #include "PetscDMMoose.h"
 
@@ -27,19 +29,22 @@
 # include <petsc-private/dmimpl.h>
 #endif
 
-// libMesh Includes
+// MOOSE includes
+#include "PenetrationLocator.h"
+#include "NearestNodeLocator.h"
+#include "GeometricSearchData.h"
+#include "FEProblem.h"
+#include "DisplacedProblem.h"
+#include "MooseMesh.h"
+#include "NonlinearSystem.h"
+
+// libMesh includes
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/preconditioner.h"
-
-#include "PenetrationLocator.h"
-#include "NearestNodeLocator.h"
-#include "GeometricSearchData.h"
-#include "FEProblem.h"
-#include "DisplacedProblem.h"
 
 struct DM_Moose
 {

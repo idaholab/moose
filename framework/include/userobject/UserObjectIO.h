@@ -15,7 +15,11 @@
 #ifndef USEROBJECTIO_H
 #define USEROBJECTIO_H
 
-#include "UserObjectWarehouse.h"
+// C++ includes
+#include <string>
+
+// Forward declarations
+class UserObjectWarehouse;
 
 class UserObjectIO
 {

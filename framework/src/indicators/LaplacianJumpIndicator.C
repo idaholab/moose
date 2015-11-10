@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "LaplacianJumpIndicator.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<LaplacianJumpIndicator>()

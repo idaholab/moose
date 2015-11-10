@@ -12,8 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "AddMortarInterfaceAction.h"
 #include "FEProblem.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<AddMortarInterfaceAction>()

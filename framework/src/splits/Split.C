@@ -12,12 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "Split.h"
 #include "InputParameters.h"
 #include "PetscSupport.h"
+#include "FEProblem.h"
+#include "NonlinearSystem.h"
 
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 // petsc 3.3.0 or later needed
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 
 template<>
 InputParameters validParams<Split>()

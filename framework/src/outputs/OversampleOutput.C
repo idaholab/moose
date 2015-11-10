@@ -19,6 +19,11 @@
 #include "FileMesh.h"
 #include "MooseApp.h"
 
+// libMesh includes
+#include "libmesh/equation_systems.h"
+#include "libmesh/mesh_function.h"
+
+
 template<>
 InputParameters validParams<OversampleOutput>()
 {

@@ -12,10 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Moose includes
+// MOOSE includes
 #include "XDA.h"
 #include "MooseApp.h"
 #include "FEProblem.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<XDA>()

@@ -14,11 +14,12 @@
 
 #include "MultiAppPostprocessorToAuxScalarTransfer.h"
 
-// Moose
+// MOOSE includes
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "MultiApp.h"
 
-// libMesh
+// libMesh includes
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 

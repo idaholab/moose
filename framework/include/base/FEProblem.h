@@ -15,6 +15,7 @@
 #ifndef FEPROBLEM_H
 #define FEPROBLEM_H
 
+// MOOSE includes
 #include "SubProblem.h"
 #include "AuxiliarySystem.h"
 #include "GeometricSearchData.h"
@@ -32,6 +33,7 @@
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "PetscSupport.h"
+#include "MooseApp.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -51,6 +53,7 @@ class VectorPostprocessorData;
 class MooseEnum;
 class Resurrector;
 class Assembly;
+class JacobianBlock;
 
 // libMesh forward declarations
 namespace libMesh
@@ -316,11 +319,10 @@ public:
   virtual void checkExceptionAndStopSolve();
 
   virtual bool converged();
-  virtual unsigned int nNonlinearIterations() { return _nl.nNonlinearIterations(); }
-  virtual unsigned int nLinearIterations() { return _nl.nLinearIterations(); }
-  virtual Real finalNonlinearResidual() { return _nl.finalNonlinearResidual(); }
-
-  virtual bool computingInitialResidual() { return _nl.computingInitialResidual(); }
+  virtual unsigned int nNonlinearIterations();
+  virtual unsigned int nLinearIterations();
+  virtual Real finalNonlinearResidual();
+  virtual bool computingInitialResidual();
 
   /**
    * Returns true if we are currently computing Jacobian

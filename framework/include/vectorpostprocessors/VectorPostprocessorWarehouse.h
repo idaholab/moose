@@ -15,13 +15,11 @@
 #ifndef VECTORPOSTPROCESSORWAREHOUSE_H
 #define VECTORPOSTPROCESSORWAREHOUSE_H
 
-#include <vector>
-#include <map>
-#include <set>
-
+// MOOSE includes
 #include "Warehouse.h"
 #include "MooseTypes.h"
 
+// Forward declarations
 class VectorPostprocessor;
 class ElementVectorPostprocessor;
 class InternalSideVectorPostprocessor;

@@ -12,8 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "UserObjectInterface.h"
-#include "FEProblem.h"
+#include "InputParameters.h"
 
 UserObjectInterface::UserObjectInterface(const InputParameters & params) :
     _uoi_feproblem(*params.get<FEProblem *>("_fe_problem")),

@@ -12,9 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "ElementsAlongLine.h"
-
 #include "RayTracing.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<ElementsAlongLine>()
