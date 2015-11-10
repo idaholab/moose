@@ -12,23 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REALFUNCTIONCONTROL_H
-#define REALFUNCTIONCONTROL_H
+#ifndef DISABLEOBJECTS_H
+#define DISABLEOBJECTS_H
 
 // MOOSE includes
 #include "Control.h"
 
 // Forward declarations
-class RealFunctionControl;
+class DisableObjects;
 class Function;
 
 template<>
-InputParameters validParams<RealFunctionControl>();
+InputParameters validParams<DisableObjects>();
 
 /**
- * A basic control for changing an input parameter using a Function
+ * A basic control for disabling objects for a portion of the simulation.
  */
-class RealFunctionControl : public Control
+class DisableObjects : public Control
 {
 public:
 
@@ -36,7 +36,7 @@ public:
    * Class constructor
    * @param parameters Input parameters for this Control object
    */
-  RealFunctionControl(const InputParameters & parameters);
+  DisableObjects(const InputParameters & parameters);
 
   /**
    * Evaluate the function and set the parameter value
@@ -45,11 +45,14 @@ public:
 
 private:
 
-  /// The function to execute
-  Function & _function;
+  /// List of objects to disable
+  const std::vector<std::string> & _disable;
 
-  /// Vector of parameters to change
-  ControllableParameter<Real> _parameters;
+  /// The time to begin disabling the supplied object tags (defaults to the simulation start time)
+  Real _start_time;
+
+  /// The time to stop disabling the supplied object tags (defaults to the end of the simulation)
+  Real _end_time;
 };
 
-#endif // REALFUNCTIONCONTROL_H
+#endif // DISABLEOBJECTS_H

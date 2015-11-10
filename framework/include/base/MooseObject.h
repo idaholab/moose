@@ -76,8 +76,6 @@ public:
    */
   bool enabled() { return _enabled; }
 
-
-
 protected:
 
   /// The MooseApp this object is associated with

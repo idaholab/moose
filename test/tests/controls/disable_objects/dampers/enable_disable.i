@@ -1,20 +1,16 @@
 [Mesh]
+  type = GeneratedMesh
   dim = 2
-  file = square.e
+  nx = 10
+  ny = 10
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -22,21 +18,25 @@
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = left
     value = 0
   [../]
-
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = right
     value = 1
   [../]
+[]
+
+[Executioner]
+  type = Steady
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Dampers]
@@ -47,12 +47,6 @@
   [../]
 []
 
-[Executioner]
-  type = Steady
-  solve_type = 'PJFNK'
-[]
-
 [Outputs]
-  file_base = out
   exodus = true
 []

@@ -927,6 +927,11 @@ public:
    */
   void executeControls(const ExecFlagType & exec_type);
 
+  /**
+   * Update the active objects in the warehouses
+   */
+  void updateActiveObjects();
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -1018,6 +1023,7 @@ protected:
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
   void checkUserObjects();
+
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();

@@ -63,4 +63,3 @@ Problem::getTimePeriods() const
 {
   return _time_periods;
 }
-

@@ -51,6 +51,9 @@ protected:
 
   template<typename T>
   const T & getControllableValueByName(const std::string & name, bool warn_when_values_differ = true);
+
+  template<typename T>
+  const T & getControllableValueByName(const std::string & tag, const std::string & param_name, bool warn_when_values_differ = true);
   ///@}
 
   ///@{
@@ -66,6 +69,10 @@ protected:
 
   template<typename T>
   void setControllableValueByName(const std::string & name, const T & value, bool warn_when_values_differ = false);
+
+  template<typename T>
+  void setControllableValueByName(const std::string & tag, const std::string & param_name, const T & value, bool warn_when_values_differ = false);
+
   ///@}
 
   /**
@@ -94,7 +101,7 @@ private:
 
   /// Helper method for retrieving controllable parameters
   template<typename T>
-  ControllableParameter<T> getControllableParameterHelper(const std::string & name, bool warn_when_values_differ);
+  ControllableParameter<T> getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ);
 
   /// The name of the object, for better error message
   const std::string & _ci_name;
@@ -115,7 +122,17 @@ template<typename T>
 const T &
 ControlInterface::getControllableValueByName(const std::string & name, bool warn_when_values_differ)
 {
-  ControllableParameter<T> helper = getControllableParameterHelper<T>(name, warn_when_values_differ);
+  MooseObjectParameterName desired(name);
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ);
+  return  *(helper.get()[0]);
+}
+
+template<typename T>
+const T &
+ControlInterface::getControllableValueByName(const std::string & tag, const std::string & param_name, bool warn_when_values_differ)
+{
+  MooseObjectParameterName desired(tag, param_name);
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ);
   return  *(helper.get()[0]);
 }
 
@@ -130,19 +147,25 @@ template<typename T>
 void
 ControlInterface::setControllableValueByName(const std::string & name, const T & value, bool warn_when_values_differ)
 {
-  ControllableParameter<T> helper = getControllableParameterHelper<T>(name, warn_when_values_differ);
+  MooseObjectParameterName desired(name);
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ);
+  helper.set(value);
+}
+
+template<typename T>
+void
+ControlInterface::setControllableValueByName(const std::string & tag, const std::string & param_name, const T & value, bool warn_when_values_differ)
+{
+  MooseObjectParameterName desired(tag, param_name);
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ);
   helper.set(value);
 }
 
 template<typename T>
 ControllableParameter<T>
-ControlInterface::getControllableParameterHelper(const std::string & name, bool warn_when_values_differ)
+ControlInterface::getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ)
 {
-
-  // The desired parameter name
-  MooseObjectParameterName desired(name);
-
-  // The ControlllableParametr object to return
+  // The ControllableParameter object to return
   ControllableParameter<T> output;
 
   // Loop over all InputParameter objects
@@ -157,7 +180,7 @@ ControlInterface::getControllableParameterHelper(const std::string & name, bool 
     {
       // Do not allow non-controllable types to be controlled
       if (!it->second->isControllable(desired.parameter()))
-        mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " is not a controllable parameter.");
+        mooseError("The desired parameter is not controllable: " << desired);
 
       // Store pointer to the writable parameter
       output.insert(MooseObjectParameterName(it->first, desired.parameter()), &(it->second->set<T>(desired.parameter())));
@@ -166,7 +189,7 @@ ControlInterface::getControllableParameterHelper(const std::string & name, bool 
 
   // Error if nothing was found
   if (output.size() == 0)
-    mooseError("The controlled parameter, '" << name << "', in " << _ci_name << " was not found.");
+    mooseError("The controlled parameter was not found: " << desired);
 
   // Produce a warning, if the flag is true, when multiple parameters have differing values
   if (warn_when_values_differ)
@@ -183,7 +206,7 @@ ControlInterface::getControllableParameterHelper(const std::string & name, bool 
       if (value0 != **it)
       {
         std::ostringstream oss;
-        oss << "The controlled parameter, '" << name << "', in " << _ci_name << " was found,\n";
+        oss << "The controlled parameter with tag, '" << desired.tag() << "', and name, '" << desired.name() << "', in " << _ci_name << " was found,\n";
         oss << "but the number of parameters have differing values.\n\n";
         oss << output.dump();
         mooseWarning(oss.str());

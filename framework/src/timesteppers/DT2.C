@@ -126,6 +126,7 @@ DT2::step()
     Moose::setSolverDefaults(_fe_problem);
     nl.solve();
     _converged = nl.converged();
+
     if (_converged)
     {
       nl_sys.update();

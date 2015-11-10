@@ -409,6 +409,7 @@
 
 // Controls
 #include "RealFunctionControl.h"
+#include "DisableObjects.h"
 
 // Partitioner
 #include "LibmeshPartitioner.h"
@@ -755,6 +756,7 @@ registerObjects(Factory & factory)
 
   // Controls
   registerControl(RealFunctionControl);
+  registerControl(DisableObjects);
 
   // Partitioner
   registerPartitioner(LibmeshPartitioner);

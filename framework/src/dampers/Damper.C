@@ -66,4 +66,3 @@ Damper::computeDamping()
 
   return damping;
 }
-

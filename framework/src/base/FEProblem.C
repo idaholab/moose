@@ -451,8 +451,6 @@ void FEProblem::initialSetup()
     _has_initialized_stateful = true;
 
   // Call initialSetup on the nonlinear system
-  _nl.initialSetupBCs();
-  _nl.initialSetupKernels();
   _nl.initialSetup();
 
   // Auxilary variable initialSetup calls
@@ -2619,6 +2617,14 @@ FEProblem::executeControls(const ExecFlagType & exec_type)
 {
   _control_warehouse.setup(exec_type);
   _control_warehouse.execute(exec_type);
+}
+
+void
+FEProblem::updateActiveObjects()
+{
+  _nl.updateActiveObjects();
+
+  _control_warehouse.updateActive();
 }
 
 void

@@ -3,7 +3,7 @@
     # Test non-controllable parameter error
     type = RunException
     input = 'non_controllable_error.i'
-    expect_err = "The controlled parameter, 'Kernels/diff/non_controllable', in test_control is not a controllable parameter."
+    expect_err = "The desired parameter is not controllable: Kernels/diff/non_controllable"
     match_literal = true
     max_threads = 1
   [../]
@@ -21,7 +21,7 @@
     # Test that an invalid parameter name errors properly
     type = RunException
     input = 'no_parameter_found.i'
-    expect_err = "The controlled parameter, 'unknown_param_name', in func_control was not found."
+    expect_err = "The controlled parameter was not found: unknown_param_name"
     match_literal = true
     max_threads = 1
   [../]

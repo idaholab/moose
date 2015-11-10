@@ -188,7 +188,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   _bcs.resize(n_threads);
   _dirac_kernels.resize(n_threads);
   _dg_kernels.resize(n_threads);
-  _dampers.resize(n_threads);
   _constraints.resize(n_threads);
 }
 
@@ -318,25 +317,18 @@ void
 NonlinearSystem::initialSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
-    _constraints[i].initialSetup();
-}
-
-void
-NonlinearSystem::initialSetupBCs()
-{
-  for (unsigned int i=0; i<libMesh::n_threads(); i++)
-    _bcs[i].initialSetup();
-}
-
-void
-NonlinearSystem::initialSetupKernels()
-{
-  for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
+    _bcs[i].initialSetup();
+
     _kernels[i].initialSetup();
     _dirac_kernels[i].initialSetup();
-    if (_doing_dg) _dg_kernels[i].initialSetup();
+    if (_doing_dg)
+      _dg_kernels[i].initialSetup();
+
+    _constraints[i].initialSetup();
   }
+
+  _dampers.initialSetup();
 }
 
 void
@@ -348,8 +340,11 @@ NonlinearSystem::timestepSetup()
     _bcs[i].timestepSetup();
     _dirac_kernels[i].timestepSetup();
     _constraints[i].timestepSetup();
-    if (_doing_dg) _dg_kernels[i].timestepSetup();
+    if (_doing_dg)
+      _dg_kernels[i].timestepSetup();
   }
+
+  _dampers.timestepSetup();
 }
 
 
@@ -694,7 +689,7 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
     MooseSharedPointer<Damper> damper = MooseSharedNamespace::static_pointer_cast<Damper>(_factory.create(damper_name, name, parameters, tid));
-    _dampers[tid].addDamper(damper);
+    _dampers.add(damper, tid);
   }
 }
 
@@ -839,6 +834,8 @@ NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
   //Global Kernels
   for (std::vector<KernelBase *>::const_iterator kernel_it = _kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
     (*kernel_it)->subdomainSetup();
+
+  _dampers.subdomainSetup();
 }
 
 NumericVector<Number> &
@@ -1205,6 +1202,8 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
     if (_doing_dg) _dg_kernels[i].residualSetup();
     _constraints[i].residualSetup();
   }
+
+  _dampers.residualSetup();
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
@@ -1811,6 +1810,8 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     if (_doing_dg) _dg_kernels[i].jacobianSetup();
   }
 
+  _dampers.jacobianSetup();
+
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     _fe_problem.reinitScalars(tid);
@@ -2127,6 +2128,12 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   Moose::perf_log.pop("compute_jacobian_block()","Solve");
 }
 
+void
+NonlinearSystem::updateActiveObjects()
+{
+  _dampers.updateActive();
+}
+
 Real
 NonlinearSystem::computeDamping(const NumericVector<Number>& update)
 {
@@ -2135,7 +2142,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number>& update)
   // Default to no damping
   Real damping = 1.0;
 
-  if (_dampers[0].all().size() > 0)
+  if (_dampers.size() > 0)
   {
     *_increment_vec = update;
     ComputeDampingThread cid(_fe_problem, *this);
@@ -2479,8 +2486,7 @@ NonlinearSystem::getDiracKernelWarehouse(THREAD_ID tid)
 }
 
 const DamperWarehouse &
-NonlinearSystem::getDamperWarehouse(THREAD_ID tid)
+NonlinearSystem::getDamperWarehouse()
 {
-  mooseAssert(tid < _dampers.size(), "Thread ID does not exist.");
-  return _dampers[tid];
+  return _dampers;
 }
