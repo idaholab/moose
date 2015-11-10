@@ -16,11 +16,11 @@
 #define NEARESTNODEVALUEAUX_H
 
 #include "AuxKernel.h"
-#include "NearestNodeLocator.h"
 
 
 //Forward Declarations
 class NearestNodeValueAux;
+class NearestNodeLocator;
 
 template<>
 InputParameters validParams<NearestNodeValueAux>();

@@ -23,9 +23,11 @@
 #include "AppFactory.h"
 #include "MooseUtils.h"
 #include "Console.h"
+#include "RestartableDataIO.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"
+#include "libmesh/numeric_vector.h"
 
 #include <iostream>
 #include <fstream>

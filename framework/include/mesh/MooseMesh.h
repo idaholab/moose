@@ -15,30 +15,32 @@
 #ifndef MOOSEMESH_H
 #define MOOSEMESH_H
 
-#include "InputParameters.h"
 #include "MooseObject.h"
 #include "BndNode.h"
 #include "BndElement.h"
-#include "MooseTypes.h"
 #include "Restartable.h"
 #include "MooseEnum.h"
-#include "MoosePartitioner.h"
 
 // libMesh
 #include "libmesh/mesh.h"
-#include "libmesh/boundary_info.h"
 #include "libmesh/elem_range.h"
 #include "libmesh/node_range.h"
-#include "libmesh/periodic_boundaries.h"
-#include "libmesh/quadrature.h"
-
-#include <map>
 
 //forward declaration
 class MooseMesh;
 class NonlinearSystem;
 class Assembly;
-namespace libMesh { class ExodusII_IO; }
+
+// libMesh forward declarations
+namespace libMesh
+{
+class ExodusII_IO;
+class QBase;
+class PeriodicBoundaries;
+class Partitioner;
+}
+
+// Useful typedefs
 typedef StoredRange<std::set<Node *>::iterator, Node*> SemiLocalNodeRange;
 
 template<>

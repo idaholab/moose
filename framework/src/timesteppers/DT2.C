@@ -14,11 +14,14 @@
 
 #include "DT2.h"
 #include "FEProblem.h"
+#include "TimeIntegrator.h"
+
 //libMesh includes
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/transient_system.h"
+
 // C++ Includes
 #include <iomanip>
 

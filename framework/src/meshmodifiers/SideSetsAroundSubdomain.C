@@ -15,6 +15,7 @@
 #include "SideSetsAroundSubdomain.h"
 #include "InputParameters.h"
 #include "MooseTypes.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/mesh.h"

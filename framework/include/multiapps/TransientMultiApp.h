@@ -15,13 +15,10 @@
 #define TRANSIENTMULTIAPP_H
 
 #include "MultiApp.h"
-#include "MooseApp.h"
-#include "Transient.h"
-#include "TransientInterface.h"
 
-#include <exception>
-
+// Forward declarations
 class TransientMultiApp;
+class Transient;
 
 template<>
 InputParameters validParams<TransientMultiApp>();

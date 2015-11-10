@@ -26,7 +26,6 @@
 #include "DependencyResolverInterface.h"
 #include "RandomInterface.h"
 #include "GeometricSearchInterface.h"
-#include "MooseMesh.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
@@ -34,11 +33,11 @@
 #include "MeshChangedInterface.h"
 
 //forward declarations
-class Problem;
 class SubProblem;
 class AuxKernel;
 class AuxiliarySystem;
 class SystemBase;
+class MooseMesh;
 
 template<>
 InputParameters validParams<AuxKernel>();

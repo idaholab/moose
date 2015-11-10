@@ -14,7 +14,7 @@
 
 #include "NodalBC.h"
 #include "MooseVariable.h"
-
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<NodalBC>()

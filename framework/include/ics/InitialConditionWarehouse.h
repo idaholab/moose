@@ -17,7 +17,9 @@
 #include <vector>
 #include <map>
 #include <string>
+
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 class InitialCondition;
 class ScalarInitialCondition;

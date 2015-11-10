@@ -17,6 +17,7 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "AddOutputAction.h"
+#include "Material.h"
 
 // Declare the output helper specializations
 template<>

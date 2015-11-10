@@ -18,9 +18,6 @@
 // MOOSE includes
 #include "MeshModifier.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
 // Forward declerations
 class RenameBlock;
 

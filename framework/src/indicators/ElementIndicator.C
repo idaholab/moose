@@ -15,9 +15,6 @@
 #include "ElementIndicator.h"
 #include "Assembly.h"
 #include "MooseVariable.h"
-#include "Problem.h"
-#include "SubProblem.h"
-#include "SystemBase.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -29,7 +26,7 @@ InputParameters validParams<ElementIndicator>()
   params.addRequiredParam<VariableName>("variable", "The name of the variable that this Indicator operates on");
 
   std::vector<SubdomainName> everywhere(1, "ANY_BLOCK_ID");
-params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or name where the object works");
+  params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or name where the object works");
 
   params += validParams<TransientInterface>();
   return params;

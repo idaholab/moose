@@ -15,6 +15,7 @@
 #include "AddAllSideSetsByNormals.h"
 #include "Parser.h"
 #include "InputParameters.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/mesh_generation.h"

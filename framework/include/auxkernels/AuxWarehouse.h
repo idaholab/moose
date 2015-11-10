@@ -16,6 +16,7 @@
 #define AUXWAREHOUSE_H
 
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 #include <vector>
 #include <map>

@@ -17,7 +17,6 @@
 
 #include "ODEKernel.h"
 #include "FunctionParserUtils.h"
-#include "libmesh/fparser_ad.hh"
 
 //Forward Declarations
 class ParsedODEKernel;

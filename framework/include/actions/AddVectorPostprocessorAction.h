@@ -16,7 +16,6 @@
 #define ADDVECTORPOSTPROCESSORACTION_H
 
 #include "MooseObjectAction.h"
-#include "ExecStore.h"
 
 class AddVectorPostprocessorAction;
 

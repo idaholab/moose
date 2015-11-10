@@ -27,8 +27,6 @@
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseVariable.h"
-#include "SubProblem.h"
-#include "MooseMesh.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
@@ -36,6 +34,8 @@
 //Forward Declarations
 class Assembly;
 class DiracKernel;
+class SubProblem;
+class MooseMesh;
 
 template<>
 InputParameters validParams<DiracKernel>();

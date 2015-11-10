@@ -15,9 +15,12 @@
 #include "ExodusFormatter.h"
 #include "Parser.h"
 #include "MooseApp.h"
+#include "SystemInfo.h"
+
 // libMesh
 #include "libmesh/exodusII.h"
-//
+
+// C++
 #include <sstream>
 #include <vector>
 

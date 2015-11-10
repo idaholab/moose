@@ -16,22 +16,14 @@
 #define INTERNALSIDEINDICATOR_H
 
 // local includes
-#include "MooseArray.h"
 #include "Indicator.h"
 #include "NeighborCoupleable.h"
 #include "ScalarCoupleable.h"
 #include "NeighborMooseVariableInterface.h"
-#include "MooseVariableDependencyInterface.h"
 
-#include "Assembly.h"
-#include "MooseVariable.h"
-
-class MooseMesh;
-class Problem;
-class SubProblem;
-
-//Forward Declarations
+// Forward Declarations
 class InternalSideIndicator;
+class MooseVariable;
 
 template<>
 InputParameters validParams<InternalSideIndicator>();
@@ -83,8 +75,6 @@ protected:
   QBase * & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
-
-//  unsigned int _i, _j;
 
   BoundaryID _boundary_id;
 

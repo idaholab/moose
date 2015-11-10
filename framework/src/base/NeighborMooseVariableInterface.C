@@ -16,6 +16,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
+#include "Assembly.h"
 
 NeighborMooseVariableInterface::NeighborMooseVariableInterface(const InputParameters & parameters, bool nodal) :
     MooseVariableInterface(parameters, nodal)

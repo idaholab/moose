@@ -14,6 +14,7 @@
 
 #include "NodalScalarKernel.h"
 #include "SystemBase.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<NodalScalarKernel>()

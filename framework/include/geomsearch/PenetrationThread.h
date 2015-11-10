@@ -15,9 +15,12 @@
 #ifndef PENETRATIONTHREAD_H
 #define PENETRATIONTHREAD_H
 
+// MOOSE includes
 #include "PenetrationLocator.h"
 #include "ParallelUniqueId.h"
-#include "MooseVariable.h"
+
+// Forward declarations
+class MooseVariable;
 
 class PenetrationThread
 {

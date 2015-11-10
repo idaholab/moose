@@ -27,6 +27,7 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dense_subvector.h"
 #include "libmesh/libmesh_common.h"
+#include "libmesh/quadrature.h"
 
 const BoundaryID DGKernel::InternalBndId = 12345;
 

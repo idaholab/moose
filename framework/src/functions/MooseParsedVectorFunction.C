@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "MooseParsedVectorFunction.h"
+#include "MooseParsedFunctionWrapper.h"
 
 template<>
 InputParameters validParams<MooseParsedVectorFunction>()

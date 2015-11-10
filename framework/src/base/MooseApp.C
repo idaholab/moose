@@ -29,6 +29,9 @@
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
 #include "MooseObjectAction.h"
+#include "InputParameterWarehouse.h"
+#include "SystemInfo.h"
+#include "RestartableDataIO.h"
 
 // Regular expression includes
 #include "pcrecpp.h"

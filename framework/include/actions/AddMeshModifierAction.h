@@ -19,7 +19,6 @@
 
 //Forward Declaration
 class AddMeshModifierAction;
-class MooseMesh;
 
 template<>
 InputParameters validParams<AddMeshModifierAction>();

@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "NodalEqualValueConstraint.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<NodalEqualValueConstraint>()

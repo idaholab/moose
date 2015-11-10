@@ -19,13 +19,15 @@
 #include <string>
 #include <vector>
 
+// MOOSE includes
+#include "ParallelUniqueId.h"
+#include "MooseError.h"
+
 // libMesh includes
-#include "libmesh/dense_vector.h"
-#include "libmesh/point.h"
 #include "libmesh/parsed_function.h"
 
-// MOOSE includes
-#include "FEProblem.h"
+// Forward declarations
+class FEProblem;
 
 /**
  * A wrapper class for creating and evaluating parsed functions via the

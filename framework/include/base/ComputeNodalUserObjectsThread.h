@@ -21,8 +21,8 @@
 // libMesh includes
 #include "libmesh/node_range.h"
 
-class Problem;
-class FEProblem;
+// Forward declarations
+class SubProblem;
 
 class ComputeNodalUserObjectsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {

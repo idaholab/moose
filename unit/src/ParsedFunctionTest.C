@@ -21,6 +21,7 @@
 #include "MooseUnitApp.h"
 #include "AppFactory.h"
 #include "GeneratedMesh.h"
+#include "MooseParsedFunctionWrapper.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( ParsedFunctionTest );
 

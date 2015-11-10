@@ -20,9 +20,8 @@
 
 // libMesh includes
 #include "libmesh/node_range.h"
-#include "libmesh/numeric_vector.h"
 
-
+// Forward declarations
 class FEProblem;
 class AuxiliarySystem;
 

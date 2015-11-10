@@ -12,11 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "DiracKernel.h"
-
 // Moose includes
+#include "DiracKernel.h"
+#include "Assembly.h"
 #include "SystemBase.h"
 #include "Problem.h"
+
+// libMesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<DiracKernel>()

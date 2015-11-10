@@ -20,7 +20,6 @@
 
 // Forward declerations
 class CommonOutputAction;
-class OutputWarehouse;
 
 template<>
 InputParameters validParams<CommonOutputAction>();

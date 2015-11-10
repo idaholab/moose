@@ -18,6 +18,7 @@
 
 // libmesh includes
 #include "libmesh/threads.h"
+#include "libmesh/system.h"
 #include LIBMESH_INCLUDE_UNORDERED_SET
 LIBMESH_DEFINE_HASH_POINTERS
 

@@ -17,7 +17,9 @@
 #include "MaterialData.h"
 #include "MooseMesh.h"
 
+// libmesh includes
 #include "libmesh/fe_interface.h"
+#include "libmesh/quadrature.h"
 
 std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
 

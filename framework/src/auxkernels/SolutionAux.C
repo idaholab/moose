@@ -14,6 +14,7 @@
 
 #include "MooseError.h"
 #include "SolutionAux.h"
+#include "SolutionUserObject.h"
 
 template<>
 InputParameters validParams<SolutionAux>()

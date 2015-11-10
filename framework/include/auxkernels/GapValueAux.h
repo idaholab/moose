@@ -16,11 +16,11 @@
 #define GAPVALUEAUX_H
 
 #include "AuxKernel.h"
-#include "PenetrationLocator.h"
 
 
 //Forward Declarations
 class GapValueAux;
+class PenetrationLocator;
 
 template<>
 InputParameters validParams<GapValueAux>();

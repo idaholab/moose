@@ -26,18 +26,12 @@
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
-#include "MooseVariable.h"
-#include "SubProblem.h"
-#include "MooseMesh.h"
-
-//libMesh includes
-#include "libmesh/libmesh_common.h"
-#include "libmesh/elem.h"
-#include "libmesh/point.h"
-
 //Forward Declarations
 class Assembly;
 class Constraint;
+class MooseVariable;
+class SubProblem;
+class MooseMesh;
 
 template<>
 InputParameters validParams<Constraint>();

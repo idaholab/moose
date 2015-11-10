@@ -16,16 +16,10 @@
 #define SCALARINITIALCONDITION_H
 
 #include "MooseObject.h"
-#include "ParallelUniqueId.h"
-#include "InputParameters.h"
-#include "Coupleable.h"
 #include "ScalarCoupleable.h"
 #include "DependencyResolverInterface.h"
 
 #include "libmesh/dense_vector.h"
-
-// System includes
-#include <string>
 
 //forward declarations
 class ScalarInitialCondition;

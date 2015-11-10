@@ -11,9 +11,10 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "FullSolveMultiApp.h"
 
+#include "FullSolveMultiApp.h"
 #include "LayeredSideFluxAverage.h"
+#include "Executioner.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"

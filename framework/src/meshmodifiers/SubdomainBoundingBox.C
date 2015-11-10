@@ -13,8 +13,8 @@
 /****************************************************************/
 
 #include "SubdomainBoundingBox.h"
-
 #include "Conversion.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<SubdomainBoundingBox>()

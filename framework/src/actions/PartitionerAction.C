@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "PartitionerAction.h"
-
+#include "MoosePartitioner.h"
 #include "FEProblem.h"
 #include "MooseEnum.h"
 

@@ -14,6 +14,9 @@
 
 #include "GenericConstantMaterial.h"
 
+// libMesh includes
+#include "libmesh/quadrature.h"
+
 template<>
 InputParameters validParams<GenericConstantMaterial>()
 {

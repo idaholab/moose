@@ -17,6 +17,7 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariable.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<NodalKernel>()

@@ -17,18 +17,9 @@
 
 // MOOSE includes
 #include "MooseObjectAction.h"
-#include "OutputWarehouse.h"
-#include "MooseMesh.h"
-
-// libMesh includes
-#include "libmesh/equation_systems.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/mesh_function.h"
 
 // Forward declerations
 class AddOutputAction;
-class OutputWarehouse;
-class Output;
 
 template<>
 InputParameters validParams<AddOutputAction>();

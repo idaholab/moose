@@ -16,7 +16,6 @@
 #define PIECEWISECONSTANT_H
 
 #include "Piecewise.h"
-#include "LinearInterpolation.h"
 
 class PiecewiseConstant : public Piecewise
 {

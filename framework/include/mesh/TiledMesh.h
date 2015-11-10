@@ -17,9 +17,6 @@
 
 #include "MooseMesh.h"
 
-#include "libmesh/libmesh.h"
-#include "libmesh/vector_value.h"
-
 class TiledMesh;
 
 template<>

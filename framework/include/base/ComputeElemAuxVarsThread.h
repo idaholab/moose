@@ -17,12 +17,13 @@
 
 #include "ThreadedElementLoop.h"
 #include "AuxWarehouse.h"
+
 // libMesh includes
 #include "libmesh/elem_range.h"
 
+// Forward declarations
 class FEProblem;
 class AuxiliarySystem;
-
 
 class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 {

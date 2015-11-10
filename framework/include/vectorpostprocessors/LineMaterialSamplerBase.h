@@ -21,6 +21,10 @@
 #include "FEProblem.h"
 #include "InputParameters.h"
 #include "BlockRestrictable.h"
+#include "Assembly.h"
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 //Forward Declarations
 template<typename T>

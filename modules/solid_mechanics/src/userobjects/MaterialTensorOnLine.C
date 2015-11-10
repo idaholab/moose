@@ -4,12 +4,17 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "MaterialTensorOnLine.h"
 #include "SymmTensor.h"
 #include "FEProblem.h"
+
 #include <cmath>
 #include <algorithm>
 #include <set>
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<MaterialTensorOnLine>()

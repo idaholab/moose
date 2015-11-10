@@ -17,13 +17,12 @@
 
 // MOOSE includes
 #include "InputParameters.h"
-#include "MooseTypes.h"
-#include "FEProblem.h"
-#include "MooseMesh.h"
 #include "MaterialData.h"
+#include "FEProblem.h"
 
 // Forward declarations
 class BoundaryRestrictable;
+class MooseMesh;
 
 template<>
 InputParameters validParams<BoundaryRestrictable>();

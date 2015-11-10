@@ -15,6 +15,7 @@
 #ifndef BNDELEMENT_H
 #define BNDELEMENT_H
 
+#include "MooseTypes.h"
 #include "libmesh/elem.h"
 
 struct BndElement

@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "NearestNodeDistanceAux.h"
+#include "NearestNodeLocator.h"
 
 template<>
 InputParameters validParams<NearestNodeDistanceAux>()

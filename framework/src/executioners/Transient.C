@@ -21,6 +21,8 @@
 #include "TimeStepper.h"
 #include "MooseApp.h"
 #include "Conversion.h"
+#include "FEProblem.h"
+
 //libMesh includes
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"

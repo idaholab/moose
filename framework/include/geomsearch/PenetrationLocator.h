@@ -16,24 +16,19 @@
 #define PENETRATIONLOCATOR_H
 
 // Moose includes
-#include "GeometricSearchInterface.h"
+#include "Restartable.h"
 #include "PenetrationInfo.h"
 
 // libmesh includes
-#include "libmesh/libmesh_common.h"
-#include "MooseMesh.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/point.h"
-#include "libmesh/fe_type.h"
 #include "libmesh/fe.h"
 
-#include <vector>
-#include <map>
-
-//Forward Declarations
+// Forward Declarations
 class SubProblem;
 class MooseMesh;
 class GeometricSearchData;
+class NearestNodeLocator;
 
 class PenetrationLocator : Restartable
 {

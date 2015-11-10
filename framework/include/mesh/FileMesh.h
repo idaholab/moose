@@ -16,7 +16,6 @@
 #define FILEMESH_H
 
 #include "MooseMesh.h"
-#include "libmesh/exodusII_io.h"
 
 //forward declaration
 class FileMesh;

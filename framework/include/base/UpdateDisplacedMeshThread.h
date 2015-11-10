@@ -15,12 +15,19 @@
 #ifndef UPDATEDISPLACEDMESHTHREAD_H
 #define UPDATEDISPLACEDMESHTHREAD_H
 
-#include "libmesh/numeric_vector.h"
 
 #include "ThreadedNodeLoop.h"
-#include "MooseMesh.h"
 
+// Forward declarations
 class DisplacedProblem;
+class UpdateDisplacedMeshThread;
+class MooseMesh;
+
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
 
 class UpdateDisplacedMeshThread : public ThreadedNodeLoop<SemiLocalNodeRange, SemiLocalNodeRange::const_iterator>
 {

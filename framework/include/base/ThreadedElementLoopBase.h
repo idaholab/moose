@@ -21,8 +21,7 @@
 #include "MooseException.h"
 
 /**
- * Base class for assembling-like calculations
- *
+ * Base class for assembly-like calculations.
  */
 template<typename RangeType>
 class ThreadedElementLoopBase

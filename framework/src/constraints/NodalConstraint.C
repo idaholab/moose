@@ -11,9 +11,13 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "NodalConstraint.h"
 
+#include "NodalConstraint.h"
 #include "SystemBase.h"
+#include "Assembly.h"
+
+// libMesh includes
+#include "libmesh/sparse_matrix.h"
 
 template<>
 InputParameters validParams<NodalConstraint>()

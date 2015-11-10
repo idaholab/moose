@@ -17,6 +17,7 @@
 
 #include "UserObject.h"
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 #include <vector>
 #include <map>

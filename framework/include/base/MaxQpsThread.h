@@ -15,20 +15,21 @@
 #ifndef MAXQPSTHREAD_H
 #define MAXQPSTHREAD_H
 
-#include "Moose.h"
 #include "ParallelUniqueId.h"
 
 // libMesh includes
-#include "libmesh/node_range.h"
-#include "libmesh/system.h"
-#include "libmesh/quadrature.h"
+#include "libmesh/elem_range.h"
+#include "libmesh/enum_order.h"
+#include "libmesh/enum_quadrature_type.h"
 
+// Forward declarations
 class FEProblem;
 
 /**
- * This class determines the maximum number of Quadrature Points and Shape Functions
- * used for a given simulation based on the variable discretizations, and quadrature
- * rules used for all variables in the system.
+ * This class determines the maximum number of Quadrature Points and
+ * Shape Functions used for a given simulation based on the variable
+ * discretizations, and quadrature rules used for all variables in the
+ * system.
  */
 class MaxQpsThread
 {

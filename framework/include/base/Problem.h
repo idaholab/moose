@@ -15,28 +15,8 @@
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
-#include "ParallelUniqueId.h"
-#include "InputParameters.h"
-#include "ExecStore.h"
-#include "MooseArray.h"
 #include "MooseObject.h"
-#include "MooseUtils.h"
-#include "Output.h"
 
-// libMesh
-#include "libmesh/libmesh_common.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/quadrature.h"
-#include "libmesh/elem.h"
-#include "libmesh/node.h"
-#include "libmesh/nonlinear_implicit_system.h"
-
-#include <string>
-
-class MooseVariable;
-class MooseVariableScalar;
-class Material;
-class Function;
 class TimePeriod;
 class Problem;
 

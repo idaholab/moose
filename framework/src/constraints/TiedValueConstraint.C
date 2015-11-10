@@ -11,9 +11,11 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "TiedValueConstraint.h"
 
-#include "SystemBase.h"
+// libMesh includes
+#include "libmesh/sparse_matrix.h"
 
 template<>
 InputParameters validParams<TiedValueConstraint>()

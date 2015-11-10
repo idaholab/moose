@@ -4,12 +4,14 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "Nonlinear3D.h"
-
 #include "SolidModel.h"
-
 #include "Problem.h"
 #include "SymmIsotropicElasticityTensor.h"
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 namespace SolidMechanics
 {

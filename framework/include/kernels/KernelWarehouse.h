@@ -15,14 +15,11 @@
 #ifndef KERNELWAREHOUSE_H
 #define KERNELWAREHOUSE_H
 
-#include <vector>
-#include <map>
-#include <set>
-
 #include "Warehouse.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
 
+// Forward declarations
 class KernelBase;
 class ScalarKernel;
 
