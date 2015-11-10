@@ -12,29 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTEREBOUNDARYINITIALCONDITIONTHREAD_H
-#define COMPUTEREBOUNDARYINITIALCONDITIONTHREAD_H
+#ifndef RESETDISPLACEDMESHTHREAD_H
+#define RESETDISPLACEDMESHTHREAD_H
 
-#include "Moose.h"
+#include "libmesh/numeric_vector.h"
+
 #include "ThreadedNodeLoop.h"
 #include "MooseMesh.h"
 
-// libmesh
-#include "libmesh/elem_range.h"
+class DisplacedProblem;
 
-class FEProblem;
-
-class ComputeBoundaryInitialConditionThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ResetDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
 {
 public:
-  ComputeBoundaryInitialConditionThread(FEProblem & fe_problem);
+  ResetDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem);
 
-  // Splitting Constructor
-  ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x, Threads::split split);
+  ResetDisplacedMeshThread(ResetDisplacedMeshThread & x, Threads::split split);
 
-  void onNode(ConstBndNodeRange::const_iterator & nd);
+  void onNode(NodeRange::const_iterator & nd);
 
-  void join(const ComputeBoundaryInitialConditionThread & /*y*/);
+  void join(const ResetDisplacedMeshThread & /*y*/);
+
+protected:
+  DisplacedProblem & _displaced_problem;
+  MooseMesh & _ref_mesh;
 };
 
-#endif //COMPUTEBOUNDARYINITIALCONDITIONTHREAD_H
+#endif /* RESETDISPLACEDMESHTHREAD_H */
