@@ -43,6 +43,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual void initialSetup();
 
 private:
   /// coupled variable for cb

@@ -55,6 +55,13 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & par
   }
 }
 
+void
+KKSPhaseChemicalPotential::initialSetup()
+{
+  validateNonlinearCoupling<Real>("fa_name");
+  validateNonlinearCoupling<Real>("fb_name");
+}
+
 Real
 KKSPhaseChemicalPotential::computeQpResidual()
 {
@@ -66,7 +73,7 @@ Real
 KKSPhaseChemicalPotential::computeQpJacobian()
 {
   // for on diagonal we return the d/dca derivative of the residual
-  return _test[_i][_qp] * _phi[_j][_qp] * (_d2fadca2[_qp] - _d2fbdcbca[_qp]); // OK
+  return _test[_i][_qp] * _phi[_j][_qp] * (_d2fadca2[_qp] - _d2fbdcbca[_qp]);
 }
 
 Real
@@ -77,6 +84,5 @@ KKSPhaseChemicalPotential::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  return _test[_i][_qp] * _phi[_j][_qp] * ((*_off_diag_a[cvar])[_qp] - (*_off_diag_b[cvar])[_qp]); // This contributes to a buggy Jacobian
+  return _test[_i][_qp] * _phi[_j][_qp] * ((*_off_diag_a[cvar])[_qp] - (*_off_diag_b[cvar])[_qp]);
 }
-

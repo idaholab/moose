@@ -52,6 +52,11 @@ protected:
 
   /// Second derivative of the free energy function \f$ \frac {d^2}{dc_b^2} F_b \f$
   const MaterialProperty<Real> & _prop_d2Fbdcb2;
+
+  /// Mixed partial derivatives of the free energy function wrt ca and
+  /// any other coupled variables \f$ \frac {d^2}{dc_a dq} F_a \f$
+  std::vector<const MaterialProperty<Real>* > _off_diag_a;
+
 };
 
 #endif //KKSACBULKC_H
