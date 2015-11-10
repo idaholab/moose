@@ -586,6 +586,9 @@ void FEProblem::initialSetup()
     Threads::parallel_reduce(elem_range, cmt);
   }
 
+  // Control Logic
+  executeControls(EXEC_INITIAL);
+
   // Scalar variables need to reinited for the initial conditions to be available for output
   for (unsigned int tid = 0; tid < n_threads; tid++)
     reinitScalars(tid);
@@ -1154,6 +1157,8 @@ FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
     // FIXME: cannot do this b/c variables are not computed => potential NaNs will pop-up
 //    reinitMaterials(subdomain, tid);
   }
+
+  executeControls(EXEC_SUBDOMAIN);
 
   // Call the subdomain methods of the output system, these are not threaded so only call it once
   if (tid == 0)
@@ -2265,6 +2270,11 @@ FEProblem::execute(const ExecFlagType & exec_type)
   computeUserObjects(exec_type, UserObjectWarehouse::POST_AUX);
   Moose::perf_log.pop("computeUserObjects()", "Setup");
 
+  // Controls
+  Moose::perf_log.push("computeControls()", "Setup");
+  executeControls(exec_type);
+  Moose::perf_log.pop("computeControls()", "Setup");
+
   // Return the current flag to None
   _current_execute_on_flag = EXEC_NONE;
 }
@@ -2278,7 +2288,7 @@ FEProblem::computeAuxiliaryKernels(const ExecFlagType & type)
 void
 FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group)
 {
-  // Perform Residual/Jacobian setups
+  // Perform Residual/Jacobain setups
   switch (type)
   {
   case EXEC_LINEAR:
@@ -2602,6 +2612,13 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
     if (pp)
       _pps_data.storeValue(name, pp->getValue());
   }
+}
+
+void
+FEProblem::executeControls(const ExecFlagType & exec_type)
+{
+  _control_warehouse.setup(exec_type);
+  _control_warehouse.execute(exec_type);
 }
 
 void
@@ -3434,6 +3451,8 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
 
+  executeControls(EXEC_LINEAR);
+
   _app.getOutputWarehouse().residualSetup();
 
   _nl.computeResidual(residual, type);
@@ -3482,6 +3501,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _aux.compute(EXEC_NONLINEAR);
 
     computeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::POST_AUX);
+
+    executeControls(EXEC_NONLINEAR);
 
     _app.getOutputWarehouse().jacobianSetup();
 

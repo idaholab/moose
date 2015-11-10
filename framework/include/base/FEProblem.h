@@ -41,6 +41,7 @@
 #include "OutputWarehouse.h"
 #include "MooseApp.h"
 #include "PetscSupport.h"
+#include "ControlWarehouse.h"
 
 class DisplacedProblem;
 
@@ -892,7 +893,6 @@ public:
   /// Returns whether or not this Problem has a TimeIntegrator
   bool hasTimeIntegrator() const { return _has_time_integrator; }
 
-
   /**
    * Return the current execution flag.
    *
@@ -917,6 +917,15 @@ public:
    */
   virtual void computeAuxiliaryKernels(const ExecFlagType & type);
 
+  /**
+   * Reference to the control logic warehouse.
+   */
+  ControlWarehouse & getControlWarehouse() { return _control_warehouse; }
+
+  /**
+   * Performs setup and execute calls for Control objects.
+   */
+  void executeControls(const ExecFlagType & exec_type);
 
 protected:
   MooseMesh & _mesh;
@@ -1082,6 +1091,9 @@ protected:
 
   /// Current execute_on flag
   ExecFlagType _current_execute_on_flag;
+
+  /// The control logic warehouse
+  ControlWarehouse _control_warehouse;
 
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage

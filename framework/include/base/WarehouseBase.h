@@ -18,6 +18,7 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "ExecuteOnStorage.h"
+#include "MooseTypes.h"
 
 /**
  * MooseObject storage container.

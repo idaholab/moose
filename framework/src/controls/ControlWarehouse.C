@@ -12,44 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDCONTROLACTION_H
-#define ADDCONTROLACTION_H
+#include "ControlWarehouse.h"
 
-// MOOSE includes
-#include "MooseObjectAction.h"
-
-// Forward declarations
-class AddControlAction;
-
-template<>
-InputParameters validParams<AddControlAction>();
-
-/**
- * Action for creating Control objects
- *
- * Control objects are GeneralUserObjects, thus just
- * use the AddUserObjectAction
- */
-class AddControlAction : public MooseObjectAction
+ControlWarehouse::ControlWarehouse() :
+    WarehouseBase(/*threaded = */ false)
 {
-public:
+}
 
-  /**
-   * Class constructor
-   * @param params Parameters for this Action
-   */
-  AddControlAction(InputParameters parameters);
-
-  /**
-   * Class destructor
-   */
-  virtual ~AddControlAction(){};
-
-  /**
-   * Create and store the Control object.
-   */
-  virtual void act();
-
-};
-
-#endif // ADDCONTROLACTION_H
+void
+ControlWarehouse::execute(const ExecFlagType & exec_flag, THREAD_ID tid)
+{
+  checkThreadID(tid);
+  const std::vector<MooseSharedPointer<Control> > & objects = getActive(exec_flag, tid);
+  for (std::vector<MooseSharedPointer<Control> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    (*it)->execute();
+}

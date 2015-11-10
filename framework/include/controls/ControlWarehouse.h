@@ -12,44 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDCONTROLACTION_H
-#define ADDCONTROLACTION_H
+#ifndef CONTROLWAREHOUSE_H
+#define CONTROLWAREHOUSE_H
 
 // MOOSE includes
-#include "MooseObjectAction.h"
-
-// Forward declarations
-class AddControlAction;
-
-template<>
-InputParameters validParams<AddControlAction>();
+#include "WarehouseBase.h"
+#include "Control.h"
 
 /**
- * Action for creating Control objects
- *
- * Control objects are GeneralUserObjects, thus just
- * use the AddUserObjectAction
+ * Non threaded storage for Control objects.
  */
-class AddControlAction : public MooseObjectAction
+class ControlWarehouse : public WarehouseBase<Control>
 {
 public:
+  ControlWarehouse();
 
   /**
-   * Class constructor
-   * @param params Parameters for this Action
+   * Call the execute methods of Control objects.
    */
-  AddControlAction(InputParameters parameters);
-
-  /**
-   * Class destructor
-   */
-  virtual ~AddControlAction(){};
-
-  /**
-   * Create and store the Control object.
-   */
-  virtual void act();
+  virtual void execute(const ExecFlagType & exec_flag, THREAD_ID tid = 0);
 
 };
 
-#endif // ADDCONTROLACTION_H
+#endif // CONTROLWAREHOUSE
