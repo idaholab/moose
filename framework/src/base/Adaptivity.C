@@ -27,6 +27,7 @@
 #include "libmesh/patch_recovery_error_estimator.h"
 #include "libmesh/fourth_error_estimators.h"
 #include "libmesh/parallel.h"
+#include "libmesh/error_vector.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 

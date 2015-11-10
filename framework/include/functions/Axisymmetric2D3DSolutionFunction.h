@@ -16,10 +16,10 @@
 #define AXISYMMETRIC2D3DSOLUTIONFUNCTION_H
 
 #include "Function.h"
-#include "SolutionUserObject.h"
 
 // Forward decleration
 class Axisymmetric2D3DSolutionFunction;
+class SolutionUserObject;
 
 template<>
 InputParameters validParams<Axisymmetric2D3DSolutionFunction>();

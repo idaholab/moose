@@ -15,6 +15,10 @@
 #include "Damper.h"
 #include "SystemBase.h"
 #include "SubProblem.h"
+#include "Assembly.h"
+
+// libMesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<Damper>()

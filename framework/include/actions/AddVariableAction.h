@@ -20,7 +20,7 @@
 #include "OutputInterface.h"
 
 // libMesh includes
-#include "libmesh/fe.h"
+#include "libmesh/fe_type.h"
 
 // Forward declerations
 class AddVariableAction;
@@ -90,9 +90,6 @@ protected:
 
   /// Absolute zero tolerance
   static const Real _abs_zero_tol;
-
-
-  // std::string _variable_to_read;
 };
 
 #endif // ADDVARIABLEACTION_H

@@ -15,7 +15,7 @@
 #ifndef CACHECHANGEDLISTSTHREAD_H
 #define CACHECHANGEDLISTSTHREAD_H
 
-#include "ThreadedElementLoop.h"
+#include "ThreadedElementLoopBase.h"
 
 // libMesh includes
 #include "libmesh/stored_range.h"

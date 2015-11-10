@@ -15,6 +15,10 @@
 #include "QuadraturePointMarker.h"
 #include "FEProblem.h"
 #include "MooseEnum.h"
+#include "Assembly.h"
+
+// libMesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<QuadraturePointMarker>()

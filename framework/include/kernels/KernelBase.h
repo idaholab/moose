@@ -16,32 +16,25 @@
 #define KERNELBASE_H
 
 #include "MooseObject.h"
+#include "BlockRestrictable.h"
 #include "SetupInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
+#include "PostprocessorInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "RandomInterface.h"
-#include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
-#include "BlockRestrictable.h"
-#include "Assembly.h"
-#include "MooseVariable.h"
-#include "SubProblem.h"
-#include "MooseTypes.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
-// libMesh
-#include "libmesh/fe.h"
-#include "libmesh/quadrature.h"
-
 class MooseMesh;
-class Problem;
 class SubProblem;
 class KernelBase;
+class Assembly;
+class MooseVariable;
 
 template<>
 InputParameters validParams<KernelBase>();

@@ -15,9 +15,10 @@
 #include "Material.h"
 #include "SubProblem.h"
 #include "MaterialData.h"
+#include "Assembly.h"
 
-// system includes
-#include <iostream>
+// libMesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<Material>()

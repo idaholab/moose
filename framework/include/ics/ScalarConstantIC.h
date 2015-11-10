@@ -17,12 +17,6 @@
 
 #include "ScalarInitialCondition.h"
 
-// LibMesh includes
-#include "libmesh/parameters.h"
-
-// System includes
-#include <string>
-
 // Forward Declarations
 class ScalarConstantIC;
 

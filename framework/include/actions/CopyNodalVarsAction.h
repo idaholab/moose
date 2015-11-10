@@ -15,7 +15,7 @@
 #ifndef COPYNODALVARSACTION_H
 #define COPYNODALVARSACTION_H
 
-#include "AddVariableAction.h"
+#include "Action.h"
 
 class CopyNodalVarsAction;
 

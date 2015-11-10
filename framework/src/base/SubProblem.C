@@ -18,6 +18,8 @@
 #include "Conversion.h"
 #include "Function.h"
 #include "MooseApp.h"
+#include "MooseVariable.h"
+#include "MooseArray.h"
 
 template<>
 InputParameters validParams<SubProblem>()

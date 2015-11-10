@@ -15,8 +15,6 @@
 #include "ComputeInitialConditionThread.h"
 #include "FEProblem.h"
 #include "InitialCondition.h"
-// libmesh includes
-#include "libmesh/threads.h"
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblem & fe_problem) :
     _fe_problem(fe_problem)

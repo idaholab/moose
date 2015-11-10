@@ -23,8 +23,7 @@
 #include "MooseTypes.h"
 #include "InitialCondition.h"
 #include "ScalarInitialCondition.h"
-// libMesh
-#include "libmesh/quadrature_gauss.h"
+#include "Assembly.h"
 
 /// Free function used for a libMesh callback
 void extraSendList(std::vector<dof_id_type> & send_list, void * context)

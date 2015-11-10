@@ -17,10 +17,12 @@
 #include "Material.h"
 #include "MaterialProperty.h"
 #include "KernelBase.h"
-#include "FEProblem.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
+
+// Forward declarations
+class FEProblem;
 
 /**
  * Helper function templates to set a variable to zero.

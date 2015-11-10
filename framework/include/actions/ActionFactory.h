@@ -21,7 +21,6 @@
 
 #include "Action.h"
 #include "InputParameters.h"
-#include "ActionWarehouse.h"
 
 
 /**
@@ -37,7 +36,6 @@
 #define addTaskDependency(action, depends_on)                      syntax.addDependency(action, depends_on)
 
 // Forward Declaration
-class ActionFactory;
 class MooseApp;
 
 /**

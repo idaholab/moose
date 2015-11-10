@@ -16,18 +16,12 @@
 #define WAREHOUSE_H
 
 #include <vector>
-#include <map>
-#include <set>
-
-#include "MooseError.h"
-#include "MooseTypes.h"
 
 /**
  * Base class for all Warehouse containers. The warehouses in MOOSE hold
  * all of the MooseObjects. Returns various collections of objects when requested
  * and is responsible for deletion of those objects when the simulation ends.
  */
-
 template <typename T>
 class Warehouse
 {

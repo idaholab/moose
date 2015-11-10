@@ -19,11 +19,14 @@
 #include "RandomInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
-// libMesh
-#include "libmesh/numeric_vector.h"
-#include "libmesh/sparse_matrix.h"
-
+// Forward declarations
 class NodalBC;
+
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
 
 template<>
 InputParameters validParams<NodalBC>();

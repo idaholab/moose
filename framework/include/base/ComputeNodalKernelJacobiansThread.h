@@ -20,17 +20,25 @@
 
 // libMesh includes
 #include "libmesh/node_range.h"
-#include "libmesh/numeric_vector.h"
 
-
+// Forward declarations
 class FEProblem;
 class AuxiliarySystem;
+
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class SparseMatrix;
+}
 
 
 class ComputeNodalKernelJacobiansThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelJacobiansThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<NodalKernelWarehouse> & nodal_kernels,  SparseMatrix<Number> & jacobian);
+  ComputeNodalKernelJacobiansThread(FEProblem & fe_problem,
+                                    AuxiliarySystem & sys,
+                                    std::vector<NodalKernelWarehouse> & nodal_kernels,
+                                    SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeNodalKernelJacobiansThread(ComputeNodalKernelJacobiansThread & x, Threads::split split);

@@ -18,6 +18,10 @@
 #include "Assembly.h"
 #include "SystemBase.h"
 
+// libMesh includes
+#include "libmesh/variable.h"
+#include "libmesh/dof_map.h"
+
 
 MooseVariableBase::MooseVariableBase(unsigned int var_num, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     _var_num(var_num),

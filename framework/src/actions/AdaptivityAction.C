@@ -24,6 +24,7 @@
 
 // libMesh includes
 #include "libmesh/transient_system.h"
+#include "libmesh/system_norm.h"
 
 template<>
 InputParameters validParams<AdaptivityAction>()

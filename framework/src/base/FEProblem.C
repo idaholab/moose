@@ -13,6 +13,10 @@
 /****************************************************************/
 
 #include "FEProblem.h"
+#include "MaterialPropertyStorage.h"
+#include "VectorPostprocessorData.h"
+#include "MooseEnum.h"
+#include "Resurrector.h"
 #include "Factory.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
@@ -41,7 +45,6 @@
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
 #include "ComputeJacobianBlocksThread.h"
-
 #include "ScalarInitialCondition.h"
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
@@ -55,24 +58,24 @@
 #include "GeneralVectorPostprocessor.h"
 #include "Indicator.h"
 #include "Marker.h"
-
 #include "MultiApp.h"
 #include "TransientMultiApp.h"
-
 #include "ElementUserObject.h"
 #include "NodalUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "GeneralUserObject.h"
-
 #include "InternalSideIndicator.h"
-
 #include "Transfer.h"
 #include "MultiAppTransfer.h"
 #include "MultiMooseEnum.h"
+#include "Predictor.h"
+#include "Assembly.h"
 
-//libmesh Includes
+// libMesh includes
 #include "libmesh/exodusII_io.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/coupling_matrix.h"
 
 Threads::spin_mutex get_function_mutex;
 
@@ -3076,6 +3079,18 @@ FEProblem::setCouplingMatrix(CouplingMatrix * cm)
   _coupling = Moose::COUPLING_CUSTOM;
   delete _cm;
   _cm = cm;
+}
+
+bool
+FEProblem::areCoupled(unsigned int ivar, unsigned int jvar)
+{
+  return (*_cm)(ivar, jvar);
+}
+
+std::vector<std::pair<MooseVariable *, MooseVariable *> > &
+FEProblem::couplingEntries(THREAD_ID tid)
+{
+  return _assembly[tid]->couplingEntries();
 }
 
 void

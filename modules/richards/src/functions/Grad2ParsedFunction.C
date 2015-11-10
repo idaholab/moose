@@ -7,6 +7,7 @@
 
 
 #include "Grad2ParsedFunction.h"
+#include "MooseParsedFunctionWrapper.h"
 
 template<>
 InputParameters validParams<Grad2ParsedFunction>()

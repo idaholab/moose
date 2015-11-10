@@ -20,6 +20,7 @@
 // libMesh includes
 #include "libmesh/elem_range.h"
 
+// Forward declarations
 class AuxiliarySystem;
 
 class ComputeIndicatorThread : public ThreadedElementLoop<ConstElemRange>

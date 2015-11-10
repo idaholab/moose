@@ -5,11 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "RichardsFullyUpwindFlux.h"
+#include "Assembly.h"
 
-#include <iostream>
-
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<RichardsFullyUpwindFlux>()

@@ -17,12 +17,13 @@
 
 // MOOSE includes
 #include "InputParameters.h"
-#include "MooseTypes.h"
-#include "FEProblem.h"
+#include "ParallelUniqueId.h"
 #include "MaterialData.h"
 
 // Forward declarations
 class BlockRestrictable;
+class FEProblem;
+class MooseMesh;
 
 template<>
 InputParameters validParams<BlockRestrictable>();
@@ -75,6 +76,12 @@ public:
    * @param boundary_ids The boundary ids that the object is restricted to
    */
   BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids);
+
+  /**
+   * Destructor: does nothing but needs to be marked as virtual since
+   * this class defines virtual functions.
+   */
+  virtual ~BlockRestrictable() {}
 
   /**
    * Return the block names for this object

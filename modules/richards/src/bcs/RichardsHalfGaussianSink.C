@@ -8,8 +8,7 @@
 
 #include "RichardsHalfGaussianSink.h"
 #include "Material.h"
-
-#include <iostream>
+#include "Function.h"
 
 
 template<>

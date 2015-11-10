@@ -15,13 +15,9 @@
 #ifndef COMPUTEREBOUNDARYINITIALCONDITIONTHREAD_H
 #define COMPUTEREBOUNDARYINITIALCONDITIONTHREAD_H
 
-#include "Moose.h"
 #include "ThreadedNodeLoop.h"
-#include "MooseMesh.h"
 
-// libmesh
-#include "libmesh/elem_range.h"
-
+// Forward declarations
 class FEProblem;
 
 class ComputeBoundaryInitialConditionThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>

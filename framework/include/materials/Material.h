@@ -16,37 +16,31 @@
 #define MATERIAL_H
 
 #include "MooseObject.h"
+#include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 #include "SetupInterface.h"
 #include "Coupleable.h"
-#include "ScalarCoupleable.h"
 #include "MooseVariableDependencyInterface.h"
+#include "ScalarCoupleable.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
-#include "PostprocessorInterface.h"
-#include "MaterialProperty.h"
 #include "MaterialPropertyInterface.h"
-#include "MaterialData.h"
-#include "ParallelUniqueId.h"
-#include "Problem.h"
-#include "SubProblem.h"
+#include "PostprocessorInterface.h"
 #include "DependencyResolverInterface.h"
-#include "Function.h"
-#include "BlockRestrictable.h"
-#include "BoundaryRestrictable.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 #include "OutputInterface.h"
 #include "RandomInterface.h"
 
-// libMesh includes
-#include "libmesh/quadrature_gauss.h"
-#include "libmesh/elem.h"
+#include "MaterialProperty.h"
 
 // forward declarations
 class Material;
 class MooseMesh;
+class MaterialData;
+class SubProblem;
 
 /**
  * Holds a data structure used to compute material properties at a Quadrature point

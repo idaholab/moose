@@ -21,6 +21,8 @@
 
 // libmesh includes
 #include "libmesh/threads.h"
+#include "libmesh/quadrature.h"
+
 
 template<>
 InputParameters validParams<FDKernel>()

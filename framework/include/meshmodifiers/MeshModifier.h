@@ -16,15 +16,11 @@
 #define MESHMODIFIER_H
 
 #include "MooseObject.h"
-#include "MooseMesh.h"
-#include "InputParameters.h"
 #include "Restartable.h"
 
-// System includes
-#include <string>
-
-class Problem;
+// Forward declarations
 class MeshModifier;
+class MooseMesh;
 
 template<>
 InputParameters validParams<MeshModifier>();

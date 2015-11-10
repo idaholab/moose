@@ -16,6 +16,9 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
+// libMesh includes
+#include "libmesh/coupling_matrix.h"
+
 
 template<>
 InputParameters validParams<FiniteDifferencePreconditioner>()

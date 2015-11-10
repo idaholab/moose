@@ -14,6 +14,7 @@
 
 #include "TwoMaterialPropertyInterface.h"
 #include "MaterialData.h"
+#include "InputParameters.h"
 
 TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const InputParameters & parameters) :
     MaterialPropertyInterface(parameters),

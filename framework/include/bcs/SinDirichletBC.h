@@ -15,11 +15,9 @@
 #ifndef SINDIRICHLETBC_H
 #define SINDIRICHLETBC_H
 
-#include "libmesh/libmesh_common.h"
 #include "NodalBC.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class SinDirichletBC;
 
 template<>

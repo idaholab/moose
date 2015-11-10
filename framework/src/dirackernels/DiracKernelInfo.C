@@ -17,6 +17,7 @@
 
 // LibMesh
 #include "libmesh/point_locator_base.h"
+#include "libmesh/elem.h"
 
 DiracKernelInfo::DiracKernelInfo() :
     _point_locator()

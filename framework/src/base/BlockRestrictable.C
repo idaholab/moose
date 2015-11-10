@@ -15,6 +15,7 @@
 // MOOSE Includes
 #include "BlockRestrictable.h"
 #include "Material.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<BlockRestrictable>()

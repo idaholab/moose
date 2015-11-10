@@ -4,11 +4,15 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "LinearIsotropicMaterial.h"
 #include "ColumnMajorMatrix.h"
 #include "SolidMechanicsMaterial.h"
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<LinearIsotropicMaterial>()

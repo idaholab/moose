@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "PiecewiseMultilinear.h"
+#include "GriddedData.h"
 
 
 template<>

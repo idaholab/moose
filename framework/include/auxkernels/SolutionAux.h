@@ -16,10 +16,10 @@
 #define SOLUTIONAUX_H
 
 #include "AuxKernel.h"
-#include "SolutionUserObject.h"
 
 // Forward declaration
 class SolutionAux;
+class SolutionUserObject;
 
 template<>
 InputParameters validParams<SolutionAux>();

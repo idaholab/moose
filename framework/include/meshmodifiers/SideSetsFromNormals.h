@@ -16,7 +16,6 @@
 #define SIDESETSFROMNORMALS_H
 
 #include "AddSideSetsBase.h"
-#include "libmesh/fe.h"
 
 class SideSetsFromNormals;
 
@@ -38,7 +37,6 @@ protected:
   std::vector<BoundaryName> _boundary_names;
 
   std::vector<Point> _normals;
-
 };
 
 #endif /* SIDESETSFROMNORMALS_H */

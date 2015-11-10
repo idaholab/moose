@@ -18,12 +18,14 @@
 #include <vector>
 
 #include "MooseTypes.h"
-#include "libmesh/libmesh_common.h"
+#include "libmesh/libmesh_base.h"
 
 /**
- * The class for storing warehouses that holds objects that are being evaluated at different times
+ * The class for storing warehouses that holds objects that are being
+ * evaluated at different times.
  *
- * Currently we can do only Post-processors and AuxKernels, but this object will help to extend the other subsystems.
+ * Currently we can do only Post-processors and AuxKernels, but this
+ * object will help to extend the other subsystems.
  */
 template<typename T>
 class ExecStore

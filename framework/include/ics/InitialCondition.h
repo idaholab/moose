@@ -16,17 +16,15 @@
 #define INITIALCONDITION_H
 
 #include "MooseObject.h"
+#include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "ParallelUniqueId.h"
 #include "Restartable.h"
 #include "BlockRestrictable.h"
 #include "DependencyResolverInterface.h"
 #include "BoundaryRestrictable.h"
 #include "ZeroInterface.h"
-// System includes
-#include <string>
 
 // libMesh
 #include "libmesh/point.h"

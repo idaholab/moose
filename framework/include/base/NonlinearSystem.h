@@ -24,23 +24,24 @@
 #include "ConstraintWarehouse.h"
 #include "SplitWarehouse.h"
 #include "NodalKernelWarehouse.h"
-#include "TimeIntegrator.h"
-#include "Predictor.h"
-#include "NodalKernelWarehouse.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/sparse_matrix.h"
-#include "libmesh/petsc_matrix.h"
-#include "libmesh/coupling_matrix.h"
-#include "libmesh/libmesh_common.h"
-#include LIBMESH_INCLUDE_UNORDERED_MAP
 
+// Forward declarations
 class FEProblem;
 class MoosePreconditioner;
 class JacobianBlock;
+class TimeIntegrator;
+class Predictor;
+
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class NumericVector;
+template <typename T> class SparseMatrix;
+}
 
 /**
  * Nonlinear system to be solved

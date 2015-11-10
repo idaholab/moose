@@ -19,7 +19,6 @@
 
 //Forward Declarations
 class ConstantRate;
-class Function;
 
 template<>
 InputParameters validParams<ConstantRate>();

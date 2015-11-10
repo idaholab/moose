@@ -15,6 +15,10 @@
 #include "KernelGrad.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
+#include "Assembly.h"
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<KernelGrad>()

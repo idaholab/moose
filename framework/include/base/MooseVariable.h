@@ -18,18 +18,23 @@
 #include "MooseVariableBase.h"
 #include "ParallelUniqueId.h"
 
-// libMesh
-#include "libmesh/quadrature.h"
-#include "libmesh/dense_vector.h"
-#include "libmesh/dense_matrix.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/sparse_matrix.h"
-#include "libmesh/elem.h"
-#include "libmesh/node.h"
+// libMesh includes
+#include "libmesh/fe_type.h"
 
+// Forward declarations
 class Assembly;
 class SubProblem;
 class SystemBase;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class Elem;
+class Node;
+class QBase;
+template <typename T> class NumericVector;
+template <typename T> class DenseVector;
+}
 
 /**
  * Class for stuff related to variables

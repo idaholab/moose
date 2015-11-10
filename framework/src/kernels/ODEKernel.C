@@ -14,6 +14,7 @@
 
 #include "ODEKernel.h"
 #include "SystemBase.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<ODEKernel>()

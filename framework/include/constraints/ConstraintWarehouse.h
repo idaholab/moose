@@ -16,6 +16,7 @@
 #define CONSTRAINTWAREHOUSE_H
 
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 class Constraint;
 class NodalConstraint;

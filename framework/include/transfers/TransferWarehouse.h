@@ -20,6 +20,7 @@
 #include <set>
 
 #include "Warehouse.h"
+#include "MooseTypes.h"
 
 class Transfer;
 class MultiAppTransfer;

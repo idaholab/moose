@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "ParsedODEKernel.h"
+#include "libmesh/fparser_ad.hh"
 
 template<>
 InputParameters validParams<ParsedODEKernel>()

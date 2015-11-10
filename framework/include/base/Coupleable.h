@@ -15,9 +15,12 @@
 #ifndef COUPLEABLE_H
 #define COUPLEABLE_H
 
-#include "MooseVariable.h"
-#include "MooseVariableScalar.h"
-#include "InputParameters.h"
+// MOOSE includes
+#include "MooseVariableBase.h"
+
+// Forward declarations
+class InputParameters;
+class MooseVariable;
 
 /**
  * Interface for objects that needs coupling capabilities

@@ -15,21 +15,24 @@
 #ifndef AUXILIARYSYSTEM_H
 #define AUXILIARYSYSTEM_H
 
-#include <set>
 #include "SystemBase.h"
 #include "ExecStore.h"
 #include "AuxWarehouse.h"
-#include "TimeIntegrator.h"
 
 // libMesh include
-#include "libmesh/equation_systems.h"
 #include "libmesh/explicit_system.h"
 #include "libmesh/transient_system.h"
 
-#include "libmesh/numeric_vector.h"
-
+// Forward declarations
 class AuxKernel;
 class FEProblem;
+class TimeIntegrator;
+
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
 
 /**
  * A system that holds auxiliary variables

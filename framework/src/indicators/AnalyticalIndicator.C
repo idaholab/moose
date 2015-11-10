@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "AnalyticalIndicator.h"
+#include "Function.h"
 
 template<>
 InputParameters validParams<AnalyticalIndicator>()

@@ -16,11 +16,11 @@
 #define EIGENEXECUTIONERBASE_H
 
 #include "Executioner.h"
-#include "FEProblem.h"
 
 // Forward Declarations
 class EigenExecutionerBase;
 class EigenSystem;
+class FEProblem;
 
 template<>
 InputParameters validParams<EigenExecutionerBase>();

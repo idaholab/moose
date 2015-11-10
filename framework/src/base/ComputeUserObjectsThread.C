@@ -13,14 +13,14 @@
 /****************************************************************/
 
 #include "ComputeUserObjectsThread.h"
-
 #include "Problem.h"
 #include "SystemBase.h"
-
 #include "ElementUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
+
+#include "libmesh/numeric_vector.h"
 
 
 ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group) :

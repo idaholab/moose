@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "NearestNodeThread.h"
+#include "MooseMesh.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

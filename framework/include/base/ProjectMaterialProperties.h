@@ -16,12 +16,13 @@
 #define PROJECTMATERIALPROPERTIES_H
 
 #include "ThreadedElementLoop.h"
+#include "MaterialWarehouse.h"
+
 // libMesh includes
 #include "libmesh/elem_range.h"
 
 class FEProblem;
 class NonlinearSystem;
-class MaterialWarehouse;
 class MaterialPropertyStorage;
 class MaterialData;
 class Assembly;

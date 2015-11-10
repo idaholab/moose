@@ -20,11 +20,17 @@
 #include "SystemBase.h"
 #include "MooseTypes.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 
 // libMesh
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/fe_interface.h"
-
+#include "libmesh/dof_map.h"
+#include "libmesh/coupling_matrix.h"
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
+#include "libmesh/sparse_matrix.h"
 
 Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _sys(sys),

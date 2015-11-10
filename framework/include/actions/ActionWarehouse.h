@@ -29,7 +29,6 @@
 typedef std::vector<Action *>::iterator ActionIterator;
 
 class MooseMesh;
-class Executioner;
 class Syntax;
 class ActionFactory;
 

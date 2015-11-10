@@ -17,6 +17,7 @@
 #include "MooseMesh.h"
 #include "SystemBase.h"
 #include "MooseEnum.h"
+#include "PenetrationLocator.h"
 
 #include "libmesh/string_to_enum.h"
 

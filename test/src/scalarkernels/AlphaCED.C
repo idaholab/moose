@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "AlphaCED.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<AlphaCED>()

@@ -17,7 +17,10 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseVariable.h"
+
+// libMesh includes
 #include "libmesh/fe_interface.h"
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<InitialCondition>()

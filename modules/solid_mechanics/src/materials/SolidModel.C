@@ -4,8 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "SolidModel.h"
 
+#include "SolidModel.h"
 #include "AxisymmetricRZ.h"
 #include "NonlinearRZ.h"
 #include "SphericalR.h"
@@ -14,13 +14,14 @@
 #include "PlaneStrain.h"
 #include "NonlinearPlaneStrain.h"
 #include "VolumetricModel.h"
-
 #include "ConstitutiveModel.h"
 #include "SymmIsotropicElasticityTensor.h"
-
 #include "MooseApp.h"
 #include "Problem.h"
 #include "PiecewiseLinear.h"
+
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<SolidModel>()

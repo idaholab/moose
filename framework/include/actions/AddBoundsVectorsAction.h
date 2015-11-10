@@ -15,7 +15,7 @@
 #ifndef ADDBOUNDSVECTORSACTION_H
 #define ADDBOUNDSVECTORSACTION_H
 
-#include "MooseObjectAction.h"
+#include "Action.h"
 
 class AddBoundsVectorsAction;
 

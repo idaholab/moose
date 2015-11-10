@@ -15,7 +15,6 @@
 #include "UpdateDisplacedMeshThread.h"
 #include "DisplacedProblem.h"
 #include "MooseMesh.h"
-
 #include "SubProblem.h"
 
 UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem) :

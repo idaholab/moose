@@ -18,6 +18,12 @@
 #include "UpdateDisplacedMeshThread.h"
 #include "ResetDisplacedMeshThread.h"
 #include "MooseApp.h"
+#include "MooseMesh.h"
+#include "Assembly.h"
+#include "FEProblem.h"
+
+// libMesh includes
+#include "libmesh/numeric_vector.h"
 
 template<>
 InputParameters validParams<DisplacedProblem>()
@@ -48,6 +54,24 @@ DisplacedProblem::~DisplacedProblem()
 {
   for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
     delete _assembly[i];
+}
+
+bool
+DisplacedProblem::isTransient() const
+{
+  return _mproblem.isTransient();
+}
+
+Moose::CoordinateSystemType
+DisplacedProblem::getCoordSystem(SubdomainID sid)
+{
+  return _mproblem.getCoordSystem(sid);
+}
+
+std::set<dof_id_type> &
+DisplacedProblem::ghostedElems()
+{
+  return _mproblem.ghostedElems();
 }
 
 void

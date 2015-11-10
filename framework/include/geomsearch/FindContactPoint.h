@@ -13,19 +13,24 @@
 /****************************************************************/
 
 // Moose
-#include "PenetrationLocator.h"
+#include "Moose.h"
 
-// libMesh
-#include "libmesh/elem.h"
-#include "libmesh/vector_value.h"
+// libMesh headers
+#include "libmesh/fe_base.h"
+
+// Forward declarations
+class PenetrationInfo;
 
 namespace Moose
 {
 
 void
 findContactPoint(PenetrationInfo & p_info,
-                 FEBase * _fe, FEType & _fe_type, const Point & slave_point,
-                 bool start_with_centroid, const Real tangential_tolerance,
+                 FEBase * _fe,
+                 FEType & _fe_type,
+                 const Point & slave_point,
+                 bool start_with_centroid,
+                 const Real tangential_tolerance,
                  bool & contact_point_on_side);
 
 void

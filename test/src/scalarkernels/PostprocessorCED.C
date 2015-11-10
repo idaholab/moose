@@ -11,7 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "PostprocessorCED.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<PostprocessorCED>()

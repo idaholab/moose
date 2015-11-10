@@ -15,6 +15,7 @@
 #include "SideSetsBetweenSubdomains.h"
 #include "InputParameters.h"
 #include "MooseTypes.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<SideSetsBetweenSubdomains>()

@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "MooseParsedGradFunction.h"
+#include "MooseParsedFunctionWrapper.h"
 
 template<>
 InputParameters validParams<MooseParsedGradFunction>()

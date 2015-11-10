@@ -19,18 +19,16 @@
 #include "MaterialProperty.h"
 #include "HashMap.h"
 
-//libMesh
-#include "libmesh/elem.h"
-#include "libmesh/quadrature.h"
-#include "libmesh/mesh.h"
-
-#include <vector>
-#include <map>
-#include <string>
-
+// Forward declarations
 class Material;
 class MaterialData;
 class QpMap;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class QBase;
+}
 
 /**
  * Stores the stateful material properties computed by materials.

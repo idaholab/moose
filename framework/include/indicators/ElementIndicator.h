@@ -18,23 +18,15 @@
 #include "Indicator.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
-#include "Assembly.h"
-#include "MooseVariable.h"
-#include "SubProblem.h"
-#include "MooseTypes.h"
 #include "Coupleable.h"
 #include "ScalarCoupleable.h"
 #include "MooseVariableInterface.h"
-#include "MooseVariableDependencyInterface.h"
+#include "MaterialPropertyInterface.h"
 #include "ZeroInterface.h"
-// libMesh
-#include "libmesh/fe.h"
-#include "libmesh/quadrature.h"
 
-class MooseMesh;
-class Problem;
-class SubProblem;
+// Forward declarations
 class ElementIndicator;
+class MooseVariable;
 
 template<>
 InputParameters validParams<ElementIndicator>();

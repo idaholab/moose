@@ -16,7 +16,6 @@
 #define SIDESETSFROMPOINTS_H
 
 #include "AddSideSetsBase.h"
-#include "libmesh/fe.h"
 
 class SideSetsFromPoints;
 

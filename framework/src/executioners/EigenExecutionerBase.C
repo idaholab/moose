@@ -17,6 +17,7 @@
 
 #include "MooseApp.h"
 #include "DisplacedProblem.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<EigenExecutionerBase>()

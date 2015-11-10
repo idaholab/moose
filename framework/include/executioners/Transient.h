@@ -16,11 +16,6 @@
 #define TRANSIENT_H
 
 #include "Executioner.h"
-#include "FEProblem.h"
-
-// LibMesh includes
-#include "libmesh/mesh_function.h"
-#include "libmesh/parameters.h"
 
 // System includes
 #include <string>
@@ -29,6 +24,7 @@
 // Forward Declarations
 class Transient;
 class TimeStepper;
+class FEProblem;
 
 template<>
 InputParameters validParams<Transient>();

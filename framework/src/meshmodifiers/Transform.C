@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "Transform.h"
+#include "MooseMesh.h"
 
 #include "libmesh/mesh_modification.h"
 

@@ -14,6 +14,7 @@
 
 #include "MooseError.h"
 #include "SolutionFunction.h"
+#include "SolutionUserObject.h"
 
 
 template<>

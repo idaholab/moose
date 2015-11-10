@@ -17,16 +17,16 @@
 
 //MOOSE includes
 #include "Constraint.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "TransientInterface.h"
-#include "GeometricSearchInterface.h"
-
-//libMesh includes
-#include "libmesh/sparse_matrix.h"
 
 //Forward Declarations
 class NodeFaceConstraint;
+
+// libMesh forward declarations
+namespace libMesh
+{
+template <typename T> class SparseMatrix;
+}
 
 template<>
 InputParameters validParams<NodeFaceConstraint>();

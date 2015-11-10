@@ -19,7 +19,6 @@
 #include "MooseArray.h"
 
 // libMesh
-#include "libmesh/elem.h"
 #include "libmesh/point.h"
 
 #include <set>
@@ -27,6 +26,12 @@
 
 // Forward declarations
 class MooseMesh;
+
+namespace libMesh
+{
+class Elem;
+class PointLocatorBase;
+}
 
 /**
  * The DiracKernelInfo object is a place where all the Dirac points

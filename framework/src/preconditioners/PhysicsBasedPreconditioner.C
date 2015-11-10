@@ -19,7 +19,7 @@
 #include "MooseEnum.h"
 #include "ComputeJacobianBlocksThread.h"
 
-//libMesh Includes
+// libMesh Includes
 #include "libmesh/libmesh_common.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -29,6 +29,7 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/coupling_matrix.h"
 
 template<>
 InputParameters validParams<PhysicsBasedPreconditioner>()

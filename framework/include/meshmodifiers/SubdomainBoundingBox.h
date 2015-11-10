@@ -60,7 +60,6 @@ private:
 
   /// Bounding box for testing element centroids against
   MeshTools::BoundingBox _bounding_box;
-
 };
 
 #endif //SUBDOMAINBOUDINGBOX_H
