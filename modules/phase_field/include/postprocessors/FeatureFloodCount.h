@@ -88,9 +88,10 @@ protected:
 
   /**
    * This method will "mark" all entities on neighboring elements that
-   * are above the supplied threshold
+   * are above the supplied threshold. If live_region == -1, that means the
+   * region is inactive (unmarked areas)
    */
-  void flood(const DofObject *dof_object, int current_idx, unsigned int live_region);
+  void flood(const DofObject *dof_object, int current_idx, int live_region);
 
   /**
    * These routines packs/unpack the _bubble_map data into a structure suitable for parallel
