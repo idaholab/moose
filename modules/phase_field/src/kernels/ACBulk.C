@@ -12,7 +12,7 @@ InputParameters validParams<ACBulk>()
   InputParameters params = validParams<KernelValue>();
   params.addClassDescription("Allen-Cahn bulk energy kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
-  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends ons");
+  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
   return params;
 }
 

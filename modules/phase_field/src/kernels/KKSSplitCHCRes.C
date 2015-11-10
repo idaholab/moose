@@ -23,7 +23,7 @@ InputParameters validParams<KKSSplitCHCRes>()
 }
 
 KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters) :
-    DerivativeMaterialInterface<SplitCHBase>(parameters),
+    DerivativeMaterialInterface<JvarMapInterface<SplitCHBase> >(parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _ca_var(coupled("ca")),
@@ -38,16 +38,22 @@ KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters) :
     _w(coupledValue("w"))
 {
   // reserve space for derivatives
-  _second_derivatives.resize(_nvar);
+  _d2Fadcadarg.resize(_nvar);
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
     MooseVariable *cvar = this->_coupled_moose_vars[i];
 
-    // get the second derivative material property (TODO:warn)
-    _second_derivatives[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name());
+    // get the second derivative material property
+    _d2Fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name());
   }
+}
+
+void
+KKSSplitCHCRes::initialSetup()
+{
+  validateNonlinearCoupling<Real>("fa_name");
 }
 
 Real
@@ -90,5 +96,10 @@ KKSSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _ca_var)
     return _phi[_j][_qp] * _test[_i][_qp] * _second_derivative_Fa[_qp];
 
-  return 0.0;
+  // get the coupled variable jvar is referring to
+  unsigned int cvar;
+  if (!mapJvarToCvar(jvar, cvar))
+    return 0.0;
+
+  return _phi[_j][_qp] * _test[_i][_qp] * (*_d2Fadcadarg[cvar])[_qp];
 }

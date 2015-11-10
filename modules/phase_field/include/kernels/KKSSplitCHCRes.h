@@ -29,7 +29,7 @@ InputParameters validParams<KKSSplitCHCRes>();
  * The user picks one phase free energy \f$ F_a \f$ (f_base) and its corresponding
  * phase concentration \f$ c_a \f$
  */
-class KKSSplitCHCRes : public DerivativeMaterialInterface<SplitCHBase>
+class KKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapInterface<SplitCHBase> >
 {
 public:
   KKSSplitCHCRes(const InputParameters & parameters);
@@ -38,6 +38,7 @@ protected:
   virtual Real computeDFDC(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   virtual Real computeQpResidual();
+  virtual void initialSetup();
 
 private:
   /// Number of coupled variables
@@ -52,7 +53,7 @@ private:
   ///@}
 
   /// Derivatives of \f$ dFa/dca \f$ with respect to all coupled variables
-  std::vector<const MaterialProperty<Real> *> _second_derivatives;
+  std::vector<const MaterialProperty<Real> *> _d2Fadcadarg;
 
   /// h(eta) material property
   const MaterialProperty<Real> & _prop_h;
