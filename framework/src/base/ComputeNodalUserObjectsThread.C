@@ -15,22 +15,22 @@
 #include "ComputeNodalUserObjectsThread.h"
 
 #include "AuxiliarySystem.h"
-#include "SubProblem.h"
+#include "FEProblem.h"
 #include "NodalUserObject.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(SubProblem & problem, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group) :
-    _sub_problem(problem),
+ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblem & fe_problem, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group) :
+    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _user_objects(user_objects),
     _group(group)
 {
 }
 
 // Splitting Constructor
-ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split /*split*/) :
-    _sub_problem(x._sub_problem),
+ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split) :
+    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _user_objects(x._user_objects),
     _group(x._group)
 {
@@ -41,48 +41,42 @@ ComputeNodalUserObjectsThread::~ComputeNodalUserObjectsThread()
 }
 
 void
-ComputeNodalUserObjectsThread::operator() (const ConstNodeRange & range)
+ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
 {
-  ParallelUniqueId puid;
-  _tid = puid.id;
+  const Node * node = *node_it;
+  _fe_problem.reinitNode(node, _tid);
 
-  for (ConstNodeRange::const_iterator node_it = range.begin() ; node_it != range.end(); ++node_it)
+  // All Nodes
+  for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it =
+         _user_objects[_tid].nodalUserObjects(Moose::ANY_BOUNDARY_ID, _group).begin();
+       nodal_user_object_it != _user_objects[_tid].nodalUserObjects(Moose::ANY_BOUNDARY_ID, _group).end();
+       ++nodal_user_object_it)
   {
-    const Node * node = *node_it;
-    _sub_problem.reinitNode(node, _tid);
+    (*nodal_user_object_it)->execute();
+  }
 
-    // All Nodes
-    for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it =
-           _user_objects[_tid].nodalUserObjects(Moose::ANY_BOUNDARY_ID, _group).begin();
-         nodal_user_object_it != _user_objects[_tid].nodalUserObjects(Moose::ANY_BOUNDARY_ID, _group).end();
+  // Boundary Restricted UserObjects
+  std::vector<BoundaryID> nodeset_ids = _fe_problem.mesh().getMesh().get_boundary_info().boundary_ids(node);
+
+  for (std::vector<BoundaryID>::iterator it = nodeset_ids.begin(); it != nodeset_ids.end(); ++it)
+  {
+    for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = _user_objects[_tid].nodalUserObjects(*it, _group).begin();
+         nodal_user_object_it != _user_objects[_tid].nodalUserObjects(*it, _group).end();
          ++nodal_user_object_it)
     {
       (*nodal_user_object_it)->execute();
     }
+  }
 
-    // Boundary Restricted UserObjects
-    std::vector<BoundaryID> nodeset_ids = _sub_problem.mesh().getMesh().get_boundary_info().boundary_ids(node);
-
-    for (std::vector<BoundaryID>::iterator it = nodeset_ids.begin(); it != nodeset_ids.end(); ++it)
+  // Subdomain Restricted UserObjects
+  const std::set<SubdomainID> & block_ids = _fe_problem.mesh().getNodeBlockIds(*node);
+  for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
+  {
+    for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = _user_objects[_tid].blockNodalUserObjects(*block_it, _group).begin();
+         nodal_user_object_it != _user_objects[_tid].blockNodalUserObjects(*block_it, _group).end();
+         ++nodal_user_object_it)
     {
-      for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = _user_objects[_tid].nodalUserObjects(*it, _group).begin();
-           nodal_user_object_it != _user_objects[_tid].nodalUserObjects(*it, _group).end();
-           ++nodal_user_object_it)
-      {
-        (*nodal_user_object_it)->execute();
-      }
-    }
-
-    // Subdomain Restricted UserObjects
-    const std::set<SubdomainID> & block_ids = _sub_problem.mesh().getNodeBlockIds(*node);
-    for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
-    {
-      for (std::vector<NodalUserObject *>::const_iterator nodal_user_object_it = _user_objects[_tid].blockNodalUserObjects(*block_it, _group).begin();
-           nodal_user_object_it != _user_objects[_tid].blockNodalUserObjects(*block_it, _group).end();
-           ++nodal_user_object_it)
-      {
-        (*nodal_user_object_it)->execute();
-      }
+      (*nodal_user_object_it)->execute();
     }
   }
 }

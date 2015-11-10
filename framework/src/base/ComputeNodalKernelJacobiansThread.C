@@ -25,7 +25,7 @@ ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(FEProblem &
                                                                      AuxiliarySystem & sys,
                                                                      std::vector<NodalKernelWarehouse> & nodal_kernels,
                                                                      SparseMatrix<Number> & jacobian) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem, sys),
+    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(sys),
     _nodal_kernels(nodal_kernels),
     _jacobian(jacobian),
@@ -66,7 +66,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
     // The NodalKernels that are active and are coupled to the jvar in question
     std::vector<MooseSharedPointer<NodalKernel> > active_involved_kernels;
 
-    const std::set<SubdomainID> & block_ids = _sys.mesh().getNodeBlockIds(*node);
+    const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
     for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
     {
       // Loop over each NodalKernel to see if it's involved with the jvar

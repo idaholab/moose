@@ -24,7 +24,7 @@
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(FEProblem & fe_problem,
                                                      AuxiliarySystem & sys,
                                                      std::vector<NodalKernelWarehouse> & nodal_kernels) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem, sys),
+    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(sys),
     _nodal_kernels(nodal_kernels),
     _num_cached(0)

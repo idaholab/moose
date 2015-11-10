@@ -19,13 +19,11 @@
 #include "MooseMesh.h"
 #include "FEProblem.h"
 
-class SystemBase;
-
 template<typename RangeType, typename IteratorType>
 class ThreadedNodeLoop
 {
 public:
-  ThreadedNodeLoop(FEProblem & fe_problem, SystemBase & sys);
+  ThreadedNodeLoop(FEProblem & fe_problem);
 
   // Splitting Constructor
   ThreadedNodeLoop(ThreadedNodeLoop & x, Threads::split split);
@@ -71,21 +69,18 @@ public:
 
 protected:
   FEProblem & _fe_problem;
-  SystemBase & _sys;
   THREAD_ID _tid;
 };
 
 template<typename RangeType, typename IteratorType>
-ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(FEProblem & fe_problem, SystemBase & sys) :
-    _fe_problem(fe_problem),
-    _sys(sys)
+ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(FEProblem & fe_problem) :
+    _fe_problem(fe_problem)
 {
 }
 
 template<typename RangeType, typename IteratorType>
 ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(ThreadedNodeLoop & x, Threads::split /*split*/) :
-    _fe_problem(x._fe_problem),
-    _sys(x._sys)
+    _fe_problem(x._fe_problem)
 {
 }
 

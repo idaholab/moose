@@ -15,31 +15,29 @@
 #ifndef COMPUTENODALUserObjectsTHREAD_H
 #define COMPUTENODALUserObjectsTHREAD_H
 
-#include "ParallelUniqueId.h"
+#include "ThreadedNodeLoop.h"
 #include "UserObjectWarehouse.h"
+
 // libMesh includes
 #include "libmesh/node_range.h"
 
 class Problem;
-class SubProblem;
+class FEProblem;
 
-class ComputeNodalUserObjectsThread
+class ComputeNodalUserObjectsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalUserObjectsThread(SubProblem & problem, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
+  ComputeNodalUserObjectsThread(FEProblem & fe_problem, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
   // Splitting Constructor
   ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split);
 
   virtual ~ComputeNodalUserObjectsThread();
 
-  void operator() (const ConstNodeRange & range);
+  virtual void onNode(ConstNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalUserObjectsThread & /*y*/);
 
 protected:
-  SubProblem & _sub_problem;
-  THREAD_ID _tid;
-
   std::vector<UserObjectWarehouse> & _user_objects;
   UserObjectWarehouse::GROUP _group;
 };

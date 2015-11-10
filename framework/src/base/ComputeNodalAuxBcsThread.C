@@ -24,7 +24,7 @@
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblem & fe_problem,
                                                    AuxiliarySystem & sys,
                                                    std::vector<AuxWarehouse> & auxs) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem, sys),
+    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(sys),
     _auxs(auxs)
 {
@@ -74,7 +74,7 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
     for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._nodal_vars[_tid].begin(); it != _aux_sys._nodal_vars[_tid].end(); ++it)
     {
       MooseVariable * var = it->second;
-      var->insert(_sys.solution());
+      var->insert(_aux_sys.solution());
     }
   }
 }
