@@ -40,7 +40,8 @@ ExampleShapeElementUserObject::initialize()
   // Jacobian term storage is up to the user. One option is using an std::vector
   // We resize it to the total number of DOFs in the system and zero it out.
   // WARNING: this can be large number (smart sparse storage could be a future improvement)
-  _jacobian_storage.assign(_subproblem.es().n_dofs(), 0.0);
+  if (_currently_computing_jacobian)
+    _jacobian_storage.assign(_subproblem.es().n_dofs(), 0.0);
 }
 
 void
@@ -49,7 +50,7 @@ ExampleShapeElementUserObject::execute()
   //
   // integrate u^2*v over the simulation domain
   //
-  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     _integral += _JxW[qp] * _coord[qp] * (_u_value[qp] * _u_value[qp]) * _v_value[qp];
 }
 

@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 5
-  ny = 5
+  nx = 3
+  ny = 3
 []
 
 [Variables]
@@ -61,8 +61,8 @@
 [UserObjects]
   [./example_uo]
     type = ExampleShapeElementUserObject
-    u = v
-    v = u
+    u = u
+    v = v
     # as this userobject computes quantities for both the residual AND the jacobian
     # it needs to have these execute_on flags set.
     execute_on = 'linear nonlinear'
