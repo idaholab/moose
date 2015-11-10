@@ -34,11 +34,6 @@ void
 AddControlAction::act()
 {
   _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem", _problem.get());
-
-
-
   MooseSharedPointer<Control> control = MooseSharedNamespace::static_pointer_cast<Control>(_factory.create(_type, _name, _moose_object_pars));
-
-
   _problem->getControlWarehouse().add(control);
 }

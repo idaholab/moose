@@ -96,9 +96,6 @@ private:
   /// A reference to the InputParameterWarehouse which is used for access the parameter objects
   InputParameterWarehouse & _input_parameter_warehouse;
 
-  /// The object thread id, needed for access the warehouse
-  THREAD_ID _tid;
-
   /// Helper method for retrieving controllable parameters
   template<typename T>
   ControllableParameter<T> getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ);
@@ -168,22 +165,26 @@ ControlInterface::getControllableParameterHelper(const MooseObjectParameterName 
   // The ControllableParameter object to return
   ControllableParameter<T> output;
 
-  // Loop over all InputParameter objects
-  for (InputParameterWarehouse::InputParameterIterator it = _input_parameter_warehouse.begin(_tid); it != _input_parameter_warehouse.end(_tid); ++it)
+  // Loop over all threads
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    // If the desired object name does not match the current object name, move on
-    if (desired != it->first)
-      continue;
-
-    // If the parameter is valid and controllable update the output vector with a pointer to the parameter
-    if (it->second->have_parameter<T>(desired.parameter()))
+    // Loop over all InputParameter objects
+    for (InputParameterWarehouse::InputParameterIterator it = _input_parameter_warehouse.begin(tid); it != _input_parameter_warehouse.end(tid); ++it)
     {
-      // Do not allow non-controllable types to be controlled
-      if (!it->second->isControllable(desired.parameter()))
-        mooseError("The desired parameter is not controllable: " << desired);
+      // If the desired object name does not match the current object name, move on
+      if (desired != it->first)
+        continue;
 
-      // Store pointer to the writable parameter
-      output.insert(MooseObjectParameterName(it->first, desired.parameter()), &(it->second->set<T>(desired.parameter())));
+      // If the parameter is valid and controllable update the output vector with a pointer to the parameter
+      if (it->second->have_parameter<T>(desired.parameter()))
+      {
+        // Do not allow non-controllable types to be controlled
+        if (!it->second->isControllable(desired.parameter()))
+          mooseError("The desired parameter is not controllable: " << desired);
+
+        // Store pointer to the writable parameter
+        output.insert(MooseObjectParameterName(it->first, desired.parameter()), &(it->second->set<T>(desired.parameter())));
+      }
     }
   }
 

@@ -5,7 +5,6 @@
     input = 'non_controllable_error.i'
     expect_err = "The desired parameter is not controllable: Kernels/diff/non_controllable"
     match_literal = true
-    max_threads = 1
   [../]
 
   [./multiple_params_found_warning]
@@ -13,7 +12,6 @@
     type = RunApp
     input = 'multiple_parameters_found.i'
     expect_out = "parameters have differing values"
-    max_threads = 1
     allow_warnings = 1
   [../]
 
@@ -23,15 +21,5 @@
     input = 'no_parameter_found.i'
     expect_err = "The controlled parameter was not found: unknown_param_name"
     match_literal = true
-    max_threads = 1
-  [../]
-
-  [./thread_error]
-    # Tests threading error
-    type = RunException
-    input = 'no_parameter_found.i'
-    expect_err = "The control logic system is experimental and under heavy development, it currently does not work with threading."
-    match_literal = true
-    min_threads = 2
   [../]
 []
