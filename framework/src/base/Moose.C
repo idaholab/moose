@@ -327,7 +327,6 @@
 #include "MultiAppProjectionTransfer.h"
 #include "MultiAppPostprocessorToAuxScalarTransfer.h"
 
-
 // Actions
 #include "AddBCAction.h"
 #include "AddDiracKernelAction.h"

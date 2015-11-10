@@ -21,16 +21,17 @@
 namespace Moose
 {
 
-// Currently there are 6 exec types (See MooseTypes.h)
+// Currently there are 7 exec types (See MooseTypes.h)
 const std::vector<ExecFlagType> populateExecTypes()
 {
-  std::vector<ExecFlagType> exec_types(6);
+  std::vector<ExecFlagType> exec_types(7);
   exec_types[0] = EXEC_INITIAL;
   exec_types[1] = EXEC_TIMESTEP_BEGIN;
   exec_types[2] = EXEC_NONLINEAR;
   exec_types[3] = EXEC_LINEAR;
   exec_types[4] = EXEC_TIMESTEP_END;
   exec_types[5] = EXEC_CUSTOM;
+  exec_types[6] = EXEC_SUBDOMAIN;
   return exec_types;
 }
 
