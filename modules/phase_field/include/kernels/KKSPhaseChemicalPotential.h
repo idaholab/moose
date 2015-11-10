@@ -56,8 +56,8 @@ private:
   const MaterialProperty<Real> & _d2fadca2;
   const MaterialProperty<Real> & _d2fbdcbca;
 
-  std::vector<const MaterialProperty<Real>* > _off_diag_a;
-  std::vector<const MaterialProperty<Real>* > _off_diag_b;
+  std::vector<const MaterialProperty<Real>* > _d2fadcadarg;
+  std::vector<const MaterialProperty<Real>* > _d2fbdcbdarg;
 };
 
 #endif //KKSPHASECHEMICALPOTENTIAL_H

@@ -41,8 +41,8 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & par
 #endif
 
   unsigned int nvar = _coupled_moose_vars.size();
-  _off_diag_a.resize(nvar);
-  _off_diag_b.resize(nvar);
+  _d2fadcadarg.resize(nvar);
+  _d2fbdcbdarg.resize(nvar);
 
   for (i = 0; i < nvar; ++i)
   {
@@ -50,8 +50,8 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & par
     arg = _coupled_moose_vars[i];
 
     // lookup table for the material properties representing the derivatives needed for the off-diagonal jacobian
-    _off_diag_a[i] = &getMaterialPropertyDerivative<Real>("fa_name", _var.name(), arg->name());
-    _off_diag_b[i] = &getMaterialPropertyDerivative<Real>("fb_name", _cb_name, arg->name());
+    _d2fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _var.name(), arg->name());
+    _d2fbdcbdarg[i] = &getMaterialPropertyDerivative<Real>("fb_name", _cb_name, arg->name());
   }
 }
 
@@ -84,5 +84,5 @@ KKSPhaseChemicalPotential::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  return _test[_i][_qp] * _phi[_j][_qp] * ((*_off_diag_a[cvar])[_qp] - (*_off_diag_b[cvar])[_qp]);
+  return _test[_i][_qp] * _phi[_j][_qp] * ((*_d2fadcadarg[cvar])[_qp] - (*_d2fbdcbdarg[cvar])[_qp]);
 }

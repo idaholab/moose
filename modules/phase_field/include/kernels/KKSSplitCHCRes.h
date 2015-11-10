@@ -53,7 +53,7 @@ private:
   ///@}
 
   /// Derivatives of \f$ dFa/dca \f$ with respect to all coupled variables
-  std::vector<const MaterialProperty<Real> *> _off_diag_a;
+  std::vector<const MaterialProperty<Real> *> _d2Fadcadarg;
 
   /// h(eta) material property
   const MaterialProperty<Real> & _prop_h;

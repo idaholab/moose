@@ -30,7 +30,7 @@ KKSACBulkC::KKSACBulkC(const InputParameters & parameters) :
     _prop_d2Fbdcb2(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _cb_name))
 {
   //Resize to number of coupled variables (_nvar from KKSACBulkBase constructor)
-  _off_diag_a.resize(_nvar);
+  _prop_d2Fadcadarg.resize(_nvar);
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
@@ -38,9 +38,8 @@ KKSACBulkC::KKSACBulkC(const InputParameters & parameters) :
     MooseVariable *cvar = _coupled_moose_vars[i];
 
     // get second partial derivatives wrt ca and other coupled variable
-    _off_diag_a[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name());
+    _prop_d2Fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name());
   }
-
 }
 
 Real
@@ -93,7 +92,7 @@ KKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return res;
 
-  res += _L[_qp] * _prop_dh[_qp] * (*_off_diag_a[cvar])[_qp]
+  res += _L[_qp] * _prop_dh[_qp] * (*_prop_d2Fadcadarg[cvar])[_qp]
             * (_ca[_qp] - _cb[_qp]) * _phi[_j][_qp]  * _test[_i][_qp];
 
   return res;
