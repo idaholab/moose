@@ -38,12 +38,8 @@ ShapeElementUserObject::coupled(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
 
-  // Jacobians can only be requested for non-linear variables
-  if (var->kind() != Moose::VAR_NONLINEAR)
-    mooseError("ShapeElementUserObject Jacobians can only be requested for non-linear variables.");
-
   // add to the set of variables for which executeJacobian will be called
-  if (_compute_jacobians)
+  if (_compute_jacobians && var->kind() == Moose::VAR_NONLINEAR)
     _jacobian_moose_variables.insert(var);
 
   // return the variable number
