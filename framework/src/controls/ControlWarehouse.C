@@ -12,28 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
-#include "AddControlAction.h"
-#include "FEProblem.h"
-#include "Factory.h"
-#include "Control.h"
+#include "ControlWarehouse.h"
 
-template<>
-InputParameters validParams<AddControlAction>()
-{
-  InputParameters params = validParams<MooseObjectAction>();
-  return params;
-}
-
-AddControlAction::AddControlAction(InputParameters parameters) :
-  MooseObjectAction(parameters)
+ControlWarehouse::ControlWarehouse() :
+    WarehouseBase(/*threaded = */ false)
 {
 }
 
 void
-AddControlAction::act()
+ControlWarehouse::execute(const ExecFlagType & exec_flag, THREAD_ID tid)
 {
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem", _problem.get());
-  MooseSharedPointer<Control> control = MooseSharedNamespace::static_pointer_cast<Control>(_factory.create(_type, _name, _moose_object_pars));
-  _problem->getControlWarehouse().add(control);
+  checkThreadID(tid);
+  const std::vector<MooseSharedPointer<Control> > & objects = getActive(exec_flag, tid);
+  for (std::vector<MooseSharedPointer<Control> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    (*it)->execute();
 }

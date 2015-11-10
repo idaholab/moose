@@ -12,28 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef CONTROLWAREHOUSE_H
+#define CONTROLWAREHOUSE_H
+
 // MOOSE includes
-#include "AddControlAction.h"
-#include "FEProblem.h"
-#include "Factory.h"
+#include "WarehouseBase.h"
 #include "Control.h"
 
-template<>
-InputParameters validParams<AddControlAction>()
+/**
+ * Non threaded storage for Control objects.
+ */
+class ControlWarehouse : public WarehouseBase<Control>
 {
-  InputParameters params = validParams<MooseObjectAction>();
-  return params;
-}
+public:
+  ControlWarehouse();
 
-AddControlAction::AddControlAction(InputParameters parameters) :
-  MooseObjectAction(parameters)
-{
-}
+  /**
+   * Call the execute methods of Control objects.
+   */
+  virtual void execute(const ExecFlagType & exec_flag, THREAD_ID tid = 0);
 
-void
-AddControlAction::act()
-{
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem", _problem.get());
-  MooseSharedPointer<Control> control = MooseSharedNamespace::static_pointer_cast<Control>(_factory.create(_type, _name, _moose_object_pars));
-  _problem->getControlWarehouse().add(control);
-}
+};
+
+#endif // CONTROLWAREHOUSE

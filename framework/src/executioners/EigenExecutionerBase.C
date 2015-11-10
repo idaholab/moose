@@ -112,7 +112,9 @@ EigenExecutionerBase::init()
   // check if _source_integral has been evaluated during initialSetup()
   if ((bx_execflag & EXEC_INITIAL) == EXEC_NONE)
     _problem.execute(EXEC_LINEAR);
-  if (_source_integral==0.0) mooseError("|Bx| = 0!");
+
+  if (_source_integral==0.0)
+    mooseError("|Bx| = 0!");
 
   // normalize solution to make |Bx|=_eigenvalue, _eigenvalue at this point has the initialized value
   makeBXConsistent(_eigenvalue);
@@ -415,6 +417,7 @@ EigenExecutionerBase::normalizeSolution(bool force)
       // EXEC_CUSTOM is special, should be treated only by specifically designed executioners.
       if (Moose::exec_types[i]==EXEC_CUSTOM)
         continue;
+
       _problem.execute(Moose::exec_types[i]);
     }
   }

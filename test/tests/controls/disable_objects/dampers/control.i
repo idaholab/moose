@@ -38,39 +38,31 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 10
+  num_steps = 5
   dt = 0.1
-  dtmin = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
+[Dampers]
+  [./u_damp]
+    type = ConstantDamper
+    variable = u
+    damping = 0.9
+  [../]
+[]
+
 [Outputs]
-  csv = true
-[]
-
-[Functions]
-  [./func_coef]
-    type = ParsedFunction
-    value = '2*t + 0.1'
-  [../]
-[]
-
-[Postprocessors]
-  [./coef]
-    type = RealControlParameterReporter
-    parameter = 'coef'
-  [../]
+  exodus = true
 []
 
 [Controls]
-  [./func_control]
-    type = RealFunctionControl
-    parameter = 'coef'
-    function = 'func_coef'
+  [./damping_control]
+    type = DisableObjects
+    disable = 'u_damp'
+    start_time = 0.25
     execute_on = 'initial timestep_begin'
   [../]
 []
