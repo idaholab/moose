@@ -15,7 +15,7 @@
 #ifndef COMPUTENODALKERNELJACOBIANSTHREAD_H
 #define COMPUTENODALKERNELJACOBIANSTHREAD_H
 
-#include "ParallelUniqueId.h"
+#include "ThreadedNodeLoop.h"
 #include "NodalKernelWarehouse.h"
 
 // libMesh includes
@@ -27,7 +27,7 @@ class FEProblem;
 class AuxiliarySystem;
 
 
-class ComputeNodalKernelJacobiansThread
+class ComputeNodalKernelJacobiansThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   ComputeNodalKernelJacobiansThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<NodalKernelWarehouse> & nodal_kernels,  SparseMatrix<Number> & jacobian);
@@ -35,18 +35,21 @@ public:
   // Splitting Constructor
   ComputeNodalKernelJacobiansThread(ComputeNodalKernelJacobiansThread & x, Threads::split split);
 
-  void operator() (const ConstNodeRange & range);
+  virtual void pre();
+
+  virtual void onNode(ConstNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalKernelJacobiansThread & /*y*/);
 
 protected:
-  FEProblem & _fe_problem;
-  AuxiliarySystem & _sys;
-  THREAD_ID _tid;
+  AuxiliarySystem & _aux_sys;
 
   std::vector<NodalKernelWarehouse> & _nodal_kernels;
 
   SparseMatrix<Number> & _jacobian;
+
+  /// Number of contributions cached up
+  unsigned int _num_cached;
 };
 
 #endif //COMPUTENODALKERNELJACOBIANSTHREAD_H

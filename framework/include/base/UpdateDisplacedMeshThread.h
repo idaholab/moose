@@ -17,23 +17,44 @@
 
 #include "libmesh/numeric_vector.h"
 
+#include "ThreadedNodeLoop.h"
 #include "MooseMesh.h"
 
 class DisplacedProblem;
 
-class UpdateDisplacedMeshThread
+class UpdateDisplacedMeshThread : public ThreadedNodeLoop<SemiLocalNodeRange, SemiLocalNodeRange::const_iterator>
 {
 public:
-  UpdateDisplacedMeshThread(DisplacedProblem & problem);
+  UpdateDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem);
 
-  void operator() (const SemiLocalNodeRange & range) const;
-  void operator() (const NodeRange & range) const;
+  UpdateDisplacedMeshThread(UpdateDisplacedMeshThread & x, Threads::split split);
+
+  virtual void pre();
+
+  virtual void onNode(SemiLocalNodeRange::const_iterator & nd);
+
+  void join(const UpdateDisplacedMeshThread & /*y*/);
 
 protected:
-  DisplacedProblem & _problem;
+  DisplacedProblem & _displaced_problem;
   MooseMesh & _ref_mesh;
   const NumericVector<Number> & _nl_soln;
   const NumericVector<Number> & _aux_soln;
+
+
+private:
+  std::vector<unsigned int> _var_nums;
+  std::vector<unsigned int> _var_nums_directions;
+
+  std::vector<unsigned int> _aux_var_nums;
+  std::vector<unsigned int> _aux_var_nums_directions;
+
+
+  unsigned int _num_var_nums;
+  unsigned int _num_aux_var_nums;
+
+  unsigned int _nonlinear_system_number;
+  unsigned int _aux_system_number;
 };
 
 #endif /* UPDATEDISPLACEDMESHTHREAD_H */

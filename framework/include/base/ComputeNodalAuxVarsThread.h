@@ -15,30 +15,27 @@
 #ifndef COMPUTENODALAUXVARSTHREAD_H
 #define COMPUTENODALAUXVARSTHREAD_H
 
-#include "ParallelUniqueId.h"
+#include "ThreadedNodeLoop.h"
 #include "AuxWarehouse.h"
+
 // libMesh includes
 #include "libmesh/node_range.h"
 
-class FEProblem;
 class AuxiliarySystem;
 
-
-class ComputeNodalAuxVarsThread
+class ComputeNodalAuxVarsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   ComputeNodalAuxVarsThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
   // Splitting Constructor
   ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split);
 
-  void operator() (const ConstNodeRange & range);
+  void onNode(ConstNodeRange::const_iterator & nd);
 
   void join(const ComputeNodalAuxVarsThread & /*y*/);
 
 protected:
-  FEProblem & _fe_problem;
   AuxiliarySystem & _sys;
-  THREAD_ID _tid;
 
   std::vector<AuxWarehouse> & _auxs;
 };
