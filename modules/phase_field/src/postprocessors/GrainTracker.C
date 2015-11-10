@@ -466,10 +466,10 @@ GrainTracker::trackGrains()
       std::set<unsigned int> used_indices;
       std::map<unsigned int, unsigned int> error_indices;
 
-      if (grain_num != new_grains.size())
+      if (grain_num != new_grains.size() && processor_id() == 0)
         mooseWarning("Mismatch:\nEBSD centers: " << grain_num << " Grain Tracker Centers: " << new_grains.size());
 
-      unsigned int next_index = grain_num+1;
+      unsigned int next_index = grain_num;
       for (unsigned int i = 0; i < new_grains.size(); ++i)
       {
         Real min_centroid_diff = std::numeric_limits<Real>::max();
@@ -497,7 +497,7 @@ GrainTracker::trackGrains()
                      << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
           _unique_grains[next_index] = new_grains[i];
 
-          _unique_grain_to_ebsd_num[next_index] = closest_match_idx+1;
+          _unique_grain_to_ebsd_num[next_index] = closest_match_idx;
 
           ++next_index;
         }
@@ -505,9 +505,9 @@ GrainTracker::trackGrains()
         {
           Moose::out << "Assigning center " << closest_match_idx << " "
                      << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
-          _unique_grains[closest_match_idx+1] = new_grains[i];
+          _unique_grains[closest_match_idx] = new_grains[i];
 
-          _unique_grain_to_ebsd_num[closest_match_idx+1] = closest_match_idx+1;
+          _unique_grain_to_ebsd_num[closest_match_idx] = closest_match_idx;
 
           used_indices.insert(closest_match_idx);
         }
@@ -515,7 +515,7 @@ GrainTracker::trackGrains()
       if (!error_indices.empty())
       {
         for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
-          Moose::out << "Grain " << grain_it->first << ": " << center_points[grain_it->first - 1] << '\n';
+          Moose::out << "Grain " << grain_it->first << ": " << center_points[grain_it->first] << '\n';
 
         Moose::out << "Error Indices:\n";
         for (std::map<unsigned int, unsigned int>::const_iterator it = error_indices.begin(); it != error_indices.end(); ++it)
@@ -528,10 +528,10 @@ GrainTracker::trackGrains()
     }
     else
     {
-      for (unsigned int i = 1; i <= new_grains.size(); ++i)
+      for (unsigned int i = 0; i < new_grains.size(); ++i)
       {
-        new_grains[i-1]->status = MARKED;
-        _unique_grains[i] = new_grains[i-1];                   // Transfer ownership of the memory
+        new_grains[i]->status = MARKED;
+        _unique_grains[i] = new_grains[i];                   // Transfer ownership of the memory
       }
     }
     return;  // Return early - no matching or tracking to do
@@ -632,10 +632,10 @@ GrainTracker::trackGrains()
       Moose::out << COLOR_YELLOW
                  << "*****************************************************************************\n"
                  << "Couldn't find a matching grain while working on variable index: " << new_grains[i]->variable_idx
-                 << "\nCreating new unique grain: " << _unique_grains.size() + 1
+                 << "\nCreating new unique grain: " << _unique_grains.size()
                  << "\n*****************************************************************************\n" << COLOR_DEFAULT;
       new_grains[i]->status = MARKED;
-      _unique_grains[_unique_grains.size() + 1] = new_grains[i];   // transfer ownership
+      _unique_grains[_unique_grains.size()] = new_grains[i];   // transfer ownership
     }
 
 
@@ -953,7 +953,7 @@ GrainTracker::calculateBubbleVolumes()
   Moose::perf_log.push("calculateBubbleVolumes()", "GrainTracker");
 
   // The size of the bubble array will be sized to the max index of the unique grains map
-  unsigned int max_id = _unique_grains.size() ? _unique_grains.rbegin()->first + 1 : 0;
+  unsigned int max_id = _unique_grains.size() ? _unique_grains.rbegin()->first + 1: 0;
   _all_bubble_volumes.resize(max_id, 0);
 
   const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
