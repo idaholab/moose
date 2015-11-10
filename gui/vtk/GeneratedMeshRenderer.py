@@ -193,7 +193,10 @@ class GeneratedMeshRenderer(MeshRenderer):
       id_list.InsertNextId(i)
 
     extract = vtk.vtkExtractCells()
-    extract.SetInput(grid)
+    if vtk.VTK_MAJOR_VERSION <= 5:
+      extract.SetInput(grid)
+    else:
+      extract.SetInputData(grid)
     extract.SetCellList(id_list)
 
     return extract.GetOutput()

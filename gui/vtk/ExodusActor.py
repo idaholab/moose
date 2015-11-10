@@ -16,11 +16,17 @@ class ExodusActor(PeacockActor):
     self.mesh = data.GetBlock(type).GetBlock(index)
 
     self.geom = vtk.vtkDataSetSurfaceFilter()
-    self.geom.SetInput(self.mesh)
+    if vtk.VTK_MAJOR_VERSION <= 5:
+      self.geom.SetInput(self.mesh)
+    else:
+      self.geom.SetInputData(self.mesh)
     self.geom.Update()
 
     self.mapper = vtk.vtkDataSetMapper()
-    self.mapper.SetInput(self.mesh)
+    if vtk.VTK_MAJOR_VERSION <= 5:
+      self.mapper.SetInput(self.mesh)
+    else:
+      self.mapper.SetInputData(self.mesh)
 
     self.actor = vtk.vtkActor()
     self.actor.SetMapper(self.mapper)
