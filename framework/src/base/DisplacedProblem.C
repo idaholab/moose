@@ -16,6 +16,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "UpdateDisplacedMeshThread.h"
+#include "ResetDisplacedMeshThread.h"
 #include "MooseApp.h"
 
 template<>
@@ -113,7 +114,9 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
   _nl_solution = &soln;
   _aux_solution = &aux_soln;
 
-  Threads::parallel_for (*_mesh.getActiveSemiLocalNodeRange(), UpdateDisplacedMeshThread(*this));
+  UpdateDisplacedMeshThread udmt(_mproblem, *this);
+
+  Threads::parallel_reduce(*_mesh.getActiveSemiLocalNodeRange(), udmt);
 
   // Update the geometric searches that depend on the displaced mesh
   _geometric_search_data.update();
@@ -596,6 +599,11 @@ DisplacedProblem::undisplaceMesh()
   // require this.  We are using the GRAIN_SIZE=1 from MooseMesh.C,
   // not sure how this value was decided upon.
   //
+  // (DRG: The grainsize parameter is ultimately passed to TBB to help
+  // it choose how to split up the range.  A grainsize of 1 says "split
+  // it as much as you want".  Years ago I experimentally found that it
+  // didn't matter much and that using 1 was fine.)
+  //
   // Note: we don't have to invalidate/update as much stuff as
   // DisplacedProblem::updateMesh() does, since this will be handled
   // by a later call to updateMesh().
@@ -603,6 +611,8 @@ DisplacedProblem::undisplaceMesh()
                        _mesh.getMesh().nodes_end(),
                        /*grainsize=*/1);
 
+  ResetDisplacedMeshThread rdmt(_mproblem, *this);
+
   // Undisplace the mesh using threads.
-  Threads::parallel_for (node_range, UpdateDisplacedMeshThread(*this));
+  Threads::parallel_reduce (node_range, rdmt);
 }

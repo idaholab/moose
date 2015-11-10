@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef UPDATEDISPLACEDMESHTHREAD_H
-#define UPDATEDISPLACEDMESHTHREAD_H
+#ifndef RESETDISPLACEDMESHTHREAD_H
+#define RESETDISPLACEDMESHTHREAD_H
 
 #include "libmesh/numeric_vector.h"
 
@@ -22,39 +22,20 @@
 
 class DisplacedProblem;
 
-class UpdateDisplacedMeshThread : public ThreadedNodeLoop<SemiLocalNodeRange, SemiLocalNodeRange::const_iterator>
+class ResetDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
 {
 public:
-  UpdateDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem);
+  ResetDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem);
 
-  UpdateDisplacedMeshThread(UpdateDisplacedMeshThread & x, Threads::split split);
+  ResetDisplacedMeshThread(ResetDisplacedMeshThread & x, Threads::split split);
 
-  virtual void pre();
+  void onNode(NodeRange::const_iterator & nd);
 
-  virtual void onNode(SemiLocalNodeRange::const_iterator & nd);
-
-  void join(const UpdateDisplacedMeshThread & /*y*/);
+  void join(const ResetDisplacedMeshThread & /*y*/);
 
 protected:
   DisplacedProblem & _displaced_problem;
   MooseMesh & _ref_mesh;
-  const NumericVector<Number> & _nl_soln;
-  const NumericVector<Number> & _aux_soln;
-
-
-private:
-  std::vector<unsigned int> _var_nums;
-  std::vector<unsigned int> _var_nums_directions;
-
-  std::vector<unsigned int> _aux_var_nums;
-  std::vector<unsigned int> _aux_var_nums_directions;
-
-
-  unsigned int _num_var_nums;
-  unsigned int _num_aux_var_nums;
-
-  unsigned int _nonlinear_system_number;
-  unsigned int _aux_system_number;
 };
 
-#endif /* UPDATEDISPLACEDMESHTHREAD_H */
+#endif /* RESETDISPLACEDMESHTHREAD_H */
