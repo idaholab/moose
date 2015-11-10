@@ -9,11 +9,17 @@ class GeneratedMeshActor(PeacockActor):
     self.mesh = mesh
 
     self.geom = vtk.vtkDataSetSurfaceFilter()
-    self.geom.SetInput(self.mesh)
+    if vtk.VTK_MAJOR_VERSION <= 5:
+      self.geom.SetInput(self.mesh)
+    else:
+      self.geom.SetInputData(self.mesh)
     self.geom.Update()
 
     self.mapper = vtk.vtkPolyDataMapper()
-    self.mapper.SetInput(self.geom.GetOutput())
+    if vtk.VTK_MAJOR_VERSION <= 5:
+      self.mapper.SetInput(self.geom.GetOutput())
+    else:
+      self.mapper.SetInputData(self.geom.GetOutput())
 
     self.actor = vtk.vtkActor();
     self.actor.SetMapper(self.mapper);

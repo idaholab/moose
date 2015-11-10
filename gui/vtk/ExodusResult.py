@@ -103,7 +103,10 @@ class ExodusResult:
       self.current_actor = self.actor
 
       self.clipper = vtk.vtkTableBasedClipDataSet()
-      self.clipper.SetInput(self.output)
+      if vtk.VTK_MAJOR_VERSION <= 5:
+          self.clipper.SetInput(self.output)
+      else:
+          self.clipper.SetInputData(self.output)
       self.clipper.SetClipFunction(self.plane)
       self.clipper.Update()
 

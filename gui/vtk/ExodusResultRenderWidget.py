@@ -1114,7 +1114,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.timestep_to_timestep = {}
     self.current_max_timestep = -1
     for result in self.exodus_results:
-      result.reader.UpdateTimeInformation()
+      if vtk.VTK_MAJOR_VERSION <= 5:
+        result.reader.UpdateTimeInformation()
+      else:
+        result.reader.UpdateInformation()
       min = result.reader.GetTimeStepRange()[0]
       max = result.reader.GetTimeStepRange()[1]
       for timestep in xrange(min, max+1):
