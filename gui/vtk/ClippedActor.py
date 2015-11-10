@@ -10,12 +10,19 @@ class ClippedActor(PeacockActor):
     self.plane = plane
 
     self.clipper = vtk.vtkTableBasedClipDataSet()
-    self.clipper.SetInput(self.original_actor.mesh)
+    if vtk.VTK_MAJOR_VERSION <= 5:
+      self.clipper.SetInput(self.original_actor.mesh)
+    else:
+      self.clipper.SetInputData(self.original_actor.mesh)
+
     self.clipper.SetClipFunction(self.plane)
     self.clipper.Update()
 
     self.clip_mapper = vtk.vtkDataSetMapper()
-    self.clip_mapper.SetInput(self.clipper.GetOutput())
+    if vtk.VTK_MAJOR_VERSION <= 5:
+      self.clip_mapper.SetInput(self.clipper.GetOutput())
+    else:
+      self.clip_mapper.SetInputConnection(self.clipper.GetOutputPort())
 
     self.clip_actor = vtk.vtkActor()
     self.clip_actor.SetMapper(self.clip_mapper)
