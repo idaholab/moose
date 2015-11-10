@@ -383,6 +383,39 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
   return originalCoordinate;
 }
 
+double BasicMultivariateNormal::cellProbabilityWeight(std::vector<double> center, std::vector<double> dx){
+    /**
+     * This function calculates the integral of the pdf in a cell region
+     * In the 1D case a cell region is an interval [a,b], thus the integral of the pdf in such interval is
+     * calculated as CDF(b)-CDF(a). This functions perform a similar evolution but for a generic ND cell
+     * This function assumes all the input variables are uncorrelated, and follows univariate normal distribution N(0,1)
+     * Input Parameters:
+     * center: a vector to store the grid coordinate, for ND grid sampler, center represents the coordinate of given grid point
+     * dx:  a vector to store the distance between given grid coordinate and its connected points, for ND grid sampler, dx represents the distance between grid_coordinate_plus_one - grid_coordinate_minus_one, where grid_coordinate_plus_one and grid_coordinate_minus_one are the shift of "center"
+     */
+
+  double value = 1.0;
+  double upperBound = 0.0;
+  double lowerBound = 0.0;
+  double cdfValue = 0.0;
+  BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
+  for (unsigned int i = 0; i < center.size(); ++i) {
+    upperBound = center.at(i) + dx.at(i)/2.0;
+    lowerBound = center.at(i) - dx.at(i)/2.0;
+    cdfValue = normalDistribution->Cdf(upperBound) - normalDistribution->Cdf(lowerBound);
+    value *= cdfValue;
+  }
+  return value;
+}
+
+double BasicMultivariateNormal::inverseMarginalForPCA(double F){
+    /**
+     * This function calculates the inverse marginal distribution at F of a MVN distribution when using pca decomposition
+     */
+  BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
+  return normalDistribution->InverseCdf(F);
+}
+
 double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix){
   /**
    * This function calculates the pdf values at x of a MVN distribution
@@ -564,13 +597,11 @@ double BasicMultivariateNormal::phi(double x){
  return value;
 }
 
-
 double BasicMultivariateNormal::phi_inv(double x){
  normal s;
  double value = quantile(s,x);
  return value;
 }
-
 
 //double BasicMultivariateNormal::rn(){
 //    boost::random::mt19937 rng;

@@ -35,4 +35,17 @@
   input = 'test_mvn_pca.py'
   requires_swig2 = True
  [../]
+
+ [./test_inverseMarginalforPCA]
+  type = 'CrowPython'
+  input = 'test_inverseMarginalForPCA.py'
+  requires_swig2 = True
+ [../]
+
+ [./test_cellProbabilityWeight]
+  type = 'CrowPython'
+  input = 'test_cellProbabilityWeight.py'
+  requires_swig2 = True
+ [../]
+
 []
