@@ -123,9 +123,6 @@ MultiApp::MultiApp(const InputParameters & parameters):
 
   mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
 
-  // Fill in the _positions vector
-  fillPositions();
-
   if (_move_apps.size() != _move_positions.size())
     mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp " << name());
 

@@ -589,13 +589,22 @@ Console::write(std::string message, bool indent /*=true*/)
   if (_write_file)
     _file_output_stream << message;
 
+  // Need to strip off the last new line for proper indentation
+  bool has_end_newline = (message[message.size()-1]=='\n');
+  if (has_end_newline)
+    message = message.substr(0, message.size()-1);
+
   // Apply MultiApp indenting
   if (indent && _app.multiAppLevel() > 0)
     MooseUtils::indentMessage(_app.name(), message);
 
   // Write message to the screen
   if (_write_screen)
+  {
     Moose::out << message;
+    if (has_end_newline)
+      Moose::out << "\n";
+  }
 }
 
 void
