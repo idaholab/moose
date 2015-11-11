@@ -66,6 +66,9 @@ NodalNormalsPreprocessor::execute()
   // Get a reference to our BoundaryInfo object for later use...
   BoundaryInfo & boundary_info = _mesh.getMesh().get_boundary_info();
 
+  // Container to catch IDs handed back by BoundaryInfo.
+  std::vector<BoundaryID> node_boundary_ids;
+
   // Loop through each node on the current element
   for (unsigned int i = 0; i < _current_elem->n_nodes(); i++)
   {
@@ -76,7 +79,7 @@ NodalNormalsPreprocessor::execute()
     if (_mesh.isBoundaryNode(node->id()))
     {
       // List of IDs for the boundary
-      std::vector<BoundaryID> node_boundary_ids = boundary_info.boundary_ids(node);
+      boundary_info.boundary_ids(node, node_boundary_ids);
 
       // Perform the calculation, the node must be:
       //    (1) On a boundary to which the object is restricted
@@ -116,4 +119,3 @@ void
 NodalNormalsPreprocessor::threadJoin(const UserObject & /*uo*/)
 {
 }
-
