@@ -149,7 +149,7 @@ EigenExecutionerBase::makeBXConsistent(Real k)
     _problem.execute(EXEC_LINEAR);
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << _source_integral;
-    _console << " |Bx_0| = " << ss.str() << std::endl;
+    _console << "\n|Bx| = " << ss.str() << std::endl;
   }
 }
 
@@ -304,7 +304,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
         ss << " +================+=====================+\n" << std::flush;
         ss << std::endl;
       }
-      _console << ss.str() << std::endl;
+      _console << ss.str();
     }
 
     // increment iteration number here
@@ -431,7 +431,7 @@ EigenExecutionerBase::printEigenvalue()
   ss << " Eigenvalue = " << std::fixed << std::setprecision(10) << _eigenvalue << std::endl;
   ss << "******************************************************* " << std::endl;
 
-  _console << ss.str();
+  _console << ss.str() << std::flush;
 }
 
 EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters()

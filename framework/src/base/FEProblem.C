@@ -515,12 +515,16 @@ void FEProblem::initialSetup()
   // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ restartable data has been restored
 
   // Call initialSetup on the MultiApps
+  if (_has_multiapps)
+    _console << COLOR_MAGENTA << "Initializing MultiApps" << COLOR_DEFAULT << std::endl;
   _multi_apps(EXEC_LINEAR)[0].initialSetup();
   _multi_apps(EXEC_NONLINEAR)[0].initialSetup();
   _multi_apps(EXEC_TIMESTEP_END)[0].initialSetup();
   _multi_apps(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
   _multi_apps(EXEC_INITIAL)[0].initialSetup();
   _multi_apps(EXEC_CUSTOM)[0].initialSetup();
+  if (_has_multiapps)
+    _console << COLOR_MAGENTA << "Finished Initializing MultiApps" << COLOR_DEFAULT << std::endl;
 
   // Call initialSetup on the transfers
   _transfers(EXEC_LINEAR)[0].initialSetup();
@@ -2780,17 +2784,30 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     std::vector<Transfer *> transfers = _to_multi_app_transfers(type)[0].all();
     if (transfers.size())
+    {
+      _console << COLOR_MAGENTA << "Starting Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
       for (unsigned int i=0; i<transfers.size(); i++)
       {
         Moose::perf_log.push(transfers[i]->name(), "Transfers");
         transfers[i]->execute();
         Moose::perf_log.pop(transfers[i]->name(), "Transfers");
       }
+
+      _console << "Waiting For Transfers To Finish" << std::endl;
+      MooseUtils::parallelBarrierNotify(_communicator);
+
+      _console << COLOR_MAGENTA << "Transfers on " <<  Moose::stringify(type) << " Are Finished" << COLOR_DEFAULT << std::endl;
+    }
+    else
+    {
+      if (multi_apps.size())
+        _console << COLOR_MAGENTA << "No Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
+    }
   }
 
   if (multi_apps.size())
   {
-    _console << "Executing MultiApps" << std::endl;
+    _console << COLOR_MAGENTA << "Executing MultiApps on " <<  Moose::stringify(type) << COLOR_DEFAULT << std::endl;
 
     bool success = true;
 
@@ -2805,7 +2822,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     if (!success)
       return false;
 
-    _console << "Finished Executing MultiApps" << std::endl;
+    _console << COLOR_MAGENTA << "Finished Executing MultiApps on " <<  Moose::stringify(type) << COLOR_DEFAULT << std::endl;
   }
 
   // Execute Transfers _from_ MultiApps
@@ -2813,7 +2830,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     std::vector<Transfer *> transfers = _from_multi_app_transfers(type)[0].all();
     if (transfers.size())
     {
-      _console << "Starting Transfers From MultiApps" << std::endl;
+      _console << COLOR_MAGENTA << "Starting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
       for (unsigned int i=0; i<transfers.size(); i++)
       {
         Moose::perf_log.push(transfers[i]->name(), "Transfers");
@@ -2824,7 +2841,12 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
       _console << "Waiting For Transfers To Finish" << std::endl;
       MooseUtils::parallelBarrierNotify(_communicator);
 
-      _console << "Transfers Are Finished" << std::endl;
+      _console << COLOR_MAGENTA << "Transfers " << Moose::stringify(type) << " Are Finished" << COLOR_DEFAULT << std::endl;
+    }
+    else
+    {
+      if (multi_apps.size())
+        _console << COLOR_MAGENTA << "No Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
     }
   }
 

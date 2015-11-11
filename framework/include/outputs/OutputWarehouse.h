@@ -26,6 +26,7 @@
 // Forward declarations
 class Checkpoint;
 class FEProblem;
+class MooseApp;
 
 /**
  * Class for storing and utilizing output objects
@@ -37,7 +38,7 @@ public:
   /**
    * Class constructor
    */
-  OutputWarehouse();
+  OutputWarehouse(MooseApp & app);
 
   /*
    * Class destructor
@@ -181,6 +182,11 @@ public:
    */
   std::ostringstream & consoleBuffer() { return _console_buffer; }
 
+  /**
+   * Set if the outputs to Console before its construction are to be buffered or to screen directly
+   * @param buffer Ture to buffer
+   */
+  void bufferConsoleOutputsBeforeConstruction(bool buffer) { _buffer_action_console_outputs = buffer; }
 
 private:
 
@@ -283,6 +289,12 @@ private:
    * before buffered content. It is private because people shouldn't be messing with it.
    */
   void flushConsoleBuffer();
+
+  /// MooseApp
+  MooseApp & _app;
+
+  /// True to buffer console outputs in actions
+  bool _buffer_action_console_outputs;
 
   /// A map of the output pointers
   std::map<OutputName, Output *> _object_map;

@@ -71,6 +71,12 @@ namespace Moose {
   template<>
   std::string stringify(const SolveType & t);
 
+  /**
+   * Convert execution flag type into human readable string
+   */
+  template<>
+  std::string stringify(const ExecFlagType & t);
+
 }
 
 /**
