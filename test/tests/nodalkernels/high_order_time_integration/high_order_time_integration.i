@@ -82,11 +82,12 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  end_time = 20
+  end_time = 10
   dt = 1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  scheme = 'crank-nicolson'
 []
 
 [Outputs]

@@ -15,7 +15,7 @@
 #ifndef TIMEDERIVATIVENODALKERNEL_H
 #define TIMEDERIVATIVENODALKERNEL_H
 
-#include "NodalKernel.h"
+#include "TimeNodalKernel.h"
 
 //Forward Declarations
 class TimeDerivativeNodalKernel;
@@ -26,7 +26,7 @@ InputParameters validParams<TimeDerivativeNodalKernel>();
 /**
  * Represents du/dt
  */
-class TimeDerivativeNodalKernel : public NodalKernel
+class TimeDerivativeNodalKernel : public TimeNodalKernel
 {
 public:
   /**

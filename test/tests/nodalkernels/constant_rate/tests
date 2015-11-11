@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'constant_rate.i'
     exodiff = 'constant_rate_out.e'
+    rel_err = 1e-05
   [../]
 
   [./threaded]
@@ -11,5 +12,6 @@
     exodiff = 'constant_rate_out.e'
     min_threads = '3'
     prereq = 'test' # Force ordering since they output the same files
+    rel_err = 1e-05
   [../]
 []
