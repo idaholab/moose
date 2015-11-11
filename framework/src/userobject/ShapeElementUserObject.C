@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "ShapeElementUserObject.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<ShapeElementUserObject>()
