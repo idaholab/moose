@@ -45,6 +45,11 @@ public:
    * @param p porepressure
    */
   Real d2density(Real p) const;
+
+private:
+  /// Unit of measurement for pressure (should be 1 for pressure in Pa, 1E6 for pressure in MPa, etc)
+  Real _p_unit;
+
 };
 
 #endif // RICHARDSDENSITYMETHANE20DEGC_H
