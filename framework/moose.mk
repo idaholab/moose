@@ -39,17 +39,11 @@ moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 moose_LIBS := $(moose_LIB) $(pcre_LIB) $(ice_updater_LIB)
 
 # source files
-moose_precompiled_headers := $(FRAMEWORK_DIR)/include/base/Precompiled.h
 moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
 moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
 moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
 moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
 # object files
-ifdef PRECOMPILED
-moose_precompiled_headers_objects := $(patsubst %.h, %.h.gch/$(METHOD).h.gch, $(moose_precompiled_headers))
-else
-moose_precompiled_headers_objects :=
-endif
 moose_objects	:= $(patsubst %.C, %.$(obj-suffix), $(moose_srcfiles))
 moose_objects	+= $(patsubst %.c, %.$(obj-suffix), $(moose_csrcfiles))
 moose_objects   += $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
@@ -98,7 +92,7 @@ $(ice_updater_LIB): $(ice_updater_objects)
 	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(ice_updater_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(ice_updater_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(ice_updater_LIB) $(ice_updater_DIR)
 
-$(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB) $(ice_updater_LIB)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(ice_updater_LIB)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(ice_updater_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
@@ -113,10 +107,6 @@ sa:: $(moose_analyzer)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/mtwist/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/ice_updater/src/*.d)
-
-ifdef PRECOMPILED
--include $(FRAMEWORK_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch.d
-endif
 
 #
 # exodiff

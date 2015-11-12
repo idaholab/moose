@@ -2864,7 +2864,10 @@ FEProblem::restoreMultiApps(ExecFlagType type, bool force)
 
   if (multi_apps.size())
   {
-    _console << "Restoring MultiApps" << std::endl;
+    if (force)
+      _console << "\nRestoring Multiapps because of solve failure!" << std::endl;
+    else
+      _console << "\nRestoring MultiApps" << std::endl;
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
       if (force || multi_apps[i]->needsRestoration())
