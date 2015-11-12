@@ -45,6 +45,7 @@
 #include "RenameBlock.h"
 #include "AssignElementSubdomainID.h"
 #include "ImageSubdomain.h"
+#include "BlockDeleter.h"
 
 // problems
 #include "FEProblem.h"
@@ -447,6 +448,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(RenameBlock);
   registerMeshModifier(AssignElementSubdomainID);
   registerMeshModifier(ImageSubdomain);
+  registerMeshModifier(BlockDeleter);
 
   // problems
   registerProblem(FEProblem);
