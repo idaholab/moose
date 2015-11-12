@@ -7,5 +7,5 @@ REPO_DIR=${1:-"$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../"}
 if [ ! -d "$REPO_DIR" ]; then
   echo "$REPO_DIR directory does not exist";
 else
-  find $REPO_DIR -path ./contrib -prune -o -path ./libmesh -prune -o -name "*.[Chi]" -o -name "*.py" -type f -print0 | xargs -0 perl -pli -e "s/\s+$//"
+  find $REPO_DIR -path ./contrib -prune -o -path ./libmesh -prune -o \( -name "*.[Chi]" -o -name "*.py" \) -type f -print0 | xargs -0 perl -pli -e "s/\s+$//"
 fi
