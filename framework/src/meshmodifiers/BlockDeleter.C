@@ -12,10 +12,7 @@
 /* See COPYRIGHT for full restrictions */
 /****************************************************************/
 #include "BlockDeleter.h"
-<<<<<<< HEAD
 #include "MooseMesh.h"
-=======
->>>>>>> c9e0414... Initial block deleter for #3080. Does not work on two processors. Also leaves removed nodes hanging, but physics do not propogate across these nodes.
 
 template<>
 InputParameters validParams<BlockDeleter>()
@@ -45,7 +42,7 @@ BlockDeleter::modify()
 
   // Loop over the elements, checking if they should be deleted
   for (MeshBase::element_iterator el = mesh.active_elements_begin(); el != mesh.active_elements_end(); ++el)
-  {   
+  {
     unsigned int elem_id = (*el)->id();
     if ((*el)->subdomain_id() == _block_id)
     {
