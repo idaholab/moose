@@ -22,6 +22,7 @@
 #include "UserObject.h"
 #include "Executioner.h"
 #include "FEProblem.h"
+#include "libmesh/mesh_tools.h"
 
 #include "MooseTypes.h"
 
