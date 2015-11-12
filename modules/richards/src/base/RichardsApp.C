@@ -91,6 +91,7 @@
 #include "Q2PPorepressureDiffusion.h"
 #include "Q2PSaturationFlux.h"
 #include "Q2PSaturationDiffusion.h"
+#include "Q2PSaturationDiffusionFunction.h"
 #include "Q2PMassChange.h"
 
   // BoundaryConditions
@@ -214,6 +215,7 @@ RichardsApp::registerObjects(Factory & factory)
   registerKernel(Q2PPorepressureDiffusion);
   registerKernel(Q2PSaturationFlux);
   registerKernel(Q2PSaturationDiffusion);
+  registerKernel(Q2PSaturationDiffusionFunction);
   registerKernel(Q2PMassChange);
 
   // BoundaryConditions
