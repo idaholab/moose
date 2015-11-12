@@ -60,6 +60,7 @@ public:
 
   unsigned int id() { return _id; }
 
+  Component * parent() { return _parent; }
 
   /**
    * Initialize the component
