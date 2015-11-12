@@ -289,8 +289,6 @@ Transient::incrementStepOrReject()
   }
   else
   {
-    _console<<"\nRestoring Multiapps Because of solve failure!"<<std::endl;
-
     _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_END, true);
     _time_stepper->rejectStep();
