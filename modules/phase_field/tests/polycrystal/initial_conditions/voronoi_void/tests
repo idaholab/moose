@@ -1,0 +1,17 @@
+[Tests]
+  [./periodic_test]
+    type = 'Exodiff'
+    input = 'PolycrystalVoronoiVoidIC_periodic_test.i'
+    exodiff = 'periodic.e'
+  [../]
+  [./notperiodic_test]
+    type = 'Exodiff'
+    input = 'PolycrystalVoronoiVoidIC_notperiodic_test.i'
+    exodiff = 'notperiodic.e'
+  [../]
+  [./moregrains_test]
+    type = 'Exodiff'
+    input = 'PolycrystalVoronoiVoidIC_moregrains_test.i'
+    exodiff = 'moregrains.e'
+  [../]
+[]
