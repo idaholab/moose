@@ -103,21 +103,12 @@ GrainTracker::~GrainTracker()
 }
 
 Real
-GrainTracker::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
+GrainTracker::getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigned int var_idx) const
 {
   if (_t_step < _tracking_step)
     return 0;
 
-  return FeatureFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
-}
-
-Real
-GrainTracker::getEntityValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
-{
-  if (_t_step < _tracking_step)
-    return 0;
-
-  return FeatureFloodCount::getEntityValue(node_id, var_idx, show_var_coloring);
+  return FeatureFloodCount::getEntityValue(node_id, field_type, var_idx);
 }
 
 Real

@@ -126,6 +126,13 @@ FeatureFloodCount::initialize()
   _all_bubble_volumes.clear();
 
   _bytes_used = 0;
+  
+  _ghosted_elem_ids.clear();
+  const MeshBase::element_iterator end = _mesh.getMesh().ghost_elements_end();
+  for (MeshBase::element_iterator el = _mesh.getMesh().ghost_elements_begin(); el != end; ++el)
+    _ghosted_elem_ids.insert((*el)->id());
+
+  _communicator.set_union(_ghosted_elem_ids);
 }
 
 void
@@ -222,32 +229,26 @@ FeatureFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool
 {
   mooseDoOnce(mooseWarning("Please call getEntityValue instead"));
 
-  return getEntityValue(node_id, var_idx, show_var_coloring);
+  return 0;
 }
 
 Real
 FeatureFloodCount::getElementalValue(dof_id_type /*element_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
+  
   return 0;
 }
 
 Real
-FeatureFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool show_var_coloring) const
+FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx) const
 {
   mooseAssert(var_idx < _maps_size, "Index out of range");
-  mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
+//  mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
 
-  if (show_var_coloring)
+  switch (field_type)
   {
-    std::map<dof_id_type, int>::const_iterator entity_it = _var_index_maps[var_idx].find(entity_id);
-
-    if (entity_it != _var_index_maps[var_idx].end())
-      return entity_it->second;
-    else
-      return -1;
-  }
-  else
+  case UNIQUE_REGION:
   {
     std::map<dof_id_type, int>::const_iterator entity_it = _bubble_maps[var_idx].find(entity_id);
 
@@ -256,6 +257,23 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, unsigned int var_idx, b
     else
       return -1;
   }
+
+  case VARIABLE_COLORING:
+  {
+    std::map<dof_id_type, int>::const_iterator entity_it = _var_index_maps[var_idx].find(entity_id);
+
+    if (entity_it != _var_index_maps[var_idx].end())
+      return entity_it->second;
+    else
+      return -1;
+  }
+
+  case GHOSTED_ELEMS:
+    return _ghosted_elem_ids.find(entity_id) != _ghosted_elem_ids.end();
+
+  default:
+    return 0;
+  };
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &

@@ -32,7 +32,7 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the nodal value
    */
-  virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const = 0;
+//  virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const = 0;
 
   /**
    * Accessor for retrieving either nodal or elemental information (unique grains or variable indicies)
@@ -41,7 +41,7 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the entity value
    */
-  virtual Real getEntityValue(dof_id_type entity_id, unsigned int var_idx=0, bool show_var_coloring=false) const = 0;
+  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD_TYPE, unsigned int var_idx=0) const = 0;
 
   /**
    * Accessor for retrieving elemental field data (grain centroids).

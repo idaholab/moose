@@ -46,6 +46,10 @@
   [../]
   [./var_indices]
   [../]
+  [./ghost_regions]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [Kernels]
@@ -75,6 +79,13 @@
     variable = var_indices
     bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
+    execute_on = 'initial timestep_end'
+  [../]
+  [./ghosted_elems]
+    type = FeatureFloodCountAux
+    variable = ghost_regions
+    bubble_object = grain_tracker
+    field_display = GHOSTED_ELEMS
     execute_on = 'initial timestep_end'
   [../]
 []

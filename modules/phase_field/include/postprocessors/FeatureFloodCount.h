@@ -52,17 +52,26 @@ public:
   virtual void finalize();
   virtual Real getValue();
 
+  enum FIELD_TYPE
+  {
+  UNIQUE_REGION,
+  VARIABLE_COLORING,
+  ACTIVE_BOUNDS,
+  CENTROID,
+  GHOSTED_ELEMS
+  };
+  
   // Retrieve field information
   virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
   virtual Real getElementalValue(dof_id_type element_id) const;
 
-  virtual Real getEntityValue(dof_id_type entity_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
+  virtual Real getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx=0) const;
 
 //  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type /*node_id*/) const;
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
   inline bool isElemental() const { return _is_elemental; }
-
+  
 protected:
   class BubbleData
   {
@@ -260,6 +269,8 @@ protected:
 
   /// Average value of the domain which can optionally be used to find bubbles in a field
   const PostprocessorValue & _element_average_value;
+
+  std::set<dof_id_type> _ghosted_elem_ids;
 
   /**
    * The data structure which is a list of nodes that are constrained to other nodes
