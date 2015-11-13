@@ -107,7 +107,7 @@ protected:
    * communication operations. See the comments in these routines for the exact
    * data structure layout.
    */
-  void pack(std::vector<unsigned int> & packed_data) const;
+  void pack(std::vector<unsigned int> & packed_data);
   void unpack(const std::vector<unsigned int> & packed_data);
 
   /**
@@ -270,7 +270,7 @@ protected:
   /// Average value of the domain which can optionally be used to find bubbles in a field
   const PostprocessorValue & _element_average_value;
 
-  std::set<dof_id_type> _ghosted_elem_ids;
+  std::set<dof_id_type> _ghosted_entity_ids;
 
   /**
    * The data structure which is a list of nodes that are constrained to other nodes

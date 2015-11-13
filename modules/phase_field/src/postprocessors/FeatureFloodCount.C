@@ -127,12 +127,24 @@ FeatureFloodCount::initialize()
 
   _bytes_used = 0;
   
-  _ghosted_elem_ids.clear();
+  _ghosted_entity_ids.clear();
+
+  // Populate the global ghosted entity data structure
   const MeshBase::element_iterator end = _mesh.getMesh().ghost_elements_end();
   for (MeshBase::element_iterator el = _mesh.getMesh().ghost_elements_begin(); el != end; ++el)
-    _ghosted_elem_ids.insert((*el)->id());
+  {
+    const Elem * current_elem = *el;
 
-  _communicator.set_union(_ghosted_elem_ids);
+    if (_is_elemental)
+      _ghosted_entity_ids.insert(current_elem->id());
+    else
+    {
+      unsigned int n_nodes = current_elem->n_vertices();
+      for (unsigned int i = 0; i < n_nodes; ++i)
+        _ghosted_entity_ids.insert(current_elem->get_node(i)->id());
+    }
+  }
+  _communicator.set_union(_ghosted_entity_ids);
 }
 
 void
@@ -269,7 +281,7 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, 
   }
 
   case GHOSTED_ELEMS:
-    return _ghosted_elem_ids.find(entity_id) != _ghosted_elem_ids.end();
+    return _ghosted_entity_ids.find(entity_id) != _ghosted_entity_ids.end();
 
   default:
     return 0;
@@ -284,7 +296,7 @@ FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
 }
 
 void
-FeatureFloodCount::pack(std::vector<unsigned int> & packed_data) const
+FeatureFloodCount::pack(std::vector<unsigned int> & packed_data)
 {
   /**
    * Don't repack the data if it's already packed - we might lose data that was updated
@@ -296,65 +308,105 @@ FeatureFloodCount::pack(std::vector<unsigned int> & packed_data) const
 
   /**
    * We need a data structure that reorganizes the region markings into sets so that we can pack them up
-   * in a form to marshall them between processors.  The set of nodes are stored by map_num, region_num.
+   * in a form to marshall them between processors.  The set of nodes are stored by region_num for the
+   * current map_num.
    **/
-  std::vector<std::vector<std::set<dof_id_type> > > data(_maps_size);
+  std::vector<std::set<dof_id_type> > ghost_data;
 
+  /**
+   * This data structure holds just the local processors markings. It's used to prepopulate
+   * the bubble_sets data structure for use in the mergeSets routine.
+   */
+  std::vector<std::set<dof_id_type> > local_data;
+  
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-  {
-    data[map_num].resize(_region_counts[map_num]);
+  { 
+    ghost_data.resize(_region_counts[map_num]);
+    local_data.resize(_region_counts[map_num]);
+    unsigned int ghost_counter = 0;
 
-    {
-      std::map<dof_id_type, int>::const_iterator end = _bubble_maps[map_num].end();
-      // Reorganize the data by values
-
-      for (std::map<dof_id_type, int>::const_iterator it = _bubble_maps[map_num].begin(); it != end; ++it)
-        data[map_num][(it->second)].insert(it->first);
-
-      mooseAssert(_region_counts[map_num] == data[map_num].size(), "Error in packing data");
-    }
-
+    std::map<dof_id_type, int>::const_iterator b_end = _bubble_maps[map_num].end();
+    // Reorganize the data by values
+    for (std::map<dof_id_type, int>::const_iterator b_it = _bubble_maps[map_num].begin(); b_it != b_end; ++b_it)
     {
       /**
-       * The size of the packed data structure should be the sum of all of the following:
-       * total number of marked nodes
-       * the owning variable index for the current bubble
-       * the number of unique bubbles.
-       *
-       * We will pack the data into a series of groups representing each unique bubble
-       * the nodes for each group will be proceeded by the number of nodes in that group
-       * @verbatim
-       * [ <i_nodes> <var_idx> <n_0> <n_1> ... <n_i> <j_nodes> <var_idx> <n_0> <n_1> ... <n_j> ]
-       * @endverbatim
+       * Neighboring processors only need enough information to stitch together the regions
+       * we'll only pack information that's on the processor boundaries.
        */
-
-      // Note the _region_counts[mar_num]*2 takes into account the number of nodes and the variable index for each region
-      std::vector<dof_id_type> partial_packed_data(_bubble_maps[map_num].size() + _region_counts[map_num]*2);
-
-      // Now pack it up
-      unsigned int current_idx = 0;
-
-      // Note: The zeroth "region" is everything outside of a bubble - we don't want to put
-      // that into our packed data structure so start at 1 here!
-      for (unsigned int i = 0; i < _region_counts[map_num]; ++i)
+      if (_ghosted_entity_ids.find(b_it->first) != _ghosted_entity_ids.end())        
       {
-        partial_packed_data[current_idx++] = data[map_num][i].size();     // The number of nodes in the current region
-
-        if (_single_map_mode)
-        {
-          mooseAssert(i < _region_to_var_idx.size(), "Index out of bounds in FeatureFloodCounter");
-          partial_packed_data[current_idx++] = _region_to_var_idx[i];     // The variable owning this bubble
-        }
-        else
-          partial_packed_data[current_idx++] = map_num;                   // The variable owning this bubble
-
-        std::set<dof_id_type>::iterator end = data[map_num][i].end();
-        for (std::set<dof_id_type>::iterator it = data[map_num][i].begin(); it != end; ++it)
-          partial_packed_data[current_idx++] = *it;                       // The individual entity ids
+        ghost_data[(b_it->second)].insert(b_it->first);
+        ++ghost_counter;
       }
-
-      packed_data.insert(packed_data.end(), partial_packed_data.begin(), partial_packed_data.end());
+      
+      /**
+       * However we still need to save all of the local data for use in merging
+       * and field update routines.
+       */
+//      local_data[(b_it->second)].insert(b_it->first);
     }
+
+    /**
+     * We'll save the local data immediately two our bubble_sets data structure. It doesn't
+     * need to be communicated.
+     */
+//    for (unsigned int i = 0; i < _region_counts[map_num]; ++i)
+//      _bubble_sets[_single_map_mode ? 0 : map_num].push_back(BubbleData(local_data[i], _region_to_var_idx[i]));
+
+
+    /****************************************************************************************************
+     * TODO: I believe this routine is properly packaging up entities on ghosted regions now. Those
+     * regions will be unpacked and merged with neighboring processors. What we need to do know is
+     * create a seperate data structure for merging local only bubbles and figure out how to count them.
+     *
+     * It seems to me that if a bubble is "completely" within the local region not only will it
+     * not be merged with any other set, but it'll only be counted on that single processor. This is not
+     * quite true when using periodic boundaries.
+     */
+
+    
+
+    /**
+     * The size of the packed data structure should be the sum of all of the following:
+     * total number of marked entities in ghost regions
+     * the owning variable index for the current region
+     * the number of unique regions.
+     *
+     * We will pack the data into a series of groups representing each unique region
+     * the entities for each group will be proceeded by the number of entities and the owning
+     * variable for that group.
+     * @verbatim
+     * [ <i_nodes> <var_idx> <n_0> <n_1> ... <n_i> <j_nodes> <var_idx> <n_0> <n_1> ... <n_j> ]
+     * @endverbatim
+     */
+
+    // Note the _region_counts[mar_num]*2 takes into account the number of nodes and the variable index for each region
+    std::vector<dof_id_type> partial_packed_data;
+    partial_packed_data.reserve(ghost_counter + _region_counts[map_num]*2);
+
+    // Now pack it up
+    for (unsigned int i = 0; i < _region_counts[map_num]; ++i)
+    {
+      // Skip over the empty sets
+      if (ghost_data[i].empty())
+        continue;
+      
+      partial_packed_data.push_back(ghost_data[i].size());              // The number of nodes in the current region
+      
+      if (_single_map_mode)
+      {
+        mooseAssert(i < _region_to_var_idx.size(), "Index out of bounds in FeatureFloodCounter");
+        partial_packed_data.push_back(_region_to_var_idx[i]);           // The variable owning this bubble
+      }
+      else
+        partial_packed_data.push_back(map_num);                         // The variable owning this bubble
+      
+      std::set<dof_id_type>::iterator end = ghost_data[i].end();
+      for (std::set<dof_id_type>::iterator it = ghost_data[i].begin(); it != end; ++it)
+        partial_packed_data.push_back(*it);                             // The individual entity ids
+    }
+    
+    packed_data.insert(packed_data.end(), partial_packed_data.begin(), partial_packed_data.end());
   }
 }
 
@@ -569,26 +621,30 @@ FeatureFloodCount::updateFieldInfo()
 {
   // This variable is only relevant in single map mode
   _region_to_var_idx.resize(_bubble_sets[0].size());
-
+  
   // Finally update the original bubble map with field data from the merged sets
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
+    _bubble_maps[map_num].clear();
+    
     unsigned int counter = 0;
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
     {
+      std::cout << "Size: " << it1->_entity_ids.size() << std::endl;
       for (std::set<dof_id_type>::iterator it2 = it1->_entity_ids.begin(); it2 != it1->_entity_ids.end(); ++it2)
       {
         // Color the bubble map with a unique region
         _bubble_maps[map_num][*it2] = counter;
-        if (_var_index_mode)
-          _var_index_maps[map_num][*it2] = it1->_var_idx;
+//        if (_var_index_mode)
+//          _var_index_maps[map_num][*it2] = it1->_var_idx;
       }
-
-      if (_single_map_mode)
-        _region_to_var_idx[counter] = it1->_var_idx;
+// 
+//      if (_single_map_mode)
+//        _region_to_var_idx[counter] = it1->_var_idx;
       ++counter;
     }
 
+    std::cerr << "Proc: " << processor_id() << " map_num: " << map_num << " : " << counter << '\n';
     _region_counts[map_num] = counter;
   }
 }
