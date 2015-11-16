@@ -7,6 +7,7 @@
  */
 
 #include "distribution_ND.h"
+#include "distributionNDCartesianSpline.h"
 #include <string>
 #include <list>
 
@@ -139,7 +140,7 @@ InputParameters validParams<MultiDimensionalCartesianSpline>(){
 
 MultiDimensionalCartesianSpline::MultiDimensionalCartesianSpline(const InputParameters & parameters):
     distributionND(parameters),
-	//BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"), getParam<bool>("CDF"))
+        //BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"), getParam<bool>("CDF"))
     BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"), getParam<bool>("CDF"))
 {
 }

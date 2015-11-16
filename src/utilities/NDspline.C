@@ -26,8 +26,8 @@ NDSpline::NDSpline(std::string filename){
  std::vector<double> beta(_dimensions);
 
  for (int nDim=0; nDim<_dimensions; nDim++){
-         alpha[nDim] = 0.0;
-         beta[nDim] = 0.0;
+   alpha.at(nDim) = 0.0;
+   beta.at(nDim) = 0.0;
  }
 
  NDSpline_init(_discretizations, _values, alpha, beta);
@@ -71,8 +71,8 @@ void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretization
           _spline_coefficients = getCoefficients(_values, _hj.at(0), _alpha.at(0), _beta.at(0));
 
             for (int i=0; i<_dimensions; i++){
-             _cellPoint0.push_back(_discretizations[i][0]);
-             _cellDxs.push_back(_discretizations[i][_discretizations[i].size()-1]-_discretizations[i][0]);
+              _cellPoint0.push_back(_discretizations.at(i).at(0));
+              _cellDxs.push_back(_discretizations.at(i).at(_discretizations.at(i).size()-1)-_discretizations.at(i).at(0));
             }
 
          for (int i=0; i<_dimensions; i++){
@@ -120,7 +120,7 @@ double NDSpline::interpolateAt(std::vector<double> point_coordinate){
    double distance = 0;
 
    for (int nDim=0; nDim<_dimensions; nDim++)
-    distance = distance + pow((coordinates.at(nDim)-point_coordinate.at(nDim)),2);
+    distance = distance + pow((_discretizations.at(nDim).at(coordinates.at(nDim))-point_coordinate.at(nDim)),2);
 
    distances.at(i) = sqrt(distance);
 
@@ -291,6 +291,14 @@ void NDSpline::from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDd
 }
 
 
+
+
+//double NDSpline::u_k(double x, double a, double h, double k){
+// // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
+// return phi((x-a)/h - (k-2));
+//}
+
+
 double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
   // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
   //double up   = discretizations[0];
@@ -366,18 +374,18 @@ void NDSpline::tridag(std::vector<double> & a, std::vector<double> & b, std::vec
  double bet;
  std::vector<double> gam(n);
 
- if (b[0]==0) throw ("Error 1 in tridag: b[0]==0");
- u[0] = r[0]/(bet=b[0]);
+ if (b.at(0)==0) throw ("Error 1 in tridag: b[0]==0");
+ u.at(0) = r.at(0)/(bet=b.at(0));
 
  for (int j=1; j<n; j++){
-  gam[j]=c[j-1]/bet;
-  bet=b[j]-a[j]*gam[j];
-  if (bet == 0) throw ("Error 1 in tridag: bet == 0");
-  u[j]=(r[j]-a[j]*u[j-1])/bet;
+   gam.at(j)=c.at(j-1)/bet;
+   bet=b.at(j)-a.at(j)*gam.at(j);
+   if (bet == 0) throw ("Error 1 in tridag: bet == 0");
+   u.at(j)=(r.at(j)-a.at(j)*u.at(j-1))/bet;
  }
 
  for (j=n-2;j>=0;j--)
-  u[j] -= gam[j+1]*u[j+1];
+   u.at(j) -= gam.at(j+1)*u.at(j+1);
 
 }
 
@@ -488,6 +496,7 @@ bool NDSpline::checkBoundaries(std::vector<double> point){
 }
 
 double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
+
         int down=0;
 
         for(unsigned int n=0; n<discretizations.size(); n++)
@@ -562,36 +571,36 @@ double NDSpline::spline_cartesian_marginal_integration(double coordinate,int mar
 }
 
 double NDSpline::spline_cartesian_inverse_marginal(double CDF,int marginal_variable, double precision){
-        //  Newton–Raphson method used here
+  //  Newton–Raphson method used here
 
-        if ((CDF<0.0) and (CDF>1.0))
-                throw ("Error in spline_cartesian_inverse_marginal: CDF provided is out of boundaries [0.0,1.0]");
+  if ((CDF<0.0) and (CDF>1.0))
+    throw ("Error in spline_cartesian_inverse_marginal: CDF provided is out of boundaries [0.0,1.0]");
 
-        double up = _discretizations[marginal_variable][_discretizations[marginal_variable].size()-1];
-        double down = _discretizations[marginal_variable][0]+0.000001;
-        CDF = spline_cartesian_marginal_integration(down,marginal_variable) + CDF*(spline_cartesian_marginal_integration(up,marginal_variable) - spline_cartesian_marginal_integration(down,marginal_variable));
+  double up = _discretizations.at(marginal_variable).at(_discretizations.at(marginal_variable).size()-1);
+  double down = _discretizations.at(marginal_variable).at(0)+0.000001;
+  CDF = spline_cartesian_marginal_integration(down,marginal_variable) + CDF*(spline_cartesian_marginal_integration(up,marginal_variable) - spline_cartesian_marginal_integration(down,marginal_variable));
 
-        int mid_position = _discretizations[marginal_variable].size()/2;
+  int mid_position = _discretizations.at(marginal_variable).size()/2;
 
-        double epsilon = 1.0;
-        double x_n   = _discretizations[marginal_variable][mid_position];
-        double x_np1 = _discretizations[marginal_variable][mid_position+1];
-    double derivative;
+  double epsilon = 1.0;
+  double x_n   = _discretizations.at(marginal_variable).at(mid_position);
+  double x_np1 = _discretizations.at(marginal_variable).at(mid_position+1);
+  double derivative;
 
-        do{
-                if (x_np1>x_n)
-                        derivative = (spline_cartesian_marginal_integration(x_np1,marginal_variable) - spline_cartesian_marginal_integration(x_n,marginal_variable))/(x_np1 - x_n);
-                else
-                        derivative = (spline_cartesian_marginal_integration(x_n,marginal_variable) - spline_cartesian_marginal_integration(x_np1,marginal_variable))/(x_n - x_np1);
-                double next = x_n - (spline_cartesian_marginal_integration(x_n,marginal_variable) - CDF) / derivative;
-                epsilon = std::abs(x_np1 - x_n);
-                x_n = x_np1;
-                x_np1 = next;
-        }while(epsilon>precision);
+  do{
+    if (x_np1>x_n)
+      derivative = (spline_cartesian_marginal_integration(x_np1,marginal_variable) - spline_cartesian_marginal_integration(x_n,marginal_variable))/(x_np1 - x_n);
+    else
+      derivative = (spline_cartesian_marginal_integration(x_n,marginal_variable) - spline_cartesian_marginal_integration(x_np1,marginal_variable))/(x_n - x_np1);
+    double next = x_n - (spline_cartesian_marginal_integration(x_n,marginal_variable) - CDF) / derivative;
+    epsilon = std::abs(x_np1 - x_n);
+    x_n = x_np1;
+    x_np1 = next;
+  }while(epsilon>precision);
 
-        return x_np1;
+  return x_np1;
 
-        //return 3.0;
+  //return 3.0;
 }
 
 double NDSpline::integralSpline(std::vector<double> point_coordinate){
@@ -685,9 +694,9 @@ double NDSpline::PHI(double t){
 // boost::random::uniform_distribution<> dist(1, numberOfCells);
 //
 // int pickedCell = dist(rng)-1;
-//	std::vector<double> coordinate(_dimensions);
-//	for (int i=0; i<_dimensions; i++){
-//		coordinate.at(i) = spline_cartesian_inverse_marginal(F, i, _tolerance);
-//	}
-//	return coordinate;
+//  std::vector<double> coordinate(_dimensions);
+//  for (int i=0; i<_dimensions; i++){
+//    coordinate.at(i) = spline_cartesian_inverse_marginal(F, i, _tolerance);
+//  }
+//  return coordinate;
 //}

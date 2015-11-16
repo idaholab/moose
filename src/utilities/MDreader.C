@@ -17,13 +17,13 @@
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 bool checkIfdoubleIsInt(double value){
-	double intPart;
-	double decPart = std::modf(value, &intPart);
+        double intPart;
+        double decPart = std::modf(value, &intPart);
 
-	if (decPart == 0.0)
-		return true;
-	else
-		return false;
+        if (decPart == 0.0)
+                return true;
+        else
+                return false;
 }
 
 void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::vector< std::vector<double> > & discretizationValues, std::vector<double> & values){
@@ -43,9 +43,9 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
 
  int startingPoint = 0;
  if (checkIfdoubleIsInt(data[startingPoint]))
-	 numberOfDimensions = (int)data[startingPoint];
+         numberOfDimensions = (int)data[startingPoint];
  else
-	 throwError("readOrderedNDarray: error in" << filename << "; number of dimensions must be integer");
+         throwError("readOrderedNDarray: error in" << filename << "; number of dimensions must be integer");
  //std::cerr << "numberOfDimensions: " << numberOfDimensions << std::endl;
 
     std::vector<int> discretizations (numberOfDimensions);
@@ -53,10 +53,10 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
     startingPoint++;
     //std::cerr << "discretizations" << std::endl;
     for (int i=0; i<numberOfDimensions; i++){
-    	if (checkIfdoubleIsInt(data[startingPoint]))
-    		discretizations[i] = (int)data[startingPoint];
-    	else
-    		 throwError("readOrderedNDarray: error in" << filename << "; number of discretizaions must be integer");
+        if (checkIfdoubleIsInt(data[startingPoint]))
+                discretizations[i] = (int)data[startingPoint];
+        else
+                 throwError("readOrderedNDarray: error in" << filename << "; number of discretizaions must be integer");
         //std::cerr << "discretizations["<< i << "]: " << discretizations[i] << std::endl;
         startingPoint++;
     }
@@ -95,15 +95,15 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, unsi
  data = read1Darray(filename);
 
  if (checkIfdoubleIsInt(data[0]))
-	 numberOfDimensions = (int)data[0];
+         numberOfDimensions = (int)data[0];
  else
-	 throwError("readScatteredNDarray: error in" << filename << "; number of dimensions must be integer");
+         throwError("readScatteredNDarray: error in" << filename << "; number of dimensions must be integer");
  numberOfDimensions = (int)data[0];
 
  if (checkIfdoubleIsInt(data[1]))
-	 numberOfPoints = (int)data[1];
+         numberOfPoints = (int)data[1];
  else
-	 throwError("readScatteredNDarray: error in" << filename << "; number of points must be integer");
+         throwError("readScatteredNDarray: error in" << filename << "; number of points must be integer");
 
  int startingPoint = 2;
 
@@ -132,12 +132,12 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, unsi
   throwError("Data contained in " << filename << " is not complete: expected number of points and point coordinates do not match.");
 
 //for (int n=0; n<numberOfPoints; n++){
-//	 std::cout<< pointcoordinates[n][0] << " ; " << pointcoordinates[n][1] << " : " << values[n] << std::endl;
+//       std::cout<< pointcoordinates[n][0] << " ; " << pointcoordinates[n][1] << " : " << values[n] << std::endl;
 // }
 
 }
 
-void readMatrix(const std::string filename, int & rows, int & columns, std::vector< std::vector<double> > & matrix){
+void readMatrix(const std::string filename, unsigned int & rows, unsigned int & columns, std::vector< std::vector<double> > & matrix){
  // Data format: row1
  //              row2
  //              row3
@@ -155,7 +155,7 @@ void readMatrix(const std::string filename, int & rows, int & columns, std::vect
 }
 
 
-int ReadNumbers(const std::string & s, std::vector <double> & v ) {
+unsigned int ReadNumbers(const std::string & s, std::vector <double> & v ) {
     std::istringstream is( s );
     double n;
     while( is >> n )
@@ -167,14 +167,14 @@ int ReadNumbers(const std::string & s, std::vector <double> & v ) {
 
 
 
-void import_matrix_from_txt_file(const std::string filename_X, std::vector <double>& v, int& rows, int& cols){
+void import_matrix_from_txt_file(const std::string filename_X, std::vector <double>& v, unsigned int& rows, unsigned int& cols){
     std::ifstream file_X;
     std::string line;
 
     file_X.open(filename_X.c_str());
     if (file_X.is_open())
     {
-        int i=0;
+        unsigned int i=0;
         getline(file_X, line);
 
         cols =ReadNumbers( line, v );

@@ -14,6 +14,9 @@
 #include <cmath>   // to use erfc error function
 #include <ctime>   // for rand() and srand()
 
+//#include <Eigen/Dense>
+#include <Eigen/SVD>
+
 /*
  *  distributionFunctions
  *      source: Numerical Recipes in C++ 3rd edition
@@ -26,8 +29,15 @@ void matrixBackConversion(double original[], std::vector<std::vector<double> > c
 void inverseMatrix(double* A, int N);
 void computeInverse(const std::vector<std::vector<double> > & matrix, std::vector<std::vector<double> > & inverse);
 // convert a matrix stored in a vector to a matrix stored in a vector of vector
-void vectorToMatrix(int &rows, int & columns, std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix);
+void vectorToMatrix(unsigned int &rows, unsigned int & columns, std::vector<double> &vecMatrix, std::vector<std::vector<double> > &_cov_matrix);
 double getDeterminant(std::vector<std::vector<double> > matrix);
+
+// functions for singular value decomposition
+void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix);
+void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix, unsigned int rank);
+void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted);
+void matrixConversionToCxxVVectorType(const Eigen::MatrixXd & original, std::vector<std::vector<double> > &converted);
+void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vector<double>  &converted);
 
 void nrerror(const char error_text[]);
 

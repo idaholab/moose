@@ -6,6 +6,8 @@
 *.a
 *.so
 *.pyc
+*.dylib
+*~
 libCROW-*so*
 control_modules/distribution1D.py
 control_modules/distribution1D_wrap.cxx
