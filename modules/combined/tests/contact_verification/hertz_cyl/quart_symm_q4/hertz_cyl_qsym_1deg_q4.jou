@@ -1,0 +1,83 @@
+title 'Hertz Cylinder Contact (Quarter Symm, theta = 1 deg)'
+
+# Setup dimensions of problem
+#{W_f=5.0}     Width of foundation
+#{H_f=1.0}      Height of foundation
+#{R=3.0}        Radius of cylinder
+#{theta=1.0}     Contact angle (degrees)
+#{rfac=0.75}    Radial factor for splitting geometry in radial dir
+#{nelem_cit=10}  Number of elements in cylinder inner section theta dir
+#{bias_cit=0.80}   Biasing for cylinder inner section theta dir
+#{nelem_cot=25}  Number of elements in cylinder outer section theta dir
+#{bias_cot=0.80}   Biasing for cylinder outer section theta dir
+#{nelem_cor=10}   Number of elements in cylinder outer section radial dir
+#{bias_cor=0.75}   Biasing for cylinder outer section radial dir
+
+# Foundation
+create vertex 0 0
+create vertex {W_f} 0
+create vertex {W_f} {H_f}
+create vertex 0 {H_f}
+
+# Cylinder
+create vertex 0 {H_f + R}
+create vertex {R} {H_f + R}
+create vertex {R * sind(theta)} {H_f + R * (1.0 - cosd(theta))}
+create vertex 0 {H_f + R * (1.0 - rfac * cosd(theta))}
+create vertex {rfac * R * cosd(theta)} {H_f + R}
+create vertex {rfac * R * sind(theta)} {H_f + R * (1.0- rfac * cosd(theta))}
+
+create surface vertex 1 2 3 4
+
+create curve arc center vertex 5 7 6
+create curve vertex 10 7
+create curve vertex 9 6
+create curve vertex 9 10
+
+create curve arc center vertex 5 4 7
+create curve vertex 4 8
+create curve vertex 8 10
+
+vertex 4 merge off
+merge all
+
+label curve on
+
+create surface curve 5 7 8 6
+create surface curve 9 12 11 10
+create surface vertex 8 10 9 5
+
+merge all
+ 
+block 1 surf 1
+block 2 surf 2
+block 3 surf 3
+block 4 surf 4
+
+block 1 elem quad4
+block 2 elem quad4
+block 3 elem quad4
+block 4 elem quad4
+
+# Specify meshing
+curve 1 2 3 4 interval 1
+curve 10 6 7 interval {nelem_cor}
+curve 9 11 20 interval {nelem_cit}
+curve 5 8 21 interval {nelem_cot}
+
+# Specify mesh biasing
+curve 6 7 scheme bias {bias_cor}
+curve 10 scheme bias {1.0/bias_cor}
+curve 9 11 scheme bias {bias_cit}
+curve 8 21 scheme bias {bias_cot}
+curve 5 scheme bias {1.0/bias_cot}
+
+mesh surf all
+
+sideset 1 curve 1
+sideset 2 curve 4 10 21
+sideset 3 curve 3
+sideset 4 curve 5 9
+sideset 5 curve 7 20
+
+export mesh 'hertz_cyl_qsym_1deg_q4.e' overwrite
