@@ -4,4 +4,9 @@
     input = 'meta_action_test.i'
     exodiff = 'out.e'
   [../]
+  [./test_print_materials]
+    type = 'CSVDiff'
+    input = 'print_materials.i'
+    csvdiff = 'materials.csv'
+  [../]
 []

@@ -210,6 +210,7 @@
 #include "AddLotsOfAuxVariablesAction.h"
 #include "ApplyCoupledVariablesTestAction.h"
 #include "AddLotsOfDiffusion.h"
+#include "PrintMaterials.h"
 
 // From MOOSE
 #include "AddVariableAction.h"
@@ -470,6 +471,7 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddLotsOfDiffusion, "add_kernel");
   registerAction(AddLotsOfDiffusion, "add_bc");
 
+  registerAction(PrintMaterials, "meta_action");
 
   syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
   syntax.registerActionSyntax("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
@@ -479,4 +481,6 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
 
   syntax.registerActionSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
+
+  syntax.registerActionSyntax("PrintMaterials", "PrintMaterials");
 }
