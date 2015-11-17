@@ -60,6 +60,7 @@ public:
   const std::string & type() const { return _action_type; }
 
   InputParameters & parameters() { return _pars; }
+  const InputParameters & parameters() const { return _pars; }
 
   const std::string & specificTaskName() const { return _specific_task_name; }
 
