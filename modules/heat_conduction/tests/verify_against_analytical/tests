@@ -1,0 +1,7 @@
+[Tests]
+  [./1D_transient]
+    type = 'Exodiff'
+    input = '1D_transient.i'
+    exodiff = '1D_transient_out.e'
+  [../]
+[]
