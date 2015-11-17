@@ -195,6 +195,14 @@ public:
     return value;
   }
 
+  double returnUpperBound(int dimension){
+    return _interpolator.returnUpperBound(dimension);
+  }
+
+  double returnLowerBound(int dimension){
+    return _interpolator.returnLowerBound(dimension);
+  }
+
 protected:
   bool _CDFprovided;
   NDSpline _interpolator;

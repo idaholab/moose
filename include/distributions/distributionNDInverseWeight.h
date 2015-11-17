@@ -176,6 +176,13 @@ public:
     return _interpolator.returnDimensionality();
   }
 
+  double returnUpperBound(int dimension){
+    return _interpolator.returnUpperBound(dimension);
+  }
+
+  double returnLowerBound(int dimension){
+    return _interpolator.returnLowerBound(dimension);
+  }
 
 protected:
   InverseDistanceWeighting  _interpolator;

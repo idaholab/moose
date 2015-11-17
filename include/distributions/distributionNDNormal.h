@@ -68,6 +68,13 @@ public:
   void computeSVD(int rank);
   double pdfInTransformedSpace(std::vector<double> x);
 
+  double returnLowerBound(int dimension){
+    return _lowerBounds.at(dimension);
+  }
+
+  double returnUpperBound(int dimension){
+    return _upperBounds.at(dimension);
+  }
 
 private:
   std::vector<double> _mu;
@@ -83,6 +90,9 @@ private:
   std::vector<std::vector<double> > _svdTransformedMatrix;
   std::string _covarianceType;
   double _determinant_cov_matrix;
+
+  std::vector<double> _upperBounds;
+  std::vector<double> _lowerBounds;
 
   BasicMultiDimensionalCartesianSpline _cartesianDistribution;
 

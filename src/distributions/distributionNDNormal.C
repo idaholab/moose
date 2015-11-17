@@ -114,6 +114,8 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
        discretization_temp.push_back(disc_value);
      }
      discretizations.push_back(discretization_temp);
+     _lowerBounds.push_back(discretization_temp.at(0));
+     _upperBounds.push_back(discretization_temp.back());
    }
 
    std::vector< double > values (numberValues);

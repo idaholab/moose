@@ -37,6 +37,9 @@ public:
    virtual int returnDimensionality() = 0;
    double cellIntegral(std::vector<double> center, std::vector<double> dx);
 
+   virtual double returnUpperBound(int dimension) = 0;
+   virtual double returnLowerBound(int dimension) = 0;
+
    std::string & getType();
 
    std::vector<int> oneDtoNDconverter(int oneDcoordinate, std::vector<int> indexes){

@@ -67,6 +67,16 @@ public:
           return _interpolator.returnDimensionality();
   }
 
+  double returnLowerBound(int dimension){
+    throwError("BasicMultiDimensionalScatteredMS: returnLowerBound not available");
+    return 0.0;
+  }
+
+  double returnUpperBound(int dimension){
+    throwError("BasicMultiDimensionalScatteredMS: returnUpperBound not available");
+    return 0.0;
+  }
+
 protected:
   MicroSphere _interpolator;
 };
