@@ -2404,37 +2404,6 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
       ComputeUserObjectsThread cppt(*this, getNonlinearSystem(), *getNonlinearSystem().currentSolution(), pps, group);
       Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
-      for (std::set<SubdomainID>::const_iterator block_ids_it = pps[0].blockIds().begin();
-           block_ids_it != pps[0].blockIds().end();
-           ++block_ids_it)
-      {
-        SubdomainID block_id = *block_ids_it;
-
-        const std::vector<ElementUserObject *> & element_user_objects = pps[0].elementUserObjects(block_id, group);
-        // Store element user_objects values
-        for (unsigned int i = 0; i < element_user_objects.size(); ++i)
-        {
-          ElementUserObject *ps = element_user_objects[i];
-          std::string name = ps->name();
-
-          // join across the threads (gather the value in thread #0)
-          if (already_gathered.find(ps) == already_gathered.end())
-          {
-            for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-              ps->threadJoin(*pps[tid].elementUserObjects(block_id, group)[i]);
-
-            ps->finalize();
-
-            Postprocessor * pp = getPostprocessorPointer<ElementUserObject, ElementPostprocessor>(ps);
-
-            if (pp)
-              _pps_data.storeValue(name, pp->getValue());
-
-            already_gathered.insert(ps);
-          }
-        }
-      }
-
       // Store side user_objects values
       already_gathered.clear();
       for (std::set<BoundaryID>::const_iterator boundary_ids_it = pps[0].boundaryIds().begin();
@@ -2514,6 +2483,39 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
         already_gathered.insert(ps);
       }
       */
+
+      // Store element user_objects values
+      already_gathered.clear();
+      for (std::set<SubdomainID>::const_iterator block_ids_it = pps[0].blockIds().begin();
+           block_ids_it != pps[0].blockIds().end();
+           ++block_ids_it)
+      {
+        SubdomainID block_id = *block_ids_it;
+
+        const std::vector<ElementUserObject *> & element_user_objects = pps[0].elementUserObjects(block_id, group);
+        // Store element user_objects values
+        for (unsigned int i = 0; i < element_user_objects.size(); ++i)
+        {
+          ElementUserObject *ps = element_user_objects[i];
+          std::string name = ps->name();
+
+          // join across the threads (gather the value in thread #0)
+          if (already_gathered.find(ps) == already_gathered.end())
+          {
+            for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+              ps->threadJoin(*pps[tid].elementUserObjects(block_id, group)[i]);
+
+            ps->finalize();
+
+            Postprocessor * pp = getPostprocessorPointer<ElementUserObject, ElementPostprocessor>(ps);
+
+            if (pp)
+              _pps_data.storeValue(name, pp->getValue());
+
+            already_gathered.insert(ps);
+          }
+        }
+      }
     }
 
     // Don't waste time looping over nodes if there aren't any nodal user_objects to calculate
