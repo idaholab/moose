@@ -1,0 +1,4 @@
+node_area = ifez(nodal_area_interface,1E-3,nodal_area_interface)
+tang_tract_x = tang_force_x / node_area
+save all
+exit

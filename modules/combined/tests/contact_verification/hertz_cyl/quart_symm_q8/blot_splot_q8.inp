@@ -1,0 +1,8 @@
+splot
+node 832 836 833 886 884 918 916 950 948 982 980 1014 1012 1046 1044 
+node add 1078 1076 1110 1108 1140 11 15 12
+contact_pressure
+time 1.0
+p
+neutral
+exit
