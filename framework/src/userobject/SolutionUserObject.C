@@ -124,6 +124,9 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters) :
   RealTensorValue vec1_to_z = RotationMatrix::rotVecToZ(_rotation1_vector);
   // _r1 is then: rotate points so vec1 lies along z; then rotate about angle1; then rotate points back
   _r1 = vec1_to_z.transpose()*(rot1_z*vec1_to_z);
+
+  if (isParamValid("timestep") && getParam<std::string>("timestep") == "-1")
+    mooseError("A \"timestep\" of -1 is no longer supported for interpolation. Instead simply remove this parameter altogether for interpolation");
 }
 
 SolutionUserObject::~SolutionUserObject()
@@ -167,7 +170,7 @@ SolutionUserObject::readXda()
   else if (_file_type ==  "xda")
     _es->read(_es_file, READ, EquationSystems::READ_HEADER | EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
 
-  // This should never occur, just incase produce an error
+  // This should never occur, just in case produce an error
   else
     mooseError("Faild to determine proper read method for XDA/XDR equation system file: " << _es_file);
 
@@ -259,7 +262,7 @@ SolutionUserObject::readExodusII()
   for (std::vector<std::string>::const_iterator it = elemental.begin(); it != elemental.end(); ++it)
     _system->add_variable(*it, CONSTANT, MONOMIAL);
 
-  // Initilize the equations systems
+  // Initialize the equations systems
   _es->init();
 
   // Interpolate times
@@ -333,7 +336,7 @@ SolutionUserObject::directValue(const Node * node, const std::string & var_name)
   dof_id_type node_id = node->id();
   dof_id_type dof_id = _system->get_mesh().node(node_id).dof_number(sys_num, var_num, 0);
 
-  // Return the desried value for the dof
+  // Return the desired value for the dof
   return directValue(dof_id);
 }
 
@@ -365,7 +368,7 @@ SolutionUserObject::finalize()
 void
 SolutionUserObject::timestepSetup()
 {
-  // Update time interpolatation for ExodusII solution
+  // Update time interpolation for ExodusII solution
   if (_file_type == 1 && _interpolate_times)
     updateExodusTimeInterpolation(_t);
 }
@@ -438,7 +441,7 @@ SolutionUserObject::initialSetup()
       _system_variables.push_back(_system->variable_name(*it));
   }
 
-  // Otherwise, gather the numbers for the variabels given
+  // Otherwise, gather the numbers for the variables given
   else
   {
     for (std::vector<std::string>::const_iterator it = _system_variables.begin(); it != _system_variables.end(); ++it)
@@ -596,7 +599,7 @@ SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_
   // Extract the value at the current point
   Real val = evalMeshFunction(pt, var_name, 1);
 
-  // Interplolate
+  // Interpolate
   if (_file_type == 1 && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time, "Time passed into value() must match time at last call to timestepSetup()");
