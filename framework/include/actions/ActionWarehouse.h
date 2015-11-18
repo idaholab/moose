@@ -114,9 +114,7 @@ public:
         if (act->name() == name)
         {
           p = dynamic_cast<T*>(act);
-          if (!p)
-            mooseError("The action with name being "+name+" is not in the desired type");
-          else
+          if (p)
             break;
         }
       }

@@ -15,7 +15,8 @@
 []
 
 [Kernels]
-  [./diff_v]
+  # intentionally give a name the same as material names
+  [./mat1]
     type = Diffusion
     variable = convected
   [../]
