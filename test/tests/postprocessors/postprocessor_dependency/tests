@@ -1,0 +1,7 @@
+[Tests]
+  [./element_side_test]
+    type = 'CSVDiff'
+    input = 'element_side_pp.i'
+    csvdiff = 'out.csv'
+  [../]
+[]
