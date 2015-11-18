@@ -1,0 +1,12 @@
+splot
+node 238 787 798 809 820 831 842 853 864 875 567 566 578 589 600
+contact_pressure
+time 1.0
+p
+neutral
+node 238 239 259 270 281 292 303 314 325 336 7 8 28 39 50
+contact_pressure
+time 1.0
+p
+neutral
+exit

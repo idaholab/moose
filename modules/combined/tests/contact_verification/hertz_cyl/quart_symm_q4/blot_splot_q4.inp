@@ -1,0 +1,7 @@
+splot
+node 293 294 314 325 336 347 358 369 380 391 7 8 28 39
+contact_pressure
+time 1.0
+p
+neutral
+exit

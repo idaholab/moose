@@ -16,6 +16,7 @@
 
 #include "ActionWarehouse.h"
 #include "AddMaterialAction.h"
+#include "MooseApp.h"
 
 #include <fstream>
 
@@ -35,24 +36,28 @@ PrintMaterials::PrintMaterials(const InputParameters & params) :
 void
 PrintMaterials::act()
 {
-  std::set<const AddMaterialAction *> actions = _awh.getActions<AddMaterialAction>();
-
-  std::map<std::string, unsigned int> map_type;
-  map_type["GenericConstantMaterial"] = 100;
-  map_type["CoupledMaterial"] = 888;
-
-  std::ofstream os(getParam<FileName>("csv_file").c_str());
-  os << "name_id,type_id" << std::endl;
-  unsigned int i=0;
-  for (std::set<const AddMaterialAction *>::iterator it = actions.begin();
-       it != actions.end(); ++it)
-    os << i++ << "," << map_type[(*it)->getMooseObjectType()] << std::endl;
-  os.close();
-
-  if (actions.size()>0)
+  // only act on master processor
+  if (_app.processor_id() == 0)
   {
-    const AddMaterialAction & action = _awh.getAction<AddMaterialAction>((*actions.begin())->name());
-    if (*actions.begin() != (&action))
-      mooseError("something is really wrong");
+    std::set<const AddMaterialAction *> actions = _awh.getActions<AddMaterialAction>();
+
+    std::map<std::string, unsigned int> map_type;
+    map_type["GenericConstantMaterial"] = 100;
+    map_type["CoupledMaterial"] = 888;
+
+    std::ofstream os(getParam<FileName>("csv_file").c_str());
+    os << "name_id,type_id" << std::endl;
+    unsigned int i=0;
+    for (std::set<const AddMaterialAction *>::iterator it = actions.begin();
+         it != actions.end(); ++it)
+      os << i++ << "," << map_type[(*it)->getMooseObjectType()] << std::endl;
+    os.close();
+
+    if (actions.size()>0)
+    {
+      const AddMaterialAction & action = _awh.getAction<AddMaterialAction>((*actions.begin())->name());
+      if (*actions.begin() != (&action))
+        mooseError("something is really wrong");
+    }
   }
 }
