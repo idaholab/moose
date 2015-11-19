@@ -442,8 +442,8 @@ UserObjectWarehouse::sortUserObjects(std::vector<T *> & uo_vector)
     // Sort based on dependencies
     DependencyResolverInterface::sort<T *>(uo_vector);
   }
-  catch(CyclicDependencyException<UserObject *> & e)
+  catch(CyclicDependencyException<T *> & e)
   {
-    DependencyResolverInterface::cyclicDependencyError<UserObject *>(e, "Cyclic dependency detected in UserObject ordering");
+    DependencyResolverInterface::cyclicDependencyError<T *>(e, "Cyclic dependency detected in UserObject ordering");
   }
 }

@@ -1044,6 +1044,7 @@ protected:
 
   void checkUserObjects();
 
+
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();
 

@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "UserObjectInterface.h"
-#include "FEProblem.h"
 
 UserObjectInterface::UserObjectInterface(const InputParameters & params) :
     _uoi_feproblem(*params.get<FEProblem *>("_fe_problem")),
