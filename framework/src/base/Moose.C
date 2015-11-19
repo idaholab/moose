@@ -330,7 +330,6 @@
 #include "MultiAppProjectionTransfer.h"
 #include "MultiAppPostprocessorToAuxScalarTransfer.h"
 
-
 // Actions
 #include "AddBCAction.h"
 #include "AddDiracKernelAction.h"
@@ -413,6 +412,7 @@
 
 // Controls
 #include "RealFunctionControl.h"
+#include "DisableObjects.h"
 
 // Partitioner
 #include "LibmeshPartitioner.h"
@@ -762,6 +762,7 @@ registerObjects(Factory & factory)
 
   // Controls
   registerControl(RealFunctionControl);
+  registerControl(DisableObjects);
 
   // Partitioner
   registerPartitioner(LibmeshPartitioner);
