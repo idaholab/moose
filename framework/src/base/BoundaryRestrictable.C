@@ -16,6 +16,7 @@
 #include "BoundaryRestrictable.h"
 #include "Material.h"
 #include "MooseMesh.h"
+#include "MooseObject.h"
 
 template<>
 InputParameters validParams<BoundaryRestrictable>()
@@ -36,6 +37,7 @@ InputParameters validParams<BoundaryRestrictable>()
 
 // Standard constructor
 BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters) :
+    BoundaryRestrictableHelper(),
     _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
@@ -50,6 +52,7 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters) :
 
 // Dual restricted constructor
 BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids) :
+    BoundaryRestrictableHelper(),
     _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
