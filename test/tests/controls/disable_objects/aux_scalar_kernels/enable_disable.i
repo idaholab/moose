@@ -12,12 +12,7 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
-    variable = u
-    coef = 0.1
-  [../]
-  [./time]
-    type = TimeDerivative
+    type = Diffusion
     variable = u
   [../]
 []
@@ -38,18 +33,10 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 5
-  dt = 0.1
+  type = Steady
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-[]
-
-[Postprocessors]
-  [./nlin]
-    type = NumNonlinearIterations
-  [../]
 []
 
 [Dampers]
@@ -61,14 +48,5 @@
 []
 
 [Outputs]
-  csv = true
-[]
-
-[Controls]
-  [./damping_control]
-    type = DisableObjects
-    disable = 'u_damp'
-    start_time = 0.25
-    execute_on = 'initial timestep_begin'
-  [../]
+  exodus = true
 []
