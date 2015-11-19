@@ -62,7 +62,7 @@
 [Postprocessors]
   [./coef]
     type = RealControlParameterReporter
-    parameter = 'coef'
+    parameter = 'Kernels/diff/coef'
   [../]
 []
 

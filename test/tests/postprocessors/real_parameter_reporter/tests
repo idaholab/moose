@@ -3,6 +3,21 @@
     type = 'CSVDiff'
     input = 'real_parameter_reporter.i'
     csvdiff = 'real_parameter_reporter_out.csv'
-    max_threads = 1
+  [../]
+
+  [./bad_name_error]
+    # Test Error when complete name is not provided
+    type = 'RunException'
+    input = 'real_parameter_reporter.i'
+    cli_args = 'Postprocessors/coef_value/parameter=diff/coef'
+    expect_err = "Unknown InputParameters object diff"
+  [../]
+
+  [./no_param_error]
+    # Test Error when complete name is not provided
+    type = 'RunException'
+    input = 'real_parameter_reporter.i'
+    cli_args = 'Postprocessors/coef_value/parameter=Kernels/diff/coef2'
+    expect_err = "no double parameter named \"coef2\" found."
   [../]
 []

@@ -54,7 +54,7 @@
 [Postprocessors]
   [./coef_value]
     type = RealControlParameterReporter
-    parameter = 'coef'
+    parameter = 'Kernels/diff/coef'
     execute_on = 'initial timestep_begin'
   [../]
 []
