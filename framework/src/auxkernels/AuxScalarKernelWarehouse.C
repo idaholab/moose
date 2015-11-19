@@ -12,29 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTENODALAUXBCSTHREAD_H
-#define COMPUTENODALAUXBCSTHREAD_H
-
 // MOOSE includes
-#include "ThreadedNodeLoop.h"
+#include "AuxScalarKernelWarehouse.h"
 
-class ComputeNodalAuxBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+
+AuxScalarKernelWarehouse::AuxScalarKernelWarehouse() :
+    MooseObjectWarehouse<AuxScalarKernel>(/*threaded=*/true)
 {
-public:
-  ComputeNodalAuxBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectStorage<AuxKernel> & storage);
+}
 
-  // Splitting Constructor
-  ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it);
+void
+AuxScalarKernelWarehouse::initialSetup(THREAD_ID tid)
+{
+  // Sort the objects
+  _all_objects.sort(tid);
+  _execute_objects.sort(tid);
 
-  void join(const ComputeNodalAuxBcsThread & /*y*/);
-
-protected:
-  AuxiliarySystem & _aux_sys;
-
-  /// Storage object containing active AuxKernel objects
-  const MooseObjectStorage<AuxKernel> & _storage;
-};
-
-#endif //COMPUTENODALAUXBCSTHREAD_H
+  // Call initialSetup on all objects
+  MooseObjectWarehouse<AuxScalarKernel>::initialSetup(tid);
+}

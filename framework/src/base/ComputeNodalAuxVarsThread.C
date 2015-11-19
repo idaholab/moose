@@ -22,10 +22,10 @@
 
 ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(FEProblem & fe_problem,
                                                      AuxiliarySystem & sys,
-                                                     std::vector<AuxWarehouse> & auxs) :
+                                                     const MooseObjectStorage<AuxKernel> & storage) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _sys(sys),
-    _auxs(auxs)
+    _storage(storage)
 {
 }
 
@@ -33,7 +33,7 @@ ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(FEProblem & fe_problem,
 ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _sys(x._sys),
-    _auxs(x._auxs)
+    _storage(x._storage)
 {
 }
 
@@ -51,13 +51,23 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   _fe_problem.reinitNode(node, _tid);
 
+  // Get a map of all active block restricted AuxKernel objects
+  const std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > > & block_kernels = _storage.getActiveBlockObjects(_tid);
+
+  // Loop over all SubdomainIDs for the curnent node, if an AuxKernel is active on this block then compute it.
   const std::set<SubdomainID> & block_ids = _sys.mesh().getNodeBlockIds(*node);
   for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
   {
-    for (std::vector<AuxKernel*>::const_iterator aux_it = _auxs[_tid].activeBlockNodalKernels(*block_it).begin();
-         aux_it != _auxs[_tid].activeBlockNodalKernels(*block_it).end();
-         ++aux_it)
-      (*aux_it)->compute();
+    std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = block_kernels.find(*block_it);
+
+    if (iter != block_kernels.end())
+      for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = iter->second.begin(); aux_it != iter->second.end(); ++aux_it)
+      {
+        std::cout << "Computing: " << (*aux_it)->name() << std::endl;
+        (*aux_it)->compute();
+
+      }
+
   }
 
   // We are done, so update the solution vector
