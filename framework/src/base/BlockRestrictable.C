@@ -38,24 +38,29 @@ InputParameters validParams<BlockRestrictable>()
 
 // Standard constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
+    BlockRestrictableHelper(),
     _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _boundary_ids(_empty_boundary_ids),
-    _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
+    _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
+    _block_restricted(false)
 {
   initializeBlockRestrictable(parameters);
 }
 
 // Dual restricted constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids) :
+    BlockRestrictableHelper(),
     _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _boundary_ids(boundary_ids),
-    _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
+    _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
+    _block_restricted(false)
+
 {
   initializeBlockRestrictable(parameters);
 }
@@ -123,6 +128,8 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
     _blk_ids.insert(Moose::ANY_BLOCK_ID);
     _blocks = std::vector<SubdomainName>(1, "ANY_BLOCK_ID");
   }
+  else
+    _block_restricted = true;
 
   // If this object is block restricted, check that defined blocks exist on the mesh
   if (_blk_ids.find(Moose::ANY_BLOCK_ID) == _blk_ids.end())
@@ -150,8 +157,10 @@ BlockRestrictable::blocks() const
 }
 
 const std::set<SubdomainID> &
-BlockRestrictable::blockIDs() const
+BlockRestrictable::blockIDs(bool mesh_ids/*=false*/) const
 {
+  if (mesh_ids && !_block_restricted)
+    return meshBlockIDs();
   return _blk_ids;
 }
 
@@ -249,7 +258,7 @@ BlockRestrictable::variableSubdomainIDs(const InputParameters & parameters) cons
 }
 
 const std::set<SubdomainID> &
-BlockRestrictable::meshBlockIDs()
+BlockRestrictable::meshBlockIDs() const
 {
   return _blk_mesh->meshSubdomains();
 }

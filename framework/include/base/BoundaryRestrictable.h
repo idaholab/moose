@@ -34,7 +34,7 @@ InputParameters validParams<BoundaryRestrictable>();
  * to certain boundaries. The parameters "_boundary_id" and "boundary", which are
  * created with validParams<BoundaryRestrictable> are used the framework.
  */
-class BoundaryRestrictable
+class BoundaryRestrictable : public virtual BoundaryRestrictableHelper
 {
 public:
 
@@ -71,7 +71,7 @@ public:
    * Return the boundary IDs for this object
    * @return A set of all boundary ids for which the object is restricted
    */
-  const std::set<BoundaryID> & boundaryIDs() const;
+  const virtual std::set<BoundaryID> & boundaryIDs() const;
 
   /**
    * Return the boundary names for this object
@@ -158,8 +158,15 @@ public:
 
   /**
    * Returns true if this object has been restricted to a boundary
+   * @see MooseObject
    */
-  bool boundaryRestricted() { return _boundary_restricted; }
+  virtual bool boundaryRestricted() { return _boundary_restricted; }
+
+  /**
+   * Returns true if an object inherits from this class.
+   * @see MooseObject
+   */
+  inline virtual bool isBoundaryRestrictable() { return true; }
 
   /**
    * Returns the set of all boundary ids for the entire mesh

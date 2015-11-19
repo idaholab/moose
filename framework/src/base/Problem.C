@@ -21,6 +21,7 @@ template<>
 InputParameters validParams<Problem>()
 {
   InputParameters params;
+  params += validParams<MooseObject>();
   params.registerBase("Problem");
   return params;
 }
@@ -62,4 +63,3 @@ Problem::getTimePeriods() const
 {
   return _time_periods;
 }
-

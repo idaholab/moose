@@ -19,6 +19,7 @@
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
 #include "MaterialData.h"
+#include "MooseObject.h"
 
 // Forward declarations
 class BlockRestrictable;
@@ -57,7 +58,7 @@ InputParameters validParams<BlockRestrictable>();
  * \see Kernel
  * \see SideSetsAroundSubdomain
  */
-class BlockRestrictable
+class BlockRestrictable : public virtual BlockRestrictableHelper
 {
 public:
 
@@ -101,9 +102,10 @@ public:
 
   /**
    * Return the block subdomain ids for this object
+   * @param mesh_ids When true, this will return all mesh ids rather than ANY_BLOCK_ID (@see MooseObjectStorage)
    * @return a set of SudomainIDs that are valid for this object
    */
-  const std::set<SubdomainID> & blockIDs() const;
+  const virtual std::set<SubdomainID> & blockIDs(bool mesh_ids = false) const;
 
   /**
    * Test if the supplied block name is valid for this object
@@ -175,7 +177,20 @@ public:
    * Return all of the SubdomainIDs for the mesh
    * @return A set of all subdomians for the entire domain
    */
-  const std::set<SubdomainID> & meshBlockIDs();
+  const std::set<SubdomainID> & meshBlockIDs() const;
+
+  /**
+   * Returns true if this object has been restricted to a boundary
+   * @see MooseObject
+   */
+  virtual bool blockRestricted() { return _block_restricted; }
+
+  /**
+   * Returns true if an object inherits from this class.
+   * @see MooseObject
+   */
+  inline virtual bool isBlockRestrictable() { return true; }
+
 
 protected:
 
@@ -214,6 +229,9 @@ private:
 
   /// Thread id for this object
   THREAD_ID _blk_tid;
+
+  /// Flag indicating if the class is block restricted
+  bool _block_restricted;
 
   /**
    * An initialization routine needed for dual constructors
