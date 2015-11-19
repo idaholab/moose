@@ -18,7 +18,7 @@
 // MOOSE includes
 #include "Control.h"
 
-// Forward declerations
+// Forward declarations
 class TestControl;
 
 template<>
@@ -33,15 +33,6 @@ public:
   TestControl(const InputParameters & parameters);
   virtual ~TestControl(){};
   virtual void execute();
-
-  ///@{
-  /**
-   * These methods are left intentionally empty
-   */
-  virtual void initialize(){}
-  virtual void finalize(){}
-  virtual void threadJoin(const UserObject & /*uo*/){}
-  ///@}
 
 private:
 
