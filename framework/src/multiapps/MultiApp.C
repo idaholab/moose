@@ -502,6 +502,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // Update the MultiApp level for the app that was just created
   app->setMultiAppLevel(_app.multiAppLevel() + 1);
   app->setupOptions();
+  preRunInputFile();
   app->runInputFile();
 }
 
@@ -601,4 +602,9 @@ MultiApp::globalAppToLocal(unsigned int global_app)
 
   _console << _first_local_app << " " << global_app << '\n';
   mooseError("Invalid global_app!");
+}
+
+void
+MultiApp::preRunInputFile()
+{
 }
