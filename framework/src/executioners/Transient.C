@@ -398,6 +398,9 @@ Transient::solveStep(Real input_dt)
   // Perform output for timestep begin
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
 
+  // Update warehouse active objects
+  _problem.updateActiveObjects();
+
   _time_stepper->step();
 
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
