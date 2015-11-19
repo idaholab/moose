@@ -38,11 +38,9 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   num_steps = 10
   dt = 0.1
-  dtmin = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -52,25 +50,11 @@
   csv = true
 []
 
-[Functions]
-  [./func_coef]
-    type = ParsedFunction
-    value = '2*t + 0.1'
-  [../]
-[]
-
-[Postprocessors]
-  [./coef]
-    type = RealControlParameterReporter
-    parameter = 'coef'
-  [../]
-[]
-
 [Controls]
   [./func_control]
-    type = RealFunctionControl
+    type = TestControl
+    test_type = 'tid_warehouse_error'
     parameter = 'coef'
-    function = 'func_coef'
     execute_on = 'initial timestep_begin'
   [../]
 []

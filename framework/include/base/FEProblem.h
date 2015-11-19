@@ -32,6 +32,7 @@
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "PetscSupport.h"
+#include "ControlWarehouse.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -898,7 +899,6 @@ public:
   /// Returns whether or not this Problem has a TimeIntegrator
   bool hasTimeIntegrator() const { return _has_time_integrator; }
 
-
   /**
    * Return the current execution flag.
    *
@@ -936,6 +936,21 @@ public:
   std::vector<VariableSecond> _second_zero;
   std::vector<VariablePhiSecond> _second_phi_zero;
   ///@}
+
+  /**
+   * Reference to the control logic warehouse.
+   */
+  ControlWarehouse & getControlWarehouse() { return _control_warehouse; }
+
+  /**
+   * Performs setup and execute calls for Control objects.
+   */
+  void executeControls(const ExecFlagType & exec_type);
+
+  /**
+   * Update the active objects in the warehouses
+   */
+  void updateActiveObjects();
 
 protected:
   MooseMesh & _mesh;
@@ -1101,6 +1116,9 @@ protected:
 
   /// Current execute_on flag
   ExecFlagType _current_execute_on_flag;
+
+  /// The control logic warehouse
+  ControlWarehouse _control_warehouse;
 
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage

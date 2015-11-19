@@ -12,44 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REALFUNCTIONCONTROL_H
-#define REALFUNCTIONCONTROL_H
+#ifndef CONTROLWAREHOUSE_H
+#define CONTROLWAREHOUSE_H
 
 // MOOSE includes
+#include "MooseObjectWarehouse.h"
 #include "Control.h"
 
-// Forward declarations
-class RealFunctionControl;
-class Function;
-
-template<>
-InputParameters validParams<RealFunctionControl>();
-
 /**
- * A basic control for changing an input parameter using a Function
+ * Non threaded storage for Control objects.
  */
-class RealFunctionControl : public Control
+class ControlWarehouse : public MooseObjectWarehouse<Control>
 {
 public:
+  ControlWarehouse();
+
+  void setup(const ExecFlagType & exec_flag);
+
 
   /**
-   * Class constructor
-   * @param parameters Input parameters for this Control object
+   * Call the execute methods of Control objects.
    */
-  RealFunctionControl(const InputParameters & parameters);
+  virtual void execute(const ExecFlagType & exec_flag);
 
-  /**
-   * Evaluate the function and set the parameter value
-   */
-  virtual void execute();
 
-private:
 
-  /// The function to execute
-  Function & _function;
-
-  /// Vector of parameters to change
-  ControllableParameter<Real> _parameters;
 };
 
-#endif // REALFUNCTIONCONTROL_H
+#endif // CONTROLWAREHOUSE
