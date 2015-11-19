@@ -125,7 +125,11 @@ CROW: $(CONTROL_MODULES) $(PYTHON_MODULES)
 
 delete_list := $(CROW_APP) $(CROW_LIB) $(CROW_DIR)/libCROW-$(METHOD).*
 
-clean::
+.PHONY : crow_clean
+
+clean :: crow_clean
+
+crow_clean :
 	@rm -f $(CROW_DIR)/control_modules/_distribution1D.so \
 	  $(CROW_DIR)/control_modules/_crowtools.so \
 	  $(CROW_DIR)/control_modules/distribution1D_wrap.cxx \
