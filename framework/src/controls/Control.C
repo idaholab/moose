@@ -22,7 +22,6 @@ InputParameters validParams<Control>()
   params += validParams<TransientInterface>();
   params += validParams<SetupInterface>();
   params += validParams<FunctionInterface>();
-  params += validParams<ControlInterface>();
   params.registerBase("Control");
 
   params.set<MultiMooseEnum>("execute_on") = Control::getExecuteOptions();
@@ -35,8 +34,11 @@ Control::Control(const InputParameters & parameters) :
     TransientInterface(parameters, "control"),
     SetupInterface(parameters),
     FunctionInterface(parameters),
-    ControlInterface(parameters),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem"))
+    UserObjectInterface(parameters),
+    PostprocessorInterface(parameters),
+    VectorPostprocessorInterface(parameters),
+    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _input_parameter_warehouse(_app.getInputParameterWarehouse())
 {
 }
 

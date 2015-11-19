@@ -29,14 +29,10 @@ public:
 
   void setup(const ExecFlagType & exec_flag);
 
-
   /**
    * Call the execute methods of Control objects.
    */
   virtual void execute(const ExecFlagType & exec_flag);
-
-
-
 };
 
 #endif // CONTROLWAREHOUSE
