@@ -2135,6 +2135,11 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   Moose::perf_log.pop("compute_jacobian_block()","Solve");
 }
 
+void
+NonlinearSystem::updateActive(THREAD_ID tid)
+{
+}
+
 Real
 NonlinearSystem::computeDamping(const NumericVector<Number>& update)
 {
