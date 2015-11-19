@@ -12,44 +12,44 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REALFUNCTIONCONTROL_H
-#define REALFUNCTIONCONTROL_H
-
 // MOOSE includes
-#include "Control.h"
+#include "ControlWarehouse.h"
 
-// Forward declarations
-class RealFunctionControl;
-class Function;
-
-template<>
-InputParameters validParams<RealFunctionControl>();
-
-/**
- * A basic control for changing an input parameter using a Function
- */
-class RealFunctionControl : public Control
+ControlWarehouse::ControlWarehouse() :
+    MooseObjectWarehouse(/*threaded=*/false)
 {
-public:
+}
 
-  /**
-   * Class constructor
-   * @param parameters Input parameters for this Control object
-   */
-  RealFunctionControl(const InputParameters & parameters);
+void
+ControlWarehouse::execute(const ExecFlagType & exec_flag)
+{
+  const MooseObjectStorage<Control> & objects = _execute_objects[exec_flag];
+  for (std::vector<MooseSharedPointer<Control> >::const_iterator it = objects[0].begin(); it != objects[0].end(); ++it)
+    (*it)->execute();
+}
 
-  /**
-   * Evaluate the function and set the parameter value
-   */
-  virtual void execute();
 
-private:
-
-  /// The function to execute
-  Function & _function;
-
-  /// Vector of parameters to change
-  ControllableParameter<Real> _parameters;
-};
-
-#endif // REALFUNCTIONCONTROL_H
+void
+ControlWarehouse::setup(const ExecFlagType & exec_flag)
+{
+  switch (exec_flag)
+  {
+  case EXEC_INITIAL:
+    initialSetup();
+    break;
+  case EXEC_TIMESTEP_BEGIN:
+    timestepSetup();
+    break;
+  case EXEC_SUBDOMAIN:
+    subdomainSetup();
+    break;
+  case EXEC_NONLINEAR:
+    jacobianSetup();
+    break;
+  case EXEC_LINEAR:
+    residualSetup();
+    break;
+  default:
+    break;
+  }
+}
