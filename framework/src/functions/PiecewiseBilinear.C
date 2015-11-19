@@ -21,6 +21,9 @@ InputParameters validParams<PiecewiseBilinear>()
 {
   InputParameters params = validParams<Function>();
   params.addParam<FileName>("data_file", "", "File holding csv data for use with PiecewiseBilinear");
+  params.addParam<std::vector<Real> >("x", "The x abscissa values");
+  params.addParam<std::vector<Real> >("y", "The y abscissa values");
+  params.addParam<std::vector<Real> >("z", "The ordinate values");
   params.addParam<int>("axis", -1, "The axis used (0, 1, or 2 for x, y, or z).");
   params.addParam<int>("xaxis", -1, "The coordinate used for x-axis data (0, 1, or 2 for x, y, or z).");
   params.addParam<int>("yaxis", -1, "The coordinate used for y-axis data (0, 1, or 2 for x, y, or z).");
@@ -41,8 +44,6 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
     _scale_factor( getParam<Real>("scale_factor") ),
     _radial(getParam<bool>("radial"))
 {
-  if (!parameters.isParamValid("data_file"))
-    mooseError("In PiecewiseBilinear " << _name << ": 'data_file' must be specified.");
 
   if (!_axisValid && !_yaxisValid && !_xaxisValid)
     mooseError("In PiecewiseBilinear " << _name << ": None of axis, yaxis, or xaxis properly defined.  Allowable range is 0-2");
@@ -56,9 +57,59 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
   std::vector<Real> x;
   std::vector<Real> y;
   ColumnMajorMatrix z;
+  std::vector<Real> z_vec;
 
-  // Parse to get x, y, z
-  parse(x, y, z);
+  if (_data_file_name != "")
+  {
+    if ((parameters.isParamValid("x")) ||
+        (parameters.isParamValid("y")) ||
+        (parameters.isParamValid("z")))
+    {
+      mooseError("In PiecewiseBilinear: Cannot specify 'data_file' and 'x', 'y', or 'z' together.");
+    }
+    else
+    {
+      // Parse to get x, y, z
+      parse( x, y, z );
+    }
+  }
+  else if ((parameters.isParamValid("x")) ||
+           (parameters.isParamValid("y")) ||
+           (parameters.isParamValid("z")))
+  {
+    if (! ((parameters.isParamValid("x")) &&
+           (parameters.isParamValid("y")) &&
+           (parameters.isParamValid("z"))))
+    {
+      mooseError("In PiecewiseBilinear: 'x' and 'y' and 'z' must be specified if any one is specified.");
+    }
+    else
+    {
+      x = getParam<std::vector<Real> >("x");
+      y = getParam<std::vector<Real> >("y");
+      z_vec = getParam<std::vector<Real> >("z");
+      //check that size of z = (size of x)*(size of y)
+      if(z_vec.size() != x.size()*y.size()) {
+        mooseError("In PiecewiseBilinear: Size of z should be the size of x times the size of y.");
+      }
+      
+      //reshape and populate z matrix
+      z.reshape(y.size(),x.size());
+      int idx=0;
+      for(int i=0; i < y.size(); i++)
+      { 
+        for(int j=0; j < x.size(); j++) 
+        {
+          z(i,j)=z_vec[idx];
+          idx+=1;
+        }
+      }
+    }
+  }
+  else
+  {
+    mooseError("In PiecewiseBilinear, 'data_file' or 'x' and 'y' and 'z' must be specified.");
+  }
 
   _bilinear_interp.reset(new BilinearInterpolation(x, y, z));
 }
