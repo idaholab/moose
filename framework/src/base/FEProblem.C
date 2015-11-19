@@ -71,6 +71,7 @@
 #include "MultiMooseEnum.h"
 #include "Predictor.h"
 #include "Assembly.h"
+#include "ControlWarehouse.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"
@@ -140,6 +141,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _has_time_integrator(false),
     _has_exception(false),
     _current_execute_on_flag(EXEC_NONE),
+    _control_warehouse(new ControlWarehouse()),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
@@ -2635,8 +2637,8 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
 void
 FEProblem::executeControls(const ExecFlagType & exec_type)
 {
-  _control_warehouse.setup(exec_type);
-  _control_warehouse.execute(exec_type);
+  _control_warehouse->setup(exec_type);
+  _control_warehouse->execute(exec_type);
 }
 
 void
@@ -2649,7 +2651,7 @@ FEProblem::updateActiveObjects()
     _aux.updateActive(tid);
   }
 
-  _control_warehouse.updateActive();
+  _control_warehouse->updateActive();
 }
 
 void
