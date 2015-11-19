@@ -15,9 +15,9 @@
   [../]
   [./control]
     # Test that a damper may be disabled during simulation
-    type = RunApp
+    type = CSVDiff
     input = 'control.i'
-    expect_out = "Time\sStep\s+2.*?6\s*Nonlinear"
-    absent_out = "Time\sStep\s+3.*?6\s*Nonlinear"
+    csvdiff = control_out.csv
+    max_parallel = 1 # Examines number of iterations, which changes with MPI
   [../]
 []

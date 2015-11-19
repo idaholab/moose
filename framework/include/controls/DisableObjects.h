@@ -49,10 +49,10 @@ private:
   const std::vector<std::string> & _disable;
 
   /// The time to begin disabling the supplied object tags (defaults to the simulation start time)
-  Real _start_time;
+  std::vector<Real> _start_time;
 
   /// The time to stop disabling the supplied object tags (defaults to the end of the simulation)
-  Real _end_time;
+  std::vector<Real> _end_time;
 };
 
 #endif // DISABLEOBJECTS_H
