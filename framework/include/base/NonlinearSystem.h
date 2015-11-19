@@ -72,8 +72,6 @@ public:
 
   // Setup Functions ////
   virtual void initialSetup();
-  virtual void initialSetupBCs();
-  virtual void initialSetupKernels();
   virtual void timestepSetup();
 
   void setupFiniteDifferencedPreconditioner();
@@ -441,7 +439,7 @@ public:
   const DGKernelWarehouse & getDGKernelWarehouse(THREAD_ID tid);
   const BCWarehouse & getBCWarehouse(THREAD_ID tid);
   const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
-  const DamperWarehouse & getDamperWarehouse(THREAD_ID tid);
+  const DamperWarehouse & getDamperWarehouse();
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
   //@}
 
@@ -525,7 +523,7 @@ protected:
   /// DG Kernel storage for each thread
   std::vector<DGKernelWarehouse> _dg_kernels;
   /// Dampers for each thread
-  std::vector<DamperWarehouse> _dampers;
+  DamperWarehouse _dampers;
   /// NodalKernels for each thread
   std::vector<NodalKernelWarehouse> _nodal_kernels;
 

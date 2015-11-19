@@ -16,17 +16,12 @@
 #include "Damper.h"
 
 DamperWarehouse::DamperWarehouse() :
-    Warehouse<Damper>()
+    MooseObjectWarehouse<Damper>()
 {
 }
 
-DamperWarehouse::~DamperWarehouse()
+const MooseObjectStorage<Damper> &
+DamperWarehouse::getStorage() const
 {
-}
-
-void
-DamperWarehouse::addDamper(MooseSharedPointer<Damper> & damper)
-{
-  _all_ptrs.push_back(damper);
-  _all_objects.push_back(damper.get());
+  return _all_objects;
 }
