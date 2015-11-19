@@ -16,6 +16,7 @@
 #include "AddControlAction.h"
 #include "FEProblem.h"
 #include "Factory.h"
+#include "ControlWarehouse.h"
 #include "Control.h"
 
 template<>

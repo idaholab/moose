@@ -16,7 +16,7 @@
 #include "ControlWarehouse.h"
 
 ControlWarehouse::ControlWarehouse() :
-    MooseObjectWarehouse(/*threaded=*/false)
+    MooseObjectWarehouse<Control>(/*threaded=*/false)
 {
 }
 
