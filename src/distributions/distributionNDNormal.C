@@ -419,6 +419,7 @@ double BasicMultivariateNormal::inverseMarginalForPCA(double F){
 double BasicMultivariateNormal::marginalCdfForPCA(double x){
     /**
      * This function calculates the marginal cdf at x of a MVN distribution when using pca decomposition
+     * If PCA method is used, the marginal cdf is assumed to be standard normal distribution, i.e. mean = 0.0 , and sigma = 1.0
      */
   BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
   return normalDistribution->Cdf(x);
