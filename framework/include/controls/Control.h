@@ -16,7 +16,10 @@
 #define CONTROL_H
 
 // MOOSE includes
-#include "GeneralUserObject.h"
+#include "MooseObject.h"
+#include "TransientInterface.h"
+#include "SetupInterface.h"
+#include "FunctionInterface.h"
 #include "ControlInterface.h"
 
 // Forward declarations
@@ -26,15 +29,17 @@ template<>
 InputParameters validParams<Control>();
 
 /**
- * Base class for Control objects
+ * Base class for Control objects.
  *
- * Control objects are simply GeneralUserObjects with an additional interface
- * for accessing InputParameters via the InputParameterWarehouse. These objects
- * are create by the [Controls] block in the input file after all other MooseObjects
- * are created, so they have access to parameters in all other MooseObjects.
+ * These objects are create by the [Controls] block in the input file after
+ * all other MooseObjects are created, so they have access to parameters
+ * in all other MooseObjects.
  */
 class Control :
-  public GeneralUserObject,
+  public MooseObject,
+  public TransientInterface,
+  public SetupInterface,
+  public FunctionInterface,
   public ControlInterface
 {
 public:
@@ -49,6 +54,23 @@ public:
    * Class destructor
    */
   virtual ~Control(){}
+
+  /**
+   * Execute the control. This must be overridden.
+   */
+  virtual void execute() = 0;
+
+  /**
+   * Return the valid "execute_on" options for Control objects
+   */
+  static MultiMooseEnum getExecuteOptions();
+
+
+protected:
+
+  /// Reference to the FEProblem for this  object
+  FEProblem & _fe_problem;
+
 };
 
 #endif //FUNCTIONCONTROL_H
