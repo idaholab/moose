@@ -12,21 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ComputeNodalAuxBcsThread.h"
+// libMesh includes
+#include "libmesh/threads.h"
 
+// MOOSE includes
+#include "ComputeNodalAuxBcsThread.h"
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "AuxKernel.h"
 
-// libmesh includes
-#include "libmesh/threads.h"
 
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblem & fe_problem,
                                                    AuxiliarySystem & sys,
-                                                   std::vector<AuxWarehouse> & auxs) :
+                                                   const MooseObjectStorage<AuxKernel> & storage) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(sys),
-    _auxs(auxs)
+    _storage(storage)
 {
 }
 
@@ -34,7 +35,7 @@ ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblem & fe_problem,
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _auxs(x._auxs)
+    _storage(x._storage)
 {
 }
 
@@ -52,18 +53,21 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
     var->prepareAux();
   }
 
-  if (_auxs[_tid].activeBCs(boundary_id).size() > 0)
+  Node * node = bnode->_node;
+
+  if (node->processor_id() == _fe_problem.processor_id())
   {
-    Node * node = bnode->_node;
+    // Get a map of all active block restricted AuxKernel objects
+    const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > > & kernels = _storage.getActiveBoundaryObjects(_tid);
 
-    if (node->processor_id() == _fe_problem.processor_id())
+    // Operate on the node BoundaryID only
+    const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = kernels.find(boundary_id);
+    if (iter != kernels.end())
     {
-      _fe_problem.reinitNodeFace(node, boundary_id, _tid);
+          _fe_problem.reinitNodeFace(node, boundary_id, _tid);
 
-      for (std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeBCs(boundary_id).begin();
-           aux_it != _auxs[_tid].activeBCs(boundary_id).end();
-           ++aux_it)
-        (*aux_it)->compute();
+          for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = iter->second.begin(); aux_it != iter->second.end(); ++aux_it)
+            (*aux_it)->compute();
     }
   }
 

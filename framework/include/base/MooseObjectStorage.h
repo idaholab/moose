@@ -156,6 +156,7 @@ MooseObjectStorage<MooseObjectType>::~MooseObjectStorage()
 {
 }
 
+
 template<typename MooseObjectType>
 void
 MooseObjectStorage<MooseObjectType>::addObject(MooseSharedPointer<MooseObjectType> object, THREAD_ID tid /*= 0*/)
@@ -285,7 +286,6 @@ MooseObjectStorage<MooseObjectType>::updateActiveHelper(std::vector<MooseSharedP
 }
 
 
-
 template<typename MooseObjectType>
 void
 MooseObjectStorage<MooseObjectType>::initialSetup(THREAD_ID tid/* = 0*/) const
@@ -359,8 +359,10 @@ MooseObjectStorage<MooseObjectType>::sort(THREAD_ID tid/* = 0*/)
       sortHelper(iter->second);
   }
 
-
   sortHelper(_all_objects[tid]);
+
+  // The active lists now must be update to reflect the order changes
+  updateActive(tid);
 }
 
 
