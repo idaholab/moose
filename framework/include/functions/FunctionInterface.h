@@ -20,6 +20,10 @@
 
 class Function;
 class FEProblem;
+class FunctionInterface;
+
+template<>
+InputParameters validParams<FunctionInterface>();
 
 /**
  * Interface for objects that need to use functions

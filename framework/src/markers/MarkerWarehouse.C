@@ -84,5 +84,5 @@ MarkerWarehouse::updateActiveMarkers(unsigned int subdomain_id)
       _active_markers.push_back(marker);
   }
 
-  DependencyResolverInterface::sort(_active_markers.begin(), _active_markers.end());
+  DependencyResolverInterface::sort<Marker *>(_active_markers);
 }

@@ -274,6 +274,12 @@ public:
 
   virtual void setSolution(const NumericVector<Number> & soln);
 
+
+  /**
+   * Update active objects of Warehouses owned by NonlinearSystem
+   */
+  void updateActive(THREAD_ID tid);
+
   /**
    * Set transient term used by residual and Jacobian evaluation.
    * @param udot transient term
