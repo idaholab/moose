@@ -62,12 +62,7 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
 
     if (iter != block_kernels.end())
       for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = iter->second.begin(); aux_it != iter->second.end(); ++aux_it)
-      {
-        std::cout << "Computing: " << (*aux_it)->name() << std::endl;
         (*aux_it)->compute();
-
-      }
-
   }
 
   // We are done, so update the solution vector

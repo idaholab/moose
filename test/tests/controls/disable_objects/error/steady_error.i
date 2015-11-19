@@ -38,18 +38,10 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 5
-  dt = 0.1
+  type = Steady
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-[]
-
-[Postprocessors]
-  [./nlin]
-    type = NumNonlinearIterations
-  [../]
 []
 
 [Dampers]
@@ -61,7 +53,7 @@
 []
 
 [Outputs]
-  csv = true
+  exodus = true
 []
 
 [Controls]

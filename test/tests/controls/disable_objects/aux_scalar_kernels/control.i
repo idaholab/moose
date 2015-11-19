@@ -10,6 +10,22 @@
   [../]
 []
 
+[AuxVariables]
+  [./aux0]
+    family = SCALAR
+  [../]
+  [./aux1]
+    family = SCALAR
+  [../]
+[]
+
+[Functions]
+  [./func]
+    type = ParsedFunction
+    value = t
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = CoefDiffusion
@@ -19,6 +35,19 @@
   [./time]
     type = TimeDerivative
     variable = u
+  [../]
+[]
+
+[AuxScalarKernels]
+  [./scalar_aux0]
+    type = FunctionScalarAux
+    variable = aux0
+    function = func
+  [../]
+  [./scalar_aux1]
+    type = FunctionScalarAux
+    variable = aux1
+    function = func
   [../]
 []
 
@@ -39,25 +68,11 @@
 
 [Executioner]
   type = Transient
-  num_steps = 5
+  num_steps = 10
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-[]
-
-[Postprocessors]
-  [./nlin]
-    type = NumNonlinearIterations
-  [../]
-[]
-
-[Dampers]
-  [./u_damp]
-    type = ConstantDamper
-    variable = u
-    damping = 0.9
-  [../]
 []
 
 [Outputs]
@@ -67,8 +82,9 @@
 [Controls]
   [./damping_control]
     type = DisableObjects
-    disable = 'u_damp'
+    disable = 'scalar_aux0 scalar_aux1'
     start_time = 0.25
+    end_time = 0.75
     execute_on = 'initial timestep_begin'
   [../]
 []

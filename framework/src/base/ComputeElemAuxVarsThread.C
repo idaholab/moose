@@ -75,8 +75,6 @@ ComputeElemAuxVarsThread::subdomainChanged()
 void
 ComputeElemAuxVarsThread::onElement(const Elem * elem)
 {
-  std::cout << "_subdomain = " << _subdomain << std::endl;
-
   // Get a map of all active block restricted AuxKernel objects
   const std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > > & block_kernels = _storage.getActiveBlockObjects(_tid);
 
