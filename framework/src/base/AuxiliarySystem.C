@@ -97,6 +97,18 @@ AuxiliarySystem::residualSetup()
 }
 
 void
+AuxiliarySystem::updateActive(THREAD_ID tid)
+{
+}
+
+
+void
+AuxiliarySystem::subdomainSetup()
+{
+}
+
+
+void
 AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
   SystemTempl<TransientExplicitSystem>::addVariable(var_name, type, scale_factor, active_subdomains);

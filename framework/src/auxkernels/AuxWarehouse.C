@@ -134,17 +134,11 @@ AuxWarehouse::sortAuxKernels(std::vector<AuxKernel *> & aux_vector)
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort(aux_vector.begin(), aux_vector.end());
+    DependencyResolverInterface::sort<AuxKernel *>(aux_vector);
   }
-  catch(CyclicDependencyException<DependencyResolverInterface *> & e)
+  catch(CyclicDependencyException<AuxKernel *> & e)
   {
-    std::ostringstream oss;
-
-    oss << "Cyclic dependency detected in aux kernel ordering:\n";
-    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
-    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-      oss << (static_cast<AuxKernel *>(it->first))->name() << " -> " << (static_cast<AuxKernel *>(it->second))->name() << "\n";
-    mooseError(oss.str());
+    DependencyResolverInterface::cyclicDependencyError<AuxKernel *>(e, "Cyclic dependency detected in aux kernel ordering");
   }
 }
 
@@ -154,16 +148,10 @@ AuxWarehouse::sortScalarKernels(std::vector<AuxScalarKernel *> & kernels)
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort(kernels.begin(), kernels.end());
+    DependencyResolverInterface::sort<AuxScalarKernel *>(kernels);
   }
-  catch(CyclicDependencyException<DependencyResolverInterface *> & e)
+  catch(CyclicDependencyException<AuxScalarKernel *> & e)
   {
-    std::ostringstream oss;
-
-    oss << "Cyclic dependency detected in aux scalar kernel ordering:\n";
-    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
-    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-      oss << (static_cast<AuxScalarKernel *>(it->first))->name() << " -> " << (static_cast<AuxScalarKernel *>(it->second))->name() << "\n";
-    mooseError(oss.str());
+    DependencyResolverInterface::cyclicDependencyError<AuxScalarKernel *>(e, "Cyclic dependency detected in aux scalar kernel ordering");
   }
 }

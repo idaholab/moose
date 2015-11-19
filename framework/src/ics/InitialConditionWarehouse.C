@@ -137,17 +137,11 @@ InitialConditionWarehouse::sortICs(std::vector<InitialCondition *> & ics)
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort(ics.begin(), ics.end());
+    DependencyResolverInterface::sort<InitialCondition *>(ics);
   }
-  catch (CyclicDependencyException<DependencyResolverInterface *> & e)
+  catch (CyclicDependencyException<InitialCondition *> & e)
   {
-    std::ostringstream oss;
-
-    oss << "Cyclic dependency detected in aux kernel ordering:" << std::endl;
-    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
-    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-      oss << (static_cast<InitialCondition *>(it->first))->name() << " -> " << (static_cast<InitialCondition *>(it->second))->name() << std::endl;
-    mooseError(oss.str());
+    DependencyResolverInterface::cyclicDependencyError<InitialCondition *>(e, "Cyclic dependency detected in InitialCondition ordering");
   }
 }
 
@@ -157,16 +151,10 @@ InitialConditionWarehouse::sortScalarICs(std::vector<ScalarInitialCondition *> &
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort(ics.begin(), ics.end());
+    DependencyResolverInterface::sort<ScalarInitialCondition *>(ics);
   }
-  catch (CyclicDependencyException<DependencyResolverInterface *> & e)
+  catch (CyclicDependencyException<ScalarInitialCondition *> & e)
   {
-    std::ostringstream oss;
-
-    oss << "Cyclic dependency detected in aux kernel ordering:" << std::endl;
-    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
-    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-      oss << (static_cast<ScalarInitialCondition *>(it->first))->name() << " -> " << (static_cast<ScalarInitialCondition *>(it->second))->name() << std::endl;
-    mooseError(oss.str());
+    DependencyResolverInterface::cyclicDependencyError<ScalarInitialCondition *>(e, "Cyclic dependency detected in ScalarInitialCondition ordering");
   }
 }
