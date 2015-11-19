@@ -24,6 +24,7 @@
 
 // Forward declarations
 class NonlinearSystem;
+class Damper;
 
 class ComputeDampingThread : public ThreadedElementLoop<ConstElemRange>
 {

@@ -16,8 +16,10 @@
 #define USEROBJECTINTERFACE_H
 
 // MOOSE includes
+#include "InputParameters.h"
 #include "ParallelUniqueId.h"
 #include "FEProblem.h"
+#include "UserObject.h"
 
 // Forward declarations
 class InputParameters;

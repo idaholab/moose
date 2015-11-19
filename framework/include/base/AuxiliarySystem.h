@@ -15,9 +15,8 @@
 #ifndef AUXILIARYSYSTEM_H
 #define AUXILIARYSYSTEM_H
 
+// MOOSE includes
 #include "SystemBase.h"
-#include "ExecStore.h"
-#include "AuxWarehouse.h"
 
 // libMesh include
 #include "libmesh/explicit_system.h"
@@ -27,6 +26,8 @@
 class AuxKernel;
 class FEProblem;
 class TimeIntegrator;
+class AuxScalarKernelWarehouse;
+class AuxKernelWarehouse;
 
 // libMesh forward declarations
 namespace libMesh
@@ -153,7 +154,11 @@ protected:
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
 
-  ExecStore<AuxWarehouse> _auxs;
+  // Storage for AuxScalarKernel objects (this must be a pointer due to cyclic includes)
+  UniquePtr<AuxScalarKernelWarehouse> _aux_scalar_warehouse;
+
+  // Storage for AuxKernel objects (this must be a pointer due to cyclic includes)
+  UniquePtr<AuxKernelWarehouse> _aux_warehouse;
 
   friend class AuxKernel;
   friend class ComputeNodalAuxVarsThread;
