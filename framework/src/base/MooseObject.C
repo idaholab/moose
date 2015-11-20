@@ -30,8 +30,6 @@ InputParameters validParams<MooseObject>()
 }
 
 MooseObject::MooseObject(const InputParameters & parameters) :
-    BlockRestrictableHelper(),
-    BoundaryRestrictableHelper(),
     ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
     ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
     _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),

@@ -58,7 +58,7 @@ InputParameters validParams<BlockRestrictable>();
  * \see Kernel
  * \see SideSetsAroundSubdomain
  */
-class BlockRestrictable : public virtual BlockRestrictableHelper
+class BlockRestrictable
 {
 public:
 
@@ -105,7 +105,7 @@ public:
    * @param mesh_ids When true, this will return all mesh ids rather than ANY_BLOCK_ID (@see MooseObjectStorage)
    * @return a set of SudomainIDs that are valid for this object
    */
-  const virtual std::set<SubdomainID> & blockIDs(bool mesh_ids = false) const;
+  const virtual std::set<SubdomainID> & blockIDs() const;
 
   /**
    * Test if the supplied block name is valid for this object
@@ -184,13 +184,6 @@ public:
    * @see MooseObject
    */
   virtual bool blockRestricted() { return _block_restricted; }
-
-  /**
-   * Returns true if an object inherits from this class.
-   * @see MooseObject
-   */
-  inline virtual bool isBlockRestrictable() { return true; }
-
 
 protected:
 

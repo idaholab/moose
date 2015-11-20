@@ -27,7 +27,8 @@
 #include "Parser.h"
 #include "TimeIntegrator.h"
 #include "AuxScalarKernelWarehouse.h"
-#include "AuxKernelWarehouse.h"
+#include "NodalAuxKernelWarehouse.h"
+#include "ElementalAuxKernelWarehouse.h"
 
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/node_range.h"
@@ -42,7 +43,8 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _need_serialized_solution(false),
     _aux_scalar_warehouse(new AuxScalarKernelWarehouse()),
-    _aux_warehouse(new AuxKernelWarehouse())
+    _nodal_aux_warehouse(new NodalAuxKernelWarehouse()),
+    _elemental_aux_warehouse(new ElementalAuxKernelWarehouse())
 {
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
@@ -64,7 +66,8 @@ AuxiliarySystem::initialSetup()
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_warehouse->initialSetup(tid);
-    _aux_warehouse->initialSetup(tid);
+    _nodal_aux_warehouse->initialSetup(tid);
+    _elemental_aux_warehouse->initialSetup(tid);
   }
 }
 
@@ -74,7 +77,8 @@ AuxiliarySystem::timestepSetup()
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_warehouse->timestepSetup(tid);
-    _aux_warehouse->timestepSetup(tid);
+    _nodal_aux_warehouse->timestepSetup(tid);
+    _elemental_aux_warehouse->timestepSetup(tid);
   }
 }
 
@@ -84,7 +88,8 @@ AuxiliarySystem::subdomainSetup()
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_warehouse->subdomainSetup(tid);
-    _aux_warehouse->subdomainSetup(tid);
+    _nodal_aux_warehouse->subdomainSetup(tid);
+    _elemental_aux_warehouse->subdomainSetup(tid);
   }
 }
 
@@ -94,7 +99,8 @@ AuxiliarySystem::jacobianSetup()
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_warehouse->jacobianSetup(tid);
-    _aux_warehouse->jacobianSetup(tid);
+    _nodal_aux_warehouse->jacobianSetup(tid);
+    _elemental_aux_warehouse->jacobianSetup(tid);
   }
 }
 
@@ -104,7 +110,8 @@ AuxiliarySystem::residualSetup()
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_warehouse->residualSetup(tid);
-    _aux_warehouse->residualSetup(tid);
+    _nodal_aux_warehouse->residualSetup(tid);
+    _elemental_aux_warehouse->residualSetup(tid);
   }
 }
 
@@ -112,7 +119,8 @@ void
 AuxiliarySystem::updateActive(THREAD_ID tid)
 {
   _aux_scalar_warehouse->updateActive(tid);
-  _aux_warehouse->updateActive(tid);
+  _nodal_aux_warehouse->updateActive(tid);
+  _elemental_aux_warehouse->updateActive(tid);
 }
 
 
@@ -148,7 +156,10 @@ AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     MooseSharedPointer<AuxKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxKernel>(_factory.create(kernel_name, name, parameters, tid));
-    _aux_warehouse->addObject(kernel, tid);
+    if (kernel->isNodal())
+      _nodal_aux_warehouse->addObject(kernel, tid);
+    else
+      _elemental_aux_warehouse->addObject(kernel, tid);
   }
 }
 
@@ -273,7 +284,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Elemental AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _aux_warehouse->getStorage(AuxKernelWarehouse::ELEMENTAL, type)[0];
+    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _elemental_aux_warehouse->getStorage(type).getActiveObjects();
     for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator it = auxs.begin(); it != auxs.end(); ++it)
     {
       const std::set<std::string> & uo = (*it)->getDependObjects();
@@ -283,7 +294,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Nodal AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _aux_warehouse->getStorage(AuxKernelWarehouse::NODAL, type)[0];
+    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _nodal_aux_warehouse->getStorage(type).getActiveObjects();
     for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator it = auxs.begin(); it != auxs.end(); ++it)
     {
       const std::set<std::string> & uo = (*it)->getDependObjects();
@@ -311,7 +322,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
   Moose::perf_log.push("update_aux_vars_scalar()","Solve");
 
   // Reference to the current storage container
-  const MooseObjectStorage<AuxScalarKernel> & storage = (*_aux_scalar_warehouse)[type];
+  const MooseObjectStorage<AuxScalarKernel> & storage = _aux_scalar_warehouse->getStorage(type);
 
   PARALLEL_TRY {
     // FIXME: run multi-threaded
@@ -321,7 +332,8 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
       _fe_problem.reinitScalars(tid);
 
       // Call compute() method on all active AuxScalarKernel objects
-      for (std::vector<MooseSharedPointer<AuxScalarKernel> >::const_iterator it = storage[tid].begin(); it != storage[tid].end(); ++it)
+      const std::vector<MooseSharedPointer<AuxScalarKernel> > & objects = storage.getActiveObjects(tid);
+      for (std::vector<MooseSharedPointer<AuxScalarKernel> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
         (*it)->compute();
 
       const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(tid);
@@ -346,7 +358,7 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
   Moose::perf_log.push("update_aux_vars_nodal()","Solve");
 
   // Reference to the Nodal AuxKernel storage
-  const MooseObjectStorage<AuxKernel> & nodal = _aux_warehouse->getStorage(AuxKernelWarehouse::NODAL, type);
+  const MooseObjectStorage<AuxKernel> & nodal = _nodal_aux_warehouse->getStorage(type);
 
   // Block Nodal AuxKernels
   PARALLEL_TRY {
@@ -387,7 +399,7 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
   Moose::perf_log.push("update_aux_vars_elemental()","Solve");
 
   // Reference to the Nodal AuxKernel storage
-  const MooseObjectStorage<AuxKernel> & elemental = _aux_warehouse->getStorage(AuxKernelWarehouse::ELEMENTAL, type);
+  const MooseObjectStorage<AuxKernel> & elemental = _elemental_aux_warehouse->getStorage(type);
 
   // Block Elemental AuxKernels
   PARALLEL_TRY {
@@ -445,5 +457,5 @@ AuxiliarySystem::getMinQuadratureOrder()
 bool
 AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id)
 {
-  return _aux_warehouse->hasActiveBoundaryObjects(bnd_id);
+  return _elemental_aux_warehouse->getStorage().hasActiveBoundaryObjects(bnd_id);
 }

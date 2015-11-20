@@ -15,16 +15,18 @@
 // MOOSE includes
 #include "ControlWarehouse.h"
 
+
 ControlWarehouse::ControlWarehouse() :
     MooseObjectWarehouse<Control>(/*threaded=*/false)
 {
 }
 
+
 void
 ControlWarehouse::execute(const ExecFlagType & exec_flag)
 {
-  const MooseObjectStorage<Control> & objects = _execute_objects[exec_flag];
-  for (std::vector<MooseSharedPointer<Control> >::const_iterator it = objects[0].begin(); it != objects[0].end(); ++it)
+  const std::vector<MooseSharedPointer<Control> > & objects = _execute_objects[exec_flag].getActiveObjects();
+  for (std::vector<MooseSharedPointer<Control> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     (*it)->execute();
 }
 

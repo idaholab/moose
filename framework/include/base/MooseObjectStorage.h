@@ -16,8 +16,8 @@
 #define MOOSEOBJECTSTORAGE_H
 
 // MOOSE includes
-#include "ObjectStorage.h"
 #include "DependencyResolverInterface.h"
+#include "BoundaryRestrictable.h"
 #include "BlockRestrictable.h"
 
 /**
@@ -27,15 +27,11 @@
  * restricted objects. It also, maintains lists of active objects for use by Controls.
  */
 template<typename MooseObjectType>
-class MooseObjectStorage : public ObjectStorage<MooseObjectType>
+class MooseObjectStorage
 {
 public:
 
-  // Use the following from the base class
-  using ObjectStorage<MooseObjectType>::_num_threads;
-  using ObjectStorage<MooseObjectType>::_all_objects;
-
-   /**
+  /**
    * Constructor.
    * @param threaded When true (default) threaded storage is enabled.
    */
@@ -54,17 +50,11 @@ public:
 
   ///@{
   /**
-   * Provides [] operator access to the threaded storage.
-   */
-  inline std::vector<MooseSharedPointer<MooseObjectType> > & operator[](THREAD_ID tid) { return _active_objects[tid]; }
-  inline const std::vector<MooseSharedPointer<MooseObjectType> > & operator[](THREAD_ID tid) const { return _active_objects[tid]; }
-  //@}
-
-  ///@{
-  /**
-   * Retrieve complete storage to the block/boundary restricted objects for a given thread.
+   * Retrieve complete storage to the all and block/boundary restricted objects for a given thread.
    * @param tid The thread id to retrieve objects from
    */
+  inline std::vector<MooseSharedPointer<MooseObjectType> > & getActiveObjects(THREAD_ID tid = 0) { return _active_objects[tid]; }
+  inline const std::vector<MooseSharedPointer<MooseObjectType> > & getActiveObjects(THREAD_ID tid = 0) const { return _active_objects[tid]; }
   inline const std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > > & getActiveBlockObjects(THREAD_ID tid = 0) const { return _active_block_objects[tid]; }
   inline const std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > > & getActiveBoundaryObjects(THREAD_ID tid = 0) const { return _active_boundary_objects[tid]; }
   ///*}
@@ -99,6 +89,7 @@ public:
   void jacobianSetup(THREAD_ID tid = 0) const;
   void residualSetup(THREAD_ID tid = 0) const;
   ///@}
+
   /**
    * Sort the objects using the DependencyResolver.
    */
@@ -106,17 +97,23 @@ public:
 
 protected:
 
+  /// Convenience member storing the number of threads used for storage (1 or libMesh::n_threads)
+  const THREAD_ID _num_threads;
+
+  /// Storage container for the ALL pointers (THREAD_ID on outer vector)
+  std::vector<std::vector<MooseSharedPointer<MooseObjectType> > > _all_objects;
+
+  /// All active objects (THREAD_ID on outer vector)
+  std::vector<std::vector<MooseSharedPointer<MooseObjectType> > >_active_objects;
+
   // All block restricted objects (THREAD_ID on outer vector)
   std::vector<std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > > > _all_block_objects;
 
-  // All boundary restricted objects (THREAD_ID on outer vector)
-  std::vector<std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > > >_all_boundary_objects;
-
-  /// All active objects, this is the counterpart to ObjectStorage::_all_objects (THREAD_ID on outer vector)
-  std::vector<std::vector<MooseSharedPointer<MooseObjectType> > >_active_objects;
-
   /// Active block restricted objects (THREAD_ID on outer vector)
   std::vector<std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > > > _active_block_objects;
+
+  // All boundary restricted objects (THREAD_ID on outer vector)
+  std::vector<std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > > >_all_boundary_objects;
 
   /// Active boundary restricted objects (THREAD_ID on outer vector)
   std::vector<std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > > >_active_boundary_objects;
@@ -141,11 +138,12 @@ protected:
 
 template<typename MooseObjectType>
 MooseObjectStorage<MooseObjectType>::MooseObjectStorage(bool threaded /*=true*/) :
-    ObjectStorage<MooseObjectType>(threaded),
-    _all_block_objects(_num_threads),
-    _all_boundary_objects(_num_threads),
+    _num_threads(threaded ? libMesh::n_threads() : 1),
+    _all_objects(_num_threads),
     _active_objects(_num_threads),
+    _all_block_objects(_num_threads),
     _active_block_objects(_num_threads),
+    _all_boundary_objects(_num_threads),
     _active_boundary_objects(_num_threads)
 {
 }
@@ -164,17 +162,21 @@ MooseObjectStorage<MooseObjectType>::addObject(MooseSharedPointer<MooseObjectTyp
   checkThreadID(tid);
 
   // Stores object in list of all objects
-  ObjectStorage<MooseObjectType>::addObject(object);
+  _all_objects[tid].push_back(object);
 
   // If enabled, store object in a list of all active
   bool enabled = object->enabled();
   if (enabled)
     _active_objects[tid].push_back(object);
 
+  // Perform casts to the Block/BoundaryRestrictable
+  MooseSharedPointer<BoundaryRestrictable> bnd = MooseSharedNamespace::dynamic_pointer_cast<BoundaryRestrictable>(object);
+  MooseSharedPointer<BlockRestrictable> blk = MooseSharedNamespace::dynamic_pointer_cast<BlockRestrictable>(object);
+
   // Boundary Restricted
-  if (object->boundaryRestricted())
+  if (bnd && bnd->boundaryRestricted())
   {
-    for (std::set<BoundaryID>::const_iterator it = object->boundaryIDs().begin(); it != object->boundaryIDs().end(); ++it)
+    for (std::set<BoundaryID>::const_iterator it = bnd->boundaryIDs().begin(); it != bnd->boundaryIDs().end(); ++it)
     {
       _all_boundary_objects[tid][*it].push_back(object);
       if (enabled)
@@ -183,10 +185,15 @@ MooseObjectStorage<MooseObjectType>::addObject(MooseSharedPointer<MooseObjectTyp
   }
 
   // Block Restricted
-  else if (object->isBlockRestrictable())
+  else if (blk)
   {
-    const std::set<SubdomainID> & ids = object->blockIDs(/*mesh_ids=*/true);
-    for (std::set<SubdomainID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
+    const std::set<SubdomainID> * ids;
+    if (blk->blockRestricted())
+      ids = &blk->blockIDs();
+    else
+      ids = &blk->meshBlockIDs();
+
+    for (std::set<SubdomainID>::const_iterator it = ids->begin(); it != ids->end(); ++it)
     {
       _all_block_objects[tid][*it].push_back(object);
       if (enabled)
