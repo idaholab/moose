@@ -4,4 +4,32 @@
     input = '2d_linear_interpolation_test.i'
     exodiff = 'out.e'
   [../]
+
+  [./test_internal]
+    type = 'Exodiff'
+    input = '2d_linear_interpolation_test_internal.i'
+    exodiff = 'out.e'
+    prereq = 'test'
+  [../]
+
+  [./data_file_and_xyz_error]
+    type = 'RunException'
+    input = '2d_linear_interpolation_test_internal.i'
+    cli_args = 'Outputs/csv=false Functions/u/data_file=fred.csv'
+    expect_err = "In PiecewiseBilinear: Cannot specify 'data_file' and 'x', 'y', or 'z' together"
+  [../]
+
+  [./size_xyz_error]
+    type = 'RunException'
+    input = '2d_linear_interpolation_test_internal.i'
+    cli_args = "Outputs/exodus=false Functions/u/x='0 2 3 4'"
+    expect_err = "In PiecewiseBilinear: Size of z should be the size of x times the size of y"
+  [../]
+
+  [./xyz_error]
+    type = 'RunException'
+    input = 'xyz_error.i'
+    expect_err = "In PiecewiseBilinear: 'x' and 'y' and 'z' must be specified if any one is specified"
+  [../]
+
 []
