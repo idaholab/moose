@@ -50,7 +50,8 @@ ComputeDampingThread::onElement(const Elem *elem)
   _fe_problem.reinitElem(elem, _tid);
   _nl.reinitDampers(_tid);
 
-  for (std::vector<MooseSharedPointer<Damper> >::const_iterator it = _dampers[_tid].begin(); it != _dampers[_tid].end(); ++it)
+  const std::vector<MooseSharedPointer<Damper> > & objects = _dampers.getActiveObjects(_tid);
+  for (std::vector<MooseSharedPointer<Damper> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
   {
     Real cur_damping = (*it)->computeDamping();
     if (cur_damping < _damping)

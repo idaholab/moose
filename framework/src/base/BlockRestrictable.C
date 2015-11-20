@@ -38,7 +38,6 @@ InputParameters validParams<BlockRestrictable>()
 
 // Standard constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
-    BlockRestrictableHelper(),
     _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
@@ -52,7 +51,6 @@ BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
 
 // Dual restricted constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids) :
-    BlockRestrictableHelper(),
     _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
@@ -157,10 +155,8 @@ BlockRestrictable::blocks() const
 }
 
 const std::set<SubdomainID> &
-BlockRestrictable::blockIDs(bool mesh_ids/*=false*/) const
+BlockRestrictable::blockIDs() const
 {
-  if (mesh_ids && !_block_restricted)
-    return meshBlockIDs();
   return _blk_ids;
 }
 

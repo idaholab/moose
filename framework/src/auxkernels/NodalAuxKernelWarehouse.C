@@ -12,34 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONTROLWAREHOUSE_H
-#define CONTROLWAREHOUSE_H
-
 // MOOSE includes
-#include "MooseObjectWarehouse.h"
-#include "Control.h"
+#include "NodalAuxKernelWarehouse.h"
 
-/**
- * Non threaded storage for Control objects.
- */
-class ControlWarehouse : public MooseObjectWarehouse<Control>
+
+NodalAuxKernelWarehouse::NodalAuxKernelWarehouse() :
+    MooseObjectWarehouse<AuxKernel>()
 {
-public:
+}
 
-  /**
-   * Contrcutor.
-   */
-  ControlWarehouse();
 
-  /**
-   * Convienence method for calling setup methods (initialSetup, jacobianSetup, ...)
-   */
-  void setup(const ExecFlagType & exec_flag);
+void
+NodalAuxKernelWarehouse::initialSetup(THREAD_ID tid)
+{
+  // Sort the objects
+  _all_objects.sort(tid);
+  _execute_objects.sort(tid);
 
-  /**
-   * Call the execute methods of Control objects.
-   */
-  virtual void execute(const ExecFlagType & exec_flag);
-};
-
-#endif // CONTROLWAREHOUSE
+  // Call initialSetup on all objects
+  MooseObjectWarehouse<AuxKernel>::initialSetup(tid);
+}
