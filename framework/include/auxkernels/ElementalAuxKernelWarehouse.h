@@ -12,34 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONTROLWAREHOUSE_H
-#define CONTROLWAREHOUSE_H
+#ifndef ELEMENTALAUXKERNELWAREHOUSE_H
+#define ELEMENTALAUXKERNELWAREHOUSE_H
 
 // MOOSE includes
 #include "MooseObjectWarehouse.h"
-#include "Control.h"
+#include "AuxKernel.h"
 
-/**
- * Non threaded storage for Control objects.
- */
-class ControlWarehouse : public MooseObjectWarehouse<Control>
+class ElementalAuxKernelWarehouse : public MooseObjectWarehouse<AuxKernel>
 {
 public:
 
   /**
-   * Contrcutor.
+   * Constructor.
    */
-  ControlWarehouse();
+  ElementalAuxKernelWarehouse();
 
   /**
-   * Convienence method for calling setup methods (initialSetup, jacobianSetup, ...)
+   * Sorts the AuxScalarKenels prior to calling the initialSetup.
    */
-  void setup(const ExecFlagType & exec_flag);
-
-  /**
-   * Call the execute methods of Control objects.
-   */
-  virtual void execute(const ExecFlagType & exec_flag);
+  virtual void initialSetup(THREAD_ID tid);
 };
 
-#endif // CONTROLWAREHOUSE
+#endif // ELEMENTALAUXSCALARKERNELWAREHOUSE_H

@@ -37,7 +37,6 @@ InputParameters validParams<BoundaryRestrictable>()
 
 // Standard constructor
 BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters) :
-    BoundaryRestrictableHelper(),
     _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
@@ -45,6 +44,7 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters) :
     _boundary_restricted(false),
     _block_ids(_empty_block_ids),
     _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
+    _bnd_material_data(_bnd_feproblem->getBoundaryMaterialData(_bnd_tid)),
     _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
 {
   initializeBoundaryRestrictable(parameters);
@@ -52,7 +52,6 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters) :
 
 // Dual restricted constructor
 BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids) :
-    BoundaryRestrictableHelper(),
     _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
@@ -60,6 +59,7 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, c
     _boundary_restricted(false),
     _block_ids(block_ids),
     _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
+    _bnd_material_data(_bnd_feproblem->getBoundaryMaterialData(_bnd_tid)),
     _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
 {
   initializeBoundaryRestrictable(parameters);

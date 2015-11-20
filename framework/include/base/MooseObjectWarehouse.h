@@ -16,14 +16,13 @@
 #define MOOSEOBJECTWAREHOUSE_H
 
 // MOOSE includes
-#include "WarehouseBase.h"
 #include "ExecuteMooseObjectStorage.h"
 
 /**
  * A general warehouse for storing a single set of objects.
  */
 template <typename T>
-class MooseObjectWarehouse : public WarehouseBase<T>
+class MooseObjectWarehouse
 {
 public:
 
@@ -45,10 +44,12 @@ public:
 
   ///@{
   /**
-   * Operator [] access to the objects for a given execute flag.
+   * Access to the objects in this warehouse.
    */
-  inline MooseObjectStorage<T> & operator[](ExecFlagType exec_type) { return _execute_objects[exec_type]; }
-  inline const MooseObjectStorage<T> & operator[](ExecFlagType exec_type) const { return _execute_objects[exec_type]; }
+  MooseObjectStorage<T> & getStorage() { return _all_objects; }
+  const MooseObjectStorage<T> & getStorage() const { return _all_objects; }
+  MooseObjectStorage<T> & getStorage(ExecFlagType exec_type) { return _execute_objects[exec_type]; }
+  const MooseObjectStorage<T> & getStorage(ExecFlagType exec_type) const { return _execute_objects[exec_type]; }
   ///@}
 
   /**
@@ -85,6 +86,7 @@ MooseObjectWarehouse<T>::MooseObjectWarehouse(bool threaded /*=true*/) :
     _execute_objects(threaded)
 {
 }
+
 
 template<typename T>
 void

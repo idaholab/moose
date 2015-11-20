@@ -29,11 +29,6 @@ public:
   AuxScalarKernelWarehouse();
 
   /**
-   * Destructor.
-   */
-  ~AuxScalarKernelWarehouse(){}
-
-  /**
    * Sorts the AuxScalarKenels prior to calling the initialSetup.
    */
   virtual void initialSetup(THREAD_ID tid);
