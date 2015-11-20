@@ -4,4 +4,10 @@
     input = '2d_linear_interpolation_test.i'
     exodiff = 'out.e'
   [../]
+
+  [./test_internal]
+    type = 'Exodiff'
+    input = '2d_linear_interpolation_test_internal.i'
+    exodiff = 'out.e'
+  [../]
 []
