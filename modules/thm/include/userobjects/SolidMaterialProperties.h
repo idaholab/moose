@@ -14,8 +14,8 @@ InputParameters validParams<SolidMaterialProperties>();
  *
  */
 class SolidMaterialProperties :
-  public GeneralUserObject,
-  public ZeroInterface
+    public GeneralUserObject,
+    public ZeroInterface
 {
 public:
   SolidMaterialProperties(const InputParameters & parameters);
@@ -29,22 +29,14 @@ public:
   Real Cp(Real temp) const;
   Real rho(Real temp) const;
 
+  Function & getKFunction() const { return _k; }
+  Function & getCpFunction() const { return _Cp; }
+  Function & getRhoFunction() const { return _rho; }
+
 protected:
-  const Real & _k_const;
-  const Real & _Cp_const;
-  const Real & _rho_const;
-
-  Function * _k;
-  Function * _Cp;
-  Function * _rho;
-
-  /**
-   * Helper function so we can avoid calling getParam on parameters
-   * before they are valid.
-   */
-  const Real & setConstRefParam(const InputParameters & parameters, std::string get_string, std::string set_string);
+  Function & _k;
+  Function & _Cp;
+  Function & _rho;
 };
-
-
 
 #endif /* SOLIDMATERIALPROPERTIES_H */
