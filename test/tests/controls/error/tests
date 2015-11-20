@@ -30,4 +30,12 @@
     expect_err = "Attempting to access a thread id \(12345\) greater than the number allowed by the storage item \(1\)"
     method = 'dbg'
   [../]
+
+  [./disable_executioner]
+    # Test that certain objects (e.g., Executioner) may not be disabled
+    type = RunException
+    input = 'disable_executioner.i'
+    expect_err = "The desired parameter is not controllable: Executioner/enable"
+  [../]
+
 []
