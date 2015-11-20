@@ -270,6 +270,9 @@ protected:
    */
   unsigned int globalAppToLocal(unsigned int global_app);
 
+  /// call back executed right before app->runInputFile()
+  virtual void preRunInputFile();
+
   /// The FEProblem this MultiApp is part of
   FEProblem & _fe_problem;
 
