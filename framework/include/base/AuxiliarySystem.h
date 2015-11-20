@@ -27,7 +27,8 @@ class AuxKernel;
 class FEProblem;
 class TimeIntegrator;
 class AuxScalarKernelWarehouse;
-class AuxKernelWarehouse;
+class NodalAuxKernelWarehouse;
+class ElementalAuxKernelWarehouse;
 
 // libMesh forward declarations
 namespace libMesh
@@ -158,7 +159,10 @@ protected:
   UniquePtr<AuxScalarKernelWarehouse> _aux_scalar_warehouse;
 
   // Storage for AuxKernel objects (this must be a pointer due to cyclic includes)
-  UniquePtr<AuxKernelWarehouse> _aux_warehouse;
+  UniquePtr<NodalAuxKernelWarehouse> _nodal_aux_warehouse;
+
+  // Storage for AuxKernel objects (this must be a pointer due to cyclic includes)
+  UniquePtr<ElementalAuxKernelWarehouse> _elemental_aux_warehouse;
 
   friend class AuxKernel;
   friend class ComputeNodalAuxVarsThread;

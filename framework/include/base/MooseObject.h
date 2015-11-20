@@ -22,55 +22,6 @@
 // libMesh includes
 #include "libmesh/parallel_object.h"
 
-
-/**
- * A helper class to allow MooseObject to have the block/boundary restricted methods.
- *
- * When storing objects that are restricted it is desired to have the ability to know
- * if an object is block/boundary restricted. Since this may not be accomplished with the
- * InputParameters since they are const, a method must be available to perform this test.
- *
- * Therefore, this class which is virtually inherited by both MooseObject and BlockRestrictable
- * allows for this function to exist on every MooseObject (defaulting to false) and be overridden
- * by the Block Restricted class, in the case this method should return true.
- *
- * Additionally, performing a dynamic_cast to BoundaryRestrcitable in MooseObjectStorage is not possible due to cyclic
- * dependencies with FEProblem.h.
- *
- * @see MooseObjectStorage
- */
-class BlockRestrictableHelper
-{
-public:
-  BlockRestrictableHelper() {}
-  virtual ~BlockRestrictableHelper(){}
-  virtual bool isBlockRestrictable(){ return false; }
-  virtual bool blockRestricted(){return false; }
-  virtual const std::set<SubdomainID> & blockIDs(bool /*mesh_ids = false*/) const { mooseError("Object is not Block restrictable."); return _blk_ids; }
-
-protected:
-  std::set<SubdomainID> _blk_ids;
-};
-
-
-/**
- * A helper class to allow MooseObject to have the 'boundaryRestricted' method.
- * @see BlockRestrictableHelper
- */
-class BoundaryRestrictableHelper
-{
-public:
-  BoundaryRestrictableHelper(){}
-  virtual ~BoundaryRestrictableHelper(){}
-  virtual bool isBoundaryRestrictable(){ return false; }
-  virtual bool boundaryRestricted(){return false; }
-  virtual const std::set<BoundaryID> & boundaryIDs() const { mooseError("Object is not Boundary restrictable."); return _bnd_ids; }
-
-protected:
-  std::set<BoundaryID> _bnd_ids;
-};
-
-
 class MooseApp;
 class MooseObject;
 
@@ -82,8 +33,6 @@ InputParameters validParams<MooseObject>();
  * Every object that can be built by the factory should be derived from this class.
  */
 class MooseObject :
-  public virtual BlockRestrictableHelper, // see BlockRestrictable.h
-  public virtual BoundaryRestrictableHelper, // see BoundaryRestrictable.h
   public ConsoleStreamInterface,
   public libMesh::ParallelObject
 {
@@ -127,18 +76,6 @@ public:
    * Return the enabled status of the object.
    */
   bool enabled() { return _enabled; }
-
-  /**
-   * Returns true of the object has been restricted to a boundary.
-   * @see BoundaryRestrictable
-   */
-  //virtual bool boundaryRestricted() { return false; }
-
-  /**
-   * Returns true of the object has been restricted to a subdomain.
-   * @see BlockRestrictable
-   */
-  //virtual bool blockRestricted() { return false; }
 
 
 protected:
