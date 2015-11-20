@@ -92,13 +92,13 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
       if(z_vec.size() != x.size()*y.size()) {
         mooseError("In PiecewiseBilinear: Size of z should be the size of x times the size of y.");
       }
-      
+
       //reshape and populate z matrix
       z.reshape(y.size(),x.size());
       int idx=0;
       for(int i=0; i < y.size(); i++)
-      { 
-        for(int j=0; j < x.size(); j++) 
+      {
+        for(int j=0; j < x.size(); j++)
         {
           z(i,j)=z_vec[idx];
           idx+=1;
