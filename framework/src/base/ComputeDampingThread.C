@@ -12,13 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "ComputeDampingThread.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
 #include "Damper.h"
 #include "DamperWarehouse.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeDampingThread::ComputeDampingThread(FEProblem & feproblem,
