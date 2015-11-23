@@ -602,12 +602,30 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
 
     MooseSharedPointer<BoundaryCondition> bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create(bc_name, name, parameters, tid));
 
+    MooseSharedPointer<IntegratedBC> ibc = MooseSharedNamespace::dynamic_pointer_cast<IntegratedBC>(bc);
+    if (ibc)
+    {
+      _integrated_bcs.addObject(ibc, tid);
+      _vars[tid].addBoundaryVars(boundary_ids, ibc->getCoupledVars());
+
+      if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
+        _has_save_in = true;
+      if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
+        _has_diag_save_in = true;
+      continue;
+    }
+
+
+
+
+
+
+
     MooseSharedPointer<PresetNodalBC> pnbc = MooseSharedNamespace::dynamic_pointer_cast<PresetNodalBC>(bc);
     if (pnbc.get())
       _bcs[tid].addPresetNodalBC(boundary_ids, pnbc);
 
     MooseSharedPointer<NodalBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<NodalBC>(bc);
-    MooseSharedPointer<IntegratedBC> ibc = MooseSharedNamespace::dynamic_pointer_cast<IntegratedBC>(bc);
     if (nbc.get())
     {
       _bcs[tid].addNodalBC(boundary_ids, nbc);
@@ -616,16 +634,6 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
         _has_nodalbc_save_in = true;
       if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
         _has_nodalbc_diag_save_in = true;
-    }
-    else if (ibc.get())
-    {
-      _bcs[tid].addBC(boundary_ids, ibc);
-      _vars[tid].addBoundaryVars(boundary_ids, ibc->getCoupledVars());
-
-      if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
-        _has_save_in = true;
-      if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
-        _has_diag_save_in = true;
     }
     else
       mooseError("Unknown type of BoundaryCondition object");
@@ -2142,6 +2150,7 @@ void
 NonlinearSystem::updateActive(THREAD_ID tid)
 {
   _dampers.updateActive(tid);
+  _integrated_bcs.updateActive(tid);
 }
 
 Real
@@ -2436,9 +2445,7 @@ NonlinearSystem::setPCSide(MooseEnum pcs)
 bool
 NonlinearSystem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
-  std::vector<IntegratedBC *> bcs;
-  _bcs[tid].activeIntegrated(bnd_id, bcs);
-  return !bcs.empty();
+  return _integrated_bcs.getStorage().hasActiveBoundaryObjects(bnd_id, tid);
 }
 
 bool
