@@ -19,6 +19,7 @@
 #include "DependencyResolverInterface.h"
 #include "BoundaryRestrictable.h"
 #include "BlockRestrictable.h"
+#include "MooseVariable.h"
 
 /**
  * A storage container for MooseObjects.
@@ -26,7 +27,7 @@
  * This container is stores threaded copies and includes automatic storage of block/boundary
  * restricted objects. It also, maintains lists of active objects for use by Controls.
  */
-template<typename MooseObjectType>
+template<typename T>
 class MooseObjectStorage
 {
 public:
@@ -46,23 +47,37 @@ public:
    * Adds an object to the storage structure.
    * @param object A shared pointer to the object being added
    */
-  virtual void addObject(MooseSharedPointer<MooseObjectType> object, THREAD_ID tid = 0);
+  virtual void addObject(MooseSharedPointer<T> object, THREAD_ID tid = 0);
 
   ///@{
   /**
-   * Retrieve complete storage to the all and block/boundary restricted objects for a given thread.
+   * Retrieve complete vector to the all/block/boundary restricted objects for a given thread.
    * @param tid The thread id to retrieve objects from
    */
-  inline std::vector<MooseSharedPointer<MooseObjectType> > & getActiveObjects(THREAD_ID tid = 0) { return _active_objects[tid]; }
-  inline const std::vector<MooseSharedPointer<MooseObjectType> > & getActiveObjects(THREAD_ID tid = 0) const { return _active_objects[tid]; }
-  inline const std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > > & getActiveBlockObjects(THREAD_ID tid = 0) const { return _active_block_objects[tid]; }
-  inline const std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > > & getActiveBoundaryObjects(THREAD_ID tid = 0) const { return _active_boundary_objects[tid]; }
+  const std::vector<MooseSharedPointer<T> > & getObjects(THREAD_ID tid = 0) const;
+  const std::map<SubdomainID, std::vector<MooseSharedPointer<T> > > & getBlockObjects(THREAD_ID tid = 0) const;
+  const std::vector<MooseSharedPointer<T> > & getBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
+  const std::map<BoundaryID, std::vector<MooseSharedPointer<T> > > & getBoundaryObjects(THREAD_ID tid = 0) const;
+  const std::vector<MooseSharedPointer<T> > & getBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
+  ///@}
+
+  ///@{
+  /**
+   * Retrieve complete vector to the active all/block/boundary restricted objects for a given thread.
+   * @param tid The thread id to retrieve objects from
+   */
+  const std::vector<MooseSharedPointer<T> > & getActiveObjects(THREAD_ID tid = 0) const;
+  const std::map<SubdomainID, std::vector<MooseSharedPointer<T> > > & getActiveBlockObjects(THREAD_ID tid = 0) const;
+  const std::vector<MooseSharedPointer<T> > & getActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
+  const std::map<BoundaryID, std::vector<MooseSharedPointer<T> > > & getActiveBoundaryObjects(THREAD_ID tid = 0) const;
+  const std::vector<MooseSharedPointer<T> > & getActiveBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
   ///*}
 
   ///@{
   /**
    * Convenience functions for determining if block/boundary restricted objects exist.
    */
+  bool hasActiveObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(THREAD_ID tid = 0) const;
@@ -95,38 +110,54 @@ public:
    */
   void sort(THREAD_ID tid = 0);
 
+  ///@{
+  /**
+   * Update variable dependency vector.
+   */
+  void updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
+  void updateBlockVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
+  void updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
+  ///@}
+
+
 protected:
 
   /// Convenience member storing the number of threads used for storage (1 or libMesh::n_threads)
   const THREAD_ID _num_threads;
 
   /// Storage container for the ALL pointers (THREAD_ID on outer vector)
-  std::vector<std::vector<MooseSharedPointer<MooseObjectType> > > _all_objects;
+  std::vector<std::vector<MooseSharedPointer<T> > > _all_objects;
 
   /// All active objects (THREAD_ID on outer vector)
-  std::vector<std::vector<MooseSharedPointer<MooseObjectType> > >_active_objects;
+  std::vector<std::vector<MooseSharedPointer<T> > > _active_objects;
 
   // All block restricted objects (THREAD_ID on outer vector)
-  std::vector<std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > > > _all_block_objects;
+  std::vector<std::map<SubdomainID, std::vector<MooseSharedPointer<T> > > > _all_block_objects;
 
   /// Active block restricted objects (THREAD_ID on outer vector)
-  std::vector<std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > > > _active_block_objects;
+  std::vector<std::map<SubdomainID, std::vector<MooseSharedPointer<T> > > > _active_block_objects;
 
   // All boundary restricted objects (THREAD_ID on outer vector)
-  std::vector<std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > > >_all_boundary_objects;
+  std::vector<std::map<BoundaryID, std::vector<MooseSharedPointer<T> > > > _all_boundary_objects;
 
   /// Active boundary restricted objects (THREAD_ID on outer vector)
-  std::vector<std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > > >_active_boundary_objects;
+  std::vector<std::map<BoundaryID, std::vector<MooseSharedPointer<T> > > > _active_boundary_objects;
 
   /**
    * Helper method for updating active vectors
    */
-  static void updateActiveHelper(std::vector<MooseSharedPointer<MooseObjectType> > & active, const std::vector<MooseSharedPointer<MooseObjectType> > & all);
+  static void updateActiveHelper(std::vector<MooseSharedPointer<T> > & active, const std::vector<MooseSharedPointer<T> > & all);
 
   /**
    * Helper method for sorting vectors of objects.
    */
-  static void sortHelper(std::vector<MooseSharedPointer<MooseObjectType> > & objects);
+  static void sortHelper(std::vector<MooseSharedPointer<T> > & objects);
+
+  /**
+   * Helper method for updating variable dependency vector
+   */
+  static void updateVariableDependencyHelper(std::set<MooseVariable *> & needed_moose_vars,
+                                             const std::vector<MooseSharedPointer<T> > & objects);
 
   /**
    * Calls assert on thread id.
@@ -136,8 +167,8 @@ protected:
 };
 
 
-template<typename MooseObjectType>
-MooseObjectStorage<MooseObjectType>::MooseObjectStorage(bool threaded /*=true*/) :
+template<typename T>
+MooseObjectStorage<T>::MooseObjectStorage(bool threaded /*=true*/) :
     _num_threads(threaded ? libMesh::n_threads() : 1),
     _all_objects(_num_threads),
     _active_objects(_num_threads),
@@ -149,15 +180,15 @@ MooseObjectStorage<MooseObjectType>::MooseObjectStorage(bool threaded /*=true*/)
 }
 
 
-template<typename MooseObjectType>
-MooseObjectStorage<MooseObjectType>::~MooseObjectStorage()
+template<typename T>
+MooseObjectStorage<T>::~MooseObjectStorage()
 {
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::addObject(MooseSharedPointer<MooseObjectType> object, THREAD_ID tid /*= 0*/)
+MooseObjectStorage<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid /*= 0*/)
 {
   checkThreadID(tid);
 
@@ -203,73 +234,180 @@ MooseObjectStorage<MooseObjectType>::addObject(MooseSharedPointer<MooseObjectTyp
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
+inline const std::vector<MooseSharedPointer<T> > &
+MooseObjectStorage<T>::getObjects(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  return _all_objects[tid];
+}
+
+
+template<typename T>
+inline const std::map<BoundaryID, std::vector<MooseSharedPointer<T> > > &
+MooseObjectStorage<T>::getBoundaryObjects(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  return _all_boundary_objects[tid];
+}
+
+
+template<typename T>
+const std::vector<MooseSharedPointer<T> > &
+MooseObjectStorage<T>::getBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _all_boundary_objects[tid].find(id);
+  mooseAssert(iter != _all_boundary_objects[tid].end(), "Unable to located active boundary objects for the given id: " << id << ".");
+  return iter->second;
+}
+
+
+template<typename T>
+inline const std::map<SubdomainID, std::vector<MooseSharedPointer<T> > > &
+MooseObjectStorage<T>::getBlockObjects(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  return _all_block_objects[tid];
+}
+
+
+template<typename T>
+const std::vector<MooseSharedPointer<T> > &
+MooseObjectStorage<T>::getBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _all_block_objects[tid].find(id);
+  mooseAssert(iter != _all_block_objects[tid].end(), "Unable to located active block objects for the given id: " << id << ".");
+  return iter->second;
+}
+
+
+template<typename T>
+inline const std::vector<MooseSharedPointer<T> > &
+MooseObjectStorage<T>::getActiveObjects(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  return _active_objects[tid];
+}
+
+
+template<typename T>
+inline const std::map<BoundaryID, std::vector<MooseSharedPointer<T> > > &
+MooseObjectStorage<T>::getActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  return _active_boundary_objects[tid];
+}
+
+
+template<typename T>
+const std::vector<MooseSharedPointer<T> > &
+MooseObjectStorage<T>::getActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_boundary_objects[tid].find(id);
+  mooseAssert(iter != _active_boundary_objects[tid].end(), "Unable to located active boundary objects for the given id: " << id << ".");
+  return iter->second;
+}
+
+
+template<typename T>
+inline const std::map<SubdomainID, std::vector<MooseSharedPointer<T> > > &
+MooseObjectStorage<T>::getActiveBlockObjects(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  return _active_block_objects[tid];
+}
+
+
+template<typename T>
+const std::vector<MooseSharedPointer<T> > &
+MooseObjectStorage<T>::getActiveBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_block_objects[tid].find(id);
+  mooseAssert(iter != _active_block_objects[tid].end(), "Unable to located active block objects for the given id: " << id << ".");
+  return iter->second;
+}
+
+
+template<typename T>
 bool
-MooseObjectStorage<MooseObjectType>::hasActiveBlockObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectStorage<T>::hasActiveObjects(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  return !_active_objects[tid].empty();
+}
+
+
+template<typename T>
+bool
+MooseObjectStorage<T>::hasActiveBlockObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   bool has_active_block_objects = false;
-  typename std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > >::const_iterator it;
+  typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
   for (it = _active_block_objects[tid].begin(); it != _active_block_objects[tid].end(); ++it)
     has_active_block_objects |= !(it->second.empty());
   return has_active_block_objects;
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 bool
-MooseObjectStorage<MooseObjectType>::hasActiveBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
+MooseObjectStorage<T>::hasActiveBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > >::const_iterator iter = _active_block_objects[tid].find(id);
+  typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_block_objects[tid].find(id);
   if (iter != _active_block_objects[tid].end() && !iter->second.empty())
     return true;
   return false;
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 bool
-MooseObjectStorage<MooseObjectType>::hasActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectStorage<T>::hasActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   bool has_active_boundary_objects = false;
-  typename std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > >::const_iterator it;
+  typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
   for (it = _active_boundary_objects[tid].begin(); it != _active_boundary_objects[tid].end(); ++it)
     has_active_boundary_objects |= !(it->second.empty());
   return has_active_boundary_objects;
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 bool
-MooseObjectStorage<MooseObjectType>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
+MooseObjectStorage<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > >::const_iterator iter = _active_boundary_objects[tid].find(id);
+  typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_boundary_objects[tid].find(id);
   if (iter != _active_boundary_objects[tid].end() && !iter->second.empty())
     return true;
   return false;
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::updateActive(THREAD_ID tid /*= 0*/)
+MooseObjectStorage<T>::updateActive(THREAD_ID tid /*= 0*/)
 {
   checkThreadID(tid);
 
   updateActiveHelper(_active_objects[tid], _all_objects[tid]);
 
   {
-    typename std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > >::const_iterator it;
+    typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
     for (it = _all_block_objects[tid].begin(); it != _all_block_objects[tid].end(); ++it)
       updateActiveHelper(_active_block_objects[tid][it->first], it->second);
   }
 
 
   {
-    typename std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > >::const_iterator it;
+    typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
     for (it = _all_boundary_objects[tid].begin(); it != _all_boundary_objects[tid].end(); ++it)
       updateActiveHelper(_active_boundary_objects[tid][it->first], it->second);
   }
@@ -277,11 +415,11 @@ MooseObjectStorage<MooseObjectType>::updateActive(THREAD_ID tid /*= 0*/)
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::updateActiveHelper(std::vector<MooseSharedPointer<MooseObjectType> > & active, const std::vector<MooseSharedPointer<MooseObjectType> > & all)
+MooseObjectStorage<T>::updateActiveHelper(std::vector<MooseSharedPointer<T> > & active, const std::vector<MooseSharedPointer<T> > & all)
 {
-  typename std::vector<MooseSharedPointer<MooseObjectType> >::const_iterator iter;
+  typename std::vector<MooseSharedPointer<T> >::const_iterator iter;
 
   // Clear the active list
   active.clear();
@@ -293,75 +431,75 @@ MooseObjectStorage<MooseObjectType>::updateActiveHelper(std::vector<MooseSharedP
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::initialSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectStorage<T>::initialSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<MooseObjectType> >::const_iterator it;
+  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
   for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     (*it)->initialSetup();
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::timestepSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectStorage<T>::timestepSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<MooseObjectType> >::const_iterator it;
+  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
   for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     (*it)->timestepSetup();
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::subdomainSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectStorage<T>::subdomainSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<MooseObjectType> >::const_iterator it;
+  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
   for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     (*it)->subdomainSetup();
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::jacobianSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectStorage<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<MooseObjectType> >::const_iterator it;
+  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
   for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     (*it)->jacobianSetup();
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::residualSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectStorage<T>::residualSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<MooseObjectType> >::const_iterator it;
+  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
   for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     (*it)->residualSetup();
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::sort(THREAD_ID tid/* = 0*/)
+MooseObjectStorage<T>::sort(THREAD_ID tid/* = 0*/)
 {
   checkThreadID(tid);
 
   {
-    typename std::map<SubdomainID, std::vector<MooseSharedPointer<MooseObjectType> > >::iterator iter;
+    typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::iterator iter;
     for (iter = _all_block_objects[tid].begin(); iter != _all_block_objects[tid].end(); ++iter)
       sortHelper(iter->second);
   }
 
   {
-    typename std::map<BoundaryID, std::vector<MooseSharedPointer<MooseObjectType> > >::iterator iter;
+    typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::iterator iter;
     for (iter = _all_boundary_objects[tid].begin(); iter != _all_boundary_objects[tid].end(); ++iter)
       sortHelper(iter->second);
   }
@@ -373,9 +511,57 @@ MooseObjectStorage<MooseObjectType>::sort(THREAD_ID tid/* = 0*/)
 }
 
 
-template<typename MooseObjectType>
+template<typename T>
 void
-MooseObjectStorage<MooseObjectType>::sortHelper(std::vector<MooseSharedPointer<MooseObjectType> > & objects)
+MooseObjectStorage<T>::updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+{
+  if (hasActiveObjects(tid))
+    updateVariableDependencyHelper(needed_moose_vars, _all_objects[tid]);
+}
+
+
+template<typename T>
+void
+MooseObjectStorage<T>::updateBlockVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+{
+  if (hasActiveBlockObjects(tid))
+  {
+    typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
+    for (it = _active_block_objects[tid].begin(); it != _active_block_objects[tid].end(); ++it)
+      updateVariableDependencyHelper(needed_moose_vars, it->second);
+  }
+}
+
+
+template<typename T>
+void
+MooseObjectStorage<T>::updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+{
+  if (hasActiveBoundaryObjects(tid))
+  {
+    typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
+    for (it = _active_boundary_objects[tid].begin(); it != _active_boundary_objects[tid].end(); ++it)
+      updateVariableDependencyHelper(needed_moose_vars, it->second);
+  }
+}
+
+
+template<typename T>
+void
+MooseObjectStorage<T>::updateVariableDependencyHelper(std::set<MooseVariable *> & needed_moose_vars,
+                                                                    const std::vector<MooseSharedPointer<T> > & objects)
+{
+  for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+  {
+    const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+  }
+}
+
+
+template<typename T>
+void
+MooseObjectStorage<T>::sortHelper(std::vector<MooseSharedPointer<T> > & objects)
 {
   // Do nothing if the vector is empty
   if (objects.empty())
@@ -387,17 +573,17 @@ MooseObjectStorage<MooseObjectType>::sortHelper(std::vector<MooseSharedPointer<M
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort<MooseSharedPointer<MooseObjectType> >(objects);
+    DependencyResolverInterface::sort<MooseSharedPointer<T> >(objects);
   }
-  catch(CyclicDependencyException<MooseSharedPointer<MooseObjectType> > & e)
+  catch(CyclicDependencyException<MooseSharedPointer<T> > & e)
   {
-    DependencyResolverInterface::cyclicDependencyError<MooseSharedPointer<MooseObjectType> >(e, "Cyclic dependency detected in object ordering");
+    DependencyResolverInterface::cyclicDependencyError<MooseSharedPointer<T> >(e, "Cyclic dependency detected in object ordering");
   }
 }
 
-template<typename MooseObjectType>
+template<typename T>
 inline void
-MooseObjectStorage<MooseObjectType>::checkThreadID(THREAD_ID tid) const
+MooseObjectStorage<T>::checkThreadID(THREAD_ID tid) const
 {
   mooseAssert(tid < _num_threads, "Attempting to access a thread id (" << tid << ") greater than the number allowed by the storage item (" << _num_threads << ")");
 }
