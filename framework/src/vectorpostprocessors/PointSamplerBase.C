@@ -61,7 +61,7 @@ PointSamplerBase::initialize()
 void
 PointSamplerBase::execute()
 {
-  MeshTools::BoundingBox bbox = getInflatedProcessorBoundingBox();
+  MeshTools::BoundingBox bbox = _mesh.getInflatedProcessorBoundingBox();
 
   for (unsigned int i=0; i<_points.size(); i++)
   {
@@ -141,21 +141,4 @@ PointSamplerBase::getLocalElemContainingPoint(const Point & p, unsigned int /*id
     return elem;
 
   return NULL;
-}
-
-MeshTools::BoundingBox
-PointSamplerBase::getInflatedProcessorBoundingBox()
-{
-  // Grab a bounding box to speed things up
-  MeshTools::BoundingBox bbox = MeshTools::processor_bounding_box(_mesh, processor_id());
-
-  // Inflate the bbox just a bit to deal with roundoff
-  // Adding 1% of the diagonal size in each direction on each end
-  Real inflation_amount = 0.01 * (bbox.max() - bbox.min()).size();
-  Point inflation(inflation_amount, inflation_amount, inflation_amount);
-
-  bbox.first -= inflation; // min
-  bbox.second += inflation; // max
-
-  return bbox;
 }

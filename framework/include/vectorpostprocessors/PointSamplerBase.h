@@ -60,11 +60,6 @@ protected:
    */
   const Elem * getLocalElemContainingPoint(const Point & p, unsigned int id);
 
-  /**
-   * Gets a processor_bounding_box... and inflates it a bit to handle edge cases
-   */
-  MeshTools::BoundingBox getInflatedProcessorBoundingBox();
-
   /// The Mesh we're using
   MooseMesh & _mesh;
 

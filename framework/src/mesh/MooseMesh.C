@@ -2056,6 +2056,23 @@ MooseMesh::getPatchUpdateStrategy()
   return _patch_update_strategy;
 }
 
+MeshTools::BoundingBox
+MooseMesh::getInflatedProcessorBoundingBox(Real inflation_multiplier) const
+{
+  // Grab a bounding box to speed things up
+  MeshTools::BoundingBox bbox = MeshTools::processor_bounding_box(getMesh(), processor_id());
+
+  // Inflate the bbox just a bit to deal with roundoff
+  // Adding 1% of the diagonal size in each direction on each end
+  Real inflation_amount = inflation_multiplier * (bbox.max() - bbox.min()).size();
+  Point inflation(inflation_amount, inflation_amount, inflation_amount);
+
+  bbox.first -= inflation; // min
+  bbox.second += inflation; // max
+
+  return bbox;
+}
+
 MooseMesh::operator libMesh::MeshBase & ()
 {
   return getMesh();
