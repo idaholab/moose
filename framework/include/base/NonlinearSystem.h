@@ -20,10 +20,10 @@
 #include "BCWarehouse.h"
 #include "DiracKernelWarehouse.h"
 #include "DGKernelWarehouse.h"
-#include "DamperWarehouse.h"
 #include "ConstraintWarehouse.h"
 #include "SplitWarehouse.h"
 #include "NodalKernelWarehouse.h"
+#include "MooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -35,6 +35,7 @@ class MoosePreconditioner;
 class JacobianBlock;
 class TimeIntegrator;
 class Predictor;
+class Damper;
 
 // libMesh forward declarations
 namespace libMesh
@@ -439,8 +440,9 @@ public:
   const DGKernelWarehouse & getDGKernelWarehouse(THREAD_ID tid);
   const BCWarehouse & getBCWarehouse(THREAD_ID tid);
   const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
-  const DamperWarehouse & getDamperWarehouse();
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
+  const MooseObjectWarehouse<Damper> & getDamperWarehouse() { return _dampers; }
+
   //@}
 
   /**
@@ -516,14 +518,22 @@ protected:
   // holders
   /// Kernel storage for each thread
   std::vector<KernelWarehouse> _kernels;
+
+  ///@}
+  /// BoundaryCondition Warhouses
+  MooseObjectWarehouse<IntegratedBC> _integrated_bcs;
+
+  ///@}
+
   /// BC storage for each thread
   std::vector<BCWarehouse> _bcs;
   /// Dirac Kernel storage for each thread
   std::vector<DiracKernelWarehouse> _dirac_kernels;
   /// DG Kernel storage for each thread
   std::vector<DGKernelWarehouse> _dg_kernels;
+
   /// Dampers for each thread
-  DamperWarehouse _dampers;
+  MooseObjectWarehouse<Damper> _dampers;
   /// NodalKernels for each thread
   std::vector<NodalKernelWarehouse> _nodal_kernels;
 
