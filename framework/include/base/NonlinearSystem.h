@@ -36,6 +36,7 @@ class JacobianBlock;
 class TimeIntegrator;
 class Predictor;
 class Damper;
+class IntegratedBC;
 
 // libMesh forward declarations
 namespace libMesh
@@ -441,6 +442,8 @@ public:
   const BCWarehouse & getBCWarehouse(THREAD_ID tid);
   const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
+
+  const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
   const MooseObjectWarehouse<Damper> & getDamperWarehouse() { return _dampers; }
 
   //@}

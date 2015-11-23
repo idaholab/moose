@@ -17,7 +17,6 @@
 #include "NonlinearSystem.h"
 #include "Problem.h"
 #include "Damper.h"
-#include "DamperWarehouse.h"
 
 // libMesh includes
 #include "libmesh/threads.h"
