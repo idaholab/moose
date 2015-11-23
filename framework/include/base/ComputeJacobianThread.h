@@ -49,6 +49,12 @@ protected:
 
   unsigned int _num_cached;
 
+  ///@{
+  // Reference to BC storage structures
+  const MooseObjectStorage<IntegratedBC> & _integrated_bcs;
+
+  ///@}
+
   virtual void computeJacobian();
   virtual void computeFaceJacobian(BoundaryID bnd_id);
   virtual void computeInternalFaceJacobian();

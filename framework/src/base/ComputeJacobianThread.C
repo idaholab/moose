@@ -26,7 +26,9 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSy
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _jacobian(jacobian),
     _sys(sys),
-    _num_cached(0)
+    _num_cached(0),
+    _integrated_bcs(sys.getIntegratedBCWarehouse().getStorage())
+
 {
 }
 
@@ -35,7 +37,8 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
     ThreadedElementLoop<ConstElemRange>(x, split),
     _jacobian(x._jacobian),
     _sys(x._sys),
-    _num_cached(x._num_cached)
+    _num_cached(x._num_cached),
+    _integrated_bcs(x._integrated_bcs)
 {
 }
 
@@ -61,11 +64,10 @@ ComputeJacobianThread::computeJacobian()
 void
 ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  std::vector<IntegratedBC *> bcs;
-  _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
-  for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+  const std::vector<MooseSharedPointer<IntegratedBC> > & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+  for (std::vector<MooseSharedPointer<IntegratedBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
   {
-    IntegratedBC * bc = *it;
+    MooseSharedPointer<IntegratedBC> bc = *it;
     if (bc->shouldApply() && bc->isImplicit())
     {
       bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
@@ -109,26 +111,7 @@ ComputeJacobianThread::subdomainChanged()
   }
 
   // Boundary Condition Dependencies
-  const std::set<unsigned int> & subdomain_boundary_ids = _mesh.getSubdomainBoundaryIds(_subdomain);
-  for (std::set<unsigned int>::const_iterator id_it = subdomain_boundary_ids.begin();
-      id_it != subdomain_boundary_ids.end();
-      ++id_it)
-  {
-    std::vector<IntegratedBC *> bcs;
-    _sys.getBCWarehouse(_tid).activeIntegrated(*id_it, bcs);
-    if (bcs.size() > 0)
-    {
-      for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
-      {
-        IntegratedBC * bc = (*it);
-        if (bc->shouldApply())
-        {
-          const std::set<MooseVariable *> & mv_deps = bc->getMooseVariableDependencies();
-          needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-        }
-      }
-    }
-  }
+  _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars);
 
   // DG Kernel dependencies
   {
@@ -163,10 +146,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
 void
 ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
-
-  std::vector<IntegratedBC *> bcs;
-  _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
-  if (bcs.size() > 0)
+  if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 

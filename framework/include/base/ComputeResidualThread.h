@@ -47,6 +47,12 @@ protected:
   NonlinearSystem & _sys;
   Moose::KernelType _kernel_type;
   unsigned int _num_cached;
+
+  ///@{
+  // Reference to BC storage structures
+  const MooseObjectStorage<IntegratedBC> & _integrated_bcs;
+
+  ///@}
 };
 
 #endif //COMPUTERESIDUALTHREAD_H
