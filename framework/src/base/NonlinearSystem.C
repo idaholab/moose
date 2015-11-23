@@ -2494,9 +2494,3 @@ NonlinearSystem::getDiracKernelWarehouse(THREAD_ID tid)
   mooseAssert(tid < _dirac_kernels.size(), "Thread ID does not exist.");
   return _dirac_kernels[tid];
 }
-
-const DamperWarehouse &
-NonlinearSystem::getDamperWarehouse()
-{
-  return _dampers;
-}
