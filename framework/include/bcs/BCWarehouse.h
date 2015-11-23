@@ -47,15 +47,9 @@ public:
    * Methods for adding the various types of BoundaryCondition objects to the warehouse
    * @param boundary_ids A set of BoundaryIDs that the supplied object pointer is active on
    */
-  void addBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<IntegratedBC> & bc);
   void addNodalBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<NodalBC> & bc);
   void addPresetNodalBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<PresetNodalBC> & bc);
   ///@}
-
-  /**
-   * Get boundary conditions on a specified boundary id
-   */
-  const std::vector<IntegratedBC *> & getBCs(BoundaryID boundary_id) const;
 
   /**
    * Check for the existence of nodal bcs for the specified boundary
@@ -77,13 +71,6 @@ public:
    * @param bnds set of boundaries that are active
    */
   void activeBoundaries(std::set<BoundaryID> & bnds) const;
-
-  /**
-   * Get active integrated boundary conditions
-   * @param boundary_id Boundary ID
-   * @param active_integrated A vector to populate with the active integrated bcs
-   */
-  void activeIntegrated(BoundaryID boundary_id, std::vector<IntegratedBC *> & active_integrated) const;
 
   /**
    * Get active nodal boundary conditions
