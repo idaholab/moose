@@ -48,4 +48,10 @@
   requires_swig2 = True
  [../]
 
+ [./test_marginalCdfForPCA]
+  type = 'CrowPython'
+  input = 'test_marginalCdfForPCA.py'
+  requires_swig2 = True
+ [../]
+
 []
