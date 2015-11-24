@@ -30,6 +30,7 @@ class ICEUpdaterTester(RunApp):
   def prepare(self):
     self.httpServer = SimpleHttpServer("localhost", self.port)
     self.httpServer.start()
+    self.httpServer.resetNPosts()
     return
 
   # This method will be called to process the results of running the test.  Any post-test
@@ -47,6 +48,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         length = int(self.headers.getheader('content-length'))
         data = cgi.parse_qs(self.rfile.read(length), keep_blank_values=1)
+        #print data
         HTTPRequestHandler.nPosts += 1
         self.send_response(200)
         return
@@ -68,12 +70,18 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     def getNumberOfPosts(self):
         return HTTPRequestHandler.nPosts
 
+    def resetNPosts(self):
+        HTTPRequestHandler.nPosts = 0
+
 class SimpleHttpServer():
     def __init__(self, ip, port):
         self.server = ThreadedHTTPServer((ip, port), HTTPRequestHandler)
 
     def getNumberOfPosts(self):
         return self.server.getNumberOfPosts()
+
+    def resetNPosts(self):
+        self.server.resetNPosts()
 
     def start(self):
         self.server_thread = threading.Thread(target=self.server.serve_forever)

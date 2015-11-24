@@ -34,6 +34,7 @@
 
 #include <iostream>
 #include <string>
+#include "INetworkingTool.h"
 
 #include "libmesh/libmesh_config.h"
 
@@ -54,7 +55,7 @@
  * LibcurlUtils is a utility class used to transmit and receive information
  * with the POST and GET HTTP methods using the C library libcurl.
  */
-class LibcurlUtils
+class LibcurlUtils : public INetworkingTool
 {
 
 private:
@@ -130,14 +131,14 @@ public:
    *
    * @param ignoreSslPeerVerification The value for the ignoreSslPeerVerification flag.
    */
-  void setIgnoreSslPeerVerification(bool ignoreSslPeerVerification);
+  virtual void setIgnoreSslPeerVerification(bool ignoreSslPeerVerification);
 
   /**
    * Sets the noProxyFlag's value to 'val'.
    *
    * @param val The new value for the noProxyFlag.
    */
-  void setNoProxyFlag(bool val) { noProxyFlag = val; }
+  virtual void setNoProxyFlag(bool val) { noProxyFlag = val; }
 
   /**
    * A callback required by the C libcurl library to write the contents returned by get() to a buffer.

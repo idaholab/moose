@@ -63,7 +63,9 @@ enum PropertyType
    * This literal represents the username that should be used for
    * authenticating with the server.
    */
-  PASSWORD
+  PASSWORD,
+
+  NETWORKING_TOOL
 };
 
 #endif

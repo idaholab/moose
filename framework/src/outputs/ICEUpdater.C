@@ -17,12 +17,11 @@
 #include "PostprocessorWarehouse.h"
 #include "Postprocessor.h"
 #include "Updater.h"
-
 #include <sstream>
+#include "MooseTypes.h"
 
 // Currently the ICE Updater requires TBB
-#ifdef LIBMESH_HAVE_TBB_API
-#if !TBB_VERSION_LESS_THAN(4,0)
+#ifdef LIBMESH_HAVE_CXX11
 
 template<>
 InputParameters validParams<ICEUpdater>()
@@ -30,9 +29,15 @@ InputParameters validParams<ICEUpdater>()
   InputParameters params = validParams<AdvancedOutput<Output> >();
   params += AdvancedOutput<Output>::enableOutputTypes("postprocessor");
 
+  // Get an MooseEnum of the available 'execute_on' options
+  MooseEnum networkingTools("asio=0x01 curl=0x02");
+
+  params.addParam<MooseEnum>("networkingTool", networkingTools, "The back-end networking tool to use - could be asio, curl, etc...");
   params.addRequiredParam<std::string>("item_id", "The currently running MOOSE Item Id.");
   params.addRequiredParam<std::string>("url", "The URL of the currently running ICE Core instance.");
   params.addParam<bool>("noproxy", true, "If true, set 'CURLOPT_NOPROXY, \"*\"' when calling libcurl APIs.");
+
+  params.set<MooseEnum>("networkingTool") = "asio";
 
   return params;
 }
@@ -41,6 +46,9 @@ ICEUpdater::ICEUpdater(const InputParameters & parameters) :
     AdvancedOutput<Output>(parameters),
     _noproxy(getParam<bool>("noproxy"))
 {
+  if (_communicator.rank() != 0)
+    return;
+
   // Create the iStream containing the initialization data for the Updater
   std::stringstream ss;
   ss << "item_id=" + getParam<std::string>("item_id") + "\n";
@@ -48,6 +56,7 @@ ICEUpdater::ICEUpdater(const InputParameters & parameters) :
   ss << "url=" << getParam<std::string>("url") + "\n";
   ss << "username=ice\n";
   ss << "password=veryice\n";
+  ss << "networkingTool=" + std::string(getParam<MooseEnum>("networkingTool")) + "\n";
 
   // Create the ICE Updater
   _updater = MooseSharedPointer<Updater>(new Updater(ss));
@@ -57,16 +66,23 @@ ICEUpdater::ICEUpdater(const InputParameters & parameters) :
 
   // Start the Updater.
   _updater->start();
+
 }
 
 ICEUpdater::~ICEUpdater()
 {
+  if (_communicator.rank() != 0)
+    return;
+
   // Stop the ICEUpdater thread
   _updater->stop();
 }
 
 void ICEUpdater::initialSetup()
 {
+  if (_communicator.rank() != 0)
+    return;
+
   // Call base class setup method
   AdvancedOutput<Output>::initialSetup();
 
@@ -85,10 +101,14 @@ void ICEUpdater::initialSetup()
 
 void ICEUpdater::outputPostprocessors()
 {
+  if (_communicator.rank() != 0)
+    return;
+
   // Get the list of Postprocessors
   const std::set<std::string> & pps = getPostprocessorOutput();
   for (std::set<std::string>::const_iterator it = pps.begin(); it != pps.end(); ++it)
   {
+
     // Grab the value at the current time
     PostprocessorValue value = _problem_ptr->getPostprocessorValue(*it);
 
@@ -103,5 +123,4 @@ void ICEUpdater::outputPostprocessors()
   }
 }
 
-#endif // #if !TBB_VERSION_LESS_THAN(4,0)
-#endif // LIBMESH_HAVE_TBB_API
+#endif // LIBMESH_HAVE_CXX11
