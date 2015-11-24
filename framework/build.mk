@@ -57,6 +57,11 @@ ifneq (,$(findstring mpi,$(cxx_compiler)))
 	cxx_compiler = $(shell $(libmesh_CXX) -show)
 endif
 
+# If we are using C++11 then we can use Asio Networking
+ifeq (,$(findstring "-std=gnu++11",$(libmesh_CXXFLAGS)))
+	ADDITIONAL_CPPFLAGS += "-DASIO_STANDALONE"
+endif
+
 MOOSE_PRECOMPILED ?= false
 PCH_FLAGS=
 PCH_MODE=
