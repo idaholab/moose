@@ -121,7 +121,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 
     for (std::vector<MooseSharedPointer<IntegratedBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
     {
-      if ((*it)->shouldApply())
+      if ((*it)->shouldApply() && (*it)->isActive())
         (*it)->computeResidual();
     }
     _fe_problem.swapBackMaterialsFace(_tid);
