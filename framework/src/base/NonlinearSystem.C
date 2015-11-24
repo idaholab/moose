@@ -152,6 +152,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _Re_time(addVector("Re_time", false, GHOSTED)),
     _Re_non_time(addVector("Re_non_time", false, GHOSTED)),
     _nodal_bcs(/*threaded=*/false),
+    _preset_nodal_bcs(/*threaded=*/false),
     _increment_vec(NULL),
     _pc_side(Moose::PCS_RIGHT),
     _use_finite_differenced_preconditioner(false),
@@ -194,7 +195,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   unsigned int n_threads = libMesh::n_threads();
   _kernels.resize(n_threads);
   _nodal_kernels.resize(n_threads);
-  _bcs.resize(n_threads);
   _dirac_kernels.resize(n_threads);
   _dg_kernels.resize(n_threads);
   _constraints.resize(n_threads);
@@ -327,7 +327,6 @@ NonlinearSystem::initialSetup()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    _bcs[tid].initialSetup();
     _kernels[tid].initialSetup();
     _dirac_kernels[tid].initialSetup();
     if (_doing_dg)
@@ -337,8 +336,8 @@ NonlinearSystem::initialSetup()
     _dampers.initialSetup(tid);
     _integrated_bcs.initialSetup(tid);
   }
-
   _nodal_bcs.initialSetup();
+  _preset_nodal_bcs.initialSetup();
 }
 
 void
@@ -347,7 +346,6 @@ NonlinearSystem::timestepSetup()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels[tid].timestepSetup();
-    _bcs[tid].timestepSetup();
     _dirac_kernels[tid].timestepSetup();
     _constraints[tid].timestepSetup();
     if (_doing_dg)
@@ -355,8 +353,8 @@ NonlinearSystem::timestepSetup()
     _dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
   }
-
   _nodal_bcs.timestepSetup();
+  _preset_nodal_bcs.timestepSetup();
 }
 
 
@@ -595,26 +593,39 @@ NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::st
 void
 NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  // Create a set of boundary ids
-  std::set<BoundaryID> boundary_ids;
-  const std::vector<BoundaryName> & boundary_names = parameters.get<std::vector<BoundaryName> >("boundary");
-  for (std::vector<BoundaryName>::const_iterator it = boundary_names.begin(); it != boundary_names.end(); ++it)
-    boundary_ids.insert(_mesh.getBoundaryID(*it));
-
-  std::cout << "bc_name = " << bc_name << std::endl;
-
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
+    // Create the objecte for the current thread
     parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
-
     MooseSharedPointer<BoundaryCondition> bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create(bc_name, name, parameters, tid));
 
+    // Active BoundaryIDs for the object
+    const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
     _vars[tid].addBoundaryVar(boundary_ids, &bc->variable());
 
-    // IntegratedBC
+    // PresetNodalBC
+    MooseSharedPointer<PresetNodalBC> pnbc = MooseSharedNamespace::dynamic_pointer_cast<PresetNodalBC>(bc);
+    if (pnbc)
+      if (tid == 0)
+        _preset_nodal_bcs.addObject(pnbc);
+
+    // IntegragedBC and NodalBC
     MooseSharedPointer<IntegratedBC> ibc = MooseSharedNamespace::dynamic_pointer_cast<IntegratedBC>(bc);
-    if (ibc)
+    MooseSharedPointer<NodalBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<NodalBC>(bc);
+    if (nbc)
+    {
+      _vars[tid].addBoundaryVars(boundary_ids, nbc->getCoupledVars());
+      if (tid == 0)
+      {
+        _nodal_bcs.addObject(nbc);
+        if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
+          _has_nodalbc_save_in = true;
+        if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
+          _has_nodalbc_diag_save_in = true;
+      }
+    }
+    else if (ibc)
     {
       _integrated_bcs.addObject(ibc, tid);
       _vars[tid].addBoundaryVars(boundary_ids, ibc->getCoupledVars());
@@ -623,31 +634,9 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
         _has_save_in = true;
       if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
         _has_diag_save_in = true;
-      continue;
     }
-
-    MooseSharedPointer<PresetNodalBC> pnbc = MooseSharedNamespace::dynamic_pointer_cast<PresetNodalBC>(bc);
-    if (pnbc.get())
-      _bcs[tid].addPresetNodalBC(boundary_ids, pnbc);
-
-    MooseSharedPointer<NodalBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<NodalBC>(bc);
-    if (nbc)
-    {
-      if (tid == 0)
-        _nodal_bcs.addObject(nbc);
-
-      _vars[tid].addBoundaryVars(boundary_ids, nbc->getCoupledVars());
-
-      if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
-        _has_nodalbc_save_in = true;
-      if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
-        _has_nodalbc_diag_save_in = true;
-      continue;
-    }
-
     else
       mooseError("Unknown type of BoundaryCondition object");
-
 
   }
 }
@@ -818,6 +807,9 @@ NonlinearSystem::setInitialSolution()
     _fe_problem.predictorCleanup(initial_solution);
   }
 
+  // PresetNodalBC storage
+  const MooseObjectStorage<PresetNodalBC> & storage = _preset_nodal_bcs.getStorage();
+
   // do nodal BC
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
@@ -831,10 +823,12 @@ NonlinearSystem::setInitialSolution()
       // reinit variables in nodes
       _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-      std::vector<PresetNodalBC*> preset;
-      _bcs[0].activePresetNodal(boundary_id, preset);
-      for (std::vector<PresetNodalBC *>::iterator it = preset.begin(); it != preset.end(); ++it)
-        (*it)->computeValue(initial_solution);
+      if (storage.hasActiveBoundaryObjects(boundary_id))
+      {
+        const std::vector<MooseSharedPointer<PresetNodalBC> > & preset = storage.getActiveBoundaryObjects(boundary_id);
+        for (std::vector<MooseSharedPointer<PresetNodalBC> >::const_iterator it = preset.begin(); it != preset.end(); ++it)
+          (*it)->computeValue(initial_solution);
+      }
     }
   }
 
@@ -1219,10 +1213,11 @@ void
 NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 {
    // residualSetup() /////
+  _preset_nodal_bcs.residualSetup();
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels[tid].residualSetup();
-    _bcs[tid].residualSetup();
     _dirac_kernels[tid].residualSetup();
     if (_doing_dg) _dg_kernels[tid].residualSetup();
     _constraints[tid].residualSetup();
@@ -1231,7 +1226,6 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 
   }
   _nodal_bcs.residualSetup();
-
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
@@ -1836,7 +1830,6 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels[tid].jacobianSetup();
-    _bcs[tid].jacobianSetup();
     _dirac_kernels[tid].jacobianSetup();
     _constraints[tid].jacobianSetup();
     if (_doing_dg)
@@ -1844,7 +1837,8 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     _dampers.jacobianSetup(tid);
     _integrated_bcs.jacobianSetup(tid);
   }
-  _nodal_bcs.residualSetup();
+  _nodal_bcs.jacobianSetup();
+  _preset_nodal_bcs.jacobianSetup();
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
@@ -2171,7 +2165,10 @@ NonlinearSystem::updateActive(THREAD_ID tid)
   _integrated_bcs.updateActive(tid);
 
   if (tid == 0)
+  {
     _nodal_bcs.updateActive();
+    _preset_nodal_bcs.updateActive();
+  }
 }
 
 Real
@@ -2507,13 +2504,6 @@ NonlinearSystem::getDGKernelWarehouse(THREAD_ID tid)
 {
   mooseAssert(tid < _dg_kernels.size(), "Thread ID does not exist.");
   return _dg_kernels[tid];
-}
-
-const BCWarehouse &
-NonlinearSystem::getBCWarehouse(THREAD_ID tid)
-{
-  mooseAssert(tid < _bcs.size(), "Thread ID does not exist.");
-  return _bcs[tid];
 }
 
 const DiracKernelWarehouse &
