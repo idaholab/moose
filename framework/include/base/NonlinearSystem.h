@@ -17,7 +17,6 @@
 
 #include "SystemBase.h"
 #include "KernelWarehouse.h"
-#include "BCWarehouse.h"
 #include "DiracKernelWarehouse.h"
 #include "DGKernelWarehouse.h"
 #include "ConstraintWarehouse.h"
@@ -37,6 +36,8 @@ class TimeIntegrator;
 class Predictor;
 class Damper;
 class IntegratedBC;
+class NodalBC;
+class PresetNodalBC;
 
 // libMesh forward declarations
 namespace libMesh
@@ -439,14 +440,12 @@ public:
    */
   const KernelWarehouse & getKernelWarehouse(THREAD_ID tid);
   const DGKernelWarehouse & getDGKernelWarehouse(THREAD_ID tid);
-  const BCWarehouse & getBCWarehouse(THREAD_ID tid);
   const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
-
   const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
   const MooseObjectWarehouse<NodalBC> & getNodalBCWarehouse() { return _nodal_bcs; }
+  const MooseObjectWarehouse<PresetNodalBC> & getPresetNodalBCWarehouse() { return _preset_nodal_bcs; }
   const MooseObjectWarehouse<Damper> & getDamperWarehouse() { return _dampers; }
-
   //@}
 
   /**
@@ -527,11 +526,9 @@ protected:
   /// BoundaryCondition Warhouses
   MooseObjectWarehouse<IntegratedBC> _integrated_bcs;
   MooseObjectWarehouse<NodalBC> _nodal_bcs;
-
+  MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
   ///@}
 
-  /// BC storage for each thread
-  std::vector<BCWarehouse> _bcs;
   /// Dirac Kernel storage for each thread
   std::vector<DiracKernelWarehouse> _dirac_kernels;
   /// DG Kernel storage for each thread
