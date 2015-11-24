@@ -119,8 +119,6 @@ public:
 
 #else // !ASIO_STANDALONE
 
-
-
 /**
  * If we aren't using cxx11, build a stub AsioNetworkingTool class that does nothing
  * but throw errors if used.
