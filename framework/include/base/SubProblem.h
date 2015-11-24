@@ -295,16 +295,6 @@ public:
    */
   virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
-public:
-  /**
-   * Convenience zeros
-   */
-  std::vector<Real> _real_zero;
-  std::vector<VariableValue> _zero;
-  std::vector<VariableGradient> _grad_zero;
-  std::vector<VariableSecond> _second_zero;
-  std::vector<VariablePhiSecond> _second_phi_zero;
-
 protected:
   /// The Factory for building objects
   Factory & _factory;

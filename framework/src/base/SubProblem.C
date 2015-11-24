@@ -36,25 +36,12 @@ SubProblem::SubProblem(const InputParameters & parameters) :
     _rz_coord_axis(1) // default to RZ rotation around y-axis
 {
   unsigned int n_threads = libMesh::n_threads();
-  _real_zero.resize(n_threads, 0.);
-  _zero.resize(n_threads);
-  _grad_zero.resize(n_threads);
-  _second_zero.resize(n_threads);
-  _second_phi_zero.resize(n_threads);
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
 }
 
 SubProblem::~SubProblem()
 {
-  unsigned int n_threads = libMesh::n_threads();
-  for (unsigned int i = 0; i < n_threads; i++)
-  {
-    _zero[i].release();
-    _grad_zero[i].release();
-    _second_zero[i].release();
-    _second_phi_zero[i].release();
-  }
 }
 
 void

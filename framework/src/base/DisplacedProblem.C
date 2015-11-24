@@ -267,23 +267,6 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
   if (n_points)
   {
-    unsigned int max_qps = _mproblem.getMaxQps();
-
-    if (n_points > max_qps)
-    {
-      /**
-       * The maximum number of qps can rise if several Dirac points are added to a single element.
-       * In that case we need to resize the zeros to compensate.
-       */
-      for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-      {
-        _zero[tid].resize(max_qps, 0);
-        _grad_zero[tid].resize(max_qps, 0);
-        _second_zero[tid].resize(max_qps, RealTensor(0.));
-        _second_phi_zero[tid].resize(max_qps, std::vector<RealTensor>(_mproblem.getMaxShapeFunctions(), RealTensor(0.)));
-      }
-    }
-
     _assembly[tid]->reinitAtPhysical(elem, points);
 
     _displaced_nl.prepare(tid);
