@@ -32,20 +32,12 @@ BCWarehouse::initialSetup()
   for (std::map<BoundaryID, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->initialSetup();
-
-  for (std::map<BoundaryID, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->initialSetup();
 }
 
 void
 BCWarehouse::timestepSetup()
 {
   for (std::map<BoundaryID, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->timestepSetup();
-
-  for (std::map<BoundaryID, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->timestepSetup();
 }
@@ -56,10 +48,6 @@ BCWarehouse::residualSetup()
   for (std::map<BoundaryID, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->residualSetup();
-
-  for (std::map<BoundaryID, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->residualSetup();
 }
 
 void
@@ -68,21 +56,6 @@ BCWarehouse::jacobianSetup()
   for (std::map<BoundaryID, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
     for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->jacobianSetup();
-
-  for (std::map<BoundaryID, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->jacobianSetup();
-}
-
-
-void
-BCWarehouse::addNodalBC(const std::set<BoundaryID> & boundary_ids, MooseSharedPointer<NodalBC> & bc)
-{
-  _all_objects.push_back(bc.get());
-  _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
-
-  for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-    _nodal_bcs[*it].push_back(bc.get());
 }
 
 void
@@ -93,13 +66,6 @@ void
 
   for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
     _preset_nodal_bcs[*it].push_back(bc.get());
-}
-
-const std::vector<NodalBC *> &
-BCWarehouse::getNodalBCs(BoundaryID boundary_id) const
-{
-  mooseAssert(_nodal_bcs.find(boundary_id) != _nodal_bcs.end(), "Unknown boundary id: " << boundary_id);
-  return _nodal_bcs.find(boundary_id)->second;
 }
 
 const std::vector<PresetNodalBC *> &
@@ -115,22 +81,8 @@ BCWarehouse::activeBoundaries(std::set<BoundaryID> & bnds) const
   for (std::map<BoundaryID, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
     bnds.insert(curr->first);
 
-  for (std::map<BoundaryID, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)
-    bnds.insert(curr->first);
-
   for (std::map<BoundaryID, std::vector<PresetNodalBC *> >::const_iterator curr = _preset_nodal_bcs.begin(); curr != _preset_nodal_bcs.end(); ++curr)
     bnds.insert(curr->first);
-}
-
-void
-BCWarehouse::activeNodal(BoundaryID boundary_id, std::vector<NodalBC *> & active_nodal) const
-{
-  active_nodal.clear();
-
-  if (_nodal_bcs.find(boundary_id) != _nodal_bcs.end())
-    for (std::vector<NodalBC *>::const_iterator it = _nodal_bcs.at(boundary_id).begin(); it != _nodal_bcs.at(boundary_id).end(); ++it)
-      if ((*it)->isActive())
-        active_nodal.push_back(*it);
 }
 
 void

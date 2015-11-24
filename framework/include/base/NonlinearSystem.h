@@ -444,6 +444,7 @@ public:
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
 
   const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
+  const MooseObjectWarehouse<NodalBC> & getNodalBCWarehouse() { return _nodal_bcs; }
   const MooseObjectWarehouse<Damper> & getDamperWarehouse() { return _dampers; }
 
   //@}
@@ -525,6 +526,7 @@ protected:
   ///@}
   /// BoundaryCondition Warhouses
   MooseObjectWarehouse<IntegratedBC> _integrated_bcs;
+  MooseObjectWarehouse<NodalBC> _nodal_bcs;
 
   ///@}
 
