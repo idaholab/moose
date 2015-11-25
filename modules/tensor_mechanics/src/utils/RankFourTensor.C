@@ -731,7 +731,7 @@ RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> & in
         for (unsigned int l = 0; l < N; ++l)
         {
           _vals[i][j][k][l] = input[0] * (i==j) * (k==l) + input[1] * (i==k) * (j==l) + input[1] * (i==l) * (j==k);
-          for (unsigned int m = 0 ; m < N ; ++m)
+          for (unsigned int m = 0; m < N; ++m)
             _vals[i][j][k][l] += input[2] * PermutationTensor::eps(i, j, m) * PermutationTensor::eps(k, l, m);
         }
 }

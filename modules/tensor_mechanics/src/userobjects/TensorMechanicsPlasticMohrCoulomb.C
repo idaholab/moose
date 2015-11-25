@@ -200,10 +200,10 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & 
 
     dr_dstress = 0.25*tmp*(d2eigvals[2] - d2eigvals[0] + (d2eigvals[2] + d2eigvals[0])*sin_angle)/denom;
 
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
-        for (unsigned k = 0 ; k < 3 ; ++k)
-          for (unsigned l = 0 ; l < 3 ; ++l)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
+        for (unsigned k = 0; k < 3; ++k)
+          for (unsigned l = 0; l < 3; ++l)
           {
             dr_dstress(i, j, k, l) += 0.5*d2smooth_over_denom*dmean_stress(i, j)*dmean_stress(k, l);
             dr_dstress(i, j, k, l) += 0.25*dtmp(i, j)*dtmp(k, l)/denom;
@@ -219,10 +219,10 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & 
     Real kk = aaa + bbb*sin3Lode + ccc*std::pow(sin3Lode, 2);
     RankTwoTensor dkk = (bbb + 2*ccc*sin3Lode)*dsin3Lode;
     RankFourTensor d2kk = (bbb + 2*ccc*sin3Lode)*stress.d2sin3Lode(_lode_cutoff);
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
-        for (unsigned k = 0 ; k < 3 ; ++k)
-          for (unsigned l = 0 ; l < 3 ; ++l)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
+        for (unsigned k = 0; k < 3; ++k)
+          for (unsigned l = 0; l < 3; ++l)
             d2kk(i, j, k, l) += 2*ccc*dsin3Lode(i, j)*dsin3Lode(k, l);
 
     Real sibar2 = stress.secondInvariant();
@@ -235,10 +235,10 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & 
     RankTwoTensor numer_full = 0.5*dsmooth(stress)*dmean_stress + 0.5*dsibar2*kk*kk + sibar2*kk*dkk;
 
     dr_dstress = (0.5*d2sibar2*std::pow(kk, 2) + sibar2*kk*d2kk)/denom;
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
-        for (unsigned k = 0 ; k < 3 ; ++k)
-          for (unsigned l = 0 ; l < 3 ; ++l)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
+        for (unsigned k = 0; k < 3; ++k)
+          for (unsigned l = 0; l < 3; ++l)
           {
             dr_dstress(i, j, k, l) += 0.5*d2smooth_over_denom*dmean_stress(i, j)*dmean_stress(k, l);
             dr_dstress(i, j, k, l) += (dsibar2(i, j)*dkk(k, l)*kk + dkk(i, j)*dsibar2(k, l)*kk + sibar2*dkk(i, j)*dkk(k, l))/denom;

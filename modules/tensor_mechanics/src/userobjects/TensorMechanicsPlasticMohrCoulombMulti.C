@@ -75,8 +75,8 @@ TensorMechanicsPlasticMohrCoulombMulti::perturbStress(const RankTwoTensor & stre
   RankTwoTensor shifted_stress = stress;
   while (eigvals[0] > eigvals[1] - 0.1*_shift || eigvals[1] > eigvals[2] - 0.1*_shift)
   {
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j <= i ; ++j)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j <= i; ++j)
       {
         small_perturbation = 0.1*_shift*2*(MooseRandom::rand() - 0.5);
         shifted_stress(i, j) += small_perturbation;
@@ -230,17 +230,17 @@ TensorMechanicsPlasticMohrCoulombMulti::activeConstraints(const std::vector<Real
   Real oneminus = 1 - sinpsi;
   Real oneplus = 1 + sinpsi;
   norm[0].resize(3);
-  norm[0][0] = oneplus ; norm[0][1] = -oneminus ; norm[0][2] = 0;
+  norm[0][0] = oneplus; norm[0][1] = -oneminus; norm[0][2] = 0;
   norm[1].resize(3);
-  norm[1][0] = -oneminus ; norm[1][1] = oneplus ; norm[1][2] = 0;
+  norm[1][0] = -oneminus; norm[1][1] = oneplus; norm[1][2] = 0;
   norm[2].resize(3);
-  norm[2][0] = oneplus ; norm[2][1] = 0 ; norm[2][2] = -oneminus;
+  norm[2][0] = oneplus; norm[2][1] = 0; norm[2][2] = -oneminus;
   norm[3].resize(3);
-  norm[3][0] = -oneminus ; norm[3][1] = 0 ; norm[3][2] = oneplus;
+  norm[3][0] = -oneminus; norm[3][1] = 0; norm[3][2] = oneplus;
   norm[4].resize(3);
-  norm[4][0] = 0 ; norm[4][1] = oneplus ; norm[4][2] = -oneminus;
+  norm[4][0] = 0; norm[4][1] = oneplus; norm[4][2] = -oneminus;
   norm[5].resize(3);
-  norm[5][0] = 0 ; norm[5][1] = -oneminus ; norm[5][2] = oneplus;
+  norm[5][0] = 0; norm[5][1] = -oneminus; norm[5][2] = oneplus;
 
   // the flow directions are these norm multiplied by Eijkl.
   // I call the flow directions "n".
@@ -249,11 +249,11 @@ TensorMechanicsPlasticMohrCoulombMulti::activeConstraints(const std::vector<Real
   // rotate to the principal-stress frame, and i don't
   // have to worry about strange off-diagonal things
   std::vector<std::vector<Real> > n(6);
-  for (unsigned ys = 0 ; ys < 6 ; ++ys)
+  for (unsigned ys = 0; ys < 6; ++ys)
   {
     n[ys].assign(3, 0);
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
         n[ys][i] += Eijkl(i,i,j,j)*norm[ys][j];
   }
 

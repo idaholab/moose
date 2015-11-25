@@ -679,10 +679,10 @@ RankTwoTensor::d2sin3Lode(const Real r0) const
   RankTwoTensor dIII = dthirdInvariant();
   RankFourTensor deriv = d2thirdInvariant()/std::pow(bar, 1.5) - 1.5*d2secondInvariant()*J3/std::pow(bar, 2.5);
 
-  for (unsigned i = 0 ; i < N ; ++i)
-    for (unsigned j = 0 ; j < N ; ++j)
-      for (unsigned k = 0 ; k < N ; ++k)
-        for (unsigned l = 0 ; l < N ; ++l)
+  for (unsigned i = 0; i < N; ++i)
+    for (unsigned j = 0; j < N; ++j)
+      for (unsigned k = 0; k < N; ++k)
+        for (unsigned l = 0; l < N; ++l)
           deriv(i, j, k, l) += (-1.5*dII(i, j)*dIII(k, l) -1.5 * dIII(i, j) * dII(k, l)) / std::pow(bar, 2.5) + 1.5*2.5*dII(i, j) * dII(k, l) * J3 / std::pow(bar, 3.5);
 
   deriv *= -1.5 * std::sqrt(3.0);

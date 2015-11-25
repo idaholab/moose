@@ -32,6 +32,7 @@
 #include "FiniteStrainMohrCoulomb.h"
 #include "FiniteStrainCrystalPlasticity.h"
 #include "FiniteStrainCPSlipRateRes.h"
+#include "FiniteStrainUObasedCP.h"
 #include "ComputeMultiPlasticityStress.h"
 #include "CosseratLinearElasticMaterial.h"
 #include "ElementPropertyReadFileTest.h"
@@ -40,6 +41,7 @@
 #include "SimpleEigenStrainMaterial.h"
 #include "CompositeElasticityTensor.h"
 #include "ComputeElasticityTensor.h"
+#include "ComputeElasticityTensorCP.h"
 #include "ComputeIsotropicElasticityTensor.h"
 #include "ComputeSmallStrain.h"
 #include "ComputePlaneSmallStrain.h"
@@ -92,6 +94,11 @@
 #include "NewmarkVelAux.h"
 
 #include "Pressure.h"
+
+#include "CrystalPlasticitySlipRateGSS.h"
+#include "CrystalPlasticitySlipResistanceGSS.h"
+#include "CrystalPlasticityStateVariableGSS.h"
+#include "CrystalPlasticityStateVariableEvolutionRateComponentGSS.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -147,6 +154,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainRatePlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
   registerMaterial(FiniteStrainCPSlipRateRes);
+  registerMaterial(FiniteStrainUObasedCP);
   registerMaterial(ComputeMultiPlasticityStress);
   registerMaterial(CosseratLinearElasticMaterial);
   registerMaterial(ElementPropertyReadFileTest);
@@ -155,6 +163,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(SimpleEigenStrainMaterial);
   registerMaterial(CompositeElasticityTensor);
   registerMaterial(ComputeElasticityTensor);
+  registerMaterial(ComputeElasticityTensorCP);
   registerMaterial(ComputeIsotropicElasticityTensor);
   registerMaterial(ComputeSmallStrain);
   registerMaterial(ComputePlaneSmallStrain);
@@ -195,6 +204,10 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(HEVPEqvPlasticStrain);
   registerUserObject(HEVPEqvPlasticStrainRate);
   registerUserObject(HEVPFlowRatePowerLawJ2);
+  registerUserObject(CrystalPlasticitySlipRateGSS);
+  registerUserObject(CrystalPlasticitySlipResistanceGSS);
+  registerUserObject(CrystalPlasticityStateVariableGSS);
+  registerUserObject(CrystalPlasticityStateVariableEvolutionRateComponentGSS);
 
   registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);

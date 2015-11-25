@@ -208,10 +208,10 @@ ComputeMultiPlasticityStress::postReturnMap()
     _plastic_strain[_qp].rotate(_rot);
 
     // Rotate n by _rotation_increment
-    for (unsigned int i = 0 ; i < LIBMESH_DIM ; ++i)
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       _n[_qp](i) = 0;
-      for (unsigned int j = 0 ; j < LIBMESH_DIM ; ++j)
+      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
         _n[_qp](i) += _rotation_increment[_qp](i, j)*_n_old[_qp](j);
     }
   }
@@ -315,7 +315,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
   RankTwoTensor stress_good = stress_old;
   RankTwoTensor plastic_strain_good = plastic_strain_old;
   std::vector<Real> intnl_good(_num_models);
-  for (unsigned model = 0 ; model < _num_models ; ++model)
+  for (unsigned model = 0; model < _num_models; ++model)
     intnl_good[model] = intnl_old[model];
   std::vector<Real> yf_good(_num_surfaces);
 
@@ -351,9 +351,9 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
       {
         stress_good = stress;
         plastic_strain_good = plastic_strain;
-        for (unsigned model = 0 ; model < _num_models ; ++model)
+        for (unsigned model = 0; model < _num_models; ++model)
           intnl_good[model] = intnl[model];
-        for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+        for (unsigned surface = 0; surface < _num_surfaces; ++surface)
           yf_good[surface] = yf[surface];
         if (num_consecutive_successes >= 2)
           step_size *= 1.2;
@@ -366,10 +366,10 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
       num_consecutive_successes = 0;
       stress = stress_good;
       plastic_strain = plastic_strain_good;
-      for (unsigned model = 0 ; model < _num_models ; ++model)
+      for (unsigned model = 0; model < _num_models; ++model)
         intnl[model] = intnl_good[model];
       yf.resize(_num_surfaces); // might have excited with junk
-      for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+      for (unsigned surface = 0; surface < _num_surfaces; ++surface)
         yf[surface] = yf_good[surface];
       dep = step_size*this_strain_increment;
 
@@ -382,9 +382,9 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
     {
       stress = stress_good;
       plastic_strain = plastic_strain_good;
-      for (unsigned model = 0 ; model < _num_models ; ++model)
+      for (unsigned model = 0; model < _num_models; ++model)
         intnl[model] = intnl_good[model];
-      for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+      for (unsigned surface = 0; surface < _num_surfaces; ++surface)
         yf[surface] = yf_good[surface];
     }
     else
@@ -396,7 +396,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
       _fspb_debug_stress = stress_good + E_ijkl*dep;
       _fspb_debug_pm.assign(_num_surfaces, 1); // this is chosen arbitrarily - please change if a more suitable value occurs to you!
       _fspb_debug_intnl.resize(_num_models);
-      for (unsigned model = 0 ; model < _num_models ; ++model)
+      for (unsigned model = 0; model < _num_models; ++model)
         _fspb_debug_intnl[model] = intnl_good[model];
       checkDerivatives();
       checkJacobian(_my_elasticity_tensor.invSymm(), _intnl_old[_qp]);
@@ -490,7 +490,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
   {
     // if "optimized" fails we can change the deactivation scheme to "safe", etc
     deact_scheme = optimized;
-    for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+    for (unsigned surface = 0; surface < _num_surfaces; ++surface)
       initial_act[surface] = act[surface];
   }
 
@@ -523,7 +523,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
   // Later it will get contributions from epp and ic, but
   // at present these are zero
   Real nr_res2 = 0;
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (act[surface])
       nr_res2 += 0.5*std::pow(f[surface]/_f[modelNumber(surface)]->_f_tol, 2.0);
 
@@ -642,14 +642,14 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
         {
           constraints_added = true;
           std::vector<bool> act_plus(_num_surfaces, false); // "act" with the positive constraints added in
-          for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+          for (unsigned surface = 0; surface < _num_surfaces; ++surface)
             if (act[surface] || (!act[surface] && (all_f[surface] > _f[modelNumber(surface)]->_f_tol)))
               act_plus[surface] = true;
           if (actives_tried.find(activeCombinationNumber(act_plus)) == actives_tried.end())
           {
             // haven't tried this combination of actives yet
             constraints_added = true;
-            for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+            for (unsigned surface = 0; surface < _num_surfaces; ++surface)
               act[surface] = act_plus[surface];
           }
           else
@@ -691,7 +691,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
     {
       stress = initial_stress;
       delta_dp = RankTwoTensor(); // back to zero change in plastic strain
-      for (unsigned model = 0 ; model < _num_models ; ++model)
+      for (unsigned model = 0; model < _num_models; ++model)
         intnl[model] = intnl_old[model];  // back to old internal params
       pm.assign(_num_surfaces, 0.0); // back to zero plastic multipliers
 
@@ -709,7 +709,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
 
       nr_res2 = 0;
       unsigned ind = 0;
-      for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+      for (unsigned surface = 0; surface < _num_surfaces; ++surface)
         if (act[surface])
         {
           if (f[ind] > _f[modelNumber(surface)]->_f_tol)
@@ -724,7 +724,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
   {
     plastic_strain += delta_dp;
 
-    for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+    for (unsigned surface = 0; surface < _num_surfaces; ++surface)
       cumulative_pm[surface] += pm[surface];
 
 
@@ -748,7 +748,7 @@ bool
 ComputeMultiPlasticityStress::canAddConstraints(const std::vector<bool> & act,
                                                 const std::vector<Real> & all_f)
 {
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (!act[surface] && (all_f[surface] > _f[modelNumber(surface)]->_f_tol))
       return true;
   return false;
@@ -798,7 +798,7 @@ ComputeMultiPlasticityStress::changeScheme(const std::vector<bool> & initial_act
       && (_deactivation_scheme == optimized_to_safe || _deactivation_scheme == optimized_to_safe_to_dumb))
   {
     current_deactivation_scheme = safe;
-    for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+    for (unsigned surface = 0; surface < _num_surfaces; ++surface)
       act[surface] = initial_act[surface];
   }
   else if (   (current_deactivation_scheme == safe && (_deactivation_scheme == optimized_to_safe_to_dumb || _deactivation_scheme == safe_to_dumb) && can_revert_to_dumb)
@@ -839,10 +839,10 @@ ComputeMultiPlasticityStress::singleStep(Real & nr_res2,
     // we potentially use the "before_step" quantities, so record them here
     stress_before_step = stress;
     intnl_before_step.resize(_num_models);
-    for (unsigned model = 0 ; model < _num_models ; ++model)
+    for (unsigned model = 0; model < _num_models; ++model)
       intnl_before_step[model] = intnl[model];
     pm_before_step.resize(_num_surfaces);
-    for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+    for (unsigned surface = 0; surface < _num_surfaces; ++surface)
       pm_before_step[surface] = pm[surface];
     delta_dp_before_step = delta_dp;
   }
@@ -871,7 +871,7 @@ ComputeMultiPlasticityStress::singleStep(Real & nr_res2,
     // calculate dstress, dpm and dintnl for one full Newton-Raphson step
     nrStep(stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, active, deact_ld);
 
-    for (unsigned surface = 0 ; surface < deact_ld.size() ; ++surface)
+    for (unsigned surface = 0; surface < deact_ld.size(); ++surface)
       if (deact_ld[surface])
       {
         ld_encountered = true;
@@ -890,7 +890,7 @@ ComputeMultiPlasticityStress::singleStep(Real & nr_res2,
     constraints_changing = false;
     if (deactivation_scheme == optimized)
     {
-      for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+      for (unsigned surface = 0; surface < _num_surfaces; ++surface)
         if (active[surface] && pm[surface] < 0.0)
           constraints_changing = true;
     }
@@ -900,7 +900,7 @@ ComputeMultiPlasticityStress::singleStep(Real & nr_res2,
       stress = stress_before_step;
       delta_dp = delta_dp_before_step;
       nr_res2 = nr_res2_before_step;
-      for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+      for (unsigned surface = 0; surface < _num_surfaces; ++surface)
       {
         if (active[surface] && pm[surface] < 0.0)
         {
@@ -942,7 +942,7 @@ ComputeMultiPlasticityStress::singleStep(Real & nr_res2,
       // this function then the calling function will not realise we've converged!
       // Therefore, check for this case
       unsigned ind = 0;
-      for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+      for (unsigned surface = 0; surface < _num_surfaces; ++surface)
         if (active[surface])
           if (f[ind++] > _f[modelNumber(surface)]->_f_tol)
             completely_converged = false;
@@ -961,7 +961,7 @@ bool
 ComputeMultiPlasticityStress::reinstateLinearDependentConstraints(std::vector<bool> & deactivated_due_to_ld)
 {
   bool reinstated_actives = false;
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (deactivated_due_to_ld[surface])
       reinstated_actives = true;
 
@@ -973,7 +973,7 @@ unsigned
 ComputeMultiPlasticityStress::numberActive(const std::vector<bool> & active)
 {
   unsigned num_active = 0;
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (active[surface])
       num_active++;
   return num_active;
@@ -987,7 +987,7 @@ ComputeMultiPlasticityStress::checkAdmissible(const RankTwoTensor & stress, cons
 
   yieldFunction(stress, intnl, act, all_f);
 
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (all_f[surface] > _f[modelNumber(surface)]->_f_tol)
       return false;
 
@@ -999,7 +999,7 @@ bool
 ComputeMultiPlasticityStress::checkKuhnTucker(const std::vector<Real> & f, const std::vector<Real> & pm, const std::vector<bool> & active)
 {
   unsigned ind = 0;
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
   {
     if (active[surface])
     {
@@ -1010,7 +1010,7 @@ ComputeMultiPlasticityStress::checkKuhnTucker(const std::vector<Real> & f, const
     else if (pm[surface] != 0)
       mooseError("Crash due to plastic multiplier not being zero.  This occurred because of poor coding!!");
   }
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (pm[surface] < 0)
       return false;
 
@@ -1025,7 +1025,7 @@ ComputeMultiPlasticityStress::applyKuhnTucker(const std::vector<Real> & f, const
   unsigned ind = 0;
 
   // turn off all active surfaces that have f<0 and pm!=0
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
   {
     if (active[surface])
     {
@@ -1045,7 +1045,7 @@ ComputeMultiPlasticityStress::applyKuhnTucker(const std::vector<Real> & f, const
   {
     int surface_to_turn_off = -1;
     Real min_pm = 0;
-    for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+    for (unsigned surface = 0; surface < _num_surfaces; ++surface)
       if (pm[surface] < min_pm)
       {
         min_pm = pm[surface];
@@ -1062,7 +1062,7 @@ ComputeMultiPlasticityStress::residual2(const std::vector<Real> & pm, const std:
   Real nr_res2 = 0;
   unsigned ind = 0;
 
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (active[surface])
     {
       if (!deactivated_due_to_ld[surface])
@@ -1078,10 +1078,10 @@ ComputeMultiPlasticityStress::residual2(const std::vector<Real> & pm, const std:
   nr_res2 += 0.5*std::pow(epp.L2norm()/_epp_tol, 2);
 
   std::vector<bool> active_not_deact(_num_surfaces);
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     active_not_deact[surface] = (active[surface] && !deactivated_due_to_ld[surface]);
   ind = 0;
-  for (unsigned model = 0 ; model < _num_models ; ++model)
+  for (unsigned model = 0; model < _num_models; ++model)
     if (anyActiveSurfaces(model, active_not_deact))
       nr_res2 += 0.5*std::pow(ic[ind++]/_f[model]->_ic_tol, 2);
 
@@ -1140,10 +1140,10 @@ ComputeMultiPlasticityStress::lineSearch(Real & nr_res2,
   while (true)
   {
     // update the variables using this line-search parameter
-    for (unsigned alpha = 0 ; alpha < pm.size() ; ++alpha)
+    for (unsigned alpha = 0; alpha < pm.size(); ++alpha)
       ls_pm[alpha] = pm[alpha] + dpm[alpha]*lam;
     ls_delta_dp = delta_dp - E_inv*dstress*lam;
-    for (unsigned a = 0 ; a < intnl.size() ; ++ a)
+    for (unsigned a = 0; a < intnl.size(); ++ a)
       ls_intnl[a] = intnl[a] + dintnl[a]*lam;
     ls_stress = stress + dstress*lam;
 
@@ -1159,10 +1159,10 @@ ComputeMultiPlasticityStress::lineSearch(Real & nr_res2,
     {
       success = false;
       // restore plastic multipliers, yield functions, etc to original values
-      for (unsigned alpha = 0 ; alpha < pm.size() ; ++alpha)
+      for (unsigned alpha = 0; alpha < pm.size(); ++alpha)
         ls_pm[alpha] = pm[alpha];
       ls_delta_dp = delta_dp;
-      for (unsigned a = 0 ; a < intnl.size() ; ++ a)
+      for (unsigned a = 0; a < intnl.size(); ++ a)
         ls_intnl[a] = intnl[a];
       ls_stress = stress;
       calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, r, epp, ic, active);
@@ -1206,10 +1206,10 @@ ComputeMultiPlasticityStress::lineSearch(Real & nr_res2,
 
   // assign the quantities found in the line-search
   // back to the originals
-  for (unsigned alpha = 0 ; alpha < pm.size() ; ++alpha)
+  for (unsigned alpha = 0; alpha < pm.size(); ++alpha)
     pm[alpha] = ls_pm[alpha];
   delta_dp = ls_delta_dp;
-  for (unsigned a = 0 ; a < intnl.size() ; ++ a)
+  for (unsigned a = 0; a < intnl.size(); ++ a)
     intnl[a] = ls_intnl[a];
   stress = ls_stress;
 
@@ -1234,7 +1234,7 @@ ComputeMultiPlasticityStress::buildDumbOrder(const RankTwoTensor & stress,
 
   typedef std::pair<Real, unsigned> pair_for_sorting;
   std::vector<pair_for_sorting> dist(_num_surfaces);
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
   {
     dist[surface].first = f[surface]/df_dstress[surface].L2norm();
     dist[surface].second = surface;
@@ -1242,7 +1242,7 @@ ComputeMultiPlasticityStress::buildDumbOrder(const RankTwoTensor & stress,
   std::sort(dist.begin(), dist.end()); // sorted in ascending order of f/df_dstress
 
   dumb_order.resize(_num_surfaces);
-  for (unsigned i = 0 ; i < _num_surfaces ; ++i)
+  for (unsigned i = 0; i < _num_surfaces; ++i)
     dumb_order[i] = dist[_num_surfaces - 1 - i].second;
   // now dumb_order[0] is the surface with the greatest f/df_dstress
 }
@@ -1253,7 +1253,7 @@ ComputeMultiPlasticityStress::incrementDumb(int & dumb_iteration,
                                             std::vector<bool> & act)
 {
   dumb_iteration += 1;
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     act[dumb_order[surface]] = (dumb_iteration & (1 << surface)); // returns true if the surface_th bit of dumb_iteration == 1
 }
 
@@ -1268,7 +1268,7 @@ unsigned int
 ComputeMultiPlasticityStress::activeCombinationNumber(const std::vector<bool> & act)
 {
   unsigned num = 0;
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (act[surface])
       num += (1 << surface); // (1 << x) = 2^x
 
@@ -1286,7 +1286,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   // that when subdividing a strain increment, a surface
   // is only active for one sub-step
   std::vector<bool> act_at_some_step(_num_surfaces);
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     act_at_some_step[surface] = (cumulative_pm[surface] > 0);
 
   // "act" might contain surfaces that are linearly dependent
@@ -1294,7 +1294,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   // for this strain increment need to be varied to find
   // the consistent tangent operator
   std::vector<bool> act_vary(_num_surfaces);
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     act_vary[surface] = (pm_this_step[surface] > 0);
 
 
@@ -1317,12 +1317,12 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   // r_minus_stuff[alpha] = r[alpha] - pm_cumulatve[gamma]*dr[gamma]_dintnl[a]_at_some_step*h[a][alpha], with alpha only being in act_vary, but gamma being act_at_some_step
   std::vector<RankTwoTensor> r_minus_stuff;
   ind1 = 0;
-  for (unsigned surface1 = 0 ; surface1 < _num_surfaces ; ++surface1)
+  for (unsigned surface1 = 0; surface1 < _num_surfaces; ++surface1)
     if (act_vary[surface1])
     {
       r_minus_stuff.push_back(r[ind1]);
       ind2 = 0;
-      for (unsigned surface2 = 0 ; surface2 < _num_surfaces ; ++surface2)
+      for (unsigned surface2 = 0; surface2 < _num_surfaces; ++surface2)
         if (act_at_some_step[surface2])
         {
           if (modelNumber(surface1) == modelNumber(surface2))
@@ -1336,7 +1336,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
 
 
   unsigned int num_currently_active = 0;
-  for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
+  for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (act_vary[surface])
       num_currently_active += 1;
 
@@ -1351,11 +1351,11 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
 
   ind1 = 0;
   RankTwoTensor r2;
-  for (unsigned surface1 = 0 ; surface1 < _num_surfaces ; ++surface1)
+  for (unsigned surface1 = 0; surface1 < _num_surfaces; ++surface1)
     if (act_vary[surface1])
     {
       ind2 = 0;
-      for (unsigned surface2 = 0 ; surface2 < _num_surfaces ; ++surface2)
+      for (unsigned surface2 = 0; surface2 < _num_surfaces; ++surface2)
         if (act_vary[surface2])
         {
           r2 = df_dstress[ind1]*(E_ijkl*r_minus_stuff[ind2]);
@@ -1377,19 +1377,19 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
 
   RankFourTensor strain_coeff = E_ijkl;
   ind1 = 0;
-  for (unsigned surface1 = 0 ; surface1 < _num_surfaces ; ++surface1)
+  for (unsigned surface1 = 0; surface1 < _num_surfaces; ++surface1)
     if (act_vary[surface1])
     {
       RankTwoTensor part1 = E_ijkl*r_minus_stuff[ind1];
       ind2 = 0;
-      for (unsigned surface2 = 0 ; surface2 < _num_surfaces ; ++surface2)
+      for (unsigned surface2 = 0; surface2 < _num_surfaces; ++surface2)
         if (act_vary[surface2])
         {
           RankTwoTensor part2 = E_ijkl*df_dstress[ind2];
-          for (unsigned i = 0 ; i < 3 ; i++)
-            for (unsigned j = 0 ; j < 3 ; j++)
-              for (unsigned k = 0 ; k < 3 ; k++)
-                for (unsigned l = 0 ; l < 3 ; l++)
+          for (unsigned i = 0; i < 3; i++)
+            for (unsigned j = 0; j < 3; j++)
+              for (unsigned k = 0; k < 3; k++)
+                for (unsigned l = 0; l < 3; l++)
                   strain_coeff(i, j, k, l) -= part1(i, j)*part2(k, l)*zzz[ind1*num_currently_active + ind2];
           ind2++;
         }
@@ -1404,7 +1404,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
 
   RankFourTensor part3;
   ind1 = 0;
-  for (unsigned surface1 = 0 ; surface1 < _num_surfaces ; ++ surface1)
+  for (unsigned surface1 = 0; surface1 < _num_surfaces; ++ surface1)
     if (act_at_some_step[surface1])
     {
       part3 += cumulative_pm[surface1]*E_ijkl*dr_dstress_at_some_step[ind1];
@@ -1417,19 +1417,19 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   part3 = part3.transposeMajor(); // this is because below i want df_dstress[ind2]*part3, and this equals (part3.transposeMajor())*df_dstress[ind2]
 
   ind1 = 0;
-  for (unsigned surface1 = 0 ; surface1 < _num_surfaces ; ++surface1)
+  for (unsigned surface1 = 0; surface1 < _num_surfaces; ++surface1)
     if (act_vary[surface1])
     {
       RankTwoTensor part1 = E_ijkl*r_minus_stuff[ind1];
       ind2 = 0;
-      for (unsigned surface2 = 0 ; surface2 < _num_surfaces ; ++surface2)
+      for (unsigned surface2 = 0; surface2 < _num_surfaces; ++surface2)
         if (act_vary[surface2])
         {
           RankTwoTensor part2 = part3*df_dstress[ind2];
-          for (unsigned i = 0 ; i < 3 ; i++)
-            for (unsigned j = 0 ; j < 3 ; j++)
-              for (unsigned k = 0 ; k < 3 ; k++)
-                for (unsigned l = 0 ; l < 3 ; l++)
+          for (unsigned i = 0; i < 3; i++)
+            for (unsigned j = 0; j < 3; j++)
+              for (unsigned k = 0; k < 3; k++)
+                for (unsigned l = 0; l < 3; l++)
                   stress_coeff(i, j, k, l) -= part1(i, j)*part2(k, l)*zzz[ind1*num_currently_active + ind2];
           ind2++;
         }

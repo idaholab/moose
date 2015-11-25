@@ -162,7 +162,7 @@ TensorMechanicsPlasticModel::activeConstraints(const std::vector<Real> & f, cons
 {
   mooseAssert(f.size() == numberSurfaces(), "f incorrectly sized at " << f.size() << " in activeConstraints");
   act.resize(numberSurfaces());
-  for (unsigned surface = 0 ; surface < numberSurfaces() ; ++surface)
+  for (unsigned surface = 0; surface < numberSurfaces(); ++surface)
     act[surface] = (f[surface] > _f_tol);
 }
 
