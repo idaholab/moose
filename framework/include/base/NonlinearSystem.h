@@ -522,7 +522,7 @@ protected:
   /// Kernel storage for each thread
   std::vector<KernelWarehouse> _kernels;
 
-  ///@}
+  ///@{
   /// BoundaryCondition Warhouses
   MooseObjectWarehouse<IntegratedBC> _integrated_bcs;
   MooseObjectWarehouse<NodalBC> _nodal_bcs;
@@ -544,7 +544,7 @@ protected:
 
 public:
   /// Constraints for each thread
-  std::vector<ConstraintWarehouse> _constraints;
+  ConstraintWarehouse _constraints;
 
 
 protected:

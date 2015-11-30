@@ -16,9 +16,10 @@
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
 #include "FaceFaceConstraint.h"
+#include "FEProblem.h"
 
 ConstraintWarehouse::ConstraintWarehouse() :
-    Warehouse<Constraint>()
+    MooseObjectWarehouse<Constraint>()
 {
 }
 
@@ -27,146 +28,147 @@ ConstraintWarehouse::~ConstraintWarehouse()
 }
 
 void
-ConstraintWarehouse::initialSetup()
+ConstraintWarehouse::addObject(MooseSharedPointer<Constraint> constraint, THREAD_ID /*tid = 0*/)
 {
-  for (NodalConstraintIter curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
-    (*curr)->initialSetup();
 
-  for (NodeFaceIter curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->initialSetup();
+  // Adds the constraint to the complete list of objects
+  MooseObjectWarehouse::addObject(constraint);
 
-  for (NodeFaceIter curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->initialSetup();
+  // Cast the Constraint object to the various types stored in this wareouse
+  MooseSharedPointer<NodalConstraint> nodal =  MooseSharedNamespace::dynamic_pointer_cast<NodalConstraint>(constraint);
+  MooseSharedPointer<NodeFaceConstraint> node_face = MooseSharedNamespace::dynamic_pointer_cast<NodeFaceConstraint>(constraint);
+  MooseSharedPointer<FaceFaceConstraint> face_face = MooseSharedNamespace::dynamic_pointer_cast<FaceFaceConstraint>(constraint);
 
-  for (FaceFaceIter curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->initialSetup();
-}
+  // NodeFaceConstraint
+  if (node_face)
+  {
+    MooseMesh & mesh = constraint->getParam<FEProblem *>("_fe_problem")->mesh();
+    unsigned int slave = mesh.getBoundaryID(constraint->getParam<BoundaryName>("slave"));
+    unsigned int master = mesh.getBoundaryID(constraint->getParam<BoundaryName>("master"));
 
-void
-ConstraintWarehouse::timestepSetup()
-{
-  for (NodalConstraintIter curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
-    (*curr)->timestepSetup();
+    bool displaced = node_face->isParamValid("use_displaced_mesh") && node_face->getParam<bool>("use_displaced_mesh");
+    if (displaced)
+      _displaced_node_face_constraints[slave].addObject(node_face);
+    else
+      _node_face_constraints[slave].addObject(node_face);
+  }
 
-  for (NodeFaceIter curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->timestepSetup();
+  // FaceFaceConstraint
+  else if (face_face)
+  {
+    const std::string & interface = face_face->getParam<std::string>("interface");
+    _face_face_constraints[interface].addObject(face_face);
+  }
 
-  for (NodeFaceIter curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->timestepSetup();
+  // NodalConstraint
+  else if (nodal)
+    _nodal_constraints.addObject(nodal);
 
-  for (FaceFaceIter curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->timestepSetup();
-}
-
-void
-ConstraintWarehouse::residualSetup()
-{
-  for (NodalConstraintIter curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
-    (*curr)->residualSetup();
-
-  for (NodeFaceIter curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->residualSetup();
-
-  for (NodeFaceIter curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->residualSetup();
-
-  for (FaceFaceIter curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->residualSetup();
-}
-
-void
-ConstraintWarehouse::jacobianSetup()
-{
-  for (NodalConstraintIter curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
-    (*curr)->jacobianSetup();
-
-  for (NodeFaceIter curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->jacobianSetup();
-
-  for (NodeFaceIter curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->jacobianSetup();
-
-  for (FaceFaceIter curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
-    for (unsigned int i=0; i<curr->second.size(); i++)
-      (curr->second)[i]->jacobianSetup();
-}
-
-void
-ConstraintWarehouse::addNodalConstraint(MooseSharedPointer<NodalConstraint> nc)
-{
-  _all_objects.push_back(nc.get());
-  _all_ptrs.push_back(nc);
-  _nodal_constraints.push_back(nc.get());
-}
-
-void
-ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*master*/, MooseSharedPointer<NodeFaceConstraint> nfc)
-{
-  _all_objects.push_back(nfc.get());
-  _all_ptrs.push_back(nfc);
-
-  bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") && nfc->getParam<bool>("use_displaced_mesh");
-
-  if (displaced)
-    _displaced_node_face_constraints[slave].push_back(nfc.get());
   else
-    _node_face_constraints[slave].push_back(nfc.get());
+    mooseError("Unknown type of Constraint object");
+
 }
 
-void
-ConstraintWarehouse::addFaceFaceConstraint(const std::string & name, MooseSharedPointer<FaceFaceConstraint> ffc)
+
+bool
+ConstraintWarehouse::hasActiveNodalConstraints() const
 {
-  _all_objects.push_back(ffc.get());
-  _all_ptrs.push_back(ffc);
-  _face_face_constraints[name].push_back(ffc.get());
+  return _nodal_constraints.hasActiveObjects();
 }
 
-std::vector<NodalConstraint *> &
-ConstraintWarehouse::getNodalConstraints()
+
+bool
+ConstraintWarehouse::hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced /*= false*/) const
 {
-  return _nodal_constraints;
+  std::map<BoundaryID, MooseObjectStorage<NodeFaceConstraint> >::const_iterator iter, end;
+  if (displaced)
+  {
+    iter = _displaced_node_face_constraints.find(boundary_id);
+    end = _displaced_node_face_constraints.end();
+  }
+
+  else
+  {
+    iter = _node_face_constraints.find(boundary_id);
+    end = _node_face_constraints.end();
+  }
+  return (iter != end && iter->second.hasActiveObjects());
 }
 
-std::vector<NodeFaceConstraint *> &
-ConstraintWarehouse::getNodeFaceConstraints(BoundaryID boundary_id)
+
+bool
+ConstraintWarehouse::hasActiveFaceFaceConstraints(const std::string & name) const
 {
-  return _node_face_constraints[boundary_id];
+  std::map<std::string, MooseObjectStorage<FaceFaceConstraint> >::const_iterator iter = _face_face_constraints.find(name);
+  return (iter != _face_face_constraints.end() && iter->second.hasActiveObjects());
 }
 
-std::vector<NodeFaceConstraint *> &
-ConstraintWarehouse::getDisplacedNodeFaceConstraints(BoundaryID boundary_id)
+
+const std::vector<MooseSharedPointer<NodalConstraint> > &
+ConstraintWarehouse::getActiveNodalConstraints() const
 {
-  return _displaced_node_face_constraints[boundary_id];
+  return _nodal_constraints.getActiveObjects();
 }
 
-std::vector<FaceFaceConstraint *> &
-ConstraintWarehouse::getFaceFaceConstraints(const std::string & name)
+
+const std::vector<MooseSharedPointer<NodeFaceConstraint> > &
+ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced /*=false*/) const
 {
-  return _face_face_constraints[name];
+  std::map<BoundaryID, MooseObjectStorage<NodeFaceConstraint> >::const_iterator iter;
+  if (displaced)
+    iter = _displaced_node_face_constraints.find(boundary_id);
+  else
+    iter = _node_face_constraints.find(boundary_id);
+
+  return iter->second.getActiveObjects();
 }
+
+
+const std::vector<MooseSharedPointer<FaceFaceConstraint> > &
+ConstraintWarehouse::getActiveFaceFaceConstraints(const std::string & name) const
+{
+  std::map<std::string, MooseObjectStorage<FaceFaceConstraint> >::const_iterator iter = _face_face_constraints.find(name);
+  return iter->second.getActiveObjects();
+}
+
 
 void
 ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const
 {
-  for (FaceFaceIter it = _face_face_constraints.begin(); it != _face_face_constraints.end(); ++it)
+  std::map<std::string, MooseObjectStorage<FaceFaceConstraint> >::const_iterator it;
+  std::vector<MooseSharedPointer<FaceFaceConstraint> >::const_iterator jt;
+
+  for (it = _face_face_constraints.begin(); it != _face_face_constraints.end(); ++it)
   {
-    for (std::vector<FaceFaceConstraint *>::const_iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+    const std::vector<MooseSharedPointer<FaceFaceConstraint> > objects = it->second.getActiveObjects();
+    for (jt = objects.begin(); jt != objects.end(); ++jt)
     {
       MooseVariable & var = (*jt)->variable();
       unique_variables.insert(var.name());
       const std::set<SubdomainID> & subdomains = var.activeSubdomains();
       subdomains_covered.insert(subdomains.begin(), subdomains.end());
     }
+  }
+}
+
+
+void
+ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
+{
+  MooseObjectWarehouse::updateActive();
+  _nodal_constraints.updateActive();
+
+  {
+    std::map<BoundaryID, MooseObjectStorage<NodeFaceConstraint> >::iterator it;
+    for (it = _node_face_constraints.begin(); it != _node_face_constraints.end(); ++it)
+      it->second.updateActive();
+    for (it = _displaced_node_face_constraints.begin(); it != _displaced_node_face_constraints.end(); ++it)
+      it->second.updateActive();
+  }
+
+  {
+    std::map<std::string, MooseObjectStorage<FaceFaceConstraint> >::iterator it;
+    for (it = _face_face_constraints.begin(); it != _face_face_constraints.end(); ++it)
+      it->second.updateActive();
   }
 }

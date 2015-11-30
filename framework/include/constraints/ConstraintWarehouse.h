@@ -17,6 +17,7 @@
 
 #include "Warehouse.h"
 #include "MooseTypes.h"
+#include "MooseObjectWarehouse.h"
 
 class Constraint;
 class NodalConstraint;
@@ -26,52 +27,59 @@ class FaceFaceConstraint;
 /**
  * Warehouse for storing constraints
  */
-class ConstraintWarehouse : public Warehouse<Constraint>
+class ConstraintWarehouse : public MooseObjectWarehouse<Constraint>
 {
 public:
   ConstraintWarehouse();
   virtual ~ConstraintWarehouse();
 
-  // Setup /////
-  void initialSetup();
-  void timestepSetup();
-  void residualSetup();
-  void jacobianSetup();
+  /**
+   * Adds a constraint to the Warehouse.
+   */
+  virtual void addObject(MooseSharedPointer<Constraint> constraint, THREAD_ID tid = 0);
 
-  void addNodalConstraint(MooseSharedPointer<NodalConstraint> nfc);
+  ///@{
+  /**
+   * Methods to test if active Constraint objects exist.
+   */
+  bool hasActiveNodalConstraints() const;
+  bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced = false) const;
+  bool hasActiveFaceFaceConstraints(const std::string & name) const;
+  ///@}
 
-  void addNodeFaceConstraint(unsigned int slave, unsigned int master, MooseSharedPointer<NodeFaceConstraint> nfc);
+  ///@{
+  /**
+   * Methods for accessing the active Constraint objects.
+   */
+  const std::vector<MooseSharedPointer<NodalConstraint> > & getActiveNodalConstraints() const;
+  const std::vector<MooseSharedPointer<NodeFaceConstraint> > & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced = false) const;
+  const std::vector<MooseSharedPointer<FaceFaceConstraint> > & getActiveFaceFaceConstraints(const std::string & name) const;
+  ///@}
 
-  void addFaceFaceConstraint(const std::string & name, MooseSharedPointer<FaceFaceConstraint> ffc);
-
-  std::vector<NodalConstraint *> & getNodalConstraints();
-
-  std::vector<NodeFaceConstraint *> & getNodeFaceConstraints(BoundaryID boundary_id);
-  std::vector<NodeFaceConstraint *> & getDisplacedNodeFaceConstraints(BoundaryID boundary_id);
-
-  std::vector<FaceFaceConstraint *> & getFaceFaceConstraints(const std::string & name);
-
+  /**
+   * Update ths list of subdomains with constraints.
+   */
   void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const;
 
-protected:
   /**
-   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
-   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   * Update the active lists, for all types stored.
    */
-  std::vector<MooseSharedPointer<Constraint> > _all_ptrs;
+  virtual void updateActive(THREAD_ID tid = 0);
 
-  /// nodal constraints on a boundary
-  std::vector<NodalConstraint *> _nodal_constraints;
+protected:
 
-  std::map<BoundaryID, std::vector<NodeFaceConstraint *> > _node_face_constraints;
-  std::map<BoundaryID, std::vector<NodeFaceConstraint *> > _displaced_node_face_constraints;
+  /// Storage for NodalConstraint objects
+  MooseObjectStorage<NodalConstraint> _nodal_constraints;
 
-  std::map<std::string, std::vector<FaceFaceConstraint *> > _face_face_constraints;
+  /// Storage for NodeFaceConstraint objects (non-displaced)
+  std::map<BoundaryID, MooseObjectStorage<NodeFaceConstraint> > _node_face_constraints;
 
-  // We can't use "auto", but these typedefs make parsing for loops much easier for humans...
-  typedef std::vector<NodalConstraint *>::const_iterator NodalConstraintIter;
-  typedef std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator NodeFaceIter;
-  typedef std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator FaceFaceIter;
+  /// Storage for NodeFaceConstraint objects (displaced)
+  std::map<BoundaryID, MooseObjectStorage<NodeFaceConstraint> > _displaced_node_face_constraints;
+
+  /// Storage for FaceFaceConstraints
+  std::map<std::string, MooseObjectStorage<FaceFaceConstraint> > _face_face_constraints;
+
 };
 
 #endif // CONSTRAINTWAREHOUSE_H

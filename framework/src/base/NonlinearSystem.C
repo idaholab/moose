@@ -197,7 +197,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   _nodal_kernels.resize(n_threads);
   _dirac_kernels.resize(n_threads);
   _dg_kernels.resize(n_threads);
-  _constraints.resize(n_threads);
 }
 
 NonlinearSystem::~NonlinearSystem()
@@ -332,12 +331,13 @@ NonlinearSystem::initialSetup()
     if (_doing_dg)
       _dg_kernels[tid].initialSetup();
 
-    _constraints[tid].initialSetup();
     _dampers.initialSetup(tid);
     _integrated_bcs.initialSetup(tid);
   }
+
   _nodal_bcs.initialSetup();
   _preset_nodal_bcs.initialSetup();
+  _constraints.initialSetup();
 }
 
 void
@@ -347,14 +347,15 @@ NonlinearSystem::timestepSetup()
   {
     _kernels[tid].timestepSetup();
     _dirac_kernels[tid].timestepSetup();
-    _constraints[tid].timestepSetup();
     if (_doing_dg)
       _dg_kernels[tid].timestepSetup();
     _dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
   }
+
   _nodal_bcs.timestepSetup();
   _preset_nodal_bcs.timestepSetup();
+  _constraints.timestepSetup();
 }
 
 
@@ -646,23 +647,9 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
 {
   MooseSharedPointer<Constraint> constraint = MooseSharedNamespace::static_pointer_cast<Constraint>(_factory.create(c_name, name, parameters));
 
-  MooseSharedPointer<NodalConstraint>    nc =  MooseSharedNamespace::dynamic_pointer_cast<NodalConstraint>(constraint);
-  MooseSharedPointer<NodeFaceConstraint> nfc = MooseSharedNamespace::dynamic_pointer_cast<NodeFaceConstraint>(constraint);
-  MooseSharedPointer<FaceFaceConstraint> ffc = MooseSharedNamespace::dynamic_pointer_cast<FaceFaceConstraint>(constraint);
-  if (nfc.get())
-  {
-    unsigned int slave = _mesh.getBoundaryID(parameters.get<BoundaryName>("slave"));
-    unsigned int master = _mesh.getBoundaryID(parameters.get<BoundaryName>("master"));
-    _constraints[0].addNodeFaceConstraint(slave, master, nfc);
-  }
-  else if (ffc.get())
-    _constraints[0].addFaceFaceConstraint(parameters.get<std::string>("interface"), ffc);
-  else if (nc.get())
-    _constraints[0].addNodalConstraint(nc);
-  else
-    mooseError("Unknown type of Constraint object");
+  _constraints.addObject(constraint);
 
-  if (constraint.get() != NULL && constraint.get()->addCouplingEntriesToJacobian())
+  if (constraint && constraint->addCouplingEntriesToJacobian())
     addImplicitGeometricCouplingEntriesToJacobian(true);
 }
 
@@ -888,22 +875,26 @@ NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residua
 {
   THREAD_ID tid = 0; // constraints are going to be done single-threaded
   residual.close();
-  std::vector<NodalConstraint *> & ncs = _constraints[0].getNodalConstraints();
-  for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
-  {
-    NodalConstraint * nc = (*it);
-    std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
-    std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
 
-    if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
+  if (_constraints.hasActiveNodalConstraints())
+  {
+    const std::vector<MooseSharedPointer<NodalConstraint> > & ncs = _constraints.getActiveNodalConstraints();
+    for (std::vector<MooseSharedPointer<NodalConstraint> >::const_iterator it = ncs.begin(); it != ncs.end(); ++it)
     {
-       _fe_problem.reinitNodes(master_node_ids, tid);
-       _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
-       nc->computeResidual(residual);
+      MooseSharedPointer<NodalConstraint> nc = (*it);
+      std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+      std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
+
+      if (!slave_node_ids.empty() && !master_node_ids.empty())
+      {
+        _fe_problem.reinitNodes(master_node_ids, tid);
+        _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
+        nc->computeResidual(residual);
+      }
     }
+    _fe_problem.addCachedResidualDirectly(residual, tid);
+    residual.close();
   }
-  _fe_problem.addCachedResidualDirectly(residual,0);
-  residual.close();
 }
 
 void
@@ -911,22 +902,26 @@ NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian
 {
   THREAD_ID tid = 0;    // constraints are going to be done single-threaded
   jacobian.close();
-  std::vector<NodalConstraint *> & ncs = _constraints[0].getNodalConstraints();
-  for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
-  {
-    NodalConstraint * nc = (*it);
-    std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
-    std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
 
-    if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
+  if (_constraints.hasActiveNodalConstraints())
+  {
+    const std::vector<MooseSharedPointer<NodalConstraint> > & ncs = _constraints.getActiveNodalConstraints();
+    for (std::vector<MooseSharedPointer<NodalConstraint> >::const_iterator it = ncs.begin(); it != ncs.end(); ++it)
     {
-      _fe_problem.reinitNodes(master_node_ids, tid);
-      _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
-      nc->computeJacobian(jacobian);
+      MooseSharedPointer<NodalConstraint> nc = (*it);
+      std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+      std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
+
+      if (!slave_node_ids.empty() && !master_node_ids.empty())
+      {
+        _fe_problem.reinitNodes(master_node_ids, tid);
+        _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
+        nc->computeJacobian(jacobian);
+      }
     }
-  }
-  _fe_problem.addCachedJacobian(jacobian, 0);
+  _fe_problem.addCachedJacobian(jacobian, tid);
   jacobian.close();
+  }
 }
 
 void
@@ -957,15 +952,10 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 
     BoundaryID slave_boundary = pen_loc._slave_boundary;
 
-    std::vector<NodeFaceConstraint *> constraints;
-
-    if (!displaced)
-      constraints = _constraints[0].getNodeFaceConstraints(slave_boundary);
-    else
-      constraints = _constraints[0].getDisplacedNodeFaceConstraints(slave_boundary);
-
-    if (constraints.size())
+    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
     {
+      const std::vector<MooseSharedPointer<NodeFaceConstraint> > & constraints = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
@@ -991,9 +981,9 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
             // reinit variables on the master element's face at the contact point
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
-            for (unsigned int c=0; c < constraints.size(); c++)
+            for (std::vector<MooseSharedPointer<NodeFaceConstraint> >::const_iterator it = constraints.begin(); it != constraints.end(); ++it)
             {
-              NodeFaceConstraint * nfc = constraints[c];
+              MooseSharedPointer<NodeFaceConstraint> nfc = *it;
 
               if (nfc->shouldApply())
               {
@@ -1043,7 +1033,6 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       it != penetration_locators->end();
       ++it)
   {
-
     if (_assemble_constraints_separately)
     {
       // Reset the constraint_applied flag before each new constraint, as they need to be assembled separately
@@ -1055,15 +1044,10 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
     BoundaryID slave_boundary = pen_loc._slave_boundary;
 
-    std::vector<NodeFaceConstraint *> constraints;
-
-    if (!displaced)
-      constraints = _constraints[0].getNodeFaceConstraints(slave_boundary);
-    else
-      constraints = _constraints[0].getDisplacedNodeFaceConstraints(slave_boundary);
-
-    if (constraints.size())
+    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary))
     {
+      const std::vector<MooseSharedPointer<NodeFaceConstraint> > & constraints = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
@@ -1092,9 +1076,9 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
             // reinit variables on the master element's face at the contact point
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
-            for (unsigned int c=0; c < constraints.size(); c++)
+            for (std::vector<MooseSharedPointer<NodeFaceConstraint> >::const_iterator it = constraints.begin(); it != constraints.end(); ++it)
             {
-              NodeFaceConstraint * nfc = constraints[c];
+              MooseSharedPointer<NodeFaceConstraint> nfc = *it;
 
               if (nfc->shouldApply())
               {
@@ -1169,9 +1153,9 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
   {
     MooseMesh::MortarInterface * iface = *it;
 
-    std::vector<FaceFaceConstraint *> & face_constraints = _constraints[tid].getFaceFaceConstraints(iface->_name);
-    if (face_constraints.size() > 0)
+    if (_constraints.hasActiveFaceFaceConstraints(iface->_name))
     {
+      const std::vector<MooseSharedPointer<FaceFaceConstraint> > & face_constraints = _constraints.getActiveFaceFaceConstraints(iface->_name);
       // go over elements on that interface
       const std::vector<Elem *> & elems = iface->_elems;
       for (std::vector<Elem *>::const_iterator el = elems.begin(); el != elems.end(); ++el)
@@ -1181,18 +1165,18 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
         _fe_problem.prepare(elem, tid);
         _fe_problem.reinitElem(elem, tid);
 
-        for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
+        for (std::vector<MooseSharedPointer<FaceFaceConstraint> >::const_iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
         {
-          FaceFaceConstraint * ffc = *fc_it;
+          MooseSharedPointer<FaceFaceConstraint> ffc = *fc_it;
           ffc->reinit();
           ffc->computeResidual();
         }
         _fe_problem.cacheResidual(tid);
 
         // evaluate residuals that go into master and slave side
-        for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
+        for (std::vector<MooseSharedPointer<FaceFaceConstraint> >::const_iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
         {
-          FaceFaceConstraint * ffc = *fc_it;
+          MooseSharedPointer<FaceFaceConstraint> ffc = *fc_it;
 
           ffc->reinitSide(Moose::Master);
           ffc->computeResidualSide(Moose::Master);
@@ -1220,12 +1204,13 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
     _kernels[tid].residualSetup();
     _dirac_kernels[tid].residualSetup();
     if (_doing_dg) _dg_kernels[tid].residualSetup();
-    _constraints[tid].residualSetup();
+
     _dampers.residualSetup(tid);
     _integrated_bcs.residualSetup(tid);
 
   }
   _nodal_bcs.residualSetup();
+  _constraints.residualSetup();
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
@@ -1462,29 +1447,33 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
   }
 
   // handle node-to-node constraints
-  const std::vector<NodalConstraint *> & ceds = _constraints[0].getNodalConstraints();
-  for (std::vector<NodalConstraint *>::const_iterator it = ceds.begin(); it != ceds.end(); ++it)
+  if (_constraints.hasActiveNodalConstraints())
   {
-    NodalConstraint * nc = *it;
 
-    std::vector<dof_id_type> master_dofs;
-    std::vector<dof_id_type> &  master_node_ids = nc->getMasterNodeId();
-    for (std::vector<dof_id_type>::iterator mi = master_node_ids.begin(); mi != master_node_ids.end(); mi++)
-      getNodeDofs(*mi, master_dofs);
-
-    std::vector<dof_id_type> slave_dofs;
-    std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
-    for (std::vector<dof_id_type>::iterator si = slave_node_ids.begin(); si != slave_node_ids.end(); si++)
-      getNodeDofs(*si, slave_dofs);
-
-    for (std::vector<dof_id_type>::iterator mi = master_dofs.begin(); mi != master_dofs.end(); mi++)
+    const std::vector<MooseSharedPointer<NodalConstraint> > & ceds = _constraints.getActiveNodalConstraints();
+    for (std::vector<MooseSharedPointer<NodalConstraint> >::const_iterator it = ceds.begin(); it != ceds.end(); ++it)
     {
-      dof_id_type master_id = *mi;
-      for (std::vector<dof_id_type>::iterator si = slave_dofs.begin(); si != slave_dofs.end(); si++)
+      MooseSharedPointer<NodalConstraint> nc = *it;
+
+      std::vector<dof_id_type> master_dofs;
+      std::vector<dof_id_type> &  master_node_ids = nc->getMasterNodeId();
+      for (std::vector<dof_id_type>::iterator mi = master_node_ids.begin(); mi != master_node_ids.end(); mi++)
+        getNodeDofs(*mi, master_dofs);
+
+      std::vector<dof_id_type> slave_dofs;
+      std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+      for (std::vector<dof_id_type>::iterator si = slave_node_ids.begin(); si != slave_node_ids.end(); si++)
+        getNodeDofs(*si, slave_dofs);
+
+      for (std::vector<dof_id_type>::iterator mi = master_dofs.begin(); mi != master_dofs.end(); mi++)
       {
-        dof_id_type slave_id = *si;
-        graph[master_id].push_back(slave_id);
-        graph[slave_id].push_back(master_id);
+        dof_id_type master_id = *mi;
+        for (std::vector<dof_id_type>::iterator si = slave_dofs.begin(); si != slave_dofs.end(); si++)
+        {
+          dof_id_type slave_id = *si;
+          graph[master_id].push_back(slave_id);
+          graph[slave_id].push_back(master_id);
+        }
       }
     }
   }
@@ -1562,16 +1551,11 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
     BoundaryID slave_boundary = pen_loc._slave_boundary;
 
-    std::vector<NodeFaceConstraint *> constraints;
-
-    if (!displaced)
-      constraints = _constraints[0].getNodeFaceConstraints(slave_boundary);
-    else
-      constraints = _constraints[0].getDisplacedNodeFaceConstraints(slave_boundary);
-
     zero_rows.clear();
-    if (constraints.size())
+    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
     {
+      const std::vector<MooseSharedPointer<NodeFaceConstraint> > & constraints = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
@@ -1597,9 +1581,9 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
             // reinit variables on the master element's face at the contact point
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
-            for (unsigned int c=0; c < constraints.size(); c++)
+            for (std::vector<MooseSharedPointer<NodeFaceConstraint> >::const_iterator it = constraints.begin(); it != constraints.end(); ++it)
             {
-              NodeFaceConstraint * nfc = constraints[c];
+              MooseSharedPointer<NodeFaceConstraint> nfc = *it;
 
               nfc->_jacobian = &jacobian;
 
@@ -1747,12 +1731,13 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
     {
       const Elem * elem = *el;
       // for each element process constraints on the
-      std::vector<FaceFaceConstraint *> & face_constraints = _constraints[tid].getFaceFaceConstraints(iface->_name);
-      if (face_constraints.size() > 0)
+      if (_constraints.hasActiveFaceFaceConstraints(iface->_name))
       {
-        for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
+        const std::vector<MooseSharedPointer<FaceFaceConstraint> > & face_constraints = _constraints.getActiveFaceFaceConstraints(iface->_name);
+
+        for (std::vector<MooseSharedPointer<FaceFaceConstraint> >::const_iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
         {
-          FaceFaceConstraint * ffc = *fc_it;
+          MooseSharedPointer<FaceFaceConstraint> ffc = *fc_it;
 
           _fe_problem.prepare(elem, tid);
           _fe_problem.reinitElem(elem, tid);
@@ -1831,7 +1816,6 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   {
     _kernels[tid].jacobianSetup();
     _dirac_kernels[tid].jacobianSetup();
-    _constraints[tid].jacobianSetup();
     if (_doing_dg)
       _dg_kernels[tid].jacobianSetup();
     _dampers.jacobianSetup(tid);
@@ -1839,6 +1823,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   }
   _nodal_bcs.jacobianSetup();
   _preset_nodal_bcs.jacobianSetup();
+  _constraints.jacobianSetup();
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
@@ -2407,7 +2392,7 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
 
   global_kernels_exist |= _nodal_kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
 
-  _constraints[0].subdomainsCovered(input_subdomains, kernel_variables);
+  _constraints.subdomainsCovered(input_subdomains, kernel_variables);
   if (!global_kernels_exist)
   {
     std::set<SubdomainID> difference;
