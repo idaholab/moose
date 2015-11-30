@@ -1934,7 +1934,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   if (_has_diag_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
-  // Storage structor for all NodalBC objects
+  // Storage structure for all NodalBC objects
   const MooseObjectStorage<NodalBC> & storage = _nodal_bcs.getStorage();
 
   PARALLEL_TRY {
@@ -2101,6 +2101,8 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   for (unsigned int i=0; i<blocks.size(); i++)
     blocks[i]->_jacobian.close();
 
+
+  const MooseObjectStorage<NodalBC> & storage = _nodal_bcs.getStorage();
   for (unsigned int i=0; i<blocks.size(); i++)
   {
     libMesh::System & precond_system = blocks[i]->_precond_system;
@@ -2119,21 +2121,23 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
         BoundaryID boundary_id = bnode->_bnd_id;
         Node * node = bnode->_node;
 
-        const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getStorage().getActiveBoundaryObjects(boundary_id);
-        if (!bcs.empty())
+        if (storage.hasActiveBoundaryObjects(boundary_id))
         {
-          if (node->processor_id() == processor_id())
+          const std::vector<MooseSharedPointer<NodalBC> > & bcs = storage.getActiveBoundaryObjects(boundary_id);
           {
-            _fe_problem.reinitNodeFace(node, boundary_id, 0);
-
-            for (std::vector<MooseSharedPointer<NodalBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
+            if (node->processor_id() == processor_id())
             {
-              MooseSharedPointer<NodalBC> bc = *it;
-              if (bc->variable().number() == ivar && bc->shouldApply() && bc->isActive())
+              _fe_problem.reinitNodeFace(node, boundary_id, 0);
+
+              for (std::vector<MooseSharedPointer<NodalBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
               {
-                //The first zero is for the variable number... there is only one variable in each mini-system
-                //The second zero only works with Lagrange elements!
-                zero_rows.push_back(node->dof_number(precond_system.number(), 0, 0));
+                MooseSharedPointer<NodalBC> bc = *it;
+                if (bc->variable().number() == ivar && bc->shouldApply() && bc->isActive())
+                {
+                  //The first zero is for the variable number... there is only one variable in each mini-system
+                  //The second zero only works with Lagrange elements!
+                  zero_rows.push_back(node->dof_number(precond_system.number(), 0, 0));
+                }
               }
             }
           }
