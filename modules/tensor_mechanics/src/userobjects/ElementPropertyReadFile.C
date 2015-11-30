@@ -40,6 +40,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     _range(i) = _top_right(i) - _bottom_left(i);
   }
 
+  _max_range = _range(0);
   for (unsigned int i = 1; i < LIBMESH_DIM; i++)
     if (_range(i) > _max_range)
       _max_range = _range(i);

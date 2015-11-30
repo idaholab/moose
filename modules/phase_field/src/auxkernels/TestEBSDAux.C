@@ -24,6 +24,11 @@ TestEBSDAux::TestEBSDAux(const InputParameters & parameters) :
 {
 }
 
+TestEBSDAux::~TestEBSDAux()
+{
+  delete _val;
+}
+
 Real
 TestEBSDAux::computeValue()
 {
