@@ -148,7 +148,9 @@ LineMaterialSamplerBase<T>::execute()
   std::vector<Elem *> intersected_elems;
   std::vector<LineSegment> segments;
 
-  Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), intersected_elems, segments);
+  MooseSharedPointer<PointLocatorBase> plb = MooseSharedPointer<PointLocatorBase>(_fe_problem.mesh().getMesh().sub_point_locator().release());
+
+  Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), plb, intersected_elems, segments);
 
   const RealVectorValue line_vec = _end - _start;
   const Real line_length(line_vec.size());
