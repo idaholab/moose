@@ -46,7 +46,9 @@ ElementsAlongLine::execute()
   std::vector<Elem *> intersected_elems;
   std::vector<LineSegment> segments;
 
-  Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), intersected_elems, segments);
+  MooseSharedPointer<PointLocatorBase> plb = MooseSharedPointer<PointLocatorBase>(_fe_problem.mesh().getMesh().sub_point_locator().release());
+
+  Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), plb, intersected_elems, segments);
 
   unsigned int num_elems = intersected_elems.size();
 

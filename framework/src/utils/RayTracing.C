@@ -21,7 +21,6 @@
 #include "libmesh/plane.h"
 #include "libmesh/point.h"
 #include "libmesh/mesh.h"
-#include "libmesh/point_locator_base.h"
 #include "libmesh/elem.h"
 
 namespace Moose
@@ -177,16 +176,13 @@ void recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment, 
   return;
 }
 
-void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & mesh, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
+void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & mesh, MooseSharedPointer<PointLocatorBase> & point_locator, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
 {
   // Make sure our list is clear
   intersected_elems.clear();
 
-  // Grab a PointLocator for finding the first element:
-  const PointLocatorBase & pl = mesh.point_locator();
-
   // Find the starting element
-  const Elem * first_elem = pl(p0);
+  const Elem * first_elem = (*point_locator)(p0);
 
   // Quick return if can't even locate the first element.
   if (!first_elem)

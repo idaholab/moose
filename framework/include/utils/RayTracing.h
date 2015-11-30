@@ -17,9 +17,11 @@
 
 #include "Moose.h"
 #include "LineSegment.h"
+#include "MooseTypes.h"
 
 // libMesh includes
 #include "libmesh/point.h"
+#include "libmesh/point_locator_base.h"
 
 // forward declares
 class LineSegment;
@@ -42,7 +44,7 @@ namespace Moose
  * @param intersected_elems The elements intersected by the line.  Will be empty if there are no intersections.
  * @param segments The line segments across each element
  */
-void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & mesh, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments);
+void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & mesh, MooseSharedPointer<PointLocatorBase> & point_locator, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments);
 }
 
 #endif // RAYTRACING_H
