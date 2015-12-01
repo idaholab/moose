@@ -16,10 +16,10 @@
 #define AUXSCALARKERNELWAREHOUSE_H
 
 // MOOSE includes
-#include "MooseObjectWarehouse.h"
+#include "ExecuteMooseObjectWarehouse.h"
 #include "AuxScalarKernel.h"
 
-class AuxScalarKernelWarehouse : public MooseObjectWarehouse<AuxScalarKernel>
+class AuxScalarKernelWarehouse : public ExecuteMooseObjectWarehouse<AuxScalarKernel>
 {
 public:
 
