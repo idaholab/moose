@@ -75,6 +75,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   queue.push_back(QueueItem(_func_F));
 
   // generate derivatives until the queue is exhausted
+  std::vector<ADFunction*> adfunctions;
   while (!queue.empty())
   {
     QueueItem current = queue.front();
@@ -145,6 +146,8 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
         newderivative.second = newitem._F;
         _derivatives.push_back(newderivative);
       }
+      else
+        adfunctions.push_back(newitem._F);
 
       // push item to queue if further differentiation is required
       if (newitem._dargs.size() < _derivative_order)
@@ -154,6 +157,9 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     // remove the 'current' element from the queue
     queue.pop_front();
   }
+  // cleanup zero derivatives
+  for (std::vector<ADFunction*>::iterator it = adfunctions.begin(); it != adfunctions.end(); ++it)
+    delete *it;
 
   // increase the parameter buffer to provide storage for the material property derivatives
   _func_params.resize(_nargs + _mat_prop_descriptors.size());
