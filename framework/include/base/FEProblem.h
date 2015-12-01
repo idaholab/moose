@@ -923,6 +923,19 @@ public:
    */
   virtual void computeAuxiliaryKernels(const ExecFlagType & type);
 
+public:
+
+  ///@{
+  /**
+   * Convenience zeros
+   * @see ZeroInterface
+   */
+  std::vector<Real> _real_zero;
+  std::vector<VariableValue> _zero;
+  std::vector<VariableGradient> _grad_zero;
+  std::vector<VariableSecond> _second_zero;
+  std::vector<VariablePhiSecond> _second_phi_zero;
+  ///@}
 
 protected:
   MooseMesh & _mesh;

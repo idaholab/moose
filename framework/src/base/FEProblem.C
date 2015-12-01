@@ -155,6 +155,12 @@ FEProblem::FEProblem(const InputParameters & parameters) :
 
   unsigned int n_threads = libMesh::n_threads();
 
+  _real_zero.resize(n_threads, 0.);
+  _zero.resize(n_threads);
+  _grad_zero.resize(n_threads);
+  _second_zero.resize(n_threads);
+  _second_phi_zero.resize(n_threads);
+
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i] = new Assembly(_nl, couplingMatrix(), i);
@@ -228,6 +234,11 @@ FEProblem::~FEProblem()
     delete _material_data[i];
     delete _bnd_material_data[i];
     delete _neighbor_material_data[i];
+
+    _zero[i].release();
+    _grad_zero[i].release();
+    _second_zero[i].release();
+    _second_phi_zero[i].release();
   }
 
   delete &_nl;
@@ -924,7 +935,7 @@ FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
       for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
       {
         _zero[tid].resize(getMaxQps(), 0);
-        _grad_zero[tid].resize(getMaxQps(), 0);
+        _grad_zero[tid].resize(getMaxQps(), RealGradient(0.));
         _second_zero[tid].resize(getMaxQps(), RealTensor(0.));
         _second_phi_zero[tid].resize(getMaxQps(), std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
       }
@@ -3066,7 +3077,7 @@ FEProblem::createQRules(QuadratureType type, Order order, Order volume_order, Or
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     _zero[tid].resize(getMaxQps(), 0);
-    _grad_zero[tid].resize(getMaxQps(), 0);
+    _grad_zero[tid].resize(getMaxQps(), RealGradient(0.));
     _second_zero[tid].resize(getMaxQps(), RealTensor(0.));
     _second_phi_zero[tid].resize(getMaxQps(), std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
   }

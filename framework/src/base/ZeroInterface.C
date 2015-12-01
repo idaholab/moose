@@ -13,15 +13,15 @@
 /****************************************************************/
 
 #include "ZeroInterface.h"
-#include "SubProblem.h"
+#include "FEProblem.h"
 
 ZeroInterface::ZeroInterface(const InputParameters & parameters) :
-    _zi_subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _zi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _zi_tid(parameters.get<THREAD_ID>("_tid")),
-    _real_zero(_zi_subproblem._real_zero[_zi_tid]),
-    _zero(_zi_subproblem._zero[_zi_tid]),
-    _grad_zero(_zi_subproblem._grad_zero[_zi_tid]),
-    _second_zero(_zi_subproblem._second_zero[_zi_tid]),
-    _second_phi_zero(_zi_subproblem._second_phi_zero[_zi_tid])
+    _real_zero(_zi_feproblem._real_zero[_zi_tid]),
+    _zero(_zi_feproblem._zero[_zi_tid]),
+    _grad_zero(_zi_feproblem._grad_zero[_zi_tid]),
+    _second_zero(_zi_feproblem._second_zero[_zi_tid]),
+    _second_phi_zero(_zi_feproblem._second_phi_zero[_zi_tid])
 {
 }
