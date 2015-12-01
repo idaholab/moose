@@ -16,10 +16,10 @@
 #define ELEMENTALAUXKERNELWAREHOUSE_H
 
 // MOOSE includes
-#include "MooseObjectWarehouse.h"
+#include "ExecuteMooseObjectWarehouse.h"
 #include "AuxKernel.h"
 
-class ElementalAuxKernelWarehouse : public MooseObjectWarehouse<AuxKernel>
+class ElementalAuxKernelWarehouse : public ExecuteMooseObjectWarehouse<AuxKernel>
 {
 public:
 
