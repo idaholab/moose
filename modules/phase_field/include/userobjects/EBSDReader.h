@@ -96,9 +96,9 @@ public:
   unsigned int getGlobalID(unsigned int phase, unsigned int local_id) const { return _global_id[phase][local_id]; }
 
   /// Factory function to return a point functor specified by name
-  EBSDPointDataFunctor * getPointDataAccessFunctor(const MooseEnum & field_name) const;
+  MooseSharedPointer<EBSDPointDataFunctor> getPointDataAccessFunctor(const MooseEnum & field_name) const;
   /// Factory function to return a average functor specified by name
-  EBSDAvgDataFunctor * getAvgDataAccessFunctor(const MooseEnum & field_name) const;
+  MooseSharedPointer<EBSDAvgDataFunctor> getAvgDataAccessFunctor(const MooseEnum & field_name) const;
 
   /**
    * Returns a map consisting of the node index followd by
