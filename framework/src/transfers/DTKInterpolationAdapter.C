@@ -303,9 +303,15 @@ DTKInterpolationAdapter::get_element_topology(const Elem * elem)
     return DataTransferKit::DTK_TRIANGLE;
   else if (type == QUAD4)
     return DataTransferKit::DTK_QUADRILATERAL;
+  else if (type == QUAD8)
+    return DataTransferKit::DTK_QUADRILATERAL;
+  else if (type == QUAD9)
+    return DataTransferKit::DTK_QUADRILATERAL;
   else if (type == TET4)
     return DataTransferKit::DTK_TETRAHEDRON;
   else if (type == HEX8)
+    return DataTransferKit::DTK_HEXAHEDRON;
+  else if (type == HEX27)
     return DataTransferKit::DTK_HEXAHEDRON;
   else if (type == PYRAMID5)
     return DataTransferKit::DTK_PYRAMID;
