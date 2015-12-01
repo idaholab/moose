@@ -17,7 +17,7 @@
 
 
 ControlWarehouse::ControlWarehouse() :
-    MooseObjectWarehouse<Control>(/*threaded=*/false)
+    ExecuteMooseObjectWarehouse<Control>(/*threaded=*/false)
 {
 }
 

@@ -16,13 +16,13 @@
 #define CONTROLWAREHOUSE_H
 
 // MOOSE includes
-#include "MooseObjectWarehouse.h"
+#include "ExecuteMooseObjectWarehouse.h"
 #include "Control.h"
 
 /**
  * Non threaded storage for Control objects.
  */
-class ControlWarehouse : public MooseObjectWarehouse<Control>
+class ControlWarehouse : public ExecuteMooseObjectWarehouse<Control>
 {
 public:
 

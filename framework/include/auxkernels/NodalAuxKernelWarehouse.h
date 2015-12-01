@@ -16,10 +16,10 @@
 #define NODALAUXKERNELWAREHOUSE_H
 
 // MOOSE includes
-#include "MooseObjectWarehouse.h"
+#include "ExecuteMooseObjectWarehouse.h"
 #include "AuxKernel.h"
 
-class NodalAuxKernelWarehouse : public MooseObjectWarehouse<AuxKernel>
+class NodalAuxKernelWarehouse : public ExecuteMooseObjectWarehouse<AuxKernel>
 {
 public:
 

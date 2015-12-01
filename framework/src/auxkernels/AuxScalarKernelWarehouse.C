@@ -17,7 +17,7 @@
 
 
 AuxScalarKernelWarehouse::AuxScalarKernelWarehouse() :
-    MooseObjectWarehouse<AuxScalarKernel>(/*threaded=*/true)
+    ExecuteMooseObjectWarehouse<AuxScalarKernel>(/*threaded=*/true)
 {
 }
 
