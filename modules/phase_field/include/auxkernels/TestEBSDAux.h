@@ -24,6 +24,7 @@ class TestEBSDAux : public AuxKernel, EBSDAccessFunctors
 {
 public:
   TestEBSDAux(const InputParameters & parameters);
+  ~TestEBSDAux();
 
 protected:
   virtual Real computeValue();
