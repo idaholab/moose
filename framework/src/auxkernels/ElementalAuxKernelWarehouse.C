@@ -16,7 +16,7 @@
 #include "ElementalAuxKernelWarehouse.h"
 
 ElementalAuxKernelWarehouse::ElementalAuxKernelWarehouse() :
-    MooseObjectWarehouse<AuxKernel>()
+    ExecuteMooseObjectWarehouse<AuxKernel>()
 {
 }
 

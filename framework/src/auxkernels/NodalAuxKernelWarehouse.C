@@ -17,7 +17,7 @@
 
 
 NodalAuxKernelWarehouse::NodalAuxKernelWarehouse() :
-    MooseObjectWarehouse<AuxKernel>()
+    ExecuteMooseObjectWarehouse<AuxKernel>()
 {
 }
 
