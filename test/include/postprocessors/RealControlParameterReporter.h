@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "GeneralPostprocessor.h"
-#include "ControlInterface.h"
 
 // Forward Declarations
 class RealControlParameterReporter;
@@ -26,8 +25,7 @@ template<>
 InputParameters validParams<RealControlParameterReporter>();
 
 class RealControlParameterReporter :
-  public GeneralPostprocessor,
-  public ControlInterface
+  public GeneralPostprocessor
 {
 public:
   RealControlParameterReporter(const InputParameters & parameters);

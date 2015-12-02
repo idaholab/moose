@@ -289,17 +289,11 @@ MaterialWarehouse::sortMaterials(std::vector<Material *> & materials_vector)
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort(materials_vector.begin(), materials_vector.end());
+    DependencyResolverInterface::sort<Material *>(materials_vector);
   }
-  catch(CyclicDependencyException<DependencyResolverInterface *> & e)
+  catch(CyclicDependencyException<Material *> & e)
   {
-    std::ostringstream oss;
-
-    oss << "Cyclic dependency detected in material property couplings:\n";
-    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
-    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-      oss << (static_cast<Material *>(it->first))->name() << " -> " << (static_cast<Material *>(it->second))->name() << "\n";
-    mooseError(oss.str());
+    DependencyResolverInterface::cyclicDependencyError<Material *>(e, "Cyclic dependency detected in material property couplings");
   }
 }
 

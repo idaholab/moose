@@ -16,6 +16,7 @@
 #include "BoundaryRestrictable.h"
 #include "Material.h"
 #include "MooseMesh.h"
+#include "MooseObject.h"
 
 template<>
 InputParameters validParams<BoundaryRestrictable>()
@@ -43,6 +44,7 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters) :
     _boundary_restricted(false),
     _block_ids(_empty_block_ids),
     _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
+    _bnd_material_data(_bnd_feproblem->getBoundaryMaterialData(_bnd_tid)),
     _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
 {
   initializeBoundaryRestrictable(parameters);
@@ -57,6 +59,7 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, c
     _boundary_restricted(false),
     _block_ids(block_ids),
     _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
+    _bnd_material_data(_bnd_feproblem->getBoundaryMaterialData(_bnd_tid)),
     _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
 {
   initializeBoundaryRestrictable(parameters);

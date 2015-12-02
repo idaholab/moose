@@ -15,10 +15,12 @@
 #ifndef USEROBJECTINTERFACE_H
 #define USEROBJECTINTERFACE_H
 
+// MOOSE includes
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "UserObject.h"
 
 /**
  * Interface for objects that need to use user objects
