@@ -22,6 +22,7 @@
 
 // Currently the ICE Updater requires TBB
 #ifdef LIBMESH_HAVE_TBB_API
+#if !TBB_VERSION_LESS_THAN(4,0)
 
 template<>
 InputParameters validParams<ICEUpdater>()
@@ -102,4 +103,5 @@ void ICEUpdater::outputPostprocessors()
   }
 }
 
+#endif // #if !TBB_VERSION_LESS_THAN(4,0)
 #endif // LIBMESH_HAVE_TBB_API
