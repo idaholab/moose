@@ -542,9 +542,9 @@ protected:
   /// Decomposition splits
   SplitWarehouse _splits;
 
-public:
+//public:
   /// Constraints for each thread
-  std::vector<ConstraintWarehouse> _constraints;
+  ConstraintWarehouse _constraints;
 
 
 protected:
