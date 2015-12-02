@@ -43,6 +43,7 @@
 #include "MooseError.h"
 
 #ifdef LIBMESH_HAVE_TBB_API
+#if !TBB_VERSION_LESS_THAN(4,0)
 #include <tbb/mutex.h>
 #include <tbb/concurrent_queue.h>
 
@@ -375,6 +376,7 @@ public:
   void updateProgress(int) {}
 };
 
+#endif // #if !TBB_VERSION_LESS_THAN(4,0)
 #endif // LIBMESH_HAVE_TBB_API
 
 #endif
