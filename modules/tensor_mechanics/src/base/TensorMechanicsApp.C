@@ -70,10 +70,12 @@
 #include "TensorMechanicsHardeningCutExponential.h"
 #include "TensorMechanicsHardeningCubic.h"
 #include "ElementPropertyReadFile.h"
-#include "HyperElasticStress.h"
-#include "FlowRateModel.h"
-#include "RambergOsgoodHardening.h"
 #include "EulerAngleFileReader.h"
+#include "HEVPLinearHardening.h"
+#include "HEVPRambergOsgoodHardening.h"
+#include "HEVPEqvPlasticStrain.h"
+#include "HEVPEqvPlasticStrainRate.h"
+#include "HEVPFlowRatePowerLawJ2.h"
 
 #include "RankTwoAux.h"
 #include "RankFourAux.h"
@@ -179,10 +181,12 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsHardeningCutExponential);
   registerUserObject(TensorMechanicsHardeningCubic);
   registerUserObject(ElementPropertyReadFile);
-  registerUserObject(HyperElasticStress);
-  registerUserObject(FlowRateModel);
-  registerUserObject(RambergOsgoodHardening);
   registerUserObject(EulerAngleFileReader);
+  registerUserObject(HEVPLinearHardening);
+  registerUserObject(HEVPRambergOsgoodHardening);
+  registerUserObject(HEVPEqvPlasticStrain);
+  registerUserObject(HEVPEqvPlasticStrainRate);
+  registerUserObject(HEVPFlowRatePowerLawJ2);
 
   registerAux(RankTwoAux);
   registerAux(RankFourAux);
