@@ -180,7 +180,6 @@ private:
 
   /// Create a console stream object for this helper class
   ConsoleStream _is_console;
-
 };
 
 #endif // IMAGESAMPLER_H

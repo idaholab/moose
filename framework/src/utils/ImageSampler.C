@@ -72,6 +72,10 @@ ImageSampler::~ImageSampler()
 void
 ImageSampler::setupImageSampler(MooseMesh & mesh)
 {
+  // Don't warn that mesh or _is_pars are unused when VTK is not enabled.
+  libmesh_ignore(mesh);
+  libmesh_ignore(_is_pars);
+
 #ifdef LIBMESH_HAVE_VTK
   // Get access to the Mesh object
   MeshTools::BoundingBox bbox = MeshTools::bounding_box(mesh.getMesh());
