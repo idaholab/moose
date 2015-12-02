@@ -86,7 +86,7 @@ template<typename T>
 void
 MooseObjectWarehouse<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid)
 {
-  _all_objects.addObject(object,tid);
+  _all_objects.addObject(object, tid);
 }
 
 template<typename T>
