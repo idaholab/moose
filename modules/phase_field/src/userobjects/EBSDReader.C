@@ -23,6 +23,7 @@ EBSDReader::EBSDReader(const InputParameters & params) :
     _nl(_fe_problem.getNonlinearSystem()),
     _feature_num(0),
     _custom_columns(getParam<unsigned int>("custom_columns")),
+    _time_step(_fe_problem.timeStep()),
     _mesh_dimension(_mesh.dimension()),
     _nx(0),
     _ny(0),
@@ -291,6 +292,14 @@ EBSDReader::getNodeToPhaseWeightMap() const
 {
   return _node_to_phase_weight_map;
 }
+
+void
+EBSDReader::meshChanged()
+{
+  // maps are only rebuild for use in initial conditions, which happens in time step zero
+  if (_time_step == 0)
+    buildNodeWeightMaps();
+};
 
 void
 EBSDReader::buildNodeWeightMaps()
