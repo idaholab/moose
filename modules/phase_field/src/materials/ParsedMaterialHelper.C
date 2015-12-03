@@ -23,17 +23,11 @@ ParsedMaterialHelper::ParsedMaterialHelper(const InputParameters & parameters,
                                            VariableNameMappingMode map_mode) :
     FunctionMaterialBase(parameters),
     FunctionParserUtils(parameters),
-    _func_F(NULL),
     _variable_names(_nargs),
     _mat_prop_descriptors(0),
     _tol(0),
     _map_mode(map_mode)
 {
-}
-
-ParsedMaterialHelper::~ParsedMaterialHelper()
-{
-  delete _func_F;
 }
 
 void
@@ -64,7 +58,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
                                     const std::vector<Real> & tol_values)
 {
   // build base function object
-  _func_F =  new ADFunction();
+  _func_F = ADFunctionPtr(new ADFunction());
 
   // initialize constants
   addFParserConstants(_func_F, constant_names, constant_expressions);
@@ -188,4 +182,3 @@ ParsedMaterialHelper::computeProperties()
       (*_prop_F)[_qp] = evaluate(_func_F);
   }
 }
-

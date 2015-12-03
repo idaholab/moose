@@ -58,7 +58,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
   }
 
   // base function object
-  _func_F =  new ADFunction();
+  _func_F =  ADFunctionPtr(new ADFunction());
 
   // add the constant expressions
   addFParserConstants(_func_F,
@@ -70,14 +70,16 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
     mooseError("Invalid function\n" << _function << "\nin ParsedODEKernel " << name() << ".\n" << _func_F->ErrorMsg());
 
   // on-diagonal derivative
-  _func_dFdu = new ADFunction(*_func_F);
+  _func_dFdu = ADFunctionPtr(new ADFunction(*_func_F));
+
   if (_func_dFdu->AutoDiff(_var.name()) != -1)
     mooseError("Failed to take first derivative w.r.t. " << _var.name());
 
   // off-diagonal derivatives
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    _func_dFdarg[i] = new ADFunction(*_func_F);
+    _func_dFdarg[i] = ADFunctionPtr(new ADFunction(*_func_F));
+
     if (_func_dFdarg[i]->AutoDiff(_arg_names[i]) != -1)
       mooseError("Failed to take first derivative w.r.t. " << _arg_names[i]);
   }
@@ -102,14 +104,6 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
 
   // reserve storage for parameter passing buffer
   _func_params.resize(_nargs + 1);
-}
-
-ParsedODEKernel::~ParsedODEKernel()
-{
-  delete _func_F;
-  delete _func_dFdu;
-  for (unsigned int i = 0; i < _nargs; ++i)
-    delete _func_dFdarg[i];
 }
 
 void
@@ -145,4 +139,3 @@ ParsedODEKernel::computeQpOffDiagJacobian(unsigned int jvar)
   updateParams();
   return evaluate(_func_dFdarg[i]);
 }
-

@@ -33,7 +33,6 @@ class ParsedODEKernel :
 {
 public:
   ParsedODEKernel(const InputParameters & parameters);
-  virtual ~ParsedODEKernel();
 
 protected:
   void updateParams();
@@ -51,11 +50,11 @@ protected:
   std::vector<std::string> _arg_names;
 
   /// function parser object for the resudual and on-diagonal Jacobian
-  ADFunction * _func_F;
-  ADFunction * _func_dFdu;
+  ADFunctionPtr _func_F;
+  ADFunctionPtr _func_dFdu;
 
   /// function parser objects for the Jacobian
-  std::vector<ADFunction *> _func_dFdarg;
+  std::vector<ADFunctionPtr> _func_dFdarg;
 
   /// number of non-linear variables in the problem
   const unsigned int _number_of_nl_variables;

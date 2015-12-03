@@ -35,8 +35,6 @@ public:
   ParsedMaterialHelper(const InputParameters & parameters,
                        VariableNameMappingMode map_mode);
 
-  virtual ~ParsedMaterialHelper();
-
   void functionParse(const std::string & function_expression);
   void functionParse(const std::string & function_expression,
                      const std::vector<std::string> & constant_names,
@@ -58,7 +56,7 @@ protected:
   virtual void functionsOptimize();
 
   /// The undiffed free energy function parser object.
-  ADFunction * _func_F;
+  ADFunctionPtr _func_F;
 
   /// variable names used in the expression (depends on the map_mode)
   std::vector<std::string> _variable_names;
