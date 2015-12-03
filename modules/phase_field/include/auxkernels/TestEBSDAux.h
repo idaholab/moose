@@ -35,7 +35,7 @@ protected:
   MooseEnum _data_name;
 
   /// Accessor functor to fetch the selected data field form the EBSD data point
-  EBSDPointDataFunctor * _val;
+  MooseSharedPointer<EBSDPointDataFunctor> _val;
 };
 
 #endif //TESTEBSDAUX_H

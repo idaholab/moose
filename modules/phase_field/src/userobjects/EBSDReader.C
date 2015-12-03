@@ -331,56 +331,94 @@ EBSDReader::buildNodeWeightMaps()
   }
 }
 
-EBSDAccessFunctors::EBSDPointDataFunctor *
+MooseSharedPointer<EBSDAccessFunctors::EBSDPointDataFunctor>
 EBSDReader::getPointDataAccessFunctor(const MooseEnum & field_name) const
 {
+  EBSDPointDataFunctor * ret_val = NULL;
+
   switch (field_name)
   {
     case 0: // phi1
-      return new EBSDPointDataPhi1();
+      ret_val = new EBSDPointDataPhi1();
+      break;
     case 1: // phi
-      return new EBSDPointDataPhi();
+      ret_val = new EBSDPointDataPhi();
+      break;
     case 2: // phi2
-      return new EBSDPointDataPhi2();
+      ret_val = new EBSDPointDataPhi2();
+      break;
     case 3: // grain
-      return new EBSDPointDataGrain();
+      ret_val = new EBSDPointDataGrain();
+      break;
     case 4: // phase
-      return new EBSDPointDataPhase();
+      ret_val = new EBSDPointDataPhase();
+      break;
     case 5: // symmetry
-      return new EBSDPointDataSymmetry();
+      ret_val = new EBSDPointDataSymmetry();
+      break;
     case 6: // op
-      return new EBSDPointDataOp();
+      ret_val = new EBSDPointDataOp();
+      break;
+    default:
+    {
+      // check for custom columns
+      for (unsigned int i = 0; i < _custom_columns; ++i)
+        if (field_name == "CUSTOM" + Moose::stringify(i))
+        {
+          ret_val = new EBSDPointDataCustom(i);
+          break;
+        }
+    }
   }
 
-  // check for custom columns
-  for (unsigned int i = 0; i < _custom_columns; ++i)
-    if (field_name == "CUSTOM" + Moose::stringify(i))
-      return new EBSDPointDataCustom(i);
+  // If ret_val was not set by any of the above cases, throw an error.
+  if (!ret_val)
+    mooseError("Error:  Please input supported EBSD_param");
 
-  mooseError("Error:  Please input supported EBSD_param");
+  // If we made it here, wrap up the the ret_val in a
+  // MooseSharedPointer and ship it off.
+  return MooseSharedPointer<EBSDPointDataFunctor>(ret_val);
 }
 
-EBSDAccessFunctors::EBSDAvgDataFunctor *
+MooseSharedPointer<EBSDAccessFunctors::EBSDAvgDataFunctor>
 EBSDReader::getAvgDataAccessFunctor(const MooseEnum & field_name) const
 {
+  EBSDAvgDataFunctor * ret_val = NULL;
+
   switch (field_name)
   {
     case 0: // phi1
-      return new EBSDAvgDataPhi1();
+      ret_val = new EBSDAvgDataPhi1();
+      break;
     case 1: // phi
-      return new EBSDAvgDataPhi();
+      ret_val = new EBSDAvgDataPhi();
+      break;
     case 2: // phi2
-      return new EBSDAvgDataPhi2();
+      ret_val = new EBSDAvgDataPhi2();
+      break;
     case 3: // phase
-      return new EBSDAvgDataPhase();
+      ret_val = new EBSDAvgDataPhase();
+      break;
     case 4: // symmetry
-      return new EBSDAvgDataSymmetry();
+      ret_val = new EBSDAvgDataSymmetry();
+      break;
+    default:
+    {
+      // check for custom columns
+      for (unsigned int i = 0; i < _custom_columns; ++i)
+        if (field_name == "CUSTOM" + Moose::stringify(i))
+        {
+          ret_val = new EBSDAvgDataCustom(i);
+          break;
+        }
+    }
   }
 
-  // check for custom columns
-  for (unsigned int i = 0; i < _custom_columns; ++i)
-    if (field_name == "CUSTOM" + Moose::stringify(i))
-      return new EBSDAvgDataCustom(i);
+  // If ret_val was not set by any of the above cases, throw an error.
+  if (!ret_val)
+    mooseError("Error:  Please input supported EBSD_param");
 
-  mooseError("Error:  Please input supported EBSD_param");
+  // If we made it here, wrap up the the ret_val in a
+  // MooseSharedPointer and ship it off.
+  return MooseSharedPointer<EBSDAvgDataFunctor>(ret_val);
 }
