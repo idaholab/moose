@@ -2152,6 +2152,7 @@ NonlinearSystem::updateActive(THREAD_ID tid)
   {
     _nodal_bcs.updateActive();
     _preset_nodal_bcs.updateActive();
+    _constraints.updateActive();
   }
 }
 
