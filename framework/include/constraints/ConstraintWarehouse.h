@@ -62,6 +62,11 @@ public:
    */
   void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const;
 
+  /**
+   * Update the various active lists.
+   */
+  void updateActive(THREAD_ID tid = 0);
+
 protected:
 
   /// NodalConstraint objects

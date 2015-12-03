@@ -139,6 +139,28 @@ ConstraintWarehouse::hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
 
 
 void
+ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
+{
+  MooseObjectWarehouse<Constraint>::updateActive();
+  _nodal_constraints.updateActive();
+
+  {
+    std::map<BoundaryID, MooseObjectStorage<NodeFaceConstraint> >::iterator it;
+    for (it = _node_face_constraints.begin(); it != _node_face_constraints.end(); ++it)
+      it->second.updateActive();
+    for (it = _displaced_node_face_constraints.begin(); it != _displaced_node_face_constraints.end(); ++it)
+      it->second.updateActive();
+  }
+
+  {
+    std::map<std::string, MooseObjectStorage<FaceFaceConstraint> >::iterator it;
+    for (std::map<BoundaryID, MooseObjectStorage<NodeFaceConstraint> >::iterator it = _node_face_constraints.begin(); it != _node_face_constraints.end(); ++it)
+      it->second.updateActive();
+  }
+}
+
+
+void
 ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const
 {
   std::map<std::string, MooseObjectStorage<FaceFaceConstraint> >::const_iterator it;
