@@ -18,6 +18,7 @@
 #include "FEProblem.h"
 
 #include <unistd.h>
+#include <time.h>
 
 template<>
 InputParameters validParams<FileOutput>()
@@ -25,6 +26,8 @@ InputParameters validParams<FileOutput>()
   // Create InputParameters object for this stand-alone object
   InputParameters params = validParams<PetscOutput>();
   params.addParam<std::string>("file_base", "The desired solution output name without an extension");
+  params.addParam<bool>("append_date", false, "When true the date and time are appended to the output filename.");
+  params.addParam<std::string>("append_date_format", "%Y-%m-%dT%T%z", "The format of the date/time to append (see http://www.cplusplus.com/reference/ctime/strftime).");
 
   // Add the padding option and list it as 'Advanced'
   params.addParam<unsigned int>("padding", 4, "The number of for extension suffix (e.g., out.e-s002)");
@@ -51,6 +54,20 @@ FileOutput::FileOutput(const InputParameters & parameters) :
     _file_base = getOutputFileBase(_app);
   else
     _file_base = getOutputFileBase(_app, "_" + name());
+
+  // Append the date/time
+  if (getParam<bool>("append_date"))
+  {
+    // Get the current time
+    time_t now;
+    ::time(&now); // need :: to avoid confusion with time() method of Output class
+
+    // Format the time
+    char buffer[80];
+    strftime(buffer, 80, getParam<std::string>("append_date_format").c_str(), localtime(&now));
+    _file_base += "_";
+    _file_base += buffer;
+  }
 
   // Check the file directory of file_base
   std::string base = "./" + _file_base;
